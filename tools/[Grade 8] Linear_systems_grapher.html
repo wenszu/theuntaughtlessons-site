@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Linear & Systems Grapher — IB Mathematics</title>
+<title>Linear & Systems Grapher — Grade 8</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
@@ -59,7 +59,7 @@ header p  { font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 1px; }
   border-bottom: 2px solid var(--border); padding: 0 20px;
 }
 .tab {
-  padding: 11px 20px; font-size: 12px; font-weight: 700;
+  padding: 11px 18px; font-size: 12px; font-weight: 700;
   color: var(--text3); cursor: pointer; border: none; background: none;
   border-bottom: 2px solid transparent; margin-bottom: -2px;
   transition: all 0.15s; font-family: 'Outfit', sans-serif;
@@ -72,7 +72,7 @@ header p  { font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 1px; }
 
 /* LEFT */
 .left {
-  width: 286px; flex-shrink: 0;
+  width: 290px; flex-shrink: 0;
   background: var(--surf); border-right: 1px solid var(--border);
   overflow-y: auto; padding: 15px;
   display: flex; flex-direction: column; gap: 11px;
@@ -82,7 +82,7 @@ header p  { font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 1px; }
   border-radius: 12px; padding: 13px;
 }
 .card h3 {
-  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
   letter-spacing: 1.2px; color: var(--text3); margin-bottom: 11px;
 }
 
@@ -98,7 +98,7 @@ header p  { font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 1px; }
 /* Sliders */
 .sg { margin-bottom: 10px; }
 .sh { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
-.sl { font-size: 12px; font-weight: 600; color: var(--text2); }
+.sl { font-size: 13px; font-weight: 600; color: var(--text2); }
 .sv {
   font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600;
   padding: 2px 9px; border-radius: 6px; min-width: 44px; text-align: right;
@@ -111,17 +111,17 @@ input[type=range] {
   background: var(--border); border-radius: 2px; outline: none; cursor: pointer;
 }
 input[type=range].b::-webkit-slider-thumb {
-  -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%;
+  -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%;
   background: var(--blue); cursor: pointer;
 }
 input[type=range].r::-webkit-slider-thumb {
-  -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%;
+  -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%;
   background: var(--red); cursor: pointer;
 }
 
 /* Value rows */
 .vrow { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-.vl { font-size: 12px; font-weight: 600; color: var(--text2); }
+.vl { font-size: 13px; font-weight: 600; color: var(--text2); }
 .vc {
   font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600;
   padding: 3px 10px; border-radius: 7px; min-width: 90px; text-align: right;
@@ -134,8 +134,8 @@ input[type=range].r::-webkit-slider-thumb {
 
 /* Insight */
 .ins {
-  border-radius: 9px; padding: 9px 11px;
-  font-size: 12px; font-weight: 500; line-height: 1.6;
+  border-radius: 9px; padding: 10px 12px;
+  font-size: 13px; font-weight: 500; line-height: 1.6;
   border-left: 3px solid; margin-top: 7px;
 }
 .ins.b { background: var(--blue-l); color: #2a4cbf; border-color: var(--blue); }
@@ -147,8 +147,8 @@ input[type=range].r::-webkit-slider-thumb {
 /* Step box */
 .stepbox {
   background: var(--surf3); border-radius: 9px; padding: 11px 13px;
-  font-family: 'JetBrains Mono', monospace; font-size: 11.5px;
-  color: var(--text2); line-height: 1.9; margin-top: 6px;
+  font-family: 'JetBrains Mono', monospace; font-size: 12px;
+  color: var(--text2); line-height: 2; margin-top: 6px;
 }
 .stepbox .hi { color: var(--text); font-weight: 600; }
 .stepbox .blu { color: var(--blue); }
@@ -161,7 +161,7 @@ input[type=range].r::-webkit-slider-thumb {
 .pbtn {
   background: var(--surf3); border: 1px solid var(--border);
   color: var(--text2); font-family: 'Outfit', sans-serif;
-  font-size: 11px; font-weight: 600; padding: 7px 5px;
+  font-size: 12px; font-weight: 600; padding: 8px 5px;
   border-radius: 8px; cursor: pointer; transition: all 0.15s; text-align: center;
 }
 .pbtn:hover { border-color: var(--blue); color: var(--blue); background: var(--blue-l); }
@@ -171,23 +171,23 @@ input[type=range].r::-webkit-slider-thumb {
   background: var(--navy); border-radius: 10px; padding: 13px;
   text-align: center; margin-bottom: 11px;
 }
-.prob .pq { font-size: 10px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
-.prob .pe { font-family: 'JetBrains Mono', monospace; font-size: 16px; font-weight: 600; color: white; line-height: 1.6; }
+.prob .pq { font-size: 11px; color: rgba(255,255,255,0.5); margin-bottom: 5px; }
+.prob .pe { font-family: 'JetBrains Mono', monospace; font-size: 16px; font-weight: 600; color: white; line-height: 1.8; }
 .ainput {
   width: 100%; padding: 9px 13px; border-radius: 9px;
   border: 1.5px solid var(--border); background: var(--surf2);
-  font-family: 'JetBrains Mono', monospace; font-size: 15px; font-weight: 600;
+  font-family: 'JetBrains Mono', monospace; font-size: 16px; font-weight: 600;
   color: var(--text); outline: none; text-align: center; margin-bottom: 8px;
 }
 .ainput:focus { border-color: var(--blue); }
-.fb { padding: 8px 12px; border-radius: 9px; font-size: 12px; font-weight: 600; text-align: center; display: none; margin-bottom: 8px; }
+.fb { padding: 9px 12px; border-radius: 9px; font-size: 13px; font-weight: 600; text-align: center; display: none; margin-bottom: 8px; }
 .fb.ok  { background: var(--green-l); color: var(--green); border: 1px solid rgba(26,184,122,0.3); display: block; }
 .fb.err { background: var(--red-l);   color: var(--red);   border: 1px solid rgba(229,67,75,0.3);  display: block; }
 .sc { display: flex; gap: 7px; margin-bottom: 11px; }
-.sp { flex: 1; text-align: center; padding: 7px; border-radius: 9px; font-size: 13px; font-weight: 700; }
+.sp { flex: 1; text-align: center; padding: 8px; border-radius: 9px; font-size: 14px; font-weight: 700; }
 .sp.ok  { background: var(--green-l); color: var(--green); }
 .sp.err { background: var(--red-l);   color: var(--red); }
-.btn { display: block; width: 100%; padding: 10px; border-radius: 9px; font-family: 'Outfit', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; border: none; transition: all 0.14s; margin-bottom: 7px; }
+.btn { display: block; width: 100%; padding: 11px; border-radius: 9px; font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; border: none; transition: all 0.14s; margin-bottom: 7px; }
 .btn-blue { background: var(--blue); color: white; }
 .btn-blue:hover { background: #2d56e0; transform: translateY(-1px); }
 .btn-out { background: transparent; border: 1.5px solid var(--border); color: var(--text2); }
@@ -195,7 +195,7 @@ input[type=range].r::-webkit-slider-thumb {
 
 /* RIGHT */
 .right { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-.instr { background: var(--navy); padding: 7px 18px; font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.6); text-align: center; flex-shrink: 0; }
+.instr { background: var(--navy); padding: 7px 18px; font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.7); text-align: center; flex-shrink: 0; }
 canvas { flex: 1; display: block; cursor: crosshair; }
 .btm {
   background: var(--surf); border-top: 1px solid var(--border);
@@ -203,8 +203,8 @@ canvas { flex: 1; display: block; cursor: crosshair; }
   padding: 11px 16px; flex-shrink: 0;
 }
 .bc { background: var(--surf2); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; }
-.bt { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: var(--text3); margin-bottom: 5px; }
-.bv { font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: var(--text2); line-height: 1.7; }
+.bt { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: var(--text3); margin-bottom: 5px; }
+.bv { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text2); line-height: 1.7; }
 
 ::-webkit-scrollbar { width: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
@@ -216,18 +216,18 @@ canvas { flex: 1; display: block; cursor: crosshair; }
 <header>
   <div class="hlogo">∥</div>
   <div>
-    <h1>Linear & Systems Grapher</h1>
-    <p>Lines, Intersections & Systems of Equations · Grade 8 · IB Mathematics</p>
+    <h1>Linear &amp; Systems Grapher</h1>
+    <p>Explore how lines work — Grade 8 Mathematics</p>
   </div>
-  <div class="ibpill">IB PREP</div>
+  <div class="ibpill">GRADE 8</div>
 </header>
 
 <div class="tabbar">
-  <button class="tab active" onclick="setTab('single')">① One Line</button>
-  <button class="tab" onclick="setTab('system')">② Two Lines (System)</button>
+  <button class="tab active" onclick="setTab('single')">① What's a Line?</button>
+  <button class="tab" onclick="setTab('system')">② Two Lines Meet</button>
   <button class="tab" onclick="setTab('types')">③ System Types</button>
-  <button class="tab" onclick="setTab('solve')">④ Substitution Method</button>
-  <button class="tab" onclick="setTab('practice')">⑤ Practice</button>
+  <button class="tab" onclick="setTab('solve')">④ How to Solve It</button>
+  <button class="tab" onclick="setTab('practice')">⑤ Practice!</button>
 </div>
 
 <div class="app">
@@ -245,18 +245,14 @@ const ctx = cv.getContext('2d');
 
 // State
 let tab = 'single';
-// Line 1: y = m1*x + b1
 let m1 = 1, b1 = 0;
-// Line 2: y = m2*x + b2
 let m2 = -1, b2 = 4;
-// Types mode
-let sysType = 'consistent'; // consistent / inconsistent / dependent
-// Practice
+let sysType = 'consistent';
 let prac = { correct:0, wrong:0, current:null, answered:false };
 
 // ── helpers ──────────────────────────────────────────────────────────────────
 function fmt(n, d=2){ const r=Math.round(n*100)/100; return Number.isInteger(r)?r.toString():r.toFixed(d); }
-function fmtEq(m,b,color=''){
+function fmtEq(m,b){
   let s='y = ';
   if(m===0) s+=fmt(b);
   else {
@@ -312,7 +308,7 @@ function bindSliders(){
 function applyType(){
   if(sysType==='consistent'){ m1=1;b1=0;m2=-1;b2=4; }
   else if(sysType==='inconsistent'){ m1=2;b1=1;m2=2;b2=-3; }
-  else { m1=1;b1=2;m2=1;b2=2; } // dependent
+  else { m1=1;b1=2;m2=1;b2=2; }
 }
 
 // ── LEFT panels ───────────────────────────────────────────────────────────────
@@ -335,32 +331,43 @@ function sliderBlock(id, label, min, max, step, val, cls){
 
 function leftSingle(){
   const xint = m1!==0 ? -b1/m1 : null;
+  const slopeWord = m1>0 ? 'going up ↗' : m1<0 ? 'going down ↘' : 'flat →';
+  const rampDesc = m1===0
+    ? 'A flat road — perfectly level, no slope at all.'
+    : m1>0
+      ? `For every 1 step right, go <b>${fmt(Math.abs(m1))}</b> step${Math.abs(m1)!==1?'s':''} UP — like climbing a ramp!`
+      : `For every 1 step right, go <b>${fmt(Math.abs(m1))}</b> step${Math.abs(m1)!==1?'s':''} DOWN — like sliding down a ramp.`;
   return `
+  <div class="card">
+    <h3>🎯 Start Here</h3>
+    <div class="ins b">A line on a graph follows one simple rule: <b>"for every step right, go up (or down) a set amount."</b> That amount is called the <b>slope</b>. Drag the sliders and watch the line move!</div>
+  </div>
   <div class="card">
     <h3>Line Controls</h3>
     <div class="eq-display line1">${fmtEq(m1,b1)}</div>
-    ${sliderBlock('m1','Slope (m)',-5,5,0.5,m1,'b')}
-    ${sliderBlock('b1','y-intercept (b)',-8,8,0.5,b1,'b')}
+    ${sliderBlock('m1','Slope (m) — steepness',-5,5,0.5,m1,'b')}
+    ${sliderBlock('b1','y-intercept (b) — start height',-8,8,0.5,b1,'b')}
   </div>
   <div class="card">
     <h3>Line Properties</h3>
     <div class="vrow"><span class="vl">Slope m</span><span class="vc b">${fmt(m1)}</span></div>
     <div class="vrow"><span class="vl">y-intercept</span><span class="vc b">(0, ${fmt(b1)})</span></div>
-    <div class="vrow"><span class="vl">x-intercept</span><span class="vc b">${xint!==null?`(${fmt(xint)}, 0)`:'none (horiz.)'}</span></div>
-    <div class="vrow"><span class="vl">Direction</span><span class="vc ${m1>0?'g':m1<0?'r':'a'}">${m1>0?'↗ rising':m1<0?'↘ falling':'→ horizontal'}</span></div>
+    <div class="vrow"><span class="vl">x-intercept</span><span class="vc b">${xint!==null?`(${fmt(xint)}, 0)`:'none (horizontal)'}</span></div>
+    <div class="vrow"><span class="vl">Direction</span><span class="vc ${m1>0?'g':m1<0?'r':'a'}">${slopeWord}</span></div>
   </div>
   <div class="card">
-    <h3>What Slope Means</h3>
-    <div class="ins b">Slope = rise ÷ run. For every 1 step right, the line goes <b>${fmt(m1)}</b> steps up${m1<0?' (negative = going down)':''}.</div>
-    <div class="ins g" style="margin-top:7px">The y-intercept <b>(0, ${fmt(b1)})</b> is where the line crosses the y-axis — it's the starting value when x = 0.</div>
+    <h3>🏂 What Slope Means</h3>
+    <div class="ins b">${rampDesc}</div>
+    <div class="ins g" style="margin-top:7px">The <b>y-intercept (0, ${fmt(b1)})</b> is where your line starts — it's the height when x = 0. Think of it as the "starting point" before you take any steps.</div>
+    <div class="ins a" style="margin-top:7px">Slope = <b>rise ÷ run</b>. Rise = how far up. Run = how far right. A slope of 2 means you go up 2 for every 1 you go right.</div>
   </div>
   <div class="card">
-    <h3>Presets</h3>
+    <h3>Try These!</h3>
     <div class="pgrid">
-      <button class="pbtn" onclick="m1=1;b1=0;updateAll()">slope = 1</button>
-      <button class="pbtn" onclick="m1=2;b1=-3;updateAll()">slope = 2</button>
-      <button class="pbtn" onclick="m1=-1;b1=4;updateAll()">neg. slope</button>
-      <button class="pbtn" onclick="m1=0;b1=3;updateAll()">horizontal</button>
+      <button class="pbtn" onclick="m1=1;b1=0;updateAll()">slope = 1 (45°)</button>
+      <button class="pbtn" onclick="m1=2;b1=-3;updateAll()">steep ramp</button>
+      <button class="pbtn" onclick="m1=-1;b1=4;updateAll()">going downhill</button>
+      <button class="pbtn" onclick="m1=0;b1=3;updateAll()">flat road</button>
     </div>
   </div>`;
 }
@@ -368,6 +375,10 @@ function leftSingle(){
 function leftSystem(){
   const pt=intersection(m1,b1,m2,b2);
   return `
+  <div class="card">
+    <h3>🤝 What's Happening?</h3>
+    <div class="ins b">Two lines = two rules. The point where they <b>cross</b> is the solution — the one spot that satisfies BOTH rules at the same time. Drag the sliders to find it!</div>
+  </div>
   <div class="card">
     <h3>Line 1 (blue)</h3>
     <div class="eq-display line1">${fmtEq(m1,b1)}</div>
@@ -381,38 +392,42 @@ function leftSystem(){
     ${sliderBlock('b2','Intercept b₂',-8,8,0.5,b2,'r')}
   </div>
   <div class="card">
-    <h3>Intersection Point</h3>
+    <h3>🟢 Where They Meet</h3>
     ${pt
-      ? `<div class="vrow"><span class="vl">Solution x</span><span class="vc g">${fmt(pt.x)}</span></div>
-         <div class="vrow"><span class="vl">Solution y</span><span class="vc g">${fmt(pt.y)}</span></div>
-         <div class="ins g">The solution (${fmt(pt.x)}, ${fmt(pt.y)}) satisfies both equations simultaneously.</div>`
-      : `<div class="ins r">No intersection — the lines are parallel (same slope, different intercepts). No solution.</div>`
+      ? `<div class="vrow"><span class="vl">x =</span><span class="vc g">${fmt(pt.x)}</span></div>
+         <div class="vrow"><span class="vl">y =</span><span class="vc g">${fmt(pt.y)}</span></div>
+         <div class="ins g">The green dot at <b>(${fmt(pt.x)}, ${fmt(pt.y)})</b> is where both lines agree. Plug those values into either equation — you'll get the same answer!</div>`
+      : `<div class="ins r">These lines are <b>parallel</b> — same slope, so they never cross. No point satisfies both rules. No solution!</div>`
     }
   </div>`;
 }
 
 function leftTypes(){
-  const typeOptions = `<select id="sys-type" style="width:100%;padding:8px 10px;border-radius:8px;border:1.5px solid var(--border);background:var(--surf3);color:var(--text);font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;outline:none;cursor:pointer;margin-bottom:10px">
-    <option value="consistent" ${sysType==='consistent'?'selected':''}>Consistent — One solution</option>
-    <option value="inconsistent" ${sysType==='inconsistent'?'selected':''}>Inconsistent — No solution</option>
-    <option value="dependent" ${sysType==='dependent'?'selected':''}>Dependent — Infinite solutions</option>
+  const typeOptions = `<select id="sys-type" style="width:100%;padding:9px 10px;border-radius:8px;border:1.5px solid var(--border);background:var(--surf3);color:var(--text);font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;outline:none;cursor:pointer;margin-bottom:10px">
+    <option value="consistent" ${sysType==='consistent'?'selected':''}>✓ Consistent — Lines cross (1 answer)</option>
+    <option value="inconsistent" ${sysType==='inconsistent'?'selected':''}>✗ Inconsistent — Parallel (no answer)</option>
+    <option value="dependent" ${sysType==='dependent'?'selected':''}>∞ Dependent — Same line (infinite answers)</option>
   </select>`;
 
   let explanation='', insClass='b';
   if(sysType==='consistent'){
-    explanation='The two lines have <b>different slopes</b> so they intersect at exactly one point. That point is the unique solution.';
+    explanation='The two lines have <b>different slopes</b>, so they tilt differently and cross at exactly one point. That crossing point is the answer!';
     insClass='g';
   } else if(sysType==='inconsistent'){
-    explanation='The two lines have the <b>same slope but different y-intercepts</b> — they are parallel and never meet. No solution exists.';
+    explanation='The two lines have the <b>same slope</b> — they\'re parallel, like train tracks. They go in the same direction and <b>never meet</b>. No answer exists!';
     insClass='r';
   } else {
-    explanation='The two lines are <b>identical</b> — same slope, same intercept. Every point on the line is a solution. Infinitely many solutions.';
+    explanation='The two lines are <b>exactly the same</b> — same slope, same intercept. Every single point on the line is a solution. Too many answers to count!';
     insClass='a';
   }
 
   return `
   <div class="card">
-    <h3>System Type</h3>
+    <h3>🔍 3 Things Can Happen</h3>
+    <div class="ins b">When you have 2 lines, there are only 3 possible outcomes. Pick one below and see what it looks like on the graph!</div>
+  </div>
+  <div class="card">
+    <h3>Choose a Type</h3>
     ${typeOptions}
     <div class="eq-display line1">${fmtEq(m1,b1)}</div>
     <div class="eq-display line2" style="margin-top:6px">${fmtEq(m2,b2)}</div>
@@ -421,13 +436,12 @@ function leftTypes(){
     <h3>What's Happening</h3>
     <div class="vrow"><span class="vl">Slope 1</span><span class="vc b">${fmt(m1)}</span></div>
     <div class="vrow"><span class="vl">Slope 2</span><span class="vc r">${fmt(m2)}</span></div>
-    <div class="vrow"><span class="vl">Same slope?</span><span class="vc ${Math.abs(m1-m2)<0.001?'r':'g'}">${Math.abs(m1-m2)<0.001?'Yes':'No'}</span></div>
-    <div class="vrow"><span class="vl">Same intercept?</span><span class="vc ${(Math.abs(m1-m2)<0.001&&Math.abs(b1-b2)<0.001)?'g':'r'}">${(Math.abs(m1-m2)<0.001&&Math.abs(b1-b2)<0.001)?'Yes':'No'}</span></div>
-    <div class="ins ${insClass}">${explanation}</div>
+    <div class="vrow"><span class="vl">Same slope?</span><span class="vc ${Math.abs(m1-m2)<0.001?'r':'g'}">${Math.abs(m1-m2)<0.001?'Yes → problem!':'No → they cross!'}</span></div>
+    <div class="ins ${insClass}" style="margin-top:8px">${explanation}</div>
   </div>
   <div class="card">
-    <h3>IB Key Rule</h3>
-    <div class="ins p">In IB exams, always check slopes first. Same slope → either no solution or infinite solutions. Different slopes → exactly one solution.</div>
+    <h3>💡 Quick Rule</h3>
+    <div class="ins p">Always check the slopes first! <b>Different slopes?</b> → They cross → 1 answer. <b>Same slope?</b> → Either no answer (parallel) or infinite answers (identical).</div>
   </div>`;
 }
 
@@ -439,38 +453,43 @@ function leftSolve(){
     const xv=fmt(pt.x), yv=fmt(pt.y);
     steps=`
     <div class="stepbox">
-      <span class="hi">System:</span><br>
+      <span class="hi">The two lines:</span><br>
       <span class="blu">y = ${fmt(m1)}x + ${fmt(b1)}</span>  ...(1)<br>
       <span class="red">y = ${fmt(m2)}x + ${fmt(b2)}</span>  ...(2)<br>
       <br>
-      <span class="hi">Step 1: Set equal</span><br>
-      Since both = y:<br>
+      <span class="hi">Step 1 — Set them equal</span><br>
+      Both sides equal y, so set<br>
+      equation (1) = equation (2):<br>
       <span class="blu">${fmt(m1)}x + ${fmt(b1)}</span> = <span class="red">${fmt(m2)}x + ${fmt(b2)}</span><br>
       <br>
-      <span class="hi">Step 2: Solve for x</span><br>
-      ${fmt(m1)}x − ${fmt(m2)}x = ${fmt(b2)} − ${fmt(b1)}<br>
+      <span class="hi">Step 2 — Solve for x</span><br>
+      Move x terms to one side:<br>
       ${fmt(m1-m2)}x = ${fmt(b2-b1)}<br>
-      x = ${fmt(b2-b1)} ÷ ${fmt(m1-m2)}<br>
       <span class="grn">x = ${xv}</span><br>
       <br>
-      <span class="hi">Step 3: Find y</span><br>
-      y = ${fmt(m1)}(${xv}) + ${fmt(b1)}<br>
+      <span class="hi">Step 3 — Find y</span><br>
+      Plug x back into equation (1):<br>
+      y = ${fmt(m1)} × ${xv} + ${fmt(b1)}<br>
       <span class="grn">y = ${yv}</span><br>
       <br>
-      <span class="hi">Solution: (${xv}, ${yv}) ✓</span>
+      <span class="hi">✓ Solution: (${xv}, ${yv})</span>
     </div>`;
   } else {
-    steps=`<div class="stepbox"><span class="hi">Same slope (${fmt(m1)}) → parallel lines → No solution.</span></div>`;
+    steps=`<div class="stepbox"><span class="hi">Both lines have slope ${fmt(m1)} → parallel lines → No solution.</span></div>`;
   }
   return `
   <div class="card">
-    <h3>Line 1</h3>
+    <h3>👀 Watch It Solve Itself</h3>
+    <div class="ins b">Change the lines with the sliders and watch the full solution update in real time. This is called the <b>substitution method</b> — the main technique you need to know!</div>
+  </div>
+  <div class="card">
+    <h3>Line 1 (blue)</h3>
     <div class="eq-display line1">${e1}</div>
     ${sliderBlock('m1','m₁',-5,5,0.5,m1,'b')}
     ${sliderBlock('b1','b₁',-8,8,0.5,b1,'b')}
   </div>
   <div class="card">
-    <h3>Line 2</h3>
+    <h3>Line 2 (red)</h3>
     <div class="eq-display line2">${e2}</div>
     ${sliderBlock('m2','m₂',-5,5,0.5,m2,'r')}
     ${sliderBlock('b2','b₂',-8,8,0.5,b2,'r')}
@@ -483,14 +502,14 @@ function leftSolve(){
 
 // ── PRACTICE ──────────────────────────────────────────────────────────────────
 const PROBS=[
-  {q:'y = 2x + 1\ny = x + 3\nFind x:',  ans:2,  hint:'Set equal: 2x+1 = x+3 → x = 2'},
-  {q:'y = 3x − 2\ny = x + 4\nFind x:',  ans:3,  hint:'Set equal: 3x−2 = x+4 → 2x=6 → x=3'},
-  {q:'y = x + 5\ny = −x + 1\nFind x:', ans:-2, hint:'x+5 = −x+1 → 2x = −4 → x = −2'},
-  {q:'y = 2x\ny = x + 4\nFind x:',     ans:4,  hint:'2x = x+4 → x = 4'},
-  {q:'y = 4x − 3\ny = 2x + 1\nFind x:',ans:2, hint:'4x−3 = 2x+1 → 2x=4 → x=2'},
-  {q:'y = −2x + 6\ny = x\nFind x:',    ans:2,  hint:'−2x+6 = x → 6 = 3x → x=2'},
-  {q:'y = 3x + 1\ny = −x + 9\nFind x:',ans:2, hint:'3x+1 = −x+9 → 4x=8 → x=2'},
-  {q:'y = x − 1\ny = 3x + 3\nFind x:', ans:-2, hint:'x−1 = 3x+3 → −2x=4 → x=−2'},
+  {q:'y = 2x + 1\ny = x + 3\nFind x:',  ans:2,  hint:'Set equal: 2x + 1 = x + 3 → subtract x from both sides → x + 1 = 3 → x = 2'},
+  {q:'y = 3x − 2\ny = x + 4\nFind x:',  ans:3,  hint:'Set equal: 3x − 2 = x + 4 → 2x = 6 → x = 3'},
+  {q:'y = x + 5\ny = −x + 1\nFind x:', ans:-2, hint:'x + 5 = −x + 1 → 2x = −4 → x = −2'},
+  {q:'y = 2x\ny = x + 4\nFind x:',     ans:4,  hint:'2x = x + 4 → subtract x → x = 4'},
+  {q:'y = 4x − 3\ny = 2x + 1\nFind x:',ans:2, hint:'4x − 3 = 2x + 1 → 2x = 4 → x = 2'},
+  {q:'y = −2x + 6\ny = x\nFind x:',    ans:2,  hint:'−2x + 6 = x → 6 = 3x → x = 2'},
+  {q:'y = 3x + 1\ny = −x + 9\nFind x:',ans:2, hint:'3x + 1 = −x + 9 → 4x = 8 → x = 2'},
+  {q:'y = x − 1\ny = 3x + 3\nFind x:', ans:-2, hint:'x − 1 = 3x + 3 → −2x = 4 → x = −2'},
 ];
 
 function newProb(){
@@ -508,50 +527,55 @@ function checkAns(){
   const fb=document.getElementById('ans-fb');
   if(!inp||!fb) return;
   const v=parseFloat(inp.value);
-  if(isNaN(v)){fb.className='fb err';fb.textContent='Enter a number.';return;}
+  if(isNaN(v)){fb.className='fb err';fb.textContent='Type a number first!';return;}
   const pr=prac.current;
   if(Math.abs(v-pr.ans)<0.05){
     prac.correct++;
     fb.className='fb ok';
-    fb.textContent=`✓ Correct! x = ${pr.ans}. ${pr.hint}`;
+    fb.textContent=`🎉 Yes! x = ${pr.ans}. ${pr.hint}`;
     inp.style.borderColor='var(--green)';
   } else {
     prac.wrong++;
     fb.className='fb err';
-    fb.textContent=`✗ Not quite. x = ${pr.ans}. ${pr.hint}`;
+    fb.textContent=`Not quite — the answer is x = ${pr.ans}. Here's why: ${pr.hint}`;
     inp.style.borderColor='var(--red)';
   }
   prac.answered=true;
   const sr=document.getElementById('sc-row');
-  if(sr) sr.innerHTML=`<div class="sp ok">✓ ${prac.correct}</div><div class="sp err">✗ ${prac.wrong}</div>`;
+  if(sr) sr.innerHTML=`<div class="sp ok">✓ ${prac.correct} correct</div><div class="sp err">✗ ${prac.wrong} wrong</div>`;
 }
 
 function leftPractice(){
   if(!prac.current) newProb();
   const pr=prac.current;
   return `
-  <div class="card"><h3>Score</h3>
+  <div class="card"><h3>Your Score</h3>
     <div class="sc" id="sc-row">
-      <div class="sp ok">✓ ${prac.correct}</div>
-      <div class="sp err">✗ ${prac.wrong}</div>
+      <div class="sp ok">✓ ${prac.correct} correct</div>
+      <div class="sp err">✗ ${prac.wrong} wrong</div>
     </div>
   </div>
-  <div class="card"><h3>Solve the System</h3>
+  <div class="card"><h3>🧩 Solve the System</h3>
     <div class="prob">
-      <div class="pq">Find the x value of the solution</div>
+      <div class="pq">Find the x value where the lines meet</div>
       <div class="pe">${pr.q.replace(/\n/g,'<br>')}</div>
     </div>
-    <input class="ainput" id="ans-inp" type="number" step="0.5" placeholder="x = ?">
+    <input class="ainput" id="ans-inp" type="number" step="0.5" placeholder="Type x = ?">
     <div class="fb" id="ans-fb"></div>
-    <button class="btn btn-blue" onclick="checkAns()">Check Answer</button>
+    <button class="btn btn-blue" onclick="checkAns()">Check My Answer</button>
     <button class="btn btn-out" onclick="newProb();renderLeft()">Next Problem →</button>
   </div>
-  <div class="card"><h3>Method Reminder</h3>
+  <div class="card"><h3>💡 How to Do It</h3>
     <div class="stepbox">
-      1. Set the two equations equal<br>
+      1. Both equations equal y, so set<br>
+         the right sides equal to each other<br>
+      <br>
       2. Solve for x<br>
-      3. Substitute x back in<br>
-         to find y
+         (get x alone on one side)<br>
+      <br>
+      3. That x value is your answer!<br>
+      <br>
+      <span class="grn">Tip: substitute back in to<br>check your answer</span>
     </div>
   </div>`;
 }
@@ -561,35 +585,35 @@ function renderBtm(){
   const B=document.getElementById('btm');
   const I=document.getElementById('instr');
   if(tab==='single'){
-    I.textContent='Drag the slope and y-intercept sliders — watch how the line changes. Slope controls steepness, intercept moves it up or down.';
+    I.textContent='Drag the slope slider — watch the line tilt. Drag the y-intercept slider — watch the line move up or down. The line always follows y = mx + b.';
     B.innerHTML=`
-      <div class="bc"><div class="bt">📐 Slope-Intercept Form</div><div class="bv">y = mx + b<br>m = slope (steepness)<br>b = y-intercept (start point)</div></div>
-      <div class="bc"><div class="bt">📏 Reading Slope</div><div class="bv">Slope = rise / run<br>m = 2 means: up 2 for every 1 right<br>m = −1 means: down 1 for every 1 right</div></div>
-      <div class="bc"><div class="bt">🎯 IB Tip</div><div class="bv">IB always uses y = mx + c (not b) for the intercept. Same idea, different letter. Don't be caught off guard!</div></div>`;
+      <div class="bc"><div class="bt">📐 The Formula</div><div class="bv">y = mx + b<br>m = slope (steepness)<br>b = y-intercept (start height)</div></div>
+      <div class="bc"><div class="bt">🏂 Reading Slope</div><div class="bv">Slope = rise ÷ run<br>m = 2: go up 2 for every 1 right<br>m = −1: go DOWN 1 for every 1 right</div></div>
+      <div class="bc"><div class="bt">🌍 Real World</div><div class="bv">Slope appears everywhere: ramps, hills, speed (distance ÷ time), cost per item, and temperature change over time.</div></div>`;
   } else if(tab==='system'){
-    I.textContent='Adjust both lines with the sliders. The green dot shows where they intersect — that point satisfies both equations at the same time.';
+    I.textContent='Adjust both lines. The green dot shows where they meet — that point is the solution because it lies on BOTH lines at the same time.';
     B.innerHTML=`
       <div class="bc"><div class="bt">🔵 Line 1 (blue)</div><div class="bv">${fmtEq(m1,b1)}</div></div>
       <div class="bc"><div class="bt">🔴 Line 2 (red)</div><div class="bv">${fmtEq(m2,b2)}</div></div>
-      <div class="bc"><div class="bt">🟢 Intersection</div><div class="bv">${(()=>{const p=intersection(m1,b1,m2,b2);return p?`x = ${fmt(p.x)}, y = ${fmt(p.y)}\nSolution: (${fmt(p.x)}, ${fmt(p.y)})`:'No intersection (parallel lines)';})()}</div></div>`;
+      <div class="bc"><div class="bt">🟢 Meeting Point</div><div class="bv">${(()=>{const p=intersection(m1,b1,m2,b2);return p?`x = ${fmt(p.x)}, y = ${fmt(p.y)}\nSolution: (${fmt(p.x)}, ${fmt(p.y)})`:'No meeting point (parallel)';})()}</div></div>`;
   } else if(tab==='types'){
-    I.textContent='Switch between the three types of systems using the dropdown. See exactly what "consistent", "inconsistent", and "dependent" look like on a graph.';
+    I.textContent='Switch between the three types. Watch how the graph changes — you can SEE why some systems have solutions and others don\'t.';
     B.innerHTML=`
-      <div class="bc"><div class="bt">✓ Consistent</div><div class="bv">Different slopes → lines cross → 1 solution. Most common in IB.</div></div>
-      <div class="bc"><div class="bt">✗ Inconsistent</div><div class="bv">Same slope, different intercept → parallel → 0 solutions.</div></div>
-      <div class="bc"><div class="bt">∞ Dependent</div><div class="bv">Identical lines → every point is a solution → infinitely many.</div></div>`;
+      <div class="bc"><div class="bt">✓ Consistent</div><div class="bv">Lines cross → 1 solution<br>Different slopes → they tilt toward each other and cross.</div></div>
+      <div class="bc"><div class="bt">✗ Inconsistent</div><div class="bv">Lines are parallel → 0 solutions<br>Same slope → they never meet, no matter how far you extend them.</div></div>
+      <div class="bc"><div class="bt">∞ Dependent</div><div class="bv">Same line → ∞ solutions<br>Every point on the line is a solution — they're identical!</div></div>`;
   } else if(tab==='solve'){
-    I.textContent='Change the lines and watch the full substitution method update step by step in real time. This is the method IB expects you to show working for.';
+    I.textContent='Change the lines and watch the full solution update step by step. This is exactly the working you need to show in a test!';
     B.innerHTML=`
-      <div class="bc"><div class="bt">📝 Substitution Method</div><div class="bv">Since both equations equal y, set them equal to each other. Solve for x, then substitute back.</div></div>
-      <div class="bc"><div class="bt">✏ Show All Working</div><div class="bv">IB awards method marks even if your arithmetic slips. Always write each step clearly.</div></div>
-      <div class="bc"><div class="bt">✓ Check Your Answer</div><div class="bv">Substitute (x, y) back into BOTH equations to verify. IB often asks you to verify.</div></div>`;
+      <div class="bc"><div class="bt">📝 The Method</div><div class="bv">Since both equations equal y, set them equal to each other. Then solve for x. Then find y.</div></div>
+      <div class="bc"><div class="bt">✏ Show Your Work</div><div class="bv">Always write every step, even if it feels obvious. You get marks for the method, not just the final answer!</div></div>
+      <div class="bc"><div class="bt">✓ Always Check</div><div class="bv">Plug your (x, y) back into BOTH equations. If both work → you got it right!</div></div>`;
   } else {
-    I.textContent='Set the two equations equal and solve for x. Enter only the x value. Use the method reminder on the left.';
+    I.textContent='Set the equations equal and solve for x. Type your answer and press Check. The graph shows the lines — can you spot where they cross?';
     B.innerHTML=`
-      <div class="bc"><div class="bt">🔑 Key Step</div><div class="bv">Both equations equal y, so set them equal to each other and solve for x.</div></div>
-      <div class="bc"><div class="bt">📌 After Finding x</div><div class="bv">Substitute x into either equation to find y. Both equations give the same y — that's how you know it's right.</div></div>
-      <div class="bc"><div class="bt">🎯 IB Format</div><div class="bv">Always state the solution as a coordinate pair: "The solution is (x, y)."</div></div>`;
+      <div class="bc"><div class="bt">🔑 Key Step</div><div class="bv">Both equations equal y. So set them equal to each other and solve for x.</div></div>
+      <div class="bc"><div class="bt">📌 After Finding x</div><div class="bv">Substitute x back into either equation to find y. Both equations give the same y — that's how you know it's right!</div></div>
+      <div class="bc"><div class="bt">🎯 Final Answer</div><div class="bv">Always write your solution as a coordinate pair: "The solution is (x, y)."</div></div>`;
   }
 }
 
@@ -615,7 +639,6 @@ function drawGrid(){
   ctx.strokeStyle='#c5ccee'; ctx.lineWidth=1.5;
   ctx.beginPath();ctx.moveTo(tx(0),0);ctx.lineTo(tx(0),H);ctx.stroke();
   ctx.beginPath();ctx.moveTo(0,ty(0));ctx.lineTo(W,ty(0));ctx.stroke();
-  // tick labels
   ctx.fillStyle='#c5ccee'; ctx.font='10px JetBrains Mono,monospace';
   ctx.textAlign='center';
   for(let x=x0;x<=x1;x++){if(x===0)continue;const px=tx(x);if(px<8||px>W-8)continue;ctx.fillText(x,px,ty(0)+14);}
@@ -666,7 +689,6 @@ function draw(){
 }
 
 function labelLine(m,b,color,lineLabel){
-  // Find a nice x to put the label
   const lx=3, ly=m*lx+b;
   if(ty(ly)>20&&ty(ly)<H-20){
     ctx.fillStyle=color; ctx.font='bold 12px Outfit,sans-serif'; ctx.textAlign='left';
@@ -675,22 +697,18 @@ function labelLine(m,b,color,lineLabel){
 }
 
 function drawSingle(){
-  // rise/run visual
   const rx=1, ry=m1;
   ctx.strokeStyle='rgba(61,107,255,0.2)'; ctx.lineWidth=1.5; ctx.setLineDash([3,3]);
   ctx.beginPath();ctx.moveTo(tx(0),ty(b1));ctx.lineTo(tx(rx),ty(b1));ctx.stroke();
   ctx.beginPath();ctx.moveTo(tx(rx),ty(b1));ctx.lineTo(tx(rx),ty(b1+ry));ctx.stroke();
   ctx.setLineDash([]);
-  // labels
   ctx.fillStyle='rgba(61,107,255,0.5)';ctx.font='11px Outfit,sans-serif';ctx.textAlign='center';
   ctx.fillText('run=1',tx(0.5),ty(b1)+16);
   ctx.textAlign='left';
   ctx.fillText(`rise=${fmt(m1)}`,tx(rx)+5,(ty(b1)+ty(b1+ry))/2);
 
   plotLine(m1,b1,'#3d6bff');
-  // y-intercept
   dotPoint(0,b1,'#3d6bff',`(0, ${fmt(b1)})`,{x:10,y:-10});
-  // x-intercept
   if(m1!==0){
     const xi=-b1/m1;
     if(Math.abs(xi)<15) dotPoint(xi,0,'#8b5cf6',`(${fmt(xi)}, 0)`,{x:5,y:15});
@@ -713,7 +731,6 @@ function drawSystem(){
 
 function drawTypes(){
   if(sysType==='dependent'){
-    // Draw one fat line to show they're identical
     plotLine(m1,b1,'rgba(61,107,255,0.3)',6);
     plotLine(m1,b1,'#8b5cf6',2.5);
     ctx.fillStyle='#8b5cf6';ctx.font='bold 12px Outfit,sans-serif';ctx.textAlign='center';
@@ -723,7 +740,6 @@ function drawTypes(){
     plotLine(m2,b2,'#e5434b');
     ctx.fillStyle='#e5434b';ctx.font='bold 12px Outfit,sans-serif';ctx.textAlign='center';
     ctx.fillText('Parallel lines — no intersection — no solution',W/2,H*0.15);
-    // Arrow showing the gap
     ctx.strokeStyle='rgba(245,158,11,0.5)';ctx.lineWidth=1.5;ctx.setLineDash([3,3]);
     ctx.beginPath();ctx.moveTo(tx(0),ty(b1));ctx.lineTo(tx(0),ty(b2));ctx.stroke();
     ctx.setLineDash([]);
@@ -753,11 +769,9 @@ function drawSolve(){
 function drawPractice(){
   if(!prac.current) return;
   ctx.fillStyle='#f5f7ff';ctx.fillRect(0,0,W,H);
-  // Parse and draw the lines from the problem
   const pr=prac.current;
   const lines=pr.q.split('\n').slice(0,2);
   const parse=eq=>{
-    // y = mx + b or y = mx
     const m=eq.match(/y\s*=\s*([−\-]?\d*\.?\d*)x\s*([+\-]\s*\d+\.?\d*)?/);
     if(!m) return {m:0,b:0};
     let slope=parseFloat(m[1].replace('−','-')||'1');
@@ -775,19 +789,18 @@ function drawPractice(){
       drawDash(pt.x,pt.y,pt.x,0,'rgba(26,184,122,0.3)');
       drawDash(pt.x,pt.y,0,pt.y,'rgba(26,184,122,0.3)');
       if(prac.answered) dotPoint(pt.x,pt.y,'#1ab87a',`Answer (${fmt(pt.x)}, ${fmt(pt.y)})`,{x:10,y:-12});
-      else { // show point but not label
+      else {
         ctx.beginPath();ctx.arc(tx(pt.x),ty(pt.y),7,0,Math.PI*2);
         ctx.fillStyle='rgba(26,184,122,0.3)';ctx.fill();
       }
     }
   }catch(e){}
-  // Problem text overlay
   ctx.fillStyle='rgba(28,39,85,0.88)';
   ctx.beginPath();ctx.roundRect(W*0.55,H*0.08,W*0.4,H*0.28,12);ctx.fill();
   ctx.fillStyle='rgba(255,255,255,0.4)';ctx.font='10px Outfit,sans-serif';ctx.textAlign='center';
-  ctx.fillText('SYSTEM',W*0.75,H*0.14);
+  ctx.fillText('SOLVE THIS SYSTEM',W*0.75,H*0.14);
   ctx.fillStyle='white';ctx.font='bold 13px JetBrains Mono,monospace';
-  lines.slice(0,2).forEach((l,i)=> ctx.fillText(l,W*0.75,H*0.19+i*20));
+  lines.slice(0,2).forEach((l,i)=> ctx.fillText(l,W*0.75,H*0.19+i*22));
 }
 
 // ── RESIZE ────────────────────────────────────────────────────────────────────

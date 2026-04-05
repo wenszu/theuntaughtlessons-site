@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Logarithm Explorer — IB Mathematics</title>
+<title>Logarithm Explorer — Grade 9–10</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
 
@@ -54,7 +54,7 @@ header {
   width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
   background: linear-gradient(135deg, var(--blue), var(--purple));
   display: flex; align-items: center; justify-content: center;
-  font-size: 17px; font-weight: 700; color: white;
+  font-size: 15px; font-weight: 700; color: white;
 }
 header h1 { font-size: 16px; font-weight: 700; }
 header p { font-size: 11px; color: var(--text2); margin-top: 1px; }
@@ -72,7 +72,7 @@ header p { font-size: 11px; color: var(--text2); margin-top: 1px; }
   padding: 0 20px; gap: 2px;
 }
 .mbtn {
-  padding: 11px 18px; font-family: 'DM Sans', sans-serif;
+  padding: 11px 16px; font-family: 'DM Sans', sans-serif;
   font-size: 12px; font-weight: 600; color: var(--text2);
   border: none; background: none; cursor: pointer;
   border-bottom: 2px solid transparent; margin-bottom: -1px;
@@ -100,7 +100,7 @@ header p { font-size: 11px; color: var(--text2); margin-top: 1px; }
   border-radius: 12px; padding: 14px;
 }
 .card h3 {
-  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
   letter-spacing: 1.2px; color: var(--text3); margin-bottom: 12px;
 }
 
@@ -120,11 +120,11 @@ input[type=range] {
   background: var(--border); border-radius: 2px; outline: none; cursor: pointer;
 }
 input[type=range].base::-webkit-slider-thumb {
-  -webkit-appearance: none; width: 15px; height: 15px; border-radius: 50%;
+  -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%;
   background: var(--blue); cursor: pointer; box-shadow: 0 0 8px var(--blue-glow);
 }
 input[type=range].x::-webkit-slider-thumb {
-  -webkit-appearance: none; width: 15px; height: 15px; border-radius: 50%;
+  -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%;
   background: var(--green); cursor: pointer; box-shadow: 0 0 8px var(--green-glow);
 }
 
@@ -147,7 +147,7 @@ input[type=range].x::-webkit-slider-thumb {
 /* Equation box */
 .eq-box {
   background: var(--s3); border-radius: 10px; padding: 12px 14px;
-  font-family: 'DM Mono', monospace; font-size: 13px; line-height: 1.9;
+  font-family: 'DM Mono', monospace; font-size: 13px; line-height: 2;
   color: var(--text2); margin-top: 4px;
 }
 .eq-box .hi { color: var(--text); font-weight: 500; }
@@ -160,13 +160,14 @@ input[type=range].x::-webkit-slider-thumb {
 /* Insight */
 .insight {
   border-radius: 9px; padding: 10px 12px;
-  font-size: 12px; font-weight: 500; line-height: 1.6;
+  font-size: 13px; font-weight: 500; line-height: 1.6;
   border-left: 3px solid; margin-top: 8px;
 }
 .insight.blue { background: rgba(79,142,247,0.08); color: #a8c4fc; border-color: var(--blue); }
 .insight.green { background: rgba(45,212,160,0.08); color: #8ef5d8; border-color: var(--green); }
 .insight.amber { background: rgba(245,166,35,0.08); color: #fcd58a; border-color: var(--amber); }
 .insight.rose  { background: rgba(240,98,146,0.08); color: #f9b8cc; border-color: var(--rose); }
+.insight.purple { background: rgba(181,123,238,0.08); color: #d4b0f7; border-color: var(--purple); }
 
 /* Law cards */
 .law-card {
@@ -174,7 +175,7 @@ input[type=range].x::-webkit-slider-thumb {
   margin-bottom: 8px; border: 1px solid var(--border);
 }
 .law-card .law-name {
-  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
   letter-spacing: 1px; color: var(--text3); margin-bottom: 5px;
 }
 .law-card .law-formula {
@@ -183,6 +184,10 @@ input[type=range].x::-webkit-slider-thumb {
 }
 .law-card .law-example {
   font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text2);
+  margin-bottom: 4px;
+}
+.law-card .law-plain {
+  font-size: 12px; color: var(--green); font-style: italic;
 }
 
 /* Preset btns */
@@ -190,7 +195,7 @@ input[type=range].x::-webkit-slider-thumb {
 .preset-btn {
   background: var(--s3); border: 1px solid var(--border);
   color: var(--text2); font-family: 'DM Sans', sans-serif;
-  font-size: 11px; font-weight: 600; padding: 7px 6px;
+  font-size: 12px; font-weight: 600; padding: 8px 6px;
   border-radius: 8px; cursor: pointer; transition: all 0.15s;
   text-align: center;
 }
@@ -202,36 +207,36 @@ input[type=range].x::-webkit-slider-thumb {
   text-align: center; margin-bottom: 12px;
 }
 .prob-box .prob-q {
-  font-size: 10px; color: var(--text3); text-transform: uppercase;
+  font-size: 11px; color: var(--text3); text-transform: uppercase;
   letter-spacing: 1px; margin-bottom: 6px;
 }
 .prob-box .prob-eq {
-  font-family: 'DM Mono', monospace; font-size: 19px; font-weight: 500; color: var(--text);
+  font-family: 'DM Mono', monospace; font-size: 22px; font-weight: 500; color: var(--text);
 }
 .ans-input {
   width: 100%; padding: 10px 14px; border-radius: 9px;
   border: 1.5px solid var(--border); background: var(--s3);
-  font-family: 'DM Mono', monospace; font-size: 16px; font-weight: 500;
+  font-family: 'DM Mono', monospace; font-size: 17px; font-weight: 500;
   color: var(--text); outline: none; text-align: center; margin-bottom: 9px;
   transition: border-color 0.15s;
 }
 .ans-input:focus { border-color: var(--green); }
 .feedback {
-  padding: 9px 14px; border-radius: 9px; font-size: 12px;
+  padding: 9px 14px; border-radius: 9px; font-size: 13px;
   font-weight: 600; text-align: center; display: none; margin-bottom: 9px;
 }
 .feedback.ok  { background: rgba(45,212,160,0.1); color: var(--green); border: 1px solid rgba(45,212,160,0.3); display: block; }
 .feedback.err { background: rgba(240,98,146,0.1); color: var(--rose);  border: 1px solid rgba(240,98,146,0.3); display: block; }
 .score-row { display: flex; gap: 8px; margin-bottom: 12px; }
 .score-pill {
-  flex: 1; text-align: center; padding: 7px; border-radius: 9px;
-  font-size: 12px; font-weight: 700;
+  flex: 1; text-align: center; padding: 8px; border-radius: 9px;
+  font-size: 13px; font-weight: 700;
 }
 .score-pill.ok  { background: rgba(45,212,160,0.1); color: var(--green); }
 .score-pill.err { background: rgba(240,98,146,0.1); color: var(--rose); }
 .btn {
-  display: block; width: 100%; padding: 10px; border-radius: 9px;
-  font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 700;
+  display: block; width: 100%; padding: 11px; border-radius: 9px;
+  font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 700;
   cursor: pointer; border: none; transition: all 0.15s; margin-bottom: 7px;
 }
 .btn-green { background: var(--green); color: #021f15; }
@@ -255,13 +260,13 @@ canvas { flex: 1; display: block; }
   background: var(--s2); border: 1px solid var(--border);
   border-radius: 10px; padding: 11px 13px;
 }
-.bc .bt { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: var(--text3); margin-bottom: 5px; }
+.bc .bt { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: var(--text3); margin-bottom: 5px; }
 .bc .bv { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text2); line-height: 1.7; }
 
 /* INSTR BAR */
 .instr {
   background: #0d1025; border-bottom: 1px solid var(--border);
-  padding: 7px 20px; font-size: 11px; font-weight: 600;
+  padding: 7px 20px; font-size: 12px; font-weight: 600;
   color: var(--text2); text-align: center; flex-shrink: 0;
 }
 
@@ -276,17 +281,17 @@ canvas { flex: 1; display: block; }
   <div class="logo">log</div>
   <div>
     <h1>Logarithm Explorer</h1>
-    <p>The Inverse of Exponentials · IB Mathematics</p>
+    <p>Understand logarithms step by step — Grade 9–10</p>
   </div>
-  <div class="ib-pill">IB PREP</div>
+  <div class="ib-pill">GRADE 9–10</div>
 </header>
 
 <div class="modebar">
-  <button class="mbtn active" onclick="setMode('concept')">① The Big Idea</button>
-  <button class="mbtn" onclick="setMode('graph')">② Graph Explorer</button>
-  <button class="mbtn" onclick="setMode('laws')">③ Log Laws</button>
-  <button class="mbtn" onclick="setMode('natural')">④ Natural Log & e</button>
-  <button class="mbtn" onclick="setMode('practice')">⑤ Practice</button>
+  <button class="mbtn active" onclick="setMode('concept')">① What's a Log?</button>
+  <button class="mbtn" onclick="setMode('graph')">② See the Graph</button>
+  <button class="mbtn" onclick="setMode('laws')">③ Log Rules</button>
+  <button class="mbtn" onclick="setMode('natural')">④ The Number e</button>
+  <button class="mbtn" onclick="setMode('practice')">⑤ Practice!</button>
 </div>
 
 <div class="app">
@@ -333,27 +338,25 @@ function renderLeft(){
   else if(mode==='natural')L.innerHTML=leftNatural();
   else                   L.innerHTML=leftPractice();
 
-  // re-bind sliders
   const sa=document.getElementById('sl-base');
   const sx=document.getElementById('sl-x');
   if(sa) sa.oninput=function(){ base=parseFloat(this.value); if(Math.abs(base-1)<0.05)base=1.05; document.getElementById('vbase').textContent=fmtBase(base); updateAll(); };
   if(sx) sx.oninput=function(){ xVal=parseFloat(this.value); document.getElementById('vx').textContent=fmt(xVal); updateAll(); };
 
-  // practice bindings
   const inp=document.getElementById('ans-input');
   if(inp) inp.onkeydown=e=>{ if(e.key==='Enter') checkAnswer(); };
 }
 
 function sliders(showBase=true, showX=true){
-  let html='<div class="card"><h3>Controls</h3>';
+  let html='<div class="card"><h3>Controls — Drag to Explore</h3>';
   if(showBase) html+=`
     <div class="sl-group">
-      <div class="sl-header"><span class="sl-label">Base (b)</span><span class="sl-val base" id="vbase">${fmtBase(base)}</span></div>
+      <div class="sl-header"><span class="sl-label">Base (b) — the bottom number</span><span class="sl-val base" id="vbase">${fmtBase(base)}</span></div>
       <input type="range" class="base" id="sl-base" min="1.1" max="10" step="0.1" value="${base}">
     </div>`;
   if(showX) html+=`
     <div class="sl-group">
-      <div class="sl-header"><span class="sl-label">x value</span><span class="sl-val x" id="vx">${fmt(xVal)}</span></div>
+      <div class="sl-header"><span class="sl-label">x value — what we're asking about</span><span class="sl-val x" id="vx">${fmt(xVal)}</span></div>
       <input type="range" class="x" id="sl-x" min="0.1" max="100" step="0.1" value="${xVal}">
     </div>`;
   html+='</div>';
@@ -363,52 +366,96 @@ function sliders(showBase=true, showX=true){
 function leftConcept(){
   const lv=logBase(base,xVal), ev=expBase(base,lv);
   const bStr=fmtBase(base), xStr=fmt(xVal), lvStr=fmt(lv);
-  return sliders()+`
+  const puzzle = base===2&&xVal===8 ? '2 × 2 × 2 = 8, so the answer is 3!'
+    : base===2&&xVal===4 ? '2 × 2 = 4, so the answer is 2!'
+    : base===10&&xVal===100 ? '10 × 10 = 100, so the answer is 2!'
+    : base===3&&xVal===27 ? '3 × 3 × 3 = 27, so the answer is 3!'
+    : `${bStr} to the power ${lvStr} gives ${xStr}`;
+  return `
   <div class="card">
-    <h3>The Core Idea</h3>
-    <div class="eq-box">
-      <span class="blu">b</span><sup><span class="grn">y</span></sup> = <span class="amb">x</span><br>
-      ⟺<br>
+    <h3>What is a Logarithm?</h3>
+    <p style="font-size:13px;line-height:1.75;color:var(--text2)">You already know how powers work:</p>
+    <div class="eq-box" style="margin-top:8px;text-align:center">
+      2<sup>1</sup> = 2 &nbsp;&nbsp;&nbsp; 2<sup>2</sup> = 4 &nbsp;&nbsp;&nbsp; 2<sup>3</sup> = 8 &nbsp;&nbsp;&nbsp; 2<sup>4</sup> = 16
+    </div>
+    <p style="font-size:13px;line-height:1.75;color:var(--text2);margin-top:10px">A logarithm reverses this. Instead of asking <em>"what do you get when you raise 2 to the power 3?"</em>, it asks:</p>
+    <div class="insight blue" style="margin-top:8px"><b>"2 to what power gives 8?"</b><br>The answer is 3. That is what log₂(8) = 3 means.</div>
+    <p style="font-size:13px;line-height:1.75;color:var(--text2);margin-top:10px">The logarithm <strong>is the exponent</strong> — it tells you the power you need.</p>
+  </div>
+  <div class="card">
+    <h3>The Three Parts</h3>
+    <div class="eq-box" style="text-align:center;font-size:15px">
       log<sub><span class="blu">b</span></sub>(<span class="amb">x</span>) = <span class="grn">y</span>
     </div>
-    <div class="insight blue" style="margin-top:10px">
-      Logarithm answers: <b>"What power do I raise b to, to get x?"</b>
+    <div style="margin-top:12px;display:flex;flex-direction:column;gap:7px">
+      <div class="vrow"><span class="vrow-label"><span class="blu">b</span> — base</span><span class="vchip blue">the bottom number</span></div>
+      <div class="vrow"><span class="vrow-label"><span class="amb">x</span> — argument</span><span class="vchip amber">what you're logging</span></div>
+      <div class="vrow"><span class="vrow-label"><span class="grn">y</span> — logarithm</span><span class="vchip green">the power (the answer)</span></div>
     </div>
+    <div class="insight amber" style="margin-top:10px">This is the same as writing <span class="blu">b</span><sup><span class="grn">y</span></sup> = <span class="amb">x</span>. Both forms say the exact same thing — just arranged differently.</div>
   </div>
-
   <div class="card">
-    <h3>With Your Numbers</h3>
+    <h3>Where Logarithms Appear</h3>
+    <p style="font-size:13px;line-height:1.9;color:var(--text2)">
+      Sound — decibels measure loudness (your ears hear logarithmically)<br>
+      Earthquakes — the Richter scale uses log base 10<br>
+      Chemistry — pH measures how acidic a liquid is<br>
+      Finance — compound interest and population growth<br>
+      Music — octaves follow a logarithmic pattern
+    </p>
+  </div>
+  <div style="text-align:center;padding:12px 0 4px;font-size:10px;font-weight:700;letter-spacing:2px;color:var(--text3);text-transform:uppercase">— try it yourself —</div>
+  <div class="card">
+    <h3>The Big Idea</h3>
+    <div class="insight blue"><b>Question:</b> ${bStr} to what power gives ${xStr}?<br><br><b>Answer: ${lvStr}</b> &nbsp;—&nbsp; ${puzzle}</div>
+    <div class="insight green" style="margin-top:8px">Drag the sliders below to change the numbers and see this relationship update live.</div>
+  </div>
+  ${sliders()}
+  <div class="card">
+    <h3>The Two Forms</h3>
     <div class="eq-box">
       <span class="blu">${bStr}</span><sup><span class="grn">${lvStr}</span></sup> = <span class="amb">${xStr}</span><br>
-      ⟺<br>
-      log<sub><span class="blu">${bStr}</span></sub>(<span class="amb">${xStr}</span>) = <span class="grn">${lvStr}</span>
+      <span style="color:var(--text3)">← exponential form</span><br><br>
+      log<sub><span class="blu">${bStr}</span></sub>(<span class="amb">${xStr}</span>) = <span class="grn">${lvStr}</span><br>
+      <span style="color:var(--text3)">← logarithm form (same thing)</span>
     </div>
-    <div class="vrow" style="margin-top:10px"><span class="vrow-label">Base b</span><span class="vchip blue">${bStr}</span></div>
-    <div class="vrow"><span class="vrow-label">Argument x</span><span class="vchip amber">${xStr}</span></div>
+    <div class="insight amber" style="margin-top:10px">These mean <b>exactly the same thing</b>. Switching between them is the core skill to practise.</div>
+  </div>
+  <div class="card">
+    <h3>In Numbers</h3>
+    <div class="vrow"><span class="vrow-label">Base b =</span><span class="vchip blue">${bStr}</span></div>
+    <div class="vrow"><span class="vrow-label">Argument x =</span><span class="vchip amber">${xStr}</span></div>
     <div class="vrow"><span class="vrow-label">log<sub>${bStr}</sub>(${xStr}) =</span><span class="vchip green">${lvStr}</span></div>
-    <div class="insight green">Read it aloud: "log base ${bStr} of ${xStr} equals ${lvStr}" means ${bStr} to the power ${lvStr} gives ${xStr}.</div>
+    <div class="insight green" style="margin-top:4px">Read it as: "${bStr} to the power ${lvStr} gives ${xStr}."</div>
   </div>`;
 }
 
 function leftGraph(){
   const lv=logBase(base,xVal);
-  return sliders()+`
+  return `
+  <div class="card">
+    <h3>About This Section</h3>
+    <p style="font-size:13px;line-height:1.75;color:var(--text2)">This graph plots y = log<sub>b</sub>(x) (green) alongside y = b<sup>x</sup> (blue). They are always mirror images of each other across the line y = x — because logarithms and exponentials are inverse operations.<br><br>Drag the <b>base</b> slider to reshape both curves. Drag <b>x</b> to read the log value at any point.</p>
+  </div>
+  `+sliders()+`
   <div class="card">
     <h3>Reading the Graph</h3>
     <div class="vrow"><span class="vrow-label">Base b</span><span class="vchip blue">${fmtBase(base)}</span></div>
     <div class="vrow"><span class="vrow-label">x</span><span class="vchip amber">${fmt(xVal)}</span></div>
     <div class="vrow"><span class="vrow-label">log<sub>${fmtBase(base)}</sub>(x) =</span><span class="vchip green">${fmt(lv)}</span></div>
-    <div class="insight blue" style="margin-top:4px">The <b style="color:var(--blue)">blue</b> curve is y = b<sup>x</sup> (exponential).<br>The <b style="color:var(--green)">green</b> curve is y = log<sub>b</sub>(x) (logarithm).<br>They are <b>mirror images</b> across y = x.</div>
+    <div class="insight blue" style="margin-top:4px">The <b style="color:var(--blue)">blue</b> curve is y = b<sup>x</sup> (exponential).<br>The <b style="color:var(--green)">green</b> curve is y = log<sub>b</sub>(x) (logarithm).<br>They are <b>mirror images</b> — flip one across the dashed line y = x and you get the other!</div>
   </div>
   <div class="card">
-    <h3>Key Features</h3>
-    <div class="vrow"><span class="vrow-label">Domain</span><span class="vchip blue">x > 0 only</span></div>
-    <div class="vrow"><span class="vrow-label">x-intercept</span><span class="vchip green">(1, 0) always</span></div>
-    <div class="vrow"><span class="vrow-label">Vertical asymptote</span><span class="vchip rose">x = 0</span></div>
-    <div class="insight amber" style="margin-top:4px">log<sub>b</sub>(1) = 0 <b>always</b>, for any base. Because b⁰ = 1.</div>
+    <h3>Key Features Explained</h3>
+    <div class="vrow"><span class="vrow-label">Works for...</span><span class="vchip blue">x &gt; 0 only</span></div>
+    <div class="insight blue" style="margin-top:2px">You can't take the log of 0 or a negative number — the curve simply doesn't exist there. Try it on a calculator: log(−1) gives an error!</div>
+    <div class="vrow" style="margin-top:8px"><span class="vrow-label">Always crosses</span><span class="vchip green">(1, 0)</span></div>
+    <div class="insight green" style="margin-top:2px">log<sub>b</sub>(1) = 0 for any base, because any number to the power 0 equals 1.</div>
+    <div class="vrow" style="margin-top:8px"><span class="vrow-label">Approaches but never crosses</span><span class="vchip rose">x = 0</span></div>
+    <div class="insight rose" style="margin-top:2px">The curve gets closer and closer to x = 0 but never touches it — like a wall. This is called a <b>vertical asymptote</b>.</div>
   </div>
   <div class="card">
-    <h3>Presets</h3>
+    <h3>Try These!</h3>
     <div class="presets">
       <button class="preset-btn" onclick="base=2;xVal=8;updateAll()">base 2</button>
       <button class="preset-btn" onclick="base=10;xVal=100;updateAll()">base 10</button>
@@ -424,7 +471,12 @@ function leftLaws(){
   const la=logBase(base,a), lb2=logBase(base,b2);
   const prod=logBase(base,a*b2), quot=logBase(base,a/b2), pw=logBase(base,Math.pow(a,3));
   return `
-  <div class="card"><h3>Controls</h3>
+  <div class="card">
+    <h3>About This Section</h3>
+    <p style="font-size:13px;line-height:1.75;color:var(--text2)">There are three rules that let you break apart or combine any logarithm expression. They appear in almost every exam question involving logs.<br><br>Drag the sliders to change the numbers and watch all three rules update in real time with actual values.</p>
+  </div>
+  <div class="card">
+    <h3>Controls</h3>
     <div class="sl-group">
       <div class="sl-header"><span class="sl-label">Base (b)</span><span class="sl-val base" id="vbase">${bStr}</span></div>
       <input type="range" class="base" id="sl-base" min="1.1" max="10" step="0.1" value="${base}">
@@ -435,57 +487,65 @@ function leftLaws(){
     </div>
   </div>
   <div class="card">
-    <h3>Three Log Laws</h3>
+    <h3>📜 The 3 Log Rules</h3>
     <div class="law-card">
-      <div class="law-name">① Product Law</div>
+      <div class="law-name">① Product Rule</div>
       <div class="law-formula">log<sub>b</sub>(M·N) = log<sub>b</sub>(M) + log<sub>b</sub>(N)</div>
       <div class="law-example">log<sub>${bStr}</sub>(${fmt(a)}·${fmt(b2)}) = ${fmt(la)} + ${fmt(lb2)} = ${fmt(prod)}</div>
+      <div class="law-plain">In plain English: multiplying numbers → add their logs</div>
     </div>
     <div class="law-card">
-      <div class="law-name">② Quotient Law</div>
+      <div class="law-name">② Quotient Rule</div>
       <div class="law-formula">log<sub>b</sub>(M/N) = log<sub>b</sub>(M) − log<sub>b</sub>(N)</div>
       <div class="law-example">log<sub>${bStr}</sub>(${fmt(a)}/${fmt(b2)}) = ${fmt(la)} − ${fmt(lb2)} = ${fmt(quot)}</div>
+      <div class="law-plain">In plain English: dividing numbers → subtract their logs</div>
     </div>
     <div class="law-card">
-      <div class="law-name">③ Power Law</div>
+      <div class="law-name">③ Power Rule</div>
       <div class="law-formula">log<sub>b</sub>(M<sup>p</sup>) = p · log<sub>b</sub>(M)</div>
       <div class="law-example">log<sub>${bStr}</sub>(${fmt(a)}<sup>3</sup>) = 3 × ${fmt(la)} = ${fmt(pw)}</div>
+      <div class="law-plain">In plain English: an exponent → multiply it out front</div>
     </div>
-    <div class="insight amber">These three laws let you break apart or combine any logarithm. They are <b>essential</b> for IB exam questions.</div>
+    <div class="insight amber">These 3 rules let you break apart or combine any logarithm. They're the most useful tools in your log toolkit!</div>
   </div>`;
 }
 
 function leftNatural(){
-  const ev=Math.exp(xVal>10?Math.log(xVal):xVal>5?2:1);
   const lnVal=Math.log(xVal);
   return `
-  <div class="card"><h3>Controls</h3>
+  <div class="card">
+    <h3>About This Section</h3>
+    <p style="font-size:13px;line-height:1.75;color:var(--text2)">The natural logarithm (written <b>ln</b>) is simply the logarithm with base <b>e ≈ 2.718</b>. Unlike base 2 or base 10, e appears automatically in nature whenever something grows or changes continuously.<br><br>ln and e<sup>x</sup> are inverse functions — they perfectly cancel each other out. Drag x to explore.</p>
+  </div>
+  <div class="card">
+    <h3>Controls</h3>
     <div class="sl-group">
       <div class="sl-header"><span class="sl-label">x value</span><span class="sl-val x" id="vx">${fmt(xVal)}</span></div>
       <input type="range" class="x" id="sl-x" min="0.1" max="30" step="0.1" value="${xVal}">
     </div>
   </div>
   <div class="card">
-    <h3>The Number e</h3>
+    <h3>🔢 The Number e</h3>
     <div class="eq-box">
       e ≈ <span class="grn">2.71828...</span><br>
-      It is irrational — like π<br>
+      Irrational — never ends, like π<br>
       It is the <span class="blu">natural base</span>
     </div>
-    <div class="insight blue" style="margin-top:8px">e appears naturally in growth, decay, finance, and calculus. It is the most important number in advanced mathematics.</div>
+    <div class="insight blue" style="margin-top:8px"><b>Where does e appear?</b> Anywhere things grow or shrink smoothly — bacteria doubling, money earning compound interest, radioactive decay. It's the universe's favorite number for change!</div>
   </div>
   <div class="card">
-    <h3>Natural Logarithm (ln)</h3>
+    <h3>ln — The Natural Log</h3>
     <div class="eq-box">
       ln(x) = log<sub><span class="grn">e</span></sub>(x)<br><br>
       ln(<span class="amb">${fmt(xVal)}</span>) = <span class="grn">${fmt(lnVal)}</span><br><br>
       e<sup><span class="grn">${fmt(lnVal)}</span></sup> = <span class="amb">${fmt(xVal)}</span>
     </div>
-    <div class="vrow" style="margin-top:10px"><span class="vrow-label">ln(x)</span><span class="vchip green">${fmt(lnVal)}</span></div>
+    <div class="insight green" style="margin-top:8px">ln is just log with base e. It's the most common log in higher math and science — when someone writes "log" without a base, they often mean ln!</div>
+    <div class="vrow" style="margin-top:8px"><span class="vrow-label">ln(x)</span><span class="vchip green">${fmt(lnVal)}</span></div>
     <div class="vrow"><span class="vrow-label">e^ln(x)</span><span class="vchip amber">${fmt(Math.exp(lnVal))}</span></div>
   </div>
   <div class="card">
-    <h3>Key ln Facts</h3>
+    <h3>⚡ Key ln Facts</h3>
     <div class="law-card">
       <div class="law-formula">ln(e) = 1</div>
       <div class="law-example">Because e¹ = e</div>
@@ -496,29 +556,29 @@ function leftNatural(){
     </div>
     <div class="law-card">
       <div class="law-formula">e^ln(x) = x</div>
-      <div class="law-example">They perfectly undo each other</div>
+      <div class="law-example">They perfectly cancel each other out!</div>
     </div>
-    <div class="insight rose" style="margin-top:4px">ln and e<sup>x</sup> are inverse functions — they cancel each other out. This is used constantly in IB calculus.</div>
+    <div class="insight rose" style="margin-top:4px">ln and e<sup>x</sup> are <b>inverse functions</b> — they undo each other. Like + and −, or × and ÷. This is used constantly in calculus!</div>
   </div>`;
 }
 
 // ── PRACTICE ─────────────────────────────────────────────────────────────────
 const PROBLEMS = [
-  {q:'log₂(8) = ?',   a:3,   hint:'2³ = 8'},
-  {q:'log₂(32) = ?',  a:5,   hint:'2⁵ = 32'},
-  {q:'log₃(9) = ?',   a:2,   hint:'3² = 9'},
-  {q:'log₃(27) = ?',  a:3,   hint:'3³ = 27'},
-  {q:'log₅(25) = ?',  a:2,   hint:'5² = 25'},
-  {q:'log₁₀(1000) = ?',a:3,  hint:'10³ = 1000'},
-  {q:'log₁₀(0.1) = ?',a:-1, hint:'10⁻¹ = 0.1'},
-  {q:'log₂(1) = ?',   a:0,   hint:'2⁰ = 1'},
-  {q:'log₄(64) = ?',  a:3,   hint:'4³ = 64'},
-  {q:'log₂(0.5) = ?', a:-1,  hint:'2⁻¹ = 0.5'},
-  {q:'ln(e²) = ?',    a:2,   hint:'ln and e cancel, leaving the power'},
-  {q:'ln(1) = ?',     a:0,   hint:'e⁰ = 1'},
-  {q:'log₆(36) = ?',  a:2,   hint:'6² = 36'},
-  {q:'log₂(64) = ?',  a:6,   hint:'2⁶ = 64'},
-  {q:'log₁₀(1) = ?',  a:0,   hint:'10⁰ = 1'},
+  {q:'log₂(8) = ?',   a:3,   hint:'Ask: 2 to what power = 8?  →  2³ = 8  →  answer is 3'},
+  {q:'log₂(32) = ?',  a:5,   hint:'Ask: 2 to what power = 32?  →  2⁵ = 32  →  answer is 5'},
+  {q:'log₃(9) = ?',   a:2,   hint:'Ask: 3 to what power = 9?  →  3² = 9  →  answer is 2'},
+  {q:'log₃(27) = ?',  a:3,   hint:'Ask: 3 to what power = 27?  →  3³ = 27  →  answer is 3'},
+  {q:'log₅(25) = ?',  a:2,   hint:'Ask: 5 to what power = 25?  →  5² = 25  →  answer is 2'},
+  {q:'log₁₀(1000) = ?',a:3,  hint:'Ask: 10 to what power = 1000?  →  10³ = 1000  →  answer is 3'},
+  {q:'log₁₀(0.1) = ?',a:-1, hint:'Ask: 10 to what power = 0.1?  →  10⁻¹ = 0.1  →  answer is −1'},
+  {q:'log₂(1) = ?',   a:0,   hint:'Any base to the power 0 = 1, so log of 1 is ALWAYS 0'},
+  {q:'log₄(64) = ?',  a:3,   hint:'Ask: 4 to what power = 64?  →  4³ = 64  →  answer is 3'},
+  {q:'log₂(0.5) = ?', a:-1,  hint:'0.5 = ½ = 2⁻¹, so the answer is −1'},
+  {q:'ln(e²) = ?',    a:2,   hint:'ln and e cancel each other out, leaving just the power: 2'},
+  {q:'ln(1) = ?',     a:0,   hint:'e⁰ = 1, so ln(1) = 0. Also: log of 1 is always 0!'},
+  {q:'log₆(36) = ?',  a:2,   hint:'Ask: 6 to what power = 36?  →  6² = 36  →  answer is 2'},
+  {q:'log₂(64) = ?',  a:6,   hint:'Ask: 2 to what power = 64?  →  2⁶ = 64  →  answer is 6'},
+  {q:'log₁₀(1) = ?',  a:0,   hint:'Any base to the power 0 = 1, so the answer is 0'},
 ];
 
 function newProblem(){
@@ -536,17 +596,17 @@ function checkAnswer(){
   const fb=document.getElementById('feedback');
   if(!inp||!fb) return;
   const v=parseFloat(inp.value);
-  if(isNaN(v)){ fb.className='feedback err'; fb.textContent='Enter a number.'; return; }
+  if(isNaN(v)){ fb.className='feedback err'; fb.textContent='Type a number first!'; return; }
   const pr=practice.current;
   if(Math.abs(v-pr.a)<0.05){
     practice.correct++;
     fb.className='feedback ok';
-    fb.textContent=`✓ Correct! ${pr.q.replace('?','').trim()} ${pr.a}. Hint: ${pr.hint}`;
+    fb.textContent=`🎉 Yes! ${pr.q.replace('?','').trim()} ${pr.a}`;
     inp.style.borderColor='var(--green)';
   } else {
     practice.wrong++;
     fb.className='feedback err';
-    fb.textContent=`✗ Not quite. Answer is ${pr.a}. Hint: ${pr.hint}`;
+    fb.textContent=`Not quite — the answer is ${pr.a}. ${pr.hint}`;
     inp.style.borderColor='var(--rose)';
   }
   practice.answered=true;
@@ -555,7 +615,7 @@ function checkAnswer(){
 
 function updateScoreDisplay(){
   const el=document.getElementById('score-row');
-  if(el) el.innerHTML=`<div class="score-pill ok">✓ ${practice.correct}</div><div class="score-pill err">✗ ${practice.wrong}</div>`;
+  if(el) el.innerHTML=`<div class="score-pill ok">✓ ${practice.correct} correct</div><div class="score-pill err">✗ ${practice.wrong} wrong</div>`;
 }
 
 function leftPractice(){
@@ -563,31 +623,35 @@ function leftPractice(){
   const pr=practice.current;
   return `
   <div class="card">
-    <h3>Score</h3>
+    <h3>About This Section</h3>
+    <p style="font-size:13px;line-height:1.75;color:var(--text2)">Each problem gives you a logarithm to evaluate. Convert it to exponential form in your head and find the power. The graph on the right shows the hint strategy for every question.<br><br>Aim to do this without the hint — that means you truly understand it.</p>
+  </div>
+  <div class="card">
+    <h3>Your Score</h3>
     <div class="score-row" id="score-row">
-      <div class="score-pill ok">✓ ${practice.correct}</div>
-      <div class="score-pill err">✗ ${practice.wrong}</div>
+      <div class="score-pill ok">✓ ${practice.correct} correct</div>
+      <div class="score-pill err">✗ ${practice.wrong} wrong</div>
     </div>
   </div>
   <div class="card">
-    <h3>Solve It</h3>
+    <h3>🧩 Solve It</h3>
     <div class="prob-box">
       <div class="prob-q">Find the value</div>
       <div class="prob-eq">${pr.q}</div>
     </div>
     <input class="ans-input" id="ans-input" type="number" step="0.01" placeholder="Your answer...">
     <div class="feedback" id="feedback"></div>
-    <button class="btn btn-green" onclick="checkAnswer()">Check Answer</button>
+    <button class="btn btn-green" onclick="checkAnswer()">Check My Answer</button>
     <button class="btn btn-outline" onclick="newProblem();renderLeft()">Next Problem →</button>
   </div>
   <div class="card">
-    <h3>Key Reminder</h3>
+    <h3>💡 How to Think About It</h3>
     <div class="eq-box">
-      log<sub>b</sub>(x) = y<br>
-      means<br>
-      b<sup>y</sup> = x<br><br>
-      <span style="color:var(--text3)">Ask: "b to what power gives x?"</span>
+      log<sub>b</sub>(x) = ?<br><br>
+      <span style="color:var(--green)">Ask yourself:<br>"b to what power gives x?"</span><br><br>
+      <span style="color:var(--text3)">Then rewrite it as:<br>b<sup>?</sup> = x<br>and solve for the power</span>
     </div>
+    <div class="insight amber" style="margin-top:8px"><b>Stuck?</b> Try plugging in small powers (0, 1, 2, 3...) until one works. Start from the definition!</div>
   </div>`;
 }
 
@@ -596,35 +660,35 @@ function renderBottom(){
   const B=document.getElementById('bottom');
   const I=document.getElementById('instr');
   if(mode==='concept'){
-    I.textContent='Drag the sliders to change the base and x value — watch how the exponential and log relationship stay perfectly linked.';
+    I.textContent='Drag the sliders to change the base and x value — watch the puzzle update and see how the exponential and logarithm forms stay perfectly in sync.';
     B.innerHTML=`
-      <div class="bc"><div class="bt">📘 Definition</div><div class="bv">log_b(x) = y means b^y = x<br>A logarithm is an exponent.</div></div>
-      <div class="bc"><div class="bt">⚠ Restrictions</div><div class="bv">Base b: must be > 0, ≠ 1<br>Argument x: must be > 0<br>These come up in IB questions!</div></div>
-      <div class="bc"><div class="bt">🔗 IB Connection</div><div class="bv">Logs appear in: exponential equations, compound interest, population models, pH chemistry, and Richter scale problems.</div></div>`;
+      <div class="bc"><div class="bt">📘 The Big Idea</div><div class="bv">log_b(x) = y means b^y = x<br>A logarithm asks: "what power?"</div></div>
+      <div class="bc"><div class="bt">⚠ Rules for Bases</div><div class="bv">Base b must be: > 0 and ≠ 1<br>Argument x must be: > 0<br>Breaking these causes errors!</div></div>
+      <div class="bc"><div class="bt">🌍 Real World</div><div class="bv">Logs appear in: sound levels (dB), earthquake strength (Richter), pH of water, and compound interest calculations.</div></div>`;
   } else if(mode==='graph'){
-    I.textContent='Change the base — watch how the curve shape changes. The green log curve and blue exponential curve are always mirror images across y = x.';
+    I.textContent='Change the base and watch how the curve shape changes. Notice: the log curve and exponential curve are always perfect mirror images across y = x.';
     B.innerHTML=`
-      <div class="bc"><div class="bt">🟦 Blue Curve</div><div class="bv">y = b^x (exponential)<br>Always passes through (0,1)<br>Domain: all real x</div></div>
-      <div class="bc"><div class="bt">🟩 Green Curve</div><div class="bv">y = log_b(x) (logarithm)<br>Always passes through (1,0)<br>Domain: x > 0 only</div></div>
-      <div class="bc"><div class="bt">🪞 Mirror Line</div><div class="bv">The dashed line y = x is the mirror. Inverse functions always reflect across this line. Key IB concept.</div></div>`;
+      <div class="bc"><div class="bt">🔵 Blue Curve</div><div class="bv">y = b^x (exponential)<br>Always passes through (0, 1)<br>Grows faster as base increases</div></div>
+      <div class="bc"><div class="bt">🟢 Green Curve</div><div class="bv">y = log_b(x) (logarithm)<br>Always passes through (1, 0)<br>Only works for x > 0</div></div>
+      <div class="bc"><div class="bt">🪞 Mirror Line</div><div class="bv">The dashed line y = x is the mirror. Inverse functions always reflect across it — this is a key concept in all of math!</div></div>`;
   } else if(mode==='laws'){
-    I.textContent='The three log laws let you expand or compress logarithm expressions. Adjust the sliders and watch the laws compute in real time.';
+    I.textContent='Drag the sliders and watch the three log rules compute in real time. Try to predict the output before looking — that\'s how you truly learn the rules!';
     B.innerHTML=`
-      <div class="bc"><div class="bt">① Product</div><div class="bv">log(M·N) = log(M) + log(N)<br>Multiplication → Addition</div></div>
-      <div class="bc"><div class="bt">② Quotient</div><div class="bv">log(M/N) = log(M) − log(N)<br>Division → Subtraction</div></div>
-      <div class="bc"><div class="bt">③ Power</div><div class="bv">log(M^p) = p·log(M)<br>Exponent → Multiply out front</div></div>`;
+      <div class="bc"><div class="bt">① Product Rule</div><div class="bv">log(M·N) = log(M) + log(N)<br>Multiply numbers = Add logs</div></div>
+      <div class="bc"><div class="bt">② Quotient Rule</div><div class="bv">log(M/N) = log(M) − log(N)<br>Divide numbers = Subtract logs</div></div>
+      <div class="bc"><div class="bt">③ Power Rule</div><div class="bv">log(M^p) = p · log(M)<br>Exponent = Multiply out front</div></div>`;
   } else if(mode==='natural'){
-    I.textContent='The natural logarithm ln uses base e ≈ 2.718. It is the most important logarithm in IB Mathematics and beyond.';
+    I.textContent='The natural log ln uses base e ≈ 2.718. Drag x and watch ln(x) update. Notice how ln and e^x perfectly undo each other.';
     B.innerHTML=`
-      <div class="bc"><div class="bt">e ≈ 2.71828</div><div class="bv">Irrational, like π. Appears naturally in continuous growth and calculus.</div></div>
-      <div class="bc"><div class="bt">ln(x) = log_e(x)</div><div class="bv">ln and e^x are inverses.<br>e^(ln x) = x<br>ln(e^x) = x</div></div>
-      <div class="bc"><div class="bt">🎯 IB Exam</div><div class="bv">IB uses ln constantly in calculus (differentiation, integration) and in exponential growth/decay problems.</div></div>`;
+      <div class="bc"><div class="bt">e ≈ 2.71828</div><div class="bv">Irrational, like π. Appears naturally in: growth, decay, finance, and calculus.</div></div>
+      <div class="bc"><div class="bt">ln(x) = log_e(x)</div><div class="bv">ln and e^x are inverses.<br>e^(ln x) = x always<br>ln(e^x) = x always</div></div>
+      <div class="bc"><div class="bt">🎯 Why it Matters</div><div class="bv">ln is used constantly in calculus (derivatives and integrals) and in exponential growth and decay problems.</div></div>`;
   } else {
-    I.textContent='Practice converting between logarithm and exponential form. Ask yourself: "what power do I raise the base to, to get the argument?"';
+    I.textContent='Convert to exponential form first — ask "base to what power = argument?" Type your answer and press Check. You can do this!';
     B.innerHTML=`
-      <div class="bc"><div class="bt">Strategy</div><div class="bv">log_b(x) = ?<br>Ask: b^? = x<br>Think in exponential form first.</div></div>
-      <div class="bc"><div class="bt">Common Values</div><div class="bv">log_b(1) = 0 always<br>log_b(b) = 1 always<br>log_b(b^n) = n always</div></div>
-      <div class="bc"><div class="bt">Negative Logs</div><div class="bv">log_2(0.5) = −1 because 2^(−1) = 0.5. Negative logs come from arguments between 0 and 1.</div></div>`;
+      <div class="bc"><div class="bt">🔑 The Strategy</div><div class="bv">log_b(x) = ?<br>Rewrite as: b^? = x<br>Think in exponential form first.</div></div>
+      <div class="bc"><div class="bt">⭐ Always True</div><div class="bv">log_b(1) = 0 always<br>log_b(b) = 1 always<br>log_b(b^n) = n always</div></div>
+      <div class="bc"><div class="bt">➖ Negative Logs</div><div class="bv">log_2(0.5) = −1 because 2^(−1) = 0.5. Negative results mean the argument is between 0 and 1.</div></div>`;
   }
 }
 
@@ -651,7 +715,6 @@ function drawGrid2(){
   ctx.strokeStyle='#2e3860'; ctx.lineWidth=1.5;
   ctx.beginPath();ctx.moveTo(tx(0),0);ctx.lineTo(tx(0),H);ctx.stroke();
   ctx.beginPath();ctx.moveTo(0,ty(0));ctx.lineTo(W,ty(0));ctx.stroke();
-  // labels
   ctx.fillStyle='#2e3860'; ctx.font='10px DM Mono,monospace'; ctx.textAlign='center';
   for(let x=x0;x<=x1;x++){if(x===0)continue;const px=tx(x);if(px<10||px>W-10)continue;ctx.fillText(x,px,ty(0)+14);}
   ctx.textAlign='right';
@@ -702,25 +765,20 @@ function draw(){
 
 function drawConcept(){
   const lv=logBase(base,xVal);
-  // Draw both curves lightly
   plotCurve(x=>expBase(base,x),'rgba(79,142,247,0.25)',1.5);
   plotCurve(x=>logBase(base,x),'rgba(45,212,160,0.25)',1.5);
 
-  // Mirror line
   ctx.strokeStyle='rgba(60,70,120,0.4)'; ctx.lineWidth=1; ctx.setLineDash([6,6]);
   ctx.beginPath();ctx.moveTo(0,H);ctx.lineTo(W,0);ctx.stroke();
   ctx.setLineDash([]);
 
-  // Animated "arrow" from b^y to x
-  // Show: point (lv, xVal) on exp curve and (xVal, lv) on log curve
   const expPt={x:lv,y:xVal};
   const logPt={x:xVal,y:lv};
 
-  // Big diagram in center-ish
   const diagramX = W*0.62, diagramY = H*0.25;
   ctx.fillStyle='rgba(19,22,42,0.85)';
   ctx.beginPath();ctx.roundRect(diagramX-10,diagramY-10,W*0.34,H*0.42,12);ctx.fill();
-  ctx.strokeStyle='var(--border)';ctx.lineWidth=1;
+  ctx.strokeStyle='#272d4a';ctx.lineWidth=1;
   ctx.beginPath();ctx.roundRect(diagramX-10,diagramY-10,W*0.34,H*0.42,12);ctx.stroke();
 
   ctx.textAlign='left';
@@ -729,64 +787,54 @@ function drawConcept(){
   ctx.fillStyle='#f5a623'; ctx.fillText(`x = ${fmt(xVal)}`, diagramX, diagramY+38);
   ctx.fillStyle='#2dd4a0'; ctx.fillText(`y = ${fmt(lv)}`, diagramX, diagramY+60);
 
-  ctx.fillStyle='var(--text2)'; ctx.font='13px DM Mono,monospace';
+  ctx.fillStyle='#7d87b5'; ctx.font='13px DM Mono,monospace';
   ctx.fillText('Exponential form:', diagramX, diagramY+92);
-  ctx.fillStyle='var(--text)'; ctx.font='bold 13px DM Mono,monospace';
+  ctx.fillStyle='#e4e8ff'; ctx.font='bold 13px DM Mono,monospace';
   ctx.fillText(`${fmtBase(base)}^${fmt(lv)} = ${fmt(xVal)}`, diagramX, diagramY+112);
 
-  ctx.fillStyle='var(--text2)'; ctx.font='13px DM Mono,monospace';
+  ctx.fillStyle='#7d87b5'; ctx.font='13px DM Mono,monospace';
   ctx.fillText('Logarithm form:', diagramX, diagramY+140);
-  ctx.fillStyle='var(--text)'; ctx.font='bold 13px DM Mono,monospace';
+  ctx.fillStyle='#e4e8ff'; ctx.font='bold 13px DM Mono,monospace';
   ctx.fillText(`log_${fmtBase(base)}(${fmt(xVal)}) = ${fmt(lv)}`, diagramX, diagramY+160);
 
-  // Highlight point on log curve
   if(xVal>0){
     drawDashedLine(xVal,lv,xVal,0,'rgba(245,166,35,0.4)');
     drawDashedLine(xVal,lv,0,lv,'rgba(45,212,160,0.4)');
     drawPoint(xVal,lv,'#f5a623',`(${fmt(xVal)}, ${fmt(lv)})`);
   }
 
-  // Log curve prominent
   plotCurve(x=>logBase(base,x),'#2dd4a0',2.5);
 }
 
 function drawGraph(){
   const lv=logBase(base,xVal);
-  // Mirror line y=x
   ctx.strokeStyle='rgba(80,90,160,0.35)'; ctx.lineWidth=1.5; ctx.setLineDash([6,6]);
   ctx.beginPath();
   const mn=Math.min(fx(0),fy(H)), mx=Math.max(fx(W),fy(0));
   ctx.moveTo(tx(mn),ty(mn));ctx.lineTo(tx(mx),ty(mx));
   ctx.stroke(); ctx.setLineDash([]);
 
-  // Label mirror
   ctx.fillStyle='rgba(80,90,160,0.6)';ctx.font='11px DM Sans,sans-serif';ctx.textAlign='center';
   ctx.fillText('y = x', tx(3)+10, ty(3)-10);
 
-  // Exponential
   plotCurve(x=>expBase(base,x),'#4f8ef7',2.5);
-  // Log
   plotCurve(x=>logBase(base,x),'#2dd4a0',2.5);
 
-  // Vertical asymptote
   ctx.strokeStyle='rgba(240,98,146,0.4)'; ctx.lineWidth=1.5; ctx.setLineDash([4,4]);
   ctx.beginPath();ctx.moveTo(tx(0),0);ctx.lineTo(tx(0),H);ctx.stroke();
   ctx.setLineDash([]);
   ctx.fillStyle='rgba(240,98,146,0.7)';ctx.font='10px DM Sans,sans-serif';ctx.textAlign='left';
-  ctx.fillText('asymptote x=0',tx(0)+4,20);
+  ctx.fillText('wall at x=0',tx(0)+4,20);
 
-  // Key points
   drawPoint(1,0,'#2dd4a0','(1, 0) always');
   drawPoint(0,1,'#4f8ef7','(0, 1) always');
 
-  // Hover point
   if(xVal>0.1){
     drawDashedLine(xVal,lv,xVal,0,'rgba(245,166,35,0.35)');
     drawDashedLine(xVal,lv,0,lv,'rgba(245,166,35,0.35)');
     drawPoint(xVal,lv,'#f5a623',`(${fmt(xVal,1)}, ${fmt(lv,2)})`);
   }
 
-  // Labels
   ctx.fillStyle='#4f8ef7'; ctx.font='bold 12px DM Sans,sans-serif'; ctx.textAlign='left';
   ctx.fillText(`y = ${fmtBase(base)}^x`, tx(1.2), ty(expBase(base,1.5))-8);
   ctx.fillStyle='#2dd4a0';
@@ -798,12 +846,9 @@ function drawLaws(){
   const lM=logBase(base,M), lN=logBase(base,N);
   const lMN=logBase(base,M*N);
 
-  // Log curve
   plotCurve(x=>logBase(base,x),'rgba(45,212,160,0.3)',1.5);
 
-  // Show product law visually: lM + lN = lMN on the number line / curve
   if(M>0&&N>0&&M*N<10000){
-    // Draw points for M, N, M*N on the curve
     drawDashedLine(M,lM,M,0,'rgba(79,142,247,0.4)');
     drawDashedLine(N,lN,N,0,'rgba(181,123,238,0.4)');
     drawDashedLine(M*N,lMN,M*N,0,'rgba(245,166,35,0.4)');
@@ -818,16 +863,15 @@ function drawLaws(){
 
   plotCurve(x=>logBase(base,x),'#2dd4a0',2.5);
 
-  // Info box
   const bx=W*0.55, by=30;
   ctx.fillStyle='rgba(19,22,42,0.9)';
   ctx.beginPath();ctx.roundRect(bx,by,W*0.41,130,10);ctx.fill();
-  ctx.strokeStyle=var_border();ctx.lineWidth=1;
+  ctx.strokeStyle='#272d4a';ctx.lineWidth=1;
   ctx.beginPath();ctx.roundRect(bx,by,W*0.41,130,10);ctx.stroke();
 
   ctx.textAlign='left';
   ctx.font='bold 11px DM Mono,monospace';
-  ctx.fillStyle='#7d87b5'; ctx.fillText('Product Law Live:', bx+12, by+22);
+  ctx.fillStyle='#7d87b5'; ctx.fillText('Product Rule Live:', bx+12, by+22);
   ctx.fillStyle='#4f8ef7'; ctx.fillText(`log(${fmt(M,1)}) = ${fmt(lM)}`, bx+12, by+44);
   ctx.fillStyle='#b57bee'; ctx.fillText(`log(${fmt(N,1)}) = ${fmt(lN)}`, bx+12, by+64);
   ctx.fillStyle='#7d87b5'; ctx.fillText('Sum =', bx+12, by+84);
@@ -836,41 +880,34 @@ function drawLaws(){
   ctx.fillStyle='#2dd4a0'; ctx.fillText(fmt(lMN), bx+105, by+104);
   const match=Math.abs(lM+lN-lMN)<0.01;
   ctx.fillStyle=match?'#2dd4a0':'#f06292';
-  ctx.fillText(match?'✓ Equal!':'≈ Check rounding',bx+12,by+122);
+  ctx.fillText(match?'✓ They match!':'≈ Check rounding',bx+12,by+122);
 }
 
 function var_border(){ return '#272d4a'; }
 
 function drawNatural(){
   const lnVal=Math.log(xVal);
-  // e^x curve
   plotCurve(x=>Math.exp(x),'rgba(79,142,247,0.5)',2);
-  // ln(x) curve
   plotCurve(x=>Math.log(x),'rgba(45,212,160,0.5)',2);
-  // Mirror
   ctx.strokeStyle='rgba(60,70,100,0.3)';ctx.lineWidth=1;ctx.setLineDash([5,5]);
   ctx.beginPath();ctx.moveTo(0,H);ctx.lineTo(W,0);ctx.stroke();ctx.setLineDash([]);
 
-  // Point (1, e) on exp and (e, 1) on ln
   drawPoint(1,Math.E,'#4f8ef7','(1, e)');
   drawPoint(Math.E,1,'#2dd4a0','(e, 1)');
   drawPoint(0,1,'#4f8ef7','(0,1)');
   drawPoint(1,0,'#2dd4a0','(1,0)');
 
-  // Current x point
   if(xVal>0.05){
     drawDashedLine(xVal,lnVal,xVal,0,'rgba(245,166,35,0.35)');
     drawDashedLine(xVal,lnVal,0,lnVal,'rgba(245,166,35,0.35)');
     drawPoint(xVal,lnVal,'#f5a623',`ln(${fmt(xVal,1)})=${fmt(lnVal)}`);
   }
 
-  // Labels
   ctx.fillStyle='#4f8ef7';ctx.font='bold 12px DM Sans,sans-serif';ctx.textAlign='left';
   ctx.fillText('y = eˣ',tx(0.5),ty(Math.exp(0.5))-10);
   ctx.fillStyle='#2dd4a0';
   ctx.fillText('y = ln(x)',tx(4),ty(Math.log(4))-10);
 
-  // e marker on x axis
   ctx.strokeStyle='rgba(181,123,238,0.5)';ctx.lineWidth=1;ctx.setLineDash([3,3]);
   ctx.beginPath();ctx.moveTo(tx(Math.E),ty(0)-5);ctx.lineTo(tx(Math.E),ty(0)+5);ctx.stroke();
   ctx.setLineDash([]);
@@ -883,7 +920,6 @@ function drawPractice(){
   if(!practice.current) return;
   const pr=practice.current;
 
-  // Large equation display
   ctx.textAlign='center';
   ctx.fillStyle='#1e2440';
   ctx.beginPath();ctx.roundRect(W*0.15,H*0.1,W*0.7,H*0.5,16);ctx.fill();
@@ -892,7 +928,7 @@ function drawPractice(){
 
   ctx.fillStyle='#2e3860';
   ctx.font='bold 13px DM Sans,sans-serif';
-  ctx.fillText('Convert to exponential form to find the answer:',W/2,H*0.18);
+  ctx.fillText('Ask: base to what power = argument?',W/2,H*0.18);
 
   ctx.fillStyle='#e4e8ff';
   ctx.font='bold 36px DM Mono,monospace';
@@ -900,20 +936,18 @@ function drawPractice(){
 
   ctx.fillStyle='#3d4470';
   ctx.font='13px DM Sans,sans-serif';
-  ctx.fillText(`Hint: ${pr.hint}`,W/2,H*0.48);
+  ctx.fillText(`💡 ${pr.hint}`,W/2,H*0.48);
 
-  // Step reminder
   ctx.fillStyle='#1a2050';
   ctx.beginPath();ctx.roundRect(W*0.2,H*0.67,W*0.6,H*0.25,12);ctx.fill();
   ctx.fillStyle='#2e3860';ctx.font='bold 11px DM Sans,sans-serif';
   ctx.fillText('Remember: log_b(x) = y  ⟺  b^y = x',W/2,H*0.76);
   ctx.fillStyle='#3d4470';ctx.font='11px DM Mono,monospace';
-  ctx.fillText('Ask yourself: "base to what power = argument?"',W/2,H*0.86);
+  ctx.fillText('Rewrite as exponential form and solve for the power',W/2,H*0.86);
 }
 
 // ── RESIZE ────────────────────────────────────────────────────────────────────
 function resize(){
-  const app=document.querySelector('.app');
   const right=document.querySelector('.right');
   const bottom=document.getElementById('bottom');
   const instr=document.getElementById('instr');
