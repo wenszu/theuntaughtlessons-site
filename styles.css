@@ -1,0 +1,212 @@
+/* ============================================================
+   The Untaught Lessons — styles.css
+   Brand: cream bg, navy text, gold accent (sparingly)
+   Fonts: Playfair Display (headings), Lato (body)
+   ============================================================ */
+
+/* ── Reset ── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── Base ── */
+html, body {
+  background: #F3EDE2;
+}
+
+body {
+  font-family: 'Lato', sans-serif;
+  font-weight: 300;
+  font-size: 17px;
+  line-height: 1.85;
+  color: #4A4A4A;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Container ── */
+.container {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 0 48px;
+}
+
+/* ── Navigation ── */
+nav {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 40px 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+nav img {
+  height: 32px;
+  width: auto;
+  display: block;
+}
+
+nav ul {
+  list-style: none;
+  display: flex;
+  gap: 32px;
+}
+
+nav ul li a {
+  font-family: 'Lato', sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  color: #4A4A4A;
+  text-decoration: none;
+  letter-spacing: 0.02em;
+}
+
+nav ul li a:hover {
+  color: #003366;
+}
+
+nav ul li a.active {
+  color: #003366;
+}
+
+/* ── Section label ── */
+.section-label {
+  display: block;
+  font-family: 'Lato', sans-serif;
+  font-weight: 400;
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: #4D7094;
+  margin-bottom: 28px;
+}
+
+/* ── Hero ── */
+.hero {
+  padding: 96px 0;
+}
+
+.hero h1 {
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  font-size: 56px;
+  color: #003366;
+  line-height: 1.12;
+  margin-bottom: 24px;
+}
+
+.hero-rule {
+  width: 56px;
+  height: 1px;
+  background: #EEA320;
+  margin-bottom: 28px;
+}
+
+.hero p {
+  font-family: 'Lato', sans-serif;
+  font-weight: 300;
+  font-size: 18px;
+  color: #4A4A4A;
+  max-width: 440px;
+  line-height: 1.7;
+}
+
+/* ── Core Program ── */
+.core-program {
+  padding: 120px 0;
+  border-left: 2px solid #EEA320;
+  padding-left: 36px;
+  margin-left: -38px;
+}
+
+.core-program h2 {
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  font-size: 38px;
+  color: #003366;
+  line-height: 1.2;
+  margin-bottom: 24px;
+}
+
+.core-program p {
+  font-family: 'Lato', sans-serif;
+  font-weight: 300;
+  font-size: 17px;
+  color: #4A4A4A;
+  max-width: 480px;
+  line-height: 1.85;
+}
+
+/* ── Applications ── */
+.applications {
+  padding: 80px 0;
+}
+
+.applications p {
+  font-family: 'Lato', sans-serif;
+  font-weight: 300;
+  font-size: 15px;
+  color: #4D7094;
+  letter-spacing: 0.01em;
+  line-height: 1.85;
+}
+
+/* ── Tools ── */
+.tools-section {
+  padding: 60px 0;
+  border-top: 1px solid rgba(74, 74, 74, 0.25);
+}
+
+/* Required block — restyled, links and structure preserved */
+.tools-section .tools h2 {
+  font-family: 'Lato', sans-serif;
+  font-weight: 400;
+  font-size: 13px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #4D7094;
+  margin-bottom: 20px;
+}
+
+.tools-section .tools a {
+  display: block;
+  font-family: 'Lato', sans-serif;
+  font-weight: 300;
+  font-size: 16px;
+  color: #003366;
+  text-decoration: none;
+  line-height: 2.2;
+}
+
+.tools-section .tools a:hover {
+  color: #EEA320;
+}
+
+/* ── About ── */
+.about {
+  padding: 60px 0;
+}
+
+.about p {
+  font-family: 'Lato', sans-serif;
+  font-weight: 300;
+  font-size: 17px;
+  color: #4A4A4A;
+  max-width: 440px;
+  line-height: 1.85;
+}
+
+/* ── Footer ── */
+footer {
+  padding: 40px 0;
+  border-top: 1px solid rgba(74, 74, 74, 0.12);
+}
+
+footer p {
+  font-family: 'Lato', sans-serif;
+  font-weight: 300;
+  font-size: 13px;
+  color: #4A4A4A;
+}
