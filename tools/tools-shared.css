@@ -1,0 +1,41 @@
+/* ============================================================
+   The Untaught Lessons — tools-shared.css
+   Shared brand nav bar and base variables for all tool pages.
+   Brand: cream bg (#F3EDE2), navy (#003366), gold (#EEA320)
+   Fonts: Lato (body), Roboto Mono (technical)
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Roboto+Mono:wght@400;500&display=swap');
+
+/* ── Brand navigation bar ── */
+.brand-nav {
+  background: #F3EDE2;
+  border-bottom: 1px solid rgba(0, 51, 102, 0.15);
+  padding: 10px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: 'Lato', sans-serif;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+.brand-nav a {
+  color: #003366;
+  text-decoration: none;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  transition: color 0.15s;
+}
+
+.brand-nav a:hover {
+  color: #EEA320;
+}
+
+.brand-nav span {
+  color: #4D7094;
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  font-weight: 400;
+}

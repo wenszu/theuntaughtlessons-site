@@ -4,38 +4,40 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Logarithm Explorer — Grade 9–10</title>
+<link rel="stylesheet" href="tools-shared.css">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
 
 :root {
-  --bg: #0c0e1a;
-  --s1: #13162a;
-  --s2: #191d33;
-  --s3: #1f2440;
-  --border: #272d4a;
-  --blue: #4f8ef7;
-  --blue-d: #1a3a8f;
-  --blue-glow: rgba(79,142,247,0.25);
-  --green: #2dd4a0;
-  --green-d: #0a6648;
-  --green-glow: rgba(45,212,160,0.2);
-  --amber: #f5a623;
-  --amber-d: #7a4e00;
-  --amber-glow: rgba(245,166,35,0.2);
-  --rose: #f06292;
-  --rose-d: #7b1535;
-  --purple: #b57bee;
-  --purple-d: #4a1d8a;
-  --text: #e4e8ff;
-  --text2: #7d87b5;
-  --text3: #3d4470;
-  --shadow: 0 4px 24px rgba(0,0,0,0.5);
+  --bg: #F3EDE2;
+  --s1: #EDE8DF;
+  --s2: #F3EDE2;
+  --s3: #E8E2D8;
+  --border: rgba(0, 51, 102, 0.15);
+
+  /* Semantic colour aliases — used in JS template strings */
+  --blue: #003366;
+  --blue-d: #001f44;
+  --blue-glow: rgba(0, 51, 102, 0.1);
+  --green: #EEA320;
+  --green-d: #8B6010;
+  --green-glow: rgba(238, 163, 32, 0.15);
+  --amber: #4D7094;
+  --amber-d: #2A4A6A;
+  --amber-glow: rgba(77, 112, 148, 0.15);
+  --rose: #4A4A4A;
+  --rose-d: #222222;
+  --purple: #4D7094;
+  --purple-d: #2A4A6A;
+  --text: #003366;
+  --text2: #4D7094;
+  --text3: rgba(0, 51, 102, 0.4);
+  --shadow: 0 2px 8px rgba(0, 51, 102, 0.08);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Lato', sans-serif;
   background: var(--bg);
   color: var(--text);
   min-height: 100vh;
@@ -45,24 +47,26 @@ body {
 /* HEADER */
 header {
   height: 58px;
-  background: linear-gradient(90deg, #0f1228 0%, #151935 100%);
-  border-bottom: 1px solid var(--border);
+  background: #003366;
+  border-bottom: none;
   display: flex; align-items: center;
   padding: 0 24px; gap: 14px;
 }
 .logo {
   width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
-  background: linear-gradient(135deg, var(--blue), var(--purple));
+  background: #EEA320;
   display: flex; align-items: center; justify-content: center;
-  font-size: 15px; font-weight: 700; color: white;
+  font-size: 13px; font-weight: 700; color: #003366;
+  font-family: 'Lato', sans-serif;
 }
-header h1 { font-size: 16px; font-weight: 700; }
-header p { font-size: 11px; color: var(--text2); margin-top: 1px; }
+header h1 { font-size: 16px; font-weight: 700; color: #F3EDE2; font-family: 'Lato', sans-serif; }
+header p  { font-size: 11px; color: rgba(243, 237, 226, 0.6); margin-top: 1px; }
 .ib-pill {
-  margin-left: auto; background: linear-gradient(135deg, var(--blue-d), var(--purple-d));
-  border: 1px solid rgba(79,142,247,0.4);
-  color: var(--blue); font-size: 10px; font-weight: 700;
+  margin-left: auto; background: rgba(238, 163, 32, 0.15);
+  border: 1px solid rgba(238, 163, 32, 0.4);
+  color: #EEA320; font-size: 10px; font-weight: 700;
   letter-spacing: 1px; padding: 4px 12px; border-radius: 20px;
+  font-family: 'Lato', sans-serif;
 }
 
 /* MODE BAR */
@@ -72,19 +76,19 @@ header p { font-size: 11px; color: var(--text2); margin-top: 1px; }
   padding: 0 20px; gap: 2px;
 }
 .mbtn {
-  padding: 11px 16px; font-family: 'DM Sans', sans-serif;
-  font-size: 12px; font-weight: 600; color: var(--text2);
+  padding: 11px 16px; font-family: 'Lato', sans-serif;
+  font-size: 12px; font-weight: 700; color: var(--text2);
   border: none; background: none; cursor: pointer;
   border-bottom: 2px solid transparent; margin-bottom: -1px;
   transition: all 0.18s; white-space: nowrap;
 }
-.mbtn.active { color: var(--green); border-bottom-color: var(--green); }
+.mbtn.active { color: #EEA320; border-bottom-color: #EEA320; }
 .mbtn:hover:not(.active) { color: var(--text); }
 
 /* LAYOUT */
 .app {
   display: flex;
-  height: calc(100vh - 58px - 44px);
+  height: calc(100vh - 36px - 58px - 44px);
 }
 
 /* LEFT PANEL */
@@ -102,18 +106,19 @@ header p { font-size: 11px; color: var(--text2); margin-top: 1px; }
 .card h3 {
   font-size: 11px; font-weight: 700; text-transform: uppercase;
   letter-spacing: 1.2px; color: var(--text3); margin-bottom: 12px;
+  font-family: 'Lato', sans-serif;
 }
 
 /* Sliders */
 .sl-group { margin-bottom: 12px; }
 .sl-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-.sl-label { font-size: 13px; font-weight: 600; color: var(--text2); }
+.sl-label { font-size: 13px; font-weight: 400; color: var(--text2); }
 .sl-val {
-  font-family: 'DM Mono', monospace; font-size: 14px; font-weight: 500;
+  font-family: 'Roboto Mono', monospace; font-size: 14px; font-weight: 500;
   padding: 3px 10px; border-radius: 7px; min-width: 50px; text-align: right;
 }
-.sl-val.base { background: rgba(79,142,247,0.15); color: var(--blue); }
-.sl-val.x    { background: rgba(45,212,160,0.15); color: var(--green); }
+.sl-val.base { background: var(--blue-glow); color: var(--blue); }
+.sl-val.x    { background: var(--green-glow); color: var(--green); }
 
 input[type=range] {
   width: 100%; height: 4px; -webkit-appearance: none; appearance: none;
@@ -121,11 +126,11 @@ input[type=range] {
 }
 input[type=range].base::-webkit-slider-thumb {
   -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%;
-  background: var(--blue); cursor: pointer; box-shadow: 0 0 8px var(--blue-glow);
+  background: var(--blue); cursor: pointer;
 }
 input[type=range].x::-webkit-slider-thumb {
   -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%;
-  background: var(--green); cursor: pointer; box-shadow: 0 0 8px var(--green-glow);
+  background: var(--green); cursor: pointer;
 }
 
 /* Value rows */
@@ -133,24 +138,24 @@ input[type=range].x::-webkit-slider-thumb {
   display: flex; justify-content: space-between; align-items: center;
   margin-bottom: 9px; gap: 8px;
 }
-.vrow-label { font-size: 13px; font-weight: 500; color: var(--text2); }
+.vrow-label { font-size: 13px; font-weight: 400; color: var(--text2); }
 .vchip {
-  font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 500;
+  font-family: 'Roboto Mono', monospace; font-size: 13px; font-weight: 500;
   padding: 3px 10px; border-radius: 7px; min-width: 80px; text-align: right;
 }
-.vchip.blue { background: rgba(79,142,247,0.12); color: var(--blue); border: 1px solid rgba(79,142,247,0.2); }
-.vchip.green { background: rgba(45,212,160,0.12); color: var(--green); border: 1px solid rgba(45,212,160,0.2); }
-.vchip.amber { background: rgba(245,166,35,0.12); color: var(--amber); border: 1px solid rgba(245,166,35,0.2); }
-.vchip.rose  { background: rgba(240,98,146,0.12); color: var(--rose);  border: 1px solid rgba(240,98,146,0.2); }
-.vchip.purple{ background: rgba(181,123,238,0.12); color: var(--purple);border: 1px solid rgba(181,123,238,0.2); }
+.vchip.blue   { background: var(--blue-glow);   color: var(--blue);   border: 1px solid rgba(0,51,102,0.15); }
+.vchip.green  { background: var(--green-glow);  color: var(--green);  border: 1px solid rgba(238,163,32,0.2); }
+.vchip.amber  { background: var(--amber-glow);  color: var(--amber);  border: 1px solid rgba(77,112,148,0.2); }
+.vchip.rose   { background: rgba(74,74,74,0.07); color: var(--rose);  border: 1px solid rgba(74,74,74,0.15); }
+.vchip.purple { background: var(--amber-glow);  color: var(--purple); border: 1px solid rgba(77,112,148,0.2); }
 
 /* Equation box */
 .eq-box {
   background: var(--s3); border-radius: 10px; padding: 12px 14px;
-  font-family: 'DM Mono', monospace; font-size: 13px; line-height: 2;
+  font-family: 'Roboto Mono', monospace; font-size: 13px; line-height: 2;
   color: var(--text2); margin-top: 4px;
 }
-.eq-box .hi { color: var(--text); font-weight: 500; }
+.eq-box .hi  { color: var(--text); font-weight: 500; }
 .eq-box .blu { color: var(--blue); }
 .eq-box .grn { color: var(--green); }
 .eq-box .amb { color: var(--amber); }
@@ -160,14 +165,14 @@ input[type=range].x::-webkit-slider-thumb {
 /* Insight */
 .insight {
   border-radius: 9px; padding: 10px 12px;
-  font-size: 13px; font-weight: 500; line-height: 1.6;
+  font-size: 13px; font-weight: 400; line-height: 1.6;
   border-left: 3px solid; margin-top: 8px;
 }
-.insight.blue { background: rgba(79,142,247,0.08); color: #a8c4fc; border-color: var(--blue); }
-.insight.green { background: rgba(45,212,160,0.08); color: #8ef5d8; border-color: var(--green); }
-.insight.amber { background: rgba(245,166,35,0.08); color: #fcd58a; border-color: var(--amber); }
-.insight.rose  { background: rgba(240,98,146,0.08); color: #f9b8cc; border-color: var(--rose); }
-.insight.purple { background: rgba(181,123,238,0.08); color: #d4b0f7; border-color: var(--purple); }
+.insight.blue   { background: var(--blue-glow);             color: var(--blue);   border-color: var(--blue); }
+.insight.green  { background: var(--green-glow);            color: #7A5A00;       border-color: var(--green); }
+.insight.amber  { background: var(--amber-glow);            color: var(--amber);  border-color: var(--amber); }
+.insight.rose   { background: rgba(74,74,74,0.07);          color: var(--rose);   border-color: var(--rose); }
+.insight.purple { background: var(--amber-glow);            color: var(--purple); border-color: var(--purple); }
 
 /* Law cards */
 .law-card {
@@ -179,11 +184,11 @@ input[type=range].x::-webkit-slider-thumb {
   letter-spacing: 1px; color: var(--text3); margin-bottom: 5px;
 }
 .law-card .law-formula {
-  font-family: 'DM Mono', monospace; font-size: 12px; color: var(--amber);
+  font-family: 'Roboto Mono', monospace; font-size: 12px; color: var(--amber);
   margin-bottom: 4px;
 }
 .law-card .law-example {
-  font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text2);
+  font-family: 'Roboto Mono', monospace; font-size: 11px; color: var(--text2);
   margin-bottom: 4px;
 }
 .law-card .law-plain {
@@ -194,8 +199,8 @@ input[type=range].x::-webkit-slider-thumb {
 .presets { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
 .preset-btn {
   background: var(--s3); border: 1px solid var(--border);
-  color: var(--text2); font-family: 'DM Sans', sans-serif;
-  font-size: 12px; font-weight: 600; padding: 8px 6px;
+  color: var(--text2); font-family: 'Lato', sans-serif;
+  font-size: 12px; font-weight: 700; padding: 8px 6px;
   border-radius: 8px; cursor: pointer; transition: all 0.15s;
   text-align: center;
 }
@@ -203,44 +208,45 @@ input[type=range].x::-webkit-slider-thumb {
 
 /* Practice */
 .prob-box {
-  background: var(--s3); border-radius: 10px; padding: 14px;
+  background: #003366; border-radius: 10px; padding: 14px;
   text-align: center; margin-bottom: 12px;
 }
 .prob-box .prob-q {
-  font-size: 11px; color: var(--text3); text-transform: uppercase;
-  letter-spacing: 1px; margin-bottom: 6px;
+  font-size: 11px; color: rgba(243,237,226,0.5); text-transform: uppercase;
+  letter-spacing: 1px; margin-bottom: 6px; font-family: 'Lato', sans-serif;
 }
 .prob-box .prob-eq {
-  font-family: 'DM Mono', monospace; font-size: 22px; font-weight: 500; color: var(--text);
+  font-family: 'Roboto Mono', monospace; font-size: 22px; font-weight: 500; color: #F3EDE2;
 }
 .ans-input {
   width: 100%; padding: 10px 14px; border-radius: 9px;
   border: 1.5px solid var(--border); background: var(--s3);
-  font-family: 'DM Mono', monospace; font-size: 17px; font-weight: 500;
+  font-family: 'Roboto Mono', monospace; font-size: 17px; font-weight: 500;
   color: var(--text); outline: none; text-align: center; margin-bottom: 9px;
   transition: border-color 0.15s;
 }
 .ans-input:focus { border-color: var(--green); }
 .feedback {
   padding: 9px 14px; border-radius: 9px; font-size: 13px;
-  font-weight: 600; text-align: center; display: none; margin-bottom: 9px;
+  font-weight: 400; text-align: center; display: none; margin-bottom: 9px;
+  font-family: 'Lato', sans-serif;
 }
-.feedback.ok  { background: rgba(45,212,160,0.1); color: var(--green); border: 1px solid rgba(45,212,160,0.3); display: block; }
-.feedback.err { background: rgba(240,98,146,0.1); color: var(--rose);  border: 1px solid rgba(240,98,146,0.3); display: block; }
+.feedback.ok  { background: var(--green-glow); color: #7A5A00; border: 1px solid rgba(238,163,32,0.3); display: block; }
+.feedback.err { background: rgba(74,74,74,0.08); color: var(--rose); border: 1px solid rgba(74,74,74,0.2); display: block; }
 .score-row { display: flex; gap: 8px; margin-bottom: 12px; }
 .score-pill {
   flex: 1; text-align: center; padding: 8px; border-radius: 9px;
-  font-size: 13px; font-weight: 700;
+  font-size: 13px; font-weight: 700; font-family: 'Lato', sans-serif;
 }
-.score-pill.ok  { background: rgba(45,212,160,0.1); color: var(--green); }
-.score-pill.err { background: rgba(240,98,146,0.1); color: var(--rose); }
+.score-pill.ok  { background: var(--green-glow); color: #7A5A00; }
+.score-pill.err { background: rgba(74,74,74,0.08); color: var(--rose); }
 .btn {
   display: block; width: 100%; padding: 11px; border-radius: 9px;
-  font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 700;
+  font-family: 'Lato', sans-serif; font-size: 14px; font-weight: 700;
   cursor: pointer; border: none; transition: all 0.15s; margin-bottom: 7px;
 }
-.btn-green { background: var(--green); color: #021f15; }
-.btn-green:hover { background: #25c090; transform: translateY(-1px); }
+.btn-green { background: #EEA320; color: #003366; }
+.btn-green:hover { background: #D4911C; }
 .btn-outline { background: transparent; border: 1.5px solid var(--border); color: var(--text2); }
 .btn-outline:hover { border-color: var(--green); color: var(--green); }
 
@@ -260,14 +266,15 @@ canvas { flex: 1; display: block; }
   background: var(--s2); border: 1px solid var(--border);
   border-radius: 10px; padding: 11px 13px;
 }
-.bc .bt { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: var(--text3); margin-bottom: 5px; }
-.bc .bv { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text2); line-height: 1.7; }
+.bc .bt { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: var(--text3); margin-bottom: 5px; font-family: 'Lato', sans-serif; }
+.bc .bv { font-family: 'Roboto Mono', monospace; font-size: 12px; color: var(--text2); line-height: 1.7; }
 
 /* INSTR BAR */
 .instr {
-  background: #0d1025; border-bottom: 1px solid var(--border);
-  padding: 7px 20px; font-size: 12px; font-weight: 600;
+  background: var(--s1); border-bottom: 1px solid var(--border);
+  padding: 7px 20px; font-size: 12px; font-weight: 400;
   color: var(--text2); text-align: center; flex-shrink: 0;
+  font-family: 'Lato', sans-serif;
 }
 
 ::-webkit-scrollbar { width: 5px; }
@@ -276,6 +283,11 @@ canvas { flex: 1; display: block; }
 </style>
 </head>
 <body>
+
+<div class="brand-nav">
+  <a href="../index.html">&larr; The Untaught Lessons</a>
+  <span>Math Tools</span>
+</div>
 
 <header>
   <div class="logo">log</div>
@@ -435,7 +447,7 @@ function leftGraph(){
   return `
   <div class="card">
     <h3>About This Section</h3>
-    <p style="font-size:13px;line-height:1.75;color:var(--text2)">This graph plots y = log<sub>b</sub>(x) (green) alongside y = b<sup>x</sup> (blue). They are always mirror images of each other across the line y = x — because logarithms and exponentials are inverse operations.<br><br>Drag the <b>base</b> slider to reshape both curves. Drag <b>x</b> to read the log value at any point.</p>
+    <p style="font-size:13px;line-height:1.75;color:var(--text2)">This graph plots y = log<sub>b</sub>(x) (gold) alongside y = b<sup>x</sup> (navy). They are always mirror images of each other across the line y = x — because logarithms and exponentials are inverse operations.<br><br>Drag the <b>base</b> slider to reshape both curves. Drag <b>x</b> to read the log value at any point.</p>
   </div>
   `+sliders()+`
   <div class="card">
@@ -443,7 +455,7 @@ function leftGraph(){
     <div class="vrow"><span class="vrow-label">Base b</span><span class="vchip blue">${fmtBase(base)}</span></div>
     <div class="vrow"><span class="vrow-label">x</span><span class="vchip amber">${fmt(xVal)}</span></div>
     <div class="vrow"><span class="vrow-label">log<sub>${fmtBase(base)}</sub>(x) =</span><span class="vchip green">${fmt(lv)}</span></div>
-    <div class="insight blue" style="margin-top:4px">The <b style="color:var(--blue)">blue</b> curve is y = b<sup>x</sup> (exponential).<br>The <b style="color:var(--green)">green</b> curve is y = log<sub>b</sub>(x) (logarithm).<br>They are <b>mirror images</b> — flip one across the dashed line y = x and you get the other!</div>
+    <div class="insight blue" style="margin-top:4px">The <b style="color:var(--blue)">navy</b> curve is y = b<sup>x</sup> (exponential).<br>The <b style="color:var(--green)">gold</b> curve is y = log<sub>b</sub>(x) (logarithm).<br>They are <b>mirror images</b> — flip one across the dashed line y = x and you get the other!</div>
   </div>
   <div class="card">
     <h3>Key Features Explained</h3>
@@ -487,7 +499,7 @@ function leftLaws(){
     </div>
   </div>
   <div class="card">
-    <h3>📜 The 3 Log Rules</h3>
+    <h3>The 3 Log Rules</h3>
     <div class="law-card">
       <div class="law-name">① Product Rule</div>
       <div class="law-formula">log<sub>b</sub>(M·N) = log<sub>b</sub>(M) + log<sub>b</sub>(N)</div>
@@ -525,7 +537,7 @@ function leftNatural(){
     </div>
   </div>
   <div class="card">
-    <h3>🔢 The Number e</h3>
+    <h3>The Number e</h3>
     <div class="eq-box">
       e ≈ <span class="grn">2.71828...</span><br>
       Irrational — never ends, like π<br>
@@ -545,7 +557,7 @@ function leftNatural(){
     <div class="vrow"><span class="vrow-label">e^ln(x)</span><span class="vchip amber">${fmt(Math.exp(lnVal))}</span></div>
   </div>
   <div class="card">
-    <h3>⚡ Key ln Facts</h3>
+    <h3>Key ln Facts</h3>
     <div class="law-card">
       <div class="law-formula">ln(e) = 1</div>
       <div class="law-example">Because e¹ = e</div>
@@ -601,7 +613,7 @@ function checkAnswer(){
   if(Math.abs(v-pr.a)<0.05){
     practice.correct++;
     fb.className='feedback ok';
-    fb.textContent=`🎉 Yes! ${pr.q.replace('?','').trim()} ${pr.a}`;
+    fb.textContent=`Yes! ${pr.q.replace('?','').trim()} ${pr.a}`;
     inp.style.borderColor='var(--green)';
   } else {
     practice.wrong++;
@@ -634,7 +646,7 @@ function leftPractice(){
     </div>
   </div>
   <div class="card">
-    <h3>🧩 Solve It</h3>
+    <h3>Solve It</h3>
     <div class="prob-box">
       <div class="prob-q">Find the value</div>
       <div class="prob-eq">${pr.q}</div>
@@ -645,7 +657,7 @@ function leftPractice(){
     <button class="btn btn-outline" onclick="newProblem();renderLeft()">Next Problem →</button>
   </div>
   <div class="card">
-    <h3>💡 How to Think About It</h3>
+    <h3>How to Think About It</h3>
     <div class="eq-box">
       log<sub>b</sub>(x) = ?<br><br>
       <span style="color:var(--green)">Ask yourself:<br>"b to what power gives x?"</span><br><br>
@@ -662,15 +674,15 @@ function renderBottom(){
   if(mode==='concept'){
     I.textContent='Drag the sliders to change the base and x value — watch the puzzle update and see how the exponential and logarithm forms stay perfectly in sync.';
     B.innerHTML=`
-      <div class="bc"><div class="bt">📘 The Big Idea</div><div class="bv">log_b(x) = y means b^y = x<br>A logarithm asks: "what power?"</div></div>
-      <div class="bc"><div class="bt">⚠ Rules for Bases</div><div class="bv">Base b must be: > 0 and ≠ 1<br>Argument x must be: > 0<br>Breaking these causes errors!</div></div>
-      <div class="bc"><div class="bt">🌍 Real World</div><div class="bv">Logs appear in: sound levels (dB), earthquake strength (Richter), pH of water, and compound interest calculations.</div></div>`;
+      <div class="bc"><div class="bt">The Big Idea</div><div class="bv">log_b(x) = y means b^y = x<br>A logarithm asks: "what power?"</div></div>
+      <div class="bc"><div class="bt">Rules for Bases</div><div class="bv">Base b must be: > 0 and ≠ 1<br>Argument x must be: > 0<br>Breaking these causes errors!</div></div>
+      <div class="bc"><div class="bt">Real World</div><div class="bv">Logs appear in: sound levels (dB), earthquake strength (Richter), pH of water, and compound interest calculations.</div></div>`;
   } else if(mode==='graph'){
     I.textContent='Change the base and watch how the curve shape changes. Notice: the log curve and exponential curve are always perfect mirror images across y = x.';
     B.innerHTML=`
-      <div class="bc"><div class="bt">🔵 Blue Curve</div><div class="bv">y = b^x (exponential)<br>Always passes through (0, 1)<br>Grows faster as base increases</div></div>
-      <div class="bc"><div class="bt">🟢 Green Curve</div><div class="bv">y = log_b(x) (logarithm)<br>Always passes through (1, 0)<br>Only works for x > 0</div></div>
-      <div class="bc"><div class="bt">🪞 Mirror Line</div><div class="bv">The dashed line y = x is the mirror. Inverse functions always reflect across it — this is a key concept in all of math!</div></div>`;
+      <div class="bc"><div class="bt">Navy Curve</div><div class="bv">y = b^x (exponential)<br>Always passes through (0, 1)<br>Grows faster as base increases</div></div>
+      <div class="bc"><div class="bt">Gold Curve</div><div class="bv">y = log_b(x) (logarithm)<br>Always passes through (1, 0)<br>Only works for x > 0</div></div>
+      <div class="bc"><div class="bt">Mirror Line</div><div class="bv">The dashed line y = x is the mirror. Inverse functions always reflect across it — a key concept in all of math!</div></div>`;
   } else if(mode==='laws'){
     I.textContent='Drag the sliders and watch the three log rules compute in real time. Try to predict the output before looking — that\'s how you truly learn the rules!';
     B.innerHTML=`
@@ -682,13 +694,13 @@ function renderBottom(){
     B.innerHTML=`
       <div class="bc"><div class="bt">e ≈ 2.71828</div><div class="bv">Irrational, like π. Appears naturally in: growth, decay, finance, and calculus.</div></div>
       <div class="bc"><div class="bt">ln(x) = log_e(x)</div><div class="bv">ln and e^x are inverses.<br>e^(ln x) = x always<br>ln(e^x) = x always</div></div>
-      <div class="bc"><div class="bt">🎯 Why it Matters</div><div class="bv">ln is used constantly in calculus (derivatives and integrals) and in exponential growth and decay problems.</div></div>`;
+      <div class="bc"><div class="bt">Why it Matters</div><div class="bv">ln is used constantly in calculus (derivatives and integrals) and in exponential growth and decay problems.</div></div>`;
   } else {
     I.textContent='Convert to exponential form first — ask "base to what power = argument?" Type your answer and press Check. You can do this!';
     B.innerHTML=`
-      <div class="bc"><div class="bt">🔑 The Strategy</div><div class="bv">log_b(x) = ?<br>Rewrite as: b^? = x<br>Think in exponential form first.</div></div>
-      <div class="bc"><div class="bt">⭐ Always True</div><div class="bv">log_b(1) = 0 always<br>log_b(b) = 1 always<br>log_b(b^n) = n always</div></div>
-      <div class="bc"><div class="bt">➖ Negative Logs</div><div class="bv">log_2(0.5) = −1 because 2^(−1) = 0.5. Negative results mean the argument is between 0 and 1.</div></div>`;
+      <div class="bc"><div class="bt">The Strategy</div><div class="bv">log_b(x) = ?<br>Rewrite as: b^? = x<br>Think in exponential form first.</div></div>
+      <div class="bc"><div class="bt">Always True</div><div class="bv">log_b(1) = 0 always<br>log_b(b) = 1 always<br>log_b(b^n) = n always</div></div>
+      <div class="bc"><div class="bt">Negative Logs</div><div class="bv">log_2(0.5) = −1 because 2^(−1) = 0.5. Negative results mean the argument is between 0 and 1.</div></div>`;
   }
 }
 
@@ -707,15 +719,15 @@ function fx(px){ return (px-OX)/SC; }
 function fy(py){ return (OY-py)/SC; }
 
 function drawGrid2(){
-  ctx.strokeStyle='#1e2440'; ctx.lineWidth=1;
+  ctx.strokeStyle='rgba(0,51,102,0.07)'; ctx.lineWidth=1;
   const x0=Math.floor(fx(0)), x1=Math.ceil(fx(W));
   const y0=Math.floor(fy(H)), y1=Math.ceil(fy(0));
   for(let x=x0;x<=x1;x++){ctx.beginPath();ctx.moveTo(tx(x),0);ctx.lineTo(tx(x),H);ctx.stroke();}
   for(let y=y0;y<=y1;y++){ctx.beginPath();ctx.moveTo(0,ty(y));ctx.lineTo(W,ty(y));ctx.stroke();}
-  ctx.strokeStyle='#2e3860'; ctx.lineWidth=1.5;
+  ctx.strokeStyle='rgba(0,51,102,0.2)'; ctx.lineWidth=1.5;
   ctx.beginPath();ctx.moveTo(tx(0),0);ctx.lineTo(tx(0),H);ctx.stroke();
   ctx.beginPath();ctx.moveTo(0,ty(0));ctx.lineTo(W,ty(0));ctx.stroke();
-  ctx.fillStyle='#2e3860'; ctx.font='10px DM Mono,monospace'; ctx.textAlign='center';
+  ctx.fillStyle='rgba(0,51,102,0.35)'; ctx.font='10px Roboto Mono,monospace'; ctx.textAlign='center';
   for(let x=x0;x<=x1;x++){if(x===0)continue;const px=tx(x);if(px<10||px>W-10)continue;ctx.fillText(x,px,ty(0)+14);}
   ctx.textAlign='right';
   for(let y=y0;y<=y1;y++){if(y===0)continue;const py=ty(y);if(py<10||py>H-10)continue;ctx.fillText(y,tx(0)-5,py+4);}
@@ -734,17 +746,17 @@ function plotCurve(fn, color, lw=2.5){
 
 function drawPoint(x,y,color,label=''){
   const px=tx(x),py=ty(y);
-  ctx.shadowColor=color; ctx.shadowBlur=12;
+  ctx.shadowColor=color; ctx.shadowBlur=6;
   ctx.beginPath();ctx.arc(px,py,6,0,Math.PI*2);
   ctx.fillStyle=color;ctx.fill();
   ctx.shadowBlur=0;
   if(label){
-    ctx.fillStyle=color; ctx.font='bold 12px DM Sans,sans-serif'; ctx.textAlign='left';
+    ctx.fillStyle=color; ctx.font='bold 12px Lato,sans-serif'; ctx.textAlign='left';
     ctx.fillText(label,px+9,py-6);
   }
 }
 
-function drawDashedLine(x1,y1,x2,y2,color='#2e3860'){
+function drawDashedLine(x1,y1,x2,y2,color='rgba(0,51,102,0.2)'){
   ctx.strokeStyle=color; ctx.lineWidth=1; ctx.setLineDash([4,4]);
   ctx.beginPath();ctx.moveTo(tx(x1),ty(y1));ctx.lineTo(tx(x2),ty(y2));ctx.stroke();
   ctx.setLineDash([]);
@@ -753,7 +765,7 @@ function drawDashedLine(x1,y1,x2,y2,color='#2e3860'){
 function draw(){
   setupCoords();
   ctx.clearRect(0,0,W,H);
-  ctx.fillStyle='#0c0e1a'; ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='#F9F6F1'; ctx.fillRect(0,0,W,H);
   drawGrid2();
 
   if(mode==='concept')    drawConcept();
@@ -765,10 +777,10 @@ function draw(){
 
 function drawConcept(){
   const lv=logBase(base,xVal);
-  plotCurve(x=>expBase(base,x),'rgba(79,142,247,0.25)',1.5);
-  plotCurve(x=>logBase(base,x),'rgba(45,212,160,0.25)',1.5);
+  plotCurve(x=>expBase(base,x),'rgba(0,51,102,0.15)',1.5);
+  plotCurve(x=>logBase(base,x),'rgba(238,163,32,0.2)',1.5);
 
-  ctx.strokeStyle='rgba(60,70,120,0.4)'; ctx.lineWidth=1; ctx.setLineDash([6,6]);
+  ctx.strokeStyle='rgba(0,51,102,0.12)'; ctx.lineWidth=1; ctx.setLineDash([6,6]);
   ctx.beginPath();ctx.moveTo(0,H);ctx.lineTo(W,0);ctx.stroke();
   ctx.setLineDash([]);
 
@@ -776,68 +788,68 @@ function drawConcept(){
   const logPt={x:xVal,y:lv};
 
   const diagramX = W*0.62, diagramY = H*0.25;
-  ctx.fillStyle='rgba(19,22,42,0.85)';
+  ctx.fillStyle='rgba(243,237,226,0.95)';
   ctx.beginPath();ctx.roundRect(diagramX-10,diagramY-10,W*0.34,H*0.42,12);ctx.fill();
-  ctx.strokeStyle='#272d4a';ctx.lineWidth=1;
+  ctx.strokeStyle='rgba(0,51,102,0.15)';ctx.lineWidth=1;
   ctx.beginPath();ctx.roundRect(diagramX-10,diagramY-10,W*0.34,H*0.42,12);ctx.stroke();
 
   ctx.textAlign='left';
-  ctx.font='bold 14px DM Mono,monospace';
-  ctx.fillStyle='#4f8ef7'; ctx.fillText(`b = ${fmtBase(base)}`, diagramX, diagramY+16);
-  ctx.fillStyle='#f5a623'; ctx.fillText(`x = ${fmt(xVal)}`, diagramX, diagramY+38);
-  ctx.fillStyle='#2dd4a0'; ctx.fillText(`y = ${fmt(lv)}`, diagramX, diagramY+60);
+  ctx.font='bold 14px Roboto Mono,monospace';
+  ctx.fillStyle='#003366'; ctx.fillText(`b = ${fmtBase(base)}`, diagramX, diagramY+16);
+  ctx.fillStyle='#4D7094'; ctx.fillText(`x = ${fmt(xVal)}`, diagramX, diagramY+38);
+  ctx.fillStyle='#EEA320'; ctx.fillText(`y = ${fmt(lv)}`, diagramX, diagramY+60);
 
-  ctx.fillStyle='#7d87b5'; ctx.font='13px DM Mono,monospace';
+  ctx.fillStyle='#4D7094'; ctx.font='13px Roboto Mono,monospace';
   ctx.fillText('Exponential form:', diagramX, diagramY+92);
-  ctx.fillStyle='#e4e8ff'; ctx.font='bold 13px DM Mono,monospace';
+  ctx.fillStyle='#003366'; ctx.font='bold 13px Roboto Mono,monospace';
   ctx.fillText(`${fmtBase(base)}^${fmt(lv)} = ${fmt(xVal)}`, diagramX, diagramY+112);
 
-  ctx.fillStyle='#7d87b5'; ctx.font='13px DM Mono,monospace';
+  ctx.fillStyle='#4D7094'; ctx.font='13px Roboto Mono,monospace';
   ctx.fillText('Logarithm form:', diagramX, diagramY+140);
-  ctx.fillStyle='#e4e8ff'; ctx.font='bold 13px DM Mono,monospace';
+  ctx.fillStyle='#003366'; ctx.font='bold 13px Roboto Mono,monospace';
   ctx.fillText(`log_${fmtBase(base)}(${fmt(xVal)}) = ${fmt(lv)}`, diagramX, diagramY+160);
 
   if(xVal>0){
-    drawDashedLine(xVal,lv,xVal,0,'rgba(245,166,35,0.4)');
-    drawDashedLine(xVal,lv,0,lv,'rgba(45,212,160,0.4)');
-    drawPoint(xVal,lv,'#f5a623',`(${fmt(xVal)}, ${fmt(lv)})`);
+    drawDashedLine(xVal,lv,xVal,0,'rgba(77,112,148,0.35)');
+    drawDashedLine(xVal,lv,0,lv,'rgba(238,163,32,0.35)');
+    drawPoint(xVal,lv,'#4D7094',`(${fmt(xVal)}, ${fmt(lv)})`);
   }
 
-  plotCurve(x=>logBase(base,x),'#2dd4a0',2.5);
+  plotCurve(x=>logBase(base,x),'#EEA320',2.5);
 }
 
 function drawGraph(){
   const lv=logBase(base,xVal);
-  ctx.strokeStyle='rgba(80,90,160,0.35)'; ctx.lineWidth=1.5; ctx.setLineDash([6,6]);
+  ctx.strokeStyle='rgba(0,51,102,0.12)'; ctx.lineWidth=1.5; ctx.setLineDash([6,6]);
   ctx.beginPath();
   const mn=Math.min(fx(0),fy(H)), mx=Math.max(fx(W),fy(0));
   ctx.moveTo(tx(mn),ty(mn));ctx.lineTo(tx(mx),ty(mx));
   ctx.stroke(); ctx.setLineDash([]);
 
-  ctx.fillStyle='rgba(80,90,160,0.6)';ctx.font='11px DM Sans,sans-serif';ctx.textAlign='center';
+  ctx.fillStyle='rgba(0,51,102,0.4)';ctx.font='11px Lato,sans-serif';ctx.textAlign='center';
   ctx.fillText('y = x', tx(3)+10, ty(3)-10);
 
-  plotCurve(x=>expBase(base,x),'#4f8ef7',2.5);
-  plotCurve(x=>logBase(base,x),'#2dd4a0',2.5);
+  plotCurve(x=>expBase(base,x),'#003366',2.5);
+  plotCurve(x=>logBase(base,x),'#EEA320',2.5);
 
-  ctx.strokeStyle='rgba(240,98,146,0.4)'; ctx.lineWidth=1.5; ctx.setLineDash([4,4]);
+  ctx.strokeStyle='rgba(77,112,148,0.4)'; ctx.lineWidth=1.5; ctx.setLineDash([4,4]);
   ctx.beginPath();ctx.moveTo(tx(0),0);ctx.lineTo(tx(0),H);ctx.stroke();
   ctx.setLineDash([]);
-  ctx.fillStyle='rgba(240,98,146,0.7)';ctx.font='10px DM Sans,sans-serif';ctx.textAlign='left';
+  ctx.fillStyle='rgba(77,112,148,0.7)';ctx.font='10px Lato,sans-serif';ctx.textAlign='left';
   ctx.fillText('wall at x=0',tx(0)+4,20);
 
-  drawPoint(1,0,'#2dd4a0','(1, 0) always');
-  drawPoint(0,1,'#4f8ef7','(0, 1) always');
+  drawPoint(1,0,'#EEA320','(1, 0) always');
+  drawPoint(0,1,'#003366','(0, 1) always');
 
   if(xVal>0.1){
-    drawDashedLine(xVal,lv,xVal,0,'rgba(245,166,35,0.35)');
-    drawDashedLine(xVal,lv,0,lv,'rgba(245,166,35,0.35)');
-    drawPoint(xVal,lv,'#f5a623',`(${fmt(xVal,1)}, ${fmt(lv,2)})`);
+    drawDashedLine(xVal,lv,xVal,0,'rgba(77,112,148,0.35)');
+    drawDashedLine(xVal,lv,0,lv,'rgba(77,112,148,0.35)');
+    drawPoint(xVal,lv,'#4D7094',`(${fmt(xVal,1)}, ${fmt(lv,2)})`);
   }
 
-  ctx.fillStyle='#4f8ef7'; ctx.font='bold 12px DM Sans,sans-serif'; ctx.textAlign='left';
+  ctx.fillStyle='#003366'; ctx.font='bold 12px Lato,sans-serif'; ctx.textAlign='left';
   ctx.fillText(`y = ${fmtBase(base)}^x`, tx(1.2), ty(expBase(base,1.5))-8);
-  ctx.fillStyle='#2dd4a0';
+  ctx.fillStyle='#EEA320';
   ctx.fillText(`y = log_${fmtBase(base)}(x)`, tx(3), ty(logBase(base,3))-10);
 }
 
@@ -846,103 +858,100 @@ function drawLaws(){
   const lM=logBase(base,M), lN=logBase(base,N);
   const lMN=logBase(base,M*N);
 
-  plotCurve(x=>logBase(base,x),'rgba(45,212,160,0.3)',1.5);
+  plotCurve(x=>logBase(base,x),'rgba(238,163,32,0.25)',1.5);
 
   if(M>0&&N>0&&M*N<10000){
-    drawDashedLine(M,lM,M,0,'rgba(79,142,247,0.4)');
-    drawDashedLine(N,lN,N,0,'rgba(181,123,238,0.4)');
-    drawDashedLine(M*N,lMN,M*N,0,'rgba(245,166,35,0.4)');
-    drawDashedLine(0,lM,M,lM,'rgba(79,142,247,0.3)');
-    drawDashedLine(0,lN,N,lN,'rgba(181,123,238,0.3)');
-    drawDashedLine(0,lMN,M*N>fx(W)?fx(W):M*N,lMN,'rgba(245,166,35,0.3)');
+    drawDashedLine(M,lM,M,0,'rgba(0,51,102,0.35)');
+    drawDashedLine(N,lN,N,0,'rgba(77,112,148,0.35)');
+    drawDashedLine(M*N,lMN,M*N,0,'rgba(77,112,148,0.35)');
+    drawDashedLine(0,lM,M,lM,'rgba(0,51,102,0.25)');
+    drawDashedLine(0,lN,N,lN,'rgba(77,112,148,0.25)');
+    drawDashedLine(0,lMN,M*N>fx(W)?fx(W):M*N,lMN,'rgba(77,112,148,0.25)');
 
-    if(M<fx(W)) drawPoint(M,lM,'#4f8ef7',`M=${fmt(M,1)}`);
-    if(N<fx(W)) drawPoint(N,lN,'#b57bee',`N=${fmt(N,1)}`);
-    if(M*N<fx(W)) drawPoint(M*N,lMN,'#f5a623',`M·N=${fmt(M*N,1)}`);
+    if(M<fx(W)) drawPoint(M,lM,'#003366',`M=${fmt(M,1)}`);
+    if(N<fx(W)) drawPoint(N,lN,'#4D7094',`N=${fmt(N,1)}`);
+    if(M*N<fx(W)) drawPoint(M*N,lMN,'#4D7094',`M·N=${fmt(M*N,1)}`);
   }
 
-  plotCurve(x=>logBase(base,x),'#2dd4a0',2.5);
+  plotCurve(x=>logBase(base,x),'#EEA320',2.5);
 
   const bx=W*0.55, by=30;
-  ctx.fillStyle='rgba(19,22,42,0.9)';
+  ctx.fillStyle='rgba(243,237,226,0.95)';
   ctx.beginPath();ctx.roundRect(bx,by,W*0.41,130,10);ctx.fill();
-  ctx.strokeStyle='#272d4a';ctx.lineWidth=1;
+  ctx.strokeStyle='rgba(0,51,102,0.15)';ctx.lineWidth=1;
   ctx.beginPath();ctx.roundRect(bx,by,W*0.41,130,10);ctx.stroke();
 
   ctx.textAlign='left';
-  ctx.font='bold 11px DM Mono,monospace';
-  ctx.fillStyle='#7d87b5'; ctx.fillText('Product Rule Live:', bx+12, by+22);
-  ctx.fillStyle='#4f8ef7'; ctx.fillText(`log(${fmt(M,1)}) = ${fmt(lM)}`, bx+12, by+44);
-  ctx.fillStyle='#b57bee'; ctx.fillText(`log(${fmt(N,1)}) = ${fmt(lN)}`, bx+12, by+64);
-  ctx.fillStyle='#7d87b5'; ctx.fillText('Sum =', bx+12, by+84);
-  ctx.fillStyle='#f5a623'; ctx.fillText(`${fmt(lM)} + ${fmt(lN)} = ${fmt(lM+lN)}`, bx+60, by+84);
-  ctx.fillStyle='#7d87b5'; ctx.fillText('log(M·N) =', bx+12, by+104);
-  ctx.fillStyle='#2dd4a0'; ctx.fillText(fmt(lMN), bx+105, by+104);
+  ctx.font='bold 11px Roboto Mono,monospace';
+  ctx.fillStyle='#4D7094'; ctx.fillText('Product Rule Live:', bx+12, by+22);
+  ctx.fillStyle='#003366'; ctx.fillText(`log(${fmt(M,1)}) = ${fmt(lM)}`, bx+12, by+44);
+  ctx.fillStyle='#4D7094'; ctx.fillText(`log(${fmt(N,1)}) = ${fmt(lN)}`, bx+12, by+64);
+  ctx.fillStyle='#4D7094'; ctx.fillText('Sum =', bx+12, by+84);
+  ctx.fillStyle='#4D7094'; ctx.fillText(`${fmt(lM)} + ${fmt(lN)} = ${fmt(lM+lN)}`, bx+60, by+84);
+  ctx.fillStyle='#4D7094'; ctx.fillText('log(M·N) =', bx+12, by+104);
+  ctx.fillStyle='#EEA320'; ctx.fillText(fmt(lMN), bx+105, by+104);
   const match=Math.abs(lM+lN-lMN)<0.01;
-  ctx.fillStyle=match?'#2dd4a0':'#f06292';
+  ctx.fillStyle=match?'#EEA320':'#4A4A4A';
   ctx.fillText(match?'✓ They match!':'≈ Check rounding',bx+12,by+122);
 }
 
-function var_border(){ return '#272d4a'; }
-
 function drawNatural(){
   const lnVal=Math.log(xVal);
-  plotCurve(x=>Math.exp(x),'rgba(79,142,247,0.5)',2);
-  plotCurve(x=>Math.log(x),'rgba(45,212,160,0.5)',2);
-  ctx.strokeStyle='rgba(60,70,100,0.3)';ctx.lineWidth=1;ctx.setLineDash([5,5]);
+  plotCurve(x=>Math.exp(x),'rgba(0,51,102,0.4)',2);
+  plotCurve(x=>Math.log(x),'rgba(238,163,32,0.4)',2);
+  ctx.strokeStyle='rgba(0,51,102,0.1)';ctx.lineWidth=1;ctx.setLineDash([5,5]);
   ctx.beginPath();ctx.moveTo(0,H);ctx.lineTo(W,0);ctx.stroke();ctx.setLineDash([]);
 
-  drawPoint(1,Math.E,'#4f8ef7','(1, e)');
-  drawPoint(Math.E,1,'#2dd4a0','(e, 1)');
-  drawPoint(0,1,'#4f8ef7','(0,1)');
-  drawPoint(1,0,'#2dd4a0','(1,0)');
+  drawPoint(1,Math.E,'#003366','(1, e)');
+  drawPoint(Math.E,1,'#EEA320','(e, 1)');
+  drawPoint(0,1,'#003366','(0,1)');
+  drawPoint(1,0,'#EEA320','(1,0)');
 
   if(xVal>0.05){
-    drawDashedLine(xVal,lnVal,xVal,0,'rgba(245,166,35,0.35)');
-    drawDashedLine(xVal,lnVal,0,lnVal,'rgba(245,166,35,0.35)');
-    drawPoint(xVal,lnVal,'#f5a623',`ln(${fmt(xVal,1)})=${fmt(lnVal)}`);
+    drawDashedLine(xVal,lnVal,xVal,0,'rgba(77,112,148,0.35)');
+    drawDashedLine(xVal,lnVal,0,lnVal,'rgba(77,112,148,0.35)');
+    drawPoint(xVal,lnVal,'#4D7094',`ln(${fmt(xVal,1)})=${fmt(lnVal)}`);
   }
 
-  ctx.fillStyle='#4f8ef7';ctx.font='bold 12px DM Sans,sans-serif';ctx.textAlign='left';
+  ctx.fillStyle='#003366';ctx.font='bold 12px Lato,sans-serif';ctx.textAlign='left';
   ctx.fillText('y = eˣ',tx(0.5),ty(Math.exp(0.5))-10);
-  ctx.fillStyle='#2dd4a0';
+  ctx.fillStyle='#EEA320';
   ctx.fillText('y = ln(x)',tx(4),ty(Math.log(4))-10);
 
-  ctx.strokeStyle='rgba(181,123,238,0.5)';ctx.lineWidth=1;ctx.setLineDash([3,3]);
+  ctx.strokeStyle='rgba(77,112,148,0.4)';ctx.lineWidth=1;ctx.setLineDash([3,3]);
   ctx.beginPath();ctx.moveTo(tx(Math.E),ty(0)-5);ctx.lineTo(tx(Math.E),ty(0)+5);ctx.stroke();
   ctx.setLineDash([]);
-  ctx.fillStyle='#b57bee';ctx.font='10px DM Mono,monospace';ctx.textAlign='center';
+  ctx.fillStyle='#4D7094';ctx.font='10px Roboto Mono,monospace';ctx.textAlign='center';
   ctx.fillText('e',tx(Math.E),ty(0)+17);
 }
 
 function drawPractice(){
-  ctx.fillStyle='#0c0e1a';ctx.fillRect(0,0,W,H);
   if(!practice.current) return;
   const pr=practice.current;
 
   ctx.textAlign='center';
-  ctx.fillStyle='#1e2440';
+  ctx.fillStyle='rgba(243,237,226,0.95)';
   ctx.beginPath();ctx.roundRect(W*0.15,H*0.1,W*0.7,H*0.5,16);ctx.fill();
-  ctx.strokeStyle='#272d4a';ctx.lineWidth=1;
+  ctx.strokeStyle='rgba(0,51,102,0.15)';ctx.lineWidth=1;
   ctx.beginPath();ctx.roundRect(W*0.15,H*0.1,W*0.7,H*0.5,16);ctx.stroke();
 
-  ctx.fillStyle='#2e3860';
-  ctx.font='bold 13px DM Sans,sans-serif';
+  ctx.fillStyle='#4D7094';
+  ctx.font='bold 13px Lato,sans-serif';
   ctx.fillText('Ask: base to what power = argument?',W/2,H*0.18);
 
-  ctx.fillStyle='#e4e8ff';
-  ctx.font='bold 36px DM Mono,monospace';
+  ctx.fillStyle='#003366';
+  ctx.font='bold 36px Roboto Mono,monospace';
   ctx.fillText(pr.q,W/2,H*0.35);
 
-  ctx.fillStyle='#3d4470';
-  ctx.font='13px DM Sans,sans-serif';
-  ctx.fillText(`💡 ${pr.hint}`,W/2,H*0.48);
+  ctx.fillStyle='#4D7094';
+  ctx.font='13px Lato,sans-serif';
+  ctx.fillText(`${pr.hint}`,W/2,H*0.48);
 
-  ctx.fillStyle='#1a2050';
+  ctx.fillStyle='rgba(237,232,223,0.9)';
   ctx.beginPath();ctx.roundRect(W*0.2,H*0.67,W*0.6,H*0.25,12);ctx.fill();
-  ctx.fillStyle='#2e3860';ctx.font='bold 11px DM Sans,sans-serif';
+  ctx.fillStyle='#4D7094';ctx.font='bold 11px Lato,sans-serif';
   ctx.fillText('Remember: log_b(x) = y  ⟺  b^y = x',W/2,H*0.76);
-  ctx.fillStyle='#3d4470';ctx.font='11px DM Mono,monospace';
+  ctx.fillStyle='#4D7094';ctx.font='11px Roboto Mono,monospace';
   ctx.fillText('Rewrite as exponential form and solve for the power',W/2,H*0.86);
 }
 

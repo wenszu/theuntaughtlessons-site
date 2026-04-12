@@ -61,10 +61,11 @@ nav ul li a {
   color: #4A4A4A;
   text-decoration: none;
   letter-spacing: 0.02em;
+  transition: color 0.15s;
 }
 
 nav ul li a:hover {
-  color: #003366;
+  color: #EEA320;
 }
 
 nav ul li a.active {
@@ -115,7 +116,7 @@ nav ul li a.active {
 
 /* ── Core Program ── */
 .core-program {
-  padding: 120px 0;
+  padding: 80px 0;
   border-left: 2px solid #EEA320;
   padding-left: 36px;
   margin-left: -38px;
@@ -141,7 +142,7 @@ nav ul li a.active {
 
 /* ── Applications ── */
 .applications {
-  padding: 80px 0;
+  padding: 60px 0;
 }
 
 .applications p {
@@ -159,34 +160,51 @@ nav ul li a.active {
   border-top: 1px solid rgba(74, 74, 74, 0.25);
 }
 
-/* Required block — restyled, links and structure preserved */
 .tools-section .tools h2 {
   font-family: 'Lato', sans-serif;
   font-weight: 400;
-  font-size: 13px;
-  letter-spacing: 2px;
+  font-size: 11px;
+  letter-spacing: 3px;
   text-transform: uppercase;
   color: #4D7094;
+  margin-bottom: 24px;
+}
+
+.tool-item {
   margin-bottom: 20px;
+}
+
+.tool-item:last-child {
+  margin-bottom: 0;
 }
 
 .tools-section .tools a {
   display: block;
   font-family: 'Lato', sans-serif;
-  font-weight: 300;
+  font-weight: 400;
   font-size: 16px;
   color: #003366;
   text-decoration: none;
-  line-height: 2.2;
+  margin-bottom: 4px;
+  transition: color 0.15s;
 }
 
 .tools-section .tools a:hover {
   color: #EEA320;
 }
 
+.tool-desc {
+  font-family: 'Lato', sans-serif;
+  font-weight: 300;
+  font-size: 14px;
+  color: #4D7094;
+  line-height: 1.5;
+}
+
 /* ── About ── */
 .about {
   padding: 60px 0;
+  border-top: 1px solid rgba(74, 74, 74, 0.12);
 }
 
 .about p {
@@ -194,8 +212,27 @@ nav ul li a.active {
   font-weight: 300;
   font-size: 17px;
   color: #4A4A4A;
-  max-width: 440px;
+  max-width: 480px;
   line-height: 1.85;
+  margin-bottom: 16px;
+}
+
+.about p:last-of-type {
+  margin-bottom: 24px;
+}
+
+.contact-link {
+  font-family: 'Lato', sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  color: #003366;
+  text-decoration: none;
+  letter-spacing: 0.02em;
+  transition: color 0.15s;
+}
+
+.contact-link:hover {
+  color: #EEA320;
 }
 
 /* ── Footer ── */
@@ -204,9 +241,72 @@ footer {
   border-top: 1px solid rgba(74, 74, 74, 0.12);
 }
 
+.footer-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
 footer p {
   font-family: 'Lato', sans-serif;
   font-weight: 300;
   font-size: 13px;
   color: #4A4A4A;
+}
+
+footer a {
+  font-family: 'Lato', sans-serif;
+  font-weight: 300;
+  font-size: 13px;
+  color: #4D7094;
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+footer a:hover {
+  color: #EEA320;
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  nav {
+    padding: 24px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  nav ul {
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  .container {
+    padding: 0 24px;
+  }
+
+  .hero {
+    padding: 60px 0;
+  }
+
+  .hero h1 {
+    font-size: 38px;
+  }
+
+  .core-program {
+    margin-left: 0;
+    padding-left: 24px;
+    padding-top: 60px;
+    padding-bottom: 60px;
+  }
+
+  .core-program h2 {
+    font-size: 28px;
+  }
+
+  .footer-inner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
 }
