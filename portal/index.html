@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Portal — The Untaught Lessons</title>
+  <link rel="stylesheet" href="portal.css">
+  <script src="portal.js"></script>
+</head>
+<body>
+
+  <!-- ── Password gate ─────────────────────────────────────────── -->
+  <div id="gate">
+    <div class="gate-card">
+      <span class="gate-wordmark">The Untaught Lessons</span>
+      <h2>Beta Portal</h2>
+      <p>Enter your access code to continue.</p>
+      <form id="gate-form">
+        <input
+          id="gate-password"
+          class="gate-input"
+          type="password"
+          placeholder="Access code"
+          autocomplete="current-password"
+          autofocus
+        />
+        <button class="gate-btn" type="submit">Enter</button>
+        <p id="gate-error" class="gate-error"></p>
+      </form>
+    </div>
+  </div>
+
+  <!-- ── Portal nav ────────────────────────────────────────────── -->
+  <nav class="portal-nav">
+    <div class="portal-nav-left">
+      <a href="../" class="portal-wordmark">The Untaught Lessons</a>
+    </div>
+    <div class="portal-nav-right">
+      <span class="beta-badge">Beta</span>
+      <button class="portal-logout" onclick="portalLogout()">Sign out</button>
+    </div>
+  </nav>
+
+  <!-- ── Dashboard ─────────────────────────────────────────────── -->
+  <main class="portal-main">
+
+    <div class="dashboard-header">
+      <span class="section-label">Dashboard</span>
+      <h1>Your workspace.</h1>
+      <p>Three workbooks. One program. Work through each at your own pace.</p>
+    </div>
+
+    <div class="workbook-grid">
+
+      <!-- Workbook A — active -->
+      <a href="workbook-a.html" class="workbook-card clickable">
+        <div class="workbook-letter">A</div>
+        <div class="workbook-info">
+          <div class="workbook-phase">Phase 1</div>
+          <div class="workbook-title">Think Clearly</div>
+          <div class="workbook-desc">Structure information. Separate signal from noise. Lead with the bottom line.</div>
+          <div class="workbook-progress">
+            <div class="progress-track">
+              <div class="progress-fill" id="progress-a" style="width: 0%"></div>
+            </div>
+            <span class="progress-text" id="progress-a-text">0 of 4 complete</span>
+          </div>
+        </div>
+        <span class="workbook-status active">Active</span>
+      </a>
+
+      <!-- Workbook B — locked -->
+      <div class="workbook-card locked">
+        <div class="workbook-letter">B</div>
+        <div class="workbook-info">
+          <div class="workbook-phase">Phase 2</div>
+          <div class="workbook-title">Speak Concisely</div>
+          <div class="workbook-desc">Communicate with precision and economy. Short, clear, persuasive.</div>
+          <div class="workbook-progress">
+            <div class="progress-track">
+              <div class="progress-fill" style="width: 0%"></div>
+            </div>
+            <span class="progress-text">0 of 4 complete</span>
+          </div>
+        </div>
+        <span class="workbook-status coming">Coming soon</span>
+      </div>
+
+      <!-- Workbook C — locked -->
+      <div class="workbook-card locked">
+        <div class="workbook-letter">C</div>
+        <div class="workbook-info">
+          <div class="workbook-phase">Phase 3</div>
+          <div class="workbook-title">Act Confidently</div>
+          <div class="workbook-desc">Make decisions. Own the room. Lead with conviction under pressure.</div>
+          <div class="workbook-progress">
+            <div class="progress-track">
+              <div class="progress-fill" style="width: 0%"></div>
+            </div>
+            <span class="progress-text">0 of 4 complete</span>
+          </div>
+        </div>
+        <span class="workbook-status coming">Coming soon</span>
+      </div>
+
+    </div><!-- /workbook-grid -->
+
+    <!-- Resources -->
+    <div class="resources-section">
+      <h2>Resources</h2>
+      <a href="../tools/[Grade 9 and 10] Logarithm_explorer.html" class="resource-link" target="_blank">
+        Logarithm explorer — Grade 9–10 math tool
+      </a>
+      <a href="../tools/[Grade 8] Linear_systems_grapher.html" class="resource-link" target="_blank">
+        Linear systems grapher — Grade 8 math tool
+      </a>
+      <a href="mailto:info@theuntaughtlessons.com" class="resource-link">
+        Send feedback → info@theuntaughtlessons.com
+      </a>
+    </div>
+
+  </main>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+
+      initGate(function () {
+        // Render Workbook A progress from localStorage
+        var done  = countCompleted('workbook_a');
+        var total = 4;
+        var pct   = Math.round((done / total) * 100);
+
+        var fillEl = document.getElementById('progress-a');
+        var textEl = document.getElementById('progress-a-text');
+
+        if (fillEl) fillEl.style.width = pct + '%';
+        if (textEl) textEl.textContent = done + ' of ' + total + ' complete';
+      });
+
+    });
+  </script>
+
+</body>
+</html>
