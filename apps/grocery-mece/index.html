@@ -523,7 +523,9 @@
     }
 
     function renderZone(zoneKey) {
-      const zoneEl = document.querySelector(`[data-zone="${zoneKey}"]`);
+      const zoneEl = zoneKey === 'list'
+        ? document.getElementById('messyList')
+        : document.querySelector(`.bucket-items[data-zone="${zoneKey}"]`);
       if (!zoneEl) return;
       zoneEl.innerHTML = '';
       state.placements[zoneKey].forEach((id) => {
