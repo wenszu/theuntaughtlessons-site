@@ -3,743 +3,88 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Turn your messy grocery list into a clear guide</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lato:wght@300;400;700&display=swap');
-
-    :root {
-      --bg: #F3EDE2;
-      --navy: #003366;
-      --gold: #EEA320;
-      --charcoal: #4A4A4A;
-      --white: #fff;
-      --line: rgba(0, 51, 102, 0.18);
-      --shadow: 0 10px 26px rgba(0, 51, 102, 0.08);
-      --radius: 14px;
-    }
-
-    * { box-sizing: border-box; }
-
-    body {
-      margin: 0;
-      font-family: 'Lato', sans-serif;
-      color: var(--charcoal);
-      background: var(--bg);
-    }
-
-    .page {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 32px 20px 40px;
-    }
-
-    h1, h2, h3 {
-      font-family: 'Playfair Display', serif;
-      color: var(--navy);
-      margin-top: 0;
-    }
-
-    .header {
-      margin-bottom: 22px;
-      border-bottom: 1px solid var(--line);
-      padding-bottom: 14px;
-    }
-
-    .header h1 {
-      font-size: clamp(1.8rem, 3vw, 2.3rem);
-      margin-bottom: 8px;
-    }
-
-    .header p {
-      margin: 0;
-      max-width: 75ch;
-      line-height: 1.45;
-    }
-
-    .layout {
-      display: grid;
-      grid-template-columns: minmax(260px, 1fr) minmax(560px, 2.2fr);
-      gap: 18px;
-      align-items: start;
-    }
-
-    .panel {
-      background: var(--white);
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-    }
-
-    .panel-head {
-      padding: 14px 16px;
-      border-bottom: 1px solid var(--line);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .panel-head h2 {
-      margin: 0;
-      font-size: 1.2rem;
-    }
-
-    .panel-body { padding: 14px 14px 16px; }
-
-    .item-zone {
-      min-height: 520px;
-      border: 1px dashed rgba(0, 51, 102, 0.25);
-      border-radius: 12px;
-      padding: 10px;
-      background: linear-gradient(180deg, rgba(243,237,226,.75), rgba(255,255,255,.95));
-      transition: .15s ease;
-    }
-
-    .item-zone.drag-over,
-    .bucket-items.drag-over {
-      border-color: var(--gold);
-      background: #fff7e9;
-    }
-
-    .item-card {
-      background: #fff;
-      border: 1px solid rgba(0, 51, 102, 0.16);
-      border-radius: 10px;
-      margin-bottom: 8px;
-      padding: 10px 12px;
-      cursor: grab;
-      font-weight: 700;
-      color: var(--navy);
-      user-select: none;
-    }
-
-    .item-card:active { cursor: grabbing; }
-
-    .buckets-wrap {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(170px, 1fr));
-      gap: 10px;
-      margin-bottom: 12px;
-    }
-
-    .bucket {
-      border: 1px solid var(--line);
-      border-radius: 12px;
-      background: #fff;
-      min-height: 380px;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .bucket-head {
-      padding: 10px;
-      border-bottom: 1px solid var(--line);
-      background: rgba(243, 237, 226, 0.45);
-    }
-
-    .bucket-head label {
-      font-size: .79rem;
-      text-transform: uppercase;
-      letter-spacing: .03em;
-      color: var(--navy);
-      display: block;
-      margin-bottom: 4px;
-      font-weight: 700;
-    }
-
-    .bucket-name {
-      width: 100%;
-      border: 1px solid rgba(0, 51, 102, .22);
-      border-radius: 8px;
-      padding: 8px;
-      font-family: inherit;
-      font-size: .95rem;
-    }
-
-    .bucket-items {
-      min-height: 290px;
-      padding: 8px;
-      flex: 1;
-      border-radius: 0 0 12px 12px;
-      transition: .15s ease;
-    }
-
-    textarea {
-      width: 100%;
-      min-height: 85px;
-      border: 1px solid rgba(0,51,102,.2);
-      border-radius: 10px;
-      padding: 10px;
-      resize: vertical;
-      font-family: inherit;
-      font-size: .95rem;
-      margin-top: 8px;
-    }
-
-    .buttons {
-      margin-top: 12px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    button {
-      border: 1px solid var(--navy);
-      border-radius: 8px;
-      background: #fff;
-      color: var(--navy);
-      padding: 9px 12px;
-      font-weight: 700;
-      font-family: inherit;
-      cursor: pointer;
-    }
-
-    button.primary {
-      background: var(--navy);
-      color: #fff;
-      border-color: var(--navy);
-    }
-
-    button.gold {
-      background: var(--gold);
-      border-color: var(--gold);
-      color: #2e2107;
-    }
-
-    button:disabled { opacity: .45; cursor: not-allowed; }
-
-    .feedback,
-    .sample-answer {
-      margin-top: 14px;
-      border: 1px solid var(--line);
-      border-radius: 12px;
-      background: #fff;
-      padding: 12px 14px;
-      line-height: 1.45;
-    }
-
-    .feedback h3,
-    .sample-answer h3 { margin-bottom: 6px; font-size: 1.12rem; }
-
-    .feedback ul,
-    .sample-answer ul {
-      margin: 6px 0 8px 18px;
-      padding: 0;
-    }
-
-    .score {
-      font-size: 1.15rem;
-      color: var(--navy);
-      font-weight: 700;
-      margin: 4px 0 8px;
-    }
-
-    .small {
-      font-size: .9rem;
-      color: #5e5e5e;
-    }
-
-    .hidden { display: none; }
-
-    @media (max-width: 980px) {
-      .layout { grid-template-columns: 1fr; }
-      .item-zone { min-height: 260px; }
-      .bucket { min-height: 280px; }
-      .bucket-items { min-height: 170px; }
-    }
-
-    @media (max-width: 720px) {
-      .buckets-wrap { grid-template-columns: 1fr; }
-    }
-  </style>
+  <title>The Untaught Lessons</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lato:wght@300;400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <main class="page">
-    <header class="header">
-      <h1>Turn your messy grocery list into a clear guide</h1>
-      <p>Practice structured thinking: create exactly three clear buckets, sort the messy list, and reflect on why your structure is MECE (mutually exclusive, collectively exhaustive).</p>
-    </header>
 
-    <section class="layout">
-      <article class="panel">
-        <div class="panel-head">
-          <h2>Messy grocery list</h2>
-          <span class="small" id="listCount"></span>
+  <!-- Navigation -->
+  <nav>
+    <img src="assets/logo.png" alt="The Untaught Lessons">
+    <ul>
+      <li><a href="#" class="active">Home</a></li>
+      <li><a href="#core-program">Core Program</a></li>
+      <li><a href="#applications">Applications</a></li>
+      <li><a href="#tools">Tools</a></li>
+      <li><a href="#about">About</a></li>
+    </ul>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="container">
+      <h1>The Untaught<br>Lessons</h1>
+      <div class="hero-rule"></div>
+      <p>Structured thinking for students who want to go further.</p>
+    </div>
+  </section>
+
+  <!-- Core Program -->
+  <section id="core-program">
+    <div class="container">
+      <div class="core-program">
+        <span class="section-label">Core Program</span>
+        <h2>The program that teaches<br>you how to think.</h2>
+        <p>Most education tells you what to think. This program teaches you how — through structured frameworks, real problems, and deliberate practice.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Applications -->
+  <section id="applications" class="applications">
+    <div class="container">
+      <p>Consulting and strategy &nbsp;·&nbsp; Academic preparation &nbsp;·&nbsp; IB Mathematics &nbsp;·&nbsp; Independent study</p>
+    </div>
+  </section>
+
+  <!-- Tools -->
+  <section id="tools" class="tools-section">
+    <div class="container">
+      <div class="tools">
+        <h2>Math tools</h2>
+        <div class="tool-item">
+          <a href="tools/[Grade 9 and 10] Logarithm_explorer.html">Logarithm explorer</a>
+          <p class="tool-desc">Grade 9–10 &nbsp;·&nbsp; Understand exponential thinking through interactive graphs</p>
         </div>
-        <div class="panel-body">
-          <div id="messyList" class="item-zone" data-zone="list"></div>
-          <p class="small">Tip: You can drag items into buckets and drag them back here.</p>
+        <div class="tool-item">
+          <a href="tools/[Grade 8] Linear_systems_grapher.html">Linear systems grapher</a>
+          <p class="tool-desc">Grade 8 &nbsp;·&nbsp; Explore lines, slopes, and systems of equations visually</p>
         </div>
-      </article>
+      </div>
+    </div>
+  </section>
 
-      <article class="panel">
-        <div class="panel-head">
-          <h2>Your three buckets</h2>
-        </div>
-        <div class="panel-body">
-          <div class="buckets-wrap" id="bucketsWrap"></div>
+  <!-- About -->
+  <section id="about" class="about">
+    <div class="container">
+      <p>Built for students who are serious about learning.</p>
+      <p>The Untaught Lessons uses deliberate practice and structured frameworks to develop mathematical thinking — not just answer-getting.</p>
+      <a href="mailto:info@theuntaughtlessons.com" class="contact-link">Get in touch &rarr;</a>
+    </div>
+  </section>
 
-          <label for="whyText"><strong>Why did you choose these three buckets?</strong></label>
-          <textarea id="whyText" placeholder="Explain your logic in 2–3 sentences..."></textarea>
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="footer-inner">
+        <p>&copy; 2026 The Untaught Lessons</p>
+        <a href="mailto:info@theuntaughtlessons.com">Contact</a>
+      </div>
+    </div>
+  </footer>
 
-          <div class="buttons">
-            <button id="generateBtn">Generate new list</button>
-            <button id="checkBtn" class="primary" disabled>Check my answer</button>
-            <button id="sampleBtn">Show sample answer</button>
-            <button id="resetBtn" class="gold">Reset</button>
-          </div>
-
-          <div id="feedback" class="feedback hidden"></div>
-          <div id="sampleAnswer" class="sample-answer hidden"></div>
-        </div>
-      </article>
-    </section>
-  </main>
-
-  <script>
-    // -------------------------
-    // Data layer
-    // -------------------------
-    const ITEM_BANK = [
-      { name: 'Carrots', idealBucket: 'fresh_cold', tags: ['produce', 'fresh'] },
-      { name: 'Frozen meatballs', idealBucket: 'fresh_cold', tags: ['frozen', 'meat'] },
-      { name: 'Cheese', idealBucket: 'fresh_cold', tags: ['dairy', 'refrigerated'] },
-      { name: 'Chicken', idealBucket: 'fresh_cold', tags: ['meat', 'fresh'] },
-      { name: 'Potatoes', idealBucket: 'fresh_cold', tags: ['produce'] },
-      { name: 'Milk', idealBucket: 'fresh_cold', tags: ['dairy'] },
-      { name: 'Sausages', idealBucket: 'fresh_cold', tags: ['meat'] },
-      { name: 'Butter', idealBucket: 'fresh_cold', tags: ['dairy'] },
-      { name: 'Beef', idealBucket: 'fresh_cold', tags: ['meat'] },
-      { name: 'Bell peppers', idealBucket: 'fresh_cold', tags: ['produce'] },
-      { name: 'Lettuce', idealBucket: 'fresh_cold', tags: ['produce'] },
-      { name: 'Spinach', idealBucket: 'fresh_cold', tags: ['produce'] },
-      { name: 'Cream', idealBucket: 'fresh_cold', tags: ['dairy'] },
-      { name: 'Grapes', idealBucket: 'fresh_cold', tags: ['fruit', 'fresh'] },
-      { name: 'Garlic', idealBucket: 'fresh_cold', tags: ['produce'] },
-      { name: 'Ice cream', idealBucket: 'fresh_cold', tags: ['frozen', 'dairy'] },
-      { name: 'Onions', idealBucket: 'fresh_cold', tags: ['produce'] },
-      { name: 'Pasta', idealBucket: 'pantry', tags: ['dry', 'staple'] },
-      { name: 'Canned tomatoes', idealBucket: 'pantry', tags: ['canned'] },
-      { name: 'Paprika', idealBucket: 'pantry', tags: ['spice', 'seasoning'] },
-      { name: 'Rice', idealBucket: 'pantry', tags: ['grains', 'dry'] },
-      { name: 'Sugar', idealBucket: 'pantry', tags: ['staple'] },
-      { name: 'Salt', idealBucket: 'pantry', tags: ['seasoning'] },
-      { name: 'Bottled olives', idealBucket: 'pantry', tags: ['jarred'] },
-      { name: 'Olive oil', idealBucket: 'pantry', tags: ['oil', 'staple'] },
-      { name: 'Bathroom tissue', idealBucket: 'supplies', tags: ['paper', 'household'] },
-      { name: 'Candles', idealBucket: 'supplies', tags: ['household'] },
-      { name: 'Charcoal', idealBucket: 'supplies', tags: ['household', 'bbq'] },
-      { name: 'Kitchen towels', idealBucket: 'supplies', tags: ['paper', 'household'] },
-      { name: 'Paper plates', idealBucket: 'supplies', tags: ['party', 'paper'] }
-    ];
-
-    const KEYWORDS = {
-      fresh_cold: ['fresh', 'cold', 'fridge', 'frozen', 'produce', 'meat', 'dairy', 'perishable', 'refrigerated'],
-      pantry: ['pantry', 'dry', 'shelf', 'canned', 'staples', 'grains', 'seasoning', 'oil', 'cupboard'],
-      supplies: ['supplies', 'non-food', 'household', 'party', 'tools', 'paper', 'cleaning', 'cooking']
-    };
-
-    const IDEAL_LABELS = {
-      fresh_cold: 'Fresh / cold food',
-      pantry: 'Pantry items',
-      supplies: 'Non-food supplies'
-    };
-
-    const state = {
-      generatedItems: [],
-      placements: { list: [], bucket1: [], bucket2: [], bucket3: [] },
-      bucketNames: { bucket1: '', bucket2: '', bucket3: '' }
-    };
-
-    // -------------------------
-    // Utility functions
-    // -------------------------
-    const shuffle = (arr) => {
-      const copy = [...arr];
-      for (let i = copy.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [copy[i], copy[j]] = [copy[j], copy[i]];
-      }
-      return copy;
-    };
-
-    const sample = (arr, count) => shuffle(arr).slice(0, count);
-
-    function levenshtein(a, b) {
-      const m = a.length;
-      const n = b.length;
-      const dp = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0));
-      for (let i = 0; i <= m; i++) dp[i][0] = i;
-      for (let j = 0; j <= n; j++) dp[0][j] = j;
-      for (let i = 1; i <= m; i++) {
-        for (let j = 1; j <= n; j++) {
-          const cost = a[i - 1] === b[j - 1] ? 0 : 1;
-          dp[i][j] = Math.min(
-            dp[i - 1][j] + 1,
-            dp[i][j - 1] + 1,
-            dp[i - 1][j - 1] + cost
-          );
-        }
-      }
-      return dp[m][n];
-    }
-
-    function tokenize(text) {
-      return text
-        .toLowerCase()
-        .replace(/[^a-z\s-]/g, ' ')
-        .split(/\s+/)
-        .filter(Boolean);
-    }
-
-    function getItemById(id) {
-      return state.generatedItems.find((item) => item.id === id);
-    }
-
-    // -------------------------
-    // Generation + rendering
-    // -------------------------
-    function generateList() {
-      const byBucket = {
-        fresh_cold: ITEM_BANK.filter((i) => i.idealBucket === 'fresh_cold'),
-        pantry: ITEM_BANK.filter((i) => i.idealBucket === 'pantry'),
-        supplies: ITEM_BANK.filter((i) => i.idealBucket === 'supplies')
-      };
-
-      const targetCount = 24 + Math.floor(Math.random() * 7); // 24..30
-      const mandatory = [
-        ...sample(byBucket.fresh_cold, 3),
-        ...sample(byBucket.pantry, 3),
-        ...sample(byBucket.supplies, 3)
-      ];
-
-      const mandatoryNames = new Set(mandatory.map((i) => i.name));
-      const remainingPool = ITEM_BANK.filter((i) => !mandatoryNames.has(i.name));
-      const remainderNeeded = Math.max(0, targetCount - mandatory.length);
-      const extra = sample(remainingPool, remainderNeeded);
-      const finalItems = shuffle([...mandatory, ...extra]).map((item, idx) => ({
-        ...item,
-        id: `item-${idx}-${item.name.toLowerCase().replace(/\s+/g, '-')}`
-      }));
-
-      state.generatedItems = finalItems;
-      state.placements = { list: finalItems.map((i) => i.id), bucket1: [], bucket2: [], bucket3: [] };
-      state.bucketNames = { bucket1: '', bucket2: '', bucket3: '' };
-
-      renderAll();
-      clearFeedback();
-    }
-
-    function buildBuckets() {
-      const wrap = document.getElementById('bucketsWrap');
-      wrap.innerHTML = '';
-      ['bucket1', 'bucket2', 'bucket3'].forEach((bucketKey, index) => {
-        const bucket = document.createElement('section');
-        bucket.className = 'bucket';
-        bucket.innerHTML = `
-          <div class="bucket-head">
-            <label for="${bucketKey}Input">Name this bucket</label>
-            <input id="${bucketKey}Input" class="bucket-name" type="text" placeholder="Bucket ${index + 1}" />
-          </div>
-          <div class="bucket-items" data-zone="${bucketKey}"></div>
-        `;
-        wrap.appendChild(bucket);
-      });
-    }
-
-    function renderAll() {
-      renderZone('list');
-      renderZone('bucket1');
-      renderZone('bucket2');
-      renderZone('bucket3');
-
-      document.getElementById('listCount').textContent = `${state.generatedItems.length} items`;
-
-      ['bucket1', 'bucket2', 'bucket3'].forEach((bucketKey) => {
-        const input = document.getElementById(`${bucketKey}Input`);
-        if (input && input.value !== state.bucketNames[bucketKey]) {
-          input.value = state.bucketNames[bucketKey];
-        }
-      });
-
-      const movedCount = state.placements.bucket1.length + state.placements.bucket2.length + state.placements.bucket3.length;
-      document.getElementById('checkBtn').disabled = movedCount === 0;
-    }
-
-    function renderZone(zoneKey) {
-      const zoneEl = document.querySelector(`[data-zone="${zoneKey}"]`);
-      if (!zoneEl) return;
-      zoneEl.innerHTML = '';
-      state.placements[zoneKey].forEach((id) => {
-        const item = getItemById(id);
-        if (!item) return;
-        const card = document.createElement('div');
-        card.className = 'item-card';
-        card.draggable = true;
-        card.dataset.itemId = id;
-        card.textContent = item.name;
-        zoneEl.appendChild(card);
-      });
-    }
-
-    // -------------------------
-    // Drag-and-drop layer
-    // -------------------------
-    function moveItem(itemId, targetZone) {
-      Object.keys(state.placements).forEach((zone) => {
-        state.placements[zone] = state.placements[zone].filter((id) => id !== itemId);
-      });
-      state.placements[targetZone].push(itemId);
-      renderAll();
-    }
-
-    function wireDragAndDrop() {
-      document.addEventListener('dragstart', (e) => {
-        if (!e.target.classList.contains('item-card')) return;
-        e.dataTransfer.setData('text/plain', e.target.dataset.itemId);
-      });
-
-      document.addEventListener('dragover', (e) => {
-        const zone = e.target.closest('[data-zone]');
-        if (!zone) return;
-        e.preventDefault();
-      });
-
-      document.addEventListener('dragenter', (e) => {
-        const zone = e.target.closest('[data-zone]');
-        if (!zone) return;
-        zone.classList.add('drag-over');
-      });
-
-      document.addEventListener('dragleave', (e) => {
-        const zone = e.target.closest('[data-zone]');
-        if (!zone) return;
-        zone.classList.remove('drag-over');
-      });
-
-      document.addEventListener('drop', (e) => {
-        const zone = e.target.closest('[data-zone]');
-        if (!zone) return;
-        e.preventDefault();
-        zone.classList.remove('drag-over');
-        const itemId = e.dataTransfer.getData('text/plain');
-        if (!itemId) return;
-        moveItem(itemId, zone.dataset.zone);
-      });
-    }
-
-    // -------------------------
-    // Scoring + feedback layer
-    // -------------------------
-    function getBucketMajorityIdeal(bucketItems) {
-      if (!bucketItems.length) return null;
-      const counts = { fresh_cold: 0, pantry: 0, supplies: 0 };
-      bucketItems.forEach((id) => {
-        const item = getItemById(id);
-        if (item) counts[item.idealBucket] += 1;
-      });
-      return Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0];
-    }
-
-    function bucketNameScore(name, mappedIdeal) {
-      if (!name.trim()) return 0;
-      const words = tokenize(name);
-      if (!words.length || !mappedIdeal) return 0.4;
-
-      const keywords = KEYWORDS[mappedIdeal];
-      let best = 0;
-
-      words.forEach((word) => {
-        keywords.forEach((key) => {
-          if (word === key || word.includes(key) || key.includes(word)) {
-            best = Math.max(best, 1);
-          } else {
-            const dist = levenshtein(word, key);
-            const threshold = key.length > 6 ? 2 : 1;
-            if (dist <= threshold) best = Math.max(best, 0.8);
-          }
-        });
-      });
-
-      return best || 0.2;
-    }
-
-    function evaluate() {
-      const allCount = state.generatedItems.length;
-      const placedCount = state.placements.bucket1.length + state.placements.bucket2.length + state.placements.bucket3.length;
-      const completionRatio = placedCount / allCount;
-
-      const mapping = {
-        bucket1: getBucketMajorityIdeal(state.placements.bucket1),
-        bucket2: getBucketMajorityIdeal(state.placements.bucket2),
-        bucket3: getBucketMajorityIdeal(state.placements.bucket3)
-      };
-
-      let correctFits = 0;
-      const misplaced = [];
-      ['bucket1', 'bucket2', 'bucket3'].forEach((bucketKey) => {
-        const mappedIdeal = mapping[bucketKey];
-        state.placements[bucketKey].forEach((id) => {
-          const item = getItemById(id);
-          if (!item || !mappedIdeal) return;
-          if (item.idealBucket === mappedIdeal) {
-            correctFits += 1;
-          } else if (misplaced.length < 5) {
-            misplaced.push(`${item.name} → ${IDEAL_LABELS[mappedIdeal]}`);
-          }
-        });
-      });
-      const itemFitRatio = placedCount ? correctFits / placedCount : 0;
-
-      const mappedVals = Object.values(mapping).filter(Boolean);
-      const uniqueMapped = new Set(mappedVals);
-      const meceRatio = mappedVals.length < 3 ? uniqueMapped.size / 3 : uniqueMapped.size === 3 ? 1 : uniqueMapped.size / 3;
-
-      const nameScores = ['bucket1', 'bucket2', 'bucket3'].map((bucketKey) => {
-        const input = document.getElementById(`${bucketKey}Input`);
-        state.bucketNames[bucketKey] = input ? input.value : '';
-        return bucketNameScore(state.bucketNames[bucketKey], mapping[bucketKey]);
-      });
-      const nameRatio = nameScores.reduce((a, b) => a + b, 0) / nameScores.length;
-
-      const totalScore = Math.round(
-        completionRatio * 20 +
-        itemFitRatio * 40 +
-        meceRatio * 25 +
-        nameRatio * 15
-      );
-
-      return {
-        completionRatio,
-        itemFitRatio,
-        meceRatio,
-        nameRatio,
-        totalScore,
-        correctFits,
-        placedCount,
-        mapping,
-        misplaced,
-        namesBlank: Object.values(state.bucketNames).some((name) => !name.trim())
-      };
-    }
-
-    function suggestedNamesFromMapping(mapping) {
-      return ['bucket1', 'bucket2', 'bucket3'].map((key, idx) => {
-        const label = mapping[key] ? IDEAL_LABELS[mapping[key]] : `Bucket ${idx + 1} (needs clearer grouping)`;
-        return `Bucket ${idx + 1}: ${label}`;
-      });
-    }
-
-    function getRevision(evalResult) {
-      if (evalResult.completionRatio < 1) {
-        return 'Place every item first. Then review your category boundaries.';
-      }
-      if (evalResult.meceRatio < 1) {
-        return 'Two buckets appear to overlap. Redraw boundaries so each bucket represents a distinct idea.';
-      }
-      if (evalResult.itemFitRatio < 0.85) {
-        return 'Move edge-case items to the bucket where similar items already dominate.';
-      }
-      if (evalResult.namesBlank || evalResult.nameRatio < 0.65) {
-        return 'Keep your structure, but rename buckets with clearer labels (e.g., Fresh/Cold, Pantry, Supplies).';
-      }
-      return 'Strong structure. Tighten wording and keep the Rule of Three for future lists.';
-    }
-
-    function showFeedback(evalResult) {
-      const panel = document.getElementById('feedback');
-      panel.classList.remove('hidden');
-
-      const categoryClarity = evalResult.nameRatio >= 0.75
-        ? 'Your bucket names are mostly clear and easy to interpret.'
-        : 'Bucket names are partly clear, but some labels should be more specific.';
-
-      const meceText = evalResult.meceRatio === 1
-        ? 'Your three buckets map cleanly to three distinct categories.'
-        : 'There is overlap: at least two buckets seem to represent the same category.';
-
-      const itemFitText = `${evalResult.correctFits} of ${evalResult.placedCount || 0} placed items fit their mapped category.`;
-      const misplacedHtml = evalResult.misplaced.length
-        ? `<li><strong>Misplaced examples:</strong> ${evalResult.misplaced.join('; ')}</li>`
-        : '<li><strong>Misplaced examples:</strong> None among sampled examples.</li>';
-
-      const suggested = suggestedNamesFromMapping(evalResult.mapping);
-
-      panel.innerHTML = `
-        <h3>Feedback</h3>
-        <p class="score">Total score: ${evalResult.totalScore} / 100</p>
-        <ul>
-          <li><strong>Category clarity:</strong> ${categoryClarity}</li>
-          <li><strong>MECE quality:</strong> ${meceText}</li>
-          <li><strong>Item fit:</strong> ${itemFitText}</li>
-          <li><strong>Suggested revision:</strong> ${getRevision(evalResult)}</li>
-          ${misplacedHtml}
-        </ul>
-        <p><strong>Suggested improved bucket names:</strong></p>
-        <ul>${suggested.map((s) => `<li>${s}</li>`).join('')}</ul>
-        ${evalResult.namesBlank ? '<p class="small"><em>You left one or more bucket names blank. Your item placement was still evaluated.</em></p>' : ''}
-      `;
-    }
-
-    function clearFeedback() {
-      document.getElementById('feedback').classList.add('hidden');
-      document.getElementById('feedback').innerHTML = '';
-    }
-
-    function renderSampleAnswer() {
-      const sample = document.getElementById('sampleAnswer');
-      sample.innerHTML = `
-        <h3>Sample answer</h3>
-        <p><strong>Fresh / cold food:</strong> Carrots, Frozen meatballs, Cheese, Chicken, Potatoes, Milk, Sausages, Butter, Beef, Bell peppers, Lettuce, Spinach, Cream, Grapes, Garlic, Ice cream, Onions</p>
-        <p><strong>Pantry items:</strong> Pasta, Canned tomatoes, Paprika, Rice, Sugar, Salt, Bottled olives, Olive oil</p>
-        <p><strong>Non-food supplies:</strong> Bathroom tissue, Candles, Charcoal, Kitchen towels, Paper plates</p>
-      `;
-    }
-
-    // -------------------------
-    // Event layer
-    // -------------------------
-    function wireEvents() {
-      ['bucket1', 'bucket2', 'bucket3'].forEach((bucketKey) => {
-        document.addEventListener('input', (e) => {
-          if (e.target.id === `${bucketKey}Input`) {
-            state.bucketNames[bucketKey] = e.target.value;
-          }
-        });
-      });
-
-      document.getElementById('generateBtn').addEventListener('click', generateList);
-
-      document.getElementById('checkBtn').addEventListener('click', () => {
-        const result = evaluate();
-        showFeedback(result);
-      });
-
-      document.getElementById('sampleBtn').addEventListener('click', () => {
-        const sample = document.getElementById('sampleAnswer');
-        sample.classList.toggle('hidden');
-        document.getElementById('sampleBtn').textContent = sample.classList.contains('hidden')
-          ? 'Show sample answer'
-          : 'Hide sample answer';
-      });
-
-      document.getElementById('resetBtn').addEventListener('click', () => {
-        state.placements = { list: state.generatedItems.map((i) => i.id), bucket1: [], bucket2: [], bucket3: [] };
-        state.bucketNames = { bucket1: '', bucket2: '', bucket3: '' };
-        document.getElementById('whyText').value = '';
-        clearFeedback();
-        renderAll();
-      });
-    }
-
-    // -------------------------
-    // Bootstrapping
-    // -------------------------
-    buildBuckets();
-    wireDragAndDrop();
-    wireEvents();
-    renderSampleAnswer();
-    generateList();
-  </script>
 </body>
 </html>
