@@ -114,6 +114,11 @@
     }
 
     .item-card:active { cursor: grabbing; }
+    .item-card.selected {
+      background: #FFF2CC;
+      border-color: var(--gold);
+      box-shadow: inset 0 0 0 1px rgba(238, 163, 32, 0.35);
+    }
 
     .buckets-wrap {
       display: grid;
@@ -303,8 +308,8 @@
     </header>
 
     <div class="mobile-steps" aria-label="Mobile panel navigation">
-      <button id="showListBtn" class="mobile-step-btn active" type="button">1) Messy list</button>
-      <button id="showBucketsBtn" class="mobile-step-btn" type="button">2) Buckets</button>
+      <button id="showListBtn" class="mobile-step-btn active" type="button">A) Messy list</button>
+      <button id="showBucketsBtn" class="mobile-step-btn" type="button">B) Buckets</button>
     </div>
 
     <section class="layout">
@@ -315,7 +320,7 @@
         </div>
         <div class="panel-body">
           <div id="messyList" class="item-zone" data-zone="list"></div>
-          <p class="small">Tip: You can drag items into buckets and drag them back here.</p>
+          <p class="small">Tip: Desktop = drag & drop. Mobile = tap item (yellow), then tap the destination bucket.</p>
         </div>
       </article>
 
@@ -396,7 +401,8 @@
     const state = {
       generatedItems: [],
       placements: { list: [], bucket1: [], bucket2: [], bucket3: [] },
-      bucketNames: { bucket1: '', bucket2: '', bucket3: '' }
+      bucketNames: { bucket1: '', bucket2: '', bucket3: '' },
+      selectedItemId: null
     };
 
     // -------------------------
@@ -473,6 +479,7 @@
       state.generatedItems = finalItems;
       state.placements = { list: finalItems.map((i) => i.id), bucket1: [], bucket2: [], bucket3: [] };
       state.bucketNames = { bucket1: '', bucket2: '', bucket3: '' };
+      state.selectedItemId = null;
 
       renderAll();
       clearFeedback();
@@ -484,6 +491,7 @@
       ['bucket1', 'bucket2', 'bucket3'].forEach((bucketKey, index) => {
         const bucket = document.createElement('section');
         bucket.className = 'bucket';
+        bucket.dataset.zone = bucketKey;
         bucket.innerHTML = `
           <div class="bucket-head">
             <label for="${bucketKey}Input">Name this bucket</label>
@@ -523,6 +531,7 @@
         if (!item) return;
         const card = document.createElement('div');
         card.className = 'item-card';
+        if (state.selectedItemId === id) card.classList.add('selected');
         card.draggable = true;
         card.dataset.itemId = id;
         card.textContent = item.name;
@@ -538,6 +547,7 @@
         state.placements[zone] = state.placements[zone].filter((id) => id !== itemId);
       });
       state.placements[targetZone].push(itemId);
+      state.selectedItemId = null;
       renderAll();
     }
 
@@ -573,6 +583,26 @@
         const itemId = e.dataTransfer.getData('text/plain');
         if (!itemId) return;
         moveItem(itemId, zone.dataset.zone);
+      });
+    }
+
+    function wireTapToMove() {
+      document.addEventListener('click', (e) => {
+        const card = e.target.closest('.item-card');
+        if (card) {
+          const clickedItemId = card.dataset.itemId;
+          state.selectedItemId = state.selectedItemId === clickedItemId ? null : clickedItemId;
+          renderAll();
+          return;
+        }
+
+        if (e.target.closest('input, textarea, button, label')) return;
+
+        const zone = e.target.closest('[data-zone]');
+        if (!zone || !state.selectedItemId) return;
+        const targetZone = zone.dataset.zone;
+        if (!state.placements[targetZone]) return;
+        moveItem(state.selectedItemId, targetZone);
       });
     }
 
@@ -797,6 +827,7 @@
       document.getElementById('resetBtn').addEventListener('click', () => {
         state.placements = { list: state.generatedItems.map((i) => i.id), bucket1: [], bucket2: [], bucket3: [] };
         state.bucketNames = { bucket1: '', bucket2: '', bucket3: '' };
+        state.selectedItemId = null;
         document.getElementById('whyText').value = '';
         clearFeedback();
         renderAll();
@@ -812,6 +843,7 @@
     // -------------------------
     buildBuckets();
     wireDragAndDrop();
+    wireTapToMove();
     wireEvents();
     renderSampleAnswer();
     generateList();
