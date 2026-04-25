@@ -393,7 +393,7 @@
     };
 
     const IDEAL_LABELS = {
-      fresh_cold: 'Fresh / cold food',
+      fresh_cold: 'Fresh/ cold food',
       pantry: 'Pantry items',
       supplies: 'Non-food supplies'
     };
@@ -401,7 +401,7 @@
     const state = {
       generatedItems: [],
       placements: { list: [], bucket1: [], bucket2: [], bucket3: [] },
-      bucketNames: { bucket1: '', bucket2: '', bucket3: '' },
+      bucketNames: { bucket1: '', bucket2: '', bucket3: 'Others' },
       selectedItemId: null
     };
 
@@ -478,7 +478,7 @@
 
       state.generatedItems = finalItems;
       state.placements = { list: finalItems.map((i) => i.id), bucket1: [], bucket2: [], bucket3: [] };
-      state.bucketNames = { bucket1: '', bucket2: '', bucket3: '' };
+      state.bucketNames = { bucket1: '', bucket2: '', bucket3: 'Others' };
       state.selectedItemId = null;
 
       renderAll();
@@ -495,8 +495,8 @@
         bucket.dataset.zone = bucketKey;
         bucket.innerHTML = `
           <div class="bucket-head">
-            <label for="${bucketKey}Input">Name this bucket</label>
-            <input id="${bucketKey}Input" class="bucket-name" type="text" placeholder="Bucket ${index + 1}" />
+            <label for="${bucketKey}Input">${bucketKey === 'bucket3' ? 'Catch-all bucket' : 'Name this bucket'}</label>
+            <input id="${bucketKey}Input" class="bucket-name" type="text" placeholder="Bucket ${index + 1}" ${bucketKey === 'bucket3' ? 'value="Others" readonly aria-readonly="true"' : ''} />
           </div>
           <div class="bucket-items" data-zone="${bucketKey}"></div>
         `;
@@ -695,7 +695,8 @@
 
       const nameScores = ['bucket1', 'bucket2', 'bucket3'].map((bucketKey) => {
         const input = document.getElementById(`${bucketKey}Input`);
-        state.bucketNames[bucketKey] = input ? input.value : '';
+        state.bucketNames[bucketKey] = bucketKey === 'bucket3' ? 'Others' : input ? input.value : '';
+        if (bucketKey === 'bucket3') return 1;
         return bucketNameScore(state.bucketNames[bucketKey], mapping[bucketKey]);
       });
       const nameRatio = nameScores.reduce((a, b) => a + b, 0) / nameScores.length;
@@ -719,13 +720,15 @@
         mapping,
         profiles,
         misplaced,
-        namesBlank: Object.values(state.bucketNames).some((name) => !name.trim())
+        namesBlank: ['bucket1', 'bucket2'].some((key) => !state.bucketNames[key].trim())
       };
     }
 
     function suggestedNamesFromMapping(mapping, profiles) {
       return ['bucket1', 'bucket2', 'bucket3'].map((key, idx) => {
-        const label = mapping[key]
+        const label = key === 'bucket3'
+          ? 'Others'
+          : mapping[key]
           ? IDEAL_LABELS[mapping[key]]
           : profiles[key]?.isTie
             ? `Bucket ${idx + 1} (mixed group: split this bucket more clearly)`
@@ -830,9 +833,9 @@
       Object.keys(grouped).forEach((key) => grouped[key].sort((a, b) => a.localeCompare(b)));
       sample.innerHTML = `
         <h3>Sample answer</h3>
-        <p><strong>Fresh / cold food:</strong> ${grouped.fresh_cold.join(', ') || 'No items in this generated list.'}</p>
+        <p><strong>Fresh/ cold food:</strong> ${grouped.fresh_cold.join(', ') || 'No items in this generated list.'}</p>
         <p><strong>Pantry items:</strong> ${grouped.pantry.join(', ') || 'No items in this generated list.'}</p>
-        <p><strong>Non-food supplies:</strong> ${grouped.supplies.join(', ') || 'No items in this generated list.'}</p>
+        <p><strong>Others:</strong> ${grouped.supplies.join(', ') || 'No items in this generated list.'}</p>
       `;
     }
 
@@ -840,7 +843,7 @@
     // Event layer
     // -------------------------
     function wireEvents() {
-      ['bucket1', 'bucket2', 'bucket3'].forEach((bucketKey) => {
+      ['bucket1', 'bucket2'].forEach((bucketKey) => {
         document.addEventListener('input', (e) => {
           if (e.target.id === `${bucketKey}Input`) {
             state.bucketNames[bucketKey] = e.target.value;
@@ -865,7 +868,7 @@
 
       document.getElementById('resetBtn').addEventListener('click', () => {
         state.placements = { list: state.generatedItems.map((i) => i.id), bucket1: [], bucket2: [], bucket3: [] };
-        state.bucketNames = { bucket1: '', bucket2: '', bucket3: '' };
+        state.bucketNames = { bucket1: '', bucket2: '', bucket3: 'Others' };
         state.selectedItemId = null;
         document.getElementById('whyText').value = '';
         clearFeedback();
