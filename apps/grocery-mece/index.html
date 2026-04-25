@@ -240,16 +240,58 @@
     }
 
     .hidden { display: none; }
+    .mobile-steps { display: none; }
 
     @media (max-width: 980px) {
       .layout { grid-template-columns: 1fr; }
       .item-zone { min-height: 260px; }
       .bucket { min-height: 280px; }
       .bucket-items { min-height: 170px; }
+
+      .mobile-steps {
+        display: flex;
+        gap: 8px;
+        margin: 0 0 10px;
+      }
+
+      .mobile-step-btn {
+        flex: 1;
+        border: 1px solid rgba(0, 51, 102, .25);
+        background: #fff;
+      }
+
+      .mobile-step-btn.active {
+        background: var(--navy);
+        color: #fff;
+        border-color: var(--navy);
+      }
+
+      .panel.mobile-hidden {
+        display: none;
+      }
     }
 
     @media (max-width: 720px) {
-      .buckets-wrap { grid-template-columns: 1fr; }
+      .page { padding: 20px 14px 28px; }
+
+      .buckets-wrap {
+        display: grid;
+        grid-auto-flow: column;
+        grid-auto-columns: minmax(250px, 86vw);
+        grid-template-columns: none;
+        overflow-x: auto;
+        overscroll-behavior-x: contain;
+        padding-bottom: 4px;
+        scrollbar-width: thin;
+      }
+
+      .bucket {
+        min-height: 290px;
+      }
+
+      .bucket-items {
+        min-height: 175px;
+      }
     }
   </style>
 </head>
@@ -260,8 +302,13 @@
       <p>Practice structured thinking: create exactly three clear buckets, sort the messy list, and reflect on why your structure is MECE (mutually exclusive, collectively exhaustive).</p>
     </header>
 
+    <div class="mobile-steps" aria-label="Mobile panel navigation">
+      <button id="showListBtn" class="mobile-step-btn active" type="button">1) Messy list</button>
+      <button id="showBucketsBtn" class="mobile-step-btn" type="button">2) Buckets</button>
+    </div>
+
     <section class="layout">
-      <article class="panel">
+      <article class="panel" id="listPanel">
         <div class="panel-head">
           <h2>Messy grocery list</h2>
           <span class="small" id="listCount"></span>
@@ -272,12 +319,13 @@
         </div>
       </article>
 
-      <article class="panel">
+      <article class="panel" id="bucketPanel">
         <div class="panel-head">
           <h2>Your three buckets</h2>
         </div>
         <div class="panel-body">
           <div class="buckets-wrap" id="bucketsWrap"></div>
+          <p class="small">On mobile, swipe left/right to view all three buckets.</p>
 
           <label for="whyText"><strong>Why did you choose these three buckets?</strong></label>
           <textarea id="whyText" placeholder="Explain your logic in 2–3 sentences..."></textarea>
@@ -686,6 +734,29 @@
       document.getElementById('feedback').innerHTML = '';
     }
 
+    function setMobileView(view) {
+      const isMobile = window.matchMedia('(max-width: 980px)').matches;
+      const listPanel = document.getElementById('listPanel');
+      const bucketPanel = document.getElementById('bucketPanel');
+      const showListBtn = document.getElementById('showListBtn');
+      const showBucketsBtn = document.getElementById('showBucketsBtn');
+      if (!listPanel || !bucketPanel || !showListBtn || !showBucketsBtn) return;
+
+      if (!isMobile) {
+        listPanel.classList.remove('mobile-hidden');
+        bucketPanel.classList.remove('mobile-hidden');
+        showListBtn.classList.remove('active');
+        showBucketsBtn.classList.remove('active');
+        return;
+      }
+
+      const showList = view === 'list';
+      listPanel.classList.toggle('mobile-hidden', !showList);
+      bucketPanel.classList.toggle('mobile-hidden', showList);
+      showListBtn.classList.toggle('active', showList);
+      showBucketsBtn.classList.toggle('active', !showList);
+    }
+
     function renderSampleAnswer() {
       const sample = document.getElementById('sampleAnswer');
       sample.innerHTML = `
@@ -730,6 +801,10 @@
         clearFeedback();
         renderAll();
       });
+
+      document.getElementById('showListBtn').addEventListener('click', () => setMobileView('list'));
+      document.getElementById('showBucketsBtn').addEventListener('click', () => setMobileView('buckets'));
+      window.addEventListener('resize', () => setMobileView('list'));
     }
 
     // -------------------------
@@ -740,6 +815,7 @@
     wireEvents();
     renderSampleAnswer();
     generateList();
+    setMobileView('list');
   </script>
 </body>
 </html>
