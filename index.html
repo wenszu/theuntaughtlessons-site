@@ -6,82 +6,283 @@
   <title>The Untaught Lessons</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lato:wght@300;400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-  <!-- Navigation -->
+  <!-- ── Navigation ───────────────────────────────────────────── -->
   <nav>
-    <img src="assets/logo.png" alt="The Untaught Lessons">
-    <ul>
-      <li><a href="#" class="active">Home</a></li>
-      <li><a href="#core-program">Core Program</a></li>
-      <li><a href="#applications">Applications</a></li>
-      <li><a href="#tools">Tools</a></li>
-      <li><a href="#about">About</a></li>
+    <a href="/"><img src="assets/logo.png" alt="The Untaught Lessons"></a>
+    <ul class="nav-links">
+      <li><a href="#program">Program</a></li>
+      <li><a href="#how-it-works">How it works</a></li>
+      <li><a href="#why">Why it works</a></li>
+      <li><a href="#faq">FAQ</a></li>
     </ul>
+    <a href="portal/" class="nav-cta">Enter Portal</a>
   </nav>
 
-  <!-- Hero -->
+  <!-- ── Hero ─────────────────────────────────────────────────── -->
   <section class="hero">
     <div class="container">
-      <h1>The Untaught<br>Lessons</h1>
+      <p class="hero-eyebrow">Cohort 1 — Now open</p>
+      <h1>Learn the skills<br>that matter, faster.</h1>
       <div class="hero-rule"></div>
-      <p>Structured thinking for students who want to go further.</p>
-    </div>
-  </section>
-
-  <!-- Core Program -->
-  <section id="core-program">
-    <div class="container">
-      <div class="core-program">
-        <span class="section-label">Core Program</span>
-        <h2>The program that teaches<br>you how to think.</h2>
-        <p>Most education tells you what to think. This program teaches you how — through structured frameworks, real problems, and deliberate practice.</p>
+      <p>Practical lessons about life and work you wish someone had taught you sooner.</p>
+      <div class="hero-actions">
+        <a href="portal/" class="btn-primary">Enter beta portal</a>
+        <a href="#program" class="btn-text">Explore the program</a>
       </div>
     </div>
   </section>
 
-  <!-- Applications -->
-  <section id="applications" class="applications">
+  <!-- ── What we do ────────────────────────────────────────────── -->
+  <section id="about" class="what-we-do">
     <div class="container">
-      <p>Consulting and strategy &nbsp;·&nbsp; Academic preparation &nbsp;·&nbsp; IB Mathematics &nbsp;·&nbsp; Independent study</p>
+      <span class="section-label">What we do</span>
+      <p>
+        The Untaught Lessons is a learning firm focused on the skills that determine
+        performance when it matters — but are rarely taught directly.
+      </p>
+      <p>
+        <strong>The first program:</strong> how to think clearly, speak concisely,
+        and act confidently. The skills that separate people who get things done from
+        people who know things.
+      </p>
     </div>
   </section>
 
-  <!-- Tools -->
-  <section id="tools" class="tools-section">
+  <!-- ── Program ───────────────────────────────────────────────── -->
+  <section id="program" class="program">
     <div class="container">
-      <div class="tools">
-        <h2>Math tools</h2>
-        <div class="tool-item">
-          <a href="tools/[Grade 9 and 10] Logarithm_explorer.html">Logarithm explorer</a>
-          <p class="tool-desc">Grade 9–10 &nbsp;·&nbsp; Understand exponential thinking through interactive graphs</p>
+      <span class="section-label">First program</span>
+      <h2>How to think clearly, speak concisely, and act confidently.</h2>
+
+      <div class="phase-cards">
+
+        <div class="phase-card">
+          <span class="phase-num">Phase 1 · Workbook A</span>
+          <h3>Think Clearly</h3>
+          <p>Structure information. Separate signal from noise. Lead with the bottom line — not the context that led to it.</p>
+          <span class="phase-tag">Now open</span>
         </div>
-        <div class="tool-item">
-          <a href="tools/[Grade 8] Linear_systems_grapher.html">Linear systems grapher</a>
-          <p class="tool-desc">Grade 8 &nbsp;·&nbsp; Explore lines, slopes, and systems of equations visually</p>
+
+        <div class="phase-card">
+          <span class="phase-num">Phase 2 · Workbook B</span>
+          <h3>Speak Concisely</h3>
+          <p>Communicate with precision and economy. Say what you mean in the fewest words that carry full meaning.</p>
+          <span class="phase-tag">Coming soon</span>
         </div>
+
+        <div class="phase-card">
+          <span class="phase-num">Phase 3 · Workbook C</span>
+          <h3>Act Confidently</h3>
+          <p>Make decisions under pressure. Lead with conviction. Own the room — not through volume, but through preparation.</p>
+          <span class="phase-tag">Coming soon</span>
+        </div>
+
       </div>
     </div>
   </section>
 
-  <!-- About -->
-  <section id="about" class="about">
+  <!-- ── How it works ──────────────────────────────────────────── -->
+  <section id="how-it-works" class="how-it-works">
     <div class="container">
-      <p>Built for students who are serious about learning.</p>
-      <p>The Untaught Lessons uses deliberate practice and structured frameworks to develop mathematical thinking — not just answer-getting.</p>
-      <a href="mailto:info@theuntaughtlessons.com" class="contact-link">Get in touch &rarr;</a>
+      <span class="section-label">The method</span>
+      <h2>Watch. Practice. Improve.</h2>
+
+      <div class="steps">
+
+        <div class="step-item">
+          <span class="step-n">01</span>
+          <div class="step-content">
+            <h4>Watch</h4>
+            <p>Short, focused video lessons. Each one introduces a specific framework or concept — nothing longer than it needs to be.</p>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <span class="step-n">02</span>
+          <div class="step-content">
+            <h4>Practice</h4>
+            <p>Enter the portal. Work through guided exercises using real-world scenarios. You apply the framework before you see the answer.</p>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <span class="step-n">03</span>
+          <div class="step-content">
+            <h4>Compare</h4>
+            <p>Review the sample answer. See what a strong response looks like — and exactly what makes it work.</p>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <span class="step-n">04</span>
+          <div class="step-content">
+            <h4>Improve with AI</h4>
+            <p>Use a structured prompt to stress-test your thinking with an AI model. Not for answers. For the gap you missed.</p>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <span class="step-n">05</span>
+          <div class="step-content">
+            <h4>Reflect</h4>
+            <p>Write one thing you noticed. Mark it done. Move to the next module.</p>
+          </div>
+        </div>
+
+      </div>
     </div>
   </section>
 
-  <!-- Footer -->
+  <!-- ── Why it works ──────────────────────────────────────────── -->
+  <section id="why" class="why-it-works">
+    <div class="container">
+      <span class="section-label">Why it works</span>
+      <h2>Built on what actually works.</h2>
+
+      <div class="why-items">
+
+        <div class="why-item">
+          <strong>Practice-first</strong>
+          <p>You attempt the problem before you see how it's solved. That gap is where learning actually happens.</p>
+        </div>
+
+        <div class="why-item">
+          <strong>Clear frameworks</strong>
+          <p>Structured thinking, not abstract advice. Each concept has a specific form you can practise and apply immediately.</p>
+        </div>
+
+        <div class="why-item">
+          <strong>Real scenarios</strong>
+          <p>Every exercise is set in a real-world context. You're not practising in the abstract — you're doing the actual thing.</p>
+        </div>
+
+        <div class="why-item">
+          <strong>AI as thought partner</strong>
+          <p>AI doesn't give you the answer. It stress-tests the one you already have — which is a fundamentally different and more useful function.</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Portal preview ────────────────────────────────────────── -->
+  <section class="portal-preview">
+    <div class="container">
+      <span class="section-label">The portal</span>
+      <p class="lead">
+        The portal is the practice engine. Watch the videos first — then come here to do the work.
+        Progress is tracked locally so you can pick up exactly where you left off.
+      </p>
+
+      <div class="preview-frame">
+        <p class="preview-frame-label">Your dashboard</p>
+        <div class="preview-cards">
+          <div class="preview-card preview-active">
+            <div class="preview-card-left">
+              <span class="preview-card-letter">A</span>
+              <span class="preview-card-title">Think Clearly — 4 modules</span>
+            </div>
+            <span class="preview-card-status">Active</span>
+          </div>
+          <div class="preview-card preview-locked">
+            <div class="preview-card-left">
+              <span class="preview-card-letter">B</span>
+              <span class="preview-card-title">Speak Concisely</span>
+            </div>
+            <span class="preview-card-status">Coming soon</span>
+          </div>
+          <div class="preview-card preview-locked">
+            <div class="preview-card-left">
+              <span class="preview-card-letter">C</span>
+              <span class="preview-card-title">Act Confidently</span>
+            </div>
+            <span class="preview-card-status">Coming soon</span>
+          </div>
+        </div>
+      </div>
+
+      <a href="portal/" class="btn-primary">Enter beta portal</a>
+    </div>
+  </section>
+
+  <!-- ── FAQ ───────────────────────────────────────────────────── -->
+  <section id="faq" class="faq">
+    <div class="container">
+      <span class="section-label">Common questions</span>
+      <h2>FAQ</h2>
+
+      <details class="faq-item">
+        <summary>Who is this for?</summary>
+        <p>
+          Anyone who wants to think more clearly and communicate with impact — students,
+          early professionals, and managers who feel underprepared for high-stakes moments.
+          The content is accessible but not dumbed down.
+        </p>
+      </details>
+
+      <details class="faq-item">
+        <summary>How long does each module take?</summary>
+        <p>
+          Each module takes 20–40 minutes, depending on how much time you spend on the exercises.
+          Workbook A has four modules. You work at your own pace — there are no deadlines.
+        </p>
+      </details>
+
+      <details class="faq-item">
+        <summary>Do I need to use AI tools?</summary>
+        <p>
+          No. The AI exercises are optional but valuable. They're designed for Claude, ChatGPT,
+          or any capable model. The core learning works without them — the AI step is about
+          getting faster feedback, not doing the work for you.
+        </p>
+      </details>
+
+      <details class="faq-item">
+        <summary>Is this self-paced?</summary>
+        <p>
+          Yes. The portal tracks your progress in your browser. Pick up where you left off,
+          on any device you've previously logged in from. No account required.
+        </p>
+      </details>
+
+      <details class="faq-item">
+        <summary>What happens after the beta?</summary>
+        <p>
+          Beta participants get early access to Workbooks B and C as they're released,
+          and a direct line to give feedback that shapes the program. The beta is how
+          we find out what works.
+        </p>
+      </details>
+
+    </div>
+  </section>
+
+  <!-- ── About strip ────────────────────────────────────────────── -->
+  <section class="about-strip">
+    <div class="container">
+      <p>
+        Built for people who are serious about how they think and what they do with it.
+        Not for everyone. For the ones who want to go further.
+      </p>
+      <a href="portal/" class="btn-primary">Enter beta portal</a>
+    </div>
+  </section>
+
+  <!-- ── Footer ────────────────────────────────────────────────── -->
   <footer>
     <div class="container">
       <div class="footer-inner">
         <p>&copy; 2026 The Untaught Lessons</p>
-        <a href="mailto:info@theuntaughtlessons.com">Contact</a>
+        <div class="footer-links">
+          <a href="tools/[Grade 9 and 10] Logarithm_explorer.html">Logarithm explorer</a>
+          <a href="tools/[Grade 8] Linear_systems_grapher.html">Linear systems grapher</a>
+          <a href="mailto:info@theuntaughtlessons.com">Contact</a>
+        </div>
       </div>
     </div>
   </footer>

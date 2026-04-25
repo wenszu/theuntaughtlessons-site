@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Workbook A: Think Clearly — The Untaught Lessons</title>
+  <link rel="stylesheet" href="portal.css">
+  <script src="portal.js"></script>
+  <script>
+    // Auth guard — redirect before page renders if not authenticated
+    if (typeof isAuthenticated === 'function' && !isAuthenticated()) {
+      window.location.replace('index.html');
+    }
+  </script>
+</head>
+<body>
+
+  <!-- ── Portal nav ────────────────────────────────────────────── -->
+  <nav class="portal-nav">
+    <div class="portal-nav-left">
+      <a href="../" class="portal-wordmark">The Untaught Lessons</a>
+      <div class="portal-breadcrumb">
+        <span class="portal-breadcrumb-sep">›</span>
+        <a href="index.html">Dashboard</a>
+        <span class="portal-breadcrumb-sep">›</span>
+        <span>Workbook A</span>
+      </div>
+    </div>
+    <div class="portal-nav-right">
+      <span class="beta-badge">Beta</span>
+      <button class="portal-logout" onclick="portalLogout()">Sign out</button>
+    </div>
+  </nav>
+
+  <!-- ── Main ──────────────────────────────────────────────────── -->
+  <main class="portal-main">
+
+    <!-- Workbook header -->
+    <div class="workbook-page-header">
+      <div class="workbook-phase">Phase 1 · Workbook A</div>
+      <h1>Think Clearly</h1>
+      <p class="intro">
+        Before you can communicate clearly, you need to think clearly. This workbook
+        builds the core habit: structure first, words second. You'll learn to separate
+        signal from noise, group ideas without overlap, and lead with the bottom line.
+      </p>
+    </div>
+
+    <!-- Story context -->
+    <div class="story-card">
+      <span class="story-label">Your situation</span>
+      <p>
+        <strong>MA</strong> is a strategy and marketing consultancy based in Tokyo.
+        Its clients are mid-size firms navigating inflection points — expansion, repositioning, change.
+      </p>
+      <p>
+        <strong>Aiko Mori</strong> is the founder and managing director. Precise, demanding, and fast.
+        She trusts people who can structure their thinking — and she notices immediately when they can't.
+      </p>
+      <p>
+        You are the new <strong>Chief of Staff</strong>. It's your first week.
+        Your job is to make Aiko faster, not slower. That starts with how information reaches her.
+      </p>
+    </div>
+
+    <!-- ── Module list ──────────────────────────────────────────── -->
+    <div class="module-list">
+
+      <!-- ══════════════════════════════════════════════════════════
+           MODULE 1 — Manager's messy top-of-mind  [COMPLETE]
+           ══════════════════════════════════════════════════════════ -->
+      <div class="module-card active open" id="module-1-card">
+
+        <div class="module-card-header" onclick="toggleModule('module-1-card')">
+          <span class="module-num">01</span>
+          <h3>Manager's messy top-of-mind</h3>
+          <span class="module-badge not-started" id="module-1-badge">Not started</span>
+          <span class="module-toggle">›</span>
+        </div>
+
+        <div class="module-body">
+
+          <!-- Context -->
+          <div class="module-section module-context">
+            <div class="context-title">What you're practising</div>
+            <p>
+              A <strong>BSP</strong> (Bottom-line Supporting Point) is a short, factual statement
+              — one idea per line, no explanation attached. The discipline is compression: say the
+              fact, not the story around it.
+            </p>
+            <p>
+              <strong>MECE</strong> (Mutually Exclusive, Collectively Exhaustive) means your
+              categories don't overlap and nothing is left out. It's the most useful grouping
+              discipline in structured communication.
+            </p>
+            <p>
+              <em>
+                This exercise: take a disorganised status update and restructure it so Aiko
+                can read it in under 60 seconds before a board briefing.
+              </em>
+            </p>
+          </div>
+
+          <!-- Step 1: Read the update -->
+          <div class="module-section">
+            <div class="step-header">
+              <div class="step-num">1</div>
+              <div class="step-title">Read the update</div>
+            </div>
+            <p class="step-instruction">
+              The Head of Strategy sent you a voice memo transcript at 7:40am.
+              Aiko's board briefing starts at 9:00am. Read it carefully — then work through the steps below.
+            </p>
+            <div class="source-material">
+              <span class="source-label">Voice memo — Head of Strategy, 07:38</span>
+              <p class="source-text">
+                "So the Tokyo team flagged that the Olympic project timeline is slipping — they said
+                maybe two weeks but I think it's more like four. Also we haven't confirmed the venue
+                for the client summit yet, the hotel we wanted is now saying there's a booking
+                conflict, so we need to get back to them by Friday or we lose the date. The Tanaka
+                account renewal is coming up end of month — revenue's fine, I think around ¥3.2M,
+                so that's good. Design team is stretched — Hana is out sick this week and the Sato
+                deck still isn't done. The new hire starts Monday. Budget-wise we're okay this
+                quarter but I noticed our production spend for the Olympic project is running about
+                15% over estimate."
+              </p>
+            </div>
+          </div>
+
+          <!-- Step 2: Add BSPs -->
+          <div class="module-section">
+            <div class="step-header">
+              <div class="step-num">2</div>
+              <div class="step-title">Add your BSPs</div>
+            </div>
+            <p class="step-instruction">
+              Write each key fact from the update as a short, clear statement — one per line.
+              No explanation. Just the fact. Aim for 6–8 BSPs.
+            </p>
+            <textarea
+              id="bsp-input"
+              class="response-area"
+              placeholder="Olympic project tracking approximately 4 weeks behind schedule&#10;Client summit venue unconfirmed — hotel deadline: Friday&#10;..."
+            ></textarea>
+          </div>
+
+          <!-- Step 3: Group into MECE buckets -->
+          <div class="module-section">
+            <div class="step-header">
+              <div class="step-num">3</div>
+              <div class="step-title">Group into three MECE buckets</div>
+            </div>
+            <p class="step-instruction">
+              Name three non-overlapping categories. Assign each BSP to exactly one.
+              Start with a one-sentence bottom line before the buckets.
+            </p>
+            <textarea
+              id="mece-input"
+              class="response-area"
+              placeholder="BOTTOM LINE: ...&#10;&#10;Bucket 1 — [Name]&#10;• ...&#10;&#10;Bucket 2 — [Name]&#10;• ...&#10;&#10;Bucket 3 — [Name]&#10;• ..."
+            ></textarea>
+          </div>
+
+          <!-- Step 4: Compare your answer -->
+          <div class="module-section">
+            <div class="step-header">
+              <div class="step-num">4</div>
+              <div class="step-title">Compare your answer</div>
+            </div>
+            <p class="step-instruction">
+              When you're done with your version, reveal the sample answer below.
+              Don't look before you've made a real attempt.
+            </p>
+
+            <button id="reveal-btn" class="reveal-btn" onclick="handleReveal()">
+              Show sample answer
+            </button>
+
+            <div id="answer-card" class="answer-card">
+              <div class="answer-label">Sample answer</div>
+
+              <div class="answer-block">
+                <div class="answer-block-title">Bottom line</div>
+                <div class="answer-structure">
+                  Three categories of risk require decisions before end of week.
+                </div>
+              </div>
+
+              <hr class="answer-divider">
+
+              <div class="answer-block">
+                <div class="answer-block-title">Structured update</div>
+                <div class="answer-structure">
+                  <strong>Bucket 1 — Delivery Risk</strong>
+                  &bull; Olympic project: tracking 4 weeks behind schedule (not 2)<br>
+                  &bull; Sato deck incomplete; Hana absent this week
+
+                  <strong>Bucket 2 — Client &amp; Revenue Risk</strong>
+                  &bull; Client summit venue unconfirmed — hotel deadline: Friday<br>
+                  &bull; Tanaka renewal (¥3.2M) due end of month; status: on track
+
+                  <strong>Bucket 3 — Resource &amp; Budget Risk</strong>
+                  &bull; Olympic project production spend: +15% over estimate<br>
+                  &bull; New hire starts Monday; design team capacity currently strained
+                </div>
+              </div>
+
+              <hr class="answer-divider">
+
+              <div class="answer-block">
+                <div class="answer-note">
+                  <div class="answer-note-title">Why this works</div>
+                  <p>
+                    The bottom line orients the reader before they touch a single detail — they
+                    know what kind of update this is. The three MECE buckets eliminate overlap:
+                    each fact has exactly one home. A board member can scan this in 20 seconds
+                    and know precisely what needs a decision.
+                  </p>
+                </div>
+              </div>
+
+              <div class="answer-block" style="margin-top: 14px;">
+                <div class="answer-note">
+                  <div class="answer-note-title">Common mistake</div>
+                  <p>
+                    Grouping by project rather than by risk type. It's tempting to put everything
+                    Olympic-related in one bucket. But that conflates a delivery issue, a budget
+                    issue, and a resource issue. MECE requires that the grouping principle applies
+                    consistently — here, risk type is the principle.
+                  </p>
+                </div>
+              </div>
+
+            </div><!-- /answer-card -->
+          </div>
+
+          <!-- Step 5: Improve with AI -->
+          <div class="module-section">
+            <div class="step-header">
+              <div class="step-num">5</div>
+              <div class="step-title">Improve with AI</div>
+            </div>
+
+            <div class="ai-block">
+              <div class="ai-block-header">
+                <span class="ai-block-label">AI prompt</span>
+                <button class="copy-btn" id="copy-btn" onclick="handleCopy()">Copy prompt</button>
+              </div>
+
+              <p class="ai-reason">
+                <strong>Why use AI here:</strong> AI can stress-test your structure faster than
+                re-reading it yourself — useful for spotting overlap you've stopped noticing, and
+                for sharpening a bottom line that feels close but isn't quite right.
+              </p>
+
+              <div id="ai-prompt-text" class="ai-prompt">I want you to review my structured update for MECE clarity and bottom-line strength.
+
+My structured update:
+[PASTE YOUR VERSION HERE]
+
+Original raw update:
+"So the Tokyo team flagged that the Olympic project timeline is slipping — they said maybe two weeks but I think it's more like four. Also we haven't confirmed the venue for the client summit yet, the hotel we wanted is now saying there's a booking conflict, so we need to get back to them by Friday or we lose the date. The Tanaka account renewal is coming up end of month — revenue's fine, I think around ¥3.2M, so that's good. Design team is stretched — Hana is out sick this week and the Sato deck still isn't done. The new hire starts Monday. Budget-wise we're okay this quarter but I noticed our production spend for the Olympic project is running about 15% over estimate."
+
+Please:
+1. Check my buckets for MECE violations — any overlap or gaps?
+2. Flag any facts from the original I missed or misrepresented
+3. Assess whether my bottom line accurately captures the situation
+4. Suggest one way to make the bottom line sharper
+
+Be direct. One short paragraph per point.</div>
+
+              <p class="ai-expect">
+                <strong>What to expect:</strong> Specific feedback on each bucket, flagged
+                overlaps or missing items, and a suggested alternative bottom line. You're
+                not looking for praise — you're looking for the gap you missed.
+              </p>
+
+              <div class="ai-block-footer">
+                <p class="ai-reflection-q">
+                  Before you paste: which grouping decision was hardest?
+                  Was there a fact that felt like it could belong in two buckets?
+                </p>
+              </div>
+            </div><!-- /ai-block -->
+          </div>
+
+          <!-- Step 6: Reflect and complete -->
+          <div class="module-section">
+            <div class="step-header">
+              <div class="step-num">6</div>
+              <div class="step-title">Reflect</div>
+            </div>
+            <p class="step-instruction">
+              What did you notice? What was harder than you expected?
+              Write a sentence or two — this is for you, not for evaluation.
+            </p>
+            <textarea
+              id="reflection-input"
+              class="response-area reflection"
+              placeholder="The hardest part was..."
+            ></textarea>
+            <p class="autosave-note">Saves automatically.</p>
+          </div>
+
+          <!-- Mark complete -->
+          <div class="complete-section">
+            <button class="mark-complete-btn" id="complete-btn" onclick="handleComplete()">
+              Mark complete
+            </button>
+            <p class="complete-msg" id="complete-msg">
+              <strong>Module 1 complete.</strong> Well done.
+            </p>
+          </div>
+
+        </div><!-- /module-body -->
+      </div><!-- /module-1 -->
+
+
+      <!-- MODULE 2 — stub -->
+      <div class="module-card stub">
+        <div class="module-card-header">
+          <span class="module-num">02</span>
+          <h3>Separating signal from noise</h3>
+          <span class="module-badge coming-soon">Coming soon</span>
+        </div>
+        <div class="module-coming">
+          How to identify what matters in a dense information set — and leave the rest out.
+        </div>
+      </div>
+
+      <!-- MODULE 3 — stub -->
+      <div class="module-card stub">
+        <div class="module-card-header">
+          <span class="module-num">03</span>
+          <h3>The 30-second structure</h3>
+          <span class="module-badge coming-soon">Coming soon</span>
+        </div>
+        <div class="module-coming">
+          How to open any verbal or written briefing in under 30 seconds — bottom line first.
+        </div>
+      </div>
+
+      <!-- MODULE 4 — stub -->
+      <div class="module-card stub">
+        <div class="module-card-header">
+          <span class="module-num">04</span>
+          <h3>Making the recommendation</h3>
+          <span class="module-badge coming-soon">Coming soon</span>
+        </div>
+        <div class="module-coming">
+          How to move from analysis to a clear, defensible recommendation — and stand behind it.
+        </div>
+      </div>
+
+    </div><!-- /module-list -->
+
+  </main><!-- /portal-main -->
+
+  <script>
+    var WB  = 'workbook_a';
+    var MOD = 'module_1';
+    var TOTAL_MODULES = 4;
+
+    document.addEventListener('DOMContentLoaded', function () {
+      restoreState();
+    });
+
+    // ── State restore ──────────────────────────────────────────────
+
+    function restoreState() {
+      var data = getModuleData(WB, MOD);
+
+      // Restore reflection
+      var reflEl = document.getElementById('reflection-input');
+      if (reflEl && data.reflection_text) {
+        reflEl.value = data.reflection_text;
+      }
+
+      // Restore answer key
+      if (data.answer_key_viewed) {
+        showAnswerCard();
+      }
+
+      // Restore complete state
+      if (data.status === 'complete') {
+        setCompleteUI();
+      }
+
+      // Restore badge
+      updateBadge(data.status);
+
+      // Auto-save reflection on input
+      if (reflEl) {
+        reflEl.addEventListener('input', debounce(function () {
+          saveReflection(WB, MOD, reflEl.value);
+          updateBadge(getModuleData(WB, MOD).status);
+        }, 800));
+      }
+    }
+
+    // ── Module toggle ──────────────────────────────────────────────
+
+    function toggleModule(cardId) {
+      // Module 1 is always open; stubs don't toggle
+      // This function is here for future use when modules need toggling
+    }
+
+    // ── Answer reveal ──────────────────────────────────────────────
+
+    function handleReveal() {
+      markAnswerViewed(WB, MOD);
+      showAnswerCard();
+      updateBadge(getModuleData(WB, MOD).status);
+    }
+
+    function showAnswerCard() {
+      var btn  = document.getElementById('reveal-btn');
+      var card = document.getElementById('answer-card');
+      if (btn)  btn.style.display = 'none';
+      if (card) card.classList.add('visible');
+    }
+
+    // ── AI copy ────────────────────────────────────────────────────
+
+    function handleCopy() {
+      var promptEl = document.getElementById('ai-prompt-text');
+      var btn      = document.getElementById('copy-btn');
+      if (promptEl && btn) {
+        copyToClipboard(promptEl.textContent, btn);
+      }
+    }
+
+    // ── Mark complete ──────────────────────────────────────────────
+
+    function handleComplete() {
+      markModuleComplete(WB, MOD);
+      setCompleteUI();
+      updateBadge('complete');
+    }
+
+    function setCompleteUI() {
+      var btn = document.getElementById('complete-btn');
+      var msg = document.getElementById('complete-msg');
+      if (btn) { btn.textContent = 'Completed'; btn.disabled = true; }
+      if (msg) msg.style.display = 'block';
+    }
+
+    // ── Badge ──────────────────────────────────────────────────────
+
+    function updateBadge(status) {
+      var badge = document.getElementById('module-1-badge');
+      if (!badge) return;
+      var labels = {
+        'not_started': 'Not started',
+        'in_progress': 'In progress',
+        'complete':    'Complete'
+      };
+      var classes = {
+        'not_started': 'not-started',
+        'in_progress': 'in-progress',
+        'complete':    'complete'
+      };
+      badge.textContent = labels[status] || 'Not started';
+      badge.className   = 'module-badge ' + (classes[status] || 'not-started');
+    }
+  </script>
+
+</body>
+</html>
