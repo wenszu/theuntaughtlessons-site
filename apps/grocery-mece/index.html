@@ -482,6 +482,7 @@
       state.selectedItemId = null;
 
       renderAll();
+      renderSampleAnswer();
       clearFeedback();
     }
 
@@ -611,14 +612,23 @@
     // -------------------------
     // Scoring + feedback layer
     // -------------------------
-    function getBucketMajorityIdeal(bucketItems) {
+    function getBucketProfile(bucketItems) {
       if (!bucketItems.length) return null;
       const counts = { fresh_cold: 0, pantry: 0, supplies: 0 };
       bucketItems.forEach((id) => {
         const item = getItemById(id);
         if (item) counts[item.idealBucket] += 1;
       });
-      return Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0];
+      const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+      const topCount = sorted[0][1];
+      const isTie = sorted.filter((entry) => entry[1] === topCount).length > 1;
+      return {
+        ideal: sorted[0][0],
+        topCount,
+        total: bucketItems.length,
+        isTie,
+        confident: !isTie && topCount > 0
+      };
     }
 
     function bucketNameScore(name, mappedIdeal) {
@@ -649,19 +659,27 @@
       const placedCount = state.placements.bucket1.length + state.placements.bucket2.length + state.placements.bucket3.length;
       const completionRatio = placedCount / allCount;
 
+      const profiles = {
+        bucket1: getBucketProfile(state.placements.bucket1),
+        bucket2: getBucketProfile(state.placements.bucket2),
+        bucket3: getBucketProfile(state.placements.bucket3)
+      };
+
       const mapping = {
-        bucket1: getBucketMajorityIdeal(state.placements.bucket1),
-        bucket2: getBucketMajorityIdeal(state.placements.bucket2),
-        bucket3: getBucketMajorityIdeal(state.placements.bucket3)
+        bucket1: profiles.bucket1?.confident ? profiles.bucket1.ideal : null,
+        bucket2: profiles.bucket2?.confident ? profiles.bucket2.ideal : null,
+        bucket3: profiles.bucket3?.confident ? profiles.bucket3.ideal : null
       };
 
       let correctFits = 0;
+      let evaluatedFitItems = 0;
       const misplaced = [];
       ['bucket1', 'bucket2', 'bucket3'].forEach((bucketKey) => {
         const mappedIdeal = mapping[bucketKey];
         state.placements[bucketKey].forEach((id) => {
           const item = getItemById(id);
           if (!item || !mappedIdeal) return;
+          evaluatedFitItems += 1;
           if (item.idealBucket === mappedIdeal) {
             correctFits += 1;
           } else if (misplaced.length < 5) {
@@ -669,7 +687,7 @@
           }
         });
       });
-      const itemFitRatio = placedCount ? correctFits / placedCount : 0;
+      const itemFitRatio = evaluatedFitItems ? correctFits / evaluatedFitItems : 0;
 
       const mappedVals = Object.values(mapping).filter(Boolean);
       const uniqueMapped = new Set(mappedVals);
@@ -697,15 +715,21 @@
         totalScore,
         correctFits,
         placedCount,
+        evaluatedFitItems,
         mapping,
+        profiles,
         misplaced,
         namesBlank: Object.values(state.bucketNames).some((name) => !name.trim())
       };
     }
 
-    function suggestedNamesFromMapping(mapping) {
+    function suggestedNamesFromMapping(mapping, profiles) {
       return ['bucket1', 'bucket2', 'bucket3'].map((key, idx) => {
-        const label = mapping[key] ? IDEAL_LABELS[mapping[key]] : `Bucket ${idx + 1} (needs clearer grouping)`;
+        const label = mapping[key]
+          ? IDEAL_LABELS[mapping[key]]
+          : profiles[key]?.isTie
+            ? `Bucket ${idx + 1} (mixed group: split this bucket more clearly)`
+            : `Bucket ${idx + 1} (needs clearer grouping)`;
         return `Bucket ${idx + 1}: ${label}`;
       });
     }
@@ -730,7 +754,9 @@
       const panel = document.getElementById('feedback');
       panel.classList.remove('hidden');
 
-      const categoryClarity = evalResult.nameRatio >= 0.75
+      const categoryClarity = evalResult.namesBlank
+        ? 'One or more bucket names are blank. Add labels so your structure is easier to read.'
+        : evalResult.nameRatio >= 0.75
         ? 'Your bucket names are mostly clear and easy to interpret.'
         : 'Bucket names are partly clear, but some labels should be more specific.';
 
@@ -738,12 +764,15 @@
         ? 'Your three buckets map cleanly to three distinct categories.'
         : 'There is overlap: at least two buckets seem to represent the same category.';
 
-      const itemFitText = `${evalResult.correctFits} of ${evalResult.placedCount || 0} placed items fit their mapped category.`;
+      const itemFitText = `${evalResult.correctFits} of ${evalResult.evaluatedFitItems || 0} evaluated items fit their mapped category.`;
       const misplacedHtml = evalResult.misplaced.length
         ? `<li><strong>Misplaced examples:</strong> ${evalResult.misplaced.join('; ')}</li>`
         : '<li><strong>Misplaced examples:</strong> None among sampled examples.</li>';
 
-      const suggested = suggestedNamesFromMapping(evalResult.mapping);
+      const suggested = suggestedNamesFromMapping(evalResult.mapping, evalResult.profiles);
+      const ambiguousBuckets = ['bucket1', 'bucket2', 'bucket3']
+        .filter((bucketKey) => evalResult.profiles[bucketKey]?.isTie)
+        .map((bucketKey) => bucketKey.replace('bucket', 'Bucket '));
 
       panel.innerHTML = `
         <h3>Feedback</h3>
@@ -755,6 +784,7 @@
           <li><strong>Suggested revision:</strong> ${getRevision(evalResult)}</li>
           ${misplacedHtml}
         </ul>
+        ${ambiguousBuckets.length ? `<p class="small"><em>Note: ${ambiguousBuckets.join(', ')} had mixed item types, so mapping confidence was lower for those buckets.</em></p>` : ''}
         <p><strong>Suggested improved bucket names:</strong></p>
         <ul>${suggested.map((s) => `<li>${s}</li>`).join('')}</ul>
         ${evalResult.namesBlank ? '<p class="small"><em>You left one or more bucket names blank. Your item placement was still evaluated.</em></p>' : ''}
@@ -791,11 +821,18 @@
 
     function renderSampleAnswer() {
       const sample = document.getElementById('sampleAnswer');
+      const grouped = {
+        fresh_cold: [],
+        pantry: [],
+        supplies: []
+      };
+      state.generatedItems.forEach((item) => grouped[item.idealBucket].push(item.name));
+      Object.keys(grouped).forEach((key) => grouped[key].sort((a, b) => a.localeCompare(b)));
       sample.innerHTML = `
         <h3>Sample answer</h3>
-        <p><strong>Fresh / cold food:</strong> Carrots, Frozen meatballs, Cheese, Chicken, Potatoes, Milk, Sausages, Butter, Beef, Bell peppers, Lettuce, Spinach, Cream, Grapes, Garlic, Ice cream, Onions</p>
-        <p><strong>Pantry items:</strong> Pasta, Canned tomatoes, Paprika, Rice, Sugar, Salt, Bottled olives, Olive oil</p>
-        <p><strong>Non-food supplies:</strong> Bathroom tissue, Candles, Charcoal, Kitchen towels, Paper plates</p>
+        <p><strong>Fresh / cold food:</strong> ${grouped.fresh_cold.join(', ') || 'No items in this generated list.'}</p>
+        <p><strong>Pantry items:</strong> ${grouped.pantry.join(', ') || 'No items in this generated list.'}</p>
+        <p><strong>Non-food supplies:</strong> ${grouped.supplies.join(', ') || 'No items in this generated list.'}</p>
       `;
     }
 
