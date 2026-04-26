@@ -114,11 +114,6 @@
     }
 
     .item-card:active { cursor: grabbing; }
-    .item-card.selected {
-      background: #FFF2CC;
-      border-color: var(--gold);
-      box-shadow: inset 0 0 0 1px rgba(238, 163, 32, 0.35);
-    }
 
     .buckets-wrap {
       display: grid;
@@ -245,58 +240,16 @@
     }
 
     .hidden { display: none; }
-    .mobile-steps { display: none; }
 
     @media (max-width: 980px) {
       .layout { grid-template-columns: 1fr; }
       .item-zone { min-height: 260px; }
       .bucket { min-height: 280px; }
       .bucket-items { min-height: 170px; }
-
-      .mobile-steps {
-        display: flex;
-        gap: 8px;
-        margin: 0 0 10px;
-      }
-
-      .mobile-step-btn {
-        flex: 1;
-        border: 1px solid rgba(0, 51, 102, .25);
-        background: #fff;
-      }
-
-      .mobile-step-btn.active {
-        background: var(--navy);
-        color: #fff;
-        border-color: var(--navy);
-      }
-
-      .panel.mobile-hidden {
-        display: none;
-      }
     }
 
     @media (max-width: 720px) {
-      .page { padding: 20px 14px 28px; }
-
-      .buckets-wrap {
-        display: grid;
-        grid-auto-flow: column;
-        grid-auto-columns: minmax(250px, 86vw);
-        grid-template-columns: none;
-        overflow-x: auto;
-        overscroll-behavior-x: contain;
-        padding-bottom: 4px;
-        scrollbar-width: thin;
-      }
-
-      .bucket {
-        min-height: 290px;
-      }
-
-      .bucket-items {
-        min-height: 175px;
-      }
+      .buckets-wrap { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -307,30 +260,24 @@
       <p>Practice structured thinking: create exactly three clear buckets, sort the messy list, and reflect on why your structure is MECE (mutually exclusive, collectively exhaustive).</p>
     </header>
 
-    <div class="mobile-steps" aria-label="Mobile panel navigation">
-      <button id="showListBtn" class="mobile-step-btn active" type="button">A) Messy list</button>
-      <button id="showBucketsBtn" class="mobile-step-btn" type="button">B) Buckets</button>
-    </div>
-
     <section class="layout">
-      <article class="panel" id="listPanel">
+      <article class="panel">
         <div class="panel-head">
           <h2>Messy grocery list</h2>
           <span class="small" id="listCount"></span>
         </div>
         <div class="panel-body">
           <div id="messyList" class="item-zone" data-zone="list"></div>
-          <p class="small">Tip: Desktop = drag & drop. Mobile = tap item (yellow), then tap the destination bucket.</p>
+          <p class="small">Tip: You can drag items into buckets and drag them back here.</p>
         </div>
       </article>
 
-      <article class="panel" id="bucketPanel">
+      <article class="panel">
         <div class="panel-head">
           <h2>Your three buckets</h2>
         </div>
         <div class="panel-body">
           <div class="buckets-wrap" id="bucketsWrap"></div>
-          <p class="small">On mobile, swipe left/right to view all three buckets.</p>
 
           <label for="whyText"><strong>Why did you choose these three buckets?</strong></label>
           <textarea id="whyText" placeholder="Explain your logic in 2–3 sentences..."></textarea>
@@ -393,7 +340,7 @@
     };
 
     const IDEAL_LABELS = {
-      fresh_cold: 'Fresh/ cold food',
+      fresh_cold: 'Fresh / cold food',
       pantry: 'Pantry items',
       supplies: 'Non-food supplies'
     };
@@ -401,8 +348,7 @@
     const state = {
       generatedItems: [],
       placements: { list: [], bucket1: [], bucket2: [], bucket3: [] },
-      bucketNames: { bucket1: '', bucket2: '', bucket3: 'Others' },
-      selectedItemId: null
+      bucketNames: { bucket1: '', bucket2: '', bucket3: '' }
     };
 
     // -------------------------
@@ -478,11 +424,9 @@
 
       state.generatedItems = finalItems;
       state.placements = { list: finalItems.map((i) => i.id), bucket1: [], bucket2: [], bucket3: [] };
-      state.bucketNames = { bucket1: '', bucket2: '', bucket3: 'Others' };
-      state.selectedItemId = null;
+      state.bucketNames = { bucket1: '', bucket2: '', bucket3: '' };
 
       renderAll();
-      renderSampleAnswer();
       clearFeedback();
     }
 
@@ -492,11 +436,10 @@
       ['bucket1', 'bucket2', 'bucket3'].forEach((bucketKey, index) => {
         const bucket = document.createElement('section');
         bucket.className = 'bucket';
-        bucket.dataset.zone = bucketKey;
         bucket.innerHTML = `
           <div class="bucket-head">
-            <label for="${bucketKey}Input">${bucketKey === 'bucket3' ? 'Catch-all bucket' : 'Name this bucket'}</label>
-            <input id="${bucketKey}Input" class="bucket-name" type="text" placeholder="Bucket ${index + 1}" ${bucketKey === 'bucket3' ? 'value="Others" readonly aria-readonly="true"' : ''} />
+            <label for="${bucketKey}Input">Name this bucket</label>
+            <input id="${bucketKey}Input" class="bucket-name" type="text" placeholder="Bucket ${index + 1}" />
           </div>
           <div class="bucket-items" data-zone="${bucketKey}"></div>
         `;
@@ -524,9 +467,7 @@
     }
 
     function renderZone(zoneKey) {
-      const zoneEl = zoneKey === 'list'
-        ? document.getElementById('messyList')
-        : document.querySelector(`.bucket-items[data-zone="${zoneKey}"]`);
+      const zoneEl = document.querySelector(`[data-zone="${zoneKey}"]`);
       if (!zoneEl) return;
       zoneEl.innerHTML = '';
       state.placements[zoneKey].forEach((id) => {
@@ -534,7 +475,6 @@
         if (!item) return;
         const card = document.createElement('div');
         card.className = 'item-card';
-        if (state.selectedItemId === id) card.classList.add('selected');
         card.draggable = true;
         card.dataset.itemId = id;
         card.textContent = item.name;
@@ -550,7 +490,6 @@
         state.placements[zone] = state.placements[zone].filter((id) => id !== itemId);
       });
       state.placements[targetZone].push(itemId);
-      state.selectedItemId = null;
       renderAll();
     }
 
@@ -589,46 +528,17 @@
       });
     }
 
-    function wireTapToMove() {
-      document.addEventListener('click', (e) => {
-        const card = e.target.closest('.item-card');
-        if (card) {
-          const clickedItemId = card.dataset.itemId;
-          state.selectedItemId = state.selectedItemId === clickedItemId ? null : clickedItemId;
-          renderAll();
-          return;
-        }
-
-        if (e.target.closest('input, textarea, button, label')) return;
-
-        const zone = e.target.closest('[data-zone]');
-        if (!zone || !state.selectedItemId) return;
-        const targetZone = zone.dataset.zone;
-        if (!state.placements[targetZone]) return;
-        moveItem(state.selectedItemId, targetZone);
-      });
-    }
-
     // -------------------------
     // Scoring + feedback layer
     // -------------------------
-    function getBucketProfile(bucketItems) {
+    function getBucketMajorityIdeal(bucketItems) {
       if (!bucketItems.length) return null;
       const counts = { fresh_cold: 0, pantry: 0, supplies: 0 };
       bucketItems.forEach((id) => {
         const item = getItemById(id);
         if (item) counts[item.idealBucket] += 1;
       });
-      const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
-      const topCount = sorted[0][1];
-      const isTie = sorted.filter((entry) => entry[1] === topCount).length > 1;
-      return {
-        ideal: sorted[0][0],
-        topCount,
-        total: bucketItems.length,
-        isTie,
-        confident: !isTie && topCount > 0
-      };
+      return Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0];
     }
 
     function bucketNameScore(name, mappedIdeal) {
@@ -659,27 +569,19 @@
       const placedCount = state.placements.bucket1.length + state.placements.bucket2.length + state.placements.bucket3.length;
       const completionRatio = placedCount / allCount;
 
-      const profiles = {
-        bucket1: getBucketProfile(state.placements.bucket1),
-        bucket2: getBucketProfile(state.placements.bucket2),
-        bucket3: getBucketProfile(state.placements.bucket3)
-      };
-
       const mapping = {
-        bucket1: profiles.bucket1?.confident ? profiles.bucket1.ideal : null,
-        bucket2: profiles.bucket2?.confident ? profiles.bucket2.ideal : null,
-        bucket3: profiles.bucket3?.confident ? profiles.bucket3.ideal : null
+        bucket1: getBucketMajorityIdeal(state.placements.bucket1),
+        bucket2: getBucketMajorityIdeal(state.placements.bucket2),
+        bucket3: getBucketMajorityIdeal(state.placements.bucket3)
       };
 
       let correctFits = 0;
-      let evaluatedFitItems = 0;
       const misplaced = [];
       ['bucket1', 'bucket2', 'bucket3'].forEach((bucketKey) => {
         const mappedIdeal = mapping[bucketKey];
         state.placements[bucketKey].forEach((id) => {
           const item = getItemById(id);
           if (!item || !mappedIdeal) return;
-          evaluatedFitItems += 1;
           if (item.idealBucket === mappedIdeal) {
             correctFits += 1;
           } else if (misplaced.length < 5) {
@@ -687,7 +589,7 @@
           }
         });
       });
-      const itemFitRatio = evaluatedFitItems ? correctFits / evaluatedFitItems : 0;
+      const itemFitRatio = placedCount ? correctFits / placedCount : 0;
 
       const mappedVals = Object.values(mapping).filter(Boolean);
       const uniqueMapped = new Set(mappedVals);
@@ -695,8 +597,7 @@
 
       const nameScores = ['bucket1', 'bucket2', 'bucket3'].map((bucketKey) => {
         const input = document.getElementById(`${bucketKey}Input`);
-        state.bucketNames[bucketKey] = bucketKey === 'bucket3' ? 'Others' : input ? input.value : '';
-        if (bucketKey === 'bucket3') return 1;
+        state.bucketNames[bucketKey] = input ? input.value : '';
         return bucketNameScore(state.bucketNames[bucketKey], mapping[bucketKey]);
       });
       const nameRatio = nameScores.reduce((a, b) => a + b, 0) / nameScores.length;
@@ -716,23 +617,15 @@
         totalScore,
         correctFits,
         placedCount,
-        evaluatedFitItems,
         mapping,
-        profiles,
         misplaced,
-        namesBlank: ['bucket1', 'bucket2'].some((key) => !state.bucketNames[key].trim())
+        namesBlank: Object.values(state.bucketNames).some((name) => !name.trim())
       };
     }
 
-    function suggestedNamesFromMapping(mapping, profiles) {
+    function suggestedNamesFromMapping(mapping) {
       return ['bucket1', 'bucket2', 'bucket3'].map((key, idx) => {
-        const label = key === 'bucket3'
-          ? 'Others'
-          : mapping[key]
-          ? IDEAL_LABELS[mapping[key]]
-          : profiles[key]?.isTie
-            ? `Bucket ${idx + 1} (mixed group: split this bucket more clearly)`
-            : `Bucket ${idx + 1} (needs clearer grouping)`;
+        const label = mapping[key] ? IDEAL_LABELS[mapping[key]] : `Bucket ${idx + 1} (needs clearer grouping)`;
         return `Bucket ${idx + 1}: ${label}`;
       });
     }
@@ -757,9 +650,7 @@
       const panel = document.getElementById('feedback');
       panel.classList.remove('hidden');
 
-      const categoryClarity = evalResult.namesBlank
-        ? 'One or more bucket names are blank. Add labels so your structure is easier to read.'
-        : evalResult.nameRatio >= 0.75
+      const categoryClarity = evalResult.nameRatio >= 0.75
         ? 'Your bucket names are mostly clear and easy to interpret.'
         : 'Bucket names are partly clear, but some labels should be more specific.';
 
@@ -767,15 +658,12 @@
         ? 'Your three buckets map cleanly to three distinct categories.'
         : 'There is overlap: at least two buckets seem to represent the same category.';
 
-      const itemFitText = `${evalResult.correctFits} of ${evalResult.evaluatedFitItems || 0} evaluated items fit their mapped category.`;
+      const itemFitText = `${evalResult.correctFits} of ${evalResult.placedCount || 0} placed items fit their mapped category.`;
       const misplacedHtml = evalResult.misplaced.length
         ? `<li><strong>Misplaced examples:</strong> ${evalResult.misplaced.join('; ')}</li>`
         : '<li><strong>Misplaced examples:</strong> None among sampled examples.</li>';
 
-      const suggested = suggestedNamesFromMapping(evalResult.mapping, evalResult.profiles);
-      const ambiguousBuckets = ['bucket1', 'bucket2', 'bucket3']
-        .filter((bucketKey) => evalResult.profiles[bucketKey]?.isTie)
-        .map((bucketKey) => bucketKey.replace('bucket', 'Bucket '));
+      const suggested = suggestedNamesFromMapping(evalResult.mapping);
 
       panel.innerHTML = `
         <h3>Feedback</h3>
@@ -787,7 +675,6 @@
           <li><strong>Suggested revision:</strong> ${getRevision(evalResult)}</li>
           ${misplacedHtml}
         </ul>
-        ${ambiguousBuckets.length ? `<p class="small"><em>Note: ${ambiguousBuckets.join(', ')} had mixed item types, so mapping confidence was lower for those buckets.</em></p>` : ''}
         <p><strong>Suggested improved bucket names:</strong></p>
         <ul>${suggested.map((s) => `<li>${s}</li>`).join('')}</ul>
         ${evalResult.namesBlank ? '<p class="small"><em>You left one or more bucket names blank. Your item placement was still evaluated.</em></p>' : ''}
@@ -799,43 +686,13 @@
       document.getElementById('feedback').innerHTML = '';
     }
 
-    function setMobileView(view) {
-      const isMobile = window.matchMedia('(max-width: 980px)').matches;
-      const listPanel = document.getElementById('listPanel');
-      const bucketPanel = document.getElementById('bucketPanel');
-      const showListBtn = document.getElementById('showListBtn');
-      const showBucketsBtn = document.getElementById('showBucketsBtn');
-      if (!listPanel || !bucketPanel || !showListBtn || !showBucketsBtn) return;
-
-      if (!isMobile) {
-        listPanel.classList.remove('mobile-hidden');
-        bucketPanel.classList.remove('mobile-hidden');
-        showListBtn.classList.remove('active');
-        showBucketsBtn.classList.remove('active');
-        return;
-      }
-
-      const showList = view === 'list';
-      listPanel.classList.toggle('mobile-hidden', !showList);
-      bucketPanel.classList.toggle('mobile-hidden', showList);
-      showListBtn.classList.toggle('active', showList);
-      showBucketsBtn.classList.toggle('active', !showList);
-    }
-
     function renderSampleAnswer() {
       const sample = document.getElementById('sampleAnswer');
-      const grouped = {
-        fresh_cold: [],
-        pantry: [],
-        supplies: []
-      };
-      state.generatedItems.forEach((item) => grouped[item.idealBucket].push(item.name));
-      Object.keys(grouped).forEach((key) => grouped[key].sort((a, b) => a.localeCompare(b)));
       sample.innerHTML = `
         <h3>Sample answer</h3>
-        <p><strong>Fresh/ cold food:</strong> ${grouped.fresh_cold.join(', ') || 'No items in this generated list.'}</p>
-        <p><strong>Pantry items:</strong> ${grouped.pantry.join(', ') || 'No items in this generated list.'}</p>
-        <p><strong>Others:</strong> ${grouped.supplies.join(', ') || 'No items in this generated list.'}</p>
+        <p><strong>Fresh / cold food:</strong> Carrots, Frozen meatballs, Cheese, Chicken, Potatoes, Milk, Sausages, Butter, Beef, Bell peppers, Lettuce, Spinach, Cream, Grapes, Garlic, Ice cream, Onions</p>
+        <p><strong>Pantry items:</strong> Pasta, Canned tomatoes, Paprika, Rice, Sugar, Salt, Bottled olives, Olive oil</p>
+        <p><strong>Non-food supplies:</strong> Bathroom tissue, Candles, Charcoal, Kitchen towels, Paper plates</p>
       `;
     }
 
@@ -843,7 +700,7 @@
     // Event layer
     // -------------------------
     function wireEvents() {
-      ['bucket1', 'bucket2'].forEach((bucketKey) => {
+      ['bucket1', 'bucket2', 'bucket3'].forEach((bucketKey) => {
         document.addEventListener('input', (e) => {
           if (e.target.id === `${bucketKey}Input`) {
             state.bucketNames[bucketKey] = e.target.value;
@@ -868,16 +725,11 @@
 
       document.getElementById('resetBtn').addEventListener('click', () => {
         state.placements = { list: state.generatedItems.map((i) => i.id), bucket1: [], bucket2: [], bucket3: [] };
-        state.bucketNames = { bucket1: '', bucket2: '', bucket3: 'Others' };
-        state.selectedItemId = null;
+        state.bucketNames = { bucket1: '', bucket2: '', bucket3: '' };
         document.getElementById('whyText').value = '';
         clearFeedback();
         renderAll();
       });
-
-      document.getElementById('showListBtn').addEventListener('click', () => setMobileView('list'));
-      document.getElementById('showBucketsBtn').addEventListener('click', () => setMobileView('buckets'));
-      window.addEventListener('resize', () => setMobileView('list'));
     }
 
     // -------------------------
@@ -885,11 +737,9 @@
     // -------------------------
     buildBuckets();
     wireDragAndDrop();
-    wireTapToMove();
     wireEvents();
     renderSampleAnswer();
     generateList();
-    setMobileView('list');
   </script>
 </body>
 </html>

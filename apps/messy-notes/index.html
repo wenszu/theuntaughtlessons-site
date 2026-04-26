@@ -1,0 +1,1333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Manager’s messy notes</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lato:wght@300;400;700&family=Roboto+Mono:wght@400;500&display=swap');
+
+    :root {
+      --bg: #F3EDE2;
+      --navy: #003366;
+      --gold: #EEA320;
+      --charcoal: #4A4A4A;
+      --steel: #4D7094;
+      --white: #fff;
+      --paper: #FAF8F4;
+      --line: rgba(0, 51, 102, 0.18);
+      --shadow: 0 10px 26px rgba(0, 51, 102, 0.08);
+      --radius: 14px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: 'Lato', sans-serif;
+      color: var(--charcoal);
+      background: var(--bg);
+    }
+
+    button,
+    input,
+    textarea {
+      font: inherit;
+    }
+
+    .page {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 28px 20px 42px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 22px;
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 16px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--navy);
+      text-decoration: none;
+      font-size: .74rem;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    .brand img {
+      width: 52px;
+      height: 52px;
+      object-fit: contain;
+      opacity: .88;
+    }
+
+    .phase-pill {
+      border: 1px solid rgba(238, 163, 32, .48);
+      background: rgba(238, 163, 32, .12);
+      color: var(--navy);
+      border-radius: 999px;
+      padding: 5px 12px;
+      font-size: .74rem;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .hero {
+      margin-bottom: 22px;
+    }
+
+    h1,
+    h2,
+    h3 {
+      font-family: 'Playfair Display', serif;
+      color: var(--navy);
+      margin-top: 0;
+    }
+
+    h1 {
+      font-size: clamp(1.9rem, 3vw, 2.45rem);
+      line-height: 1.12;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      margin: 0;
+      max-width: 74ch;
+      line-height: 1.45;
+      font-size: 1.03rem;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(280px, 0.95fr) minmax(560px, 2.05fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .panel {
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .panel + .panel {
+      margin-top: 14px;
+    }
+
+    .panel-head {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .panel-head h2,
+    .panel-head h3 {
+      margin: 0;
+      font-size: 1.16rem;
+    }
+
+    .panel-body {
+      padding: 14px 16px 16px;
+    }
+
+    .story-card,
+    .source-card,
+    .constraint-list,
+    .comparison-box,
+    .attempt-card {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--paper);
+    }
+
+    .story-card {
+      padding: 13px 14px;
+      line-height: 1.55;
+    }
+
+    .story-card p,
+    .source-card p {
+      margin: 0;
+    }
+
+    .instructions {
+      margin: 12px 0 0 18px;
+      padding: 0;
+      line-height: 1.55;
+    }
+
+    .source-card {
+      padding: 14px;
+      margin-bottom: 12px;
+    }
+
+    .source-label,
+    .small-label {
+      display: block;
+      color: var(--steel);
+      font-size: .74rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      font-weight: 700;
+      margin-bottom: 7px;
+    }
+
+    .source-text {
+      white-space: pre-line;
+      line-height: 1.6;
+    }
+
+    .constraint-list {
+      list-style: none;
+      margin: 0;
+      padding: 10px 12px;
+      display: grid;
+      gap: 7px;
+    }
+
+    .constraint-list li::before {
+      content: "";
+      display: inline-block;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--gold);
+      margin-right: 8px;
+      transform: translateY(-1px);
+    }
+
+    .timer-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .timer-display {
+      font-family: 'Roboto Mono', monospace;
+      color: var(--navy);
+      font-size: 1.55rem;
+      font-weight: 500;
+      line-height: 1;
+    }
+
+    .timer-display.over-target {
+      color: #8B6010;
+    }
+
+    .timer-note,
+    .small {
+      font-size: .9rem;
+      color: #5e5e5e;
+      line-height: 1.45;
+    }
+
+    .mode-switch {
+      display: inline-flex;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 3px;
+      background: var(--paper);
+      margin-bottom: 12px;
+    }
+
+    .mode-btn {
+      border: 0;
+      border-radius: 7px;
+      background: transparent;
+      color: var(--navy);
+      padding: 8px 11px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .mode-btn.active {
+      background: var(--navy);
+      color: #fff;
+    }
+
+    .response-area {
+      width: 100%;
+      min-height: 330px;
+      border: 1px solid rgba(0,51,102,.2);
+      border-radius: 10px;
+      padding: 12px;
+      resize: vertical;
+      color: var(--charcoal);
+      background: #fff;
+      line-height: 1.55;
+    }
+
+    .section-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .section-box {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fff;
+      padding: 10px;
+    }
+
+    .section-box label {
+      display: block;
+      color: var(--navy);
+      font-size: .79rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      margin-bottom: 5px;
+    }
+
+    .section-title {
+      width: 100%;
+      border: 1px solid rgba(0,51,102,.2);
+      border-radius: 8px;
+      padding: 8px;
+      margin-bottom: 8px;
+    }
+
+    .section-response {
+      min-height: 230px;
+    }
+
+    .buttons {
+      margin-top: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    button {
+      border: 1px solid var(--navy);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--navy);
+      padding: 9px 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    button.primary {
+      background: var(--navy);
+      color: #fff;
+      border-color: var(--navy);
+    }
+
+    button.gold {
+      background: var(--gold);
+      border-color: var(--gold);
+      color: #2e2107;
+    }
+
+    button:disabled {
+      opacity: .45;
+      cursor: not-allowed;
+    }
+
+    .confirmation,
+    .checklist-panel,
+    .score-panel,
+    .comparison-panel,
+    .attempts-panel {
+      margin-top: 14px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fff;
+      padding: 12px 14px;
+      line-height: 1.45;
+    }
+
+    .confirmation strong {
+      color: var(--navy);
+    }
+
+    .checklist {
+      display: grid;
+      gap: 9px;
+      margin: 10px 0 0;
+    }
+
+    .checklist label {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      line-height: 1.35;
+    }
+
+    .checklist input {
+      margin-top: 3px;
+      accent-color: var(--gold);
+    }
+
+    .score-panel {
+      margin-top: 14px;
+      background: var(--paper);
+    }
+
+    .score-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: flex-start;
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 10px;
+      margin-bottom: 10px;
+    }
+
+    .score-title {
+      color: var(--navy);
+      font-weight: 700;
+      font-size: 1.12rem;
+    }
+
+    .score-insight {
+      margin: 4px 0 0;
+      color: #5e5e5e;
+      font-size: .92rem;
+    }
+
+    .score-total {
+      color: var(--navy);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 1.35rem;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    .score-rows {
+      display: grid;
+      gap: 9px;
+    }
+
+    .score-row {
+      display: grid;
+      grid-template-columns: 110px minmax(110px, 1fr) 70px minmax(180px, 1.3fr);
+      gap: 10px;
+      align-items: center;
+      font-size: .92rem;
+    }
+
+    .score-name {
+      color: var(--navy);
+      font-weight: 700;
+    }
+
+    .score-bar {
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(0, 51, 102, .12);
+      overflow: hidden;
+    }
+
+    .score-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: var(--gold);
+    }
+
+    .score-points {
+      color: var(--navy);
+      font-family: 'Roboto Mono', monospace;
+      font-size: .82rem;
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .score-message {
+      color: #5e5e5e;
+      line-height: 1.35;
+    }
+
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    .comparison-box {
+      padding: 12px;
+      background: var(--paper);
+      min-height: 240px;
+    }
+
+    .comparison-box h3 {
+      font-size: 1.05rem;
+      margin-bottom: 8px;
+    }
+
+    .answer-pre {
+      white-space: pre-wrap;
+      line-height: 1.55;
+      margin: 0;
+    }
+
+    .sample-answer {
+      line-height: 1.55;
+    }
+
+    .sample-answer h4 {
+      color: var(--navy);
+      margin: 14px 0 6px;
+      font-size: 1rem;
+    }
+
+    .sample-answer h4:first-child {
+      margin-top: 0;
+    }
+
+    .sample-answer ul {
+      margin: 0 0 0 18px;
+      padding: 0;
+    }
+
+    .sample-answer li {
+      margin-bottom: 7px;
+    }
+
+    .attempt-card {
+      padding: 10px 12px;
+      margin-top: 9px;
+      background: var(--paper);
+    }
+
+    .attempt-card summary {
+      cursor: pointer;
+      color: var(--navy);
+      font-weight: 700;
+    }
+
+    .attempt-meta {
+      display: block;
+      margin-top: 3px;
+      color: #5e5e5e;
+      font-size: .86rem;
+      font-weight: 400;
+    }
+
+    .hidden { display: none; }
+
+    @media (max-width: 980px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .section-grid,
+      .comparison-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .score-row {
+        grid-template-columns: 1fr;
+        gap: 5px;
+      }
+
+      .score-points {
+        text-align: left;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .page {
+        padding: 20px 14px 34px;
+      }
+
+      .topbar {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .timer-row {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .mode-switch {
+        width: 100%;
+      }
+
+      .mode-btn {
+        flex: 1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <div class="topbar">
+      <a class="brand" href="../../index.html" aria-label="The Untaught Lessons homepage">
+        <img src="../../assets/logo.png" alt="The Untaught Lessons" />
+        <span>The Untaught Lessons</span>
+      </a>
+      <span class="phase-pill" id="phasePill"></span>
+    </div>
+
+    <header class="hero">
+      <h1 id="activityTitle"></h1>
+      <p class="subtitle" id="activitySubtitle"></p>
+    </header>
+
+    <section class="layout">
+      <aside>
+        <article class="panel">
+          <div class="panel-head">
+            <h2>Context</h2>
+          </div>
+          <div class="panel-body">
+            <div class="story-card">
+              <p id="storyContext"></p>
+            </div>
+            <ul class="instructions" id="instructionsList"></ul>
+          </div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-head">
+            <h2>Task</h2>
+          </div>
+          <div class="panel-body">
+            <div class="source-card">
+              <span class="source-label">Source note</span>
+              <p class="source-text" id="sourceText"></p>
+            </div>
+            <span class="small-label">Constraints</span>
+            <ul class="constraint-list" id="constraintsList"></ul>
+          </div>
+        </article>
+
+        <article class="panel attempts-panel">
+          <div class="panel-head">
+            <h2>Previous attempts</h2>
+          </div>
+          <div class="panel-body">
+            <p class="small">Saved locally in this browser only. Nothing is sent externally.</p>
+            <div id="attemptsList"></div>
+            <div class="buttons">
+              <button id="clearAttemptsBtn">Clear previous attempts</button>
+            </div>
+          </div>
+        </article>
+      </aside>
+
+      <section>
+        <article class="panel">
+          <div class="panel-head">
+            <h2>Your response</h2>
+            <button id="toggleTimerBtn" type="button">Hide timer</button>
+          </div>
+          <div class="panel-body">
+            <div class="timer-row">
+              <div>
+                <span class="small-label">Elapsed time</span>
+                <div class="timer-display" id="timerDisplay">00:00</div>
+              </div>
+              <p class="timer-note" id="timerNote">Target: submit within 5 minutes. Hiding the timer keeps time running.</p>
+            </div>
+
+            <div class="mode-switch" aria-label="Answer input mode">
+              <button class="mode-btn active" id="openModeBtn" type="button">Open response</button>
+              <button class="mode-btn" id="sectionModeBtn" type="button">Three-section response</button>
+            </div>
+
+            <div id="openMode">
+              <textarea id="openResponse" class="response-area" placeholder=""></textarea>
+            </div>
+
+            <div id="sectionMode" class="hidden">
+              <div class="section-grid" id="sectionGrid"></div>
+            </div>
+
+            <div class="buttons">
+              <button id="submitBtn" class="primary" type="button">Submit</button>
+              <button id="tryAgainBtn" class="gold" type="button">Try again</button>
+            </div>
+
+            <div id="confirmation" class="confirmation hidden"></div>
+
+            <div id="checklistPanel" class="checklist-panel hidden">
+              <h3>Self-assessment</h3>
+              <p class="small">Check your own work before looking at the sample answer.</p>
+              <div class="checklist" id="checklist"></div>
+              <div id="scorePanel" class="score-panel hidden"></div>
+              <div class="buttons">
+                <button id="revealSampleBtn" class="primary" type="button">Reveal sample answer</button>
+              </div>
+            </div>
+
+            <div id="comparisonPanel" class="comparison-panel hidden">
+              <h3>Side-by-side comparison</h3>
+              <div class="comparison-grid">
+                <div class="comparison-box">
+                  <h3>Your answer</h3>
+                  <pre class="answer-pre" id="submittedAnswer"></pre>
+                </div>
+                <div class="comparison-box">
+                  <h3>Sample answer</h3>
+                  <div class="sample-answer" id="sampleAnswer"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>
+      </section>
+    </section>
+  </main>
+
+  <script>
+    // Activity config: copy this object to create the next standalone practice.
+    const ACTIVITY = {
+      id: 'messy-notes-ashley',
+      phase: 'Think clearly',
+      title: 'Manager’s messy notes',
+      subtitle: 'Turn a rushed update into an Aiko-ready summary.',
+      storyContext: 'Aiko needs a clean update. Ashley sent a rushed note. Your job is to make it Aiko-ready.',
+      instructions: [
+        '<strong>Define three buckets:</strong> Split the content into exactly three distinct categories, each capturing a clear theme or purpose.',
+        '<strong>Start with BSP:</strong> Begin every bullet point with a bolded summary phrase (BSP) that is short and descriptive.'
+      ],
+      sourceText: 'Hey, quick update on the McDonald’s launch.\n\nWe are launching a limited-time McDonald’s x Pokémon Happy Meal in the US. This is new because we are launching 8 blind box collectibles with 8 designs, box art that can be cut out, and a QR code that unlocks a Pokémon Trainer Certification once customers collect all 8 boxes.\n\nWe aim to market this by using in-app push notifications, billboards, and partnering with known collectors to drive hype.\n\nKey issues include a limit of 2 boxes per person to prevent hoarding and logistics risk from under-supply.\n\n— Ashley Kat, VP of Partnerships',
+      constraints: [
+        'Exactly 3 sections',
+        'Use BSP format',
+        'Keep it concise',
+        'Make the buckets MECE'
+      ],
+      durationSeconds: 300,
+      inputPlaceholder: 'Write your structured response here...',
+      sectionPlaceholders: [
+        'What will we launch?',
+        'How will we launch?',
+        'What could break?'
+      ],
+      checklist: [
+        'Did I use exactly 3 sections?',
+        'Are my sections mutually exclusive?',
+        'Do my sections cover the full message?',
+        'Does each bullet start with a BSP?',
+        'Did I keep the answer concise?'
+      ],
+      scoring: {
+        wordCountTarget: {
+          min: 70,
+          idealMin: 90,
+          idealMax: 130,
+          max: 160
+        },
+        coverageKeywords: [
+          { label: 'Launch concept', terms: ['McDonald’s', 'Pokémon', 'Happy Meal'] },
+          { label: 'Collectibles', terms: ['blind box', 'designs'] },
+          { label: 'QR journey', terms: ['QR', 'certification'] },
+          { label: 'Marketing', terms: ['push notifications', 'billboards', 'collectors'] },
+          { label: 'Risks', terms: ['purchase limit', 'hoarding', 'under-supply'] }
+        ]
+      },
+      sampleAnswer: [
+        {
+          title: 'What will we launch?',
+          bullets: [
+            '<strong>Blind-box collectibles:</strong> Launch 8 collectible designs to drive repeat visits.',
+            '<strong>Cut-out box art:</strong> Make packaging part of the collectible experience.',
+            '<strong>Trainer certification:</strong> Use a QR journey to reward customers who collect all 8 boxes.'
+          ]
+        },
+        {
+          title: 'How will we launch?',
+          bullets: [
+            '<strong>In-app pushes:</strong> Use targeted prompts to drive store visits.',
+            '<strong>Billboards:</strong> Build mass awareness for the limited-time launch.',
+            '<strong>Collector partners:</strong> Create credibility and hype through known collectors.'
+          ]
+        },
+        {
+          title: 'What could break?',
+          bullets: [
+            '<strong>Purchase limits:</strong> Cap purchases at 2 boxes per person to reduce hoarding.',
+            '<strong>Under-supply risk:</strong> Manage logistics carefully so scarcity does not damage momentum.'
+          ]
+        }
+      ]
+    };
+
+    const STORAGE_PREFIX = 'utl_practice_attempts_';
+    const MAX_ATTEMPTS = 10;
+    const storageKey = `${STORAGE_PREFIX}${ACTIVITY.id}`;
+
+    const state = {
+      mode: 'open',
+      timerHidden: false,
+      startedAt: Date.now(),
+      elapsedSeconds: 0,
+      lastAttemptId: null,
+      lastScore: null
+    };
+
+    const els = {};
+
+    function getEl(id) {
+      return document.getElementById(id);
+    }
+
+    function formatSeconds(totalSeconds) {
+      const mins = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
+      const secs = Math.floor(totalSeconds % 60).toString().padStart(2, '0');
+      return `${mins}:${secs}`;
+    }
+
+    function escapeHtml(value) {
+      return value
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function loadAttempts() {
+      try {
+        return JSON.parse(localStorage.getItem(storageKey)) || [];
+      } catch (error) {
+        return [];
+      }
+    }
+
+    function saveAttempts(attempts) {
+      const trimmed = attempts.slice(-MAX_ATTEMPTS);
+      localStorage.setItem(storageKey, JSON.stringify(trimmed));
+    }
+
+    function addAttempt(attempt) {
+      const attempts = loadAttempts();
+      attempts.push(attempt);
+      saveAttempts(attempts);
+      renderAttempts();
+    }
+
+    function updateAttemptChecklist(checklistSelections) {
+      if (!state.lastAttemptId) return;
+      const attempts = loadAttempts();
+      const index = attempts.findIndex((attempt) => attempt.attemptId === state.lastAttemptId);
+      if (index === -1) return;
+      attempts[index].checklistSelections = checklistSelections;
+      saveAttempts(attempts);
+      renderAttempts();
+    }
+
+    function currentElapsedSeconds() {
+      return Math.floor((Date.now() - state.startedAt) / 1000);
+    }
+
+    function isWithinTarget() {
+      return currentElapsedSeconds() <= ACTIVITY.durationSeconds;
+    }
+
+    function resetTimer() {
+      state.startedAt = Date.now();
+      state.elapsedSeconds = 0;
+      renderTimer();
+    }
+
+    function renderTimer() {
+      const elapsed = currentElapsedSeconds();
+      state.elapsedSeconds = elapsed;
+      els.timerDisplay.textContent = formatSeconds(elapsed);
+      els.timerDisplay.classList.toggle('over-target', elapsed > ACTIVITY.durationSeconds);
+      els.timerNote.textContent = elapsed > ACTIVITY.durationSeconds
+        ? 'Past the 5-minute target, but you can still submit when ready.'
+        : 'Target: submit within 5 minutes. Hiding the timer keeps time running.';
+    }
+
+    function getOpenResponse() {
+      return els.openResponse.value.trim();
+    }
+
+    function getSectionResponse() {
+      return [1, 2, 3].map((num) => {
+        const title = getEl(`sectionTitle${num}`).value.trim();
+        const body = getEl(`sectionBody${num}`).value.trim();
+        return { title, body };
+      });
+    }
+
+    function formatSectionResponse(sections) {
+      return sections
+        .map((section, index) => {
+          const title = section.title || `Section ${index + 1}`;
+          const body = section.body || '';
+          return `${title}\n${body}`.trim();
+        })
+        .filter(Boolean)
+        .join('\n\n');
+    }
+
+    function getCurrentResponse() {
+      if (state.mode === 'sections') {
+        return {
+          mode: 'sections',
+          sections: getSectionResponse(),
+          text: formatSectionResponse(getSectionResponse())
+        };
+      }
+
+      return {
+        mode: 'open',
+        text: getOpenResponse()
+      };
+    }
+
+    function hasAnyContent() {
+      const response = getCurrentResponse();
+      return Boolean(response.text.trim());
+    }
+
+    function normalizeForMatch(text) {
+      return text
+        .toLowerCase()
+        .replace(/[’‘]/g, "'")
+        .replace(/[–—]/g, '-');
+    }
+
+    function countWords(text) {
+      const words = text.match(/[A-Za-z0-9À-ÿ]+(?:['’-][A-Za-z0-9À-ÿ]+)?/g);
+      return words ? words.length : 0;
+    }
+
+    function getResponseLines(text) {
+      return text
+        .split('\n')
+        .map((line) => line.trim())
+        .filter(Boolean);
+    }
+
+    function countSections(response) {
+      if (response.mode === 'sections') {
+        return response.sections.filter((section) => section.title || section.body).length;
+      }
+
+      const lines = getResponseLines(response.text);
+      const headingLines = lines.filter((line) => {
+        const clean = line.replace(/^#+\s*/, '').trim();
+        return clean.length <= 80 && !/^[•*-]\s/.test(clean) && !clean.includes(':');
+      });
+      const colonHeadings = lines.filter((line) => /^[A-Z][^:]{2,60}\?$/.test(line));
+
+      return Math.max(headingLines.length, colonHeadings.length);
+    }
+
+    function getBulletLines(text) {
+      const lines = getResponseLines(text);
+      const explicitBullets = lines.filter((line) => /^[•*-]\s+/.test(line));
+      if (explicitBullets.length) return explicitBullets;
+      return lines.filter((line) => line.includes(':'));
+    }
+
+    function scoreStructure(response) {
+      const sectionCount = countSections(response);
+      let points = 0;
+      let message = 'Structure is not yet clear.';
+
+      if (sectionCount === 3) {
+        points = 30;
+        message = 'Used 3 sections correctly.';
+      } else if (sectionCount === 2 || sectionCount === 4) {
+        points = 18;
+        message = `Used ${sectionCount} sections; aim for exactly 3.`;
+      } else if (sectionCount > 1) {
+        points = 8;
+        message = 'Some structure is visible, but the section count is off.';
+      }
+
+      return { label: 'Structure', points, max: 30, message, details: { sectionCount } };
+    }
+
+    function scoreBspFormat(text) {
+      const bullets = getBulletLines(text);
+      const bspBullets = bullets.filter((line) => {
+        const clean = line.replace(/^[•*-]\s+/, '').trim();
+        const colonIndex = clean.indexOf(':');
+        return colonIndex > 0 && colonIndex <= 36;
+      });
+      const ratio = bullets.length ? bspBullets.length / bullets.length : 0;
+      const points = Math.round(ratio * 20);
+      let message = 'No BSP-style bullet lines detected.';
+
+      if (ratio === 1 && bullets.length) {
+        message = 'Every detected bullet uses BSP format.';
+      } else if (ratio >= 0.65) {
+        message = 'Some bullets are missing BSP format.';
+      } else if (ratio > 0) {
+        message = 'Most bullets need a short BSP before the colon.';
+      }
+
+      return {
+        label: 'BSP format',
+        points,
+        max: 20,
+        message,
+        details: { bulletCount: bullets.length, bspBulletCount: bspBullets.length }
+      };
+    }
+
+    function scoreCoverage(text, scoringConfig) {
+      const normalizedText = normalizeForMatch(text);
+      const groups = scoringConfig.coverageKeywords.map((group) => {
+        const matchedTerms = group.terms.filter((term) => normalizedText.includes(normalizeForMatch(term)));
+        return {
+          label: group.label,
+          matched: matchedTerms.length > 0,
+          matchedTerms
+        };
+      });
+      const matchedGroups = groups.filter((group) => group.matched);
+      const points = Math.round((matchedGroups.length / groups.length) * 30);
+      const missing = groups.filter((group) => !group.matched).map((group) => group.label);
+      const message = missing.length
+        ? `Missing ${missing[0].toLowerCase()} coverage.`
+        : 'Covers all key content groups.';
+
+      return {
+        label: 'Coverage',
+        points,
+        max: 30,
+        message,
+        details: { matched: matchedGroups.map((group) => group.label), missing }
+      };
+    }
+
+    function scoreConciseness(text, scoringConfig) {
+      const wordCount = countWords(text);
+      const target = scoringConfig.wordCountTarget;
+      let points = 6;
+      let message = 'Length is outside the target range.';
+
+      if (wordCount >= target.idealMin && wordCount <= target.idealMax) {
+        points = 20;
+        message = 'Concise and within the ideal range.';
+      } else if (wordCount >= target.min && wordCount <= target.max) {
+        points = 14;
+        message = wordCount < target.idealMin ? 'Slightly short.' : 'Slightly verbose.';
+      } else if (wordCount < target.min) {
+        message = 'Too brief to cover the full message.';
+      } else {
+        message = 'Too verbose for an Aiko-ready summary.';
+      }
+
+      return { label: 'Conciseness', points, max: 20, message, details: { wordCount } };
+    }
+
+    function getScoreInsight(categories) {
+      const sorted = categories.slice().sort((a, b) => (a.points / a.max) - (b.points / b.max));
+      const weakest = sorted[0];
+      const strongest = sorted[sorted.length - 1];
+
+      if (strongest.label === 'Structure' && weakest.label !== 'Structure') {
+        return `Strong structure. Improve ${weakest.label.toLowerCase()}.`;
+      }
+      if (strongest.label === 'Coverage' && weakest.label !== 'Coverage') {
+        return `Good coverage. Tighten ${weakest.label.toLowerCase()}.`;
+      }
+      if (weakest.label === 'Conciseness') {
+        return 'Good foundation. Tighten conciseness.';
+      }
+      return `Focus next on ${weakest.label.toLowerCase()}.`;
+    }
+
+    function scorePractice(response, scoringConfig) {
+      const text = response.text;
+      const categories = [
+        scoreStructure(response),
+        scoreBspFormat(text),
+        scoreCoverage(text, scoringConfig),
+        scoreConciseness(text, scoringConfig)
+      ];
+      const total = categories.reduce((sum, category) => sum + category.points, 0);
+      const wordCount = categories.find((category) => category.label === 'Conciseness').details.wordCount;
+
+      return {
+        total,
+        max: 100,
+        insight: getScoreInsight(categories),
+        wordCount,
+        categories
+      };
+    }
+
+    function setMode(nextMode) {
+      if (state.mode === nextMode) return;
+      state.mode = nextMode;
+      els.openModeBtn.classList.toggle('active', nextMode === 'open');
+      els.sectionModeBtn.classList.toggle('active', nextMode === 'sections');
+      els.openMode.classList.toggle('hidden', nextMode !== 'open');
+      els.sectionMode.classList.toggle('hidden', nextMode !== 'sections');
+    }
+
+    function renderConfig() {
+      els.phasePill.textContent = ACTIVITY.phase;
+      els.activityTitle.textContent = ACTIVITY.title;
+      els.activitySubtitle.textContent = ACTIVITY.subtitle;
+      els.storyContext.textContent = ACTIVITY.storyContext;
+      els.sourceText.textContent = ACTIVITY.sourceText;
+      els.openResponse.placeholder = ACTIVITY.inputPlaceholder;
+
+      els.instructionsList.innerHTML = ACTIVITY.instructions
+        .map((item) => `<li>${item}</li>`)
+        .join('');
+
+      els.constraintsList.innerHTML = ACTIVITY.constraints
+        .map((item) => `<li>${escapeHtml(item)}</li>`)
+        .join('');
+    }
+
+    function buildSectionInputs() {
+      els.sectionGrid.innerHTML = ACTIVITY.sectionPlaceholders.map((placeholder, index) => {
+        const num = index + 1;
+        return `
+          <div class="section-box">
+            <label for="sectionTitle${num}">Section ${num}</label>
+            <input id="sectionTitle${num}" class="section-title" type="text" placeholder="${escapeHtml(placeholder)}" />
+            <textarea id="sectionBody${num}" class="response-area section-response" placeholder="Bullet responses..."></textarea>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderChecklist() {
+      els.checklist.innerHTML = ACTIVITY.checklist.map((item, index) => `
+        <label>
+          <input type="checkbox" data-check-index="${index}" />
+          <span>${escapeHtml(item)}</span>
+        </label>
+      `).join('');
+    }
+
+    function collectChecklistSelections() {
+      return Array.from(els.checklist.querySelectorAll('input[type="checkbox"]')).map((input, index) => ({
+        label: ACTIVITY.checklist[index],
+        checked: input.checked
+      }));
+    }
+
+    function renderSampleAnswer() {
+      els.sampleAnswer.innerHTML = ACTIVITY.sampleAnswer.map((section) => `
+        <h4>${escapeHtml(section.title)}</h4>
+        <ul>${section.bullets.map((bullet) => `<li>${bullet}</li>`).join('')}</ul>
+      `).join('');
+    }
+
+    function renderScore(score) {
+      els.scorePanel.classList.remove('hidden');
+      els.scorePanel.innerHTML = `
+        <div class="score-head">
+          <div>
+            <div class="score-title">Practice score</div>
+            <p class="score-insight">${escapeHtml(score.insight)}</p>
+          </div>
+          <div class="score-total">${score.total} / ${score.max}</div>
+        </div>
+        <div class="score-rows">
+          ${score.categories.map((category) => {
+            const pct = Math.round((category.points / category.max) * 100);
+            return `
+              <div class="score-row">
+                <div class="score-name">${escapeHtml(category.label)}</div>
+                <div class="score-bar" aria-label="${escapeHtml(category.label)} score">
+                  <div class="score-fill" style="width: ${pct}%"></div>
+                </div>
+                <div class="score-points">${category.points} / ${category.max}</div>
+                <div class="score-message">${escapeHtml(category.message)}</div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
+    }
+
+    function submitAttempt() {
+      if (!hasAnyContent()) {
+        els.confirmation.classList.remove('hidden');
+        els.confirmation.innerHTML = '<strong>Add a response first.</strong> Then submit when you are ready.';
+        return;
+      }
+
+      const response = getCurrentResponse();
+      const withinTarget = isWithinTarget();
+      const score = scorePractice(response, ACTIVITY.scoring);
+      const attempt = {
+        attemptId: `${ACTIVITY.id}-${Date.now()}`,
+        activityId: ACTIVITY.id,
+        timestamp: new Date().toISOString(),
+        inputMode: response.mode,
+        userResponse: response,
+        submittedWithinTarget: withinTarget,
+        timingResult: {
+          elapsedSeconds: currentElapsedSeconds(),
+          submittedWithinTarget: withinTarget
+        },
+        elapsedSeconds: currentElapsedSeconds(),
+        checklistSelections: [],
+        score: score.total,
+        categoryScores: score.categories,
+        wordCount: score.wordCount
+      };
+
+      // Future backend extension point:
+      // sendAttemptToApi(attempt), sendAttemptToGoogleSheets(attempt), or sendFeedbackEmail(attempt).
+      addAttempt(attempt);
+      state.lastAttemptId = attempt.attemptId;
+      state.lastScore = score;
+
+      els.submittedAnswer.textContent = response.text;
+      els.confirmation.classList.remove('hidden');
+      els.confirmation.innerHTML = `<strong>Attempt saved locally.</strong> Submitted ${withinTarget ? 'within' : 'after'} the 5-minute target.`;
+      els.checklistPanel.classList.remove('hidden');
+      renderScore(score);
+      els.comparisonPanel.classList.add('hidden');
+    }
+
+    function clearCurrentInput() {
+      els.openResponse.value = '';
+      [1, 2, 3].forEach((num) => {
+        getEl(`sectionTitle${num}`).value = '';
+        getEl(`sectionBody${num}`).value = '';
+      });
+      state.lastAttemptId = null;
+      state.lastScore = null;
+      els.confirmation.classList.add('hidden');
+      els.checklistPanel.classList.add('hidden');
+      els.scorePanel.classList.add('hidden');
+      els.scorePanel.innerHTML = '';
+      els.comparisonPanel.classList.add('hidden');
+      renderChecklist();
+      resetTimer();
+    }
+
+    function renderAttempts() {
+      const attempts = loadAttempts().slice().reverse();
+      if (!attempts.length) {
+        els.attemptsList.innerHTML = '<p class="small">No previous attempts yet.</p>';
+        return;
+      }
+
+      els.attemptsList.innerHTML = attempts.map((attempt) => {
+        const date = new Date(attempt.timestamp).toLocaleString([], {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+        const status = attempt.submittedWithinTarget ? 'Within 5 minutes' : 'Over 5 minutes';
+        const scoreText = typeof attempt.score === 'number' ? ` · ${attempt.score} / 100` : '';
+        const answer = attempt.userResponse && attempt.userResponse.text
+          ? attempt.userResponse.text
+          : '';
+        return `
+          <details class="attempt-card">
+            <summary>
+              ${escapeHtml(date)}
+              <span class="attempt-meta">${escapeHtml(status)} · ${escapeHtml(attempt.inputMode)}${scoreText}</span>
+            </summary>
+            <pre class="answer-pre">${escapeHtml(answer)}</pre>
+          </details>
+        `;
+      }).join('');
+    }
+
+    function wireEvents() {
+      els.openModeBtn.addEventListener('click', () => setMode('open'));
+      els.sectionModeBtn.addEventListener('click', () => setMode('sections'));
+
+      els.toggleTimerBtn.addEventListener('click', () => {
+        state.timerHidden = !state.timerHidden;
+        els.timerDisplay.classList.toggle('hidden', state.timerHidden);
+        els.toggleTimerBtn.textContent = state.timerHidden ? 'Show timer' : 'Hide timer';
+      });
+
+      els.submitBtn.addEventListener('click', submitAttempt);
+      els.tryAgainBtn.addEventListener('click', clearCurrentInput);
+
+      els.revealSampleBtn.addEventListener('click', () => {
+        updateAttemptChecklist(collectChecklistSelections());
+        els.comparisonPanel.classList.remove('hidden');
+      });
+
+      els.checklist.addEventListener('change', () => {
+        updateAttemptChecklist(collectChecklistSelections());
+      });
+
+      els.clearAttemptsBtn.addEventListener('click', () => {
+        localStorage.removeItem(storageKey);
+        renderAttempts();
+      });
+    }
+
+    function cacheElements() {
+      [
+        'phasePill',
+        'activityTitle',
+        'activitySubtitle',
+        'storyContext',
+        'instructionsList',
+        'sourceText',
+        'constraintsList',
+        'timerDisplay',
+        'timerNote',
+        'toggleTimerBtn',
+        'openModeBtn',
+        'sectionModeBtn',
+        'openMode',
+        'sectionMode',
+        'openResponse',
+        'sectionGrid',
+        'submitBtn',
+        'tryAgainBtn',
+        'confirmation',
+        'checklistPanel',
+        'checklist',
+        'scorePanel',
+        'revealSampleBtn',
+        'comparisonPanel',
+        'submittedAnswer',
+        'sampleAnswer',
+        'attemptsList',
+        'clearAttemptsBtn'
+      ].forEach((id) => {
+        els[id] = getEl(id);
+      });
+    }
+
+    function init() {
+      cacheElements();
+      renderConfig();
+      buildSectionInputs();
+      renderChecklist();
+      renderSampleAnswer();
+      renderAttempts();
+      wireEvents();
+      renderTimer();
+      setInterval(renderTimer, 1000);
+    }
+
+    init();
+  </script>
+</body>
+</html>
