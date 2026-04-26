@@ -105,11 +105,18 @@ nav {
   gap: 24px;
 }
 
+nav > a:first-child {
+  display: flex;
+  align-items: center;
+  line-height: 0;
+  flex-shrink: 0;
+}
+
 nav img {
   height: 30px;
   width: auto;
   display: block;
-  flex-shrink: 0;
+  border: none;
 }
 
 .nav-links {
@@ -429,9 +436,10 @@ nav img {
 }
 
 .preview-frame {
-  background: var(--smoke);
-  border: 1px solid rgba(0,51,102,0.1);
-  border-radius: 4px;
+  background: #fff;
+  border: 1px solid rgba(0,51,102,0.18);
+  border-top: 3px solid var(--gold);
+  border-radius: 0 0 4px 4px;
   padding: 28px 28px 24px;
   margin-bottom: 36px;
 }
@@ -453,8 +461,8 @@ nav img {
 }
 
 .preview-card {
-  background: #fff;
-  border: 1px solid rgba(0,51,102,0.1);
+  background: var(--smoke);
+  border: 1px solid rgba(0,51,102,0.12);
   border-radius: 3px;
   padding: 14px 18px;
   display: flex;
