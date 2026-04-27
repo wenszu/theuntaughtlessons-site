@@ -220,6 +220,10 @@
       margin-bottom: 12px;
     }
 
+    .timer-main {
+      min-width: 150px;
+    }
+
     .timer-display {
       font-family: 'Roboto Mono', monospace;
       color: var(--navy);
@@ -237,6 +241,18 @@
       font-size: .9rem;
       color: #5e5e5e;
       line-height: 1.45;
+    }
+
+    .timer-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin-top: 8px;
+    }
+
+    .timer-controls button {
+      padding: 7px 10px;
+      font-size: .9rem;
     }
 
     .mode-switch {
@@ -465,6 +481,31 @@
       margin-top: 10px;
     }
 
+    .mobile-result-tabs {
+      display: none;
+      margin-top: 14px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--paper);
+      padding: 4px;
+      gap: 4px;
+    }
+
+    .mobile-tab {
+      flex: 1;
+      border: 0;
+      border-radius: 7px;
+      background: transparent;
+      color: var(--navy);
+      padding: 10px 8px;
+      font-size: .88rem;
+    }
+
+    .mobile-tab.active {
+      background: var(--navy);
+      color: #fff;
+    }
+
     .comparison-box {
       padding: 12px;
       background: var(--paper);
@@ -525,6 +566,50 @@
       font-weight: 400;
     }
 
+    .recent-attempts {
+      margin: 0 0 14px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--paper);
+      padding: 10px 12px;
+    }
+
+    .recent-attempts h3 {
+      font-size: 1rem;
+      margin-bottom: 8px;
+    }
+
+    .recent-list {
+      display: grid;
+      gap: 7px;
+    }
+
+    .recent-item {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      border-top: 1px solid rgba(0, 51, 102, .1);
+      padding-top: 7px;
+      font-size: .9rem;
+    }
+
+    .recent-item:first-child {
+      border-top: 0;
+      padding-top: 0;
+    }
+
+    .recent-score {
+      color: var(--navy);
+      font-family: 'Roboto Mono', monospace;
+      white-space: nowrap;
+    }
+
+    .trend {
+      color: var(--steel);
+      font-size: .86rem;
+      white-space: nowrap;
+    }
+
     .hidden { display: none; }
 
     @media (max-width: 980px) {
@@ -562,12 +647,102 @@
         flex-direction: column;
       }
 
+      .timer-row.minimized .timer-main {
+        display: none;
+      }
+
+      .timer-row.minimized {
+        gap: 6px;
+      }
+
       .mode-switch {
         width: 100%;
       }
 
       .mode-btn {
         flex: 1;
+      }
+
+      .layout {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .layout > section {
+        order: -1;
+      }
+
+      .hero {
+        margin-bottom: 14px;
+      }
+
+      aside .panel .panel-body {
+        display: none;
+      }
+
+      aside .panel.open .panel-body {
+        display: block;
+      }
+
+      aside .panel {
+        box-shadow: none;
+      }
+
+      aside .panel-head {
+        cursor: pointer;
+        min-height: 48px;
+      }
+
+      aside .panel-head::after {
+        content: "Show";
+        color: var(--steel);
+        font-size: .86rem;
+        font-family: 'Lato', sans-serif;
+      }
+
+      aside .panel.open .panel-head::after {
+        content: "Hide";
+      }
+
+      .response-area {
+        min-height: 260px;
+      }
+
+      .section-response {
+        min-height: 150px;
+      }
+
+      .mobile-result-tabs.visible {
+        display: flex;
+      }
+
+      body[data-mobile-tab="self"] .score-panel,
+      body[data-mobile-tab="self"] .comparison-panel,
+      body[data-mobile-tab="score"] .checklist,
+      body[data-mobile-tab="score"] .self-check-copy,
+      body[data-mobile-tab="score"] .comparison-panel,
+      body[data-mobile-tab="answer"] .checklist,
+      body[data-mobile-tab="answer"] .self-check-copy,
+      body[data-mobile-tab="answer"] .score-panel,
+      body[data-mobile-tab="sample"] .checklist,
+      body[data-mobile-tab="sample"] .self-check-copy,
+      body[data-mobile-tab="sample"] .score-panel {
+        display: none;
+      }
+
+      body[data-mobile-tab="answer"] #sampleComparison,
+      body[data-mobile-tab="sample"] #userComparison {
+        display: none;
+      }
+
+      body[data-mobile-tab="answer"] .comparison-panel,
+      body[data-mobile-tab="sample"] .comparison-panel {
+        display: block;
+      }
+
+      body[data-mobile-tab="answer"] .comparison-grid,
+      body[data-mobile-tab="sample"] .comparison-grid {
+        display: block;
       }
     }
   </style>
@@ -636,12 +811,22 @@
             <button id="toggleTimerBtn" type="button">Hide timer</button>
           </div>
           <div class="panel-body">
-            <div class="timer-row">
-              <div>
+            <div id="recentAttempts" class="recent-attempts hidden"></div>
+
+            <div class="timer-row minimized" id="timerRow">
+              <div class="timer-main">
                 <span class="small-label">Elapsed time</span>
                 <div class="timer-display" id="timerDisplay">00:00</div>
               </div>
-              <p class="timer-note" id="timerNote">Target: submit within 5 minutes. Hiding the timer keeps time running.</p>
+              <div>
+                <p class="timer-note" id="timerNote">Timer starts when you begin writing. Target: 5 minutes.</p>
+                <div class="timer-controls">
+                  <button id="startTimerBtn" type="button">Start</button>
+                  <button id="pauseTimerBtn" type="button" disabled>Pause</button>
+                  <button id="resumeTimerBtn" type="button" class="hidden">Resume</button>
+                  <button id="resetTimerBtn" type="button">Reset timer</button>
+                </div>
+              </div>
             </div>
 
             <div class="mode-switch" aria-label="Answer input mode">
@@ -664,9 +849,16 @@
 
             <div id="confirmation" class="confirmation hidden"></div>
 
+            <div id="mobileResultTabs" class="mobile-result-tabs" aria-label="Result sections">
+              <button class="mobile-tab active" type="button" data-tab="self">Self-check</button>
+              <button class="mobile-tab" type="button" data-tab="score">Score</button>
+              <button class="mobile-tab" type="button" data-tab="answer">Your answer</button>
+              <button class="mobile-tab" type="button" data-tab="sample">Sample</button>
+            </div>
+
             <div id="checklistPanel" class="checklist-panel hidden">
-              <h3>Self-assessment</h3>
-              <p class="small">Check your own work before looking at the sample answer.</p>
+              <h3 class="self-check-copy">Self-assessment</h3>
+              <p class="small self-check-copy">Check your own work before looking at the sample answer.</p>
               <div class="checklist" id="checklist"></div>
               <div id="scorePanel" class="score-panel hidden"></div>
               <div class="buttons">
@@ -677,11 +869,11 @@
             <div id="comparisonPanel" class="comparison-panel hidden">
               <h3>Side-by-side comparison</h3>
               <div class="comparison-grid">
-                <div class="comparison-box">
+                <div class="comparison-box" id="userComparison">
                   <h3>Your answer</h3>
                   <pre class="answer-pre" id="submittedAnswer"></pre>
                 </div>
-                <div class="comparison-box">
+                <div class="comparison-box" id="sampleComparison">
                   <h3>Sample answer</h3>
                   <div class="sample-answer" id="sampleAnswer"></div>
                 </div>
@@ -775,10 +967,13 @@
     const state = {
       mode: 'open',
       timerHidden: false,
-      startedAt: Date.now(),
-      elapsedSeconds: 0,
+      timerStarted: false,
+      timerRunning: false,
+      timerStartedAt: null,
+      timerElapsedBeforePause: 0,
       lastAttemptId: null,
-      lastScore: null
+      lastScore: null,
+      sampleRevealed: false
     };
 
     const els = {};
@@ -833,27 +1028,64 @@
     }
 
     function currentElapsedSeconds() {
-      return Math.floor((Date.now() - state.startedAt) / 1000);
+      if (!state.timerStarted) return 0;
+      if (!state.timerRunning) return state.timerElapsedBeforePause;
+      return state.timerElapsedBeforePause + Math.floor((Date.now() - state.timerStartedAt) / 1000);
     }
 
     function isWithinTarget() {
       return currentElapsedSeconds() <= ACTIVITY.durationSeconds;
     }
 
+    function startTimer() {
+      if (state.timerRunning) return;
+      state.timerStarted = true;
+      state.timerRunning = true;
+      state.timerStartedAt = Date.now();
+      renderTimer();
+    }
+
+    function pauseTimer() {
+      if (!state.timerRunning) return;
+      state.timerElapsedBeforePause = currentElapsedSeconds();
+      state.timerRunning = false;
+      state.timerStartedAt = null;
+      renderTimer();
+    }
+
+    function resumeTimer() {
+      if (!state.timerStarted || state.timerRunning) return;
+      state.timerRunning = true;
+      state.timerStartedAt = Date.now();
+      renderTimer();
+    }
+
     function resetTimer() {
-      state.startedAt = Date.now();
-      state.elapsedSeconds = 0;
+      state.timerStarted = false;
+      state.timerRunning = false;
+      state.timerStartedAt = null;
+      state.timerElapsedBeforePause = 0;
       renderTimer();
     }
 
     function renderTimer() {
       const elapsed = currentElapsedSeconds();
-      state.elapsedSeconds = elapsed;
       els.timerDisplay.textContent = formatSeconds(elapsed);
       els.timerDisplay.classList.toggle('over-target', elapsed > ACTIVITY.durationSeconds);
-      els.timerNote.textContent = elapsed > ACTIVITY.durationSeconds
-        ? 'Past the 5-minute target, but you can still submit when ready.'
-        : 'Target: submit within 5 minutes. Hiding the timer keeps time running.';
+      els.startTimerBtn.disabled = state.timerStarted;
+      els.pauseTimerBtn.disabled = !state.timerRunning;
+      els.pauseTimerBtn.classList.toggle('hidden', state.timerStarted && !state.timerRunning);
+      els.resumeTimerBtn.classList.toggle('hidden', !state.timerStarted || state.timerRunning);
+
+      if (!state.timerStarted) {
+        els.timerNote.textContent = 'Timer starts when you begin writing. Target: 5 minutes.';
+      } else if (!state.timerRunning) {
+        els.timerNote.textContent = `Paused at ${formatSeconds(elapsed)}.`;
+      } else {
+        els.timerNote.textContent = elapsed > ACTIVITY.durationSeconds
+          ? 'Past the 5-minute target, but you can still submit when ready.'
+          : 'Target: submit within 5 minutes. Hiding the timer keeps time running.';
+      }
     }
 
     function getOpenResponse() {
@@ -1161,6 +1393,42 @@
       `;
     }
 
+    function renderRecentAttempts() {
+      const attempts = loadAttempts().slice(-3).reverse();
+      if (!attempts.length) {
+        els.recentAttempts.classList.add('hidden');
+        els.recentAttempts.innerHTML = '';
+        return;
+      }
+
+      els.recentAttempts.classList.remove('hidden');
+      els.recentAttempts.innerHTML = `
+        <h3>Recent attempts</h3>
+        <div class="recent-list">
+          ${attempts.map((attempt, index) => {
+            const date = new Date(attempt.timestamp).toLocaleString([], {
+              month: 'short',
+              day: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit'
+            });
+            const previous = attempts[index + 1];
+            const trend = previous && typeof attempt.score === 'number' && typeof previous.score === 'number'
+              ? attempt.score - previous.score
+              : null;
+            const trendText = trend === null || trend === 0 ? '' : `${trend > 0 ? '+' : ''}${trend} improvement`;
+            const elapsed = attempt.timingResult ? attempt.timingResult.elapsedSeconds : attempt.elapsedSeconds;
+            return `
+              <div class="recent-item">
+                <span>${escapeHtml(date)}${trendText ? ` <span class="trend">${escapeHtml(trendText)}</span>` : ''}<br><span class="small">${formatSeconds(elapsed || 0)}</span></span>
+                <span class="recent-score">${typeof attempt.score === 'number' ? `${attempt.score} / 100` : 'No score'}</span>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
+    }
+
     function submitAttempt() {
       if (!hasAnyContent()) {
         els.confirmation.classList.remove('hidden');
@@ -1170,6 +1438,8 @@
 
       const response = getCurrentResponse();
       const withinTarget = isWithinTarget();
+      const elapsedSeconds = currentElapsedSeconds();
+      pauseTimer();
       const score = scorePractice(response, ACTIVITY.scoring);
       const attempt = {
         attemptId: `${ACTIVITY.id}-${Date.now()}`,
@@ -1179,10 +1449,10 @@
         userResponse: response,
         submittedWithinTarget: withinTarget,
         timingResult: {
-          elapsedSeconds: currentElapsedSeconds(),
+          elapsedSeconds,
           submittedWithinTarget: withinTarget
         },
-        elapsedSeconds: currentElapsedSeconds(),
+        elapsedSeconds,
         checklistSelections: [],
         score: score.total,
         categoryScores: score.categories,
@@ -1194,13 +1464,16 @@
       addAttempt(attempt);
       state.lastAttemptId = attempt.attemptId;
       state.lastScore = score;
+      state.sampleRevealed = false;
 
       els.submittedAnswer.textContent = response.text;
       els.confirmation.classList.remove('hidden');
-      els.confirmation.innerHTML = `<strong>Attempt saved locally.</strong> Submitted ${withinTarget ? 'within' : 'after'} the 5-minute target.`;
+      els.confirmation.innerHTML = `<strong>Attempt saved locally.</strong> Submitted ${withinTarget ? 'within' : 'after'} the 5-minute target. Time used: ${formatSeconds(elapsedSeconds)}.`;
+      els.mobileResultTabs.classList.add('visible');
       els.checklistPanel.classList.remove('hidden');
       renderScore(score);
       els.comparisonPanel.classList.add('hidden');
+      setMobileTab('self');
     }
 
     function clearCurrentInput() {
@@ -1211,17 +1484,21 @@
       });
       state.lastAttemptId = null;
       state.lastScore = null;
+      state.sampleRevealed = false;
       els.confirmation.classList.add('hidden');
+      els.mobileResultTabs.classList.remove('visible');
       els.checklistPanel.classList.add('hidden');
       els.scorePanel.classList.add('hidden');
       els.scorePanel.innerHTML = '';
       els.comparisonPanel.classList.add('hidden');
+      setMobileTab('self');
       renderChecklist();
       resetTimer();
     }
 
     function renderAttempts() {
       const attempts = loadAttempts().slice().reverse();
+      renderRecentAttempts();
       if (!attempts.length) {
         els.attemptsList.innerHTML = '<p class="small">No previous attempts yet.</p>';
         return;
@@ -1237,6 +1514,7 @@
         });
         const status = attempt.submittedWithinTarget ? 'Within 5 minutes' : 'Over 5 minutes';
         const scoreText = typeof attempt.score === 'number' ? ` · ${attempt.score} / 100` : '';
+        const elapsed = attempt.timingResult ? attempt.timingResult.elapsedSeconds : attempt.elapsedSeconds;
         const answer = attempt.userResponse && attempt.userResponse.text
           ? attempt.userResponse.text
           : '';
@@ -1244,12 +1522,44 @@
           <details class="attempt-card">
             <summary>
               ${escapeHtml(date)}
-              <span class="attempt-meta">${escapeHtml(status)} · ${escapeHtml(attempt.inputMode)}${scoreText}</span>
+              <span class="attempt-meta">${escapeHtml(status)} · ${formatSeconds(elapsed || 0)} · ${escapeHtml(attempt.inputMode)}${scoreText}</span>
             </summary>
             <pre class="answer-pre">${escapeHtml(answer)}</pre>
           </details>
         `;
       }).join('');
+    }
+
+    function setMobileTab(tab) {
+      document.body.dataset.mobileTab = tab;
+      els.mobileResultTabs.querySelectorAll('.mobile-tab').forEach((button) => {
+        button.classList.toggle('active', button.dataset.tab === tab);
+      });
+    }
+
+    function startTimerFromInput() {
+      if (!state.timerStarted) startTimer();
+    }
+
+    function wireMobilePanelToggles() {
+      document.querySelectorAll('aside .panel-head').forEach((head) => {
+        head.addEventListener('click', () => {
+          if (!window.matchMedia('(max-width: 640px)').matches) return;
+          head.closest('.panel').classList.toggle('open');
+        });
+      });
+    }
+
+    function initializeResponsiveTimer() {
+      if (window.matchMedia('(max-width: 640px)').matches) {
+        state.timerHidden = true;
+        els.timerRow.classList.add('minimized');
+        els.toggleTimerBtn.textContent = 'Show timer';
+      } else {
+        state.timerHidden = false;
+        els.timerRow.classList.remove('minimized');
+        els.toggleTimerBtn.textContent = 'Hide timer';
+      }
     }
 
     function wireEvents() {
@@ -1258,16 +1568,36 @@
 
       els.toggleTimerBtn.addEventListener('click', () => {
         state.timerHidden = !state.timerHidden;
-        els.timerDisplay.classList.toggle('hidden', state.timerHidden);
+        els.timerRow.classList.toggle('minimized', state.timerHidden);
         els.toggleTimerBtn.textContent = state.timerHidden ? 'Show timer' : 'Hide timer';
       });
+
+      els.startTimerBtn.addEventListener('click', startTimer);
+      els.pauseTimerBtn.addEventListener('click', pauseTimer);
+      els.resumeTimerBtn.addEventListener('click', resumeTimer);
+      els.resetTimerBtn.addEventListener('click', resetTimer);
+
+      els.openResponse.addEventListener('input', startTimerFromInput);
+      els.sectionGrid.addEventListener('input', startTimerFromInput);
 
       els.submitBtn.addEventListener('click', submitAttempt);
       els.tryAgainBtn.addEventListener('click', clearCurrentInput);
 
       els.revealSampleBtn.addEventListener('click', () => {
         updateAttemptChecklist(collectChecklistSelections());
+        state.sampleRevealed = true;
         els.comparisonPanel.classList.remove('hidden');
+        if (window.matchMedia('(max-width: 640px)').matches) setMobileTab('sample');
+      });
+
+      els.mobileResultTabs.addEventListener('click', (event) => {
+        const button = event.target.closest('[data-tab]');
+        if (!button) return;
+        if (button.dataset.tab === 'sample' && !state.sampleRevealed) return;
+        setMobileTab(button.dataset.tab);
+        if (button.dataset.tab === 'answer' || (button.dataset.tab === 'sample' && state.sampleRevealed)) {
+          els.comparisonPanel.classList.remove('hidden');
+        }
       });
 
       els.checklist.addEventListener('change', () => {
@@ -1278,6 +1608,8 @@
         localStorage.removeItem(storageKey);
         renderAttempts();
       });
+
+      wireMobilePanelToggles();
     }
 
     function cacheElements() {
@@ -1289,9 +1621,15 @@
         'instructionsList',
         'sourceText',
         'constraintsList',
+        'recentAttempts',
+        'timerRow',
         'timerDisplay',
         'timerNote',
         'toggleTimerBtn',
+        'startTimerBtn',
+        'pauseTimerBtn',
+        'resumeTimerBtn',
+        'resetTimerBtn',
         'openModeBtn',
         'sectionModeBtn',
         'openMode',
@@ -1301,6 +1639,7 @@
         'submitBtn',
         'tryAgainBtn',
         'confirmation',
+        'mobileResultTabs',
         'checklistPanel',
         'checklist',
         'scorePanel',
@@ -1322,6 +1661,8 @@
       renderChecklist();
       renderSampleAnswer();
       renderAttempts();
+      setMobileTab('self');
+      initializeResponsiveTimer();
       wireEvents();
       renderTimer();
       setInterval(renderTimer, 1000);
