@@ -1,0 +1,57 @@
+.activity-timer-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.activity-timer-main {
+  min-width: 150px;
+}
+
+.activity-timer-display {
+  font-family: 'Roboto Mono', monospace;
+  color: var(--navy);
+  font-size: 1.55rem;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.activity-timer-display.over-target {
+  color: #8B6010;
+}
+
+.activity-timer-note {
+  font-size: .9rem;
+  color: #5e5e5e;
+  line-height: 1.45;
+  margin: 0;
+}
+
+.activity-timer-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 8px;
+}
+
+.activity-timer-controls button {
+  padding: 7px 10px;
+  font-size: .9rem;
+}
+
+@media (max-width: 640px) {
+  .activity-timer-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .activity-timer-row.minimized .activity-timer-main {
+    display: none;
+  }
+
+  .activity-timer-row.minimized {
+    gap: 6px;
+  }
+}

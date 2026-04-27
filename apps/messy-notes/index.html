@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Manager’s messy notes</title>
+  <link rel="stylesheet" href="../shared/activity-timer.css">
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lato:wght@300;400;700&family=Roboto+Mono:wght@400;500&display=swap');
 
@@ -813,14 +814,14 @@
           <div class="panel-body">
             <div id="recentAttempts" class="recent-attempts hidden"></div>
 
-            <div class="timer-row minimized" id="timerRow">
-              <div class="timer-main">
+            <div class="timer-row activity-timer-row minimized" id="timerRow">
+              <div class="timer-main activity-timer-main">
                 <span class="small-label">Elapsed time</span>
-                <div class="timer-display" id="timerDisplay">00:00</div>
+                <div class="timer-display activity-timer-display" id="timerDisplay">00:00</div>
               </div>
               <div>
-                <p class="timer-note" id="timerNote">Timer starts when you begin writing. Target: 5 minutes.</p>
-                <div class="timer-controls">
+                <p class="timer-note activity-timer-note" id="timerNote">Timer starts when you begin writing. Target: 5 minutes.</p>
+                <div class="timer-controls activity-timer-controls">
                   <button id="startTimerBtn" type="button">Start</button>
                   <button id="pauseTimerBtn" type="button" disabled>Pause</button>
                   <button id="resumeTimerBtn" type="button" class="hidden">Resume</button>
@@ -885,6 +886,7 @@
     </section>
   </main>
 
+  <script src="../shared/activity-timer.js"></script>
   <script>
     // Activity config: copy this object to create the next standalone practice.
     const ACTIVITY = {
@@ -966,17 +968,13 @@
 
     const state = {
       mode: 'open',
-      timerHidden: false,
-      timerStarted: false,
-      timerRunning: false,
-      timerStartedAt: null,
-      timerElapsedBeforePause: 0,
       lastAttemptId: null,
       lastScore: null,
       sampleRevealed: false
     };
 
     const els = {};
+    let activityTimer = null;
 
     function getEl(id) {
       return document.getElementById(id);
@@ -1028,64 +1026,31 @@
     }
 
     function currentElapsedSeconds() {
-      if (!state.timerStarted) return 0;
-      if (!state.timerRunning) return state.timerElapsedBeforePause;
-      return state.timerElapsedBeforePause + Math.floor((Date.now() - state.timerStartedAt) / 1000);
+      return activityTimer.elapsedSeconds();
     }
 
     function isWithinTarget() {
-      return currentElapsedSeconds() <= ACTIVITY.durationSeconds;
+      return activityTimer.isWithinTarget();
     }
 
     function startTimer() {
-      if (state.timerRunning) return;
-      state.timerStarted = true;
-      state.timerRunning = true;
-      state.timerStartedAt = Date.now();
-      renderTimer();
+      activityTimer.start();
     }
 
     function pauseTimer() {
-      if (!state.timerRunning) return;
-      state.timerElapsedBeforePause = currentElapsedSeconds();
-      state.timerRunning = false;
-      state.timerStartedAt = null;
-      renderTimer();
+      activityTimer.pause();
     }
 
     function resumeTimer() {
-      if (!state.timerStarted || state.timerRunning) return;
-      state.timerRunning = true;
-      state.timerStartedAt = Date.now();
-      renderTimer();
+      activityTimer.resume();
     }
 
     function resetTimer() {
-      state.timerStarted = false;
-      state.timerRunning = false;
-      state.timerStartedAt = null;
-      state.timerElapsedBeforePause = 0;
-      renderTimer();
+      activityTimer.reset();
     }
 
     function renderTimer() {
-      const elapsed = currentElapsedSeconds();
-      els.timerDisplay.textContent = formatSeconds(elapsed);
-      els.timerDisplay.classList.toggle('over-target', elapsed > ACTIVITY.durationSeconds);
-      els.startTimerBtn.disabled = state.timerStarted;
-      els.pauseTimerBtn.disabled = !state.timerRunning;
-      els.pauseTimerBtn.classList.toggle('hidden', state.timerStarted && !state.timerRunning);
-      els.resumeTimerBtn.classList.toggle('hidden', !state.timerStarted || state.timerRunning);
-
-      if (!state.timerStarted) {
-        els.timerNote.textContent = 'Timer starts when you begin writing. Target: 5 minutes.';
-      } else if (!state.timerRunning) {
-        els.timerNote.textContent = `Paused at ${formatSeconds(elapsed)}.`;
-      } else {
-        els.timerNote.textContent = elapsed > ACTIVITY.durationSeconds
-          ? 'Past the 5-minute target, but you can still submit when ready.'
-          : 'Target: submit within 5 minutes. Hiding the timer keeps time running.';
-      }
+      activityTimer.render();
     }
 
     function getOpenResponse() {
@@ -1538,7 +1503,7 @@
     }
 
     function startTimerFromInput() {
-      if (!state.timerStarted) startTimer();
+      activityTimer.startFromInteraction();
     }
 
     function wireMobilePanelToggles() {
@@ -1551,31 +1516,12 @@
     }
 
     function initializeResponsiveTimer() {
-      if (window.matchMedia('(max-width: 640px)').matches) {
-        state.timerHidden = true;
-        els.timerRow.classList.add('minimized');
-        els.toggleTimerBtn.textContent = 'Show timer';
-      } else {
-        state.timerHidden = false;
-        els.timerRow.classList.remove('minimized');
-        els.toggleTimerBtn.textContent = 'Hide timer';
-      }
+      activityTimer.initializeResponsiveVisibility();
     }
 
     function wireEvents() {
       els.openModeBtn.addEventListener('click', () => setMode('open'));
       els.sectionModeBtn.addEventListener('click', () => setMode('sections'));
-
-      els.toggleTimerBtn.addEventListener('click', () => {
-        state.timerHidden = !state.timerHidden;
-        els.timerRow.classList.toggle('minimized', state.timerHidden);
-        els.toggleTimerBtn.textContent = state.timerHidden ? 'Show timer' : 'Hide timer';
-      });
-
-      els.startTimerBtn.addEventListener('click', startTimer);
-      els.pauseTimerBtn.addEventListener('click', pauseTimer);
-      els.resumeTimerBtn.addEventListener('click', resumeTimer);
-      els.resetTimerBtn.addEventListener('click', resetTimer);
 
       els.openResponse.addEventListener('input', startTimerFromInput);
       els.sectionGrid.addEventListener('input', startTimerFromInput);
@@ -1662,10 +1608,21 @@
       renderSampleAnswer();
       renderAttempts();
       setMobileTab('self');
+      activityTimer = ActivityTimer.create({
+        elements: {
+          row: els.timerRow,
+          display: els.timerDisplay,
+          note: els.timerNote,
+          toggleBtn: els.toggleTimerBtn,
+          startBtn: els.startTimerBtn,
+          pauseBtn: els.pauseTimerBtn,
+          resumeBtn: els.resumeTimerBtn,
+          resetBtn: els.resetTimerBtn
+        },
+        targetSeconds: ACTIVITY.durationSeconds
+      });
       initializeResponsiveTimer();
       wireEvents();
-      renderTimer();
-      setInterval(renderTimer, 1000);
     }
 
     init();
