@@ -4,8 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Turn your messy grocery list into a clear guide</title>
+  <link rel="stylesheet" href="../shared/activity-timer.css">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lato:wght@300;400;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lato:wght@300;400;700&family=Roboto+Mono:wght@400;500&display=swap');
 
     :root {
       --bg: #F3EDE2;
@@ -45,6 +46,13 @@
       padding-bottom: 14px;
     }
 
+    .header-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(280px, 380px);
+      gap: 18px;
+      align-items: start;
+    }
+
     .header h1 {
       font-size: clamp(1.8rem, 3vw, 2.3rem);
       margin-bottom: 8px;
@@ -54,6 +62,28 @@
       margin: 0;
       max-width: 75ch;
       line-height: 1.45;
+    }
+
+    .timer-panel .panel-head {
+      padding: 12px 14px;
+    }
+
+    .timer-panel .panel-body {
+      padding: 12px 14px 14px;
+    }
+
+    .timer-panel .activity-timer-row {
+      margin-bottom: 0;
+    }
+
+    .small-label {
+      display: block;
+      color: #6e7785;
+      font-size: .74rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      font-weight: 700;
+      margin-bottom: 7px;
     }
 
     .layout {
@@ -242,6 +272,7 @@
     .hidden { display: none; }
 
     @media (max-width: 980px) {
+      .header-grid { grid-template-columns: 1fr; }
       .layout { grid-template-columns: 1fr; }
       .item-zone { min-height: 260px; }
       .bucket { min-height: 280px; }
@@ -256,8 +287,36 @@
 <body>
   <main class="page">
     <header class="header">
-      <h1>Turn your messy grocery list into a clear guide</h1>
-      <p>Practice structured thinking: create exactly three clear buckets, sort the messy list, and reflect on why your structure is MECE (mutually exclusive, collectively exhaustive).</p>
+      <div class="header-grid">
+        <div>
+          <h1>Turn your messy grocery list into a clear guide</h1>
+          <p>Practice structured thinking: create exactly three clear buckets, sort the messy list, and reflect on why your structure is MECE (mutually exclusive, collectively exhaustive).</p>
+        </div>
+
+        <aside class="panel timer-panel" aria-label="Elapsed time">
+          <div class="panel-head">
+            <h2>Timer</h2>
+            <button id="toggleTimerBtn" type="button">Hide timer</button>
+          </div>
+          <div class="panel-body">
+            <div class="activity-timer-row minimized" id="timerRow">
+              <div class="activity-timer-main">
+                <span class="small-label">Elapsed time</span>
+                <div class="activity-timer-display" id="timerDisplay">00:00</div>
+              </div>
+              <div>
+                <p class="activity-timer-note" id="timerNote">Timer starts when you begin sorting. Target: 5 minutes.</p>
+                <div class="activity-timer-controls">
+                  <button id="startTimerBtn" type="button">Start</button>
+                  <button id="pauseTimerBtn" type="button" disabled>Pause</button>
+                  <button id="resumeTimerBtn" type="button" class="hidden">Resume</button>
+                  <button id="resetTimerBtn" type="button">Reset timer</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </div>
     </header>
 
     <section class="layout">
@@ -296,6 +355,7 @@
     </section>
   </main>
 
+  <script src="../shared/activity-timer.js"></script>
   <script>
     // -------------------------
     // Data layer
@@ -350,6 +410,8 @@
       placements: { list: [], bucket1: [], bucket2: [], bucket3: [] },
       bucketNames: { bucket1: '', bucket2: '', bucket3: '' }
     };
+
+    let activityTimer = null;
 
     // -------------------------
     // Utility functions
@@ -428,6 +490,7 @@
 
       renderAll();
       clearFeedback();
+      if (activityTimer) activityTimer.reset();
     }
 
     function buildBuckets() {
@@ -496,6 +559,7 @@
     function wireDragAndDrop() {
       document.addEventListener('dragstart', (e) => {
         if (!e.target.classList.contains('item-card')) return;
+        activityTimer.startFromInteraction();
         e.dataTransfer.setData('text/plain', e.target.dataset.itemId);
       });
 
@@ -524,6 +588,7 @@
         zone.classList.remove('drag-over');
         const itemId = e.dataTransfer.getData('text/plain');
         if (!itemId) return;
+        activityTimer.startFromInteraction();
         moveItem(itemId, zone.dataset.zone);
       });
     }
@@ -649,6 +714,7 @@
     function showFeedback(evalResult) {
       const panel = document.getElementById('feedback');
       panel.classList.remove('hidden');
+      const elapsedSeconds = activityTimer.elapsedSeconds();
 
       const categoryClarity = evalResult.nameRatio >= 0.75
         ? 'Your bucket names are mostly clear and easy to interpret.'
@@ -668,6 +734,7 @@
       panel.innerHTML = `
         <h3>Feedback</h3>
         <p class="score">Total score: ${evalResult.totalScore} / 100</p>
+        <p><strong>Total time used:</strong> ${activityTimer.formatSeconds(elapsedSeconds)}</p>
         <ul>
           <li><strong>Category clarity:</strong> ${categoryClarity}</li>
           <li><strong>MECE quality:</strong> ${meceText}</li>
@@ -703,14 +770,20 @@
       ['bucket1', 'bucket2', 'bucket3'].forEach((bucketKey) => {
         document.addEventListener('input', (e) => {
           if (e.target.id === `${bucketKey}Input`) {
+            activityTimer.startFromInteraction();
             state.bucketNames[bucketKey] = e.target.value;
           }
         });
       });
 
+      document.getElementById('whyText').addEventListener('input', () => {
+        activityTimer.startFromInteraction();
+      });
+
       document.getElementById('generateBtn').addEventListener('click', generateList);
 
       document.getElementById('checkBtn').addEventListener('click', () => {
+        activityTimer.pause();
         const result = evaluate();
         showFeedback(result);
       });
@@ -728,6 +801,7 @@
         state.bucketNames = { bucket1: '', bucket2: '', bucket3: '' };
         document.getElementById('whyText').value = '';
         clearFeedback();
+        activityTimer.reset();
         renderAll();
       });
     }
@@ -735,6 +809,20 @@
     // -------------------------
     // Bootstrapping
     // -------------------------
+    activityTimer = ActivityTimer.create({
+      elements: {
+        row: document.getElementById('timerRow'),
+        display: document.getElementById('timerDisplay'),
+        note: document.getElementById('timerNote'),
+        toggleBtn: document.getElementById('toggleTimerBtn'),
+        startBtn: document.getElementById('startTimerBtn'),
+        pauseBtn: document.getElementById('pauseTimerBtn'),
+        resumeBtn: document.getElementById('resumeTimerBtn'),
+        resetBtn: document.getElementById('resetTimerBtn')
+      },
+      targetSeconds: 300,
+      idleMessage: 'Timer starts when you begin sorting. Target: 5 minutes.'
+    });
     buildBuckets();
     wireDragAndDrop();
     wireEvents();
