@@ -1,0 +1,10 @@
+{
+  "name": "12 in 12 Challenge Tracker",
+  "short_name": "12 in 12",
+  "description": "A private daily challenge tracker for The Untaught Lessons.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#F3EDE2",
+  "theme_color": "#003366"
+}

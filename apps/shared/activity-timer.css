@@ -41,17 +41,17 @@
   font-size: .9rem;
 }
 
+.activity-timer-row.minimized .activity-timer-main {
+  display: none;
+}
+
+.activity-timer-row.minimized {
+  gap: 6px;
+}
+
 @media (max-width: 640px) {
   .activity-timer-row {
     align-items: flex-start;
     flex-direction: column;
-  }
-
-  .activity-timer-row.minimized .activity-timer-main {
-    display: none;
-  }
-
-  .activity-timer-row.minimized {
-    gap: 6px;
   }
 }

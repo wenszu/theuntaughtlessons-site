@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#003366" />
+  <title>12 in 12 Challenge Tracker</title>
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lato:wght@300;400;700&display=swap');
+
+    :root {
+      --cream: #F3EDE2;
+      --navy: #003366;
+      --deep-navy: #001A33;
+      --gold: #EEA320;
+      --charcoal: #4A4A4A;
+      --white: #fff;
+      --line: rgba(0, 51, 102, 0.16);
+      --shadow: 0 10px 26px rgba(0, 51, 102, 0.08);
+      --radius: 14px;
+      --done: #6F9478;
+      --partial: #E7C46F;
+      --missed: #D7D4CE;
+      --muted: #6b6b6b;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { min-height: 100%; background: var(--cream); }
+
+    body {
+      margin: 0;
+      min-height: 100%;
+      font-family: Lato, "Avenir Next", Arial, sans-serif;
+      color: var(--charcoal);
+      background: var(--cream);
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit;
+    }
+
+    button {
+      min-height: 46px;
+      border: 1px solid var(--navy);
+      border-radius: 8px;
+      background: var(--white);
+      color: var(--navy);
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: .5;
+    }
+
+    h1,
+    h2,
+    h3 {
+      margin-top: 0;
+      color: var(--navy);
+      font-family: "Playfair Display", Georgia, serif;
+      letter-spacing: 0;
+    }
+
+    .app-shell {
+      width: min(100%, 960px);
+      margin: 0 auto;
+      padding: 16px 14px calc(92px + env(safe-area-inset-bottom));
+    }
+
+    .screen { display: none; }
+    .screen.active { display: block; }
+    .hidden { display: none !important; }
+
+    .topbar {
+      padding: 8px 2px 14px;
+      border-bottom: 1px solid var(--line);
+      margin-bottom: 14px;
+    }
+
+    .brand-kicker {
+      display: block;
+      margin-bottom: 5px;
+      color: var(--deep-navy);
+      font-size: .74rem;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .topbar h1 {
+      margin-bottom: 5px;
+      font-size: clamp(1.75rem, 8vw, 2.35rem);
+      line-height: 1.05;
+    }
+
+    .topbar p,
+    .muted {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .panel {
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .panel-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .panel-head h2 {
+      margin: 0;
+      font-size: 1.18rem;
+    }
+
+    .panel-body { padding: 16px; }
+
+    .setup-card {
+      margin-top: 18px;
+    }
+
+    .field {
+      display: grid;
+      gap: 7px;
+      margin-bottom: 14px;
+    }
+
+    label,
+    .field-label {
+      color: var(--navy);
+      font-size: .86rem;
+      font-weight: 700;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      min-height: 46px;
+      border: 1px solid rgba(0, 51, 102, .22);
+      border-radius: 10px;
+      background: var(--white);
+      color: var(--charcoal);
+      padding: 10px 12px;
+    }
+
+    textarea {
+      min-height: 68px;
+      resize: none;
+      line-height: 1.35;
+    }
+
+    .segmented {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .segmented button {
+      min-height: 50px;
+    }
+
+    .segmented button.active {
+      background: var(--navy);
+      color: var(--white);
+    }
+
+    .primary-action {
+      width: 100%;
+      min-height: 52px;
+      background: var(--navy);
+      color: var(--white);
+    }
+
+    .today-card {
+      display: grid;
+      gap: 16px;
+    }
+
+    .challenge-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 30px;
+      padding: 5px 10px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--navy);
+      font-size: .86rem;
+      font-weight: 700;
+      background: rgba(243, 237, 226, .58);
+    }
+
+    .date-label {
+      color: var(--muted);
+      font-size: .94rem;
+      line-height: 1.4;
+    }
+
+    .prompt {
+      margin: 0;
+      color: var(--deep-navy);
+      font-size: 1.6rem;
+      line-height: 1.12;
+      font-family: "Playfair Display", Georgia, serif;
+      font-weight: 700;
+    }
+
+    .status-actions {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+
+    .status-btn {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      min-height: 58px;
+      padding: 12px 14px;
+      border-color: var(--line);
+      text-align: left;
+    }
+
+    .status-btn.active {
+      border-color: var(--navy);
+      box-shadow: 0 0 0 2px rgba(0, 51, 102, .09);
+    }
+
+    .status-dot {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 1px solid rgba(0, 0, 0, .08);
+      flex: 0 0 auto;
+    }
+
+    .status-done .status-dot,
+    .day.done { background: var(--done); }
+
+    .status-partial .status-dot,
+    .day.partial { background: var(--partial); }
+
+    .status-missed .status-dot,
+    .day.missed { background: var(--missed); }
+
+    .reinforcement {
+      min-height: 24px;
+      margin: 0;
+      color: var(--navy);
+      font-weight: 700;
+      line-height: 1.4;
+    }
+
+    .note-panel {
+      border-top: 1px solid var(--line);
+      padding-top: 14px;
+    }
+
+    .microcopy {
+      margin: 0 0 8px;
+      color: #7A5A14;
+      font-weight: 700;
+    }
+
+    .calendar-summary {
+      display: grid;
+      gap: 10px;
+    }
+
+    .month-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .month-row h2 {
+      margin: 0;
+      font-size: 1.25rem;
+    }
+
+    .month-controls {
+      display: flex;
+      gap: 8px;
+    }
+
+    .icon-btn {
+      width: 46px;
+      padding: 0;
+      font-size: 1.1rem;
+    }
+
+    .progress {
+      height: 7px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: rgba(0, 51, 102, .1);
+    }
+
+    .progress span {
+      display: block;
+      width: 0%;
+      height: 100%;
+      border-radius: inherit;
+      background: var(--done);
+      transition: width .18s ease;
+    }
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 6px;
+      margin-top: 14px;
+    }
+
+    .weekday {
+      color: var(--muted);
+      font-size: .72rem;
+      font-weight: 700;
+      text-align: center;
+      text-transform: uppercase;
+    }
+
+    .day {
+      position: relative;
+      aspect-ratio: 1;
+      min-height: 42px;
+      border: 1px solid rgba(0, 51, 102, .14);
+      border-radius: 10px;
+      background: var(--white);
+      color: var(--deep-navy);
+      font-weight: 700;
+    }
+
+    .day.empty {
+      border-color: transparent;
+      background: transparent;
+      pointer-events: none;
+    }
+
+    .day.future {
+      background: transparent;
+      color: rgba(74, 74, 74, .48);
+    }
+
+    .day.today {
+      border-color: var(--navy);
+      box-shadow: inset 0 0 0 1px var(--navy);
+    }
+
+    .day.selected {
+      outline: 3px solid rgba(238, 163, 32, .28);
+      outline-offset: 1px;
+    }
+
+    .day.has-note::after {
+      content: "";
+      position: absolute;
+      right: 7px;
+      bottom: 7px;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--navy);
+      opacity: .65;
+    }
+
+    .edit-sheet {
+      margin-top: 14px;
+    }
+
+    .edit-status {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin: 12px 0;
+    }
+
+    .edit-status button {
+      min-height: 48px;
+      padding: 8px;
+      border-color: var(--line);
+    }
+
+    .edit-status button.active {
+      border-color: var(--navy);
+      box-shadow: 0 0 0 2px rgba(0, 51, 102, .09);
+    }
+
+    .settings-actions {
+      display: grid;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .secondary-action {
+      width: 100%;
+      background: var(--white);
+    }
+
+    .quiet-action {
+      width: 100%;
+      border-color: rgba(0, 51, 102, .18);
+      color: var(--charcoal);
+    }
+
+    .settings-note {
+      margin: 0 0 16px;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .import-box {
+      display: grid;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .message {
+      min-height: 22px;
+      margin: 10px 0 0;
+      color: var(--navy);
+      font-weight: 700;
+      line-height: 1.35;
+    }
+
+    .bottom-nav {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 10;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+      border-top: 1px solid var(--line);
+      background: rgba(255, 255, 255, .95);
+      box-shadow: 0 -8px 20px rgba(0, 51, 102, .07);
+      backdrop-filter: blur(10px);
+    }
+
+    .bottom-nav button {
+      min-height: 50px;
+      border-color: transparent;
+      background: transparent;
+      color: var(--charcoal);
+    }
+
+    .bottom-nav button.active {
+      background: var(--navy);
+      color: var(--white);
+    }
+
+    @media (min-width: 720px) {
+      .app-shell {
+        padding: 28px 22px 108px;
+      }
+
+      .desktop-grid {
+        display: grid;
+        grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr);
+        gap: 18px;
+        align-items: start;
+      }
+
+      .status-actions {
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      .status-btn {
+        display: grid;
+        justify-items: start;
+        min-height: 84px;
+      }
+
+      .bottom-nav {
+        left: 50%;
+        width: min(100%, 960px);
+        transform: translateX(-50%);
+        border: 1px solid var(--line);
+        border-bottom: 0;
+        border-radius: 16px 16px 0 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app-shell">
+    <section id="setupScreen" class="screen" aria-labelledby="setupTitle">
+      <header class="topbar">
+        <span class="brand-kicker">The Untaught Lessons</span>
+        <h1 id="setupTitle">Start your challenge</h1>
+        <p>One goal. One day at a time.</p>
+      </header>
+
+      <form id="setupForm" class="panel setup-card">
+        <div class="panel-body">
+          <div class="field">
+            <span class="field-label">Challenge type</span>
+            <div class="segmented" role="group" aria-label="Challenge type">
+              <button id="typeMonthly" type="button" data-type="monthly">Monthly</button>
+              <button id="typeTwelve" type="button" data-type="12-in-12">12 in 12</button>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="setupGoal">Challenge name</label>
+            <input id="setupGoal" name="goal" type="text" autocomplete="off" placeholder="Exercise daily" required />
+          </div>
+
+          <div class="field">
+            <label for="setupCategory">Category</label>
+            <select id="setupCategory" name="category" required></select>
+          </div>
+
+          <div class="field">
+            <label for="setupStartDate">Start date</label>
+            <input id="setupStartDate" name="startDate" type="date" required />
+          </div>
+
+          <button class="primary-action" type="submit">Start challenge</button>
+          <p id="setupMessage" class="message" aria-live="polite"></p>
+        </div>
+      </form>
+    </section>
+
+    <section id="appScreen" class="screen" aria-labelledby="appTitle">
+      <header class="topbar">
+        <span class="brand-kicker">12 in 12 Challenge Tracker</span>
+        <h1 id="appTitle">Today</h1>
+        <p id="screenSubtext">A quick check-in for the day in front of you.</p>
+      </header>
+
+      <section id="todayView" class="screen active" aria-labelledby="todayTitle">
+        <div class="desktop-grid">
+          <article class="panel today-card">
+            <div class="panel-body">
+              <div class="challenge-meta">
+                <span id="todayCategory" class="pill"></span>
+                <span id="todayType" class="pill"></span>
+              </div>
+              <h2 id="todayTitle"></h2>
+              <p id="todayDate" class="date-label"></p>
+              <p class="prompt">Did you do it today?</p>
+
+              <div class="status-actions" aria-label="Today status">
+                <button class="status-btn status-done" type="button" data-status="done">
+                  <span>Done</span>
+                  <span class="status-dot" aria-hidden="true"></span>
+                </button>
+                <button class="status-btn status-partial" type="button" data-status="partial">
+                  <span>Partial</span>
+                  <span class="status-dot" aria-hidden="true"></span>
+                </button>
+                <button class="status-btn status-missed" type="button" data-status="missed">
+                  <span>Missed</span>
+                  <span class="status-dot" aria-hidden="true"></span>
+                </button>
+              </div>
+
+              <p id="todayReinforcement" class="reinforcement" aria-live="polite"></p>
+
+              <div id="todayNotePanel" class="note-panel hidden">
+                <p id="todayMicrocopy" class="microcopy hidden">That counts.</p>
+                <div class="field">
+                  <label for="todayNote">What got in the way?</label>
+                  <textarea id="todayNote" rows="2" maxlength="180" placeholder="Optional"></textarea>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <aside class="panel">
+            <div class="panel-head">
+              <h2>This month</h2>
+            </div>
+            <div class="panel-body calendar-summary">
+              <p id="todayMonthCount" class="muted"></p>
+              <div class="progress" aria-hidden="true"><span id="todayProgressBar"></span></div>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <section id="calendarView" class="screen" aria-labelledby="calendarTitle">
+        <article class="panel">
+          <div class="panel-head">
+            <div class="month-row">
+              <h2 id="calendarTitle"></h2>
+            </div>
+            <div class="month-controls">
+              <button id="prevMonthBtn" class="icon-btn" type="button" aria-label="Previous month">&lt;</button>
+              <button id="nextMonthBtn" class="icon-btn" type="button" aria-label="Next month">&gt;</button>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div class="calendar-summary">
+              <p id="calendarCount" class="muted"></p>
+              <div class="progress" aria-hidden="true"><span id="calendarProgressBar"></span></div>
+            </div>
+            <div id="calendarGrid" class="calendar-grid" aria-label="Monthly calendar"></div>
+          </div>
+        </article>
+
+        <article id="editSheet" class="panel edit-sheet hidden">
+          <div class="panel-body">
+            <h2 id="editDateTitle"></h2>
+            <div class="edit-status" aria-label="Edit selected day">
+              <button type="button" data-edit-status="done">Done</button>
+              <button type="button" data-edit-status="partial">Partial</button>
+              <button type="button" data-edit-status="missed">Missed</button>
+            </div>
+            <div id="editNoteWrap" class="field hidden">
+              <label for="editNote">What got in the way?</label>
+              <textarea id="editNote" rows="2" maxlength="180" placeholder="Optional"></textarea>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <section id="settingsView" class="screen" aria-labelledby="settingsTitle">
+        <article class="panel">
+          <div class="panel-head">
+            <h2 id="settingsTitle">Settings</h2>
+          </div>
+          <div class="panel-body">
+            <p class="settings-note">Your data is stored on this device and browser. It will not sync across devices unless you export and import it.</p>
+            <p class="settings-note">Data persists on the same device/browser but may be lost if browser data is cleared or device changes.</p>
+
+            <div class="field">
+              <label for="settingsGoal">Challenge name</label>
+              <input id="settingsGoal" type="text" autocomplete="off" />
+            </div>
+
+            <div class="field">
+              <label for="settingsCategory">Category</label>
+              <select id="settingsCategory"></select>
+            </div>
+
+            <div class="settings-actions">
+              <button id="exportBtn" class="secondary-action" type="button">Export data (JSON)</button>
+              <button id="showImportBtn" class="secondary-action" type="button">Import data (JSON)</button>
+              <button id="clearDataBtn" class="quiet-action" type="button">Clear data</button>
+            </div>
+
+            <div id="importBox" class="import-box hidden">
+              <label for="importText">Paste JSON data</label>
+              <textarea id="importText" rows="5" placeholder='{"version":1,...}'></textarea>
+              <button id="importBtn" class="primary-action" type="button">Import data</button>
+            </div>
+
+            <p id="settingsMessage" class="message" aria-live="polite"></p>
+          </div>
+        </article>
+      </section>
+    </section>
+  </main>
+
+  <nav id="bottomNav" class="bottom-nav hidden" aria-label="App navigation">
+    <button type="button" data-view="today">Today</button>
+    <button type="button" data-view="calendar">Calendar</button>
+    <button type="button" data-view="settings">Settings</button>
+  </nav>
+
+  <script src="./app.js"></script>
+</body>
+</html>
