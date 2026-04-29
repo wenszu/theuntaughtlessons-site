@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="An interactive Grade 9–10 math tool from The Untaught Lessons for understanding logarithms, graphs, log rules, natural logs, and practice problems.">
 <title>Logarithm Explorer — Grade 9–10</title>
 <link rel="stylesheet" href="tools-shared.css">
 <style>
@@ -284,12 +285,12 @@ canvas { flex: 1; display: block; }
 </head>
 <body>
 
-<div class="brand-nav">
+<div id="navigation" class="brand-nav">
   <a href="../index.html">&larr; The Untaught Lessons</a>
   <span>Math Tools</span>
 </div>
 
-<header>
+<header id="hero">
   <div class="logo">log</div>
   <div>
     <h1>Logarithm Explorer</h1>
@@ -298,7 +299,7 @@ canvas { flex: 1; display: block; }
   <div class="ib-pill">GRADE 9–10</div>
 </header>
 
-<div class="modebar">
+<div id="topics" class="modebar">
   <button class="mbtn active" onclick="setMode('concept')">① What's a Log?</button>
   <button class="mbtn" onclick="setMode('graph')">② See the Graph</button>
   <button class="mbtn" onclick="setMode('laws')">③ Log Rules</button>
@@ -306,10 +307,13 @@ canvas { flex: 1; display: block; }
   <button class="mbtn" onclick="setMode('practice')">⑤ Practice!</button>
 </div>
 
-<div class="app">
-  <div class="left" id="left"></div>
+<div id="tool" class="app">
+  <div class="left" id="left">
+    <h2>Explore logarithms</h2>
+    <p>Use this tool to connect logarithms to exponents, graphs, log rules, natural logarithms, and practice questions.</p>
+  </div>
   <div class="right">
-    <div class="instr" id="instr"></div>
+    <div class="instr" id="instr">Choose a topic to explore logarithms visually and step by step.</div>
     <canvas id="cv"></canvas>
     <div class="bottom" id="bottom"></div>
   </div>

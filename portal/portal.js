@@ -1,8 +1,7 @@
 /* ================================================================
    The Untaught Lessons — portal.js
-   Beta auth + localStorage progress tracking.
+   LocalStorage progress tracking and workbook helpers.
 
-   BETA PASSWORD : Change BETA_PASSWORD below to update access code.
    PROGRESS DATA : localStorage key 'tul_progress'
    SCHEMA        : {
                      workbook_a: {
@@ -18,28 +17,7 @@
 
 'use strict';
 
-var BETA_PASSWORD = 'untaught2026';
-var AUTH_KEY      = 'tul_auth';
 var PROGRESS_KEY  = 'tul_progress';
-
-// ── Authentication ─────────────────────────────────────────────────
-
-function isAuthenticated() {
-  return localStorage.getItem(AUTH_KEY) === 'granted';
-}
-
-function attemptLogin(password) {
-  if (password.trim() === BETA_PASSWORD) {
-    localStorage.setItem(AUTH_KEY, 'granted');
-    return true;
-  }
-  return false;
-}
-
-function portalLogout() {
-  localStorage.removeItem(AUTH_KEY);
-  window.location.href = 'index.html';
-}
 
 // ── Progress ───────────────────────────────────────────────────────
 
@@ -96,43 +74,6 @@ function countCompleted(workbook) {
   return Object.values(wb).filter(function(m) {
     return m.status === 'complete';
   }).length;
-}
-
-// ── Password gate ──────────────────────────────────────────────────
-// Call initGate(callbackFn) on DOMContentLoaded.
-// If already authenticated: removes gate, runs callback immediately.
-// If not: shows gate form, runs callback after successful login.
-
-function initGate(onReady) {
-  var gate  = document.getElementById('gate');
-  var form  = document.getElementById('gate-form');
-  var input = document.getElementById('gate-password');
-  var err   = document.getElementById('gate-error');
-
-  if (!gate) {
-    if (onReady) onReady();
-    return;
-  }
-
-  if (isAuthenticated()) {
-    gate.remove();
-    if (onReady) onReady();
-    return;
-  }
-
-  gate.style.display = 'flex';
-
-  form.addEventListener('submit', function(e) {
-    e.preventDefault();
-    if (attemptLogin(input.value)) {
-      gate.remove();
-      if (onReady) onReady();
-    } else {
-      err.textContent = 'Incorrect access code.';
-      input.value = '';
-      input.focus();
-    }
-  });
 }
 
 // ── Clipboard ──────────────────────────────────────────────────────

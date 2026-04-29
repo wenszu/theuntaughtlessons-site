@@ -15,25 +15,12 @@ The `localStorage` functions work fine from `file://` in modern browsers.
 
 ---
 
-## Beta password
-
-The password is set in `portal/portal.js`:
-
-```js
-var BETA_PASSWORD = 'untaught2026';
-```
-
-Change that string to update the password. All portal pages share this one variable.
-
----
-
 ## How to clear progress (for testing)
 
 Open browser DevTools → Console, then run:
 
 ```js
 localStorage.removeItem('tul_progress');
-localStorage.removeItem('tul_auth');
 ```
 
 Or clear all site data in Settings → Privacy → Clear Browsing Data.
@@ -71,12 +58,12 @@ Status values: `"not_started"` | `"in_progress"` | `"complete"`
 
 ```
 portal/
-  index.html        Portal dashboard (password gate + workbook cards)
+  index.html        Portal dashboard (workbook cards + resources)
   workbook-a.html   Workbook A: Think Clearly (Module 1 complete + stubs)
   workbook-b.html   Workbook B: Speak Concisely (stubs)
   workbook-c.html   Workbook C: Act Confidently (stubs)
   portal.css        All portal styles
-  portal.js         Auth + progress tracking + clipboard utility
+  portal.js         Progress tracking + clipboard utility
   README.md         This file
 ```
 

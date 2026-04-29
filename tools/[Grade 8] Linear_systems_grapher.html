@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="An interactive Grade 8 math tool from The Untaught Lessons for exploring linear equations, graphing lines, systems, and solution types.">
 <title>Linear &amp; Systems Grapher — Grade 8</title>
 <link rel="stylesheet" href="tools-shared.css">
 <style>
@@ -216,12 +217,12 @@ canvas { flex: 1; display: block; cursor: crosshair; }
 </head>
 <body>
 
-<div class="brand-nav">
+<div id="navigation" class="brand-nav">
   <a href="../index.html">&larr; The Untaught Lessons</a>
   <span>Math Tools</span>
 </div>
 
-<header>
+<header id="hero">
   <div class="hlogo">∥</div>
   <div>
     <h1>Linear &amp; Systems Grapher</h1>
@@ -230,7 +231,7 @@ canvas { flex: 1; display: block; cursor: crosshair; }
   <div class="ibpill">GRADE 8</div>
 </header>
 
-<div class="tabbar">
+<div id="topics" class="tabbar">
   <button class="tab active" onclick="setTab('single')">① What's a Line?</button>
   <button class="tab" onclick="setTab('system')">② Two Lines Meet</button>
   <button class="tab" onclick="setTab('types')">③ System Types</button>
@@ -238,10 +239,13 @@ canvas { flex: 1; display: block; cursor: crosshair; }
   <button class="tab" onclick="setTab('practice')">⑤ Practice!</button>
 </div>
 
-<div class="app">
-  <div class="left" id="left"></div>
+<div id="tool" class="app">
+  <div class="left" id="left">
+    <h2>Explore lines and systems</h2>
+    <p>Use this tool to see slope, intercepts, intersections, parallel lines, and solution types for systems of linear equations.</p>
+  </div>
   <div class="right">
-    <div class="instr" id="instr"></div>
+    <div class="instr" id="instr">Choose a topic to explore linear equations visually and step by step.</div>
     <canvas id="cv"></canvas>
     <div class="btm" id="btm"></div>
   </div>

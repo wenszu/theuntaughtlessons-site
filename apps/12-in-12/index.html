@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="theme-color" content="#003366" />
+  <meta name="description" content="A private, local-first Untaught Lessons challenge tracker for setting a simple goal, checking in daily, and viewing behavior over time." />
   <title>12 in 12 Challenge Tracker</title>
   <link rel="manifest" href="./manifest.webmanifest" />
   <style>
@@ -508,9 +509,9 @@
   </style>
 </head>
 <body>
-  <main class="app-shell">
-    <section id="setupScreen" class="screen" aria-labelledby="setupTitle">
-      <header class="topbar">
+  <main id="content" class="app-shell">
+    <section id="setupScreen" class="screen active" aria-labelledby="setupTitle">
+      <header id="setup-hero" class="topbar">
         <span class="brand-kicker">The Untaught Lessons</span>
         <h1 id="setupTitle">Start your challenge</h1>
         <p>One goal. One day at a time.</p>
@@ -548,7 +549,7 @@
     </section>
 
     <section id="appScreen" class="screen" aria-labelledby="appTitle">
-      <header class="topbar">
+      <header id="app-hero" class="topbar">
         <span class="brand-kicker">12 in 12 Challenge Tracker</span>
         <h1 id="appTitle">Today</h1>
         <p id="screenSubtext">A quick check-in for the day in front of you.</p>

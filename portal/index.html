@@ -3,54 +3,33 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="The Untaught Lessons beta portal dashboard with static workbook summaries, resources, and local progress tracking." />
   <title>Portal — The Untaught Lessons</title>
   <link rel="stylesheet" href="portal.css">
   <script src="portal.js"></script>
 </head>
 <body>
 
-  <!-- ── Password gate ─────────────────────────────────────────── -->
-  <div id="gate">
-    <div class="gate-card">
-      <span class="gate-wordmark">The Untaught Lessons</span>
-      <h2>Beta Portal</h2>
-      <p>Enter your access code to continue.</p>
-      <form id="gate-form">
-        <input
-          id="gate-password"
-          class="gate-input"
-          type="password"
-          placeholder="Access code"
-          autocomplete="current-password"
-          autofocus
-        />
-        <button class="gate-btn" type="submit">Enter</button>
-        <p id="gate-error" class="gate-error"></p>
-      </form>
-    </div>
-  </div>
-
   <!-- ── Portal nav ────────────────────────────────────────────── -->
-  <nav class="portal-nav">
+  <nav id="navigation" class="portal-nav">
     <div class="portal-nav-left">
       <a href="../" class="portal-wordmark">The Untaught Lessons</a>
     </div>
     <div class="portal-nav-right">
       <span class="beta-badge">Beta</span>
-      <button class="portal-logout" onclick="portalLogout()">Sign out</button>
     </div>
   </nav>
 
   <!-- ── Dashboard ─────────────────────────────────────────────── -->
-  <main class="portal-main">
+  <main id="dashboard" class="portal-main">
 
-    <div class="dashboard-header">
+    <div id="hero" class="dashboard-header">
       <span class="section-label">Dashboard</span>
       <h1>Your workspace.</h1>
       <p>Three workbooks. One program. Work through each at your own pace.</p>
     </div>
 
-    <div class="workbook-grid">
+    <div id="workbooks" class="workbook-grid">
 
       <!-- Workbook A — active -->
       <a href="workbook-a.html" class="workbook-card clickable">
@@ -106,7 +85,7 @@
     </div><!-- /workbook-grid -->
 
     <!-- Resources -->
-    <div class="resources-section">
+    <div id="resources" class="resources-section">
       <h2>Resources</h2>
       <a href="../tools/[Grade 9 and 10] Logarithm_explorer.html" class="resource-link" target="_blank">
         Logarithm explorer — Grade 9–10 math tool
@@ -124,18 +103,15 @@
   <script>
     document.addEventListener('DOMContentLoaded', function () {
 
-      initGate(function () {
-        // Render Workbook A progress from localStorage
-        var done  = countCompleted('workbook_a');
-        var total = 4;
-        var pct   = Math.round((done / total) * 100);
+      var done  = countCompleted('workbook_a');
+      var total = 4;
+      var pct   = Math.round((done / total) * 100);
 
-        var fillEl = document.getElementById('progress-a');
-        var textEl = document.getElementById('progress-a-text');
+      var fillEl = document.getElementById('progress-a');
+      var textEl = document.getElementById('progress-a-text');
 
-        if (fillEl) fillEl.style.width = pct + '%';
-        if (textEl) textEl.textContent = done + ' of ' + total + ' complete';
-      });
+      if (fillEl) fillEl.style.width = pct + '%';
+      if (textEl) textEl.textContent = done + ' of ' + total + ' complete';
 
     });
   </script>
