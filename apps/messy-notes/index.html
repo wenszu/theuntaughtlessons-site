@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="A free Untaught Lessons practice tool for turning rough manager notes into a structured, concise, Aiko-ready response." />
   <title>Manager’s messy notes</title>
   <link rel="stylesheet" href="../shared/activity-timer.css">
   <style>
@@ -749,31 +750,34 @@
   </style>
 </head>
 <body>
-  <main class="page">
-    <div class="topbar">
+  <main id="content" class="page">
+    <div id="navigation" class="topbar">
       <a class="brand" href="../../index.html" aria-label="The Untaught Lessons homepage">
         <img src="../../assets/logo.png" alt="The Untaught Lessons" />
         <span>The Untaught Lessons</span>
       </a>
-      <span class="phase-pill" id="phasePill"></span>
+      <span class="phase-pill" id="phasePill">Think clearly</span>
     </div>
 
-    <header class="hero">
-      <h1 id="activityTitle"></h1>
-      <p class="subtitle" id="activitySubtitle"></p>
+    <header id="hero" class="hero">
+      <h1 id="activityTitle">Manager’s messy notes</h1>
+      <p class="subtitle" id="activitySubtitle">Turn a rushed update into an Aiko-ready summary.</p>
     </header>
 
-    <section class="layout">
-      <aside>
+    <section id="exercise" class="layout">
+      <aside id="context">
         <article class="panel">
           <div class="panel-head">
             <h2>Context</h2>
           </div>
           <div class="panel-body">
             <div class="story-card">
-              <p id="storyContext"></p>
+              <p id="storyContext">Aiko needs a clean update. Ashley sent a rushed note. Your job is to make it Aiko-ready.</p>
             </div>
-            <ul class="instructions" id="instructionsList"></ul>
+            <ul class="instructions" id="instructionsList">
+              <li><strong>Define three buckets:</strong> Split the content into exactly three distinct categories, each capturing a clear theme or purpose.</li>
+              <li><strong>Start with BSP:</strong> Begin every bullet point with a bolded summary phrase that is short and descriptive.</li>
+            </ul>
           </div>
         </article>
 
@@ -784,10 +788,15 @@
           <div class="panel-body">
             <div class="source-card">
               <span class="source-label">Source note</span>
-              <p class="source-text" id="sourceText"></p>
+              <p class="source-text" id="sourceText">Hey, quick update on the McDonald’s launch. We are launching a limited-time McDonald’s x Pokémon Happy Meal in the US with 8 blind box collectibles, cut-out box art, and a QR code that unlocks a Pokémon Trainer Certification once customers collect all 8 boxes. We aim to market this with in-app push notifications, billboards, and known collectors. Key issues include a limit of 2 boxes per person to prevent hoarding and logistics risk from under-supply. — Ashley Kat, VP of Partnerships</p>
             </div>
             <span class="small-label">Constraints</span>
-            <ul class="constraint-list" id="constraintsList"></ul>
+            <ul class="constraint-list" id="constraintsList">
+              <li>Exactly 3 sections</li>
+              <li>Use BSP format</li>
+              <li>Keep it concise</li>
+              <li>Make the buckets MECE</li>
+            </ul>
           </div>
         </article>
 
@@ -805,7 +814,7 @@
         </article>
       </aside>
 
-      <section>
+      <section id="response">
         <article class="panel">
           <div class="panel-head">
             <h2>Your response</h2>

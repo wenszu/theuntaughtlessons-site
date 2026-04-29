@@ -3,18 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Workbook C from The Untaught Lessons previews confident action modules for decision-making, leadership presence, feedback, and difficult conversations." />
   <title>Workbook C: Act Confidently — The Untaught Lessons</title>
   <link rel="stylesheet" href="portal.css">
   <script src="portal.js"></script>
-  <script>
-    if (typeof isAuthenticated === 'function' && !isAuthenticated()) {
-      window.location.replace('index.html');
-    }
-  </script>
 </head>
 <body>
 
-  <nav class="portal-nav">
+  <nav id="navigation" class="portal-nav">
     <div class="portal-nav-left">
       <a href="../" class="portal-wordmark">The Untaught Lessons</a>
       <div class="portal-breadcrumb">
@@ -26,13 +22,12 @@
     </div>
     <div class="portal-nav-right">
       <span class="beta-badge">Beta</span>
-      <button class="portal-logout" onclick="portalLogout()">Sign out</button>
     </div>
   </nav>
 
-  <main class="portal-main">
+  <main id="workbook" class="portal-main">
 
-    <div class="workbook-page-header">
+    <div id="hero" class="workbook-page-header">
       <div class="workbook-phase">Phase 3 · Workbook C</div>
       <h1>Act Confidently</h1>
       <p class="intro">
@@ -41,7 +36,7 @@
       </p>
     </div>
 
-    <div class="story-card">
+    <div id="scenario" class="story-card">
       <span class="story-label">What's next</span>
       <p>
         Workbook C is in development. It will focus on decision-making, leadership presence,
@@ -54,7 +49,7 @@
       </p>
     </div>
 
-    <div class="module-list">
+    <div id="modules" class="module-list">
       <div class="module-card stub">
         <div class="module-card-header">
           <span class="module-num">01</span>
@@ -89,7 +84,7 @@
       </div>
     </div>
 
-    <div class="resources-section">
+    <div id="resources" class="resources-section">
       <h2>Navigation</h2>
       <a href="workbook-b.html" class="resource-link">← Workbook B: Speak Concisely</a>
       <a href="index.html" class="resource-link">Back to dashboard</a>

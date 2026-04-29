@@ -3,20 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Workbook A from The Untaught Lessons teaches structured thinking, MECE grouping, bottom-line communication, and reflection through static guided exercises." />
   <title>Workbook A: Think Clearly — The Untaught Lessons</title>
   <link rel="stylesheet" href="portal.css">
   <script src="portal.js"></script>
-  <script>
-    // Auth guard — redirect before page renders if not authenticated
-    if (typeof isAuthenticated === 'function' && !isAuthenticated()) {
-      window.location.replace('index.html');
-    }
-  </script>
 </head>
 <body>
 
   <!-- ── Portal nav ────────────────────────────────────────────── -->
-  <nav class="portal-nav">
+  <nav id="navigation" class="portal-nav">
     <div class="portal-nav-left">
       <a href="../" class="portal-wordmark">The Untaught Lessons</a>
       <div class="portal-breadcrumb">
@@ -28,15 +23,14 @@
     </div>
     <div class="portal-nav-right">
       <span class="beta-badge">Beta</span>
-      <button class="portal-logout" onclick="portalLogout()">Sign out</button>
     </div>
   </nav>
 
   <!-- ── Main ──────────────────────────────────────────────────── -->
-  <main class="portal-main">
+  <main id="workbook" class="portal-main">
 
     <!-- Workbook header -->
-    <div class="workbook-page-header">
+    <div id="hero" class="workbook-page-header">
       <div class="workbook-phase">Phase 1 · Workbook A</div>
       <h1>Think Clearly</h1>
       <p class="intro">
@@ -47,7 +41,7 @@
     </div>
 
     <!-- Story context -->
-    <div class="story-card">
+    <div id="scenario" class="story-card">
       <span class="story-label">Your situation</span>
       <p>
         <strong>MA</strong> is a strategy and marketing consultancy based in Tokyo.
@@ -64,7 +58,7 @@
     </div>
 
     <!-- ── Module list ──────────────────────────────────────────── -->
-    <div class="module-list">
+    <div id="modules" class="module-list">
 
       <!-- ══════════════════════════════════════════════════════════
            MODULE 1 — Manager's messy top-of-mind  [COMPLETE]
