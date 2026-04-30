@@ -3,75 +3,166 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Explore The Untaught Lessons program for thinking clearly, speaking concisely, and acting confidently through practical workbook-based learning." />
+  <meta name="description" content="Programs coming soon from The Untaught Lessons." />
   <title>Programs - The Untaught Lessons</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=Lato:wght@300;700&family=Roboto+Mono:wght@400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css?v=section-label-fix-20260430">
 </head>
-<body>
+<body class="home-page programs-page">
+  <nav id="navigation" class="site-nav" aria-label="Primary navigation">
+    <a class="nav-brand" href="/" aria-label="The Untaught Lessons home">
+      <img src="assets/logo.png" alt="The Untaught Lessons" />
+    </a>
 
-  <nav id="navigation">
-    <a href="/" class="nav-logo"><img src="assets/logo.png" alt="The Untaught Lessons"></a>
-    <ul class="nav-links">
-      <li><a href="/#about">About</a></li>
-      <li><a href="programs.html" class="active">Programs</a></li>
-      <li><a href="tools.html">Tools</a></li>
-      <li><a href="insights.html">Insights</a></li>
-      <li><a href="portal.html">Portal</a></li>
-    </ul>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="navMenu" aria-label="Open navigation">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+
+    <div id="navMenu" class="nav-menu">
+      <a href="/">Home</a>
+      <a href="/about.html">About</a>
+      <a href="/programs">Programs</a>
+      <a href="/contact.html">Contact</a>
+      <a class="nav-button nav-button-secondary" href="/member-login">Member Login</a>
+      <button class="nav-button nav-button-primary" type="button" onclick="openLeadModal()">Get in Touch</button>
+    </div>
   </nav>
 
   <main id="content">
-    <section id="hero" class="page-hero">
-      <div class="container">
-        <span class="section-label">Programs</span>
-        <h1>Think • Speak • Act</h1>
-        <p>A practical program for clearer thinking, sharper communication, and more confident action.</p>
-      </div>
-    </section>
-
-    <section id="programs" class="page-section">
-      <div class="container">
-        <div class="phase-cards">
-          <div class="phase-card">
-            <span class="phase-num">Phase 1 · Workbook A</span>
-            <h3>Think Clearly</h3>
-            <p>Structure information. Separate signal from noise. Lead with the bottom line.</p>
-            <span class="phase-tag">Now open</span>
-          </div>
-
-          <div class="phase-card">
-            <span class="phase-num">Phase 2 · Workbook B</span>
-            <h3>Speak Concisely</h3>
-            <p>Communicate with precision and economy. Say what matters without the padding.</p>
-            <span class="phase-tag">Coming soon</span>
-          </div>
-
-          <div class="phase-card">
-            <span class="phase-num">Phase 3 · Workbook C</span>
-            <h3>Act Confidently</h3>
-            <p>Make decisions under pressure. Lead with preparation, presence, and conviction.</p>
-            <span class="phase-tag">Coming soon</span>
-          </div>
-        </div>
+    <section class="programs-placeholder" aria-labelledby="programs-title">
+      <div class="programs-placeholder-inner">
+        <img class="programs-logo" src="assets/[Logo] The Untaught Lessons - transparent v1.png" alt="The Untaught Lessons" />
+        <h1 id="programs-title">Programs coming soon.</h1>
+        <p>Check back shortly.</p>
+        <a class="programs-back-link" href="/">← Back to Home</a>
       </div>
     </section>
   </main>
 
-  <footer id="footer">
-    <div class="container">
-      <div class="footer-inner">
-        <p>&copy; 2026 The Untaught Lessons</p>
-        <div class="footer-links">
-          <a href="tools.html">Tools</a>
-          <a href="insights.html">Insights</a>
-          <a href="portal.html">Portal</a>
-        </div>
+  <div class="lead-modal" id="leadModal" aria-hidden="true">
+    <div class="lead-modal-overlay" data-close-lead-modal></div>
+    <div class="lead-modal-card" role="dialog" aria-modal="true" aria-labelledby="leadModalTitle">
+      <button class="lead-modal-close" type="button" aria-label="Close modal" data-close-lead-modal>&times;</button>
+      <div class="lead-modal-content">
+        <h2 id="leadModalTitle">Let's connect.</h2>
+        <p>Tell us a little about yourself and we'll be in touch.</p>
+        <form class="lead-form" id="leadForm">
+          <label for="leadName">Name</label>
+          <input id="leadName" name="name" type="text" placeholder="Your full name" required>
+
+          <label for="leadEmail">Email</label>
+          <input id="leadEmail" name="email" type="email" placeholder="Your email address" required>
+
+          <label for="leadRole">Role</label>
+          <select id="leadRole" name="role" required>
+            <option value="" disabled selected>Select your role</option>
+            <option value="Student">Student</option>
+            <option value="Professional">Professional</option>
+            <option value="Manager">Manager</option>
+            <option value="Other">Other</option>
+          </select>
+
+          <label for="leadMessage">What brings you here?</label>
+          <textarea id="leadMessage" name="message" rows="3" placeholder="Tell us what you're looking for (optional)"></textarea>
+
+          <button class="lead-submit" type="submit">Send</button>
+          <p class="lead-error" role="alert">Something went wrong. Please try again or email us directly.</p>
+        </form>
       </div>
     </div>
-  </footer>
+  </div>
 
+  <script>
+    const SCRIPT_URL = 'YOUR_SCRIPT_URL';
+    const navToggle = document.querySelector('.nav-toggle');
+    const navMenu = document.getElementById('navMenu');
+    const leadModal = document.getElementById('leadModal');
+    const leadModalContent = leadModal.querySelector('.lead-modal-content');
+    const leadModalInitialContent = leadModalContent.innerHTML;
+
+    navToggle.addEventListener('click', () => {
+      const isOpen = navToggle.getAttribute('aria-expanded') === 'true';
+      navToggle.setAttribute('aria-expanded', String(!isOpen));
+      navMenu.classList.toggle('is-open', !isOpen);
+    });
+
+    navMenu.querySelectorAll('a, button').forEach((link) => {
+      link.addEventListener('click', () => {
+        navToggle.setAttribute('aria-expanded', 'false');
+        navMenu.classList.remove('is-open');
+      });
+    });
+
+    function openLeadModal() {
+      leadModalContent.innerHTML = leadModalInitialContent;
+      leadModal.classList.add('is-open');
+      leadModal.setAttribute('aria-hidden', 'false');
+      document.body.classList.add('modal-open');
+      leadModalContent.querySelector('input, select, textarea, button')?.focus();
+    }
+
+    function closeLeadModal() {
+      leadModal.classList.remove('is-open');
+      leadModal.setAttribute('aria-hidden', 'true');
+      document.body.classList.remove('modal-open');
+    }
+
+    function showSuccessState() {
+      leadModalContent.innerHTML = `
+        <div class="lead-success">
+          <svg width="48" height="48" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+            <circle cx="24" cy="24" r="22" fill="none" stroke="#EEA320" stroke-width="3"></circle>
+            <path d="M14 24.5l6.5 6.5L34.5 17" fill="none" stroke="#EEA320" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+          <h2>You're on our list.</h2>
+          <p>We'll be in touch soon.</p>
+        </div>
+      `;
+      window.setTimeout(closeLeadModal, 3000);
+    }
+
+    function showErrorState() {
+      const error = leadModalContent.querySelector('.lead-error');
+      if (error) error.classList.add('is-visible');
+    }
+
+    async function submitForm(e) {
+      e.preventDefault();
+      const form = e.target;
+      const payload = {
+        name: form.name.value,
+        email: form.email.value,
+        role: form.role.value,
+        message: form.message.value || ''
+      };
+
+      try {
+        await fetch(SCRIPT_URL, {
+          method: 'POST',
+          body: JSON.stringify(payload),
+          headers: { 'Content-Type': 'application/json' }
+        });
+        showSuccessState();
+      } catch (err) {
+        showErrorState();
+      }
+    }
+
+    leadModal.addEventListener('click', (event) => {
+      if (event.target.matches('[data-close-lead-modal]')) closeLeadModal();
+    });
+
+    leadModal.addEventListener('submit', (event) => {
+      if (event.target.matches('.lead-form')) submitForm(event);
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && leadModal.classList.contains('is-open')) closeLeadModal();
+    });
+  </script>
 </body>
 </html>
