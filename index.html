@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=Lato:wght@300;700&family=Roboto+Mono:wght@400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=section-label-fix-20260430">
 </head>
 <body class="home-page">
   <nav id="navigation" class="site-nav" aria-label="Primary navigation">
@@ -24,10 +24,11 @@
 
     <div id="navMenu" class="nav-menu">
       <a href="#hero">Home</a>
-      <a href="#pillars">Programs</a>
-      <a href="#questions">About</a>
-      <a href="#footer">Contact</a>
-      <a class="nav-call" href="mailto:info@theuntaughtlessons.com">Book a Call</a>
+      <a href="/about.html">About</a>
+      <a href="/programs">Programs</a>
+      <a href="/contact.html">Contact</a>
+      <a class="nav-button nav-button-secondary" href="/member-login">Member Login</a>
+      <button class="nav-button nav-button-primary" type="button" onclick="openLeadModal()">Get in Touch</button>
     </div>
   </nav>
 
@@ -37,13 +38,18 @@
         <img class="hero-logo" src="assets/logo.png" alt="The Untaught Lessons" />
         <h1 id="hero-title">Practical lessons about life and work you wish someone had taught you sooner.</h1>
         <div class="hero-divider" aria-hidden="true"></div>
-        <a class="hero-button" href="#pillars">Explore Programs</a>
+        <a class="hero-button" href="/programs">Explore Programs</a>
+        <p class="credibility-strip">
+          TRUSTED BY 5,000+ PROFESSIONALS &nbsp;·&nbsp; 25+ YEARS OF REAL-WORLD APPLICATION
+        </p>
       </div>
     </section>
 
     <section id="questions" class="questions-section" aria-labelledby="questions-title">
       <div class="home-container">
-        <p class="home-label" id="questions-title">Sound familiar?</p>
+        <div class="section-label" id="questions-title">
+          <span class="section-label-text">Sound familiar?</span>
+        </div>
         <div class="question-list">
           <p class="reveal-question">Why do your ideas sound clear in your head... but messy out loud?</p>
           <p class="reveal-question">If you had 30 seconds to explain your thinking, can you actually land your main point?</p>
@@ -58,8 +64,16 @@
 
     <section id="pillars" class="pillars-section" aria-labelledby="pillars-title">
       <div class="home-container wide">
-        <p class="home-label" id="pillars-title">What you will learn</p>
-        <div class="pillar-grid">
+        <div class="section-label">
+          <span class="section-label-text">What you will learn</span>
+        </div>
+        <div id="pillars-title">
+          <h2 class="section-headline">
+            Think. Speak. Act.<span class="trademark">™</span>
+          </h2>
+          <p class="section-subheadline">How to Think Clearly, Speak Concisely and Act Confidently</p>
+        </div>
+        <div class="pillar-grid" style="margin-top: 16px;">
           <article class="flip-card">
             <div class="flip-card-inner">
               <div class="flip-face flip-front">
@@ -104,14 +118,17 @@
 
     <section id="stats" class="stats-section" aria-labelledby="stats-title">
       <div class="home-container wide">
-        <p class="home-label" id="stats-title">The reach</p>
+        <div class="section-label">
+          <span class="section-label-text">The reach</span>
+        </div>
+        <h2 class="section-headline" id="stats-title">The results speak for themselves</h2>
         <div class="stats-grid">
           <article class="stat-item">
             <strong class="stat-number" data-target="5000" data-suffix="+">0</strong>
             <p>Professionals Reached</p>
           </article>
           <article class="stat-item">
-            <strong class="stat-number" data-target="12">0</strong>
+            <strong class="stat-number" data-target="25" data-suffix="+">0</strong>
             <p>Years of Real World Application</p>
           </article>
           <article class="stat-item">
@@ -128,7 +145,10 @@
 
     <section id="testimonials" class="testimonials-section" aria-labelledby="testimonials-title">
       <div class="home-container wide">
-        <p class="home-label" id="testimonials-title">What people say</p>
+        <div class="section-label">
+          <span class="section-label-text">What people say</span>
+        </div>
+        <h2 class="section-headline" id="testimonials-title">What people are saying</h2>
       </div>
 
       <div class="marquee-wrap" aria-label="Testimonials">
@@ -232,7 +252,7 @@
       <div class="home-container">
         <h2 id="cta-title">Ready to learn what no one taught you?</h2>
         <p>Join thousands of professionals and students who have.</p>
-        <a class="cta-button" href="#pillars">Explore Programs</a>
+        <button class="cta-button" type="button" onclick="openLeadModal()">Get in Touch</button>
       </div>
     </section>
   </main>
@@ -245,9 +265,10 @@
       </div>
 
       <div class="footer-links" aria-label="Footer navigation">
-        <a href="#pillars">Programs</a>
-        <a href="#questions">About</a>
-        <a href="mailto:info@theuntaughtlessons.com">Contact</a>
+        <a href="#hero">Home</a>
+        <a href="/about.html">About</a>
+        <a href="/programs">Programs</a>
+        <a href="/contact.html">Contact</a>
       </div>
     </div>
     <div class="footer-bottom">
@@ -255,9 +276,46 @@
     </div>
   </footer>
 
+  <div class="lead-modal" id="leadModal" aria-hidden="true">
+    <div class="lead-modal-overlay" data-close-lead-modal></div>
+    <div class="lead-modal-card" role="dialog" aria-modal="true" aria-labelledby="leadModalTitle">
+      <button class="lead-modal-close" type="button" aria-label="Close modal" data-close-lead-modal>&times;</button>
+      <div class="lead-modal-content">
+        <h2 id="leadModalTitle">Let's connect.</h2>
+        <p>Tell us a little about yourself and we'll be in touch.</p>
+        <form class="lead-form" id="leadForm">
+          <label for="leadName">Name</label>
+          <input id="leadName" name="name" type="text" placeholder="Your full name" required>
+
+          <label for="leadEmail">Email</label>
+          <input id="leadEmail" name="email" type="email" placeholder="Your email address" required>
+
+          <label for="leadRole">Role</label>
+          <select id="leadRole" name="role" required>
+            <option value="" disabled selected>Select your role</option>
+            <option value="Student">Student</option>
+            <option value="Professional">Professional</option>
+            <option value="Manager">Manager</option>
+            <option value="Other">Other</option>
+          </select>
+
+          <label for="leadMessage">What brings you here?</label>
+          <textarea id="leadMessage" name="message" rows="3" placeholder="Tell us what you're looking for (optional)"></textarea>
+
+          <button class="lead-submit" type="submit">Send</button>
+          <p class="lead-error" id="leadError" role="alert">Something went wrong. Please try again or email us directly.</p>
+        </form>
+      </div>
+    </div>
+  </div>
+
   <script>
+    const SCRIPT_URL = 'YOUR_SCRIPT_URL';
     const navToggle = document.querySelector('.nav-toggle');
     const navMenu = document.getElementById('navMenu');
+    const leadModal = document.getElementById('leadModal');
+    const leadModalContent = leadModal.querySelector('.lead-modal-content');
+    const leadModalInitialContent = leadModalContent.innerHTML;
 
     navToggle.addEventListener('click', () => {
       const isOpen = navToggle.getAttribute('aria-expanded') === 'true';
@@ -265,12 +323,87 @@
       navMenu.classList.toggle('is-open', !isOpen);
     });
 
-    navMenu.querySelectorAll('a').forEach((link) => {
+    navMenu.querySelectorAll('a, button').forEach((link) => {
       link.addEventListener('click', () => {
         navToggle.setAttribute('aria-expanded', 'false');
         navMenu.classList.remove('is-open');
       });
     });
+
+    function openLeadModal() {
+      leadModalContent.innerHTML = leadModalInitialContent;
+      leadModal.classList.add('is-open');
+      leadModal.setAttribute('aria-hidden', 'false');
+      document.body.classList.add('modal-open');
+      leadModalContent.querySelector('input, select, textarea, button')?.focus();
+    }
+
+    function closeLeadModal() {
+      leadModal.classList.remove('is-open');
+      leadModal.setAttribute('aria-hidden', 'true');
+      document.body.classList.remove('modal-open');
+    }
+
+    function showSuccessState() {
+      leadModalContent.innerHTML = `
+        <div class="lead-success">
+          <svg width="48" height="48" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+            <circle cx="24" cy="24" r="22" fill="none" stroke="#EEA320" stroke-width="3"></circle>
+            <path d="M14 24.5l6.5 6.5L34.5 17" fill="none" stroke="#EEA320" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+          <h2>You're on our list.</h2>
+          <p>We'll be in touch soon.</p>
+        </div>
+      `;
+      window.setTimeout(closeLeadModal, 3000);
+    }
+
+    function showErrorState() {
+      const error = leadModalContent.querySelector('.lead-error');
+      if (error) error.classList.add('is-visible');
+    }
+
+    async function submitForm(e) {
+      e.preventDefault();
+      const form = e.target;
+      const payload = {
+        name: form.name.value,
+        email: form.email.value,
+        role: form.role.value,
+        message: form.message.value || ''
+      };
+
+      try {
+        await fetch(SCRIPT_URL, {
+          method: 'POST',
+          body: JSON.stringify(payload),
+          headers: { 'Content-Type': 'application/json' }
+        });
+        showSuccessState();
+      } catch (err) {
+        showErrorState();
+      }
+    }
+
+    leadModal.addEventListener('click', (event) => {
+      if (event.target.matches('[data-close-lead-modal]')) closeLeadModal();
+    });
+
+    leadModal.addEventListener('submit', (event) => {
+      if (event.target.matches('.lead-form')) submitForm(event);
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && leadModal.classList.contains('is-open')) closeLeadModal();
+    });
+
+    if ('ontouchstart' in window) {
+      document.querySelectorAll('.flip-card').forEach(card => {
+        card.addEventListener('click', () => {
+          card.classList.toggle('flipped');
+        });
+      });
+    }
 
     const revealObserver = new IntersectionObserver((entries, observer) => {
       entries.forEach((entry) => {
