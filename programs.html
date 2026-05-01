@@ -3,12 +3,637 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Programs coming soon from The Untaught Lessons." />
+  <meta name="description" content="Think. Speak. Act. from The Untaught Lessons teaches structured thinking, concise communication, and confident presence." />
   <title>Programs - The Untaught Lessons</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=Lato:wght@300;700&family=Roboto+Mono:wght@400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css?v=section-label-fix-20260430">
+  <style>
+    .programs-page {
+      --program-navy: #003366;
+      --program-gold: #EEA320;
+      --program-cream: #F3EDE2;
+      --program-deep-cream: #EBE4D5;
+      --program-charcoal: #4A4A4A;
+      --program-white: #FFFFFF;
+      background: var(--program-navy);
+    }
+
+    .programs-page main {
+      overflow: hidden;
+    }
+
+    .program-section {
+      padding: 100px 0;
+    }
+
+    .program-section.navy {
+      background: var(--program-navy);
+    }
+
+    .program-section.cream {
+      background: var(--program-cream);
+    }
+
+    .program-section.deep-cream {
+      background: var(--program-deep-cream);
+    }
+
+    .program-container {
+      width: min(100%, 1120px);
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    .program-container.narrow {
+      width: min(100%, 768px);
+    }
+
+    .program-section-label {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin: 0 0 56px;
+      color: var(--program-gold);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 10pt;
+      font-weight: 400;
+      letter-spacing: 2px;
+      line-height: 1.4;
+      text-transform: uppercase;
+    }
+
+    .program-section-label::before {
+      content: "";
+      width: 48px;
+      height: 1px;
+      background: var(--program-gold);
+      flex: 0 0 auto;
+    }
+
+    .program-heading {
+      max-width: 720px;
+      margin: 0;
+      color: var(--program-navy);
+      font-family: 'Playfair Display', serif;
+      font-size: 40pt;
+      font-style: italic;
+      font-weight: 700;
+      letter-spacing: 0;
+      line-height: 1.3;
+      text-align: left;
+    }
+
+    .program-body {
+      max-width: 720px;
+      margin: 24px 0 0;
+      color: var(--program-charcoal);
+      font-family: 'Lato', sans-serif;
+      font-size: 17pt;
+      font-weight: 300;
+      line-height: 1.8;
+      text-align: left;
+    }
+
+    .program-cta-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 56px;
+      padding: 16px 40px;
+      border: 0;
+      border-radius: 4px;
+      background: var(--program-gold);
+      color: var(--program-navy);
+      font-family: 'Lato', sans-serif;
+      font-size: 15pt;
+      font-weight: 700;
+      line-height: 1;
+      cursor: pointer;
+      text-decoration: none;
+      transition: filter .2s ease;
+    }
+
+    .program-cta-button:hover {
+      filter: brightness(1.08);
+    }
+
+    .tsa-mark {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-weight: 400;
+    }
+
+    .tsa-mark .trademark,
+    .program-trademark {
+      font-family: 'Playfair Display', serif;
+      font-style: normal;
+      font-weight: 400;
+      vertical-align: super;
+      line-height: 0;
+    }
+
+    .tsa-mark .trademark {
+      font-size: .72em;
+    }
+
+    .program-hero {
+      padding: 120px 24px;
+      background: var(--program-navy);
+      text-align: center;
+    }
+
+    .program-hero-inner {
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    .program-hero h1 {
+      margin: 0;
+      color: var(--program-white);
+      font-family: 'Playfair Display', serif;
+      font-size: 52pt;
+      font-style: italic;
+      font-weight: 700;
+      letter-spacing: 0;
+      line-height: 1.1;
+      text-align: center;
+    }
+
+    .program-hero h1 .program-trademark {
+      color: var(--program-white);
+      font-size: 22pt;
+    }
+
+    .program-hero-subtitle {
+      margin: 16px 0 0;
+      color: var(--program-gold);
+      font-family: 'Playfair Display', serif;
+      font-size: 22pt;
+      font-style: italic;
+      font-weight: 400;
+      line-height: 1.35;
+      text-align: center;
+    }
+
+    .program-hero-divider {
+      width: 80px;
+      height: 1px;
+      margin: 48px auto 0;
+      background: var(--program-gold);
+    }
+
+    .program-hero-copy {
+      max-width: 640px;
+      margin: 32px auto 0;
+      color: var(--program-white);
+      font-family: 'Lato', sans-serif;
+      font-size: 17pt;
+      font-weight: 300;
+      line-height: 1.8;
+      text-align: center;
+    }
+
+    .program-hero .program-cta-button {
+      margin-top: 40px;
+    }
+
+    .audience-grid,
+    .testimonial-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 32px;
+      margin-top: 40px;
+    }
+
+    .audience-card {
+      padding: 40px;
+      border-top: 3px solid var(--program-gold);
+      border-radius: 4px;
+      background: var(--program-white);
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+
+    .audience-card h3 {
+      margin: 0 0 16px;
+      color: var(--program-navy);
+      font-family: 'Lato', sans-serif;
+      font-size: 18pt;
+      font-weight: 700;
+      line-height: 1.3;
+    }
+
+    .audience-card p {
+      margin: 0;
+      color: var(--program-charcoal);
+      font-family: 'Lato', sans-serif;
+      font-size: 15pt;
+      font-weight: 300;
+      line-height: 1.8;
+    }
+
+    .phase-list {
+      max-width: 900px;
+      margin: 56px 0 0;
+    }
+
+    .phase-block {
+      display: grid;
+      grid-template-columns: minmax(0, 35%) minmax(0, 65%);
+      gap: 48px;
+      padding: 48px 0;
+      border-top: 1px solid var(--program-gold);
+    }
+
+    .phase-number {
+      display: block;
+      color: var(--program-gold);
+      font-family: 'Playfair Display', serif;
+      font-size: 64pt;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .phase-name {
+      margin: 8px 0 0;
+      color: var(--program-navy);
+      font-family: 'Playfair Display', serif;
+      font-size: 24pt;
+      font-style: italic;
+      font-weight: 700;
+      line-height: 1.25;
+    }
+
+    .phase-time {
+      margin: 8px 0 0;
+      color: var(--program-charcoal);
+      font-family: 'Lato', sans-serif;
+      font-size: 13pt;
+      font-style: italic;
+      font-weight: 300;
+      line-height: 1.5;
+    }
+
+    .phase-description {
+      margin: 0 0 24px;
+      color: var(--program-charcoal);
+      font-family: 'Lato', sans-serif;
+      font-size: 17pt;
+      font-style: italic;
+      font-weight: 300;
+      line-height: 1.8;
+    }
+
+    .phase-label,
+    .ai-label {
+      margin: 0 0 12px;
+      color: var(--program-gold);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 10pt;
+      font-weight: 400;
+      letter-spacing: 2px;
+      line-height: 1.4;
+      text-transform: uppercase;
+    }
+
+    .video-list {
+      display: grid;
+      gap: 0;
+      margin: 0 0 24px;
+      padding: 0;
+      list-style: none;
+      color: var(--program-charcoal);
+      font-family: 'Lato', sans-serif;
+      font-size: 15pt;
+      font-weight: 300;
+      line-height: 2;
+    }
+
+    .video-list li {
+      position: relative;
+      padding-left: 20px;
+    }
+
+    .video-list li::before {
+      content: "";
+      position: absolute;
+      top: .92em;
+      left: 0;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--program-gold);
+    }
+
+    .exercise-copy {
+      margin: 0 0 24px;
+      color: var(--program-charcoal);
+      font-family: 'Lato', sans-serif;
+      font-size: 15pt;
+      font-weight: 300;
+      line-height: 1.8;
+    }
+
+    .ai-callout {
+      padding: 20px 24px;
+      border-left: 3px solid var(--program-gold);
+      border-radius: 0 4px 4px 0;
+      background: var(--program-white);
+    }
+
+    .ai-callout p:last-child {
+      margin: 0;
+      color: var(--program-charcoal);
+      font-family: 'Lato', sans-serif;
+      font-size: 15pt;
+      font-style: italic;
+      font-weight: 300;
+      line-height: 1.7;
+    }
+
+    .program-total-time {
+      max-width: 760px;
+      margin: 56px auto 0;
+      color: var(--program-navy);
+      font-family: 'Playfair Display', serif;
+      font-size: 20pt;
+      font-style: italic;
+      font-weight: 400;
+      line-height: 1.5;
+      text-align: center;
+    }
+
+    .expect-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 32px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .expect-stat {
+      padding: 0 32px;
+      text-align: center;
+    }
+
+    .expect-stat strong {
+      display: block;
+      color: var(--program-white);
+      font-family: 'Playfair Display', serif;
+      font-size: 40pt;
+      font-weight: 700;
+      letter-spacing: 0;
+      line-height: 1.15;
+    }
+
+    .expect-stat span {
+      display: block;
+      margin-top: 14px;
+      color: var(--program-gold);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 11pt;
+      font-weight: 400;
+      letter-spacing: 2px;
+      line-height: 1.5;
+      text-transform: uppercase;
+    }
+
+    .expect-copy {
+      max-width: 640px;
+      margin: 56px auto 0;
+      color: var(--program-white);
+      font-family: 'Lato', sans-serif;
+      font-size: 17pt;
+      font-weight: 300;
+      line-height: 1.8;
+      text-align: center;
+    }
+
+    .expect-button-wrap {
+      margin-top: 40px;
+      text-align: center;
+    }
+
+    .program-section.navy .program-section-label {
+      color: var(--program-gold);
+    }
+
+    .testimonial-grid {
+      margin-top: 48px;
+    }
+
+    .testimonial-card-static {
+      padding: 40px;
+      border-left: 4px solid var(--program-navy);
+      border-radius: 4px;
+      background: var(--program-white);
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+
+    .testimonial-card-static blockquote {
+      margin: 0;
+    }
+
+    .testimonial-card-static p {
+      margin: 0;
+      color: var(--program-charcoal);
+      font-family: 'Lato', sans-serif;
+      font-size: 15pt;
+      font-style: italic;
+      font-weight: 300;
+      line-height: 1.8;
+    }
+
+    .testimonial-card-static footer {
+      margin-top: 24px;
+    }
+
+    .testimonial-card-static strong {
+      display: block;
+      color: var(--program-navy);
+      font-family: 'Lato', sans-serif;
+      font-size: 14pt;
+      font-weight: 700;
+      line-height: 1.4;
+    }
+
+    .testimonial-card-static span {
+      display: block;
+      margin-top: 4px;
+      color: var(--program-gold);
+      font-family: 'Lato', sans-serif;
+      font-size: 13pt;
+      font-weight: 300;
+      line-height: 1.4;
+    }
+
+    .closing-program-cta {
+      padding: 120px 24px;
+      background: var(--program-navy);
+      text-align: center;
+    }
+
+    .closing-program-cta h2 {
+      max-width: 600px;
+      margin: 0 auto;
+      color: var(--program-white);
+      font-family: 'Playfair Display', serif;
+      font-size: 36pt;
+      font-style: italic;
+      font-weight: 700;
+      letter-spacing: 0;
+      line-height: 1.4;
+      text-align: center;
+    }
+
+    .closing-program-cta p {
+      margin: 24px 0 0;
+      color: var(--program-gold);
+      font-family: 'Lato', sans-serif;
+      font-size: 17pt;
+      font-weight: 300;
+      line-height: 1.6;
+      text-align: center;
+    }
+
+    .closing-program-cta .program-cta-button {
+      margin-top: 40px;
+    }
+
+    .program-reveal {
+      opacity: 0;
+      transform: translateY(20px);
+      will-change: opacity, transform;
+    }
+
+    .program-reveal.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .audience-card.program-reveal,
+    .testimonial-card-static.program-reveal {
+      transition: opacity .4s ease, transform .4s ease;
+    }
+
+    .phase-block.program-reveal {
+      transition: opacity .5s ease, transform .5s ease;
+    }
+
+    @media (max-width: 768px) {
+      .program-section {
+        padding: 84px 0;
+      }
+
+      .program-hero,
+      .closing-program-cta {
+        padding: 96px 24px;
+      }
+
+      .program-hero h1 {
+        font-size: 40pt;
+      }
+
+      .program-hero h1 .program-trademark {
+        font-size: 17pt;
+      }
+
+      .program-hero-subtitle,
+      .program-total-time {
+        font-size: 19pt;
+      }
+
+      .program-heading {
+        font-size: 32pt;
+      }
+
+      .audience-grid,
+      .testimonial-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .phase-block {
+        grid-template-columns: 1fr;
+        gap: 28px;
+      }
+
+      .expect-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 42px 18px;
+      }
+
+      .expect-stat {
+        padding: 0 16px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .program-container {
+        padding: 0 20px;
+      }
+
+      .program-section {
+        padding: 72px 0;
+      }
+
+      .program-hero,
+      .closing-program-cta {
+        padding: 80px 20px;
+      }
+
+      .program-hero h1 {
+        font-size: 31pt;
+      }
+
+      .program-hero h1 .program-trademark {
+        font-size: 13pt;
+      }
+
+      .program-hero-subtitle {
+        font-size: 17pt;
+      }
+
+      .program-hero-copy,
+      .program-body,
+      .expect-copy {
+        font-size: 15pt;
+      }
+
+      .program-heading {
+        font-size: 27pt;
+      }
+
+      .audience-card,
+      .testimonial-card-static {
+        padding: 32px 24px;
+      }
+
+      .phase-number {
+        font-size: 52pt;
+      }
+
+      .phase-name {
+        font-size: 22pt;
+      }
+
+      .phase-description {
+        font-size: 15pt;
+      }
+
+      .expect-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .expect-stat strong {
+        font-size: 32pt;
+      }
+
+      .closing-program-cta h2 {
+        font-size: 28pt;
+      }
+    }
+  </style>
 </head>
 <body class="home-page programs-page">
   <nav id="navigation" class="site-nav" aria-label="Primary navigation">
@@ -23,9 +648,9 @@
     </button>
 
     <div id="navMenu" class="nav-menu">
-      <a href="/">Home</a>
+      <a href="#hero">Home</a>
       <a href="/about.html">About</a>
-      <a href="/programs">Programs</a>
+      <a href="/programs.html">Programs</a>
       <a href="/contact.html">Contact</a>
       <a class="nav-button nav-button-secondary" href="/member-login">Member Login</a>
       <button class="nav-button nav-button-primary" type="button" onclick="openLeadModal()">Get in Touch</button>
@@ -33,15 +658,217 @@
   </nav>
 
   <main id="content">
-    <section class="programs-placeholder" aria-labelledby="programs-title">
-      <div class="programs-placeholder-inner">
-        <img class="programs-logo" src="assets/[Logo] The Untaught Lessons - transparent v1.png" alt="The Untaught Lessons" />
-        <h1 id="programs-title">Programs coming soon.</h1>
-        <p>Check back shortly.</p>
-        <a class="programs-back-link" href="/">← Back to Home</a>
+    <section id="hero" class="program-hero" aria-labelledby="hero-title">
+      <div class="program-hero-inner">
+        <h1 id="hero-title">Think. Speak. Act.<span class="program-trademark">&trade;</span></h1>
+        <p class="program-hero-subtitle">How to Think Clearly, Speak Concisely and Act Confidently</p>
+        <div class="program-hero-divider" aria-hidden="true"></div>
+        <p class="program-hero-copy">The same frameworks used by McKinsey consultants, media presenters, and global business executives &mdash; now available to anyone with the motivation to learn. This is not a course about theory. It is a program that changes how you think, communicate and show up in the world.</p>
+        <button class="program-cta-button" type="button" onclick="openLeadModal()">Get in Touch</button>
       </div>
     </section>
+
+    <section id="audience" class="program-section cream" aria-labelledby="audience-title">
+      <div class="program-container">
+        <div class="program-section-label">Who This Is For</div>
+        <h2 id="audience-title" class="program-heading">This program was built for people who are done waiting to be taught.</h2>
+
+        <div class="audience-grid">
+          <article class="audience-card program-reveal">
+            <h3>Students</h3>
+            <p>The gap between a good student and a great opportunity is rarely grades. It is how clearly you think, how confidently you communicate, and how well you present yourself under pressure. <span class="tsa-mark">Think. Speak. Act.<span class="trademark">&trade;</span></span> gives you the foundational skills that top universities and employers look for but almost no school teaches. Start building these foundations now and the compounding effect will follow you for the rest of your career.</p>
+          </article>
+
+          <article class="audience-card program-reveal">
+            <h3>Professionals</h3>
+            <p>You have the experience and the ideas. What holds most professionals back is not what they know but how effectively they communicate it. <span class="tsa-mark">Think. Speak. Act.<span class="trademark">&trade;</span></span> teaches you how to structure your thinking under pressure, land your point of view in a way that moves people, and carry yourself with the kind of confidence that gets you heard, promoted and trusted with more.</p>
+          </article>
+
+          <article class="audience-card program-reveal">
+            <h3>Organizations</h3>
+            <p>The most common performance gap in high-growth organizations is not technical skill. It is the ability to think clearly under pressure, communicate with precision, and lead with confidence. <span class="tsa-mark">Think. Speak. Act.<span class="trademark">&trade;</span></span> builds these capabilities across your team, creating a common language for structured thinking, sharper communication, and stronger presence at every level.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="how-it-works" class="program-section deep-cream" aria-labelledby="how-title">
+      <div class="program-container">
+        <div class="program-section-label">How It Works</div>
+        <h2 id="how-title" class="program-heading">Three phases. One immersive storyline. Real skills you will use the next day.</h2>
+        <p class="program-body">Every exercise is built around an immersive real-world storyline. You are not doing abstract drills. You are navigating high-stakes situations where your thinking, communication and presence are tested in the moment.</p>
+
+        <div class="phase-list">
+          <article class="phase-block program-reveal">
+            <div class="phase-left">
+              <span class="phase-number">01</span>
+              <h3 class="phase-name">Think Clearly</h3>
+              <p class="phase-time">2 hours 17 minutes</p>
+            </div>
+            <div class="phase-right">
+              <p class="phase-description">Most people were never taught how to organize their thoughts before they open their mouth. Phase 1 gives you the frameworks to fix that.</p>
+              <p class="phase-label">Videos</p>
+              <ul class="video-list">
+                <li>Introduction</li>
+                <li>KonMari for the Cluttered Mind</li>
+                <li>Rule of Three</li>
+                <li>Bolded Summary Phrases</li>
+              </ul>
+              <p class="phase-label">Exercises</p>
+              <p class="exercise-copy">Seven hands-on exercises including real workplace scenarios where you practice structuring messy information, organizing your thinking under time pressure, and communicating complex ideas with clarity and precision.</p>
+              <div class="ai-callout">
+                <p class="ai-label">AI Integration</p>
+                <p>In this phase you will use AI as a thinking partner &mdash; learning how to stress-test your logic, identify gaps in your reasoning, and compress your ideas before you communicate them.</p>
+              </div>
+            </div>
+          </article>
+
+          <article class="phase-block program-reveal">
+            <div class="phase-left">
+              <span class="phase-number">02</span>
+              <h3 class="phase-name">Speak Concisely</h3>
+              <p class="phase-time">2 hours 5 minutes</p>
+            </div>
+            <div class="phase-right">
+              <p class="phase-description">Clarity in your head means nothing if you cannot land it with others. Phase 2 teaches you how to structure, sequence and deliver your thinking so it moves people.</p>
+              <p class="phase-label">Videos</p>
+              <ul class="video-list">
+                <li>Wait, What's the Problem Again?</li>
+                <li>Divide and Conquer</li>
+                <li>The Executive Storyline</li>
+                <li>The Art of Persuasion</li>
+              </ul>
+              <p class="phase-label">Exercises</p>
+              <p class="exercise-copy">Seven exercises including the Pyramid Principle in practice, building a persuasive narrative from scratch, and high-stakes communication scenarios where precision and confidence determine the outcome.</p>
+              <div class="ai-callout">
+                <p class="ai-label">AI Integration</p>
+                <p>In this phase you will use AI to sharpen and compress your writing in real time &mdash; getting instant feedback on your communication before a high-stakes moment.</p>
+              </div>
+            </div>
+          </article>
+
+          <article class="phase-block program-reveal">
+            <div class="phase-left">
+              <span class="phase-number">03</span>
+              <h3 class="phase-name">Act Confidently</h3>
+              <p class="phase-time">1 hour 56 minutes</p>
+            </div>
+            <div class="phase-right">
+              <p class="phase-description">Executive presence is not a personality trait. It is a set of learnable behaviors. Phase 3 teaches you how to read a room, hold your ground, and lead with gravitas.</p>
+              <p class="phase-label">Videos</p>
+              <ul class="video-list">
+                <li>How to Read People</li>
+                <li>Let's Switch Hats</li>
+                <li>Speak Like Obama</li>
+                <li>I Have Bad News</li>
+                <li>The Art of Saying No</li>
+              </ul>
+              <p class="phase-label">Exercises</p>
+              <p class="exercise-copy">Five exercises including perspective-taking scenarios, body language and silence techniques, and navigating difficult conversations with composure and authority.</p>
+              <div class="ai-callout">
+                <p class="ai-label">AI Integration</p>
+                <p>In this phase you will use AI to simulate difficult conversations &mdash; practicing how to read, respond and adapt in real time before the conversation actually happens.</p>
+              </div>
+            </div>
+          </article>
+        </div>
+
+        <p class="program-total-time">Total program time: approximately 6 hours and 20 minutes of combined video and exercises.</p>
+      </div>
+    </section>
+
+    <section id="what-to-expect" class="program-section navy" aria-labelledby="expect-title">
+      <div class="program-container">
+        <div class="program-section-label" id="expect-title">What To Expect</div>
+        <div class="expect-grid">
+          <article class="expect-stat">
+            <strong>Self-Paced</strong>
+            <span>Learn On Your Own Schedule</span>
+          </article>
+          <article class="expect-stat">
+            <strong>3</strong>
+            <span>Progressive Phases</span>
+          </article>
+          <article class="expect-stat">
+            <strong>6h 20m</strong>
+            <span>Total Program Time</span>
+          </article>
+          <article class="expect-stat">
+            <strong>Personal</strong>
+            <span>Feedback On Your Work</span>
+          </article>
+        </div>
+        <p class="expect-copy">Enrollment is by application. We curate each cohort to ensure the learning experience is maximized for everyone in it. The one requirement is a genuine motivation to grow.</p>
+        <div class="expect-button-wrap">
+          <button class="program-cta-button" type="button" onclick="openLeadModal()">Get in Touch</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="testimonials" class="program-section cream" aria-labelledby="testimonials-title">
+      <div class="program-container">
+        <div class="program-section-label">What People Say</div>
+        <h2 id="testimonials-title" class="program-heading">The results speak for themselves.</h2>
+
+        <div class="testimonial-grid">
+          <article class="testimonial-card-static program-reveal">
+            <blockquote>
+              <p>"I am really glad I joined the workshop as I was able to get out of my comfort zone. I noticed an improvement outside the workshop and my participation in class increased."</p>
+              <footer>
+                <strong>Student 1</strong>
+                <span>Workshop Participant</span>
+              </footer>
+            </blockquote>
+          </article>
+
+          <article class="testimonial-card-static program-reveal">
+            <blockquote>
+              <p>"Looking back at my life I have not processed my thoughts properly because I am trying to give an answer as quickly as possible. The techniques taught can help me formulate more structured ideas."</p>
+              <footer>
+                <strong>Student 2</strong>
+                <span>Workshop Participant</span>
+              </footer>
+            </blockquote>
+          </article>
+
+          <article class="testimonial-card-static program-reveal">
+            <blockquote>
+              <p>"I came across your workshop at the right time and it has been helping me a lot. I am putting the exercises to use already dealing with a crisis situation."</p>
+              <footer>
+                <strong>Student 3</strong>
+                <span>Workshop Participant</span>
+              </footer>
+            </blockquote>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="cta" class="closing-program-cta" aria-labelledby="cta-title">
+      <h2 id="cta-title">Ready to close the gap?</h2>
+      <p>Join thousands of professionals and students who have.</p>
+      <button class="program-cta-button" type="button" onclick="openLeadModal()">Get in Touch</button>
+    </section>
   </main>
+
+  <footer id="footer" class="site-footer">
+    <div class="footer-grid">
+      <div>
+        <img class="footer-logo" src="assets/logo.png" alt="The Untaught Lessons" />
+        <p class="footer-tagline">Practical lessons about life and work you wish someone had taught you sooner.</p>
+      </div>
+
+      <div class="footer-links" aria-label="Footer navigation">
+        <a href="#hero">Home</a>
+        <a href="/about.html">About</a>
+        <a href="/programs.html">Programs</a>
+        <a href="/contact.html">Contact</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2026 The Untaught Lessons. All rights reserved.</p>
+    </div>
+  </footer>
 
   <div class="lead-modal" id="leadModal" aria-hidden="true">
     <div class="lead-modal-overlay" data-close-lead-modal></div>
@@ -70,7 +897,7 @@
           <textarea id="leadMessage" name="message" rows="3" placeholder="Tell us what you're looking for (optional)"></textarea>
 
           <button class="lead-submit" type="submit">Send</button>
-          <p class="lead-error" role="alert">Something went wrong. Please try again or email us directly.</p>
+          <p class="lead-error" id="leadError" role="alert">Something went wrong. Please try again or email us directly.</p>
         </form>
       </div>
     </div>
@@ -162,6 +989,29 @@
 
     document.addEventListener('keydown', (event) => {
       if (event.key === 'Escape' && leadModal.classList.contains('is-open')) closeLeadModal();
+    });
+
+    const revealObserver = new IntersectionObserver((entries, observer) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add('is-visible');
+        observer.unobserve(entry.target);
+      });
+    }, { threshold: 0.2 });
+
+    document.querySelectorAll('.audience-card.program-reveal').forEach((card, index) => {
+      card.style.transitionDelay = `${index * 0.2}s`;
+      revealObserver.observe(card);
+    });
+
+    document.querySelectorAll('.phase-block.program-reveal').forEach((phase, index) => {
+      phase.style.transitionDelay = `${index * 0.15}s`;
+      revealObserver.observe(phase);
+    });
+
+    document.querySelectorAll('.testimonial-card-static.program-reveal').forEach((card, index) => {
+      card.style.transitionDelay = `${index * 0.2}s`;
+      revealObserver.observe(card);
     });
   </script>
 </body>
