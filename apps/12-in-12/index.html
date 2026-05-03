@@ -8,22 +8,21 @@
   <title>12 in 12 Challenge Tracker</title>
   <link rel="manifest" href="./manifest.webmanifest" />
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lato:wght@300;400;700&display=swap');
-
     :root {
       --cream: #F3EDE2;
       --navy: #003366;
       --deep-navy: #001A33;
       --gold: #EEA320;
+      --steel: #4D7094;
       --charcoal: #4A4A4A;
       --white: #fff;
-      --line: rgba(0, 51, 102, 0.16);
+      --line: #E8DFD1;
       --shadow: 0 10px 26px rgba(0, 51, 102, 0.08);
-      --radius: 14px;
-      --done: #6F9478;
-      --partial: #E7C46F;
-      --missed: #D7D4CE;
-      --muted: #6b6b6b;
+      --radius: 12px;
+      --done: #6B8F71;
+      --partial: #C9A84C;
+      --missed: #cccccc;
+      --muted: #4D7094;
     }
 
     * { box-sizing: border-box; }
@@ -33,7 +32,7 @@
     body {
       margin: 0;
       min-height: 100%;
-      font-family: Lato, "Avenir Next", Arial, sans-serif;
+      font-family: Arial, sans-serif;
       color: var(--charcoal);
       background: var(--cream);
     }
@@ -65,12 +64,12 @@
     h3 {
       margin-top: 0;
       color: var(--navy);
-      font-family: "Playfair Display", Georgia, serif;
+      font-family: Georgia, serif;
       letter-spacing: 0;
     }
 
     .app-shell {
-      width: min(100%, 960px);
+      width: min(100%, 430px);
       margin: 0 auto;
       padding: 16px 14px calc(92px + env(safe-area-inset-bottom));
     }
@@ -85,10 +84,17 @@
       margin-bottom: 14px;
     }
 
+    .brand-logo {
+      display: block;
+      width: 96px;
+      height: auto;
+      margin: 0 0 10px;
+    }
+
     .brand-kicker {
       display: block;
       margin-bottom: 5px;
-      color: var(--deep-navy);
+      color: var(--steel);
       font-size: .74rem;
       font-weight: 700;
       letter-spacing: .08em;
@@ -110,7 +116,7 @@
 
     .panel {
       background: var(--white);
-      border: 1px solid var(--line);
+      border: .5px solid var(--line);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
     }
@@ -177,15 +183,70 @@
     }
 
     .segmented button.active {
-      background: var(--navy);
-      color: var(--white);
+      border-color: var(--gold);
+      background: var(--gold);
+      color: var(--deep-navy);
     }
 
     .primary-action {
       width: 100%;
       min-height: 52px;
+      border-color: var(--gold);
+      background: var(--gold);
+      color: var(--deep-navy);
+    }
+
+    .challenge-banner {
+      display: grid;
+      gap: 10px;
+      margin-bottom: 14px;
+      padding: 16px;
+      border-radius: 12px;
       background: var(--navy);
       color: var(--white);
+    }
+
+    .banner-row {
+      display: flex;
+      align-items: start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .banner-kicker {
+      color: rgba(255, 255, 255, .78);
+      font-size: .78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .challenge-banner h2 {
+      margin: 0;
+      color: var(--white);
+      font-size: 1.28rem;
+      line-height: 1.18;
+    }
+
+    .banner-pill {
+      flex: 0 0 auto;
+      max-width: 36%;
+      padding: 5px 9px;
+      border: 1px solid rgba(238, 163, 32, .55);
+      border-radius: 999px;
+      color: var(--gold);
+      font-size: .75rem;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .banner-link {
+      width: fit-content;
+      min-height: 0;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: var(--gold);
+      text-decoration: underline;
     }
 
     .today-card {
@@ -223,7 +284,7 @@
       color: var(--deep-navy);
       font-size: 1.6rem;
       line-height: 1.12;
-      font-family: "Playfair Display", Georgia, serif;
+      font-family: Georgia, serif;
       font-weight: 700;
     }
 
@@ -447,6 +508,188 @@
       line-height: 1.35;
     }
 
+    .category-list,
+    .template-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .category-card,
+    .template-card {
+      display: grid;
+      gap: 4px;
+      width: 100%;
+      min-height: 0;
+      padding: 14px;
+      border: .5px solid var(--line);
+      border-radius: 12px;
+      background: var(--white);
+      color: var(--charcoal);
+      text-align: left;
+    }
+
+    .category-card {
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+    }
+
+    .card-title {
+      color: var(--navy);
+      font-size: 17px;
+      font-weight: 700;
+    }
+
+    .template-card .card-title {
+      font-size: 16px;
+    }
+
+    .card-copy {
+      margin: 3px 0 0;
+      color: var(--steel);
+      font-size: 13px;
+      font-weight: 400;
+      line-height: 1.35;
+    }
+
+    .arrow {
+      color: var(--gold);
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+
+    .template-card.selected {
+      border-color: var(--navy);
+      box-shadow: 0 0 0 2px rgba(0, 51, 102, .09);
+    }
+
+    .template-head {
+      display: flex;
+      align-items: start;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .checkmark {
+      color: var(--navy);
+      font-weight: 700;
+    }
+
+    .browse-category {
+      display: grid;
+      gap: 10px;
+    }
+
+    .browse-templates {
+      display: grid;
+      gap: 10px;
+      margin: -2px 0 8px;
+    }
+
+    .use-template {
+      justify-self: start;
+      min-height: 38px;
+      margin-top: 8px;
+      padding: 8px 12px;
+      border-color: var(--gold);
+      background: var(--gold);
+      color: var(--deep-navy);
+      font-size: .84rem;
+    }
+
+    .onboarding {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      overflow-y: auto;
+      background: var(--cream);
+      padding: max(18px, env(safe-area-inset-top)) 16px max(24px, env(safe-area-inset-bottom));
+    }
+
+    .onboarding-inner {
+      display: grid;
+      align-content: center;
+      gap: 18px;
+      width: min(100%, 430px);
+      min-height: 100%;
+      margin: 0 auto;
+    }
+
+    .onboarding-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 46px;
+    }
+
+    .step-label {
+      color: var(--steel);
+      font-size: .8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .back-btn {
+      min-height: 38px;
+      width: 38px;
+      padding: 0;
+      border-color: transparent;
+      background: transparent;
+      color: var(--navy);
+      font-size: 1.35rem;
+    }
+
+    .onboarding-copy {
+      text-align: center;
+    }
+
+    .onboarding-copy h2 {
+      margin-bottom: 10px;
+      font-size: 2rem;
+      line-height: 1.05;
+    }
+
+    .onboarding-copy p {
+      margin: 0;
+      color: var(--steel);
+      line-height: 1.5;
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 120;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+      background: rgba(0, 26, 51, .42);
+    }
+
+    .modal-card {
+      width: min(100%, 390px);
+      padding: 18px;
+      background: var(--white);
+      border: .5px solid var(--line);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+    }
+
+    .modal-card h2 {
+      margin-bottom: 8px;
+      font-size: 1.28rem;
+    }
+
+    .modal-card p {
+      margin: 0 0 16px;
+      color: var(--steel);
+      line-height: 1.45;
+    }
+
+    .modal-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
     .bottom-nav {
       position: fixed;
       left: 0;
@@ -454,8 +697,8 @@
       bottom: 0;
       z-index: 10;
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 4px;
       padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
       border-top: 1px solid var(--line);
       background: rgba(255, 255, 255, .95);
@@ -465,6 +708,7 @@
 
     .bottom-nav button {
       min-height: 50px;
+      padding: 0 6px;
       border-color: transparent;
       background: transparent;
       color: var(--charcoal);
@@ -475,16 +719,211 @@
       color: var(--white);
     }
 
-    @media (min-width: 720px) {
+    .sidebar {
+      display: none;
+    }
+
+    @media (min-width: 600px) and (max-width: 1023px) {
       .app-shell {
-        padding: 28px 22px 108px;
+        width: min(100%, 600px);
+        padding: 28px 22px 112px;
+      }
+
+      .topbar {
+        margin-bottom: 18px;
+      }
+
+      .brand-kicker {
+        font-size: 12px;
+      }
+
+      .topbar h1 {
+        font-size: 36px;
+      }
+
+      .panel-body {
+        padding: 20px 28px;
+      }
+
+      .challenge-banner {
+        padding: 20px 24px;
+      }
+
+      .challenge-banner h2 {
+        font-size: 20px;
+      }
+
+      .bottom-nav {
+        left: 50%;
+        width: min(100%, 600px);
+        transform: translateX(-50%);
+        padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+        border: 1px solid var(--line);
+        border-bottom: 0;
+        border-radius: 16px 16px 0 0;
+      }
+
+      .bottom-nav button {
+        padding: 0 10px;
+      }
+    }
+
+    @media (max-width: 1023px) {
+      .sidebar {
+        display: none;
+      }
+
+      .bottom-nav {
+        display: grid;
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 20;
+        display: flex;
+        flex-direction: column;
+        width: 260px;
+        height: 100vh;
+        background: var(--navy);
+      }
+
+      .sidebar-logo {
+        padding: 32px 28px 24px;
+      }
+
+      .sidebar-logo img {
+        display: block;
+        width: 168px;
+        height: auto;
+        margin: 0 0 16px -6px;
+      }
+
+      .sidebar-logo strong {
+        display: block;
+        color: var(--white);
+        font-family: Georgia, serif;
+        font-size: 20px;
+        line-height: 1.1;
+      }
+
+      .sidebar-logo span {
+        display: block;
+        margin-top: 4px;
+        color: var(--steel);
+        font-size: 12px;
+      }
+
+      .sidebar-nav {
+        display: grid;
+        gap: 2px;
+      }
+
+      .sidebar-nav button {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        min-height: 44px;
+        padding: 0 28px;
+        border: 0;
+        border-left: 3px solid transparent;
+        border-radius: 0;
+        background: transparent;
+        color: rgba(255, 255, 255, .75);
+        font-size: 15px;
+        text-align: left;
+        text-decoration: none;
+      }
+
+      .sidebar-nav button.active {
+        border-left-color: var(--gold);
+        background: rgba(255, 255, 255, .10);
+        color: var(--white);
+      }
+
+      .sidebar-tagline {
+        position: absolute;
+        left: 28px;
+        bottom: 24px;
+        margin: 0;
+        color: rgba(255, 255, 255, .35);
+        font-size: 11px;
+      }
+
+      .bottom-nav {
+        display: none;
+      }
+
+      .app-shell {
+        width: auto;
+        max-width: none;
+        margin: 0 0 0 260px;
+        padding: 36px 48px 48px;
+      }
+
+      #appScreen,
+      #setupScreen {
+        max-width: 860px;
+        margin: 0 auto;
+      }
+
+      .topbar {
+        margin-bottom: 22px;
+      }
+
+      .brand-kicker {
+        font-size: 12px;
+      }
+
+      .brand-logo {
+        width: 128px;
+        margin-bottom: 12px;
+      }
+
+      .topbar h1 {
+        font-size: 40px;
+      }
+
+      .topbar p,
+      .muted,
+      .card-copy {
+        font-size: 15px;
+      }
+
+      label,
+      .field-label {
+        font-size: 14px;
+      }
+
+      .panel-head h2,
+      .prompt {
+        font-size: 18px;
+      }
+
+      .panel-body {
+        padding: 20px 28px;
+      }
+
+      .challenge-banner {
+        padding: 20px 24px;
+      }
+
+      .challenge-banner h2 {
+        font-size: 22px;
       }
 
       .desktop-grid {
         display: grid;
-        grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr);
-        gap: 18px;
-        align-items: start;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        align-items: stretch;
+      }
+
+      .desktop-grid > .panel {
+        height: 100%;
       }
 
       .status-actions {
@@ -497,21 +936,93 @@
         min-height: 84px;
       }
 
-      .bottom-nav {
-        left: 50%;
-        width: min(100%, 960px);
-        transform: translateX(-50%);
-        border: 1px solid var(--line);
-        border-bottom: 0;
-        border-radius: 16px 16px 0 0;
+      .calendar-grid {
+        gap: 8px;
+      }
+
+      .day {
+        min-height: 0;
+      }
+
+      #browseList {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+      }
+
+      .browse-category:has(.browse-templates) {
+        grid-column: 1 / -1;
+      }
+
+      .browse-templates {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+      }
+
+      #settingsView .panel {
+        max-width: 480px;
+      }
+
+      .onboarding-inner {
+        width: min(100%, 720px);
+      }
+
+      #onboardingWelcome {
+        width: min(100%, 480px);
+        margin: 0 auto;
+        padding: 28px;
+        border: .5px solid var(--line);
+        border-radius: 12px;
+        background: var(--white);
+        box-shadow: var(--shadow);
+      }
+
+      #onboardingCategories {
+        width: min(100%, 680px);
+        margin: 0 auto;
+      }
+
+      #onboardingCategoryList {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      #onboardingTemplates {
+        width: min(100%, 720px);
+        margin: 0 auto;
+      }
+
+      #onboardingTemplateList {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      #onboardingTemplates > .field,
+      #confirmChallengeBtn {
+        width: min(100%, 480px);
+        margin-left: auto;
+        margin-right: auto;
       }
     }
   </style>
 </head>
 <body>
+  <aside class="sidebar" aria-label="App navigation">
+    <div class="sidebar-logo">
+      <img src="../../assets/[Logo] The Untaught Lessons - white text - transparent.png" alt="The Untaught Lessons" />
+      <strong>12 in 12</strong>
+      <span>Challenge Tracker</span>
+    </div>
+    <nav class="sidebar-nav">
+      <button type="button" data-view="today">Today</button>
+      <button type="button" data-view="calendar">Calendar</button>
+      <button type="button" data-view="browse">Browse</button>
+      <button type="button" data-view="settings">Settings</button>
+    </nav>
+    <p class="sidebar-tagline">One habit. One month. Repeat.</p>
+  </aside>
+
   <main id="content" class="app-shell">
     <section id="setupScreen" class="screen active" aria-labelledby="setupTitle">
       <header id="setup-hero" class="topbar">
+        <img class="brand-logo" src="../../assets/logo.png" alt="The Untaught Lessons" />
         <span class="brand-kicker">The Untaught Lessons</span>
         <h1 id="setupTitle">Start your challenge</h1>
         <p>One goal. One day at a time.</p>
@@ -550,19 +1061,27 @@
 
     <section id="appScreen" class="screen" aria-labelledby="appTitle">
       <header id="app-hero" class="topbar">
+        <img class="brand-logo" src="../../assets/logo.png" alt="The Untaught Lessons" />
         <span class="brand-kicker">12 in 12 Challenge Tracker</span>
         <h1 id="appTitle">Today</h1>
         <p id="screenSubtext">A quick check-in for the day in front of you.</p>
       </header>
 
       <section id="todayView" class="screen active" aria-labelledby="todayTitle">
+        <article id="challengeBanner" class="challenge-banner">
+          <div class="banner-row">
+            <div>
+              <span id="bannerKicker" class="banner-kicker"></span>
+              <h2 id="bannerTitle"></h2>
+            </div>
+            <span id="bannerCategory" class="banner-pill"></span>
+          </div>
+          <button id="bannerPickBtn" class="banner-link hidden" type="button">Pick one &rarr;</button>
+        </article>
+
         <div class="desktop-grid">
           <article class="panel today-card">
             <div class="panel-body">
-              <div class="challenge-meta">
-                <span id="todayCategory" class="pill"></span>
-                <span id="todayType" class="pill"></span>
-              </div>
               <h2 id="todayTitle"></h2>
               <p id="todayDate" class="date-label"></p>
               <p class="prompt">Did you do it today?</p>
@@ -607,6 +1126,17 @@
       </section>
 
       <section id="calendarView" class="screen" aria-labelledby="calendarTitle">
+        <article id="calendarChallengeBanner" class="challenge-banner">
+          <div class="banner-row">
+            <div>
+              <span id="calendarBannerKicker" class="banner-kicker"></span>
+              <h2 id="calendarBannerTitle"></h2>
+            </div>
+            <span id="calendarBannerCategory" class="banner-pill"></span>
+          </div>
+          <button id="calendarBannerPickBtn" class="banner-link hidden" type="button">Pick one &rarr;</button>
+        </article>
+
         <article class="panel">
           <div class="panel-head">
             <div class="month-row">
@@ -662,6 +1192,7 @@
             </div>
 
             <div class="settings-actions">
+              <button id="saveSettingsBtn" class="primary-action" type="button">Save challenge</button>
               <button id="exportBtn" class="secondary-action" type="button">Export data (JSON)</button>
               <button id="showImportBtn" class="secondary-action" type="button">Import data (JSON)</button>
               <button id="clearDataBtn" class="quiet-action" type="button">Clear data</button>
@@ -677,12 +1208,65 @@
           </div>
         </article>
       </section>
+
+      <section id="browseView" class="screen" aria-labelledby="browseTitle">
+        <div id="browseList" class="category-list"></div>
+      </section>
     </section>
   </main>
+
+  <section id="onboardingOverlay" class="onboarding hidden" aria-modal="true" role="dialog">
+    <div class="onboarding-inner">
+      <div class="onboarding-top">
+        <button id="onboardingBack" class="back-btn hidden" type="button" aria-label="Go back">&larr;</button>
+        <span id="onboardingStep" class="step-label">Step 1 of 3</span>
+        <span aria-hidden="true"></span>
+      </div>
+
+      <div id="onboardingWelcome">
+        <div class="onboarding-copy">
+          <h2>A new month. One experiment.</h2>
+          <p>Pick one habit. Commit to it daily. See what you learn.</p>
+        </div>
+        <button id="startOnboardingBtn" class="primary-action" type="button">Pick my challenge &rarr;</button>
+      </div>
+
+      <div id="onboardingCategories" class="hidden">
+        <div class="onboarding-copy">
+          <h2>What do you want to work on?</h2>
+        </div>
+        <div id="onboardingCategoryList" class="category-list"></div>
+      </div>
+
+      <div id="onboardingTemplates" class="hidden">
+        <div class="onboarding-copy">
+          <h2 id="templateStepTitle"></h2>
+        </div>
+        <div id="onboardingTemplateList" class="template-list"></div>
+        <div class="field">
+          <label for="customChallengeInput">Challenge name</label>
+          <input id="customChallengeInput" type="text" autocomplete="off" />
+        </div>
+        <button id="confirmChallengeBtn" class="primary-action" type="button">Start this challenge &rarr;</button>
+      </div>
+    </div>
+  </section>
+
+  <div id="warningModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="warningTitle">
+    <div class="modal-card">
+      <h2 id="warningTitle">Change challenge?</h2>
+      <p>Changing your challenge will reset your progress for this month. Are you sure?</p>
+      <div class="modal-actions">
+        <button id="cancelWarningBtn" class="secondary-action" type="button">Cancel</button>
+        <button id="confirmWarningBtn" class="primary-action" type="button">Confirm</button>
+      </div>
+    </div>
+  </div>
 
   <nav id="bottomNav" class="bottom-nav hidden" aria-label="App navigation">
     <button type="button" data-view="today">Today</button>
     <button type="button" data-view="calendar">Calendar</button>
+    <button type="button" data-view="browse">Browse</button>
     <button type="button" data-view="settings">Settings</button>
   </nav>
 
