@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Member tools for The Untaught Lessons." />
+  <title>Member Login - The Untaught Lessons</title>
+  <style>
+    :root {
+      --cream: #F3EDE2;
+      --navy: #003366;
+      --deep-navy: #001A33;
+      --gold: #EEA320;
+      --steel: #4D7094;
+      --charcoal: #4A4A4A;
+      --white: #fff;
+      --line: #E8DFD1;
+      --shadow: 0 18px 45px rgba(0, 51, 102, .10);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Arial, sans-serif;
+      color: var(--charcoal);
+      background: var(--cream);
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    .page {
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    .shell {
+      width: min(100%, 1040px);
+      margin: 0 auto;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 8px 0 28px;
+    }
+
+    .logo {
+      display: block;
+      width: 132px;
+      height: auto;
+    }
+
+    .home-link {
+      color: var(--steel);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .center-stage {
+      display: grid;
+      align-items: center;
+      min-height: calc(100vh - 120px);
+    }
+
+    .login-card,
+    .dashboard {
+      background: var(--white);
+      border: .5px solid var(--line);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+    }
+
+    .login-card {
+      width: min(100%, 460px);
+      margin: 0 auto;
+      padding: 28px;
+    }
+
+    .section-label {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--steel);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    h1,
+    h2,
+    h3 {
+      margin: 0;
+      color: var(--navy);
+      font-family: Georgia, serif;
+      letter-spacing: 0;
+    }
+
+    h1 {
+      font-size: clamp(38px, 8vw, 58px);
+      line-height: .98;
+    }
+
+    .login-card p,
+    .dashboard-header p,
+    .tool-card p {
+      color: var(--steel);
+      line-height: 1.5;
+    }
+
+    .login-form {
+      display: grid;
+      gap: 12px;
+      margin-top: 22px;
+    }
+
+    label {
+      color: var(--navy);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    input {
+      width: 100%;
+      min-height: 48px;
+      padding: 10px 12px;
+      border: 1px solid rgba(0, 51, 102, .22);
+      border-radius: 10px;
+      background: var(--white);
+      color: var(--charcoal);
+    }
+
+    .primary-button {
+      min-height: 50px;
+      border: 1px solid var(--gold);
+      border-radius: 8px;
+      background: var(--gold);
+      color: var(--deep-navy);
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .message {
+      min-height: 22px;
+      margin: 0;
+      color: #8A1F1F;
+      font-weight: 700;
+      line-height: 1.35;
+    }
+
+    .dashboard {
+      padding: 28px;
+    }
+
+    .dashboard-header {
+      display: grid;
+      gap: 8px;
+      padding-bottom: 22px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .dashboard-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .text-button {
+      min-height: 0;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: var(--steel);
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .phase-stack {
+      display: grid;
+      gap: 24px;
+      margin-top: 24px;
+    }
+
+    .phase-section {
+      display: grid;
+      gap: 14px;
+    }
+
+    .phase-heading {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 16px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .phase-heading h2 {
+      font-size: 26px;
+      line-height: 1.1;
+    }
+
+    .phase-heading span {
+      color: var(--steel);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .tool-grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    .tool-card {
+      display: grid;
+      gap: 12px;
+      min-height: 190px;
+      padding: 22px;
+      border: .5px solid var(--line);
+      border-radius: 12px;
+      background: var(--cream);
+    }
+
+    .tool-card h2 {
+      font-size: 24px;
+      line-height: 1.08;
+    }
+
+    .tool-card p {
+      margin: 0;
+    }
+
+    .tool-card.tbd {
+      min-height: 130px;
+      background: rgba(243, 237, 226, .55);
+    }
+
+    .tool-card.tbd h3 {
+      color: var(--navy);
+      font-size: 22px;
+    }
+
+    .tool-link {
+      align-self: end;
+      justify-self: start;
+      display: inline-flex;
+      align-items: center;
+      min-height: 42px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      background: var(--navy);
+      color: var(--white);
+      font-weight: 700;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    @media (min-width: 780px) {
+      .page {
+        padding: 32px;
+      }
+
+      .dashboard {
+        padding: 34px;
+      }
+
+      .tool-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <div class="shell">
+      <header class="topbar">
+        <a href="../" aria-label="The Untaught Lessons home">
+          <img class="logo" src="../assets/logo.png" alt="The Untaught Lessons" />
+        </a>
+        <a class="home-link" href="../">Back to site</a>
+      </header>
+
+      <section class="center-stage">
+        <article id="loginCard" class="login-card">
+          <span class="section-label">Member Login</span>
+          <h1>Welcome back.</h1>
+          <p>Enter the member password to open your Untaught Lessons tools.</p>
+
+          <form id="loginForm" class="login-form">
+            <label for="passwordInput">Password</label>
+            <input id="passwordInput" type="password" autocomplete="current-password" required />
+            <button class="primary-button" type="submit">Open member tools</button>
+            <p id="loginMessage" class="message" aria-live="polite"></p>
+          </form>
+        </article>
+
+        <section id="dashboard" class="dashboard hidden" aria-labelledby="dashboardTitle">
+          <div class="dashboard-header">
+            <span class="section-label">Member Tools</span>
+            <h1 id="dashboardTitle">Your practice workspace.</h1>
+            <p>Open the tools you have been building and keep practicing from one simple place.</p>
+            <div class="dashboard-actions">
+              <button id="logoutBtn" class="text-button" type="button">Log out</button>
+            </div>
+          </div>
+
+          <div class="phase-stack">
+            <section class="phase-section" aria-labelledby="phaseOneTitle">
+              <div class="phase-heading">
+                <h2 id="phaseOneTitle">Phase 1: Think clearly</h2>
+                <span>Available now</span>
+              </div>
+              <div class="tool-grid">
+                <article class="tool-card">
+                  <span class="section-label">Structured Thinking</span>
+                  <h2>Messy Grocery List</h2>
+                  <p>Practice sorting a messy list into clean MECE buckets.</p>
+                  <a class="tool-link" href="../apps/grocery-mece/">Open tool</a>
+                </article>
+
+                <article class="tool-card">
+                  <span class="section-label">Communication Drill</span>
+                  <h2>Manager's Messy Notes</h2>
+                  <p>Turn scattered manager notes into a clearer, more useful update.</p>
+                  <a class="tool-link" href="../apps/messy-notes/">Open tool</a>
+                </article>
+              </div>
+            </section>
+
+            <section class="phase-section" aria-labelledby="phaseTwoTitle">
+              <div class="phase-heading">
+                <h2 id="phaseTwoTitle">Phase 2: Speak concisely</h2>
+                <span>Coming soon</span>
+              </div>
+              <article class="tool-card tbd">
+                <span class="section-label">TBD</span>
+                <h3>Tools coming soon</h3>
+                <p>Exercises for concise speaking and sharper communication will live here.</p>
+              </article>
+            </section>
+
+            <section class="phase-section" aria-labelledby="phaseThreeTitle">
+              <div class="phase-heading">
+                <h2 id="phaseThreeTitle">Phase 3: Act confidently</h2>
+                <span>Coming soon</span>
+              </div>
+              <article class="tool-card tbd">
+                <span class="section-label">TBD</span>
+                <h3>Tools coming soon</h3>
+                <p>Exercises for confidence, presence, and action will live here.</p>
+              </article>
+            </section>
+
+            <section class="phase-section" aria-labelledby="otherToolsTitle">
+              <div class="phase-heading">
+                <h2 id="otherToolsTitle">Others: Other useful tools</h2>
+                <span>Available now</span>
+              </div>
+              <div class="tool-grid">
+                <article class="tool-card">
+                  <span class="section-label">Habit Tracker</span>
+                  <h2>12 in 12 Challenge Tracker</h2>
+                  <p>Pick one monthly experiment, check in daily, and review your progress.</p>
+                  <a class="tool-link" href="../apps/12-in-12/">Open tool</a>
+                </article>
+              </div>
+            </section>
+          </div>
+        </section>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    (function () {
+      var PASSWORD = 'utl2026';
+      var SESSION_KEY = 'utl_member_unlocked';
+      var loginCard = document.getElementById('loginCard');
+      var dashboard = document.getElementById('dashboard');
+      var form = document.getElementById('loginForm');
+      var input = document.getElementById('passwordInput');
+      var message = document.getElementById('loginMessage');
+      var logoutBtn = document.getElementById('logoutBtn');
+
+      function showDashboard() {
+        loginCard.classList.add('hidden');
+        dashboard.classList.remove('hidden');
+      }
+
+      function showLogin() {
+        dashboard.classList.add('hidden');
+        loginCard.classList.remove('hidden');
+        input.value = '';
+        input.focus();
+      }
+
+      if (localStorage.getItem(SESSION_KEY) === 'true') {
+        showDashboard();
+      }
+
+      form.addEventListener('submit', function (event) {
+        event.preventDefault();
+        if (input.value === PASSWORD) {
+          localStorage.setItem(SESSION_KEY, 'true');
+          message.textContent = '';
+          showDashboard();
+          return;
+        }
+        message.textContent = 'That password did not work.';
+      });
+
+      logoutBtn.addEventListener('click', function () {
+        localStorage.removeItem(SESSION_KEY);
+        showLogin();
+      });
+    })();
+  </script>
+</body>
+</html>
