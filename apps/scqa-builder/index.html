@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SCQA Builder | The Untaught Lessons</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="../../assets/favicon-bluebg-whitedoor-thicker-32.png?v=6">
+  <link rel="shortcut icon" type="image/png" href="../../assets/favicon-bluebg-whitedoor-thicker-32.png?v=6">
+  <link rel="apple-touch-icon" sizes="180x180" href="../../assets/apple-touch-icon.png?v=3">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=Lato:wght@300;400;700&family=Roboto+Mono:wght@400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --cream: #F3EDE2;
+      --navy: #003366;
+      --steel: #4D7094;
+      --charcoal: #4A4A4A;
+      --gold: #EEA320;
+      --gold-hover: #D4921C;
+      --white: #FFFFFF;
+      --line: #E8DFD1;
+      --rule: #D6E4F0;
+      --soft: #F9F7F3;
+      --tan: #EBE4D5;
+      --green: #6B8F71;
+      --red: #C0392B;
+      --amber: #C9A84C;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--cream);
+      color: var(--charcoal);
+      font-family: Lato, Arial, sans-serif;
+      font-size: 15px;
+      line-height: 1.5;
+    }
+
+    button, input, textarea { font: inherit; }
+
+    input, textarea {
+      width: 100%;
+      border: none;
+      border-radius: 8px;
+      background: var(--soft);
+      color: var(--charcoal);
+      resize: none;
+    }
+
+    input:focus, textarea:focus, button:focus-visible {
+      outline: 2px solid var(--gold);
+      outline-offset: 2px;
+      border: none;
+    }
+
+    textarea { overflow: hidden; }
+
+    .app-header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: grid;
+      grid-template-columns: auto auto minmax(240px, 1fr) auto;
+      align-items: center;
+      column-gap: 20px;
+      min-height: 76px;
+      padding: 12px 32px;
+      background: var(--navy);
+      color: var(--white);
+    }
+
+    .brand-logo-frame {
+      display: block;
+      width: 224px;
+      height: 46px;
+    }
+
+    .brand-logo-frame img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .brand-divider {
+      width: 1px;
+      height: 38px;
+      background: rgba(255, 255, 255, .42);
+    }
+
+    .app-kicker, .small-label, .eyebrow, .label, .hint {
+      font-family: "Roboto Mono", monospace;
+    }
+
+    .app-kicker {
+      display: block;
+      color: var(--gold);
+      font-size: 10px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+
+    .app-title {
+      display: block;
+      margin-top: 3px;
+      color: var(--white);
+      font-family: "Playfair Display", Georgia, serif;
+      font-size: 27px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .utility-cluster {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    .utility-metric {
+      min-width: 148px;
+      padding: 7px 10px;
+      border: 1px solid rgba(255, 255, 255, .18);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, .08);
+    }
+
+    .small-label {
+      color: var(--gold);
+      font-size: 9px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+
+    .utility-value, .timer-display {
+      color: var(--white);
+      font-family: "Roboto Mono", monospace;
+      font-size: 18px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .utility-controls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .icon-timer-btn {
+      width: 34px;
+      height: 34px;
+      border: 1px solid rgba(255, 255, 255, .3);
+      border-radius: 50%;
+      background: rgba(255, 255, 255, .08);
+      color: var(--white);
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .icon-timer-btn.reset { font-size: 21px; }
+    .icon-timer-btn:disabled { cursor: not-allowed; opacity: .45; }
+
+    .screen { display: none; }
+    .screen.active { display: block; }
+
+    .page-title {
+      padding: 40px 60px 28px;
+    }
+
+    .eyebrow {
+      margin-bottom: 8px;
+      color: var(--gold);
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    h1, h2, h3 {
+      margin: 0;
+      color: var(--navy);
+      font-family: "Playfair Display", Georgia, serif;
+      line-height: 1.15;
+    }
+
+    .title {
+      font-size: 36px;
+      font-weight: 700;
+    }
+
+    .subtitle {
+      max-width: 560px;
+      margin: 12px 0 0;
+      color: var(--charcoal);
+      font-size: 15px;
+    }
+
+    .callout {
+      max-width: 600px;
+      margin-top: 20px;
+      padding: 16px 20px;
+      border-radius: 10px;
+      background: var(--tan);
+    }
+
+    .how-strip {
+      display: flex;
+      gap: 32px;
+      max-width: 760px;
+      margin-top: 24px;
+      flex-wrap: wrap;
+    }
+
+    .how-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+    }
+
+    .num-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--navy);
+      color: var(--white);
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .card {
+      background: var(--white);
+      border: .5px solid var(--line);
+      border-radius: 12px;
+    }
+
+    .context-card {
+      max-width: 720px;
+      margin: 32px auto 0;
+      padding: 32px;
+    }
+
+    .label {
+      margin-bottom: 8px;
+      color: var(--gold);
+      font-size: 10px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+
+    .instruction {
+      margin: 0 0 12px;
+      color: var(--steel);
+      font-size: 13px;
+    }
+
+    .hint {
+      margin-top: 8px;
+      color: var(--gold);
+      font-size: 10px;
+    }
+
+    #contextInput { min-height: 120px; padding: 12px; }
+    #topicInput { padding: 10px 12px; }
+
+    .template-toggle, .cta-area { text-align: center; }
+    .template-toggle { margin-top: 16px; font-size: 13px; }
+
+    .link-button, .text-link {
+      border: 0;
+      background: transparent;
+      color: var(--navy);
+      cursor: pointer;
+      text-decoration: underline;
+      padding: 0;
+    }
+
+    .template-status {
+      display: inline-block;
+      margin-left: 8px;
+      color: var(--charcoal);
+      font-size: 12px;
+      opacity: 0;
+      transition: opacity .2s ease;
+    }
+
+    .template-status.show { opacity: 1; }
+
+    .cta-area {
+      margin-top: 28px;
+      padding-bottom: 48px;
+    }
+
+    .btn {
+      border-radius: 8px;
+      padding: 12px 28px;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    .btn-primary {
+      border: none;
+      background: var(--gold);
+      color: var(--navy);
+    }
+
+    .btn-primary:hover:not(:disabled) { background: var(--gold-hover); }
+
+    .btn-secondary {
+      border: 1.5px solid var(--navy);
+      background: transparent;
+      color: var(--navy);
+    }
+
+    .btn-secondary:hover { background: var(--tan); }
+    .btn:disabled { cursor: not-allowed; opacity: .4; }
+
+    .clear-link {
+      display: inline-block;
+      margin-top: 14px;
+      border: 0;
+      background: transparent;
+      color: var(--steel);
+      cursor: pointer;
+      font-size: 12px;
+      text-decoration: underline;
+    }
+
+    .work-layout {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      gap: 32px;
+      padding: 32px;
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 100px;
+      align-self: start;
+    }
+
+    .side-card { padding: 20px; }
+    .context-text { font-size: 13px; line-height: 1.55; }
+    .topic-label { margin-top: 8px; color: var(--navy); font-size: 12px; font-weight: 700; }
+    .edit-link { float: right; margin-top: 10px; color: var(--steel); font-size: 11px; }
+
+    .reference {
+      margin-top: 16px;
+      padding: 16px;
+      border-radius: 12px;
+      background: var(--tan);
+    }
+
+    .ref-row {
+      display: grid;
+      grid-template-columns: 24px 1fr;
+      gap: 8px;
+      padding: 9px 0;
+      border-top: 1px solid var(--rule);
+      font-size: 12px;
+    }
+
+    .ref-row:first-of-type { border-top: 0; }
+    .ref-row strong { color: var(--navy); }
+
+    .progress-box { margin-top: 16px; font-size: 13px; }
+    .progress-track { height: 4px; margin-top: 6px; border-radius: 2px; background: rgba(255,255,255,.8); overflow: hidden; }
+    .progress-fill { width: 0; height: 100%; background: var(--navy); }
+
+    .mobile-guidance { display: none; margin-bottom: 18px; padding: 16px; }
+    .mobile-guidance summary { cursor: pointer; color: var(--navy); font-weight: 700; }
+
+    .form-header { margin-bottom: 24px; }
+    .form-header h1 { font-size: 26px; }
+    .form-header p { max-width: 640px; margin: 10px 0 0; line-height: 1.6; }
+
+    .field-stack {
+      display: grid;
+      gap: 16px;
+    }
+
+    .scqa-card {
+      padding: 22px 24px;
+      border-left: 4px solid var(--navy);
+      border-radius: 10px;
+      background: var(--white);
+      border-top: .5px solid var(--line);
+      border-right: .5px solid var(--line);
+      border-bottom: .5px solid var(--line);
+    }
+
+    .scqa-card.focused { box-shadow: 0 0 0 2px #EEA32033; }
+    .scqa-card.c { border-left-color: var(--red); }
+    .scqa-card.q { border-left-color: var(--steel); }
+    .scqa-card.a { border-left-color: var(--green); }
+
+    .field-head {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .letter {
+      color: var(--navy);
+      font-family: "Playfair Display", Georgia, serif;
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .scqa-card.c .letter { color: var(--red); }
+    .scqa-card.q .letter { color: var(--steel); }
+    .scqa-card.a .letter { color: var(--green); }
+
+    .field-hint { margin: 0 0 10px; color: var(--steel); font-size: 12px; }
+    .scqa-card textarea { min-height: 86px; padding: 10px 12px; }
+    .scqa-card input { padding: 10px 12px; }
+    .warning { display: none; margin-top: 8px; color: var(--amber); font-family: "Roboto Mono", monospace; font-size: 10px; }
+    .warning.show { display: block; }
+
+    .summary-toggle {
+      margin-top: 14px;
+      border: 0;
+      background: transparent;
+      color: var(--steel);
+      cursor: pointer;
+      font-family: "Roboto Mono", monospace;
+      font-size: 10px;
+      padding: 0;
+    }
+
+    .summary-box { display: none; margin-top: 10px; }
+    .summary-box.show { display: block; }
+    .summary-item { margin-bottom: 6px; padding: 10px; border-radius: 6px; background: var(--soft); font-size: 12px; }
+
+    .bottom-bar {
+      position: sticky;
+      bottom: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin: 24px -32px -32px;
+      padding: 16px 32px;
+      border-top: .5px solid var(--line);
+      background: var(--cream);
+      z-index: 8;
+    }
+
+    .remaining {
+      color: var(--charcoal);
+      font-family: "Roboto Mono", monospace;
+      font-size: 10px;
+    }
+
+    .review { padding: 0 60px 48px; }
+    .review .page-title { padding-left: 0; padding-right: 0; }
+
+    .context-banner {
+      margin-bottom: 28px;
+      padding: 20px 32px;
+      border-radius: 12px;
+      background: var(--navy);
+      color: var(--white);
+    }
+
+    .context-banner .label { color: var(--white); opacity: .6; font-size: 9px; }
+    .context-banner p { margin: 0; font-size: 14px; line-height: 1.5; }
+    .context-banner strong { display: block; margin-top: 6px; color: var(--gold); font-size: 13px; }
+
+    .review-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    .review-header {
+      padding: 14px 20px;
+      border-radius: 8px 8px 0 0;
+      background: var(--navy);
+      color: var(--white);
+    }
+
+    .review-header .label { color: var(--white); opacity: .6; font-size: 9px; margin: 0; }
+    .review-body { border: .5px solid var(--line); border-top: 0; border-radius: 0 0 8px 8px; background: var(--white); }
+    .review-row { padding: 16px 20px; border-top: .5px solid var(--cream); }
+    .review-row:first-child { border-top: 0; }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      margin-right: 12px;
+      border-radius: 50%;
+      background: var(--navy);
+      color: var(--white);
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .badge.c { background: var(--red); }
+    .badge.q { background: var(--steel); }
+    .badge.a { background: var(--green); }
+    .row-label { display: block; margin: -23px 0 4px 34px; color: var(--steel); font-family: "Roboto Mono", monospace; font-size: 9px; letter-spacing: 1px; }
+    .row-content { margin-left: 34px; font-size: 14px; line-height: 1.6; }
+    .empty { color: var(--steel); font-style: italic; }
+
+    .action-row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-top: 32px; padding-bottom: 12px; }
+    .copy-group { display: grid; gap: 6px; }
+    .copy-note { color: var(--gold); font-family: "Roboto Mono", monospace; font-size: 10px; letter-spacing: 1px; }
+
+    .panel { position: relative; margin-top: 18px; padding: 28px 32px; border: .5px solid var(--line); border-radius: 12px; background: var(--white); }
+    .panel-close { position: absolute; top: 16px; right: 18px; border: 0; background: transparent; color: var(--charcoal); cursor: pointer; font-size: 18px; }
+    .score-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .score-line { color: var(--navy); font-family: "Playfair Display", Georgia, serif; font-size: 22px; font-weight: 700; }
+    .score-line span { color: var(--charcoal); font-family: Lato, Arial, sans-serif; font-size: 13px; font-weight: 400; }
+    .rule-row { padding: 10px 0; border-top: 1px solid var(--line); }
+    .rule-top { display: grid; grid-template-columns: 24px 1fr auto; gap: 8px; align-items: center; }
+    .mark.pass { color: var(--green); font-weight: 700; }
+    .mark.fail { color: var(--red); font-weight: 700; }
+    .rule-points { color: var(--steel); font-family: "Roboto Mono", monospace; font-size: 11px; }
+    .hint-toggle { margin-left: 8px; border: 0; background: transparent; color: var(--steel); cursor: pointer; font-size: 11px; padding: 0; }
+    .rule-hint { display: none; margin-top: 6px; padding: 10px 12px; border-radius: 6px; background: var(--soft); font-size: 12px; }
+    .rule-hint.show { display: block; }
+    .score-message { color: var(--steel); font-size: 13px; font-style: italic; }
+    .diff-note { margin-top: 20px; padding: 12px; border-radius: 8px; background: var(--soft); font-size: 13px; }
+    .diff-note.good { color: var(--green); }
+    .diff-note.warn { color: var(--amber); }
+
+    .sample-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    .sample-col { padding: 16px; border-radius: 8px; background: var(--soft); }
+    .sample-notice { margin: 0 0 14px; padding: 10px 14px; border-radius: 8px; background: var(--tan); font-family: "Roboto Mono", monospace; font-size: 11px; }
+
+    .modal { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; padding: 20px; background: rgba(0,0,0,.4); z-index: 30; }
+    .modal.show { display: flex; }
+    .modal-card { width: min(100%, 400px); padding: 32px; border-radius: 12px; background: var(--white); }
+    .modal-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+    .toast { position: fixed; left: 50%; bottom: 28px; padding: 12px 20px; border-radius: 8px; background: var(--white); color: var(--navy); font-size: 13px; opacity: 0; transform: translate(-50%, 12px); pointer-events: none; z-index: 9999; transition: all .2s ease; }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+    @media (max-width: 1023px) {
+      .app-header { grid-template-columns: 1fr; gap: 12px; }
+      .brand-divider { display: none; }
+      .utility-cluster { justify-content: flex-start; flex-wrap: wrap; }
+      .work-layout { display: block; padding: 24px 20px; }
+      .sidebar { display: none; }
+      .mobile-guidance { display: block; }
+    }
+
+    @media (max-width: 767px) {
+      .page-title, .review { padding-left: 20px; padding-right: 20px; }
+      .title { font-size: 31px; }
+      .context-card { margin-left: 20px; margin-right: 20px; padding: 24px; }
+      .bottom-bar { position: static; flex-direction: column; align-items: stretch; margin: 24px 0 0; padding: 16px 0 0; }
+      .review-grid, .sample-grid, .score-grid { grid-template-columns: 1fr; }
+      .action-row, .modal-actions { align-items: stretch; flex-direction: column; }
+      .btn, .copy-group { width: 100%; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+  <header class="app-header">
+    <a class="brand-logo-frame" href="../../index.html" aria-label="The Untaught Lessons homepage">
+      <img src="../../assets/utl-logo-nav-white.png" alt="The Untaught Lessons">
+    </a>
+    <div class="brand-divider" aria-hidden="true"></div>
+    <div>
+      <span class="app-kicker">Phase 2 · Speak Concisely</span>
+      <span class="app-title">SCQA Builder</span>
+    </div>
+    <div class="utility-cluster" aria-label="Writing utilities">
+      <div class="utility-metric" aria-live="polite">
+        <span class="small-label" id="wordCountLabel">Word count (in current box)</span>
+        <div class="utility-value" id="wordCountDisplay">0</div>
+      </div>
+      <div class="utility-metric">
+        <span class="small-label">Elapsed time</span>
+        <div class="timer-display" id="timerDisplay">00:00</div>
+      </div>
+      <div class="utility-controls">
+        <button class="icon-timer-btn" id="timerPauseBtn" type="button" aria-label="Pause timer">⏸</button>
+        <button class="icon-timer-btn" id="timerPlayBtn" type="button" aria-label="Start timer">▶</button>
+        <button class="icon-timer-btn reset" id="timerResetBtn" type="button" aria-label="Reset timer">↺</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="screen active" id="screen1">
+      <div class="page-title">
+        <div class="eyebrow">EXERCISE 02</div>
+        <h1 class="title">Frame your SCQA.</h1>
+        <p class="subtitle">Turn your problem into a clear, structured narrative — twice.</p>
+        <div class="callout">
+          <div class="label">WHY TWO FORMULATIONS?</div>
+          <div>The first SCQA gets your thinking on paper. The second forces you to take a different angle — sharpen the complication, reframe the question, or challenge your own answer.</div>
+        </div>
+        <div class="how-strip">
+          <div class="how-item"><span class="num-icon">1</span>Set your context</div>
+          <div class="how-item"><span class="num-icon">2</span>Write SCQA #1</div>
+          <div class="how-item"><span class="num-icon">3</span>Write a different SCQA #2</div>
+          <div class="how-item"><span class="num-icon">4</span>Review and check both</div>
+        </div>
+      </div>
+      <div class="context-card card">
+        <div class="label">YOUR CONTEXT</div>
+        <p class="instruction">What problem or situation are you working with? This is your raw material — you will frame it two different ways.</p>
+        <textarea id="contextInput" data-word-label="Context" placeholder="e.g. The Olympics is still the world's most recognisable sports property, but recent games are struggling to capture the same cultural impact and collective attention."></textarea>
+        <div class="hint">Tip: Write 2–4 sentences. Include the situation, the tension you see, and what question it raises.</div>
+        <div style="margin-top:16px">
+          <div class="label">TOPIC LABEL (OPTIONAL)</div>
+          <p class="instruction">Give your problem a short name.</p>
+          <input id="topicInput" type="text" data-word-label="Topic label" placeholder="e.g. Olympics cultural decline">
+        </div>
+      </div>
+      <div class="template-toggle">
+        <span>Need a starting point?</span>
+        <button class="link-button" type="button" id="loadTemplate">Load the Olympics template →</button>
+        <span class="template-status" id="templateStatus">✓ Template loaded</span>
+      </div>
+      <div class="cta-area">
+        <button class="btn btn-primary" type="button" id="toScqa1" disabled>Write SCQA #1 →</button>
+        <br>
+        <button class="clear-link" type="button" id="clearFresh">Clear and start fresh</button>
+      </div>
+    </section>
+
+    <section class="screen" id="screen2"></section>
+    <section class="screen" id="screen3"></section>
+
+    <section class="screen review" id="screen4">
+      <div class="page-title">
+        <div class="eyebrow">YOUR SCQA FORMULATIONS</div>
+        <h1 class="title">Two framings. One problem.</h1>
+        <p class="subtitle">Read both side by side. Notice what changed — that gap is where your clearer thinking lives.</p>
+      </div>
+      <div class="context-banner">
+        <div class="label">YOUR CONTEXT</div>
+        <p id="reviewContext"></p>
+        <strong id="reviewTopic"></strong>
+      </div>
+      <div class="review-grid" id="reviewGrid"></div>
+      <div class="action-row">
+        <button class="btn btn-secondary" type="button" id="editScqa2">← Edit SCQA #2</button>
+        <button class="btn btn-secondary" type="button" id="editScqa1">Edit SCQA #1</button>
+        <button class="btn btn-secondary" type="button" id="checkAnswers">Check my answers</button>
+        <button class="btn btn-secondary" type="button" id="showSamples">Show sample answers</button>
+        <button class="btn btn-secondary" type="button" id="startOver">Start over →</button>
+        <div class="copy-group">
+          <button class="btn btn-primary" type="button" id="copyEmail">Copy for email</button>
+          <div class="copy-note">READY TO PASTE INTO YOUR EMAIL TO AIKO</div>
+        </div>
+      </div>
+      <div id="feedbackMount"></div>
+      <div id="sampleMount"></div>
+    </section>
+  </main>
+
+  <div class="modal" id="confirmModal" role="dialog" aria-modal="true">
+    <div class="modal-card">
+      <p>This will clear both SCQA formulations. Are you sure?</p>
+      <div class="modal-actions">
+        <button class="btn btn-primary" id="confirmStartOver" type="button">Yes, start over</button>
+        <button class="btn btn-secondary" id="cancelStartOver" type="button">Cancel</button>
+      </div>
+    </div>
+  </div>
+  <div class="toast" id="toast">Copied! Paste it into your email to Aiko.</div>
+
+  <script>
+    const STORAGE_KEY = "utl_scqa_builder_v2";
+    const TIMER_TARGET = 10 * 60;
+    const blankScqa = () => ({ s: "", c: "", q: "", a: "" });
+    const blankState = () => ({ context: "", topicLabel: "", scqa1: blankScqa(), scqa2: blankScqa(), currentScreen: 1 });
+    const templateState = {
+      context: "The Olympics has historically been one of the most unifying global events. However, recent games have struggled to capture the same cultural impact and collective attention. The challenge is understanding why the Games are losing their gravity — and what can be done to restore it.",
+      topicLabel: "Olympics cultural decline",
+      scqa1: {
+        s: "The Olympics is still the world's most recognisable sports property, with unmatched athletes, history, and global reach.",
+        c: "However, recognition is no longer translating into gravity: shared moments are fragmenting, clip-first consumption rewards spectacle over meaning, and legitimacy is noisier — so the Games feel less like a global ritual and more like optional content.",
+        q: "How do we restore the Olympics as a rare, earned cultural timestamp — without chasing trends or diluting the brand?",
+        a: "Rebuild Olympic gravity through (1) ritual design that creates shared moments again, (2) athlete-led story arcs that make stakes legible over time, and (3) one coherent tone system that every channel reinforces while controlling commercial signals."
+      },
+      scqa2: {
+        s: "The Games deliver extraordinary competition across a massive programme, and digital platforms now provide unprecedented distribution and personalisation.",
+        c: "Yet the experience has become hard to follow: audiences are split across platforms and time zones, the broadcast-first format no longer matches how culture is consumed, and short-form clips strip context — so casual fans don't know what matters, why it matters, or who to care about.",
+        q: "How can the Olympics be made easy to follow for modern audiences while preserving prestige, neutrality, and emotional depth?",
+        a: "Create a clarity layer on top of the Games: (1) daily three-path viewing routes (Must-see / Stories / Underdogs), (2) structured narrative coverage that builds athlete stakes across days, and (3) a disciplined tone and partner system that reduces trust volatility and over-commercialisation signal."
+      },
+      currentScreen: 1
+    };
+
+    let state = blankState();
+    let currentScreen = 1;
+    let activeWordField = null;
+    let timerStarted = false;
+    let timerRunning = false;
+    let timerStartedAt = null;
+    let timerElapsedBeforePause = 0;
+
+    const $ = (selector, root = document) => root.querySelector(selector);
+    const $$ = (selector, root = document) => Array.from(root.querySelectorAll(selector));
+    const labels = { s: "Situation", c: "Complication", q: "Question", a: "Answer" };
+    const colors = { s: "", c: "c", q: "q", a: "a" };
+
+    function escapeHtml(text) {
+      return String(text || "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#039;");
+    }
+
+    function wordCount(text) { return (String(text).trim().match(/\b[\w'-]+\b/g) || []).length; }
+    function filled(text, min = 15) { return String(text || "").trim().length >= min; }
+    function autoResize(el) { if (el.tagName === "TEXTAREA") { el.style.height = "auto"; el.style.height = `${el.scrollHeight}px`; } }
+    function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+
+    function safeState(raw) {
+      try {
+        const parsed = JSON.parse(raw);
+        return {
+          ...blankState(),
+          ...parsed,
+          scqa1: { ...blankScqa(), ...(parsed.scqa1 || {}) },
+          scqa2: { ...blankScqa(), ...(parsed.scqa2 || {}) }
+        };
+      } catch {
+        return blankState();
+      }
+    }
+
+    function renderWordCount(target = activeWordField) {
+      $("#wordCountLabel").textContent = "Word count (in current box)";
+      $("#wordCountDisplay").textContent = target && target.matches("input, textarea") ? wordCount(target.value) : "0";
+    }
+
+    function elapsedSeconds() {
+      if (!timerStarted) return 0;
+      if (!timerRunning) return timerElapsedBeforePause;
+      return timerElapsedBeforePause + Math.floor((Date.now() - timerStartedAt) / 1000);
+    }
+
+    function formatSeconds(total) {
+      return `${String(Math.floor(total / 60)).padStart(2, "0")}:${String(total % 60).padStart(2, "0")}`;
+    }
+
+    function renderTimer() {
+      const elapsed = elapsedSeconds();
+      $("#timerDisplay").textContent = formatSeconds(elapsed);
+      $("#timerDisplay").style.color = elapsed > TIMER_TARGET ? "var(--gold)" : "";
+      $("#timerPauseBtn").disabled = !timerRunning;
+      $("#timerPlayBtn").disabled = timerRunning;
+      $("#timerPlayBtn").setAttribute("aria-label", timerStarted ? "Resume timer" : "Start timer");
+    }
+
+    function startTimer() {
+      if (timerRunning) return;
+      timerStarted = true;
+      timerRunning = true;
+      timerStartedAt = Date.now();
+      renderTimer();
+    }
+
+    function pauseTimer() {
+      if (!timerRunning) return;
+      timerElapsedBeforePause = elapsedSeconds();
+      timerRunning = false;
+      timerStartedAt = null;
+      renderTimer();
+    }
+
+    function resumeTimer() {
+      if (!timerStarted || timerRunning) return;
+      timerRunning = true;
+      timerStartedAt = Date.now();
+      renderTimer();
+    }
+
+    function resetTimer(start = false) {
+      timerStarted = false;
+      timerRunning = false;
+      timerStartedAt = null;
+      timerElapsedBeforePause = 0;
+      renderTimer();
+      if (start) startTimer();
+    }
+
+    function startTimerFromInteraction() { if (currentScreen === 2 || currentScreen === 3) startTimer(); }
+
+    function updateFromDom() {
+      const contextInput = $("#contextInput");
+      const topicInput = $("#topicInput");
+      if (contextInput) state.context = contextInput.value;
+      if (topicInput) state.topicLabel = topicInput.value;
+      $$("[data-scqa]").forEach((field) => {
+        state[field.dataset.scqa][field.dataset.part] = field.value;
+      });
+      save();
+      renderControls();
+      renderSidebar();
+      renderReview();
+    }
+
+    function renderControls() {
+      $("#toScqa1").disabled = !filled(state.context, 20);
+      const req1 = Object.values(state.scqa1).filter((v) => !filled(v)).length;
+      const req2 = Object.values(state.scqa2).filter((v) => !filled(v)).length;
+      const next1 = $("#toScqa2");
+      const next2 = $("#toReview");
+      if (next1) next1.disabled = req1 > 0;
+      if (next2) next2.disabled = req2 > 0;
+      const rem1 = $("#remaining1");
+      const rem2 = $("#remaining2");
+      if (rem1) rem1.textContent = req1 ? `${req1} field${req1 === 1 ? "" : "s"} still needed` : "";
+      if (rem2) rem2.textContent = req2 ? `${req2} field${req2 === 1 ? "" : "s"} still needed` : "";
+      ["1", "2"].forEach((n) => {
+        const fill = $(`#progress${n}`);
+        const text = $(`#progressText${n}`);
+        if (fill && text) {
+          const completed = Object.values(state[`scqa${n}`]).filter((v) => filled(v)).length;
+          text.textContent = `SCQA #${n}: ${completed} / 4 fields`;
+          fill.style.width = `${completed * 25}%`;
+        }
+      });
+    }
+
+    function renderSidebar() {
+      $$(".sideContext").forEach((el) => el.textContent = state.context || "No context yet.");
+      $$(".sideTopic").forEach((el) => {
+        el.textContent = state.topicLabel || "";
+        el.style.display = state.topicLabel ? "block" : "none";
+      });
+    }
+
+    function referenceMarkup(includeSummary = false) {
+      return `
+        <div class="reference">
+          <div class="label">WHAT EACH PART MEANS</div>
+          <div class="ref-row"><strong>S</strong><span>What is still true today — the stable context your audience accepts.</span></div>
+          <div class="ref-row"><strong>C</strong><span>What has changed or stopped working — the tension that makes the problem matter now.</span></div>
+          <div class="ref-row"><strong>Q</strong><span>The single most important question to answer to resolve the tension.</span></div>
+          <div class="ref-row"><strong>A</strong><span>Your clear answer, stated upfront, supported by 2–3 key ideas.</span></div>
+          <div class="ref-row"><strong></strong><em>SC defines the problem. QA builds your recommendation. They should feel like one connected story.</em></div>
+          ${includeSummary ? `<button class="summary-toggle" type="button" id="summaryToggle">REVIEW YOUR SCQA #1 ▾</button><div class="summary-box" id="summaryBox"></div>` : ""}
+        </div>
+      `;
+    }
+
+    function scqaFieldsMarkup(which) {
+      const data = state[which];
+      return `<div class="field-stack">${["s", "c", "q", "a"].map((part) => `
+        <article class="scqa-card ${colors[part]}" data-card>
+          <div class="field-head"><span class="letter">${part.toUpperCase()}</span><span class="label">${labels[part].toUpperCase()}</span></div>
+          <p class="field-hint">${hintFor(part)}</p>
+          ${part === "q"
+            ? `<input data-scqa="${which}" data-part="${part}" data-word-label="${labels[part]}" type="text" value="${escapeHtml(data[part])}" placeholder="${placeholderFor(part)}">`
+            : `<textarea data-scqa="${which}" data-part="${part}" data-word-label="${labels[part]}" placeholder="${placeholderFor(part)}">${escapeHtml(data[part])}</textarea>`}
+          <div class="hint">${microHintFor(part)}</div>
+          ${part === "q" ? `<div class="warning" data-warning="${which}">Questions end with a question mark — don't forget it.</div>` : ""}
+        </article>
+      `).join("")}</div>`;
+    }
+
+    function hintFor(part) {
+      return {
+        s: "What is still true today that makes this problem matter? This is the stable ground your audience stands on before you introduce the tension.",
+        c: "What has changed, broken, or stopped working — and why does it matter right now?",
+        q: "What is the single most important question that resolves the tension between S and C? One question only.",
+        a: "State your answer upfront, then support it with 2–3 key ideas. Lead with the conclusion."
+      }[part];
+    }
+
+    function microHintFor(part) {
+      return {
+        s: "Aim for 1–2 sentences. State facts your audience already accepts.",
+        c: "Make the tension sharp. Vague complications produce vague answers.",
+        q: "Must end with a question mark. One question only.",
+        a: "Lead with your answer. Support with 2–3 numbered points."
+      }[part];
+    }
+
+    function placeholderFor(part) {
+      return {
+        s: "What is already true about this situation that your audience would accept?",
+        c: "What has changed, broken, or become harder now?",
+        q: "What single question does that tension create?",
+        a: "What is your direct answer, supported by 2–3 key ideas?"
+      }[part];
+    }
+
+    function buildWorkScreen(screen, which) {
+      const isSecond = which === "scqa2";
+      const root = $(`#screen${screen}`);
+      root.innerHTML = `
+        <div class="work-layout">
+          <aside class="sidebar">
+            <div class="side-card card">
+              <div class="label">YOUR CONTEXT</div>
+              <div class="context-text sideContext"></div>
+              <div class="topic-label sideTopic"></div>
+              <button class="link-button edit-link" type="button" data-go="1">Edit ↗</button>
+            </div>
+            ${referenceMarkup(isSecond)}
+            <div class="progress-box">
+              <div id="progressText${isSecond ? "2" : "1"}">SCQA #${isSecond ? "2" : "1"}: 0 / 4 fields</div>
+              <div class="progress-track"><div class="progress-fill" id="progress${isSecond ? "2" : "1"}"></div></div>
+            </div>
+          </aside>
+          <section>
+            <details class="mobile-guidance card">
+              <summary>Show guidance ▾</summary>
+              ${referenceMarkup(isSecond)}
+            </details>
+            <div class="form-header">
+              <div class="eyebrow">FORMULATION ${isSecond ? "02" : "01"}</div>
+              <h1>${isSecond ? "Write a different SCQA." : "Write your first SCQA."}</h1>
+              <p>${isSecond ? "This is not a revision of your first SCQA. Change your angle: start from a different situation, sharpen the complication, reframe the question, or build a completely different answer." : "Use your context to frame a clear problem narrative. Start with what is true, introduce what is broken, distil it into one sharp question, then answer it directly."}</p>
+            </div>
+            ${isSecond ? `<div class="callout" style="margin:0 0 20px"><div class="label">HOW TO MAKE THIS ONE DIFFERENT</div><div>Try a different entry point. Make the complication sharper. Ask a question that challenges your first answer.</div></div>` : ""}
+            ${scqaFieldsMarkup(which)}
+            <div class="bottom-bar">
+              <button class="btn btn-secondary" type="button" data-go="${isSecond ? 2 : 1}">${isSecond ? "← Back to SCQA #1" : "← Back"}</button>
+              <div class="remaining" id="remaining${isSecond ? "2" : "1"}"></div>
+              <button class="btn btn-primary" type="button" id="${isSecond ? "toReview" : "toScqa2"}">${isSecond ? "Review both →" : "Write SCQA #2 →"}</button>
+            </div>
+          </section>
+        </div>`;
+    }
+
+    function renderReview() {
+      $("#reviewContext").textContent = state.context || "—";
+      $("#reviewTopic").textContent = state.topicLabel || "";
+      $("#reviewTopic").style.display = state.topicLabel ? "block" : "none";
+      $("#reviewGrid").innerHTML = [1, 2].map((n) => reviewColumn(`FORMULATION 0${n}`, state[`scqa${n}`])).join("");
+    }
+
+    function reviewColumn(title, data) {
+      return `<article><div class="review-header"><div class="label">${title}</div></div><div class="review-body">
+        ${["s", "c", "q", "a"].map((part) => `<div class="review-row"><span class="badge ${colors[part]}">${part.toUpperCase()}</span><span class="row-label">${labels[part].toUpperCase()}</span><div class="row-content ${data[part] ? "" : "empty"}">${escapeHtml(data[part] || "—")}</div></div>`).join("")}
+      </div></article>`;
+    }
+
+    function goToScreen(screen) {
+      currentScreen = screen;
+      state.currentScreen = screen;
+      save();
+      $$(".screen").forEach((el, index) => el.classList.toggle("active", index + 1 === screen));
+      if (screen === 2) resetTimer(true);
+      if (screen === 3) resetTimer(true);
+      if (screen === 4) { pauseTimer(); $("#feedbackMount").innerHTML = ""; $("#sampleMount").innerHTML = ""; renderReview(); }
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function renderAll() {
+      $("#contextInput").value = state.context;
+      $("#topicInput").value = state.topicLabel;
+      buildWorkScreen(2, "scqa1");
+      buildWorkScreen(3, "scqa2");
+      renderSidebar();
+      renderReview();
+      renderControls();
+      $$("textarea").forEach(autoResize);
+      renderSummary();
+    }
+
+    function renderSummary() {
+      $$("#summaryBox").forEach((box) => {
+        box.innerHTML = ["s", "c", "q", "a"].map((part) => `<div class="summary-item"><strong>${part.toUpperCase()}:</strong> ${escapeHtml(state.scqa1[part] || "—")}</div>`).join("");
+      });
+    }
+
+    function clearAll() {
+      localStorage.removeItem(STORAGE_KEY);
+      state = blankState();
+      resetTimer();
+      renderAll();
+      goToScreen(1);
+    }
+
+    function normalizeWords(text) { return String(text).toLowerCase().replace(/[^\w\s'-]/g, " ").split(/\s+/).filter(Boolean); }
+    function hasSharedPhrase(a, b, n) {
+      const aWords = normalizeWords(a), bWords = normalizeWords(b), phrases = new Set();
+      for (let i = 0; i <= aWords.length - n; i++) phrases.add(aWords.slice(i, i + n).join(" "));
+      for (let i = 0; i <= bWords.length - n; i++) if (phrases.has(bWords.slice(i, i + n).join(" "))) return true;
+      return false;
+    }
+    const stop = new Set(["the","and","for","with","that","this","have","from","they","will","what","when","which","there","their","about","would","could","should","being","been","were","more","also","into","than","then","some","your","our","its","how","why","does","still","now","very","most","only","both","make","such","even","these","those"]);
+    function significantWords(text) { return normalizeWords(text).filter((w) => w.length > 4 && !stop.has(w)); }
+    function echoCount(source, target) { const targetSet = new Set(significantWords(target)); return significantWords(source).filter((w) => targetSet.has(w)).length; }
+
+    function checkOne(data) {
+      const tension = ["however","but","yet","despite","no longer","failing","broken","lost","struggling","declining","increasingly","challenge","problem","tension","disconnect","gap","risk","threat","eroding","shifting","losing"];
+      const badStarts = ["first,","firstly,","to begin","there are","we need to look at","the reason","as we can see"];
+      const results = [];
+      const add = (pass, label, fail, hint) => results.push({ pass, label: pass ? label : fail, points: pass ? 1 : 0, hint });
+      const missing = Object.entries(data).filter(([, v]) => !filled(v)).map(([k]) => labels[k]);
+      add(!missing.length, "All four fields completed", `Missing field(s) — ${missing.join(", ")}`, "Every SCQA needs all four parts — an incomplete framework leaves the story broken.");
+      add(data.q.trim().endsWith("?"), "Question is properly framed", "Question is missing a question mark", "A question that does not end with '?' may not actually be a question.");
+      add(!badStarts.some((s) => data.a.trim().toLowerCase().startsWith(s)), "Answer leads with a conclusion", "Answer may be building up instead of leading", "Lead with your answer. Do not make the reader wait for your point.");
+      add(tension.some((w) => data.c.toLowerCase().includes(w)), "Complication signals real tension", "Complication may lack tension", "A strong complication should feel like something has changed or broken.");
+      add(!hasSharedPhrase(data.s, data.c, 5), "Situation and Complication are distinct", "Situation and Complication may overlap", "S sets stable ground. C disrupts it.");
+      add(echoCount(data.c, data.q) >= 2, "Question connects to your Complication", "Question may not address your Complication", "Your question should emerge from the tension in your complication.");
+      add(echoCount(data.q, data.a) >= 2, "Answer addresses your Question", "Answer may not address your Question", "Your answer should resolve your question directly.");
+      return results;
+    }
+
+    function scoreMessage(score) {
+      if (score >= 6) return "Sharp framing. This SCQA tells a clear story from start to finish.";
+      if (score >= 4) return "Solid start. Focus on the flagged areas — tension and alignment will tighten this significantly.";
+      if (score >= 2) return "The structure is there. Ask: does my complication really create tension? Does my answer really answer my question?";
+      return "Fill in all four fields first, then re-check. The framework only works when all parts are present.";
+    }
+
+    function renderFeedback() {
+      const r1 = checkOne(state.scqa1), r2 = checkOne(state.scqa2);
+      const s1 = r1.reduce((sum, r) => sum + r.points, 0), s2 = r2.reduce((sum, r) => sum + r.points, 0);
+      const similarS = hasSharedPhrase(state.scqa1.s, state.scqa2.s, 6);
+      const similarQ = hasSharedPhrase(state.scqa1.q, state.scqa2.q, 6);
+      const diffText = !similarS && !similarQ ? "Your two formulations take genuinely different angles — good work." : `${similarS ? "Your two Situations are very similar. " : ""}${similarQ ? "Your two Questions are very similar." : ""}`;
+      $("#feedbackMount").innerHTML = `<section class="panel"><button class="panel-close" data-close-panel="feedbackMount" type="button">×</button><div class="label">ANSWER CHECK</div>
+        <div class="score-grid"><div class="score-line">SCQA #1: ${s1} / 7 <span>pts</span></div><div class="score-line">SCQA #2: ${s2} / 7 <span>pts</span></div></div>
+        <div class="score-grid"><div>${rulesMarkup(r1)}<p class="score-message">${scoreMessage(s1)}</p></div><div>${rulesMarkup(r2)}<p class="score-message">${scoreMessage(s2)}</p></div></div>
+        <div class="label" style="color:var(--steel);margin-top:20px">DIFFERENTIATION CHECK</div><div class="diff-note ${!similarS && !similarQ ? "good" : "warn"}">${diffText}</div>
+      </section>`;
+    }
+
+    function rulesMarkup(results) {
+      return results.map((r) => `<div class="rule-row"><div class="rule-top"><span class="mark ${r.pass ? "pass" : "fail"}">${r.pass ? "✓" : "✗"}</span><span>${escapeHtml(r.label)}${!r.pass ? ` <button class="hint-toggle" type="button">▾ hint</button>` : ""}</span><span class="rule-points">[${r.points} pt]</span></div>${!r.pass ? `<div class="rule-hint">${escapeHtml(r.hint)}</div>` : ""}</div>`).join("");
+    }
+
+    function renderSamples() {
+      const custom = state.context.trim() !== templateState.context;
+      $("#sampleMount").innerHTML = `<section class="panel"><button class="panel-close" data-close-panel="sampleMount" type="button">×</button>${custom ? `<p class="sample-notice">These samples use the Olympics case study. Use them as a model for structure and language — not for content.</p>` : ""}<div class="sample-grid"><div class="sample-col"><div class="label" style="color:var(--steel)">SAMPLE FORMULATION 1</div>${reviewColumn("", templateState.scqa1)}</div><div class="sample-col"><div class="label" style="color:var(--steel)">SAMPLE FORMULATION 2</div>${reviewColumn("", templateState.scqa2)}</div></div></section>`;
+    }
+
+    function copyText() {
+      return `CONTEXT\n${state.context}\n\nSCQA FORMULATION 1\nS (Situation): ${state.scqa1.s}\nC (Complication): ${state.scqa1.c}\nQ (Question): ${state.scqa1.q}\nA (Answer): ${state.scqa1.a}\n\nSCQA FORMULATION 2\nS (Situation): ${state.scqa2.s}\nC (Complication): ${state.scqa2.c}\nQ (Question): ${state.scqa2.q}\nA (Answer): ${state.scqa2.a}`;
+    }
+
+    async function copyForEmail() {
+      try { await navigator.clipboard.writeText(copyText()); }
+      catch {
+        const helper = document.createElement("textarea");
+        helper.value = copyText();
+        document.body.appendChild(helper);
+        helper.select();
+        document.execCommand("copy");
+        helper.remove();
+      }
+      $("#toast").classList.add("show");
+      setTimeout(() => $("#toast").classList.remove("show"), 2500);
+    }
+
+    document.addEventListener("input", (event) => {
+      if (event.target.matches("textarea")) autoResize(event.target);
+      if (event.target.matches("input, textarea")) {
+        activeWordField = event.target;
+        renderWordCount(event.target);
+        startTimerFromInteraction();
+        updateFromDom();
+      }
+    });
+
+    document.addEventListener("focusin", (event) => {
+      if (event.target.matches("input, textarea")) {
+        activeWordField = event.target;
+        renderWordCount(event.target);
+      }
+      const card = event.target.closest("[data-card]");
+      if (card) card.classList.add("focused");
+    });
+
+    document.addEventListener("focusout", (event) => {
+      const card = event.target.closest("[data-card]");
+      if (card) card.classList.remove("focused");
+      if (event.target.dataset.part === "q" && filled(event.target.value, 10)) {
+        const warning = $(`[data-warning="${event.target.dataset.scqa}"]`);
+        if (warning) warning.classList.toggle("show", !event.target.value.trim().endsWith("?"));
+      }
+    });
+
+    document.addEventListener("click", (event) => {
+      const go = event.target.closest("[data-go]");
+      if (go) { updateFromDom(); goToScreen(Number(go.dataset.go)); return; }
+      if (event.target.id === "toScqa2") { updateFromDom(); goToScreen(3); return; }
+      if (event.target.id === "toReview") { updateFromDom(); goToScreen(4); return; }
+      const closePanel = event.target.dataset.closePanel;
+      if (closePanel) { $(`#${closePanel}`).innerHTML = ""; return; }
+      if (event.target.matches(".hint-toggle")) event.target.closest(".rule-row").querySelector(".rule-hint").classList.toggle("show");
+      if (event.target.id === "summaryToggle") $("#summaryBox").classList.toggle("show");
+    });
+
+    $("#loadTemplate").addEventListener("click", () => {
+      state = {
+        ...blankState(),
+        context: templateState.context,
+        topicLabel: templateState.topicLabel,
+        currentScreen
+      };
+      save();
+      renderAll();
+      $("#templateStatus").classList.add("show");
+      setTimeout(() => $("#templateStatus").classList.remove("show"), 2000);
+    });
+    $("#toScqa1").addEventListener("click", () => { updateFromDom(); goToScreen(2); });
+    $("#clearFresh").addEventListener("click", clearAll);
+    $("#editScqa2").addEventListener("click", () => goToScreen(3));
+    $("#editScqa1").addEventListener("click", () => goToScreen(2));
+    $("#checkAnswers").addEventListener("click", renderFeedback);
+    $("#showSamples").addEventListener("click", renderSamples);
+    $("#copyEmail").addEventListener("click", copyForEmail);
+    $("#startOver").addEventListener("click", () => $("#confirmModal").classList.add("show"));
+    $("#cancelStartOver").addEventListener("click", () => $("#confirmModal").classList.remove("show"));
+    $("#confirmStartOver").addEventListener("click", () => { $("#confirmModal").classList.remove("show"); clearAll(); });
+    $("#confirmModal").addEventListener("click", (event) => { if (event.target.id === "confirmModal") $("#confirmModal").classList.remove("show"); });
+    $("#timerPauseBtn").addEventListener("click", pauseTimer);
+    $("#timerPlayBtn").addEventListener("click", () => timerStarted ? resumeTimer() : startTimer());
+    $("#timerResetBtn").addEventListener("click", () => resetTimer());
+
+    setInterval(renderTimer, 1000);
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) state = safeState(saved);
+    renderAll();
+    renderTimer();
+    renderWordCount();
+    goToScreen(Math.min(Math.max(state.currentScreen, 1), 4));
+  </script>
+</body>
+</html>

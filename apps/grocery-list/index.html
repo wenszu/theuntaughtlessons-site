@@ -3,8 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="A free Untaught Lessons practice tool for sorting a messy grocery list into clear MECE buckets and reflecting on the structure." />
-  <title>Turn your messy grocery list into a clear guide</title>
+  <meta name="description" content="A free Untaught Lessons practice tool for sorting a grocery list into clear MECE buckets and reflecting on the structure." />
+  <title>Grocery list</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="../../assets/favicon-bluebg-whitedoor-thicker-32.png?v=6">
+  <link rel="shortcut icon" type="image/png" href="../../assets/favicon-bluebg-whitedoor-thicker-32.png?v=6">
+  <link rel="apple-touch-icon" sizes="180x180" href="../../assets/apple-touch-icon.png?v=3">
   <link rel="stylesheet" href="../shared/activity-timer.css">
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lato:wght@300;400;700&family=Roboto+Mono:wght@400;500&display=swap');
@@ -27,6 +30,126 @@
       font-family: 'Lato', sans-serif;
       color: var(--charcoal);
       background: var(--bg);
+    }
+
+    .app-header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: grid;
+      grid-template-columns: auto auto minmax(220px, 1fr) auto;
+      align-items: center;
+      column-gap: 20px;
+      min-height: 76px;
+      padding: 12px 32px;
+      background: var(--navy);
+      color: var(--white);
+    }
+
+    .brand-logo-frame {
+      display: block;
+      width: 224px;
+      height: 46px;
+    }
+
+    .brand-logo-frame img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .brand-divider {
+      width: 1px;
+      height: 38px;
+      background: rgba(255, 255, 255, .42);
+    }
+
+    .app-kicker {
+      display: block;
+      color: var(--gold);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+
+    .app-title {
+      display: block;
+      margin-top: 3px;
+      color: var(--white);
+      font-family: 'Playfair Display', serif;
+      font-size: 27px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .app-timer {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    .timer-compat {
+      display: none;
+    }
+
+    .utility-metric {
+      min-width: 148px;
+      padding: 7px 10px;
+      border: 1px solid rgba(255, 255, 255, .18);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, .08);
+    }
+
+    .utility-metric .small-label {
+      color: var(--gold);
+    }
+
+    .utility-metric .activity-timer-display {
+      color: var(--white);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 18px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .utility-metric .activity-timer-display.over-target {
+      color: var(--gold);
+    }
+
+    .utility-controls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .icon-timer-btn {
+      width: 34px;
+      height: 34px;
+      border: 1px solid rgba(255, 255, 255, .3);
+      border-radius: 50%;
+      background: rgba(255, 255, 255, .08);
+      color: var(--white);
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: 700;
+      line-height: 1;
+      padding: 0;
+    }
+
+    .icon-timer-btn:hover {
+      background: rgba(255, 255, 255, .16);
+    }
+
+    .icon-timer-btn.reset {
+      font-size: 21px;
+    }
+
+    .icon-timer-btn:disabled {
+      cursor: not-allowed;
+      opacity: .45;
     }
 
     .page {
@@ -273,6 +396,20 @@
     .hidden { display: none; }
 
     @media (max-width: 980px) {
+      .app-header {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+
+      .brand-divider {
+        display: none;
+      }
+
+      .app-timer {
+        justify-content: flex-start;
+        flex-wrap: wrap;
+      }
+
       .header-grid { grid-template-columns: 1fr; }
       .layout { grid-template-columns: 1fr; }
       .item-zone { min-height: 260px; }
@@ -286,44 +423,53 @@
   </style>
 </head>
 <body>
+  <header class="app-header">
+    <a class="brand-logo-frame" href="../../index.html" aria-label="The Untaught Lessons homepage">
+      <img src="../../assets/utl-logo-nav-white.png" alt="The Untaught Lessons">
+    </a>
+    <div class="brand-divider" aria-hidden="true"></div>
+    <div>
+      <span class="app-kicker">Phase 1 · Think Clearly</span>
+      <span class="app-title">Grocery List</span>
+    </div>
+    <div class="app-timer" aria-label="Elapsed time">
+      <div class="utility-metric">
+        <span class="small-label">Elapsed time</span>
+        <div class="activity-timer-display" id="timerDisplay">00:00</div>
+      </div>
+      <div class="utility-controls">
+        <button class="icon-timer-btn" id="timerPauseIconBtn" type="button" aria-label="Pause timer">⏸</button>
+        <button class="icon-timer-btn" id="timerPlayIconBtn" type="button" aria-label="Start timer">▶</button>
+        <button class="icon-timer-btn reset" id="timerResetIconBtn" type="button" aria-label="Reset timer">↺</button>
+      </div>
+      <div class="activity-timer-row minimized timer-compat" id="timerRow">
+        <div class="activity-timer-main">
+          <span class="small-label">Elapsed time</span>
+        </div>
+        <div>
+          <p class="activity-timer-note" id="timerNote">Timer starts when you begin sorting. Target: 5 minutes.</p>
+          <div class="activity-timer-controls">
+            <button id="toggleTimerBtn" type="button">Hide timer</button>
+            <button id="startTimerBtn" type="button">Start</button>
+            <button id="pauseTimerBtn" type="button" disabled>Pause</button>
+            <button id="resumeTimerBtn" type="button" class="hidden">Resume</button>
+            <button id="resetTimerBtn" type="button">Reset timer</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
   <main id="content" class="page">
     <header id="hero" class="header">
-      <div class="header-grid">
-        <div>
-          <h1>Turn your messy grocery list into a clear guide</h1>
-          <p>Practice structured thinking: create exactly three clear buckets, sort the messy list, and reflect on why your structure is MECE (mutually exclusive, collectively exhaustive).</p>
-        </div>
-
-        <aside class="panel timer-panel" aria-label="Elapsed time">
-          <div class="panel-head">
-            <h2>Timer</h2>
-            <button id="toggleTimerBtn" type="button">Hide timer</button>
-          </div>
-          <div class="panel-body">
-            <div class="activity-timer-row minimized" id="timerRow">
-              <div class="activity-timer-main">
-                <span class="small-label">Elapsed time</span>
-                <div class="activity-timer-display" id="timerDisplay">00:00</div>
-              </div>
-              <div>
-                <p class="activity-timer-note" id="timerNote">Timer starts when you begin sorting. Target: 5 minutes.</p>
-                <div class="activity-timer-controls">
-                  <button id="startTimerBtn" type="button">Start</button>
-                  <button id="pauseTimerBtn" type="button" disabled>Pause</button>
-                  <button id="resumeTimerBtn" type="button" class="hidden">Resume</button>
-                  <button id="resetTimerBtn" type="button">Reset timer</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </aside>
-      </div>
+      <h1>Grocery list</h1>
+      <p>Practice structured thinking: create exactly three clear buckets, sort the messy list, and reflect on why your structure is MECE (mutually exclusive, collectively exhaustive).</p>
     </header>
 
     <section id="exercise" class="layout">
       <article id="messy-list" class="panel">
         <div class="panel-head">
-          <h2>Messy grocery list</h2>
+          <h2>Grocery list</h2>
           <span class="small" id="listCount"></span>
         </div>
         <div class="panel-body">
@@ -811,6 +957,22 @@
         activityTimer.reset();
         renderAll();
       });
+
+      document.getElementById('timerPauseIconBtn').addEventListener('click', () => {
+        activityTimer.pause();
+      });
+      document.getElementById('timerPlayIconBtn').addEventListener('click', () => {
+        activityTimer.hasStarted() ? activityTimer.resume() : activityTimer.start();
+      });
+      document.getElementById('timerResetIconBtn').addEventListener('click', () => {
+        activityTimer.reset();
+      });
+    }
+
+    function syncHeaderTimerIcons() {
+      document.getElementById('timerPauseIconBtn').disabled = !activityTimer.isRunning();
+      document.getElementById('timerPlayIconBtn').disabled = activityTimer.isRunning();
+      document.getElementById('timerPlayIconBtn').setAttribute('aria-label', activityTimer.hasStarted() ? 'Resume timer' : 'Start timer');
     }
 
     // -------------------------
@@ -830,6 +992,8 @@
       targetSeconds: 300,
       idleMessage: 'Timer starts when you begin sorting. Target: 5 minutes.'
     });
+    setInterval(syncHeaderTimerIcons, 500);
+    syncHeaderTimerIcons();
     buildBuckets();
     wireDragAndDrop();
     wireEvents();
