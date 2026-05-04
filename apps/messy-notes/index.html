@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="A free Untaught Lessons practice tool for turning rough manager notes into a structured, concise, Aiko-ready response." />
   <title>Manager’s messy notes</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="../../assets/favicon-bluebg-whitedoor-thicker-32.png?v=6">
+  <link rel="shortcut icon" type="image/png" href="../../assets/favicon-bluebg-whitedoor-thicker-32.png?v=6">
+  <link rel="apple-touch-icon" sizes="180x180" href="../../assets/apple-touch-icon.png?v=3">
   <link rel="stylesheet" href="../shared/activity-timer.css">
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lato:wght@300;400;700&family=Roboto+Mono:wght@400;500&display=swap');
@@ -35,6 +38,126 @@
     input,
     textarea {
       font: inherit;
+    }
+
+    .app-header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: grid;
+      grid-template-columns: auto auto minmax(220px, 1fr) auto;
+      align-items: center;
+      column-gap: 20px;
+      min-height: 76px;
+      padding: 12px 32px;
+      background: var(--navy);
+      color: var(--white);
+    }
+
+    .app-logo-frame {
+      display: block;
+      width: 224px;
+      height: 46px;
+    }
+
+    .app-logo-frame img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .brand-divider {
+      width: 1px;
+      height: 38px;
+      background: rgba(255, 255, 255, .42);
+    }
+
+    .app-kicker {
+      display: block;
+      color: var(--gold);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+
+    .app-title {
+      display: block;
+      margin-top: 3px;
+      color: var(--white);
+      font-family: 'Playfair Display', serif;
+      font-size: 27px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .app-timer {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    .timer-compat {
+      display: none;
+    }
+
+    .utility-metric {
+      min-width: 148px;
+      padding: 7px 10px;
+      border: 1px solid rgba(255, 255, 255, .18);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, .08);
+    }
+
+    .utility-metric .small-label {
+      color: var(--gold);
+    }
+
+    .utility-metric .activity-timer-display {
+      color: var(--white);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 18px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .utility-metric .activity-timer-display.over-target {
+      color: var(--gold);
+    }
+
+    .utility-controls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .icon-timer-btn {
+      width: 34px;
+      height: 34px;
+      border: 1px solid rgba(255, 255, 255, .3);
+      border-radius: 50%;
+      background: rgba(255, 255, 255, .08);
+      color: var(--white);
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: 700;
+      line-height: 1;
+      padding: 0;
+    }
+
+    .icon-timer-btn:hover {
+      background: rgba(255, 255, 255, .16);
+    }
+
+    .icon-timer-btn.reset {
+      font-size: 21px;
+    }
+
+    .icon-timer-btn:disabled {
+      cursor: not-allowed;
+      opacity: .45;
     }
 
     .page {
@@ -255,6 +378,10 @@
     .timer-controls button {
       padding: 7px 10px;
       font-size: .9rem;
+    }
+
+    .app-timer .timer-compat {
+      display: none !important;
     }
 
     .mode-switch {
@@ -615,6 +742,20 @@
     .hidden { display: none; }
 
     @media (max-width: 980px) {
+      .app-header {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+
+      .brand-divider {
+        display: none;
+      }
+
+      .app-timer {
+        justify-content: flex-start;
+        flex-wrap: wrap;
+      }
+
       .layout {
         grid-template-columns: 1fr;
       }
@@ -750,15 +891,44 @@
   </style>
 </head>
 <body>
-  <main id="content" class="page">
-    <div id="navigation" class="topbar">
-      <a class="brand" href="../../index.html" aria-label="The Untaught Lessons homepage">
-        <img src="../../assets/logo.png" alt="The Untaught Lessons" />
-        <span>The Untaught Lessons</span>
-      </a>
-      <span class="phase-pill" id="phasePill">Think clearly</span>
+  <header class="app-header">
+    <a class="app-logo-frame" href="../../index.html" aria-label="The Untaught Lessons homepage">
+      <img src="../../assets/utl-logo-nav-white.png" alt="The Untaught Lessons">
+    </a>
+    <div class="brand-divider" aria-hidden="true"></div>
+    <div>
+      <span class="app-kicker">Phase 1 · Think Clearly</span>
+      <span class="app-title">Manager’s Messy Notes</span>
     </div>
+    <div class="app-timer" aria-label="Elapsed time">
+      <div class="utility-metric">
+        <span class="small-label">Elapsed time</span>
+        <div class="timer-display activity-timer-display" id="timerDisplay">00:00</div>
+      </div>
+      <div class="utility-controls">
+        <button class="icon-timer-btn" id="timerPauseIconBtn" type="button" aria-label="Pause timer">⏸</button>
+        <button class="icon-timer-btn" id="timerPlayIconBtn" type="button" aria-label="Start timer">▶</button>
+        <button class="icon-timer-btn reset" id="timerResetIconBtn" type="button" aria-label="Reset timer">↺</button>
+      </div>
+      <div class="timer-row activity-timer-row minimized timer-compat" id="timerRow">
+        <div class="timer-main activity-timer-main">
+          <span class="small-label">Elapsed time</span>
+        </div>
+        <div>
+          <p class="timer-note activity-timer-note" id="timerNote">Timer starts when you begin writing. Target: 5 minutes.</p>
+          <div class="timer-controls activity-timer-controls">
+            <button id="toggleTimerBtn" type="button">Hide timer</button>
+            <button id="startTimerBtn" type="button">Start</button>
+            <button id="pauseTimerBtn" type="button" disabled>Pause</button>
+            <button id="resumeTimerBtn" type="button" class="hidden">Resume</button>
+            <button id="resetTimerBtn" type="button">Reset timer</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
 
+  <main id="content" class="page">
     <header id="hero" class="hero">
       <h1 id="activityTitle">Manager’s messy notes</h1>
       <p class="subtitle" id="activitySubtitle">Turn a rushed update into an Aiko-ready summary.</p>
@@ -818,26 +988,9 @@
         <article class="panel">
           <div class="panel-head">
             <h2>Your response</h2>
-            <button id="toggleTimerBtn" type="button">Hide timer</button>
           </div>
           <div class="panel-body">
             <div id="recentAttempts" class="recent-attempts hidden"></div>
-
-            <div class="timer-row activity-timer-row minimized" id="timerRow">
-              <div class="timer-main activity-timer-main">
-                <span class="small-label">Elapsed time</span>
-                <div class="timer-display activity-timer-display" id="timerDisplay">00:00</div>
-              </div>
-              <div>
-                <p class="timer-note activity-timer-note" id="timerNote">Timer starts when you begin writing. Target: 5 minutes.</p>
-                <div class="timer-controls activity-timer-controls">
-                  <button id="startTimerBtn" type="button">Start</button>
-                  <button id="pauseTimerBtn" type="button" disabled>Pause</button>
-                  <button id="resumeTimerBtn" type="button" class="hidden">Resume</button>
-                  <button id="resetTimerBtn" type="button">Reset timer</button>
-                </div>
-              </div>
-            </div>
 
             <div class="mode-switch" aria-label="Answer input mode">
               <button class="mode-btn active" id="openModeBtn" type="button">Open response</button>
@@ -1564,7 +1717,23 @@
         renderAttempts();
       });
 
+      els.timerPauseIconBtn.addEventListener('click', () => {
+        pauseTimer();
+      });
+      els.timerPlayIconBtn.addEventListener('click', () => {
+        activityTimer.hasStarted() ? resumeTimer() : startTimer();
+      });
+      els.timerResetIconBtn.addEventListener('click', () => {
+        resetTimer();
+      });
+
       wireMobilePanelToggles();
+    }
+
+    function syncHeaderTimerIcons() {
+      els.timerPauseIconBtn.disabled = !activityTimer.isRunning();
+      els.timerPlayIconBtn.disabled = activityTimer.isRunning();
+      els.timerPlayIconBtn.setAttribute('aria-label', activityTimer.hasStarted() ? 'Resume timer' : 'Start timer');
     }
 
     function cacheElements() {
@@ -1585,6 +1754,9 @@
         'pauseTimerBtn',
         'resumeTimerBtn',
         'resetTimerBtn',
+        'timerPauseIconBtn',
+        'timerPlayIconBtn',
+        'timerResetIconBtn',
         'openModeBtn',
         'sectionModeBtn',
         'openMode',
@@ -1630,6 +1802,8 @@
         },
         targetSeconds: ACTIVITY.durationSeconds
       });
+      setInterval(syncHeaderTimerIcons, 500);
+      syncHeaderTimerIcons();
       initializeResponsiveTimer();
       wireEvents();
     }

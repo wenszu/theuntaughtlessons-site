@@ -1,0 +1,2156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Issue Tree Builder | The Untaught Lessons</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="../../assets/favicon-bluebg-whitedoor-thicker-32.png?v=6">
+  <link rel="shortcut icon" type="image/png" href="../../assets/favicon-bluebg-whitedoor-thicker-32.png?v=6">
+  <link rel="apple-touch-icon" sizes="180x180" href="../../assets/apple-touch-icon.png?v=3">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=Lato:wght@300;400;700&family=Roboto+Mono:wght@400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --cream: #F3EDE2;
+      --navy: #003366;
+      --steel: #4D7094;
+      --charcoal: #4A4A4A;
+      --gold: #EEA320;
+      --gold-hover: #D4921C;
+      --white: #FFFFFF;
+      --line: #E8DFD1;
+      --rule: #D6E4F0;
+      --soft: #F9F7F3;
+      --tan: #EBE4D5;
+      --green: #6B8F71;
+      --red: #C0392B;
+      --amber: #C9A84C;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--cream);
+      color: var(--charcoal);
+      font-family: Lato, Arial, sans-serif;
+      font-size: 15px;
+      line-height: 1.5;
+    }
+
+    button,
+    input,
+    textarea {
+      font: inherit;
+    }
+
+    button,
+    input,
+    textarea,
+    .card,
+    .argument-card,
+    .modal-card,
+    .toast {
+      transition: all 0.2s ease;
+    }
+
+    input,
+    textarea {
+      width: 100%;
+      border: none;
+      border-radius: 8px;
+      background: var(--soft);
+      color: var(--charcoal);
+      resize: none;
+    }
+
+    input:focus,
+    textarea:focus,
+    button:focus-visible,
+    a:focus-visible {
+      outline: 2px solid var(--gold);
+      outline-offset: 2px;
+      border: none;
+    }
+
+    textarea {
+      overflow: hidden;
+    }
+
+    .app-header {
+      display: grid;
+      grid-template-columns: auto auto minmax(240px, 1fr) auto;
+      align-items: center;
+      column-gap: 20px;
+      width: 100%;
+      min-height: 76px;
+      padding: 12px 32px;
+      background: var(--navy);
+      color: var(--white);
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-logo-frame {
+      display: block;
+      width: 224px;
+      height: 46px;
+    }
+
+    .brand-logo-frame img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .brand-divider {
+      width: 1px;
+      height: 38px;
+      background: rgba(255, 255, 255, 0.42);
+    }
+
+    .app-heading {
+      justify-self: start;
+      min-width: 0;
+    }
+
+    .app-kicker {
+      display: block;
+      color: var(--gold);
+      font-family: "Roboto Mono", monospace;
+      font-size: 10px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+
+    .app-title {
+      display: block;
+      margin-top: 3px;
+      color: var(--white);
+      font-family: "Playfair Display", Georgia, serif;
+      font-size: 27px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .screen {
+      display: none;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    .page-title {
+      padding: 40px 60px 28px;
+    }
+
+    .eyebrow,
+    .label,
+    .hint,
+    .mono {
+      font-family: "Roboto Mono", monospace;
+    }
+
+    .eyebrow {
+      margin-bottom: 8px;
+      color: var(--gold);
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    h1,
+    h2,
+    h3 {
+      margin: 0;
+      color: var(--navy);
+      font-family: "Playfair Display", Georgia, serif;
+      line-height: 1.15;
+    }
+
+    .title {
+      font-size: 36px;
+      font-weight: 700;
+    }
+
+    .subtitle {
+      max-width: 520px;
+      margin: 12px 0 0;
+      color: var(--charcoal);
+      font-size: 15px;
+    }
+
+    .how-strip {
+      display: flex;
+      gap: 32px;
+      max-width: 560px;
+      margin-top: 24px;
+      flex-wrap: wrap;
+    }
+
+    .how-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--charcoal);
+      font-size: 13px;
+    }
+
+    .num-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--navy);
+      color: var(--white);
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .card {
+      background: var(--white);
+      border: 0.5px solid var(--line);
+      border-radius: 12px;
+    }
+
+    .problem-card {
+      max-width: 720px;
+      margin: 32px auto 0;
+      padding: 32px;
+    }
+
+    .label {
+      margin-bottom: 8px;
+      color: var(--gold);
+      font-size: 10px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+
+    .instruction {
+      margin: 0 0 12px;
+      color: var(--steel);
+      font-size: 13px;
+    }
+
+    #problemStatement {
+      min-height: 100px;
+      padding: 12px;
+      font-size: 14px;
+    }
+
+    .hint {
+      margin-top: 8px;
+      color: var(--gold);
+      font-size: 10px;
+    }
+
+    .template-toggle,
+    .cta-area {
+      text-align: center;
+    }
+
+    .template-toggle {
+      margin-top: 16px;
+      font-size: 13px;
+    }
+
+    .link-button {
+      border: 0;
+      background: transparent;
+      color: var(--navy);
+      cursor: pointer;
+      text-decoration: underline;
+      padding: 0;
+    }
+
+    .template-status {
+      display: inline-block;
+      margin-left: 8px;
+      color: var(--charcoal);
+      font-size: 12px;
+      opacity: 0;
+    }
+
+    .template-status.show {
+      opacity: 1;
+    }
+
+    .cta-area {
+      margin-top: 28px;
+      padding-bottom: 48px;
+    }
+
+    .btn {
+      border-radius: 8px;
+      padding: 12px 28px;
+      cursor: pointer;
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      border: none;
+      background: var(--gold);
+      color: var(--navy);
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: var(--gold-hover);
+    }
+
+    .btn-secondary {
+      border: 1.5px solid var(--navy);
+      background: transparent;
+      color: var(--navy);
+    }
+
+    .btn-secondary:hover {
+      background: var(--tan);
+    }
+
+    .btn:disabled {
+      cursor: not-allowed;
+      opacity: 0.4;
+    }
+
+    .clear-link {
+      display: inline-block;
+      margin-top: 14px;
+      border: 0;
+      background: transparent;
+      color: var(--steel);
+      cursor: pointer;
+      font-size: 12px;
+      text-decoration: underline;
+    }
+
+    .build-main {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 32px;
+      padding: 32px;
+    }
+
+    .utility-cluster {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+      flex: 0 0 auto;
+    }
+
+    .utility-metric {
+      min-width: 148px;
+      padding: 7px 10px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .small-label {
+      color: var(--gold);
+      font-family: "Roboto Mono", monospace;
+      font-size: 9px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+
+    .utility-value,
+    .activity-timer-display {
+      color: var(--white);
+      font-family: "Roboto Mono", monospace;
+      font-size: 18px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .activity-timer-display.over-target {
+      color: var(--gold);
+    }
+
+    .utility-controls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .icon-timer-btn {
+      width: 34px;
+      height: 34px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--white);
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .icon-timer-btn:hover {
+      background: rgba(255, 255, 255, 0.16);
+    }
+
+    .icon-timer-btn.reset {
+      font-size: 21px;
+    }
+
+    .detail-remove {
+      position: absolute;
+      top: 50%;
+      right: 8px;
+      width: 24px;
+      height: 24px;
+      border: 0;
+      border-radius: 50%;
+      background: transparent;
+      color: var(--steel);
+      cursor: pointer;
+      font-size: 18px;
+      line-height: 1;
+      transform: translateY(-50%);
+    }
+
+    .detail-remove:hover {
+      background: var(--tan);
+      color: var(--navy);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 32px;
+      align-self: start;
+    }
+
+    .side-card {
+      position: relative;
+      padding: 20px;
+      padding-bottom: 34px;
+    }
+
+    .question-text {
+      color: var(--navy);
+      font-family: "Playfair Display", Georgia, serif;
+      font-size: 15px;
+      font-style: italic;
+      line-height: 1.5;
+    }
+
+    .edit-link {
+      position: absolute;
+      right: 18px;
+      bottom: 12px;
+      color: var(--steel);
+      font-size: 11px;
+    }
+
+    .progress-box {
+      margin-top: 16px;
+      font-size: 13px;
+    }
+
+    .progress-track {
+      height: 4px;
+      margin-top: 6px;
+      border-radius: 2px;
+      background: rgba(255, 255, 255, 0.8);
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      width: 0;
+      height: 100%;
+      border-radius: inherit;
+      background: var(--navy);
+    }
+
+    .guidance {
+      margin-top: 16px;
+      padding: 16px;
+      border-radius: 12px;
+      background: var(--tan);
+    }
+
+    .guidance p {
+      margin: 0;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .guidance strong {
+      color: var(--navy);
+      font-weight: 700;
+    }
+
+    .guidance-rule {
+      height: 1px;
+      margin: 10px 0;
+      background: var(--rule);
+    }
+
+    .mobile-guidance {
+      display: none;
+      margin-bottom: 18px;
+    }
+
+    .mobile-guidance summary {
+      cursor: pointer;
+      color: var(--navy);
+      font-weight: 700;
+    }
+
+    .tree-area {}
+
+    .tree-topbar { display: none; }
+
+    .question-node {
+      border: 2px solid var(--navy);
+      border-radius: 10px;
+      padding: 16px 24px;
+      text-align: center;
+    }
+
+    .question-node h2 {
+      font-size: 17px;
+    }
+
+    .vertical-connector {
+      width: 1px;
+      height: 24px;
+      margin: 0 auto;
+      border-left: 1px dashed var(--rule);
+    }
+
+    .hypothesis-card {
+      margin-bottom: 24px;
+      padding: 20px;
+      border-left: 4px solid var(--gold);
+      border-radius: 8px;
+      background: var(--white);
+    }
+
+    #hypothesis {
+      padding: 10px 12px;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+
+    .arguments {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .argument-card {
+      border-left: 4px solid var(--navy);
+      border-radius: 8px;
+      background: var(--white);
+      cursor: pointer;
+    }
+
+    .argument-card.expanded {
+      border-left-color: var(--gold);
+      cursor: default;
+    }
+
+    .argument-card.detail-focus {
+      box-shadow: -3px 0 0 0 var(--gold);
+    }
+
+    .argument-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 16px 20px;
+      cursor: pointer;
+    }
+
+    .argument-card.expanded .argument-header {
+      padding-bottom: 8px;
+    }
+
+    .argument-title-text {
+      color: var(--charcoal);
+      font-size: 14px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .chevron {
+      color: var(--navy);
+      font-size: 16px;
+      line-height: 1;
+    }
+
+    .argument-body {
+      display: none;
+      padding: 0 20px 20px;
+    }
+
+    .argument-card.expanded .argument-body {
+      display: block;
+    }
+
+    .argument-input {
+      min-height: 72px;
+      padding: 10px 12px;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+
+    .details-section {
+      max-height: 0;
+      margin-top: 0;
+      opacity: 0;
+      overflow: hidden;
+      transform: translateY(8px);
+      transition: opacity 0.3s ease, transform 0.3s ease, max-height 0.3s ease, margin-top 0.3s ease;
+    }
+
+    .details-section.show {
+      max-height: 900px;
+      margin-top: 16px;
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .details-sub {
+      margin: 0 0 8px;
+      color: var(--steel);
+      font-size: 12px;
+    }
+
+    .detail-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .detail-wrap {
+      position: relative;
+    }
+
+    .detail-wrap::before {
+      content: "•";
+      position: absolute;
+      top: 50%;
+      left: 10px;
+      color: var(--navy);
+      font-size: 14px;
+      transform: translateY(-50%);
+    }
+
+    .detail-input {
+      padding: 9px 12px 9px 26px;
+      border-radius: 6px;
+      font-size: 13px;
+    }
+
+    .detail-actions {
+      margin-top: 10px;
+    }
+
+    .add-detail {
+      border: 0;
+      background: transparent;
+      color: var(--navy);
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 0;
+      text-decoration: underline;
+    }
+
+    .advance-prompt {
+      display: none;
+      margin-top: 12px;
+      border: 0;
+      background: transparent;
+      color: var(--steel);
+      cursor: pointer;
+      font-size: 12px;
+      padding: 0;
+    }
+
+    .advance-prompt.show {
+      display: inline-block;
+    }
+
+    .bottom-bar {
+      position: sticky;
+      bottom: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin: 24px -32px -32px;
+      padding: 16px 32px;
+      border-top: 0.5px solid var(--line);
+      background: var(--cream);
+      z-index: 3;
+    }
+
+    .remaining {
+      color: var(--charcoal);
+      font-family: "Roboto Mono", monospace;
+      font-size: 10px;
+    }
+
+    .review {
+      padding: 0 60px 48px;
+    }
+
+    .review .page-title {
+      padding-left: 0;
+      padding-right: 0;
+    }
+
+    .question-banner {
+      margin-bottom: 24px;
+      padding: 24px 40px;
+      border-radius: 12px;
+      background: var(--navy);
+      color: var(--white);
+    }
+
+    .question-banner .label {
+      color: var(--white);
+      font-size: 9px;
+      opacity: 0.6;
+    }
+
+    .question-banner h2 {
+      color: var(--white);
+      font-size: 18px;
+      font-style: italic;
+      font-weight: 400;
+    }
+
+    .review-hypothesis {
+      margin-bottom: 24px;
+      padding: 20px 24px;
+      border-left: 4px solid var(--gold);
+      border-radius: 8px;
+      background: var(--white);
+    }
+
+    .review-hypothesis p {
+      margin: 0;
+      color: var(--navy);
+      font-size: 16px;
+      font-weight: 700;
+      line-height: 1.5;
+    }
+
+    .review-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .review-arg-header {
+      min-height: 96px;
+      padding: 12px 16px;
+      border-radius: 8px 8px 0 0;
+      background: var(--navy);
+      color: var(--white);
+      font-weight: 700;
+    }
+
+    .review-arg-header .label {
+      color: var(--white);
+      font-size: 9px;
+      opacity: 0.6;
+    }
+
+    .review-arg-body {
+      min-height: 152px;
+      padding: 16px;
+      border: 0.5px solid var(--line);
+      border-top: 0;
+      border-radius: 0 0 8px 8px;
+      background: var(--white);
+    }
+
+    .detail-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 6px;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .detail-row .bullet {
+      color: var(--gold);
+      font-size: 14px;
+    }
+
+    .empty {
+      color: var(--steel);
+      font-style: italic;
+    }
+
+    .action-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-top: 32px;
+      padding-bottom: 12px;
+    }
+
+    .copy-group {
+      display: grid;
+      gap: 6px;
+    }
+
+    .copy-note {
+      color: var(--gold);
+      font-family: "Roboto Mono", monospace;
+      font-size: 10px;
+      letter-spacing: 1px;
+    }
+
+    .panel {
+      position: relative;
+      margin-top: 18px;
+      padding: 28px 32px;
+      border: 0.5px solid var(--line);
+      border-radius: 12px;
+      background: var(--white);
+    }
+
+    .panel-close {
+      position: absolute;
+      top: 16px;
+      right: 18px;
+      border: 0;
+      background: transparent;
+      color: var(--charcoal);
+      cursor: pointer;
+      font-size: 18px;
+    }
+
+    .score-line {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      color: var(--navy);
+      font-family: "Playfair Display", Georgia, serif;
+      font-size: 28px;
+      font-weight: 700;
+    }
+
+    .score-line span {
+      color: var(--charcoal);
+      font-family: Lato, Arial, sans-serif;
+      font-size: 13px;
+      font-weight: 400;
+    }
+
+    .score-track {
+      height: 6px;
+      margin: 12px 0 14px;
+      border-radius: 3px;
+      background: var(--cream);
+      overflow: hidden;
+    }
+
+    .score-fill {
+      height: 100%;
+      background: var(--navy);
+    }
+
+    .rule-row {
+      padding: 10px 0;
+      border-top: 1px solid var(--line);
+    }
+
+    .rule-top {
+      display: grid;
+      grid-template-columns: 24px 1fr auto;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .mark {
+      font-weight: 700;
+    }
+
+    .mark.pass {
+      color: var(--green);
+    }
+
+    .mark.fail {
+      color: var(--red);
+    }
+
+    .mark.partial {
+      color: var(--amber);
+    }
+
+    .rule-points {
+      color: var(--steel);
+      font-family: "Roboto Mono", monospace;
+      font-size: 11px;
+    }
+
+    .hint-toggle {
+      margin-left: 8px;
+      border: 0;
+      background: transparent;
+      color: var(--steel);
+      cursor: pointer;
+      font-size: 11px;
+      padding: 0;
+    }
+
+    .rule-hint {
+      display: none;
+      margin-top: 6px;
+      padding: 10px 12px;
+      border-radius: 6px;
+      background: var(--soft);
+      font-size: 12px;
+    }
+
+    .rule-hint.show {
+      display: block;
+    }
+
+    .score-message {
+      margin: 14px 0 0;
+      color: var(--steel);
+      font-size: 13px;
+      font-style: italic;
+    }
+
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    .compare-column {
+      display: grid;
+      gap: 12px;
+    }
+
+    .compare-column.sample {
+      padding: 16px;
+      border-radius: 8px;
+      background: var(--soft);
+    }
+
+    .compare-section {
+      padding: 14px;
+      border: 0.5px solid var(--line);
+      border-radius: 8px;
+      background: var(--white);
+    }
+
+    .compare-section h3 {
+      margin-bottom: 8px;
+      font-family: Lato, Arial, sans-serif;
+      font-size: 14px;
+    }
+
+    .sample-notice {
+      margin: 0 0 14px;
+      color: var(--charcoal);
+      font-family: "Roboto Mono", monospace;
+      font-size: 11px;
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: rgba(0, 0, 0, 0.4);
+      z-index: 20;
+    }
+
+    .modal.show {
+      display: flex;
+    }
+
+    .modal-card {
+      width: min(100%, 400px);
+      padding: 32px;
+      border-radius: 12px;
+      background: var(--white);
+    }
+
+    .modal-card p {
+      margin: 0 0 20px;
+      color: var(--charcoal);
+      font-size: 15px;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 28px;
+      padding: 12px 20px;
+      border-radius: 8px;
+      background: var(--white);
+      color: var(--navy);
+      font-size: 13px;
+      opacity: 0;
+      transform: translate(-50%, 12px);
+      pointer-events: none;
+      z-index: 30;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+
+    @media (min-width: 1024px) {
+      .build-main {
+        grid-template-columns: 300px minmax(0, 1fr);
+        align-items: start;
+      }
+
+      .tree-area {
+        overflow-x: visible;
+        padding: 8px 4px 2px;
+      }
+
+      .question-node {
+        max-width: none;
+        border: 0;
+        border-radius: 0;
+        background: var(--navy);
+        color: var(--white);
+        text-align: center;
+      }
+
+      .question-node {
+        padding: 18px 24px;
+      }
+
+      .question-node h2 {
+        color: var(--white);
+        font-family: Lato, Arial, sans-serif;
+        font-size: 20px;
+        font-weight: 700;
+      }
+
+      .hypothesis-card {
+        margin: 14px auto 24px;
+        padding: 0;
+        border: 0;
+        border-radius: 6px;
+        background: var(--white);
+        max-width: none;
+      }
+
+      .hypothesis-card .label,
+      .hypothesis-card .instruction,
+      .hypothesis-card .hint {
+        display: none;
+      }
+
+      #hypothesis {
+        min-height: 72px;
+        background: var(--white);
+        color: #000b2a;
+        font-size: 16px;
+        font-weight: 700;
+        line-height: 1.35;
+        padding: 18px 22px;
+        text-align: left;
+      }
+
+      #hypothesis::placeholder {
+        color: rgba(0, 11, 42, 0.58);
+      }
+
+      .vertical-connector {
+        height: 0;
+        border-left: 0;
+      }
+
+      .arguments {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(240px, 1fr));
+        gap: 28px;
+        min-width: 880px;
+        position: relative;
+      }
+
+      .argument-card {
+        position: relative;
+        display: grid;
+        gap: 18px;
+        border: 0;
+        border-radius: 0;
+        background: transparent;
+        cursor: default;
+      }
+
+      .argument-card::before {
+        display: none;
+      }
+
+      .argument-card.detail-focus {
+        box-shadow: none;
+      }
+
+      .argument-header {
+        display: block;
+        min-height: 58px;
+        padding: 14px 16px;
+        background: var(--white);
+        text-align: center;
+        cursor: default;
+      }
+
+      .argument-header .label {
+        color: var(--navy);
+        font-family: Lato, Arial, sans-serif;
+        font-size: 17px;
+        font-weight: 700;
+        letter-spacing: 0;
+        margin: 0;
+      }
+
+      .argument-title-text,
+      .chevron {
+        display: none;
+      }
+
+      .argument-body,
+      .argument-card.expanded .argument-body {
+        display: block;
+        padding: 0;
+      }
+
+      .argument-input {
+        min-height: 102px;
+        padding: 18px 20px;
+        background: var(--white);
+        border: 0.5px solid transparent;
+        color: #000b2a;
+        font-size: 16px;
+        font-weight: 700;
+        line-height: 1.25;
+        text-align: left;
+      }
+
+      .argument-body > .hint {
+        display: none;
+      }
+
+      .details-section,
+      .details-section.show {
+        max-height: none;
+        margin-top: 20px;
+        opacity: 1;
+        overflow: visible;
+        transform: none;
+      }
+
+      .details-section > .label,
+      .details-sub {
+        display: none;
+      }
+
+      .detail-list {
+        position: relative;
+        gap: 14px;
+        padding-left: 0;
+      }
+
+      .detail-list::before {
+        content: "";
+        position: absolute;
+        top: 29px;
+        bottom: 29px;
+        left: 24px;
+        width: 1.5px;
+        background: rgba(74, 74, 74, 0.7);
+        pointer-events: none;
+      }
+
+      .detail-wrap {
+        position: relative;
+        display: grid;
+        grid-template-columns: 58px minmax(0, 1fr);
+        align-items: center;
+      }
+
+      .detail-wrap::before {
+        content: "";
+        position: static;
+        justify-self: end;
+        width: 34px;
+        height: 1.5px;
+        background: rgba(74, 74, 74, 0.7);
+        color: transparent;
+        transform: none;
+      }
+
+      .detail-input {
+        min-height: 58px;
+        padding: 12px 38px 12px 14px;
+        background: var(--white);
+        border: 0.5px solid transparent;
+        color: #000b2a;
+        font-size: 14px;
+        line-height: 1.35;
+        text-align: left;
+      }
+
+      .detail-input::placeholder {
+        color: rgba(0, 11, 42, 0.58);
+      }
+
+      .advance-prompt {
+        display: none !important;
+      }
+
+      .detail-actions {
+        padding-left: 58px;
+      }
+    }
+
+    @media (max-width: 1023px) {
+      .app-header {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+
+      .brand-divider {
+        display: none;
+      }
+
+      .app-heading,
+      .utility-cluster {
+        justify-self: start;
+      }
+
+      .build-main {
+        display: block;
+      }
+
+      .timer-panel {
+        margin-bottom: 16px;
+      }
+
+      .utility-cluster {
+        justify-content: flex-start;
+        width: 100%;
+        flex-wrap: wrap;
+      }
+
+      .sidebar {
+        display: block;
+        position: static;
+      }
+
+      .sidebar .side-card,
+      .sidebar .progress-box,
+      .sidebar > .guidance {
+        display: none;
+      }
+
+      .mobile-guidance {
+        display: block;
+      }
+
+      .tree-area {
+        padding-top: 0;
+      }
+
+      .review-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 767px) {
+      .app-header,
+      .page-title,
+      .review,
+      .build-main {
+        padding-left: 20px;
+        padding-right: 20px;
+      }
+
+      .title {
+        font-size: 31px;
+      }
+
+      .problem-card {
+        margin-left: 20px;
+        margin-right: 20px;
+        padding: 24px;
+      }
+
+      .how-strip {
+        display: grid;
+        gap: 12px;
+      }
+
+      .bottom-bar {
+        position: static;
+        flex-direction: column;
+        align-items: stretch;
+        margin: 24px 0 0;
+        padding: 16px 0 0;
+      }
+
+      .review-grid,
+      .comparison-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .action-row,
+      .modal-actions {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .btn,
+      .copy-group {
+        width: 100%;
+        text-align: center;
+      }
+
+      .question-banner {
+        padding: 22px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="app-header">
+    <div class="brand">
+      <span class="brand-logo-frame">
+        <img src="../../assets/utl-logo-nav-white.png" alt="The Untaught Lessons">
+      </span>
+    </div>
+    <div class="brand-divider" aria-hidden="true"></div>
+    <div class="app-heading">
+      <span class="app-kicker">Phase 2 · Speak Concisely</span>
+      <span class="app-title">Issue Tree Builder</span>
+    </div>
+    <div class="utility-cluster" aria-label="Writing utilities">
+      <div class="utility-metric" aria-live="polite">
+        <span class="small-label" id="wordCountLabel">Word count (in current box)</span>
+        <div class="utility-value" id="wordCountDisplay">0</div>
+      </div>
+      <div class="utility-metric">
+        <span class="small-label">Elapsed time</span>
+        <div class="activity-timer-display" id="timerDisplay">00:00</div>
+      </div>
+      <div class="utility-controls">
+        <button class="icon-timer-btn" id="timerPauseBtn" type="button" aria-label="Pause timer">⏸</button>
+        <button class="icon-timer-btn" id="timerPlayBtn" type="button" aria-label="Start timer">▶</button>
+        <button class="icon-timer-btn reset" id="timerResetBtn" type="button" aria-label="Reset timer">↺</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="screen active" id="screen1">
+      <div class="page-title">
+        <div class="eyebrow">EXERCISE</div>
+        <h1 class="title">Build your issue tree.</h1>
+        <p class="subtitle">Start with a question. Break it into causes. Structure your thinking.</p>
+        <div class="how-strip" aria-label="How it works">
+          <div class="how-item"><span class="num-icon">1</span><span>Set your central question</span></div>
+          <div class="how-item"><span class="num-icon">2</span><span>Build 3 arguments</span></div>
+          <div class="how-item"><span class="num-icon">3</span><span>Add evidence to each</span></div>
+        </div>
+      </div>
+
+      <div class="problem-card card">
+        <div class="label">THE PROBLEM STATEMENT</div>
+        <p class="instruction">What is the central question you are trying to diagnose?</p>
+        <textarea id="problemStatement" placeholder="e.g. Why is the Olympics losing its cultural impact?"></textarea>
+        <div class="hint">Tip: Frame it as a "Why" or "What" question.</div>
+      </div>
+
+      <div class="template-toggle">
+        <span>Need a starting point?</span>
+        <button class="link-button" type="button" id="loadTemplate">Load the Olympics template →</button>
+        <span class="template-status" id="templateStatus">✓ Template loaded</span>
+      </div>
+
+      <div class="cta-area">
+        <button class="btn btn-primary" type="button" id="startBtn" disabled>Start building →</button>
+        <br>
+        <button class="clear-link" type="button" id="clearFresh">Clear and start fresh</button>
+      </div>
+    </section>
+
+    <section class="screen" id="screen2">
+      <div class="build-main">
+        <aside class="sidebar">
+          <div class="side-card card">
+            <div class="label">YOUR QUESTION</div>
+            <div class="question-text" id="sideQuestion"></div>
+            <button class="link-button edit-link" type="button" id="editQuestion">Edit ↗</button>
+          </div>
+          <div class="progress-box">
+            <div id="argProgress">Arguments: 0 / 3</div>
+            <div id="detailProgress">Details: 0 / 9</div>
+            <div class="progress-track"><div class="progress-fill" id="fieldProgress"></div></div>
+          </div>
+          <div class="guidance">
+            <div class="label">GUIDANCE</div>
+            <p><strong>Answer the question.</strong> Each argument should directly explain your central question. Keep asking "Why?" as you go deeper.</p>
+            <div class="guidance-rule"></div>
+            <p><strong>Use one bucket.</strong> If an argument covers two ideas, split it into cleaner branches.</p>
+            <div class="guidance-rule"></div>
+            <p><strong>Check for overlap.</strong> If your 3 arguments repeat each other, rethink the buckets.</p>
+          </div>
+        </aside>
+
+        <section class="tree-area">
+          <details class="mobile-guidance card">
+            <summary>Show guidance ▾</summary>
+            <div class="guidance">
+              <div class="label">YOUR QUESTION</div>
+              <p id="mobileQuestion"></p>
+              <div class="guidance-rule"></div>
+              <p><strong>Answer the question.</strong> Each argument should directly explain your central question. Keep asking "Why?" as you go deeper.</p>
+              <div class="guidance-rule"></div>
+              <p><strong>Use one bucket.</strong> If an argument covers two ideas, split it into cleaner branches.</p>
+              <div class="guidance-rule"></div>
+              <p><strong>Check for overlap.</strong> If your 3 arguments repeat each other, rethink the buckets.</p>
+            </div>
+          </details>
+
+          <div class="question-node card">
+            <h2 id="treeQuestion"></h2>
+          </div>
+          <div class="vertical-connector" aria-hidden="true"></div>
+
+          <div class="hypothesis-card">
+            <div class="label">YOUR HYPOTHESIS</div>
+            <p class="instruction">In one sentence, what do you think is the root cause? State it before you prove it.</p>
+            <input id="hypothesis" type="text" data-word-label="Hypothesis" placeholder="e.g. The Olympics is losing gravity because of broken culture, lost story, and noise.">
+            <div class="hint">Aim for one sentence — 20 words max.</div>
+          </div>
+
+          <div class="arguments" id="arguments"></div>
+
+          <div class="bottom-bar">
+            <button class="btn btn-secondary" type="button" id="backToQuestion">← Back</button>
+            <div class="remaining" id="remainingFields">4 fields still needed</div>
+            <button class="btn btn-primary" type="button" id="reviewBtn" disabled>Review my thinking →</button>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <section class="screen review" id="screen3">
+      <div class="page-title">
+        <div class="eyebrow">YOUR ISSUE TREE</div>
+        <h1 class="title">Your thinking, structured.</h1>
+      </div>
+
+      <div class="question-banner">
+        <div class="label">THE QUESTION</div>
+        <h2 id="reviewQuestion"></h2>
+      </div>
+
+      <div class="review-hypothesis">
+        <div class="label">YOUR HYPOTHESIS</div>
+        <p id="reviewHypothesis"></p>
+      </div>
+
+      <div class="review-grid" id="reviewGrid"></div>
+
+      <div class="action-row">
+        <button class="btn btn-secondary" type="button" id="editTree">← Edit my tree</button>
+        <button class="btn btn-secondary" type="button" id="checkAnswer">Check my answer</button>
+        <button class="btn btn-secondary" type="button" id="showSample">Show sample answer</button>
+        <button class="btn btn-secondary" type="button" id="startOver">Start over →</button>
+        <div class="copy-group">
+          <button class="btn btn-primary" type="button" id="copyEmail">Copy for email</button>
+          <div class="copy-note">READY TO PASTE INTO YOUR EMAIL TO AIKO</div>
+        </div>
+      </div>
+
+      <div id="feedbackMount"></div>
+      <div id="sampleMount"></div>
+    </section>
+  </main>
+
+  <div class="modal" id="confirmModal" role="dialog" aria-modal="true" aria-labelledby="modalText">
+    <div class="modal-card">
+      <p id="modalText">This will clear your current tree. Are you sure?</p>
+      <div class="modal-actions">
+        <button class="btn btn-primary" type="button" id="confirmStartOver">Yes, start over</button>
+        <button class="btn btn-secondary" type="button" id="cancelStartOver">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">Copied! Paste it into your email to Aiko.</div>
+
+  <script>
+    const STORAGE_KEY = "utl_issue_tree";
+    const TIMER_TARGET = 15 * 60;
+    const blankState = () => ({
+      problemStatement: "",
+      hypothesis: "",
+      arguments: [
+        { text: "", details: ["", "", ""] },
+        { text: "", details: ["", "", ""] },
+        { text: "", details: ["", "", ""] }
+      ],
+      currentScreen: 1
+    });
+
+    const templateState = {
+      problemStatement: "Why is the Olympics losing its cultural impact?",
+      hypothesis: "The Olympics is losing gravity because of broken culture, a lost story arc, and lack of legitimate transparency.",
+      arguments: [
+        {
+          text: "Shared ritual is breaking",
+          details: [
+            "Fragmented attention: no single shared moment; audiences split across platforms and time zones.",
+            "Broadcast-first packaging: still feels like a TV event while audiences consume through feeds.",
+            "Highlights over attendance: people catch up later, so the Games lose the live collective feeling."
+          ]
+        },
+        {
+          text: "Meaning is getting replaced by moment-chasing",
+          details: [
+            "Clip culture: short-form rewards shock and spectacle; meaning needs arcs and buildup.",
+            "Virality outshines excellence — so sacredness doesn't accumulate over time.",
+            "Winners aren't legible: without athlete-led arcs, audiences don't feel the personal stakes."
+          ]
+        },
+        {
+          text: "Legitimacy and tone are getting noisier",
+          details: [
+            "Trust volatility: politics and polarization make the Olympics feel biased depending on the viewer.",
+            "Generic unity messaging lands as tone-deaf in a fractured world.",
+            "Over-commercialization signal: sponsorship load makes the Games feel sold, not earned."
+          ]
+        }
+      ],
+      currentScreen: 1
+    };
+
+    let state = blankState();
+    let currentScreen = 1;
+    let openArgument = 0;
+    let timerStarted = false;
+    let timerRunning = false;
+    let timerStartedAt = null;
+    let timerElapsedBeforePause = 0;
+    let timerInterval = null;
+    let activeWordField = null;
+
+    const $ = (selector, root = document) => root.querySelector(selector);
+    const $$ = (selector, root = document) => Array.from(root.querySelectorAll(selector));
+
+    const fields = {
+      problem: $("#problemStatement"),
+      hypothesis: $("#hypothesis"),
+      arguments: $("#arguments"),
+      reviewGrid: $("#reviewGrid")
+    };
+
+    function safeState(raw) {
+      try {
+        const parsed = JSON.parse(raw);
+        const next = blankState();
+        next.problemStatement = parsed.problemStatement || "";
+        next.hypothesis = parsed.hypothesis || "";
+        next.currentScreen = Number(parsed.currentScreen) || 1;
+        next.arguments = next.arguments.map((arg, i) => {
+          const savedDetails = parsed.arguments?.[i]?.details || [];
+          const details = savedDetails.length >= 3 ? savedDetails : [0, 1, 2].map((j) => savedDetails[j] || "");
+          return {
+            text: parsed.arguments?.[i]?.text || "",
+            details
+          };
+        });
+        return next;
+      } catch {
+        return blankState();
+      }
+    }
+
+    function save() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function clearAll() {
+      localStorage.removeItem(STORAGE_KEY);
+      state = blankState();
+      openArgument = 0;
+      renderAll();
+      goToScreen(1);
+    }
+
+    function filled(text, min = 10) {
+      return text.trim().length >= min;
+    }
+
+    function wordCount(text) {
+      return (text.trim().match(/\b[\w'-]+\b/g) || []).length;
+    }
+
+    function escapeHtml(text) {
+      return String(text)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function autoResize(el) {
+      el.style.height = "auto";
+      el.style.height = `${el.scrollHeight}px`;
+    }
+
+    function renderArguments() {
+      fields.arguments.innerHTML = "";
+      state.arguments.forEach((arg, index) => {
+        const card = document.createElement("article");
+        card.className = `argument-card ${openArgument === index ? "expanded" : ""}`;
+        card.dataset.index = index;
+        const title = arg.text.trim() || "Click to expand";
+        card.innerHTML = `
+          <div class="argument-header">
+            <div>
+              <div class="label">ARGUMENT ${index + 1}</div>
+              <div class="argument-title-text">${escapeHtml(title)}</div>
+            </div>
+            <div class="chevron">${openArgument === index ? "▴" : "▾"}</div>
+          </div>
+          <div class="argument-body">
+            <textarea class="argument-input" data-arg="${index}" data-word-label="Argument ${index + 1}" placeholder="State a broad cause or bucket — what is one major reason?">${escapeHtml(arg.text)}</textarea>
+            <div class="hint">One bucket only. If it covers two ideas, split it.</div>
+            <div class="details-section ${filled(arg.text) ? "show" : ""}">
+              <div class="label">SUPPORTING DETAILS</div>
+              <p class="details-sub">Add 3 specific pieces of evidence or examples.</p>
+              <div class="detail-list">
+                ${arg.details.map((detail, detailIndex) => `
+                  <div class="detail-wrap">
+                    <textarea class="detail-input" data-arg="${index}" data-detail="${detailIndex}" data-word-label="Detail ${detailIndex + 1}" placeholder="Supporting detail ${detailIndex + 1}: Specific evidence or example...">${escapeHtml(detail)}</textarea>
+                    ${detailIndex >= 3 ? `<button class="detail-remove" type="button" data-remove-detail="${index}" data-detail="${detailIndex}" aria-label="Remove supporting detail ${detailIndex + 1}">×</button>` : ""}
+                  </div>
+                `).join("")}
+              </div>
+              <div class="detail-actions">
+                <button class="add-detail" type="button" data-add-detail="${index}">+ Add supporting detail</button>
+              </div>
+              ${index < 2 ? `<button class="advance-prompt ${arg.details.every((detail) => detail.trim()) ? "show" : ""}" type="button" data-next="${index + 1}">Argument ${index + 1} done. Open Argument ${index + 2} →</button>` : ""}
+            </div>
+          </div>
+        `;
+        fields.arguments.appendChild(card);
+      });
+
+      $$(".argument-input, .detail-input").forEach(autoResize);
+    }
+
+    function renderProgress() {
+      const argumentCount = state.arguments.filter((arg) => filled(arg.text)).length;
+      const detailCount = state.arguments.flatMap((arg) => arg.details).filter((detail) => filled(detail)).length;
+      const detailTotal = state.arguments.reduce((sum, arg) => sum + arg.details.length, 0);
+      const totalFilled = (filled(state.hypothesis) ? 1 : 0) + argumentCount + detailCount;
+      const totalFields = 1 + 3 + Math.max(9, detailTotal);
+      const requiredMissing = [state.hypothesis, ...state.arguments.map((arg) => arg.text)].filter((text) => !filled(text)).length;
+      $("#argProgress").textContent = `Arguments: ${argumentCount} / 3`;
+      $("#detailProgress").textContent = `Details: ${detailCount} / ${detailTotal}`;
+      $("#fieldProgress").style.width = `${Math.round((totalFilled / totalFields) * 100)}%`;
+      $("#remainingFields").textContent = requiredMissing ? `${requiredMissing} field${requiredMissing === 1 ? "" : "s"} still needed` : "";
+      $("#remainingFields").style.visibility = requiredMissing ? "visible" : "hidden";
+      $("#reviewBtn").disabled = requiredMissing > 0;
+    }
+
+    function renderReview() {
+      $("#reviewQuestion").textContent = state.problemStatement || "—";
+      $("#reviewHypothesis").textContent = state.hypothesis || "—";
+      fields.reviewGrid.innerHTML = state.arguments.map((arg, index) => `
+        <article>
+          <div class="review-arg-header">
+            <span class="label">ARGUMENT ${index + 1}</span>
+            ${escapeHtml(arg.text || "—")}
+          </div>
+          <div class="review-arg-body">
+            ${arg.details.map((detail) => `
+              <div class="detail-row">
+                <span class="bullet">•</span>
+                <span class="${detail.trim() ? "" : "empty"}">${escapeHtml(detail.trim() || "—")}</span>
+              </div>
+            `).join("")}
+          </div>
+        </article>
+      `).join("");
+    }
+
+    function renderAll() {
+      fields.problem.value = state.problemStatement;
+      fields.hypothesis.value = state.hypothesis;
+      $("#sideQuestion").textContent = state.problemStatement || "No question yet.";
+      $("#mobileQuestion").textContent = state.problemStatement || "No question yet.";
+      $("#treeQuestion").textContent = state.problemStatement || "No question yet.";
+      $("#startBtn").disabled = !filled(state.problemStatement);
+      renderArguments();
+      renderProgress();
+      renderReview();
+      $$("#feedbackMount, #sampleMount").forEach((mount) => mount.innerHTML = "");
+      $$("textarea").forEach(autoResize);
+    }
+
+    function goToScreen(screen) {
+      currentScreen = screen;
+      state.currentScreen = screen;
+      save();
+      $$(".screen").forEach((screenEl, index) => {
+        screenEl.classList.toggle("active", index + 1 === screen);
+      });
+      if (screen === 3) {
+        $("#feedbackMount").innerHTML = "";
+        $("#sampleMount").innerHTML = "";
+        renderReview();
+      }
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function updateFromDom() {
+      state.problemStatement = fields.problem.value;
+      state.hypothesis = fields.hypothesis.value;
+      $$(".argument-input").forEach((input) => {
+        state.arguments[Number(input.dataset.arg)].text = input.value;
+      });
+      $$(".detail-input").forEach((input) => {
+        state.arguments[Number(input.dataset.arg)].details[Number(input.dataset.detail)] = input.value;
+      });
+      save();
+      renderProgress();
+      $("#startBtn").disabled = !filled(state.problemStatement);
+      $("#sideQuestion").textContent = state.problemStatement || "No question yet.";
+      $("#mobileQuestion").textContent = state.problemStatement || "No question yet.";
+      $("#treeQuestion").textContent = state.problemStatement || "No question yet.";
+    }
+
+    function formatSeconds(totalSeconds) {
+      const minutes = Math.floor(totalSeconds / 60).toString().padStart(2, "0");
+      const seconds = Math.floor(totalSeconds % 60).toString().padStart(2, "0");
+      return `${minutes}:${seconds}`;
+    }
+
+    function elapsedSeconds() {
+      if (!timerStarted) return 0;
+      if (!timerRunning) return timerElapsedBeforePause;
+      return timerElapsedBeforePause + Math.floor((Date.now() - timerStartedAt) / 1000);
+    }
+
+    function renderTimer() {
+      const elapsed = elapsedSeconds();
+      $("#timerDisplay").textContent = formatSeconds(elapsed);
+      $("#timerDisplay").classList.toggle("over-target", elapsed > TIMER_TARGET);
+      $("#timerPauseBtn").disabled = !timerRunning;
+      $("#timerPlayBtn").disabled = timerRunning;
+      $("#timerPlayBtn").setAttribute("aria-label", timerStarted ? "Resume timer" : "Start timer");
+    }
+
+    function startTimer() {
+      if (timerRunning) return;
+      timerStarted = true;
+      timerRunning = true;
+      timerStartedAt = Date.now();
+      renderTimer();
+    }
+
+    function pauseTimer() {
+      if (!timerRunning) return;
+      timerElapsedBeforePause = elapsedSeconds();
+      timerRunning = false;
+      timerStartedAt = null;
+      renderTimer();
+    }
+
+    function resumeTimer() {
+      if (!timerStarted || timerRunning) return;
+      timerRunning = true;
+      timerStartedAt = Date.now();
+      renderTimer();
+    }
+
+    function resetTimer() {
+      timerStarted = false;
+      timerRunning = false;
+      timerStartedAt = null;
+      timerElapsedBeforePause = 0;
+      renderTimer();
+    }
+
+    function startTimerFromInteraction() {
+      if (!timerStarted) startTimer();
+    }
+
+    function renderWordCount(target = activeWordField) {
+      const labelEl = $("#wordCountLabel");
+      const countEl = $("#wordCountDisplay");
+      if (!labelEl || !countEl) return;
+      if (!target || !target.matches("input, textarea")) {
+        labelEl.textContent = "Word count (in current box)";
+        countEl.textContent = "0";
+        return;
+      }
+      labelEl.textContent = "Word count (in current box)";
+      countEl.textContent = wordCount(target.value);
+    }
+
+    function normalizeWords(text) {
+      return text.toLowerCase().replace(/[^\w\s'-]/g, " ").split(/\s+/).filter(Boolean);
+    }
+
+    function hasSharedPhrase(a, b) {
+      const wordsA = normalizeWords(a);
+      const wordsB = normalizeWords(b);
+      const phrases = new Set();
+      for (let i = 0; i <= wordsA.length - 4; i += 1) {
+        phrases.add(wordsA.slice(i, i + 4).join(" "));
+      }
+      for (let i = 0; i <= wordsB.length - 4; i += 1) {
+        if (phrases.has(wordsB.slice(i, i + 4).join(" "))) return true;
+      }
+      return false;
+    }
+
+    function significantWords(text) {
+      const stop = new Set(["about", "because", "their", "there", "these", "those", "which", "while", "where", "would", "could", "should", "losing", "impact", "question", "problem", "statement"]);
+      return normalizeWords(text).filter((word) => word.length > 4 && !stop.has(word));
+    }
+
+    function runChecks() {
+      const args = state.arguments;
+      const details = args.flatMap((arg) => arg.details);
+      const results = [];
+      const add = (status, label, points, hint = "") => results.push({ status, label, points, hint });
+
+      add(filled(state.hypothesis) ? "pass" : "fail", filled(state.hypothesis) ? "Hypothesis stated" : "No hypothesis found", filled(state.hypothesis) ? 1 : 0, "State your overall answer before proving it. What do you believe is the root cause?");
+
+      const missingArgs = args.map((arg, i) => filled(arg.text) ? "" : `Argument ${i + 1} is empty`).filter(Boolean);
+      add(missingArgs.length ? "fail" : "pass", missingArgs.length ? `Missing argument(s): ${missingArgs.join(", ")}` : "All 3 arguments provided", missingArgs.length ? 0 : 1, "Your issue tree needs 3 distinct buckets. Each should answer your central question.");
+
+      const overlaps = [[0, 1], [0, 2], [1, 2]].filter(([a, b]) => hasSharedPhrase(args[a].text, args[b].text));
+      add(overlaps.length ? "fail" : "pass", overlaps.length ? "Arguments may overlap" : "Arguments appear distinct", overlaps.length ? 0 : 1, "Two of your arguments seem to cover similar ground. MECE means each bucket should be distinct — if they overlap, merge or split them.");
+
+      const filledDetails = details.filter((detail) => filled(detail)).length;
+      if (filledDetails >= 7) add("pass", "Strong detail coverage (7+ of 9)", 1);
+      else if (filledDetails >= 5) add("partial", "Partial detail coverage", 0.5, "Each argument needs specific evidence — vague buckets without detail are hard to defend.");
+      else add("fail", "Too many details missing", 0, "Each argument needs specific evidence — vague buckets without detail are hard to defend.");
+
+      const hypoWords = wordCount(state.hypothesis);
+      add(hypoWords <= 35 ? "pass" : "fail", hypoWords <= 35 ? "Hypothesis is concise" : `Hypothesis is too long (${hypoWords} words — aim for under 35)`, hypoWords <= 35 ? 1 : 0, "Your hypothesis should fit in one clear sentence. Cut anything that belongs in the arguments instead.");
+
+      const longArgs = args.map((arg, i) => wordCount(arg.text) > 8 ? `Argument ${i + 1} is ${wordCount(arg.text)} words` : "").filter(Boolean);
+      add(longArgs.length ? "fail" : "pass", longArgs.length ? `Argument(s) may be too complex: ${longArgs.join(", ")}` : "Arguments are tight and focused", longArgs.length ? 0 : 1, "A good argument label is a short bucket name, not a full sentence. e.g. 'Shared ritual is breaking' not 'The shared rituals that used to unite audiences are breaking down.'");
+
+      const generic = ["things", "issues", "problems", "factors", "aspects", "various", "many", "several", "some", "etc"];
+      const vague = details.some((detail) => {
+        const words = normalizeWords(detail);
+        return words.filter((word) => generic.includes(word)).length >= 2 && significantWords(detail).length <= 2;
+      });
+      add(vague ? "fail" : "pass", vague ? "Some details may be too vague" : "Details appear specific", vague ? 0 : 1, "Specific details name things: platforms, percentages, behaviours, named trends. 'Various issues with media' is vague. 'Broadcast-first packaging clashes with how feeds work' is specific.");
+
+      const question = state.problemStatement.trim();
+      const isQuestion = question.endsWith("?") || /^(why|what|how|when|which)\b/i.test(question);
+      add(isQuestion ? "pass" : "fail", isQuestion ? "Problem is framed as a question" : "Problem statement is not a question", isQuestion ? 1 : 0, "Frame your problem as a question — 'Why is X happening?' works much better than 'X is declining.'");
+
+      const hypoWordsSet = new Set(significantWords(state.hypothesis));
+      const hypoMatches = args.filter((arg) => significantWords(arg.text).some((word) => hypoWordsSet.has(word))).length;
+      add(hypoMatches >= 2 ? "pass" : "fail", hypoMatches >= 2 ? "Hypothesis connects to your arguments" : "Hypothesis may not reflect your arguments", hypoMatches >= 2 ? 1 : 0, "Your hypothesis should preview your 3 arguments. If the words don't echo each other, your story arc may not hang together.");
+
+      const problemWordsSet = new Set(significantWords(state.problemStatement));
+      const problemMatches = args.filter((arg) => significantWords(arg.text).some((word) => problemWordsSet.has(word))).length;
+      add(problemMatches >= 2 ? "pass" : "fail", problemMatches >= 2 ? "Arguments are anchored to your question" : "Arguments may not address your question", problemMatches >= 2 ? 1 : 0, "Your arguments should directly diagnose your problem. Re-read your question and check — does each argument explain a reason why that specific problem exists?");
+
+      return results;
+    }
+
+    function scoreMessage(score) {
+      if (score >= 9) return "Strong work. Your tree is structured, specific, and aligned. This is what clear thinking looks like.";
+      if (score >= 7) return "Solid foundation. A few refinements and this is ready to share with Aiko.";
+      if (score >= 5) return "Getting there. Focus on the flagged areas — specificity and alignment will sharpen this significantly.";
+      if (score >= 3) return "The structure is there, but the thinking needs more depth. Go back to the arguments and ask 'why?' one more time.";
+      return "Start with the basics — make sure every field is filled before checking. The tree needs all its branches.";
+    }
+
+    function renderFeedback() {
+      const results = runChecks();
+      const score = results.reduce((sum, result) => sum + result.points, 0);
+      $("#feedbackMount").innerHTML = `
+        <section class="panel" aria-live="polite">
+          <button class="panel-close" type="button" data-close-panel="feedbackMount">×</button>
+          <div class="label">ANSWER CHECK</div>
+          <div class="score-line">${score} / 10 <span>points</span></div>
+          <div class="score-track"><div class="score-fill" style="width: ${score * 10}%"></div></div>
+          ${results.map((result) => `
+            <div class="rule-row">
+              <div class="rule-top">
+                <span class="mark ${result.status}">${result.status === "pass" ? "✓" : result.status === "partial" ? "◑" : "✗"}</span>
+                <span>${escapeHtml(result.label)}${result.hint && result.status !== "pass" ? ` <button class="hint-toggle" type="button">▾ show hint</button>` : ""}</span>
+                <span class="rule-points">[${result.points} pt]</span>
+              </div>
+              ${result.hint && result.status !== "pass" ? `<div class="rule-hint">${escapeHtml(result.hint)}</div>` : ""}
+            </div>
+          `).join("")}
+          <p class="score-message">${escapeHtml(scoreMessage(score))}</p>
+        </section>
+      `;
+    }
+
+    function compareBlock(data) {
+      return `
+        <div class="compare-section">
+          <h3>Hypothesis</h3>
+          <p>${escapeHtml(data.hypothesis || "—")}</p>
+        </div>
+        ${data.arguments.map((arg, index) => `
+          <div class="compare-section">
+            <h3>Argument ${index + 1}: ${escapeHtml(arg.text || "—")}</h3>
+            ${arg.details.map((detail) => `
+              <div class="detail-row"><span class="bullet">•</span><span>${escapeHtml(detail || "—")}</span></div>
+            `).join("")}
+          </div>
+        `).join("")}
+      `;
+    }
+
+    function renderSample() {
+      const customProblem = state.problemStatement.trim() !== templateState.problemStatement;
+      $("#sampleMount").innerHTML = `
+        <section class="panel">
+          <button class="panel-close" type="button" data-close-panel="sampleMount">×</button>
+          ${customProblem ? `<p class="sample-notice">Sample answer shown is for the Olympics template. Use it as a model for structure, not content.</p>` : ""}
+          <div class="comparison-grid">
+            <div class="compare-column">
+              <div class="label">YOUR ANSWER</div>
+              ${compareBlock(state)}
+            </div>
+            <div class="compare-column sample">
+              <div class="label" style="color: var(--steel);">SAMPLE ANSWER</div>
+              ${compareBlock(templateState)}
+            </div>
+          </div>
+        </section>
+      `;
+    }
+
+    function copyText() {
+      const lines = [
+        "THE QUESTION",
+        state.problemStatement,
+        "",
+        "MY HYPOTHESIS",
+        state.hypothesis,
+        ""
+      ];
+      state.arguments.forEach((arg, index) => {
+        lines.push(`ARGUMENT ${index + 1}: ${arg.text}`);
+        arg.details.forEach((detail) => lines.push(`  • ${detail}`));
+        lines.push("");
+      });
+      return lines.join("\n").trim();
+    }
+
+    async function copyForEmail() {
+      const text = copyText();
+      try {
+        await navigator.clipboard.writeText(text);
+      } catch {
+        const helper = document.createElement("textarea");
+        helper.value = text;
+        document.body.appendChild(helper);
+        helper.select();
+        document.execCommand("copy");
+        helper.remove();
+      }
+      const toast = $("#toast");
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), 2500);
+    }
+
+    document.addEventListener("input", (event) => {
+      if (event.target.matches("textarea")) autoResize(event.target);
+      if (event.target.matches("input, textarea")) {
+        if (currentScreen === 2) startTimerFromInteraction();
+        activeWordField = event.target;
+        renderWordCount(event.target);
+        updateFromDom();
+        if (event.target.matches(".argument-input")) {
+          const index = Number(event.target.dataset.arg);
+          const card = event.target.closest(".argument-card");
+          const section = $(".details-section", card);
+          state.arguments[index].text = event.target.value;
+          section.classList.toggle("show", filled(event.target.value));
+          $(".argument-title-text", card).textContent = event.target.value.trim() || "Click to expand";
+          save();
+        }
+        if (event.target.matches(".detail-input")) {
+          const index = Number(event.target.dataset.arg);
+          const card = event.target.closest(".argument-card");
+          const prompt = $(".advance-prompt", card);
+          if (prompt) prompt.classList.toggle("show", state.arguments[index].details.every((detail) => detail.trim()));
+        }
+      }
+    });
+
+    document.addEventListener("focusin", (event) => {
+      if (event.target.matches("input, textarea")) {
+        activeWordField = event.target;
+        renderWordCount(event.target);
+      }
+      if (event.target.matches(".detail-input")) event.target.closest(".argument-card").classList.add("detail-focus");
+    });
+
+    document.addEventListener("focusout", (event) => {
+      if (event.target.matches(".detail-input")) event.target.closest(".argument-card").classList.remove("detail-focus");
+    });
+
+    document.addEventListener("click", (event) => {
+      const header = event.target.closest(".argument-header");
+      if (header) {
+        if (window.matchMedia("(min-width: 1024px)").matches) return;
+        const index = Number(header.closest(".argument-card").dataset.index);
+        openArgument = openArgument === index ? -1 : index;
+        renderArguments();
+        return;
+      }
+
+      const advance = event.target.closest(".advance-prompt");
+      if (advance) {
+        openArgument = Number(advance.dataset.next);
+        renderArguments();
+        return;
+      }
+
+      const addDetail = event.target.closest(".add-detail");
+      if (addDetail) {
+        const index = Number(addDetail.dataset.addDetail);
+        updateFromDom();
+        state.arguments[index].details.push("");
+        openArgument = index;
+        save();
+        renderArguments();
+        renderProgress();
+        const newInput = $(`.detail-input[data-arg="${index}"][data-detail="${state.arguments[index].details.length - 1}"]`);
+        if (newInput) newInput.focus();
+        return;
+      }
+
+      const removeDetail = event.target.closest(".detail-remove");
+      if (removeDetail) {
+        const index = Number(removeDetail.dataset.removeDetail);
+        const detailIndex = Number(removeDetail.dataset.detail);
+        updateFromDom();
+        state.arguments[index].details.splice(detailIndex, 1);
+        if (state.arguments[index].details.length < 3) {
+          state.arguments[index].details = state.arguments[index].details.concat(Array(3 - state.arguments[index].details.length).fill(""));
+        }
+        openArgument = index;
+        activeWordField = null;
+        save();
+        renderArguments();
+        renderProgress();
+        renderWordCount();
+        return;
+      }
+
+      const closePanel = event.target.dataset.closePanel;
+      if (closePanel) {
+        $(`#${closePanel}`).innerHTML = "";
+        return;
+      }
+
+      if (event.target.matches(".hint-toggle")) {
+        const hint = event.target.closest(".rule-row").querySelector(".rule-hint");
+        hint.classList.toggle("show");
+      }
+    });
+
+    $("#loadTemplate").addEventListener("click", () => {
+      state = JSON.parse(JSON.stringify(templateState));
+      state.currentScreen = currentScreen;
+      openArgument = 0;
+      save();
+      renderAll();
+      const status = $("#templateStatus");
+      status.classList.add("show");
+      setTimeout(() => status.classList.remove("show"), 2000);
+    });
+
+    $("#startBtn").addEventListener("click", () => goToScreen(2));
+    $("#clearFresh").addEventListener("click", clearAll);
+    $("#backToQuestion").addEventListener("click", () => goToScreen(1));
+    $("#editQuestion").addEventListener("click", () => {
+      if (state.hypothesis.trim() || state.arguments.some((arg) => arg.text.trim() || arg.details.some(Boolean))) {
+        if (!confirm("Go back? Your progress will be saved.")) return;
+      }
+      goToScreen(1);
+    });
+    $("#reviewBtn").addEventListener("click", () => goToScreen(3));
+    $("#editTree").addEventListener("click", () => goToScreen(2));
+    $("#checkAnswer").addEventListener("click", renderFeedback);
+    $("#showSample").addEventListener("click", renderSample);
+    $("#copyEmail").addEventListener("click", copyForEmail);
+    $("#startOver").addEventListener("click", () => $("#confirmModal").classList.add("show"));
+    $("#cancelStartOver").addEventListener("click", () => $("#confirmModal").classList.remove("show"));
+    $("#confirmStartOver").addEventListener("click", () => {
+      $("#confirmModal").classList.remove("show");
+      clearAll();
+    });
+    $("#confirmModal").addEventListener("click", (event) => {
+      if (event.target.id === "confirmModal") $("#confirmModal").classList.remove("show");
+    });
+    $("#timerPauseBtn").addEventListener("click", pauseTimer);
+    $("#timerPlayBtn").addEventListener("click", () => timerStarted ? resumeTimer() : startTimer());
+    $("#timerResetBtn").addEventListener("click", resetTimer);
+
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) state = safeState(saved);
+    timerInterval = setInterval(renderTimer, 1000);
+    renderAll();
+    renderTimer();
+    renderWordCount();
+    goToScreen(Math.min(Math.max(state.currentScreen, 1), 3));
+  </script>
+</body>
+</html>
