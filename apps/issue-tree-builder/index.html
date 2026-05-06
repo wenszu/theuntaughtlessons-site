@@ -362,6 +362,13 @@
       background: rgba(255, 255, 255, 0.08);
     }
 
+    .utility-label-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
     .small-label {
       color: var(--gold);
       font-family: "Roboto Mono", monospace;
@@ -382,6 +389,35 @@
     .activity-timer-display.over-target {
       color: var(--gold);
     }
+
+    .metric-hide-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      border: 1px solid rgba(255, 255, 255, .32);
+      border-radius: 50%;
+      background: rgba(255, 255, 255, .08);
+      color: var(--white);
+      cursor: pointer;
+      padding: 0;
+    }
+
+    .metric-hide-btn:hover {
+      background: rgba(255, 255, 255, .16);
+    }
+
+    .metric-hide-btn svg {
+      width: 14px;
+      height: 14px;
+      stroke-width: 2.2;
+    }
+
+    .utility-metric.time-hidden .activity-timer-display {
+      visibility: hidden;
+    }
+
 
     .utility-controls {
       display: flex;
@@ -1356,9 +1392,9 @@
 <body>
   <header class="app-header">
     <div class="brand">
-      <span class="brand-logo-frame">
+      <a class="brand-logo-frame" href="../../index.html" aria-label="The Untaught Lessons homepage">
         <img src="../../assets/utl-logo-nav-white.png" alt="The Untaught Lessons">
-      </span>
+      </a>
     </div>
     <div class="brand-divider" aria-hidden="true"></div>
     <div class="app-heading">
@@ -1370,8 +1406,11 @@
         <span class="small-label" id="wordCountLabel">Word count (in current box)</span>
         <div class="utility-value" id="wordCountDisplay">0</div>
       </div>
-      <div class="utility-metric">
-        <span class="small-label">Elapsed time</span>
+      <div class="utility-metric" id="timerMetric">
+        <div class="utility-label-row">
+          <span class="small-label">Elapsed time</span>
+          <button class="metric-hide-btn" id="timerMetricToggleBtn" type="button" aria-label="Hide elapsed time" aria-pressed="false"></button>
+        </div>
         <div class="activity-timer-display" id="timerDisplay">00:00</div>
       </div>
       <div class="utility-controls">
@@ -1576,6 +1615,7 @@
     let timerStartedAt = null;
     let timerElapsedBeforePause = 0;
     let timerInterval = null;
+    let timerMetricHidden = false;
     let activeWordField = null;
 
     const $ = (selector, root = document) => root.querySelector(selector);
@@ -1786,6 +1826,12 @@
       $("#timerPauseBtn").disabled = !timerRunning;
       $("#timerPlayBtn").disabled = timerRunning;
       $("#timerPlayBtn").setAttribute("aria-label", timerStarted ? "Resume timer" : "Start timer");
+      $("#timerMetric").classList.toggle("time-hidden", timerMetricHidden);
+      $("#timerMetricToggleBtn").setAttribute("aria-label", timerMetricHidden ? "Show elapsed time" : "Hide elapsed time");
+      $("#timerMetricToggleBtn").setAttribute("aria-pressed", timerMetricHidden ? "true" : "false");
+      $("#timerMetricToggleBtn").innerHTML = timerMetricHidden
+        ? '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.7 10.7 0 0 1 12 20C5 20 2 12 2 12a18.4 18.4 0 0 1 5.06-5.94"/><path d="M9.9 4.24A10.3 10.3 0 0 1 12 4c7 0 10 8 10 8a18.5 18.5 0 0 1-2.16 3.19"/><path d="M14.12 14.12A3 3 0 0 1 9.88 9.88"/><path d="M1 1l22 22"/></svg>'
+        : '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-8 10-8 10 8 10 8-3 8-10 8-10-8-10-8Z"/><circle cx="12" cy="12" r="3"/></svg>';
     }
 
     function startTimer() {
@@ -2045,6 +2091,15 @@
       if (event.target.matches(".detail-input")) event.target.closest(".argument-card").classList.remove("detail-focus");
     });
 
+    document.addEventListener("click", () => {
+      requestAnimationFrame(() => {
+        if (document.activeElement && document.activeElement.matches("input, textarea")) {
+          activeWordField = document.activeElement;
+          renderWordCount(document.activeElement);
+        }
+      });
+    });
+
     document.addEventListener("click", (event) => {
       const header = event.target.closest(".argument-header");
       if (header) {
@@ -2107,8 +2162,11 @@
     });
 
     $("#loadTemplate").addEventListener("click", () => {
-      state = JSON.parse(JSON.stringify(templateState));
-      state.currentScreen = currentScreen;
+      state = {
+        ...blankState(),
+        problemStatement: templateState.problemStatement,
+        currentScreen
+      };
       openArgument = 0;
       save();
       renderAll();
@@ -2143,6 +2201,10 @@
     $("#timerPauseBtn").addEventListener("click", pauseTimer);
     $("#timerPlayBtn").addEventListener("click", () => timerStarted ? resumeTimer() : startTimer());
     $("#timerResetBtn").addEventListener("click", resetTimer);
+    $("#timerMetricToggleBtn").addEventListener("click", () => {
+      timerMetricHidden = !timerMetricHidden;
+      renderTimer();
+    });
 
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) state = safeState(saved);

@@ -558,7 +558,7 @@
 .home-page .marquee-track {
   display: flex;
   gap: 24px;
-  animation-duration: 42s;
+  animation-duration: 540s;
   animation-timing-function: linear;
   animation-iteration-count: infinite;
   animation-play-state: paused;
@@ -569,9 +569,9 @@
 .home-page .marquee-right .marquee-track { animation-name: marquee-right; }
 
 .home-page .testimonial-card {
-  flex: 0 0 340px;
-  width: 340px;
-  min-height: 260px;
+  flex: 0 0 420px;
+  width: 420px;
+  min-height: 360px;
   margin: 0;
   padding: 32px;
   border-left: 4px solid var(--home-navy);
@@ -584,13 +584,13 @@
   margin: 0;
   color: var(--home-charcoal);
   font-family: 'Lato', sans-serif;
-  font-size: 15pt;
+  font-size: 13.5pt;
   font-style: italic;
   font-weight: 300;
   line-height: 1.7;
 }
 
-.home-page .testimonial-card footer { margin-top: 22px; }
+.home-page .testimonial-card footer { margin-top: 24px; }
 
 .home-page .testimonial-card strong,
 .home-page .testimonial-card span {
@@ -604,10 +604,20 @@
   font-weight: 700;
 }
 
-.home-page .testimonial-card span {
-  color: var(--home-gold);
-  font-size: 13pt;
+.home-page .testimonial-card .testimonial-title {
+  margin-top: 4px;
+  color: var(--home-charcoal);
+  font-size: 12.5pt;
+  font-style: italic;
   font-weight: 300;
+}
+
+.home-page .testimonial-card .testimonial-company {
+  margin-top: 20px;
+  color: #000;
+  font-size: 17pt;
+  font-weight: 700;
+  letter-spacing: .02em;
 }
 
 @keyframes marquee-left {
