@@ -103,6 +103,20 @@
       background: rgba(255, 255, 255, .08);
     }
 
+    .utility-label-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .utility-metric-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
     .utility-metric .small-label {
       color: var(--gold);
     }
@@ -113,6 +127,36 @@
       font-size: 18px;
       font-weight: 700;
       line-height: 1;
+    }
+
+    .metric-hide-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      border: 1px solid rgba(255, 255, 255, .32);
+      border-radius: 50%;
+      background: rgba(255, 255, 255, .08);
+      color: var(--white);
+      cursor: pointer;
+      font-size: 11px;
+      line-height: 1;
+      padding: 0;
+    }
+
+    .metric-hide-btn svg {
+      width: 14px;
+      height: 14px;
+      stroke-width: 2.2;
+    }
+
+    .metric-hide-btn:hover {
+      background: rgba(255, 255, 255, .16);
+    }
+
+    .utility-metric.time-hidden .activity-timer-display {
+      visibility: hidden;
     }
 
     .utility-metric .activity-timer-display.over-target {
@@ -433,9 +477,14 @@
       <span class="app-title">Grocery List</span>
     </div>
     <div class="app-timer" aria-label="Elapsed time">
-      <div class="utility-metric">
-        <span class="small-label">Elapsed time</span>
-        <div class="activity-timer-display" id="timerDisplay">00:00</div>
+      <div class="utility-metric" id="timerMetric">
+        <div class="utility-label-row">
+          <span class="small-label">Elapsed time</span>
+          <button class="metric-hide-btn" id="timerMetricToggleBtn" type="button" aria-label="Hide elapsed time" aria-pressed="false"></button>
+        </div>
+        <div class="utility-metric-row">
+          <div class="activity-timer-display" id="timerDisplay">00:00</div>
+        </div>
       </div>
       <div class="utility-controls">
         <button class="icon-timer-btn" id="timerPauseIconBtn" type="button" aria-label="Pause timer">⏸</button>
@@ -565,6 +614,7 @@
     };
 
     let activityTimer = null;
+    let timerMetricHidden = false;
 
     // -------------------------
     // Utility functions
@@ -961,6 +1011,10 @@
       document.getElementById('timerPauseIconBtn').addEventListener('click', () => {
         activityTimer.pause();
       });
+      document.getElementById('timerMetricToggleBtn').addEventListener('click', () => {
+        timerMetricHidden = !timerMetricHidden;
+        syncHeaderTimerIcons();
+      });
       document.getElementById('timerPlayIconBtn').addEventListener('click', () => {
         activityTimer.hasStarted() ? activityTimer.resume() : activityTimer.start();
       });
@@ -973,6 +1027,12 @@
       document.getElementById('timerPauseIconBtn').disabled = !activityTimer.isRunning();
       document.getElementById('timerPlayIconBtn').disabled = activityTimer.isRunning();
       document.getElementById('timerPlayIconBtn').setAttribute('aria-label', activityTimer.hasStarted() ? 'Resume timer' : 'Start timer');
+      document.getElementById('timerMetric').classList.toggle('time-hidden', timerMetricHidden);
+      document.getElementById('timerMetricToggleBtn').setAttribute('aria-label', timerMetricHidden ? 'Show elapsed time' : 'Hide elapsed time');
+      document.getElementById('timerMetricToggleBtn').setAttribute('aria-pressed', timerMetricHidden ? 'true' : 'false');
+      document.getElementById('timerMetricToggleBtn').innerHTML = timerMetricHidden
+        ? '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.7 10.7 0 0 1 12 20C5 20 2 12 2 12a18.4 18.4 0 0 1 5.06-5.94"/><path d="M9.9 4.24A10.3 10.3 0 0 1 12 4c7 0 10 8 10 8a18.5 18.5 0 0 1-2.16 3.19"/><path d="M14.12 14.12A3 3 0 0 1 9.88 9.88"/><path d="M1 1l22 22"/></svg>'
+        : '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-8 10-8 10 8 10 8-3 8-10 8-10-8-10-8Z"/><circle cx="12" cy="12" r="3"/></svg>';
     }
 
     // -------------------------

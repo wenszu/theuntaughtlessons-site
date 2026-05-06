@@ -111,6 +111,13 @@
       background: rgba(255, 255, 255, .08);
     }
 
+    .utility-label-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
     .utility-metric .small-label {
       color: var(--gold);
     }
@@ -125,6 +132,34 @@
 
     .utility-metric .activity-timer-display.over-target {
       color: var(--gold);
+    }
+
+    .metric-hide-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      border: 1px solid rgba(255, 255, 255, .32);
+      border-radius: 50%;
+      background: rgba(255, 255, 255, .08);
+      color: var(--white);
+      cursor: pointer;
+      padding: 0;
+    }
+
+    .metric-hide-btn:hover {
+      background: rgba(255, 255, 255, .16);
+    }
+
+    .metric-hide-btn svg {
+      width: 14px;
+      height: 14px;
+      stroke-width: 2.2;
+    }
+
+    .utility-metric.time-hidden .activity-timer-display {
+      visibility: hidden;
     }
 
     .utility-controls {
@@ -901,8 +936,11 @@
       <span class="app-title">Manager’s Messy Notes</span>
     </div>
     <div class="app-timer" aria-label="Elapsed time">
-      <div class="utility-metric">
-        <span class="small-label">Elapsed time</span>
+      <div class="utility-metric" id="timerMetric">
+        <div class="utility-label-row">
+          <span class="small-label">Elapsed time</span>
+          <button class="metric-hide-btn" id="timerMetricToggleBtn" type="button" aria-label="Hide elapsed time" aria-pressed="false"></button>
+        </div>
         <div class="timer-display activity-timer-display" id="timerDisplay">00:00</div>
       </div>
       <div class="utility-controls">
@@ -993,8 +1031,8 @@
             <div id="recentAttempts" class="recent-attempts hidden"></div>
 
             <div class="mode-switch" aria-label="Answer input mode">
-              <button class="mode-btn active" id="openModeBtn" type="button">Open response</button>
-              <button class="mode-btn" id="sectionModeBtn" type="button">Three-section response</button>
+              <button class="mode-btn active" id="openModeBtn" type="button" data-response-mode="open" onclick="window.switchMessyNotesMode && window.switchMessyNotesMode('open')">Open response</button>
+              <button class="mode-btn" id="sectionModeBtn" type="button" data-response-mode="sections" onclick="window.switchMessyNotesMode && window.switchMessyNotesMode('sections')">Three-section response</button>
             </div>
 
             <div id="openMode">
@@ -1004,6 +1042,28 @@
             <div id="sectionMode" class="hidden">
               <div class="section-grid" id="sectionGrid"></div>
             </div>
+
+            <script>
+              window.switchMessyNotesMode = function (nextMode) {
+                var openBtn = document.getElementById('openModeBtn');
+                var sectionBtn = document.getElementById('sectionModeBtn');
+                var openMode = document.getElementById('openMode');
+                var sectionMode = document.getElementById('sectionMode');
+                if (!openBtn || !sectionBtn || !openMode || !sectionMode) return;
+                openBtn.classList.toggle('active', nextMode === 'open');
+                sectionBtn.classList.toggle('active', nextMode === 'sections');
+                openBtn.setAttribute('aria-pressed', nextMode === 'open' ? 'true' : 'false');
+                sectionBtn.setAttribute('aria-pressed', nextMode === 'sections' ? 'true' : 'false');
+                openMode.classList.toggle('hidden', nextMode !== 'open');
+                sectionMode.classList.toggle('hidden', nextMode !== 'sections');
+              };
+              document.getElementById('openModeBtn').addEventListener('click', function () {
+                window.switchMessyNotesMode('open');
+              });
+              document.getElementById('sectionModeBtn').addEventListener('click', function () {
+                window.switchMessyNotesMode('sections');
+              });
+            </script>
 
             <div class="buttons">
               <button id="submitBtn" class="primary" type="button">Submit</button>
@@ -1137,6 +1197,7 @@
 
     const els = {};
     let activityTimer = null;
+    let timerMetricHidden = false;
 
     function getEl(id) {
       return document.getElementById(id);
@@ -1431,16 +1492,12 @@
     }
 
     function setMode(nextMode) {
-      if (state.mode === nextMode) return;
       state.mode = nextMode;
-      els.openModeBtn.classList.toggle('active', nextMode === 'open');
-      els.sectionModeBtn.classList.toggle('active', nextMode === 'sections');
-      els.openMode.classList.toggle('hidden', nextMode !== 'open');
-      els.sectionMode.classList.toggle('hidden', nextMode !== 'sections');
+      if (window.switchMessyNotesMode) window.switchMessyNotesMode(nextMode);
     }
 
     function renderConfig() {
-      els.phasePill.textContent = ACTIVITY.phase;
+      if (els.phasePill) els.phasePill.textContent = ACTIVITY.phase;
       els.activityTitle.textContent = ACTIVITY.title;
       els.activitySubtitle.textContent = ACTIVITY.subtitle;
       els.storyContext.textContent = ACTIVITY.storyContext;
@@ -1684,6 +1741,11 @@
     function wireEvents() {
       els.openModeBtn.addEventListener('click', () => setMode('open'));
       els.sectionModeBtn.addEventListener('click', () => setMode('sections'));
+      document.querySelector('.mode-switch').addEventListener('click', (event) => {
+        const button = event.target.closest('.mode-btn');
+        if (!button) return;
+        setMode(button.id === 'sectionModeBtn' ? 'sections' : 'open');
+      });
 
       els.openResponse.addEventListener('input', startTimerFromInput);
       els.sectionGrid.addEventListener('input', startTimerFromInput);
@@ -1726,6 +1788,10 @@
       els.timerResetIconBtn.addEventListener('click', () => {
         resetTimer();
       });
+      els.timerMetricToggleBtn.addEventListener('click', () => {
+        timerMetricHidden = !timerMetricHidden;
+        syncHeaderTimerIcons();
+      });
 
       wireMobilePanelToggles();
     }
@@ -1734,6 +1800,12 @@
       els.timerPauseIconBtn.disabled = !activityTimer.isRunning();
       els.timerPlayIconBtn.disabled = activityTimer.isRunning();
       els.timerPlayIconBtn.setAttribute('aria-label', activityTimer.hasStarted() ? 'Resume timer' : 'Start timer');
+      els.timerMetric.classList.toggle('time-hidden', timerMetricHidden);
+      els.timerMetricToggleBtn.setAttribute('aria-label', timerMetricHidden ? 'Show elapsed time' : 'Hide elapsed time');
+      els.timerMetricToggleBtn.setAttribute('aria-pressed', timerMetricHidden ? 'true' : 'false');
+      els.timerMetricToggleBtn.innerHTML = timerMetricHidden
+        ? '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.7 10.7 0 0 1 12 20C5 20 2 12 2 12a18.4 18.4 0 0 1 5.06-5.94"/><path d="M9.9 4.24A10.3 10.3 0 0 1 12 4c7 0 10 8 10 8a18.5 18.5 0 0 1-2.16 3.19"/><path d="M14.12 14.12A3 3 0 0 1 9.88 9.88"/><path d="M1 1l22 22"/></svg>'
+        : '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-8 10-8 10 8 10 8-3 8-10 8-10-8-10-8Z"/><circle cx="12" cy="12" r="3"/></svg>';
     }
 
     function cacheElements() {
@@ -1757,6 +1829,8 @@
         'timerPauseIconBtn',
         'timerPlayIconBtn',
         'timerResetIconBtn',
+        'timerMetric',
+        'timerMetricToggleBtn',
         'openModeBtn',
         'sectionModeBtn',
         'openMode',
@@ -1805,6 +1879,7 @@
       setInterval(syncHeaderTimerIcons, 500);
       syncHeaderTimerIcons();
       initializeResponsiveTimer();
+      setMode(state.mode);
       wireEvents();
     }
 
