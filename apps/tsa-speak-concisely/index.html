@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Speak Concisely TSA Score placeholder from The Untaught Lessons." />
+  <title>Speak Concisely | TSA Score™</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="../../assets/favicon-bluebg-whitedoor-thicker-32.png?v=6">
+  <link rel="shortcut icon" type="image/png" href="../../assets/favicon-bluebg-whitedoor-thicker-32.png?v=6">
+  <link rel="apple-touch-icon" sizes="180x180" href="../../assets/apple-touch-icon.png?v=3">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lato:wght@300;400;700&family=Roboto+Mono:wght@400;500&display=swap');
+
+    :root {
+      --cream: #F3EDE2;
+      --navy: #003366;
+      --gold: #EEA320;
+      --charcoal: #4A4A4A;
+      --white: #FFFFFF;
+      --line: rgba(0, 51, 102, .14);
+      --shadow: 0 18px 44px rgba(0, 51, 102, .10);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--cream);
+      color: var(--charcoal);
+      font-family: 'Lato', sans-serif;
+    }
+
+    .app-header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: grid;
+      grid-template-columns: auto auto minmax(220px, 1fr);
+      align-items: center;
+      column-gap: 20px;
+      min-height: 76px;
+      padding: 12px 32px;
+      background: var(--navy);
+      color: var(--white);
+    }
+
+    .brand-logo-frame {
+      display: block;
+      width: 224px;
+      height: 46px;
+    }
+
+    .brand-logo-frame img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .brand-divider {
+      width: 1px;
+      height: 38px;
+      background: rgba(255, 255, 255, .42);
+    }
+
+    .app-kicker {
+      display: block;
+      color: var(--gold);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+
+    .app-title {
+      display: block;
+      margin-top: 3px;
+      color: var(--white);
+      font-family: 'Playfair Display', serif;
+      font-size: 27px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .placeholder-main {
+      width: min(100%, 860px);
+      margin: 0 auto;
+      padding: 72px 24px 88px;
+    }
+
+    .placeholder-card {
+      padding: 36px;
+      border: 1px solid var(--line);
+      border-top: 4px solid var(--gold);
+      border-radius: 12px;
+      background: var(--white);
+      box-shadow: var(--shadow);
+    }
+
+    .placeholder-label {
+      margin: 0 0 12px;
+      color: var(--gold);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 1.8px;
+      line-height: 1.4;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      color: var(--navy);
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(38px, 6vw, 62px);
+      line-height: 1.05;
+    }
+
+    p {
+      margin: 18px 0 0;
+      color: var(--charcoal);
+      font-size: 18px;
+      line-height: 1.65;
+    }
+
+    .placeholder-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 28px;
+    }
+
+    .placeholder-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 48px;
+      padding: 13px 18px;
+      border: 1px solid var(--navy);
+      border-radius: 6px;
+      background: var(--navy);
+      color: var(--white);
+      font-size: 16px;
+      font-weight: 700;
+      line-height: 1;
+      text-decoration: none;
+    }
+
+    .placeholder-button.secondary {
+      background: var(--white);
+      color: var(--navy);
+    }
+
+    @media (max-width: 760px) {
+      .app-header {
+        grid-template-columns: 1fr;
+        row-gap: 10px;
+        padding: 12px 18px;
+      }
+
+      .brand-logo-frame {
+        width: 164px;
+        height: 40px;
+      }
+
+      .brand-divider {
+        display: none;
+      }
+
+      .placeholder-card {
+        padding: 26px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="app-header">
+    <a class="brand-logo-frame" href="../../index.html" aria-label="The Untaught Lessons home">
+      <img src="../../assets/utl-logo-nav-white.png" alt="The Untaught Lessons" />
+    </a>
+    <div class="brand-divider" aria-hidden="true"></div>
+    <div>
+      <span class="app-kicker">TSA Score™ · Part 2</span>
+      <span class="app-title">Speak Concisely</span>
+    </div>
+  </header>
+
+  <main class="placeholder-main">
+    <section class="placeholder-card">
+      <p class="placeholder-label" id="assessmentMode">Diagnostic · Section 2</p>
+      <h1>Speak Concisely is coming soon.</h1>
+      <p>This holding page is where Part 2 of the TSA Score™ will live. It will measure how clearly someone can deliver the most important message in the time they have.</p>
+      <div class="placeholder-actions">
+        <a class="placeholder-button" id="backLink" href="../../tsa-score.html">Back to TSA Score</a>
+        <a class="placeholder-button secondary" href="../../index.html">Back to Home</a>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const mode = params.get('assessment') === 'checkpoint' ? 'Checkpoint' : 'Diagnostic';
+    const exercise = params.get('exercise') === 'b' ? 'Exercise B' : 'Exercise A';
+    document.getElementById('assessmentMode').textContent = `${mode} · Section 2 · ${exercise}`;
+    document.getElementById('backLink').href = mode === 'Checkpoint' ? '../tsa-checkpoint/index.html' : '../../tsa-score.html';
+    document.getElementById('backLink').textContent = mode === 'Checkpoint' ? 'Back to Checkpoint' : 'Back to TSA Score';
+  </script>
+</body>
+</html>

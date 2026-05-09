@@ -84,6 +84,14 @@
 
 .home-page .nav-menu a:hover { color: var(--home-gold); }
 
+.home-page .nav-menu a.nav-link-active {
+  color: var(--home-navy);
+  text-decoration: underline;
+  text-decoration-color: var(--home-gold);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 8px;
+}
+
 .home-page .nav-menu .nav-button {
   display: inline-flex;
   align-items: center;
@@ -414,6 +422,66 @@
 .home-page .pillars-section {
   padding: 100px 0;
   background: var(--home-deep-cream);
+}
+
+.home-page .tsa-home-teaser {
+  padding: 88px 0;
+  background: var(--home-navy);
+  text-align: center;
+}
+
+.home-page .tsa-home-teaser h2 {
+  margin: 0;
+  color: var(--home-white);
+  font-family: 'Playfair Display', serif;
+  font-size: 38pt;
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+.home-page .tsa-home-teaser p {
+  max-width: 560px;
+  margin: 20px auto 0;
+  color: var(--home-cream);
+  font-family: 'Lato', sans-serif;
+  font-size: 16pt;
+  font-weight: 300;
+  line-height: 1.65;
+}
+
+.home-page .tsa-home-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 50px;
+  margin-top: 30px;
+  padding: 14px 28px;
+  border-radius: 999px;
+  background: var(--home-gold);
+  color: var(--home-navy);
+  font-family: 'Lato', sans-serif;
+  font-size: 14pt;
+  font-weight: 700;
+  line-height: 1;
+  text-decoration: none;
+  transition: filter .2s ease, transform .2s ease;
+}
+
+.home-page .tsa-home-button:hover {
+  color: var(--home-navy);
+  filter: brightness(1.06);
+  transform: translateY(-1px);
+}
+
+.home-page .tsa-home-meta {
+  display: block;
+  margin-top: 18px;
+  color: var(--home-cream);
+  font-family: 'Roboto Mono', monospace;
+  font-size: 10.5pt;
+  font-weight: 400;
+  letter-spacing: 1.2px;
+  line-height: 1.5;
 }
 
 .home-page .pillar-grid {
@@ -889,6 +957,269 @@
   font-family: 'Lato', sans-serif;
   font-size: 15pt;
   font-weight: 300;
+}
+
+.tsa-page {
+  background: var(--home-cream);
+}
+
+.tsa-section {
+  padding: 96px 0;
+}
+
+.tsa-container {
+  width: min(100%, 1120px);
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.tsa-container.narrow {
+  width: min(100%, 820px);
+  text-align: center;
+}
+
+.tsa-hero {
+  padding: 116px 0 104px;
+  background: var(--home-cream);
+  text-align: center;
+}
+
+.tsa-hero h1 {
+  margin: 0;
+  color: var(--home-navy);
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(44px, 7vw, 78px);
+  font-weight: 700;
+  line-height: 1.06;
+}
+
+.tsa-hero p {
+  max-width: 850px;
+  margin: 24px auto 0;
+  color: var(--home-charcoal);
+  font-family: 'Lato', sans-serif;
+  font-size: 18pt;
+  font-weight: 300;
+  line-height: 1.65;
+}
+
+.tsa-formula {
+  display: block;
+  margin-top: 28px;
+  color: var(--home-gold);
+  font-family: 'Roboto Mono', monospace;
+  font-size: 12pt;
+  font-weight: 400;
+  letter-spacing: 1.4px;
+  line-height: 1.6;
+  text-transform: uppercase;
+}
+
+.tsa-explainer {
+  background: var(--home-white);
+}
+
+.tsa-pillar-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 28px;
+}
+
+.tsa-pillar {
+  text-align: center;
+}
+
+.tsa-pillar-icon {
+  display: block;
+  font-size: 34px;
+  line-height: 1;
+}
+
+.tsa-pillar h2 {
+  margin: 18px 0 10px;
+  color: var(--home-gold);
+  font-family: 'Playfair Display', serif;
+  font-size: 24pt;
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+.tsa-pillar p,
+.tsa-explainer-copy,
+.tsa-step p,
+.tsa-card p {
+  color: var(--home-charcoal);
+  font-family: 'Lato', sans-serif;
+  font-weight: 300;
+  line-height: 1.65;
+}
+
+.tsa-pillar p {
+  margin: 0;
+  font-size: 14.5pt;
+}
+
+.tsa-explainer-copy {
+  max-width: 640px;
+  margin: 56px auto 0;
+  font-size: 16pt;
+  text-align: center;
+}
+
+.tsa-routing {
+  background: var(--home-cream);
+}
+
+.tsa-card-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 32px;
+  align-items: stretch;
+}
+
+.tsa-card {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  padding: 32px;
+  border: 1px solid #E0E0E0;
+  border-top: 4px solid var(--home-gold);
+  border-radius: 12px;
+  background: var(--home-white);
+  box-shadow: 0 16px 38px rgba(0, 51, 102, .09);
+}
+
+.tsa-card-label {
+  color: var(--home-gold);
+  font-family: 'Roboto Mono', monospace;
+  font-size: 10.5pt;
+  font-weight: 400;
+  letter-spacing: 1.8px;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.tsa-card h2 {
+  margin: 14px 0 14px;
+  color: var(--home-navy);
+  font-family: 'Playfair Display', serif;
+  font-size: 32pt;
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+.tsa-card p {
+  margin: 0;
+  font-size: 15.5pt;
+}
+
+.tsa-card-detail {
+  display: block;
+  margin-top: 24px;
+  color: var(--home-charcoal);
+  font-family: 'Roboto Mono', monospace;
+  font-size: 10.5pt;
+  font-weight: 400;
+  letter-spacing: .7px;
+  line-height: 1.5;
+}
+
+.tsa-card-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 50px;
+  margin-top: auto;
+  padding: 14px 18px;
+  border: 1px solid var(--home-navy);
+  border-radius: 4px;
+  font-family: 'Lato', sans-serif;
+  font-size: 14pt;
+  font-weight: 700;
+  line-height: 1;
+  text-decoration: none;
+  transition: background .2s ease, color .2s ease, filter .2s ease;
+}
+
+.tsa-card-button.primary {
+  margin-top: 34px;
+  background: var(--home-navy);
+  color: var(--home-white);
+}
+
+.tsa-card-button.secondary {
+  margin-top: 34px;
+  background: var(--home-white);
+  color: var(--home-navy);
+}
+
+.tsa-card-button:hover {
+  filter: brightness(1.05);
+}
+
+.tsa-how {
+  background: var(--home-white);
+}
+
+.tsa-how h2 {
+  margin: 0 0 44px;
+  color: var(--home-navy);
+  font-family: 'Playfair Display', serif;
+  font-size: 38pt;
+  font-weight: 700;
+  line-height: 1.15;
+  text-align: center;
+}
+
+.tsa-step-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 28px;
+}
+
+.tsa-step {
+  text-align: center;
+}
+
+.tsa-step-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--home-navy);
+  color: var(--home-white);
+  font-family: 'Lato', sans-serif;
+  font-size: 13pt;
+  font-weight: 700;
+}
+
+.tsa-step h3 {
+  margin: 18px 0 10px;
+  color: var(--home-navy);
+  font-family: 'Playfair Display', serif;
+  font-size: 22pt;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.tsa-step p {
+  margin: 0;
+  font-size: 14.5pt;
+}
+
+.tsa-rubric-line {
+  margin: 48px 0 0;
+  color: var(--home-gold);
+  font-family: 'Roboto Mono', monospace;
+  font-size: 11pt;
+  font-weight: 400;
+  letter-spacing: 1.4px;
+  line-height: 1.5;
+  text-align: center;
+  text-transform: uppercase;
 }
 
 .programs-page {
@@ -1459,6 +1790,49 @@
 
   .home-page .member-tools-button {
     justify-self: start;
+  }
+
+  .home-page .tsa-home-teaser {
+    padding: 72px 0;
+  }
+
+  .home-page .tsa-home-teaser h2 {
+    font-size: 30pt;
+  }
+
+  .home-page .tsa-home-teaser p {
+    font-size: 14.5pt;
+  }
+
+  .tsa-section {
+    padding: 72px 0;
+  }
+
+  .tsa-hero {
+    padding: 88px 0 78px;
+  }
+
+  .tsa-hero p {
+    font-size: 15.5pt;
+  }
+
+  .tsa-formula {
+    font-size: 10.5pt;
+  }
+
+  .tsa-pillar-grid,
+  .tsa-card-grid,
+  .tsa-step-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .tsa-card {
+    padding: 28px;
+  }
+
+  .tsa-card h2,
+  .tsa-how h2 {
+    font-size: 28pt;
   }
 
   .home-page .pillar-grid { grid-template-columns: minmax(0, 340px); }

@@ -294,9 +294,12 @@
     }
 
     .item-zone.drag-over,
-    .bucket-items.drag-over {
+    .bucket-items.drag-over,
+    .item-zone.tap-target,
+    .bucket-items.tap-target {
       border-color: var(--gold);
       background: #fff7e9;
+      box-shadow: 0 0 0 2px rgba(238, 163, 32, .22);
     }
 
     .item-card {
@@ -309,9 +312,30 @@
       font-weight: 700;
       color: var(--navy);
       user-select: none;
+      touch-action: manipulation;
+      transition: background .15s ease, border-color .15s ease, box-shadow .15s ease, transform .15s ease;
     }
 
     .item-card:active { cursor: grabbing; }
+
+    .item-card.selected {
+      border-color: var(--gold);
+      background: #fff7e9;
+      box-shadow: 0 0 0 2px rgba(238, 163, 32, .25);
+      transform: translateY(-1px);
+    }
+
+    .tap-move-hint {
+      display: none;
+      margin: 8px 0 0;
+      color: var(--navy);
+      font-size: .86rem;
+      font-weight: 700;
+    }
+
+    .tap-move-hint.show {
+      display: block;
+    }
 
     .buckets-wrap {
       display: grid;
@@ -358,8 +382,20 @@
       min-height: 290px;
       padding: 8px;
       flex: 1;
-      border-radius: 0 0 12px 12px;
+      margin: 10px;
+      border: 2px dashed rgba(0, 51, 102, .18);
+      border-radius: 10px;
+      background: #FAF8F3;
       transition: .15s ease;
+    }
+
+    .bucket-empty {
+      margin: 18px 0 0;
+      color: var(--steel);
+      font-size: .9rem;
+      font-style: italic;
+      line-height: 1.45;
+      text-align: center;
     }
 
     textarea {
@@ -529,7 +565,8 @@
             <div class="item-card">yogurt</div>
             <div class="item-card">spinach</div>
           </div>
-          <p class="small">Tip: You can drag items into buckets and drag them back here.</p>
+          <p class="small">Tip: Drag items on desktop. On mobile, tap an item, then tap a bucket or the list to move it.</p>
+          <p class="tap-move-hint" id="tapMoveHint" aria-live="polite"></p>
         </div>
       </article>
 
@@ -615,6 +652,7 @@
 
     let activityTimer = null;
     let timerMetricHidden = false;
+    let selectedItemId = null;
 
     // -------------------------
     // Utility functions
@@ -690,6 +728,7 @@
       state.generatedItems = finalItems;
       state.placements = { list: finalItems.map((i) => i.id), bucket1: [], bucket2: [], bucket3: [] };
       state.bucketNames = { bucket1: '', bucket2: '', bucket3: '' };
+      selectedItemId = null;
 
       renderAll();
       clearFeedback();
@@ -730,6 +769,7 @@
 
       const movedCount = state.placements.bucket1.length + state.placements.bucket2.length + state.placements.bucket3.length;
       document.getElementById('checkBtn').disabled = movedCount === 0;
+      renderSelectionState();
     }
 
     function renderZone(zoneKey) {
@@ -738,30 +778,99 @@
       zoneEl.innerHTML = '';
       state.placements[zoneKey].forEach((id) => {
         const item = getItemById(id);
-        if (!item) return;
         const card = document.createElement('div');
-        card.className = 'item-card';
+        card.className = `item-card${id === selectedItemId ? ' selected' : ''}`;
         card.draggable = true;
         card.dataset.itemId = id;
+        card.setAttribute('role', 'button');
+        card.setAttribute('tabindex', '0');
+        card.setAttribute('aria-pressed', id === selectedItemId ? 'true' : 'false');
         card.textContent = item.name;
         zoneEl.appendChild(card);
       });
+      if (zoneKey !== 'list' && state.placements[zoneKey].length === 0) {
+        const empty = document.createElement('p');
+        empty.className = 'bucket-empty';
+        empty.textContent = 'Drop or tap items here.';
+        zoneEl.appendChild(empty);
+      }
     }
 
     // -------------------------
     // Drag-and-drop layer
     // -------------------------
     function moveItem(itemId, targetZone) {
+      if (!state.placements[targetZone]) return;
       Object.keys(state.placements).forEach((zone) => {
         state.placements[zone] = state.placements[zone].filter((id) => id !== itemId);
       });
       state.placements[targetZone].push(itemId);
+      selectedItemId = null;
       renderAll();
+    }
+
+    function findItemZone(itemId) {
+      return Object.keys(state.placements).find((zone) => state.placements[zone].includes(itemId));
+    }
+
+    function renderSelectionState() {
+      const selectedItem = selectedItemId ? getItemById(selectedItemId) : null;
+      const selectedZone = selectedItemId ? findItemZone(selectedItemId) : null;
+      document.querySelectorAll('.item-card').forEach((card) => {
+        const isSelected = card.dataset.itemId === selectedItemId;
+        card.classList.toggle('selected', isSelected);
+        card.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
+      });
+      document.querySelectorAll('[data-zone]').forEach((zone) => {
+        zone.classList.toggle('tap-target', Boolean(selectedItemId) && zone.dataset.zone !== selectedZone);
+      });
+      const hint = document.getElementById('tapMoveHint');
+      if (!hint) return;
+      hint.classList.toggle('show', Boolean(selectedItem));
+      hint.textContent = selectedItem ? `${selectedItem.name} selected. Tap a bucket or the list to move it.` : '';
+    }
+
+    function selectItem(itemId) {
+      selectedItemId = selectedItemId === itemId ? null : itemId;
+      activityTimer.startFromInteraction();
+      renderSelectionState();
+    }
+
+    function wireTapToMove() {
+      document.addEventListener('click', (e) => {
+        const itemCard = e.target.closest('.item-card');
+        if (itemCard) {
+          e.preventDefault();
+          selectItem(itemCard.dataset.itemId);
+          return;
+        }
+
+        const zone = e.target.closest('[data-zone]');
+        if (!zone || !selectedItemId) return;
+        e.preventDefault();
+        const currentZone = findItemZone(selectedItemId);
+        if (zone.dataset.zone !== currentZone) {
+          activityTimer.startFromInteraction();
+          moveItem(selectedItemId, zone.dataset.zone);
+        } else {
+          selectedItemId = null;
+          renderSelectionState();
+        }
+      });
+
+      document.addEventListener('keydown', (e) => {
+        if (!e.target.classList.contains('item-card')) return;
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        e.preventDefault();
+        selectItem(e.target.dataset.itemId);
+      });
     }
 
     function wireDragAndDrop() {
       document.addEventListener('dragstart', (e) => {
         if (!e.target.classList.contains('item-card')) return;
+        selectedItemId = null;
+        renderSelectionState();
         activityTimer.startFromInteraction();
         e.dataTransfer.setData('text/plain', e.target.dataset.itemId);
       });
@@ -1002,6 +1111,7 @@
       document.getElementById('resetBtn').addEventListener('click', () => {
         state.placements = { list: state.generatedItems.map((i) => i.id), bucket1: [], bucket2: [], bucket3: [] };
         state.bucketNames = { bucket1: '', bucket2: '', bucket3: '' };
+        selectedItemId = null;
         document.getElementById('whyText').value = '';
         clearFeedback();
         activityTimer.reset();
@@ -1055,6 +1165,7 @@
     setInterval(syncHeaderTimerIcons, 500);
     syncHeaderTimerIcons();
     buildBuckets();
+    wireTapToMove();
     wireDragAndDrop();
     wireEvents();
     renderSampleAnswer();
