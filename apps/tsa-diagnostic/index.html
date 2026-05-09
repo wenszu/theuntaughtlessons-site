@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="TSA Score™ Sort & Bucket diagnostic assessment from The Untaught Lessons." />
+  <title>Sort & Bucket | TSA Score™</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="../../assets/favicon-bluebg-whitedoor-thicker-32.png?v=6">
+  <link rel="shortcut icon" type="image/png" href="../../assets/favicon-bluebg-whitedoor-thicker-32.png?v=6">
+  <link rel="apple-touch-icon" sizes="180x180" href="../../assets/apple-touch-icon.png?v=3">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lato:wght@300;400;700&family=Roboto+Mono:wght@400;500;700&display=swap');
+
+    :root {
+      --cream: #F3EDE2;
+      --navy: #003366;
+      --gold: #EEA320;
+      --charcoal: #4A4A4A;
+      --steel: #4D7094;
+      --white: #FFFFFF;
+      --line: rgba(0, 51, 102, .14);
+      --shadow: 0 18px 44px rgba(0, 51, 102, .10);
+      --red: #B85B5B;
+      --red-bg: #F8E7E4;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--cream);
+      color: var(--charcoal);
+      font-family: 'Lato', sans-serif;
+    }
+
+    body.tsa-diag-locked {
+      overflow: hidden;
+    }
+
+    .tsa-diag-header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: grid;
+      grid-template-columns: auto auto minmax(220px, 1fr);
+      align-items: center;
+      column-gap: 20px;
+      min-height: 76px;
+      padding: 12px 32px;
+      background: var(--navy);
+      color: var(--white);
+    }
+
+    .tsa-diag-logo {
+      display: block;
+      width: 224px;
+      height: 46px;
+    }
+
+    .tsa-diag-logo img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .tsa-diag-divider {
+      width: 1px;
+      height: 38px;
+      background: rgba(255, 255, 255, .42);
+    }
+
+    .tsa-diag-kicker {
+      display: block;
+      color: var(--gold);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+
+    .tsa-diag-title {
+      display: block;
+      margin-top: 3px;
+      color: var(--white);
+      font-family: 'Playfair Display', serif;
+      font-size: 27px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .tsa-diag-gate {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background: var(--cream);
+    }
+
+    .tsa-diag-gate.is-hidden {
+      display: none;
+    }
+
+    .tsa-diag-gate-card {
+      width: min(100%, 520px);
+      padding: 36px;
+      border: 1px solid var(--line);
+      border-top: 4px solid var(--gold);
+      border-radius: 12px;
+      background: var(--white);
+      box-shadow: var(--shadow);
+    }
+
+    .tsa-diag-gate-logo {
+      width: 156px;
+      height: auto;
+      margin: 0 auto 28px;
+    }
+
+    h1, h2, h3 {
+      font-family: 'Playfair Display', serif;
+      color: var(--navy);
+    }
+
+    .tsa-diag-gate-card h1 {
+      margin: 0;
+      font-size: 34px;
+      line-height: 1.15;
+      text-align: center;
+    }
+
+    .tsa-diag-gate-card p {
+      margin: 12px 0 28px;
+      color: var(--charcoal);
+      font-size: 17px;
+      line-height: 1.6;
+      text-align: center;
+    }
+
+    .tsa-diag-form {
+      display: grid;
+      gap: 12px;
+    }
+
+    .tsa-diag-form label {
+      color: var(--navy);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .tsa-diag-form input {
+      width: 100%;
+      padding: 13px 12px;
+      border: 1px solid rgba(0, 51, 102, .22);
+      border-radius: 6px;
+      color: var(--charcoal);
+      font-family: 'Lato', sans-serif;
+      font-size: 16px;
+    }
+
+    .tsa-diag-form input:focus {
+      border-color: var(--navy);
+      outline: 2px solid rgba(238, 163, 32, .26);
+    }
+
+    .tsa-diag-submit,
+    .tsa-diag-primary,
+    .tsa-diag-secondary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 48px;
+      padding: 13px 18px;
+      border-radius: 6px;
+      font-family: 'Lato', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      line-height: 1;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .tsa-diag-submit,
+    .tsa-diag-primary {
+      border: 1px solid var(--gold);
+      background: var(--gold);
+      color: var(--navy);
+    }
+
+    .tsa-diag-submit {
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    .tsa-diag-submit[disabled],
+    .tsa-diag-primary[disabled] {
+      cursor: not-allowed;
+      opacity: .62;
+    }
+
+    .tsa-diag-secondary {
+      border: 1px solid var(--navy);
+      background: var(--white);
+      color: var(--navy);
+    }
+
+    .tsa-diag-error {
+      display: none;
+      margin: 4px 0 0;
+      color: #9F3A38;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 1.4;
+    }
+
+    .tsa-diag-error.is-visible {
+      display: block;
+    }
+
+    .tsa-diag-main {
+      width: min(100%, 1180px);
+      margin: 0 auto;
+      padding: 54px 24px 80px;
+    }
+
+    .tsa-diag-intro {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 24px;
+      margin-bottom: 26px;
+    }
+
+    .tsa-diag-label {
+      margin: 0 0 10px;
+      color: var(--gold);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 1.8px;
+      line-height: 1.4;
+      text-transform: uppercase;
+    }
+
+    .tsa-diag-intro h1 {
+      margin: 0;
+      font-size: clamp(38px, 6vw, 64px);
+      line-height: 1.05;
+    }
+
+    .tsa-diag-intro p {
+      max-width: 760px;
+      margin: 16px 0 0;
+      color: var(--charcoal);
+      font-size: 18px;
+      line-height: 1.65;
+    }
+
+    .tsa-diag-set {
+      display: inline-block;
+      width: fit-content;
+      margin-top: 16px;
+      padding: 0;
+      color: var(--steel);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      opacity: .72;
+    }
+
+    .tsa-diag-panel {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--white);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .tsa-diag-panel-head {
+      padding: 24px 28px;
+      border-bottom: 1px solid var(--line);
+      background: #FAF8F3;
+    }
+
+    .tsa-diag-panel-head h2 {
+      margin: 0;
+      font-size: 30px;
+      line-height: 1.2;
+    }
+
+    .tsa-diag-panel-head p {
+      margin: 10px 0 0;
+      font-size: 17px;
+      line-height: 1.55;
+    }
+
+    .tsa-diag-instruction-note {
+      max-width: 860px;
+      margin: 14px 0 0;
+      color: var(--charcoal);
+      font-size: 16px;
+      line-height: 1.6;
+    }
+
+    .tsa-diag-step {
+      padding: 28px;
+    }
+
+    .tsa-diag-select-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .tsa-diag-select-card {
+      display: grid;
+      gap: 9px;
+    }
+
+    .tsa-diag-select-card label {
+      color: var(--navy);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 1.4px;
+      text-transform: uppercase;
+    }
+
+    .tsa-diag-select-card select {
+      width: 100%;
+      min-height: 50px;
+      padding: 12px;
+      border: 1px solid rgba(0, 51, 102, .22);
+      border-radius: 8px;
+      background: var(--white);
+      color: var(--charcoal);
+      font-family: 'Lato', sans-serif;
+      font-size: 16px;
+    }
+
+    .tsa-diag-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      justify-content: flex-end;
+      margin-top: 24px;
+    }
+
+    .tsa-diag-workspace {
+      display: none;
+      grid-template-columns: minmax(250px, .9fr) minmax(0, 1.55fr);
+      gap: 24px;
+      align-items: start;
+    }
+
+    .tsa-diag-workspace.is-visible {
+      display: grid;
+    }
+
+    .tsa-diag-item-list,
+    .tsa-diag-bucket {
+      min-height: 150px;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--white);
+      box-shadow: 0 8px 18px rgba(0, 51, 102, .06);
+    }
+
+    .tsa-diag-item-list {
+      background: #FAF8F3;
+    }
+
+    .tsa-diag-item-list.is-target,
+    .tsa-diag-bucket.is-target {
+      outline: 2px solid rgba(238, 163, 32, .65);
+      outline-offset: 2px;
+    }
+
+    .tsa-diag-list-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin: 0 0 14px;
+      color: var(--navy);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 1.4px;
+      line-height: 1.4;
+      text-transform: uppercase;
+    }
+
+    .tsa-diag-count {
+      color: var(--steel);
+      white-space: nowrap;
+    }
+
+    .tsa-diag-items {
+      display: grid;
+      gap: 10px;
+    }
+
+    .tsa-diag-bucket-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .tsa-diag-bucket-drop {
+      min-height: 220px;
+      margin-top: 14px;
+      padding: 12px;
+      border: 2px dashed rgba(0, 51, 102, .18);
+      border-radius: 10px;
+      background: #FAF8F3;
+      transition: border-color .2s ease, background .2s ease;
+    }
+
+    .tsa-diag-bucket.is-target .tsa-diag-bucket-drop {
+      border-color: var(--gold);
+      background: #FFF8E9;
+    }
+
+    .tsa-diag-empty {
+      margin: 14px 0 0;
+      color: var(--steel);
+      font-size: 14px;
+      font-style: italic;
+      line-height: 1.5;
+      text-align: center;
+    }
+
+    .tsa-diag-pill {
+      width: 100%;
+      padding: 12px 13px;
+      border: 1px solid rgba(0, 51, 102, .14);
+      border-radius: 8px;
+      background: var(--white);
+      color: var(--charcoal);
+      font-family: 'Lato', sans-serif;
+      font-size: 15px;
+      line-height: 1.35;
+      text-align: left;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0, 51, 102, .05);
+    }
+
+    .tsa-diag-pill[draggable="true"] {
+      cursor: grab;
+    }
+
+    .tsa-diag-pill.is-selected {
+      border-color: var(--gold);
+      background: #FFF8E9;
+      box-shadow: 0 0 0 2px rgba(238, 163, 32, .38);
+    }
+
+    .tsa-diag-pill.is-wrong {
+      border-color: rgba(184, 91, 91, .55);
+      background: var(--red-bg);
+      color: #762F2F;
+    }
+
+    .tsa-diag-helper {
+      margin: 16px 0 0;
+      color: var(--steel);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .tsa-diag-submit-row {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      margin-top: 24px;
+      padding-top: 22px;
+      border-top: 1px solid var(--line);
+    }
+
+    .tsa-diag-submit-row.is-visible {
+      display: flex;
+    }
+
+    .tsa-diag-status {
+      color: var(--charcoal);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 12px;
+      letter-spacing: .8px;
+      line-height: 1.5;
+      text-transform: uppercase;
+    }
+
+    .tsa-diag-score-card {
+      padding: 34px;
+      border: 1px solid var(--line);
+      border-top: 4px solid var(--gold);
+      border-radius: 12px;
+      background: var(--white);
+      box-shadow: var(--shadow);
+    }
+
+    .tsa-diag-score-card h1 {
+      margin: 0;
+      font-size: clamp(34px, 5vw, 56px);
+      line-height: 1.1;
+    }
+
+    .tsa-diag-score {
+      margin: 18px 0 22px;
+      color: var(--gold);
+      font-family: 'Roboto Mono', monospace;
+      font-size: clamp(42px, 8vw, 72px);
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .tsa-diag-score-rows {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 22px;
+    }
+
+    .tsa-diag-score-row {
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #FAF8F3;
+      color: var(--navy);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .tsa-diag-interpretation {
+      margin: 0 0 30px;
+      color: var(--charcoal);
+      font-size: 18px;
+      line-height: 1.6;
+    }
+
+    .tsa-diag-answer-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .tsa-diag-answer-card {
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #FAF8F3;
+    }
+
+    .tsa-diag-answer-card h3 {
+      margin: 0 0 12px;
+      color: var(--navy);
+      font-size: 20px;
+      line-height: 1.2;
+    }
+
+    .tsa-diag-answer-card ul {
+      display: grid;
+      gap: 8px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .tsa-diag-answer-card li {
+      padding: 8px 10px;
+      border-radius: 6px;
+      background: var(--white);
+      color: var(--charcoal);
+      font-size: 14px;
+      line-height: 1.35;
+    }
+
+    .tsa-diag-answer-card li.is-wrong {
+      background: var(--red-bg);
+      color: #762F2F;
+    }
+
+    .tsa-diag-score-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 28px;
+    }
+
+    @media (max-width: 860px) {
+      .tsa-diag-header {
+        grid-template-columns: 1fr;
+        gap: 8px;
+        padding: 14px 20px;
+      }
+
+      .tsa-diag-logo {
+        width: 172px;
+        height: 40px;
+      }
+
+      .tsa-diag-divider {
+        display: none;
+      }
+
+      .tsa-diag-intro,
+      .tsa-diag-workspace,
+      .tsa-diag-bucket-grid,
+      .tsa-diag-select-grid,
+      .tsa-diag-score-rows,
+      .tsa-diag-answer-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .tsa-diag-set {
+        white-space: normal;
+      }
+
+      .tsa-diag-submit-row {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .tsa-diag-primary,
+      .tsa-diag-secondary {
+        width: 100%;
+      }
+    }
+
+    @media (max-width: 420px) {
+      .tsa-diag-main {
+        padding: 36px 14px 60px;
+      }
+
+      .tsa-diag-gate-card,
+      .tsa-diag-step,
+      .tsa-diag-panel-head,
+      .tsa-diag-score-card {
+        padding: 22px;
+      }
+    }
+  </style>
+</head>
+<body class="tsa-diag-locked">
+  <header class="tsa-diag-header">
+    <a class="tsa-diag-logo" href="../../index.html" aria-label="The Untaught Lessons home">
+      <img src="../../assets/utl-logo-nav-white.png" alt="The Untaught Lessons" />
+    </a>
+    <div class="tsa-diag-divider" aria-hidden="true"></div>
+    <div>
+      <span class="tsa-diag-kicker">TSA Score™</span>
+      <span class="tsa-diag-title">Sort &amp; Bucket</span>
+    </div>
+  </header>
+
+  <section class="tsa-diag-gate" id="contactGate" aria-labelledby="gateTitle">
+    <div class="tsa-diag-gate-card">
+      <img class="tsa-diag-gate-logo" src="../../assets/logo.png" alt="The Untaught Lessons" />
+      <h1 id="gateTitle">Before we begin</h1>
+      <p>Enter your details to get your TSA Score™ and track your progress.</p>
+      <form class="tsa-diag-form" id="gateForm">
+        <label for="fullName">Full name</label>
+        <input id="fullName" name="name" type="text" autocomplete="name" required>
+
+        <label for="emailAddress">Email address</label>
+        <input id="emailAddress" name="email" type="email" autocomplete="email" required>
+
+        <label for="roleTitle">Role / Job title</label>
+        <input id="roleTitle" name="role" type="text" autocomplete="organization-title" required>
+
+        <button class="tsa-diag-submit" id="gateSubmit" type="submit">Begin assessment</button>
+        <p class="tsa-diag-error" id="gateError" role="alert">Please check your details and try again.</p>
+      </form>
+    </div>
+  </section>
+
+  <main class="tsa-diag-main" id="app" hidden></main>
+
+  <script>
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzJE--FL2kB_XDNZRnszCtlyLRPvaLAHGuF5TAOdXJk40atbvf5Y6ELuSK2B7CSLaMN/exec';
+    const GATE_KEY = 'tsa_gate_complete';
+    const SORT_SCORE_KEY = 'tsa_sort_score';
+    const assessmentMode = new URLSearchParams(window.location.search).get('assessment') === 'checkpoint' ? 'Checkpoint' : 'Diagnostic';
+
+    const sets = [
+      {
+        name: 'Meeting Agenda from Hell',
+        scenario: '',
+        sortingInstruction: '',
+        items: ['Q3 budget approval vote', 'Project status from team leads', "Someone's vacation dates", 'New org chart announcement', 'Decision on vendor contract', 'Team birthday celebration', 'Policy change effective next month', 'Discussion on unclear process', 'Request for IT equipment', 'Product launch go/no-go', 'Action items from last week', 'Debate over office layout'],
+        wordBank: ['Decisions Needed', 'Updates Only', 'Parking Lot', 'Action Items', 'Discussion Topics', 'Information Share', 'Open Issues', 'Follow-Ups', 'Announcements', 'Next Steps'],
+        correctLabels: ['Decisions Needed', 'Updates Only', 'Parking Lot'],
+        answerKey: {
+          'Decisions Needed': ['Q3 budget approval vote', 'Decision on vendor contract', 'Product launch go/no-go', 'Debate over office layout'],
+          'Updates Only': ['Project status from team leads', 'New org chart announcement', 'Policy change effective next month', 'Action items from last week'],
+          'Parking Lot': ["Someone's vacation dates", 'Team birthday celebration', 'Request for IT equipment', 'Discussion on unclear process']
+        }
+      },
+      {
+        name: 'Work Trip Packing List',
+        scenario: "You're packing for a 2-day client presentation trip.",
+        sortingInstruction: '',
+        items: ['Laptop', 'Charger', 'Passport', 'Wallet', 'Dress shoes', 'Vitamins', 'Notebook', 'Phone', 'Suit jacket', 'Headphones', 'Pen', 'Power bank'],
+        wordBank: ['Work Essentials', 'Travel Documents & Wallet', 'Clothing & Personal', 'Tech & Gadgets', 'Business Gear', 'Health & Comfort', 'Accessories', 'Everyday Carry', 'Professional Items', 'Personal Care'],
+        correctLabels: ['Work Essentials', 'Travel Documents & Wallet', 'Clothing & Personal'],
+        answerKey: {
+          'Work Essentials': ['Laptop', 'Charger', 'Notebook', 'Pen'],
+          'Travel Documents & Wallet': ['Passport', 'Wallet', 'Power bank', 'Phone'],
+          'Clothing & Personal': ['Dress shoes', 'Suit jacket', 'Vitamins', 'Headphones']
+        }
+      },
+      {
+        name: 'Performance Review Feedback',
+        scenario: '',
+        sortingInstruction: '',
+        items: ['Consistently meets deadlines', 'Strong cross-team communicator', 'Takes initiative without prompting', 'Positive team culture contributor', 'Needs to improve executive communication', 'Presentation skills require work', 'Can be too detail-oriented in senior meetings', 'Struggles to prioritize under pressure', 'Enroll in leadership training by Q3', 'Shadow a director in stakeholder meetings', 'Set monthly check-ins with manager', 'Complete conflict resolution workshop'],
+        wordBank: ['Strengths to Celebrate', 'Areas to Develop', 'Actions to Take', "What's Working", 'What Needs Work', 'Next Steps', 'Keep Doing', 'Stop Doing', 'Start Doing', 'Development Areas'],
+        correctLabels: ['Strengths to Celebrate', 'Areas to Develop', 'Actions to Take'],
+        answerKey: {
+          'Strengths to Celebrate': ['Consistently meets deadlines', 'Strong cross-team communicator', 'Takes initiative without prompting', 'Positive team culture contributor'],
+          'Areas to Develop': ['Needs to improve executive communication', 'Presentation skills require work', 'Can be too detail-oriented in senior meetings', 'Struggles to prioritize under pressure'],
+          'Actions to Take': ['Enroll in leadership training by Q3', 'Shadow a director in stakeholder meetings', 'Set monthly check-ins with manager', 'Complete conflict resolution workshop']
+        }
+      },
+      {
+        name: 'Customer Complaint Inbox',
+        scenario: 'These are support tickets from your product team. Sort them by how they should be handled.',
+        sortingInstruction: '',
+        items: ['App crashes on login for 30% of users', 'Payment processing failing at checkout', 'Data not saving — users losing work', 'Security vulnerability reported by user', 'Slow load times reported intermittently by 3 users', 'Feature X behaves differently on iOS vs Android', 'Search results seem inconsistent', 'Export function missing some records', 'User wants dark mode', 'Font size too small on mobile', 'Request to add keyboard shortcut', 'Onboarding tutorial feels outdated'],
+        wordBank: ['Fix Immediately', 'Investigate Further', 'Backlog & Monitor', 'Critical Issues', 'Nice to Have', 'Bugs', 'Feature Requests', 'High Priority', 'Low Priority', 'Enhancements'],
+        correctLabels: ['Fix Immediately', 'Investigate Further', 'Backlog & Monitor'],
+        answerKey: {
+          'Fix Immediately': ['App crashes on login for 30% of users', 'Payment processing failing at checkout', 'Data not saving — users losing work', 'Security vulnerability reported by user'],
+          'Investigate Further': ['Slow load times reported intermittently by 3 users', 'Feature X behaves differently on iOS vs Android', 'Search results seem inconsistent', 'Export function missing some records'],
+          'Backlog & Monitor': ['User wants dark mode', 'Font size too small on mobile', 'Request to add keyboard shortcut', 'Onboarding tutorial feels outdated']
+        }
+      },
+      {
+        name: "New Employee's First Week",
+        scenario: '',
+        sortingInstruction: '',
+        items: ['Meet your manager', 'Get laptop and access set up', 'Read the team handbook', 'Introduce yourself to the team', 'Schedule 1:1s with key stakeholders', "Review last quarter's goals", 'Shadow a team meeting', 'Complete mandatory HR training', 'Form an opinion on team strategy', 'Build relationships with cross-functional teams', 'Propose any process changes', 'Learn the unwritten rules of the culture'],
+        wordBank: ['Do on Day 1', 'Complete by End of Week', "Don't Rush — First Month", 'Urgent', 'This Week', 'Later', 'Immediate', 'Short-Term', 'Long-Term', 'Onboarding Essentials'],
+        correctLabels: ['Do on Day 1', 'Complete by End of Week', "Don't Rush — First Month"],
+        answerKey: {
+          'Do on Day 1': ['Meet your manager', 'Get laptop and access set up', 'Read the team handbook', 'Introduce yourself to the team'],
+          'Complete by End of Week': ['Schedule 1:1s with key stakeholders', "Review last quarter's goals", 'Shadow a team meeting', 'Complete mandatory HR training'],
+          "Don't Rush — First Month": ['Form an opinion on team strategy', 'Build relationships with cross-functional teams', 'Propose any process changes', 'Learn the unwritten rules of the culture']
+        }
+      },
+      {
+        name: 'Reasons a Project Is Off Track',
+        scenario: 'These are findings from a project post-mortem. Sort them by root cause category.',
+        sortingInstruction: 'Think about the category each reason belongs to, not who caused it.',
+        items: ["Stakeholder wasn't looped in early enough", "Team didn't flag risks to the manager", 'Cross-functional partner had different priorities', 'Feedback was vague and not actionable', 'Scope was not defined clearly at the start', 'Timeline was too aggressive given resources', "Dependencies weren't mapped before kickoff", 'No clear owner for key decisions', "Deliverable quality didn't meet expectations", 'Milestones slipped without escalation', "Final output didn't match the brief", 'Testing was skipped due to time pressure'],
+        wordBank: ['People & Communication', 'Process & Planning', 'Execution & Delivery', 'Team Issues', 'Planning Failures', 'Output Problems', 'Human Factors', 'Structural Problems', 'Delivery Gaps', 'Root Causes'],
+        correctLabels: ['People & Communication', 'Process & Planning', 'Execution & Delivery'],
+        answerKey: {
+          'People & Communication': ["Stakeholder wasn't looped in early enough", "Team didn't flag risks to the manager", 'Cross-functional partner had different priorities', 'Feedback was vague and not actionable'],
+          'Process & Planning': ['Scope was not defined clearly at the start', 'Timeline was too aggressive given resources', "Dependencies weren't mapped before kickoff", 'No clear owner for key decisions'],
+          'Execution & Delivery': ["Deliverable quality didn't meet expectations", 'Milestones slipped without escalation', "Final output didn't match the brief", 'Testing was skipped due to time pressure']
+        }
+      }
+    ];
+
+    const app = document.getElementById('app');
+    const contactGate = document.getElementById('contactGate');
+    const gateForm = document.getElementById('gateForm');
+    const gateSubmit = document.getElementById('gateSubmit');
+    const gateError = document.getElementById('gateError');
+    const selectedSetIndex = Math.floor(Math.random() * 6);
+    const activeSet = sets[selectedSetIndex];
+    const state = {
+      participant: { name: '', email: '' },
+      labels: ['', '', ''],
+      placements: {},
+      selectedItem: null,
+      shuffledItems: shuffle(activeSet.items)
+    };
+
+    function shuffle(items) {
+      const copy = [...items];
+      for (let i = copy.length - 1; i > 0; i -= 1) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, char => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+      }[char]));
+    }
+
+    function startAssessment() {
+      contactGate.classList.add('is-hidden');
+      document.body.classList.remove('tsa-diag-locked');
+      app.hidden = false;
+      renderSortingStep();
+    }
+
+    gateForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      gateError.classList.remove('is-visible');
+      if (!gateForm.checkValidity()) {
+        gateForm.reportValidity();
+        return;
+      }
+
+      const formData = new FormData(gateForm);
+      state.participant.name = formData.get('name').trim();
+      state.participant.email = formData.get('email').trim();
+      const payload = {
+        name: state.participant.name,
+        email: state.participant.email,
+        role: formData.get('role').trim(),
+        message: `Submitted via TSA ${assessmentMode}`,
+        page: window.location.href
+      };
+
+      gateSubmit.disabled = true;
+      gateSubmit.textContent = 'Starting...';
+
+      try {
+        await fetch(SCRIPT_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          body: JSON.stringify(payload)
+        });
+        sessionStorage.setItem(GATE_KEY, 'true');
+        sessionStorage.setItem('tsa_participant_name', state.participant.name);
+        sessionStorage.setItem('tsa_participant_email', state.participant.email);
+        startAssessment();
+      } catch (error) {
+        gateSubmit.disabled = false;
+        gateSubmit.textContent = 'Begin assessment';
+        gateError.classList.add('is-visible');
+      }
+    });
+
+    if (sessionStorage.getItem(GATE_KEY) === 'true') {
+      state.participant.name = sessionStorage.getItem('tsa_participant_name') || '';
+      state.participant.email = sessionStorage.getItem('tsa_participant_email') || '';
+      startAssessment();
+    }
+
+    function renderShell(innerHtml) {
+      app.innerHTML = `
+        <section class="tsa-diag-intro">
+          <div>
+            <p class="tsa-diag-label">Think Clearly · Exercise A</p>
+            <h1>Sort &amp; Bucket</h1>
+            <p>Review the items, choose three bucket labels, then sort all twelve items into the structure you chose.</p>
+            <div class="tsa-diag-set">${escapeHtml(activeSet.name)}</div>
+          </div>
+        </section>
+        ${innerHtml}
+      `;
+    }
+
+    function handleLabelChange(event) {
+      const index = Number(event.target.dataset.labelIndex);
+      state.labels[index] = event.target.value;
+      refreshLabelOptions();
+      renderPlacements();
+    }
+
+    function refreshLabelOptions() {
+      const selected = new Set(state.labels.filter(Boolean));
+      document.querySelectorAll('[data-label-index]').forEach(select => {
+        [...select.options].forEach(option => {
+          option.disabled = Boolean(option.value && selected.has(option.value) && option.value !== select.value);
+        });
+      });
+      refreshSubmitState();
+    }
+
+    function renderSortingStep() {
+      state.placements = {};
+      state.selectedItem = null;
+      renderShell(`
+        <section class="tsa-diag-panel">
+          <div class="tsa-diag-panel-head">
+            <h2>Sort the items</h2>
+            <p>Your goal is to turn a messy list into three clear groups. Scan the items first, choose the best label for each bucket from the dropdowns, then move every item into the bucket where it belongs. Drag items on desktop, or tap an item and then tap a bucket on mobile.</p>
+            ${activeSet.scenario ? `<p>${escapeHtml(activeSet.scenario)}</p>` : ''}
+            ${activeSet.sortingInstruction ? `<p>${escapeHtml(activeSet.sortingInstruction)}</p>` : ''}
+          </div>
+          <div class="tsa-diag-step">
+            <div class="tsa-diag-workspace is-visible">
+              <div class="tsa-diag-item-list" data-drop-zone="unplaced">
+                <p class="tsa-diag-list-title">Unplaced items <span class="tsa-diag-count" id="unplacedCount"></span></p>
+                <div class="tsa-diag-items" id="unplacedItems"></div>
+              </div>
+              <div class="tsa-diag-bucket-grid" id="bucketGrid"></div>
+            </div>
+            <p class="tsa-diag-helper" id="tapHelper">All 12 items must be placed before you submit.</p>
+            <div class="tsa-diag-submit-row" id="submitRow">
+              <span class="tsa-diag-status" id="placementStatus"></span>
+              <button class="tsa-diag-primary" id="submitAssessment" type="button" disabled>Submit assessment</button>
+            </div>
+          </div>
+        </section>
+      `);
+      document.getElementById('submitAssessment').addEventListener('click', showScore);
+      renderPlacements();
+      refreshLabelOptions();
+    }
+
+    function getItemLocation(item) {
+      return state.placements[item] || 'unplaced';
+    }
+
+    function moveItem(item, target) {
+      if (target === 'unplaced') {
+        delete state.placements[item];
+      } else {
+        state.placements[item] = target;
+      }
+      state.selectedItem = null;
+      renderPlacements();
+    }
+
+    function renderPlacements() {
+      const unplaced = state.shuffledItems.filter(item => getItemLocation(item) === 'unplaced');
+      document.getElementById('unplacedItems').innerHTML = unplaced.map(item => itemButton(item)).join('');
+      document.getElementById('unplacedCount').textContent = `${unplaced.length} left`;
+      document.getElementById('bucketGrid').innerHTML = [0, 1, 2].map(index => {
+        const bucketId = `bucket-${index}`;
+        const label = state.labels[index] || `Bucket ${index + 1}`;
+        const bucketItems = state.shuffledItems.filter(item => getItemLocation(item) === bucketId);
+        return `
+          <div class="tsa-diag-bucket" data-drop-zone="${bucketId}">
+            <div class="tsa-diag-select-card">
+              <label for="bucketLabel${index}">Bucket ${index + 1}</label>
+              <select id="bucketLabel${index}" data-label-index="${index}">
+                <option value="">Choose a label</option>
+                ${activeSet.wordBank.map(option => `<option value="${escapeHtml(option)}" ${option === state.labels[index] ? 'selected' : ''}>${escapeHtml(option)}</option>`).join('')}
+              </select>
+            </div>
+            <p class="tsa-diag-list-title">${escapeHtml(label)} <span class="tsa-diag-count">${bucketItems.length}</span></p>
+            <div class="tsa-diag-bucket-drop">
+              <div class="tsa-diag-items">${bucketItems.map(item => itemButton(item)).join('')}</div>
+              ${bucketItems.length ? '' : '<p class="tsa-diag-empty">Drop or tap items here.</p>'}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      document.querySelectorAll('[data-label-index]').forEach(select => {
+        select.addEventListener('change', handleLabelChange);
+      });
+      refreshLabelOptions();
+
+      document.querySelectorAll('.tsa-diag-pill').forEach(button => {
+        button.addEventListener('click', handleItemClick);
+        button.addEventListener('dragstart', event => {
+          event.dataTransfer.setData('text/plain', button.dataset.item);
+        });
+      });
+
+      document.querySelectorAll('[data-drop-zone]').forEach(zone => {
+        zone.addEventListener('click', handleZoneClick);
+        zone.addEventListener('dragover', event => {
+          event.preventDefault();
+          zone.classList.add('is-target');
+        });
+        zone.addEventListener('dragleave', () => zone.classList.remove('is-target'));
+        zone.addEventListener('drop', event => {
+          event.preventDefault();
+          zone.classList.remove('is-target');
+          const item = event.dataTransfer.getData('text/plain');
+          if (item) moveItem(item, zone.dataset.dropZone);
+        });
+      });
+
+      refreshSelectedState();
+      document.getElementById('submitRow').classList.add('is-visible');
+      refreshSubmitState();
+    }
+
+    function refreshSubmitState() {
+      const submitButton = document.getElementById('submitAssessment');
+      const status = document.getElementById('placementStatus');
+      if (!submitButton || !status) return;
+      const placedCount = Object.keys(state.placements).length;
+      const selected = new Set(state.labels.filter(Boolean));
+      const labelsReady = state.labels.every(Boolean) && selected.size === 3;
+      submitButton.disabled = !(labelsReady && placedCount === activeSet.items.length);
+      status.textContent = labelsReady
+        ? `${placedCount} / ${activeSet.items.length} placed`
+        : 'Choose 3 different bucket labels';
+    }
+
+    function itemButton(item) {
+      return `<button class="tsa-diag-pill" type="button" draggable="true" data-item="${escapeHtml(item)}">${escapeHtml(item)}</button>`;
+    }
+
+    function handleItemClick(event) {
+      event.stopPropagation();
+      const item = event.currentTarget.dataset.item;
+      if (state.selectedItem === item && getItemLocation(item) !== 'unplaced') {
+        moveItem(item, 'unplaced');
+        return;
+      }
+      state.selectedItem = state.selectedItem === item ? null : item;
+      refreshSelectedState();
+    }
+
+    function handleZoneClick(event) {
+      const zone = event.currentTarget.dataset.dropZone;
+      if (!state.selectedItem || event.target.closest('.tsa-diag-pill')) return;
+      moveItem(state.selectedItem, zone);
+    }
+
+    function refreshSelectedState() {
+      document.querySelectorAll('.tsa-diag-pill').forEach(button => {
+        button.classList.toggle('is-selected', button.dataset.item === state.selectedItem);
+      });
+      document.querySelectorAll('[data-drop-zone]').forEach(zone => {
+        zone.classList.toggle('is-target', Boolean(state.selectedItem));
+      });
+      const helper = document.getElementById('tapHelper');
+      if (helper) helper.textContent = state.selectedItem ? 'Now tap a bucket or the unplaced list to move the selected item.' : 'All 12 items must be placed before you submit.';
+    }
+
+    function correctBucketFor(item) {
+      return Object.entries(activeSet.answerKey).find(([, items]) => items.includes(item))?.[0] || '';
+    }
+
+    function calculateScore() {
+      const labelScore = state.labels.reduce((sum, label, index) => sum + (label === activeSet.correctLabels[index] ? 2 : 0), 0);
+      const misplaced = activeSet.items.filter(item => {
+        const bucketIndex = Number(String(state.placements[item]).replace('bucket-', ''));
+        return state.labels[bucketIndex] !== correctBucketFor(item);
+      });
+      let placementScore;
+      if (misplaced.length === 0) placementScore = 14;
+      else if (misplaced.length === 1) placementScore = 11;
+      else if (misplaced.length === 2) placementScore = 8;
+      else if (misplaced.length === 3) placementScore = 6;
+      else placementScore = Math.max(0, 6 - ((misplaced.length - 3) * 1.5));
+
+      return {
+        labelScore,
+        placementScore,
+        total: Math.round((labelScore + placementScore) * 10) / 10,
+        misplaced
+      };
+    }
+
+    function interpretation(total) {
+      if (total >= 18) return 'Strong — your categories were clean and your sorting was precise.';
+      if (total >= 13) return 'Solid — you got the structure right with a few placements to sharpen.';
+      if (total >= 8) return 'Developing — some of your categories or placements need refinement.';
+      return 'Early stage — this is exactly what the UTL program builds.';
+    }
+
+    function showScore() {
+      const score = calculateScore();
+      const storagePayload = {
+        score: score.total,
+        labelScore: score.labelScore,
+        placementScore: score.placementScore,
+        setIndex: selectedSetIndex,
+        setName: activeSet.name
+      };
+      sessionStorage.setItem(SORT_SCORE_KEY, JSON.stringify(storagePayload));
+      localStorage.setItem(SORT_SCORE_KEY, JSON.stringify(storagePayload));
+
+      renderShell(`
+        <section class="tsa-diag-score-card">
+          <h1>Your Sort &amp; Bucket Score</h1>
+          <div class="tsa-diag-score">${score.total} / 20</div>
+          <div class="tsa-diag-score-rows">
+            <div class="tsa-diag-score-row">Bucket labels: ${score.labelScore} / 6</div>
+            <div class="tsa-diag-score-row">Item placement: ${score.placementScore} / 14</div>
+          </div>
+          <p class="tsa-diag-interpretation">${interpretation(score.total)}</p>
+          <p class="tsa-diag-label">Answer Reveal</p>
+          <div class="tsa-diag-answer-grid">
+            ${activeSet.correctLabels.map(label => `
+              <div class="tsa-diag-answer-card">
+                <h3>${escapeHtml(label)}</h3>
+                <ul>
+                  ${activeSet.answerKey[label].map(item => `<li class="${score.misplaced.includes(item) ? 'is-wrong' : ''}">${escapeHtml(item)}</li>`).join('')}
+                </ul>
+              </div>
+            `).join('')}
+          </div>
+          <div class="tsa-diag-score-actions">
+            <button class="tsa-diag-secondary" id="copyResults" type="button">Copy Results</button>
+            <a class="tsa-diag-primary" href="../tsa-speak-concisely/index.html?assessment=${assessmentMode === 'Checkpoint' ? 'checkpoint' : 'diagnostic'}">Continue to Speak Concisely →</a>
+          </div>
+        </section>
+      `);
+
+      document.getElementById('copyResults').addEventListener('click', async event => {
+        const line = `Sort & Bucket\t${score.total}/20\tLabels: ${score.labelScore}/6\tPlacement: ${score.placementScore}/14\tSet: ${activeSet.name}`;
+        await navigator.clipboard.writeText(line);
+        event.target.textContent = 'Copied';
+      });
+    }
+  </script>
+</body>
+</html>

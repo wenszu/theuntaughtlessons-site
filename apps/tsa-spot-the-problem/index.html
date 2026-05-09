@@ -1,0 +1,1354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="TSA Score™ Spot the Problem diagnostic assessment from The Untaught Lessons." />
+  <title>Spot the Problem | TSA Score™</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="../../assets/favicon-bluebg-whitedoor-thicker-32.png?v=6">
+  <link rel="shortcut icon" type="image/png" href="../../assets/favicon-bluebg-whitedoor-thicker-32.png?v=6">
+  <link rel="apple-touch-icon" sizes="180x180" href="../../assets/apple-touch-icon.png?v=3">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lato:wght@300;400;700&family=Roboto+Mono:wght@400;500;700&display=swap');
+
+    :root {
+      --cream: #F3EDE2;
+      --navy: #003366;
+      --gold: #EEA320;
+      --charcoal: #4A4A4A;
+      --steel: #4D7094;
+      --white: #FFFFFF;
+      --line: rgba(0, 51, 102, .14);
+      --shadow: 0 18px 44px rgba(0, 51, 102, .10);
+      --red: #B85B5B;
+      --red-bg: #F8E7E4;
+      --bucket-a: #F8F3E8;
+      --bucket-b: #EEF4F8;
+      --bucket-c: #F2F0F7;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--cream);
+      color: var(--charcoal);
+      font-family: 'Lato', sans-serif;
+    }
+
+    body.tsa-stp-locked {
+      overflow: hidden;
+    }
+
+    .tsa-stp-header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: grid;
+      grid-template-columns: auto auto minmax(220px, 1fr);
+      align-items: center;
+      column-gap: 20px;
+      min-height: 76px;
+      padding: 12px 32px;
+      background: var(--navy);
+      color: var(--white);
+    }
+
+    .tsa-stp-logo {
+      display: block;
+      width: 224px;
+      height: 46px;
+    }
+
+    .tsa-stp-logo img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .tsa-stp-divider {
+      width: 1px;
+      height: 38px;
+      background: rgba(255, 255, 255, .42);
+    }
+
+    .tsa-stp-kicker {
+      display: block;
+      color: var(--gold);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+
+    .tsa-stp-title {
+      display: block;
+      margin-top: 3px;
+      color: var(--white);
+      font-family: 'Playfair Display', serif;
+      font-size: 27px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .tsa-stp-gate {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background: var(--cream);
+    }
+
+    .tsa-stp-gate.is-hidden {
+      display: none;
+    }
+
+    .tsa-stp-gate-card {
+      width: min(100%, 520px);
+      padding: 36px;
+      border: 1px solid var(--line);
+      border-top: 4px solid var(--gold);
+      border-radius: 12px;
+      background: var(--white);
+      box-shadow: var(--shadow);
+    }
+
+    .tsa-stp-gate-logo {
+      width: 156px;
+      height: auto;
+      margin: 0 auto 28px;
+    }
+
+    h1, h2, h3 {
+      font-family: 'Playfair Display', serif;
+      color: var(--navy);
+    }
+
+    .tsa-stp-gate-card h1 {
+      margin: 0;
+      font-size: 34px;
+      line-height: 1.15;
+      text-align: center;
+    }
+
+    .tsa-stp-gate-card p {
+      margin: 12px 0 28px;
+      color: var(--charcoal);
+      font-size: 17px;
+      line-height: 1.6;
+      text-align: center;
+    }
+
+    .tsa-stp-form {
+      display: grid;
+      gap: 12px;
+    }
+
+    .tsa-stp-form label {
+      color: var(--navy);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .tsa-stp-form input {
+      width: 100%;
+      padding: 13px 12px;
+      border: 1px solid rgba(0, 51, 102, .22);
+      border-radius: 6px;
+      color: var(--charcoal);
+      font-family: 'Lato', sans-serif;
+      font-size: 16px;
+    }
+
+    .tsa-stp-form input:focus {
+      border-color: var(--navy);
+      outline: 2px solid rgba(238, 163, 32, .26);
+    }
+
+    .tsa-stp-submit,
+    .tsa-stp-primary,
+    .tsa-stp-secondary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 48px;
+      padding: 13px 18px;
+      border-radius: 6px;
+      font-family: 'Lato', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      line-height: 1;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .tsa-stp-submit,
+    .tsa-stp-primary {
+      border: 1px solid var(--gold);
+      background: var(--gold);
+      color: var(--navy);
+    }
+
+    .tsa-stp-submit {
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    .tsa-stp-submit[disabled],
+    .tsa-stp-primary[disabled] {
+      cursor: not-allowed;
+      opacity: .62;
+    }
+
+    .tsa-stp-secondary {
+      border: 1px solid var(--navy);
+      background: var(--white);
+      color: var(--navy);
+    }
+
+    .tsa-stp-error {
+      display: none;
+      margin: 4px 0 0;
+      color: #9F3A38;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 1.4;
+    }
+
+    .tsa-stp-error.is-visible {
+      display: block;
+    }
+
+    .tsa-stp-main {
+      width: min(100%, 1180px);
+      margin: 0 auto;
+      padding: 54px 24px 80px;
+    }
+
+    .tsa-stp-intro {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 24px;
+      margin-bottom: 26px;
+    }
+
+    .tsa-stp-label {
+      margin: 0 0 10px;
+      color: var(--gold);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 1.8px;
+      line-height: 1.4;
+      text-transform: uppercase;
+    }
+
+    .tsa-stp-intro h1 {
+      margin: 0;
+      font-size: clamp(38px, 6vw, 64px);
+      line-height: 1.05;
+    }
+
+    .tsa-stp-intro p {
+      max-width: 820px;
+      margin: 16px 0 0;
+      color: var(--charcoal);
+      font-size: 18px;
+      line-height: 1.65;
+    }
+
+    .tsa-stp-workspace {
+      display: grid;
+      grid-template-columns: minmax(260px, .85fr) minmax(0, 1.7fr);
+      gap: 20px;
+      align-items: start;
+    }
+
+    .tsa-stp-instruction-strip {
+      margin-bottom: 20px;
+      padding: 16px 18px;
+      border: 1px solid;
+      border-radius: 10px;
+      font-size: 17px;
+      font-weight: 700;
+      line-height: 1.5;
+    }
+
+    .tsa-stp-part-gold .tsa-stp-instruction-strip {
+      border-color: var(--gold);
+      background: rgba(238, 163, 32, .08);
+      color: var(--navy);
+    }
+
+    .tsa-stp-part-steel .tsa-stp-instruction-strip {
+      border-color: var(--steel);
+      background: rgba(77, 112, 148, .08);
+      color: var(--navy);
+    }
+
+    .tsa-stp-left-zone,
+    .tsa-stp-drop-zone {
+      min-height: 260px;
+      padding: 14px;
+      border: 2px dashed;
+      border-radius: 12px;
+      background: var(--white);
+      transition: border-color .2s ease, background .2s ease, box-shadow .2s ease;
+    }
+
+    .tsa-stp-part-gold .tsa-stp-left-zone,
+    .tsa-stp-part-gold .tsa-stp-drop-zone {
+      border-color: var(--gold);
+      background: rgba(238, 163, 32, .08);
+    }
+
+    .tsa-stp-part-steel .tsa-stp-left-zone,
+    .tsa-stp-part-steel .tsa-stp-drop-zone {
+      border-color: var(--steel);
+      background: rgba(77, 112, 148, .08);
+    }
+
+    .tsa-stp-left-zone.is-target,
+    .tsa-stp-drop-zone.is-target {
+      box-shadow: 0 0 0 3px rgba(238, 163, 32, .28);
+    }
+
+    .tsa-stp-part-steel .tsa-stp-left-zone.is-target,
+    .tsa-stp-part-steel .tsa-stp-drop-zone.is-target {
+      box-shadow: 0 0 0 3px rgba(77, 112, 148, .28);
+    }
+
+    .tsa-stp-zone-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin: 0 0 12px;
+      color: var(--navy);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 1.3px;
+      line-height: 1.4;
+      text-transform: uppercase;
+    }
+
+    .tsa-stp-bucket-grid.work {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .tsa-stp-work-bucket {
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--white);
+      box-shadow: 0 8px 18px rgba(0, 51, 102, .06);
+    }
+
+    .tsa-stp-work-bucket h3 {
+      margin: 0 0 12px;
+      font-size: 20px;
+      line-height: 1.2;
+    }
+
+    .tsa-stp-items {
+      display: grid;
+      gap: 9px;
+    }
+
+    .tsa-stp-empty,
+    .tsa-stp-slot {
+      margin: 12px 0 0;
+      color: var(--steel);
+      font-size: 14px;
+      font-style: italic;
+      line-height: 1.45;
+      text-align: center;
+    }
+
+    .tsa-stp-slot {
+      padding: 10px;
+      border: 1px dashed rgba(0, 51, 102, .24);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, .72);
+    }
+
+    .tsa-stp-chip.is-static {
+      cursor: default;
+      opacity: .78;
+      box-shadow: none;
+    }
+
+    .tsa-stp-part-gold .tsa-stp-chip.is-selected {
+      border-color: var(--gold);
+      background: #FFF8E9;
+      box-shadow: 0 0 0 2px rgba(238, 163, 32, .38);
+    }
+
+    .tsa-stp-part-steel .tsa-stp-chip.is-selected {
+      border-color: var(--steel);
+      background: #EEF4F8;
+      box-shadow: 0 0 0 2px rgba(77, 112, 148, .38);
+    }
+
+    .tsa-stp-panel,
+    .tsa-stp-score-card {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--white);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .tsa-stp-panel-head {
+      padding: 24px 28px;
+      border-bottom: 1px solid var(--line);
+      background: #FAF8F3;
+    }
+
+    .tsa-stp-progress {
+      margin: 0 0 9px;
+      color: var(--gold);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 1.6px;
+      text-transform: uppercase;
+    }
+
+    .tsa-stp-panel-head h2 {
+      margin: 0;
+      font-size: 30px;
+      line-height: 1.2;
+    }
+
+    .tsa-stp-panel-head p {
+      margin: 10px 0 0;
+      font-size: 17px;
+      line-height: 1.55;
+    }
+
+    .tsa-stp-step {
+      padding: 28px;
+    }
+
+    .tsa-stp-bucket-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .tsa-stp-bucket {
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #FAF8F3;
+    }
+
+    .tsa-stp-bucket:nth-child(1) { background: var(--bucket-a); }
+    .tsa-stp-bucket:nth-child(2) { background: var(--bucket-b); }
+    .tsa-stp-bucket:nth-child(3) { background: var(--bucket-c); }
+
+    .tsa-stp-bucket h3 {
+      margin: 0 0 14px;
+      font-size: 21px;
+      line-height: 1.2;
+    }
+
+    .tsa-stp-chip-grid,
+    .tsa-stp-bank {
+      display: grid;
+      gap: 10px;
+    }
+
+    .tsa-stp-chip,
+    .tsa-stp-card-choice {
+      width: 100%;
+      padding: 12px 13px;
+      border: 1px solid rgba(0, 51, 102, .14);
+      border-radius: 8px;
+      background: var(--white);
+      color: var(--charcoal);
+      font-family: 'Lato', sans-serif;
+      font-size: 15px;
+      line-height: 1.35;
+      text-align: left;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0, 51, 102, .05);
+    }
+
+    .tsa-stp-chip.is-selected,
+    .tsa-stp-card-choice.is-selected {
+      border-color: var(--gold);
+      background: #FFF8E9;
+      box-shadow: 0 0 0 2px rgba(238, 163, 32, .38);
+    }
+
+    .tsa-stp-card-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .tsa-stp-card-choice {
+      min-height: 90px;
+      color: var(--navy);
+      font-family: 'Playfair Display', serif;
+      font-size: 23px;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .tsa-stp-inline-error {
+      display: none;
+      margin: 16px 0 0;
+      color: #9F3A38;
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 1.4;
+    }
+
+    .tsa-stp-inline-error.is-visible {
+      display: block;
+    }
+
+    .tsa-stp-actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .tsa-stp-score-card {
+      padding: 34px;
+      border-top: 4px solid var(--gold);
+    }
+
+    .tsa-stp-score-card h1 {
+      margin: 0;
+      font-size: clamp(34px, 5vw, 56px);
+      line-height: 1.1;
+    }
+
+    .tsa-stp-score {
+      margin: 18px 0 22px;
+      color: var(--gold);
+      font-family: 'Roboto Mono', monospace;
+      font-size: clamp(42px, 8vw, 72px);
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .tsa-stp-score-rows,
+    .tsa-stp-score-summary {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+
+    .tsa-stp-score-summary {
+      grid-template-columns: minmax(0, 1.25fr) minmax(0, .9fr);
+      align-items: stretch;
+      margin: 22px 0;
+    }
+
+    .tsa-stp-score-row,
+    .tsa-stp-combined,
+    .tsa-stp-score-tile {
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #FAF8F3;
+      color: var(--navy);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .tsa-stp-score-tile {
+      display: grid;
+      align-content: start;
+      gap: 8px;
+      min-height: 100%;
+      background: var(--white);
+    }
+
+    .tsa-stp-score-tile.featured {
+      border-top: 4px solid var(--gold);
+      background: #FFFDF8;
+    }
+
+    .tsa-stp-score-tile .tile-label {
+      color: var(--charcoal);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 1.2px;
+      line-height: 1.4;
+      text-transform: uppercase;
+    }
+
+    .tsa-stp-score-tile .tile-title {
+      color: var(--navy);
+      font-family: 'Playfair Display', serif;
+      font-size: 26px;
+      font-weight: 700;
+      line-height: 1.15;
+    }
+
+    .tsa-stp-score-tile .tile-score {
+      color: var(--gold);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 34px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .tsa-stp-score-tile .tile-detail {
+      color: var(--charcoal);
+      font-family: 'Lato', sans-serif;
+      font-size: 15px;
+      line-height: 1.45;
+    }
+
+    .tsa-stp-interpretation,
+    .tsa-stp-answer {
+      margin: 0 0 22px;
+      color: var(--charcoal);
+      font-size: 18px;
+      line-height: 1.6;
+    }
+
+    .tsa-stp-answer strong {
+      color: var(--navy);
+      font-weight: 700;
+    }
+
+    .tsa-stp-combined {
+      margin: 22px 0;
+      border-top: 4px solid var(--gold);
+      font-size: 15px;
+    }
+
+    .tsa-stp-combined h2 {
+      margin: 0 0 12px;
+      font-size: 26px;
+      line-height: 1.15;
+    }
+
+    .tsa-stp-score-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 28px;
+    }
+
+    .tsa-stp-part-gold .tsa-stp-chip.is-selected {
+      border-color: var(--gold);
+      background: #FFF8E9;
+      box-shadow: 0 0 0 2px rgba(238, 163, 32, .38);
+    }
+
+    .tsa-stp-part-steel .tsa-stp-chip.is-selected {
+      border-color: var(--steel);
+      background: #EEF4F8;
+      box-shadow: 0 0 0 2px rgba(77, 112, 148, .38);
+    }
+
+    @media (max-width: 860px) {
+      .tsa-stp-header {
+        grid-template-columns: 1fr;
+        gap: 8px;
+        padding: 14px 20px;
+      }
+
+      .tsa-stp-logo {
+        width: 172px;
+        height: 40px;
+      }
+
+      .tsa-stp-divider {
+        display: none;
+      }
+
+      .tsa-stp-intro,
+      .tsa-stp-bucket-grid,
+      .tsa-stp-workspace,
+      .tsa-stp-bucket-grid.work,
+      .tsa-stp-card-grid,
+      .tsa-stp-score-rows,
+      .tsa-stp-score-summary {
+        grid-template-columns: 1fr;
+      }
+
+      .tsa-stp-primary,
+      .tsa-stp-secondary {
+        width: 100%;
+      }
+    }
+
+    @media (max-width: 420px) {
+      .tsa-stp-main {
+        padding: 36px 14px 60px;
+      }
+
+      .tsa-stp-gate-card,
+      .tsa-stp-step,
+      .tsa-stp-panel-head,
+      .tsa-stp-score-card {
+        padding: 22px;
+      }
+    }
+  </style>
+</head>
+<body class="tsa-stp-locked">
+  <header class="tsa-stp-header">
+    <a class="tsa-stp-logo" href="../../index.html" aria-label="The Untaught Lessons home">
+      <img src="../../assets/utl-logo-nav-white.png" alt="The Untaught Lessons" />
+    </a>
+    <div class="tsa-stp-divider" aria-hidden="true"></div>
+    <div>
+      <span class="tsa-stp-kicker">TSA Score™</span>
+      <span class="tsa-stp-title">Spot the Problem</span>
+    </div>
+  </header>
+
+  <section class="tsa-stp-gate" id="contactGate" aria-labelledby="gateTitle">
+    <div class="tsa-stp-gate-card">
+      <img class="tsa-stp-gate-logo" src="../../assets/logo.png" alt="The Untaught Lessons" />
+      <h1 id="gateTitle">Before we begin</h1>
+      <p>Enter your details to get your TSA Score™ and track your progress.</p>
+      <form class="tsa-stp-form" id="gateForm">
+        <label for="fullName">Full name</label>
+        <input id="fullName" name="name" type="text" autocomplete="name" required>
+
+        <label for="emailAddress">Email address</label>
+        <input id="emailAddress" name="email" type="email" autocomplete="email" required>
+
+        <label for="roleTitle">Role / Job title</label>
+        <input id="roleTitle" name="role" type="text" autocomplete="organization-title" required>
+
+        <button class="tsa-stp-submit" id="gateSubmit" type="submit">Begin assessment</button>
+        <p class="tsa-stp-error" id="gateError" role="alert">Please check your details and try again.</p>
+      </form>
+    </div>
+  </section>
+
+  <main class="tsa-stp-main" id="app" hidden></main>
+
+  <script>
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzJE--FL2kB_XDNZRnszCtlyLRPvaLAHGuF5TAOdXJk40atbvf5Y6ELuSK2B7CSLaMN/exec';
+    const GATE_KEY = 'tsa_gate_complete';
+    const SORT_SCORE_KEY = 'tsa_sort_score';
+    const assessmentMode = new URLSearchParams(window.location.search).get('assessment') === 'checkpoint' ? 'Checkpoint' : 'Diagnostic';
+
+    const sets = [
+      {
+        partA: {
+          topic: 'What makes feedback useful?',
+          buckets: {
+            Clarity: ['Describes specific behavior not general traits', 'Uses concrete examples from real situations', 'Avoids vague language like "be more professional"', 'States clearly what needs to change'],
+            'Timing & Delivery': ['Given close to when the event happened', 'Delivered privately not in front of others', "Doesn't use fuzzy phrases — is direct about the issue"],
+            Actionability: ['Focuses on what the person can actually change', 'Suggests a specific path forward', 'Checks for understanding after giving feedback']
+          },
+          overlaps: ['Avoids vague language like "be more professional"', "Doesn't use fuzzy phrases — is direct about the issue"]
+        },
+        partB: {
+          topic: 'Traits of a great communicator',
+          leftItems: ['Listens before responding', 'Adjusts message to suit the audience', 'Speaks loudly in all situations', 'Uses jargon to sound expert', 'Avoids silence at all costs'],
+          buckets: {
+            Clarity: ['Gets to the point quickly', 'Uses simple language'],
+            Connection: ['Makes eye contact', 'Shows genuine interest'],
+            Confidence: ['Holds their ground under pushback', 'Projects calm under pressure']
+          },
+          answers: { 'Adjusts message to suit the audience': 'Clarity', 'Listens before responding': 'Connection' }
+        }
+      },
+      {
+        partA: {
+          topic: 'What makes a strong project manager?',
+          buckets: {
+            Planning: ['Sets clear milestones', 'Defines what success looks like', 'Allocates resources early', 'Breaks work into manageable tasks'],
+            Communication: ['Tells the team what winning looks like', 'Listens actively to the team', 'Updates stakeholders regularly', 'Keeps everyone informed on progress'],
+            Delivery: ['Meets deadlines consistently', 'Holds the team accountable', 'Manages scope to avoid scope creep']
+          },
+          overlaps: ['Defines what success looks like', 'Tells the team what winning looks like', 'Updates stakeholders regularly', 'Keeps everyone informed on progress']
+        },
+        partB: {
+          topic: 'What builds trust at work?',
+          leftItems: ['Does what they say they will do', 'Shares information openly', 'Takes credit for team wins', 'Avoids difficult conversations', 'Changes position when pressured'],
+          buckets: {
+            Reliability: ['Shows up consistently', 'Meets commitments without being chased'],
+            Integrity: ['Tells the truth even when it is uncomfortable'],
+            Transparency: ['Acknowledges mistakes quickly', 'Asks for input before deciding']
+          },
+          answers: { 'Does what they say they will do': 'Reliability', 'Shares information openly': 'Integrity' }
+        }
+      },
+      {
+        partA: {
+          topic: 'What makes a presentation land?',
+          buckets: {
+            Structure: ['Opens with the key message not background', 'Covers only what the audience needs to know', 'Follows a logical flow from problem to solution', 'Ends with a clear call to action'],
+            Delivery: ['Speaks with confidence and eye contact', "Doesn't read from the slides", 'Paces the talk so key points land', 'Controls the rhythm so the audience can follow'],
+            'Audience Fit': ['Removes anything irrelevant to this specific audience', 'Anticipates questions and addresses them early', 'Leaves one clear takeaway the audience remembers']
+          },
+          overlaps: ['Covers only what the audience needs to know', 'Removes anything irrelevant to this specific audience', 'Paces the talk so key points land', 'Controls the rhythm so the audience can follow']
+        },
+        partB: {
+          topic: 'What makes a team high-performing?',
+          leftItems: ['Clear roles so no one duplicates effort', 'Psychological safety to speak up', 'Everyone agrees with the leader always', 'No conflict ever', 'Works the longest hours'],
+          buckets: {
+            Structure: ['Shared goals everyone understands', 'Decision-making process is clear'],
+            Culture: ['Members trust each other', 'Disagreement is handled constructively'],
+            Execution: ['Progress is tracked and visible', 'Accountability is shared not concentrated']
+          },
+          answers: { 'Clear roles so no one duplicates effort': 'Structure', 'Psychological safety to speak up': 'Culture' }
+        }
+      },
+      {
+        partA: {
+          topic: 'Why do projects go off track?',
+          buckets: {
+            People: ["Key stakeholder wasn't looped in early", "Team didn't raise risks to the manager", 'Important person was left out of decisions', 'Cross-functional partner had competing priorities'],
+            Process: ["Scope wasn't defined clearly at the start", 'No clear owner for key decisions', 'Timeline was too aggressive given resources', 'Nobody was accountable for the final call'],
+            Execution: ["Deliverable didn't meet expectations", "Progress wasn't tracked or escalated", "Deadlines were missed and no one flagged it", 'Testing was skipped under time pressure']
+          },
+          overlaps: ["Key stakeholder wasn't looped in early", 'Important person was left out of decisions', 'No clear owner for key decisions', 'Nobody was accountable for the final call', "Progress wasn't tracked or escalated", "Deadlines were missed and no one flagged it"]
+        },
+        partB: {
+          topic: 'What does executive presence look like?',
+          leftItems: ['Speaks with conviction even under uncertainty', 'Reads the room and adjusts in real time', 'Always has the loudest voice in the room', 'Never shows any emotion', 'Agrees with the most senior person present'],
+          buckets: {
+            Communication: ['Gets to the point without over-explaining', 'Frames ideas in terms of impact not activity'],
+            Composure: ['Stays calm when things go wrong', "Doesn't get defensive under challenge"],
+            Awareness: ['Knows what matters to who is in the room']
+          },
+          answers: { 'Speaks with conviction even under uncertainty': 'Communication', 'Reads the room and adjusts in real time': 'Awareness' }
+        }
+      },
+      {
+        partA: {
+          topic: 'What makes someone ready for promotion?',
+          buckets: {
+            Performance: ['Consistently exceeds what the role requires', 'Delivers results without needing to be told', 'Goes beyond the expectations of the current job', 'Gets things done even in ambiguous situations'],
+            Leadership: ['Others seek them out for advice and input', 'Brings people together around a shared goal', 'Takes initiative and drives things forward', 'Rallies the team toward a common direction'],
+            Readiness: ['Has already shown they can do the next job', 'Understands how decisions get made at the next level', 'Is already operating at the level above', 'Knows what matters to senior stakeholders']
+          },
+          overlaps: ['Consistently exceeds what the role requires', 'Goes beyond the expectations of the current job', 'Brings people together around a shared goal', 'Rallies the team toward a common direction', 'Has already shown they can do the next job', 'Is already operating at the level above']
+        },
+        partB: {
+          topic: 'What makes a decision well-made?',
+          leftItems: ['Considers second-order effects not just the immediate outcome', 'Is made at the right time — not too early or too late', 'Is made by whoever shouts loudest', 'Never changes once made', 'Avoids any input from others'],
+          buckets: {
+            Thinking: ['Uses available data without waiting for perfect information', 'Weighs trade-offs explicitly'],
+            Process: ['Involves the right people at the right level'],
+            Outcome: ['Can be explained and defended clearly', 'Is revisable if new information emerges']
+          },
+          answers: { 'Considers second-order effects not just the immediate outcome': 'Thinking', 'Is made at the right time — not too early or too late': 'Process' }
+        }
+      }
+    ];
+
+    const app = document.getElementById('app');
+    const contactGate = document.getElementById('contactGate');
+    const gateForm = document.getElementById('gateForm');
+    const gateSubmit = document.getElementById('gateSubmit');
+    const gateError = document.getElementById('gateError');
+    const selectedPartA = pickRandom(sets.map((set, index) => index), 3);
+    const selectedPartB = pickRandom(sets.map((set, index) => index), 3);
+    const SPOT_SCORE_KEY = 'tsa_spot_score';
+    const state = {
+      participant: { name: '', email: '' },
+      part: 'A',
+      partAIndex: 0,
+      partBIndex: 0,
+      selectedItem: null,
+      scores: { partA: 0, partB: 0 },
+      partAScores: [],
+      partBScores: [],
+      partA: { left: [], buckets: {} },
+      partB: { left: [], buckets: {} }
+    };
+
+    function pickRandom(items, count) {
+      const copy = [...items];
+      for (let i = copy.length - 1; i > 0; i -= 1) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy.slice(0, count);
+    }
+
+    function activePartASet() {
+      return sets[selectedPartA[state.partAIndex]];
+    }
+
+    function activePartBSet() {
+      return sets[selectedPartB[state.partBIndex]];
+    }
+
+    function activeProblem() {
+      return state.part === 'A' ? activePartASet().partA : activePartBSet().partB;
+    }
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, char => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+      }[char]));
+    }
+
+    function startAssessment() {
+      contactGate.classList.add('is-hidden');
+      document.body.classList.remove('tsa-stp-locked');
+      app.hidden = false;
+      initializePartA();
+      renderPartA();
+    }
+
+    gateForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      gateError.classList.remove('is-visible');
+      if (!gateForm.checkValidity()) {
+        gateForm.reportValidity();
+        return;
+      }
+
+      const formData = new FormData(gateForm);
+      state.participant.name = formData.get('name').trim();
+      state.participant.email = formData.get('email').trim();
+      const payload = {
+        name: state.participant.name,
+        email: state.participant.email,
+        role: formData.get('role').trim(),
+        message: `Submitted via TSA ${assessmentMode}`,
+        page: window.location.href
+      };
+
+      gateSubmit.disabled = true;
+      gateSubmit.textContent = 'Starting...';
+
+      try {
+        await fetch(SCRIPT_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          body: JSON.stringify(payload)
+        });
+        sessionStorage.setItem(GATE_KEY, 'true');
+        sessionStorage.setItem('tsa_participant_name', state.participant.name);
+        sessionStorage.setItem('tsa_participant_email', state.participant.email);
+        startAssessment();
+      } catch (error) {
+        gateSubmit.disabled = false;
+        gateSubmit.textContent = 'Begin assessment';
+        gateError.classList.add('is-visible');
+      }
+    });
+
+    if (sessionStorage.getItem(GATE_KEY) === 'true') {
+      state.participant.name = sessionStorage.getItem('tsa_participant_name') || '';
+      state.participant.email = sessionStorage.getItem('tsa_participant_email') || '';
+      startAssessment();
+    }
+
+    function renderShell(innerHtml) {
+      app.innerHTML = `
+        <section class="tsa-stp-intro">
+          <div>
+            <p class="tsa-stp-label">Think Clearly · Exercise B</p>
+            <h1>Spot the Problem</h1>
+            <p>Find structural problems in grouped information. First remove duplicate ideas. Then add the missing items where they belong.</p>
+          </div>
+        </section>
+        ${innerHtml}
+      `;
+    }
+
+    function initializePartA() {
+      state.part = 'A';
+      state.selectedItem = null;
+      state.partA.left = [];
+      state.partA.buckets = {};
+      Object.entries(activePartASet().partA.buckets).forEach(([bucket, items]) => {
+        state.partA.buckets[bucket] = [...items];
+      });
+    }
+
+    function initializePartB() {
+      state.part = 'B';
+      state.selectedItem = null;
+      state.partB.left = [...activePartBSet().partB.leftItems];
+      state.partB.buckets = {};
+      Object.keys(activePartBSet().partB.buckets).forEach(bucket => {
+        state.partB.buckets[bucket] = [];
+      });
+    }
+
+    function renderPartA() {
+      const problem = activePartASet().partA;
+      renderShell(renderWorkspace({
+        title: `Part A · Problem ${state.partAIndex + 1} of ${selectedPartA.length}`,
+        themeClass: 'tsa-stp-part-gold',
+        instruction: 'Some items in these groups say the same thing in different words. Move the duplicates back to the left.',
+        leftTitle: 'Duplicates you found',
+        data: state.partA,
+        sourceBuckets: problem.buckets,
+        showEmptySlots: false,
+        submitLabel: 'Next problem',
+        submitDisabled: state.partA.left.length === 0
+      }));
+      wireWorkspace();
+      document.getElementById('submitPart').addEventListener('click', submitPartA);
+    }
+
+    function renderPartB() {
+      const problem = activePartBSet().partB;
+      renderShell(renderWorkspace({
+        title: `Part B · Problem ${state.partBIndex + 1} of ${selectedPartB.length}`,
+        themeClass: 'tsa-stp-part-steel',
+        instruction: 'Some groups are missing items. Move some items from the left into the correct group on the right. Please note not everything on the left need to be moved.',
+        leftTitle: 'Possible missing items',
+        data: state.partB,
+        sourceBuckets: problem.buckets,
+        showEmptySlots: true,
+        submitLabel: state.partBIndex === selectedPartB.length - 1 ? 'See score' : 'Next problem',
+        submitDisabled: Object.values(state.partB.buckets).flat().length === 0
+      }));
+      wireWorkspace();
+      document.getElementById('submitPart').addEventListener('click', submitPartB);
+      window.requestAnimationFrame(() => document.getElementById('app')?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+    }
+
+    function renderWorkspace(config) {
+      const names = Object.keys(config.sourceBuckets);
+      return `
+        <section class="tsa-stp-panel">
+          <div class="tsa-stp-panel-head">
+            <p class="tsa-stp-progress">${escapeHtml(config.title)}</p>
+            <h2>${escapeHtml(activeProblem().topic)}</h2>
+          </div>
+          <div class="tsa-stp-step ${config.themeClass}">
+            <div class="tsa-stp-instruction-strip">${escapeHtml(config.instruction)}</div>
+            <div class="tsa-stp-workspace">
+              <section class="tsa-stp-left-zone" data-zone="left">
+                <p class="tsa-stp-zone-title">${escapeHtml(config.leftTitle)} <span>${config.data.left.length}</span></p>
+                <div class="tsa-stp-items">${config.data.left.map(item => itemChip(item, 'left')).join('')}</div>
+                ${config.data.left.length ? '' : '<p class="tsa-stp-empty">Move items here.</p>'}
+              </section>
+              <div class="tsa-stp-bucket-grid work">
+                ${names.map(bucket => {
+                  const moved = config.data.buckets[bucket] || [];
+                  const visibleItems = state.part === 'A' ? moved : [...config.sourceBuckets[bucket], ...moved];
+                  return `
+                    <section class="tsa-stp-work-bucket">
+                      <h3>${escapeHtml(bucket)}</h3>
+                      <div class="tsa-stp-drop-zone" data-zone="${escapeHtml(bucket)}">
+                        <div class="tsa-stp-items">
+                          ${visibleItems.map(item => itemChip(item, bucket, state.part === 'B' && !moved.includes(item) ? 'is-static' : '')).join('')}
+                        </div>
+                        ${config.showEmptySlots && Object.values(activePartBSet().partB.answers).includes(bucket) ? '<p class="tsa-stp-slot">Missing item slot</p>' : ''}
+                      </div>
+                    </section>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+            <div class="tsa-stp-actions">
+              <button class="tsa-stp-primary" id="submitPart" type="button" ${config.submitDisabled ? 'disabled' : ''}>${escapeHtml(config.submitLabel)}</button>
+            </div>
+          </div>
+        </section>
+      `;
+    }
+
+    function itemChip(item, zone, extraClass = '') {
+      const selected = state.selectedItem === item ? 'is-selected' : '';
+      const draggable = extraClass.includes('is-static') ? 'false' : 'true';
+      return `<button class="tsa-stp-chip ${selected} ${extraClass}" type="button" draggable="${draggable}" data-item="${escapeHtml(item)}" data-zone="${escapeHtml(zone)}">${escapeHtml(item)}</button>`;
+    }
+
+    function wireWorkspace() {
+      document.querySelectorAll('.tsa-stp-chip:not(.is-static)').forEach(chip => {
+        chip.addEventListener('click', handleChipClick);
+        chip.addEventListener('dragstart', event => {
+          state.selectedItem = null;
+          event.dataTransfer.setData('text/plain', chip.dataset.item);
+        });
+      });
+
+      document.querySelectorAll('.tsa-stp-left-zone, .tsa-stp-drop-zone').forEach(zone => {
+        zone.addEventListener('click', handleZoneClick);
+        zone.addEventListener('dragover', event => {
+          event.preventDefault();
+          zone.classList.add('is-target');
+        });
+        zone.addEventListener('dragleave', () => zone.classList.remove('is-target'));
+        zone.addEventListener('drop', event => {
+          event.preventDefault();
+          zone.classList.remove('is-target');
+          const item = event.dataTransfer.getData('text/plain');
+          if (item) moveItem(item, zone.dataset.zone);
+        });
+      });
+    }
+
+    function handleChipClick(event) {
+      event.stopPropagation();
+      const item = event.currentTarget.dataset.item;
+      const zone = event.currentTarget.dataset.zone;
+      if (zone !== 'left') {
+        moveItem(item, 'left');
+        return;
+      }
+      state.selectedItem = state.selectedItem === item ? null : item;
+      refreshSelectedState();
+    }
+
+    function handleZoneClick(event) {
+      const zone = event.currentTarget.dataset.zone;
+      if (!state.selectedItem || event.target.closest('.tsa-stp-chip')) return;
+      moveItem(state.selectedItem, zone);
+    }
+
+    function activePartState() {
+      return state.part === 'A' ? state.partA : state.partB;
+    }
+
+    function moveItem(item, targetZone) {
+      const data = activePartState();
+      data.left = data.left.filter(value => value !== item);
+      Object.keys(data.buckets).forEach(bucket => {
+        data.buckets[bucket] = data.buckets[bucket].filter(value => value !== item);
+      });
+      if (targetZone === 'left') {
+        data.left.push(item);
+      } else if (data.buckets[targetZone]) {
+        data.buckets[targetZone].push(item);
+      }
+      state.selectedItem = null;
+      state.part === 'A' ? renderPartA() : renderPartB();
+    }
+
+    function refreshSelectedState() {
+      document.querySelectorAll('.tsa-stp-chip').forEach(chip => {
+        chip.classList.toggle('is-selected', chip.dataset.item === state.selectedItem);
+      });
+      document.querySelectorAll('.tsa-stp-left-zone, .tsa-stp-drop-zone').forEach(zone => {
+        zone.classList.toggle('is-target', Boolean(state.selectedItem));
+      });
+    }
+
+    function submitPartA() {
+      const pairs = overlapPairs();
+      const correct = pairs.filter(pair => pair.every(item => state.partA.left.includes(item))).length;
+      const totalPairs = selectedPartA.reduce((sum, setIndex) => sum + (sets[setIndex].partA.overlaps.length / 2), 0);
+      const perOverlap = 10 / totalPairs;
+      state.partAScores[state.partAIndex] = Math.round(correct * perOverlap * 10) / 10;
+      state.scores.partA = Math.round(state.partAScores.reduce((sum, score) => sum + (score || 0), 0) * 10) / 10;
+      if (state.partAIndex < selectedPartA.length - 1) {
+        state.partAIndex += 1;
+        initializePartA();
+        renderPartA();
+        return;
+      }
+      initializePartB();
+      renderPartB();
+    }
+
+    function overlapPairs() {
+      const problem = activePartASet().partA;
+      const pairs = [];
+      for (let i = 0; i < problem.overlaps.length; i += 2) {
+        pairs.push(problem.overlaps.slice(i, i + 2));
+      }
+      return pairs;
+    }
+
+    function submitPartB() {
+      const problem = activePartBSet().partB;
+      let correct = 0;
+      Object.entries(state.partB.buckets).forEach(([bucket, items]) => {
+        items.forEach(item => {
+          if (problem.answers[item] === bucket) correct += 1;
+        });
+      });
+      const totalAnswers = selectedPartB.reduce((sum, setIndex) => sum + Object.keys(sets[setIndex].partB.answers).length, 0);
+      const perAnswer = 10 / totalAnswers;
+      state.partBScores[state.partBIndex] = Math.round(correct * perAnswer * 10) / 10;
+      state.scores.partB = Math.round(state.partBScores.reduce((sum, score) => sum + (score || 0), 0) * 10) / 10;
+      if (state.partBIndex < selectedPartB.length - 1) {
+        state.partBIndex += 1;
+        initializePartB();
+        renderPartB();
+        return;
+      }
+      const storagePayload = {
+        score: totalScore(),
+        partA: state.scores.partA,
+        partB: state.scores.partB,
+        partASetIndexes: selectedPartA,
+        partBSetIndexes: selectedPartB,
+        partATopics: selectedPartA.map(setIndex => sets[setIndex].partA.topic),
+        partBTopics: selectedPartB.map(setIndex => sets[setIndex].partB.topic)
+      };
+      sessionStorage.setItem(SPOT_SCORE_KEY, JSON.stringify(storagePayload));
+      localStorage.setItem(SPOT_SCORE_KEY, JSON.stringify(storagePayload));
+      showScore();
+    }
+
+    function totalScore() {
+      return Math.round((state.scores.partA + state.scores.partB) * 10) / 10;
+    }
+
+    function interpretation(total) {
+      if (total >= 18) return 'Sharp — you spotted both structural errors precisely.';
+      if (total >= 12) return 'Good eye — you caught most of it. The overlap is the hardest part.';
+      if (total >= 4) return 'Getting there — conceptual overlaps take practice to spot.';
+      return 'This is a skill the UTL program develops directly.';
+    }
+
+    function readSortScore() {
+      try {
+        const raw = sessionStorage.getItem(SORT_SCORE_KEY);
+        return raw ? JSON.parse(raw) : null;
+      } catch (error) {
+        return null;
+      }
+    }
+
+    function formatScore(value) {
+      return Number(value).toFixed(1).replace(/\.0$/, '');
+    }
+
+    function participantEmail() {
+      return state.participant.email || sessionStorage.getItem('tsa_participant_email') || '';
+    }
+
+    function participantName() {
+      return state.participant.name || sessionStorage.getItem('tsa_participant_name') || 'Participant';
+    }
+
+    function emailResults(sortScore, spotTotal, combined) {
+      const email = participantEmail();
+      if (!email) {
+        alert('We could not find your email from this session. Please copy your results instead.');
+        return;
+      }
+
+      const sortLine = sortScore
+        ? `Exercise A: Sort & Bucket: ${formatScore(sortScore.score)} / 20`
+        : 'Exercise A: Sort & Bucket: Not completed yet';
+      const combinedLine = combined !== null
+        ? `Think Clearly Total: ${formatScore(combined)} / 40 (${Math.round((combined / 40) * 100)}%)`
+        : 'Think Clearly Total: Complete Sort & Bucket to see your full Part 1 score.';
+      const subject = 'Your The Untaught Lessons TSA Score results';
+      const siteRoot = 'https://theuntaughtlessons.com';
+      const body = [
+        'The Untaught Lessons',
+        'TSA Score™ Results',
+        '',
+        `Name: ${participantName()}`,
+        '',
+        sortLine,
+        `Exercise B: Spot the Problem: ${formatScore(spotTotal)} / 20`,
+        `  Part A: Find the Overlaps: ${formatScore(state.scores.partA)} / 10`,
+        `  Part B: Fix the Gaps: ${formatScore(state.scores.partB)} / 10`,
+        '',
+        combinedLine,
+        '',
+        'Your exercises:',
+        `${siteRoot}/apps/tsa-checkpoint/`,
+        '',
+        'Learn more:',
+        `${siteRoot}/tsa-score.html`,
+        siteRoot
+      ].join('\n');
+
+      window.location.href = `mailto:${encodeURIComponent(email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    }
+
+    function showScore() {
+      const total = totalScore();
+      const sortScore = readSortScore();
+      const combined = sortScore ? Number(sortScore.score) + total : null;
+      const overlapReveal = selectedPartA.map(setIndex => {
+        const overlaps = sets[setIndex].partA.overlaps;
+        const pairs = [];
+        for (let i = 0; i < overlaps.length; i += 2) {
+          pairs.push(`${escapeHtml(overlaps[i])} and ${escapeHtml(overlaps[i + 1])}`);
+        }
+        return `<strong>${escapeHtml(sets[setIndex].partA.topic)}:</strong> ${pairs.join(' / ')}`;
+      }).join('<br>');
+      const gapReveal = selectedPartB.map(setIndex => {
+        const entries = Object.entries(sets[setIndex].partB.answers).map(([item, bucket]) => `${escapeHtml(item)} → ${escapeHtml(bucket)}`);
+        return `<strong>${escapeHtml(sets[setIndex].partB.topic)}:</strong> ${entries.join(' / ')}`;
+      }).join('<br>');
+      const combinedMarkup = sortScore ? `
+        <div class="tsa-stp-combined">
+          <h2>Think Clearly Scorecard</h2>
+          <div class="tsa-stp-score-rows">
+            <div class="tsa-stp-score-row">Exercise A · Sort &amp; Bucket<br><strong>${formatScore(sortScore.score)} / 20</strong></div>
+            <div class="tsa-stp-score-row">Exercise B · Spot the Problem<br><strong>${formatScore(total)} / 20</strong></div>
+          </div>
+          <div class="tsa-stp-score-row">Think Clearly Total<br><strong>${formatScore(combined)} / 40 · ${Math.round((combined / 40) * 100)}%</strong></div>
+        </div>
+      ` : '';
+
+      renderShell(`
+        <section class="tsa-stp-score-card">
+          <h1>Your Spot the Problem Score</h1>
+          <div class="tsa-stp-score-summary">
+            <div class="tsa-stp-score-tile featured">
+              <span class="tile-label">Exercise B</span>
+              <span class="tile-title">Spot the Problem</span>
+              <span class="tile-score">${formatScore(total)} / 20</span>
+              <span class="tile-detail">${interpretation(total)}</span>
+            </div>
+            <div class="tsa-stp-score-rows">
+              <div class="tsa-stp-score-tile">
+                <span class="tile-label">Exercise B · Part A</span>
+                <span class="tile-title">Find the Overlaps</span>
+                <span class="tile-score">${formatScore(state.scores.partA)} / 10</span>
+              </div>
+              <div class="tsa-stp-score-tile">
+                <span class="tile-label">Exercise B · Part B</span>
+                <span class="tile-title">Fix the Gaps</span>
+                <span class="tile-score">${formatScore(state.scores.partB)} / 10</span>
+              </div>
+            </div>
+          </div>
+          <p class="tsa-stp-label">Answer Reveal</p>
+          <p class="tsa-stp-answer"><strong>Part A overlaps:</strong><br>${overlapReveal}</p>
+          <p class="tsa-stp-answer"><strong>Part B missing items:</strong><br>${gapReveal}</p>
+          ${combinedMarkup}
+          <div class="tsa-stp-score-actions">
+            <button class="tsa-stp-secondary" id="copyResults" type="button">Copy Results</button>
+            <button class="tsa-stp-secondary" id="emailResults" type="button">Email Results</button>
+            <a class="tsa-stp-primary" href="../tsa-checkpoint/index.html">Back to Checkpoint</a>
+          </div>
+        </section>
+      `);
+
+      document.getElementById('copyResults').addEventListener('click', async event => {
+        let line = `Spot the Problem\t${formatScore(total)}/20\tPart A: ${formatScore(state.scores.partA)}/10\tPart B: ${formatScore(state.scores.partB)}/10\tSets: ${selectedPartA.map(setIndex => sets[setIndex].partA.topic).join(', ')} + ${selectedPartB.map(setIndex => sets[setIndex].partB.topic).join(', ')}`;
+        if (combined !== null) line += `\tPart 1 Total: ${combined}/40`;
+        await navigator.clipboard.writeText(line);
+        event.target.textContent = 'Copied';
+      });
+
+      document.getElementById('emailResults').addEventListener('click', () => {
+        emailResults(sortScore, total, combined);
+      });
+    }
+  </script>
+</body>
+</html>

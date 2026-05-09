@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=Lato:wght@300;700&family=Roboto+Mono:wght@400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=testimonial-company-black-20260506">
+  <link rel="stylesheet" href="styles.css?v=tsa-score-20260508">
 </head>
 <body class="home-page">
   <nav id="navigation" class="site-nav" aria-label="Primary navigation">
@@ -26,10 +26,11 @@
     </button>
 
     <div id="navMenu" class="nav-menu">
-      <a href="#hero">Home</a>
+      <a class="nav-link-active" href="#hero" aria-current="page">Home</a>
       <a href="/about.html">About</a>
       <a href="/programs.html">Programs</a>
       <a href="/contact.html">Contact</a>
+      <a href="/tsa-score.html">Find Your Level</a>
       <a class="nav-button nav-button-secondary" href="/member-login/">Member Login</a>
       <button class="nav-button nav-button-primary" type="button" onclick="openLeadModal()">Get in Touch</button>
     </div>
@@ -119,6 +120,15 @@
             </div>
           </article>
         </div>
+      </div>
+    </section>
+
+    <section id="tsa-teaser" class="tsa-home-teaser" aria-labelledby="tsa-teaser-title">
+      <div class="home-container">
+        <h2 id="tsa-teaser-title">Where do you stand today?</h2>
+        <p>The TSA Score™ is a 10-15 minute self-assessment that measures your thinking, speaking, and acting across 10 criteria. Take the Diagnostic to find your baseline before training.</p>
+        <a class="tsa-home-button" href="/tsa-score.html">Find Your Level</a>
+        <span class="tsa-home-meta">Free · No account needed · Instant results</span>
       </div>
     </section>
 

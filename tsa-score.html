@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Find your TSA Score™ across thinking clearly, speaking concisely, and acting confidently." />
+  <title>Find Your Level - The Untaught Lessons</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-bluebg-whitedoor-thicker-32.png?v=6">
+  <link rel="shortcut icon" type="image/png" href="/assets/favicon-bluebg-whitedoor-thicker-32.png?v=6">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png?v=3">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=Lato:wght@300;700&family=Roboto+Mono:wght@400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css?v=tsa-score-20260508">
+</head>
+<body class="home-page tsa-page">
+  <nav id="navigation" class="site-nav" aria-label="Primary navigation">
+    <a class="nav-brand" href="/" aria-label="The Untaught Lessons home">
+      <img src="assets/logo.png" alt="The Untaught Lessons" />
+    </a>
+
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="navMenu" aria-label="Open navigation">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+
+    <div id="navMenu" class="nav-menu">
+      <a href="/">Home</a>
+      <a href="/about.html">About</a>
+      <a href="/programs.html">Programs</a>
+      <a href="/contact.html">Contact</a>
+      <a class="nav-link-active" href="/tsa-score.html" aria-current="page">Find Your Level</a>
+      <a class="nav-button nav-button-secondary" href="/member-login/">Member Login</a>
+      <button class="nav-button nav-button-primary" type="button" onclick="openLeadModal()">Get in Touch</button>
+    </div>
+  </nav>
+
+  <main id="content">
+    <section class="tsa-hero" aria-labelledby="tsa-title">
+      <div class="tsa-container narrow">
+        <h1 id="tsa-title">Find Your Level</h1>
+        <p>The TSA Score™ measures how clearly you think, how concisely you speak, and how confidently you act — three skills that define how you show up at work and in life.</p>
+        <span class="tsa-formula">C³ = Clarity of Thought · Conciseness of Delivery · Confidence in Action</span>
+      </div>
+    </section>
+
+    <section class="tsa-section tsa-explainer" aria-labelledby="tsa-explainer-title">
+      <div class="tsa-container">
+        <h2 id="tsa-explainer-title" class="sr-only">What is the TSA Score™?</h2>
+        <div class="tsa-pillar-grid">
+          <article class="tsa-pillar">
+            <span class="tsa-pillar-icon" aria-hidden="true">🧠</span>
+            <h2>Think Clearly</h2>
+            <p>Can you organize your ideas so others can follow them?</p>
+          </article>
+          <article class="tsa-pillar">
+            <span class="tsa-pillar-icon" aria-hidden="true">🗣️</span>
+            <h2>Speak Concisely</h2>
+            <p>Can you say what matters most in the time you have?</p>
+          </article>
+          <article class="tsa-pillar">
+            <span class="tsa-pillar-icon" aria-hidden="true">⚡</span>
+            <h2>Act Confidently</h2>
+            <p>Can you hold your ground in a difficult conversation?</p>
+          </article>
+        </div>
+        <p class="tsa-explainer-copy">The TSA Score™ gives you a number out of 100 across all three. Take it before training to see where you start. Take it again after to see how far you've come.</p>
+      </div>
+    </section>
+
+    <section class="tsa-section tsa-routing" aria-labelledby="tsa-routing-title">
+      <div class="tsa-container">
+        <h2 id="tsa-routing-title" class="sr-only">Choose your assessment</h2>
+        <div class="tsa-card-grid">
+          <article class="tsa-card">
+            <span class="tsa-card-label">Starting Point</span>
+            <h2>The Diagnostic</h2>
+            <p>Haven't taken UTL training yet? Or do you simply want an honest baseline? The Diagnostic shows you exactly where you stand today across thinking, speaking, and acting. No preparation needed. No right or wrong answers. Just a clear picture of your starting point.</p>
+            <span class="tsa-card-detail">10 minutes · 3 sections · Instant score</span>
+            <a class="tsa-card-button primary" href="apps/tsa-diagnostic/index.html">Take the Diagnostic</a>
+          </article>
+
+          <article class="tsa-card">
+            <span class="tsa-card-label">Measure Your Growth</span>
+            <h2>The Checkpoint</h2>
+            <p>Completed UTL training? The Checkpoint uses the same assessment, but now you have the tools. See how your score has shifted. The difference between your Diagnostic and your Checkpoint is your proof of growth.</p>
+            <span class="tsa-card-detail">15 minutes · 3 sections · Part A/B exercises · Score comparison</span>
+            <a class="tsa-card-button primary" href="apps/tsa-checkpoint/index.html">Take the Checkpoint</a>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="tsa-section tsa-how" aria-labelledby="tsa-how-title">
+      <div class="tsa-container">
+        <h2 id="tsa-how-title">How it works</h2>
+        <div class="tsa-step-grid">
+          <article class="tsa-step">
+            <span class="tsa-step-number">1</span>
+            <h3>Sort your thinking.</h3>
+            <p>You'll organize a set of items into logical groups. No tricks — just clear, structured thinking.</p>
+          </article>
+          <article class="tsa-step">
+            <span class="tsa-step-number">2</span>
+            <h3>Say it out loud.</h3>
+            <p>You'll record yourself giving a short talk, then compress it. The goal is to say more with less.</p>
+          </article>
+          <article class="tsa-step">
+            <span class="tsa-step-number">3</span>
+            <h3>Handle the hard conversation.</h3>
+            <p>You'll play out a realistic difficult conversation with an AI character. Say the hard thing. Hold your ground.</p>
+          </article>
+        </div>
+        <p class="tsa-rubric-line">Every exercise is scored automatically using the C³ Rubric™</p>
+      </div>
+    </section>
+  </main>
+
+  <footer id="footer" class="site-footer">
+    <div class="footer-grid">
+      <div>
+        <img class="footer-logo" src="assets/logo.png" alt="The Untaught Lessons" />
+        <p class="footer-tagline">Practical lessons about life and work you wish someone had taught you sooner.</p>
+      </div>
+
+      <div class="footer-links" aria-label="Footer navigation">
+        <a href="/">Home</a>
+        <a href="/about.html">About</a>
+        <a href="/programs.html">Programs</a>
+        <a href="/contact.html">Contact</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2026 The Untaught Lessons. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <div class="lead-modal" id="leadModal" aria-hidden="true">
+    <div class="lead-modal-overlay" data-close-lead-modal></div>
+    <div class="lead-modal-card" role="dialog" aria-modal="true" aria-labelledby="leadModalTitle">
+      <button class="lead-modal-close" type="button" aria-label="Close modal" data-close-lead-modal>&times;</button>
+      <div class="lead-modal-content">
+        <h2 id="leadModalTitle">Let's connect.</h2>
+        <p>Tell us a little about yourself and we'll be in touch.</p>
+        <form class="lead-form" id="leadForm">
+          <label for="leadName">Name</label>
+          <input id="leadName" name="name" type="text" placeholder="Your full name" required>
+
+          <label for="leadEmail">Email</label>
+          <input id="leadEmail" name="email" type="email" placeholder="Your email address" required>
+
+          <label for="leadRole">Role</label>
+          <select id="leadRole" name="role" required>
+            <option value="" disabled selected>Select your role</option>
+            <option value="Student">Student</option>
+            <option value="Professional">Professional</option>
+            <option value="Manager">Manager</option>
+            <option value="Other">Other</option>
+          </select>
+
+          <label for="leadMessage">What brings you here?</label>
+          <textarea id="leadMessage" name="message" rows="3" placeholder="Tell us what you're looking for (optional)"></textarea>
+
+          <button class="lead-submit" type="submit">Send</button>
+          <p class="lead-error" id="leadError" role="alert">Something went wrong. Please try again or email us directly.</p>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzJE--FL2kB_XDNZRnszCtlyLRPvaLAHGuF5TAOdXJk40atbvf5Y6ELuSK2B7CSLaMN/exec';
+    const navToggle = document.querySelector('.nav-toggle');
+    const navMenu = document.getElementById('navMenu');
+    const leadModal = document.getElementById('leadModal');
+    const leadModalContent = leadModal.querySelector('.lead-modal-content');
+    const leadModalInitialContent = leadModalContent.innerHTML;
+
+    navToggle.addEventListener('click', () => {
+      const isOpen = navToggle.getAttribute('aria-expanded') === 'true';
+      navToggle.setAttribute('aria-expanded', String(!isOpen));
+      navMenu.classList.toggle('is-open', !isOpen);
+    });
+
+    navMenu.querySelectorAll('a, button').forEach((link) => {
+      link.addEventListener('click', () => {
+        navToggle.setAttribute('aria-expanded', 'false');
+        navMenu.classList.remove('is-open');
+      });
+    });
+
+    function openLeadModal() {
+      leadModalContent.innerHTML = leadModalInitialContent;
+      leadModal.classList.add('is-open');
+      leadModal.setAttribute('aria-hidden', 'false');
+      document.body.classList.add('modal-open');
+      leadModalContent.querySelector('input, select, textarea, button')?.focus();
+    }
+
+    function closeLeadModal() {
+      leadModal.classList.remove('is-open');
+      leadModal.setAttribute('aria-hidden', 'true');
+      document.body.classList.remove('modal-open');
+    }
+
+    function showSuccessState() {
+      leadModalContent.innerHTML = `
+        <div class="lead-success">
+          <svg width="48" height="48" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+            <circle cx="24" cy="24" r="22" fill="none" stroke="#EEA320" stroke-width="3"></circle>
+            <path d="M14 24.5l6.5 6.5L34.5 17" fill="none" stroke="#EEA320" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+          <h2>You're on our list.</h2>
+          <p>We'll be in touch soon.</p>
+        </div>
+      `;
+      window.setTimeout(closeLeadModal, 3000);
+    }
+
+    function showErrorState() {
+      const error = leadModalContent.querySelector('.lead-error');
+      if (error) error.classList.add('is-visible');
+    }
+
+    async function submitForm(e) {
+      e.preventDefault();
+      const form = e.target;
+      const payload = {
+        name: form.name.value,
+        email: form.email.value,
+        role: form.role.value,
+        message: form.message.value || '',
+        page: window.location.href
+      };
+
+      try {
+        await fetch(SCRIPT_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          body: JSON.stringify(payload)
+        });
+        showSuccessState();
+      } catch (err) {
+        showErrorState();
+      }
+    }
+
+    leadModal.addEventListener('click', (event) => {
+      if (event.target.matches('[data-close-lead-modal]')) closeLeadModal();
+    });
+
+    leadModal.addEventListener('submit', (event) => {
+      if (event.target.matches('.lead-form')) submitForm(event);
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && leadModal.classList.contains('is-open')) closeLeadModal();
+    });
+  </script>
+</body>
+</html>
