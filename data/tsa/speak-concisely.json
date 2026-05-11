@@ -1,0 +1,207 @@
+[
+  {
+    "id": "speak_concisely_001",
+    "difficulty": "beginner",
+    "tags": [
+      "speak-concisely",
+      "bsp",
+      "executive-communication"
+    ],
+    "timeLimitSeconds": 90,
+    "number": 1,
+    "category": "Business pitch",
+    "title": "The chicken contact lens startup",
+    "scenario": "You have 90 seconds to pitch this idea to a room of investors who have heard everything. Make them lean forward.",
+    "points": [
+      {
+        "summary": "The science is real",
+        "detail": "Red-tinted contact lenses make chickens measurably less aggressive, reduce pecking, and increase egg production. The idea comes from real 1980s science that never scaled commercially."
+      },
+      {
+        "summary": "The problem is large",
+        "detail": "The global poultry industry is worth $400 billion and loses an estimated $2 billion annually to aggressive flock behavior and injuries."
+      },
+      {
+        "summary": "Current solutions are under pressure",
+        "detail": "Beak trimming and sedatives face increasing regulatory pressure across the EU and are banned in 12 countries."
+      },
+      {
+        "summary": "Early trial results are promising",
+        "detail": "A farm trial in the Netherlands showed a 22% reduction in flock injuries and a 9% increase in egg yield over 3 months using prototype soft lenses."
+      },
+      {
+        "summary": "The business model can recur",
+        "detail": "Manufacturing cost is $0.04 per lens at scale, the product lasts 6 weeks, and the model is a farmer subscription."
+      }
+    ],
+    "keyMessages": [
+      "There is a real, large, and unsolved problem in the poultry industry.",
+      "The science works and there is early proof from a live trial.",
+      "The business model is viable and recurring."
+    ]
+  },
+  {
+    "id": "speak_concisely_002",
+    "difficulty": "beginner",
+    "tags": [
+      "speak-concisely",
+      "bsp",
+      "executive-communication"
+    ],
+    "timeLimitSeconds": 90,
+    "number": 2,
+    "category": "Operations update under pressure",
+    "title": "Your instant noodle brand is on fire in the wrong way",
+    "scenario": "You run a regional instant noodle brand. A food blogger just posted that your spicy shrimp flavor tastes like scented candle water. It has 2 million views. Your CEO wants a briefing in the next 10 minutes.",
+    "points": [
+      {
+        "summary": "The issue is already viral",
+        "detail": "The video went viral 4 hours ago. Social mentions are up 1,800%, and sentiment is 67% negative."
+      },
+      {
+        "summary": "The supplier changed the product",
+        "detail": "The formulation was unchanged, but a supplier switched one ingredient without notifying you, which altered the aroma profile."
+      },
+      {
+        "summary": "The risk appears contained",
+        "detail": "Batch 4471 includes about 80,000 units across three markets. No safety issue has been identified."
+      },
+      {
+        "summary": "Retail partners are already reacting",
+        "detail": "Three retail partners have asked whether to pull the product from shelves. One has already done so unilaterally."
+      },
+      {
+        "summary": "The decision window is short",
+        "detail": "PR recommends a proactive statement within 2 hours. Legal recommends waiting until the supplier investigation is complete."
+      }
+    ],
+    "keyMessages": [
+      "What happened and what we know, including batch 4471, supplier issue, and no safety risk.",
+      "What is at stake right now, including retail partners, reputation, and the 2-hour decision window.",
+      "A clear recommended next step with a rationale."
+    ]
+  },
+  {
+    "id": "speak_concisely_003",
+    "difficulty": "intermediate",
+    "tags": [
+      "speak-concisely",
+      "bsp",
+      "executive-communication"
+    ],
+    "timeLimitSeconds": 90,
+    "number": 3,
+    "category": "Persuasion to a skeptical audience",
+    "title": "Why your city should host the world's first UFO tourism festival",
+    "scenario": "You are the head of the city tourism board. Your mayor gives you 90 seconds at the next council meeting to make the case for why your city should invest $2M in a UFO tourism festival. Half the room thinks you are joking.",
+    "points": [
+      {
+        "summary": "The tourism model already works",
+        "detail": "Roswell, New Mexico generates $95M annually in UFO-related tourism despite having a population of 48,000."
+      },
+      {
+        "summary": "The market is growing",
+        "detail": "Google searches for UFO tourism have grown 340% since 2020 after the US government declassified UAP reports."
+      },
+      {
+        "summary": "The city has a real advantage",
+        "detail": "Your city has three documented UAP sighting hotspots within 40km, a disused air force base, and no competing festival in the region."
+      },
+      {
+        "summary": "The economics can work",
+        "detail": "A conservative model projects 12,000 visitors in year one at an average spend of $280, creating $3.36M in direct visitor spend against a $2M investment."
+      },
+      {
+        "summary": "Local partners are ready",
+        "detail": "Three hotels, two catering companies, and a tour operator have signed letters of intent if the council approves the budget."
+      }
+    ],
+    "keyMessages": [
+      "This is a proven and growing market, not a joke.",
+      "Our city has a unique and unfair advantage.",
+      "The economics work with positive ROI and private sector commitment."
+    ]
+  },
+  {
+    "id": "speak_concisely_004",
+    "difficulty": "intermediate",
+    "tags": [
+      "speak-concisely",
+      "bsp",
+      "executive-communication"
+    ],
+    "timeLimitSeconds": 90,
+    "number": 4,
+    "category": "Internal recommendation under divided opinion",
+    "title": "Your company's new nap room is causing a war in the office",
+    "scenario": "You are the head of people operations. The CEO just saw a study on nap rooms and wants one. Half the leadership team thinks it is brilliant. The other half thinks it signals laziness to clients. You have 90 seconds to give your recommendation at the next leadership meeting.",
+    "points": [
+      {
+        "summary": "The science supports short naps",
+        "detail": "NASA research shows a 26-minute nap improves performance by 34% and alertness by 54% in pilots."
+      },
+      {
+        "summary": "Employees already feel the problem",
+        "detail": "61% of staff report afternoon energy slumps that affect work quality, and only 12% feel comfortable taking breaks away from their desks."
+      },
+      {
+        "summary": "Comparable companies have precedent",
+        "detail": "Nike, Google, Ben and Jerry's, and Huffington Post all have sleep pods or dedicated rest spaces without reported client perception issues."
+      },
+      {
+        "summary": "The cost is relatively low",
+        "detail": "Converting one unused conference room costs about $8,000 once. One disengaged employee is estimated to cost $16,000 annually in lost productivity."
+      },
+      {
+        "summary": "Leadership behavior is inconsistent",
+        "detail": "Three senior leaders privately nap in their cars at lunch. Two call a nap room too casual for the culture without citing evidence."
+      }
+    ],
+    "keyMessages": [
+      "The science and internal data both support this.",
+      "The client perception concern is not supported by comparable company precedent.",
+      "A clear recommendation with the key condition or caveat."
+    ]
+  },
+  {
+    "id": "speak_concisely_005",
+    "difficulty": "advanced",
+    "tags": [
+      "speak-concisely",
+      "bsp",
+      "executive-communication"
+    ],
+    "timeLimitSeconds": 90,
+    "number": 5,
+    "category": "Reframing a bad metric under pressure",
+    "title": "Your school came last in every subject and you think that is a good thing",
+    "scenario": "You are the principal of a school that ranked last in the district on standardized tests this year for the third year in a row. The school board wants answers. You have 90 seconds to give them your take before they vote on leadership changes.",
+    "points": [
+      {
+        "summary": "The school serves a harder context",
+        "detail": "74% of students are English-language learners working in their second or third language, the highest proportion in the district."
+      },
+      {
+        "summary": "Growth tells a different story",
+        "detail": "On a value-added measure that tracks improvement from each student's starting point, the school ranked 2nd in the district."
+      },
+      {
+        "summary": "Community signals are strong",
+        "detail": "Parent satisfaction is the highest in the district for the second consecutive year, and teacher retention is 94% versus a district average of 71%."
+      },
+      {
+        "summary": "Student outcomes are breaking barriers",
+        "detail": "Three of last year's graduates are now in university programs, including one with a full scholarship."
+      },
+      {
+        "summary": "The ranking metric is incomplete",
+        "detail": "The district uses raw test scores as its only ranking metric, and no comparable school has ever finished above 3rd on that measure."
+      }
+    ],
+    "keyMessages": [
+      "The ranking metric is wrong for our context because raw scores ignore starting points.",
+      "The right measures show we are performing exceptionally well.",
+      "A clear ask for what we need from the board to continue."
+    ]
+  }
+]

@@ -1,0 +1,44 @@
+[
+  {
+    "id": "issue_tree_001",
+    "title": "Issue tree builder",
+    "difficulty": "beginner",
+    "phase": "speak-concisely",
+    "tags": [
+      "issue-tree",
+      "problem-solving"
+    ],
+    "prompt": "Break the problem into three clean branches.",
+    "timerMinutes": 15,
+    "problemStatement": "Why is the Olympics losing its cultural impact?",
+    "sampleAnswer": {
+      "hypothesis": "The Olympics is losing gravity because of broken culture, a lost story arc, and lack of legitimate transparency.",
+      "arguments": [
+        {
+          "title": "Shared ritual is breaking",
+          "supportingDetails": [
+            "Fragmented attention: no single shared moment; audiences split across platforms and time zones.",
+            "Broadcast-first packaging: still feels like a TV event while audiences consume through feeds.",
+            "Highlights over attendance: people catch up later, so the Games lose the live collective feeling."
+          ]
+        },
+        {
+          "title": "Meaning is getting replaced by moment-chasing",
+          "supportingDetails": [
+            "Clip culture: short-form rewards shock and spectacle; meaning needs arcs and buildup.",
+            "Virality outshines excellence — so sacredness doesn't accumulate over time.",
+            "Winners aren't legible: without athlete-led arcs, audiences don't feel the personal stakes."
+          ]
+        },
+        {
+          "title": "Legitimacy and tone are getting noisier",
+          "supportingDetails": [
+            "Trust volatility: politics and polarization make the Olympics feel biased depending on the viewer.",
+            "Generic unity messaging lands as tone-deaf in a fractured world.",
+            "Over-commercialization signal: sponsorship load makes the Games feel sold, not earned."
+          ]
+        }
+      ]
+    }
+  }
+]

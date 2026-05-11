@@ -187,8 +187,8 @@
   <main class="placeholder-main">
     <section class="placeholder-card">
       <p class="placeholder-label" id="assessmentMode">Checkpoint · Section 3</p>
-      <h1>Act Confidently is coming soon.</h1>
-      <p>This holding page is where Section 3 of the TSA Score™ will live. It will measure how someone responds to pressure, pushback, and difficult conversations.</p>
+      <h1 id="placeholderTitle">Act Confidently is coming soon.</h1>
+      <p id="placeholderPrompt">This holding page is where Section 3 of the TSA Score™ will live. It will measure how someone responds to pressure, pushback, and difficult conversations.</p>
       <div class="placeholder-actions">
         <a class="placeholder-button" id="backLink" href="../tsa-checkpoint/index.html">Back to Checkpoint</a>
         <a class="placeholder-button secondary" href="../../index.html">Back to Home</a>
@@ -197,12 +197,32 @@
   </main>
 
   <script>
+    const DATA_URL = '../../data/tsa/act-confidently.json';
     const params = new URLSearchParams(window.location.search);
     const mode = params.get('assessment') === 'diagnostic' ? 'Diagnostic' : 'Checkpoint';
     const exercise = params.get('exercise') === 'b' ? 'Exercise B' : 'Exercise A';
     document.getElementById('assessmentMode').textContent = `${mode} · Section 3 · ${exercise}`;
     document.getElementById('backLink').href = mode === 'Checkpoint' ? '../tsa-checkpoint/index.html' : '../../tsa-score.html';
     document.getElementById('backLink').textContent = mode === 'Checkpoint' ? 'Back to Checkpoint' : 'Back to TSA Score';
+
+    // Placeholder content is loaded from ../../data/tsa/act-confidently.json.
+    // Add future Act Confidently assessment scenarios to that JSON file, then
+    // wire rendering and scoring logic here when Section 3 is built.
+    async function loadPlaceholderData() {
+      try {
+        const response = await fetch(DATA_URL);
+        if (!response.ok) throw new Error(`Unable to load ${DATA_URL}`);
+        const data = await response.json();
+        const activity = Array.isArray(data) ? data[0] : null;
+        if (!activity) throw new Error('Act Confidently data is empty.');
+        document.getElementById('placeholderTitle').textContent = `${activity.title || 'Act Confidently'} is coming soon.`;
+        document.getElementById('placeholderPrompt').textContent = activity.prompt || document.getElementById('placeholderPrompt').textContent;
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    loadPlaceholderData();
   </script>
 </body>
 </html>

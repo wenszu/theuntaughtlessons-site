@@ -1,0 +1,120 @@
+[
+  {
+    "id": "messy-notes-ashley",
+    "phase": "Think clearly",
+    "phaseSlug": "think-clearly",
+    "title": "Manager’s messy notes",
+    "subtitle": "Turn a rushed update into an Aiko-ready summary.",
+    "storyContext": "Aiko needs a clean update. Ashley sent a rushed note. Your job is to make it Aiko-ready.",
+    "instructions": [
+      "<strong>Define three buckets:</strong> Split the content into exactly three distinct categories, each capturing a clear theme or purpose.",
+      "<strong>Start with BSP:</strong> Begin every bullet point with a bolded summary phrase (BSP) that is short and descriptive."
+    ],
+    "sourceText": "Hey, quick update on the McDonald’s launch.\n\nWe are launching a limited-time McDonald’s x Pokémon Happy Meal in the US. This is new because we are launching 8 blind box collectibles with 8 designs, box art that can be cut out, and a QR code that unlocks a Pokémon Trainer Certification once customers collect all 8 boxes.\n\nWe aim to market this by using in-app push notifications, billboards, and partnering with known collectors to drive hype.\n\nKey issues include a limit of 2 boxes per person to prevent hoarding and logistics risk from under-supply.\n\n— Ashley Kat, VP of Partnerships",
+    "constraints": [
+      "Exactly 3 sections",
+      "Use BSP format",
+      "Keep it concise",
+      "Make the buckets MECE"
+    ],
+    "durationSeconds": 300,
+    "inputPlaceholder": "Write your structured response here...",
+    "sectionPlaceholders": [
+      "What will we launch?",
+      "How will we launch?",
+      "What could break?"
+    ],
+    "checklist": [
+      "Did I use exactly 3 sections?",
+      "Are my sections mutually exclusive?",
+      "Do my sections cover the full message?",
+      "Does each bullet start with a BSP?",
+      "Did I keep the answer concise?"
+    ],
+    "scoring": {
+      "wordCountTarget": {
+        "min": 70,
+        "idealMin": 90,
+        "idealMax": 130,
+        "max": 160
+      },
+      "coverageKeywords": [
+        {
+          "label": "Launch concept",
+          "terms": [
+            "McDonald’s",
+            "Pokémon",
+            "Happy Meal"
+          ]
+        },
+        {
+          "label": "Collectibles",
+          "terms": [
+            "blind box",
+            "designs"
+          ]
+        },
+        {
+          "label": "QR journey",
+          "terms": [
+            "QR",
+            "certification"
+          ]
+        },
+        {
+          "label": "Marketing",
+          "terms": [
+            "push notifications",
+            "billboards",
+            "collectors"
+          ]
+        },
+        {
+          "label": "Risks",
+          "terms": [
+            "purchase limit",
+            "hoarding",
+            "under-supply"
+          ]
+        }
+      ]
+    },
+    "sampleAnswer": [
+      {
+        "title": "What will we launch?",
+        "bullets": [
+          "<strong>Blind-box collectibles:</strong> Launch 8 collectible designs to drive repeat visits.",
+          "<strong>Cut-out box art:</strong> Make packaging part of the collectible experience.",
+          "<strong>Trainer certification:</strong> Use a QR journey to reward customers who collect all 8 boxes."
+        ]
+      },
+      {
+        "title": "How will we launch?",
+        "bullets": [
+          "<strong>In-app pushes:</strong> Use targeted prompts to drive store visits.",
+          "<strong>Billboards:</strong> Build mass awareness for the limited-time launch.",
+          "<strong>Collector partners:</strong> Create credibility and hype through known collectors."
+        ]
+      },
+      {
+        "title": "What could break?",
+        "bullets": [
+          "<strong>Purchase limits:</strong> Cap purchases at 2 boxes per person to reduce hoarding.",
+          "<strong>Under-supply risk:</strong> Manage logistics carefully so scarcity does not damage momentum."
+        ]
+      }
+    ],
+    "difficulty": "beginner",
+    "tags": [
+      "bsp",
+      "rule-of-three",
+      "mece"
+    ],
+    "prompt": "Turn the messy notes into a structured response.",
+    "timerMinutes": 5,
+    "reflectionPrompts": [
+      "Which details were essential?",
+      "Which details did you remove?"
+    ]
+  }
+]

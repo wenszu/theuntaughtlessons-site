@@ -1,0 +1,352 @@
+[
+  {
+    "id": "spot_problem_001",
+    "difficulty": "beginner",
+    "tags": [
+      "think-clearly",
+      "overlap",
+      "gap"
+    ],
+    "scoring": {
+      "totalPoints": 20,
+      "partAPoints": 10,
+      "partBPoints": 10
+    },
+    "partA": {
+      "topic": "What makes feedback useful?",
+      "buckets": {
+        "Clarity": [
+          "Describes specific behavior not general traits",
+          "Uses concrete examples from real situations",
+          "Avoids vague language like \"be more professional\"",
+          "States clearly what needs to change"
+        ],
+        "Timing & Delivery": [
+          "Given close to when the event happened",
+          "Delivered privately not in front of others",
+          "Doesn't use fuzzy phrases — is direct about the issue"
+        ],
+        "Actionability": [
+          "Focuses on what the person can actually change",
+          "Suggests a specific path forward",
+          "Checks for understanding after giving feedback"
+        ]
+      },
+      "overlaps": [
+        "Avoids vague language like \"be more professional\"",
+        "Doesn't use fuzzy phrases — is direct about the issue"
+      ]
+    },
+    "partB": {
+      "topic": "Traits of a great communicator",
+      "leftItems": [
+        "Listens before responding",
+        "Adjusts message to suit the audience",
+        "Speaks loudly in all situations",
+        "Uses jargon to sound expert",
+        "Avoids silence at all costs"
+      ],
+      "buckets": {
+        "Clarity": [
+          "Gets to the point quickly",
+          "Uses simple language"
+        ],
+        "Connection": [
+          "Makes eye contact",
+          "Shows genuine interest"
+        ],
+        "Confidence": [
+          "Holds their ground under pushback",
+          "Projects calm under pressure"
+        ]
+      },
+      "answers": {
+        "Adjusts message to suit the audience": "Clarity",
+        "Listens before responding": "Connection"
+      }
+    }
+  },
+  {
+    "id": "spot_problem_002",
+    "difficulty": "beginner",
+    "tags": [
+      "think-clearly",
+      "overlap",
+      "gap"
+    ],
+    "scoring": {
+      "totalPoints": 20,
+      "partAPoints": 10,
+      "partBPoints": 10
+    },
+    "partA": {
+      "topic": "What makes a strong project manager?",
+      "buckets": {
+        "Planning": [
+          "Sets clear milestones",
+          "Defines what success looks like",
+          "Allocates resources early",
+          "Breaks work into manageable tasks"
+        ],
+        "Communication": [
+          "Tells the team what winning looks like",
+          "Listens actively to the team",
+          "Updates stakeholders regularly",
+          "Keeps everyone informed on progress"
+        ],
+        "Delivery": [
+          "Meets deadlines consistently",
+          "Holds the team accountable",
+          "Manages scope to avoid scope creep"
+        ]
+      },
+      "overlaps": [
+        "Defines what success looks like",
+        "Tells the team what winning looks like",
+        "Updates stakeholders regularly",
+        "Keeps everyone informed on progress"
+      ]
+    },
+    "partB": {
+      "topic": "What builds trust at work?",
+      "leftItems": [
+        "Does what they say they will do",
+        "Shares information openly",
+        "Takes credit for team wins",
+        "Avoids difficult conversations",
+        "Changes position when pressured"
+      ],
+      "buckets": {
+        "Reliability": [
+          "Shows up consistently",
+          "Meets commitments without being chased"
+        ],
+        "Integrity": [
+          "Tells the truth even when it is uncomfortable"
+        ],
+        "Transparency": [
+          "Acknowledges mistakes quickly",
+          "Asks for input before deciding"
+        ]
+      },
+      "answers": {
+        "Does what they say they will do": "Reliability",
+        "Shares information openly": "Integrity"
+      }
+    }
+  },
+  {
+    "id": "spot_problem_003",
+    "difficulty": "intermediate",
+    "tags": [
+      "think-clearly",
+      "overlap",
+      "gap"
+    ],
+    "scoring": {
+      "totalPoints": 20,
+      "partAPoints": 10,
+      "partBPoints": 10
+    },
+    "partA": {
+      "topic": "What makes a presentation land?",
+      "buckets": {
+        "Structure": [
+          "Opens with the key message not background",
+          "Covers only what the audience needs to know",
+          "Follows a logical flow from problem to solution",
+          "Ends with a clear call to action"
+        ],
+        "Delivery": [
+          "Speaks with confidence and eye contact",
+          "Doesn't read from the slides",
+          "Paces the talk so key points land",
+          "Controls the rhythm so the audience can follow"
+        ],
+        "Audience Fit": [
+          "Removes anything irrelevant to this specific audience",
+          "Anticipates questions and addresses them early",
+          "Leaves one clear takeaway the audience remembers"
+        ]
+      },
+      "overlaps": [
+        "Covers only what the audience needs to know",
+        "Removes anything irrelevant to this specific audience",
+        "Paces the talk so key points land",
+        "Controls the rhythm so the audience can follow"
+      ]
+    },
+    "partB": {
+      "topic": "What makes a team high-performing?",
+      "leftItems": [
+        "Clear roles so no one duplicates effort",
+        "Psychological safety to speak up",
+        "Everyone agrees with the leader always",
+        "No conflict ever",
+        "Works the longest hours"
+      ],
+      "buckets": {
+        "Structure": [
+          "Shared goals everyone understands",
+          "Decision-making process is clear"
+        ],
+        "Culture": [
+          "Members trust each other",
+          "Disagreement is handled constructively"
+        ],
+        "Execution": [
+          "Progress is tracked and visible",
+          "Accountability is shared not concentrated"
+        ]
+      },
+      "answers": {
+        "Clear roles so no one duplicates effort": "Structure",
+        "Psychological safety to speak up": "Culture"
+      }
+    }
+  },
+  {
+    "id": "spot_problem_004",
+    "difficulty": "intermediate",
+    "tags": [
+      "think-clearly",
+      "overlap",
+      "gap"
+    ],
+    "scoring": {
+      "totalPoints": 20,
+      "partAPoints": 10,
+      "partBPoints": 10
+    },
+    "partA": {
+      "topic": "Why do projects go off track?",
+      "buckets": {
+        "People": [
+          "Key stakeholder wasn't looped in early",
+          "Team didn't raise risks to the manager",
+          "Important person was left out of decisions",
+          "Cross-functional partner had competing priorities"
+        ],
+        "Process": [
+          "Scope wasn't defined clearly at the start",
+          "No clear owner for key decisions",
+          "Timeline was too aggressive given resources",
+          "Nobody was accountable for the final call"
+        ],
+        "Execution": [
+          "Deliverable didn't meet expectations",
+          "Progress wasn't tracked or escalated",
+          "Deadlines were missed and no one flagged it",
+          "Testing was skipped under time pressure"
+        ]
+      },
+      "overlaps": [
+        "Key stakeholder wasn't looped in early",
+        "Important person was left out of decisions",
+        "No clear owner for key decisions",
+        "Nobody was accountable for the final call",
+        "Progress wasn't tracked or escalated",
+        "Deadlines were missed and no one flagged it"
+      ]
+    },
+    "partB": {
+      "topic": "What does executive presence look like?",
+      "leftItems": [
+        "Speaks with conviction even under uncertainty",
+        "Reads the room and adjusts in real time",
+        "Always has the loudest voice in the room",
+        "Never shows any emotion",
+        "Agrees with the most senior person present"
+      ],
+      "buckets": {
+        "Communication": [
+          "Gets to the point without over-explaining",
+          "Frames ideas in terms of impact not activity"
+        ],
+        "Composure": [
+          "Stays calm when things go wrong",
+          "Doesn't get defensive under challenge"
+        ],
+        "Awareness": [
+          "Knows what matters to who is in the room"
+        ]
+      },
+      "answers": {
+        "Speaks with conviction even under uncertainty": "Communication",
+        "Reads the room and adjusts in real time": "Awareness"
+      }
+    }
+  },
+  {
+    "id": "spot_problem_005",
+    "difficulty": "advanced",
+    "tags": [
+      "think-clearly",
+      "overlap",
+      "gap"
+    ],
+    "scoring": {
+      "totalPoints": 20,
+      "partAPoints": 10,
+      "partBPoints": 10
+    },
+    "partA": {
+      "topic": "What makes someone ready for promotion?",
+      "buckets": {
+        "Performance": [
+          "Consistently exceeds what the role requires",
+          "Delivers results without needing to be told",
+          "Goes beyond the expectations of the current job",
+          "Gets things done even in ambiguous situations"
+        ],
+        "Leadership": [
+          "Others seek them out for advice and input",
+          "Brings people together around a shared goal",
+          "Takes initiative and drives things forward",
+          "Rallies the team toward a common direction"
+        ],
+        "Readiness": [
+          "Has already shown they can do the next job",
+          "Understands how decisions get made at the next level",
+          "Is already operating at the level above",
+          "Knows what matters to senior stakeholders"
+        ]
+      },
+      "overlaps": [
+        "Consistently exceeds what the role requires",
+        "Goes beyond the expectations of the current job",
+        "Brings people together around a shared goal",
+        "Rallies the team toward a common direction",
+        "Has already shown they can do the next job",
+        "Is already operating at the level above"
+      ]
+    },
+    "partB": {
+      "topic": "What makes a decision well-made?",
+      "leftItems": [
+        "Considers second-order effects not just the immediate outcome",
+        "Is made at the right time — not too early or too late",
+        "Is made by whoever shouts loudest",
+        "Never changes once made",
+        "Avoids any input from others"
+      ],
+      "buckets": {
+        "Thinking": [
+          "Uses available data without waiting for perfect information",
+          "Weighs trade-offs explicitly"
+        ],
+        "Process": [
+          "Involves the right people at the right level"
+        ],
+        "Outcome": [
+          "Can be explained and defended clearly",
+          "Is revisable if new information emerges"
+        ]
+      },
+      "answers": {
+        "Considers second-order effects not just the immediate outcome": "Thinking",
+        "Is made at the right time — not too early or too late": "Process"
+      }
+    }
+  }
+]
