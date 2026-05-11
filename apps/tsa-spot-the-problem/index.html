@@ -745,123 +745,18 @@
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzJE--FL2kB_XDNZRnszCtlyLRPvaLAHGuF5TAOdXJk40atbvf5Y6ELuSK2B7CSLaMN/exec';
     const GATE_KEY = 'tsa_gate_complete';
     const SORT_SCORE_KEY = 'tsa_sort_score';
+    const DATA_URL = '../../data/tsa/spot-the-problem.json';
     const assessmentMode = new URLSearchParams(window.location.search).get('assessment') === 'checkpoint' ? 'Checkpoint' : 'Diagnostic';
 
-    const sets = [
-      {
-        partA: {
-          topic: 'What makes feedback useful?',
-          buckets: {
-            Clarity: ['Describes specific behavior not general traits', 'Uses concrete examples from real situations', 'Avoids vague language like "be more professional"', 'States clearly what needs to change'],
-            'Timing & Delivery': ['Given close to when the event happened', 'Delivered privately not in front of others', "Doesn't use fuzzy phrases — is direct about the issue"],
-            Actionability: ['Focuses on what the person can actually change', 'Suggests a specific path forward', 'Checks for understanding after giving feedback']
-          },
-          overlaps: ['Avoids vague language like "be more professional"', "Doesn't use fuzzy phrases — is direct about the issue"]
-        },
-        partB: {
-          topic: 'Traits of a great communicator',
-          leftItems: ['Listens before responding', 'Adjusts message to suit the audience', 'Speaks loudly in all situations', 'Uses jargon to sound expert', 'Avoids silence at all costs'],
-          buckets: {
-            Clarity: ['Gets to the point quickly', 'Uses simple language'],
-            Connection: ['Makes eye contact', 'Shows genuine interest'],
-            Confidence: ['Holds their ground under pushback', 'Projects calm under pressure']
-          },
-          answers: { 'Adjusts message to suit the audience': 'Clarity', 'Listens before responding': 'Connection' }
-        }
-      },
-      {
-        partA: {
-          topic: 'What makes a strong project manager?',
-          buckets: {
-            Planning: ['Sets clear milestones', 'Defines what success looks like', 'Allocates resources early', 'Breaks work into manageable tasks'],
-            Communication: ['Tells the team what winning looks like', 'Listens actively to the team', 'Updates stakeholders regularly', 'Keeps everyone informed on progress'],
-            Delivery: ['Meets deadlines consistently', 'Holds the team accountable', 'Manages scope to avoid scope creep']
-          },
-          overlaps: ['Defines what success looks like', 'Tells the team what winning looks like', 'Updates stakeholders regularly', 'Keeps everyone informed on progress']
-        },
-        partB: {
-          topic: 'What builds trust at work?',
-          leftItems: ['Does what they say they will do', 'Shares information openly', 'Takes credit for team wins', 'Avoids difficult conversations', 'Changes position when pressured'],
-          buckets: {
-            Reliability: ['Shows up consistently', 'Meets commitments without being chased'],
-            Integrity: ['Tells the truth even when it is uncomfortable'],
-            Transparency: ['Acknowledges mistakes quickly', 'Asks for input before deciding']
-          },
-          answers: { 'Does what they say they will do': 'Reliability', 'Shares information openly': 'Integrity' }
-        }
-      },
-      {
-        partA: {
-          topic: 'What makes a presentation land?',
-          buckets: {
-            Structure: ['Opens with the key message not background', 'Covers only what the audience needs to know', 'Follows a logical flow from problem to solution', 'Ends with a clear call to action'],
-            Delivery: ['Speaks with confidence and eye contact', "Doesn't read from the slides", 'Paces the talk so key points land', 'Controls the rhythm so the audience can follow'],
-            'Audience Fit': ['Removes anything irrelevant to this specific audience', 'Anticipates questions and addresses them early', 'Leaves one clear takeaway the audience remembers']
-          },
-          overlaps: ['Covers only what the audience needs to know', 'Removes anything irrelevant to this specific audience', 'Paces the talk so key points land', 'Controls the rhythm so the audience can follow']
-        },
-        partB: {
-          topic: 'What makes a team high-performing?',
-          leftItems: ['Clear roles so no one duplicates effort', 'Psychological safety to speak up', 'Everyone agrees with the leader always', 'No conflict ever', 'Works the longest hours'],
-          buckets: {
-            Structure: ['Shared goals everyone understands', 'Decision-making process is clear'],
-            Culture: ['Members trust each other', 'Disagreement is handled constructively'],
-            Execution: ['Progress is tracked and visible', 'Accountability is shared not concentrated']
-          },
-          answers: { 'Clear roles so no one duplicates effort': 'Structure', 'Psychological safety to speak up': 'Culture' }
-        }
-      },
-      {
-        partA: {
-          topic: 'Why do projects go off track?',
-          buckets: {
-            People: ["Key stakeholder wasn't looped in early", "Team didn't raise risks to the manager", 'Important person was left out of decisions', 'Cross-functional partner had competing priorities'],
-            Process: ["Scope wasn't defined clearly at the start", 'No clear owner for key decisions', 'Timeline was too aggressive given resources', 'Nobody was accountable for the final call'],
-            Execution: ["Deliverable didn't meet expectations", "Progress wasn't tracked or escalated", "Deadlines were missed and no one flagged it", 'Testing was skipped under time pressure']
-          },
-          overlaps: ["Key stakeholder wasn't looped in early", 'Important person was left out of decisions', 'No clear owner for key decisions', 'Nobody was accountable for the final call', "Progress wasn't tracked or escalated", "Deadlines were missed and no one flagged it"]
-        },
-        partB: {
-          topic: 'What does executive presence look like?',
-          leftItems: ['Speaks with conviction even under uncertainty', 'Reads the room and adjusts in real time', 'Always has the loudest voice in the room', 'Never shows any emotion', 'Agrees with the most senior person present'],
-          buckets: {
-            Communication: ['Gets to the point without over-explaining', 'Frames ideas in terms of impact not activity'],
-            Composure: ['Stays calm when things go wrong', "Doesn't get defensive under challenge"],
-            Awareness: ['Knows what matters to who is in the room']
-          },
-          answers: { 'Speaks with conviction even under uncertainty': 'Communication', 'Reads the room and adjusts in real time': 'Awareness' }
-        }
-      },
-      {
-        partA: {
-          topic: 'What makes someone ready for promotion?',
-          buckets: {
-            Performance: ['Consistently exceeds what the role requires', 'Delivers results without needing to be told', 'Goes beyond the expectations of the current job', 'Gets things done even in ambiguous situations'],
-            Leadership: ['Others seek them out for advice and input', 'Brings people together around a shared goal', 'Takes initiative and drives things forward', 'Rallies the team toward a common direction'],
-            Readiness: ['Has already shown they can do the next job', 'Understands how decisions get made at the next level', 'Is already operating at the level above', 'Knows what matters to senior stakeholders']
-          },
-          overlaps: ['Consistently exceeds what the role requires', 'Goes beyond the expectations of the current job', 'Brings people together around a shared goal', 'Rallies the team toward a common direction', 'Has already shown they can do the next job', 'Is already operating at the level above']
-        },
-        partB: {
-          topic: 'What makes a decision well-made?',
-          leftItems: ['Considers second-order effects not just the immediate outcome', 'Is made at the right time — not too early or too late', 'Is made by whoever shouts loudest', 'Never changes once made', 'Avoids any input from others'],
-          buckets: {
-            Thinking: ['Uses available data without waiting for perfect information', 'Weighs trade-offs explicitly'],
-            Process: ['Involves the right people at the right level'],
-            Outcome: ['Can be explained and defended clearly', 'Is revisable if new information emerges']
-          },
-          answers: { 'Considers second-order effects not just the immediate outcome': 'Thinking', 'Is made at the right time — not too early or too late': 'Process' }
-        }
-      }
-    ];
+    let sets = [];
+    let selectedPartA = [];
+    let selectedPartB = [];
 
     const app = document.getElementById('app');
     const contactGate = document.getElementById('contactGate');
     const gateForm = document.getElementById('gateForm');
     const gateSubmit = document.getElementById('gateSubmit');
     const gateError = document.getElementById('gateError');
-    const selectedPartA = pickRandom(sets.map((set, index) => index), 3);
-    const selectedPartB = pickRandom(sets.map((set, index) => index), 3);
     const SPOT_SCORE_KEY = 'tsa_spot_score';
     const state = {
       participant: { name: '', email: '' },
@@ -907,7 +802,51 @@
       }[char]));
     }
 
+    function renderLoadingState() {
+      app.hidden = false;
+      app.innerHTML = `
+        <section class="tsa-stp-panel">
+          <div class="tsa-stp-panel-head">
+            <h2>Loading assessment...</h2>
+            <p>Preparing the Spot the Problem exercise.</p>
+          </div>
+        </section>
+      `;
+    }
+
+    function renderDataError() {
+      contactGate.classList.add('is-hidden');
+      document.body.classList.remove('tsa-stp-locked');
+      app.hidden = false;
+      app.innerHTML = `
+        <section class="tsa-stp-panel">
+          <div class="tsa-stp-panel-head">
+            <h2>We could not load this assessment.</h2>
+            <p>Please refresh the page. If the issue continues, the exercise data file may be missing or malformed.</p>
+          </div>
+        </section>
+      `;
+    }
+
+    // Exercise data is loaded from ../../data/tsa/spot-the-problem.json.
+    // Add new overlap/gap sets in that JSON file, not in this HTML.
+    // Expected schema: an array of set objects with partA buckets/overlaps
+    // and partB leftItems/buckets/answers.
+    async function loadExerciseData() {
+      const response = await fetch(DATA_URL);
+      if (!response.ok) throw new Error(`Unable to load ${DATA_URL}`);
+      const data = await response.json();
+      if (!Array.isArray(data) || !data.length) throw new Error('Spot the Problem data is empty.');
+      sets = data;
+      selectedPartA = pickRandom(sets.map((set, index) => index), Math.min(3, sets.length));
+      selectedPartB = pickRandom(sets.map((set, index) => index), Math.min(3, sets.length));
+    }
+
     function startAssessment() {
+      if (!sets.length) {
+        renderLoadingState();
+        return;
+      }
       contactGate.classList.add('is-hidden');
       document.body.classList.remove('tsa-stp-locked');
       app.hidden = false;
@@ -954,10 +893,20 @@
       }
     });
 
-    if (sessionStorage.getItem(GATE_KEY) === 'true') {
-      state.participant.name = sessionStorage.getItem('tsa_participant_name') || '';
-      state.participant.email = sessionStorage.getItem('tsa_participant_email') || '';
-      startAssessment();
+    async function initializeApp() {
+      const gateComplete = sessionStorage.getItem(GATE_KEY) === 'true';
+      if (gateComplete) renderLoadingState();
+      try {
+        await loadExerciseData();
+        if (gateComplete) {
+          state.participant.name = sessionStorage.getItem('tsa_participant_name') || '';
+          state.participant.email = sessionStorage.getItem('tsa_participant_email') || '';
+          startAssessment();
+        }
+      } catch (error) {
+        console.error(error);
+        renderDataError();
+      }
     }
 
     function renderShell(innerHtml) {
@@ -1349,6 +1298,8 @@
         emailResults(sortScore, total, combined);
       });
     }
+
+    initializeApp();
   </script>
 </body>
 </html>

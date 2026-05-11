@@ -1,0 +1,30 @@
+[
+  {
+    "id": "scqa_001",
+    "title": "SCQA builder",
+    "difficulty": "beginner",
+    "phase": "speak-concisely",
+    "tags": [
+      "scqa",
+      "storyline"
+    ],
+    "prompt": "Write two different SCQA formulations from the same context.",
+    "timerMinutes": 10,
+    "context": "The Olympics has historically been one of the most unifying global events. However, recent games have struggled to capture the same cultural impact and collective attention. The challenge is understanding why the Games are losing their gravity — and what can be done to restore it.",
+    "topicLabel": "Olympics cultural decline",
+    "sampleAnswers": [
+      {
+        "s": "The Olympics is still the world's most recognisable sports property, with unmatched athletes, history, and global reach.",
+        "c": "However, recognition is no longer translating into gravity: shared moments are fragmenting, clip-first consumption rewards spectacle over meaning, and legitimacy is noisier — so the Games feel less like a global ritual and more like optional content.",
+        "q": "How do we restore the Olympics as a rare, earned cultural timestamp — without chasing trends or diluting the brand?",
+        "a": "Rebuild Olympic gravity through (1) ritual design that creates shared moments again, (2) athlete-led story arcs that make stakes legible over time, and (3) one coherent tone system that every channel reinforces while controlling commercial signals."
+      },
+      {
+        "s": "The Games deliver extraordinary competition across a massive programme, and digital platforms now provide unprecedented distribution and personalisation.",
+        "c": "Yet the experience has become hard to follow: audiences are split across platforms and time zones, the broadcast-first format no longer matches how culture is consumed, and short-form clips strip context — so casual fans don't know what matters, why it matters, or who to care about.",
+        "q": "How can the Olympics be made easy to follow for modern audiences while preserving prestige, neutrality, and emotional depth?",
+        "a": "Create a clarity layer on top of the Games: (1) daily three-path viewing routes (Must-see / Stories / Underdogs), (2) structured narrative coverage that builds athlete stakes across days, and (3) a disciplined tone and partner system that reduces trust volatility and over-commercialisation signal."
+      }
+    ]
+  }
+]

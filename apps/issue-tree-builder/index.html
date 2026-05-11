@@ -1564,6 +1564,7 @@
   <script>
     const STORAGE_KEY = "utl_issue_tree";
     const TIMER_TARGET = 15 * 60;
+    const DATA_URL = "../../data/practice/issue-tree-builder.json";
     const blankState = () => ({
       problemStatement: "",
       hypothesis: "",
@@ -1575,37 +1576,7 @@
       currentScreen: 1
     });
 
-    const templateState = {
-      problemStatement: "Why is the Olympics losing its cultural impact?",
-      hypothesis: "The Olympics is losing gravity because of broken culture, a lost story arc, and lack of legitimate transparency.",
-      arguments: [
-        {
-          text: "Shared ritual is breaking",
-          details: [
-            "Fragmented attention: no single shared moment; audiences split across platforms and time zones.",
-            "Broadcast-first packaging: still feels like a TV event while audiences consume through feeds.",
-            "Highlights over attendance: people catch up later, so the Games lose the live collective feeling."
-          ]
-        },
-        {
-          text: "Meaning is getting replaced by moment-chasing",
-          details: [
-            "Clip culture: short-form rewards shock and spectacle; meaning needs arcs and buildup.",
-            "Virality outshines excellence — so sacredness doesn't accumulate over time.",
-            "Winners aren't legible: without athlete-led arcs, audiences don't feel the personal stakes."
-          ]
-        },
-        {
-          text: "Legitimacy and tone are getting noisier",
-          details: [
-            "Trust volatility: politics and polarization make the Olympics feel biased depending on the viewer.",
-            "Generic unity messaging lands as tone-deaf in a fractured world.",
-            "Over-commercialization signal: sponsorship load makes the Games feel sold, not earned."
-          ]
-        }
-      ],
-      currentScreen: 1
-    };
+    let templateState = null;
 
     let state = blankState();
     let currentScreen = 1;
@@ -1617,6 +1588,28 @@
     let timerInterval = null;
     let timerMetricHidden = false;
     let activeWordField = null;
+
+    // Exercise data is loaded from ../../data/practice/issue-tree-builder.json.
+    // Add future issue-tree variations to that JSON file. This app loads the
+    // first variation by default and converts sampleAnswer into the existing
+    // templateState shape used by preload, sample reveal, and review screens.
+    async function loadPracticeData() {
+      const response = await fetch(DATA_URL);
+      if (!response.ok) throw new Error(`Unable to load ${DATA_URL}`);
+      const data = await response.json();
+      if (!Array.isArray(data) || !data.length) throw new Error("Issue tree data is empty.");
+      const activity = data[0];
+      templateState = {
+        problemStatement: activity.problemStatement || "",
+        hypothesis: activity.sampleAnswer?.hypothesis || "",
+        arguments: (activity.sampleAnswer?.arguments || []).slice(0, 3).map((arg) => ({
+          text: arg.title || "",
+          details: (arg.supportingDetails || []).concat(["", "", ""]).slice(0, Math.max(3, (arg.supportingDetails || []).length))
+        })),
+        currentScreen: 1
+      };
+      while (templateState.arguments.length < 3) templateState.arguments.push({ text: "", details: ["", "", ""] });
+    }
 
     const $ = (selector, root = document) => root.querySelector(selector);
     const $$ = (selector, root = document) => Array.from(root.querySelectorAll(selector));
@@ -2206,13 +2199,32 @@
       renderTimer();
     });
 
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) state = safeState(saved);
-    timerInterval = setInterval(renderTimer, 1000);
-    renderAll();
-    renderTimer();
-    renderWordCount();
-    goToScreen(Math.min(Math.max(state.currentScreen, 1), 3));
+    async function initializeApp() {
+      try {
+        await loadPracticeData();
+      } catch (error) {
+        console.error(error);
+        document.querySelector("main").innerHTML = `
+          <section class="screen active">
+            <div class="hero">
+              <p class="eyebrow">Exercise</p>
+              <h1>We could not load this exercise.</h1>
+              <p>Please refresh the page. If the issue continues, the practice data file may be missing or malformed.</p>
+            </div>
+          </section>
+        `;
+        return;
+      }
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) state = safeState(saved);
+      timerInterval = setInterval(renderTimer, 1000);
+      renderAll();
+      renderTimer();
+      renderWordCount();
+      goToScreen(Math.min(Math.max(state.currentScreen, 1), 3));
+    }
+
+    initializeApp();
   </script>
 </body>
 </html>

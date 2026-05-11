@@ -559,11 +559,7 @@
         </div>
         <div class="panel-body">
           <div id="messyList" class="item-zone" data-zone="list">
-            <div class="item-card">apples</div>
-            <div class="item-card">rice</div>
-            <div class="item-card">dish soap</div>
-            <div class="item-card">yogurt</div>
-            <div class="item-card">spinach</div>
+            <p class="small">Loading exercise...</p>
           </div>
           <p class="small">Tip: Drag items on desktop. On mobile, tap an item, then tap a bucket or the list to move it.</p>
           <p class="tap-move-hint" id="tapMoveHint" aria-live="polite"></p>
@@ -599,50 +595,13 @@
     // -------------------------
     // Data layer
     // -------------------------
-    const ITEM_BANK = [
-      { name: 'Carrots', idealBucket: 'fresh_cold', tags: ['produce', 'fresh'] },
-      { name: 'Frozen meatballs', idealBucket: 'fresh_cold', tags: ['frozen', 'meat'] },
-      { name: 'Cheese', idealBucket: 'fresh_cold', tags: ['dairy', 'refrigerated'] },
-      { name: 'Chicken', idealBucket: 'fresh_cold', tags: ['meat', 'fresh'] },
-      { name: 'Potatoes', idealBucket: 'fresh_cold', tags: ['produce'] },
-      { name: 'Milk', idealBucket: 'fresh_cold', tags: ['dairy'] },
-      { name: 'Sausages', idealBucket: 'fresh_cold', tags: ['meat'] },
-      { name: 'Butter', idealBucket: 'fresh_cold', tags: ['dairy'] },
-      { name: 'Beef', idealBucket: 'fresh_cold', tags: ['meat'] },
-      { name: 'Bell peppers', idealBucket: 'fresh_cold', tags: ['produce'] },
-      { name: 'Lettuce', idealBucket: 'fresh_cold', tags: ['produce'] },
-      { name: 'Spinach', idealBucket: 'fresh_cold', tags: ['produce'] },
-      { name: 'Cream', idealBucket: 'fresh_cold', tags: ['dairy'] },
-      { name: 'Grapes', idealBucket: 'fresh_cold', tags: ['fruit', 'fresh'] },
-      { name: 'Garlic', idealBucket: 'fresh_cold', tags: ['produce'] },
-      { name: 'Ice cream', idealBucket: 'fresh_cold', tags: ['frozen', 'dairy'] },
-      { name: 'Onions', idealBucket: 'fresh_cold', tags: ['produce'] },
-      { name: 'Pasta', idealBucket: 'pantry', tags: ['dry', 'staple'] },
-      { name: 'Canned tomatoes', idealBucket: 'pantry', tags: ['canned'] },
-      { name: 'Paprika', idealBucket: 'pantry', tags: ['spice', 'seasoning'] },
-      { name: 'Rice', idealBucket: 'pantry', tags: ['grains', 'dry'] },
-      { name: 'Sugar', idealBucket: 'pantry', tags: ['staple'] },
-      { name: 'Salt', idealBucket: 'pantry', tags: ['seasoning'] },
-      { name: 'Bottled olives', idealBucket: 'pantry', tags: ['jarred'] },
-      { name: 'Olive oil', idealBucket: 'pantry', tags: ['oil', 'staple'] },
-      { name: 'Bathroom tissue', idealBucket: 'supplies', tags: ['paper', 'household'] },
-      { name: 'Candles', idealBucket: 'supplies', tags: ['household'] },
-      { name: 'Charcoal', idealBucket: 'supplies', tags: ['household', 'bbq'] },
-      { name: 'Kitchen towels', idealBucket: 'supplies', tags: ['paper', 'household'] },
-      { name: 'Paper plates', idealBucket: 'supplies', tags: ['party', 'paper'] }
-    ];
+    const DATA_URL = '../../data/practice/grocery-list.json';
+    let ITEM_BANK = [];
 
-    const KEYWORDS = {
-      fresh_cold: ['fresh', 'cold', 'fridge', 'frozen', 'produce', 'meat', 'dairy', 'perishable', 'refrigerated'],
-      pantry: ['pantry', 'dry', 'shelf', 'canned', 'staples', 'grains', 'seasoning', 'oil', 'cupboard'],
-      supplies: ['supplies', 'non-food', 'household', 'party', 'tools', 'paper', 'cleaning', 'cooking']
-    };
+    let KEYWORDS = {};
 
-    const IDEAL_LABELS = {
-      fresh_cold: 'Fresh / cold food',
-      pantry: 'Pantry items',
-      supplies: 'Non-food supplies'
-    };
+    let IDEAL_LABELS = {};
+    let PRACTICE_ACTIVITY = null;
 
     const state = {
       generatedItems: [],
@@ -667,6 +626,30 @@
     };
 
     const sample = (arr, count) => shuffle(arr).slice(0, count);
+
+    function showDataStatus(title, message) {
+      const list = document.getElementById('messyList');
+      if (list) {
+        list.innerHTML = `<p class="small"><strong>${title}</strong><br>${message}</p>`;
+      }
+    }
+
+    // Exercise data is loaded from ../../data/practice/grocery-list.json.
+    // Add future grocery variations to that JSON file. The app currently loads
+    // the first variation by default and expects itemBank, keywords, and
+    // idealLabels fields for generation and self-check scoring.
+    async function loadPracticeData() {
+      showDataStatus('Loading exercise...', 'Preparing the grocery list.');
+      const response = await fetch(DATA_URL);
+      if (!response.ok) throw new Error(`Unable to load ${DATA_URL}`);
+      const data = await response.json();
+      if (!Array.isArray(data) || !data.length) throw new Error('Grocery list data is empty.');
+      PRACTICE_ACTIVITY = data[0];
+      ITEM_BANK = PRACTICE_ACTIVITY.itemBank || [];
+      KEYWORDS = PRACTICE_ACTIVITY.keywords || {};
+      IDEAL_LABELS = PRACTICE_ACTIVITY.idealLabels || {};
+      if (!ITEM_BANK.length) throw new Error('Grocery list item bank is empty.');
+    }
 
     function levenshtein(a, b) {
       const m = a.length;
@@ -1148,28 +1131,38 @@
     // -------------------------
     // Bootstrapping
     // -------------------------
-    activityTimer = ActivityTimer.create({
-      elements: {
-        row: document.getElementById('timerRow'),
-        display: document.getElementById('timerDisplay'),
-        note: document.getElementById('timerNote'),
-        toggleBtn: document.getElementById('toggleTimerBtn'),
-        startBtn: document.getElementById('startTimerBtn'),
-        pauseBtn: document.getElementById('pauseTimerBtn'),
-        resumeBtn: document.getElementById('resumeTimerBtn'),
-        resetBtn: document.getElementById('resetTimerBtn')
-      },
-      targetSeconds: 300,
-      idleMessage: 'Timer starts when you begin sorting. Target: 5 minutes.'
-    });
-    setInterval(syncHeaderTimerIcons, 500);
-    syncHeaderTimerIcons();
-    buildBuckets();
-    wireTapToMove();
-    wireDragAndDrop();
-    wireEvents();
-    renderSampleAnswer();
-    generateList();
+    async function initializeApp() {
+      try {
+        await loadPracticeData();
+        activityTimer = ActivityTimer.create({
+          elements: {
+            row: document.getElementById('timerRow'),
+            display: document.getElementById('timerDisplay'),
+            note: document.getElementById('timerNote'),
+            toggleBtn: document.getElementById('toggleTimerBtn'),
+            startBtn: document.getElementById('startTimerBtn'),
+            pauseBtn: document.getElementById('pauseTimerBtn'),
+            resumeBtn: document.getElementById('resumeTimerBtn'),
+            resetBtn: document.getElementById('resetTimerBtn')
+          },
+          targetSeconds: 300,
+          idleMessage: 'Timer starts when you begin sorting. Target: 5 minutes.'
+        });
+        setInterval(syncHeaderTimerIcons, 500);
+        syncHeaderTimerIcons();
+        buildBuckets();
+        wireTapToMove();
+        wireDragAndDrop();
+        wireEvents();
+        renderSampleAnswer();
+        generateList();
+      } catch (error) {
+        console.error(error);
+        showDataStatus('We could not load this exercise.', 'Please refresh the page. If the issue continues, the practice data file may be missing or malformed.');
+      }
+    }
+
+    initializeApp();
   </script>
 </body>
 </html>

@@ -1,0 +1,288 @@
+[
+  {
+    "id": "grocery_list_001",
+    "title": "Grocery list",
+    "difficulty": "beginner",
+    "phase": "think-clearly",
+    "tags": [
+      "mece",
+      "rule-of-three"
+    ],
+    "prompt": "Sort this list into clean MECE buckets.",
+    "timerMinutes": 5,
+    "itemBank": [
+      {
+        "name": "Carrots",
+        "idealBucket": "fresh_cold",
+        "tags": [
+          "produce",
+          "fresh"
+        ]
+      },
+      {
+        "name": "Frozen meatballs",
+        "idealBucket": "fresh_cold",
+        "tags": [
+          "frozen",
+          "meat"
+        ]
+      },
+      {
+        "name": "Cheese",
+        "idealBucket": "fresh_cold",
+        "tags": [
+          "dairy",
+          "refrigerated"
+        ]
+      },
+      {
+        "name": "Chicken",
+        "idealBucket": "fresh_cold",
+        "tags": [
+          "meat",
+          "fresh"
+        ]
+      },
+      {
+        "name": "Potatoes",
+        "idealBucket": "fresh_cold",
+        "tags": [
+          "produce"
+        ]
+      },
+      {
+        "name": "Milk",
+        "idealBucket": "fresh_cold",
+        "tags": [
+          "dairy"
+        ]
+      },
+      {
+        "name": "Sausages",
+        "idealBucket": "fresh_cold",
+        "tags": [
+          "meat"
+        ]
+      },
+      {
+        "name": "Butter",
+        "idealBucket": "fresh_cold",
+        "tags": [
+          "dairy"
+        ]
+      },
+      {
+        "name": "Beef",
+        "idealBucket": "fresh_cold",
+        "tags": [
+          "meat"
+        ]
+      },
+      {
+        "name": "Bell peppers",
+        "idealBucket": "fresh_cold",
+        "tags": [
+          "produce"
+        ]
+      },
+      {
+        "name": "Lettuce",
+        "idealBucket": "fresh_cold",
+        "tags": [
+          "produce"
+        ]
+      },
+      {
+        "name": "Spinach",
+        "idealBucket": "fresh_cold",
+        "tags": [
+          "produce"
+        ]
+      },
+      {
+        "name": "Cream",
+        "idealBucket": "fresh_cold",
+        "tags": [
+          "dairy"
+        ]
+      },
+      {
+        "name": "Grapes",
+        "idealBucket": "fresh_cold",
+        "tags": [
+          "fruit",
+          "fresh"
+        ]
+      },
+      {
+        "name": "Garlic",
+        "idealBucket": "fresh_cold",
+        "tags": [
+          "produce"
+        ]
+      },
+      {
+        "name": "Ice cream",
+        "idealBucket": "fresh_cold",
+        "tags": [
+          "frozen",
+          "dairy"
+        ]
+      },
+      {
+        "name": "Onions",
+        "idealBucket": "fresh_cold",
+        "tags": [
+          "produce"
+        ]
+      },
+      {
+        "name": "Pasta",
+        "idealBucket": "pantry",
+        "tags": [
+          "dry",
+          "staple"
+        ]
+      },
+      {
+        "name": "Canned tomatoes",
+        "idealBucket": "pantry",
+        "tags": [
+          "canned"
+        ]
+      },
+      {
+        "name": "Paprika",
+        "idealBucket": "pantry",
+        "tags": [
+          "spice",
+          "seasoning"
+        ]
+      },
+      {
+        "name": "Rice",
+        "idealBucket": "pantry",
+        "tags": [
+          "grains",
+          "dry"
+        ]
+      },
+      {
+        "name": "Sugar",
+        "idealBucket": "pantry",
+        "tags": [
+          "staple"
+        ]
+      },
+      {
+        "name": "Salt",
+        "idealBucket": "pantry",
+        "tags": [
+          "seasoning"
+        ]
+      },
+      {
+        "name": "Bottled olives",
+        "idealBucket": "pantry",
+        "tags": [
+          "jarred"
+        ]
+      },
+      {
+        "name": "Olive oil",
+        "idealBucket": "pantry",
+        "tags": [
+          "oil",
+          "staple"
+        ]
+      },
+      {
+        "name": "Bathroom tissue",
+        "idealBucket": "supplies",
+        "tags": [
+          "paper",
+          "household"
+        ]
+      },
+      {
+        "name": "Candles",
+        "idealBucket": "supplies",
+        "tags": [
+          "household"
+        ]
+      },
+      {
+        "name": "Charcoal",
+        "idealBucket": "supplies",
+        "tags": [
+          "household",
+          "bbq"
+        ]
+      },
+      {
+        "name": "Kitchen towels",
+        "idealBucket": "supplies",
+        "tags": [
+          "paper",
+          "household"
+        ]
+      },
+      {
+        "name": "Paper plates",
+        "idealBucket": "supplies",
+        "tags": [
+          "party",
+          "paper"
+        ]
+      }
+    ],
+    "keywords": {
+      "fresh_cold": [
+        "fresh",
+        "cold",
+        "fridge",
+        "frozen",
+        "produce",
+        "meat",
+        "dairy",
+        "perishable",
+        "refrigerated"
+      ],
+      "pantry": [
+        "pantry",
+        "dry",
+        "shelf",
+        "canned",
+        "staples",
+        "grains",
+        "seasoning",
+        "oil",
+        "cupboard"
+      ],
+      "supplies": [
+        "supplies",
+        "non-food",
+        "household",
+        "party",
+        "tools",
+        "paper",
+        "cleaning",
+        "cooking"
+      ]
+    },
+    "idealLabels": {
+      "fresh_cold": "Fresh / cold food",
+      "pantry": "Pantry items",
+      "supplies": "Non-food supplies"
+    },
+    "generation": {
+      "minItems": 24,
+      "maxItems": 30,
+      "mandatoryPerBucket": 3
+    },
+    "reflectionPrompts": [
+      "What made your categories clean or unclear?",
+      "Where did you have overlap?"
+    ]
+  }
+]

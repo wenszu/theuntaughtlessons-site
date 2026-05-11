@@ -187,8 +187,8 @@
   <main class="placeholder-main">
     <section class="placeholder-card">
       <p class="placeholder-label" id="assessmentMode">Diagnostic · Section 2</p>
-      <h1>Speak Concisely is coming soon.</h1>
-      <p>This holding page is where Part 2 of the TSA Score™ will live. It will measure how clearly someone can deliver the most important message in the time they have.</p>
+      <h1 id="placeholderTitle">Speak Concisely is coming soon.</h1>
+      <p id="placeholderPrompt">Loading assessment details...</p>
       <div class="placeholder-actions">
         <a class="placeholder-button" id="backLink" href="../../tsa-score.html">Back to TSA Score</a>
         <a class="placeholder-button secondary" href="../../index.html">Back to Home</a>
@@ -197,12 +197,32 @@
   </main>
 
   <script>
+    const DATA_URL = '../../data/tsa/speak-concisely.json';
     const params = new URLSearchParams(window.location.search);
     const mode = params.get('assessment') === 'checkpoint' ? 'Checkpoint' : 'Diagnostic';
     const exercise = params.get('exercise') === 'b' ? 'Exercise B' : 'Exercise A';
     document.getElementById('assessmentMode').textContent = `${mode} · Section 2 · ${exercise}`;
     document.getElementById('backLink').href = mode === 'Checkpoint' ? '../tsa-checkpoint/index.html' : '../../tsa-score.html';
     document.getElementById('backLink').textContent = mode === 'Checkpoint' ? 'Back to Checkpoint' : 'Back to TSA Score';
+
+    // Placeholder reads from ../../data/tsa/speak-concisely.json so Speak
+    // Concisely content stays in the shared TSA data source.
+    async function loadPlaceholderData() {
+      try {
+        const response = await fetch(DATA_URL);
+        if (!response.ok) throw new Error(`Unable to load ${DATA_URL}`);
+        const data = await response.json();
+        const firstTopic = Array.isArray(data) ? data[0] : null;
+        document.getElementById('placeholderPrompt').textContent = firstTopic
+          ? 'This holding page uses the shared Speak Concisely assessment data. Open the active Speak Concisely assessment to complete the exercise.'
+          : 'Speak Concisely assessment details are coming soon.';
+      } catch (error) {
+        console.error(error);
+        document.getElementById('placeholderPrompt').textContent = 'Speak Concisely assessment details are coming soon.';
+      }
+    }
+
+    loadPlaceholderData();
   </script>
 </body>
 </html>

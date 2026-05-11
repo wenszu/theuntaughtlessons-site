@@ -1,14 +1,51 @@
 # The Untaught Lessons Website Context
 
-Last updated: 2026-05-09  
+Last updated: 2026-05-11  
 Primary purpose: Living implementation and design reference for The Untaught Lessons static website and practice apps.
 
 Use this file when referencing the site with other tools. It should be updated whenever pages, apps, visual rules, navigation, routing, forms, or core functionality change.
 
 ## Change Log
 
+### 2026-05-11
+
+- Updated TSA Sort & Bucket scoring and data after panel testing:
+  - Added `labelEquivalents` to all `data/tsa/sort-bucket.json` exercise sets so semantically correct bucket labels can receive credit.
+  - Replaced four ambiguous Sort & Bucket items and added replacement audit notes in the JSON.
+  - Added a `dualBucket` rule for `Debate over office layout` in `sort_bucket_001`.
+  - Updated `apps/tsa-sort-bucket/index.html` scoring so label scoring uses JSON equivalents and placement scoring respects dual-bucket items.
+- Added a lightweight content-management import/export structure:
+  - New `/csv/tsa/` folder for TSA assessment CSV exports.
+  - New `/csv/practice/` folder for member-area practice CSV exports.
+  - New `/scripts/` folder for developer-only utility scripts.
+  - Added `scripts/import-exercise-data.js` as a plain Node.js CSV-to-JSON import scaffold.
+  - Added README files documenting the Google Sheets → CSV → script → JSON → commit → deploy workflow.
+  - The production website continues to fetch JSON only and never reads CSV or Google Sheets directly.
+- Refactored TSA assessment content into shared JSON:
+  - New files under `data/tsa/`: `sort-bucket.json`, `spot-the-problem.json`, `speak-concisely.json`, and `act-confidently.json`.
+  - TSA apps now fetch assessment sets, prompts, answer keys, topic details, and scoring metadata from JSON before rendering.
+  - Diagnostic and Checkpoint continue to share the same TSA exercise data sources through query parameters.
+  - Existing contact gates, scoring logic, storage keys, answer reveal, copy results, email results, routing, and mobile tap interactions were preserved.
+- Refactored member practice content into shared JSON:
+  - New files under `data/practice/`: `grocery-list.json`, `messy-notes.json`, `issue-tree-builder.json`, and `scqa-builder.json`.
+  - Practice apps now load item banks, prompts, templates, sample answers, reflection prompts, timer metadata, and scoring metadata from JSON.
+  - Apps currently load the first practice variation by default so future variation selectors can be added without changing the data model.
+- Added loading and error handling for JSON-powered apps:
+  - Apps show a simple loading state while data is fetched.
+  - Apps show a user-friendly error if the JSON file is missing, malformed, or empty.
+- Updated the implementation rule:
+  - Future exercise variations should be added to `/data/tsa/` or `/data/practice/`, not hardcoded into app `index.html` files.
+
 ### 2026-05-09
 
+- Reworked the Diagnostic into a hub:
+  - `apps/tsa-diagnostic/index.html` now shows all Diagnostic sections before participants enter individual exercises.
+  - Existing Sort & Bucket exercise moved to `apps/tsa-sort-bucket/index.html`.
+  - Diagnostic Section 1 links only to Sort & Bucket.
+  - Diagnostic Section 2 links only to the Speak Concisely Short Talk assessment.
+  - Diagnostic Section 3 links to the Act Confidently Difficult Conversation placeholder.
+  - Diagnostic scorecard starts hidden and uses an eye icon button to reveal or hide scores.
+- Connected Speak Concisely as the active Section 2 Exercise A in the Checkpoint hub.
 - Clarified the TSA Spot the Problem score screen:
   - The scorecard now separates Exercise B overall score from Part A, Find the Overlaps, and Part B, Fix the Gaps.
   - The combined Think Clearly scorecard labels Exercise A, Sort & Bucket, and Exercise B, Spot the Problem, explicitly.
@@ -62,7 +99,7 @@ Use this file when referencing the site with other tools. It should be updated w
   - Bucket columns now use white cards with dashed drop zones and empty-state guidance.
 - Refined TSA Diagnostic Sort & Bucket so participants see the item list while selecting bucket labels. The exercise now uses one grocery-list-style workspace with the unplaced list on the left and three bucket columns on the right.
 - Built TSA Diagnostic Part 1 assessment files:
-  - `apps/tsa-diagnostic/index.html` for Exercise A, Sort & Bucket.
+  - `apps/tsa-sort-bucket/index.html` for Exercise A, Sort & Bucket.
   - `apps/tsa-spot-the-problem/index.html` for Exercise B, Spot the Problem.
 - Added contact gates to both TSA Diagnostic Part 1 files using the existing Google Apps Script endpoint.
 - Added session storage behavior for TSA Diagnostic Part 1:
@@ -254,6 +291,120 @@ Public site cards generally use:
 - Small radius, usually 4px to 12px depending on context.
 - Soft shadow.
 - Gold accents for labels, top borders, or dividers.
+
+## Exercise Data Architecture
+
+Exercise content is stored outside app HTML files in shared JSON files. Static apps fetch these files with relative paths, so the site still works with:
+
+```bash
+python3 -m http.server 8061 --bind 127.0.0.1
+```
+
+and remains compatible with Cloudflare Pages static hosting.
+
+### Editing Pipeline
+
+Google Sheets can act as the human editing layer, but it is not a runtime dependency.
+
+The content workflow is:
+
+```text
+Google Sheets → CSV → script → JSON → commit → deploy
+```
+
+Folder roles:
+
+- `csv/tsa/`: Holds Google Sheets CSV exports for TSA assessment exercises.
+- `csv/practice/`: Holds Google Sheets CSV exports for member-area practice apps.
+- `scripts/`: Holds developer-only utility scripts, including `scripts/import-exercise-data.js`.
+- `data/`: Holds production JSON fetched by the website at runtime.
+
+Runtime rule:
+
+- The website should never fetch Google Sheets directly.
+- The website should never fetch CSV files directly.
+- Browser pages should fetch only static JSON from `data/tsa/` and `data/practice/`.
+
+Importer status:
+
+- `scripts/import-exercise-data.js` is a plain Node.js scaffold.
+- It reads CSV files recursively from `csv/tsa/` and `csv/practice/`.
+- It detects missing CSV files, skips empty files, parses CSV safely, validates basic columns, and logs clear status.
+- Most schema-specific CSV-to-JSON converters are TODO placeholders until the Google Sheets tab schemas are finalized.
+
+### TSA Assessment Data
+
+TSA assessment content lives in:
+
+```text
+data/tsa/
+  sort-bucket.json
+  spot-the-problem.json
+  speak-concisely.json
+  act-confidently.json
+```
+
+Use TSA JSON for assessment content, answer mappings, scoring metadata, diagnostic/checkpoint reuse, and future analytics fields.
+
+Current app data sources:
+
+- `apps/tsa-sort-bucket/index.html` fetches `../../data/tsa/sort-bucket.json`.
+- `apps/tsa-spot-the-problem/index.html` fetches `../../data/tsa/spot-the-problem.json`.
+- `apps/tsa-speak/index.html` fetches `../../data/tsa/speak-concisely.json`.
+- `apps/tsa-act-confidently/index.html` fetches `../../data/tsa/act-confidently.json`.
+
+TSA JSON should contain content and answer metadata only. Scoring logic, rendering, storage, contact gates, routing, drag/drop, mobile tap behavior, and email/copy results stay in the app JavaScript.
+
+Sort & Bucket schema notes:
+
+- Array of sets.
+- Each set should include `id`, `title`, `difficulty`, `tags`, `prompt`, `scenario`, `sortingInstruction`, `items`, `bucketOptions`, `correctBuckets`, `answerKey`, and `scoring`.
+- `answerKey` maps each correct bucket label to the list of item text strings that belong there.
+
+Spot the Problem schema notes:
+
+- Array of sets.
+- Each set includes `partA` and `partB`.
+- `partA` contains `topic`, `buckets`, and `overlaps`.
+- `partB` contains `topic`, `leftItems`, `buckets`, and `answers`.
+
+Speak Concisely schema notes:
+
+- Array of topics.
+- Each topic includes `id`, `number`, `category`, `title`, `scenario`, `points`, `keyMessages`, `difficulty`, `tags`, and optional `timeLimitSeconds`.
+
+### Practice App Data
+
+Practice content lives in:
+
+```text
+data/practice/
+  grocery-list.json
+  messy-notes.json
+  issue-tree-builder.json
+  scqa-builder.json
+```
+
+Use practice JSON for practice variations, prompts, sample answers, templates, reflection prompts, timer defaults, difficulty tags, and item banks.
+
+Current practice app data sources:
+
+- `apps/grocery-list/index.html` fetches `../../data/practice/grocery-list.json`.
+- `apps/messy-notes/index.html` fetches `../../data/practice/messy-notes.json`.
+- `apps/issue-tree-builder/index.html` fetches `../../data/practice/issue-tree-builder.json`.
+- `apps/scqa-builder/index.html` fetches `../../data/practice/scqa-builder.json`.
+
+Practice apps currently load the first variation in each JSON file. Add future variations as additional array entries. Do not add new exercise content directly to app HTML unless it is generic placeholder UI copy.
+
+Practice JSON schema notes for future Google Sheets export:
+
+- Keep stable `id` fields for each variation.
+- Include `title`, `difficulty`, `phase`, `tags`, `prompt`, and `timerMinutes`.
+- For sample answers, prefer structured arrays over long strings so they can map cleanly into sheet rows later.
+- Grocery: `itemBank`, `keywords`, `idealLabels`, `generation`, `sampleAnswer`, `reflectionPrompts`.
+- Messy Notes: activity config fields plus `sampleAnswer`, `checklist`, `scoring`, and `reflectionPrompts`.
+- Issue Tree: `problemStatement` and `sampleAnswer.arguments`.
+- SCQA: `context`, `topicLabel`, and `sampleAnswers`.
 
 ## Page Map
 
@@ -458,6 +609,38 @@ Phase:
 
 Purpose:
 
+- Diagnostic hub for the pre-training TSA Score™.
+- Routes participants into each section of the Diagnostic from one starting page.
+- Shows completion status and a scorecard when scores exist.
+
+Current sections:
+
+- Section 1, Think Clearly:
+  - Diagnostic Exercise, Sort & Bucket, links to `../tsa-sort-bucket/index.html`.
+- Section 2, Speak Concisely:
+  - Diagnostic Exercise, Short Talk, links to `../tsa-speak/index.html`.
+- Section 3, Act Confidently:
+  - Diagnostic Exercise, Difficult Conversation, placeholder.
+
+Scoring behavior:
+
+- Reads `tsa_sort_score` and `tsa_speak_score`.
+- Scorecard starts hidden by default.
+- Eye icon button toggles score visibility.
+- Completed cards show completion without exposing scores until the scorecard is revealed.
+- Scorecard is organized by section:
+  - Section 1, Think Clearly, out of 20.
+  - Section 2, Speak Concisely, out of 30.
+  - Section 3, Act Confidently, pending.
+
+### `apps/tsa-sort-bucket/index.html`
+
+Phase:
+
+- TSA Score™.
+
+Purpose:
+
 - Exercise A of TSA Diagnostic Part 1, Think Clearly.
 - Assesses whether the participant can name clean buckets and sort messy information into those buckets.
 
@@ -474,8 +657,8 @@ Key functionality:
 - Auto-scored out of 20 points:
   - Bucket labels: 6 points.
   - Item placement: 14 points.
-- Stores result in `sessionStorage` under `tsa_sort_score`.
-- Score screen includes answer reveal, copy-results button, and continuation to Spot the Problem.
+- Stores result in `sessionStorage` and `localStorage` under `tsa_sort_score`.
+- Score screen includes answer reveal, copy-results button, and continuation to Speak Concisely.
 
 ### `apps/tsa-spot-the-problem/index.html`
 
@@ -510,18 +693,25 @@ Phase:
 Purpose:
 
 - Checkpoint hub for post-training TSA Score™ comparison.
-- Routes participants into the two Think Clearly checkpoint exercises.
+- Routes participants into the three TSA sections.
 - Shows whether each exercise is complete by reading session storage.
 - If only one exercise is complete, prompts the participant to complete the other.
 
-Current exercises:
+Current sections:
 
-- Sort & Bucket, linking to `../tsa-diagnostic/index.html?assessment=checkpoint`.
-- Spot the Problem, linking to `../tsa-spot-the-problem/index.html?assessment=checkpoint`.
+- Section 1, Think Clearly:
+  - Exercise A, Sort & Bucket, links to `../tsa-sort-bucket/index.html?assessment=checkpoint`.
+  - Exercise B, Spot the Problem, links to `../tsa-spot-the-problem/index.html?assessment=checkpoint`.
+- Section 2, Speak Concisely:
+  - Exercise A links to `../tsa-speak/index.html?version=checkpoint`.
+  - Exercise B is a placeholder.
+- Section 3, Act Confidently:
+  - Exercise A and B are placeholders.
 
 Implementation note:
 
-- The Checkpoint currently reuses the same two exercise app files as the Diagnostic, with the `assessment=checkpoint` query parameter to distinguish form submissions.
+- The Checkpoint reuses the Think Clearly exercise files with the `assessment=checkpoint` query parameter.
+- The Checkpoint uses `version=checkpoint` for the Speak Concisely app.
 
 ### `apps/12-in-12/index.html`
 
