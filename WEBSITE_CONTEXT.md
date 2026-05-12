@@ -40,6 +40,7 @@ Use this file when referencing the site with other tools. It should be updated w
   - Act Confidently is separated into its own Section 3 block instead of appearing inside Speak Concisely.
   - Both hubs show completion status and score summaries from browser storage.
   - Act Confidently remains marked as coming soon.
+- Bumped the `tsa-score.html` stylesheet cache key and added fallback button classes to the public Find Your Level CTA so deployed versions render it as a gold button instead of a plain text link.
 - Google Sheet operations requested for this release are pending reconnection of the Google Drive connector:
   - Rename the sheet to `[Website] UTL leads and assessments`.
   - Add the `Assessments` tab.
