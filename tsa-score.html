@@ -40,8 +40,8 @@
     <section class="tsa-hero" aria-labelledby="tsa-title">
       <div class="tsa-container narrow">
         <h1 id="tsa-title">Find Your Level</h1>
-        <p>The TSA Score™ measures how clearly you think, how concisely you speak, and how confidently you act — three skills that define how you show up at work and in life.</p>
-        <span class="tsa-formula">C³ = Clarity of Thought · Conciseness of Delivery · Confidence in Action</span>
+        <p>See how clearly you think — in under 10 minutes.</p>
+        <p>Most people assume clear thinking comes naturally.<br>This exercise will show you where you actually stand.<br>One exercise. No prior knowledge needed. Enter your details to begin.</p>
       </div>
     </section>
 
@@ -72,21 +72,26 @@
     <section class="tsa-section tsa-routing" aria-labelledby="tsa-routing-title">
       <div class="tsa-container">
         <h2 id="tsa-routing-title" class="sr-only">Choose your assessment</h2>
+        <div class="tsa-start-card">
+          <h2>Not a member yet? Start here.</h2>
+          <p>See how clearly you think in under 10 minutes. One exercise, no signup required.</p>
+          <a class="tsa-start-button" href="apps/find-your-level/index.html">Find Your Level</a>
+        </div>
         <div class="tsa-card-grid">
           <article class="tsa-card">
             <span class="tsa-card-label">Starting Point</span>
             <h2>The Diagnostic</h2>
-            <p>Haven't taken UTL training yet? Or do you simply want an honest baseline? The Diagnostic shows you exactly where you stand today across thinking, speaking, and acting. No preparation needed. No right or wrong answers. Just a clear picture of your starting point.</p>
-            <span class="tsa-card-detail">10 to 15 minutes · 3 sections · Instant score</span>
-            <a class="tsa-card-button primary" href="apps/tsa-diagnostic/index.html">Take the Diagnostic</a>
+            <p>Your full baseline assessment before the program begins. Covers all three dimensions of the TSA Score™ so you know exactly where to focus.</p>
+            <span class="tsa-card-detail">Member assessment · 3 sections</span>
+            <span class="tsa-card-button locked" aria-disabled="true">🔒 Member Access Only</span>
           </article>
 
           <article class="tsa-card">
             <span class="tsa-card-label">Measure Your Growth</span>
             <h2>The Checkpoint</h2>
-            <p>Completed UTL training? The Checkpoint uses the same assessment, but now you have the tools. See how your score has shifted. The difference between your Diagnostic and your Checkpoint is your proof of growth.</p>
-            <span class="tsa-card-detail">15 to 20 minutes · 3 sections</span>
-            <a class="tsa-card-button primary" href="apps/tsa-checkpoint/index.html">Take the Checkpoint</a>
+            <p>Your post-program assessment. Same standard, new variation. See how far you have come since your Diagnostic.</p>
+            <span class="tsa-card-detail">Member assessment · 3 sections</span>
+            <span class="tsa-card-button locked" aria-disabled="true">🔒 Member Access Only</span>
           </article>
         </div>
       </div>
@@ -231,7 +236,8 @@
         email: form.email.value,
         role: form.role.value,
         message: form.message.value || '',
-        page: window.location.href
+        page: window.location.href,
+        source: 'find-your-level'
       };
 
       try {

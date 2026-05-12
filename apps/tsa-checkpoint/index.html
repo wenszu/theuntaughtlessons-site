@@ -9,22 +9,24 @@
   <link rel="shortcut icon" type="image/png" href="../../assets/favicon-bluebg-whitedoor-thicker-32.png?v=6">
   <link rel="apple-touch-icon" sizes="180x180" href="../../assets/apple-touch-icon.png?v=3">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lato:wght@300;400;700&family=Roboto+Mono:wght@400;500&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lato:wght@300;400;700&family=Roboto+Mono:wght@400;500;700&display=swap');
 
     :root {
-      --bg: #F3EDE2;
+      --cream: #F3EDE2;
       --navy: #003366;
       --gold: #EEA320;
       --charcoal: #4A4A4A;
       --steel: #4D7094;
       --white: #FFFFFF;
+      --line: rgba(0, 51, 102, .14);
+      --shadow: 0 16px 38px rgba(0, 51, 102, .08);
     }
 
     * { box-sizing: border-box; }
 
     body {
       margin: 0;
-      background: var(--bg);
+      background: var(--cream);
       color: var(--charcoal);
       font-family: 'Lato', sans-serif;
     }
@@ -81,288 +83,206 @@
       line-height: 1;
     }
 
-    .checkpoint-main {
-      width: min(100%, 1080px);
+    .hub-main {
+      width: min(100%, 1120px);
       margin: 0 auto;
-      padding: 72px 24px 88px;
+      padding: 68px 24px 88px;
     }
 
-    .checkpoint-hero {
-      max-width: 760px;
+    .hub-hero {
+      max-width: 780px;
       margin-bottom: 34px;
     }
 
-    .checkpoint-label {
-      margin: 0 0 10px;
-      color: var(--gold);
+    .hub-label,
+    .section-label,
+    .card-label,
+    .status-pill {
       font-family: 'Roboto Mono', monospace;
-      font-size: 11px;
-      letter-spacing: 1.8px;
-      text-transform: uppercase;
-    }
-
-    .checkpoint-hero h1 {
-      margin: 0;
-      color: var(--navy);
-      font-family: 'Playfair Display', serif;
-      font-size: clamp(38px, 6vw, 64px);
-      line-height: 1.05;
-    }
-
-    .checkpoint-hero p {
-      margin: 18px 0 0;
-      color: var(--charcoal);
-      font-size: 18px;
-      line-height: 1.65;
-    }
-
-    .checkpoint-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 22px;
-    }
-
-    .checkpoint-section {
-      margin-top: 30px;
-    }
-
-    .checkpoint-section:first-of-type {
-      margin-top: 0;
-    }
-
-    .checkpoint-section-head {
-      display: flex;
-      align-items: baseline;
-      justify-content: space-between;
-      gap: 18px;
-      margin: 0 0 14px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid rgba(0, 51, 102, .14);
-    }
-
-    .checkpoint-section-head span {
-      color: var(--gold);
-      font-family: 'Roboto Mono', monospace;
-      font-size: 11px;
-      letter-spacing: 1.6px;
-      text-transform: uppercase;
-    }
-
-    .checkpoint-section-head h2 {
-      margin: 4px 0 0;
-      color: var(--navy);
-      font-family: 'Playfair Display', serif;
-      font-size: 34px;
-      line-height: 1.12;
-    }
-
-    .checkpoint-section-head p {
-      max-width: 360px;
-      margin: 0;
-      color: var(--charcoal);
-      font-size: 15px;
-      line-height: 1.5;
-      text-align: right;
-    }
-
-    .checkpoint-card {
-      display: flex;
-      flex-direction: column;
-      min-height: 100%;
-      padding: 30px;
-      border: 1px solid rgba(0, 51, 102, .12);
-      border-top: 4px solid var(--gold);
-      border-radius: 12px;
-      background: var(--white);
-      box-shadow: 0 16px 38px rgba(0, 51, 102, .08);
-    }
-
-    .checkpoint-card span {
-      color: var(--gold);
-      font-family: 'Roboto Mono', monospace;
-      font-size: 10px;
       letter-spacing: 1.5px;
       text-transform: uppercase;
     }
 
-    .checkpoint-card h2 {
-      margin: 12px 0 12px;
+    .hub-label,
+    .section-label,
+    .card-label {
+      color: var(--gold);
+      font-size: 11px;
+    }
+
+    h1,
+    h2,
+    h3 {
+      margin: 0;
       color: var(--navy);
       font-family: 'Playfair Display', serif;
-      font-size: 30px;
-      line-height: 1.15;
+      line-height: 1.1;
     }
 
-    .checkpoint-card p {
-      margin: 0;
+    .hub-hero h1 {
+      margin-top: 8px;
+      font-size: clamp(42px, 6vw, 68px);
+    }
+
+    .hub-hero p,
+    .section-head p,
+    .exercise-card p,
+    .score-card p {
       color: var(--charcoal);
-      font-size: 16px;
-      line-height: 1.65;
+      font-size: 17px;
+      line-height: 1.6;
     }
 
-    .checkpoint-button {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 48px;
-      padding: 13px 18px;
-      border: 1px solid var(--navy);
-      border-radius: 6px;
-      background: var(--navy);
-      color: var(--white);
-      font-size: 16px;
-      font-weight: 700;
-      line-height: 1;
-      text-decoration: none;
-      cursor: pointer;
+    .hub-hero p {
+      max-width: 720px;
+      margin: 16px 0 0;
+      font-size: 19px;
     }
 
-    .checkpoint-button {
-      margin-top: auto;
+    .assessment-section {
+      margin-top: 34px;
     }
 
-    .checkpoint-status {
-      display: inline-flex;
-      width: fit-content;
-      margin: 18px 0 20px;
-      padding: 7px 10px;
-      border-radius: 999px;
-      background: rgba(77, 112, 148, .12);
-      color: var(--steel);
-      font-family: 'Roboto Mono', monospace;
-      font-size: 10px;
-      letter-spacing: 1px;
-      line-height: 1.2;
-      text-transform: uppercase;
+    .section-head {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 24px;
+      margin-bottom: 14px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--line);
     }
 
-    .checkpoint-card.is-complete {
-      border-color: rgba(238, 163, 32, .38);
-      background: #FFFDF8;
+    .section-head h2 {
+      margin-top: 4px;
+      font-size: clamp(28px, 4vw, 38px);
     }
 
-    .checkpoint-card.is-placeholder {
+    .section-head p {
+      max-width: 380px;
+      margin: 0;
+      text-align: right;
+    }
+
+    .card-grid,
+    .score-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .exercise-card,
+    .score-card {
+      display: flex;
+      flex-direction: column;
+      min-height: 100%;
+      padding: 26px;
+      border: 1px solid var(--line);
+      border-top: 4px solid var(--gold);
+      border-radius: 10px;
+      background: var(--white);
+      box-shadow: var(--shadow);
+    }
+
+    .exercise-card.is-muted {
       border-top-color: var(--steel);
       background: #FAF8F3;
     }
 
-    .checkpoint-card.is-complete .checkpoint-status {
-      background: rgba(238, 163, 32, .16);
-      color: #8B6010;
+    .exercise-card h3 {
+      margin-top: 10px;
+      font-size: 29px;
     }
 
-    .checkpoint-card-result {
-      display: none;
-      margin: 0 0 18px;
-      padding: 16px;
-      border: 1px solid rgba(238, 163, 32, .42);
-      border-radius: 10px;
-      background: rgba(238, 163, 32, .10);
-      color: var(--navy);
+    .exercise-card p {
+      margin: 12px 0 20px;
     }
 
-    .checkpoint-card-result.is-visible {
-      display: block;
-    }
-
-    .checkpoint-card-result strong {
-      display: block;
-      margin-bottom: 6px;
-      color: var(--navy);
-      font-family: 'Roboto Mono', monospace;
-      font-size: 24px;
+    .status-pill {
+      display: inline-flex;
+      width: fit-content;
+      margin-bottom: 2px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: rgba(77, 112, 148, .12);
+      color: var(--steel);
+      font-size: 10px;
       line-height: 1;
     }
 
-    .checkpoint-card-result span {
-      display: block;
-      color: var(--charcoal);
-      font-family: 'Lato', sans-serif;
-      font-size: 14px;
-      letter-spacing: 0;
-      line-height: 1.45;
-      text-transform: none;
+    .status-pill.is-complete {
+      background: rgba(238, 163, 32, .18);
+      color: #7B540A;
     }
 
-    .checkpoint-score-grid {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 12px;
-      margin-top: 14px;
+    .card-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: auto;
     }
 
-    .checkpoint-score-box {
-      padding: 12px;
-      border: 1px solid rgba(0, 51, 102, .12);
-      border-radius: 8px;
-      background: var(--white);
-      color: var(--charcoal);
-      font-family: 'Roboto Mono', monospace;
-      font-size: 12px;
-      line-height: 1.45;
-    }
-
-    .checkpoint-score-box.is-total {
-      grid-column: 1 / -1;
-      padding: 22px;
-      border-color: rgba(238, 163, 32, .55);
-      border-top: 4px solid var(--gold);
-      background: #FFFDF8;
-    }
-
-    .checkpoint-score-box strong {
-      display: block;
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 46px;
+      padding: 12px 16px;
+      border: 1px solid var(--gold);
+      border-radius: 6px;
+      background: var(--gold);
       color: var(--navy);
-      font-size: 18px;
-      line-height: 1.2;
-      margin-top: 4px;
+      font-weight: 700;
+      line-height: 1;
+      text-decoration: none;
     }
 
-    .checkpoint-score-box.is-total strong {
-      color: var(--gold);
-      font-size: clamp(34px, 6vw, 52px);
+    .button.secondary {
+      border-color: var(--navy);
+      background: var(--navy);
+      color: var(--white);
     }
 
-    .checkpoint-scorecard {
-      display: none;
-      margin: 28px 0 0;
+    .button.disabled {
+      border-color: rgba(0, 51, 102, .14);
+      background: rgba(0, 51, 102, .08);
+      color: var(--steel);
+      pointer-events: none;
+    }
+
+    .score-panel {
+      margin-top: 36px;
       padding: 28px;
-      border: 1px solid rgba(0, 51, 102, .12);
-      border-top: 4px solid var(--gold);
+      border: 1px solid var(--line);
       border-radius: 12px;
-      background: var(--white);
-      box-shadow: 0 16px 38px rgba(0, 51, 102, .08);
+      background: rgba(255, 255, 255, .58);
     }
 
-    .checkpoint-scorecard.is-visible {
-      display: block;
-    }
-
-    .checkpoint-scorecard h2 {
-      margin: 0 0 18px;
-      color: var(--navy);
-      font-family: 'Playfair Display', serif;
+    .score-panel h2 {
       font-size: 34px;
-      line-height: 1.15;
     }
 
-    .checkpoint-scorecard .checkpoint-score-grid {
-      margin-top: 0;
+    .score-grid {
+      margin-top: 16px;
     }
 
-    .checkpoint-score-meta {
+    .score-card strong {
       display: block;
       margin-top: 8px;
-      color: var(--charcoal);
-      font-family: 'Lato', sans-serif;
-      font-size: 13px;
-      line-height: 1.45;
+      color: var(--gold);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 28px;
     }
 
-    @media (max-width: 760px) {
-      .app-header {
+    @media (max-width: 780px) {
+      .app-header,
+      .section-head {
         grid-template-columns: 1fr;
+        display: grid;
         row-gap: 10px;
+      }
+
+      .app-header {
         padding: 12px 18px;
       }
 
@@ -375,25 +295,13 @@
         display: none;
       }
 
-      .app-meta {
-        grid-column: 1 / -1;
-        grid-row: 2;
-      }
-
-      .checkpoint-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .checkpoint-section-head {
-        display: block;
-      }
-
-      .checkpoint-section-head p {
-        margin-top: 10px;
+      .section-head p {
+        max-width: none;
         text-align: left;
       }
 
-      .checkpoint-score-grid {
+      .card-grid,
+      .score-grid {
         grid-template-columns: 1fr;
       }
     }
@@ -405,178 +313,160 @@
       <img src="../../assets/utl-logo-nav-white.png" alt="The Untaught Lessons" />
     </a>
     <div class="brand-divider" aria-hidden="true"></div>
-    <div class="app-meta">
+    <div>
       <span class="app-kicker">TSA Score™</span>
       <span class="app-title">The Checkpoint</span>
     </div>
   </header>
 
-  <main class="checkpoint-main">
-    <section class="checkpoint-hero" aria-labelledby="checkpointTitle">
-      <p class="checkpoint-label">Measure Your Growth</p>
-      <h1 id="checkpointTitle">The Checkpoint</h1>
-      <p>Move through the three TSA sections after training. Section 1 has two Think Clearly exercises; Sections 2 and 3 are placeholders for Speak Concisely and Act Confidently.</p>
+  <main class="hub-main">
+    <section class="hub-hero">
+      <p class="hub-label">Post-Program Assessment</p>
+      <h1>The Checkpoint</h1>
+      <p>Your post-program TSA Score™ assessment. Take this after completing all three workbooks to see how far you have come.</p>
     </section>
 
-    <section class="checkpoint-section" aria-labelledby="thinkClearlyTitle">
-      <div class="checkpoint-section-head">
+    <section class="assessment-section" aria-labelledby="thinkTitle">
+      <div class="section-head">
         <div>
-          <span>Section 1</span>
-          <h2 id="thinkClearlyTitle">Think Clearly</h2>
+          <span class="section-label">Section 1</span>
+          <h2 id="thinkTitle">Think Clearly</h2>
         </div>
-        <p>Two exercises measure how cleanly you organize information and spot structural problems.</p>
+        <p>Complete both exercises to see your Think Clearly checkpoint score.</p>
       </div>
-      <div class="checkpoint-grid" aria-label="Think Clearly checkpoint exercises">
-        <article class="checkpoint-card" id="sortCard">
-          <span>Exercise A</span>
-          <h2>Sort &amp; Bucket</h2>
-          <p>Create three clean buckets from a messy list, then sort every item into the structure you chose.</p>
-          <div class="checkpoint-status" id="sortStatus">Not started</div>
-          <div class="checkpoint-card-result" id="sortResult"></div>
-          <a class="checkpoint-button" href="../tsa-sort-bucket/index.html?assessment=checkpoint">Start Sort &amp; Bucket</a>
+      <div class="card-grid">
+        <article class="exercise-card">
+          <span class="status-pill" data-status="tsa_sort_score">Not started</span>
+          <span class="card-label">Exercise A</span>
+          <h3>Sort & Bucket</h3>
+          <p>Name three buckets, then sort a messy list into the right structure.</p>
+          <div class="card-actions">
+            <a class="button" href="../tsa-sort-bucket/index.html?assessment=checkpoint">Start Exercise A</a>
+            <a class="button secondary" href="../tsa-sort-bucket/index.html?assessment=checkpoint&retake=1">Retake</a>
+          </div>
         </article>
-
-        <article class="checkpoint-card" id="spotCard">
-          <span>Exercise B</span>
-          <h2>Spot the Problem</h2>
-          <p>Review a pre-organized structure, find the overlap and the gap, then choose the cleanest fix.</p>
-          <div class="checkpoint-status" id="spotStatus">Not started</div>
-          <div class="checkpoint-card-result" id="spotResult"></div>
-          <a class="checkpoint-button" href="../tsa-spot-the-problem/index.html?assessment=checkpoint">Start Spot the Problem</a>
+        <article class="exercise-card">
+          <span class="status-pill" data-status="tsa_spot_score">Not started</span>
+          <span class="card-label">Exercise B</span>
+          <h3>Spot the Problem</h3>
+          <p>Find overlaps and gaps in pre-built structures.</p>
+          <div class="card-actions">
+            <a class="button" href="../tsa-spot-the-problem/index.html?assessment=checkpoint">Start Exercise B</a>
+            <a class="button secondary" href="../tsa-spot-the-problem/index.html?assessment=checkpoint&retake=1">Retake</a>
+          </div>
         </article>
       </div>
     </section>
 
-    <section class="checkpoint-section" aria-labelledby="speakConciselyTitle">
-      <div class="checkpoint-section-head">
+    <section class="assessment-section" aria-labelledby="speakTitle">
+      <div class="section-head">
         <div>
-          <span>Section 2</span>
-          <h2 id="speakConciselyTitle">Speak Concisely</h2>
+          <span class="section-label">Section 2</span>
+          <h2 id="speakTitle">Speak Concisely</h2>
         </div>
-        <p>These exercises will measure how well you compress your message without losing meaning.</p>
+        <p>Complete the short talk checkpoint and return here for your score.</p>
       </div>
-      <div class="checkpoint-grid" aria-label="Speak Concisely checkpoint exercises">
-        <article class="checkpoint-card">
-          <span>Exercise A</span>
-          <h2>Short Talk</h2>
-          <p>Deliver a short message, then tighten it so the point lands faster and cleaner.</p>
-          <div class="checkpoint-status">Ready</div>
-          <a class="checkpoint-button" href="../tsa-speak/index.html?version=checkpoint">Start Speak Concisely</a>
-        </article>
-
-        <article class="checkpoint-card is-placeholder">
-          <span>Exercise B</span>
-          <h2>Compression Drill</h2>
-          <p>Reduce a longer explanation into the few words that matter most.</p>
-          <div class="checkpoint-status">Placeholder</div>
-          <a class="checkpoint-button" href="../tsa-speak-concisely/index.html?assessment=checkpoint&exercise=b">Open Placeholder</a>
+      <div class="card-grid">
+        <article class="exercise-card">
+          <span class="status-pill" data-status="tsa_speak_score">Not started</span>
+          <span class="card-label">Exercise</span>
+          <h3>Short Talk</h3>
+          <p>Give a concise recommendation and submit your transcript for scoring.</p>
+          <div class="card-actions">
+            <a class="button" href="../tsa-speak/index.html?version=checkpoint">Start Speak Concisely</a>
+            <a class="button secondary" href="../tsa-speak/index.html?version=checkpoint&retake=1">Retake</a>
+          </div>
         </article>
       </div>
     </section>
 
-    <section class="checkpoint-section" aria-labelledby="actConfidentlyTitle">
-      <div class="checkpoint-section-head">
+    <section class="assessment-section" aria-labelledby="actTitle">
+      <div class="section-head">
         <div>
-          <span>Section 3</span>
-          <h2 id="actConfidentlyTitle">Act Confidently</h2>
+          <span class="section-label">Section 3</span>
+          <h2 id="actTitle">Act Confidently</h2>
         </div>
-        <p>These exercises will measure how you handle pressure, pushback, and difficult conversations.</p>
+        <p>Practice the difficult conversation once this section launches.</p>
       </div>
-      <div class="checkpoint-grid" aria-label="Act Confidently checkpoint exercises">
-        <article class="checkpoint-card is-placeholder">
-          <span>Exercise A</span>
-          <h2>Difficult Conversation</h2>
-          <p>Practice saying the hard thing clearly while holding your ground.</p>
-          <div class="checkpoint-status">Coming soon</div>
-          <a class="checkpoint-button" href="../tsa-act-confidently/index.html?assessment=checkpoint&exercise=a">Open Placeholder</a>
-        </article>
-
-        <article class="checkpoint-card is-placeholder">
-          <span>Exercise B</span>
-          <h2>Pushback Response</h2>
-          <p>Respond to resistance without over-explaining, shrinking, or escalating.</p>
-          <div class="checkpoint-status">Placeholder</div>
-          <a class="checkpoint-button" href="../tsa-act-confidently/index.html?assessment=checkpoint&exercise=b">Open Placeholder</a>
+      <div class="card-grid">
+        <article class="exercise-card is-muted">
+          <span class="status-pill">Coming soon</span>
+          <span class="card-label">Exercise</span>
+          <h3>Act Confidently</h3>
+          <p>The difficult conversation checkpoint is coming soon.</p>
+          <div class="card-actions">
+            <span class="button disabled">Coming soon</span>
+          </div>
         </article>
       </div>
     </section>
 
-    <section class="checkpoint-scorecard" id="checkpointScorecard" aria-labelledby="checkpointScorecardTitle">
-      <h2 id="checkpointScorecardTitle">Checkpoint Scorecard</h2>
-      <div class="checkpoint-score-grid" id="checkpointScorecardGrid"></div>
+    <section class="score-panel" aria-labelledby="scoreTitle">
+      <h2 id="scoreTitle">Your Checkpoint Scorecard</h2>
+      <div class="score-grid">
+        <article class="score-card">
+          <span class="card-label">Think Clearly</span>
+          <strong id="thinkScore">Not complete</strong>
+          <p>Complete Sort & Bucket and Spot the Problem to see this section score.</p>
+        </article>
+        <article class="score-card">
+          <span class="card-label">Speak Concisely</span>
+          <strong id="speakScore">Not complete</strong>
+          <p>Complete the Short Talk assessment to see this section score.</p>
+        </article>
+      </div>
     </section>
   </main>
+
   <script>
     function readScore(key) {
+      const raw = localStorage.getItem(key) || sessionStorage.getItem(key);
+      if (!raw) return null;
       try {
-        const raw = sessionStorage.getItem(key) || localStorage.getItem(key);
-        return raw ? JSON.parse(raw) : null;
+        const parsed = JSON.parse(raw);
+        return typeof parsed === 'number' ? { score: parsed } : parsed;
       } catch (error) {
         return null;
       }
     }
 
-    const sortScore = readScore('tsa_sort_score');
-    const spotScore = readScore('tsa_spot_score');
-    const sortCard = document.getElementById('sortCard');
-    const spotCard = document.getElementById('spotCard');
-    const sortStatus = document.getElementById('sortStatus');
-    const spotStatus = document.getElementById('spotStatus');
-    const sortResult = document.getElementById('sortResult');
-    const spotResult = document.getElementById('spotResult');
-    const scorecard = document.getElementById('checkpointScorecard');
-    const scorecardGrid = document.getElementById('checkpointScorecardGrid');
-
-    function formatScore(value) {
-      if (value === null || value === undefined || value === '') return 'Pending';
-      const number = Number(value);
-      if (Number.isNaN(number)) return 'Pending';
-      return number.toFixed(1).replace(/\.0$/, '');
+    function scoreValue(result) {
+      if (!result) return null;
+      if (typeof result.score === 'number') return result.score;
+      if (typeof result.total === 'number') return result.total;
+      if (typeof result.percentage === 'number') return result.percentage;
+      return null;
     }
 
-    function scoreBox(label, score, total, meta = '', extraClass = '') {
-      const scoreText = score === null || score === undefined ? 'Pending' : `${formatScore(score)}/${total}`;
-      return `
-        <div class="checkpoint-score-box ${extraClass}">
-          ${label}<strong>${scoreText}</strong>
-          ${meta ? `<span class="checkpoint-score-meta">${meta}</span>` : ''}
-        </div>
-      `;
+    function updateStatus(key) {
+      const result = readScore(key);
+      const value = scoreValue(result);
+      const status = document.querySelector(`[data-status="${key}"]`);
+      if (!status || value === null) return;
+      status.textContent = `Completed · ${Math.round(value)}${value <= 40 ? ' pts' : '%'}`;
+      status.classList.add('is-complete');
     }
 
-    function renderScorecard() {
-      if (!sortScore && !spotScore) return;
-      const total = sortScore && spotScore ? Number(sortScore.score) + Number(spotScore.score) : null;
-      const percent = total !== null ? Math.round((total / 40) * 100) : null;
-      const partialTotal = (sortScore ? Number(sortScore.score) : 0) + (spotScore ? Number(spotScore.score) : 0);
-      const totalMeta = percent !== null
-        ? `${percent}% · Both checkpoint exercises complete.`
-        : `${formatScore(partialTotal)}/40 so far. Finish the remaining exercise to see your full Think Clearly score.`;
-      scorecardGrid.innerHTML = `
-        ${scoreBox('Think Clearly Total', total !== null ? total : partialTotal, 40, totalMeta, 'is-total')}
-        ${scoreBox('Exercise A · Sort & Bucket', sortScore?.score, 20, sortScore ? `Bucket labels: ${formatScore(sortScore.labelScore)}/6<br>Item placement: ${formatScore(sortScore.placementScore)}/14` : 'Complete this exercise to unlock the score.')}
-        ${scoreBox('Exercise B · Spot the Problem', spotScore?.score, 20, spotScore ? `Part A, Find the Overlaps: ${formatScore(spotScore.partA)}/10<br>Part B, Fix the Gaps: ${formatScore(spotScore.partB)}/10` : 'Complete this exercise to unlock the score.')}
-      `;
-      scorecard.classList.add('is-visible');
+    function updateScores() {
+      const sort = scoreValue(readScore('tsa_sort_score'));
+      const spot = scoreValue(readScore('tsa_spot_score'));
+      const speak = scoreValue(readScore('tsa_speak_score'));
+      updateStatus('tsa_sort_score');
+      updateStatus('tsa_spot_score');
+      updateStatus('tsa_speak_score');
+
+      if (typeof sort === 'number' && typeof spot === 'number') {
+        document.getElementById('thinkScore').textContent = `${Math.round(sort + spot)} / 40`;
+      } else if (typeof sort === 'number' || typeof spot === 'number') {
+        document.getElementById('thinkScore').textContent = `${Math.round((sort || 0) + (spot || 0))} / 40 partial`;
+      }
+
+      if (typeof speak === 'number') {
+        document.getElementById('speakScore').textContent = `${Math.round(speak)}${speak <= 30 ? ' pts' : '%'}`;
+      }
     }
 
-    if (sortScore) {
-      sortCard.classList.add('is-complete');
-      sortStatus.textContent = 'Completed';
-      sortResult.innerHTML = `<strong>${formatScore(sortScore.score)}/20</strong><span>Bucket labels: ${formatScore(sortScore.labelScore)}/6<br>Item placement: ${formatScore(sortScore.placementScore)}/14</span>`;
-      sortResult.classList.add('is-visible');
-      sortCard.querySelector('.checkpoint-button').textContent = 'Retake Exercise A';
-    }
-
-    if (spotScore) {
-      spotCard.classList.add('is-complete');
-      spotStatus.textContent = 'Completed';
-      spotResult.innerHTML = `<strong>${formatScore(spotScore.score)}/20</strong><span>Part A, Find the Overlaps: ${formatScore(spotScore.partA)}/10<br>Part B, Fix the Gaps: ${formatScore(spotScore.partB)}/10</span>`;
-      spotResult.classList.add('is-visible');
-      spotCard.querySelector('.checkpoint-button').textContent = 'Retake Exercise B';
-    }
-
-    renderScorecard();
+    updateScores();
   </script>
 </body>
 </html>

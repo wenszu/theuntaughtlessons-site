@@ -1070,6 +1070,55 @@
   background: var(--home-cream);
 }
 
+.tsa-start-card {
+  max-width: 720px;
+  margin: 0 auto 34px;
+  padding: 34px;
+  border: 1px solid rgba(0, 51, 102, .14);
+  border-top: 4px solid var(--home-gold);
+  border-radius: 12px;
+  background: var(--home-navy);
+  color: var(--home-cream);
+  text-align: center;
+  box-shadow: 0 16px 38px rgba(0, 51, 102, .12);
+}
+
+.tsa-start-card h2 {
+  margin: 0;
+  color: var(--home-white);
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(28pt, 5vw, 42pt);
+  line-height: 1.12;
+}
+
+.tsa-start-card p {
+  max-width: 560px;
+  margin: 14px auto 0;
+  color: var(--home-cream);
+  font-family: 'Lato', sans-serif;
+  font-size: 15.5pt;
+  font-weight: 300;
+  line-height: 1.55;
+}
+
+.tsa-start-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 50px;
+  margin-top: 24px;
+  padding: 14px 24px;
+  border: 1px solid var(--home-gold);
+  border-radius: 4px;
+  background: var(--home-gold);
+  color: var(--home-navy);
+  font-family: 'Lato', sans-serif;
+  font-size: 14pt;
+  font-weight: 700;
+  line-height: 1;
+  text-decoration: none;
+}
+
 .tsa-card-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1152,6 +1201,14 @@
   margin-top: 34px;
   background: var(--home-white);
   color: var(--home-navy);
+}
+
+.tsa-card-button.locked {
+  margin-top: 34px;
+  border-color: rgba(0, 51, 102, .24);
+  background: #F6F1E8;
+  color: var(--home-navy);
+  cursor: not-allowed;
 }
 
 .tsa-card-button:hover {
