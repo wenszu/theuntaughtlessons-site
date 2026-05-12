@@ -77,8 +77,8 @@
             <option value="Something else">Something else</option>
           </select>
 
-          <label for="contactMessage">Message</label>
-          <textarea id="contactMessage" name="message" rows="5" placeholder="Tell us more about what you are looking for" required></textarea>
+          <label for="contactMessage">What brings you here?</label>
+          <textarea id="contactMessage" name="message" rows="5" placeholder="Tell us what you are looking for" required></textarea>
 
           <button class="contact-submit" type="submit">Send</button>
           <p class="contact-error" role="alert">Something went wrong. Please try again or email us directly at wenszu.lin@gmail.com</p>
@@ -231,7 +231,9 @@
         name: form.name.value,
         email: form.email.value,
         role: form.role.value,
-        message: form.message.value || ''
+        message: form.message.value || '',
+        page: window.location.href,
+        source: 'contact-form'
       };
 
       try {
@@ -272,7 +274,9 @@
         email: form.email.value,
         role: form.role.value,
         help: form.help.value,
-        message: form.message.value
+        message: form.message.value,
+        page: window.location.href,
+        source: 'contact-form'
       };
 
       try {

@@ -9,6 +9,8 @@
   <link rel="shortcut icon" type="image/png" href="/assets/favicon-bluebg-whitedoor-thicker-32.png?v=6">
   <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png?v=3">
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lato:wght@300;400;700&family=Roboto+Mono:wght@400;500;700&display=swap');
+
     :root {
       --cream: #F3EDE2;
       --navy: #003366;
@@ -26,7 +28,7 @@
     body {
       margin: 0;
       min-height: 100vh;
-      font-family: Arial, sans-serif;
+      font-family: 'Lato', sans-serif;
       color: var(--charcoal);
       background: var(--cream);
     }
@@ -95,7 +97,8 @@
       display: block;
       margin-bottom: 8px;
       color: var(--steel);
-      font-size: 12px;
+      font-family: 'Roboto Mono', monospace;
+      font-size: 11px;
       font-weight: 700;
       letter-spacing: .08em;
       text-transform: uppercase;
@@ -106,7 +109,7 @@
     h3 {
       margin: 0;
       color: var(--navy);
-      font-family: Georgia, serif;
+      font-family: 'Playfair Display', serif;
       letter-spacing: 0;
     }
 
@@ -117,7 +120,8 @@
 
     .login-card p,
     .dashboard-header p,
-    .tool-card p {
+    .tool-card p,
+    .phase-section > p {
       color: var(--steel);
       line-height: 1.5;
     }
@@ -234,8 +238,10 @@
       min-height: 190px;
       padding: 22px;
       border: .5px solid var(--line);
-      border-radius: 12px;
-      background: var(--cream);
+      border-top: 4px solid var(--gold);
+      border-radius: 8px;
+      background: var(--white);
+      box-shadow: 0 14px 32px rgba(0, 51, 102, .08);
     }
 
     .tool-card h2 {
@@ -249,7 +255,9 @@
 
     .tool-card.tbd {
       min-height: 130px;
-      background: rgba(243, 237, 226, .55);
+      border-top-color: rgba(77, 112, 148, .42);
+      background: rgba(243, 237, 226, .72);
+      box-shadow: none;
     }
 
     .tool-card.tbd h3 {
@@ -265,9 +273,22 @@
       min-height: 42px;
       padding: 10px 14px;
       border-radius: 8px;
-      background: var(--navy);
-      color: var(--white);
+      background: var(--gold);
+      color: var(--deep-navy);
       font-weight: 700;
+    }
+
+    .slides-placeholder {
+      display: grid;
+      place-items: center;
+      min-height: 150px;
+      padding: 22px;
+      border: 2px dashed rgba(0, 51, 102, .25);
+      border-radius: 8px;
+      background: var(--cream);
+      color: var(--charcoal);
+      font-weight: 700;
+      text-align: center;
     }
 
     .hidden {
@@ -324,65 +345,96 @@
           </div>
 
           <div class="phase-stack">
-            <section class="phase-section" aria-labelledby="phaseOneTitle">
+            <section class="phase-section" aria-labelledby="tsaScoreTitle">
               <div class="phase-heading">
-                <h2 id="phaseOneTitle">Phase 1: Think clearly</h2>
-                <span>Available now</span>
+                <h2 id="tsaScoreTitle">TSA Score™</h2>
+                <span>Assessments</span>
               </div>
+              <p>Take your baseline assessment before the program begins. Return here after completing all three workbooks to measure your growth.</p>
               <div class="tool-grid">
                 <article class="tool-card">
-                  <span class="section-label">Structured Thinking</span>
+                  <span class="section-label">TSA Score™</span>
+                  <h2>The Diagnostic</h2>
+                  <p>Your full baseline assessment. Take this before Workbook A.</p>
+                  <a class="tool-link" href="../apps/tsa-diagnostic/index.html">Start The Diagnostic</a>
+                </article>
+
+                <article class="tool-card">
+                  <span class="section-label">TSA Score™</span>
+                  <h2>The Checkpoint</h2>
+                  <p>Your post-program assessment. Take this after Workbook C.</p>
+                  <a class="tool-link" href="../apps/tsa-checkpoint/index.html">Start The Checkpoint</a>
+                </article>
+              </div>
+            </section>
+
+            <section class="phase-section" aria-labelledby="workbookATitle">
+              <div class="phase-heading">
+                <h2 id="workbookATitle">Workbook A — Think Clearly</h2>
+                <span>Phase 1</span>
+              </div>
+              <p>Watch the context slides, then work through the exercises below.</p>
+              <!-- Replace this placeholder with the Google Slides embed src URL for Workbook A -->
+              <div class="slides-placeholder">Workbook A slides — embed Google Slides link here</div>
+              <div class="tool-grid">
+                <article class="tool-card">
+                  <span class="section-label">Phase 1 | Think Clearly</span>
                   <h2>Grocery List</h2>
-                  <p>Practice sorting a messy list into clean MECE buckets.</p>
-                  <a class="tool-link" href="../apps/grocery-list/">Open tool</a>
+                  <p>Sort a messy list into clean MECE buckets.</p>
+                  <a class="tool-link" href="../apps/grocery-list/index.html">Open tool</a>
                 </article>
 
                 <article class="tool-card">
-                  <span class="section-label">Communication Drill</span>
+                  <span class="section-label">Phase 1 | Think Clearly</span>
                   <h2>Manager's Messy Notes</h2>
-                  <p>Turn scattered manager notes into a clearer, more useful update.</p>
-                  <a class="tool-link" href="../apps/messy-notes/">Open tool</a>
+                  <p>Turn a rushed manager update into a structured, decision-ready summary.</p>
+                  <a class="tool-link" href="../apps/messy-notes/index.html">Open tool</a>
                 </article>
               </div>
             </section>
 
-            <section class="phase-section" aria-labelledby="phaseTwoTitle">
+            <section class="phase-section" aria-labelledby="workbookBTitle">
               <div class="phase-heading">
-                <h2 id="phaseTwoTitle">Phase 2: Speak concisely</h2>
-                <span>Available now</span>
+                <h2 id="workbookBTitle">Workbook B — Speak Concisely</h2>
+                <span>Phase 2</span>
               </div>
+              <p>Watch the context slides, then work through the exercises below.</p>
+              <!-- Replace this placeholder with the Google Slides embed src URL for Workbook B -->
+              <div class="slides-placeholder">Workbook B slides — embed Google Slides link here</div>
               <div class="tool-grid">
                 <article class="tool-card">
-                  <span class="section-label">Structured Communication</span>
+                  <span class="section-label">Phase 2 | Speak Concisely</span>
                   <h2>Issue Tree Builder</h2>
-                  <p>Break a complex question into a hypothesis, three arguments, and supporting details.</p>
-                  <a class="tool-link" href="../apps/issue-tree-builder/">Open tool</a>
+                  <p>Build an issue tree from a central question, hypothesis, and supporting arguments.</p>
+                  <a class="tool-link" href="../apps/issue-tree-builder/index.html">Open tool</a>
                 </article>
 
                 <article class="tool-card">
-                  <span class="section-label">Executive Communication</span>
+                  <span class="section-label">Phase 2 | Speak Concisely</span>
                   <h2>SCQA Builder</h2>
-                  <p>Frame a situation, complication, question, and answer in two distinct ways.</p>
-                  <a class="tool-link" href="../apps/scqa-builder/">Open tool</a>
+                  <p>Write two SCQA formulations from a single context to practice executive storylining.</p>
+                  <a class="tool-link" href="../apps/scqa-builder/index.html">Open tool</a>
                 </article>
               </div>
             </section>
 
-            <section class="phase-section" aria-labelledby="phaseThreeTitle">
+            <section class="phase-section" aria-labelledby="workbookCTitle">
               <div class="phase-heading">
-                <h2 id="phaseThreeTitle">Phase 3: Act confidently</h2>
-                <span>Coming soon</span>
+                <h2 id="workbookCTitle">Workbook C — Act Confidently</h2>
+                <span>Phase 3</span>
               </div>
+              <p>Watch the context slides, then work through the exercises below.</p>
+              <!-- Replace this placeholder with the Google Slides embed src URL for Workbook C -->
+              <div class="slides-placeholder">Workbook C slides — embed Google Slides link here</div>
               <article class="tool-card tbd">
-                <span class="section-label">TBD</span>
-                <h3>Tools coming soon</h3>
-                <p>Exercises for confidence, presence, and action will live here.</p>
+                <span class="section-label">Coming Soon</span>
+                <h3>Exercises coming soon.</h3>
               </article>
             </section>
 
-            <section class="phase-section" aria-labelledby="otherToolsTitle">
+            <section class="phase-section" aria-labelledby="moreToolsTitle">
               <div class="phase-heading">
-                <h2 id="otherToolsTitle">Others: Other useful tools</h2>
+                <h2 id="moreToolsTitle">More Tools</h2>
                 <span>Available now</span>
               </div>
               <div class="tool-grid">
@@ -390,7 +442,7 @@
                   <span class="section-label">Habit Tracker</span>
                   <h2>12 in 12 Challenge Tracker</h2>
                   <p>Pick one monthly experiment, check in daily, and review your progress.</p>
-                  <a class="tool-link" href="../apps/12-in-12/">Open tool</a>
+                  <a class="tool-link" href="../apps/12-in-12/index.html">Open tool</a>
                 </article>
               </div>
             </section>

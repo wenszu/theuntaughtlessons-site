@@ -9,6 +9,41 @@ Use this file when referencing the site with other tools. It should be updated w
 
 ### 2026-05-11
 
+- Restructured the member dashboard into five workbook and assessment sections:
+  - TSA Score™.
+  - Workbook A, Think Clearly.
+  - Workbook B, Speak Concisely.
+  - Workbook C, Act Confidently.
+  - More Tools.
+- Created `apps/find-your-level/index.html` as a public email-gated Sort & Bucket exercise:
+  - Uses the shared app header pattern with Think Clearly / Find Your Level.
+  - Collects name, email, optional role, and `What brings you here?` before the exercise starts.
+  - Sends lead submissions with `source: "find-your-level"`.
+  - Loads `sort_bucket_001` from `data/sort-bucket.json`.
+  - Scores bucket labels and item placement out of 20, converts the result to a percentage, and shows the result immediately.
+  - Sends assessment result payloads with `assessment_type: "find-your-level"` for the future Assessments tab.
+- Created `data/sort-bucket.json` as the root-level public Sort & Bucket question bank:
+  - Contains all six Sort & Bucket variations with stable `exercise_id` values.
+  - Includes scenarios, prompts, correct buckets, label word banks, label equivalents, dual-bucket items, item answer keys, and scoring metadata.
+- Updated `tsa-score.html`:
+  - Replaced the hero and description copy with the shorter Find Your Level positioning.
+  - Added a prominent public CTA to `apps/find-your-level/index.html`.
+  - Locked The Diagnostic and The Checkpoint cards to member access only.
+  - Removed public routing from the Diagnostic and Checkpoint cards.
+- Updated contact form payloads:
+  - Homepage and contact page Get in Touch submissions now include `source: "contact-form"`.
+  - Find Your Level submissions use `source: "find-your-level"`.
+  - Contact form message fields are visibly labeled `What brings you here?` and submit through the `message` payload field.
+- Restored `apps/tsa-diagnostic/index.html` and `apps/tsa-checkpoint/index.html` as assessment hub pages:
+  - Diagnostic now routes to Sort & Bucket, Spot the Problem, and Speak Concisely.
+  - Checkpoint now routes to checkpoint-mode Sort & Bucket, Spot the Problem, and Speak Concisely.
+  - Act Confidently is separated into its own Section 3 block instead of appearing inside Speak Concisely.
+  - Both hubs show completion status and score summaries from browser storage.
+  - Act Confidently remains marked as coming soon.
+- Google Sheet operations requested for this release are pending reconnection of the Google Drive connector:
+  - Rename the sheet to `[Website] UTL leads and assessments`.
+  - Add the `Assessments` tab.
+  - Add a `source` column to the contacts tab if missing.
 - Updated TSA Sort & Bucket scoring and data after panel testing:
   - Added `labelEquivalents` to all `data/tsa/sort-bucket.json` exercise sets so semantically correct bucket labels can receive credit.
   - Replaced four ambiguous Sort & Bucket items and added replacement audit notes in the JSON.
@@ -344,10 +379,19 @@ data/tsa/
   act-confidently.json
 ```
 
+Public Find Your Level content lives in:
+
+```text
+data/sort-bucket.json
+```
+
+This root-level file is intentionally separate from the member TSA assessment JSON because the public Find Your Level app locks to one public variation, `sort_bucket_001`, while still preserving the full six-exercise Sort & Bucket question bank for future reuse.
+
 Use TSA JSON for assessment content, answer mappings, scoring metadata, diagnostic/checkpoint reuse, and future analytics fields.
 
 Current app data sources:
 
+- `apps/find-your-level/index.html` fetches `../../data/sort-bucket.json` and locks to `sort_bucket_001`.
 - `apps/tsa-sort-bucket/index.html` fetches `../../data/tsa/sort-bucket.json`.
 - `apps/tsa-spot-the-problem/index.html` fetches `../../data/tsa/spot-the-problem.json`.
 - `apps/tsa-speak/index.html` fetches `../../data/tsa/speak-concisely.json`.
@@ -441,21 +485,43 @@ Find Your Level page.
 Purpose:
 
 - Introduces the TSA Score™.
-- Explains the three C³ dimensions.
-- Routes visitors to The Diagnostic or The Checkpoint.
+- Routes public visitors to the Find Your Level exercise.
+- Shows The Diagnostic and The Checkpoint as member-only assessments.
 
 Sections:
 
 - Sticky public nav with `Find Your Level` active.
 - Hero.
-- Three-pillar explainer.
-- Two equal-height assessment cards:
-  - The Diagnostic links to `apps/tsa-diagnostic/index.html`.
-  - The Checkpoint links to `apps/tsa-checkpoint/index.html`.
-- How it works section.
+- Public CTA card linking to `apps/find-your-level/index.html`.
+- Two equal-height locked assessment cards:
+  - The Diagnostic.
+  - The Checkpoint.
 - Footer.
 
 CSS for this page is scoped with `tsa-` class prefixes in `styles.css`.
+
+### `apps/find-your-level/index.html`
+
+Public Find Your Level exercise.
+
+Purpose:
+
+- Lets non-members see how clearly they think in under 10 minutes.
+- Uses the public Sort & Bucket exercise variation `sort_bucket_001`.
+- Captures lead details before the exercise begins.
+
+Key functionality:
+
+- Details gate with name, email, and optional role.
+- `What brings you here?` field submits through the `message` payload field.
+- Lead payload uses `source: "find-your-level"`.
+- Loads `data/sort-bucket.json`.
+- Locks to `sort_bucket_001`, Meeting Agenda from Hell.
+- Participants name three buckets from the word bank, then sort twelve items.
+- Desktop supports drag and drop.
+- Mobile supports tap item, then tap bucket.
+- Scores bucket labels and item placement out of 20, converts the total to a percentage, and shows a score interpretation.
+- Sends assessment result payloads for future routing to the Google Sheet `Assessments` tab.
 
 ### `about.html`
 
@@ -515,6 +581,27 @@ Current visible tools include:
 - SCQA Builder
 
 ## App Map
+
+### `apps/find-your-level/index.html`
+
+Phase:
+
+- Public Think Clearly entry point.
+
+Purpose:
+
+- Gives non-members a short public diagnostic experience before joining the program.
+- Captures lead details and shows an immediate Sort & Bucket score.
+
+Key functionality:
+
+- Details gate before exercise content loads.
+- Fetches `data/sort-bucket.json`.
+- Uses `sort_bucket_001` only.
+- Bucket naming from a word bank.
+- Drag/drop on desktop and tap-to-move on mobile.
+- Score screen with percentage, interpretation, and waitlist CTA.
+- Sends lead and assessment payloads through the existing Google Apps Script endpoint.
 
 ### `apps/grocery-list/index.html`
 
@@ -609,29 +696,25 @@ Phase:
 
 Purpose:
 
-- Diagnostic hub for the pre-training TSA Score™.
-- Routes participants into each section of the Diagnostic from one starting page.
-- Shows completion status and a scorecard when scores exist.
+- Member Diagnostic hub for the baseline TSA Score™ assessment.
+- Routes participants into available Diagnostic exercises and shows completion progress.
 
 Current sections:
 
 - Section 1, Think Clearly:
-  - Diagnostic Exercise, Sort & Bucket, links to `../tsa-sort-bucket/index.html`.
+  - Exercise A, Sort & Bucket, links to `../tsa-sort-bucket/index.html`.
+  - Exercise B, Spot the Problem, links to `../tsa-spot-the-problem/index.html`.
 - Section 2, Speak Concisely:
-  - Diagnostic Exercise, Short Talk, links to `../tsa-speak/index.html`.
+  - Short Talk, links to `../tsa-speak/index.html`.
 - Section 3, Act Confidently:
-  - Diagnostic Exercise, Difficult Conversation, placeholder.
+  - Marked as coming soon.
 
-Scoring behavior:
+Score behavior:
 
-- Reads `tsa_sort_score` and `tsa_speak_score`.
-- Scorecard starts hidden by default.
-- Eye icon button toggles score visibility.
-- Completed cards show completion without exposing scores until the scorecard is revealed.
-- Scorecard is organized by section:
-  - Section 1, Think Clearly, out of 20.
-  - Section 2, Speak Concisely, out of 30.
-  - Section 3, Act Confidently, pending.
+- Reads `tsa_sort_score`, `tsa_spot_score`, and `tsa_speak_score` from browser storage.
+- Shows completed status pills when scores are available.
+- Shows a Think Clearly score out of 40 when Sort & Bucket and Spot the Problem are complete.
+- Shows a partial Think Clearly score when only one Think Clearly exercise is complete.
 
 ### `apps/tsa-sort-bucket/index.html`
 
@@ -692,10 +775,8 @@ Phase:
 
 Purpose:
 
-- Checkpoint hub for post-training TSA Score™ comparison.
-- Routes participants into the three TSA sections.
-- Shows whether each exercise is complete by reading session storage.
-- If only one exercise is complete, prompts the participant to complete the other.
+- Member Checkpoint hub for the post-program TSA Score™ assessment.
+- Routes participants into available Checkpoint exercises and shows completion progress.
 
 Current sections:
 
@@ -703,15 +784,15 @@ Current sections:
   - Exercise A, Sort & Bucket, links to `../tsa-sort-bucket/index.html?assessment=checkpoint`.
   - Exercise B, Spot the Problem, links to `../tsa-spot-the-problem/index.html?assessment=checkpoint`.
 - Section 2, Speak Concisely:
-  - Exercise A links to `../tsa-speak/index.html?version=checkpoint`.
-  - Exercise B is a placeholder.
+  - Short Talk, links to `../tsa-speak/index.html?version=checkpoint`.
 - Section 3, Act Confidently:
-  - Exercise A and B are placeholders.
+  - Marked as coming soon.
 
-Implementation note:
+Score behavior:
 
-- The Checkpoint reuses the Think Clearly exercise files with the `assessment=checkpoint` query parameter.
-- The Checkpoint uses `version=checkpoint` for the Speak Concisely app.
+- Reads `tsa_sort_score`, `tsa_spot_score`, and `tsa_speak_score` from browser storage.
+- Shows completed status pills and retake buttons for available exercises.
+- Shows Think Clearly and Speak Concisely scorecards when results exist.
 
 ### `apps/12-in-12/index.html`
 
@@ -722,6 +803,14 @@ Purpose:
 Note:
 
 - Less recently maintained than the main four practice apps.
+
+## Known Notes
+
+- Google Sheet admin changes are pending Google Drive connector reconnection:
+  - Rename sheet ID `10iQByFqVCffHanZbbHLnYj7Csbet4fgOCd2FWDzEqkE` to `[Website] UTL leads and assessments`.
+  - Add an `Assessments` tab with columns `email`, `assessment_type`, `version`, `score`, `variation_id`, and `submitted_at`.
+  - Add a `source` column to the contacts tab if it does not already exist.
+- The current Google Apps Script endpoint must route Find Your Level assessment payloads to the future `Assessments` tab. The static site already sends the required assessment fields.
 
 ## Lead Form Integration
 
@@ -748,8 +837,9 @@ Payload fields:
 - `role`
 - `message`
 - `page`
+- `source`
 
-The `page` field is the URL where the form was submitted from.
+The `page` field is the URL where the form was submitted from. The `source` field distinguishes contact leads from assessment leads, such as `contact-form` or `find-your-level`.
 
 ## Testimonials
 
