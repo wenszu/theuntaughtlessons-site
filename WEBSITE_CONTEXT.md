@@ -1,20 +1,55 @@
 # The Untaught Lessons Website Context
 
-Last updated: 2026-05-11  
+Last updated: 2026-05-12
 Primary purpose: Living implementation and design reference for The Untaught Lessons static website and practice apps.
 
 Use this file when referencing the site with other tools. It should be updated whenever pages, apps, visual rules, navigation, routing, forms, or core functionality change.
 
 ## Change Log
 
+### 2026-05-12
+
+- Redesigned `member-login/index.html` as a structured member hub:
+  - Added sticky section navigation for Orientation, Phase 1, Phase 2, and Phase 3.
+  - Added an MA mission card positioning the member as Chief of Staff to Aiko Mori.
+  - Added optional TSA Score™ bookends before the workbook sections.
+  - Organised all workbook content into interleaved context slide blocks and exercise cards.
+- Restyled member hub app cards to match the previous large workbook-card design:
+  - Gold top border.
+  - Roboto Mono phase label.
+  - Playfair Display navy app title.
+  - Larger description text.
+  - Gold `Open tool` CTA treatment.
+- Added the Google Slides embed pattern for member hub context blocks:
+  - 16:9 iframe wrapper.
+  - Full-screen link below each embed.
+  - Placeholder slide URLs pending actual published deck links.
+- Added the published Google Slides embed URL for the member hub Orientation section.
+- Updated member hub slide blocks so live iframe blocks and placeholder slide blocks start collapsed and open from the slide context bar toggle.
+- Added alternating white and parchment backgrounds to member hub content sections while keeping exercise cards white.
+- Created `apps/rushed-voice-memo/index.html`:
+  - Based on the Messy Notes app.
+  - Phase 1, Think Clearly.
+  - Uses Current status, Key blockers, and Next steps as structured response sections.
+- Created `apps/rushed-voice-memo-ai/index.html`:
+  - Based on the TSA Speak app.
+  - Phase 1, Think Clearly.
+  - Adds the AI transcription flow, transcript entry, time fields, and collapsible AI structuring prompt.
+- Created `apps/chalkboard-notes/index.html`:
+  - Based on the Messy Notes app.
+  - Adds the chalkboard image placeholder block.
+  - Uses Current state, Ideal state, and Roadblocks as structured response sections.
+- Moved Grocery List from an orientation warm-up position into the Phase 1 exercise sequence.
+
 ### 2026-05-11
 
-- Restructured the member dashboard into five workbook and assessment sections:
-  - TSA Score™.
-  - Workbook A, Think Clearly.
-  - Workbook B, Speak Concisely.
-  - Workbook C, Act Confidently.
-  - More Tools.
+- Restructured the member dashboard so the core section order is:
+  - 1. TSA Score™.
+  - 2. Orientation.
+  - 3. Workbook A, Think Clearly.
+  - 4. Workbook B, Speak Concisely.
+  - 5. Workbook C, Act Confidently.
+  - More Tools remains below the core five sections.
 - Created `apps/find-your-level/index.html` as a public email-gated Sort & Bucket exercise:
   - Uses the shared app header pattern with Think Clearly / Find Your Level.
   - Collects name, email, optional role, and `What brings you here?` before the exercise starts.
@@ -40,7 +75,25 @@ Use this file when referencing the site with other tools. It should be updated w
   - Act Confidently is separated into its own Section 3 block instead of appearing inside Speak Concisely.
   - Both hubs show completion status and score summaries from browser storage.
   - Act Confidently remains marked as coming soon.
-- Bumped the `tsa-score.html` stylesheet cache key and added fallback button classes to the public Find Your Level CTA so deployed versions render it as a gold button instead of a plain text link.
+- Bumped the `tsa-score.html` stylesheet cache key and tightened the public Find Your Level CTA styling so deployed versions render it as a gold button with white text.
+- Updated `apps/find-your-level/index.html` so participants go directly into the combined Sort & Bucket workspace:
+  - Removed the separate first bucket-naming step from the user flow.
+  - Moved bucket label dropdowns into the three bucket columns.
+  - Matched the workspace more closely to the Grocery List drop-zone look and feel.
+- Added a site-wide session contact profile:
+  - Public lead forms store contact details in `sessionStorage` after successful submission.
+  - Find Your Level reuses that profile and skips its gate during the same browser session.
+  - TSA Sort & Bucket, Spot the Problem, and Speak Concisely reuse the same session profile and skip repeat contact gates.
+- Standardized role capture across all contact-style forms:
+  - Find Your Level and TSA assessment gates now use the same role dropdown pattern as the main contact forms.
+  - Shared options are Student, Professional, Manager, and Other.
+- Updated `tsa-score.html` How It Works section to describe only the public Sort & Bucket exercise.
+- Updated `programs.html` What People Say section to use the real testimonial source instead of placeholder workshop quotes.
+- Migrated testimonials from `assets/testimonials.js` into `data/testimonials.json`:
+  - Removed `assets/testimonials.js`.
+  - Homepage now fetches testimonial JSON at page load and fills `#testimonialRowOne` and `#testimonialRowTwo`.
+  - Programs page now fetches the same JSON and renders the first six real testimonials.
+  - Testimonial fields are `quote`, `name`, `title`, and `company`.
 - Google Sheet operations requested for this release are pending reconnection of the Google Drive connector:
   - Rename the sheet to `[Website] UTL leads and assessments`.
   - Add the `Assessments` tab.
@@ -477,7 +530,7 @@ Important functionality:
 - Google Apps Script submission.
 - Animated reveal questions.
 - Stats count-up animation.
-- Testimonial marquee through `assets/testimonials.js`.
+- Testimonial marquee through `data/testimonials.json`.
 
 ### `tsa-score.html`
 
@@ -572,14 +625,22 @@ Member tools landing page.
 Purpose:
 
 - Password-gated workspace for practice tools.
-- Lists tools after access.
+- Structured member hub for TSA Score™, orientation, and the three workbook phases.
 
-Current visible tools include:
+Current section order:
 
-- Grocery List
-- Manager's Messy Notes
-- Issue Tree Builder
-- SCQA Builder
+- TSA Score™.
+- Orientation.
+- Phase 1, Think Clearly.
+- Phase 2, Speak Concisely.
+- Phase 3, Act Confidently.
+
+Key functionality:
+
+- Sticky section navigation for Orientation, Phase 1, Phase 2, and Phase 3.
+- MA mission card introducing Aiko Mori and the Chief of Staff role.
+- Google Slides placeholder embeds for orientation and each workbook context chunk.
+- Exercise cards for active apps and dimmed coming-soon cards for future exercises.
 
 ## App Map
 
@@ -646,6 +707,62 @@ Key functionality:
 Known important fix:
 
 - Three-section response navigation must continue to work.
+
+### `apps/rushed-voice-memo/index.html`
+
+Phase:
+
+- Phase 1, Think Clearly.
+
+Purpose:
+
+- Turn a rushed verbal update, provided as a transcript, into a clean structured written summary.
+
+Key functionality:
+
+- Same core interaction pattern as Messy Notes.
+- Open response mode.
+- Three-section structured response mode.
+- Timer and word count.
+- Structured sections are Current status, Key blockers, and Next steps.
+
+### `apps/rushed-voice-memo-ai/index.html`
+
+Phase:
+
+- Phase 1, Think Clearly.
+
+Purpose:
+
+- Transcribe a provided voice file using ChatGPT, then use an AI prompt to structure the transcript into MECE buckets.
+
+Key functionality:
+
+- Five-step transcription instruction block.
+- Transcript textarea.
+- Collapsible AI structuring prompt.
+- Recording time fields.
+- Submit button for continuing after the transcript is pasted.
+- Adapted from the TSA Speak app pattern.
+
+### `apps/chalkboard-notes/index.html`
+
+Phase:
+
+- Phase 1, Think Clearly.
+
+Purpose:
+
+- Take notes from a provided chalkboard image and organise them into MECE buckets with BSP headers.
+
+Key functionality:
+
+- Same core interaction pattern as Messy Notes.
+- Open response mode.
+- Three-section structured response mode.
+- Chalkboard image placeholder above the source input.
+- Structured sections are Current state, Ideal state, and Roadblocks.
+- Image placeholder path is `assets/chalkboard-notes.jpg`.
 
 ### `apps/issue-tree-builder/index.html`
 
@@ -847,13 +964,22 @@ The `page` field is the URL where the form was submitted from. The `source` fiel
 Testimonials are rendered from:
 
 ```text
-assets/testimonials.js
+data/testimonials.json
 ```
 
-Homepage loads the script and fills:
+Homepage fetches the JSON at page load and fills:
 
 - `#testimonialRowOne`
 - `#testimonialRowTwo`
+
+Programs page also fetches this JSON and renders the first six testimonials in `#programTestimonials`.
+
+Field structure:
+
+- `quote`
+- `name`
+- `title`
+- `company`
 
 Current styling:
 
