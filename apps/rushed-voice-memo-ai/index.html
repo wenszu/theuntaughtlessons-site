@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="TSA Score™ Speak Concisely assessment from The Untaught Lessons." />
-  <title>Speak Concisely | TSA Score™</title>
+  <meta name="description" content="Rushed voice memo AI summary exercise from The Untaught Lessons." />
+  <title>Rushed voice memo — AI summary</title>
   <link rel="icon" type="image/png" sizes="32x32" href="../../assets/favicon-bluebg-whitedoor-thicker-32.png?v=6">
   <link rel="shortcut icon" type="image/png" href="../../assets/favicon-bluebg-whitedoor-thicker-32.png?v=6">
   <link rel="apple-touch-icon" sizes="180x180" href="../../assets/apple-touch-icon.png?v=3">
@@ -664,8 +664,8 @@
     </a>
     <div class="tsa-speak-divider" aria-hidden="true"></div>
     <div>
-      <span class="tsa-speak-kicker">TSA Score™</span>
-      <span class="tsa-speak-title" id="headerTitle">Speak Concisely</span>
+      <span class="tsa-speak-kicker">Phase 1 · Think Clearly</span>
+      <span class="tsa-speak-title" id="headerTitle">Rushed voice memo — AI summary</span>
     </div>
   </header>
 
@@ -707,7 +707,7 @@
     const DATA_URL = '../../data/tsa/speak-concisely.json';
     const isCheckpoint = new URLSearchParams(window.location.search).get('version') === 'checkpoint';
     const versionLabel = isCheckpoint ? 'Checkpoint' : 'Diagnostic';
-    document.getElementById('headerTitle').textContent = isCheckpoint ? 'Speak Concisely: Checkpoint' : 'Speak Concisely';
+    document.getElementById('headerTitle').textContent = 'Rushed voice memo — AI summary';
 
     const SCORER_SYSTEM_PROMPT = `You are a scoring assistant for the TSA Score™ assessment by The Untaught Lessons™.
 
@@ -782,7 +782,7 @@ Return only JSON with C1, C4, C5, C6, C7, C8, msg1, msg2, msg3, feedback, and co
             <h2>Loading assessment...</h2>
           </div>
           <div class="tsa-speak-panel-body">
-            <p>Preparing the Speak Concisely exercise.</p>
+            <p>Preparing the rushed voice memo exercise.</p>
           </div>
         </section>
       `;
@@ -805,14 +805,14 @@ Return only JSON with C1, C4, C5, C6, C7, C8, msg1, msg2, msg3, feedback, and co
     }
 
     // Exercise data is loaded from ../../data/tsa/speak-concisely.json.
-    // Add new Speak Concisely topics in that JSON file, not in this HTML.
+    // Add new AI-supported voice memo topics in that JSON file, not in this HTML.
     // Expected schema: an array of topic objects with title, scenario, points,
     // keyMessages, tags, difficulty, and optional timeLimitSeconds metadata.
     async function loadExerciseData() {
       const response = await fetch(DATA_URL);
       if (!response.ok) throw new Error(`Unable to load ${DATA_URL}`);
       const data = await response.json();
-      if (!Array.isArray(data) || !data.length) throw new Error('Speak Concisely data is empty.');
+      if (!Array.isArray(data) || !data.length) throw new Error('Rushed voice memo data is empty.');
       topics = data;
       setIndex = Math.floor(Math.random() * topics.length);
       currentTopic = topics[setIndex];
@@ -844,7 +844,7 @@ Return only JSON with C1, C4, C5, C6, C7, C8, msg1, msg2, msg3, feedback, and co
         name: state.participant.name,
         email: state.participant.email,
         role: formData.get('role').trim(),
-        message: 'Submitted via TSA Diagnostic — Phase 2 Speak Concisely',
+        message: 'Submitted via Rushed voice memo AI summary',
         page: window.location.href,
         source: 'tsa-assessment'
       };
@@ -893,9 +893,9 @@ Return only JSON with C1, C4, C5, C6, C7, C8, msg1, msg2, msg3, feedback, and co
     function renderShell(innerHtml) {
       app.innerHTML = `
         <section class="tsa-speak-intro">
-          <p class="tsa-speak-label">Phase 2 · Speak Concisely · ${versionLabel}</p>
-          <h1>Speak Concisely</h1>
-          <p>Identify the most important messages from a set of information and deliver them clearly within a time limit.</p>
+          <p class="tsa-speak-label">Phase 1 · Think Clearly</p>
+          <h1>Rushed voice memo — AI summary</h1>
+          <p>Transcribe the voice memo, then use the AI prompt to turn it into a clean structured summary.</p>
         </section>
         ${innerHtml}
       `;
@@ -1011,23 +1011,44 @@ Return only JSON with C1, C4, C5, C6, C7, C8, msg1, msg2, msg3, feedback, and co
       };
       return `
         <details class="tsa-speak-record-help">
-          <summary>How to record and transcribe</summary>
+          <summary>How to transcribe the voice file</summary>
           <div class="tsa-speak-help-body">
-            <h3>How to record and transcribe your talk: 6 steps</h3>
+            <h3>How to transcribe the voice file</h3>
             <ol class="tsa-speak-help-steps">
-              <li>${icons.camera}<strong>Open your camera app:</strong> Open your phone's native camera app and switch to video mode. Make sure sound is on and you have storage space.</li>
-              <li>${icons.record}<strong>Record your talk:</strong> Prop your phone up so it can capture you clearly. Hit record, give your talk, then stop recording when you are done.</li>
-              <li>${icons.laptop}<strong>Open ChatGPT on your laptop:</strong> Go to chatgpt.com. Click the microphone icon to start voice input. Place your phone close to the laptop microphone.</li>
-              <li>${icons.audio}<strong>Play your video out loud:</strong> Play the recorded video on your phone while ChatGPT listens through the laptop mic. It transcribes in real time.</li>
-              <li>${icons.select}<strong>Copy the transcript:</strong> Once the video ends, stop ChatGPT voice input. Select all the transcribed text and copy it.</li>
-              <li>${icons.paste}<strong>Paste and submit:</strong> Paste the transcript into the box below. Review it quickly, then submit.</li>
+              <li>${icons.camera}<strong>Open the voice file:</strong> You were sent a voice memo file via email. Open it on your phone or laptop.</li>
+              <li>${icons.laptop}<strong>Open ChatGPT voice mode:</strong> Go to chatgpt.com. Click the microphone icon to start voice input.</li>
+              <li>${icons.audio}<strong>Play the file into ChatGPT:</strong> Play the voice memo out loud while ChatGPT listens through your microphone. It transcribes in real time.</li>
+              <li>${icons.select}<strong>Copy the transcript:</strong> Once the file ends, stop ChatGPT. Select all the transcribed text and copy it.</li>
+              <li>${icons.paste}<strong>Paste and use the AI prompt:</strong> Paste the transcript into the box below. Then use the AI prompt provided to have ChatGPT structure your notes into MECE buckets.</li>
             </ol>
             <p><strong>Alternative free tools if ChatGPT is unavailable:</strong></p>
             <ul>
-              <li><strong>Google Docs voice typing:</strong> Use Tools, then Voice typing. It is free and works in Chrome.</li>
-              <li><strong>Otter.ai free tier:</strong> Upload your video file directly. It transcribes automatically.</li>
-              <li><strong>Manual fallback:</strong> If transcription fails, type what you said as accurately as you can. Minimum 50 words required to submit.</li>
+              <li><strong>Google Docs voice typing:</strong> Use Tools → Voice typing. Free, works in Chrome.</li>
+              <li><strong>Otter.ai free tier:</strong> Upload your audio file directly. It transcribes automatically.</li>
+              <li><strong>Manual fallback:</strong> If transcription fails, type what you heard. Minimum 50 words to submit.</li>
             </ul>
+          </div>
+        </details>
+      `;
+    }
+
+    function aiPromptBlock() {
+      return `
+        <details class="tsa-speak-record-help">
+          <summary>AI structuring prompt</summary>
+          <div class="tsa-speak-help-body">
+            <pre style="white-space: pre-wrap; font-family: 'Lato', sans-serif; line-height: 1.6;">You are an expert in structured communication. I will paste a transcript of a
+rushed verbal update below. Your job is to turn it into a clean, structured
+written summary using the following rules:
+
+1. Organise the output into exactly three MECE buckets.
+2. Use Bolded Summary Phrases (BSP) for every header and key point.
+3. Each bucket should have 2–3 bullet points using BSP starters.
+4. Remove filler words, repetition, and anything unclear.
+5. Keep the tone professional and decision-ready.
+
+Here is the transcript:
+[paste transcript here]</pre>
           </div>
         </details>
       `;
@@ -1036,7 +1057,8 @@ Return only JSON with C1, C4, C5, C6, C7, C8, msg1, msg2, msg3, feedback, and co
     function transcriptBox({ id, label, buttonId, buttonText }) {
       return `
         <label class="tsa-speak-field-label" for="${id}">${label}</label>
-        <textarea class="tsa-speak-textarea" id="${id}" placeholder="Paste your transcript here..."></textarea>
+        <textarea class="tsa-speak-textarea" id="${id}" placeholder="Paste your transcript here…"></textarea>
+        ${aiPromptBlock()}
         <div class="tsa-speak-time-grid" aria-label="Recording time">
           <label for="${id}Minutes">Minutes
             <input id="${id}Minutes" type="number" min="0" max="10" inputmode="numeric" placeholder="0">
@@ -1083,7 +1105,7 @@ Return only JSON with C1, C4, C5, C6, C7, C8, msg1, msg2, msg3, feedback, and co
           </div>
           <div class="tsa-speak-step">
             ${helpPanel()}
-            ${transcriptBox({ id: 'diagnosticTranscript', label: 'Your transcript', buttonId: 'submitTranscript', buttonText: 'Submit my transcript' })}
+            ${transcriptBox({ id: 'diagnosticTranscript', label: 'Your transcript', buttonId: 'submitTranscript', buttonText: 'Done. Continue →' })}
           </div>
         </section>
       `);

@@ -177,6 +177,19 @@
     const leadModalContent = leadModal.querySelector('.lead-modal-content');
     const leadModalInitialContent = leadModalContent.innerHTML;
     const contactForm = document.getElementById('contactForm');
+    const CONTACT_SESSION_KEY = 'utl_contact_shared';
+    const CONTACT_PROFILE_KEY = 'utl_contact_profile';
+
+    function rememberContact(payload) {
+      sessionStorage.setItem(CONTACT_SESSION_KEY, 'true');
+      sessionStorage.setItem(CONTACT_PROFILE_KEY, JSON.stringify({
+        name: payload.name || '',
+        email: payload.email || '',
+        role: payload.role || '',
+        message: payload.message || '',
+        source: payload.source || ''
+      }));
+    }
 
     navToggle.addEventListener('click', () => {
       const isOpen = navToggle.getAttribute('aria-expanded') === 'true';
@@ -242,6 +255,7 @@
           body: JSON.stringify(payload),
           headers: { 'Content-Type': 'application/json' }
         });
+        rememberContact(payload);
         showSuccessState();
       } catch (err) {
         showErrorState();
@@ -285,6 +299,7 @@
           body: JSON.stringify(payload),
           headers: { 'Content-Type': 'application/json' }
         });
+        rememberContact(payload);
         showContactSuccess();
       } catch (err) {
         showContactError();

@@ -1101,7 +1101,7 @@
   line-height: 1.55;
 }
 
-.tsa-start-button {
+.tsa-start-card .tsa-start-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1111,12 +1111,16 @@
   border: 1px solid var(--home-gold);
   border-radius: 4px;
   background: var(--home-gold);
-  color: var(--home-navy);
+  color: var(--home-white);
   font-family: 'Lato', sans-serif;
   font-size: 14pt;
   font-weight: 700;
   line-height: 1;
   text-decoration: none;
+}
+
+.tsa-start-card .tsa-start-button:hover {
+  filter: brightness(.96);
 }
 
 .tsa-card-grid {

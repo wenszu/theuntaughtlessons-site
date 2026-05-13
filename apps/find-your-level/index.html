@@ -267,7 +267,7 @@
 
     .exercise-grid {
       display: grid;
-      grid-template-columns: minmax(240px, .7fr) minmax(480px, 1.3fr);
+      grid-template-columns: minmax(280px, .8fr) minmax(620px, 1.6fr);
       gap: 18px;
       align-items: stretch;
       margin-top: 18px;
@@ -277,9 +277,9 @@
     .bucket {
       min-height: 320px;
       padding: 16px;
-      border: 1px dashed rgba(0, 51, 102, .28);
+      border: 1.5px dashed rgba(77, 112, 148, .42);
       border-radius: 10px;
-      background: #FAF8F3;
+      background: rgba(255, 255, 255, .72);
     }
 
     .bucket-grid {
@@ -290,6 +290,17 @@
 
     .bucket {
       background: var(--white);
+    }
+
+    .bucket label {
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .bucket select {
+      margin-bottom: 14px;
+      background: var(--white);
+      font-weight: 700;
     }
 
     .bucket.is-target,
@@ -424,7 +435,13 @@
         <input id="emailAddress" name="email" type="email" autocomplete="email" required>
 
         <label for="roleTitle">Role</label>
-        <input id="roleTitle" name="role" type="text" autocomplete="organization-title" placeholder="e.g. Student, Manager, Consultant">
+        <select id="roleTitle" name="role">
+          <option value="" selected>Select your role</option>
+          <option value="Student">Student</option>
+          <option value="Professional">Professional</option>
+          <option value="Manager">Manager</option>
+          <option value="Other">Other</option>
+        </select>
 
         <label for="leadReason">What brings you here?</label>
         <textarea id="leadReason" name="message" rows="3" placeholder="Tell us what you are looking for"></textarea>
@@ -444,6 +461,8 @@
     const startButton = document.getElementById('startButton');
     const app = document.getElementById('app');
     const timerDisplay = document.getElementById('timerDisplay');
+    const CONTACT_SESSION_KEY = 'utl_contact_shared';
+    const CONTACT_PROFILE_KEY = 'utl_contact_profile';
     let exercise = null;
     let selectedItem = null;
     let timerStartedAt = null;
@@ -453,6 +472,27 @@
       bucketLabels: ['', '', ''],
       placements: {}
     };
+
+    function readContactProfile() {
+      if (sessionStorage.getItem(CONTACT_SESSION_KEY) !== 'true') return null;
+      try {
+        const profile = JSON.parse(sessionStorage.getItem(CONTACT_PROFILE_KEY) || '{}');
+        return profile.name && profile.email ? profile : null;
+      } catch (error) {
+        return null;
+      }
+    }
+
+    function rememberContact(payload) {
+      sessionStorage.setItem(CONTACT_SESSION_KEY, 'true');
+      sessionStorage.setItem(CONTACT_PROFILE_KEY, JSON.stringify({
+        name: payload.name || '',
+        email: payload.email || '',
+        role: payload.role || '',
+        message: payload.message || '',
+        source: payload.source || ''
+      }));
+    }
 
     function escapeHtml(value) {
       return String(value || '').replace(/[&<>"']/g, char => ({
@@ -582,7 +622,7 @@
       renderShell(`
         <section class="panel">
           <h2>Sort the items</h2>
-          <p>Drag cards into a bucket on desktop. On mobile, tap an item, then tap the bucket where it belongs.</p>
+          <p>Choose a label for each bucket, then move every item into the bucket where it belongs. On desktop, drag cards into a bucket. On mobile, tap an item, then tap the bucket.</p>
           <div class="exercise-grid">
             <div class="item-list" data-zone="unplaced">
               <h3>Unplaced items</h3>
@@ -612,16 +652,32 @@
         const items = exercise.items.filter(item => getItemLocation(item.item_id) === zone);
         return `
           <section class="bucket" data-zone="${zone}">
-            <h3>${escapeHtml(state.bucketLabels[index])}</h3>
+            <label for="bucketLabel${index}">Bucket ${index + 1}</label>
+            <select id="bucketLabel${index}" data-label-index="${index}">
+              <option value="">Choose a label</option>
+              ${exercise.label_word_bank.map(label => `<option value="${escapeHtml(label)}"${state.bucketLabels[index] === label ? ' selected' : ''}>${escapeHtml(label)}</option>`).join('')}
+            </select>
             <div class="items">${items.map(itemButton).join('')}</div>
             ${items.length ? '' : '<p class="empty">Drop or tap items here.</p>'}
           </section>
         `;
       }).join('');
+      wireBucketLabels();
       wireMovement();
       const placed = Object.keys(state.placements).length;
       document.getElementById('statusLine').textContent = `${placed} of ${exercise.items.length} items placed`;
-      document.getElementById('submitButton').disabled = placed !== exercise.items.length;
+      const chosen = new Set(state.bucketLabels.filter(Boolean));
+      document.getElementById('submitButton').disabled = placed !== exercise.items.length || !state.bucketLabels.every(Boolean) || chosen.size !== 3;
+    }
+
+    function wireBucketLabels() {
+      document.querySelectorAll('[data-label-index]').forEach(select => {
+        select.addEventListener('change', () => {
+          state.bucketLabels[Number(select.dataset.labelIndex)] = select.value;
+          updateSortingZones();
+        });
+      });
+      refreshDisabledOptions();
     }
 
     function wireMovement() {
@@ -754,18 +810,39 @@
           mode: 'no-cors',
           body: JSON.stringify(payload)
         });
+        rememberContact(payload);
         await loadExercise();
         gate.classList.add('is-hidden');
         document.body.classList.remove('tsa-locked');
         app.hidden = false;
         startTimer();
-        renderNaming();
+        renderSorting();
       } catch (error) {
         startButton.disabled = false;
         startButton.textContent = 'Start the exercise';
         alert('We could not start the exercise. Please refresh and try again.');
       }
     });
+
+    async function initializeFromSharedContact() {
+      const profile = readContactProfile();
+      if (!profile) return;
+      state.participant = { name: profile.name, email: profile.email };
+      sessionStorage.setItem('find_your_level_name', profile.name);
+      sessionStorage.setItem('find_your_level_email', profile.email);
+      try {
+        await loadExercise();
+        gate.classList.add('is-hidden');
+        document.body.classList.remove('tsa-locked');
+        app.hidden = false;
+        startTimer();
+        renderSorting();
+      } catch (error) {
+        console.warn('We could not reuse the saved contact session.', error);
+      }
+    }
+
+    initializeFromSharedContact();
   </script>
 </body>
 </html>

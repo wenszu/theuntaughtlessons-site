@@ -75,7 +75,7 @@
         <div class="tsa-start-card">
           <h2>Not a member yet? Start here.</h2>
           <p>See how clearly you think in under 10 minutes. One exercise, no signup required.</p>
-          <a class="tsa-start-button tsa-card-button primary" href="apps/find-your-level/index.html">Find Your Level</a>
+          <a class="tsa-start-button" href="apps/find-your-level/index.html">Find Your Level</a>
         </div>
         <div class="tsa-card-grid">
           <article class="tsa-card">
@@ -103,21 +103,11 @@
         <div class="tsa-step-grid">
           <article class="tsa-step">
             <span class="tsa-step-number">1</span>
-            <h3>Sort your thinking.</h3>
-            <p>You'll organize a set of items into logical groups. No tricks — just clear, structured thinking.</p>
-          </article>
-          <article class="tsa-step">
-            <span class="tsa-step-number">2</span>
-            <h3>Say it out loud.</h3>
-            <p>You'll record yourself giving a short talk, then compress it. The goal is to say more with less.</p>
-          </article>
-          <article class="tsa-step">
-            <span class="tsa-step-number">3</span>
-            <h3>Handle the hard conversation.</h3>
-            <p>You'll play out a realistic difficult conversation with an AI character. Say the hard thing. Hold your ground.</p>
+            <h3>Sort & Bucket.</h3>
+            <p>You will organize a messy set of items into three clean buckets. Choose the bucket labels, place every item, and see how clearly your structure holds up.</p>
           </article>
         </div>
-        <p class="tsa-rubric-line">Every exercise is scored automatically using the C³ Rubric™</p>
+        <p class="tsa-rubric-line">Your score is based on bucket labels and item placement.</p>
       </div>
     </section>
   </main>
@@ -181,6 +171,19 @@
     const leadModal = document.getElementById('leadModal');
     const leadModalContent = leadModal.querySelector('.lead-modal-content');
     const leadModalInitialContent = leadModalContent.innerHTML;
+    const CONTACT_SESSION_KEY = 'utl_contact_shared';
+    const CONTACT_PROFILE_KEY = 'utl_contact_profile';
+
+    function rememberContact(payload) {
+      sessionStorage.setItem(CONTACT_SESSION_KEY, 'true');
+      sessionStorage.setItem(CONTACT_PROFILE_KEY, JSON.stringify({
+        name: payload.name || '',
+        email: payload.email || '',
+        role: payload.role || '',
+        message: payload.message || '',
+        source: payload.source || ''
+      }));
+    }
 
     navToggle.addEventListener('click', () => {
       const isOpen = navToggle.getAttribute('aria-expanded') === 'true';
@@ -246,6 +249,7 @@
           mode: 'no-cors',
           body: JSON.stringify(payload)
         });
+        rememberContact(payload);
         showSuccessState();
       } catch (err) {
         showErrorState();

@@ -731,7 +731,13 @@
         <input id="emailAddress" name="email" type="email" autocomplete="email" required>
 
         <label for="roleTitle">Role / Job title</label>
-        <input id="roleTitle" name="role" type="text" autocomplete="organization-title" required>
+        <select id="roleTitle" name="role" required>
+          <option value="" disabled selected>Select your role</option>
+          <option value="Student">Student</option>
+          <option value="Professional">Professional</option>
+          <option value="Manager">Manager</option>
+          <option value="Other">Other</option>
+        </select>
 
         <button class="tsa-stp-submit" id="gateSubmit" type="submit">Begin assessment</button>
         <p class="tsa-stp-error" id="gateError" role="alert">Please check your details and try again.</p>
@@ -744,6 +750,8 @@
   <script>
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzJE--FL2kB_XDNZRnszCtlyLRPvaLAHGuF5TAOdXJk40atbvf5Y6ELuSK2B7CSLaMN/exec';
     const GATE_KEY = 'tsa_gate_complete';
+    const CONTACT_SESSION_KEY = 'utl_contact_shared';
+    const CONTACT_PROFILE_KEY = 'utl_contact_profile';
     const SORT_SCORE_KEY = 'tsa_sort_score';
     const DATA_URL = '../../data/tsa/spot-the-problem.json';
     const assessmentMode = new URLSearchParams(window.location.search).get('assessment') === 'checkpoint' ? 'Checkpoint' : 'Diagnostic';
@@ -770,6 +778,27 @@
       partA: { left: [], buckets: {} },
       partB: { left: [], buckets: {} }
     };
+
+    function readContactProfile() {
+      if (sessionStorage.getItem(CONTACT_SESSION_KEY) !== 'true') return null;
+      try {
+        const profile = JSON.parse(sessionStorage.getItem(CONTACT_PROFILE_KEY) || '{}');
+        return profile.name && profile.email ? profile : null;
+      } catch (error) {
+        return null;
+      }
+    }
+
+    function rememberContact(payload) {
+      sessionStorage.setItem(CONTACT_SESSION_KEY, 'true');
+      sessionStorage.setItem(CONTACT_PROFILE_KEY, JSON.stringify({
+        name: payload.name || '',
+        email: payload.email || '',
+        role: payload.role || '',
+        message: payload.message || '',
+        source: payload.source || 'tsa-assessment'
+      }));
+    }
 
     function pickRandom(items, count) {
       const copy = [...items];
@@ -870,7 +899,8 @@
         email: state.participant.email,
         role: formData.get('role').trim(),
         message: `Submitted via TSA ${assessmentMode}`,
-        page: window.location.href
+        page: window.location.href,
+        source: 'tsa-assessment'
       };
 
       gateSubmit.disabled = true;
@@ -885,6 +915,7 @@
         sessionStorage.setItem(GATE_KEY, 'true');
         sessionStorage.setItem('tsa_participant_name', state.participant.name);
         sessionStorage.setItem('tsa_participant_email', state.participant.email);
+        rememberContact(payload);
         startAssessment();
       } catch (error) {
         gateSubmit.disabled = false;
@@ -894,13 +925,17 @@
     });
 
     async function initializeApp() {
-      const gateComplete = sessionStorage.getItem(GATE_KEY) === 'true';
+      const contactProfile = readContactProfile();
+      const gateComplete = sessionStorage.getItem(GATE_KEY) === 'true' || Boolean(contactProfile);
       if (gateComplete) renderLoadingState();
       try {
         await loadExerciseData();
         if (gateComplete) {
-          state.participant.name = sessionStorage.getItem('tsa_participant_name') || '';
-          state.participant.email = sessionStorage.getItem('tsa_participant_email') || '';
+          state.participant.name = sessionStorage.getItem('tsa_participant_name') || contactProfile?.name || '';
+          state.participant.email = sessionStorage.getItem('tsa_participant_email') || contactProfile?.email || '';
+          sessionStorage.setItem(GATE_KEY, 'true');
+          sessionStorage.setItem('tsa_participant_name', state.participant.name);
+          sessionStorage.setItem('tsa_participant_email', state.participant.email);
           startAssessment();
         }
       } catch (error) {

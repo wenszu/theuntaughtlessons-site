@@ -1,0 +1,1862 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="A free Untaught Lessons practice tool for turning rough manager notes into a structured, concise, Aiko-ready response." />
+  <title>Rushed voice memo</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="../../assets/favicon-bluebg-whitedoor-thicker-32.png?v=6">
+  <link rel="shortcut icon" type="image/png" href="../../assets/favicon-bluebg-whitedoor-thicker-32.png?v=6">
+  <link rel="apple-touch-icon" sizes="180x180" href="../../assets/apple-touch-icon.png?v=3">
+  <link rel="stylesheet" href="../shared/activity-timer.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lato:wght@300;400;700&family=Roboto+Mono:wght@400;500&display=swap');
+
+    :root {
+      --bg: #F3EDE2;
+      --navy: #003366;
+      --gold: #EEA320;
+      --charcoal: #4A4A4A;
+      --steel: #4D7094;
+      --white: #fff;
+      --paper: #FAF8F4;
+      --line: rgba(0, 51, 102, 0.18);
+      --shadow: 0 10px 26px rgba(0, 51, 102, 0.08);
+      --radius: 14px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: 'Lato', sans-serif;
+      color: var(--charcoal);
+      background: var(--bg);
+    }
+
+    button,
+    input,
+    textarea {
+      font: inherit;
+    }
+
+    .app-header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: grid;
+      grid-template-columns: auto auto minmax(220px, 1fr) auto;
+      align-items: center;
+      column-gap: 20px;
+      min-height: 76px;
+      padding: 12px 32px;
+      background: var(--navy);
+      color: var(--white);
+    }
+
+    .app-logo-frame {
+      display: block;
+      width: 224px;
+      height: 46px;
+    }
+
+    .app-logo-frame img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .brand-divider {
+      width: 1px;
+      height: 38px;
+      background: rgba(255, 255, 255, .42);
+    }
+
+    .app-kicker {
+      display: block;
+      color: var(--gold);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+
+    .app-title {
+      display: block;
+      margin-top: 3px;
+      color: var(--white);
+      font-family: 'Playfair Display', serif;
+      font-size: 27px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .app-timer {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    .timer-compat {
+      display: none;
+    }
+
+    .utility-metric {
+      min-width: 148px;
+      padding: 7px 10px;
+      border: 1px solid rgba(255, 255, 255, .18);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, .08);
+    }
+
+    .utility-label-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .utility-metric .small-label {
+      color: var(--gold);
+    }
+
+    .utility-metric .activity-timer-display {
+      color: var(--white);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 18px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .utility-metric .activity-timer-display.over-target {
+      color: var(--gold);
+    }
+
+    .metric-hide-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      border: 1px solid rgba(255, 255, 255, .32);
+      border-radius: 50%;
+      background: rgba(255, 255, 255, .08);
+      color: var(--white);
+      cursor: pointer;
+      padding: 0;
+    }
+
+    .metric-hide-btn:hover {
+      background: rgba(255, 255, 255, .16);
+    }
+
+    .metric-hide-btn svg {
+      width: 14px;
+      height: 14px;
+      stroke-width: 2.2;
+    }
+
+    .utility-metric.time-hidden .activity-timer-display {
+      visibility: hidden;
+    }
+
+    .utility-controls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .icon-timer-btn {
+      width: 34px;
+      height: 34px;
+      border: 1px solid rgba(255, 255, 255, .3);
+      border-radius: 50%;
+      background: rgba(255, 255, 255, .08);
+      color: var(--white);
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: 700;
+      line-height: 1;
+      padding: 0;
+    }
+
+    .icon-timer-btn:hover {
+      background: rgba(255, 255, 255, .16);
+    }
+
+    .icon-timer-btn.reset {
+      font-size: 21px;
+    }
+
+    .icon-timer-btn:disabled {
+      cursor: not-allowed;
+      opacity: .45;
+    }
+
+    .page {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 28px 20px 42px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 22px;
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 16px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--navy);
+      text-decoration: none;
+      font-size: .74rem;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    .brand img {
+      width: 52px;
+      height: 52px;
+      object-fit: contain;
+      opacity: .88;
+    }
+
+    .phase-pill {
+      border: 1px solid rgba(238, 163, 32, .48);
+      background: rgba(238, 163, 32, .12);
+      color: var(--navy);
+      border-radius: 999px;
+      padding: 5px 12px;
+      font-size: .74rem;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .hero {
+      margin-bottom: 22px;
+    }
+
+    h1,
+    h2,
+    h3 {
+      font-family: 'Playfair Display', serif;
+      color: var(--navy);
+      margin-top: 0;
+    }
+
+    h1 {
+      font-size: clamp(1.9rem, 3vw, 2.45rem);
+      line-height: 1.12;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      margin: 0;
+      max-width: 74ch;
+      line-height: 1.45;
+      font-size: 1.03rem;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(280px, 0.95fr) minmax(560px, 2.05fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .panel {
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .panel + .panel {
+      margin-top: 14px;
+    }
+
+    .panel-head {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .panel-head h2,
+    .panel-head h3 {
+      margin: 0;
+      font-size: 1.16rem;
+    }
+
+    .panel-body {
+      padding: 14px 16px 16px;
+    }
+
+    .story-card,
+    .source-card,
+    .constraint-list,
+    .comparison-box,
+    .attempt-card {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--paper);
+    }
+
+    .story-card {
+      padding: 13px 14px;
+      line-height: 1.55;
+    }
+
+    .story-card p,
+    .source-card p {
+      margin: 0;
+    }
+
+    .instructions {
+      margin: 12px 0 0 18px;
+      padding: 0;
+      line-height: 1.55;
+    }
+
+    .source-card {
+      padding: 14px;
+      margin-bottom: 12px;
+    }
+
+    .source-label,
+    .small-label {
+      display: block;
+      color: var(--steel);
+      font-size: .74rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      font-weight: 700;
+      margin-bottom: 7px;
+    }
+
+    .source-text {
+      white-space: pre-line;
+      line-height: 1.6;
+    }
+
+    .constraint-list {
+      list-style: none;
+      margin: 0;
+      padding: 10px 12px;
+      display: grid;
+      gap: 7px;
+    }
+
+    .constraint-list li::before {
+      content: "";
+      display: inline-block;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--gold);
+      margin-right: 8px;
+      transform: translateY(-1px);
+    }
+
+    .timer-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .timer-main {
+      min-width: 150px;
+    }
+
+    .timer-display {
+      font-family: 'Roboto Mono', monospace;
+      color: var(--navy);
+      font-size: 1.55rem;
+      font-weight: 500;
+      line-height: 1;
+    }
+
+    .timer-display.over-target {
+      color: #8B6010;
+    }
+
+    .timer-note,
+    .small {
+      font-size: .9rem;
+      color: #5e5e5e;
+      line-height: 1.45;
+    }
+
+    .timer-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin-top: 8px;
+    }
+
+    .timer-controls button {
+      padding: 7px 10px;
+      font-size: .9rem;
+    }
+
+    .app-timer .timer-compat {
+      display: none !important;
+    }
+
+    .mode-switch {
+      display: inline-flex;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 3px;
+      background: var(--paper);
+      margin-bottom: 12px;
+    }
+
+    .mode-btn {
+      border: 0;
+      border-radius: 7px;
+      background: transparent;
+      color: var(--navy);
+      padding: 8px 11px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .mode-btn.active {
+      background: var(--navy);
+      color: #fff;
+    }
+
+    .response-area {
+      width: 100%;
+      min-height: 330px;
+      border: 1px solid rgba(0,51,102,.2);
+      border-radius: 10px;
+      padding: 12px;
+      resize: vertical;
+      color: var(--charcoal);
+      background: #fff;
+      line-height: 1.55;
+    }
+
+    .section-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .section-box {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fff;
+      padding: 10px;
+    }
+
+    .section-box label {
+      display: block;
+      color: var(--navy);
+      font-size: .79rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      margin-bottom: 5px;
+    }
+
+    .section-title {
+      width: 100%;
+      border: 1px solid rgba(0,51,102,.2);
+      border-radius: 8px;
+      padding: 8px;
+      margin-bottom: 8px;
+    }
+
+    .section-response {
+      min-height: 230px;
+    }
+
+    .buttons {
+      margin-top: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    button {
+      border: 1px solid var(--navy);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--navy);
+      padding: 9px 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    button.primary {
+      background: var(--navy);
+      color: #fff;
+      border-color: var(--navy);
+    }
+
+    button.gold {
+      background: var(--gold);
+      border-color: var(--gold);
+      color: #2e2107;
+    }
+
+    button:disabled {
+      opacity: .45;
+      cursor: not-allowed;
+    }
+
+    .confirmation,
+    .checklist-panel,
+    .score-panel,
+    .comparison-panel,
+    .attempts-panel {
+      margin-top: 14px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fff;
+      padding: 12px 14px;
+      line-height: 1.45;
+    }
+
+    .confirmation strong {
+      color: var(--navy);
+    }
+
+    .checklist {
+      display: grid;
+      gap: 9px;
+      margin: 10px 0 0;
+    }
+
+    .checklist label {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      line-height: 1.35;
+    }
+
+    .checklist input {
+      margin-top: 3px;
+      accent-color: var(--gold);
+    }
+
+    .score-panel {
+      margin-top: 14px;
+      background: var(--paper);
+    }
+
+    .score-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: flex-start;
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 10px;
+      margin-bottom: 10px;
+    }
+
+    .score-title {
+      color: var(--navy);
+      font-weight: 700;
+      font-size: 1.12rem;
+    }
+
+    .score-insight {
+      margin: 4px 0 0;
+      color: #5e5e5e;
+      font-size: .92rem;
+    }
+
+    .score-total {
+      color: var(--navy);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 1.35rem;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    .score-rows {
+      display: grid;
+      gap: 9px;
+    }
+
+    .score-row {
+      display: grid;
+      grid-template-columns: 110px minmax(110px, 1fr) 70px minmax(180px, 1.3fr);
+      gap: 10px;
+      align-items: center;
+      font-size: .92rem;
+    }
+
+    .score-name {
+      color: var(--navy);
+      font-weight: 700;
+    }
+
+    .score-bar {
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(0, 51, 102, .12);
+      overflow: hidden;
+    }
+
+    .score-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: var(--gold);
+    }
+
+    .score-points {
+      color: var(--navy);
+      font-family: 'Roboto Mono', monospace;
+      font-size: .82rem;
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .score-message {
+      color: #5e5e5e;
+      line-height: 1.35;
+    }
+
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    .mobile-result-tabs {
+      display: none;
+      margin-top: 14px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--paper);
+      padding: 4px;
+      gap: 4px;
+    }
+
+    .mobile-tab {
+      flex: 1;
+      border: 0;
+      border-radius: 7px;
+      background: transparent;
+      color: var(--navy);
+      padding: 10px 8px;
+      font-size: .88rem;
+    }
+
+    .mobile-tab.active {
+      background: var(--navy);
+      color: #fff;
+    }
+
+    .comparison-box {
+      padding: 12px;
+      background: var(--paper);
+      min-height: 240px;
+    }
+
+    .comparison-box h3 {
+      font-size: 1.05rem;
+      margin-bottom: 8px;
+    }
+
+    .answer-pre {
+      white-space: pre-wrap;
+      line-height: 1.55;
+      margin: 0;
+    }
+
+    .sample-answer {
+      line-height: 1.55;
+    }
+
+    .sample-answer h4 {
+      color: var(--navy);
+      margin: 14px 0 6px;
+      font-size: 1rem;
+    }
+
+    .sample-answer h4:first-child {
+      margin-top: 0;
+    }
+
+    .sample-answer ul {
+      margin: 0 0 0 18px;
+      padding: 0;
+    }
+
+    .sample-answer li {
+      margin-bottom: 7px;
+    }
+
+    .attempt-card {
+      padding: 10px 12px;
+      margin-top: 9px;
+      background: var(--paper);
+    }
+
+    .attempt-card summary {
+      cursor: pointer;
+      color: var(--navy);
+      font-weight: 700;
+    }
+
+    .attempt-meta {
+      display: block;
+      margin-top: 3px;
+      color: #5e5e5e;
+      font-size: .86rem;
+      font-weight: 400;
+    }
+
+    .recent-attempts {
+      margin: 0 0 14px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--paper);
+      padding: 10px 12px;
+    }
+
+    .recent-attempts h3 {
+      font-size: 1rem;
+      margin-bottom: 8px;
+    }
+
+    .recent-list {
+      display: grid;
+      gap: 7px;
+    }
+
+    .recent-item {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      border-top: 1px solid rgba(0, 51, 102, .1);
+      padding-top: 7px;
+      font-size: .9rem;
+    }
+
+    .recent-item:first-child {
+      border-top: 0;
+      padding-top: 0;
+    }
+
+    .recent-score {
+      color: var(--navy);
+      font-family: 'Roboto Mono', monospace;
+      white-space: nowrap;
+    }
+
+    .trend {
+      color: var(--steel);
+      font-size: .86rem;
+      white-space: nowrap;
+    }
+
+    .hidden { display: none; }
+
+    @media (max-width: 980px) {
+      .app-header {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+
+      .brand-divider {
+        display: none;
+      }
+
+      .app-timer {
+        justify-content: flex-start;
+        flex-wrap: wrap;
+      }
+
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .section-grid,
+      .comparison-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .score-row {
+        grid-template-columns: 1fr;
+        gap: 5px;
+      }
+
+      .score-points {
+        text-align: left;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .page {
+        padding: 20px 14px 34px;
+      }
+
+      .topbar {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .timer-row {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .timer-row.minimized .timer-main {
+        display: none;
+      }
+
+      .timer-row.minimized {
+        gap: 6px;
+      }
+
+      .mode-switch {
+        width: 100%;
+      }
+
+      .mode-btn {
+        flex: 1;
+      }
+
+      .layout {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .layout > section {
+        order: -1;
+      }
+
+      .hero {
+        margin-bottom: 14px;
+      }
+
+      aside .panel .panel-body {
+        display: none;
+      }
+
+      aside .panel.open .panel-body {
+        display: block;
+      }
+
+      aside .panel {
+        box-shadow: none;
+      }
+
+      aside .panel-head {
+        cursor: pointer;
+        min-height: 48px;
+      }
+
+      aside .panel-head::after {
+        content: "Show";
+        color: var(--steel);
+        font-size: .86rem;
+        font-family: 'Lato', sans-serif;
+      }
+
+      aside .panel.open .panel-head::after {
+        content: "Hide";
+      }
+
+      .response-area {
+        min-height: 260px;
+      }
+
+      .section-response {
+        min-height: 150px;
+      }
+
+      .mobile-result-tabs.visible {
+        display: flex;
+      }
+
+      body[data-mobile-tab="self"] .score-panel,
+      body[data-mobile-tab="self"] .comparison-panel,
+      body[data-mobile-tab="score"] .checklist,
+      body[data-mobile-tab="score"] .self-check-copy,
+      body[data-mobile-tab="score"] .comparison-panel,
+      body[data-mobile-tab="answer"] .checklist,
+      body[data-mobile-tab="answer"] .self-check-copy,
+      body[data-mobile-tab="answer"] .score-panel,
+      body[data-mobile-tab="sample"] .checklist,
+      body[data-mobile-tab="sample"] .self-check-copy,
+      body[data-mobile-tab="sample"] .score-panel {
+        display: none;
+      }
+
+      body[data-mobile-tab="answer"] #sampleComparison,
+      body[data-mobile-tab="sample"] #userComparison {
+        display: none;
+      }
+
+      body[data-mobile-tab="answer"] .comparison-panel,
+      body[data-mobile-tab="sample"] .comparison-panel {
+        display: block;
+      }
+
+      body[data-mobile-tab="answer"] .comparison-grid,
+      body[data-mobile-tab="sample"] .comparison-grid {
+        display: block;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="app-header">
+    <a class="app-logo-frame" href="../../index.html" aria-label="The Untaught Lessons homepage">
+      <img src="../../assets/utl-logo-nav-white.png" alt="The Untaught Lessons">
+    </a>
+    <div class="brand-divider" aria-hidden="true"></div>
+    <div>
+      <span class="app-kicker">Phase 1 · Think Clearly</span>
+      <span class="app-title">Rushed voice memo</span>
+    </div>
+    <div class="app-timer" aria-label="Elapsed time">
+      <div class="utility-metric" id="timerMetric">
+        <div class="utility-label-row">
+          <span class="small-label">Elapsed time</span>
+          <button class="metric-hide-btn" id="timerMetricToggleBtn" type="button" aria-label="Hide elapsed time" aria-pressed="false"></button>
+        </div>
+        <div class="timer-display activity-timer-display" id="timerDisplay">00:00</div>
+      </div>
+      <div class="utility-controls">
+        <button class="icon-timer-btn" id="timerPauseIconBtn" type="button" aria-label="Pause timer">⏸</button>
+        <button class="icon-timer-btn" id="timerPlayIconBtn" type="button" aria-label="Start timer">▶</button>
+        <button class="icon-timer-btn reset" id="timerResetIconBtn" type="button" aria-label="Reset timer">↺</button>
+      </div>
+      <div class="timer-row activity-timer-row minimized timer-compat" id="timerRow">
+        <div class="timer-main activity-timer-main">
+          <span class="small-label">Elapsed time</span>
+        </div>
+        <div>
+          <p class="timer-note activity-timer-note" id="timerNote">Timer starts when you begin writing. Target: 5 minutes.</p>
+          <div class="timer-controls activity-timer-controls">
+            <button id="toggleTimerBtn" type="button">Hide timer</button>
+            <button id="startTimerBtn" type="button">Start</button>
+            <button id="pauseTimerBtn" type="button" disabled>Pause</button>
+            <button id="resumeTimerBtn" type="button" class="hidden">Resume</button>
+            <button id="resetTimerBtn" type="button">Reset timer</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main id="content" class="page">
+    <header id="hero" class="hero">
+      <h1 id="activityTitle">Rushed voice memo</h1>
+      <p class="subtitle" id="activitySubtitle">Turn a rushed verbal update into an Aiko-ready summary.</p>
+    </header>
+
+    <section id="exercise" class="layout">
+      <aside id="context">
+        <article class="panel">
+          <div class="panel-head">
+            <h2>Your task</h2>
+          </div>
+          <div class="panel-body">
+            <div class="story-card">
+              <p id="storyContext">Loading exercise...</p>
+            </div>
+            <ul class="instructions" id="instructionsList">
+              <li><strong>Define three buckets:</strong> Split the content into exactly three distinct categories, each capturing a clear theme or purpose.</li>
+              <li><strong>Start with BSP:</strong> Begin every bullet point with a bolded summary phrase that is short and descriptive.</li>
+            </ul>
+          </div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-head">
+            <h2>Task</h2>
+          </div>
+          <div class="panel-body">
+            <div class="source-card">
+              <span class="source-label">Voice memo transcript</span>
+              <p class="source-text" id="sourceText">Loading exercise...</p>
+            </div>
+            <span class="small-label">Constraints</span>
+            <ul class="constraint-list" id="constraintsList">
+              <li>Exactly 3 sections</li>
+              <li>Use BSP format</li>
+              <li>Keep it concise</li>
+              <li>Make the buckets MECE</li>
+            </ul>
+          </div>
+        </article>
+
+        <article class="panel attempts-panel">
+          <div class="panel-head">
+            <h2>Previous attempts</h2>
+          </div>
+          <div class="panel-body">
+            <p class="small">Saved locally in this browser only. Nothing is sent externally.</p>
+            <div id="attemptsList"></div>
+            <div class="buttons">
+              <button id="clearAttemptsBtn">Clear previous attempts</button>
+            </div>
+          </div>
+        </article>
+      </aside>
+
+      <section id="response">
+        <article class="panel">
+          <div class="panel-head">
+            <h2>Your response</h2>
+          </div>
+          <div class="panel-body">
+            <div id="recentAttempts" class="recent-attempts hidden"></div>
+
+            <div class="mode-switch" aria-label="Answer input mode">
+              <button class="mode-btn active" id="openModeBtn" type="button" data-response-mode="open" onclick="window.switchMessyNotesMode && window.switchMessyNotesMode('open')">Open response</button>
+              <button class="mode-btn" id="sectionModeBtn" type="button" data-response-mode="sections" onclick="window.switchMessyNotesMode && window.switchMessyNotesMode('sections')">Three-section response</button>
+            </div>
+
+            <div id="openMode">
+              <textarea id="openResponse" class="response-area" placeholder=""></textarea>
+            </div>
+
+            <div id="sectionMode" class="hidden">
+              <div class="section-grid" id="sectionGrid"></div>
+            </div>
+
+            <script>
+              window.switchMessyNotesMode = function (nextMode) {
+                var openBtn = document.getElementById('openModeBtn');
+                var sectionBtn = document.getElementById('sectionModeBtn');
+                var openMode = document.getElementById('openMode');
+                var sectionMode = document.getElementById('sectionMode');
+                if (!openBtn || !sectionBtn || !openMode || !sectionMode) return;
+                openBtn.classList.toggle('active', nextMode === 'open');
+                sectionBtn.classList.toggle('active', nextMode === 'sections');
+                openBtn.setAttribute('aria-pressed', nextMode === 'open' ? 'true' : 'false');
+                sectionBtn.setAttribute('aria-pressed', nextMode === 'sections' ? 'true' : 'false');
+                openMode.classList.toggle('hidden', nextMode !== 'open');
+                sectionMode.classList.toggle('hidden', nextMode !== 'sections');
+              };
+              document.getElementById('openModeBtn').addEventListener('click', function () {
+                window.switchMessyNotesMode('open');
+              });
+              document.getElementById('sectionModeBtn').addEventListener('click', function () {
+                window.switchMessyNotesMode('sections');
+              });
+            </script>
+
+            <div class="buttons">
+              <button id="submitBtn" class="primary" type="button">Submit</button>
+              <button id="tryAgainBtn" class="gold" type="button">Try again</button>
+            </div>
+
+            <div id="confirmation" class="confirmation hidden"></div>
+
+            <div id="mobileResultTabs" class="mobile-result-tabs" aria-label="Result sections">
+              <button class="mobile-tab active" type="button" data-tab="self">Self-check</button>
+              <button class="mobile-tab" type="button" data-tab="score">Score</button>
+              <button class="mobile-tab" type="button" data-tab="answer">Your answer</button>
+              <button class="mobile-tab" type="button" data-tab="sample">Sample</button>
+            </div>
+
+            <div id="checklistPanel" class="checklist-panel hidden">
+              <h3 class="self-check-copy">Self-assessment</h3>
+              <p class="small self-check-copy">Check your own work before looking at the sample answer.</p>
+              <div class="checklist" id="checklist"></div>
+              <div id="scorePanel" class="score-panel hidden"></div>
+              <div class="buttons">
+                <button id="revealSampleBtn" class="primary" type="button">Reveal sample answer</button>
+              </div>
+            </div>
+
+            <div id="comparisonPanel" class="comparison-panel hidden">
+              <h3>Side-by-side comparison</h3>
+              <div class="comparison-grid">
+                <div class="comparison-box" id="userComparison">
+                  <h3>Your answer</h3>
+                  <pre class="answer-pre" id="submittedAnswer"></pre>
+                </div>
+                <div class="comparison-box" id="sampleComparison">
+                  <h3>Sample answer</h3>
+                  <div class="sample-answer" id="sampleAnswer"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>
+      </section>
+    </section>
+  </main>
+
+  <script src="../shared/activity-timer.js"></script>
+  <script>
+    // Activity config: copy this object to create the next standalone practice.
+    const DATA_URL = '../../data/practice/messy-notes.json';
+    let ACTIVITY = null;
+
+    const STORAGE_PREFIX = 'utl_practice_attempts_';
+    const MAX_ATTEMPTS = 10;
+    let storageKey = '';
+
+    const state = {
+      mode: 'open',
+      lastAttemptId: null,
+      lastScore: null,
+      sampleRevealed: false
+    };
+
+    const els = {};
+    let activityTimer = null;
+    let timerMetricHidden = false;
+
+    // Exercise data is loaded from ../../data/practice/messy-notes.json.
+    // Add future messy-notes variations to that JSON file. This app loads the
+    // first variation by default and expects the activity config fields used by
+    // renderConfig, checklist scoring, sample answer, and local attempt storage.
+    async function loadPracticeData() {
+      const response = await fetch(DATA_URL);
+      if (!response.ok) throw new Error(`Unable to load ${DATA_URL}`);
+      const data = await response.json();
+      if (!Array.isArray(data) || !data.length) throw new Error('Messy notes data is empty.');
+      ACTIVITY = {
+        ...data[0],
+        id: 'rushed-voice-memo',
+        title: 'Rushed voice memo',
+        subtitle: 'Turn a rushed verbal update into an Aiko-ready summary.',
+        storyContext: 'Aiko sent you a rushed voice memo. She spoke quickly and without structure. Your job is to turn her verbal update into a clean, structured written summary that she can act on.',
+        instructions: [
+          '<strong>Your task:</strong> Aiko sent you a rushed voice memo. She spoke quickly and without structure. Your job is to turn her verbal update into a clean, structured written summary that she can act on.',
+          '<strong>Make it usable:</strong> Organise the update into three clear buckets and start each bullet with a BSP.'
+        ],
+        sourceText: '[Voice memo transcript will be loaded here. This will be a rushed, unstructured verbal update from Aiko covering the Olympic project status, key blockers, and next steps — delivered quickly and without structure.]',
+        inputPlaceholder: 'Write your structured voice memo summary here...',
+        sectionPlaceholders: ['Current status', 'Key blockers', 'Next steps'],
+        sampleAnswer: [
+          { title: 'Current status', bullets: ['<strong>Status summary:</strong> Capture the latest project state in clear, decision-ready language.'] },
+          { title: 'Key blockers', bullets: ['<strong>Blocker summary:</strong> Separate the few blockers that matter from the surrounding noise.'] },
+          { title: 'Next steps', bullets: ['<strong>Action summary:</strong> Clarify what Aiko should do next and who needs to act.'] }
+        ]
+      };
+      storageKey = `${STORAGE_PREFIX}${ACTIVITY.id}`;
+    }
+
+    function getEl(id) {
+      return document.getElementById(id);
+    }
+
+    function formatSeconds(totalSeconds) {
+      const mins = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
+      const secs = Math.floor(totalSeconds % 60).toString().padStart(2, '0');
+      return `${mins}:${secs}`;
+    }
+
+    function escapeHtml(value) {
+      return value
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function loadAttempts() {
+      try {
+        return JSON.parse(localStorage.getItem(storageKey)) || [];
+      } catch (error) {
+        return [];
+      }
+    }
+
+    function saveAttempts(attempts) {
+      const trimmed = attempts.slice(-MAX_ATTEMPTS);
+      localStorage.setItem(storageKey, JSON.stringify(trimmed));
+    }
+
+    function addAttempt(attempt) {
+      const attempts = loadAttempts();
+      attempts.push(attempt);
+      saveAttempts(attempts);
+      renderAttempts();
+    }
+
+    function updateAttemptChecklist(checklistSelections) {
+      if (!state.lastAttemptId) return;
+      const attempts = loadAttempts();
+      const index = attempts.findIndex((attempt) => attempt.attemptId === state.lastAttemptId);
+      if (index === -1) return;
+      attempts[index].checklistSelections = checklistSelections;
+      saveAttempts(attempts);
+      renderAttempts();
+    }
+
+    function currentElapsedSeconds() {
+      return activityTimer.elapsedSeconds();
+    }
+
+    function isWithinTarget() {
+      return activityTimer.isWithinTarget();
+    }
+
+    function startTimer() {
+      activityTimer.start();
+    }
+
+    function pauseTimer() {
+      activityTimer.pause();
+    }
+
+    function resumeTimer() {
+      activityTimer.resume();
+    }
+
+    function resetTimer() {
+      activityTimer.reset();
+    }
+
+    function renderTimer() {
+      activityTimer.render();
+    }
+
+    function getOpenResponse() {
+      return els.openResponse.value.trim();
+    }
+
+    function getSectionResponse() {
+      return [1, 2, 3].map((num) => {
+        const title = getEl(`sectionTitle${num}`).value.trim();
+        const body = getEl(`sectionBody${num}`).value.trim();
+        return { title, body };
+      });
+    }
+
+    function formatSectionResponse(sections) {
+      return sections
+        .map((section, index) => {
+          const title = section.title || `Section ${index + 1}`;
+          const body = section.body || '';
+          return `${title}\n${body}`.trim();
+        })
+        .filter(Boolean)
+        .join('\n\n');
+    }
+
+    function getCurrentResponse() {
+      if (state.mode === 'sections') {
+        return {
+          mode: 'sections',
+          sections: getSectionResponse(),
+          text: formatSectionResponse(getSectionResponse())
+        };
+      }
+
+      return {
+        mode: 'open',
+        text: getOpenResponse()
+      };
+    }
+
+    function hasAnyContent() {
+      const response = getCurrentResponse();
+      return Boolean(response.text.trim());
+    }
+
+    function normalizeForMatch(text) {
+      return text
+        .toLowerCase()
+        .replace(/[’‘]/g, "'")
+        .replace(/[–—]/g, '-');
+    }
+
+    function countWords(text) {
+      const words = text.match(/[A-Za-z0-9À-ÿ]+(?:['’-][A-Za-z0-9À-ÿ]+)?/g);
+      return words ? words.length : 0;
+    }
+
+    function getResponseLines(text) {
+      return text
+        .split('\n')
+        .map((line) => line.trim())
+        .filter(Boolean);
+    }
+
+    function countSections(response) {
+      if (response.mode === 'sections') {
+        return response.sections.filter((section) => section.title || section.body).length;
+      }
+
+      const lines = getResponseLines(response.text);
+      const headingLines = lines.filter((line) => {
+        const clean = line.replace(/^#+\s*/, '').trim();
+        return clean.length <= 80 && !/^[•*-]\s/.test(clean) && !clean.includes(':');
+      });
+      const colonHeadings = lines.filter((line) => /^[A-Z][^:]{2,60}\?$/.test(line));
+
+      return Math.max(headingLines.length, colonHeadings.length);
+    }
+
+    function getBulletLines(text) {
+      const lines = getResponseLines(text);
+      const explicitBullets = lines.filter((line) => /^[•*-]\s+/.test(line));
+      if (explicitBullets.length) return explicitBullets;
+      return lines.filter((line) => line.includes(':'));
+    }
+
+    function scoreStructure(response) {
+      const sectionCount = countSections(response);
+      let points = 0;
+      let message = 'Structure is not yet clear.';
+
+      if (sectionCount === 3) {
+        points = 30;
+        message = 'Used 3 sections correctly.';
+      } else if (sectionCount === 2 || sectionCount === 4) {
+        points = 18;
+        message = `Used ${sectionCount} sections; aim for exactly 3.`;
+      } else if (sectionCount > 1) {
+        points = 8;
+        message = 'Some structure is visible, but the section count is off.';
+      }
+
+      return { label: 'Structure', points, max: 30, message, details: { sectionCount } };
+    }
+
+    function scoreBspFormat(text) {
+      const bullets = getBulletLines(text);
+      const bspBullets = bullets.filter((line) => {
+        const clean = line.replace(/^[•*-]\s+/, '').trim();
+        const colonIndex = clean.indexOf(':');
+        return colonIndex > 0 && colonIndex <= 36;
+      });
+      const ratio = bullets.length ? bspBullets.length / bullets.length : 0;
+      const points = Math.round(ratio * 20);
+      let message = 'No BSP-style bullet lines detected.';
+
+      if (ratio === 1 && bullets.length) {
+        message = 'Every detected bullet uses BSP format.';
+      } else if (ratio >= 0.65) {
+        message = 'Some bullets are missing BSP format.';
+      } else if (ratio > 0) {
+        message = 'Most bullets need a short BSP before the colon.';
+      }
+
+      return {
+        label: 'BSP format',
+        points,
+        max: 20,
+        message,
+        details: { bulletCount: bullets.length, bspBulletCount: bspBullets.length }
+      };
+    }
+
+    function scoreCoverage(text, scoringConfig) {
+      const normalizedText = normalizeForMatch(text);
+      const groups = scoringConfig.coverageKeywords.map((group) => {
+        const matchedTerms = group.terms.filter((term) => normalizedText.includes(normalizeForMatch(term)));
+        return {
+          label: group.label,
+          matched: matchedTerms.length > 0,
+          matchedTerms
+        };
+      });
+      const matchedGroups = groups.filter((group) => group.matched);
+      const points = Math.round((matchedGroups.length / groups.length) * 30);
+      const missing = groups.filter((group) => !group.matched).map((group) => group.label);
+      const message = missing.length
+        ? `Missing ${missing[0].toLowerCase()} coverage.`
+        : 'Covers all key content groups.';
+
+      return {
+        label: 'Coverage',
+        points,
+        max: 30,
+        message,
+        details: { matched: matchedGroups.map((group) => group.label), missing }
+      };
+    }
+
+    function scoreConciseness(text, scoringConfig) {
+      const wordCount = countWords(text);
+      const target = scoringConfig.wordCountTarget;
+      let points = 6;
+      let message = 'Length is outside the target range.';
+
+      if (wordCount >= target.idealMin && wordCount <= target.idealMax) {
+        points = 20;
+        message = 'Concise and within the ideal range.';
+      } else if (wordCount >= target.min && wordCount <= target.max) {
+        points = 14;
+        message = wordCount < target.idealMin ? 'Slightly short.' : 'Slightly verbose.';
+      } else if (wordCount < target.min) {
+        message = 'Too brief to cover the full message.';
+      } else {
+        message = 'Too verbose for an Aiko-ready summary.';
+      }
+
+      return { label: 'Conciseness', points, max: 20, message, details: { wordCount } };
+    }
+
+    function getScoreInsight(categories) {
+      const sorted = categories.slice().sort((a, b) => (a.points / a.max) - (b.points / b.max));
+      const weakest = sorted[0];
+      const strongest = sorted[sorted.length - 1];
+
+      if (strongest.label === 'Structure' && weakest.label !== 'Structure') {
+        return `Strong structure. Improve ${weakest.label.toLowerCase()}.`;
+      }
+      if (strongest.label === 'Coverage' && weakest.label !== 'Coverage') {
+        return `Good coverage. Tighten ${weakest.label.toLowerCase()}.`;
+      }
+      if (weakest.label === 'Conciseness') {
+        return 'Good foundation. Tighten conciseness.';
+      }
+      return `Focus next on ${weakest.label.toLowerCase()}.`;
+    }
+
+    function scorePractice(response, scoringConfig) {
+      const text = response.text;
+      const categories = [
+        scoreStructure(response),
+        scoreBspFormat(text),
+        scoreCoverage(text, scoringConfig),
+        scoreConciseness(text, scoringConfig)
+      ];
+      const total = categories.reduce((sum, category) => sum + category.points, 0);
+      const wordCount = categories.find((category) => category.label === 'Conciseness').details.wordCount;
+
+      return {
+        total,
+        max: 100,
+        insight: getScoreInsight(categories),
+        wordCount,
+        categories
+      };
+    }
+
+    function setMode(nextMode) {
+      state.mode = nextMode;
+      if (window.switchMessyNotesMode) window.switchMessyNotesMode(nextMode);
+    }
+
+    function renderConfig() {
+      if (els.phasePill) els.phasePill.textContent = ACTIVITY.phase;
+      els.activityTitle.textContent = ACTIVITY.title;
+      els.activitySubtitle.textContent = ACTIVITY.subtitle;
+      els.storyContext.textContent = ACTIVITY.storyContext;
+      els.sourceText.textContent = ACTIVITY.sourceText;
+      els.openResponse.placeholder = ACTIVITY.inputPlaceholder;
+
+      els.instructionsList.innerHTML = ACTIVITY.instructions
+        .map((item) => `<li>${item}</li>`)
+        .join('');
+
+      els.constraintsList.innerHTML = ACTIVITY.constraints
+        .map((item) => `<li>${escapeHtml(item)}</li>`)
+        .join('');
+    }
+
+    function buildSectionInputs() {
+      els.sectionGrid.innerHTML = ACTIVITY.sectionPlaceholders.map((placeholder, index) => {
+        const num = index + 1;
+        return `
+          <div class="section-box">
+            <label for="sectionTitle${num}">Section ${num}</label>
+            <input id="sectionTitle${num}" class="section-title" type="text" placeholder="${escapeHtml(placeholder)}" />
+            <textarea id="sectionBody${num}" class="response-area section-response" placeholder="Bullet responses..."></textarea>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderChecklist() {
+      els.checklist.innerHTML = ACTIVITY.checklist.map((item, index) => `
+        <label>
+          <input type="checkbox" data-check-index="${index}" />
+          <span>${escapeHtml(item)}</span>
+        </label>
+      `).join('');
+    }
+
+    function collectChecklistSelections() {
+      return Array.from(els.checklist.querySelectorAll('input[type="checkbox"]')).map((input, index) => ({
+        label: ACTIVITY.checklist[index],
+        checked: input.checked
+      }));
+    }
+
+    function renderSampleAnswer() {
+      els.sampleAnswer.innerHTML = ACTIVITY.sampleAnswer.map((section) => `
+        <h4>${escapeHtml(section.title)}</h4>
+        <ul>${section.bullets.map((bullet) => `<li>${bullet}</li>`).join('')}</ul>
+      `).join('');
+    }
+
+    function renderScore(score) {
+      els.scorePanel.classList.remove('hidden');
+      els.scorePanel.innerHTML = `
+        <div class="score-head">
+          <div>
+            <div class="score-title">Practice score</div>
+            <p class="score-insight">${escapeHtml(score.insight)}</p>
+          </div>
+          <div class="score-total">${score.total} / ${score.max}</div>
+        </div>
+        <div class="score-rows">
+          ${score.categories.map((category) => {
+            const pct = Math.round((category.points / category.max) * 100);
+            return `
+              <div class="score-row">
+                <div class="score-name">${escapeHtml(category.label)}</div>
+                <div class="score-bar" aria-label="${escapeHtml(category.label)} score">
+                  <div class="score-fill" style="width: ${pct}%"></div>
+                </div>
+                <div class="score-points">${category.points} / ${category.max}</div>
+                <div class="score-message">${escapeHtml(category.message)}</div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
+    }
+
+    function renderRecentAttempts() {
+      const attempts = loadAttempts().slice(-3).reverse();
+      if (!attempts.length) {
+        els.recentAttempts.classList.add('hidden');
+        els.recentAttempts.innerHTML = '';
+        return;
+      }
+
+      els.recentAttempts.classList.remove('hidden');
+      els.recentAttempts.innerHTML = `
+        <h3>Recent attempts</h3>
+        <div class="recent-list">
+          ${attempts.map((attempt, index) => {
+            const date = new Date(attempt.timestamp).toLocaleString([], {
+              month: 'short',
+              day: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit'
+            });
+            const previous = attempts[index + 1];
+            const trend = previous && typeof attempt.score === 'number' && typeof previous.score === 'number'
+              ? attempt.score - previous.score
+              : null;
+            const trendText = trend === null || trend === 0 ? '' : `${trend > 0 ? '+' : ''}${trend} improvement`;
+            const elapsed = attempt.timingResult ? attempt.timingResult.elapsedSeconds : attempt.elapsedSeconds;
+            return `
+              <div class="recent-item">
+                <span>${escapeHtml(date)}${trendText ? ` <span class="trend">${escapeHtml(trendText)}</span>` : ''}<br><span class="small">${formatSeconds(elapsed || 0)}</span></span>
+                <span class="recent-score">${typeof attempt.score === 'number' ? `${attempt.score} / 100` : 'No score'}</span>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
+    }
+
+    function submitAttempt() {
+      if (!hasAnyContent()) {
+        els.confirmation.classList.remove('hidden');
+        els.confirmation.innerHTML = '<strong>Add a response first.</strong> Then submit when you are ready.';
+        return;
+      }
+
+      const response = getCurrentResponse();
+      const withinTarget = isWithinTarget();
+      const elapsedSeconds = currentElapsedSeconds();
+      pauseTimer();
+      const score = scorePractice(response, ACTIVITY.scoring);
+      const attempt = {
+        attemptId: `${ACTIVITY.id}-${Date.now()}`,
+        activityId: ACTIVITY.id,
+        timestamp: new Date().toISOString(),
+        inputMode: response.mode,
+        userResponse: response,
+        submittedWithinTarget: withinTarget,
+        timingResult: {
+          elapsedSeconds,
+          submittedWithinTarget: withinTarget
+        },
+        elapsedSeconds,
+        checklistSelections: [],
+        score: score.total,
+        categoryScores: score.categories,
+        wordCount: score.wordCount
+      };
+
+      // Future backend extension point:
+      // sendAttemptToApi(attempt), sendAttemptToGoogleSheets(attempt), or sendFeedbackEmail(attempt).
+      addAttempt(attempt);
+      state.lastAttemptId = attempt.attemptId;
+      state.lastScore = score;
+      state.sampleRevealed = false;
+
+      els.submittedAnswer.textContent = response.text;
+      els.confirmation.classList.remove('hidden');
+      els.confirmation.innerHTML = `<strong>Attempt saved locally.</strong> Submitted ${withinTarget ? 'within' : 'after'} the 5-minute target. Time used: ${formatSeconds(elapsedSeconds)}.`;
+      els.mobileResultTabs.classList.add('visible');
+      els.checklistPanel.classList.remove('hidden');
+      renderScore(score);
+      els.comparisonPanel.classList.add('hidden');
+      setMobileTab('self');
+    }
+
+    function clearCurrentInput() {
+      els.openResponse.value = '';
+      [1, 2, 3].forEach((num) => {
+        getEl(`sectionTitle${num}`).value = '';
+        getEl(`sectionBody${num}`).value = '';
+      });
+      state.lastAttemptId = null;
+      state.lastScore = null;
+      state.sampleRevealed = false;
+      els.confirmation.classList.add('hidden');
+      els.mobileResultTabs.classList.remove('visible');
+      els.checklistPanel.classList.add('hidden');
+      els.scorePanel.classList.add('hidden');
+      els.scorePanel.innerHTML = '';
+      els.comparisonPanel.classList.add('hidden');
+      setMobileTab('self');
+      renderChecklist();
+      resetTimer();
+    }
+
+    function renderAttempts() {
+      const attempts = loadAttempts().slice().reverse();
+      renderRecentAttempts();
+      if (!attempts.length) {
+        els.attemptsList.innerHTML = '<p class="small">No previous attempts yet.</p>';
+        return;
+      }
+
+      els.attemptsList.innerHTML = attempts.map((attempt) => {
+        const date = new Date(attempt.timestamp).toLocaleString([], {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+        const status = attempt.submittedWithinTarget ? 'Within 5 minutes' : 'Over 5 minutes';
+        const scoreText = typeof attempt.score === 'number' ? ` · ${attempt.score} / 100` : '';
+        const elapsed = attempt.timingResult ? attempt.timingResult.elapsedSeconds : attempt.elapsedSeconds;
+        const answer = attempt.userResponse && attempt.userResponse.text
+          ? attempt.userResponse.text
+          : '';
+        return `
+          <details class="attempt-card">
+            <summary>
+              ${escapeHtml(date)}
+              <span class="attempt-meta">${escapeHtml(status)} · ${formatSeconds(elapsed || 0)} · ${escapeHtml(attempt.inputMode)}${scoreText}</span>
+            </summary>
+            <pre class="answer-pre">${escapeHtml(answer)}</pre>
+          </details>
+        `;
+      }).join('');
+    }
+
+    function setMobileTab(tab) {
+      document.body.dataset.mobileTab = tab;
+      els.mobileResultTabs.querySelectorAll('.mobile-tab').forEach((button) => {
+        button.classList.toggle('active', button.dataset.tab === tab);
+      });
+    }
+
+    function startTimerFromInput() {
+      activityTimer.startFromInteraction();
+    }
+
+    function wireMobilePanelToggles() {
+      document.querySelectorAll('aside .panel-head').forEach((head) => {
+        head.addEventListener('click', () => {
+          if (!window.matchMedia('(max-width: 640px)').matches) return;
+          head.closest('.panel').classList.toggle('open');
+        });
+      });
+    }
+
+    function initializeResponsiveTimer() {
+      activityTimer.initializeResponsiveVisibility();
+    }
+
+    function wireEvents() {
+      els.openModeBtn.addEventListener('click', () => setMode('open'));
+      els.sectionModeBtn.addEventListener('click', () => setMode('sections'));
+      document.querySelector('.mode-switch').addEventListener('click', (event) => {
+        const button = event.target.closest('.mode-btn');
+        if (!button) return;
+        setMode(button.id === 'sectionModeBtn' ? 'sections' : 'open');
+      });
+
+      els.openResponse.addEventListener('input', startTimerFromInput);
+      els.sectionGrid.addEventListener('input', startTimerFromInput);
+
+      els.submitBtn.addEventListener('click', submitAttempt);
+      els.tryAgainBtn.addEventListener('click', clearCurrentInput);
+
+      els.revealSampleBtn.addEventListener('click', () => {
+        updateAttemptChecklist(collectChecklistSelections());
+        state.sampleRevealed = true;
+        els.comparisonPanel.classList.remove('hidden');
+        if (window.matchMedia('(max-width: 640px)').matches) setMobileTab('sample');
+      });
+
+      els.mobileResultTabs.addEventListener('click', (event) => {
+        const button = event.target.closest('[data-tab]');
+        if (!button) return;
+        if (button.dataset.tab === 'sample' && !state.sampleRevealed) return;
+        setMobileTab(button.dataset.tab);
+        if (button.dataset.tab === 'answer' || (button.dataset.tab === 'sample' && state.sampleRevealed)) {
+          els.comparisonPanel.classList.remove('hidden');
+        }
+      });
+
+      els.checklist.addEventListener('change', () => {
+        updateAttemptChecklist(collectChecklistSelections());
+      });
+
+      els.clearAttemptsBtn.addEventListener('click', () => {
+        localStorage.removeItem(storageKey);
+        renderAttempts();
+      });
+
+      els.timerPauseIconBtn.addEventListener('click', () => {
+        pauseTimer();
+      });
+      els.timerPlayIconBtn.addEventListener('click', () => {
+        activityTimer.hasStarted() ? resumeTimer() : startTimer();
+      });
+      els.timerResetIconBtn.addEventListener('click', () => {
+        resetTimer();
+      });
+      els.timerMetricToggleBtn.addEventListener('click', () => {
+        timerMetricHidden = !timerMetricHidden;
+        syncHeaderTimerIcons();
+      });
+
+      wireMobilePanelToggles();
+    }
+
+    function syncHeaderTimerIcons() {
+      els.timerPauseIconBtn.disabled = !activityTimer.isRunning();
+      els.timerPlayIconBtn.disabled = activityTimer.isRunning();
+      els.timerPlayIconBtn.setAttribute('aria-label', activityTimer.hasStarted() ? 'Resume timer' : 'Start timer');
+      els.timerMetric.classList.toggle('time-hidden', timerMetricHidden);
+      els.timerMetricToggleBtn.setAttribute('aria-label', timerMetricHidden ? 'Show elapsed time' : 'Hide elapsed time');
+      els.timerMetricToggleBtn.setAttribute('aria-pressed', timerMetricHidden ? 'true' : 'false');
+      els.timerMetricToggleBtn.innerHTML = timerMetricHidden
+        ? '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.7 10.7 0 0 1 12 20C5 20 2 12 2 12a18.4 18.4 0 0 1 5.06-5.94"/><path d="M9.9 4.24A10.3 10.3 0 0 1 12 4c7 0 10 8 10 8a18.5 18.5 0 0 1-2.16 3.19"/><path d="M14.12 14.12A3 3 0 0 1 9.88 9.88"/><path d="M1 1l22 22"/></svg>'
+        : '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-8 10-8 10 8 10 8-3 8-10 8-10-8-10-8Z"/><circle cx="12" cy="12" r="3"/></svg>';
+    }
+
+    function cacheElements() {
+      [
+        'phasePill',
+        'activityTitle',
+        'activitySubtitle',
+        'storyContext',
+        'instructionsList',
+        'sourceText',
+        'constraintsList',
+        'recentAttempts',
+        'timerRow',
+        'timerDisplay',
+        'timerNote',
+        'toggleTimerBtn',
+        'startTimerBtn',
+        'pauseTimerBtn',
+        'resumeTimerBtn',
+        'resetTimerBtn',
+        'timerPauseIconBtn',
+        'timerPlayIconBtn',
+        'timerResetIconBtn',
+        'timerMetric',
+        'timerMetricToggleBtn',
+        'openModeBtn',
+        'sectionModeBtn',
+        'openMode',
+        'sectionMode',
+        'openResponse',
+        'sectionGrid',
+        'submitBtn',
+        'tryAgainBtn',
+        'confirmation',
+        'mobileResultTabs',
+        'checklistPanel',
+        'checklist',
+        'scorePanel',
+        'revealSampleBtn',
+        'comparisonPanel',
+        'submittedAnswer',
+        'sampleAnswer',
+        'attemptsList',
+        'clearAttemptsBtn'
+      ].forEach((id) => {
+        els[id] = getEl(id);
+      });
+    }
+
+    async function init() {
+      cacheElements();
+      try {
+        await loadPracticeData();
+      } catch (error) {
+        console.error(error);
+        document.getElementById('content').innerHTML = `
+          <article class="panel">
+            <div class="panel-head"><h2>We could not load this exercise.</h2></div>
+            <div class="panel-body"><p>Please refresh the page. If the issue continues, the practice data file may be missing or malformed.</p></div>
+          </article>
+        `;
+        return;
+      }
+      renderConfig();
+      buildSectionInputs();
+      renderChecklist();
+      renderSampleAnswer();
+      renderAttempts();
+      setMobileTab('self');
+      activityTimer = ActivityTimer.create({
+        elements: {
+          row: els.timerRow,
+          display: els.timerDisplay,
+          note: els.timerNote,
+          toggleBtn: els.toggleTimerBtn,
+          startBtn: els.startTimerBtn,
+          pauseBtn: els.pauseTimerBtn,
+          resumeBtn: els.resumeTimerBtn,
+          resetBtn: els.resetTimerBtn
+        },
+        targetSeconds: ACTIVITY.durationSeconds
+      });
+      setInterval(syncHeaderTimerIcons, 500);
+      syncHeaderTimerIcons();
+      initializeResponsiveTimer();
+      setMode(state.mode);
+      wireEvents();
+    }
+
+    init();
+  </script>
+</body>
+</html>

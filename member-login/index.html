@@ -196,13 +196,27 @@
 
     .phase-stack {
       display: grid;
-      gap: 24px;
+      gap: 0;
       margin-top: 24px;
     }
 
     .phase-section {
       display: grid;
       gap: 14px;
+      margin: 0;
+      padding: 2rem 1.75rem;
+      border-top: 1px solid rgba(0, 0, 0, .06);
+    }
+
+    #tsa-score,
+    #phase1,
+    #phase3 {
+      background-color: #ffffff;
+    }
+
+    #orientation,
+    #phase2 {
+      background-color: #E8DFD1;
     }
 
     .phase-heading {
@@ -279,16 +293,249 @@
     }
 
     .slides-placeholder {
-      display: grid;
-      place-items: center;
-      min-height: 150px;
-      padding: 22px;
-      border: 2px dashed rgba(0, 51, 102, .25);
+      width: 100%;
+      aspect-ratio: 16/9;
+      background: #f3ede2;
+      border: 1px dashed #c8bfb0;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Lato', sans-serif;
+      font-size: 13px;
+      color: #aaa;
+      margin-bottom: 8px;
+    }
+
+    .member-nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin: -28px -28px 28px;
+      padding: 14px 28px;
+      border-bottom: 1px solid var(--line);
+      border-radius: 12px 12px 0 0;
+      background: rgba(255, 255, 255, .96);
+      backdrop-filter: blur(10px);
+    }
+
+    .member-nav-links {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      color: var(--steel);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+
+    .member-nav a {
+      padding: 6px 0;
+      border-bottom: 2px solid transparent;
+    }
+
+    .member-nav a.active {
+      color: var(--navy);
+      border-bottom-color: var(--gold);
+    }
+
+    .mission-card {
+      margin-top: 18px;
+      padding: 1rem 1.25rem;
+      border-left: 3px solid var(--navy);
       border-radius: 8px;
       background: var(--cream);
       color: var(--charcoal);
+      line-height: 1.65;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 9px;
+      border-radius: 999px;
+      background: rgba(238, 163, 32, .16);
+      color: var(--deep-navy);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 10px;
       font-weight: 700;
-      text-align: center;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .phase-description {
+      max-width: 720px;
+      margin: 0;
+    }
+
+    .phase-chunk {
+      display: grid;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .slides-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 0;
+      padding: 9px 14px;
+      border-radius: 6px;
+      background: var(--cream);
+      color: var(--charcoal);
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    #orientation .slides-bar,
+    #phase2 .slides-bar {
+      background: rgba(0, 0, 0, .05);
+    }
+
+    .slides-bar-icon {
+      color: var(--gold);
+      font-size: 11px;
+    }
+
+    .slides-embed-wrapper {
+      position: relative;
+      height: 0;
+      margin-bottom: 8px;
+      padding-bottom: 56.25%;
+      overflow: hidden;
+      border: 1px solid #e0d9d0;
+      border-radius: 8px;
+      background: var(--cream);
+    }
+
+    .slides-embed-wrapper iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+    }
+
+    .slides-embed-wrapper.is-collapsed {
+      display: none;
+    }
+
+    .slides-placeholder.is-collapsed {
+      display: none;
+    }
+
+    .slides-fullscreen-link {
+      display: block;
+      margin: -2px 0 8px;
+      color: var(--navy);
+      font-size: 12px;
+      font-family: 'Lato', sans-serif;
+      text-align: right;
+      text-decoration: none;
+    }
+
+    .slides-fullscreen-link.is-collapsed {
+      display: none;
+    }
+
+    .slides-fullscreen-link:hover {
+      text-decoration: underline;
+    }
+
+    .exercise-card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
+      gap: 18px;
+    }
+
+    .exercise-card {
+      display: grid;
+      align-content: start;
+      gap: 18px;
+      min-height: 260px;
+      padding: 30px 34px;
+      border: 1px solid #e0d9d0;
+      border-top: 6px solid var(--gold);
+      border-radius: 10px;
+      background: var(--white);
+      box-shadow: 0 16px 36px rgba(0, 51, 102, .08);
+      text-decoration: none;
+      cursor: pointer;
+      transition: border-color .15s, box-shadow .15s, transform .15s;
+    }
+
+    .exercise-card:hover {
+      border-color: rgba(0, 51, 102, .32);
+      box-shadow: 0 22px 48px rgba(0, 51, 102, .12);
+      transform: translateY(-2px);
+    }
+
+    .exercise-card .card-type {
+      margin: 12px 0 6px;
+      color: var(--steel);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+
+    .exercise-card .card-title {
+      color: var(--navy);
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(30px, 4vw, 42px);
+      font-weight: 700;
+      line-height: 1.05;
+    }
+
+    .exercise-card .card-time {
+      max-width: 620px;
+      color: var(--steel);
+      font-size: clamp(18px, 2vw, 23px);
+      line-height: 1.45;
+    }
+
+    .exercise-card[href]::after {
+      content: "Open tool";
+      align-self: end;
+      justify-self: start;
+      display: inline-flex;
+      align-items: center;
+      min-height: 52px;
+      margin-top: 16px;
+      padding: 12px 18px;
+      border-radius: 8px;
+      background: var(--gold);
+      color: var(--deep-navy);
+      font-family: 'Lato', sans-serif;
+      font-size: 19px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .exercise-card.coming-soon {
+      opacity: .5;
+      cursor: default;
+      pointer-events: none;
+    }
+
+    .coming-soon-badge {
+      display: inline-block;
+      margin-top: 6px;
+      padding: 2px 7px;
+      border: 1px solid #e0d9d0;
+      border-radius: 4px;
+      background: var(--cream);
+      color: #888;
+      font-size: 10px;
     }
 
     .hidden {
@@ -302,6 +549,12 @@
 
       .dashboard {
         padding: 34px;
+      }
+
+      .member-nav {
+        margin: -34px -34px 30px;
+        padding-right: 34px;
+        padding-left: 34px;
       }
 
       .tool-grid {
@@ -335,115 +588,249 @@
         </article>
 
         <section id="dashboard" class="dashboard hidden" aria-labelledby="dashboardTitle">
+          <nav class="member-nav" aria-label="Member workspace sections">
+            <div class="member-nav-links">
+              <a class="member-nav-link active" href="#orientation">Orientation</a>
+              <span aria-hidden="true">·</span>
+              <a class="member-nav-link" href="#phase1">Phase 1</a>
+              <span aria-hidden="true">·</span>
+              <a class="member-nav-link" href="#phase2">Phase 2</a>
+              <span aria-hidden="true">·</span>
+              <a class="member-nav-link" href="#phase3">Phase 3</a>
+            </div>
+            <button id="logoutBtn" class="text-button" type="button">Log out</button>
+          </nav>
+
           <div class="dashboard-header">
             <span class="section-label">Member Tools</span>
             <h1 id="dashboardTitle">Your practice workspace.</h1>
-            <p>Open the tools you have been building and keep practicing from one simple place.</p>
-            <div class="dashboard-actions">
-              <button id="logoutBtn" class="text-button" type="button">Log out</button>
+            <p>Open the tools you have been building and keep practicing from one place.</p>
+            <div class="mission-card">
+              You are now Chief of Staff to Aiko Mori. You've just joined MA, a high-stakes marketing agency built on clarity before action. Aiko does not want more information. She wants clean thinking she can act on immediately.
             </div>
           </div>
 
           <div class="phase-stack">
-            <section class="phase-section" aria-labelledby="tsaScoreTitle">
+            <section class="phase-section" id="tsa-score" aria-labelledby="tsaScoreTitle">
               <div class="phase-heading">
-                <h2 id="tsaScoreTitle">TSA Score™</h2>
-                <span>Assessments</span>
+                <div>
+                  <span class="section-label">Before You Begin</span>
+                  <h2 id="tsaScoreTitle">TSA Score™</h2>
+                </div>
+                <span class="badge">Optional</span>
               </div>
-              <p>Take your baseline assessment before the program begins. Return here after completing all three workbooks to measure your growth.</p>
+              <p class="phase-description">Take your baseline before starting. Return after Phase 3 to measure your growth.</p>
               <div class="tool-grid">
                 <article class="tool-card">
                   <span class="section-label">TSA Score™</span>
                   <h2>The Diagnostic</h2>
-                  <p>Your full baseline assessment. Take this before Workbook A.</p>
+                  <p>Take this before Phase 1.</p>
                   <a class="tool-link" href="../apps/tsa-diagnostic/index.html">Start The Diagnostic</a>
                 </article>
 
                 <article class="tool-card">
                   <span class="section-label">TSA Score™</span>
                   <h2>The Checkpoint</h2>
-                  <p>Your post-program assessment. Take this after Workbook C.</p>
+                  <p>Take this after Phase 3.</p>
                   <a class="tool-link" href="../apps/tsa-checkpoint/index.html">Start The Checkpoint</a>
                 </article>
               </div>
             </section>
 
-            <section class="phase-section" aria-labelledby="workbookATitle">
+            <section class="phase-section" id="orientation" aria-labelledby="orientationTitle">
               <div class="phase-heading">
-                <h2 id="workbookATitle">Workbook A — Think Clearly</h2>
-                <span>Phase 1</span>
+                <div>
+                  <span class="section-label">All Phases</span>
+                  <h2 id="orientationTitle">Orientation</h2>
+                </div>
               </div>
-              <p>Watch the context slides, then work through the exercises below.</p>
-              <!-- Replace this placeholder with the Google Slides embed src URL for Workbook A -->
-              <div class="slides-placeholder">Workbook A slides — embed Google Slides link here</div>
-              <div class="tool-grid">
-                <article class="tool-card">
-                  <span class="section-label">Phase 1 | Think Clearly</span>
-                  <h2>Grocery List</h2>
-                  <p>Sort a messy list into clean MECE buckets.</p>
-                  <a class="tool-link" href="../apps/grocery-list/index.html">Open tool</a>
-                </article>
+              <p class="phase-description">Complete this before starting any of the three workbooks. This applies to all phases.</p>
+              <div class="slides-bar" onclick="toggleSlides(this)">
+                <span class="slides-bar-icon">▶</span>
+                <span class="slides-bar-label">Orientation slides</span>
+              </div>
+              <div class="slides-embed-wrapper is-collapsed">
+                <iframe src="https://docs.google.com/presentation/d/e/2PACX-1vQwCHgkU4ms-rvT89180hJrbEx79Xlatja5IcWBsda40WQ8oruUOkRCi77MGmGymeNdxAoBTYNFRViY/pubembed?start=false&loop=false&delayms=3000" frameborder="0" allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true"></iframe>
+              </div>
+              <a href="https://docs.google.com/presentation/d/e/2PACX-1vQwCHgkU4ms-rvT89180hJrbEx79Xlatja5IcWBsda40WQ8oruUOkRCi77MGmGymeNdxAoBTYNFRViY/pubembed?start=false&loop=false&delayms=3000" target="_blank" class="slides-fullscreen-link is-collapsed">Open in full screen ↗</a>
+            </section>
 
-                <article class="tool-card">
-                  <span class="section-label">Phase 1 | Think Clearly</span>
-                  <h2>Manager's Messy Notes</h2>
-                  <p>Turn a rushed manager update into a structured, decision-ready summary.</p>
-                  <a class="tool-link" href="../apps/messy-notes/index.html">Open tool</a>
-                </article>
+            <section class="phase-section" id="phase1" aria-labelledby="phase1Title">
+              <div class="phase-heading">
+                <div>
+                  <span class="section-label">Phase 1</span>
+                  <h2 id="phase1Title">Think Clearly</h2>
+                </div>
+              </div>
+
+              <div class="phase-chunk">
+                <div class="slides-bar" onclick="toggleSlides(this)">
+                  <span class="slides-bar-icon">▶</span>
+                  <span class="slides-bar-label">Context — MECE & structured thinking</span>
+                </div>
+                <div class="slides-placeholder is-collapsed">Slides coming soon</div>
+                <div class="exercise-card-grid">
+                  <a class="exercise-card" href="../apps/grocery-list/index.html">
+                    <div class="card-type">Phase 1 | Think Clearly</div>
+                    <div class="card-title">Grocery List</div>
+                    <div class="card-time">Sort a messy list into clean MECE buckets.</div>
+                  </a>
+                </div>
+              </div>
+
+              <div class="phase-chunk">
+                <div class="slides-bar" onclick="toggleSlides(this)">
+                  <span class="slides-bar-icon">▶</span>
+                  <span class="slides-bar-label">Context — manager communications</span>
+                </div>
+                <div class="slides-placeholder is-collapsed">Slides coming soon</div>
+                <div class="exercise-card-grid">
+                  <a class="exercise-card" href="../apps/messy-notes/index.html">
+                    <div class="card-type">Phase 1 | Think Clearly</div>
+                    <div class="card-title">Manager's messy notes</div>
+                    <div class="card-time">Turn a rushed manager update into a structured summary.</div>
+                  </a>
+                </div>
+              </div>
+
+              <div class="phase-chunk">
+                <div class="slides-bar" onclick="toggleSlides(this)">
+                  <span class="slides-bar-icon">▶</span>
+                  <span class="slides-bar-label">Context — voice memos & structured note-taking</span>
+                </div>
+                <div class="slides-placeholder is-collapsed">Slides coming soon</div>
+                <div class="exercise-card-grid">
+                  <a class="exercise-card" href="../apps/rushed-voice-memo/index.html">
+                    <div class="card-type">Phase 1 | Think Clearly</div>
+                    <div class="card-title">Rushed voice memo</div>
+                    <div class="card-time">Turn a rushed verbal update into a clean written summary.</div>
+                  </a>
+                  <a class="exercise-card" href="../apps/rushed-voice-memo-ai/index.html">
+                    <div class="card-type">Phase 1 | Think Clearly</div>
+                    <div class="card-title">Rushed voice memo with AI</div>
+                    <div class="card-time">Transcribe a voice memo, then structure it with an AI prompt.</div>
+                  </a>
+                </div>
+              </div>
+
+              <div class="phase-chunk">
+                <div class="slides-bar" onclick="toggleSlides(this)">
+                  <span class="slides-bar-icon">▶</span>
+                  <span class="slides-bar-label">Context — chalkboard notes & BSP method</span>
+                </div>
+                <div class="slides-placeholder is-collapsed">Slides coming soon</div>
+                <div class="exercise-card-grid">
+                  <a class="exercise-card" href="../apps/chalkboard-notes/index.html">
+                    <div class="card-type">Phase 1 | Think Clearly</div>
+                    <div class="card-title">Chalkboard notes</div>
+                    <div class="card-time">Organise chalkboard ideas into MECE buckets with BSP headers.</div>
+                  </a>
+                </div>
               </div>
             </section>
 
-            <section class="phase-section" aria-labelledby="workbookBTitle">
+            <section class="phase-section" id="phase2" aria-labelledby="phase2Title">
               <div class="phase-heading">
-                <h2 id="workbookBTitle">Workbook B — Speak Concisely</h2>
-                <span>Phase 2</span>
+                <div>
+                  <span class="section-label">Phase 2</span>
+                  <h2 id="phase2Title">Speak Concisely</h2>
+                </div>
               </div>
-              <p>Watch the context slides, then work through the exercises below.</p>
-              <!-- Replace this placeholder with the Google Slides embed src URL for Workbook B -->
-              <div class="slides-placeholder">Workbook B slides — embed Google Slides link here</div>
-              <div class="tool-grid">
-                <article class="tool-card">
-                  <span class="section-label">Phase 2 | Speak Concisely</span>
-                  <h2>Issue Tree Builder</h2>
-                  <p>Build an issue tree from a central question, hypothesis, and supporting arguments.</p>
-                  <a class="tool-link" href="../apps/issue-tree-builder/index.html">Open tool</a>
-                </article>
 
-                <article class="tool-card">
-                  <span class="section-label">Phase 2 | Speak Concisely</span>
-                  <h2>SCQA Builder</h2>
-                  <p>Write two SCQA formulations from a single context to practice executive storylining.</p>
-                  <a class="tool-link" href="../apps/scqa-builder/index.html">Open tool</a>
-                </article>
+              <div class="phase-chunk">
+                <div class="slides-bar" onclick="toggleSlides(this)"><span class="slides-bar-icon">▶</span><span class="slides-bar-label">Context — issue trees & problem framing</span></div>
+                <div class="slides-placeholder is-collapsed">Slides coming soon</div>
+                <div class="exercise-card-grid">
+                  <a class="exercise-card" href="../apps/issue-tree-builder/index.html">
+                    <div class="card-type">Phase 2 | Speak Concisely</div>
+                    <div class="card-title">Issue tree builder</div>
+                    <div class="card-time">Build an issue tree from a question, hypothesis, and arguments.</div>
+                  </a>
+                </div>
+              </div>
+
+              <div class="phase-chunk">
+                <div class="slides-bar" onclick="toggleSlides(this)"><span class="slides-bar-icon">▶</span><span class="slides-bar-label">Context — SCQA & Minto's pyramid</span></div>
+                <div class="slides-placeholder is-collapsed">Slides coming soon</div>
+                <div class="exercise-card-grid">
+                  <a class="exercise-card" href="../apps/scqa-builder/index.html">
+                    <div class="card-type">Phase 2 | Speak Concisely</div>
+                    <div class="card-title">SCQA builder</div>
+                    <div class="card-time">Practice executive storylining from a single context.</div>
+                  </a>
+                  <article class="exercise-card coming-soon">
+                    <div class="card-type">Coming soon</div>
+                    <div class="card-title">Email to Aiko</div>
+                    <span class="coming-soon-badge">Coming soon</span>
+                  </article>
+                </div>
+              </div>
+
+              <div class="phase-chunk">
+                <div class="slides-bar" onclick="toggleSlides(this)"><span class="slides-bar-icon">▶</span><span class="slides-bar-label">Context — spoken communication</span></div>
+                <div class="slides-placeholder is-collapsed">Slides coming soon</div>
+                <div class="exercise-card-grid">
+                  <article class="exercise-card coming-soon">
+                    <div class="card-type">Coming soon</div>
+                    <div class="card-title">Explain to Aiko (120s)</div>
+                    <span class="coming-soon-badge">Coming soon</span>
+                  </article>
+                  <article class="exercise-card coming-soon">
+                    <div class="card-type">Coming soon</div>
+                    <div class="card-title">Elevator pitch (60s)</div>
+                    <span class="coming-soon-badge">Coming soon</span>
+                  </article>
+                </div>
               </div>
             </section>
 
-            <section class="phase-section" aria-labelledby="workbookCTitle">
+            <section class="phase-section" id="phase3" aria-labelledby="phase3Title">
               <div class="phase-heading">
-                <h2 id="workbookCTitle">Workbook C — Act Confidently</h2>
-                <span>Phase 3</span>
+                <div>
+                  <span class="section-label">Phase 3</span>
+                  <h2 id="phase3Title">Act Confidently</h2>
+                </div>
               </div>
-              <p>Watch the context slides, then work through the exercises below.</p>
-              <!-- Replace this placeholder with the Google Slides embed src URL for Workbook C -->
-              <div class="slides-placeholder">Workbook C slides — embed Google Slides link here</div>
-              <article class="tool-card tbd">
-                <span class="section-label">Coming Soon</span>
-                <h3>Exercises coming soon.</h3>
-              </article>
-            </section>
 
-            <section class="phase-section" aria-labelledby="moreToolsTitle">
-              <div class="phase-heading">
-                <h2 id="moreToolsTitle">More Tools</h2>
-                <span>Available now</span>
+              <div class="phase-chunk">
+                <div class="slides-bar" onclick="toggleSlides(this)"><span class="slides-bar-icon">▶</span><span class="slides-bar-label">Context — prioritisation & saying no</span></div>
+                <div class="slides-placeholder is-collapsed">Slides coming soon</div>
+                <div class="exercise-card-grid">
+                  <article class="exercise-card coming-soon">
+                    <div class="card-type">Coming soon</div>
+                    <div class="card-title">The art of saying no</div>
+                    <span class="coming-soon-badge">Coming soon</span>
+                  </article>
+                </div>
               </div>
-              <div class="tool-grid">
-                <article class="tool-card">
-                  <span class="section-label">Habit Tracker</span>
-                  <h2>12 in 12 Challenge Tracker</h2>
-                  <p>Pick one monthly experiment, check in daily, and review your progress.</p>
-                  <a class="tool-link" href="../apps/12-in-12/index.html">Open tool</a>
-                </article>
+
+              <div class="phase-chunk">
+                <div class="slides-bar" onclick="toggleSlides(this)"><span class="slides-bar-icon">▶</span><span class="slides-bar-label">Context — delivering difficult news</span></div>
+                <div class="slides-placeholder is-collapsed">Slides coming soon</div>
+                <div class="exercise-card-grid">
+                  <article class="exercise-card coming-soon">
+                    <div class="card-type">Coming soon</div>
+                    <div class="card-title">I have bad news...</div>
+                    <span class="coming-soon-badge">Coming soon</span>
+                  </article>
+                  <article class="exercise-card coming-soon">
+                    <div class="card-type">Coming soon</div>
+                    <div class="card-title">Let's switch hats</div>
+                    <span class="coming-soon-badge">Coming soon</span>
+                  </article>
+                </div>
+              </div>
+
+              <div class="phase-chunk">
+                <div class="slides-bar" onclick="toggleSlides(this)"><span class="slides-bar-icon">▶</span><span class="slides-bar-label">Context — presence & delivery</span></div>
+                <div class="slides-placeholder is-collapsed">Slides coming soon</div>
+                <div class="exercise-card-grid">
+                  <article class="exercise-card coming-soon">
+                    <div class="card-type">Coming soon</div>
+                    <div class="card-title">Speak like Obama</div>
+                    <span class="coming-soon-badge">Coming soon</span>
+                  </article>
+                </div>
               </div>
             </section>
           </div>
@@ -462,10 +849,64 @@
       var input = document.getElementById('passwordInput');
       var message = document.getElementById('loginMessage');
       var logoutBtn = document.getElementById('logoutBtn');
+      var navLinks = Array.prototype.slice.call(document.querySelectorAll('.member-nav-link'));
+      var navObserver = null;
+
+      function setActiveNav(sectionId) {
+        navLinks.forEach(function (link) {
+          link.classList.toggle('active', link.getAttribute('href') === '#' + sectionId);
+        });
+      }
+
+      function initSectionNav() {
+        if (navObserver) {
+          return;
+        }
+        var sections = ['orientation', 'phase1', 'phase2', 'phase3']
+          .map(function (id) { return document.getElementById(id); })
+          .filter(Boolean);
+
+        navObserver = new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            if (entry.isIntersecting) {
+              setActiveNav(entry.target.id);
+            }
+          });
+        }, {
+          root: null,
+          rootMargin: '-22% 0px -60% 0px',
+          threshold: 0
+        });
+
+        sections.forEach(function (section) {
+          navObserver.observe(section);
+        });
+      }
+
+      function toggleSlides(el) {
+        var icon = el.querySelector('.slides-bar-icon');
+        var panel = el.nextElementSibling;
+        var link = panel ? panel.nextElementSibling : null;
+
+        if (!panel || (!panel.classList.contains('slides-embed-wrapper') && !panel.classList.contains('slides-placeholder'))) {
+          return;
+        }
+
+        var isCollapsed = panel.classList.toggle('is-collapsed');
+        if (link && link.classList.contains('slides-fullscreen-link')) {
+          link.classList.toggle('is-collapsed', isCollapsed);
+        }
+        if (icon) {
+          icon.textContent = isCollapsed ? '▶' : '▼';
+        }
+      }
+
+      window.toggleSlides = toggleSlides;
 
       function showDashboard() {
         loginCard.classList.add('hidden');
         dashboard.classList.remove('hidden');
+        initSectionNav();
       }
 
       function showLogin() {

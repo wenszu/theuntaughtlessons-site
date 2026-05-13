@@ -234,14 +234,74 @@
     </div>
   </div>
 
-  <script src="assets/testimonials.js?v=testimonial-footer-20260506"></script>
   <script>
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzJE--FL2kB_XDNZRnszCtlyLRPvaLAHGuF5TAOdXJk40atbvf5Y6ELuSK2B7CSLaMN/exec';
+    const TESTIMONIALS_URL = 'data/testimonials.json';
     const navToggle = document.querySelector('.nav-toggle');
     const navMenu = document.getElementById('navMenu');
     const leadModal = document.getElementById('leadModal');
     const leadModalContent = leadModal.querySelector('.lead-modal-content');
     const leadModalInitialContent = leadModalContent.innerHTML;
+    const CONTACT_SESSION_KEY = 'utl_contact_shared';
+    const CONTACT_PROFILE_KEY = 'utl_contact_profile';
+
+    function rememberContact(payload) {
+      sessionStorage.setItem(CONTACT_SESSION_KEY, 'true');
+      sessionStorage.setItem(CONTACT_PROFILE_KEY, JSON.stringify({
+        name: payload.name || '',
+        email: payload.email || '',
+        role: payload.role || '',
+        message: payload.message || '',
+        source: payload.source || ''
+      }));
+    }
+
+    function escapeText(value) {
+      return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function testimonialCard(testimonial) {
+      return `
+        <blockquote class="testimonial-card">
+          <p>"${escapeText(testimonial.quote)}"</p>
+          <footer>
+            <strong>${escapeText(testimonial.name)}</strong>
+            <span class="testimonial-title">${escapeText(testimonial.title)}</span>
+            <span class="testimonial-company">${escapeText(testimonial.company)}</span>
+          </footer>
+        </blockquote>
+      `;
+    }
+
+    function renderTestimonialRow(rowId, items) {
+      const row = document.getElementById(rowId);
+      if (!row) return;
+      const cards = items.map(testimonialCard).join('');
+      row.innerHTML = `
+        <div class="marquee-track">${cards}</div>
+        <div class="marquee-track" aria-hidden="true">${cards}</div>
+      `;
+    }
+
+    async function loadTestimonials() {
+      try {
+        const response = await fetch(TESTIMONIALS_URL);
+        if (!response.ok) throw new Error('Unable to load testimonials.');
+        const testimonials = await response.json();
+        const midpoint = Math.ceil(testimonials.length / 2);
+        renderTestimonialRow('testimonialRowOne', testimonials.slice(0, midpoint));
+        renderTestimonialRow('testimonialRowTwo', testimonials.slice(midpoint));
+      } catch (error) {
+        console.warn('Testimonials could not be loaded.', error);
+      }
+    }
+
+    loadTestimonials();
 
     navToggle.addEventListener('click', () => {
       const isOpen = navToggle.getAttribute('aria-expanded') === 'true';
@@ -307,6 +367,7 @@
           mode: 'no-cors',
           body: JSON.stringify(payload)
         });
+        rememberContact(payload);
         showSuccessState();
       } catch (err) {
         showErrorState();

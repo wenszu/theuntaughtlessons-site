@@ -471,6 +471,18 @@
       line-height: 1.4;
     }
 
+    .testimonial-card-static .testimonial-title {
+      color: var(--program-charcoal);
+      font-style: italic;
+    }
+
+    .testimonial-card-static .testimonial-company {
+      margin-top: 12px;
+      color: #000000;
+      font-size: 15pt;
+      font-weight: 700;
+    }
+
     .closing-program-cta {
       padding: 120px 24px;
       background: var(--program-navy);
@@ -814,37 +826,7 @@
         <div class="program-section-label">What People Say</div>
         <h2 id="testimonials-title" class="program-heading">The results speak for themselves.</h2>
 
-        <div class="testimonial-grid">
-          <article class="testimonial-card-static program-reveal">
-            <blockquote>
-              <p>"I am really glad I joined the workshop as I was able to get out of my comfort zone. I noticed an improvement outside the workshop and my participation in class increased."</p>
-              <footer>
-                <strong>Student 1</strong>
-                <span>Workshop Participant</span>
-              </footer>
-            </blockquote>
-          </article>
-
-          <article class="testimonial-card-static program-reveal">
-            <blockquote>
-              <p>"Looking back at my life I have not processed my thoughts properly because I am trying to give an answer as quickly as possible. The techniques taught can help me formulate more structured ideas."</p>
-              <footer>
-                <strong>Student 2</strong>
-                <span>Workshop Participant</span>
-              </footer>
-            </blockquote>
-          </article>
-
-          <article class="testimonial-card-static program-reveal">
-            <blockquote>
-              <p>"I came across your workshop at the right time and it has been helping me a lot. I am putting the exercises to use already dealing with a crisis situation."</p>
-              <footer>
-                <strong>Student 3</strong>
-                <span>Workshop Participant</span>
-              </footer>
-            </blockquote>
-          </article>
-        </div>
+        <div class="testimonial-grid" id="programTestimonials"></div>
       </div>
     </section>
 
@@ -909,6 +891,7 @@
 
   <script>
     const SCRIPT_URL = 'YOUR_SCRIPT_URL';
+    const TESTIMONIALS_URL = 'data/testimonials.json';
     const navToggle = document.querySelector('.nav-toggle');
     const navMenu = document.getElementById('navMenu');
     const leadModal = document.getElementById('leadModal');
@@ -1003,6 +986,51 @@
       });
     }, { threshold: 0.2 });
 
+    function escapeText(value) {
+      return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function programTestimonialCard(testimonial) {
+      return `
+        <article class="testimonial-card-static program-reveal">
+          <blockquote>
+            <p>"${escapeText(testimonial.quote)}"</p>
+            <footer>
+              <strong>${escapeText(testimonial.name)}</strong>
+              <span class="testimonial-title">${escapeText(testimonial.title)}</span>
+              <span class="testimonial-company">${escapeText(testimonial.company)}</span>
+            </footer>
+          </blockquote>
+        </article>
+      `;
+    }
+
+    function observeProgramTestimonials() {
+      document.querySelectorAll('.testimonial-card-static.program-reveal').forEach((card, index) => {
+        card.style.transitionDelay = `${index * 0.2}s`;
+        revealObserver.observe(card);
+      });
+    }
+
+    async function loadProgramTestimonials() {
+      const grid = document.getElementById('programTestimonials');
+      if (!grid) return;
+      try {
+        const response = await fetch(TESTIMONIALS_URL);
+        if (!response.ok) throw new Error('Unable to load testimonials.');
+        const testimonials = await response.json();
+        grid.innerHTML = testimonials.slice(0, 6).map(programTestimonialCard).join('');
+        observeProgramTestimonials();
+      } catch (error) {
+        console.warn('Program testimonials could not be loaded.', error);
+      }
+    }
+
     document.querySelectorAll('.audience-card.program-reveal').forEach((card, index) => {
       card.style.transitionDelay = `${index * 0.2}s`;
       revealObserver.observe(card);
@@ -1013,10 +1041,7 @@
       revealObserver.observe(phase);
     });
 
-    document.querySelectorAll('.testimonial-card-static.program-reveal').forEach((card, index) => {
-      card.style.transitionDelay = `${index * 0.2}s`;
-      revealObserver.observe(card);
-    });
+    loadProgramTestimonials();
   </script>
 </body>
 </html>
