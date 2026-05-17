@@ -1,11 +1,43 @@
 # The Untaught Lessons Website Context
 
-Last updated: 2026-05-12
+Last updated: 2026-05-13
 Primary purpose: Living implementation and design reference for The Untaught Lessons static website and practice apps.
 
 Use this file when referencing the site with other tools. It should be updated whenever pages, apps, visual rules, navigation, routing, forms, or core functionality change.
 
 ## Change Log
+
+### 2026-05-13
+
+- Added `admin/index.html` as a static localStorage-powered configuration panel:
+  - Password-gated with default password `utl2026_admin`.
+  - Controls member hub mission card visibility, footer admin link visibility, TSA Score™ status, phase lock states, slide URLs, and member/admin passwords.
+  - Provides quick links to the member hub, My results, and all current member apps.
+  - Password fields and login gates include an on-brand eye toggle to show or hide password values.
+- Updated `member-login/index.html` to read admin configuration from localStorage:
+  - Slim navy identity bar added above the sticky member navigation.
+  - Sticky section nav now follows Orientation, Phase 1, Phase 2, Phase 3, and My results.
+  - Phase 2 and Phase 3 default to locked until changed in the admin panel.
+  - TSA Score™ section replaced by contextual Diagnostic and Checkpoint prompt cards.
+  - Footer now includes a prominent My results link and quiet Admin link.
+- Created `my-results/index.html`:
+  - Participant exercise record with assessment section, phase-by-phase exercise cards, progress bar, copy to workbook, download, and send-to-instructor action.
+  - Reads `utl_result_*` keys from localStorage and has no password gate.
+- Added standardized local result saving to active practice apps:
+  - Grocery List, Manager's messy notes, Rushed voice memo, Rushed voice memo with AI, Chalkboard notes, Issue tree builder, and SCQA builder.
+  - Completion screens now include a saved-on-this-browser notice with a link to My results.
+- Added Send to instructor controls to the admin panel:
+  - `utl_send_instructor` controls button visibility.
+  - `utl_send_instructor_url` stores the Apps Script endpoint for future result submission.
+- Added Assessments section to the member hub:
+  - `#assessments` contains The Diagnostic and The Checkpoint cards with timing instructions and context chips.
+  - Sticky nav now includes Assessments and My results as matched destination links.
+  - Standalone checkpoint prompt after Phase 3 was replaced by a lightweight one-line nudge linking to `#assessments`.
+  - Admin sidebar label changed from TSA Score™ to Assessments.
+- Added configurable Google Slides behavior:
+  - Slide context rows remain collapsed by default.
+  - Saved Google Slides URLs replace placeholders with embedded iframe blocks.
+  - Missing URLs continue to show `Slides coming soon`.
 
 ### 2026-05-12
 
@@ -27,6 +59,7 @@ Use this file when referencing the site with other tools. It should be updated w
 - Added the published Google Slides embed URL for the member hub Orientation section.
 - Updated member hub slide blocks so live iframe blocks and placeholder slide blocks start collapsed and open from the slide context bar toggle.
 - Added alternating white and parchment backgrounds to member hub content sections while keeping exercise cards white.
+- Reinforced the public `tsa-score.html` Find Your Level CTA so it renders as a gold button rather than a plain text link on deployment.
 - Created `apps/rushed-voice-memo/index.html`:
   - Based on the Messy Notes app.
   - Phase 1, Think Clearly.
@@ -625,22 +658,112 @@ Member tools landing page.
 Purpose:
 
 - Password-gated workspace for practice tools.
-- Structured member hub for TSA Score™, orientation, and the three workbook phases.
+- Structured member hub for orientation, the three workbook phases, and contextual TSA Score™ prompts.
 
 Current section order:
 
-- TSA Score™.
 - Orientation.
 - Phase 1, Think Clearly.
 - Phase 2, Speak Concisely.
 - Phase 3, Act Confidently.
+- Phase 3 checkpoint nudge.
+- Assessments, TSA Score™.
 
 Key functionality:
 
-- Sticky section navigation for Orientation, Phase 1, Phase 2, and Phase 3.
+- Slim navy identity bar.
+- Sticky section navigation for Orientation, Phase 1, Phase 2, Phase 3, Assessments, and My results.
 - MA mission card introducing Aiko Mori and the Chief of Staff role.
 - Google Slides placeholder embeds for orientation and each workbook context chunk.
+- Admin-controlled slide URL injection through localStorage.
+- Admin-controlled phase lock overlays for Phase 1, Phase 2, and Phase 3.
+- Admin-controlled Assessments section live, placeholder, or hidden states.
 - Exercise cards for active apps and dimmed coming-soon cards for future exercises.
+- Footer links to My results and Admin.
+
+### `my-results/index.html`
+
+Participant exercise record page.
+
+Purpose:
+
+- Reads all `utl_result_*` keys from localStorage.
+- Shows assessment results for TSA Score™.
+- Shows exercise results by phase with completion status.
+- Provides copy-to-workbook, full response viewing, download, and send-to-instructor actions.
+- No password gate.
+
+Access:
+
+- Sticky nav `My results` link.
+- Member hub footer link.
+- Exercise completion save notice links.
+
+### `admin/index.html`
+
+Admin panel.
+
+Access:
+
+- Footer link on `member-login/index.html`, shown as a small low-opacity `Admin` text link.
+
+Default password:
+
+- `utl2026_admin`
+
+Password localStorage key:
+
+- `utl_admin_password`
+
+Purpose:
+
+- Configure member hub visibility, phase availability, slide URLs, and passwords without editing code.
+
+Key functionality:
+
+- Password-gated admin session stored under `utl_admin_auth`.
+- Toggle controls for mission card, footer link, phase locks, TSA Score™ state, and Orientation slide status.
+- URL inputs for Orientation and phase context slide embeds.
+- Password controls for member hub and admin access.
+- Send to instructor toggle and Apps Script endpoint URL input.
+- Quick links for validating My results and member apps in new tabs.
+
+## LocalStorage Admin Keys
+
+| Key | Default | Options | Controls |
+| --- | --- | --- | --- |
+| `utl_admin_auth` | — | `"true"` | Admin session |
+| `utl_admin_password` | `utl2026_admin` | any string | Admin password |
+| `utl_member_password` | hardcoded fallback | any string | Member password |
+| `utl_mission_card` | `show` | `show` / `hide` | MA mission card |
+| `utl_footer_link` | `show` | `show` / `hide` | Admin footer link |
+| `utl_tsa_status` | `placeholder` | `live` / `placeholder` / `hidden` | TSA Score section |
+| `utl_orientation_slides` | `placeholder` | `live` / `placeholder` | Orientation slides |
+| `utl_phase1_status` | `live` | `live` / `locked` | Phase 1 access |
+| `utl_phase2_status` | `locked` | `live` / `locked` | Phase 2 access |
+| `utl_phase3_status` | `locked` | `live` / `locked` | Phase 3 access |
+| `utl_send_instructor` | `hidden` | `live` / `hidden` | Send to instructor button |
+| `utl_send_instructor_url` | `""` | URL string | Apps Script endpoint |
+| `utl_slides_orientation` | `""` | Google Slides embed URL | Orientation iframe src |
+| `utl_slides_phase1_chunk1` | `""` | Google Slides embed URL | Phase 1 chunk 1 iframe |
+| `utl_slides_phase1_chunk2` | `""` | Google Slides embed URL | Phase 1 chunk 2 iframe |
+| `utl_slides_phase1_chunk3` | `""` | Google Slides embed URL | Phase 1 chunk 3 iframe |
+| `utl_slides_phase1_chunk4` | `""` | Google Slides embed URL | Phase 1 chunk 4 iframe |
+| `utl_slides_phase2_chunk1` | `""` | Google Slides embed URL | Phase 2 chunk 1 iframe |
+| `utl_slides_phase2_chunk2` | `""` | Google Slides embed URL | Phase 2 chunk 2 iframe |
+| `utl_slides_phase2_chunk3` | `""` | Google Slides embed URL | Phase 2 chunk 3 iframe |
+| `utl_slides_phase3_chunk1` | `""` | Google Slides embed URL | Phase 3 chunk 1 iframe |
+| `utl_slides_phase3_chunk2` | `""` | Google Slides embed URL | Phase 3 chunk 2 iframe |
+| `utl_slides_phase3_chunk3` | `""` | Google Slides embed URL | Phase 3 chunk 3 iframe |
+| `utl_result_grocery-list` | — | JSON object | Grocery list result |
+| `utl_result_messy-notes` | — | JSON object | Messy notes result |
+| `utl_result_rushed-voice-memo` | — | JSON object | Rushed voice memo result |
+| `utl_result_rushed-voice-memo-ai` | — | JSON object | Rushed voice memo AI result |
+| `utl_result_chalkboard-notes` | — | JSON object | Chalkboard notes result |
+| `utl_result_issue-tree` | — | JSON object | Issue tree result |
+| `utl_result_scqa-builder` | — | JSON object | SCQA builder result |
+| `utl_result_tsa_diagnostic` | — | JSON object | TSA Diagnostic result |
+| `utl_result_tsa_checkpoint` | — | JSON object | TSA Checkpoint result |
 
 ## App Map
 

@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="Member tools for The Untaught Lessons." />
-  <title>Member Login - The Untaught Lessons</title>
+  <title>Member Workspace — The Untaught Lessons</title>
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-bluebg-whitedoor-thicker-32.png?v=6">
   <link rel="shortcut icon" type="image/png" href="/assets/favicon-bluebg-whitedoor-thicker-32.png?v=6">
   <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png?v=3">
@@ -148,6 +148,42 @@
       color: var(--charcoal);
     }
 
+    .password-input-wrap {
+      position: relative;
+    }
+
+    .password-input-wrap input {
+      padding-right: 46px;
+    }
+
+    .password-toggle {
+      position: absolute;
+      top: 50%;
+      right: 10px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border: 1px solid rgba(0, 51, 102, .18);
+      border-radius: 999px;
+      background: #ffffff;
+      color: var(--navy);
+      cursor: pointer;
+      transform: translateY(-50%);
+    }
+
+    .password-toggle:hover {
+      border-color: var(--navy);
+      background: var(--cream);
+    }
+
+    .password-toggle svg {
+      width: 18px;
+      height: 18px;
+      pointer-events: none;
+    }
+
     .primary-button {
       min-height: 50px;
       border: 1px solid var(--gold);
@@ -200,7 +236,8 @@
       margin-top: 24px;
     }
 
-    .phase-section {
+    .phase-section,
+    .hub-section {
       display: grid;
       gap: 14px;
       margin: 0;
@@ -208,14 +245,14 @@
       border-top: 1px solid rgba(0, 0, 0, .06);
     }
 
-    #tsa-score,
-    #phase1,
-    #phase3 {
+    #orientation,
+    #phase2,
+    #assessments {
       background-color: #ffffff;
     }
 
-    #orientation,
-    #phase2 {
+    #phase1,
+    #phase3 {
       background-color: #E8DFD1;
     }
 
@@ -231,6 +268,44 @@
     .phase-heading h2 {
       font-size: 26px;
       line-height: 1.1;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 16px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .section-title {
+      color: var(--navy);
+      font-family: 'Playfair Display', serif;
+      font-size: 26px;
+      font-weight: 700;
+      line-height: 1.1;
+    }
+
+    .optional-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 9px;
+      border-radius: 999px;
+      background: rgba(238, 163, 32, .16);
+      color: var(--deep-navy);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .section-description {
+      max-width: 720px;
+      margin: 0;
+      color: var(--steel);
+      line-height: 1.5;
     }
 
     .phase-heading span {
@@ -307,43 +382,133 @@
       margin-bottom: 8px;
     }
 
-    .member-nav {
-      position: sticky;
-      top: 0;
-      z-index: 100;
+    .member-identity-bar {
+      margin: -28px -28px 0;
+      padding: 10px 1.75rem;
+      background: var(--navy);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 16px;
-      margin: -28px -28px 28px;
-      padding: 14px 28px;
-      border-bottom: 1px solid var(--line);
       border-radius: 12px 12px 0 0;
-      background: rgba(255, 255, 255, .96);
-      backdrop-filter: blur(10px);
     }
 
-    .member-nav-links {
+    .member-identity-left {
       display: flex;
-      flex-wrap: wrap;
       align-items: center;
-      gap: 8px;
-      color: var(--steel);
+      gap: 12px;
+    }
+
+    .identity-logo-text {
+      color: var(--white);
       font-family: 'Roboto Mono', monospace;
-      font-size: 12px;
+      font-size: 10px;
       font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .identity-label {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 11px;
+      color: rgba(255, 255, 255, .7);
       letter-spacing: .06em;
       text-transform: uppercase;
     }
 
-    .member-nav a {
-      padding: 6px 0;
-      border-bottom: 2px solid transparent;
+    .identity-back {
+      font-family: 'Lato', sans-serif;
+      font-size: 12px;
+      color: var(--gold);
+      text-decoration: none;
+      opacity: .85;
     }
 
-    .member-nav a.active {
+    .identity-back:hover {
+      opacity: 1;
+    }
+
+    .member-nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      margin: 0 -28px 28px;
+      background: var(--cream);
+      border-bottom: .5px solid rgba(0, 0, 0, .08);
+    }
+
+    .member-nav-inner {
+      display: flex;
+      align-items: center;
+      height: 44px;
+      padding: 0 1.75rem;
+      gap: 0;
+    }
+
+    .nav-workspace-label {
+      margin-right: 16px;
+      flex-shrink: 0;
+      color: var(--gold);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 10px;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      flex: 1;
+    }
+
+    .nav-item {
+      padding: 4px 10px;
+      border-radius: 6px;
+      color: var(--charcoal);
+      font-family: 'Lato', sans-serif;
+      font-size: 12px;
+      text-decoration: none;
+      transition: background .15s;
+    }
+
+    .nav-item:hover {
+      background: rgba(0, 0, 0, .05);
+    }
+
+    .nav-item.active {
       color: var(--navy);
-      border-bottom-color: var(--gold);
+      font-weight: 500;
+      background: rgba(0, 51, 102, .07);
+    }
+
+    .nav-item-results {
+      margin-left: 6px;
+      border: .5px solid rgba(0, 51, 102, .25);
+      color: var(--navy);
+      font-weight: 500;
+    }
+
+    .nav-item-results:hover {
+      background: rgba(0, 51, 102, .07);
+    }
+
+    .nav-sep {
+      padding: 0 2px;
+      color: #c8bfb0;
+      font-size: 12px;
+    }
+
+    .nav-logout {
+      margin-left: auto;
+      flex-shrink: 0;
+      color: #888;
+      font-family: 'Lato', sans-serif;
+      font-size: 12px;
+      text-decoration: none;
+    }
+
+    .nav-logout:hover {
+      color: var(--navy);
     }
 
     .mission-card {
@@ -394,9 +559,140 @@
       cursor: pointer;
     }
 
-    #orientation .slides-bar,
-    #phase2 .slides-bar {
+    #phase1 .slides-bar,
+    #phase3 .slides-bar {
       background: rgba(0, 0, 0, .05);
+    }
+
+    .phase-locked {
+      position: relative;
+    }
+
+    .phase-locked a,
+    .phase-locked button {
+      opacity: .4;
+      pointer-events: none;
+    }
+
+    .phase-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 5;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(243, 237, 226, .88);
+      color: var(--navy);
+      font-family: 'Lato', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .phase-locked .phase-overlay {
+      display: flex;
+    }
+
+    .phase3-nudge {
+      padding: 10px 1.75rem;
+      font-family: 'Lato', sans-serif;
+      font-size: 12px;
+      color: #888;
+      background: var(--white);
+      border-top: .5px solid rgba(0, 0, 0, .06);
+    }
+
+    .phase3-nudge-link {
+      color: var(--gold);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .phase3-nudge-link:hover { text-decoration: underline; }
+
+    .tsa-assessment-card {
+      background: var(--white);
+      border: .5px solid #e0d8cd;
+      border-radius: 10px;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 10px;
+    }
+
+    .tsa-assessment-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.5rem;
+    }
+
+    .tsa-assessment-left { flex: 1; }
+
+    .tsa-assessment-tag {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 10px;
+      color: var(--gold);
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      margin-bottom: 6px;
+    }
+
+    .tsa-assessment-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 17px;
+      color: var(--navy);
+      margin-bottom: 4px;
+    }
+
+    .tsa-assessment-sub {
+      font-size: 12px;
+      color: var(--charcoal);
+      line-height: 1.55;
+      max-width: 400px;
+      margin-bottom: 10px;
+    }
+
+    .tsa-assessment-chips {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .tsa-chip {
+      font-size: 11px;
+      color: var(--charcoal);
+      background: var(--cream);
+      padding: 4px 10px;
+      border-radius: 20px;
+      border: .5px solid #d4ccbf;
+      white-space: nowrap;
+      font-family: 'Lato', sans-serif;
+    }
+
+    .tsa-assessment-btn {
+      font-family: 'Lato', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      background: var(--gold);
+      color: var(--white);
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      text-decoration: none;
+      white-space: nowrap;
+      flex-shrink: 0;
+      display: inline-block;
+    }
+
+    .tsa-assessment-btn:hover { background: #C2841A; }
+
+    .tsa-coming-soon {
+      padding: 6px 14px;
+      border: .5px solid #d4ccbf;
+      border-radius: 6px;
+      background: var(--cream);
+      color: #888;
+      font-family: 'Roboto Mono', monospace;
+      font-size: 11px;
     }
 
     .slides-bar-icon {
@@ -448,6 +744,47 @@
 
     .slides-fullscreen-link:hover {
       text-decoration: underline;
+    }
+
+    .member-footer {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      text-align: center;
+      padding: 2rem 0 1.5rem;
+      border-top: .5px solid rgba(0, 0, 0, .08);
+      margin-top: 3rem;
+    }
+
+    .footer-results-link {
+      color: var(--navy);
+      font-family: 'Lato', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      text-decoration: none;
+    }
+
+    .footer-results-link:hover {
+      text-decoration: underline;
+    }
+
+    .footer-divider {
+      color: #c8bfb0;
+      font-size: 12px;
+    }
+
+    .footer-admin-link {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 11px;
+      color: #4A4A4A;
+      opacity: .35;
+      text-decoration: none;
+      letter-spacing: .04em;
+    }
+
+    .footer-admin-link:hover {
+      opacity: .6;
     }
 
     .exercise-card-grid {
@@ -552,9 +889,12 @@
       }
 
       .member-nav {
-        margin: -34px -34px 30px;
-        padding-right: 34px;
-        padding-left: 34px;
+        margin-right: -34px;
+        margin-left: -34px;
+      }
+
+      .member-identity-bar {
+        margin: -34px -34px 0;
       }
 
       .tool-grid {
@@ -581,62 +921,59 @@
 
           <form id="loginForm" class="login-form">
             <label for="passwordInput">Password</label>
-            <input id="passwordInput" type="password" autocomplete="current-password" required />
+            <div class="password-input-wrap">
+              <input id="passwordInput" type="password" autocomplete="current-password" required />
+              <button class="password-toggle" type="button" aria-label="Show password" aria-pressed="false" data-password-toggle="passwordInput">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+                  <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/>
+                </svg>
+              </button>
+            </div>
             <button class="primary-button" type="submit">Open member tools</button>
             <p id="loginMessage" class="message" aria-live="polite"></p>
           </form>
         </article>
 
         <section id="dashboard" class="dashboard hidden" aria-labelledby="dashboardTitle">
-          <nav class="member-nav" aria-label="Member workspace sections">
-            <div class="member-nav-links">
-              <a class="member-nav-link active" href="#orientation">Orientation</a>
-              <span aria-hidden="true">·</span>
-              <a class="member-nav-link" href="#phase1">Phase 1</a>
-              <span aria-hidden="true">·</span>
-              <a class="member-nav-link" href="#phase2">Phase 2</a>
-              <span aria-hidden="true">·</span>
-              <a class="member-nav-link" href="#phase3">Phase 3</a>
+          <div class="member-identity-bar">
+            <div class="member-identity-left">
+              <span class="identity-logo-text">The Untaught Lessons</span>
+              <span class="identity-label">Member workspace</span>
             </div>
-            <button id="logoutBtn" class="text-button" type="button">Log out</button>
+            <a href="../index.html" class="identity-back">Back to site</a>
+          </div>
+
+          <nav class="member-nav" id="member-nav" aria-label="Member workspace sections">
+            <div class="member-nav-inner">
+              <span class="nav-workspace-label">Member workspace</span>
+              <div class="nav-links">
+                <a href="#orientation" class="nav-item active" data-section="orientation">Orientation</a>
+                <span class="nav-sep">·</span>
+                <a href="#phase1" class="nav-item" data-section="phase1">Phase 1</a>
+                <span class="nav-sep">·</span>
+                <a href="#phase2" class="nav-item" data-section="phase2">Phase 2</a>
+                <span class="nav-sep">·</span>
+                <a href="#phase3" class="nav-item" data-section="phase3">Phase 3</a>
+                <span class="nav-sep">·</span>
+                <a href="#assessments" class="nav-item nav-item-results" data-section="assessments">Assessments</a>
+                <span class="nav-sep">·</span>
+                <a href="../my-results/index.html" class="nav-item nav-item-results">My results</a>
+              </div>
+              <a href="#" class="nav-logout" id="logoutBtn">Log out</a>
+            </div>
           </nav>
 
           <div class="dashboard-header">
             <span class="section-label">Member Tools</span>
             <h1 id="dashboardTitle">Your practice workspace.</h1>
             <p>Open the tools you have been building and keep practicing from one place.</p>
-            <div class="mission-card">
+            <div class="mission-card" id="missionCard">
               You are now Chief of Staff to Aiko Mori. You've just joined MA, a high-stakes marketing agency built on clarity before action. Aiko does not want more information. She wants clean thinking she can act on immediately.
             </div>
           </div>
 
           <div class="phase-stack">
-            <section class="phase-section" id="tsa-score" aria-labelledby="tsaScoreTitle">
-              <div class="phase-heading">
-                <div>
-                  <span class="section-label">Before You Begin</span>
-                  <h2 id="tsaScoreTitle">TSA Score™</h2>
-                </div>
-                <span class="badge">Optional</span>
-              </div>
-              <p class="phase-description">Take your baseline before starting. Return after Phase 3 to measure your growth.</p>
-              <div class="tool-grid">
-                <article class="tool-card">
-                  <span class="section-label">TSA Score™</span>
-                  <h2>The Diagnostic</h2>
-                  <p>Take this before Phase 1.</p>
-                  <a class="tool-link" href="../apps/tsa-diagnostic/index.html">Start The Diagnostic</a>
-                </article>
-
-                <article class="tool-card">
-                  <span class="section-label">TSA Score™</span>
-                  <h2>The Checkpoint</h2>
-                  <p>Take this after Phase 3.</p>
-                  <a class="tool-link" href="../apps/tsa-checkpoint/index.html">Start The Checkpoint</a>
-                </article>
-              </div>
-            </section>
-
             <section class="phase-section" id="orientation" aria-labelledby="orientationTitle">
               <div class="phase-heading">
                 <div>
@@ -645,7 +982,7 @@
                 </div>
               </div>
               <p class="phase-description">Complete this before starting any of the three workbooks. This applies to all phases.</p>
-              <div class="slides-bar" onclick="toggleSlides(this)">
+              <div class="slides-bar" onclick="toggleSlides(this)" data-slide-key="utl_slides_orientation" data-status-key="utl_orientation_slides">
                 <span class="slides-bar-icon">▶</span>
                 <span class="slides-bar-label">Orientation slides</span>
               </div>
@@ -664,7 +1001,7 @@
               </div>
 
               <div class="phase-chunk">
-                <div class="slides-bar" onclick="toggleSlides(this)">
+                <div class="slides-bar" onclick="toggleSlides(this)" data-slide-key="utl_slides_phase1_chunk1">
                   <span class="slides-bar-icon">▶</span>
                   <span class="slides-bar-label">Context — MECE & structured thinking</span>
                 </div>
@@ -679,7 +1016,7 @@
               </div>
 
               <div class="phase-chunk">
-                <div class="slides-bar" onclick="toggleSlides(this)">
+                <div class="slides-bar" onclick="toggleSlides(this)" data-slide-key="utl_slides_phase1_chunk2">
                   <span class="slides-bar-icon">▶</span>
                   <span class="slides-bar-label">Context — manager communications</span>
                 </div>
@@ -694,7 +1031,7 @@
               </div>
 
               <div class="phase-chunk">
-                <div class="slides-bar" onclick="toggleSlides(this)">
+                <div class="slides-bar" onclick="toggleSlides(this)" data-slide-key="utl_slides_phase1_chunk3">
                   <span class="slides-bar-icon">▶</span>
                   <span class="slides-bar-label">Context — voice memos & structured note-taking</span>
                 </div>
@@ -714,7 +1051,7 @@
               </div>
 
               <div class="phase-chunk">
-                <div class="slides-bar" onclick="toggleSlides(this)">
+                <div class="slides-bar" onclick="toggleSlides(this)" data-slide-key="utl_slides_phase1_chunk4">
                   <span class="slides-bar-icon">▶</span>
                   <span class="slides-bar-label">Context — chalkboard notes & BSP method</span>
                 </div>
@@ -727,6 +1064,7 @@
                   </a>
                 </div>
               </div>
+              <div class="phase-overlay">This phase is not yet available</div>
             </section>
 
             <section class="phase-section" id="phase2" aria-labelledby="phase2Title">
@@ -738,7 +1076,7 @@
               </div>
 
               <div class="phase-chunk">
-                <div class="slides-bar" onclick="toggleSlides(this)"><span class="slides-bar-icon">▶</span><span class="slides-bar-label">Context — issue trees & problem framing</span></div>
+                <div class="slides-bar" onclick="toggleSlides(this)" data-slide-key="utl_slides_phase2_chunk1"><span class="slides-bar-icon">▶</span><span class="slides-bar-label">Context — issue trees & problem framing</span></div>
                 <div class="slides-placeholder is-collapsed">Slides coming soon</div>
                 <div class="exercise-card-grid">
                   <a class="exercise-card" href="../apps/issue-tree-builder/index.html">
@@ -750,7 +1088,7 @@
               </div>
 
               <div class="phase-chunk">
-                <div class="slides-bar" onclick="toggleSlides(this)"><span class="slides-bar-icon">▶</span><span class="slides-bar-label">Context — SCQA & Minto's pyramid</span></div>
+                <div class="slides-bar" onclick="toggleSlides(this)" data-slide-key="utl_slides_phase2_chunk2"><span class="slides-bar-icon">▶</span><span class="slides-bar-label">Context — SCQA & Minto's pyramid</span></div>
                 <div class="slides-placeholder is-collapsed">Slides coming soon</div>
                 <div class="exercise-card-grid">
                   <a class="exercise-card" href="../apps/scqa-builder/index.html">
@@ -767,7 +1105,7 @@
               </div>
 
               <div class="phase-chunk">
-                <div class="slides-bar" onclick="toggleSlides(this)"><span class="slides-bar-icon">▶</span><span class="slides-bar-label">Context — spoken communication</span></div>
+                <div class="slides-bar" onclick="toggleSlides(this)" data-slide-key="utl_slides_phase2_chunk3"><span class="slides-bar-icon">▶</span><span class="slides-bar-label">Context — spoken communication</span></div>
                 <div class="slides-placeholder is-collapsed">Slides coming soon</div>
                 <div class="exercise-card-grid">
                   <article class="exercise-card coming-soon">
@@ -782,6 +1120,7 @@
                   </article>
                 </div>
               </div>
+              <div class="phase-overlay">This phase is not yet available</div>
             </section>
 
             <section class="phase-section" id="phase3" aria-labelledby="phase3Title">
@@ -793,7 +1132,7 @@
               </div>
 
               <div class="phase-chunk">
-                <div class="slides-bar" onclick="toggleSlides(this)"><span class="slides-bar-icon">▶</span><span class="slides-bar-label">Context — prioritisation & saying no</span></div>
+                <div class="slides-bar" onclick="toggleSlides(this)" data-slide-key="utl_slides_phase3_chunk1"><span class="slides-bar-icon">▶</span><span class="slides-bar-label">Context — prioritisation & saying no</span></div>
                 <div class="slides-placeholder is-collapsed">Slides coming soon</div>
                 <div class="exercise-card-grid">
                   <article class="exercise-card coming-soon">
@@ -805,7 +1144,7 @@
               </div>
 
               <div class="phase-chunk">
-                <div class="slides-bar" onclick="toggleSlides(this)"><span class="slides-bar-icon">▶</span><span class="slides-bar-label">Context — delivering difficult news</span></div>
+                <div class="slides-bar" onclick="toggleSlides(this)" data-slide-key="utl_slides_phase3_chunk2"><span class="slides-bar-icon">▶</span><span class="slides-bar-label">Context — delivering difficult news</span></div>
                 <div class="slides-placeholder is-collapsed">Slides coming soon</div>
                 <div class="exercise-card-grid">
                   <article class="exercise-card coming-soon">
@@ -822,7 +1161,7 @@
               </div>
 
               <div class="phase-chunk">
-                <div class="slides-bar" onclick="toggleSlides(this)"><span class="slides-bar-icon">▶</span><span class="slides-bar-label">Context — presence & delivery</span></div>
+                <div class="slides-bar" onclick="toggleSlides(this)" data-slide-key="utl_slides_phase3_chunk3"><span class="slides-bar-icon">▶</span><span class="slides-bar-label">Context — presence & delivery</span></div>
                 <div class="slides-placeholder is-collapsed">Slides coming soon</div>
                 <div class="exercise-card-grid">
                   <article class="exercise-card coming-soon">
@@ -832,8 +1171,63 @@
                   </article>
                 </div>
               </div>
+              <div class="phase-overlay">This phase is not yet available</div>
+            </section>
+
+            <div class="phase3-nudge">
+              Completed Phase 3?
+              <a href="#assessments" class="phase3-nudge-link">Take The Checkpoint →</a>
+            </div>
+
+            <section id="assessments" class="hub-section">
+              <div class="section-header">
+                <div>
+                  <div class="section-label">Assessments</div>
+                  <div class="section-title">TSA Score™</div>
+                </div>
+                <span class="optional-badge">Optional</span>
+              </div>
+
+              <p class="section-description">Measure your executive communication level before and after the program. Both assessments are optional — take The Diagnostic before Phase 1 and The Checkpoint after Phase 3 to compare your growth.</p>
+
+              <div class="tsa-assessment-card" id="diagnostic-card">
+                <div class="tsa-assessment-inner">
+                  <div class="tsa-assessment-left">
+                    <div class="tsa-assessment-tag">TSA Score™ · The Diagnostic</div>
+                    <div class="tsa-assessment-title">Establish your baseline</div>
+                    <div class="tsa-assessment-sub">Take this before Phase 1. It measures where you are before the program begins so you have a starting point to compare against at the end.</div>
+                    <div class="tsa-assessment-chips">
+                      <span class="tsa-chip">15-20 min</span>
+                      <span class="tsa-chip">Take before Phase 1</span>
+                      <span class="tsa-chip">Results saved to My results</span>
+                    </div>
+                  </div>
+                  <a href="../apps/tsa-diagnostic/index.html" class="tsa-assessment-btn">Start The Diagnostic</a>
+                </div>
+              </div>
+
+              <div class="tsa-assessment-card" id="checkpoint-card">
+                <div class="tsa-assessment-inner">
+                  <div class="tsa-assessment-left">
+                    <div class="tsa-assessment-tag">TSA Score™ · The Checkpoint</div>
+                    <div class="tsa-assessment-title">Measure your growth</div>
+                    <div class="tsa-assessment-sub">Take this after Phase 3. It uses the same assessment as The Diagnostic so you can compare your scores before and after the program.</div>
+                    <div class="tsa-assessment-chips">
+                      <span class="tsa-chip">15-20 min</span>
+                      <span class="tsa-chip">Take after Phase 3</span>
+                      <span class="tsa-chip">Compare with your Diagnostic</span>
+                    </div>
+                  </div>
+                  <a href="../apps/tsa-checkpoint/index.html" class="tsa-assessment-btn">Start The Checkpoint</a>
+                </div>
+              </div>
             </section>
           </div>
+          <footer class="member-footer">
+            <a href="../my-results/index.html" class="footer-results-link">My results</a>
+            <span class="footer-divider">·</span>
+            <a href="../admin/index.html" id="admin-footer-link" class="footer-admin-link">Admin</a>
+          </footer>
         </section>
       </section>
     </div>
@@ -841,7 +1235,6 @@
 
   <script>
     (function () {
-      var PASSWORD = 'utl2026';
       var SESSION_KEY = 'utl_member_unlocked';
       var loginCard = document.getElementById('loginCard');
       var dashboard = document.getElementById('dashboard');
@@ -849,8 +1242,159 @@
       var input = document.getElementById('passwordInput');
       var message = document.getElementById('loginMessage');
       var logoutBtn = document.getElementById('logoutBtn');
-      var navLinks = Array.prototype.slice.call(document.querySelectorAll('.member-nav-link'));
+      var navLinks = Array.prototype.slice.call(document.querySelectorAll('.nav-item[data-section]'));
       var navObserver = null;
+      var assessmentsSection = document.getElementById('assessments');
+      var phase3Nudge = document.querySelector('.phase3-nudge');
+
+      document.querySelectorAll('[data-password-toggle]').forEach(function (toggle) {
+        var target = document.getElementById(toggle.dataset.passwordToggle);
+        if (!target) return;
+
+        toggle.addEventListener('click', function () {
+          var shouldShow = target.type === 'password';
+          target.type = shouldShow ? 'text' : 'password';
+          toggle.setAttribute('aria-label', shouldShow ? 'Hide password' : 'Show password');
+          toggle.setAttribute('aria-pressed', String(shouldShow));
+        });
+      });
+
+      function storedValue(key, fallback) {
+        var value = localStorage.getItem(key);
+        return value === null || value === '' ? fallback : value;
+      }
+
+      function createSlideWrapper(src) {
+        var wrapper = document.createElement('div');
+        wrapper.className = 'slides-embed-wrapper is-collapsed';
+        wrapper.innerHTML = '<iframe src="' + src + '" frameborder="0" allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true"></iframe>';
+        return wrapper;
+      }
+
+      function createSlidePlaceholder() {
+        var placeholder = document.createElement('div');
+        placeholder.className = 'slides-placeholder is-collapsed';
+        placeholder.textContent = 'Slides coming soon';
+        return placeholder;
+      }
+
+      function ensureFullscreenLink(panel, src) {
+        var next = panel.nextElementSibling;
+        if (next && next.classList.contains('slides-fullscreen-link')) {
+          next.href = src;
+          next.classList.add('is-collapsed');
+          return;
+        }
+        var link = document.createElement('a');
+        link.href = src;
+        link.target = '_blank';
+        link.className = 'slides-fullscreen-link is-collapsed';
+        link.textContent = 'Open in full screen ↗';
+        panel.insertAdjacentElement('afterend', link);
+      }
+
+      function removeFullscreenLink(panel) {
+        var next = panel.nextElementSibling;
+        if (next && next.classList.contains('slides-fullscreen-link')) {
+          next.remove();
+        }
+      }
+
+      function configureSlideBlock(bar) {
+        var key = bar.dataset.slideKey;
+        var statusKey = bar.dataset.statusKey;
+        var currentPanel = bar.nextElementSibling;
+        if (!key || !currentPanel) return;
+
+        var status = statusKey ? storedValue(statusKey, 'placeholder') : 'live';
+        var savedSrc = (localStorage.getItem(key) || '').trim();
+        var src = savedSrc || '';
+        var shouldShowSlides = status === 'live' && src;
+        var replacement = shouldShowSlides ? createSlideWrapper(src) : createSlidePlaceholder();
+
+        currentPanel.replaceWith(replacement);
+        if (shouldShowSlides) {
+          ensureFullscreenLink(replacement, src);
+        } else {
+          removeFullscreenLink(replacement);
+        }
+        var icon = bar.querySelector('.slides-bar-icon');
+        if (icon) icon.textContent = '▶';
+      }
+
+      function setPhaseStatus(id, status) {
+        var section = document.getElementById(id);
+        if (!section) return;
+        section.classList.toggle('phase-locked', status === 'locked');
+        section.querySelectorAll('a, button').forEach(function (control) {
+          if (status === 'locked') {
+            control.setAttribute('aria-disabled', 'true');
+          } else {
+            control.removeAttribute('aria-disabled');
+          }
+        });
+      }
+
+      function setTsaStatus(status) {
+        if (!assessmentsSection) return;
+        if (status === 'hidden') {
+          assessmentsSection.style.display = 'none';
+          if (phase3Nudge) phase3Nudge.style.display = 'none';
+          return;
+        }
+
+        assessmentsSection.style.display = '';
+        assessmentsSection.style.opacity = status === 'placeholder' ? '.6' : '';
+        if (phase3Nudge) phase3Nudge.style.display = status === 'placeholder' ? 'none' : '';
+
+        assessmentsSection.querySelectorAll('.tsa-assessment-card').forEach(function (card) {
+          var href = card.id === 'checkpoint-card' ? '../apps/tsa-checkpoint/index.html' : '../apps/tsa-diagnostic/index.html';
+          var label = card.id === 'checkpoint-card' ? 'Start The Checkpoint' : 'Start The Diagnostic';
+          var action = card.querySelector('.tsa-assessment-btn, .tsa-coming-soon');
+          if (!action) return;
+
+          if (status === 'live') {
+            if (action.tagName.toLowerCase() !== 'a') {
+              var link = document.createElement('a');
+              link.href = href;
+              link.className = 'tsa-assessment-btn';
+              link.textContent = label;
+              action.replaceWith(link);
+            }
+            return;
+          }
+
+          if (!action.classList.contains('tsa-coming-soon')) {
+            var comingSoon = document.createElement('span');
+            comingSoon.className = 'tsa-coming-soon';
+            comingSoon.textContent = 'Coming soon';
+            action.replaceWith(comingSoon);
+          }
+        });
+      }
+
+      function readAdminConfig() {
+        var missionCard = document.getElementById('missionCard');
+        var footerLink = document.getElementById('admin-footer-link');
+        if (missionCard) {
+          missionCard.style.display = storedValue('utl_mission_card', 'show') === 'hide' ? 'none' : '';
+        }
+        if (footerLink) {
+          footerLink.style.display = storedValue('utl_footer_link', 'show') === 'hide' ? 'none' : '';
+        }
+
+        setTsaStatus(storedValue('utl_tsa_status', 'placeholder'));
+        setPhaseStatus('phase1', storedValue('utl_phase1_status', 'live'));
+        setPhaseStatus('phase2', storedValue('utl_phase2_status', 'locked'));
+        setPhaseStatus('phase3', storedValue('utl_phase3_status', 'locked'));
+        document.querySelectorAll('.slides-bar[data-slide-key]').forEach(configureSlideBlock);
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', readAdminConfig);
+      } else {
+        readAdminConfig();
+      }
 
       function setActiveNav(sectionId) {
         navLinks.forEach(function (link) {
@@ -862,7 +1406,7 @@
         if (navObserver) {
           return;
         }
-        var sections = ['orientation', 'phase1', 'phase2', 'phase3']
+        var sections = ['orientation', 'phase1', 'phase2', 'phase3', 'assessments']
           .map(function (id) { return document.getElementById(id); })
           .filter(Boolean);
 
@@ -922,7 +1466,8 @@
 
       form.addEventListener('submit', function (event) {
         event.preventDefault();
-        if (input.value === PASSWORD) {
+        var password = storedValue('utl_member_password', 'utl2026');
+        if (input.value === password) {
           localStorage.setItem(SESSION_KEY, 'true');
           message.textContent = '';
           showDashboard();
@@ -931,9 +1476,14 @@
         message.textContent = 'That password did not work.';
       });
 
-      logoutBtn.addEventListener('click', function () {
+      window.logout = function () {
         localStorage.removeItem(SESSION_KEY);
         showLogin();
+      };
+
+      logoutBtn.addEventListener('click', function (event) {
+        event.preventDefault();
+        window.logout();
       });
     })();
   </script>
