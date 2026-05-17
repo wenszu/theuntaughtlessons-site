@@ -615,6 +615,39 @@
       line-height: 1.15;
     }
 
+    .completion-save-notice {
+      background: #F3EDE2;
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-top: 1.5rem;
+    }
+
+    .save-notice-text {
+      font-family: 'Lato', sans-serif;
+      font-size: 13px;
+      color: #003366;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+
+    .save-notice-link {
+      color: #EEA320;
+      text-decoration: none;
+      font-weight: 500;
+      margin-left: 4px;
+    }
+
+    .save-notice-link:hover { text-decoration: underline; }
+
+    .save-notice-caveat {
+      font-size: 11px;
+      color: #888;
+      font-family: 'Lato', sans-serif;
+      line-height: 1.5;
+    }
+
     @media (max-width: 860px) {
       .tsa-speak-header {
         grid-template-columns: 1fr;
@@ -1290,6 +1323,34 @@ Here is the transcript:
       }
     }
 
+    function saveResult(appId, phase, exerciseName, durationSeconds, responseObj) {
+      const existing = localStorage.getItem('utl_result_' + appId);
+      const attempt = existing ? (JSON.parse(existing).attempt || 0) + 1 : 1;
+      const record = {
+        app_id: appId,
+        phase,
+        exercise: exerciseName,
+        completed_at: new Date().toISOString(),
+        duration_seconds: Math.round(durationSeconds),
+        attempt,
+        response: responseObj
+      };
+      localStorage.setItem('utl_result_' + appId, JSON.stringify(record));
+    }
+
+    function completionSaveNotice() {
+      return `
+        <div class="completion-save-notice">
+          <div class="save-notice-text">
+            <i class="ti ti-device-floppy" aria-hidden="true"></i>
+            Your response has been saved to this browser.
+            <a href="../../my-results/index.html" class="save-notice-link">View all your results →</a>
+          </div>
+          <div class="save-notice-caveat">Saved on this device only. Copy your response into your companion workbook to keep a permanent record.</div>
+        </div>
+      `;
+    }
+
     async function scoreSubmission() {
       renderShell(`
         <section class="tsa-speak-panel">
@@ -1318,6 +1379,15 @@ Here is the transcript:
         version: versionLabel,
         raw
       };
+      const durationSeconds = isCheckpoint
+        ? Number(state.durations.transcriptA || 0) + Number(state.durations.transcriptB || 0)
+        : Number(state.durations.diagnosticTranscript || 0);
+      saveResult('rushed-voice-memo-ai', 1, 'Rushed voice memo with AI', durationSeconds, {
+        transcript: isCheckpoint ? state.transcriptA : state.transcript,
+        ai_structured_output: isCheckpoint ? state.transcriptB : state.transcript,
+        duration_minutes: Math.floor(durationSeconds / 60),
+        duration_seconds: durationSeconds
+      });
       sessionStorage.setItem(SPEAK_SCORE_KEY, JSON.stringify(result));
       localStorage.setItem(SPEAK_SCORE_KEY, JSON.stringify(result));
       showScore(result);
@@ -1368,6 +1438,7 @@ Here is the transcript:
           </div>
           ${isCheckpoint ? `<p><strong>Compression:</strong> ${Number(result.raw.compression || 0)}/5. ${escapeHtml(result.raw.compression_feedback || '')}</p>` : ''}
           <p><strong>Overall:</strong> ${escapeHtml(result.raw.feedback?.overall || '')}</p>
+          ${completionSaveNotice()}
           <p class="tsa-speak-copy-line" id="copyLine" hidden>Speak Concisely\t${result.score}/30\tCoverage: ${result.coverage}/12\tDelivery: ${result.delivery}/9\t${isCheckpoint ? 'Compression' : 'Conciseness'}: ${result.conciseness}/9\tTopic: ${currentTopic.title}\tVersion: ${versionLabel}</p>
           <div class="tsa-speak-actions">
             <button class="tsa-speak-button secondary" id="copyResults" type="button">Copy Results</button>

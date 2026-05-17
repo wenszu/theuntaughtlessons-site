@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Your saved Untaught Lessons exercise results.">
+  <title>My Results — The Untaught Lessons</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon-bluebg-whitedoor-thicker-32.png?v=6">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lato:wght@300;400;700&family=Roboto+Mono:wght@400;500;700&display=swap');
+
+    :root {
+      --navy: #003366;
+      --gold: #EEA320;
+      --cream: #F3EDE2;
+      --parchment: #E8DFD1;
+      --charcoal: #4A4A4A;
+      --white: #FFFFFF;
+      --line: #e0d8cd;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--cream);
+      color: var(--charcoal);
+      font-family: 'Lato', sans-serif;
+    }
+
+    a { color: inherit; }
+
+    button { font: inherit; }
+
+    .member-identity-bar {
+      background: var(--navy);
+      padding: 10px 1.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .member-identity-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .identity-logo-text {
+      color: var(--white);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .identity-label {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 11px;
+      color: rgba(255,255,255,.7);
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+
+    .identity-back {
+      font-family: 'Lato', sans-serif;
+      font-size: 12px;
+      color: var(--gold);
+      text-decoration: none;
+      opacity: .85;
+    }
+
+    .identity-back:hover { opacity: 1; }
+
+    .member-nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--cream);
+      border-bottom: .5px solid rgba(0,0,0,.08);
+    }
+
+    .member-nav-inner {
+      display: flex;
+      align-items: center;
+      height: 44px;
+      padding: 0 1.75rem;
+      gap: 0;
+    }
+
+    .nav-workspace-label {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 10px;
+      color: var(--gold);
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      margin-right: 16px;
+      flex-shrink: 0;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      flex: 1;
+    }
+
+    .nav-item {
+      font-family: 'Lato', sans-serif;
+      font-size: 12px;
+      color: var(--charcoal);
+      text-decoration: none;
+      padding: 4px 10px;
+      border-radius: 6px;
+      transition: background .15s;
+    }
+
+    .nav-item:hover { background: rgba(0,0,0,.05); }
+
+    .nav-item.active {
+      color: var(--navy);
+      font-weight: 500;
+      background: rgba(0,51,102,.07);
+    }
+
+    .nav-item-results {
+      color: var(--navy);
+      font-weight: 500;
+      border: .5px solid rgba(0,51,102,.25);
+      margin-left: 6px;
+    }
+
+    .nav-sep {
+      font-size: 12px;
+      color: #c8bfb0;
+      padding: 0 2px;
+    }
+
+    .nav-logout {
+      font-family: 'Lato', sans-serif;
+      font-size: 12px;
+      color: #888;
+      text-decoration: none;
+      margin-left: auto;
+      flex-shrink: 0;
+    }
+
+    .nav-logout:hover { color: var(--navy); }
+
+    .results-shell {
+      max-width: 660px;
+      margin: 0 auto;
+      padding: 2.5rem 1.75rem 3rem;
+    }
+
+    .results-header { margin-bottom: 1.25rem; }
+
+    .results-label {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 10px;
+      color: var(--gold);
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      margin-bottom: 6px;
+    }
+
+    .results-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 26px;
+      color: var(--navy);
+      margin: 0 0 4px;
+    }
+
+    .results-subtitle {
+      font-size: 13px;
+      color: var(--charcoal);
+      margin: 0;
+    }
+
+    .device-notice {
+      background: var(--white);
+      border-left: 3px solid var(--gold);
+      border-radius: 0;
+      padding: 10px 14px;
+      font-family: 'Lato', sans-serif;
+      font-size: 12px;
+      color: var(--charcoal);
+      line-height: 1.6;
+      margin-bottom: 1.5rem;
+    }
+
+    .device-notice strong {
+      color: var(--navy);
+      font-weight: 500;
+    }
+
+    .overall-progress,
+    .results-actions-row {
+      background: var(--white);
+      border: .5px solid var(--line);
+      border-radius: 10px;
+      padding: 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .progress-label {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 10px;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      margin-bottom: 10px;
+    }
+
+    .progress-track {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+
+    .progress-dot {
+      flex: 1;
+      height: 6px;
+      border-radius: 3px;
+    }
+
+    .progress-dot.done { background: var(--navy); }
+    .progress-dot.pending { background: var(--line); }
+
+    .progress-count {
+      font-size: 12px;
+      color: #888;
+      font-family: 'Lato', sans-serif;
+    }
+
+    .progress-count span {
+      font-weight: 500;
+      color: var(--navy);
+    }
+
+    .results-section { margin: 0 0 1.5rem; }
+
+    .results-section-header,
+    .assessment-section-header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      border-bottom: .5px solid #d4ccbf;
+      padding-bottom: 8px;
+      margin-bottom: 10px;
+    }
+
+    .assessment-section-header { border-left: 3px solid var(--gold); padding-left: 10px; }
+
+    .results-section-label {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 10px;
+      color: var(--gold);
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      margin-bottom: 2px;
+    }
+
+    .results-section-title,
+    .assessment-section-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 18px;
+      color: var(--navy);
+    }
+
+    .results-section-count {
+      font-size: 12px;
+      color: #888;
+      font-family: 'Roboto Mono', monospace;
+    }
+
+    .ex-result-card {
+      background: var(--white);
+      border: .5px solid var(--line);
+      border-radius: 10px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 8px;
+    }
+
+    .ex-result-card.ex-result-pending { opacity: .55; }
+
+    .ex-result-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .ex-result-title {
+      font-family: 'Lato', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--navy);
+    }
+
+    .ex-result-meta {
+      font-size: 11px;
+      color: #888;
+      font-family: 'Lato', sans-serif;
+      margin-top: 2px;
+    }
+
+    .ex-badge-done,
+    .ex-badge-pending {
+      font-size: 10px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-family: 'Roboto Mono', monospace;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .ex-badge-done { background: #E1F5EE; color: #085041; }
+    .ex-badge-pending { background: #F1EFE8; color: #888; }
+
+    .ex-result-preview {
+      font-size: 12px;
+      color: var(--charcoal);
+      line-height: 1.6;
+      background: var(--cream);
+      border-radius: 6px;
+      padding: 8px 12px;
+      margin-bottom: 10px;
+      font-style: italic;
+    }
+
+    .ex-result-actions,
+    .results-actions-buttons {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .btn-copy-workbook,
+    .btn-view-full {
+      font-family: 'Lato', sans-serif;
+      font-size: 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      padding: 5px 12px;
+    }
+
+    .btn-copy-workbook {
+      color: var(--navy);
+      border: .5px solid var(--navy);
+      background: var(--white);
+    }
+
+    .btn-copy-workbook:hover,
+    .btn-view-full:hover { background: var(--cream); }
+
+    .btn-view-full {
+      color: #888;
+      border: .5px solid var(--line);
+      background: var(--white);
+    }
+
+    .ex-result-full {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: .5px solid var(--line);
+      font-size: 13px;
+      color: var(--charcoal);
+      line-height: 1.7;
+      font-family: 'Lato', sans-serif;
+      white-space: pre-wrap;
+    }
+
+    .ex-pending-msg {
+      font-size: 12px;
+      color: #888;
+      font-style: italic;
+      font-family: 'Lato', sans-serif;
+    }
+
+    .before-after-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--charcoal);
+      margin-top: 8px;
+      padding: 8px 12px;
+      background: var(--cream);
+      border-radius: 6px;
+    }
+
+    .score-increase { color: #0F6E56; font-weight: 500; }
+    .score-decrease { color: #993C1D; font-weight: 500; }
+
+    .results-actions-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.5rem;
+      margin-top: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .results-actions-title {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--navy);
+      margin-bottom: 4px;
+    }
+
+    .results-actions-sub,
+    .send-status {
+      font-size: 12px;
+      color: var(--charcoal);
+      line-height: 1.5;
+    }
+
+    .btn-download,
+    .btn-send,
+    .take-now-link {
+      font-family: 'Lato', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--white);
+      border: none;
+      padding: 9px 18px;
+      border-radius: 6px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+    }
+
+    .btn-download { background: var(--navy); }
+    .btn-download:hover { background: #001A33; }
+    .btn-send,
+    .take-now-link { background: var(--gold); }
+    .btn-send:hover,
+    .take-now-link:hover { background: #C2841A; }
+
+    .btn-send.coming-soon {
+      opacity: .4;
+      cursor: default;
+      pointer-events: none;
+    }
+
+    .results-footer {
+      text-align: center;
+      padding: 2rem 0 1rem;
+      border-top: .5px solid rgba(0,0,0,.08);
+      margin-top: 2rem;
+    }
+
+    .results-back-link {
+      font-family: 'Lato', sans-serif;
+      font-size: 13px;
+      color: var(--navy);
+      text-decoration: none;
+    }
+
+    .results-back-link:hover { text-decoration: underline; }
+
+    @media (max-width: 700px) {
+      .member-nav-inner,
+      .nav-links,
+      .member-identity-bar,
+      .results-actions-row {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .nav-sep,
+      .nav-workspace-label { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="member-identity-bar">
+    <div class="member-identity-left">
+      <span class="identity-logo-text">The Untaught Lessons</span>
+      <span class="identity-label">Member workspace</span>
+    </div>
+    <a href="../index.html" class="identity-back">Back to site</a>
+  </div>
+
+  <nav class="member-nav" id="member-nav">
+    <div class="member-nav-inner">
+      <span class="nav-workspace-label">Member workspace</span>
+      <div class="nav-links">
+        <a href="../member-login/index.html#orientation" class="nav-item">Orientation</a>
+        <span class="nav-sep">·</span>
+        <a href="../member-login/index.html#phase1" class="nav-item">Phase 1</a>
+        <span class="nav-sep">·</span>
+        <a href="../member-login/index.html#phase2" class="nav-item">Phase 2</a>
+        <span class="nav-sep">·</span>
+        <a href="../member-login/index.html#phase3" class="nav-item">Phase 3</a>
+        <span class="nav-sep">·</span>
+        <span class="nav-item nav-item-results active">My results</span>
+      </div>
+      <a href="../member-login/index.html" class="nav-logout">Log out</a>
+    </div>
+  </nav>
+
+  <main class="results-shell">
+    <div class="results-header">
+      <div class="results-label">My results</div>
+      <h1 class="results-title">Your exercise record.</h1>
+      <p class="results-subtitle">A summary of everything you have completed on this device.</p>
+    </div>
+
+    <div class="device-notice">
+      <strong>Saved on this device only.</strong>
+      Your results are stored in this browser and will be lost if you clear your browser history or switch to a different device or browser. Copy your responses into your companion workbook to keep a permanent record.
+    </div>
+
+    <div class="overall-progress">
+      <div class="progress-label">Overall progress</div>
+      <div class="progress-track" id="progress-track"></div>
+      <div class="progress-count"><span id="completed-count">0</span> of <span id="total-count">7</span> exercises completed</div>
+    </div>
+
+    <section class="results-section" id="assessmentResults"></section>
+    <section class="results-section" id="phase1Results"></section>
+    <section class="results-section" id="phase2Results"></section>
+    <section class="results-section" id="phase3Results"></section>
+
+    <div class="results-actions-row">
+      <div class="results-actions-left">
+        <div class="results-actions-title">Save your results</div>
+        <div class="results-actions-sub">Download a copy of all completed responses or send them to your instructor.</div>
+        <div class="send-status" id="sendStatus" aria-live="polite"></div>
+      </div>
+      <div class="results-actions-buttons">
+        <button class="btn-download" onclick="downloadResults()">Download my results</button>
+        <button class="btn-send" id="btn-send-instructor" onclick="sendToInstructor()">Send to instructor</button>
+      </div>
+    </div>
+
+    <footer class="results-footer">
+      <a href="../member-login/index.html" class="results-back-link">← Back to workspace</a>
+    </footer>
+  </main>
+
+  <script>
+    const APPS = [
+      { id: 'grocery-list', phase: 1, name: 'Grocery List', path: '../apps/grocery-list/index.html' },
+      { id: 'messy-notes', phase: 1, name: "Manager's messy notes", path: '../apps/messy-notes/index.html' },
+      { id: 'rushed-voice-memo', phase: 1, name: 'Rushed voice memo', path: '../apps/rushed-voice-memo/index.html' },
+      { id: 'rushed-voice-memo-ai', phase: 1, name: 'Rushed voice memo with AI', path: '../apps/rushed-voice-memo-ai/index.html' },
+      { id: 'chalkboard-notes', phase: 1, name: 'Chalkboard notes', path: '../apps/chalkboard-notes/index.html' },
+      { id: 'issue-tree', phase: 2, name: 'Issue tree builder', path: '../apps/issue-tree-builder/index.html' },
+      { id: 'scqa-builder', phase: 2, name: 'SCQA builder', path: '../apps/scqa-builder/index.html' }
+    ];
+
+    const ASSESSMENTS = [
+      { key: 'utl_result_tsa_diagnostic', name: 'The Diagnostic', path: '../apps/tsa-diagnostic/index.html' },
+      { key: 'utl_result_tsa_checkpoint', name: 'The Checkpoint', path: '../apps/tsa-checkpoint/index.html' }
+    ];
+
+    function resultFor(appId) {
+      try {
+        const raw = localStorage.getItem('utl_result_' + appId);
+        return raw ? JSON.parse(raw) : null;
+      } catch (error) {
+        return null;
+      }
+    }
+
+    function readKey(key) {
+      try {
+        const raw = localStorage.getItem(key);
+        return raw ? JSON.parse(raw) : null;
+      } catch (error) {
+        return null;
+      }
+    }
+
+    function formatDate(isoString) {
+      if (!isoString) return 'date unknown';
+      return new Date(isoString).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+    }
+
+    function formatDuration(seconds) {
+      if (!seconds && seconds !== 0) return 'time unknown';
+      return Math.round(seconds / 60) + ' min';
+    }
+
+    function words(text, count) {
+      return String(text || '').trim().split(/\s+/).filter(Boolean).slice(0, count).join(' ');
+    }
+
+    function bullets(items) {
+      return (items || []).map((item) => '• ' + item).join('\n');
+    }
+
+    function formatPreview(appId, record) {
+      const r = record.response || {};
+      if (appId === 'grocery-list') {
+        return `${r.bucket1_name || 'Bucket 1'}: ${(r.bucket1_items || []).slice(0, 3).join(', ')} · ${r.bucket2_name || 'Bucket 2'}: ${(r.bucket2_items || []).slice(0, 2).join(', ')} · ${r.bucket3_name || 'Bucket 3'}: ${(r.bucket3_items || []).slice(0, 2).join(', ')}`;
+      }
+      if (['messy-notes', 'rushed-voice-memo', 'chalkboard-notes'].includes(appId)) {
+        if (r.mode === 'structured') return `${r.section1_heading || 'Section 1'}: ${words(r.section1_body, 15)}...`;
+        return words(r.open_response, 25) + '...';
+      }
+      if (appId === 'rushed-voice-memo-ai') return words(r.ai_structured_output, 25) + '...';
+      if (appId === 'issue-tree') return `Hypothesis: ${words(r.hypothesis, 12)}... · ${r.argument1 || 'Argument 1'}: ${(r.argument1_details || [])[0] || ''}`;
+      if (appId === 'scqa-builder') return `S: ${words(r.scqa1?.situation, 10)}... · C: ${words(r.scqa1?.complication, 10)}...`;
+      return words(JSON.stringify(r), 25) + '...';
+    }
+
+    function formatFullResponse(appId, record) {
+      const r = record.response || {};
+      if (appId === 'grocery-list') {
+        return `GROCERY LIST — MECE BUCKETS\n\n${r.bucket1_name || 'BUCKET 1'}\n${bullets(r.bucket1_items)}\n\n${r.bucket2_name || 'BUCKET 2'}\n${bullets(r.bucket2_items)}\n\n${r.bucket3_name || 'BUCKET 3'}\n${bullets(r.bucket3_items)}`;
+      }
+      if (['messy-notes', 'rushed-voice-memo', 'chalkboard-notes'].includes(appId)) {
+        if (r.mode !== 'structured') return r.open_response || '';
+        return `${r.section1_heading || 'SECTION 1'}\n${r.section1_body || ''}\n\n${r.section2_heading || 'SECTION 2'}\n${r.section2_body || ''}\n\n${r.section3_heading || 'SECTION 3'}\n${r.section3_body || ''}`;
+      }
+      if (appId === 'rushed-voice-memo-ai') return `TRANSCRIPT\n${r.transcript || ''}\n\nSTRUCTURED OUTPUT\n${r.ai_structured_output || ''}`;
+      if (appId === 'issue-tree') {
+        return `ISSUE TREE\n\nHypothesis: ${r.hypothesis || ''}\n\nArgument 1: ${r.argument1 || ''}\n${bullets(r.argument1_details)}\n\nArgument 2: ${r.argument2 || ''}\n${bullets(r.argument2_details)}\n\nArgument 3: ${r.argument3 || ''}\n${bullets(r.argument3_details)}`;
+      }
+      if (appId === 'scqa-builder') {
+        return `SCQA #1\nSituation: ${r.scqa1?.situation || ''}\nComplication: ${r.scqa1?.complication || ''}\nQuestion: ${r.scqa1?.question || ''}\nAnswer: ${r.scqa1?.answer || ''}\n\nSCQA #2\nSituation: ${r.scqa2?.situation || ''}\nComplication: ${r.scqa2?.complication || ''}\nQuestion: ${r.scqa2?.question || ''}\nAnswer: ${r.scqa2?.answer || ''}`;
+      }
+      return JSON.stringify(r, null, 2);
+    }
+
+    function completedCard(app, record) {
+      return `<div class="ex-result-card">
+        <div class="ex-result-header">
+          <div>
+            <div class="ex-result-title">${app.name}</div>
+            <div class="ex-result-meta">Completed ${formatDate(record.completed_at)} · ${formatDuration(record.duration_seconds)} · attempt ${record.attempt || 1}</div>
+          </div>
+          <span class="ex-badge-done">Done</span>
+        </div>
+        <div class="ex-result-preview" id="preview-${app.id}">${formatPreview(app.id, record)}</div>
+        <div class="ex-result-actions">
+          <button class="btn-copy-workbook" onclick="copyToWorkbook('${app.id}')">Copy to workbook</button>
+          <button class="btn-view-full" onclick="toggleFullResponse('${app.id}')">View full response</button>
+        </div>
+        <div class="ex-result-full" id="full-${app.id}" style="display:none">${formatFullResponse(app.id, record)}</div>
+      </div>`;
+    }
+
+    function pendingCard(app) {
+      return `<div class="ex-result-card ex-result-pending">
+        <div class="ex-result-header">
+          <div>
+            <div class="ex-result-title">${app.name}</div>
+            <div class="ex-result-meta">Not yet completed</div>
+          </div>
+          <span class="ex-badge-pending">Pending</span>
+        </div>
+        <div class="ex-pending-msg">Complete this exercise on the workspace to see your response here.</div>
+      </div>`;
+    }
+
+    function renderProgress() {
+      const track = document.getElementById('progress-track');
+      let completedCount = 0;
+      APPS.forEach((app) => {
+        const dot = document.createElement('div');
+        dot.className = 'progress-dot';
+        if (resultFor(app.id)) {
+          dot.classList.add('done');
+          completedCount++;
+        } else {
+          dot.classList.add('pending');
+        }
+        track.appendChild(dot);
+      });
+      document.getElementById('completed-count').textContent = completedCount;
+      document.getElementById('total-count').textContent = APPS.length;
+    }
+
+    function renderAssessments() {
+      const diagnostic = readKey('utl_result_tsa_diagnostic');
+      const checkpoint = readKey('utl_result_tsa_checkpoint');
+      const mount = document.getElementById('assessmentResults');
+      let body = '';
+      if (!diagnostic && !checkpoint) {
+        body = '<div class="ex-result-card ex-result-pending"><div class="ex-pending-msg">Your TSA Score™ assessments will appear here once you complete The Diagnostic or The Checkpoint. Both are optional.</div></div>';
+      } else {
+        body = ASSESSMENTS.map((assessment) => {
+          const record = readKey(assessment.key);
+          if (!record) {
+            return `<div class="ex-result-card ex-result-pending"><div class="ex-result-header"><div><div class="ex-result-title">${assessment.name}</div><div class="ex-result-meta">Not yet taken</div></div><span class="ex-badge-pending">Pending</span></div><a class="take-now-link" href="${assessment.path}">Take now →</a></div>`;
+          }
+          const score = record.score ?? record.response?.score ?? record.response?.percentage;
+          return `<div class="ex-result-card"><div class="ex-result-header"><div><div class="ex-result-title">${assessment.name}</div><div class="ex-result-meta">Completed ${formatDate(record.completed_at)}</div></div><span class="ex-badge-done">Done</span></div>${score !== undefined ? `<div class="ex-result-preview">Your score: ${score}%</div>` : ''}</div>`;
+        }).join('');
+        if (diagnostic && checkpoint) {
+          const dScore = Number(diagnostic.score ?? diagnostic.response?.score ?? 0);
+          const cScore = Number(checkpoint.score ?? checkpoint.response?.score ?? 0);
+          const delta = cScore - dScore;
+          body += `<div class="before-after-row">Diagnostic: ${dScore}% → Checkpoint: ${cScore}% · <span class="${delta >= 0 ? 'score-increase' : 'score-decrease'}">${delta >= 0 ? '+' : ''}${delta} points</span></div>`;
+        }
+      }
+      mount.innerHTML = `<div class="assessment-section-header"><div><div class="results-section-label">TSA Score™</div><div class="assessment-section-title">Your assessment</div></div></div>${body}`;
+    }
+
+    function renderPhase(targetId, phase, title) {
+      const apps = APPS.filter((app) => app.phase === phase);
+      const done = apps.filter((app) => resultFor(app.id)).length;
+      const body = apps.length
+        ? apps.map((app) => {
+            const record = resultFor(app.id);
+            return record ? completedCard(app, record) : pendingCard(app);
+          }).join('')
+        : '<div class="ex-result-card ex-result-pending"><div class="ex-result-meta" style="font-style:italic">Exercises for Phase 3 are coming soon.</div></div>';
+      document.getElementById(targetId).innerHTML = `<div class="results-section-header"><div><div class="results-section-label">Phase ${phase}</div><div class="results-section-title">${title}</div></div><div class="results-section-count">${done} of ${apps.length} done</div></div>${body}`;
+    }
+
+    function copyToWorkbook(appId) {
+      const record = resultFor(appId);
+      if (!record) return;
+      const text = formatFullResponse(appId, record);
+      const button = event.target;
+      navigator.clipboard.writeText(text).then(() => {
+        const original = button.textContent;
+        button.textContent = 'Copied ✓';
+        setTimeout(() => button.textContent = original, 2000);
+      }).catch(() => {
+        alert('Could not copy automatically. Select the text below and copy manually.');
+        const full = document.getElementById('full-' + appId);
+        if (full) full.style.display = 'block';
+      });
+    }
+
+    function toggleFullResponse(appId) {
+      const full = document.getElementById('full-' + appId);
+      if (!full) return;
+      const button = event.target;
+      const isHidden = full.style.display === 'none';
+      full.style.display = isHidden ? 'block' : 'none';
+      button.textContent = isHidden ? 'Hide response' : 'View full response';
+    }
+
+    function completedRecords() {
+      return APPS.map((app) => ({ app, record: resultFor(app.id) })).filter((entry) => entry.record);
+    }
+
+    function downloadResults() {
+      const today = new Date().toISOString().slice(0, 10);
+      const parts = [`THE UNTAUGHT LESSONS — MY RESULTS\nDownloaded: ${today}\n━━━━━━━━━━━━━━━━━━━━━━━━━━━`];
+      completedRecords().forEach(({ app, record }) => {
+        parts.push(`\nEXERCISE: ${app.name}\nPhase ${app.phase} · Completed ${formatDate(record.completed_at)} · ${formatDuration(record.duration_seconds)}\n━━━━━━━━━━━━━━━━━━━━━━━━━━━\n${formatFullResponse(app.id, record)}`);
+      });
+      const blob = new Blob([parts.join('\n\n')], { type: 'text/plain' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `utl-my-results-${today}.txt`;
+      link.click();
+      URL.revokeObjectURL(link.href);
+    }
+
+    function sendToInstructor() {
+      const status = document.getElementById('sendStatus');
+      const url = (localStorage.getItem('utl_send_instructor_url') || '').trim();
+      if (!url) {
+        status.textContent = 'This feature is not yet active. Download your results instead.';
+        return;
+      }
+      fetch(url, {
+        method: 'POST',
+        mode: 'no-cors',
+        body: JSON.stringify({ submitted_at: new Date().toISOString(), results: completedRecords() })
+      }).then(() => {
+        status.textContent = 'Sent. Your instructor now has a copy of your results.';
+      }).catch(() => {
+        status.textContent = 'Could not send. Please download your results and email them instead.';
+      });
+    }
+
+    function applySendInstructorStatus() {
+      const button = document.getElementById('btn-send-instructor');
+      if (localStorage.getItem('utl_send_instructor') !== 'live') {
+        button.style.display = 'none';
+      }
+    }
+
+    renderProgress();
+    renderAssessments();
+    renderPhase('phase1Results', 1, 'Think clearly');
+    renderPhase('phase2Results', 2, 'Speak concisely');
+    renderPhase('phase3Results', 3, 'Act confidently');
+    applySendInstructorStatus();
+  </script>
+</body>
+</html>

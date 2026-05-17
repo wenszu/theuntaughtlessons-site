@@ -473,6 +473,39 @@
       color: #5e5e5e;
     }
 
+    .completion-save-notice {
+      background: #F3EDE2;
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-top: 1.5rem;
+    }
+
+    .save-notice-text {
+      font-family: 'Lato', sans-serif;
+      font-size: 13px;
+      color: #003366;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+
+    .save-notice-link {
+      color: #EEA320;
+      text-decoration: none;
+      font-weight: 500;
+      margin-left: 4px;
+    }
+
+    .save-notice-link:hover { text-decoration: underline; }
+
+    .save-notice-caveat {
+      font-size: 11px;
+      color: #888;
+      font-family: 'Lato', sans-serif;
+      line-height: 1.5;
+    }
+
     .hidden { display: none; }
 
     @media (max-width: 980px) {
@@ -1010,6 +1043,14 @@
       const panel = document.getElementById('feedback');
       panel.classList.remove('hidden');
       const elapsedSeconds = activityTimer.elapsedSeconds();
+      saveResult('grocery-list', 1, 'Grocery list', elapsedSeconds, {
+        bucket1_name: state.bucketNames.bucket1,
+        bucket1_items: bucketItems('bucket1'),
+        bucket2_name: state.bucketNames.bucket2,
+        bucket2_items: bucketItems('bucket2'),
+        bucket3_name: state.bucketNames.bucket3,
+        bucket3_items: bucketItems('bucket3')
+      });
 
       const categoryClarity = evalResult.nameRatio >= 0.75
         ? 'Your bucket names are mostly clear and easy to interpret.'
@@ -1040,12 +1081,45 @@
         <p><strong>Suggested improved bucket names:</strong></p>
         <ul>${suggested.map((s) => `<li>${s}</li>`).join('')}</ul>
         ${evalResult.namesBlank ? '<p class="small"><em>You left one or more bucket names blank. Your item placement was still evaluated.</em></p>' : ''}
+        ${completionSaveNotice()}
       `;
     }
 
     function clearFeedback() {
       document.getElementById('feedback').classList.add('hidden');
       document.getElementById('feedback').innerHTML = '';
+    }
+
+    function saveResult(appId, phase, exerciseName, durationSeconds, responseObj) {
+      const existing = localStorage.getItem('utl_result_' + appId);
+      const attempt = existing ? (JSON.parse(existing).attempt || 0) + 1 : 1;
+      const record = {
+        app_id: appId,
+        phase,
+        exercise: exerciseName,
+        completed_at: new Date().toISOString(),
+        duration_seconds: Math.round(durationSeconds),
+        attempt,
+        response: responseObj
+      };
+      localStorage.setItem('utl_result_' + appId, JSON.stringify(record));
+    }
+
+    function completionSaveNotice() {
+      return `
+        <div class="completion-save-notice">
+          <div class="save-notice-text">
+            <i class="ti ti-device-floppy" aria-hidden="true"></i>
+            Your response has been saved to this browser.
+            <a href="../../my-results/index.html" class="save-notice-link">View all your results →</a>
+          </div>
+          <div class="save-notice-caveat">Saved on this device only. Copy your response into your companion workbook to keep a permanent record.</div>
+        </div>
+      `;
+    }
+
+    function bucketItems(bucketKey) {
+      return state.placements[bucketKey].map((id) => getItemById(id)?.text || '').filter(Boolean);
     }
 
     function renderSampleAnswer() {

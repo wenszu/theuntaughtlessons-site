@@ -1102,25 +1102,30 @@
 }
 
 .tsa-start-card .tsa-start-button {
-  display: inline-flex;
+  display: inline-flex !important;
   align-items: center;
   justify-content: center;
+  min-width: 190px;
   min-height: 50px;
   margin-top: 24px;
-  padding: 14px 24px;
-  border: 1px solid var(--home-gold);
-  border-radius: 4px;
-  background: var(--home-gold);
-  color: var(--home-white);
+  padding: 16px 28px;
+  border: 1px solid var(--home-gold) !important;
+  border-radius: 8px;
+  background: var(--home-gold) !important;
+  color: var(--home-white) !important;
   font-family: 'Lato', sans-serif;
   font-size: 14pt;
   font-weight: 700;
   line-height: 1;
-  text-decoration: none;
+  text-decoration: none !important;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, .18);
+  transition: transform .18s ease, filter .18s ease, box-shadow .18s ease;
 }
 
 .tsa-start-card .tsa-start-button:hover {
   filter: brightness(.96);
+  transform: translateY(-1px);
+  box-shadow: 0 16px 34px rgba(0, 0, 0, .22);
 }
 
 .tsa-card-grid {

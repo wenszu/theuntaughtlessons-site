@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin — The Untaught Lessons</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon-bluebg-whitedoor-thicker-32.png?v=6">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lato:wght@300;400;700&family=Roboto+Mono:wght@400;500;700&display=swap');
+
+    :root {
+      --navy: #003366;
+      --gold: #EEA320;
+      --cream: #F3EDE2;
+      --charcoal: #4A4A4A;
+      --line: #d4ccbf;
+      --green: #2d6a4f;
+      --white: #ffffff;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--cream);
+      color: var(--charcoal);
+      font-family: 'Lato', sans-serif;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    .admin-gate {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+
+    .admin-gate-card {
+      width: min(100%, 380px);
+      padding: 28px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--white);
+      box-shadow: 0 18px 42px rgba(0, 51, 102, .12);
+    }
+
+    .admin-label,
+    .section-label,
+    .nav-group-label {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 10px;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+
+    .admin-label,
+    .section-label,
+    .nav-group-label {
+      color: var(--gold);
+    }
+
+    h1,
+    h2 {
+      margin: 0;
+      color: var(--navy);
+      font-family: 'Playfair Display', serif;
+      line-height: 1.08;
+    }
+
+    .admin-gate-card h1 {
+      margin-top: 8px;
+      font-size: 24px;
+    }
+
+    .gate-form,
+    .field-stack {
+      display: grid;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    label {
+      color: var(--navy);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    input {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--white);
+      color: var(--charcoal);
+      font-family: 'Lato', sans-serif;
+      font-size: 13px;
+    }
+
+    input:focus {
+      border-color: var(--navy);
+      outline: none;
+    }
+
+    .primary-button,
+    .small-button {
+      border: 1px solid var(--gold);
+      border-radius: 6px;
+      background: var(--gold);
+      color: var(--white);
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    .primary-button {
+      min-height: 44px;
+    }
+
+    .small-button {
+      padding: 7px 13px;
+      font-size: 13px;
+    }
+
+    .secondary-button {
+      border-color: var(--navy);
+      background: var(--white);
+      color: var(--navy);
+    }
+
+    .error {
+      display: none;
+      margin: 0;
+      color: #8A1F1F;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .error.is-visible {
+      display: block;
+    }
+
+    .admin-app {
+      display: none;
+      min-height: 100vh;
+    }
+
+    .admin-app.is-visible {
+      display: block;
+    }
+
+    .member-identity-bar {
+      position: fixed;
+      inset: 0 0 auto 0;
+      z-index: 30;
+      background: var(--navy);
+      padding: 10px 1.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255, 255, 255, .12);
+    }
+
+    .member-identity-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .identity-logo-text {
+      color: var(--white);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .identity-label {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 11px;
+      color: rgba(255, 255, 255, .7);
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+
+    .identity-back {
+      font-family: 'Lato', sans-serif;
+      font-size: 12px;
+      color: var(--gold);
+      text-decoration: none;
+      opacity: .85;
+    }
+
+    .identity-back:hover {
+      opacity: 1;
+    }
+
+    .admin-sidebar {
+      position: fixed;
+      inset: 40px auto 0 0;
+      width: 220px;
+      padding: 1.5rem 1rem;
+      overflow-y: auto;
+      background: var(--navy);
+      color: var(--white);
+    }
+
+    .sidebar-kicker {
+      color: rgba(255, 255, 255, .88);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 10px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .sidebar-title {
+      margin-top: 5px;
+      color: var(--white);
+      font-family: 'Playfair Display', serif;
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .sidebar-divider {
+      height: 1px;
+      margin: 1rem 0;
+      background: rgba(255, 255, 255, .15);
+    }
+
+    .nav-group-label {
+      display: block;
+      margin-top: 1.5rem;
+      padding: 0 10px;
+    }
+
+    .admin-nav-item {
+      display: block;
+      width: 100%;
+      margin-top: 4px;
+      padding: 7px 10px;
+      border: 0;
+      border-radius: 6px;
+      background: transparent;
+      color: rgba(255, 255, 255, .7);
+      cursor: pointer;
+      font-family: 'Lato', sans-serif;
+      font-size: 13px;
+      text-align: left;
+      transition: background .15s, color .15s;
+    }
+
+    .admin-nav-item:hover {
+      background: rgba(255, 255, 255, .08);
+    }
+
+    .admin-nav-item.active {
+      background: rgba(255, 255, 255, .12);
+      color: var(--white);
+    }
+
+    .logout-link {
+      display: inline-block;
+      margin-top: 22px;
+      padding: 0 10px;
+      color: rgba(255, 255, 255, .7);
+      cursor: pointer;
+      font-size: 13px;
+      text-decoration: none;
+    }
+
+    .admin-main {
+      max-width: 760px;
+      min-height: 100vh;
+      margin-left: 220px;
+      padding: calc(2.5rem + 40px) 3rem 2.5rem;
+      background: var(--cream);
+    }
+
+    .admin-section {
+      margin-bottom: 34px;
+      padding: 24px;
+      border: 1px solid rgba(0, 51, 102, .08);
+      border-radius: 10px;
+      background: rgba(255, 255, 255, .72);
+    }
+
+    .admin-section h2 {
+      margin-top: 5px;
+      font-size: 22px;
+    }
+
+    .section-divider {
+      height: 1px;
+      margin: 1rem 0;
+      background: var(--line);
+    }
+
+    .description {
+      margin: 0 0 16px;
+      color: var(--charcoal);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .toggle-row {
+      display: grid;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .toggle-control {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .toggle-button {
+      padding: 7px 16px;
+      border: 1px solid var(--navy);
+      border-radius: 6px;
+      background: var(--white);
+      color: var(--navy);
+      cursor: pointer;
+      font-family: 'Lato', sans-serif;
+      font-size: 13px;
+      transition: all .15s;
+    }
+
+    .toggle-button.is-active {
+      border-color: var(--gold);
+      background: var(--gold);
+      color: var(--white);
+    }
+
+    .sub-label {
+      min-height: 18px;
+      color: #888;
+      font-size: 12px;
+    }
+
+    .saved {
+      display: inline-block;
+      min-width: 60px;
+      color: var(--green);
+      font-size: 12px;
+      opacity: 0;
+      transition: opacity .2s;
+    }
+
+    .saved.is-visible {
+      opacity: 1;
+    }
+
+    .url-block,
+    .password-block {
+      display: grid;
+      gap: 8px;
+      margin-top: 18px;
+    }
+
+    .status-line {
+      color: #888;
+      font-size: 12px;
+    }
+
+    .status-line.has-value {
+      color: var(--green);
+    }
+
+    .instruction-callout {
+      margin-top: 10px;
+      padding: 1rem 1.25rem;
+      border-left: 3px solid var(--navy);
+      background: var(--white);
+    }
+
+    .instruction-callout h3 {
+      margin: 0 0 8px;
+      color: var(--navy);
+      font-family: 'Lato', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .instruction-callout ol {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--charcoal);
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    .instruction-callout em {
+      display: block;
+      margin-top: 8px;
+      color: #888;
+      font-size: 12px;
+    }
+
+    .password-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .password-input-wrap {
+      position: relative;
+    }
+
+    .password-input-wrap input {
+      padding-right: 46px;
+    }
+
+    .password-toggle {
+      position: absolute;
+      top: 50%;
+      right: 10px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border: 1px solid rgba(0, 51, 102, .18);
+      border-radius: 999px;
+      background: #ffffff;
+      color: var(--navy);
+      cursor: pointer;
+      transform: translateY(-50%);
+    }
+
+    .password-toggle:hover {
+      border-color: var(--navy);
+      background: var(--cream);
+    }
+
+    .password-toggle svg {
+      width: 18px;
+      height: 18px;
+      pointer-events: none;
+    }
+
+    .warning-callout {
+      margin-top: 16px;
+      padding: .75rem 1rem;
+      border-left: 3px solid var(--gold);
+      background: #fff8e1;
+      color: var(--charcoal);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .quick-link {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: center;
+      padding: 10px;
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .quick-link:hover {
+      border-radius: 6px;
+      background: rgba(0, 0, 0, .03);
+    }
+
+    .quick-link-name {
+      color: var(--navy);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .quick-link-path {
+      margin-top: 2px;
+      color: #888;
+      font-family: 'Roboto Mono', monospace;
+      font-size: 11px;
+    }
+
+    @media (max-width: 760px) {
+      .admin-sidebar {
+        position: static;
+        width: 100%;
+        min-height: 0;
+      }
+
+      .admin-main {
+        margin-left: 0;
+        padding: 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <section class="admin-gate" id="adminGate">
+    <div class="admin-gate-card">
+      <span class="admin-label">Admin Access</span>
+      <h1>Site configuration</h1>
+      <form class="gate-form" id="adminGateForm">
+        <label for="adminPassword">Password</label>
+        <div class="password-input-wrap">
+          <input id="adminPassword" type="password" autocomplete="current-password" required>
+          <button class="password-toggle" type="button" aria-label="Show password" aria-pressed="false" data-password-toggle="adminPassword">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+              <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/>
+            </svg>
+          </button>
+        </div>
+        <button class="primary-button" type="submit">Enter</button>
+        <p class="error" id="adminError">Incorrect password</p>
+      </form>
+    </div>
+  </section>
+
+  <div class="admin-app" id="adminApp">
+    <div class="member-identity-bar">
+      <div class="member-identity-left">
+        <span class="identity-logo-text">The Untaught Lessons</span>
+        <span class="identity-label">Admin</span>
+      </div>
+      <a href="../index.html" class="identity-back">Back to site</a>
+    </div>
+
+    <aside class="admin-sidebar">
+      <div class="sidebar-kicker">The Untaught Lessons</div>
+      <div class="sidebar-title">Admin</div>
+      <div class="sidebar-divider"></div>
+
+      <span class="nav-group-label">Site</span>
+      <button class="admin-nav-item active" data-target="section-mission">Mission card</button>
+      <button class="admin-nav-item" data-target="section-footer-link">Footer link</button>
+
+      <span class="nav-group-label">Members</span>
+      <button class="admin-nav-item" data-target="section-orientation">Orientation</button>
+      <button class="admin-nav-item" data-target="section-phase1">Phase 1</button>
+      <button class="admin-nav-item" data-target="section-phase2">Phase 2</button>
+      <button class="admin-nav-item" data-target="section-phase3">Phase 3</button>
+      <button class="admin-nav-item" data-target="section-tsa">Assessments</button>
+      <button class="admin-nav-item" data-target="section-send-instructor">Send to instructor</button>
+
+      <span class="nav-group-label">Access</span>
+      <button class="admin-nav-item" data-target="section-passwords">Passwords</button>
+
+      <span class="nav-group-label">Links</span>
+      <button class="admin-nav-item" data-target="section-links">Quick links</button>
+
+      <a class="logout-link" id="logoutLink" href="#">Log out</a>
+    </aside>
+
+    <main class="admin-main">
+      <section class="admin-section" id="section-mission">
+        <span class="section-label">Site</span>
+        <h2>Mission card</h2>
+        <div class="section-divider"></div>
+        <p class="description">Controls the MA storyline card shown at the top of the member hub.</p>
+        <div class="toggle-row" data-key="utl_mission_card" data-default="show" data-options="show:Show,hide:Hide"></div>
+      </section>
+
+      <section class="admin-section" id="section-footer-link">
+        <span class="section-label">Site</span>
+        <h2>Footer link</h2>
+        <div class="section-divider"></div>
+        <p class="description">Controls the small Admin link in the footer of the member hub. Hide this if you do not want participants to see it.</p>
+        <div class="toggle-row" data-key="utl_footer_link" data-default="show" data-options="show:Show,hide:Hide"></div>
+      </section>
+
+      <section class="admin-section" id="section-orientation">
+        <span class="section-label">Members</span>
+        <h2>Orientation</h2>
+        <div class="section-divider"></div>
+        <p class="description">Controls the Orientation section of the member hub.</p>
+        <div class="toggle-row" data-key="utl_orientation_slides" data-default="placeholder" data-options="live:Live,placeholder:Placeholder" data-labels="live:Embedded slides will show,placeholder:'Slides coming soon' message will show"></div>
+        <div class="url-block" data-key="utl_slides_orientation" data-label="Orientation slides URL"></div>
+      </section>
+
+      <section class="admin-section" id="section-phase1">
+        <span class="section-label">Members</span>
+        <h2>Phase 1</h2>
+        <div class="section-divider"></div>
+        <p class="description">Controls Phase 1 — Think Clearly.</p>
+        <div class="toggle-row" data-key="utl_phase1_status" data-default="live" data-options="live:Live,locked:Locked" data-labels="live:Phase is accessible to participants,locked:Phase shows a 'Not yet available' overlay"></div>
+        <div class="url-block" data-key="utl_slides_phase1_chunk1" data-label="Chunk 1 — MECE & structured thinking"></div>
+        <div class="url-block" data-key="utl_slides_phase1_chunk2" data-label="Chunk 2 — Manager communications"></div>
+        <div class="url-block" data-key="utl_slides_phase1_chunk3" data-label="Chunk 3 — Voice memos & structured note-taking"></div>
+        <div class="url-block" data-key="utl_slides_phase1_chunk4" data-label="Chunk 4 — Chalkboard notes & BSP method"></div>
+      </section>
+
+      <section class="admin-section" id="section-phase2">
+        <span class="section-label">Members</span>
+        <h2>Phase 2</h2>
+        <div class="section-divider"></div>
+        <p class="description">Controls Phase 2 — Speak Concisely.</p>
+        <div class="toggle-row" data-key="utl_phase2_status" data-default="locked" data-options="live:Live,locked:Locked"></div>
+        <div class="url-block" data-key="utl_slides_phase2_chunk1" data-label="Chunk 1 — Issue trees & problem framing"></div>
+        <div class="url-block" data-key="utl_slides_phase2_chunk2" data-label="Chunk 2 — SCQA & Minto's pyramid"></div>
+        <div class="url-block" data-key="utl_slides_phase2_chunk3" data-label="Chunk 3 — Spoken communication"></div>
+      </section>
+
+      <section class="admin-section" id="section-phase3">
+        <span class="section-label">Members</span>
+        <h2>Phase 3</h2>
+        <div class="section-divider"></div>
+        <p class="description">Controls Phase 3 — Act Confidently.</p>
+        <div class="toggle-row" data-key="utl_phase3_status" data-default="locked" data-options="live:Live,locked:Locked"></div>
+        <div class="url-block" data-key="utl_slides_phase3_chunk1" data-label="Chunk 1 — Prioritisation & saying no"></div>
+        <div class="url-block" data-key="utl_slides_phase3_chunk2" data-label="Chunk 2 — Delivering difficult news"></div>
+        <div class="url-block" data-key="utl_slides_phase3_chunk3" data-label="Chunk 3 — Presence & delivery"></div>
+      </section>
+
+      <section class="admin-section" id="section-tsa">
+        <span class="section-label">Members</span>
+        <h2>TSA Score™</h2>
+        <div class="section-divider"></div>
+        <p class="description">Controls the contextual Diagnostic and Checkpoint prompt cards in the member hub.</p>
+        <div class="toggle-row" data-key="utl_tsa_status" data-default="placeholder" data-options="live:Live,placeholder:Placeholder,hidden:Hidden" data-labels="live:Full Diagnostic and Checkpoint cards shown,placeholder:Coming soon message shown, dimmed,hidden:Section removed from the page entirely"></div>
+      </section>
+
+      <section class="admin-section" id="section-send-instructor">
+        <span class="section-label">Members</span>
+        <h2>Send to instructor</h2>
+        <div class="section-divider"></div>
+        <p class="description">When active, participants can send their results directly to you from their My results page. This requires an Apps Script URL from your connected Google Sheet.</p>
+        <div class="toggle-row" data-key="utl_send_instructor" data-default="hidden" data-options="live:Live,hidden:Hidden" data-labels="live:Send to instructor button is active,hidden:Button is hidden from participants"></div>
+        <div class="url-block" data-key="utl_send_instructor_url" data-label="Apps Script endpoint URL" data-placeholder="Paste your Apps Script web app URL here"></div>
+        <div class="instruction-callout">
+          <h3>How to get this URL</h3>
+          <ol>
+            <li>Open your Google Sheet</li>
+            <li>Click Extensions → Apps Script</li>
+            <li>Paste the provided Apps Script code from the program documentation</li>
+            <li>Click Deploy → New deployment</li>
+            <li>Select type: Web app</li>
+            <li>Set access to: Anyone</li>
+            <li>Click Deploy and copy the web app URL</li>
+            <li>Paste that URL into the field above</li>
+          </ol>
+          <em>This URL acts as your private endpoint. Do not share it publicly.</em>
+        </div>
+      </section>
+
+      <section class="admin-section" id="section-passwords">
+        <span class="section-label">Access</span>
+        <h2>Passwords</h2>
+        <div class="section-divider"></div>
+        <div class="password-block" data-key="utl_member_password" data-label="Member hub password" data-description="This is the password participants use to access the member hub." data-default="utl2026"></div>
+        <div class="password-block" data-key="utl_admin_password" data-label="Admin password" data-description="Keep this private. Grants full access to this configuration panel." data-default="utl2026_admin"></div>
+        <div class="warning-callout">If you change this password and forget it, you will need to edit admin/index.html directly to regain access.</div>
+      </section>
+
+      <section class="admin-section" id="section-links">
+        <span class="section-label">Links</span>
+        <h2>Quick links</h2>
+        <div class="section-divider"></div>
+        <p class="description">Open these links in a new tab to verify your changes.</p>
+        <div id="quickLinks"></div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const AUTH_KEY = 'utl_admin_auth';
+    const PASSWORD_KEY = 'utl_admin_password';
+    const DEFAULT_ADMIN_PASSWORD = 'utl2026_admin';
+
+    const gate = document.getElementById('adminGate');
+    const app = document.getElementById('adminApp');
+    const gateForm = document.getElementById('adminGateForm');
+    const adminError = document.getElementById('adminError');
+
+    document.querySelectorAll('[data-password-toggle]').forEach((toggle) => {
+      const target = document.getElementById(toggle.dataset.passwordToggle);
+      if (!target) return;
+
+      toggle.addEventListener('click', () => {
+        const shouldShow = target.type === 'password';
+        target.type = shouldShow ? 'text' : 'password';
+        toggle.setAttribute('aria-label', shouldShow ? 'Hide password' : 'Show password');
+        toggle.setAttribute('aria-pressed', String(shouldShow));
+      });
+    });
+
+    function getValue(key, fallback) {
+      const value = localStorage.getItem(key);
+      return value === null || value === '' ? fallback : value;
+    }
+
+    function showSaved(target) {
+      target.classList.add('is-visible');
+      window.setTimeout(() => target.classList.remove('is-visible'), 1500);
+    }
+
+    function showAdmin() {
+      gate.style.display = 'none';
+      app.classList.add('is-visible');
+    }
+
+    function parsePairs(value) {
+      return value.split(',').map((pair) => {
+        const parts = pair.split(':');
+        return { value: parts[0], label: parts.slice(1).join(':') };
+      });
+    }
+
+    function parseLabels(value) {
+      const labels = {};
+      if (!value) return labels;
+      value.split(',').forEach((pair) => {
+        const parts = pair.split(':');
+        labels[parts[0]] = parts.slice(1).join(':');
+      });
+      return labels;
+    }
+
+    function renderToggles() {
+      document.querySelectorAll('.toggle-row').forEach((row) => {
+        const key = row.dataset.key;
+        const options = parsePairs(row.dataset.options);
+        const labels = parseLabels(row.dataset.labels || '');
+        const current = getValue(key, row.dataset.default);
+        const saved = document.createElement('span');
+        saved.className = 'saved';
+        saved.textContent = 'Saved ✓';
+        const control = document.createElement('div');
+        control.className = 'toggle-control';
+
+        options.forEach((option) => {
+          const button = document.createElement('button');
+          button.className = 'toggle-button';
+          button.type = 'button';
+          button.textContent = option.label;
+          button.dataset.value = option.value;
+          button.classList.toggle('is-active', option.value === current);
+          button.addEventListener('click', () => {
+            localStorage.setItem(key, option.value);
+            row.querySelectorAll('.toggle-button').forEach((item) => item.classList.toggle('is-active', item === button));
+            const sub = row.querySelector('.sub-label');
+            if (sub) sub.textContent = labels[option.value] || '';
+            showSaved(saved);
+          });
+          control.appendChild(button);
+        });
+
+        control.appendChild(saved);
+        row.appendChild(control);
+        const subLabel = document.createElement('div');
+        subLabel.className = 'sub-label';
+        subLabel.textContent = labels[current] || '';
+        row.appendChild(subLabel);
+      });
+    }
+
+    function instructionCallout() {
+      return `
+        <div class="instruction-callout">
+          <h3>How to get this URL</h3>
+          <ol>
+            <li>Open your Google Slides deck</li>
+            <li>Click File → Share → Publish to web</li>
+            <li>Click the Embed tab</li>
+            <li>Click Publish, then confirm with OK</li>
+            <li>An iframe code will appear. Copy only the URL inside src="..." — it looks like this: https://docs.google.com/presentation/d/[ID]/embed?start=false&amp;loop=false</li>
+            <li>Paste that URL into the field above</li>
+          </ol>
+          <em>Do not paste the full iframe tag — only the URL.</em>
+        </div>
+      `;
+    }
+
+    function renderUrlInputs() {
+      document.querySelectorAll('.url-block').forEach((block) => {
+        const key = block.dataset.key;
+        const value = localStorage.getItem(key) || '';
+        const placeholder = block.dataset.placeholder || 'https://docs.google.com/presentation/d/...';
+        const isSlidesUrl = key.indexOf('utl_slides_') === 0;
+        block.innerHTML = `
+          <label>${block.dataset.label}</label>
+          <input type="url" value="${value}" placeholder="${placeholder}">
+          <div class="status-line ${value ? 'has-value' : ''}">${value ? (isSlidesUrl ? 'URL saved — slides will show when status is set to Live' : 'Endpoint URL saved') : (isSlidesUrl ? 'No URL set — placeholder showing' : 'No endpoint URL set')}</div>
+          <span class="saved">Saved ✓</span>
+          ${isSlidesUrl ? instructionCallout() : ''}
+        `;
+        const input = block.querySelector('input');
+        const status = block.querySelector('.status-line');
+        const saved = block.querySelector('.saved');
+
+        function save() {
+          localStorage.setItem(key, input.value.trim());
+          const hasValue = input.value.trim().length > 0;
+          status.classList.toggle('has-value', hasValue);
+          status.textContent = hasValue ? (isSlidesUrl ? 'URL saved — slides will show when status is set to Live' : 'Endpoint URL saved') : (isSlidesUrl ? 'No URL set — placeholder showing' : 'No endpoint URL set');
+          showSaved(saved);
+        }
+
+        input.addEventListener('blur', save);
+        input.addEventListener('keydown', (event) => {
+          if (event.key === 'Enter') {
+            event.preventDefault();
+            save();
+          }
+        });
+      });
+    }
+
+    function renderPasswordBlocks() {
+      document.querySelectorAll('.password-block').forEach((block) => {
+        const key = block.dataset.key;
+        const value = getValue(key, block.dataset.default);
+        block.innerHTML = `
+          <label>${block.dataset.label}</label>
+          <p class="description">${block.dataset.description}</p>
+          <div class="password-input-wrap">
+            <input type="password" value="${value}" readonly>
+            <button class="password-toggle" type="button" aria-label="Show password" aria-pressed="false">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/>
+              </svg>
+            </button>
+          </div>
+          <div class="password-actions">
+            <button class="small-button secondary-button" type="button" data-action="change">Change</button>
+            <button class="small-button" type="button" data-action="save">Save</button>
+            <span class="saved">Saved ✓</span>
+          </div>
+        `;
+        const input = block.querySelector('input');
+        const saved = block.querySelector('.saved');
+        const toggle = block.querySelector('.password-toggle');
+        toggle.addEventListener('click', () => {
+          const isHidden = input.type === 'password';
+          input.type = isHidden ? 'text' : 'password';
+          toggle.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
+          toggle.setAttribute('aria-pressed', String(isHidden));
+        });
+        block.querySelector('[data-action="change"]').addEventListener('click', () => {
+          input.readOnly = false;
+          input.focus();
+          input.select();
+        });
+        block.querySelector('[data-action="save"]').addEventListener('click', () => {
+          localStorage.setItem(key, input.value.trim());
+          input.readOnly = true;
+          showSaved(saved);
+        });
+      });
+    }
+
+    function renderQuickLinks() {
+      const links = [
+        ['Member hub', '../member-login/index.html'],
+        ['My results', '../my-results/index.html'],
+        ['Grocery List', '../apps/grocery-list/index.html'],
+        ["Manager's messy notes", '../apps/messy-notes/index.html'],
+        ['Rushed voice memo', '../apps/rushed-voice-memo/index.html'],
+        ['Rushed voice memo — AI', '../apps/rushed-voice-memo-ai/index.html'],
+        ['Chalkboard notes', '../apps/chalkboard-notes/index.html'],
+        ['Issue tree builder', '../apps/issue-tree-builder/index.html'],
+        ['SCQA builder', '../apps/scqa-builder/index.html']
+      ];
+      document.getElementById('quickLinks').innerHTML = links.map(([name, path]) => `
+        <a class="quick-link" href="${path}" target="_blank">
+          <span><span class="quick-link-name">${name}</span><span class="quick-link-path">${path}</span></span>
+          <span aria-hidden="true">→</span>
+        </a>
+      `).join('');
+    }
+
+    function initNav() {
+      const navItems = Array.from(document.querySelectorAll('.admin-nav-item'));
+      const sections = navItems.map((item) => document.getElementById(item.dataset.target)).filter(Boolean);
+      navItems.forEach((item) => {
+        item.addEventListener('click', () => {
+          document.getElementById(item.dataset.target)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+      });
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            navItems.forEach((item) => item.classList.toggle('active', item.dataset.target === entry.target.id));
+          }
+        });
+      }, { rootMargin: '-20% 0px -65% 0px' });
+      sections.forEach((section) => observer.observe(section));
+    }
+
+    gateForm.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const acceptedPassword = getValue(PASSWORD_KEY, DEFAULT_ADMIN_PASSWORD);
+      if (document.getElementById('adminPassword').value === acceptedPassword) {
+        localStorage.setItem(AUTH_KEY, 'true');
+        adminError.classList.remove('is-visible');
+        showAdmin();
+        return;
+      }
+      adminError.classList.add('is-visible');
+    });
+
+    document.getElementById('logoutLink').addEventListener('click', (event) => {
+      event.preventDefault();
+      localStorage.removeItem(AUTH_KEY);
+      window.location.reload();
+    });
+
+    renderToggles();
+    renderUrlInputs();
+    renderPasswordBlocks();
+    renderQuickLinks();
+    initNav();
+
+    if (localStorage.getItem(AUTH_KEY) === 'true') {
+      showAdmin();
+    }
+  </script>
+</body>
+</html>
