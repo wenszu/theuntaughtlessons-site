@@ -29,7 +29,8 @@
     }
 
     button,
-    input {
+    input,
+    select {
       font: inherit;
     }
 
@@ -90,7 +91,8 @@
       font-weight: 700;
     }
 
-    input {
+    input,
+    select {
       width: 100%;
       padding: 9px 12px;
       border: 1px solid var(--line);
@@ -101,7 +103,8 @@
       font-size: 13px;
     }
 
-    input:focus {
+    input:focus,
+    select:focus {
       border-color: var(--navy);
       outline: none;
     }
@@ -357,10 +360,129 @@
     }
 
     .url-block,
+    .embed-block,
     .password-block {
       display: grid;
       gap: 8px;
       margin-top: 18px;
+    }
+
+    .embed-block {
+      padding: 14px;
+      border: 1px solid rgba(0, 51, 102, .08);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, .62);
+    }
+
+    .embed-controls {
+      display: grid;
+      grid-template-columns: 1fr 180px auto;
+      gap: 10px;
+      align-items: end;
+    }
+
+    .embed-field {
+      display: grid;
+      gap: 6px;
+    }
+
+    .sync-list {
+      display: grid;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .sync-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .sync-summary {
+      margin-top: 12px;
+      color: var(--navy);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .visibility-help {
+      margin: 12px 0 14px;
+      padding: 12px 14px;
+      border-left: 4px solid var(--gold);
+      background: rgba(238, 163, 32, .1);
+      color: var(--charcoal);
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .visibility-help strong {
+      color: var(--navy);
+    }
+
+    .sync-item {
+      display: grid;
+      grid-template-columns: 24px 1fr;
+      gap: 8px;
+      align-items: start;
+      padding: 9px 10px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: var(--white);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .sync-state-ok { color: var(--green); }
+    .sync-state-warn { color: #b7791f; }
+    .sync-state-bad { color: #8A1F1F; }
+
+    .visibility-card {
+      display: grid;
+      gap: 10px;
+      margin-top: 14px;
+      padding: 14px;
+      border: 1px solid rgba(0, 51, 102, .08);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, .7);
+    }
+
+    .visibility-row {
+      display: grid;
+      grid-template-columns: 150px 1fr auto;
+      gap: 10px;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(0, 0, 0, .06);
+      font-size: 13px;
+    }
+
+    .visibility-row:last-child {
+      border-bottom: 0;
+    }
+
+    .visibility-name {
+      color: var(--navy);
+      font-weight: 700;
+    }
+
+    .visibility-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px 9px;
+      border-radius: 999px;
+      background: var(--cream);
+      color: var(--charcoal);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .visibility-badge.is-live {
+      background: #e8f5ed;
+      color: var(--green);
     }
 
     .status-line {
@@ -534,7 +656,8 @@
 
       <span class="nav-group-label">Site</span>
       <button class="admin-nav-item active" data-target="section-mission">Mission card</button>
-      <button class="admin-nav-item" data-target="section-footer-link">Footer link</button>
+      <button class="admin-nav-item" data-target="section-sync">Site sync check</button>
+      <button class="admin-nav-item" data-target="section-visibility">Visibility</button>
 
       <span class="nav-group-label">Members</span>
       <button class="admin-nav-item" data-target="section-orientation">Orientation</button>
@@ -562,12 +685,35 @@
         <div class="toggle-row" data-key="utl_mission_card" data-default="show" data-options="show:Show,hide:Hide"></div>
       </section>
 
-      <section class="admin-section" id="section-footer-link">
+      <section class="admin-section" id="section-sync">
         <span class="section-label">Site</span>
-        <h2>Footer link</h2>
+        <h2>Site sync check</h2>
         <div class="section-divider"></div>
-        <p class="description">Controls the small Admin link in the footer of the member hub. Hide this if you do not want participants to see it.</p>
-        <div class="toggle-row" data-key="utl_footer_link" data-default="show" data-options="show:Show,hide:Hide"></div>
+        <p class="description">Checks whether the member hub still matches the admin panel's expected accordions, exercise cards, app links, completion keys, and embed keys.</p>
+        <div class="sync-actions">
+          <button class="small-button" type="button" id="runSyncCheck">Run check</button>
+          <button class="small-button secondary-button" type="button" id="rerunSyncCheck" hidden>Rerun check</button>
+          <button class="small-button secondary-button" type="button" id="hideSyncCheck" hidden>Hide results</button>
+        </div>
+        <div class="sync-summary" id="syncCheckSummary"></div>
+        <div class="sync-list" id="syncCheckResults"></div>
+      </section>
+
+      <section class="admin-section" id="section-visibility">
+        <span class="section-label">Site</span>
+        <h2>Visibility</h2>
+        <div class="section-divider"></div>
+        <p class="description">Participant view unlocks phases automatically based on completion. Admin mode bypasses this gating so you can inspect all phases at once.</p>
+        <div class="toggle-row" data-key="utl_admin_preview_bypass" data-default="on" data-options="on:Bypass on,off:Bypass off" data-labels="on:Preview link opens all phases with admin bypass,off:Preview link opens the normal participant sequence"></div>
+        <div class="visibility-help">
+          <strong>Bypass on:</strong> The preview button opens the member hub with all phases visible. In this browser, the member hub also treats admin bypass as active after you have entered the admin console.<br>
+          <strong>Bypass off:</strong> The preview button opens the normal participant view, where Phase 2 and Phase 3 stay hidden until the required exercises are marked done.
+        </div>
+        <div class="visibility-card" id="visibilityStatus"></div>
+        <div class="sync-actions">
+          <button class="small-button secondary-button" type="button" id="refreshVisibility">Refresh status</button>
+          <a class="small-button" href="../member-login/index.html?mode=admin" target="_blank" id="memberHubPreviewLink" style="display:inline-flex;align-items:center;text-decoration:none;">Open member hub in admin mode</a>
+        </div>
       </section>
 
       <section class="admin-section" id="section-orientation">
@@ -575,8 +721,7 @@
         <h2>Orientation</h2>
         <div class="section-divider"></div>
         <p class="description">Controls the Orientation section of the member hub.</p>
-        <div class="toggle-row" data-key="utl_orientation_slides" data-default="placeholder" data-options="live:Live,placeholder:Placeholder" data-labels="live:Embedded slides will show,placeholder:'Slides coming soon' message will show"></div>
-        <div class="url-block" data-key="utl_slides_orientation" data-label="Orientation slides URL"></div>
+        <div id="embed-orientation"></div>
       </section>
 
       <section class="admin-section" id="section-phase1">
@@ -585,32 +730,23 @@
         <div class="section-divider"></div>
         <p class="description">Controls Phase 1 — Think Clearly.</p>
         <div class="toggle-row" data-key="utl_phase1_status" data-default="live" data-options="live:Live,locked:Locked" data-labels="live:Phase is accessible to participants,locked:Phase shows a 'Not yet available' overlay"></div>
-        <div class="url-block" data-key="utl_slides_phase1_chunk1" data-label="Chunk 1 — MECE & structured thinking"></div>
-        <div class="url-block" data-key="utl_slides_phase1_chunk2" data-label="Chunk 2 — Manager communications"></div>
-        <div class="url-block" data-key="utl_slides_phase1_chunk3" data-label="Chunk 3 — Voice memos & structured note-taking"></div>
-        <div class="url-block" data-key="utl_slides_phase1_chunk4" data-label="Chunk 4 — Chalkboard notes & BSP method"></div>
+        <div id="embed-phase1"></div>
       </section>
 
       <section class="admin-section" id="section-phase2">
         <span class="section-label">Members</span>
         <h2>Phase 2</h2>
         <div class="section-divider"></div>
-        <p class="description">Controls Phase 2 — Speak Concisely.</p>
-        <div class="toggle-row" data-key="utl_phase2_status" data-default="locked" data-options="live:Live,locked:Locked"></div>
-        <div class="url-block" data-key="utl_slides_phase2_chunk1" data-label="Chunk 1 — Issue trees & problem framing"></div>
-        <div class="url-block" data-key="utl_slides_phase2_chunk2" data-label="Chunk 2 — SCQA & Minto's pyramid"></div>
-        <div class="url-block" data-key="utl_slides_phase2_chunk3" data-label="Chunk 3 — Spoken communication"></div>
+        <p class="description">Controls Phase 2 — Speak Concisely embeds. Phase visibility is automatic and shown in the Visibility section.</p>
+        <div id="embed-phase2"></div>
       </section>
 
       <section class="admin-section" id="section-phase3">
         <span class="section-label">Members</span>
         <h2>Phase 3</h2>
         <div class="section-divider"></div>
-        <p class="description">Controls Phase 3 — Act Confidently.</p>
-        <div class="toggle-row" data-key="utl_phase3_status" data-default="locked" data-options="live:Live,locked:Locked"></div>
-        <div class="url-block" data-key="utl_slides_phase3_chunk1" data-label="Chunk 1 — Prioritisation & saying no"></div>
-        <div class="url-block" data-key="utl_slides_phase3_chunk2" data-label="Chunk 2 — Delivering difficult news"></div>
-        <div class="url-block" data-key="utl_slides_phase3_chunk3" data-label="Chunk 3 — Presence & delivery"></div>
+        <p class="description">Controls Phase 3 — Act Confidently embeds. Phase visibility is automatic and shown in the Visibility section.</p>
+        <div id="embed-phase3"></div>
       </section>
 
       <section class="admin-section" id="section-tsa">
@@ -672,6 +808,58 @@
     const app = document.getElementById('adminApp');
     const gateForm = document.getElementById('adminGateForm');
     const adminError = document.getElementById('adminError');
+    const EXPECTED_EMBEDS = [
+      ['embed-orientation', 'utl_embed_orientation_welcome', 'Your first day at MA'],
+      ['embed-orientation', 'utl_embed_orientation_howto', 'How this program works'],
+      ['embed-phase1', 'utl_embed_p1_first_day', 'Before your first day'],
+      ['embed-phase1', 'utl_embed_p1_ai_grocery', 'Try the same task with AI'],
+      ['embed-phase1', 'utl_embed_p1_message_desk', 'A message just landed on your desk'],
+      ['embed-phase1', 'utl_embed_p1_hugh_favour', 'Hugh needs a favour'],
+      ['embed-phase1', 'utl_embed_p1_ai_memo', 'Try the same memo with AI'],
+      ['embed-phase1', 'utl_embed_p1_olympic_brainstorm', 'Aiko needs the Olympic brainstorm session sorted'],
+      ['embed-phase2', 'utl_embed_p2_aiko_question', 'Aiko liked your work. Now she has a question.'],
+      ['embed-phase2', 'utl_embed_p2_frame_answer', 'Before you frame your answer'],
+      ['embed-phase2', 'utl_embed_p2_outside_perspectives', 'Get outside perspectives before you commit'],
+      ['embed-phase2', 'utl_embed_p2_aiko_email', 'Aiko does not have time to read everything'],
+      ['embed-phase2', 'utl_embed_p2_hallway', 'She bumped into you in the hallway'],
+      ['embed-phase2', 'utl_embed_p2_compress', 'Now compress it'],
+      ['embed-phase3', 'utl_embed_p3_lead_role', 'You just got the lead role.'],
+      ['embed-phase3', 'utl_embed_p3_bad_news', 'You have to be the one to say it'],
+      ['embed-phase3', 'utl_embed_p3_read_room', 'Read the room before you speak'],
+      ['embed-phase3', 'utl_embed_p3_eyes_on_you', 'All eyes are on you']
+    ];
+    const EXPECTED_EXERCISES = [
+      ['Grocery List', '../apps/grocery-list/index.html', 'utl_p1_ex1_done'],
+      ['Grocery List with AI', '../apps/grocery-list-ai/index.html', 'utl_p1_ex2_done'],
+      ["Manager's Messy Notes", '../apps/messy-notes/index.html', 'utl_p1_ex3_done'],
+      ['Rushed Voice Memo', '../apps/rushed-voice-memo/index.html', 'utl_p1_ex4_done'],
+      ['Rushed Voice Memo with AI', '../apps/rushed-voice-memo-ai/index.html', 'utl_p1_ex5_done'],
+      ['Chalkboard Notes', '../apps/chalkboard-notes/index.html', 'utl_p1_ex6_done'],
+      ['Issue Tree Builder', '../apps/issue-tree-builder/index.html', 'utl_p2_ex1_done'],
+      ['SCQA Builder', '../apps/scqa-builder/index.html', 'utl_p2_ex2_done'],
+      ['Advisory Board with AI', '', ''],
+      ['Email to Aiko', '', ''],
+      ['Explain to Aiko (120s)', '', ''],
+      ['Elevator Pitch (60s)', '', ''],
+      ['The Art of Saying No', '', ''],
+      ['I Have Bad News...', '', ''],
+      ["Let's Switch Hats", '', ''],
+      ['Speak Like Obama', '', '']
+    ];
+    const LEGACY_EMBED_KEYS = {
+      utl_embed_orientation_welcome: 'utl_slides_orientation',
+      utl_embed_orientation_howto: 'utl_slides_orientation',
+      utl_embed_p1_first_day: 'utl_slides_phase1_chunk1',
+      utl_embed_p1_message_desk: 'utl_slides_phase1_chunk2',
+      utl_embed_p1_hugh_favour: 'utl_slides_phase1_chunk3',
+      utl_embed_p1_olympic_brainstorm: 'utl_slides_phase1_chunk4',
+      utl_embed_p2_aiko_question: 'utl_slides_phase2_chunk1',
+      utl_embed_p2_frame_answer: 'utl_slides_phase2_chunk2',
+      utl_embed_p2_hallway: 'utl_slides_phase2_chunk3',
+      utl_embed_p3_lead_role: 'utl_slides_phase3_chunk1',
+      utl_embed_p3_bad_news: 'utl_slides_phase3_chunk2',
+      utl_embed_p3_read_room: 'utl_slides_phase3_chunk3'
+    };
 
     document.querySelectorAll('[data-password-toggle]').forEach((toggle) => {
       const target = document.getElementById(toggle.dataset.passwordToggle);
@@ -688,6 +876,17 @@
     function getValue(key, fallback) {
       const value = localStorage.getItem(key);
       return value === null || value === '' ? fallback : value;
+    }
+
+    function getEmbedConfig(key) {
+      try {
+        const config = JSON.parse(localStorage.getItem(key) || '{}');
+        if (config.url) return config;
+        const legacyUrl = LEGACY_EMBED_KEYS[key] ? localStorage.getItem(LEGACY_EMBED_KEYS[key]) : '';
+        return legacyUrl ? { url: legacyUrl, type: 'slides' } : {};
+      } catch (error) {
+        return {};
+      }
     }
 
     function showSaved(target) {
@@ -722,6 +921,9 @@
         const key = row.dataset.key;
         const options = parsePairs(row.dataset.options);
         const labels = parseLabels(row.dataset.labels || '');
+        if (key === 'utl_admin_preview_bypass' && localStorage.getItem(key) === null) {
+          localStorage.setItem(key, row.dataset.default);
+        }
         const current = getValue(key, row.dataset.default);
         const saved = document.createElement('span');
         saved.className = 'saved';
@@ -741,6 +943,7 @@
             row.querySelectorAll('.toggle-button').forEach((item) => item.classList.toggle('is-active', item === button));
             const sub = row.querySelector('.sub-label');
             if (sub) sub.textContent = labels[option.value] || '';
+            if (key === 'utl_admin_preview_bypass') renderVisibilityStatus();
             showSaved(saved);
           });
           control.appendChild(button);
@@ -776,14 +979,12 @@
       document.querySelectorAll('.url-block').forEach((block) => {
         const key = block.dataset.key;
         const value = localStorage.getItem(key) || '';
-        const placeholder = block.dataset.placeholder || 'https://docs.google.com/presentation/d/...';
-        const isSlidesUrl = key.indexOf('utl_slides_') === 0;
+        const placeholder = block.dataset.placeholder || 'Paste URL here';
         block.innerHTML = `
           <label>${block.dataset.label}</label>
           <input type="url" value="${value}" placeholder="${placeholder}">
-          <div class="status-line ${value ? 'has-value' : ''}">${value ? (isSlidesUrl ? 'URL saved — slides will show when status is set to Live' : 'Endpoint URL saved') : (isSlidesUrl ? 'No URL set — placeholder showing' : 'No endpoint URL set')}</div>
+          <div class="status-line ${value ? 'has-value' : ''}">${value ? 'Endpoint URL saved' : 'No endpoint URL set'}</div>
           <span class="saved">Saved ✓</span>
-          ${isSlidesUrl ? instructionCallout() : ''}
         `;
         const input = block.querySelector('input');
         const status = block.querySelector('.status-line');
@@ -793,7 +994,7 @@
           localStorage.setItem(key, input.value.trim());
           const hasValue = input.value.trim().length > 0;
           status.classList.toggle('has-value', hasValue);
-          status.textContent = hasValue ? (isSlidesUrl ? 'URL saved — slides will show when status is set to Live' : 'Endpoint URL saved') : (isSlidesUrl ? 'No URL set — placeholder showing' : 'No endpoint URL set');
+          status.textContent = hasValue ? 'Endpoint URL saved' : 'No endpoint URL set';
           showSaved(saved);
         }
 
@@ -805,6 +1006,175 @@
           }
         });
       });
+    }
+
+    function renderEmbedBlocks() {
+      EXPECTED_EMBEDS.forEach(([targetId, key, label]) => {
+        const target = document.getElementById(targetId);
+        if (!target) return;
+        const config = getEmbedConfig(key);
+        const block = document.createElement('div');
+        block.className = 'embed-block';
+        block.dataset.key = key;
+        block.innerHTML = `
+          <label>${label}</label>
+          <div class="embed-controls">
+            <div class="embed-field">
+              <label>Embed URL</label>
+              <input type="url" value="${config.url || ''}" placeholder="Paste Google Slides or Google Drive video URL">
+            </div>
+            <div class="embed-field">
+              <label>Type</label>
+              <select>
+                <option value="slides"${(config.type || 'slides') === 'slides' ? ' selected' : ''}>Google Slides</option>
+                <option value="video"${config.type === 'video' ? ' selected' : ''}>Google Drive Video</option>
+              </select>
+            </div>
+            <button class="small-button" type="button">Save</button>
+          </div>
+          <div class="status-line ${config.url ? 'has-value' : ''}">${config.url ? 'Embed saved' : 'No embed set'}</div>
+          <span class="saved">Saved ✓</span>
+        `;
+        const input = block.querySelector('input');
+        const select = block.querySelector('select');
+        const status = block.querySelector('.status-line');
+        const saved = block.querySelector('.saved');
+        block.querySelector('button').addEventListener('click', () => {
+          const payload = {
+            url: input.value.trim(),
+            type: select.value
+          };
+          if (payload.url) {
+            localStorage.setItem(key, JSON.stringify(payload));
+          } else {
+            localStorage.removeItem(key);
+          }
+          status.classList.toggle('has-value', Boolean(payload.url));
+          status.textContent = payload.url ? 'Embed saved' : 'No embed set';
+          showSaved(saved);
+        });
+        target.appendChild(block);
+      });
+    }
+
+    function syncItem(state, text) {
+      const icon = state === 'ok' ? '✓' : state === 'warn' ? '⚠' : '✗';
+      return `<div class="sync-item"><span class="sync-state-${state}">${icon}</span><span>${text}</span></div>`;
+    }
+
+    async function appPathStatus(path) {
+      if (!path) return 'ok';
+      try {
+        const response = await fetch(path, { cache: 'no-store' });
+        return response.ok ? 'ok' : 'warn';
+      } catch (error) {
+        return 'warn';
+      }
+    }
+
+    async function runSyncCheck() {
+      const output = document.getElementById('syncCheckResults');
+      const summary = document.getElementById('syncCheckSummary');
+      const runButton = document.getElementById('runSyncCheck');
+      const rerunButton = document.getElementById('rerunSyncCheck');
+      const hideButton = document.getElementById('hideSyncCheck');
+      output.innerHTML = syncItem('warn', 'Running sync check...');
+      summary.textContent = '';
+      runButton.hidden = true;
+      rerunButton.hidden = true;
+      hideButton.hidden = true;
+      let html = '';
+      try {
+        const response = await fetch('../member-login/index.html', { cache: 'no-store' });
+        html = await response.text();
+      } catch (error) {
+        output.innerHTML = syncItem('bad', 'Could not read member-login/index.html for sync check.');
+        summary.textContent = 'Sync check could not run.';
+        rerunButton.hidden = false;
+        hideButton.hidden = false;
+        return;
+      }
+
+      const rows = [];
+      const counts = { ok: 0, warn: 0, bad: 0 };
+      function add(state, text) {
+        counts[state] += 1;
+        rows.push(syncItem(state, text));
+      }
+
+      EXPECTED_EMBEDS.forEach(([, key, label]) => {
+        add(html.includes(`data-embed-key="${key}"`) ? 'ok' : 'bad', `Context accordion: ${label} (${key})`);
+        add(html.includes(key) ? 'ok' : 'bad', `Embed key in member hub logic: ${key}`);
+      });
+
+      for (const [title, path, key] of EXPECTED_EXERCISES) {
+        add(html.includes(`<div class="card-title">${title}</div>`) ? 'ok' : 'bad', `Exercise title: ${title}`);
+        if (path) {
+          const found = html.includes(`href="${path}"`);
+          const pathState = found ? await appPathStatus(path) : 'bad';
+          add(found && pathState === 'ok' ? 'ok' : found ? 'warn' : 'bad', `Open tool path: ${title} → ${path}`);
+        }
+        if (key) {
+          add(html.includes(key) ? 'ok' : 'bad', `Completion localStorage key: ${key}`);
+        }
+      }
+
+      output.innerHTML = rows.join('');
+      summary.textContent = `Sync check complete: ${counts.ok} matched, ${counts.warn} warnings, ${counts.bad} missing.`;
+      rerunButton.hidden = false;
+      hideButton.hidden = false;
+    }
+
+    function hideSyncCheckResults() {
+      document.getElementById('syncCheckResults').innerHTML = '';
+      document.getElementById('syncCheckSummary').textContent = '';
+      document.getElementById('runSyncCheck').hidden = false;
+      document.getElementById('rerunSyncCheck').hidden = true;
+      document.getElementById('hideSyncCheck').hidden = true;
+    }
+
+    function isDone(key) {
+      return localStorage.getItem(key) === 'true';
+    }
+
+    function updateMemberHubPreviewLink(bypassEnabled) {
+      const link = document.getElementById('memberHubPreviewLink');
+      if (!link) return;
+      link.href = bypassEnabled ? '../member-login/index.html?mode=admin' : '../member-login/index.html';
+      link.textContent = bypassEnabled ? 'Open member hub with bypass' : 'Open member hub as participant';
+    }
+
+    function renderVisibilityStatus() {
+      const p1Keys = ['utl_p1_ex1_done', 'utl_p1_ex2_done', 'utl_p1_ex3_done', 'utl_p1_ex4_done', 'utl_p1_ex5_done', 'utl_p1_ex6_done'];
+      const p2Keys = ['utl_p2_ex1_done', 'utl_p2_ex2_done'];
+      const p1Done = p1Keys.filter(isDone).length;
+      const p2Done = p2Keys.filter(isDone).length;
+      const phase2Live = p1Done === p1Keys.length;
+      const phase3Live = phase2Live && p2Done === p2Keys.length;
+      const bypassEnabled = getValue('utl_admin_preview_bypass', 'on') === 'on';
+      updateMemberHubPreviewLink(bypassEnabled);
+      document.getElementById('visibilityStatus').innerHTML = `
+        <div class="visibility-row">
+          <span class="visibility-name">Phase 1</span>
+          <span>Always visible. Exercises still unlock one by one inside the phase.</span>
+          <span class="visibility-badge is-live">Visible</span>
+        </div>
+        <div class="visibility-row">
+          <span class="visibility-name">Phase 2</span>
+          <span>${p1Done} of ${p1Keys.length} Phase 1 live exercises marked done.</span>
+          <span class="visibility-badge ${phase2Live ? 'is-live' : ''}">${phase2Live ? 'Visible' : 'Hidden'}</span>
+        </div>
+        <div class="visibility-row">
+          <span class="visibility-name">Phase 3</span>
+          <span>${p2Done} of ${p2Keys.length} Phase 2 live exercises marked done. Phase 2 must also be visible.</span>
+          <span class="visibility-badge ${phase3Live ? 'is-live' : ''}">${phase3Live ? 'Visible' : 'Hidden'}</span>
+        </div>
+        <div class="visibility-row">
+          <span class="visibility-name">Preview bypass</span>
+          <span>${bypassEnabled ? 'Preview link opens the member hub with all phases visible.' : 'Preview link opens the normal participant sequence.'}</span>
+          <span class="visibility-badge ${bypassEnabled ? 'is-live' : ''}">${bypassEnabled ? 'On' : 'Off'}</span>
+        </div>
+      `;
     }
 
     function renderPasswordBlocks() {
@@ -854,6 +1224,7 @@
     function renderQuickLinks() {
       const links = [
         ['Member hub', '../member-login/index.html'],
+        ['Member hub — admin mode', '../member-login/index.html?mode=admin'],
         ['My results', '../my-results/index.html'],
         ['Grocery List', '../apps/grocery-list/index.html'],
         ["Manager's messy notes", '../apps/messy-notes/index.html'],
@@ -908,10 +1279,17 @@
     });
 
     renderToggles();
+    renderEmbedBlocks();
     renderUrlInputs();
     renderPasswordBlocks();
     renderQuickLinks();
+    renderVisibilityStatus();
     initNav();
+
+    document.getElementById('runSyncCheck')?.addEventListener('click', runSyncCheck);
+    document.getElementById('rerunSyncCheck')?.addEventListener('click', runSyncCheck);
+    document.getElementById('hideSyncCheck')?.addEventListener('click', hideSyncCheckResults);
+    document.getElementById('refreshVisibility')?.addEventListener('click', renderVisibilityStatus);
 
     if (localStorage.getItem(AUTH_KEY) === 'true') {
       showAdmin();

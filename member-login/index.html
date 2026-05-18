@@ -864,6 +864,265 @@
       pointer-events: none;
     }
 
+    .ws-context-accordion {
+      padding: 12px 16px;
+      border-radius: 7px;
+      background: #EEE8DC;
+      cursor: pointer;
+    }
+
+    .ws-context-accordion .slides-bar-icon {
+      position: relative;
+      width: 24px;
+      height: 24px;
+      flex: 0 0 24px;
+      border-radius: 5px;
+      background: #EEA320;
+      color: transparent;
+      font-size: 0;
+    }
+
+    .ws-context-accordion .slides-bar-icon::before,
+    .ws-context-accordion .slides-bar-icon::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 12px;
+      height: 2.5px;
+      border-radius: 999px;
+      background: #ffffff;
+      transform: translate(-50%, -50%);
+    }
+
+    .ws-context-accordion .slides-bar-icon::after {
+      transform: translate(-50%, -50%) rotate(90deg);
+    }
+
+    .ws-context-accordion.ws-expanded .slides-bar-icon::after {
+      opacity: 0;
+    }
+
+    .ws-context-text {
+      display: grid;
+      gap: 2px;
+    }
+
+    .ws-context-label {
+      color: #003366;
+      font-size: 13.5px;
+      font-weight: 600;
+    }
+
+    .ws-context-sub {
+      color: #4D7094;
+      font-size: 11.5px;
+    }
+
+    .ws-ex-card {
+      border: 2px solid #EEA320;
+      cursor: default;
+    }
+
+    .ws-ex-card:hover {
+      transform: none;
+    }
+
+    .ws-ex-card::after {
+      content: none !important;
+    }
+
+    .ws-ex-card .card-type {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 0;
+    }
+
+    .ws-step-circle {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      border-radius: 999px;
+      background: #003366;
+      color: #ffffff;
+      font-family: 'Roboto Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0;
+    }
+
+    .ws-done-pill {
+      display: none;
+      padding: 2px 8px;
+      border-radius: 20px;
+      background: #e8f5ed;
+      color: #2e7d4f;
+      font-family: 'Lato', sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0;
+      text-transform: none;
+    }
+
+    .ws-ex-card.ws-is-done {
+      border-color: #2e7d4f;
+    }
+
+    .ws-ex-card.ws-is-done .ws-step-circle {
+      background: #2e7d4f;
+    }
+
+    .ws-ex-card.ws-is-done .ws-done-pill {
+      display: inline-flex;
+    }
+
+    .ws-ex-card.ws-is-locked {
+      border-color: #e0dbd2;
+      opacity: .55;
+    }
+
+    .ws-ex-card.ws-is-locked .ws-step-circle {
+      background: #003366;
+    }
+
+    .ws-card-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .ws-open-tool,
+    .ws-mark-done {
+      border-radius: 7px;
+      text-decoration: none;
+    }
+
+    .ws-open-tool {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 11px 22px;
+      background: #EEA320;
+      color: #003366;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .ws-is-done .ws-open-tool {
+      opacity: .65;
+    }
+
+    .ws-is-locked .ws-open-tool {
+      pointer-events: none;
+    }
+
+    .ws-mark-done {
+      padding: 10px 16px;
+      border: 1.5px solid #c8c2b8;
+      background: transparent;
+      color: #4D7094;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .ws-mark-done:hover {
+      border-color: #2e7d4f;
+      color: #2e7d4f;
+    }
+
+    .ws-is-done .ws-mark-done {
+      border-color: #2e7d4f;
+      color: #2e7d4f;
+    }
+
+    .ws-is-locked .ws-mark-done {
+      display: none;
+    }
+
+    .ws-lock-hint {
+      display: none;
+      margin-top: 8px;
+      color: #bbb;
+      font-size: 11px;
+    }
+
+    .ws-is-locked .ws-lock-hint {
+      display: block;
+    }
+
+    .ws-static-card {
+      cursor: default;
+    }
+
+    .ws-static-card .ws-card-actions {
+      margin-top: 6px;
+    }
+
+    .ws-coming-soon-card {
+      border-color: #e0dbd2;
+      opacity: .55;
+      cursor: default;
+      pointer-events: none;
+    }
+
+    .ws-coming-soon-card .ws-step-circle {
+      background: #4D7094;
+    }
+
+    .ws-phase2-coming-soon-card {
+      border: 2px solid #e0dbd2;
+      opacity: 1;
+      cursor: default;
+    }
+
+    .ws-phase2-coming-soon-card:hover {
+      border-color: #e0dbd2;
+      box-shadow: 0 16px 36px rgba(0, 51, 102, .08);
+      transform: none;
+    }
+
+    .ws-phase2-coming-soon-card .card-type {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 0;
+    }
+
+    .ws-phase2-coming-soon-card .ws-step-circle {
+      background: #4D7094;
+    }
+
+    .ws-coming-soon-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      padding: 11px 22px;
+      border: 0;
+      border-radius: 7px;
+      background: #e8e2d8;
+      color: #999;
+      font-family: 'Lato', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: not-allowed;
+    }
+
+    .ws-phase-reveal {
+      display: none;
+      margin-bottom: 12px;
+      color: #EEA320;
+      font-family: 'Roboto Mono', monospace;
+      font-size: 13px;
+      letter-spacing: .04em;
+    }
+
     .coming-soon-badge {
       display: inline-block;
       margin-top: 6px;
@@ -982,14 +1241,28 @@
                 </div>
               </div>
               <p class="phase-description">Complete this before starting any of the three workbooks. This applies to all phases.</p>
-              <div class="slides-bar" onclick="toggleSlides(this)" data-slide-key="utl_slides_orientation" data-status-key="utl_orientation_slides">
-                <span class="slides-bar-icon">▶</span>
-                <span class="slides-bar-label">Orientation slides</span>
+
+              <div class="phase-chunk">
+                <div class="slides-bar ws-context-accordion" onclick="toggleSlides(this)" data-embed-key="utl_embed_orientation_welcome">
+                  <span class="slides-bar-icon">▶</span>
+                  <span class="ws-context-text"><span class="ws-context-label">Your first day at MA</span><span class="ws-context-sub">Read before starting</span></span>
+                </div>
+                <div class="slides-embed-wrapper is-collapsed">
+                  <iframe src="https://docs.google.com/presentation/d/1W___1_VW5_GfeUcyYVVqzJkBPu3GFPSVV_Fmdg0CoFA/embed?start=false&loop=false&delayms=3000&slide=id.g3dbb839eca5_0_363" frameborder="0" allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true"></iframe>
+                </div>
+                <a href="https://docs.google.com/presentation/d/1W___1_VW5_GfeUcyYVVqzJkBPu3GFPSVV_Fmdg0CoFA/edit?slide=id.g3dbb839eca5_0_363" target="_blank" class="slides-fullscreen-link is-collapsed">Open in full screen ↗</a>
               </div>
-              <div class="slides-embed-wrapper is-collapsed">
-                <iframe src="https://docs.google.com/presentation/d/e/2PACX-1vQwCHgkU4ms-rvT89180hJrbEx79Xlatja5IcWBsda40WQ8oruUOkRCi77MGmGymeNdxAoBTYNFRViY/pubembed?start=false&loop=false&delayms=3000" frameborder="0" allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true"></iframe>
+
+              <div class="phase-chunk">
+                <div class="slides-bar ws-context-accordion" onclick="toggleSlides(this)" data-embed-key="utl_embed_orientation_howto">
+                  <span class="slides-bar-icon">▶</span>
+                  <span class="ws-context-text"><span class="ws-context-label">How this program works</span><span class="ws-context-sub">Read before starting</span></span>
+                </div>
+                <div class="slides-embed-wrapper is-collapsed">
+                  <iframe src="https://docs.google.com/presentation/d/1W___1_VW5_GfeUcyYVVqzJkBPu3GFPSVV_Fmdg0CoFA/embed?start=false&loop=false&delayms=3000&slide=id.p" frameborder="0" allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true"></iframe>
+                </div>
+                <a href="https://docs.google.com/presentation/d/1W___1_VW5_GfeUcyYVVqzJkBPu3GFPSVV_Fmdg0CoFA/edit#slide=id.p" target="_blank" class="slides-fullscreen-link is-collapsed">Open in full screen ↗</a>
               </div>
-              <a href="https://docs.google.com/presentation/d/e/2PACX-1vQwCHgkU4ms-rvT89180hJrbEx79Xlatja5IcWBsda40WQ8oruUOkRCi77MGmGymeNdxAoBTYNFRViY/pubembed?start=false&loop=false&delayms=3000" target="_blank" class="slides-fullscreen-link is-collapsed">Open in full screen ↗</a>
             </section>
 
             <section class="phase-section" id="phase1" aria-labelledby="phase1Title">
@@ -1001,73 +1274,117 @@
               </div>
 
               <div class="phase-chunk">
-                <div class="slides-bar" onclick="toggleSlides(this)" data-slide-key="utl_slides_phase1_chunk1">
+                <div class="slides-bar ws-context-accordion" onclick="toggleSlides(this)" data-embed-key="utl_embed_p1_first_day">
                   <span class="slides-bar-icon">▶</span>
-                  <span class="slides-bar-label">Context — MECE & structured thinking</span>
+                  <span class="ws-context-text"><span class="ws-context-label">Before your first day</span><span class="ws-context-sub">Read before starting</span></span>
                 </div>
                 <div class="slides-placeholder is-collapsed">Slides coming soon</div>
-                <div class="exercise-card-grid">
-                  <a class="exercise-card" href="../apps/grocery-list/index.html">
-                    <div class="card-type">Phase 1 | Think Clearly</div>
-                    <div class="card-title">Grocery List</div>
-                    <div class="card-time">Sort a messy list into clean MECE buckets.</div>
-                  </a>
-                </div>
+                <article class="exercise-card ws-ex-card" data-ws-exercise="1" data-ws-href="../apps/grocery-list/index.html">
+                  <div class="card-type"><span class="ws-step-circle">1</span><span>Phase 1 | Think Clearly</span><span class="ws-done-pill">✓ Done</span></div>
+                  <div class="card-title">Grocery List</div>
+                  <div class="card-time">Sort a messy list into clean MECE buckets.</div>
+                  <div class="ws-card-actions">
+                    <a class="ws-open-tool" href="../apps/grocery-list/index.html">Open tool</a>
+                    <button class="ws-mark-done" type="button">Mark as done</button>
+                  </div>
+                  <div class="ws-lock-hint"></div>
+                </article>
               </div>
 
               <div class="phase-chunk">
-                <div class="slides-bar" onclick="toggleSlides(this)" data-slide-key="utl_slides_phase1_chunk2">
+                <div class="slides-bar ws-context-accordion" onclick="toggleSlides(this)" data-embed-key="utl_embed_p1_ai_grocery">
                   <span class="slides-bar-icon">▶</span>
-                  <span class="slides-bar-label">Context — manager communications</span>
+                  <span class="ws-context-text"><span class="ws-context-label">Try the same task with AI</span><span class="ws-context-sub">Read before starting</span></span>
                 </div>
-                <div class="slides-placeholder is-collapsed">Slides coming soon</div>
-                <div class="exercise-card-grid">
-                  <a class="exercise-card" href="../apps/messy-notes/index.html">
-                    <div class="card-type">Phase 1 | Think Clearly</div>
-                    <div class="card-title">Manager's messy notes</div>
-                    <div class="card-time">Turn a rushed manager update into a structured summary.</div>
-                  </a>
-                </div>
+                <div class="slides-placeholder is-collapsed"><!-- embed to be added --></div>
+                <article class="exercise-card ws-ex-card" data-ws-exercise="2" data-ws-href="../apps/grocery-list-ai/index.html">
+                  <div class="card-type"><span class="ws-step-circle">2</span><span>Phase 1 | Think Clearly</span><span class="ws-done-pill">✓ Done</span></div>
+                  <div class="card-title">Grocery List with AI</div>
+                  <div class="card-time">Use AI to organize the same list differently.</div>
+                  <div class="ws-card-actions">
+                    <a class="ws-open-tool" href="../apps/grocery-list-ai/index.html">Open tool</a>
+                    <button class="ws-mark-done" type="button">Mark as done</button>
+                  </div>
+                  <div class="ws-lock-hint">Complete exercise 1 to unlock</div>
+                </article>
               </div>
 
               <div class="phase-chunk">
-                <div class="slides-bar" onclick="toggleSlides(this)" data-slide-key="utl_slides_phase1_chunk3">
+                <div class="slides-bar ws-context-accordion" onclick="toggleSlides(this)" data-embed-key="utl_embed_p1_message_desk">
                   <span class="slides-bar-icon">▶</span>
-                  <span class="slides-bar-label">Context — voice memos & structured note-taking</span>
+                  <span class="ws-context-text"><span class="ws-context-label">A message just landed on your desk</span><span class="ws-context-sub">Read before starting</span></span>
                 </div>
                 <div class="slides-placeholder is-collapsed">Slides coming soon</div>
-                <div class="exercise-card-grid">
-                  <a class="exercise-card" href="../apps/rushed-voice-memo/index.html">
-                    <div class="card-type">Phase 1 | Think Clearly</div>
-                    <div class="card-title">Rushed voice memo</div>
-                    <div class="card-time">Turn a rushed verbal update into a clean written summary.</div>
-                  </a>
-                  <a class="exercise-card" href="../apps/rushed-voice-memo-ai/index.html">
-                    <div class="card-type">Phase 1 | Think Clearly</div>
-                    <div class="card-title">Rushed voice memo with AI</div>
-                    <div class="card-time">Transcribe a voice memo, then structure it with an AI prompt.</div>
-                  </a>
-                </div>
+                <article class="exercise-card ws-ex-card" data-ws-exercise="3" data-ws-href="../apps/messy-notes/index.html">
+                  <div class="card-type"><span class="ws-step-circle">3</span><span>Phase 1 | Think Clearly</span><span class="ws-done-pill">✓ Done</span></div>
+                  <div class="card-title">Manager's Messy Notes</div>
+                  <div class="card-time">Turn a rushed manager update into a structured summary.</div>
+                  <div class="ws-card-actions">
+                    <a class="ws-open-tool" href="../apps/messy-notes/index.html">Open tool</a>
+                    <button class="ws-mark-done" type="button">Mark as done</button>
+                  </div>
+                  <div class="ws-lock-hint">Complete exercise 2 to unlock</div>
+                </article>
               </div>
 
               <div class="phase-chunk">
-                <div class="slides-bar" onclick="toggleSlides(this)" data-slide-key="utl_slides_phase1_chunk4">
+                <div class="slides-bar ws-context-accordion" onclick="toggleSlides(this)" data-embed-key="utl_embed_p1_hugh_favour">
                   <span class="slides-bar-icon">▶</span>
-                  <span class="slides-bar-label">Context — chalkboard notes & BSP method</span>
+                  <span class="ws-context-text"><span class="ws-context-label">Hugh needs a favour</span><span class="ws-context-sub">Read before starting</span></span>
                 </div>
                 <div class="slides-placeholder is-collapsed">Slides coming soon</div>
-                <div class="exercise-card-grid">
-                  <a class="exercise-card" href="../apps/chalkboard-notes/index.html">
-                    <div class="card-type">Phase 1 | Think Clearly</div>
-                    <div class="card-title">Chalkboard notes</div>
-                    <div class="card-time">Organise chalkboard ideas into MECE buckets with BSP headers.</div>
-                  </a>
+                <article class="exercise-card ws-ex-card" data-ws-exercise="4" data-ws-href="../apps/rushed-voice-memo/index.html">
+                  <div class="card-type"><span class="ws-step-circle">4</span><span>Phase 1 | Think Clearly</span><span class="ws-done-pill">✓ Done</span></div>
+                  <div class="card-title">Rushed Voice Memo</div>
+                  <div class="card-time">Turn a rushed verbal update into a clean written summary.</div>
+                  <div class="ws-card-actions">
+                    <a class="ws-open-tool" href="../apps/rushed-voice-memo/index.html">Open tool</a>
+                    <button class="ws-mark-done" type="button">Mark as done</button>
+                  </div>
+                  <div class="ws-lock-hint">Complete exercise 3 to unlock</div>
+                </article>
+              </div>
+
+              <div class="phase-chunk">
+                <div class="slides-bar ws-context-accordion" onclick="toggleSlides(this)" data-embed-key="utl_embed_p1_ai_memo">
+                  <span class="slides-bar-icon">▶</span>
+                  <span class="ws-context-text"><span class="ws-context-label">Try the same memo with AI</span><span class="ws-context-sub">Read before starting</span></span>
                 </div>
+                <div class="slides-placeholder is-collapsed"><!-- embed to be added --></div>
+                <article class="exercise-card ws-ex-card" data-ws-exercise="5" data-ws-href="../apps/rushed-voice-memo-ai/index.html">
+                  <div class="card-type"><span class="ws-step-circle">5</span><span>Phase 1 | Think Clearly</span><span class="ws-done-pill">✓ Done</span></div>
+                  <div class="card-title">Rushed Voice Memo with AI</div>
+                  <div class="card-time">Transcribe a voice memo, then structure it with AI.</div>
+                  <div class="ws-card-actions">
+                    <a class="ws-open-tool" href="../apps/rushed-voice-memo-ai/index.html">Open tool</a>
+                    <button class="ws-mark-done" type="button">Mark as done</button>
+                  </div>
+                  <div class="ws-lock-hint">Complete exercise 4 to unlock</div>
+                </article>
+              </div>
+
+              <div class="phase-chunk">
+                <div class="slides-bar ws-context-accordion" onclick="toggleSlides(this)" data-embed-key="utl_embed_p1_olympic_brainstorm">
+                  <span class="slides-bar-icon">▶</span>
+                  <span class="ws-context-text"><span class="ws-context-label">Aiko needs the Olympic brainstorm session sorted</span><span class="ws-context-sub">Read before starting</span></span>
+                </div>
+                <div class="slides-placeholder is-collapsed">Slides coming soon</div>
+                <article class="exercise-card ws-ex-card" data-ws-exercise="6" data-ws-href="../apps/chalkboard-notes/index.html">
+                  <div class="card-type"><span class="ws-step-circle">6</span><span>Phase 1 | Think Clearly</span><span class="ws-done-pill">✓ Done</span></div>
+                  <div class="card-title">Chalkboard Notes</div>
+                  <div class="card-time">Turn a scattered brainstorm into clear, actionable buckets.</div>
+                  <div class="ws-card-actions">
+                    <a class="ws-open-tool" href="../apps/chalkboard-notes/index.html">Open tool</a>
+                    <button class="ws-mark-done" type="button">Mark as done</button>
+                  </div>
+                  <div class="ws-lock-hint">Complete exercise 5 to unlock</div>
+                </article>
               </div>
               <div class="phase-overlay">This phase is not yet available</div>
             </section>
 
             <section class="phase-section" id="phase2" aria-labelledby="phase2Title">
+              <div class="ws-phase-reveal" data-phase-reveal="phase2">Phase 1 complete. Phase 2 is now unlocked.</div>
               <div class="phase-heading">
                 <div>
                   <span class="section-label">Phase 2</span>
@@ -1076,54 +1393,109 @@
               </div>
 
               <div class="phase-chunk">
-                <div class="slides-bar" onclick="toggleSlides(this)" data-slide-key="utl_slides_phase2_chunk1"><span class="slides-bar-icon">▶</span><span class="slides-bar-label">Context — issue trees & problem framing</span></div>
-                <div class="slides-placeholder is-collapsed">Slides coming soon</div>
-                <div class="exercise-card-grid">
-                  <a class="exercise-card" href="../apps/issue-tree-builder/index.html">
-                    <div class="card-type">Phase 2 | Speak Concisely</div>
-                    <div class="card-title">Issue tree builder</div>
-                    <div class="card-time">Build an issue tree from a question, hypothesis, and arguments.</div>
-                  </a>
+                <div class="slides-bar ws-context-accordion" onclick="toggleSlides(this)" data-embed-key="utl_embed_p2_aiko_question">
+                  <span class="slides-bar-icon">▶</span>
+                  <span class="ws-context-text"><span class="ws-context-label">Aiko liked your work. Now she has a question.</span><span class="ws-context-sub">Read before starting</span></span>
                 </div>
+                <div class="slides-placeholder is-collapsed">Slides coming soon</div>
+                <article class="exercise-card ws-ex-card" data-ws-p2-exercise="1" data-ws-href="../apps/issue-tree-builder/index.html">
+                  <div class="card-type"><span class="ws-step-circle">1</span><span>Phase 2 | Speak Concisely</span><span class="ws-done-pill">✓ Done</span></div>
+                  <div class="card-title">Issue Tree Builder</div>
+                  <div class="card-time">Break down why the Olympics is losing its magic.</div>
+                  <div class="ws-card-actions">
+                    <a class="ws-open-tool" href="../apps/issue-tree-builder/index.html">Open tool</a>
+                    <button class="ws-mark-done" type="button">Mark as done</button>
+                  </div>
+                  <div class="ws-lock-hint"></div>
+                </article>
               </div>
 
               <div class="phase-chunk">
-                <div class="slides-bar" onclick="toggleSlides(this)" data-slide-key="utl_slides_phase2_chunk2"><span class="slides-bar-icon">▶</span><span class="slides-bar-label">Context — SCQA & Minto's pyramid</span></div>
-                <div class="slides-placeholder is-collapsed">Slides coming soon</div>
-                <div class="exercise-card-grid">
-                  <a class="exercise-card" href="../apps/scqa-builder/index.html">
-                    <div class="card-type">Phase 2 | Speak Concisely</div>
-                    <div class="card-title">SCQA builder</div>
-                    <div class="card-time">Practice executive storylining from a single context.</div>
-                  </a>
-                  <article class="exercise-card coming-soon">
-                    <div class="card-type">Coming soon</div>
-                    <div class="card-title">Email to Aiko</div>
-                    <span class="coming-soon-badge">Coming soon</span>
-                  </article>
+                <div class="slides-bar ws-context-accordion" onclick="toggleSlides(this)" data-embed-key="utl_embed_p2_frame_answer">
+                  <span class="slides-bar-icon">▶</span>
+                  <span class="ws-context-text"><span class="ws-context-label">Before you frame your answer</span><span class="ws-context-sub">Read before starting</span></span>
                 </div>
+                <div class="slides-placeholder is-collapsed">Slides coming soon</div>
+                <article class="exercise-card ws-ex-card" data-ws-p2-exercise="2" data-ws-href="../apps/scqa-builder/index.html">
+                  <div class="card-type"><span class="ws-step-circle">2</span><span>Phase 2 | Speak Concisely</span><span class="ws-done-pill">✓ Done</span></div>
+                  <div class="card-title">SCQA Builder</div>
+                  <div class="card-time">Turn your issue tree into a sharp problem statement.</div>
+                  <div class="ws-card-actions">
+                    <a class="ws-open-tool" href="../apps/scqa-builder/index.html">Open tool</a>
+                    <button class="ws-mark-done" type="button">Mark as done</button>
+                  </div>
+                  <div class="ws-lock-hint">Complete exercise 1 to unlock</div>
+                </article>
               </div>
 
               <div class="phase-chunk">
-                <div class="slides-bar" onclick="toggleSlides(this)" data-slide-key="utl_slides_phase2_chunk3"><span class="slides-bar-icon">▶</span><span class="slides-bar-label">Context — spoken communication</span></div>
-                <div class="slides-placeholder is-collapsed">Slides coming soon</div>
-                <div class="exercise-card-grid">
-                  <article class="exercise-card coming-soon">
-                    <div class="card-type">Coming soon</div>
-                    <div class="card-title">Explain to Aiko (120s)</div>
-                    <span class="coming-soon-badge">Coming soon</span>
-                  </article>
-                  <article class="exercise-card coming-soon">
-                    <div class="card-type">Coming soon</div>
-                    <div class="card-title">Elevator pitch (60s)</div>
-                    <span class="coming-soon-badge">Coming soon</span>
-                  </article>
+                <div class="slides-bar ws-context-accordion" onclick="toggleSlides(this)" data-embed-key="utl_embed_p2_outside_perspectives">
+                  <span class="slides-bar-icon">▶</span>
+                  <span class="ws-context-text"><span class="ws-context-label">Get outside perspectives before you commit</span><span class="ws-context-sub">Read before starting</span></span>
                 </div>
+                <div class="slides-placeholder is-collapsed"><!-- embed to be added --></div>
+                <article class="exercise-card ws-phase2-coming-soon-card">
+                  <div class="card-type"><span class="ws-step-circle">3</span><span>Phase 2 | Speak Concisely</span></div>
+                  <div class="card-title">Advisory Board with AI</div>
+                  <div class="card-time">Stress-test your SCQA with a virtual advisory board.</div>
+                  <div class="ws-card-actions">
+                    <button class="ws-coming-soon-button" type="button" disabled>Coming soon</button>
+                  </div>
+                </article>
+              </div>
+
+              <div class="phase-chunk">
+                <div class="slides-bar ws-context-accordion" onclick="toggleSlides(this)" data-embed-key="utl_embed_p2_aiko_email">
+                  <span class="slides-bar-icon">▶</span>
+                  <span class="ws-context-text"><span class="ws-context-label">Aiko does not have time to read everything</span><span class="ws-context-sub">Read before starting</span></span>
+                </div>
+                <div class="slides-placeholder is-collapsed"><!-- embed to be added --></div>
+                <article class="exercise-card ws-phase2-coming-soon-card">
+                  <div class="card-type"><span class="ws-step-circle">4</span><span>Phase 2 | Speak Concisely</span></div>
+                  <div class="card-title">Email to Aiko</div>
+                  <div class="card-time">Write a clear, answer-first email using Minto's pyramid.</div>
+                  <div class="ws-card-actions">
+                    <button class="ws-coming-soon-button" type="button" disabled>Coming soon</button>
+                  </div>
+                </article>
+              </div>
+
+              <div class="phase-chunk">
+                <div class="slides-bar ws-context-accordion" onclick="toggleSlides(this)" data-embed-key="utl_embed_p2_hallway">
+                  <span class="slides-bar-icon">▶</span>
+                  <span class="ws-context-text"><span class="ws-context-label">She bumped into you in the hallway</span><span class="ws-context-sub">Read before starting</span></span>
+                </div>
+                <div class="slides-placeholder is-collapsed">Slides coming soon</div>
+                <article class="exercise-card ws-phase2-coming-soon-card">
+                  <div class="card-type"><span class="ws-step-circle">5</span><span>Phase 2 | Speak Concisely</span></div>
+                  <div class="card-title">Explain to Aiko (120s)</div>
+                  <div class="card-time">Give a short explanation with a clear point, structure, and ask.</div>
+                  <div class="ws-card-actions">
+                    <button class="ws-coming-soon-button" type="button" disabled>Coming soon</button>
+                  </div>
+                </article>
+              </div>
+
+              <div class="phase-chunk">
+                <div class="slides-bar ws-context-accordion" onclick="toggleSlides(this)" data-embed-key="utl_embed_p2_compress">
+                  <span class="slides-bar-icon">▶</span>
+                  <span class="ws-context-text"><span class="ws-context-label">Now compress it</span><span class="ws-context-sub">Read before starting</span></span>
+                </div>
+                <div class="slides-placeholder is-collapsed"><!-- embed to be added --></div>
+                <article class="exercise-card ws-phase2-coming-soon-card">
+                  <div class="card-type"><span class="ws-step-circle">6</span><span>Phase 2 | Speak Concisely</span></div>
+                  <div class="card-title">Elevator Pitch (60s)</div>
+                  <div class="card-time">Compress a recommendation into one focused minute.</div>
+                  <div class="ws-card-actions">
+                    <button class="ws-coming-soon-button" type="button" disabled>Coming soon</button>
+                  </div>
+                </article>
               </div>
               <div class="phase-overlay">This phase is not yet available</div>
             </section>
 
             <section class="phase-section" id="phase3" aria-labelledby="phase3Title">
+              <div class="ws-phase-reveal" data-phase-reveal="phase3">Phase 2 complete. Phase 3 is now unlocked.</div>
               <div class="phase-heading">
                 <div>
                   <span class="section-label">Phase 3</span>
@@ -1132,44 +1504,67 @@
               </div>
 
               <div class="phase-chunk">
-                <div class="slides-bar" onclick="toggleSlides(this)" data-slide-key="utl_slides_phase3_chunk1"><span class="slides-bar-icon">▶</span><span class="slides-bar-label">Context — prioritisation & saying no</span></div>
-                <div class="slides-placeholder is-collapsed">Slides coming soon</div>
-                <div class="exercise-card-grid">
-                  <article class="exercise-card coming-soon">
-                    <div class="card-type">Coming soon</div>
-                    <div class="card-title">The art of saying no</div>
-                    <span class="coming-soon-badge">Coming soon</span>
-                  </article>
+                <div class="slides-bar ws-context-accordion" onclick="toggleSlides(this)" data-embed-key="utl_embed_p3_lead_role">
+                  <span class="slides-bar-icon">▶</span>
+                  <span class="ws-context-text"><span class="ws-context-label">You just got the lead role.</span><span class="ws-context-sub">Read before starting</span></span>
                 </div>
+                <div class="slides-placeholder is-collapsed"><!-- embed to be added --></div>
+                <article class="exercise-card ws-phase2-coming-soon-card">
+                  <div class="card-type"><span class="ws-step-circle">1</span><span>Phase 3 | Act Confidently</span></div>
+                  <div class="card-title">The Art of Saying No</div>
+                  <div class="card-time">Prioritize what actually matters using the Eisenhower matrix.</div>
+                  <div class="ws-card-actions">
+                    <button class="ws-coming-soon-button" type="button" disabled>Coming soon</button>
+                  </div>
+                </article>
               </div>
 
               <div class="phase-chunk">
-                <div class="slides-bar" onclick="toggleSlides(this)" data-slide-key="utl_slides_phase3_chunk2"><span class="slides-bar-icon">▶</span><span class="slides-bar-label">Context — delivering difficult news</span></div>
-                <div class="slides-placeholder is-collapsed">Slides coming soon</div>
-                <div class="exercise-card-grid">
-                  <article class="exercise-card coming-soon">
-                    <div class="card-type">Coming soon</div>
-                    <div class="card-title">I have bad news...</div>
-                    <span class="coming-soon-badge">Coming soon</span>
-                  </article>
-                  <article class="exercise-card coming-soon">
-                    <div class="card-type">Coming soon</div>
-                    <div class="card-title">Let's switch hats</div>
-                    <span class="coming-soon-badge">Coming soon</span>
-                  </article>
+                <div class="slides-bar ws-context-accordion" onclick="toggleSlides(this)" data-embed-key="utl_embed_p3_bad_news">
+                  <span class="slides-bar-icon">▶</span>
+                  <span class="ws-context-text"><span class="ws-context-label">You have to be the one to say it</span><span class="ws-context-sub">Read before starting</span></span>
                 </div>
+                <div class="slides-placeholder is-collapsed"><!-- embed to be added --></div>
+                <article class="exercise-card ws-phase2-coming-soon-card">
+                  <div class="card-type"><span class="ws-step-circle">2</span><span>Phase 3 | Act Confidently</span></div>
+                  <div class="card-title">I Have Bad News...</div>
+                  <div class="card-time">Deliver a difficult message clearly and with composure.</div>
+                  <div class="ws-card-actions">
+                    <button class="ws-coming-soon-button" type="button" disabled>Coming soon</button>
+                  </div>
+                </article>
               </div>
 
               <div class="phase-chunk">
-                <div class="slides-bar" onclick="toggleSlides(this)" data-slide-key="utl_slides_phase3_chunk3"><span class="slides-bar-icon">▶</span><span class="slides-bar-label">Context — presence & delivery</span></div>
-                <div class="slides-placeholder is-collapsed">Slides coming soon</div>
-                <div class="exercise-card-grid">
-                  <article class="exercise-card coming-soon">
-                    <div class="card-type">Coming soon</div>
-                    <div class="card-title">Speak like Obama</div>
-                    <span class="coming-soon-badge">Coming soon</span>
-                  </article>
+                <div class="slides-bar ws-context-accordion" onclick="toggleSlides(this)" data-embed-key="utl_embed_p3_read_room">
+                  <span class="slides-bar-icon">▶</span>
+                  <span class="ws-context-text"><span class="ws-context-label">Read the room before you speak</span><span class="ws-context-sub">Read before starting</span></span>
                 </div>
+                <div class="slides-placeholder is-collapsed"><!-- embed to be added --></div>
+                <article class="exercise-card ws-phase2-coming-soon-card">
+                  <div class="card-type"><span class="ws-step-circle">3</span><span>Phase 3 | Act Confidently</span></div>
+                  <div class="card-title">Let's Switch Hats</div>
+                  <div class="card-time">See the situation through someone else's eyes.</div>
+                  <div class="ws-card-actions">
+                    <button class="ws-coming-soon-button" type="button" disabled>Coming soon</button>
+                  </div>
+                </article>
+              </div>
+
+              <div class="phase-chunk">
+                <div class="slides-bar ws-context-accordion" onclick="toggleSlides(this)" data-embed-key="utl_embed_p3_eyes_on_you">
+                  <span class="slides-bar-icon">▶</span>
+                  <span class="ws-context-text"><span class="ws-context-label">All eyes are on you</span><span class="ws-context-sub">Read before starting</span></span>
+                </div>
+                <div class="slides-placeholder is-collapsed"><!-- embed to be added --></div>
+                <article class="exercise-card ws-phase2-coming-soon-card">
+                  <div class="card-type"><span class="ws-step-circle">4</span><span>Phase 3 | Act Confidently</span></div>
+                  <div class="card-title">Speak Like Obama</div>
+                  <div class="card-time">Deliver your message clearly when the stakes are high.</div>
+                  <div class="ws-card-actions">
+                    <button class="ws-coming-soon-button" type="button" disabled>Coming soon</button>
+                  </div>
+                </article>
               </div>
               <div class="phase-overlay">This phase is not yet available</div>
             </section>
@@ -1246,6 +1641,20 @@
       var navObserver = null;
       var assessmentsSection = document.getElementById('assessments');
       var phase3Nudge = document.querySelector('.phase3-nudge');
+      var legacyEmbedKeys = {
+        utl_embed_orientation_welcome: 'utl_slides_orientation',
+        utl_embed_orientation_howto: 'utl_slides_orientation',
+        utl_embed_p1_first_day: 'utl_slides_phase1_chunk1',
+        utl_embed_p1_message_desk: 'utl_slides_phase1_chunk2',
+        utl_embed_p1_hugh_favour: 'utl_slides_phase1_chunk3',
+        utl_embed_p1_olympic_brainstorm: 'utl_slides_phase1_chunk4',
+        utl_embed_p2_aiko_question: 'utl_slides_phase2_chunk1',
+        utl_embed_p2_frame_answer: 'utl_slides_phase2_chunk2',
+        utl_embed_p2_hallway: 'utl_slides_phase2_chunk3',
+        utl_embed_p3_lead_role: 'utl_slides_phase3_chunk1',
+        utl_embed_p3_bad_news: 'utl_slides_phase3_chunk2',
+        utl_embed_p3_read_room: 'utl_slides_phase3_chunk3'
+      };
 
       document.querySelectorAll('[data-password-toggle]').forEach(function (toggle) {
         var target = document.getElementById(toggle.dataset.passwordToggle);
@@ -1264,18 +1673,41 @@
         return value === null || value === '' ? fallback : value;
       }
 
-      function createSlideWrapper(src) {
+      function createEmbedWrapper(src) {
         var wrapper = document.createElement('div');
         wrapper.className = 'slides-embed-wrapper is-collapsed';
-        wrapper.innerHTML = '<iframe src="' + src + '" frameborder="0" allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true"></iframe>';
+        wrapper.style.height = '450px';
+        wrapper.style.paddingBottom = '0';
+        wrapper.innerHTML = '<iframe src="' + src + '" width="100%" height="450" frameborder="0" allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true"></iframe>';
         return wrapper;
       }
 
       function createSlidePlaceholder() {
         var placeholder = document.createElement('div');
         placeholder.className = 'slides-placeholder is-collapsed';
-        placeholder.textContent = 'Slides coming soon';
+        placeholder.innerHTML = '<!-- embed to be added -->';
         return placeholder;
+      }
+
+      function getPresentationId(url) {
+        var match = url.match(/\/presentation\/d\/e\/([^/]+)/) || url.match(/\/presentation\/d\/([^/]+)/);
+        return match ? match[1] : '';
+      }
+
+      function getDriveFileId(url) {
+        var match = url.match(/\/file\/d\/([^/]+)/) || url.match(/[?&]id=([^&]+)/);
+        return match ? match[1] : '';
+      }
+
+      function buildEmbedSrc(rawUrl, type) {
+        var url = (rawUrl || '').trim();
+        if (!url) return '';
+        if (type === 'video') {
+          var fileId = getDriveFileId(url);
+          return fileId ? 'https://drive.google.com/file/d/' + fileId + '/preview' : url;
+        }
+        var deckId = getPresentationId(url);
+        return deckId ? 'https://docs.google.com/presentation/d/' + deckId + '/embed?start=false&loop=false&delayms=3000' : url;
       }
 
       function ensureFullscreenLink(panel, src) {
@@ -1300,26 +1732,37 @@
         }
       }
 
-      function configureSlideBlock(bar) {
-        var key = bar.dataset.slideKey;
-        var statusKey = bar.dataset.statusKey;
+      function configureEmbedBlock(bar) {
+        var key = bar.dataset.embedKey || bar.dataset.slideKey;
         var currentPanel = bar.nextElementSibling;
         if (!key || !currentPanel) return;
 
-        var status = statusKey ? storedValue(statusKey, 'placeholder') : 'live';
-        var savedSrc = (localStorage.getItem(key) || '').trim();
-        var src = savedSrc || '';
-        var shouldShowSlides = status === 'live' && src;
-        var replacement = shouldShowSlides ? createSlideWrapper(src) : createSlidePlaceholder();
+        var stored = localStorage.getItem(key);
+        if (!stored && legacyEmbedKeys[key]) {
+          var legacyUrl = localStorage.getItem(legacyEmbedKeys[key]);
+          stored = legacyUrl ? JSON.stringify({ url: legacyUrl, type: 'slides' }) : '';
+        }
+        var config = null;
+        try {
+          config = stored ? JSON.parse(stored) : null;
+        } catch (error) {
+          config = stored ? { url: stored, type: 'slides' } : null;
+        }
+        if (stored && !config) {
+          config = { url: stored, type: 'slides' };
+        }
+
+        var src = config ? buildEmbedSrc(config.url, config.type || 'slides') : '';
+        var replacement = src ? createEmbedWrapper(src) : createSlidePlaceholder();
 
         currentPanel.replaceWith(replacement);
-        if (shouldShowSlides) {
+        if (src) {
           ensureFullscreenLink(replacement, src);
         } else {
           removeFullscreenLink(replacement);
         }
         var icon = bar.querySelector('.slides-bar-icon');
-        if (icon) icon.textContent = '▶';
+        if (icon) icon.textContent = '+';
       }
 
       function setPhaseStatus(id, status) {
@@ -1375,19 +1818,13 @@
 
       function readAdminConfig() {
         var missionCard = document.getElementById('missionCard');
-        var footerLink = document.getElementById('admin-footer-link');
         if (missionCard) {
           missionCard.style.display = storedValue('utl_mission_card', 'show') === 'hide' ? 'none' : '';
-        }
-        if (footerLink) {
-          footerLink.style.display = storedValue('utl_footer_link', 'show') === 'hide' ? 'none' : '';
         }
 
         setTsaStatus(storedValue('utl_tsa_status', 'placeholder'));
         setPhaseStatus('phase1', storedValue('utl_phase1_status', 'live'));
-        setPhaseStatus('phase2', storedValue('utl_phase2_status', 'locked'));
-        setPhaseStatus('phase3', storedValue('utl_phase3_status', 'locked'));
-        document.querySelectorAll('.slides-bar[data-slide-key]').forEach(configureSlideBlock);
+        document.querySelectorAll('.slides-bar[data-embed-key], .slides-bar[data-slide-key]').forEach(configureEmbedBlock);
       }
 
       if (document.readyState === 'loading') {
@@ -1437,20 +1874,201 @@
         }
 
         var isCollapsed = panel.classList.toggle('is-collapsed');
+        el.classList.toggle('ws-expanded', !isCollapsed);
         if (link && link.classList.contains('slides-fullscreen-link')) {
           link.classList.toggle('is-collapsed', isCollapsed);
         }
         if (icon) {
-          icon.textContent = isCollapsed ? '▶' : '▼';
+          icon.textContent = isCollapsed ? '+' : '-';
         }
       }
 
       window.toggleSlides = toggleSlides;
 
+      function phaseOneDoneKey(number) {
+        return 'utl_p1_ex' + number + '_done';
+      }
+
+      function isPhaseOneDone(number) {
+        return localStorage.getItem(phaseOneDoneKey(number)) === 'true';
+      }
+
+      function setPhaseOneDone(number, done) {
+        if (done) {
+          localStorage.setItem(phaseOneDoneKey(number), 'true');
+        } else {
+          localStorage.removeItem(phaseOneDoneKey(number));
+        }
+      }
+
+      function renderPhaseOneExerciseStates() {
+        var cards = Array.prototype.slice.call(document.querySelectorAll('[data-ws-exercise]'));
+        cards.forEach(function (card) {
+          var number = Number(card.dataset.wsExercise);
+          var done = isPhaseOneDone(number);
+          var unlocked = number === 1 || isPhaseOneDone(number - 1) || done;
+          var locked = !unlocked;
+          var step = card.querySelector('.ws-step-circle');
+          var markButton = card.querySelector('.ws-mark-done');
+          var openLink = card.querySelector('.ws-open-tool');
+          var lockHint = card.querySelector('.ws-lock-hint');
+
+          card.classList.toggle('ws-is-done', done);
+          card.classList.toggle('ws-is-locked', locked);
+          if (step) step.textContent = done ? '✓' : String(number);
+          if (markButton) markButton.textContent = done ? 'Click to undo' : 'Mark as done';
+          if (openLink) {
+            openLink.setAttribute('aria-disabled', locked ? 'true' : 'false');
+            openLink.tabIndex = locked ? -1 : 0;
+          }
+          if (lockHint) lockHint.textContent = number > 1 ? 'Complete exercise ' + (number - 1) + ' to unlock' : '';
+        });
+      }
+
+      function initPhaseOneExerciseToggles() {
+        document.querySelectorAll('[data-ws-exercise]').forEach(function (card) {
+          var markButton = card.querySelector('.ws-mark-done');
+          if (!markButton) return;
+          markButton.addEventListener('click', function () {
+            if (card.classList.contains('ws-is-locked')) return;
+            var number = Number(card.dataset.wsExercise);
+            setPhaseOneDone(number, !isPhaseOneDone(number));
+            renderPhaseOneExerciseStates();
+            applyPhaseVisibility();
+          });
+        });
+
+        document.querySelectorAll('.ws-open-tool').forEach(function (link) {
+          link.addEventListener('click', function (event) {
+            if (link.getAttribute('aria-disabled') === 'true') {
+              event.preventDefault();
+            }
+          });
+        });
+
+        renderPhaseOneExerciseStates();
+      }
+
+      function phaseTwoDoneKey(number) {
+        return 'utl_p2_ex' + number + '_done';
+      }
+
+      function isPhaseTwoDone(number) {
+        return localStorage.getItem(phaseTwoDoneKey(number)) === 'true';
+      }
+
+      function setPhaseTwoDone(number, done) {
+        if (done) {
+          localStorage.setItem(phaseTwoDoneKey(number), 'true');
+        } else {
+          localStorage.removeItem(phaseTwoDoneKey(number));
+        }
+      }
+
+      function renderPhaseTwoExerciseStates() {
+        var cards = Array.prototype.slice.call(document.querySelectorAll('[data-ws-p2-exercise]'));
+        cards.forEach(function (card) {
+          var number = Number(card.dataset.wsP2Exercise);
+          var done = isPhaseTwoDone(number);
+          var unlocked = number === 1 || isPhaseTwoDone(number - 1) || done;
+          var locked = !unlocked;
+          var step = card.querySelector('.ws-step-circle');
+          var markButton = card.querySelector('.ws-mark-done');
+          var openLink = card.querySelector('.ws-open-tool');
+          var lockHint = card.querySelector('.ws-lock-hint');
+
+          card.classList.toggle('ws-is-done', done);
+          card.classList.toggle('ws-is-locked', locked);
+          if (step) step.textContent = done ? '✓' : String(number);
+          if (markButton) markButton.textContent = done ? 'Click to undo' : 'Mark as done';
+          if (openLink) {
+            openLink.setAttribute('aria-disabled', locked ? 'true' : 'false');
+            openLink.tabIndex = locked ? -1 : 0;
+          }
+          if (lockHint) lockHint.textContent = number > 1 ? 'Complete exercise ' + (number - 1) + ' to unlock' : '';
+        });
+      }
+
+      function initPhaseTwoExerciseToggles() {
+        document.querySelectorAll('[data-ws-p2-exercise]').forEach(function (card) {
+          var markButton = card.querySelector('.ws-mark-done');
+          if (!markButton) return;
+          markButton.addEventListener('click', function () {
+            if (card.classList.contains('ws-is-locked')) return;
+            var number = Number(card.dataset.wsP2Exercise);
+            setPhaseTwoDone(number, !isPhaseTwoDone(number));
+            renderPhaseTwoExerciseStates();
+            applyPhaseVisibility();
+          });
+        });
+
+        renderPhaseTwoExerciseStates();
+      }
+
+      function isAdminMode() {
+        return new URLSearchParams(window.location.search).get('mode') === 'admin' ||
+          (localStorage.getItem('utl_admin_auth') === 'true' && localStorage.getItem('utl_admin_preview_bypass') === 'on');
+      }
+
+      function allKeysDone(keys) {
+        return keys.every(function (key) {
+          return localStorage.getItem(key) === 'true';
+        });
+      }
+
+      function showPhaseReveal(phaseId) {
+        var reveal = document.querySelector('[data-phase-reveal="' + phaseId + '"]');
+        if (!reveal) return;
+        reveal.style.display = 'block';
+        window.clearTimeout(reveal._hideTimer);
+        reveal._hideTimer = window.setTimeout(function () {
+          reveal.style.display = 'none';
+        }, 5000);
+      }
+
+      function setPhaseVisible(phaseId, visible) {
+        var section = document.getElementById(phaseId);
+        if (!section) return;
+        var wasHidden = section.style.display === 'none';
+        section.style.display = visible ? '' : 'none';
+        if (visible && wasHidden) {
+          showPhaseReveal(phaseId);
+        }
+      }
+
+      function applyPhaseVisibility() {
+        if (isAdminMode()) {
+          setPhaseVisible('phase2', true);
+          setPhaseVisible('phase3', true);
+          if (phase3Nudge) phase3Nudge.style.display = '';
+          return;
+        }
+
+        var phase2Unlocked = allKeysDone([
+          'utl_p1_ex1_done',
+          'utl_p1_ex2_done',
+          'utl_p1_ex3_done',
+          'utl_p1_ex4_done',
+          'utl_p1_ex5_done',
+          'utl_p1_ex6_done'
+        ]);
+        var phase3Unlocked = phase2Unlocked && allKeysDone([
+          'utl_p2_ex1_done',
+          'utl_p2_ex2_done'
+        ]);
+
+        setPhaseVisible('phase2', phase2Unlocked);
+        setPhaseVisible('phase3', phase3Unlocked);
+        if (phase3Nudge) phase3Nudge.style.display = phase3Unlocked ? '' : 'none';
+      }
+
       function showDashboard() {
         loginCard.classList.add('hidden');
         dashboard.classList.remove('hidden');
         initSectionNav();
+        renderPhaseOneExerciseStates();
+        renderPhaseTwoExerciseStates();
+        applyPhaseVisibility();
       }
 
       function showLogin() {
@@ -1463,6 +2081,9 @@
       if (localStorage.getItem(SESSION_KEY) === 'true') {
         showDashboard();
       }
+
+      initPhaseOneExerciseToggles();
+      initPhaseTwoExerciseToggles();
 
       form.addEventListener('submit', function (event) {
         event.preventDefault();
@@ -1484,6 +2105,12 @@
       logoutBtn.addEventListener('click', function (event) {
         event.preventDefault();
         window.logout();
+      });
+
+      window.addEventListener('storage', function (event) {
+        if (event.key === 'utl_admin_preview_bypass' || event.key === 'utl_admin_auth') {
+          applyPhaseVisibility();
+        }
       });
     })();
   </script>
