@@ -1,11 +1,40 @@
 # The Untaught Lessons Website Context
 
-Last updated: 2026-05-13
+Last updated: 2026-05-18
 Primary purpose: Living implementation and design reference for The Untaught Lessons static website and practice apps.
 
 Use this file when referencing the site with other tools. It should be updated whenever pages, apps, visual rules, navigation, routing, forms, or core functionality change.
 
 ## Change Log
+
+### 2026-05-18
+
+- Split Orientation section in `member-login/index.html` into two separate accordions: `Your first day at MA` (Welcome to MA storyline, shown first) and `How this program works` (UTL workbook orientation FAQs, shown second). Both start collapsed. Both use the gold square +/- accordion icon.
+- Restructured Phase 2 section in `member-login/index.html` to fully vertical stacked layout. Each exercise now has its own context accordion immediately above it.
+- Updated all Phase 2 context accordion labels to narrative-driven names aligned with the MA storyline.
+- Removed side-by-side card layout for Explain to Aiko (120s) and Elevator Pitch (60s). Both are now full-width stacked cards.
+- Exercises 3-6 in Phase 2 show coming soon state. Context accordions remain visible. No gating applied to coming soon cards.
+- Phase 2 localStorage keys: `utl_p2_ex1_done` and `utl_p2_ex2_done`. Sequential unlock between exercises 1 and 2 only.
+- Restructured Phase 3 section in `member-login/index.html` to fully vertical stacked layout. Each exercise has its own context accordion immediately above it.
+- All Phase 3 exercises show coming soon state. No gating applied. No localStorage keys needed for Phase 3.
+- Phase 3 context accordion labels: You just got the lead role / You have to be the one to say it / Read the room before you speak / All eyes are on you.
+- Phase 3 exercise titles: The Art of Saying No / I Have Bad News... / Let's Switch Hats / Speak Like Obama.
+- Added per-accordion embed management to admin panel. Each context accordion has a URL input and type selector (Google Slides or Google Drive Video). Embed config saved to localStorage using `utl_embed_[id]` keys. Renders as iframe on participant page on load.
+- Added site sync check section to admin panel. Checks accordion IDs, exercise titles, app paths, localStorage keys, and embed keys against expected values. Triggered on demand via Run check button.
+- Improved site sync check controls with clearer Run, Rerun, and Hide results actions plus a summary count after each check.
+- Added Visibility section to admin panel showing Phase 1, Phase 2, Phase 3, and admin-mode visibility status from the current localStorage completion state.
+- Added admin preview bypass toggle in the Visibility section. When on, the preview link opens the member hub with `?mode=admin` and the member hub treats bypass as active in the same authenticated admin browser; when off, it opens the normal participant sequence.
+- Removed footer link toggle from admin panel. Admin footer link is now always visible. Removed any show/hide logic tied to it.
+- Added automatic phase visibility gating. Phase 2 hidden until all 6 Phase 1 live exercises marked done. Phase 3 hidden until Phase 2 exercises 1 and 2 marked done. Admin mode bypasses all phase gating. Brief gold reveal message shown on phase unlock.
+- Updated mark as done button label in done state from Marked as done to Click to undo across all phases.
+
+### 2026-05-17
+
+- Resized context accordion rows in member workspace — 24px icon, 13.5px label, slightly smaller than exercise cards.
+- Added gold/green/locked border states to Phase 1 exercise cards.
+- Added Mark as Done toggle button to each exercise card. Saves to localStorage (`utl_p1_ex[N]_done`). Toggling undone reverses all states and re-locks the next exercise if not yet completed.
+- Exercise gating: Phase 1 exercises unlock sequentially as each is marked done. State restored on page load from localStorage.
+- Matched Phase 2 and Phase 3 context accordions and app cards to the Orientation and Phase 1 workspace pattern.
 
 ### 2026-05-13
 
@@ -674,9 +703,9 @@ Key functionality:
 - Slim navy identity bar.
 - Sticky section navigation for Orientation, Phase 1, Phase 2, Phase 3, Assessments, and My results.
 - MA mission card introducing Aiko Mori and the Chief of Staff role.
-- Google Slides placeholder embeds for orientation and each workbook context chunk.
-- Admin-controlled slide URL injection through localStorage.
-- Admin-controlled phase lock overlays for Phase 1, Phase 2, and Phase 3.
+- Context accordions for orientation and each workbook exercise.
+- Admin-controlled embed injection through `utl_embed_*` localStorage keys, supporting Google Slides and Google Drive video.
+- Automatic progressive phase gating for Phase 2 and Phase 3 based on exercise completion, with `?mode=admin` bypass.
 - Admin-controlled Assessments section live, placeholder, or hidden states.
 - Exercise cards for active apps and dimmed coming-soon cards for future exercises.
 - Footer links to My results and Admin.
@@ -717,13 +746,15 @@ Password localStorage key:
 
 Purpose:
 
-- Configure member hub visibility, phase availability, slide URLs, and passwords without editing code.
+- Configure member hub visibility, per-accordion embeds, automatic phase gating visibility, result submission, and passwords without editing code.
 
 Key functionality:
 
 - Password-gated admin session stored under `utl_admin_auth`.
-- Toggle controls for mission card, footer link, phase locks, TSA Score™ state, and Orientation slide status.
-- URL inputs for Orientation and phase context slide embeds.
+- Toggle controls for mission card, Phase 1 availability, and TSA Score™ state.
+- Per-accordion embed controls for Orientation and phase context blocks, with Google Slides or Google Drive Video type selectors.
+- Site sync check for accordion IDs, exercise titles, app paths, localStorage keys, and embed keys, with Run, Rerun, Hide results, and summary count controls.
+- Visibility section showing Phase 1, Phase 2, Phase 3, and admin preview bypass status from the current localStorage completion state.
 - Password controls for member hub and admin access.
 - Send to instructor toggle and Apps Script endpoint URL input.
 - Quick links for validating My results and member apps in new tabs.
@@ -736,25 +767,14 @@ Key functionality:
 | `utl_admin_password` | `utl2026_admin` | any string | Admin password |
 | `utl_member_password` | hardcoded fallback | any string | Member password |
 | `utl_mission_card` | `show` | `show` / `hide` | MA mission card |
-| `utl_footer_link` | `show` | `show` / `hide` | Admin footer link |
+| `utl_admin_preview_bypass` | `on` | `on` / `off` | Admin member hub preview link mode |
 | `utl_tsa_status` | `placeholder` | `live` / `placeholder` / `hidden` | TSA Score section |
-| `utl_orientation_slides` | `placeholder` | `live` / `placeholder` | Orientation slides |
 | `utl_phase1_status` | `live` | `live` / `locked` | Phase 1 access |
-| `utl_phase2_status` | `locked` | `live` / `locked` | Phase 2 access |
-| `utl_phase3_status` | `locked` | `live` / `locked` | Phase 3 access |
 | `utl_send_instructor` | `hidden` | `live` / `hidden` | Send to instructor button |
 | `utl_send_instructor_url` | `""` | URL string | Apps Script endpoint |
-| `utl_slides_orientation` | `""` | Google Slides embed URL | Orientation iframe src |
-| `utl_slides_phase1_chunk1` | `""` | Google Slides embed URL | Phase 1 chunk 1 iframe |
-| `utl_slides_phase1_chunk2` | `""` | Google Slides embed URL | Phase 1 chunk 2 iframe |
-| `utl_slides_phase1_chunk3` | `""` | Google Slides embed URL | Phase 1 chunk 3 iframe |
-| `utl_slides_phase1_chunk4` | `""` | Google Slides embed URL | Phase 1 chunk 4 iframe |
-| `utl_slides_phase2_chunk1` | `""` | Google Slides embed URL | Phase 2 chunk 1 iframe |
-| `utl_slides_phase2_chunk2` | `""` | Google Slides embed URL | Phase 2 chunk 2 iframe |
-| `utl_slides_phase2_chunk3` | `""` | Google Slides embed URL | Phase 2 chunk 3 iframe |
-| `utl_slides_phase3_chunk1` | `""` | Google Slides embed URL | Phase 3 chunk 1 iframe |
-| `utl_slides_phase3_chunk2` | `""` | Google Slides embed URL | Phase 3 chunk 2 iframe |
-| `utl_slides_phase3_chunk3` | `""` | Google Slides embed URL | Phase 3 chunk 3 iframe |
+| `utl_embed_*` | — | JSON object `{ url, type }` | Per-accordion Google Slides or Drive video embed |
+| `utl_p1_ex[N]_done` | — | `"true"` | Phase 1 sequential exercise completion and Phase 2 visibility unlock |
+| `utl_p2_ex[N]_done` | — | `"true"` | Phase 2 sequential exercise completion and Phase 3 visibility unlock |
 | `utl_result_grocery-list` | — | JSON object | Grocery list result |
 | `utl_result_messy-notes` | — | JSON object | Messy notes result |
 | `utl_result_rushed-voice-memo` | — | JSON object | Rushed voice memo result |
