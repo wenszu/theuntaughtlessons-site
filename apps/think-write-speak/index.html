@@ -1,0 +1,501 @@
+<!--
+REUSE AUDIT
+- App header and timer: copied from apps/messy-notes/index.html
+- Screen progression and step indicator: copied from apps/grocery-list/index.html
+- Card layout and button styles: copied from apps/messy-notes/index.html
+- Pre-fill and copy-to-clipboard pattern: copied from apps/scqa-builder/index.html
+- Word count behavior: copied from apps/messy-notes/index.html
+- Show/hide toggle: copied from apps/scqa-builder/index.html
+- New code written for this file only: five-part Minto email scaffold, live email preview, speaking handoff cards
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Turn SCQA thinking into an email and spoken update.">
+  <title>Think. Write. Speak. | The Untaught Lessons</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="../../assets/favicon-bluebg-whitedoor-thicker-32.png?v=6">
+  <link rel="shortcut icon" type="image/png" href="../../assets/favicon-bluebg-whitedoor-thicker-32.png?v=6">
+  <link rel="apple-touch-icon" sizes="180x180" href="../../assets/apple-touch-icon.png?v=3">
+  <link rel="stylesheet" href="../shared/activity-timer.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lato:wght@300;400;700&family=Roboto+Mono:wght@400;500;700&display=swap');
+    :root {
+      --tws-cream: #F3EDE2;
+      --tws-navy: #003366;
+      --tws-gold: #EEA320;
+      --tws-charcoal: #4A4A4A;
+      --tws-steel: #4D7094;
+      --tws-white: #FFFFFF;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--tws-cream);
+      color: var(--tws-charcoal);
+      font-family: 'Lato', sans-serif;
+    }
+    button, textarea, input { font: inherit; }
+    .tws-header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: grid;
+      grid-template-columns: auto auto minmax(220px, 1fr) auto;
+      align-items: center;
+      column-gap: 20px;
+      min-height: 76px;
+      padding: 12px 32px;
+      background: var(--tws-navy);
+      color: var(--tws-white);
+    }
+    .tws-logo {
+      display: block;
+      width: 224px;
+      height: 46px;
+    }
+    .tws-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+    .tws-divider {
+      width: 1px;
+      height: 38px;
+      background: rgba(255,255,255,.42);
+    }
+    .tws-kicker {
+      display: block;
+      color: var(--tws-gold);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+    .tws-title {
+      display: block;
+      margin-top: 3px;
+      color: var(--tws-white);
+      font-family: 'Playfair Display', serif;
+      font-size: 27px;
+      font-weight: 700;
+      line-height: 1;
+    }
+    .tws-timer {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+    .tws-utility {
+      min-width: 148px;
+      padding: 7px 10px;
+      border: 1px solid rgba(255,255,255,.18);
+      border-radius: 8px;
+      background: rgba(255,255,255,.08);
+    }
+    .tws-utility-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .tws-small-label {
+      color: var(--tws-gold);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    .tws-time {
+      color: var(--tws-white);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 18px;
+      font-weight: 700;
+      line-height: 1;
+    }
+    .tws-hide-time,
+    .tws-icon-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(255,255,255,.32);
+      background: rgba(255,255,255,.08);
+      color: var(--tws-white);
+      cursor: pointer;
+    }
+    .tws-hide-time {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      padding: 0;
+    }
+    .tws-hide-time svg { width: 14px; height: 14px; }
+    .tws-utility.tws-time-hidden .tws-time { visibility: hidden; }
+    .tws-controls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .tws-icon-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      font-size: 15px;
+      font-weight: 700;
+      padding: 0;
+    }
+    .tws-icon-btn:disabled { opacity: .45; cursor: not-allowed; }
+    .tws-main {
+      width: min(1180px, calc(100% - 40px));
+      margin: 0 auto;
+      padding: 34px 0 56px;
+    }
+    .tws-progress {
+      margin-bottom: 14px;
+      color: var(--tws-gold);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 12px;
+      letter-spacing: 1.4px;
+      text-transform: uppercase;
+    }
+    .tws-screen {
+      display: none;
+      opacity: 0;
+      transition: opacity .2s ease;
+    }
+    .tws-screen.tws-active {
+      display: block;
+      opacity: 1;
+    }
+    .tws-hero {
+      margin-bottom: 22px;
+    }
+    .tws-hero h1, .tws-panel h2, .tws-card h2 {
+      margin: 0;
+      color: var(--tws-navy);
+      font-family: 'Playfair Display', serif;
+      line-height: 1.12;
+    }
+    .tws-hero h1 {
+      font-size: clamp(2.1rem, 5vw, 4rem);
+    }
+    .tws-hero p {
+      max-width: 760px;
+      margin: 10px 0 0;
+      line-height: 1.55;
+      font-size: 1.05rem;
+    }
+    .tws-panel, .tws-card {
+      border: 1px solid rgba(0,51,102,.16);
+      border-radius: 8px;
+      background: var(--tws-white);
+      box-shadow: 0 12px 30px rgba(0,51,102,.08);
+      padding: 22px;
+      margin-bottom: 18px;
+    }
+    .tws-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(360px, .86fr);
+      gap: 18px;
+      align-items: start;
+    }
+    .tws-label {
+      display: block;
+      margin: 0 0 8px;
+      color: var(--tws-gold);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    .tws-field {
+      margin-bottom: 14px;
+    }
+    .tws-field p {
+      margin: 0 0 8px;
+      color: var(--tws-steel);
+      font-size: .93rem;
+      line-height: 1.45;
+    }
+    .tws-textarea {
+      width: 100%;
+      min-height: 105px;
+      border: 1px solid rgba(0,51,102,.22);
+      border-radius: 8px;
+      background: var(--tws-cream);
+      color: var(--tws-charcoal);
+      line-height: 1.55;
+      padding: 13px;
+      resize: vertical;
+    }
+    .tws-email-field .tws-textarea { min-height: 82px; }
+    .tws-button-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      margin-top: 16px;
+    }
+    .tws-button {
+      min-height: 44px;
+      border: 1px solid var(--tws-navy);
+      border-radius: 7px;
+      background: var(--tws-white);
+      color: var(--tws-navy);
+      cursor: pointer;
+      font-weight: 700;
+      padding: 10px 18px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+    }
+    .tws-button.tws-gold {
+      border-color: var(--tws-gold);
+      background: var(--tws-gold);
+      color: var(--tws-navy);
+    }
+    .tws-link {
+      border: 0;
+      background: transparent;
+      color: var(--tws-navy);
+      cursor: pointer;
+      text-decoration: underline;
+    }
+    .tws-fixed-line {
+      margin: 0 0 14px;
+      color: var(--tws-charcoal);
+      font-style: italic;
+    }
+    .tws-count {
+      margin-top: 8px;
+      color: var(--tws-charcoal);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 12px;
+    }
+    .tws-preview {
+      overflow: hidden;
+      padding: 0;
+    }
+    .tws-preview-head {
+      background: var(--tws-navy);
+      color: var(--tws-gold);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      padding: 12px 16px;
+      text-transform: uppercase;
+    }
+    .tws-preview-body {
+      padding: 18px;
+      line-height: 1.65;
+      white-space: pre-line;
+    }
+    .tws-placeholder {
+      color: var(--tws-steel);
+      font-style: italic;
+    }
+    .tws-sample {
+      display: none;
+      margin-top: 14px;
+      border-radius: 8px;
+      background: var(--tws-cream);
+      padding: 14px;
+      white-space: pre-line;
+      line-height: 1.55;
+    }
+    .tws-sample.tws-open { display: block; }
+    .tws-card-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+    .tws-card {
+      border-top: 3px solid var(--tws-gold);
+    }
+    .tws-card p {
+      line-height: 1.6;
+    }
+    .tws-note {
+      width: min(640px, 100%);
+      margin: 20px auto 0;
+      text-align: center;
+      font-style: italic;
+      line-height: 1.55;
+    }
+    @media (max-width: 768px) {
+      .tws-header {
+        grid-template-columns: auto 1fr;
+        row-gap: 10px;
+        padding: 12px 18px;
+      }
+      .tws-logo { width: 168px; }
+      .tws-divider { display: none; }
+      .tws-timer { grid-column: 1 / -1; justify-content: flex-start; }
+      .tws-main { width: min(100% - 24px, 1180px); }
+      .tws-grid, .tws-card-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header class="tws-header">
+    <a class="tws-logo" href="../../index.html" aria-label="The Untaught Lessons home"><img src="../../assets/utl-logo-nav-white.png" alt="The Untaught Lessons"></a>
+    <div class="tws-divider" aria-hidden="true"></div>
+    <div><span class="tws-kicker">PHASE 2 · SPEAK CONCISELY</span><span class="tws-title">Think. Write. Speak.</span></div>
+    <div class="tws-timer" aria-label="Elapsed time">
+      <div class="tws-utility" id="timerMetric">
+        <div class="tws-utility-row"><span class="tws-small-label">Elapsed time</span><button class="tws-hide-time" id="timerMetricToggleBtn" type="button" aria-label="Hide elapsed time" aria-pressed="false"></button></div>
+        <div class="tws-time activity-timer-display" id="timerDisplay">00:00</div>
+      </div>
+      <div class="tws-controls"><button class="tws-icon-btn" id="timerPauseIconBtn" type="button">⏸</button><button class="tws-icon-btn" id="timerPlayIconBtn" type="button">▶</button><button class="tws-icon-btn" id="timerResetIconBtn" type="button">↺</button></div>
+    </div>
+  </header>
+
+  <main class="tws-main">
+    <div class="tws-progress" id="progressText">Step 1 of 3</div>
+
+    <section class="tws-screen tws-active" data-screen="1">
+      <div class="tws-hero"><h1>Your SCQA</h1><p>This is the thinking you already built. If you completed the SCQA Builder, paste your work below. If you haven't yet, the example is already filled in — just keep going.</p></div>
+      <div class="tws-panel">
+        <div class="tws-field"><label class="tws-label" for="situation">Situation</label><textarea class="tws-textarea" id="situation">The Olympics has been one of the most unifying global events for over a century, with billions tuning in across generations.</textarea></div>
+        <div class="tws-field"><label class="tws-label" for="complication">Complication</label><textarea class="tws-textarea" id="complication">Despite its legacy, recent Games have failed to hold the same cultural weight. Audiences are fragmented, emotional connection is weaker, and the event no longer commands the shared attention it once did.</textarea></div>
+        <div class="tws-field"><label class="tws-label" for="question">Question</label><textarea class="tws-textarea" id="question">How can the Olympics reclaim its cultural relevance in a world of fractured attention and eroded trust?</textarea></div>
+        <div class="tws-field"><label class="tws-label" for="answer">Answer</label><textarea class="tws-textarea" id="answer">The Olympics needs a clarity layer — structured daily viewing routes, narrative-driven athlete coverage, and a tone and partnership system that reduces trust volatility and over-commercialization.</textarea></div>
+        <div class="tws-button-row"><button class="tws-button tws-gold" data-next type="button">This is my SCQA — build my email</button><button class="tws-link" data-next type="button">Skip — use the example</button></div>
+      </div>
+    </section>
+
+    <section class="tws-screen" data-screen="2">
+      <div class="tws-hero"><h1>Write the Email</h1><p>Aiko does not have time to read your full breakdown. She needs one clear, answer-first email she can act on immediately. Use Minto's Pyramid: lead with your answer, support it with three points, close with a next step.</p></div>
+      <div class="tws-grid">
+        <section class="tws-panel">
+          <p class="tws-fixed-line">Hey Aiko,</p>
+          <div class="tws-field tws-email-field"><label class="tws-label" for="emailAnswer">Your answer — lead with this</label><p>State your main conclusion in one sentence. This is the first thing she reads.</p><textarea class="tws-textarea" id="emailAnswer"></textarea></div>
+          <div class="tws-field tws-email-field"><label class="tws-label" for="point1">Point 1 — first supporting reason</label><p>Bold header phrase, then one to two sentences of explanation.</p><textarea class="tws-textarea" id="point1"></textarea></div>
+          <div class="tws-field tws-email-field"><label class="tws-label" for="point2">Point 2 — second supporting reason</label><p>Bold header phrase, then one to two sentences of explanation.</p><textarea class="tws-textarea" id="point2"></textarea></div>
+          <div class="tws-field tws-email-field"><label class="tws-label" for="point3">Point 3 — third supporting reason</label><p>Bold header phrase, then one to two sentences of explanation.</p><textarea class="tws-textarea" id="point3"></textarea></div>
+          <div class="tws-field tws-email-field"><label class="tws-label" for="closing">Closing line — what happens next</label><p>One sentence. Signal a meeting, a decision, or a follow-up. No vague endings.</p><textarea class="tws-textarea" id="closing"></textarea></div>
+          <p class="tws-fixed-line">Best, [Your name]</p>
+          <div class="tws-count" id="wordCount">0 words · Target: 80–120 words</div>
+          <button class="tws-link" id="sampleToggle" type="button">Show sample answer ↓</button>
+          <div class="tws-sample" id="sampleBox">Hey Aiko,
+
+We believe the Olympics is losing cultural impact primarily due to reduced everyday relevance, fragmented attention, and weaker emotional connection with audiences.
+
+Lower day-to-day visibility: The Olympics only peaks every four years, while audiences are now constantly engaged with always-on sports and digital content.
+
+Fragmented media landscape: Viewers are spread across platforms, making it harder for the Olympics to capture sustained, collective attention.
+
+Weaker emotional connection: Fewer consistent athlete narratives and national storylines reduce long-term attachment and anticipation.
+
+Happy to walk through implications and potential focus areas next.
+
+Best, Yutee Elle</div>
+          <div class="tws-button-row"><button class="tws-button tws-gold" data-next type="button">My email is ready — now say it</button></div>
+        </section>
+        <aside class="tws-panel tws-preview">
+          <div class="tws-preview-head">Email Preview</div>
+          <div class="tws-preview-body" id="previewBody"></div>
+          <div class="tws-button-row" style="padding:0 18px 18px"><button class="tws-button tws-gold" id="copyEmail" type="button">Copy email</button></div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="tws-screen" data-screen="3">
+      <div class="tws-hero" style="text-align:center"><h1>Now Say It Out Loud</h1><p style="margin-left:auto;margin-right:auto">In writing, Aiko can reread your message. In conversation, she only hears it once. That means your structure has to survive being spoken — it needs to land immediately, without slides, without context, just your voice. You are about to do this twice. First as a two-minute voice update. Then compressed to sixty seconds. Both use the same scorer you already know.</p></div>
+      <div class="tws-card-grid">
+        <article class="tws-card"><div class="tws-label">Recording A · 2 minutes</div><h2>The Voice Update</h2><p>Turn your email into a spoken update. Write for speaking, not reading — shorter sentences, natural rhythm, no jargon. Aim for 200 to 250 words in your script. Record yourself on your phone or laptop. Speak naturally. Do not read word for word. Lead with the bottom line, follow a clean structure, and deliver it with confidence. When you are done, transcribe it using ChatGPT in voice mode and paste the transcript into the scorer.</p><div class="tws-label">200–250 words · ~2 minutes</div><a class="tws-button tws-gold" href="../tsa-diagnostic/index.html" target="_blank" rel="noopener">Open the Voice Scorer →</a></article>
+        <article class="tws-card"><div class="tws-label">Recording B · 60 seconds</div><h2>The Elevator Pitch</h2><p>Now cut it in half. Same message, same structure, sixty seconds. This is the compression task — you have to decide what actually matters when half the time disappears. Go back to your script from Recording A. Cut everything that is not essential. Aim for 100 to 120 words. Record again, transcribe, and paste into the scorer. The scorer will compare this version against your first recording.</p><div class="tws-label">100–120 words · ~60 seconds</div><a class="tws-button tws-gold" href="../tsa-diagnostic/index.html" target="_blank" rel="noopener">Open the Voice Scorer →</a></article>
+      </div>
+      <p class="tws-note">You have written it, said it clearly, and compressed it. That is the full communication loop — from thinking to writing to speaking.</p>
+    </section>
+  </main>
+
+  <script>
+    let currentScreen = 1;
+    let timerHidden = false;
+    let timerStarted = false;
+    let timerRunning = false;
+    let timerStartedAt = 0;
+    let timerElapsed = 0;
+    const ids = ['emailAnswer', 'point1', 'point2', 'point3', 'closing'];
+    function $(id) { return document.getElementById(id); }
+    function showScreen(number) {
+      currentScreen = number;
+      document.querySelectorAll('.tws-screen').forEach(screen => screen.classList.toggle('tws-active', screen.dataset.screen === String(number)));
+      $('progressText').textContent = `Step ${number} of 3`;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      if (!timerStarted) startTimer();
+    }
+    function fallbackCopy(text) {
+      const temp = document.createElement('textarea');
+      temp.value = text;
+      document.body.appendChild(temp);
+      temp.select();
+      document.execCommand('copy');
+      temp.remove();
+    }
+    function copyText(text, button) {
+      const done = () => {
+        const original = button.textContent;
+        button.textContent = 'Copied!';
+        window.setTimeout(() => { button.textContent = original; }, 2000);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done).catch(() => { fallbackCopy(text); done(); });
+      else { fallbackCopy(text); done(); }
+    }
+    function valueOr(id, fallback) {
+      return $(id).value.trim() || fallback;
+    }
+    function buildEmailText() {
+      return `Hey Aiko,
+
+${valueOr('emailAnswer', 'Your answer will appear here...')}
+
+${valueOr('point1', 'Point 1...')}
+
+${valueOr('point2', 'Point 2...')}
+
+${valueOr('point3', 'Point 3...')}
+
+${valueOr('closing', 'Your closing line...')}
+
+Best, [Your name]`;
+    }
+    function renderPreview() {
+      $('previewBody').innerHTML = buildEmailText().split('\n').map(line => {
+        const isPlaceholder = ['Your answer will appear here...', 'Point 1...', 'Point 2...', 'Point 3...', 'Your closing line...'].includes(line);
+        return isPlaceholder ? `<span class="tws-placeholder">${line}</span>` : line;
+      }).join('\n');
+      const words = ids.map(id => $(id).value).join(' ').trim().split(/\s+/).filter(Boolean).length;
+      $('wordCount').textContent = `${words} words · Target: 80–120 words`;
+    }
+    function seconds() { return timerRunning ? timerElapsed + Math.floor((Date.now() - timerStartedAt) / 1000) : timerElapsed; }
+    function fmt(total) { return `${String(Math.floor(total / 60)).padStart(2,'0')}:${String(total % 60).padStart(2,'0')}`; }
+    function renderTimer() {
+      $('timerDisplay').textContent = fmt(seconds());
+      $('timerPauseIconBtn').disabled = !timerRunning;
+      $('timerPlayIconBtn').disabled = timerRunning;
+      $('timerMetric').classList.toggle('tws-time-hidden', timerHidden);
+      $('timerMetricToggleBtn').innerHTML = timerHidden ? '<svg viewBox="0 0 24 24" fill="none"><path d="M3 3l18 18" stroke="currentColor" stroke-linecap="round"/><path d="M10.6 10.6A2 2 0 0012 14a2 2 0 001.4-.6" stroke="currentColor" stroke-linecap="round"/><path d="M6.5 6.9C4.1 8.5 2.5 12 2.5 12s3.5 6 9.5 6c1.5 0 2.8-.4 3.9-1" stroke="currentColor" stroke-linecap="round"/></svg>' : '<svg viewBox="0 0 24 24" fill="none"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6z" stroke="currentColor"/><circle cx="12" cy="12" r="3" stroke="currentColor"/></svg>';
+    }
+    function startTimer() { if (timerRunning) return; timerStarted = true; timerRunning = true; timerStartedAt = Date.now(); renderTimer(); }
+    function pauseTimer() { if (!timerRunning) return; timerElapsed = seconds(); timerRunning = false; renderTimer(); }
+    function resetTimer() { timerStarted = false; timerRunning = false; timerElapsed = 0; renderTimer(); }
+    document.querySelectorAll('[data-next]').forEach(button => button.addEventListener('click', () => showScreen(currentScreen + 1)));
+    document.querySelectorAll('textarea').forEach(textarea => textarea.addEventListener('input', () => { renderPreview(); if (!timerStarted) startTimer(); }));
+    $('sampleToggle').addEventListener('click', () => { $('sampleBox').classList.toggle('tws-open'); $('sampleToggle').textContent = $('sampleBox').classList.contains('tws-open') ? 'Hide sample answer ↑' : 'Show sample answer ↓'; });
+    $('copyEmail').addEventListener('click', event => copyText(buildEmailText(), event.target));
+    $('timerPauseIconBtn').addEventListener('click', pauseTimer);
+    $('timerPlayIconBtn').addEventListener('click', startTimer);
+    $('timerResetIconBtn').addEventListener('click', resetTimer);
+    $('timerMetricToggleBtn').addEventListener('click', () => { timerHidden = !timerHidden; renderTimer(); });
+    renderPreview();
+    renderTimer();
+    setInterval(renderTimer, 1000);
+  </script>
+</body>
+</html>

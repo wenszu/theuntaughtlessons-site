@@ -24,6 +24,14 @@ Use this file when referencing the site with other tools. It should be updated w
 - Improved site sync check controls with clearer Run, Rerun, and Hide results actions plus a summary count after each check.
 - Added Visibility section to admin panel showing Phase 1, Phase 2, Phase 3, and admin-mode visibility status from the current localStorage completion state.
 - Added admin preview bypass toggle in the Visibility section. When on, the preview link opens the member hub with `?mode=admin` and the member hub treats bypass as active in the same authenticated admin browser; when off, it opens the normal participant sequence.
+- Added individual admin view toggles for The Diagnostic and The Checkpoint assessment cards, with Live, Coming soon, and Hidden states.
+- Added a `Set ready assessment apps live` shortcut in the admin Assessments section to restore the overall section, Diagnostic card, and Checkpoint card to Live when older browser settings still hold placeholder values.
+- Added quick links for Diagnostic and Checkpoint hubs plus ready TSA exercise apps: Sort & Bucket, Spot the Problem, and Speak Concisely.
+- Created `apps/advisory-board/index.html` — Phase 2 advisory board app. 5 screens: Your Work (pre-filled Olympics example, copy-per-section + copy-all), Build Your Board (orchestrator education copy, 8 preset personas + custom card, orchestrator selection), Generate Prompt (Mode A: assembled board prompt, Mode B: AI board design prompt), Capture Insights (paste and parse output, orchestrator verdict card), Save Your Board (localStorage persistence with pre-select on return). CSS prefix: `ab-`.
+- Created `apps/toolkit/index.html` — cross-program AI prompt reference. 5 tool cards: MECE Checker, Problem Breakdown, SCQA Sharpener, Decision-Ready Email, Advisory Board (Mode A/B toggle). Member area only. CSS prefix: `tk-`.
+- Created `apps/think-write-speak/index.html` — Phase 2 full communication loop exercise. 3 screens: Your SCQA (pre-filled, reuses SCQA Builder context setup), Write the Email (reuses Messy Notes three-section structure, Minto pyramid labels, live email preview), Say It Out Loud (handoff cards to TSA scorer for Recording A and B). CSS prefix: `tws-`.
+- Added three tool links to `member-login/index.html`: Advisory Board, Toolkit, Think. Write. Speak.
+- Moved Toolkit out of the Phase 2 exercise sequence and into its own bottom-level `#toolkit` section in the member workspace. Added Toolkit to the sticky nav as a destination link to the right of My results.
 - Removed footer link toggle from admin panel. Admin footer link is now always visible. Removed any show/hide logic tied to it.
 - Added automatic phase visibility gating. Phase 2 hidden until all 6 Phase 1 live exercises marked done. Phase 3 hidden until Phase 2 exercises 1 and 2 marked done. Admin mode bypasses all phase gating. Brief gold reveal message shown on phase unlock.
 - Updated mark as done button label in done state from Marked as done to Click to undo across all phases.
@@ -258,7 +266,7 @@ Use this file when referencing the site with other tools. It should be updated w
   - `tsa_sort_score` passes the Sort & Bucket score into Spot the Problem.
 - Added Type 1 auto-scoring, answer reveal, copy-results behavior, and Part 1 combined scoring for the Think Clearly assessment.
 - Added the `Find Your Level` active nav state consistently across Home, About, Programs, Contact, and Find Your Level.
-- Added trademark usage rules for `TSA Score™`, `C³ Rubric™`, and standalone `Think. Speak. Act.™`.
+- Added trademark usage rules for `TSA Score™`, `C³ Rubric™`, and the then-current standalone program title.
 - Created `tsa-score.html`, a standalone TSA Score™ routing page for The Diagnostic and The Checkpoint.
 - Added homepage TSA Score™ teaser after the three learning pillars.
 - Added `Find Your Level` navigation link across the public site.
@@ -371,7 +379,7 @@ Use the trademark symbol on first use on each page or distinct section:
 - `TSA Score™`
 - `C³ Rubric™`
 
-Use `Think. Speak. Act.™` when it appears as a standalone tagline, title, hero phrase, or title-style phrase.
+Use `Think, Speak, and Act Like an Executive` when referring to the program name.
 
 Do not add `™` when Think, Speak, and Act appear as individual headers, labels, or pillar names.
 
@@ -654,7 +662,7 @@ Programs page.
 
 Purpose:
 
-- Explains the Think. Speak. Act.™ program.
+- Explains the Think, Speak, and Act Like an Executive program.
 - Covers audiences, phases, what to expect, and program CTA.
 
 Important note:
@@ -768,7 +776,9 @@ Key functionality:
 | `utl_member_password` | hardcoded fallback | any string | Member password |
 | `utl_mission_card` | `show` | `show` / `hide` | MA mission card |
 | `utl_admin_preview_bypass` | `on` | `on` / `off` | Admin member hub preview link mode |
-| `utl_tsa_status` | `placeholder` | `live` / `placeholder` / `hidden` | TSA Score section |
+| `utl_tsa_status` | `live` | `live` / `placeholder` / `hidden` | TSA Score section |
+| `utl_tsa_diagnostic_status` | `live` | `live` / `placeholder` / `hidden` | The Diagnostic card |
+| `utl_tsa_checkpoint_status` | `live` | `live` / `placeholder` / `hidden` | The Checkpoint card |
 | `utl_phase1_status` | `live` | `live` / `locked` | Phase 1 access |
 | `utl_send_instructor` | `hidden` | `live` / `hidden` | Send to instructor button |
 | `utl_send_instructor_url` | `""` | URL string | Apps Script endpoint |
@@ -948,6 +958,87 @@ Key functionality:
 Design note:
 
 - Preload should provide leading context or prompts, not fill all answers.
+
+### `apps/advisory-board/index.html`
+
+Phase:
+
+- Phase 2, Speak Concisely.
+
+Purpose:
+
+- Virtual advisory board builder and prompt generator.
+
+Key functionality:
+
+- Pre-filled Olympics example.
+- 8 preset personas plus custom advisor cards.
+- Orchestrator education and selection.
+- Mode A and Mode B prompt generation.
+- Output paste and parse flow.
+- Saved default board in localStorage.
+
+CSS scope:
+
+- `ab-`
+
+### `apps/toolkit/index.html`
+
+Phase:
+
+- Cross-program reference.
+
+Purpose:
+
+- Reusable AI prompt toolkit for post-program application.
+
+Key functionality:
+
+- 5 tool cards.
+- Collapsible example input blocks.
+- Copy-prompt buttons.
+- Mode A/B toggle on advisory board card.
+
+CSS scope:
+
+- `tk-`
+
+Access:
+
+- Member area only.
+
+### `apps/think-write-speak/index.html`
+
+Phase:
+
+- Phase 2, Speak Concisely.
+
+Purpose:
+
+- Full communication loop from SCQA to email to spoken delivery.
+
+Key functionality:
+
+- Pre-filled SCQA.
+- Minto pyramid email scaffold.
+- Live email preview.
+- Sample answer toggle.
+- Handoff to TSA scorer.
+
+Reuses:
+
+- Messy Notes three-section structure.
+- SCQA Builder context setup.
+- Phase 2 app header and timer.
+
+CSS scope:
+
+- `tws-`
+
+Speaking stages:
+
+- Handled by existing `apps/tsa-diagnostic/index.html`.
+- No changes to that file.
 
 ### `apps/tsa-diagnostic/index.html`
 

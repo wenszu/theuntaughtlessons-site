@@ -1,0 +1,722 @@
+<!--
+REUSE AUDIT
+- App header and timer: copied from apps/messy-notes/index.html
+- Screen progression and step indicator: copied from apps/grocery-list/index.html
+- Card layout and button styles: copied from apps/messy-notes/index.html
+- Pre-fill and copy-to-clipboard pattern: copied from apps/scqa-builder/index.html
+- Word count behavior: copied from apps/messy-notes/index.html
+- Show/hide toggle: copied from apps/scqa-builder/index.html
+- New code written for this file only: advisor/orchestrator selection, prompt assembly, advisory-board parser, saved-board persistence
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Build a virtual advisory board and generate a structured AI prompt.">
+  <title>Advisory Board | The Untaught Lessons</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="../../assets/favicon-bluebg-whitedoor-thicker-32.png?v=6">
+  <link rel="shortcut icon" type="image/png" href="../../assets/favicon-bluebg-whitedoor-thicker-32.png?v=6">
+  <link rel="apple-touch-icon" sizes="180x180" href="../../assets/apple-touch-icon.png?v=3">
+  <link rel="stylesheet" href="../shared/activity-timer.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lato:wght@300;400;700&family=Roboto+Mono:wght@400;500;700&display=swap');
+    :root {
+      --ab-cream: #F3EDE2;
+      --ab-navy: #003366;
+      --ab-gold: #EEA320;
+      --ab-charcoal: #4A4A4A;
+      --ab-steel: #4D7094;
+      --ab-white: #FFFFFF;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--ab-cream);
+      color: var(--ab-charcoal);
+      font-family: 'Lato', sans-serif;
+    }
+    button, textarea, input { font: inherit; }
+    .ab-header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: grid;
+      grid-template-columns: auto auto minmax(220px, 1fr) auto;
+      align-items: center;
+      column-gap: 20px;
+      min-height: 76px;
+      padding: 12px 32px;
+      background: var(--ab-navy);
+      color: var(--ab-white);
+    }
+    .ab-logo {
+      display: block;
+      width: 224px;
+      height: 46px;
+    }
+    .ab-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+    .ab-divider {
+      width: 1px;
+      height: 38px;
+      background: rgba(255,255,255,.42);
+    }
+    .ab-kicker {
+      display: block;
+      color: var(--ab-gold);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+    .ab-title {
+      display: block;
+      margin-top: 3px;
+      color: var(--ab-white);
+      font-family: 'Playfair Display', serif;
+      font-size: 27px;
+      font-weight: 700;
+      line-height: 1;
+    }
+    .ab-timer {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+    .ab-utility-metric {
+      min-width: 148px;
+      padding: 7px 10px;
+      border: 1px solid rgba(255,255,255,.18);
+      border-radius: 8px;
+      background: rgba(255,255,255,.08);
+    }
+    .ab-utility-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .ab-small-label {
+      color: var(--ab-gold);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    .ab-time-display {
+      color: var(--ab-white);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 18px;
+      font-weight: 700;
+      line-height: 1;
+    }
+    .ab-hide-time,
+    .ab-icon-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(255,255,255,.32);
+      background: rgba(255,255,255,.08);
+      color: var(--ab-white);
+      cursor: pointer;
+    }
+    .ab-hide-time {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      padding: 0;
+    }
+    .ab-hide-time svg {
+      width: 14px;
+      height: 14px;
+      stroke-width: 2.2;
+    }
+    .ab-utility-metric.ab-time-hidden .ab-time-display { visibility: hidden; }
+    .ab-controls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .ab-icon-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      font-size: 15px;
+      font-weight: 700;
+      line-height: 1;
+      padding: 0;
+    }
+    .ab-icon-btn:disabled {
+      cursor: not-allowed;
+      opacity: .45;
+    }
+    .ab-main {
+      width: min(1180px, calc(100% - 40px));
+      margin: 0 auto;
+      padding: 34px 0 56px;
+    }
+    .ab-progress {
+      margin-bottom: 14px;
+      color: var(--ab-gold);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 12px;
+      letter-spacing: 1.4px;
+      text-transform: uppercase;
+    }
+    .ab-screen {
+      display: none;
+      opacity: 0;
+      transition: opacity .2s ease;
+    }
+    .ab-screen.ab-active {
+      display: block;
+      opacity: 1;
+    }
+    .ab-hero {
+      margin-bottom: 22px;
+    }
+    .ab-hero h1, .ab-panel h2, .ab-card h3, .ab-verdict h2 {
+      margin: 0;
+      color: var(--ab-navy);
+      font-family: 'Playfair Display', serif;
+      line-height: 1.12;
+    }
+    .ab-hero h1 {
+      font-size: clamp(2.1rem, 5vw, 4rem);
+    }
+    .ab-hero p {
+      max-width: 760px;
+      margin: 10px 0 0;
+      font-size: 1.05rem;
+      line-height: 1.55;
+    }
+    .ab-panel, .ab-card, .ab-output-card {
+      background: var(--ab-white);
+      border: 1px solid rgba(0,51,102,.16);
+      border-radius: 8px;
+      box-shadow: 0 12px 30px rgba(0,51,102,.08);
+    }
+    .ab-panel {
+      padding: 24px;
+      margin-bottom: 18px;
+    }
+    .ab-work-grid {
+      display: grid;
+      gap: 16px;
+    }
+    .ab-field-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+    .ab-label {
+      color: var(--ab-gold);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    .ab-textarea, .ab-prompt-box, .ab-input {
+      width: 100%;
+      border: 1px solid rgba(0,51,102,.22);
+      border-radius: 8px;
+      background: var(--ab-cream);
+      color: var(--ab-charcoal);
+      padding: 13px;
+      line-height: 1.55;
+    }
+    .ab-textarea {
+      min-height: 150px;
+      resize: vertical;
+    }
+    .ab-prompt-box {
+      min-height: 260px;
+      font-family: 'Roboto Mono', monospace;
+      font-size: 12px;
+      white-space: pre-wrap;
+    }
+    .ab-button-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      margin-top: 16px;
+    }
+    .ab-button, .ab-small-button {
+      min-height: 44px;
+      border: 1px solid var(--ab-navy);
+      border-radius: 7px;
+      background: var(--ab-white);
+      color: var(--ab-navy);
+      cursor: pointer;
+      font-weight: 700;
+      padding: 10px 18px;
+    }
+    .ab-button.ab-gold, .ab-small-button.ab-gold {
+      border-color: var(--ab-gold);
+      background: var(--ab-gold);
+      color: var(--ab-navy);
+    }
+    .ab-button:disabled {
+      cursor: not-allowed;
+      opacity: .55;
+    }
+    .ab-link-button {
+      border: 0;
+      background: transparent;
+      color: var(--ab-navy);
+      cursor: pointer;
+      text-decoration: underline;
+    }
+    .ab-education {
+      display: grid;
+      gap: 16px;
+      margin-bottom: 22px;
+    }
+    .ab-education h2 {
+      margin-bottom: 6px;
+    }
+    .ab-education p {
+      margin: 0;
+      line-height: 1.65;
+    }
+    .ab-card-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 12px;
+    }
+    .ab-card {
+      position: relative;
+      padding: 18px;
+      text-align: left;
+      cursor: pointer;
+    }
+    .ab-card.ab-selected, .ab-card.ab-orchestrator {
+      border-color: var(--ab-gold);
+      box-shadow: 0 0 0 2px rgba(238,163,32,.22);
+    }
+    .ab-card h3 {
+      font-size: 1.3rem;
+    }
+    .ab-card p {
+      margin: 10px 0 0;
+      line-height: 1.5;
+    }
+    .ab-badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      border-radius: 999px;
+      background: var(--ab-gold);
+      color: var(--ab-navy);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 4px 8px;
+      text-transform: uppercase;
+    }
+    .ab-add-fields {
+      display: none;
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .ab-add-fields.ab-open {
+      display: grid;
+    }
+    .ab-note {
+      margin-top: 10px;
+      color: var(--ab-steel);
+      font-size: .92rem;
+      line-height: 1.45;
+    }
+    .ab-error {
+      display: none;
+      margin-top: 10px;
+      color: var(--ab-navy);
+      font-weight: 700;
+    }
+    .ab-error.ab-show { display: block; }
+    .ab-two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+    .ab-output-grid {
+      display: grid;
+      gap: 14px;
+      margin-top: 18px;
+    }
+    .ab-output-card {
+      padding: 16px;
+    }
+    .ab-output-card h3 {
+      margin: 0 0 10px;
+      color: var(--ab-navy);
+      font-family: 'Playfair Display', serif;
+    }
+    .ab-output-card strong {
+      color: var(--ab-navy);
+    }
+    .ab-verdict {
+      margin-top: 18px;
+      padding: 18px;
+      border-left: 4px solid var(--ab-gold);
+      background: var(--ab-cream);
+    }
+    .ab-chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .ab-chip {
+      border-radius: 999px;
+      background: var(--ab-navy);
+      color: var(--ab-white);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 11px;
+      padding: 6px 10px;
+    }
+    .ab-chip.ab-gold-chip {
+      background: var(--ab-gold);
+      color: var(--ab-navy);
+    }
+    @media (max-width: 768px) {
+      .ab-header {
+        grid-template-columns: auto 1fr;
+        row-gap: 10px;
+        padding: 12px 18px;
+      }
+      .ab-logo { width: 168px; }
+      .ab-divider { display: none; }
+      .ab-timer { grid-column: 1 / -1; justify-content: flex-start; }
+      .ab-main { width: min(100% - 24px, 1180px); }
+      .ab-card-grid, .ab-two-col { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header class="ab-header">
+    <a class="ab-logo" href="../../index.html" aria-label="The Untaught Lessons home"><img src="../../assets/utl-logo-nav-white.png" alt="The Untaught Lessons"></a>
+    <div class="ab-divider" aria-hidden="true"></div>
+    <div><span class="ab-kicker">PHASE 2 · SPEAK CONCISELY</span><span class="ab-title">Advisory Board</span></div>
+    <div class="ab-timer" aria-label="Elapsed time">
+      <div class="ab-utility-metric" id="timerMetric">
+        <div class="ab-utility-row">
+          <span class="ab-small-label">Elapsed time</span>
+          <button class="ab-hide-time" id="timerMetricToggleBtn" type="button" aria-label="Hide elapsed time" aria-pressed="false"></button>
+        </div>
+        <div class="ab-time-display activity-timer-display" id="timerDisplay">00:00</div>
+      </div>
+      <div class="ab-controls">
+        <button class="ab-icon-btn" id="timerPauseIconBtn" type="button" aria-label="Pause timer">⏸</button>
+        <button class="ab-icon-btn" id="timerPlayIconBtn" type="button" aria-label="Start timer">▶</button>
+        <button class="ab-icon-btn" id="timerResetIconBtn" type="button" aria-label="Reset timer">↺</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="ab-main">
+    <div class="ab-progress" id="progressText">Step 1 of 5</div>
+
+    <section class="ab-screen ab-active" data-screen="1">
+      <div class="ab-hero"><h1>Your Work</h1><p>Paste your problem statement, issue tree, and SCQA below. If you haven't done those exercises yet, the example is already filled in — just keep going.</p></div>
+      <div class="ab-panel ab-work-grid">
+        <div><div class="ab-field-head"><span class="ab-label">Problem Statement</span><button class="ab-small-button" data-copy-target="problemText" type="button">Copy</button></div><textarea class="ab-textarea" id="problemText">Why is the Olympics losing its cultural impact?
+
+The Olympics has historically been one of the most unifying global events. However, recent games have struggled to capture the same cultural relevance, sustained attention, and emotional connection with audiences.</textarea></div>
+        <div><div class="ab-field-head"><span class="ab-label">Issue Tree</span><button class="ab-small-button" data-copy-target="treeText" type="button">Copy</button></div><textarea class="ab-textarea" id="treeText">Central question: Why is the Olympics losing its magic?
+
+Argument 1: Shared ritual is breaking
+- Fragmented attention: no single shared moment; audiences split across platforms, time zones, and competing world stages
+- Broadcast-first packaging: still feels like a TV event while audiences consume culturally through feeds and communities
+- Highlights over attendance: people catch up later, so the Games lose the live collective timestamp feeling
+
+Argument 2: Meaning is getting replaced by moment-chasing
+- Clip culture: short-form rewards shock, controversy, and spectacle; meaning needs arcs and buildup
+- Moment-chasing storytelling: highlights and virality outshine training, stakes, and excellence
+- Winners aren't legible: without consistent athlete-led arcs, audiences don't feel the personal stakes behind excellence
+
+Argument 3: Legitimacy and tone are getting noisier
+- Trust volatility: politics and polarization make the Olympics feel biased or contested
+- Sensitivity: generic unity messaging can land as tone-deaf in a fractured world
+- Over-commercialization signal: sponsorship and ad load makes the Games feel monetized rather than earned</textarea></div>
+        <div><div class="ab-field-head"><span class="ab-label">SCQA</span><button class="ab-small-button" data-copy-target="scqaText" type="button">Copy</button></div><textarea class="ab-textarea" id="scqaText">Situation: The Olympics has been one of the most unifying global events for over a century, with billions tuning in across generations.
+
+Complication: Despite its legacy, recent Games have failed to hold the same cultural weight. Audiences are fragmented, emotional connection is weaker, and the event no longer commands the shared attention it once did.
+
+Question: How can the Olympics reclaim its cultural relevance in a world of fractured attention and eroded trust?
+
+Answer: The Olympics needs a clarity layer — structured daily viewing routes, narrative-driven athlete coverage, and a tone and partnership system that reduces trust volatility and over-commercialization.</textarea></div>
+        <div class="ab-button-row"><button class="ab-button ab-gold" id="copyAllBtn" type="button">Copy all + continue</button><button class="ab-link-button" data-next type="button">Next</button></div>
+      </div>
+    </section>
+
+    <section class="ab-screen" data-screen="2">
+      <div class="ab-hero"><h1>Build Your Board</h1></div>
+      <div class="ab-panel ab-education">
+        <div><h2>What is the Orchestrator?</h2><p>Every advisory board needs someone whose job is not to add another opinion to the pile. Their job is to listen to all of it and then make a call. Not find the middle ground between everyone, not summarize what the room said, but actually decide what the right move is and say it clearly.</p><p>That is what the Orchestrator does. They sit above the debate, let the advisors do their work, and when the session is over, they are the one who tells you what to prioritize and what to do next.</p></div>
+        <div><h2>There are two ways to think about who that person should be.</h2><p>The first is to make the Orchestrator a version of yourself. You choose someone whose decision-making instincts, values, and way of weighing tradeoffs are close to yours. The reason this works is not because you want agreement. Your advisors will still push back hard. But at the end of the session, you want a final verdict that reflects how you would actually move in real life, not just what the loudest voice in the room concluded. This approach is especially useful when the decision ultimately belongs to you and you want to pressure-test your own thinking before you commit.</p><p>The second approach is to ask a completely different question: who is the most qualified person in the world to make this specific call, regardless of whether they think like you? If you are working through a consumer hardware product, you might put Steve Jobs in the Orchestrator seat. Your advisors still represent finance, legal, operations, the end user, and they each bring their own challenge. But when all of that input has been heard, Jobs is the one who weighs it through the lens of what makes a product genuinely great. His final verdict carries the authority of someone who has navigated exactly this kind of tension before and knows what actually matters.</p><p>Neither approach is better than the other. The question worth asking yourself before you choose is whether you need clarity on what you would do, or whether you need the best possible decision for this particular problem regardless of whose instincts it reflects.</p><p>One thing stays consistent no matter who you choose. The Orchestrator does not participate in the advisory session itself. They observe and let each voice make its case without interruption. Their role only begins when everyone else has finished, and when they speak, they are not recapping the conversation but closing it with a direction.</p></div>
+      </div>
+      <div class="ab-panel" id="savedBanner" hidden><strong>You have a saved board.</strong> Pre-selected below — swap any member out if this problem needs a different perspective.</div>
+      <div class="ab-panel"><div class="ab-label">Select at least 3 advisors — you can add more</div><div class="ab-card-grid" id="advisorGrid"></div></div>
+      <div class="ab-panel"><div class="ab-label">Now choose your Orchestrator — this person makes the final call</div><div class="ab-card-grid" id="orchestratorGrid"></div><p class="ab-note" id="roleNote"></p><div class="ab-button-row"><button class="ab-button ab-gold" id="buildPromptBtn" type="button" disabled>Build my prompt</button></div><p class="ab-error" id="boardError">Select at least 3 advisors and 1 orchestrator first.</p></div>
+    </section>
+
+    <section class="ab-screen" data-screen="3">
+      <div class="ab-hero"><h1>Your Prompt is Ready</h1><p>Copy it and paste it into any AI tool — Claude, ChatGPT, Gemini, or any other you already use.</p></div>
+      <div class="ab-two-col">
+        <div class="ab-panel"><div class="ab-label">Option A — Run your board</div><p>You have built your board. This prompt packages everything — your work, your advisors, and the output format — so your AI tool knows exactly what to do.</p><textarea class="ab-prompt-box" id="modeAPrompt" readonly></textarea><button class="ab-button ab-gold" data-copy-target="modeAPrompt" type="button">Copy prompt</button></div>
+        <div class="ab-panel"><div class="ab-label">Option B — Build your board with AI first</div><p>Not sure who should be on your panel? Paste this prompt into your AI tool. It will recommend a board of six suited to your specific problem — then come back and add them as custom advisors.</p><textarea class="ab-prompt-box" id="modeBPrompt" readonly></textarea><button class="ab-button ab-gold" data-copy-target="modeBPrompt" type="button">Copy prompt</button></div>
+      </div>
+      <div class="ab-button-row"><button class="ab-button ab-gold" data-next type="button">Next</button></div>
+    </section>
+
+    <section class="ab-screen" data-screen="4">
+      <div class="ab-hero"><h1>Paste Your Output</h1><p>Run the prompt in your AI tool, then paste the full output here.</p></div>
+      <div class="ab-panel"><textarea class="ab-textarea" id="aiOutput" style="min-height:300px" placeholder="Paste the full advisory board output from your AI tool here..."></textarea><div class="ab-button-row"><button class="ab-button ab-gold" id="organizeBtn" type="button">Organize my board</button></div><p class="ab-error" id="parseError">We couldn't organize this automatically. You can still read your output above and copy what you need.</p><div id="parsedOutput"></div></div>
+      <div class="ab-button-row"><button class="ab-button ab-gold" data-next type="button">Next</button></div>
+    </section>
+
+    <section class="ab-screen" data-screen="5">
+      <div class="ab-hero"><h1>Save Your Board</h1><p>You just ran your first advisory board. The most effective leaders keep one on standby — a trusted panel they can bring to any problem, not just this one.</p></div>
+      <div class="ab-panel"><h2>Save this board</h2><div class="ab-chip-row" id="summaryChips"></div><div class="ab-button-row"><button class="ab-button ab-gold" id="saveBoardBtn" type="button">Save as my default board</button></div><p class="ab-note">Next time you open this app, your board will be pre-selected. You can always swap individual members out for a new problem.</p></div>
+      <div class="ab-panel"><h2>Build a new board</h2><button class="ab-button" id="newBoardBtn" type="button">Build a different board</button></div>
+    </section>
+  </main>
+
+  <script>
+    const advisors = [
+      ['Steve Jobs','Radical simplicity / Product vision',"Cuts anything that doesn't serve the single most important idea. He has no patience for complexity dressed up as thoroughness, and he will tell you when your argument is too clever for its own good. If the core idea isn't immediately clear, he will ask you to start over."],
+      ['Jeff Bezos','Customer obsession / Long-term systems','Wants to know who this is actually for and whether it still holds up in five years. He will challenge assumptions that feel obvious and push back on any framing that prioritizes internal logic over what the end user actually experiences. Narrative is not enough for him without the mechanism behind it.'],
+      ['Sheryl Sandberg','Operational clarity / Stakeholder alignment','Asks whether this can actually be executed and whether the right people are already aligned. She is less interested in whether your argument is intellectually sound than in whether you have thought through what happens when it meets real organizations, real timelines, and real politics.'],
+      ['Ray Dalio','Radical transparency / First-principles logic',"Will surface every assumption you haven't explicitly stated and ask you to prove it. He operates on the belief that most arguments collapse when you stop letting people get away with things that sound true but haven't been tested. Expect to be asked why at least three times in a row."],
+      ['Indra Nooyi','Global complexity / Long-term brand thinking',"Asks what gets lost when you simplify and who isn't in the room. She brings a global operating lens and a deep awareness of how decisions that look clean from the inside land differently depending on where and who you are talking to."],
+      ['The Skeptical CFO','Financial discipline / ROI scrutiny',"Will not be moved by a compelling narrative alone. Wants to know what this costs, what happens if it doesn't work, and whether the return justifies the exposure. If your argument doesn't survive a hard financial question, this is where you will find out."],
+      ['The Front-Line User','Ground-level reality / Lived experience',"Doesn't engage with the framework at all. Only cares about whether this reflects what people actually experience when they show up to use it, buy it, or live with it. The gap between what looks good in a slide and what works in practice is exactly what this perspective exists to expose."],
+      ["The Devil's Advocate",'Stress-testing / Contrarian logic',"Takes the strongest opposing position available and stays there until the argument can hold its ground. Not because they believe the counterargument is right, but because an idea that can't survive its strongest critic isn't ready to leave the room."]
+    ].map((item, index) => ({ id: `preset-${index}`, name: item[0], lens: item[1], description: item[2] }));
+    let board = [...advisors];
+    let selectedAdvisors = new Set();
+    let orchestratorId = '';
+    let currentScreen = 1;
+    let timerHidden = false;
+    let timerStarted = false;
+    let timerRunning = false;
+    let timerStartedAt = 0;
+    let timerElapsed = 0;
+
+    function $(id) { return document.getElementById(id); }
+    function showScreen(number) {
+      currentScreen = number;
+      document.querySelectorAll('.ab-screen').forEach(screen => screen.classList.toggle('ab-active', screen.dataset.screen === String(number)));
+      $('progressText').textContent = `Step ${number} of 5`;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    function fallbackCopy(text) {
+      const temp = document.createElement('textarea');
+      temp.value = text;
+      document.body.appendChild(temp);
+      temp.select();
+      document.execCommand('copy');
+      temp.remove();
+    }
+    function copyText(text, button) {
+      const done = () => {
+        const original = button.textContent;
+        button.textContent = 'Copied!';
+        window.setTimeout(() => { button.textContent = original; }, 2000);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done).catch(() => { fallbackCopy(text); done(); });
+      else { fallbackCopy(text); done(); }
+    }
+    function advisorCard(person, mode) {
+      const card = document.createElement('article');
+      card.className = 'ab-card';
+      card.dataset.id = person.id;
+      const selected = mode === 'advisor' ? selectedAdvisors.has(person.id) : orchestratorId === person.id;
+      card.classList.toggle(mode === 'advisor' ? 'ab-selected' : 'ab-orchestrator', selected);
+      card.innerHTML = `${selected ? `<span class="ab-badge">${mode === 'advisor' ? '✓' : 'Orchestrator'}</span>` : ''}<h3>${person.name}</h3><div class="ab-label">${person.lens}</div><p>${person.description}</p>`;
+      card.addEventListener('click', () => {
+        if (mode === 'advisor') selectedAdvisors.has(person.id) ? selectedAdvisors.delete(person.id) : selectedAdvisors.add(person.id);
+        else orchestratorId = person.id;
+        renderBoard();
+      });
+      return card;
+    }
+    function addCustomCard(container, mode) {
+      const wrap = document.createElement('article');
+      wrap.className = 'ab-card';
+      wrap.innerHTML = '<h3>+ Add your own</h3><p>Name a specific person or persona you want in the room.</p><div class="ab-add-fields"><input class="ab-input" placeholder="Name"><textarea class="ab-textarea" placeholder="How do they think and what do they challenge?"></textarea><button class="ab-small-button ab-gold" type="button">Add to board</button></div>';
+      const fields = wrap.querySelector('.ab-add-fields');
+      wrap.addEventListener('click', event => {
+        if (event.target.tagName !== 'BUTTON') fields.classList.add('ab-open');
+      });
+      wrap.querySelector('button').addEventListener('click', event => {
+        event.stopPropagation();
+        const name = wrap.querySelector('input').value.trim();
+        const description = wrap.querySelector('textarea').value.trim();
+        if (!name || !description) return;
+        const custom = { id: `custom-${Date.now()}`, name, lens: 'Custom perspective', description };
+        board.push(custom);
+        if (mode === 'advisor') selectedAdvisors.add(custom.id); else orchestratorId = custom.id;
+        renderBoard();
+      });
+      container.appendChild(wrap);
+    }
+    function renderBoard() {
+      const advisorGrid = $('advisorGrid');
+      const orchestratorGrid = $('orchestratorGrid');
+      advisorGrid.innerHTML = '';
+      orchestratorGrid.innerHTML = '';
+      board.forEach(person => advisorGrid.appendChild(advisorCard(person, 'advisor')));
+      addCustomCard(advisorGrid, 'advisor');
+      board.forEach(person => orchestratorGrid.appendChild(advisorCard(person, 'orchestrator')));
+      addCustomCard(orchestratorGrid, 'orchestrator');
+      $('roleNote').textContent = selectedAdvisors.has(orchestratorId) ? 'This person is already on your board as an advisor. Choose a different Orchestrator or swap their role.' : '';
+      $('buildPromptBtn').disabled = selectedAdvisors.size < 3 || !orchestratorId || selectedAdvisors.has(orchestratorId);
+    }
+    function selectedPeople() { return board.filter(person => selectedAdvisors.has(person.id)); }
+    function orchestrator() { return board.find(person => person.id === orchestratorId); }
+    function buildModeA() {
+      return `You are facilitating a structured advisory board session. Your job is to simulate a panel of expert advisors reviewing a piece of work, then deliver a final verdict from the Orchestrator.
+
+---
+
+CONTEXT
+
+${$('problemText').value}
+
+---
+
+THE WORK BEING REVIEWED
+
+Issue Tree:
+${$('treeText').value}
+
+SCQA:
+${$('scqaText').value}
+
+---
+
+THE ADVISORY BOARD
+
+${selectedPeople().map(person => `Advisor: ${person.name}\nRole lens: ${person.lens}\nHow they challenge: ${person.description}`).join('\n\n---\n\n')}
+
+---
+
+THE ORCHESTRATOR
+
+Orchestrator: ${orchestrator().name}
+Role lens: ${orchestrator().lens}
+How they decide: ${orchestrator().description}
+
+The Orchestrator does not speak during the advisory session. They observe and listen to all advisor input before delivering the final verdict.
+
+---
+
+INSTRUCTIONS
+
+Step 1: Have each advisor review both the issue tree and the SCQA. For each advisor:
+
+ADVISOR NAME
+What I like: [max 2 points]
+What I would challenge or cut: [max 2 points]
+What I recommend: [max 2 points]
+
+Step 2: After all advisors have responded, the Orchestrator delivers:
+
+ORCHESTRATOR VERDICT — ${orchestrator().name}
+Synthesis: [2–3 sentences summarizing key tensions and agreements]
+Final decision: [1–2 sentences stating clearly what should be prioritized or changed]
+Recommended next step: [One specific, actionable next step]
+
+Stay in character for each voice. Do not blend advisor perspectives. The Orchestrator makes a call, not a summary.`;
+    }
+    function buildModeB() {
+      return `I need help designing a virtual advisory board for the following problem:
+
+${$('problemText').value}
+
+My goal is to stress-test my thinking, identify blind spots, and get a final recommendation I can act on.
+
+Please recommend a panel of 6 people — 5 advisors and 1 orchestrator — specifically suited to this problem. For each person provide:
+
+1. Name or persona (real person, named archetype, or role-based persona)
+2. Role lens (short phrase — e.g. "Customer obsession / long-term systems")
+3. Why they are right for this problem (2–3 sentences specific to the problem above)
+4. What they are most likely to challenge (1–2 sentences)
+
+For the Orchestrator, explain why this person is the right one to make the final call on this type of problem.
+
+Return your recommendations in a clean list format I can easily read and act on.`;
+    }
+    function organizeOutput() {
+      const text = $('aiOutput').value;
+      const output = $('parsedOutput');
+      $('parseError').classList.remove('ab-show');
+      if (!text.includes('What I like:') || !text.includes('ORCHESTRATOR VERDICT')) { $('parseError').classList.add('ab-show'); return; }
+      const beforeVerdict = text.split('ORCHESTRATOR VERDICT')[0];
+      const verdict = text.split('ORCHESTRATOR VERDICT')[1] || '';
+      const chunks = beforeVerdict.split('What I like:').slice(1);
+      output.innerHTML = `<div class="ab-output-grid">${chunks.map((chunk, index) => {
+        const challengeParts = chunk.split('What I would challenge');
+        const like = challengeParts[0] || '';
+        const recommendParts = (challengeParts[1] || '').split('What I recommend:');
+        return `<div class="ab-output-card"><h3>Advisor ${index + 1}</h3><p><strong>What I like:</strong> ${like.trim()}</p><p><strong>What I would challenge:</strong> ${(recommendParts[0] || '').replace(':','').trim()}</p><p><strong>What I recommend:</strong> ${(recommendParts[1] || '').trim()}</p></div>`;
+      }).join('')}</div><div class="ab-verdict" id="verdictBlock"><h2>Orchestrator Verdict</h2><p>${verdict.trim().replace(/\n/g, '<br>')}</p></div><button class="ab-button ab-gold" id="copySummaryBtn" type="button">Copy summary</button>`;
+      $('copySummaryBtn').addEventListener('click', event => copyText(verdict.trim(), event.target));
+    }
+    function updateSummary() {
+      $('summaryChips').innerHTML = `${selectedPeople().map(person => `<span class="ab-chip">${person.name}</span>`).join('')}<span class="ab-chip ab-gold-chip">${orchestrator().name}</span>`;
+    }
+    function loadSaved() {
+      try {
+        const saved = JSON.parse(localStorage.getItem('utl-advisory-board-default') || '{}');
+        if (!saved.advisors || !saved.orchestrator) return;
+        selectedAdvisors = new Set(saved.advisors);
+        orchestratorId = saved.orchestrator;
+        $('savedBanner').hidden = false;
+      } catch (error) {}
+    }
+    function seconds() { return timerRunning ? timerElapsed + Math.floor((Date.now() - timerStartedAt) / 1000) : timerElapsed; }
+    function fmt(total) { return `${String(Math.floor(total / 60)).padStart(2,'0')}:${String(total % 60).padStart(2,'0')}`; }
+    function renderTimer() {
+      $('timerDisplay').textContent = fmt(seconds());
+      $('timerPauseIconBtn').disabled = !timerRunning;
+      $('timerPlayIconBtn').disabled = timerRunning;
+      $('timerMetric').classList.toggle('ab-time-hidden', timerHidden);
+      $('timerMetricToggleBtn').innerHTML = timerHidden ? '<svg viewBox="0 0 24 24" fill="none"><path d="M3 3l18 18" stroke="currentColor" stroke-linecap="round"/><path d="M10.6 10.6A2 2 0 0012 14a2 2 0 001.4-.6" stroke="currentColor" stroke-linecap="round"/><path d="M6.5 6.9C4.1 8.5 2.5 12 2.5 12s3.5 6 9.5 6c1.5 0 2.8-.4 3.9-1" stroke="currentColor" stroke-linecap="round"/></svg>' : '<svg viewBox="0 0 24 24" fill="none"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6z" stroke="currentColor"/><circle cx="12" cy="12" r="3" stroke="currentColor"/></svg>';
+    }
+    function startTimer() { if (timerRunning) return; timerStarted = true; timerRunning = true; timerStartedAt = Date.now(); renderTimer(); }
+    function pauseTimer() { if (!timerRunning) return; timerElapsed = seconds(); timerRunning = false; renderTimer(); }
+    function resetTimer() { timerStarted = false; timerRunning = false; timerElapsed = 0; renderTimer(); }
+
+    document.querySelectorAll('[data-copy-target]').forEach(button => button.addEventListener('click', () => copyText($(button.dataset.copyTarget).value, button)));
+    document.querySelectorAll('[data-next]').forEach(button => button.addEventListener('click', () => showScreen(currentScreen + 1)));
+    $('copyAllBtn').addEventListener('click', event => { copyText(`Problem Statement\n${$('problemText').value}\n\nIssue Tree\n${$('treeText').value}\n\nSCQA\n${$('scqaText').value}`, event.target); showScreen(2); });
+    $('buildPromptBtn').addEventListener('click', () => { $('boardError').classList.remove('ab-show'); if ($('buildPromptBtn').disabled) { $('boardError').classList.add('ab-show'); return; } $('modeAPrompt').value = buildModeA(); $('modeBPrompt').value = buildModeB(); showScreen(3); });
+    $('organizeBtn').addEventListener('click', organizeOutput);
+    $('saveBoardBtn').addEventListener('click', event => { localStorage.setItem('utl-advisory-board-default', JSON.stringify({ advisors: [...selectedAdvisors], orchestrator: orchestratorId })); copyText('Board saved', event.target); });
+    $('newBoardBtn').addEventListener('click', () => { selectedAdvisors.clear(); orchestratorId = ''; renderBoard(); showScreen(2); });
+    $('timerPauseIconBtn').addEventListener('click', pauseTimer);
+    $('timerPlayIconBtn').addEventListener('click', () => timerStarted ? startTimer() : startTimer());
+    $('timerResetIconBtn').addEventListener('click', resetTimer);
+    $('timerMetricToggleBtn').addEventListener('click', () => { timerHidden = !timerHidden; renderTimer(); });
+    document.addEventListener('input', () => { if (!timerStarted) startTimer(); });
+    loadSaved();
+    renderBoard();
+    renderTimer();
+    setInterval(renderTimer, 1000);
+  </script>
+</body>
+</html>

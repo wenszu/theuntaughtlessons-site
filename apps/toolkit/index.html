@@ -1,0 +1,489 @@
+<!--
+REUSE AUDIT
+- App header and timer: header shell copied from apps/messy-notes/index.html, timer intentionally omitted per prompt
+- Screen progression and step indicator: not used, single reference page
+- Card layout and button styles: copied from member-login/index.html workbook card pattern
+- Pre-fill and copy-to-clipboard pattern: copied from apps/scqa-builder/index.html
+- Word count behavior: not used
+- Show/hide toggle: copied from apps/scqa-builder/index.html sample answer toggle
+- New code written for this file only: toolkit card data rendering and Advisory Board mode toggle
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="AI prompt toolkit for The Untaught Lessons.">
+  <title>Toolkit | The Untaught Lessons</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="../../assets/favicon-bluebg-whitedoor-thicker-32.png?v=6">
+  <link rel="shortcut icon" type="image/png" href="../../assets/favicon-bluebg-whitedoor-thicker-32.png?v=6">
+  <link rel="apple-touch-icon" sizes="180x180" href="../../assets/apple-touch-icon.png?v=3">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lato:wght@300;400;700&family=Roboto+Mono:wght@400;500;700&display=swap');
+    :root {
+      --tk-cream: #F3EDE2;
+      --tk-navy: #003366;
+      --tk-gold: #EEA320;
+      --tk-charcoal: #4A4A4A;
+      --tk-steel: #4D7094;
+      --tk-white: #FFFFFF;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--tk-cream);
+      color: var(--tk-charcoal);
+      font-family: 'Lato', sans-serif;
+    }
+    button, textarea { font: inherit; }
+    .tk-header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: grid;
+      grid-template-columns: auto auto minmax(220px, 1fr);
+      align-items: center;
+      column-gap: 20px;
+      min-height: 76px;
+      padding: 12px 32px;
+      background: var(--tk-navy);
+      color: var(--tk-white);
+    }
+    .tk-logo {
+      display: block;
+      width: 224px;
+      height: 46px;
+    }
+    .tk-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+    .tk-divider {
+      width: 1px;
+      height: 38px;
+      background: rgba(255,255,255,.42);
+    }
+    .tk-kicker {
+      display: block;
+      color: var(--tk-gold);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+    .tk-title {
+      display: block;
+      margin-top: 3px;
+      color: var(--tk-white);
+      font-family: 'Playfair Display', serif;
+      font-size: 27px;
+      font-weight: 700;
+      line-height: 1;
+    }
+    .tk-intro {
+      padding: 58px 20px 34px;
+      text-align: center;
+    }
+    .tk-intro h1 {
+      margin: 0;
+      color: var(--tk-navy);
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2.2rem, 5vw, 4.5rem);
+      line-height: 1.05;
+    }
+    .tk-intro p {
+      width: min(760px, 100%);
+      margin: 16px auto 0;
+      font-size: 1.08rem;
+      line-height: 1.6;
+    }
+    .tk-main {
+      width: min(1180px, calc(100% - 40px));
+      margin: 0 auto;
+      padding-bottom: 56px;
+    }
+    .tk-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+    .tk-card {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      border: 1px solid rgba(0,51,102,.14);
+      border-top: 3px solid var(--tk-gold);
+      border-radius: 8px;
+      background: var(--tk-white);
+      box-shadow: 0 12px 30px rgba(0,51,102,.08);
+      padding: 22px;
+    }
+    .tk-label {
+      color: var(--tk-gold);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    .tk-card h2 {
+      margin: 0;
+      color: var(--tk-navy);
+      font-family: 'Playfair Display', serif;
+      font-size: 1.65rem;
+      line-height: 1.1;
+    }
+    .tk-card p {
+      margin: 0;
+      line-height: 1.55;
+    }
+    .tk-toggle {
+      align-self: flex-start;
+      min-height: 44px;
+      border: 0;
+      background: transparent;
+      color: var(--tk-navy);
+      cursor: pointer;
+      font-weight: 700;
+      padding: 0;
+      text-decoration: underline;
+    }
+    .tk-example {
+      display: none;
+      border-radius: 8px;
+      background: var(--tk-cream);
+      color: var(--tk-charcoal);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 12px;
+      line-height: 1.55;
+      padding: 12px;
+      white-space: pre-wrap;
+    }
+    .tk-example.tk-open { display: block; }
+    .tk-prompt {
+      width: 100%;
+      min-height: 300px;
+      border: 1px solid rgba(0,51,102,.28);
+      border-radius: 8px;
+      background: var(--tk-cream);
+      color: var(--tk-charcoal);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 12px;
+      line-height: 1.55;
+      padding: 12px;
+      resize: vertical;
+    }
+    .tk-button {
+      min-height: 44px;
+      border: 1px solid var(--tk-gold);
+      border-radius: 7px;
+      background: var(--tk-gold);
+      color: var(--tk-navy);
+      cursor: pointer;
+      font-weight: 700;
+      padding: 10px 18px;
+      align-self: flex-start;
+    }
+    .tk-tabs {
+      display: inline-flex;
+      gap: 4px;
+      border: 1px solid rgba(0,51,102,.18);
+      border-radius: 8px;
+      padding: 4px;
+      background: var(--tk-cream);
+    }
+    .tk-tab {
+      min-height: 44px;
+      border: 0;
+      border-radius: 6px;
+      background: transparent;
+      color: var(--tk-charcoal);
+      cursor: pointer;
+      font-family: 'Roboto Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 8px 12px;
+      text-transform: uppercase;
+    }
+    .tk-tab.tk-active {
+      background: var(--tk-gold);
+      color: var(--tk-navy);
+    }
+    .tk-mode { display: none; }
+    .tk-mode.tk-active { display: grid; gap: 12px; }
+    .tk-footer-note {
+      margin: 32px auto 0;
+      text-align: center;
+      font-style: italic;
+      color: var(--tk-charcoal);
+      font-size: .95rem;
+    }
+    @media (max-width: 768px) {
+      .tk-header {
+        grid-template-columns: auto 1fr;
+        row-gap: 10px;
+        padding: 12px 18px;
+      }
+      .tk-logo { width: 168px; }
+      .tk-divider { display: none; }
+      .tk-grid { grid-template-columns: 1fr; }
+      .tk-main { width: min(100% - 24px, 1180px); }
+    }
+  </style>
+</head>
+<body>
+  <header class="tk-header">
+    <a class="tk-logo" href="../../index.html" aria-label="The Untaught Lessons home"><img src="../../assets/utl-logo-nav-white.png" alt="The Untaught Lessons"></a>
+    <div class="tk-divider" aria-hidden="true"></div>
+    <div><span class="tk-kicker">THE UNTAUGHT LESSONS</span><span class="tk-title">Toolkit</span></div>
+  </header>
+
+  <section class="tk-intro">
+    <h1>Your AI Prompt Toolkit</h1>
+    <p>These are the same tools we use inside the program, rebuilt so you can use them on any problem at any time. Each one takes less than a minute to run in whatever AI tool you already have. Paste the prompt, swap in your own context, and go.</p>
+  </section>
+
+  <main class="tk-main">
+    <div class="tk-grid" id="toolGrid"></div>
+    <p class="tk-footer-note">These tools are built from the same frameworks you used inside the program. The more you use them, the faster the thinking becomes yours.</p>
+  </main>
+
+  <script>
+    const tools = [
+      {
+        phase: 'PHASE 1 · THINK CLEARLY',
+        name: 'Check If Your Structure Holds Up',
+        description: 'Paste in any list, set of arguments, or grouping of ideas. This prompt checks whether your structure is truly MECE — no overlaps, nothing missing — and tells you exactly where it breaks down.',
+        example: `Arguments for why our product launch is at risk:
+- The market timing is wrong
+- Our competitor just launched something similar
+- Our internal team isn't aligned on priorities
+- The pricing hasn't been finalized
+- Marketing and product aren't talking to each other`,
+        prompt: `You are an expert in structured thinking and MECE problem decomposition.
+
+I am going to give you a list of items — arguments, buckets, issues, or ideas. Your job is to evaluate whether this list is truly MECE: mutually exclusive (no overlaps between items) and collectively exhaustive (nothing important is missing).
+
+Here is my list:
+[PASTE YOUR LIST HERE]
+
+Please do the following:
+1. Identify any overlaps — items that belong in the same category or say the same thing in different ways
+2. Identify any gaps — important items or angles that are missing entirely
+3. Suggest a cleaner MECE structure, regrouped where needed
+4. Explain in plain language what you changed and why
+
+Be direct. If the structure holds up well, say so and explain why. If it doesn't, tell me specifically where it breaks.`
+      },
+      {
+        phase: 'PHASE 2 · SPEAK CONCISELY',
+        name: 'Break Down Any Problem',
+        description: 'Give AI your central question and your rough thinking. This prompt builds a clean issue tree — a hypothesis, three MECE arguments, and supporting details under each.',
+        example: `Central question: Why is employee retention dropping in our mid-level management team?
+My rough thinking: people are leaving for better pay, managers feel under-supported, and there's been a lot of uncertainty since the reorg`,
+        prompt: `You are an expert in structured problem decomposition using issue trees.
+
+I am going to give you a central question and some rough initial thinking. Build a clean, MECE issue tree that breaks this problem into its root causes.
+
+Central question: [PASTE YOUR QUESTION HERE]
+My initial thinking: [PASTE YOUR ROUGH IDEAS HERE]
+
+Structure your output as follows:
+
+Hypothesis: [One sentence answering the central question upfront]
+
+Argument 1: [Broad cause or bucket]
+- Supporting detail 1: [Specific evidence or sub-cause]
+- Supporting detail 2
+- Supporting detail 3
+
+Argument 2: [Broad cause or bucket]
+- Supporting detail 1
+- Supporting detail 2
+- Supporting detail 3
+
+Argument 3: [Broad cause or bucket]
+- Supporting detail 1
+- Supporting detail 2
+- Supporting detail 3
+
+Rules:
+- Three arguments must be MECE — no overlap, no gaps
+- Each supporting detail must be specific enough to be actionable
+- Keep asking "why?" as you go — surface root causes, not symptoms
+- If my initial thinking contains overlaps or gaps, reorganize it rather than preserving it`
+      },
+      {
+        phase: 'PHASE 2 · SPEAK CONCISELY',
+        name: 'Sharpen Your SCQA',
+        description: 'Paste in a draft SCQA. This prompt stress-tests each element and returns a sharper version with a note on what changed and why.',
+        example: `Situation: Our company has been growing steadily for the past three years.
+Complication: But lately things have been harder.
+Question: What should we do?
+Answer: We need to focus on our core customers and fix operations.`,
+        prompt: `You are an expert in executive communication and the SCQA framework.
+
+I am going to give you a draft SCQA. Stress-test each element and return a sharper, more decision-ready version.
+
+My draft SCQA:
+Situation: [PASTE HERE]
+Complication: [PASTE HERE]
+Question: [PASTE HERE]
+Answer: [PASTE HERE]
+
+Evaluate each element:
+
+Situation: Is it grounded in specific facts — or is it vague background?
+Complication: Is it specific enough to create genuine tension — or does it just say "something is wrong"?
+Question: Is this the single most important question that resolves the tension?
+Answer: Does it lead with the conclusion — or does it bury it?
+
+Return:
+1. Your assessment of each element (2–3 sentences each)
+2. A revised version of the full SCQA
+3. A brief note on the most important change you made and why`
+      },
+      {
+        phase: 'PHASE 2 · SPEAK CONCISELY',
+        name: 'Write a Decision-Ready Email',
+        description: "Paste in your SCQA or issue tree. This prompt converts it into an answer-first email using Minto's Pyramid — structured for a senior reader who will read it once and needs to act immediately.",
+        example: `Situation: Our onboarding process has been the same for three years.
+Complication: New hire time-to-productivity has increased by 40% since we moved to hybrid work, and three recent hires cited confusion during onboarding as a reason for leaving within 90 days.
+Question: How do we redesign onboarding to match how people actually work today?
+Answer: Rebuild onboarding around three shifts — digital-first delivery, manager accountability checkpoints, and a 90-day milestone framework instead of a two-day event.`,
+        prompt: `You are an expert in executive communication and Minto's Pyramid Principle.
+
+Convert the following SCQA or issue tree into a clear, answer-first email written for a senior stakeholder who will read it once and needs to act on it immediately.
+
+My input:
+[PASTE YOUR SCQA OR ISSUE TREE HERE]
+
+Write the email using this structure:
+
+Opening line: Lead with the main conclusion or recommendation. Do not build up to it. The first sentence is the answer.
+
+Supporting arguments: Three clear, distinct reasons or supporting points. Each labeled with a short bold header followed by one to two sentences.
+
+Closing: One sentence that signals what happens next — a meeting, a decision, a follow-up.
+
+Sign-off: Professional and brief.
+
+Rules:
+- Readable in under 90 seconds
+- No jargon, no hedging, no throat-clearing in the opening
+- Every sentence earns its place — if it doesn't add information, cut it
+- Write for someone who is senior, time-poor, and will only read this once`
+      }
+    ];
+
+    const advisoryA = `You are facilitating a structured advisory board session. Simulate a panel of expert advisors reviewing a piece of work, then deliver a final verdict from the Orchestrator.
+
+CONTEXT
+[PASTE YOUR PROBLEM STATEMENT HERE]
+
+THE WORK BEING REVIEWED
+Issue Tree: [PASTE YOUR ISSUE TREE HERE]
+SCQA:
+Situation: [PASTE S]
+Complication: [PASTE C]
+Question: [PASTE Q]
+Answer: [PASTE A]
+
+THE ADVISORY BOARD
+[For each advisor:]
+Advisor: [Name]
+Role lens: [Role lens]
+How they challenge: [Description]
+
+THE ORCHESTRATOR
+Orchestrator: [Name]
+Role lens: [Role lens]
+How they decide: [Description]
+
+The Orchestrator observes only. They deliver the final verdict after all advisors have spoken.
+
+INSTRUCTIONS
+For each advisor:
+ADVISOR NAME
+What I like: [max 2 points]
+What I would challenge or cut: [max 2 points]
+What I recommend: [max 2 points]
+
+Then the Orchestrator:
+ORCHESTRATOR VERDICT — [Name]
+Synthesis: [2–3 sentences]
+Final decision: [1–2 sentences]
+Recommended next step: [One specific action]
+
+Stay in character. Do not blend perspectives. The Orchestrator makes a call, not a summary.`;
+
+    const advisoryB = `I need help designing a virtual advisory board for the following problem:
+
+[PASTE YOUR PROBLEM STATEMENT AND END GOAL HERE]
+
+Recommend a panel of 6 — 5 advisors and 1 orchestrator — specifically suited to this problem.
+
+For each person:
+1. Name or persona
+2. Role lens (short phrase)
+3. Why they are right for this problem (2–3 sentences)
+4. What they are most likely to challenge (1–2 sentences)
+
+For the Orchestrator, explain why this person is right to make the final call on this type of problem.
+
+Return in a clean list I can easily read and act on.`;
+
+    function fallbackCopy(text) {
+      const temp = document.createElement('textarea');
+      temp.value = text;
+      document.body.appendChild(temp);
+      temp.select();
+      document.execCommand('copy');
+      temp.remove();
+    }
+    function copyText(text, button) {
+      const done = () => {
+        const original = button.textContent;
+        button.textContent = 'Copied!';
+        window.setTimeout(() => { button.textContent = original; }, 2000);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done).catch(() => { fallbackCopy(text); done(); });
+      else { fallbackCopy(text); done(); }
+    }
+    function renderTool(tool, index) {
+      return `<article class="tk-card">
+        <div class="tk-label">${tool.phase}</div>
+        <h2>${tool.name}</h2>
+        <p>${tool.description}</p>
+        <button class="tk-toggle" type="button" data-example="${index}">See example input</button>
+        <div class="tk-example" id="example-${index}">${tool.example}</div>
+        <textarea class="tk-prompt" id="prompt-${index}" readonly>${tool.prompt}</textarea>
+        <button class="tk-button" type="button" data-copy="prompt-${index}">Copy prompt</button>
+      </article>`;
+    }
+    document.getElementById('toolGrid').innerHTML = tools.map(renderTool).join('') + `
+      <article class="tk-card">
+        <div class="tk-label">PHASE 2 · SPEAK CONCISELY</div>
+        <h2>Advisory Board</h2>
+        <p>Two modes. Run a board you have already built, or ask AI to design the right panel for your problem from scratch. Both return structured advisor feedback and a final orchestrator verdict.</p>
+        <div class="tk-tabs">
+          <button class="tk-tab tk-active" type="button" data-mode="a">Run your board</button>
+          <button class="tk-tab" type="button" data-mode="b">Design your board first</button>
+        </div>
+        <div class="tk-mode tk-active" id="mode-a"><div class="tk-label">RUN YOUR BOARD</div><p>Built your board? This prompt runs the full session — each advisor's structured feedback, and a final orchestrator verdict with a recommended next step.</p><textarea class="tk-prompt" id="advisoryA" readonly>${advisoryA}</textarea><button class="tk-button" type="button" data-copy="advisoryA">Copy prompt</button></div>
+        <div class="tk-mode" id="mode-b"><div class="tk-label">DESIGN YOUR BOARD FIRST</div><p>Not sure who should be on your panel? Paste this prompt first. It will recommend a board of six suited to your specific problem — then come back and use Mode A.</p><textarea class="tk-prompt" id="advisoryB" readonly>${advisoryB}</textarea><button class="tk-button" type="button" data-copy="advisoryB">Copy prompt</button></div>
+      </article>`;
+    document.querySelectorAll('[data-example]').forEach(button => button.addEventListener('click', () => {
+      const box = document.getElementById(`example-${button.dataset.example}`);
+      box.classList.toggle('tk-open');
+      button.textContent = box.classList.contains('tk-open') ? 'Hide example input' : 'See example input';
+    }));
+    document.querySelectorAll('[data-copy]').forEach(button => button.addEventListener('click', () => copyText(document.getElementById(button.dataset.copy).value, button)));
+    document.querySelectorAll('.tk-tab').forEach(button => button.addEventListener('click', () => {
+      document.querySelectorAll('.tk-tab').forEach(tab => tab.classList.toggle('tk-active', tab === button));
+      document.querySelectorAll('.tk-mode').forEach(mode => mode.classList.toggle('tk-active', mode.id === `mode-${button.dataset.mode}`));
+    }));
+  </script>
+</body>
+</html>
