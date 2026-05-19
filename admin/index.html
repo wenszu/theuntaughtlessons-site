@@ -753,8 +753,14 @@
         <span class="section-label">Members</span>
         <h2>TSA Score™</h2>
         <div class="section-divider"></div>
-        <p class="description">Controls the contextual Diagnostic and Checkpoint prompt cards in the member hub.</p>
-        <div class="toggle-row" data-key="utl_tsa_status" data-default="placeholder" data-options="live:Live,placeholder:Placeholder,hidden:Hidden" data-labels="live:Full Diagnostic and Checkpoint cards shown,placeholder:Coming soon message shown, dimmed,hidden:Section removed from the page entirely"></div>
+        <p class="description">Controls the assessment cards in the member hub. Set the section to Live first, then choose whether each assessment is available, coming soon, or hidden.</p>
+        <div class="toggle-row" data-key="utl_tsa_status" data-default="live" data-options="live:Live,placeholder:Placeholder,hidden:Hidden" data-labels="live:Assessment section shown in the member hub,placeholder:Whole section shows coming soon buttons,hidden:Assessment section removed from the page entirely"></div>
+        <div class="toggle-row" data-key="utl_tsa_diagnostic_status" data-default="live" data-options="live:Live,placeholder:Coming soon,hidden:Hidden" data-labels="live:The Diagnostic card links to its assessment hub,placeholder:The Diagnostic card shows a Coming soon badge,hidden:The Diagnostic card is hidden"></div>
+        <div class="toggle-row" data-key="utl_tsa_checkpoint_status" data-default="live" data-options="live:Live,placeholder:Coming soon,hidden:Hidden" data-labels="live:The Checkpoint card links to its assessment hub,placeholder:The Checkpoint card shows a Coming soon badge,hidden:The Checkpoint card is hidden"></div>
+        <div class="sync-actions" style="margin-top: 14px;">
+          <button class="small-button" type="button" id="showReadyAssessments">Set ready assessment apps live</button>
+          <a class="small-button secondary-button" href="../member-login/index.html?mode=admin#assessments" target="_blank" style="display:inline-flex;align-items:center;text-decoration:none;">Preview Assessments</a>
+        </div>
       </section>
 
       <section class="admin-section" id="section-send-instructor">
@@ -1226,6 +1232,15 @@
         ['Member hub', '../member-login/index.html'],
         ['Member hub — admin mode', '../member-login/index.html?mode=admin'],
         ['My results', '../my-results/index.html'],
+        ['Diagnostic hub', '../apps/tsa-diagnostic/index.html'],
+        ['Checkpoint hub', '../apps/tsa-checkpoint/index.html'],
+        ['Diagnostic — Sort & Bucket', '../apps/tsa-sort-bucket/index.html?assessment=diagnostic'],
+        ['Checkpoint — Sort & Bucket', '../apps/tsa-sort-bucket/index.html?assessment=checkpoint'],
+        ['Diagnostic — Spot the Problem', '../apps/tsa-spot-the-problem/index.html?assessment=diagnostic'],
+        ['Checkpoint — Spot the Problem', '../apps/tsa-spot-the-problem/index.html?assessment=checkpoint'],
+        ['Diagnostic — Speak Concisely', '../apps/tsa-speak/index.html?version=diagnostic'],
+        ['Checkpoint — Speak Concisely', '../apps/tsa-speak/index.html?version=checkpoint'],
+        ['Act Confidently placeholder', '../apps/tsa-act-confidently/index.html'],
         ['Grocery List', '../apps/grocery-list/index.html'],
         ["Manager's messy notes", '../apps/messy-notes/index.html'],
         ['Rushed voice memo', '../apps/rushed-voice-memo/index.html'],
@@ -1290,6 +1305,12 @@
     document.getElementById('rerunSyncCheck')?.addEventListener('click', runSyncCheck);
     document.getElementById('hideSyncCheck')?.addEventListener('click', hideSyncCheckResults);
     document.getElementById('refreshVisibility')?.addEventListener('click', renderVisibilityStatus);
+    document.getElementById('showReadyAssessments')?.addEventListener('click', () => {
+      localStorage.setItem('utl_tsa_status', 'live');
+      localStorage.setItem('utl_tsa_diagnostic_status', 'live');
+      localStorage.setItem('utl_tsa_checkpoint_status', 'live');
+      window.location.reload();
+    });
 
     if (localStorage.getItem(AUTH_KEY) === 'true') {
       showAdmin();

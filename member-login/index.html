@@ -252,7 +252,8 @@
     }
 
     #phase1,
-    #phase3 {
+    #phase3,
+    #toolkit {
       background-color: #E8DFD1;
     }
 
@@ -1218,6 +1219,7 @@
                 <a href="#assessments" class="nav-item nav-item-results" data-section="assessments">Assessments</a>
                 <span class="nav-sep">·</span>
                 <a href="../my-results/index.html" class="nav-item nav-item-results">My results</a>
+                <a href="#toolkit" class="nav-item nav-item-results" data-section="toolkit">Toolkit</a>
               </div>
               <a href="#" class="nav-logout" id="logoutBtn">Log out</a>
             </div>
@@ -1436,10 +1438,10 @@
                 <div class="slides-placeholder is-collapsed"><!-- embed to be added --></div>
                 <article class="exercise-card ws-phase2-coming-soon-card">
                   <div class="card-type"><span class="ws-step-circle">3</span><span>Phase 2 | Speak Concisely</span></div>
-                  <div class="card-title">Advisory Board with AI</div>
+                  <div class="card-title">Advisory Board</div>
                   <div class="card-time">Stress-test your SCQA with a virtual advisory board.</div>
                   <div class="ws-card-actions">
-                    <button class="ws-coming-soon-button" type="button" disabled>Coming soon</button>
+                    <a class="ws-open-tool" href="../apps/advisory-board/index.html">Open tool</a>
                   </div>
                 </article>
               </div>
@@ -1452,10 +1454,10 @@
                 <div class="slides-placeholder is-collapsed"><!-- embed to be added --></div>
                 <article class="exercise-card ws-phase2-coming-soon-card">
                   <div class="card-type"><span class="ws-step-circle">4</span><span>Phase 2 | Speak Concisely</span></div>
-                  <div class="card-title">Email to Aiko</div>
-                  <div class="card-time">Write a clear, answer-first email using Minto's pyramid.</div>
+                  <div class="card-title">Think. Write. Speak.</div>
+                  <div class="card-time">Turn your SCQA into an answer-first email, then prepare to say it out loud.</div>
                   <div class="ws-card-actions">
-                    <button class="ws-coming-soon-button" type="button" disabled>Coming soon</button>
+                    <a class="ws-open-tool" href="../apps/think-write-speak/index.html">Open tool</a>
                   </div>
                 </article>
               </div>
@@ -1614,6 +1616,35 @@
                     </div>
                   </div>
                   <a href="../apps/tsa-checkpoint/index.html" class="tsa-assessment-btn">Start The Checkpoint</a>
+                </div>
+              </div>
+            </section>
+
+            <section id="toolkit" class="hub-section">
+              <div class="section-header">
+                <div>
+                  <div class="section-label">Toolkit</div>
+                  <div class="section-title">AI Prompt Toolkit</div>
+                </div>
+                <span class="optional-badge">Reference</span>
+              </div>
+
+              <p class="section-description">Use reusable AI prompts for issue trees, SCQA, decision-ready emails, and advisory boards. Keep this open as a reference while you work through the program.</p>
+
+              <div class="tsa-assessment-card">
+                <div class="tsa-assessment-inner">
+                  <div class="tsa-assessment-left">
+                    <div class="tsa-assessment-tag">Member tool</div>
+                    <div class="tsa-assessment-title">Open the Toolkit</div>
+                    <div class="tsa-assessment-sub">A reusable prompt library for the structured thinking and communication tools in the MA workspace.</div>
+                    <div class="tsa-assessment-chips">
+                      <span class="tsa-chip">Issue trees</span>
+                      <span class="tsa-chip">SCQA</span>
+                      <span class="tsa-chip">Decision-ready email</span>
+                      <span class="tsa-chip">Advisory board</span>
+                    </div>
+                  </div>
+                  <a href="../apps/toolkit/index.html" class="tsa-assessment-btn">Open Toolkit</a>
                 </div>
               </div>
             </section>
@@ -1788,15 +1819,23 @@
 
         assessmentsSection.style.display = '';
         assessmentsSection.style.opacity = status === 'placeholder' ? '.6' : '';
-        if (phase3Nudge) phase3Nudge.style.display = status === 'placeholder' ? 'none' : '';
+        var checkpointStatus = status === 'live' ? storedValue('utl_tsa_checkpoint_status', 'live') : 'placeholder';
+        if (phase3Nudge) phase3Nudge.style.display = checkpointStatus === 'live' ? '' : 'none';
 
         assessmentsSection.querySelectorAll('.tsa-assessment-card').forEach(function (card) {
-          var href = card.id === 'checkpoint-card' ? '../apps/tsa-checkpoint/index.html' : '../apps/tsa-diagnostic/index.html';
-          var label = card.id === 'checkpoint-card' ? 'Start The Checkpoint' : 'Start The Diagnostic';
+          var isCheckpoint = card.id === 'checkpoint-card';
+          var cardStatus = status === 'live'
+            ? storedValue(isCheckpoint ? 'utl_tsa_checkpoint_status' : 'utl_tsa_diagnostic_status', 'live')
+            : 'placeholder';
+          var href = isCheckpoint ? '../apps/tsa-checkpoint/index.html' : '../apps/tsa-diagnostic/index.html';
+          var label = isCheckpoint ? 'Start The Checkpoint' : 'Start The Diagnostic';
           var action = card.querySelector('.tsa-assessment-btn, .tsa-coming-soon');
           if (!action) return;
 
-          if (status === 'live') {
+          card.style.display = cardStatus === 'hidden' ? 'none' : '';
+          if (cardStatus === 'hidden') return;
+
+          if (cardStatus === 'live') {
             if (action.tagName.toLowerCase() !== 'a') {
               var link = document.createElement('a');
               link.href = href;
@@ -1822,7 +1861,7 @@
           missionCard.style.display = storedValue('utl_mission_card', 'show') === 'hide' ? 'none' : '';
         }
 
-        setTsaStatus(storedValue('utl_tsa_status', 'placeholder'));
+        setTsaStatus(storedValue('utl_tsa_status', 'live'));
         setPhaseStatus('phase1', storedValue('utl_phase1_status', 'live'));
         document.querySelectorAll('.slides-bar[data-embed-key], .slides-bar[data-slide-key]').forEach(configureEmbedBlock);
       }
@@ -1843,7 +1882,7 @@
         if (navObserver) {
           return;
         }
-        var sections = ['orientation', 'phase1', 'phase2', 'phase3', 'assessments']
+        var sections = ['orientation', 'phase1', 'phase2', 'phase3', 'assessments', 'toolkit']
           .map(function (id) { return document.getElementById(id); })
           .filter(Boolean);
 
