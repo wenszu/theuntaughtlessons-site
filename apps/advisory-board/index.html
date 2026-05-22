@@ -13,8 +13,8 @@ REUSE AUDIT
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Build a virtual advisory board and generate a structured AI prompt.">
-  <title>Advisory Board | The Untaught Lessons</title>
+  <meta name="description" content="Build a virtual advisory board with AI and generate a structured prompt.">
+  <title>Advisory board with AI | The Untaught Lessons</title>
   <link rel="icon" type="image/png" sizes="32x32" href="../../assets/favicon-bluebg-whitedoor-thicker-32.png?v=6">
   <link rel="shortcut icon" type="image/png" href="../../assets/favicon-bluebg-whitedoor-thicker-32.png?v=6">
   <link rel="apple-touch-icon" sizes="180x180" href="../../assets/apple-touch-icon.png?v=3">
@@ -288,6 +288,26 @@ REUSE AUDIT
       margin: 0;
       line-height: 1.65;
     }
+    .ab-qa-list {
+      display: grid;
+      gap: 14px;
+    }
+    .ab-qa-item {
+      border: 1px solid rgba(0,51,102,.14);
+      border-radius: 8px;
+      background: var(--ab-white);
+      padding: 16px;
+    }
+    .ab-qa-item h3 {
+      margin: 0 0 8px;
+      color: var(--ab-navy);
+      font-family: 'Playfair Display', serif;
+      font-size: 1.25rem;
+    }
+    .ab-qa-item p {
+      margin: 0;
+      line-height: 1.6;
+    }
     .ab-card-grid {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -408,7 +428,7 @@ REUSE AUDIT
   <header class="ab-header">
     <a class="ab-logo" href="../../index.html" aria-label="The Untaught Lessons home"><img src="../../assets/utl-logo-nav-white.png" alt="The Untaught Lessons"></a>
     <div class="ab-divider" aria-hidden="true"></div>
-    <div><span class="ab-kicker">PHASE 2 · SPEAK CONCISELY</span><span class="ab-title">Advisory Board</span></div>
+    <div><span class="ab-kicker">PHASE 2 · SPEAK CONCISELY</span><span class="ab-title">Advisory board with AI</span></div>
     <div class="ab-timer" aria-label="Elapsed time">
       <div class="ab-utility-metric" id="timerMetric">
         <div class="ab-utility-row">
@@ -426,69 +446,78 @@ REUSE AUDIT
   </header>
 
   <main class="ab-main">
-    <div class="ab-progress" id="progressText">Step 1 of 5</div>
+    <div class="ab-progress" id="progressText">Step 1 of 6</div>
 
     <section class="ab-screen ab-active" data-screen="1">
-      <div class="ab-hero"><h1>Your Work</h1><p>Paste your problem statement, issue tree, and SCQA below. If you haven't done those exercises yet, the example is already filled in — just keep going.</p></div>
+      <div class="ab-hero"><h1>Advisory board with AI</h1><p>Before you build one, it helps to understand what this tool is doing. Think of it as a structured way to ask AI for multiple perspectives without letting the conversation become noise.</p></div>
+      <div class="ab-panel ab-qa-list">
+        <div class="ab-qa-item"><h3>What is a virtual advisory board?</h3><p>A set of AI-generated advisors, each assigned a specific role. One thinks like a CFO. Another thinks like a customer. Another thinks like someone responsible for making the project actually work. AI is unusually good at this because you can tell it exactly who to be, and it will respond as that person would. You are not getting one generic answer. You are getting six different people reacting to the same work.</p></div>
+        <div class="ab-qa-item"><h3>Why does having multiple roles matter?</h3><p>Most people ask AI one broad question and get one broad answer. Giving AI a role changes the quality of what comes back. A CFO notices things a customer never would. A customer notices things an operator never would. When each advisor is locked into a specific lens, the feedback stops being general and starts being useful. You can weigh it, push back on it, and decide what actually applies.</p></div>
+        <div class="ab-qa-item"><h3>Who is the orchestrator?</h3><p>The orchestrator is not another advisor. They do not add another perspective to the pile. Their job is to listen to all the advisors, compare what they said, and decide what matters most. They are the person who turns a room full of opinions into one clear direction.</p></div>
+        <div class="ab-qa-item"><h3>Why does someone need to make the final call?</h3><p>More advice can create more confusion. The advisors give you breadth. The orchestrator gives you a decision. Without someone responsible for the final call, you end up with a long list of things to fix and no way to prioritize. The orchestrator is the process having a spine.</p></div>
+        <div class="ab-qa-item"><h3>How do I choose my orchestrator?</h3><p>You can choose someone who thinks like you when the decision is yours to own. You can also choose the person best suited to the problem, even if they think differently from you. The key question is simple: do you need your best decision here, or the best decision for this specific problem? Those are not always the same answer.</p></div>
+        <div class="ab-qa-item"><h3>How do I get the most out of this?</h3><p>Give the board something real to react to. In this exercise, you will give each advisor a problem statement, an issue tree, and an SCQA. They will each respond from their assigned role. Your job is not to accept every comment. Your job is to decide which feedback sharpens the work and which feedback you can set aside.</p></div>
+      </div>
+      <div class="ab-button-row"><button class="ab-button ab-gold" data-next type="button">Continue</button></div>
+    </section>
+
+    <section class="ab-screen" data-screen="2">
+      <div class="ab-hero"><h1>Example work</h1><p>To make the virtual board useful, we need to give it something concrete to review. This example uses the Olympics issue tree and SCQA from the earlier Phase 2 exercises. You can use this as a model for how to package your own work later.</p><p>The board will use the problem statement to understand the topic, the issue tree to inspect the logic, and the SCQA to judge whether the recommendation lands clearly.</p></div>
       <div class="ab-panel ab-work-grid">
-        <div><div class="ab-field-head"><span class="ab-label">Problem Statement</span><button class="ab-small-button" data-copy-target="problemText" type="button">Copy</button></div><textarea class="ab-textarea" id="problemText">Why is the Olympics losing its cultural impact?
+        <div><div class="ab-field-head"><span class="ab-label">Problem Statement</span></div><textarea class="ab-textarea" id="problemText">Why is the Olympics losing its cultural impact?
 
 The Olympics has historically been one of the most unifying global events. However, recent games have struggled to capture the same cultural relevance, sustained attention, and emotional connection with audiences.</textarea></div>
-        <div><div class="ab-field-head"><span class="ab-label">Issue Tree</span><button class="ab-small-button" data-copy-target="treeText" type="button">Copy</button></div><textarea class="ab-textarea" id="treeText">Central question: Why is the Olympics losing its magic?
+        <div><div class="ab-field-head"><span class="ab-label">Issue Tree</span></div><textarea class="ab-textarea" id="treeText">Central question: Why is the Olympics losing its magic?
 
 Argument 1: Shared ritual is breaking
-- Fragmented attention: no single shared moment; audiences split across platforms, time zones, and competing world stages
-- Broadcast-first packaging: still feels like a TV event while audiences consume culturally through feeds and communities
-- Highlights over attendance: people catch up later, so the Games lose the live collective timestamp feeling
+Fragmented attention: There is no single shared moment because audiences are split across platforms, time zones, and competing world stages.
+Broadcast-first packaging: The Olympics still feels like a TV event while audiences now consume culture through feeds and communities.
+Highlights over attendance: People catch up later, so the Games lose the live collective timestamp feeling.
 
 Argument 2: Meaning is getting replaced by moment-chasing
-- Clip culture: short-form rewards shock, controversy, and spectacle; meaning needs arcs and buildup
-- Moment-chasing storytelling: highlights and virality outshine training, stakes, and excellence
-- Winners aren't legible: without consistent athlete-led arcs, audiences don't feel the personal stakes behind excellence
+Clip culture: Short-form content rewards shock, controversy, and spectacle while meaning needs arcs and buildup.
+Moment-chasing storytelling: Highlights and virality outshine training, stakes, and excellence.
+Winners are not legible: Without consistent athlete-led arcs, audiences do not feel the personal stakes behind excellence.
 
 Argument 3: Legitimacy and tone are getting noisier
-- Trust volatility: politics and polarization make the Olympics feel biased or contested
-- Sensitivity: generic unity messaging can land as tone-deaf in a fractured world
-- Over-commercialization signal: sponsorship and ad load makes the Games feel monetized rather than earned</textarea></div>
-        <div><div class="ab-field-head"><span class="ab-label">SCQA</span><button class="ab-small-button" data-copy-target="scqaText" type="button">Copy</button></div><textarea class="ab-textarea" id="scqaText">Situation: The Olympics has been one of the most unifying global events for over a century, with billions tuning in across generations.
+Trust volatility: Politics and polarization make the Olympics feel biased or contested.
+Sensitivity risk: Generic unity messaging can land as tone-deaf in a fractured world.
+Commercialization signal: Sponsorship and ad load can make the Games feel monetized rather than earned.</textarea></div>
+        <div><div class="ab-field-head"><span class="ab-label">SCQA</span></div><textarea class="ab-textarea" id="scqaText">Situation: The Olympics has been one of the most unifying global events for over a century, with billions tuning in across generations.
 
 Complication: Despite its legacy, recent Games have failed to hold the same cultural weight. Audiences are fragmented, emotional connection is weaker, and the event no longer commands the shared attention it once did.
 
 Question: How can the Olympics reclaim its cultural relevance in a world of fractured attention and eroded trust?
 
-Answer: The Olympics needs a clarity layer — structured daily viewing routes, narrative-driven athlete coverage, and a tone and partnership system that reduces trust volatility and over-commercialization.</textarea></div>
-        <div class="ab-button-row"><button class="ab-button ab-gold" id="copyAllBtn" type="button">Copy all + continue</button><button class="ab-link-button" data-next type="button">Next</button></div>
+Answer: The Olympics needs a clarity layer with structured daily viewing routes, narrative-driven athlete coverage, and a tone and partnership system that reduces trust volatility and over-commercialization.</textarea></div>
+        <div class="ab-button-row"><button class="ab-button ab-gold" id="copyAllBtn" type="button">Copy all and continue</button></div>
       </div>
-    </section>
-
-    <section class="ab-screen" data-screen="2">
-      <div class="ab-hero"><h1>Build Your Board</h1></div>
-      <div class="ab-panel ab-education">
-        <div><h2>What is the Orchestrator?</h2><p>Every advisory board needs someone whose job is not to add another opinion to the pile. Their job is to listen to all of it and then make a call. Not find the middle ground between everyone, not summarize what the room said, but actually decide what the right move is and say it clearly.</p><p>That is what the Orchestrator does. They sit above the debate, let the advisors do their work, and when the session is over, they are the one who tells you what to prioritize and what to do next.</p></div>
-        <div><h2>There are two ways to think about who that person should be.</h2><p>The first is to make the Orchestrator a version of yourself. You choose someone whose decision-making instincts, values, and way of weighing tradeoffs are close to yours. The reason this works is not because you want agreement. Your advisors will still push back hard. But at the end of the session, you want a final verdict that reflects how you would actually move in real life, not just what the loudest voice in the room concluded. This approach is especially useful when the decision ultimately belongs to you and you want to pressure-test your own thinking before you commit.</p><p>The second approach is to ask a completely different question: who is the most qualified person in the world to make this specific call, regardless of whether they think like you? If you are working through a consumer hardware product, you might put Steve Jobs in the Orchestrator seat. Your advisors still represent finance, legal, operations, the end user, and they each bring their own challenge. But when all of that input has been heard, Jobs is the one who weighs it through the lens of what makes a product genuinely great. His final verdict carries the authority of someone who has navigated exactly this kind of tension before and knows what actually matters.</p><p>Neither approach is better than the other. The question worth asking yourself before you choose is whether you need clarity on what you would do, or whether you need the best possible decision for this particular problem regardless of whose instincts it reflects.</p><p>One thing stays consistent no matter who you choose. The Orchestrator does not participate in the advisory session itself. They observe and let each voice make its case without interruption. Their role only begins when everyone else has finished, and when they speak, they are not recapping the conversation but closing it with a direction.</p></div>
-      </div>
-      <div class="ab-panel" id="savedBanner" hidden><strong>You have a saved board.</strong> Pre-selected below — swap any member out if this problem needs a different perspective.</div>
-      <div class="ab-panel"><div class="ab-label">Select at least 3 advisors — you can add more</div><div class="ab-card-grid" id="advisorGrid"></div></div>
-      <div class="ab-panel"><div class="ab-label">Now choose your Orchestrator — this person makes the final call</div><div class="ab-card-grid" id="orchestratorGrid"></div><p class="ab-note" id="roleNote"></p><div class="ab-button-row"><button class="ab-button ab-gold" id="buildPromptBtn" type="button" disabled>Build my prompt</button></div><p class="ab-error" id="boardError">Select at least 3 advisors and 1 orchestrator first.</p></div>
     </section>
 
     <section class="ab-screen" data-screen="3">
-      <div class="ab-hero"><h1>Your Prompt is Ready</h1><p>Copy it and paste it into any AI tool — Claude, ChatGPT, Gemini, or any other you already use.</p></div>
-      <div class="ab-two-col">
-        <div class="ab-panel"><div class="ab-label">Option A — Run your board</div><p>You have built your board. This prompt packages everything — your work, your advisors, and the output format — so your AI tool knows exactly what to do.</p><textarea class="ab-prompt-box" id="modeAPrompt" readonly></textarea><button class="ab-button ab-gold" data-copy-target="modeAPrompt" type="button">Copy prompt</button></div>
-        <div class="ab-panel"><div class="ab-label">Option B — Build your board with AI first</div><p>Not sure who should be on your panel? Paste this prompt into your AI tool. It will recommend a board of six suited to your specific problem — then come back and add them as custom advisors.</p><textarea class="ab-prompt-box" id="modeBPrompt" readonly></textarea><button class="ab-button ab-gold" data-copy-target="modeBPrompt" type="button">Copy prompt</button></div>
-      </div>
-      <div class="ab-button-row"><button class="ab-button ab-gold" data-next type="button">Next</button></div>
+      <div class="ab-hero"><h1>Build your virtual board</h1><p>Choose the advisors who will pressure-test the work, then choose one orchestrator who will make the final call after everyone has spoken.</p></div>
+      <div class="ab-panel" id="savedBanner" hidden><strong>You have a saved board.</strong> It is pre-selected below. Swap anyone out if this problem needs a different perspective.</div>
+      <div class="ab-panel"><div class="ab-label">Select at least 3 advisors. You can add more.</div><div class="ab-card-grid" id="advisorGrid"></div></div>
+      <div class="ab-panel"><div class="ab-label">Now choose your orchestrator. This person makes the final call.</div><div class="ab-card-grid" id="orchestratorGrid"></div><p class="ab-note" id="roleNote"></p><div class="ab-button-row"><button class="ab-button ab-gold" id="buildPromptBtn" type="button" disabled>Build my prompt</button></div><p class="ab-error" id="boardError">Select at least 3 advisors and 1 orchestrator first.</p></div>
     </section>
 
     <section class="ab-screen" data-screen="4">
-      <div class="ab-hero"><h1>Paste Your Output</h1><p>Run the prompt in your AI tool, then paste the full output here.</p></div>
-      <div class="ab-panel"><textarea class="ab-textarea" id="aiOutput" style="min-height:300px" placeholder="Paste the full advisory board output from your AI tool here..."></textarea><div class="ab-button-row"><button class="ab-button ab-gold" id="organizeBtn" type="button">Organize my board</button></div><p class="ab-error" id="parseError">We couldn't organize this automatically. You can still read your output above and copy what you need.</p><div id="parsedOutput"></div></div>
-      <div class="ab-button-row"><button class="ab-button ab-gold" data-next type="button">Next</button></div>
+      <div class="ab-hero"><h1>Your prompt is ready</h1><p>Copy it and paste it into any AI tool such as Claude, ChatGPT, Gemini, or any other tool you already use.</p></div>
+      <div class="ab-two-col">
+        <div class="ab-panel"><div class="ab-label">Option A. Run your board</div><p>You have built your board. This prompt packages your work, your advisors, and the output format so your AI tool knows exactly what to do.</p><textarea class="ab-prompt-box" id="modeAPrompt" readonly></textarea><button class="ab-button ab-gold" data-copy-target="modeAPrompt" type="button">Copy prompt</button></div>
+        <div class="ab-panel"><div class="ab-label">Option B. Build your board with AI first</div><p>Not sure who should be on your panel? Paste this prompt into your AI tool. It will recommend a board of six suited to your specific problem. Then come back and add them as custom advisors.</p><textarea class="ab-prompt-box" id="modeBPrompt" readonly></textarea><button class="ab-button ab-gold" data-copy-target="modeBPrompt" type="button">Copy prompt</button></div>
+      </div>
+      <div class="ab-button-row"><button class="ab-button ab-gold" data-next type="button">Continue</button></div>
     </section>
 
     <section class="ab-screen" data-screen="5">
-      <div class="ab-hero"><h1>Save Your Board</h1><p>You just ran your first advisory board. The most effective leaders keep one on standby — a trusted panel they can bring to any problem, not just this one.</p></div>
+      <div class="ab-hero"><h1>Paste your output</h1><p>Run the prompt in your AI tool, then paste the full output here.</p></div>
+      <div class="ab-panel"><textarea class="ab-textarea" id="aiOutput" style="min-height:300px" placeholder="Paste the full advisory board output from your AI tool here..."></textarea><div class="ab-button-row"><button class="ab-button ab-gold" id="organizeBtn" type="button">Organize my board</button></div><p class="ab-error" id="parseError">We couldn't organize this automatically. You can still read your output above and copy what you need.</p><div id="parsedOutput"></div></div>
+      <div class="ab-button-row"><button class="ab-button ab-gold" data-next type="button">Continue</button></div>
+    </section>
+
+    <section class="ab-screen" data-screen="6">
+      <div class="ab-hero"><h1>Save your board</h1><p>You just ran your first advisory board. The most effective leaders keep one on standby. It becomes a trusted panel they can bring to any problem, not just this one.</p></div>
       <div class="ab-panel"><h2>Save this board</h2><div class="ab-chip-row" id="summaryChips"></div><div class="ab-button-row"><button class="ab-button ab-gold" id="saveBoardBtn" type="button">Save as my default board</button></div><p class="ab-note">Next time you open this app, your board will be pre-selected. You can always swap individual members out for a new problem.</p></div>
       <div class="ab-panel"><h2>Build a new board</h2><button class="ab-button" id="newBoardBtn" type="button">Build a different board</button></div>
     </section>
@@ -519,7 +548,7 @@ Answer: The Olympics needs a clarity layer — structured daily viewing routes, 
     function showScreen(number) {
       currentScreen = number;
       document.querySelectorAll('.ab-screen').forEach(screen => screen.classList.toggle('ab-active', screen.dataset.screen === String(number)));
-      $('progressText').textContent = `Step ${number} of 5`;
+      $('progressText').textContent = `Step ${number} of 6`;
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
     function fallbackCopy(text) {
@@ -582,21 +611,17 @@ Answer: The Olympics needs a clarity layer — structured daily viewing routes, 
       addCustomCard(advisorGrid, 'advisor');
       board.forEach(person => orchestratorGrid.appendChild(advisorCard(person, 'orchestrator')));
       addCustomCard(orchestratorGrid, 'orchestrator');
-      $('roleNote').textContent = selectedAdvisors.has(orchestratorId) ? 'This person is already on your board as an advisor. Choose a different Orchestrator or swap their role.' : '';
+      $('roleNote').textContent = selectedAdvisors.has(orchestratorId) ? 'This person is already on your board as an advisor. Choose a different orchestrator or swap their role.' : '';
       $('buildPromptBtn').disabled = selectedAdvisors.size < 3 || !orchestratorId || selectedAdvisors.has(orchestratorId);
     }
     function selectedPeople() { return board.filter(person => selectedAdvisors.has(person.id)); }
     function orchestrator() { return board.find(person => person.id === orchestratorId); }
     function buildModeA() {
-      return `You are facilitating a structured advisory board session. Your job is to simulate a panel of expert advisors reviewing a piece of work, then deliver a final verdict from the Orchestrator.
-
----
+      return `You are facilitating a structured advisory board session. Your job is to simulate a panel of expert advisors reviewing a piece of work, then deliver a final verdict from the orchestrator.
 
 CONTEXT
 
 ${$('problemText').value}
-
----
 
 THE WORK BEING REVIEWED
 
@@ -606,13 +631,9 @@ ${$('treeText').value}
 SCQA:
 ${$('scqaText').value}
 
----
-
 THE ADVISORY BOARD
 
-${selectedPeople().map(person => `Advisor: ${person.name}\nRole lens: ${person.lens}\nHow they challenge: ${person.description}`).join('\n\n---\n\n')}
-
----
+${selectedPeople().map(person => `Advisor: ${person.name}\nRole lens: ${person.lens}\nHow they challenge: ${person.description}`).join('\n\n')}
 
 THE ORCHESTRATOR
 
@@ -620,27 +641,25 @@ Orchestrator: ${orchestrator().name}
 Role lens: ${orchestrator().lens}
 How they decide: ${orchestrator().description}
 
-The Orchestrator does not speak during the advisory session. They observe and listen to all advisor input before delivering the final verdict.
-
----
+The orchestrator does not speak during the advisory session. They observe and listen to all advisor input before delivering the final verdict.
 
 INSTRUCTIONS
 
-Step 1: Have each advisor review both the issue tree and the SCQA. For each advisor:
+Step 1: Have each advisor review both the issue tree and the SCQA. For each advisor, use this format:
 
 ADVISOR NAME
 What I like: [max 2 points]
 What I would challenge or cut: [max 2 points]
 What I recommend: [max 2 points]
 
-Step 2: After all advisors have responded, the Orchestrator delivers:
+Step 2: After all advisors have responded, the orchestrator delivers:
 
-ORCHESTRATOR VERDICT — ${orchestrator().name}
-Synthesis: [2–3 sentences summarizing key tensions and agreements]
-Final decision: [1–2 sentences stating clearly what should be prioritized or changed]
+ORCHESTRATOR VERDICT: ${orchestrator().name}
+Synthesis: [2 to 3 sentences summarizing key tensions and agreements]
+Final decision: [1 to 2 sentences stating clearly what should be prioritized or changed]
 Recommended next step: [One specific, actionable next step]
 
-Stay in character for each voice. Do not blend advisor perspectives. The Orchestrator makes a call, not a summary.`;
+Stay in character for each voice. Do not blend advisor perspectives. The orchestrator makes a call, not a summary.`;
     }
     function buildModeB() {
       return `I need help designing a virtual advisory board for the following problem:
@@ -649,14 +668,14 @@ ${$('problemText').value}
 
 My goal is to stress-test my thinking, identify blind spots, and get a final recommendation I can act on.
 
-Please recommend a panel of 6 people — 5 advisors and 1 orchestrator — specifically suited to this problem. For each person provide:
+Please recommend a panel of 6 people: 5 advisors and 1 orchestrator, specifically suited to this problem. For each person provide:
 
 1. Name or persona (real person, named archetype, or role-based persona)
-2. Role lens (short phrase — e.g. "Customer obsession / long-term systems")
-3. Why they are right for this problem (2–3 sentences specific to the problem above)
-4. What they are most likely to challenge (1–2 sentences)
+2. Role lens (short phrase, for example "Customer obsession / long-term systems")
+3. Why they are right for this problem (2 to 3 sentences specific to the problem above)
+4. What they are most likely to challenge (1 to 2 sentences)
 
-For the Orchestrator, explain why this person is the right one to make the final call on this type of problem.
+For the orchestrator, explain why this person is the right one to make the final call on this type of problem.
 
 Return your recommendations in a clean list format I can easily read and act on.`;
     }
@@ -673,7 +692,7 @@ Return your recommendations in a clean list format I can easily read and act on.
         const like = challengeParts[0] || '';
         const recommendParts = (challengeParts[1] || '').split('What I recommend:');
         return `<div class="ab-output-card"><h3>Advisor ${index + 1}</h3><p><strong>What I like:</strong> ${like.trim()}</p><p><strong>What I would challenge:</strong> ${(recommendParts[0] || '').replace(':','').trim()}</p><p><strong>What I recommend:</strong> ${(recommendParts[1] || '').trim()}</p></div>`;
-      }).join('')}</div><div class="ab-verdict" id="verdictBlock"><h2>Orchestrator Verdict</h2><p>${verdict.trim().replace(/\n/g, '<br>')}</p></div><button class="ab-button ab-gold" id="copySummaryBtn" type="button">Copy summary</button>`;
+      }).join('')}</div><div class="ab-verdict" id="verdictBlock"><h2>Orchestrator verdict</h2><p>${verdict.trim().replace(/\n/g, '<br>')}</p></div><button class="ab-button ab-gold" id="copySummaryBtn" type="button">Copy summary</button>`;
       $('copySummaryBtn').addEventListener('click', event => copyText(verdict.trim(), event.target));
     }
     function updateSummary() {
@@ -703,11 +722,11 @@ Return your recommendations in a clean list format I can easily read and act on.
 
     document.querySelectorAll('[data-copy-target]').forEach(button => button.addEventListener('click', () => copyText($(button.dataset.copyTarget).value, button)));
     document.querySelectorAll('[data-next]').forEach(button => button.addEventListener('click', () => showScreen(currentScreen + 1)));
-    $('copyAllBtn').addEventListener('click', event => { copyText(`Problem Statement\n${$('problemText').value}\n\nIssue Tree\n${$('treeText').value}\n\nSCQA\n${$('scqaText').value}`, event.target); showScreen(2); });
-    $('buildPromptBtn').addEventListener('click', () => { $('boardError').classList.remove('ab-show'); if ($('buildPromptBtn').disabled) { $('boardError').classList.add('ab-show'); return; } $('modeAPrompt').value = buildModeA(); $('modeBPrompt').value = buildModeB(); showScreen(3); });
+    $('copyAllBtn').addEventListener('click', event => { copyText(`Problem Statement\n${$('problemText').value}\n\nIssue Tree\n${$('treeText').value}\n\nSCQA\n${$('scqaText').value}`, event.target); showScreen(3); });
+    $('buildPromptBtn').addEventListener('click', () => { $('boardError').classList.remove('ab-show'); if ($('buildPromptBtn').disabled) { $('boardError').classList.add('ab-show'); return; } $('modeAPrompt').value = buildModeA(); $('modeBPrompt').value = buildModeB(); showScreen(4); });
     $('organizeBtn').addEventListener('click', organizeOutput);
     $('saveBoardBtn').addEventListener('click', event => { localStorage.setItem('utl-advisory-board-default', JSON.stringify({ advisors: [...selectedAdvisors], orchestrator: orchestratorId })); copyText('Board saved', event.target); });
-    $('newBoardBtn').addEventListener('click', () => { selectedAdvisors.clear(); orchestratorId = ''; renderBoard(); showScreen(2); });
+    $('newBoardBtn').addEventListener('click', () => { selectedAdvisors.clear(); orchestratorId = ''; renderBoard(); showScreen(3); });
     $('timerPauseIconBtn').addEventListener('click', pauseTimer);
     $('timerPlayIconBtn').addEventListener('click', () => timerStarted ? startTimer() : startTimer());
     $('timerResetIconBtn').addEventListener('click', resetTimer);

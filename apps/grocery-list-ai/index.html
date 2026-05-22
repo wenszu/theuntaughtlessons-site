@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="A member practice tool for using AI to organize an offsite supply list into clear MECE buckets." />
+  <title>Grocery List with AI</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="../../assets/favicon-bluebg-whitedoor-thicker-32.png?v=6">
+  <link rel="shortcut icon" type="image/png" href="../../assets/favicon-bluebg-whitedoor-thicker-32.png?v=6">
+  <link rel="apple-touch-icon" sizes="180x180" href="../../assets/apple-touch-icon.png?v=3">
+  <link rel="stylesheet" href="../../styles.css">
+  <link rel="stylesheet" href="../shared/activity-timer.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lato:wght@300;400;700&family=Roboto+Mono:wght@400;500&display=swap');
+
+    :root {
+      --bg: #F3EDE2;
+      --navy: #003366;
+      --gold: #EEA320;
+      --charcoal: #4A4A4A;
+      --steel: #4D7094;
+      --white: #fff;
+      --line: rgba(0, 51, 102, 0.18);
+      --shadow: 0 10px 26px rgba(0, 51, 102, 0.08);
+      --radius: 14px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: 'Lato', sans-serif;
+      color: var(--charcoal);
+      background: var(--bg);
+    }
+
+    button,
+    textarea {
+      font: inherit;
+    }
+
+    .app-header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: grid;
+      grid-template-columns: auto auto minmax(220px, 1fr) auto;
+      align-items: center;
+      column-gap: 20px;
+      min-height: 76px;
+      padding: 12px 32px;
+      background: var(--navy);
+      color: var(--white);
+    }
+
+    .brand-logo-frame {
+      display: block;
+      width: 224px;
+      height: 46px;
+    }
+
+    .brand-logo-frame img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .brand-divider {
+      width: 1px;
+      height: 38px;
+      background: rgba(255, 255, 255, .42);
+    }
+
+    .app-kicker {
+      display: block;
+      color: var(--gold);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+
+    .app-title {
+      display: block;
+      margin-top: 3px;
+      color: var(--white);
+      font-family: 'Playfair Display', serif;
+      font-size: 27px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .app-timer {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    .timer-compat { display: none; }
+
+    .utility-metric {
+      min-width: 148px;
+      padding: 7px 10px;
+      border: 1px solid rgba(255, 255, 255, .18);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, .08);
+    }
+
+    .utility-label-row,
+    .utility-metric-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .utility-metric .small-label { color: var(--gold); }
+
+    .utility-metric .activity-timer-display {
+      color: var(--white);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 18px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .utility-metric.time-hidden .activity-timer-display {
+      visibility: hidden;
+    }
+
+    .utility-metric .activity-timer-display.over-target {
+      color: var(--gold);
+    }
+
+    .metric-hide-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      border: 1px solid rgba(255, 255, 255, .32);
+      border-radius: 50%;
+      background: rgba(255, 255, 255, .08);
+      color: var(--white);
+      cursor: pointer;
+      font-size: 11px;
+      line-height: 1;
+      padding: 0;
+    }
+
+    .metric-hide-btn svg {
+      width: 14px;
+      height: 14px;
+      stroke-width: 2.2;
+    }
+
+    .metric-hide-btn:hover,
+    .icon-timer-btn:hover {
+      background: rgba(255, 255, 255, .16);
+    }
+
+    .utility-controls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .icon-timer-btn {
+      width: 34px;
+      height: 34px;
+      border: 1px solid rgba(255, 255, 255, .3);
+      border-radius: 50%;
+      background: rgba(255, 255, 255, .08);
+      color: var(--white);
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: 700;
+      line-height: 1;
+      padding: 0;
+    }
+
+    .icon-timer-btn.reset { font-size: 21px; }
+    .icon-timer-btn:disabled { cursor: not-allowed; opacity: .45; }
+
+    .page {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 32px 20px 44px;
+    }
+
+    h1,
+    h2,
+    h3 {
+      font-family: 'Playfair Display', serif;
+      color: var(--navy);
+      margin-top: 0;
+    }
+
+    .header {
+      margin-bottom: 22px;
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 14px;
+    }
+
+    .header h1 {
+      font-size: clamp(1.8rem, 3vw, 2.4rem);
+      margin-bottom: 8px;
+    }
+
+    .header p {
+      margin: 0;
+      max-width: 75ch;
+      line-height: 1.45;
+    }
+
+    .small-label {
+      display: block;
+      color: #6e7785;
+      font-size: .74rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      font-weight: 700;
+      margin-bottom: 7px;
+    }
+
+    .panel {
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .panel-head {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .panel-head h2 {
+      margin: 0;
+      font-size: 1.25rem;
+    }
+
+    .panel-body { padding: 16px; }
+
+    .story-card,
+    .source-card,
+    .takeaway-card {
+      border: 1px solid rgba(0, 51, 102, .18);
+      border-radius: 12px;
+      background: linear-gradient(180deg, rgba(243, 237, 226, .72), rgba(255, 255, 255, .96));
+      padding: 16px;
+      line-height: 1.55;
+    }
+
+    .source-card {
+      display: grid;
+      gap: 12px;
+      margin-top: 16px;
+      margin-bottom: 18px;
+    }
+
+    .supply-list {
+      margin: 0;
+      color: var(--navy);
+      font-weight: 700;
+    }
+
+    .screen {
+      display: grid;
+      gap: 18px;
+    }
+
+    .screen.hidden { display: none; }
+
+    .hidden { display: none; }
+
+    .prompt-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .prompt-card {
+      display: flex;
+      flex-direction: column;
+      min-height: 100%;
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px;
+    }
+
+    .prompt-card h3 {
+      margin-bottom: 4px;
+      font-size: 1.2rem;
+    }
+
+    .prompt-description {
+      margin: 0 0 12px;
+      color: var(--steel);
+      font-size: .92rem;
+      line-height: 1.45;
+    }
+
+    .prompt-text {
+      flex: 1;
+      min-height: 340px;
+      margin: 0 0 14px;
+      padding: 13px;
+      border: 1px solid rgba(0, 51, 102, .16);
+      border-radius: 10px;
+      background: #FAF8F3;
+      color: var(--charcoal);
+      font-family: 'Lato', sans-serif;
+      font-size: .93rem;
+      line-height: 1.5;
+      white-space: pre-wrap;
+    }
+
+    .prompt-text strong {
+      color: var(--navy);
+    }
+
+    .response-area {
+      width: 100%;
+      min-height: 260px;
+      border: 1px solid rgba(0, 51, 102, .2);
+      border-radius: 12px;
+      padding: 14px;
+      resize: vertical;
+      font-family: inherit;
+      font-size: 1rem;
+      line-height: 1.5;
+    }
+
+    .response-area:focus,
+    button:focus-visible {
+      outline: 3px solid rgba(238, 163, 32, .35);
+      outline-offset: 2px;
+    }
+
+    .buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    button,
+    .button-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--navy);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--navy);
+      padding: 9px 12px;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    button.primary,
+    .button-link.primary {
+      background: var(--navy);
+      color: #fff;
+      border-color: var(--navy);
+    }
+
+    button.gold,
+    .button-link.gold {
+      background: var(--gold);
+      border-color: var(--gold);
+      color: #2e2107;
+    }
+
+    button:disabled {
+      opacity: .45;
+      cursor: not-allowed;
+    }
+
+    .takeaway-grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    .takeaway-card p {
+      margin: 0;
+      line-height: 1.55;
+    }
+
+    .completion-save-notice {
+      background: #F3EDE2;
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-top: 1rem;
+    }
+
+    .save-notice-text {
+      font-family: 'Lato', sans-serif;
+      font-size: 13px;
+      color: #003366;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+
+    .save-notice-link {
+      color: #EEA320;
+      text-decoration: none;
+      font-weight: 500;
+      margin-left: 4px;
+    }
+
+    .save-notice-link:hover { text-decoration: underline; }
+
+    .small {
+      font-size: .9rem;
+      color: #5e5e5e;
+    }
+
+    @media (max-width: 980px) {
+      .app-header {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+
+      .brand-divider { display: none; }
+
+      .app-timer {
+        justify-content: flex-start;
+        flex-wrap: wrap;
+      }
+
+      .prompt-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .prompt-text {
+        min-height: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="app-header">
+    <a class="brand-logo-frame" href="../../index.html" aria-label="The Untaught Lessons homepage">
+      <img src="../../assets/utl-logo-nav-white.png" alt="The Untaught Lessons">
+    </a>
+    <div class="brand-divider" aria-hidden="true"></div>
+    <div>
+      <span class="app-kicker">Phase 1 · Think Clearly</span>
+      <span class="app-title">Grocery List with AI</span>
+    </div>
+    <div class="app-timer" aria-label="Elapsed time">
+      <div class="utility-metric" id="timerMetric">
+        <div class="utility-label-row">
+          <span class="small-label">Elapsed time</span>
+          <button class="metric-hide-btn" id="timerMetricToggleBtn" type="button" aria-label="Hide elapsed time" aria-pressed="false"></button>
+        </div>
+        <div class="utility-metric-row">
+          <div class="activity-timer-display" id="timerDisplay">00:00</div>
+        </div>
+      </div>
+      <div class="utility-controls">
+        <button class="icon-timer-btn" id="timerPauseIconBtn" type="button" aria-label="Pause timer">⏸</button>
+        <button class="icon-timer-btn" id="timerPlayIconBtn" type="button" aria-label="Start timer">▶</button>
+        <button class="icon-timer-btn reset" id="timerResetIconBtn" type="button" aria-label="Reset timer">↺</button>
+      </div>
+      <div class="activity-timer-row minimized timer-compat" id="timerRow">
+        <div class="activity-timer-main">
+          <span class="small-label">Elapsed time</span>
+        </div>
+        <div>
+          <p class="activity-timer-note" id="timerNote">Timer starts when you begin using the AI prompt. Target: 5 minutes.</p>
+          <div class="activity-timer-controls">
+            <button id="toggleTimerBtn" type="button">Hide timer</button>
+            <button id="startTimerBtn" type="button">Start</button>
+            <button id="pauseTimerBtn" type="button" disabled>Pause</button>
+            <button id="resumeTimerBtn" type="button" class="hidden">Resume</button>
+            <button id="resetTimerBtn" type="button">Reset timer</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main id="content" class="page">
+    <header class="header">
+      <h1>Grocery List with AI</h1>
+      <p>Practice using AI without outsourcing your judgment. Your job is to compare different MECE structures and decide whether the output is actually clean.</p>
+    </header>
+
+    <section class="screen" data-screen="1">
+      <article class="panel">
+        <div class="panel-head">
+          <div>
+            <span class="small-label">Your task</span>
+            <h2>Organize Aiko’s offsite list</h2>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="story-card">
+            <p>You just got off a call with Aiko. She's hosting the MA team offsite next week and needs someone to organize the supply list her assistant threw together. It's a mess. She wants it bucketed cleanly before she reviews vendors. You've already practiced MECE bucketing by hand. Now try it with AI.</p>
+          </div>
+          <div class="source-card">
+            <span class="small-label">Supply list</span>
+            <p class="supply-list" id="supplyListText"></p>
+          </div>
+          <div>
+            <span class="small-label">Pick a prompt angle</span>
+            <h2>Choose the logic you want AI to follow</h2>
+          </div>
+          <p>Each prompt organizes the same list by a different logic. Copy one and paste it into your AI tool. If you have time, try two and compare.</p>
+          <div class="prompt-grid" id="promptGrid"></div>
+          <div class="buttons">
+            <a class="button-link" href="../../member-login/index.html">Back to workspace</a>
+            <button type="button" class="primary" data-next="2">I’ve tried it. Continue</button>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <section class="screen hidden" data-screen="2">
+      <article class="panel">
+        <div class="panel-head">
+          <div>
+            <span class="small-label">Reflect</span>
+            <h2>Judge the output</h2>
+          </div>
+        </div>
+        <div class="panel-body">
+          <p><strong>Did the AI output feel MECE to you? Was anything bucketed in a way you would have done differently?</strong></p>
+          <textarea id="reflectionText" class="response-area" placeholder="Write your thoughts here..."></textarea>
+          <p class="small" id="reflectionHint">Minimum 20 characters to continue.</p>
+          <div class="buttons">
+            <button type="button" data-back="1">Back</button>
+            <button type="button" class="primary" id="reflectionContinueBtn" data-next="3" disabled>Continue</button>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <section class="screen hidden" data-screen="3">
+      <article class="panel">
+        <div class="panel-head">
+          <div>
+            <span class="small-label">The takeaway</span>
+            <h2>AI makes your structure visible</h2>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="takeaway-grid">
+            <div class="takeaway-card">
+              <p><strong>The prompt shapes the structure.</strong> Each prompt angle produces a valid but different MECE output because MECE isn't one right answer. It is a discipline.</p>
+            </div>
+            <div class="takeaway-card">
+              <p><strong>AI follows your logic, not its own.</strong> The quality of the buckets reflects the clarity of your instructions. Weak prompt, weak structure.</p>
+            </div>
+            <div class="takeaway-card">
+              <p><strong>Your job isn't to prompt.</strong> Your job is to judge. The executive skill is knowing whether the output is actually MECE, not just whether it looks clean.</p>
+            </div>
+          </div>
+          <div class="completion-save-notice">
+            <div class="save-notice-text">Progress is saved in the member workspace when you mark this exercise done.</div>
+          </div>
+          <div class="buttons">
+            <button type="button" data-back="2">Back</button>
+            <a class="button-link primary" href="../../member-login/index.html">Back to workspace</a>
+          </div>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <script src="../shared/activity-timer.js"></script>
+  <script>
+    const SUPPLY_ITEMS = [
+      'Bottled water',
+      'Flip chart paper',
+      'Name badges',
+      'Printed agendas',
+      'Whiteboard markers',
+      'Fruit platters',
+      'Extension cords',
+      'Sticky notes',
+      'Coffee and tea setup',
+      'HDMI cables',
+      'Hand sanitizer',
+      'Mints',
+      'Printed workbooks',
+      'Projector screen',
+      'Napkins',
+      'Pens',
+      'Tissues',
+      'Laptop stands',
+      'Catering utensils',
+      'Trash bags',
+      'Power strips',
+      'Snack boxes',
+      'Markers for name badges',
+      'Tablecloths'
+    ];
+    const SUPPLY_LIST = SUPPLY_ITEMS.join(', ');
+    const SUPPLY_LIST_FOR_PROMPT = SUPPLY_ITEMS.map((item) => `- ${item}`).join('\n');
+
+    const PROMPTS = [
+      {
+        label: 'Setup sequence',
+        description: 'Organizes by timing across the event day',
+        text: `**Context:** I need to organize a team offsite supply list.
+
+**Task:** Sort the list into exactly three MECE buckets based on when each item is needed during the event day.
+
+**Use these buckets:**
+1. **Before the session:** Items needed to set up the room before participants arrive.
+2. **During the session:** Items used while the working session is happening.
+3. **Breaks and meals:** Items used for food, drinks, and participant comfort.
+
+**Rules:**
+- **Single placement:** Every item must appear exactly once in the final output.
+- **No overlap:** Avoid assigning the same item to multiple timing buckets.
+- **Parallel labels:** Keep bucket names clear, short, and parallel.
+- **Ambiguous timing:** If an item could fit in more than one timing bucket, choose the strongest fit and briefly explain why.
+
+**Supply list:**
+${SUPPLY_LIST_FOR_PROMPT}`
+      },
+      {
+        label: 'Ownership',
+        description: 'Organizes by who is responsible for each item',
+        text: `**Context:** I need to organize an offsite supply list so Aiko can review who owns what.
+
+**Task:** Sort the list into exactly three MECE buckets based on who should be responsible for each item.
+
+**Use these buckets:**
+1. **AV and tech team:** Items connected to room setup, screens, devices, cables, and technical support.
+2. **Catering and hospitality team:** Items connected to food, drinks, breaks, and participant comfort.
+3. **Event coordinator:** Items connected to logistics, printed materials, room readiness, and general operations.
+
+**Rules:**
+- **Single ownership:** Every item must appear exactly once in the final output.
+- **No overlap:** Avoid assigning the same responsibility to multiple owners.
+- **Clarify ambiguity:** Where ownership is unclear, assign the item to one owner and briefly explain the reasoning behind the decision.
+- **Easy review:** Keep the structure simple, clean, and easy for Aiko to scan and review quickly.
+
+**Supply list:**
+${SUPPLY_LIST_FOR_PROMPT}`
+      },
+      {
+        label: 'AI-created structure',
+        description: 'Asks GenAI to create the MECE buckets',
+        text: `**Context:** I have a messy supply list for a one-day MA team offsite.
+
+**Task:** Create exactly three MECE buckets for this list, then sort every item into those buckets.
+
+**MECE requirement:** The buckets must be mutually exclusive and collectively exhaustive. Each item should fit in one bucket only, and all items must be covered.
+
+**Your output should include:**
+1. **Bucket names:** Create three short, parallel bucket names.
+2. **MECE rationale:** Explain in one sentence why the three buckets are mutually exclusive and collectively exhaustive.
+3. **Sorted items:** Place every item under exactly one bucket.
+4. **Classification notes:** Add a short note for any item that was difficult to classify.
+
+**Rules:**
+- **Single placement:** Every item must appear exactly once in the final output.
+- **Three buckets only:** Do not create a fourth bucket.
+- **Complete coverage:** Do not leave anything unsorted.
+- **Specific labels:** Do not use vague bucket names like Miscellaneous or Other.
+
+**Supply list:**
+${SUPPLY_LIST_FOR_PROMPT}`
+      }
+    ];
+
+    let activityTimer = null;
+    let timerMetricHidden = false;
+
+    function copyText(text, button) {
+      const done = () => {
+        if (!button) return;
+        const original = button.textContent;
+        button.textContent = 'Copied ✓';
+        window.setTimeout(() => { button.textContent = original; }, 2000);
+      };
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(done).catch(() => fallbackCopy(text, done));
+      } else {
+        fallbackCopy(text, done);
+      }
+    }
+
+    function fallbackCopy(text, callback) {
+      const area = document.createElement('textarea');
+      area.value = text;
+      area.setAttribute('readonly', '');
+      area.style.position = 'fixed';
+      area.style.left = '-9999px';
+      document.body.appendChild(area);
+      area.select();
+      document.execCommand('copy');
+      area.remove();
+      callback();
+    }
+
+    function formatPromptForDisplay(text) {
+      return text
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/\*\*(.+?):\*\*/g, '<strong>$1:</strong>');
+    }
+
+    function showScreen(screenNumber) {
+      document.querySelectorAll('[data-screen]').forEach((screen) => {
+        screen.classList.toggle('hidden', screen.dataset.screen !== String(screenNumber));
+      });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      if (activityTimer) activityTimer.startFromInteraction();
+    }
+
+    function renderPrompts() {
+      const grid = document.getElementById('promptGrid');
+      grid.innerHTML = '';
+      PROMPTS.forEach((prompt, index) => {
+        const card = document.createElement('article');
+        card.className = 'prompt-card';
+        const title = document.createElement('h3');
+        title.textContent = prompt.label;
+        const description = document.createElement('p');
+        description.className = 'prompt-description';
+        description.textContent = prompt.description;
+        const text = document.createElement('div');
+        text.className = 'prompt-text';
+        text.id = `promptText${index}`;
+        text.innerHTML = formatPromptForDisplay(prompt.text);
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'gold';
+        button.dataset.copyPrompt = String(index);
+        button.textContent = 'Copy prompt';
+        card.append(title, description, text, button);
+        grid.appendChild(card);
+      });
+    }
+
+    function syncHeaderTimerIcons() {
+      document.getElementById('timerPauseIconBtn').disabled = !activityTimer.isRunning();
+      document.getElementById('timerPlayIconBtn').disabled = activityTimer.isRunning();
+      document.getElementById('timerPlayIconBtn').setAttribute('aria-label', activityTimer.hasStarted() ? 'Resume timer' : 'Start timer');
+      document.getElementById('timerMetric').classList.toggle('time-hidden', timerMetricHidden);
+      document.getElementById('timerMetricToggleBtn').setAttribute('aria-label', timerMetricHidden ? 'Show elapsed time' : 'Hide elapsed time');
+      document.getElementById('timerMetricToggleBtn').setAttribute('aria-pressed', timerMetricHidden ? 'true' : 'false');
+      document.getElementById('timerMetricToggleBtn').innerHTML = timerMetricHidden
+        ? '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.7 10.7 0 0 1 12 20C5 20 2 12 2 12a18.4 18.4 0 0 1 5.06-5.94"/><path d="M9.9 4.24A10.3 10.3 0 0 1 12 4c7 0 10 8 10 8a18.5 18.5 0 0 1-2.16 3.19"/><path d="M14.12 14.12A3 3 0 0 1 9.88 9.88"/><path d="M1 1l22 22"/></svg>'
+        : '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-8 10-8 10 8 10 8-3 8-10 8-10-8-10-8Z"/><circle cx="12" cy="12" r="3"/></svg>';
+    }
+
+    function wireEvents() {
+      document.querySelectorAll('[data-next]').forEach((button) => {
+        button.addEventListener('click', () => showScreen(button.dataset.next));
+      });
+
+      document.querySelectorAll('[data-back]').forEach((button) => {
+        button.addEventListener('click', () => showScreen(button.dataset.back));
+      });
+
+      document.addEventListener('click', (event) => {
+        const button = event.target.closest('[data-copy-prompt]');
+        if (!button) return;
+        activityTimer.startFromInteraction();
+        copyText(PROMPTS[Number(button.dataset.copyPrompt)].text, button);
+      });
+
+      document.getElementById('reflectionText').addEventListener('input', (event) => {
+        activityTimer.startFromInteraction();
+        const count = event.target.value.trim().length;
+        document.getElementById('reflectionContinueBtn').disabled = count < 20;
+        document.getElementById('reflectionHint').textContent = count < 20
+          ? `Minimum 20 characters to continue. ${count}/20`
+          : 'Ready to continue.';
+      });
+
+      document.getElementById('timerPauseIconBtn').addEventListener('click', () => {
+        activityTimer.pause();
+      });
+      document.getElementById('timerMetricToggleBtn').addEventListener('click', () => {
+        timerMetricHidden = !timerMetricHidden;
+        syncHeaderTimerIcons();
+      });
+      document.getElementById('timerPlayIconBtn').addEventListener('click', () => {
+        activityTimer.hasStarted() ? activityTimer.resume() : activityTimer.start();
+      });
+      document.getElementById('timerResetIconBtn').addEventListener('click', () => {
+        activityTimer.reset();
+      });
+    }
+
+    function initializeApp() {
+      document.getElementById('supplyListText').textContent = SUPPLY_LIST;
+      renderPrompts();
+      activityTimer = ActivityTimer.create({
+        elements: {
+          row: document.getElementById('timerRow'),
+          display: document.getElementById('timerDisplay'),
+          note: document.getElementById('timerNote'),
+          toggleBtn: document.getElementById('toggleTimerBtn'),
+          startBtn: document.getElementById('startTimerBtn'),
+          pauseBtn: document.getElementById('pauseTimerBtn'),
+          resumeBtn: document.getElementById('resumeTimerBtn'),
+          resetBtn: document.getElementById('resetTimerBtn')
+        },
+        targetSeconds: 300,
+        idleMessage: 'Timer starts when you begin using the AI prompt. Target: 5 minutes.'
+      });
+      setInterval(syncHeaderTimerIcons, 500);
+      syncHeaderTimerIcons();
+      wireEvents();
+    }
+
+    initializeApp();
+  </script>
+</body>
+</html>

@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Practice writing an answer-first email from your SCQA.">
+  <title>Write to Aiko | The Untaught Lessons</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="../../assets/favicon-bluebg-whitedoor-thicker-32.png?v=6">
+  <link rel="shortcut icon" type="image/png" href="../../assets/favicon-bluebg-whitedoor-thicker-32.png?v=6">
+  <link rel="apple-touch-icon" sizes="180x180" href="../../assets/apple-touch-icon.png?v=3">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lato:wght@300;400;700&family=Roboto+Mono:wght@400;500;700&display=swap');
+
+    :root {
+      --write-to-aiko-navy: #003366;
+      --write-to-aiko-gold: #EEA320;
+      --write-to-aiko-gold-hover: #D4921C;
+      --write-to-aiko-cream: #F3EDE2;
+      --write-to-aiko-charcoal: #4A4A4A;
+      --write-to-aiko-steel: #4D7094;
+      --write-to-aiko-white: #FFFFFF;
+      --write-to-aiko-paper: #FAF8F4;
+      --write-to-aiko-line: #E8DFD1;
+      --write-to-aiko-deep: #001A33;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--write-to-aiko-cream);
+      color: var(--write-to-aiko-charcoal);
+      font-family: 'Lato', Arial, sans-serif;
+      font-size: 15px;
+      line-height: 1.5;
+    }
+
+    button,
+    textarea {
+      font: inherit;
+    }
+
+    button:focus-visible,
+    a:focus-visible,
+    textarea:focus {
+      outline: 2px solid var(--write-to-aiko-gold);
+      outline-offset: 2px;
+    }
+
+    .write-to-aiko-header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: grid;
+      grid-template-columns: auto auto minmax(220px, 1fr) auto;
+      align-items: center;
+      column-gap: 20px;
+      min-height: 76px;
+      padding: 12px 32px;
+      background: var(--write-to-aiko-navy);
+      color: var(--write-to-aiko-white);
+    }
+
+    .write-to-aiko-logo {
+      display: block;
+      width: 224px;
+      height: 46px;
+    }
+
+    .write-to-aiko-logo img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .write-to-aiko-divider {
+      width: 1px;
+      height: 38px;
+      background: rgba(255, 255, 255, .42);
+    }
+
+    .write-to-aiko-kicker,
+    .write-to-aiko-small-label,
+    .write-to-aiko-label,
+    .write-to-aiko-toggle,
+    .write-to-aiko-sample-toggle,
+    .write-to-aiko-status,
+    .write-to-aiko-count-line {
+      font-family: 'Roboto Mono', monospace;
+    }
+
+    .write-to-aiko-kicker {
+      display: block;
+      color: var(--write-to-aiko-gold);
+      font-size: 10px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+
+    .write-to-aiko-title {
+      display: block;
+      margin-top: 3px;
+      color: var(--write-to-aiko-white);
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 27px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .write-to-aiko-utilities {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    .write-to-aiko-utility {
+      min-width: 136px;
+      padding: 7px 10px;
+      border: 1px solid rgba(255, 255, 255, .18);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, .08);
+    }
+
+    .write-to-aiko-small-label {
+      display: block;
+      color: var(--write-to-aiko-gold);
+      font-size: 9px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+
+    .write-to-aiko-utility-value {
+      display: block;
+      margin-top: 3px;
+      color: var(--write-to-aiko-white);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 18px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .write-to-aiko-main {
+      width: min(1220px, calc(100% - 40px));
+      margin: 0 auto;
+      padding: 34px 0 56px;
+    }
+
+    .write-to-aiko-grid {
+      display: grid;
+      grid-template-columns: minmax(300px, .88fr) minmax(420px, 1.12fr);
+      gap: 22px;
+      align-items: start;
+    }
+
+    .write-to-aiko-panel {
+      border: 1px solid rgba(0, 51, 102, .16);
+      border-radius: 8px;
+      background: var(--write-to-aiko-white);
+      box-shadow: 0 14px 32px rgba(0, 51, 102, .08);
+    }
+
+    .write-to-aiko-scqa {
+      padding: 22px;
+    }
+
+    .write-to-aiko-panel-title {
+      margin: 0 0 16px;
+      color: var(--write-to-aiko-navy);
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: clamp(1.45rem, 3vw, 2.05rem);
+      line-height: 1.12;
+    }
+
+    .write-to-aiko-label {
+      display: block;
+      margin: 0 0 7px;
+      color: var(--write-to-aiko-gold);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+    }
+
+    .write-to-aiko-scqa-toggle {
+      margin: 16px 0 0;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: var(--write-to-aiko-navy);
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    .write-to-aiko-scqa-details {
+      display: none;
+      margin-top: 14px;
+      padding-top: 16px;
+      border-top: 1px solid var(--write-to-aiko-line);
+    }
+
+    .write-to-aiko-scqa-details.is-open {
+      display: grid;
+      gap: 14px;
+    }
+
+    .write-to-aiko-scqa-item p {
+      margin: 0;
+      color: var(--write-to-aiko-charcoal);
+      font-size: .94rem;
+      line-height: 1.55;
+    }
+
+    .write-to-aiko-answer-item {
+      margin-top: 16px;
+    }
+
+    .write-to-aiko-writing {
+      overflow: hidden;
+    }
+
+    .write-to-aiko-writing-inner {
+      padding: 22px;
+    }
+
+    .write-to-aiko-mode-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 18px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--write-to-aiko-line);
+    }
+
+    .write-to-aiko-toggle-wrap {
+      display: inline-grid;
+      grid-template-columns: 1fr 1fr;
+      padding: 3px;
+      border: 1px solid rgba(0, 51, 102, .18);
+      border-radius: 8px;
+      background: var(--write-to-aiko-paper);
+    }
+
+    .write-to-aiko-toggle {
+      min-width: 112px;
+      min-height: 38px;
+      padding: 8px 12px;
+      border: 0;
+      border-radius: 6px;
+      background: transparent;
+      color: var(--write-to-aiko-navy);
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .write-to-aiko-toggle.is-active {
+      background: var(--write-to-aiko-navy);
+      color: var(--write-to-aiko-white);
+    }
+
+    .write-to-aiko-salutation,
+    .write-to-aiko-signoff {
+      margin: 0;
+      color: var(--write-to-aiko-navy);
+      font-weight: 700;
+      line-height: 1.5;
+    }
+
+    .write-to-aiko-form {
+      display: grid;
+      gap: 14px;
+      margin: 14px 0;
+    }
+
+    .write-to-aiko-section {
+      display: grid;
+      gap: 6px;
+    }
+
+    .write-to-aiko-section-note {
+      margin: 0;
+      color: var(--write-to-aiko-steel);
+      font-size: .92rem;
+      line-height: 1.45;
+    }
+
+    .write-to-aiko-length-note {
+      margin: -4px 0 14px;
+      color: var(--write-to-aiko-steel);
+      font-size: .94rem;
+      line-height: 1.45;
+    }
+
+    .write-to-aiko-textarea {
+      width: 100%;
+      min-height: 88px;
+      padding: 12px;
+      border: 1px solid rgba(0, 51, 102, .18);
+      border-radius: 8px;
+      background: var(--write-to-aiko-paper);
+      color: var(--write-to-aiko-charcoal);
+      line-height: 1.5;
+      resize: vertical;
+    }
+
+    .write-to-aiko-open-textarea {
+      min-height: 430px;
+    }
+
+    .write-to-aiko-mode {
+      display: none;
+    }
+
+    .write-to-aiko-mode.is-active {
+      display: block;
+    }
+
+    .write-to-aiko-footer-count {
+      margin: 18px -22px 0;
+      padding: 12px 22px;
+      border-top: 1px solid var(--write-to-aiko-line);
+      border-bottom: 1px solid var(--write-to-aiko-line);
+      background: var(--write-to-aiko-paper);
+    }
+
+    .write-to-aiko-count-line {
+      margin: 0;
+      color: var(--write-to-aiko-navy);
+      font-size: 12px;
+      letter-spacing: .02em;
+    }
+
+    .write-to-aiko-sample-block {
+      margin-top: 18px;
+      padding-top: 2px;
+    }
+
+    .write-to-aiko-sample-toggle {
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: var(--write-to-aiko-navy);
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .write-to-aiko-sample {
+      display: none;
+      margin-top: 12px;
+      padding: 16px;
+      border-left: 3px solid var(--write-to-aiko-gold);
+      border-radius: 8px;
+      background: var(--write-to-aiko-cream);
+      white-space: pre-line;
+    }
+
+    .write-to-aiko-sample.is-open {
+      display: block;
+    }
+
+    .write-to-aiko-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .write-to-aiko-submit,
+    .write-to-aiko-reset {
+      min-height: 44px;
+      padding: 10px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    .write-to-aiko-submit {
+      border: 1px solid var(--write-to-aiko-gold);
+      background: var(--write-to-aiko-gold);
+      color: var(--write-to-aiko-deep);
+    }
+
+    .write-to-aiko-submit:hover:not(:disabled) {
+      background: var(--write-to-aiko-gold-hover);
+    }
+
+    .write-to-aiko-submit:disabled {
+      cursor: not-allowed;
+      opacity: .62;
+    }
+
+    .write-to-aiko-reset {
+      border: 1px solid var(--write-to-aiko-navy);
+      background: transparent;
+      color: var(--write-to-aiko-navy);
+    }
+
+    .write-to-aiko-status {
+      min-height: 18px;
+      margin: 8px 0 0;
+      color: var(--write-to-aiko-gold);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .06em;
+    }
+
+    @media (max-width: 900px) {
+      .write-to-aiko-header {
+        grid-template-columns: 1fr auto;
+        gap: 10px 16px;
+        padding: 12px 18px;
+      }
+
+      .write-to-aiko-logo {
+        width: 178px;
+        height: 38px;
+      }
+
+      .write-to-aiko-divider {
+        display: none;
+      }
+
+      .write-to-aiko-heading {
+        grid-column: 1 / -1;
+      }
+
+      .write-to-aiko-utilities {
+        grid-column: 1 / -1;
+        justify-content: flex-start;
+        overflow-x: auto;
+        padding-bottom: 2px;
+      }
+
+      .write-to-aiko-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .write-to-aiko-main {
+        width: min(100% - 28px, 1220px);
+        padding-top: 22px;
+      }
+
+      .write-to-aiko-title {
+        font-size: 24px;
+      }
+
+      .write-to-aiko-utility {
+        min-width: 122px;
+      }
+
+      .write-to-aiko-toggle-wrap {
+        width: 100%;
+      }
+
+      .write-to-aiko-toggle {
+        min-width: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="write-to-aiko-header">
+    <a class="write-to-aiko-logo" href="../../index.html" aria-label="The Untaught Lessons homepage">
+      <img src="../../assets/utl-logo-nav-white.png" alt="The Untaught Lessons">
+    </a>
+    <div class="write-to-aiko-divider" aria-hidden="true"></div>
+    <div class="write-to-aiko-heading">
+      <span class="write-to-aiko-kicker">Phase 2 · Speak Concisely</span>
+      <span class="write-to-aiko-title">Write to Aiko</span>
+    </div>
+    <div class="write-to-aiko-utilities" aria-label="Practice metrics">
+      <div class="write-to-aiko-utility">
+        <span class="write-to-aiko-small-label">Timer</span>
+        <span class="write-to-aiko-utility-value" id="writeToAikoTimer">00:00</span>
+      </div>
+      <div class="write-to-aiko-utility">
+        <span class="write-to-aiko-small-label">Words</span>
+        <span class="write-to-aiko-utility-value" id="writeToAikoHeaderCount">0</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="write-to-aiko-main">
+    <div class="write-to-aiko-grid">
+      <section class="write-to-aiko-panel write-to-aiko-scqa" aria-labelledby="writeToAikoScqaTitle">
+        <h1 class="write-to-aiko-panel-title" id="writeToAikoScqaTitle">Your SCQA — use this to write your email.</h1>
+        <button class="write-to-aiko-scqa-toggle" type="button" id="writeToAikoScqaToggle" aria-expanded="true" aria-controls="writeToAikoScqaDetails">Hide full SCQA</button>
+        <div class="write-to-aiko-scqa-details is-open" id="writeToAikoScqaDetails">
+          <div class="write-to-aiko-scqa-item">
+            <span class="write-to-aiko-label">Situation</span>
+            <p>The Olympics is still the world's most recognizable sports property, with unmatched athletes, history, and global reach.</p>
+          </div>
+          <div class="write-to-aiko-scqa-item">
+            <span class="write-to-aiko-label">Complication</span>
+            <p>Recognition isn't translating into gravity — shared moments are fragmenting, clip-first consumption rewards spectacle over meaning, and legitimacy is noisier, so the Games feel less like a global ritual and more like optional content.</p>
+          </div>
+          <div class="write-to-aiko-scqa-item">
+            <span class="write-to-aiko-label">Question</span>
+            <p>How do we restore the Olympics as a rare, earned cultural timestamp — without chasing trends or diluting the brand?</p>
+          </div>
+        </div>
+        <div class="write-to-aiko-scqa-item write-to-aiko-answer-item">
+          <span class="write-to-aiko-label">Answer</span>
+          <p>Rebuild Olympic gravity through (1) ritual design that creates shared moments again, (2) athlete-led story arcs that make stakes legible over time, and (3) one coherent spine — a modern thesis and tone system that every channel reinforces while controlling commercial signals.</p>
+        </div>
+      </section>
+
+      <section class="write-to-aiko-panel write-to-aiko-writing" aria-labelledby="writeToAikoWritingTitle">
+        <div class="write-to-aiko-writing-inner">
+          <div class="write-to-aiko-mode-row">
+            <h2 class="write-to-aiko-panel-title" id="writeToAikoWritingTitle">Email draft</h2>
+            <div class="write-to-aiko-toggle-wrap" role="tablist" aria-label="Writing mode">
+              <button class="write-to-aiko-toggle is-active" type="button" role="tab" aria-selected="true" data-mode="structured">Structured</button>
+              <button class="write-to-aiko-toggle" type="button" role="tab" aria-selected="false" data-mode="open">Open</button>
+            </div>
+          </div>
+          <p class="write-to-aiko-length-note">Suggested length: 80-120 words.</p>
+
+          <p class="write-to-aiko-salutation">Hey Aiko,</p>
+
+          <div class="write-to-aiko-mode is-active" id="writeToAikoStructuredMode" data-mode-panel="structured">
+            <div class="write-to-aiko-form">
+              <label class="write-to-aiko-section">
+                <span class="write-to-aiko-label">Your bottom line</span>
+                <span class="write-to-aiko-section-note">State your main conclusion in one sentence. This is the first thing she reads.</span>
+                <textarea class="write-to-aiko-textarea" data-structured-field="bottomLine"></textarea>
+              </label>
+              <label class="write-to-aiko-section">
+                <span class="write-to-aiko-label">Point 1</span>
+                <span class="write-to-aiko-section-note">Bold header phrase, then one to two sentences of explanation.</span>
+                <textarea class="write-to-aiko-textarea" data-structured-field="point1"></textarea>
+              </label>
+              <label class="write-to-aiko-section">
+                <span class="write-to-aiko-label">Point 2</span>
+                <span class="write-to-aiko-section-note">Bold header phrase, then one to two sentences of explanation.</span>
+                <textarea class="write-to-aiko-textarea" data-structured-field="point2"></textarea>
+              </label>
+              <label class="write-to-aiko-section">
+                <span class="write-to-aiko-label">Point 3</span>
+                <span class="write-to-aiko-section-note">Bold header phrase, then one to two sentences of explanation.</span>
+                <textarea class="write-to-aiko-textarea" data-structured-field="point3"></textarea>
+              </label>
+              <label class="write-to-aiko-section">
+                <span class="write-to-aiko-label">Closing line</span>
+                <span class="write-to-aiko-section-note">One sentence. Signal a meeting, a decision, or a follow-up. No vague endings.</span>
+                <textarea class="write-to-aiko-textarea" data-structured-field="closing"></textarea>
+              </label>
+            </div>
+          </div>
+
+          <div class="write-to-aiko-mode" id="writeToAikoOpenMode" data-mode-panel="open">
+            <div class="write-to-aiko-form">
+              <label class="write-to-aiko-section">
+                <span class="write-to-aiko-label">Open draft</span>
+                <textarea class="write-to-aiko-textarea write-to-aiko-open-textarea" id="writeToAikoOpenText" placeholder="Write your answer-first email to Aiko here..."></textarea>
+              </label>
+            </div>
+          </div>
+
+          <p class="write-to-aiko-signoff">Best,<br>[Your name]</p>
+
+          <div class="write-to-aiko-footer-count">
+            <p class="write-to-aiko-count-line"><span id="writeToAikoFooterCount">0</span> words · Suggested length: 80-120 words</p>
+          </div>
+
+          <div class="write-to-aiko-sample-block">
+            <button class="write-to-aiko-sample-toggle" type="button" id="writeToAikoSampleToggle" aria-expanded="false" aria-controls="writeToAikoSample">Show sample answer ↓</button>
+            <div class="write-to-aiko-sample" id="writeToAikoSample">Hey Aiko!
+
+We believe the Olympics is losing cultural impact primarily due to reduced everyday relevance, fragmented attention, and weaker emotional connection with audiences.
+
+This is driven by three key factors:
+
+Lower day-to-day visibility: The Olympics only peaks every four years, while audiences are now constantly engaged with always-on sports and digital content.
+
+Fragmented media landscape: Viewers are spread across platforms, making it harder for the Olympics to capture sustained, collective attention.
+
+Weaker emotional connection: Fewer consistent athlete narratives and national storylines reduce long-term attachment and anticipation.
+
+As a result, the Olympics is shifting from a unifying global moment to a more episodic and less culturally central event. Happy to walk through implications and potential focus areas next.
+
+Best, Yutee Elle</div>
+          </div>
+
+          <div class="write-to-aiko-actions">
+            <button class="write-to-aiko-submit" type="button" id="writeToAikoSubmit">Submit</button>
+            <button class="write-to-aiko-reset" type="button" id="writeToAikoReset">Try again</button>
+          </div>
+          <p class="write-to-aiko-status" id="writeToAikoStatus" role="status" aria-live="polite"></p>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    (function () {
+      const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzJE--FL2kB_XDNZRnszCtlyLRPvaLAHGuF5TAOdXJk40atbvf5Y6ELuSK2B7CSLaMN/exec';
+      const state = {
+        mode: 'structured',
+        timerStarted: false,
+        startedAt: null,
+        timerId: null
+      };
+
+      const timerEl = document.getElementById('writeToAikoTimer');
+      const headerCount = document.getElementById('writeToAikoHeaderCount');
+      const footerCount = document.getElementById('writeToAikoFooterCount');
+      const submitBtn = document.getElementById('writeToAikoSubmit');
+      const resetBtn = document.getElementById('writeToAikoReset');
+      const statusEl = document.getElementById('writeToAikoStatus');
+      const openText = document.getElementById('writeToAikoOpenText');
+      const structuredFields = Array.prototype.slice.call(document.querySelectorAll('[data-structured-field]'));
+
+      function wordCount(text) {
+        const words = text.trim().match(/\b[\w'-]+\b/g);
+        return words ? words.length : 0;
+      }
+
+      function formatSeconds(total) {
+        const minutes = Math.floor(total / 60).toString().padStart(2, '0');
+        const seconds = Math.floor(total % 60).toString().padStart(2, '0');
+        return minutes + ':' + seconds;
+      }
+
+      function startTimer() {
+        if (state.timerStarted) return;
+        state.timerStarted = true;
+        state.startedAt = Date.now();
+        state.timerId = window.setInterval(updateTimer, 1000);
+        updateTimer();
+      }
+
+      function stopTimer() {
+        if (state.timerId) window.clearInterval(state.timerId);
+        state.timerStarted = false;
+        state.startedAt = null;
+        state.timerId = null;
+        timerEl.textContent = '00:00';
+      }
+
+      function updateTimer() {
+        const elapsed = state.startedAt ? Math.floor((Date.now() - state.startedAt) / 1000) : 0;
+        timerEl.textContent = formatSeconds(elapsed);
+      }
+
+      function visibleText() {
+        if (state.mode === 'open') return openText.value;
+        return structuredFields.map((field) => field.value).join('\n');
+      }
+
+      function updateCounts() {
+        const count = wordCount(visibleText());
+        headerCount.textContent = String(count);
+        footerCount.textContent = String(count);
+      }
+
+      function structuredBody() {
+        return structuredFields
+          .map((field) => field.value.trim())
+          .filter(Boolean)
+          .join('\n\n');
+      }
+
+      function emailBodyOnly(text) {
+        return text
+          .replace(/^hey\s+aiko[!,]?\s*/i, '')
+          .replace(/\s*best,[\s\S]*$/i, '')
+          .trim();
+      }
+
+      function splitDraftIntoSections(text) {
+        const body = emailBodyOnly(text);
+        if (!body) return ['', '', '', '', ''];
+        let sections = body.split(/\n\s*\n/).map((part) => part.trim()).filter(Boolean);
+        if (sections.length < 2) {
+          sections = body.split(/\n+/).map((part) => part.trim()).filter(Boolean);
+        }
+        const nextValues = ['', '', '', '', ''];
+        sections.slice(0, 4).forEach((part, index) => {
+          nextValues[index] = part;
+        });
+        if (sections.length >= 5) {
+          nextValues[4] = sections.slice(4).join('\n\n');
+        } else if (sections.length === 4) {
+          nextValues[4] = '';
+        }
+        return nextValues;
+      }
+
+      function transferDraftToMode(nextMode) {
+        if (state.mode === 'structured' && nextMode === 'open') {
+          openText.value = structuredBody();
+          return;
+        }
+        if (state.mode === 'open' && nextMode === 'structured') {
+          splitDraftIntoSections(openText.value).forEach((value, index) => {
+            structuredFields[index].value = value;
+          });
+        }
+      }
+
+      function composedEmail() {
+        const body = state.mode === 'open' ? openText.value.trim() : structuredBody();
+        return ['Hey Aiko,', body, 'Best,\n[Your name]'].filter(Boolean).join('\n\n');
+      }
+
+      function readProfileEmail() {
+        const directKeys = ['tsa_participant_email', 'find_your_level_email'];
+        for (const key of directKeys) {
+          const value = sessionStorage.getItem(key);
+          if (value) return value;
+        }
+        try {
+          const profile = JSON.parse(sessionStorage.getItem('utl_contact_profile') || '{}');
+          return profile.email || '';
+        } catch (error) {
+          return '';
+        }
+      }
+
+      function setMode(mode) {
+        if (mode === state.mode) return;
+        transferDraftToMode(mode);
+        state.mode = mode;
+        document.querySelectorAll('.write-to-aiko-toggle').forEach((button) => {
+          const isActive = button.dataset.mode === mode;
+          button.classList.toggle('is-active', isActive);
+          button.setAttribute('aria-selected', String(isActive));
+        });
+        document.querySelectorAll('[data-mode-panel]').forEach((panel) => {
+          panel.classList.toggle('is-active', panel.dataset.modePanel === mode);
+        });
+        updateCounts();
+      }
+
+      document.getElementById('writeToAikoScqaToggle').addEventListener('click', (event) => {
+        const details = document.getElementById('writeToAikoScqaDetails');
+        const isOpen = details.classList.toggle('is-open');
+        event.currentTarget.textContent = isOpen ? 'Hide full SCQA' : 'View full SCQA';
+        event.currentTarget.setAttribute('aria-expanded', String(isOpen));
+      });
+
+      document.getElementById('writeToAikoSampleToggle').addEventListener('click', (event) => {
+        const sample = document.getElementById('writeToAikoSample');
+        const isOpen = sample.classList.toggle('is-open');
+        event.currentTarget.textContent = isOpen ? 'Hide sample answer ↑' : 'Show sample answer ↓';
+        event.currentTarget.setAttribute('aria-expanded', String(isOpen));
+      });
+
+      document.querySelectorAll('.write-to-aiko-toggle').forEach((button) => {
+        button.addEventListener('click', () => setMode(button.dataset.mode));
+      });
+
+      document.querySelectorAll('textarea').forEach((textarea) => {
+        textarea.addEventListener('input', () => {
+          startTimer();
+          updateCounts();
+          statusEl.textContent = '';
+          submitBtn.disabled = false;
+        });
+      });
+
+      submitBtn.addEventListener('click', async () => {
+        const response = composedEmail();
+        if (!wordCount(visibleText())) {
+          statusEl.textContent = 'Write your email before submitting.';
+          return;
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Sending...';
+        statusEl.textContent = '';
+
+        const payload = {
+          email: readProfileEmail(),
+          response,
+          mode: state.mode,
+          page: window.location.href
+        };
+
+        try {
+          await fetch(SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            body: JSON.stringify(payload)
+          });
+          submitBtn.textContent = 'Submit';
+          submitBtn.disabled = true;
+          statusEl.textContent = 'Sent! Check your inbox.';
+        } catch (error) {
+          submitBtn.textContent = 'Submit';
+          submitBtn.disabled = false;
+          statusEl.textContent = 'Could not send. Please try again.';
+        }
+      });
+
+      resetBtn.addEventListener('click', () => {
+        structuredFields.forEach((field) => {
+          field.value = '';
+        });
+        openText.value = '';
+        setMode('structured');
+        stopTimer();
+        updateCounts();
+        submitBtn.textContent = 'Submit';
+        submitBtn.disabled = false;
+        statusEl.textContent = '';
+      });
+
+      setMode('structured');
+      updateCounts();
+    })();
+  </script>
+</body>
+</html>

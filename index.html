@@ -30,7 +30,7 @@
       <a href="/about.html">About</a>
       <a href="/programs.html">Programs</a>
       <a href="/contact.html">Contact</a>
-      <a href="/tsa-score.html">Find Your Level</a>
+      <a href="/tsa-score.html" data-public-find-level>Find Your Level</a>
       <a class="nav-button nav-button-secondary" href="/member-login/">Member Login</a>
       <button class="nav-button nav-button-primary" type="button" onclick="openLeadModal()">Get in Touch</button>
     </div>
@@ -123,7 +123,7 @@
       </div>
     </section>
 
-    <section id="tsa-teaser" class="tsa-home-teaser" aria-labelledby="tsa-teaser-title">
+    <section id="tsa-teaser" class="tsa-home-teaser" aria-labelledby="tsa-teaser-title" data-public-find-level>
       <div class="home-container">
         <h2 id="tsa-teaser-title">Where do you stand today?</h2>
         <p>The TSA Score™ is a 10-15 minute self-assessment that measures your thinking, speaking, and acting across 10 criteria. Take the Diagnostic to find your baseline before training.</p>
@@ -244,6 +244,16 @@
     const leadModalInitialContent = leadModalContent.innerHTML;
     const CONTACT_SESSION_KEY = 'utl_contact_shared';
     const CONTACT_PROFILE_KEY = 'utl_contact_profile';
+    const FIND_LEVEL_VISIBILITY_KEY = 'utl_public_find_level';
+
+    function applyFindLevelVisibility() {
+      const shouldShow = localStorage.getItem(FIND_LEVEL_VISIBILITY_KEY) !== 'hide';
+      document.querySelectorAll('[data-public-find-level]').forEach((element) => {
+        element.hidden = !shouldShow;
+      });
+    }
+
+    applyFindLevelVisibility();
 
     function rememberContact(payload) {
       sessionStorage.setItem(CONTACT_SESSION_KEY, 'true');

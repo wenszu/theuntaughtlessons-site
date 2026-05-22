@@ -160,6 +160,7 @@
     }
 
     .tsa-speak-form input,
+    .tsa-speak-form select,
     .tsa-speak-textarea,
     .tsa-speak-note-input {
       width: 100%;
@@ -167,8 +168,10 @@
       border: 1px solid rgba(0, 51, 102, .22);
       border-radius: 6px;
       color: var(--charcoal);
+      background: var(--white);
       font-family: 'Lato', sans-serif;
       font-size: 16px;
+      min-height: 50px;
     }
 
     .tsa-speak-textarea {
@@ -241,6 +244,7 @@
     }
 
     .tsa-speak-form input:focus,
+    .tsa-speak-form select:focus,
     .tsa-speak-textarea:focus,
     .tsa-speak-note-input:focus {
       border-color: var(--navy);
@@ -858,15 +862,14 @@ Return only JSON with C1, C4, C5, C6, C7, C8, msg1, msg2, msg3, feedback, and co
           mode: 'no-cors',
           body: JSON.stringify(payload)
         });
+      } catch (error) {
+        console.warn('Lead capture failed, continuing assessment locally.', error);
+      } finally {
         sessionStorage.setItem(GATE_KEY, 'true');
         sessionStorage.setItem('tsa_participant_name', state.participant.name);
         sessionStorage.setItem('tsa_participant_email', state.participant.email);
         rememberContact(payload);
         startAssessment();
-      } catch (error) {
-        gateSubmit.disabled = false;
-        gateSubmit.textContent = 'Begin assessment';
-        gateError.classList.add('is-visible');
       }
     });
 
@@ -1047,6 +1050,7 @@ Return only JSON with C1, C4, C5, C6, C7, C8, msg1, msg2, msg3, feedback, and co
         </div>
         <p class="tsa-speak-count" id="${id}Count">0 characters · 0 words</p>
         <div class="tsa-speak-actions">
+          <a class="tsa-speak-link-button secondary" href="../../member-login/index.html#assessments">Back to member workspace</a>
           <button class="tsa-speak-button" id="${buttonId}" type="button" disabled>${buttonText}</button>
         </div>
       `;
