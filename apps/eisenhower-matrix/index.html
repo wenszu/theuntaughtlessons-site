@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Practice prioritizing tasks with the Eisenhower Matrix.">
+  <title>The Art of Saying No | The Untaught Lessons</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="../../assets/favicon-bluebg-whitedoor-thicker-32.png?v=6">
+  <link rel="shortcut icon" type="image/png" href="../../assets/favicon-bluebg-whitedoor-thicker-32.png?v=6">
+  <link rel="apple-touch-icon" sizes="180x180" href="../../assets/apple-touch-icon.png?v=3">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lato:wght@300;400;700&family=Roboto+Mono:wght@400;500;700&display=swap');
+
+    :root {
+      --eisenhower-navy: #003366;
+      --eisenhower-gold: #EEA320;
+      --eisenhower-cream: #F3EDE2;
+      --eisenhower-charcoal: #4A4A4A;
+      --eisenhower-white: #FFFFFF;
+      --eisenhower-line: #C7D8E8;
+      --eisenhower-soft: #F7F5EF;
+      --eisenhower-shadow: 0 8px 20px rgba(0, 51, 102, .06);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--eisenhower-cream);
+      color: var(--eisenhower-charcoal);
+      font-family: 'Lato', Arial, sans-serif;
+    }
+
+    button,
+    select {
+      font: inherit;
+    }
+
+    button:focus-visible,
+    select:focus-visible {
+      outline: 2px solid var(--eisenhower-gold);
+      outline-offset: 2px;
+    }
+
+    .eisenhower-header {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      display: grid;
+      grid-template-columns: auto auto minmax(220px, 1fr);
+      align-items: center;
+      column-gap: 20px;
+      min-height: 76px;
+      padding: 12px 32px;
+      background: var(--eisenhower-navy);
+      color: var(--eisenhower-white);
+    }
+
+    .eisenhower-logo {
+      display: block;
+      width: 224px;
+      height: 46px;
+    }
+
+    .eisenhower-logo img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .eisenhower-divider {
+      width: 1px;
+      height: 38px;
+      background: rgba(255, 255, 255, .42);
+    }
+
+    .eisenhower-kicker,
+    .eisenhower-context-label,
+    .eisenhower-context-select,
+    .eisenhower-axis,
+    .eisenhower-empty,
+    .eisenhower-button,
+    .eisenhower-timer-label,
+    .eisenhower-timer-value,
+    .eisenhower-example-banner,
+    .eisenhower-note {
+      font-family: 'Roboto Mono', monospace;
+    }
+
+    .eisenhower-kicker {
+      display: block;
+      color: var(--eisenhower-gold);
+      font-size: 10px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+
+    .eisenhower-title {
+      display: block;
+      margin-top: 3px;
+      color: var(--eisenhower-white);
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 27px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .eisenhower-context {
+      position: sticky;
+      top: 76px;
+      z-index: 20;
+      display: grid;
+      grid-template-columns: minmax(250px, 330px) minmax(220px, 1fr) auto;
+      align-items: center;
+      gap: 16px;
+      padding: 10px 32px;
+      border-bottom: 1px solid #D8CFC1;
+      background: rgba(243, 237, 226, .96);
+      backdrop-filter: blur(8px);
+    }
+
+    .eisenhower-scenario-control {
+      display: grid;
+      gap: 5px;
+    }
+
+    .eisenhower-context-label {
+      color: var(--eisenhower-gold);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+    }
+
+    .eisenhower-context-select {
+      min-height: 42px;
+      padding: 9px 10px;
+      border: 1px solid var(--eisenhower-navy);
+      border-radius: 6px;
+      background: var(--eisenhower-white);
+      color: var(--eisenhower-navy);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .04em;
+    }
+
+    .eisenhower-context-copy {
+      margin: 0;
+      color: var(--eisenhower-charcoal);
+      font-size: 15px;
+      line-height: 1.4;
+    }
+
+    .eisenhower-timer {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 10px;
+      border: 1px solid var(--eisenhower-line);
+      border-radius: 6px;
+      background: var(--eisenhower-white);
+      white-space: nowrap;
+    }
+
+    .eisenhower-timer-label {
+      color: var(--eisenhower-gold);
+      font-size: 9px;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+    }
+
+    .eisenhower-timer-value {
+      color: var(--eisenhower-navy);
+      font-size: 18px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .eisenhower-icon-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px;
+      height: 30px;
+      border: 1px solid var(--eisenhower-line);
+      border-radius: 6px;
+      background: var(--eisenhower-white);
+      color: var(--eisenhower-navy);
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 1;
+      padding: 0;
+    }
+
+    .eisenhower-main {
+      width: min(1200px, calc(100% - 56px));
+      margin: 0 auto;
+      padding: 12px 0 96px;
+    }
+
+    .eisenhower-page-intro {
+      margin: 0 0 16px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid #D8CFC1;
+    }
+
+    .eisenhower-page-intro h1 {
+      margin: 0 0 6px;
+      color: var(--eisenhower-navy);
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: clamp(32px, 4vw, 44px);
+      line-height: 1.05;
+    }
+
+    .eisenhower-page-intro p {
+      max-width: 760px;
+      margin: 0;
+      color: var(--eisenhower-charcoal);
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .eisenhower-workspace {
+      display: grid;
+      grid-template-columns: minmax(260px, 286px) minmax(0, 1fr);
+      gap: 14px;
+      align-items: start;
+    }
+
+    .eisenhower-panel {
+      border: 1px solid var(--eisenhower-line);
+      border-radius: 8px;
+      background: var(--eisenhower-white);
+      box-shadow: var(--eisenhower-shadow);
+    }
+
+    .eisenhower-task-panel {
+      padding: 14px 12px 12px;
+    }
+
+    .eisenhower-panel h2 {
+      margin: 0 0 12px;
+      color: var(--eisenhower-navy);
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 18px;
+      line-height: 1.12;
+    }
+
+    .eisenhower-panel-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .eisenhower-count {
+      color: var(--eisenhower-charcoal);
+      font-size: 12px;
+      line-height: 1;
+    }
+
+    .eisenhower-task-list {
+      display: flex;
+      min-height: 360px;
+      flex-direction: column;
+      gap: 8px;
+      padding: 10px;
+      border: 1px dashed var(--eisenhower-line);
+      border-radius: 8px;
+      background: var(--eisenhower-soft);
+    }
+
+    .eisenhower-chip {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      width: 100%;
+      border: 1px solid var(--eisenhower-line);
+      border-radius: 6px;
+      background: var(--eisenhower-white);
+      color: var(--eisenhower-navy);
+      box-shadow: none;
+      cursor: grab;
+      font-family: 'Lato', Arial, sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 1.3;
+      text-align: left;
+      padding: 8px 10px;
+    }
+
+    .eisenhower-chip.is-small {
+      border-radius: 6px;
+      box-shadow: none;
+      font-size: 12px;
+      padding: 7px 9px;
+    }
+
+    .eisenhower-chip.is-selected {
+      border-color: var(--eisenhower-gold);
+      box-shadow: 0 0 0 2px rgba(238, 163, 32, .42);
+    }
+
+    .eisenhower-chip[draggable="true"]:active {
+      cursor: grabbing;
+    }
+
+    .eisenhower-handle {
+      flex: 0 0 auto;
+      color: var(--eisenhower-gold);
+      font-weight: 700;
+      letter-spacing: -2px;
+    }
+
+    .eisenhower-empty {
+      display: none;
+      margin: 8px 0 0;
+      color: var(--eisenhower-charcoal);
+      font-size: 11px;
+      line-height: 1.5;
+    }
+
+    .eisenhower-empty.is-visible {
+      display: block;
+    }
+
+    .eisenhower-example-banner {
+      display: none;
+      margin-bottom: 12px;
+      padding: 10px 12px;
+      border-left: 3px solid var(--eisenhower-gold);
+      border-radius: 6px;
+      background: var(--eisenhower-white);
+      color: var(--eisenhower-navy);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .eisenhower-example-banner.is-visible {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .eisenhower-matrix-wrap {
+      display: grid;
+      grid-template-columns: 34px 1fr;
+      grid-template-rows: 28px 1fr;
+      gap: 6px;
+    }
+
+    .eisenhower-axis-top {
+      grid-column: 2;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .eisenhower-axis-left {
+      grid-row: 2;
+      display: grid;
+      grid-template-rows: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .eisenhower-axis {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--eisenhower-gold);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+
+    .eisenhower-axis-left .eisenhower-axis {
+      writing-mode: vertical-rl;
+      transform: rotate(180deg);
+    }
+
+    .eisenhower-matrix {
+      grid-column: 2;
+      grid-row: 2;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      min-height: 640px;
+      border: 1px solid var(--eisenhower-line);
+      border-radius: 8px;
+      overflow: hidden;
+      background: var(--eisenhower-white);
+      box-shadow: var(--eisenhower-shadow);
+    }
+
+    .eisenhower-quadrant {
+      min-height: 320px;
+      padding: 14px 12px;
+      border-right: 1px solid var(--eisenhower-line);
+      border-bottom: 1px solid var(--eisenhower-line);
+      background: #FFFFFF;
+      transition: background .18s ease, box-shadow .18s ease;
+    }
+
+    .eisenhower-quadrant:nth-child(2n) { border-right: 0; }
+    .eisenhower-quadrant:nth-child(n+3) { border-bottom: 0; }
+
+    .eisenhower-quadrant.drag-over,
+    .eisenhower-task-list.drag-over,
+    .eisenhower-quadrant.tap-target,
+    .eisenhower-task-list.tap-target {
+      background: rgba(238, 163, 32, .10);
+      box-shadow: inset 0 0 0 2px rgba(238, 163, 32, .5);
+    }
+
+    .eisenhower-quadrant h3 {
+      margin: 0;
+      color: var(--eisenhower-navy);
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: clamp(20px, 2.6vw, 28px);
+      line-height: 1;
+    }
+
+    .eisenhower-quadrant-sub {
+      margin: 5px 0 14px;
+      color: var(--eisenhower-charcoal);
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .eisenhower-zone {
+      display: grid;
+      gap: 9px;
+      align-content: start;
+      min-height: 220px;
+      padding: 10px;
+      border: 1px dashed var(--eisenhower-line);
+      border-radius: 8px;
+      background: var(--eisenhower-soft);
+    }
+
+    .eisenhower-note {
+      display: block;
+      margin: 4px 0 0 22px;
+      color: var(--eisenhower-charcoal);
+      font-size: 10px;
+      font-style: italic;
+      line-height: 1.4;
+    }
+
+    .eisenhower-actions {
+      position: fixed;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 25;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 32px;
+      border-top: 1px solid var(--eisenhower-line);
+      background: rgba(243, 237, 226, .96);
+      backdrop-filter: blur(8px);
+    }
+
+    .eisenhower-button {
+      min-height: 42px;
+      border-radius: 6px;
+      background: transparent;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      padding: 10px 14px;
+    }
+
+    .eisenhower-button.navy {
+      border: 1px solid var(--eisenhower-navy);
+      color: var(--eisenhower-navy);
+    }
+
+    .eisenhower-button.gold {
+      border: 1px solid var(--eisenhower-gold);
+      color: var(--eisenhower-navy);
+    }
+
+    @media (max-width: 940px) {
+      .eisenhower-header,
+      .eisenhower-context {
+        grid-template-columns: 1fr;
+        gap: 10px;
+        padding-inline: 18px;
+      }
+
+      .eisenhower-context {
+        position: static;
+      }
+
+      .eisenhower-logo {
+        width: 178px;
+        height: 38px;
+      }
+
+      .eisenhower-divider {
+        display: none;
+      }
+
+      .eisenhower-workspace {
+        grid-template-columns: 1fr;
+      }
+
+      .eisenhower-matrix {
+        min-height: 0;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .eisenhower-main {
+        width: min(100% - 24px, 1280px);
+      }
+
+      .eisenhower-matrix-wrap {
+        grid-template-columns: 24px 1fr;
+      }
+
+      .eisenhower-matrix {
+        grid-template-columns: 1fr;
+      }
+
+      .eisenhower-quadrant {
+        min-height: 240px;
+        border-right: 0;
+        border-bottom: 1px solid var(--eisenhower-line);
+      }
+
+      .eisenhower-quadrant:nth-child(n+3) {
+        border-bottom: 1px solid var(--eisenhower-line);
+      }
+
+      .eisenhower-axis-top {
+        display: none;
+      }
+
+      .eisenhower-axis-left {
+        display: none;
+      }
+
+      .eisenhower-matrix-wrap {
+        display: block;
+      }
+
+      .eisenhower-actions {
+        flex-direction: column;
+        padding: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="eisenhower-header">
+    <a class="eisenhower-logo" href="../../index.html" aria-label="The Untaught Lessons homepage">
+      <img src="../../assets/utl-logo-nav-white.png" alt="The Untaught Lessons">
+    </a>
+    <div class="eisenhower-divider" aria-hidden="true"></div>
+    <div>
+      <span class="eisenhower-kicker">Phase 3 · Act Confidently</span>
+      <span class="eisenhower-title">The Art of Saying No</span>
+    </div>
+  </header>
+
+  <section class="eisenhower-context" aria-label="Scenario and timer">
+    <label class="eisenhower-scenario-control">
+      <span class="eisenhower-context-label">Scenario:</span>
+      <select class="eisenhower-context-select" id="scenarioSelect"></select>
+    </label>
+    <p class="eisenhower-context-copy" id="contextSentence"></p>
+    <div class="eisenhower-timer" aria-label="Timer">
+      <span class="eisenhower-timer-label">Timer</span>
+      <span class="eisenhower-timer-value" id="timerValue">00:00</span>
+      <button class="eisenhower-icon-button" id="timerToggle" type="button" aria-label="Pause timer">Ⅱ</button>
+      <button class="eisenhower-icon-button" id="timerReset" type="button" aria-label="Reset timer">↻</button>
+    </div>
+  </section>
+
+  <main class="eisenhower-main">
+    <section class="eisenhower-page-intro">
+      <h1>The Art of Saying No</h1>
+      <p>Practice prioritizing: sort the tasks by urgency and importance, then compare your judgment with one possible example.</p>
+    </section>
+    <section class="eisenhower-workspace">
+      <aside class="eisenhower-panel eisenhower-task-panel">
+        <div class="eisenhower-panel-head">
+          <h2>Task list</h2>
+          <span class="eisenhower-count">10 tasks</span>
+        </div>
+        <div class="eisenhower-task-list" id="taskList" data-zone="list"></div>
+        <p class="eisenhower-empty" id="emptyState">All tasks placed. Review your matrix.</p>
+      </aside>
+
+      <section aria-label="Eisenhower Matrix">
+        <div class="eisenhower-example-banner" id="exampleBanner">
+          <span>This is one strong way to prioritize. Yours may differ depending on your goals.</span>
+          <button class="eisenhower-button navy" id="backToAnswer" type="button">Back to my answer</button>
+        </div>
+        <div class="eisenhower-matrix-wrap">
+          <div aria-hidden="true"></div>
+          <div class="eisenhower-axis-top" aria-hidden="true">
+            <div class="eisenhower-axis">Important</div>
+            <div class="eisenhower-axis">Not important</div>
+          </div>
+          <div class="eisenhower-axis-left" aria-hidden="true">
+            <div class="eisenhower-axis">Urgent</div>
+            <div class="eisenhower-axis">Not urgent</div>
+          </div>
+          <div class="eisenhower-matrix" id="matrix"></div>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <footer class="eisenhower-actions">
+    <button class="eisenhower-button navy" id="showExample" type="button">Show example placement</button>
+    <button class="eisenhower-button gold" id="tryAgain" type="button">Try again</button>
+  </footer>
+
+  <script>
+    (function () {
+      const QUADRANTS = [
+        { id: 'do', title: 'Do', sub: 'Urgent + Important' },
+        { id: 'delegate', title: 'Delegate', sub: 'Urgent + Not Important' },
+        { id: 'schedule', title: 'Schedule', sub: 'Not Urgent + Important' },
+        { id: 'delete', title: 'Delete', sub: 'Not Urgent + Not Important' }
+      ];
+
+      const SCENARIOS = [
+        {
+          id: 'olympic',
+          label: 'MA / Olympic project',
+          sentence: "Requests are coming from all directions. Aiko won't tell you what to prioritize — you decide.",
+          tasks: [
+            "Finalize the Olympic committee deck for tomorrow's 9am presentation",
+            "Prepare the strategic narrative for a stakeholder meeting next week",
+            "Send follow-up notes from today's partner meeting while details are fresh",
+            "Review feedback from last week's internal review session",
+            "Respond to a journalist asking for a comment on the Olympic project",
+            "Help ops set up the meeting room for Aiko's client visit this afternoon",
+            "Draft the Q3 project roadmap Aiko asked for by end of month",
+            "Meet a potential new partner who is in town only today",
+            "Accompany a sick colleague to the clinic",
+            "Update the team's shared project tracker that hasn't been touched in two weeks"
+          ],
+          sample: { do: [1, 3, 9], schedule: [2, 7, 8], delegate: [6, 10], delete: [4, 5], ambiguous: [8, 9] }
+        },
+        {
+          id: 'student',
+          label: 'Student life',
+          sentence: "It's hell week. Not everything can get done. What actually moves the needle?",
+          tasks: [
+            "Study for an exam happening in two days",
+            "Write a paper due tomorrow night",
+            "Attend your student org's event that you co-planned — it's tonight",
+            "Reply to a professor's email about your research assistant application",
+            "Call your parents — they've been waiting three days",
+            "Help a close friend move apartments — they asked last week",
+            "Submit a scholarship application due in four days",
+            "Do laundry — you're down to your last outfit",
+            "Review notes from last week's lecture to fill in gaps",
+            "Watch the new episode everyone in your group chat is discussing"
+          ],
+          sample: { do: [1, 2, 3], schedule: [7, 4, 5], delegate: [8, 6], delete: [10, 9], ambiguous: [3, 5] }
+        },
+        {
+          id: 'life',
+          label: 'Personal / life admin',
+          sentence: 'Your to-do list has been growing for weeks. Time to be ruthless.',
+          tasks: [
+            "Pay a credit card bill due tomorrow — late fee kicks in otherwise",
+            "Book a doctor's appointment for a health issue you've been ignoring for a month",
+            "Renew your passport — you have a trip in six weeks",
+            "Reply to a friend's wedding RSVP — deadline was yesterday",
+            "Clean and organize your home workspace",
+            "Cancel a gym membership you haven't used in three months",
+            "Call your bank about a suspicious charge on your statement",
+            "Buy a birthday gift for a family member whose birthday is this weekend",
+            "Sort through and delete old files on your laptop",
+            "Research and compare internet providers — your contract renews next month"
+          ],
+          sample: { do: [1, 7, 2], schedule: [3, 8, 10], delegate: [4, 6], delete: [5, 9], ambiguous: [2, 10] }
+        },
+        {
+          id: 'manager',
+          label: 'Manager with a team',
+          sentence: 'Your team is stretched and so are you. Decide what you do, what you delegate, and what you cut.',
+          tasks: [
+            "Review and approve a team member's client deliverable due today",
+            "Prepare for a performance review conversation you've been putting off",
+            "Respond to a client escalation that came in this morning",
+            "Write the team's monthly report — your manager needs it by Friday",
+            "Attend a cross-functional sync loosely related to your team's work",
+            "Onboard a new team member who starts tomorrow",
+            "Follow up on a proposal you sent a potential partner two weeks ago",
+            "Reorganize the team's shared drive — it's a mess",
+            "Review a junior team member's draft presentation before their client call today",
+            "Plan the team's quarter-end social event"
+          ],
+          sample: { do: [3, 9, 1], schedule: [2, 6, 7], delegate: [4, 10], delete: [5, 8], ambiguous: [1, 7] }
+        },
+        {
+          id: 'new-job',
+          label: 'New job, first 90 days',
+          sentence: "Everything feels urgent in a new role. Most of it isn't.",
+          tasks: [
+            "Prepare a summary of your first-week observations for your manager",
+            "Set up introductory 1:1 meetings with all key stakeholders",
+            "Respond to a Slack message from a senior leader asking a quick question",
+            "Learn the company's internal tools and systems",
+            "Attend every optional meeting you've been invited to this week",
+            "Draft your 30-60-90 day plan — your manager asked for it by end of month",
+            "Update your LinkedIn profile to reflect the new role",
+            "Review the last six months of team reports and meeting notes",
+            "Fix a small but visible error in a client-facing document you spotted",
+            "Accept an invitation to present at an internal all-hands next week"
+          ],
+          sample: { do: [3, 9], schedule: [1, 6, 8], delegate: [4, 2], delete: [5, 10, 7], ambiguous: [7, 8] }
+        },
+        {
+          id: 'freelancer',
+          label: 'Freelancer / consultant',
+          sentence: 'You work alone. Every hour is a decision. Not all clients are equal.',
+          tasks: [
+            "Send a revised proposal to a high-value client who asked for changes",
+            "Follow up on three unpaid invoices from last month",
+            "Prepare for a discovery call with a promising new lead — it's tomorrow",
+            "Write a LinkedIn post you've been drafting for two weeks",
+            "Schedule and batch your social media posts for the month",
+            "Reply to a low-budget client asking for significant scope changes",
+            "Protect focused work time for a project due this Friday",
+            "Attend a networking event tonight — you don't know anyone going",
+            "File your quarterly taxes — due in one week",
+            "Research a new tool that might improve your workflow"
+          ],
+          sample: { do: [1, 9, 2], schedule: [3, 7], delegate: [5, 10, 6], delete: [8, 4], ambiguous: [2, 6] }
+        }
+      ];
+
+      const state = {
+        scenarioId: SCENARIOS[0].id,
+        placements: {},
+        selectedId: null,
+        exampleMode: false,
+        savedPlacements: null,
+        timerStartedAt: Date.now(),
+        elapsedBeforePause: 0,
+        timerRunning: true
+      };
+
+      const scenarioSelect = document.getElementById('scenarioSelect');
+      const contextSentence = document.getElementById('contextSentence');
+      const taskList = document.getElementById('taskList');
+      const matrix = document.getElementById('matrix');
+      const emptyState = document.getElementById('emptyState');
+      const exampleBanner = document.getElementById('exampleBanner');
+      const showExample = document.getElementById('showExample');
+      const backToAnswer = document.getElementById('backToAnswer');
+      const tryAgain = document.getElementById('tryAgain');
+      const timerValue = document.getElementById('timerValue');
+      const timerToggle = document.getElementById('timerToggle');
+      const timerReset = document.getElementById('timerReset');
+
+      function scenario() {
+        return SCENARIOS.find((item) => item.id === state.scenarioId) || SCENARIOS[0];
+      }
+
+      function taskId(index) {
+        return `task-${index + 1}`;
+      }
+
+      function taskIndex(id) {
+        return Number(id.replace('task-', '')) - 1;
+      }
+
+      function escapeHtml(value) {
+        return String(value).replace(/[&<>"']/g, (char) => ({
+          '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
+        }[char]));
+      }
+
+      function formatSeconds(total) {
+        const mins = Math.floor(total / 60).toString().padStart(2, '0');
+        const secs = Math.floor(total % 60).toString().padStart(2, '0');
+        return `${mins}:${secs}`;
+      }
+
+      function elapsedSeconds() {
+        if (!state.timerRunning) return state.elapsedBeforePause;
+        return state.elapsedBeforePause + Math.floor((Date.now() - state.timerStartedAt) / 1000);
+      }
+
+      function resetTimer() {
+        state.elapsedBeforePause = 0;
+        state.timerStartedAt = Date.now();
+        state.timerRunning = true;
+        timerToggle.textContent = 'Ⅱ';
+        timerToggle.setAttribute('aria-label', 'Pause timer');
+        renderTimer();
+      }
+
+      function renderTimer() {
+        timerValue.textContent = formatSeconds(elapsedSeconds());
+      }
+
+      function placedIdsIn(zone) {
+        return Object.entries(state.placements).filter(([, value]) => value === zone).map(([key]) => key);
+      }
+
+      function unplacedIds() {
+        return scenario().tasks.map((_, index) => taskId(index)).filter((id) => !state.placements[id]);
+      }
+
+      function makeChip(id, small = false, readonly = false) {
+        const text = scenario().tasks[taskIndex(id)];
+        return `
+          <button class="eisenhower-chip ${small ? 'is-small' : ''} ${state.selectedId === id ? 'is-selected' : ''}" type="button" data-item-id="${id}" draggable="${!readonly}">
+            <span class="eisenhower-handle" aria-hidden="true">⋮⋮</span>
+            <span>${escapeHtml(text)}</span>
+          </button>
+        `;
+      }
+
+      function renderScenarioOptions() {
+        scenarioSelect.innerHTML = SCENARIOS.map((item) => `<option value="${item.id}">${escapeHtml(item.label)}</option>`).join('');
+        scenarioSelect.value = state.scenarioId;
+      }
+
+      function renderTaskList() {
+        const ids = unplacedIds();
+        taskList.innerHTML = ids.map((id) => makeChip(id)).join('');
+        emptyState.classList.toggle('is-visible', ids.length === 0);
+      }
+
+      function renderMatrix() {
+        matrix.innerHTML = QUADRANTS.map((quad) => `
+          <section class="eisenhower-quadrant" data-zone="${quad.id}">
+            <h3>${quad.title}</h3>
+            <p class="eisenhower-quadrant-sub">${quad.sub}</p>
+            <div class="eisenhower-zone">
+              ${placedIdsIn(quad.id).map((id) => {
+                const note = state.exampleMode && scenario().sample.ambiguous.includes(taskIndex(id) + 1)
+                  ? '<span class="eisenhower-note">Context-dependent — both placements can be right.</span>'
+                  : '';
+                return `<div>${makeChip(id, true, state.exampleMode)}${note}</div>`;
+              }).join('')}
+            </div>
+          </section>
+        `).join('');
+        exampleBanner.classList.toggle('is-visible', state.exampleMode);
+        showExample.style.visibility = state.exampleMode ? 'hidden' : '';
+        updateTapTargets();
+      }
+
+      function renderAll() {
+        contextSentence.textContent = scenario().sentence;
+        renderTaskList();
+        renderMatrix();
+      }
+
+      function moveItem(id, zone) {
+        if (state.exampleMode) return;
+        if (zone === 'list') delete state.placements[id];
+        else state.placements[id] = zone;
+        state.selectedId = null;
+        renderAll();
+      }
+
+      function resetBoard() {
+        state.placements = {};
+        state.selectedId = null;
+        state.exampleMode = false;
+        state.savedPlacements = null;
+        resetTimer();
+        renderAll();
+      }
+
+      function updateTapTargets() {
+        document.querySelectorAll('.eisenhower-chip').forEach((chip) => {
+          chip.classList.toggle('is-selected', chip.dataset.itemId === state.selectedId);
+          chip.setAttribute('aria-pressed', chip.dataset.itemId === state.selectedId ? 'true' : 'false');
+        });
+        document.querySelectorAll('[data-zone]').forEach((zone) => {
+          const current = state.selectedId ? (state.placements[state.selectedId] || 'list') : '';
+          zone.classList.toggle('tap-target', Boolean(state.selectedId) && zone.dataset.zone !== current);
+        });
+      }
+
+      function showExamplePlacement() {
+        if (state.exampleMode) return;
+        state.savedPlacements = { ...state.placements };
+        const samplePlacements = {};
+        Object.entries(scenario().sample).forEach(([zone, indexes]) => {
+          if (zone === 'ambiguous') return;
+          indexes.forEach((index) => {
+            samplePlacements[taskId(index - 1)] = zone;
+          });
+        });
+        state.placements = samplePlacements;
+        state.selectedId = null;
+        state.exampleMode = true;
+        renderAll();
+      }
+
+      function restoreAnswer() {
+        state.placements = { ...(state.savedPlacements || {}) };
+        state.exampleMode = false;
+        state.savedPlacements = null;
+        renderAll();
+      }
+
+      document.addEventListener('click', (event) => {
+        const chip = event.target.closest('.eisenhower-chip');
+        if (chip && !state.exampleMode) {
+          const id = chip.dataset.itemId;
+          state.selectedId = state.selectedId === id ? null : id;
+          updateTapTargets();
+          return;
+        }
+        const zone = event.target.closest('[data-zone]');
+        if (zone && state.selectedId && !state.exampleMode) {
+          moveItem(state.selectedId, zone.dataset.zone);
+        }
+      });
+
+      document.addEventListener('dragstart', (event) => {
+        const chip = event.target.closest('.eisenhower-chip');
+        if (!chip || state.exampleMode) return;
+        state.selectedId = null;
+        event.dataTransfer.setData('text/plain', chip.dataset.itemId);
+      });
+
+      document.addEventListener('dragover', (event) => {
+        const zone = event.target.closest('[data-zone]');
+        if (!zone || state.exampleMode) return;
+        event.preventDefault();
+      });
+
+      document.addEventListener('dragenter', (event) => {
+        const zone = event.target.closest('[data-zone]');
+        if (!zone || state.exampleMode) return;
+        zone.classList.add('drag-over');
+      });
+
+      document.addEventListener('dragleave', (event) => {
+        const zone = event.target.closest('[data-zone]');
+        if (!zone) return;
+        zone.classList.remove('drag-over');
+      });
+
+      document.addEventListener('drop', (event) => {
+        const zone = event.target.closest('[data-zone]');
+        if (!zone || state.exampleMode) return;
+        event.preventDefault();
+        zone.classList.remove('drag-over');
+        const id = event.dataTransfer.getData('text/plain');
+        if (id) moveItem(id, zone.dataset.zone);
+      });
+
+      scenarioSelect.addEventListener('change', () => {
+        state.scenarioId = scenarioSelect.value;
+        resetBoard();
+      });
+      showExample.addEventListener('click', showExamplePlacement);
+      backToAnswer.addEventListener('click', restoreAnswer);
+      tryAgain.addEventListener('click', resetBoard);
+      timerReset.addEventListener('click', resetTimer);
+      timerToggle.addEventListener('click', () => {
+        if (state.timerRunning) {
+          state.elapsedBeforePause = elapsedSeconds();
+          state.timerRunning = false;
+          timerToggle.textContent = '▶';
+          timerToggle.setAttribute('aria-label', 'Resume timer');
+        } else {
+          state.timerStartedAt = Date.now();
+          state.timerRunning = true;
+          timerToggle.textContent = 'Ⅱ';
+          timerToggle.setAttribute('aria-label', 'Pause timer');
+        }
+        renderTimer();
+      });
+
+      renderScenarioOptions();
+      renderAll();
+      renderTimer();
+      setInterval(renderTimer, 1000);
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Practice perspective taking before a difficult conversation.">
+  <title>Let's Switch Hats | The Untaught Lessons</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="../../assets/favicon-bluebg-whitedoor-thicker-32.png?v=6">
+  <link rel="shortcut icon" type="image/png" href="../../assets/favicon-bluebg-whitedoor-thicker-32.png?v=6">
+  <link rel="apple-touch-icon" sizes="180x180" href="../../assets/apple-touch-icon.png?v=3">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lato:wght@300;400;700&family=Roboto+Mono:wght@400;500;700&display=swap');
+
+    :root {
+      --lsh-navy: #003366;
+      --lsh-gold: #EEA320;
+      --lsh-cream: #F3EDE2;
+      --lsh-charcoal: #4A4A4A;
+      --lsh-white: #FFFFFF;
+      --lsh-line: #C7D8E8;
+      --lsh-soft: #F7F5EF;
+      --lsh-shadow: 0 10px 24px rgba(0, 51, 102, .08);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--lsh-cream);
+      color: var(--lsh-charcoal);
+      font-family: 'Lato', Arial, sans-serif;
+    }
+
+    a { color: inherit; }
+
+    button {
+      font: inherit;
+    }
+
+    button:focus-visible,
+    a:focus-visible {
+      outline: 2px solid var(--lsh-gold);
+      outline-offset: 3px;
+    }
+
+    .lsh-header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: grid;
+      grid-template-columns: auto auto minmax(220px, 1fr) auto;
+      align-items: center;
+      column-gap: 20px;
+      min-height: 76px;
+      padding: 12px 32px;
+      background: var(--lsh-navy);
+      color: var(--lsh-white);
+    }
+
+    .lsh-logo {
+      display: block;
+      width: 224px;
+      height: 46px;
+    }
+
+    .lsh-logo img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .lsh-divider {
+      width: 1px;
+      height: 38px;
+      background: rgba(255, 255, 255, .42);
+    }
+
+    .lsh-kicker,
+    .lsh-label,
+    .lsh-button,
+    .lsh-timer-label,
+    .lsh-timer-value,
+    .lsh-step-number {
+      font-family: 'Roboto Mono', monospace;
+    }
+
+    .lsh-kicker {
+      display: block;
+      color: var(--lsh-gold);
+      font-size: 10px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+
+    .lsh-title {
+      display: block;
+      margin-top: 3px;
+      color: var(--lsh-white);
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 27px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .lsh-timer {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 7px 10px;
+      border: 1px solid rgba(255, 255, 255, .32);
+      border-radius: 6px;
+      background: rgba(255, 255, 255, .08);
+      white-space: nowrap;
+    }
+
+    .lsh-timer-label {
+      color: var(--lsh-gold);
+      font-size: 9px;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+    }
+
+    .lsh-timer-value {
+      color: var(--lsh-white);
+      font-size: 18px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .lsh-icon-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px;
+      height: 30px;
+      border: 1px solid rgba(255, 255, 255, .34);
+      border-radius: 6px;
+      background: transparent;
+      color: var(--lsh-white);
+      cursor: pointer;
+      font-weight: 700;
+      line-height: 1;
+      padding: 0;
+    }
+
+    .lsh-main {
+      width: min(1120px, calc(100% - 56px));
+      margin: 0 auto;
+      padding: 28px 0 84px;
+    }
+
+    .lsh-intro {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(260px, 340px);
+      gap: 24px;
+      align-items: stretch;
+      padding-bottom: 18px;
+      border-bottom: 1px solid #D8CFC1;
+    }
+
+    .lsh-intro h1 {
+      margin: 0 0 8px;
+      color: var(--lsh-navy);
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: clamp(36px, 5vw, 58px);
+      line-height: 1.03;
+    }
+
+    .lsh-intro p {
+      max-width: 760px;
+      margin: 0;
+      color: var(--lsh-charcoal);
+      font-size: 17px;
+      line-height: 1.55;
+    }
+
+    .lsh-brief-card,
+    .lsh-panel,
+    .lsh-action-card {
+      border: 1px solid var(--lsh-line);
+      border-radius: 8px;
+      background: var(--lsh-white);
+      box-shadow: var(--lsh-shadow);
+    }
+
+    .lsh-brief-card {
+      padding: 18px;
+    }
+
+    .lsh-label {
+      margin: 0 0 8px;
+      color: var(--lsh-gold);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.3px;
+      text-transform: uppercase;
+    }
+
+    .lsh-brief-card strong {
+      display: block;
+      color: var(--lsh-gold);
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 26px;
+      line-height: 1.1;
+    }
+
+    .lsh-brief-card span {
+      display: block;
+      margin-top: 8px;
+      font-size: 15px;
+      line-height: 1.45;
+    }
+
+    .lsh-grid {
+      display: grid;
+      grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr);
+      gap: 18px;
+      margin-top: 22px;
+    }
+
+    .lsh-panel {
+      padding: 20px;
+    }
+
+    .lsh-panel h2 {
+      margin: 0 0 12px;
+      color: var(--lsh-navy);
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 28px;
+      line-height: 1.15;
+    }
+
+    .lsh-panel p {
+      margin: 0 0 14px;
+      font-size: 16px;
+      line-height: 1.55;
+    }
+
+    .lsh-panel p:last-child {
+      margin-bottom: 0;
+    }
+
+    .lsh-scenario {
+      display: grid;
+      gap: 12px;
+      padding: 16px;
+      border: 1px dashed var(--lsh-line);
+      border-radius: 8px;
+      background: var(--lsh-soft);
+    }
+
+    .lsh-scenario p {
+      margin: 0;
+    }
+
+    .lsh-steps {
+      display: grid;
+      gap: 12px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .lsh-step {
+      position: relative;
+      display: grid;
+      grid-template-columns: 42px minmax(0, 1fr);
+      gap: 12px;
+      padding: 14px;
+      border: 1px solid var(--lsh-line);
+      border-radius: 8px;
+      background: var(--lsh-soft);
+    }
+
+    .lsh-step:not(:last-child)::after {
+      content: "";
+      position: absolute;
+      left: 30px;
+      top: 49px;
+      bottom: -15px;
+      width: 1px;
+      border-left: 1px dashed rgba(74, 74, 74, .2);
+    }
+
+    .lsh-step-number {
+      position: relative;
+      z-index: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px;
+      height: 30px;
+      border-radius: 999px;
+      background: var(--lsh-gold);
+      color: var(--lsh-white);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .lsh-step strong {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--lsh-navy);
+      font-size: 16px;
+    }
+
+    .lsh-step > span:not(.lsh-step-number) {
+      display: block;
+      font-size: 15px;
+      line-height: 1.45;
+    }
+
+    .lsh-action-card {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 20px;
+      align-items: center;
+      margin-top: 18px;
+      padding: 20px;
+      border-color: var(--lsh-gold);
+    }
+
+    .lsh-action-card h2 {
+      margin: 0 0 6px;
+      color: var(--lsh-navy);
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 30px;
+      line-height: 1.1;
+    }
+
+    .lsh-action-card p {
+      margin: 0;
+      font-size: 16px;
+      line-height: 1.5;
+    }
+
+    .lsh-actions {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+
+    .lsh-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 11px 22px;
+      border-radius: 7px;
+      border: 0;
+      background: var(--lsh-white);
+      color: var(--lsh-navy);
+      font-family: 'Lato', Arial, sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .lsh-button-primary {
+      border-color: var(--lsh-gold);
+      background: var(--lsh-gold);
+      color: var(--lsh-navy);
+    }
+
+    .lsh-prep-cue {
+      margin: 12px 0 0;
+      padding-left: 12px;
+      border-left: 3px solid var(--lsh-gold);
+      color: var(--lsh-navy);
+      font-family: 'Lato', Arial, sans-serif;
+      font-size: 16px;
+      font-weight: 600;
+      line-height: 1.45;
+    }
+
+    .lsh-exit-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 16px;
+      border: 1.5px solid #c8c2b8;
+      border-radius: 7px;
+      background: transparent;
+      color: var(--lsh-navy);
+      font-family: 'Lato', Arial, sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .lsh-exit-link:hover {
+      border-color: #2e7d4f;
+      color: #2e7d4f;
+      text-decoration: none;
+    }
+
+    @media (max-width: 860px) {
+      .lsh-header {
+        grid-template-columns: 1fr auto;
+        row-gap: 10px;
+        padding: 12px 18px;
+      }
+
+      .lsh-logo {
+        width: 176px;
+        height: 38px;
+      }
+
+      .lsh-divider {
+        display: none;
+      }
+
+      .lsh-heading {
+        grid-column: 1 / -1;
+        grid-row: 2;
+      }
+
+      .lsh-timer {
+        grid-column: 2;
+        grid-row: 1;
+      }
+
+      .lsh-main {
+        width: min(100% - 32px, 640px);
+        padding-top: 20px;
+      }
+
+      .lsh-intro,
+      .lsh-grid,
+      .lsh-action-card {
+        grid-template-columns: 1fr;
+      }
+
+      .lsh-actions {
+        align-items: flex-start;
+        justify-content: flex-start;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .lsh-header {
+        grid-template-columns: 1fr;
+      }
+
+      .lsh-timer {
+        grid-column: 1;
+        grid-row: 3;
+        width: 100%;
+        justify-content: space-between;
+      }
+
+      .lsh-title {
+        font-size: 24px;
+      }
+
+      .lsh-step {
+        grid-template-columns: 1fr;
+      }
+
+      .lsh-step:not(:last-child)::after {
+        display: none;
+      }
+
+      .lsh-button {
+        width: 100%;
+      }
+
+      .lsh-exit-link {
+        align-self: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="lsh-header">
+    <a class="lsh-logo" href="../../index.html" aria-label="The Untaught Lessons homepage">
+      <img src="../../assets/utl-logo-nav-white.png" alt="The Untaught Lessons">
+    </a>
+    <div class="lsh-divider" aria-hidden="true"></div>
+    <div class="lsh-heading">
+      <span class="lsh-kicker">PHASE 3 &middot; ACT CONFIDENTLY</span>
+      <span class="lsh-title">Let's Switch Hats</span>
+    </div>
+    <div class="lsh-timer" aria-label="Exercise timer">
+      <span class="lsh-timer-label">Timer</span>
+      <span class="lsh-timer-value" id="timerValue">00:00</span>
+      <button class="lsh-icon-button" id="timerToggle" type="button" aria-label="Start timer" title="Start timer">▶</button>
+      <button class="lsh-icon-button" id="timerReset" type="button" aria-label="Reset timer" title="Reset timer">↺</button>
+    </div>
+  </header>
+
+  <main class="lsh-main">
+    <section class="lsh-intro" aria-labelledby="lshIntroTitle">
+      <div>
+        <p class="lsh-label">Perspective taking</p>
+        <h1 id="lshIntroTitle">See it their way before you say your way.</h1>
+        <p>Your job is to understand how the other person sees the situation before you respond. Not to agree. Not to compromise. To understand first &mdash; because how you see it and how they see it are rarely the same thing.</p>
+      </div>
+      <aside class="lsh-brief-card" aria-label="Exercise brief">
+        <p class="lsh-label">Exercise brief</p>
+        <strong>15 minutes</strong>
+        <span>Use the Let's Switch Hats CustomGPT to step into someone else's perspective, practice reading their constraints and motivations, and reshape how you'd approach the conversation.</span>
+        <span>When you finish, note one thing you'd say differently now that you've seen it from their side.</span>
+      </aside>
+    </section>
+
+    <section class="lsh-grid" aria-label="Practice instructions">
+      <article class="lsh-panel">
+        <h2>The scenario</h2>
+        <div class="lsh-scenario">
+          <p>You are now leading the Olympic project. You will work with people who think very differently from you &mdash; different roles, different pressures, different definitions of success.</p>
+          <p>What feels obvious to you may feel risky or unclear to someone else. Before you push your idea, you need to understand their world first.</p>
+          <p>Before opening the GPT, choose a real person and situation: a colleague you need to convince, a stakeholder who keeps pushing back, a manager who seems hard to read, or a decision someone made that frustrated you.</p>
+        </div>
+        <p class="lsh-prep-cue">Choose your person and situation above before opening the GPT.</p>
+      </article>
+
+      <article class="lsh-panel">
+        <h2>Your switching framework</h2>
+        <ol class="lsh-steps">
+          <li class="lsh-step">
+            <span class="lsh-step-number">1</span>
+            <span><strong>Name their role and pressures.</strong> What do they need to protect? What are they accountable for? What would failure look like for them?</span>
+          </li>
+          <li class="lsh-step">
+            <span class="lsh-step-number">2</span>
+            <span><strong>Identify what they actually want.</strong> Not what they say they want &mdash; what outcome matters most to them in this situation?</span>
+          </li>
+          <li class="lsh-step">
+            <span class="lsh-step-number">3</span>
+            <span><strong>Spot where your view and theirs diverge.</strong> Where are you assuming they see it the same way you do? That gap is where the friction lives.</span>
+          </li>
+          <li class="lsh-step">
+            <span class="lsh-step-number">4</span>
+            <span><strong>Adjust how you'd approach the conversation.</strong> Given what you now know about their world, what would you say differently?</span>
+          </li>
+        </ol>
+      </article>
+    </section>
+
+    <section class="lsh-action-card" aria-label="Open CustomGPT">
+      <div>
+        <p class="lsh-label">Practice with AI</p>
+        <h2>Open the Let's Switch Hats CustomGPT.</h2>
+        <p>Choose your scenario, ask it to play the other person, and practice until your message would actually land for them &mdash; not just for you.</p>
+      </div>
+      <div class="lsh-actions">
+        <a class="lsh-button lsh-button-primary" href="https://chatgpt.com/g/g-6a0ad0becb6881918015ab7d434da1c5-let-s-switch-hats" target="_blank" rel="noopener">Open CustomGPT</a>
+        <a class="lsh-exit-link" href="../../member-login/index.html#phase3">Back to member workspace</a>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    (() => {
+      const timerValue = document.getElementById('timerValue');
+      const timerToggle = document.getElementById('timerToggle');
+      const timerReset = document.getElementById('timerReset');
+      let elapsed = 0;
+      let intervalId = null;
+
+      function formatTime(seconds) {
+        const minutes = Math.floor(seconds / 60).toString().padStart(2, '0');
+        const secs = (seconds % 60).toString().padStart(2, '0');
+        return `${minutes}:${secs}`;
+      }
+
+      function renderTimer() {
+        timerValue.textContent = formatTime(elapsed);
+        timerToggle.textContent = intervalId ? 'Ⅱ' : '▶';
+        timerToggle.setAttribute('aria-label', intervalId ? 'Pause timer' : 'Start timer');
+        timerToggle.setAttribute('title', intervalId ? 'Pause timer' : 'Start timer');
+      }
+
+      function stopTimer() {
+        if (intervalId) {
+          clearInterval(intervalId);
+          intervalId = null;
+        }
+      }
+
+      timerToggle.addEventListener('click', () => {
+        if (intervalId) {
+          stopTimer();
+          renderTimer();
+          return;
+        }
+
+        intervalId = window.setInterval(() => {
+          elapsed += 1;
+          renderTimer();
+        }, 1000);
+        renderTimer();
+      });
+
+      timerReset.addEventListener('click', () => {
+        stopTimer();
+        elapsed = 0;
+        renderTimer();
+      });
+
+      renderTimer();
+    })();
+  </script>
+</body>
+</html>

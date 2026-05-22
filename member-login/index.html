@@ -462,9 +462,29 @@
       flex: 1;
     }
 
+    .nav-phase-links,
+    .nav-utility-links {
+      display: flex;
+      align-items: center;
+      gap: 0;
+    }
+
+    .nav-spacer {
+      flex: 1;
+    }
+
+    .nav-divider {
+      width: 1px;
+      height: 22px;
+      margin: 0 20px;
+      background: #d5cfc5;
+      flex-shrink: 0;
+    }
+
     .nav-item {
-      padding: 4px 10px;
+      padding: 4px 10px 6px;
       border-radius: 6px;
+      border-bottom: 2px solid transparent;
       color: var(--charcoal);
       font-family: 'Lato', sans-serif;
       font-size: 12px;
@@ -479,7 +499,8 @@
     .nav-item.active {
       color: var(--navy);
       font-weight: 500;
-      background: rgba(0, 51, 102, .07);
+      background: transparent;
+      border-bottom-color: var(--gold);
     }
 
     .nav-item-results {
@@ -493,6 +514,17 @@
       background: rgba(0, 51, 102, .07);
     }
 
+    .nav-item-results.active {
+      background: var(--navy);
+      border: .5px solid var(--navy);
+      border-color: var(--navy);
+      color: var(--white);
+    }
+
+    .nav-item-results.active:hover {
+      background: var(--navy);
+    }
+
     .nav-sep {
       padding: 0 2px;
       color: #c8bfb0;
@@ -500,7 +532,6 @@
     }
 
     .nav-logout {
-      margin-left: auto;
       flex-shrink: 0;
       color: #888;
       font-family: 'Lato', sans-serif;
@@ -1043,7 +1074,9 @@
     }
 
     .ws-is-locked .ws-mark-done {
-      display: none;
+      opacity: .55;
+      cursor: not-allowed;
+      pointer-events: none;
     }
 
     .ws-lock-hint {
@@ -1208,19 +1241,24 @@
             <div class="member-nav-inner">
               <span class="nav-workspace-label">Member workspace</span>
               <div class="nav-links">
-                <a href="#orientation" class="nav-item active" data-section="orientation">Orientation</a>
-                <span class="nav-sep">·</span>
-                <a href="#phase1" class="nav-item" data-section="phase1">Phase 1</a>
-                <span class="nav-sep">·</span>
-                <a href="#phase2" class="nav-item" data-section="phase2">Phase 2</a>
-                <span class="nav-sep">·</span>
-                <a href="#phase3" class="nav-item" data-section="phase3">Phase 3</a>
-                <span class="nav-sep">·</span>
-                <a href="#assessments" class="nav-item nav-item-results" data-section="assessments">Assessments</a>
-                <span class="nav-sep">·</span>
-                <a href="../my-results/index.html" class="nav-item nav-item-results">My results</a>
-                <a href="#toolkit" class="nav-item nav-item-results" data-section="toolkit">Toolkit</a>
+                <div class="nav-phase-links">
+                  <a href="#orientation" class="nav-item active" data-section="orientation">Orientation</a>
+                  <span class="nav-sep">·</span>
+                  <a href="#phase1" class="nav-item" data-section="phase1">Phase 1</a>
+                  <span class="nav-sep">·</span>
+                  <a href="#phase2" class="nav-item" data-section="phase2">Phase 2</a>
+                  <span class="nav-sep">·</span>
+                  <a href="#phase3" class="nav-item" data-section="phase3">Phase 3</a>
+                </div>
+                <span class="nav-spacer" aria-hidden="true"></span>
+                <span class="nav-divider" aria-hidden="true"></span>
+                <div class="nav-utility-links">
+                  <a href="#assessments" class="nav-item nav-item-results" data-section="assessments">Assessments</a>
+                  <a href="../my-results/index.html" class="nav-item nav-item-results">My results</a>
+                  <a href="#toolkit" class="nav-item nav-item-results" data-section="toolkit">Toolkit</a>
+                </div>
               </div>
+              <span class="nav-divider" aria-hidden="true"></span>
               <a href="#" class="nav-logout" id="logoutBtn">Log out</a>
             </div>
           </nav>
@@ -1436,13 +1474,15 @@
                   <span class="ws-context-text"><span class="ws-context-label">Get outside perspectives before you commit</span><span class="ws-context-sub">Read before starting</span></span>
                 </div>
                 <div class="slides-placeholder is-collapsed"><!-- embed to be added --></div>
-                <article class="exercise-card ws-phase2-coming-soon-card">
-                  <div class="card-type"><span class="ws-step-circle">3</span><span>Phase 2 | Speak Concisely</span></div>
-                  <div class="card-title">Advisory Board</div>
+                <article class="exercise-card ws-ex-card" data-ws-p2-exercise="3" data-ws-href="../apps/advisory-board/index.html">
+                  <div class="card-type"><span class="ws-step-circle">3</span><span>Phase 2 | Speak Concisely</span><span class="ws-done-pill">✓ Done</span></div>
+                  <div class="card-title">Advisory board with AI</div>
                   <div class="card-time">Stress-test your SCQA with a virtual advisory board.</div>
                   <div class="ws-card-actions">
                     <a class="ws-open-tool" href="../apps/advisory-board/index.html">Open tool</a>
+                    <button class="ws-mark-done" type="button">Mark as done</button>
                   </div>
+                  <div class="ws-lock-hint">Complete exercise 2 to unlock</div>
                 </article>
               </div>
 
@@ -1452,13 +1492,15 @@
                   <span class="ws-context-text"><span class="ws-context-label">Aiko does not have time to read everything</span><span class="ws-context-sub">Read before starting</span></span>
                 </div>
                 <div class="slides-placeholder is-collapsed"><!-- embed to be added --></div>
-                <article class="exercise-card ws-phase2-coming-soon-card">
-                  <div class="card-type"><span class="ws-step-circle">4</span><span>Phase 2 | Speak Concisely</span></div>
-                  <div class="card-title">Think. Write. Speak.</div>
-                  <div class="card-time">Turn your SCQA into an answer-first email, then prepare to say it out loud.</div>
+                <article class="exercise-card ws-ex-card" data-ws-p2-exercise="4" data-ws-href="../apps/write-to-aiko/index.html">
+                  <div class="card-type"><span class="ws-step-circle">4</span><span>Phase 2 | Speak Concisely</span><span class="ws-done-pill">✓ Done</span></div>
+                  <div class="card-title">Write to Aiko</div>
+                  <div class="card-time">Turn your SCQA into an answer-first email Aiko can act on quickly.</div>
                   <div class="ws-card-actions">
-                    <a class="ws-open-tool" href="../apps/think-write-speak/index.html">Open tool</a>
+                    <a class="ws-open-tool" href="../apps/write-to-aiko/index.html">Open tool</a>
+                    <button class="ws-mark-done" type="button">Mark as done</button>
                   </div>
+                  <div class="ws-lock-hint">Complete exercise 3 to unlock</div>
                 </article>
               </div>
 
@@ -1468,13 +1510,15 @@
                   <span class="ws-context-text"><span class="ws-context-label">She bumped into you in the hallway</span><span class="ws-context-sub">Read before starting</span></span>
                 </div>
                 <div class="slides-placeholder is-collapsed">Slides coming soon</div>
-                <article class="exercise-card ws-phase2-coming-soon-card">
-                  <div class="card-type"><span class="ws-step-circle">5</span><span>Phase 2 | Speak Concisely</span></div>
+                <article class="exercise-card ws-ex-card" data-ws-p2-exercise="5" data-ws-href="../apps/explain-to-aiko/index.html">
+                  <div class="card-type"><span class="ws-step-circle">5</span><span>Phase 2 | Speak Concisely</span><span class="ws-done-pill">✓ Done</span></div>
                   <div class="card-title">Explain to Aiko (120s)</div>
                   <div class="card-time">Give a short explanation with a clear point, structure, and ask.</div>
                   <div class="ws-card-actions">
-                    <button class="ws-coming-soon-button" type="button" disabled>Coming soon</button>
+                    <a class="ws-open-tool" href="../apps/explain-to-aiko/index.html">Open tool</a>
+                    <button class="ws-mark-done" type="button">Mark as done</button>
                   </div>
+                  <div class="ws-lock-hint">Complete exercise 4 to unlock</div>
                 </article>
               </div>
 
@@ -1484,13 +1528,15 @@
                   <span class="ws-context-text"><span class="ws-context-label">Now compress it</span><span class="ws-context-sub">Read before starting</span></span>
                 </div>
                 <div class="slides-placeholder is-collapsed"><!-- embed to be added --></div>
-                <article class="exercise-card ws-phase2-coming-soon-card">
-                  <div class="card-type"><span class="ws-step-circle">6</span><span>Phase 2 | Speak Concisely</span></div>
-                  <div class="card-title">Elevator Pitch (60s)</div>
-                  <div class="card-time">Compress a recommendation into one focused minute.</div>
+                <article class="exercise-card ws-ex-card" data-ws-p2-exercise="6" data-ws-href="../apps/explain-to-aiko-60/index.html">
+                  <div class="card-type"><span class="ws-step-circle">6</span><span>Phase 2 | Speak Concisely</span><span class="ws-done-pill">✓ Done</span></div>
+                  <div class="card-title">Explain to Aiko (60s)</div>
+                  <div class="card-time">Compress the same recommendation into one focused minute.</div>
                   <div class="ws-card-actions">
-                    <button class="ws-coming-soon-button" type="button" disabled>Coming soon</button>
+                    <a class="ws-open-tool" href="../apps/explain-to-aiko-60/index.html">Open tool</a>
+                    <button class="ws-mark-done" type="button">Mark as done</button>
                   </div>
+                  <div class="ws-lock-hint">Complete exercise 5 to unlock</div>
                 </article>
               </div>
               <div class="phase-overlay">This phase is not yet available</div>
@@ -1511,13 +1557,15 @@
                   <span class="ws-context-text"><span class="ws-context-label">You just got the lead role.</span><span class="ws-context-sub">Read before starting</span></span>
                 </div>
                 <div class="slides-placeholder is-collapsed"><!-- embed to be added --></div>
-                <article class="exercise-card ws-phase2-coming-soon-card">
-                  <div class="card-type"><span class="ws-step-circle">1</span><span>Phase 3 | Act Confidently</span></div>
+                <article class="exercise-card ws-ex-card" data-ws-p3-exercise="1" data-ws-href="../apps/eisenhower-matrix/index.html">
+                  <div class="card-type"><span class="ws-step-circle">1</span><span>Phase 3 | Act Confidently</span><span class="ws-done-pill">✓ Done</span></div>
                   <div class="card-title">The Art of Saying No</div>
                   <div class="card-time">Prioritize what actually matters using the Eisenhower matrix.</div>
                   <div class="ws-card-actions">
-                    <button class="ws-coming-soon-button" type="button" disabled>Coming soon</button>
+                    <a class="ws-open-tool" href="../apps/eisenhower-matrix/index.html">Open tool</a>
+                    <button class="ws-mark-done" type="button">Mark as done</button>
                   </div>
+                  <div class="ws-lock-hint"></div>
                 </article>
               </div>
 
@@ -1527,13 +1575,15 @@
                   <span class="ws-context-text"><span class="ws-context-label">You have to be the one to say it</span><span class="ws-context-sub">Read before starting</span></span>
                 </div>
                 <div class="slides-placeholder is-collapsed"><!-- embed to be added --></div>
-                <article class="exercise-card ws-phase2-coming-soon-card">
-                  <div class="card-type"><span class="ws-step-circle">2</span><span>Phase 3 | Act Confidently</span></div>
+                <article class="exercise-card ws-ex-card" data-ws-p3-exercise="2" data-ws-href="../apps/i-have-bad-news/index.html">
+                  <div class="card-type"><span class="ws-step-circle">2</span><span>Phase 3 | Act Confidently</span><span class="ws-done-pill">✓ Done</span></div>
                   <div class="card-title">I Have Bad News...</div>
                   <div class="card-time">Deliver a difficult message clearly and with composure.</div>
                   <div class="ws-card-actions">
-                    <button class="ws-coming-soon-button" type="button" disabled>Coming soon</button>
+                    <a class="ws-open-tool" href="../apps/i-have-bad-news/index.html">Open tool</a>
+                    <button class="ws-mark-done" type="button">Mark as done</button>
                   </div>
+                  <div class="ws-lock-hint">Complete exercise 1 to unlock</div>
                 </article>
               </div>
 
@@ -1543,13 +1593,15 @@
                   <span class="ws-context-text"><span class="ws-context-label">Read the room before you speak</span><span class="ws-context-sub">Read before starting</span></span>
                 </div>
                 <div class="slides-placeholder is-collapsed"><!-- embed to be added --></div>
-                <article class="exercise-card ws-phase2-coming-soon-card">
-                  <div class="card-type"><span class="ws-step-circle">3</span><span>Phase 3 | Act Confidently</span></div>
+                <article class="exercise-card ws-ex-card" data-ws-p3-exercise="3" data-ws-href="../apps/lets-switch-hats/index.html">
+                  <div class="card-type"><span class="ws-step-circle">3</span><span>Phase 3 | Act Confidently</span><span class="ws-done-pill">✓ Done</span></div>
                   <div class="card-title">Let's Switch Hats</div>
                   <div class="card-time">See the situation through someone else's eyes.</div>
                   <div class="ws-card-actions">
-                    <button class="ws-coming-soon-button" type="button" disabled>Coming soon</button>
+                    <a class="ws-open-tool" href="../apps/lets-switch-hats/index.html">Open tool</a>
+                    <button class="ws-mark-done" type="button">Mark as done</button>
                   </div>
+                  <div class="ws-lock-hint">Complete exercise 2 to unlock</div>
                 </article>
               </div>
 
@@ -1559,13 +1611,15 @@
                   <span class="ws-context-text"><span class="ws-context-label">All eyes are on you</span><span class="ws-context-sub">Read before starting</span></span>
                 </div>
                 <div class="slides-placeholder is-collapsed"><!-- embed to be added --></div>
-                <article class="exercise-card ws-phase2-coming-soon-card">
-                  <div class="card-type"><span class="ws-step-circle">4</span><span>Phase 3 | Act Confidently</span></div>
+                <article class="exercise-card ws-ex-card" data-ws-p3-exercise="4" data-ws-href="../apps/speak-like-obama/index.html">
+                  <div class="card-type"><span class="ws-step-circle">4</span><span>Phase 3 | Act Confidently</span><span class="ws-done-pill">✓ Done</span></div>
                   <div class="card-title">Speak Like Obama</div>
                   <div class="card-time">Deliver your message clearly when the stakes are high.</div>
                   <div class="ws-card-actions">
-                    <button class="ws-coming-soon-button" type="button" disabled>Coming soon</button>
+                    <a class="ws-open-tool" href="../apps/speak-like-obama/index.html">Open tool</a>
+                    <button class="ws-mark-done" type="button">Mark as done</button>
                   </div>
+                  <div class="ws-lock-hint">Complete exercise 3 to unlock</div>
                 </article>
               </div>
               <div class="phase-overlay">This phase is not yet available</div>
@@ -1686,6 +1740,26 @@
         utl_embed_p3_bad_news: 'utl_slides_phase3_chunk2',
         utl_embed_p3_read_room: 'utl_slides_phase3_chunk3'
       };
+      var defaultEmbedConfigs = {
+        utl_embed_orientation_welcome: { url: 'https://docs.google.com/presentation/d/1p0bvALYVQ_U-FGFfUx47W05sQuy4GQRka_-N079n9J0/edit?slide=id.g3e2ad370f6d_0_280', type: 'slides' },
+        utl_embed_orientation_howto: { url: 'https://docs.google.com/presentation/d/1p0bvALYVQ_U-FGFfUx47W05sQuy4GQRka_-N079n9J0/edit?slide=id.g3e2ad370f6d_0_361', type: 'slides' },
+        utl_embed_p1_first_day: { url: 'https://docs.google.com/presentation/d/1p0bvALYVQ_U-FGFfUx47W05sQuy4GQRka_-N079n9J0/edit?slide=id.g3e2ad370f6d_0_543', type: 'slides' },
+        utl_embed_p1_ai_grocery: { url: 'https://docs.google.com/presentation/d/1p0bvALYVQ_U-FGFfUx47W05sQuy4GQRka_-N079n9J0/edit?slide=id.g3e2ad370f6d_0_717', type: 'slides' },
+        utl_embed_p1_message_desk: { url: 'https://docs.google.com/presentation/d/1p0bvALYVQ_U-FGFfUx47W05sQuy4GQRka_-N079n9J0/edit?slide=id.g3e2ad370f6d_0_930', type: 'slides' },
+        utl_embed_p1_hugh_favour: { url: 'https://docs.google.com/presentation/d/1p0bvALYVQ_U-FGFfUx47W05sQuy4GQRka_-N079n9J0/edit?slide=id.g3e2ad370f6d_0_1162', type: 'slides' },
+        utl_embed_p1_ai_memo: { url: 'https://docs.google.com/presentation/d/1p0bvALYVQ_U-FGFfUx47W05sQuy4GQRka_-N079n9J0/edit?slide=id.g3e2ad370f6d_0_1347', type: 'slides' },
+        utl_embed_p1_olympic_brainstorm: { url: 'https://docs.google.com/presentation/d/1p0bvALYVQ_U-FGFfUx47W05sQuy4GQRka_-N079n9J0/edit?slide=id.g3e2ad370f6d_0_1520', type: 'slides' },
+        utl_embed_p2_aiko_question: { url: 'https://docs.google.com/presentation/d/1p0bvALYVQ_U-FGFfUx47W05sQuy4GQRka_-N079n9J0/edit?slide=id.g3e2ad370f6d_0_2065', type: 'slides' },
+        utl_embed_p2_frame_answer: { url: 'https://docs.google.com/presentation/d/1p0bvALYVQ_U-FGFfUx47W05sQuy4GQRka_-N079n9J0/edit?slide=id.g3e2dc34c604_0_0', type: 'slides' },
+        utl_embed_p2_outside_perspectives: { url: 'https://docs.google.com/presentation/d/1p0bvALYVQ_U-FGFfUx47W05sQuy4GQRka_-N079n9J0/edit?slide=id.g3e2dc34c604_0_64', type: 'slides' },
+        utl_embed_p2_aiko_email: { url: 'https://docs.google.com/presentation/d/1p0bvALYVQ_U-FGFfUx47W05sQuy4GQRka_-N079n9J0/edit?slide=id.g3e2dc34c604_0_244', type: 'slides' },
+        utl_embed_p2_hallway: { url: 'https://docs.google.com/presentation/d/1p0bvALYVQ_U-FGFfUx47W05sQuy4GQRka_-N079n9J0/edit?slide=id.g3e2dc34c604_0_430', type: 'slides' },
+        utl_embed_p2_compress: { url: 'https://docs.google.com/presentation/d/1p0bvALYVQ_U-FGFfUx47W05sQuy4GQRka_-N079n9J0/edit?slide=id.g3e2dc34c604_0_430', type: 'slides' },
+        utl_embed_p3_lead_role: { url: 'https://docs.google.com/presentation/d/1p0bvALYVQ_U-FGFfUx47W05sQuy4GQRka_-N079n9J0/edit?slide=id.g3e2dc34c604_0_851', type: 'slides' },
+        utl_embed_p3_bad_news: { url: 'https://docs.google.com/presentation/d/1p0bvALYVQ_U-FGFfUx47W05sQuy4GQRka_-N079n9J0/edit?slide=id.g3e2dc34c604_0_1038', type: 'slides' },
+        utl_embed_p3_read_room: { url: 'https://docs.google.com/presentation/d/1p0bvALYVQ_U-FGFfUx47W05sQuy4GQRka_-N079n9J0/edit?slide=id.g3e2dc34c604_0_1584', type: 'slides' },
+        utl_embed_p3_eyes_on_you: { url: 'https://docs.google.com/presentation/d/1p0bvALYVQ_U-FGFfUx47W05sQuy4GQRka_-N079n9J0/edit?slide=id.g3e2dc34c604_0_1767', type: 'slides' }
+      };
 
       document.querySelectorAll('[data-password-toggle]').forEach(function (toggle) {
         var target = document.getElementById(toggle.dataset.passwordToggle);
@@ -1738,7 +1812,9 @@
           return fileId ? 'https://drive.google.com/file/d/' + fileId + '/preview' : url;
         }
         var deckId = getPresentationId(url);
-        return deckId ? 'https://docs.google.com/presentation/d/' + deckId + '/embed?start=false&loop=false&delayms=3000' : url;
+        var slideMatch = url.match(/[?&]slide=([^&#]+)/) || url.match(/#slide=([^&#]+)/);
+        var slideParam = slideMatch ? '&slide=' + encodeURIComponent(decodeURIComponent(slideMatch[1])) : '';
+        return deckId ? 'https://docs.google.com/presentation/d/' + deckId + '/embed?start=false&loop=false&delayms=3000' + slideParam : url;
       }
 
       function ensureFullscreenLink(panel, src) {
@@ -1781,6 +1857,9 @@
         }
         if (stored && !config) {
           config = { url: stored, type: 'slides' };
+        }
+        if (!config && defaultEmbedConfigs[key]) {
+          config = defaultEmbedConfigs[key];
         }
 
         var src = config ? buildEmbedSrc(config.url, config.type || 'slides') : '';
@@ -1955,7 +2034,11 @@
           card.classList.toggle('ws-is-done', done);
           card.classList.toggle('ws-is-locked', locked);
           if (step) step.textContent = done ? '✓' : String(number);
-          if (markButton) markButton.textContent = done ? 'Click to undo' : 'Mark as done';
+          if (markButton) {
+            markButton.textContent = done ? 'Click to undo' : 'Mark as done';
+            markButton.disabled = locked;
+            markButton.setAttribute('aria-disabled', locked ? 'true' : 'false');
+          }
           if (openLink) {
             openLink.setAttribute('aria-disabled', locked ? 'true' : 'false');
             openLink.tabIndex = locked ? -1 : 0;
@@ -2019,7 +2102,11 @@
           card.classList.toggle('ws-is-done', done);
           card.classList.toggle('ws-is-locked', locked);
           if (step) step.textContent = done ? '✓' : String(number);
-          if (markButton) markButton.textContent = done ? 'Click to undo' : 'Mark as done';
+          if (markButton) {
+            markButton.textContent = done ? 'Click to undo' : 'Mark as done';
+            markButton.disabled = locked;
+            markButton.setAttribute('aria-disabled', locked ? 'true' : 'false');
+          }
           if (openLink) {
             openLink.setAttribute('aria-disabled', locked ? 'true' : 'false');
             openLink.tabIndex = locked ? -1 : 0;
@@ -2044,9 +2131,73 @@
         renderPhaseTwoExerciseStates();
       }
 
+      function phaseThreeDoneKey(number) {
+        return 'utl_p3_ex' + number + '_done';
+      }
+
+      function isPhaseThreeDone(number) {
+        return localStorage.getItem(phaseThreeDoneKey(number)) === 'true';
+      }
+
+      function setPhaseThreeDone(number, done) {
+        if (done) {
+          localStorage.setItem(phaseThreeDoneKey(number), 'true');
+        } else {
+          localStorage.removeItem(phaseThreeDoneKey(number));
+        }
+      }
+
+      function renderPhaseThreeExerciseStates() {
+        var cards = Array.prototype.slice.call(document.querySelectorAll('[data-ws-p3-exercise]'));
+        cards.forEach(function (card) {
+          var number = Number(card.dataset.wsP3Exercise);
+          var done = isPhaseThreeDone(number);
+          var unlocked = number === 1 || isPhaseThreeDone(number - 1) || done;
+          var locked = !unlocked;
+          var step = card.querySelector('.ws-step-circle');
+          var markButton = card.querySelector('.ws-mark-done');
+          var openLink = card.querySelector('.ws-open-tool');
+          var lockHint = card.querySelector('.ws-lock-hint');
+
+          card.classList.toggle('ws-is-done', done);
+          card.classList.toggle('ws-is-locked', locked);
+          if (step) step.textContent = done ? '✓' : String(number);
+          if (markButton) {
+            markButton.textContent = done ? 'Click to undo' : 'Mark as done';
+            markButton.disabled = locked;
+            markButton.setAttribute('aria-disabled', locked ? 'true' : 'false');
+          }
+          if (openLink) {
+            openLink.setAttribute('aria-disabled', locked ? 'true' : 'false');
+            openLink.tabIndex = locked ? -1 : 0;
+          }
+          if (lockHint) lockHint.textContent = number > 1 ? 'Complete exercise ' + (number - 1) + ' to unlock' : '';
+        });
+      }
+
+      function initPhaseThreeExerciseToggles() {
+        document.querySelectorAll('[data-ws-p3-exercise]').forEach(function (card) {
+          var markButton = card.querySelector('.ws-mark-done');
+          if (!markButton) return;
+          markButton.addEventListener('click', function () {
+            if (card.classList.contains('ws-is-locked')) return;
+            var number = Number(card.dataset.wsP3Exercise);
+            setPhaseThreeDone(number, !isPhaseThreeDone(number));
+            renderPhaseThreeExerciseStates();
+            applyPhaseVisibility();
+          });
+        });
+
+        renderPhaseThreeExerciseStates();
+      }
+
       function isAdminMode() {
         return new URLSearchParams(window.location.search).get('mode') === 'admin' ||
           (localStorage.getItem('utl_admin_auth') === 'true' && localStorage.getItem('utl_admin_preview_bypass') === 'on');
+      }
+
+      function phaseAllowed(phaseNumber) {
+        return localStorage.getItem('utl_phase' + phaseNumber + '_status') !== 'hide';
       }
 
       function allKeysDone(keys) {
@@ -2076,10 +2227,17 @@
       }
 
       function applyPhaseVisibility() {
+        var phase2Allowed = phaseAllowed(2);
+        var phase3Allowed = phaseAllowed(3);
         if (isAdminMode()) {
-          setPhaseVisible('phase2', true);
-          setPhaseVisible('phase3', true);
-          if (phase3Nudge) phase3Nudge.style.display = '';
+          setPhaseVisible('phase2', phase2Allowed);
+          setPhaseVisible('phase3', phase3Allowed);
+          if (phase3Nudge) phase3Nudge.style.display = phase3Allowed && allKeysDone([
+            'utl_p3_ex1_done',
+            'utl_p3_ex2_done',
+            'utl_p3_ex3_done',
+            'utl_p3_ex4_done'
+          ]) ? '' : 'none';
           return;
         }
 
@@ -2091,14 +2249,25 @@
           'utl_p1_ex5_done',
           'utl_p1_ex6_done'
         ]);
-        var phase3Unlocked = phase2Unlocked && allKeysDone([
+        var phase2Visible = phase2Allowed && phase2Unlocked;
+        var phase3Unlocked = phase2Visible && allKeysDone([
           'utl_p2_ex1_done',
-          'utl_p2_ex2_done'
+          'utl_p2_ex2_done',
+          'utl_p2_ex3_done',
+          'utl_p2_ex4_done',
+          'utl_p2_ex5_done',
+          'utl_p2_ex6_done'
         ]);
+        var phase3Visible = phase3Allowed && phase3Unlocked;
 
-        setPhaseVisible('phase2', phase2Unlocked);
-        setPhaseVisible('phase3', phase3Unlocked);
-        if (phase3Nudge) phase3Nudge.style.display = phase3Unlocked ? '' : 'none';
+        setPhaseVisible('phase2', phase2Visible);
+        setPhaseVisible('phase3', phase3Visible);
+        if (phase3Nudge) phase3Nudge.style.display = phase3Visible && allKeysDone([
+          'utl_p3_ex1_done',
+          'utl_p3_ex2_done',
+          'utl_p3_ex3_done',
+          'utl_p3_ex4_done'
+        ]) ? '' : 'none';
       }
 
       function showDashboard() {
@@ -2107,6 +2276,7 @@
         initSectionNav();
         renderPhaseOneExerciseStates();
         renderPhaseTwoExerciseStates();
+        renderPhaseThreeExerciseStates();
         applyPhaseVisibility();
       }
 
@@ -2123,6 +2293,7 @@
 
       initPhaseOneExerciseToggles();
       initPhaseTwoExerciseToggles();
+      initPhaseThreeExerciseToggles();
 
       form.addEventListener('submit', function (event) {
         event.preventDefault();
@@ -2147,7 +2318,7 @@
       });
 
       window.addEventListener('storage', function (event) {
-        if (event.key === 'utl_admin_preview_bypass' || event.key === 'utl_admin_auth') {
+        if (event.key === 'utl_admin_preview_bypass' || event.key === 'utl_admin_auth' || event.key === 'utl_phase2_status' || event.key === 'utl_phase3_status') {
           applyPhaseVisibility();
         }
       });

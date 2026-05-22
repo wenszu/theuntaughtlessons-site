@@ -12,28 +12,47 @@ Use this file when referencing the site with other tools. It should be updated w
 - Split Orientation section in `member-login/index.html` into two separate accordions: `Your first day at MA` (Welcome to MA storyline, shown first) and `How this program works` (UTL workbook orientation FAQs, shown second). Both start collapsed. Both use the gold square +/- accordion icon.
 - Restructured Phase 2 section in `member-login/index.html` to fully vertical stacked layout. Each exercise now has its own context accordion immediately above it.
 - Updated all Phase 2 context accordion labels to narrative-driven names aligned with the MA storyline.
-- Removed side-by-side card layout for Explain to Aiko (120s) and Elevator Pitch (60s). Both are now full-width stacked cards.
-- Exercises 3-6 in Phase 2 show coming soon state. Context accordions remain visible. No gating applied to coming soon cards.
-- Phase 2 localStorage keys: `utl_p2_ex1_done` and `utl_p2_ex2_done`. Sequential unlock between exercises 1 and 2 only.
+- Removed side-by-side card layout for Explain to Aiko (120s) and Explain to Aiko (60s). Both are now full-width stacked cards.
+- Phase 2 exercises 1-6 are live and use the same Mark as Done workflow: Issue Tree Builder, SCQA Builder, Advisory board with AI, Write to Aiko, Explain to Aiko (120s), and Explain to Aiko (60s).
+- Phase 2 localStorage keys: `utl_p2_ex1_done`, `utl_p2_ex2_done`, `utl_p2_ex3_done`, `utl_p2_ex4_done`, `utl_p2_ex5_done`, and `utl_p2_ex6_done`. Sequential unlock runs through exercises 1-6.
 - Restructured Phase 3 section in `member-login/index.html` to fully vertical stacked layout. Each exercise has its own context accordion immediately above it.
-- All Phase 3 exercises show coming soon state. No gating applied. No localStorage keys needed for Phase 3.
+- Phase 3 exercises 1-4 are live and use the same Mark as Done workflow: The Art of Saying No, I Have Bad News..., Let's Switch Hats, and Speak Like Obama.
 - Phase 3 context accordion labels: You just got the lead role / You have to be the one to say it / Read the room before you speak / All eyes are on you.
 - Phase 3 exercise titles: The Art of Saying No / I Have Bad News... / Let's Switch Hats / Speak Like Obama.
 - Added per-accordion embed management to admin panel. Each context accordion has a URL input and type selector (Google Slides or Google Drive Video). Embed config saved to localStorage using `utl_embed_[id]` keys. Renders as iframe on participant page on load.
 - Added site sync check section to admin panel. Checks accordion IDs, exercise titles, app paths, localStorage keys, and embed keys against expected values. Triggered on demand via Run check button.
 - Improved site sync check controls with clearer Run, Rerun, and Hide results actions plus a summary count after each check.
 - Added Visibility section to admin panel showing Phase 1, Phase 2, Phase 3, and admin-mode visibility status from the current localStorage completion state.
+- Admin Visibility section is organized as a checklist grouped by Main Page, Member Workspace, and Admin Preview. It controls `utl_public_find_level`, `utl_mission_card`, `utl_phase1_status`, `utl_phase2_status`, `utl_phase3_status`, `utl_tsa_status`, and `utl_admin_preview_bypass` with plain-language labels.
 - Added admin preview bypass toggle in the Visibility section. When on, the preview link opens the member hub with `?mode=admin` and the member hub treats bypass as active in the same authenticated admin browser; when off, it opens the normal participant sequence.
 - Added individual admin view toggles for The Diagnostic and The Checkpoint assessment cards, with Live, Coming soon, and Hidden states.
 - Added a `Set ready assessment apps live` shortcut in the admin Assessments section to restore the overall section, Diagnostic card, and Checkpoint card to Live when older browser settings still hold placeholder values.
 - Added quick links for Diagnostic and Checkpoint hubs plus ready TSA exercise apps: Sort & Bucket, Spot the Problem, and Speak Concisely.
 - Created `apps/advisory-board/index.html` — Phase 2 advisory board app. 5 screens: Your Work (pre-filled Olympics example, copy-per-section + copy-all), Build Your Board (orchestrator education copy, 8 preset personas + custom card, orchestrator selection), Generate Prompt (Mode A: assembled board prompt, Mode B: AI board design prompt), Capture Insights (paste and parse output, orchestrator verdict card), Save Your Board (localStorage persistence with pre-select on return). CSS prefix: `ab-`.
 - Created `apps/toolkit/index.html` — cross-program AI prompt reference. 5 tool cards: MECE Checker, Problem Breakdown, SCQA Sharpener, Decision-Ready Email, Advisory Board (Mode A/B toggle). Member area only. CSS prefix: `tk-`.
-- Created `apps/think-write-speak/index.html` — Phase 2 full communication loop exercise. 3 screens: Your SCQA (pre-filled, reuses SCQA Builder context setup), Write the Email (reuses Messy Notes three-section structure, Minto pyramid labels, live email preview), Say It Out Loud (handoff cards to TSA scorer for Recording A and B). CSS prefix: `tws-`.
-- Added three tool links to `member-login/index.html`: Advisory Board, Toolkit, Think. Write. Speak.
+- Created `apps/write-to-aiko/index.html` — Phase 2 answer-first email exercise. Two-column SCQA reference and writing area, structured/open writing modes, live timer and word count, sample answer toggle, and Apps Script submit flow. CSS prefix: `write-to-aiko-`.
+- Created `apps/explain-to-aiko/index.html` — Phase 2 120-second spoken explanation exercise. Reuses TSA Speak recording/transcription structure, with email reference on the left and talking-points prep on the right. Target: 120 seconds / 220-260 words.
+- Created `apps/explain-to-aiko-60/index.html` — Phase 2 60-second compression exercise. Same broad recording/transcription structure as the 120-second version, shortened instructions, target 60 seconds / 110-130 words, and completion message congratulating the learner on delivering an elevator pitch.
+- `apps/explain-to-aiko/index.html` saves the latest talking-points prep to `utl_explain_to_aiko_120_prep`; `apps/explain-to-aiko-60/index.html` preloads that prep by default.
+- Created `apps/eisenhower-matrix/index.html` — Phase 3 Eisenhower Matrix practice app for The Art of Saying No. Six scenarios, desktop drag/drop, mobile tap-to-select, example placement reveal, and try-again reset.
+- Added Phase 3 sequential completion state for the four live Phase 3 apps using `utl_p3_ex1_done`, `utl_p3_ex2_done`, `utl_p3_ex3_done`, and `utl_p3_ex4_done`. The member workspace uses the same green outline, done pill, lock hint, and next-app unlock behavior as Phase 1 and Phase 2. Admin includes Phase 3 completion toggles and visibility status for the checkpoint nudge.
+- Added workbook slide-link defaults to `member-login/index.html` so pre-app context accordions load their Google Slides embeds even when admin/localStorage has no saved URL. Existing saved admin URLs still override defaults.
+- Updated member workspace slide embed URLs to preserve the `slide=` anchor from Google Slides links.
+- Added `Back to member workspace` links to recording/transcript pages: TSA Speak assessment recordings return to `#assessments`, Rushed Voice Memo with AI returns to `#phase1`, and both Explain to Aiko recording pages return to `#phase2`.
+- Added three tool links to `member-login/index.html`: Advisory Board, Toolkit, Write to Aiko.
+- Renamed the Phase 2 advisory app to `Advisory board with AI` in the app header and member workspace card.
+- Reordered `apps/advisory-board/index.html` so it starts with a Q&A introduction to virtual boards and orchestrators, then shows example work, board selection, prompt generation, output capture, and saved board flow.
+- Updated `apps/tsa-speak/index.html` so the role selector matches the contact gate input height and valid details allow the assessment to start even if lead capture cannot reach the Apps Script endpoint.
+- Added Mark as Done buttons and sequential completion state to Phase 2 exercises 3 and 4: Advisory board with AI and Write to Aiko. Admin sync and phase visibility checks now track `utl_p2_ex3_done` and `utl_p2_ex4_done`.
 - Moved Toolkit out of the Phase 2 exercise sequence and into its own bottom-level `#toolkit` section in the member workspace. Added Toolkit to the sticky nav as a destination link to the right of My results.
+- Updated the member workspace sticky nav so phase links stay left, Assessments / My results / Toolkit sit as a right-aligned utility group, and vertical dividers separate the phase group and Log out. Utility active state now uses filled navy styling.
+- Updated Orientation and Phase 1 / 2 / 3 active nav states to use a gold underline while keeping utility links on the filled navy active style.
+- Created `apps/grocery-list-ai/index.html` — Phase 1 AI practice app. Four-screen flow: storyline + copyable supply list, prompt-angle selection, reflection response, and takeaway. Reuses the Grocery List app header/timer/screen pattern and Messy Notes open-response styling.
+- Refined `apps/grocery-list-ai/index.html` so the supply list and prompt choices appear together on the first screen. Each copied prompt now includes the full supply list in a clearer structured format, and Back buttons support easier navigation between screens.
+- Updated Grocery List with AI prompt cards to use BSP-style section labels, ordered the prompts as Setup Sequence / Ownership / AI-created structure, and added a GenAI-created MECE bucket prompt.
+- Updated all Grocery List with AI prompt list items so each point starts with a bolded summary phrase, reinforcing BSP writing inside the prompts themselves.
 - Removed footer link toggle from admin panel. Admin footer link is now always visible. Removed any show/hide logic tied to it.
-- Added automatic phase visibility gating. Phase 2 hidden until all 6 Phase 1 live exercises marked done. Phase 3 hidden until Phase 2 exercises 1 and 2 marked done. Admin mode bypasses all phase gating. Brief gold reveal message shown on phase unlock.
+- Added automatic phase visibility gating. Phase 2 hidden until all 6 Phase 1 live exercises marked done. Phase 3 hidden until Phase 2 exercises 1-6 marked done. Admin mode bypasses all phase gating. Brief gold reveal message shown on phase unlock.
 - Updated mark as done button label in done state from Marked as done to Click to undo across all phases.
 
 ### 2026-05-17
@@ -1007,7 +1026,7 @@ Access:
 
 - Member area only.
 
-### `apps/think-write-speak/index.html`
+### `apps/write-to-aiko/index.html`
 
 Phase:
 
@@ -1015,30 +1034,143 @@ Phase:
 
 Purpose:
 
-- Full communication loop from SCQA to email to spoken delivery.
+- Practice writing a concise, answer-first email to Aiko from a completed SCQA.
 
 Key functionality:
 
-- Pre-filled SCQA.
-- Minto pyramid email scaffold.
-- Live email preview.
+- Pre-filled Olympics SCQA reference panel with prominent Answer field.
+- Collapsed Situation, Complication, and Question details behind a full SCQA toggle.
+- Structured mode with five writing fields.
+- Open mode with one freeform textarea.
+- Static salutation and signoff.
+- Header timer and word count.
+- Footer word count with 80-120 word target.
 - Sample answer toggle.
-- Handoff to TSA scorer.
-
-Reuses:
-
-- Messy Notes three-section structure.
-- SCQA Builder context setup.
-- Phase 2 app header and timer.
+- Apps Script submit flow with `email`, `response`, `mode`, and `page` payload fields.
 
 CSS scope:
 
-- `tws-`
+- `write-to-aiko-`
 
-Speaking stages:
+### `apps/explain-to-aiko/index.html`
 
-- Handled by existing `apps/tsa-diagnostic/index.html`.
-- No changes to that file.
+Phase:
+
+- Phase 2, Speak Concisely.
+
+Purpose:
+
+- Practice turning the Aiko email into a 120-second spoken explanation.
+
+Key functionality:
+
+- Same broad structure as `apps/tsa-speak/index.html`.
+- Talk brief screen with 120-second instruction and recommended word count.
+- Prep screen with the email to Aiko on the left and talking-points prep on the right.
+- Open response and three-section prep modes.
+- Record/transcribe help panel.
+- Transcript paste box with recording duration fields and live character/word count.
+- Apps Script submit flow plus localStorage fallback record under `utl_result_explain_to_aiko`.
+
+Target:
+
+- 120 seconds.
+- Recommended 220-260 words.
+
+### `apps/explain-to-aiko-60/index.html`
+
+Phase:
+
+- Phase 2, Speak Concisely.
+
+Purpose:
+
+- Practice compressing the 120-second Aiko explanation into a 60-second elevator pitch.
+
+Key functionality:
+
+- Same broad structure as `apps/explain-to-aiko/index.html`.
+- Short compression brief: deliver the key points in 60 seconds or less.
+- Prep screen with the email to Aiko on the left and talking-points prep on the right.
+- Open response and three-section prep modes.
+- Record/transcribe help panel.
+- Transcript paste box with recording duration fields and live character/word count.
+- Apps Script submit flow plus localStorage fallback record under `utl_result_explain_to_aiko_60`.
+- Completion screen congratulates the learner for delivering the elevator pitch.
+
+Target:
+
+- 60 seconds or less.
+- Recommended 110-130 words.
+
+### `apps/eisenhower-matrix/index.html`
+
+Phase:
+
+- Phase 3, Act Confidently.
+
+Purpose:
+
+- Practice prioritizing tasks using the Eisenhower Matrix across six real-world scenarios.
+
+Key functionality:
+
+- Drag-and-drop on desktop.
+- Tap-to-select on mobile.
+- Scenario switcher dropdown.
+- Example placement reveal with read-only flip view.
+- Try again reset.
+
+### `apps/i-have-bad-news/index.html`
+
+Phase:
+
+- Phase 3, Act Confidently.
+
+Purpose:
+
+- Instruction launch page for practicing difficult conversations and delivering bad news clearly, calmly, and humanely.
+
+Key functionality:
+
+- 20-minute exercise timer.
+- Brand-aligned instruction panels for scenario selection and message structure.
+- Primary link to the Difficult Conversations CustomGPT.
+- Back link to the Phase 3 member workspace.
+
+### `apps/lets-switch-hats/index.html`
+
+Phase:
+
+- Phase 3, Act Confidently.
+
+Purpose:
+
+- Instruction launch page for perspective-taking practice before a difficult conversation.
+
+Key functionality:
+
+- 15-minute exercise timer.
+- Brand-aligned instruction panels for scenario selection and the switching framework.
+- Primary link to the Let's Switch Hats CustomGPT.
+- Back link to the Phase 3 member workspace.
+
+### `apps/speak-like-obama/index.html`
+
+Phase:
+
+- Phase 3, Act Confidently.
+
+Purpose:
+
+- Instruction launch page for executive speech delivery practice using the Speak Like Obama Gem.
+
+Key functionality:
+
+- 15-minute exercise timer.
+- Brand-aligned instruction panels for speech setup and the delivery feedback loop.
+- Primary link to the Speak Like Obama Gemini Gem.
+- Back link to the Phase 3 member workspace.
 
 ### `apps/tsa-diagnostic/index.html`
 

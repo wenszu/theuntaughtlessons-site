@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Practice delivering difficult news clearly and with composure.">
+  <title>I Have Bad News... | The Untaught Lessons</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="../../assets/favicon-bluebg-whitedoor-thicker-32.png?v=6">
+  <link rel="shortcut icon" type="image/png" href="../../assets/favicon-bluebg-whitedoor-thicker-32.png?v=6">
+  <link rel="apple-touch-icon" sizes="180x180" href="../../assets/apple-touch-icon.png?v=3">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lato:wght@300;400;700&family=Roboto+Mono:wght@400;500;700&display=swap');
+
+    :root {
+      --bad-news-navy: #003366;
+      --bad-news-gold: #EEA320;
+      --bad-news-cream: #F3EDE2;
+      --bad-news-charcoal: #4A4A4A;
+      --bad-news-white: #FFFFFF;
+      --bad-news-line: #C7D8E8;
+      --bad-news-soft: #F7F5EF;
+      --bad-news-shadow: 0 10px 24px rgba(0, 51, 102, .08);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bad-news-cream);
+      color: var(--bad-news-charcoal);
+      font-family: 'Lato', Arial, sans-serif;
+    }
+
+    a { color: inherit; }
+
+    button {
+      font: inherit;
+    }
+
+    button:focus-visible,
+    a:focus-visible {
+      outline: 2px solid var(--bad-news-gold);
+      outline-offset: 3px;
+    }
+
+    .bad-news-header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: grid;
+      grid-template-columns: auto auto minmax(220px, 1fr) auto;
+      align-items: center;
+      column-gap: 20px;
+      min-height: 76px;
+      padding: 12px 32px;
+      background: var(--bad-news-navy);
+      color: var(--bad-news-white);
+    }
+
+    .bad-news-logo {
+      display: block;
+      width: 224px;
+      height: 46px;
+    }
+
+    .bad-news-logo img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .bad-news-divider {
+      width: 1px;
+      height: 38px;
+      background: rgba(255, 255, 255, .42);
+    }
+
+    .bad-news-kicker,
+    .bad-news-label,
+    .bad-news-meta,
+    .bad-news-button,
+    .bad-news-timer-label,
+    .bad-news-timer-value,
+    .bad-news-note,
+    .bad-news-step-number {
+      font-family: 'Roboto Mono', monospace;
+    }
+
+    .bad-news-kicker {
+      display: block;
+      color: var(--bad-news-gold);
+      font-size: 10px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+
+    .bad-news-title {
+      display: block;
+      margin-top: 3px;
+      color: var(--bad-news-white);
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 27px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .bad-news-timer {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 7px 10px;
+      border: 1px solid rgba(255, 255, 255, .32);
+      border-radius: 6px;
+      background: rgba(255, 255, 255, .08);
+      white-space: nowrap;
+    }
+
+    .bad-news-timer-label {
+      color: var(--bad-news-gold);
+      font-size: 9px;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+    }
+
+    .bad-news-timer-value {
+      color: var(--bad-news-white);
+      font-size: 18px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .bad-news-icon-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px;
+      height: 30px;
+      border: 1px solid rgba(255, 255, 255, .34);
+      border-radius: 6px;
+      background: transparent;
+      color: var(--bad-news-white);
+      cursor: pointer;
+      font-weight: 700;
+      line-height: 1;
+      padding: 0;
+    }
+
+    .bad-news-main {
+      width: min(1120px, calc(100% - 56px));
+      margin: 0 auto;
+      padding: 28px 0 84px;
+    }
+
+    .bad-news-intro {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(260px, 340px);
+      gap: 24px;
+      align-items: stretch;
+      padding-bottom: 18px;
+      border-bottom: 1px solid #D8CFC1;
+    }
+
+    .bad-news-intro h1 {
+      margin: 0 0 8px;
+      color: var(--bad-news-navy);
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: clamp(36px, 5vw, 58px);
+      line-height: 1.03;
+    }
+
+    .bad-news-intro p {
+      max-width: 760px;
+      margin: 0;
+      color: var(--bad-news-charcoal);
+      font-size: 17px;
+      line-height: 1.55;
+    }
+
+    .bad-news-brief-card,
+    .bad-news-panel,
+    .bad-news-action-card {
+      border: 1px solid var(--bad-news-line);
+      border-radius: 8px;
+      background: var(--bad-news-white);
+      box-shadow: var(--bad-news-shadow);
+    }
+
+    .bad-news-brief-card {
+      padding: 18px;
+    }
+
+    .bad-news-label {
+      margin: 0 0 8px;
+      color: var(--bad-news-gold);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.3px;
+      text-transform: uppercase;
+    }
+
+    .bad-news-brief-card strong {
+      display: block;
+      color: var(--bad-news-navy);
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 26px;
+      line-height: 1.1;
+    }
+
+    .bad-news-brief-card span {
+      display: block;
+      margin-top: 8px;
+      font-size: 15px;
+      line-height: 1.45;
+    }
+
+    .bad-news-grid {
+      display: grid;
+      grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr);
+      gap: 18px;
+      margin-top: 22px;
+    }
+
+    .bad-news-panel {
+      padding: 20px;
+    }
+
+    .bad-news-panel h2 {
+      margin: 0 0 12px;
+      color: var(--bad-news-navy);
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 28px;
+      line-height: 1.15;
+    }
+
+    .bad-news-panel p {
+      margin: 0 0 14px;
+      font-size: 16px;
+      line-height: 1.55;
+    }
+
+    .bad-news-panel p:last-child {
+      margin-bottom: 0;
+    }
+
+    .bad-news-scenario {
+      display: grid;
+      gap: 12px;
+      padding: 16px;
+      border: 1px dashed var(--bad-news-line);
+      border-radius: 8px;
+      background: var(--bad-news-soft);
+    }
+
+    .bad-news-scenario p {
+      margin: 0;
+    }
+
+    .bad-news-steps {
+      display: grid;
+      gap: 12px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .bad-news-step {
+      position: relative;
+      display: grid;
+      grid-template-columns: 42px minmax(0, 1fr);
+      gap: 12px;
+      padding: 14px;
+      border: 1px solid var(--bad-news-line);
+      border-radius: 8px;
+      background: var(--bad-news-soft);
+    }
+
+    .bad-news-step:not(:last-child)::after {
+      content: "";
+      position: absolute;
+      left: 30px;
+      top: 49px;
+      bottom: -15px;
+      width: 1px;
+      border-left: 1px dashed rgba(74, 74, 74, .2);
+    }
+
+    .bad-news-step-number {
+      position: relative;
+      z-index: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px;
+      height: 30px;
+      border-radius: 999px;
+      background: var(--bad-news-gold);
+      color: var(--bad-news-white);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .bad-news-step strong {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--bad-news-navy);
+      font-size: 16px;
+    }
+
+    .bad-news-step > span:not(.bad-news-step-number) {
+      display: block;
+      font-size: 15px;
+      line-height: 1.45;
+    }
+
+    .bad-news-action-card {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 20px;
+      align-items: center;
+      margin-top: 18px;
+      padding: 20px;
+      border-color: var(--bad-news-gold);
+    }
+
+    .bad-news-action-card h2 {
+      margin: 0 0 6px;
+      color: var(--bad-news-navy);
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 30px;
+      line-height: 1.1;
+    }
+
+    .bad-news-action-card p {
+      margin: 0;
+      font-size: 16px;
+      line-height: 1.5;
+    }
+
+    .bad-news-actions {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+
+    .bad-news-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 11px 22px;
+      border-radius: 7px;
+      border: 0;
+      background: var(--bad-news-white);
+      color: var(--bad-news-navy);
+      font-family: 'Lato', Arial, sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .bad-news-button-primary {
+      border-color: var(--bad-news-gold);
+      background: var(--bad-news-gold);
+      color: var(--bad-news-navy);
+    }
+
+    .bad-news-note {
+      margin-top: 12px;
+      color: var(--bad-news-navy);
+      font-family: 'Lato', Arial, sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      line-height: 1.45;
+    }
+
+    .bad-news-prep-cue {
+      margin: 12px 0 0;
+      padding-left: 12px;
+      border-left: 3px solid var(--bad-news-gold);
+      color: var(--bad-news-navy);
+      font-family: 'Lato', Arial, sans-serif;
+      font-size: 16px;
+      font-weight: 600;
+      line-height: 1.45;
+    }
+
+    .bad-news-exit-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 16px;
+      border: 1.5px solid #c8c2b8;
+      border-radius: 7px;
+      background: transparent;
+      color: var(--bad-news-navy);
+      font-family: 'Lato', Arial, sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .bad-news-exit-link:hover {
+      border-color: #2e7d4f;
+      color: #2e7d4f;
+      text-decoration: none;
+    }
+
+    @media (max-width: 860px) {
+      .bad-news-header {
+        grid-template-columns: 1fr auto;
+        row-gap: 10px;
+        padding: 12px 18px;
+      }
+
+      .bad-news-logo {
+        width: 176px;
+        height: 38px;
+      }
+
+      .bad-news-divider {
+        display: none;
+      }
+
+      .bad-news-heading {
+        grid-column: 1 / -1;
+        grid-row: 2;
+      }
+
+      .bad-news-timer {
+        grid-column: 2;
+        grid-row: 1;
+      }
+
+      .bad-news-main {
+        width: min(100% - 32px, 640px);
+        padding-top: 20px;
+      }
+
+      .bad-news-intro,
+      .bad-news-grid,
+      .bad-news-action-card {
+        grid-template-columns: 1fr;
+      }
+
+      .bad-news-actions {
+        align-items: flex-start;
+        justify-content: flex-start;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .bad-news-header {
+        grid-template-columns: 1fr;
+      }
+
+      .bad-news-timer {
+        grid-column: 1;
+        grid-row: 3;
+        width: 100%;
+        justify-content: space-between;
+      }
+
+      .bad-news-title {
+        font-size: 24px;
+      }
+
+      .bad-news-step {
+        grid-template-columns: 1fr;
+      }
+
+      .bad-news-step:not(:last-child)::after {
+        display: none;
+      }
+
+      .bad-news-button {
+        width: 100%;
+      }
+
+      .bad-news-exit-link {
+        align-self: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="bad-news-header">
+    <a class="bad-news-logo" href="../../index.html" aria-label="The Untaught Lessons homepage">
+      <img src="../../assets/utl-logo-nav-white.png" alt="The Untaught Lessons">
+    </a>
+    <div class="bad-news-divider" aria-hidden="true"></div>
+    <div class="bad-news-heading">
+      <span class="bad-news-kicker">Phase 3 · Act Confidently</span>
+      <span class="bad-news-title">I Have Bad News...</span>
+    </div>
+    <div class="bad-news-timer" aria-label="Exercise timer">
+      <span class="bad-news-timer-label">Timer</span>
+      <span class="bad-news-timer-value" id="timerValue">00:00</span>
+      <button class="bad-news-icon-button" id="timerToggle" type="button" aria-label="Start timer" title="Start timer">▶</button>
+      <button class="bad-news-icon-button" id="timerReset" type="button" aria-label="Reset timer" title="Reset timer">↺</button>
+    </div>
+  </header>
+
+  <main class="bad-news-main">
+    <section class="bad-news-intro" aria-labelledby="badNewsIntroTitle">
+      <div>
+        <p class="bad-news-label">Difficult conversations</p>
+        <h1 id="badNewsIntroTitle">Say the hard thing without making it harder.</h1>
+        <p>Your job is to deliver bad news in a way that is clear, calm, and useful. Do not hide the message. Do not over-explain. Give the person enough truth to understand the decision, enough context to trust you, and enough next step to move forward.</p>
+      </div>
+      <aside class="bad-news-brief-card" aria-label="Exercise brief">
+        <p class="bad-news-label">Exercise brief</p>
+        <strong>20 minutes</strong>
+        <span>Use the Difficult Conversations CustomGPT to rehearse the message, pressure-test your wording, and practice responding when the other person pushes back.</span>
+        <span>When you finish, note one thing you'd say differently next time.</span>
+      </aside>
+    </section>
+
+    <section class="bad-news-grid" aria-label="Practice instructions">
+      <article class="bad-news-panel">
+        <h2>The scenario</h2>
+        <div class="bad-news-scenario">
+          <p>You are the person who has to say it. Something has changed, someone will be disappointed, and delaying the message will only make the situation worse.</p>
+          <p>Before opening the GPT, choose one real or realistic situation: a missed deadline, a rejected request, a budget cut, a performance concern, a client setback, or a decision someone will not like.</p>
+        </div>
+        <p class="bad-news-note">Keep the situation professional. The goal is not to win the conversation. The goal is to preserve trust while making the truth unmistakable.</p>
+        <p class="bad-news-prep-cue">Complete your scenario above before opening the GPT.</p>
+      </article>
+
+      <article class="bad-news-panel">
+        <h2>Your delivery structure</h2>
+        <ol class="bad-news-steps">
+          <li class="bad-news-step">
+            <span class="bad-news-step-number">1</span>
+            <span><strong>Lead with the news.</strong> Say the core message in the first one or two sentences. No long runway.</span>
+          </li>
+          <li class="bad-news-step">
+            <span class="bad-news-step-number">2</span>
+            <span><strong>Explain the reason, not every detail.</strong> Give the logic that matters. Avoid sounding defensive or vague.</span>
+          </li>
+          <li class="bad-news-step">
+            <span class="bad-news-step-number">3</span>
+            <span><strong>Name the impact.</strong> Show that you understand what this means for the other person or team.</span>
+          </li>
+          <li class="bad-news-step">
+            <span class="bad-news-step-number">4</span>
+            <span><strong>Offer the next step.</strong> Be specific about what happens now, what support is available, or what decision is needed.</span>
+          </li>
+        </ol>
+      </article>
+    </section>
+
+    <section class="bad-news-action-card" aria-label="Open CustomGPT">
+      <div>
+        <p class="bad-news-label">Practice with AI</p>
+        <h2>Open the Difficult Conversations CustomGPT.</h2>
+        <p>Paste your situation, ask it to role-play the other person, and revise until your message is direct, humane, and ready to say out loud.</p>
+      </div>
+      <div class="bad-news-actions">
+        <a class="bad-news-button bad-news-button-primary" href="https://chatgpt.com/g/g-6a005f27d7808191a5c4b4ae759fe69b-difficult-conversations" target="_blank" rel="noopener">Open CustomGPT</a>
+        <a class="bad-news-exit-link" href="../../member-login/index.html#phase3">Back to member workspace</a>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    (() => {
+      const timerValue = document.getElementById('timerValue');
+      const timerToggle = document.getElementById('timerToggle');
+      const timerReset = document.getElementById('timerReset');
+      let elapsed = 0;
+      let intervalId = null;
+
+      function formatTime(seconds) {
+        const minutes = Math.floor(seconds / 60).toString().padStart(2, '0');
+        const secs = (seconds % 60).toString().padStart(2, '0');
+        return `${minutes}:${secs}`;
+      }
+
+      function renderTimer() {
+        timerValue.textContent = formatTime(elapsed);
+        timerToggle.textContent = intervalId ? 'Ⅱ' : '▶';
+        timerToggle.setAttribute('aria-label', intervalId ? 'Pause timer' : 'Start timer');
+        timerToggle.setAttribute('title', intervalId ? 'Pause timer' : 'Start timer');
+      }
+
+      function stopTimer() {
+        if (intervalId) {
+          clearInterval(intervalId);
+          intervalId = null;
+        }
+      }
+
+      timerToggle.addEventListener('click', () => {
+        if (intervalId) {
+          stopTimer();
+          renderTimer();
+          return;
+        }
+
+        intervalId = window.setInterval(() => {
+          elapsed += 1;
+          renderTimer();
+        }, 1000);
+        renderTimer();
+      });
+
+      timerReset.addEventListener('click', () => {
+        stopTimer();
+        elapsed = 0;
+        renderTimer();
+      });
+
+      renderTimer();
+    })();
+  </script>
+</body>
+</html>
