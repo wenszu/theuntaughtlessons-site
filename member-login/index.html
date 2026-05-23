@@ -2476,7 +2476,7 @@
 
   <script type="module">
     import { doc, getDoc, serverTimestamp, setDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
-    import { auth, db, firebaseInitError, getAuthorizedMember, getGoogleRedirectResult, isSignInWithEmailLink, onAuthStateChanged, requireAuthorizedMember, saveUserProgress, sendSignInInvite, signInWithEmailAndPassword, signInWithEmailLink, signInWithGoogleRedirect, signOut } from "../assets/firebase.js";
+    import { auth, db, firebaseInitError, getAuthorizedMember, isSignInWithEmailLink, onAuthStateChanged, requireAuthorizedMember, saveUserProgress, sendSignInInvite, signInWithEmailAndPassword, signInWithEmailLink, signInWithGooglePopup, signOut } from "../assets/firebase.js";
 
     function profileFromUser(user, fallbackEmail) {
       return {
@@ -2566,8 +2566,7 @@
       saveUserRosterProfile: saveUserRosterProfile,
       saveUserProgress: saveUserProgress,
       sendSignInInvite: sendSignInInvite,
-      getGoogleRedirectResult: getGoogleRedirectResult,
-      signInWithGoogle: signInWithGoogleRedirect,
+      signInWithGoogle: signInWithGooglePopup,
       signInWithEmailAndPassword: signInWithEmailAndPassword,
       signInWithEmailLink: signInWithEmailLink,
       signOut: signOut
@@ -3764,23 +3763,6 @@
         }, 5000);
 
         if (!googleSignInButton) return;
-        if (firebaseAuthReady() && window.utlFirebaseAuth.getGoogleRedirectResult) {
-          window.utlFirebaseAuth.getGoogleRedirectResult().then(async function (credential) {
-            if (!credential || !credential.user) return;
-            message.textContent = 'Finishing Google sign-in...';
-            var member = await window.utlFirebaseAuth.requireAuthorizedMember(credential.user);
-            await handleFirebaseAuthenticatedUser({
-              user: credential.user,
-              member: member,
-              fallbackEmail: 'google-user'
-            });
-          }).catch(function (error) {
-            console.error('Google redirect sign-in failed.', error);
-            message.textContent = googleSignInMessage(error);
-            refreshGoogleSignInButton();
-          });
-        }
-
       });
 
       function matchesLocalTestAccount(username, password) {
