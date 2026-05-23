@@ -760,6 +760,9 @@
       } catch (error) {
         console.warn('Assessment result submission failed.', error);
       }
+      import('../../assets/firebase.js')
+        .then(({ saveUserProgress }) => saveUserProgress('find-your-level', 'Find Your Level', payload))
+        .catch((error) => console.warn('Firestore progress save failed.', error));
     }
 
     function showScore() {

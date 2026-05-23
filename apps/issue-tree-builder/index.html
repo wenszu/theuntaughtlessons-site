@@ -1387,6 +1387,158 @@
         padding: 22px;
       }
     }
+
+    /* === MOBILE RESPONSIVE — May 2026 === */
+    @media (max-width: 768px) {
+      body {
+        overflow-x: hidden;
+      }
+
+      .app-header {
+        display: flex;
+        align-items: center;
+        gap: 10px 12px;
+        padding: 10px 16px;
+        flex-wrap: wrap;
+      }
+
+      .brand-logo-frame {
+        width: 140px;
+        min-width: 140px;
+        height: 32px;
+      }
+
+      .brand-divider {
+        display: none;
+      }
+
+      .app-heading {
+        flex: 1 1 180px;
+        min-width: 0;
+      }
+
+      .app-kicker {
+        font-size: 9px;
+        line-height: 1.2;
+      }
+
+      .app-title {
+        font-size: 21px;
+        line-height: 1.1;
+      }
+
+      .utility-cluster {
+        margin-left: auto;
+        justify-content: flex-end;
+        gap: 6px;
+        flex-wrap: wrap;
+        width: auto;
+      }
+
+      .utility-metric {
+        min-height: 44px;
+      }
+
+      .metric-hide-btn,
+      .icon-timer-btn {
+        width: 44px;
+        min-width: 44px;
+        height: 44px;
+        min-height: 44px;
+      }
+
+      .build-main {
+        display: block;
+        padding-right: 16px;
+        padding-left: 16px;
+      }
+
+      .tree-area {
+        width: 100%;
+        overflow: visible;
+      }
+
+      .question-node {
+        width: 100%;
+        min-height: 80px;
+      }
+
+      .question-node h2,
+      #hypothesis {
+        font-size: 15px;
+      }
+
+      #hypothesis {
+        min-height: 80px;
+      }
+
+      .arguments {
+        display: grid;
+        grid-template-columns: 1fr;
+        min-width: 0;
+        gap: 16px;
+      }
+
+      .argument-card,
+      .detail-wrap {
+        width: 100%;
+      }
+
+      .argument-title-text {
+        white-space: normal;
+      }
+
+      .argument-input,
+      .detail-input {
+        width: 100%;
+        font-size: 15px;
+      }
+
+      .argument-input {
+        min-height: 100px;
+      }
+
+      .details-section,
+      .detail-actions {
+        padding-left: 16px;
+      }
+
+      .detail-wrap {
+        display: grid;
+        gap: 8px;
+      }
+
+      .add-detail,
+      .detail-remove {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        min-height: 44px;
+        font-size: 15px;
+      }
+
+      .detail-remove {
+        position: static;
+        transform: none;
+      }
+
+      .bottom-bar {
+        position: static;
+        flex-direction: column;
+        align-items: stretch;
+        margin: 24px 0 0;
+        padding: 16px 0 0;
+      }
+
+      .btn,
+      .bottom-bar .btn,
+      .action-row .btn {
+        width: 100%;
+        min-height: 44px;
+        font-size: 15px;
+      }
+    }
     .completion-save-notice {
       background: #F3EDE2;
       border-radius: 8px;
@@ -1779,6 +1931,9 @@
         response: responseObj
       };
       localStorage.setItem('utl_result_' + appId, JSON.stringify(record));
+      import('../../assets/firebase.js')
+        .then(({ saveUserProgress }) => saveUserProgress(appId, exerciseName, record))
+        .catch((error) => console.warn('Firestore progress save failed.', error));
     }
 
     function completionSaveNotice() {

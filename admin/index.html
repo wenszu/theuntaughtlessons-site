@@ -128,6 +128,12 @@
       font-size: 13px;
     }
 
+    .primary-button:disabled,
+    .small-button:disabled {
+      cursor: not-allowed;
+      opacity: .62;
+    }
+
     .secondary-button {
       border-color: var(--navy);
       background: var(--white);
@@ -173,6 +179,18 @@
       gap: 12px;
     }
 
+    .identity-logo-link {
+      display: inline-flex;
+      align-items: center;
+      text-decoration: none;
+    }
+
+    .identity-logo-image {
+      display: block;
+      width: 92px;
+      height: auto;
+    }
+
     .identity-logo-text {
       color: var(--white);
       font-family: 'Roboto Mono', monospace;
@@ -196,6 +214,17 @@
       color: var(--gold);
       text-decoration: none;
       opacity: .85;
+    }
+
+    .identity-links {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .identity-link-separator {
+      color: rgba(255, 255, 255, .35);
+      font-size: 12px;
     }
 
     .identity-back:hover {
@@ -276,10 +305,11 @@
     }
 
     .admin-main {
-      max-width: 760px;
+      width: calc(100% - 220px);
+      max-width: none;
       min-height: 100vh;
       margin-left: 220px;
-      padding: calc(2.5rem + 40px) 3rem 2.5rem;
+      padding: calc(2.5rem + 40px) 2rem 2.5rem;
       background: var(--cream);
     }
 
@@ -372,6 +402,174 @@
       border: 1px solid rgba(0, 51, 102, .08);
       border-radius: 8px;
       background: rgba(255, 255, 255, .62);
+    }
+
+    .phase-layout-editor {
+      display: grid;
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .phase-layout-row {
+      display: grid;
+      grid-template-columns: 28px 1fr;
+      gap: 14px;
+      padding: 16px 20px 16px 14px;
+      border: 1px solid rgba(0, 51, 102, .08);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, .72);
+      transition: border-color .15s ease, box-shadow .15s ease, transform .15s ease;
+    }
+
+    .phase-layout-row.is-dragging {
+      opacity: .55;
+      transform: scale(.995);
+    }
+
+    .phase-layout-row.is-drop-before {
+      border-top-color: var(--gold);
+      box-shadow: inset 0 4px 0 rgba(238, 163, 32, .92);
+    }
+
+    .phase-layout-row.is-drop-after {
+      border-bottom-color: var(--gold);
+      box-shadow: inset 0 -4px 0 rgba(238, 163, 32, .92);
+    }
+
+    .phase-layout-row.is-new {
+      border-color: rgba(45, 106, 79, .55);
+      animation: layout-row-added 1.4s ease;
+    }
+
+    @keyframes layout-row-added {
+      0% {
+        background: rgba(45, 106, 79, .12);
+        box-shadow: 0 0 0 3px rgba(45, 106, 79, .12);
+      }
+      100% {
+        background: rgba(255, 255, 255, .72);
+        box-shadow: none;
+      }
+    }
+
+    .phase-layout-handle {
+      display: inline-flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding-top: 4px;
+      color: rgba(74, 74, 74, .46);
+      cursor: grab;
+      font-size: 18px;
+      line-height: 1;
+      user-select: none;
+    }
+
+    .phase-layout-row.is-dragging .phase-layout-handle,
+    .phase-layout-handle:hover {
+      color: var(--gold);
+    }
+
+    .phase-layout-handle:active {
+      cursor: grabbing;
+    }
+
+    .phase-layout-content {
+      display: grid;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .phase-layout-row.is-app {
+      background: rgba(243, 237, 226, .62);
+    }
+
+    .phase-layout-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .phase-layout-kind {
+      color: var(--gold);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+
+    .phase-layout-grid {
+      display: grid;
+      grid-template-columns: minmax(190px, .95fr) minmax(280px, 1.45fr) minmax(170px, .72fr);
+      gap: 12px;
+      align-items: end;
+    }
+
+    .phase-layout-field {
+      display: grid;
+      gap: 6px;
+    }
+
+    .phase-layout-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .layout-status {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      color: var(--green);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .02em;
+      opacity: 0;
+      transition: opacity .2s ease;
+    }
+
+    .layout-status.is-visible {
+      opacity: 1;
+    }
+
+    .phase-layout-trash {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px;
+      height: 30px;
+      border: 0;
+      border-radius: 999px;
+      background: transparent;
+      color: rgba(74, 74, 74, .42);
+      cursor: pointer;
+    }
+
+    .phase-layout-trash:hover {
+      background: rgba(138, 31, 31, .08);
+      color: #8A1F1F;
+    }
+
+    .phase-layout-trash svg {
+      width: 16px;
+      height: 16px;
+      pointer-events: none;
+    }
+
+    .phase-layout-check {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      color: var(--navy);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .phase-layout-check input {
+      width: auto;
     }
 
     .embed-controls {
@@ -571,6 +769,48 @@
       align-items: center;
     }
 
+    .invite-card {
+      display: grid;
+      gap: 14px;
+      max-width: 520px;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--white);
+    }
+
+    .invite-card .description {
+      margin-bottom: 0;
+    }
+
+    .invite-actions {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: end;
+    }
+
+    .invite-actions label {
+      display: grid;
+      gap: 7px;
+    }
+
+    .invite-status {
+      min-height: 20px;
+      margin: 0;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 1.45;
+    }
+
+    .invite-status.is-success {
+      color: var(--green);
+    }
+
+    .invite-status.is-error {
+      color: #8A1F1F;
+    }
+
     .password-input-wrap {
       position: relative;
     }
@@ -653,8 +893,14 @@
       }
 
       .admin-main {
+        width: 100%;
         margin-left: 0;
         padding: 24px;
+      }
+
+      .phase-layout-grid,
+      .invite-actions {
+        grid-template-columns: 1fr;
       }
     }
   </style>
@@ -684,10 +930,16 @@
   <div class="admin-app" id="adminApp">
     <div class="member-identity-bar">
       <div class="member-identity-left">
-        <span class="identity-logo-text">The Untaught Lessons</span>
+        <a class="identity-logo-link" href="../index.html" aria-label="The Untaught Lessons home">
+          <img class="identity-logo-image" src="../assets/utl-logo-nav-white.png" alt="The Untaught Lessons">
+        </a>
         <span class="identity-label">Admin</span>
       </div>
-      <a href="../index.html" class="identity-back">Back to site</a>
+      <div class="identity-links" aria-label="Admin navigation links">
+        <a href="../member-login/index.html" class="identity-back">Back to member workspace</a>
+        <span class="identity-link-separator" aria-hidden="true">|</span>
+        <a href="../index.html" class="identity-back">Back to main page</a>
+      </div>
     </div>
 
     <aside class="admin-sidebar">
@@ -709,6 +961,7 @@
       <button class="admin-nav-item" data-target="section-send-instructor">Send to instructor</button>
 
       <span class="nav-group-label">Access</span>
+      <button class="admin-nav-item" data-target="section-invite-members">Invite members</button>
       <button class="admin-nav-item" data-target="section-passwords">Passwords</button>
 
       <span class="nav-group-label">Links</span>
@@ -757,7 +1010,13 @@
         <span class="section-label">Members</span>
         <h2>Orientation</h2>
         <div class="section-divider"></div>
-        <p class="description">Controls the Orientation section of the member hub.</p>
+        <p class="description">Controls the Orientation section of the member hub. Add, rename, delete, or reorder context sub-sections.</p>
+        <div class="sync-actions">
+          <button class="small-button" type="button" data-add-context="orientation">Add context sub-section</button>
+          <button class="small-button secondary-button" type="button" data-save-layout-default="orientation">Set current layout as default</button>
+          <button class="small-button secondary-button" type="button" data-reset-layout="orientation">Reset Orientation layout</button>
+          <span class="layout-status" data-layout-status="orientation" aria-live="polite"></span>
+        </div>
         <div id="embed-orientation"></div>
       </section>
 
@@ -765,8 +1024,13 @@
         <span class="section-label">Members</span>
         <h2>Phase 1</h2>
         <div class="section-divider"></div>
-        <p class="description">Controls Phase 1 — Think Clearly.</p>
-        <div class="toggle-row" data-key="utl_phase1_status" data-default="live" data-options="live:Live,locked:Locked" data-labels="live:Phase is accessible to participants,locked:Phase shows a 'Not yet available' overlay"></div>
+        <p class="description">Controls Phase 1 — Think Clearly context sections and app visibility. Move rows to change their order in the member workspace.</p>
+        <div class="sync-actions">
+          <button class="small-button" type="button" data-add-context="phase1">Add context sub-section</button>
+          <button class="small-button secondary-button" type="button" data-save-layout-default="phase1">Set current layout as default</button>
+          <button class="small-button secondary-button" type="button" data-reset-layout="phase1">Reset Phase 1 layout</button>
+          <span class="layout-status" data-layout-status="phase1" aria-live="polite"></span>
+        </div>
         <div id="embed-phase1"></div>
       </section>
 
@@ -774,7 +1038,13 @@
         <span class="section-label">Members</span>
         <h2>Phase 2</h2>
         <div class="section-divider"></div>
-        <p class="description">Controls Phase 2 — Speak Concisely embeds. Phase visibility is automatic and shown in the Visibility section.</p>
+        <p class="description">Controls Phase 2 — Speak Concisely context sections and app visibility. Phase visibility is automatic and shown in the Visibility section.</p>
+        <div class="sync-actions">
+          <button class="small-button" type="button" data-add-context="phase2">Add context sub-section</button>
+          <button class="small-button secondary-button" type="button" data-save-layout-default="phase2">Set current layout as default</button>
+          <button class="small-button secondary-button" type="button" data-reset-layout="phase2">Reset Phase 2 layout</button>
+          <span class="layout-status" data-layout-status="phase2" aria-live="polite"></span>
+        </div>
         <div id="embed-phase2"></div>
       </section>
 
@@ -782,11 +1052,13 @@
         <span class="section-label">Members</span>
         <h2>Phase 3</h2>
         <div class="section-divider"></div>
-        <p class="description">Controls Phase 3 — Act Confidently embeds and local completion state. Phase visibility is automatic and shown in the Visibility section.</p>
-        <div class="toggle-row" data-key="utl_p3_ex1_done" data-default="false" data-options="false:Not done,true:Marked done" data-labels="false:The Art of Saying No is not marked complete,true:The Art of Saying No is marked complete and unlocks I Have Bad News..."></div>
-        <div class="toggle-row" data-key="utl_p3_ex2_done" data-default="false" data-options="false:Not done,true:Marked done" data-labels="false:I Have Bad News... is not marked complete,true:I Have Bad News... is marked complete and unlocks Let's Switch Hats"></div>
-        <div class="toggle-row" data-key="utl_p3_ex3_done" data-default="false" data-options="false:Not done,true:Marked done" data-labels="false:Let's Switch Hats is not marked complete,true:Let's Switch Hats is marked complete and unlocks Speak Like Obama"></div>
-        <div class="toggle-row" data-key="utl_p3_ex4_done" data-default="false" data-options="false:Not done,true:Marked done" data-labels="false:Speak Like Obama is not marked complete,true:Speak Like Obama is marked complete and shows the checkpoint nudge"></div>
+        <p class="description">Controls Phase 3 — Act Confidently context sections and app visibility. Participant completion remains automatic from the member workspace.</p>
+        <div class="sync-actions">
+          <button class="small-button" type="button" data-add-context="phase3">Add context sub-section</button>
+          <button class="small-button secondary-button" type="button" data-save-layout-default="phase3">Set current layout as default</button>
+          <button class="small-button secondary-button" type="button" data-reset-layout="phase3">Reset Phase 3 layout</button>
+          <span class="layout-status" data-layout-status="phase3" aria-live="polite"></span>
+        </div>
         <div id="embed-phase3"></div>
       </section>
 
@@ -794,10 +1066,10 @@
         <span class="section-label">Members</span>
         <h2>TSA Score™</h2>
         <div class="section-divider"></div>
-        <p class="description">Controls the assessment cards in the member hub. Set the section to Live first, then choose whether each assessment is available, coming soon, or hidden.</p>
-        <div class="toggle-row" data-key="utl_tsa_status" data-default="live" data-options="live:Live,placeholder:Placeholder,hidden:Hidden" data-labels="live:Assessment section shown in the member hub,placeholder:Whole section shows coming soon buttons,hidden:Assessment section removed from the page entirely"></div>
-        <div class="toggle-row" data-key="utl_tsa_diagnostic_status" data-default="live" data-options="live:Live,placeholder:Coming soon,hidden:Hidden" data-labels="live:The Diagnostic card links to its assessment hub,placeholder:The Diagnostic card shows a Coming soon badge,hidden:The Diagnostic card is hidden"></div>
-        <div class="toggle-row" data-key="utl_tsa_checkpoint_status" data-default="live" data-options="live:Live,placeholder:Coming soon,hidden:Hidden" data-labels="live:The Checkpoint card links to its assessment hub,placeholder:The Checkpoint card shows a Coming soon badge,hidden:The Checkpoint card is hidden"></div>
+        <p class="description">Controls the assessment cards in the member hub. Choose whether the section is shown, shown as coming soon, or hidden.</p>
+        <div class="toggle-row" data-key="utl_tsa_status" data-default="live" data-options="live:Show,placeholder:Coming soon,hidden:Hide" data-labels="live:Assessment section shown in the member hub,placeholder:Whole section shows coming soon buttons,hidden:Assessment section removed from the page entirely"></div>
+        <div class="toggle-row" data-key="utl_tsa_diagnostic_status" data-default="live" data-options="live:Show,placeholder:Coming soon,hidden:Hide" data-labels="live:The Diagnostic card links to its assessment hub,placeholder:The Diagnostic card shows a Coming soon badge,hidden:The Diagnostic card is hidden"></div>
+        <div class="toggle-row" data-key="utl_tsa_checkpoint_status" data-default="live" data-options="live:Show,placeholder:Coming soon,hidden:Hide" data-labels="live:The Checkpoint card links to its assessment hub,placeholder:The Checkpoint card shows a Coming soon badge,hidden:The Checkpoint card is hidden"></div>
         <div class="sync-actions" style="margin-top: 14px;">
           <button class="small-button" type="button" id="showReadyAssessments">Set ready assessment apps live</button>
           <a class="small-button secondary-button" href="../member-login/index.html?mode=admin#assessments" target="_blank" style="display:inline-flex;align-items:center;text-decoration:none;">Preview Assessments</a>
@@ -809,7 +1081,7 @@
         <h2>Send to instructor</h2>
         <div class="section-divider"></div>
         <p class="description">When active, participants can send their results directly to you from their My results page. This requires an Apps Script URL from your connected Google Sheet.</p>
-        <div class="toggle-row" data-key="utl_send_instructor" data-default="hidden" data-options="live:Live,hidden:Hidden" data-labels="live:Send to instructor button is active,hidden:Button is hidden from participants"></div>
+        <div class="toggle-row" data-key="utl_send_instructor" data-default="hidden" data-options="live:Show,hidden:Hide" data-labels="live:Send to instructor button is active,hidden:Button is hidden from participants"></div>
         <div class="url-block" data-key="utl_send_instructor_url" data-label="Apps Script endpoint URL" data-placeholder="Paste your Apps Script web app URL here"></div>
         <div class="instruction-callout">
           <h3>How to get this URL</h3>
@@ -824,6 +1096,23 @@
             <li>Paste that URL into the field above</li>
           </ol>
           <em>This URL acts as your private endpoint. Do not share it publicly.</em>
+        </div>
+      </section>
+
+      <section class="admin-section" id="section-invite-members">
+        <span class="section-label">Access</span>
+        <h2>Invite members</h2>
+        <div class="section-divider"></div>
+        <p class="description">Send a passwordless login link to a new member. They will click the link from their inbox and land directly in the member workspace.</p>
+        <div class="invite-card">
+          <div class="invite-actions">
+            <label for="inviteEmail">
+              Member email
+              <input id="inviteEmail" type="email" autocomplete="email" placeholder="name@example.com">
+            </label>
+            <button class="small-button" type="button" id="sendLoginInvite">Send Login Invite</button>
+          </div>
+          <p class="invite-status" id="inviteStatus" aria-live="polite"></p>
         </div>
       </section>
 
@@ -846,6 +1135,16 @@
     </main>
   </div>
 
+  <script type="module">
+    import { sendSignInInvite } from "../assets/firebase.js";
+
+    window.utlFirebaseAuth = {
+      ...(window.utlFirebaseAuth || {}),
+      sendSignInInvite: sendSignInInvite
+    };
+    window.dispatchEvent(new CustomEvent('utlFirebaseAuthReady'));
+  </script>
+
   <script>
     const AUTH_KEY = 'utl_admin_auth';
     const PASSWORD_KEY = 'utl_admin_password';
@@ -855,6 +1154,10 @@
     const app = document.getElementById('adminApp');
     const gateForm = document.getElementById('adminGateForm');
     const adminError = document.getElementById('adminError');
+    const inviteEmail = document.getElementById('inviteEmail');
+    const sendLoginInvite = document.getElementById('sendLoginInvite');
+    const inviteStatus = document.getElementById('inviteStatus');
+    let pendingLayoutHighlightKey = '';
     const EXPECTED_EMBEDS = [
       ['embed-orientation', 'utl_embed_orientation_welcome', 'Your first day at MA'],
       ['embed-orientation', 'utl_embed_orientation_howto', 'How this program works'],
@@ -893,6 +1196,50 @@
       ["Let's Switch Hats", '../apps/lets-switch-hats/index.html', 'utl_p3_ex3_done'],
       ['Speak Like Obama', '../apps/speak-like-obama/index.html', 'utl_p3_ex4_done']
     ];
+    const PHASE_LAYOUT_DEFAULTS = {
+      orientation: [
+        { kind: 'context', key: 'utl_embed_orientation_welcome', label: 'Your first day at MA', visible: true, type: 'slides', url: '' },
+        { kind: 'context', key: 'utl_embed_orientation_howto', label: 'How this program works', visible: true, type: 'slides', url: '' }
+      ],
+      phase1: [
+        { kind: 'context', key: 'utl_embed_p1_first_day', label: 'Before your first day', visible: true, type: 'slides', url: '' },
+        { kind: 'app', key: 'utl_app_p1_1', title: 'Grocery List', visible: true },
+        { kind: 'context', key: 'utl_embed_p1_ai_grocery', label: 'Try the same task with AI', visible: true, type: 'slides', url: '' },
+        { kind: 'app', key: 'utl_app_p1_2', title: 'Grocery List with AI', visible: true },
+        { kind: 'context', key: 'utl_embed_p1_message_desk', label: 'A message just landed on your desk', visible: true, type: 'slides', url: '' },
+        { kind: 'app', key: 'utl_app_p1_3', title: "Manager's Messy Notes", visible: true },
+        { kind: 'context', key: 'utl_embed_p1_hugh_favour', label: 'Hugh needs a favour', visible: true, type: 'slides', url: '' },
+        { kind: 'app', key: 'utl_app_p1_4', title: 'Rushed Voice Memo', visible: true },
+        { kind: 'context', key: 'utl_embed_p1_ai_memo', label: 'Try the same memo with AI', visible: true, type: 'slides', url: '' },
+        { kind: 'app', key: 'utl_app_p1_5', title: 'Rushed Voice Memo with AI', visible: true },
+        { kind: 'context', key: 'utl_embed_p1_olympic_brainstorm', label: 'Aiko needs the Olympic brainstorm session sorted', visible: true, type: 'slides', url: '' },
+        { kind: 'app', key: 'utl_app_p1_6', title: 'Chalkboard Notes', visible: true }
+      ],
+      phase2: [
+        { kind: 'context', key: 'utl_embed_p2_aiko_question', label: 'Aiko liked your work. Now she has a question.', visible: true, type: 'slides', url: '' },
+        { kind: 'app', key: 'utl_app_p2_1', title: 'Issue Tree Builder', visible: true },
+        { kind: 'context', key: 'utl_embed_p2_frame_answer', label: 'Before you frame your answer', visible: true, type: 'slides', url: '' },
+        { kind: 'app', key: 'utl_app_p2_2', title: 'SCQA Builder', visible: true },
+        { kind: 'context', key: 'utl_embed_p2_outside_perspectives', label: 'Get outside perspectives before you commit', visible: true, type: 'slides', url: '' },
+        { kind: 'app', key: 'utl_app_p2_3', title: 'Advisory board with AI', visible: true },
+        { kind: 'context', key: 'utl_embed_p2_aiko_email', label: 'Aiko does not have time to read everything', visible: true, type: 'slides', url: '' },
+        { kind: 'app', key: 'utl_app_p2_4', title: 'Write to Aiko', visible: true },
+        { kind: 'context', key: 'utl_embed_p2_hallway', label: 'She bumped into you in the hallway', visible: true, type: 'slides', url: '' },
+        { kind: 'app', key: 'utl_app_p2_5', title: 'Explain to Aiko (120s)', visible: true },
+        { kind: 'context', key: 'utl_embed_p2_compress', label: 'Now compress it', visible: true, type: 'slides', url: '' },
+        { kind: 'app', key: 'utl_app_p2_6', title: 'Explain to Aiko (60s)', visible: true }
+      ],
+      phase3: [
+        { kind: 'context', key: 'utl_embed_p3_lead_role', label: 'You just got the lead role.', visible: true, type: 'slides', url: '' },
+        { kind: 'app', key: 'utl_app_p3_1', title: 'The Art of Saying No', visible: true },
+        { kind: 'context', key: 'utl_embed_p3_bad_news', label: 'You have to be the one to say it', visible: true, type: 'slides', url: '' },
+        { kind: 'app', key: 'utl_app_p3_2', title: 'I Have Bad News...', visible: true },
+        { kind: 'context', key: 'utl_embed_p3_read_room', label: 'Read the room before you speak', visible: true, type: 'slides', url: '' },
+        { kind: 'app', key: 'utl_app_p3_3', title: "Let's Switch Hats", visible: true },
+        { kind: 'context', key: 'utl_embed_p3_eyes_on_you', label: 'All eyes are on you', visible: true, type: 'slides', url: '' },
+        { kind: 'app', key: 'utl_app_p3_4', title: 'Speak Like Obama', visible: true }
+      ]
+    };
     const VISIBILITY_CHECKLIST = [
       {
         title: 'Main Page',
@@ -917,14 +1264,6 @@
             fallback: 'show',
             label: 'Show MA mission card',
             description: 'Shows the storyline card at the top of the member workspace.'
-          },
-          {
-            key: 'utl_phase1_status',
-            checkedValue: 'live',
-            uncheckedValue: 'locked',
-            fallback: 'live',
-            label: 'Keep Phase 1 accessible',
-            description: 'When unchecked, Phase 1 remains on the page but shows the not-yet-available overlay.'
           },
           {
             key: 'utl_phase2_status',
@@ -1009,6 +1348,106 @@
       }
     }
 
+    function escapeHtml(value) {
+      return String(value || '').replace(/[&<>"']/g, (char) => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+      }[char]));
+    }
+
+    function phaseLayoutKey(phaseId) {
+      return 'utl_layout_' + phaseId;
+    }
+
+    function phaseLayoutDefaultKey(phaseId) {
+      return 'utl_layout_default_' + phaseId;
+    }
+
+    function builtInPhaseLayout(phaseId) {
+      return PHASE_LAYOUT_DEFAULTS[phaseId] || [];
+    }
+
+    function normalizePhaseLayoutItem(item) {
+      return {
+        ...item,
+        visible: item.visible !== false,
+        type: item.type || 'slides',
+        url: item.url || ''
+      };
+    }
+
+    function defaultPhaseLayout(phaseId) {
+      let source = builtInPhaseLayout(phaseId);
+      try {
+        const savedDefault = JSON.parse(localStorage.getItem(phaseLayoutDefaultKey(phaseId)) || 'null');
+        if (Array.isArray(savedDefault)) source = savedDefault;
+      } catch (error) {
+        source = builtInPhaseLayout(phaseId);
+      }
+
+      return source.map((item) => {
+        const embedConfig = item.kind === 'context' ? getEmbedConfig(item.key) : {};
+        return normalizePhaseLayoutItem({
+          ...item,
+          url: item.url || embedConfig.url || '',
+          type: item.type || embedConfig.type || 'slides'
+        });
+      });
+    }
+
+    function readPhaseLayout(phaseId) {
+      try {
+        const stored = JSON.parse(localStorage.getItem(phaseLayoutKey(phaseId)) || 'null');
+        if (Array.isArray(stored)) {
+          const normalized = stored.map(normalizePhaseLayoutItem);
+          const storedKeys = new Set(normalized.map((item) => item.key));
+          defaultPhaseLayout(phaseId).forEach((item) => {
+            if (!storedKeys.has(item.key)) normalized.push(item);
+          });
+          return normalized;
+        }
+      } catch (error) {
+        // Fall through to defaults.
+      }
+      return defaultPhaseLayout(phaseId);
+    }
+
+    function savePhaseLayout(phaseId, layout) {
+      localStorage.setItem(phaseLayoutKey(phaseId), JSON.stringify(layout));
+    }
+
+    function savePhaseLayoutDefault(phaseId, layout) {
+      localStorage.setItem(phaseLayoutDefaultKey(phaseId), JSON.stringify(layout.map(normalizePhaseLayoutItem)));
+      savePhaseLayout(phaseId, layout);
+    }
+
+    function showLayoutStatus(phaseId, message) {
+      const status = document.querySelector(`[data-layout-status="${phaseId}"]`);
+      if (!status) return;
+      status.textContent = message;
+      status.classList.add('is-visible');
+      window.clearTimeout(status._hideTimer);
+      status._hideTimer = window.setTimeout(() => {
+        status.classList.remove('is-visible');
+      }, 2600);
+    }
+
+    function persistContextEmbed(item) {
+      if (!item.key) return;
+      if (item.url) {
+        localStorage.setItem(item.key, JSON.stringify({ url: item.url, type: item.type || 'slides' }));
+      } else {
+        localStorage.removeItem(item.key);
+      }
+    }
+
+    function phaseLabel(phaseId) {
+      return phaseId.replace('phase', 'Phase ');
+    }
+
     function showSaved(target) {
       target.classList.add('is-visible');
       window.setTimeout(() => target.classList.remove('is-visible'), 1500);
@@ -1017,6 +1456,50 @@
     function showAdmin() {
       gate.style.display = 'none';
       app.classList.add('is-visible');
+    }
+
+    function setInviteStatus(message, type) {
+      if (!inviteStatus) return;
+      inviteStatus.textContent = message;
+      inviteStatus.classList.toggle('is-success', type === 'success');
+      inviteStatus.classList.toggle('is-error', type === 'error');
+    }
+
+    async function handleSendLoginInvite() {
+      const email = inviteEmail.value.trim();
+      if (!email) {
+        setInviteStatus('Please enter an email address.', 'error');
+        inviteEmail.focus();
+        return;
+      }
+
+      if (!inviteEmail.checkValidity()) {
+        setInviteStatus('Please enter a valid email address.', 'error');
+        inviteEmail.focus();
+        return;
+      }
+
+      const firebaseAuth = window.utlFirebaseAuth;
+      if (!firebaseAuth || !firebaseAuth.sendSignInInvite) {
+        setInviteStatus('Firebase invite tools are still loading. Please try again in a moment.', 'error');
+        return;
+      }
+
+      sendLoginInvite.disabled = true;
+      sendLoginInvite.textContent = 'Sending...';
+      setInviteStatus('', '');
+
+      try {
+        await firebaseAuth.sendSignInInvite(email);
+        inviteEmail.value = '';
+        setInviteStatus("⚡ Success! Invite link sent to the user's inbox.", 'success');
+      } catch (error) {
+        const detail = error && error.message ? error.message : 'Unknown error';
+        setInviteStatus(`Invite failed: ${detail}`, 'error');
+      } finally {
+        sendLoginInvite.disabled = false;
+        sendLoginInvite.textContent = 'Send Login Invite';
+      }
     }
 
     function syncToggleControl(key, value) {
@@ -1116,7 +1599,7 @@
             const sub = row.querySelector('.sub-label');
             if (sub) sub.textContent = labels[option.value] || '';
             if (VISIBILITY_CHECKLIST.some((group) => group.items.some((item) => item.key === key))) renderVisibilityChecklist();
-            if (key === 'utl_admin_preview_bypass' || key === 'utl_public_find_level' || key === 'utl_mission_card' || key === 'utl_phase1_status' || key === 'utl_phase2_status' || key === 'utl_phase3_status' || key === 'utl_tsa_status' || /_done$/.test(key)) renderVisibilityStatus();
+            if (key === 'utl_admin_preview_bypass' || key === 'utl_public_find_level' || key === 'utl_mission_card' || key === 'utl_phase2_status' || key === 'utl_phase3_status' || key === 'utl_tsa_status' || /_done$/.test(key)) renderVisibilityStatus();
             showSaved(saved);
           });
           control.appendChild(button);
@@ -1181,8 +1664,8 @@
       });
     }
 
-    function renderEmbedBlocks() {
-      EXPECTED_EMBEDS.forEach(([targetId, key, label]) => {
+    function renderSingleEmbedBlocks() {
+      EXPECTED_EMBEDS.filter(([targetId]) => targetId === 'embed-orientation').forEach(([targetId, key, label]) => {
         const target = document.getElementById(targetId);
         if (!target) return;
         const config = getEmbedConfig(key);
@@ -1228,6 +1711,173 @@
         });
         target.appendChild(block);
       });
+    }
+
+    function clearDropIndicators(list) {
+      list.querySelectorAll('.phase-layout-row').forEach((row) => {
+        row.classList.remove('is-drop-before', 'is-drop-after');
+      });
+      delete list.dataset.dropIndex;
+    }
+
+    function renderPhaseLayoutEditors() {
+      ['orientation', 'phase1', 'phase2', 'phase3'].forEach((phaseId) => {
+        const target = document.getElementById('embed-' + phaseId);
+        if (!target) return;
+        const layout = readPhaseLayout(phaseId);
+        target.innerHTML = `<div class="phase-layout-editor" data-phase-layout="${phaseId}"></div>`;
+        const list = target.querySelector('.phase-layout-editor');
+        let draggedIndex = null;
+
+        layout.forEach((item, index) => {
+          const row = document.createElement('div');
+          row.className = 'phase-layout-row ' + (item.kind === 'app' ? 'is-app' : 'is-context');
+          if (item.key === pendingLayoutHighlightKey) {
+            row.classList.add('is-new');
+            window.setTimeout(() => row.classList.remove('is-new'), 1500);
+          }
+          row.dataset.index = String(index);
+          row.innerHTML = item.kind === 'app' ? `
+            <span class="phase-layout-handle" draggable="true" title="Drag to reorder" aria-label="Drag to reorder">⠿</span>
+            <div class="phase-layout-content">
+              <div class="phase-layout-top">
+                <span class="phase-layout-kind">App</span>
+                <label class="phase-layout-check"><input type="checkbox" data-field="visible" ${item.visible !== false ? 'checked' : ''}> Show in member workspace</label>
+              </div>
+              <div class="phase-layout-grid">
+                <div class="phase-layout-field">
+                  <label>App name</label>
+                  <input type="text" value="${escapeHtml(item.title)}" readonly>
+                </div>
+                <div class="phase-layout-field">
+                  <label>Internal app ID</label>
+                  <input type="text" value="${escapeHtml(item.key)}" readonly>
+                </div>
+              </div>
+            </div>
+          ` : `
+            <span class="phase-layout-handle" draggable="true" title="Drag to reorder" aria-label="Drag to reorder">⠿</span>
+            <div class="phase-layout-content">
+              <div class="phase-layout-top">
+                <span class="phase-layout-kind">Context sub-section</span>
+                <label class="phase-layout-check"><input type="checkbox" data-field="visible" ${item.visible !== false ? 'checked' : ''}> Show in member workspace</label>
+                <button class="phase-layout-trash" type="button" data-action="delete" aria-label="Delete context sub-section">
+                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M4 7h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                    <path d="M10 11v6M14 11v6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                    <path d="M6 7l1 14h10l1-14M9 7V4h6v3" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+                  </svg>
+                </button>
+              </div>
+              <div class="phase-layout-grid">
+                <div class="phase-layout-field">
+                  <label>Sub-section name</label>
+                  <input type="text" data-field="label" value="${escapeHtml(item.label)}" placeholder="Context title">
+                </div>
+                <div class="phase-layout-field">
+                  <label>Embed URL</label>
+                  <input type="url" data-field="url" value="${escapeHtml(item.url)}" placeholder="Paste Google Slides or Google Drive video URL">
+                </div>
+                <div class="phase-layout-field">
+                  <label>Type</label>
+                  <select data-field="type">
+                    <option value="slides"${(item.type || 'slides') === 'slides' ? ' selected' : ''}>Google Slides</option>
+                    <option value="video"${item.type === 'video' ? ' selected' : ''}>Google Drive Video</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          `;
+          list.appendChild(row);
+        });
+
+        list.addEventListener('change', (event) => {
+          const row = event.target.closest('.phase-layout-row');
+          if (!row) return;
+          const index = Number(row.dataset.index);
+          const field = event.target.dataset.field;
+          if (!field) return;
+          if (event.target.type === 'checkbox') {
+            layout[index][field] = event.target.checked;
+          } else {
+            layout[index][field] = event.target.value.trim();
+          }
+          if (layout[index].kind === 'context') persistContextEmbed(layout[index]);
+          savePhaseLayout(phaseId, layout);
+          renderVisibilityStatus();
+        });
+
+        list.addEventListener('dragstart', (event) => {
+          if (!event.target.classList.contains('phase-layout-handle')) return;
+          const row = event.target.closest('.phase-layout-row');
+          draggedIndex = Number(row.dataset.index);
+          row.classList.add('is-dragging');
+          event.dataTransfer.effectAllowed = 'move';
+          event.dataTransfer.setData('text/plain', String(draggedIndex));
+        });
+
+        list.addEventListener('dragend', () => {
+          list.querySelectorAll('.phase-layout-row').forEach((row) => row.classList.remove('is-dragging'));
+          clearDropIndicators(list);
+          draggedIndex = null;
+        });
+
+        list.addEventListener('dragover', (event) => {
+          if (draggedIndex === null) return;
+          event.preventDefault();
+          event.dataTransfer.dropEffect = 'move';
+          const targetRow = event.target.closest('.phase-layout-row');
+          if (!targetRow || !list.contains(targetRow)) return;
+          const targetIndex = Number(targetRow.dataset.index);
+          const rect = targetRow.getBoundingClientRect();
+          const placeAfter = event.clientY > rect.top + rect.height / 2;
+          clearDropIndicators(list);
+          targetRow.classList.add(placeAfter ? 'is-drop-after' : 'is-drop-before');
+          list.dataset.dropIndex = String(placeAfter ? targetIndex + 1 : targetIndex);
+        });
+
+        list.addEventListener('dragleave', (event) => {
+          if (!list.contains(event.relatedTarget)) clearDropIndicators(list);
+        });
+
+        list.addEventListener('drop', (event) => {
+          const targetRow = event.target.closest('.phase-layout-row');
+          if (!targetRow || draggedIndex === null) return;
+          event.preventDefault();
+          let dropIndex = Number(list.dataset.dropIndex || targetRow.dataset.index);
+          clearDropIndicators(list);
+          if (dropIndex === draggedIndex) return;
+          const [moved] = layout.splice(draggedIndex, 1);
+          if (draggedIndex < dropIndex) dropIndex -= 1;
+          layout.splice(dropIndex, 0, moved);
+          savePhaseLayout(phaseId, layout);
+          renderPhaseLayoutEditors();
+          renderVisibilityStatus();
+        });
+
+        list.addEventListener('click', (event) => {
+          const button = event.target.closest('[data-action]');
+          const row = event.target.closest('.phase-layout-row');
+          if (!button || !row) return;
+          const index = Number(row.dataset.index);
+          const action = button.dataset.action;
+          if (action === 'delete' && layout[index].kind === 'context') {
+            const confirmed = window.confirm('Delete this context sub-section? This cannot be undone unless you reset the layout.');
+            if (!confirmed) return;
+            layout.splice(index, 1);
+          } else {
+            return;
+          }
+          savePhaseLayout(phaseId, layout);
+          renderPhaseLayoutEditors();
+          renderVisibilityStatus();
+          showLayoutStatus(phaseId, 'Context sub-section deleted.');
+        });
+      });
+    }
+
+    function renderEmbedBlocks() {
+      renderPhaseLayoutEditors();
     }
 
     function syncItem(state, text) {
@@ -1310,6 +1960,14 @@
       return localStorage.getItem(key) === 'true';
     }
 
+    function visibleDoneKeysForPhase(phaseNumber) {
+      const phaseId = 'phase' + phaseNumber;
+      const prefix = 'utl_app_p' + phaseNumber + '_';
+      return readPhaseLayout(phaseId)
+        .filter((item) => item.kind === 'app' && item.visible !== false && item.key && item.key.indexOf(prefix) === 0)
+        .map((item) => 'utl_p' + phaseNumber + '_ex' + item.key.replace(prefix, '') + '_done');
+    }
+
     function updateMemberHubPreviewLink(bypassEnabled) {
       const link = document.getElementById('memberHubPreviewLink');
       if (!link) return;
@@ -1318,9 +1976,9 @@
     }
 
     function renderVisibilityStatus() {
-      const p1Keys = ['utl_p1_ex1_done', 'utl_p1_ex2_done', 'utl_p1_ex3_done', 'utl_p1_ex4_done', 'utl_p1_ex5_done', 'utl_p1_ex6_done'];
-      const p2Keys = ['utl_p2_ex1_done', 'utl_p2_ex2_done', 'utl_p2_ex3_done', 'utl_p2_ex4_done', 'utl_p2_ex5_done', 'utl_p2_ex6_done'];
-      const p3Keys = ['utl_p3_ex1_done', 'utl_p3_ex2_done', 'utl_p3_ex3_done', 'utl_p3_ex4_done'];
+      const p1Keys = visibleDoneKeysForPhase(1);
+      const p2Keys = visibleDoneKeysForPhase(2);
+      const p3Keys = visibleDoneKeysForPhase(3);
       const p1Done = p1Keys.filter(isDone).length;
       const p2Done = p2Keys.filter(isDone).length;
       const p3Done = p3Keys.filter(isDone).length;
@@ -1350,19 +2008,14 @@
           <span class="visibility-badge ${getValue('utl_tsa_status', 'live') !== 'hidden' ? 'is-live' : ''}">${getValue('utl_tsa_status', 'live') !== 'hidden' ? 'Visible' : 'Hidden'}</span>
         </div>
         <div class="visibility-row">
-          <span class="visibility-name">Phase 1</span>
-          <span>${getValue('utl_phase1_status', 'live') === 'live' ? 'Phase 1 is accessible. Exercises still unlock one by one inside the phase.' : 'Phase 1 shows the not-yet-available overlay.'}</span>
-          <span class="visibility-badge ${getValue('utl_phase1_status', 'live') === 'live' ? 'is-live' : ''}">${getValue('utl_phase1_status', 'live') === 'live' ? 'Visible' : 'Locked'}</span>
-        </div>
-        <div class="visibility-row">
           <span class="visibility-name">Phase 2</span>
           <span>${phase2Allowed ? `${p1Done} of ${p1Keys.length} Phase 1 live exercises marked done.` : 'Phase 2 is hidden by the Member Workspace checklist.'}</span>
-          <span class="visibility-badge ${phase2Live ? 'is-live' : ''}">${phase2Live ? 'Visible' : phase2Allowed ? 'Locked' : 'Hidden'}</span>
+          <span class="visibility-badge ${phase2Live ? 'is-live' : ''}">${phase2Live ? 'Visible' : phase2Allowed ? 'Waiting' : 'Hidden'}</span>
         </div>
         <div class="visibility-row">
           <span class="visibility-name">Phase 3</span>
           <span>${phase3Allowed ? `${p2Done} of ${p2Keys.length} Phase 2 live exercises marked done. Phase 2 must also be visible.` : 'Phase 3 is hidden by the Member Workspace checklist.'}</span>
-          <span class="visibility-badge ${phase3Live ? 'is-live' : ''}">${phase3Live ? 'Visible' : phase3Allowed ? 'Locked' : 'Hidden'}</span>
+          <span class="visibility-badge ${phase3Live ? 'is-live' : ''}">${phase3Live ? 'Visible' : phase3Allowed ? 'Waiting' : 'Hidden'}</span>
         </div>
         <div class="visibility-row">
           <span class="visibility-name">Checkpoint nudge</span>
@@ -1506,6 +2159,54 @@
     document.getElementById('refreshVisibility')?.addEventListener('click', () => {
       renderVisibilityChecklist();
       renderVisibilityStatus();
+    });
+    document.querySelectorAll('[data-add-context]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const phaseId = button.dataset.addContext;
+        const layout = readPhaseLayout(phaseId);
+        const newItem = {
+          kind: 'context',
+          key: 'utl_embed_custom_' + phaseId + '_' + Date.now(),
+          label: 'New context sub-section',
+          visible: true,
+          type: 'slides',
+          url: ''
+        };
+        layout.push(newItem);
+        pendingLayoutHighlightKey = newItem.key;
+        savePhaseLayout(phaseId, layout);
+        renderPhaseLayoutEditors();
+        showLayoutStatus(phaseId, 'New context sub-section added at the bottom.');
+        window.setTimeout(() => {
+          if (pendingLayoutHighlightKey === newItem.key) pendingLayoutHighlightKey = '';
+        }, 1600);
+      });
+    });
+    document.querySelectorAll('[data-save-layout-default]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const phaseId = button.dataset.saveLayoutDefault;
+        const layout = readPhaseLayout(phaseId);
+        savePhaseLayoutDefault(phaseId, layout);
+        renderPhaseLayoutEditors();
+        renderVisibilityStatus();
+        showLayoutStatus(phaseId, 'Current layout saved as the reset default.');
+      });
+    });
+    document.querySelectorAll('[data-reset-layout]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const phaseId = button.dataset.resetLayout;
+        savePhaseLayout(phaseId, defaultPhaseLayout(phaseId));
+        renderPhaseLayoutEditors();
+        renderVisibilityStatus();
+        showLayoutStatus(phaseId, 'Layout reset to the saved default.');
+      });
+    });
+    sendLoginInvite?.addEventListener('click', handleSendLoginInvite);
+    inviteEmail?.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        handleSendLoginInvite();
+      }
     });
     document.getElementById('showReadyAssessments')?.addEventListener('click', () => {
       localStorage.setItem('utl_tsa_status', 'live');

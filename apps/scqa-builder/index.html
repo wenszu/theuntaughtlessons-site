@@ -597,6 +597,156 @@
       .action-row, .modal-actions { align-items: stretch; flex-direction: column; }
       .btn, .copy-group { width: 100%; text-align: center; }
     }
+
+    /* === MOBILE RESPONSIVE — May 2026 === */
+    @media (max-width: 768px) {
+      body {
+        overflow-x: hidden;
+      }
+
+      .app-header {
+        display: flex;
+        align-items: center;
+        gap: 10px 12px;
+        padding: 10px 16px;
+        flex-wrap: wrap;
+      }
+
+      .brand-logo-frame {
+        width: 140px;
+        min-width: 140px;
+        height: 32px;
+      }
+
+      .brand-divider {
+        display: none;
+      }
+
+      .app-heading {
+        flex: 1 1 180px;
+        min-width: 0;
+      }
+
+      .app-kicker {
+        font-size: 9px;
+        line-height: 1.2;
+      }
+
+      .app-title {
+        font-size: 21px;
+        line-height: 1.1;
+      }
+
+      .utility-cluster {
+        margin-left: auto;
+        justify-content: flex-end;
+        gap: 6px;
+        flex-wrap: wrap;
+      }
+
+      .utility-metric {
+        min-height: 44px;
+      }
+
+      .metric-hide-btn,
+      .icon-timer-btn {
+        width: 44px;
+        min-width: 44px;
+        height: 44px;
+        min-height: 44px;
+      }
+
+      .work-layout {
+        display: block;
+        padding-right: 16px;
+        padding-left: 16px;
+      }
+
+      .context-card {
+        width: auto;
+        margin: 24px 16px 0;
+        padding: 20px 16px;
+      }
+
+      #contextInput,
+      #topicInput,
+      .scqa-card textarea,
+      .scqa-card input {
+        width: 100%;
+        font-size: 15px;
+      }
+
+      #contextInput,
+      .scqa-card textarea {
+        min-height: 100px;
+      }
+
+      .field-stack {
+        grid-template-columns: 1fr;
+      }
+
+      .scqa-card {
+        padding: 18px 16px;
+      }
+
+      .field-head .label,
+      .scqa-card .label {
+        font-family: 'Roboto Mono', monospace;
+        font-size: 12px;
+      }
+
+      .review-grid,
+      .sample-grid,
+      .score-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .review-grid article + article,
+      .sample-grid article + article {
+        padding-top: 18px;
+        border-top: 2px solid var(--gold);
+      }
+
+      .context-banner {
+        width: 100%;
+        padding: 18px 16px;
+        font-size: 15px;
+      }
+
+      .context-banner p {
+        font-size: 15px;
+      }
+
+      .panel,
+      .review,
+      .score-message,
+      .rule-row,
+      .rule-hint {
+        width: 100%;
+      }
+
+      .score-message,
+      .rule-row,
+      .rule-hint {
+        font-size: 14px;
+      }
+
+      .bottom-bar {
+        position: static;
+        flex-direction: column;
+        align-items: stretch;
+        margin: 24px 0 0;
+        padding: 16px 0 0;
+      }
+
+      .btn,
+      .action-row .btn,
+      .bottom-bar .btn {
+        width: 100%;
+        min-height: 44px;
+        font-size: 15px;
+      }
+    }
     .completion-save-notice {
       background: #F3EDE2;
       border-radius: 8px;
@@ -1048,6 +1198,9 @@
         response: responseObj
       };
       localStorage.setItem('utl_result_' + appId, JSON.stringify(record));
+      import('../../assets/firebase.js')
+        .then(({ saveUserProgress }) => saveUserProgress(appId, exerciseName, record))
+        .catch((error) => console.warn('Firestore progress save failed.', error));
     }
 
     function completionSaveNotice() {

@@ -796,6 +796,9 @@ Best, Yutee Elle</div>
             mode: 'no-cors',
             body: JSON.stringify(payload)
           });
+          import('../../assets/firebase.js')
+            .then(({ saveUserProgress }) => saveUserProgress('write-to-aiko', 'Write to Aiko', payload))
+            .catch((error) => console.warn('Firestore progress save failed.', error));
           submitBtn.textContent = 'Submit';
           submitBtn.disabled = true;
           statusEl.textContent = 'Sent! Check your inbox.';

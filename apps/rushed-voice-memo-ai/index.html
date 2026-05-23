@@ -1337,6 +1337,9 @@ Here is the transcript:
         response: responseObj
       };
       localStorage.setItem('utl_result_' + appId, JSON.stringify(record));
+      import('../../assets/firebase.js')
+        .then(({ saveUserProgress }) => saveUserProgress(appId, exerciseName, record))
+        .catch((error) => console.warn('Firestore progress save failed.', error));
     }
 
     function completionSaveNotice() {
@@ -1391,6 +1394,9 @@ Here is the transcript:
       });
       sessionStorage.setItem(SPEAK_SCORE_KEY, JSON.stringify(result));
       localStorage.setItem(SPEAK_SCORE_KEY, JSON.stringify(result));
+      import('../../assets/firebase.js')
+        .then(({ saveUserProgress }) => saveUserProgress(SPEAK_SCORE_KEY, `Rushed Voice Memo AI Speak (${versionLabel})`, result))
+        .catch((error) => console.warn('Firestore progress save failed.', error));
       showScore(result);
     }
 

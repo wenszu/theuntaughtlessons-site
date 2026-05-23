@@ -194,12 +194,48 @@
       cursor: pointer;
     }
 
+    .google-button {
+      min-height: 50px;
+      border: 1px solid rgba(0, 51, 102, .22);
+      border-radius: 8px;
+      background: var(--white);
+      color: var(--navy);
+      font-family: 'Lato', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .google-button:hover {
+      border-color: var(--gold);
+    }
+
     .message {
       min-height: 22px;
       margin: 0;
       color: #8A1F1F;
       font-weight: 700;
       line-height: 1.35;
+    }
+
+    .auth-mode-switch {
+      margin: 0;
+      color: var(--steel);
+      font-size: 13px;
+      line-height: 1.45;
+      text-align: center;
+    }
+
+    .auth-mode-button {
+      border: 0;
+      background: transparent;
+      color: var(--navy);
+      cursor: pointer;
+      font-family: 'Lato', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      text-decoration: underline;
+      text-underline-offset: 2px;
     }
 
     .dashboard {
@@ -399,6 +435,12 @@
       gap: 12px;
     }
 
+    .member-identity-right {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
     .identity-logo-text {
       color: var(--white);
       font-family: 'Roboto Mono', monospace;
@@ -408,12 +450,82 @@
       text-transform: uppercase;
     }
 
+    .identity-logo-link {
+      display: inline-flex;
+      align-items: center;
+      text-decoration: none;
+    }
+
+    .identity-logo-image {
+      display: block;
+      width: 82px;
+      height: auto;
+    }
+
     .identity-label {
       font-family: 'Roboto Mono', monospace;
       font-size: 11px;
       color: rgba(255, 255, 255, .7);
       letter-spacing: .06em;
       text-transform: uppercase;
+    }
+
+    .identity-user {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      color: var(--white);
+      font-family: 'Lato', sans-serif;
+    }
+
+    .identity-user[hidden] {
+      display: none;
+    }
+
+    .identity-avatar {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border: 1px solid rgba(255, 255, 255, .35);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, .12);
+      color: var(--gold);
+      font-size: 12px;
+      font-weight: 700;
+      overflow: hidden;
+      text-transform: uppercase;
+    }
+
+    .identity-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .identity-user-copy {
+      display: grid;
+      gap: 1px;
+      min-width: 0;
+    }
+
+    .identity-user-status {
+      color: rgba(255, 255, 255, .62);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 9px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .identity-user-email {
+      max-width: 230px;
+      overflow: hidden;
+      color: var(--white);
+      font-size: 12px;
+      font-weight: 700;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     .identity-back {
@@ -1194,12 +1306,146 @@
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
     }
+
+    /* === MOBILE RESPONSIVE — May 2026 === */
+    @media (max-width: 768px) {
+      body {
+        overflow-x: hidden;
+      }
+
+      .page {
+        padding-right: 16px;
+        padding-left: 16px;
+      }
+
+      .dashboard {
+        padding-right: 16px;
+        padding-left: 16px;
+      }
+
+      .member-nav {
+        margin-right: -16px;
+        margin-left: -16px;
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .member-nav-inner,
+      .nav-links,
+      .nav-phase-links,
+      .nav-utility-links {
+        display: flex;
+        align-items: center;
+        flex-wrap: nowrap;
+        white-space: nowrap;
+      }
+
+      .member-nav-inner {
+        width: max-content;
+        min-width: 100%;
+        height: auto;
+        min-height: 44px;
+        padding-right: 16px;
+        padding-left: 16px;
+      }
+
+      .nav-item,
+      .nav-logout {
+        display: inline-flex;
+        align-items: center;
+        min-height: 44px;
+        font-size: 14px;
+        white-space: nowrap;
+      }
+
+      .nav-workspace-label {
+        white-space: nowrap;
+      }
+
+      .phase-section,
+      .hub-section {
+        padding-right: 16px;
+        padding-left: 16px;
+      }
+
+      .phase-heading .section-label,
+      .section-header .section-label {
+        font-size: 11px !important;
+        letter-spacing: .08em;
+      }
+
+      .phase-heading h2,
+      .section-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 24px !important;
+      }
+
+      .slides-bar,
+      .ws-context-accordion {
+        width: 100%;
+        min-height: 44px;
+        font-size: 14px;
+      }
+
+      .ws-context-accordion .slides-bar-icon {
+        width: 28px;
+        height: 28px;
+        flex-basis: 28px;
+      }
+
+      .ws-context-label {
+        font-size: 14px;
+      }
+
+      .exercise-card {
+        width: 100%;
+        padding-right: 16px;
+        padding-left: 16px;
+      }
+
+      .exercise-card-grid {
+        width: 100%;
+      }
+
+      .exercise-card .card-title {
+        font-family: 'Playfair Display', serif;
+        font-size: max(22px, 1.375rem) !important;
+      }
+
+      .exercise-card .card-time {
+        font-family: 'Lato', sans-serif;
+        font-size: max(15px, .9375rem) !important;
+      }
+
+      .exercise-card .card-type {
+        font-size: 11px;
+      }
+
+      .ws-open-tool,
+      .ws-mark-done {
+        width: 100%;
+        min-height: 44px;
+        font-size: 15px;
+      }
+
+      .ws-card-actions {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
+      }
+
+      .ws-lock-hint,
+      .ws-is-locked .ws-lock-hint {
+        font-size: 13px;
+        text-align: left;
+      }
+    }
   </style>
 </head>
-<body>
+<body class="member-workspace-page">
   <main class="page">
     <div class="shell">
-      <header class="topbar">
+      <header class="topbar" id="memberTopbar">
         <a href="../" aria-label="The Untaught Lessons home">
           <img class="logo" src="../assets/logo.png" alt="The Untaught Lessons" />
         </a>
@@ -1209,10 +1455,13 @@
       <section class="center-stage">
         <article id="loginCard" class="login-card">
           <span class="section-label">Member Login</span>
-          <h1>Welcome back.</h1>
-          <p>Enter the member password to open your Untaught Lessons tools.</p>
+          <h1 id="authTitle">Welcome back.</h1>
+          <p id="authIntro">Enter your member credentials to open your Untaught Lessons tools.</p>
 
           <form id="loginForm" class="login-form">
+            <label for="usernameInput">Username or email</label>
+            <input id="usernameInput" type="text" autocomplete="username" required />
+
             <label for="passwordInput">Password</label>
             <div class="password-input-wrap">
               <input id="passwordInput" type="password" autocomplete="current-password" required />
@@ -1223,7 +1472,8 @@
                 </svg>
               </button>
             </div>
-            <button class="primary-button" type="submit">Open member tools</button>
+            <button class="primary-button" id="authSubmitButton" type="submit">Open member tools</button>
+            <button class="google-button" id="googleSignInButton" type="button">Sign in with Google</button>
             <p id="loginMessage" class="message" aria-live="polite"></p>
           </form>
         </article>
@@ -1231,10 +1481,21 @@
         <section id="dashboard" class="dashboard hidden" aria-labelledby="dashboardTitle">
           <div class="member-identity-bar">
             <div class="member-identity-left">
-              <span class="identity-logo-text">The Untaught Lessons</span>
+              <a class="identity-logo-link" href="../index.html" aria-label="The Untaught Lessons home">
+                <img class="identity-logo-image" src="../assets/utl-logo-nav-white.png" alt="The Untaught Lessons">
+              </a>
               <span class="identity-label">Member workspace</span>
             </div>
-            <a href="../index.html" class="identity-back">Back to site</a>
+            <div class="member-identity-right">
+              <div class="identity-user" id="memberIdentity" hidden>
+                <span class="identity-avatar" id="memberAvatar" aria-hidden="true">U</span>
+                <span class="identity-user-copy">
+                  <span class="identity-user-status">Signed in</span>
+                  <span class="identity-user-email" id="memberEmail">Member</span>
+                </span>
+              </div>
+              <a href="../index.html" class="identity-back">Back to site</a>
+            </div>
           </div>
 
           <nav class="member-nav" id="member-nav" aria-label="Member workspace sections">
@@ -1713,19 +1974,88 @@
     </div>
   </main>
 
+  <script type="module">
+    import { auth, GoogleAuthProvider, isSignInWithEmailLink, onAuthStateChanged, saveUserProgress, sendSignInInvite, signInWithEmailAndPassword, signInWithEmailLink, signInWithPopup, signOut } from "../assets/firebase.js";
+
+    async function signInWithGoogle() {
+      const provider = new GoogleAuthProvider();
+      return signInWithPopup(auth, provider);
+    }
+
+    function profileFromUser(user, fallbackEmail) {
+      return {
+        displayName: user && user.displayName ? user.displayName : '',
+        email: user && user.email ? user.email : fallbackEmail,
+        photoURL: user && user.photoURL ? user.photoURL : ''
+      };
+    }
+
+    async function completeEmailLinkSignIn() {
+      if (!isSignInWithEmailLink(auth, window.location.href)) return;
+
+      let email = window.localStorage.getItem('emailForSignIn');
+      if (!email) {
+        email = window.prompt('Please confirm your email to finish signing in.');
+      }
+      if (!email) return;
+
+      try {
+        const credential = await signInWithEmailLink(auth, email, window.location.href);
+        window.localStorage.removeItem('emailForSignIn');
+        const profile = profileFromUser(credential.user, email);
+        if (typeof window.utlGrantMemberAccess === 'function') {
+          window.utlGrantMemberAccess(profile);
+        } else {
+          window.dispatchEvent(new CustomEvent('utlEmailLinkSignInComplete', { detail: profile }));
+        }
+        window.history.replaceState({}, document.title, window.location.pathname);
+      } catch (error) {
+        console.error('Email link sign-in failed.', error);
+      }
+    }
+
+    window.utlFirebaseAuth = {
+      auth: auth,
+      isSignInWithEmailLink: isSignInWithEmailLink,
+      onAuthStateChanged: onAuthStateChanged,
+      saveUserProgress: saveUserProgress,
+      sendSignInInvite: sendSignInInvite,
+      signInWithGoogle: signInWithGoogle,
+      signInWithEmailAndPassword: signInWithEmailAndPassword,
+      signInWithEmailLink: signInWithEmailLink,
+      signOut: signOut
+    };
+    window.dispatchEvent(new CustomEvent('utlFirebaseAuthReady'));
+    if (document.readyState === 'loading') {
+      window.addEventListener('DOMContentLoaded', completeEmailLinkSignIn, { once: true });
+    } else {
+      completeEmailLinkSignIn();
+    }
+  </script>
+
   <script>
     (function () {
       var SESSION_KEY = 'utl_member_unlocked';
       var loginCard = document.getElementById('loginCard');
       var dashboard = document.getElementById('dashboard');
+      var memberTopbar = document.getElementById('memberTopbar');
       var form = document.getElementById('loginForm');
+      var authTitle = document.getElementById('authTitle');
+      var authIntro = document.getElementById('authIntro');
+      var authSubmitButton = document.getElementById('authSubmitButton');
+      var googleSignInButton = document.getElementById('googleSignInButton');
+      var usernameInput = document.getElementById('usernameInput');
       var input = document.getElementById('passwordInput');
       var message = document.getElementById('loginMessage');
       var logoutBtn = document.getElementById('logoutBtn');
+      var memberIdentity = document.getElementById('memberIdentity');
+      var memberAvatar = document.getElementById('memberAvatar');
+      var memberEmail = document.getElementById('memberEmail');
       var navLinks = Array.prototype.slice.call(document.querySelectorAll('.nav-item[data-section]'));
       var navObserver = null;
       var assessmentsSection = document.getElementById('assessments');
       var phase3Nudge = document.querySelector('.phase3-nudge');
+      var firebaseProfileListenerStarted = false;
       var legacyEmbedKeys = {
         utl_embed_orientation_welcome: 'utl_slides_orientation',
         utl_embed_orientation_howto: 'utl_slides_orientation',
@@ -1760,6 +2090,50 @@
         utl_embed_p3_read_room: { url: 'https://docs.google.com/presentation/d/1p0bvALYVQ_U-FGFfUx47W05sQuy4GQRka_-N079n9J0/edit?slide=id.g3e2dc34c604_0_1584', type: 'slides' },
         utl_embed_p3_eyes_on_you: { url: 'https://docs.google.com/presentation/d/1p0bvALYVQ_U-FGFfUx47W05sQuy4GQRka_-N079n9J0/edit?slide=id.g3e2dc34c604_0_1767', type: 'slides' }
       };
+      var phaseLayoutDefaults = {
+        orientation: [
+          { kind: 'context', key: 'utl_embed_orientation_welcome', label: 'Your first day at MA', visible: true },
+          { kind: 'context', key: 'utl_embed_orientation_howto', label: 'How this program works', visible: true }
+        ],
+        phase1: [
+          { kind: 'context', key: 'utl_embed_p1_first_day', label: 'Before your first day', visible: true },
+          { kind: 'app', key: 'utl_app_p1_1', visible: true },
+          { kind: 'context', key: 'utl_embed_p1_ai_grocery', label: 'Try the same task with AI', visible: true },
+          { kind: 'app', key: 'utl_app_p1_2', visible: true },
+          { kind: 'context', key: 'utl_embed_p1_message_desk', label: 'A message just landed on your desk', visible: true },
+          { kind: 'app', key: 'utl_app_p1_3', visible: true },
+          { kind: 'context', key: 'utl_embed_p1_hugh_favour', label: 'Hugh needs a favour', visible: true },
+          { kind: 'app', key: 'utl_app_p1_4', visible: true },
+          { kind: 'context', key: 'utl_embed_p1_ai_memo', label: 'Try the same memo with AI', visible: true },
+          { kind: 'app', key: 'utl_app_p1_5', visible: true },
+          { kind: 'context', key: 'utl_embed_p1_olympic_brainstorm', label: 'Aiko needs the Olympic brainstorm session sorted', visible: true },
+          { kind: 'app', key: 'utl_app_p1_6', visible: true }
+        ],
+        phase2: [
+          { kind: 'context', key: 'utl_embed_p2_aiko_question', label: 'Aiko liked your work. Now she has a question.', visible: true },
+          { kind: 'app', key: 'utl_app_p2_1', visible: true },
+          { kind: 'context', key: 'utl_embed_p2_frame_answer', label: 'Before you frame your answer', visible: true },
+          { kind: 'app', key: 'utl_app_p2_2', visible: true },
+          { kind: 'context', key: 'utl_embed_p2_outside_perspectives', label: 'Get outside perspectives before you commit', visible: true },
+          { kind: 'app', key: 'utl_app_p2_3', visible: true },
+          { kind: 'context', key: 'utl_embed_p2_aiko_email', label: 'Aiko does not have time to read everything', visible: true },
+          { kind: 'app', key: 'utl_app_p2_4', visible: true },
+          { kind: 'context', key: 'utl_embed_p2_hallway', label: 'She bumped into you in the hallway', visible: true },
+          { kind: 'app', key: 'utl_app_p2_5', visible: true },
+          { kind: 'context', key: 'utl_embed_p2_compress', label: 'Now compress it', visible: true },
+          { kind: 'app', key: 'utl_app_p2_6', visible: true }
+        ],
+        phase3: [
+          { kind: 'context', key: 'utl_embed_p3_lead_role', label: 'You just got the lead role.', visible: true },
+          { kind: 'app', key: 'utl_app_p3_1', visible: true },
+          { kind: 'context', key: 'utl_embed_p3_bad_news', label: 'You have to be the one to say it', visible: true },
+          { kind: 'app', key: 'utl_app_p3_2', visible: true },
+          { kind: 'context', key: 'utl_embed_p3_read_room', label: 'Read the room before you speak', visible: true },
+          { kind: 'app', key: 'utl_app_p3_3', visible: true },
+          { kind: 'context', key: 'utl_embed_p3_eyes_on_you', label: 'All eyes are on you', visible: true },
+          { kind: 'app', key: 'utl_app_p3_4', visible: true }
+        ]
+      };
 
       document.querySelectorAll('[data-password-toggle]').forEach(function (toggle) {
         var target = document.getElementById(toggle.dataset.passwordToggle);
@@ -1792,6 +2166,137 @@
         placeholder.className = 'slides-placeholder is-collapsed';
         placeholder.innerHTML = '<!-- embed to be added -->';
         return placeholder;
+      }
+
+      function readPhaseLayout(phaseId) {
+        try {
+          var stored = JSON.parse(localStorage.getItem('utl_layout_' + phaseId) || localStorage.getItem('utl_layout_default_' + phaseId) || 'null');
+          if (Array.isArray(stored)) {
+            var normalized = stored.map(function (item) {
+              return Object.assign({}, item, { visible: item.visible !== false });
+            });
+            var storedKeys = normalized.map(function (item) { return item.key; });
+            (phaseLayoutDefaults[phaseId] || []).forEach(function (item) {
+              if (storedKeys.indexOf(item.key) === -1) {
+                normalized.push(Object.assign({}, item, { visible: item.visible !== false }));
+              }
+            });
+            return normalized;
+          }
+        } catch (error) {
+          // Fall through to defaults.
+        }
+        return (phaseLayoutDefaults[phaseId] || []).map(function (item) {
+          return Object.assign({}, item, { visible: item.visible !== false });
+        });
+      }
+
+      function layoutEmbedConfigForKey(key) {
+        var phases = ['orientation', 'phase1', 'phase2', 'phase3'];
+        for (var i = 0; i < phases.length; i += 1) {
+          var layout = readPhaseLayout(phases[i]);
+          for (var j = 0; j < layout.length; j += 1) {
+            var item = layout[j];
+            if (item.kind === 'context' && item.key === key && item.url) {
+              return {
+                url: item.url,
+                type: item.type || 'slides'
+              };
+            }
+          }
+        }
+        return null;
+      }
+
+      function appKeyForCard(card) {
+        if (card.matches('[data-ws-exercise]')) return 'utl_app_p1_' + card.dataset.wsExercise;
+        if (card.matches('[data-ws-p2-exercise]')) return 'utl_app_p2_' + card.dataset.wsP2Exercise;
+        if (card.matches('[data-ws-p3-exercise]')) return 'utl_app_p3_' + card.dataset.wsP3Exercise;
+        return '';
+      }
+
+      function createContextChunk(item) {
+        var chunk = document.createElement('div');
+        chunk.className = 'phase-chunk';
+        var label = item.label || 'Context';
+        chunk.innerHTML = '<div class="slides-bar ws-context-accordion" onclick="toggleSlides(this)" data-embed-key="' + item.key + '">' +
+          '<span class="slides-bar-icon">+</span>' +
+          '<span class="ws-context-text"><span class="ws-context-label"></span><span class="ws-context-sub">Read before starting</span></span>' +
+          '</div><div class="slides-placeholder is-collapsed"><!-- embed to be added --></div>';
+        chunk.querySelector('.ws-context-label').textContent = label;
+        return chunk;
+      }
+
+      function standaloneChunkFromNode(node) {
+        var chunk = document.createElement('div');
+        chunk.className = 'phase-chunk';
+        chunk.appendChild(node);
+        return chunk;
+      }
+
+      function applyPhaseLayout(phaseId) {
+        var section = document.getElementById(phaseId);
+        if (!section) return;
+        var overlay = section.querySelector('.phase-overlay');
+        var existingContexts = {};
+        var existingApps = {};
+
+        section.querySelectorAll('.slides-bar[data-embed-key]').forEach(function (bar) {
+          var key = bar.dataset.embedKey;
+          var chunk = bar.closest('.phase-chunk');
+          if (!chunk || !key) return;
+          var siblings = [bar];
+          var current = bar.nextElementSibling;
+          while (current && !current.matches('article.exercise-card')) {
+            siblings.push(current);
+            current = current.nextElementSibling;
+          }
+          existingContexts[key] = siblings;
+        });
+
+        section.querySelectorAll('article.exercise-card').forEach(function (card) {
+          var key = appKeyForCard(card);
+          if (key) existingApps[key] = card;
+        });
+
+        section.querySelectorAll('.phase-chunk').forEach(function (chunk) {
+          chunk.remove();
+        });
+
+        var insertBefore = overlay || null;
+        readPhaseLayout(phaseId).forEach(function (item) {
+          if (item.visible === false) return;
+          if (item.kind === 'context') {
+            var chunk = document.createElement('div');
+            chunk.className = 'phase-chunk';
+            var nodes = existingContexts[item.key];
+            if (nodes && nodes.length) {
+              nodes.forEach(function (node) { chunk.appendChild(node); });
+              var labelNode = chunk.querySelector('.ws-context-label');
+              if (labelNode && item.label) labelNode.textContent = item.label;
+            } else {
+              chunk = createContextChunk(item);
+            }
+            section.insertBefore(chunk, insertBefore);
+            configureEmbedBlock(chunk.querySelector('.slides-bar[data-embed-key]'));
+          }
+          if (item.kind === 'app' && existingApps[item.key]) {
+            section.insertBefore(standaloneChunkFromNode(existingApps[item.key]), insertBefore);
+          }
+        });
+      }
+
+      function visibleExerciseNumbers(phaseNumber) {
+        return readPhaseLayout('phase' + phaseNumber)
+          .filter(function (item) { return item.kind === 'app' && item.visible !== false && item.key && item.key.indexOf('utl_app_p' + phaseNumber + '_') === 0; })
+          .map(function (item) { return Number(item.key.replace('utl_app_p' + phaseNumber + '_', '')); })
+          .filter(Boolean);
+      }
+
+      function visibleDoneKeys(phaseNumber) {
+        return visibleExerciseNumbers(phaseNumber).map(function (number) {
+          return 'utl_p' + phaseNumber + '_ex' + number + '_done';
+        });
       }
 
       function getPresentationId(url) {
@@ -1844,7 +2349,9 @@
         var currentPanel = bar.nextElementSibling;
         if (!key || !currentPanel) return;
 
-        var stored = localStorage.getItem(key);
+        var directStored = localStorage.getItem(key);
+        var stored = directStored;
+        var layoutConfig = layoutEmbedConfigForKey(key);
         if (!stored && legacyEmbedKeys[key]) {
           var legacyUrl = localStorage.getItem(legacyEmbedKeys[key]);
           stored = legacyUrl ? JSON.stringify({ url: legacyUrl, type: 'slides' }) : '';
@@ -1862,6 +2369,10 @@
           config = defaultEmbedConfigs[key];
         }
 
+        if (layoutConfig && !directStored) {
+          config = layoutConfig;
+        }
+
         var src = config ? buildEmbedSrc(config.url, config.type || 'slides') : '';
         var replacement = src ? createEmbedWrapper(src) : createSlidePlaceholder();
 
@@ -1873,19 +2384,6 @@
         }
         var icon = bar.querySelector('.slides-bar-icon');
         if (icon) icon.textContent = '+';
-      }
-
-      function setPhaseStatus(id, status) {
-        var section = document.getElementById(id);
-        if (!section) return;
-        section.classList.toggle('phase-locked', status === 'locked');
-        section.querySelectorAll('a, button').forEach(function (control) {
-          if (status === 'locked') {
-            control.setAttribute('aria-disabled', 'true');
-          } else {
-            control.removeAttribute('aria-disabled');
-          }
-        });
       }
 
       function setTsaStatus(status) {
@@ -1941,8 +2439,11 @@
         }
 
         setTsaStatus(storedValue('utl_tsa_status', 'live'));
-        setPhaseStatus('phase1', storedValue('utl_phase1_status', 'live'));
         document.querySelectorAll('.slides-bar[data-embed-key], .slides-bar[data-slide-key]').forEach(configureEmbedBlock);
+        applyPhaseLayout('orientation');
+        applyPhaseLayout('phase1');
+        applyPhaseLayout('phase2');
+        applyPhaseLayout('phase3');
       }
 
       if (document.readyState === 'loading') {
@@ -2011,6 +2512,42 @@
         return localStorage.getItem(phaseOneDoneKey(number)) === 'true';
       }
 
+      function exerciseSlug(value) {
+        return String(value || 'exercise')
+          .toLowerCase()
+          .replace(/&/g, 'and')
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/^-+|-+$/g, '') || 'exercise';
+      }
+
+      function memberWorkspaceExerciseMeta(card, phase, number) {
+        var nameNode = card.querySelector('.card-title');
+        var link = card.querySelector('.ws-open-tool');
+        var exerciseName = nameNode ? nameNode.textContent.trim() : 'Exercise ' + number;
+        return {
+          exerciseId: 'phase-' + phase + '-' + exerciseSlug(exerciseName || number),
+          exerciseName: exerciseName,
+          exercisePayload: {
+            phase: phase,
+            exerciseNumber: number,
+            href: link ? link.getAttribute('href') : '',
+            source: 'member-workspace-mark-done',
+            completedFrom: window.location.href
+          }
+        };
+      }
+
+      async function saveWorkspaceProgress(card, phase, number) {
+        var firebaseAuth = window.utlFirebaseAuth;
+        if (!firebaseAuth || !firebaseAuth.saveUserProgress) return;
+        var meta = memberWorkspaceExerciseMeta(card, phase, number);
+        try {
+          await firebaseAuth.saveUserProgress(meta.exerciseId, meta.exerciseName, meta.exercisePayload);
+        } catch (error) {
+          console.warn('Firestore progress save failed.', error);
+        }
+      }
+
       function setPhaseOneDone(number, done) {
         if (done) {
           localStorage.setItem(phaseOneDoneKey(number), 'true');
@@ -2021,10 +2558,14 @@
 
       function renderPhaseOneExerciseStates() {
         var cards = Array.prototype.slice.call(document.querySelectorAll('[data-ws-exercise]'));
+        var visibleNumbers = visibleExerciseNumbers(1);
         cards.forEach(function (card) {
           var number = Number(card.dataset.wsExercise);
+          var visibleIndex = visibleNumbers.indexOf(number);
+          if (visibleIndex === -1) return;
           var done = isPhaseOneDone(number);
-          var unlocked = number === 1 || isPhaseOneDone(number - 1) || done;
+          var previousNumber = visibleNumbers[visibleIndex - 1];
+          var unlocked = visibleIndex === 0 || isPhaseOneDone(previousNumber) || done;
           var locked = !unlocked;
           var step = card.querySelector('.ws-step-circle');
           var markButton = card.querySelector('.ws-mark-done');
@@ -2043,7 +2584,7 @@
             openLink.setAttribute('aria-disabled', locked ? 'true' : 'false');
             openLink.tabIndex = locked ? -1 : 0;
           }
-          if (lockHint) lockHint.textContent = number > 1 ? 'Complete exercise ' + (number - 1) + ' to unlock' : '';
+          if (lockHint) lockHint.textContent = visibleIndex > 0 ? 'Complete exercise ' + previousNumber + ' to unlock' : '';
         });
       }
 
@@ -2054,7 +2595,9 @@
           markButton.addEventListener('click', function () {
             if (card.classList.contains('ws-is-locked')) return;
             var number = Number(card.dataset.wsExercise);
-            setPhaseOneDone(number, !isPhaseOneDone(number));
+            var nextDone = !isPhaseOneDone(number);
+            setPhaseOneDone(number, nextDone);
+            if (nextDone) saveWorkspaceProgress(card, 1, number);
             renderPhaseOneExerciseStates();
             applyPhaseVisibility();
           });
@@ -2089,10 +2632,14 @@
 
       function renderPhaseTwoExerciseStates() {
         var cards = Array.prototype.slice.call(document.querySelectorAll('[data-ws-p2-exercise]'));
+        var visibleNumbers = visibleExerciseNumbers(2);
         cards.forEach(function (card) {
           var number = Number(card.dataset.wsP2Exercise);
+          var visibleIndex = visibleNumbers.indexOf(number);
+          if (visibleIndex === -1) return;
           var done = isPhaseTwoDone(number);
-          var unlocked = number === 1 || isPhaseTwoDone(number - 1) || done;
+          var previousNumber = visibleNumbers[visibleIndex - 1];
+          var unlocked = visibleIndex === 0 || isPhaseTwoDone(previousNumber) || done;
           var locked = !unlocked;
           var step = card.querySelector('.ws-step-circle');
           var markButton = card.querySelector('.ws-mark-done');
@@ -2111,7 +2658,7 @@
             openLink.setAttribute('aria-disabled', locked ? 'true' : 'false');
             openLink.tabIndex = locked ? -1 : 0;
           }
-          if (lockHint) lockHint.textContent = number > 1 ? 'Complete exercise ' + (number - 1) + ' to unlock' : '';
+          if (lockHint) lockHint.textContent = visibleIndex > 0 ? 'Complete exercise ' + previousNumber + ' to unlock' : '';
         });
       }
 
@@ -2122,7 +2669,9 @@
           markButton.addEventListener('click', function () {
             if (card.classList.contains('ws-is-locked')) return;
             var number = Number(card.dataset.wsP2Exercise);
-            setPhaseTwoDone(number, !isPhaseTwoDone(number));
+            var nextDone = !isPhaseTwoDone(number);
+            setPhaseTwoDone(number, nextDone);
+            if (nextDone) saveWorkspaceProgress(card, 2, number);
             renderPhaseTwoExerciseStates();
             applyPhaseVisibility();
           });
@@ -2149,10 +2698,14 @@
 
       function renderPhaseThreeExerciseStates() {
         var cards = Array.prototype.slice.call(document.querySelectorAll('[data-ws-p3-exercise]'));
+        var visibleNumbers = visibleExerciseNumbers(3);
         cards.forEach(function (card) {
           var number = Number(card.dataset.wsP3Exercise);
+          var visibleIndex = visibleNumbers.indexOf(number);
+          if (visibleIndex === -1) return;
           var done = isPhaseThreeDone(number);
-          var unlocked = number === 1 || isPhaseThreeDone(number - 1) || done;
+          var previousNumber = visibleNumbers[visibleIndex - 1];
+          var unlocked = visibleIndex === 0 || isPhaseThreeDone(previousNumber) || done;
           var locked = !unlocked;
           var step = card.querySelector('.ws-step-circle');
           var markButton = card.querySelector('.ws-mark-done');
@@ -2171,7 +2724,7 @@
             openLink.setAttribute('aria-disabled', locked ? 'true' : 'false');
             openLink.tabIndex = locked ? -1 : 0;
           }
-          if (lockHint) lockHint.textContent = number > 1 ? 'Complete exercise ' + (number - 1) + ' to unlock' : '';
+          if (lockHint) lockHint.textContent = visibleIndex > 0 ? 'Complete exercise ' + previousNumber + ' to unlock' : '';
         });
       }
 
@@ -2182,7 +2735,9 @@
           markButton.addEventListener('click', function () {
             if (card.classList.contains('ws-is-locked')) return;
             var number = Number(card.dataset.wsP3Exercise);
-            setPhaseThreeDone(number, !isPhaseThreeDone(number));
+            var nextDone = !isPhaseThreeDone(number);
+            setPhaseThreeDone(number, nextDone);
+            if (nextDone) saveWorkspaceProgress(card, 3, number);
             renderPhaseThreeExerciseStates();
             applyPhaseVisibility();
           });
@@ -2232,47 +2787,102 @@
         if (isAdminMode()) {
           setPhaseVisible('phase2', phase2Allowed);
           setPhaseVisible('phase3', phase3Allowed);
-          if (phase3Nudge) phase3Nudge.style.display = phase3Allowed && allKeysDone([
-            'utl_p3_ex1_done',
-            'utl_p3_ex2_done',
-            'utl_p3_ex3_done',
-            'utl_p3_ex4_done'
-          ]) ? '' : 'none';
+          if (phase3Nudge) phase3Nudge.style.display = phase3Allowed && allKeysDone(visibleDoneKeys(3)) ? '' : 'none';
           return;
         }
 
-        var phase2Unlocked = allKeysDone([
-          'utl_p1_ex1_done',
-          'utl_p1_ex2_done',
-          'utl_p1_ex3_done',
-          'utl_p1_ex4_done',
-          'utl_p1_ex5_done',
-          'utl_p1_ex6_done'
-        ]);
+        var phase2Unlocked = allKeysDone(visibleDoneKeys(1));
         var phase2Visible = phase2Allowed && phase2Unlocked;
-        var phase3Unlocked = phase2Visible && allKeysDone([
-          'utl_p2_ex1_done',
-          'utl_p2_ex2_done',
-          'utl_p2_ex3_done',
-          'utl_p2_ex4_done',
-          'utl_p2_ex5_done',
-          'utl_p2_ex6_done'
-        ]);
+        var phase3Unlocked = phase2Visible && allKeysDone(visibleDoneKeys(2));
         var phase3Visible = phase3Allowed && phase3Unlocked;
 
         setPhaseVisible('phase2', phase2Visible);
         setPhaseVisible('phase3', phase3Visible);
-        if (phase3Nudge) phase3Nudge.style.display = phase3Visible && allKeysDone([
-          'utl_p3_ex1_done',
-          'utl_p3_ex2_done',
-          'utl_p3_ex3_done',
-          'utl_p3_ex4_done'
-        ]) ? '' : 'none';
+        if (phase3Nudge) phase3Nudge.style.display = phase3Visible && allKeysDone(visibleDoneKeys(3)) ? '' : 'none';
+      }
+
+      function getInitials(value) {
+        var words = String(value || 'Member').trim().split(/\s+/).filter(Boolean);
+        if (!words.length) return 'M';
+        if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
+        return (words[0].charAt(0) + words[1].charAt(0)).toUpperCase();
+      }
+
+      function normalizeMemberProfile(profile) {
+        var safeProfile = typeof profile === 'string' ? { username: profile } : (profile || {});
+        var email = safeProfile.email || safeProfile.username || '';
+        var displayName = safeProfile.displayName || email || 'Member';
+        return {
+          displayName: displayName,
+          email: email,
+          photoURL: safeProfile.photoURL || ''
+        };
+      }
+
+      function getStoredMemberProfile() {
+        try {
+          var storedProfile = JSON.parse(localStorage.getItem('utl_member_profile') || '{}');
+          if (!storedProfile.email && !storedProfile.displayName && localStorage.getItem('utl_member_username')) {
+            storedProfile.username = localStorage.getItem('utl_member_username');
+          }
+          return normalizeMemberProfile(storedProfile);
+        } catch (error) {
+          return normalizeMemberProfile(localStorage.getItem('utl_member_username') || 'Member');
+        }
+      }
+
+      function renderMemberProfile() {
+        if (!memberIdentity || !memberAvatar || !memberEmail) return;
+        var profile = getStoredMemberProfile();
+        var label = profile.email || profile.displayName || 'Member';
+        memberEmail.textContent = label;
+        memberAvatar.textContent = '';
+
+        if (profile.photoURL) {
+          var image = document.createElement('img');
+          image.src = profile.photoURL;
+          image.alt = '';
+          memberAvatar.appendChild(image);
+        } else {
+          memberAvatar.textContent = getInitials(profile.displayName || label);
+        }
+
+        memberIdentity.hidden = false;
+      }
+
+      function saveMemberProfile(profile) {
+        var normalizedProfile = normalizeMemberProfile(profile);
+        if (normalizedProfile.email) {
+          localStorage.setItem('utl_member_username', normalizedProfile.email);
+        }
+        localStorage.setItem('utl_member_profile', JSON.stringify(normalizedProfile));
+        renderMemberProfile();
+      }
+
+      function profileFromFirebaseUser(user, fallbackEmail) {
+        return normalizeMemberProfile({
+          displayName: user && user.displayName ? user.displayName : '',
+          email: user && user.email ? user.email : fallbackEmail,
+          photoURL: user && user.photoURL ? user.photoURL : ''
+        });
+      }
+
+      function syncFirebaseAuthProfile() {
+        var firebaseAuth = window.utlFirebaseAuth;
+        if (firebaseProfileListenerStarted || !firebaseAuth || !firebaseAuth.auth || !firebaseAuth.onAuthStateChanged) return;
+        firebaseProfileListenerStarted = true;
+        firebaseAuth.onAuthStateChanged(firebaseAuth.auth, function (user) {
+          if (user && localStorage.getItem(SESSION_KEY) === 'true') {
+            saveMemberProfile(profileFromFirebaseUser(user, localStorage.getItem('utl_member_username') || 'Member'));
+          }
+        });
       }
 
       function showDashboard() {
         loginCard.classList.add('hidden');
+        if (memberTopbar) memberTopbar.classList.add('hidden');
         dashboard.classList.remove('hidden');
+        renderMemberProfile();
         initSectionNav();
         renderPhaseOneExerciseStates();
         renderPhaseTwoExerciseStates();
@@ -2282,33 +2892,90 @@
 
       function showLogin() {
         dashboard.classList.add('hidden');
+        if (memberTopbar) memberTopbar.classList.remove('hidden');
         loginCard.classList.remove('hidden');
+        if (memberIdentity) memberIdentity.hidden = true;
+        usernameInput.value = '';
         input.value = '';
-        input.focus();
+        usernameInput.focus();
+      }
+
+      function grantMemberAccess(profile) {
+        localStorage.setItem(SESSION_KEY, 'true');
+        saveMemberProfile(profile);
+        message.textContent = '';
+        showDashboard();
+      }
+
+      window.utlGrantMemberAccess = grantMemberAccess;
+      window.addEventListener('utlEmailLinkSignInComplete', function (event) {
+        grantMemberAccess(event.detail || 'Member');
+      });
+
+      function matchesLocalTestAccount(username, password) {
+        return (username === 'admin' && password === 'password123') ||
+          (username === 'testuser' && password === 'member2026');
       }
 
       if (localStorage.getItem(SESSION_KEY) === 'true') {
         showDashboard();
       }
+      syncFirebaseAuthProfile();
+      window.addEventListener('utlFirebaseAuthReady', syncFirebaseAuthProfile);
 
       initPhaseOneExerciseToggles();
       initPhaseTwoExerciseToggles();
       initPhaseThreeExerciseToggles();
 
-      form.addEventListener('submit', function (event) {
+      googleSignInButton.addEventListener('click', async function () {
+        var firebaseAuth = window.utlFirebaseAuth;
+        if (!firebaseAuth || !firebaseAuth.signInWithGoogle) return;
+
+        try {
+          var credential = await firebaseAuth.signInWithGoogle();
+          grantMemberAccess(profileFromFirebaseUser(credential.user, 'google-user'));
+        } catch (error) {
+          console.error('Google sign-in failed.', error);
+        }
+      });
+
+      form.addEventListener('submit', async function (event) {
         event.preventDefault();
-        var password = storedValue('utl_member_password', 'utl2026');
-        if (input.value === password) {
-          localStorage.setItem(SESSION_KEY, 'true');
-          message.textContent = '';
-          showDashboard();
+        var username = usernameInput.value.trim();
+        var password = input.value;
+        var firebaseAuth = window.utlFirebaseAuth;
+
+        if (matchesLocalTestAccount(username, password)) {
+          grantMemberAccess({
+            displayName: username,
+            email: username
+          });
           return;
         }
+
+        if (firebaseAuth && firebaseAuth.auth && firebaseAuth.signInWithEmailAndPassword) {
+          try {
+            var credential = await firebaseAuth.signInWithEmailAndPassword(firebaseAuth.auth, username, password);
+            grantMemberAccess(profileFromFirebaseUser(credential.user, username));
+            return;
+          } catch (error) {
+            console.warn('Firebase member login failed.', error);
+          }
+        }
+
         message.textContent = 'That password did not work.';
       });
 
       window.logout = function () {
+        var firebaseAuth = window.utlFirebaseAuth;
+        if (firebaseAuth && firebaseAuth.auth && firebaseAuth.signOut) {
+          firebaseAuth.signOut(firebaseAuth.auth).catch(function (error) {
+            console.warn('Firebase sign-out failed.', error);
+          });
+        }
         localStorage.removeItem(SESSION_KEY);
+        localStorage.removeItem('utl_member_username');
+        localStorage.removeItem('utl_member_profile');
         showLogin();
       };
 

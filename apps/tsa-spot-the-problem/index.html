@@ -1186,6 +1186,9 @@
       };
       sessionStorage.setItem(SPOT_SCORE_KEY, JSON.stringify(storagePayload));
       localStorage.setItem(SPOT_SCORE_KEY, JSON.stringify(storagePayload));
+      import('../../assets/firebase.js')
+        .then(({ saveUserProgress }) => saveUserProgress(SPOT_SCORE_KEY, `TSA Spot the Problem (${assessmentMode})`, storagePayload))
+        .catch((error) => console.warn('Firestore progress save failed.', error));
       showScore();
     }
 

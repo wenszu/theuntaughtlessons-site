@@ -30,7 +30,8 @@
 
     a { color: inherit; }
 
-    button { font: inherit; }
+    button,
+    input { font: inherit; }
 
     .member-identity-bar {
       background: var(--navy);
@@ -44,6 +45,12 @@
       display: flex;
       align-items: center;
       gap: 12px;
+    }
+
+    .member-identity-right {
+      display: flex;
+      align-items: center;
+      gap: 14px;
     }
 
     .identity-logo-text {
@@ -61,6 +68,62 @@
       color: rgba(255,255,255,.7);
       letter-spacing: .06em;
       text-transform: uppercase;
+    }
+
+    .identity-user {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      color: var(--white);
+      font-family: 'Lato', sans-serif;
+    }
+
+    .identity-user[hidden] { display: none; }
+
+    .identity-avatar {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border: 1px solid rgba(255, 255, 255, .35);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, .12);
+      color: var(--gold);
+      font-size: 12px;
+      font-weight: 700;
+      overflow: hidden;
+      text-transform: uppercase;
+    }
+
+    .identity-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .identity-user-copy {
+      display: grid;
+      gap: 1px;
+      min-width: 0;
+    }
+
+    .identity-user-status {
+      color: rgba(255, 255, 255, .62);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 9px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .identity-user-email {
+      max-width: 230px;
+      overflow: hidden;
+      color: var(--white);
+      font-size: 12px;
+      font-weight: 700;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     .identity-back {
@@ -106,6 +169,23 @@
       flex: 1;
     }
 
+    .nav-phase-links,
+    .nav-utility-links {
+      display: flex;
+      align-items: center;
+      gap: 0;
+    }
+
+    .nav-spacer { flex: 1; }
+
+    .nav-divider {
+      width: 1px;
+      height: 18px;
+      margin: 0 12px;
+      background: #d4ccbf;
+      flex-shrink: 0;
+    }
+
     .nav-item {
       font-family: 'Lato', sans-serif;
       font-size: 12px;
@@ -137,12 +217,16 @@
       padding: 0 2px;
     }
 
+    .nav-logout-sep {
+      margin: 0 16px;
+      flex-shrink: 0;
+    }
+
     .nav-logout {
       font-family: 'Lato', sans-serif;
       font-size: 12px;
       color: #888;
       text-decoration: none;
-      margin-left: auto;
       flex-shrink: 0;
     }
 
@@ -195,6 +279,25 @@
       font-weight: 500;
     }
 
+    .storage-origin-hint {
+      display: none;
+      margin-top: 8px;
+      color: var(--navy);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .storage-origin-hint.is-visible {
+      display: block;
+    }
+
+    .storage-origin-hint a {
+      color: var(--navy);
+      font-weight: 700;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+
     .overall-progress,
     .results-actions-row {
       background: var(--white);
@@ -213,20 +316,68 @@
       margin-bottom: 10px;
     }
 
-    .progress-track {
+    .progress-summary {
       display: flex;
-      gap: 6px;
-      margin-bottom: 8px;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .phase-progress-list {
+      display: grid;
+      gap: 14px;
+    }
+
+    .phase-progress-row {
+      display: grid;
+      gap: 7px;
+    }
+
+    .phase-progress-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--charcoal);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+
+    .phase-progress-count {
+      color: #888;
+      letter-spacing: 0;
+      text-transform: none;
+    }
+
+    .progress-track {
+      display: grid;
+      grid-template-columns: repeat(var(--progress-total, 6), minmax(18px, 1fr));
+      gap: 5px;
+      margin-bottom: 10px;
     }
 
     .progress-dot {
-      flex: 1;
-      height: 6px;
-      border-radius: 3px;
+      position: relative;
+      height: 10px;
+      border-radius: 2px;
     }
 
-    .progress-dot.done { background: var(--navy); }
+    .progress-dot.done { background: var(--gold); }
     .progress-dot.pending { background: var(--line); }
+
+    .progress-dot::after {
+      content: attr(data-number);
+      position: absolute;
+      top: 14px;
+      left: 50%;
+      color: #aaa;
+      font-family: 'Roboto Mono', monospace;
+      font-size: 9px;
+      transform: translateX(-50%);
+    }
 
     .progress-count {
       font-size: 12px;
@@ -284,6 +435,11 @@
     }
 
     .ex-result-card.ex-result-pending { opacity: .55; }
+
+    .ex-result-card.ex-result-marked {
+      border-color: rgba(15, 110, 86, .28);
+      opacity: 1;
+    }
 
     .ex-result-header {
       display: flex;
@@ -380,6 +536,13 @@
       font-family: 'Lato', sans-serif;
     }
 
+    .ex-marked-msg {
+      font-size: 12px;
+      color: var(--charcoal);
+      line-height: 1.6;
+      font-family: 'Lato', sans-serif;
+    }
+
     .before-after-row {
       display: flex;
       align-items: center;
@@ -396,12 +559,11 @@
     .score-decrease { color: #993C1D; font-weight: 500; }
 
     .results-actions-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(260px, 340px);
       gap: 1.5rem;
       margin-top: 2rem;
-      flex-wrap: wrap;
+      align-items: start;
     }
 
     .results-actions-title {
@@ -416,6 +578,50 @@
       font-size: 12px;
       color: var(--charcoal);
       line-height: 1.5;
+    }
+
+    .send-status {
+      min-height: 18px;
+      margin-top: 8px;
+      font-weight: 700;
+    }
+
+    .send-status.is-success { color: #0F6E56; }
+    .send-status.is-error { color: #8A1F1F; }
+
+    .results-email-form {
+      display: grid;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .results-email-label {
+      color: var(--navy);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .results-email-input {
+      width: 100%;
+      min-height: 38px;
+      padding: 8px 10px;
+      border: .5px solid rgba(0, 51, 102, .28);
+      border-radius: 6px;
+      background: var(--white);
+      color: var(--charcoal);
+      font-size: 13px;
+    }
+
+    .results-email-input:focus {
+      border-color: var(--gold);
+      outline: 2px solid rgba(238, 163, 32, .18);
+    }
+
+    .results-email-hint {
+      margin: 0;
+      color: #888;
+      font-size: 11px;
+      line-height: 1.45;
     }
 
     .btn-download,
@@ -446,6 +652,12 @@
       pointer-events: none;
     }
 
+    .btn-download:disabled,
+    .btn-send:disabled {
+      cursor: not-allowed;
+      opacity: .62;
+    }
+
     .results-footer {
       text-align: center;
       padding: 2rem 0 1rem;
@@ -471,8 +683,27 @@
         flex-direction: column;
       }
 
+      .results-actions-row {
+        grid-template-columns: 1fr;
+      }
+
       .nav-sep,
-      .nav-workspace-label { display: none; }
+      .nav-workspace-label,
+      .nav-divider,
+      .nav-spacer,
+      .nav-logout-sep { display: none; }
+
+      .nav-links,
+      .nav-phase-links,
+      .nav-utility-links {
+        flex-wrap: wrap;
+      }
+
+      .progress-summary {
+        display: block;
+      }
+
+      .phase-progress-head { display: block; }
     }
   </style>
 </head>
@@ -482,23 +713,40 @@
       <span class="identity-logo-text">The Untaught Lessons</span>
       <span class="identity-label">Member workspace</span>
     </div>
-    <a href="../index.html" class="identity-back">Back to site</a>
+    <div class="member-identity-right">
+      <div class="identity-user" id="memberIdentity" hidden>
+        <span class="identity-avatar" id="memberAvatar" aria-hidden="true">U</span>
+        <span class="identity-user-copy">
+          <span class="identity-user-status">Signed in</span>
+          <span class="identity-user-email" id="memberEmail">Member</span>
+        </span>
+      </div>
+      <a href="../index.html" class="identity-back">Back to site</a>
+    </div>
   </div>
 
   <nav class="member-nav" id="member-nav">
     <div class="member-nav-inner">
       <span class="nav-workspace-label">Member workspace</span>
       <div class="nav-links">
-        <a href="../member-login/index.html#orientation" class="nav-item">Orientation</a>
-        <span class="nav-sep">·</span>
-        <a href="../member-login/index.html#phase1" class="nav-item">Phase 1</a>
-        <span class="nav-sep">·</span>
-        <a href="../member-login/index.html#phase2" class="nav-item">Phase 2</a>
-        <span class="nav-sep">·</span>
-        <a href="../member-login/index.html#phase3" class="nav-item">Phase 3</a>
-        <span class="nav-sep">·</span>
-        <span class="nav-item nav-item-results active">My results</span>
+        <div class="nav-phase-links">
+          <a href="../member-login/index.html#orientation" class="nav-item">Orientation</a>
+          <span class="nav-sep">|</span>
+          <a href="../member-login/index.html#phase1" class="nav-item">Phase 1</a>
+          <span class="nav-sep">|</span>
+          <a href="../member-login/index.html#phase2" class="nav-item">Phase 2</a>
+          <span class="nav-sep">|</span>
+          <a href="../member-login/index.html#phase3" class="nav-item">Phase 3</a>
+        </div>
+        <span class="nav-spacer" aria-hidden="true"></span>
+        <span class="nav-divider" aria-hidden="true"></span>
+        <div class="nav-utility-links">
+          <a href="../member-login/index.html#assessments" class="nav-item nav-item-results">Assessments</a>
+          <span class="nav-item nav-item-results active">My results</span>
+          <a href="../member-login/index.html#toolkit" class="nav-item nav-item-results">Toolkit</a>
+        </div>
       </div>
+      <span class="nav-sep nav-logout-sep" aria-hidden="true">|</span>
       <a href="../member-login/index.html" class="nav-logout">Log out</a>
     </div>
   </nav>
@@ -513,28 +761,36 @@
     <div class="device-notice">
       <strong>Saved on this device only.</strong>
       Your results are stored in this browser and will be lost if you clear your browser history or switch to a different device or browser. Copy your responses into your companion workbook to keep a permanent record.
+      <div class="storage-origin-hint" id="storageOriginHint"></div>
     </div>
 
     <div class="overall-progress">
-      <div class="progress-label">Overall progress</div>
-      <div class="progress-track" id="progress-track"></div>
-      <div class="progress-count"><span id="completed-count">0</span> of <span id="total-count">7</span> exercises completed</div>
+      <div class="progress-summary">
+        <div class="progress-label">Overall progress</div>
+        <div class="progress-count"><span id="completed-count">0</span> of <span id="total-count">16</span> exercises completed</div>
+      </div>
+      <div class="phase-progress-list" id="phase-progress-list"></div>
     </div>
 
-    <section class="results-section" id="assessmentResults"></section>
     <section class="results-section" id="phase1Results"></section>
     <section class="results-section" id="phase2Results"></section>
     <section class="results-section" id="phase3Results"></section>
+    <section class="results-section" id="assessmentResults"></section>
 
     <div class="results-actions-row">
       <div class="results-actions-left">
         <div class="results-actions-title">Save your results</div>
-        <div class="results-actions-sub">Download a copy of all completed responses or send them to your instructor.</div>
+        <div class="results-actions-sub">Download a clean text copy of your workbook record, or email the same file content to yourself and anyone else who should receive it.</div>
         <div class="send-status" id="sendStatus" aria-live="polite"></div>
       </div>
-      <div class="results-actions-buttons">
-        <button class="btn-download" onclick="downloadResults()">Download my results</button>
-        <button class="btn-send" id="btn-send-instructor" onclick="sendToInstructor()">Send to instructor</button>
+      <div class="results-email-form">
+        <label class="results-email-label" for="resultsEmailRecipients">Email results to</label>
+        <input class="results-email-input" id="resultsEmailRecipients" type="text" autocomplete="email" placeholder="you@example.com, instructor@example.com">
+        <p class="results-email-hint">Separate multiple emails with commas or spaces.</p>
+        <div class="results-actions-buttons">
+          <button class="btn-download" onclick="downloadResults()">Download my results</button>
+          <button class="btn-send" id="btn-send-instructor" onclick="emailMyResults()">Email my results</button>
+        </div>
       </div>
     </div>
 
@@ -545,13 +801,22 @@
 
   <script>
     const APPS = [
-      { id: 'grocery-list', phase: 1, name: 'Grocery List', path: '../apps/grocery-list/index.html' },
-      { id: 'messy-notes', phase: 1, name: "Manager's messy notes", path: '../apps/messy-notes/index.html' },
-      { id: 'rushed-voice-memo', phase: 1, name: 'Rushed voice memo', path: '../apps/rushed-voice-memo/index.html' },
-      { id: 'rushed-voice-memo-ai', phase: 1, name: 'Rushed voice memo with AI', path: '../apps/rushed-voice-memo-ai/index.html' },
-      { id: 'chalkboard-notes', phase: 1, name: 'Chalkboard notes', path: '../apps/chalkboard-notes/index.html' },
-      { id: 'issue-tree', phase: 2, name: 'Issue tree builder', path: '../apps/issue-tree-builder/index.html' },
-      { id: 'scqa-builder', phase: 2, name: 'SCQA builder', path: '../apps/scqa-builder/index.html' }
+      { id: 'grocery-list', phase: 1, number: 1, doneKey: 'utl_p1_ex1_done', name: 'Grocery List', path: '../apps/grocery-list/index.html' },
+      { id: 'grocery-list-ai', phase: 1, number: 2, doneKey: 'utl_p1_ex2_done', name: 'Grocery List with AI', path: '../apps/grocery-list-ai/index.html' },
+      { id: 'messy-notes', phase: 1, number: 3, doneKey: 'utl_p1_ex3_done', name: "Manager's messy notes", path: '../apps/messy-notes/index.html' },
+      { id: 'rushed-voice-memo', phase: 1, number: 4, doneKey: 'utl_p1_ex4_done', name: 'Rushed voice memo', path: '../apps/rushed-voice-memo/index.html' },
+      { id: 'rushed-voice-memo-ai', phase: 1, number: 5, doneKey: 'utl_p1_ex5_done', name: 'Rushed voice memo with AI', path: '../apps/rushed-voice-memo-ai/index.html' },
+      { id: 'chalkboard-notes', phase: 1, number: 6, doneKey: 'utl_p1_ex6_done', name: 'Chalkboard notes', path: '../apps/chalkboard-notes/index.html' },
+      { id: 'issue-tree', phase: 2, number: 1, doneKey: 'utl_p2_ex1_done', name: 'Issue tree builder', path: '../apps/issue-tree-builder/index.html' },
+      { id: 'scqa-builder', phase: 2, number: 2, doneKey: 'utl_p2_ex2_done', name: 'SCQA builder', path: '../apps/scqa-builder/index.html' },
+      { id: 'advisory-board', phase: 2, number: 3, doneKey: 'utl_p2_ex3_done', name: 'Advisory board with AI', path: '../apps/advisory-board/index.html' },
+      { id: 'write-to-aiko', phase: 2, number: 4, doneKey: 'utl_p2_ex4_done', name: 'Write to Aiko', path: '../apps/write-to-aiko/index.html' },
+      { id: 'explain-to-aiko', phase: 2, number: 5, doneKey: 'utl_p2_ex5_done', name: 'Explain to Aiko (120s)', path: '../apps/explain-to-aiko/index.html' },
+      { id: 'explain-to-aiko-60', phase: 2, number: 6, doneKey: 'utl_p2_ex6_done', name: 'Explain to Aiko (60s)', path: '../apps/explain-to-aiko-60/index.html' },
+      { id: 'eisenhower-matrix', phase: 3, number: 1, doneKey: 'utl_p3_ex1_done', name: 'The Art of Saying No', path: '../apps/eisenhower-matrix/index.html' },
+      { id: 'i-have-bad-news', phase: 3, number: 2, doneKey: 'utl_p3_ex2_done', name: 'I Have Bad News...', path: '../apps/i-have-bad-news/index.html' },
+      { id: 'lets-switch-hats', phase: 3, number: 3, doneKey: 'utl_p3_ex3_done', name: "Let's Switch Hats", path: '../apps/lets-switch-hats/index.html' },
+      { id: 'speak-like-obama', phase: 3, number: 4, doneKey: 'utl_p3_ex4_done', name: 'Speak Like Obama', path: '../apps/speak-like-obama/index.html' }
     ];
 
     const ASSESSMENTS = [
@@ -561,11 +826,95 @@
 
     function resultFor(appId) {
       try {
-        const raw = localStorage.getItem('utl_result_' + appId);
+        const aliases = {
+          'explain-to-aiko': 'explain_to_aiko',
+          'explain-to-aiko-60': 'explain_to_aiko_60'
+        };
+        const raw = localStorage.getItem('utl_result_' + appId) || (aliases[appId] ? localStorage.getItem('utl_result_' + aliases[appId]) : null);
         return raw ? JSON.parse(raw) : null;
       } catch (error) {
         return null;
       }
+    }
+
+    function isWorkspaceDone(app) {
+      return Boolean(app.doneKey && localStorage.getItem(app.doneKey) === 'true');
+    }
+
+    function isComplete(app) {
+      return isWorkspaceDone(app) || Boolean(resultFor(app.id));
+    }
+
+    function renderStorageOriginHint() {
+      const hint = document.getElementById('storageOriginHint');
+      if (!hint) return;
+      const host = window.location.hostname;
+      if (host !== '127.0.0.1' && host !== 'localhost') return;
+      const alternateHost = host === '127.0.0.1' ? 'localhost' : '127.0.0.1';
+      const alternateUrl = `${window.location.protocol}//${alternateHost}${window.location.port ? ':' + window.location.port : ''}${window.location.pathname}${window.location.search}${window.location.hash}`;
+      hint.innerHTML = `Local testing note: results only match the workspace when both pages use the same address. You are on <strong>${host}</strong>. If you marked exercises done on <strong>${alternateHost}</strong>, open <a href="${alternateUrl}">this page on ${alternateHost}</a>.`;
+      hint.classList.add('is-visible');
+    }
+
+    function getInitials(value) {
+      const words = String(value || 'Member').trim().split(/\s+/).filter(Boolean);
+      if (!words.length) return 'M';
+      if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
+      return (words[0].charAt(0) + words[1].charAt(0)).toUpperCase();
+    }
+
+    function getStoredMemberProfile() {
+      try {
+        const storedProfile = JSON.parse(localStorage.getItem('utl_member_profile') || '{}');
+        if (!storedProfile.email && !storedProfile.displayName && localStorage.getItem('utl_member_username')) {
+          storedProfile.username = localStorage.getItem('utl_member_username');
+        }
+        return storedProfile;
+      } catch (error) {
+        return { username: localStorage.getItem('utl_member_username') || 'Member' };
+      }
+    }
+
+    function currentUserEmail() {
+      const profile = getStoredMemberProfile();
+      return profile.email || profile.username || '';
+    }
+
+    function cleanUserIdentifier() {
+      const email = currentUserEmail();
+      const base = email && email.includes('@') ? email.split('@')[0] : (email || 'member');
+      return String(base).trim().toLowerCase().replace(/[^a-z0-9._-]+/g, '-').replace(/^-+|-+$/g, '') || 'member';
+    }
+
+    function compactDateStamp(date = new Date()) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}${month}${day}`;
+    }
+
+    function renderMemberProfile() {
+      const memberIdentity = document.getElementById('memberIdentity');
+      const memberAvatar = document.getElementById('memberAvatar');
+      const memberEmail = document.getElementById('memberEmail');
+      if (!memberIdentity || !memberAvatar || !memberEmail) return;
+
+      const profile = getStoredMemberProfile();
+      const label = profile.email || profile.username || profile.displayName || 'Member';
+      const displayName = profile.displayName || label;
+      memberEmail.textContent = label;
+      memberAvatar.textContent = '';
+
+      if (profile.photoURL) {
+        const image = document.createElement('img');
+        image.src = profile.photoURL;
+        image.alt = '';
+        memberAvatar.appendChild(image);
+      } else {
+        memberAvatar.textContent = getInitials(displayName);
+      }
+
+      memberIdentity.hidden = false;
     }
 
     function readKey(key) {
@@ -607,10 +956,16 @@
       if (appId === 'rushed-voice-memo-ai') return words(r.ai_structured_output, 25) + '...';
       if (appId === 'issue-tree') return `Hypothesis: ${words(r.hypothesis, 12)}... · ${r.argument1 || 'Argument 1'}: ${(r.argument1_details || [])[0] || ''}`;
       if (appId === 'scqa-builder') return `S: ${words(r.scqa1?.situation, 10)}... · C: ${words(r.scqa1?.complication, 10)}...`;
+      if (appId === 'write-to-aiko') return words(r.response || record.response, 30) + '...';
+      if (appId === 'explain-to-aiko' || appId === 'explain-to-aiko-60') return words(r.transcript || record.transcript || '', 30) + '...';
       return words(JSON.stringify(r), 25) + '...';
     }
 
     function formatFullResponse(appId, record) {
+      if (!record) return '';
+      if (typeof record.savedPayload === 'string') return record.savedPayload;
+      if (record.savedPayload && typeof record.savedPayload === 'object') return JSON.stringify(record.savedPayload, null, 2);
+      if (typeof record.response === 'string') return record.response;
       const r = record.response || {};
       if (appId === 'grocery-list') {
         return `GROCERY LIST — MECE BUCKETS\n\n${r.bucket1_name || 'BUCKET 1'}\n${bullets(r.bucket1_items)}\n\n${r.bucket2_name || 'BUCKET 2'}\n${bullets(r.bucket2_items)}\n\n${r.bucket3_name || 'BUCKET 3'}\n${bullets(r.bucket3_items)}`;
@@ -626,10 +981,24 @@
       if (appId === 'scqa-builder') {
         return `SCQA #1\nSituation: ${r.scqa1?.situation || ''}\nComplication: ${r.scqa1?.complication || ''}\nQuestion: ${r.scqa1?.question || ''}\nAnswer: ${r.scqa1?.answer || ''}\n\nSCQA #2\nSituation: ${r.scqa2?.situation || ''}\nComplication: ${r.scqa2?.complication || ''}\nQuestion: ${r.scqa2?.question || ''}\nAnswer: ${r.scqa2?.answer || ''}`;
       }
+      if (appId === 'write-to-aiko') return r.response || record.response || '';
+      if (appId === 'explain-to-aiko' || appId === 'explain-to-aiko-60') return r.transcript || record.transcript || '';
       return JSON.stringify(r, null, 2);
     }
 
     function completedCard(app, record) {
+      if (!record) {
+        return `<div class="ex-result-card ex-result-marked">
+          <div class="ex-result-header">
+            <div>
+              <div class="ex-result-title">${app.name}</div>
+              <div class="ex-result-meta">Marked done in the member workspace</div>
+            </div>
+            <span class="ex-badge-done">Done</span>
+          </div>
+          <div class="ex-marked-msg">This exercise has been checked off. No written response has been saved in this browser yet.</div>
+        </div>`;
+      }
       return `<div class="ex-result-card">
         <div class="ex-result-header">
           <div>
@@ -661,21 +1030,26 @@
     }
 
     function renderProgress() {
-      const track = document.getElementById('progress-track');
-      let completedCount = 0;
-      APPS.forEach((app) => {
-        const dot = document.createElement('div');
-        dot.className = 'progress-dot';
-        if (resultFor(app.id)) {
-          dot.classList.add('done');
-          completedCount++;
-        } else {
-          dot.classList.add('pending');
-        }
-        track.appendChild(dot);
-      });
+      const phaseList = document.getElementById('phase-progress-list');
+      const completedCount = APPS.filter(isComplete).length;
       document.getElementById('completed-count').textContent = completedCount;
       document.getElementById('total-count').textContent = APPS.length;
+
+      phaseList.innerHTML = [1, 2, 3].map((phase) => {
+        const apps = APPS.filter((app) => app.phase === phase);
+        const done = apps.filter(isComplete).length;
+        const dots = apps.map((app) => {
+          const complete = isComplete(app);
+          return `<span class="progress-dot ${complete ? 'done' : 'pending'}" data-number="${app.number}" title="${app.name}: ${complete ? 'Done' : 'Pending'}"></span>`;
+        }).join('');
+        return `<div class="phase-progress-row">
+          <div class="phase-progress-head">
+            <span>Phase ${phase}</span>
+            <span class="phase-progress-count">${done} of ${apps.length} done</span>
+          </div>
+          <div class="progress-track" style="--progress-total:${apps.length}">${dots}</div>
+        </div>`;
+      }).join('');
     }
 
     function renderAssessments() {
@@ -706,11 +1080,11 @@
 
     function renderPhase(targetId, phase, title) {
       const apps = APPS.filter((app) => app.phase === phase);
-      const done = apps.filter((app) => resultFor(app.id)).length;
+      const done = apps.filter(isComplete).length;
       const body = apps.length
         ? apps.map((app) => {
             const record = resultFor(app.id);
-            return record ? completedCard(app, record) : pendingCard(app);
+            return isComplete(app) ? completedCard(app, record) : pendingCard(app);
           }).join('')
         : '<div class="ex-result-card ex-result-pending"><div class="ex-result-meta" style="font-style:italic">Exercises for Phase 3 are coming soon.</div></div>';
       document.getElementById(targetId).innerHTML = `<div class="results-section-header"><div><div class="results-section-label">Phase ${phase}</div><div class="results-section-title">${title}</div></div><div class="results-section-count">${done} of ${apps.length} done</div></div>${body}`;
@@ -741,54 +1115,187 @@
       button.textContent = isHidden ? 'Hide response' : 'View full response';
     }
 
-    function completedRecords() {
-      return APPS.map((app) => ({ app, record: resultFor(app.id) })).filter((entry) => entry.record);
+    function assessmentRecord(assessment) {
+      return readKey(assessment.key);
+    }
+
+    function assessmentResponseText(record) {
+      if (!record) return '';
+      const score = record.score ?? record.response?.score ?? record.response?.percentage;
+      const lines = [];
+      if (score !== undefined) lines.push(`Score: ${score}%`);
+      if (record.response) lines.push(JSON.stringify(record.response, null, 2));
+      return lines.join('\n\n') || JSON.stringify(record, null, 2);
+    }
+
+    function exerciseEntries() {
+      const phaseTitles = {
+        1: 'Think clearly',
+        2: 'Speak concisely',
+        3: 'Act confidently'
+      };
+
+      const phaseEntries = [1, 2, 3].map((phase) => ({
+        section: `Phase ${phase} · ${phaseTitles[phase]}`,
+        items: APPS.filter((app) => app.phase === phase).map((app) => {
+          const record = resultFor(app.id);
+          const completed = isComplete(app);
+          return {
+            name: app.name,
+            status: completed ? 'Completed' : 'Pending',
+            responseText: completed
+              ? (record ? formatFullResponse(app.id, record) : 'No written response saved in this browser.')
+              : '',
+            completedAt: record?.completed_at || ''
+          };
+        })
+      }));
+
+      return phaseEntries.concat({
+        section: 'TSA Score™ Assessments',
+        items: ASSESSMENTS.map((assessment) => {
+          const record = assessmentRecord(assessment);
+          return {
+            name: assessment.name,
+            status: record ? 'Completed' : 'Pending',
+            responseText: record ? assessmentResponseText(record) : '',
+            completedAt: record?.completed_at || ''
+          };
+        })
+      });
+    }
+
+    function indentBlock(text) {
+      const content = String(text || 'No written response saved in this browser.').trim();
+      return content.split('\n').map((line) => `    ${line}`).join('\n');
+    }
+
+    function buildResultsText() {
+      const email = currentUserEmail() || 'Member';
+      const downloadedAt = new Date().toLocaleString();
+      const sections = [
+        '# The Untaught Lessons — My Results',
+        '',
+        `User: ${email}`,
+        `Generated: ${downloadedAt}`,
+        '',
+        '============================================================'
+      ];
+
+      exerciseEntries().forEach((section) => {
+        sections.push('', `## ${section.section}`, '------------------------------------------------------------');
+        section.items.forEach((item) => {
+          const isCompleted = item.status === 'Completed';
+          sections.push('', `${isCompleted ? '[✓]' : '[-]'} ${item.name}`, `Status: ${item.status}`);
+          if (item.completedAt) sections.push(`Completed: ${formatDate(item.completedAt)}`);
+          if (isCompleted) {
+            sections.push('', 'Saved Response:', indentBlock(item.responseText));
+          }
+        });
+      });
+
+      sections.push('', '============================================================', 'End of results');
+      return sections.join('\n');
+    }
+
+    function resultsFilename() {
+      return `${compactDateStamp()} - UTL results (${cleanUserIdentifier()}).txt`;
     }
 
     function downloadResults() {
-      const today = new Date().toISOString().slice(0, 10);
-      const parts = [`THE UNTAUGHT LESSONS — MY RESULTS\nDownloaded: ${today}\n━━━━━━━━━━━━━━━━━━━━━━━━━━━`];
-      completedRecords().forEach(({ app, record }) => {
-        parts.push(`\nEXERCISE: ${app.name}\nPhase ${app.phase} · Completed ${formatDate(record.completed_at)} · ${formatDuration(record.duration_seconds)}\n━━━━━━━━━━━━━━━━━━━━━━━━━━━\n${formatFullResponse(app.id, record)}`);
-      });
-      const blob = new Blob([parts.join('\n\n')], { type: 'text/plain' });
+      const blob = new Blob([buildResultsText()], { type: 'text/plain;charset=utf-8' });
       const link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
-      link.download = `utl-my-results-${today}.txt`;
+      link.download = resultsFilename();
       link.click();
       URL.revokeObjectURL(link.href);
     }
 
-    function sendToInstructor() {
+    function setSendStatus(message, type) {
       const status = document.getElementById('sendStatus');
+      if (!status) return;
+      status.textContent = message;
+      status.classList.toggle('is-success', type === 'success');
+      status.classList.toggle('is-error', type === 'error');
+    }
+
+    function parseRecipientEmails(value) {
+      return String(value || '').split(/[\s,]+/).map((email) => email.trim()).filter(Boolean);
+    }
+
+    function invalidRecipientEmails(recipients) {
+      return recipients.filter((email) => !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email));
+    }
+
+    function populateRecipientField() {
+      const input = document.getElementById('resultsEmailRecipients');
+      if (!input) return;
+      input.value = currentUserEmail();
+    }
+
+    function emailMyResults() {
       const url = (localStorage.getItem('utl_send_instructor_url') || '').trim();
+      const input = document.getElementById('resultsEmailRecipients');
+      const recipients = parseRecipientEmails(input ? input.value : '');
       if (!url) {
-        status.textContent = 'This feature is not yet active. Download your results instead.';
+        setSendStatus('Email is not configured yet. Download your results instead.', 'error');
         return;
       }
+      if (!recipients.length) {
+        setSendStatus('Add at least one recipient email.', 'error');
+        if (input) input.focus();
+        return;
+      }
+      const invalidEmails = invalidRecipientEmails(recipients);
+      if (invalidEmails.length) {
+        setSendStatus(`Check this email address: ${invalidEmails[0]}`, 'error');
+        if (input) input.focus();
+        return;
+      }
+
+      const button = document.getElementById('btn-send-instructor');
+      if (button) {
+        button.disabled = true;
+        button.textContent = 'Sending...';
+      }
+      setSendStatus('Sending your results...', '');
+
       fetch(url, {
         method: 'POST',
         mode: 'no-cors',
-        body: JSON.stringify({ submitted_at: new Date().toISOString(), results: completedRecords() })
+        body: JSON.stringify({
+          submitted_at: new Date().toISOString(),
+          user_email: currentUserEmail(),
+          recipients,
+          filename: resultsFilename(),
+          results_text: buildResultsText()
+        })
       }).then(() => {
-        status.textContent = 'Sent. Your instructor now has a copy of your results.';
+        setSendStatus('Sent. Your results email has been queued.', 'success');
       }).catch(() => {
-        status.textContent = 'Could not send. Please download your results and email them instead.';
+        setSendStatus('Could not send. Please download your results and email them instead.', 'error');
+      }).finally(() => {
+        if (button) {
+          button.disabled = false;
+          button.textContent = 'Email my results';
+        }
       });
     }
 
     function applySendInstructorStatus() {
       const button = document.getElementById('btn-send-instructor');
-      if (localStorage.getItem('utl_send_instructor') !== 'live') {
-        button.style.display = 'none';
-      }
+      if (!button) return;
+      button.classList.remove('coming-soon');
     }
 
+    renderStorageOriginHint();
+    renderMemberProfile();
     renderProgress();
     renderAssessments();
     renderPhase('phase1Results', 1, 'Think clearly');
     renderPhase('phase2Results', 2, 'Speak concisely');
     renderPhase('phase3Results', 3, 'Act confidently');
+    populateRecipientField();
     applySendInstructorStatus();
   </script>
 </body>
