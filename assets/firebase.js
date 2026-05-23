@@ -36,66 +36,12 @@ const firebaseConfig = {
   measurementId: 'G-F7C8J1LHR7'
 };
 
-const REQUIRED_FIREBASE_ENV = [
-  ["apiKey", "apiKey"],
-  ["authDomain", "authDomain"],
-  ["projectId", "projectId"],
-  ["storageBucket", "storageBucket"],
-  ["messagingSenderId", "messagingSenderId"],
-  ["appId", "appId"]
-];
-
-let app = null;
-let auth = null;
-let db = null;
 let firebaseInitError = null;
-let authPersistenceReady = Promise.resolve();
 
 const actionCodeSettings = {
   url: "http://localhost:8061/member-login/",
   handleCodeInApp: true
 };
-
-function assertFirebaseEnvironment(config) {
-  const missing = REQUIRED_FIREBASE_ENV
-    .filter(([configKey]) => !config[configKey])
-    .map(([, envKey]) => envKey);
-
-  if (missing.length) {
-    throw new Error("Firebase configuration is incomplete. Missing: " + missing.join(", "));
-  }
-}
-
-function onDomReady(callback) {
-  if (typeof document === "undefined") return;
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", callback, { once: true });
-    return;
-  }
-  callback();
-}
-
-function showFirebaseInitError(error) {
-  const message = error && error.message
-    ? error.message
-    : "Firebase failed to initialize. Check the Firebase environment configuration.";
-
-  onDomReady(() => {
-    const loadingContainer =
-      document.getElementById("firebaseLoadingContainer") ||
-      document.querySelector("[data-firebase-loading]") ||
-      document.getElementById("loginMessage") ||
-      document.querySelector(".message");
-
-    if (loadingContainer) {
-      loadingContainer.textContent = message;
-    }
-
-    window.dispatchEvent(new CustomEvent("utlFirebaseInitError", {
-      detail: message
-    }));
-  });
-}
 
 function requireFirebaseAuth() {
   if (!auth) {
@@ -111,26 +57,19 @@ function requireFirestore() {
   return db;
 }
 
-try {
-  assertFirebaseEnvironment(firebaseConfig);
-  app = initializeApp(firebaseConfig);
-  auth = getAuth(app);
-  authPersistenceReady = setPersistence(auth, browserLocalPersistence);
-  db = getFirestore(app);
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const authPersistenceReady = setPersistence(auth, browserLocalPersistence);
+const provider = new GoogleAuthProvider();
+const db = getFirestore(app);
 
-  if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
-    connectAuthEmulator(auth, "http://127.0.0.1:9099");
-    connectFirestoreEmulator(db, "127.0.0.1", 8085);
-    console.log("⚡ Connected to local Firebase Emulators");
-  }
-} catch (error) {
-  firebaseInitError = error;
-  console.error("Firebase Init Failed:", error);
-  showFirebaseInitError(error);
+if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
+  connectAuthEmulator(auth, "http://127.0.0.1:9099");
+  connectFirestoreEmulator(db, "127.0.0.1", 8085);
+  console.log("⚡ Connected to local Firebase Emulators");
 }
 
 async function signInWithGoogleRedirect() {
-  const provider = new GoogleAuthProvider();
   await authPersistenceReady;
   return signInWithRedirect(requireFirebaseAuth(), provider);
 }
@@ -139,6 +78,26 @@ async function getGoogleRedirectResult() {
   await authPersistenceReady;
   return getRedirectResult(requireFirebaseAuth());
 }
+
+window.addEventListener("load", async () => {
+  try {
+    await authPersistenceReady;
+
+    const googleButton = document.getElementById("google-signin-btn") || document.querySelector(".google-login-button");
+    if (googleButton && !googleButton.dataset.firebaseGoogleBound) {
+      googleButton.dataset.firebaseGoogleBound = "true";
+      googleButton.addEventListener("click", (event) => {
+        event.preventDefault();
+        googleButton.disabled = true;
+        googleButton.textContent = "Redirecting to Google...";
+        signInWithRedirect(auth, provider);
+      });
+    }
+  } catch (error) {
+    firebaseInitError = error;
+    console.error("Auth initialization failed:", error);
+  }
+});
 
 async function getAuthorizedMember(email) {
   const normalizedEmail = String(email || "").trim().toLowerCase();
