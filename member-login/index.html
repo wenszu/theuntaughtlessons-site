@@ -2476,12 +2476,7 @@
 
   <script type="module">
     import { doc, getDoc, serverTimestamp, setDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
-    import { auth, db, getAuthorizedMember, GoogleAuthProvider, isSignInWithEmailLink, onAuthStateChanged, requireAuthorizedMember, saveUserProgress, sendSignInInvite, signInWithEmailAndPassword, signInWithEmailLink, signInWithPopup, signOut } from "../assets/firebase.js";
-
-    async function signInWithGoogle() {
-      const provider = new GoogleAuthProvider();
-      return signInWithPopup(auth, provider);
-    }
+    import { auth, db, firebaseInitError, getAuthorizedMember, isSignInWithEmailLink, onAuthStateChanged, requireAuthorizedMember, saveUserProgress, sendSignInInvite, signInWithEmailAndPassword, signInWithEmailLink, signInWithGooglePopup, signOut } from "../assets/firebase.js";
 
     function profileFromUser(user, fallbackEmail) {
       return {
@@ -2501,6 +2496,7 @@
     function userProfileDocRef(email) {
       const normalizedEmail = String(email || '').trim().toLowerCase();
       if (!normalizedEmail) throw new Error('A signed-in user email is required.');
+      if (!db) throw firebaseInitError || new Error('Firestore is not initialized.');
       return doc(db, 'users', normalizedEmail);
     }
 
@@ -2534,6 +2530,7 @@
     }
 
     async function completeEmailLinkSignIn() {
+      if (!auth) return;
       if (!isSignInWithEmailLink(auth, window.location.href)) return;
 
       let email = window.localStorage.getItem('emailForSignIn');
@@ -2560,6 +2557,7 @@
 
     window.utlFirebaseAuth = {
       auth: auth,
+      firebaseInitError: firebaseInitError,
       isSignInWithEmailLink: isSignInWithEmailLink,
       getAuthorizedMember: getAuthorizedMember,
       getUserRosterProfile: getUserRosterProfile,
@@ -2568,7 +2566,7 @@
       saveUserRosterProfile: saveUserRosterProfile,
       saveUserProgress: saveUserProgress,
       sendSignInInvite: sendSignInInvite,
-      signInWithGoogle: signInWithGoogle,
+      signInWithGoogle: signInWithGooglePopup,
       signInWithEmailAndPassword: signInWithEmailAndPassword,
       signInWithEmailLink: signInWithEmailLink,
       signOut: signOut
@@ -3704,6 +3702,12 @@
         showLogin();
       });
 
+      window.addEventListener('utlFirebaseInitError', function (event) {
+        message.textContent = event.detail || 'Firebase failed to initialize. Check the Firebase environment configuration.';
+        refreshGoogleSignInButton();
+        showLogin();
+      });
+
       function firebaseAuthReady() {
         return window.utlFirebaseAuth && window.utlFirebaseAuth.signInWithGoogle && window.utlFirebaseAuth.requireAuthorizedMember;
       }
@@ -3739,14 +3743,57 @@
         return 'Google sign-in did not work.';
       }
 
-      refreshGoogleSignInButton();
-      window.addEventListener('utlFirebaseAuthReady', refreshGoogleSignInButton);
-      window.setTimeout(function () {
-        if (!firebaseAuthReady()) {
-          refreshGoogleSignInButton();
-          message.textContent = 'Google sign-in could not finish loading. Please refresh and try again.';
+      function onLoginDomReady(callback) {
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', callback, { once: true });
+          return;
         }
-      }, 5000);
+        callback();
+      }
+
+      onLoginDomReady(function () {
+        googleSignInButton = document.getElementById('googleSignInButton');
+        refreshGoogleSignInButton();
+        window.addEventListener('utlFirebaseAuthReady', refreshGoogleSignInButton);
+        window.setTimeout(function () {
+          if (!firebaseAuthReady()) {
+            refreshGoogleSignInButton();
+            message.textContent = 'Google sign-in could not finish loading. Please refresh and try again.';
+          }
+        }, 5000);
+
+        if (!googleSignInButton) return;
+        googleSignInButton.addEventListener('click', async function () {
+          var originalText = googleSignInButton.textContent;
+          var firebaseAuth = firebaseAuthReady() ? window.utlFirebaseAuth : null;
+          message.textContent = '';
+
+          if (!firebaseAuth) {
+            refreshGoogleSignInButton();
+            message.textContent = 'Google sign-in is still loading. Please refresh and try again.';
+            return;
+          }
+
+          googleSignInButton.disabled = true;
+          googleSignInButton.textContent = 'Opening Google...';
+
+          try {
+            var credential = await firebaseAuth.signInWithGoogle();
+            var member = await firebaseAuth.requireAuthorizedMember(credential.user);
+            await handleFirebaseAuthenticatedUser({
+              user: credential.user,
+              member: member,
+              fallbackEmail: 'google-user'
+            });
+          } catch (error) {
+            console.error('Google sign-in failed.', error);
+            message.textContent = googleSignInMessage(error);
+          } finally {
+            googleSignInButton.disabled = false;
+            googleSignInButton.textContent = originalText;
+          }
+        });
+      });
 
       function matchesLocalTestAccount(username, password) {
         return (username === 'admin' && password === 'password123') ||
@@ -3842,37 +3889,6 @@
       if (profileEditCancel) {
         profileEditCancel.addEventListener('click', closeProfileEditModal);
       }
-
-      googleSignInButton.addEventListener('click', async function () {
-        var originalText = googleSignInButton.textContent;
-        var firebaseAuth = firebaseAuthReady() ? window.utlFirebaseAuth : null;
-        message.textContent = '';
-
-        if (!firebaseAuth) {
-          refreshGoogleSignInButton();
-          message.textContent = 'Google sign-in is still loading. Please refresh and try again.';
-          return;
-        }
-
-        googleSignInButton.disabled = true;
-        googleSignInButton.textContent = 'Opening Google...';
-
-        try {
-          var credential = await firebaseAuth.signInWithGoogle();
-          var member = await firebaseAuth.requireAuthorizedMember(credential.user);
-          await handleFirebaseAuthenticatedUser({
-            user: credential.user,
-            member: member,
-            fallbackEmail: 'google-user'
-          });
-        } catch (error) {
-          console.error('Google sign-in failed.', error);
-          message.textContent = googleSignInMessage(error);
-        } finally {
-          googleSignInButton.disabled = false;
-          googleSignInButton.textContent = originalText;
-        }
-      });
 
       form.addEventListener('submit', async function (event) {
         event.preventDefault();
