@@ -2566,7 +2566,7 @@
       saveUserRosterProfile: saveUserRosterProfile,
       saveUserProgress: saveUserProgress,
       sendSignInInvite: sendSignInInvite,
-      signInWithGoogle: signInWithGooglePopup,
+      signInWithGoogle: typeof signInWithGooglePopup !== 'undefined' ? signInWithGooglePopup : auth ? auth.signInWithGoogle : null,
       signInWithEmailAndPassword: signInWithEmailAndPassword,
       signInWithEmailLink: signInWithEmailLink,
       signOut: signOut
