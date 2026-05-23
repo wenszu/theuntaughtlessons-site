@@ -24,13 +24,13 @@ import {
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "AIzaSyAqM97wUydwu2QVUZGMbH4NWcUTEr62JQc",
-  authDomain: "the-untaught-lessons.firebaseapp.com",
-  projectId: "the-untaught-lessons",
-  storageBucket: "the-untaught-lessons.firebasestorage.app",
-  messagingSenderId: "429241278717",
-  appId: "1:429241278717:web:f69fc7add8f47ba579de94",
-  measurementId: "G-F7C8J1LHR7"
+  apiKey: 'AIzaSyAqM97wUydwu2QVUZGMbH4NWcUTEr62JQc',
+  authDomain: 'the-untaught-lessons.firebaseapp.com',
+  projectId: 'the-untaught-lessons',
+  storageBucket: 'the-untaught-lessons.firebasestorage.app',
+  messagingSenderId: '429241278717',
+  appId: '1:429241278717:web:f69fc7add8f47ba579de94',
+  measurementId: 'G-F7C8J1LHR7'
 };
 
 const REQUIRED_FIREBASE_ENV = [
