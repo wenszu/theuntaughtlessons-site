@@ -4,7 +4,6 @@ import {
   connectAuthEmulator,
   createUserWithEmailAndPassword,
   getAuth,
-  getRedirectResult,
   GoogleAuthProvider,
   isSignInWithEmailLink,
   onAuthStateChanged,
@@ -12,7 +11,7 @@ import {
   setPersistence,
   signInWithEmailAndPassword,
   signInWithEmailLink,
-  signInWithRedirect,
+  signInWithPopup,
   signOut
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 import {
@@ -61,6 +60,7 @@ function requireFirestore() {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
+provider.setCustomParameters({ prompt: "select_account" });
 const db = getFirestore(app);
 
 if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
@@ -69,14 +69,9 @@ if (window.location.hostname === "localhost" || window.location.hostname === "12
   console.log("⚡ Connected to local Firebase Emulators");
 }
 
-async function signInWithGoogleRedirect() {
+async function signInWithGooglePopup() {
   await authPersistenceReady;
-  return signInWithRedirect(requireFirebaseAuth(), provider);
-}
-
-async function getGoogleRedirectResult() {
-  await authPersistenceReady;
-  return getRedirectResult(requireFirebaseAuth());
+  return signInWithPopup(requireFirebaseAuth(), provider);
 }
 
 window.addEventListener("load", async () => {
@@ -86,9 +81,23 @@ window.addEventListener("load", async () => {
 
     const googleButton = document.getElementById("google-signin-btn") || document.querySelector(".google-login-button");
     if (googleButton) {
-      googleButton.addEventListener("click", (event) => {
+      googleButton.addEventListener("click", async (event) => {
         event.preventDefault();
-        signInWithRedirect(auth, provider);
+        try {
+          const result = await signInWithPopup(auth, provider);
+          console.log("Successfully authenticated:", result.user.email);
+          window.dispatchEvent(new CustomEvent("utlFirebaseAuthenticated", {
+            detail: {
+              user: result.user,
+              fallbackEmail: result.user.email || "google-user"
+            }
+          }));
+        } catch (authError) {
+          console.error("Popup auth failed:", authError);
+          window.dispatchEvent(new CustomEvent("utlAuthError", {
+            detail: authError.message || "Google sign-in did not work."
+          }));
+        }
       });
     }
   } catch (error) {
@@ -159,7 +168,6 @@ export {
   db,
   firebaseConfig,
   firebaseInitError,
-  getGoogleRedirectResult,
   getAuthorizedMember,
   getDoc,
   GoogleAuthProvider,
@@ -171,7 +179,7 @@ export {
   saveUserProgress,
   signInWithEmailAndPassword,
   signInWithEmailLink,
-  signInWithGoogleRedirect,
-  signInWithRedirect,
+  signInWithGooglePopup,
+  signInWithPopup,
   signOut
 };
