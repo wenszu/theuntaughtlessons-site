@@ -210,6 +210,11 @@
       border-color: var(--gold);
     }
 
+    .google-button:disabled {
+      cursor: wait;
+      opacity: .62;
+    }
+
     .message {
       min-height: 22px;
       margin: 0;
@@ -3056,6 +3061,35 @@
         });
       }
 
+      function scrollToWorkspaceSection(sectionId) {
+        var section = document.getElementById(sectionId);
+        if (!section || section.offsetParent === null) return false;
+        var header = document.querySelector('.member-identity-bar');
+        var headerHeight = header ? header.getBoundingClientRect().height : 0;
+        var targetTop = section.getBoundingClientRect().top + window.pageYOffset - headerHeight - 12;
+        window.scrollTo({
+          top: Math.max(targetTop, 0),
+          behavior: 'smooth'
+        });
+        if (history.pushState) {
+          history.pushState(null, '', '#' + sectionId);
+        } else {
+          window.location.hash = sectionId;
+        }
+        setActiveNav(sectionId);
+        return true;
+      }
+
+      navLinks.forEach(function (link) {
+        link.addEventListener('click', function (event) {
+          var sectionId = link.dataset.section;
+          if (!sectionId) return;
+          if (scrollToWorkspaceSection(sectionId)) {
+            event.preventDefault();
+          }
+        });
+      });
+
       function initSectionNav() {
         if (navObserver) {
           return;
@@ -3670,6 +3704,50 @@
         showLogin();
       });
 
+      function firebaseAuthReady() {
+        return window.utlFirebaseAuth && window.utlFirebaseAuth.signInWithGoogle && window.utlFirebaseAuth.requireAuthorizedMember;
+      }
+
+      function refreshGoogleSignInButton() {
+        if (!googleSignInButton) return;
+        if (firebaseAuthReady()) {
+          googleSignInButton.disabled = false;
+          googleSignInButton.textContent = 'Sign in with Google';
+        } else {
+          googleSignInButton.disabled = true;
+          googleSignInButton.textContent = 'Loading Google sign-in...';
+        }
+      }
+
+      function googleSignInMessage(error) {
+        var code = error && error.code ? error.code : '';
+        if (error && error.message === 'This Google account does not have an active membership invite.') {
+          return 'This Google account does not have an active membership invite.';
+        }
+        if (code === 'auth/unauthorized-domain') {
+          return 'Google sign-in is not enabled for this website domain yet.';
+        }
+        if (code === 'auth/popup-closed-by-user') {
+          return 'Google sign-in was closed before it finished.';
+        }
+        if (code === 'auth/popup-blocked') {
+          return 'Your browser blocked the Google sign-in popup. Please allow popups and try again.';
+        }
+        if (error && error.message) {
+          return error.message;
+        }
+        return 'Google sign-in did not work.';
+      }
+
+      refreshGoogleSignInButton();
+      window.addEventListener('utlFirebaseAuthReady', refreshGoogleSignInButton);
+      window.setTimeout(function () {
+        if (!firebaseAuthReady()) {
+          refreshGoogleSignInButton();
+          message.textContent = 'Google sign-in could not finish loading. Please refresh and try again.';
+        }
+      }, 5000);
+
       function matchesLocalTestAccount(username, password) {
         return (username === 'admin' && password === 'password123') ||
           (username === 'testuser' && password === 'member2026');
@@ -3766,8 +3844,18 @@
       }
 
       googleSignInButton.addEventListener('click', async function () {
-        var firebaseAuth = window.utlFirebaseAuth;
-        if (!firebaseAuth || !firebaseAuth.signInWithGoogle) return;
+        var originalText = googleSignInButton.textContent;
+        var firebaseAuth = firebaseAuthReady() ? window.utlFirebaseAuth : null;
+        message.textContent = '';
+
+        if (!firebaseAuth) {
+          refreshGoogleSignInButton();
+          message.textContent = 'Google sign-in is still loading. Please refresh and try again.';
+          return;
+        }
+
+        googleSignInButton.disabled = true;
+        googleSignInButton.textContent = 'Opening Google...';
 
         try {
           var credential = await firebaseAuth.signInWithGoogle();
@@ -3779,9 +3867,10 @@
           });
         } catch (error) {
           console.error('Google sign-in failed.', error);
-          message.textContent = error.message === 'This Google account does not have an active membership invite.'
-            ? 'This Google account does not have an active membership invite.'
-            : 'Google sign-in did not work.';
+          message.textContent = googleSignInMessage(error);
+        } finally {
+          googleSignInButton.disabled = false;
+          googleSignInButton.textContent = originalText;
         }
       });
 
