@@ -753,6 +753,7 @@
         selectedId: null,
         exampleMode: false,
         savedPlacements: null,
+        lastSavedSignature: '',
         timerStartedAt: Date.now(),
         elapsedBeforePause: 0,
         timerRunning: true
@@ -866,6 +867,31 @@
         contextSentence.textContent = scenario().sentence;
         renderTaskList();
         renderMatrix();
+        saveCompletionIfReady();
+      }
+
+      function completionPayload() {
+        const activeScenario = scenario();
+        return {
+          scenarioId: activeScenario.id,
+          scenarioLabel: activeScenario.label,
+          placements: Object.fromEntries(Object.entries(state.placements).map(([id, zone]) => [
+            activeScenario.tasks[taskIndex(id)],
+            zone
+          ])),
+          page: window.location.href
+        };
+      }
+
+      function saveCompletionIfReady() {
+        if (state.exampleMode) return;
+        if (Object.keys(state.placements).length !== scenario().tasks.length) return;
+        const signature = JSON.stringify({ scenarioId: state.scenarioId, placements: state.placements });
+        if (state.lastSavedSignature === signature) return;
+        state.lastSavedSignature = signature;
+        import('../../assets/firebase.js')
+          .then(({ saveUserProgress }) => saveUserProgress('eisenhower-matrix', 'The Art of Saying No', completionPayload()))
+          .catch((error) => console.warn('Firestore progress save failed.', error));
       }
 
       function moveItem(id, zone) {
@@ -881,6 +907,7 @@
         state.selectedId = null;
         state.exampleMode = false;
         state.savedPlacements = null;
+        state.lastSavedSignature = '';
         resetTimer();
         renderAll();
       }

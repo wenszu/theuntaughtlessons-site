@@ -15,6 +15,7 @@ import {
 import {
   connectFirestoreEmulator,
   doc,
+  getDoc,
   getFirestore,
   serverTimestamp,
   setDoc
@@ -49,9 +50,42 @@ async function signInWithGooglePopup() {
   return signInWithPopup(auth, googleProvider);
 }
 
+async function getAuthorizedMember(email) {
+  const normalizedEmail = String(email || "").trim().toLowerCase();
+  if (!normalizedEmail) return null;
+
+  const memberRef = doc(db, "authorized_members", normalizedEmail);
+  const memberSnap = await getDoc(memberRef);
+  return memberSnap.exists() ? memberSnap.data() : null;
+}
+
+async function requireAuthorizedMember(user) {
+  const member = await getAuthorizedMember(user && user.email);
+  if (!member) {
+    await signOut(auth);
+    throw new Error("This Google account does not have an active membership invite.");
+  }
+  return member;
+}
+
 async function sendSignInInvite(email) {
   await sendSignInLinkToEmail(auth, email, actionCodeSettings);
   window.localStorage.setItem("emailForSignIn", email);
+}
+
+async function authorizeMember(email, fields = {}) {
+  const normalizedEmail = String(email || "").trim().toLowerCase();
+  if (!normalizedEmail) {
+    throw new Error("An email address is required to authorize a member.");
+  }
+
+  const memberRef = doc(db, "authorized_members", normalizedEmail);
+  await setDoc(memberRef, {
+    email: normalizedEmail,
+    role: fields.role || "member",
+    updatedAt: serverTimestamp(),
+    ...fields
+  }, { merge: true });
 }
 
 async function saveUserProgress(exerciseId, exerciseName, exercisePayload = {}) {
@@ -72,12 +106,16 @@ export {
   actionCodeSettings,
   app,
   auth,
+  authorizeMember,
   createUserWithEmailAndPassword,
   db,
+  getAuthorizedMember,
+  getDoc,
   GoogleAuthProvider,
   googleProvider,
   isSignInWithEmailLink,
   onAuthStateChanged,
+  requireAuthorizedMember,
   sendSignInInvite,
   sendSignInLinkToEmail,
   saveUserProgress,

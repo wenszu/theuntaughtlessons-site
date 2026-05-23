@@ -166,7 +166,8 @@
       inset: 0 0 auto 0;
       z-index: 30;
       background: var(--navy);
-      padding: 10px 1.75rem;
+      min-height: 54px;
+      padding: 8px 1.75rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -182,12 +183,21 @@
     .identity-logo-link {
       display: inline-flex;
       align-items: center;
+      min-height: 44px;
+      padding: 6px 8px;
+      border-radius: 8px;
       text-decoration: none;
+      transition: background .15s ease, box-shadow .15s ease;
+    }
+
+    .identity-logo-link:hover {
+      background: rgba(255, 255, 255, .12);
+      box-shadow: inset 0 -2px 0 var(--gold);
     }
 
     .identity-logo-image {
       display: block;
-      width: 92px;
+      width: 82px;
       height: auto;
     }
 
@@ -201,25 +211,31 @@
     }
 
     .identity-label {
+      display: inline-flex;
+      align-items: center;
+      min-height: 44px;
+      padding: 6px 8px;
+      border-radius: 8px;
       font-family: 'Roboto Mono', monospace;
       font-size: 11px;
       color: rgba(255, 255, 255, .7);
       letter-spacing: .06em;
-      text-transform: uppercase;
-    }
-
-    .identity-back {
-      font-family: 'Lato', sans-serif;
-      font-size: 12px;
-      color: var(--gold);
+      line-height: 1.15;
       text-decoration: none;
-      opacity: .85;
+      text-transform: uppercase;
+      transition: background .15s ease, box-shadow .15s ease, color .15s ease;
     }
 
-    .identity-links {
+    .identity-label:hover {
+      background: rgba(255, 255, 255, .12);
+      box-shadow: inset 0 -2px 0 var(--gold);
+      color: var(--gold);
+    }
+
+    .identity-nav {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 4px;
     }
 
     .identity-link-separator {
@@ -227,13 +243,9 @@
       font-size: 12px;
     }
 
-    .identity-back:hover {
-      opacity: 1;
-    }
-
     .admin-sidebar {
       position: fixed;
-      inset: 40px auto 0 0;
+      inset: 54px auto 0 0;
       width: 220px;
       padding: 1.5rem 1rem;
       overflow-y: auto;
@@ -309,7 +321,7 @@
       max-width: none;
       min-height: 100vh;
       margin-left: 220px;
-      padding: calc(2.5rem + 40px) 2rem 2.5rem;
+      padding: calc(2.5rem + 54px) 2rem 2.5rem;
       background: var(--cream);
     }
 
@@ -886,10 +898,22 @@
     }
 
     @media (max-width: 760px) {
+      .member-identity-bar {
+        overflow-x: auto;
+        justify-content: flex-start;
+        white-space: nowrap;
+        scrollbar-width: none;
+      }
+
+      .member-identity-bar::-webkit-scrollbar {
+        display: none;
+      }
+
       .admin-sidebar {
         position: static;
         width: 100%;
         min-height: 0;
+        margin-top: 54px;
       }
 
       .admin-main {
@@ -933,12 +957,9 @@
         <a class="identity-logo-link" href="../index.html" aria-label="The Untaught Lessons home">
           <img class="identity-logo-image" src="../assets/utl-logo-nav-white.png" alt="The Untaught Lessons">
         </a>
-        <span class="identity-label">Admin</span>
-      </div>
-      <div class="identity-links" aria-label="Admin navigation links">
-        <a href="../member-login/index.html" class="identity-back">Back to member workspace</a>
-        <span class="identity-link-separator" aria-hidden="true">|</span>
-        <a href="../index.html" class="identity-back">Back to main page</a>
+        <nav class="identity-nav" aria-label="Admin quick links">
+          <a class="identity-label" href="../member-login/index.html">Member<br>workspace</a>
+        </nav>
       </div>
     </div>
 
@@ -1136,10 +1157,11 @@
   </div>
 
   <script type="module">
-    import { sendSignInInvite } from "../assets/firebase.js";
+    import { authorizeMember, sendSignInInvite } from "../assets/firebase.js";
 
     window.utlFirebaseAuth = {
       ...(window.utlFirebaseAuth || {}),
+      authorizeMember: authorizeMember,
       sendSignInInvite: sendSignInInvite
     };
     window.dispatchEvent(new CustomEvent('utlFirebaseAuthReady'));
@@ -1516,7 +1538,7 @@
       }
 
       const firebaseAuth = window.utlFirebaseAuth;
-      if (!firebaseAuth || !firebaseAuth.sendSignInInvite) {
+      if (!firebaseAuth || !firebaseAuth.sendSignInInvite || !firebaseAuth.authorizeMember) {
         setInviteStatus('Firebase invite tools are still loading. Please try again in a moment.', 'error');
         return;
       }
@@ -1526,7 +1548,9 @@
       setInviteStatus('', '');
 
       try {
-        await firebaseAuth.sendSignInInvite(email);
+        const normalizedEmail = email.toLowerCase();
+        await firebaseAuth.authorizeMember(normalizedEmail, { role: 'member' });
+        await firebaseAuth.sendSignInInvite(normalizedEmail);
         inviteEmail.value = '';
         setInviteStatus("⚡ Success! Invite link sent to the user's inbox.", 'success');
       } catch (error) {
