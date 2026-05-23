@@ -1,15 +1,18 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
 import {
+  browserLocalPersistence,
   connectAuthEmulator,
   createUserWithEmailAndPassword,
   getAuth,
+  getRedirectResult,
   GoogleAuthProvider,
   isSignInWithEmailLink,
   onAuthStateChanged,
   sendSignInLinkToEmail,
+  setPersistence,
   signInWithEmailAndPassword,
   signInWithEmailLink,
-  signInWithPopup,
+  signInWithRedirect,
   signOut
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 import {
@@ -46,6 +49,7 @@ let app = null;
 let auth = null;
 let db = null;
 let firebaseInitError = null;
+let authPersistenceReady = Promise.resolve();
 
 const actionCodeSettings = {
   url: "http://localhost:8061/member-login/",
@@ -111,6 +115,7 @@ try {
   assertFirebaseEnvironment(firebaseConfig);
   app = initializeApp(firebaseConfig);
   auth = getAuth(app);
+  authPersistenceReady = setPersistence(auth, browserLocalPersistence);
   db = getFirestore(app);
 
   if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
@@ -124,9 +129,15 @@ try {
   showFirebaseInitError(error);
 }
 
-async function signInWithGooglePopup() {
+async function signInWithGoogleRedirect() {
   const provider = new GoogleAuthProvider();
-  return signInWithPopup(requireFirebaseAuth(), provider);
+  await authPersistenceReady;
+  return signInWithRedirect(requireFirebaseAuth(), provider);
+}
+
+async function getGoogleRedirectResult() {
+  await authPersistenceReady;
+  return getRedirectResult(requireFirebaseAuth());
 }
 
 async function getAuthorizedMember(email) {
@@ -191,6 +202,7 @@ export {
   db,
   firebaseConfig,
   firebaseInitError,
+  getGoogleRedirectResult,
   getAuthorizedMember,
   getDoc,
   GoogleAuthProvider,
@@ -202,7 +214,7 @@ export {
   saveUserProgress,
   signInWithEmailAndPassword,
   signInWithEmailLink,
-  signInWithGooglePopup,
-  signInWithPopup,
+  signInWithGoogleRedirect,
+  signInWithRedirect,
   signOut
 };
