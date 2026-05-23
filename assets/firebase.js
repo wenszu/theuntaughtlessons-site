@@ -21,54 +21,25 @@ import {
   setDoc
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-const viteEnv = import.meta.env || {};
-const windowEnv = typeof window !== "undefined"
-  ? (window.__UTL_FIREBASE_CONFIG__ || window.firebaseConfig || {})
-  : {};
-const windowViteEnv = typeof window !== "undefined"
-  ? {
-      VITE_FIREBASE_API_KEY: window.VITE_FIREBASE_API_KEY,
-      VITE_FIREBASE_AUTH_DOMAIN: window.VITE_FIREBASE_AUTH_DOMAIN,
-      VITE_FIREBASE_PROJECT_ID: window.VITE_FIREBASE_PROJECT_ID,
-      VITE_FIREBASE_STORAGE_BUCKET: window.VITE_FIREBASE_STORAGE_BUCKET,
-      VITE_FIREBASE_MESSAGING_SENDER_ID: window.VITE_FIREBASE_MESSAGING_SENDER_ID,
-      VITE_FIREBASE_APP_ID: window.VITE_FIREBASE_APP_ID
-    }
-  : {};
-const staticProductionConfig = {
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
   apiKey: "AIzaSyAqM97wUydwu2QVUZGMbH4NWcUTEr62JQc",
   authDomain: "the-untaught-lessons.firebaseapp.com",
   projectId: "the-untaught-lessons",
   storageBucket: "the-untaught-lessons.firebasestorage.app",
   messagingSenderId: "429241278717",
-  appId: "1:429241278717:web:f69fc7add8f47ba579de94"
-};
-
-function firstConfigValue() {
-  for (const value of arguments) {
-    if (value !== undefined && value !== null && String(value).trim() !== "") {
-      return value;
-    }
-  }
-  return "";
-}
-
-const firebaseConfig = {
-  apiKey: firstConfigValue(viteEnv.VITE_FIREBASE_API_KEY, windowViteEnv.VITE_FIREBASE_API_KEY, windowEnv.apiKey, staticProductionConfig.apiKey),
-  authDomain: firstConfigValue(viteEnv.VITE_FIREBASE_AUTH_DOMAIN, windowViteEnv.VITE_FIREBASE_AUTH_DOMAIN, windowEnv.authDomain, staticProductionConfig.authDomain),
-  projectId: firstConfigValue(viteEnv.VITE_FIREBASE_PROJECT_ID, windowViteEnv.VITE_FIREBASE_PROJECT_ID, windowEnv.projectId, staticProductionConfig.projectId),
-  storageBucket: firstConfigValue(viteEnv.VITE_FIREBASE_STORAGE_BUCKET, windowViteEnv.VITE_FIREBASE_STORAGE_BUCKET, windowEnv.storageBucket, staticProductionConfig.storageBucket),
-  messagingSenderId: firstConfigValue(viteEnv.VITE_FIREBASE_MESSAGING_SENDER_ID, windowViteEnv.VITE_FIREBASE_MESSAGING_SENDER_ID, windowEnv.messagingSenderId, staticProductionConfig.messagingSenderId),
-  appId: firstConfigValue(viteEnv.VITE_FIREBASE_APP_ID, windowViteEnv.VITE_FIREBASE_APP_ID, windowEnv.appId, staticProductionConfig.appId)
+  appId: "1:429241278717:web:f69fc7add8f47ba579de94",
+  measurementId: "G-F7C8J1LHR7"
 };
 
 const REQUIRED_FIREBASE_ENV = [
-  ["apiKey", "VITE_FIREBASE_API_KEY"],
-  ["authDomain", "VITE_FIREBASE_AUTH_DOMAIN"],
-  ["projectId", "VITE_FIREBASE_PROJECT_ID"],
-  ["storageBucket", "VITE_FIREBASE_STORAGE_BUCKET"],
-  ["messagingSenderId", "VITE_FIREBASE_MESSAGING_SENDER_ID"],
-  ["appId", "VITE_FIREBASE_APP_ID"]
+  ["apiKey", "apiKey"],
+  ["authDomain", "authDomain"],
+  ["projectId", "projectId"],
+  ["storageBucket", "storageBucket"],
+  ["messagingSenderId", "messagingSenderId"],
+  ["appId", "appId"]
 ];
 
 let app = null;
