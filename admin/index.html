@@ -1167,12 +1167,14 @@
       ['embed-phase1', 'utl_embed_p1_hugh_favour', 'Hugh needs a favour'],
       ['embed-phase1', 'utl_embed_p1_ai_memo', 'Try the same memo with AI'],
       ['embed-phase1', 'utl_embed_p1_olympic_brainstorm', 'Aiko needs the Olympic brainstorm session sorted'],
+      ['embed-phase2', 'utl_embed_p2_recap_storyline', 'Recap and storyline'],
       ['embed-phase2', 'utl_embed_p2_aiko_question', 'Aiko liked your work. Now she has a question.'],
       ['embed-phase2', 'utl_embed_p2_frame_answer', 'Before you frame your answer'],
       ['embed-phase2', 'utl_embed_p2_outside_perspectives', 'Get outside perspectives before you commit'],
       ['embed-phase2', 'utl_embed_p2_aiko_email', 'Aiko does not have time to read everything'],
       ['embed-phase2', 'utl_embed_p2_hallway', 'She bumped into you in the hallway'],
       ['embed-phase2', 'utl_embed_p2_compress', 'Now compress it'],
+      ['embed-phase3', 'utl_embed_p3_recap_storyline', 'Recap and storyline'],
       ['embed-phase3', 'utl_embed_p3_lead_role', 'You just got the lead role.'],
       ['embed-phase3', 'utl_embed_p3_bad_news', 'You have to be the one to say it'],
       ['embed-phase3', 'utl_embed_p3_read_room', 'Read the room before you speak'],
@@ -1198,45 +1200,47 @@
     ];
     const PHASE_LAYOUT_DEFAULTS = {
       orientation: [
-        { kind: 'context', key: 'utl_embed_orientation_welcome', label: 'Your first day at MA', visible: true, type: 'slides', url: '' },
+        { kind: 'context', key: 'utl_embed_orientation_welcome', label: 'Your first day at MA', visible: true, type: 'video', url: 'https://drive.google.com/file/d/1_o8FmQXijNxUmUJpOJ3XgZ9hOUxcCiI1/view' },
         { kind: 'context', key: 'utl_embed_orientation_howto', label: 'How this program works', visible: true, type: 'slides', url: '' }
       ],
       phase1: [
-        { kind: 'context', key: 'utl_embed_p1_first_day', label: 'Before your first day', visible: true, type: 'slides', url: '' },
+        { kind: 'context', key: 'utl_embed_p1_first_day', label: 'Before your first day', visible: true, type: 'video', url: 'https://drive.google.com/file/d/1O9Uyc_3XmP4XfltPQJ7T-zPUba6fdiJJ/view?usp=vids_web' },
         { kind: 'app', key: 'utl_app_p1_1', title: 'Grocery List', visible: true },
         { kind: 'context', key: 'utl_embed_p1_ai_grocery', label: 'Try the same task with AI', visible: true, type: 'slides', url: '' },
         { kind: 'app', key: 'utl_app_p1_2', title: 'Grocery List with AI', visible: true },
-        { kind: 'context', key: 'utl_embed_p1_message_desk', label: 'A message just landed on your desk', visible: true, type: 'slides', url: '' },
+        { kind: 'context', key: 'utl_embed_p1_message_desk', label: 'A message just landed on your desk', visible: true, type: 'video', url: 'https://drive.google.com/file/d/1JpPDKz5RTyWFIJxUkeKSB5etP4W57Dax/view?usp=vids_web' },
         { kind: 'app', key: 'utl_app_p1_3', title: "Manager's Messy Notes", visible: true },
-        { kind: 'context', key: 'utl_embed_p1_hugh_favour', label: 'Hugh needs a favour', visible: true, type: 'slides', url: '' },
+        { kind: 'context', key: 'utl_embed_p1_hugh_favour', label: 'Hugh needs a favour', visible: true, type: 'video', url: 'https://drive.google.com/file/d/1EZe8wYzQvic6DaFJwraixATYR6Kx18oM/view?usp=vids_web' },
         { kind: 'app', key: 'utl_app_p1_4', title: 'Rushed Voice Memo', visible: true },
         { kind: 'context', key: 'utl_embed_p1_ai_memo', label: 'Try the same memo with AI', visible: true, type: 'slides', url: '' },
         { kind: 'app', key: 'utl_app_p1_5', title: 'Rushed Voice Memo with AI', visible: true },
-        { kind: 'context', key: 'utl_embed_p1_olympic_brainstorm', label: 'Aiko needs the Olympic brainstorm session sorted', visible: true, type: 'slides', url: '' },
+        { kind: 'context', key: 'utl_embed_p1_olympic_brainstorm', label: 'Aiko needs the Olympic brainstorm session sorted', visible: true, type: 'video', url: 'https://drive.google.com/file/d/1kuQ7yqGvwjRnGufN4ZHMIAcqtdLq9NfN/view?usp=vids_web' },
         { kind: 'app', key: 'utl_app_p1_6', title: 'Chalkboard Notes', visible: true }
       ],
       phase2: [
-        { kind: 'context', key: 'utl_embed_p2_aiko_question', label: 'Aiko liked your work. Now she has a question.', visible: true, type: 'slides', url: '' },
+        { kind: 'context', key: 'utl_embed_p2_recap_storyline', label: 'Recap and storyline', visible: true, type: 'video', url: 'https://drive.google.com/open?id=1A6lCodeBWSOQLNAEMOE4bpYYB5xJXWjb&usp=drive_copy' },
+        { kind: 'context', key: 'utl_embed_p2_aiko_question', label: 'Aiko liked your work. Now she has a question.', visible: true, type: 'video', url: 'https://drive.google.com/file/d/15AaNTTkiRsIVf90RfsmcSa3aEuFTqOAT/view?usp=vids_web' },
         { kind: 'app', key: 'utl_app_p2_1', title: 'Issue Tree Builder', visible: true },
-        { kind: 'context', key: 'utl_embed_p2_frame_answer', label: 'Before you frame your answer', visible: true, type: 'slides', url: '' },
+        { kind: 'context', key: 'utl_embed_p2_frame_answer', label: 'Before you frame your answer', visible: true, type: 'video', url: 'https://drive.google.com/open?id=168tYlq9fRUKl7NrlELHuwAPwAxC2_5yD&usp=drive_copy' },
         { kind: 'app', key: 'utl_app_p2_2', title: 'SCQA Builder', visible: true },
         { kind: 'context', key: 'utl_embed_p2_outside_perspectives', label: 'Get outside perspectives before you commit', visible: true, type: 'slides', url: '' },
         { kind: 'app', key: 'utl_app_p2_3', title: 'Advisory board with AI', visible: true },
-        { kind: 'context', key: 'utl_embed_p2_aiko_email', label: 'Aiko does not have time to read everything', visible: true, type: 'slides', url: '' },
+        { kind: 'context', key: 'utl_embed_p2_aiko_email', label: 'Aiko does not have time to read everything', visible: true, type: 'video', url: 'https://drive.google.com/open?id=1Tw0MhCjy5Tkdodjy8LvIEB-XEEuK4Di3&usp=drive_copy' },
         { kind: 'app', key: 'utl_app_p2_4', title: 'Write to Aiko', visible: true },
-        { kind: 'context', key: 'utl_embed_p2_hallway', label: 'She bumped into you in the hallway', visible: true, type: 'slides', url: '' },
+        { kind: 'context', key: 'utl_embed_p2_hallway', label: 'She bumped into you in the hallway', visible: true, type: 'video', url: 'https://drive.google.com/file/d/10b0x6cTO1rf3DYlTBbDm4tNQ4cirhWzh/view?usp=vids_web' },
         { kind: 'app', key: 'utl_app_p2_5', title: 'Explain to Aiko (120s)', visible: true },
         { kind: 'context', key: 'utl_embed_p2_compress', label: 'Now compress it', visible: true, type: 'slides', url: '' },
         { kind: 'app', key: 'utl_app_p2_6', title: 'Explain to Aiko (60s)', visible: true }
       ],
       phase3: [
-        { kind: 'context', key: 'utl_embed_p3_lead_role', label: 'You just got the lead role.', visible: true, type: 'slides', url: '' },
+        { kind: 'context', key: 'utl_embed_p3_recap_storyline', label: 'Recap and storyline', visible: true, type: 'video', url: 'https://drive.google.com/file/d/1xJsxbjivMPHJvGKjWxtvPM0grgm2LiE-/view?usp=vids_web' },
+        { kind: 'context', key: 'utl_embed_p3_lead_role', label: 'You just got the lead role.', visible: true, type: 'video', url: 'https://drive.google.com/open?id=18UnP9dxWd31EeCfEfODiPBQ-Jfyxbd8Q&usp=drive_copy' },
         { kind: 'app', key: 'utl_app_p3_1', title: 'The Art of Saying No', visible: true },
-        { kind: 'context', key: 'utl_embed_p3_bad_news', label: 'You have to be the one to say it', visible: true, type: 'slides', url: '' },
+        { kind: 'context', key: 'utl_embed_p3_bad_news', label: 'You have to be the one to say it', visible: true, type: 'video', url: 'https://drive.google.com/file/d/1m04hT3TUZkaKZN8-f0zlWWOBLA1DS6fF/view?usp=vids_web' },
         { kind: 'app', key: 'utl_app_p3_2', title: 'I Have Bad News...', visible: true },
-        { kind: 'context', key: 'utl_embed_p3_read_room', label: 'Read the room before you speak', visible: true, type: 'slides', url: '' },
+        { kind: 'context', key: 'utl_embed_p3_read_room', label: 'Read the room before you speak', visible: true, type: 'video', url: 'https://drive.google.com/file/d/1UVaAj5EG7Kg4c1uZhXaR0bqwasgtjQgS/view?usp=vids_web' },
         { kind: 'app', key: 'utl_app_p3_3', title: "Let's Switch Hats", visible: true },
-        { kind: 'context', key: 'utl_embed_p3_eyes_on_you', label: 'All eyes are on you', visible: true, type: 'slides', url: '' },
+        { kind: 'context', key: 'utl_embed_p3_eyes_on_you', label: 'All eyes are on you', visible: true, type: 'video', url: 'https://drive.google.com/file/d/1ndtAyGJpud5jDA5pLyYoGmqOJOeFabPO/view?usp=vids_web' },
         { kind: 'app', key: 'utl_app_p3_4', title: 'Speak Like Obama', visible: true }
       ]
     };
@@ -1320,6 +1324,34 @@
       utl_embed_p3_read_room: 'utl_slides_phase3_chunk3'
     };
 
+    function builtInEmbedConfig(key) {
+      return Object.values(PHASE_LAYOUT_DEFAULTS)
+        .flat()
+        .find((item) => item.kind === 'context' && item.key === key && item.url);
+    }
+
+    function migrateMay2026VideoEmbeds() {
+      const migrationKey = 'utl_video_embeds_may2026';
+      if (localStorage.getItem(migrationKey) === 'done') return;
+      Object.values(PHASE_LAYOUT_DEFAULTS).flat().forEach((item) => {
+        if (item.kind !== 'context' || item.type !== 'video' || !item.url) return;
+        let existing = null;
+        try {
+          existing = JSON.parse(localStorage.getItem(item.key) || 'null');
+        } catch (error) {
+          existing = null;
+        }
+        const existingUrl = existing?.url || '';
+        const existingType = existing?.type || '';
+        if (!existingUrl || existingType !== 'video' || /docs\.google\.com\/presentation/.test(existingUrl)) {
+          localStorage.setItem(item.key, JSON.stringify({ url: item.url, type: item.type }));
+        }
+      });
+      localStorage.setItem(migrationKey, 'done');
+    }
+
+    migrateMay2026VideoEmbeds();
+
     document.querySelectorAll('[data-password-toggle]').forEach((toggle) => {
       const target = document.getElementById(toggle.dataset.passwordToggle);
       if (!target) return;
@@ -1342,7 +1374,9 @@
         const config = JSON.parse(localStorage.getItem(key) || '{}');
         if (config.url) return config;
         const legacyUrl = LEGACY_EMBED_KEYS[key] ? localStorage.getItem(LEGACY_EMBED_KEYS[key]) : '';
-        return legacyUrl ? { url: legacyUrl, type: 'slides' } : {};
+        if (legacyUrl) return { url: legacyUrl, type: 'slides' };
+        const builtIn = builtInEmbedConfig(key);
+        return builtIn ? { url: builtIn.url, type: builtIn.type || 'slides' } : {};
       } catch (error) {
         return {};
       }
@@ -1371,11 +1405,13 @@
     }
 
     function normalizePhaseLayoutItem(item) {
+      const builtIn = builtInEmbedConfig(item.key);
+      const url = item.url || builtIn?.url || '';
       return {
         ...item,
         visible: item.visible !== false,
-        type: item.type || 'slides',
-        url: item.url || ''
+        type: item.url ? item.type || builtIn?.type || 'slides' : builtIn?.type || item.type || 'slides',
+        url
       };
     }
 
