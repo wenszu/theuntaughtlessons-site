@@ -3751,18 +3751,34 @@
         window.addEventListener('load', callback, { once: true });
       }
 
-      onLoginWindowLoad(function () {
-        googleSignInButton = document.getElementById('google-signin-btn');
-        refreshGoogleSignInButton();
-        window.addEventListener('utlFirebaseAuthReady', refreshGoogleSignInButton);
-        window.setTimeout(function () {
-          if (!firebaseAuthReady()) {
-            refreshGoogleSignInButton();
-            message.textContent = 'Google sign-in could not finish loading. Please refresh and try again.';
-          }
-        }, 5000);
+      document.addEventListener("DOMContentLoaded", function () {
+        var googleSignInButton = document.getElementById('google-signin-btn');
+        if (googleSignInButton) {
+          googleSignInButton.addEventListener('click', function (e) {
+            e.preventDefault();
 
-        if (!googleSignInButton) return;
+            var firebaseAuth = window.utlFirebaseAuth;
+            if (firebaseAuth && firebaseAuth.signInWithGoogle && firebaseAuth.auth) {
+              googleSignInButton.disabled = true;
+              googleSignInButton.textContent = "Connecting to Google...";
+
+              firebaseAuth.signInWithGoogle(firebaseAuth.auth)
+                .then(function (result) {
+                  console.log("Authenticated successfully:", result.user.email);
+                })
+                .catch(function (error) {
+                  console.error("Popup interaction dropped:", error);
+                  var msg = document.getElementById('loginMessage');
+                  if (msg) msg.textContent = googleSignInMessage(error);
+                  googleSignInButton.disabled = false;
+                  googleSignInButton.textContent = "Sign in with Google";
+                });
+            } else {
+              var msg = document.getElementById('loginMessage');
+              if (msg) msg.textContent = "Authentication core is initializing. Please tap again in a moment.";
+            }
+          });
+        }
       });
 
       function matchesLocalTestAccount(username, password) {
