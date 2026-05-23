@@ -3743,7 +3743,7 @@
         return 'Google sign-in did not work.';
       }
 
-      function onLoginWindowLoad(callback) {
+function onLoginWindowLoad(callback) {
         if (document.readyState === 'complete') {
           callback();
           return;
@@ -3754,25 +3754,37 @@
       document.addEventListener("DOMContentLoaded", function () {
         var googleSignInButton = document.getElementById('google-signin-btn');
         if (googleSignInButton) {
+          // Force the button to render active and clickable immediately on load
+          googleSignInButton.disabled = false;
+          googleSignInButton.textContent = 'Sign in with Google';
+
           googleSignInButton.addEventListener('click', function (e) {
             e.preventDefault();
 
             var firebaseAuth = window.utlFirebaseAuth;
-            if (firebaseAuth && firebaseAuth.signInWithGoogle && firebaseAuth.auth) {
-              googleSignInButton.disabled = true;
-              googleSignInButton.textContent = "Connecting to Google...";
+            if (firebaseAuth && firebaseAuth.auth) {
+              // Gracefully handle whatever naming schema the module bundle used
+              var launchSignIn = firebaseAuth.signInWithGoogle || firebaseAuth.signInWithGooglePopup;
 
-              firebaseAuth.signInWithGoogle(firebaseAuth.auth)
-                .then(function (result) {
-                  console.log("Authenticated successfully:", result.user.email);
-                })
-                .catch(function (error) {
-                  console.error("Popup interaction dropped:", error);
-                  var msg = document.getElementById('loginMessage');
-                  if (msg) msg.textContent = googleSignInMessage(error);
-                  googleSignInButton.disabled = false;
-                  googleSignInButton.textContent = "Sign in with Google";
-                });
+              if (launchSignIn) {
+                googleSignInButton.disabled = true;
+                googleSignInButton.textContent = "Connecting to Google...";
+
+                launchSignIn(firebaseAuth.auth)
+                  .then(function (result) {
+                    console.log("Authenticated successfully:", result.user.email);
+                  })
+                  .catch(function (error) {
+                    console.error("Popup window dropped:", error);
+                    var msg = document.getElementById('loginMessage');
+                    if (msg) msg.textContent = googleSignInMessage(error);
+                    googleSignInButton.disabled = false;
+                    googleSignInButton.textContent = "Sign in with Google";
+                  });
+              } else {
+                var msg = document.getElementById('loginMessage');
+                if (msg) msg.textContent = "Sign-in method could not be mapped to the initialization framework.";
+              }
             } else {
               var msg = document.getElementById('loginMessage');
               if (msg) msg.textContent = "Authentication core is initializing. Please tap again in a moment.";
