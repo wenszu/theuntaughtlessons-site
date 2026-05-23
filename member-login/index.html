@@ -3743,15 +3743,15 @@
         return 'Google sign-in did not work.';
       }
 
-      function onLoginDomReady(callback) {
-        if (document.readyState === 'loading') {
-          document.addEventListener('DOMContentLoaded', callback, { once: true });
+      function onLoginWindowLoad(callback) {
+        if (document.readyState === 'complete') {
+          callback();
           return;
         }
-        callback();
+        window.addEventListener('load', callback, { once: true });
       }
 
-      onLoginDomReady(function () {
+      onLoginWindowLoad(function () {
         googleSignInButton = document.getElementById('googleSignInButton');
         refreshGoogleSignInButton();
         window.addEventListener('utlFirebaseAuthReady', refreshGoogleSignInButton);
