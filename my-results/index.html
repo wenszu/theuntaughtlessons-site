@@ -38,19 +38,25 @@
       padding: 10px 1.75rem;
       display: flex;
       align-items: center;
+      gap: 18px;
       justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 250;
     }
 
     .member-identity-left {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
+      flex: 0 0 auto;
     }
 
     .member-identity-right {
       display: flex;
       align-items: center;
       gap: 14px;
+      flex: 0 0 auto;
     }
 
     .identity-logo-text {
@@ -62,12 +68,50 @@
       text-transform: uppercase;
     }
 
+    .identity-logo-link {
+      display: inline-flex;
+      align-items: center;
+      min-height: 44px;
+      padding: 6px 8px;
+      border-radius: 8px;
+      text-decoration: none;
+      transition: background .15s ease, box-shadow .15s ease;
+    }
+
+    .identity-logo-link:hover {
+      background: rgba(255, 255, 255, .12);
+      box-shadow: inset 0 -2px 0 var(--gold);
+    }
+
+    .identity-logo-image {
+      display: block;
+      width: 82px;
+      height: auto;
+    }
+
     .identity-label {
+      display: inline-flex;
+      align-items: center;
+      min-height: 44px;
+      padding: 6px 8px;
+      border-radius: 8px;
       font-family: 'Roboto Mono', monospace;
       font-size: 11px;
       color: rgba(255,255,255,.7);
       letter-spacing: .06em;
+      line-height: 1.15;
       text-transform: uppercase;
+      transition: background .15s ease, box-shadow .15s ease, color .15s ease;
+    }
+
+    .identity-label-link {
+      text-decoration: none;
+    }
+
+    .identity-label-link:hover {
+      background: rgba(255, 255, 255, .12);
+      box-shadow: inset 0 -2px 0 var(--gold);
+      color: var(--gold);
     }
 
     .identity-user {
@@ -86,14 +130,15 @@
       justify-content: center;
       width: 32px;
       height: 32px;
-      border: 1px solid rgba(255, 255, 255, .35);
+      border: 1px solid rgba(238, 163, 32, .78);
       border-radius: 999px;
-      background: rgba(255, 255, 255, .12);
-      color: var(--gold);
+      background: var(--gold);
+      color: var(--navy);
       font-size: 12px;
       font-weight: 700;
       overflow: hidden;
       text-transform: uppercase;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .28);
     }
 
     .identity-avatar img {
@@ -109,9 +154,10 @@
     }
 
     .identity-user-status {
-      color: rgba(255, 255, 255, .62);
+      color: var(--gold);
       font-family: 'Roboto Mono', monospace;
       font-size: 9px;
+      font-weight: 700;
       letter-spacing: .08em;
       text-transform: uppercase;
     }
@@ -137,18 +183,29 @@
     .identity-back:hover { opacity: 1; }
 
     .member-nav {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      background: var(--cream);
-      border-bottom: .5px solid rgba(0,0,0,.08);
+      flex: 1 1 auto;
+      min-width: 0;
+      margin: 0;
+      overflow-x: auto;
+      overflow-y: hidden;
+      background: transparent;
+      border: 0;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .member-nav::-webkit-scrollbar {
+      display: none;
     }
 
     .member-nav-inner {
       display: flex;
       align-items: center;
-      height: 44px;
-      padding: 0 1.75rem;
+      width: max-content;
+      min-width: 100%;
+      height: auto;
+      min-height: 44px;
+      padding: 0;
       gap: 0;
     }
 
@@ -167,6 +224,8 @@
       align-items: center;
       gap: 0;
       flex: 1;
+      min-width: max-content;
+      white-space: nowrap;
     }
 
     .nav-phase-links,
@@ -180,41 +239,58 @@
 
     .nav-divider {
       width: 1px;
-      height: 18px;
-      margin: 0 12px;
-      background: #d4ccbf;
+      height: 22px;
+      margin: 0 22px;
+      background: rgba(255, 255, 255, .28);
       flex-shrink: 0;
     }
 
     .nav-item {
+      display: inline-flex;
+      align-items: center;
+      min-height: 44px;
       font-family: 'Lato', sans-serif;
-      font-size: 12px;
-      color: var(--charcoal);
+      font-size: 13px;
+      color: rgba(255, 255, 255, .86);
       text-decoration: none;
-      padding: 4px 10px;
-      border-radius: 6px;
+      padding: 0 10px;
+      border-bottom: 2px solid transparent;
+      border-radius: 0;
       transition: background .15s;
     }
 
-    .nav-item:hover { background: rgba(0,0,0,.05); }
+    .nav-item:hover { background: rgba(255, 255, 255, .08); }
 
     .nav-item.active {
-      color: var(--navy);
+      color: var(--white);
       font-weight: 500;
-      background: rgba(0,51,102,.07);
+      background: transparent;
+      border-bottom-color: var(--gold);
     }
 
     .nav-item-results {
-      color: var(--navy);
+      color: rgba(255, 255, 255, .86);
       font-weight: 500;
-      border: .5px solid rgba(0,51,102,.25);
-      margin-left: 6px;
+      border: 0;
+      margin-left: 0;
+    }
+
+    .nav-item-results.active {
+      background: transparent;
+      border: 0;
+      border-bottom: 2px solid var(--gold);
+      color: var(--white);
     }
 
     .nav-sep {
       font-size: 12px;
-      color: #c8bfb0;
+      color: rgba(255, 255, 255, .32);
       padding: 0 2px;
+    }
+
+    .nav-item[hidden],
+    .nav-sep[hidden] {
+      display: none;
     }
 
     .nav-logout-sep {
@@ -659,8 +735,12 @@
     }
 
     .results-footer {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
       text-align: center;
-      padding: 2rem 0 1rem;
+      padding: 1.75rem 0 1rem;
       border-top: .5px solid rgba(0,0,0,.08);
       margin-top: 2rem;
     }
@@ -668,36 +748,63 @@
     .results-back-link {
       font-family: 'Lato', sans-serif;
       font-size: 13px;
+      font-weight: 700;
       color: var(--navy);
-      text-decoration: none;
+      text-decoration: underline;
+      text-decoration-thickness: 1px;
+      text-underline-offset: 4px;
+      background: transparent;
+      border: 0;
+      padding: 0;
     }
 
-    .results-back-link:hover { text-decoration: underline; }
+    .results-back-link:hover {
+      color: #001A33;
+      text-decoration-color: var(--gold);
+    }
+
+    .results-footer-sep {
+      color: #c8bfb0;
+      font-size: 12px;
+    }
 
     @media (max-width: 700px) {
+      body {
+        overflow-x: hidden;
+      }
+
+      .member-identity-bar {
+        flex-wrap: wrap;
+        gap: 8px 12px;
+        padding: 10px 16px;
+      }
+
+      .member-identity-left {
+        order: 1;
+      }
+
+      .member-identity-right {
+        order: 2;
+        margin-left: auto;
+      }
+
+      .member-nav {
+        order: 3;
+        flex-basis: 100%;
+      }
+
       .member-nav-inner,
-      .nav-links,
-      .member-identity-bar,
-      .results-actions-row {
-        align-items: flex-start;
-        flex-direction: column;
+      .nav-links {
+        align-items: center;
       }
 
       .results-actions-row {
         grid-template-columns: 1fr;
       }
 
-      .nav-sep,
       .nav-workspace-label,
-      .nav-divider,
       .nav-spacer,
       .nav-logout-sep { display: none; }
-
-      .nav-links,
-      .nav-phase-links,
-      .nav-utility-links {
-        flex-wrap: wrap;
-      }
 
       .progress-summary {
         display: block;
@@ -710,9 +817,34 @@
 <body>
   <div class="member-identity-bar">
     <div class="member-identity-left">
-      <span class="identity-logo-text">The Untaught Lessons</span>
-      <span class="identity-label">Member workspace</span>
+      <a class="identity-logo-link" href="../index.html" aria-label="The Untaught Lessons home">
+        <img class="identity-logo-image" src="../assets/utl-logo-nav-white.png" alt="The Untaught Lessons">
+      </a>
+      <a class="identity-label identity-label-link" href="../member-login/index.html">Member<br>workspace</a>
     </div>
+    <nav class="member-nav" id="member-nav" aria-label="Member workspace sections">
+      <div class="member-nav-inner">
+        <div class="nav-links">
+          <div class="nav-phase-links">
+            <a href="../member-login/index.html#orientation" class="nav-item">Orientation</a>
+            <span class="nav-sep">|</span>
+            <a href="../member-login/index.html#phase1" class="nav-item">Phase 1</a>
+            <span class="nav-sep">|</span>
+            <a href="../member-login/index.html#phase2" class="nav-item">Phase 2</a>
+            <span class="nav-sep">|</span>
+            <a href="../member-login/index.html#phase3" class="nav-item">Phase 3</a>
+          </div>
+          <span class="nav-divider" aria-hidden="true"></span>
+          <div class="nav-utility-links">
+            <a href="../member-login/index.html#assessments" class="nav-item nav-item-results" data-assessment-nav>Assessments</a>
+            <span class="nav-sep" data-assessment-nav>|</span>
+            <span class="nav-item nav-item-results active">My results</span>
+            <span class="nav-sep">|</span>
+            <a href="../member-login/index.html#toolkit" class="nav-item nav-item-results">Toolkit</a>
+          </div>
+        </div>
+      </div>
+    </nav>
     <div class="member-identity-right">
       <div class="identity-user" id="memberIdentity" hidden>
         <span class="identity-avatar" id="memberAvatar" aria-hidden="true">U</span>
@@ -721,35 +853,8 @@
           <span class="identity-user-email" id="memberEmail">Member</span>
         </span>
       </div>
-      <a href="../index.html" class="identity-back">Back to site</a>
     </div>
   </div>
-
-  <nav class="member-nav" id="member-nav">
-    <div class="member-nav-inner">
-      <span class="nav-workspace-label">Member workspace</span>
-      <div class="nav-links">
-        <div class="nav-phase-links">
-          <a href="../member-login/index.html#orientation" class="nav-item">Orientation</a>
-          <span class="nav-sep">|</span>
-          <a href="../member-login/index.html#phase1" class="nav-item">Phase 1</a>
-          <span class="nav-sep">|</span>
-          <a href="../member-login/index.html#phase2" class="nav-item">Phase 2</a>
-          <span class="nav-sep">|</span>
-          <a href="../member-login/index.html#phase3" class="nav-item">Phase 3</a>
-        </div>
-        <span class="nav-spacer" aria-hidden="true"></span>
-        <span class="nav-divider" aria-hidden="true"></span>
-        <div class="nav-utility-links">
-          <a href="../member-login/index.html#assessments" class="nav-item nav-item-results">Assessments</a>
-          <span class="nav-item nav-item-results active">My results</span>
-          <a href="../member-login/index.html#toolkit" class="nav-item nav-item-results">Toolkit</a>
-        </div>
-      </div>
-      <span class="nav-sep nav-logout-sep" aria-hidden="true">|</span>
-      <a href="../member-login/index.html" class="nav-logout">Log out</a>
-    </div>
-  </nav>
 
   <main class="results-shell">
     <div class="results-header">
@@ -796,6 +901,8 @@
 
     <footer class="results-footer">
       <a href="../member-login/index.html" class="results-back-link">← Back to workspace</a>
+      <span class="results-footer-sep" aria-hidden="true">|</span>
+      <a href="../index.html" class="results-back-link">Back to main site</a>
     </footer>
   </main>
 
@@ -1288,8 +1395,16 @@
       button.classList.remove('coming-soon');
     }
 
+    function applyAssessmentNavVisibility() {
+      const isHidden = localStorage.getItem('utl_tsa_status') === 'hidden';
+      document.querySelectorAll('[data-assessment-nav]').forEach((item) => {
+        item.hidden = isHidden;
+      });
+    }
+
     renderStorageOriginHint();
     renderMemberProfile();
+    applyAssessmentNavVisibility();
     renderProgress();
     renderAssessments();
     renderPhase('phase1Results', 1, 'Think clearly');
@@ -1297,6 +1412,9 @@
     renderPhase('phase3Results', 3, 'Act confidently');
     populateRecipientField();
     applySendInstructorStatus();
+    window.addEventListener('storage', (event) => {
+      if (event.key === 'utl_tsa_status') applyAssessmentNavVisibility();
+    });
   </script>
 </body>
 </html>

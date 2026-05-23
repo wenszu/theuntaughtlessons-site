@@ -279,6 +279,7 @@
       margin: 0;
       padding: 2rem 1.75rem;
       border-top: 1px solid rgba(0, 0, 0, .06);
+      scroll-margin-top: 64px;
     }
 
     #orientation,
@@ -425,20 +426,26 @@
       background: var(--navy);
       display: flex;
       align-items: center;
+      gap: 18px;
       justify-content: space-between;
       border-radius: 12px 12px 0 0;
+      position: sticky;
+      top: 0;
+      z-index: 250;
     }
 
     .member-identity-left {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
+      flex: 0 0 auto;
     }
 
     .member-identity-right {
       display: flex;
       align-items: center;
       gap: 14px;
+      flex: 0 0 auto;
     }
 
     .identity-logo-text {
@@ -453,7 +460,16 @@
     .identity-logo-link {
       display: inline-flex;
       align-items: center;
+      min-height: 44px;
+      padding: 6px 8px;
+      border-radius: 8px;
       text-decoration: none;
+      transition: background .15s ease, box-shadow .15s ease;
+    }
+
+    .identity-logo-link:hover {
+      background: rgba(255, 255, 255, .12);
+      box-shadow: inset 0 -2px 0 var(--gold);
     }
 
     .identity-logo-image {
@@ -463,17 +479,35 @@
     }
 
     .identity-label {
+      display: inline-flex;
+      align-items: center;
+      min-height: 44px;
+      padding: 6px 8px;
+      border-radius: 8px;
       font-family: 'Roboto Mono', monospace;
       font-size: 11px;
       color: rgba(255, 255, 255, .7);
       letter-spacing: .06em;
+      line-height: 1.15;
       text-transform: uppercase;
+      transition: background .15s ease, box-shadow .15s ease, color .15s ease;
+    }
+
+    .identity-label:hover {
+      background: rgba(255, 255, 255, .12);
+      box-shadow: inset 0 -2px 0 var(--gold);
+      color: var(--gold);
+    }
+
+    .identity-label-link {
+      text-decoration: none;
     }
 
     .identity-user {
       display: flex;
       align-items: center;
       gap: 9px;
+      position: relative;
       color: var(--white);
       font-family: 'Lato', sans-serif;
     }
@@ -488,14 +522,20 @@
       justify-content: center;
       width: 32px;
       height: 32px;
-      border: 1px solid rgba(255, 255, 255, .35);
+      border: 1px solid rgba(238, 163, 32, .78);
       border-radius: 999px;
-      background: rgba(255, 255, 255, .12);
-      color: var(--gold);
+      background: var(--gold);
+      color: var(--navy);
       font-size: 12px;
       font-weight: 700;
       overflow: hidden;
       text-transform: uppercase;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .28);
+    }
+
+    .identity-avatar-button {
+      padding: 0;
+      cursor: pointer;
     }
 
     .identity-avatar img {
@@ -511,10 +551,11 @@
     }
 
     .identity-user-status {
-      color: rgba(255, 255, 255, .62);
+      color: var(--gold);
       font-family: 'Roboto Mono', monospace;
       font-size: 9px;
-      letter-spacing: .08em;
+      font-weight: 700;
+      letter-spacing: .1em;
       text-transform: uppercase;
     }
 
@@ -540,20 +581,260 @@
       opacity: 1;
     }
 
+    .profile-dropdown {
+      position: absolute;
+      top: calc(100% + 10px);
+      right: 0;
+      z-index: 300;
+      width: min(320px, calc(100vw - 32px));
+      padding: 16px;
+      border: 1px solid rgba(0, 51, 102, .2);
+      border-top: 4px solid var(--gold);
+      border-radius: 8px;
+      background: var(--white);
+      box-shadow: 0 18px 42px rgba(0, 51, 102, .18);
+      color: var(--charcoal);
+    }
+
+    .profile-dropdown::before {
+      content: "";
+      position: absolute;
+      top: -9px;
+      right: 14px;
+      width: 14px;
+      height: 14px;
+      border-left: 1px solid rgba(0, 51, 102, .2);
+      border-top: 1px solid rgba(0, 51, 102, .2);
+      background: var(--white);
+      transform: rotate(45deg);
+    }
+
+    .profile-dropdown-label {
+      margin-bottom: 8px;
+      color: var(--gold);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+
+    .profile-dropdown[hidden] {
+      display: none;
+    }
+
+    .profile-dropdown-name {
+      color: var(--navy);
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 22px;
+      font-weight: 700;
+      line-height: 1.05;
+    }
+
+    .profile-dropdown-meta {
+      margin-top: 6px;
+      color: var(--steel);
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .profile-dropdown-email {
+      margin-top: 8px;
+      color: var(--charcoal);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 11px;
+      line-height: 1.35;
+      word-break: break-word;
+    }
+
+    .profile-dropdown-divider {
+      height: 1px;
+      margin: 14px 0;
+      background: linear-gradient(90deg, var(--gold), rgba(238, 163, 32, 0));
+    }
+
+    .profile-dropdown-action {
+      width: 100%;
+      min-height: 40px;
+      padding: 9px 12px;
+      border: 1px solid rgba(0, 51, 102, .28);
+      border-radius: 7px;
+      background: transparent;
+      color: var(--navy);
+      cursor: pointer;
+      font-family: 'Lato', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      text-align: center;
+      text-decoration: none;
+    }
+
+    .profile-dropdown-action:hover {
+      border-color: var(--gold);
+      background: rgba(238, 163, 32, .1);
+    }
+
+    .profile-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+      background: rgba(0, 24, 48, .58);
+    }
+
+    .profile-modal[hidden] {
+      display: none;
+    }
+
+    .profile-modal-card {
+      width: min(100%, 480px);
+      padding: 28px;
+      border: 1px solid #dfd6ca;
+      border-radius: 10px;
+      background: var(--white);
+      box-shadow: 0 24px 72px rgba(0, 24, 48, .24);
+    }
+
+    .profile-modal-card h2 {
+      margin: 0 0 8px;
+      color: var(--navy);
+      font-family: 'Playfair Display', serif;
+      font-size: 30px;
+      line-height: 1.05;
+    }
+
+    .profile-modal-card p {
+      margin: 0 0 18px;
+      color: var(--steel);
+      font-size: 15px;
+      line-height: 1.45;
+    }
+
+    .profile-form {
+      display: grid;
+      gap: 12px;
+    }
+
+    .profile-field {
+      display: grid;
+      gap: 6px;
+    }
+
+    .profile-field label,
+    .profile-opt-in {
+      color: var(--navy);
+      font-family: 'Lato', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .profile-field input {
+      width: 100%;
+      min-height: 44px;
+      padding: 10px 12px;
+      border: 1px solid #c8bfb0;
+      border-radius: 7px;
+      color: var(--charcoal);
+      font-size: 15px;
+    }
+
+    .profile-opt-in {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 10px;
+      align-items: start;
+      margin-top: 4px;
+      color: var(--charcoal);
+      font-weight: 400;
+      line-height: 1.4;
+    }
+
+    .profile-opt-in input {
+      margin-top: 2px;
+    }
+
+    .profile-form-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 8px;
+    }
+
+    .profile-save-button,
+    .profile-cancel-button {
+      min-height: 44px;
+      padding: 10px 16px;
+      border-radius: 7px;
+      cursor: pointer;
+      font-family: 'Lato', sans-serif;
+      font-weight: 700;
+    }
+
+    .profile-save-button {
+      border: 1px solid var(--gold);
+      background: var(--gold);
+      color: var(--deep-navy);
+    }
+
+    .profile-cancel-button {
+      border: 1px solid #c8bfb0;
+      background: transparent;
+      color: var(--navy);
+    }
+
+    .profile-form-message {
+      min-height: 18px;
+      margin: 0;
+      color: #9b3a2f;
+      font-size: 12px;
+    }
+
+    .profile-dropdown-logout {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 40px;
+      margin-top: 10px;
+      padding: 9px 12px;
+      border: 1px solid rgba(74, 74, 74, .22);
+      border-radius: 7px;
+      color: var(--charcoal);
+      font-size: 13px;
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .profile-dropdown-logout:hover {
+      border-color: var(--navy);
+      color: var(--navy);
+    }
+
     .member-nav {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      margin: 0 -28px 28px;
-      background: var(--cream);
-      border-bottom: .5px solid rgba(0, 0, 0, .08);
+      flex: 1 1 auto;
+      min-width: 0;
+      margin: 0;
+      overflow-x: auto;
+      overflow-y: hidden;
+      background: transparent;
+      border: 0;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .member-nav::-webkit-scrollbar {
+      display: none;
     }
 
     .member-nav-inner {
       display: flex;
       align-items: center;
-      height: 44px;
-      padding: 0 1.75rem;
+      width: max-content;
+      min-width: 100%;
+      height: auto;
+      min-height: 44px;
+      padding: 0;
       gap: 0;
     }
 
@@ -572,6 +853,8 @@
       align-items: center;
       gap: 0;
       flex: 1;
+      min-width: max-content;
+      white-space: nowrap;
     }
 
     .nav-phase-links,
@@ -588,59 +871,67 @@
     .nav-divider {
       width: 1px;
       height: 22px;
-      margin: 0 20px;
-      background: #d5cfc5;
+      margin: 0 22px;
+      background: rgba(255, 255, 255, .28);
       flex-shrink: 0;
     }
 
     .nav-item {
-      padding: 4px 10px 6px;
-      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      min-height: 44px;
+      padding: 0 10px;
+      border-radius: 0;
       border-bottom: 2px solid transparent;
-      color: var(--charcoal);
+      color: rgba(255, 255, 255, .86);
       font-family: 'Lato', sans-serif;
-      font-size: 12px;
+      font-size: 13px;
       text-decoration: none;
       transition: background .15s;
     }
 
     .nav-item:hover {
-      background: rgba(0, 0, 0, .05);
+      background: rgba(255, 255, 255, .08);
     }
 
     .nav-item.active {
-      color: var(--navy);
+      color: var(--white);
       font-weight: 500;
       background: transparent;
       border-bottom-color: var(--gold);
     }
 
     .nav-item-results {
-      margin-left: 6px;
-      border: .5px solid rgba(0, 51, 102, .25);
-      color: var(--navy);
+      margin-left: 0;
+      border: 0;
+      color: rgba(255, 255, 255, .86);
       font-weight: 500;
     }
 
     .nav-item-results:hover {
-      background: rgba(0, 51, 102, .07);
+      background: rgba(255, 255, 255, .08);
     }
 
     .nav-item-results.active {
-      background: var(--navy);
-      border: .5px solid var(--navy);
-      border-color: var(--navy);
+      background: transparent;
+      border: 0;
+      border-bottom: 2px solid var(--gold);
       color: var(--white);
     }
 
     .nav-item-results.active:hover {
-      background: var(--navy);
+      background: rgba(255, 255, 255, .08);
     }
 
     .nav-sep {
       padding: 0 2px;
-      color: #c8bfb0;
+      color: rgba(255, 255, 255, .32);
       font-size: 12px;
+    }
+
+    .nav-item[hidden],
+    .nav-sep[hidden] {
+      display: none;
     }
 
     .nav-logout {
@@ -1293,11 +1584,6 @@
         padding: 34px;
       }
 
-      .member-nav {
-        margin-right: -34px;
-        margin-left: -34px;
-      }
-
       .member-identity-bar {
         margin: -34px -34px 0;
       }
@@ -1307,9 +1593,10 @@
       }
     }
 
-    /* === MOBILE RESPONSIVE — May 2026 === */
+    /* === MEMBER WORKSPACE MOBILE — May 2026 === */
     @media (max-width: 768px) {
-      body {
+      body,
+      .member-workspace-page {
         overflow-x: hidden;
       }
 
@@ -1318,17 +1605,92 @@
         padding-left: 16px;
       }
 
+      .topbar {
+        min-height: 48px;
+        padding-top: 0;
+        padding-bottom: 12px;
+      }
+
+      .logo {
+        width: auto;
+        height: 30px;
+      }
+
+      .home-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 44px;
+        min-height: 44px;
+        font-size: 14px;
+      }
+
       .dashboard {
+        overflow-x: hidden;
+        overflow-y: visible;
+        padding-top: 16px;
         padding-right: 16px;
         padding-left: 16px;
       }
 
-      .member-nav {
+      .member-identity-bar {
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px 12px;
         margin-right: -16px;
         margin-left: -16px;
+        padding: 8px 16px;
+      }
+
+      .member-identity-left {
+        order: 1;
+      }
+
+      .member-identity-right {
+        order: 2;
+        margin-left: auto;
+      }
+
+      .dashboard-header {
+        gap: 6px;
+        padding: 12px 0 16px;
+      }
+
+      .dashboard-header h1 {
+        font-family: 'Playfair Display', serif;
+        font-size: 26px !important;
+        line-height: 1.05;
+      }
+
+      .dashboard-header p {
+        margin: 0;
+        font-family: 'Lato', sans-serif;
+        font-size: 16px;
+        line-height: 1.45;
+      }
+
+      .mission-card {
+        width: 100%;
+        margin-top: 12px;
+        padding: 12px 16px;
+        font-size: 14px;
+        line-height: 1.5;
+      }
+
+      .member-nav {
+        order: 3;
+        flex-basis: 100%;
+        margin-right: 0;
+        margin-left: 0;
         overflow-x: auto;
         overflow-y: hidden;
+        white-space: nowrap;
+        scrollbar-width: none;
         -webkit-overflow-scrolling: touch;
+      }
+
+      .member-nav::-webkit-scrollbar {
+        display: none;
       }
 
       .member-nav-inner,
@@ -1346,98 +1708,164 @@
         min-width: 100%;
         height: auto;
         min-height: 44px;
-        padding-right: 16px;
-        padding-left: 16px;
+        gap: 0;
+        padding-right: 0;
+        padding-left: 0;
       }
 
-      .nav-item,
-      .nav-logout {
+      .nav-item {
         display: inline-flex;
         align-items: center;
+        justify-content: center;
         min-height: 44px;
+        padding: 0 16px;
         font-size: 14px;
         white-space: nowrap;
       }
 
+      .nav-item.active {
+        border-bottom-color: var(--gold);
+      }
+
       .nav-workspace-label {
+        display: inline-flex;
+        align-items: center;
+        min-height: 44px;
+        font-family: 'Roboto Mono', monospace;
+        font-size: 11px;
+        flex-shrink: 0;
         white-space: nowrap;
+      }
+
+      .nav-divider,
+      .nav-sep {
+        flex-shrink: 0;
       }
 
       .phase-section,
       .hub-section {
+        gap: 12px;
+        padding-top: 20px;
         padding-right: 16px;
+        padding-bottom: 20px;
         padding-left: 16px;
       }
 
       .phase-heading .section-label,
       .section-header .section-label {
-        font-size: 11px !important;
+        font-family: 'Roboto Mono', monospace;
+        font-size: 10px !important;
         letter-spacing: .08em;
       }
 
       .phase-heading h2,
       .section-title {
         font-family: 'Playfair Display', serif;
-        font-size: 24px !important;
+        font-size: 20px !important;
+        line-height: 1.12;
+      }
+
+      .phase-stack {
+        gap: 0;
+        margin-top: 14px;
+      }
+
+      .phase-chunk {
+        gap: 8px;
+        margin-top: 6px;
       }
 
       .slides-bar,
       .ws-context-accordion {
         width: 100%;
         min-height: 44px;
+        align-items: center;
+        padding: 10px 16px;
         font-size: 14px;
       }
 
       .ws-context-accordion .slides-bar-icon {
-        width: 28px;
-        height: 28px;
-        flex-basis: 28px;
+        width: 24px;
+        height: 24px;
+        flex-basis: 24px;
       }
 
       .ws-context-label {
+        font-family: 'Lato', sans-serif;
         font-size: 14px;
       }
 
-      .exercise-card {
-        width: 100%;
-        padding-right: 16px;
-        padding-left: 16px;
+      .ws-context-sub {
+        font-size: 12px;
       }
 
       .exercise-card-grid {
         width: 100%;
+        gap: 12px;
+      }
+
+      .exercise-card {
+        width: 100%;
+        min-height: 0;
+        gap: 12px;
+        padding: 16px;
+        padding-right: 16px;
+        padding-left: 16px;
+        border-radius: 8px;
       }
 
       .exercise-card .card-title {
         font-family: 'Playfair Display', serif;
-        font-size: max(22px, 1.375rem) !important;
+        font-size: 20px !important;
+        line-height: 1.1;
       }
 
       .exercise-card .card-time {
         font-family: 'Lato', sans-serif;
-        font-size: max(15px, .9375rem) !important;
+        font-size: 14px !important;
+        line-height: 1.4;
       }
 
       .exercise-card .card-type {
-        font-size: 11px;
+        display: flex;
+        align-items: center;
+        min-width: 0;
+        font-family: 'Roboto Mono', monospace;
+        font-size: 10px;
+        line-height: 1.2;
+        white-space: nowrap;
+        letter-spacing: .06em;
+      }
+
+      .ws-step-circle {
+        width: 22px;
+        min-width: 22px;
+        height: 22px;
+      }
+
+      .ws-done-pill {
+        flex-shrink: 0;
       }
 
       .ws-open-tool,
       .ws-mark-done {
         width: 100%;
-        min-height: 44px;
+        min-height: 48px;
         font-size: 15px;
       }
 
       .ws-card-actions {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
+        grid-template-columns: 1fr;
+        gap: 8px;
+        margin-top: 8px;
       }
 
       .ws-lock-hint,
       .ws-is-locked .ws-lock-hint {
         font-size: 13px;
-        text-align: left;
+        color: var(--charcoal);
+        text-align: center;
       }
     }
   </style>
@@ -1449,7 +1877,6 @@
         <a href="../" aria-label="The Untaught Lessons home">
           <img class="logo" src="../assets/logo.png" alt="The Untaught Lessons" />
         </a>
-        <a class="home-link" href="../">Back to site</a>
       </header>
 
       <section class="center-stage">
@@ -1484,45 +1911,50 @@
               <a class="identity-logo-link" href="../index.html" aria-label="The Untaught Lessons home">
                 <img class="identity-logo-image" src="../assets/utl-logo-nav-white.png" alt="The Untaught Lessons">
               </a>
-              <span class="identity-label">Member workspace</span>
+              <a class="identity-label identity-label-link" href="#orientation">Member<br>workspace</a>
             </div>
+            <nav class="member-nav" id="member-nav" aria-label="Member workspace sections">
+              <div class="member-nav-inner">
+                <div class="nav-links">
+                  <div class="nav-phase-links">
+                    <a href="#orientation" class="nav-item active" data-section="orientation">Orientation</a>
+                    <span class="nav-sep">|</span>
+                    <a href="#phase1" class="nav-item" data-section="phase1">Phase 1</a>
+                    <span class="nav-sep">|</span>
+                    <a href="#phase2" class="nav-item" data-section="phase2">Phase 2</a>
+                    <span class="nav-sep">|</span>
+                    <a href="#phase3" class="nav-item" data-section="phase3">Phase 3</a>
+                  </div>
+                  <span class="nav-divider" aria-hidden="true"></span>
+                  <div class="nav-utility-links">
+                    <a href="#assessments" class="nav-item nav-item-results" data-section="assessments" data-assessment-nav>Assessments</a>
+                    <span class="nav-sep" data-assessment-nav>|</span>
+                    <a href="../my-results/index.html" class="nav-item nav-item-results">My results</a>
+                    <span class="nav-sep">|</span>
+                    <a href="#toolkit" class="nav-item nav-item-results" data-section="toolkit">Toolkit</a>
+                  </div>
+                </div>
+              </div>
+            </nav>
             <div class="member-identity-right">
               <div class="identity-user" id="memberIdentity" hidden>
-                <span class="identity-avatar" id="memberAvatar" aria-hidden="true">U</span>
+                <button class="identity-avatar identity-avatar-button" id="memberAvatar" type="button" aria-label="Open profile menu" aria-expanded="false">U</button>
                 <span class="identity-user-copy">
                   <span class="identity-user-status">Signed in</span>
                   <span class="identity-user-email" id="memberEmail">Member</span>
                 </span>
+                <div class="profile-dropdown" id="profileDropdown" hidden>
+                  <div class="profile-dropdown-label">MA Roster Profile</div>
+                  <div class="profile-dropdown-name" id="profileDropdownName">Member</div>
+                  <div class="profile-dropdown-meta" id="profileDropdownMeta">Profile details not set</div>
+                  <div class="profile-dropdown-email" id="profileDropdownEmail">Signed in</div>
+                  <div class="profile-dropdown-divider"></div>
+                  <button class="profile-dropdown-action" id="editProfileButton" type="button">Edit Profile Details</button>
+                  <a href="#" class="profile-dropdown-logout nav-logout" id="logoutBtn">Log out</a>
+                </div>
               </div>
-              <a href="../index.html" class="identity-back">Back to site</a>
             </div>
           </div>
-
-          <nav class="member-nav" id="member-nav" aria-label="Member workspace sections">
-            <div class="member-nav-inner">
-              <span class="nav-workspace-label">Member workspace</span>
-              <div class="nav-links">
-                <div class="nav-phase-links">
-                  <a href="#orientation" class="nav-item active" data-section="orientation">Orientation</a>
-                  <span class="nav-sep">·</span>
-                  <a href="#phase1" class="nav-item" data-section="phase1">Phase 1</a>
-                  <span class="nav-sep">·</span>
-                  <a href="#phase2" class="nav-item" data-section="phase2">Phase 2</a>
-                  <span class="nav-sep">·</span>
-                  <a href="#phase3" class="nav-item" data-section="phase3">Phase 3</a>
-                </div>
-                <span class="nav-spacer" aria-hidden="true"></span>
-                <span class="nav-divider" aria-hidden="true"></span>
-                <div class="nav-utility-links">
-                  <a href="#assessments" class="nav-item nav-item-results" data-section="assessments">Assessments</a>
-                  <a href="../my-results/index.html" class="nav-item nav-item-results">My results</a>
-                  <a href="#toolkit" class="nav-item nav-item-results" data-section="toolkit">Toolkit</a>
-                </div>
-              </div>
-              <span class="nav-divider" aria-hidden="true"></span>
-              <a href="#" class="nav-logout" id="logoutBtn">Log out</a>
-            </div>
-          </nav>
 
           <div class="dashboard-header">
             <span class="section-label">Member Tools</span>
@@ -1974,8 +2406,72 @@
     </div>
   </main>
 
+  <div class="profile-modal" id="onboardingModal" hidden role="dialog" aria-modal="true" aria-labelledby="onboardingTitle">
+    <section class="profile-modal-card">
+      <h2 id="onboardingTitle">MA Agency Roster Setup</h2>
+      <p>Set up your member profile before entering the workspace.</p>
+      <form class="profile-form" id="onboardingForm">
+        <div class="profile-field">
+          <label for="onboardingFirstName">First Name</label>
+          <input id="onboardingFirstName" name="firstName" type="text" autocomplete="given-name" required>
+        </div>
+        <div class="profile-field">
+          <label for="onboardingLastName">Last Name</label>
+          <input id="onboardingLastName" name="lastName" type="text" autocomplete="family-name" required>
+        </div>
+        <div class="profile-field">
+          <label for="onboardingTitleInput">Current Role / Title</label>
+          <input id="onboardingTitleInput" name="title" type="text" placeholder="e.g., Senior Analyst, Student, or Consultant" required>
+        </div>
+        <div class="profile-field">
+          <label for="onboardingCompany">Company / Institution</label>
+          <input id="onboardingCompany" name="company" type="text" placeholder="e.g., Acme Corp or University Name" required>
+        </div>
+        <label class="profile-opt-in">
+          <input id="onboardingSubstack" name="substackOptIn" type="checkbox" checked>
+          <span>Keep me updated with executive communication blueprints, frameworks, and case studies via The Untaught Lessons Substack.</span>
+        </label>
+        <p class="profile-form-message" id="onboardingMessage" aria-live="polite"></p>
+        <div class="profile-form-actions">
+          <button class="profile-save-button" type="submit">Enter workspace</button>
+        </div>
+      </form>
+    </section>
+  </div>
+
+  <div class="profile-modal" id="profileEditModal" hidden role="dialog" aria-modal="true" aria-labelledby="profileEditTitle">
+    <section class="profile-modal-card">
+      <h2 id="profileEditTitle">Update Your MA Profile</h2>
+      <p>Keep your roster details current so the workspace can personalize your experience.</p>
+      <form class="profile-form" id="profileEditForm">
+        <div class="profile-field">
+          <label for="editFirstName">First Name</label>
+          <input id="editFirstName" name="firstName" type="text" autocomplete="given-name" required>
+        </div>
+        <div class="profile-field">
+          <label for="editLastName">Last Name</label>
+          <input id="editLastName" name="lastName" type="text" autocomplete="family-name" required>
+        </div>
+        <div class="profile-field">
+          <label for="editTitleInput">Current Role / Title</label>
+          <input id="editTitleInput" name="title" type="text" placeholder="e.g., Senior Analyst, Student, or Consultant" required>
+        </div>
+        <div class="profile-field">
+          <label for="editCompany">Company / Institution</label>
+          <input id="editCompany" name="company" type="text" placeholder="e.g., Acme Corp or University Name" required>
+        </div>
+        <p class="profile-form-message" id="profileEditMessage" aria-live="polite"></p>
+        <div class="profile-form-actions">
+          <button class="profile-cancel-button" id="profileEditCancel" type="button">Cancel</button>
+          <button class="profile-save-button" type="submit">Save profile</button>
+        </div>
+      </form>
+    </section>
+  </div>
+
   <script type="module">
-    import { auth, GoogleAuthProvider, isSignInWithEmailLink, onAuthStateChanged, saveUserProgress, sendSignInInvite, signInWithEmailAndPassword, signInWithEmailLink, signInWithPopup, signOut } from "../assets/firebase.js";
+    import { doc, getDoc, serverTimestamp, setDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+    import { auth, db, getAuthorizedMember, GoogleAuthProvider, isSignInWithEmailLink, onAuthStateChanged, requireAuthorizedMember, saveUserProgress, sendSignInInvite, signInWithEmailAndPassword, signInWithEmailLink, signInWithPopup, signOut } from "../assets/firebase.js";
 
     async function signInWithGoogle() {
       const provider = new GoogleAuthProvider();
@@ -1986,8 +2482,50 @@
       return {
         displayName: user && user.displayName ? user.displayName : '',
         email: user && user.email ? user.email : fallbackEmail,
-        photoURL: user && user.photoURL ? user.photoURL : ''
+        photoURL: user && user.photoURL ? user.photoURL : '',
+        role: ''
       };
+    }
+
+    function profileWithMemberRole(user, member, fallbackEmail) {
+      const profile = profileFromUser(user, fallbackEmail);
+      profile.role = member && member.role ? member.role : 'member';
+      return profile;
+    }
+
+    function userProfileDocRef(email) {
+      const normalizedEmail = String(email || '').trim().toLowerCase();
+      if (!normalizedEmail) throw new Error('A signed-in user email is required.');
+      return doc(db, 'users', normalizedEmail);
+    }
+
+    async function getUserRosterProfile(email) {
+      const snap = await getDoc(userProfileDocRef(email));
+      return snap.exists() ? snap.data() : {};
+    }
+
+    async function saveUserRosterProfile(email, profile) {
+      const payload = {
+        email: String(email || '').trim().toLowerCase(),
+        firstName: profile.firstName || '',
+        lastName: profile.lastName || '',
+        title: profile.title || '',
+        company: profile.company || '',
+        substackOptIn: profile.substackOptIn !== false,
+        onboardingCompleted: true,
+        updatedAt: serverTimestamp()
+      };
+      await setDoc(userProfileDocRef(email), payload, { merge: true });
+      return payload;
+    }
+
+    async function completeAuthenticatedUser(user, member, fallbackEmail) {
+      const detail = { user, member, fallbackEmail };
+      if (typeof window.utlHandleFirebaseAuthenticatedUser === 'function') {
+        await window.utlHandleFirebaseAuthenticatedUser(detail);
+      } else {
+        window.dispatchEvent(new CustomEvent('utlFirebaseAuthenticated', { detail }));
+      }
     }
 
     async function completeEmailLinkSignIn() {
@@ -2001,23 +2539,28 @@
 
       try {
         const credential = await signInWithEmailLink(auth, email, window.location.href);
-        window.localStorage.removeItem('emailForSignIn');
-        const profile = profileFromUser(credential.user, email);
-        if (typeof window.utlGrantMemberAccess === 'function') {
-          window.utlGrantMemberAccess(profile);
-        } else {
-          window.dispatchEvent(new CustomEvent('utlEmailLinkSignInComplete', { detail: profile }));
+        const member = await getAuthorizedMember(credential.user.email || email);
+        if (!member) {
+          await signOut(auth);
+          throw new Error('This Google account does not have an active membership invite.');
         }
+        window.localStorage.removeItem('emailForSignIn');
+        await completeAuthenticatedUser(credential.user, member, email);
         window.history.replaceState({}, document.title, window.location.pathname);
       } catch (error) {
         console.error('Email link sign-in failed.', error);
+        window.dispatchEvent(new CustomEvent('utlAuthError', { detail: error.message || 'That sign-in link did not work.' }));
       }
     }
 
     window.utlFirebaseAuth = {
       auth: auth,
       isSignInWithEmailLink: isSignInWithEmailLink,
+      getAuthorizedMember: getAuthorizedMember,
+      getUserRosterProfile: getUserRosterProfile,
       onAuthStateChanged: onAuthStateChanged,
+      requireAuthorizedMember: requireAuthorizedMember,
+      saveUserRosterProfile: saveUserRosterProfile,
       saveUserProgress: saveUserProgress,
       sendSignInInvite: sendSignInInvite,
       signInWithGoogle: signInWithGoogle,
@@ -2051,11 +2594,26 @@
       var memberIdentity = document.getElementById('memberIdentity');
       var memberAvatar = document.getElementById('memberAvatar');
       var memberEmail = document.getElementById('memberEmail');
+      var profileDropdown = document.getElementById('profileDropdown');
+      var profileDropdownName = document.getElementById('profileDropdownName');
+      var profileDropdownMeta = document.getElementById('profileDropdownMeta');
+      var profileDropdownEmail = document.getElementById('profileDropdownEmail');
+      var editProfileButton = document.getElementById('editProfileButton');
+      var onboardingModal = document.getElementById('onboardingModal');
+      var onboardingForm = document.getElementById('onboardingForm');
+      var onboardingMessage = document.getElementById('onboardingMessage');
+      var profileEditModal = document.getElementById('profileEditModal');
+      var profileEditForm = document.getElementById('profileEditForm');
+      var profileEditCancel = document.getElementById('profileEditCancel');
+      var profileEditMessage = document.getElementById('profileEditMessage');
       var navLinks = Array.prototype.slice.call(document.querySelectorAll('.nav-item[data-section]'));
       var navObserver = null;
       var assessmentsSection = document.getElementById('assessments');
+      var assessmentNavItems = Array.prototype.slice.call(document.querySelectorAll('[data-assessment-nav]'));
       var phase3Nudge = document.querySelector('.phase3-nudge');
+      var adminFooterLink = document.getElementById('admin-footer-link');
       var firebaseProfileListenerStarted = false;
+      var pendingAuthContext = null;
       var legacyEmbedKeys = {
         utl_embed_orientation_welcome: 'utl_slides_orientation',
         utl_embed_orientation_howto: 'utl_slides_orientation',
@@ -2424,6 +2982,9 @@
       }
 
       function setTsaStatus(status) {
+        assessmentNavItems.forEach(function (item) {
+          item.hidden = status === 'hidden';
+        });
         if (!assessmentsSection) return;
         if (status === 'hidden') {
           assessmentsSection.style.display = 'none';
@@ -2534,9 +3095,25 @@
         if (link && link.classList.contains('slides-fullscreen-link')) {
           link.classList.toggle('is-collapsed', isCollapsed);
         }
+        if (isCollapsed) {
+          stopEmbeddedMedia(panel);
+        }
         if (icon) {
           icon.textContent = isCollapsed ? '+' : '-';
         }
+      }
+
+      function stopEmbeddedMedia(panel) {
+        if (!panel) return;
+        panel.querySelectorAll('iframe').forEach(function (iframe) {
+          var src = iframe.getAttribute('src');
+          if (!src) return;
+          iframe.setAttribute('data-src', src);
+          iframe.setAttribute('src', '');
+          window.setTimeout(function () {
+            iframe.setAttribute('src', iframe.getAttribute('data-src') || src);
+          }, 0);
+        });
       }
 
       window.toggleSlides = toggleSlides;
@@ -2848,11 +3425,21 @@
       function normalizeMemberProfile(profile) {
         var safeProfile = typeof profile === 'string' ? { username: profile } : (profile || {});
         var email = safeProfile.email || safeProfile.username || '';
-        var displayName = safeProfile.displayName || email || 'Member';
+        var firstName = safeProfile.firstName || '';
+        var lastName = safeProfile.lastName || '';
+        var fullName = [firstName, lastName].filter(Boolean).join(' ').trim();
+        var displayName = safeProfile.displayName || fullName || email || 'Member';
         return {
           displayName: displayName,
           email: email,
-          photoURL: safeProfile.photoURL || ''
+          photoURL: safeProfile.photoURL || '',
+          role: safeProfile.role || 'member',
+          firstName: firstName,
+          lastName: lastName,
+          title: safeProfile.title || '',
+          company: safeProfile.company || '',
+          substackOptIn: safeProfile.substackOptIn !== false,
+          onboardingCompleted: safeProfile.onboardingCompleted === true
         };
       }
 
@@ -2871,7 +3458,8 @@
       function renderMemberProfile() {
         if (!memberIdentity || !memberAvatar || !memberEmail) return;
         var profile = getStoredMemberProfile();
-        var label = profile.email || profile.displayName || 'Member';
+        var fullName = [profile.firstName, profile.lastName].filter(Boolean).join(' ').trim();
+        var label = fullName || profile.email || profile.displayName || 'Member';
         memberEmail.textContent = label;
         memberAvatar.textContent = '';
 
@@ -2884,13 +3472,25 @@
           memberAvatar.textContent = getInitials(profile.displayName || label);
         }
 
+        if (profileDropdownName) profileDropdownName.textContent = fullName || profile.displayName || profile.email || 'Member';
+        if (profileDropdownMeta) {
+          var meta = [profile.title, profile.company].filter(Boolean).join(' · ');
+          profileDropdownMeta.textContent = meta || 'Add your role and company to complete your roster profile.';
+        }
+        if (profileDropdownEmail) profileDropdownEmail.textContent = profile.email ? 'Signed in as ' + profile.email : 'Signed in';
         memberIdentity.hidden = false;
+        if (adminFooterLink) adminFooterLink.hidden = false;
       }
 
       function saveMemberProfile(profile) {
         var normalizedProfile = normalizeMemberProfile(profile);
         if (normalizedProfile.email) {
           localStorage.setItem('utl_member_username', normalizedProfile.email);
+        }
+        if (normalizedProfile.role === 'admin') {
+          localStorage.setItem('utl_admin_auth', 'true');
+        } else {
+          localStorage.removeItem('utl_admin_auth');
         }
         localStorage.setItem('utl_member_profile', JSON.stringify(normalizedProfile));
         renderMemberProfile();
@@ -2904,13 +3504,119 @@
         });
       }
 
+      function profileFromFirebaseUserAndMember(user, member, fallbackEmail) {
+        var profile = profileFromFirebaseUser(user, fallbackEmail);
+        profile.role = member && member.role ? member.role : 'member';
+        return profile;
+      }
+
+      function profileFromAuthAndRoster(user, member, roster, fallbackEmail) {
+        var profile = profileFromFirebaseUserAndMember(user, member, fallbackEmail);
+        roster = roster || {};
+        profile.firstName = roster.firstName || '';
+        profile.lastName = roster.lastName || '';
+        profile.title = roster.title || '';
+        profile.company = roster.company || '';
+        profile.substackOptIn = roster.substackOptIn !== false;
+        profile.onboardingCompleted = roster.onboardingCompleted === true;
+        var fullName = [profile.firstName, profile.lastName].filter(Boolean).join(' ').trim();
+        if (fullName) profile.displayName = fullName;
+        return normalizeMemberProfile(profile);
+      }
+
+      function formValues(form, includeOptIn) {
+        var data = new FormData(form);
+        return {
+          firstName: String(data.get('firstName') || '').trim(),
+          lastName: String(data.get('lastName') || '').trim(),
+          title: String(data.get('title') || '').trim(),
+          company: String(data.get('company') || '').trim(),
+          substackOptIn: includeOptIn ? Boolean(data.get('substackOptIn')) : getStoredMemberProfile().substackOptIn
+        };
+      }
+
+      function fillProfileForm(form, profile) {
+        if (!form) return;
+        form.elements.firstName.value = profile.firstName || '';
+        form.elements.lastName.value = profile.lastName || '';
+        form.elements.title.value = profile.title || '';
+        form.elements.company.value = profile.company || '';
+        if (form.elements.substackOptIn) {
+          form.elements.substackOptIn.checked = profile.substackOptIn !== false;
+        }
+      }
+
+      function closeProfileDropdown() {
+        if (!profileDropdown || !memberAvatar) return;
+        profileDropdown.hidden = true;
+        memberAvatar.setAttribute('aria-expanded', 'false');
+      }
+
+      function openProfileDropdown() {
+        if (!profileDropdown || !memberAvatar) return;
+        renderMemberProfile();
+        profileDropdown.hidden = false;
+        memberAvatar.setAttribute('aria-expanded', 'true');
+      }
+
+      function openOnboardingModal(context, roster) {
+        pendingAuthContext = Object.assign({}, context, { roster: roster || {} });
+        if (onboardingMessage) onboardingMessage.textContent = '';
+        fillProfileForm(onboardingForm, Object.assign({
+          substackOptIn: true
+        }, roster || {}));
+        if (onboardingModal) onboardingModal.hidden = false;
+        var firstInput = onboardingForm && onboardingForm.elements.firstName;
+        if (firstInput) firstInput.focus();
+      }
+
+      function closeOnboardingModal() {
+        if (onboardingModal) onboardingModal.hidden = true;
+      }
+
+      function openProfileEditModal() {
+        closeProfileDropdown();
+        if (profileEditMessage) profileEditMessage.textContent = '';
+        fillProfileForm(profileEditForm, getStoredMemberProfile());
+        if (profileEditModal) profileEditModal.hidden = false;
+        if (profileEditForm && profileEditForm.elements.firstName) profileEditForm.elements.firstName.focus();
+      }
+
+      function closeProfileEditModal() {
+        if (profileEditModal) profileEditModal.hidden = true;
+      }
+
+      async function saveRosterValues(email, values) {
+        var firebaseAuth = window.utlFirebaseAuth;
+        if (!firebaseAuth || !firebaseAuth.saveUserRosterProfile) {
+          throw new Error('Profile tools are still loading. Please try again.');
+        }
+        return firebaseAuth.saveUserRosterProfile(email, values);
+      }
+
+      async function handleFirebaseAuthenticatedUser(context) {
+        var firebaseAuth = window.utlFirebaseAuth;
+        if (!context || !context.user || !context.user.email || !firebaseAuth || !firebaseAuth.getUserRosterProfile) return;
+        var roster = await firebaseAuth.getUserRosterProfile(context.user.email);
+        if (!roster || roster.onboardingCompleted !== true) {
+          openOnboardingModal(context, roster);
+          return;
+        }
+        grantMemberAccess(profileFromAuthAndRoster(context.user, context.member, roster, context.fallbackEmail));
+      }
+
       function syncFirebaseAuthProfile() {
         var firebaseAuth = window.utlFirebaseAuth;
         if (firebaseProfileListenerStarted || !firebaseAuth || !firebaseAuth.auth || !firebaseAuth.onAuthStateChanged) return;
         firebaseProfileListenerStarted = true;
         firebaseAuth.onAuthStateChanged(firebaseAuth.auth, function (user) {
           if (user && localStorage.getItem(SESSION_KEY) === 'true') {
-            saveMemberProfile(profileFromFirebaseUser(user, localStorage.getItem('utl_member_username') || 'Member'));
+            var currentProfile = getStoredMemberProfile();
+            var firebaseProfile = profileFromFirebaseUser(user, localStorage.getItem('utl_member_username') || 'Member');
+            saveMemberProfile(Object.assign({}, firebaseProfile, currentProfile, {
+              email: firebaseProfile.email || currentProfile.email,
+              photoURL: firebaseProfile.photoURL || currentProfile.photoURL
+            }));
           }
         });
       }
@@ -2932,6 +3638,9 @@
         if (memberTopbar) memberTopbar.classList.remove('hidden');
         loginCard.classList.remove('hidden');
         if (memberIdentity) memberIdentity.hidden = true;
+        closeProfileDropdown();
+        closeOnboardingModal();
+        closeProfileEditModal();
         usernameInput.value = '';
         input.value = '';
         usernameInput.focus();
@@ -2945,8 +3654,20 @@
       }
 
       window.utlGrantMemberAccess = grantMemberAccess;
+      window.utlHandleFirebaseAuthenticatedUser = handleFirebaseAuthenticatedUser;
       window.addEventListener('utlEmailLinkSignInComplete', function (event) {
         grantMemberAccess(event.detail || 'Member');
+      });
+      window.addEventListener('utlFirebaseAuthenticated', function (event) {
+        handleFirebaseAuthenticatedUser(event.detail).catch(function (error) {
+          console.error('Firebase authenticated user handling failed.', error);
+          message.textContent = error.message || 'Profile setup did not work.';
+        });
+      });
+
+      window.addEventListener('utlAuthError', function (event) {
+        message.textContent = event.detail || 'That sign-in attempt did not work.';
+        showLogin();
       });
 
       function matchesLocalTestAccount(username, password) {
@@ -2964,15 +3685,103 @@
       initPhaseTwoExerciseToggles();
       initPhaseThreeExerciseToggles();
 
+      if (memberAvatar) {
+        memberAvatar.addEventListener('click', function (event) {
+          event.stopPropagation();
+          if (!profileDropdown) return;
+          if (profileDropdown.hidden) openProfileDropdown();
+          else closeProfileDropdown();
+        });
+      }
+
+      if (editProfileButton) {
+        editProfileButton.addEventListener('click', openProfileEditModal);
+      }
+
+      document.addEventListener('click', function (event) {
+        if (!profileDropdown || profileDropdown.hidden) return;
+        if (memberIdentity && memberIdentity.contains(event.target)) return;
+        closeProfileDropdown();
+      });
+
+      if (onboardingForm) {
+        onboardingForm.addEventListener('submit', async function (event) {
+          event.preventDefault();
+          if (!pendingAuthContext || !pendingAuthContext.user || !pendingAuthContext.user.email) return;
+          var submitButton = onboardingForm.querySelector('[type="submit"]');
+          var values = formValues(onboardingForm, true);
+          if (onboardingMessage) onboardingMessage.textContent = '';
+          if (submitButton) {
+            submitButton.disabled = true;
+            submitButton.textContent = 'Saving...';
+          }
+          try {
+            var savedRoster = await saveRosterValues(pendingAuthContext.user.email, values);
+            closeOnboardingModal();
+            grantMemberAccess(profileFromAuthAndRoster(pendingAuthContext.user, pendingAuthContext.member, savedRoster, pendingAuthContext.fallbackEmail));
+            pendingAuthContext = null;
+          } catch (error) {
+            if (onboardingMessage) onboardingMessage.textContent = error.message || 'Profile setup did not work.';
+          } finally {
+            if (submitButton) {
+              submitButton.disabled = false;
+              submitButton.textContent = 'Enter workspace';
+            }
+          }
+        });
+      }
+
+      if (profileEditForm) {
+        profileEditForm.addEventListener('submit', async function (event) {
+          event.preventDefault();
+          var currentProfile = getStoredMemberProfile();
+          if (!currentProfile.email) return;
+          var submitButton = profileEditForm.querySelector('[type="submit"]');
+          var values = formValues(profileEditForm, false);
+          if (profileEditMessage) profileEditMessage.textContent = '';
+          if (submitButton) {
+            submitButton.disabled = true;
+            submitButton.textContent = 'Saving...';
+          }
+          try {
+            var savedRoster = await saveRosterValues(currentProfile.email, Object.assign({}, values, {
+              substackOptIn: currentProfile.substackOptIn
+            }));
+            saveMemberProfile(Object.assign({}, currentProfile, savedRoster));
+            closeProfileEditModal();
+            closeProfileDropdown();
+          } catch (error) {
+            if (profileEditMessage) profileEditMessage.textContent = error.message || 'Profile update did not work.';
+          } finally {
+            if (submitButton) {
+              submitButton.disabled = false;
+              submitButton.textContent = 'Save profile';
+            }
+          }
+        });
+      }
+
+      if (profileEditCancel) {
+        profileEditCancel.addEventListener('click', closeProfileEditModal);
+      }
+
       googleSignInButton.addEventListener('click', async function () {
         var firebaseAuth = window.utlFirebaseAuth;
         if (!firebaseAuth || !firebaseAuth.signInWithGoogle) return;
 
         try {
           var credential = await firebaseAuth.signInWithGoogle();
-          grantMemberAccess(profileFromFirebaseUser(credential.user, 'google-user'));
+          var member = await firebaseAuth.requireAuthorizedMember(credential.user);
+          await handleFirebaseAuthenticatedUser({
+            user: credential.user,
+            member: member,
+            fallbackEmail: 'google-user'
+          });
         } catch (error) {
           console.error('Google sign-in failed.', error);
+          message.textContent = error.message === 'This Google account does not have an active membership invite.'
+            ? 'This Google account does not have an active membership invite.'
+            : 'Google sign-in did not work.';
         }
       });
 
@@ -2985,7 +3794,8 @@
         if (matchesLocalTestAccount(username, password)) {
           grantMemberAccess({
             displayName: username,
-            email: username
+            email: username,
+            role: username === 'admin' ? 'admin' : 'member'
           });
           return;
         }
@@ -2993,7 +3803,12 @@
         if (firebaseAuth && firebaseAuth.auth && firebaseAuth.signInWithEmailAndPassword) {
           try {
             var credential = await firebaseAuth.signInWithEmailAndPassword(firebaseAuth.auth, username, password);
-            grantMemberAccess(profileFromFirebaseUser(credential.user, username));
+            var member = await firebaseAuth.requireAuthorizedMember(credential.user);
+            await handleFirebaseAuthenticatedUser({
+              user: credential.user,
+              member: member,
+              fallbackEmail: username
+            });
             return;
           } catch (error) {
             console.warn('Firebase member login failed.', error);
@@ -3013,6 +3828,7 @@
         localStorage.removeItem(SESSION_KEY);
         localStorage.removeItem('utl_member_username');
         localStorage.removeItem('utl_member_profile');
+        localStorage.removeItem('utl_admin_auth');
         showLogin();
       };
 
@@ -3024,6 +3840,9 @@
       window.addEventListener('storage', function (event) {
         if (event.key === 'utl_admin_preview_bypass' || event.key === 'utl_admin_auth' || event.key === 'utl_phase2_status' || event.key === 'utl_phase3_status') {
           applyPhaseVisibility();
+        }
+        if (event.key === 'utl_tsa_status') {
+          setTsaStatus(storedValue('utl_tsa_status', 'live'));
         }
       });
     })();

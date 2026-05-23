@@ -2959,7 +2959,12 @@ footer p {
   margin-bottom: 16px !important;
 }
 
-/* === MOBILE RESPONSIVE — May 2026 === */
+.member-workspace-page .phase-section,
+.member-workspace-page .hub-section {
+  scroll-margin-top: 64px;
+}
+
+/* === MEMBER WORKSPACE MOBILE — May 2026 === */
 @media (max-width: 768px) {
   body.member-workspace-page {
     overflow-x: hidden;
@@ -2970,17 +2975,152 @@ footer p {
     padding-left: 16px;
   }
 
+  .member-workspace-page .topbar {
+    min-height: 48px;
+    padding-top: 0;
+    padding-bottom: 12px;
+  }
+
+  .member-workspace-page .logo {
+    width: auto;
+    height: 30px;
+  }
+
+  .member-workspace-page .home-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
+    font-size: 14px;
+  }
+
+  .member-workspace-page .identity-avatar {
+    background: #EEA320;
+    color: #003366;
+    border-color: rgba(238, 163, 32, .78);
+  }
+
+  .member-workspace-page .identity-user-status {
+    color: #EEA320;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: .1em;
+  }
+
+  .member-workspace-page .profile-dropdown {
+    right: 0;
+    width: min(320px, calc(100vw - 32px));
+    padding: 16px;
+    border-top: 4px solid #EEA320;
+    border-radius: 8px;
+  }
+
+  .member-workspace-page .profile-dropdown-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    line-height: 1.05;
+  }
+
+  .member-workspace-page .profile-dropdown-meta {
+    font-size: 13px;
+    line-height: 1.4;
+  }
+
+  .member-workspace-page .profile-dropdown-action {
+    min-height: 40px;
+    padding: 9px 12px;
+    border: 1px solid rgba(0, 51, 102, .28);
+    border-radius: 7px;
+    text-align: center;
+    text-decoration: none;
+  }
+
+  .member-workspace-page .profile-dropdown-logout {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 40px;
+    margin-top: 10px;
+    padding: 9px 12px;
+    border: 1px solid rgba(74, 74, 74, .22);
+    border-radius: 7px;
+    color: #4A4A4A;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+  }
+
   .member-workspace-page .dashboard {
+    overflow-x: hidden;
+    overflow-y: visible;
+    padding-top: 16px;
     padding-right: 16px;
     padding-left: 16px;
   }
 
-  .member-workspace-page .member-nav {
+  .member-workspace-page .member-identity-bar {
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 12px;
     margin-right: -16px;
     margin-left: -16px;
+    padding: 8px 16px;
+  }
+
+  .member-workspace-page .identity-label {
+    line-height: 1.15;
+  }
+
+  .member-workspace-page .member-identity-left {
+    order: 1;
+  }
+
+  .member-workspace-page .member-identity-right {
+    order: 2;
+    margin-left: auto;
+  }
+
+  .member-workspace-page .dashboard-header {
+    gap: 6px;
+    padding: 12px 0 16px;
+  }
+
+  .member-workspace-page .dashboard-header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 26px !important;
+    line-height: 1.05;
+  }
+
+  .member-workspace-page .dashboard-header p {
+    margin: 0;
+    font-family: 'Lato', sans-serif;
+    font-size: 16px;
+    line-height: 1.45;
+  }
+
+  .member-workspace-page .mission-card {
+    width: 100%;
+    margin-top: 12px;
+    padding: 12px 16px;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .member-workspace-page .member-nav {
+    order: 3;
+    flex-basis: 100%;
+    margin-right: 0;
+    margin-left: 0;
     overflow-x: auto;
     overflow-y: hidden;
+    white-space: nowrap;
+    scrollbar-width: none;
     -webkit-overflow-scrolling: touch;
+  }
+
+  .member-workspace-page .member-nav::-webkit-scrollbar {
+    display: none;
   }
 
   .member-workspace-page .member-nav-inner,
@@ -2998,97 +3138,166 @@ footer p {
     min-width: 100%;
     height: auto;
     min-height: 44px;
-    padding-right: 16px;
-    padding-left: 16px;
+    gap: 0;
+    padding-right: 0;
+    padding-left: 0;
   }
 
-  .member-workspace-page .nav-item,
-  .member-workspace-page .nav-logout {
+  .member-workspace-page .nav-item {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     min-height: 44px;
+    padding: 0 16px;
     font-size: 14px;
     white-space: nowrap;
   }
 
+  .member-workspace-page .nav-item.active {
+    border-bottom-color: #EEA320;
+  }
+
   .member-workspace-page .nav-workspace-label {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    font-family: 'Roboto Mono', monospace;
+    font-size: 11px;
+    flex-shrink: 0;
     white-space: nowrap;
+  }
+
+  .member-workspace-page .nav-divider,
+  .member-workspace-page .nav-sep {
+    flex-shrink: 0;
+  }
+
+  .member-workspace-page .nav-divider {
+    margin-right: 22px;
+    margin-left: 22px;
   }
 
   .member-workspace-page .phase-section,
   .member-workspace-page .hub-section {
+    gap: 12px;
+    padding-top: 20px;
     padding-right: 16px;
+    padding-bottom: 20px;
     padding-left: 16px;
   }
 
   .member-workspace-page .phase-heading .section-label,
   .member-workspace-page .section-header .section-label {
-    font-size: 11px !important;
+    font-family: 'Roboto Mono', monospace;
+    font-size: 10px !important;
     letter-spacing: .08em;
   }
 
   .member-workspace-page .phase-heading h2,
   .member-workspace-page .section-title {
     font-family: 'Playfair Display', serif;
-    font-size: 24px !important;
+    font-size: 20px !important;
+    line-height: 1.12;
+  }
+
+  .member-workspace-page .phase-stack {
+    gap: 0;
+    margin-top: 14px;
+  }
+
+  .member-workspace-page .phase-chunk {
+    gap: 8px;
+    margin-top: 6px;
   }
 
   .member-workspace-page .slides-bar,
   .member-workspace-page .ws-context-accordion {
     width: 100%;
     min-height: 44px;
+    align-items: center;
+    padding: 10px 16px;
     font-size: 14px;
   }
 
   .member-workspace-page .ws-context-accordion .slides-bar-icon {
-    width: 28px;
-    height: 28px;
-    flex-basis: 28px;
+    width: 24px;
+    height: 24px;
+    flex-basis: 24px;
   }
 
   .member-workspace-page .ws-context-label {
+    font-family: 'Lato', sans-serif;
     font-size: 14px;
   }
 
-  .member-workspace-page .exercise-card {
-    width: 100%;
-    padding-right: 16px;
-    padding-left: 16px;
+  .member-workspace-page .ws-context-sub {
+    font-size: 12px;
   }
 
   .member-workspace-page .exercise-card-grid {
     width: 100%;
+    gap: 12px;
+  }
+
+  .member-workspace-page .exercise-card {
+    width: 100%;
+    min-height: 0;
+    gap: 12px;
+    padding: 16px;
+    border-radius: 8px;
   }
 
   .member-workspace-page .exercise-card .card-title {
     font-family: 'Playfair Display', serif;
-    font-size: max(22px, 1.375rem) !important;
+    font-size: 20px !important;
+    line-height: 1.1;
   }
 
   .member-workspace-page .exercise-card .card-time {
     font-family: 'Lato', sans-serif;
-    font-size: max(15px, .9375rem) !important;
+    font-size: 14px !important;
+    line-height: 1.4;
   }
 
   .member-workspace-page .exercise-card .card-type {
-    font-size: 11px;
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    font-family: 'Roboto Mono', monospace;
+    font-size: 10px;
+    line-height: 1.2;
+    white-space: nowrap;
+    letter-spacing: .06em;
+  }
+
+  .member-workspace-page .ws-step-circle {
+    width: 22px;
+    min-width: 22px;
+    height: 22px;
+  }
+
+  .member-workspace-page .ws-done-pill {
+    flex-shrink: 0;
   }
 
   .member-workspace-page .ws-open-tool,
   .member-workspace-page .ws-mark-done {
     width: 100%;
-    min-height: 44px;
+    min-height: 48px;
     font-size: 15px;
   }
 
   .member-workspace-page .ws-card-actions {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
+    grid-template-columns: 1fr;
+    gap: 8px;
+    margin-top: 8px;
   }
 
   .member-workspace-page .ws-lock-hint,
   .member-workspace-page .ws-is-locked .ws-lock-hint {
     font-size: 13px;
-    text-align: left;
+    color: #4A4A4A;
+    text-align: center;
   }
 }

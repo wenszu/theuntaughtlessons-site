@@ -720,12 +720,35 @@ Return your recommendations in a clean list format I can easily read and act on.
     function pauseTimer() { if (!timerRunning) return; timerElapsed = seconds(); timerRunning = false; renderTimer(); }
     function resetTimer() { timerStarted = false; timerRunning = false; timerElapsed = 0; renderTimer(); }
 
+    function saveBoardProgress() {
+      const payload = {
+        problem: $('problemText').value,
+        issueTree: $('treeText').value,
+        scqa: $('scqaText').value,
+        advisors: selectedPeople().map(person => ({
+          name: person.name,
+          lens: person.lens,
+          description: person.description
+        })),
+        orchestrator: orchestrator(),
+        organizedOutput: $('parsedOutput').textContent.trim(),
+        page: window.location.href
+      };
+      import('../../assets/firebase.js')
+        .then(({ saveUserProgress }) => saveUserProgress('advisory-board', 'Advisory Board with AI', payload))
+        .catch(error => console.warn('Firestore progress save failed.', error));
+    }
+
     document.querySelectorAll('[data-copy-target]').forEach(button => button.addEventListener('click', () => copyText($(button.dataset.copyTarget).value, button)));
     document.querySelectorAll('[data-next]').forEach(button => button.addEventListener('click', () => showScreen(currentScreen + 1)));
     $('copyAllBtn').addEventListener('click', event => { copyText(`Problem Statement\n${$('problemText').value}\n\nIssue Tree\n${$('treeText').value}\n\nSCQA\n${$('scqaText').value}`, event.target); showScreen(3); });
     $('buildPromptBtn').addEventListener('click', () => { $('boardError').classList.remove('ab-show'); if ($('buildPromptBtn').disabled) { $('boardError').classList.add('ab-show'); return; } $('modeAPrompt').value = buildModeA(); $('modeBPrompt').value = buildModeB(); showScreen(4); });
     $('organizeBtn').addEventListener('click', organizeOutput);
-    $('saveBoardBtn').addEventListener('click', event => { localStorage.setItem('utl-advisory-board-default', JSON.stringify({ advisors: [...selectedAdvisors], orchestrator: orchestratorId })); copyText('Board saved', event.target); });
+    $('saveBoardBtn').addEventListener('click', event => {
+      localStorage.setItem('utl-advisory-board-default', JSON.stringify({ advisors: [...selectedAdvisors], orchestrator: orchestratorId }));
+      saveBoardProgress();
+      copyText('Board saved', event.target);
+    });
     $('newBoardBtn').addEventListener('click', () => { selectedAdvisors.clear(); orchestratorId = ''; renderBoard(); showScreen(3); });
     $('timerPauseIconBtn').addEventListener('click', pauseTimer);
     $('timerPlayIconBtn').addEventListener('click', () => timerStarted ? startTimer() : startTimer());
