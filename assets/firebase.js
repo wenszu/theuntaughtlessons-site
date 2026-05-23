@@ -27,16 +27,17 @@ import {
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: 'AIzaSyAqM97wUydwu2QVUZGMbH4NWcUTEr62JQc',
-  authDomain: 'the-untaught-lessons.firebaseapp.com',
-  projectId: 'the-untaught-lessons',
-  storageBucket: 'the-untaught-lessons.firebasestorage.app',
-  messagingSenderId: '429241278717',
-  appId: '1:429241278717:web:f69fc7add8f47ba579de94',
-  measurementId: 'G-F7C8J1LHR7'
+  apiKey: "AIzaSyAqM97wUydwu2QVUZGMbH4NWcUTEr62JQc",
+  authDomain: "the-untaught-lessons.firebaseapp.com",
+  projectId: "the-untaught-lessons",
+  storageBucket: "the-untaught-lessons.firebasestorage.app",
+  messagingSenderId: "429241278717",
+  appId: "1:429241278717:web:f69fc7add8f47ba579de94",
+  measurementId: "G-F7C8J1LHR7"
 };
 
 let firebaseInitError = null;
+let authPersistenceReady = Promise.resolve();
 
 const actionCodeSettings = {
   url: "http://localhost:8061/member-login/",
@@ -59,7 +60,6 @@ function requireFirestore() {
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const authPersistenceReady = setPersistence(auth, browserLocalPersistence);
 const provider = new GoogleAuthProvider();
 const db = getFirestore(app);
 
@@ -81,15 +81,13 @@ async function getGoogleRedirectResult() {
 
 window.addEventListener("load", async () => {
   try {
+    authPersistenceReady = setPersistence(auth, browserLocalPersistence);
     await authPersistenceReady;
 
     const googleButton = document.getElementById("google-signin-btn") || document.querySelector(".google-login-button");
-    if (googleButton && !googleButton.dataset.firebaseGoogleBound) {
-      googleButton.dataset.firebaseGoogleBound = "true";
+    if (googleButton) {
       googleButton.addEventListener("click", (event) => {
         event.preventDefault();
-        googleButton.disabled = true;
-        googleButton.textContent = "Redirecting to Google...";
         signInWithRedirect(auth, provider);
       });
     }
