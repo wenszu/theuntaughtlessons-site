@@ -1302,6 +1302,9 @@ Return only JSON with C1, C4, C5, C6, C7, C8, msg1, msg2, msg3, feedback, and co
       };
       sessionStorage.setItem(SPEAK_SCORE_KEY, JSON.stringify(result));
       localStorage.setItem(SPEAK_SCORE_KEY, JSON.stringify(result));
+      import('../../assets/firebase.js')
+        .then(({ saveUserProgress }) => saveUserProgress(SPEAK_SCORE_KEY, `TSA Speak Concisely (${versionLabel})`, result))
+        .catch((error) => console.warn('Firestore progress save failed.', error));
       showScore(result);
     }
 

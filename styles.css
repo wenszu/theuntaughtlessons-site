@@ -2958,3 +2958,137 @@ footer p {
   background-color: #EEA320 !important;
   margin-bottom: 16px !important;
 }
+
+/* === MOBILE RESPONSIVE — May 2026 === */
+@media (max-width: 768px) {
+  body.member-workspace-page {
+    overflow-x: hidden;
+  }
+
+  .member-workspace-page .page {
+    padding-right: 16px;
+    padding-left: 16px;
+  }
+
+  .member-workspace-page .dashboard {
+    padding-right: 16px;
+    padding-left: 16px;
+  }
+
+  .member-workspace-page .member-nav {
+    margin-right: -16px;
+    margin-left: -16px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .member-workspace-page .member-nav-inner,
+  .member-workspace-page .nav-links,
+  .member-workspace-page .nav-phase-links,
+  .member-workspace-page .nav-utility-links {
+    display: flex;
+    align-items: center;
+    flex-wrap: nowrap;
+    white-space: nowrap;
+  }
+
+  .member-workspace-page .member-nav-inner {
+    width: max-content;
+    min-width: 100%;
+    height: auto;
+    min-height: 44px;
+    padding-right: 16px;
+    padding-left: 16px;
+  }
+
+  .member-workspace-page .nav-item,
+  .member-workspace-page .nav-logout {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    font-size: 14px;
+    white-space: nowrap;
+  }
+
+  .member-workspace-page .nav-workspace-label {
+    white-space: nowrap;
+  }
+
+  .member-workspace-page .phase-section,
+  .member-workspace-page .hub-section {
+    padding-right: 16px;
+    padding-left: 16px;
+  }
+
+  .member-workspace-page .phase-heading .section-label,
+  .member-workspace-page .section-header .section-label {
+    font-size: 11px !important;
+    letter-spacing: .08em;
+  }
+
+  .member-workspace-page .phase-heading h2,
+  .member-workspace-page .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 24px !important;
+  }
+
+  .member-workspace-page .slides-bar,
+  .member-workspace-page .ws-context-accordion {
+    width: 100%;
+    min-height: 44px;
+    font-size: 14px;
+  }
+
+  .member-workspace-page .ws-context-accordion .slides-bar-icon {
+    width: 28px;
+    height: 28px;
+    flex-basis: 28px;
+  }
+
+  .member-workspace-page .ws-context-label {
+    font-size: 14px;
+  }
+
+  .member-workspace-page .exercise-card {
+    width: 100%;
+    padding-right: 16px;
+    padding-left: 16px;
+  }
+
+  .member-workspace-page .exercise-card-grid {
+    width: 100%;
+  }
+
+  .member-workspace-page .exercise-card .card-title {
+    font-family: 'Playfair Display', serif;
+    font-size: max(22px, 1.375rem) !important;
+  }
+
+  .member-workspace-page .exercise-card .card-time {
+    font-family: 'Lato', sans-serif;
+    font-size: max(15px, .9375rem) !important;
+  }
+
+  .member-workspace-page .exercise-card .card-type {
+    font-size: 11px;
+  }
+
+  .member-workspace-page .ws-open-tool,
+  .member-workspace-page .ws-mark-done {
+    width: 100%;
+    min-height: 44px;
+    font-size: 15px;
+  }
+
+  .member-workspace-page .ws-card-actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
+  }
+
+  .member-workspace-page .ws-lock-hint,
+  .member-workspace-page .ws-is-locked .ws-lock-hint {
+    font-size: 13px;
+    text-align: left;
+  }
+}

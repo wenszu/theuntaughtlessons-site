@@ -956,6 +956,115 @@
         display: block;
       }
     }
+
+    /* === MOBILE RESPONSIVE — May 2026 === */
+    @media (max-width: 768px) {
+      body {
+        overflow-x: hidden;
+      }
+
+      .app-header {
+        display: flex;
+        align-items: center;
+        gap: 10px 12px;
+        padding: 10px 16px;
+        flex-wrap: wrap;
+      }
+
+      .app-logo-frame {
+        width: 140px;
+        min-width: 140px;
+        height: 32px;
+      }
+
+      .brand-divider {
+        display: none;
+      }
+
+      .app-kicker {
+        font-size: 9px;
+        line-height: 1.2;
+      }
+
+      .app-title {
+        font-size: 21px;
+        line-height: 1.1;
+      }
+
+      .app-timer {
+        margin-left: auto;
+        justify-content: flex-end;
+        gap: 6px;
+        flex-wrap: wrap;
+      }
+
+      .utility-metric {
+        min-height: 44px;
+      }
+
+      .metric-hide-btn,
+      .icon-timer-btn {
+        width: 44px;
+        min-width: 44px;
+        height: 44px;
+        min-height: 44px;
+      }
+
+      .page {
+        padding-right: 16px;
+        padding-left: 16px;
+      }
+
+      .mode-switch {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        width: 100%;
+      }
+
+      .mode-btn {
+        min-height: 44px;
+        font-size: 15px;
+      }
+
+      .response-area,
+      .section-response,
+      .section-title {
+        width: 100%;
+        font-size: 15px;
+      }
+
+      .response-area,
+      .section-response {
+        min-height: 120px;
+      }
+
+      .buttons {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 160px), 1fr));
+      }
+
+      button,
+      .buttons button {
+        min-height: 44px;
+        font-size: 15px;
+      }
+
+      .score-panel,
+      .checklist-panel,
+      .comparison-panel,
+      .attempts-panel,
+      .recent-attempts,
+      .word-count,
+      .review-area {
+        width: 100%;
+        font-size: 14px;
+      }
+
+      .score-row {
+        grid-template-columns: 1fr;
+        font-size: 14px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -1241,6 +1350,9 @@
         response: responseObj
       };
       localStorage.setItem('utl_result_' + appId, JSON.stringify(record));
+      import('../../assets/firebase.js')
+        .then(({ saveUserProgress }) => saveUserProgress(appId, exerciseName, record))
+        .catch((error) => console.warn('Firestore progress save failed.', error));
     }
 
     function completionSaveNotice() {

@@ -1130,6 +1130,9 @@
       };
       sessionStorage.setItem(SORT_SCORE_KEY, JSON.stringify(storagePayload));
       localStorage.setItem(SORT_SCORE_KEY, JSON.stringify(storagePayload));
+      import('../../assets/firebase.js')
+        .then(({ saveUserProgress }) => saveUserProgress(SORT_SCORE_KEY, `TSA Sort & Bucket (${assessmentMode})`, storagePayload))
+        .catch((error) => console.warn('Firestore progress save failed.', error));
 
       renderShell(`
         <section class="tsa-diag-score-card">

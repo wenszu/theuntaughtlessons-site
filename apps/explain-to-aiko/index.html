@@ -855,6 +855,9 @@ Best, Yutee Elle`;
             console.warn('Submission failed.', error);
           } finally {
             localStorage.setItem('utl_result_explain_to_aiko', JSON.stringify(payload));
+            import('../../assets/firebase.js')
+              .then(({ saveUserProgress }) => saveUserProgress('explain-to-aiko-120', 'Explain to Aiko (120s)', payload))
+              .catch((error) => console.warn('Firestore progress save failed.', error));
             submit.textContent = 'Submitted';
             status.textContent = 'Saved.';
           }

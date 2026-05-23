@@ -1259,6 +1259,9 @@
         response: responseObj
       };
       localStorage.setItem('utl_result_' + appId, JSON.stringify(record));
+      import('../../assets/firebase.js')
+        .then(({ saveUserProgress }) => saveUserProgress(appId, exerciseName, record))
+        .catch((error) => console.warn('Firestore progress save failed.', error));
     }
 
     function completionSaveNotice() {
