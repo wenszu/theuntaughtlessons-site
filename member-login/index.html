@@ -1905,7 +1905,7 @@
               </button>
             </div>
             <button class="primary-button" id="authSubmitButton" type="submit">Open member tools</button>
-            <button class="google-button" id="googleSignInButton" type="button">Sign in with Google</button>
+            <button class="google-button google-login-button" id="google-signin-btn" type="button">Sign in with Google</button>
             <p id="loginMessage" class="message" aria-live="polite"></p>
           </form>
         </article>
@@ -2590,7 +2590,7 @@
       var authTitle = document.getElementById('authTitle');
       var authIntro = document.getElementById('authIntro');
       var authSubmitButton = document.getElementById('authSubmitButton');
-      var googleSignInButton = document.getElementById('googleSignInButton');
+      var googleSignInButton = document.getElementById('google-signin-btn');
       var usernameInput = document.getElementById('usernameInput');
       var input = document.getElementById('passwordInput');
       var message = document.getElementById('loginMessage');
@@ -3753,7 +3753,7 @@
       }
 
       onLoginWindowLoad(function () {
-        googleSignInButton = document.getElementById('googleSignInButton');
+        googleSignInButton = document.getElementById('google-signin-btn');
         refreshGoogleSignInButton();
         window.addEventListener('utlFirebaseAuthReady', refreshGoogleSignInButton);
         window.setTimeout(function () {
@@ -3781,30 +3781,6 @@
           });
         }
 
-        googleSignInButton.addEventListener('click', async function () {
-          var originalText = googleSignInButton.textContent;
-          var firebaseAuth = firebaseAuthReady() ? window.utlFirebaseAuth : null;
-          message.textContent = '';
-
-          if (!firebaseAuth) {
-            refreshGoogleSignInButton();
-            message.textContent = 'Google sign-in is still loading. Please refresh and try again.';
-            return;
-          }
-
-          googleSignInButton.disabled = true;
-          googleSignInButton.textContent = 'Redirecting to Google...';
-
-          try {
-            await firebaseAuth.signInWithGoogle();
-          } catch (error) {
-            console.error('Google sign-in failed.', error);
-            message.textContent = googleSignInMessage(error);
-          } finally {
-            googleSignInButton.disabled = false;
-            googleSignInButton.textContent = originalText;
-          }
-        });
       });
 
       function matchesLocalTestAccount(username, password) {
