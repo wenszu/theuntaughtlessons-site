@@ -992,6 +992,57 @@
         grid-template-columns: 1fr;
       }
     }
+
+    /* FIX 1 — Collapsible sections */
+    .admin-section-head { display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
+    .section-toggle-btn { flex-shrink:0; width:28px; height:28px; border:1px solid rgba(0,51,102,.18); border-radius:6px; background:transparent; color:var(--navy); cursor:pointer; font-size:20px; font-weight:700; line-height:1; display:inline-flex; align-items:center; justify-content:center; margin-top:4px; transition:background .15s; }
+    .section-toggle-btn:hover { background:rgba(0,51,102,.06); }
+    .section-body { overflow:hidden; max-height:0; transition:max-height .35s ease; }
+    .section-body.is-open { max-height:9999px; }
+
+    /* FIX 2 — Quick links groups */
+    .ql-group { margin-top:10px; }
+    .ql-group + .ql-group { margin-top:8px; padding-top:8px; border-top:1px solid var(--line); }
+    .ql-group-label { display:block; margin-bottom:2px; padding:0 10px; color:var(--gold); font-family:'Roboto Mono',monospace; font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; }
+
+    /* FIX 3 — Structured sync check */
+    .sync-result-row { display:grid; grid-template-columns:1fr auto auto; gap:10px; align-items:center; padding:9px 12px; border:1px solid var(--line); border-radius:7px; background:var(--white); font-size:12px; }
+    .sync-result-name { color:var(--navy); font-weight:700; }
+    .sync-badge { display:inline-flex; align-items:center; justify-content:center; min-width:56px; padding:3px 8px; border-radius:999px; font-family:'Roboto Mono',monospace; font-size:10px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; }
+    .sync-badge-pass { background:#e8f5ed; color:var(--green); }
+    .sync-badge-fail { background:#fdecea; color:#8A1F1F; }
+    .sync-badge-missing { background:#f0f0f0; color:#777; }
+    .sync-fix-btn { background:transparent; border:0; padding:0; color:var(--gold); font-size:11px; font-family:'Roboto Mono',monospace; font-weight:700; text-decoration:underline; cursor:pointer; }
+    .sync-summary-bar { margin-bottom:12px; padding:10px 14px; border-radius:7px; background:var(--navy); color:var(--white); font-family:'Roboto Mono',monospace; font-size:12px; font-weight:700; }
+
+    /* FIX 4 — Embed URL format validation */
+    .url-fmt-warn { display:none; margin-top:5px; color:var(--gold); font-size:12px; font-weight:700; line-height:1.45; }
+    .url-fmt-warn.is-visible { display:block; }
+    .url-fmt-ok { display:none; margin-top:5px; color:var(--green); font-size:12px; font-weight:700; }
+    .url-fmt-ok.is-visible { display:block; }
+
+    /* FIX 5 — Save confirmation toast */
+    #adminToast { position:fixed; bottom:24px; right:24px; z-index:999; min-width:120px; padding:11px 18px; border-radius:8px; background:var(--green); color:#fff; font-family:'Roboto Mono',monospace; font-size:12px; font-weight:700; letter-spacing:.04em; box-shadow:0 4px 20px rgba(0,0,0,.18); opacity:0; transform:translateY(8px); transition:opacity .2s ease,transform .2s ease; pointer-events:none; }
+    #adminToast.is-visible { opacity:1; transform:translateY(0); }
+    #adminToast.is-error { background:#8A1F1F; }
+
+    /* FIX 6 — Password cards */
+    .password-card { margin-top:14px; padding:16px; border:1px solid #E0D8CC; border-radius:8px; background:var(--white); }
+    .admin-pw-warning { display:flex; gap:9px; align-items:flex-start; margin-bottom:12px; padding:10px 12px; background:#fff8e1; border-radius:6px; color:var(--charcoal); font-family:'Roboto Mono',monospace; font-size:12px; line-height:1.5; }
+
+    /* FIX 7 — Lesson video empty state */
+    .phase-layout-row.has-empty-video { border-left:3px solid var(--gold); }
+    .no-video-note { margin-top:3px; color:var(--gold); font-family:'Roboto Mono',monospace; font-size:10px; font-weight:700; opacity:.8; }
+
+    /* FIX 8 — Invite log */
+    .invite-log { margin-top:16px; }
+    .invite-log-head { margin:0 0 8px; color:var(--navy); font-family:'Roboto Mono',monospace; font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; }
+    .invite-log-table { width:100%; border-collapse:collapse; font-size:12px; }
+    .invite-log-table th { padding:6px 10px; background:var(--navy); color:rgba(255,255,255,.8); font-family:'Roboto Mono',monospace; font-size:10px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; text-align:left; }
+    .invite-log-table td { padding:7px 10px; border-bottom:1px solid var(--line); color:var(--charcoal); }
+    .invite-log-table tr:nth-child(even) td { background:var(--cream); }
+    .invite-log-table tr:nth-child(odd) td { background:var(--white); }
+    .invite-log-none { margin:6px 0 0; color:#888; font-size:12px; }
   </style>
 </head>
 <body>
@@ -1200,6 +1251,7 @@
           </div>
           <p class="invite-status" id="inviteStatus" aria-live="polite"></p>
         </div>
+        <div id="inviteLog" class="invite-log"></div>
       </section>
 
       <section class="admin-section" id="section-passwords">
@@ -1238,6 +1290,99 @@
     const AUTH_KEY = 'utl_admin_auth';
     const PASSWORD_KEY = 'utl_admin_password';
     const DEFAULT_ADMIN_PASSWORD = 'utl2026_admin';
+
+    // FIX 8 — Invite log
+    const inviteSessionLog = [];
+
+    // FIX 5 — Toast
+    let toastTimer = null;
+    function showToast(message, type) {
+      let toast = document.getElementById('adminToast');
+      if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'adminToast';
+        document.body.appendChild(toast);
+      }
+      toast.textContent = message;
+      toast.className = type === 'error' ? 'is-error' : '';
+      void toast.offsetWidth;
+      toast.classList.add('is-visible');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove('is-visible'), 2000);
+    }
+
+    // FIX 1 & 3 — Shared helper: open and scroll to a section
+    function openAndScrollToSection(id) {
+      const section = document.getElementById(id);
+      if (!section) return;
+      const body = section.querySelector('.section-body');
+      const btn = section.querySelector('.section-toggle-btn');
+      if (body && !body.classList.contains('is-open')) {
+        body.classList.add('is-open');
+        if (btn) btn.textContent = '−';
+        try {
+          const states = JSON.parse(localStorage.getItem('utl_admin_section_states') || '{}');
+          states[id] = true;
+          localStorage.setItem('utl_admin_section_states', JSON.stringify(states));
+        } catch (e) {}
+      }
+      section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // FIX 4 — Embed URL validation
+    function validateEmbedUrl(input, warnEl, okEl) {
+      const val = input.value.trim();
+      if (!val || !val.includes('drive.google.com')) {
+        warnEl.classList.remove('is-visible');
+        okEl.classList.remove('is-visible');
+        return;
+      }
+      if (val.includes('/preview')) {
+        warnEl.classList.remove('is-visible');
+        okEl.classList.add('is-visible');
+      } else if (/\/view|\/open|drive_copy/.test(val)) {
+        warnEl.classList.add('is-visible');
+        okEl.classList.remove('is-visible');
+      } else {
+        warnEl.classList.remove('is-visible');
+        okEl.classList.remove('is-visible');
+      }
+    }
+
+    function bindEmbedUrlValidation(container) {
+      const input = container.querySelector('input[data-field="url"], .embed-controls input[type="url"]');
+      if (!input || input.dataset.embedValidBound === 'true') return;
+      input.dataset.embedValidBound = 'true';
+      const warnEl = document.createElement('div');
+      warnEl.className = 'url-fmt-warn';
+      warnEl.textContent = '⚠️ This URL format may not embed correctly. Use the /preview format instead: https://drive.google.com/file/d/FILE_ID/preview';
+      const okEl = document.createElement('div');
+      okEl.className = 'url-fmt-ok';
+      okEl.textContent = '✓ URL uses /preview format';
+      input.after(warnEl);
+      warnEl.after(okEl);
+      input.addEventListener('input', () => validateEmbedUrl(input, warnEl, okEl));
+      validateEmbedUrl(input, warnEl, okEl);
+    }
+
+    // FIX 8 — Invite log functions
+    function logInvite(email) {
+      const now = new Date();
+      const time = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+      inviteSessionLog.unshift({ email, time });
+      if (inviteSessionLog.length > 10) inviteSessionLog.pop();
+      renderInviteLog();
+    }
+
+    function renderInviteLog() {
+      const container = document.getElementById('inviteLog');
+      if (!container) return;
+      if (!inviteSessionLog.length) {
+        container.innerHTML = '<p class="invite-log-none">No invites sent this session.</p>';
+        return;
+      }
+      container.innerHTML = `<p class="invite-log-head">Invites sent this session</p><table class="invite-log-table"><thead><tr><th>Email</th><th>Time</th></tr></thead><tbody>${inviteSessionLog.map(e => `<tr><td>${escapeHtml(e.email)}</td><td>${e.time}</td></tr>`).join('')}</tbody></table>`;
+    }
 
     const gate = document.getElementById('adminGate');
     const app = document.getElementById('adminApp');
@@ -1576,6 +1721,7 @@
     function showSaved(target) {
       target.classList.add('is-visible');
       window.setTimeout(() => target.classList.remove('is-visible'), 1500);
+      showToast('Saved');
     }
 
     function showAdmin() {
@@ -1623,6 +1769,7 @@
         await firebaseAuth.sendSignInInvite(normalizedEmail);
         inviteEmail.value = '';
         setInviteStatus("⚡ Success! Invite link sent to the user's inbox.", 'success');
+        logInvite(normalizedEmail);
       } catch (error) {
         const detail = error && error.message ? error.message : 'Unknown error';
         setInviteStatus(`Invite failed: ${detail}`, 'error');
@@ -1782,8 +1929,11 @@
       const orderedLessons = lessonOrderForPhase(phaseId, phase.lessons);
       return `
         <div class="phase-layout-videos" data-lesson-layout="${phaseId}">
-          ${orderedLessons.map((lesson, index) => `
-            <div class="phase-layout-row is-video" data-learning-video="utl_url_${lesson.id}" data-lesson-id="${lesson.id}" data-index="${index}">
+          ${orderedLessons.map((lesson, index) => {
+            const videoVal = learningVideoValue(`utl_url_${lesson.id}`, lesson.videoUrl || '');
+            const isEmpty = !videoVal;
+            return `
+            <div class="phase-layout-row is-video${isEmpty ? ' has-empty-video' : ''}" data-learning-video="utl_url_${lesson.id}" data-lesson-id="${lesson.id}" data-index="${index}">
               <span class="phase-layout-handle" draggable="true" title="Drag to reorder" aria-label="Drag to reorder">⠿</span>
               <div class="phase-layout-content">
                 <div class="phase-layout-top">
@@ -1797,7 +1947,7 @@
                   </div>
                   <div class="phase-layout-field">
                     <label>Video URL</label>
-                    <input type="url" value="${escapeHtml(learningVideoValue(`utl_url_${lesson.id}`, lesson.videoUrl || ''))}" placeholder="Paste Google Drive or Vimeo URL">
+                    <input type="url" value="${escapeHtml(videoVal)}" placeholder="Paste Google Drive or Vimeo URL">${isEmpty ? '<span class="no-video-note">No video saved</span>' : ''}
                   </div>
                   <div class="phase-layout-field">
                     <label>&nbsp;</label>
@@ -1807,7 +1957,7 @@
                 </div>
               </div>
             </div>
-          `).join('')}
+          `}).join('')}
         </div>
       `;
     }
@@ -1967,6 +2117,7 @@
           status.textContent = payload.url ? 'Embed saved' : 'No embed set';
           showSaved(saved);
         });
+        bindEmbedUrlValidation(block);
         target.appendChild(block);
       });
     }
@@ -2049,6 +2200,7 @@
             </div>
           `;
           list.appendChild(row);
+          if (item.kind === 'context') bindEmbedUrlValidation(row);
         });
 
         list.addEventListener('change', (event) => {
@@ -2148,10 +2300,10 @@
     async function appPathStatus(path) {
       if (!path) return 'ok';
       try {
-        const response = await fetch(path, { cache: 'no-store' });
-        return response.ok ? 'ok' : 'warn';
+        const response = await fetch(path, { method: 'HEAD', cache: 'no-store' });
+        return response.ok ? 'ok' : 'fail';
       } catch (error) {
-        return 'warn';
+        return 'fail';
       }
     }
 
@@ -2161,49 +2313,91 @@
       const runButton = document.getElementById('runSyncCheck');
       const rerunButton = document.getElementById('rerunSyncCheck');
       const hideButton = document.getElementById('hideSyncCheck');
-      output.innerHTML = syncItem('warn', 'Running sync check...');
-      summary.textContent = '';
+      output.innerHTML = '<div class="sync-item"><span class="sync-state-warn">⚠</span><span>Running sync check...</span></div>';
+      summary.innerHTML = '';
       runButton.hidden = true;
       rerunButton.hidden = true;
       hideButton.hidden = true;
-      let html = '';
-      try {
-        const response = await fetch('../member-login/index.html', { cache: 'no-store' });
-        html = await response.text();
-      } catch (error) {
-        output.innerHTML = syncItem('bad', 'Could not read member-login/index.html for sync check.');
-        summary.textContent = 'Sync check could not run.';
-        rerunButton.hidden = false;
-        hideButton.hidden = false;
-        return;
+
+      const resultRows = [];
+      let passCount = 0;
+      let failCount = 0;
+      let missingCount = 0;
+
+      function addRow(name, status, sectionId) {
+        if (status === 'pass') passCount++;
+        else if (status === 'fail') failCount++;
+        else missingCount++;
+        const badgeClass = status === 'pass' ? 'sync-badge-pass' : status === 'fail' ? 'sync-badge-fail' : 'sync-badge-missing';
+        const badgeText = status === 'pass' ? 'Pass' : status === 'fail' ? 'Fail' : 'Missing';
+        const fixBtn = sectionId ? `<button class="sync-fix-btn" type="button" data-fix-section="${escapeHtml(sectionId)}">Fix →</button>` : '<span></span>';
+        resultRows.push(`<div class="sync-result-row"><span class="sync-result-name">${escapeHtml(name)}</span><span class="sync-badge ${badgeClass}">${badgeText}</span>${fixBtn}</div>`);
       }
 
-      const rows = [];
-      const counts = { ok: 0, warn: 0, bad: 0 };
-      function add(state, text) {
-        counts[state] += 1;
-        rows.push(syncItem(state, text));
+      // 1. Lesson video URLs
+      const content = window.UTL_CONTENT;
+      if (content) {
+        ['phase1', 'phase2', 'phase3'].forEach((phaseId) => {
+          const phase = content[phaseId];
+          if (!phase || !Array.isArray(phase.lessons)) return;
+          phase.lessons.forEach((lesson) => {
+            const url = localStorage.getItem('utl_url_' + lesson.id) || lesson.videoUrl || '';
+            let status;
+            if (!url) status = 'missing';
+            else if (url.includes('/preview')) status = 'pass';
+            else status = 'fail';
+            addRow(`Video: ${lesson.title}`, status, 'section-' + phaseId);
+          });
+        });
       }
 
-      EXPECTED_EMBEDS.forEach(([, key, label]) => {
-        add(html.includes(`data-embed-key="${key}"`) ? 'ok' : 'bad', `Context accordion: ${label} (${key})`);
-        add(html.includes(key) ? 'ok' : 'bad', `Embed key in member hub logic: ${key}`);
+      // 2. Context embed URLs
+      ['orientation', 'phase1', 'phase2', 'phase3'].forEach((phaseId) => {
+        const layout = readPhaseLayout(phaseId);
+        layout.filter(item => item.kind === 'context').forEach((item) => {
+          const url = item.url || '';
+          let status;
+          if (!url) status = 'missing';
+          else if (url.includes('/preview') || url.includes('docs.google.com/presentation')) status = 'pass';
+          else if (/\/view|\/open|drive_copy/.test(url)) status = 'fail';
+          else status = 'missing';
+          addRow(`Embed: ${item.label}`, status, 'section-' + phaseId);
+        });
       });
 
-      for (const [title, path, key] of EXPECTED_EXERCISES) {
-        add(html.includes(`<div class="card-title">${title}</div>`) ? 'ok' : 'bad', `Exercise title: ${title}`);
-        if (path) {
-          const found = html.includes(`href="${path}"`);
-          const pathState = found ? await appPathStatus(path) : 'bad';
-          add(found && pathState === 'ok' ? 'ok' : found ? 'warn' : 'bad', `Open tool path: ${title} → ${path}`);
-        }
-        if (key) {
-          add(html.includes(key) ? 'ok' : 'bad', `Completion localStorage key: ${key}`);
-        }
+      // 3. App IDs
+      ['phase1', 'phase2', 'phase3'].forEach((phaseId) => {
+        const layout = readPhaseLayout(phaseId);
+        layout.filter(item => item.kind === 'app').forEach((item) => {
+          const valid = /^utl_app_p[1-3]_\d+$/.test(item.key);
+          addRow(`App ID: ${item.key}`, valid ? 'pass' : 'fail', 'section-' + phaseId);
+        });
+      });
+
+      // 4. Quick link reachability
+      const quickPaths = [
+        ['member-login/index.html', '../member-login/index.html'],
+        ['my-results/index.html', '../my-results/index.html'],
+        ['apps/grocery-list/index.html', '../apps/grocery-list/index.html'],
+        ['apps/messy-notes/index.html', '../apps/messy-notes/index.html'],
+        ['apps/issue-tree-builder/index.html', '../apps/issue-tree-builder/index.html'],
+        ['apps/scqa-builder/index.html', '../apps/scqa-builder/index.html'],
+        ['apps/eisenhower-matrix/index.html', '../apps/eisenhower-matrix/index.html'],
+        ['apps/i-have-bad-news/index.html', '../apps/i-have-bad-news/index.html']
+      ];
+      for (const [label, path] of quickPaths) {
+        const status = await appPathStatus(path);
+        addRow(`Link: ${label}`, status === 'ok' ? 'pass' : 'fail', 'section-links');
       }
 
-      output.innerHTML = rows.join('');
-      summary.textContent = `Sync check complete: ${counts.ok} matched, ${counts.warn} warnings, ${counts.bad} missing.`;
+      // 5. Apps Script URL
+      const scriptUrl = localStorage.getItem('utl_send_instructor_url');
+      addRow('Apps Script URL', scriptUrl ? 'pass' : 'missing', 'section-send-instructor');
+
+      const total = passCount + failCount + missingCount;
+      summary.innerHTML = `<div class="sync-summary-bar">${passCount} of ${total} checks passed — ${failCount} failed, ${missingCount} missing</div>`;
+      output.innerHTML = `<div class="sync-list">${resultRows.join('')}</div>`;
+
       rerunButton.hidden = false;
       hideButton.hidden = false;
     }
@@ -2288,6 +2482,23 @@
       `;
     }
 
+    // FIX 6 — Wrap password cards
+    function wrapPasswordCards() {
+      document.querySelectorAll('.password-block').forEach((block) => {
+        if (block.parentElement.classList.contains('password-card')) return;
+        const card = document.createElement('div');
+        card.className = 'password-card';
+        block.parentNode.insertBefore(card, block);
+        card.appendChild(block);
+        if (block.dataset.key === 'utl_admin_password') {
+          const warning = document.createElement('div');
+          warning.className = 'admin-pw-warning';
+          warning.innerHTML = '<span>⚠️</span><span>Keep this password private. If you lose it, you will need to edit admin/index.html directly to regain access.</span>';
+          card.insertBefore(warning, block);
+        }
+      });
+    }
+
     function renderPasswordBlocks() {
       document.querySelectorAll('.password-block').forEach((block) => {
         const key = block.dataset.key;
@@ -2358,12 +2569,103 @@
         ["Let's Switch Hats", '../apps/lets-switch-hats/index.html'],
         ['Speak Like Obama', '../apps/speak-like-obama/index.html']
       ];
-      document.getElementById('quickLinks').innerHTML = links.map(([name, path]) => `
-        <a class="quick-link" href="${path}" target="_blank">
-          <span><span class="quick-link-name">${name}</span><span class="quick-link-path">${path}</span></span>
-          <span aria-hidden="true">→</span>
-        </a>
+      const linkMap = Object.fromEntries(links.map(([name, path]) => [name, path]));
+      const groups = [
+        { label: 'Site', names: ['Member hub', 'Member hub — admin mode', 'My results'] },
+        { label: 'Assessments', names: ['Diagnostic hub', 'Checkpoint hub', 'Diagnostic — Sort & Bucket', 'Checkpoint — Sort & Bucket', 'Diagnostic — Spot the Problem', 'Checkpoint — Spot the Problem', 'Diagnostic — Speak Concisely', 'Checkpoint — Speak Concisely', 'Act Confidently placeholder'] },
+        { label: 'Phase 1 Apps', names: ['Grocery List', "Manager's messy notes", 'Rushed voice memo', 'Rushed voice memo — AI', 'Chalkboard notes'] },
+        { label: 'Phase 2 Apps', names: ['Issue tree builder', 'SCQA builder'] },
+        { label: 'Phase 3 Apps', names: ['The Art of Saying No', 'I Have Bad News...', "Let's Switch Hats", 'Speak Like Obama'] }
+      ];
+      function linkHtml(name) {
+        const path = linkMap[name];
+        if (!path) return '';
+        return `<a class="quick-link" href="${path}" target="_blank"><span><span class="quick-link-name">${escapeHtml(name)}</span><span class="quick-link-path">${escapeHtml(path)}</span></span><span aria-hidden="true">→</span></a>`;
+      }
+      document.getElementById('quickLinks').innerHTML = groups.map(group => `
+        <div class="ql-group">
+          <span class="ql-group-label">${escapeHtml(group.label)}</span>
+          ${group.names.map(linkHtml).join('')}
+        </div>
       `).join('');
+    }
+
+    // FIX 1 — Collapsible sections
+    function initCollapsibleSections() {
+      let savedStates = {};
+      try {
+        savedStates = JSON.parse(localStorage.getItem('utl_admin_section_states') || '{}');
+      } catch (e) {}
+
+      const activeNavItem = document.querySelector('.admin-nav-item.active');
+      const defaultOpenId = activeNavItem ? activeNavItem.dataset.target : 'section-mission';
+      const hasSavedStates = Object.keys(savedStates).length > 0;
+
+      document.querySelectorAll('.admin-section[id]').forEach((section) => {
+        const id = section.id;
+
+        // Build head container
+        const head = document.createElement('div');
+        head.className = 'admin-section-head';
+
+        // Move section-label and h2 into head
+        const labelEl = section.querySelector(':scope > .section-label');
+        const h2El = section.querySelector(':scope > h2');
+        const headContent = document.createElement('div');
+        if (labelEl) headContent.appendChild(labelEl);
+        if (h2El) headContent.appendChild(h2El);
+        head.appendChild(headContent);
+
+        // Toggle button
+        const btn = document.createElement('button');
+        btn.className = 'section-toggle-btn';
+        btn.type = 'button';
+        btn.setAttribute('aria-label', 'Toggle section');
+        head.appendChild(btn);
+
+        section.insertBefore(head, section.firstChild);
+
+        // Wrap remaining children in section-body
+        const body = document.createElement('div');
+        body.className = 'section-body';
+        // Collect all direct children after head
+        const children = Array.from(section.children).filter(c => c !== head);
+        children.forEach(c => body.appendChild(c));
+        section.appendChild(body);
+
+        // Determine open state
+        let isOpen;
+        if (hasSavedStates) {
+          isOpen = savedStates[id] !== false && savedStates[id] !== undefined ? Boolean(savedStates[id]) : false;
+          if (!(id in savedStates)) isOpen = (id === defaultOpenId);
+        } else {
+          isOpen = (id === defaultOpenId);
+        }
+
+        if (isOpen) {
+          body.classList.add('is-open');
+          btn.textContent = '−';
+        } else {
+          btn.textContent = '+';
+        }
+
+        btn.addEventListener('click', () => {
+          const open = body.classList.toggle('is-open');
+          btn.textContent = open ? '−' : '+';
+          try {
+            const states = JSON.parse(localStorage.getItem('utl_admin_section_states') || '{}');
+            states[id] = open;
+            localStorage.setItem('utl_admin_section_states', JSON.stringify(states));
+          } catch (e) {}
+        });
+      });
+
+      // Add nav click listeners that open+scroll before the existing scroll listener
+      document.querySelectorAll('.admin-nav-item').forEach((item) => {
+        item.addEventListener('click', () => {
+          openAndScrollToSection(item.dataset.target);
+        });
+      });
     }
 
     function initNav() {
@@ -2413,6 +2715,17 @@
     renderQuickLinks();
     renderVisibilityStatus();
     initNav();
+    wrapPasswordCards();
+    initCollapsibleSections();
+    renderInviteLog();
+    window.setTimeout(runSyncCheck, 400);
+
+    // Persistent event delegation for Fix → buttons in sync results
+    document.getElementById('syncCheckResults')?.addEventListener('click', (event) => {
+      const btn = event.target.closest('.sync-fix-btn');
+      if (!btn) return;
+      openAndScrollToSection(btn.dataset.fixSection);
+    });
 
     document.getElementById('runSyncCheck')?.addEventListener('click', runSyncCheck);
     document.getElementById('rerunSyncCheck')?.addEventListener('click', runSyncCheck);
