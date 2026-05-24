@@ -1,11 +1,55 @@
 # The Untaught Lessons Website Context
 
-Last updated: 2026-05-18
+Last updated: 2026-05-24
 Primary purpose: Living implementation and design reference for The Untaught Lessons static website and practice apps.
 
 Use this file when referencing the site with other tools. It should be updated whenever pages, apps, visual rules, navigation, routing, forms, or core functionality change.
 
 ## Change Log
+
+### 2026-05-24
+
+- Rebuilt `member-login/index.html` as the new member learning journey dashboard instead of the previous flat tool list.
+- Added `member-login/content-config.js` as the member workspace source of truth for orientation video defaults, phase lesson video slots, exercise context URLs, progress keys, shared workspace nav, shared `.ws-` scoped styles, and admin/localStorage overrides.
+- Added dedicated member workspace pages:
+  - `member-login/orientation.html`
+  - `member-login/phase-1.html`
+  - `member-login/phase-2.html`
+  - `member-login/phase-3.html`
+  - `admin/index.html`
+- Added the new sticky member workspace nav across the new member pages with UTL white logo, phase links, My Results, Toolkit, user label, gold avatar, active gold underline, and phase done checkmarks.
+- Preserved the existing local member gate pattern using `utl_member_unlocked` and the hardcoded test accounts `admin/password123` and `testuser/member2026`.
+- Added phase-based progression:
+  - Phase 1 is always accessible.
+  - Phase 2 unlocks when all Phase 1 exercises are marked done.
+  - Phase 3 unlocks when all Phase 2 exercises are marked done.
+  - Unlock state is stored with `utl_p1_done`, `utl_p2_done`, and `utl_p3_done`.
+- Added lesson watch state using `utl_watched_{lessonId}` and `utl_p{N}_videos_done`; exercise cards remain visible but dimmed until all lessons in that phase are watched.
+- Added exercise visit and completion state using `utl_visited_{exerciseId}` and `utl_done_{exerciseId}`. Exercise cards mark visits before navigating to existing app URLs under `apps/`.
+- Added `admin/index.html` as the active localStorage content manager for lesson video URLs, orientation video URL, exercise context media URLs, exercise context types, and Phase 2 / Phase 3 visibility toggles. Admin overrides use `utl_url_{lessonId}`, `utl_ctx_url_{exerciseId}`, `utl_ctx_type_{exerciseId}`, `utl_phase2_status`, and `utl_phase3_status`.
+- Deprecated `member-login/admin.html`; it now redirects to `admin/index.html`.
+- Added member profile dropdown behavior to the new workspace nav, including the profile label, admin link, member workspace link, and Log out action.
+- Updated phase pages so exercise context blocks remain visible even while practice cards are locked until lessons are watched. Added manual Mark all watched and Reset watched controls for testing the watch/practice transition.
+- Restored the original `admin/index.html` admin console design as the canonical admin surface. Added a Learning videos section there for Orientation and Phase 1 / 2 / 3 lesson URL controls while keeping `member-login/admin.html` as a redirect only.
+- Linked the new Phase 2 / Phase 3 workspace unlock behavior to the existing admin visibility keys (`utl_phase2_status`, `utl_phase3_status`) so those checkboxes now govern whether unlocked phases can appear.
+- Updated new phase exercise sections to match the earlier member workspace pattern: beige context accordion rows with plus/minus controls, expandable embedded context media, large white practice cards, green completion outlines, and `Open tool` / `Mark as done` or `Click to undo` actions.
+- Added small checked circles and green outlines for watched lesson tiles and the active video player. Current lesson, Mark all watched, and Reset watched controls support manual testing of the watch flow.
+- Restored the quiet bottom Admin link on the new member dashboard pointing to `admin/index.html`; Log out now lives in the workspace profile dropdown.
+- Restored the full previous member sequence into `member-login/content-config.js`: Orientation context sections, six Phase 1 exercises, six Phase 2 exercises, four Phase 3 exercises, and the old `utl_embed_*` / `utl_p*_ex*_done` compatibility keys.
+- New phase pages now read legacy admin-saved context media from `utl_embed_*` JSON first, then fall back to built-in Google Drive / Google Slides defaults. Google Drive `open?id=` and Google Slides edit URLs are rewritten into embeddable iframe URLs at render time.
+- When all lesson videos in a phase are marked watched, the collapsed Watch section can now be expanded into a real rewatch player with the lesson rail still available.
+- Main phase lesson videos now include `Open in full screen` links, watched lessons can be toggled back to unwatched with `Click to unwatch`, and the collapsed Watch section chevron changes between expand and collapse states.
+- Moved lesson video URL controls out of the separate Learning videos admin section and into the Phase 1 / Phase 2 / Phase 3 admin sections as blue-tinted lesson video rows. Orientation remains context-only with no standalone lesson video control.
+- Member workspace phase visibility now treats `utl_phase2_status` and `utl_phase3_status` as direct show/hide gates for the new phase pages and nav links. `utl_tsa_status` now controls whether the Assessments link appears in the member workspace nav and whether the dashboard renders the Assessments section.
+- Simplified the phase lesson player controls by removing the Mark as Watched / Mark all watched / Reset watched action row. Learners now toggle watched state only from the small check circle on each lesson tile. Main and rewatch players show a direct `Open in a new screen` link when a lesson URL exists.
+- Removed the standalone video player from `member-login/orientation.html`; Orientation is now context-only.
+- Improved phase lesson player spacing: fullscreen links now sit in their own padded row, lesson rails have more top/bottom padding, lesson tiles have wider gaps and internal right padding, and rewatch panels include more breathing room around the player and tile rail.
+- Orientation now defaults `Your first day at MA` to expanded on first load while keeping `How this program works` collapsed.
+- Completed phase video sections now use a blue-tinted play icon plus the same gold +/- control style used by context accordions.
+- Admin lesson video rows now use the same six-dot drag handle as context/app rows, can be reordered within each phase, and save order to `utl_lesson_order_{phaseId}`. Phase pages read that saved order when rendering lesson videos.
+- Added additional spacing between each phase admin action row and the first lesson video box.
+- Updated the member workspace profile dropdown so Admin appears in its own `Admin access` section for admin users, separated from normal navigation and Log out. Logging out now clears the local admin access flag as well as the member session.
+- Left existing `apps/` practice files untouched. Phase pages link to existing app URLs from `content-config.js`.
 
 ### 2026-05-18
 
@@ -709,33 +753,110 @@ Purpose:
 
 ### `member-login/index.html`
 
-Member tools landing page.
+Member learning journey dashboard.
 
 Purpose:
 
-- Password-gated workspace for practice tools.
-- Structured member hub for orientation, the three workbook phases, and contextual TSA Score™ prompts.
+- Password-gated landing page for the member learning sequence.
+- Replaces the prior flat tool list with three phase cards and an overall progress bar.
 
 Current section order:
 
-- Orientation.
-- Phase 1, Think Clearly.
-- Phase 2, Speak Concisely.
-- Phase 3, Act Confidently.
-- Phase 3 checkpoint nudge.
-- Assessments, TSA Score™.
+- Login card when locked.
+- `Your Learning Journey` dashboard when unlocked.
+- Overall progress bar.
+- Phase 1, Think Clearly card.
+- Phase 2, Speak Concisely card.
+- Phase 3, Act Confidently card.
 
 Key functionality:
 
-- Slim navy identity bar.
-- Sticky section navigation for Orientation, Phase 1, Phase 2, Phase 3, Assessments, and My results.
-- MA mission card introducing Aiko Mori and the Chief of Staff role.
-- Context accordions for orientation and each workbook exercise.
-- Admin-controlled embed injection through `utl_embed_*` localStorage keys, supporting Google Slides and Google Drive video.
-- Automatic progressive phase gating for Phase 2 and Phase 3 based on exercise completion, with `?mode=admin` bypass.
-- Admin-controlled Assessments section live, placeholder, or hidden states.
-- Exercise cards for active apps and dimmed coming-soon cards for future exercises.
-- Footer links to My results and Admin.
+- Uses the existing local member gate pattern with `utl_member_unlocked`.
+- Hardcoded test accounts remain `admin/password123` and `testuser/member2026`.
+- Phase 1 is always accessible.
+- Phase 2 unlocks when Phase 1 exercises are complete.
+- Phase 3 unlocks when Phase 2 exercises are complete.
+- Dashboard progress reads lesson and exercise completion state from localStorage.
+- Links to `member-login/orientation.html`, `phase-1.html`, `phase-2.html`, `phase-3.html`, `my-results/index.html`, `apps/toolkit/index.html`, and `admin/index.html`.
+
+### `member-login/orientation.html`
+
+Orientation page for members.
+
+Purpose:
+
+- Introduces the MA storyline and member workspace flow before Phase 1.
+
+Key functionality:
+
+- Uses the shared member workspace nav from `member-login/content-config.js`.
+- Reads the orientation video URL from `utl_url_orientation`, falling back to `UTL_CONTENT.orientation.videoUrl`.
+- Shows a 16:9 video player when a URL exists and a branded coming-soon placeholder when empty.
+- Links forward to `member-login/phase-1.html`.
+
+### `member-login/phase-1.html`
+
+Phase page for Think Clearly.
+
+Purpose:
+
+- Hosts the Phase 1 watch-then-practice sequence.
+
+Key functionality:
+
+- Reads lesson and exercise data from `member-login/content-config.js`.
+- Tracks lesson watch state with `utl_watched_{lessonId}` and `utl_p1_videos_done`.
+- Keeps exercise context blocks visible while exercise cards remain locked until all Phase 1 videos are watched.
+- Includes manual Mark as Watched, Mark all watched, and Reset watched controls for testing.
+- Tracks exercise visits with `utl_visited_{exerciseId}` and completion with `utl_done_{exerciseId}`.
+- Sets `utl_p1_done` when all Phase 1 exercises are marked done.
+
+### `member-login/phase-2.html`
+
+Phase page for Speak Concisely.
+
+Purpose:
+
+- Hosts the Phase 2 watch-then-practice sequence.
+
+Key functionality:
+
+- Locked until `utl_p1_done` is true and `utl_phase2_status` is not `hide`.
+- Tracks lesson watch state with `utl_watched_{lessonId}` and `utl_p2_videos_done`.
+- Sets `utl_p2_done` when all Phase 2 exercises are marked done.
+
+### `member-login/phase-3.html`
+
+Phase page for Act Confidently.
+
+Purpose:
+
+- Hosts the Phase 3 watch-then-practice sequence.
+
+Key functionality:
+
+- Locked until `utl_p2_done` is true and `utl_phase3_status` is not `hide`.
+- Tracks lesson watch state with `utl_watched_{lessonId}` and `utl_p3_videos_done`.
+- Sets `utl_p3_done` when all Phase 3 exercises are marked done.
+- Final bottom navigation routes to `my-results/index.html` when complete.
+
+### `member-login/admin.html`
+
+Deprecated redirect.
+
+Purpose:
+
+- Redirects old member admin links to `../admin/index.html`.
+
+### `member-login/content-config.js`
+
+Member workspace configuration and renderer.
+
+Purpose:
+
+- Single source of truth for the new phase-based member workspace defaults.
+- Holds `UTL_CONTENT` with orientation, phase lessons, exercise context, and app links.
+- Provides shared `.ws-` scoped styles, shared member nav rendering, localStorage progress helpers, phase page rendering, and admin page rendering.
 
 ### `my-results/index.html`
 
@@ -773,18 +894,18 @@ Password localStorage key:
 
 Purpose:
 
-- Configure member hub visibility, per-accordion embeds, automatic phase gating visibility, result submission, and passwords without editing code.
+- Configure member workspace video URLs, context media URLs, and phase visibility without editing code.
 
 Key functionality:
 
 - Password-gated admin session stored under `utl_admin_auth`.
-- Toggle controls for mission card, Phase 1 availability, and TSA Score™ state.
-- Per-accordion embed controls for Orientation and phase context blocks, with Google Slides or Google Drive Video type selectors.
-- Site sync check for accordion IDs, exercise titles, app paths, localStorage keys, and embed keys, with Run, Rerun, Hide results, and summary count controls.
-- Visibility section showing Phase 1, Phase 2, Phase 3, and admin preview bypass status from the current localStorage completion state.
-- Password controls for member hub and admin access.
-- Send to instructor toggle and Apps Script endpoint URL input.
-- Quick links for validating My results and member apps in new tabs.
+- Uses the shared member workspace nav and `.ws-` scoped renderer from `member-login/content-config.js`.
+- Visibility checkboxes control whether Phase 2 and Phase 3 can appear when unlocked.
+- Orientation video URL saves under `utl_url_orientation`.
+- Lesson video URLs save under `utl_url_{lessonId}`.
+- Exercise context URLs save under `utl_ctx_url_{exerciseId}`.
+- Exercise context type overrides save under `utl_ctx_type_{exerciseId}`.
+- `Save all changes` writes all visible URL inputs to localStorage.
 
 ## LocalStorage Admin Keys
 
@@ -792,18 +913,24 @@ Key functionality:
 | --- | --- | --- | --- |
 | `utl_admin_auth` | — | `"true"` | Admin session |
 | `utl_admin_password` | `utl2026_admin` | any string | Admin password |
-| `utl_member_password` | hardcoded fallback | any string | Member password |
-| `utl_mission_card` | `show` | `show` / `hide` | MA mission card |
-| `utl_admin_preview_bypass` | `on` | `on` / `off` | Admin member hub preview link mode |
-| `utl_tsa_status` | `live` | `live` / `placeholder` / `hidden` | TSA Score section |
-| `utl_tsa_diagnostic_status` | `live` | `live` / `placeholder` / `hidden` | The Diagnostic card |
-| `utl_tsa_checkpoint_status` | `live` | `live` / `placeholder` / `hidden` | The Checkpoint card |
-| `utl_phase1_status` | `live` | `live` / `locked` | Phase 1 access |
+| `utl_member_unlocked` | — | `"true"` / `"false"` | Member workspace session gate |
+| `utl_member_username` | — | string | Current local member username/email label |
+| `utl_member_profile` | — | JSON object | Current local member profile label and role |
+| `utl_watched_{lessonId}` | — | `"true"` | Lesson watched state |
+| `utl_p1_videos_done` | — | `"true"` / `"false"` | Phase 1 lesson completion |
+| `utl_p2_videos_done` | — | `"true"` / `"false"` | Phase 2 lesson completion |
+| `utl_p3_videos_done` | — | `"true"` / `"false"` | Phase 3 lesson completion |
+| `utl_visited_{exerciseId}` | — | `"true"` | Exercise card has been clicked |
+| `utl_done_{exerciseId}` | — | `"true"` | Exercise manually marked done |
+| `utl_p1_done` | — | `"true"` / `"false"` | Phase 1 exercise completion and Phase 2 unlock |
+| `utl_p2_done` | — | `"true"` / `"false"` | Phase 2 exercise completion and Phase 3 unlock |
+| `utl_p3_done` | — | `"true"` / `"false"` | Phase 3 exercise completion |
+| `utl_url_orientation` | — | URL string | Orientation video URL override |
+| `utl_url_{lessonId}` | — | URL string | Lesson video URL override |
+| `utl_ctx_url_{exerciseId}` | — | URL string | Exercise context media URL override |
+| `utl_ctx_type_{exerciseId}` | — | `video` / `slides` / `text` | Exercise context type override |
 | `utl_send_instructor` | `hidden` | `live` / `hidden` | Send to instructor button |
 | `utl_send_instructor_url` | `""` | URL string | Apps Script endpoint |
-| `utl_embed_*` | — | JSON object `{ url, type }` | Per-accordion Google Slides or Drive video embed |
-| `utl_p1_ex[N]_done` | — | `"true"` | Phase 1 sequential exercise completion and Phase 2 visibility unlock |
-| `utl_p2_ex[N]_done` | — | `"true"` | Phase 2 sequential exercise completion and Phase 3 visibility unlock |
 | `utl_result_grocery-list` | — | JSON object | Grocery list result |
 | `utl_result_messy-notes` | — | JSON object | Messy notes result |
 | `utl_result_rushed-voice-memo` | — | JSON object | Rushed voice memo result |
@@ -1290,6 +1417,8 @@ Note:
 
 ## Known Notes
 
+- New member workspace video/context management is localStorage-only by design. Admin changes are per browser and do not publish to other visitors unless the defaults in `member-login/content-config.js` are updated in code.
+- New member workspace lesson `videoUrl` and exercise `contextUrl` defaults are intentionally empty until real URLs are added through the admin page or committed into `member-login/content-config.js`.
 - Google Sheet admin changes are pending Google Drive connector reconnection:
   - Rename sheet ID `10iQByFqVCffHanZbbHLnYj7Csbet4fgOCd2FWDzEqkE` to `[Website] UTL leads and assessments`.
   - Add an `Assessments` tab with columns `email`, `assessment_type`, `version`, `score`, `variation_id`, and `submitted_at`.
@@ -1405,8 +1534,8 @@ http://127.0.0.1:8061/
 
 Likely next work areas:
 
-- Build the TSA Diagnostic assessment.
-- Build the TSA Checkpoint assessment.
+- Add production lesson video URLs and context media URLs to `member-login/content-config.js` once the final assets are approved.
+- Decide whether member workspace admin URL changes should remain browser-local or move to a publishable static JSON/config workflow later.
 - Add actual scoring logic using the C³ Rubric™.
 - Decide whether TSA results are purely local or submitted somewhere.
 - Continue aligning all app headers and timers.
