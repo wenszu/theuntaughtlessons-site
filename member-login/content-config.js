@@ -1,6 +1,6 @@
 const UTL_CONTENT = {
   orientation: {
-    videoUrl: "",
+    videoUrl: "https://drive.google.com/open?id=19q9wU__985LRFgY_3uWawiAVJJOmhI9k&usp=drive_copy",
     contexts: [
       {
         id: "orientation-welcome",
@@ -24,11 +24,11 @@ const UTL_CONTENT = {
     title: "Think Clearly",
     description: "Build clean structure before you communicate. Watch the lessons, then practice turning messy inputs into clear thinking.",
     lessons: [
-      { id: "p1-l1", title: "KonMari for the Cluttered Mind", duration: "12 min", videoUrl: "" },
-      { id: "p1-l2", title: "Rule of Three", duration: "9 min", videoUrl: "" },
-      { id: "p1-l3", title: "Bolded Summary Phrase", duration: "11 min", videoUrl: "" },
-      { id: "p1-l4", title: "Wait, What's the Problem Again?", duration: "14 min", videoUrl: "" },
-      { id: "p1-l5", title: "Divide and Conquer", duration: "10 min", videoUrl: "" }
+      { id: "p1-l1", title: "KonMari for the Cluttered Mind", duration: "12 min", videoUrl: "https://drive.google.com/open?id=1JogKtDiCfhNjNckFLhOEJCCw7gh7eORq&usp=drive_copy" },
+      { id: "p1-l2", title: "Rule of Three", duration: "9 min", videoUrl: "https://drive.google.com/open?id=1fFBBPC0JbHf1IPeHIz_9yKrp173coxJM&usp=drive_copy" },
+      { id: "p1-l3", title: "Bolded Summary Phrase", duration: "11 min", videoUrl: "https://drive.google.com/open?id=1ZSKGHTUSZs2T3g3aTMgQ9fk9lHg_fN34&usp=drive_copy" },
+      { id: "p1-l4", title: "Wait, What's the Problem Again?", duration: "14 min", videoUrl: "https://drive.google.com/open?id=1b2nAA0d-Rq-jetDuRQeAusttazKQa-Si&usp=drive_copy" },
+      { id: "p1-l5", title: "Divide and Conquer", duration: "10 min", videoUrl: "https://drive.google.com/open?id=1hsdZTxdjNF2Yqsy9JRdC9jkc7wk5uGEO&usp=drive_copy" }
     ],
     exercises: [
       {
@@ -115,10 +115,10 @@ const UTL_CONTENT = {
     title: "Speak Concisely",
     description: "Move from structured thinking to sharp communication. Practice making the point first and making the logic easy to follow.",
     lessons: [
-      { id: "p2-l1", title: "The Executive Storyline", duration: "13 min", videoUrl: "" },
-      { id: "p2-l2", title: "Divide and Conquer", duration: "11 min", videoUrl: "" },
-      { id: "p2-l3", title: "The Art of Persuasion", duration: "14 min", videoUrl: "" },
-      { id: "p2-l4", title: "Bolded Summary Phrase (Advanced)", duration: "10 min", videoUrl: "" }
+      { id: "p2-l1", title: "The Executive Storyline", duration: "13 min", videoUrl: "https://drive.google.com/open?id=1BONR9sIQM-Mscia3ZaG-06lP6G2dTZP_&usp=drive_copy" },
+      { id: "p2-l2", title: "Divide and Conquer", duration: "11 min", videoUrl: "https://drive.google.com/open?id=1hsdZTxdjNF2Yqsy9JRdC9jkc7wk5uGEO&usp=drive_copy" },
+      { id: "p2-l3", title: "The Art of Persuasion", duration: "14 min", videoUrl: "https://drive.google.com/open?id=1Qxo0Mf_1I3_J_CLXf4CzKJvtZdxyz2kL&usp=drive_copy" },
+      { id: "p2-l4", title: "Bolded Summary Phrase (Advanced)", duration: "10 min", videoUrl: "https://drive.google.com/open?id=1ZSKGHTUSZs2T3g3aTMgQ9fk9lHg_fN34&usp=drive_copy" }
     ],
     introContexts: [
       {
@@ -215,11 +215,11 @@ const UTL_CONTENT = {
     title: "Act Confidently",
     description: "Practice judgment under pressure. Decide what matters, read the room, and speak with steadiness when the stakes rise.",
     lessons: [
-      { id: "p3-l1", title: "How to Read People", duration: "11 min", videoUrl: "" },
-      { id: "p3-l2", title: "Let's Switch Hats", duration: "9 min", videoUrl: "" },
-      { id: "p3-l3", title: "Speak Like Obama", duration: "13 min", videoUrl: "" },
-      { id: "p3-l4", title: "The Art of Saying No", duration: "10 min", videoUrl: "" },
-      { id: "p3-l5", title: "I Have Bad News...", duration: "12 min", videoUrl: "" }
+      { id: "p3-l1", title: "How to Read People", duration: "11 min", videoUrl: "https://drive.google.com/open?id=1YUxx3D7GsLXzKZLG4SlvNrk8jWVgvM0_&usp=drive_copy" },
+      { id: "p3-l2", title: "Let's Switch Hats", duration: "9 min", videoUrl: "https://drive.google.com/open?id=1h9r_4E7IkQ_aTKtHd3bl6IYHxF3dozhO&usp=drive_copy" },
+      { id: "p3-l3", title: "Speak Like Obama", duration: "13 min", videoUrl: "https://drive.google.com/open?id=1sYAwaMxQE85_rvxRMabJvDm5a3yjZ6oz&usp=drive_copy" },
+      { id: "p3-l4", title: "The Art of Saying No", duration: "10 min", videoUrl: "https://drive.google.com/open?id=1XCOBAWDlcTht8w_utWZKwkw8wfBO_gC5&usp=drive_copy" },
+      { id: "p3-l5", title: "I Have Bad News...", duration: "12 min", videoUrl: "https://drive.google.com/open?id=1RZxxq34xb3C6lpLxVYt5399a66ganrHG&usp=drive_copy" }
     ],
     introContexts: [
       {
@@ -503,11 +503,6 @@ const UTL_CONTENT = {
     return true;
   }
 
-  function phaseNavVisible(phaseKey) {
-    if (phaseKey === "phase1") return true;
-    return phaseUnlocked(phaseKey);
-  }
-
   function allPhaseProgress() {
     var total = 0;
     var done = 0;
@@ -637,8 +632,8 @@ const UTL_CONTENT = {
     var links = [
       { key: "home", label: "Home", href: memberHref("index.html") },
       { key: "phase1", label: "Phase 1", href: memberHref("phase-1.html"), dropdown: true },
-      { key: "phase2", label: "Phase 2", href: memberHref("phase-2.html"), dropdown: true, hidden: !phaseNavVisible("phase2") },
-      { key: "phase3", label: "Phase 3", href: memberHref("phase-3.html"), dropdown: true, hidden: !phaseNavVisible("phase3") },
+      { key: "phase2", label: "Phase 2", href: memberHref("phase-2.html"), dropdown: true },
+      { key: "phase3", label: "Phase 3", href: memberHref("phase-3.html"), dropdown: true },
       { key: "assessments", label: "Assessments", href: memberHref("index.html") + "#assessments", hidden: localStorage.getItem("utl_tsa_status") === "hidden" }
     ].filter(function (link) { return !link.hidden; });
     if (active === "admin") links.push({ key: "admin", label: "Admin", href: adminHref() });
