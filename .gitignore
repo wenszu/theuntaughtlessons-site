@@ -1,3 +1,6 @@
 visual/*.png
 visual/*.png
 visual/*.png
+.firebase/
+firebase-debug.log
+public/
