@@ -25,7 +25,24 @@
     "ignore": [
       "firebase.json",
       "**/.*",
-      "**/node_modules/**"
+      "**/node_modules/**",
+      ".git",
+      ".git/**",
+      ".firebase",
+      ".firebase/**",
+      ".claude",
+      ".claude/**",
+      "firestore.rules",
+      "firebase-debug.log",
+      "WEBSITE_CONTEXT.md",
+      "context",
+      "context/**",
+      "csv",
+      "csv/**",
+      "scripts",
+      "scripts/**",
+      "public",
+      "public/**"
     ],
     "headers": [
       {
