@@ -533,7 +533,7 @@ const UTL_CONTENT = {
       ".ws-links{display:flex;align-items:center;justify-content:center;gap:12px;min-width:0}.ws-link{min-height:54px;display:inline-flex;align-items:center;border-bottom:3px solid transparent;color:rgba(255,255,255,.68);font:700 10.5px 'Roboto Mono',monospace;letter-spacing:.08em;text-transform:uppercase;text-decoration:none;white-space:nowrap}.ws-link:hover,.ws-link.ws-active{color:var(--ws-white);border-bottom-color:var(--ws-gold)}.ws-sep{color:rgba(255,255,255,.32);font-family:'Roboto Mono',monospace}",
       ".ws-user{position:relative;display:flex;align-items:center;gap:10px;justify-content:flex-end}.ws-user-email{max-width:170px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:rgba(255,255,255,.68);font:700 10px 'Roboto Mono',monospace;letter-spacing:.06em}.ws-avatar{width:32px;height:32px;border-radius:999px;border:0;background:var(--ws-gold);color:var(--ws-navy);display:grid;place-items:center;font:700 12px 'Roboto Mono',monospace;cursor:pointer}.ws-profile-menu{position:absolute;right:0;top:44px;width:260px;background:#fff;color:var(--ws-charcoal);border:1px solid var(--ws-line);border-radius:10px;box-shadow:0 18px 40px rgba(0,51,102,.18);padding:14px;z-index:50}.ws-profile-menu[hidden]{display:none}.ws-profile-name{margin:0;color:var(--ws-navy);font-weight:700}.ws-profile-email{margin:3px 0 12px;color:var(--ws-steel);font-size:13px;word-break:break-word}.ws-profile-menu a,.ws-profile-menu button{width:100%;min-height:36px;display:flex;align-items:center;border:0;background:transparent;color:var(--ws-navy);font:700 12px Lato,sans-serif;text-align:left;text-decoration:none;cursor:pointer;padding:6px 0}.ws-profile-menu a:hover,.ws-profile-menu button:hover{text-decoration:underline}.ws-profile-divider{height:1px;background:var(--ws-line);margin:8px 0}.ws-profile-section{margin:10px 0;padding:10px 0;border-top:1px solid var(--ws-line);border-bottom:1px solid var(--ws-line)}.ws-profile-section-label{display:block;margin:0 0 7px;color:var(--ws-gold);font:700 10px 'Roboto Mono',monospace;letter-spacing:.09em;text-transform:uppercase}.ws-profile-menu .ws-admin-link{min-height:40px;padding:8px 10px;border-radius:8px;background:rgba(238,163,32,.14);color:var(--ws-navy)}.ws-profile-menu .ws-admin-link:hover{background:rgba(238,163,32,.22);text-decoration:none}.ws-profile-menu .ws-logout{color:#8A1F1F}",
       ".ws-main{padding:54px 0 72px}.ws-kicker{display:inline-flex;color:var(--ws-gold);font:700 11px 'Roboto Mono',monospace;letter-spacing:.1em;text-transform:uppercase}.ws-title{margin:10px 0 12px;color:var(--ws-navy);font:700 clamp(40px,6vw,66px)/.98 'Playfair Display',serif}.ws-subtitle{max-width:760px;margin:0;color:var(--ws-steel);font-size:18px;line-height:1.55}",
-      ".ws-login-wrap{min-height:calc(100vh - 54px);display:grid;place-items:center;padding:48px 20px}.ws-login-card{width:min(460px,100%);background:#fff;border:1px solid var(--ws-line);border-radius:12px;padding:30px;box-shadow:0 18px 45px rgba(0,51,102,.1)}.ws-form{display:grid;gap:12px;margin-top:24px}.ws-form label{color:var(--ws-navy);font-weight:700}.ws-input,.ws-textarea,.ws-select{width:100%;min-height:46px;border:1px solid rgba(0,51,102,.22);border-radius:8px;padding:10px 12px;background:#fff;color:var(--ws-charcoal);font:400 15px Lato,sans-serif}.ws-textarea{min-height:88px;resize:vertical}.ws-message{min-height:20px;margin:0;color:#8A1F1F;font-weight:700}.ws-message.ws-success{color:var(--ws-green)}",
+      ".ws-login-wrap{min-height:calc(100vh - 54px);display:grid;place-items:center;padding:48px 20px}.ws-login-card{width:min(460px,100%);background:#fff;border:1px solid var(--ws-line);border-radius:12px;padding:30px;box-shadow:0 18px 45px rgba(0,51,102,.1)}.ws-form{display:grid;gap:12px;margin-top:24px}.ws-form label{color:var(--ws-navy);font-weight:700}.ws-login-divider{display:flex;align-items:center;gap:12px;margin:18px 0 0;color:var(--ws-steel);font:700 10px 'Roboto Mono',monospace;letter-spacing:.08em;text-transform:uppercase}.ws-login-divider:before,.ws-login-divider:after{content:'';height:1px;background:var(--ws-line);flex:1}.ws-input,.ws-textarea,.ws-select{width:100%;min-height:46px;border:1px solid rgba(0,51,102,.22);border-radius:8px;padding:10px 12px;background:#fff;color:var(--ws-charcoal);font:400 15px Lato,sans-serif}.ws-textarea{min-height:88px;resize:vertical}.ws-message{min-height:20px;margin:0;color:#8A1F1F;font-weight:700}.ws-message.ws-success{color:var(--ws-green)}",
       ".ws-button{min-height:44px;border-radius:8px;border:1px solid var(--ws-gold);background:var(--ws-gold);color:var(--ws-navy);font:700 13px 'Roboto Mono',monospace;letter-spacing:.04em;text-transform:uppercase;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;padding:0 18px;cursor:pointer}.ws-button:hover{filter:brightness(.97)}.ws-button[disabled],.ws-button.ws-disabled{opacity:.45;cursor:not-allowed;filter:grayscale(.2)}.ws-button-secondary{background:#fff;border-color:rgba(0,51,102,.28);color:var(--ws-navy)}.ws-button-navy{background:var(--ws-navy);border-color:var(--ws-navy);color:#fff}",
       ".ws-progress-card{margin:34px 0 24px;background:#fff;border:1px solid var(--ws-line);border-radius:12px;padding:18px}.ws-progress-row{display:flex;justify-content:space-between;gap:16px;color:var(--ws-navy);font:700 11px 'Roboto Mono',monospace;letter-spacing:.08em;text-transform:uppercase}.ws-progress-track{height:12px;background:#EFE6D8;border-radius:999px;margin-top:12px;overflow:hidden}.ws-progress-fill{height:100%;background:linear-gradient(90deg,var(--ws-gold),#f4c15c);border-radius:999px}",
       ".ws-phase-list{display:grid;gap:18px}.ws-phase-card{position:relative;display:grid;grid-template-columns:8px 92px 1fr auto;align-items:center;gap:22px;min-height:178px;background:#fff;border:1px solid var(--ws-line);border-radius:12px;overflow:hidden;padding:22px 24px 22px 0;text-decoration:none;color:inherit;box-shadow:0 12px 28px rgba(0,51,102,.06)}.ws-phase-card.ws-locked{opacity:.72}.ws-phase-stripe{align-self:stretch;background:var(--ws-gold)}.ws-locked .ws-phase-stripe{background:#9AAFC3}.ws-phase-number{color:rgba(0,51,102,.08);font:700 74px/1 'Playfair Display',serif;text-align:center}.ws-phase-content h2{margin:6px 0;color:var(--ws-navy);font:700 34px/1.05 'Playfair Display',serif}.ws-phase-content p{margin:0;color:var(--ws-steel);line-height:1.45}.ws-trail{display:flex;align-items:center;gap:8px;margin-top:16px;color:var(--ws-navy);font:700 10px 'Roboto Mono',monospace;text-transform:uppercase;letter-spacing:.07em}.ws-dot{width:10px;height:10px;border-radius:99px;background:var(--ws-gold)}.ws-arrow{color:var(--ws-steel)}.ws-pill{display:inline-flex;align-items:center;border-radius:999px;padding:5px 9px;font:700 10px 'Roboto Mono',monospace;letter-spacing:.06em;text-transform:uppercase}.ws-pill-gold{background:rgba(238,163,32,.18);color:var(--ws-navy)}.ws-pill-muted{background:#E8EEF4;color:var(--ws-steel)}.ws-pill-green{background:rgba(44,122,75,.12);color:var(--ws-green)}.ws-phase-actions{display:grid;gap:10px;justify-items:end}",
@@ -635,14 +635,51 @@ const UTL_CONTENT = {
     message.textContent = "That password did not work.";
   }
 
+  async function handleGoogleLogin(button, message) {
+    if (!button || !message) return;
+    var originalText = button.textContent;
+    button.disabled = true;
+    button.textContent = "Connecting to Google...";
+    message.textContent = "";
+    message.classList.remove("ws-success");
+    try {
+      var firebaseAuth = await import("../assets/firebase.js");
+      var credential = await firebaseAuth.signInWithGooglePopup();
+      var member = await firebaseAuth.requireAuthorizedMember(credential.user);
+      var email = credential.user && credential.user.email ? String(credential.user.email).trim().toLowerCase() : "";
+      writeBool(SESSION_KEY, true);
+      localStorage.setItem(USER_KEY, email || "member");
+      localStorage.setItem(PROFILE_KEY, JSON.stringify({
+        email: email || "member",
+        displayName: credential.user && credential.user.displayName ? credential.user.displayName : email,
+        photoURL: credential.user && credential.user.photoURL ? credential.user.photoURL : "",
+        role: member && member.role ? member.role : "member"
+      }));
+      if (member && member.role === "admin") localStorage.setItem(ADMIN_KEY, "true");
+      else localStorage.removeItem(ADMIN_KEY);
+      message.classList.add("ws-success");
+      message.textContent = "Signed in. Opening your workspace...";
+      window.location.href = "index.html";
+    } catch (error) {
+      console.error("Google member login failed.", error);
+      message.textContent = error && error.message ? error.message : "Google sign-in did not work.";
+      button.disabled = false;
+      button.textContent = originalText;
+    }
+  }
+
   function renderIndex() {
     injectStyles();
     document.body.classList.add("ws-page");
     if (!isMemberUnlocked()) {
-      document.body.innerHTML = '<section class="ws-login-wrap"><article class="ws-login-card"><span class="ws-kicker">Member Login</span><h1 class="ws-title">Welcome back.</h1><p class="ws-subtitle">Enter your member credentials to open your Untaught Lessons workspace.</p><form class="ws-form" id="wsLoginForm"><label for="wsUsername">Username or email</label><input class="ws-input" id="wsUsername" autocomplete="username" required><label for="wsPassword">Password</label><input class="ws-input" id="wsPassword" type="password" autocomplete="current-password" required><button class="ws-button" type="submit">Open member workspace</button><p class="ws-message" id="wsLoginMessage" aria-live="polite"></p></form></article></section>';
+      document.body.innerHTML = '<section class="ws-login-wrap"><article class="ws-login-card"><span class="ws-kicker">Member Login</span><h1 class="ws-title">Welcome back.</h1><p class="ws-subtitle">Use Google sign-in or your backdoor member credentials to open your Untaught Lessons workspace.</p><button class="ws-button ws-button-navy" id="wsGoogleLogin" type="button">Sign in with Google</button><div class="ws-login-divider">Or</div><form class="ws-form" id="wsLoginForm"><label for="wsUsername">Username or email</label><input class="ws-input" id="wsUsername" autocomplete="username" required><label for="wsPassword">Password</label><input class="ws-input" id="wsPassword" type="password" autocomplete="current-password" required><button class="ws-button" type="submit">Open member workspace</button><p class="ws-message" id="wsLoginMessage" aria-live="polite"></p></form></article></section>';
       qs("#wsLoginForm").addEventListener("submit", function (event) {
         event.preventDefault();
         handleLogin(event.currentTarget, qs("#wsLoginMessage"));
+      });
+      qs("#wsGoogleLogin").addEventListener("click", function (event) {
+        event.preventDefault();
+        handleGoogleLogin(event.currentTarget, qs("#wsLoginMessage"));
       });
       return;
     }
