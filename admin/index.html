@@ -1574,6 +1574,9 @@
     }
 
     function showAdmin() {
+      localStorage.setItem('utl_member_unlocked', 'true');
+      localStorage.setItem('utl_member_username', 'admin');
+      localStorage.setItem('utl_member_profile', JSON.stringify({ email: 'admin', displayName: 'admin', role: 'admin' }));
       gate.style.display = 'none';
       app.classList.add('is-visible');
     }
@@ -2236,8 +2239,8 @@
       const p3Done = p3Keys.filter(isDone).length;
       const phase2Allowed = getValue('utl_phase2_status', 'show') === 'show';
       const phase3Allowed = getValue('utl_phase3_status', 'show') === 'show';
-      const phase2Live = phase2Allowed;
-      const phase3Live = phase3Allowed;
+      const phase2Live = phase2Allowed && p1Done === p1Keys.length;
+      const phase3Live = phase3Allowed && p2Done === p2Keys.length;
       const checkpointReady = phase3Live && p3Done === p3Keys.length;
       const bypassEnabled = getValue('utl_admin_preview_bypass', 'on') === 'on';
       updateMemberHubPreviewLink(bypassEnabled);
@@ -2259,12 +2262,12 @@
         </div>
         <div class="visibility-row">
           <span class="visibility-name">Phase 2</span>
-          <span>${phase2Allowed ? 'Phase 2 link and page are visible in the member workspace.' : 'Phase 2 is hidden by the Member Workspace checklist.'}</span>
+          <span>${phase2Allowed ? `${p1Done} of ${p1Keys.length} Phase 1 live exercises complete. Phase 2 appears after unlock.` : 'Phase 2 is hidden by the Member Workspace checklist.'}</span>
           <span class="visibility-badge ${phase2Live ? 'is-live' : ''}">${phase2Live ? 'Visible' : 'Hidden'}</span>
         </div>
         <div class="visibility-row">
           <span class="visibility-name">Phase 3</span>
-          <span>${phase3Allowed ? 'Phase 3 link and page are visible in the member workspace.' : 'Phase 3 is hidden by the Member Workspace checklist.'}</span>
+          <span>${phase3Allowed ? `${p2Done} of ${p2Keys.length} Phase 2 live exercises complete. Phase 3 appears after unlock.` : 'Phase 3 is hidden by the Member Workspace checklist.'}</span>
           <span class="visibility-badge ${phase3Live ? 'is-live' : ''}">${phase3Live ? 'Visible' : 'Hidden'}</span>
         </div>
         <div class="visibility-row">
@@ -2391,6 +2394,9 @@
     document.getElementById('logoutLink').addEventListener('click', (event) => {
       event.preventDefault();
       localStorage.removeItem(AUTH_KEY);
+      localStorage.removeItem('utl_member_unlocked');
+      localStorage.removeItem('utl_member_username');
+      localStorage.removeItem('utl_member_profile');
       window.location.reload();
     });
 

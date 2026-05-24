@@ -309,20 +309,42 @@ const UTL_CONTENT = {
     return /\/admin\/(?:index\.html)?$/.test(window.location.pathname);
   }
 
+  function inPhasePracticeRoot() {
+    return /\/member-login\/phase-1\/practice\/(?:index\.html)?$/.test(window.location.pathname);
+  }
+
+  function adminPreviewMode() {
+    var params = new URLSearchParams(window.location.search || "");
+    return params.get("mode") === "admin" && localStorage.getItem("utl_admin_preview_bypass") !== "off";
+  }
+
   function memberHref(file) {
+    if (inPhasePracticeRoot()) return "../../" + file;
+    return inAdminRoot() ? "../member-login/" + file : file;
+  }
+
+  function memberPath(file) {
     return inAdminRoot() ? "../member-login/" + file : file;
   }
 
   function appHref(path) {
+    if (inPhasePracticeRoot()) return "../../" + path.replace(/^\.\.\//, "../");
     return inAdminRoot() ? path.replace(/^\.\.\//, "../") : path;
   }
 
   function homeHref() {
+    if (inPhasePracticeRoot()) return "../../index.html";
     return inAdminRoot() ? "../index.html" : "../index.html";
   }
 
   function adminHref() {
+    if (inPhasePracticeRoot()) return "../../../admin/index.html";
     return inAdminRoot() ? "index.html" : "../admin/index.html";
+  }
+
+  function assetHref(path) {
+    if (inPhasePracticeRoot()) return "../../" + path;
+    return path;
   }
 
   function qs(selector, root) {
@@ -475,9 +497,15 @@ const UTL_CONTENT = {
 
   function phaseUnlocked(phaseKey) {
     if (phaseKey === "phase1") return true;
-    if (phaseKey === "phase2") return localStorage.getItem("utl_phase2_status") !== "hide";
-    if (phaseKey === "phase3") return localStorage.getItem("utl_phase3_status") !== "hide";
+    if (adminPreviewMode()) return localStorage.getItem("utl_" + phaseKey + "_status") !== "hide";
+    if (phaseKey === "phase2") return exercisesDone("phase1") && localStorage.getItem("utl_phase2_status") !== "hide";
+    if (phaseKey === "phase3") return exercisesDone("phase2") && localStorage.getItem("utl_phase3_status") !== "hide";
     return true;
+  }
+
+  function phaseNavVisible(phaseKey) {
+    if (phaseKey === "phase1") return true;
+    return phaseUnlocked(phaseKey);
   }
 
   function allPhaseProgress() {
@@ -492,6 +520,42 @@ const UTL_CONTENT = {
       }).length;
     });
     return { done: done, total: total, percent: total ? Math.round((done / total) * 100) : 0 };
+  }
+
+  function exerciseProgress() {
+    var total = 0;
+    var done = 0;
+    phases.forEach(function (phaseKey) {
+      var exercises = getPhase(phaseKey).exercises || [];
+      total += exercises.length;
+      done += exercises.filter(function (exercise) {
+        return exerciseDone(exercise);
+      }).length;
+    });
+    return { done: done, total: total, percent: total ? Math.round((done / total) * 100) : 0 };
+  }
+
+  function phaseStepState(phaseKey, type) {
+    var phase = getPhase(phaseKey);
+    if (type === "watch") {
+      var watched = watchedCount(phaseKey);
+      if (watched === 0) return "empty";
+      return watched === phase.lessons.length ? "solid" : "half";
+    }
+    var done = phase.exercises.filter(function (exercise) {
+      return exerciseDone(exercise);
+    }).length;
+    var visited = phase.exercises.some(function (exercise) {
+      return readBool(visitedKey(exercise.id));
+    });
+    if (done === 0 && !visited) return "empty";
+    return done === phase.exercises.length ? "solid" : "half";
+  }
+
+  function phaseStatus(phaseKey) {
+    if (!phaseUnlocked(phaseKey)) return "Locked";
+    if (phaseStepState(phaseKey, "watch") === "empty" && phaseStepState(phaseKey, "practice") === "empty") return "Not Started";
+    return "In Progress";
   }
 
   function sanitizeMediaUrl(url) {
@@ -532,14 +596,17 @@ const UTL_CONTENT = {
       ".ws-hidden{display:none}",
       ".ws-nav{position:sticky;top:0;z-index:30;background:var(--ws-navy);color:var(--ws-white);box-shadow:0 10px 28px rgba(0,51,102,.14)}",
       ".ws-nav-inner{height:54px;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:22px;width:min(1180px,calc(100% - 32px));margin:0 auto}",
-      ".ws-brand{display:flex;align-items:center;gap:14px;min-width:0}.ws-logo-link{display:flex;align-items:center;border-radius:6px}.ws-logo-link:hover,.ws-workspace-link:hover{background:rgba(238,163,32,.18)}.ws-logo{height:31px;width:auto;display:block}.ws-brand-sep,.ws-nav-divider{width:1px;height:22px;background:rgba(255,255,255,.28)}.ws-workspace-link{color:rgba(255,255,255,.72);font:700 10px/1.1 'Roboto Mono',monospace;letter-spacing:.08em;text-transform:uppercase;padding:7px;border-radius:6px;text-decoration:none}",
-      ".ws-links{display:flex;align-items:center;justify-content:center;gap:12px;min-width:0}.ws-link{min-height:54px;display:inline-flex;align-items:center;border-bottom:3px solid transparent;color:rgba(255,255,255,.68);font:700 10.5px 'Roboto Mono',monospace;letter-spacing:.08em;text-transform:uppercase;text-decoration:none;white-space:nowrap}.ws-link:hover,.ws-link.ws-active{color:var(--ws-white);border-bottom-color:var(--ws-gold)}.ws-sep{color:rgba(255,255,255,.32);font-family:'Roboto Mono',monospace}",
-      ".ws-user{position:relative;display:flex;align-items:center;gap:10px;justify-content:flex-end}.ws-user-email{max-width:170px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:rgba(255,255,255,.68);font:700 10px 'Roboto Mono',monospace;letter-spacing:.06em}.ws-avatar{width:36px;height:36px;border-radius:999px;border:0;background:var(--ws-gold);color:var(--ws-navy);display:grid;place-items:center;font:700 12px 'Roboto Mono',monospace;cursor:pointer;overflow:hidden;padding:0}.ws-avatar img,.ws-profile-avatar img{width:100%;height:100%;object-fit:cover;display:block}.ws-profile-menu{position:absolute;right:0;top:46px;width:236px;background:#fff;color:var(--ws-charcoal);border:1px solid var(--ws-line);border-radius:9px;box-shadow:0 18px 40px rgba(0,51,102,.22);padding:0;z-index:50;overflow:hidden}.ws-profile-menu:before{content:'';position:absolute;top:-8px;right:18px;width:16px;height:16px;background:var(--ws-navy);transform:rotate(45deg)}.ws-profile-menu[hidden]{display:none}.ws-profile-head{position:relative;display:flex;align-items:center;gap:13px;background:var(--ws-navy);color:#fff;padding:14px 16px 13px;border-bottom:3px solid var(--ws-gold)}.ws-profile-avatar{width:46px;height:46px;border-radius:999px;background:var(--ws-gold);color:var(--ws-navy);display:grid;place-items:center;overflow:hidden;font:700 14px 'Roboto Mono',monospace;flex:0 0 auto}.ws-profile-name{margin:0;color:#fff;font-size:15px;font-weight:700;line-height:1.15}.ws-profile-role{margin:4px 0 0;color:var(--ws-gold);font:700 9.5px 'Roboto Mono',monospace;letter-spacing:.12em;text-transform:uppercase}.ws-profile-section{padding:11px 16px 10px;border-bottom:1px solid var(--ws-line)}.ws-profile-section:last-child{border-bottom:0}.ws-profile-section-label{display:block;margin:0 0 7px;color:var(--ws-gold);font:700 9.5px 'Roboto Mono',monospace;letter-spacing:.12em;text-transform:uppercase}.ws-profile-menu a,.ws-profile-menu button{width:100%;min-height:36px;display:flex;align-items:center;gap:12px;border:0;background:transparent;color:var(--ws-navy);font:700 14px Lato,sans-serif;text-align:left;text-decoration:none;cursor:pointer;padding:4px 0}.ws-profile-menu a:hover,.ws-profile-menu button:hover{text-decoration:underline}.ws-profile-icon{width:18px;color:var(--ws-steel);display:inline-flex;justify-content:center;font-size:16px;line-height:1}.ws-profile-menu .ws-admin-link .ws-profile-icon{color:var(--ws-gold)}.ws-profile-menu .ws-logout{color:var(--ws-steel)}",
+      ".ws-brand{display:flex;align-items:center;gap:14px;min-width:0}.ws-logo-link{display:flex;align-items:center;border-radius:6px}.ws-logo-link:hover{background:rgba(238,163,32,.18)}.ws-logo{height:31px;width:auto;display:block}.ws-brand-sep,.ws-workspace-link,.ws-nav-divider{display:none}",
+      ".ws-links{display:flex;align-items:center;justify-content:center;gap:16px;min-width:0}.ws-link{min-height:54px;display:inline-flex;align-items:center;border-bottom:3px solid transparent;color:rgba(255,255,255,.72);font:700 13px Lato,sans-serif;letter-spacing:0;text-decoration:none;white-space:nowrap}.ws-link:hover,.ws-link.ws-active{color:var(--ws-white);border-bottom-color:var(--ws-gold)}.ws-sep{color:rgba(255,255,255,.32);font-family:Lato,sans-serif}",
+      ".ws-nav-drop{position:relative;display:inline-flex}.ws-nav-trigger{border-left:0;border-right:0;border-top:0;background:transparent;padding:0;cursor:pointer}.ws-phase-menu{position:absolute;top:52px;left:0;width:300px;background:#fff;color:var(--ws-navy);border:1px solid var(--ws-line);border-radius:8px;box-shadow:0 18px 40px rgba(0,51,102,.22);overflow:hidden;z-index:80;display:none}.ws-nav-drop:hover .ws-phase-menu,.ws-nav-drop:focus-within .ws-phase-menu{display:block}.ws-phase-menu:before{content:attr(data-label);display:block;padding:12px 16px 8px;color:var(--ws-steel);font:700 11px 'Roboto Mono',monospace;letter-spacing:.14em;text-transform:uppercase}.ws-phase-menu a{display:flex;gap:12px;align-items:center;padding:13px 16px;color:var(--ws-navy);text-decoration:none}.ws-phase-menu a:hover{background:#f4eddf}.ws-phase-menu strong{display:block;font-size:16px}.ws-phase-menu small{display:block;margin-top:2px;color:var(--ws-steel);font-size:13px}.ws-phase-menu .ws-media-icon{margin:0;width:36px;height:36px;border-radius:8px}",
+      ".ws-user{position:relative;display:flex;align-items:center;gap:10px;justify-content:flex-end}.ws-user-email{max-width:170px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:rgba(255,255,255,.72);font:700 12px Lato,sans-serif;letter-spacing:0}.ws-avatar{width:36px;height:36px;border-radius:999px;border:0;background:var(--ws-gold);color:var(--ws-navy);display:grid;place-items:center;font:700 12px 'Roboto Mono',monospace;cursor:pointer;overflow:hidden;padding:0}.ws-avatar img,.ws-profile-avatar img{width:100%;height:100%;object-fit:cover;display:block}.ws-profile-menu{position:absolute;right:0;top:46px;width:236px;background:#fff;color:var(--ws-charcoal);border:1px solid var(--ws-line);border-radius:9px;box-shadow:0 18px 40px rgba(0,51,102,.22);padding:0;z-index:50;overflow:hidden}.ws-profile-menu:before{content:'';position:absolute;top:-8px;right:18px;width:16px;height:16px;background:var(--ws-navy);transform:rotate(45deg)}.ws-profile-menu[hidden]{display:none}.ws-profile-head{position:relative;display:flex;align-items:center;gap:13px;background:var(--ws-navy);color:#fff;padding:14px 16px 13px;border-bottom:3px solid var(--ws-gold)}.ws-profile-avatar{width:46px;height:46px;border-radius:999px;background:var(--ws-gold);color:var(--ws-navy);display:grid;place-items:center;overflow:hidden;font:700 14px 'Roboto Mono',monospace;flex:0 0 auto}.ws-profile-name{margin:0;color:#fff;font-size:15px;font-weight:700;line-height:1.15}.ws-profile-role{margin:4px 0 0;color:var(--ws-gold);font:700 9.5px 'Roboto Mono',monospace;letter-spacing:.12em;text-transform:uppercase}.ws-profile-section{padding:11px 16px 10px;border-bottom:1px solid var(--ws-line)}.ws-profile-section:last-child{border-bottom:0}.ws-profile-section-label{display:block;margin:0 0 7px;color:var(--ws-gold);font:700 9.5px 'Roboto Mono',monospace;letter-spacing:.12em;text-transform:uppercase}.ws-profile-menu a,.ws-profile-menu button{width:100%;min-height:36px;display:flex;align-items:center;gap:12px;border:0;background:transparent;color:var(--ws-navy);font:700 14px Lato,sans-serif;text-align:left;text-decoration:none;cursor:pointer;padding:4px 0}.ws-profile-menu a:hover,.ws-profile-menu button:hover{text-decoration:underline}.ws-profile-icon{width:18px;color:var(--ws-steel);display:inline-flex;justify-content:center;font-size:16px;line-height:1}.ws-profile-menu .ws-admin-link .ws-profile-icon{color:var(--ws-gold)}.ws-profile-menu .ws-logout{color:var(--ws-steel)}",
       ".ws-main{padding:54px 0 72px}.ws-kicker{display:inline-flex;color:var(--ws-gold);font:700 11px 'Roboto Mono',monospace;letter-spacing:.1em;text-transform:uppercase}.ws-title{margin:10px 0 12px;color:var(--ws-navy);font:700 clamp(40px,6vw,66px)/.98 'Playfair Display',serif}.ws-subtitle{max-width:760px;margin:0;color:var(--ws-steel);font-size:18px;line-height:1.55}",
       ".ws-login-wrap{min-height:calc(100vh - 54px);display:grid;place-items:center;padding:48px 20px}.ws-login-card{width:min(460px,100%);background:#fff;border:1px solid var(--ws-line);border-radius:12px;padding:30px;box-shadow:0 18px 45px rgba(0,51,102,.1)}.ws-login-card .ws-subtitle{font-size:17px}.ws-form{display:grid;gap:12px;margin-top:24px}.ws-form label{color:var(--ws-navy);font-weight:700}.ws-login-divider{display:flex;align-items:center;gap:12px;margin:18px 0;color:var(--ws-steel);font:700 10px 'Roboto Mono',monospace;letter-spacing:.08em;text-transform:uppercase}.ws-login-divider:before,.ws-login-divider:after{content:'';height:1px;background:var(--ws-line);flex:1}.ws-input,.ws-textarea,.ws-select{width:100%;min-height:46px;border:1px solid rgba(0,51,102,.22);border-radius:8px;padding:10px 12px;background:#fff;color:var(--ws-charcoal);font:400 15px Lato,sans-serif}.ws-textarea{min-height:88px;resize:vertical}.ws-message{min-height:20px;margin:0;color:#8A1F1F;font-weight:700}.ws-message.ws-success{color:var(--ws-green)}.ws-google-button{min-height:40px;width:auto;gap:9px;background:#fff;border:1px solid #747775;border-radius:999px;color:#1f1f1f;text-transform:none;font:700 13px Arial,sans-serif;letter-spacing:0;padding:0 15px 0 11px}.ws-google-button:hover{background:#f8fafd;filter:none}.ws-google-mark{position:relative;width:18px;height:18px;border-radius:999px;background:conic-gradient(from -45deg,#4285F4 0 25%,#34A853 0 50%,#FBBC05 0 75%,#EA4335 0 100%);display:inline-block;flex:0 0 auto}.ws-google-mark:before{content:'';position:absolute;inset:4px;background:#fff;border-radius:999px}.ws-google-mark:after{content:'';position:absolute;right:0;top:7px;width:9px;height:4px;background:#4285F4;border-radius:0 2px 2px 0}",
+      ".ws-home-stack{display:grid;gap:26px}.ws-orientation-card{background:#fff;border:1px solid var(--ws-line);border-radius:12px;overflow:hidden}.ws-orientation-head{width:100%;border:0;background:#fff;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:14px;padding:18px 20px;text-align:left;cursor:pointer}.ws-start-badge{background:var(--ws-navy);color:var(--ws-gold);border-radius:3px;padding:5px 9px;font:700 9px 'Roboto Mono',monospace;letter-spacing:.1em;text-transform:uppercase}.ws-orientation-title{display:block;color:var(--ws-navy);font-weight:700}.ws-orientation-sub{display:block;margin-top:2px;color:var(--ws-steel);font-size:13px}.ws-disclosure-icon{width:34px;height:34px;border-radius:8px;background:var(--ws-gold);color:#fff;display:inline-grid;place-items:center;font:700 22px/1 Lato,sans-serif}.ws-orientation-body{display:none;padding:0 20px 20px}.ws-orientation-card.ws-open .ws-orientation-body{display:block}.ws-orientation-copy{margin:0 0 16px;color:var(--ws-charcoal);line-height:1.55}.ws-ready-row{display:flex;gap:10px;align-items:center;margin-top:14px;color:var(--ws-navy);font-weight:700}.ws-ready-row input{width:18px;height:18px}.ws-how-row{margin-top:14px}.ws-how-toggle{width:100%;border:0;background:#efe7d9;border-radius:8px;display:flex;align-items:center;gap:12px;padding:12px;color:var(--ws-navy);text-align:left;cursor:pointer}.ws-how-toggle .ws-media-icon{width:26px;height:26px;font-size:12px}.ws-how-toggle .ws-disclosure-icon{margin-left:auto;width:28px;height:28px;font-size:18px}.ws-how-body{display:none;padding:14px 2px 0}.ws-how-body.ws-open{display:block}.ws-step-tabs{position:sticky;top:54px;z-index:25;background:var(--ws-cream);border-bottom:1px solid var(--ws-line)}.ws-step-tabs-inner{width:min(1180px,calc(100% - 32px));margin:0 auto;display:flex;gap:24px}.ws-step-tab{min-height:46px;display:inline-flex;align-items:center;border-bottom:3px solid transparent;color:var(--ws-steel);font:700 11px 'Roboto Mono',monospace;letter-spacing:.06em;text-transform:uppercase;text-decoration:none}.ws-step-tab.ws-active{color:var(--ws-navy);border-bottom-color:var(--ws-gold)}.ws-breadcrumb{display:none}.ws-gold-cta{margin-top:18px;background:var(--ws-gold);border-radius:10px;padding:16px 18px;display:flex;justify-content:space-between;align-items:center;gap:16px;color:var(--ws-navy);font-weight:700}.ws-gold-cta a{color:var(--ws-navy);font:700 12px 'Roboto Mono',monospace;text-transform:uppercase;text-decoration:none}.ws-phase-card .ws-dot.empty{background:#fff;border:1px solid var(--ws-line)}.ws-phase-card .ws-dot.half{background:linear-gradient(90deg,var(--ws-gold) 50%,#fff 50%);border:1px solid var(--ws-gold)}.ws-phase-card .ws-dot.solid{background:var(--ws-gold);border:1px solid var(--ws-gold)}.ws-locked .ws-dot{background:#e4e4e4!important;border-color:#d6d6d6!important}.ws-locked .ws-phase-stripe{background:#d5d5d5}.ws-locked .ws-button{background:#f7f5ef;border-color:#d8d2c8;color:#9a9389}.ws-pill-locked{background:#efefef;color:#9a9389}.ws-pill-progress{background:rgba(238,163,32,.18);color:var(--ws-navy)}",
+      ".ws-practice-reminder{margin:24px 0;background:#fff7e8;border:1px solid rgba(238,163,32,.35);border-radius:10px;padding:14px 16px;color:var(--ws-navy);font-weight:700}.ws-practice-reminder a{color:var(--ws-navy);text-decoration:underline;text-underline-offset:3px}.ws-practice-list{display:grid;gap:18px}.ws-practice-card{background:#fff;border:1px solid var(--ws-line);border-radius:12px;overflow:hidden}.ws-practice-head{width:100%;border:0;background:#fff;display:grid;grid-template-columns:1fr auto;gap:14px;padding:22px;text-align:left;cursor:pointer}.ws-practice-head h3{margin:6px 0;color:var(--ws-navy);font:700 30px 'Playfair Display',serif}.ws-practice-head p{margin:0;color:var(--ws-steel);line-height:1.45}.ws-practice-chevron{color:var(--ws-steel);font-size:20px}.ws-practice-body{display:none;padding:0 22px 22px}.ws-practice-card.ws-open .ws-practice-body{display:block}.ws-before-block{background:#fbf6ed;border:1px solid var(--ws-line);border-radius:10px;padding:18px;margin-bottom:16px}.ws-before-block h4{margin:0 0 8px;color:var(--ws-navy);font:700 12px 'Roboto Mono',monospace;letter-spacing:.08em;text-transform:uppercase}.ws-before-block p{margin:0 0 14px;line-height:1.5}.ws-practice-actions{display:grid;grid-template-columns:1fr 1fr;gap:12px}.ws-button-dashed{background:#fff;border-style:dashed;border-color:rgba(0,51,102,.38);color:var(--ws-navy)}.ws-ai-panel{display:none;margin-top:14px;border:1px solid var(--ws-line);border-radius:10px;padding:18px;background:#fff}.ws-ai-panel.ws-open{display:block}.ws-ai-panel p{margin:0 0 14px;color:var(--ws-steel);font-weight:700}",
       ".ws-button{min-height:44px;border-radius:8px;border:1px solid var(--ws-gold);background:var(--ws-gold);color:var(--ws-navy);font:700 13px 'Roboto Mono',monospace;letter-spacing:.04em;text-transform:uppercase;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;padding:0 18px;cursor:pointer}.ws-button:hover{filter:brightness(.97)}.ws-button[disabled],.ws-button.ws-disabled{opacity:.45;cursor:not-allowed;filter:grayscale(.2)}.ws-button-secondary{background:#fff;border-color:rgba(0,51,102,.28);color:var(--ws-navy)}.ws-button-navy{background:var(--ws-navy);border-color:var(--ws-navy);color:#fff}",
       ".ws-progress-card{margin:34px 0 24px;background:#fff;border:1px solid var(--ws-line);border-radius:12px;padding:18px}.ws-progress-row{display:flex;justify-content:space-between;gap:16px;color:var(--ws-navy);font:700 11px 'Roboto Mono',monospace;letter-spacing:.08em;text-transform:uppercase}.ws-progress-track{height:12px;background:#EFE6D8;border-radius:999px;margin-top:12px;overflow:hidden}.ws-progress-fill{height:100%;background:linear-gradient(90deg,var(--ws-gold),#f4c15c);border-radius:999px}",
-      ".ws-phase-list{display:grid;gap:18px}.ws-phase-card{position:relative;display:grid;grid-template-columns:8px 92px 1fr auto;align-items:center;gap:22px;min-height:178px;background:#fff;border:1px solid var(--ws-line);border-radius:12px;overflow:hidden;padding:22px 24px 22px 0;text-decoration:none;color:inherit;box-shadow:0 12px 28px rgba(0,51,102,.06)}.ws-phase-card.ws-locked{opacity:.72}.ws-phase-stripe{align-self:stretch;background:var(--ws-gold)}.ws-locked .ws-phase-stripe{background:#9AAFC3}.ws-phase-number{color:rgba(0,51,102,.08);font:700 74px/1 'Playfair Display',serif;text-align:center}.ws-phase-content h2{margin:6px 0;color:var(--ws-navy);font:700 34px/1.05 'Playfair Display',serif}.ws-phase-content p{margin:0;color:var(--ws-steel);line-height:1.45}.ws-trail{display:flex;align-items:center;gap:8px;margin-top:16px;color:var(--ws-navy);font:700 10px 'Roboto Mono',monospace;text-transform:uppercase;letter-spacing:.07em}.ws-dot{width:10px;height:10px;border-radius:99px;background:var(--ws-gold)}.ws-arrow{color:var(--ws-steel)}.ws-pill{display:inline-flex;align-items:center;border-radius:999px;padding:5px 9px;font:700 10px 'Roboto Mono',monospace;letter-spacing:.06em;text-transform:uppercase}.ws-pill-gold{background:rgba(238,163,32,.18);color:var(--ws-navy)}.ws-pill-muted{background:#E8EEF4;color:var(--ws-steel)}.ws-pill-green{background:rgba(44,122,75,.12);color:var(--ws-green)}.ws-phase-actions{display:grid;gap:10px;justify-items:end}",
+      ".ws-phase-list{display:grid;gap:18px}.ws-phase-card{position:relative;display:grid;grid-template-columns:8px 92px 1fr auto;align-items:center;gap:22px;min-height:178px;background:#fff;border:1px solid var(--ws-line);border-radius:12px;overflow:hidden;padding:22px 24px 22px 0;text-decoration:none;color:inherit;box-shadow:0 12px 28px rgba(0,51,102,.06)}.ws-phase-card.ws-locked{opacity:.72}.ws-phase-stripe{align-self:stretch;background:var(--ws-gold)}.ws-locked .ws-phase-stripe{background:#d5d5d5}.ws-phase-number{color:rgba(0,51,102,.08);font:700 74px/1 'Playfair Display',serif;text-align:center}.ws-phase-content h2{margin:6px 0;color:var(--ws-navy);font:700 34px/1.05 'Playfair Display',serif}.ws-phase-content p{margin:0;color:var(--ws-steel);line-height:1.45}.ws-trail{display:flex;align-items:center;gap:8px;margin-top:16px;color:var(--ws-navy);font:700 10px 'Roboto Mono',monospace;text-transform:uppercase;letter-spacing:.07em}.ws-dot{width:10px;height:10px;border-radius:99px;background:var(--ws-gold)}.ws-arrow{color:var(--ws-steel)}.ws-pill{display:inline-flex;align-items:center;border-radius:999px;padding:5px 9px;font:700 10px 'Roboto Mono',monospace;letter-spacing:.06em;text-transform:uppercase}.ws-pill-gold{background:rgba(238,163,32,.18);color:var(--ws-navy)}.ws-pill-muted{background:#E8EEF4;color:var(--ws-steel)}.ws-pill-green{background:rgba(44,122,75,.12);color:var(--ws-green)}.ws-phase-actions{display:grid;gap:10px;justify-items:end}",
       ".ws-stepper{display:flex;gap:10px;margin:28px 0;align-items:center}.ws-step{display:flex;align-items:center;gap:8px;border:0;border-bottom:2px solid var(--ws-line);background:transparent;padding:8px 2px;color:var(--ws-steel);font:700 11px 'Roboto Mono',monospace;text-transform:uppercase;letter-spacing:.06em}.ws-step.ws-active{border-bottom-color:var(--ws-navy);color:var(--ws-navy)}.ws-step.ws-done{border-bottom-color:var(--ws-green);color:var(--ws-green)}",
       ".ws-section{margin-top:30px}.ws-section-head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:14px}.ws-section-head h2{margin:0;color:var(--ws-navy);font:700 31px 'Playfair Display',serif}.ws-count{color:var(--ws-steel);font:700 11px 'Roboto Mono',monospace;text-transform:uppercase;letter-spacing:.08em}",
       ".ws-player-card{background:#fff;border:1px solid var(--ws-line);border-radius:12px;overflow:hidden}.ws-player{position:relative;aspect-ratio:16/9;background:linear-gradient(135deg,#002448,#003366 55%,#244F78);display:grid;place-items:center;color:#fff}.ws-player iframe{position:absolute;inset:0;width:100%;height:100%;border:0}.ws-player-placeholder{text-align:center;padding:22px}.ws-play-icon{width:58px;height:58px;border-radius:999px;background:var(--ws-gold);color:var(--ws-navy);display:grid;place-items:center;margin:0 auto 14px;font-size:24px}.ws-player-meta{position:absolute;left:22px;bottom:20px;right:22px;text-shadow:0 2px 8px rgba(0,0,0,.35)}.ws-player-meta h3{margin:6px 0 0;color:#fff;font:700 25px 'Playfair Display',serif}.ws-player-actions{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:16px}",
@@ -550,15 +617,15 @@ const UTL_CONTENT = {
       ".ws-context-toggle{width:100%;display:flex;align-items:center;gap:14px;border:0;border-radius:10px;background:#ded6c8;color:var(--ws-navy);padding:16px 18px;text-align:left;cursor:pointer}.ws-context-toggle-icon{width:30px;height:30px;border-radius:8px;background:var(--ws-gold);color:#fff;display:grid;place-items:center;font-size:24px;font-weight:700;line-height:1}.ws-context-toggle-title{display:block;color:var(--ws-navy);font-size:17px;font-weight:700}.ws-context-toggle-sub{display:block;color:var(--ws-steel);font-size:14px;margin-top:2px}.ws-context-panel{display:none;padding:18px 0 0}.ws-context-panel.ws-open{display:block}.ws-context-panel-inner{color:var(--ws-charcoal)}.ws-context-panel-inner p{margin:0 0 14px;color:var(--ws-charcoal);line-height:1.5}.ws-context-embed{margin-top:14px;border-radius:10px;overflow:hidden;background:#000;border:1px solid var(--ws-line)}.ws-context-embed iframe{display:block;width:100%;height:450px;border:0}.ws-fullscreen-link{display:block;padding:14px 22px 0;text-align:right;color:var(--ws-navy);font-weight:700;text-decoration:none}.ws-fullscreen-link:hover{text-decoration:underline}.ws-context-panel .ws-fullscreen-link{padding:0;margin-top:12px}.ws-context-panel .ws-media-row{background:var(--ws-navy);margin-top:14px}.ws-workbook-card{position:relative;margin-top:18px;background:#fff;border:1px solid var(--ws-line);border-radius:12px;padding:34px 36px;display:grid;gap:22px}.ws-workbook-card.ws-done{border:2px solid var(--ws-green)}.ws-workbook-card.ws-disabled{opacity:.56}.ws-workbook-card.ws-disabled a,.ws-workbook-card.ws-disabled button{pointer-events:none}.ws-workbook-top{display:flex;align-items:center;gap:12px;color:var(--ws-steel);font:700 14px 'Roboto Mono',monospace;letter-spacing:.14em;text-transform:uppercase}.ws-status-circle{width:28px;height:28px;border-radius:999px;background:#d9e4ee;color:var(--ws-steel);display:grid;place-items:center;font:700 14px Lato,sans-serif}.ws-workbook-card.ws-done .ws-status-circle{background:var(--ws-green);color:#fff}.ws-workbook-card h3{margin:0;color:var(--ws-navy);font:700 clamp(34px,5vw,54px)/1.02 'Playfair Display',serif}.ws-workbook-card p{max-width:780px;margin:0;color:var(--ws-steel);font-size:22px;line-height:1.35}.ws-card-actions{display:flex;gap:12px;flex-wrap:wrap}.ws-done-pill{display:inline-flex;align-items:center;gap:5px;background:rgba(44,122,75,.12);color:var(--ws-green);border-radius:999px;padding:4px 10px;font:700 12px Lato,sans-serif;letter-spacing:0;text-transform:none}",
       ".ws-admin-visibility{margin-top:30px;background:#fff;border:1px solid var(--ws-line);border-radius:12px;padding:18px;display:grid;gap:12px}.ws-check-row{display:flex;align-items:flex-start;gap:10px;color:var(--ws-navy);font-weight:700}.ws-check-row input{margin-top:3px}.ws-help{margin:0;color:var(--ws-steel);font-size:14px;line-height:1.45}",
       ".ws-bottom-nav{display:flex;justify-content:space-between;gap:12px;margin-top:34px}.ws-bottom-nav .ws-button{min-width:180px}.ws-admin-grid{display:grid;gap:16px;margin-top:30px}.ws-admin-phase{background:#fff;border:1px solid var(--ws-line);border-radius:12px;overflow:hidden}.ws-admin-toggle{width:100%;display:grid;grid-template-columns:74px 1fr auto;align-items:center;gap:16px;border:0;background:#fff;padding:18px;text-align:left;cursor:pointer}.ws-admin-num{color:rgba(0,51,102,.12);font:700 54px 'Playfair Display',serif}.ws-admin-body{display:none;padding:0 18px 18px}.ws-admin-phase.ws-open .ws-admin-body{display:block}.ws-slot{border-top:1px solid var(--ws-line);padding:16px 0;display:grid;gap:10px}.ws-slot-head{display:flex;justify-content:space-between;gap:12px}.ws-type-buttons{display:flex;gap:8px}.ws-type-button{border:1px solid rgba(0,51,102,.25);background:#fff;color:var(--ws-navy);border-radius:999px;padding:7px 10px;font:700 10px 'Roboto Mono',monospace;cursor:pointer}.ws-type-button.ws-selected{background:var(--ws-navy);color:#fff}.ws-save-row{display:flex;gap:8px}.ws-save-row .ws-input{background:#fbf7ef}.ws-save-note{min-height:18px;color:var(--ws-green);font:700 11px 'Roboto Mono',monospace}.ws-save-bar{position:sticky;bottom:0;background:#fff;border-top:1px solid var(--ws-line);padding:12px 0;margin-top:32px;box-shadow:0 -8px 20px rgba(0,51,102,.07)}.ws-save-bar-inner{display:flex;justify-content:space-between;align-items:center;gap:16px}",
-      "@media(max-width:768px){.ws-shell{width:calc(100% - 32px)}.ws-nav-inner{height:auto;grid-template-columns:1fr auto;gap:0;width:100%;padding:0 12px}.ws-brand{height:54px}.ws-brand-sep,.ws-workspace-link{display:none}.ws-user{height:54px}.ws-links{grid-column:1/-1;justify-content:flex-start;overflow-x:auto;white-space:nowrap;gap:10px;border-top:1px solid rgba(255,255,255,.14);scrollbar-width:none}.ws-links::-webkit-scrollbar,.ws-lesson-rail::-webkit-scrollbar{display:none}.ws-link{min-height:44px;font-size:10px}.ws-user-email{display:none}.ws-main{padding:34px 0 48px}.ws-title{font-size:38px}.ws-subtitle{font-size:16px}.ws-phase-card{grid-template-columns:6px 54px 1fr;gap:14px;padding:18px 16px 18px 0}.ws-phase-actions{grid-column:2/-1;justify-items:start}.ws-phase-number{font-size:48px}.ws-phase-content h2{font-size:27px}.ws-stepper{flex-wrap:wrap}.ws-section-head{align-items:flex-start;flex-direction:column}.ws-player-actions{align-items:flex-start;flex-direction:column}.ws-scroll-hint{display:block}.ws-lesson-rail{display:flex;overflow-x:auto;gap:10px;padding-bottom:4px;scrollbar-width:none}.ws-lesson-tile{min-width:104px}.ws-collapsed{grid-template-columns:auto 1fr auto}.ws-collapsed .ws-pill{display:none}.ws-context-embed iframe{height:260px}.ws-workbook-card{padding:24px 20px}.ws-workbook-top{font-size:11px;letter-spacing:.1em}.ws-workbook-card h3{font-size:34px}.ws-workbook-card p{font-size:17px}.ws-card-actions .ws-button{width:100%}.ws-exercise-card{grid-template-columns:1fr}.ws-bottom-nav{flex-direction:row}.ws-bottom-nav .ws-button{min-width:0;flex:1;padding:0 10px;font-size:10px}.ws-admin-toggle{grid-template-columns:48px 1fr auto}.ws-save-bar-inner{flex-direction:column;align-items:stretch}.ws-save-row{flex-direction:column}}"
+      "@media(max-width:768px){.ws-shell{width:calc(100% - 32px)}.ws-nav-inner{height:auto;grid-template-columns:1fr auto;gap:0;width:100%;padding:0 12px}.ws-brand{height:54px}.ws-brand-sep,.ws-workspace-link{display:none}.ws-user{height:54px}.ws-links{grid-column:1/-1;justify-content:flex-start;overflow-x:auto;white-space:nowrap;gap:10px;border-top:1px solid rgba(255,255,255,.14);scrollbar-width:none}.ws-links::-webkit-scrollbar,.ws-lesson-rail::-webkit-scrollbar,.ws-step-tabs-inner::-webkit-scrollbar{display:none}.ws-link{min-height:44px;font-size:12px}.ws-phase-menu{position:fixed;left:12px;right:12px;top:96px;width:auto}.ws-user-email{display:none}.ws-main{padding:34px 0 48px}.ws-title{font-size:38px}.ws-subtitle{font-size:16px}.ws-orientation-head{grid-template-columns:1fr auto}.ws-start-badge{width:max-content}.ws-step-tabs{top:98px}.ws-step-tabs-inner{overflow-x:auto;scrollbar-width:none}.ws-step-tab{flex:0 0 auto;font-size:10px}.ws-gold-cta{align-items:flex-start;flex-direction:column}.ws-practice-actions{grid-template-columns:1fr}.ws-phase-card{grid-template-columns:6px 54px 1fr;gap:14px;padding:18px 16px 18px 0}.ws-phase-actions{grid-column:2/-1;justify-items:start}.ws-phase-number{font-size:48px}.ws-phase-content h2{font-size:27px}.ws-stepper{flex-wrap:wrap}.ws-section-head{align-items:flex-start;flex-direction:column}.ws-player-actions{align-items:flex-start;flex-direction:column}.ws-scroll-hint{display:block}.ws-lesson-rail{display:flex;overflow-x:auto;gap:10px;padding-bottom:4px;scrollbar-width:none}.ws-lesson-tile{min-width:104px}.ws-collapsed{grid-template-columns:auto 1fr auto}.ws-collapsed .ws-pill{display:none}.ws-context-embed iframe{height:260px}.ws-workbook-card{padding:24px 20px}.ws-workbook-top{font-size:11px;letter-spacing:.1em}.ws-workbook-card h3{font-size:34px}.ws-workbook-card p{font-size:17px}.ws-card-actions .ws-button{width:100%}.ws-exercise-card{grid-template-columns:1fr}.ws-bottom-nav{flex-direction:row}.ws-bottom-nav .ws-button{min-width:0;flex:1;padding:0 10px;font-size:10px}.ws-admin-toggle{grid-template-columns:48px 1fr auto}.ws-save-bar-inner{flex-direction:column;align-items:stretch}.ws-save-row{flex-direction:column}}"
     ].join("\n");
     document.head.appendChild(style);
   }
 
-  function pageShell(active, contentHtml) {
+  function pageShell(active, contentHtml, subnavHtml) {
     injectStyles();
     document.body.classList.add("ws-page");
-    document.body.innerHTML = navHtml(active) + '<main class="ws-main"><div class="ws-shell">' + contentHtml + "</div></main>";
+    document.body.innerHTML = navHtml(active) + (subnavHtml || "") + '<main class="ws-main"><div class="ws-shell">' + contentHtml + "</div></main>";
     bindNav();
   }
 
@@ -568,20 +635,34 @@ const UTL_CONTENT = {
     var roleLabel = user.role === "admin" ? "Administrator" : "Member";
     var adminSection = user.role === "admin" ? '<div class="ws-profile-section"><span class="ws-profile-section-label">Admin</span><a class="ws-admin-link" href="' + adminHref() + '"><span class="ws-profile-icon">&#9788;</span><span>Admin Console</span></a></div>' : "";
     var links = [
-      { key: "orientation", label: "Orientation", href: memberHref("orientation.html") },
-      { key: "phase1", label: "Phase 1", href: memberHref("phase-1.html") },
-      { key: "phase2", label: "Phase 2", href: memberHref("phase-2.html"), hidden: localStorage.getItem("utl_phase2_status") === "hide" },
-      { key: "phase3", label: "Phase 3", href: memberHref("phase-3.html"), hidden: localStorage.getItem("utl_phase3_status") === "hide" },
+      { key: "home", label: "Home", href: memberHref("index.html") },
+      { key: "phase1", label: "Phase 1", href: memberHref("phase-1.html"), dropdown: true },
+      { key: "phase2", label: "Phase 2", href: memberHref("phase-2.html"), dropdown: true, hidden: !phaseNavVisible("phase2") },
+      { key: "phase3", label: "Phase 3", href: memberHref("phase-3.html"), dropdown: true, hidden: !phaseNavVisible("phase3") },
       { key: "assessments", label: "Assessments", href: memberHref("index.html") + "#assessments", hidden: localStorage.getItem("utl_tsa_status") === "hidden" }
     ].filter(function (link) { return !link.hidden; });
     if (active === "admin") links.push({ key: "admin", label: "Admin", href: adminHref() });
     return '<header class="ws-nav"><div class="ws-nav-inner">' +
-      '<div class="ws-brand"><a class="ws-logo-link" href="' + homeHref() + '" aria-label="The Untaught Lessons home"><img class="ws-logo" src="../assets/utl-logo-nav-white.png" alt="The Untaught Lessons"></a><span class="ws-brand-sep"></span><a class="ws-workspace-link" href="' + memberHref("index.html") + '">Member Workspace</a></div>' +
+      '<div class="ws-brand"><a class="ws-logo-link" href="' + homeHref() + '" aria-label="The Untaught Lessons home"><img class="ws-logo" src="' + assetHref("../assets/utl-logo-nav-white.png") + '" alt="The Untaught Lessons"></a></div>' +
       '<nav class="ws-links" aria-label="Member workspace">' + links.map(function (link, index) {
+        if (link.dropdown) {
+          return (index ? '<span class="ws-sep">|</span>' : "") + phaseDropdownHtml(link, active);
+        }
         return (index ? '<span class="ws-sep">|</span>' : "") + '<a class="ws-link ' + (active === link.key ? "ws-active" : "") + '" href="' + link.href + '">' + link.label + '</a>';
       }).join("") + '</nav>' +
-      '<div class="ws-user"><span class="ws-user-email">' + escapeHtml(user.email) + '</span><button class="ws-avatar" type="button" aria-label="Open profile menu" aria-expanded="false">' + avatar + '</button><div class="ws-profile-menu" hidden><div class="ws-profile-head"><span class="ws-profile-avatar">' + avatar + '</span><div><p class="ws-profile-name">' + escapeHtml(user.label) + '</p><p class="ws-profile-role">' + roleLabel + '</p></div></div><div class="ws-profile-section"><span class="ws-profile-section-label">Your Space</span><a href="../my-results/index.html"><span class="ws-profile-icon">&#9638;</span><span>My Results</span></a><a href="../apps/toolkit/index.html"><span class="ws-profile-icon">&#8962;</span><span>Toolkit</span></a></div>' + adminSection + '<div class="ws-profile-section"><button class="ws-logout" type="button"><span class="ws-profile-icon">&#8618;</span><span>Log out</span></button></div></div></div>' +
+      '<div class="ws-user"><span class="ws-user-email">' + escapeHtml(user.email) + '</span><button class="ws-avatar" type="button" aria-label="Open profile menu" aria-expanded="false">' + avatar + '</button><div class="ws-profile-menu" hidden><div class="ws-profile-head"><span class="ws-profile-avatar">' + avatar + '</span><div><p class="ws-profile-name">' + escapeHtml(user.label) + '</p><p class="ws-profile-role">' + roleLabel + '</p></div></div><div class="ws-profile-section"><span class="ws-profile-section-label">Your Space</span><a href="' + appHref("../my-results/index.html") + '"><span class="ws-profile-icon">&#9638;</span><span>My Results</span></a><a href="' + appHref("../apps/toolkit/index.html") + '"><span class="ws-profile-icon">&#8962;</span><span>Toolkit</span></a></div>' + adminSection + '<div class="ws-profile-section"><button class="ws-logout" type="button"><span class="ws-profile-icon">&#8618;</span><span>Log out</span></button></div></div></div>' +
       '</div></header>';
+  }
+
+  function phaseDropdownHtml(link, active) {
+    var key = link.key;
+    var phase = getPhase(key);
+    var label = link.label + " - " + phase.title;
+    var watchHref = key === "phase1" ? memberHref("phase-1.html") : memberHref(phaseFiles[key]);
+    var practiceHref = key === "phase1" ? memberHref("phase-1/practice/index.html") : memberHref(phaseFiles[key]) + "#exercises";
+    var lessonText = phase.lessons.length + " lessons";
+    var exerciseText = phase.exercises.length + " exercises";
+    return '<span class="ws-nav-drop"><a class="ws-link ws-nav-trigger ' + (active === key ? "ws-active" : "") + '" href="' + watchHref + '">' + link.label + '</a><div class="ws-phase-menu" data-label="' + escapeHtml(label) + '"><a href="' + watchHref + '"><span class="ws-media-icon">&#9654;</span><span><strong>Watch the lessons</strong><small>' + lessonText + '</small></span></a><a href="' + practiceHref + '"><span class="ws-media-icon">&#9998;</span><span><strong>Practice the exercises</strong><small>' + exerciseText + '</small></span></a></div></span>';
   }
 
   function bindNav() {
@@ -599,6 +680,7 @@ const UTL_CONTENT = {
     });
     document.addEventListener("click", function (event) {
       if (event.target.closest(".ws-user")) return;
+      if (event.target.closest(".ws-nav-drop")) return;
       qsa(".ws-profile-menu").forEach(function (menu) { menu.hidden = true; });
       qsa(".ws-avatar").forEach(function (button) { button.setAttribute("aria-expanded", "false"); });
     });
@@ -688,25 +770,79 @@ const UTL_CONTENT = {
       });
       return;
     }
-    var progress = allPhaseProgress();
-    var visiblePhases = phases.filter(function (phaseKey) {
-      return !(phaseKey === "phase2" && localStorage.getItem("utl_phase2_status") === "hide") && !(phaseKey === "phase3" && localStorage.getItem("utl_phase3_status") === "hide");
-    });
-    var cards = visiblePhases.map(function (phaseKey) {
-      var number = phaseNumbers[phaseKey];
-      var phase = getPhase(phaseKey);
-      var unlocked = phaseUnlocked(phaseKey);
-      var done = exercisesDone(phaseKey);
-      var status = done ? "Done" : unlocked ? "In Progress" : "Locked";
-      var pillClass = done ? "ws-pill-green" : unlocked ? "ws-pill-gold" : "ws-pill-muted";
-      return '<article class="ws-phase-card ' + (unlocked ? "" : "ws-locked") + '"><div class="ws-phase-stripe"></div><div class="ws-phase-number">0' + number + '</div><div class="ws-phase-content"><span class="ws-kicker">' + phaseLabels[phaseKey] + '</span><h2>' + escapeHtml(phase.title) + '</h2><p>' + escapeHtml(phaseDescriptions[phaseKey]) + '</p><div class="ws-trail"><span class="ws-dot"></span>Watch<span class="ws-arrow">&rarr;</span><span class="ws-dot"></span>Practice</div></div><div class="ws-phase-actions"><span class="ws-pill ' + pillClass + '">' + status + '</span>' + (unlocked ? '<a class="ws-button" href="' + phaseFiles[phaseKey] + '">Continue</a>' : '<span class="ws-button ws-disabled">Locked</span>') + '</div></article>';
-    }).join("");
-    pageShell("workspace", '<span class="ws-kicker">Member Workspace</span><h1 class="ws-title">Your Learning Journey</h1><p class="ws-subtitle">Work through each phase in order - watch all the videos, then complete the exercises before moving on.</p><section class="ws-progress-card"><div class="ws-progress-row"><span>Overall progress</span><span>' + progress.done + ' of ' + progress.total + ' complete</span></div><div class="ws-progress-track"><div class="ws-progress-fill" style="width:' + progress.percent + '%"></div></div></section><section class="ws-phase-list">' + cards + '</section>' + assessmentsSection() + '<div style="margin-top:28px;display:flex;gap:12px;flex-wrap:wrap"><a class="ws-button ws-button-secondary" href="orientation.html">Start orientation</a><a style="align-self:center;color:var(--ws-steel);font:700 12px Lato,sans-serif;text-decoration:underline;text-underline-offset:2px" href="../admin/index.html">Admin</a></div>');
+    pageShell("home", homePageHtml());
+    bindHomePage();
+  }
+
+  function homePageHtml() {
+    var progress = exerciseProgress();
+    return '<div class="ws-home-stack">' + orientationCardHtml() + '<section><div class="ws-section-head"><h2>Your Learning Journey</h2><span class="ws-count">' + progress.done + ' of ' + progress.total + ' complete</span></div><section class="ws-progress-card"><div class="ws-progress-row"><span>Overall progress</span><span>' + progress.percent + '%</span></div><div class="ws-progress-track"><div class="ws-progress-fill" style="width:' + progress.percent + '%"></div></div></section><section class="ws-phase-list">' + phases.map(phaseJourneyCard).join("") + '</section></section>' + assessmentsSection() + '</div>';
+  }
+
+  function orientationCardHtml() {
+    var complete = readBool("utl_orientation_ready");
+    var open = localStorage.getItem("utl_orientation_open") === null ? !complete : readBool("utl_orientation_open");
+    var orientation = UTL_CONTENT.orientation.contexts[0] || {};
+    var how = UTL_CONTENT.orientation.contexts[1] || {};
+    var video = exerciseContextUrl(orientation) ? '<div class="ws-player-card"><div class="ws-player">' + renderIframe(exerciseContextUrl(orientation), orientation.contextTitle) + '<div class="ws-player-meta"><span class="ws-kicker">Orientation to the UTL program</span><h3>' + escapeHtml(orientation.contextTitle || "Orientation") + '</h3></div></div></div>' : '<div class="ws-player-card"><div class="ws-player"><div class="ws-player-placeholder"><span class="ws-play-icon">&#9654;</span><p>Orientation video coming soon</p></div></div></div>';
+    return '<article class="ws-orientation-card ' + (open ? "ws-open" : "") + '" id="orientation"><button class="ws-orientation-head" type="button" data-orientation-toggle><span class="ws-start-badge">Start Here</span><span><span class="ws-orientation-title">Orientation</span><span class="ws-orientation-sub">' + (complete ? "Orientation complete &#10003;" : "Get oriented before jumping into Phase 1") + '</span></span><span class="ws-orientation-chevron ws-disclosure-icon">' + (open ? "&minus;" : "+") + '</span></button><div class="ws-orientation-body"><p class="ws-orientation-copy">Welcome to the MA storyline. You are stepping into a Chief of Staff role where Aiko expects clarity, structure, and judgment from day one. Work through each phase in order: watch the lessons, then complete the exercises before moving on.</p>' + video + '<div class="ws-how-row"><button class="ws-how-toggle" type="button" data-how-toggle><span class="ws-media-icon">i</span><span><strong>How this program works</strong><br><small>Read before starting</small></span><span class="ws-disclosure-icon" data-how-icon>+</span></button><div class="ws-how-body" data-how-body><p>' + escapeHtml(how.contextBody || "Watch the setup, read the context, complete the practice, and mark your progress as you go.") + '</p>' + (exerciseContextUrl(how) ? '<div class="ws-context-embed">' + renderIframe(exerciseContextUrl(how), how.contextTitle) + '</div>' : '') + '</div></div><label class="ws-ready-row"><input type="checkbox" data-orientation-ready ' + (complete ? "checked" : "") + '> <span>I\'ve watched the orientation and I\'m ready to start.</span></label></div></article>';
+  }
+
+  function phaseJourneyCard(phaseKey) {
+    var number = phaseNumbers[phaseKey];
+    var phase = getPhase(phaseKey);
+    var unlocked = phaseUnlocked(phaseKey);
+    var status = phaseStatus(phaseKey);
+    var pillClass = status === "Locked" ? "ws-pill-locked" : status === "In Progress" ? "ws-pill-progress" : "ws-pill-muted";
+    var href = phaseKey === "phase1" ? phaseFiles.phase1 : phaseFiles[phaseKey];
+    return '<article class="ws-phase-card ' + (unlocked ? "" : "ws-locked") + '"><div class="ws-phase-stripe"></div><div class="ws-phase-number">0' + number + '</div><div class="ws-phase-content"><span class="ws-kicker">' + phaseLabels[phaseKey] + '</span><h2>' + escapeHtml(phase.title) + '</h2><p>' + escapeHtml(phaseDescriptions[phaseKey]) + '</p><div class="ws-trail"><span class="ws-dot ' + phaseStepState(phaseKey, "watch") + '"></span>Watch<span class="ws-arrow">&rarr;</span><span class="ws-dot ' + phaseStepState(phaseKey, "practice") + '"></span>Practice</div></div><div class="ws-phase-actions"><span class="ws-pill ' + pillClass + '">' + status + '</span>' + (unlocked ? '<a class="ws-button" href="' + href + '">Continue &rarr;</a>' : '<span class="ws-button ws-disabled">Continue &rarr;</span>') + '</div></article>';
   }
 
   function assessmentsSection() {
     if (localStorage.getItem("utl_tsa_status") === "hidden") return "";
-    return '<section class="ws-section" id="assessments"><div class="ws-section-head"><h2>Assessments</h2><span class="ws-count">TSA Score</span></div><div class="ws-phase-list"><article class="ws-phase-card"><div class="ws-phase-stripe"></div><div class="ws-phase-number">A</div><div class="ws-phase-content"><span class="ws-kicker">Assessment</span><h2>The Diagnostic</h2><p>Take the starting assessment when you are ready.</p></div><div class="ws-phase-actions"><a class="ws-button" href="../apps/tsa-diagnostic/index.html">Open</a></div></article><article class="ws-phase-card"><div class="ws-phase-stripe"></div><div class="ws-phase-number">B</div><div class="ws-phase-content"><span class="ws-kicker">Assessment</span><h2>The Checkpoint</h2><p>Return here after the practice sequence to compare progress.</p></div><div class="ws-phase-actions"><a class="ws-button ws-button-secondary" href="../apps/tsa-checkpoint/index.html">Open</a></div></article></div></section>';
+    return '<section class="ws-section" id="assessments"><div class="ws-section-head"><h2>Assessments</h2><span class="ws-count">TSA Score</span></div><div class="ws-phase-list"><article class="ws-phase-card"><div class="ws-phase-stripe"></div><div class="ws-phase-number">A</div><div class="ws-phase-content"><span class="ws-kicker">Assessment</span><h2>The Diagnostic</h2><p>Take the starting assessment when you are ready.</p></div><div class="ws-phase-actions"><a class="ws-button" href="../apps/tsa-diagnostic/index.html">Open &rarr;</a></div></article></div></section>';
+  }
+
+  function bindHomePage() {
+    var orientationToggle = qs("[data-orientation-toggle]");
+    var orientationCard = qs(".ws-orientation-card");
+    if (orientationToggle && orientationCard) {
+      orientationToggle.addEventListener("click", function () {
+        var open = !orientationCard.classList.contains("ws-open");
+        orientationCard.classList.toggle("ws-open", open);
+        writeBool("utl_orientation_open", open);
+        var chevron = orientationToggle.querySelector(".ws-orientation-chevron");
+        if (chevron) chevron.innerHTML = open ? "&minus;" : "+";
+      });
+    }
+    var howToggle = qs("[data-how-toggle]");
+    if (howToggle) {
+      howToggle.addEventListener("click", function () {
+        var body = qs("[data-how-body]");
+        if (body) {
+          var open = !body.classList.contains("ws-open");
+          body.classList.toggle("ws-open", open);
+          var icon = qs("[data-how-icon]");
+          if (icon) icon.innerHTML = open ? "&minus;" : "+";
+        }
+      });
+    }
+    var ready = qs("[data-orientation-ready]");
+    if (ready && orientationCard) {
+      ready.addEventListener("change", function () {
+        writeBool("utl_orientation_ready", ready.checked);
+        if (ready.checked) {
+          setTimeout(function () {
+            orientationCard.classList.remove("ws-open");
+            writeBool("utl_orientation_open", false);
+            var sub = qs(".ws-orientation-sub");
+            var chevron = qs(".ws-orientation-chevron");
+            if (sub) sub.innerHTML = "Orientation complete &#10003;";
+            if (chevron) chevron.innerHTML = "+";
+          }, 550);
+        }
+      });
+    }
   }
 
   function renderOrientation() {
@@ -722,6 +858,19 @@ const UTL_CONTENT = {
     return '<span class="ws-kicker">' + phaseLabels[phaseKey] + '</span><h1 class="ws-title">' + escapeHtml(phase.title) + '</h1><p class="ws-subtitle">' + escapeHtml(doneVideos ? "Videos done. Now apply what you learned." : phase.description) + '</p><div class="ws-stepper"><span class="ws-step ' + (doneVideos ? "ws-done" : "ws-active") + '">Step 1 Watch</span><span class="ws-step ' + (doneVideos ? "ws-active" : "") + '">Step 2 Practice</span></div>';
   }
 
+  function phaseOneWatchHeader() {
+    var phase = getPhase("phase1");
+    return '<span class="ws-kicker">Phase 1</span><h1 class="ws-title">' + escapeHtml(phase.title) + '</h1><p class="ws-subtitle">' + escapeHtml(phase.description) + '</p>';
+  }
+
+  function phaseOnePracticeHeader() {
+    return '<span class="ws-kicker">Phase 1</span><h1 class="ws-title">Practice the Exercises</h1><p class="ws-subtitle">Apply the Think Clearly lessons in the MA storyline. Start with your own structure, then compare with AI when useful.</p>';
+  }
+
+  function stepTabs(active) {
+    return '<div class="ws-step-tabs"><div class="ws-step-tabs-inner"><a class="ws-step-tab ' + (active === "watch" ? "ws-active" : "") + '" href="' + memberHref("phase-1.html") + '">Step 1 &middot; Watch the lessons</a><a class="ws-step-tab ' + (active === "practice" ? "ws-active" : "") + '" href="' + memberHref("phase-1/practice/index.html") + '">Step 2 &middot; Practice the exercises</a></div></div>';
+  }
+
   function renderPhasePage(phaseKey) {
     if (!requireMember()) return;
     if (!phaseUnlocked(phaseKey)) {
@@ -729,8 +878,75 @@ const UTL_CONTENT = {
       return;
     }
     var activeId = sessionStorage.getItem("utl_active_lesson_" + phaseKey) || getPhase(phaseKey).lessons[0].id;
-    pageShell(phaseKey, phaseHeader(phaseKey) + videoSection(phaseKey, activeId) + exerciseSection(phaseKey) + bottomPhaseNav(phaseKey));
+    if (phaseKey === "phase1") {
+      pageShell(phaseKey, phaseOneWatchHeader() + videoSection(phaseKey, activeId) + '<div class="ws-gold-cta"><span>When you\'re done &rarr;</span><a href="' + memberHref("phase-1/practice/index.html") + '">Go to Practice the Exercises</a></div>', stepTabs("watch"));
+    } else {
+      pageShell(phaseKey, phaseHeader(phaseKey) + videoSection(phaseKey, activeId) + exerciseSection(phaseKey) + bottomPhaseNav(phaseKey));
+    }
     bindPhasePage(phaseKey);
+  }
+
+  function renderPhasePracticePage(phaseKey) {
+    if (!requireMember()) return;
+    if (phaseKey !== "phase1") {
+      renderPhasePage(phaseKey);
+      return;
+    }
+    var body = phaseOnePracticeHeader() + '<div class="ws-practice-reminder">Haven\'t watched the lessons yet? <a href="' + memberHref("phase-1.html") + '">Start with Step 1 &rarr;</a></div><section class="ws-practice-list">' + phaseOnePracticeCards() + '</section>';
+    pageShell("phase1", body, stepTabs("practice"));
+    bindPracticePage();
+  }
+
+  function phaseOnePracticeCards() {
+    var exercises = getPhase("phase1").exercises;
+    var grocery = exercises[0];
+    var groceryAi = exercises[1];
+    var notes = exercises[2];
+    var notesAi = exercises[4];
+    return practiceCard("practice-grocery", grocery, groceryAi, true) + practiceCard("practice-notes", notes, notesAi, false);
+  }
+
+  function mediaPreview(exercise) {
+    var url = exerciseContextUrl(exercise);
+    if (!url) return '<div class="ws-media-row ws-missing"><span class="ws-media-icon">&#9654;</span><span>Video coming soon</span></div>';
+    return '<div class="ws-context-embed">' + renderIframe(url, exercise.contextTitle || exercise.title) + '</div>';
+  }
+
+  function practiceCard(cardId, exercise, aiExercise, defaultOpen) {
+    var open = localStorage.getItem("utl_practice_open_" + cardId) === null ? defaultOpen : readBool("utl_practice_open_" + cardId);
+    return '<article class="ws-practice-card ' + (open ? "ws-open" : "") + '" data-practice-card="' + cardId + '"><button class="ws-practice-head" type="button" data-practice-toggle="' + cardId + '"><span><span class="ws-kicker">' + escapeHtml(exercise.type) + '</span><h3>' + escapeHtml(exercise.title) + '</h3><p>' + escapeHtml(exercise.description) + '</p></span><span class="ws-practice-chevron ws-disclosure-icon">' + (open ? "&minus;" : "+") + '</span></button><div class="ws-practice-body"><div class="ws-before-block"><h4>Before you start</h4><p>' + escapeHtml(exercise.contextBody) + '</p>' + mediaPreview(exercise) + '</div><div class="ws-practice-actions"><a class="ws-button ws-button-navy" href="' + appHref(exercise.appUrl) + '" data-exercise-visit="' + exercise.id + '">Start exercise &rarr;</a><button class="ws-button ws-button-dashed" type="button" data-ai-toggle="' + cardId + '">Compare with AI <span data-ai-arrow="' + cardId + '">&darr;</span></button></div><div class="ws-ai-panel" data-ai-panel="' + cardId + '"><p>Watch the AI setup, then compare how prompting changes the shape of the work.</p>' + mediaPreview(aiExercise) + '<p style="margin-top:14px"><a class="ws-button" href="' + appHref(aiExercise.appUrl) + '" data-exercise-visit="' + aiExercise.id + '">I\'ve watched it - start the AI exercise &rarr;</a></p></div></div></article>';
+  }
+
+  function bindPracticePage() {
+    bindContextToggles();
+    qsa("[data-practice-toggle]").forEach(function (button) {
+      button.addEventListener("click", function () {
+        var id = button.getAttribute("data-practice-toggle");
+        var card = qs('[data-practice-card="' + id + '"]');
+        if (!card) return;
+        var open = !card.classList.contains("ws-open");
+        card.classList.toggle("ws-open", open);
+        writeBool("utl_practice_open_" + id, open);
+        var chevron = button.querySelector(".ws-practice-chevron");
+        if (chevron) chevron.innerHTML = open ? "&minus;" : "+";
+      });
+    });
+    qsa("[data-ai-toggle]").forEach(function (button) {
+      button.addEventListener("click", function () {
+        var id = button.getAttribute("data-ai-toggle");
+        var panel = qs('[data-ai-panel="' + id + '"]');
+        var arrow = qs('[data-ai-arrow="' + id + '"]');
+        if (!panel) return;
+        var open = !panel.classList.contains("ws-open");
+        panel.classList.toggle("ws-open", open);
+        if (arrow) arrow.innerHTML = open ? "&uarr;" : "&darr;";
+      });
+    });
+    qsa("[data-exercise-visit]").forEach(function (link) {
+      link.addEventListener("click", function () {
+        writeBool(visitedKey(link.getAttribute("data-exercise-visit")), true);
+      });
+    });
   }
 
   function videoSection(phaseKey, activeId) {
@@ -800,7 +1016,7 @@ const UTL_CONTENT = {
   function exerciseSection(phaseKey) {
     var phase = getPhase(phaseKey);
     var doneVideos = videosDone(phaseKey);
-    return '<section class="ws-section ws-exercises"><div class="ws-section-head"><h2>Practice the Exercises</h2><span class="ws-count">' + phase.exercises.filter(function (exercise) { return exerciseDone(exercise); }).length + ' of ' + phase.exercises.length + ' done</span></div>' + introContextSection(phaseKey) + '<div class="ws-exercise-stack">' + phase.exercises.map(function (exercise) {
+    return '<section class="ws-section ws-exercises" id="exercises"><div class="ws-section-head"><h2>Practice the Exercises</h2><span class="ws-count">' + phase.exercises.filter(function (exercise) { return exerciseDone(exercise); }).length + ' of ' + phase.exercises.length + ' done</span></div>' + introContextSection(phaseKey) + '<div class="ws-exercise-stack">' + phase.exercises.map(function (exercise) {
       return exerciseUnit(phaseKey, exercise, doneVideos);
     }).join("") + '</div></section>';
   }
@@ -969,10 +1185,10 @@ const UTL_CONTENT = {
   }
 
   function adminAccordionHtml() {
-    var orientation = '<article class="ws-admin-phase ws-open"><button class="ws-admin-toggle" type="button"><span class="ws-admin-num">00</span><span><span class="ws-kicker">Orientation</span><strong>Welcome</strong><br><small>2 context sections &middot; 0 exercises</small></span><span>v</span></button><div class="ws-admin-body"><p class="ws-help">Orientation is context-only and has no separate lesson video.</p></div></article>';
+    var orientation = '<article class="ws-admin-phase ws-open"><button class="ws-admin-toggle" type="button"><span class="ws-admin-num">00</span><span><span class="ws-kicker">Orientation</span><strong>Welcome</strong><br><small>2 context sections &middot; 0 exercises</small></span><span class="ws-disclosure-icon">&minus;</span></button><div class="ws-admin-body"><p class="ws-help">Orientation is context-only and has no separate lesson video.</p></div></article>';
     return orientation + phases.map(function (phaseKey) {
       var phase = getPhase(phaseKey);
-      return '<article class="ws-admin-phase"><button class="ws-admin-toggle" type="button"><span class="ws-admin-num">0' + phaseNumbers[phaseKey] + '</span><span><span class="ws-kicker">' + phaseLabels[phaseKey] + '</span><strong>' + escapeHtml(phase.title) + '</strong><br><small>' + phase.lessons.length + ' lessons &middot; ' + phase.exercises.length + ' exercises</small></span><span>v</span></button><div class="ws-admin-body"><h3>Lesson Videos</h3>' + phase.lessons.map(function (lesson, index) {
+      return '<article class="ws-admin-phase"><button class="ws-admin-toggle" type="button"><span class="ws-admin-num">0' + phaseNumbers[phaseKey] + '</span><span><span class="ws-kicker">' + phaseLabels[phaseKey] + '</span><strong>' + escapeHtml(phase.title) + '</strong><br><small>' + phase.lessons.length + ' lessons &middot; ' + phase.exercises.length + ' exercises</small></span><span class="ws-disclosure-icon">+</span></button><div class="ws-admin-body"><h3>Lesson Videos</h3>' + phase.lessons.map(function (lesson, index) {
         return '<div class="ws-slot"><div class="ws-slot-head"><strong>Lesson ' + (index + 1) + ': ' + escapeHtml(lesson.title) + '</strong><span class="ws-pill ws-pill-muted">' + escapeHtml(lesson.duration) + '</span></div><div class="ws-save-row"><input class="ws-input" data-storage-key="utl_url_' + lesson.id + '" placeholder="Paste Google Drive or Vimeo URL" value="' + escapeHtml(lessonUrl(lesson)) + '"><button class="ws-button ws-button-navy" data-save-field type="button">Save</button></div><span class="ws-save-note"></span></div>';
       }).join("") + '<h3>Exercise Context</h3>' + phase.exercises.map(function (exercise) {
         return adminExerciseSlot(exercise);
@@ -996,7 +1212,10 @@ const UTL_CONTENT = {
     });
     qsa(".ws-admin-toggle").forEach(function (button) {
       button.addEventListener("click", function () {
-        button.closest(".ws-admin-phase").classList.toggle("ws-open");
+        var phase = button.closest(".ws-admin-phase");
+        phase.classList.toggle("ws-open");
+        var icon = button.querySelector(".ws-disclosure-icon");
+        if (icon) icon.innerHTML = phase.classList.contains("ws-open") ? "&minus;" : "+";
       });
     });
     qsa("[data-type-buttons]").forEach(function (group) {
@@ -1044,6 +1263,7 @@ const UTL_CONTENT = {
     renderIndex: renderIndex,
     renderOrientation: renderOrientation,
     renderPhasePage: renderPhasePage,
+    renderPhasePracticePage: renderPhasePracticePage,
     renderAdmin: renderAdmin,
     getPhase: getPhase
   };
