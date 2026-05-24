@@ -419,7 +419,7 @@
     .phase-layout-editor {
       display: grid;
       gap: 12px;
-      margin-top: 18px;
+      margin-top: 22px;
     }
 
     .phase-layout-row {
@@ -493,6 +493,18 @@
 
     .phase-layout-row.is-app {
       background: rgba(243, 237, 226, .62);
+    }
+
+    .phase-layout-row.is-video {
+      background: rgba(77, 112, 148, .11);
+      border-color: rgba(77, 112, 148, .2);
+    }
+
+    .phase-layout-videos {
+      display: grid;
+      gap: 12px;
+      margin-top: 22px;
+      margin-bottom: 20px;
     }
 
     .phase-layout-top {
@@ -594,6 +606,54 @@
     .embed-field {
       display: grid;
       gap: 6px;
+    }
+
+    .learning-video-grid {
+      display: grid;
+      gap: 14px;
+      margin-top: 16px;
+    }
+
+    .learning-video-card {
+      padding: 14px;
+      border: 1px solid rgba(0, 51, 102, .08);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, .7);
+    }
+
+    .learning-video-card h3 {
+      margin: 0 0 10px;
+      color: var(--navy);
+      font-family: 'Playfair Display', serif;
+      font-size: 20px;
+    }
+
+    .learning-video-row {
+      display: grid;
+      grid-template-columns: minmax(180px, .8fr) minmax(280px, 1.4fr) auto;
+      gap: 10px;
+      align-items: end;
+      padding: 10px 0;
+      border-top: 1px solid rgba(0, 0, 0, .06);
+    }
+
+    .learning-video-row:first-of-type {
+      border-top: 0;
+    }
+
+    .learning-video-meta {
+      display: grid;
+      gap: 3px;
+    }
+
+    .learning-video-meta strong {
+      color: var(--navy);
+      font-size: 13px;
+    }
+
+    .learning-video-meta span {
+      color: #777;
+      font-size: 12px;
     }
 
     .sync-list {
@@ -1031,7 +1091,7 @@
         <span class="section-label">Members</span>
         <h2>Orientation</h2>
         <div class="section-divider"></div>
-        <p class="description">Controls the Orientation section of the member hub. Add, rename, delete, or reorder context sub-sections.</p>
+        <p class="description">Controls the Orientation section of the member hub. Orientation does not have a separate lesson video; use the two context sub-sections below.</p>
         <div class="sync-actions">
           <button class="small-button" type="button" data-add-context="orientation">Add context sub-section</button>
           <button class="small-button secondary-button" type="button" data-save-layout-default="orientation">Set current layout as default</button>
@@ -1155,6 +1215,8 @@
       </section>
     </main>
   </div>
+
+  <script src="../member-login/content-config.js"></script>
 
   <script type="module">
     import { authorizeMember, sendSignInInvite } from "../assets/firebase.js";
@@ -1614,6 +1676,134 @@
       });
     }
 
+    function learningVideoValue(key, fallback = '') {
+      return localStorage.getItem(key) || fallback || '';
+    }
+
+    function lessonOrderForPhase(phaseId, lessons) {
+      const list = Array.isArray(lessons) ? lessons.slice() : [];
+      try {
+        const saved = JSON.parse(localStorage.getItem('utl_lesson_order_' + phaseId) || '[]');
+        if (Array.isArray(saved) && saved.length) {
+          list.sort((a, b) => {
+            const aIndex = saved.indexOf(a.id);
+            const bIndex = saved.indexOf(b.id);
+            return (aIndex === -1 ? 999 : aIndex) - (bIndex === -1 ? 999 : bIndex);
+          });
+        }
+      } catch (error) {
+        return list;
+      }
+      return list;
+    }
+
+    function saveLessonOrder(list) {
+      const phaseId = list.dataset.lessonLayout;
+      const ids = Array.from(list.querySelectorAll('[data-lesson-id]')).map((row) => row.dataset.lessonId);
+      localStorage.setItem('utl_lesson_order_' + phaseId, JSON.stringify(ids));
+    }
+
+    function bindLessonVideoDrag(root = document) {
+      root.querySelectorAll('[data-lesson-layout]').forEach((list) => {
+        if (list.dataset.dragBound === 'true') return;
+        list.dataset.dragBound = 'true';
+        let draggedRow = null;
+        list.addEventListener('dragstart', (event) => {
+          if (!event.target.classList.contains('phase-layout-handle')) return;
+          draggedRow = event.target.closest('.phase-layout-row');
+          if (!draggedRow) return;
+          draggedRow.classList.add('is-dragging');
+          event.dataTransfer.effectAllowed = 'move';
+          event.dataTransfer.setData('text/plain', draggedRow.dataset.lessonId || '');
+        });
+        list.addEventListener('dragover', (event) => {
+          if (!draggedRow) return;
+          event.preventDefault();
+          const targetRow = event.target.closest('.phase-layout-row');
+          if (!targetRow || targetRow === draggedRow || !list.contains(targetRow)) return;
+          const rect = targetRow.getBoundingClientRect();
+          const before = event.clientY < rect.top + rect.height / 2;
+          targetRow.classList.toggle('is-drop-before', before);
+          targetRow.classList.toggle('is-drop-after', !before);
+        });
+        list.addEventListener('dragleave', (event) => {
+          const row = event.target.closest('.phase-layout-row');
+          if (row) row.classList.remove('is-drop-before', 'is-drop-after');
+        });
+        list.addEventListener('drop', (event) => {
+          if (!draggedRow) return;
+          event.preventDefault();
+          const targetRow = event.target.closest('.phase-layout-row');
+          if (targetRow && targetRow !== draggedRow && list.contains(targetRow)) {
+            const rect = targetRow.getBoundingClientRect();
+            const before = event.clientY < rect.top + rect.height / 2;
+            list.insertBefore(draggedRow, before ? targetRow : targetRow.nextSibling);
+            saveLessonOrder(list);
+          }
+          list.querySelectorAll('.phase-layout-row').forEach((row) => row.classList.remove('is-drop-before', 'is-drop-after', 'is-dragging'));
+          draggedRow = null;
+        });
+        list.addEventListener('dragend', () => {
+          list.querySelectorAll('.phase-layout-row').forEach((row) => row.classList.remove('is-drop-before', 'is-drop-after', 'is-dragging'));
+          draggedRow = null;
+        });
+      });
+    }
+
+    function bindLearningVideoRows(root = document) {
+      root.querySelectorAll('[data-learning-video]').forEach((row) => {
+        if (row.dataset.bound === 'true') return;
+        row.dataset.bound = 'true';
+        const key = row.dataset.learningVideo;
+        const input = row.querySelector('input');
+        const saved = row.querySelector('.saved');
+        row.querySelector('button').addEventListener('click', () => {
+          if (input.value.trim()) localStorage.setItem(key, input.value.trim());
+          else localStorage.removeItem(key);
+          showSaved(saved);
+        });
+      });
+    }
+
+    function phaseLessonVideoControlsHtml(phaseId) {
+      const content = window.UTL_CONTENT;
+      if (!content || phaseId === 'orientation') return '';
+      const key = phaseId.replace('phase', 'phase');
+      const phase = content[key];
+      if (!phase || !Array.isArray(phase.lessons) || !phase.lessons.length) return '';
+      const orderedLessons = lessonOrderForPhase(phaseId, phase.lessons);
+      return `
+        <div class="phase-layout-videos" data-lesson-layout="${phaseId}">
+          ${orderedLessons.map((lesson, index) => `
+            <div class="phase-layout-row is-video" data-learning-video="utl_url_${lesson.id}" data-lesson-id="${lesson.id}" data-index="${index}">
+              <span class="phase-layout-handle" draggable="true" title="Drag to reorder" aria-label="Drag to reorder">⠿</span>
+              <div class="phase-layout-content">
+                <div class="phase-layout-top">
+                  <span class="phase-layout-kind">Lesson video</span>
+                  <span class="status-line">${escapeHtml(lesson.duration || '')}</span>
+                </div>
+                <div class="phase-layout-grid">
+                  <div class="phase-layout-field">
+                    <label>Lesson name</label>
+                    <input type="text" value="${escapeHtml(`Lesson ${index + 1}: ${lesson.title}`)}" readonly>
+                  </div>
+                  <div class="phase-layout-field">
+                    <label>Video URL</label>
+                    <input type="url" value="${escapeHtml(learningVideoValue(`utl_url_${lesson.id}`, lesson.videoUrl || ''))}" placeholder="Paste Google Drive or Vimeo URL">
+                  </div>
+                  <div class="phase-layout-field">
+                    <label>&nbsp;</label>
+                    <button class="small-button" type="button">Save video</button>
+                    <span class="saved">Saved ✓</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
     function parsePairs(value) {
       return value.split(',').map((pair) => {
         const parts = pair.split(':');
@@ -1785,7 +1975,9 @@
         const target = document.getElementById('embed-' + phaseId);
         if (!target) return;
         const layout = readPhaseLayout(phaseId);
-        target.innerHTML = `<div class="phase-layout-editor" data-phase-layout="${phaseId}"></div>`;
+        target.innerHTML = `${phaseLessonVideoControlsHtml(phaseId)}<div class="phase-layout-editor" data-phase-layout="${phaseId}"></div>`;
+        bindLearningVideoRows(target);
+        bindLessonVideoDrag(target);
         const list = target.querySelector('.phase-layout-editor');
         let draggedIndex = null;
 
@@ -2044,10 +2236,8 @@
       const p3Done = p3Keys.filter(isDone).length;
       const phase2Allowed = getValue('utl_phase2_status', 'show') === 'show';
       const phase3Allowed = getValue('utl_phase3_status', 'show') === 'show';
-      const phase2Unlocked = p1Done === p1Keys.length;
-      const phase2Live = phase2Allowed && phase2Unlocked;
-      const phase3Unlocked = phase2Live && p2Done === p2Keys.length;
-      const phase3Live = phase3Allowed && phase3Unlocked;
+      const phase2Live = phase2Allowed;
+      const phase3Live = phase3Allowed;
       const checkpointReady = phase3Live && p3Done === p3Keys.length;
       const bypassEnabled = getValue('utl_admin_preview_bypass', 'on') === 'on';
       updateMemberHubPreviewLink(bypassEnabled);
@@ -2069,13 +2259,13 @@
         </div>
         <div class="visibility-row">
           <span class="visibility-name">Phase 2</span>
-          <span>${phase2Allowed ? `${p1Done} of ${p1Keys.length} Phase 1 live exercises marked done.` : 'Phase 2 is hidden by the Member Workspace checklist.'}</span>
-          <span class="visibility-badge ${phase2Live ? 'is-live' : ''}">${phase2Live ? 'Visible' : phase2Allowed ? 'Waiting' : 'Hidden'}</span>
+          <span>${phase2Allowed ? 'Phase 2 link and page are visible in the member workspace.' : 'Phase 2 is hidden by the Member Workspace checklist.'}</span>
+          <span class="visibility-badge ${phase2Live ? 'is-live' : ''}">${phase2Live ? 'Visible' : 'Hidden'}</span>
         </div>
         <div class="visibility-row">
           <span class="visibility-name">Phase 3</span>
-          <span>${phase3Allowed ? `${p2Done} of ${p2Keys.length} Phase 2 live exercises marked done. Phase 2 must also be visible.` : 'Phase 3 is hidden by the Member Workspace checklist.'}</span>
-          <span class="visibility-badge ${phase3Live ? 'is-live' : ''}">${phase3Live ? 'Visible' : phase3Allowed ? 'Waiting' : 'Hidden'}</span>
+          <span>${phase3Allowed ? 'Phase 3 link and page are visible in the member workspace.' : 'Phase 3 is hidden by the Member Workspace checklist.'}</span>
+          <span class="visibility-badge ${phase3Live ? 'is-live' : ''}">${phase3Live ? 'Visible' : 'Hidden'}</span>
         </div>
         <div class="visibility-row">
           <span class="visibility-name">Checkpoint nudge</span>

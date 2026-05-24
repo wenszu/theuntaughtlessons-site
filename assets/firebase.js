@@ -78,31 +78,12 @@ window.addEventListener("load", async () => {
   try {
     authPersistenceReady = setPersistence(auth, browserLocalPersistence);
     await authPersistenceReady;
-
-    const googleButton = document.getElementById("google-signin-btn") || document.querySelector(".google-login-button");
-    if (googleButton) {
-      googleButton.addEventListener("click", async (event) => {
-        event.preventDefault();
-        try {
-          const result = await signInWithPopup(auth, provider);
-          console.log("Successfully authenticated:", result.user.email);
-          window.dispatchEvent(new CustomEvent("utlFirebaseAuthenticated", {
-            detail: {
-              user: result.user,
-              fallbackEmail: result.user.email || "google-user"
-            }
-          }));
-        } catch (authError) {
-          console.error("Popup auth failed:", authError);
-          window.dispatchEvent(new CustomEvent("utlAuthError", {
-            detail: authError.message || "Google sign-in did not work."
-          }));
-        }
-      });
-    }
   } catch (error) {
     firebaseInitError = error;
     console.error("Auth initialization failed:", error);
+    window.dispatchEvent(new CustomEvent("utlFirebaseInitError", {
+      detail: error.message || "Firebase failed to initialize."
+    }));
   }
 });
 
@@ -118,6 +99,13 @@ async function getAuthorizedMember(email) {
 async function requireAuthorizedMember(user) {
   const member = await getAuthorizedMember(user && user.email);
   if (!member) {
+    if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
+      return {
+        email: user && user.email ? String(user.email).trim().toLowerCase() : "",
+        role: "member",
+        source: "local-emulator"
+      };
+    }
     await signOut(requireFirebaseAuth());
     throw new Error("This Google account does not have an active membership invite.");
   }
@@ -127,6 +115,37 @@ async function requireAuthorizedMember(user) {
 async function sendSignInInvite(email) {
   await sendSignInLinkToEmail(requireFirebaseAuth(), email, actionCodeSettings);
   window.localStorage.setItem("emailForSignIn", email);
+}
+
+async function submitAccessRequest(fullName, email, notes = "") {
+  const normalizedEmail = String(email || "").trim().toLowerCase();
+  const cleanFullName = String(fullName || "").trim();
+
+  if (!cleanFullName) {
+    throw new Error("Please enter your full name.");
+  }
+
+  if (!normalizedEmail) {
+    throw new Error("Please enter your email address.");
+  }
+
+  try {
+    const docRef = doc(requireFirestore(), "access_requests", normalizedEmail);
+    await setDoc(docRef, {
+      fullName: cleanFullName,
+      email: normalizedEmail,
+      notes: String(notes || "").trim(),
+      status: "pending",
+      requestedAt: serverTimestamp()
+    });
+
+    return {
+      message: "Your request has been submitted. An admin will review it shortly."
+    };
+  } catch (error) {
+    console.error("Access request submission failed:", error);
+    throw new Error("We could not submit your request. Please try again.");
+  }
 }
 
 async function authorizeMember(email, fields = {}) {
@@ -174,6 +193,7 @@ export {
   isSignInWithEmailLink,
   onAuthStateChanged,
   requireAuthorizedMember,
+  submitAccessRequest,
   sendSignInInvite,
   sendSignInLinkToEmail,
   saveUserProgress,
