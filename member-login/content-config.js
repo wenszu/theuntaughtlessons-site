@@ -494,7 +494,6 @@ const UTL_CONTENT = {
     }
     injectStyles();
     document.body.classList.add("ws-page");
-    document.body.innerHTML = '<section class="ws-login-wrap"><article class="ws-login-card"><span class="ws-kicker">Syncing</span><h1 class="ws-title">Loading your workspace.</h1><p class="ws-subtitle">Checking your saved progress before we open the page.</p></article></section>';
     import(firebaseHref())
       .then(function (firebase) {
         return firebase.getMemberWorkspaceProgress();
@@ -1141,7 +1140,7 @@ const UTL_CONTENT = {
 
   function singlePracticeCard(cardId, exercise, defaultOpen) {
     var open = localStorage.getItem("utl_practice_open_" + cardId) === null ? defaultOpen : readBool("utl_practice_open_" + cardId);
-    return '<article class="ws-practice-card ' + (open ? "ws-open" : "") + '" data-practice-card="' + cardId + '"><button class="ws-practice-head" type="button" data-practice-toggle="' + cardId + '"><span><span class="ws-kicker">' + escapeHtml(exercise.type) + '</span><h3>' + escapeHtml(exercise.title) + '</h3><p>' + escapeHtml(exercise.description) + '</p></span><span class="ws-practice-chevron">' + (open ? "&minus;" : "+") + '</span></button><div class="ws-practice-body"><div class="ws-before-block"><h4>Before you start</h4><p>' + escapeHtml(exercise.contextBody) + '</p></div>' + mediaPreview(exercise) + '<a class="ws-button ws-button-navy" href="' + appHref(exercise.appUrl) + '" data-exercise-visit="' + exercise.id + '">Start Exercise &rarr;</a></div></article>';
+    return '<article class="ws-practice-card ' + (open ? "ws-open" : "") + '" data-practice-card="' + cardId + '"><button class="ws-practice-head" type="button" data-practice-toggle="' + cardId + '"><span><span class="ws-kicker">' + escapeHtml(exercise.type) + '</span><h3>' + escapeHtml(exercise.title) + '</h3><p>' + escapeHtml(exercise.description) + '</p></span><span class="ws-practice-chevron">' + (open ? "&minus;" : "+") + '</span></button><div class="ws-practice-body"><div class="ws-before-block"><h4>Before you start</h4><p>' + escapeHtml(exercise.contextBody) + '</p></div><div class="ws-practice-pane ws-active">' + mediaPreview(exercise) + '<a class="ws-button ws-button-navy" href="' + appHref(exercise.appUrl) + '" data-exercise-visit="' + exercise.id + '">Start Exercise &rarr;</a></div></div></article>';
   }
 
   function contextOnlyPracticeCard(cardId, context, defaultOpen) {
