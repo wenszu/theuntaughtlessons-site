@@ -368,7 +368,7 @@ const UTL_CONTENT = {
   }
 
   function firebaseHref() {
-    var version = "?v=20260525-mobile-auth";
+    var version = "?v=20260525-progress-save";
     if (inPhasePracticeRoot()) return "../../../assets/firebase.js" + version;
     return (inAdminRoot() ? "../assets/firebase.js" : "../assets/firebase.js") + version;
   }

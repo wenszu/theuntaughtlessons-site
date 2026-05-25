@@ -45,6 +45,27 @@ const actionCodeSettings = {
   handleCodeInApp: true
 };
 
+const exerciseProgressIds = {
+  "grocery-list": "p1-e1",
+  "grocery-list-ai": "p1-e2",
+  "messy-notes": "p1-e3",
+  "rushed-voice-memo": "p1-e4",
+  "rushed-voice-memo-ai": "p1-e5",
+  "chalkboard-notes": "p1-e6",
+  "issue-tree": "p2-e1",
+  "issue-tree-builder": "p2-e1",
+  "scqa-builder": "p2-e2",
+  "advisory-board": "p2-e3",
+  "write-to-aiko": "p2-e4",
+  "explain-to-aiko": "p2-e5",
+  "explain-to-aiko-120": "p2-e5",
+  "explain-to-aiko-60": "p2-e6",
+  "eisenhower-matrix": "p3-e1",
+  "i-have-bad-news": "p3-e2",
+  "lets-switch-hats": "p3-e3",
+  "speak-like-obama": "p3-e4"
+};
+
 function requireFirebaseAuth() {
   if (!auth) {
     throw firebaseInitError || new Error("Firebase Auth is not initialized.");
@@ -229,12 +250,12 @@ async function saveMemberWorkspaceProgress(progress = {}) {
 }
 
 async function saveUserProgress(exerciseId, exerciseName, exercisePayload = {}) {
-  const readyAuth = requireFirebaseAuth();
-  if (!readyAuth.currentUser || !readyAuth.currentUser.uid) {
+  const user = await getSignedInUser();
+  if (!user || !user.uid) {
     throw new Error("A signed-in Firebase user is required to save progress.");
   }
 
-  const docRef = doc(requireFirestore(), "users", readyAuth.currentUser.uid, "completed_exercises", exerciseId);
+  const docRef = doc(requireFirestore(), "users", user.uid, "completed_exercises", exerciseId);
   await setDoc(docRef, {
     status: "Done",
     exerciseName: exerciseName,
@@ -242,17 +263,28 @@ async function saveUserProgress(exerciseId, exerciseName, exercisePayload = {}) 
     savedPayload: exercisePayload
   }, { merge: true });
 
-  const userRef = doc(requireFirestore(), "users", readyAuth.currentUser.uid);
+  const canonicalId = exerciseProgressIds[exerciseId] || exerciseId;
+  const completedAt = new Date().toISOString();
+  const exerciseProgress = {
+    [exerciseId]: {
+      visited: true,
+      completed: true,
+      completedAt: completedAt,
+      title: exerciseName
+    }
+  };
+  exerciseProgress[canonicalId] = {
+    visited: true,
+    completed: true,
+    completedAt: completedAt,
+    title: exerciseName,
+    appKey: exerciseId
+  };
+
+  const userRef = doc(requireFirestore(), "users", user.uid);
   await setDoc(userRef, {
     workspaceProgress: {
-      exercises: {
-        [exerciseId]: {
-          visited: true,
-          completed: true,
-          completedAt: new Date().toISOString(),
-          title: exerciseName
-        }
-      }
+      exercises: exerciseProgress
     },
     lastSeenAt: serverTimestamp(),
     updatedAt: serverTimestamp()
