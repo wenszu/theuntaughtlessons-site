@@ -3,18 +3,25 @@ const UTL_CONTENT = {
     videoUrl: "https://drive.google.com/open?id=19q9wU__985LRFgY_3uWawiAVJJOmhI9k&usp=drive_copy",
     contexts: [
       {
+        id: "orientation-start",
+        contextType: "text",
+        contextUrl: "",
+        contextTitle: "Welcome to MA!",
+        contextBody: "You are now Chief of Staff to Aiko Mori, founder of MA, one of the most prestigious marketing agencies in the world. This is the biggest move of your career so far.\n\nAt MA, work moves quickly. Information arrives incomplete, priorities shift constantly, and decisions need to be made before everything feels ready. As the newest addition to Aiko's team, she expects you to bring clarity into that environment.\n\nThink clearly when information is cluttered. Speak concisely when attention is limited. Act confidently when there is pressure, uncertainty, or risk.\n\nYour role is simple: help Aiko move from chaos to clarity.\n\nTo prepare you for this role, Aiko has suggested that you take The Untaught Lessons, a course built around the real skills people are expected to have at work but are rarely taught directly. Over the next set of exercises, you will step into situations that mirror the kinds of problems MA teams deal with every day: messy updates, rushed conversations, unclear priorities, difficult decisions, and high-stakes communication.\n\nWelcome to MA."
+      },
+      {
         id: "orientation-welcome",
         legacyEmbedKey: "utl_embed_orientation_welcome",
         contextType: "video",
-        contextUrl: "https://drive.google.com/file/d/1_o8FmQXijNxUmUJpOJ3XgZ9hOUxcCiI1/view",
-        contextTitle: "Your first day at MA",
-        contextBody: "Welcome to the MA storyline. You are stepping into a Chief of Staff role where Aiko expects clarity, structure, and judgment from day one."
+        contextUrl: "https://drive.google.com/open?id=19q9wU__985LRFgY_3uWawiAVJJOmhI9k&usp=drive_copy",
+        contextTitle: "Welcome to The Untaught Lessons",
+        contextBody: "Start with a short welcome before moving into the program flow."
       },
       {
         id: "orientation-howto",
         legacyEmbedKey: "utl_embed_orientation_howto",
         contextType: "slides",
-        contextUrl: "https://docs.google.com/presentation/d/1p0bvALYVQ_U-FGFfUx47W05sQuy4GQRka_-N079n9J0/edit?slide=id.g3e2ad370f6d_0_361",
+        contextUrl: "https://drive.google.com/open?id=1Rw8tpfMir2c0LyV8FRIBNzoBmT5fUnVsu_n0-NftyXM&usp=drive_copy",
         contextTitle: "How this program works",
         contextBody: "Use this orientation to understand the learning rhythm: watch the setup, read the context, complete the practice, and mark your progress as you go."
       }
@@ -29,6 +36,16 @@ const UTL_CONTENT = {
       { id: "p1-l3", title: "Bolded Summary Phrase", duration: "11 min", videoUrl: "https://drive.google.com/open?id=1ZSKGHTUSZs2T3g3aTMgQ9fk9lHg_fN34&usp=drive_copy" },
       { id: "p1-l4", title: "Wait, What's the Problem Again?", duration: "14 min", videoUrl: "https://drive.google.com/open?id=1b2nAA0d-Rq-jetDuRQeAusttazKQa-Si&usp=drive_copy" },
       { id: "p1-l5", title: "Divide and Conquer", duration: "10 min", videoUrl: "https://drive.google.com/open?id=1hsdZTxdjNF2Yqsy9JRdC9jkc7wk5uGEO&usp=drive_copy" }
+    ],
+    introContexts: [
+      {
+        id: "p1-welcome-ma",
+        legacyEmbedKey: "utl_embed_p1_welcome_ma",
+        contextType: "video",
+        contextUrl: "https://drive.google.com/file/d/1BdvDKLdjPz931sPVHSwTvcZT0u72Rcn1/view",
+        contextTitle: "Welcome to MA",
+        contextBody: "The journey that you will undertake in the program."
+      }
     ],
     exercises: [
       {
@@ -137,38 +154,38 @@ const UTL_CONTENT = {
         legacyEmbedKey: "utl_embed_p2_aiko_question",
         title: "Issue Tree Builder",
         type: "Problem Breakdown",
-        description: "Build an issue tree from a central question with hypothesis, arguments, and supporting details.",
+        description: "Build an issue tree to break down the problem into solvable parts.",
         appUrl: "../apps/issue-tree-builder/index.html",
         contextType: "video",
         contextUrl: "https://drive.google.com/file/d/15AaNTTkiRsIVf90RfsmcSa3aEuFTqOAT/view?usp=vids_web",
         contextTitle: "Aiko liked your work. Now she has a question.",
-        contextBody: "Aiko needs a clear breakdown of the project challenge before the team meeting. Your job is to structure the problem so she can make a decision."
+        contextBody: "Break down the problem into MECE parts."
       },
       {
         id: "p2-e2",
         legacyDoneKey: "utl_p2_ex2_done",
         legacyEmbedKey: "utl_embed_p2_frame_answer",
-        title: "SCQA Builder",
+        title: "Framing the Storyline",
         type: "Storyline",
-        description: "Practice writing two SCQA formulations from a single context.",
+        description: "Using the issue tree, create an SCQA formulation.",
         appUrl: "../apps/scqa-builder/index.html",
         contextType: "video",
         contextUrl: "https://drive.google.com/open?id=168tYlq9fRUKl7NrlELHuwAPwAxC2_5yD&usp=drive_copy",
-        contextTitle: "Before you frame your answer",
-        contextBody: "You need to send Aiko a concise update on the project status. Use the SCQA framework to structure your message so it lands immediately."
+        contextTitle: "Create an executive-ready brief",
+        contextBody: "You will need to make this more readable for Aiko."
       },
       {
         id: "p2-e3",
         legacyDoneKey: "utl_p2_ex3_done",
         legacyEmbedKey: "utl_embed_p2_outside_perspectives",
-        title: "Advisory board with AI",
+        title: "Advisory Board with AI",
         type: "AI Advisory Board",
         description: "Use AI to simulate outside perspectives before committing to a recommendation.",
         appUrl: "../apps/advisory-board/index.html",
-        contextType: "slides",
-        contextUrl: "https://docs.google.com/presentation/d/1p0bvALYVQ_U-FGFfUx47W05sQuy4GQRka_-N079n9J0/edit?slide=id.g3e2dc34c604_0_64",
+        contextType: "video",
+        contextUrl: "https://drive.google.com/file/d/1hNWuA1HBbZI57fUfDgdjlqLkJHYHjf1Q/view?usp=vids_web",
         contextTitle: "Get outside perspectives before you commit",
-        contextBody: "Before you lock in your answer, use outside perspectives to test what you may be missing."
+        contextBody: "Find expert opinions on your outputs."
       },
       {
         id: "p2-e4",
@@ -181,7 +198,7 @@ const UTL_CONTENT = {
         contextType: "video",
         contextUrl: "https://drive.google.com/open?id=1Tw0MhCjy5Tkdodjy8LvIEB-XEEuK4Di3&usp=drive_copy",
         contextTitle: "Aiko does not have time to read everything",
-        contextBody: "Aiko needs the answer first. Turn your structure into a short email she can read quickly and act on."
+        contextBody: "Aiko needed the reply yesterday. She needs the email ASAP."
       },
       {
         id: "p2-e5",
@@ -192,9 +209,9 @@ const UTL_CONTENT = {
         description: "Prepare and record a 120-second spoken explanation of the same answer.",
         appUrl: "../apps/explain-to-aiko/index.html",
         contextType: "video",
-        contextUrl: "https://drive.google.com/file/d/10b0x6cTO1rf3DYlTBbDm4tNQ4cirhWzh/view?usp=vids_web",
-        contextTitle: "She bumped into you in the hallway",
-        contextBody: "You do not have the luxury of a long memo. Explain the key points out loud in a clear, structured way."
+        contextUrl: "https://drive.google.com/file/d/17Nbk0w7C3MuEfwb_gsBn9oipmZ85exJ4/view",
+        contextTitle: "You bumped into Aiko",
+        contextBody: "Aiko said you can send her a quick voice message; she does not mind this time."
       },
       {
         id: "p2-e6",
@@ -204,8 +221,8 @@ const UTL_CONTENT = {
         type: "Elevator Pitch",
         description: "Compress the same message into 60 seconds or less.",
         appUrl: "../apps/explain-to-aiko-60/index.html",
-        contextType: "slides",
-        contextUrl: "https://docs.google.com/presentation/d/1p0bvALYVQ_U-FGFfUx47W05sQuy4GQRka_-N079n9J0/edit?slide=id.g3e2dc34c604_0_430",
+        contextType: "video",
+        contextUrl: "https://drive.google.com/file/d/1LSc2dnbgk855FeG7R4WvWvf8P0kLJCpb/view",
         contextTitle: "Now compress it",
         contextBody: "Now, instead of 120 seconds, see if you can deliver the key points in 60 seconds or less."
       }
@@ -238,7 +255,7 @@ const UTL_CONTENT = {
         legacyEmbedKey: "utl_embed_p3_lead_role",
         title: "The Art of Saying No",
         type: "Prioritize",
-        description: "Decide what to deprioritize when everything feels urgent.",
+        description: "Everything feels important, but not everything is.",
         appUrl: "../apps/eisenhower-matrix/index.html",
         contextType: "video",
         contextUrl: "https://drive.google.com/open?id=18UnP9dxWd31EeCfEfODiPBQ-Jfyxbd8Q&usp=drive_copy",
@@ -251,7 +268,7 @@ const UTL_CONTENT = {
         legacyEmbedKey: "utl_embed_p3_bad_news",
         title: "I Have Bad News...",
         type: "Difficult Conversation",
-        description: "Practice delivering hard news clearly while preserving trust.",
+        description: "Learn the art of being comfortable with difficult conversations.",
         appUrl: "../apps/i-have-bad-news/index.html",
         contextType: "video",
         contextUrl: "https://drive.google.com/file/d/1m04hT3TUZkaKZN8-f0zlWWOBLA1DS6fF/view?usp=vids_web",
@@ -264,7 +281,7 @@ const UTL_CONTENT = {
         legacyEmbedKey: "utl_embed_p3_read_room",
         title: "Let's Switch Hats",
         type: "Perspective Taking",
-        description: "See the situation from the other person's side before deciding what to say.",
+        description: "You will need to understand how others think.",
         appUrl: "../apps/lets-switch-hats/index.html",
         contextType: "video",
         contextUrl: "https://drive.google.com/file/d/1UVaAj5EG7Kg4c1uZhXaR0bqwasgtjQgS/view?usp=vids_web",
@@ -277,12 +294,12 @@ const UTL_CONTENT = {
         legacyEmbedKey: "utl_embed_p3_eyes_on_you",
         title: "Speak Like Obama",
         type: "Executive Presence",
-        description: "Practice speaking with rhythm, restraint, and conviction when all eyes are on you.",
+        description: "Your task involves two things: being clear, and being impactful. Make it land like Obama.",
         appUrl: "../apps/speak-like-obama/index.html",
         contextType: "video",
         contextUrl: "https://drive.google.com/file/d/1ndtAyGJpud5jDA5pLyYoGmqOJOeFabPO/view?usp=vids_web",
         contextTitle: "All eyes are on you",
-        contextBody: "You have the room's attention. Practice making your message steady, memorable, and easy to follow."
+        contextBody: "Act as your team's voice and lead with confidence."
       }
     ]
   }
@@ -299,6 +316,8 @@ const UTL_CONTENT = {
   var phaseNumbers = { phase1: 1, phase2: 2, phase3: 3 };
   var phaseLabels = { phase1: "Phase 1", phase2: "Phase 2", phase3: "Phase 3" };
   var phaseFiles = { phase1: "phase-1.html", phase2: "phase-2.html", phase3: "phase-3.html" };
+  var remoteProgressLoaded = false;
+  var remoteProgressSaveTimer = null;
   var phaseDescriptions = {
     phase1: "Learn to sort noise into signal.",
     phase2: "Turn structure into concise communication.",
@@ -315,7 +334,8 @@ const UTL_CONTENT = {
 
   function adminPreviewMode() {
     var params = new URLSearchParams(window.location.search || "");
-    return params.get("mode") === "admin" && localStorage.getItem("utl_admin_preview_bypass") !== "off";
+    var adminSession = params.get("mode") === "admin" || localStorage.getItem(ADMIN_KEY) === "true";
+    return adminSession && localStorage.getItem("utl_admin_preview_bypass") === "on";
   }
 
   function memberHref(file) {
@@ -347,6 +367,11 @@ const UTL_CONTENT = {
     return path;
   }
 
+  function firebaseHref() {
+    if (inPhasePracticeRoot()) return "../../../assets/firebase.js";
+    return inAdminRoot() ? "../assets/firebase.js" : "../assets/firebase.js";
+  }
+
   function qs(selector, root) {
     return (root || document).querySelector(selector);
   }
@@ -363,6 +388,129 @@ const UTL_CONTENT = {
     localStorage.setItem(key, value ? "true" : "false");
   }
 
+  function allLessons() {
+    return phases.reduce(function (items, phaseKey) {
+      return items.concat(getPhase(phaseKey).lessons || []);
+    }, []);
+  }
+
+  function allExercises() {
+    return phases.reduce(function (items, phaseKey) {
+      return items.concat((getPhase(phaseKey).exercises || []).map(function (exercise) {
+        exercise.phaseKey = phaseKey;
+        return exercise;
+      }));
+    }, []);
+  }
+
+  function exerciseAppKey(exercise) {
+    var match = String(exercise && exercise.appUrl || "").match(/\/apps\/([^/]+)/);
+    return match ? match[1] : "";
+  }
+
+  function progressSnapshot() {
+    var lessons = {};
+    var exercises = {};
+    phases.forEach(function (phaseKey) {
+      orderedLessons(phaseKey).forEach(function (lesson) {
+        lessons[lesson.id] = { watched: readBool(watchedKey(lesson.id)) };
+      });
+    });
+    allExercises().forEach(function (exercise) {
+      var appKey = exerciseAppKey(exercise);
+      exercises[exercise.id] = {
+        visited: readBool(visitedKey(exercise.id)) || (appKey ? readBool(visitedKey(appKey)) : false),
+        completed: exerciseDone(exercise) || (appKey ? readBool(doneKey(appKey)) : false),
+        phase: exercise.phaseKey || "",
+        title: exercise.title,
+        appKey: appKey
+      };
+    });
+    return {
+      version: 1,
+      orientation: {
+        ready: readBool("utl_orientation_ready"),
+        open: readBool("utl_orientation_open")
+      },
+      lessons: lessons,
+      exercises: exercises,
+      phases: {
+        phase1: { videosDone: readBool(phaseVideosDoneKey("phase1")), exercisesDone: readBool(phaseDoneKey("phase1")) },
+        phase2: { videosDone: readBool(phaseVideosDoneKey("phase2")), exercisesDone: readBool(phaseDoneKey("phase2")) },
+        phase3: { videosDone: readBool(phaseVideosDoneKey("phase3")), exercisesDone: readBool(phaseDoneKey("phase3")) }
+      },
+      updatedAtClient: new Date().toISOString()
+    };
+  }
+
+  function applyRemoteProgress(progress) {
+    if (!progress || typeof progress !== "object") return;
+    var orientation = progress.orientation || {};
+    if (typeof orientation.ready === "boolean") writeBool("utl_orientation_ready", orientation.ready);
+    if (typeof orientation.open === "boolean") writeBool("utl_orientation_open", orientation.open);
+
+    var remoteLessons = progress.lessons || {};
+    allLessons().forEach(function (lesson) {
+      var saved = remoteLessons[lesson.id];
+      if (saved && typeof saved.watched === "boolean") writeBool(watchedKey(lesson.id), saved.watched);
+    });
+
+    var remoteExercises = progress.exercises || {};
+    allExercises().forEach(function (exercise) {
+      var appKey = exerciseAppKey(exercise);
+      var saved = remoteExercises[exercise.id] || (appKey ? remoteExercises[appKey] : null);
+      if (!saved) return;
+      if (typeof saved.visited === "boolean") writeBool(visitedKey(exercise.id), saved.visited);
+      if (typeof saved.completed === "boolean") writeExerciseDone(exercise, saved.completed);
+    });
+
+    phases.forEach(function (phaseKey) {
+      videosDone(phaseKey);
+      exercisesDone(phaseKey);
+    });
+  }
+
+  function saveRemoteProgressNow() {
+    if (!readBool(SESSION_KEY)) return Promise.resolve();
+    return import(firebaseHref())
+      .then(function (firebase) {
+        return firebase.saveMemberWorkspaceProgress(progressSnapshot());
+      })
+      .catch(function (error) {
+        console.warn("Firestore workspace progress save failed.", error);
+      });
+  }
+
+  function queueRemoteProgressSave() {
+    if (remoteProgressSaveTimer) clearTimeout(remoteProgressSaveTimer);
+    remoteProgressSaveTimer = setTimeout(saveRemoteProgressNow, 250);
+  }
+
+  function ensureRemoteProgressLoaded(callback) {
+    if (!readBool(SESSION_KEY) || remoteProgressLoaded) {
+      callback();
+      return;
+    }
+    injectStyles();
+    document.body.classList.add("ws-page");
+    document.body.innerHTML = '<section class="ws-login-wrap"><article class="ws-login-card"><span class="ws-kicker">Syncing</span><h1 class="ws-title">Loading your workspace.</h1><p class="ws-subtitle">Checking your saved progress before we open the page.</p></article></section>';
+    import(firebaseHref())
+      .then(function (firebase) {
+        return firebase.getMemberWorkspaceProgress();
+      })
+      .then(function (progress) {
+        if (progress) applyRemoteProgress(progress);
+        else return saveRemoteProgressNow();
+      })
+      .catch(function (error) {
+        console.warn("Firestore workspace progress load failed.", error);
+      })
+      .then(function () {
+        remoteProgressLoaded = true;
+        callback();
+      });
+  }
+
   function escapeHtml(value) {
     return String(value == null ? "" : value)
       .replace(/&/g, "&amp;")
@@ -370,6 +518,12 @@ const UTL_CONTENT = {
       .replace(/>/g, "&gt;")
       .replace(/"/g, "&quot;")
       .replace(/'/g, "&#039;");
+  }
+
+  function textParagraphs(value) {
+    return String(value || "").split(/\n{2,}/).map(function (paragraph) {
+      return "<p>" + escapeHtml(paragraph.trim()) + "</p>";
+    }).join("");
   }
 
   function initials(value) {
@@ -497,7 +651,7 @@ const UTL_CONTENT = {
 
   function phaseUnlocked(phaseKey) {
     if (phaseKey === "phase1") return true;
-    if (adminPreviewMode()) return localStorage.getItem("utl_" + phaseKey + "_status") !== "hide";
+    if (adminPreviewMode()) return true;
     if (phaseKey === "phase2") return exercisesDone("phase1") && localStorage.getItem("utl_phase2_status") !== "hide";
     if (phaseKey === "phase3") return exercisesDone("phase2") && localStorage.getItem("utl_phase3_status") !== "hide";
     return true;
@@ -596,9 +750,9 @@ const UTL_CONTENT = {
       ".ws-nav-drop{position:relative;display:inline-flex}.ws-nav-trigger{border-left:0;border-right:0;border-top:0;background:transparent;padding:0;cursor:pointer}.ws-phase-menu{position:absolute;top:52px;left:0;width:300px;background:#fff;color:var(--ws-navy);border:1px solid var(--ws-line);border-radius:8px;box-shadow:0 18px 40px rgba(0,51,102,.22);overflow:hidden;z-index:80;display:none}.ws-nav-drop:hover .ws-phase-menu,.ws-nav-drop:focus-within .ws-phase-menu{display:block}.ws-phase-menu:before{content:attr(data-label);display:block;padding:12px 16px 8px;color:var(--ws-steel);font:700 11px 'Roboto Mono',monospace;letter-spacing:.14em;text-transform:uppercase}.ws-phase-menu a{display:flex;gap:12px;align-items:center;padding:13px 16px;color:var(--ws-navy);text-decoration:none}.ws-phase-menu a:hover{background:#f4eddf}.ws-phase-menu strong{display:block;font-size:16px}.ws-phase-menu small{display:block;margin-top:2px;color:var(--ws-steel);font-size:13px}.ws-phase-menu .ws-media-icon{margin:0;width:36px;height:36px;border-radius:8px}",
       ".ws-user{position:relative;display:flex;align-items:center;gap:10px;justify-content:flex-end}.ws-user-email{max-width:170px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:rgba(255,255,255,.72);font:700 12px Lato,sans-serif;letter-spacing:0}.ws-avatar{width:36px;height:36px;border-radius:999px;border:0;background:var(--ws-gold);color:var(--ws-navy);display:grid;place-items:center;font:700 12px 'Roboto Mono',monospace;cursor:pointer;overflow:hidden;padding:0}.ws-avatar img,.ws-profile-avatar img{width:100%;height:100%;object-fit:cover;display:block}.ws-profile-menu{position:absolute;right:0;top:100%;min-width:200px;max-width:240px;background:#fff;color:var(--ws-charcoal);border:1px solid var(--ws-line);border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.15);padding:0;z-index:200;overflow:hidden}.ws-profile-menu:before{content:'';position:absolute;top:-8px;right:18px;width:16px;height:16px;background:var(--ws-navy);transform:rotate(45deg)}.ws-profile-menu[hidden]{display:none}.ws-profile-head{position:relative;display:flex;align-items:center;gap:13px;background:var(--ws-navy);color:#fff;padding:14px 16px 13px;border-bottom:3px solid var(--ws-gold)}.ws-profile-avatar{width:46px;height:46px;border-radius:999px;background:var(--ws-gold);color:var(--ws-navy);display:grid;place-items:center;overflow:hidden;font:700 14px 'Roboto Mono',monospace;flex:0 0 auto}.ws-profile-name{margin:0;color:#fff;font-size:15px;font-weight:700;line-height:1.15}.ws-profile-role{margin:4px 0 0;color:var(--ws-gold);font:700 9.5px 'Roboto Mono',monospace;letter-spacing:.12em;text-transform:uppercase}.ws-profile-section{padding:11px 16px 10px;border-bottom:1px solid var(--ws-line)}.ws-profile-section:last-child{border-bottom:0}.ws-profile-section-label{display:block;margin:0 0 7px;color:var(--ws-gold);font:700 9.5px 'Roboto Mono',monospace;letter-spacing:.12em;text-transform:uppercase}.ws-profile-menu a,.ws-profile-menu button{width:100%;min-height:36px;display:flex;align-items:center;gap:12px;border:0;background:transparent;color:var(--ws-navy);font:700 14px Lato,sans-serif;text-align:left;text-decoration:none;cursor:pointer;padding:4px 0}.ws-profile-menu a:hover,.ws-profile-menu button:hover{text-decoration:underline}.ws-profile-icon{width:18px;color:var(--ws-steel);display:inline-flex;justify-content:center;font-size:16px;line-height:1}.ws-profile-menu .ws-admin-link .ws-profile-icon{color:var(--ws-gold)}.ws-profile-menu .ws-logout{color:var(--ws-steel)}",
       ".ws-main{padding:54px 0 72px}.ws-kicker{display:inline-flex;color:var(--ws-gold);font:700 11px 'Roboto Mono',monospace;letter-spacing:.1em;text-transform:uppercase}.ws-title{margin:10px 0 12px;color:var(--ws-navy);font:700 clamp(40px,6vw,66px)/.98 'Playfair Display',serif}.ws-subtitle{max-width:760px;margin:0;color:var(--ws-steel);font-size:18px;line-height:1.55}",
-      ".ws-login-wrap{min-height:calc(100vh - 54px);display:grid;place-items:center;padding:48px 20px}.ws-login-card{width:min(460px,100%);background:#fff;border:1px solid var(--ws-line);border-radius:12px;padding:30px;box-shadow:0 18px 45px rgba(0,51,102,.1)}.ws-login-card .ws-subtitle{font-size:17px}.ws-form{display:grid;gap:12px;margin-top:24px}.ws-form label{color:var(--ws-navy);font-weight:700}.ws-login-divider{display:flex;align-items:center;gap:12px;margin:18px 0;color:var(--ws-steel);font:700 10px 'Roboto Mono',monospace;letter-spacing:.08em;text-transform:uppercase}.ws-login-divider:before,.ws-login-divider:after{content:'';height:1px;background:var(--ws-line);flex:1}.ws-input,.ws-textarea,.ws-select{width:100%;min-height:46px;border:1px solid rgba(0,51,102,.22);border-radius:8px;padding:10px 12px;background:#fff;color:var(--ws-charcoal);font:400 15px Lato,sans-serif}.ws-textarea{min-height:88px;resize:vertical}.ws-message{min-height:20px;margin:0;color:#8A1F1F;font-weight:700}.ws-message.ws-success{color:var(--ws-green)}.ws-google-button{min-height:40px;width:auto;gap:9px;background:#fff;border:1px solid #747775;border-radius:999px;color:#1f1f1f;text-transform:none;font:700 13px Arial,sans-serif;letter-spacing:0;padding:0 15px 0 11px}.ws-google-button:hover{background:#f8fafd;filter:none}.ws-google-mark{position:relative;width:18px;height:18px;border-radius:999px;background:conic-gradient(from -45deg,#4285F4 0 25%,#34A853 0 50%,#FBBC05 0 75%,#EA4335 0 100%);display:inline-block;flex:0 0 auto}.ws-google-mark:before{content:'';position:absolute;inset:4px;background:#fff;border-radius:999px}.ws-google-mark:after{content:'';position:absolute;right:0;top:7px;width:9px;height:4px;background:#4285F4;border-radius:0 2px 2px 0}",
-      ".ws-home-stack{display:grid;gap:26px}.ws-orientation-card{background:#fff;border:1px solid var(--ws-line);border-radius:12px;overflow:hidden}.ws-orientation-head{width:100%;border:0;background:#fff;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:14px;padding:18px 20px;text-align:left;cursor:pointer}.ws-start-badge{background:var(--ws-navy);color:var(--ws-gold);border-radius:3px;padding:5px 9px;font:700 9px 'Roboto Mono',monospace;letter-spacing:.1em;text-transform:uppercase}.ws-orientation-title{display:block;color:var(--ws-navy);font-weight:700}.ws-orientation-sub{display:block;margin-top:2px;color:var(--ws-steel);font-size:13px}.ws-disclosure-icon{width:34px;height:34px;border-radius:8px;background:var(--ws-gold);color:#fff;display:inline-grid;place-items:center;font:700 22px/1 Lato,sans-serif}.ws-orientation-body{display:none;padding:0 20px 20px}.ws-orientation-card.ws-open .ws-orientation-body{display:block}.ws-orientation-copy{margin:0 0 16px;color:var(--ws-charcoal);line-height:1.55}.ws-ready-row{display:flex;gap:10px;align-items:center;margin-top:14px;color:var(--ws-navy);font-weight:700}.ws-ready-row input{width:18px;height:18px}.ws-how-row{margin-top:14px}.ws-how-toggle{width:100%;border:0;background:#efe7d9;border-radius:8px;display:flex;align-items:center;gap:12px;padding:12px;color:var(--ws-navy);text-align:left;cursor:pointer}.ws-how-toggle .ws-media-icon{width:26px;height:26px;font-size:12px}.ws-how-toggle .ws-disclosure-icon{margin-left:auto;width:28px;height:28px;font-size:18px}.ws-how-body{display:none;padding:14px 2px 0}.ws-how-body.ws-open{display:block}.ws-step-tabs{position:sticky;top:54px;z-index:25;background:var(--ws-cream);border-bottom:1px solid var(--ws-line)}.ws-step-tabs-inner{width:min(1180px,calc(100% - 32px));margin:0 auto;display:flex;gap:24px}.ws-step-tab{min-height:46px;display:inline-flex;align-items:center;border-bottom:3px solid transparent;color:var(--ws-steel);font:700 11px 'Roboto Mono',monospace;letter-spacing:.06em;text-transform:uppercase;text-decoration:none}.ws-step-tab.ws-active{color:var(--ws-navy);border-bottom-color:var(--ws-gold)}.ws-breadcrumb{display:none}.ws-gold-cta{margin-top:18px;background:var(--ws-gold);border-radius:10px;padding:16px 18px;display:flex;justify-content:space-between;align-items:center;gap:16px;color:var(--ws-navy);font-weight:700}.ws-gold-cta a{color:var(--ws-navy);font:700 12px 'Roboto Mono',monospace;text-transform:uppercase;text-decoration:none}.ws-phase-card .ws-dot.empty{background:#fff;border:1px solid var(--ws-line)}.ws-phase-card .ws-dot.half{background:linear-gradient(90deg,var(--ws-gold) 50%,#fff 50%);border:1px solid var(--ws-gold)}.ws-phase-card .ws-dot.solid{background:var(--ws-gold);border:1px solid var(--ws-gold)}.ws-locked .ws-dot{background:#e4e4e4!important;border-color:#d6d6d6!important}.ws-locked .ws-phase-stripe{background:#d5d5d5}.ws-locked .ws-button{background:#f7f5ef;border-color:#d8d2c8;color:#9a9389}.ws-pill-locked{background:#efefef;color:#9a9389}.ws-pill-progress{background:rgba(238,163,32,.18);color:var(--ws-navy)}",
-      ".ws-practice-reminder{margin:24px 0;background:#fff7e8;border:1px solid rgba(238,163,32,.35);border-radius:10px;padding:14px 16px;color:var(--ws-navy);font-weight:700}.ws-practice-reminder a{color:var(--ws-navy);text-decoration:underline;text-underline-offset:3px}.ws-practice-list{display:grid;gap:18px}.ws-practice-card{background:#fff;border:1px solid var(--ws-line);border-radius:12px;overflow:hidden}.ws-practice-head{width:100%;border:0;background:#fff;display:grid;grid-template-columns:1fr auto;gap:14px;padding:22px;text-align:left;cursor:pointer}.ws-practice-head h3{margin:6px 0;color:var(--ws-navy);font:700 30px 'Playfair Display',serif}.ws-practice-head p{margin:0;color:var(--ws-steel);line-height:1.45}.ws-practice-chevron{color:var(--ws-steel);font-size:20px}.ws-practice-body{display:none;padding:0 22px 22px}.ws-practice-card.ws-open .ws-practice-body{display:block}.ws-before-block{background:#fbf6ed;border:1px solid var(--ws-line);border-radius:10px;padding:18px;margin-bottom:16px}.ws-before-block h4{margin:0 0 8px;color:var(--ws-navy);font:700 12px 'Roboto Mono',monospace;letter-spacing:.08em;text-transform:uppercase}.ws-before-block p{margin:0 0 14px;line-height:1.5}.ws-practice-actions{display:grid;grid-template-columns:1fr 1fr;gap:12px}.ws-button-dashed{background:#fff;border-style:dashed;border-color:rgba(0,51,102,.38);color:var(--ws-navy)}.ws-ai-panel{display:none;margin-top:14px;border:1px solid var(--ws-line);border-radius:10px;padding:18px;background:#fff}.ws-ai-panel.ws-open{display:block}.ws-ai-panel p{margin:0 0 14px;color:var(--ws-steel);font-weight:700}",
+      ".ws-login-wrap{min-height:calc(100vh - 54px);display:grid;place-items:center;padding:48px 20px}.ws-login-card{width:min(460px,100%);background:#fff;border:1px solid var(--ws-line);border-radius:12px;padding:30px;box-shadow:0 18px 45px rgba(0,51,102,.1)}.ws-login-card .ws-subtitle{font-size:17px}.ws-form{display:grid;gap:12px;margin-top:24px}.ws-form label{color:var(--ws-navy);font-weight:700}.ws-login-card .ws-form .ws-button,.ws-login-card .ws-google-button{width:100%}.ws-login-divider{display:flex;align-items:center;gap:12px;margin:18px 0;color:var(--ws-steel);font:700 10px 'Roboto Mono',monospace;letter-spacing:.08em;text-transform:uppercase}.ws-login-divider:before,.ws-login-divider:after{content:'';height:1px;background:var(--ws-line);flex:1}.ws-input,.ws-textarea,.ws-select{width:100%;min-height:46px;border:1px solid rgba(0,51,102,.22);border-radius:8px;padding:10px 12px;background:#fff;color:var(--ws-charcoal);font:400 15px Lato,sans-serif}.ws-textarea{min-height:88px;resize:vertical}.ws-message{min-height:20px;margin:0;color:#8A1F1F;font-weight:700}.ws-message.ws-success{color:var(--ws-green)}.ws-login-card .ws-google-button{position:relative;min-height:46px;gap:10px;background:#fff;border:1px solid #747775;border-radius:8px;color:#1f1f1f;text-transform:none;font:500 14px/20px Roboto,Arial,sans-serif;letter-spacing:0;padding:0 12px;box-shadow:none}.ws-login-card .ws-google-button:hover{background:#f8fafd;border-color:#3c4043;filter:none}.ws-login-card .ws-google-button:focus-visible{outline:2px solid #4285F4;outline-offset:2px}.ws-login-card .ws-google-button[disabled]{background:#f1f3f4;color:#5f6368;border-color:#dadce0}.ws-google-mark{width:20px;height:20px;display:inline-block;flex:0 0 auto;background:center/contain no-repeat url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath fill='%23EA4335' d='M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z'/%3E%3Cpath fill='%234285F4' d='M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z'/%3E%3Cpath fill='%23FBBC05' d='M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24s.92 7.54 2.56 10.78l7.97-6.19z'/%3E%3Cpath fill='%2334A853' d='M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z'/%3E%3Cpath fill='none' d='M0 0h48v48H0z'/%3E%3C/svg%3E\")}",
+      ".ws-home-stack{display:grid;gap:26px}.ws-orientation-card{background:#fff;border:1px solid var(--ws-line);border-radius:12px;overflow:hidden}.ws-orientation-head{width:100%;border:0;background:#fff;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:14px;padding:18px 20px;text-align:left;cursor:pointer}.ws-start-badge{background:var(--ws-navy);color:var(--ws-gold);border-radius:3px;padding:5px 9px;font:700 9px 'Roboto Mono',monospace;letter-spacing:.1em;text-transform:uppercase}.ws-orientation-title{display:block;color:var(--ws-navy);font-weight:700}.ws-orientation-sub{display:block;margin-top:2px;color:var(--ws-steel);font-size:13px}.ws-disclosure-icon{width:34px;height:34px;border-radius:8px;background:var(--ws-gold);color:#fff;display:inline-grid;place-items:center;font:700 22px/1 Lato,sans-serif}.ws-orientation-body{display:none;padding:0 20px 20px}.ws-orientation-card.ws-open .ws-orientation-body{display:block}.ws-orientation-copy{max-width:820px;margin:0 0 20px;color:var(--ws-charcoal);font-size:17px;line-height:1.68}.ws-orientation-copy h3{margin:0 0 14px;color:var(--ws-navy);font:700 30px/1.1 'Playfair Display',serif}.ws-orientation-copy p{margin:0 0 13px}.ws-orientation-copy p:last-child{margin-bottom:0}.ws-ready-row{display:flex;gap:10px;align-items:center;margin-top:14px;color:var(--ws-navy);font-weight:700}.ws-ready-row input{width:18px;height:18px}.ws-how-row{margin-top:14px}.ws-how-toggle{width:100%;border:0;background:#efe7d9;border-radius:8px;display:flex;align-items:center;gap:12px;padding:12px;color:var(--ws-navy);text-align:left;cursor:pointer}.ws-how-toggle .ws-media-icon{width:26px;height:26px;font-size:12px}.ws-how-toggle .ws-disclosure-icon{margin-left:auto;width:28px;height:28px;font-size:18px}.ws-how-body{display:none;padding:14px 2px 0}.ws-how-body.ws-open{display:block}.ws-step-tabs{position:sticky;top:54px;z-index:25;background:var(--ws-cream);border-bottom:1px solid var(--ws-line)}.ws-step-tabs-inner{width:min(1180px,calc(100% - 32px));margin:0 auto;display:flex;gap:24px}.ws-step-tab{min-height:46px;display:inline-flex;align-items:center;border-bottom:3px solid transparent;color:var(--ws-steel);font:700 11px 'Roboto Mono',monospace;letter-spacing:.06em;text-transform:uppercase;text-decoration:none}.ws-step-tab.ws-active{color:var(--ws-navy);border-bottom-color:var(--ws-gold)}.ws-breadcrumb{display:none}.ws-gold-cta{margin-top:18px;background:var(--ws-gold);border-radius:10px;padding:16px 18px;display:flex;justify-content:space-between;align-items:center;gap:16px;color:var(--ws-navy);font-weight:700}.ws-gold-cta a{color:var(--ws-navy);font:700 12px 'Roboto Mono',monospace;text-transform:uppercase;text-decoration:none}.ws-phase-card .ws-dot.empty{background:#fff;border:1px solid var(--ws-line)}.ws-phase-card .ws-dot.half{background:linear-gradient(90deg,var(--ws-gold) 50%,#fff 50%);border:1px solid var(--ws-gold)}.ws-phase-card .ws-dot.solid{background:var(--ws-gold);border:1px solid var(--ws-gold)}.ws-locked .ws-dot{background:#e4e4e4!important;border-color:#d6d6d6!important}.ws-locked .ws-phase-stripe{background:#d5d5d5}.ws-locked .ws-button{background:#f7f5ef;border-color:#d8d2c8;color:#9a9389}.ws-pill-locked{background:#efefef;color:#9a9389}.ws-pill-progress{background:rgba(238,163,32,.18);color:var(--ws-navy)}",
+      ".ws-practice-reminder{margin:24px 0;background:#fff7e8;border:1px solid rgba(238,163,32,.35);border-radius:10px;padding:14px 16px;color:var(--ws-navy);font-weight:700}.ws-practice-reminder a{color:var(--ws-navy);text-decoration:underline;text-underline-offset:3px}.ws-practice-list{display:grid;gap:18px}.ws-practice-card{background:#fff;border:1px solid var(--ws-line);border-radius:12px;overflow:hidden}.ws-practice-head{width:100%;border:0;background:#fff;display:grid;grid-template-columns:1fr auto;gap:14px;padding:22px 22px 12px;text-align:left;cursor:pointer}.ws-practice-head h3{margin:6px 0;color:var(--ws-navy);font:700 30px 'Playfair Display',serif}.ws-practice-head p{margin:0;color:var(--ws-steel);line-height:1.45}.ws-practice-chevron{width:26px;height:26px;border-radius:6px;background:var(--ws-gold);color:#fff;display:inline-grid;place-items:center;font:700 20px/1 Lato,sans-serif}.ws-practice-body{display:none;padding:0 22px 22px}.ws-practice-card.ws-open .ws-practice-body{display:block}.ws-exercise-tabs{display:flex;gap:22px;border-bottom:2px solid var(--ws-line);margin:10px 0 8px}.ws-exercise-tab{border:0;border-bottom:3px solid transparent;background:transparent;color:#9a9a9a;display:inline-flex;align-items:center;gap:8px;padding:12px 0 11px;font:700 12px 'Roboto Mono',monospace;letter-spacing:.08em;text-transform:uppercase;cursor:pointer}.ws-exercise-tab.ws-active{color:var(--ws-navy);border-bottom-color:var(--ws-gold)}.ws-tab-badge{width:22px;height:22px;border-radius:999px;background:#e8e0d4;color:#9a9a9a;display:inline-grid;place-items:center;font:700 11px Lato,sans-serif}.ws-exercise-tab.ws-active .ws-tab-badge{background:var(--ws-gold);color:#fff}.ws-tab-hint{margin:0 0 18px;color:#9a9a9a;font:700 9px 'Roboto Mono',monospace;letter-spacing:.08em}.ws-tab-hint span{color:var(--ws-gold)}.ws-practice-pane{display:none}.ws-practice-pane.ws-active{display:block}.ws-before-block{background:var(--ws-cream);border:1px solid var(--ws-line);border-radius:10px;padding:18px;margin-bottom:16px}.ws-before-block h4,.ws-ai-context h4{margin:0 0 10px;font:700 12px 'Roboto Mono',monospace;letter-spacing:.12em;text-transform:uppercase}.ws-before-block h4{color:var(--ws-navy)}.ws-before-block p{margin:0;line-height:1.5}.ws-practice-pane .ws-context-embed{margin-bottom:16px}.ws-practice-pane .ws-button{width:100%}.ws-ai-context{background:var(--ws-navy);color:#fff;border-radius:10px;padding:20px 22px;margin-bottom:16px}.ws-ai-context h4{color:rgba(255,255,255,.62)}.ws-ai-context p{margin:0;color:#fff;line-height:1.55}.ws-ai-link-card{min-height:92px;border:2px solid var(--ws-line);border-radius:10px;background:#fff;color:var(--ws-navy);display:grid;grid-template-columns:54px 1fr auto;align-items:center;gap:16px;padding:16px 20px;margin-bottom:16px;text-decoration:none}.ws-ai-link-card:hover{border-color:var(--ws-gold)}.ws-ai-icon{width:42px;height:42px;border-radius:8px;background:#f3eee6;display:grid;place-items:center;font-size:22px}.ws-ai-link-card strong{display:block;color:var(--ws-navy);font-size:16px}.ws-ai-link-card small{display:block;color:var(--ws-charcoal);font-weight:700;margin-top:3px}.ws-ai-arrow{color:var(--ws-gold);font-size:22px}.ws-button-gold{background:var(--ws-gold);border-color:var(--ws-gold);color:#fff}.ws-button-dashed{background:#fff;border-style:dashed;border-color:rgba(0,51,102,.38);color:var(--ws-navy)}",
       ".ws-button{min-height:44px;border-radius:8px;border:1px solid var(--ws-gold);background:var(--ws-gold);color:var(--ws-navy);font:700 13px 'Roboto Mono',monospace;letter-spacing:.04em;text-transform:uppercase;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;padding:0 18px;cursor:pointer}.ws-button:hover{filter:brightness(.97)}.ws-button[disabled],.ws-button.ws-disabled{opacity:.45;cursor:not-allowed;filter:grayscale(.2)}.ws-button-secondary{background:#fff;border-color:rgba(0,51,102,.28);color:var(--ws-navy)}.ws-button-navy{background:var(--ws-navy);border-color:var(--ws-navy);color:#fff}",
       ".ws-progress-card{margin:34px 0 24px;background:#fff;border:1px solid var(--ws-line);border-radius:12px;padding:18px}.ws-progress-row{display:flex;justify-content:space-between;gap:16px;color:var(--ws-navy);font:700 11px 'Roboto Mono',monospace;letter-spacing:.08em;text-transform:uppercase}.ws-progress-track{height:12px;background:#EFE6D8;border-radius:999px;margin-top:12px;overflow:hidden}.ws-progress-fill{height:100%;background:linear-gradient(90deg,var(--ws-gold),#f4c15c);border-radius:999px}",
       ".ws-phase-list{display:grid;gap:18px}.ws-phase-card{position:relative;display:grid;grid-template-columns:8px 92px 1fr auto;align-items:center;gap:22px;min-height:178px;background:#fff;border:1px solid var(--ws-line);border-radius:12px;overflow:hidden;padding:22px 24px 22px 0;text-decoration:none;color:inherit;box-shadow:0 12px 28px rgba(0,51,102,.06)}.ws-phase-card.ws-locked{opacity:.72}.ws-phase-stripe{align-self:stretch;background:var(--ws-gold)}.ws-locked .ws-phase-stripe{background:#d5d5d5}.ws-phase-number{color:rgba(0,51,102,.08);font:700 74px/1 'Playfair Display',serif;text-align:center}.ws-phase-content h2{margin:6px 0;color:var(--ws-navy);font:700 34px/1.05 'Playfair Display',serif}.ws-phase-content p{margin:0;color:var(--ws-steel);line-height:1.45}.ws-trail{display:flex;align-items:center;gap:8px;margin-top:16px;color:var(--ws-navy);font:700 10px 'Roboto Mono',monospace;text-transform:uppercase;letter-spacing:.07em}.ws-dot{width:10px;height:10px;border-radius:99px;background:var(--ws-gold)}.ws-arrow{color:var(--ws-steel)}.ws-pill{display:inline-flex;align-items:center;border-radius:999px;padding:5px 9px;font:700 10px 'Roboto Mono',monospace;letter-spacing:.06em;text-transform:uppercase}.ws-pill-gold{background:rgba(238,163,32,.18);color:var(--ws-navy)}.ws-pill-muted{background:#E8EEF4;color:var(--ws-steel)}.ws-pill-green{background:rgba(44,122,75,.12);color:var(--ws-green)}.ws-phase-actions{display:grid;gap:10px;justify-items:end}",
@@ -607,12 +761,12 @@ const UTL_CONTENT = {
       ".ws-player-card{background:#fff;border:1px solid var(--ws-line);border-radius:12px;overflow:hidden}.ws-player{position:relative;background:linear-gradient(135deg,#002448,#003366 55%,#244F78);color:#fff}.ws-player-placeholder{text-align:center;padding:22px}.ws-play-icon{width:58px;height:58px;border-radius:999px;background:var(--ws-gold);color:var(--ws-navy);display:grid;place-items:center;margin:0 auto 14px;font-size:24px}.ws-player-meta{position:absolute;left:22px;bottom:20px;right:22px;text-shadow:0 2px 8px rgba(0,0,0,.35)}.ws-player-meta h3{margin:6px 0 0;color:#fff;font:700 25px 'Playfair Display',serif}.ws-player-actions{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:16px}",
       ".ws-rail-wrap{padding:22px 22px 24px;border-top:1px solid rgba(0,51,102,.08);background:#fff}.ws-scroll-hint{display:none;color:var(--ws-steel);font:700 10px 'Roboto Mono',monospace;letter-spacing:.08em;text-transform:uppercase;margin:0 0 8px}.ws-lesson-rail{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px}.ws-lesson-tile{min-height:108px;border:1px solid var(--ws-line);border-radius:10px;background:#fff;color:var(--ws-navy);padding:14px 38px 14px 14px;text-align:left;cursor:pointer}.ws-lesson-tile.ws-active{background:var(--ws-navy);color:#fff}.ws-lesson-tile strong{display:block;font:700 10px 'Roboto Mono',monospace;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px}.ws-lesson-tile span{display:block;font-size:13px;line-height:1.25}.ws-lesson-tile small{display:block;margin-top:9px;color:inherit;opacity:.75}.ws-check{color:var(--ws-gold);font-weight:700}",
       ".ws-collapsed{background:#fff;border:1px solid var(--ws-line);border-radius:12px;padding:18px;display:grid;grid-template-columns:auto 1fr auto auto;align-items:center;gap:14px;cursor:pointer}.ws-green-circle{width:34px;height:34px;border-radius:999px;background:var(--ws-green);color:#fff;display:grid;place-items:center;font-weight:700}.ws-video-toggle-icon{width:34px;height:34px;border-radius:9px;background:rgba(77,112,148,.16);color:var(--ws-navy);display:grid;place-items:center;font-size:16px;font-weight:700}.ws-collapsed h3{margin:0;color:var(--ws-navy);font:700 24px 'Playfair Display',serif}.ws-collapsed p{margin:2px 0 0;color:var(--ws-steel)}.ws-rewatch{display:none;background:#fff;border:1px solid var(--ws-line);border-top:0;border-radius:0 0 12px 12px;padding:22px}.ws-rewatch.ws-open{display:block}.ws-rewatch .ws-lesson-rail a{text-decoration:none}",
-      ".ws-exercise-stack{display:grid;gap:20px}.ws-unit{border-radius:12px;overflow:hidden;box-shadow:0 12px 28px rgba(0,51,102,.06)}.ws-context{background:var(--ws-navy);color:#fff;padding:20px 22px}.ws-context-tag{color:var(--ws-gold);font:700 10px 'Roboto Mono',monospace;letter-spacing:.09em;text-transform:uppercase}.ws-context h3{margin:7px 0;color:#fff;font:700 27px 'Playfair Display',serif}.ws-context p{margin:0;color:rgba(255,255,255,.78);line-height:1.5}.ws-media-row{margin-top:14px;display:flex;align-items:center;gap:12px;border:1px solid rgba(255,255,255,.22);border-radius:10px;padding:11px;color:#fff;text-decoration:none}.ws-media-icon{width:34px;height:34px;border-radius:999px;background:var(--ws-gold);color:var(--ws-navy);display:grid;place-items:center;font-weight:700}.ws-media-row.ws-missing{opacity:.62;pointer-events:none}.ws-exercise-card{display:grid;grid-template-columns:1fr auto;gap:16px;background:#fff;border:1px solid var(--ws-line);border-top:0;padding:22px;text-decoration:none;color:inherit}.ws-exercise-card.ws-disabled{opacity:.55}.ws-exercise-card.ws-disabled a,.ws-exercise-card.ws-disabled button{pointer-events:none}.ws-exercise-card h3{margin:7px 0;color:var(--ws-navy);font:700 28px 'Playfair Display',serif}.ws-exercise-card p{margin:0 0 14px;color:var(--ws-steel);line-height:1.45}.ws-open-link{font:700 11px 'Roboto Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--ws-navy)}.ws-mark-done{align-self:end}",
+      ".ws-exercise-stack{display:grid;gap:20px}.ws-intro-contexts{gap:18px;margin:8px 0 24px}.ws-unit{border-radius:12px;overflow:hidden;box-shadow:0 12px 28px rgba(0,51,102,.06)}.ws-stacked-unit{display:grid;gap:18px;background:#fff;border:1px solid var(--ws-line);padding:0 0 18px}.ws-stacked-unit .ws-context-toggle{border-radius:0}.ws-stacked-unit .ws-context-toggle:first-child{border-radius:10px 10px 0 0}.ws-stacked-unit .ws-context-panel{padding:18px 18px 0}.ws-stacked-unit .ws-workbook-card{margin:0 18px}.ws-context{background:var(--ws-navy);color:#fff;padding:20px 22px}.ws-context-tag{color:var(--ws-gold);font:700 10px 'Roboto Mono',monospace;letter-spacing:.09em;text-transform:uppercase}.ws-context h3{margin:7px 0;color:#fff;font:700 27px 'Playfair Display',serif}.ws-context p{margin:0;color:rgba(255,255,255,.78);line-height:1.5}.ws-media-row{margin-top:14px;display:flex;align-items:center;gap:12px;border:1px solid rgba(255,255,255,.22);border-radius:10px;padding:11px;color:#fff;text-decoration:none}.ws-media-icon{width:34px;height:34px;border-radius:999px;background:var(--ws-gold);color:var(--ws-navy);display:grid;place-items:center;font-weight:700}.ws-media-row.ws-missing{opacity:.62;pointer-events:none}.ws-exercise-card{display:grid;grid-template-columns:1fr auto;gap:16px;background:#fff;border:1px solid var(--ws-line);border-top:0;padding:22px;text-decoration:none;color:inherit}.ws-exercise-card.ws-disabled{opacity:.55}.ws-exercise-card.ws-disabled a,.ws-exercise-card.ws-disabled button{pointer-events:none}.ws-exercise-card h3{margin:7px 0;color:var(--ws-navy);font:700 28px 'Playfair Display',serif}.ws-exercise-card p{margin:0 0 14px;color:var(--ws-steel);line-height:1.45}.ws-open-link{font:700 11px 'Roboto Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--ws-navy)}.ws-mark-done{align-self:end}",
       ".ws-video-complete .ws-player-card,.ws-lesson-tile.ws-watched{border-color:var(--ws-green);box-shadow:0 0 0 2px rgba(44,122,75,.16)}.ws-lesson-tile{position:relative}.ws-lesson-check{position:absolute;top:8px;right:8px;width:20px;height:20px;border-radius:999px;border:1px solid rgba(0,51,102,.24);background:#fff;color:transparent;display:grid;place-items:center;font-size:12px;font-weight:700}.ws-lesson-tile.ws-watched .ws-lesson-check{background:var(--ws-green);border-color:var(--ws-green);color:#fff}.ws-video-check{position:absolute;top:14px;right:14px;width:30px;height:30px;border-radius:999px;border:1px solid rgba(255,255,255,.6);background:rgba(255,255,255,.9);color:transparent;display:grid;place-items:center;font-weight:700;z-index:2;cursor:pointer}.ws-video-complete .ws-video-check{background:var(--ws-green);border-color:var(--ws-green);color:#fff}",
-      ".ws-context-toggle{width:100%;display:flex;align-items:center;gap:14px;border:0;border-radius:10px;background:#ded6c8;color:var(--ws-navy);padding:16px 18px;text-align:left;cursor:pointer}.ws-context-toggle-icon{width:30px;height:30px;border-radius:8px;background:var(--ws-gold);color:#fff;display:grid;place-items:center;font-size:24px;font-weight:700;line-height:1}.ws-context-toggle-title{display:block;color:var(--ws-navy);font-size:17px;font-weight:700}.ws-context-toggle-sub{display:block;color:var(--ws-steel);font-size:14px;margin-top:2px}.ws-context-panel{display:none;padding:18px 0 0}.ws-context-panel.ws-open{display:block}.ws-context-panel-inner{color:var(--ws-charcoal)}.ws-context-panel-inner p{margin:0 0 14px;color:var(--ws-charcoal);line-height:1.5}.ws-context-embed{margin-top:14px;border-radius:10px;overflow:hidden;border:1px solid var(--ws-line)}.ws-fullscreen-link{display:block;padding:14px 22px 0;text-align:right;color:var(--ws-navy);font-weight:700;text-decoration:none}.ws-fullscreen-link:hover{text-decoration:underline}.ws-context-panel .ws-fullscreen-link{padding:0;margin-top:12px}.ws-context-panel .ws-media-row{background:var(--ws-navy);margin-top:14px}.ws-workbook-card{position:relative;margin-top:18px;background:#fff;border:1px solid var(--ws-line);border-radius:12px;padding:34px 36px;display:grid;gap:22px}.ws-workbook-card.ws-done{border:2px solid var(--ws-green)}.ws-workbook-card.ws-disabled{opacity:.56}.ws-workbook-card.ws-disabled a,.ws-workbook-card.ws-disabled button{pointer-events:none}.ws-workbook-top{display:flex;align-items:center;gap:12px;color:var(--ws-steel);font:700 14px 'Roboto Mono',monospace;letter-spacing:.14em;text-transform:uppercase}.ws-status-circle{width:28px;height:28px;border-radius:999px;background:#d9e4ee;color:var(--ws-steel);display:grid;place-items:center;font:700 14px Lato,sans-serif}.ws-workbook-card.ws-done .ws-status-circle{background:var(--ws-green);color:#fff}.ws-workbook-card h3{margin:0;color:var(--ws-navy);font:700 clamp(34px,5vw,54px)/1.02 'Playfair Display',serif}.ws-workbook-card p{max-width:780px;margin:0;color:var(--ws-steel);font-size:22px;line-height:1.35}.ws-card-actions{display:flex;gap:12px;flex-wrap:wrap}.ws-done-pill{display:inline-flex;align-items:center;gap:5px;background:rgba(44,122,75,.12);color:var(--ws-green);border-radius:999px;padding:4px 10px;font:700 12px Lato,sans-serif;letter-spacing:0;text-transform:none}",
+      ".ws-context-toggle{width:100%;display:flex;align-items:center;gap:14px;border:0;border-radius:10px;background:#ded6c8;color:var(--ws-navy);padding:16px 18px;text-align:left;cursor:pointer}.ws-context-toggle-icon{width:30px;height:30px;border-radius:8px;background:var(--ws-gold);color:#fff;display:grid;place-items:center;font-size:24px;font-weight:700;line-height:1}.ws-context-toggle-title{display:block;color:var(--ws-navy);font-size:17px;font-weight:700}.ws-context-toggle-sub{display:block;color:var(--ws-steel);font-size:14px;margin-top:2px}.ws-context-panel{display:none;padding:18px 0 0}.ws-context-panel.ws-open{display:block}.ws-context-panel-inner{color:var(--ws-charcoal)}.ws-context-panel-inner p{margin:0 0 14px;color:var(--ws-charcoal);line-height:1.5}.ws-context-embed{margin-top:14px;border-radius:10px;overflow:hidden;border:1px solid var(--ws-line)}.ws-context-panel .ws-media-row{background:var(--ws-navy);margin-top:14px}.ws-workbook-card{position:relative;margin-top:18px;background:#fff;border:1px solid var(--ws-line);border-radius:12px;padding:34px 36px;display:grid;gap:22px}.ws-workbook-card.ws-done{border:2px solid var(--ws-green)}.ws-workbook-card.ws-disabled{opacity:.56}.ws-workbook-card.ws-disabled a,.ws-workbook-card.ws-disabled button{pointer-events:none}.ws-workbook-top{display:flex;align-items:center;gap:12px;color:var(--ws-steel);font:700 14px 'Roboto Mono',monospace;letter-spacing:.14em;text-transform:uppercase}.ws-status-circle{width:28px;height:28px;border-radius:999px;background:#d9e4ee;color:var(--ws-steel);display:grid;place-items:center;font:700 14px Lato,sans-serif}.ws-workbook-card.ws-done .ws-status-circle{background:var(--ws-green);color:#fff}.ws-workbook-card h3{margin:0;color:var(--ws-navy);font:700 clamp(34px,5vw,54px)/1.02 'Playfair Display',serif}.ws-workbook-card p{max-width:780px;margin:0;color:var(--ws-steel);font-size:22px;line-height:1.35}.ws-card-actions{display:flex;gap:12px;flex-wrap:wrap}.ws-done-pill{display:inline-flex;align-items:center;gap:5px;background:rgba(44,122,75,.12);color:var(--ws-green);border-radius:999px;padding:4px 10px;font:700 12px Lato,sans-serif;letter-spacing:0;text-transform:none}",
       ".ws-admin-visibility{margin-top:30px;background:#fff;border:1px solid var(--ws-line);border-radius:12px;padding:18px;display:grid;gap:12px}.ws-check-row{display:flex;align-items:flex-start;gap:10px;color:var(--ws-navy);font-weight:700}.ws-check-row input{margin-top:3px}.ws-help{margin:0;color:var(--ws-steel);font-size:14px;line-height:1.45}",
       ".ws-bottom-nav{display:flex;justify-content:space-between;gap:12px;margin-top:34px}.ws-bottom-nav .ws-button{min-width:180px}.ws-admin-grid{display:grid;gap:16px;margin-top:30px}.ws-admin-phase{background:#fff;border:1px solid var(--ws-line);border-radius:12px;overflow:hidden}.ws-admin-toggle{width:100%;display:grid;grid-template-columns:74px 1fr auto;align-items:center;gap:16px;border:0;background:#fff;padding:18px;text-align:left;cursor:pointer}.ws-admin-num{color:rgba(0,51,102,.12);font:700 54px 'Playfair Display',serif}.ws-admin-body{display:none;padding:0 18px 18px}.ws-admin-phase.ws-open .ws-admin-body{display:block}.ws-slot{border-top:1px solid var(--ws-line);padding:16px 0;display:grid;gap:10px}.ws-slot-head{display:flex;justify-content:space-between;gap:12px}.ws-type-buttons{display:flex;gap:8px}.ws-type-button{border:1px solid rgba(0,51,102,.25);background:#fff;color:var(--ws-navy);border-radius:999px;padding:7px 10px;font:700 10px 'Roboto Mono',monospace;cursor:pointer}.ws-type-button.ws-selected{background:var(--ws-navy);color:#fff}.ws-save-row{display:flex;gap:8px}.ws-save-row .ws-input{background:#fbf7ef}.ws-save-note{min-height:18px;color:var(--ws-green);font:700 11px 'Roboto Mono',monospace}.ws-save-bar{position:sticky;bottom:0;background:#fff;border-top:1px solid var(--ws-line);padding:12px 0;margin-top:32px;box-shadow:0 -8px 20px rgba(0,51,102,.07)}.ws-save-bar-inner{display:flex;justify-content:space-between;align-items:center;gap:16px}",
-      "@media(max-width:768px){.ws-shell{width:calc(100% - 32px)}.ws-nav-inner{height:auto;grid-template-columns:1fr auto;gap:0;width:100%;padding:10px 12px}.ws-brand{height:auto}.ws-brand-sep,.ws-workspace-link{display:none}.ws-user{height:auto}.ws-links{grid-column:1/-1;justify-content:flex-start;overflow-x:auto;white-space:nowrap;gap:10px;border-top:1px solid rgba(255,255,255,.14);scrollbar-width:none}.ws-links::-webkit-scrollbar,.ws-lesson-rail::-webkit-scrollbar,.ws-step-tabs-inner::-webkit-scrollbar{display:none}.ws-link{min-height:44px;font-size:12px}.ws-phase-menu{position:fixed;left:12px;right:12px;top:96px;width:auto}.ws-user-email{display:none}.ws-main{padding:34px 0 48px}.ws-title{font-size:38px}.ws-subtitle{font-size:16px}.ws-orientation-head{grid-template-columns:1fr auto}.ws-start-badge{width:max-content}.ws-step-tabs{top:98px}.ws-step-tabs-inner{overflow-x:auto;scrollbar-width:none}.ws-step-tab{flex:0 0 auto;font-size:10px}.ws-gold-cta{align-items:flex-start;flex-direction:column}.ws-practice-actions{grid-template-columns:1fr}.ws-phase-card{grid-template-columns:6px 54px 1fr;gap:14px;padding:18px 16px 18px 0}.ws-phase-actions{grid-column:2/-1;justify-items:start}.ws-phase-number{font-size:48px}.ws-phase-content h2{font-size:27px}.ws-stepper{flex-wrap:wrap}.ws-section-head{align-items:flex-start;flex-direction:column}.ws-player-actions{align-items:flex-start;flex-direction:column}.ws-scroll-hint{display:block}.ws-lesson-rail{display:flex;overflow-x:auto;gap:10px;padding-bottom:4px;scrollbar-width:none}.ws-lesson-tile{min-width:104px}.ws-collapsed{grid-template-columns:auto 1fr auto}.ws-collapsed .ws-pill{display:none}.ws-workbook-card{padding:24px 20px}.ws-workbook-top{font-size:11px;letter-spacing:.1em}.ws-workbook-card h3{font-size:34px}.ws-workbook-card p{font-size:17px}.ws-card-actions .ws-button{width:100%}.ws-exercise-card{grid-template-columns:1fr}.ws-bottom-nav{flex-direction:row}.ws-bottom-nav .ws-button{min-width:0;flex:1;padding:0 10px;font-size:10px}.ws-admin-toggle{grid-template-columns:48px 1fr auto}.ws-save-bar-inner{flex-direction:column;align-items:stretch}.ws-save-row{flex-direction:column}}"
+      "@media(max-width:768px){.ws-shell{width:calc(100% - 32px)}.ws-nav-inner{height:auto;grid-template-columns:1fr auto;gap:0;width:100%;padding:10px 12px}.ws-brand{height:auto}.ws-brand-sep,.ws-workspace-link{display:none}.ws-user{height:auto}.ws-links{grid-column:1/-1;justify-content:flex-start;overflow-x:auto;white-space:nowrap;gap:10px;border-top:1px solid rgba(255,255,255,.14);scrollbar-width:none}.ws-links::-webkit-scrollbar,.ws-lesson-rail::-webkit-scrollbar,.ws-step-tabs-inner::-webkit-scrollbar{display:none}.ws-link{min-height:44px;font-size:12px}.ws-phase-menu{position:fixed;left:12px;right:12px;top:96px;width:auto}.ws-user-email{display:none}.ws-main{padding:34px 0 48px}.ws-title{font-size:38px}.ws-subtitle{font-size:16px}.ws-orientation-head{grid-template-columns:1fr auto}.ws-start-badge{width:max-content}.ws-step-tabs{top:98px}.ws-step-tabs-inner{overflow-x:auto;scrollbar-width:none}.ws-step-tab{flex:0 0 auto;font-size:10px}.ws-gold-cta{align-items:flex-start;flex-direction:column}.ws-exercise-tabs{gap:14px;overflow-x:auto;scrollbar-width:none}.ws-exercise-tabs::-webkit-scrollbar{display:none}.ws-exercise-tab{flex:0 0 auto;font-size:10px}.ws-ai-link-card{grid-template-columns:42px 1fr;gap:12px;padding:14px}.ws-ai-arrow{display:none}.ws-phase-card{grid-template-columns:6px 54px 1fr;gap:14px;padding:18px 16px 18px 0}.ws-phase-actions{grid-column:2/-1;justify-items:start}.ws-phase-number{font-size:48px}.ws-phase-content h2{font-size:27px}.ws-stepper{flex-wrap:wrap}.ws-section-head{align-items:flex-start;flex-direction:column}.ws-player-actions{align-items:flex-start;flex-direction:column}.ws-scroll-hint{display:block}.ws-lesson-rail{display:flex;overflow-x:auto;gap:10px;padding-bottom:4px;scrollbar-width:none}.ws-lesson-tile{min-width:104px}.ws-collapsed{grid-template-columns:auto 1fr auto}.ws-collapsed .ws-pill{display:none}.ws-workbook-card{padding:24px 20px}.ws-workbook-top{font-size:11px;letter-spacing:.1em}.ws-workbook-card h3{font-size:34px}.ws-workbook-card p{font-size:17px}.ws-card-actions .ws-button{width:100%}.ws-exercise-card{grid-template-columns:1fr}.ws-bottom-nav{flex-direction:row}.ws-bottom-nav .ws-button{min-width:0;flex:1;padding:0 10px;font-size:10px}.ws-admin-toggle{grid-template-columns:48px 1fr auto}.ws-save-bar-inner{flex-direction:column;align-items:stretch}.ws-save-row{flex-direction:column}}"
     ].join("\n");
     document.head.appendChild(style);
   }
@@ -725,7 +879,7 @@ const UTL_CONTENT = {
     message.textContent = "";
     message.classList.remove("ws-success");
     try {
-      var firebaseAuth = await import("../assets/firebase.js");
+      var firebaseAuth = await import(firebaseHref());
       var credential = await firebaseAuth.signInWithGooglePopup();
       var member = await firebaseAuth.requireAuthorizedMember(credential.user);
       var email = credential.user && credential.user.email ? String(credential.user.email).trim().toLowerCase() : "";
@@ -737,6 +891,7 @@ const UTL_CONTENT = {
         photoURL: credential.user && credential.user.photoURL ? credential.user.photoURL : "",
         role: member && member.role ? member.role : "member"
       }));
+      await firebaseAuth.saveUserProfile(credential.user, member || {});
       if (member && member.role === "admin") localStorage.setItem(ADMIN_KEY, "true");
       else localStorage.removeItem(ADMIN_KEY);
       message.classList.add("ws-success");
@@ -765,6 +920,10 @@ const UTL_CONTENT = {
       });
       return;
     }
+    if (!remoteProgressLoaded) {
+      ensureRemoteProgressLoaded(renderIndex);
+      return;
+    }
     pageShell("home", homePageHtml());
     bindHomePage();
   }
@@ -777,10 +936,12 @@ const UTL_CONTENT = {
   function orientationCardHtml() {
     var complete = readBool("utl_orientation_ready");
     var open = localStorage.getItem("utl_orientation_open") === null ? !complete : readBool("utl_orientation_open");
-    var orientation = UTL_CONTENT.orientation.contexts[0] || {};
-    var how = UTL_CONTENT.orientation.contexts[1] || {};
-    var video = exerciseContextUrl(orientation) ? '<div class="ws-player-card"><div class="ws-player">' + renderIframe(exerciseContextUrl(orientation), orientation.contextTitle) + '<div class="ws-player-meta"><span class="ws-kicker">Orientation to the UTL program</span><h3>' + escapeHtml(orientation.contextTitle || "Orientation") + '</h3></div></div></div>' : '<div class="ws-player-card"><div class="ws-player"><div class="ws-player-placeholder"><span class="ws-play-icon">&#9654;</span><p>Orientation video coming soon</p></div></div></div>';
-    return '<article class="ws-orientation-card ' + (open ? "ws-open" : "") + '" id="orientation"><button class="ws-orientation-head" type="button" data-orientation-toggle><span class="ws-start-badge">Start Here</span><span><span class="ws-orientation-title">Orientation</span><span class="ws-orientation-sub">' + (complete ? "Orientation complete &#10003;" : "Get oriented before jumping into Phase 1") + '</span></span><span class="ws-orientation-chevron ws-disclosure-icon">' + (open ? "&minus;" : "+") + '</span></button><div class="ws-orientation-body"><p class="ws-orientation-copy">Welcome to the MA storyline. You are stepping into a Chief of Staff role where Aiko expects clarity, structure, and judgment from day one. Work through each phase in order: watch the lessons, then complete the exercises before moving on.</p>' + video + '<div class="ws-how-row"><button class="ws-how-toggle" type="button" data-how-toggle><span class="ws-media-icon">i</span><span><strong>How this program works</strong><br><small>Read before starting</small></span><span class="ws-disclosure-icon" data-how-icon>+</span></button><div class="ws-how-body" data-how-body><p>' + escapeHtml(how.contextBody || "Watch the setup, read the context, complete the practice, and mark your progress as you go.") + '</p>' + (exerciseContextUrl(how) ? '<div class="ws-context-embed">' + renderIframe(exerciseContextUrl(how), how.contextTitle) + '</div>' : '') + '</div></div><label class="ws-ready-row"><input type="checkbox" data-orientation-ready ' + (complete ? "checked" : "") + '> <span>I\'ve watched the orientation and I\'m ready to start.</span></label></div></article>';
+    var intro = UTL_CONTENT.orientation.contexts[0] || {};
+    var orientation = UTL_CONTENT.orientation.contexts[1] || {};
+    var how = UTL_CONTENT.orientation.contexts[2] || {};
+    var orientationUrl = orientation.contextUrl || exerciseContextUrl(orientation);
+    var video = orientationUrl ? '<div class="ws-player-card"><div class="ws-player">' + renderIframe(orientationUrl, orientation.contextTitle) + '<div class="ws-player-meta"><span class="ws-kicker">Orientation to the UTL program</span><h3>' + escapeHtml(orientation.contextTitle || "Orientation") + '</h3></div></div></div>' : '<div class="ws-player-card"><div class="ws-player"><div class="ws-player-placeholder"><span class="ws-play-icon">&#9654;</span><p>Orientation video coming soon</p></div></div></div>';
+    return '<article class="ws-orientation-card ' + (open ? "ws-open" : "") + '" id="orientation"><button class="ws-orientation-head" type="button" data-orientation-toggle><span class="ws-start-badge">Start Here</span><span><span class="ws-orientation-title">Orientation</span><span class="ws-orientation-sub">' + (complete ? "Orientation complete &#10003;" : "Get oriented before jumping into Phase 1") + '</span></span><span class="ws-orientation-chevron ws-disclosure-icon">' + (open ? "&minus;" : "+") + '</span></button><div class="ws-orientation-body"><div class="ws-orientation-copy"><h3>' + escapeHtml(intro.contextTitle || "Welcome") + '</h3>' + textParagraphs(intro.contextBody) + '</div>' + video + '<div class="ws-how-row"><button class="ws-how-toggle" type="button" data-how-toggle><span class="ws-media-icon">i</span><span><strong>How this program works</strong><br><small>Read before starting</small></span><span class="ws-disclosure-icon" data-how-icon>+</span></button><div class="ws-how-body" data-how-body><p>' + escapeHtml(how.contextBody || "Watch the setup, read the context, complete the practice, and mark your progress as you go.") + '</p>' + (exerciseContextUrl(how) ? '<div class="ws-context-embed">' + renderIframe(exerciseContextUrl(how), how.contextTitle) + '</div>' : '') + '</div></div><label class="ws-ready-row"><input type="checkbox" data-orientation-ready ' + (complete ? "checked" : "") + '> <span>I\'ve watched the orientation and I\'m ready to start.</span></label></div></article>';
   }
 
   function phaseJourneyCard(phaseKey) {
@@ -806,6 +967,7 @@ const UTL_CONTENT = {
         var open = !orientationCard.classList.contains("ws-open");
         orientationCard.classList.toggle("ws-open", open);
         writeBool("utl_orientation_open", open);
+        queueRemoteProgressSave();
         var chevron = orientationToggle.querySelector(".ws-orientation-chevron");
         if (chevron) chevron.innerHTML = open ? "&minus;" : "+";
       });
@@ -826,10 +988,12 @@ const UTL_CONTENT = {
     if (ready && orientationCard) {
       ready.addEventListener("change", function () {
         writeBool("utl_orientation_ready", ready.checked);
+        queueRemoteProgressSave();
         if (ready.checked) {
           setTimeout(function () {
             orientationCard.classList.remove("ws-open");
             writeBool("utl_orientation_open", false);
+            queueRemoteProgressSave();
             var sub = qs(".ws-orientation-sub");
             var chevron = qs(".ws-orientation-chevron");
             if (sub) sub.innerHTML = "Orientation complete &#10003;";
@@ -842,6 +1006,10 @@ const UTL_CONTENT = {
 
   function renderOrientation() {
     if (!requireMember()) return;
+    if (!remoteProgressLoaded) {
+      ensureRemoteProgressLoaded(function () { renderOrientation(); });
+      return;
+    }
     pageShell("orientation", '<span class="ws-kicker">Orientation</span><h1 class="ws-title">Start here.</h1><p class="ws-subtitle">Get oriented to the MA storyline, the learning sequence, and how to move through the member workspace.</p>' + orientationContextSection() + '<nav class="ws-bottom-nav"><a class="ws-button ws-button-secondary" href="index.html">&larr; Dashboard</a><a class="ws-button" href="phase-1.html">Phase 1: Think Clearly &rarr;</a></nav>');
     bindContextToggles();
   }
@@ -868,6 +1036,10 @@ const UTL_CONTENT = {
 
   function renderPhasePage(phaseKey) {
     if (!requireMember()) return;
+    if (!remoteProgressLoaded) {
+      ensureRemoteProgressLoaded(function () { renderPhasePage(phaseKey); });
+      return;
+    }
     if (!phaseUnlocked(phaseKey)) {
       pageShell(phaseKey, '<span class="ws-kicker">' + phaseLabels[phaseKey] + '</span><h1 class="ws-title">This phase is locked.</h1><p class="ws-subtitle">Complete the previous phase exercises to continue.</p><p style="margin-top:24px"><a class="ws-button" href="index.html">Back to dashboard</a></p>');
       return;
@@ -883,6 +1055,10 @@ const UTL_CONTENT = {
 
   function renderPhasePracticePage(phaseKey) {
     if (!requireMember()) return;
+    if (!remoteProgressLoaded) {
+      ensureRemoteProgressLoaded(function () { renderPhasePracticePage(phaseKey); });
+      return;
+    }
     if (phaseKey !== "phase1") {
       renderPhasePage(phaseKey);
       return;
@@ -893,12 +1069,15 @@ const UTL_CONTENT = {
   }
 
   function phaseOnePracticeCards() {
-    var exercises = getPhase("phase1").exercises;
+    var phase = getPhase("phase1");
+    var exercises = phase.exercises;
     var grocery = exercises[0];
     var groceryAi = exercises[1];
     var notes = exercises[2];
+    var rushed = exercises[3];
     var notesAi = exercises[4];
-    return practiceCard("practice-grocery", grocery, groceryAi, true) + practiceCard("practice-notes", notes, notesAi, false);
+    var chalkboard = exercises[5];
+    return contextOnlyPracticeCard("practice-p1-welcome", phase.introContexts[0], true) + practiceCard("practice-grocery", grocery, groceryAi, true) + singlePracticeCard("practice-notes", notes, false) + practiceCard("practice-rushed", rushed, notesAi, false) + singlePracticeCard("practice-chalkboard", chalkboard, false);
   }
 
   function mediaPreview(exercise) {
@@ -909,7 +1088,20 @@ const UTL_CONTENT = {
 
   function practiceCard(cardId, exercise, aiExercise, defaultOpen) {
     var open = localStorage.getItem("utl_practice_open_" + cardId) === null ? defaultOpen : readBool("utl_practice_open_" + cardId);
-    return '<article class="ws-practice-card ' + (open ? "ws-open" : "") + '" data-practice-card="' + cardId + '"><button class="ws-practice-head" type="button" data-practice-toggle="' + cardId + '"><span><span class="ws-kicker">' + escapeHtml(exercise.type) + '</span><h3>' + escapeHtml(exercise.title) + '</h3><p>' + escapeHtml(exercise.description) + '</p></span><span class="ws-practice-chevron ws-disclosure-icon">' + (open ? "&minus;" : "+") + '</span></button><div class="ws-practice-body"><div class="ws-before-block"><h4>Before you start</h4><p>' + escapeHtml(exercise.contextBody) + '</p>' + mediaPreview(exercise) + '</div><div class="ws-practice-actions"><a class="ws-button ws-button-navy" href="' + appHref(exercise.appUrl) + '" data-exercise-visit="' + exercise.id + '">Start exercise &rarr;</a><button class="ws-button ws-button-dashed" type="button" data-ai-toggle="' + cardId + '">Compare with AI <span data-ai-arrow="' + cardId + '">&darr;</span></button></div><div class="ws-ai-panel" data-ai-panel="' + cardId + '"><p>Watch the AI setup, then compare how prompting changes the shape of the work.</p>' + mediaPreview(aiExercise) + '<p style="margin-top:14px"><a class="ws-button" href="' + appHref(aiExercise.appUrl) + '" data-exercise-visit="' + aiExercise.id + '">I\'ve watched it - start the AI exercise &rarr;</a></p></div></div></article>';
+    var activeTab = localStorage.getItem("utl_practice_tab_" + cardId) || "start";
+    var hint = activeTab === "ai" ? 'Watch the AI setup &mdash; then compare how prompting changes the shape of the work.' : 'Start here first &mdash; then compare your work with <span>AI &#10022;</span>';
+    return '<article class="ws-practice-card ' + (open ? "ws-open" : "") + '" data-practice-card="' + cardId + '"><button class="ws-practice-head" type="button" data-practice-toggle="' + cardId + '"><span><span class="ws-kicker">' + escapeHtml(exercise.type) + '</span><h3>' + escapeHtml(exercise.title) + '</h3><p>' + escapeHtml(exercise.description) + '</p></span><span class="ws-practice-chevron">' + (open ? "&minus;" : "+") + '</span></button><div class="ws-practice-body"><div class="ws-exercise-tabs" role="tablist" aria-label="' + escapeHtml(exercise.title) + ' exercise modes"><button class="ws-exercise-tab ' + (activeTab === "ai" ? "" : "ws-active") + '" type="button" role="tab" data-practice-tab="' + cardId + '" data-tab-value="start"><span class="ws-tab-badge">1</span><span>Start Here</span></button><button class="ws-exercise-tab ' + (activeTab === "ai" ? "ws-active" : "") + '" type="button" role="tab" data-practice-tab="' + cardId + '" data-tab-value="ai"><span class="ws-tab-badge">2</span><span>Try with AI &#10022;</span></button></div><p class="ws-tab-hint" data-tab-hint="' + cardId + '">' + hint + '</p><div class="ws-practice-pane ' + (activeTab === "ai" ? "" : "ws-active") + '" data-tab-pane="' + cardId + '" data-tab-panel="start"><div class="ws-before-block"><h4>Before you start</h4><p>' + escapeHtml(exercise.contextBody) + '</p></div>' + mediaPreview(exercise) + '<a class="ws-button ws-button-navy" href="' + appHref(exercise.appUrl) + '" data-exercise-visit="' + exercise.id + '">Start Exercise &rarr;</a></div><div class="ws-practice-pane ' + (activeTab === "ai" ? "ws-active" : "") + '" data-tab-pane="' + cardId + '" data-tab-panel="ai"><div class="ws-ai-context"><h4>Now try it with AI</h4><p>You\'ve completed the exercise yourself. Now see how AI handles the same task &mdash; and how the prompt you give it shapes the output you get back.</p></div><a class="ws-ai-link-card" href="' + appHref(aiExercise.appUrl) + '" data-exercise-visit="' + aiExercise.id + '"><span class="ws-ai-icon">&#128203;</span><span><strong>' + escapeHtml(exercise.title) + ' &mdash; AI Exercise</strong><small>Prompt guide + walkthrough</small></span><span class="ws-ai-arrow">&rarr;</span></a><a class="ws-button ws-button-gold" href="' + appHref(aiExercise.appUrl) + '" data-exercise-visit="' + aiExercise.id + '">Open AI Exercise &rarr;</a></div></div></article>';
+  }
+
+  function singlePracticeCard(cardId, exercise, defaultOpen) {
+    var open = localStorage.getItem("utl_practice_open_" + cardId) === null ? defaultOpen : readBool("utl_practice_open_" + cardId);
+    return '<article class="ws-practice-card ' + (open ? "ws-open" : "") + '" data-practice-card="' + cardId + '"><button class="ws-practice-head" type="button" data-practice-toggle="' + cardId + '"><span><span class="ws-kicker">' + escapeHtml(exercise.type) + '</span><h3>' + escapeHtml(exercise.title) + '</h3><p>' + escapeHtml(exercise.description) + '</p></span><span class="ws-practice-chevron">' + (open ? "&minus;" : "+") + '</span></button><div class="ws-practice-body"><div class="ws-before-block"><h4>Before you start</h4><p>' + escapeHtml(exercise.contextBody) + '</p></div>' + mediaPreview(exercise) + '<a class="ws-button ws-button-navy" href="' + appHref(exercise.appUrl) + '" data-exercise-visit="' + exercise.id + '">Start Exercise &rarr;</a></div></article>';
+  }
+
+  function contextOnlyPracticeCard(cardId, context, defaultOpen) {
+    if (!context) return "";
+    var open = localStorage.getItem("utl_practice_open_" + cardId) === null ? defaultOpen : readBool("utl_practice_open_" + cardId);
+    return '<article class="ws-practice-card ' + (open ? "ws-open" : "") + '" data-practice-card="' + cardId + '"><button class="ws-practice-head" type="button" data-practice-toggle="' + cardId + '"><span><span class="ws-kicker">Context</span><h3>' + escapeHtml(context.contextTitle) + '</h3><p>' + escapeHtml(context.contextBody) + '</p></span><span class="ws-practice-chevron">' + (open ? "&minus;" : "+") + '</span></button><div class="ws-practice-body">' + mediaPreview(context) + '</div></article>';
   }
 
   function bindPracticePage() {
@@ -926,20 +1118,25 @@ const UTL_CONTENT = {
         if (chevron) chevron.innerHTML = open ? "&minus;" : "+";
       });
     });
-    qsa("[data-ai-toggle]").forEach(function (button) {
+    qsa("[data-practice-tab]").forEach(function (button) {
       button.addEventListener("click", function () {
-        var id = button.getAttribute("data-ai-toggle");
-        var panel = qs('[data-ai-panel="' + id + '"]');
-        var arrow = qs('[data-ai-arrow="' + id + '"]');
-        if (!panel) return;
-        var open = !panel.classList.contains("ws-open");
-        panel.classList.toggle("ws-open", open);
-        if (arrow) arrow.innerHTML = open ? "&uarr;" : "&darr;";
+        var id = button.getAttribute("data-practice-tab");
+        var value = button.getAttribute("data-tab-value");
+        localStorage.setItem("utl_practice_tab_" + id, value);
+        qsa('[data-practice-tab="' + id + '"]').forEach(function (tab) {
+          tab.classList.toggle("ws-active", tab.getAttribute("data-tab-value") === value);
+        });
+        qsa('[data-tab-pane="' + id + '"]').forEach(function (pane) {
+          pane.classList.toggle("ws-active", pane.getAttribute("data-tab-panel") === value);
+        });
+        var hint = qs('[data-tab-hint="' + id + '"]');
+        if (hint) hint.innerHTML = value === "ai" ? 'Watch the AI setup &mdash; then compare how prompting changes the shape of the work.' : 'Start here first &mdash; then compare your work with <span>AI &#10022;</span>';
       });
     });
     qsa("[data-exercise-visit]").forEach(function (link) {
       link.addEventListener("click", function () {
         writeBool(visitedKey(link.getAttribute("data-exercise-visit")), true);
+        saveRemoteProgressNow();
       });
     });
   }
@@ -952,13 +1149,12 @@ const UTL_CONTENT = {
     var done = videosDone(phaseKey);
     var active = lessons.find(function (lesson) { return lesson.id === activeId; }) || lessons[0];
     var activeWatched = readBool(watchedKey(active.id));
-    var fullscreen = lessonFullscreenLink(active);
     if (done) {
       return '<section class="ws-section"><div class="ws-collapsed" data-rewatch-toggle><span class="ws-video-toggle-icon">&#9654;</span><div><h3>Watch the Lessons</h3><p>All ' + lessons.length + ' watched &middot; click to rewatch</p></div><span class="ws-pill ws-pill-green">Done</span><span class="ws-context-toggle-icon" data-rewatch-symbol>+</span></div><div class="ws-rewatch" id="wsRewatch">' + rewatchPlayer(phaseKey, active.id) + '</div></section>';
     }
     var url = lessonUrl(active);
     var player = url ? renderIframe(url, active.title) : '<div class="ws-player-placeholder"><div class="ws-play-icon">&#9654;</div><h2>' + escapeHtml(active.title) + '</h2><p>Video coming soon</p></div>';
-    return '<section class="ws-section ' + (activeWatched ? "ws-video-complete" : "") + '"><div class="ws-section-head"><h2>Watch the Lessons</h2><span class="ws-count">' + count + ' of ' + lessons.length + ' watched</span></div><div class="ws-player-card"><div class="ws-player">' + player + '<div class="ws-player-meta"><span class="ws-kicker">Lesson ' + (lessons.indexOf(active) + 1) + ' of ' + lessons.length + ' &middot; Phase ' + number + '</span><h3>' + escapeHtml(active.title) + '</h3></div></div>' + fullscreen + '<div class="ws-rail-wrap">' + lessonRail(phaseKey, active.id, false) + '</div></div></section>';
+    return '<section class="ws-section ' + (activeWatched ? "ws-video-complete" : "") + '"><div class="ws-section-head"><h2>Watch the Lessons</h2><span class="ws-count">' + count + ' of ' + lessons.length + ' watched</span></div><div class="ws-player-card"><div class="ws-player">' + player + '<div class="ws-player-meta"><span class="ws-kicker">Lesson ' + (lessons.indexOf(active) + 1) + ' of ' + lessons.length + ' &middot; Phase ' + number + '</span><h3>' + escapeHtml(active.title) + '</h3></div></div><div class="ws-rail-wrap">' + lessonRail(phaseKey, active.id, false) + '</div></div></section>';
   }
 
   function lessonRail(phaseKey, activeId, asLinks) {
@@ -980,13 +1176,7 @@ const UTL_CONTENT = {
     var active = lessons.find(function (lesson) { return lesson.id === activeId; }) || lessons[0];
     var url = lessonUrl(active);
     var player = url ? renderIframe(url, active.title) : '<div class="ws-player-placeholder"><div class="ws-play-icon">&#9654;</div><h2>' + escapeHtml(active.title) + '</h2><p>Video coming soon</p></div>';
-    return '<div class="ws-player-card"><div class="ws-player">' + player + '<div class="ws-player-meta"><span class="ws-kicker">Rewatch lesson</span><h3>' + escapeHtml(active.title) + '</h3></div></div>' + lessonFullscreenLink(active) + '<div class="ws-rail-wrap">' + lessonRail(phaseKey, active.id, false) + '</div></div>';
-  }
-
-  function lessonFullscreenLink(lesson) {
-    var url = lessonUrl(lesson);
-    if (!url) return "";
-    return '<a class="ws-fullscreen-link" href="' + escapeHtml(sanitizeMediaUrl(url)) + '" target="_blank" rel="noopener">Open in a new screen &nearr;</a>';
+    return '<div class="ws-player-card"><div class="ws-player">' + player + '<div class="ws-player-meta"><span class="ws-kicker">Rewatch lesson</span><h3>' + escapeHtml(active.title) + '</h3></div></div><div class="ws-rail-wrap">' + lessonRail(phaseKey, active.id, false) + '</div></div>';
   }
 
   function orientationContextSection() {
@@ -1012,21 +1202,27 @@ const UTL_CONTENT = {
     var phase = getPhase(phaseKey);
     var doneVideos = videosDone(phaseKey);
     return '<section class="ws-section ws-exercises" id="exercises"><div class="ws-section-head"><h2>Practice the Exercises</h2><span class="ws-count">' + phase.exercises.filter(function (exercise) { return exerciseDone(exercise); }).length + ' of ' + phase.exercises.length + ' done</span></div>' + introContextSection(phaseKey) + '<div class="ws-exercise-stack">' + phase.exercises.map(function (exercise) {
+      if (phaseKey === "phase2" && exercise.id === "p2-e6") return "";
+      if (phaseKey === "phase2" && exercise.id === "p2-e5") return stackedExerciseUnit(phaseKey, [exercise, getPhase(phaseKey).exercises.find(function (item) { return item.id === "p2-e6"; })], doneVideos);
       return exerciseUnit(phaseKey, exercise, doneVideos);
     }).join("") + '</div></section>';
   }
 
   function contextBlock(context) {
+    return '<article class="ws-unit">' + contextPanelHtml(context) + '</article>';
+  }
+
+  function contextPanelHtml(context) {
     var contextType = exerciseContextType(context);
     var contextUrl = exerciseContextUrl(context);
     var open = readBool("utl_ctx_open_" + context.id);
     var media = "";
     if (contextType === "video") {
-      media = contextUrl ? '<div class="ws-context-embed">' + renderIframe(contextUrl, context.contextTitle) + '</div><a class="ws-fullscreen-link" href="' + escapeHtml(sanitizeMediaUrl(contextUrl)) + '" target="_blank" rel="noopener">Open in full screen &nearr;</a>' : '<div class="ws-media-row ws-missing"><span class="ws-media-icon">&#9654;</span><span>Context video coming soon</span></div>';
+      media = contextUrl ? '<div class="ws-context-embed">' + renderIframe(contextUrl, context.contextTitle) + '</div>' : '<div class="ws-media-row ws-missing"><span class="ws-media-icon">&#9654;</span><span>Context video coming soon</span></div>';
     } else if (contextType === "slides") {
-      media = contextUrl ? '<div class="ws-context-embed">' + renderIframe(contextUrl, context.contextTitle) + '</div><a class="ws-fullscreen-link" href="' + escapeHtml(sanitizeMediaUrl(contextUrl)) + '" target="_blank" rel="noopener">Open in full screen &nearr;</a>' : '<div class="ws-media-row ws-missing"><span class="ws-media-icon">&#9635;</span><span>Slides coming soon</span></div>';
+      media = contextUrl ? '<div class="ws-context-embed">' + renderIframe(contextUrl, context.contextTitle) + '</div>' : '<div class="ws-media-row ws-missing"><span class="ws-media-icon">&#9635;</span><span>Slides coming soon</span></div>';
     }
-    return '<article class="ws-unit"><button class="ws-context-toggle" type="button" data-context-toggle="' + context.id + '" aria-expanded="' + (open ? "true" : "false") + '"><span class="ws-context-toggle-icon">' + (open ? "&minus;" : "+") + '</span><span><span class="ws-context-toggle-title">' + escapeHtml(context.contextTitle) + '</span><span class="ws-context-toggle-sub">Read before starting</span></span></button><div class="ws-context-panel ' + (open ? "ws-open" : "") + '" data-context-panel="' + context.id + '"><div class="ws-context-panel-inner"><p>' + escapeHtml(context.contextBody) + '</p>' + media + '</div></div></article>';
+    return '<button class="ws-context-toggle" type="button" data-context-toggle="' + context.id + '" aria-expanded="' + (open ? "true" : "false") + '"><span class="ws-context-toggle-icon">' + (open ? "&minus;" : "+") + '</span><span><span class="ws-context-toggle-title">' + escapeHtml(context.contextTitle) + '</span><span class="ws-context-toggle-sub">Read before starting</span></span></button><div class="ws-context-panel ' + (open ? "ws-open" : "") + '" data-context-panel="' + context.id + '"><div class="ws-context-panel-inner"><p>' + escapeHtml(context.contextBody) + '</p>' + media + '</div></div>';
   }
 
   function exerciseUnit(phaseKey, exercise, enabled) {
@@ -1036,11 +1232,19 @@ const UTL_CONTENT = {
     var open = readBool("utl_ctx_open_" + exercise.id);
     var media = "";
     if (contextType === "video") {
-      media = contextUrl ? '<div class="ws-context-embed">' + renderIframe(contextUrl, exercise.contextTitle) + '</div><a class="ws-fullscreen-link" href="' + escapeHtml(sanitizeMediaUrl(contextUrl)) + '" target="_blank" rel="noopener">Open in full screen &nearr;</a>' : '<div class="ws-media-row ws-missing"><span class="ws-media-icon">&#9654;</span><span>Context video coming soon</span></div>';
+      media = contextUrl ? '<div class="ws-context-embed">' + renderIframe(contextUrl, exercise.contextTitle) + '</div>' : '<div class="ws-media-row ws-missing"><span class="ws-media-icon">&#9654;</span><span>Context video coming soon</span></div>';
     } else if (contextType === "slides") {
-      media = contextUrl ? '<div class="ws-context-embed">' + renderIframe(contextUrl, exercise.contextTitle) + '</div><a class="ws-fullscreen-link" href="' + escapeHtml(sanitizeMediaUrl(contextUrl)) + '" target="_blank" rel="noopener">Open in full screen &nearr;</a>' : '<div class="ws-media-row ws-missing"><span class="ws-media-icon">&#9635;</span><span>Slides coming soon</span></div>';
+      media = contextUrl ? '<div class="ws-context-embed">' + renderIframe(contextUrl, exercise.contextTitle) + '</div>' : '<div class="ws-media-row ws-missing"><span class="ws-media-icon">&#9635;</span><span>Slides coming soon</span></div>';
     }
     return contextBlock(exercise).replace("</article>", '<div class="ws-workbook-card ' + (done ? "ws-done " : "") + (enabled ? "" : "ws-disabled") + '"><div class="ws-workbook-top"><span class="ws-status-circle">' + (done ? "&#10003;" : phaseNumbers[phaseKey]) + '</span><span>' + phaseLabels[phaseKey] + ' | ' + escapeHtml(getPhase(phaseKey).title) + '</span>' + (done ? '<span class="ws-done-pill"><span>&#10003;</span><span>Done</span></span>' : "") + '</div><h3>' + escapeHtml(exercise.title) + '</h3><p>' + escapeHtml(exercise.description) + '</p><div class="ws-card-actions"><a class="ws-button" href="' + escapeHtml(exercise.appUrl) + '" data-exercise-visit="' + exercise.id + '">' + (enabled ? "Open tool" : "Watch all videos to unlock") + '</a>' + (enabled ? '<button class="ws-button ws-button-secondary" type="button" data-exercise-done="' + exercise.id + '">' + (done ? "Click to undo" : "Mark as done") + '</button>' : "") + '</div></div></article>');
+  }
+
+  function stackedExerciseUnit(phaseKey, exercises, enabled) {
+    var items = exercises.filter(Boolean);
+    return '<article class="ws-unit ws-stacked-unit">' + items.map(function (exercise) {
+      var done = exerciseDone(exercise);
+      return contextPanelHtml(exercise) + '<div class="ws-workbook-card ' + (done ? "ws-done " : "") + (enabled ? "" : "ws-disabled") + '"><div class="ws-workbook-top"><span class="ws-status-circle">' + (done ? "&#10003;" : phaseNumbers[phaseKey]) + '</span><span>' + phaseLabels[phaseKey] + ' | ' + escapeHtml(getPhase(phaseKey).title) + '</span>' + (done ? '<span class="ws-done-pill"><span>&#10003;</span><span>Done</span></span>' : "") + '</div><h3>' + escapeHtml(exercise.title) + '</h3><p>' + escapeHtml(exercise.description) + '</p><div class="ws-card-actions"><a class="ws-button" href="' + escapeHtml(exercise.appUrl) + '" data-exercise-visit="' + exercise.id + '">' + (enabled ? "Open tool" : "Watch all videos to unlock") + '</a>' + (enabled ? '<button class="ws-button ws-button-secondary" type="button" data-exercise-done="' + exercise.id + '">' + (done ? "Click to undo" : "Mark as done") + '</button>' : "") + '</div></div>';
+    }).join("") + '</article>';
   }
 
   function bottomPhaseNav(phaseKey) {
@@ -1089,6 +1293,7 @@ const UTL_CONTENT = {
         var key = watchedKey(button.getAttribute("data-watch-id"));
         writeBool(key, !readBool(key));
         videosDone(phaseKey);
+        queueRemoteProgressSave();
         renderPhasePage(phaseKey);
       });
       button.addEventListener("keydown", function (event) {
@@ -1104,6 +1309,7 @@ const UTL_CONTENT = {
           writeBool(watchedKey(lesson.id), true);
         });
         videosDone(phaseKey);
+        queueRemoteProgressSave();
         renderPhasePage(phaseKey);
       });
     });
@@ -1113,12 +1319,14 @@ const UTL_CONTENT = {
           localStorage.removeItem(watchedKey(lesson.id));
         });
         writeBool(phaseVideosDoneKey(phaseKey), false);
+        queueRemoteProgressSave();
         renderPhasePage(phaseKey);
       });
     });
     qsa("[data-exercise-visit]").forEach(function (link) {
       link.addEventListener("click", function () {
         writeBool(visitedKey(link.getAttribute("data-exercise-visit")), true);
+        saveRemoteProgressNow();
       });
     });
     qsa("[data-exercise-done]").forEach(function (button) {
@@ -1128,6 +1336,7 @@ const UTL_CONTENT = {
         if (!exercise) return;
         writeExerciseDone(exercise, !exerciseDone(exercise));
         exercisesDone(phaseKey);
+        queueRemoteProgressSave();
         renderPhasePage(phaseKey);
       });
     });
@@ -1176,7 +1385,8 @@ const UTL_CONTENT = {
   function visibilityHtml() {
     var phase2Visible = localStorage.getItem("utl_phase2_status") !== "hide";
     var phase3Visible = localStorage.getItem("utl_phase3_status") !== "hide";
-    return '<section class="ws-admin-visibility"><span class="ws-kicker">Visibility</span><label class="ws-check-row"><input type="checkbox" data-visibility-phase="utl_phase2_status" ' + (phase2Visible ? "checked" : "") + '><span>Allow Phase 2 to appear when unlocked</span></label><p class="ws-help">Phase 2 appears once Phase 1 exercises are complete and this box is checked.</p><label class="ws-check-row"><input type="checkbox" data-visibility-phase="utl_phase3_status" ' + (phase3Visible ? "checked" : "") + '><span>Allow Phase 3 to appear when unlocked</span></label><p class="ws-help">Phase 3 appears once Phase 2 exercises are complete and this box is checked.</p></section>';
+    var previewUnlocked = localStorage.getItem("utl_admin_preview_bypass") === "on";
+    return '<section class="ws-admin-visibility"><span class="ws-kicker">Learner Release Gates</span><label class="ws-check-row"><input type="checkbox" data-visibility-phase="utl_phase2_status" ' + (phase2Visible ? "checked" : "") + '><span>Release Phase 2 after Phase 1 is complete</span></label><p class="ws-help">Use this to hold Phase 2 until its videos, context, and exercises are ready. Learners still need to complete Phase 1 before it opens.</p><label class="ws-check-row"><input type="checkbox" data-visibility-phase="utl_phase3_status" ' + (phase3Visible ? "checked" : "") + '><span>Release Phase 3 after Phase 2 is complete</span></label><p class="ws-help">Use this to hold Phase 3 until its videos, context, and exercises are ready. Learners still need to complete Phase 2 before it opens.</p><label class="ws-check-row"><input type="checkbox" data-visibility-phase="utl_admin_preview_bypass" ' + (previewUnlocked ? "checked" : "") + '><span>Unlock all phases for admin preview</span></label><p class="ws-help">For admins only. When on, Phase 2 and Phase 3 open immediately while you preview the member area.</p></section>';
   }
 
   function adminAccordionHtml() {
@@ -1202,7 +1412,8 @@ const UTL_CONTENT = {
   function bindAdmin() {
     qsa("[data-visibility-phase]").forEach(function (checkbox) {
       checkbox.addEventListener("change", function () {
-        localStorage.setItem(checkbox.getAttribute("data-visibility-phase"), checkbox.checked ? "show" : "hide");
+        var key = checkbox.getAttribute("data-visibility-phase");
+        localStorage.setItem(key, key === "utl_admin_preview_bypass" ? (checkbox.checked ? "on" : "off") : (checkbox.checked ? "show" : "hide"));
       });
     });
     qsa(".ws-admin-toggle").forEach(function (button) {

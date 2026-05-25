@@ -1493,7 +1493,7 @@
         ]
       },
       {
-        title: 'Member Workspace',
+        title: 'Learner Release Gates',
         items: [
           {
             key: 'utl_mission_card',
@@ -1508,16 +1508,16 @@
             checkedValue: 'show',
             uncheckedValue: 'hide',
             fallback: 'show',
-            label: 'Allow Phase 2 to appear when unlocked',
-            description: 'When unchecked, Phase 2 stays hidden even if Phase 1 is complete.'
+            label: 'Release Phase 2 after Phase 1 is complete',
+            description: 'Use this to hold Phase 2 until its videos, context, and exercises are ready. Learners still need to complete Phase 1 before it opens.'
           },
           {
             key: 'utl_phase3_status',
             checkedValue: 'show',
             uncheckedValue: 'hide',
             fallback: 'show',
-            label: 'Allow Phase 3 to appear when unlocked',
-            description: 'When unchecked, Phase 3 stays hidden even if Phase 2 is complete.'
+            label: 'Release Phase 3 after Phase 2 is complete',
+            description: 'Use this to hold Phase 3 until its videos, context, and exercises are ready. Learners still need to complete Phase 2 before it opens.'
           },
           {
             key: 'utl_tsa_status',
@@ -1536,9 +1536,9 @@
             key: 'utl_admin_preview_bypass',
             checkedValue: 'on',
             uncheckedValue: 'off',
-            fallback: 'on',
-            label: 'Preview all member phases',
-            description: 'For admin preview only. Participants still follow the normal unlock sequence.'
+            fallback: 'off',
+            label: 'Unlock all phases for admin preview',
+            description: 'For admins only. When on, Phase 2 and Phase 3 open immediately while you preview the member area. Learners still follow the normal unlock sequence.'
           }
         ]
       }
@@ -2441,7 +2441,7 @@
       const phase2Live = phase2Allowed && p1Done === p1Keys.length;
       const phase3Live = phase3Allowed && p2Done === p2Keys.length;
       const checkpointReady = phase3Live && p3Done === p3Keys.length;
-      const bypassEnabled = getValue('utl_admin_preview_bypass', 'on') === 'on';
+      const bypassEnabled = getValue('utl_admin_preview_bypass', 'off') === 'on';
       updateMemberHubPreviewLink(bypassEnabled);
       document.getElementById('visibilityStatus').innerHTML = `
         <div class="visibility-row">
@@ -2461,13 +2461,13 @@
         </div>
         <div class="visibility-row">
           <span class="visibility-name">Phase 2</span>
-          <span>${phase2Allowed ? `${p1Done} of ${p1Keys.length} Phase 1 live exercises complete. Phase 2 appears after unlock.` : 'Phase 2 is hidden by the Member Workspace checklist.'}</span>
-          <span class="visibility-badge ${phase2Live ? 'is-live' : ''}">${phase2Live ? 'Visible' : 'Hidden'}</span>
+          <span>${bypassEnabled ? 'Admin preview opens Phase 2 now. Learners still need Phase 1 complete.' : phase2Allowed ? `${p1Done} of ${p1Keys.length} Phase 1 live exercises complete. Learners see Phase 2 after unlock.` : 'Phase 2 is locked for learners by the release gate.'}</span>
+          <span class="visibility-badge ${phase2Live || bypassEnabled ? 'is-live' : ''}">${bypassEnabled ? 'Preview Unlocked' : phase2Live ? 'Learner Unlocked' : 'Learner Locked'}</span>
         </div>
         <div class="visibility-row">
           <span class="visibility-name">Phase 3</span>
-          <span>${phase3Allowed ? `${p2Done} of ${p2Keys.length} Phase 2 live exercises complete. Phase 3 appears after unlock.` : 'Phase 3 is hidden by the Member Workspace checklist.'}</span>
-          <span class="visibility-badge ${phase3Live ? 'is-live' : ''}">${phase3Live ? 'Visible' : 'Hidden'}</span>
+          <span>${bypassEnabled ? 'Admin preview opens Phase 3 now. Learners still need Phase 2 complete.' : phase3Allowed ? `${p2Done} of ${p2Keys.length} Phase 2 live exercises complete. Learners see Phase 3 after unlock.` : 'Phase 3 is locked for learners by the release gate.'}</span>
+          <span class="visibility-badge ${phase3Live || bypassEnabled ? 'is-live' : ''}">${bypassEnabled ? 'Preview Unlocked' : phase3Live ? 'Learner Unlocked' : 'Learner Locked'}</span>
         </div>
         <div class="visibility-row">
           <span class="visibility-name">Checkpoint nudge</span>
@@ -2476,7 +2476,7 @@
         </div>
         <div class="visibility-row">
           <span class="visibility-name">Admin preview</span>
-          <span>${bypassEnabled ? 'Preview opens the member workspace with all phases visible.' : 'Preview follows the normal participant unlock sequence.'}</span>
+          <span>${bypassEnabled ? 'Admin preview opens Phase 2 and Phase 3 immediately.' : 'Admin preview follows the normal learner unlock sequence.'}</span>
           <span class="visibility-badge ${bypassEnabled ? 'is-live' : ''}">${bypassEnabled ? 'All phases' : 'Normal'}</span>
         </div>
       `;

@@ -63,7 +63,11 @@ const provider = new GoogleAuthProvider();
 provider.setCustomParameters({ prompt: "select_account" });
 const db = getFirestore(app);
 
-if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
+const useLocalFirebaseEmulators =
+  window.localStorage.getItem("utl_use_firebase_emulators") === "true" ||
+  new URLSearchParams(window.location.search || "").get("emulators") === "true";
+
+if (useLocalFirebaseEmulators) {
   connectAuthEmulator(auth, "http://127.0.0.1:9099");
   connectFirestoreEmulator(db, "127.0.0.1", 8085);
   console.log("⚡ Connected to local Firebase Emulators");
@@ -72,6 +76,19 @@ if (window.location.hostname === "localhost" || window.location.hostname === "12
 async function signInWithGooglePopup() {
   await authPersistenceReady;
   return signInWithPopup(requireFirebaseAuth(), provider);
+}
+
+async function getSignedInUser() {
+  const readyAuth = requireFirebaseAuth();
+  await authPersistenceReady;
+  if (readyAuth.currentUser) return readyAuth.currentUser;
+
+  return new Promise((resolve) => {
+    const unsubscribe = onAuthStateChanged(readyAuth, (user) => {
+      unsubscribe();
+      resolve(user || null);
+    });
+  });
 }
 
 window.addEventListener("load", async () => {
@@ -163,6 +180,42 @@ async function authorizeMember(email, fields = {}) {
   }, { merge: true });
 }
 
+async function saveUserProfile(user, member = {}) {
+  if (!user || !user.uid) return;
+
+  await setDoc(doc(requireFirestore(), "users", user.uid), {
+    email: user.email ? String(user.email).trim().toLowerCase() : "",
+    displayName: user.displayName || "",
+    photoURL: user.photoURL || "",
+    role: member.role || "member",
+    lastSeenAt: serverTimestamp(),
+    updatedAt: serverTimestamp()
+  }, { merge: true });
+}
+
+async function getMemberWorkspaceProgress() {
+  const user = await getSignedInUser();
+  if (!user || !user.uid) return null;
+
+  const userSnap = await getDoc(doc(requireFirestore(), "users", user.uid));
+  if (!userSnap.exists()) return null;
+  const data = userSnap.data() || {};
+  return data.workspaceProgress || null;
+}
+
+async function saveMemberWorkspaceProgress(progress = {}) {
+  const user = await getSignedInUser();
+  if (!user || !user.uid) {
+    throw new Error("A signed-in Firebase user is required to save workspace progress.");
+  }
+
+  await setDoc(doc(requireFirestore(), "users", user.uid), {
+    workspaceProgress: progress,
+    lastSeenAt: serverTimestamp(),
+    updatedAt: serverTimestamp()
+  }, { merge: true });
+}
+
 async function saveUserProgress(exerciseId, exerciseName, exercisePayload = {}) {
   const readyAuth = requireFirebaseAuth();
   if (!readyAuth.currentUser || !readyAuth.currentUser.uid) {
@@ -175,6 +228,22 @@ async function saveUserProgress(exerciseId, exerciseName, exercisePayload = {}) 
     exerciseName: exerciseName,
     updatedAt: serverTimestamp(),
     savedPayload: exercisePayload
+  }, { merge: true });
+
+  const userRef = doc(requireFirestore(), "users", readyAuth.currentUser.uid);
+  await setDoc(userRef, {
+    workspaceProgress: {
+      exercises: {
+        [exerciseId]: {
+          visited: true,
+          completed: true,
+          completedAt: new Date().toISOString(),
+          title: exerciseName
+        }
+      }
+    },
+    lastSeenAt: serverTimestamp(),
+    updatedAt: serverTimestamp()
   }, { merge: true });
 }
 
@@ -189,10 +258,14 @@ export {
   firebaseInitError,
   getAuthorizedMember,
   getDoc,
+  getMemberWorkspaceProgress,
+  getSignedInUser,
   GoogleAuthProvider,
   isSignInWithEmailLink,
   onAuthStateChanged,
   requireAuthorizedMember,
+  saveMemberWorkspaceProgress,
+  saveUserProfile,
   submitAccessRequest,
   sendSignInInvite,
   sendSignInLinkToEmail,
