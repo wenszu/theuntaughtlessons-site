@@ -368,8 +368,9 @@ const UTL_CONTENT = {
   }
 
   function firebaseHref() {
-    if (inPhasePracticeRoot()) return "../../../assets/firebase.js";
-    return inAdminRoot() ? "../assets/firebase.js" : "../assets/firebase.js";
+    var version = "?v=20260525-mobile-auth";
+    if (inPhasePracticeRoot()) return "../../../assets/firebase.js" + version;
+    return (inAdminRoot() ? "../assets/firebase.js" : "../assets/firebase.js") + version;
   }
 
   function qs(selector, root) {
@@ -766,7 +767,7 @@ const UTL_CONTENT = {
       ".ws-context-toggle{width:100%;display:flex;align-items:center;gap:14px;border:0;border-radius:10px;background:#ded6c8;color:var(--ws-navy);padding:16px 18px;text-align:left;cursor:pointer}.ws-context-toggle-icon{width:30px;height:30px;border-radius:8px;background:var(--ws-gold);color:#fff;display:grid;place-items:center;font-size:24px;font-weight:700;line-height:1}.ws-context-toggle-title{display:block;color:var(--ws-navy);font-size:17px;font-weight:700}.ws-context-toggle-sub{display:block;color:var(--ws-steel);font-size:14px;margin-top:2px}.ws-context-panel{display:none;padding:18px 0 0}.ws-context-panel.ws-open{display:block}.ws-context-panel-inner{color:var(--ws-charcoal)}.ws-context-panel-inner p{margin:0 0 14px;color:var(--ws-charcoal);line-height:1.5}.ws-context-embed{margin-top:14px;border-radius:10px;overflow:hidden;border:1px solid var(--ws-line)}.ws-context-panel .ws-media-row{background:var(--ws-navy);margin-top:14px}.ws-workbook-card{position:relative;margin-top:18px;background:#fff;border:1px solid var(--ws-line);border-radius:12px;padding:34px 36px;display:grid;gap:22px}.ws-workbook-card.ws-done{border:2px solid var(--ws-green)}.ws-workbook-card.ws-disabled{opacity:.56}.ws-workbook-card.ws-disabled a,.ws-workbook-card.ws-disabled button{pointer-events:none}.ws-workbook-top{display:flex;align-items:center;gap:12px;color:var(--ws-steel);font:700 14px 'Roboto Mono',monospace;letter-spacing:.14em;text-transform:uppercase}.ws-status-circle{width:28px;height:28px;border-radius:999px;background:#d9e4ee;color:var(--ws-steel);display:grid;place-items:center;font:700 14px Lato,sans-serif}.ws-workbook-card.ws-done .ws-status-circle{background:var(--ws-green);color:#fff}.ws-workbook-card h3{margin:0;color:var(--ws-navy);font:700 clamp(34px,5vw,54px)/1.02 'Playfair Display',serif}.ws-workbook-card p{max-width:780px;margin:0;color:var(--ws-steel);font-size:22px;line-height:1.35}.ws-card-actions{display:flex;gap:12px;flex-wrap:wrap}.ws-done-pill{display:inline-flex;align-items:center;gap:5px;background:rgba(44,122,75,.12);color:var(--ws-green);border-radius:999px;padding:4px 10px;font:700 12px Lato,sans-serif;letter-spacing:0;text-transform:none}",
       ".ws-admin-visibility{margin-top:30px;background:#fff;border:1px solid var(--ws-line);border-radius:12px;padding:18px;display:grid;gap:12px}.ws-check-row{display:flex;align-items:flex-start;gap:10px;color:var(--ws-navy);font-weight:700}.ws-check-row input{margin-top:3px}.ws-help{margin:0;color:var(--ws-steel);font-size:14px;line-height:1.45}",
       ".ws-bottom-nav{display:flex;justify-content:space-between;gap:12px;margin-top:34px}.ws-bottom-nav .ws-button{min-width:180px}.ws-admin-grid{display:grid;gap:16px;margin-top:30px}.ws-admin-phase{background:#fff;border:1px solid var(--ws-line);border-radius:12px;overflow:hidden}.ws-admin-toggle{width:100%;display:grid;grid-template-columns:74px 1fr auto;align-items:center;gap:16px;border:0;background:#fff;padding:18px;text-align:left;cursor:pointer}.ws-admin-num{color:rgba(0,51,102,.12);font:700 54px 'Playfair Display',serif}.ws-admin-body{display:none;padding:0 18px 18px}.ws-admin-phase.ws-open .ws-admin-body{display:block}.ws-slot{border-top:1px solid var(--ws-line);padding:16px 0;display:grid;gap:10px}.ws-slot-head{display:flex;justify-content:space-between;gap:12px}.ws-type-buttons{display:flex;gap:8px}.ws-type-button{border:1px solid rgba(0,51,102,.25);background:#fff;color:var(--ws-navy);border-radius:999px;padding:7px 10px;font:700 10px 'Roboto Mono',monospace;cursor:pointer}.ws-type-button.ws-selected{background:var(--ws-navy);color:#fff}.ws-save-row{display:flex;gap:8px}.ws-save-row .ws-input{background:#fbf7ef}.ws-save-note{min-height:18px;color:var(--ws-green);font:700 11px 'Roboto Mono',monospace}.ws-save-bar{position:sticky;bottom:0;background:#fff;border-top:1px solid var(--ws-line);padding:12px 0;margin-top:32px;box-shadow:0 -8px 20px rgba(0,51,102,.07)}.ws-save-bar-inner{display:flex;justify-content:space-between;align-items:center;gap:16px}",
-      "@media(max-width:768px){.ws-shell{width:calc(100% - 32px)}.ws-nav-inner{height:auto;grid-template-columns:1fr auto;gap:0;width:100%;padding:10px 12px}.ws-brand{height:auto}.ws-brand-sep,.ws-workspace-link{display:none}.ws-user{height:auto}.ws-links{grid-column:1/-1;justify-content:flex-start;overflow-x:auto;white-space:nowrap;gap:10px;border-top:1px solid rgba(255,255,255,.14);scrollbar-width:none}.ws-links::-webkit-scrollbar,.ws-lesson-rail::-webkit-scrollbar,.ws-step-tabs-inner::-webkit-scrollbar{display:none}.ws-link{min-height:44px;font-size:12px}.ws-phase-menu{position:fixed;left:12px;right:12px;top:96px;width:auto}.ws-user-email{display:none}.ws-main{padding:34px 0 48px}.ws-title{font-size:38px}.ws-subtitle{font-size:16px}.ws-orientation-head{grid-template-columns:1fr auto}.ws-start-badge{width:max-content}.ws-step-tabs{top:98px}.ws-step-tabs-inner{overflow-x:auto;scrollbar-width:none}.ws-step-tab{flex:0 0 auto;font-size:10px}.ws-gold-cta{align-items:flex-start;flex-direction:column}.ws-exercise-tabs{gap:14px;overflow-x:auto;scrollbar-width:none}.ws-exercise-tabs::-webkit-scrollbar{display:none}.ws-exercise-tab{flex:0 0 auto;font-size:10px}.ws-ai-link-card{grid-template-columns:42px 1fr;gap:12px;padding:14px}.ws-ai-arrow{display:none}.ws-phase-card{grid-template-columns:6px 54px 1fr;gap:14px;padding:18px 16px 18px 0}.ws-phase-actions{grid-column:2/-1;justify-items:start}.ws-phase-number{font-size:48px}.ws-phase-content h2{font-size:27px}.ws-stepper{flex-wrap:wrap}.ws-section-head{align-items:flex-start;flex-direction:column}.ws-player-actions{align-items:flex-start;flex-direction:column}.ws-scroll-hint{display:block}.ws-lesson-rail{display:flex;overflow-x:auto;gap:10px;padding-bottom:4px;scrollbar-width:none}.ws-lesson-tile{min-width:104px}.ws-collapsed{grid-template-columns:auto 1fr auto}.ws-collapsed .ws-pill{display:none}.ws-workbook-card{padding:24px 20px}.ws-workbook-top{font-size:11px;letter-spacing:.1em}.ws-workbook-card h3{font-size:34px}.ws-workbook-card p{font-size:17px}.ws-card-actions .ws-button{width:100%}.ws-exercise-card{grid-template-columns:1fr}.ws-bottom-nav{flex-direction:row}.ws-bottom-nav .ws-button{min-width:0;flex:1;padding:0 10px;font-size:10px}.ws-admin-toggle{grid-template-columns:48px 1fr auto}.ws-save-bar-inner{flex-direction:column;align-items:stretch}.ws-save-row{flex-direction:column}}"
+      "@media(max-width:768px){body.ws-page{background:var(--ws-cream)}.ws-shell{width:calc(100% - 28px)}.ws-nav-inner{height:auto;grid-template-columns:auto 1fr auto;grid-template-rows:auto auto;gap:0 10px;width:100%;padding:8px 12px 0}.ws-brand{grid-column:1;grid-row:1;height:42px;align-items:center}.ws-logo{height:30px}.ws-user{grid-column:3;grid-row:1;height:42px}.ws-user-email{display:none}.ws-avatar{width:36px;height:36px}.ws-links{grid-column:1/-1;grid-row:2;justify-content:flex-start;overflow-x:auto;white-space:nowrap;gap:10px;border-top:1px solid rgba(255,255,255,.14);scrollbar-width:none}.ws-links::-webkit-scrollbar,.ws-lesson-rail::-webkit-scrollbar,.ws-step-tabs-inner::-webkit-scrollbar,.ws-exercise-tabs::-webkit-scrollbar{display:none}.ws-link{min-height:42px;font-size:14px}.ws-sep{opacity:.55}.ws-phase-menu{position:fixed;left:12px;right:12px;top:92px;width:auto}.ws-profile-menu{position:fixed;top:56px;right:12px;left:auto;width:min(270px,calc(100vw - 24px));max-width:none}.ws-main{padding:24px 0 48px}.ws-title{font-size:40px}.ws-subtitle{font-size:17px}.ws-login-wrap{min-height:100svh;padding:28px 16px}.ws-login-card{padding:28px 24px}.ws-login-card .ws-title{font-size:54px}.ws-login-card .ws-subtitle{font-size:18px}.ws-login-card .ws-google-button{min-height:50px}.ws-orientation-head{grid-template-columns:1fr auto;align-items:start;padding:16px}.ws-start-badge{width:max-content;margin-bottom:8px}.ws-orientation-title{font-size:18px}.ws-orientation-sub{font-size:15px;line-height:1.35}.ws-orientation-body{padding:0 16px 18px}.ws-orientation-copy{font-size:16px;line-height:1.58}.ws-orientation-copy h3{font-size:28px}.ws-disclosure-icon{width:34px;height:34px}.ws-player-card,.ws-context-embed{border-radius:12px}.ws-player-meta{position:static;padding:12px 14px;background:var(--ws-navy);text-shadow:none}.ws-player-meta h3{font-size:21px}.ws-how-toggle{padding:12px}.ws-ready-row{align-items:flex-start;font-size:16px;line-height:1.35}.ws-ready-row input{margin-top:3px;flex:0 0 auto}.ws-step-tabs{top:85px}.ws-step-tabs-inner{width:100%;padding:0 12px;overflow-x:auto;scrollbar-width:none;gap:20px}.ws-step-tab{flex:0 0 auto;min-height:42px;font-size:10px}.ws-gold-cta{align-items:flex-start;flex-direction:column}.ws-exercise-tabs{gap:14px;overflow-x:auto;scrollbar-width:none}.ws-exercise-tab{flex:0 0 auto;font-size:10px}.ws-ai-link-card{grid-template-columns:42px 1fr;gap:12px;padding:14px}.ws-ai-arrow{display:none}.ws-phase-card{grid-template-columns:6px 50px 1fr;gap:12px;min-height:150px;padding:18px 14px 18px 0}.ws-phase-actions{grid-column:2/-1;justify-items:start}.ws-phase-number{font-size:46px}.ws-phase-content h2{font-size:27px}.ws-stepper{flex-wrap:wrap}.ws-section{margin-top:24px}.ws-section-head{align-items:flex-start;flex-direction:column}.ws-player-actions{align-items:flex-start;flex-direction:column}.ws-scroll-hint{display:block}.ws-lesson-rail{display:flex;overflow-x:auto;gap:10px;padding-bottom:4px;scrollbar-width:none}.ws-lesson-tile{min-width:124px}.ws-collapsed{grid-template-columns:auto 1fr auto}.ws-collapsed .ws-pill{display:none}.ws-context-toggle{padding:14px}.ws-workbook-card{padding:24px 20px}.ws-workbook-top{font-size:11px;letter-spacing:.1em}.ws-workbook-card h3{font-size:34px}.ws-workbook-card p{font-size:17px}.ws-card-actions .ws-button{width:100%}.ws-exercise-card{grid-template-columns:1fr}.ws-bottom-nav{flex-direction:row}.ws-bottom-nav .ws-button{min-width:0;flex:1;padding:0 10px;font-size:10px}.ws-admin-toggle{grid-template-columns:48px 1fr auto}.ws-save-bar-inner{flex-direction:column;align-items:stretch}.ws-save-row{flex-direction:column}}"
     ].join("\n");
     document.head.appendChild(style);
   }
@@ -871,6 +872,47 @@ const UTL_CONTENT = {
     message.textContent = "That password did not work.";
   }
 
+  function isMobileAuthContext() {
+    return window.matchMedia("(max-width: 768px), (pointer: coarse)").matches;
+  }
+
+  async function finishGoogleCredential(firebaseAuth, credential, message) {
+    var member = await firebaseAuth.requireAuthorizedMember(credential.user);
+    var email = credential.user && credential.user.email ? String(credential.user.email).trim().toLowerCase() : "";
+    writeBool(SESSION_KEY, true);
+    localStorage.setItem(USER_KEY, email || "member");
+    localStorage.setItem(PROFILE_KEY, JSON.stringify({
+      email: email || "member",
+      displayName: credential.user && credential.user.displayName ? credential.user.displayName : email,
+      photoURL: credential.user && credential.user.photoURL ? credential.user.photoURL : "",
+      role: member && member.role ? member.role : "member"
+    }));
+    await firebaseAuth.saveUserProfile(credential.user, member || {});
+    if (member && member.role === "admin") localStorage.setItem(ADMIN_KEY, "true");
+    else localStorage.removeItem(ADMIN_KEY);
+    if (message) {
+      message.classList.add("ws-success");
+      message.textContent = "Signed in. Opening your workspace...";
+    }
+    window.location.href = "index.html";
+  }
+
+  async function handleGoogleRedirectResult(message) {
+    try {
+      var firebaseAuth = await import(firebaseHref());
+      var credential = await firebaseAuth.getGoogleRedirectResult();
+      if (!credential || !credential.user) return;
+      if (message) {
+        message.textContent = "Finishing Google sign-in...";
+        message.classList.remove("ws-success");
+      }
+      await finishGoogleCredential(firebaseAuth, credential, message);
+    } catch (error) {
+      console.error("Google redirect login failed.", error);
+      if (message) message.textContent = error && error.message ? error.message : "Google sign-in did not work.";
+    }
+  }
+
   async function handleGoogleLogin(button, message) {
     if (!button || !message) return;
     var originalText = button.textContent;
@@ -880,25 +922,28 @@ const UTL_CONTENT = {
     message.classList.remove("ws-success");
     try {
       var firebaseAuth = await import(firebaseHref());
+      if (isMobileAuthContext()) {
+        message.classList.add("ws-success");
+        message.textContent = "Opening Google sign-in...";
+        await firebaseAuth.signInWithGoogleRedirect();
+        return;
+      }
       var credential = await firebaseAuth.signInWithGooglePopup();
-      var member = await firebaseAuth.requireAuthorizedMember(credential.user);
-      var email = credential.user && credential.user.email ? String(credential.user.email).trim().toLowerCase() : "";
-      writeBool(SESSION_KEY, true);
-      localStorage.setItem(USER_KEY, email || "member");
-      localStorage.setItem(PROFILE_KEY, JSON.stringify({
-        email: email || "member",
-        displayName: credential.user && credential.user.displayName ? credential.user.displayName : email,
-        photoURL: credential.user && credential.user.photoURL ? credential.user.photoURL : "",
-        role: member && member.role ? member.role : "member"
-      }));
-      await firebaseAuth.saveUserProfile(credential.user, member || {});
-      if (member && member.role === "admin") localStorage.setItem(ADMIN_KEY, "true");
-      else localStorage.removeItem(ADMIN_KEY);
-      message.classList.add("ws-success");
-      message.textContent = "Signed in. Opening your workspace...";
-      window.location.href = "index.html";
+      await finishGoogleCredential(firebaseAuth, credential, message);
     } catch (error) {
       console.error("Google member login failed.", error);
+      if (error && (error.code === "auth/popup-blocked" || error.code === "auth/popup-closed-by-user")) {
+        try {
+          var redirectAuth = await import(firebaseHref());
+          message.classList.add("ws-success");
+          message.textContent = "Opening Google sign-in...";
+          await redirectAuth.signInWithGoogleRedirect();
+          return;
+        } catch (redirectError) {
+          console.error("Google redirect fallback failed.", redirectError);
+          error = redirectError;
+        }
+      }
       message.textContent = error && error.message ? error.message : "Google sign-in did not work.";
       button.disabled = false;
       button.textContent = originalText;
@@ -918,6 +963,7 @@ const UTL_CONTENT = {
         event.preventDefault();
         handleGoogleLogin(event.currentTarget, qs("#wsLoginMessage"));
       });
+      handleGoogleRedirectResult(qs("#wsLoginMessage"));
       return;
     }
     if (!remoteProgressLoaded) {

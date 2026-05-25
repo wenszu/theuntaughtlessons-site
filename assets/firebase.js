@@ -4,6 +4,7 @@ import {
   connectAuthEmulator,
   createUserWithEmailAndPassword,
   getAuth,
+  getRedirectResult,
   GoogleAuthProvider,
   isSignInWithEmailLink,
   onAuthStateChanged,
@@ -12,6 +13,7 @@ import {
   signInWithEmailAndPassword,
   signInWithEmailLink,
   signInWithPopup,
+  signInWithRedirect,
   signOut
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 import {
@@ -76,6 +78,16 @@ if (useLocalFirebaseEmulators) {
 async function signInWithGooglePopup() {
   await authPersistenceReady;
   return signInWithPopup(requireFirebaseAuth(), provider);
+}
+
+async function signInWithGoogleRedirect() {
+  await authPersistenceReady;
+  return signInWithRedirect(requireFirebaseAuth(), provider);
+}
+
+async function getGoogleRedirectResult() {
+  await authPersistenceReady;
+  return getRedirectResult(requireFirebaseAuth());
 }
 
 async function getSignedInUser() {
@@ -258,6 +270,7 @@ export {
   firebaseInitError,
   getAuthorizedMember,
   getDoc,
+  getGoogleRedirectResult,
   getMemberWorkspaceProgress,
   getSignedInUser,
   GoogleAuthProvider,
@@ -273,6 +286,7 @@ export {
   signInWithEmailAndPassword,
   signInWithEmailLink,
   signInWithGooglePopup,
+  signInWithGoogleRedirect,
   signInWithPopup,
   signOut
 };
