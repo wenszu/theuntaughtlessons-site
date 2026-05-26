@@ -961,6 +961,14 @@
       z-index: 3;
     }
 
+    .bottom-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
     .remaining {
       color: var(--charcoal);
       font-family: "Roboto Mono", monospace;
@@ -1231,6 +1239,159 @@
       color: var(--charcoal);
       font-family: "Roboto Mono", monospace;
       font-size: 11px;
+    }
+
+    .sample-answer-panel {
+      margin-top: 24px;
+      padding: 28px 32px 34px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--white);
+      box-shadow: 0 18px 38px rgba(0, 51, 102, .08);
+    }
+
+    .sample-answer-head {
+      display: grid;
+      gap: 10px;
+      margin-bottom: 22px;
+    }
+
+    .sample-answer-ribbon {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      color: var(--white);
+      font-family: Lato, Arial, sans-serif;
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    .sample-answer-ribbon span {
+      padding: 12px 18px;
+      background: var(--gold);
+    }
+
+    .sample-answer-ribbon::after {
+      content: "";
+      flex: 1;
+      height: 8px;
+      background: var(--gold);
+    }
+
+    .sample-answer-title {
+      color: var(--navy);
+      font-family: "Playfair Display", Georgia, serif;
+      font-size: clamp(36px, 5vw, 72px);
+      font-weight: 700;
+      line-height: 0.96;
+      margin: 0;
+    }
+
+    .sample-answer-tip {
+      margin: 0;
+      color: #777;
+      font-family: "Playfair Display", Georgia, serif;
+      font-size: clamp(22px, 3vw, 38px);
+      font-style: italic;
+      line-height: 1.05;
+    }
+
+    .sample-answer-bars {
+      display: grid;
+      gap: 12px;
+      margin: 20px 0 22px;
+    }
+
+    .sample-answer-bar {
+      padding: 18px 24px;
+      background: var(--gold);
+      color: var(--white);
+      font-family: Lato, Arial, sans-serif;
+      font-size: clamp(20px, 2.5vw, 34px);
+      font-weight: 700;
+      line-height: 1.2;
+      text-align: center;
+    }
+
+    .sample-answer-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 26px;
+      align-items: start;
+    }
+
+    .sample-answer-column {
+      display: grid;
+      gap: 14px;
+    }
+
+    .sample-answer-arg-label,
+    .sample-answer-arg-title,
+    .sample-answer-detail {
+      background: #FCFAF5;
+      color: #000b2a;
+      text-align: center;
+    }
+
+    .sample-answer-arg-label {
+      padding: 14px 12px;
+      font-family: Lato, Arial, sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+    }
+
+    .sample-answer-arg-title {
+      min-height: 92px;
+      display: grid;
+      place-items: center;
+      padding: 18px 20px;
+      font-family: Lato, Arial, sans-serif;
+      font-size: 22px;
+      font-weight: 800;
+      line-height: 1.15;
+    }
+
+    .sample-answer-details {
+      display: grid;
+      gap: 14px;
+      position: relative;
+      padding-left: 36px;
+    }
+
+    .sample-answer-details::before {
+      content: "";
+      position: absolute;
+      top: 34px;
+      bottom: 34px;
+      left: 13px;
+      width: 2px;
+      background: rgba(74, 74, 74, .65);
+    }
+
+    .sample-answer-detail {
+      min-height: 74px;
+      display: grid;
+      place-items: center;
+      padding: 12px 16px;
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 1.25;
+      position: relative;
+    }
+
+    .sample-answer-detail::before {
+      content: "";
+      position: absolute;
+      left: -36px;
+      width: 36px;
+      height: 2px;
+      background: rgba(74, 74, 74, .65);
+    }
+
+    .sample-answer-actions {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 22px;
     }
 
     .modal {
@@ -1608,9 +1769,37 @@
         padding: 16px 0 0;
       }
 
+      .bottom-actions {
+        width: 100%;
+        flex-direction: column;
+        align-items: stretch;
+      }
+
       .review-grid,
-      .comparison-grid {
+      .comparison-grid,
+      .sample-answer-grid {
         grid-template-columns: 1fr;
+      }
+
+      .sample-answer-panel {
+        padding: 22px 18px 24px;
+      }
+
+      .sample-answer-ribbon {
+        font-size: 14px;
+      }
+
+      .sample-answer-title {
+        font-size: 34px;
+      }
+
+      .sample-answer-tip {
+        font-size: 22px;
+      }
+
+      .sample-answer-bar {
+        padding: 14px 16px;
+        font-size: 20px;
       }
 
       .action-row,
@@ -1961,47 +2150,18 @@
           <div class="arguments" id="arguments"></div>
 
           <div class="bottom-bar">
-            <button class="btn btn-secondary" type="button" id="backToQuestion">← Back</button>
-            <div class="remaining" id="remainingFields">4 fields still needed</div>
-            <button class="btn btn-primary" type="button" id="reviewBtn" disabled>Review my thinking →</button>
+            <div class="remaining" id="remainingFields">Add 3 argument names and 9 supporting details</div>
+            <div class="bottom-actions">
+              <button class="btn btn-secondary" type="button" id="showSample">Show sample answer</button>
+              <button class="btn btn-primary" type="button" id="saveAnswerBtn">Save my answer →</button>
+            </div>
           </div>
+          <div id="saveNoticeMount"></div>
+          <div id="sampleMount"></div>
         </section>
       </div>
     </section>
 
-    <section class="screen review" id="screen3">
-      <div class="page-title">
-        <div class="eyebrow">YOUR ISSUE TREE</div>
-        <h1 class="title">Your thinking, structured.</h1>
-      </div>
-
-      <div class="question-banner">
-        <div class="label">THE QUESTION</div>
-        <h2 id="reviewQuestion"></h2>
-      </div>
-
-      <div class="review-hypothesis">
-        <div class="label">YOUR HYPOTHESIS</div>
-        <p id="reviewHypothesis"></p>
-      </div>
-
-      <div class="review-grid" id="reviewGrid"></div>
-      <div id="saveNoticeMount"></div>
-
-      <div class="action-row">
-        <button class="btn btn-secondary" type="button" id="editTree">← Edit my tree</button>
-        <button class="btn btn-secondary" type="button" id="checkAnswer">Check my answer</button>
-        <button class="btn btn-secondary" type="button" id="showSample">Show sample answer</button>
-        <button class="btn btn-secondary" type="button" id="startOver">Start over →</button>
-        <div class="copy-group">
-          <button class="btn btn-primary" type="button" id="copyEmail">Copy for email</button>
-          <div class="copy-note">READY TO PASTE INTO YOUR EMAIL TO AIKO</div>
-        </div>
-      </div>
-
-      <div id="feedbackMount"></div>
-      <div id="sampleMount"></div>
-    </section>
   </main>
 
   <div class="modal" id="confirmModal" role="dialog" aria-modal="true" aria-labelledby="modalText">
@@ -2337,7 +2497,6 @@
       }
       $("#remainingFields").textContent = remainingText;
       $("#remainingFields").style.visibility = requiredMissing ? "visible" : "hidden";
-      $("#reviewBtn").disabled = false;
     }
 
     function saveResult(appId, phase, exerciseName, durationSeconds, responseObj) {
@@ -2363,16 +2522,24 @@
         <div class="completion-save-notice">
           <div class="save-notice-text">
             <i class="ti ti-device-floppy" aria-hidden="true"></i>
-            Your response has been saved to this browser.
+            Your response has been saved.
             <a href="../../my-results/index.html" class="save-notice-link">View all your results →</a>
           </div>
-          <div class="save-notice-caveat">Saved on this device only. Copy your response into your companion workbook to keep a permanent record.</div>
+          <div class="save-notice-caveat">If you are signed in, this also syncs to your Firestore profile.</div>
         </div>
       `;
     }
 
-    function renderReview() {
-      saveResult('issue-tree', 2, 'Issue tree builder', elapsedSeconds(), {
+    function setSaveButtonSaved(saved) {
+      const button = $("#saveAnswerBtn");
+      if (!button) return;
+      button.textContent = saved ? "View all your results →" : "Save my answer →";
+      if (saved) button.dataset.saved = "true";
+      else delete button.dataset.saved;
+    }
+
+    function issueTreePayload() {
+      return {
         hypothesis: state.hypothesis,
         argument1: state.arguments[0]?.text || '',
         argument1_details: state.arguments[0]?.details || [],
@@ -2380,26 +2547,16 @@
         argument2_details: state.arguments[1]?.details || [],
         argument3: state.arguments[2]?.text || '',
         argument3_details: state.arguments[2]?.details || []
+      };
+    }
+
+    function saveIssueTreeAnswer() {
+      updateFromDom();
+      saveResult('issue-tree', 2, 'Issue tree builder', elapsedSeconds(), {
+        ...issueTreePayload()
       });
-      $("#reviewQuestion").textContent = state.problemStatement || "—";
-      $("#reviewHypothesis").textContent = state.hypothesis || "—";
-      fields.reviewGrid.innerHTML = state.arguments.map((arg, index) => `
-        <article>
-          <div class="review-arg-header">
-            <span class="label">ARGUMENT ${index + 1}</span>
-            ${escapeHtml(arg.text || "—")}
-          </div>
-          <div class="review-arg-body">
-            ${arg.details.map((detail) => `
-              <div class="detail-row">
-                <span class="bullet">•</span>
-                <span class="${detail.trim() ? "" : "empty"}">${formatEvidenceText(detail.trim() || "—")}</span>
-              </div>
-            `).join("")}
-          </div>
-        </article>
-      `).join("");
       $("#saveNoticeMount").innerHTML = completionSaveNotice();
+      setSaveButtonSaved(true);
     }
 
     function renderAll() {
@@ -2412,8 +2569,8 @@
       renderArguments();
       renderEvidenceList();
       renderProgress();
-      renderReview();
-      $$("#feedbackMount, #sampleMount").forEach((mount) => mount.innerHTML = "");
+      setSaveButtonSaved(Boolean(localStorage.getItem("utl_result_issue-tree")));
+      $$("#sampleMount").forEach((mount) => mount.innerHTML = "");
       $$("textarea").forEach(autoResize);
     }
 
@@ -2425,11 +2582,6 @@
       $$(".screen").forEach((screenEl, index) => {
         screenEl.classList.toggle("active", index + 1 === screen);
       });
-      if (screen === 3) {
-        $("#feedbackMount").innerHTML = "";
-        $("#sampleMount").innerHTML = "";
-        renderReview();
-      }
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
@@ -2443,6 +2595,7 @@
         state.arguments[Number(input.dataset.arg)].details[Number(input.dataset.detail)] = input.value;
       });
       save();
+      setSaveButtonSaved(false);
       renderProgress();
       if ($("#startBtn")) $("#startBtn").disabled = !filled(state.problemStatement);
       setTextIfPresent("#sideQuestion", state.problemStatement || "No question yet.");
@@ -2618,41 +2771,38 @@
       `;
     }
 
-    function compareBlock(data) {
-      return `
-        <div class="compare-section">
-          <h3>Hypothesis</h3>
-          <p>${escapeHtml(data.hypothesis || "—")}</p>
-        </div>
-        ${data.arguments.map((arg, index) => `
-          <div class="compare-section">
-            <h3>Argument ${index + 1}: ${escapeHtml(arg.text || "—")}</h3>
-            ${arg.details.map((detail) => `
-              <div class="detail-row"><span class="bullet">•</span><span>${formatEvidenceText(detail || "—")}</span></div>
+    function renderSample() {
+      const data = templateState || blankState();
+      $("#sampleMount").innerHTML = `
+        <section class="sample-answer-panel" aria-live="polite">
+          <div class="sample-answer-head">
+            <div class="sample-answer-ribbon"><span>Core exercise | Sample answer</span></div>
+            <h2 class="sample-answer-title">Organizing thoughts: Sample answer key</h2>
+            <p class="sample-answer-tip">Tip: Good bucketing requires clear questions to be answered.</p>
+          </div>
+          <div class="sample-answer-bars">
+            <div class="sample-answer-bar">${escapeHtml(data.problemStatement || "Why is the Olympics losing its cultural impact?")}</div>
+            <div class="sample-answer-bar">${escapeHtml(data.hypothesis || "The Olympics is losing gravity because of broken culture, a lost story arc, and lack of legitimate transparency.")}</div>
+          </div>
+          <div class="sample-answer-grid">
+            ${data.arguments.map((arg, index) => `
+              <article class="sample-answer-column">
+                <div class="sample-answer-arg-label">Argument ${index + 1}</div>
+                <div class="sample-answer-arg-title">${escapeHtml(arg.text || "—")}</div>
+                <div class="sample-answer-details">
+                  ${arg.details.filter((detail) => detail.trim()).map((detail) => `
+                    <div class="sample-answer-detail">${formatEvidenceText(detail)}</div>
+                  `).join("")}
+                </div>
+              </article>
             `).join("")}
           </div>
-        `).join("")}
-      `;
-    }
-
-    function renderSample() {
-      const customProblem = state.problemStatement.trim() !== templateState.problemStatement;
-      $("#sampleMount").innerHTML = `
-        <section class="panel">
-          <button class="panel-close" type="button" data-close-panel="sampleMount">×</button>
-          ${customProblem ? `<p class="sample-notice">Sample answer shown is for the Olympics template. Use it as a model for structure, not content.</p>` : ""}
-          <div class="comparison-grid">
-            <div class="compare-column">
-              <div class="label">YOUR ANSWER</div>
-              ${compareBlock(state)}
-            </div>
-            <div class="compare-column sample">
-              <div class="label" style="color: var(--steel);">SAMPLE ANSWER</div>
-              ${compareBlock(templateState)}
-            </div>
+          <div class="sample-answer-actions">
+            <button class="btn btn-secondary" type="button" data-close-panel="sampleMount">Hide sample answer</button>
           </div>
         </section>
       `;
+      $("#sampleMount").scrollIntoView({ behavior: "smooth", block: "start" });
     }
 
     function copyText() {
@@ -2911,7 +3061,6 @@
     if (startButton) startButton.addEventListener("click", () => goToScreen(2));
     const clearFreshButton = $("#clearFresh");
     if (clearFreshButton) clearFreshButton.addEventListener("click", clearAll);
-    $("#backToQuestion").addEventListener("click", () => goToScreen(2));
     const emailToggle = $("#emailToggle");
     if (emailToggle) {
       emailToggle.addEventListener("click", () => {
@@ -2922,12 +3071,14 @@
         $("#emailToggleIcon").textContent = open ? "−" : "+";
       });
     }
-    $("#reviewBtn").addEventListener("click", () => goToScreen(3));
-    $("#editTree").addEventListener("click", () => goToScreen(2));
-    $("#checkAnswer").addEventListener("click", renderFeedback);
     $("#showSample").addEventListener("click", renderSample);
-    $("#copyEmail").addEventListener("click", copyForEmail);
-    $("#startOver").addEventListener("click", () => $("#confirmModal").classList.add("show"));
+    $("#saveAnswerBtn").addEventListener("click", (event) => {
+      if (event.currentTarget.dataset.saved === "true") {
+        window.location.href = "../../my-results/index.html";
+        return;
+      }
+      saveIssueTreeAnswer();
+    });
     $("#cancelStartOver").addEventListener("click", () => $("#confirmModal").classList.remove("show"));
     $("#confirmStartOver").addEventListener("click", () => {
       $("#confirmModal").classList.remove("show");
@@ -2970,7 +3121,7 @@
       renderAll();
       renderTimer();
       renderWordCount();
-      goToScreen(Math.min(Math.max(state.currentScreen, 2), 3));
+      goToScreen(2);
     }
 
     initializeApp();
