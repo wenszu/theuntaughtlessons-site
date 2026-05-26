@@ -535,6 +535,18 @@
       gap: 6px;
     }
 
+    .phase-layout-field input[readonly] {
+      background: #F3EDE2;
+      color: rgba(0, 51, 102, .72);
+      cursor: default;
+    }
+
+    .field-note {
+      color: var(--steel);
+      font-size: 11px;
+      line-height: 1.35;
+    }
+
     .phase-layout-field > .small-button {
       justify-self: start;
       align-self: end;
@@ -663,8 +675,118 @@
 
     .sync-list {
       display: grid;
-      gap: 8px;
+      gap: 14px;
       margin-top: 14px;
+    }
+
+    .sync-check-group {
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      background: var(--white);
+      overflow: hidden;
+    }
+
+    .sync-check-head {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: center;
+      padding: 14px 16px;
+      border: 0;
+      border-bottom: 1px solid var(--line);
+      background: #FAF8F4;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .sync-check-head h3 {
+      margin: 0;
+      color: var(--navy);
+      font-family: 'Playfair Display', serif;
+      font-size: 20px;
+    }
+
+    .sync-check-head p {
+      margin: 4px 0 0;
+      color: var(--steel);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .sync-collapse-icon {
+      width: 26px;
+      height: 26px;
+      border-radius: 6px;
+      background: var(--gold);
+      color: var(--white);
+      display: grid;
+      place-items: center;
+      font-size: 20px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .sync-check-body {
+      display: grid;
+    }
+
+    .sync-check-group.is-collapsed .sync-check-body {
+      display: none;
+    }
+
+    .sync-check-section {
+      border-top: 1px solid rgba(0, 51, 102, .08);
+    }
+
+    .sync-check-section:first-of-type {
+      border-top: 0;
+    }
+
+    .sync-section-head {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: center;
+      padding: 12px 16px;
+      border: 0;
+      background: var(--white);
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .sync-section-head h4 {
+      margin: 0 0 8px;
+      color: var(--navy);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .sync-section-meta {
+      color: var(--steel);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+
+    .sync-section-body {
+      display: grid;
+      padding: 0 16px 14px;
+    }
+
+    .sync-check-section.is-collapsed .sync-section-body {
+      display: none;
+    }
+
+    .sync-result-stack {
+      display: grid;
+      gap: 7px;
     }
 
     .sync-actions {
@@ -1014,6 +1136,8 @@
     .sync-badge-missing { background:#f0f0f0; color:#777; }
     .sync-fix-btn { background:transparent; border:0; padding:0; color:var(--gold); font-size:11px; font-family:'Roboto Mono',monospace; font-weight:700; text-decoration:underline; cursor:pointer; }
     .sync-summary-bar { margin-bottom:12px; padding:10px 14px; border-radius:7px; background:var(--navy); color:var(--white); font-family:'Roboto Mono',monospace; font-size:12px; font-weight:700; }
+    .sync-result-row { grid-template-columns:1fr auto auto; }
+    .sync-result-detail { display:block; margin-top:2px; color:#777; font-size:11px; font-weight:400; line-height:1.35; }
 
     /* FIX 4 — Embed URL format validation */
     .url-fmt-warn { display:none; margin-top:5px; color:var(--gold); font-size:12px; font-weight:700; line-height:1.45; }
@@ -1161,7 +1285,7 @@
         <span class="section-label">Members</span>
         <h2>Phase 1</h2>
         <div class="section-divider"></div>
-        <p class="description">Controls Phase 1 — Think Clearly context sections and app visibility. Move rows to change their order in the member workspace.</p>
+        <p class="description">Controls Phase 1 — Think clearly context sections and app visibility. Move rows to change their order in the member workspace.</p>
         <div class="sync-actions">
           <button class="small-button" type="button" data-add-context="phase1">Add context sub-section</button>
           <button class="small-button secondary-button" type="button" data-save-layout-default="phase1">Set current layout as default</button>
@@ -1175,7 +1299,7 @@
         <span class="section-label">Members</span>
         <h2>Phase 2</h2>
         <div class="section-divider"></div>
-        <p class="description">Controls Phase 2 — Speak Concisely context sections and app visibility. Phase visibility is automatic and shown in the Visibility section.</p>
+        <p class="description">Controls Phase 2 — Speak concisely context sections and app visibility. Phase visibility is automatic and shown in the Visibility section.</p>
         <div class="sync-actions">
           <button class="small-button" type="button" data-add-context="phase2">Add context sub-section</button>
           <button class="small-button secondary-button" type="button" data-save-layout-default="phase2">Set current layout as default</button>
@@ -1189,7 +1313,7 @@
         <span class="section-label">Members</span>
         <h2>Phase 3</h2>
         <div class="section-divider"></div>
-        <p class="description">Controls Phase 3 — Act Confidently context sections and app visibility. Participant completion remains automatic from the member workspace.</p>
+        <p class="description">Controls Phase 3 — Act confidently context sections and app visibility. Participant completion remains automatic from the member workspace.</p>
         <div class="sync-actions">
           <button class="small-button" type="button" data-add-context="phase3">Add context sub-section</button>
           <button class="small-button secondary-button" type="button" data-save-layout-default="phase3">Set current layout as default</button>
@@ -1205,8 +1329,8 @@
         <div class="section-divider"></div>
         <p class="description">Controls the assessment cards in the member hub. Choose whether the section is shown, shown as coming soon, or hidden.</p>
         <div class="toggle-row" data-key="utl_tsa_status" data-default="live" data-options="live:Show,placeholder:Coming soon,hidden:Hide" data-labels="live:Assessment section shown in the member hub,placeholder:Whole section shows coming soon buttons,hidden:Assessment section removed from the page entirely"></div>
-        <div class="toggle-row" data-key="utl_tsa_diagnostic_status" data-default="live" data-options="live:Show,placeholder:Coming soon,hidden:Hide" data-labels="live:The Diagnostic card links to its assessment hub,placeholder:The Diagnostic card shows a Coming soon badge,hidden:The Diagnostic card is hidden"></div>
-        <div class="toggle-row" data-key="utl_tsa_checkpoint_status" data-default="live" data-options="live:Show,placeholder:Coming soon,hidden:Hide" data-labels="live:The Checkpoint card links to its assessment hub,placeholder:The Checkpoint card shows a Coming soon badge,hidden:The Checkpoint card is hidden"></div>
+        <div class="toggle-row" data-key="utl_tsa_diagnostic_status" data-default="live" data-options="live:Show,placeholder:Coming soon,hidden:Hide" data-labels="live:The diagnostic card links to its assessment hub,placeholder:The diagnostic card shows a Coming soon badge,hidden:The diagnostic card is hidden"></div>
+        <div class="toggle-row" data-key="utl_tsa_checkpoint_status" data-default="live" data-options="live:Show,placeholder:Coming soon,hidden:Hide" data-labels="live:The checkpoint card links to its assessment hub,placeholder:The checkpoint card shows a Coming soon badge,hidden:The checkpoint card is hidden"></div>
         <div class="sync-actions" style="margin-top: 14px;">
           <button class="small-button" type="button" id="showReadyAssessments">Set ready assessment apps live</button>
           <a class="small-button secondary-button" href="../member-login/index.html?mode=admin#assessments" target="_blank" style="display:inline-flex;align-items:center;text-decoration:none;">Preview Assessments</a>
@@ -1415,22 +1539,22 @@
       ['embed-phase3', 'utl_embed_p3_eyes_on_you', 'All eyes are on you']
     ];
     const EXPECTED_EXERCISES = [
-      ['Grocery List', '../apps/grocery-list/index.html', 'utl_p1_ex1_done'],
-      ['Grocery List with AI', '../apps/grocery-list-ai/index.html', 'utl_p1_ex2_done'],
-      ["Manager's Messy Notes", '../apps/messy-notes/index.html', 'utl_p1_ex3_done'],
-      ['Rushed Voice Memo', '../apps/rushed-voice-memo/index.html', 'utl_p1_ex4_done'],
-      ['Rushed Voice Memo with AI', '../apps/rushed-voice-memo-ai/index.html', 'utl_p1_ex5_done'],
-      ['Chalkboard Notes', '../apps/chalkboard-notes/index.html', 'utl_p1_ex6_done'],
-      ['Issue Tree Builder', '../apps/issue-tree-builder/index.html', 'utl_p2_ex1_done'],
-      ['SCQA Builder', '../apps/scqa-builder/index.html', 'utl_p2_ex2_done'],
+      ['Grocery list', '../apps/grocery-list/index.html', 'utl_p1_ex1_done'],
+      ['Grocery list with AI', '../apps/grocery-list-ai/index.html', 'utl_p1_ex2_done'],
+      ["Manager's messy notes", '../apps/messy-notes/index.html', 'utl_p1_ex3_done'],
+      ['Rushed voice memo', '../apps/rushed-voice-memo/index.html', 'utl_p1_ex4_done'],
+      ['Rushed voice memo with AI', '../apps/rushed-voice-memo-ai/index.html', 'utl_p1_ex5_done'],
+      ['Chalkboard notes', '../apps/chalkboard-notes/index.html', 'utl_p1_ex6_done'],
+      ['Issue tree builder', '../apps/issue-tree-builder/index.html', 'utl_p2_ex1_done'],
+      ['SCQA builder', '../apps/scqa-builder/index.html', 'utl_p2_ex2_done'],
       ['Advisory board with AI', '../apps/advisory-board/index.html', 'utl_p2_ex3_done'],
       ['Write to Aiko', '../apps/write-to-aiko/index.html', 'utl_p2_ex4_done'],
       ['Explain to Aiko (120s)', '../apps/explain-to-aiko/index.html', 'utl_p2_ex5_done'],
       ['Explain to Aiko (60s)', '../apps/explain-to-aiko-60/index.html', 'utl_p2_ex6_done'],
-      ['The Art of Saying No', '../apps/eisenhower-matrix/index.html', 'utl_p3_ex1_done'],
-      ['I Have Bad News...', '../apps/i-have-bad-news/index.html', 'utl_p3_ex2_done'],
-      ["Let's Switch Hats", '../apps/lets-switch-hats/index.html', 'utl_p3_ex3_done'],
-      ['Speak Like Obama', '../apps/speak-like-obama/index.html', 'utl_p3_ex4_done']
+      ['The art of saying no', '../apps/eisenhower-matrix/index.html', 'utl_p3_ex1_done'],
+      ['I have bad news...', '../apps/i-have-bad-news/index.html', 'utl_p3_ex2_done'],
+      ["Let's switch hats", '../apps/lets-switch-hats/index.html', 'utl_p3_ex3_done'],
+      ['Speak like Obama', '../apps/speak-like-obama/index.html', 'utl_p3_ex4_done']
     ];
     const PHASE_LAYOUT_DEFAULTS = {
       orientation: [
@@ -1439,24 +1563,24 @@
       ],
       phase1: [
         { kind: 'context', key: 'utl_embed_p1_first_day', label: 'Before your first day', visible: true, type: 'video', url: 'https://drive.google.com/file/d/1O9Uyc_3XmP4XfltPQJ7T-zPUba6fdiJJ/view?usp=vids_web' },
-        { kind: 'app', key: 'utl_app_p1_1', title: 'Grocery List', visible: true },
+        { kind: 'app', key: 'utl_app_p1_1', title: 'Grocery list', visible: true },
         { kind: 'context', key: 'utl_embed_p1_ai_grocery', label: 'Try the same task with AI', visible: true, type: 'slides', url: '' },
-        { kind: 'app', key: 'utl_app_p1_2', title: 'Grocery List with AI', visible: true },
+        { kind: 'app', key: 'utl_app_p1_2', title: 'Grocery list with AI', visible: true },
         { kind: 'context', key: 'utl_embed_p1_message_desk', label: 'A message just landed on your desk', visible: true, type: 'video', url: 'https://drive.google.com/file/d/1JpPDKz5RTyWFIJxUkeKSB5etP4W57Dax/view?usp=vids_web' },
-        { kind: 'app', key: 'utl_app_p1_3', title: "Manager's Messy Notes", visible: true },
+        { kind: 'app', key: 'utl_app_p1_3', title: "Manager's messy notes", visible: true },
         { kind: 'context', key: 'utl_embed_p1_hugh_favour', label: 'Hugh needs a favour', visible: true, type: 'video', url: 'https://drive.google.com/file/d/1EZe8wYzQvic6DaFJwraixATYR6Kx18oM/view?usp=vids_web' },
-        { kind: 'app', key: 'utl_app_p1_4', title: 'Rushed Voice Memo', visible: true },
+        { kind: 'app', key: 'utl_app_p1_4', title: 'Rushed voice memo', visible: true },
         { kind: 'context', key: 'utl_embed_p1_ai_memo', label: 'Try the same memo with AI', visible: true, type: 'slides', url: '' },
-        { kind: 'app', key: 'utl_app_p1_5', title: 'Rushed Voice Memo with AI', visible: true },
+        { kind: 'app', key: 'utl_app_p1_5', title: 'Rushed voice memo with AI', visible: true },
         { kind: 'context', key: 'utl_embed_p1_olympic_brainstorm', label: 'Aiko needs the Olympic brainstorm session sorted', visible: true, type: 'video', url: 'https://drive.google.com/file/d/1kuQ7yqGvwjRnGufN4ZHMIAcqtdLq9NfN/view?usp=vids_web' },
-        { kind: 'app', key: 'utl_app_p1_6', title: 'Chalkboard Notes', visible: true }
+        { kind: 'app', key: 'utl_app_p1_6', title: 'Chalkboard notes', visible: true }
       ],
       phase2: [
         { kind: 'context', key: 'utl_embed_p2_recap_storyline', label: 'Recap and storyline', visible: true, type: 'video', url: 'https://drive.google.com/open?id=1A6lCodeBWSOQLNAEMOE4bpYYB5xJXWjb&usp=drive_copy' },
         { kind: 'context', key: 'utl_embed_p2_aiko_question', label: 'Aiko liked your work. Now she has a question.', visible: true, type: 'video', url: 'https://drive.google.com/file/d/15AaNTTkiRsIVf90RfsmcSa3aEuFTqOAT/view?usp=vids_web' },
-        { kind: 'app', key: 'utl_app_p2_1', title: 'Issue Tree Builder', visible: true },
+        { kind: 'app', key: 'utl_app_p2_1', title: 'Issue tree builder', visible: true },
         { kind: 'context', key: 'utl_embed_p2_frame_answer', label: 'Before you frame your answer', visible: true, type: 'video', url: 'https://drive.google.com/open?id=168tYlq9fRUKl7NrlELHuwAPwAxC2_5yD&usp=drive_copy' },
-        { kind: 'app', key: 'utl_app_p2_2', title: 'SCQA Builder', visible: true },
+        { kind: 'app', key: 'utl_app_p2_2', title: 'SCQA builder', visible: true },
         { kind: 'context', key: 'utl_embed_p2_outside_perspectives', label: 'Get outside perspectives before you commit', visible: true, type: 'slides', url: '' },
         { kind: 'app', key: 'utl_app_p2_3', title: 'Advisory board with AI', visible: true },
         { kind: 'context', key: 'utl_embed_p2_aiko_email', label: 'Aiko does not have time to read everything', visible: true, type: 'video', url: 'https://drive.google.com/open?id=1Tw0MhCjy5Tkdodjy8LvIEB-XEEuK4Di3&usp=drive_copy' },
@@ -1469,31 +1593,31 @@
       phase3: [
         { kind: 'context', key: 'utl_embed_p3_recap_storyline', label: 'Recap and storyline', visible: true, type: 'video', url: 'https://drive.google.com/file/d/1xJsxbjivMPHJvGKjWxtvPM0grgm2LiE-/view?usp=vids_web' },
         { kind: 'context', key: 'utl_embed_p3_lead_role', label: 'You just got the lead role.', visible: true, type: 'video', url: 'https://drive.google.com/open?id=18UnP9dxWd31EeCfEfODiPBQ-Jfyxbd8Q&usp=drive_copy' },
-        { kind: 'app', key: 'utl_app_p3_1', title: 'The Art of Saying No', visible: true },
+        { kind: 'app', key: 'utl_app_p3_1', title: 'The art of saying no', visible: true },
         { kind: 'context', key: 'utl_embed_p3_bad_news', label: 'You have to be the one to say it', visible: true, type: 'video', url: 'https://drive.google.com/file/d/1m04hT3TUZkaKZN8-f0zlWWOBLA1DS6fF/view?usp=vids_web' },
-        { kind: 'app', key: 'utl_app_p3_2', title: 'I Have Bad News...', visible: true },
+        { kind: 'app', key: 'utl_app_p3_2', title: 'I have bad news...', visible: true },
         { kind: 'context', key: 'utl_embed_p3_read_room', label: 'Read the room before you speak', visible: true, type: 'video', url: 'https://drive.google.com/file/d/1UVaAj5EG7Kg4c1uZhXaR0bqwasgtjQgS/view?usp=vids_web' },
-        { kind: 'app', key: 'utl_app_p3_3', title: "Let's Switch Hats", visible: true },
+        { kind: 'app', key: 'utl_app_p3_3', title: "Let's switch hats", visible: true },
         { kind: 'context', key: 'utl_embed_p3_eyes_on_you', label: 'All eyes are on you', visible: true, type: 'video', url: 'https://drive.google.com/file/d/1ndtAyGJpud5jDA5pLyYoGmqOJOeFabPO/view?usp=vids_web' },
-        { kind: 'app', key: 'utl_app_p3_4', title: 'Speak Like Obama', visible: true }
+        { kind: 'app', key: 'utl_app_p3_4', title: 'Speak like Obama', visible: true }
       ]
     };
     const VISIBILITY_CHECKLIST = [
       {
-        title: 'Main Page',
+        title: 'Main page',
         items: [
           {
             key: 'utl_public_find_level',
             checkedValue: 'show',
             uncheckedValue: 'hide',
             fallback: 'show',
-            label: 'Show Find Your Level',
-            description: 'Shows the public Find Your Level nav link and homepage CTA.'
+            label: 'Show Find your level',
+            description: 'Shows the public Find your level nav link and homepage CTA.'
           }
         ]
       },
       {
-        title: 'Learner Release Gates',
+        title: 'Learner release gates',
         items: [
           {
             key: 'utl_mission_card',
@@ -2162,7 +2286,8 @@
                 </div>
                 <div class="phase-layout-field">
                   <label>Internal app ID</label>
-                  <input type="text" value="${escapeHtml(item.key)}" readonly>
+                  <input type="text" value="${escapeHtml(item.key)}" readonly aria-readonly="true" tabindex="-1">
+                  <span class="field-note">View only. Used by Firestore progress records.</span>
                 </div>
               </div>
             </div>
@@ -2319,87 +2444,185 @@
       rerunButton.hidden = true;
       hideButton.hidden = true;
 
-      const resultRows = [];
+      const groups = [];
+      const groupMap = new Map();
       let passCount = 0;
       let failCount = 0;
       let missingCount = 0;
 
-      function addRow(name, status, sectionId) {
+      function phaseLabel(phaseId) {
+        return {
+          orientation: 'Home / orientation',
+          phase1: 'Phase 1',
+          phase2: 'Phase 2',
+          phase3: 'Phase 3',
+          site: 'Site pages',
+          plumbing: 'Submission setup'
+        }[phaseId] || phaseId;
+      }
+
+      function getGroup(id, title, description) {
+        if (groupMap.has(id)) return groupMap.get(id);
+        const group = { id, title, description, sections: [], sectionMap: new Map() };
+        groups.push(group);
+        groupMap.set(id, group);
+        return group;
+      }
+
+      function addRow(groupId, groupTitle, groupDescription, location, name, status, sectionId, detail = '') {
         if (status === 'pass') passCount++;
         else if (status === 'fail') failCount++;
         else missingCount++;
-        const badgeClass = status === 'pass' ? 'sync-badge-pass' : status === 'fail' ? 'sync-badge-fail' : 'sync-badge-missing';
-        const badgeText = status === 'pass' ? 'Pass' : status === 'fail' ? 'Fail' : 'Missing';
-        const fixBtn = sectionId ? `<button class="sync-fix-btn" type="button" data-fix-section="${escapeHtml(sectionId)}">Fix →</button>` : '<span></span>';
-        resultRows.push(`<div class="sync-result-row"><span class="sync-result-name">${escapeHtml(name)}</span><span class="sync-badge ${badgeClass}">${badgeText}</span>${fixBtn}</div>`);
+        const group = getGroup(groupId, groupTitle, groupDescription);
+        if (!group.sectionMap.has(location)) {
+          const section = { title: location, rows: [] };
+          group.sections.push(section);
+          group.sectionMap.set(location, section);
+        }
+        group.sectionMap.get(location).rows.push({ name, status, sectionId, detail });
       }
 
-      // 1. Lesson video URLs
+      function mediaStatus(url, type) {
+        if (!url) return { status: 'missing', detail: 'No media URL is set.' };
+        if (/docs\.google\.com\/presentation/.test(url)) return { status: 'pass', detail: 'Google Slides link detected.' };
+        if (/\/preview\b/.test(url)) return { status: 'pass', detail: 'Drive preview link detected.' };
+        if (/drive\.google\.com\/uc\?export=download/.test(url)) return { status: 'pass', detail: 'Direct Drive file URL detected.' };
+        if (/vimeo\.com|youtube\.com|youtu\.be/.test(url)) return { status: 'pass', detail: 'External video URL detected.' };
+        if (/drive\.google\.com\/(?:file\/d\/|open\?id=)|drive_copy|\/view\b/.test(url)) {
+          return { status: 'fail', detail: 'Drive share link found. Convert or verify it renders as an embed before publishing.' };
+        }
+        return { status: type === 'text' ? 'pass' : 'missing', detail: type === 'text' ? 'Text-only context.' : 'URL format is not recognized.' };
+      }
+
+      function phaseFromDoneKey(doneKey) {
+        if (/p1/.test(doneKey)) return 'phase1';
+        if (/p2/.test(doneKey)) return 'phase2';
+        if (/p3/.test(doneKey)) return 'phase3';
+        return 'site';
+      }
+
+      function renderRow(row) {
+        const badgeClass = row.status === 'pass' ? 'sync-badge-pass' : row.status === 'fail' ? 'sync-badge-fail' : 'sync-badge-missing';
+        const badgeText = row.status === 'pass' ? 'Pass' : row.status === 'fail' ? 'Issue' : 'Missing';
+        const fixBtn = row.sectionId ? `<button class="sync-fix-btn" type="button" data-fix-section="${escapeHtml(row.sectionId)}">Fix →</button>` : '<span></span>';
+        const detail = row.detail ? `<span class="sync-result-detail">${escapeHtml(row.detail)}</span>` : '';
+        return `<div class="sync-result-row"><span class="sync-result-name">${escapeHtml(row.name)}${detail}</span><span class="sync-badge ${badgeClass}">${badgeText}</span>${fixBtn}</div>`;
+      }
+
+      function renderGroup(group) {
+        const sections = group.sections.map((section) => {
+          const issueCount = section.rows.filter(row => row.status !== 'pass').length;
+          const collapsedClass = issueCount ? '' : ' is-collapsed';
+          const icon = issueCount ? '&minus;' : '+';
+          const meta = issueCount ? `${issueCount} issue${issueCount === 1 ? '' : 's'}` : 'All clear';
+          return `<div class="sync-check-section${collapsedClass}"><button class="sync-section-head" type="button" data-sync-section-toggle aria-expanded="${issueCount ? 'true' : 'false'}"><span><h4>${escapeHtml(section.title)}</h4><span class="sync-section-meta">${escapeHtml(meta)}</span></span><span class="sync-collapse-icon">${icon}</span></button><div class="sync-section-body"><div class="sync-result-stack">${section.rows.map(renderRow).join('')}</div></div></div>`;
+        }).join('');
+        const issueCount = group.sections.reduce((total, section) => total + section.rows.filter(row => row.status !== 'pass').length, 0);
+        const collapsedClass = issueCount ? '' : ' is-collapsed';
+        const icon = issueCount ? '&minus;' : '+';
+        return `<article class="sync-check-group${collapsedClass}"><button class="sync-check-head" type="button" data-sync-group-toggle aria-expanded="${issueCount ? 'true' : 'false'}"><span><h3>${escapeHtml(group.title)}</h3><p>${escapeHtml(group.description)}</p></span><span class="sync-collapse-icon">${icon}</span></button><div class="sync-check-body">${sections}</div></article>`;
+      }
+
+      // 1. Media readiness: lesson videos, context videos, slides, and any configured media.
       const content = window.UTL_CONTENT;
       if (content) {
         ['phase1', 'phase2', 'phase3'].forEach((phaseId) => {
           const phase = content[phaseId];
           if (!phase || !Array.isArray(phase.lessons)) return;
-          phase.lessons.forEach((lesson) => {
+          phase.lessons.forEach((lesson, index) => {
             const url = localStorage.getItem('utl_url_' + lesson.id) || lesson.videoUrl || '';
-            let status;
-            if (!url) status = 'missing';
-            else if (url.includes('/preview')) status = 'pass';
-            else status = 'fail';
-            addRow(`Video: ${lesson.title}`, status, 'section-' + phaseId);
+            const result = mediaStatus(url, 'video');
+            addRow('media', 'Media links', 'Checks lesson videos, context videos, slides, and voice-style files for missing or non-embed-ready URLs. Playback itself may still require a manual spot check because Google Drive blocks some browser verification.', phaseLabel(phaseId), `Lesson ${index + 1}: ${lesson.title}`, result.status, 'section-' + phaseId, result.detail);
           });
         });
       }
 
-      // 2. Context embed URLs
       ['orientation', 'phase1', 'phase2', 'phase3'].forEach((phaseId) => {
         const layout = readPhaseLayout(phaseId);
         layout.filter(item => item.kind === 'context').forEach((item) => {
-          const url = item.url || '';
-          let status;
-          if (!url) status = 'missing';
-          else if (url.includes('/preview') || url.includes('docs.google.com/presentation')) status = 'pass';
-          else if (/\/view|\/open|drive_copy/.test(url)) status = 'fail';
-          else status = 'missing';
-          addRow(`Embed: ${item.label}`, status, 'section-' + phaseId);
+          const result = mediaStatus(item.url || '', item.type || 'video');
+          addRow('media', 'Media links', 'Checks lesson videos, context videos, slides, and voice-style files for missing or non-embed-ready URLs. Playback itself may still require a manual spot check because Google Drive blocks some browser verification.', phaseLabel(phaseId), `Context: ${item.label}`, result.status, 'section-' + phaseId, result.detail);
         });
       });
 
-      // 3. App IDs
+      // 2. Exercise and page links.
+      const pageChecks = [
+        ['Member home', '../member-login/index.html', 'site'],
+        ['My results', '../my-results/index.html', 'site'],
+        ['Toolkit', '../apps/toolkit/index.html', 'site'],
+        ['Admin', '../admin/index.html', 'site']
+      ];
+      EXPECTED_EXERCISES.forEach(([title, path, doneKey]) => pageChecks.push([title, path, phaseFromDoneKey(doneKey)]));
+      const seenPaths = new Set();
+      for (const [label, path, phaseId] of pageChecks) {
+        if (seenPaths.has(path)) continue;
+        seenPaths.add(path);
+        const status = await appPathStatus(path);
+        addRow('links', 'Exercise and page links', 'Checks whether learner-facing pages and exercise app pages are reachable from the admin site.', phaseLabel(phaseId), label, status === 'ok' ? 'pass' : 'fail', phaseId === 'site' ? 'section-links' : 'section-' + phaseId, path);
+      }
+
+      // 3. Progress and Firestore identifiers.
+      const seenAppIds = new Set();
       ['phase1', 'phase2', 'phase3'].forEach((phaseId) => {
         const layout = readPhaseLayout(phaseId);
         layout.filter(item => item.kind === 'app').forEach((item) => {
           const valid = /^utl_app_p[1-3]_\d+$/.test(item.key);
-          addRow(`App ID: ${item.key}`, valid ? 'pass' : 'fail', 'section-' + phaseId);
+          const duplicate = seenAppIds.has(item.key);
+          seenAppIds.add(item.key);
+          const status = valid && !duplicate ? 'pass' : 'fail';
+          const detail = duplicate ? 'Duplicate app ID. This can mix progress records.' : valid ? 'Stable view-only app ID.' : 'Unexpected app ID format.';
+          addRow('ids', 'Progress and Firestore identifiers', 'Checks IDs and completion keys that connect member progress, local storage, and Firestore records. These should stay stable once learners begin using the site.', phaseLabel(phaseId), `Internal app ID: ${item.key}`, status, 'section-' + phaseId, detail);
         });
       });
+      EXPECTED_EXERCISES.forEach(([title, path, doneKey]) => {
+        const valid = /^utl_p[1-3]_ex\d+_done$/.test(doneKey);
+        addRow('ids', 'Progress and Firestore identifiers', 'Checks IDs and completion keys that connect member progress, local storage, and Firestore records. These should stay stable once learners begin using the site.', phaseLabel(phaseFromDoneKey(doneKey)), `Completion key: ${title}`, valid ? 'pass' : 'fail', 'section-' + phaseFromDoneKey(doneKey), doneKey);
+      });
 
-      // 4. Quick link reachability
-      const quickPaths = [
-        ['member-login/index.html', '../member-login/index.html'],
-        ['my-results/index.html', '../my-results/index.html'],
-        ['apps/grocery-list/index.html', '../apps/grocery-list/index.html'],
-        ['apps/messy-notes/index.html', '../apps/messy-notes/index.html'],
-        ['apps/issue-tree-builder/index.html', '../apps/issue-tree-builder/index.html'],
-        ['apps/scqa-builder/index.html', '../apps/scqa-builder/index.html'],
-        ['apps/eisenhower-matrix/index.html', '../apps/eisenhower-matrix/index.html'],
-        ['apps/i-have-bad-news/index.html', '../apps/i-have-bad-news/index.html']
+      // 4. Visibility and release settings.
+      const releaseChecks = [
+        ['Phase 2 release gate', localStorage.getItem('utl_phase2_status') !== 'hide' ? 'pass' : 'missing', 'Phase 2 is held back until you turn the release gate on.', 'phase2'],
+        ['Phase 3 release gate', localStorage.getItem('utl_phase3_status') !== 'hide' ? 'pass' : 'missing', 'Phase 3 is held back until you turn the release gate on.', 'phase3'],
+        ['Admin preview bypass', localStorage.getItem('utl_admin_preview_bypass') === 'on' ? 'pass' : 'missing', 'Optional. Useful when previewing locked phases as an admin.', 'site']
       ];
-      for (const [label, path] of quickPaths) {
-        const status = await appPathStatus(path);
-        addRow(`Link: ${label}`, status === 'ok' ? 'pass' : 'fail', 'section-links');
-      }
+      releaseChecks.forEach(([name, status, detail, phaseId]) => {
+        addRow('visibility', 'Visibility and release settings', 'Checks learner release gates and preview settings so hidden/locked states are easier to diagnose.', phaseLabel(phaseId), name, status, 'section-visibility', detail);
+      });
 
-      // 5. Apps Script URL
+      // 5. Submission plumbing.
       const scriptUrl = localStorage.getItem('utl_send_instructor_url');
-      addRow('Apps Script URL', scriptUrl ? 'pass' : 'missing', 'section-send-instructor');
+      addRow('submission', 'Submission plumbing', 'Checks whether result-forwarding setup exists. This does not send a test submission yet.', phaseLabel('plumbing'), 'Apps Script URL', scriptUrl ? 'pass' : 'missing', 'section-send-instructor', scriptUrl || 'No instructor-results endpoint is configured.');
 
       const total = passCount + failCount + missingCount;
       summary.innerHTML = `<div class="sync-summary-bar">${passCount} of ${total} checks passed — ${failCount} failed, ${missingCount} missing</div>`;
-      output.innerHTML = `<div class="sync-list">${resultRows.join('')}</div>`;
+      output.innerHTML = `<div class="sync-list">${groups.map(renderGroup).join('')}</div>`;
+      bindSyncResultToggles(output);
 
       rerunButton.hidden = false;
       hideButton.hidden = false;
+    }
+
+    function bindSyncResultToggles(root) {
+      root.querySelectorAll('[data-sync-group-toggle]').forEach((button) => {
+        button.addEventListener('click', () => {
+          const group = button.closest('.sync-check-group');
+          if (!group) return;
+          const collapsed = group.classList.toggle('is-collapsed');
+          button.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+          const icon = button.querySelector('.sync-collapse-icon');
+          if (icon) icon.textContent = collapsed ? '+' : '−';
+        });
+      });
+      root.querySelectorAll('[data-sync-section-toggle]').forEach((button) => {
+        button.addEventListener('click', () => {
+          const section = button.closest('.sync-check-section');
+          if (!section) return;
+          const collapsed = section.classList.toggle('is-collapsed');
+          button.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+          const icon = button.querySelector('.sync-collapse-icon');
+          if (icon) icon.textContent = collapsed ? '+' : '−';
+        });
+      });
     }
 
     function hideSyncCheckResults() {
@@ -2446,7 +2669,7 @@
       document.getElementById('visibilityStatus').innerHTML = `
         <div class="visibility-row">
           <span class="visibility-name">Main page</span>
-          <span>${getValue('utl_public_find_level', 'show') === 'show' ? 'Find Your Level is visible on the public homepage.' : 'Find Your Level is hidden on the public homepage.'}</span>
+          <span>${getValue('utl_public_find_level', 'show') === 'show' ? 'Find your level is visible on the public homepage.' : 'Find your level is hidden on the public homepage.'}</span>
           <span class="visibility-badge ${getValue('utl_public_find_level', 'show') === 'show' ? 'is-live' : ''}">${getValue('utl_public_find_level', 'show') === 'show' ? 'Visible' : 'Hidden'}</span>
         </div>
         <div class="visibility-row">
@@ -2552,30 +2775,30 @@
         ['Checkpoint hub', '../apps/tsa-checkpoint/index.html'],
         ['Diagnostic — Sort & Bucket', '../apps/tsa-sort-bucket/index.html?assessment=diagnostic'],
         ['Checkpoint — Sort & Bucket', '../apps/tsa-sort-bucket/index.html?assessment=checkpoint'],
-        ['Diagnostic — Spot the Problem', '../apps/tsa-spot-the-problem/index.html?assessment=diagnostic'],
-        ['Checkpoint — Spot the Problem', '../apps/tsa-spot-the-problem/index.html?assessment=checkpoint'],
-        ['Diagnostic — Speak Concisely', '../apps/tsa-speak/index.html?version=diagnostic'],
-        ['Checkpoint — Speak Concisely', '../apps/tsa-speak/index.html?version=checkpoint'],
-        ['Act Confidently placeholder', '../apps/tsa-act-confidently/index.html'],
-        ['Grocery List', '../apps/grocery-list/index.html'],
+        ['Diagnostic — Spot the problem', '../apps/tsa-spot-the-problem/index.html?assessment=diagnostic'],
+        ['Checkpoint — Spot the problem', '../apps/tsa-spot-the-problem/index.html?assessment=checkpoint'],
+        ['Diagnostic — Speak concisely', '../apps/tsa-speak/index.html?version=diagnostic'],
+        ['Checkpoint — Speak concisely', '../apps/tsa-speak/index.html?version=checkpoint'],
+        ['Act confidently placeholder', '../apps/tsa-act-confidently/index.html'],
+        ['Grocery list', '../apps/grocery-list/index.html'],
         ["Manager's messy notes", '../apps/messy-notes/index.html'],
         ['Rushed voice memo', '../apps/rushed-voice-memo/index.html'],
         ['Rushed voice memo — AI', '../apps/rushed-voice-memo-ai/index.html'],
         ['Chalkboard notes', '../apps/chalkboard-notes/index.html'],
         ['Issue tree builder', '../apps/issue-tree-builder/index.html'],
         ['SCQA builder', '../apps/scqa-builder/index.html'],
-        ['The Art of Saying No', '../apps/eisenhower-matrix/index.html'],
-        ['I Have Bad News...', '../apps/i-have-bad-news/index.html'],
-        ["Let's Switch Hats", '../apps/lets-switch-hats/index.html'],
-        ['Speak Like Obama', '../apps/speak-like-obama/index.html']
+        ['The art of saying no', '../apps/eisenhower-matrix/index.html'],
+        ['I have bad news...', '../apps/i-have-bad-news/index.html'],
+        ["Let's switch hats", '../apps/lets-switch-hats/index.html'],
+        ['Speak like Obama', '../apps/speak-like-obama/index.html']
       ];
       const linkMap = Object.fromEntries(links.map(([name, path]) => [name, path]));
       const groups = [
         { label: 'Site', names: ['Member hub', 'Member hub — admin mode', 'My results'] },
-        { label: 'Assessments', names: ['Diagnostic hub', 'Checkpoint hub', 'Diagnostic — Sort & Bucket', 'Checkpoint — Sort & Bucket', 'Diagnostic — Spot the Problem', 'Checkpoint — Spot the Problem', 'Diagnostic — Speak Concisely', 'Checkpoint — Speak Concisely', 'Act Confidently placeholder'] },
-        { label: 'Phase 1 Apps', names: ['Grocery List', "Manager's messy notes", 'Rushed voice memo', 'Rushed voice memo — AI', 'Chalkboard notes'] },
+        { label: 'Assessments', names: ['Diagnostic hub', 'Checkpoint hub', 'Diagnostic — Sort & Bucket', 'Checkpoint — Sort & Bucket', 'Diagnostic — Spot the problem', 'Checkpoint — Spot the problem', 'Diagnostic — Speak concisely', 'Checkpoint — Speak concisely', 'Act confidently placeholder'] },
+        { label: 'Phase 1 apps', names: ['Grocery list', "Manager's messy notes", 'Rushed voice memo', 'Rushed voice memo — AI', 'Chalkboard notes'] },
         { label: 'Phase 2 Apps', names: ['Issue tree builder', 'SCQA builder'] },
-        { label: 'Phase 3 Apps', names: ['The Art of Saying No', 'I Have Bad News...', "Let's Switch Hats", 'Speak Like Obama'] }
+        { label: 'Phase 3 apps', names: ['The art of saying no', 'I have bad news...', "Let's switch hats", 'Speak like Obama'] }
       ];
       function linkHtml(name) {
         const path = linkMap[name];

@@ -889,7 +889,7 @@
       app.innerHTML = `
         <section class="tsa-diag-intro">
           <div>
-            <p class="tsa-diag-label">Think Clearly · Exercise A</p>
+            <p class="tsa-diag-label">Think clearly · Exercise A</p>
             <h1>Sort &amp; Bucket</h1>
             <p>Review the items, choose three bucket labels, then sort all twelve items into the structure you chose.</p>
             <div class="tsa-diag-set">${escapeHtml(activeSet.name)}</div>
@@ -1143,7 +1143,7 @@
             <div class="tsa-diag-score-row">Item placement: ${score.placementScore} / 14</div>
           </div>
           <p class="tsa-diag-interpretation">${interpretation(score.total)}</p>
-          <p class="tsa-diag-label">Answer Reveal</p>
+          <p class="tsa-diag-label">Answer reveal</p>
           <div class="tsa-diag-answer-grid">
             ${activeSet.correctLabels.map(label => `
               <div class="tsa-diag-answer-card">
@@ -1155,8 +1155,8 @@
             `).join('')}
           </div>
           <div class="tsa-diag-score-actions">
-            <button class="tsa-diag-secondary" id="copyResults" type="button">Copy Results</button>
-            <a class="tsa-diag-primary" href="../tsa-speak/index.html${assessmentMode === 'Checkpoint' ? '?version=checkpoint' : ''}">Continue to Speak Concisely →</a>
+            <button class="tsa-diag-secondary" id="copyResults" type="button">Copy results</button>
+            <a class="tsa-diag-primary" href="../tsa-speak/index.html${assessmentMode === 'Checkpoint' ? '?version=checkpoint' : ''}">Continue to Speak concisely →</a>
           </div>
         </section>
       `);

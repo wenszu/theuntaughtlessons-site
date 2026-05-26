@@ -92,6 +92,25 @@
       line-height: 1;
     }
 
+    .module-back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 9px;
+      color: rgba(255, 255, 255, .82);
+      font-family: 'Lato', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 1.2;
+      text-decoration: none;
+    }
+
+    .module-back-link:hover {
+      color: var(--gold);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
     .app-timer {
       display: flex;
       align-items: center;
@@ -270,7 +289,7 @@
 
     .layout {
       display: grid;
-      grid-template-columns: minmax(280px, 0.95fr) minmax(560px, 2.05fr);
+      grid-template-columns: minmax(430px, 1fr) minmax(500px, 1.55fr);
       gap: 18px;
       align-items: start;
     }
@@ -285,6 +304,12 @@
 
     .panel + .panel {
       margin-top: 14px;
+    }
+
+    .reference-panel {
+      position: sticky;
+      top: 96px;
+      z-index: 2;
     }
 
     .panel-head {
@@ -335,6 +360,37 @@
     .source-card {
       padding: 14px;
       margin-bottom: 12px;
+    }
+
+    .voice-memo-player {
+      width: 100%;
+      margin: 0 0 12px;
+      display: block;
+    }
+
+    .voice-memo-embed {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      overflow: hidden;
+      background: var(--paper);
+      margin-bottom: 12px;
+    }
+
+    .voice-memo-embed iframe {
+      display: block;
+      width: 100%;
+      height: 128px;
+      border: 0;
+    }
+
+    .voice-memo-placeholder {
+      border: 1px dashed var(--line);
+      border-radius: 12px;
+      background: var(--paper);
+      color: var(--steel);
+      padding: 14px;
+      margin-bottom: 12px;
+      line-height: 1.45;
     }
 
     .source-label,
@@ -828,6 +884,10 @@
         grid-template-columns: 1fr;
       }
 
+      .reference-panel {
+        position: static;
+      }
+
       .section-grid,
       .comparison-grid {
         grid-template-columns: 1fr;
@@ -889,6 +949,10 @@
 
       aside .panel .panel-body {
         display: none;
+      }
+
+      aside .reference-panel .panel-body {
+        display: block;
       }
 
       aside .panel.open .panel-body {
@@ -965,8 +1029,9 @@
     </a>
     <div class="brand-divider" aria-hidden="true"></div>
     <div>
-      <span class="app-kicker">Phase 1 · Think Clearly</span>
+      <span class="app-kicker">Phase 1 · Think clearly</span>
       <span class="app-title">Rushed voice memo</span>
+      <a class="module-back-link" href="../../member-login/phase-1/practice/index.html">← Back to Phase 1 exercises</a>
     </div>
     <div class="app-timer" aria-label="Elapsed time">
       <div class="utility-metric" id="timerMetric">
@@ -1007,30 +1072,24 @@
 
     <section id="exercise" class="layout">
       <aside id="context">
-        <article class="panel">
+        <article class="panel reference-panel">
           <div class="panel-head">
-            <h2>Your task</h2>
+            <h2>Voice memo</h2>
           </div>
           <div class="panel-body">
+            <audio class="voice-memo-player hidden" id="voiceMemoPlayer" controls></audio>
+            <div class="voice-memo-embed hidden" id="voiceMemoEmbed"></div>
+            <div class="voice-memo-placeholder" id="voiceMemoPlaceholder">Voice file placeholder. The audio will appear here once uploaded.</div>
+
             <div class="story-card">
+              <span class="source-label">Your task</span>
               <p id="storyContext">Loading exercise...</p>
             </div>
             <ul class="instructions" id="instructionsList">
               <li><strong>Define three buckets:</strong> Split the content into exactly three distinct categories, each capturing a clear theme or purpose.</li>
               <li><strong>Start with BSP:</strong> Begin every bullet point with a bolded summary phrase that is short and descriptive.</li>
             </ul>
-          </div>
-        </article>
 
-        <article class="panel">
-          <div class="panel-head">
-            <h2>Task</h2>
-          </div>
-          <div class="panel-body">
-            <div class="source-card">
-              <span class="source-label">Voice memo transcript</span>
-              <p class="source-text" id="sourceText">Loading exercise...</p>
-            </div>
             <span class="small-label">Constraints</span>
             <ul class="constraint-list" id="constraintsList">
               <li>Exactly 3 sections</li>
@@ -1176,9 +1235,10 @@
         id: 'rushed-voice-memo',
         title: 'Rushed voice memo',
         subtitle: 'Turn a rushed verbal update into an Aiko-ready summary.',
-        storyContext: 'Aiko sent you a rushed voice memo. She spoke quickly and without structure. Your job is to turn her verbal update into a clean, structured written summary that she can act on.',
+        audioUrl: 'https://drive.google.com/file/d/13nvMb6RrHjzCQevI1wZtDBhL-tMYObG_/view',
+        storyContext: 'Hugh sent you a rushed voice memo. He spoke quickly and without structure and he knows that. He asked you to help him turn the verbal update into a clean, structured written summary that Aiko can act on.',
         instructions: [
-          '<strong>Your task:</strong> Aiko sent you a rushed voice memo. She spoke quickly and without structure. Your job is to turn her verbal update into a clean, structured written summary that she can act on.',
+          '<strong>Your task:</strong> Hugh sent you a rushed voice memo. He spoke quickly and without structure and he knows that. He asked you to help him turn the verbal update into a clean, structured written summary that Aiko can act on.',
           '<strong>Make it usable:</strong> Organise the update into three clear buckets and start each bullet with a BSP.'
         ],
         sourceText: '[Voice memo transcript will be loaded here. This will be a rushed, unstructured verbal update from Aiko covering the Olympic project status, key blockers, and next steps — delivered quickly and without structure.]',
@@ -1540,8 +1600,21 @@
       els.activityTitle.textContent = ACTIVITY.title;
       els.activitySubtitle.textContent = ACTIVITY.subtitle;
       els.storyContext.textContent = ACTIVITY.storyContext;
-      els.sourceText.textContent = ACTIVITY.sourceText;
       els.openResponse.placeholder = ACTIVITY.inputPlaceholder;
+      const voiceMemoPlayer = document.getElementById('voiceMemoPlayer');
+      const voiceMemoEmbed = document.getElementById('voiceMemoEmbed');
+      const voiceMemoPlaceholder = document.getElementById('voiceMemoPlaceholder');
+      if (voiceMemoPlayer && ACTIVITY.audioUrl) {
+        voiceMemoPlayer.src = playableAudioUrl(ACTIVITY.audioUrl);
+        voiceMemoPlayer.onerror = function () {
+          renderVoiceMemoEmbed(ACTIVITY.audioUrl, voiceMemoEmbed, voiceMemoPlayer);
+        };
+        voiceMemoPlayer.classList.remove('hidden');
+        if (voiceMemoEmbed) voiceMemoEmbed.classList.add('hidden');
+        if (voiceMemoPlaceholder) voiceMemoPlaceholder.classList.add('hidden');
+      } else if (voiceMemoPlaceholder) {
+        voiceMemoPlaceholder.classList.remove('hidden');
+      }
 
       els.instructionsList.innerHTML = ACTIVITY.instructions
         .map((item) => `<li>${item}</li>`)
@@ -1550,6 +1623,32 @@
       els.constraintsList.innerHTML = ACTIVITY.constraints
         .map((item) => `<li>${escapeHtml(item)}</li>`)
         .join('');
+    }
+
+    function playableAudioUrl(url) {
+      const value = String(url || '').trim();
+      const fileMatch = value.match(/drive\.google\.com\/file\/d\/([^/]+)/);
+      if (fileMatch) return `https://drive.google.com/uc?export=download&id=${fileMatch[1]}`;
+      const openMatch = value.match(/drive\.google\.com\/open\?id=([^&]+)/);
+      if (openMatch) return `https://drive.google.com/uc?export=download&id=${openMatch[1]}`;
+      return value;
+    }
+
+    function drivePreviewUrl(url) {
+      const value = String(url || '').trim();
+      const fileMatch = value.match(/drive\.google\.com\/file\/d\/([^/]+)/);
+      if (fileMatch) return `https://drive.google.com/file/d/${fileMatch[1]}/preview`;
+      const openMatch = value.match(/drive\.google\.com\/open\?id=([^&]+)/);
+      if (openMatch) return `https://drive.google.com/file/d/${openMatch[1]}/preview`;
+      return '';
+    }
+
+    function renderVoiceMemoEmbed(url, embed, player) {
+      const embedUrl = drivePreviewUrl(url);
+      if (!embedUrl || !embed) return;
+      embed.innerHTML = `<iframe src="${escapeHtml(embedUrl)}" title="Voice memo player" allow="autoplay"></iframe>`;
+      embed.classList.remove('hidden');
+      if (player) player.classList.add('hidden');
     }
 
     function buildSectionInputs() {
@@ -1855,7 +1954,6 @@
         'activitySubtitle',
         'storyContext',
         'instructionsList',
-        'sourceText',
         'constraintsList',
         'recentAttempts',
         'timerRow',

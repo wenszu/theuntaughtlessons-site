@@ -92,6 +92,25 @@
       line-height: 1;
     }
 
+    .module-back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 9px;
+      color: rgba(255, 255, 255, .82);
+      font-family: 'Lato', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 1.2;
+      text-decoration: none;
+    }
+
+    .module-back-link:hover {
+      color: var(--gold);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
     .app-timer {
       display: flex;
       align-items: center;
@@ -285,6 +304,12 @@
 
     .panel + .panel {
       margin-top: 14px;
+    }
+
+    .reference-panel {
+      position: sticky;
+      top: 96px;
+      z-index: 2;
     }
 
     .panel-head {
@@ -828,6 +853,10 @@
         grid-template-columns: 1fr;
       }
 
+      .reference-panel {
+        position: static;
+      }
+
       .section-grid,
       .comparison-grid {
         grid-template-columns: 1fr;
@@ -889,6 +918,10 @@
 
       aside .panel .panel-body {
         display: none;
+      }
+
+      aside .reference-panel .panel-body {
+        display: block;
       }
 
       aside .panel.open .panel-body {
@@ -1074,8 +1107,9 @@
     </a>
     <div class="brand-divider" aria-hidden="true"></div>
     <div>
-      <span class="app-kicker">Phase 1 · Think Clearly</span>
-      <span class="app-title">Manager’s Messy Notes</span>
+      <span class="app-kicker">Phase 1 · Think clearly</span>
+      <span class="app-title">Manager’s messy notes</span>
+      <a class="module-back-link" href="../../member-login/phase-1/practice/index.html">← Back to Phase 1 exercises</a>
     </div>
     <div class="app-timer" aria-label="Elapsed time">
       <div class="utility-metric" id="timerMetric">
@@ -1116,24 +1150,9 @@
 
     <section id="exercise" class="layout">
       <aside id="context">
-        <article class="panel">
+        <article class="panel reference-panel">
           <div class="panel-head">
-            <h2>Context</h2>
-          </div>
-          <div class="panel-body">
-            <div class="story-card">
-              <p id="storyContext">Loading exercise...</p>
-            </div>
-            <ul class="instructions" id="instructionsList">
-              <li><strong>Define three buckets:</strong> Split the content into exactly three distinct categories, each capturing a clear theme or purpose.</li>
-              <li><strong>Start with BSP:</strong> Begin every bullet point with a bolded summary phrase that is short and descriptive.</li>
-            </ul>
-          </div>
-        </article>
-
-        <article class="panel">
-          <div class="panel-head">
-            <h2>Task</h2>
+            <h2>Source note</h2>
           </div>
           <div class="panel-body">
             <div class="source-card">
@@ -1146,6 +1165,21 @@
               <li>Use BSP format</li>
               <li>Keep it concise</li>
               <li>Make the buckets MECE</li>
+            </ul>
+          </div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-head">
+            <h2>Context</h2>
+          </div>
+          <div class="panel-body">
+            <div class="story-card">
+              <p id="storyContext">Loading exercise...</p>
+            </div>
+            <ul class="instructions" id="instructionsList">
+              <li><strong>Define three buckets:</strong> Split the content into exactly three distinct categories, each capturing a clear theme or purpose.</li>
+              <li><strong>Start with BSP:</strong> Begin every bullet point with a bolded summary phrase that is short and descriptive.</li>
             </ul>
           </div>
         </article>

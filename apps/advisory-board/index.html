@@ -82,6 +82,23 @@ REUSE AUDIT
       font-weight: 700;
       line-height: 1;
     }
+    .module-back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 9px;
+      color: rgba(255,255,255,.82);
+      font-family: 'Lato', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 1.2;
+      text-decoration: none;
+    }
+    .module-back-link:hover {
+      color: var(--ab-gold);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
     .ab-timer {
       display: flex;
       align-items: center;
@@ -428,7 +445,7 @@ REUSE AUDIT
   <header class="ab-header">
     <a class="ab-logo" href="../../index.html" aria-label="The Untaught Lessons home"><img src="../../assets/utl-logo-nav-white.png" alt="The Untaught Lessons"></a>
     <div class="ab-divider" aria-hidden="true"></div>
-    <div><span class="ab-kicker">PHASE 2 · SPEAK CONCISELY</span><span class="ab-title">Advisory board with AI</span></div>
+    <div><span class="ab-kicker">Phase 2 · Speak concisely</span><span class="ab-title">Advisory board with AI</span><a class="module-back-link" href="../../member-login/phase-2.html#exercises">← Back to Phase 2 exercises</a></div>
     <div class="ab-timer" aria-label="Elapsed time">
       <div class="ab-utility-metric" id="timerMetric">
         <div class="ab-utility-row">
@@ -735,7 +752,7 @@ Return your recommendations in a clean list format I can easily read and act on.
         page: window.location.href
       };
       import('../../assets/firebase.js')
-        .then(({ saveUserProgress }) => saveUserProgress('advisory-board', 'Advisory Board with AI', payload))
+        .then(({ saveUserProgress }) => saveUserProgress('advisory-board', 'Advisory board with AI', payload))
         .catch(error => console.warn('Firestore progress save failed.', error));
     }
 

@@ -6,7 +6,7 @@ REUSE AUDIT
 - Pre-fill and copy-to-clipboard pattern: copied from apps/scqa-builder/index.html
 - Word count behavior: not used
 - Show/hide toggle: copied from apps/scqa-builder/index.html sample answer toggle
-- New code written for this file only: toolkit card data rendering and Advisory Board mode toggle
+- New code written for this file only: toolkit card data rendering and Advisory board mode toggle
 -->
 <!DOCTYPE html>
 <html lang="en">
@@ -240,7 +240,7 @@ REUSE AUDIT
   </header>
 
   <section class="tk-intro">
-    <h1>Your AI Prompt Toolkit</h1>
+    <h1>Your AI prompt toolkit</h1>
     <p>These are the same tools we use inside the program, rebuilt so you can use them on any problem at any time. Each one takes less than a minute to run in whatever AI tool you already have. Paste the prompt, swap in your own context, and go.</p>
   </section>
 
@@ -252,8 +252,8 @@ REUSE AUDIT
   <script>
     const tools = [
       {
-        phase: 'PHASE 1 · THINK CLEARLY',
-        name: 'Check If Your Structure Holds Up',
+        phase: 'Phase 1 · Think clearly',
+        name: 'Check if your structure holds up',
         description: 'Paste in any list, set of arguments, or grouping of ideas. This prompt checks whether your structure is truly MECE — no overlaps, nothing missing — and tells you exactly where it breaks down.',
         example: `Arguments for why our product launch is at risk:
 - The market timing is wrong
@@ -277,8 +277,8 @@ Please do the following:
 Be direct. If the structure holds up well, say so and explain why. If it doesn't, tell me specifically where it breaks.`
       },
       {
-        phase: 'PHASE 2 · SPEAK CONCISELY',
-        name: 'Break Down Any Problem',
+        phase: 'Phase 2 · Speak concisely',
+        name: 'Break down any problem',
         description: 'Give AI your central question and your rough thinking. This prompt builds a clean issue tree — a hypothesis, three MECE arguments, and supporting details under each.',
         example: `Central question: Why is employee retention dropping in our mid-level management team?
 My rough thinking: people are leaving for better pay, managers feel under-supported, and there's been a lot of uncertainty since the reorg`,
@@ -315,8 +315,8 @@ Rules:
 - If my initial thinking contains overlaps or gaps, reorganize it rather than preserving it`
       },
       {
-        phase: 'PHASE 2 · SPEAK CONCISELY',
-        name: 'Sharpen Your SCQA',
+        phase: 'Phase 2 · Speak concisely',
+        name: 'Sharpen your SCQA',
         description: 'Paste in a draft SCQA. This prompt stress-tests each element and returns a sharper version with a note on what changed and why.',
         example: `Situation: Our company has been growing steadily for the past three years.
 Complication: But lately things have been harder.
@@ -345,8 +345,8 @@ Return:
 3. A brief note on the most important change you made and why`
       },
       {
-        phase: 'PHASE 2 · SPEAK CONCISELY',
-        name: 'Write a Decision-Ready Email',
+        phase: 'Phase 2 · Speak concisely',
+        name: 'Write a decision-ready email',
         description: "Paste in your SCQA or issue tree. This prompt converts it into an answer-first email using Minto's Pyramid — structured for a senior reader who will read it once and needs to act immediately.",
         example: `Situation: Our onboarding process has been the same for three years.
 Complication: New hire time-to-productivity has increased by 40% since we moved to hybrid work, and three recent hires cited confusion during onboarding as a reason for leaving within 90 days.
@@ -465,7 +465,7 @@ Return in a clean list I can easily read and act on.`;
     document.getElementById('toolGrid').innerHTML = tools.map(renderTool).join('') + `
       <article class="tk-card">
         <div class="tk-label">PHASE 2 · SPEAK CONCISELY</div>
-        <h2>Advisory Board</h2>
+        <h2>Advisory board</h2>
         <p>Two modes. Run a board you have already built, or ask AI to design the right panel for your problem from scratch. Both return structured advisor feedback and a final orchestrator verdict.</p>
         <div class="tk-tabs">
           <button class="tk-tab tk-active" type="button" data-mode="a">Run your board</button>
