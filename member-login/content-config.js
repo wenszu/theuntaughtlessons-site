@@ -850,6 +850,91 @@ const UTL_CONTENT = {
     return readBool(SESSION_KEY);
   }
 
+  function needsNameEntry() {
+    if (!readBool(SESSION_KEY)) return false;
+    var profile = {};
+    try { profile = JSON.parse(localStorage.getItem(PROFILE_KEY) || "{}"); } catch (e) {}
+    var email = profile.email || "";
+    if (email === "admin" || email === "testuser") return false;
+    return !("firstName" in profile);
+  }
+
+  function renderNameEntry() {
+    injectStyles();
+    document.body.classList.add("ws-page");
+    var profile = {};
+    try { profile = JSON.parse(localStorage.getItem(PROFILE_KEY) || "{}"); } catch (e) {}
+    var nameParts = (profile.displayName || "").trim().split(/\s+/);
+    var preFirst = escapeHtml(nameParts[0] || "");
+    var preLast = escapeHtml(nameParts.slice(1).join(" ") || "");
+
+    document.body.innerHTML =
+      '<section class="ws-login-wrap"><article class="ws-login-card">' +
+      '<span class="ws-kicker">Welcome</span>' +
+      '<h1 class="ws-title">What should we call you?</h1>' +
+      '<p class="ws-subtitle">This is how your name will appear in your workspace. You can use your preferred name.</p>' +
+      '<form class="ws-form" id="wsNameForm">' +
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">' +
+      '<div><label for="wsFirstName">First name</label><input class="ws-input" id="wsFirstName" type="text" autocomplete="given-name" required placeholder="First name" value="' + preFirst + '"></div>' +
+      '<div><label for="wsLastName">Last name</label><input class="ws-input" id="wsLastName" type="text" autocomplete="family-name" placeholder="Last name" value="' + preLast + '"></div>' +
+      '</div>' +
+      '<button class="ws-button" type="submit">Continue to workspace &rarr;</button>' +
+      '<p class="ws-message" id="wsNameMessage" aria-live="polite"></p>' +
+      '</form>' +
+      '<p style="margin-top:12px;text-align:center;"><button type="button" id="wsSkipName" style="background:none;border:none;color:#888;font-size:13px;cursor:pointer;text-decoration:underline;padding:0;">Skip for now</button></p>' +
+      '</article></section>';
+
+    var form = qs("#wsNameForm");
+    var message = qs("#wsNameMessage");
+
+    async function doSaveName(firstName, lastName) {
+      var updated = {};
+      try { updated = JSON.parse(localStorage.getItem(PROFILE_KEY) || "{}"); } catch (e) {}
+      updated.firstName = firstName;
+      updated.lastName = lastName;
+      localStorage.setItem(PROFILE_KEY, JSON.stringify(updated));
+      var email = updated.email || "";
+      if (email && email !== "admin" && email !== "testuser") {
+        try {
+          var firebaseAuth = await import(firebaseHref());
+          var nameVal = [firstName, lastName].filter(Boolean).join(" ").trim();
+          if (nameVal) {
+            await firebaseAuth.updateDoc(
+              firebaseAuth.doc(firebaseAuth.db, "authorized_members", email),
+              { name: nameVal }
+            );
+          }
+        } catch (e) {
+          console.warn("Could not save name to Firestore:", e && e.message);
+        }
+      }
+      renderIndex();
+    }
+
+    form.addEventListener("submit", async function (event) {
+      event.preventDefault();
+      var firstName = (qs("#wsFirstName").value || "").trim();
+      var lastName = (qs("#wsLastName").value || "").trim();
+      if (!firstName) { message.textContent = "Please enter your first name."; return; }
+      var btn = form.querySelector("button[type='submit']");
+      btn.disabled = true;
+      btn.textContent = "Saving…";
+      message.textContent = "";
+      await doSaveName(firstName, lastName);
+    });
+
+    var skipBtn = qs("#wsSkipName");
+    if (skipBtn) {
+      skipBtn.addEventListener("click", function () {
+        var updated = {};
+        try { updated = JSON.parse(localStorage.getItem(PROFILE_KEY) || "{}"); } catch (e) {}
+        updated.firstName = "";
+        localStorage.setItem(PROFILE_KEY, JSON.stringify(updated));
+        renderIndex();
+      });
+    }
+  }
+
   function requireMember() {
     if (!isMemberUnlocked()) {
       window.location.href = memberHref("index.html");
@@ -877,20 +962,37 @@ const UTL_CONTENT = {
     return window.matchMedia("(max-width: 768px), (pointer: coarse)").matches;
   }
 
-  async function finishGoogleCredential(firebaseAuth, credential, message) {
-    var member = await firebaseAuth.requireAuthorizedMember(credential.user);
-    var email = credential.user && credential.user.email ? String(credential.user.email).trim().toLowerCase() : "";
+  async function finishGoogleUser(firebaseAuth, user, message) {
+    if (!user) throw new Error("Google sign-in did not return a user.");
+    var member = await firebaseAuth.requireAuthorizedMember(user);
+    // Status and expiry checks — skipped for localhost emulator bypass
+    if (member && member.source !== "local-emulator") {
+      if (member.status === "inactive") {
+        await firebaseAuth.signOut(firebaseAuth.auth);
+        throw new Error("Your account is currently inactive. Please contact Wen-Szu.");
+      }
+      if (member.expiryDate) {
+        var expiry = member.expiryDate.toDate ? member.expiryDate.toDate() : new Date(member.expiryDate);
+        if (expiry < new Date()) {
+          var expiryStr = expiry.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+          await firebaseAuth.signOut(firebaseAuth.auth);
+          throw new Error("Your access expired on " + expiryStr + ". Please reach out to renew your access.");
+        }
+      }
+    }
+    var email = user && user.email ? String(user.email).trim().toLowerCase() : "";
     writeBool(SESSION_KEY, true);
     localStorage.setItem(USER_KEY, email || "member");
     localStorage.setItem(PROFILE_KEY, JSON.stringify({
       email: email || "member",
-      displayName: credential.user && credential.user.displayName ? credential.user.displayName : email,
-      photoURL: credential.user && credential.user.photoURL ? credential.user.photoURL : "",
+      displayName: user && user.displayName ? user.displayName : email,
+      photoURL: user && user.photoURL ? user.photoURL : "",
       role: member && member.role ? member.role : "member"
     }));
-    await firebaseAuth.saveUserProfile(credential.user, member || {});
+    await firebaseAuth.saveUserProfile(user, member || {});
     if (member && member.role === "admin") localStorage.setItem(ADMIN_KEY, "true");
     else localStorage.removeItem(ADMIN_KEY);
+    sessionStorage.removeItem("utl_google_login_pending");
     if (message) {
       message.classList.add("ws-success");
       message.textContent = "Signed in. Opening your workspace...";
@@ -898,17 +1000,30 @@ const UTL_CONTENT = {
     window.location.href = "index.html";
   }
 
+  async function finishGoogleCredential(firebaseAuth, credential, message) {
+    await finishGoogleUser(firebaseAuth, credential && credential.user, message);
+  }
+
   async function handleGoogleRedirectResult(message) {
     try {
       var firebaseAuth = await import(firebaseHref());
       var credential = await firebaseAuth.getGoogleRedirectResult();
-      if (!credential || !credential.user) return;
+      var user = credential && credential.user ? credential.user : null;
+      if (!user && sessionStorage.getItem("utl_google_login_pending") === "true") {
+        if (message) {
+          message.textContent = "Finishing Google sign-in...";
+          message.classList.add("ws-success");
+        }
+        user = await firebaseAuth.getSignedInUser();
+      }
+      if (!user) return;
       if (message) {
         message.textContent = "Finishing Google sign-in...";
         message.classList.remove("ws-success");
       }
-      await finishGoogleCredential(firebaseAuth, credential, message);
+      await finishGoogleUser(firebaseAuth, user, message);
     } catch (error) {
+      sessionStorage.removeItem("utl_google_login_pending");
       console.error("Google redirect login failed.", error);
       if (message) message.textContent = error && error.message ? error.message : "Google sign-in did not work.";
     }
@@ -926,6 +1041,7 @@ const UTL_CONTENT = {
       if (isMobileAuthContext()) {
         message.classList.add("ws-success");
         message.textContent = "Opening Google sign-in...";
+        sessionStorage.setItem("utl_google_login_pending", "true");
         await firebaseAuth.signInWithGoogleRedirect();
         return;
       }
@@ -938,6 +1054,7 @@ const UTL_CONTENT = {
           var redirectAuth = await import(firebaseHref());
           message.classList.add("ws-success");
           message.textContent = "Opening Google sign-in...";
+          sessionStorage.setItem("utl_google_login_pending", "true");
           await redirectAuth.signInWithGoogleRedirect();
           return;
         } catch (redirectError) {
@@ -965,6 +1082,10 @@ const UTL_CONTENT = {
         handleGoogleLogin(event.currentTarget, qs("#wsLoginMessage"));
       });
       handleGoogleRedirectResult(qs("#wsLoginMessage"));
+      return;
+    }
+    if (needsNameEntry()) {
+      renderNameEntry();
       return;
     }
     if (!remoteProgressLoaded) {

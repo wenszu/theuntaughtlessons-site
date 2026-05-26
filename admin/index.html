@@ -1167,6 +1167,49 @@
     .invite-log-table tr:nth-child(even) td { background:var(--cream); }
     .invite-log-table tr:nth-child(odd) td { background:var(--white); }
     .invite-log-none { margin:6px 0 0; color:#888; font-size:12px; }
+
+    /* Members management tab */
+    .mb-toolbar { display:flex; gap:8px; align-items:center; margin-bottom:14px; flex-wrap:wrap; }
+    .mb-add-form { margin:0 0 18px; padding:16px; border:1px solid var(--line); border-radius:8px; background:var(--white); }
+    .mb-add-form-title { margin:0 0 12px; color:var(--navy); font-family:'Playfair Display',serif; font-size:18px; }
+    .mb-form-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:10px; }
+    .mb-form-field { display:grid; gap:6px; }
+    .mb-form-actions { display:flex; gap:8px; margin-top:12px; align-items:center; }
+    .mb-table-wrap { overflow-x:auto; border:1px solid var(--line); border-radius:8px; }
+    .mb-table { width:100%; border-collapse:collapse; font-size:12px; white-space:nowrap; }
+    .mb-table th { padding:8px 12px; background:var(--navy); color:rgba(255,255,255,.85); font-family:'Roboto Mono',monospace; font-size:10px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; text-align:left; }
+    .mb-table td { padding:8px 12px; border-bottom:1px solid var(--line); color:var(--charcoal); vertical-align:middle; }
+    .mb-table tbody tr:last-child td { border-bottom:0; }
+    .mb-table tbody tr:nth-child(4n+1) td, .mb-table tbody tr:nth-child(4n+2) td { background:rgba(243,237,226,.35); }
+    .mb-role-badge,.mb-status-badge { display:inline-block; padding:2px 8px; border-radius:999px; font-family:'Roboto Mono',monospace; font-size:10px; font-weight:700; text-transform:uppercase; }
+    .mb-role-owner { background:#fff8e1; color:#b7791f; }
+    .mb-role-admin { background:#e8ecf5; color:var(--navy); }
+    .mb-role-user { background:#f0f0f0; color:#555; }
+    .mb-status-active { background:#e8f5ed; color:var(--green); }
+    .mb-status-inactive { background:#fdecea; color:#8A1F1F; }
+    .mb-expiry-expired { color:#8A1F1F; font-weight:700; }
+    .mb-bool-yes { color:var(--green); font-weight:700; }
+    .mb-bool-no { color:#bbb; }
+    .mb-actions { display:flex; gap:5px; flex-wrap:wrap; }
+    .mb-btn { padding:4px 9px; border:1px solid var(--line); border-radius:4px; background:var(--white); color:var(--navy); font-size:11px; font-family:'Roboto Mono',monospace; font-weight:700; cursor:pointer; white-space:nowrap; transition:border-color .12s,background .12s; }
+    .mb-btn:hover { border-color:var(--navy); }
+    .mb-btn-danger { border-color:rgba(138,31,31,.3); color:#8A1F1F; }
+    .mb-btn-danger:hover { border-color:#8A1F1F; background:#fdecea; }
+    .mb-btn-extend { border-color:rgba(45,106,79,.3); color:var(--green); }
+    .mb-btn-extend:hover { border-color:var(--green); background:#e8f5ed; }
+    .mb-edit-panel { display:none; }
+    .mb-edit-panel.mb-open { display:table-row; }
+    .mb-edit-panel > td { padding:14px 16px; background:#FAF8F4; border-bottom:2px solid var(--navy); }
+    .mb-edit-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:10px; }
+    .mb-edit-field { display:grid; gap:5px; }
+    .mb-edit-field label { color:var(--navy); font-size:12px; font-weight:700; }
+    .mb-edit-field input,.mb-edit-field select,.mb-edit-field textarea { width:100%; padding:7px 10px; border:1px solid var(--line); border-radius:5px; font-size:12px; background:var(--white); color:var(--charcoal); }
+    .mb-edit-field textarea { resize:vertical; min-height:52px; font-family:'Lato',sans-serif; }
+    .mb-edit-actions { display:flex; gap:8px; margin-top:10px; align-items:center; }
+    .mb-edit-status { font-size:12px; color:var(--green); font-weight:700; }
+    .mb-msg { font-size:13px; margin:16px 0 0; color:#888; }
+    .mb-msg.mb-err { color:#8A1F1F; font-weight:700; }
+    .mb-invite-form { margin:0 0 18px; }
   </style>
 </head>
 <body>
@@ -1222,7 +1265,7 @@
       <button class="admin-nav-item" data-target="section-send-instructor">Send to instructor</button>
 
       <span class="nav-group-label">Access</span>
-      <button class="admin-nav-item" data-target="section-invite-members">Invite members</button>
+      <button class="admin-nav-item" data-target="section-members">Members</button>
       <button class="admin-nav-item" data-target="section-passwords">Passwords</button>
 
       <span class="nav-group-label">Links</span>
@@ -1360,22 +1403,69 @@
         </div>
       </section>
 
-      <section class="admin-section" id="section-invite-members">
+      <section class="admin-section" id="section-members">
         <span class="section-label">Access</span>
-        <h2>Invite members</h2>
+        <h2>Members</h2>
         <div class="section-divider"></div>
-        <p class="description">Send a passwordless login link to a new member. They will click the link from their inbox and land directly in the member workspace.</p>
-        <div class="invite-card">
-          <div class="invite-actions">
-            <label for="inviteEmail">
-              Member email
-              <input id="inviteEmail" type="email" autocomplete="email" placeholder="name@example.com">
-            </label>
-            <button class="small-button" type="button" id="sendLoginInvite">Send Login Invite</button>
-          </div>
-          <p class="invite-status" id="inviteStatus" aria-live="polite"></p>
+        <p class="description">Manage who has access to the member workspace, or send a passwordless login invite.</p>
+        <div class="mb-toolbar">
+          <button class="small-button" type="button" id="mbAddMemberBtn">+ Add member</button>
+          <button class="small-button secondary-button" type="button" id="mbInviteBtn">Send invite</button>
+          <button class="small-button secondary-button" type="button" id="mbRefreshBtn">Refresh</button>
         </div>
-        <div id="inviteLog" class="invite-log"></div>
+
+        <div id="mbAddMemberForm" class="mb-add-form" hidden>
+          <p class="mb-add-form-title">Add new member</p>
+          <div class="mb-form-grid">
+            <div class="mb-form-field">
+              <label for="mbNewName">Name <span style="color:#8A1F1F;">*</span></label>
+              <input type="text" id="mbNewName" placeholder="Full name">
+            </div>
+            <div class="mb-form-field">
+              <label for="mbNewEmail">Email <span style="color:#8A1F1F;">*</span></label>
+              <input type="email" id="mbNewEmail" placeholder="name@example.com">
+            </div>
+            <div class="mb-form-field">
+              <label for="mbNewRole">Role</label>
+              <select id="mbNewRole">
+                <option value="user" selected>user</option>
+                <option value="admin">admin</option>
+              </select>
+            </div>
+            <div class="mb-form-field">
+              <label for="mbNewCohort">Cohort</label>
+              <input type="text" id="mbNewCohort" placeholder="e.g. 2026-A">
+            </div>
+            <div class="mb-form-field">
+              <label for="mbNewNotes">Notes</label>
+              <input type="text" id="mbNewNotes" placeholder="Optional">
+            </div>
+          </div>
+          <div class="mb-form-actions">
+            <button class="small-button" type="button" id="mbAddMemberSave">Add member</button>
+            <button class="small-button secondary-button" type="button" id="mbAddMemberCancel">Cancel</button>
+            <span class="saved" id="mbAddSaved">Added ✓</span>
+          </div>
+        </div>
+
+        <div id="mbInviteForm" class="mb-invite-form" hidden>
+          <div class="invite-card">
+            <p class="description" style="margin-bottom:0;">Send a passwordless login link. The member clicks it from their inbox and lands directly in the workspace.</p>
+            <div class="invite-actions">
+              <label for="inviteEmail">
+                Member email
+                <input id="inviteEmail" type="email" autocomplete="email" placeholder="name@example.com">
+              </label>
+              <button class="small-button" type="button" id="sendLoginInvite">Send Login Invite</button>
+            </div>
+            <p class="invite-status" id="inviteStatus" aria-live="polite"></p>
+          </div>
+          <div id="inviteLog" class="invite-log"></div>
+        </div>
+
+        <div id="mbTableWrap">
+          <p class="mb-msg">Click Refresh to load members.</p>
+        </div>
       </section>
 
       <section class="admin-section" id="section-passwords">
@@ -1400,12 +1490,27 @@
   <script src="../member-login/content-config.js"></script>
 
   <script type="module">
-    import { authorizeMember, sendSignInInvite } from "../assets/firebase.js";
+    import {
+      authorizeMember,
+      collection,
+      db,
+      deleteDoc,
+      doc,
+      getDocs,
+      sendSignInInvite,
+      Timestamp
+    } from "../assets/firebase.js";
 
     window.utlFirebaseAuth = {
       ...(window.utlFirebaseAuth || {}),
-      authorizeMember: authorizeMember,
-      sendSignInInvite: sendSignInInvite
+      authorizeMember,
+      collection,
+      db,
+      deleteDoc,
+      doc,
+      getDocs,
+      sendSignInInvite,
+      Timestamp
     };
     window.dispatchEvent(new CustomEvent('utlFirebaseAuthReady'));
   </script>
@@ -2941,6 +3046,7 @@
     wrapPasswordCards();
     initCollapsibleSections();
     renderInviteLog();
+    mbInitAddForm();
     window.setTimeout(runSyncCheck, 400);
 
     // Persistent event delegation for Fix → buttons in sync results
@@ -2953,6 +3059,10 @@
     document.getElementById('runSyncCheck')?.addEventListener('click', runSyncCheck);
     document.getElementById('rerunSyncCheck')?.addEventListener('click', runSyncCheck);
     document.getElementById('hideSyncCheck')?.addEventListener('click', hideSyncCheckResults);
+    document.querySelector('[data-target="section-members"]')?.addEventListener('click', function () {
+      if (!mbMembersCache.length) mbLoadMembers();
+    });
+    document.getElementById('mbRefreshBtn')?.addEventListener('click', mbLoadMembers);
     document.getElementById('refreshVisibility')?.addEventListener('click', () => {
       renderVisibilityChecklist();
       renderVisibilityStatus();
@@ -2998,6 +3108,351 @@
         showLayoutStatus(phaseId, 'Layout reset to the saved default.');
       });
     });
+    // ===== Members management =====
+
+    var mbMembersCache = [];
+
+    function mbFormatDate(ts) {
+      if (!ts) return '—';
+      try {
+        var d = ts.toDate ? ts.toDate() : new Date(ts);
+        if (isNaN(d.getTime())) return '—';
+        return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+      } catch (e) { return '—'; }
+    }
+
+    function mbIsExpired(ts) {
+      if (!ts) return false;
+      try {
+        var d = ts.toDate ? ts.toDate() : new Date(ts);
+        return d < new Date();
+      } catch (e) { return false; }
+    }
+
+    function mbRenderTable(docs) {
+      var wrap = document.getElementById('mbTableWrap');
+      if (!wrap) return;
+      if (!docs || !docs.length) {
+        wrap.innerHTML = '<p class="mb-msg">No members found.</p>';
+        return;
+      }
+      var rows = docs.map(function (d) {
+        var data = d.data();
+        var email = d.id;
+        var isOwner = data.role === 'owner';
+        var displayRole = (data.role === 'member' ? 'user' : data.role) || 'user';
+        var roleCls = displayRole === 'owner' ? 'mb-role-owner' : displayRole === 'admin' ? 'mb-role-admin' : 'mb-role-user';
+        var status = data.status || 'active';
+        var statusCls = status === 'inactive' ? 'mb-status-inactive' : 'mb-status-active';
+        var expired = mbIsExpired(data.expiryDate);
+        var expiryHtml = data.expiryDate
+          ? '<span class="' + (expired ? 'mb-expiry-expired' : '') + '">' + escapeHtml(mbFormatDate(data.expiryDate)) + (expired ? ' ✗' : '') + '</span>'
+          : '<span style="color:#bbb;">—</span>';
+        var groupHtml = data.googleGroupAdded
+          ? '<span class="mb-bool-yes">✓ Yes</span>'
+          : '<span class="mb-bool-no">No</span>';
+        var actions = isOwner
+          ? '<span style="color:#bbb;font-size:11px;font-family:\'Roboto Mono\',monospace;">Owner</span>'
+          : '<div class="mb-actions">' +
+              '<button class="mb-btn" type="button" data-mb-edit>Edit</button>' +
+              '<button class="mb-btn mb-btn-extend" type="button" data-mb-extend="' + escapeHtml(email) + '">+1 yr</button>' +
+              '<button class="mb-btn mb-btn-danger" type="button" data-mb-remove="' + escapeHtml(email) + '">Remove</button>' +
+            '</div>';
+        return '<tr data-mb-row>' +
+          '<td>' + escapeHtml(data.name || '—') + '</td>' +
+          '<td>' + escapeHtml(email) + '</td>' +
+          '<td><span class="mb-role-badge ' + roleCls + '">' + escapeHtml(displayRole) + '</span></td>' +
+          '<td><span class="mb-status-badge ' + statusCls + '">' + escapeHtml(status) + '</span></td>' +
+          '<td>' + escapeHtml(data.cohort || '—') + '</td>' +
+          '<td>' + escapeHtml(mbFormatDate(data.firstLoginAt)) + '</td>' +
+          '<td>' + expiryHtml + '</td>' +
+          '<td>' + groupHtml + '</td>' +
+          '<td>' + actions + '</td>' +
+        '</tr>' +
+        (isOwner ? '' :
+          '<tr class="mb-edit-panel">' +
+            '<td colspan="9">' + mbEditFormHtml(email, data) + '</td>' +
+          '</tr>'
+        );
+      }).join('');
+      wrap.innerHTML =
+        '<div class="mb-table-wrap"><table class="mb-table">' +
+          '<thead><tr>' +
+            '<th>Name</th><th>Email</th><th>Role</th><th>Status</th>' +
+            '<th>Cohort</th><th>First Login</th><th>Expiry</th><th>Group</th><th>Actions</th>' +
+          '</tr></thead>' +
+          '<tbody>' + rows + '</tbody>' +
+        '</table></div>';
+      mbBindTableActions(wrap);
+    }
+
+    function mbEditFormHtml(email, data) {
+      var expiryVal = '';
+      if (data.expiryDate) {
+        try {
+          var ed = data.expiryDate.toDate ? data.expiryDate.toDate() : new Date(data.expiryDate);
+          if (!isNaN(ed.getTime())) expiryVal = ed.toISOString().slice(0, 10);
+        } catch (e) {}
+      }
+      var displayRole = (data.role === 'member' ? 'user' : data.role) || 'user';
+      var status = data.status || 'active';
+      return '<div class="mb-edit-grid">' +
+        '<div class="mb-edit-field"><label>Role</label>' +
+          '<select data-mb-ef="role">' +
+            '<option value="user"' + (displayRole === 'user' ? ' selected' : '') + '>user</option>' +
+            '<option value="admin"' + (displayRole === 'admin' ? ' selected' : '') + '>admin</option>' +
+          '</select></div>' +
+        '<div class="mb-edit-field"><label>Status</label>' +
+          '<select data-mb-ef="status">' +
+            '<option value="active"' + (status === 'active' ? ' selected' : '') + '>active</option>' +
+            '<option value="inactive"' + (status === 'inactive' ? ' selected' : '') + '>inactive</option>' +
+          '</select></div>' +
+        '<div class="mb-edit-field"><label>Cohort</label>' +
+          '<input type="text" data-mb-ef="cohort" value="' + escapeHtml(data.cohort || '') + '" placeholder="e.g. 2026-A"></div>' +
+        '<div class="mb-edit-field"><label>Expiry date</label>' +
+          '<input type="date" data-mb-ef="expiryDate" value="' + escapeHtml(expiryVal) + '"></div>' +
+        '<div class="mb-edit-field"><label>Notes</label>' +
+          '<textarea data-mb-ef="notes" placeholder="Optional notes">' + escapeHtml(data.notes || '') + '</textarea></div>' +
+        '<div class="mb-edit-field"><label>Google Group Added</label>' +
+          '<select data-mb-ef="googleGroupAdded">' +
+            '<option value="false"' + (!data.googleGroupAdded ? ' selected' : '') + '>No</option>' +
+            '<option value="true"' + (data.googleGroupAdded ? ' selected' : '') + '>Yes</option>' +
+          '</select></div>' +
+      '</div>' +
+      '<div class="mb-edit-actions">' +
+        '<button class="small-button" type="button" data-mb-save="' + escapeHtml(email) + '">Save changes</button>' +
+        '<button class="small-button secondary-button" type="button" data-mb-cancel>Cancel</button>' +
+        '<span class="mb-edit-status" data-mb-save-status></span>' +
+      '</div>';
+    }
+
+    function mbBindTableActions(root) {
+      // Toggle edit panel by finding next sibling row
+      root.querySelectorAll('[data-mb-edit]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var memberRow = btn.closest('[data-mb-row]');
+          var editRow = memberRow && memberRow.nextElementSibling;
+          if (editRow && editRow.classList.contains('mb-edit-panel')) {
+            editRow.classList.toggle('mb-open');
+          }
+        });
+      });
+
+      root.querySelectorAll('[data-mb-cancel]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var editRow = btn.closest('.mb-edit-panel');
+          if (editRow) editRow.classList.remove('mb-open');
+        });
+      });
+
+      root.querySelectorAll('[data-mb-save]').forEach(function (btn) {
+        btn.addEventListener('click', async function () {
+          var email = btn.dataset.mbSave;
+          var editRow = btn.closest('.mb-edit-panel');
+          var fb = window.utlFirebaseAuth;
+          if (!fb || !fb.authorizeMember) { showToast('Firebase not ready', 'error'); return; }
+
+          var fields = {};
+          if (editRow) {
+            editRow.querySelectorAll('[data-mb-ef]').forEach(function (f) {
+              var key = f.dataset.mbEf;
+              if (key === 'expiryDate') {
+                if (f.value) fields.expiryDate = fb.Timestamp.fromDate(new Date(f.value));
+              } else if (key === 'googleGroupAdded') {
+                fields.googleGroupAdded = f.value === 'true';
+              } else {
+                fields[key] = f.value.trim();
+              }
+            });
+          }
+
+          btn.disabled = true;
+          try {
+            await fb.authorizeMember(email, fields);
+            var statusEl = editRow && editRow.querySelector('[data-mb-save-status]');
+            if (statusEl) {
+              statusEl.textContent = 'Saved ✓';
+              window.setTimeout(function () { statusEl.textContent = ''; }, 2000);
+            }
+            if (editRow) editRow.classList.remove('mb-open');
+            showToast('Member updated');
+            await mbLoadMembers();
+          } catch (e) {
+            showToast((e && e.message) || 'Save failed', 'error');
+          } finally {
+            btn.disabled = false;
+          }
+        });
+      });
+
+      root.querySelectorAll('[data-mb-extend]').forEach(function (btn) {
+        btn.addEventListener('click', async function () {
+          var email = btn.dataset.mbExtend;
+          var fb = window.utlFirebaseAuth;
+          if (!fb || !fb.authorizeMember || !fb.Timestamp) { showToast('Firebase not ready', 'error'); return; }
+
+          var cached = mbMembersCache.find(function (d) { return d.id === email; });
+          var currentExpiry = cached && cached.data().expiryDate;
+          var base = currentExpiry
+            ? (currentExpiry.toDate ? currentExpiry.toDate() : new Date(currentExpiry))
+            : new Date();
+          var newExpiry = new Date(base.getTime() + 365 * 24 * 60 * 60 * 1000);
+
+          btn.disabled = true;
+          try {
+            await fb.authorizeMember(email, { expiryDate: fb.Timestamp.fromDate(newExpiry) });
+            showToast('Expiry extended by 1 year');
+            await mbLoadMembers();
+          } catch (e) {
+            showToast((e && e.message) || 'Extend failed', 'error');
+          } finally {
+            btn.disabled = false;
+          }
+        });
+      });
+
+      root.querySelectorAll('[data-mb-remove]').forEach(function (btn) {
+        btn.addEventListener('click', async function () {
+          var email = btn.dataset.mbRemove;
+          if (!window.confirm('Remove ' + email + ' from the member list? This will revoke their access.')) return;
+          var fb = window.utlFirebaseAuth;
+          if (!fb || !fb.deleteDoc || !fb.doc || !fb.db) { showToast('Firebase not ready', 'error'); return; }
+          btn.disabled = true;
+          try {
+            await fb.deleteDoc(fb.doc(fb.db, 'authorized_members', email));
+            showToast('Member removed');
+            await mbLoadMembers();
+          } catch (e) {
+            showToast((e && e.message) || 'Remove failed', 'error');
+          } finally {
+            btn.disabled = false;
+          }
+        });
+      });
+    }
+
+    async function mbLoadMembers() {
+      var wrap = document.getElementById('mbTableWrap');
+      if (!wrap) return;
+      wrap.innerHTML = '<p class="mb-msg">Loading members...</p>';
+
+      var fb = window.utlFirebaseAuth;
+      if (!fb || !fb.getDocs || !fb.collection || !fb.db) {
+        wrap.innerHTML = '<p class="mb-msg">Waiting for Firebase...</p>';
+        window.addEventListener('utlFirebaseAuthReady', function handler() {
+          window.removeEventListener('utlFirebaseAuthReady', handler);
+          mbLoadMembers();
+        });
+        return;
+      }
+
+      try {
+        var snap = await fb.getDocs(fb.collection(fb.db, 'authorized_members'));
+        var docs = [];
+        snap.forEach(function (d) { docs.push(d); });
+        docs.sort(function (a, b) {
+          var na = (a.data().name || a.id).toLowerCase();
+          var nb = (b.data().name || b.id).toLowerCase();
+          return na < nb ? -1 : na > nb ? 1 : 0;
+        });
+        mbMembersCache = docs;
+        mbRenderTable(docs);
+      } catch (e) {
+        var msg = (e && e.message) || 'Unknown error';
+        var hint = msg.includes('permission') || msg.includes('Missing')
+          ? ' Sign in with Google in the member workspace first to authenticate.'
+          : '';
+        wrap.innerHTML = '<p class="mb-msg mb-err">Failed to load: ' + escapeHtml(msg) + escapeHtml(hint) + '</p>';
+      }
+    }
+
+    function mbInitAddForm() {
+      var addBtn = document.getElementById('mbAddMemberBtn');
+      var form = document.getElementById('mbAddMemberForm');
+      var cancelBtn = document.getElementById('mbAddMemberCancel');
+      var saveBtn = document.getElementById('mbAddMemberSave');
+      var savedEl = document.getElementById('mbAddSaved');
+      var inviteBtn = document.getElementById('mbInviteBtn');
+      var inviteForm = document.getElementById('mbInviteForm');
+
+      function closeAll() {
+        if (form) { form.hidden = true; }
+        if (addBtn) addBtn.textContent = '+ Add member';
+        if (inviteForm) { inviteForm.hidden = true; }
+        if (inviteBtn) inviteBtn.textContent = 'Send invite';
+      }
+
+      if (addBtn && form) {
+        addBtn.addEventListener('click', function () {
+          var isOpen = !form.hidden;
+          closeAll();
+          if (!isOpen) { form.hidden = false; addBtn.textContent = '✕ Cancel'; }
+        });
+      }
+
+      if (inviteBtn && inviteForm) {
+        inviteBtn.addEventListener('click', function () {
+          var isOpen = !inviteForm.hidden;
+          closeAll();
+          if (!isOpen) { inviteForm.hidden = false; inviteBtn.textContent = '✕ Cancel'; renderInviteLog(); }
+        });
+      }
+
+      if (cancelBtn) {
+        cancelBtn.addEventListener('click', closeAll);
+      }
+
+      if (!saveBtn) return;
+      saveBtn.addEventListener('click', async function () {
+        var fb = window.utlFirebaseAuth;
+        if (!fb || !fb.authorizeMember || !fb.Timestamp) { showToast('Firebase not ready', 'error'); return; }
+
+        var nameVal = (document.getElementById('mbNewName') || {}).value.trim();
+        var emailVal = ((document.getElementById('mbNewEmail') || {}).value || '').trim().toLowerCase();
+        var roleVal = (document.getElementById('mbNewRole') || {}).value || 'user';
+        var cohortVal = (document.getElementById('mbNewCohort') || {}).value.trim();
+        var notesVal = (document.getElementById('mbNewNotes') || {}).value.trim();
+
+        if (!nameVal) { showToast('Name is required', 'error'); return; }
+        if (!emailVal) { showToast('Email is required', 'error'); return; }
+
+        var adminProfile = {};
+        try { adminProfile = JSON.parse(localStorage.getItem('utl_member_profile') || '{}'); } catch (e) {}
+        var addedBy = adminProfile.email || 'admin';
+        var expiryDate = fb.Timestamp.fromDate(new Date(Date.now() + 365 * 24 * 60 * 60 * 1000));
+
+        saveBtn.disabled = true;
+        try {
+          await fb.authorizeMember(emailVal, {
+            name: nameVal,
+            role: roleVal,
+            cohort: cohortVal,
+            notes: notesVal,
+            addedBy: addedBy,
+            expiryDate: expiryDate,
+            googleGroupAdded: false,
+            status: 'active'
+          });
+          if (savedEl) { savedEl.classList.add('is-visible'); window.setTimeout(function () { savedEl.classList.remove('is-visible'); }, 2000); }
+          showToast('Member added');
+          document.getElementById('mbNewName').value = '';
+          document.getElementById('mbNewEmail').value = '';
+          document.getElementById('mbNewRole').value = 'user';
+          document.getElementById('mbNewCohort').value = '';
+          document.getElementById('mbNewNotes').value = '';
+          form.hidden = true;
+          addBtn.textContent = '+ Add member';
+          await mbLoadMembers();
+        } catch (e) {
+          showToast((e && e.message) || 'Add failed', 'error');
+        } finally {
+          saveBtn.disabled = false;
+        }
+      });
+    }
+
+    // ===== end Members management =====
+
     sendLoginInvite?.addEventListener('click', handleSendLoginInvite);
     inviteEmail?.addEventListener('keydown', (event) => {
       if (event.key === 'Enter') {

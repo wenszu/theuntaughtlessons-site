@@ -17,12 +17,17 @@ import {
   signOut
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 import {
+  collection,
   connectFirestoreEmulator,
+  deleteDoc,
   doc,
   getDoc,
+  getDocs,
   getFirestore,
   serverTimestamp,
-  setDoc
+  setDoc,
+  Timestamp,
+  updateDoc
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
 // Your web app's Firebase configuration
@@ -86,6 +91,15 @@ const provider = new GoogleAuthProvider();
 provider.setCustomParameters({ prompt: "select_account" });
 const db = getFirestore(app);
 
+authPersistenceReady = setPersistence(auth, browserLocalPersistence).catch((error) => {
+  firebaseInitError = error;
+  console.error("Auth persistence initialization failed:", error);
+  window.dispatchEvent(new CustomEvent("utlFirebaseInitError", {
+    detail: error.message || "Firebase failed to initialize."
+  }));
+  throw error;
+});
+
 const useLocalFirebaseEmulators =
   window.localStorage.getItem("utl_use_firebase_emulators") === "true" ||
   new URLSearchParams(window.location.search || "").get("emulators") === "true";
@@ -123,19 +137,6 @@ async function getSignedInUser() {
     });
   });
 }
-
-window.addEventListener("load", async () => {
-  try {
-    authPersistenceReady = setPersistence(auth, browserLocalPersistence);
-    await authPersistenceReady;
-  } catch (error) {
-    firebaseInitError = error;
-    console.error("Auth initialization failed:", error);
-    window.dispatchEvent(new CustomEvent("utlFirebaseInitError", {
-      detail: error.message || "Firebase failed to initialize."
-    }));
-  }
-});
 
 async function getAuthorizedMember(email) {
   const normalizedEmail = String(email || "").trim().toLowerCase();
@@ -205,12 +206,25 @@ async function authorizeMember(email, fields = {}) {
   }
 
   const memberRef = doc(requireFirestore(), "authorized_members", normalizedEmail);
-  await setDoc(memberRef, {
+  const existing = await getDoc(memberRef);
+  const isNew = !existing.exists();
+
+  const payload = {
     email: normalizedEmail,
     role: fields.role || "member",
     updatedAt: serverTimestamp(),
     ...fields
-  }, { merge: true });
+  };
+
+  // addedAt is only written on first creation, never on updates
+  if (isNew) {
+    if (!payload.addedAt) payload.addedAt = serverTimestamp();
+    if (payload.googleGroupAdded === undefined) payload.googleGroupAdded = false;
+  } else {
+    delete payload.addedAt;
+  }
+
+  await setDoc(memberRef, payload, { merge: true });
 }
 
 async function saveUserProfile(user, member = {}) {
@@ -224,6 +238,18 @@ async function saveUserProfile(user, member = {}) {
     lastSeenAt: serverTimestamp(),
     updatedAt: serverTimestamp()
   }, { merge: true });
+
+  // Update login timestamps on authorized_members
+  const email = user.email ? String(user.email).trim().toLowerCase() : "";
+  if (email) {
+    const memberRef = doc(requireFirestore(), "authorized_members", email);
+    const memberSnap = await getDoc(memberRef);
+    if (memberSnap.exists()) {
+      const loginUpdate = { lastLoginAt: serverTimestamp() };
+      if (!memberSnap.data().firstLoginAt) loginUpdate.firstLoginAt = serverTimestamp();
+      await setDoc(memberRef, loginUpdate, { merge: true });
+    }
+  }
 }
 
 async function getMemberWorkspaceProgress() {
@@ -296,12 +322,16 @@ export {
   app,
   auth,
   authorizeMember,
+  collection,
   createUserWithEmailAndPassword,
   db,
+  deleteDoc,
+  doc,
   firebaseConfig,
   firebaseInitError,
   getAuthorizedMember,
   getDoc,
+  getDocs,
   getGoogleRedirectResult,
   getMemberWorkspaceProgress,
   getSignedInUser,
@@ -320,5 +350,7 @@ export {
   signInWithGooglePopup,
   signInWithGoogleRedirect,
   signInWithPopup,
-  signOut
+  signOut,
+  Timestamp,
+  updateDoc
 };

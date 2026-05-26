@@ -20,7 +20,7 @@ service cloud.firestore {
 
     function isAdmin() {
       return signedInWithEmail() &&
-        get(/databases/$(database)/documents/authorized_members/$(request.auth.token.email.lower())).data.role == 'admin';
+        get(/databases/$(database)/documents/authorized_members/$(request.auth.token.email.lower())).data.role in ['admin', 'owner'];
     }
 
     match /users/{userId} {
@@ -34,6 +34,10 @@ service cloud.firestore {
     match /authorized_members/{email} {
       allow read: if signedIn();
       allow write: if isAdmin();
+      // Members can update only their own preferred name (set during onboarding)
+      allow update: if signedInWithEmail() &&
+        request.auth.token.email.lower() == email &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name']);
     }
 
     match /access_requests/{requestId} {
