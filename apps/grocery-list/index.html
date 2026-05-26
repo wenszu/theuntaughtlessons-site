@@ -84,6 +84,23 @@
       line-height: 1;
     }
 
+    .module-back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 9px;
+      color: rgba(255, 255, 255, .82);
+      font-size: 13px;
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .module-back-link:hover {
+      color: var(--gold);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
     .app-timer {
       display: flex;
       align-items: center;
@@ -230,6 +247,28 @@
       margin: 0;
       max-width: 75ch;
       line-height: 1.45;
+    }
+
+    .completion-row {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 14px;
+    }
+
+    .done-toggle {
+      border-color: var(--line);
+      background: var(--white);
+      color: var(--navy);
+    }
+
+    body.exercise-done .done-toggle {
+      border-color: #2C7A4B;
+      background: #2C7A4B;
+      color: var(--white);
+    }
+
+    body.exercise-done .panel {
+      opacity: .66;
     }
 
     .timer-panel .panel-head {
@@ -646,8 +685,9 @@
     </a>
     <div class="brand-divider" aria-hidden="true"></div>
     <div>
-      <span class="app-kicker">Phase 1 · Think Clearly</span>
-      <span class="app-title">Grocery List</span>
+      <span class="app-kicker">Phase 1 · Think clearly</span>
+      <span class="app-title">Grocery list</span>
+      <a class="module-back-link" href="../../member-login/phase-1/practice/index.html">← Back to Phase 1 exercises</a>
     </div>
     <div class="app-timer" aria-label="Elapsed time">
       <div class="utility-metric" id="timerMetric">
@@ -685,7 +725,10 @@
   <main id="content" class="page">
     <header id="hero" class="header">
       <h1>Grocery list</h1>
-      <p>Practice structured thinking: create exactly three clear buckets, sort the messy list, and reflect on why your structure is MECE (mutually exclusive, collectively exhaustive).</p>
+      <p>Practice structured thinking: Create exactly three clear buckets, sort the messy list, and reflect on why your structure is MECE (Mutually Exclusive, Collectively Exhaustive).</p>
+      <div class="completion-row">
+        <button class="done-toggle" id="doneToggleBtn" type="button">Mark exercise as done</button>
+      </div>
     </header>
 
     <section id="exercise" class="layout">
@@ -749,6 +792,7 @@
     let activityTimer = null;
     let timerMetricHidden = false;
     let selectedItemId = null;
+    const COMPLETION_KEYS = ['utl_done_grocery-list', 'utl_done_p1-e1', 'utl_p1_ex1_done'];
 
     // -------------------------
     // Utility functions
@@ -1140,7 +1184,7 @@
       if (evalResult.namesBlank || evalResult.nameRatio < 0.65) {
         return 'Keep your structure, but rename buckets with clearer labels (e.g., Fresh/Cold, Pantry, Supplies).';
       }
-      return 'Strong structure. Tighten wording and keep the Rule of Three for future lists.';
+      return 'Strong structure. Tighten wording and keep the Rule of three for future lists.';
     }
 
     function showFeedback(evalResult) {
@@ -1192,6 +1236,32 @@
     function clearFeedback() {
       document.getElementById('feedback').classList.add('hidden');
       document.getElementById('feedback').innerHTML = '';
+    }
+
+    function isExerciseDone() {
+      return COMPLETION_KEYS.some((key) => localStorage.getItem(key) === 'true');
+    }
+
+    function syncDoneState() {
+      const done = isExerciseDone();
+      document.body.classList.toggle('exercise-done', done);
+      const button = document.getElementById('doneToggleBtn');
+      if (button) button.textContent = done ? 'Exercise done ✓' : 'Mark exercise as done';
+    }
+
+    function setExerciseDone(done) {
+      COMPLETION_KEYS.forEach((key) => localStorage.setItem(key, done ? 'true' : 'false'));
+      syncDoneState();
+      const record = {
+        app_id: 'grocery-list',
+        phase: 1,
+        exercise: 'Grocery list',
+        completed_at: new Date().toISOString(),
+        marked_done: done
+      };
+      import('../../assets/firebase.js')
+        .then(({ saveUserProgress }) => saveUserProgress('grocery-list', 'Grocery list', record))
+        .catch((error) => console.warn('Firestore completion save failed.', error));
     }
 
     function saveResult(appId, phase, exerciseName, durationSeconds, responseObj) {
@@ -1282,6 +1352,10 @@
         renderAll();
       });
 
+      document.getElementById('doneToggleBtn').addEventListener('click', () => {
+        setExerciseDone(!isExerciseDone());
+      });
+
       document.getElementById('timerPauseIconBtn').addEventListener('click', () => {
         activityTimer.pause();
       });
@@ -1337,6 +1411,7 @@
         wireEvents();
         renderSampleAnswer();
         generateList();
+        syncDoneState();
       } catch (error) {
         console.error(error);
         showDataStatus('We could not load this exercise.', 'Please refresh the page. If the issue continues, the practice data file may be missing or malformed.');

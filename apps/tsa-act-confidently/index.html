@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Act Confidently TSA Score placeholder from The Untaught Lessons." />
-  <title>Act Confidently | TSA Score™</title>
+  <meta name="description" content="Act confidently TSA Score placeholder from The Untaught Lessons." />
+  <title>Act confidently | TSA Score™</title>
   <link rel="icon" type="image/png" sizes="32x32" href="../../assets/favicon-bluebg-whitedoor-thicker-32.png?v=6">
   <link rel="shortcut icon" type="image/png" href="../../assets/favicon-bluebg-whitedoor-thicker-32.png?v=6">
   <link rel="apple-touch-icon" sizes="180x180" href="../../assets/apple-touch-icon.png?v=3">
@@ -180,14 +180,14 @@
     <div class="brand-divider" aria-hidden="true"></div>
     <div>
       <span class="app-kicker">TSA Score™ · Section 3</span>
-      <span class="app-title">Act Confidently</span>
+      <span class="app-title">Act confidently</span>
     </div>
   </header>
 
   <main class="placeholder-main">
     <section class="placeholder-card">
       <p class="placeholder-label" id="assessmentMode">Checkpoint · Section 3</p>
-      <h1 id="placeholderTitle">Act Confidently is coming soon.</h1>
+      <h1 id="placeholderTitle">Act confidently is coming soon.</h1>
       <p id="placeholderPrompt">This holding page is where Section 3 of the TSA Score™ will live. It will measure how someone responds to pressure, pushback, and difficult conversations.</p>
       <div class="placeholder-actions">
         <a class="placeholder-button" id="backLink" href="../tsa-checkpoint/index.html">Back to Checkpoint</a>
@@ -206,7 +206,7 @@
     document.getElementById('backLink').textContent = mode === 'Checkpoint' ? 'Back to Checkpoint' : 'Back to TSA Score';
 
     // Placeholder content is loaded from ../../data/tsa/act-confidently.json.
-    // Add future Act Confidently assessment scenarios to that JSON file, then
+    // Add future Act confidently assessment scenarios to that JSON file, then
     // wire rendering and scoring logic here when Section 3 is built.
     async function loadPlaceholderData() {
       try {
@@ -214,8 +214,8 @@
         if (!response.ok) throw new Error(`Unable to load ${DATA_URL}`);
         const data = await response.json();
         const activity = Array.isArray(data) ? data[0] : null;
-        if (!activity) throw new Error('Act Confidently data is empty.');
-        document.getElementById('placeholderTitle').textContent = `${activity.title || 'Act Confidently'} is coming soon.`;
+        if (!activity) throw new Error('Act confidently data is empty.');
+        document.getElementById('placeholderTitle').textContent = `${activity.title || 'Act confidently'} is coming soon.`;
         document.getElementById('placeholderPrompt').textContent = activity.prompt || document.getElementById('placeholderPrompt').textContent;
       } catch (error) {
         console.error(error);

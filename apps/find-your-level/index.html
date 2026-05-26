@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Find Your Level public exercise from The Untaught Lessons." />
-  <title>Find Your Level | The Untaught Lessons</title>
+  <meta name="description" content="Find your level public exercise from The Untaught Lessons." />
+  <title>Find your level | The Untaught Lessons</title>
   <link rel="icon" type="image/png" sizes="32x32" href="../../assets/favicon-bluebg-whitedoor-thicker-32.png?v=6">
   <link rel="shortcut icon" type="image/png" href="../../assets/favicon-bluebg-whitedoor-thicker-32.png?v=6">
   <link rel="apple-touch-icon" sizes="180x180" href="../../assets/apple-touch-icon.png?v=3">
@@ -413,8 +413,8 @@
     </a>
     <div class="tsa-divider" aria-hidden="true"></div>
     <div>
-      <span class="tsa-kicker">Think Clearly</span>
-      <span class="tsa-title">Find Your Level</span>
+      <span class="tsa-kicker">Think clearly</span>
+      <span class="tsa-title">Find your level</span>
     </div>
     <div class="timer" aria-label="Elapsed time">
       <span>Elapsed time</span>
@@ -551,8 +551,8 @@
     function renderShell(inner) {
       app.innerHTML = `
         <section class="intro">
-          <span class="label">Public Exercise</span>
-          <h1>Find Your Level</h1>
+          <span class="label">Public exercise</span>
+          <h1>Find your level</h1>
           <p>${escapeHtml(exercise.prompt)}</p>
         </section>
         ${inner}
@@ -761,7 +761,7 @@
         console.warn('Assessment result submission failed.', error);
       }
       import('../../assets/firebase.js')
-        .then(({ saveUserProgress }) => saveUserProgress('find-your-level', 'Find Your Level', payload))
+        .then(({ saveUserProgress }) => saveUserProgress('find-your-level', 'Find your level', payload))
         .catch((error) => console.warn('Firestore progress save failed.', error));
     }
 
@@ -771,7 +771,7 @@
       const firstName = (state.participant.name || 'there').trim().split(/\s+/)[0];
       app.innerHTML = `
         <section class="score-card">
-          <span class="label">Your Result</span>
+          <span class="label">Your result</span>
           <h1>${escapeHtml(firstName)}, your score is ready.</h1>
           <div class="score">Your score: ${score.percentage}%</div>
           <p><strong>${interpretation(score.percentage)}</strong></p>

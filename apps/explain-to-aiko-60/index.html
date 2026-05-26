@@ -96,6 +96,25 @@
       line-height: 1;
     }
 
+    .module-back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 9px;
+      color: rgba(255, 255, 255, .82);
+      font-family: 'Lato', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 1.2;
+      text-decoration: none;
+    }
+
+    .module-back-link:hover {
+      color: var(--gold);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
     h1,
     h2,
     h3 {
@@ -520,8 +539,9 @@
     </a>
     <div class="tsa-speak-divider" aria-hidden="true"></div>
     <div>
-      <span class="tsa-speak-kicker">Phase 2 · Speak Concisely</span>
+      <span class="tsa-speak-kicker">Phase 2 · Speak concisely</span>
       <span class="tsa-speak-title">Explain to Aiko (60s)</span>
+      <a class="module-back-link" href="../../member-login/phase-2.html#exercises">← Back to Phase 2 exercises</a>
     </div>
   </header>
 
@@ -590,7 +610,7 @@ Best, Yutee Elle`;
       function renderShell(innerHtml) {
         app.innerHTML = `
           <section class="tsa-speak-intro">
-            <p class="tsa-speak-label">Phase 2 · Speak Concisely</p>
+            <p class="tsa-speak-label">Phase 2 · Speak concisely</p>
             <h1>Explain to Aiko</h1>
             <p>Turn your written email into a short spoken explanation. Your goal is to make the logic easy to hear, not to read the email word for word.</p>
             <span class="explain-aiko-target">Target: ${TARGET_SECONDS} seconds or less · Recommended: ${TARGET_WORDS}</span>

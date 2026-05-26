@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Issue Tree Builder | The Untaught Lessons</title>
+  <title>Issue tree builder | The Untaught Lessons</title>
   <link rel="icon" type="image/png" sizes="32x32" href="../../assets/favicon-bluebg-whitedoor-thicker-32.png?v=6">
   <link rel="shortcut icon" type="image/png" href="../../assets/favicon-bluebg-whitedoor-thicker-32.png?v=6">
   <link rel="apple-touch-icon" sizes="180x180" href="../../assets/apple-touch-icon.png?v=3">
@@ -142,6 +142,25 @@
       font-size: 27px;
       font-weight: 700;
       line-height: 1;
+    }
+
+    .module-back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 9px;
+      color: rgba(255, 255, 255, .82);
+      font-family: "Lato", sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 1.2;
+      text-decoration: none;
+    }
+
+    .module-back-link:hover {
+      color: var(--gold);
+      text-decoration: underline;
+      text-underline-offset: 3px;
     }
 
     .screen {
@@ -491,6 +510,139 @@
       line-height: 1.5;
     }
 
+    .email-card {
+      margin-top: 14px;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--white);
+      box-shadow: 0 12px 28px rgba(0, 51, 102, .06);
+    }
+
+    .email-toggle {
+      width: 100%;
+      border: 0;
+      background: transparent;
+      color: var(--navy);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 0;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .email-toggle-icon {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      background: var(--gold);
+      color: var(--white);
+      display: grid;
+      place-items: center;
+      font-size: 18px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .email-body {
+      display: none;
+      margin-top: 10px;
+    }
+
+    .email-card.email-open .email-body {
+      display: block;
+    }
+
+    .email-card p {
+      margin: 8px 0 0;
+      color: var(--charcoal);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .email-signoff {
+      margin-top: 12px;
+      color: var(--charcoal);
+      font-size: 12px;
+      line-height: 1.35;
+      text-align: right;
+    }
+
+    .email-notes-head {
+      margin-top: 16px;
+      padding-top: 14px;
+      border-top: 1px solid var(--line);
+    }
+
+    .email-notes-head .label {
+      margin-bottom: 6px;
+    }
+
+    .email-detail-list {
+      display: grid;
+      gap: 8px;
+      margin-top: 12px;
+      max-height: 420px;
+      overflow: auto;
+      padding-right: 2px;
+      border: 1px dashed transparent;
+      border-radius: 10px;
+    }
+
+    .email-detail-list.drag-over,
+    .email-detail-list.tap-target {
+      border-color: var(--gold);
+      background: #fff7e9;
+      box-shadow: 0 0 0 2px rgba(238, 163, 32, .18);
+    }
+
+    .evidence-card {
+      border: 1px solid rgba(0, 51, 102, .16);
+      border-radius: 10px;
+      background: var(--white);
+      color: var(--navy);
+      cursor: grab;
+      padding: 8px 10px;
+      font-size: 12px;
+      line-height: 1.35;
+      user-select: none;
+      touch-action: manipulation;
+      transition: background .15s ease, border-color .15s ease, box-shadow .15s ease, transform .15s ease, opacity .15s ease;
+    }
+
+    .evidence-card:active {
+      cursor: grabbing;
+    }
+
+    .evidence-card.selected {
+      border-color: var(--gold);
+      background: #fff7e9;
+      box-shadow: 0 0 0 2px rgba(238, 163, 32, .25);
+      transform: translateY(-1px);
+    }
+
+    .evidence-card.used {
+      display: none;
+    }
+
+    .evidence-card strong {
+      color: var(--navy);
+    }
+
+    .tap-evidence-hint {
+      display: none;
+      margin: 10px 0 0;
+      color: var(--navy);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .tap-evidence-hint.show {
+      display: block;
+    }
+
     .edit-link {
       position: absolute;
       right: 18px;
@@ -597,8 +749,9 @@
     }
 
     .argument-card {
+      border: 1px solid var(--line);
       border-left: 4px solid var(--navy);
-      border-radius: 8px;
+      border-radius: 10px;
       background: var(--white);
       cursor: pointer;
     }
@@ -649,8 +802,10 @@
 
     .argument-input {
       min-height: 72px;
-      padding: 10px 12px;
-      border-radius: 6px;
+      padding: 12px;
+      border: 1px solid rgba(0, 51, 102, .22);
+      border-radius: 10px;
+      background: #FAF8F3;
       font-size: 14px;
     }
 
@@ -683,22 +838,83 @@
 
     .detail-wrap {
       position: relative;
+      border: 2px dashed rgba(0, 51, 102, .18);
+      border-radius: 10px;
+      background: #FAF8F3;
+      padding: 8px;
+      transition: .15s ease;
+    }
+
+    .detail-wrap.has-detail {
+      cursor: grab;
+    }
+
+    .detail-wrap.has-detail:active {
+      cursor: grabbing;
+    }
+
+    .detail-wrap.drag-over,
+    .detail-wrap.tap-target {
+      border-color: var(--gold);
+      background: #fff7e9;
+      box-shadow: 0 0 0 2px rgba(238, 163, 32, .22);
     }
 
     .detail-wrap::before {
       content: "•";
       position: absolute;
-      top: 50%;
-      left: 10px;
+      top: 20px;
+      left: 18px;
       color: var(--navy);
       font-size: 14px;
-      transform: translateY(-50%);
     }
 
     .detail-input {
-      padding: 9px 12px 9px 26px;
-      border-radius: 6px;
-      font-size: 13px;
+      min-height: 62px;
+      padding: 9px 44px 9px 26px;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      background: var(--white);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .detail-input-hidden {
+      display: none;
+    }
+
+    .placed-detail-card {
+      min-height: 62px;
+      padding: 10px 44px 10px 26px;
+      border: 1px solid rgba(0, 51, 102, .12);
+      border-radius: 8px;
+      background: var(--white);
+      color: var(--navy);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .detail-remove {
+      position: absolute;
+      top: 14px;
+      right: 12px;
+      width: 24px;
+      height: 24px;
+      border-radius: 999px;
+      border: 0;
+      background: #F3EDE2;
+      color: var(--navy);
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      font-size: 15px;
+      line-height: 1;
+      padding: 0;
+    }
+
+    .detail-remove:hover {
+      background: rgba(192, 57, 43, .1);
+      color: var(--red);
     }
 
     .detail-actions {
@@ -1140,18 +1356,19 @@
       .arguments {
         display: grid;
         grid-template-columns: repeat(3, minmax(240px, 1fr));
-        gap: 28px;
+        gap: 16px;
         min-width: 880px;
         position: relative;
       }
 
       .argument-card {
         position: relative;
-        display: grid;
-        gap: 18px;
-        border: 0;
-        border-radius: 0;
-        background: transparent;
+        display: flex;
+        flex-direction: column;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: var(--white);
+        overflow: hidden;
         cursor: default;
       }
 
@@ -1165,20 +1382,26 @@
 
       .argument-header {
         display: block;
-        min-height: 58px;
-        padding: 14px 16px;
-        background: var(--white);
-        text-align: center;
+        min-height: 34px;
+        padding: 12px 12px 0;
+        background: rgba(243, 237, 226, .45);
+        border-bottom: 0;
+        text-align: left;
         cursor: default;
+      }
+
+      .argument-card.expanded .argument-header {
+        padding: 12px 12px 0;
       }
 
       .argument-header .label {
         color: var(--navy);
-        font-family: Lato, Arial, sans-serif;
-        font-size: 17px;
+        font-family: "Roboto Mono", monospace;
+        font-size: 10px;
         font-weight: 700;
-        letter-spacing: 0;
+        letter-spacing: .08em;
         margin: 0;
+        text-transform: uppercase;
       }
 
       .argument-title-text,
@@ -1189,19 +1412,26 @@
       .argument-body,
       .argument-card.expanded .argument-body {
         display: block;
-        padding: 0;
+        flex: 1;
+        padding: 8px 12px 12px;
+        background: rgba(243, 237, 226, .45);
       }
 
       .argument-input {
-        min-height: 102px;
-        padding: 18px 20px;
+        height: 56px;
+        min-height: 56px;
+        max-height: 56px;
+        padding: 10px 12px;
         background: var(--white);
-        border: 0.5px solid transparent;
-        color: #000b2a;
-        font-size: 16px;
+        border: 1px solid rgba(0, 51, 102, .22);
+        border-radius: 8px;
+        color: var(--navy);
+        font-size: 14px;
         font-weight: 700;
-        line-height: 1.25;
+        line-height: 1.28;
         text-align: left;
+        overflow-y: auto;
+        resize: none;
       }
 
       .argument-body > .hint {
@@ -1211,7 +1441,7 @@
       .details-section,
       .details-section.show {
         max-height: none;
-        margin-top: 20px;
+        margin-top: 12px;
         opacity: 1;
         overflow: visible;
         transform: none;
@@ -1224,48 +1454,60 @@
 
       .detail-list {
         position: relative;
-        gap: 14px;
+        gap: 8px;
         padding-left: 0;
+        min-height: 260px;
+        border: 2px dashed rgba(0, 51, 102, .18);
+        border-radius: 10px;
+        background: #FAF8F3;
+        padding: 8px;
       }
 
       .detail-list::before {
-        content: "";
-        position: absolute;
-        top: 29px;
-        bottom: 29px;
-        left: 24px;
-        width: 1.5px;
-        background: rgba(74, 74, 74, 0.7);
-        pointer-events: none;
+        display: none;
       }
 
       .detail-wrap {
         position: relative;
-        display: grid;
-        grid-template-columns: 58px minmax(0, 1fr);
-        align-items: center;
+        display: block;
+        border: 0;
+        border-radius: 8px;
+        background: transparent;
+        padding: 0;
       }
 
       .detail-wrap::before {
-        content: "";
-        position: static;
-        justify-self: end;
-        width: 34px;
-        height: 1.5px;
-        background: rgba(74, 74, 74, 0.7);
-        color: transparent;
-        transform: none;
+        display: none;
+      }
+
+      .detail-wrap.drag-over,
+      .detail-wrap.tap-target {
+        border: 0;
+        background: transparent;
+        box-shadow: none;
+      }
+
+      .detail-list:has(.detail-wrap.drag-over),
+      .argument-card:has(.detail-wrap.tap-target) .detail-list {
+        border-color: var(--gold);
+        background: #fff7e9;
+        box-shadow: 0 0 0 2px rgba(238, 163, 32, .22);
       }
 
       .detail-input {
-        min-height: 58px;
-        padding: 12px 38px 12px 14px;
+        min-height: 62px;
+        padding: 10px 44px 10px 12px;
         background: var(--white);
-        border: 0.5px solid transparent;
-        color: #000b2a;
-        font-size: 14px;
+        border: 1px solid rgba(0, 51, 102, .12);
+        border-radius: 8px;
+        color: var(--navy);
+        font-size: 12px;
         line-height: 1.35;
         text-align: left;
+      }
+
+      .placed-detail-card {
+        padding: 10px 44px 10px 12px;
       }
 
       .detail-input::placeholder {
@@ -1277,7 +1519,8 @@
       }
 
       .detail-actions {
-        padding-left: 58px;
+        padding-left: 0;
+        margin-top: 8px;
       }
     }
 
@@ -1315,7 +1558,6 @@
         position: static;
       }
 
-      .sidebar .side-card,
       .sidebar .progress-box,
       .sidebar > .guidance {
         display: none;
@@ -1539,6 +1781,26 @@
         font-size: 15px;
       }
     }
+
+    @media (min-width: 1024px) {
+      .argument-card .argument-header,
+      .argument-card.expanded .argument-header {
+        min-height: 34px !important;
+        padding: 12px 12px 0 !important;
+      }
+
+      .argument-card .argument-body,
+      .argument-card.expanded .argument-body {
+        padding: 8px 12px 12px !important;
+      }
+
+      .argument-card .argument-input {
+        height: 56px !important;
+        min-height: 56px !important;
+        max-height: 56px !important;
+      }
+    }
+
     .completion-save-notice {
       background: #F3EDE2;
       border-radius: 8px;
@@ -1582,8 +1844,9 @@
     </div>
     <div class="brand-divider" aria-hidden="true"></div>
     <div class="app-heading">
-      <span class="app-kicker">Phase 2 · Speak Concisely</span>
-      <span class="app-title">Issue Tree Builder</span>
+      <span class="app-kicker">Phase 2 · Speak concisely</span>
+      <span class="app-title">Issue tree builder</span>
+      <a class="module-back-link" href="../../member-login/phase-2.html#exercises">← Back to Phase 2 exercises</a>
     </div>
     <div class="utility-cluster" aria-label="Writing utilities">
       <div class="utility-metric" aria-live="polite">
@@ -1606,7 +1869,7 @@
   </header>
 
   <main>
-    <section class="screen active" id="screen1">
+    <section class="screen" id="screen1">
       <div class="page-title">
         <div class="eyebrow">EXERCISE</div>
         <h1 class="title">Build your issue tree.</h1>
@@ -1638,13 +1901,27 @@
       </div>
     </section>
 
-    <section class="screen" id="screen2">
+    <section class="screen active" id="screen2">
       <div class="build-main">
         <aside class="sidebar">
-          <div class="side-card card">
-            <div class="label">YOUR QUESTION</div>
-            <div class="question-text" id="sideQuestion"></div>
-            <button class="link-button edit-link" type="button" id="editQuestion">Edit ↗</button>
+          <div class="email-card email-open">
+            <button class="email-toggle" type="button" id="emailToggle" aria-expanded="true">
+              <span class="label">EMAIL FROM ASHLEY</span>
+              <span class="email-toggle-icon" id="emailToggleIcon">−</span>
+            </button>
+            <div class="email-body" id="emailBody">
+              <p>Hey,</p>
+              <p>I heard you got that email from Aiko. I cleaned up your chalkboard notes from the group chat and added some commentary. Excited to see your problem breakdown and formulation.</p>
+              <p>When you break it down, remember to answer: what are the big things that could explain this problem? Make sure your arguments are backed with pieces of info from the notes below.</p>
+              <p>I hope this helps.</p>
+              <div class="email-signoff">Best,<br><strong>Ashley Kat</strong><br><em>VP of partnerships</em></div>
+            </div>
+            <div class="email-notes-head">
+              <div class="label">CLEANED-UP NOTES</div>
+              <p>Drag or tap these notes into the supporting-detail slots. You still write the three argument labels yourself.</p>
+            </div>
+            <div class="email-detail-list" id="evidenceList"></div>
+            <div class="tap-evidence-hint" id="tapEvidenceHint"></div>
           </div>
           <div class="progress-box">
             <div id="argProgress">Arguments: 0 / 3</div>
@@ -1680,13 +1957,6 @@
             <h2 id="treeQuestion"></h2>
           </div>
           <div class="vertical-connector" aria-hidden="true"></div>
-
-          <div class="hypothesis-card">
-            <div class="label">YOUR HYPOTHESIS</div>
-            <p class="instruction">In one sentence, what do you think is the root cause? State it before you prove it.</p>
-            <input id="hypothesis" type="text" data-word-label="Hypothesis" placeholder="e.g. The Olympics is losing gravity because of broken culture, lost story, and noise.">
-            <div class="hint">Aim for one sentence — 20 words max.</div>
-          </div>
 
           <div class="arguments" id="arguments"></div>
 
@@ -1750,6 +2020,18 @@
     const STORAGE_KEY = "utl_issue_tree";
     const TIMER_TARGET = 15 * 60;
     const DATA_URL = "../../data/practice/issue-tree-builder.json";
+    const ASHLEY_DETAILS = [
+      { id: "ashley-tv-show", label: "Feels like a TV show", text: "Feels like a TV show: The Olympics feels highly produced — more like something you watch on screen than something you feel part of." },
+      { id: "ashley-no-meaning", label: "No lasting meaning", text: "No lasting meaning: Moments go viral quickly, but they fade fast and don't build into something bigger over time." },
+      { id: "ashley-highlights", label: "Highlights over stories", text: "Highlights over stories: Big wins, clips, and controversies get attention, but deeper athlete journeys are often overlooked." },
+      { id: "ashley-unity", label: "Generic unity message", text: "Generic unity message: Messaging about bringing the world together can feel surface-level, especially when global tensions are high." },
+      { id: "ashley-trust", label: "Lower trust", text: "Lower trust: Depending on where people are from, politics or bias can affect how much they trust or connect with the Games." },
+      { id: "ashley-special", label: "Less special feeling", text: "Less special feeling: The Olympics doesn't feel as rare or emotionally earned — it blends into the constant stream of content." },
+      { id: "ashley-stakes", label: "Low personal stakes", text: "Low personal stakes: Athlete stories don't always feel personal or high-stakes, so it's harder for audiences to care deeply." },
+      { id: "ashley-story", label: "No clear story", text: "No clear story: There isn't one strong, modern storyline that ties everything together across events and platforms." },
+      { id: "ashley-clips", label: "Clip-first content", text: "Clip-first content: Short clips dominate, so people see moments, not full journeys or narratives." },
+      { id: "ashley-sponsors", label: "Too many sponsors", text: "Too many sponsors: Brand presence is very visible, making the Olympics feel more commercial and less about the sport itself." }
+    ];
     const blankState = () => ({
       problemStatement: "",
       hypothesis: "",
@@ -1773,6 +2055,7 @@
     let timerInterval = null;
     let timerMetricHidden = false;
     let activeWordField = null;
+    let selectedEvidenceId = null;
 
     // Exercise data is loaded from ../../data/practice/issue-tree-builder.json.
     // Add future issue-tree variations to that JSON file. This app loads the
@@ -1803,6 +2086,7 @@
       problem: $("#problemStatement"),
       hypothesis: $("#hypothesis"),
       arguments: $("#arguments"),
+      evidenceList: $("#evidenceList"),
       reviewGrid: $("#reviewGrid")
     };
 
@@ -1834,9 +2118,11 @@
     function clearAll() {
       localStorage.removeItem(STORAGE_KEY);
       state = blankState();
+      if (templateState && templateState.problemStatement) state.problemStatement = templateState.problemStatement;
+      state.currentScreen = 2;
       openArgument = 0;
       renderAll();
-      goToScreen(1);
+      goToScreen(2);
     }
 
     function filled(text, min = 10) {
@@ -1856,9 +2142,135 @@
         .replaceAll("'", "&#039;");
     }
 
+    function formatEvidenceText(text) {
+      const value = String(text || "").trim();
+      const match = value.match(/^([^:]{2,90}:)\s*(.*)$/);
+      if (!match) return escapeHtml(value || "—");
+      return `<strong>${escapeHtml(match[1])}</strong> ${escapeHtml(match[2])}`;
+    }
+
     function autoResize(el) {
+      if (el.classList && el.classList.contains("argument-input") && window.matchMedia("(min-width: 1024px)").matches) {
+        el.style.height = "";
+        return;
+      }
       el.style.height = "auto";
       el.style.height = `${el.scrollHeight}px`;
+    }
+
+    function setTextIfPresent(selector, text) {
+      const el = $(selector);
+      if (el) el.textContent = text;
+    }
+
+    function evidenceById(id) {
+      return ASHLEY_DETAILS.find((item) => item.id === id);
+    }
+
+    function evidenceIsUsed(item) {
+      return state.arguments.some((arg) => arg.details.some((detail) => detail.trim() === item.text));
+    }
+
+    function renderEvidenceList() {
+      if (!fields.evidenceList) return;
+      fields.evidenceList.innerHTML = ASHLEY_DETAILS.map((item) => {
+        const used = evidenceIsUsed(item);
+        const selected = selectedEvidenceId === item.id;
+        return `<div class="evidence-card${used ? " used" : ""}${selected ? " selected" : ""}" draggable="true" role="button" tabindex="0" aria-pressed="${selected ? "true" : "false"}" data-evidence-id="${item.id}"><strong>${escapeHtml(item.label)}:</strong> ${escapeHtml(item.text.replace(item.label + ": ", ""))}</div>`;
+      }).join("");
+      renderEvidenceSelectionState();
+    }
+
+    function renderEvidenceSelectionState() {
+      const selected = selectedEvidenceId ? evidenceById(selectedEvidenceId) : null;
+      $$(".evidence-card").forEach((card) => {
+        const isSelected = card.dataset.evidenceId === selectedEvidenceId;
+        card.classList.toggle("selected", isSelected);
+        card.setAttribute("aria-pressed", isSelected ? "true" : "false");
+      });
+      $$(".detail-wrap").forEach((zone) => {
+        zone.classList.toggle("tap-target", Boolean(selectedEvidenceId));
+      });
+      const hint = $("#tapEvidenceHint");
+      if (!hint) return;
+      hint.classList.toggle("show", Boolean(selected));
+      hint.textContent = selected ? `${selected.label} selected. Tap a supporting-detail slot to place it.` : "";
+    }
+
+    function applyEvidenceToDetail(evidenceId, detailWrap) {
+      const evidence = evidenceById(evidenceId);
+      if (!evidence || !detailWrap) return;
+      const input = $(".detail-input", detailWrap);
+      if (!input) return;
+      input.value = evidence.text;
+      autoResize(input);
+      updateFromDom();
+      openArgument = Number(detailWrap.dataset.arg) || 0;
+      selectedEvidenceId = null;
+      renderEvidenceList();
+      renderArguments();
+      renderProgress();
+      save();
+    }
+
+    function clearDetailSlot(argIndex, detailIndex) {
+      if (!state.arguments[argIndex]) return;
+      state.arguments[argIndex].details[detailIndex] = "";
+      selectedEvidenceId = null;
+      openArgument = argIndex;
+      save();
+      renderArguments();
+      renderEvidenceList();
+      renderProgress();
+      renderWordCount();
+    }
+
+    function moveDetailSlot(sourceArg, sourceDetail, targetWrap) {
+      if (!state.arguments[sourceArg] || !targetWrap) return;
+      const targetArg = Number(targetWrap.dataset.arg);
+      const targetDetail = Number(targetWrap.dataset.detail);
+      if (!state.arguments[targetArg]) return;
+      if (sourceArg === targetArg && sourceDetail === targetDetail) return;
+      const sourceValue = state.arguments[sourceArg].details[sourceDetail] || "";
+      if (!sourceValue.trim()) return;
+      const targetValue = state.arguments[targetArg].details[targetDetail] || "";
+      state.arguments[sourceArg].details[sourceDetail] = "";
+      state.arguments[targetArg].details[targetDetail] = sourceValue;
+      if (targetValue.trim()) {
+        state.arguments[sourceArg].details[sourceDetail] = targetValue;
+      }
+      selectedEvidenceId = null;
+      openArgument = targetArg;
+      save();
+      renderArguments();
+      renderEvidenceList();
+      renderProgress();
+      renderWordCount();
+    }
+
+    function returnDetailToAshley(sourceArg, sourceDetail) {
+      if (!state.arguments[sourceArg]) return;
+      state.arguments[sourceArg].details[sourceDetail] = "";
+      selectedEvidenceId = null;
+      openArgument = sourceArg;
+      save();
+      renderArguments();
+      renderEvidenceList();
+      renderProgress();
+      renderWordCount();
+    }
+
+    function detailSlotMarkup(argIndex, detailIndex, detail) {
+      const value = detail || "";
+      const hasValue = value.trim();
+      const sharedAttrs = `data-arg="${argIndex}" data-detail="${detailIndex}" data-word-label="Detail ${detailIndex + 1}"`;
+      if (!hasValue) {
+        return `<textarea class="detail-input" ${sharedAttrs} placeholder="Supporting detail ${detailIndex + 1}: Specific evidence or example...">${escapeHtml(value)}</textarea>`;
+      }
+      return `
+        <div class="placed-detail-card">${formatEvidenceText(value)}</div>
+        <textarea class="detail-input detail-input-hidden" ${sharedAttrs}>${escapeHtml(value)}</textarea>
+      `;
     }
 
     function renderArguments() {
@@ -1877,16 +2289,16 @@
             <div class="chevron">${openArgument === index ? "▴" : "▾"}</div>
           </div>
           <div class="argument-body">
-            <textarea class="argument-input" data-arg="${index}" data-word-label="Argument ${index + 1}" placeholder="State a broad cause or bucket — what is one major reason?">${escapeHtml(arg.text)}</textarea>
+            <textarea class="argument-input" data-arg="${index}" data-word-label="Argument ${index + 1}" placeholder="Name one reason this is happening">${escapeHtml(arg.text)}</textarea>
             <div class="hint">One bucket only. If it covers two ideas, split it.</div>
             <div class="details-section ${filled(arg.text) ? "show" : ""}">
               <div class="label">SUPPORTING DETAILS</div>
               <p class="details-sub">Add 3 specific pieces of evidence or examples.</p>
               <div class="detail-list">
                 ${arg.details.map((detail, detailIndex) => `
-                  <div class="detail-wrap">
-                    <textarea class="detail-input" data-arg="${index}" data-detail="${detailIndex}" data-word-label="Detail ${detailIndex + 1}" placeholder="Supporting detail ${detailIndex + 1}: Specific evidence or example...">${escapeHtml(detail)}</textarea>
-                    ${detailIndex >= 3 ? `<button class="detail-remove" type="button" data-remove-detail="${index}" data-detail="${detailIndex}" aria-label="Remove supporting detail ${detailIndex + 1}">×</button>` : ""}
+                  <div class="detail-wrap${detail.trim() ? " has-detail" : ""}" data-detail-zone data-arg="${index}" data-detail="${detailIndex}" ${detail.trim() ? 'draggable="true"' : ""}>
+                    ${detailSlotMarkup(index, detailIndex, detail)}
+                    ${detail.trim() || detailIndex >= 3 ? `<button class="detail-remove" type="button" data-remove-detail="${index}" data-detail="${detailIndex}" aria-label="Clear supporting detail ${detailIndex + 1}">×</button>` : ""}
                   </div>
                 `).join("")}
               </div>
@@ -1906,16 +2318,26 @@
     function renderProgress() {
       const argumentCount = state.arguments.filter((arg) => filled(arg.text)).length;
       const detailCount = state.arguments.flatMap((arg) => arg.details).filter((detail) => filled(detail)).length;
-      const detailTotal = state.arguments.reduce((sum, arg) => sum + arg.details.length, 0);
-      const totalFilled = (filled(state.hypothesis) ? 1 : 0) + argumentCount + detailCount;
-      const totalFields = 1 + 3 + Math.max(9, detailTotal);
-      const requiredMissing = [state.hypothesis, ...state.arguments.map((arg) => arg.text)].filter((text) => !filled(text)).length;
+      const requiredDetailTotal = 9;
+      const totalFilled = argumentCount + detailCount;
+      const totalFields = 3 + requiredDetailTotal;
+      const missingArguments = Math.max(0, 3 - argumentCount);
+      const missingDetails = Math.max(0, requiredDetailTotal - detailCount);
+      const requiredMissing = missingArguments + missingDetails;
       $("#argProgress").textContent = `Arguments: ${argumentCount} / 3`;
-      $("#detailProgress").textContent = `Details: ${detailCount} / ${detailTotal}`;
-      $("#fieldProgress").style.width = `${Math.round((totalFilled / totalFields) * 100)}%`;
-      $("#remainingFields").textContent = requiredMissing ? `${requiredMissing} field${requiredMissing === 1 ? "" : "s"} still needed` : "";
+      $("#detailProgress").textContent = `Details: ${Math.min(detailCount, requiredDetailTotal)} / ${requiredDetailTotal}`;
+      $("#fieldProgress").style.width = `${Math.min(100, Math.round((totalFilled / totalFields) * 100))}%`;
+      let remainingText = "";
+      if (missingArguments && missingDetails) {
+        remainingText = `Add ${missingArguments} argument name${missingArguments === 1 ? "" : "s"} and ${missingDetails} supporting detail${missingDetails === 1 ? "" : "s"}`;
+      } else if (missingArguments) {
+        remainingText = `Add ${missingArguments} argument name${missingArguments === 1 ? "" : "s"}`;
+      } else if (missingDetails) {
+        remainingText = `Add ${missingDetails} supporting detail${missingDetails === 1 ? "" : "s"}`;
+      }
+      $("#remainingFields").textContent = remainingText;
       $("#remainingFields").style.visibility = requiredMissing ? "visible" : "hidden";
-      $("#reviewBtn").disabled = requiredMissing > 0;
+      $("#reviewBtn").disabled = false;
     }
 
     function saveResult(appId, phase, exerciseName, durationSeconds, responseObj) {
@@ -1971,7 +2393,7 @@
             ${arg.details.map((detail) => `
               <div class="detail-row">
                 <span class="bullet">•</span>
-                <span class="${detail.trim() ? "" : "empty"}">${escapeHtml(detail.trim() || "—")}</span>
+                <span class="${detail.trim() ? "" : "empty"}">${formatEvidenceText(detail.trim() || "—")}</span>
               </div>
             `).join("")}
           </div>
@@ -1982,12 +2404,13 @@
 
     function renderAll() {
       fields.problem.value = state.problemStatement;
-      fields.hypothesis.value = state.hypothesis;
-      $("#sideQuestion").textContent = state.problemStatement || "No question yet.";
-      $("#mobileQuestion").textContent = state.problemStatement || "No question yet.";
-      $("#treeQuestion").textContent = state.problemStatement || "No question yet.";
-      $("#startBtn").disabled = !filled(state.problemStatement);
+      if (fields.hypothesis) fields.hypothesis.value = state.hypothesis;
+      setTextIfPresent("#sideQuestion", state.problemStatement || "No question yet.");
+      setTextIfPresent("#mobileQuestion", state.problemStatement || "No question yet.");
+      setTextIfPresent("#treeQuestion", state.problemStatement || "No question yet.");
+      if ($("#startBtn")) $("#startBtn").disabled = !filled(state.problemStatement);
       renderArguments();
+      renderEvidenceList();
       renderProgress();
       renderReview();
       $$("#feedbackMount, #sampleMount").forEach((mount) => mount.innerHTML = "");
@@ -1995,6 +2418,7 @@
     }
 
     function goToScreen(screen) {
+      if (screen === 1) screen = 2;
       currentScreen = screen;
       state.currentScreen = screen;
       save();
@@ -2011,7 +2435,7 @@
 
     function updateFromDom() {
       state.problemStatement = fields.problem.value;
-      state.hypothesis = fields.hypothesis.value;
+      state.hypothesis = fields.hypothesis ? fields.hypothesis.value : "";
       $$(".argument-input").forEach((input) => {
         state.arguments[Number(input.dataset.arg)].text = input.value;
       });
@@ -2020,10 +2444,11 @@
       });
       save();
       renderProgress();
-      $("#startBtn").disabled = !filled(state.problemStatement);
-      $("#sideQuestion").textContent = state.problemStatement || "No question yet.";
-      $("#mobileQuestion").textContent = state.problemStatement || "No question yet.";
-      $("#treeQuestion").textContent = state.problemStatement || "No question yet.";
+      if ($("#startBtn")) $("#startBtn").disabled = !filled(state.problemStatement);
+      setTextIfPresent("#sideQuestion", state.problemStatement || "No question yet.");
+      setTextIfPresent("#mobileQuestion", state.problemStatement || "No question yet.");
+      setTextIfPresent("#treeQuestion", state.problemStatement || "No question yet.");
+      renderEvidenceList();
     }
 
     function formatSeconds(totalSeconds) {
@@ -2129,8 +2554,6 @@
       const results = [];
       const add = (status, label, points, hint = "") => results.push({ status, label, points, hint });
 
-      add(filled(state.hypothesis) ? "pass" : "fail", filled(state.hypothesis) ? "Hypothesis stated" : "No hypothesis found", filled(state.hypothesis) ? 1 : 0, "State your overall answer before proving it. What do you believe is the root cause?");
-
       const missingArgs = args.map((arg, i) => filled(arg.text) ? "" : `Argument ${i + 1} is empty`).filter(Boolean);
       add(missingArgs.length ? "fail" : "pass", missingArgs.length ? `Missing argument(s): ${missingArgs.join(", ")}` : "All 3 arguments provided", missingArgs.length ? 0 : 1, "Your issue tree needs 3 distinct buckets. Each should answer your central question.");
 
@@ -2141,9 +2564,6 @@
       if (filledDetails >= 7) add("pass", "Strong detail coverage (7+ of 9)", 1);
       else if (filledDetails >= 5) add("partial", "Partial detail coverage", 0.5, "Each argument needs specific evidence — vague buckets without detail are hard to defend.");
       else add("fail", "Too many details missing", 0, "Each argument needs specific evidence — vague buckets without detail are hard to defend.");
-
-      const hypoWords = wordCount(state.hypothesis);
-      add(hypoWords <= 35 ? "pass" : "fail", hypoWords <= 35 ? "Hypothesis is concise" : `Hypothesis is too long (${hypoWords} words — aim for under 35)`, hypoWords <= 35 ? 1 : 0, "Your hypothesis should fit in one clear sentence. Cut anything that belongs in the arguments instead.");
 
       const longArgs = args.map((arg, i) => wordCount(arg.text) > 8 ? `Argument ${i + 1} is ${wordCount(arg.text)} words` : "").filter(Boolean);
       add(longArgs.length ? "fail" : "pass", longArgs.length ? `Argument(s) may be too complex: ${longArgs.join(", ")}` : "Arguments are tight and focused", longArgs.length ? 0 : 1, "A good argument label is a short bucket name, not a full sentence. e.g. 'Shared ritual is breaking' not 'The shared rituals that used to unite audiences are breaking down.'");
@@ -2158,10 +2578,6 @@
       const question = state.problemStatement.trim();
       const isQuestion = question.endsWith("?") || /^(why|what|how|when|which)\b/i.test(question);
       add(isQuestion ? "pass" : "fail", isQuestion ? "Problem is framed as a question" : "Problem statement is not a question", isQuestion ? 1 : 0, "Frame your problem as a question — 'Why is X happening?' works much better than 'X is declining.'");
-
-      const hypoWordsSet = new Set(significantWords(state.hypothesis));
-      const hypoMatches = args.filter((arg) => significantWords(arg.text).some((word) => hypoWordsSet.has(word))).length;
-      add(hypoMatches >= 2 ? "pass" : "fail", hypoMatches >= 2 ? "Hypothesis connects to your arguments" : "Hypothesis may not reflect your arguments", hypoMatches >= 2 ? 1 : 0, "Your hypothesis should preview your 3 arguments. If the words don't echo each other, your story arc may not hang together.");
 
       const problemWordsSet = new Set(significantWords(state.problemStatement));
       const problemMatches = args.filter((arg) => significantWords(arg.text).some((word) => problemWordsSet.has(word))).length;
@@ -2212,7 +2628,7 @@
           <div class="compare-section">
             <h3>Argument ${index + 1}: ${escapeHtml(arg.text || "—")}</h3>
             ${arg.details.map((detail) => `
-              <div class="detail-row"><span class="bullet">•</span><span>${escapeHtml(detail || "—")}</span></div>
+              <div class="detail-row"><span class="bullet">•</span><span>${formatEvidenceText(detail || "—")}</span></div>
             `).join("")}
           </div>
         `).join("")}
@@ -2320,6 +2736,23 @@
     });
 
     document.addEventListener("click", (event) => {
+      const evidenceCard = event.target.closest(".evidence-card");
+      if (evidenceCard) {
+        event.preventDefault();
+        selectedEvidenceId = selectedEvidenceId === evidenceCard.dataset.evidenceId ? null : evidenceCard.dataset.evidenceId;
+        startTimerFromInteraction();
+        renderEvidenceSelectionState();
+        return;
+      }
+
+      const detailZone = event.target.closest("[data-detail-zone]");
+      if (detailZone && selectedEvidenceId) {
+        event.preventDefault();
+        startTimerFromInteraction();
+        applyEvidenceToDetail(selectedEvidenceId, detailZone);
+        return;
+      }
+
       const header = event.target.closest(".argument-header");
       if (header) {
         if (window.matchMedia("(min-width: 1024px)").matches) return;
@@ -2355,14 +2788,20 @@
         const index = Number(removeDetail.dataset.removeDetail);
         const detailIndex = Number(removeDetail.dataset.detail);
         updateFromDom();
-        state.arguments[index].details.splice(detailIndex, 1);
-        if (state.arguments[index].details.length < 3) {
-          state.arguments[index].details = state.arguments[index].details.concat(Array(3 - state.arguments[index].details.length).fill(""));
+        if (detailIndex >= 3 && !state.arguments[index].details[detailIndex].trim()) {
+          state.arguments[index].details.splice(detailIndex, 1);
+          if (state.arguments[index].details.length < 3) {
+            state.arguments[index].details = state.arguments[index].details.concat(Array(3 - state.arguments[index].details.length).fill(""));
+          }
+        } else {
+          state.arguments[index].details[detailIndex] = "";
         }
         openArgument = index;
         activeWordField = null;
+        selectedEvidenceId = null;
         save();
         renderArguments();
+        renderEvidenceList();
         renderProgress();
         renderWordCount();
         return;
@@ -2380,29 +2819,109 @@
       }
     });
 
-    $("#loadTemplate").addEventListener("click", () => {
-      state = {
-        ...blankState(),
-        problemStatement: templateState.problemStatement,
-        currentScreen
-      };
-      openArgument = 0;
-      save();
-      renderAll();
-      const status = $("#templateStatus");
-      status.classList.add("show");
-      setTimeout(() => status.classList.remove("show"), 2000);
+    document.addEventListener("keydown", (event) => {
+      if (!event.target.classList.contains("evidence-card")) return;
+      if (event.key !== "Enter" && event.key !== " ") return;
+      event.preventDefault();
+      selectedEvidenceId = selectedEvidenceId === event.target.dataset.evidenceId ? null : event.target.dataset.evidenceId;
+      startTimerFromInteraction();
+      renderEvidenceSelectionState();
     });
 
-    $("#startBtn").addEventListener("click", () => goToScreen(2));
-    $("#clearFresh").addEventListener("click", clearAll);
-    $("#backToQuestion").addEventListener("click", () => goToScreen(1));
-    $("#editQuestion").addEventListener("click", () => {
-      if (state.hypothesis.trim() || state.arguments.some((arg) => arg.text.trim() || arg.details.some(Boolean))) {
-        if (!confirm("Go back? Your progress will be saved.")) return;
+    document.addEventListener("dragstart", (event) => {
+      const detailWrap = event.target.closest(".detail-wrap.has-detail");
+      if (detailWrap) {
+        const argIndex = Number(detailWrap.dataset.arg);
+        const detailIndex = Number(detailWrap.dataset.detail);
+        const value = state.arguments[argIndex]?.details[detailIndex] || "";
+        if (!value.trim()) return;
+        selectedEvidenceId = null;
+        renderEvidenceSelectionState();
+        startTimerFromInteraction();
+        event.dataTransfer.setData("application/x-issue-detail", JSON.stringify({ argIndex, detailIndex }));
+        event.dataTransfer.setData("text/plain", value);
+        return;
       }
-      goToScreen(1);
+
+      const evidenceCard = event.target.closest(".evidence-card");
+      if (!evidenceCard) return;
+      selectedEvidenceId = null;
+      renderEvidenceSelectionState();
+      startTimerFromInteraction();
+      event.dataTransfer.setData("text/plain", evidenceCard.dataset.evidenceId);
     });
+
+    document.addEventListener("dragover", (event) => {
+      const zone = event.target.closest("[data-detail-zone], #evidenceList");
+      if (!zone) return;
+      event.preventDefault();
+    });
+
+    document.addEventListener("dragenter", (event) => {
+      const zone = event.target.closest("[data-detail-zone], #evidenceList");
+      if (!zone) return;
+      zone.classList.add("drag-over");
+    });
+
+    document.addEventListener("dragleave", (event) => {
+      const zone = event.target.closest("[data-detail-zone], #evidenceList");
+      if (!zone) return;
+      zone.classList.remove("drag-over");
+    });
+
+    document.addEventListener("drop", (event) => {
+      const zone = event.target.closest("[data-detail-zone], #evidenceList");
+      if (!zone) return;
+      event.preventDefault();
+      zone.classList.remove("drag-over");
+      const movedDetail = event.dataTransfer.getData("application/x-issue-detail");
+      startTimerFromInteraction();
+      if (movedDetail) {
+        const source = JSON.parse(movedDetail);
+        if (zone.id === "evidenceList") {
+          returnDetailToAshley(source.argIndex, source.detailIndex);
+        } else {
+          moveDetailSlot(source.argIndex, source.detailIndex, zone);
+        }
+        return;
+      }
+      const evidenceId = event.dataTransfer.getData("text/plain");
+      if (!evidenceId || zone.id === "evidenceList") return;
+      applyEvidenceToDetail(evidenceId, zone);
+    });
+
+    const loadTemplateButton = $("#loadTemplate");
+    if (loadTemplateButton) {
+      loadTemplateButton.addEventListener("click", () => {
+        state = {
+          ...blankState(),
+          problemStatement: templateState.problemStatement,
+          currentScreen: 2
+        };
+        openArgument = 0;
+        save();
+        renderAll();
+        const status = $("#templateStatus");
+        status.classList.add("show");
+        setTimeout(() => status.classList.remove("show"), 2000);
+      });
+    }
+
+    const startButton = $("#startBtn");
+    if (startButton) startButton.addEventListener("click", () => goToScreen(2));
+    const clearFreshButton = $("#clearFresh");
+    if (clearFreshButton) clearFreshButton.addEventListener("click", clearAll);
+    $("#backToQuestion").addEventListener("click", () => goToScreen(2));
+    const emailToggle = $("#emailToggle");
+    if (emailToggle) {
+      emailToggle.addEventListener("click", () => {
+        const card = emailToggle.closest(".email-card");
+        const open = !card.classList.contains("email-open");
+        card.classList.toggle("email-open", open);
+        emailToggle.setAttribute("aria-expanded", open ? "true" : "false");
+        $("#emailToggleIcon").textContent = open ? "−" : "+";
+      });
+    }
     $("#reviewBtn").addEventListener("click", () => goToScreen(3));
     $("#editTree").addEventListener("click", () => goToScreen(2));
     $("#checkAnswer").addEventListener("click", renderFeedback);
@@ -2443,11 +2962,15 @@
       }
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) state = safeState(saved);
+      if (!state.problemStatement && templateState && templateState.problemStatement) {
+        state.problemStatement = templateState.problemStatement;
+      }
+      if (state.currentScreen === 1) state.currentScreen = 2;
       timerInterval = setInterval(renderTimer, 1000);
       renderAll();
       renderTimer();
       renderWordCount();
-      goToScreen(Math.min(Math.max(state.currentScreen, 1), 3));
+      goToScreen(Math.min(Math.max(state.currentScreen, 2), 3));
     }
 
     initializeApp();

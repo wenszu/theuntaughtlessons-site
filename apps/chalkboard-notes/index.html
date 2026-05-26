@@ -92,6 +92,25 @@
       line-height: 1;
     }
 
+    .module-back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 9px;
+      color: rgba(255, 255, 255, .82);
+      font-family: 'Lato', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 1.2;
+      text-decoration: none;
+    }
+
+    .module-back-link:hover {
+      color: var(--gold);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
     .app-timer {
       display: flex;
       align-items: center;
@@ -983,8 +1002,9 @@
     </a>
     <div class="brand-divider" aria-hidden="true"></div>
     <div>
-      <span class="app-kicker">Phase 1 · Think Clearly</span>
+      <span class="app-kicker">Phase 1 · Think clearly</span>
       <span class="app-title">Chalkboard notes</span>
+      <a class="module-back-link" href="../../member-login/phase-1/practice/index.html">← Back to Phase 1 exercises</a>
     </div>
     <div class="app-timer" aria-label="Elapsed time">
       <div class="utility-metric" id="timerMetric">

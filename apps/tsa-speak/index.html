@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="TSA Score™ Speak Concisely assessment from The Untaught Lessons." />
-  <title>Speak Concisely | TSA Score™</title>
+  <meta name="description" content="TSA Score™ Speak concisely assessment from The Untaught Lessons." />
+  <title>Speak concisely | TSA Score™</title>
   <link rel="icon" type="image/png" sizes="32x32" href="../../assets/favicon-bluebg-whitedoor-thicker-32.png?v=6">
   <link rel="shortcut icon" type="image/png" href="../../assets/favicon-bluebg-whitedoor-thicker-32.png?v=6">
   <link rel="apple-touch-icon" sizes="180x180" href="../../assets/apple-touch-icon.png?v=3">
@@ -669,7 +669,7 @@
     <div class="tsa-speak-divider" aria-hidden="true"></div>
     <div>
       <span class="tsa-speak-kicker">TSA Score™</span>
-      <span class="tsa-speak-title" id="headerTitle">Speak Concisely</span>
+      <span class="tsa-speak-title" id="headerTitle">Speak concisely</span>
     </div>
   </header>
 
@@ -711,11 +711,11 @@
     const DATA_URL = '../../data/tsa/speak-concisely.json';
     const isCheckpoint = new URLSearchParams(window.location.search).get('version') === 'checkpoint';
     const versionLabel = isCheckpoint ? 'Checkpoint' : 'Diagnostic';
-    document.getElementById('headerTitle').textContent = isCheckpoint ? 'Speak Concisely: Checkpoint' : 'Speak Concisely';
+    document.getElementById('headerTitle').textContent = isCheckpoint ? 'Speak concisely: Checkpoint' : 'Speak concisely';
 
     const SCORER_SYSTEM_PROMPT = `You are a scoring assistant for the TSA Score™ assessment by The Untaught Lessons™.
 
-You are scoring a Phase 2 Speak Concisely submission — a participant's spoken transcript delivered under a time limit.
+You are scoring a Phase 2 Speak concisely submission — a participant's spoken transcript delivered under a time limit.
 
 Score the following criteria using the C³ Rubric™. Each criterion is scored 1 to 5. Assign whole numbers only.
 
@@ -786,7 +786,7 @@ Return only JSON with C1, C4, C5, C6, C7, C8, msg1, msg2, msg3, feedback, and co
             <h2>Loading assessment...</h2>
           </div>
           <div class="tsa-speak-panel-body">
-            <p>Preparing the Speak Concisely exercise.</p>
+            <p>Preparing the Speak concisely exercise.</p>
           </div>
         </section>
       `;
@@ -809,14 +809,14 @@ Return only JSON with C1, C4, C5, C6, C7, C8, msg1, msg2, msg3, feedback, and co
     }
 
     // Exercise data is loaded from ../../data/tsa/speak-concisely.json.
-    // Add new Speak Concisely topics in that JSON file, not in this HTML.
+    // Add new Speak concisely topics in that JSON file, not in this HTML.
     // Expected schema: an array of topic objects with title, scenario, points,
     // keyMessages, tags, difficulty, and optional timeLimitSeconds metadata.
     async function loadExerciseData() {
       const response = await fetch(DATA_URL);
       if (!response.ok) throw new Error(`Unable to load ${DATA_URL}`);
       const data = await response.json();
-      if (!Array.isArray(data) || !data.length) throw new Error('Speak Concisely data is empty.');
+      if (!Array.isArray(data) || !data.length) throw new Error('Speak concisely data is empty.');
       topics = data;
       setIndex = Math.floor(Math.random() * topics.length);
       currentTopic = topics[setIndex];
@@ -848,7 +848,7 @@ Return only JSON with C1, C4, C5, C6, C7, C8, msg1, msg2, msg3, feedback, and co
         name: state.participant.name,
         email: state.participant.email,
         role: formData.get('role').trim(),
-        message: 'Submitted via TSA Diagnostic — Phase 2 Speak Concisely',
+        message: 'Submitted via TSA Diagnostic — Phase 2 Speak concisely',
         page: window.location.href,
         source: 'tsa-assessment'
       };
@@ -896,8 +896,8 @@ Return only JSON with C1, C4, C5, C6, C7, C8, msg1, msg2, msg3, feedback, and co
     function renderShell(innerHtml) {
       app.innerHTML = `
         <section class="tsa-speak-intro">
-          <p class="tsa-speak-label">Phase 2 · Speak Concisely · ${versionLabel}</p>
-          <h1>Speak Concisely</h1>
+          <p class="tsa-speak-label">Phase 2 · Speak concisely · ${versionLabel}</p>
+          <h1>Speak concisely</h1>
           <p>Identify the most important messages from a set of information and deliver them clearly within a time limit.</p>
         </section>
         ${innerHtml}
@@ -1203,8 +1203,8 @@ Return only JSON with C1, C4, C5, C6, C7, C8, msg1, msg2, msg3, feedback, and co
       const transcript = isCheckpoint ? state.transcriptA : state.transcript;
       const checkpointInstruction = isCheckpoint ? ' This is a Checkpoint submission with two recordings. Include compression and compression_feedback in the JSON.' : '';
       const content = isCheckpoint
-        ? `Exercise: Phase 2 Speak Concisely — Checkpoint\nTopic: ${currentTopic.title}\nKey messages to score against:\n1. ${currentTopic.keyMessages[0]}\n2. ${currentTopic.keyMessages[1]}\n3. ${currentTopic.keyMessages[2]}\n\nRecording A transcript (target: 2 minutes):\n${state.transcriptA}\n\nRecording B transcript (target: 1 minute):\n${state.transcriptB}`
-        : `Exercise: Phase 2 Speak Concisely — Diagnostic\nTopic: ${currentTopic.title}\nKey messages to score against:\n1. ${currentTopic.keyMessages[0]}\n2. ${currentTopic.keyMessages[1]}\n3. ${currentTopic.keyMessages[2]}\n\nTranscript:\n${transcript}`;
+        ? `Exercise: Phase 2 Speak concisely — Checkpoint\nTopic: ${currentTopic.title}\nKey messages to score against:\n1. ${currentTopic.keyMessages[0]}\n2. ${currentTopic.keyMessages[1]}\n3. ${currentTopic.keyMessages[2]}\n\nRecording A transcript (target: 2 minutes):\n${state.transcriptA}\n\nRecording B transcript (target: 1 minute):\n${state.transcriptB}`
+        : `Exercise: Phase 2 Speak concisely — Diagnostic\nTopic: ${currentTopic.title}\nKey messages to score against:\n1. ${currentTopic.keyMessages[0]}\n2. ${currentTopic.keyMessages[1]}\n3. ${currentTopic.keyMessages[2]}\n\nTranscript:\n${transcript}`;
 
       if (!window.TSA_SPEAK_SCORER_ENDPOINT) {
         return localScoreTranscript(transcript, isCheckpoint ? state.transcriptB : '');
@@ -1260,7 +1260,7 @@ Return only JSON with C1, C4, C5, C6, C7, C8, msg1, msg2, msg3, feedback, and co
       if (total >= 27) return 'Exceptional: your message was clear, tight, and compelling.';
       if (total >= 21) return 'Strong: good coverage and delivery with room to sharpen.';
       if (total >= 13) return 'Developing: the message was there but needs more focus and conciseness.';
-      return 'Early stage: this is exactly what the UTL Speak Concisely phase builds.';
+      return 'Early stage: this is exactly what the UTL Speak concisely phase builds.';
     }
 
     function readScore(key) {
@@ -1303,7 +1303,7 @@ Return only JSON with C1, C4, C5, C6, C7, C8, msg1, msg2, msg3, feedback, and co
       sessionStorage.setItem(SPEAK_SCORE_KEY, JSON.stringify(result));
       localStorage.setItem(SPEAK_SCORE_KEY, JSON.stringify(result));
       import('../../assets/firebase.js')
-        .then(({ saveUserProgress }) => saveUserProgress(SPEAK_SCORE_KEY, `TSA Speak Concisely (${versionLabel})`, result))
+        .then(({ saveUserProgress }) => saveUserProgress(SPEAK_SCORE_KEY, `TSA Speak concisely (${versionLabel})`, result))
         .catch((error) => console.warn('Firestore progress save failed.', error));
       showScore(result);
     }
@@ -1325,15 +1325,15 @@ Return only JSON with C1, C4, C5, C6, C7, C8, msg1, msg2, msg3, feedback, and co
       const combinedMarkup = combined !== null ? `
         <div class="tsa-speak-combined">
           <h2>Running TSA Score</h2>
-          <div>Part 1: Think Clearly: ${combined} / 40</div>
-          <div>Part 2: Speak Concisely: ${result.score} / 30</div>
+          <div>Part 1: Think clearly: ${combined} / 40</div>
+          <div>Part 2: Speak concisely: ${result.score} / 30</div>
           <div><strong>Running total: ${running} / 70</strong></div>
         </div>
       ` : '';
 
       renderShell(`
         <section class="tsa-speak-score-card">
-          <h1>Your Speak Concisely Score</h1>
+          <h1>Your Speak concisely score</h1>
           <div class="tsa-speak-score">${result.score} / 30</div>
           <div class="tsa-speak-score-rows">
             <div class="tsa-speak-score-row">Message coverage<strong>${result.coverage} / 12</strong></div>
@@ -1342,7 +1342,7 @@ Return only JSON with C1, C4, C5, C6, C7, C8, msg1, msg2, msg3, feedback, and co
           </div>
           <p>${interpretation(result.score)}</p>
           ${combinedMarkup}
-          <p class="tsa-speak-label">Criterion Feedback</p>
+          <p class="tsa-speak-label">Criterion feedback</p>
           <div class="tsa-speak-feedback-grid">
             ${criterionCard('Clear Core Idea', result.raw.C1, result.raw.feedback?.C1)}
             ${criterionCard('Decision Clarity', result.raw.C4, result.raw.feedback?.C4)}
@@ -1353,11 +1353,11 @@ Return only JSON with C1, C4, C5, C6, C7, C8, msg1, msg2, msg3, feedback, and co
           </div>
           ${isCheckpoint ? `<p><strong>Compression:</strong> ${Number(result.raw.compression || 0)}/5. ${escapeHtml(result.raw.compression_feedback || '')}</p>` : ''}
           <p><strong>Overall:</strong> ${escapeHtml(result.raw.feedback?.overall || '')}</p>
-          <p class="tsa-speak-copy-line" id="copyLine" hidden>Speak Concisely\t${result.score}/30\tCoverage: ${result.coverage}/12\tDelivery: ${result.delivery}/9\t${isCheckpoint ? 'Compression' : 'Conciseness'}: ${result.conciseness}/9\tTopic: ${currentTopic.title}\tVersion: ${versionLabel}</p>
+          <p class="tsa-speak-copy-line" id="copyLine" hidden>Speak concisely\t${result.score}/30\tCoverage: ${result.coverage}/12\tDelivery: ${result.delivery}/9\t${isCheckpoint ? 'Compression' : 'Conciseness'}: ${result.conciseness}/9\tTopic: ${currentTopic.title}\tVersion: ${versionLabel}</p>
           <div class="tsa-speak-actions">
-            <button class="tsa-speak-button secondary" id="copyResults" type="button">Copy Results</button>
+            <button class="tsa-speak-button secondary" id="copyResults" type="button">Copy results</button>
             <a class="tsa-speak-link-button secondary" href="${isCheckpoint ? '../tsa-checkpoint/index.html' : '../tsa-diagnostic/index.html'}">← Back to ${isCheckpoint ? 'Checkpoint' : 'Diagnostic'}</a>
-            <a class="tsa-speak-link-button disabled" href="#" title="Coming soon">Continue to Act Confidently →</a>
+            <a class="tsa-speak-link-button disabled" href="#" title="Coming soon">Continue to Act confidently →</a>
           </div>
         </section>
       `);

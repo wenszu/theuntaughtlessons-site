@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Speak Concisely TSA Score placeholder from The Untaught Lessons." />
-  <title>Speak Concisely | TSA Score™</title>
+  <meta name="description" content="Speak concisely TSA Score placeholder from The Untaught Lessons." />
+  <title>Speak concisely | TSA Score™</title>
   <link rel="icon" type="image/png" sizes="32x32" href="../../assets/favicon-bluebg-whitedoor-thicker-32.png?v=6">
   <link rel="shortcut icon" type="image/png" href="../../assets/favicon-bluebg-whitedoor-thicker-32.png?v=6">
   <link rel="apple-touch-icon" sizes="180x180" href="../../assets/apple-touch-icon.png?v=3">
@@ -180,14 +180,14 @@
     <div class="brand-divider" aria-hidden="true"></div>
     <div>
       <span class="app-kicker">TSA Score™ · Part 2</span>
-      <span class="app-title">Speak Concisely</span>
+      <span class="app-title">Speak concisely</span>
     </div>
   </header>
 
   <main class="placeholder-main">
     <section class="placeholder-card">
       <p class="placeholder-label" id="assessmentMode">Diagnostic · Section 2</p>
-      <h1 id="placeholderTitle">Speak Concisely is coming soon.</h1>
+      <h1 id="placeholderTitle">Speak concisely is coming soon.</h1>
       <p id="placeholderPrompt">Loading assessment details...</p>
       <div class="placeholder-actions">
         <a class="placeholder-button" id="backLink" href="../../tsa-score.html">Back to TSA Score</a>
@@ -214,11 +214,11 @@
         const data = await response.json();
         const firstTopic = Array.isArray(data) ? data[0] : null;
         document.getElementById('placeholderPrompt').textContent = firstTopic
-          ? 'This holding page uses the shared Speak Concisely assessment data. Open the active Speak Concisely assessment to complete the exercise.'
-          : 'Speak Concisely assessment details are coming soon.';
+          ? 'This holding page uses the shared Speak concisely assessment data. Open the active Speak concisely assessment to complete the exercise.'
+          : 'Speak concisely assessment details are coming soon.';
       } catch (error) {
         console.error(error);
-        document.getElementById('placeholderPrompt').textContent = 'Speak Concisely assessment details are coming soon.';
+        document.getElementById('placeholderPrompt').textContent = 'Speak concisely assessment details are coming soon.';
       }
     }
 

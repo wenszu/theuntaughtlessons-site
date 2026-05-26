@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="TSA Score™ Spot the Problem diagnostic assessment from The Untaught Lessons." />
-  <title>Spot the Problem | TSA Score™</title>
+  <meta name="description" content="TSA Score™ Spot the problem diagnostic assessment from The Untaught Lessons." />
+  <title>Spot the problem | TSA Score™</title>
   <link rel="icon" type="image/png" sizes="32x32" href="../../assets/favicon-bluebg-whitedoor-thicker-32.png?v=6">
   <link rel="shortcut icon" type="image/png" href="../../assets/favicon-bluebg-whitedoor-thicker-32.png?v=6">
   <link rel="apple-touch-icon" sizes="180x180" href="../../assets/apple-touch-icon.png?v=3">
@@ -714,7 +714,7 @@
     <div class="tsa-stp-divider" aria-hidden="true"></div>
     <div>
       <span class="tsa-stp-kicker">TSA Score™</span>
-      <span class="tsa-stp-title">Spot the Problem</span>
+      <span class="tsa-stp-title">Spot the problem</span>
     </div>
   </header>
 
@@ -837,7 +837,7 @@
         <section class="tsa-stp-panel">
           <div class="tsa-stp-panel-head">
             <h2>Loading assessment...</h2>
-            <p>Preparing the Spot the Problem exercise.</p>
+            <p>Preparing the Spot the problem exercise.</p>
           </div>
         </section>
       `;
@@ -865,7 +865,7 @@
       const response = await fetch(DATA_URL);
       if (!response.ok) throw new Error(`Unable to load ${DATA_URL}`);
       const data = await response.json();
-      if (!Array.isArray(data) || !data.length) throw new Error('Spot the Problem data is empty.');
+      if (!Array.isArray(data) || !data.length) throw new Error('Spot the problem data is empty.');
       sets = data;
       selectedPartA = pickRandom(sets.map((set, index) => index), Math.min(3, sets.length));
       selectedPartB = pickRandom(sets.map((set, index) => index), Math.min(3, sets.length));
@@ -948,8 +948,8 @@
       app.innerHTML = `
         <section class="tsa-stp-intro">
           <div>
-            <p class="tsa-stp-label">Think Clearly · Exercise B</p>
-            <h1>Spot the Problem</h1>
+            <p class="tsa-stp-label">Think clearly · Exercise B</p>
+            <h1>Spot the problem</h1>
             <p>Find structural problems in grouped information. First remove duplicate ideas. Then add the missing items where they belong.</p>
           </div>
         </section>
@@ -1187,7 +1187,7 @@
       sessionStorage.setItem(SPOT_SCORE_KEY, JSON.stringify(storagePayload));
       localStorage.setItem(SPOT_SCORE_KEY, JSON.stringify(storagePayload));
       import('../../assets/firebase.js')
-        .then(({ saveUserProgress }) => saveUserProgress(SPOT_SCORE_KEY, `TSA Spot the Problem (${assessmentMode})`, storagePayload))
+        .then(({ saveUserProgress }) => saveUserProgress(SPOT_SCORE_KEY, `TSA Spot the problem (${assessmentMode})`, storagePayload))
         .catch((error) => console.warn('Firestore progress save failed.', error));
       showScore();
     }
@@ -1235,8 +1235,8 @@
         ? `Exercise A: Sort & Bucket: ${formatScore(sortScore.score)} / 20`
         : 'Exercise A: Sort & Bucket: Not completed yet';
       const combinedLine = combined !== null
-        ? `Think Clearly Total: ${formatScore(combined)} / 40 (${Math.round((combined / 40) * 100)}%)`
-        : 'Think Clearly Total: Complete Sort & Bucket to see your full Part 1 score.';
+        ? `Think clearly Total: ${formatScore(combined)} / 40 (${Math.round((combined / 40) * 100)}%)`
+        : 'Think clearly Total: Complete Sort & Bucket to see your full Part 1 score.';
       const subject = 'Your The Untaught Lessons TSA Score results';
       const siteRoot = 'https://theuntaughtlessons.com';
       const body = [
@@ -1246,9 +1246,9 @@
         `Name: ${participantName()}`,
         '',
         sortLine,
-        `Exercise B: Spot the Problem: ${formatScore(spotTotal)} / 20`,
-        `  Part A: Find the Overlaps: ${formatScore(state.scores.partA)} / 10`,
-        `  Part B: Fix the Gaps: ${formatScore(state.scores.partB)} / 10`,
+        `Exercise B: Spot the problem: ${formatScore(spotTotal)} / 20`,
+        `  Part A: Find the overlaps: ${formatScore(state.scores.partA)} / 10`,
+        `  Part B: Fix the gaps: ${formatScore(state.scores.partB)} / 10`,
         '',
         combinedLine,
         '',
@@ -1281,52 +1281,52 @@
       }).join('<br>');
       const combinedMarkup = sortScore ? `
         <div class="tsa-stp-combined">
-          <h2>Think Clearly Scorecard</h2>
+          <h2>Think clearly Scorecard</h2>
           <div class="tsa-stp-score-rows">
             <div class="tsa-stp-score-row">Exercise A · Sort &amp; Bucket<br><strong>${formatScore(sortScore.score)} / 20</strong></div>
-            <div class="tsa-stp-score-row">Exercise B · Spot the Problem<br><strong>${formatScore(total)} / 20</strong></div>
+            <div class="tsa-stp-score-row">Exercise B · Spot the problem<br><strong>${formatScore(total)} / 20</strong></div>
           </div>
-          <div class="tsa-stp-score-row">Think Clearly Total<br><strong>${formatScore(combined)} / 40 · ${Math.round((combined / 40) * 100)}%</strong></div>
+          <div class="tsa-stp-score-row">Think clearly Total<br><strong>${formatScore(combined)} / 40 · ${Math.round((combined / 40) * 100)}%</strong></div>
         </div>
       ` : '';
 
       renderShell(`
         <section class="tsa-stp-score-card">
-          <h1>Your Spot the Problem Score</h1>
+          <h1>Your Spot the problem score</h1>
           <div class="tsa-stp-score-summary">
             <div class="tsa-stp-score-tile featured">
               <span class="tile-label">Exercise B</span>
-              <span class="tile-title">Spot the Problem</span>
+              <span class="tile-title">Spot the problem</span>
               <span class="tile-score">${formatScore(total)} / 20</span>
               <span class="tile-detail">${interpretation(total)}</span>
             </div>
             <div class="tsa-stp-score-rows">
               <div class="tsa-stp-score-tile">
                 <span class="tile-label">Exercise B · Part A</span>
-                <span class="tile-title">Find the Overlaps</span>
+                <span class="tile-title">Find the overlaps</span>
                 <span class="tile-score">${formatScore(state.scores.partA)} / 10</span>
               </div>
               <div class="tsa-stp-score-tile">
                 <span class="tile-label">Exercise B · Part B</span>
-                <span class="tile-title">Fix the Gaps</span>
+                <span class="tile-title">Fix the gaps</span>
                 <span class="tile-score">${formatScore(state.scores.partB)} / 10</span>
               </div>
             </div>
           </div>
-          <p class="tsa-stp-label">Answer Reveal</p>
+          <p class="tsa-stp-label">Answer reveal</p>
           <p class="tsa-stp-answer"><strong>Part A overlaps:</strong><br>${overlapReveal}</p>
           <p class="tsa-stp-answer"><strong>Part B missing items:</strong><br>${gapReveal}</p>
           ${combinedMarkup}
           <div class="tsa-stp-score-actions">
-            <button class="tsa-stp-secondary" id="copyResults" type="button">Copy Results</button>
-            <button class="tsa-stp-secondary" id="emailResults" type="button">Email Results</button>
+            <button class="tsa-stp-secondary" id="copyResults" type="button">Copy results</button>
+            <button class="tsa-stp-secondary" id="emailResults" type="button">Email results</button>
             <a class="tsa-stp-primary" href="../tsa-checkpoint/index.html">Back to Checkpoint</a>
           </div>
         </section>
       `);
 
       document.getElementById('copyResults').addEventListener('click', async event => {
-        let line = `Spot the Problem\t${formatScore(total)}/20\tPart A: ${formatScore(state.scores.partA)}/10\tPart B: ${formatScore(state.scores.partB)}/10\tSets: ${selectedPartA.map(setIndex => sets[setIndex].partA.topic).join(', ')} + ${selectedPartB.map(setIndex => sets[setIndex].partB.topic).join(', ')}`;
+        let line = `Spot the problem\t${formatScore(total)}/20\tPart A: ${formatScore(state.scores.partA)}/10\tPart B: ${formatScore(state.scores.partB)}/10\tSets: ${selectedPartA.map(setIndex => sets[setIndex].partA.topic).join(', ')} + ${selectedPartB.map(setIndex => sets[setIndex].partB.topic).join(', ')}`;
         if (combined !== null) line += `\tPart 1 Total: ${combined}/40`;
         await navigator.clipboard.writeText(line);
         event.target.textContent = 'Copied';
