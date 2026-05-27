@@ -3197,6 +3197,8 @@
       var displayRole = (data.role === 'member' ? 'user' : data.role) || 'user';
       var status = data.status || 'active';
       return '<div class="mb-edit-grid">' +
+        '<div class="mb-edit-field"><label>Name</label>' +
+          '<input type="text" data-mb-ef="name" value="' + escapeHtml(data.name || '') + '" placeholder="Member name"></div>' +
         '<div class="mb-edit-field"><label>Role</label>' +
           '<select data-mb-ef="role">' +
             '<option value="user"' + (displayRole === 'user' ? ' selected' : '') + '>user</option>' +
