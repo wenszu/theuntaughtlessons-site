@@ -17,6 +17,7 @@
       --charcoal: #4A4A4A;
       --white: #FFFFFF;
       --line: #e0d8cd;
+      --steel: #4D7094;
     }
 
     * { box-sizing: border-box; }
@@ -869,6 +870,96 @@
     .score-increase { color: #0F6E56; font-weight: 500; }
     .score-decrease { color: #993C1D; font-weight: 500; }
 
+    /* Redesign: Stage-based Summary / Accordion */
+    .results-accordion-list {
+      display: grid;
+      gap: 12px;
+      margin-bottom: 2rem;
+    }
+
+    .results-accordion {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      overflow: hidden;
+      background: var(--white);
+      box-shadow: 0 4px 12px rgba(0, 51, 102, .03);
+    }
+
+    .results-accordion-head {
+      width: 100%;
+      padding: 1.15rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--white);
+      border: none;
+      cursor: pointer;
+      text-align: left;
+      transition: background .15s ease;
+    }
+
+    .results-accordion-head:hover {
+      background: #FAF9F6;
+    }
+
+    .results-accordion-title-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .results-accordion-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--navy);
+      margin: 0;
+    }
+
+    .results-accordion-summary {
+      font-size: 10px;
+      color: var(--steel);
+      font-family: 'Roboto Mono', monospace;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+
+    .results-accordion-icon {
+      width: 28px;
+      height: 28px;
+      background: var(--gold);
+      color: var(--white);
+      border-radius: 6px;
+      display: grid;
+      place-items: center;
+      font-weight: 700;
+      font-size: 18px;
+    }
+
+    .results-accordion-body {
+      display: none;
+      padding: 0 1.5rem 1.5rem;
+      border-top: 1px solid var(--line);
+    }
+
+    .results-accordion.is-open .results-accordion-body {
+      display: block;
+    }
+
+    .video-progress-section { margin: 1.5rem 0 2rem; }
+    .video-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; margin-top: 10px; }
+    .video-tile { padding: 10px; background: var(--cream); border-radius: 8px; border: 1px solid transparent; display: flex; flex-direction: column; gap: 6px; font-size: 11px; color: var(--charcoal); text-decoration: none; }
+    .video-tile.is-watched { background: var(--white); border-color: #E1F5EE; }
+    .video-status-row { display: flex; align-items: center; justify-content: space-between; }
+    .video-status-check { width: 16px; height: 16px; border-radius: 50%; background: var(--parchment); display: grid; place-items: center; font-size: 9px; color: var(--white); }
+    .video-tile.is-watched .video-status-check { background: #0F6E56; }
+    .video-title { font-weight: 700; line-height: 1.3; min-height: 28px; color: var(--navy); }
+    .video-link { color: var(--gold); font-weight: 700; font-size: 9px; text-transform: uppercase; letter-spacing: .04em; margin-top: auto; }
+
+    .exercise-section-header { margin-bottom: 12px; display: flex; align-items: center; gap: 8px; border-bottom: .5px solid var(--line); padding-bottom: 6px; }
+    .exercise-section-header h4 { font-family: 'Roboto Mono', monospace; font-size: 10px; color: var(--gold); text-transform: uppercase; letter-spacing: .08em; margin: 0; }
+    .exercise-list { display: grid; gap: 8px; }
+
     .results-actions-row {
       display: grid;
       grid-template-columns: minmax(0, 1fr) minmax(260px, 340px);
@@ -1085,9 +1176,7 @@
                 <a href="../member-login/phase-3.html#exercises"><span class="results-menu-icon">✎</span><span><strong>Practice the exercises</strong><small>4 exercises</small></span></a>
               </span>
             </span>
-            <span class="nav-sep">|</span>
-            <a href="../member-login/index.html#assessments" class="nav-item nav-item-results" data-assessment-nav>Assessments</a>
-          </div>
+            <a href="../member-login/index.html#assessments" class="nav-item nav-item-results" data-assessment-nav>Assessments</a>          </div>
         </div>
       </div>
     </nav>
@@ -1111,10 +1200,6 @@
             <span class="results-profile-section-label">Your space</span>
             <a href="../my-results/index.html"><span class="results-profile-icon">▦</span><span>My results</span></a>
             <a href="../apps/toolkit/index.html"><span class="results-profile-icon">⌂</span><span>Toolkit</span></a>
-          </div>
-          <div class="results-profile-section" id="adminProfileSection" hidden>
-            <span class="results-profile-section-label">Admin</span>
-            <a href="../admin/index.html"><span class="results-profile-icon">☼</span><span>Admin console</span></a>
           </div>
           <div class="results-profile-section">
             <button type="button" id="profileLogout"><span class="results-profile-icon">↪</span><span>Log out</span></button>
@@ -1145,10 +1230,7 @@
       <div class="phase-progress-list" id="phase-progress-list"></div>
     </div>
 
-    <section class="results-section" id="phase1Results"></section>
-    <section class="results-section" id="phase2Results"></section>
-    <section class="results-section" id="phase3Results"></section>
-    <section class="results-section" id="assessmentResults"></section>
+    <div class="results-accordion-list" id="resultsAccordions"></div>
 
     <div class="results-actions-row">
       <div class="results-actions-left">
@@ -1168,8 +1250,6 @@
     </div>
 
     <footer class="results-footer">
-      <a href="../member-login/index.html" class="results-back-link">← Back to workspace</a>
-      <span class="results-footer-sep" aria-hidden="true">|</span>
       <a href="../index.html" class="results-back-link">Back to main site</a>
     </footer>
   </main>
@@ -1193,6 +1273,32 @@
       { id: 'lets-switch-hats', phase: 3, number: 3, doneKey: 'utl_p3_ex3_done', name: "Let's switch hats", path: '../apps/lets-switch-hats/index.html' },
       { id: 'speak-like-obama', phase: 3, number: 4, doneKey: 'utl_p3_ex4_done', name: 'Speak like Obama', path: '../apps/speak-like-obama/index.html' }
     ];
+
+    const LESSONS = {
+      orientation: [
+        { id: "orientation-welcome", title: "Welcome", path: "../member-login/index.html" },
+        { id: "orientation-howto", title: "How this program works", path: "../member-login/index.html" }
+      ],
+      phase1: [
+        { id: "p1-welcome-ma", title: "Welcome to MA", path: "../member-login/phase-1.html" },
+        { id: "p1-l1", title: "KonMari for the mind", path: "../member-login/phase-1.html" },
+        { id: "p1-l2", title: "Rule of three", path: "../member-login/phase-1.html" },
+        { id: "p1-l3", title: "Bolded summary phrase", path: "../member-login/phase-1.html" }
+      ],
+      phase2: [
+        { id: "p1-l4", title: "What's the problem?", path: "../member-login/phase-2.html" },
+        { id: "p1-l5", title: "Divide and conquer", path: "../member-login/phase-2.html" },
+        { id: "p2-l1", title: "The executive storyline", path: "../member-login/phase-2.html" },
+        { id: "p2-l3", title: "The art of persuasion", path: "../member-login/phase-2.html" }
+      ],
+      phase3: [
+        { id: "p3-l1", title: "How to read people", path: "../member-login/phase-3.html" },
+        { id: "p3-l2", title: "Let's switch hats", path: "../member-login/phase-3.html" },
+        { id: "p3-l3", title: "Speak like Obama", path: "../member-login/phase-3.html" },
+        { id: "p3-l4", title: "The art of saying no", path: "../member-login/phase-3.html" },
+        { id: "p3-l5", title: "I have bad news...", path: "../member-login/phase-3.html" }
+      ]
+    };
 
     const ASSESSMENTS = [
       { key: 'utl_result_tsa_diagnostic', name: 'The diagnostic', path: '../apps/tsa-diagnostic/index.html' },
@@ -1275,7 +1381,6 @@
       const profileMenuAvatar = document.getElementById('profileMenuAvatar');
       const profileMenuName = document.getElementById('profileMenuName');
       const profileMenuRole = document.getElementById('profileMenuRole');
-      const adminProfileSection = document.getElementById('adminProfileSection');
       if (!memberIdentity || !memberAvatar || !memberEmail) return;
 
       const profile = getStoredMemberProfile();
@@ -1305,7 +1410,6 @@
 
       if (profileMenuName) profileMenuName.textContent = displayName;
       if (profileMenuRole) profileMenuRole.textContent = role;
-      if (adminProfileSection) adminProfileSection.hidden = role !== 'Administrator';
       memberIdentity.hidden = false;
     }
 
@@ -1472,42 +1576,102 @@
       }).join('');
     }
 
-    function renderAssessments() {
-      const diagnostic = readKey('utl_result_tsa_diagnostic');
-      const checkpoint = readKey('utl_result_tsa_checkpoint');
-      const mount = document.getElementById('assessmentResults');
-      let body = '';
-      if (!diagnostic && !checkpoint) {
-        body = '<div class="ex-result-card ex-result-pending"><div class="ex-pending-msg">Your TSA Score™ assessments will appear here once you complete the diagnostic or the checkpoint. Both are optional.</div></div>';
-      } else {
-        body = ASSESSMENTS.map((assessment) => {
-          const record = readKey(assessment.key);
-          if (!record) {
-            return `<div class="ex-result-card ex-result-pending"><div class="ex-result-header"><div><div class="ex-result-title">${assessment.name}</div><div class="ex-result-meta">Not yet taken</div></div><span class="ex-badge-pending">Pending</span></div><a class="take-now-link" href="${assessment.path}">Take now →</a></div>`;
-          }
-          const score = record.score ?? record.response?.score ?? record.response?.percentage;
-          return `<div class="ex-result-card"><div class="ex-result-header"><div><div class="ex-result-title">${assessment.name}</div><div class="ex-result-meta">Completed ${formatDate(record.completed_at)}</div></div><span class="ex-badge-done">Done</span></div>${score !== undefined ? `<div class="ex-result-preview">Your score: ${score}%</div>` : ''}</div>`;
-        }).join('');
-        if (diagnostic && checkpoint) {
-          const dScore = Number(diagnostic.score ?? diagnostic.response?.score ?? 0);
-          const cScore = Number(checkpoint.score ?? checkpoint.response?.score ?? 0);
-          const delta = cScore - dScore;
-          body += `<div class="before-after-row">Diagnostic: ${dScore}% → Checkpoint: ${cScore}% · <span class="${delta >= 0 ? 'score-increase' : 'score-decrease'}">${delta >= 0 ? '+' : ''}${delta} points</span></div>`;
-        }
-      }
-      mount.innerHTML = `<div class="assessment-section-header"><div><div class="results-section-label">TSA Score™</div><div class="assessment-section-title">Your assessment</div></div></div>${body}`;
+    function renderVideoGrid(phaseKey) {
+      const lessons = LESSONS[phaseKey] || [];
+      if (!lessons.length) return '';
+      const tiles = lessons.map(lesson => {
+        const watched = localStorage.getItem('utl_watched_' + lesson.id) === 'true';
+        return `<a href="${lesson.path}" class="video-tile ${watched ? 'is-watched' : ''}"><div class="video-status-row"><span class="video-status-check">✓</span></div><div class="video-title">${lesson.title}</div><span class="video-link">${watched ? 'Watch again' : 'Watch now'} &rarr;</span></a>`;
+      }).join('');
+      return `<div class="video-progress-section"><div class="exercise-section-header"><h4>Learning: Watch lessons</h4></div><div class="video-grid">${tiles}</div></div>`;
     }
 
-    function renderPhase(targetId, phase, title) {
-      const apps = APPS.filter((app) => app.phase === phase);
+    function getSummary(key) {
+      if (key === 'assessment') {
+        const done = ASSESSMENTS.filter(a => readKey(a.key)).length;
+        return `${done}/${ASSESSMENTS.length} Completed`;
+      }
+      const lessons = LESSONS[key] || [];
+      const watched = lessons.filter(l => localStorage.getItem('utl_watched_' + l.id) === 'true').length;
+      if (key === 'orientation') {
+        const tasks = localStorage.getItem('utl_orientation_ready') === 'true' ? 1 : 0;
+        return `${watched}/${lessons.length} Videos · ${tasks}/1 Tasks`;
+      }
+      const pNum = key.replace('phase', '');
+      const apps = APPS.filter(a => a.phase == pNum);
       const done = apps.filter(isComplete).length;
-      const body = apps.length
-        ? apps.map((app) => {
-            const record = resultFor(app.id);
-            return isComplete(app) ? completedCard(app, record) : pendingCard(app);
-          }).join('')
-        : '<div class="ex-result-card ex-result-pending"><div class="ex-result-meta" style="font-style:italic">Exercises for Phase 3 are coming soon.</div></div>';
-      document.getElementById(targetId).innerHTML = `<div class="results-section-header"><div><div class="results-section-label">Phase ${phase}</div><div class="results-section-title">${title}</div></div><div class="results-section-count">${done} of ${apps.length} done</div></div>${body}`;
+      return `${watched}/${lessons.length} Videos · ${done}/${apps.length} Exercises`;
+    }
+
+    function renderAccordion(id, title, summary, content) {
+      const isOpen = localStorage.getItem('utl_results_open_' + id) === 'true';
+      return `<div class="results-accordion ${isOpen ? 'is-open' : ''}" id="accordion-${id}">
+        <button class="results-accordion-head" onclick="toggleAccordion('${id}')">
+          <div class="results-accordion-title-wrap">
+            <h3 class="results-accordion-title">${title}</h3>
+            <span class="results-accordion-summary">${summary}</span>
+          </div>
+          <span class="results-accordion-icon">${isOpen ? '&minus;' : '+'}</span>
+        </button>
+        <div class="results-accordion-body">${content}</div>
+      </div>`;
+    }
+
+    window.toggleAccordion = function(id) {
+      const el = document.getElementById('accordion-' + id);
+      if (!el) return;
+      const isOpen = el.classList.toggle('is-open');
+      const icon = el.querySelector('.results-accordion-icon');
+      if (icon) icon.innerHTML = isOpen ? '&minus;' : '+';
+      localStorage.setItem('utl_results_open_' + id, isOpen);
+    };
+
+    function renderAllSections() {
+      const mount = document.getElementById('resultsAccordions');
+      let html = '';
+
+      // 1. Orientation
+      const orientContent = renderVideoGrid('orientation') + `<div class="exercise-progress-section"><div class="exercise-section-header"><h4>Activity</h4></div><div class="ex-result-card ${localStorage.getItem('utl_orientation_ready') === 'true' ? '' : 'ex-result-pending'}"><div class="ex-result-header"><div><div class="ex-result-title">Onboarding Readiness</div><div class="ex-result-meta">${localStorage.getItem('utl_orientation_ready') === 'true' ? 'Confirmed' : 'Not yet confirmed'}</div></div><span class="${localStorage.getItem('utl_orientation_ready') === 'true' ? 'ex-badge-done' : 'ex-badge-pending'}">${localStorage.getItem('utl_orientation_ready') === 'true' ? 'Ready' : 'Pending'}</span></div></div></div>`;
+      html += renderAccordion('orientation', 'Home & Orientation', getSummary('orientation'), orientContent);
+
+      // 2. Phases
+      const phases = [
+        { key: 'phase1', title: 'Phase 1: Think clearly' },
+        { key: 'phase2', title: 'Phase 2: Speak concisely' },
+        { key: 'phase3', title: 'Phase 3: Act confidently' }
+      ];
+      phases.forEach(p => {
+        const pNum = p.key.replace('phase', '');
+        const pApps = APPS.filter(a => a.phase == pNum);
+        const exContent = pApps.map(app => {
+          const record = resultFor(app.id);
+          return isComplete(app) ? completedCard(app, record) : pendingCard(app);
+        }).join('');
+        const content = renderVideoGrid(p.key) + `<div class="exercise-progress-section"><div class="exercise-section-header"><h4>Applying: Exercises</h4></div><div class="exercise-list">${exContent}</div></div>`;
+        html += renderAccordion(p.key, p.title, getSummary(p.key), content);
+      });
+
+      // 3. Assessments
+      const diag = readKey('utl_result_tsa_diagnostic');
+      const check = readKey('utl_result_tsa_checkpoint');
+      let assBody = ASSESSMENTS.map((assessment) => {
+        const record = readKey(assessment.key);
+        if (!record) {
+          return `<div class="ex-result-card ex-result-pending"><div class="ex-result-header"><div><div class="ex-result-title">${assessment.name}</div><div class="ex-result-meta">Not yet taken</div></div><span class="ex-badge-pending">Pending</span></div><a class="take-now-link" href="${assessment.path}">Take now →</a></div>`;
+        }
+        const score = record.score ?? record.response?.score ?? record.response?.percentage;
+        return `<div class="ex-result-card"><div class="ex-result-header"><div><div class="ex-result-title">${assessment.name}</div><div class="ex-result-meta">Completed ${formatDate(record.completed_at)}</div></div><span class="ex-badge-done">Done</span></div>${score !== undefined ? `<div class="ex-result-preview">Your score: ${score}%</div>` : ''}</div>`;
+      }).join('');
+      if (diag && check) {
+        const dScore = Number(diag.score ?? diag.response?.score ?? 0);
+        const cScore = Number(check.score ?? check.response?.score ?? 0);
+        const delta = cScore - dScore;
+        assBody += `<div class="before-after-row">Diagnostic: ${dScore}% → Checkpoint: ${cScore}% · <span class="${delta >= 0 ? 'score-increase' : 'score-decrease'}">${delta >= 0 ? '+' : ''}${delta} points</span></div>`;
+      }
+      const assContent = `<div class="exercise-progress-section"><div class="exercise-section-header"><h4>TSA Score™ Assessments</h4></div><div class="exercise-list">${assBody}</div></div>`;
+      html += renderAccordion('assessment', 'TSA Score™ assessments', getSummary('assessment'), assContent);
+
+      mount.innerHTML = html;
     }
 
     function copyToWorkbook(appId) {
@@ -1720,10 +1884,7 @@
     bindProfileMenu();
     applyAssessmentNavVisibility();
     renderProgress();
-    renderAssessments();
-    renderPhase('phase1Results', 1, 'Think clearly');
-    renderPhase('phase2Results', 2, 'Speak concisely');
-    renderPhase('phase3Results', 3, 'Act confidently');
+    renderAllSections();
     populateRecipientField();
     applySendInstructorStatus();
     window.addEventListener('storage', (event) => {

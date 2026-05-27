@@ -1,11 +1,171 @@
 # The Untaught Lessons Website Context
 
-Last updated: 2026-05-24
-Primary purpose: Living implementation and design reference for The Untaught Lessons static website and practice apps.
+Last updated: 2026-05-30
+Primary purpose: Shared implementation memory and operating guide for The Untaught Lessons website.
 
-Use this file when referencing the site with other tools. It should be updated whenever pages, apps, visual rules, navigation, routing, forms, or core functionality change.
+This file is the single source of truth for agents working on this repo. Codex, Claude, Gemini, and any future assistant should read it before making website changes and update it whenever the shape of the site changes.
+
+## How To Use This File
+
+Read this file in this order:
+
+1. `Working Rules`: How to behave in the repo.
+2. `Git and Deployment Rules`: How to commit, push, and deploy.
+3. `Site Overview`: What the site is and how it runs.
+4. `Current Implementation Notes`: Current architecture decisions.
+5. `Known Notes`: Active limitations and pending decisions.
+6. Relevant sections in `Page Map`, `App Map`, `Firebase Member System`, or `Exercise Data Architecture`.
+7. `Change Log`: Historical context only. Do not rely on the changelog instead of the current-state sections above.
+
+## Working Rules
+
+Before changing the website:
+
+- Read this file first.
+- Also follow `context/brand.md` for brand and design rules.
+- If editing prose, follow `context/voice-editor.md`.
+- Keep changes minimal and implementation-focused unless the user explicitly asks for a redesign.
+- Preserve the static HTML/CSS/JavaScript architecture unless the user explicitly approves a backend, build step, framework, or package manager.
+- Prefer existing patterns in `styles.css`, page-local CSS, `member-login/content-config.js`, and existing app files before adding a new abstraction.
+- Do not overwrite unrelated user changes.
+- Do not remove legacy localStorage compatibility keys unless the user explicitly approves it.
+- Do not change practice app logic unless the task explicitly asks for it or the change is required to fix the requested behavior.
+- Check mobile layouts around 375px and 768px when making meaningful UI changes.
+- Update this file in the same work session when pages, apps, data structures, auth behavior, deployment notes, admin workflows, or major design rules change.
+
+Related context files:
+
+- `context/brand.md`: Brand and visual rules. Treat this as required for design/UI work.
+- `context/voice-editor.md`: Wen-Szu writing and editing voice.
+- `context/claude.md`: Short Claude-specific reminder that points back to the brand rules.
+
+## Git and Deployment Rules
+
+The user prefers careful, explicit Git handling.
+
+- Do not commit or push unless the user asks to save, commit, push, upload to Git, upload to GitHub, publish a branch, or similar.
+- When the user asks to upload to Git/GitHub, use the current branch unless they specify another branch.
+- First run `git status --short --branch`.
+- Inspect the changed files before staging.
+- Stage only files relevant to the requested website change. Do not stage `.DS_Store`, local debug files, or unrelated edits.
+- Use a concise commit message that describes the actual site change. If the message is not obvious, ask the user.
+- Push to `origin` after committing. If the branch has no upstream, push with upstream tracking.
+- Do not deploy to Firebase Hosting or any other host just because the user asked to upload to GitHub. Treat deployment as a separate explicit request.
+- If the user asks to deploy, inspect `firebase.json` first and confirm the intended target. This repo is configured for Firebase Hosting with public root `"."`.
+- `WEBSITE_CONTEXT.md`, `context/**`, `csv/**`, and `scripts/**` are ignored by Firebase Hosting in `firebase.json`, so documentation and developer-only files can be committed without being published to the live site.
+- Never use destructive Git commands such as `git reset --hard` or `git checkout --` unless the user clearly asks for that exact operation.
+
+GitHub remote:
+
+```text
+origin https://github.com/wenszu/theuntaughtlessons-site.git
+```
+
+Static preview should use:
+
+```text
+http://127.0.0.1:8061/
+```
+
+Typical local server command:
+
+```bash
+python3 -m http.server 8061 --bind 127.0.0.1
+```
+
+## Maintenance Rules
+
+Update this file when a change affects future work. Do not record every tiny CSS adjustment, but do record anything another agent would need in order to avoid confusion.
+
+Update these sections as needed:
+
+- `Last updated`: Set to the absolute date of the latest meaningful context update.
+- `Change Log`: Add a dated entry with concise implementation facts.
+- `Page Map`: Add, rename, or remove public/member pages.
+- `App Map`: Add, rename, remove, or materially change practice apps.
+- `Firebase Member System`: Update auth, Firestore, invite, role, or emulator behavior.
+- `Exercise Data Architecture`: Update JSON/CSV/script workflow or schemas.
+- `LocalStorage Admin Keys`: Add or remove browser storage keys used by the site.
+- `Known Notes`: Record current limitations, pending decisions, and browser-local vs shared-production behavior.
+- `Git and Deployment Rules`: Update only when the user explicitly changes their workflow preference.
+
+Writing rules for this file:
+
+- Prefer current-state facts over vague history.
+- Use absolute dates.
+- Name exact files and keys.
+- Keep instructions practical enough that another model can act without chat history.
+- Do not store secrets, private credentials, or one-time tokens here.
 
 ## Change Log
+
+### 2026-05-27
+
+- Wired the visible Admin Console at `admin/index.html` to render the top-level tabs: Site & Content, Student Progress, and Member Management.
+- The Admin Console keeps the existing sidebar and section design, but sidebar items are now scoped to the active top-level tab.
+- Added `section-student-progress` in `admin/index.html` with a Firestore-backed progress table using `getAllMemberWorkspaceProgress()`.
+- Student Progress refresh now shows loading, failure, and last-refreshed states. The Firebase helper returns authorized members even when they do not yet have saved progress.
+- Moved the existing Members and Passwords sections into the Member Management tab.
+- Removed the redundant `The Untaught Lessons` kicker above the left-pane Admin title.
+- Restored the admin profile control in the top-right sticky admin bar, including profile details, member workspace/My results links, and Log out.
+- Updated `firestore.rules` so admins can read `users/{userId}` and `users/{userId}/completed_exercises/{exerciseId}` for the Student Progress dashboard.
+- Important implementation note: a previous tabbed Admin Console attempt exists in `member-login/content-config.js`, but the page loaded at `/admin/index.html` does not use that renderer. The canonical admin surface is `admin/index.html`.
+
+### 2026-05-27
+
+- Fixed Admin Console tab content rendering and event binding. The `bindAdminContentManager()` function now correctly applies event listeners for the content management tab, ensuring interactive elements work as expected.
+- Restored the "Assessments" link in `my-results/index.html` navigation, which was inadvertently removed.
+
+### 2026-05-27
+- Implemented a tabbed interface for the Admin Console (`/admin/index.html`).
+- Added a new "Student Progress" tab with a high-level table view of all members.
+- The table displays member name/email, last active date, and dot indicators for video and exercise completion across Orientation, Phase 1, Phase 2, Phase 3, and Assessments.
+- Added a new Firebase function `getAllMemberWorkspaceProgress()` to fetch data for the student progress table.
+- Renamed `adminAccordionHtml()` to `renderContentManagerTabHtml()` and created `renderMemberManagementTabHtml()` as a placeholder.
+- Removed the vertical separator ("|") between Phase 3 and Assessments in the "My Results" navigation bar.
+- Removed the "Admin console" link from the "My Results" page navigation and profile menu to keep the learner record focused and uncluttered.
+
+### 2026-05-27
+
+- Redesigned "My Results" page (`/my-results/index.html`) to use a stage-based summary model.
+- Added collapsible accordion sections for Orientation/Home, Phase 1, Phase 2, Phase 3, and TSA Assessments.
+- Added video viewing progress tracking per section, mirroring the workspace lessons.
+- Exercises are now grouped within their respective stages, clearly distinguishing between "Learning" (videos) and "Applying" (exercises).
+
+### 2026-05-27
+
+- Updated member practice apps (starting with Write to Aiko) to remove automated email triggers via Apps Script.
+- Switched to a "learner-controlled submission" model: data is saved to Firestore and LocalStorage automatically upon completion, but emails are only sent when requested from the "My Results" dashboard.
+
+### 2026-05-27
+
+- Reworked the top of this file into an operating guide for Codex, Claude, Gemini, and future tools.
+- Added `How To Use This File`, `Working Rules`, `Git and Deployment Rules`, and `Maintenance Rules` so the file can be used without prior chat history.
+- Added explicit Git/GitHub preference: only commit/push when asked, stage only relevant files, push the current branch to `origin`, and do not deploy unless separately requested.
+- Added Firebase/member management notes from recent work so the context file no longer stops at the 2026-05-24 localStorage-only member workspace state.
+
+### 2026-05-26
+
+- Added Firebase-backed member authorization and progress support in `assets/firebase.js`.
+- Added Firestore collections and rules for:
+  - `authorized_members`
+  - `access_requests`
+  - `users/{userId}`
+  - `users/{userId}/completed_exercises/{exerciseId}`
+- Added Google sign-in and passwordless invite helpers through Firebase Auth.
+- Member login now supports Google sign-in for authorized members while preserving the local test accounts `admin/password123` and `testuser/member2026`.
+- Unauthorized Google accounts are signed out and shown an active-membership invite error outside local emulator mode.
+- Added first-login / missing-name prompt in the member workspace so members can set a preferred display name.
+- Added admin-only member management to `admin/index.html`:
+  - Add member with name, email, role, status, and Google Group Added flag.
+  - Edit member name, role, status, and Google Group Added flag.
+  - Remove member records.
+  - Send passwordless login invites.
+  - View invite log for the current admin session.
+- Added `GOOGLE_GROUP_SETUP.md` documenting the manual Google Group workflow used to grant Drive-folder access to members. The admin field `googleGroupAdded` is a manual record only; it does not currently add/remove users from Google Groups.
+- Added Firebase local emulator support when `localStorage.utl_use_firebase_emulators` is `"true"` or the URL includes `?emulators=true`.
+- Updated member workspace nav/profile behavior to use Firebase profile/member data when available, with admin access granted by `authorized_members` role `admin` or `owner`.
+- Added a `Name` field to the admin member edit form.
 
 ### 2026-05-24
 
@@ -363,44 +523,20 @@ Use this file when referencing the site with other tools. It should be updated w
 - Added member login landing page access to practice apps.
 - Added logo and favicon consistency across app pages.
 
-## Update Protocol
-
-When the site changes, update this file in the same work session.
-
-Update these sections as needed:
-
-- `Change Log`: Add the date and a concise list of meaningful changes.
-- `Page Map`: Add, rename, or remove public pages.
-- `App Map`: Add, rename, or remove practice apps.
-- `Design System`: Update fonts, colors, logos, favicon, spacing, card styles, or shared UI patterns.
-- `Functionality`: Update timers, forms, login gating, scoring, app interactions, or routing.
-- `Known Notes`: Add current limitations, placeholder states, or decisions that future tools should respect.
-
-Use absolute dates in the change log. Keep entries practical and implementation-focused.
-
 ## Site Overview
 
 The Untaught Lessons is a static HTML, CSS, and JavaScript website for teaching practical skills around thinking clearly, speaking concisely, and acting confidently.
 
 The site is intentionally lightweight:
 
-- No backend code in the repo.
+- No custom backend application code in the repo.
 - No npm packages.
 - No build process.
 - No framework.
 - Pages run directly in the browser through static hosting.
+- Firebase Auth and Firestore are used from the browser for member authorization, member management, and progress persistence.
 
-Primary local preview URL:
-
-```text
-http://127.0.0.1:8061/
-```
-
-Typical local server command:
-
-```bash
-python3 -m http.server 8061 --bind 127.0.0.1
-```
+Primary local preview URL and server command are listed in `Git and Deployment Rules`.
 
 ## Brand System
 
@@ -637,6 +773,78 @@ Practice JSON schema notes for future Google Sheets export:
 - Issue Tree: `problemStatement` and `sampleAnswer.arguments`.
 - SCQA: `context`, `topicLabel`, and `sampleAnswers`.
 
+## Firebase Member System
+
+Firebase project:
+
+```text
+the-untaught-lessons
+```
+
+Shared Firebase client:
+
+```text
+assets/firebase.js
+```
+
+Purpose:
+
+- Supports Google sign-in, passwordless email-link invites, authorized member lookup, Firestore member records, and progress saves.
+- Keeps the website static. There is still no custom server in this repo.
+
+Core Firestore collections:
+
+- `authorized_members/{email}`: Source of truth for who can enter the member workspace with Google sign-in. Email document IDs are normalized lowercase addresses.
+- `access_requests/{email}`: Stores public/member access requests for admin review.
+- `users/{userId}`: Stores per-user workspace profile/progress data.
+- `users/{userId}/completed_exercises/{exerciseId}`: Stores per-exercise completion records.
+
+Authorized member fields currently used:
+
+- `email`
+- `name`
+- `role`: `member`, `admin`, or `owner` are the important roles. Some admin UI labels may display `member` as `user`.
+- `status`: usually `active`.
+- `googleGroupAdded`: manual flag showing whether the person has been added to the Google Group for Drive access.
+- `addedAt`
+- `updatedAt`
+
+Auth behavior:
+
+- Member login supports Google sign-in for emails that exist in `authorized_members`.
+- Local test accounts are still supported for development and quick checks:
+  - `admin/password123`
+  - `testuser/member2026`
+- Outside localhost/emulator mode, Google users without an `authorized_members` document are signed out and shown an active-membership invite error.
+- Admin access is granted by an authorized member role of `admin` or `owner`.
+- Members may update only their own `name` field in `authorized_members` during onboarding.
+
+Passwordless invite behavior:
+
+- Admin can authorize a member and send a Firebase email-link invite from `admin/index.html`.
+- Current `actionCodeSettings.url` in `assets/firebase.js` points to:
+
+```text
+http://localhost:8061/member-login/
+```
+
+- Before production invite use, confirm this URL should be changed to the live member-login URL.
+
+Local emulator behavior:
+
+- Firebase Auth emulator port: `9099`
+- Firestore emulator port: `8085`
+- Hosting emulator port: `5000`
+- Enable emulator client mode with either:
+  - `localStorage.setItem("utl_use_firebase_emulators", "true")`
+  - `?emulators=true`
+
+Google Group / Drive access:
+
+- `GOOGLE_GROUP_SETUP.md` documents the manual Google Group workflow.
+- `googleGroupAdded` is only an admin record today. It does not automatically add/remove anyone from Google Groups.
+- Future automation may use a Cloud Function, but that function is not present in this repo.
+
 ## Page Map
 
 ### `index.html`
@@ -773,6 +981,8 @@ Key functionality:
 
 - Uses the existing local member gate pattern with `utl_member_unlocked`.
 - Hardcoded test accounts remain `admin/password123` and `testuser/member2026`.
+- Also supports Firebase Google sign-in for emails listed in Firestore `authorized_members`.
+- First login can prompt for a preferred display name when a member has no saved name.
 - Phase 1 is always accessible.
 - Phase 2 unlocks when Phase 1 exercises are complete.
 - Phase 3 unlocks when Phase 2 exercises are complete.
@@ -856,7 +1066,7 @@ Purpose:
 
 - Single source of truth for the new phase-based member workspace defaults.
 - Holds `UTL_CONTENT` with orientation, phase lessons, exercise context, and app links.
-- Provides shared `.ws-` scoped styles, shared member nav rendering, localStorage progress helpers, phase page rendering, and admin page rendering.
+- Provides shared `.ws-` scoped styles, shared member nav rendering, localStorage/Firebase profile helpers, progress helpers, phase page rendering, and admin page rendering.
 
 ### `my-results/index.html`
 
@@ -894,18 +1104,22 @@ Password localStorage key:
 
 Purpose:
 
-- Configure member workspace video URLs, context media URLs, and phase visibility without editing code.
+- Configure member workspace video URLs, context media URLs, phase visibility, and member access records.
 
 Key functionality:
 
 - Password-gated admin session stored under `utl_admin_auth`.
-- Uses the shared member workspace nav and `.ws-` scoped renderer from `member-login/content-config.js`.
+- Uses the shared member workspace nav/profile behavior from `member-login/content-config.js`.
 - Visibility checkboxes control whether Phase 2 and Phase 3 can appear when unlocked.
 - Orientation video URL saves under `utl_url_orientation`.
 - Lesson video URLs save under `utl_url_{lessonId}`.
 - Exercise context URLs save under `utl_ctx_url_{exerciseId}`.
 - Exercise context type overrides save under `utl_ctx_type_{exerciseId}`.
 - `Save all changes` writes all visible URL inputs to localStorage.
+- Member Management tab reads/writes Firestore `authorized_members` documents.
+- Member Management supports name, email, role, status, Google Group Added flag, edit, remove, and send-invite flows.
+- The passwordless invite flow uses Firebase Auth email links and writes authorization records before sending.
+- The Google Group Added field is manual tracking only. Follow `GOOGLE_GROUP_SETUP.md` to add/remove people in Google Groups.
 
 ## LocalStorage Admin Keys
 
@@ -1173,7 +1387,7 @@ Key functionality:
 - Header timer and word count.
 - Footer word count with 80-120 word target.
 - Sample answer toggle.
-- Apps Script submit flow with `email`, `response`, `mode`, and `page` payload fields.
+- Firestore and LocalStorage progress save flow. Controlled email submission via My Results dashboard.
 
 CSS scope:
 
@@ -1198,6 +1412,7 @@ Key functionality:
 - Record/transcribe help panel.
 - Transcript paste box with recording duration fields and live character/word count.
 - Apps Script submit flow plus localStorage fallback record under `utl_result_explain_to_aiko`.
+- Firestore and LocalStorage progress save flow. Controlled email submission via My Results dashboard.
 
 Target:
 
@@ -1223,6 +1438,7 @@ Key functionality:
 - Record/transcribe help panel.
 - Transcript paste box with recording duration fields and live character/word count.
 - Apps Script submit flow plus localStorage fallback record under `utl_result_explain_to_aiko_60`.
+- Firestore and LocalStorage progress save flow. Controlled email submission via My Results dashboard.
 - Completion screen congratulates the learner for delivering the elevator pitch.
 
 Target:
@@ -1417,7 +1633,9 @@ Note:
 
 ## Known Notes
 
-- New member workspace video/context management is localStorage-only by design. Admin changes are per browser and do not publish to other visitors unless the defaults in `member-login/content-config.js` are updated in code.
+- Member workspace video/context management is still localStorage-only by design. Admin content changes are per browser and do not publish to other visitors unless the defaults in `member-login/content-config.js` are updated in code.
+- Member authorization and member records are Firebase/Firestore-backed through `authorized_members`.
+- Member progress has both localStorage behavior and Firebase helper support. Check the specific page/app before assuming progress is saved remotely.
 - New member workspace lesson `videoUrl` and exercise `contextUrl` defaults are intentionally empty until real URLs are added through the admin page or committed into `member-login/content-config.js`.
 - Google Sheet admin changes are pending Google Drive connector reconnection:
   - Rename sheet ID `10iQByFqVCffHanZbbHLnYj7Csbet4fgOCd2FWDzEqkE` to `[Website] UTL leads and assessments`.
@@ -1427,7 +1645,7 @@ Note:
 
 ## Lead Form Integration
 
-Homepage lead form submits to Google Apps Script:
+Public leads (Contact, Find Your Level) submit to Google Apps Script for immediate notification:
 
 ```text
 https://script.google.com/macros/s/AKfycbzJE--FL2kB_XDNZRnszCtlyLRPvaLAHGuF5TAOdXJk40atbvf5Y6ELuSK2B7CSLaMN/exec
@@ -1514,21 +1732,6 @@ New TSA Score™ styles must remain scoped with `tsa-` class names to avoid coll
 - Logo clicks in app headers should return to the homepage.
 - Navigation active states should use the same gold underline pattern.
 - Mobile layouts should be checked around 375px and 768px widths when meaningful UI changes are made.
-
-## Git and Deployment Notes
-
-Current branch may contain uncommitted changes. Before committing:
-
-- Review `git status --short`.
-- Do not stage `.DS_Store` files.
-- Do not revert unrelated user changes.
-- Keep commits focused on the requested site changes.
-
-Static preview should use:
-
-```text
-http://127.0.0.1:8061/
-```
 
 ## Future Build Notes
 
