@@ -601,6 +601,89 @@
       background: var(--green);
     }
 
+    .sp-controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .sp-search {
+      flex: 1 1 200px;
+      max-width: 280px;
+      padding: 7px 10px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      font-family: 'Lato', sans-serif;
+      font-size: 13px;
+      color: var(--navy);
+      background: var(--white);
+      outline: none;
+    }
+
+    .sp-search:focus {
+      border-color: var(--navy);
+    }
+
+    .sp-filter-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+
+    .sp-chip {
+      padding: 4px 10px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--white);
+      color: var(--charcoal);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background .12s, color .12s, border-color .12s;
+    }
+
+    .sp-chip:hover {
+      border-color: var(--navy);
+      color: var(--navy);
+    }
+
+    .sp-chip.active {
+      background: var(--navy);
+      border-color: var(--navy);
+      color: #fff;
+    }
+
+    .sp-count {
+      margin-left: auto;
+      color: #999;
+      font-family: 'Roboto Mono', monospace;
+      font-size: 11px;
+    }
+
+    .sp-sort-btn {
+      background: none;
+      border: none;
+      color: inherit;
+      cursor: pointer;
+      font: inherit;
+      padding: 0;
+      text-align: left;
+      white-space: nowrap;
+    }
+
+    .sp-sort-btn:hover { text-decoration: underline; }
+
+    .sp-sort-indicator {
+      display: inline-block;
+      margin-left: 4px;
+      opacity: .7;
+    }
+
     .section-divider {
       height: 1px;
       margin: 1rem 0;
@@ -1716,6 +1799,17 @@
         <div class="student-progress-actions">
           <button class="small-button" type="button" id="studentProgressRefresh">Refresh progress</button>
           <span class="student-progress-status" id="studentProgressStatus" aria-live="polite"></span>
+        </div>
+        <div class="sp-controls" id="spControls" hidden>
+          <input type="search" class="sp-search" id="spSearch" placeholder="Search by name or email…" aria-label="Search members">
+          <div class="sp-filter-chips" role="group" aria-label="Filter by phase">
+            <button class="sp-chip active" type="button" data-sp-filter="all">All</button>
+            <button class="sp-chip" type="button" data-sp-filter="phase1">Phase 1+</button>
+            <button class="sp-chip" type="button" data-sp-filter="phase2">Phase 2+</button>
+            <button class="sp-chip" type="button" data-sp-filter="phase3">Phase 3+</button>
+            <button class="sp-chip" type="button" data-sp-filter="completed">Completed</button>
+          </div>
+          <span class="sp-count" id="spCount"></span>
         </div>
         <div id="studentProgressTable">
           <p class="mb-msg">Click Refresh progress to load student progress.</p>
@@ -3300,6 +3394,90 @@
       return ((content[phaseKey] && content[phaseKey].exercises) || []).map((exercise) => exercise.id);
     }
 
+    // Student progress state
+    let spAllMembers = [];
+    let spSort = { col: 'name', dir: 'asc' };
+    let spFilter = 'all';
+
+    function spToMs(val) {
+      if (!val) return 0;
+      try { return (val.toDate ? val.toDate() : new Date(val)).getTime() || 0; } catch (e) { return 0; }
+    }
+
+    function spFurthestPhase(member) {
+      const exercises = (member.workspaceProgress || {}).exercises || {};
+      const p1 = phaseExerciseIds('phase1');
+      const p2 = phaseExerciseIds('phase2');
+      const p3 = phaseExerciseIds('phase3');
+      const anyDone = (ids) => ids.some((id) => exercises[id] && exercises[id].completed);
+      const allDone = (ids) => ids.length > 0 && ids.every((id) => exercises[id] && exercises[id].completed);
+      if (allDone(p3)) return 'completed';
+      if (anyDone(p3)) return 'phase3';
+      if (anyDone(p2)) return 'phase2';
+      if (anyDone(p1)) return 'phase1';
+      return 'none';
+    }
+
+    function spProgressScore(member) {
+      const progress = member.workspaceProgress || {};
+      const exercises = progress.exercises || {};
+      const lessons = progress.lessons || {};
+      let score = 0;
+      ['phase1', 'phase2', 'phase3'].forEach((ph) => {
+        phaseExerciseIds(ph).forEach((id) => { if (exercises[id] && exercises[id].completed) score++; });
+        phaseLessonIds(ph).forEach((id) => { if (lessons[id] && lessons[id].watched) score++; });
+      });
+      return score;
+    }
+
+    function spApplyView() {
+      const q = ((document.getElementById('spSearch') || {}).value || '').trim().toLowerCase();
+      let members = spAllMembers;
+
+      if (q) {
+        members = members.filter((m) => {
+          return (m.displayName || m.name || '').toLowerCase().includes(q) ||
+                 (m.email || '').toLowerCase().includes(q);
+        });
+      }
+
+      if (spFilter !== 'all') {
+        members = members.filter((m) => {
+          const phase = spFurthestPhase(m);
+          if (spFilter === 'completed') return phase === 'completed';
+          if (spFilter === 'phase3') return phase === 'phase3' || phase === 'completed';
+          if (spFilter === 'phase2') return phase === 'phase2' || phase === 'phase3' || phase === 'completed';
+          if (spFilter === 'phase1') return phase !== 'none';
+          return true;
+        });
+      }
+
+      members = [...members].sort((a, b) => {
+        let av, bv;
+        if (spSort.col === 'lastActive') {
+          av = spToMs(a.lastSeenAt || a.updatedAt);
+          bv = spToMs(b.lastSeenAt || b.updatedAt);
+        } else if (spSort.col === 'progress') {
+          av = spProgressScore(a);
+          bv = spProgressScore(b);
+        } else {
+          av = (a.displayName || a.name || a.email || '').toLowerCase();
+          bv = (b.displayName || b.name || b.email || '').toLowerCase();
+        }
+        const cmp = av < bv ? -1 : av > bv ? 1 : 0;
+        return spSort.dir === 'asc' ? cmp : -cmp;
+      });
+
+      const countEl = document.getElementById('spCount');
+      if (countEl) {
+        countEl.textContent = members.length === spAllMembers.length
+          ? spAllMembers.length + ' member' + (spAllMembers.length !== 1 ? 's' : '')
+          : members.length + ' of ' + spAllMembers.length;
+      }
+
+      renderStudentProgressTable(members);
+    }
+
     function progressDot(done, label) {
       return '<span class="progress-dot ' + (done ? 'is-done' : '') + '" title="' + escapeHtml(label) + '"></span>';
     }
@@ -3329,11 +3507,20 @@
       }
     }
 
+    function spSortTh(label, col) {
+      const active = spSort.col === col;
+      const arrow = active ? '<span class="sp-sort-indicator">' + (spSort.dir === 'asc' ? '↑' : '↓') + '</span>' : '';
+      return '<th><button class="sp-sort-btn" type="button" data-sp-sort="' + col + '">' + label + arrow + '</button></th>';
+    }
+
     function renderStudentProgressTable(members) {
       const wrap = document.getElementById('studentProgressTable');
       if (!wrap) return;
       if (!members || !members.length) {
-        wrap.innerHTML = '<p class="mb-msg">No remote student progress has been saved yet.</p>';
+        const empty = spAllMembers.length && members.length === 0
+          ? 'No members match the current search or filter.'
+          : 'No remote student progress has been saved yet.';
+        wrap.innerHTML = '<p class="mb-msg">' + escapeHtml(empty) + '</p>';
         return;
       }
       const rows = members.map((member) => {
@@ -3353,7 +3540,15 @@
         '</tr>';
       }).join('');
       wrap.innerHTML = '<div class="student-progress-table-wrap"><table class="student-progress-table">' +
-        '<thead><tr><th>Member</th><th>Last active</th><th>Orientation</th><th>Phase 1</th><th>Phase 2</th><th>Phase 3</th><th>Assessments</th></tr></thead>' +
+        '<thead><tr>' +
+        spSortTh('Member', 'name') +
+        spSortTh('Last active', 'lastActive') +
+        '<th>Orientation</th>' +
+        spSortTh('Phase 1', 'progress') +
+        '<th>Phase 2</th>' +
+        '<th>Phase 3</th>' +
+        '<th>Assessments</th>' +
+        '</tr></thead>' +
         '<tbody>' + rows + '</tbody></table></div>';
     }
 
@@ -3402,7 +3597,10 @@
       wrap.innerHTML = '<p class="mb-msg">Loading student progress...</p>';
       try {
         const members = await fb.getAllMemberWorkspaceProgress();
-        renderStudentProgressTable(members);
+        spAllMembers = members;
+        const controls = document.getElementById('spControls');
+        if (controls) controls.hidden = false;
+        spApplyView();
         if (status) {
           status.textContent = 'Signed in as ' + escapeHtml(currentUser.email) + ' · Last refreshed ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         }
@@ -3623,7 +3821,30 @@
     document.getElementById('mbRefreshBtn')?.addEventListener('click', mbLoadMembers);
     document.addEventListener('click', (event) => {
       if (event.target.closest('#studentProgressRefresh')) loadStudentProgress();
+
+      // Filter chips
+      const chip = event.target.closest('[data-sp-filter]');
+      if (chip) {
+        spFilter = chip.dataset.spFilter;
+        document.querySelectorAll('[data-sp-filter]').forEach((c) => c.classList.toggle('active', c === chip));
+        spApplyView();
+      }
+
+      // Column sort
+      const sortBtn = event.target.closest('[data-sp-sort]');
+      if (sortBtn) {
+        const col = sortBtn.dataset.spSort;
+        if (spSort.col === col) {
+          spSort.dir = spSort.dir === 'asc' ? 'desc' : 'asc';
+        } else {
+          spSort.col = col;
+          spSort.dir = col === 'lastActive' || col === 'progress' ? 'desc' : 'asc';
+        }
+        spApplyView();
+      }
     });
+
+    document.getElementById('spSearch')?.addEventListener('input', () => spApplyView());
     document.querySelectorAll('[data-admin-tab]').forEach((button) => {
       button.addEventListener('click', () => {
         switchAdminTab(button.dataset.adminTab);
