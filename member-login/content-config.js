@@ -790,7 +790,7 @@ const UTL_CONTENT = {
       { key: "phase1", label: "Phase 1", href: memberHref("phase-1.html"), dropdown: true },
       { key: "phase2", label: "Phase 2", href: memberHref("phase-2.html"), dropdown: true },
       { key: "phase3", label: "Phase 3", href: memberHref("phase-3.html"), dropdown: true },
-      { key: "assessments", label: "Assessments", href: memberHref("index.html") + "#assessments", hidden: localStorage.getItem("utl_tsa_status") === "hidden" }
+      { key: "assessments", label: "Assessments", href: memberHref("index.html") + "#assessments", hidden: localStorage.getItem("utl_tsa_status") === "hidden" },
     ].filter(function (link) { return !link.hidden; });
     if (active === "admin") links.push({ key: "admin", label: "Admin", href: adminHref() });
     return '<header class="ws-nav"><div class="ws-nav-inner">' +
@@ -1550,13 +1550,115 @@ const UTL_CONTENT = {
     });
   }
 
+  function adminNavHtml(activeTab) {
+    const tabs = [
+      { key: "content-manager", label: "Content Manager" },
+      { key: "student-progress", label: "Student Progress" },
+      { key: "member-management", label: "Member Management" }
+    ];
+    return `
+      <nav class="ws-admin-tabs" aria-label="Admin sections">
+        ${tabs.map(tab => `
+          <a href="${adminHref()}?tab=${tab.key}" class="ws-admin-tab ${activeTab === tab.key ? 'ws-active' : ''}">
+            ${tab.label}
+          </a>
+        `).join('')}
+      </nav>
+    `;
+  }
+
+  function bindAdminTabs() {
+    qsa(".ws-admin-tab").forEach(button => {
+      button.addEventListener("click", (event) => {
+        event.preventDefault();
+        const tabKey = new URL(event.currentTarget.href).searchParams.get("tab");
+        window.history.pushState({}, '', `${adminHref()}?tab=${tabKey}`);
+        renderAdminContent(tabKey);
+      });
+    });
+  }
+
+  async function renderAdminContent(activeTab) {
+    const mount = qs("#adminTabContent");
+    if (!mount) return;
+
+    let content = '';
+    if (activeTab === "content-manager") {
+      content = renderContentManagerTabHtml();
+    } else if (activeTab === "student-progress") {
+      try {
+        const firebase = await import(firebaseHref());
+        const allProgress = await firebase.getAllMemberWorkspaceProgress();
+        content = renderStudentProgressTabHtml(allProgress);
+      } catch (error) {
+        console.error("Failed to load student progress:", error);
+        content = `<p class="ws-message ws-error">Failed to load student progress: ${escapeHtml(error.message)}</p>`;
+      }
+    } else if (activeTab === "member-management") {
+      content = renderMemberManagementTabHtml();
+    } else {
+      // Default to content manager if tab is unknown
+      content = renderContentManagerTabHtml();
+    }
+    mount.innerHTML = content;
+    // Rebind specific handlers for the newly rendered content
+    if (activeTab === "content-manager") {
+      bindAdminContentManager(); // Assuming a function to bind content manager specific events
+    }
+  }
+
+  // This is the original bindAdmin function, renamed and called when content manager tab is active
+  function bindAdminContentManager() {
+    qsa("[data-visibility-phase]").forEach(function (checkbox) {
+      checkbox.addEventListener("change", function () {
+        var key = checkbox.getAttribute("data-visibility-phase");
+        localStorage.setItem(key, key === "utl_admin_preview_bypass" ? (checkbox.checked ? "on" : "off") : (checkbox.checked ? "show" : "hide"));
+      });
+    });
+    qsa(".ws-admin-toggle").forEach(function (button) {
+      button.addEventListener("click", function () {
+        var phase = button.closest(".ws-admin-phase");
+        phase.classList.toggle("ws-open");
+        var icon = button.querySelector(".ws-disclosure-icon");
+        if (icon) icon.innerHTML = phase.classList.contains("ws-open") ? "&minus;" : "+";
+      });
+    });
+    qsa("[data-type-buttons]").forEach(function (group) {
+      group.addEventListener("click", function (event) {
+        var button = event.target.closest("[data-type]");
+        if (!button) return;
+        var id = group.getAttribute("data-type-buttons");
+        var type = button.getAttribute("data-type");
+        localStorage.setItem("utl_ctx_type_" + id, type);
+        qsa(".ws-type-button", group).forEach(function (item) { item.classList.toggle("ws-selected", item === button); });
+        var row = group.parentElement.querySelector(".ws-save-row");
+        if (row) row.style.display = type === "text" ? "none" : "flex";
+      });
+    });
+    qsa("[data-save-field]").forEach(function (button) {
+      button.addEventListener("click", function () {
+        saveField(button);
+      });
+    });
+    var saveAll = qs("#wsSaveAll");
+    if (saveAll) {
+      saveAll.addEventListener("click", function () {
+        qsa("[data-storage-key]").forEach(function (input) {
+          localStorage.setItem(input.getAttribute("data-storage-key"), input.value.trim());
+        });
+        saveAll.textContent = "Saved";
+        setTimeout(function () { saveAll.textContent = "Save all changes"; }, 1500);
+      });
+    }
+  }
+
   function renderAdmin() {
     injectStyles();
     var needsPassword = localStorage.getItem(ADMIN_KEY) !== "true";
     var acceptedPassword = localStorage.getItem(ADMIN_PASSWORD_KEY) || DEFAULT_ADMIN_PASSWORD;
     if (needsPassword) {
-      document.body.classList.add("ws-page");
-      document.body.innerHTML = '<section class="ws-login-wrap"><article class="ws-login-card"><span class="ws-kicker">Admin</span><h1 class="ws-title">Content manager.</h1><p class="ws-subtitle">Enter the admin password to manage member workspace URLs.</p><form class="ws-form" id="wsAdminLogin"><label for="wsAdminPassword">Admin password</label><input class="ws-input" id="wsAdminPassword" type="password" required><button class="ws-button" type="submit">Open admin</button><p class="ws-message" id="wsAdminMessage"></p></form></article></section>';
+      document.body.classList.add("ws-page"); // Ensure ws-page class is added for styling
+      document.body.innerHTML = '<section class="ws-login-wrap"><article class="ws-login-card"><span class="ws-kicker">Admin</span><h1 class="ws-title">Admin Console.</h1><p class="ws-subtitle">Enter the admin password to access the management tools.</p><form class="ws-form" id="wsAdminLogin"><label for="wsAdminPassword">Admin password</label><input class="ws-input" id="wsAdminPassword" type="password" required><button class="ws-button" type="submit">Open admin</button><p class="ws-message" id="wsAdminMessage"></p></form></article></section>';
       qs("#wsAdminLogin").addEventListener("submit", function (event) {
         event.preventDefault();
         if (qs("#wsAdminPassword").value === acceptedPassword) {
@@ -1571,8 +1673,22 @@ const UTL_CONTENT = {
       });
       return;
     }
-    pageShell("admin", '<span class="ws-pill ws-pill-gold">Admin &middot; content manager</span><h1 class="ws-title">Manage videos and context</h1><p class="ws-subtitle">Update video URLs and context links for each phase. Paste a Google Drive share link or Vimeo URL. Changes are saved to your browser and override the defaults.</p>' + visibilityHtml() + '<section class="ws-admin-grid">' + adminAccordionHtml() + '</section><div class="ws-save-bar"><div class="ws-shell ws-save-bar-inner"><span class="ws-count">Changes are saved per field and take effect immediately.</span><button class="ws-button" id="wsSaveAll">Save all changes</button></div></div>');
-    bindAdmin();
+
+    const urlParams = new URLSearchParams(window.location.search); // Get URL parameters
+    const activeTab = urlParams.get('tab') || 'content-manager'; // Default to content-manager
+
+    document.body.classList.add("ws-page");
+    document.body.innerHTML = `
+      <header class="ws-nav">${navHtml("admin")}</header>
+      <main class="ws-main">
+        <div class="ws-shell">
+          ${adminNavHtml(activeTab)}
+          <div id="adminTabContent"></div>
+        </div>
+      </main>`;
+    bindNav(); // Bind the main nav (for profile menu) - this is already called in pageShell, but good to ensure here.
+    bindAdminTabs(); // Bind the new admin tab navigation events
+    renderAdminContent(activeTab); // Render content for the active tab
   }
 
   function visibilityHtml() {
@@ -1582,16 +1698,33 @@ const UTL_CONTENT = {
     return '<section class="ws-admin-visibility"><span class="ws-kicker">Learner release gates</span><label class="ws-check-row"><input type="checkbox" data-visibility-phase="utl_phase2_status" ' + (phase2Visible ? "checked" : "") + '><span>Release Phase 2 after Phase 1 is complete</span></label><p class="ws-help">Use this to hold Phase 2 until its videos, context, and exercises are ready. Learners still need to complete Phase 1 before it opens.</p><label class="ws-check-row"><input type="checkbox" data-visibility-phase="utl_phase3_status" ' + (phase3Visible ? "checked" : "") + '><span>Release Phase 3 after Phase 2 is complete</span></label><p class="ws-help">Use this to hold Phase 3 until its videos, context, and exercises are ready. Learners still need to complete Phase 2 before it opens.</p><label class="ws-check-row"><input type="checkbox" data-visibility-phase="utl_admin_preview_bypass" ' + (previewUnlocked ? "checked" : "") + '><span>Unlock all phases for admin preview</span></label><p class="ws-help">For admins only. When on, Phase 2 and Phase 3 open immediately while you preview the member area.</p></section>';
   }
 
-  function adminAccordionHtml() {
+  function renderContentManagerTabHtml() {
+    // Existing content manager HTML
     var orientation = '<article class="ws-admin-phase ws-open"><button class="ws-admin-toggle" type="button"><span class="ws-admin-num">00</span><span><span class="ws-kicker">Orientation</span><strong>Welcome</strong><br><small>2 context sections &middot; 0 exercises</small></span><span class="ws-disclosure-icon">&minus;</span></button><div class="ws-admin-body"><p class="ws-help">Orientation is context-only and has no separate lesson video.</p></div></article>';
-    return orientation + phases.map(function (phaseKey) {
+
+    return `
+      <section class="ws-admin-section">
+      <span class="ws-kicker">Content Manager</span>
+      <h1 class="ws-title">Manage videos and context</h1>
+      <p class="ws-subtitle">Update video URLs and context links for each phase. Paste a Google Drive share link or Vimeo URL. Changes are saved to your browser and override the defaults.</p>
+      ${visibilityHtml()}
+      <section class="ws-admin-grid">
+    ` + phases.map(function (phaseKey) {
       var phase = getPhase(phaseKey);
       return '<article class="ws-admin-phase"><button class="ws-admin-toggle" type="button"><span class="ws-admin-num">0' + phaseNumbers[phaseKey] + '</span><span><span class="ws-kicker">' + phaseLabels[phaseKey] + '</span><strong>' + escapeHtml(phase.title) + '</strong><br><small>' + phase.lessons.length + ' lessons &middot; ' + phase.exercises.length + ' exercises</small></span><span class="ws-disclosure-icon">+</span></button><div class="ws-admin-body"><h3>Lesson videos</h3>' + phase.lessons.map(function (lesson, index) {
         return '<div class="ws-slot"><div class="ws-slot-head"><strong>Lesson ' + (index + 1) + ': ' + escapeHtml(lesson.title) + '</strong><span class="ws-pill ws-pill-muted">' + escapeHtml(lesson.duration) + '</span></div><div class="ws-save-row"><input class="ws-input" data-storage-key="utl_url_' + lesson.id + '" placeholder="Paste Google Drive or Vimeo URL" value="' + escapeHtml(lessonUrl(lesson)) + '"><button class="ws-button ws-button-navy" data-save-field type="button">Save</button></div><span class="ws-save-note"></span></div>';
       }).join("") + '<h3>Exercise context</h3>' + phase.exercises.map(function (exercise) {
         return adminExerciseSlot(exercise);
       }).join("") + '</div></article>';
-    }).join("");
+    }).join("") + orientation + `
+      </section>
+      <div class="ws-save-bar">
+        <div class="ws-shell ws-save-bar-inner">
+          <span class="ws-count">Changes are saved per field and take effect immediately.</span>
+          <button class="ws-button" id="wsSaveAll">Save all changes</button>
+        </div>
+      </div>
+    `;
   }
 
   function adminExerciseSlot(exercise) {
@@ -1600,6 +1733,107 @@ const UTL_CONTENT = {
     return '<div class="ws-slot" data-admin-exercise="' + exercise.id + '"><div class="ws-slot-head"><strong>' + escapeHtml(exercise.title) + '</strong><span class="ws-pill ws-pill-gold">' + escapeHtml(exercise.type) + '</span></div><div class="ws-type-buttons" data-type-buttons="' + exercise.id + '">' + ["video", "slides", "text"].map(function (type) {
       return '<button class="ws-type-button ' + (selected === type ? "ws-selected" : "") + '" data-type="' + type + '" type="button">' + (type === "text" ? "Text only" : type[0].toUpperCase() + type.slice(1)) + '</button>';
     }).join("") + '</div><div class="ws-save-row ' + (selected === "text" ? "ws-hidden" : "") + '"><input class="ws-input" data-storage-key="utl_ctx_url_' + exercise.id + '" placeholder="Paste Google Drive or Vimeo URL" value="' + escapeHtml(url) + '"><button class="ws-button ws-button-navy" data-save-field type="button">Save</button></div><span class="ws-save-note"></span></div>';
+  }
+
+  function renderStudentProgressTabHtml(allProgress) {
+    if (!allProgress || allProgress.length === 0) {
+      return '<p class="ws-help">No member progress data available yet.</p>';
+    }
+
+    const phaseTitles = {
+      orientation: "Orientation",
+      phase1: "Phase 1",
+      phase2: "Phase 2",
+      phase3: "Phase 3",
+      assessments: "Assessments"
+    };
+
+    const headerRow = `
+      <thead>
+        <tr>
+          <th>Member</th>
+          <th>Last Active</th>
+          ${Object.keys(phaseTitles).map(key => `<th>${phaseTitles[key]}</th>`).join('')}
+          <th>Actions</th>
+        </tr>
+      </thead>
+    `;
+
+    const bodyRows = allProgress.map(member => {
+      const lastActive = member.lastSeenAt ? new Date(member.lastSeenAt.toDate()).toLocaleDateString() : 'N/A';
+      const memberName = member.displayName || member.email;
+      const memberEmail = member.email;
+
+      const phaseProgressCells = Object.keys(phaseTitles).map(phaseKey => {
+        if (phaseKey === 'assessments') {
+          const diag = member.workspaceProgress?.exercises?.['utl_result_tsa_diagnostic']?.completed;
+          const check = member.workspaceProgress?.exercises?.['utl_result_tsa_checkpoint']?.completed;
+          return `<td>
+            <span class="ws-progress-dot ${diag ? 'ws-dot-solid' : 'ws-dot-pending'}" title="Diagnostic"></span>
+            <span class="ws-progress-dot ${check ? 'ws-dot-solid' : 'ws-dot-pending'}" title="Checkpoint"></span>
+          </td>`;
+        }
+
+        const lessonsInPhase = LESSONS[phaseKey]?.length || 0;
+        const exercisesInPhase = APPS.filter(app => app.phase === phaseNumbers[phaseKey]).length || 0;
+
+        const watchedLessons = lessonsInPhase > 0 ? (Object.values(member.workspaceProgress?.lessons || {}).filter(l => l.watched && LESSONS[phaseKey].some(lesson => lesson.id === l.id)).length) : 0;
+        const completedExercises = exercisesInPhase > 0 ? (Object.values(member.workspaceProgress?.exercises || {}).filter(e => e.completed && APPS.some(app => app.id === e.appKey && app.phase === phaseNumbers[phaseKey])).length) : 0;
+
+        const videoDots = Array(lessonsInPhase).fill(0).map((_, i) => {
+          const lessonId = LESSONS[phaseKey][i]?.id;
+          const isWatched = member.workspaceProgress?.lessons?.[lessonId]?.watched;
+          return `<span class="ws-progress-dot ${isWatched ? 'ws-dot-solid' : 'ws-dot-pending'}" title="${LESSONS[phaseKey][i]?.title || 'Lesson'}"></span>`;
+        }).join('');
+
+        const exerciseDots = Array(exercisesInPhase).fill(0).map((_, i) => {
+          const exerciseId = APPS.filter(app => app.phase === phaseNumbers[phaseKey])[i]?.id;
+          const isCompleted = member.workspaceProgress?.exercises?.[exerciseId]?.completed;
+          return `<span class="ws-progress-dot ${isCompleted ? 'ws-dot-solid' : 'ws-dot-pending'}" title="${APPS.filter(app => app.phase === phaseNumbers[phaseKey])[i]?.name || 'Exercise'}"></span>`;
+        }).join('');
+
+        return `<td>
+          <div class="ws-progress-dots-group">${videoDots}</div>
+          <div class="ws-progress-dots-group">${exerciseDots}</div>
+        </td>`;
+      }).join('');
+
+      return `
+        <tr>
+          <td>${escapeHtml(memberName)}<br><small>${escapeHtml(memberEmail)}</small></td>
+          <td>${lastActive}</td>
+          ${phaseProgressCells}
+          <td><button class="ws-button ws-button-secondary ws-button-small" onclick="alert('View details for ${escapeHtml(memberName)}')">View Details</button></td>
+        </tr>
+      `;
+    }).join('');
+
+    return `
+      <section class="ws-admin-section">
+        <span class="ws-kicker">Student Progress</span>
+        <h1 class="ws-title">Member Learning Dashboard</h1>
+        <p class="ws-subtitle">Overview of all member progress, including video watch status and exercise completion.</p>
+        <div class="ws-admin-table-wrap">
+          <table class="ws-admin-table">
+            ${headerRow}
+            <tbody>
+              ${bodyRows}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    `;
+  }
+
+  function renderMemberManagementTabHtml() {
+    return `
+      <section class="ws-admin-section">
+        <span class="ws-kicker">Member Management</span>
+        <h1 class="ws-title">Manage Member Accounts</h1>
+        <p class="ws-subtitle">Add, edit, or remove member access and roles.</p>
+        <p class="ws-help">This section will contain the tools for managing individual member accounts.</p>
+      </section>
+    `;
   }
 
   function bindAdmin() {

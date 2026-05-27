@@ -800,32 +800,34 @@ Best, Yutee Elle</div>
         }
 
         submitBtn.disabled = true;
-        submitBtn.textContent = 'Sending...';
+        submitBtn.textContent = 'Saving...';
         statusEl.textContent = '';
 
+        const response = composedEmail();
         const payload = {
           email: readProfileEmail(),
           response,
           mode: state.mode,
-          page: window.location.href
+          page: window.location.href,
+          completed_at: new Date().toISOString(),
+          duration_seconds: state.startedAt ? Math.floor((Date.now() - state.startedAt) / 1000) : 0
         };
 
         try {
-          await fetch(SCRIPT_URL, {
-            method: 'POST',
-            mode: 'no-cors',
-            body: JSON.stringify(payload)
-          });
-          import('../../assets/firebase.js')
-            .then(({ saveUserProgress }) => saveUserProgress('write-to-aiko', 'Write to Aiko', payload))
-            .catch((error) => console.warn('Firestore progress save failed.', error));
+          // 1. Save to LocalStorage so "My Results" can see the text
+          localStorage.setItem('utl_result_write-to-aiko', JSON.stringify(payload));
+          
+          // 2. Save to Firestore for the permanent member record
+          const { saveUserProgress } = await import('../../assets/firebase.js');
+          await saveUserProgress('write-to-aiko', 'Write to Aiko', payload);
+
           submitBtn.textContent = 'Submit';
           submitBtn.disabled = true;
-          statusEl.textContent = 'Sent! Check your inbox.';
+          statusEl.innerHTML = 'Progress saved! View your full record on the <a href="../../my-results/index.html" style="color:inherit;font-weight:700;">My Results</a> page.';
         } catch (error) {
-          submitBtn.textContent = 'Submit';
+          console.warn('Firestore progress save failed.', error);
           submitBtn.disabled = false;
-          statusEl.textContent = 'Could not send. Please try again.';
+          statusEl.textContent = 'Could not save. Please try again.';
         }
       });
 

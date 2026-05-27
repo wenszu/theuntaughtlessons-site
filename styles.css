@@ -2003,6 +2003,131 @@
   }
 }
 
+/* Admin Tabs */
+.ws-admin-tabs {
+  display: flex;
+  border-bottom: 2px solid var(--ws-line);
+  margin-bottom: 24px;
+}
+
+.ws-admin-tab {
+  padding: 12px 18px;
+  text-decoration: none;
+  color: var(--ws-steel);
+  font-family: 'Lato', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  border-bottom: 3px solid transparent;
+  transition: color .15s ease, border-color .15s ease;
+}
+
+.ws-admin-tab:hover {
+  color: var(--ws-navy);
+}
+
+.ws-admin-tab.ws-active {
+  color: var(--ws-navy);
+  border-bottom-color: var(--ws-gold);
+}
+
+/* Student Progress Table */
+.ws-admin-table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.ws-admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--ws-white);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 51, 102, .03);
+}
+
+.ws-admin-table th,
+.ws-admin-table td {
+  padding: 12px 15px;
+  border-bottom: 1px solid var(--ws-line);
+  text-align: left;
+  vertical-align: top;
+}
+
+.ws-admin-table th {
+  background: var(--ws-cream);
+  color: var(--ws-navy);
+  font-family: 'Roboto Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  font-weight: 700;
+}
+
+.ws-admin-table td {
+  font-size: 14px;
+  color: var(--ws-charcoal);
+}
+
+.ws-admin-table td small {
+  display: block;
+  font-size: 11px;
+  color: var(--ws-steel);
+  margin-top: 2px;
+}
+
+.ws-progress-dots-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 4px; /* Space between video and exercise dots */
+}
+
+.ws-progress-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--ws-line); /* Gray for pending */
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.ws-progress-dot.ws-dot-solid {
+  background: var(--ws-green); /* Green for done */
+}
+
+.ws-progress-dot.ws-dot-half {
+  background: linear-gradient(90deg, var(--ws-green) 50%, var(--ws-line) 50%); /* Half for partially done */
+}
+
+.ws-button-small {
+  padding: 6px 10px;
+  font-size: 11px;
+  min-height: 30px;
+}
+
+/* Admin Section Header */
+.ws-admin-section {
+  margin-top: 20px;
+}
+.ws-admin-section .ws-kicker {
+  margin-bottom: 8px;
+}
+.ws-admin-section .ws-title {
+  font-size: 32px;
+  margin-top: 0;
+}
+.ws-admin-section .ws-subtitle {
+  font-size: 16px;
+  margin-bottom: 20px;
+}
+.ws-admin-section .ws-help {
+  margin-top: 15px;
+  font-size: 14px;
+  color: var(--ws-steel);
+}
+
 /* ── Reset ──────────────────────────────────────────────────────── */
 *, *::before, *::after {
   box-sizing: border-box;

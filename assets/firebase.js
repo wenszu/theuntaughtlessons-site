@@ -24,6 +24,7 @@ import {
   getDoc,
   getDocs,
   getFirestore,
+  query,
   serverTimestamp,
   setDoc,
   Timestamp,
@@ -317,6 +318,62 @@ async function saveUserProgress(exerciseId, exerciseName, exercisePayload = {}) 
   }, { merge: true });
 }
 
+async function getAllMemberWorkspaceProgress() {
+  const readyDb = requireFirestore();
+  const membersSnapshot = await getDocs(collection(readyDb, "authorized_members"));
+  const usersSnapshot = await getDocs(query(collection(readyDb, "users")));
+
+  const membersByEmail = new Map();
+  membersSnapshot.forEach((memberDoc) => {
+    const data = memberDoc.data() || {};
+    const email = String(data.email || memberDoc.id || "").trim().toLowerCase();
+    if (!email) return;
+    membersByEmail.set(email, {
+      id: memberDoc.id,
+      email,
+      name: data.name || "",
+      displayName: data.name || "",
+      role: data.role || "member",
+      status: data.status || "active",
+      googleGroupAdded: Boolean(data.googleGroupAdded),
+      firstLoginAt: data.firstLoginAt || null,
+      lastLoginAt: data.lastLoginAt || null,
+      lastSeenAt: null,
+      workspaceProgress: null
+    });
+  });
+
+  usersSnapshot.forEach((userDoc) => {
+    const data = userDoc.data() || {};
+    const email = String(data.email || "").trim().toLowerCase();
+    const key = email || userDoc.id;
+    const existing = membersByEmail.get(key) || {};
+    membersByEmail.set(key, {
+      ...existing,
+      id: existing.id || userDoc.id,
+      uid: userDoc.id,
+      email: email || existing.email || "",
+      name: existing.name || data.displayName || "",
+      displayName: data.displayName || existing.displayName || existing.name || "",
+      role: existing.role || data.role || "member",
+      status: existing.status || "active",
+      lastSeenAt: data.lastSeenAt || existing.lastSeenAt || null,
+      updatedAt: data.updatedAt || existing.updatedAt || null,
+      workspaceProgress: data.workspaceProgress || existing.workspaceProgress || null
+    });
+  });
+
+  const allProgress = Array.from(membersByEmail.values());
+  allProgress.sort((a, b) => {
+    const aLabel = (a.name || a.displayName || a.email || a.id || "").toLowerCase();
+    const bLabel = (b.name || b.displayName || b.email || b.id || "").toLowerCase();
+    return aLabel < bLabel ? -1 : aLabel > bLabel ? 1 : 0;
+  });
+
+  return allProgress;
+}
+
+
 export {
   actionCodeSettings,
   app,
@@ -333,6 +390,7 @@ export {
   getDoc,
   getDocs,
   getGoogleRedirectResult,
+  getAllMemberWorkspaceProgress,
   getMemberWorkspaceProgress,
   getSignedInUser,
   GoogleAuthProvider,

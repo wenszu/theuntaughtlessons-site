@@ -24,11 +24,13 @@ service cloud.firestore {
     }
 
     match /users/{userId} {
-      allow read, write: if isSelfUserDocument(userId);
+      allow read: if isSelfUserDocument(userId) || isAdmin();
+      allow write: if isSelfUserDocument(userId);
     }
 
     match /users/{userId}/completed_exercises/{exerciseId} {
-      allow read, write: if signedIn() && request.auth.uid == userId;
+      allow read: if (signedIn() && request.auth.uid == userId) || isAdmin();
+      allow write: if signedIn() && request.auth.uid == userId;
     }
 
     match /authorized_members/{email} {

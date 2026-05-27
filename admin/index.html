@@ -180,6 +180,13 @@
       gap: 12px;
     }
 
+    .member-identity-right {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
     .identity-logo-link {
       display: inline-flex;
       align-items: center;
@@ -243,9 +250,145 @@
       font-size: 12px;
     }
 
+    .admin-profile-email {
+      max-width: 210px;
+      overflow: hidden;
+      color: rgba(255, 255, 255, .72);
+      font-size: 12px;
+      font-weight: 700;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .admin-profile-button {
+      width: 36px;
+      height: 36px;
+      padding: 0;
+      border: 0;
+      border-radius: 999px;
+      background: var(--gold);
+      color: var(--navy);
+      cursor: pointer;
+      display: grid;
+      font-family: 'Roboto Mono', monospace;
+      font-size: 12px;
+      font-weight: 700;
+      place-items: center;
+    }
+
+    .admin-profile-button img,
+    .admin-profile-avatar img {
+      width: 100%;
+      height: 100%;
+      border-radius: inherit;
+      object-fit: cover;
+    }
+
+    .admin-profile-menu {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      width: min(260px, calc(100vw - 24px));
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--white);
+      box-shadow: 0 12px 32px rgba(0, 51, 102, .2);
+      color: var(--charcoal);
+    }
+
+    .admin-profile-menu[hidden] {
+      display: none;
+    }
+
+    .admin-profile-head {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      border-bottom: 3px solid var(--gold);
+      background: var(--navy);
+      color: var(--white);
+    }
+
+    .admin-profile-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 999px;
+      background: var(--gold);
+      color: var(--navy);
+      display: grid;
+      flex: 0 0 auto;
+      font-family: 'Roboto Mono', monospace;
+      font-size: 14px;
+      font-weight: 700;
+      place-items: center;
+    }
+
+    .admin-profile-name {
+      margin: 0;
+      color: var(--white);
+      font-size: 15px;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    .admin-profile-role {
+      margin: 4px 0 0;
+      color: var(--gold);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 9.5px;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+
+    .admin-profile-section {
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .admin-profile-section:last-child {
+      border-bottom: 0;
+    }
+
+    .admin-profile-section-label {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--gold);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 9.5px;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+
+    .admin-profile-link,
+    .admin-profile-logout {
+      width: 100%;
+      min-height: 34px;
+      padding: 4px 0;
+      border: 0;
+      background: transparent;
+      color: var(--navy);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      text-align: left;
+      text-decoration: none;
+    }
+
+    .admin-profile-link:hover,
+    .admin-profile-logout:hover {
+      text-decoration: underline;
+    }
+
     .admin-sidebar {
       position: fixed;
-      inset: 54px auto 0 0;
+      inset: 102px auto 0 0;
       width: 220px;
       padding: 1.5rem 1rem;
       overflow-y: auto;
@@ -253,19 +396,10 @@
       color: var(--white);
     }
 
-    .sidebar-kicker {
-      color: rgba(255, 255, 255, .88);
-      font-family: 'Roboto Mono', monospace;
-      font-size: 10px;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-    }
-
     .sidebar-title {
-      margin-top: 5px;
       color: var(--white);
       font-family: 'Playfair Display', serif;
-      font-size: 18px;
+      font-size: 22px;
       font-weight: 700;
     }
 
@@ -321,8 +455,54 @@
       max-width: none;
       min-height: 100vh;
       margin-left: 220px;
-      padding: calc(2.5rem + 54px) 2rem 2.5rem;
+      padding: calc(2.5rem + 102px) 2rem 2.5rem;
       background: var(--cream);
+    }
+
+    .admin-tabs {
+      position: fixed;
+      inset: 54px 0 auto 0;
+      z-index: 29;
+      min-height: 48px;
+      padding: 0 1.75rem;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255, 255, 255, .94);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 6px 18px rgba(0, 51, 102, .08);
+    }
+
+    .admin-tab {
+      min-height: 34px;
+      padding: 0 14px;
+      border: 1px solid transparent;
+      border-radius: 6px;
+      background: transparent;
+      color: var(--charcoal);
+      cursor: pointer;
+      font-family: 'Roboto Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+
+    .admin-tab:hover {
+      border-color: rgba(0, 51, 102, .14);
+      color: var(--navy);
+    }
+
+    .admin-tab.active {
+      border-color: var(--navy);
+      background: var(--navy);
+      color: var(--white);
+    }
+
+    .admin-section[hidden],
+    .admin-nav-item[hidden],
+    .nav-group-label[hidden] {
+      display: none !important;
     }
 
     .admin-section {
@@ -336,6 +516,89 @@
     .admin-section h2 {
       margin-top: 5px;
       font-size: 22px;
+    }
+
+    .student-progress-actions {
+      align-items: center;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .student-progress-status {
+      color: #777;
+      font-size: 12px;
+    }
+
+    .student-progress-table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--white);
+    }
+
+    .student-progress-table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 880px;
+      font-size: 12px;
+    }
+
+    .student-progress-table th {
+      padding: 9px 12px;
+      background: var(--navy);
+      color: rgba(255,255,255,.86);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-align: left;
+      text-transform: uppercase;
+    }
+
+    .student-progress-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+    }
+
+    .student-progress-table tbody tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .progress-cell {
+      min-width: 120px;
+    }
+
+    .progress-dot-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-top: 3px;
+    }
+
+    .progress-dot-label {
+      display: block;
+      margin-top: 8px;
+      color: #777;
+      font-family: 'Roboto Mono', monospace;
+      font-size: 9px;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+    }
+
+    .progress-dot {
+      width: 9px;
+      height: 9px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #eee;
+    }
+
+    .progress-dot.is-done {
+      border-color: var(--green);
+      background: var(--green);
     }
 
     .section-divider {
@@ -1087,7 +1350,7 @@
     @media (max-width: 760px) {
       .member-identity-bar {
         overflow-x: auto;
-        justify-content: flex-start;
+        justify-content: space-between;
         white-space: nowrap;
         scrollbar-width: none;
       }
@@ -1096,11 +1359,25 @@
         display: none;
       }
 
+      .admin-profile-email {
+        display: none;
+      }
+
+      .admin-tabs {
+        overflow-x: auto;
+        padding: 0 12px;
+        scrollbar-width: none;
+      }
+
+      .admin-tabs::-webkit-scrollbar {
+        display: none;
+      }
+
       .admin-sidebar {
         position: static;
         width: 100%;
         min-height: 0;
-        margin-top: 54px;
+        margin-top: 102px;
       }
 
       .admin-main {
@@ -1244,38 +1521,66 @@
           <a class="identity-label" href="../member-login/index.html">Member<br>workspace</a>
         </nav>
       </div>
+      <div class="member-identity-right">
+        <span class="admin-profile-email" id="adminProfileEmail">admin</span>
+        <button class="admin-profile-button" type="button" id="adminProfileButton" aria-label="Open profile menu" aria-expanded="false">AD</button>
+        <div class="admin-profile-menu" id="adminProfileMenu" hidden>
+          <div class="admin-profile-head">
+            <span class="admin-profile-avatar" id="adminProfileAvatar">AD</span>
+            <div>
+              <p class="admin-profile-name" id="adminProfileName">Admin</p>
+              <p class="admin-profile-role">Administrator</p>
+            </div>
+          </div>
+          <div class="admin-profile-section">
+            <span class="admin-profile-section-label">Your space</span>
+            <a class="admin-profile-link" href="../member-login/index.html">Member workspace</a>
+            <a class="admin-profile-link" href="../my-results/index.html">My results</a>
+          </div>
+          <div class="admin-profile-section">
+            <button class="admin-profile-logout" id="logoutLink" type="button">Log out</button>
+          </div>
+        </div>
+      </div>
     </div>
 
+    <nav class="admin-tabs" aria-label="Admin console tabs">
+      <button class="admin-tab active" type="button" data-admin-tab="content-manager">Site &amp; Content</button>
+      <button class="admin-tab" type="button" data-admin-tab="student-progress">Student Progress</button>
+      <button class="admin-tab" type="button" data-admin-tab="member-management">Member Management</button>
+    </nav>
+
     <aside class="admin-sidebar">
-      <div class="sidebar-kicker">The Untaught Lessons</div>
       <div class="sidebar-title">Admin</div>
       <div class="sidebar-divider"></div>
 
-      <span class="nav-group-label">Site</span>
-      <button class="admin-nav-item active" data-target="section-mission">Mission card</button>
-      <button class="admin-nav-item" data-target="section-sync">Site sync check</button>
-      <button class="admin-nav-item" data-target="section-visibility">Visibility</button>
+      <span class="nav-group-label" data-admin-nav-group="content-manager">Site</span>
+      <button class="admin-nav-item active" data-admin-tab-scope="content-manager" data-target="section-mission">Mission card</button>
+      <button class="admin-nav-item" data-admin-tab-scope="content-manager" data-target="section-sync">Site sync check</button>
+      <button class="admin-nav-item" data-admin-tab-scope="content-manager" data-target="section-visibility">Visibility</button>
 
-      <span class="nav-group-label">Members</span>
-      <button class="admin-nav-item" data-target="section-orientation">Orientation</button>
-      <button class="admin-nav-item" data-target="section-phase1">Phase 1</button>
-      <button class="admin-nav-item" data-target="section-phase2">Phase 2</button>
-      <button class="admin-nav-item" data-target="section-phase3">Phase 3</button>
-      <button class="admin-nav-item" data-target="section-tsa">Assessments</button>
-      <button class="admin-nav-item" data-target="section-send-instructor">Send to instructor</button>
+      <span class="nav-group-label" data-admin-nav-group="content-manager">Content</span>
+      <button class="admin-nav-item" data-admin-tab-scope="content-manager" data-target="section-orientation">Orientation</button>
+      <button class="admin-nav-item" data-admin-tab-scope="content-manager" data-target="section-phase1">Phase 1</button>
+      <button class="admin-nav-item" data-admin-tab-scope="content-manager" data-target="section-phase2">Phase 2</button>
+      <button class="admin-nav-item" data-admin-tab-scope="content-manager" data-target="section-phase3">Phase 3</button>
+      <button class="admin-nav-item" data-admin-tab-scope="content-manager" data-target="section-tsa">Assessments</button>
+      <button class="admin-nav-item" data-admin-tab-scope="content-manager" data-target="section-send-instructor">Send to instructor</button>
 
-      <span class="nav-group-label">Access</span>
-      <button class="admin-nav-item" data-target="section-members">Members</button>
-      <button class="admin-nav-item" data-target="section-passwords">Passwords</button>
+      <span class="nav-group-label" data-admin-nav-group="student-progress">Progress</span>
+      <button class="admin-nav-item" data-admin-tab-scope="student-progress" data-target="section-student-progress">Student dashboard</button>
 
-      <span class="nav-group-label">Links</span>
-      <button class="admin-nav-item" data-target="section-links">Quick links</button>
+      <span class="nav-group-label" data-admin-nav-group="member-management">Access</span>
+      <button class="admin-nav-item" data-admin-tab-scope="member-management" data-target="section-members">Members</button>
+      <button class="admin-nav-item" data-admin-tab-scope="member-management" data-target="section-passwords">Passwords</button>
 
-      <a class="logout-link" id="logoutLink" href="#">Log out</a>
+      <span class="nav-group-label" data-admin-nav-group="content-manager">Links</span>
+      <button class="admin-nav-item" data-admin-tab-scope="content-manager" data-target="section-links">Quick links</button>
+
     </aside>
 
     <main class="admin-main">
-      <section class="admin-section" id="section-mission">
+      <section class="admin-section" id="section-mission" data-admin-tab-panel="content-manager">
         <span class="section-label">Site</span>
         <h2>Mission card</h2>
         <div class="section-divider"></div>
@@ -1283,7 +1588,7 @@
         <div class="toggle-row" data-key="utl_mission_card" data-default="show" data-options="show:Show,hide:Hide"></div>
       </section>
 
-      <section class="admin-section" id="section-sync">
+      <section class="admin-section" id="section-sync" data-admin-tab-panel="content-manager">
         <span class="section-label">Site</span>
         <h2>Site sync check</h2>
         <div class="section-divider"></div>
@@ -1297,7 +1602,7 @@
         <div class="sync-list" id="syncCheckResults"></div>
       </section>
 
-      <section class="admin-section" id="section-visibility">
+      <section class="admin-section" id="section-visibility" data-admin-tab-panel="content-manager">
         <span class="section-label">Site</span>
         <h2>Visibility</h2>
         <div class="section-divider"></div>
@@ -1310,7 +1615,7 @@
         </div>
       </section>
 
-      <section class="admin-section" id="section-orientation">
+      <section class="admin-section" id="section-orientation" data-admin-tab-panel="content-manager">
         <span class="section-label">Members</span>
         <h2>Orientation</h2>
         <div class="section-divider"></div>
@@ -1324,7 +1629,7 @@
         <div id="embed-orientation"></div>
       </section>
 
-      <section class="admin-section" id="section-phase1">
+      <section class="admin-section" id="section-phase1" data-admin-tab-panel="content-manager">
         <span class="section-label">Members</span>
         <h2>Phase 1</h2>
         <div class="section-divider"></div>
@@ -1338,7 +1643,7 @@
         <div id="embed-phase1"></div>
       </section>
 
-      <section class="admin-section" id="section-phase2">
+      <section class="admin-section" id="section-phase2" data-admin-tab-panel="content-manager">
         <span class="section-label">Members</span>
         <h2>Phase 2</h2>
         <div class="section-divider"></div>
@@ -1352,7 +1657,7 @@
         <div id="embed-phase2"></div>
       </section>
 
-      <section class="admin-section" id="section-phase3">
+      <section class="admin-section" id="section-phase3" data-admin-tab-panel="content-manager">
         <span class="section-label">Members</span>
         <h2>Phase 3</h2>
         <div class="section-divider"></div>
@@ -1366,7 +1671,7 @@
         <div id="embed-phase3"></div>
       </section>
 
-      <section class="admin-section" id="section-tsa">
+      <section class="admin-section" id="section-tsa" data-admin-tab-panel="content-manager">
         <span class="section-label">Members</span>
         <h2>TSA Score™</h2>
         <div class="section-divider"></div>
@@ -1380,7 +1685,7 @@
         </div>
       </section>
 
-      <section class="admin-section" id="section-send-instructor">
+      <section class="admin-section" id="section-send-instructor" data-admin-tab-panel="content-manager">
         <span class="section-label">Members</span>
         <h2>Send to instructor</h2>
         <div class="section-divider"></div>
@@ -1403,7 +1708,21 @@
         </div>
       </section>
 
-      <section class="admin-section" id="section-members">
+      <section class="admin-section" id="section-student-progress" data-admin-tab-panel="student-progress">
+        <span class="section-label">Progress</span>
+        <h2>Student Progress</h2>
+        <div class="section-divider"></div>
+        <p class="description">High-level member progress from Firestore. Dots show watched lessons and completed exercises where remote progress has been saved.</p>
+        <div class="student-progress-actions">
+          <button class="small-button" type="button" id="studentProgressRefresh">Refresh progress</button>
+          <span class="student-progress-status" id="studentProgressStatus" aria-live="polite"></span>
+        </div>
+        <div id="studentProgressTable">
+          <p class="mb-msg">Click Refresh progress to load student progress.</p>
+        </div>
+      </section>
+
+      <section class="admin-section" id="section-members" data-admin-tab-panel="member-management">
         <span class="section-label">Access</span>
         <h2>Members</h2>
         <div class="section-divider"></div>
@@ -1468,7 +1787,7 @@
         </div>
       </section>
 
-      <section class="admin-section" id="section-passwords">
+      <section class="admin-section" id="section-passwords" data-admin-tab-panel="member-management">
         <span class="section-label">Access</span>
         <h2>Passwords</h2>
         <div class="section-divider"></div>
@@ -1477,7 +1796,7 @@
         <div class="warning-callout">If you change this password and forget it, you will need to edit admin/index.html directly to regain access.</div>
       </section>
 
-      <section class="admin-section" id="section-links">
+      <section class="admin-section" id="section-links" data-admin-tab-panel="content-manager">
         <span class="section-label">Links</span>
         <h2>Quick links</h2>
         <div class="section-divider"></div>
@@ -1496,6 +1815,7 @@
       db,
       deleteDoc,
       doc,
+      getAllMemberWorkspaceProgress,
       getDocs,
       sendSignInInvite,
       Timestamp
@@ -1508,6 +1828,7 @@
       db,
       deleteDoc,
       doc,
+      getAllMemberWorkspaceProgress,
       getDocs,
       sendSignInInvite,
       Timestamp
@@ -1956,9 +2277,52 @@
     function showAdmin() {
       localStorage.setItem('utl_member_unlocked', 'true');
       localStorage.setItem('utl_member_username', 'admin');
-      localStorage.setItem('utl_member_profile', JSON.stringify({ email: 'admin', displayName: 'admin', role: 'admin' }));
+      if (!localStorage.getItem('utl_member_profile')) {
+        localStorage.setItem('utl_member_profile', JSON.stringify({ email: 'admin', displayName: 'admin', role: 'admin' }));
+      }
       gate.style.display = 'none';
       app.classList.add('is-visible');
+      renderAdminProfile();
+      const requestedTab = new URLSearchParams(window.location.search).get('tab') || 'content-manager';
+      switchAdminTab(requestedTab, { replace: true, scroll: false });
+    }
+
+    function adminProfileData() {
+      let profile = {};
+      try {
+        profile = JSON.parse(localStorage.getItem('utl_member_profile') || '{}');
+      } catch (e) {
+        profile = {};
+      }
+      const email = profile.email || localStorage.getItem('utl_member_username') || 'admin';
+      const displayName = [profile.firstName, profile.lastName].filter(Boolean).join(' ').trim() || profile.displayName || email || 'Admin';
+      const initials = displayName
+        .split(/\s+/)
+        .filter(Boolean)
+        .slice(0, 2)
+        .map((part) => part.charAt(0).toUpperCase())
+        .join('') || 'AD';
+      return {
+        email,
+        displayName,
+        initials,
+        photoURL: profile.photoURL || ''
+      };
+    }
+
+    function renderAdminProfile() {
+      const profile = adminProfileData();
+      const emailEl = document.getElementById('adminProfileEmail');
+      const nameEl = document.getElementById('adminProfileName');
+      const button = document.getElementById('adminProfileButton');
+      const avatar = document.getElementById('adminProfileAvatar');
+      const avatarHtml = profile.photoURL
+        ? '<img src="' + escapeHtml(profile.photoURL) + '" alt="">'
+        : escapeHtml(profile.initials);
+      if (emailEl) emailEl.textContent = profile.email;
+      if (nameEl) nameEl.textContent = profile.displayName;
+      if (button) button.innerHTML = avatarHtml;
+      if (avatar) avatar.innerHTML = avatarHtml;
     }
 
     function setInviteStatus(message, type) {
@@ -2918,6 +3282,155 @@
       `).join('');
     }
 
+    function validAdminTab(tab) {
+      return ['content-manager', 'student-progress', 'member-management'].includes(tab) ? tab : 'content-manager';
+    }
+
+    function phaseLessonIds(phaseKey) {
+      const content = window.UTL_CONTENT || {};
+      return ((content[phaseKey] && content[phaseKey].lessons) || []).map((lesson) => lesson.id);
+    }
+
+    function phaseExerciseIds(phaseKey) {
+      const content = window.UTL_CONTENT || {};
+      return ((content[phaseKey] && content[phaseKey].exercises) || []).map((exercise) => exercise.id);
+    }
+
+    function progressDot(done, label) {
+      return '<span class="progress-dot ' + (done ? 'is-done' : '') + '" title="' + escapeHtml(label) + '"></span>';
+    }
+
+    function progressCell(member, phaseKey) {
+      const progress = member.workspaceProgress || {};
+      const lessons = progress.lessons || {};
+      const exercises = progress.exercises || {};
+      const lessonIds = phaseLessonIds(phaseKey);
+      const exerciseIds = phaseExerciseIds(phaseKey);
+      const lessonDots = lessonIds.map((id) => progressDot(lessons[id] && lessons[id].watched, id)).join('');
+      const exerciseDots = exerciseIds.map((id) => progressDot(exercises[id] && exercises[id].completed, id)).join('');
+      return '<td class="progress-cell">' +
+        '<span class="progress-dot-label">Videos</span><div class="progress-dot-row">' + (lessonDots || '<span style="color:#aaa;">—</span>') + '</div>' +
+        '<span class="progress-dot-label">Exercises</span><div class="progress-dot-row">' + (exerciseDots || '<span style="color:#aaa;">—</span>') + '</div>' +
+      '</td>';
+    }
+
+    function formatProgressDate(value) {
+      if (!value) return '—';
+      try {
+        const date = value.toDate ? value.toDate() : new Date(value);
+        if (isNaN(date.getTime())) return '—';
+        return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+      } catch (e) {
+        return '—';
+      }
+    }
+
+    function renderStudentProgressTable(members) {
+      const wrap = document.getElementById('studentProgressTable');
+      if (!wrap) return;
+      if (!members || !members.length) {
+        wrap.innerHTML = '<p class="mb-msg">No remote student progress has been saved yet.</p>';
+        return;
+      }
+      const rows = members.map((member) => {
+        const progress = member.workspaceProgress || {};
+        const exercises = progress.exercises || {};
+        const orientationDone = progress.orientation && progress.orientation.ready;
+        const diagnosticDone = exercises.utl_result_tsa_diagnostic && exercises.utl_result_tsa_diagnostic.completed;
+        const checkpointDone = exercises.utl_result_tsa_checkpoint && exercises.utl_result_tsa_checkpoint.completed;
+        return '<tr>' +
+          '<td><strong>' + escapeHtml(member.displayName || member.name || member.email || member.id || 'Member') + '</strong><br><small>' + escapeHtml(member.email || member.id || '') + '</small></td>' +
+          '<td>' + escapeHtml(formatProgressDate(member.lastSeenAt || member.updatedAt)) + '</td>' +
+          '<td class="progress-cell"><span class="progress-dot-label">Ready</span><div class="progress-dot-row">' + progressDot(orientationDone, 'Orientation ready') + '</div></td>' +
+          progressCell(member, 'phase1') +
+          progressCell(member, 'phase2') +
+          progressCell(member, 'phase3') +
+          '<td class="progress-cell"><span class="progress-dot-label">Assessments</span><div class="progress-dot-row">' + progressDot(diagnosticDone, 'Diagnostic') + progressDot(checkpointDone, 'Checkpoint') + '</div></td>' +
+        '</tr>';
+      }).join('');
+      wrap.innerHTML = '<div class="student-progress-table-wrap"><table class="student-progress-table">' +
+        '<thead><tr><th>Member</th><th>Last active</th><th>Orientation</th><th>Phase 1</th><th>Phase 2</th><th>Phase 3</th><th>Assessments</th></tr></thead>' +
+        '<tbody>' + rows + '</tbody></table></div>';
+    }
+
+    async function loadStudentProgress() {
+      const wrap = document.getElementById('studentProgressTable');
+      const refresh = document.getElementById('studentProgressRefresh');
+      const status = document.getElementById('studentProgressStatus');
+      if (!wrap) return;
+      const fb = window.utlFirebaseAuth;
+      if (!fb || !fb.getAllMemberWorkspaceProgress) {
+        wrap.innerHTML = '<p class="mb-msg">Waiting for Firebase...</p>';
+        if (status) status.textContent = 'Waiting for Firebase tools...';
+        window.addEventListener('utlFirebaseAuthReady', function handler() {
+          window.removeEventListener('utlFirebaseAuthReady', handler);
+          loadStudentProgress();
+        });
+        return;
+      }
+      if (refresh) {
+        refresh.disabled = true;
+        refresh.textContent = 'Refreshing...';
+      }
+      if (status) status.textContent = '';
+      wrap.innerHTML = '<p class="mb-msg">Loading student progress...</p>';
+      try {
+        const members = await fb.getAllMemberWorkspaceProgress();
+        renderStudentProgressTable(members);
+        if (status) {
+          status.textContent = 'Last refreshed ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+      } catch (error) {
+        const msg = (error && error.message) || 'Unknown error';
+        const authHint = /permission|Missing or insufficient permissions|requires/i.test(msg)
+          ? ' Make sure you are signed in with a Firebase admin or owner account, and deploy the latest Firestore rules.'
+          : '';
+        wrap.innerHTML = '<p class="mb-msg mb-err">Failed to load progress: ' + escapeHtml(msg + authHint) + '</p>';
+        if (status) status.textContent = 'Refresh failed';
+      } finally {
+        if (refresh) {
+          refresh.disabled = false;
+          refresh.textContent = 'Refresh progress';
+        }
+      }
+    }
+
+    function switchAdminTab(tab, options = {}) {
+      const activeTab = validAdminTab(tab);
+      document.querySelectorAll('[data-admin-tab]').forEach((button) => {
+        button.classList.toggle('active', button.dataset.adminTab === activeTab);
+      });
+      document.querySelectorAll('[data-admin-tab-panel]').forEach((section) => {
+        section.hidden = section.dataset.adminTabPanel !== activeTab;
+      });
+      document.querySelectorAll('[data-admin-tab-scope]').forEach((item) => {
+        item.hidden = item.dataset.adminTabScope !== activeTab;
+      });
+      document.querySelectorAll('[data-admin-nav-group]').forEach((label) => {
+        label.hidden = label.dataset.adminNavGroup !== activeTab;
+      });
+
+      const visibleNavItems = Array.from(document.querySelectorAll('.admin-nav-item')).filter((item) => !item.hidden);
+      const currentActive = visibleNavItems.find((item) => item.classList.contains('active'));
+      if (!currentActive && visibleNavItems.length) {
+        document.querySelectorAll('.admin-nav-item').forEach((item) => item.classList.remove('active'));
+        visibleNavItems[0].classList.add('active');
+      }
+
+      const url = new URL(window.location.href);
+      url.searchParams.set('tab', activeTab);
+      if (options.replace) window.history.replaceState({}, '', url);
+      else window.history.pushState({}, '', url);
+
+      if (activeTab === 'student-progress') loadStudentProgress();
+      if (activeTab === 'member-management' && !mbMembersCache.length) mbLoadMembers();
+
+      if (options.scroll !== false) {
+        const target = (currentActive || visibleNavItems[0])?.dataset.target;
+        if (target) openAndScrollToSection(target);
+      }
+    }
+
     // FIX 1 — Collapsible sections
     function initCollapsibleSections() {
       let savedStates = {};
@@ -3035,6 +3548,25 @@
       window.location.reload();
     });
 
+    document.getElementById('adminProfileButton')?.addEventListener('click', (event) => {
+      event.stopPropagation();
+      const menu = document.getElementById('adminProfileMenu');
+      const button = document.getElementById('adminProfileButton');
+      if (!menu || !button) return;
+      const shouldOpen = menu.hidden;
+      menu.hidden = !shouldOpen;
+      button.setAttribute('aria-expanded', shouldOpen ? 'true' : 'false');
+    });
+
+    document.addEventListener('click', (event) => {
+      const menu = document.getElementById('adminProfileMenu');
+      const button = document.getElementById('adminProfileButton');
+      if (!menu || !button || menu.hidden) return;
+      if (event.target.closest('.member-identity-right')) return;
+      menu.hidden = true;
+      button.setAttribute('aria-expanded', 'false');
+    });
+
     renderToggles();
     renderVisibilityChecklist();
     renderEmbedBlocks();
@@ -3063,6 +3595,14 @@
       if (!mbMembersCache.length) mbLoadMembers();
     });
     document.getElementById('mbRefreshBtn')?.addEventListener('click', mbLoadMembers);
+    document.addEventListener('click', (event) => {
+      if (event.target.closest('#studentProgressRefresh')) loadStudentProgress();
+    });
+    document.querySelectorAll('[data-admin-tab]').forEach((button) => {
+      button.addEventListener('click', () => {
+        switchAdminTab(button.dataset.adminTab);
+      });
+    });
     document.getElementById('refreshVisibility')?.addEventListener('click', () => {
       renderVisibilityChecklist();
       renderVisibilityStatus();
