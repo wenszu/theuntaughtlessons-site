@@ -1817,7 +1817,9 @@
       doc,
       getAllMemberWorkspaceProgress,
       getDocs,
+      getSignedInUser,
       sendSignInInvite,
+      signInWithGooglePopup,
       Timestamp
     } from "../assets/firebase.js";
 
@@ -1830,7 +1832,9 @@
       doc,
       getAllMemberWorkspaceProgress,
       getDocs,
+      getSignedInUser,
       sendSignInInvite,
+      signInWithGooglePopup,
       Timestamp
     };
     window.dispatchEvent(new CustomEvent('utlFirebaseAuthReady'));
@@ -3368,6 +3372,28 @@
         });
         return;
       }
+
+      // Check for a live Firebase Auth session before querying Firestore
+      wrap.innerHTML = '<p class="mb-msg">Checking sign-in status...</p>';
+      const currentUser = await fb.getSignedInUser();
+      if (!currentUser) {
+        wrap.innerHTML =
+          '<p class="mb-msg mb-err">You are not signed in with a Google account on this site.</p>' +
+          '<p class="mb-msg" style="margin-top:8px;">Student Progress requires a Firebase session. ' +
+          'Sign in with the same Google account that has admin or owner access in Firestore.</p>' +
+          '<button class="small-button" type="button" id="spSignInBtn" style="margin-top:12px;">Sign in with Google</button>';
+        document.getElementById('spSignInBtn').addEventListener('click', async function () {
+          try {
+            await fb.signInWithGooglePopup();
+            loadStudentProgress();
+          } catch (e) {
+            wrap.innerHTML = '<p class="mb-msg mb-err">Sign-in failed: ' + escapeHtml((e && e.message) || 'Unknown error') + '</p>';
+          }
+        });
+        if (status) status.textContent = 'Not signed in';
+        return;
+      }
+
       if (refresh) {
         refresh.disabled = true;
         refresh.textContent = 'Refreshing...';
@@ -3378,14 +3404,14 @@
         const members = await fb.getAllMemberWorkspaceProgress();
         renderStudentProgressTable(members);
         if (status) {
-          status.textContent = 'Last refreshed ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          status.textContent = 'Signed in as ' + escapeHtml(currentUser.email) + ' · Last refreshed ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         }
       } catch (error) {
         const msg = (error && error.message) || 'Unknown error';
-        const authHint = /permission|Missing or insufficient permissions|requires/i.test(msg)
-          ? ' Make sure you are signed in with a Firebase admin or owner account, and deploy the latest Firestore rules.'
+        const authHint = /permission|Missing or insufficient permissions/i.test(msg)
+          ? ' Your account (' + escapeHtml(currentUser.email) + ') may not have admin or owner role in Firestore authorized_members.'
           : '';
-        wrap.innerHTML = '<p class="mb-msg mb-err">Failed to load progress: ' + escapeHtml(msg + authHint) + '</p>';
+        wrap.innerHTML = '<p class="mb-msg mb-err">Failed to load progress: ' + escapeHtml(msg) + authHint + '</p>';
         if (status) status.textContent = 'Refresh failed';
       } finally {
         if (refresh) {

@@ -320,6 +320,10 @@ async function saveUserProgress(exerciseId, exerciseName, exercisePayload = {}) 
 
 async function getAllMemberWorkspaceProgress() {
   const readyDb = requireFirestore();
+  const user = await getSignedInUser();
+  if (!user) {
+    throw new Error("No Firebase session found. Sign in with your Google account through the member workspace, then return to this page.");
+  }
   const membersSnapshot = await getDocs(collection(readyDb, "authorized_members"));
   const usersSnapshot = await getDocs(query(collection(readyDb, "users")));
 
