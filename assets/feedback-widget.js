@@ -327,10 +327,6 @@ async function init() {
       document.body.appendChild(btn);
       btn.addEventListener("click", openModal);
     }
-
-    onAuthStateChanged(auth, (u) => {
-      if (!u) btn.remove();
-    });
   } catch {}
 }
 
