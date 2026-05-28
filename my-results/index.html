@@ -1824,14 +1824,11 @@
       input.value = currentUserEmail();
     }
 
+    const RESULTS_EMAIL_URL = 'https://script.google.com/macros/s/AKfycbzJE--FL2kB_XDNZRnszCtlyLRPvaLAHGuF5TAOdXJk40atbvf5Y6ELuSK2B7CSLaMN/exec';
+
     function emailMyResults() {
-      const url = (localStorage.getItem('utl_send_instructor_url') || '').trim();
       const input = document.getElementById('resultsEmailRecipients');
       const recipients = parseRecipientEmails(input ? input.value : '');
-      if (!url) {
-        setSendStatus('Email is not configured yet. Download your results instead.', 'error');
-        return;
-      }
       if (!recipients.length) {
         setSendStatus('Add at least one recipient email.', 'error');
         if (input) input.focus();
@@ -1851,10 +1848,11 @@
       }
       setSendStatus('Sending your results...', '');
 
-      fetch(url, {
+      fetch(RESULTS_EMAIL_URL, {
         method: 'POST',
         mode: 'no-cors',
         body: JSON.stringify({
+          action: 'ResultsEmail',
           submitted_at: new Date().toISOString(),
           user_email: currentUserEmail(),
           recipients,
@@ -1876,7 +1874,7 @@
     function applySendInstructorStatus() {
       const button = document.getElementById('btn-send-instructor');
       if (!button) return;
-      const isLive = localStorage.getItem('utl_send_instructor') === 'live';
+      const isLive = true; // always live — URL is hardcoded
       if (!isLive) {
         button.hidden = true;
         document.querySelectorAll('.results-email-label, .results-email-input, .results-email-hint').forEach(function(el) {

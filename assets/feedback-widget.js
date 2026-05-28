@@ -304,7 +304,11 @@ async function init() {
     const user = await getSignedInUser();
 
     if (!user) {
-      if (btn) btn.remove();
+      // Local (non-Google) login: Firebase returns null but localStorage confirms member.
+      // Keep the button; feedbackEnabled check is skipped for local users.
+      if (!isLocallyKnown) {
+        if (btn) btn.remove();
+      }
       return;
     }
 
