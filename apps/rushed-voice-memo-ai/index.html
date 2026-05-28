@@ -722,371 +722,56 @@
     </div>
   </header>
 
-  <section class="tsa-speak-gate" id="contactGate" aria-labelledby="gateTitle">
-    <div class="tsa-speak-gate-card">
-      <img class="tsa-speak-gate-logo" src="../../assets/logo.png" alt="The Untaught Lessons" />
-      <h1 id="gateTitle">Before we begin</h1>
-      <p>Enter your details to get your TSA Score™ and track your progress.</p>
-      <form class="tsa-speak-form" id="gateForm">
-        <label for="fullName">Full name</label>
-        <input id="fullName" name="name" type="text" autocomplete="name" required>
+  <main class="tsa-speak-main">
+    <section class="tsa-speak-intro">
+      <p class="tsa-speak-label">Phase 1 · Think clearly</p>
+      <h1>Rushed voice memo — AI summary</h1>
+      <p>Transcribe the voice memo from Hugh, then use the AI prompt below to turn it into a clean structured summary.</p>
+    </section>
 
-        <label for="emailAddress">Email address</label>
-        <input id="emailAddress" name="email" type="email" autocomplete="email" required>
+    <section class="tsa-speak-panel">
+      <div class="tsa-speak-panel-head">
+        <p class="tsa-speak-progress">The task</p>
+        <h2>Use AI to restructure Hugh's voice memo</h2>
+        <p>You already have the voice memo file from the previous exercise. Follow the steps below to transcribe it and use AI to structure it into a decision-ready update.</p>
+      </div>
+      <div class="tsa-speak-step">
 
-        <label for="roleTitle">Role / Job title</label>
-        <select id="roleTitle" name="role" required>
-          <option value="" disabled selected>Select your role</option>
-          <option value="Student">Student</option>
-          <option value="Professional">Professional</option>
-          <option value="Manager">Manager</option>
-          <option value="Other">Other</option>
-        </select>
-
-        <button class="tsa-speak-submit" id="gateSubmit" type="submit">Begin assessment</button>
-        <p class="tsa-speak-error" id="gateError" role="alert">Please check your details and try again.</p>
-      </form>
-    </div>
-  </section>
-
-  <main class="tsa-speak-main" id="app" hidden></main>
-
-  <script>
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzJE--FL2kB_XDNZRnszCtlyLRPvaLAHGuF5TAOdXJk40atbvf5Y6ELuSK2B7CSLaMN/exec';
-    const GATE_KEY = 'tsa_gate_complete';
-    const CONTACT_SESSION_KEY = 'utl_contact_shared';
-    const CONTACT_PROFILE_KEY = 'utl_contact_profile';
-    const SPEAK_SCORE_KEY = 'tsa_speak_score';
-    const DATA_URL = '../../data/tsa/speak-concisely.json';
-    const isCheckpoint = new URLSearchParams(window.location.search).get('version') === 'checkpoint';
-    const versionLabel = isCheckpoint ? 'Checkpoint' : 'Diagnostic';
-    document.getElementById('headerTitle').textContent = 'Rushed voice memo — AI summary';
-
-    const SCORER_SYSTEM_PROMPT = `You are a scoring assistant for the TSA Score™ assessment by The Untaught Lessons™.
-
-You are scoring a Phase 2 Speak concisely submission — a participant's spoken transcript delivered under a time limit.
-
-Score the following criteria using the C³ Rubric™. Each criterion is scored 1 to 5. Assign whole numbers only.
-
-C1 — Clear Core Idea: 1=none/scattered, 2=vague, 3=generally understood, 4=clear and focused, 5=precise and memorable.
-C4 — Decision Clarity: 1=none, 2=implied/vague, 3=present but weak, 4=clear and specific, 5=decisive and compelling.
-C5 — Controlled Pacing: 1=no control, 2=inconsistent, 3=generally understandable, 4=mostly intentional, 5=every beat serves the message.
-C6 — Vocal Clarity: 1=unclear, 2=inconsistent, 3=functional, 4=clear, 5=crisp and effortless.
-C7 — Commanding Presence: 1=weak/hesitant, 2=uneven, 3=adequate, 4=confident and credible, 5=authoritative and compelling.
-C8 — Concise Execution: 1=bloated, 2=loose, 3=acceptable, 4=tight, 5=razor sharp.
-
-Return only JSON with C1, C4, C5, C6, C7, C8, msg1, msg2, msg3, feedback, and compression fields when needed.`;
-
-    let topics = [];
-    let setIndex = 0;
-    let currentTopic = null;
-
-    const app = document.getElementById('app');
-    const contactGate = document.getElementById('contactGate');
-    const gateForm = document.getElementById('gateForm');
-    const gateSubmit = document.getElementById('gateSubmit');
-    const gateError = document.getElementById('gateError');
-    const state = {
-      participant: { name: '', email: '' },
-      notesMode: 'open',
-      reflectionMode: 'open',
-      transcript: '',
-      transcriptA: '',
-      transcriptB: '',
-      durations: {}
-    };
-
-    function readContactProfile() {
-      if (sessionStorage.getItem(CONTACT_SESSION_KEY) !== 'true') return null;
-      try {
-        const profile = JSON.parse(sessionStorage.getItem(CONTACT_PROFILE_KEY) || '{}');
-        return profile.name && profile.email ? profile : null;
-      } catch (error) {
-        return null;
-      }
-    }
-
-    function rememberContact(payload) {
-      sessionStorage.setItem(CONTACT_SESSION_KEY, 'true');
-      sessionStorage.setItem(CONTACT_PROFILE_KEY, JSON.stringify({
-        name: payload.name || '',
-        email: payload.email || '',
-        role: payload.role || '',
-        message: payload.message || '',
-        source: payload.source || 'tsa-assessment'
-      }));
-    }
-
-    function escapeHtml(value) {
-      return String(value).replace(/[&<>"']/g, char => ({
-        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
-      }[char]));
-    }
-
-    function wordCount(text) {
-      return (text.trim().match(/\b[\w'-]+\b/g) || []).length;
-    }
-
-    function renderLoadingState() {
-      app.hidden = false;
-      app.innerHTML = `
-        <section class="tsa-speak-panel">
-          <div class="tsa-speak-panel-head">
-            <h2>Loading assessment...</h2>
-          </div>
-          <div class="tsa-speak-panel-body">
-            <p>Preparing the rushed voice memo exercise.</p>
-          </div>
-        </section>
-      `;
-    }
-
-    function renderDataError() {
-      contactGate.classList.add('is-hidden');
-      document.body.classList.remove('tsa-speak-locked');
-      app.hidden = false;
-      app.innerHTML = `
-        <section class="tsa-speak-panel">
-          <div class="tsa-speak-panel-head">
-            <h2>We could not load this assessment.</h2>
-          </div>
-          <div class="tsa-speak-panel-body">
-            <p>Please refresh the page. If the issue continues, the exercise data file may be missing or malformed.</p>
-          </div>
-        </section>
-      `;
-    }
-
-    // Exercise data is loaded from ../../data/tsa/speak-concisely.json.
-    // Add new AI-supported voice memo topics in that JSON file, not in this HTML.
-    // Expected schema: an array of topic objects with title, scenario, points,
-    // keyMessages, tags, difficulty, and optional timeLimitSeconds metadata.
-    async function loadExerciseData() {
-      const response = await fetch(DATA_URL);
-      if (!response.ok) throw new Error(`Unable to load ${DATA_URL}`);
-      const data = await response.json();
-      if (!Array.isArray(data) || !data.length) throw new Error('Rushed voice memo data is empty.');
-      topics = data;
-      setIndex = Math.floor(Math.random() * topics.length);
-      currentTopic = topics[setIndex];
-    }
-
-    function startAssessment() {
-      if (!currentTopic) {
-        renderLoadingState();
-        return;
-      }
-      contactGate.classList.add('is-hidden');
-      document.body.classList.remove('tsa-speak-locked');
-      app.hidden = false;
-      renderTopicCard();
-    }
-
-    gateForm.addEventListener('submit', async (event) => {
-      event.preventDefault();
-      gateError.classList.remove('is-visible');
-      if (!gateForm.checkValidity()) {
-        gateForm.reportValidity();
-        return;
-      }
-
-      const formData = new FormData(gateForm);
-      state.participant.name = formData.get('name').trim();
-      state.participant.email = formData.get('email').trim();
-      const payload = {
-        name: state.participant.name,
-        email: state.participant.email,
-        role: formData.get('role').trim(),
-        message: 'Submitted via Rushed voice memo AI summary',
-        page: window.location.href,
-        source: 'tsa-assessment'
-      };
-
-      gateSubmit.disabled = true;
-      gateSubmit.textContent = 'Starting...';
-
-      try {
-        await fetch(SCRIPT_URL, {
-          method: 'POST',
-          mode: 'no-cors',
-          body: JSON.stringify(payload)
-        });
-        sessionStorage.setItem(GATE_KEY, 'true');
-        sessionStorage.setItem('tsa_participant_name', state.participant.name);
-        sessionStorage.setItem('tsa_participant_email', state.participant.email);
-        rememberContact(payload);
-        startAssessment();
-      } catch (error) {
-        gateSubmit.disabled = false;
-        gateSubmit.textContent = 'Begin assessment';
-        gateError.classList.add('is-visible');
-      }
-    });
-
-    async function initializeApp() {
-      const contactProfile = readContactProfile();
-      const gateComplete = sessionStorage.getItem(GATE_KEY) === 'true' || Boolean(contactProfile);
-      if (gateComplete) renderLoadingState();
-      try {
-        await loadExerciseData();
-        if (gateComplete) {
-          state.participant.name = sessionStorage.getItem('tsa_participant_name') || contactProfile?.name || '';
-          state.participant.email = sessionStorage.getItem('tsa_participant_email') || contactProfile?.email || '';
-          sessionStorage.setItem(GATE_KEY, 'true');
-          sessionStorage.setItem('tsa_participant_name', state.participant.name);
-          sessionStorage.setItem('tsa_participant_email', state.participant.email);
-          startAssessment();
-        }
-      } catch (error) {
-        console.error(error);
-        renderDataError();
-      }
-    }
-
-    function renderShell(innerHtml) {
-      app.innerHTML = `
-        <section class="tsa-speak-intro">
-          <p class="tsa-speak-label">Phase 1 · Think clearly</p>
-          <h1>Rushed voice memo — AI summary</h1>
-          <p>Transcribe the voice memo, then use the AI prompt to turn it into a clean structured summary.</p>
-        </section>
-        ${innerHtml}
-      `;
-    }
-
-    function infoList(points) {
-      return `<ul>${points.map(point => `<li><strong>${escapeHtml(point.summary)}:</strong> ${escapeHtml(point.detail)}</li>`).join('')}</ul>`;
-    }
-
-    function renderTopicCard() {
-      renderShell(`
-        <section class="tsa-speak-panel">
-          <div class="tsa-speak-panel-head">
-            <p class="tsa-speak-progress">${escapeHtml(currentTopic.category)}</p>
-            <h2>${escapeHtml(currentTopic.title)}</h2>
-            <p>${escapeHtml(currentTopic.scenario)}</p>
-          </div>
-          <div class="tsa-speak-step">
-            <div class="tsa-speak-info">
-              <h3>Information given to you</h3>
-              ${infoList(currentTopic.points)}
-            </div>
-            <div class="tsa-speak-actions">
-              <button class="tsa-speak-button" id="readyButton" type="button">I'm ready to start preparing</button>
-            </div>
-          </div>
-        </section>
-      `);
-      document.getElementById('readyButton').addEventListener('click', renderPreparation);
-    }
-
-    function notesModeSwitch(mode, target) {
-      return `
-        <div class="tsa-speak-mode-switch" aria-label="Answer input mode">
-          <button class="tsa-speak-mode-btn ${mode === 'open' ? 'is-active' : ''}" type="button" data-mode-target="${target}" data-mode-value="open">Open response</button>
-          <button class="tsa-speak-mode-btn ${mode === 'sections' ? 'is-active' : ''}" type="button" data-mode-target="${target}" data-mode-value="sections">Three-section response</button>
-        </div>
-      `;
-    }
-
-    function notesHtml(mode, prefix) {
-      if (mode === 'sections') {
-        return `
-          <div class="tsa-speak-notes-grid">
-            ${[1, 2, 3].map(number => `
-              <label class="tsa-speak-note-card">
-                <span class="tsa-speak-field-label">Section ${number}</span>
-                <input class="tsa-speak-note-title" type="text" data-note-title="${prefix}-${number}" placeholder="Section ${number}" />
-                <textarea class="tsa-speak-note-input" data-note="${prefix}-${number}" placeholder="Bullet responses..."></textarea>
-              </label>
-            `).join('')}
-          </div>
-        `;
-      }
-      return `<textarea class="tsa-speak-textarea" placeholder="Write your structured response here..."></textarea>`;
-    }
-
-    function wireModeSwitch(renderFunction) {
-      document.querySelectorAll('.tsa-speak-mode-btn').forEach(button => {
-        button.addEventListener('click', () => {
-          if (button.dataset.modeTarget === 'prep') {
-            state.notesMode = button.dataset.modeValue;
-          } else {
-            state.reflectionMode = button.dataset.modeValue;
-          }
-          renderFunction();
-        });
-      });
-    }
-
-    function renderPreparation() {
-      renderShell(`
-        <section class="tsa-speak-panel">
-          <div class="tsa-speak-panel-head">
-            <p class="tsa-speak-progress">Step 2 · Preparation notes</p>
-            <h2>Prepare your notes.</h2>
-            <p>Use this space to prepare your notes. Take as much time as you need.</p>
-          </div>
-          <div class="tsa-speak-step">
-            <div class="tsa-speak-prep-grid">
-              <section class="tsa-speak-prep-topic">
-                <h3>Talk details</h3>
-                <p><strong>${escapeHtml(currentTopic.title)}:</strong> ${escapeHtml(currentTopic.scenario)}</p>
-                <div class="tsa-speak-info">
-                  <h3>Information given to you</h3>
-                  ${infoList(currentTopic.points)}
-                </div>
-              </section>
-              <section class="tsa-speak-prep-notes">
-                <h3>Your response</h3>
-                ${notesModeSwitch(state.notesMode, 'prep')}
-                <div id="notesArea">${notesHtml(state.notesMode, 'prep')}</div>
-              </section>
-            </div>
-            <div class="tsa-speak-actions">
-              <button class="tsa-speak-button" id="recordButton" type="button">I'm ready to record</button>
-            </div>
-          </div>
-        </section>
-      `);
-      wireModeSwitch(renderPreparation);
-      document.getElementById('recordButton').addEventListener('click', () => isCheckpoint ? renderRecordingA() : renderDiagnosticRecording());
-    }
-
-    function helpPanel() {
-      const icons = {
-        camera: '<svg class="tsa-speak-step-icon" viewBox="0 0 64 48" fill="none" aria-hidden="true"><rect x="18" y="4" width="28" height="40" rx="5" fill="#FFFFFF" stroke="#003366" stroke-width="2"/><rect x="22" y="10" width="20" height="25" rx="2" fill="#F3EDE2" stroke="#003366" stroke-width="1.5"/><path d="M27 18h8l5-3v12l-5-3h-8z" fill="#EEA320" stroke="#003366" stroke-width="1.4"/><circle cx="32" cy="39" r="1.8" fill="#003366"/></svg>',
-        record: '<svg class="tsa-speak-step-icon" viewBox="0 0 64 48" fill="none" aria-hidden="true"><rect x="18" y="4" width="28" height="40" rx="5" fill="#FFFFFF" stroke="#003366" stroke-width="2"/><rect x="22" y="10" width="20" height="25" rx="2" fill="#F3EDE2" stroke="#003366" stroke-width="1.5"/><circle cx="32" cy="22" r="7" fill="#EEA320" stroke="#003366" stroke-width="1.5"/><circle cx="32" cy="22" r="3.5" fill="#B85B5B"/><circle cx="32" cy="39" r="1.8" fill="#003366"/></svg>',
-        laptop: '<svg class="tsa-speak-step-icon" viewBox="0 0 64 48" fill="none" aria-hidden="true"><rect x="13" y="9" width="38" height="26" rx="3" fill="#FFFFFF" stroke="#003366" stroke-width="2"/><path d="M8 39h48l-4-4H12z" fill="#F3EDE2" stroke="#003366" stroke-width="2" stroke-linejoin="round"/><circle cx="24" cy="22" r="5" fill="#EEA320" stroke="#003366" stroke-width="1.5"/><path d="M32 18h10M32 24h7" stroke="#003366" stroke-width="2" stroke-linecap="round"/><path d="M23 22l2 2 4-5" stroke="#003366" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-        audio: '<svg class="tsa-speak-step-icon" viewBox="0 0 64 48" fill="none" aria-hidden="true"><rect x="5" y="13" width="18" height="30" rx="4" fill="#FFFFFF" stroke="#003366" stroke-width="2"/><rect x="8" y="18" width="12" height="18" rx="2" fill="#F3EDE2" stroke="#003366" stroke-width="1.4"/><rect x="37" y="10" width="21" height="21" rx="2" fill="#FFFFFF" stroke="#003366" stroke-width="2"/><path d="M33 35h29l-4-4H37z" fill="#F3EDE2" stroke="#003366" stroke-width="2" stroke-linejoin="round"/><path d="M27 21c3 2 3 8 0 10M31 17c6 5 6 14 0 18" stroke="#EEA320" stroke-width="2.4" stroke-linecap="round"/></svg>',
-        select: '<svg class="tsa-speak-step-icon" viewBox="0 0 64 48" fill="none" aria-hidden="true"><rect x="8" y="7" width="39" height="34" rx="3" fill="#FFFFFF" stroke="#003366" stroke-width="2"/><rect x="14" y="15" width="25" height="5" rx="1" fill="#EEA320" opacity=".72"/><path d="M14 26h24M14 32h18" stroke="#003366" stroke-width="2" stroke-linecap="round"/><path d="M44 24l9 13 2-7 6-2z" fill="#F3EDE2" stroke="#003366" stroke-width="2" stroke-linejoin="round"/></svg>',
-        paste: '<svg class="tsa-speak-step-icon" viewBox="0 0 64 48" fill="none" aria-hidden="true"><rect x="9" y="9" width="22" height="30" rx="3" fill="#FFFFFF" stroke="#003366" stroke-width="2"/><path d="M16 9c0-3 8-3 8 0h4v6H12V9z" fill="#F3EDE2" stroke="#003366" stroke-width="2" stroke-linejoin="round"/><rect x="39" y="14" width="18" height="24" rx="3" fill="#FFFFFF" stroke="#003366" stroke-width="2"/><path d="M17 23h8M17 29h8M32 24h12" stroke="#003366" stroke-width="2" stroke-linecap="round"/><path d="M40 19l5 5-5 5" stroke="#EEA320" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>'
-      };
-      return `
         <details class="tsa-speak-record-help">
           <summary>How to transcribe the voice file</summary>
           <div class="tsa-speak-help-body">
             <h3>How to transcribe the voice file</h3>
             <ol class="tsa-speak-help-steps">
-              <li>${icons.camera}<strong>Open the voice file:</strong> You were sent a voice memo file via email. Open it on your phone or laptop.</li>
-              <li>${icons.laptop}<strong>Open ChatGPT voice mode:</strong> Go to chatgpt.com. Click the microphone icon to start voice input.</li>
-              <li>${icons.audio}<strong>Play the file into ChatGPT:</strong> Play the voice memo out loud while ChatGPT listens through your microphone. It transcribes in real time.</li>
-              <li>${icons.select}<strong>Copy the transcript:</strong> Once the file ends, stop ChatGPT. Select all the transcribed text and copy it.</li>
-              <li>${icons.paste}<strong>Paste and use the AI prompt:</strong> Paste the transcript into the box below. Then use the AI prompt provided to have ChatGPT structure your notes into MECE buckets.</li>
+              <li>
+                <svg class="tsa-speak-step-icon" viewBox="0 0 64 48" fill="none" aria-hidden="true"><rect x="18" y="4" width="28" height="40" rx="5" fill="#FFFFFF" stroke="#003366" stroke-width="2"/><rect x="22" y="10" width="20" height="25" rx="2" fill="#F3EDE2" stroke="#003366" stroke-width="1.5"/><path d="M27 18h8l5-3v12l-5-3h-8z" fill="#EEA320" stroke="#003366" stroke-width="1.4"/><circle cx="32" cy="39" r="1.8" fill="#003366"/></svg>
+                <strong>Open the voice file:</strong> You were sent a voice memo file via email. Open it on your phone or laptop.
+              </li>
+              <li>
+                <svg class="tsa-speak-step-icon" viewBox="0 0 64 48" fill="none" aria-hidden="true"><rect x="13" y="9" width="38" height="26" rx="3" fill="#FFFFFF" stroke="#003366" stroke-width="2"/><path d="M8 39h48l-4-4H12z" fill="#F3EDE2" stroke="#003366" stroke-width="2" stroke-linejoin="round"/><circle cx="24" cy="22" r="5" fill="#EEA320" stroke="#003366" stroke-width="1.5"/><path d="M32 18h10M32 24h7" stroke="#003366" stroke-width="2" stroke-linecap="round"/><path d="M23 22l2 2 4-5" stroke="#003366" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <strong>Open ChatGPT voice mode:</strong> Go to chatgpt.com. Click the microphone icon to start voice input.
+              </li>
+              <li>
+                <svg class="tsa-speak-step-icon" viewBox="0 0 64 48" fill="none" aria-hidden="true"><rect x="5" y="13" width="18" height="30" rx="4" fill="#FFFFFF" stroke="#003366" stroke-width="2"/><rect x="8" y="18" width="12" height="18" rx="2" fill="#F3EDE2" stroke="#003366" stroke-width="1.4"/><rect x="37" y="10" width="21" height="21" rx="2" fill="#FFFFFF" stroke="#003366" stroke-width="2"/><path d="M33 35h29l-4-4H37z" fill="#F3EDE2" stroke="#003366" stroke-width="2" stroke-linejoin="round"/><path d="M27 21c3 2 3 8 0 10M31 17c6 5 6 14 0 18" stroke="#EEA320" stroke-width="2.4" stroke-linecap="round"/></svg>
+                <strong>Play the file into ChatGPT:</strong> Play the voice memo out loud while ChatGPT listens through your microphone. It transcribes in real time.
+              </li>
+              <li>
+                <svg class="tsa-speak-step-icon" viewBox="0 0 64 48" fill="none" aria-hidden="true"><rect x="8" y="7" width="39" height="34" rx="3" fill="#FFFFFF" stroke="#003366" stroke-width="2"/><rect x="14" y="15" width="25" height="5" rx="1" fill="#EEA320" opacity=".72"/><path d="M14 26h24M14 32h18" stroke="#003366" stroke-width="2" stroke-linecap="round"/><path d="M44 24l9 13 2-7 6-2z" fill="#F3EDE2" stroke="#003366" stroke-width="2" stroke-linejoin="round"/></svg>
+                <strong>Copy the transcript:</strong> Once the file ends, stop ChatGPT. Select all the transcribed text and copy it.
+              </li>
+              <li>
+                <svg class="tsa-speak-step-icon" viewBox="0 0 64 48" fill="none" aria-hidden="true"><rect x="9" y="9" width="22" height="30" rx="3" fill="#FFFFFF" stroke="#003366" stroke-width="2"/><path d="M16 9c0-3 8-3 8 0h4v6H12V9z" fill="#F3EDE2" stroke="#003366" stroke-width="2" stroke-linejoin="round"/><rect x="39" y="14" width="18" height="24" rx="3" fill="#FFFFFF" stroke="#003366" stroke-width="2"/><path d="M17 23h8M17 29h8M32 24h12" stroke="#003366" stroke-width="2" stroke-linecap="round"/><path d="M40 19l5 5-5 5" stroke="#EEA320" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <strong>Paste and use the AI prompt:</strong> Paste the transcript into ChatGPT. Then use the AI structuring prompt below to have it structure the memo into MECE buckets.
+              </li>
             </ol>
             <p><strong>Alternative free tools if ChatGPT is unavailable:</strong></p>
             <ul>
               <li><strong>Google Docs voice typing:</strong> Use Tools → Voice typing. Free, works in Chrome.</li>
               <li><strong>Otter.ai free tier:</strong> Upload your audio file directly. It transcribes automatically.</li>
-              <li><strong>Manual fallback:</strong> If transcription fails, type what you heard. Minimum 50 words to submit.</li>
+              <li><strong>Manual fallback:</strong> If transcription fails, type what you heard. Minimum 50 words to continue.</li>
             </ul>
           </div>
         </details>
-      `;
-    }
 
-    function aiPromptBlock() {
-      return `
         <details class="tsa-speak-record-help">
           <summary>AI structuring prompt</summary>
           <div class="tsa-speak-help-body">
@@ -1104,384 +789,64 @@ Here is the transcript:
 [paste transcript here]</pre>
           </div>
         </details>
-      `;
-    }
 
-    function transcriptBox({ id, label, buttonId, buttonText }) {
-      return `
-        <label class="tsa-speak-field-label" for="${id}">${label}</label>
-        <textarea class="tsa-speak-textarea" id="${id}" placeholder="Paste your transcript here…"></textarea>
-        ${aiPromptBlock()}
-        <div class="tsa-speak-time-grid" aria-label="Recording time">
-          <label for="${id}Minutes">Minutes
-            <input id="${id}Minutes" type="number" min="0" max="10" inputmode="numeric" placeholder="0">
-          </label>
-          <label for="${id}Seconds">Seconds
-            <input id="${id}Seconds" type="number" min="0" max="59" inputmode="numeric" placeholder="00">
-          </label>
-        </div>
-        <p class="tsa-speak-count" id="${id}Count">0 characters · 0 words</p>
+        <label class="tsa-speak-field-label" for="structuredOutput">Your AI-structured output</label>
+        <textarea class="tsa-speak-textarea" id="structuredOutput" placeholder="Paste your AI-structured output here…"></textarea>
+        <p class="tsa-speak-count" id="outputCount">0 characters · 0 words</p>
+
         <div class="tsa-speak-actions">
-          <a class="tsa-speak-link-button secondary" href="../../member-login/index.html#phase1">Back to member workspace</a>
-          <button class="tsa-speak-button" id="${buttonId}" type="button" disabled>${buttonText}</button>
+          <a class="tsa-speak-link-button secondary" href="../../member-login/phase-1/practice/index.html">End exercise</a>
+          <button class="tsa-speak-button" id="markDoneBtn" type="button" disabled>Mark done</button>
         </div>
-      `;
-    }
 
-    function wireTranscript(id, buttonId, onSubmit) {
-      const textarea = document.getElementById(id);
-      const minutes = document.getElementById(`${id}Minutes`);
-      const seconds = document.getElementById(`${id}Seconds`);
-      const count = document.getElementById(`${id}Count`);
-      const button = document.getElementById(buttonId);
-      function update() {
-        const chars = textarea.value.trim().length;
-        count.textContent = `${chars} characters · ${wordCount(textarea.value)} words`;
-        button.disabled = chars < 50;
-      }
-      textarea.addEventListener('input', update);
-      button.addEventListener('click', () => {
-        const mins = Math.max(0, Number(minutes.value || 0));
-        const secs = Math.min(59, Math.max(0, Number(seconds.value || 0)));
-        state.durations[id] = (mins * 60) + secs;
-        onSubmit(textarea.value.trim());
-      });
-      update();
-    }
-
-    function renderDiagnosticRecording() {
-      renderShell(`
-        <section class="tsa-speak-panel">
-          <div class="tsa-speak-panel-head">
-            <p class="tsa-speak-progress">Step 3 · Recording · 1 minute</p>
-            <h2>Record your talk.</h2>
-            <p>Record yourself for up to 1 minute. Cover the most important messages from the topic card. When you are done, transcribe your recording and paste the result below.</p>
-          </div>
-          <div class="tsa-speak-step">
-            ${helpPanel()}
-            ${transcriptBox({ id: 'diagnosticTranscript', label: 'Your transcript', buttonId: 'submitTranscript', buttonText: 'Done. Continue →' })}
-          </div>
-        </section>
-      `);
-      wireTranscript('diagnosticTranscript', 'submitTranscript', transcript => {
-        state.transcript = transcript;
-        scoreSubmission();
-      });
-    }
-
-    function renderRecordingA() {
-      renderShell(`
-        <section class="tsa-speak-panel">
-          <div class="tsa-speak-panel-head">
-            <p class="tsa-speak-progress">Step 3 · Recording A · 2 minutes</p>
-            <h2>Record your full talk.</h2>
-            <p>Record yourself for up to 2 minutes. Cover all the key messages from the topic card. When you are done, transcribe your recording and paste the result below.</p>
-          </div>
-          <div class="tsa-speak-step">
-            ${helpPanel()}
-            ${transcriptBox({ id: 'transcriptA', label: 'Recording A: your transcript', buttonId: 'continueToReflection', buttonText: 'Recording A done. Continue' })}
-          </div>
-        </section>
-      `);
-      wireTranscript('transcriptA', 'continueToReflection', transcript => {
-        state.transcriptA = transcript;
-        renderReflection();
-      });
-    }
-
-    function renderReflection() {
-      renderShell(`
-        <section class="tsa-speak-panel">
-          <div class="tsa-speak-panel-head">
-            <p class="tsa-speak-progress">Step 4 · Reflection</p>
-            <h2>Now compress it.</h2>
-            <p>Nice work. Now here is the challenge: give the same talk in 1 minute or less.</p>
-            <p>Think about what you can cut without losing the most important messages.</p>
-          </div>
-          <div class="tsa-speak-step">
-            <h3>Your response</h3>
-            ${notesModeSwitch(state.reflectionMode, 'reflection')}
-            <div id="reflectionNotes">${notesHtml(state.reflectionMode, 'reflection')}</div>
-            <div class="tsa-speak-actions">
-              <button class="tsa-speak-button" id="recordBButton" type="button">I'm ready for Recording B</button>
+        <div id="completionNotice" hidden>
+          <div class="completion-save-notice">
+            <div class="save-notice-text">
+              Your response has been saved.
+              <a href="../../member-login/phase-1/practice/index.html" class="save-notice-link">Return to Phase 1 exercises →</a>
             </div>
+            <div class="save-notice-caveat">Saved on this device only. Copy your response into your companion workbook to keep a permanent record.</div>
           </div>
-        </section>
-      `);
-      wireModeSwitch(renderReflection);
-      document.getElementById('recordBButton').addEventListener('click', renderRecordingB);
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <script>
+    function wordCount(text) {
+      return (text.trim().match(/\b[\w'-]+\b/g) || []).length;
     }
 
-    function renderRecordingB() {
-      renderShell(`
-        <section class="tsa-speak-panel">
-          <div class="tsa-speak-panel-head">
-            <p class="tsa-speak-progress">Step 5 · Recording B · 1 minute</p>
-            <h2>Record the concise version.</h2>
-            <p>Same talk. Same key messages. 1 minute or less. Transcribe and paste below.</p>
-          </div>
-          <div class="tsa-speak-step">
-            ${transcriptBox({ id: 'transcriptB', label: 'Recording B: your transcript', buttonId: 'submitBoth', buttonText: 'Submit both transcripts' })}
-          </div>
-        </section>
-      `);
-      wireTranscript('transcriptB', 'submitBoth', transcript => {
-        state.transcriptB = transcript;
-        scoreSubmission();
-      });
-    }
+    const textarea = document.getElementById('structuredOutput');
+    const count = document.getElementById('outputCount');
+    const btn = document.getElementById('markDoneBtn');
+    const notice = document.getElementById('completionNotice');
 
-    function localScoreTranscript(transcript, transcriptB = '') {
-      const scoringText = transcriptB || transcript;
-      const lower = scoringText.toLowerCase();
-      const words = wordCount(scoringText);
-      const msgScores = currentTopic.keyMessages.map(message => {
-        const tokens = message.toLowerCase().replace(/[^\w\s]/g, '').split(/\s+/).filter(word => word.length > 4);
-        const hits = tokens.filter(token => lower.includes(token)).length;
-        if (hits >= Math.max(2, Math.ceil(tokens.length * .3))) return 4;
-        if (hits >= 1) return 2;
-        return 0;
-      });
-      const hasConclusion = /\b(recommend|should|next|therefore|ask|approve|decide|need)\b/i.test(scoringText);
-      const sentenceCount = Math.max(1, (scoringText.match(/[.!?]/g) || []).length);
-      const avgWords = words / sentenceCount;
-      const C1 = Math.min(5, Math.max(2, Math.round((msgScores.reduce((a, b) => a + b, 0) / 12) * 4) + 1));
-      const C4 = hasConclusion ? 4 : 2;
-      const C5 = avgWords <= 24 ? 4 : 3;
-      const C6 = avgWords <= 28 ? 4 : 3;
-      const C7 = hasConclusion ? 4 : 3;
-      const C8 = words <= 140 ? 4 : words <= 195 ? 3 : 2;
-      const compression = transcriptB ? Math.max(1, Math.min(5, Math.round((wordCount(transcript) ? (wordCount(transcriptB) / wordCount(transcript)) : .7) <= .75 ? 4 : 3))) : 0;
-      return {
-        C1, C4, C5, C6, C7, C8,
-        msg1: msgScores[0],
-        msg2: msgScores[1],
-        msg3: msgScores[2],
-        compression,
-        compression_feedback: transcriptB ? 'The concise version kept the main structure, but the final quality depends on whether the key messages stayed explicit.' : '',
-        feedback: {
-          C1: 'The core idea is understandable when the main takeaway appears early and stays consistent.',
-          C4: hasConclusion ? 'The transcript includes a clear recommendation or next step.' : 'The transcript would be stronger with a more explicit recommendation or next step.',
-          C5: 'The pacing appears manageable based on transcript length and sentence structure.',
-          C6: 'The wording is generally clear enough to follow.',
-          C7: hasConclusion ? 'The language projects conviction because it takes a position.' : 'The delivery would feel more confident with more decisive wording.',
-          C8: words <= 140 ? 'The transcript is concise for the target time.' : 'The transcript may need tighter editing to fit the target time.',
-          overall: 'This automated local score is a placeholder until a secure scoring endpoint is connected. Use it as directional feedback, not a final human-grade assessment.'
-        }
-      };
-    }
+    textarea.addEventListener('input', () => {
+      const chars = textarea.value.trim().length;
+      count.textContent = `${chars} characters · ${wordCount(textarea.value)} words`;
+      btn.disabled = chars < 50;
+    });
 
-    async function scoreWithClaude() {
-      const transcript = isCheckpoint ? state.transcriptA : state.transcript;
-      const checkpointInstruction = isCheckpoint ? ' This is a Checkpoint submission with two recordings. Include compression and compression_feedback in the JSON.' : '';
-      const content = isCheckpoint
-        ? `Exercise: Phase 2 Speak concisely — Checkpoint\nTopic: ${currentTopic.title}\nKey messages to score against:\n1. ${currentTopic.keyMessages[0]}\n2. ${currentTopic.keyMessages[1]}\n3. ${currentTopic.keyMessages[2]}\n\nRecording A transcript (target: 2 minutes):\n${state.transcriptA}\n\nRecording B transcript (target: 1 minute):\n${state.transcriptB}`
-        : `Exercise: Phase 2 Speak concisely — Diagnostic\nTopic: ${currentTopic.title}\nKey messages to score against:\n1. ${currentTopic.keyMessages[0]}\n2. ${currentTopic.keyMessages[1]}\n3. ${currentTopic.keyMessages[2]}\n\nTranscript:\n${transcript}`;
-
-      if (!window.TSA_SPEAK_SCORER_ENDPOINT) {
-        return localScoreTranscript(transcript, isCheckpoint ? state.transcriptB : '');
-      }
-
-      const response = await fetch(window.TSA_SPEAK_SCORER_ENDPOINT, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
-          max_tokens: 1000,
-          system: SCORER_SYSTEM_PROMPT + checkpointInstruction,
-          messages: [{ role: 'user', content }]
-        })
-      });
-      const data = await response.json();
-      const text = data.content?.[0]?.text || data.text || JSON.stringify(data);
-      return JSON.parse(text);
-    }
-
-    function applyTimingPenalties(parts) {
-      if (!isCheckpoint) {
-        const words = wordCount(state.transcript);
-        const seconds = state.durations.diagnosticTranscript || 0;
-        if ((seconds && seconds < 30) || (!seconds && words < 50)) parts.coverage = Math.max(0, parts.coverage - 4);
-        if ((seconds && seconds > 75) || (!seconds && words > 140)) parts.delivery = Math.max(0, parts.delivery - 3);
-        return parts;
-      }
-      const wordsA = wordCount(state.transcriptA);
-      const wordsB = wordCount(state.transcriptB);
-      const secondsA = state.durations.transcriptA || 0;
-      const secondsB = state.durations.transcriptB || 0;
-      if ((secondsA && secondsA < 45) || (!secondsA && wordsA < 100)) parts.coverage = Math.max(0, parts.coverage - 8);
-      else if ((secondsA && secondsA < 90) || (!secondsA && wordsA < 195)) parts.coverage = Math.max(0, parts.coverage - 4);
-      else if ((secondsA && secondsA > 180) || (!secondsA && wordsA > 390)) parts.delivery = Math.max(0, parts.delivery - 4);
-      else if ((secondsA && secondsA > 150) || (!secondsA && wordsA > 325)) parts.delivery = Math.max(0, parts.delivery - 2);
-      if ((secondsB && secondsB < 30) || (!secondsB && wordsB < 50)) parts.conciseness = Math.max(0, parts.conciseness - 6);
-      else if ((secondsB && secondsB > 120) || (!secondsB && wordsB > 260)) parts.conciseness = Math.max(0, parts.conciseness - 6);
-      else if ((secondsB && secondsB > 90) || (!secondsB && wordsB > 195)) parts.conciseness = Math.max(0, parts.conciseness - 3);
-      return parts;
-    }
-
-    function calculateParts(raw) {
-      const coverage = Number(raw.msg1 || 0) + Number(raw.msg2 || 0) + Number(raw.msg3 || 0);
-      const delivery = Math.round(((Number(raw.C5 || 0) + Number(raw.C6 || 0) + Number(raw.C7 || 0)) / 15) * 9);
-      const conciseness = isCheckpoint
-        ? Math.round((Number(raw.compression || 0) / 5) * 9)
-        : Math.round((Number(raw.C8 || 0) / 5) * 9);
-      return applyTimingPenalties({ coverage, delivery, conciseness });
-    }
-
-    function interpretation(total) {
-      if (total >= 27) return 'Exceptional: your message was clear, tight, and compelling.';
-      if (total >= 21) return 'Strong: good coverage and delivery with room to sharpen.';
-      if (total >= 13) return 'Developing: the message was there but needs more focus and conciseness.';
-      return 'Early stage: this is exactly what the UTL Speak concisely phase builds.';
-    }
-
-    function readScore(key) {
-      try {
-        const raw = sessionStorage.getItem(key);
-        return raw ? JSON.parse(raw) : null;
-      } catch (error) {
-        return null;
-      }
-    }
-
-    function saveResult(appId, phase, exerciseName, durationSeconds, responseObj) {
-      const existing = localStorage.getItem('utl_result_' + appId);
-      const attempt = existing ? (JSON.parse(existing).attempt || 0) + 1 : 1;
+    btn.addEventListener('click', () => {
+      const text = textarea.value.trim();
       const record = {
-        app_id: appId,
-        phase,
-        exercise: exerciseName,
+        app_id: 'rushed-voice-memo-ai',
+        phase: 1,
+        exercise: 'Rushed voice memo with AI',
         completed_at: new Date().toISOString(),
-        duration_seconds: Math.round(durationSeconds),
-        attempt,
-        response: responseObj
+        response: { ai_structured_output: text }
       };
-      localStorage.setItem('utl_result_' + appId, JSON.stringify(record));
+      localStorage.setItem('utl_result_rushed-voice-memo-ai', JSON.stringify(record));
       import('../../assets/firebase.js')
-        .then(({ saveUserProgress }) => saveUserProgress(appId, exerciseName, record))
-        .catch((error) => console.warn('Firestore progress save failed.', error));
-    }
+        .then(({ saveUserProgress }) => saveUserProgress('rushed-voice-memo-ai', 'Rushed voice memo with AI', record))
+        .catch(err => console.warn('Progress save failed.', err));
+      btn.disabled = true;
+      btn.textContent = 'Done ✓';
+      notice.hidden = false;
+    });
 
-    function completionSaveNotice() {
-      return `
-        <div class="completion-save-notice">
-          <div class="save-notice-text">
-            <i class="ti ti-device-floppy" aria-hidden="true"></i>
-            Your response has been saved to this browser.
-            <a href="../../my-results/index.html" class="save-notice-link">View all your results →</a>
-          </div>
-          <div class="save-notice-caveat">Saved on this device only. Copy your response into your companion workbook to keep a permanent record.</div>
-        </div>
-      `;
-    }
-
-    async function scoreSubmission() {
-      renderShell(`
-        <section class="tsa-speak-panel">
-          <div class="tsa-speak-loading">
-            <p class="tsa-speak-label">Scoring</p>
-            <h2>Scoring your transcript...</h2>
-            <p>This may take a moment.</p>
-          </div>
-        </section>
-      `);
-
-      let raw;
-      try {
-        raw = await scoreWithClaude();
-      } catch (error) {
-        raw = localScoreTranscript(isCheckpoint ? state.transcriptA : state.transcript, isCheckpoint ? state.transcriptB : '');
-      }
-      const parts = calculateParts(raw);
-      const total = Math.min(30, parts.coverage + parts.delivery + parts.conciseness);
-      const result = {
-        score: total,
-        coverage: parts.coverage,
-        delivery: parts.delivery,
-        conciseness: parts.conciseness,
-        topic: currentTopic.title,
-        version: versionLabel,
-        raw
-      };
-      const durationSeconds = isCheckpoint
-        ? Number(state.durations.transcriptA || 0) + Number(state.durations.transcriptB || 0)
-        : Number(state.durations.diagnosticTranscript || 0);
-      saveResult('rushed-voice-memo-ai', 1, 'Rushed voice memo with AI', durationSeconds, {
-        transcript: isCheckpoint ? state.transcriptA : state.transcript,
-        ai_structured_output: isCheckpoint ? state.transcriptB : state.transcript,
-        duration_minutes: Math.floor(durationSeconds / 60),
-        duration_seconds: durationSeconds
-      });
-      sessionStorage.setItem(SPEAK_SCORE_KEY, JSON.stringify(result));
-      localStorage.setItem(SPEAK_SCORE_KEY, JSON.stringify(result));
-      import('../../assets/firebase.js')
-        .then(({ saveUserProgress }) => saveUserProgress(SPEAK_SCORE_KEY, `Rushed voice memo AI Speak (${versionLabel})`, result))
-        .catch((error) => console.warn('Firestore progress save failed.', error));
-      showScore(result);
-    }
-
-    function criterionCard(title, value, feedback) {
-      return `
-        <div class="tsa-speak-feedback-card">
-          <h3>${escapeHtml(title)} · ${Number(value || 0)}/5</h3>
-          <p>${escapeHtml(feedback || 'Feedback unavailable.')}</p>
-        </div>
-      `;
-    }
-
-    function showScore(result) {
-      const sort = readScore('tsa_sort_score');
-      const spot = readScore('tsa_spot_score');
-      const combined = sort && spot ? Number(sort.score) + Number(spot.score) : null;
-      const running = combined !== null ? combined + result.score : null;
-      const combinedMarkup = combined !== null ? `
-        <div class="tsa-speak-combined">
-          <h2>Running TSA Score</h2>
-          <div>Part 1: Think clearly: ${combined} / 40</div>
-          <div>Part 2: Speak concisely: ${result.score} / 30</div>
-          <div><strong>Running total: ${running} / 70</strong></div>
-        </div>
-      ` : '';
-
-      renderShell(`
-        <section class="tsa-speak-score-card">
-          <h1>Your Speak concisely score</h1>
-          <div class="tsa-speak-score">${result.score} / 30</div>
-          <div class="tsa-speak-score-rows">
-            <div class="tsa-speak-score-row">Message coverage<strong>${result.coverage} / 12</strong></div>
-            <div class="tsa-speak-score-row">Delivery quality<strong>${result.delivery} / 9</strong></div>
-            <div class="tsa-speak-score-row">${isCheckpoint ? 'Compression' : 'Conciseness'}<strong>${result.conciseness} / 9</strong></div>
-          </div>
-          <p>${interpretation(result.score)}</p>
-          ${combinedMarkup}
-          <p class="tsa-speak-label">Criterion feedback</p>
-          <div class="tsa-speak-feedback-grid">
-            ${criterionCard('Clear Core Idea', result.raw.C1, result.raw.feedback?.C1)}
-            ${criterionCard('Decision Clarity', result.raw.C4, result.raw.feedback?.C4)}
-            ${criterionCard('Controlled Pacing', result.raw.C5, result.raw.feedback?.C5)}
-            ${criterionCard('Vocal Clarity', result.raw.C6, result.raw.feedback?.C6)}
-            ${criterionCard('Commanding Presence', result.raw.C7, result.raw.feedback?.C7)}
-            ${criterionCard('Concise Execution', result.raw.C8, result.raw.feedback?.C8)}
-          </div>
-          ${isCheckpoint ? `<p><strong>Compression:</strong> ${Number(result.raw.compression || 0)}/5. ${escapeHtml(result.raw.compression_feedback || '')}</p>` : ''}
-          <p><strong>Overall:</strong> ${escapeHtml(result.raw.feedback?.overall || '')}</p>
-          ${completionSaveNotice()}
-          <p class="tsa-speak-copy-line" id="copyLine" hidden>Speak concisely\t${result.score}/30\tCoverage: ${result.coverage}/12\tDelivery: ${result.delivery}/9\t${isCheckpoint ? 'Compression' : 'Conciseness'}: ${result.conciseness}/9\tTopic: ${currentTopic.title}\tVersion: ${versionLabel}</p>
-          <div class="tsa-speak-actions">
-            <button class="tsa-speak-button secondary" id="copyResults" type="button">Copy results</button>
-            <a class="tsa-speak-link-button secondary" href="${isCheckpoint ? '../tsa-checkpoint/index.html' : '../tsa-diagnostic/index.html'}">← Back to ${isCheckpoint ? 'Checkpoint' : 'Diagnostic'}</a>
-            <a class="tsa-speak-link-button disabled" href="#" title="Coming soon">Continue to Act confidently →</a>
-          </div>
-        </section>
-      `);
-
-      document.getElementById('copyResults').addEventListener('click', async event => {
-        await navigator.clipboard.writeText(document.getElementById('copyLine').textContent);
-        event.target.textContent = 'Copied';
-      });
-    }
-
-    initializeApp();
   </script>
 </body>
 </html>

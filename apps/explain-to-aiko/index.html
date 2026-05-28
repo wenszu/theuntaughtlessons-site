@@ -637,7 +637,7 @@ Best, Yutee Elle`;
                 </ul>
               </div>
               <div class="tsa-speak-actions">
-                <button class="tsa-speak-button" id="readyButton" type="button">I'm ready to start preparing</button>
+                <button class="tsa-speak-button" id="readyButton" type="button">I am ready to start preparing</button>
               </div>
             </div>
           </section>
@@ -748,7 +748,7 @@ Best, Yutee Elle`;
                 </section>
               </div>
               <div class="tsa-speak-actions">
-                <button class="tsa-speak-button" id="recordButton" type="button">I'm ready to record</button>
+                <button class="tsa-speak-button" id="recordButton" type="button">I am ready to record</button>
               </div>
             </div>
           </section>
@@ -845,6 +845,7 @@ Best, Yutee Elle`;
         }
 
         textarea.addEventListener('input', update);
+        textarea.addEventListener('paste', function () { setTimeout(update, 0); });
         document.getElementById('backToPrep').addEventListener('click', renderPreparation);
         submit.addEventListener('click', async () => {
           const mins = Math.max(0, Number(document.getElementById('explainMinutes').value || 0));

@@ -33,7 +33,7 @@ const UTL_CONTENT = {
     lessons: [
       { id: "p1-l1", title: "KonMari for the cluttered mind", duration: "9 min", videoUrl: "https://drive.google.com/open?id=1JogKtDiCfhNjNckFLhOEJCCw7gh7eORq&usp=drive_copy" },
       { id: "p1-l2", title: "Rule of three", duration: "8 min", videoUrl: "https://drive.google.com/open?id=1fFBBPC0JbHf1IPeHIz_9yKrp173coxJM&usp=drive_copy" },
-      { id: "p1-l3", title: "Bolded summary phrase", duration: "8 min", videoUrl: "https://drive.google.com/open?id=1ZSKGHTUSZs2T3g3aTMgQ9fk9lHg_fN34&usp=drive_copy" }
+      { id: "p1-l3", title: "Bolded summary phrases (BSP)", duration: "8 min", videoUrl: "https://drive.google.com/open?id=1ZSKGHTUSZs2T3g3aTMgQ9fk9lHg_fN34&usp=drive_copy" }
     ],
     introContexts: [
       {
@@ -78,7 +78,7 @@ const UTL_CONTENT = {
         legacyEmbedKey: "utl_embed_p1_message_desk",
         title: "Manager's messy notes",
         type: "Restructure",
-        description: "Turn a disorganized voice memo into a structured, decision-ready response.",
+        description: "Turn a disorganized message into a structured, decision-ready response using MECE, Rule of three, and BSP.",
         appUrl: "../apps/messy-notes/index.html",
         contextType: "video",
         contextUrl: "https://drive.google.com/file/d/1JpPDKz5RTyWFIJxUkeKSB5etP4W57Dax/view?usp=vids_web",
@@ -91,7 +91,7 @@ const UTL_CONTENT = {
         legacyEmbedKey: "utl_embed_p1_hugh_favour",
         title: "Rushed voice memo",
         type: "Voice structure",
-        description: "Practice converting a rushed spoken update into a clearer written response for Aiko to read through easily.",
+        description: "Turn a rushed spoken update into a clear, actionable update using the principles of MECE, Rule of three, and BSP.",
         appUrl: "../apps/rushed-voice-memo/index.html",
         contextType: "video",
         contextUrl: "https://drive.google.com/file/d/1EZe8wYzQvic6DaFJwraixATYR6Kx18oM/view?usp=vids_web",
@@ -117,7 +117,7 @@ const UTL_CONTENT = {
         legacyEmbedKey: "utl_embed_p1_olympic_brainstorm",
         title: "Chalkboard notes",
         type: "Synthesis",
-        description: "Sort notes from a brainstorming session regarding the Olympic project into a clean, useful structure. Aiko asked you this personally!",
+        description: "Practice how to think clearly by cleaning up visual clutter into actionable and MECE insights.",
         appUrl: "../apps/chalkboard-notes/index.html",
         contextType: "video",
         contextUrl: "https://drive.google.com/file/d/1kuQ7yqGvwjRnGufN4ZHMIAcqtdLq9NfN/view?usp=vids_web",
@@ -157,7 +157,7 @@ const UTL_CONTENT = {
         contextType: "video",
         contextUrl: "https://drive.google.com/file/d/15AaNTTkiRsIVf90RfsmcSa3aEuFTqOAT/view?usp=vids_web",
         contextTitle: "Aiko liked your work. Now she has a question.",
-        contextBody: "Break down the problem into MECE parts."
+        contextBody: "Create an issue tree to break problems down into MECE parts for your answer to Aiko."
       },
       {
         id: "p2-e2",
@@ -169,8 +169,8 @@ const UTL_CONTENT = {
         appUrl: "../apps/scqa-builder/index.html",
         contextType: "video",
         contextUrl: "https://drive.google.com/open?id=168tYlq9fRUKl7NrlELHuwAPwAxC2_5yD&usp=drive_copy",
-        contextTitle: "Create an executive-ready brief",
-        contextBody: "You will need to make this more readable for Aiko."
+        contextTitle: "Create an executive-ready brief for Aiko.",
+        contextBody: "You will need to make this more readable for Aiko. Use the SCQA framework to do so."
       },
       {
         id: "p2-e3",
@@ -1110,7 +1110,7 @@ const UTL_CONTENT = {
     var orientationUrl = orientation.contextUrl || exerciseContextUrl(orientation);
     var welcomeOpen = localStorage.getItem("utl_welcome_video_open") === null ? true : readBool("utl_welcome_video_open");
     var video = orientationUrl ? '<div class="ws-context-embed">' + renderIframe(orientationUrl, orientation.contextTitle) + '</div>' : '<div class="ws-player-card"><div class="ws-player"><div class="ws-player-placeholder"><span class="ws-play-icon">&#9654;</span><p>Orientation video coming soon</p></div></div></div>';
-    return '<article class="ws-orientation-card ' + (open ? "ws-open" : "") + '" id="orientation"><button class="ws-orientation-head" type="button" data-orientation-toggle><span class="ws-start-badge">Start here</span><span><span class="ws-orientation-title">Orientation</span><span class="ws-orientation-sub">' + (complete ? "Orientation complete &#10003;" : "Get oriented before jumping into Phase 1") + '</span></span><span class="ws-orientation-chevron ws-disclosure-icon">' + (open ? "&minus;" : "+") + '</span></button><div class="ws-orientation-body"><div class="ws-orientation-copy"><h3>' + escapeHtml(intro.contextTitle || "Welcome") + '</h3>' + textParagraphs(intro.contextBody) + '</div><div class="ws-how-row"><button class="ws-how-toggle" type="button" data-welcome-toggle><span class="ws-media-icon">&#9654;</span><span><strong>' + escapeHtml(orientation.contextTitle || "Welcome to The Untaught Lessons") + '</strong><br><small>' + escapeHtml(orientation.contextBody || "Watch before starting") + '</small></span><span class="ws-disclosure-icon" data-welcome-icon>' + (welcomeOpen ? "&minus;" : "+") + '</span></button><div class="ws-how-body ' + (welcomeOpen ? "ws-open" : "") + '" data-welcome-body>' + video + '</div></div><div class="ws-how-row"><button class="ws-how-toggle" type="button" data-how-toggle><span class="ws-media-icon">i</span><span><strong>How this program works</strong><br><small>Read before starting</small></span><span class="ws-disclosure-icon" data-how-icon>+</span></button><div class="ws-how-body" data-how-body><p>' + escapeHtml(how.contextBody || "Watch the setup, read the context, complete the practice, and mark your progress as you go.") + '</p>' + (exerciseContextUrl(how) ? '<div class="ws-context-embed">' + renderIframe(exerciseContextUrl(how), how.contextTitle) + '</div>' : '') + '</div></div><label class="ws-ready-row"><input type="checkbox" data-orientation-ready ' + (complete ? "checked" : "") + '> <span>I\'ve watched the orientation and I\'m ready to start.</span></label></div></article>';
+    return '<article class="ws-orientation-card ' + (open ? "ws-open" : "") + '" id="orientation"><button class="ws-orientation-head" type="button" data-orientation-toggle><span class="ws-start-badge">Start here</span><span><span class="ws-orientation-title">Orientation</span><span class="ws-orientation-sub">' + (complete ? "Orientation complete &#10003;" : "Get oriented before jumping into Phase 1") + '</span></span><span class="ws-orientation-chevron ws-disclosure-icon">' + (open ? "&minus;" : "+") + '</span></button><div class="ws-orientation-body"><div class="ws-orientation-copy"><h3>' + escapeHtml(intro.contextTitle || "Welcome") + '</h3>' + textParagraphs(intro.contextBody) + '</div><div class="ws-how-row"><button class="ws-how-toggle" type="button" data-welcome-toggle><span class="ws-media-icon">&#9654;</span><span><strong>' + escapeHtml(orientation.contextTitle || "Welcome to The Untaught Lessons") + '</strong><br><small>' + escapeHtml(orientation.contextBody || "Watch before starting") + '</small></span><span class="ws-disclosure-icon" data-welcome-icon>' + (welcomeOpen ? "&minus;" : "+") + '</span></button><div class="ws-how-body ' + (welcomeOpen ? "ws-open" : "") + '" data-welcome-body>' + video + '</div></div><div class="ws-how-row"><button class="ws-how-toggle" type="button" data-how-toggle><span class="ws-media-icon">i</span><span><strong>How this program works</strong><br><small>Read before starting</small></span><span class="ws-disclosure-icon" data-how-icon>+</span></button><div class="ws-how-body" data-how-body><p>' + escapeHtml(how.contextBody || "Watch the setup, read the context, complete the practice, and mark your progress as you go.") + '</p>' + (exerciseContextUrl(how) ? '<div class="ws-context-embed">' + renderIframe(exerciseContextUrl(how), how.contextTitle) + '</div>' : '') + '</div></div><label class="ws-ready-row"><input type="checkbox" data-orientation-ready ' + (complete ? "checked" : "") + '> <span>I have watched the orientation and I am ready to start.</span></label></div></article>';
   }
 
   function phaseJourneyCard(phaseKey) {
@@ -1228,7 +1228,7 @@ const UTL_CONTENT = {
     }
     var activeId = sessionStorage.getItem("utl_active_lesson_" + phaseKey) || getPhase(phaseKey).lessons[0].id;
     if (phaseKey === "phase1") {
-      pageShell(phaseKey, phaseOneWatchHeader() + videoSection(phaseKey, activeId) + '<div class="ws-gold-cta"><span>When you\'re done &rarr;</span><a href="' + memberHref("phase-1/practice/index.html") + '">Go to Practice the Exercises</a></div>', stepTabs("watch"));
+      pageShell(phaseKey, phaseOneWatchHeader() + videoSection(phaseKey, activeId) + '<div class="ws-gold-cta"><span>When you are done &rarr;</span><a href="' + memberHref("phase-1/practice/index.html") + '">Go to Practice the Exercises</a></div>', stepTabs("watch"));
     } else {
       pageShell(phaseKey, phaseHeader(phaseKey) + videoSection(phaseKey, activeId) + exerciseSection(phaseKey) + bottomPhaseNav(phaseKey));
     }
@@ -1246,7 +1246,7 @@ const UTL_CONTENT = {
       renderPhasePage(phaseKey);
       return;
     }
-    var body = phaseOnePracticeHeader() + '<div class="ws-practice-reminder">Haven\'t watched the lessons yet? <a href="' + memberHref("phase-1.html") + '">Start with Step 1 &rarr;</a></div><section class="ws-practice-list">' + phaseOnePracticeCards() + '</section>';
+    var body = phaseOnePracticeHeader() + '<div class="ws-practice-reminder">Not yet done watching the lessons? <a href="' + memberHref("phase-1.html") + '">Start with Step 1 &rarr;</a></div><section class="ws-practice-list">' + phaseOnePracticeCards() + '</section>';
     pageShell("phase1", body, stepTabs("practice"));
     bindPracticePage();
     scrollToHashTarget();
@@ -1282,8 +1282,8 @@ const UTL_CONTENT = {
   function practiceCard(cardId, exercise, aiExercise, defaultOpen) {
     var open = localStorage.getItem("utl_practice_open_" + cardId) === null ? defaultOpen : readBool("utl_practice_open_" + cardId);
     var activeTab = localStorage.getItem("utl_practice_tab_" + cardId) || "start";
-    var hint = activeTab === "ai" ? 'Watch the AI setup &mdash; then compare how prompting changes the shape of the work.' : 'Start here first &mdash; then compare your work with <span>AI &#10022;</span>';
-    return '<article class="ws-practice-card ' + (open ? "ws-open" : "") + '" data-practice-card="' + cardId + '"><button class="ws-practice-head" type="button" data-practice-toggle="' + cardId + '"><span><span class="ws-kicker">' + escapeHtml(exercise.type) + '</span><h3>' + escapeHtml(exercise.title) + '</h3><p>' + escapeHtml(exercise.description) + '</p></span><span class="ws-practice-chevron">' + (open ? "&minus;" : "+") + '</span></button><div class="ws-practice-body"><div class="ws-exercise-tabs" role="tablist" aria-label="' + escapeHtml(exercise.title) + ' exercise modes"><button class="ws-exercise-tab ' + (activeTab === "ai" ? "" : "ws-active") + '" type="button" role="tab" data-practice-tab="' + cardId + '" data-tab-value="start"><span class="ws-tab-badge">1</span><span>Start here</span></button><button class="ws-exercise-tab ' + (activeTab === "ai" ? "ws-active" : "") + '" type="button" role="tab" data-practice-tab="' + cardId + '" data-tab-value="ai"><span class="ws-tab-badge">2</span><span>Try with AI &#10022;</span></button></div><p class="ws-tab-hint" data-tab-hint="' + cardId + '">' + hint + '</p><div class="ws-practice-pane ' + (activeTab === "ai" ? "" : "ws-active") + '" data-tab-pane="' + cardId + '" data-tab-panel="start"><div class="ws-before-block"><h4>Before you start</h4><p>' + escapeHtml(exercise.contextBody) + '</p></div>' + mediaPreview(exercise) + '<a class="ws-button ws-button-navy" href="' + appHref(exercise.appUrl) + '" data-exercise-visit="' + exercise.id + '">Start exercise &rarr;</a></div><div class="ws-practice-pane ' + (activeTab === "ai" ? "ws-active" : "") + '" data-tab-pane="' + cardId + '" data-tab-panel="ai"><div class="ws-ai-context"><h4>Now try it with AI</h4><p>You\'ve completed the exercise yourself. Now see how AI handles the same task &mdash; and how the prompt you give it shapes the output you get back.</p></div><a class="ws-ai-link-card" href="' + appHref(aiExercise.appUrl) + '" data-exercise-visit="' + aiExercise.id + '"><span class="ws-ai-icon">&#128203;</span><span><strong>' + escapeHtml(exercise.title) + ' &mdash; AI exercise</strong><small>Prompt guide + walkthrough</small></span><span class="ws-ai-arrow">&rarr;</span></a><a class="ws-button ws-button-gold" href="' + appHref(aiExercise.appUrl) + '" data-exercise-visit="' + aiExercise.id + '">Open AI exercise &rarr;</a></div></div></article>';
+    var hint = activeTab === "ai" ? 'Watch the AI setup. Then, compare how prompting changes the shape of the work.' : 'Start here first. Then, compare your work with <span>AI &#10022;</span>';
+    return '<article class="ws-practice-card ' + (open ? "ws-open" : "") + '" data-practice-card="' + cardId + '"><button class="ws-practice-head" type="button" data-practice-toggle="' + cardId + '"><span><span class="ws-kicker">' + escapeHtml(exercise.type) + '</span><h3>' + escapeHtml(exercise.title) + '</h3><p>' + escapeHtml(exercise.description) + '</p></span><span class="ws-practice-chevron">' + (open ? "&minus;" : "+") + '</span></button><div class="ws-practice-body"><div class="ws-exercise-tabs" role="tablist" aria-label="' + escapeHtml(exercise.title) + ' exercise modes"><button class="ws-exercise-tab ' + (activeTab === "ai" ? "" : "ws-active") + '" type="button" role="tab" data-practice-tab="' + cardId + '" data-tab-value="start"><span class="ws-tab-badge">1</span><span>Start here</span></button><button class="ws-exercise-tab ' + (activeTab === "ai" ? "ws-active" : "") + '" type="button" role="tab" data-practice-tab="' + cardId + '" data-tab-value="ai"><span class="ws-tab-badge">2</span><span>Try with AI &#10022;</span></button></div><p class="ws-tab-hint" data-tab-hint="' + cardId + '">' + hint + '</p><div class="ws-practice-pane ' + (activeTab === "ai" ? "" : "ws-active") + '" data-tab-pane="' + cardId + '" data-tab-panel="start"><div class="ws-before-block"><h4>Before you start</h4><p>' + escapeHtml(exercise.contextBody) + '</p></div>' + mediaPreview(exercise) + '<a class="ws-button ws-button-navy" href="' + appHref(exercise.appUrl) + '" data-exercise-visit="' + exercise.id + '">Start exercise &rarr;</a></div><div class="ws-practice-pane ' + (activeTab === "ai" ? "ws-active" : "") + '" data-tab-pane="' + cardId + '" data-tab-panel="ai"><div class="ws-ai-context"><h4>Now try it with AI</h4><p>You have now completed the core exercise. Now, let us see how we can use AI to handle the same task. Notice how the prompt you give AI will shape the output you get back.</p></div><a class="ws-ai-link-card" href="' + appHref(aiExercise.appUrl) + '" data-exercise-visit="' + aiExercise.id + '"><span class="ws-ai-icon">&#128203;</span><span><strong>' + escapeHtml(exercise.title) + ' &mdash; AI exercise</strong><small>Prompt guide + walkthrough</small></span><span class="ws-ai-arrow">&rarr;</span></a><a class="ws-button ws-button-gold" href="' + appHref(aiExercise.appUrl) + '" data-exercise-visit="' + aiExercise.id + '">Open AI exercise &rarr;</a></div></div></article>';
   }
 
   function singlePracticeCard(cardId, exercise, defaultOpen) {
@@ -1323,7 +1323,7 @@ const UTL_CONTENT = {
           pane.classList.toggle("ws-active", pane.getAttribute("data-tab-panel") === value);
         });
         var hint = qs('[data-tab-hint="' + id + '"]');
-        if (hint) hint.innerHTML = value === "ai" ? 'Watch the AI setup &mdash; then compare how prompting changes the shape of the work.' : 'Start here first &mdash; then compare your work with <span>AI &#10022;</span>';
+        if (hint) hint.innerHTML = value === "ai" ? 'Watch the AI setup. Then, compare how prompting changes the shape of the work.' : 'Start here first. Then, compare your work with <span>AI &#10022;</span>';
       });
     });
     qsa("[data-exercise-visit]").forEach(function (link) {

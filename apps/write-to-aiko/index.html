@@ -793,7 +793,6 @@ Best, Yutee Elle</div>
       });
 
       submitBtn.addEventListener('click', async () => {
-        const response = composedEmail();
         if (!wordCount(visibleText())) {
           statusEl.textContent = 'Write your email before submitting.';
           return;

@@ -660,7 +660,7 @@
         {
           id: 'olympic',
           label: 'MA / Olympic project',
-          sentence: "Requests are coming from all directions. Aiko won't tell you what to prioritize — you decide.",
+          sentence: "Requests are coming from all directions. Aiko will not tell you what to prioritize. You decide.",
           tasks: [
             "Finalize the Olympic committee deck for tomorrow's 9am presentation",
             "Prepare the strategic narrative for a stakeholder meeting next week",
@@ -671,23 +671,23 @@
             "Draft the Q3 project roadmap Aiko asked for by end of month",
             "Meet a potential new partner who is in town only today",
             "Accompany a sick colleague to the clinic",
-            "Update the team's shared project tracker that hasn't been touched in two weeks"
+            "Update the team's shared project tracker that has not been touched in two weeks"
           ],
           sample: { do: [1, 3, 9], schedule: [2, 7, 8], delegate: [6, 10], delete: [4, 5], ambiguous: [8, 9] }
         },
         {
           id: 'student',
           label: 'Student life',
-          sentence: "It's hell week. Not everything can get done. What actually moves the needle?",
+          sentence: "It is hell week. Not everything can get done. What actually moves the needle?",
           tasks: [
             "Study for an exam happening in two days",
             "Write a paper due tomorrow night",
-            "Attend your student org's event that you co-planned — it's tonight",
+            "Attend your student org's event that you co-planned. It is tonight",
             "Reply to a professor's email about your research assistant application",
-            "Call your parents — they've been waiting three days",
-            "Help a close friend move apartments — they asked last week",
+            "Call your parents. They have been waiting three days",
+            "Help a close friend move apartments. They asked last week",
             "Submit a scholarship application due in four days",
-            "Do laundry — you're down to your last outfit",
+            "Do laundry. You are down to your last outfit",
             "Review notes from last week's lecture to fill in gaps",
             "Watch the new episode everyone in your group chat is discussing"
           ],
@@ -698,16 +698,16 @@
           label: 'Personal / life admin',
           sentence: 'Your to-do list has been growing for weeks. Time to be ruthless.',
           tasks: [
-            "Pay a credit card bill due tomorrow — late fee kicks in otherwise",
-            "Book a doctor's appointment for a health issue you've been ignoring for a month",
-            "Renew your passport — you have a trip in six weeks",
-            "Reply to a friend's wedding RSVP — deadline was yesterday",
+            "Pay a credit card bill due tomorrow. Late fee kicks in otherwise",
+            "Book a doctor's appointment for a health issue you have been ignoring for a month",
+            "Renew your passport. You have a trip in six weeks",
+            "Reply to a friend's wedding RSVP. Deadline was yesterday",
             "Clean and organize your home workspace",
-            "Cancel a gym membership you haven't used in three months",
+            "Cancel a gym membership you have not used in three months",
             "Call your bank about a suspicious charge on your statement",
             "Buy a birthday gift for a family member whose birthday is this weekend",
             "Sort through and delete old files on your laptop",
-            "Research and compare internet providers — your contract renews next month"
+            "Research and compare internet providers. Your contract renews next month"
           ],
           sample: { do: [1, 7, 2], schedule: [3, 8, 10], delegate: [4, 6], delete: [5, 9], ambiguous: [2, 10] }
         },
@@ -717,13 +717,13 @@
           sentence: 'Your team is stretched and so are you. Decide what you do, what you delegate, and what you cut.',
           tasks: [
             "Review and approve a team member's client deliverable due today",
-            "Prepare for a performance review conversation you've been putting off",
+            "Prepare for a performance review conversation you have been putting off",
             "Respond to a client escalation that came in this morning",
-            "Write the team's monthly report — your manager needs it by Friday",
+            "Write the team's monthly report. Your manager needs it by Friday",
             "Attend a cross-functional sync loosely related to your team's work",
             "Onboard a new team member who starts tomorrow",
             "Follow up on a proposal you sent a potential partner two weeks ago",
-            "Reorganize the team's shared drive — it's a mess",
+            "Reorganize the team's shared drive. It is a mess",
             "Review a junior team member's draft presentation before their client call today",
             "Plan the team's quarter-end social event"
           ],
@@ -732,14 +732,14 @@
         {
           id: 'new-job',
           label: 'New job, first 90 days',
-          sentence: "Everything feels urgent in a new role. Most of it isn't.",
+          sentence: "Everything feels urgent in a new role. Most of it is not.",
           tasks: [
             "Prepare a summary of your first-week observations for your manager",
             "Set up introductory 1:1 meetings with all key stakeholders",
             "Respond to a Slack message from a senior leader asking a quick question",
             "Learn the company's internal tools and systems",
-            "Attend every optional meeting you've been invited to this week",
-            "Draft your 30-60-90 day plan — your manager asked for it by end of month",
+            "Attend every optional meeting you have been invited to this week",
+            "Draft your 30-60-90 day plan. Your manager asked for it by end of month",
             "Update your LinkedIn profile to reflect the new role",
             "Review the last six months of team reports and meeting notes",
             "Fix a small but visible error in a client-facing document you spotted",
@@ -754,13 +754,13 @@
           tasks: [
             "Send a revised proposal to a high-value client who asked for changes",
             "Follow up on three unpaid invoices from last month",
-            "Prepare for a discovery call with a promising new lead — it's tomorrow",
-            "Write a LinkedIn post you've been drafting for two weeks",
+            "Prepare for a discovery call with a promising new lead. It is tomorrow",
+            "Write a LinkedIn post you have been drafting for two weeks",
             "Schedule and batch your social media posts for the month",
             "Reply to a low-budget client asking for significant scope changes",
             "Protect focused work time for a project due this Friday",
-            "Attend a networking event tonight — you don't know anyone going",
-            "File your quarterly taxes — due in one week",
+            "Attend a networking event tonight. You do not know anyone going",
+            "File your quarterly taxes. Due in one week",
             "Research a new tool that might improve your workflow"
           ],
           sample: { do: [1, 9, 2], schedule: [3, 7], delegate: [5, 10, 6], delete: [8, 4], ambiguous: [2, 6] }
@@ -871,7 +871,7 @@
             <div class="eisenhower-zone">
               ${placedIdsIn(quad.id).map((id) => {
                 const note = state.exampleMode && scenario().sample.ambiguous.includes(taskIndex(id) + 1)
-                  ? '<span class="eisenhower-note">Context-dependent — both placements can be right.</span>'
+                  ? '<span class="eisenhower-note">Context-dependent. Both placements can be right.</span>'
                   : '';
                 return `<div>${makeChip(id, true, state.exampleMode)}${note}</div>`;
               }).join('')}

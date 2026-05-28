@@ -320,7 +320,7 @@
       font-size: 10px;
     }
 
-    #contextInput { min-height: 120px; padding: 12px; }
+    #contextInput { min-height: 120px; padding: 12px; resize: vertical; overflow: auto; }
     #topicInput { padding: 10px 12px; }
 
     .template-toggle, .cta-area { text-align: center; }
@@ -893,10 +893,7 @@
         <button class="btn btn-secondary" type="button" id="checkAnswers">Check my answers</button>
         <button class="btn btn-secondary" type="button" id="showSamples">Show sample answers</button>
         <button class="btn btn-secondary" type="button" id="startOver">Start over →</button>
-        <div class="copy-group">
-          <button class="btn btn-primary" type="button" id="copyEmail">Copy for email</button>
-          <div class="copy-note">READY TO PASTE INTO YOUR EMAIL TO AIKO</div>
-        </div>
+        <a class="btn btn-primary" href="../../member-login/phase-1/practice/index.html">End exercise</a>
       </div>
       <div id="feedbackMount"></div>
       <div id="sampleMount"></div>
@@ -912,7 +909,7 @@
       </div>
     </div>
   </div>
-  <div class="toast" id="toast">Copied! Paste it into your email to Aiko.</div>
+  <div class="toast" id="toast"></div>
 
   <script>
     const STORAGE_KEY = "utl_scqa_builder_v2";
@@ -1091,8 +1088,8 @@
       return `
         <div class="reference">
           <div class="label">WHAT EACH PART MEANS</div>
-          <div class="ref-row"><strong>S</strong><span>What is still true today — the stable context your audience accepts.</span></div>
-          <div class="ref-row"><strong>C</strong><span>What has changed or stopped working — the tension that makes the problem matter now.</span></div>
+          <div class="ref-row"><strong>S</strong><span>What is still true today that makes this problem matter? This is the stable ground your audience stands on before you introduce the tension.</span></div>
+          <div class="ref-row"><strong>C</strong><span>What has changed or stopped working? What is the tension that makes the problem matter now?</span></div>
           <div class="ref-row"><strong>Q</strong><span>The single most important question to answer to resolve the tension.</span></div>
           <div class="ref-row"><strong>A</strong><span>Your clear answer, stated upfront, supported by 2–3 key ideas.</span></div>
           <div class="ref-row"><strong></strong><em>SC defines the problem. QA builds your recommendation. They should feel like one connected story.</em></div>
@@ -1410,7 +1407,6 @@
     $("#editScqa1").addEventListener("click", () => goToScreen(2));
     $("#checkAnswers").addEventListener("click", renderFeedback);
     $("#showSamples").addEventListener("click", renderSamples);
-    $("#copyEmail").addEventListener("click", copyForEmail);
     $("#startOver").addEventListener("click", () => $("#confirmModal").classList.add("show"));
     $("#cancelStartOver").addEventListener("click", () => $("#confirmModal").classList.remove("show"));
     $("#confirmStartOver").addEventListener("click", () => { $("#confirmModal").classList.remove("show"); clearAll(); });

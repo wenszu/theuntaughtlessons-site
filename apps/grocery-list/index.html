@@ -74,31 +74,31 @@
       text-transform: uppercase;
     }
 
-    .app-title {
-      display: block;
+    .app-title-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
       margin-top: 3px;
+    }
+
+    .app-back-arrow {
+      color: var(--white);
+      font-size: 28px;
+      line-height: 1;
+      text-decoration: none;
+      flex-shrink: 0;
+    }
+
+    .app-back-arrow:hover {
+      color: var(--gold);
+    }
+
+    .app-title {
       color: var(--white);
       font-family: 'Playfair Display', serif;
       font-size: 27px;
       font-weight: 700;
       line-height: 1;
-    }
-
-    .module-back-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      margin-top: 9px;
-      color: rgba(255, 255, 255, .82);
-      font-size: 13px;
-      font-weight: 700;
-      text-decoration: none;
-    }
-
-    .module-back-link:hover {
-      color: var(--gold);
-      text-decoration: underline;
-      text-underline-offset: 3px;
     }
 
     .app-timer {
@@ -686,8 +686,10 @@
     <div class="brand-divider" aria-hidden="true"></div>
     <div>
       <span class="app-kicker">Phase 1 · Think clearly</span>
-      <span class="app-title">Grocery list</span>
-      <a class="module-back-link" href="../../member-login/phase-1/practice/index.html">← Back to Phase 1 exercises</a>
+      <div class="app-title-row">
+        <a class="app-back-arrow" href="../../member-login/phase-1/practice/index.html" aria-label="Back to Phase 1 exercises">&#8592;</a>
+        <span class="app-title">Grocery list</span>
+      </div>
     </div>
     <div class="app-timer" aria-label="Elapsed time">
       <div class="utility-metric" id="timerMetric">

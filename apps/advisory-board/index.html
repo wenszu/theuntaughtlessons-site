@@ -579,7 +579,7 @@ Answer: The Olympics needs a clarity layer with structured daily viewing routes,
     function copyText(text, button) {
       const done = () => {
         const original = button.textContent;
-        button.textContent = 'Copied!';
+        button.textContent = 'Saved.';
         window.setTimeout(() => { button.textContent = original; }, 2000);
       };
       if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done).catch(() => { fallbackCopy(text); done(); });
@@ -625,9 +625,7 @@ Answer: The Olympics needs a clarity layer with structured daily viewing routes,
       advisorGrid.innerHTML = '';
       orchestratorGrid.innerHTML = '';
       board.forEach(person => advisorGrid.appendChild(advisorCard(person, 'advisor')));
-      addCustomCard(advisorGrid, 'advisor');
       board.forEach(person => orchestratorGrid.appendChild(advisorCard(person, 'orchestrator')));
-      addCustomCard(orchestratorGrid, 'orchestrator');
       $('roleNote').textContent = selectedAdvisors.has(orchestratorId) ? 'This person is already on your board as an advisor. Choose a different orchestrator or swap their role.' : '';
       $('buildPromptBtn').disabled = selectedAdvisors.size < 3 || !orchestratorId || selectedAdvisors.has(orchestratorId);
     }
@@ -696,6 +694,11 @@ For the orchestrator, explain why this person is the right one to make the final
 
 Return your recommendations in a clean list format I can easily read and act on.`;
     }
+    function mdToHtml(text) {
+      return text
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.+?)\*/g, '<em>$1</em>');
+    }
     function organizeOutput() {
       const text = $('aiOutput').value;
       const output = $('parsedOutput');
@@ -703,13 +706,24 @@ Return your recommendations in a clean list format I can easily read and act on.
       if (!text.includes('What I like:') || !text.includes('ORCHESTRATOR VERDICT')) { $('parseError').classList.add('ab-show'); return; }
       const beforeVerdict = text.split('ORCHESTRATOR VERDICT')[0];
       const verdict = text.split('ORCHESTRATOR VERDICT')[1] || '';
-      const chunks = beforeVerdict.split('What I like:').slice(1);
-      output.innerHTML = `<div class="ab-output-grid">${chunks.map((chunk, index) => {
-        const challengeParts = chunk.split('What I would challenge');
-        const like = challengeParts[0] || '';
-        const recommendParts = (challengeParts[1] || '').split('What I recommend:');
-        return `<div class="ab-output-card"><h3>Advisor ${index + 1}</h3><p><strong>What I like:</strong> ${like.trim()}</p><p><strong>What I would challenge:</strong> ${(recommendParts[0] || '').replace(':','').trim()}</p><p><strong>What I recommend:</strong> ${(recommendParts[1] || '').trim()}</p></div>`;
-      }).join('')}</div><div class="ab-verdict" id="verdictBlock"><h2>Orchestrator verdict</h2><p>${verdict.trim().replace(/\n/g, '<br>')}</p></div><button class="ab-button ab-gold" id="copySummaryBtn" type="button">Copy summary</button>`;
+      const parts = beforeVerdict.split(/(?=\nWhat I like:)/);
+      const advisorCards = parts.filter(p => p.includes('What I like:')).map((chunk) => {
+        const nameMatch = chunk.match(/^[\s\S]*?([A-Z][^\n]+?)[\n\r]+What I like:/);
+        const name = nameMatch ? nameMatch[1].trim().replace(/^(ADVISOR|Advisor):?\s*/i, '') : '';
+        const likeMatch = chunk.match(/What I like:\s*([\s\S]*?)(?=What I would challenge|$)/i);
+        const challengeMatch = chunk.match(/What I would challenge[^:]*:\s*([\s\S]*?)(?=What I recommend:|$)/i);
+        const recommendMatch = chunk.match(/What I recommend:\s*([\s\S]*?)$/i);
+        return `<div class="ab-output-card">${name ? `<h3>${name}</h3>` : '<h3>Advisor</h3>'}<p><strong>What I like:</strong> ${mdToHtml((likeMatch?.[1] || '').trim())}</p><p><strong>What I would challenge:</strong> ${mdToHtml((challengeMatch?.[1] || '').trim())}</p><p><strong>What I recommend:</strong> ${mdToHtml((recommendMatch?.[1] || '').trim())}</p></div>`;
+      });
+      const verdictLines = verdict.split('\n').filter(l => l.trim());
+      const verdictHtml = verdictLines.map(line => {
+        const colonIdx = line.indexOf(':');
+        if (colonIdx > 0 && colonIdx < 30) {
+          return `<p><strong>${line.slice(0, colonIdx + 1)}</strong>${mdToHtml(line.slice(colonIdx + 1))}</p>`;
+        }
+        return `<p>${mdToHtml(line)}</p>`;
+      }).join('');
+      output.innerHTML = `<div class="ab-output-grid">${advisorCards.join('')}</div><div class="ab-verdict" id="verdictBlock"><h2>Orchestrator verdict</h2>${verdictHtml}</div><button class="ab-button ab-gold" id="copySummaryBtn" type="button">Copy summary</button>`;
       $('copySummaryBtn').addEventListener('click', event => copyText(verdict.trim(), event.target));
     }
     function updateSummary() {

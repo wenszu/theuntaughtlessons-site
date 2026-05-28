@@ -1869,7 +1869,13 @@
     function applySendInstructorStatus() {
       const button = document.getElementById('btn-send-instructor');
       if (!button) return;
-      button.classList.remove('coming-soon');
+      const isLive = localStorage.getItem('utl_send_instructor') === 'live';
+      if (!isLive) {
+        button.hidden = true;
+        document.querySelectorAll('.results-email-label, .results-email-input, .results-email-hint').forEach(function(el) {
+          el.hidden = true;
+        });
+      }
     }
 
     function applyAssessmentNavVisibility() {
