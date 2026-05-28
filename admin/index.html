@@ -1535,6 +1535,9 @@
     .mb-form-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:10px; }
     .mb-form-field { display:grid; gap:6px; }
     .mb-form-actions { display:flex; gap:8px; margin-top:12px; align-items:center; }
+    .mb-add-email-status { margin-top:10px; font-family:'Lato',sans-serif; font-size:13px; padding:8px 10px; border-radius:4px; }
+    .mb-add-email-status.is-sent { background:#f0faf5; color:#0F6E56; border:1px solid #b7e4cf; }
+    .mb-add-email-status.is-error { background:#fdf3f3; color:#8A1F1F; border:1px solid #f0c0c0; }
     .mb-table-wrap { overflow-x:auto; border:1px solid var(--line); border-radius:8px; }
     .mb-table { width:100%; border-collapse:collapse; font-size:12px; white-space:nowrap; }
     .mb-table th { padding:8px 12px; background:var(--navy); color:rgba(255,255,255,.85); font-family:'Roboto Mono',monospace; font-size:10px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; text-align:left; }
@@ -1887,6 +1890,7 @@
             <button class="small-button secondary-button" type="button" id="mbAddMemberCancel">Cancel</button>
             <span class="saved" id="mbAddSaved">Added ✓</span>
           </div>
+          <div id="mbAddEmailStatus" class="mb-add-email-status" hidden></div>
         </div>
 
         <div id="mbInviteForm" class="mb-invite-form" hidden>
@@ -4294,10 +4298,33 @@
         if (localPasswordVal) newMemberData.localPassword = localPasswordVal;
 
         saveBtn.disabled = true;
+        var emailStatusEl = document.getElementById('mbAddEmailStatus');
+        if (emailStatusEl) { emailStatusEl.textContent = ''; emailStatusEl.hidden = true; }
         try {
           await fb.authorizeMember(emailVal, newMemberData);
-          if (savedEl) { savedEl.classList.add('is-visible'); window.setTimeout(function () { savedEl.classList.remove('is-visible'); }, 2000); }
-          showToast('Member added');
+
+          // Send welcome email via Apps Script
+          var emailSent = false;
+          try {
+            await fetch('https://script.google.com/macros/s/AKfycbzJE--FL2kB_XDNZRnszCtlyLRPvaLAHGuF5TAOdXJk40atbvf5Y6ELuSK2B7CSLaMN/exec', {
+              method: 'POST',
+              mode: 'no-cors',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ action: 'WelcomeEmail', name: nameVal, email: emailVal })
+            });
+            emailSent = true;
+          } catch (emailErr) { /* non-fatal */ }
+
+          showToast('Member added' + (emailSent ? ' — welcome email sent' : ''));
+          if (emailStatusEl) {
+            emailStatusEl.textContent = emailSent
+              ? '✉ Welcome email sent to ' + emailVal
+              : '⚠ Member added but welcome email could not be sent. Send manually.';
+            emailStatusEl.className = 'mb-add-email-status ' + (emailSent ? 'is-sent' : 'is-error');
+            emailStatusEl.hidden = false;
+            window.setTimeout(function () { emailStatusEl.hidden = true; }, 6000);
+          }
+
           document.getElementById('mbNewName').value = '';
           document.getElementById('mbNewEmail').value = '';
           document.getElementById('mbNewRole').value = 'user';
