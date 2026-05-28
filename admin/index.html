@@ -1638,6 +1638,7 @@
       <button class="admin-tab active" type="button" data-admin-tab="content-manager">Site &amp; Content</button>
       <button class="admin-tab" type="button" data-admin-tab="student-progress">Student Progress</button>
       <button class="admin-tab" type="button" data-admin-tab="member-management">Member Management</button>
+      <button class="admin-tab" type="button" data-admin-tab="admin-tools">Admin Tools</button>
     </nav>
 
     <aside class="admin-sidebar">
@@ -1664,6 +1665,9 @@
       <span class="nav-group-label" data-admin-nav-group="member-management">Access</span>
       <button class="admin-nav-item" data-admin-tab-scope="member-management" data-target="section-members">Members</button>
       <button class="admin-nav-item" data-admin-tab-scope="member-management" data-target="section-passwords">Passwords</button>
+
+      <span class="nav-group-label" data-admin-nav-group="admin-tools">Preview</span>
+      <button class="admin-nav-item" data-admin-tab-scope="admin-tools" data-target="section-admin-preview">Unlock phases</button>
 
       <span class="nav-group-label" data-admin-nav-group="content-manager">Links</span>
       <button class="admin-nav-item" data-admin-tab-scope="content-manager" data-target="section-links">Quick links</button>
@@ -1816,6 +1820,14 @@
           <span id="gd-feedback-status" style="font-size:12px;color:#555;display:block;margin-top:6px;min-height:16px;"></span>
           <p class="description" style="margin-top:6px;">Controls whether the floating "Got feedback?" button appears for new members by default.</p>
         </div>
+      </section>
+
+      <section class="admin-section" id="section-admin-preview" data-admin-tab-panel="admin-tools">
+        <span class="section-label">Admin Tools</span>
+        <h2>Unlock phases</h2>
+        <div class="section-divider"></div>
+        <p class="description">Controls your own view of the member area. Turning this on lets you browse Phase 2 and Phase 3 without completing Phase 1 first. Members are not affected — they still follow the normal unlock sequence.</p>
+        <div class="visibility-checklist" id="adminPreviewChecklist"></div>
       </section>
 
       <section class="admin-section" id="section-student-progress" data-admin-tab-panel="student-progress">
@@ -2225,19 +2237,6 @@
           }
         ]
       },
-      {
-        title: 'Admin Preview',
-        items: [
-          {
-            key: 'utl_admin_preview_bypass',
-            checkedValue: 'on',
-            uncheckedValue: 'off',
-            fallback: 'off',
-            label: 'Unlock all phases for admin preview',
-            description: 'For admins only. When on, Phase 2 and Phase 3 open immediately while you preview the member area. Learners still follow the normal unlock sequence.'
-          }
-        ]
-      }
     ];
     const LEGACY_EMBED_KEYS = {
       utl_embed_orientation_welcome: 'utl_slides_orientation',
@@ -2574,6 +2573,43 @@
           const item = VISIBILITY_CHECKLIST.flatMap((group) => group.items).find((entry) => entry.key === input.dataset.visibilityKey);
           if (!item) return;
           setChecklistValue(item, input.checked);
+        });
+      });
+    }
+
+    const ADMIN_PREVIEW_ITEMS = [
+      {
+        key: 'utl_admin_preview_bypass',
+        checkedValue: 'on',
+        uncheckedValue: 'off',
+        fallback: 'off',
+        label: 'Unlock all phases for admin preview',
+        description: 'When on, Phase 2 and Phase 3 open immediately while you browse the member area. Members are not affected — they still follow the normal unlock sequence.'
+      }
+    ];
+
+    function renderAdminPreviewChecklist() {
+      const target = document.getElementById('adminPreviewChecklist');
+      if (!target) return;
+      target.innerHTML = `<div class="visibility-group">${ADMIN_PREVIEW_ITEMS.map((item) => {
+        if (localStorage.getItem(item.key) === null) localStorage.setItem(item.key, item.fallback);
+        const checked = getValue(item.key, item.fallback) === item.checkedValue;
+        return `
+          <label class="visibility-check">
+            <input type="checkbox" data-admin-preview-key="${item.key}" ${checked ? 'checked' : ''}>
+            <span>
+              <strong>${item.label}</strong>
+              <span>${item.description}</span>
+            </span>
+          </label>`;
+      }).join('')}</div>`;
+
+      target.querySelectorAll('[data-admin-preview-key]').forEach((input) => {
+        input.addEventListener('change', () => {
+          const item = ADMIN_PREVIEW_ITEMS.find((entry) => entry.key === input.dataset.adminPreviewKey);
+          if (!item) return;
+          setChecklistValue(item, input.checked);
+          renderVisibilityStatus();
         });
       });
     }
@@ -3853,6 +3889,7 @@
 
     renderToggles();
     renderVisibilityChecklist();
+    renderAdminPreviewChecklist();
     renderEmbedBlocks();
     renderUrlInputs();
     renderPasswordBlocks();
