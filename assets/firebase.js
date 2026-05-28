@@ -48,7 +48,7 @@ let firebaseInitError = null;
 let authPersistenceReady = Promise.resolve();
 
 const actionCodeSettings = {
-  url: "http://localhost:8061/member-login/",
+  url: `${window.location.origin}/member-login/`,
   handleCodeInApp: true
 };
 
