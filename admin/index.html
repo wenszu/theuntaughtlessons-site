@@ -1328,16 +1328,20 @@
       margin-bottom: 0;
     }
 
+    .invite-email-label {
+      display: block;
+      font-family: 'Lato', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--navy);
+      margin-bottom: 7px;
+    }
+
     .invite-actions {
       display: grid;
       grid-template-columns: minmax(0, 1fr) auto;
       gap: 10px;
-      align-items: end;
-    }
-
-    .invite-actions label {
-      display: grid;
-      gap: 7px;
+      align-items: center;
     }
 
     .invite-status {
@@ -1896,12 +1900,12 @@
         <div id="mbInviteForm" class="mb-invite-form" hidden>
           <div class="invite-card">
             <p class="description" style="margin-bottom:0;">Send a passwordless login link. The member clicks it from their inbox and lands directly in the workspace.</p>
-            <div class="invite-actions">
-              <label for="inviteEmail">
-                Member email
+            <div>
+              <label for="inviteEmail" class="invite-email-label">Member email</label>
+              <div class="invite-actions">
                 <input id="inviteEmail" type="email" autocomplete="email" placeholder="name@example.com">
-              </label>
-              <button class="small-button" type="button" id="sendLoginInvite">Send Login Invite</button>
+                <button class="small-button" type="button" id="sendLoginInvite">Send Login Invite</button>
+              </div>
             </div>
             <p class="invite-status" id="inviteStatus" aria-live="polite"></p>
           </div>
@@ -2506,7 +2510,15 @@
         setInviteStatus("⚡ Success! Invite link sent to the user's inbox.", 'success');
         logInvite(normalizedEmail);
       } catch (error) {
-        const detail = error && error.message ? error.message : 'Unknown error';
+        const code = error && error.code ? error.code : '';
+        let detail = error && error.message ? error.message : 'Unknown error';
+        if (code === 'auth/operation-not-allowed') {
+          detail = 'Email link sign-in is not enabled. Go to Firebase Console → Authentication → Sign-in method → Email/Password → enable "Email link (passwordless sign-in)".';
+        } else if (code === 'auth/invalid-email') {
+          detail = 'That email address is not valid.';
+        } else if (code === 'auth/missing-email') {
+          detail = 'Please enter an email address.';
+        }
         setInviteStatus(`Invite failed: ${detail}`, 'error');
       } finally {
         sendLoginInvite.disabled = false;
