@@ -1649,6 +1649,7 @@
       <button class="admin-nav-item" data-admin-tab-scope="content-manager" data-target="section-phase3">Phase 3</button>
       <button class="admin-nav-item" data-admin-tab-scope="content-manager" data-target="section-tsa">Assessments</button>
       <button class="admin-nav-item" data-admin-tab-scope="content-manager" data-target="section-send-instructor">Send to instructor</button>
+      <button class="admin-nav-item" data-admin-tab-scope="content-manager" data-target="section-global-defaults">Global defaults</button>
 
       <span class="nav-group-label" data-admin-nav-group="student-progress">Progress</span>
       <button class="admin-nav-item" data-admin-tab-scope="student-progress" data-target="section-student-progress">Student dashboard</button>
@@ -1791,6 +1792,25 @@
         </div>
       </section>
 
+      <section class="admin-section" id="section-global-defaults" data-admin-tab-panel="content-manager">
+        <span class="section-label">Site &amp; Content</span>
+        <h2>Global defaults</h2>
+        <div class="section-divider"></div>
+        <p class="description">Default settings applied to new members when they first sign in. Individual members can be overridden from the Members tab.</p>
+        <div class="mb-edit-field" style="max-width:420px;">
+          <label for="gd-feedback-enabled">Feedback widget default</label>
+          <div style="display:flex;align-items:center;gap:10px;margin-top:4px;">
+            <select id="gd-feedback-enabled" style="flex:1;">
+              <option value="true">Enabled for new members</option>
+              <option value="false">Disabled for new members</option>
+            </select>
+            <button class="small-button" type="button" id="gd-feedback-save">Save</button>
+          </div>
+          <span id="gd-feedback-status" style="font-size:12px;color:#555;display:block;margin-top:6px;min-height:16px;"></span>
+          <p class="description" style="margin-top:6px;">Controls whether the floating "Got feedback?" button appears for new members by default.</p>
+        </div>
+      </section>
+
       <section class="admin-section" id="section-student-progress" data-admin-tab-panel="student-progress">
         <span class="section-label">Progress</span>
         <h2>Student Progress</h2>
@@ -1853,6 +1873,14 @@
               <label for="mbNewNotes">Notes</label>
               <input type="text" id="mbNewNotes" placeholder="Optional">
             </div>
+            <div class="mb-form-field">
+              <label for="mbNewLocalUsername">Username <span style="color:#555;font-weight:400;font-size:11px;">(non-Google login)</span></label>
+              <input type="text" id="mbNewLocalUsername" placeholder="e.g. jsmith" autocomplete="off">
+            </div>
+            <div class="mb-form-field">
+              <label for="mbNewLocalPassword">Password <span style="color:#555;font-weight:400;font-size:11px;">(non-Google login)</span></label>
+              <input type="password" id="mbNewLocalPassword" placeholder="Leave blank if Google only" autocomplete="new-password">
+            </div>
           </div>
           <div class="mb-form-actions">
             <button class="small-button" type="button" id="mbAddMemberSave">Add member</button>
@@ -1885,9 +1913,11 @@
         <span class="section-label">Access</span>
         <h2>Passwords</h2>
         <div class="section-divider"></div>
-        <div class="password-block" data-key="utl_member_password" data-label="Member hub password" data-description="This is the password participants use to access the member hub." data-default="utl2026"></div>
-        <div class="password-block" data-key="utl_admin_password" data-label="Admin password" data-description="Keep this private. Grants full access to this configuration panel." data-default="utl2026_admin"></div>
-        <div class="warning-callout">If you change this password and forget it, you will need to edit admin/index.html directly to regain access.</div>
+        <p class="description">Local (non-Google) accounts for the member workspace. Use these credentials on the member login page.</p>
+        <div class="password-block" data-key="utl_local_pw_admin" data-username="admin" data-label="Admin account" data-description="Username: admin — has admin access to this console." data-default="password123"></div>
+        <div class="password-block" data-key="utl_local_pw_testuser" data-username="testuser" data-label="Test member account" data-description="Username: testuser — standard member access, no admin." data-default="member2026"></div>
+        <div class="password-block" data-key="utl_admin_password" data-label="Admin console password" data-description="The password used to unlock this admin panel. Keep it private." data-default="utl2026_admin"></div>
+        <div class="warning-callout">If you change the admin console password and forget it, you will need to edit admin/index.html directly to regain access.</div>
       </section>
 
       <section class="admin-section" id="section-links" data-admin-tab-panel="content-manager">
@@ -1909,10 +1939,15 @@
       db,
       deleteDoc,
       doc,
+      findUserUidByEmail,
       getAllMemberWorkspaceProgress,
+      getDoc,
       getDocs,
+      getGlobalFeedbackSetting,
       getSignedInUser,
       sendSignInInvite,
+      setGlobalFeedbackSetting,
+      setUserFeedbackEnabled,
       signInWithGooglePopup,
       Timestamp
     } from "../assets/firebase.js";
@@ -1924,10 +1959,15 @@
       db,
       deleteDoc,
       doc,
+      findUserUidByEmail,
       getAllMemberWorkspaceProgress,
+      getDoc,
       getDocs,
+      getGlobalFeedbackSetting,
       getSignedInUser,
       sendSignInInvite,
+      setGlobalFeedbackSetting,
+      setUserFeedbackEnabled,
       signInWithGooglePopup,
       Timestamp
     };
@@ -3293,9 +3333,13 @@
       document.querySelectorAll('.password-block').forEach((block) => {
         const key = block.dataset.key;
         const value = getValue(key, block.dataset.default);
+        const usernameRow = block.dataset.username
+          ? `<div class="mb-edit-field" style="margin-bottom:10px;"><label>Username</label><input type="text" value="${escapeHtml(block.dataset.username)}" readonly style="background:#f5f0e8;border:1px solid #ddd;border-radius:4px;padding:7px 10px;font-family:'Roboto Mono',monospace;font-size:13px;width:100%;box-sizing:border-box;"></div>`
+          : '';
         block.innerHTML = `
           <label>${block.dataset.label}</label>
           <p class="description">${block.dataset.description}</p>
+          ${usernameRow}
           <div class="password-input-wrap">
             <input type="password" value="${value}" readonly>
             <button class="password-toggle" type="button" aria-label="Show password" aria-pressed="false">
@@ -3803,6 +3847,7 @@
     initCollapsibleSections();
     renderInviteLog();
     mbInitAddForm();
+    initGlobalDefaults();
     window.setTimeout(runSyncCheck, 400);
 
     // Persistent event delegation for Fix → buttons in sync results
@@ -4007,6 +4052,16 @@
             '<option value="false"' + (!data.googleGroupAdded ? ' selected' : '') + '>No</option>' +
             '<option value="true"' + (data.googleGroupAdded ? ' selected' : '') + '>Yes</option>' +
           '</select></div>' +
+        '<div class="mb-edit-field"><label>Feedback widget</label>' +
+          '<select data-mb-ef="feedbackEnabled">' +
+            '<option value=""' + (data.feedbackEnabled === undefined || data.feedbackEnabled === null ? ' selected' : '') + '>Default (inherit global)</option>' +
+            '<option value="true"' + (data.feedbackEnabled === true ? ' selected' : '') + '>Enabled</option>' +
+            '<option value="false"' + (data.feedbackEnabled === false ? ' selected' : '') + '>Disabled</option>' +
+          '</select></div>' +
+        '<div class="mb-edit-field"><label>Local username <span style="font-weight:400;color:#888;">(non-Google login)</span></label>' +
+          '<input type="text" data-mb-ef="localUsername" value="' + escapeHtml(data.localUsername || '') + '" placeholder="e.g. jsmith" autocomplete="off"></div>' +
+        '<div class="mb-edit-field"><label>Local password <span style="font-weight:400;color:#888;">(non-Google login)</span></label>' +
+          '<input type="password" data-mb-ef="localPassword" value="' + escapeHtml(data.localPassword || '') + '" placeholder="Leave blank to keep unchanged" autocomplete="new-password"></div>' +
       '</div>' +
       '<div class="mb-edit-actions">' +
         '<button class="small-button" type="button" data-mb-save="' + escapeHtml(email) + '">Save changes</button>' +
@@ -4042,6 +4097,7 @@
           if (!fb || !fb.authorizeMember) { showToast('Firebase not ready', 'error'); return; }
 
           var fields = {};
+          var feedbackEnabledValue = undefined;
           if (editRow) {
             editRow.querySelectorAll('[data-mb-ef]').forEach(function (f) {
               var key = f.dataset.mbEf;
@@ -4049,6 +4105,14 @@
                 if (f.value) fields.expiryDate = fb.Timestamp.fromDate(new Date(f.value));
               } else if (key === 'googleGroupAdded') {
                 fields.googleGroupAdded = f.value === 'true';
+              } else if (key === 'feedbackEnabled') {
+                if (f.value === 'true' || f.value === 'false') {
+                  fields.feedbackEnabled = f.value === 'true';
+                  feedbackEnabledValue = f.value === 'true';
+                }
+              } else if (key === 'localPassword') {
+                if (f.value.trim()) fields.localPassword = f.value.trim();
+                // blank = don't overwrite existing password
               } else {
                 fields[key] = f.value.trim();
               }
@@ -4058,6 +4122,10 @@
           btn.disabled = true;
           try {
             await fb.authorizeMember(email, fields);
+            if (feedbackEnabledValue !== undefined && fb.findUserUidByEmail && fb.setUserFeedbackEnabled) {
+              var uid = await fb.findUserUidByEmail(email);
+              if (uid) await fb.setUserFeedbackEnabled(uid, feedbackEnabledValue);
+            }
             var statusEl = editRow && editRow.querySelector('[data-mb-save-status]');
             if (statusEl) {
               statusEl.textContent = 'Saved ✓';
@@ -4201,6 +4269,8 @@
         var roleVal = (document.getElementById('mbNewRole') || {}).value || 'user';
         var cohortVal = (document.getElementById('mbNewCohort') || {}).value.trim();
         var notesVal = (document.getElementById('mbNewNotes') || {}).value.trim();
+        var localUsernameVal = (document.getElementById('mbNewLocalUsername') || {}).value.trim();
+        var localPasswordVal = (document.getElementById('mbNewLocalPassword') || {}).value.trim();
 
         if (!nameVal) { showToast('Name is required', 'error'); return; }
         if (!emailVal) { showToast('Email is required', 'error'); return; }
@@ -4210,18 +4280,22 @@
         var addedBy = adminProfile.email || 'admin';
         var expiryDate = fb.Timestamp.fromDate(new Date(Date.now() + 365 * 24 * 60 * 60 * 1000));
 
+        var newMemberData = {
+          name: nameVal,
+          role: roleVal,
+          cohort: cohortVal,
+          notes: notesVal,
+          addedBy: addedBy,
+          expiryDate: expiryDate,
+          googleGroupAdded: false,
+          status: 'active'
+        };
+        if (localUsernameVal) newMemberData.localUsername = localUsernameVal;
+        if (localPasswordVal) newMemberData.localPassword = localPasswordVal;
+
         saveBtn.disabled = true;
         try {
-          await fb.authorizeMember(emailVal, {
-            name: nameVal,
-            role: roleVal,
-            cohort: cohortVal,
-            notes: notesVal,
-            addedBy: addedBy,
-            expiryDate: expiryDate,
-            googleGroupAdded: false,
-            status: 'active'
-          });
+          await fb.authorizeMember(emailVal, newMemberData);
           if (savedEl) { savedEl.classList.add('is-visible'); window.setTimeout(function () { savedEl.classList.remove('is-visible'); }, 2000); }
           showToast('Member added');
           document.getElementById('mbNewName').value = '';
@@ -4229,6 +4303,8 @@
           document.getElementById('mbNewRole').value = 'user';
           document.getElementById('mbNewCohort').value = '';
           document.getElementById('mbNewNotes').value = '';
+          document.getElementById('mbNewLocalUsername').value = '';
+          document.getElementById('mbNewLocalPassword').value = '';
           form.hidden = true;
           addBtn.textContent = '+ Add member';
           await mbLoadMembers();
@@ -4241,6 +4317,50 @@
     }
 
     // ===== end Members management =====
+
+    function initGlobalDefaults() {
+      var select = document.getElementById('gd-feedback-enabled');
+      var saveBtn = document.getElementById('gd-feedback-save');
+      var statusEl = document.getElementById('gd-feedback-status');
+      if (!select || !saveBtn) return;
+
+      function loadGlobalDefaults() {
+        var fb = window.utlFirebaseAuth;
+        if (!fb || !fb.getGlobalFeedbackSetting) {
+          window.addEventListener('utlFirebaseAuthReady', function handler() {
+            window.removeEventListener('utlFirebaseAuthReady', handler);
+            loadGlobalDefaults();
+          });
+          return;
+        }
+        fb.getGlobalFeedbackSetting().then(function (val) {
+          select.value = val ? 'true' : 'false';
+        }).catch(function () {
+          select.value = 'true';
+        });
+      }
+
+      loadGlobalDefaults();
+
+      saveBtn.addEventListener('click', async function () {
+        var fb = window.utlFirebaseAuth;
+        if (!fb || !fb.setGlobalFeedbackSetting) { showToast('Firebase not ready', 'error'); return; }
+        saveBtn.disabled = true;
+        if (statusEl) statusEl.textContent = '';
+        try {
+          await fb.setGlobalFeedbackSetting(select.value === 'true');
+          if (statusEl) {
+            statusEl.textContent = 'Saved ✓';
+            window.setTimeout(function () { if (statusEl) statusEl.textContent = ''; }, 2000);
+          }
+          showToast('Global default saved');
+        } catch (e) {
+          showToast((e && e.message) || 'Save failed', 'error');
+        } finally {
+          saveBtn.disabled = false;
+        }
+      });
+    }
 
     sendLoginInvite?.addEventListener('click', handleSendLoginInvite);
     inviteEmail?.addEventListener('keydown', (event) => {
@@ -4260,5 +4380,6 @@
       showAdmin();
     }
   </script>
+  <script type="module" src="../assets/feedback-widget.js"></script>
 </body>
 </html>

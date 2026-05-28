@@ -28,7 +28,8 @@ import {
   serverTimestamp,
   setDoc,
   Timestamp,
-  updateDoc
+  updateDoc,
+  where
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
 // Your web app's Firebase configuration
@@ -231,25 +232,42 @@ async function authorizeMember(email, fields = {}) {
 async function saveUserProfile(user, member = {}) {
   if (!user || !user.uid) return;
 
-  await setDoc(doc(requireFirestore(), "users", user.uid), {
-    email: user.email ? String(user.email).trim().toLowerCase() : "",
+  const email = user.email ? String(user.email).trim().toLowerCase() : "";
+  const readyDb = requireFirestore();
+  const userRef = doc(readyDb, "users", user.uid);
+
+  const [existingSnap, memberSnap] = await Promise.all([
+    getDoc(userRef),
+    email ? getDoc(doc(readyDb, "authorized_members", email)) : Promise.resolve(null)
+  ]);
+
+  const isNewUser = !existingSnap.exists();
+  const profileData = {
+    email,
     displayName: user.displayName || "",
     photoURL: user.photoURL || "",
     role: member.role || "member",
     lastSeenAt: serverTimestamp(),
     updatedAt: serverTimestamp()
-  }, { merge: true });
+  };
 
-  // Update login timestamps on authorized_members
-  const email = user.email ? String(user.email).trim().toLowerCase() : "";
-  if (email) {
-    const memberRef = doc(requireFirestore(), "authorized_members", email);
-    const memberSnap = await getDoc(memberRef);
-    if (memberSnap.exists()) {
-      const loginUpdate = { lastLoginAt: serverTimestamp() };
-      if (!memberSnap.data().firstLoginAt) loginUpdate.firstLoginAt = serverTimestamp();
-      await setDoc(memberRef, loginUpdate, { merge: true });
+  if (isNewUser) {
+    const memberData = memberSnap && memberSnap.exists() ? memberSnap.data() : null;
+    let feedbackEnabled;
+    if (memberData && memberData.feedbackEnabled !== undefined) {
+      feedbackEnabled = Boolean(memberData.feedbackEnabled);
+    } else {
+      feedbackEnabled = await getGlobalFeedbackSetting();
     }
+    profileData.feedbackEnabled = feedbackEnabled;
+  }
+
+  await setDoc(userRef, profileData, { merge: true });
+
+  if (email && memberSnap && memberSnap.exists()) {
+    const loginUpdate = { lastLoginAt: serverTimestamp() };
+    if (!memberSnap.data().firstLoginAt) loginUpdate.firstLoginAt = serverTimestamp();
+    await setDoc(doc(readyDb, "authorized_members", email), loginUpdate, { merge: true });
   }
 }
 
@@ -377,6 +395,46 @@ async function getAllMemberWorkspaceProgress() {
   return allProgress;
 }
 
+async function getUserFeedbackEnabled() {
+  const user = await getSignedInUser();
+  if (!user || !user.uid) return null;
+
+  const userSnap = await getDoc(doc(requireFirestore(), "users", user.uid));
+  if (!userSnap.exists()) return null;
+  const data = userSnap.data() || {};
+  return data.feedbackEnabled !== undefined ? data.feedbackEnabled : true;
+}
+
+async function setUserFeedbackEnabled(uid, enabled) {
+  if (!uid) throw new Error("A user UID is required to set feedbackEnabled.");
+  await updateDoc(doc(requireFirestore(), "users", uid), {
+    feedbackEnabled: Boolean(enabled)
+  });
+}
+
+async function findUserUidByEmail(email) {
+  const normalizedEmail = String(email || "").trim().toLowerCase();
+  if (!normalizedEmail) return null;
+
+  const usersSnap = await getDocs(
+    query(collection(requireFirestore(), "users"), where("email", "==", normalizedEmail))
+  );
+  if (usersSnap.empty) return null;
+  return usersSnap.docs[0].id;
+}
+
+async function getGlobalFeedbackSetting() {
+  const snap = await getDoc(doc(requireFirestore(), "settings", "feedback"));
+  if (!snap.exists()) return true;
+  const data = snap.data() || {};
+  return data.defaultFeedbackEnabled !== false;
+}
+
+async function setGlobalFeedbackSetting(enabled) {
+  await setDoc(doc(requireFirestore(), "settings", "feedback"), {
+    defaultFeedbackEnabled: Boolean(enabled)
+  }, { merge: true });
+}
 
 export {
   actionCodeSettings,
@@ -394,9 +452,12 @@ export {
   getDoc,
   getDocs,
   getGoogleRedirectResult,
+  findUserUidByEmail,
   getAllMemberWorkspaceProgress,
+  getGlobalFeedbackSetting,
   getMemberWorkspaceProgress,
   getSignedInUser,
+  getUserFeedbackEnabled,
   GoogleAuthProvider,
   isSignInWithEmailLink,
   onAuthStateChanged,
@@ -407,12 +468,16 @@ export {
   sendSignInInvite,
   sendSignInLinkToEmail,
   saveUserProgress,
+  setGlobalFeedbackSetting,
+  setUserFeedbackEnabled,
   signInWithEmailAndPassword,
   signInWithEmailLink,
   signInWithGooglePopup,
   signInWithGoogleRedirect,
   signInWithPopup,
   signOut,
+  query,
   Timestamp,
-  updateDoc
+  updateDoc,
+  where
 };

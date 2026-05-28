@@ -310,6 +310,8 @@ const UTL_CONTENT = {
   var ADMIN_KEY = "utl_admin_auth";
   var ADMIN_PASSWORD_KEY = "utl_admin_password";
   var DEFAULT_ADMIN_PASSWORD = "utl2026_admin";
+  var LOCAL_PW_ADMIN = "utl_local_pw_admin";
+  var LOCAL_PW_TESTUSER = "utl_local_pw_testuser";
   var phases = ["phase1", "phase2", "phase3"];
   var phaseNumbers = { phase1: 1, phase2: 2, phase3: 3 };
   var phaseLabels = { phase1: "Phase 1", phase2: "Phase 2", phase3: "Phase 3" };
@@ -946,7 +948,11 @@ const UTL_CONTENT = {
   function handleLogin(form, message) {
     var username = qs("#wsUsername", form).value.trim();
     var password = qs("#wsPassword", form).value;
-    if ((username === "admin" && password === "password123") || (username === "testuser" && password === "member2026")) {
+
+    // Check built-in local accounts (passwords configurable from admin panel)
+    var adminPw = localStorage.getItem(LOCAL_PW_ADMIN) || "password123";
+    var testPw = localStorage.getItem(LOCAL_PW_TESTUSER) || "member2026";
+    if ((username === "admin" && password === adminPw) || (username === "testuser" && password === testPw)) {
       writeBool(SESSION_KEY, true);
       localStorage.setItem(USER_KEY, username);
       localStorage.setItem(PROFILE_KEY, JSON.stringify({ email: username, displayName: username, role: username === "admin" ? "admin" : "member" }));
@@ -955,7 +961,39 @@ const UTL_CONTENT = {
       window.location.href = "index.html";
       return;
     }
-    message.textContent = "That password did not work.";
+
+    // Check Firestore for members with a localUsername set
+    message.textContent = "Checking credentials…";
+    import(firebaseHref()).then(function (fb) {
+      return fb.getDocs(fb.query(
+        fb.collection(fb.db, "authorized_members"),
+        fb.where("localUsername", "==", username)
+      ));
+    }).then(function (snap) {
+      if (snap.empty) {
+        message.textContent = "That username or password did not match.";
+        return;
+      }
+      var memberDoc = snap.docs[0];
+      var data = memberDoc.data() || {};
+      if (!data.localPassword || data.localPassword !== password) {
+        message.textContent = "That username or password did not match.";
+        return;
+      }
+      var role = data.role || "member";
+      writeBool(SESSION_KEY, true);
+      localStorage.setItem(USER_KEY, username);
+      localStorage.setItem(PROFILE_KEY, JSON.stringify({
+        email: data.email || username,
+        displayName: data.name || username,
+        role: role
+      }));
+      if (role === "admin" || role === "owner") localStorage.setItem(ADMIN_KEY, "true");
+      else localStorage.removeItem(ADMIN_KEY);
+      window.location.href = "index.html";
+    }).catch(function () {
+      message.textContent = "That username or password did not match.";
+    });
   }
 
   function isMobileAuthContext() {

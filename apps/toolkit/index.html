@@ -41,7 +41,7 @@ REUSE AUDIT
       top: 0;
       z-index: 20;
       display: grid;
-      grid-template-columns: auto auto minmax(220px, 1fr);
+      grid-template-columns: auto auto minmax(220px, 1fr) auto;
       align-items: center;
       column-gap: 20px;
       min-height: 76px;
@@ -49,6 +49,25 @@ REUSE AUDIT
       background: var(--tk-navy);
       color: var(--tk-white);
     }
+    .tk-user { position: relative; display: flex; align-items: center; gap: 10px; }
+    .tk-user-email { max-width: 170px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: rgba(255,255,255,.72); font: 700 12px Lato,sans-serif; }
+    .tk-avatar { width: 36px; height: 36px; border-radius: 999px; border: 0; background: var(--tk-gold); color: var(--tk-navy); display: grid; place-items: center; font: 700 12px 'Roboto Mono',monospace; cursor: pointer; overflow: hidden; padding: 0; }
+    .tk-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .tk-profile-menu { position: absolute; right: 0; top: 100%; min-width: 210px; max-width: 248px; background: #fff; color: var(--tk-charcoal); border: 1px solid #e8e2d8; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,.15); padding: 0; z-index: 200; overflow: hidden; }
+    .tk-profile-menu::before { content: ''; position: absolute; top: -8px; right: 18px; width: 16px; height: 16px; background: var(--tk-navy); transform: rotate(45deg); }
+    .tk-profile-menu[hidden] { display: none; }
+    .tk-profile-head { position: relative; display: flex; align-items: center; gap: 13px; background: var(--tk-navy); color: #fff; padding: 14px 16px 13px; border-bottom: 3px solid var(--tk-gold); }
+    .tk-profile-avatar { width: 46px; height: 46px; border-radius: 999px; background: var(--tk-gold); color: var(--tk-navy); display: grid; place-items: center; overflow: hidden; font: 700 14px 'Roboto Mono',monospace; flex: 0 0 auto; }
+    .tk-profile-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .tk-profile-name { margin: 0; color: #fff; font-size: 15px; font-weight: 700; line-height: 1.15; font-family: Lato,sans-serif; }
+    .tk-profile-role { margin: 4px 0 0; color: var(--tk-gold); font: 700 9.5px 'Roboto Mono',monospace; letter-spacing: .12em; text-transform: uppercase; }
+    .tk-profile-section { padding: 11px 16px 10px; border-bottom: 1px solid #e8e2d8; }
+    .tk-profile-section:last-child { border-bottom: 0; }
+    .tk-profile-section-label { display: block; margin: 0 0 7px; color: var(--tk-gold); font: 700 9.5px 'Roboto Mono',monospace; letter-spacing: .12em; text-transform: uppercase; }
+    .tk-profile-menu a, .tk-profile-menu button { width: 100%; min-height: 36px; display: flex; align-items: center; gap: 12px; border: 0; background: transparent; color: var(--tk-navy); font: 700 14px Lato,sans-serif; text-align: left; text-decoration: none; cursor: pointer; padding: 4px 0; }
+    .tk-profile-menu a:hover, .tk-profile-menu button:hover { text-decoration: underline; }
+    .tk-profile-icon { width: 18px; color: var(--tk-steel); display: inline-flex; justify-content: center; font-size: 16px; line-height: 1; }
+    .tk-profile-logout { color: var(--tk-steel); }
     .tk-logo {
       display: block;
       width: 224px;
@@ -221,12 +240,14 @@ REUSE AUDIT
     }
     @media (max-width: 768px) {
       .tk-header {
-        grid-template-columns: auto 1fr;
+        grid-template-columns: auto 1fr auto;
         row-gap: 10px;
         padding: 12px 18px;
       }
       .tk-logo { width: 168px; }
       .tk-divider { display: none; }
+      .tk-user-email { display: none; }
+      .tk-profile-menu { position: fixed; top: 56px; right: 12px; left: auto; width: min(270px, calc(100vw - 24px)); max-width: none; }
       .tk-grid { grid-template-columns: 1fr; }
       .tk-main { width: min(100% - 24px, 1180px); }
     }
@@ -237,6 +258,31 @@ REUSE AUDIT
     <a class="tk-logo" href="../../index.html" aria-label="The Untaught Lessons home"><img src="../../assets/utl-logo-nav-white.png" alt="The Untaught Lessons"></a>
     <div class="tk-divider" aria-hidden="true"></div>
     <div><span class="tk-kicker">THE UNTAUGHT LESSONS</span><span class="tk-title">Toolkit</span></div>
+    <div class="tk-user" id="tkUser" hidden>
+      <span class="tk-user-email" id="tkUserEmail"></span>
+      <button class="tk-avatar" id="tkAvatar" type="button" aria-label="Open profile menu" aria-expanded="false">U</button>
+      <div class="tk-profile-menu" id="tkProfileMenu" hidden>
+        <div class="tk-profile-head">
+          <span class="tk-profile-avatar" id="tkMenuAvatar">U</span>
+          <div>
+            <p class="tk-profile-name" id="tkMenuName">Member</p>
+            <p class="tk-profile-role" id="tkMenuRole">Member</p>
+          </div>
+        </div>
+        <div class="tk-profile-section">
+          <span class="tk-profile-section-label">Your space</span>
+          <a href="../../my-results/index.html"><span class="tk-profile-icon">&#9638;</span><span>My results</span></a>
+          <a href="../../apps/toolkit/index.html"><span class="tk-profile-icon">&#8962;</span><span>Toolkit</span></a>
+        </div>
+        <div class="tk-profile-section" id="tkAdminSection" hidden>
+          <span class="tk-profile-section-label">Admin</span>
+          <a href="../../admin/index.html"><span class="tk-profile-icon">&#9788;</span><span>Admin console</span></a>
+        </div>
+        <div class="tk-profile-section">
+          <button class="tk-profile-logout" id="tkLogout" type="button"><span class="tk-profile-icon">&#8618;</span><span>Log out</span></button>
+        </div>
+      </div>
+    </div>
   </header>
 
   <section class="tk-intro">
@@ -485,5 +531,70 @@ Return in a clean list I can easily read and act on.`;
       document.querySelectorAll('.tk-mode').forEach(mode => mode.classList.toggle('tk-active', mode.id === `mode-${button.dataset.mode}`));
     }));
   </script>
+  <script type="module">
+    import { getSignedInUser, getAuthorizedMember, signOut, onAuthStateChanged, auth } from '../../assets/firebase.js';
+    (async () => {
+      try {
+        const user = await getSignedInUser();
+        if (!user) return;
+        const member = await getAuthorizedMember(user.email);
+        const role = member && member.role ? member.role : 'member';
+        const roleLabel = role === 'owner' || role === 'admin' ? 'Administrator' : 'Member';
+        const isAdmin = role === 'admin' || role === 'owner';
+        const displayName = (member && member.name) || user.displayName || user.email || 'Member';
+        const initials = displayName.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() || 'U';
+
+        const tkUser = document.getElementById('tkUser');
+        const tkUserEmail = document.getElementById('tkUserEmail');
+        const tkAvatar = document.getElementById('tkAvatar');
+        const tkMenuAvatar = document.getElementById('tkMenuAvatar');
+        const tkMenuName = document.getElementById('tkMenuName');
+        const tkMenuRole = document.getElementById('tkMenuRole');
+        const tkAdminSection = document.getElementById('tkAdminSection');
+        const tkProfileMenu = document.getElementById('tkProfileMenu');
+        const tkLogout = document.getElementById('tkLogout');
+
+        if (user.photoURL) {
+          const img = document.createElement('img');
+          img.src = user.photoURL;
+          img.alt = displayName;
+          tkAvatar.textContent = '';
+          tkAvatar.appendChild(img);
+          const menuImg = img.cloneNode();
+          tkMenuAvatar.textContent = '';
+          tkMenuAvatar.appendChild(menuImg);
+        } else {
+          tkAvatar.textContent = initials;
+          tkMenuAvatar.textContent = initials;
+        }
+        if (tkUserEmail) tkUserEmail.textContent = user.email || '';
+        if (tkMenuName) tkMenuName.textContent = displayName;
+        if (tkMenuRole) tkMenuRole.textContent = roleLabel;
+        if (isAdmin && tkAdminSection) tkAdminSection.hidden = false;
+        if (tkUser) tkUser.hidden = false;
+
+        tkAvatar.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const open = tkProfileMenu.hasAttribute('hidden');
+          tkProfileMenu.toggleAttribute('hidden', !open);
+          tkAvatar.setAttribute('aria-expanded', open ? 'true' : 'false');
+        });
+        document.addEventListener('click', (e) => {
+          if (!tkUser || tkUser.contains(e.target)) return;
+          tkProfileMenu.hidden = true;
+          tkAvatar.setAttribute('aria-expanded', 'false');
+        });
+        if (tkLogout) {
+          tkLogout.addEventListener('click', async () => {
+            await signOut(auth);
+            localStorage.removeItem('utl_member_unlocked');
+            localStorage.removeItem('utl_admin_auth');
+            window.location.href = '../../member-login/index.html';
+          });
+        }
+      } catch {}
+    })();
+  </script>
+  <script type="module" src="../../assets/feedback-widget.js"></script>
 </body>
 </html>
