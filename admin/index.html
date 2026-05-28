@@ -1864,6 +1864,7 @@
           <button class="small-button" type="button" id="mbAddMemberBtn">+ Add member</button>
           <button class="small-button secondary-button" type="button" id="mbInviteBtn">Send invite</button>
           <button class="small-button secondary-button" type="button" id="mbRefreshBtn">Refresh</button>
+          <button class="small-button secondary-button" type="button" id="mbDownloadCsvBtn">Download CSV</button>
         </div>
 
         <div id="mbAddMemberForm" class="mb-add-form" hidden>
@@ -1911,7 +1912,7 @@
 
         <div id="mbInviteForm" class="mb-invite-form" hidden>
           <div class="invite-card">
-            <p class="description" style="margin-bottom:0;">Send a passwordless login link. The member clicks it from their inbox and lands directly in the workspace.</p>
+            <p class="description" style="margin-bottom:0;">Send a one-click login link. The member clicks it from their inbox and lands directly in the workspace. <strong>Note:</strong> This email comes from <em>noreply@the-untaught-lessons.firebaseapp.com</em> (Firebase). Use it only when a member is having trouble logging in — not as the welcome email. The welcome email sent on member add comes from your Gmail and is the primary onboarding message.</p>
             <div>
               <label for="inviteEmail" class="invite-email-label">Member email</label>
               <div class="invite-actions">
@@ -1924,6 +1925,7 @@
           <div id="inviteLog" class="invite-log"></div>
         </div>
 
+        <div id="mbRemovalNotice" hidden></div>
         <div id="mbTableWrap">
           <p class="mb-msg">Click Refresh to load members.</p>
         </div>
@@ -3477,7 +3479,7 @@
     }
 
     function validAdminTab(tab) {
-      return ['content-manager', 'student-progress', 'member-management'].includes(tab) ? tab : 'content-manager';
+      return ['content-manager', 'student-progress', 'member-management', 'admin-tools'].includes(tab) ? tab : 'content-manager';
     }
 
     function phaseLessonIds(phaseKey) {
@@ -3917,6 +3919,7 @@
       if (!mbMembersCache.length) mbLoadMembers();
     });
     document.getElementById('mbRefreshBtn')?.addEventListener('click', mbLoadMembers);
+    document.getElementById('mbDownloadCsvBtn')?.addEventListener('click', mbDownloadCsv);
     document.addEventListener('click', (event) => {
       if (event.target.closest('#studentProgressRefresh')) loadStudentProgress();
 
@@ -4224,14 +4227,39 @@
       root.querySelectorAll('[data-mb-remove]').forEach(function (btn) {
         btn.addEventListener('click', async function () {
           var email = btn.dataset.mbRemove;
-          if (!window.confirm('Remove ' + email + ' from the member list? This will revoke their access.')) return;
+          if (!window.confirm(
+            'Remove ' + email + '?\n\n' +
+            'This will:\n' +
+            '  ✓ Revoke member workspace access\n' +
+            '  ✓ Delete their Firestore profile\n\n' +
+            'You must also do manually:\n' +
+            '  • Remove from Google Group (utl-members)\n\n' +
+            'Continue?'
+          )) return;
           var fb = window.utlFirebaseAuth;
           if (!fb || !fb.deleteDoc || !fb.doc || !fb.db) { showToast('Firebase not ready', 'error'); return; }
           btn.disabled = true;
           try {
             await fb.deleteDoc(fb.doc(fb.db, 'authorized_members', email));
+            try {
+              var uid = await fb.findUserUidByEmail(email);
+              if (uid) await fb.deleteDoc(fb.doc(fb.db, 'users', uid));
+            } catch (e2) { /* non-fatal */ }
             showToast('Member removed');
             await mbLoadMembers();
+            var notice = document.getElementById('mbRemovalNotice');
+            if (notice) {
+              notice.innerHTML =
+                '<div style="margin-bottom:14px;padding:12px 16px;border-left:3px solid #EEA320;background:#fff8e1;border-radius:4px;">' +
+                '<strong style="display:block;margin-bottom:6px;color:#003366;">Access revoked for ' + escapeHtml(email) + '</strong>' +
+                '<p style="margin:0 0 6px;font-size:13px;color:#4A4A4A;">Automated: removed from Firestore member list and user profile.</p>' +
+                '<p style="margin:0 0 4px;font-size:13px;font-weight:700;color:#4A4A4A;">Still needed manually:</p>' +
+                '<ul style="margin:4px 0 0;padding-left:18px;font-size:13px;color:#4A4A4A;line-height:1.8;">' +
+                '<li>Remove from Google Group: <a href="https://groups.google.com/g/utl-members" target="_blank" style="color:#003366;">utl-members</a></li>' +
+                '</ul></div>';
+              notice.hidden = false;
+              setTimeout(function () { notice.hidden = true; }, 20000);
+            }
           } catch (e) {
             showToast((e && e.message) || 'Remove failed', 'error');
           } finally {
@@ -4390,6 +4418,49 @@
           saveBtn.disabled = false;
         }
       });
+    }
+
+    function mbDownloadCsv() {
+      if (!mbMembersCache || !mbMembersCache.length) { showToast('Load members first', 'error'); return; }
+      var now = new Date();
+      var pad = function (n) { return String(n).padStart(2, '0'); };
+      var dateStr = now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate());
+      var timeStr = pad(now.getHours()) + pad(now.getMinutes());
+      var filename = 'utl-members-' + dateStr + '-' + timeStr + '.csv';
+      var header = ['Name', 'Email', 'Role', 'Status', 'Cohort', 'First Login', 'Expiry', 'Google Group', 'Notes', 'Added By', 'Added At', 'Local Username'];
+      function csvCell(val) {
+        var s = String(val === null || val === undefined ? '' : val).replace(/"/g, '""');
+        return (s.search(/[,"\r\n]/) !== -1) ? '"' + s + '"' : s;
+      }
+      var lines = [
+        'UTL Member Export — Downloaded: ' + now.toLocaleString(),
+        header.map(csvCell).join(',')
+      ];
+      mbMembersCache.forEach(function (d) {
+        var data = d.data();
+        var role = (data.role === 'member' ? 'user' : data.role) || 'user';
+        lines.push([
+          csvCell(data.name || ''),
+          csvCell(d.id),
+          csvCell(role),
+          csvCell(data.status || 'active'),
+          csvCell(data.cohort || ''),
+          csvCell(mbFormatDate(data.firstLoginAt)),
+          csvCell(mbFormatDate(data.expiryDate)),
+          csvCell(data.googleGroupAdded ? 'Yes' : 'No'),
+          csvCell(data.notes || ''),
+          csvCell(data.addedBy || ''),
+          csvCell(mbFormatDate(data.addedAt)),
+          csvCell(data.localUsername || '')
+        ].join(','));
+      });
+      var blob = new Blob([lines.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url; a.download = filename;
+      document.body.appendChild(a); a.click();
+      document.body.removeChild(a); URL.revokeObjectURL(url);
+      showToast('CSV downloaded — ' + mbMembersCache.length + ' members');
     }
 
     // ===== end Members management =====
