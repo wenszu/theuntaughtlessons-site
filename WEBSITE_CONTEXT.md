@@ -1,6 +1,6 @@
 # The Untaught Lessons Website Context
 
-Last updated: 2026-05-30
+Last updated: 2026-05-28
 Primary purpose: Shared implementation memory and operating guide for The Untaught Lessons website.
 
 This file is the single source of truth for agents working on this repo. Codex, Claude, Gemini, and any future assistant should read it before making website changes and update it whenever the shape of the site changes.
@@ -98,6 +98,33 @@ Writing rules for this file:
 - Do not store secrets, private credentials, or one-time tokens here.
 
 ## Change Log
+
+### 2026-05-28
+
+- Added floating "Got feedback?" widget to the entire site via `assets/feedback-widget.js`.
+- Widget is a self-contained ES module. Every page loads it with a single `<script type="module">` tag before `</body>`. Script tag paths are relative to each page's depth.
+- Widget is visible only when: user is signed into Firebase AND `feedbackEnabled !== false` on their Firestore user document.
+- Button style: gold `#EEA320`, navy `#003366`, Roboto Mono 11px 700, border-radius 20px, fixed bottom-right 24px from edges.
+- Feedback modal: white card, Playfair Display 22px heading, Lato Light 13px subheading. Captures name/email from Firebase Auth, page URL, timestamp, feedback type (6 options), and free-text description.
+- Submit: POST with `mode: 'no-cors'` to the shared Apps Script endpoint. Success shows "Got it. Thank you." (Playfair italic) with gold checkmark, auto-closes after 2 s.
+- Apps Script endpoint (same for all form submissions): `https://script.google.com/macros/s/AKfycbzJE--FL2kB_XDNZRnszCtlyLRPvaLAHGuF5TAOdXJk40atbvf5Y6ELuSK2B7CSLaMN/exec`
+- Submissions go to a `Feedback` tab in the connected Google Sheet.
+- Added `feedbackEnabled` boolean to `users/{uid}` Firestore documents. New users inherit from `authorized_members/{email}.feedbackEnabled` if pre-set, then from `settings/feedback.defaultFeedbackEnabled`, then default `true`.
+- Added `settings/feedback` Firestore document with `defaultFeedbackEnabled` boolean (global default for new users).
+- Updated `firestore.rules`:
+  - `users/{userId}` write rule now allows admins as well as the user themselves.
+  - New `settings/{docId}` rule: signed-in users may read; admins may write.
+- Added 5 new exported functions to `assets/firebase.js`:
+  - `getUserFeedbackEnabled()` — reads `feedbackEnabled` from the signed-in user's Firestore document.
+  - `setUserFeedbackEnabled(uid, enabled)` — writes `feedbackEnabled` to `users/{uid}`.
+  - `findUserUidByEmail(email)` — queries `users` by email, returns the first matching uid.
+  - `getGlobalFeedbackSetting()` — reads `settings/feedback.defaultFeedbackEnabled`, defaults to `true`.
+  - `setGlobalFeedbackSetting(enabled)` — writes `settings/feedback.defaultFeedbackEnabled`.
+- Modified `saveUserProfile()` in `assets/firebase.js` to set `feedbackEnabled` on new user documents only, using the logic above.
+- Admin panel (`admin/index.html`) updates:
+  - Member edit form now includes a `Feedback widget` select with three options: Default (inherit global), Enabled, Disabled.
+  - Saving writes `feedbackEnabled` to both `authorized_members/{email}` (via `authorizeMember`) and `users/{uid}` (via `findUserUidByEmail` + `setUserFeedbackEnabled`).
+  - New "Global defaults" section in Site & Content tab (`section-global-defaults`) with a Firestore-backed toggle for `defaultFeedbackEnabled`.
 
 ### 2026-05-27
 
@@ -798,6 +825,7 @@ Core Firestore collections:
 - `access_requests/{email}`: Stores public/member access requests for admin review.
 - `users/{userId}`: Stores per-user workspace profile/progress data.
 - `users/{userId}/completed_exercises/{exerciseId}`: Stores per-exercise completion records.
+- `settings/feedback`: Global site settings document. Currently stores `defaultFeedbackEnabled` (boolean, default `true`).
 
 Authorized member fields currently used:
 
@@ -806,8 +834,16 @@ Authorized member fields currently used:
 - `role`: `member`, `admin`, or `owner` are the important roles. Some admin UI labels may display `member` as `user`.
 - `status`: usually `active`.
 - `googleGroupAdded`: manual flag showing whether the person has been added to the Google Group for Drive access.
+- `feedbackEnabled`: optional boolean. If set before a member's first login, it is copied into `users/{uid}` at first sign-in. If absent, the global `settings/feedback.defaultFeedbackEnabled` is used instead.
 - `addedAt`
 - `updatedAt`
+
+User document fields (`users/{uid}`) currently used:
+
+- `email`, `displayName`, `photoURL`, `role`
+- `lastSeenAt`, `updatedAt`
+- `workspaceProgress`: nested object of exercise progress.
+- `feedbackEnabled`: boolean. Controls whether the floating feedback widget is shown. Set at first login; can be overridden by admin from the Members tab.
 
 Auth behavior:
 

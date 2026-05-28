@@ -25,7 +25,7 @@ service cloud.firestore {
 
     match /users/{userId} {
       allow read: if isSelfUserDocument(userId) || isAdmin();
-      allow write: if isSelfUserDocument(userId);
+      allow write: if isSelfUserDocument(userId) || isAdmin();
     }
 
     match /users/{userId}/completed_exercises/{exerciseId} {
@@ -45,6 +45,11 @@ service cloud.firestore {
     match /access_requests/{requestId} {
       allow create: if true;
       allow read, update, delete: if isAdmin();
+    }
+
+    match /settings/{docId} {
+      allow read: if signedIn();
+      allow write: if isAdmin();
     }
   }
 }

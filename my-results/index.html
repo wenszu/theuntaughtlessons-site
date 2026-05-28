@@ -286,7 +286,7 @@
     .results-profile-menu {
       position: absolute;
       right: 0;
-      top: calc(100% + 10px);
+      top: 100%;
       display: none;
       width: 235px;
       overflow: hidden;
@@ -298,7 +298,6 @@
       z-index: 600;
     }
 
-    .results-user:hover .results-profile-menu,
     .results-user:focus-within .results-profile-menu,
     .results-user.is-open .results-profile-menu {
       display: block;
@@ -1201,6 +1200,10 @@
             <a href="../my-results/index.html"><span class="results-profile-icon">▦</span><span>My results</span></a>
             <a href="../apps/toolkit/index.html"><span class="results-profile-icon">⌂</span><span>Toolkit</span></a>
           </div>
+          <div class="results-profile-section" id="profileAdminSection" hidden>
+            <span class="results-profile-section-label">Admin</span>
+            <a href="../admin/index.html"><span class="results-profile-icon">☸</span><span>Admin console</span></a>
+          </div>
           <div class="results-profile-section">
             <button type="button" id="profileLogout"><span class="results-profile-icon">↪</span><span>Log out</span></button>
           </div>
@@ -1410,6 +1413,10 @@
 
       if (profileMenuName) profileMenuName.textContent = displayName;
       if (profileMenuRole) profileMenuRole.textContent = role;
+      if (role === 'Administrator') {
+        const adminSec = document.getElementById('profileAdminSection');
+        if (adminSec) adminSec.hidden = false;
+      }
       memberIdentity.hidden = false;
     }
 
@@ -1897,5 +1904,6 @@
       if (event.key === 'utl_tsa_status') applyAssessmentNavVisibility();
     });
   </script>
+  <script type="module" src="../assets/feedback-widget.js"></script>
 </body>
 </html>
