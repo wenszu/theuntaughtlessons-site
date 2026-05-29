@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Certificate — The Untaught Lessons</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon-bluebg-whitedoor-thicker-32.png?v=6">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Lato:wght@300;400;700&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --navy: #003366;
+      --gold: #EEA320;
+      --cream: #F3EDE2;
+      --charcoal: #4A4A4A;
+      --line: #d4ccbf;
+      --white: #ffffff;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--cream);
+      color: var(--charcoal);
+      font-family: 'Lato', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+    }
+
+    .cert-topbar {
+      width: 100%;
+      background: var(--navy);
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .cert-back {
+      color: rgba(255,255,255,.75);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-decoration: none;
+      text-transform: uppercase;
+      transition: color .15s;
+    }
+
+    .cert-back:hover { color: var(--gold); }
+
+    .cert-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .cert-btn {
+      padding: 8px 18px;
+      border-radius: 6px;
+      font-family: 'Lato', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      transition: opacity .15s, transform .12s;
+    }
+
+    .cert-btn:hover { opacity: .88; transform: translateY(-1px); }
+
+    .cert-btn-primary {
+      background: var(--gold);
+      color: var(--navy);
+    }
+
+    .cert-btn-secondary {
+      background: rgba(255,255,255,.12);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,.25);
+    }
+
+    .cert-loading {
+      margin: 80px auto;
+      text-align: center;
+      color: var(--charcoal);
+      font-size: 14px;
+    }
+
+    .cert-error {
+      margin: 80px auto;
+      max-width: 480px;
+      padding: 32px;
+      background: var(--white);
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      text-align: center;
+    }
+
+    .cert-error h2 {
+      margin: 0 0 12px;
+      color: var(--navy);
+      font-family: 'Playfair Display', serif;
+      font-size: 22px;
+    }
+
+    .cert-error p {
+      margin: 0 0 20px;
+      color: var(--charcoal);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .cert-error a {
+      color: var(--navy);
+      font-weight: 700;
+    }
+
+    /* The certificate itself */
+    .cert-wrap {
+      padding: 40px 24px 60px;
+      width: 100%;
+      max-width: 820px;
+    }
+
+    .cert-card {
+      background: var(--white);
+      border: 2px solid var(--navy);
+      border-radius: 4px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Double border inset */
+    .cert-card::before {
+      content: '';
+      position: absolute;
+      inset: 8px;
+      border: 1px solid var(--gold);
+      border-radius: 2px;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .cert-inner {
+      padding: 56px 64px 52px;
+      position: relative;
+      z-index: 2;
+      text-align: center;
+    }
+
+    .cert-org {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .18em;
+      color: var(--gold);
+      text-transform: uppercase;
+      margin: 0 0 4px;
+    }
+
+    .cert-presents {
+      font-family: 'Playfair Display', serif;
+      font-size: 13px;
+      font-style: italic;
+      color: var(--charcoal);
+      margin: 0 0 28px;
+    }
+
+    .cert-cert-label {
+      font-family: 'Playfair Display', serif;
+      font-size: 13px;
+      letter-spacing: .1em;
+      color: var(--charcoal);
+      text-transform: uppercase;
+      margin: 0 0 8px;
+    }
+
+    .cert-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 42px;
+      font-weight: 700;
+      color: var(--navy);
+      line-height: 1.1;
+      margin: 0 0 28px;
+    }
+
+    .cert-for {
+      font-family: 'Playfair Display', serif;
+      font-size: 13px;
+      font-style: italic;
+      color: var(--charcoal);
+      margin: 0 0 8px;
+    }
+
+    .cert-credential {
+      font-family: 'Playfair Display', serif;
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--navy);
+      margin: 0 0 36px;
+      line-height: 1.3;
+    }
+
+    .cert-gold-rule {
+      width: 64px;
+      height: 2px;
+      background: var(--gold);
+      margin: 0 auto 32px;
+    }
+
+    .cert-desc {
+      font-family: 'Lato', sans-serif;
+      font-size: 13px;
+      font-weight: 300;
+      color: var(--charcoal);
+      max-width: 460px;
+      margin: 0 auto 40px;
+      line-height: 1.65;
+    }
+
+    .cert-footer {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 24px;
+      margin-top: 8px;
+    }
+
+    .cert-sig-block {
+      text-align: left;
+    }
+
+    .cert-sig-line {
+      width: 160px;
+      height: 1px;
+      background: var(--navy);
+      margin-bottom: 8px;
+    }
+
+    .cert-sig-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--navy);
+      margin: 0 0 2px;
+    }
+
+    .cert-sig-title {
+      font-family: 'Lato', sans-serif;
+      font-size: 11px;
+      font-weight: 400;
+      color: var(--charcoal);
+      margin: 0;
+    }
+
+    .cert-date-block {
+      text-align: right;
+    }
+
+    .cert-date-label {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: .1em;
+      color: var(--gold);
+      text-transform: uppercase;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .cert-date-value {
+      font-family: 'Playfair Display', serif;
+      font-size: 13px;
+      color: var(--navy);
+    }
+
+    .cert-corner {
+      position: absolute;
+      width: 48px;
+      height: 48px;
+      opacity: .25;
+    }
+
+    .cert-corner-tl { top: 16px; left: 16px; }
+    .cert-corner-tr { top: 16px; right: 16px; transform: scaleX(-1); }
+    .cert-corner-bl { bottom: 16px; left: 16px; transform: scaleY(-1); }
+    .cert-corner-br { bottom: 16px; right: 16px; transform: scale(-1); }
+
+    @media (max-width: 600px) {
+      .cert-inner {
+        padding: 36px 28px 36px;
+      }
+
+      .cert-name {
+        font-size: 28px;
+      }
+
+      .cert-credential {
+        font-size: 17px;
+      }
+
+      .cert-footer {
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+      }
+
+      .cert-sig-block, .cert-date-block {
+        text-align: center;
+      }
+
+      .cert-sig-line {
+        margin: 0 auto 8px;
+      }
+    }
+
+    @media print {
+      body { background: white; }
+      .cert-topbar, .cert-actions, .cert-wrap > .cert-below { display: none !important; }
+      .cert-wrap { padding: 0; max-width: 100%; }
+      .cert-card { border-width: 1.5px; page-break-inside: avoid; }
+      .cert-inner { padding: 48px 56px 44px; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="cert-topbar" aria-label="Certificate navigation">
+    <a class="cert-back" href="../member-login/index.html">&larr; Back to portal</a>
+    <div class="cert-actions" id="certActions" hidden>
+      <button class="cert-btn cert-btn-secondary" id="certPrintBtn" type="button">Save as PDF</button>
+      <button class="cert-btn cert-btn-primary" id="certLinkedInBtn" type="button">Share on LinkedIn</button>
+    </div>
+  </nav>
+
+  <div class="cert-loading" id="certLoading" aria-live="polite">Loading your certificate&hellip;</div>
+
+  <div class="cert-error" id="certError" hidden>
+    <h2 id="certErrorTitle">Not yet</h2>
+    <p id="certErrorMsg">You need to complete all three phases to receive your certificate.</p>
+    <a href="../member-login/index.html">Go back to the portal</a>
+  </div>
+
+  <div class="cert-wrap" id="certWrap" hidden>
+    <div class="cert-card" id="certCard">
+      <!-- Corner ornaments -->
+      <svg class="cert-corner cert-corner-tl" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M4 44V4h40" stroke="#003366" stroke-width="1.5"/>
+        <path d="M4 20V4h16" stroke="#EEA320" stroke-width="1.5"/>
+      </svg>
+      <svg class="cert-corner cert-corner-tr" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M4 44V4h40" stroke="#003366" stroke-width="1.5"/>
+        <path d="M4 20V4h16" stroke="#EEA320" stroke-width="1.5"/>
+      </svg>
+      <svg class="cert-corner cert-corner-bl" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M4 44V4h40" stroke="#003366" stroke-width="1.5"/>
+        <path d="M4 20V4h16" stroke="#EEA320" stroke-width="1.5"/>
+      </svg>
+      <svg class="cert-corner cert-corner-br" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M4 44V4h40" stroke="#003366" stroke-width="1.5"/>
+        <path d="M4 20V4h16" stroke="#EEA320" stroke-width="1.5"/>
+      </svg>
+
+      <div class="cert-inner">
+        <p class="cert-org">The Untaught Lessons</p>
+        <p class="cert-presents">proudly presents this certificate to</p>
+
+        <p class="cert-cert-label">Certificate of Completion</p>
+        <h1 class="cert-name" id="certRecipientName">&nbsp;</h1>
+
+        <p class="cert-for">for successfully completing</p>
+        <p class="cert-credential" id="certCredentialTitle">&nbsp;</p>
+
+        <div class="cert-gold-rule"></div>
+
+        <p class="cert-desc">This certificate recognises the completion of all three phases of the programme — the skills, the practice, and the mindset that most schools never teach.</p>
+
+        <div class="cert-footer">
+          <div class="cert-sig-block">
+            <div class="cert-sig-line"></div>
+            <p class="cert-sig-name" id="certSignatoryName">&nbsp;</p>
+            <p class="cert-sig-title" id="certSignatoryTitle">&nbsp;</p>
+          </div>
+          <div class="cert-date-block">
+            <span class="cert-date-label">Awarded</span>
+            <span class="cert-date-value" id="certAwardDate">&nbsp;</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { getSignedInUser, getEngagementSettings } from "../assets/firebase.js";
+
+    function localProfile() {
+      try { return JSON.parse(localStorage.getItem('utl_member_profile') || 'null'); } catch { return null; }
+    }
+
+    function isUnlocked() {
+      return localStorage.getItem('utl_member_unlocked') === 'true';
+    }
+
+    function checkAllDone() {
+      const keys = [
+        'utl_p1_ex1_done', 'utl_p1_ex2_done', 'utl_p1_ex3_done',
+        'utl_p1_ex4_done', 'utl_p1_ex5_done', 'utl_p1_ex6_done',
+        'utl_p2_ex1_done', 'utl_p2_ex2_done', 'utl_p2_ex3_done',
+        'utl_p2_ex4_done', 'utl_p2_ex5_done', 'utl_p2_ex6_done',
+        'utl_p3_ex1_done', 'utl_p3_ex2_done', 'utl_p3_ex3_done', 'utl_p3_ex4_done'
+      ];
+      return keys.every(k => localStorage.getItem(k) === 'true');
+    }
+
+    function showError(title, msg) {
+      document.getElementById('certLoading').hidden = true;
+      const errEl = document.getElementById('certError');
+      document.getElementById('certErrorTitle').textContent = title;
+      document.getElementById('certErrorMsg').textContent = msg;
+      errEl.hidden = false;
+    }
+
+    function formatDate(d) {
+      return d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    async function init() {
+      if (!isUnlocked()) {
+        showError('Sign in required', 'Please sign in to access your certificate.');
+        return;
+      }
+
+      if (!checkAllDone()) {
+        showError('Not yet', 'Complete all three phases to unlock your certificate. Head back to the portal to pick up where you left off.');
+        return;
+      }
+
+      let profile = localProfile();
+      let settings = null;
+
+      try {
+        const [user, eng] = await Promise.all([getSignedInUser(), getEngagementSettings()]);
+        if (user) {
+          profile = profile || {};
+          if (!profile.displayName && user.displayName) profile.displayName = user.displayName;
+          if (!profile.firstName && !profile.lastName && user.displayName) {
+            const parts = user.displayName.trim().split(/\s+/);
+            profile.firstName = parts[0] || '';
+            profile.lastName = parts.slice(1).join(' ') || '';
+          }
+        }
+        settings = eng;
+      } catch {}
+
+      if (settings && settings.certificate && settings.certificate.enabled === false) {
+        showError('Not available', 'The certificate is not currently available. Please check back later.');
+        return;
+      }
+
+      const credentialTitle = (settings && settings.certificate && settings.certificate.credentialTitle) || 'The Untaught Lessons — Full Program';
+      const signatoryName = (settings && settings.certificate && settings.certificate.signatoryName) || 'Wen-Szu Lin';
+      const signatoryTitle = (settings && settings.certificate && settings.certificate.signatoryTitle) || 'Founder, The Untaught Lessons';
+
+      const firstName = (profile && profile.firstName) || '';
+      const lastName = (profile && profile.lastName) || '';
+      const displayName = (profile && profile.displayName) || [firstName, lastName].filter(Boolean).join(' ') || 'You';
+
+      document.getElementById('certRecipientName').textContent = displayName;
+      document.getElementById('certCredentialTitle').textContent = credentialTitle;
+      document.getElementById('certSignatoryName').textContent = signatoryName;
+      document.getElementById('certSignatoryTitle').textContent = signatoryTitle;
+      document.getElementById('certAwardDate').textContent = formatDate(new Date());
+
+      document.getElementById('certLoading').hidden = true;
+      document.getElementById('certWrap').hidden = false;
+      document.getElementById('certActions').hidden = false;
+
+      document.getElementById('certPrintBtn').addEventListener('click', () => {
+        window.print();
+      });
+
+      document.getElementById('certLinkedInBtn').addEventListener('click', () => {
+        const name = encodeURIComponent(credentialTitle);
+        const org = encodeURIComponent('The Untaught Lessons');
+        const issueYear = new Date().getFullYear();
+        const issueMonth = new Date().getMonth() + 1;
+        const url = `https://www.linkedin.com/profile/add?startTask=CERTIFICATION_NAME&name=${name}&organizationName=${org}&issueYear=${issueYear}&issueMonth=${issueMonth}&certUrl=${encodeURIComponent(window.location.href)}`;
+        window.open(url, '_blank', 'noopener');
+      });
+    }
+
+    init();
+  </script>
+</body>
+</html>

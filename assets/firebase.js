@@ -451,6 +451,53 @@ async function setPublicFindLevelSetting(visible) {
   }, { merge: true });
 }
 
+function getDefaultEngagementSettings() {
+  return {
+    inApp: {
+      continueCard: true,
+      daysSinceBanner: true,
+      daysSinceThreshold: 5,
+      almostThere: true,
+      almostThereThreshold: 2,
+      phaseCompletionModal: true
+    },
+    email: {
+      enabled: false,
+      reEngagement: { enabled: false, triggerDays: 7 },
+      phaseCompletion: { enabled: false },
+      finishLine: { enabled: false },
+      senderName: "Wen-Szu",
+      replyTo: ""
+    },
+    certificate: {
+      enabled: true,
+      credentialTitle: "The Untaught Lessons — Full Program",
+      signatoryName: "Wen-Szu Lin",
+      signatoryTitle: "Founder, The Untaught Lessons"
+    }
+  };
+}
+
+async function getEngagementSettings() {
+  try {
+    const snap = await getDoc(doc(requireFirestore(), "settings", "engagement"));
+    if (!snap.exists()) return getDefaultEngagementSettings();
+    const stored = snap.data() || {};
+    const def = getDefaultEngagementSettings();
+    return {
+      inApp: Object.assign({}, def.inApp, stored.inApp || {}),
+      email: Object.assign({}, def.email, stored.email || {}),
+      certificate: Object.assign({}, def.certificate, stored.certificate || {})
+    };
+  } catch {
+    return getDefaultEngagementSettings();
+  }
+}
+
+async function setEngagementSettings(partial) {
+  await setDoc(doc(requireFirestore(), "settings", "engagement"), partial, { merge: true });
+}
+
 export {
   actionCodeSettings,
   app,
@@ -484,6 +531,8 @@ export {
   sendSignInInvite,
   sendSignInLinkToEmail,
   saveUserProgress,
+  getEngagementSettings,
+  setEngagementSettings,
   setGlobalFeedbackSetting,
   setPublicFindLevelSetting,
   setUserFeedbackEnabled,

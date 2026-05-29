@@ -1595,6 +1595,24 @@
     .mb-link-checkbox-row { margin-top:10px; }
     .mb-link-checkbox-row label { display:flex; align-items:flex-start; gap:8px; font-weight:400; font-size:13px; color:var(--charcoal); cursor:pointer; }
     .mb-link-checkbox-row input[type=checkbox] { flex-shrink:0; margin-top:2px; width:16px; height:16px; accent-color:var(--gold); }
+
+    /* Engagement tab */
+    .eng-status { min-height:20px; margin-bottom:10px; color:#888; font-size:13px; }
+    .eng-form { display:grid; gap:0; }
+    .eng-field-group { display:grid; gap:0; margin-bottom:18px; border:1px solid var(--line); border-radius:8px; background:var(--white); overflow:hidden; }
+    .eng-field-row { display:flex; align-items:flex-start; gap:14px; padding:14px 16px; border-bottom:1px solid var(--line); }
+    .eng-field-row:last-child { border-bottom:0; }
+    .eng-indent { padding-left:32px; background:rgba(243,237,226,.35); }
+    .eng-master-toggle-row { background:rgba(0,51,102,.04); }
+    .eng-toggle-label { flex:1; min-width:0; display:grid; gap:3px; }
+    .eng-toggle-name { color:var(--navy); font-size:13px; font-weight:700; line-height:1.2; }
+    .eng-toggle-desc { color:#777; font-size:12px; line-height:1.45; }
+    .eng-toggle { flex-shrink:0; min-width:56px; padding:5px 12px; border:1px solid var(--line); border-radius:20px; background:var(--white); color:#777; font-family:'Roboto Mono',monospace; font-size:11px; font-weight:700; cursor:pointer; transition:all .15s; white-space:nowrap; }
+    .eng-toggle[aria-pressed="true"] { border-color:var(--green); background:var(--green); color:#fff; }
+    .eng-number { width:72px; flex-shrink:0; padding:6px 10px; border:1px solid var(--line); border-radius:6px; font-size:13px; font-family:'Lato',sans-serif; color:var(--navy); text-align:right; }
+    .eng-text { flex-shrink:0; width:220px; max-width:100%; padding:6px 10px; border:1px solid var(--line); border-radius:6px; font-size:13px; font-family:'Lato',sans-serif; color:var(--navy); }
+    .eng-number:focus, .eng-text:focus { border-color:var(--navy); outline:none; }
+    .eng-save-btn { justify-self:start; margin-top:4px; }
   </style>
 </head>
 <body>
@@ -1657,6 +1675,7 @@
       <button class="admin-tab" type="button" data-admin-tab="student-progress">Student Progress</button>
       <button class="admin-tab" type="button" data-admin-tab="member-management">Member Management</button>
       <button class="admin-tab" type="button" data-admin-tab="admin-tools">Admin Tools</button>
+      <button class="admin-tab" type="button" data-admin-tab="engagement">Engagement</button>
     </nav>
 
     <aside class="admin-sidebar">
@@ -1686,6 +1705,12 @@
 
       <span class="nav-group-label" data-admin-nav-group="admin-tools">Preview</span>
       <button class="admin-nav-item" data-admin-tab-scope="admin-tools" data-target="section-admin-preview">Unlock phases</button>
+      <button class="admin-nav-item" data-admin-tab-scope="admin-tools" data-target="section-public-homepage">Public homepage</button>
+
+      <span class="nav-group-label" data-admin-nav-group="engagement">Engagement</span>
+      <button class="admin-nav-item" data-admin-tab-scope="engagement" data-target="section-inapp-nudges">In-app nudges</button>
+      <button class="admin-nav-item" data-admin-tab-scope="engagement" data-target="section-email-nudges">Email nudges</button>
+      <button class="admin-nav-item" data-admin-tab-scope="engagement" data-target="section-certificate">Certificate</button>
 
       <span class="nav-group-label" data-admin-nav-group="content-manager">Links</span>
       <button class="admin-nav-item" data-admin-tab-scope="content-manager" data-target="section-links">Quick links</button>
@@ -1846,6 +1871,15 @@
         <div class="section-divider"></div>
         <p class="description">Controls your own view of the member area. Turning this on lets you browse Phase 2 and Phase 3 without completing Phase 1 first. Members are not affected — they still follow the normal unlock sequence.</p>
         <div class="visibility-checklist" id="adminPreviewChecklist"></div>
+      </section>
+
+      <section class="admin-section" id="section-public-homepage" data-admin-tab-panel="admin-tools">
+        <span class="section-label">Admin Tools</span>
+        <h2>Public homepage</h2>
+        <div class="section-divider"></div>
+        <p class="description">Controls public homepage features that may need to be held back before launch.</p>
+        <div class="visibility-checklist" id="publicHomepageChecklist"></div>
+        <span id="publicHomepageStatus" style="font-size:12px;color:#555;display:block;margin-top:6px;min-height:16px;"></span>
       </section>
 
       <section class="admin-section" id="section-student-progress" data-admin-tab-panel="student-progress">
@@ -2028,6 +2062,170 @@
         <p class="description">Open these links in a new tab to verify your changes.</p>
         <div id="quickLinks"></div>
       </section>
+
+      <!-- ENGAGEMENT TAB -->
+      <section class="admin-section" id="section-inapp-nudges" data-admin-tab-panel="engagement">
+        <span class="section-label">In-app nudges</span>
+        <h2>In-app nudges</h2>
+        <div class="section-divider"></div>
+        <p class="description">These nudges appear inside the member portal. All are on by default. Turn off any you find too frequent.</p>
+        <div id="engInAppStatus" class="eng-status" aria-live="polite"></div>
+        <div id="engInAppForm" class="eng-form" hidden>
+          <div class="eng-field-group">
+            <div class="eng-field-row">
+              <label class="eng-toggle-label">
+                <span class="eng-toggle-name">Continue card</span>
+                <span class="eng-toggle-desc">Shows a &ldquo;Continue where you left off&rdquo; card at the top of the dashboard.</span>
+              </label>
+              <button class="eng-toggle" type="button" data-eng-key="inApp.continueCard" aria-pressed="true">On</button>
+            </div>
+            <div class="eng-field-row">
+              <label class="eng-toggle-label">
+                <span class="eng-toggle-name">Days-since banner</span>
+                <span class="eng-toggle-desc">Shows a &ldquo;You were last here N days ago&rdquo; banner after inactivity.</span>
+              </label>
+              <button class="eng-toggle" type="button" data-eng-key="inApp.daysSinceBanner" aria-pressed="true">On</button>
+            </div>
+            <div class="eng-field-row eng-indent" id="engDaysSinceThresholdRow">
+              <label class="eng-toggle-label" for="engDaysSinceThreshold">
+                <span class="eng-toggle-name">Days threshold</span>
+                <span class="eng-toggle-desc">Show the banner after this many days of inactivity.</span>
+              </label>
+              <input class="eng-number" type="number" id="engDaysSinceThreshold" min="1" max="60" value="5" data-eng-key="inApp.daysSinceThreshold">
+            </div>
+            <div class="eng-field-row">
+              <label class="eng-toggle-label">
+                <span class="eng-toggle-name">Almost-there prompt</span>
+                <span class="eng-toggle-desc">Highlights the last N exercises remaining in a phase to encourage completion.</span>
+              </label>
+              <button class="eng-toggle" type="button" data-eng-key="inApp.almostThere" aria-pressed="true">On</button>
+            </div>
+            <div class="eng-field-row eng-indent" id="engAlmostThereThresholdRow">
+              <label class="eng-toggle-label" for="engAlmostThereThreshold">
+                <span class="eng-toggle-name">Exercises remaining</span>
+                <span class="eng-toggle-desc">Show the prompt when this many exercises are left in a phase.</span>
+              </label>
+              <input class="eng-number" type="number" id="engAlmostThereThreshold" min="1" max="10" value="2" data-eng-key="inApp.almostThereThreshold">
+            </div>
+            <div class="eng-field-row">
+              <label class="eng-toggle-label">
+                <span class="eng-toggle-name">Phase completion modal</span>
+                <span class="eng-toggle-desc">Shows a congratulations modal the first time a member completes all exercises in a phase.</span>
+              </label>
+              <button class="eng-toggle" type="button" data-eng-key="inApp.phaseCompletionModal" aria-pressed="true">On</button>
+            </div>
+          </div>
+          <button class="small-button eng-save-btn" type="button" id="engInAppSave">Save in-app settings</button>
+          <span class="saved" id="engInAppSaved">Saved</span>
+        </div>
+      </section>
+
+      <section class="admin-section" id="section-email-nudges" data-admin-tab-panel="engagement">
+        <span class="section-label">Email nudges</span>
+        <h2>Email nudges</h2>
+        <div class="section-divider"></div>
+        <p class="description">All email nudges are <strong>off by default</strong>. Enable the master toggle first, then turn on individual nudges. Emails are sent via the same Google Apps Script used for feedback.</p>
+        <div id="engEmailStatus" class="eng-status" aria-live="polite"></div>
+        <div id="engEmailForm" class="eng-form" hidden>
+          <div class="eng-field-group">
+            <div class="eng-field-row eng-master-toggle-row">
+              <label class="eng-toggle-label">
+                <span class="eng-toggle-name">Enable email nudges</span>
+                <span class="eng-toggle-desc">Master switch. No email nudges are sent while this is off.</span>
+              </label>
+              <button class="eng-toggle" type="button" data-eng-key="email.enabled" aria-pressed="false">Off</button>
+            </div>
+            <div id="engEmailSubfields">
+              <div class="eng-field-row">
+                <label class="eng-toggle-label">
+                  <span class="eng-toggle-name">Re-engagement nudge</span>
+                  <span class="eng-toggle-desc">Sends an email after a member has been inactive for N days.</span>
+                </label>
+                <button class="eng-toggle" type="button" data-eng-key="email.reEngagement.enabled" aria-pressed="false">Off</button>
+              </div>
+              <div class="eng-field-row eng-indent">
+                <label class="eng-toggle-label" for="engReEngageDays">
+                  <span class="eng-toggle-name">Trigger after (days)</span>
+                  <span class="eng-toggle-desc">Send the nudge this many days after last activity.</span>
+                </label>
+                <input class="eng-number" type="number" id="engReEngageDays" min="1" max="90" value="7" data-eng-key="email.reEngagement.triggerDays">
+              </div>
+              <div class="eng-field-row">
+                <label class="eng-toggle-label">
+                  <span class="eng-toggle-name">Phase completion email</span>
+                  <span class="eng-toggle-desc">Sends a congratulations email when a member finishes a phase.</span>
+                </label>
+                <button class="eng-toggle" type="button" data-eng-key="email.phaseCompletion.enabled" aria-pressed="false">Off</button>
+              </div>
+              <div class="eng-field-row">
+                <label class="eng-toggle-label">
+                  <span class="eng-toggle-name">Finish-line email</span>
+                  <span class="eng-toggle-desc">Sends an email when a member completes the full program.</span>
+                </label>
+                <button class="eng-toggle" type="button" data-eng-key="email.finishLine.enabled" aria-pressed="false">Off</button>
+              </div>
+              <div class="eng-field-row">
+                <label class="eng-toggle-label" for="engSenderName">
+                  <span class="eng-toggle-name">Sender name</span>
+                  <span class="eng-toggle-desc">Shown as the &ldquo;From&rdquo; name in nudge emails.</span>
+                </label>
+                <input class="eng-text" type="text" id="engSenderName" placeholder="e.g. Wen-Szu" data-eng-key="email.senderName">
+              </div>
+              <div class="eng-field-row">
+                <label class="eng-toggle-label" for="engReplyTo">
+                  <span class="eng-toggle-name">Reply-to address</span>
+                  <span class="eng-toggle-desc">Where member replies are directed. Leave blank to use the default Apps Script account.</span>
+                </label>
+                <input class="eng-text" type="email" id="engReplyTo" placeholder="e.g. hello@theuntaughtlessons.com" data-eng-key="email.replyTo">
+              </div>
+            </div>
+          </div>
+          <button class="small-button eng-save-btn" type="button" id="engEmailSave">Save email settings</button>
+          <span class="saved" id="engEmailSaved">Saved</span>
+        </div>
+      </section>
+
+      <section class="admin-section" id="section-certificate" data-admin-tab-panel="engagement">
+        <span class="section-label">Certificate</span>
+        <h2>Certificate</h2>
+        <div class="section-divider"></div>
+        <p class="description">Members who complete all three phases can access a certificate. Customise the credential title and signatory name shown on the certificate.</p>
+        <div id="engCertStatus" class="eng-status" aria-live="polite"></div>
+        <div id="engCertForm" class="eng-form" hidden>
+          <div class="eng-field-group">
+            <div class="eng-field-row">
+              <label class="eng-toggle-label">
+                <span class="eng-toggle-name">Enable certificate</span>
+                <span class="eng-toggle-desc">Show the certificate link to members who have completed the full program.</span>
+              </label>
+              <button class="eng-toggle" type="button" data-eng-key="certificate.enabled" aria-pressed="true">On</button>
+            </div>
+            <div class="eng-field-row">
+              <label class="eng-toggle-label" for="engCredentialTitle">
+                <span class="eng-toggle-name">Credential title</span>
+                <span class="eng-toggle-desc">Shown on the certificate as the name of the credential.</span>
+              </label>
+              <input class="eng-text" type="text" id="engCredentialTitle" placeholder="e.g. The Untaught Lessons — Full Program" data-eng-key="certificate.credentialTitle">
+            </div>
+            <div class="eng-field-row">
+              <label class="eng-toggle-label" for="engSignatoryName">
+                <span class="eng-toggle-name">Signatory name</span>
+                <span class="eng-toggle-desc">Name shown under the signature line on the certificate.</span>
+              </label>
+              <input class="eng-text" type="text" id="engSignatoryName" placeholder="e.g. Wen-Szu Lin" data-eng-key="certificate.signatoryName">
+            </div>
+            <div class="eng-field-row">
+              <label class="eng-toggle-label" for="engSignatoryTitle">
+                <span class="eng-toggle-name">Signatory title</span>
+                <span class="eng-toggle-desc">Role shown under the signatory name on the certificate.</span>
+              </label>
+              <input class="eng-text" type="text" id="engSignatoryTitle" placeholder="e.g. Founder, The Untaught Lessons" data-eng-key="certificate.signatoryTitle">
+            </div>
+          </div>
+          <button class="small-button eng-save-btn" type="button" id="engCertSave">Save certificate settings</button>
+          <span class="saved" id="engCertSaved">Saved</span>
+        </div>
+      </section>
     </main>
   </div>
 
@@ -2044,10 +2242,14 @@
       getAllMemberWorkspaceProgress,
       getDoc,
       getDocs,
+      getEngagementSettings,
       getGlobalFeedbackSetting,
+      getPublicFindLevelSetting,
       getSignedInUser,
       sendSignInInvite,
+      setEngagementSettings,
       setGlobalFeedbackSetting,
+      setPublicFindLevelSetting,
       setUserFeedbackEnabled,
       signInWithGooglePopup,
       Timestamp
@@ -2064,10 +2266,14 @@
       getAllMemberWorkspaceProgress,
       getDoc,
       getDocs,
+      getEngagementSettings,
       getGlobalFeedbackSetting,
+      getPublicFindLevelSetting,
       getSignedInUser,
       sendSignInInvite,
+      setEngagementSettings,
       setGlobalFeedbackSetting,
+      setPublicFindLevelSetting,
       setUserFeedbackEnabled,
       signInWithGooglePopup,
       Timestamp
@@ -2268,19 +2474,6 @@
       ]
     };
     const VISIBILITY_CHECKLIST = [
-      {
-        title: 'Main page',
-        items: [
-          {
-            key: 'utl_public_find_level',
-            checkedValue: 'show',
-            uncheckedValue: 'hide',
-            fallback: 'show',
-            label: 'Show Find your level',
-            description: 'Shows the public Find your level nav link and homepage CTA.'
-          }
-        ]
-      },
       {
         title: 'Learner release gates',
         items: [
@@ -2681,6 +2874,17 @@
       }
     ];
 
+    const PUBLIC_HOMEPAGE_ITEMS = [
+      {
+        key: 'utl_public_find_level',
+        checkedValue: 'show',
+        uncheckedValue: 'hide',
+        fallback: 'hide',
+        label: 'Show Find your level',
+        description: 'Shows the public Find your level nav link and homepage CTA on index.html.'
+      }
+    ];
+
     function renderAdminPreviewChecklist() {
       const target = document.getElementById('adminPreviewChecklist');
       if (!target) return;
@@ -2705,6 +2909,62 @@
           renderVisibilityStatus();
         });
       });
+    }
+
+    function renderPublicHomepageChecklist() {
+      const target = document.getElementById('publicHomepageChecklist');
+      if (!target) return;
+      target.innerHTML = `<div class="visibility-group">${PUBLIC_HOMEPAGE_ITEMS.map((item) => {
+        if (localStorage.getItem(item.key) === null) localStorage.setItem(item.key, item.fallback);
+        const checked = getValue(item.key, item.fallback) === item.checkedValue;
+        return `
+          <label class="visibility-check">
+            <input type="checkbox" data-public-homepage-key="${item.key}" ${checked ? 'checked' : ''}>
+            <span>
+              <strong>${item.label}</strong>
+              <span>${item.description}</span>
+            </span>
+          </label>`;
+      }).join('')}</div>`;
+
+      target.querySelectorAll('[data-public-homepage-key]').forEach((input) => {
+        input.addEventListener('change', () => {
+          const item = PUBLIC_HOMEPAGE_ITEMS.find((entry) => entry.key === input.dataset.publicHomepageKey);
+          if (!item) return;
+          setPublicHomepageValue(item, input.checked);
+        });
+      });
+    }
+
+    async function loadPublicHomepageSetting() {
+      const input = document.querySelector('[data-public-homepage-key="utl_public_find_level"]');
+      const status = document.getElementById('publicHomepageStatus');
+      const fb = window.utlFirebaseAuth;
+      if (!input || !fb || !fb.getPublicFindLevelSetting) return;
+      if (status) status.textContent = 'Loading live setting...';
+      try {
+        const visible = await fb.getPublicFindLevelSetting();
+        localStorage.setItem('utl_public_find_level', visible ? 'show' : 'hide');
+        input.checked = visible;
+        renderVisibilityStatus();
+        if (status) status.textContent = visible ? 'Live setting: Find your level is shown.' : 'Live setting: Find your level is hidden.';
+      } catch (error) {
+        if (status) status.textContent = 'Could not load live setting. Sign in with a Firebase admin account if needed.';
+      }
+    }
+
+    async function setPublicHomepageValue(item, checked) {
+      setChecklistValue(item, checked);
+      const status = document.getElementById('publicHomepageStatus');
+      const fb = window.utlFirebaseAuth;
+      if (status) status.textContent = 'Saving live setting...';
+      try {
+        if (!fb || !fb.setPublicFindLevelSetting) throw new Error('Firebase tools are not ready.');
+        await fb.setPublicFindLevelSetting(checked);
+        if (status) status.textContent = checked ? 'Saved. Find your level will show on the public homepage.' : 'Saved. Find your level will be hidden on the public homepage.';
+      } catch (error) {
+        if (status) status.textContent = 'Local toggle saved, but live setting failed. Sign in with a Firebase admin account and try again.';
+      }
     }
 
     function learningVideoValue(key, fallback = '') {
@@ -3421,8 +3681,8 @@
       document.getElementById('visibilityStatus').innerHTML = `
         <div class="visibility-row">
           <span class="visibility-name">Main page</span>
-          <span>${getValue('utl_public_find_level', 'show') === 'show' ? 'Find your level is visible on the public homepage.' : 'Find your level is hidden on the public homepage.'}</span>
-          <span class="visibility-badge ${getValue('utl_public_find_level', 'show') === 'show' ? 'is-live' : ''}">${getValue('utl_public_find_level', 'show') === 'show' ? 'Visible' : 'Hidden'}</span>
+          <span>${getValue('utl_public_find_level', 'hide') === 'show' ? 'Find your level is visible on the public homepage.' : 'Find your level is hidden on the public homepage.'}</span>
+          <span class="visibility-badge ${getValue('utl_public_find_level', 'hide') === 'show' ? 'is-live' : ''}">${getValue('utl_public_find_level', 'hide') === 'show' ? 'Visible' : 'Hidden'}</span>
         </div>
         <div class="visibility-row">
           <span class="visibility-name">Mission card</span>
@@ -3569,8 +3829,140 @@
       `).join('');
     }
 
+    // ===== Engagement tab =====
+
+    var _engSettings = null;
+
+    function getNestedValue(obj, path) {
+      return path.split('.').reduce(function(o, k) { return (o && o[k] !== undefined) ? o[k] : undefined; }, obj);
+    }
+
+    function setNestedValue(obj, path, value) {
+      var keys = path.split('.');
+      var cur = obj;
+      for (var i = 0; i < keys.length - 1; i++) {
+        if (!cur[keys[i]] || typeof cur[keys[i]] !== 'object') cur[keys[i]] = {};
+        cur = cur[keys[i]];
+      }
+      cur[keys[keys.length - 1]] = value;
+    }
+
+    function syncEngForm(settings) {
+      document.querySelectorAll('[data-eng-key]').forEach(function(el) {
+        var key = el.dataset.engKey;
+        var val = getNestedValue(settings, key);
+        if (el.tagName === 'BUTTON') {
+          var on = val === true || val === 'true';
+          el.setAttribute('aria-pressed', on ? 'true' : 'false');
+          el.textContent = on ? 'On' : 'Off';
+        } else if (el.tagName === 'INPUT') {
+          el.value = (val !== undefined && val !== null) ? val : '';
+        }
+      });
+    }
+
+    function engFormToPartial() {
+      var partial = {};
+      document.querySelectorAll('[data-eng-key]').forEach(function(el) {
+        var key = el.dataset.engKey;
+        var val;
+        if (el.tagName === 'BUTTON') {
+          val = el.getAttribute('aria-pressed') === 'true';
+        } else if (el.type === 'number') {
+          val = parseInt(el.value, 10) || 0;
+        } else {
+          val = el.value;
+        }
+        setNestedValue(partial, key, val);
+      });
+      return partial;
+    }
+
+    function setEngStatus(id, msg) {
+      var el = document.getElementById(id);
+      if (el) el.textContent = msg;
+    }
+
+    async function loadEngagementSettings() {
+      var fb = window.utlFirebaseAuth;
+      if (!fb || !fb.getEngagementSettings) {
+        setEngStatus('engInAppStatus', 'Waiting for Firebase...');
+        setEngStatus('engEmailStatus', 'Waiting for Firebase...');
+        setEngStatus('engCertStatus', 'Waiting for Firebase...');
+        window.addEventListener('utlFirebaseAuthReady', function h() {
+          window.removeEventListener('utlFirebaseAuthReady', h);
+          loadEngagementSettings();
+        });
+        return;
+      }
+      setEngStatus('engInAppStatus', 'Loading...');
+      setEngStatus('engEmailStatus', 'Loading...');
+      setEngStatus('engCertStatus', 'Loading...');
+      try {
+        var settings = await fb.getEngagementSettings();
+        _engSettings = settings;
+        syncEngForm(settings);
+        ['engInAppForm', 'engEmailForm', 'engCertForm'].forEach(function(id) {
+          var el = document.getElementById(id);
+          if (el) el.hidden = false;
+        });
+        setEngStatus('engInAppStatus', '');
+        setEngStatus('engEmailStatus', '');
+        setEngStatus('engCertStatus', '');
+      } catch(e) {
+        var msg = 'Failed to load: ' + ((e && e.message) || 'Unknown error');
+        setEngStatus('engInAppStatus', msg);
+        setEngStatus('engEmailStatus', msg);
+        setEngStatus('engCertStatus', msg);
+      }
+    }
+
+    async function saveEngSection(saveBtn, savedId, keys) {
+      var fb = window.utlFirebaseAuth;
+      if (!fb || !fb.setEngagementSettings) return;
+      saveBtn.disabled = true;
+      try {
+        var full = engFormToPartial();
+        var partial = {};
+        keys.forEach(function(k) {
+          if (full[k] !== undefined) partial[k] = full[k];
+        });
+        await fb.setEngagementSettings(partial);
+        var savedEl = document.getElementById(savedId);
+        if (savedEl) {
+          savedEl.classList.add('is-visible');
+          window.setTimeout(function() { savedEl.classList.remove('is-visible'); }, 1500);
+        }
+        showToast('Saved');
+      } catch(e) {
+        showToast('Save failed: ' + ((e && e.message) || 'error'), true);
+      } finally {
+        saveBtn.disabled = false;
+      }
+    }
+
+    document.getElementById('engInAppSave')?.addEventListener('click', function() {
+      saveEngSection(this, 'engInAppSaved', ['inApp']);
+    });
+    document.getElementById('engEmailSave')?.addEventListener('click', function() {
+      saveEngSection(this, 'engEmailSaved', ['email']);
+    });
+    document.getElementById('engCertSave')?.addEventListener('click', function() {
+      saveEngSection(this, 'engCertSaved', ['certificate']);
+    });
+
+    document.addEventListener('click', function(e) {
+      var btn = e.target.closest('.eng-toggle');
+      if (!btn) return;
+      var pressed = btn.getAttribute('aria-pressed') === 'true';
+      btn.setAttribute('aria-pressed', pressed ? 'false' : 'true');
+      btn.textContent = pressed ? 'Off' : 'On';
+    });
+
+    // ===== End engagement tab =====
+
     function validAdminTab(tab) {
-      return ['content-manager', 'student-progress', 'member-management', 'admin-tools'].includes(tab) ? tab : 'content-manager';
+      return ['content-manager', 'student-progress', 'member-management', 'admin-tools', 'engagement'].includes(tab) ? tab : 'content-manager';
     }
 
     function phaseLessonIds(phaseKey) {
@@ -3837,6 +4229,7 @@
 
       if (activeTab === 'student-progress') loadStudentProgress();
       if (activeTab === 'member-management' && !mbMembersCache.length) mbLoadMembers();
+      if (activeTab === 'engagement') loadEngagementSettings();
 
       if (options.scroll !== false) {
         const target = (currentActive || visibleNavItems[0])?.dataset.target;
@@ -3850,6 +4243,15 @@
       try {
         savedStates = JSON.parse(localStorage.getItem('utl_admin_section_states') || '{}');
       } catch (e) {}
+
+      const collapseDefaultKey = 'utl_admin_content_collapsed_default_v2';
+      if (localStorage.getItem(collapseDefaultKey) !== 'done') {
+        document.querySelectorAll('[data-admin-tab-panel="content-manager"]').forEach((section) => {
+          if (section.id) savedStates[section.id] = false;
+        });
+        localStorage.setItem('utl_admin_section_states', JSON.stringify(savedStates));
+        localStorage.setItem(collapseDefaultKey, 'done');
+      }
 
       const activeNavItem = document.querySelector('.admin-nav-item.active');
       const defaultOpenId = activeNavItem ? activeNavItem.dataset.target : 'section-mission';
@@ -3893,7 +4295,7 @@
           isOpen = savedStates[id] !== false && savedStates[id] !== undefined ? Boolean(savedStates[id]) : false;
           if (!(id in savedStates)) isOpen = (id === defaultOpenId);
         } else {
-          isOpen = (id === defaultOpenId);
+          isOpen = false;
         }
 
         if (isOpen) {
@@ -3983,6 +4385,7 @@
     renderToggles();
     renderVisibilityChecklist();
     renderAdminPreviewChecklist();
+    renderPublicHomepageChecklist();
     renderEmbedBlocks();
     renderUrlInputs();
     renderPasswordBlocks();
@@ -3994,6 +4397,7 @@
     renderInviteLog();
     mbInitAddForm();
     initGlobalDefaults();
+    loadPublicHomepageSetting();
     window.setTimeout(runSyncCheck, 400);
 
     // Persistent event delegation for Fix → buttons in sync results

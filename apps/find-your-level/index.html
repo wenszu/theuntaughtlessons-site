@@ -374,8 +374,93 @@
       line-height: 1;
     }
 
+    .answer-key {
+      max-width: 820px;
+      margin: 28px auto 0;
+      padding: 28px 34px 34px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--white);
+      box-shadow: var(--shadow);
+      text-align: left;
+    }
+
+    .answer-key h2 {
+      font-size: 22px;
+      margin-bottom: 8px;
+    }
+
+    .answer-key .answer-rationale {
+      color: var(--steel);
+      font-style: italic;
+      font-size: 15px;
+      margin: 0 0 22px;
+      line-height: 1.6;
+    }
+
+    .answer-key-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+
+    .answer-col-head {
+      background: var(--navy);
+      color: #fff;
+      font-family: 'Roboto Mono', monospace;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      padding: 8px 12px;
+      border-radius: 6px 6px 0 0;
+    }
+
+    .answer-col-body {
+      border: 1px solid var(--line);
+      border-top: none;
+      border-radius: 0 0 6px 6px;
+      padding: 4px 0;
+    }
+
+    .answer-item {
+      padding: 10px 12px;
+      border-bottom: 1px solid rgba(0,51,102,.07);
+    }
+
+    .answer-item:last-child { border-bottom: none; }
+
+    .answer-item-text {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 3px;
+    }
+
+    .answer-item-reason {
+      font-size: 12px;
+      color: var(--steel);
+      line-height: 1.45;
+    }
+
+    .answer-edge-note {
+      margin: 18px 0 0;
+      padding: 12px 16px;
+      background: #FFF8EC;
+      border: 1px solid rgba(238,163,32,.35);
+      border-radius: 6px;
+      font-size: 13px;
+      color: var(--charcoal);
+      line-height: 1.5;
+    }
+
     .hidden {
       display: none !important;
+    }
+
+    @media (max-width: 600px) {
+      .answer-key-grid { grid-template-columns: 1fr; }
+      .answer-key { padding: 20px 18px 24px; }
     }
 
     @media (max-width: 920px) {
@@ -769,6 +854,34 @@
         .catch((error) => console.warn('Firestore progress save failed.', error));
     }
 
+    function renderAnswerKey() {
+      const sa = exercise.sample_answer;
+      if (!sa) return '';
+      const bucketOrder = exercise.correct_buckets;
+      const cols = bucketOrder.map(bucket => {
+        const items = (sa.buckets[bucket] || []).map(entry => `
+          <div class="answer-item">
+            <div class="answer-item-text">${escapeHtml(entry.item)}</div>
+            <div class="answer-item-reason">${escapeHtml(entry.reason)}</div>
+          </div>`).join('');
+        return `
+          <div>
+            <div class="answer-col-head">${escapeHtml(bucket)}</div>
+            <div class="answer-col-body">${items}</div>
+          </div>`;
+      }).join('');
+      const edgeNote = sa.edge_note
+        ? `<p class="answer-edge-note"><strong>Edge case:</strong> ${escapeHtml(sa.edge_note)}</p>`
+        : '';
+      return `
+        <div class="answer-key">
+          <h2>How the model answer sorts it</h2>
+          <p class="answer-rationale">${escapeHtml(sa.rationale)}</p>
+          <div class="answer-key-grid">${cols}</div>
+          ${edgeNote}
+        </div>`;
+    }
+
     function showScore() {
       clearInterval(timerInterval);
       const score = calculateScore();
@@ -784,6 +897,7 @@
           <p>The UTL program teaches you to think clearly, speak concisely, and act confidently. Join the waitlist to get started.</p>
           <a class="button" href="../../contact.html">Get in touch to join the waitlist</a>
         </section>
+        ${renderAnswerKey()}
       `;
       submitAssessmentResult(score);
     }

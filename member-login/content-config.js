@@ -770,6 +770,7 @@ const UTL_CONTENT = {
       ".ws-context-toggle{width:100%;display:flex;align-items:center;gap:14px;border:0;border-radius:10px;background:#ded6c8;color:var(--ws-navy);padding:16px 18px;text-align:left;cursor:pointer}.ws-context-toggle-icon{width:30px;height:30px;border-radius:8px;background:var(--ws-gold);color:#fff;display:grid;place-items:center;font-size:24px;font-weight:700;line-height:1}.ws-context-toggle-title{display:block;color:var(--ws-navy);font-size:17px;font-weight:700}.ws-context-toggle-sub{display:block;color:var(--ws-steel);font-size:14px;margin-top:2px}.ws-context-panel{display:none;padding:18px 0 0}.ws-context-panel.ws-open{display:block}.ws-context-panel-inner{color:var(--ws-charcoal)}.ws-context-panel-inner p{margin:0 0 14px;color:var(--ws-charcoal);line-height:1.5}.ws-context-embed{margin-top:14px;border-radius:10px;overflow:hidden;border:1px solid var(--ws-line)}.ws-context-panel .ws-media-row{background:var(--ws-navy);margin-top:14px}.ws-workbook-card{position:relative;margin-top:18px;background:#fff;border:1px solid var(--ws-line);border-radius:12px;padding:34px 36px;display:grid;gap:22px}.ws-workbook-card.ws-done{border:2px solid var(--ws-green);background:#f8fbf7}.ws-workbook-card.ws-disabled{opacity:.56}.ws-workbook-card.ws-disabled a,.ws-workbook-card.ws-disabled button{pointer-events:none}.ws-workbook-top{display:flex;align-items:center;gap:12px;color:var(--ws-steel);font:700 14px Lato,sans-serif;letter-spacing:.05em;text-transform:uppercase}.ws-status-circle{width:28px;height:28px;border-radius:999px;background:#d9e4ee;color:var(--ws-steel);display:grid;place-items:center;font:700 14px Lato,sans-serif}.ws-workbook-card.ws-done .ws-status-circle{background:var(--ws-green);color:#fff}.ws-workbook-card h3{margin:0;color:var(--ws-navy);font:700 clamp(34px,5vw,54px)/1.02 'Playfair Display',serif}.ws-workbook-card p{max-width:780px;margin:0;color:var(--ws-steel);font-size:22px;line-height:1.35}.ws-card-actions{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}.ws-card-actions .ws-button{min-width:190px}.ws-done-pill{display:inline-flex;align-items:center;gap:5px;background:rgba(44,122,75,.12);color:var(--ws-green);border-radius:999px;padding:4px 10px;font:700 12px Lato,sans-serif;letter-spacing:0;text-transform:none}",
       ".ws-admin-visibility{margin-top:30px;background:#fff;border:1px solid var(--ws-line);border-radius:12px;padding:18px;display:grid;gap:12px}.ws-check-row{display:flex;align-items:flex-start;gap:10px;color:var(--ws-navy);font-weight:700}.ws-check-row input{margin-top:3px}.ws-help{margin:0;color:var(--ws-steel);font-size:14px;line-height:1.45}",
       ".ws-bottom-nav{display:flex;justify-content:space-between;gap:12px;margin-top:34px}.ws-bottom-nav .ws-button{min-width:180px}.ws-admin-grid{display:grid;gap:16px;margin-top:30px}.ws-admin-phase{background:#fff;border:1px solid var(--ws-line);border-radius:12px;overflow:hidden}.ws-admin-toggle{width:100%;display:grid;grid-template-columns:74px 1fr auto;align-items:center;gap:16px;border:0;background:#fff;padding:18px;text-align:left;cursor:pointer}.ws-admin-num{color:rgba(0,51,102,.12);font:700 54px 'Playfair Display',serif}.ws-admin-body{display:none;padding:0 18px 18px}.ws-admin-phase.ws-open .ws-admin-body{display:block}.ws-slot{border-top:1px solid var(--ws-line);padding:16px 0;display:grid;gap:10px}.ws-slot-head{display:flex;justify-content:space-between;gap:12px}.ws-type-buttons{display:flex;gap:8px}.ws-type-button{border:1px solid rgba(0,51,102,.25);background:#fff;color:var(--ws-navy);border-radius:999px;padding:7px 10px;font:700 10px 'Roboto Mono',monospace;cursor:pointer}.ws-type-button.ws-selected{background:var(--ws-navy);color:#fff}.ws-save-row{display:flex;gap:8px}.ws-save-row .ws-input{background:#fbf7ef}.ws-save-note{min-height:18px;color:var(--ws-green);font:700 11px 'Roboto Mono',monospace}.ws-save-bar{position:sticky;bottom:0;background:#fff;border-top:1px solid var(--ws-line);padding:12px 0;margin-top:32px;box-shadow:0 -8px 20px rgba(0,51,102,.07)}.ws-save-bar-inner{display:flex;justify-content:space-between;align-items:center;gap:16px}",
+      ".ws-nudge-continue{display:flex;align-items:center;gap:16px;background:#fff;border:1px solid var(--ws-line);border-left:4px solid var(--ws-gold);border-radius:12px;padding:18px 20px;box-shadow:0 4px 16px rgba(0,51,102,.06)}.ws-nudge-continue-text{flex:1;min-width:0}.ws-nudge-continue-label{color:var(--ws-gold);font:700 10px 'Roboto Mono',monospace;letter-spacing:.1em;text-transform:uppercase;display:block;margin-bottom:4px}.ws-nudge-continue-title{color:var(--ws-navy);font:700 18px 'Playfair Display',serif;margin:0 0 2px}.ws-nudge-continue-sub{color:var(--ws-steel);font-size:13px;margin:0}.ws-nudge-days{display:flex;align-items:center;gap:12px;background:#F3EDE2;border:1px solid rgba(0,51,102,.12);border-radius:10px;padding:12px 16px;font-size:14px;color:var(--ws-navy)}.ws-nudge-days-icon{font-size:20px;flex-shrink:0}.ws-nudge-almost{display:block;margin-top:8px;padding:6px 10px;background:rgba(238,163,32,.12);border-radius:6px;color:var(--ws-navy);font:700 11px 'Roboto Mono',monospace;letter-spacing:.07em;text-transform:uppercase}.ws-nudge-modal-overlay{position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:24px}.ws-nudge-modal{background:#fff;border-radius:14px;max-width:420px;width:100%;padding:40px 36px 32px;text-align:center;position:relative;box-shadow:0 24px 64px rgba(0,51,102,.22)}.ws-nudge-modal-close{position:absolute;top:12px;right:14px;background:none;border:none;font-size:22px;color:#aaa;cursor:pointer;min-width:36px;min-height:36px;display:flex;align-items:center;justify-content:center}.ws-nudge-modal-icon{width:56px;height:56px;border-radius:999px;background:rgba(238,163,32,.15);display:grid;place-items:center;margin:0 auto 18px;font-size:28px}.ws-nudge-modal h2{margin:0 0 10px;color:var(--ws-navy);font:700 26px 'Playfair Display',serif}.ws-nudge-modal p{margin:0 0 24px;color:var(--ws-steel);font-size:15px;line-height:1.55}.ws-nudge-modal .ws-button{width:100%}",
       "@media(max-width:768px){body.ws-page{background:var(--ws-cream)}.ws-shell{width:calc(100% - 28px)}.ws-nav-inner{height:auto;grid-template-columns:auto 1fr auto;grid-template-rows:auto auto;gap:0 10px;width:100%;padding:8px 12px 0}.ws-brand{grid-column:1;grid-row:1;height:42px;align-items:center}.ws-logo{height:30px}.ws-user{grid-column:3;grid-row:1;height:42px}.ws-user-email{display:none}.ws-avatar{width:36px;height:36px}.ws-links{grid-column:1/-1;grid-row:2;justify-content:flex-start;overflow-x:auto;white-space:nowrap;gap:10px;border-top:1px solid rgba(255,255,255,.14);scrollbar-width:none}.ws-links::-webkit-scrollbar,.ws-lesson-rail::-webkit-scrollbar,.ws-step-tabs-inner::-webkit-scrollbar,.ws-exercise-tabs::-webkit-scrollbar{display:none}.ws-link{min-height:42px;font-size:14px}.ws-sep{opacity:.55}.ws-phase-menu{position:fixed;left:12px;right:12px;top:92px;width:auto}.ws-profile-menu{position:fixed;top:56px;right:12px;left:auto;width:min(270px,calc(100vw - 24px));max-width:none}.ws-main{padding:24px 0 48px}.ws-title{font-size:40px}.ws-subtitle{font-size:17px}.ws-login-wrap{min-height:100svh;padding:28px 16px}.ws-login-card{padding:28px 24px}.ws-login-card .ws-title{font-size:54px}.ws-login-card .ws-subtitle{font-size:18px}.ws-login-card .ws-google-button{min-height:50px}.ws-orientation-head{grid-template-columns:1fr auto;align-items:start;padding:16px}.ws-start-badge{width:max-content;margin-bottom:8px}.ws-orientation-title{font-size:18px}.ws-orientation-sub{font-size:15px;line-height:1.35}.ws-orientation-body{padding:0 16px 18px}.ws-orientation-copy{font-size:16px;line-height:1.58}.ws-orientation-copy h3{font-size:28px}.ws-disclosure-icon{width:34px;height:34px}.ws-player-card,.ws-context-embed{border-radius:12px}.ws-player-meta{position:static;padding:12px 14px;background:var(--ws-navy);text-shadow:none}.ws-player-meta h3{font-size:21px}.ws-how-toggle{padding:12px}.ws-ready-row{align-items:flex-start;font-size:16px;line-height:1.35}.ws-ready-row input{margin-top:3px;flex:0 0 auto}.ws-step-tabs{top:85px}.ws-step-tabs-inner{width:100%;padding:0 12px;overflow-x:auto;scrollbar-width:none;gap:20px}.ws-step-tab{flex:0 0 auto;min-height:42px;font-size:10px}.ws-gold-cta{align-items:flex-start;flex-direction:column}.ws-exercise-tabs{gap:14px;overflow-x:auto;scrollbar-width:none}.ws-exercise-tab{flex:0 0 auto;font-size:10px}.ws-ai-link-card{grid-template-columns:42px 1fr;gap:12px;padding:14px}.ws-ai-arrow{display:none}.ws-phase-card{grid-template-columns:6px 50px 1fr;gap:12px;min-height:150px;padding:18px 14px 18px 0}.ws-phase-actions{grid-column:2/-1;justify-items:start}.ws-phase-number{font-size:46px}.ws-phase-content h2{font-size:27px}.ws-stepper{flex-wrap:wrap}.ws-section{margin-top:24px}.ws-section-head{align-items:flex-start;flex-direction:column}.ws-player-actions{align-items:flex-start;flex-direction:column}.ws-scroll-hint{display:block}.ws-lesson-rail{display:flex;overflow-x:auto;gap:10px;padding-bottom:4px;scrollbar-width:none}.ws-lesson-tile{min-width:124px}.ws-collapsed{grid-template-columns:auto 1fr auto}.ws-collapsed .ws-pill{display:none}.ws-context-toggle{padding:14px}.ws-workbook-card{padding:24px 20px}.ws-workbook-top{font-size:11px;letter-spacing:.1em}.ws-workbook-card h3{font-size:34px}.ws-workbook-card p{font-size:17px}.ws-card-actions .ws-button{width:100%}.ws-exercise-card{grid-template-columns:1fr}.ws-bottom-nav{flex-direction:row}.ws-bottom-nav .ws-button{min-width:0;flex:1;padding:0 10px;font-size:10px}.ws-admin-toggle{grid-template-columns:48px 1fr auto}.ws-save-bar-inner{flex-direction:column;align-items:stretch}.ws-save-row{flex-direction:column}}"
     ].join("\n");
     document.head.appendChild(style);
@@ -1228,13 +1229,16 @@ const UTL_CONTENT = {
     }
     pageShell("home", homePageHtml());
     bindHomePage();
+    applyNudges();
   }
 
   function homePageHtml() {
     var progress = exerciseProgress();
     var orientationDone = readBool("utl_orientation_ready");
     var orientationPrompt = orientationDone ? "" : '<div class="ws-orientation-prompt"><span style="font-size:18px;flex-shrink:0">&#9888;</span><span>Complete orientation before starting Phase 1 — it sets up the storyline and context for all exercises. <a href="#orientation">Open orientation &uarr;</a></span></div>';
-    return '<div class="ws-home-stack">' + orientationCardHtml() + orientationPrompt + '<section><div class="ws-section-head"><h2>Your learning journey</h2><span class="ws-count">' + progress.done + ' of ' + progress.total + ' complete</span></div><section class="ws-progress-card"><div class="ws-progress-row"><span>Overall progress</span><span>' + progress.percent + '%</span></div><div class="ws-progress-track"><div class="ws-progress-fill" style="width:' + progress.percent + '%"></div></div></section><section class="ws-phase-list">' + phases.map(phaseJourneyCard).join("") + '</section></section>' + assessmentsSection() + '</div>';
+    var allDone = phases.every(function (pk) { return exercisesDone(pk); });
+    var certSection = allDone ? '<section class="ws-section"><div class="ws-section-head"><h2>Your certificate</h2></div><article class="ws-phase-card"><div class="ws-phase-stripe" style="background:#2C7A4B"></div><div class="ws-phase-number" style="color:rgba(44,122,75,.15)">&#10003;</div><div class="ws-phase-content"><span class="ws-kicker">Complete</span><h2>Certificate of completion</h2><p>You have finished the full program. Download or share your certificate.</p></div><div class="ws-phase-actions"><span class="ws-pill ws-pill-green">Done</span><a class="ws-button" href="../certificate/index.html">View certificate &rarr;</a></div></article></section>' : "";
+    return '<div class="ws-home-stack">' + orientationCardHtml() + orientationPrompt + '<section><div class="ws-section-head"><h2>Your learning journey</h2><span class="ws-count">' + progress.done + ' of ' + progress.total + ' complete</span></div><section class="ws-progress-card"><div class="ws-progress-row"><span>Overall progress</span><span>' + progress.percent + '%</span></div><div class="ws-progress-track"><div class="ws-progress-fill" style="width:' + progress.percent + '%"></div></div></section><section class="ws-phase-list">' + phases.map(phaseJourneyCard).join("") + '</section></section>' + certSection + assessmentsSection() + '</div>';
   }
 
   function orientationCardHtml() {
@@ -1272,6 +1276,155 @@ const UTL_CONTENT = {
     var checkpointCard = phase1Done ? '<article class="ws-phase-card"><div class="ws-phase-stripe"></div><div class="ws-phase-number">B</div><div class="ws-phase-content"><span class="ws-kicker">Assessment</span><h2>The checkpoint</h2><p>Take the mid-program checkpoint after finishing Phase 1 to see how your thinking has shifted.</p></div><div class="ws-phase-actions"><a class="ws-button" href="../apps/tsa-checkpoint/index.html">Open &rarr;</a></div></article>' : '<article class="ws-phase-card ws-locked"><div class="ws-phase-stripe"></div><div class="ws-phase-number">B</div><div class="ws-phase-content"><span class="ws-kicker">Assessment</span><h2>The checkpoint</h2><p>Complete all Phase 1 exercises to unlock this mid-program assessment.</p></div><div class="ws-phase-actions"><span class="ws-pill ws-pill-locked">Locked</span><span class="ws-button ws-disabled">Open &rarr;</span></div></article>';
     return '<section class="ws-section" id="assessments"><div class="ws-section-head"><h2>Assessments</h2><span class="ws-count">TSA Score</span></div><div class="ws-phase-list"><article class="ws-phase-card"><div class="ws-phase-stripe"></div><div class="ws-phase-number">A</div><div class="ws-phase-content"><span class="ws-kicker">Assessment</span><h2>The diagnostic</h2><p>Take the starting assessment when you are ready.</p></div><div class="ws-phase-actions"><a class="ws-button" href="../apps/tsa-diagnostic/index.html">Open &rarr;</a></div></article>' + checkpointCard + '</div></section>';
   }
+
+  // ===== In-app nudges =====
+
+  var NUDGE_LAST_VISIT_KEY = "utl_nudge_last_visit";
+  var NUDGE_PHASE_SEEN_PREFIX = "utl_nudge_phase_seen_";
+
+  function nudgeContinueTarget() {
+    var target = null;
+    phases.forEach(function (phaseKey) {
+      if (target || !phaseUnlocked(phaseKey)) return;
+      getPhase(phaseKey).exercises.forEach(function (ex) {
+        if (!target && !exerciseDone(ex)) target = { ex: ex, phaseKey: phaseKey };
+      });
+    });
+    return target;
+  }
+
+  function nudgeNewlyCompletePhases() {
+    var result = [];
+    phases.forEach(function (phaseKey) {
+      var num = phaseNumbers[phaseKey];
+      var seenKey = NUDGE_PHASE_SEEN_PREFIX + num;
+      if (exercisesDone(phaseKey) && localStorage.getItem(seenKey) !== "true") {
+        result.push(phaseKey);
+      }
+    });
+    return result;
+  }
+
+  function insertContinueCard(stack, target) {
+    if (qs("#ws-nudge-continue")) return;
+    var phaseLabel = phaseLabels[target.phaseKey] || "";
+    var href = appHref(target.ex.appUrl);
+    var card = document.createElement("div");
+    card.id = "ws-nudge-continue";
+    card.className = "ws-nudge-continue";
+    card.innerHTML =
+      '<div class="ws-nudge-continue-text">' +
+        '<span class="ws-nudge-continue-label">Continue where you left off</span>' +
+        '<p class="ws-nudge-continue-title">' + escapeHtml(target.ex.title) + '</p>' +
+        '<p class="ws-nudge-continue-sub">' + escapeHtml(phaseLabel) + ' &middot; ' + escapeHtml(target.ex.type || "") + '</p>' +
+      '</div>' +
+      '<a class="ws-button" href="' + escapeHtml(href) + '">Open &rarr;</a>';
+    stack.insertBefore(card, stack.firstChild);
+  }
+
+  function insertDaysSinceBanner(stack, days) {
+    if (qs("#ws-nudge-days")) return;
+    var banner = document.createElement("div");
+    banner.id = "ws-nudge-days";
+    banner.className = "ws-nudge-days";
+    banner.innerHTML =
+      '<span class="ws-nudge-days-icon">&#128336;</span>' +
+      '<span>You were last here <strong>' + days + ' day' + (days !== 1 ? 's' : '') + ' ago</strong> &mdash; good to have you back.</span>';
+    var firstChild = stack.firstChild;
+    if (firstChild) {
+      stack.insertBefore(banner, firstChild.nextSibling || null);
+    } else {
+      stack.appendChild(banner);
+    }
+  }
+
+  function applyAlmostThere(threshold) {
+    phases.forEach(function (phaseKey) {
+      if (!phaseUnlocked(phaseKey)) return;
+      var phase = getPhase(phaseKey);
+      var remaining = phase.exercises.filter(function (ex) { return !exerciseDone(ex); }).length;
+      if (remaining > 0 && remaining <= threshold) {
+        var num = phaseNumbers[phaseKey];
+        var cards = document.querySelectorAll(".ws-phase-card");
+        cards.forEach(function (card) {
+          var kicker = card.querySelector(".ws-kicker");
+          if (kicker && kicker.textContent.trim() === phaseLabels[phaseKey]) {
+            if (!card.querySelector(".ws-nudge-almost")) {
+              var badge = document.createElement("span");
+              badge.className = "ws-nudge-almost";
+              badge.textContent = remaining + ' exercise' + (remaining !== 1 ? 's' : '') + ' left to complete this phase';
+              var content = card.querySelector(".ws-phase-content");
+              if (content) content.appendChild(badge);
+            }
+          }
+        });
+      }
+    });
+  }
+
+  function showPhaseCompletionModal(phaseKey) {
+    if (qs(".ws-nudge-modal-overlay")) return;
+    var phase = getPhase(phaseKey);
+    var allDone = phases.every(function (pk) { return exercisesDone(pk); });
+    var overlay = document.createElement("div");
+    overlay.className = "ws-nudge-modal-overlay";
+
+    var certLink = allDone
+      ? '<a class="ws-button" href="../certificate/index.html" style="margin-top:8px">View your certificate &rarr;</a>'
+      : "";
+    var nextPhaseKey = phases[phases.indexOf(phaseKey) + 1];
+    var nextBtn = (!allDone && nextPhaseKey && phaseUnlocked(nextPhaseKey))
+      ? '<a class="ws-button" href="' + escapeHtml(phaseFiles[nextPhaseKey]) + '">' + escapeHtml(phaseLabels[nextPhaseKey]) + ': ' + escapeHtml(getPhase(nextPhaseKey).title) + ' &rarr;</a>'
+      : "";
+
+    overlay.innerHTML =
+      '<div class="ws-nudge-modal" role="dialog" aria-modal="true" aria-labelledby="ws-nudge-modal-title">' +
+        '<button class="ws-nudge-modal-close" type="button" aria-label="Close">&times;</button>' +
+        '<div class="ws-nudge-modal-icon">&#127881;</div>' +
+        '<h2 id="ws-nudge-modal-title">' + escapeHtml(phaseLabels[phaseKey]) + ' complete</h2>' +
+        '<p>' + (allDone ? 'You have completed the full program. Congratulations.' : 'You have finished all exercises in ' + escapeHtml(phaseLabels[phaseKey]) + '. Keep the momentum going.') + '</p>' +
+        (certLink || nextBtn || '<button class="ws-button" type="button" data-nudge-close>Back to dashboard</button>') +
+      '</div>';
+
+    overlay.querySelector(".ws-nudge-modal-close").addEventListener("click", function () { overlay.remove(); });
+    var closeBtn = overlay.querySelector("[data-nudge-close]");
+    if (closeBtn) closeBtn.addEventListener("click", function () { overlay.remove(); });
+    overlay.addEventListener("click", function (e) { if (e.target === overlay) overlay.remove(); });
+    document.body.appendChild(overlay);
+  }
+
+  function applyNudges() {
+    var stack = qs(".ws-home-stack");
+    if (!stack) return;
+
+    var now = Date.now();
+    var lastVisit = parseInt(localStorage.getItem(NUDGE_LAST_VISIT_KEY) || "0", 10);
+    localStorage.setItem(NUDGE_LAST_VISIT_KEY, String(now));
+    var daysSince = lastVisit ? Math.floor((now - lastVisit) / 86400000) : 0;
+
+    var continueTarget = nudgeContinueTarget();
+    var newlyComplete = nudgeNewlyCompletePhases();
+
+    var defaults = { continueCard: true, daysSinceBanner: true, daysSinceThreshold: 5, almostThere: true, almostThereThreshold: 2, phaseCompletionModal: true };
+
+    function applyWithSettings(inApp) {
+      var s = Object.assign({}, defaults, inApp || {});
+      if (s.continueCard && continueTarget) insertContinueCard(stack, continueTarget);
+      if (s.daysSinceBanner && lastVisit > 0 && daysSince >= Number(s.daysSinceThreshold || 5)) insertDaysSinceBanner(stack, daysSince);
+      if (s.almostThere) applyAlmostThere(Number(s.almostThereThreshold || 2));
+      if (s.phaseCompletionModal && newlyComplete.length) {
+        newlyComplete.forEach(function (pk) { localStorage.setItem(NUDGE_PHASE_SEEN_PREFIX + phaseNumbers[pk], "true"); });
+        showPhaseCompletionModal(newlyComplete[newlyComplete.length - 1]);
+      }
+    }
+
+    import(firebaseHref())
+      .then(function (fb) { return fb.getEngagementSettings(); })
+      .then(function (settings) { applyWithSettings((settings || {}).inApp); })
+      .catch(function () { applyWithSettings({}); });
+  }
+
+  // ===== End in-app nudges =====
 
   function bindHomePage() {
     var orientationToggle = qs("[data-orientation-toggle]");

@@ -119,6 +119,30 @@
       "total_pts": 20,
       "bucket_label_pts": 6,
       "item_placement_pts": 14
+    },
+    "sample_answer": {
+      "rationale": "The test is one question: does the room need to make a call today? If yes, it is a decision. If it is a report-out with no vote required, it is an update. If it does not belong in a leadership meeting at all, it is a parking lot item.",
+      "buckets": {
+        "Decisions needed": [
+          { "item": "Q3 budget approval vote", "reason": "The word approval tells you a decision is required — the room needs to vote yes or no." },
+          { "item": "Decision on vendor contract", "reason": "The word decision is in the name. Approve, reject, or renegotiate — but do it now." },
+          { "item": "Product launch go/no-go", "reason": "The most classic leadership decision. Binary, time-sensitive, and requires the full room." },
+          { "item": "Debate over office layout", "reason": "A debate that is still open is a decision waiting to happen. Either call it now or formally park it — leaving it as an unresolved debate wastes everyone's time." }
+        ],
+        "Updates only": [
+          { "item": "Project status from team leads", "reason": "A report-out. The room listens and asks questions — no vote is required." },
+          { "item": "New org chart announcement", "reason": "Already decided by leadership. This slot is communication, not a choice." },
+          { "item": "Policy change effective next month", "reason": "The policy is set. This is a notification so people are not caught off guard." },
+          { "item": "Action items from last week", "reason": "A status check — done or not done. No new decisions are made here." }
+        ],
+        "Parking lot": [
+          { "item": "Someone's vacation dates", "reason": "A personal matter handled between the person and their manager. Not a leadership team agenda item." },
+          { "item": "Team birthday celebration", "reason": "Real life, wrong room. A group chat handles this in thirty seconds." },
+          { "item": "Uploading team photos from last offsite", "reason": "An admin task. Putting it on the leadership agenda is what creates the cluttered meetings this exercise is about." },
+          { "item": "Request for IT equipment", "reason": "Operational request that belongs in the normal procurement channel, not on the leadership agenda." }
+        ]
+      },
+      "edge_note": "Debate over office layout is the one item where parking lot is equally defensible — if the debate has no proposal behind it yet, the right move is to remove it until someone brings a concrete recommendation. Either placement shows clear thinking."
     }
   },
   {
