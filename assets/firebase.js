@@ -498,6 +498,24 @@ async function setEngagementSettings(partial) {
   await setDoc(doc(requireFirestore(), "settings", "engagement"), partial, { merge: true });
 }
 
+function getDefaultAssessmentVisibility() {
+  return { userEnabled: true, adminEnabled: true };
+}
+
+async function getAssessmentVisibility() {
+  try {
+    const snap = await getDoc(doc(requireFirestore(), "settings", "assessments"));
+    if (!snap.exists()) return getDefaultAssessmentVisibility();
+    return Object.assign({}, getDefaultAssessmentVisibility(), snap.data() || {});
+  } catch {
+    return getDefaultAssessmentVisibility();
+  }
+}
+
+async function setAssessmentVisibility(partial) {
+  await setDoc(doc(requireFirestore(), "settings", "assessments"), partial, { merge: true });
+}
+
 export {
   actionCodeSettings,
   app,
@@ -531,6 +549,8 @@ export {
   sendSignInInvite,
   sendSignInLinkToEmail,
   saveUserProgress,
+  getAssessmentVisibility,
+  setAssessmentVisibility,
   getEngagementSettings,
   setEngagementSettings,
   setGlobalFeedbackSetting,

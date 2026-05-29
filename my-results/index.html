@@ -1895,27 +1895,16 @@
       }
     }
 
-    function applyAssessmentNavVisibility() {
-      const isHidden = localStorage.getItem('utl_tsa_status') === 'hidden';
-      document.querySelectorAll('[data-assessment-nav]').forEach((item) => {
-        item.hidden = isHidden;
-      });
-    }
-
     renderStorageOriginHint();
     renderMemberProfile();
     bindProfileMenu();
-    applyAssessmentNavVisibility();
     renderProgress();
     renderAllSections();
     populateRecipientField();
     applySendInstructorStatus();
-    window.addEventListener('storage', (event) => {
-      if (event.key === 'utl_tsa_status') applyAssessmentNavVisibility();
-    });
   </script>
   <script type="module">
-    import { getSignedInUser } from '../assets/firebase.js';
+    import { getSignedInUser, getAssessmentVisibility } from '../assets/firebase.js';
     (async () => {
       try {
         const user = await getSignedInUser();
@@ -1924,6 +1913,22 @@
         if (!syncNotice) return;
         syncNotice.innerHTML = '<strong>Also backed up to your account.</strong> Your exercise completion status is synced to your Untaught Lessons account and accessible from any device you sign in to. Your written responses are stored in this browser only — download or email them to keep a permanent copy.';
         syncNotice.style.display = 'block';
+      } catch {}
+    })();
+    (async () => {
+      try {
+        let profile = {};
+        try { profile = JSON.parse(localStorage.getItem('utl_member_profile') || '{}'); } catch {}
+        const isAdmin = profile.role === 'admin' || profile.role === 'owner' || localStorage.getItem('utl_admin_auth') === 'true';
+        const settings = await getAssessmentVisibility();
+        const userEnabled = settings.userEnabled !== false;
+        const adminEnabled = settings.adminEnabled !== false;
+        const canSee = isAdmin ? (userEnabled || adminEnabled) : userEnabled;
+        if (!canSee) {
+          document.querySelectorAll('[data-assessment-nav]').forEach((el) => { el.hidden = true; });
+          const accordion = document.getElementById('accordion-assessment');
+          if (accordion) accordion.hidden = true;
+        }
       } catch {}
     })();
   </script>

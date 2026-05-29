@@ -1821,6 +1821,29 @@
           <button class="small-button" type="button" id="showReadyAssessments">Set ready assessment apps live</button>
           <a class="small-button secondary-button" href="../member-login/index.html?mode=admin#assessments" target="_blank" style="display:inline-flex;align-items:center;text-decoration:none;">Preview Assessments</a>
         </div>
+        <div class="section-divider" style="margin-top:20px"></div>
+        <p class="description" style="margin-top:12px"><strong>Member access</strong> — controls who sees assessments globally. Changes take effect on the member's next page load.</p>
+        <div id="tsaVisibilityStatus" class="eng-status" aria-live="polite"></div>
+        <div id="tsaVisibilityForm" hidden>
+          <div class="eng-field-group">
+            <div class="eng-field-row">
+              <label class="eng-toggle-label">
+                <span class="eng-toggle-name">Members can see assessments</span>
+                <span class="eng-toggle-desc">When off, the nav link, dashboard section, and results tab are hidden for regular members.</span>
+              </label>
+              <button class="eng-toggle" type="button" data-tsa-vis-key="userEnabled" aria-pressed="true">On</button>
+            </div>
+            <div class="eng-field-row">
+              <label class="eng-toggle-label">
+                <span class="eng-toggle-name">Admins can see assessments when off for members</span>
+                <span class="eng-toggle-desc">When on, admins can still access and test assessments even if hidden for regular members.</span>
+              </label>
+              <button class="eng-toggle" type="button" data-tsa-vis-key="adminEnabled" aria-pressed="true">On</button>
+            </div>
+          </div>
+          <button class="small-button" type="button" id="tsaVisibilitySave" style="margin-top:4px">Save access settings</button>
+          <span class="saved" id="tsaVisibilitySaved">Saved</span>
+        </div>
       </section>
 
       <section class="admin-section" id="section-send-instructor" data-admin-tab-panel="content-manager">
@@ -2242,6 +2265,8 @@
       getAllMemberWorkspaceProgress,
       getDoc,
       getDocs,
+      getAssessmentVisibility,
+      setAssessmentVisibility,
       getEngagementSettings,
       getGlobalFeedbackSetting,
       getPublicFindLevelSetting,
@@ -2266,6 +2291,8 @@
       getAllMemberWorkspaceProgress,
       getDoc,
       getDocs,
+      getAssessmentVisibility,
+      setAssessmentVisibility,
       getEngagementSettings,
       getGlobalFeedbackSetting,
       getPublicFindLevelSetting,
@@ -3960,6 +3987,57 @@
     });
 
     // ===== End engagement tab =====
+
+    // ===== Assessment visibility =====
+
+    async function loadTsaVisibility() {
+      var fb = window.utlFirebaseAuth;
+      if (!fb || !fb.getAssessmentVisibility) return;
+      var statusEl = document.getElementById('tsaVisibilityStatus');
+      var formEl = document.getElementById('tsaVisibilityForm');
+      if (!statusEl || !formEl) return;
+      statusEl.textContent = 'Loading...';
+      try {
+        var settings = await fb.getAssessmentVisibility();
+        document.querySelectorAll('[data-tsa-vis-key]').forEach(function(btn) {
+          var key = btn.dataset.tsaVisKey;
+          var val = settings[key] !== false;
+          btn.setAttribute('aria-pressed', val ? 'true' : 'false');
+          btn.textContent = val ? 'On' : 'Off';
+        });
+        formEl.hidden = false;
+        statusEl.textContent = '';
+      } catch(e) {
+        statusEl.textContent = 'Could not load: ' + ((e && e.message) || 'Unknown error');
+      }
+    }
+
+    document.getElementById('tsaVisibilitySave')?.addEventListener('click', async function() {
+      var fb = window.utlFirebaseAuth;
+      if (!fb || !fb.setAssessmentVisibility) return;
+      var partial = {};
+      document.querySelectorAll('[data-tsa-vis-key]').forEach(function(btn) {
+        partial[btn.dataset.tsaVisKey] = btn.getAttribute('aria-pressed') === 'true';
+      });
+      this.disabled = true;
+      try {
+        await fb.setAssessmentVisibility(partial);
+        var savedEl = document.getElementById('tsaVisibilitySaved');
+        if (savedEl) { savedEl.classList.add('is-visible'); setTimeout(function(){ savedEl.classList.remove('is-visible'); }, 1500); }
+        showToast('Saved');
+      } catch(e) {
+        showToast('Save failed', true);
+      } finally {
+        this.disabled = false;
+      }
+    });
+
+    // Load TSA visibility when the content-manager tab is shown
+    window.addEventListener('utlFirebaseAuthReady', function() {
+      loadTsaVisibility();
+    });
+
+    // ===== End assessment visibility =====
 
     function validAdminTab(tab) {
       return ['content-manager', 'student-progress', 'member-management', 'admin-tools', 'engagement'].includes(tab) ? tab : 'content-manager';

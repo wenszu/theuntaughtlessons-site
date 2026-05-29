@@ -1230,6 +1230,7 @@ const UTL_CONTENT = {
     pageShell("home", homePageHtml());
     bindHomePage();
     applyNudges();
+    applyAssessmentVisibility();
   }
 
   function homePageHtml() {
@@ -1425,6 +1426,44 @@ const UTL_CONTENT = {
   }
 
   // ===== End in-app nudges =====
+
+  // ===== Assessment visibility =====
+
+  function isAdminUser() {
+    var profile = {};
+    try { profile = JSON.parse(localStorage.getItem(PROFILE_KEY) || "{}"); } catch {}
+    return profile.role === "admin" || profile.role === "owner" || localStorage.getItem(ADMIN_KEY) === "true";
+  }
+
+  function hideAssessmentsFromPage() {
+    // Hide nav link
+    var links = document.querySelectorAll('a.ws-link');
+    links.forEach(function (link) {
+      if (link.href && link.href.indexOf("#assessments") !== -1) {
+        var sep = link.previousElementSibling;
+        if (sep && sep.classList.contains("ws-sep")) sep.style.display = "none";
+        link.style.display = "none";
+      }
+    });
+    // Hide dashboard section
+    var section = document.getElementById("assessments");
+    if (section) section.style.display = "none";
+  }
+
+  function applyAssessmentVisibility() {
+    import(firebaseHref())
+      .then(function (fb) { return fb.getAssessmentVisibility(); })
+      .then(function (settings) {
+        var userEnabled = settings.userEnabled !== false;
+        var adminEnabled = settings.adminEnabled !== false;
+        var admin = isAdminUser();
+        var canSee = admin ? (userEnabled || adminEnabled) : userEnabled;
+        if (!canSee) hideAssessmentsFromPage();
+      })
+      .catch(function () {});
+  }
+
+  // ===== End assessment visibility =====
 
   function bindHomePage() {
     var orientationToggle = qs("[data-orientation-toggle]");
