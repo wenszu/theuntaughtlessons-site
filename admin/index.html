@@ -1613,6 +1613,27 @@
     .eng-text { flex-shrink:0; width:220px; max-width:100%; padding:6px 10px; border:1px solid var(--line); border-radius:6px; font-size:13px; font-family:'Lato',sans-serif; color:var(--navy); }
     .eng-number:focus, .eng-text:focus { border-color:var(--navy); outline:none; }
     .eng-save-btn { justify-self:start; margin-top:4px; }
+
+    /* ===== Content Library ===== */
+    .cl-pat-wrap { display:flex; gap:8px; align-items:center; margin-top:10px; flex-wrap:wrap; }
+    .cl-pat-input { flex:1; min-width:200px; font-family:'Roboto Mono',monospace; font-size:13px; padding:8px 10px; border:1px solid #ddd; border-radius:4px; background:#fff; box-sizing:border-box; }
+    .cl-status { font-size:13px; color:#555; min-height:18px; margin-top:8px; }
+    .cl-status.is-error { color:#c62828; }
+    .cl-status.is-success { color:#2e7d32; }
+    .cl-file-grid { display:grid; gap:8px; }
+    .cl-category-label { font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:#EEA320; margin:18px 0 6px; }
+    .cl-category-label:first-child { margin-top:0; }
+    .cl-file-card { display:flex; align-items:center; gap:14px; padding:12px 16px; border:1px solid #e0d9cc; border-radius:6px; background:#fff; }
+    .cl-file-info { flex:1; min-width:0; }
+    .cl-file-name { font-weight:600; font-size:14px; color:#1a2744; }
+    .cl-file-path { font-family:'Roboto Mono',monospace; font-size:11px; color:#888; margin-top:2px; }
+    .cl-file-desc { font-size:12px; color:#666; margin-top:2px; }
+    .cl-editor-header { display:flex; align-items:center; gap:12px; margin-bottom:10px; }
+    .cl-editor-title { font-size:16px; font-weight:700; color:#1a2744; }
+    .cl-editor-path { font-family:'Roboto Mono',monospace; font-size:12px; color:#888; margin-bottom:8px; }
+    .cl-textarea { width:100%; min-height:420px; font-family:'Roboto Mono',monospace; font-size:12px; line-height:1.6; border:1px solid #ddd; border-radius:6px; padding:12px; resize:vertical; box-sizing:border-box; background:#fafaf7; color:#1a2744; }
+    .cl-textarea:focus { outline:none; border-color:#1a2744; }
+    .cl-editor-actions { display:flex; gap:8px; align-items:center; margin-top:10px; flex-wrap:wrap; }
   </style>
 </head>
 <body>
@@ -1676,6 +1697,7 @@
       <button class="admin-tab" type="button" data-admin-tab="member-management">Member Management</button>
       <button class="admin-tab" type="button" data-admin-tab="admin-tools">Admin Tools</button>
       <button class="admin-tab" type="button" data-admin-tab="engagement">Engagement</button>
+      <button class="admin-tab" type="button" data-admin-tab="content-library">Content Library</button>
     </nav>
 
     <aside class="admin-sidebar">
@@ -1712,6 +1734,10 @@
       <button class="admin-nav-item" data-admin-tab-scope="engagement" data-target="section-email-nudges">Email nudges</button>
       <button class="admin-nav-item" data-admin-tab-scope="engagement" data-target="section-certificate">Certificate</button>
       <button class="admin-nav-item" data-admin-tab-scope="engagement" data-target="section-access-controls">Access controls</button>
+
+      <span class="nav-group-label" data-admin-nav-group="content-library">Content Library</span>
+      <button class="admin-nav-item" data-admin-tab-scope="content-library" data-target="section-cl-setup">GitHub setup</button>
+      <button class="admin-nav-item" data-admin-tab-scope="content-library" data-target="section-cl-files">Data files</button>
 
       <span class="nav-group-label" data-admin-nav-group="content-manager">Links</span>
       <button class="admin-nav-item" data-admin-tab-scope="content-manager" data-target="section-links">Quick links</button>
@@ -2278,6 +2304,59 @@
           <span class="saved" id="tsaVisibilitySaved">Saved</span>
         </div>
       </section>
+
+      <!-- ===== Content Library ===== -->
+
+      <section class="admin-section" id="section-cl-setup" data-admin-tab-panel="content-library">
+        <span class="section-label">Content Library</span>
+        <h2>GitHub setup</h2>
+        <div class="section-divider"></div>
+        <p class="description">Connect to GitHub so this admin panel can read and write data files directly. Your token is stored only in this browser — it never goes into the code or git history.</p>
+        <div class="section-divider" style="margin-top:12px"></div>
+        <p class="description" style="margin-top:12px"><strong>Step 1 — Create a fine-grained token.</strong><br>
+          Go to <strong>github.com → Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token</strong>.<br>
+          Set repository access to <em>Only select repositories → theuntaughtlessons-site</em>.<br>
+          Under Permissions → Repository permissions, set <em>Contents → Read and write</em>. Everything else stays None.</p>
+        <p class="description" style="margin-top:8px"><strong>Step 2 — Paste the token below and click Save.</strong></p>
+        <div class="cl-pat-wrap">
+          <input type="password" class="cl-pat-input" id="clPatInput" placeholder="github_pat_…" autocomplete="off">
+          <button class="password-toggle" type="button" aria-label="Show token" aria-pressed="false" data-password-toggle="clPatInput">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/></svg>
+          </button>
+          <button class="small-button" type="button" id="clPatSave">Save token</button>
+          <button class="small-button secondary-button" type="button" id="clPatClear" hidden>Clear token</button>
+        </div>
+        <p id="clPatStatus" class="cl-status" aria-live="polite"></p>
+      </section>
+
+      <section class="admin-section" id="section-cl-files" data-admin-tab-panel="content-library">
+        <span class="section-label">Content Library</span>
+        <h2>Data files</h2>
+        <div class="section-divider"></div>
+
+        <!-- File list view -->
+        <div id="clFileList">
+          <p class="description">Each file below drives one or more exercises. Load a file to view and edit its content, then save it back to GitHub. GitHub Pages will redeploy automatically in about 60 seconds.</p>
+          <div id="clFileListInner" class="cl-file-grid" style="margin-top:16px"></div>
+        </div>
+
+        <!-- Editor view (hidden until a file is loaded) -->
+        <div id="clEditor" hidden>
+          <div class="cl-editor-header">
+            <button class="small-button secondary-button" type="button" id="clEditorBack">← Back to files</button>
+            <span class="cl-editor-title" id="clEditorTitle"></span>
+          </div>
+          <p class="cl-editor-path" id="clEditorPath"></p>
+          <textarea class="cl-textarea" id="clTextarea" spellcheck="false" autocorrect="off" autocapitalize="off"></textarea>
+          <p class="cl-status" id="clEditorStatus" aria-live="polite"></p>
+          <div class="cl-editor-actions">
+            <button class="small-button" type="button" id="clSaveBtn">Save &amp; deploy</button>
+            <button class="small-button secondary-button" type="button" id="clValidateBtn">Validate JSON</button>
+            <button class="small-button secondary-button" type="button" id="clDownloadBtn">Download</button>
+          </div>
+        </div>
+      </section>
+
     </main>
   </div>
 
@@ -4120,8 +4199,198 @@
 
     // ===== End public assessment card visibility =====
 
+    // ===== Content Library =====
+
+    const CL_REPO = 'wenszu/theuntaughtlessons-site';
+    const CL_PAT_KEY = 'utl_github_pat';
+    const CL_FILES = [
+      { name: 'Grocery List',        path: 'data/practice/grocery-list.json',      category: 'Practice exercises', desc: 'MECE sort exercise with item bank and ideal bucket mappings' },
+      { name: 'Issue Tree Builder',  path: 'data/practice/issue-tree-builder.json', category: 'Practice exercises', desc: 'Problem decomposition with hypothesis and sample answer' },
+      { name: 'Messy Notes',         path: 'data/practice/messy-notes.json',        category: 'Practice exercises', desc: 'Structuring rushed notes into an Aiko-ready summary' },
+      { name: 'SCQA Builder',        path: 'data/practice/scqa-builder.json',       category: 'Practice exercises', desc: 'Situation-Complication-Question-Answer formulation exercise' },
+      { name: 'Sort & Bucket',       path: 'data/tsa/sort-bucket.json',             category: 'TSA assessments',    desc: 'Sorting scenarios used in the Diagnostic and Checkpoint' },
+      { name: 'Spot the Problem',    path: 'data/tsa/spot-the-problem.json',        category: 'TSA assessments',    desc: 'MECE gap/overlap detection with scored answer key' },
+      { name: 'Speak Concisely',     path: 'data/tsa/speak-concisely.json',         category: 'TSA assessments',    desc: 'Timed speaking scenarios with talking point guides' },
+      { name: 'Act Confidently',     path: 'data/tsa/act-confidently.json',         category: 'TSA assessments',    desc: 'Difficult-conversation assessment (placeholder)' },
+      { name: 'Find Your Level',     path: 'data/sort-bucket.json',                 category: 'Public exercise',    desc: 'Free public sort & bucket exercise on tsa-score.html' },
+    ];
+
+    let clEditing = null;
+
+    function clGetPat() { return localStorage.getItem(CL_PAT_KEY) || ''; }
+
+    function clUpdatePatStatus() {
+      const hasPat = !!clGetPat();
+      const status = document.getElementById('clPatStatus');
+      const clearBtn = document.getElementById('clPatClear');
+      const input = document.getElementById('clPatInput');
+      if (hasPat) {
+        if (status) { status.textContent = 'Token saved. Ready to load and edit files.'; status.className = 'cl-status is-success'; }
+        if (clearBtn) clearBtn.hidden = false;
+        if (input) input.placeholder = '(token saved — paste a new one to replace)';
+      } else {
+        if (status) { status.textContent = ''; status.className = 'cl-status'; }
+        if (clearBtn) clearBtn.hidden = true;
+        if (input) input.placeholder = 'github_pat_…';
+      }
+    }
+
+    function clRenderFileList() {
+      const container = document.getElementById('clFileListInner');
+      if (!container) return;
+      const categories = [...new Set(CL_FILES.map((f) => f.category))];
+      container.innerHTML = categories.map((cat) => {
+        const files = CL_FILES.filter((f) => f.category === cat);
+        return `<p class="cl-category-label">${escapeHtml(cat)}</p>` + files.map((f) => `
+          <div class="cl-file-card">
+            <div class="cl-file-info">
+              <div class="cl-file-name">${escapeHtml(f.name)}</div>
+              <div class="cl-file-path">${escapeHtml(f.path)}</div>
+              <div class="cl-file-desc">${escapeHtml(f.desc)}</div>
+            </div>
+            <button class="small-button secondary-button" type="button" data-cl-load="${escapeHtml(f.path)}">Load</button>
+          </div>`).join('');
+      }).join('');
+      container.querySelectorAll('[data-cl-load]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const file = CL_FILES.find((f) => f.path === btn.dataset.clLoad);
+          if (file) clLoadFile(file);
+        });
+      });
+    }
+
+    async function clLoadFile(file) {
+      const pat = clGetPat();
+      if (!pat) { showToast('Set up your GitHub PAT in the GitHub Setup section first.', true); openAndScrollToSection('section-cl-setup'); return; }
+      const fileList = document.getElementById('clFileList');
+      const editor = document.getElementById('clEditor');
+      const textarea = document.getElementById('clTextarea');
+      const titleEl = document.getElementById('clEditorTitle');
+      const pathEl = document.getElementById('clEditorPath');
+      const statusEl = document.getElementById('clEditorStatus');
+      if (fileList) fileList.hidden = true;
+      if (editor) editor.hidden = false;
+      if (titleEl) titleEl.textContent = file.name;
+      if (pathEl) pathEl.textContent = file.path;
+      if (textarea) { textarea.value = 'Loading…'; textarea.disabled = true; }
+      if (statusEl) { statusEl.textContent = 'Fetching from GitHub…'; statusEl.className = 'cl-status'; }
+      try {
+        const res = await fetch(`https://api.github.com/repos/${CL_REPO}/contents/${file.path}`, {
+          headers: { Authorization: `Bearer ${pat}`, Accept: 'application/vnd.github.v3+json' }
+        });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(res.status === 401 ? 'Token is invalid or expired — check your PAT in GitHub Setup.' :
+                          res.status === 404 ? 'File not found in the repo.' :
+                          err.message || `HTTP ${res.status}`);
+        }
+        const data = await res.json();
+        const raw = decodeURIComponent(escape(atob(data.content.replace(/\n/g, ''))));
+        const parsed = JSON.parse(raw);
+        clEditing = { ...file, sha: data.sha };
+        if (textarea) { textarea.value = JSON.stringify(parsed, null, 2); textarea.disabled = false; }
+        if (statusEl) { statusEl.textContent = ''; statusEl.className = 'cl-status'; }
+      } catch (e) {
+        if (statusEl) { statusEl.textContent = 'Failed to load: ' + e.message; statusEl.className = 'cl-status is-error'; }
+        if (textarea) { textarea.value = ''; textarea.disabled = false; }
+      }
+    }
+
+    async function clSaveFile() {
+      const pat = clGetPat();
+      if (!pat || !clEditing) return;
+      const textarea = document.getElementById('clTextarea');
+      const statusEl = document.getElementById('clEditorStatus');
+      const saveBtn = document.getElementById('clSaveBtn');
+      let parsed;
+      try { parsed = JSON.parse(textarea.value); }
+      catch (e) {
+        if (statusEl) { statusEl.textContent = 'Cannot save — invalid JSON: ' + e.message; statusEl.className = 'cl-status is-error'; }
+        return;
+      }
+      const content = btoa(unescape(encodeURIComponent(JSON.stringify(parsed, null, 2))));
+      if (saveBtn) saveBtn.disabled = true;
+      if (statusEl) { statusEl.textContent = 'Saving to GitHub…'; statusEl.className = 'cl-status'; }
+      try {
+        const res = await fetch(`https://api.github.com/repos/${CL_REPO}/contents/${clEditing.path}`, {
+          method: 'PUT',
+          headers: { Authorization: `Bearer ${pat}`, Accept: 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: `Update ${clEditing.path} via admin panel`, content, sha: clEditing.sha })
+        });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(res.status === 409 ? 'Conflict — someone else edited this file. Reload it and try again.' :
+                          res.status === 422 ? 'SHA mismatch — reload the file and try again.' :
+                          err.message || `HTTP ${res.status}`);
+        }
+        const data = await res.json();
+        clEditing.sha = data.content.sha;
+        if (statusEl) { statusEl.textContent = 'Saved. GitHub Pages will update in about 60 seconds.'; statusEl.className = 'cl-status is-success'; }
+        showToast('Saved to GitHub');
+      } catch (e) {
+        if (statusEl) { statusEl.textContent = 'Save failed: ' + e.message; statusEl.className = 'cl-status is-error'; }
+        showToast('Save failed', true);
+      } finally {
+        if (saveBtn) saveBtn.disabled = false;
+      }
+    }
+
+    function clValidateJSON() {
+      const textarea = document.getElementById('clTextarea');
+      const statusEl = document.getElementById('clEditorStatus');
+      if (!textarea) return;
+      try {
+        JSON.parse(textarea.value);
+        if (statusEl) { statusEl.textContent = 'JSON is valid.'; statusEl.className = 'cl-status is-success'; }
+      } catch (e) {
+        if (statusEl) { statusEl.textContent = 'Invalid JSON: ' + e.message; statusEl.className = 'cl-status is-error'; }
+      }
+    }
+
+    function clDownload() {
+      const textarea = document.getElementById('clTextarea');
+      if (!textarea || !clEditing) return;
+      const blob = new Blob([textarea.value], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = clEditing.path.split('/').pop();
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+
+    function clShowFileList() {
+      document.getElementById('clFileList').hidden = false;
+      document.getElementById('clEditor').hidden = true;
+      clEditing = null;
+    }
+
+    function clInit() {
+      clUpdatePatStatus();
+      clRenderFileList();
+      document.getElementById('clPatSave')?.addEventListener('click', () => {
+        const input = document.getElementById('clPatInput');
+        const val = (input?.value || '').trim();
+        if (!val) { showToast('Paste your token first', true); return; }
+        localStorage.setItem(CL_PAT_KEY, val);
+        if (input) input.value = '';
+        clUpdatePatStatus();
+        showToast('Token saved');
+      });
+      document.getElementById('clPatClear')?.addEventListener('click', () => {
+        localStorage.removeItem(CL_PAT_KEY);
+        clUpdatePatStatus();
+        showToast('Token cleared');
+      });
+      document.getElementById('clEditorBack')?.addEventListener('click', clShowFileList);
+      document.getElementById('clSaveBtn')?.addEventListener('click', clSaveFile);
+      document.getElementById('clValidateBtn')?.addEventListener('click', clValidateJSON);
+      document.getElementById('clDownloadBtn')?.addEventListener('click', clDownload);
+    }
+
+    // ===== End Content Library =====
+
     function validAdminTab(tab) {
-      return ['content-manager', 'student-progress', 'member-management', 'admin-tools', 'engagement'].includes(tab) ? tab : 'content-manager';
+      return ['content-manager', 'student-progress', 'member-management', 'admin-tools', 'engagement', 'content-library'].includes(tab) ? tab : 'content-manager';
     }
 
     function phaseLessonIds(phaseKey) {
@@ -4390,6 +4659,7 @@
       if (activeTab === 'member-management' && !mbMembersCache.length) mbLoadMembers();
       if (activeTab === 'engagement') loadEngagementSettings();
       if (activeTab === 'admin-tools') loadPublicAssessmentSettings();
+      if (activeTab === 'content-library') clUpdatePatStatus();
 
       if (options.scroll !== false) {
         const target = (currentActive || visibleNavItems[0])?.dataset.target;
@@ -4559,6 +4829,7 @@
     initGlobalDefaults();
     loadPublicHomepageSetting();
     loadPublicAssessmentSettings();
+    clInit();
     window.setTimeout(runSyncCheck, 400);
 
     // Persistent event delegation for Fix → buttons in sync results
