@@ -1156,7 +1156,7 @@ const UTL_CONTENT = {
     injectStyles();
     document.body.classList.add("ws-page");
     if (!isMemberUnlocked()) {
-      document.body.innerHTML = '<section class="ws-login-wrap"><article class="ws-login-card"><span class="ws-kicker">Member login</span><h1 class="ws-title">Welcome back.</h1><p class="ws-subtitle">Sign in to open your Untaught Lessons workspace.</p><form class="ws-form" id="wsLoginForm"><label for="wsUsername">Username or email</label><input class="ws-input" id="wsUsername" autocomplete="username" required><label for="wsPassword">Password</label><input class="ws-input" id="wsPassword" type="password" autocomplete="current-password" required><button class="ws-button" type="submit">Sign in</button><p class="ws-message" id="wsLoginMessage" aria-live="polite"></p></form><div class="ws-login-divider">or</div><button class="ws-button ws-google-button" id="wsGoogleLogin" type="button"><span class="ws-google-mark" aria-hidden="true"></span><span>Sign in with Google</span></button></article></section>';
+      document.body.innerHTML = '<section class="ws-login-wrap"><article class="ws-login-card"><span class="ws-kicker">Member login</span><h1 class="ws-title">Welcome back.</h1><p class="ws-subtitle">Sign in to open your Untaught Lessons workspace.</p><form class="ws-form" id="wsLoginForm"><label for="wsUsername">Username or email</label><input class="ws-input" id="wsUsername" autocomplete="username" required><label for="wsPassword">Password</label><input class="ws-input" id="wsPassword" type="password" autocomplete="current-password" required><button class="ws-button" type="submit">Sign in</button><p class="ws-message" id="wsLoginMessage" aria-live="polite"></p></form><div class="ws-login-divider">or</div><button class="ws-button ws-google-button" id="wsGoogleLogin" type="button"><span class="ws-google-mark" aria-hidden="true"></span><span>Sign in with Google</span></button><div class="ws-login-divider">or</div><div id="wsEmailSignInSection"><button class="ws-button ws-button-secondary" id="wsShowEmailSignIn" type="button" style="width:100%">Sign in with email link</button></div></article></section>';
       qs("#wsLoginForm").addEventListener("submit", function (event) {
         event.preventDefault();
         handleLogin(event.currentTarget, qs("#wsLoginMessage"));
@@ -1164,6 +1164,43 @@ const UTL_CONTENT = {
       qs("#wsGoogleLogin").addEventListener("click", function (event) {
         event.preventDefault();
         handleGoogleLogin(event.currentTarget, qs("#wsLoginMessage"));
+      });
+      qs("#wsShowEmailSignIn").addEventListener("click", function () {
+        var section = qs("#wsEmailSignInSection");
+        if (!section) return;
+        section.innerHTML = '<form class="ws-form" id="wsEmailLinkForm" style="margin-top:0"><label for="wsEmailLinkAddr">Your email address</label><input class="ws-input" id="wsEmailLinkAddr" type="email" autocomplete="email" placeholder="you@example.com" required><button class="ws-button" type="submit" style="width:100%">Send sign-in link</button><p class="ws-message" id="wsEmailLinkMsg" aria-live="polite"></p></form>';
+        qs("#wsEmailLinkForm").addEventListener("submit", async function (event) {
+          event.preventDefault();
+          var email = qs("#wsEmailLinkAddr").value.trim().toLowerCase();
+          var msg = qs("#wsEmailLinkMsg");
+          var btn = event.currentTarget.querySelector("button[type=submit]");
+          if (!email) return;
+          btn.disabled = true;
+          btn.textContent = "Sending...";
+          msg.textContent = "";
+          msg.classList.remove("ws-success");
+          try {
+            var fb = _preloadedFirebase || await import(firebaseHref());
+            _preloadedFirebase = fb;
+            var member = await fb.getAuthorizedMember(email);
+            if (!member) {
+              msg.textContent = "That email is not in our member list. Check your spelling or contact Wen-Szu.";
+              btn.disabled = false;
+              btn.textContent = "Send sign-in link";
+              return;
+            }
+            await fb.sendSignInInvite(email);
+            msg.classList.add("ws-success");
+            msg.textContent = "Link sent. Check your email and tap the sign-in link — it opens the workspace.";
+            btn.textContent = "Sent";
+          } catch (err) {
+            console.error("Email sign-in link failed.", err);
+            msg.textContent = "Could not send sign-in link. Please try again.";
+            btn.disabled = false;
+            btn.textContent = "Send sign-in link";
+          }
+        });
+        qs("#wsEmailLinkAddr").focus();
       });
       // Preload firebase eagerly so signInWithGooglePopup() opens with minimal async delay
       if (!_preloadedFirebase) {
