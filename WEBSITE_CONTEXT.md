@@ -99,6 +99,13 @@ Writing rules for this file:
 
 ## Change Log
 
+### 2026-05-29
+
+- Updated the Admin Console member-management process guide in `admin/index.html`:
+  - Capitalized the action text after each role label, such as `Admin:` and `Member:`.
+  - Added bolded summary phrases to Method C's email sub-bullets.
+  - Updated the member CSV export filename format to `YYYYMMDD - utl-members download.csv`.
+
 ### 2026-05-28
 
 - Added floating "Got feedback?" widget to the entire site via `assets/feedback-widget.js`.

@@ -1888,41 +1888,41 @@
               <div class="mb-guide-method">
                 <p class="mb-guide-method-label">Method A — Google sign-in (recommended for most members)</p>
                 <ol>
-                  <li><strong>Admin:</strong> click <strong>+ Add member</strong>, enter name and email, click Save</li>
-                  <li><strong>Member receives:</strong> a welcome email from your Gmail with a link to the workspace</li>
-                  <li><strong>Member:</strong> clicks the link, signs in with their Google account — done</li>
+                  <li><strong>Admin:</strong> Click <strong>+ Add member</strong>, enter name and email, click Save</li>
+                  <li><strong>Member receives:</strong> A welcome email from your Gmail with a link to the workspace</li>
+                  <li><strong>Member:</strong> Clicks the link, signs in with their Google account — done</li>
                   <li><em>No username or password needed. No Firebase email.</em></li>
                 </ol>
               </div>
               <div class="mb-guide-method">
                 <p class="mb-guide-method-label">Method B — Username &amp; password (non-Google accounts)</p>
                 <ol>
-                  <li><strong>Admin:</strong> click <strong>+ Add member</strong>, enter name, email, username, and password, click Save</li>
-                  <li><strong>Member receives:</strong> welcome email from your Gmail</li>
-                  <li><strong>Admin:</strong> share the username and password with the member separately (not in the welcome email)</li>
-                  <li><strong>Member:</strong> goes to the workspace, selects "Sign in with a username", enters credentials — done</li>
+                  <li><strong>Admin:</strong> Click <strong>+ Add member</strong>, enter name, email, username, and password, click Save</li>
+                  <li><strong>Member receives:</strong> Welcome email from your Gmail</li>
+                  <li><strong>Admin:</strong> Share the username and password with the member separately (not in the welcome email)</li>
+                  <li><strong>Member:</strong> Goes to the workspace, selects "Sign in with a username", enters credentials — done</li>
                 </ol>
               </div>
               <div class="mb-guide-method">
                 <p class="mb-guide-method-label">Method C — Passwordless magic link (for members who cannot use Google)</p>
                 <ol>
-                  <li><strong>Admin:</strong> click <strong>+ Add member</strong>, enter name and email, check <em>"Also send login link"</em>, click Save</li>
+                  <li><strong>Admin:</strong> Click <strong>+ Add member</strong>, enter name and email, check <em>"Also send login link"</em>, click Save</li>
                   <li><strong>Member receives two emails:</strong>
                     <ul style="margin:4px 0 0;padding-left:16px;">
-                      <li>Your welcome email (from your Gmail)</li>
-                      <li>A one-click login link from Firebase (<em>noreply@the-untaught-lessons.firebaseapp.com</em>)</li>
+                      <li><strong>Welcome email:</strong> Your welcome email from Gmail</li>
+                      <li><strong>Magic link:</strong> A one-click login link from Firebase (<em>noreply@the-untaught-lessons.firebaseapp.com</em>)</li>
                     </ul>
                   </li>
-                  <li><strong>Member:</strong> clicks the Firebase link — lands directly in the workspace</li>
+                  <li><strong>Member:</strong> Clicks the Firebase link — lands directly in the workspace</li>
                   <li><em>The Firebase link expires after 24 hours. If it expires, use "Send login link" in the table row.</em></li>
                 </ol>
               </div>
               <div class="mb-guide-method" style="border-left-color:#8A1F1F;">
                 <p class="mb-guide-method-label" style="color:#8A1F1F;">Removing a member</p>
                 <ol>
-                  <li><strong>Admin:</strong> find the member in the table, click <strong>Remove</strong></li>
-                  <li><strong>Automated:</strong> removed from Firestore member list and user profile — their next page load will be rejected</li>
-                  <li><strong>Manual — you must do this:</strong> remove them from the Google Group at <a href="https://groups.google.com/g/utl-members" target="_blank">utl-members</a></li>
+                  <li><strong>Admin:</strong> Find the member in the table, click <strong>Remove</strong></li>
+                  <li><strong>Automated:</strong> Removed from Firestore member list and user profile — their next page load will be rejected</li>
+                  <li><strong>Manual — you must do this:</strong> Remove them from the Google Group at <a href="https://groups.google.com/g/utl-members" target="_blank">utl-members</a></li>
                   <li><em>Active sessions last up to 1 hour before expiring. Outstanding login links cannot be remotely revoked.</em></li>
                 </ol>
               </div>
@@ -4536,9 +4536,8 @@
       if (!mbMembersCache || !mbMembersCache.length) { showToast('Load members first', 'error'); return; }
       var now = new Date();
       var pad = function (n) { return String(n).padStart(2, '0'); };
-      var dateStr = now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate());
-      var timeStr = pad(now.getHours()) + pad(now.getMinutes());
-      var filename = 'utl-members-' + dateStr + '-' + timeStr + '.csv';
+      var dateStr = String(now.getFullYear()) + pad(now.getMonth() + 1) + pad(now.getDate());
+      var filename = dateStr + ' - utl-members download.csv';
       var header = ['Name', 'Email', 'Role', 'Status', 'Cohort', 'First Login', 'Expiry', 'Google Group', 'Notes', 'Added By', 'Added At', 'Local Username'];
       function csvCell(val) {
         var s = String(val === null || val === undefined ? '' : val).replace(/"/g, '""');
