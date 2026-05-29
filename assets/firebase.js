@@ -516,6 +516,22 @@ async function setAssessmentVisibility(partial) {
   await setDoc(doc(requireFirestore(), "settings", "assessments"), partial, { merge: true });
 }
 
+function getDefaultPublicAssessmentSettings() {
+  return { diagnosticVisible: true, checkpointVisible: true };
+}
+async function getPublicAssessmentSettings() {
+  try {
+    const snap = await getDoc(doc(requireFirestore(), "settings", "public_assessments"));
+    if (!snap.exists()) return getDefaultPublicAssessmentSettings();
+    return Object.assign({}, getDefaultPublicAssessmentSettings(), snap.data() || {});
+  } catch {
+    return getDefaultPublicAssessmentSettings();
+  }
+}
+async function setPublicAssessmentSettings(partial) {
+  await setDoc(doc(requireFirestore(), "settings", "public_assessments"), partial, { merge: true });
+}
+
 export {
   actionCodeSettings,
   app,
@@ -551,6 +567,8 @@ export {
   saveUserProgress,
   getAssessmentVisibility,
   setAssessmentVisibility,
+  getPublicAssessmentSettings,
+  setPublicAssessmentSettings,
   getEngagementSettings,
   setEngagementSettings,
   setGlobalFeedbackSetting,

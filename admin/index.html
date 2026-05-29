@@ -1711,6 +1711,7 @@
       <button class="admin-nav-item" data-admin-tab-scope="engagement" data-target="section-inapp-nudges">In-app nudges</button>
       <button class="admin-nav-item" data-admin-tab-scope="engagement" data-target="section-email-nudges">Email nudges</button>
       <button class="admin-nav-item" data-admin-tab-scope="engagement" data-target="section-certificate">Certificate</button>
+      <button class="admin-nav-item" data-admin-tab-scope="engagement" data-target="section-access-controls">Access controls</button>
 
       <span class="nav-group-label" data-admin-nav-group="content-manager">Links</span>
       <button class="admin-nav-item" data-admin-tab-scope="content-manager" data-target="section-links">Quick links</button>
@@ -1821,29 +1822,6 @@
           <button class="small-button" type="button" id="showReadyAssessments">Set ready assessment apps live</button>
           <a class="small-button secondary-button" href="../member-login/index.html?mode=admin#assessments" target="_blank" style="display:inline-flex;align-items:center;text-decoration:none;">Preview Assessments</a>
         </div>
-        <div class="section-divider" style="margin-top:20px"></div>
-        <p class="description" style="margin-top:12px"><strong>Member access</strong> — controls who sees assessments globally. Changes take effect on the member's next page load.</p>
-        <div id="tsaVisibilityStatus" class="eng-status" aria-live="polite"></div>
-        <div id="tsaVisibilityForm" hidden>
-          <div class="eng-field-group">
-            <div class="eng-field-row">
-              <label class="eng-toggle-label">
-                <span class="eng-toggle-name">Members can see assessments</span>
-                <span class="eng-toggle-desc">When off, the nav link, dashboard section, and results tab are hidden for regular members.</span>
-              </label>
-              <button class="eng-toggle" type="button" data-tsa-vis-key="userEnabled" aria-pressed="true">On</button>
-            </div>
-            <div class="eng-field-row">
-              <label class="eng-toggle-label">
-                <span class="eng-toggle-name">Admins can see assessments when off for members</span>
-                <span class="eng-toggle-desc">When on, admins can still access and test assessments even if hidden for regular members.</span>
-              </label>
-              <button class="eng-toggle" type="button" data-tsa-vis-key="adminEnabled" aria-pressed="true">On</button>
-            </div>
-          </div>
-          <button class="small-button" type="button" id="tsaVisibilitySave" style="margin-top:4px">Save access settings</button>
-          <span class="saved" id="tsaVisibilitySaved">Saved</span>
-        </div>
       </section>
 
       <section class="admin-section" id="section-send-instructor" data-admin-tab-panel="content-manager">
@@ -1898,11 +1876,34 @@
 
       <section class="admin-section" id="section-public-homepage" data-admin-tab-panel="admin-tools">
         <span class="section-label">Admin Tools</span>
-        <h2>Public homepage</h2>
+        <h2>Public pages</h2>
         <div class="section-divider"></div>
-        <p class="description">Controls public homepage features that may need to be held back before launch.</p>
+        <p class="description"><strong>Homepage</strong> — controls which sections appear on the public homepage.</p>
         <div class="visibility-checklist" id="publicHomepageChecklist"></div>
         <span id="publicHomepageStatus" style="font-size:12px;color:#555;display:block;margin-top:6px;min-height:16px;"></span>
+        <div class="section-divider" style="margin-top:20px"></div>
+        <p class="description" style="margin-top:12px"><strong>Find Your Level page</strong> — show or hide each assessment card on the public <a href="../tsa-score.html" target="_blank">tsa-score.html</a> page. Defaults to shown.</p>
+        <div id="publicAssessmentStatus" class="eng-status" aria-live="polite"></div>
+        <div id="publicAssessmentForm" hidden>
+          <div class="eng-field-group">
+            <div class="eng-field-row">
+              <label class="eng-toggle-label">
+                <span class="eng-toggle-name">Show Diagnostic card</span>
+                <span class="eng-toggle-desc">"The Diagnostic" card on the public Find Your Level page.</span>
+              </label>
+              <button class="eng-toggle" type="button" data-pub-assess-key="diagnosticVisible" aria-pressed="true">On</button>
+            </div>
+            <div class="eng-field-row">
+              <label class="eng-toggle-label">
+                <span class="eng-toggle-name">Show Checkpoint card</span>
+                <span class="eng-toggle-desc">"The Checkpoint" card on the public Find Your Level page.</span>
+              </label>
+              <button class="eng-toggle" type="button" data-pub-assess-key="checkpointVisible" aria-pressed="true">On</button>
+            </div>
+          </div>
+          <button class="small-button" type="button" id="publicAssessmentSave" style="margin-top:4px">Save card visibility</button>
+          <span class="saved" id="publicAssessmentSaved">Saved</span>
+        </div>
       </section>
 
       <section class="admin-section" id="section-student-progress" data-admin-tab-panel="student-progress">
@@ -2249,6 +2250,34 @@
           <span class="saved" id="engCertSaved">Saved</span>
         </div>
       </section>
+
+      <section class="admin-section" id="section-access-controls" data-admin-tab-panel="engagement">
+        <span class="section-label">Engagement</span>
+        <h2>Access controls</h2>
+        <div class="section-divider"></div>
+        <p class="description">Control who can see the assessments section. When turned off for members, the nav link, dashboard section, and results tab are all hidden. Changes take effect on the member's next page load.</p>
+        <div id="tsaVisibilityStatus" class="eng-status" aria-live="polite"></div>
+        <div id="tsaVisibilityForm" hidden>
+          <div class="eng-field-group">
+            <div class="eng-field-row">
+              <label class="eng-toggle-label">
+                <span class="eng-toggle-name">Members can see assessments</span>
+                <span class="eng-toggle-desc">When off, the nav link, dashboard section, and results tab are hidden for regular members.</span>
+              </label>
+              <button class="eng-toggle" type="button" data-tsa-vis-key="userEnabled" aria-pressed="true">On</button>
+            </div>
+            <div class="eng-field-row">
+              <label class="eng-toggle-label">
+                <span class="eng-toggle-name">Admins can see assessments when off for members</span>
+                <span class="eng-toggle-desc">When on, admins can still access and test assessments even if they are hidden for regular members.</span>
+              </label>
+              <button class="eng-toggle" type="button" data-tsa-vis-key="adminEnabled" aria-pressed="true">On</button>
+            </div>
+          </div>
+          <button class="small-button" type="button" id="tsaVisibilitySave" style="margin-top:4px">Save access settings</button>
+          <span class="saved" id="tsaVisibilitySaved">Saved</span>
+        </div>
+      </section>
     </main>
   </div>
 
@@ -2267,6 +2296,8 @@
       getDocs,
       getAssessmentVisibility,
       setAssessmentVisibility,
+      getPublicAssessmentSettings,
+      setPublicAssessmentSettings,
       getEngagementSettings,
       getGlobalFeedbackSetting,
       getPublicFindLevelSetting,
@@ -2293,6 +2324,8 @@
       getDocs,
       getAssessmentVisibility,
       setAssessmentVisibility,
+      getPublicAssessmentSettings,
+      setPublicAssessmentSettings,
       getEngagementSettings,
       getGlobalFeedbackSetting,
       getPublicFindLevelSetting,
@@ -3936,6 +3969,7 @@
         setEngStatus('engInAppStatus', '');
         setEngStatus('engEmailStatus', '');
         setEngStatus('engCertStatus', '');
+        loadTsaVisibility();
       } catch(e) {
         var msg = 'Failed to load: ' + ((e && e.message) || 'Unknown error');
         setEngStatus('engInAppStatus', msg);
@@ -4032,12 +4066,60 @@
       }
     });
 
-    // Load TSA visibility when the content-manager tab is shown
-    window.addEventListener('utlFirebaseAuthReady', function() {
-      loadTsaVisibility();
+    // ===== End assessment visibility =====
+
+    // ===== Public assessment card visibility =====
+
+    async function loadPublicAssessmentSettings() {
+      var fb = window.utlFirebaseAuth;
+      if (!fb || !fb.getPublicAssessmentSettings) return;
+      var statusEl = document.getElementById('publicAssessmentStatus');
+      var formEl = document.getElementById('publicAssessmentForm');
+      if (!statusEl || !formEl) return;
+      statusEl.textContent = 'Loading...';
+      try {
+        var settings = await fb.getPublicAssessmentSettings();
+        document.querySelectorAll('[data-pub-assess-key]').forEach(function(btn) {
+          var val = settings[btn.dataset.pubAssessKey] !== false;
+          btn.setAttribute('aria-pressed', val ? 'true' : 'false');
+          btn.textContent = val ? 'On' : 'Off';
+        });
+        formEl.hidden = false;
+        statusEl.textContent = '';
+      } catch(e) {
+        statusEl.textContent = 'Could not load: ' + ((e && e.message) || 'Unknown error');
+      }
+    }
+
+    document.getElementById('publicAssessmentSave')?.addEventListener('click', async function() {
+      var fb = window.utlFirebaseAuth;
+      if (!fb || !fb.setPublicAssessmentSettings) return;
+      var partial = {};
+      document.querySelectorAll('[data-pub-assess-key]').forEach(function(btn) {
+        partial[btn.dataset.pubAssessKey] = btn.getAttribute('aria-pressed') === 'true';
+      });
+      this.disabled = true;
+      try {
+        await fb.setPublicAssessmentSettings(partial);
+        var savedEl = document.getElementById('publicAssessmentSaved');
+        if (savedEl) { savedEl.classList.add('is-visible'); setTimeout(function(){ savedEl.classList.remove('is-visible'); }, 1500); }
+        showToast('Saved');
+      } catch(e) {
+        showToast('Save failed', true);
+      } finally {
+        this.disabled = false;
+      }
     });
 
-    // ===== End assessment visibility =====
+    document.querySelectorAll('[data-pub-assess-key]').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var pressed = btn.getAttribute('aria-pressed') === 'true';
+        btn.setAttribute('aria-pressed', pressed ? 'false' : 'true');
+        btn.textContent = pressed ? 'Off' : 'On';
+      });
+    });
+
+    // ===== End public assessment card visibility =====
 
     function validAdminTab(tab) {
       return ['content-manager', 'student-progress', 'member-management', 'admin-tools', 'engagement'].includes(tab) ? tab : 'content-manager';
@@ -4218,8 +4300,8 @@
       if (!wrap) return;
       const fb = window.utlFirebaseAuth;
       if (!fb || !fb.getAllMemberWorkspaceProgress) {
-        wrap.innerHTML = '<p class="mb-msg">Waiting for Firebase...</p>';
-        if (status) status.textContent = 'Waiting for Firebase tools...';
+        wrap.innerHTML = '<p class="mb-msg">Loading...</p>';
+        if (status) status.textContent = 'Loading...';
         window.addEventListener('utlFirebaseAuthReady', function handler() {
           window.removeEventListener('utlFirebaseAuthReady', handler);
           loadStudentProgress();
@@ -4308,6 +4390,7 @@
       if (activeTab === 'student-progress') loadStudentProgress();
       if (activeTab === 'member-management' && !mbMembersCache.length) mbLoadMembers();
       if (activeTab === 'engagement') loadEngagementSettings();
+      if (activeTab === 'admin-tools') loadPublicAssessmentSettings();
 
       if (options.scroll !== false) {
         const target = (currentActive || visibleNavItems[0])?.dataset.target;
@@ -4476,6 +4559,7 @@
     mbInitAddForm();
     initGlobalDefaults();
     loadPublicHomepageSetting();
+    loadPublicAssessmentSettings();
     window.setTimeout(runSyncCheck, 400);
 
     // Persistent event delegation for Fix → buttons in sync results

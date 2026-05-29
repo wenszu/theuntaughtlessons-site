@@ -78,7 +78,7 @@
           <a class="tsa-start-button" href="apps/find-your-level/index.html">Find Your Level</a>
         </div>
         <div class="tsa-card-grid">
-          <article class="tsa-card">
+          <article class="tsa-card" data-pub-card="diagnostic">
             <span class="tsa-card-label">Starting Point</span>
             <h2>The Diagnostic</h2>
             <p>Your full baseline assessment before the program begins. Covers all three dimensions of the TSA Score™ so you know exactly where to focus.</p>
@@ -86,7 +86,7 @@
             <span class="tsa-card-button locked" aria-disabled="true">🔒 Member Access Only</span>
           </article>
 
-          <article class="tsa-card">
+          <article class="tsa-card" data-pub-card="checkpoint">
             <span class="tsa-card-label">Measure Your Growth</span>
             <h2>The Checkpoint</h2>
             <p>Your post-program assessment. Same standard, new variation. See how far you have come since your Diagnostic.</p>
@@ -269,5 +269,21 @@
     });
   </script>
   <script type="module" src="assets/feedback-widget.js?v=4"></script>
+  <script type="module">
+    import { getPublicAssessmentSettings } from './assets/firebase.js';
+    (async () => {
+      try {
+        const settings = await getPublicAssessmentSettings();
+        if (settings.diagnosticVisible === false) {
+          const el = document.querySelector('[data-pub-card="diagnostic"]');
+          if (el) el.hidden = true;
+        }
+        if (settings.checkpointVisible === false) {
+          const el = document.querySelector('[data-pub-card="checkpoint"]');
+          if (el) el.hidden = true;
+        }
+      } catch {}
+    })();
+  </script>
 </body>
 </html>
