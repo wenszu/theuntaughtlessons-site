@@ -1058,7 +1058,15 @@ const UTL_CONTENT = {
         }
         user = await firebaseAuth.getSignedInUser();
       }
-      if (!user) return;
+      if (!user) {
+        sessionStorage.removeItem("utl_google_login_pending");
+        localStorage.removeItem("utl_google_login_pending");
+        if (isPending && message) {
+          message.classList.remove("ws-success");
+          message.textContent = "Google sign-in did not complete. Try the email link option below instead.";
+        }
+        return;
+      }
       if (message) {
         message.textContent = "Finishing Google sign-in...";
         message.classList.remove("ws-success");
