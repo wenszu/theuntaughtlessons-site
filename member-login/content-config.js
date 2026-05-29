@@ -998,9 +998,7 @@ const UTL_CONTENT = {
     });
   }
 
-  function isMobileAuthContext() {
-    return window.matchMedia("(max-width: 768px), (pointer: coarse)").matches;
-  }
+  var _preloadedFirebase = null;
 
   async function finishGoogleUser(firebaseAuth, user, message) {
     if (!user) throw new Error("Google sign-in did not return a user.");
@@ -1033,6 +1031,7 @@ const UTL_CONTENT = {
     if (member && member.role === "admin") localStorage.setItem(ADMIN_KEY, "true");
     else localStorage.removeItem(ADMIN_KEY);
     sessionStorage.removeItem("utl_google_login_pending");
+    localStorage.removeItem("utl_google_login_pending");
     if (message) {
       message.classList.add("ws-success");
       message.textContent = "Signed in. Opening your workspace...";
@@ -1046,10 +1045,13 @@ const UTL_CONTENT = {
 
   async function handleGoogleRedirectResult(message) {
     try {
-      var firebaseAuth = await import(firebaseHref());
+      var firebaseAuth = _preloadedFirebase || await import(firebaseHref());
+      _preloadedFirebase = firebaseAuth;
       var credential = await firebaseAuth.getGoogleRedirectResult();
       var user = credential && credential.user ? credential.user : null;
-      if (!user && sessionStorage.getItem("utl_google_login_pending") === "true") {
+      var isPending = sessionStorage.getItem("utl_google_login_pending") === "true" ||
+                      localStorage.getItem("utl_google_login_pending") === "true";
+      if (!user && isPending) {
         if (message) {
           message.textContent = "Finishing Google sign-in...";
           message.classList.add("ws-success");
@@ -1064,6 +1066,7 @@ const UTL_CONTENT = {
       await finishGoogleUser(firebaseAuth, user, message);
     } catch (error) {
       sessionStorage.removeItem("utl_google_login_pending");
+      localStorage.removeItem("utl_google_login_pending");
       console.error("Google redirect login failed.", error);
       if (message) message.textContent = error && error.message ? error.message : "Google sign-in did not work.";
     }
@@ -1122,24 +1125,20 @@ const UTL_CONTENT = {
     message.textContent = "";
     message.classList.remove("ws-success");
     try {
-      var firebaseAuth = await import(firebaseHref());
-      if (isMobileAuthContext()) {
-        message.classList.add("ws-success");
-        message.textContent = "Opening Google sign-in...";
-        sessionStorage.setItem("utl_google_login_pending", "true");
-        await firebaseAuth.signInWithGoogleRedirect();
-        return;
-      }
+      // Use preloaded module so there is no network await between the tap and window.open()
+      var firebaseAuth = _preloadedFirebase || await import(firebaseHref());
+      _preloadedFirebase = firebaseAuth;
       var credential = await firebaseAuth.signInWithGooglePopup();
       await finishGoogleCredential(firebaseAuth, credential, message);
     } catch (error) {
       console.error("Google member login failed.", error);
       if (error && (error.code === "auth/popup-blocked" || error.code === "auth/popup-closed-by-user")) {
         try {
-          var redirectAuth = await import(firebaseHref());
+          var redirectAuth = _preloadedFirebase || await import(firebaseHref());
           message.classList.add("ws-success");
           message.textContent = "Opening Google sign-in...";
           sessionStorage.setItem("utl_google_login_pending", "true");
+          localStorage.setItem("utl_google_login_pending", "true");
           await redirectAuth.signInWithGoogleRedirect();
           return;
         } catch (redirectError) {
@@ -1166,6 +1165,10 @@ const UTL_CONTENT = {
         event.preventDefault();
         handleGoogleLogin(event.currentTarget, qs("#wsLoginMessage"));
       });
+      // Preload firebase eagerly so signInWithGooglePopup() opens with minimal async delay
+      if (!_preloadedFirebase) {
+        import(firebaseHref()).then(function(m) { _preloadedFirebase = m; }).catch(function(){});
+      }
       handleGoogleRedirectResult(qs("#wsLoginMessage"));
       handleEmailLinkSignIn();
       return;

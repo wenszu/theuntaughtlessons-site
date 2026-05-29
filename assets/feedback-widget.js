@@ -158,9 +158,6 @@ const STYLES = `
       right: 16px;
       padding: 10px 14px;
     }
-    #utl-feedback-btn .utl-fb-label {
-      display: none;
-    }
     #utl-feedback-overlay {
       align-items: flex-end;
       justify-content: stretch;

@@ -112,8 +112,10 @@ if (useLocalFirebaseEmulators) {
   console.log("⚡ Connected to local Firebase Emulators");
 }
 
-async function signInWithGooglePopup() {
-  await authPersistenceReady;
+function signInWithGooglePopup() {
+  // Do not await authPersistenceReady here — it resolves on page load, well before
+  // the user can tap. Skipping the await keeps window.open() as close to synchronous
+  // as possible, which is required for iOS Safari's user-gesture popup policy.
   return signInWithPopup(requireFirebaseAuth(), provider);
 }
 
@@ -436,6 +438,19 @@ async function setGlobalFeedbackSetting(enabled) {
   }, { merge: true });
 }
 
+async function getPublicFindLevelSetting() {
+  const snap = await getDoc(doc(requireFirestore(), "settings", "publicSite"));
+  if (!snap.exists()) return false;
+  const data = snap.data() || {};
+  return data.findLevelVisible === true;
+}
+
+async function setPublicFindLevelSetting(visible) {
+  await setDoc(doc(requireFirestore(), "settings", "publicSite"), {
+    findLevelVisible: Boolean(visible)
+  }, { merge: true });
+}
+
 export {
   actionCodeSettings,
   app,
@@ -456,6 +471,7 @@ export {
   getAllMemberWorkspaceProgress,
   getGlobalFeedbackSetting,
   getMemberWorkspaceProgress,
+  getPublicFindLevelSetting,
   getSignedInUser,
   getUserFeedbackEnabled,
   GoogleAuthProvider,
@@ -469,6 +485,7 @@ export {
   sendSignInLinkToEmail,
   saveUserProgress,
   setGlobalFeedbackSetting,
+  setPublicFindLevelSetting,
   setUserFeedbackEnabled,
   signInWithEmailAndPassword,
   signInWithEmailLink,
