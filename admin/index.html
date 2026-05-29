@@ -2948,24 +2948,27 @@
     function renderAdminPreviewChecklist() {
       const target = document.getElementById('adminPreviewChecklist');
       if (!target) return;
-      target.innerHTML = `<div class="visibility-group">${ADMIN_PREVIEW_ITEMS.map((item) => {
+      target.innerHTML = `<div class="eng-field-group">${ADMIN_PREVIEW_ITEMS.map((item) => {
         if (localStorage.getItem(item.key) === null) localStorage.setItem(item.key, item.fallback);
-        const checked = getValue(item.key, item.fallback) === item.checkedValue;
+        const on = getValue(item.key, item.fallback) === item.checkedValue;
         return `
-          <label class="visibility-check">
-            <input type="checkbox" data-admin-preview-key="${item.key}" ${checked ? 'checked' : ''}>
-            <span>
-              <strong>${item.label}</strong>
-              <span>${item.description}</span>
-            </span>
-          </label>`;
+          <div class="eng-field-row">
+            <label class="eng-toggle-label">
+              <span class="eng-toggle-name">${item.label}</span>
+              <span class="eng-toggle-desc">${item.description}</span>
+            </label>
+            <button class="eng-toggle" type="button" data-admin-preview-key="${item.key}" aria-pressed="${on}">${on ? 'On' : 'Off'}</button>
+          </div>`;
       }).join('')}</div>`;
 
-      target.querySelectorAll('[data-admin-preview-key]').forEach((input) => {
-        input.addEventListener('change', () => {
-          const item = ADMIN_PREVIEW_ITEMS.find((entry) => entry.key === input.dataset.adminPreviewKey);
-          if (!item) return;
-          setChecklistValue(item, input.checked);
+      target.querySelectorAll('[data-admin-preview-key]').forEach((btn) => {
+        btn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          const newOn = btn.getAttribute('aria-pressed') !== 'true';
+          btn.setAttribute('aria-pressed', String(newOn));
+          btn.textContent = newOn ? 'On' : 'Off';
+          const item = ADMIN_PREVIEW_ITEMS.find((entry) => entry.key === btn.dataset.adminPreviewKey);
+          if (item) setChecklistValue(item, newOn);
           renderVisibilityStatus();
         });
       });
@@ -2974,38 +2977,42 @@
     function renderPublicHomepageChecklist() {
       const target = document.getElementById('publicHomepageChecklist');
       if (!target) return;
-      target.innerHTML = `<div class="visibility-group">${PUBLIC_HOMEPAGE_ITEMS.map((item) => {
+      target.innerHTML = `<div class="eng-field-group">${PUBLIC_HOMEPAGE_ITEMS.map((item) => {
         if (localStorage.getItem(item.key) === null) localStorage.setItem(item.key, item.fallback);
-        const checked = getValue(item.key, item.fallback) === item.checkedValue;
+        const on = getValue(item.key, item.fallback) === item.checkedValue;
         return `
-          <label class="visibility-check">
-            <input type="checkbox" data-public-homepage-key="${item.key}" ${checked ? 'checked' : ''}>
-            <span>
-              <strong>${item.label}</strong>
-              <span>${item.description}</span>
-            </span>
-          </label>`;
+          <div class="eng-field-row">
+            <label class="eng-toggle-label">
+              <span class="eng-toggle-name">${item.label}</span>
+              <span class="eng-toggle-desc">${item.description}</span>
+            </label>
+            <button class="eng-toggle" type="button" data-public-homepage-key="${item.key}" aria-pressed="${on}">${on ? 'On' : 'Off'}</button>
+          </div>`;
       }).join('')}</div>`;
 
-      target.querySelectorAll('[data-public-homepage-key]').forEach((input) => {
-        input.addEventListener('change', () => {
-          const item = PUBLIC_HOMEPAGE_ITEMS.find((entry) => entry.key === input.dataset.publicHomepageKey);
-          if (!item) return;
-          setPublicHomepageValue(item, input.checked);
+      target.querySelectorAll('[data-public-homepage-key]').forEach((btn) => {
+        btn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          const newOn = btn.getAttribute('aria-pressed') !== 'true';
+          btn.setAttribute('aria-pressed', String(newOn));
+          btn.textContent = newOn ? 'On' : 'Off';
+          const item = PUBLIC_HOMEPAGE_ITEMS.find((entry) => entry.key === btn.dataset.publicHomepageKey);
+          if (item) setPublicHomepageValue(item, newOn);
         });
       });
     }
 
     async function loadPublicHomepageSetting() {
-      const input = document.querySelector('[data-public-homepage-key="utl_public_find_level"]');
+      const btn = document.querySelector('[data-public-homepage-key="utl_public_find_level"]');
       const status = document.getElementById('publicHomepageStatus');
       const fb = window.utlFirebaseAuth;
-      if (!input || !fb || !fb.getPublicFindLevelSetting) return;
+      if (!btn || !fb || !fb.getPublicFindLevelSetting) return;
       if (status) status.textContent = 'Loading live setting...';
       try {
         const visible = await fb.getPublicFindLevelSetting();
         localStorage.setItem('utl_public_find_level', visible ? 'show' : 'hide');
-        input.checked = visible;
+        btn.setAttribute('aria-pressed', String(visible));
+        btn.textContent = visible ? 'On' : 'Off';
         renderVisibilityStatus();
         if (status) status.textContent = visible ? 'Live setting: Find your level is shown.' : 'Live setting: Find your level is hidden.';
       } catch (error) {
@@ -4109,14 +4116,6 @@
       } finally {
         this.disabled = false;
       }
-    });
-
-    document.querySelectorAll('[data-pub-assess-key]').forEach(function(btn) {
-      btn.addEventListener('click', function() {
-        var pressed = btn.getAttribute('aria-pressed') === 'true';
-        btn.setAttribute('aria-pressed', pressed ? 'false' : 'true');
-        btn.textContent = pressed ? 'Off' : 'On';
-      });
     });
 
     // ===== End public assessment card visibility =====
