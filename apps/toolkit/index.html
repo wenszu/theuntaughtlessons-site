@@ -78,6 +78,18 @@ REUSE AUDIT
       height: 100%;
       object-fit: contain;
     }
+    .tk-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: rgba(255,255,255,.72);
+      font: 700 11px 'Roboto Mono', monospace;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .tk-back:hover { color: #fff; }
     .tk-divider {
       width: 1px;
       height: 38px;
@@ -257,7 +269,7 @@ REUSE AUDIT
   <header class="tk-header">
     <a class="tk-logo" href="../../index.html" aria-label="The Untaught Lessons home"><img src="../../assets/utl-logo-nav-white.png" alt="The Untaught Lessons"></a>
     <div class="tk-divider" aria-hidden="true"></div>
-    <div><span class="tk-kicker">THE UNTAUGHT LESSONS</span><span class="tk-title">Toolkit</span></div>
+    <div><a class="tk-back" href="../../member-login/index.html">&#8617; Workspace</a><span class="tk-title" style="display:block;margin-top:2px">Toolkit</span></div>
     <div class="tk-user" id="tkUser" hidden>
       <span class="tk-user-email" id="tkUserEmail"></span>
       <button class="tk-avatar" id="tkAvatar" type="button" aria-label="Open profile menu" aria-expanded="false">U</button>
@@ -271,6 +283,7 @@ REUSE AUDIT
         </div>
         <div class="tk-profile-section">
           <span class="tk-profile-section-label">Your space</span>
+          <a href="../../member-login/index.html"><span class="tk-profile-icon">&#8617;</span><span>Back to workspace</span></a>
           <a href="../../my-results/index.html"><span class="tk-profile-icon">&#9638;</span><span>My results</span></a>
           <a href="../../apps/toolkit/index.html"><span class="tk-profile-icon">&#8962;</span><span>Toolkit</span></a>
         </div>
@@ -420,6 +433,91 @@ Rules:
 - No jargon, no hedging, no throat-clearing in the opening
 - Every sentence earns its place — if it doesn't add information, cut it
 - Write for someone who is senior, time-poor, and will only read this once`
+      },
+      {
+        phase: 'Phase 3 · Act confidently',
+        name: 'Prioritize when everything feels urgent',
+        description: 'Paste in your full task list. This prompt sorts every item into the Eisenhower matrix — urgent vs. important — and tells you exactly what to do now, schedule, delegate, or drop.',
+        example: `My current task list:
+- Respond to client emails from yesterday
+- Finish the Q3 board deck (due Friday)
+- Interview candidate for open analyst role (scheduled tomorrow)
+- Review last month's budget variance report
+- Set up a recurring team stand-up
+- Fix the formatting on the investor one-pager
+- Research three competitors for the strategy offsite
+- Renew office software licences (expire next week)`,
+        prompt: `You are an expert in executive prioritization and the Eisenhower matrix.
+
+I am going to give you a task list. Sort every item into one of four quadrants based on urgency (needs action now) and importance (moves the needle on meaningful outcomes).
+
+My tasks:
+[PASTE YOUR TASK LIST HERE]
+
+Quadrant 1 — Do now (urgent + important): Action required today or this week. Delay has real consequences.
+Quadrant 2 — Schedule (not urgent + important): High-value work with no immediate deadline. Block time for it.
+Quadrant 3 — Delegate (urgent + not important): Time-sensitive but low-value. Someone else can handle it.
+Quadrant 4 — Drop (not urgent + not important): Does not move anything forward. Remove it.
+
+For each quadrant:
+1. List the tasks that belong there
+2. For Quadrant 1, suggest a specific order of completion
+3. For Quadrant 3, suggest who or what type of person should handle it
+4. For Quadrant 4, briefly explain why it does not belong on the list at all
+
+Close with one sentence: the single most important thing I should do first and why.`
+      },
+      {
+        phase: 'Phase 3 · Act confidently',
+        name: 'Prepare for a difficult conversation',
+        description: 'Paste in your situation — the message, the relationship, and what you need from the conversation. This prompt builds a clear script, prepares you for pushback, and tells you how to close with a decision.',
+        example: `I need to tell a senior colleague that the timeline they committed to the client is not realistic. We are already three weeks in and the work is behind. They are defensive about it and the client is starting to ask questions. I need them to agree to a revised timeline before Friday's client call.`,
+        prompt: `You are an expert in executive communication and high-stakes conversation design.
+
+I am going to describe a difficult conversation I need to have. Help me prepare for it.
+
+My situation:
+[DESCRIBE THE CONVERSATION — who, what, why it is difficult, what you need from it]
+
+Please give me:
+
+1. Opening line — How to start the conversation directly without being aggressive. One or two sentences that establish the stakes immediately.
+
+2. Core message — The key point I need to land, stated clearly. No hedging. No build-up.
+
+3. Supporting evidence — Two or three specific facts or observations that back up my position. Objective, not emotional.
+
+4. Anticipated pushback — The two most likely objections or defensive responses, and how to respond to each without escalating.
+
+5. Closing ask — A specific, concrete request for what I need from this conversation. A decision, a commitment, an action — not a vague "let's think about it."
+
+6. Tone calibration — One sentence on how to hold the right energy: direct but not combative, confident but not dismissive.
+
+Keep it practical. I need to be ready to walk into this conversation, not just think about it.`
+      },
+      {
+        phase: 'Phase 3 · Act confidently',
+        name: 'Challenge your own thinking',
+        description: 'Paste in a decision, recommendation, or plan. This prompt assigns four different critical lenses to your idea — and makes each one push back on a different dimension of your reasoning.',
+        example: `My recommendation: We should delay the product launch by six weeks to allow more time for user testing. We currently have limited data on how the core feature performs under real conditions, and launching with known gaps could damage trust with early adopters.`,
+        prompt: `You are facilitating a structured thinking exercise using the four-hat method.
+
+I am going to share a decision, recommendation, or plan. Evaluate it through four distinct critical lenses — each one focused on a different dimension of the thinking.
+
+My input:
+[PASTE YOUR DECISION, RECOMMENDATION, OR PLAN HERE]
+
+Apply each lens in turn:
+
+The Data lens: What evidence or information is being used to support this? What data is missing, assumed, or untested? What would you need to see to be more confident in this?
+
+The Risk lens: What could go wrong? What are the hidden costs, second-order effects, or unintended consequences? What is the worst realistic outcome if this goes ahead?
+
+The Human lens: Who is affected by this decision and how? Whose perspective is missing? What will this feel like for the people who have to live with it?
+
+The Alternative lens: What else could work? Is there a simpler path, a faster option, or a fundamentally different approach that has not been considered?
+
+Close with one synthesis question — the single most important thing I should think harder about before deciding.`
       }
     ];
 

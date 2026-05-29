@@ -597,6 +597,17 @@
       font-size: 12px;
       line-height: 1.5;
     }
+    .sync-notice {
+      background: #F0F7F0;
+      border-left: 3px solid #2E7D4F;
+      padding: 10px 14px;
+      font-family: 'Lato', sans-serif;
+      font-size: 12px;
+      color: var(--charcoal);
+      line-height: 1.6;
+      margin-bottom: 1.5rem;
+    }
+    .sync-notice strong { color: #1a5c35; font-weight: 500; }
 
     .storage-origin-hint.is-visible {
       display: block;
@@ -1219,11 +1230,12 @@
       <p class="results-subtitle">A summary of everything you have completed on this device.</p>
     </div>
 
-    <div class="device-notice">
+    <div class="device-notice" id="deviceNotice">
       <strong>Saved on this device only.</strong>
       Your results are stored in this browser and will be lost if you clear your browser history or switch to a different device or browser. Copy your responses into your companion workbook to keep a permanent record.
       <div class="storage-origin-hint" id="storageOriginHint"></div>
     </div>
+    <div class="sync-notice" id="syncNotice" style="display:none"></div>
 
     <div class="overall-progress">
       <div class="progress-summary">
@@ -1901,6 +1913,19 @@
     window.addEventListener('storage', (event) => {
       if (event.key === 'utl_tsa_status') applyAssessmentNavVisibility();
     });
+  </script>
+  <script type="module">
+    import { getSignedInUser } from '../assets/firebase.js';
+    (async () => {
+      try {
+        const user = await getSignedInUser();
+        if (!user) return;
+        const syncNotice = document.getElementById('syncNotice');
+        if (!syncNotice) return;
+        syncNotice.innerHTML = '<strong>Also backed up to your account.</strong> Your exercise completion status is synced to your Untaught Lessons account and accessible from any device you sign in to. Your written responses are stored in this browser only — download or email them to keep a permanent copy.';
+        syncNotice.style.display = 'block';
+      } catch {}
+    })();
   </script>
   <script type="module" src="../assets/feedback-widget.js?v=4"></script>
 </body>
