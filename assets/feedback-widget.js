@@ -16,6 +16,7 @@ const STYLES = `
     position: fixed;
     bottom: 24px;
     right: 24px;
+    bottom: max(24px, calc(env(safe-area-inset-bottom) + 12px));
     z-index: 9999;
     display: flex;
     align-items: center;
@@ -39,6 +40,9 @@ const STYLES = `
   }
   #utl-feedback-btn svg {
     flex-shrink: 0;
+  }
+  #utl-feedback-btn .utl-fb-label {
+    display: inline;
   }
   #utl-feedback-overlay {
     position: fixed;
@@ -117,6 +121,11 @@ const STYLES = `
     cursor: pointer;
     line-height: 1;
     padding: 0;
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
   }
   #utl-feedback-error {
     font-family: 'Lato', sans-serif;
@@ -140,6 +149,41 @@ const STYLES = `
     display: block;
     margin: 0 auto;
   }
+  @keyframes utl-fb-slide-up {
+    from { transform: translateY(100%); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+  }
+  @media (max-width: 600px) {
+    #utl-feedback-btn {
+      right: 16px;
+      padding: 10px 14px;
+    }
+    #utl-feedback-btn .utl-fb-label {
+      display: none;
+    }
+    #utl-feedback-overlay {
+      align-items: flex-end;
+      justify-content: stretch;
+    }
+    #utl-feedback-card {
+      width: 100%;
+      max-width: 100%;
+      border-radius: 16px 16px 0 0;
+      padding: 24px 20px;
+      padding-bottom: max(24px, calc(env(safe-area-inset-bottom) + 16px));
+      margin: 0;
+      box-shadow: 0 -4px 24px rgba(0,0,0,0.18);
+      animation: utl-fb-slide-up 0.28s ease;
+    }
+    #utl-feedback-type, #utl-feedback-desc {
+      font-size: 16px;
+    }
+    #utl-feedback-submit {
+      width: 100%;
+      padding: 14px 24px;
+      font-size: 15px;
+    }
+  }
 `;
 
 function injectStyles() {
@@ -158,7 +202,7 @@ function buildButton() {
     <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
       <path d="M1 1h12v8.5H8.5L7 11.5L5.5 9.5H1V1z" fill="#003366" stroke="#003366" stroke-width="0.5" stroke-linejoin="round"/>
     </svg>
-    Got feedback?
+    <span class="utl-fb-label">Got feedback?</span>
   `;
   return btn;
 }
