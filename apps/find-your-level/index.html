@@ -549,10 +549,14 @@
     }
 
     function renderShell(inner) {
+      const scenarioHtml = exercise.scenario
+        ? `<p>${escapeHtml(exercise.scenario)}</p>`
+        : '';
       app.innerHTML = `
         <section class="intro">
           <span class="label">Public exercise</span>
           <h1>Find your level</h1>
+          ${scenarioHtml}
           <p>${escapeHtml(exercise.prompt)}</p>
         </section>
         ${inner}
@@ -713,7 +717,7 @@
 
     function acceptedBuckets(item) {
       if (exercise.dual_bucket_items.includes(item.text)) {
-        return ['Decisions Needed', 'Parking Lot'];
+        return ['Decisions needed', 'Parking lot'];
       }
       return [item.correct_bucket];
     }

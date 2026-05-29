@@ -3,28 +3,28 @@
     "exercise_id": "sort_bucket_001",
     "exercise_title": "Meeting Agenda from Hell",
     "difficulty": "beginner",
-    "scenario": "",
-    "prompt": "Sort the items into three clean buckets.",
+    "scenario": "You are five minutes away from a leadership team meeting. Someone has sent you the agenda — 12 items, no structure, no priorities. Before everyone walks into the room, you need to sort them: what actually needs a decision today, what is just an update, and what should never have been on the agenda in the first place.",
+    "prompt": "Sort the 12 agenda items into three clean buckets.",
     "sorting_instruction": "",
     "correct_buckets": [
-      "Decisions Needed",
-      "Updates Only",
-      "Parking Lot"
+      "Decisions needed",
+      "Updates only",
+      "Parking lot"
     ],
     "label_word_bank": [
-      "Decisions Needed",
-      "Updates Only",
-      "Parking Lot",
-      "Action Items",
-      "Discussion Topics",
-      "Information Share",
-      "Open Issues",
-      "Follow-Ups",
+      "Decisions needed",
+      "Updates only",
+      "Parking lot",
+      "Action items",
+      "Discussion topics",
+      "Information share",
+      "Open issues",
+      "Follow-ups",
       "Announcements",
-      "Next Steps"
+      "Next steps"
     ],
     "label_equivalents": {
-      "Decisions Needed": [
+      "Decisions needed": [
         "decisions",
         "decisions required",
         "needs decision",
@@ -32,7 +32,7 @@
         "decision items",
         "what we decide"
       ],
-      "Updates Only": [
+      "Updates only": [
         "updates",
         "for information only",
         "status updates",
@@ -40,7 +40,7 @@
         "fyi items",
         "info only"
       ],
-      "Parking Lot": [
+      "Parking lot": [
         "parking lot",
         "out of scope",
         "deferred",
@@ -56,63 +56,63 @@
       {
         "item_id": "item_01",
         "text": "Q3 budget approval vote",
-        "correct_bucket": "Decisions Needed"
+        "correct_bucket": "Decisions needed"
       },
       {
         "item_id": "item_02",
         "text": "Project status from team leads",
-        "correct_bucket": "Updates Only"
+        "correct_bucket": "Updates only"
       },
       {
         "item_id": "item_03",
         "text": "Someone's vacation dates",
-        "correct_bucket": "Parking Lot"
+        "correct_bucket": "Parking lot"
       },
       {
         "item_id": "item_04",
         "text": "New org chart announcement",
-        "correct_bucket": "Updates Only"
+        "correct_bucket": "Updates only"
       },
       {
         "item_id": "item_05",
         "text": "Decision on vendor contract",
-        "correct_bucket": "Decisions Needed"
+        "correct_bucket": "Decisions needed"
       },
       {
         "item_id": "item_06",
         "text": "Team birthday celebration",
-        "correct_bucket": "Parking Lot"
+        "correct_bucket": "Parking lot"
       },
       {
         "item_id": "item_07",
         "text": "Policy change effective next month",
-        "correct_bucket": "Updates Only"
+        "correct_bucket": "Updates only"
       },
       {
         "item_id": "item_08",
         "text": "Uploading team photos from last offsite",
-        "correct_bucket": "Parking Lot",
+        "correct_bucket": "Parking lot",
         "replacement_note": "Replaced v1.1: panel test showed original item was ambiguous across buckets."
       },
       {
         "item_id": "item_09",
         "text": "Request for IT equipment",
-        "correct_bucket": "Parking Lot"
+        "correct_bucket": "Parking lot"
       },
       {
         "item_id": "item_10",
         "text": "Product launch go/no-go",
-        "correct_bucket": "Decisions Needed"
+        "correct_bucket": "Decisions needed"
       },
       {
         "item_id": "item_11",
         "text": "Action items from last week",
-        "correct_bucket": "Updates Only"
+        "correct_bucket": "Updates only"
       },
       {
         "item_id": "item_12",
         "text": "Debate over office layout",
-        "correct_bucket": "Decisions Needed"
+        "correct_bucket": "Decisions needed"
       }
     ],
     "scoring": {
@@ -125,28 +125,28 @@
     "exercise_id": "sort_bucket_002",
     "exercise_title": "Work Trip Packing List",
     "difficulty": "beginner",
-    "scenario": "You're packing for a 2-day client presentation trip.",
+    "scenario": "You are packing for a 2-day client presentation trip.",
     "prompt": "Sort the items into three clean buckets.",
     "sorting_instruction": "",
     "correct_buckets": [
-      "Work Essentials",
-      "Travel Documents & Wallet",
-      "Clothing & Personal"
+      "Work essentials",
+      "Travel documents & wallet",
+      "Clothing & personal"
     ],
     "label_word_bank": [
-      "Work Essentials",
-      "Travel Documents & Wallet",
-      "Clothing & Personal",
-      "Tech & Gadgets",
-      "Business Gear",
-      "Health & Comfort",
+      "Work essentials",
+      "Travel documents & wallet",
+      "Clothing & personal",
+      "Tech & gadgets",
+      "Business gear",
+      "Health & comfort",
       "Accessories",
-      "Everyday Carry",
-      "Professional Items",
-      "Personal Care"
+      "Everyday carry",
+      "Professional items",
+      "Personal care"
     ],
     "label_equivalents": {
-      "Work Essentials": [
+      "Work essentials": [
         "work essentials",
         "work gear",
         "work tools",
@@ -154,7 +154,7 @@
         "office supplies",
         "work kit"
       ],
-      "Travel Documents & Wallet": [
+      "Travel documents & wallet": [
         "travel documents",
         "travel docs",
         "documents",
@@ -162,7 +162,7 @@
         "wallet & docs",
         "travel & id"
       ],
-      "Clothing & Personal": [
+      "Clothing & personal": [
         "clothing & personal",
         "personal items",
         "clothes & personal",
@@ -175,62 +175,62 @@
       {
         "item_id": "item_01",
         "text": "Laptop",
-        "correct_bucket": "Work Essentials"
+        "correct_bucket": "Work essentials"
       },
       {
         "item_id": "item_02",
         "text": "Charger",
-        "correct_bucket": "Work Essentials"
+        "correct_bucket": "Work essentials"
       },
       {
         "item_id": "item_03",
         "text": "Passport",
-        "correct_bucket": "Travel Documents & Wallet"
+        "correct_bucket": "Travel documents & wallet"
       },
       {
         "item_id": "item_04",
         "text": "Wallet",
-        "correct_bucket": "Travel Documents & Wallet"
+        "correct_bucket": "Travel documents & wallet"
       },
       {
         "item_id": "item_05",
         "text": "Dress shoes",
-        "correct_bucket": "Clothing & Personal"
+        "correct_bucket": "Clothing & personal"
       },
       {
         "item_id": "item_06",
         "text": "Vitamins",
-        "correct_bucket": "Clothing & Personal"
+        "correct_bucket": "Clothing & personal"
       },
       {
         "item_id": "item_07",
         "text": "Notebook",
-        "correct_bucket": "Work Essentials"
+        "correct_bucket": "Work essentials"
       },
       {
         "item_id": "item_08",
         "text": "Phone",
-        "correct_bucket": "Travel Documents & Wallet"
+        "correct_bucket": "Travel documents & wallet"
       },
       {
         "item_id": "item_09",
         "text": "Suit jacket",
-        "correct_bucket": "Clothing & Personal"
+        "correct_bucket": "Clothing & personal"
       },
       {
         "item_id": "item_10",
         "text": "Headphones",
-        "correct_bucket": "Clothing & Personal"
+        "correct_bucket": "Clothing & personal"
       },
       {
         "item_id": "item_11",
         "text": "Pen",
-        "correct_bucket": "Work Essentials"
+        "correct_bucket": "Work essentials"
       },
       {
         "item_id": "item_12",
         "text": "Power bank",
-        "correct_bucket": "Travel Documents & Wallet"
+        "correct_bucket": "Travel documents & wallet"
       }
     ],
     "scoring": {
@@ -247,31 +247,31 @@
     "prompt": "Sort the items into three clean buckets.",
     "sorting_instruction": "",
     "correct_buckets": [
-      "Strengths to Celebrate",
-      "Areas to Develop",
-      "Actions to Take"
+      "Strengths to celebrate",
+      "Areas to develop",
+      "Actions to take"
     ],
     "label_word_bank": [
-      "Strengths to Celebrate",
-      "Areas to Develop",
-      "Actions to Take",
-      "What's Working",
-      "What Needs Work",
-      "Next Steps",
-      "Keep Doing",
-      "Stop Doing",
-      "Start Doing",
-      "Development Areas"
+      "Strengths to celebrate",
+      "Areas to develop",
+      "Actions to take",
+      "What's working",
+      "What needs work",
+      "Next steps",
+      "Keep doing",
+      "Stop doing",
+      "Start doing",
+      "Development areas"
     ],
     "label_equivalents": {
-      "Strengths to Celebrate": [
+      "Strengths to celebrate": [
         "strengths",
         "what's working",
         "keep doing",
         "positives",
         "demonstrated strengths"
       ],
-      "Areas to Develop": [
+      "Areas to develop": [
         "areas to develop",
         "development areas",
         "what needs work",
@@ -279,7 +279,7 @@
         "growth areas",
         "development priorities"
       ],
-      "Actions to Take": [
+      "Actions to take": [
         "actions",
         "next steps",
         "action items",
@@ -294,62 +294,62 @@
       {
         "item_id": "item_01",
         "text": "Consistently meets deadlines",
-        "correct_bucket": "Strengths to Celebrate"
+        "correct_bucket": "Strengths to celebrate"
       },
       {
         "item_id": "item_02",
         "text": "Strong cross-team communicator",
-        "correct_bucket": "Strengths to Celebrate"
+        "correct_bucket": "Strengths to celebrate"
       },
       {
         "item_id": "item_03",
         "text": "Takes initiative without prompting",
-        "correct_bucket": "Strengths to Celebrate"
+        "correct_bucket": "Strengths to celebrate"
       },
       {
         "item_id": "item_04",
         "text": "Positive team culture contributor",
-        "correct_bucket": "Strengths to Celebrate"
+        "correct_bucket": "Strengths to celebrate"
       },
       {
         "item_id": "item_05",
         "text": "Needs to improve executive communication",
-        "correct_bucket": "Areas to Develop"
+        "correct_bucket": "Areas to develop"
       },
       {
         "item_id": "item_06",
         "text": "Presentation skills require work",
-        "correct_bucket": "Areas to Develop"
+        "correct_bucket": "Areas to develop"
       },
       {
         "item_id": "item_07",
         "text": "Can be too detail-oriented in senior meetings",
-        "correct_bucket": "Areas to Develop"
+        "correct_bucket": "Areas to develop"
       },
       {
         "item_id": "item_08",
         "text": "Struggles to prioritize under pressure",
-        "correct_bucket": "Areas to Develop"
+        "correct_bucket": "Areas to develop"
       },
       {
         "item_id": "item_09",
         "text": "Enroll in leadership training by Q3",
-        "correct_bucket": "Actions to Take"
+        "correct_bucket": "Actions to take"
       },
       {
         "item_id": "item_10",
         "text": "Shadow a director in stakeholder meetings",
-        "correct_bucket": "Actions to Take"
+        "correct_bucket": "Actions to take"
       },
       {
         "item_id": "item_11",
         "text": "Set monthly check-ins with manager",
-        "correct_bucket": "Actions to Take"
+        "correct_bucket": "Actions to take"
       },
       {
         "item_id": "item_12",
         "text": "Complete conflict resolution workshop",
-        "correct_bucket": "Actions to Take"
+        "correct_bucket": "Actions to take"
       }
     ],
     "scoring": {
@@ -366,24 +366,24 @@
     "prompt": "Sort the items into three clean buckets.",
     "sorting_instruction": "",
     "correct_buckets": [
-      "Fix Immediately",
-      "Investigate Further",
-      "Backlog & Monitor"
+      "Fix immediately",
+      "Investigate further",
+      "Backlog & monitor"
     ],
     "label_word_bank": [
-      "Fix Immediately",
-      "Investigate Further",
-      "Backlog & Monitor",
-      "Critical Issues",
-      "Nice to Have",
+      "Fix immediately",
+      "Investigate further",
+      "Backlog & monitor",
+      "Critical issues",
+      "Nice to have",
       "Bugs",
-      "Feature Requests",
-      "High Priority",
-      "Low Priority",
+      "Feature requests",
+      "High priority",
+      "Low priority",
       "Enhancements"
     ],
     "label_equivalents": {
-      "Fix Immediately": [
+      "Fix immediately": [
         "fix immediately",
         "critical",
         "p0",
@@ -391,14 +391,14 @@
         "immediate action",
         "fix now"
       ],
-      "Investigate Further": [
+      "Investigate further": [
         "investigate further",
         "needs investigation",
         "look into",
         "monitor",
         "investigate"
       ],
-      "Backlog & Monitor": [
+      "Backlog & monitor": [
         "backlog",
         "nice to have",
         "low priority",
@@ -412,63 +412,63 @@
       {
         "item_id": "item_01",
         "text": "App crashes on login for 30% of users",
-        "correct_bucket": "Fix Immediately"
+        "correct_bucket": "Fix immediately"
       },
       {
         "item_id": "item_02",
         "text": "Payment processing failing at checkout",
-        "correct_bucket": "Fix Immediately"
+        "correct_bucket": "Fix immediately"
       },
       {
         "item_id": "item_03",
         "text": "Data not saving — users losing work",
-        "correct_bucket": "Fix Immediately"
+        "correct_bucket": "Fix immediately"
       },
       {
         "item_id": "item_04",
         "text": "Security vulnerability reported by user",
-        "correct_bucket": "Fix Immediately"
+        "correct_bucket": "Fix immediately"
       },
       {
         "item_id": "item_05",
         "text": "Search bar shows no results for common queries",
-        "correct_bucket": "Investigate Further",
+        "correct_bucket": "Investigate further",
         "replacement_note": "Replaced v1.1: panel test showed original item was ambiguous across buckets."
       },
       {
         "item_id": "item_06",
         "text": "Feature X behaves differently on iOS vs Android",
-        "correct_bucket": "Investigate Further"
+        "correct_bucket": "Investigate further"
       },
       {
         "item_id": "item_07",
         "text": "Search results seem inconsistent",
-        "correct_bucket": "Investigate Further"
+        "correct_bucket": "Investigate further"
       },
       {
         "item_id": "item_08",
         "text": "Export function missing some records",
-        "correct_bucket": "Investigate Further"
+        "correct_bucket": "Investigate further"
       },
       {
         "item_id": "item_09",
         "text": "User wants dark mode",
-        "correct_bucket": "Backlog & Monitor"
+        "correct_bucket": "Backlog & monitor"
       },
       {
         "item_id": "item_10",
         "text": "Font size too small on mobile",
-        "correct_bucket": "Backlog & Monitor"
+        "correct_bucket": "Backlog & monitor"
       },
       {
         "item_id": "item_11",
         "text": "Request to add keyboard shortcut",
-        "correct_bucket": "Backlog & Monitor"
+        "correct_bucket": "Backlog & monitor"
       },
       {
         "item_id": "item_12",
         "text": "Onboarding tutorial feels outdated",
-        "correct_bucket": "Backlog & Monitor"
+        "correct_bucket": "Backlog & monitor"
       }
     ],
     "scoring": {
@@ -486,20 +486,20 @@
     "sorting_instruction": "",
     "correct_buckets": [
       "Do on Day 1",
-      "Complete by End of Week",
-      "Don't Rush — First Month"
+      "Complete by end of week",
+      "Don't rush — first month"
     ],
     "label_word_bank": [
       "Do on Day 1",
-      "Complete by End of Week",
-      "Don't Rush — First Month",
+      "Complete by end of week",
+      "Don't rush — first month",
       "Urgent",
-      "This Week",
+      "This week",
       "Later",
       "Immediate",
-      "Short-Term",
-      "Long-Term",
-      "Onboarding Essentials"
+      "Short-term",
+      "Long-term",
+      "Onboarding essentials"
     ],
     "label_equivalents": {
       "Do on Day 1": [
@@ -510,7 +510,7 @@
         "day one",
         "day 1 essentials"
       ],
-      "Complete by End of Week": [
+      "Complete by end of week": [
         "complete by end of week",
         "this week",
         "week 1",
@@ -518,7 +518,7 @@
         "short-term",
         "week 1 goals"
       ],
-      "Don't Rush — First Month": [
+      "Don't rush — first month": [
         "first month",
         "long-term",
         "take time",
@@ -552,42 +552,42 @@
       {
         "item_id": "item_05",
         "text": "Schedule 1:1s with key stakeholders",
-        "correct_bucket": "Complete by End of Week"
+        "correct_bucket": "Complete by end of week"
       },
       {
         "item_id": "item_06",
         "text": "Review last quarter's goals",
-        "correct_bucket": "Complete by End of Week"
+        "correct_bucket": "Complete by end of week"
       },
       {
         "item_id": "item_07",
         "text": "Shadow a team meeting",
-        "correct_bucket": "Complete by End of Week"
+        "correct_bucket": "Complete by end of week"
       },
       {
         "item_id": "item_08",
         "text": "Complete mandatory HR training",
-        "correct_bucket": "Complete by End of Week"
+        "correct_bucket": "Complete by end of week"
       },
       {
         "item_id": "item_09",
         "text": "Form an opinion on team strategy",
-        "correct_bucket": "Don't Rush — First Month"
+        "correct_bucket": "Don't rush — first month"
       },
       {
         "item_id": "item_10",
         "text": "Build relationships with cross-functional teams",
-        "correct_bucket": "Don't Rush — First Month"
+        "correct_bucket": "Don't rush — first month"
       },
       {
         "item_id": "item_11",
         "text": "Propose any process changes",
-        "correct_bucket": "Don't Rush — First Month"
+        "correct_bucket": "Don't rush — first month"
       },
       {
         "item_id": "item_12",
         "text": "Learn the unwritten rules of the culture",
-        "correct_bucket": "Don't Rush — First Month"
+        "correct_bucket": "Don't rush — first month"
       }
     ],
     "scoring": {
@@ -604,24 +604,24 @@
     "prompt": "Sort the items into three clean buckets.",
     "sorting_instruction": "Think about the category each reason belongs to, not who caused it.",
     "correct_buckets": [
-      "People & Communication",
-      "Process & Planning",
-      "Execution & Delivery"
+      "People & communication",
+      "Process & planning",
+      "Execution & delivery"
     ],
     "label_word_bank": [
-      "People & Communication",
-      "Process & Planning",
-      "Execution & Delivery",
-      "Team Issues",
-      "Planning Failures",
-      "Output Problems",
-      "Human Factors",
-      "Structural Problems",
-      "Delivery Gaps",
-      "Root Causes"
+      "People & communication",
+      "Process & planning",
+      "Execution & delivery",
+      "Team issues",
+      "Planning failures",
+      "Output problems",
+      "Human factors",
+      "Structural problems",
+      "Delivery gaps",
+      "Root causes"
     ],
     "label_equivalents": {
-      "People & Communication": [
+      "People & communication": [
         "people",
         "communication",
         "human factors",
@@ -629,7 +629,7 @@
         "relationship",
         "people & communication"
       ],
-      "Process & Planning": [
+      "Process & planning": [
         "process",
         "planning",
         "structural problems",
@@ -637,7 +637,7 @@
         "process & planning",
         "structural & planning"
       ],
-      "Execution & Delivery": [
+      "Execution & delivery": [
         "execution",
         "delivery",
         "output problems",
@@ -651,64 +651,64 @@
       {
         "item_id": "item_01",
         "text": "Stakeholder wasn't looped in early enough",
-        "correct_bucket": "People & Communication"
+        "correct_bucket": "People & communication"
       },
       {
         "item_id": "item_02",
         "text": "Team didn't flag risks to the manager",
-        "correct_bucket": "People & Communication"
+        "correct_bucket": "People & communication"
       },
       {
         "item_id": "item_03",
         "text": "Cross-functional partner had different priorities",
-        "correct_bucket": "People & Communication"
+        "correct_bucket": "People & communication"
       },
       {
         "item_id": "item_04",
         "text": "Feedback was vague and not actionable",
-        "correct_bucket": "People & Communication"
+        "correct_bucket": "People & communication"
       },
       {
         "item_id": "item_05",
         "text": "Scope was not defined clearly at the start",
-        "correct_bucket": "Process & Planning"
+        "correct_bucket": "Process & planning"
       },
       {
         "item_id": "item_06",
         "text": "Timeline was too aggressive given resources",
-        "correct_bucket": "Process & Planning"
+        "correct_bucket": "Process & planning"
       },
       {
         "item_id": "item_07",
         "text": "Dependencies weren't mapped before kickoff",
-        "correct_bucket": "Process & Planning"
+        "correct_bucket": "Process & planning"
       },
       {
         "item_id": "item_08",
         "text": "Sign-off process was never agreed at kickoff",
-        "correct_bucket": "Process & Planning",
+        "correct_bucket": "Process & planning",
         "replacement_note": "Replaced v1.1: panel test showed original item was ambiguous across buckets."
       },
       {
         "item_id": "item_09",
         "text": "Deliverable quality didn't meet expectations",
-        "correct_bucket": "Execution & Delivery"
+        "correct_bucket": "Execution & delivery"
       },
       {
         "item_id": "item_10",
         "text": "Final deliverable was submitted without a quality review",
-        "correct_bucket": "Execution & Delivery",
+        "correct_bucket": "Execution & delivery",
         "replacement_note": "Replaced v1.1: panel test showed original item was ambiguous across buckets."
       },
       {
         "item_id": "item_11",
         "text": "Final output didn't match the brief",
-        "correct_bucket": "Execution & Delivery"
+        "correct_bucket": "Execution & delivery"
       },
       {
         "item_id": "item_12",
         "text": "Testing was skipped due to time pressure",
-        "correct_bucket": "Execution & Delivery"
+        "correct_bucket": "Execution & delivery"
       }
     ],
     "scoring": {
