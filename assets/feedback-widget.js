@@ -321,7 +321,6 @@ async function handleSubmit(overlay, userName, userEmail) {
 async function init() {
   injectStyles();
   try {
-    // Fast path: show button immediately from cached localStorage profile
     const cachedProfile = (() => {
       try { return JSON.parse(localStorage.getItem("utl_member_profile") || "null"); } catch { return null; }
     })();
@@ -338,21 +337,41 @@ async function init() {
     }
 
     let btn = null;
-    if (isLocallyKnown) {
-      btn = buildButton();
-      document.body.appendChild(btn);
-      btn.addEventListener("click", openModal);
+    let observer = null;
+
+    function showButton() {
+      if (!btn) {
+        btn = buildButton();
+        btn.addEventListener("click", openModal);
+      }
+      if (!document.body.contains(btn)) {
+        document.body.appendChild(btn);
+      }
+      // Re-attach whenever the SPA replaces document.body.innerHTML
+      if (!observer) {
+        observer = new MutationObserver(() => {
+          if (btn && !document.body.contains(btn)) {
+            document.body.appendChild(btn);
+          }
+        });
+        observer.observe(document.body, { childList: true });
+      }
     }
 
-    // Firebase validation runs in background — corrects user data and enforces feedbackEnabled
+    function hideButton() {
+      if (observer) { observer.disconnect(); observer = null; }
+      if (btn) { btn.remove(); btn = null; }
+    }
+
+    if (isLocallyKnown) showButton();
+
+    // Firebase validation — corrects user data and enforces feedbackEnabled
     const user = await getSignedInUser();
 
     if (!user) {
       // Local (non-Google) login: Firebase returns null but localStorage confirms member.
       // Keep the button; feedbackEnabled check is skipped for local users.
-      if (!isLocallyKnown) {
-        if (btn) btn.remove();
-      }
+      if (!isLocallyKnown) hideButton();
       return;
     }
 
@@ -362,15 +381,11 @@ async function init() {
     let feedbackEnabled = true;
     try { feedbackEnabled = await getUserFeedbackEnabled(); } catch {}
     if (feedbackEnabled === false) {
-      if (btn) btn.remove();
+      hideButton();
       return;
     }
 
-    if (!btn) {
-      btn = buildButton();
-      document.body.appendChild(btn);
-      btn.addEventListener("click", openModal);
-    }
+    showButton();
   } catch {}
 }
 

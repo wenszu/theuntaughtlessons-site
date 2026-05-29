@@ -1069,6 +1069,51 @@ const UTL_CONTENT = {
     }
   }
 
+  async function handleEmailLinkSignIn() {
+    try {
+      var firebaseAuth = await import(firebaseHref());
+      if (!firebaseAuth.isSignInWithEmailLink(firebaseAuth.auth, window.location.href)) return;
+
+      var card = document.querySelector(".ws-login-card");
+      if (!card) return;
+      card.innerHTML = '<span class="ws-kicker">Magic link sign-in</span><h1 class="ws-title">One more step.</h1><p class="ws-subtitle">Enter the email address this link was sent to.</p><form class="ws-form" id="wsEmailLinkForm"><label for="wsEmailConfirm">Your email address</label><input class="ws-input" id="wsEmailConfirm" type="email" autocomplete="email" placeholder="you@example.com" required><button class="ws-button" type="submit">Sign in</button><p class="ws-message" id="wsEmailLinkMessage" aria-live="polite"></p></form>';
+
+      qs("#wsEmailLinkForm").addEventListener("submit", async function (event) {
+        event.preventDefault();
+        var emailInput = qs("#wsEmailConfirm");
+        var linkMessage = qs("#wsEmailLinkMessage");
+        var submitBtn = event.currentTarget.querySelector("button[type=submit]");
+        var email = emailInput.value.trim();
+        if (!email) {
+          linkMessage.textContent = "Please enter your email address.";
+          return;
+        }
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Signing in...";
+        linkMessage.textContent = "";
+        linkMessage.classList.remove("ws-success");
+        try {
+          var credential = await firebaseAuth.signInWithEmailLink(firebaseAuth.auth, email, window.location.href);
+          await finishGoogleUser(firebaseAuth, credential.user, linkMessage);
+        } catch (err) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = "Sign in";
+          var errMsg = "Sign-in failed. ";
+          if (err.code === "auth/invalid-action-code") {
+            errMsg = "This link has expired or already been used. Please ask for a new one.";
+          } else if (err.code === "auth/invalid-email") {
+            errMsg = "That email does not match the one this link was sent to. Please check and try again.";
+          } else {
+            errMsg += err.message || "Please try again.";
+          }
+          linkMessage.textContent = errMsg;
+        }
+      });
+    } catch (err) {
+      console.error("Email link sign-in check failed.", err);
+    }
+  }
+
   async function handleGoogleLogin(button, message) {
     if (!button || !message) return;
     var originalText = button.textContent;
@@ -1122,6 +1167,7 @@ const UTL_CONTENT = {
         handleGoogleLogin(event.currentTarget, qs("#wsLoginMessage"));
       });
       handleGoogleRedirectResult(qs("#wsLoginMessage"));
+      handleEmailLinkSignIn();
       return;
     }
     if (needsNameEntry()) {
