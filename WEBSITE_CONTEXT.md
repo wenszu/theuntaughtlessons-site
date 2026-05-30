@@ -162,6 +162,7 @@ Apps Script `action` routing: `WelcomeEmail`, `TestEmailTemplate`, `ResultsEmail
 
 ### 2026-05-30
 
+- Added shared public-site visibility script `assets/public-site-settings.js` and applied `data-public-find-level` to public nav links on `index.html`, `about.html`, `programs.html`, and `contact.html` so the Admin Tools "Find your level" toggle controls those links consistently. The live toggle still requires deployed Firestore rules that allow public reads of `settings/publicSite`.
 - Refined Email Templates editing: the live preview now has a toolbar (undo/redo, bold, italic, link, bullets, numbering, add/remove button), the opening paragraph is edited directly inside the preview, and the optional extra CTA is added through the preview toolbar instead of side-panel fields.
 - Updated Admin Console email-template tests/welcome sends to post JSON as `text/plain` to Apps Script, preserving `action`, recipient fields, `templateData`, and `renderedHtml` while avoiding the form-encoded payload that could be ignored by the deployed script.
 - Changed the Email Templates URL field into an optional extra button: the two setup buttons stay fixed, and filling Button text + Button URL adds a separate button after the opening paragraph in the live preview.

@@ -244,17 +244,6 @@
     const leadModalInitialContent = leadModalContent.innerHTML;
     const CONTACT_SESSION_KEY = 'utl_contact_shared';
     const CONTACT_PROFILE_KEY = 'utl_contact_profile';
-    const FIND_LEVEL_VISIBILITY_KEY = 'utl_public_find_level';
-
-    function applyFindLevelVisibility() {
-      const shouldShow = localStorage.getItem(FIND_LEVEL_VISIBILITY_KEY) === 'show';
-      document.querySelectorAll('[data-public-find-level]').forEach((element) => {
-        element.hidden = !shouldShow;
-      });
-    }
-
-    applyFindLevelVisibility();
-
     function rememberContact(payload) {
       sessionStorage.setItem(CONTACT_SESSION_KEY, 'true');
       sessionStorage.setItem(CONTACT_PROFILE_KEY, JSON.stringify({
@@ -454,22 +443,7 @@
 
     marqueeObserver.observe(testimonialSection);
   </script>
-  <script type="module">
-    import { getPublicFindLevelSetting } from './assets/firebase.js';
-
-    getPublicFindLevelSetting()
-      .then((visible) => {
-        localStorage.setItem('utl_public_find_level', visible ? 'show' : 'hide');
-        document.querySelectorAll('[data-public-find-level]').forEach((element) => {
-          element.hidden = !visible;
-        });
-      })
-      .catch(() => {
-        document.querySelectorAll('[data-public-find-level]').forEach((element) => {
-          element.hidden = true;
-        });
-      });
-  </script>
+  <script type="module" src="assets/public-site-settings.js?v=1"></script>
   <script type="module" src="assets/feedback-widget.js?v=4"></script>
 </body>
 </html>
