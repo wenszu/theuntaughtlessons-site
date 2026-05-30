@@ -2182,7 +2182,7 @@
         <span class="section-label">Engagement</span>
         <h2>Email templates</h2>
         <div class="section-divider"></div>
-        <p class="description">Edit the content and design of automated emails. Variable tags like <code>{{first_name}}</code>, <code>{{login_email}}</code>, and <code>{{workspace_url}}</code> will be replaced automatically.</p>
+        <p class="description">Edit and preview the welcome email sent when you add a new member. The three setup steps and sign-off are fixed — only the fields below are editable. Use <code>{{first_name}}</code> in the intro for the member's first name.</p>
 
         <div id="etStatus" class="eng-status" aria-live="polite"></div>
         <div id="etForm" hidden>
@@ -2197,11 +2197,11 @@
                 </select>
               </div>
               <div class="field-stack" style="margin-top:20px;">
-                <div class="mb-edit-field"><label for="et-subject">Subject line</label><input type="text" id="et-subject"></div>
-                <div class="mb-edit-field"><label for="et-headline">Headline</label><input type="text" id="et-headline"></div>
-                <div class="mb-edit-field"><label for="et-intro">Intro paragraph</label><textarea id="et-intro" style="min-height:100px;"></textarea></div>
-                <div class="mb-edit-field"><label for="et-buttonLabel">Button label</label><input type="text" id="et-buttonLabel"></div>
-                <div class="mb-edit-field"><label for="et-buttonUrl">Button URL</label><input type="text" id="et-buttonUrl"></div>
+                <div class="mb-edit-field"><label for="et-subject">Subject line</label><input type="text" id="et-subject"><small style="color:#888; font-size:11px; margin-top:4px; display:block;">What appears in the member's inbox.</small></div>
+                <div class="mb-edit-field" style="display:none"><label for="et-headline">Headline</label><input type="text" id="et-headline"></div>
+                <div class="mb-edit-field"><label for="et-intro">Opening paragraph</label><textarea id="et-intro" style="min-height:90px;"></textarea><small style="color:#888; font-size:11px; margin-top:4px; display:block;">Appears below "Welcome, [First Name]." Use <code>{{first_name}}</code> to personalise.</small></div>
+                <div class="mb-edit-field" style="display:none"><label for="et-buttonLabel">Button label</label><input type="text" id="et-buttonLabel"></div>
+                <div class="mb-edit-field"><label for="et-buttonUrl">Workspace URL</label><input type="text" id="et-buttonUrl"><small style="color:#888; font-size:11px; margin-top:4px; display:block;">The "Sign in to your workspace" button destination. Default: <code>{{workspace_url}}</code>.</small></div>
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 12px;">
                   <div class="mb-edit-field">
                     <label for="et-accentColor">Accent color</label>
@@ -4249,7 +4249,7 @@
       const defaults = {
         subject: 'Welcome to The Untaught Lessons',
         headline: 'Welcome, {{first_name}}.',
-        intro: 'Your access to the Think, Speak, and Act Like an Executive program is now active. Before we begin, please complete a simple three-step setup to prepare your workspace.',
+        intro: 'You now have access to The Untaught Lessons program. Before you begin, take a few minutes to complete your setup so everything works from the start.',
         buttonLabel: 'OPEN MY WORKSPACE →',
         buttonUrl: '{{workspace_url}}',
         accentColor: '#003366',
@@ -4260,52 +4260,86 @@
 
     function generateEmailHtml(data) {
       const accent = data.accentColor || '#003366';
-      const logoHtml = data.showLogo ? `
-        <tr>
-          <td align="center" style="padding: 40px 0 20px 0;">
-            <table border="0" cellpadding="0" cellspacing="0" width="600" style="max-width: 600px;">
-              <tr>
-                <td align="center">
-                  <img src="https://theuntaughtlessons.com/assets/logo.png" alt="The Untaught Lessons" width="180" style="display: block; border: 0;" />
-                </td>
-              </tr>
-            </table>
-          </td>
-        </tr>` : '';
+      const intro = data.intro || '';
+      const workspaceUrl = (data.buttonUrl || '{{workspace_url}}').replace(/{{workspace_url}}/g, 'https://theuntaughtlessons.com/member-login/');
+      const loginEmail = data.loginEmail || '';
+      const headline = data.headline || 'Welcome.';
 
-      return `
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+      const logoBlock = data.showLogo !== false ? `
+          <tr>
+            <td align="center" style="padding: 32px 48px 24px;">
+              <img src="https://theuntaughtlessons.com/assets/logo.png" alt="The Untaught Lessons" width="160" style="display:block; border:0;" />
+            </td>
+          </tr>` : `<tr><td style="padding:24px 0 0;"></td></tr>`;
+
+      return `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /></head>
-<body style="margin: 0; padding: 0; background-color: #FFFFFF; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased;">
-  <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #FFFFFF;">
-    ${logoHtml}
+<body style="margin:0; padding:0; background-color:#F7F5F0; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; -webkit-font-smoothing:antialiased;">
+  <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color:#F7F5F0;">
     <tr>
-      <td align="center" style="padding: 20px 0 40px 0;">
-        <table border="0" cellpadding="0" cellspacing="0" width="600" style="max-width: 600px; padding: 0 40px;">
-          <tr><td align="left">
-            <h1 style="margin: 0; font-family: Georgia, serif; font-size: 36px; font-weight: 700; color: ${accent}; line-height: 1.2;">${escapeHtml(data.headline)}</h1>
-            <p style="margin: 8px 0 0 0; font-family: Georgia, serif; font-style: italic; font-size: 18px; color: #4A4A4A; line-height: 1.4;">We are glad you are here.</p>
-            <p style="margin: 24px 0 0 0; font-size: 16px; color: #4A4A4A; line-height: 1.6;">${escapeHtml(data.intro).replace(/\n/g, '<br>')}</p>
+      <td align="center" style="padding:40px 20px;">
+
+        <table border="0" cellpadding="0" cellspacing="0" width="600" style="max-width:600px; background-color:#FFFFFF; border-radius:8px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,.06);">
+          ${logoBlock}
+          <tr><td style="padding:32px 48px 0;">
+            <h1 style="margin:0 0 8px; font-family:Georgia,serif; font-size:34px; font-weight:700; color:${accent}; line-height:1.2;">${escapeHtml(headline)}</h1>
+            <p style="margin:0; font-family:Georgia,serif; font-style:italic; font-size:18px; color:#4A4A4A; line-height:1.4;">We are glad you are here.</p>
+          </td></tr>
+          <tr><td style="padding:20px 48px 0;">
+            <p style="margin:0; font-size:16px; color:#4A4A4A; line-height:1.7;">${escapeHtml(intro).replace(/\n/g, '<br>')}</p>
+          </td></tr>
+          <tr><td style="padding:32px 48px 16px;">
+            <span style="font-family:'Courier New',Courier,monospace; font-size:11px; font-weight:700; color:#EEA320; letter-spacing:2px; text-transform:uppercase;">YOUR SETUP</span>
+          </td></tr>
+
+          <tr><td style="padding:0 48px 28px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="100%"><tr>
+              <td width="40" valign="top" style="padding-top:2px;"><div style="width:28px; height:28px; background-color:${accent}; border-radius:50%; color:#FFFFFF; font-size:14px; font-weight:700; text-align:center; line-height:28px;">1</div></td>
+              <td><h2 style="margin:0 0 8px; font-size:17px; font-weight:700; color:${accent};">Join the member community</h2>
+                <p style="margin:0; font-size:14px; color:#4A4A4A; line-height:1.6;">This gives you access to the video library used throughout the program. Click the link below and join with the Google account this email was sent to.</p>
+                <table border="0" cellpadding="0" cellspacing="0" style="margin-top:16px;"><tr><td align="center" bgcolor="${accent}" style="border-radius:6px;"><a href="https://groups.google.com/g/utl-members" target="_blank" style="display:inline-block; padding:12px 24px; font-size:14px; font-weight:700; color:#FFFFFF; text-decoration:none; letter-spacing:0.5px;">Join the member community &#8594;</a></td></tr></table>
+                <p style="margin:6px 0 0; font-family:'Courier New',Courier,monospace; font-size:11px; color:#999;">groups.google.com/g/utl-members</p>
+              </td>
+            </tr></table>
+          </td></tr>
+
+          <tr><td style="padding:0 48px 28px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="100%"><tr>
+              <td width="40" valign="top" style="padding-top:2px;"><div style="width:28px; height:28px; background-color:${accent}; border-radius:50%; color:#FFFFFF; font-size:14px; font-weight:700; text-align:center; line-height:28px;">2</div></td>
+              <td><h2 style="margin:0 0 8px; font-size:17px; font-weight:700; color:${accent};">Sign in to your workspace</h2>
+                <p style="margin:0; font-size:14px; color:#4A4A4A; line-height:1.6;">Go to the member login page and sign in with the same Google account.${loginEmail ? ' Use <strong>' + escapeHtml(loginEmail) + '</strong>.' : ' No password needed.'}</p>
+                <table border="0" cellpadding="0" cellspacing="0" style="margin-top:16px;"><tr><td align="center" bgcolor="${accent}" style="border-radius:6px;"><a href="${escapeHtml(workspaceUrl)}" target="_blank" style="display:inline-block; padding:12px 24px; font-size:14px; font-weight:700; color:#FFFFFF; text-decoration:none; letter-spacing:0.5px;">Sign in to your workspace &#8594;</a></td></tr></table>
+                <p style="margin:6px 0 0; font-family:'Courier New',Courier,monospace; font-size:11px; color:#999;">${escapeHtml(workspaceUrl.replace(/^https?:\/\//, ''))}</p>
+              </td>
+            </tr></table>
+          </td></tr>
+
+          <tr><td style="padding:0 48px 40px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="100%"><tr>
+              <td width="40" valign="top" style="padding-top:2px;"><div style="width:28px; height:28px; background-color:${accent}; border-radius:50%; color:#FFFFFF; font-size:14px; font-weight:700; text-align:center; line-height:28px;">3</div></td>
+              <td><h2 style="margin:0 0 8px; font-size:17px; font-weight:700; color:${accent};">Complete your orientation</h2>
+                <p style="margin:0; font-size:14px; color:#4A4A4A; line-height:1.6;">Once you are signed in, you will land on your Home page. Start with the Home section at the top. It takes about five minutes and sets you up for everything that follows.</p>
+              </td>
+            </tr></table>
+          </td></tr>
+
+          <tr><td style="padding:0 48px 48px;">
+            <div style="border-top:1px solid #E8DFD1; padding-top:28px;">
+              <p style="margin:0 0 16px; font-size:15px; color:#4A4A4A; line-height:1.7;">Once your orientation is done, you are ready to begin Phase 1. If anything does not work as expected, just reply to this email and I will sort it out.</p>
+              <p style="margin:0 0 28px; font-size:15px; color:#4A4A4A; line-height:1.7;">Looking forward to seeing your progress.</p>
+              <p style="margin:0 0 4px; font-size:15px; color:#4A4A4A;"><strong>Wen-Szu</strong></p>
+              <p style="margin:0; font-family:'Courier New',Courier,monospace; font-size:10px; font-weight:700; color:#EEA320; letter-spacing:2px; text-transform:uppercase;">THE UNTAUGHT LESSONS</p>
+            </div>
           </td></tr>
         </table>
-      </td>
-    </tr>
-    <tr>
-      <td align="center" style="padding: 0 0 40px 0;">
-        <table border="0" cellpadding="0" cellspacing="0" width="600" style="max-width: 600px; padding: 0 40px;">
-          <tr><td align="left" style="padding-bottom: 20px;"><span style="font-family: monospace; font-size: 11px; font-weight: 700; color: #EEA320; letter-spacing: 2px; text-transform: uppercase;">YOUR SETUP</span></td></tr>
-          <tr><td style="padding-bottom: 32px;"><table border="0" cellpadding="0" cellspacing="0" width="100%"><tr><td valign="top" width="40" style="padding-top: 2px;"><div style="width: 28px; height: 28px; background-color: ${accent}; border-radius: 50%; color: #FFFFFF; font-size: 14px; font-weight: 700; text-align: center; line-height: 28px;">1</div></td><td align="left"><h2 style="margin: 0; font-size: 18px; font-weight: 700; color: ${accent};">Set your preferred name</h2><p style="margin: 8px 0 0 0; font-size: 14px; color: #4A4A4A; line-height: 1.5;">When you first enter the workspace, you will be prompted to set your display name.</p></td></tr></table></td></tr>
-          <tr><td style="padding-bottom: 32px;"><table border="0" cellpadding="0" cellspacing="0" width="100%"><tr><td valign="top" width="40" style="padding-top: 2px;"><div style="width: 28px; height: 28px; background-color: ${accent}; border-radius: 50%; color: #FFFFFF; font-size: 14px; font-weight: 700; text-align: center; line-height: 28px;">2</div></td><td align="left"><h2 style="margin: 0; font-size: 18px; font-weight: 700; color: ${accent};">Open your workspace</h2><p style="margin: 8px 0 16px 0; font-size: 14px; color: #4A4A4A; line-height: 1.5;">Use your registered email (<strong>${escapeHtml(data.loginEmail || 'your registered email')}</strong>) to sign in.</p><table border="0" cellpadding="0" cellspacing="0"><tr><td align="center" bgcolor="${accent}" style="border-radius: 6px;"><a href="${escapeHtml(data.buttonUrl || '#')}" target="_blank" style="display: inline-block; padding: 12px 24px; font-size: 14px; font-weight: 700; color: #FFFFFF; text-decoration: none; letter-spacing: 0.5px;">${escapeHtml(data.buttonLabel)}</a></td></tr></table></td></tr></table></td></tr>
-          <tr><td><table border="0" cellpadding="0" cellspacing="0" width="100%"><tr><td valign="top" width="40" style="padding-top: 2px;"><div style="width: 28px; height: 28px; background-color: ${accent}; border-radius: 50%; color: #FFFFFF; font-size: 14px; font-weight: 700; text-align: center; line-height: 28px;">3</div></td><td align="left"><h2 style="margin: 0; font-size: 18px; font-weight: 700; color: ${accent};">Complete your first lesson</h2><p style="margin: 8px 0 0 0; font-size: 14px; color: #4A4A4A; line-height: 1.5;">Start with the Orientation section to understand the MA storyline.</p></td></tr></table></td></tr>
+
+        <table border="0" cellpadding="0" cellspacing="0" width="600" style="max-width:600px;">
+          <tr><td align="center" style="padding:20px 0;">
+            <p style="margin:0; font-size:11px; color:#999; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">You received this email because you enrolled in <em>The Untaught Lessons</em>. Reply any time.</p>
+          </td></tr>
         </table>
-      </td>
-    </tr>
-    <tr>
-      <td align="center" style="padding: 20px 0 60px 0;">
-        <table border="0" cellpadding="0" cellspacing="0" width="600" style="max-width: 600px; padding: 0 40px;">
-          <tr><td style="border-top: 1px solid #E8DFD1; padding-top: 30px;"><p style="margin: 0; font-size: 15px; color: #4A4A4A; line-height: 1.5;">Regards,<br /><br /><strong>Wen-Szu Lin</strong><br />Founder, The Untaught Lessons</p><p style="margin: 40px 0 0 0; font-family: monospace; font-size: 10px; font-weight: 700; color: #4A4A4A; letter-spacing: 2px; text-transform: uppercase; text-align: center;">THE UNTAUGHT LESSONS</p></td></tr>
-        </table>
+
       </td>
     </tr>
   </table>
@@ -4319,7 +4353,8 @@
         buttonLabel: document.getElementById('et-buttonLabel').value,
         buttonUrl: document.getElementById('et-buttonUrl').value,
         accentColor: document.getElementById('et-accentColor').value,
-        showLogo: document.getElementById('et-showLogo').getAttribute('aria-pressed') === 'true'
+        showLogo: document.getElementById('et-showLogo').getAttribute('aria-pressed') === 'true',
+        loginEmail: ''
       };
       const iframe = document.getElementById('etPreview');
       if (iframe) iframe.srcdoc = generateEmailHtml(data);
@@ -4327,20 +4362,18 @@
 
     async function loadEmailTemplates() {
       const fb = window.utlFirebaseAuth;
-      if (!fb || !fb.getEmailTemplates) return;
       const statusEl = document.getElementById('etStatus');
-      const formEl = document.getElementById('etForm');
-      statusEl.textContent = 'Loading templates...';
-      try {
-        const templates = await fb.getEmailTemplates();
-        _etTemplates = templates;
-        syncEmailTemplateForm('welcomeEmail');
-        formEl.hidden = false;
-        statusEl.textContent = '';
-        initEmailTemplateListeners();
-      } catch (e) {
-        statusEl.textContent = 'Could not load templates: ' + (e.message || 'Error');
+      if (fb && fb.getEmailTemplates) {
+        try {
+          const templates = await fb.getEmailTemplates();
+          _etTemplates = templates;
+          if (statusEl) statusEl.textContent = '';
+        } catch (e) {
+          if (statusEl) statusEl.textContent = 'Using default template — could not load saved version. (' + (e.message || 'Error') + ')';
+        }
       }
+      syncEmailTemplateForm('welcomeEmail');
+      initEmailTemplateListeners();
     }
 
     document.getElementById('etSelect')?.addEventListener('change', (e) => {
@@ -4352,7 +4385,7 @@
       const def = {
         subject: 'Welcome to The Untaught Lessons',
         headline: 'Welcome, {{first_name}}.',
-        intro: 'Your access to the Think, Speak, and Act Like an Executive program is now active. Before we begin, please complete a simple three-step setup to prepare your workspace.',
+        intro: 'You now have access to The Untaught Lessons program. Before you begin, take a few minutes to complete your setup so everything works from the start.',
         buttonLabel: 'OPEN MY WORKSPACE →',
         buttonUrl: '{{workspace_url}}',
         accentColor: '#003366',
