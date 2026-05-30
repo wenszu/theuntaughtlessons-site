@@ -1,6 +1,6 @@
 # The Untaught Lessons Website Context
 
-Last updated: 2026-05-28
+Last updated: 2026-05-30
 Primary purpose: Shared implementation memory and operating guide for The Untaught Lessons website.
 
 This file is the single source of truth for agents working on this repo. Codex, Claude, Gemini, and any future assistant should read it before making website changes and update it whenever the shape of the site changes.
@@ -99,12 +99,26 @@ Writing rules for this file:
 
 ## Change Log
 
+### 2026-05-30
+
+- Standardized exercise naming across the website and documentation to use sentence case (e.g., "Grocery list" and "Issue tree builder") to align with the brand voice.
+
+### 2026-05-29
+
+- Reordered the Content Library tab in the Admin Console: "Data files" now appears before "GitHub setup" in both the sidebar and the main content area.
+- Updated Admin Console logic to ensure the "GitHub setup" section starts collapsed by default when the tab is opened.
+
 ### 2026-05-29
 
 - Updated the Admin Console member-management process guide in `admin/index.html`:
   - Capitalized the action text after each role label, such as `Admin:` and `Member:`.
   - Added bolded summary phrases to Method C's email sub-bullets.
   - Updated the member CSV export filename format to `YYYYMMDD - utl-members download.csv`.
+- Added an Admin Tools public homepage toggle for `Find your level`:
+  - Admin Console writes the live setting to Firestore `settings/publicSite.findLevelVisible`.
+  - `index.html` reads that setting through `assets/firebase.js` and hides `data-public-find-level` elements when the setting is off or missing.
+  - `firestore.rules` allows public reads of `settings/publicSite` while keeping settings writes admin-only.
+- Updated the Admin Console content-manager default so Site & Content sections start collapsed by default.
 
 ### 2026-05-28
 
@@ -1572,7 +1586,7 @@ Purpose:
 Current sections:
 
 - Section 1, Think Clearly:
-  - Exercise A, Sort & Bucket, links to `../tsa-sort-bucket/index.html`.
+  - Exercise A, Sort & bucket, links to `../tsa-sort-bucket/index.html`.
   - Exercise B, Spot the Problem, links to `../tsa-spot-the-problem/index.html`.
 - Section 2, Speak Concisely:
   - Short Talk, links to `../tsa-speak/index.html`.
@@ -1594,7 +1608,7 @@ Phase:
 
 Purpose:
 
-- Exercise A of TSA Diagnostic Part 1, Think Clearly.
+- Exercise A of TSA diagnostic part 1, Think clearly.
 - Assesses whether the participant can name clean buckets and sort messy information into those buckets.
 
 Key functionality:
@@ -1621,7 +1635,7 @@ Phase:
 
 Purpose:
 
-- Exercise B of TSA Diagnostic Part 1, Think Clearly.
+- Exercise B of TSA diagnostic part 1, Think clearly.
 - Assesses whether the participant can detect overlap and gap problems in a pre-organized structure.
 
 Key functionality:
@@ -1629,7 +1643,7 @@ Key functionality:
 - Contact gate before the assessment loads.
 - Randomly selects one of five assessment sets.
 - Uses a two-part drag/drop and mobile tap workflow:
-  - Part A, Find the Overlaps, asks participants to move duplicate ideas back to the left across three random problems.
+  - Part A, Find the overlaps, asks participants to move duplicate ideas back to the left across three random problems.
   - Part B, Fix the Gaps, asks participants to move correct missing items from the left into the right bucket across three random problems.
 - Auto-scored out of 20 points.
 - Stores result in `sessionStorage` under `tsa_spot_score`.
@@ -1651,7 +1665,7 @@ Purpose:
 Current sections:
 
 - Section 1, Think Clearly:
-  - Exercise A, Sort & Bucket, links to `../tsa-sort-bucket/index.html?assessment=checkpoint`.
+  - Exercise A, Sort & bucket, links to `../tsa-sort-bucket/index.html?assessment=checkpoint`.
   - Exercise B, Spot the Problem, links to `../tsa-spot-the-problem/index.html?assessment=checkpoint`.
 - Section 2, Speak Concisely:
   - Short Talk, links to `../tsa-speak/index.html?version=checkpoint`.

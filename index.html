@@ -247,7 +247,7 @@
     const FIND_LEVEL_VISIBILITY_KEY = 'utl_public_find_level';
 
     function applyFindLevelVisibility() {
-      const shouldShow = localStorage.getItem(FIND_LEVEL_VISIBILITY_KEY) !== 'hide';
+      const shouldShow = localStorage.getItem(FIND_LEVEL_VISIBILITY_KEY) === 'show';
       document.querySelectorAll('[data-public-find-level]').forEach((element) => {
         element.hidden = !shouldShow;
       });
@@ -453,6 +453,22 @@
     }, { threshold: 0.2 });
 
     marqueeObserver.observe(testimonialSection);
+  </script>
+  <script type="module">
+    import { getPublicFindLevelSetting } from './assets/firebase.js';
+
+    getPublicFindLevelSetting()
+      .then((visible) => {
+        localStorage.setItem('utl_public_find_level', visible ? 'show' : 'hide');
+        document.querySelectorAll('[data-public-find-level]').forEach((element) => {
+          element.hidden = !visible;
+        });
+      })
+      .catch(() => {
+        document.querySelectorAll('[data-public-find-level]').forEach((element) => {
+          element.hidden = true;
+        });
+      });
   </script>
   <script type="module" src="assets/feedback-widget.js?v=4"></script>
 </body>

@@ -1,7 +1,7 @@
 [
   {
     "exercise_id": "sort_bucket_001",
-    "exercise_title": "Meeting Agenda from Hell",
+    "exercise_title": "Meeting agenda from hell",
     "difficulty": "beginner",
     "scenario": "You are five minutes away from a leadership team meeting. Someone has sent you the agenda — 12 items, no structure, no priorities. Before everyone walks into the room, you need to sort them: what actually needs a decision today, what is just an update, and what should never have been on the agenda in the first place.",
     "prompt": "Sort the 12 agenda items into three clean buckets.",

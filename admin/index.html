@@ -1736,8 +1736,8 @@
       <button class="admin-nav-item" data-admin-tab-scope="engagement" data-target="section-access-controls">Access controls</button>
 
       <span class="nav-group-label" data-admin-nav-group="content-library">Content Library</span>
-      <button class="admin-nav-item" data-admin-tab-scope="content-library" data-target="section-cl-setup">GitHub setup</button>
       <button class="admin-nav-item" data-admin-tab-scope="content-library" data-target="section-cl-files">Data files</button>
+      <button class="admin-nav-item" data-admin-tab-scope="content-library" data-target="section-cl-setup">GitHub setup</button>
 
       <span class="nav-group-label" data-admin-nav-group="content-manager">Links</span>
       <button class="admin-nav-item" data-admin-tab-scope="content-manager" data-target="section-links">Quick links</button>
@@ -2307,28 +2307,6 @@
 
       <!-- ===== Content Library ===== -->
 
-      <section class="admin-section" id="section-cl-setup" data-admin-tab-panel="content-library">
-        <span class="section-label">Content Library</span>
-        <h2>GitHub setup</h2>
-        <div class="section-divider"></div>
-        <p class="description">Connect to GitHub so this admin panel can read and write data files directly. Your token is stored only in this browser — it never goes into the code or git history.</p>
-        <div class="section-divider" style="margin-top:12px"></div>
-        <p class="description" style="margin-top:12px"><strong>Step 1 — Create a fine-grained token.</strong><br>
-          Go to <strong>github.com → Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token</strong>.<br>
-          Set repository access to <em>Only select repositories → theuntaughtlessons-site</em>.<br>
-          Under Permissions → Repository permissions, set <em>Contents → Read and write</em>. Everything else stays None.</p>
-        <p class="description" style="margin-top:8px"><strong>Step 2 — Paste the token below and click Save.</strong></p>
-        <div class="cl-pat-wrap">
-          <input type="password" class="cl-pat-input" id="clPatInput" placeholder="github_pat_…" autocomplete="off">
-          <button class="password-toggle" type="button" aria-label="Show token" aria-pressed="false" data-password-toggle="clPatInput">
-            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/></svg>
-          </button>
-          <button class="small-button" type="button" id="clPatSave">Save token</button>
-          <button class="small-button secondary-button" type="button" id="clPatClear" hidden>Clear token</button>
-        </div>
-        <p id="clPatStatus" class="cl-status" aria-live="polite"></p>
-      </section>
-
       <section class="admin-section" id="section-cl-files" data-admin-tab-panel="content-library">
         <span class="section-label">Content Library</span>
         <h2>Data files</h2>
@@ -2355,6 +2333,28 @@
             <button class="small-button secondary-button" type="button" id="clDownloadBtn">Download</button>
           </div>
         </div>
+      </section>
+
+      <section class="admin-section" id="section-cl-setup" data-admin-tab-panel="content-library">
+        <span class="section-label">Content Library</span>
+        <h2>GitHub setup</h2>
+        <div class="section-divider"></div>
+        <p class="description">Connect to GitHub so this admin panel can read and write data files directly. Your token is stored only in this browser — it never goes into the code or git history.</p>
+        <div class="section-divider" style="margin-top:12px"></div>
+        <p class="description" style="margin-top:12px"><strong>Step 1 — Create a fine-grained token.</strong><br>
+          Go to <strong>github.com → Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token</strong>.<br>
+          Set repository access to <em>Only select repositories → theuntaughtlessons-site</em>.<br>
+          Under Permissions → Repository permissions, set <em>Contents → Read and write</em>. Everything else stays None.</p>
+        <p class="description" style="margin-top:8px"><strong>Step 2 — Paste the token below and click Save.</strong></p>
+        <div class="cl-pat-wrap">
+          <input type="password" class="cl-pat-input" id="clPatInput" placeholder="github_pat_…" autocomplete="off">
+          <button class="password-toggle" type="button" aria-label="Show token" aria-pressed="false" data-password-toggle="clPatInput">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/></svg>
+          </button>
+          <button class="small-button" type="button" id="clPatSave">Save token</button>
+          <button class="small-button secondary-button" type="button" id="clPatClear" hidden>Clear token</button>
+        </div>
+        <p id="clPatStatus" class="cl-status" aria-live="polite"></p>
       </section>
 
     </main>
@@ -3935,8 +3935,8 @@
         ['My results', '../my-results/index.html'],
         ['Diagnostic hub', '../apps/tsa-diagnostic/index.html'],
         ['Checkpoint hub', '../apps/tsa-checkpoint/index.html'],
-        ['Diagnostic — Sort & Bucket', '../apps/tsa-sort-bucket/index.html?assessment=diagnostic'],
-        ['Checkpoint — Sort & Bucket', '../apps/tsa-sort-bucket/index.html?assessment=checkpoint'],
+        ['Diagnostic — Sort & bucket', '../apps/tsa-sort-bucket/index.html?assessment=diagnostic'],
+        ['Checkpoint — Sort & bucket', '../apps/tsa-sort-bucket/index.html?assessment=checkpoint'],
         ['Diagnostic — Spot the problem', '../apps/tsa-spot-the-problem/index.html?assessment=diagnostic'],
         ['Checkpoint — Spot the problem', '../apps/tsa-spot-the-problem/index.html?assessment=checkpoint'],
         ['Diagnostic — Speak concisely', '../apps/tsa-speak/index.html?version=diagnostic'],
@@ -3957,9 +3957,9 @@
       const linkMap = Object.fromEntries(links.map(([name, path]) => [name, path]));
       const groups = [
         { label: 'Site', names: ['Member hub', 'Member hub — admin mode', 'My results'] },
-        { label: 'Assessments', names: ['Diagnostic hub', 'Checkpoint hub', 'Diagnostic — Sort & Bucket', 'Checkpoint — Sort & Bucket', 'Diagnostic — Spot the problem', 'Checkpoint — Spot the problem', 'Diagnostic — Speak concisely', 'Checkpoint — Speak concisely', 'Act confidently placeholder'] },
+        { label: 'Assessments', names: ['Diagnostic hub', 'Checkpoint hub', 'Diagnostic — Sort & bucket', 'Checkpoint — Sort & bucket', 'Diagnostic — Spot the problem', 'Checkpoint — Spot the problem', 'Diagnostic — Speak concisely', 'Checkpoint — Speak concisely', 'Act confidently placeholder'] },
         { label: 'Phase 1 apps', names: ['Grocery list', "Manager's messy notes", 'Rushed voice memo', 'Rushed voice memo — AI', 'Chalkboard notes'] },
-        { label: 'Phase 2 Apps', names: ['Issue tree builder', 'SCQA builder'] },
+        { label: 'Phase 2 apps', names: ['Issue tree builder', 'SCQA builder'] },
         { label: 'Phase 3 apps', names: ['The art of saying no', 'I have bad news...', "Let's switch hats", 'Speak like Obama'] }
       ];
       function linkHtml(name) {
@@ -4204,15 +4204,15 @@
     const CL_REPO = 'wenszu/theuntaughtlessons-site';
     const CL_PAT_KEY = 'utl_github_pat';
     const CL_FILES = [
-      { name: 'Grocery List',        path: 'data/practice/grocery-list.json',      category: 'Practice exercises', desc: 'MECE sort exercise with item bank and ideal bucket mappings' },
-      { name: 'Issue Tree Builder',  path: 'data/practice/issue-tree-builder.json', category: 'Practice exercises', desc: 'Problem decomposition with hypothesis and sample answer' },
-      { name: 'Messy Notes',         path: 'data/practice/messy-notes.json',        category: 'Practice exercises', desc: 'Structuring rushed notes into an Aiko-ready summary' },
-      { name: 'SCQA Builder',        path: 'data/practice/scqa-builder.json',       category: 'Practice exercises', desc: 'Situation-Complication-Question-Answer formulation exercise' },
-      { name: 'Sort & Bucket',       path: 'data/tsa/sort-bucket.json',             category: 'TSA assessments',    desc: 'Sorting scenarios used in the Diagnostic and Checkpoint' },
-      { name: 'Spot the Problem',    path: 'data/tsa/spot-the-problem.json',        category: 'TSA assessments',    desc: 'MECE gap/overlap detection with scored answer key' },
-      { name: 'Speak Concisely',     path: 'data/tsa/speak-concisely.json',         category: 'TSA assessments',    desc: 'Timed speaking scenarios with talking point guides' },
-      { name: 'Act Confidently',     path: 'data/tsa/act-confidently.json',         category: 'TSA assessments',    desc: 'Difficult-conversation assessment (placeholder)' },
-      { name: 'Find Your Level',     path: 'data/sort-bucket.json',                 category: 'Public exercise',    desc: 'Free public sort & bucket exercise on tsa-score.html' },
+      { name: 'Grocery list',        path: 'data/practice/grocery-list.json',      category: 'Practice exercises', desc: 'MECE sort exercise with item bank and ideal bucket mappings' },
+      { name: 'Issue tree builder',  path: 'data/practice/issue-tree-builder.json', category: 'Practice exercises', desc: 'Problem decomposition with hypothesis and sample answer' },
+      { name: 'Messy notes',         path: 'data/practice/messy-notes.json',        category: 'Practice exercises', desc: 'Structuring rushed notes into an Aiko-ready summary' },
+      { name: 'SCQA builder',        path: 'data/practice/scqa-builder.json',       category: 'Practice exercises', desc: 'Situation-complication-question-answer formulation exercise' },
+      { name: 'Sort & bucket',       path: 'data/tsa/sort-bucket.json',             category: 'TSA assessments',    desc: 'Sorting scenarios used in the Diagnostic and Checkpoint' },
+      { name: 'Spot the problem',    path: 'data/tsa/spot-the-problem.json',        category: 'TSA assessments',    desc: 'MECE gap/overlap detection with scored answer key' },
+      { name: 'Speak concisely',     path: 'data/tsa/speak-concisely.json',         category: 'TSA assessments',    desc: 'Timed speaking scenarios with talking point guides' },
+      { name: 'Act confidently',     path: 'data/tsa/act-confidently.json',         category: 'TSA assessments',    desc: 'Difficult-conversation assessment (placeholder)' },
+      { name: 'Find your level',     path: 'data/sort-bucket.json',                 category: 'Public exercise',    desc: 'Free public sort & bucket exercise on tsa-score.html' },
     ];
 
     let clEditing = null;
@@ -4674,9 +4674,9 @@
         savedStates = JSON.parse(localStorage.getItem('utl_admin_section_states') || '{}');
       } catch (e) {}
 
-      const collapseDefaultKey = 'utl_admin_content_collapsed_default_v2';
+      const collapseDefaultKey = 'utl_admin_content_collapsed_default_v3';
       if (localStorage.getItem(collapseDefaultKey) !== 'done') {
-        document.querySelectorAll('[data-admin-tab-panel="content-manager"]').forEach((section) => {
+        document.querySelectorAll('[data-admin-tab-panel="content-manager"], [data-admin-tab-panel="content-library"]').forEach((section) => {
           if (section.id) savedStates[section.id] = false;
         });
         localStorage.setItem('utl_admin_section_states', JSON.stringify(savedStates));

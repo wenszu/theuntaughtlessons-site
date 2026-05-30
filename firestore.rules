@@ -48,7 +48,7 @@ service cloud.firestore {
     }
 
     match /settings/{docId} {
-      allow read: if signedIn();
+      allow read: if docId == 'publicSite' || signedIn();
       allow write: if isAdmin();
     }
   }
