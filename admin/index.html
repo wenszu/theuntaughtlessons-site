@@ -2210,8 +2210,14 @@
                 <div class="mb-edit-field"><label for="et-subject">Subject line</label><input type="text" id="et-subject"><p class="et-note">What appears in the member's inbox.</p></div>
                 <div class="mb-edit-field" style="display:none"><label for="et-headline">Headline</label><input type="text" id="et-headline"></div>
                 <div class="mb-edit-field"><label for="et-intro">Opening paragraph</label><textarea id="et-intro" style="min-height:90px;"></textarea><p class="et-note">Appears below "Welcome, [First Name]." Use <code>{{first_name}}</code> to personalize.</p></div>
-                <div class="mb-edit-field" style="display:none"><label for="et-buttonLabel">Button label</label><input type="text" id="et-buttonLabel"></div>
-                <div class="mb-edit-field"><label for="et-buttonUrl">Workspace button link</label><input type="url" id="et-buttonUrl" placeholder="https://theuntaughtlessons.com/member-login/"><p class="et-note">This is where the <strong>Sign in to your workspace</strong> button goes. Keep the default unless the login page changes.</p></div>
+                <div class="et-card">
+                  <label class="eng-toggle-name" for="et-buttonUrl">Optional extra button</label>
+                  <p class="et-note">Paste a URL to add one extra button after the opening paragraph in the preview. Leave it blank to keep only the two fixed setup buttons.</p>
+                  <div class="field-stack" style="margin-top:10px;">
+                    <div class="mb-edit-field"><label for="et-buttonLabel">Button text</label><input type="text" id="et-buttonLabel" placeholder="Open link"></div>
+                    <div class="mb-edit-field"><label for="et-buttonUrl">Button URL</label><input type="url" id="et-buttonUrl" placeholder="https://..."></div>
+                  </div>
+                </div>
                 <div class="et-card">
                   <div class="eng-field-row">
                     <label class="eng-toggle-label" for="et-showLogo">
@@ -4266,40 +4272,42 @@
         subject: 'Welcome to The Untaught Lessons',
         headline: 'Welcome, {{first_name}}.',
         intro: 'You now have access to The Untaught Lessons program. Before you begin, take a few minutes to complete your setup so everything works from the start.',
-        buttonLabel: 'OPEN MY WORKSPACE →',
-        buttonUrl: DEFAULT_WORKSPACE_URL,
+        buttonLabel: 'Open link',
+        buttonUrl: '',
         accentColor: '#003366',
         showLogo: true
       };
       return Object.assign({}, defaults, _etTemplates[id] || {});
     }
 
-    function buildEmailScriptPayload(action, payload) {
-      const params = new URLSearchParams();
-      params.set('action', action);
-      Object.entries(payload || {}).forEach(([key, value]) => {
-        if (value === undefined || value === null) return;
-        params.set(key, typeof value === 'string' ? value : JSON.stringify(value));
-      });
-      return params;
-    }
-
     function postEmailScriptAction(action, payload) {
-      const params = buildEmailScriptPayload(action, payload);
+      const body = Object.assign({ action, source: 'admin-email-template' }, payload || {});
       return fetch(EMAIL_SCRIPT_URL + '?action=' + encodeURIComponent(action), {
         method: 'POST',
         mode: 'no-cors',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
-        body: params.toString()
+        headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
+        body: JSON.stringify(body)
       });
+    }
+
+    function normalizeExtraButtonUrl(url) {
+      const value = String(url || '').trim();
+      if (!value || value === '{{workspace_url}}' || value === DEFAULT_WORKSPACE_URL) return '';
+      return value.replace(/{{workspace_url}}/g, DEFAULT_WORKSPACE_URL);
     }
 
     function generateEmailHtml(data) {
       const accent = data.accentColor || '#003366';
       const intro = data.intro || '';
-      const workspaceUrl = (data.buttonUrl || DEFAULT_WORKSPACE_URL).replace(/{{workspace_url}}/g, DEFAULT_WORKSPACE_URL);
+      const workspaceUrl = DEFAULT_WORKSPACE_URL;
+      const extraButtonUrl = normalizeExtraButtonUrl(data.buttonUrl);
+      const extraButtonLabel = data.buttonLabel || 'Open link';
       const loginEmail = data.loginEmail || '';
       const headline = data.headline || 'Welcome.';
+      const extraButtonBlock = extraButtonUrl ? `
+          <tr><td style="padding:20px 48px 0;">
+            <table border="0" cellpadding="0" cellspacing="0"><tr><td align="center" bgcolor="${accent}" style="border-radius:6px;"><a href="${escapeHtml(extraButtonUrl)}" target="_blank" style="display:inline-block; padding:12px 24px; font-size:14px; font-weight:700; color:#FFFFFF; text-decoration:none; letter-spacing:0.5px;">${escapeHtml(extraButtonLabel)} &#8594;</a></td></tr></table>
+          </td></tr>` : '';
 
       const logoBlock = data.showLogo !== false ? `
           <tr>
@@ -4325,6 +4333,7 @@
           <tr><td style="padding:20px 48px 0;">
             <p style="margin:0; font-size:16px; color:#4A4A4A; line-height:1.7;">${escapeHtml(intro).replace(/\n/g, '<br>')}</p>
           </td></tr>
+          ${extraButtonBlock}
           <tr><td style="padding:32px 48px 16px;">
             <span style="font-family:'Courier New',Courier,monospace; font-size:11px; font-weight:700; color:#EEA320; letter-spacing:2px; text-transform:uppercase;">YOUR SETUP</span>
           </td></tr>
@@ -4422,8 +4431,8 @@
         subject: 'Welcome to The Untaught Lessons',
         headline: 'Welcome, {{first_name}}.',
         intro: 'You now have access to The Untaught Lessons program. Before you begin, take a few minutes to complete your setup so everything works from the start.',
-        buttonLabel: 'OPEN MY WORKSPACE →',
-        buttonUrl: DEFAULT_WORKSPACE_URL,
+        buttonLabel: 'Open link',
+        buttonUrl: '',
         accentColor: '#003366',
         showLogo: true
       };
@@ -4432,7 +4441,7 @@
       document.getElementById('et-headline').value = data.headline;
       document.getElementById('et-intro').value = data.intro;
       document.getElementById('et-buttonLabel').value = data.buttonLabel;
-      document.getElementById('et-buttonUrl').value = (data.buttonUrl || DEFAULT_WORKSPACE_URL).replace(/{{workspace_url}}/g, DEFAULT_WORKSPACE_URL);
+      document.getElementById('et-buttonUrl').value = normalizeExtraButtonUrl(data.buttonUrl);
       setEmailAccentColor(data.accentColor || '#003366');
       const logoBtn = document.getElementById('et-showLogo');
       const _adminEmail = adminProfileData().email || '';
@@ -4497,7 +4506,7 @@
             templateData: data,
             renderedHtml: generateEmailHtml(data)
           });
-          statusEl.textContent = 'Test email sent! Check your inbox.';
+          statusEl.textContent = 'Test email queued. Check the recipient inbox and spam folder.';
           statusEl.className = 'cl-status is-success';
           showToast('Test email sent');
         } catch (e) { statusEl.textContent = 'Failed to send: ' + (e.message || 'error'); statusEl.className = 'cl-status is-error'; showToast('Test failed', 'error'); }
@@ -5698,7 +5707,7 @@
             intro: welcomeTemplate.intro.replace(/{{first_name}}/g, firstName)
               .replace(/{{login_email}}/g, emailVal)
               .replace(/{{workspace_url}}/g, workspaceUrl),
-            buttonUrl: (welcomeTemplate.buttonUrl || workspaceUrl).replace(/{{workspace_url}}/g, workspaceUrl),
+            buttonUrl: (welcomeTemplate.buttonUrl || '').replace(/{{workspace_url}}/g, workspaceUrl),
             loginEmail: emailVal
           };
           

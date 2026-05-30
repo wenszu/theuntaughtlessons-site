@@ -162,7 +162,9 @@ Apps Script `action` routing: `WelcomeEmail`, `TestEmailTemplate`, `ResultsEmail
 
 ### 2026-05-30
 
-- Fixed Admin Console email-template delivery payloads: `TestEmailTemplate` and `WelcomeEmail` now post form-encoded Apps Script actions with explicit `recipient`, `to`, and `email` fields so the live script does not fall back to the default contact-form handler.
+- Updated Admin Console email-template tests/welcome sends to post JSON as `text/plain` to Apps Script, preserving `action`, recipient fields, `templateData`, and `renderedHtml` while avoiding the form-encoded payload that could be ignored by the deployed script.
+- Changed the Email Templates URL field into an optional extra button: the two setup buttons stay fixed, and filling Button text + Button URL adds a separate button after the opening paragraph in the live preview.
+- Fixed Admin Console email-template delivery payloads: `TestEmailTemplate` and `WelcomeEmail` include explicit `recipient`, `to`, and `email` fields so the live script does not fall back to the default contact-form handler.
 - Refined the Admin Console Email Templates editor: compact standard logo toggle, clearer "Workspace button link" field with the live member-login URL, and simplified brand accent swatches that explain what they change in the preview.
 - Redesigned welcome email template (`generateEmailHtml` in `admin/index.html`): white card on `#F7F5F0` background, logo, personalized greeting, "We are glad you are here." subtitle, opening paragraph, YOUR SETUP section with 3 hardcoded steps (Join Google Group → Sign in to workspace → Complete orientation), closing sign-off, footer.
 - Simplified Email Templates editor UI: hidden Headline and Button Label fields, relabeled Button URL to "Workspace URL", relabeled Intro to "Opening paragraph".
