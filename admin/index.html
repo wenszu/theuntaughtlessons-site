@@ -4400,7 +4400,8 @@
       document.getElementById('et-accentColor').value = data.accentColor;
       document.getElementById('et-accentColorHex').value = data.accentColor;
       const logoBtn = document.getElementById('et-showLogo');
-      document.getElementById('et-testEmail').value = adminProfileData().email || '';
+      const _adminEmail = adminProfileData().email || '';
+      document.getElementById('et-testEmail').value = _adminEmail.includes('@') ? _adminEmail : '';
       logoBtn.setAttribute('aria-pressed', String(data.showLogo));
       logoBtn.textContent = data.showLogo ? 'On' : 'Off';
       updateEmailPreview();
