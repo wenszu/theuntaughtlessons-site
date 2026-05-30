@@ -283,6 +283,17 @@ async function getMemberWorkspaceProgress() {
   return data.workspaceProgress || null;
 }
 
+async function getEmailTemplates() {
+  const snap = await getDoc(doc(requireFirestore(), "settings", "emailTemplates"));
+  return snap.exists() ? snap.data() : {};
+}
+
+async function saveEmailTemplate(id, data) {
+  await setDoc(doc(requireFirestore(), "settings", "emailTemplates"), {
+    [id]: data
+  }, { merge: true });
+}
+
 async function saveMemberWorkspaceProgress(progress = {}) {
   const user = await getSignedInUser();
   if (!user || !user.uid) {
@@ -338,6 +349,18 @@ async function saveUserProgress(exerciseId, exerciseName, exercisePayload = {}) 
   }, { merge: true });
 }
 
+async function getMemberExerciseResponses(uid) {
+  if (!uid) throw new Error("A user UID is required.");
+  const readyDb = requireFirestore();
+  const subCollectionRef = collection(readyDb, "users", uid, "completed_exercises");
+  const snapshot = await getDocs(subCollectionRef);
+  const responses = {};
+  snapshot.forEach((doc) => {
+    responses[doc.id] = doc.data();
+  });
+  return responses;
+}
+
 async function getAllMemberWorkspaceProgress() {
   const readyDb = requireFirestore();
   const user = await getSignedInUser();
@@ -373,17 +396,16 @@ async function getAllMemberWorkspaceProgress() {
     const key = email || userDoc.id;
     const existing = membersByEmail.get(key) || {};
     membersByEmail.set(key, {
-      ...existing,
       id: existing.id || userDoc.id,
       uid: userDoc.id,
       email: email || existing.email || "",
-      name: existing.name || data.displayName || "",
       displayName: data.displayName || existing.displayName || existing.name || "",
-      role: existing.role || data.role || "member",
-      status: existing.status || "active",
       lastSeenAt: data.lastSeenAt || existing.lastSeenAt || null,
       updatedAt: data.updatedAt || existing.updatedAt || null,
-      workspaceProgress: data.workspaceProgress || existing.workspaceProgress || null
+      workspaceProgress: data.workspaceProgress || existing.workspaceProgress || null,
+      role: existing.role || data.role || "member",
+      status: existing.status || "active",
+      cohort: existing.cohort || ""
     });
   });
 
@@ -548,6 +570,9 @@ export {
   getDoc,
   getDocs,
   getGoogleRedirectResult,
+  getEmailTemplates,
+  saveEmailTemplate,
+  getMemberExerciseResponses,
   findUserUidByEmail,
   getAllMemberWorkspaceProgress,
   getGlobalFeedbackSetting,

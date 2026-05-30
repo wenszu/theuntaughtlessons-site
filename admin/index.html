@@ -511,6 +511,7 @@
       border: 1px solid rgba(0, 51, 102, .08);
       border-radius: 10px;
       background: rgba(255, 255, 255, .72);
+      scroll-margin-top: 114px;
     }
 
     .admin-section h2 {
@@ -1731,6 +1732,7 @@
 
       <span class="nav-group-label" data-admin-nav-group="engagement">Engagement</span>
       <button class="admin-nav-item" data-admin-tab-scope="engagement" data-target="section-inapp-nudges">In-app nudges</button>
+      <button class="admin-nav-item" data-admin-tab-scope="engagement" data-target="section-email-templates">Email templates</button>
       <button class="admin-nav-item" data-admin-tab-scope="engagement" data-target="section-email-nudges">Email nudges</button>
       <button class="admin-nav-item" data-admin-tab-scope="engagement" data-target="section-certificate">Certificate</button>
       <button class="admin-nav-item" data-admin-tab-scope="engagement" data-target="section-access-controls">Access controls</button>
@@ -1955,6 +1957,12 @@
         <div id="studentProgressTable">
           <p class="mb-msg">Click Refresh progress to load student progress.</p>
         </div>
+        <div id="studentProgressDetail" hidden>
+          <div class="student-progress-actions">
+            <button class="small-button secondary-button" id="spDetailBack">← Back to list</button>
+          </div>
+          <div id="spDetailContent"></div>
+        </div>
       </section>
 
       <section class="admin-section" id="section-members" data-admin-tab-panel="member-management">
@@ -2170,6 +2178,74 @@
         </div>
       </section>
 
+      <section class="admin-section" id="section-email-templates" data-admin-tab-panel="engagement">
+        <span class="section-label">Engagement</span>
+        <h2>Email templates</h2>
+        <div class="section-divider"></div>
+        <p class="description">Edit the content and design of automated emails. Variable tags like <code>{{first_name}}</code>, <code>{{login_email}}</code>, and <code>{{workspace_url}}</code> will be replaced automatically.</p>
+
+        <div id="etStatus" class="eng-status" aria-live="polite"></div>
+        <div id="etForm" hidden>
+          <div style="display:grid; grid-template-columns: minmax(320px, 420px) 1fr; gap: 32px; align-items: start;">
+            <div class="eng-form">
+              <div class="mb-form-field">
+                <label for="etSelect">Select template</label>
+                <select id="etSelect">
+                  <option value="welcomeEmail">Welcome email</option>
+                  <option value="nudgeEmail">Nudge email (inactivity)</option>
+                  <option value="completionEmail">Program completion</option>
+                </select>
+              </div>
+              <div class="field-stack" style="margin-top:20px;">
+                <div class="mb-edit-field"><label for="et-subject">Subject line</label><input type="text" id="et-subject"></div>
+                <div class="mb-edit-field"><label for="et-headline">Headline</label><input type="text" id="et-headline"></div>
+                <div class="mb-edit-field"><label for="et-intro">Intro paragraph</label><textarea id="et-intro" style="min-height:100px;"></textarea></div>
+                <div class="mb-edit-field"><label for="et-buttonLabel">Button label</label><input type="text" id="et-buttonLabel"></div>
+                <div class="mb-edit-field"><label for="et-buttonUrl">Button URL</label><input type="text" id="et-buttonUrl"></div>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                  <div class="mb-edit-field">
+                    <label for="et-accentColor">Accent color</label>
+                    <div style="display:flex; gap:8px; align-items:center;">
+                      <input type="color" id="et-accentColor" style="width:44px; height:44px; padding:2px; cursor:pointer;">
+                      <input type="text" id="et-accentColorHex" style="flex:1; font-family:'Roboto Mono',monospace;">
+                    </div>
+                    <div style="display:flex; gap:6px; margin-top:8px;">
+                      <button type="button" class="color-swatch" data-color="#003366" style="width:24px; height:24px; border-radius:50%; border:1px solid var(--line); background:#003366; cursor:pointer;" title="UTL Navy"></button>
+                      <button type="button" class="color-swatch" data-color="#EEA320" style="width:24px; height:24px; border-radius:50%; border:1px solid var(--line); background:#EEA320; cursor:pointer;" title="UTL Gold"></button>
+                      <button type="button" class="color-swatch" data-color="#4D7094" style="width:24px; height:24px; border-radius:50%; border:1px solid var(--line); background:#4D7094; cursor:pointer;" title="UTL Steel"></button>
+                      <button type="button" class="color-swatch" data-color="#4A4A4A" style="width:24px; height:24px; border-radius:50%; border:1px solid var(--line); background:#4A4A4A; cursor:pointer;" title="UTL Charcoal"></button>
+                    </div>
+                  </div>
+                  <div class="mb-edit-field">
+                    <label>Show logo</label>
+                    <button class="eng-toggle" type="button" id="et-showLogo" aria-pressed="true">On</button>
+                  </div>
+                </div>
+              </div>
+              <div class="mb-form-actions" style="margin-top:24px;">
+                <button class="small-button" id="et-save">Save template</button>
+                <span class="saved" id="et-saved">Saved ✓</span>
+              </div>
+              <div class="section-divider" style="margin: 24px 0 16px;"></div>
+              <div class="mb-edit-field">
+                <label for="et-testEmail">Send test email to</label>
+                <div style="display:flex; gap:8px; margin-top:4px;">
+                  <input type="email" id="et-testEmail" placeholder="you@example.com" style="flex:1;">
+                  <button class="small-button secondary-button" id="et-sendTest" type="button">Send test</button>
+                </div>
+                <p id="etTestStatus" class="cl-status" style="margin-top:6px; min-height:18px;"></p>
+              </div>
+            </div>
+            <div class="preview-area">
+              <span class="section-label" style="font-size:9px; margin-bottom:8px;">Live preview</span>
+              <div style="border:1px solid var(--line); border-radius:10px; background:#fff; height:640px; overflow:hidden; box-shadow: 0 4px 12px rgba(0,0,0,.06);">
+                <iframe id="etPreview" style="width:100%; height:100%; border:none;"></iframe>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section class="admin-section" id="section-email-nudges" data-admin-tab-panel="engagement">
         <span class="section-label">Email nudges</span>
         <h2>Email nudges</h2>
@@ -2374,6 +2450,8 @@
       getDoc,
       getDocs,
       getAssessmentVisibility,
+      getEmailTemplates,
+      saveEmailTemplate,
       setAssessmentVisibility,
       getPublicAssessmentSettings,
       setPublicAssessmentSettings,
@@ -2397,6 +2475,8 @@
       db,
       deleteDoc,
       doc,
+      getEmailTemplates,
+      saveEmailTemplate,
       findUserUidByEmail,
       getAllMemberWorkspaceProgress,
       getDoc,
@@ -4041,26 +4121,35 @@
         });
         return;
       }
-      setEngStatus('engInAppStatus', 'Loading...');
-      setEngStatus('engEmailStatus', 'Loading...');
-      setEngStatus('engCertStatus', 'Loading...');
+      
+      // Check for Firebase session
+      const currentUser = await fb.getSignedInUser();
+      if (!currentUser) {
+        const msg = 'Please sign in with Google to manage engagement settings.';
+        ['engInAppStatus', 'engEmailStatus', 'engCertStatus', 'tsaVisibilityStatus', 'etStatus'].forEach(id => setEngStatus(id, msg));
+        return;
+      }
+
+      ['engInAppStatus', 'engEmailStatus', 'engCertStatus', 'tsaVisibilityStatus', 'etStatus'].forEach(id => setEngStatus(id, 'Loading...'));
+      
       try {
         var settings = await fb.getEngagementSettings();
         _engSettings = settings;
         syncEngForm(settings);
-        ['engInAppForm', 'engEmailForm', 'engCertForm'].forEach(function(id) {
+        ['engInAppForm', 'engEmailForm', 'engCertForm', 'tsaVisibilityForm', 'etForm'].forEach(function(id) {
           var el = document.getElementById(id);
           if (el) el.hidden = false;
         });
-        setEngStatus('engInAppStatus', '');
-        setEngStatus('engEmailStatus', '');
-        setEngStatus('engCertStatus', '');
+        ['engInAppStatus', 'engEmailStatus', 'engCertStatus', 'tsaVisibilityStatus', 'etStatus'].forEach(id => setEngStatus(id, ''));
         loadTsaVisibility();
+        loadEmailTemplates();
       } catch(e) {
         var msg = 'Failed to load: ' + ((e && e.message) || 'Unknown error');
         setEngStatus('engInAppStatus', msg);
         setEngStatus('engEmailStatus', msg);
         setEngStatus('engCertStatus', msg);
+        setEngStatus('tsaVisibilityStatus', msg);
+        setEngStatus('etStatus', msg);
       }
     }
 
@@ -4151,6 +4240,221 @@
         this.disabled = false;
       }
     });
+
+    // ===== Email Templates =====
+
+    let _etTemplates = {};
+
+    function etGetTemplate(id) {
+      const defaults = {
+        subject: 'Welcome to The Untaught Lessons',
+        headline: 'Welcome, {{first_name}}.',
+        intro: 'Your access to the Think, Speak, and Act Like an Executive program is now active. Before we begin, please complete a simple three-step setup to prepare your workspace.',
+        buttonLabel: 'OPEN MY WORKSPACE →',
+        buttonUrl: '{{workspace_url}}',
+        accentColor: '#003366',
+        showLogo: true
+      };
+      return Object.assign({}, defaults, _etTemplates[id] || {});
+    }
+
+    function generateEmailHtml(data) {
+      const accent = data.accentColor || '#003366';
+      const logoHtml = data.showLogo ? `
+        <tr>
+          <td align="center" style="padding: 40px 0 20px 0;">
+            <table border="0" cellpadding="0" cellspacing="0" width="600" style="max-width: 600px;">
+              <tr>
+                <td align="center">
+                  <img src="https://theuntaughtlessons.com/assets/logo.png" alt="The Untaught Lessons" width="180" style="display: block; border: 0;" />
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>` : '';
+
+      return `
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /></head>
+<body style="margin: 0; padding: 0; background-color: #FFFFFF; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased;">
+  <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #FFFFFF;">
+    ${logoHtml}
+    <tr>
+      <td align="center" style="padding: 20px 0 40px 0;">
+        <table border="0" cellpadding="0" cellspacing="0" width="600" style="max-width: 600px; padding: 0 40px;">
+          <tr><td align="left">
+            <h1 style="margin: 0; font-family: Georgia, serif; font-size: 36px; font-weight: 700; color: ${accent}; line-height: 1.2;">${escapeHtml(data.headline)}</h1>
+            <p style="margin: 8px 0 0 0; font-family: Georgia, serif; font-style: italic; font-size: 18px; color: #4A4A4A; line-height: 1.4;">We are glad you are here.</p>
+            <p style="margin: 24px 0 0 0; font-size: 16px; color: #4A4A4A; line-height: 1.6;">${escapeHtml(data.intro).replace(/\n/g, '<br>')}</p>
+          </td></tr>
+        </table>
+      </td>
+    </tr>
+    <tr>
+      <td align="center" style="padding: 0 0 40px 0;">
+        <table border="0" cellpadding="0" cellspacing="0" width="600" style="max-width: 600px; padding: 0 40px;">
+          <tr><td align="left" style="padding-bottom: 20px;"><span style="font-family: monospace; font-size: 11px; font-weight: 700; color: #EEA320; letter-spacing: 2px; text-transform: uppercase;">YOUR SETUP</span></td></tr>
+          <tr><td style="padding-bottom: 32px;"><table border="0" cellpadding="0" cellspacing="0" width="100%"><tr><td valign="top" width="40" style="padding-top: 2px;"><div style="width: 28px; height: 28px; background-color: ${accent}; border-radius: 50%; color: #FFFFFF; font-size: 14px; font-weight: 700; text-align: center; line-height: 28px;">1</div></td><td align="left"><h2 style="margin: 0; font-size: 18px; font-weight: 700; color: ${accent};">Set your preferred name</h2><p style="margin: 8px 0 0 0; font-size: 14px; color: #4A4A4A; line-height: 1.5;">When you first enter the workspace, you will be prompted to set your display name.</p></td></tr></table></td></tr>
+          <tr><td style="padding-bottom: 32px;"><table border="0" cellpadding="0" cellspacing="0" width="100%"><tr><td valign="top" width="40" style="padding-top: 2px;"><div style="width: 28px; height: 28px; background-color: ${accent}; border-radius: 50%; color: #FFFFFF; font-size: 14px; font-weight: 700; text-align: center; line-height: 28px;">2</div></td><td align="left"><h2 style="margin: 0; font-size: 18px; font-weight: 700; color: ${accent};">Open your workspace</h2><p style="margin: 8px 0 16px 0; font-size: 14px; color: #4A4A4A; line-height: 1.5;">Use your registered email (<strong>${escapeHtml(data.loginEmail || 'your registered email')}</strong>) to sign in.</p><table border="0" cellpadding="0" cellspacing="0"><tr><td align="center" bgcolor="${accent}" style="border-radius: 6px;"><a href="${escapeHtml(data.buttonUrl || '#')}" target="_blank" style="display: inline-block; padding: 12px 24px; font-size: 14px; font-weight: 700; color: #FFFFFF; text-decoration: none; letter-spacing: 0.5px;">${escapeHtml(data.buttonLabel)}</a></td></tr></table></td></tr></table></td></tr>
+          <tr><td><table border="0" cellpadding="0" cellspacing="0" width="100%"><tr><td valign="top" width="40" style="padding-top: 2px;"><div style="width: 28px; height: 28px; background-color: ${accent}; border-radius: 50%; color: #FFFFFF; font-size: 14px; font-weight: 700; text-align: center; line-height: 28px;">3</div></td><td align="left"><h2 style="margin: 0; font-size: 18px; font-weight: 700; color: ${accent};">Complete your first lesson</h2><p style="margin: 8px 0 0 0; font-size: 14px; color: #4A4A4A; line-height: 1.5;">Start with the Orientation section to understand the MA storyline.</p></td></tr></table></td></tr>
+        </table>
+      </td>
+    </tr>
+    <tr>
+      <td align="center" style="padding: 20px 0 60px 0;">
+        <table border="0" cellpadding="0" cellspacing="0" width="600" style="max-width: 600px; padding: 0 40px;">
+          <tr><td style="border-top: 1px solid #E8DFD1; padding-top: 30px;"><p style="margin: 0; font-size: 15px; color: #4A4A4A; line-height: 1.5;">Regards,<br /><br /><strong>Wen-Szu Lin</strong><br />Founder, The Untaught Lessons</p><p style="margin: 40px 0 0 0; font-family: monospace; font-size: 10px; font-weight: 700; color: #4A4A4A; letter-spacing: 2px; text-transform: uppercase; text-align: center;">THE UNTAUGHT LESSONS</p></td></tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body></html>`;
+    }
+
+    function updateEmailPreview() {
+      const data = {
+        headline: document.getElementById('et-headline').value,
+        intro: document.getElementById('et-intro').value,
+        buttonLabel: document.getElementById('et-buttonLabel').value,
+        buttonUrl: document.getElementById('et-buttonUrl').value,
+        accentColor: document.getElementById('et-accentColor').value,
+        showLogo: document.getElementById('et-showLogo').getAttribute('aria-pressed') === 'true'
+      };
+      const iframe = document.getElementById('etPreview');
+      if (iframe) iframe.srcdoc = generateEmailHtml(data);
+    }
+
+    async function loadEmailTemplates() {
+      const fb = window.utlFirebaseAuth;
+      if (!fb || !fb.getEmailTemplates) return;
+      const statusEl = document.getElementById('etStatus');
+      const formEl = document.getElementById('etForm');
+      statusEl.textContent = 'Loading templates...';
+      try {
+        const templates = await fb.getEmailTemplates();
+        _etTemplates = templates;
+        syncEmailTemplateForm('welcomeEmail');
+        formEl.hidden = false;
+        statusEl.textContent = '';
+        initEmailTemplateListeners();
+      } catch (e) {
+        statusEl.textContent = 'Could not load templates: ' + (e.message || 'Error');
+      }
+    }
+
+    document.getElementById('etSelect')?.addEventListener('change', (e) => {
+      syncEmailTemplateForm(e.target.value);
+    });
+
+    function syncEmailTemplateForm(id) {
+      const t = _etTemplates[id] || {};
+      const def = {
+        subject: 'Welcome to The Untaught Lessons',
+        headline: 'Welcome, {{first_name}}.',
+        intro: 'Your access to the Think, Speak, and Act Like an Executive program is now active. Before we begin, please complete a simple three-step setup to prepare your workspace.',
+        buttonLabel: 'OPEN MY WORKSPACE →',
+        buttonUrl: '{{workspace_url}}',
+        accentColor: '#003366',
+        showLogo: true
+      };
+      const data = Object.assign({}, def, t);
+      document.getElementById('et-subject').value = data.subject;
+      document.getElementById('et-headline').value = data.headline;
+      document.getElementById('et-intro').value = data.intro;
+      document.getElementById('et-buttonLabel').value = data.buttonLabel;
+      document.getElementById('et-buttonUrl').value = data.buttonUrl;
+      document.getElementById('et-accentColor').value = data.accentColor;
+      document.getElementById('et-accentColorHex').value = data.accentColor;
+      const logoBtn = document.getElementById('et-showLogo');
+      document.getElementById('et-testEmail').value = adminProfileData().email || '';
+      logoBtn.setAttribute('aria-pressed', String(data.showLogo));
+      logoBtn.textContent = data.showLogo ? 'On' : 'Off';
+      updateEmailPreview();
+    }
+
+    function initEmailTemplateListeners() {
+      if (window._etListenersBound) return;
+      window._etListenersBound = true;
+      ['et-subject', 'et-headline', 'et-intro', 'et-buttonLabel', 'et-buttonUrl'].forEach(id => {
+        document.getElementById(id).addEventListener('input', updateEmailPreview);
+      });
+      const colorInput = document.getElementById('et-accentColor');
+      const hexInput = document.getElementById('et-accentColorHex');
+      colorInput.addEventListener('input', () => { hexInput.value = colorInput.value; updateEmailPreview(); });
+      hexInput.addEventListener('input', () => {
+        if (/^#[0-9A-F]{6}$/i.test(hexInput.value)) { colorInput.value = hexInput.value; updateEmailPreview(); }
+      });
+      document.querySelectorAll('.color-swatch').forEach(swatch => {
+        swatch.addEventListener('click', () => {
+          const color = swatch.dataset.color;
+          colorInput.value = color;
+          hexInput.value = color;
+          updateEmailPreview();
+        });
+      });
+      document.getElementById('et-showLogo').addEventListener('click', () => { setTimeout(updateEmailPreview, 10); });
+      document.getElementById('et-sendTest').addEventListener('click', async () => {
+        const emailInput = document.getElementById('et-testEmail');
+        const statusEl = document.getElementById('etTestStatus');
+        const email = emailInput.value.trim();
+        if (!email) { showToast('Enter a test recipient email', 'error'); return; }
+        const btn = document.getElementById('et-sendTest');
+        btn.disabled = true;
+        statusEl.textContent = 'Sending test email...';
+        statusEl.className = 'cl-status';
+        const data = {
+          subject: document.getElementById('et-subject').value,
+          headline: document.getElementById('et-headline').value,
+          intro: document.getElementById('et-intro').value,
+          buttonLabel: document.getElementById('et-buttonLabel').value,
+          buttonUrl: document.getElementById('et-buttonUrl').value,
+          accentColor: document.getElementById('et-accentColor').value,
+          showLogo: document.getElementById('et-showLogo').getAttribute('aria-pressed') === 'true'
+        };
+        try {
+          await fetch('https://script.google.com/macros/s/AKfycbzJE--FL2kB_XDNZRnszCtlyLRPvaLAHGuF5TAOdXJk40atbvf5Y6ELuSK2B7CSLaMN/exec', {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+              action: 'TestEmailTemplate', 
+              templateId: document.getElementById('etSelect').value, 
+              recipient: email, 
+              templateData: data,
+              renderedHtml: generateEmailHtml(data)
+            })
+          });
+          statusEl.textContent = 'Test email sent! Check your inbox.';
+          statusEl.className = 'cl-status is-success';
+          showToast('Test email sent');
+        } catch (e) { statusEl.textContent = 'Failed to send: ' + (e.message || 'error'); statusEl.className = 'cl-status is-error'; showToast('Test failed', 'error'); }
+        finally { btn.disabled = false; }
+      });
+      document.getElementById('et-save').addEventListener('click', async () => {
+        const fb = window.utlFirebaseAuth;
+        const id = document.getElementById('etSelect').value;
+        const data = {
+          subject: document.getElementById('et-subject').value,
+          headline: document.getElementById('et-headline').value,
+          intro: document.getElementById('et-intro').value,
+          buttonLabel: document.getElementById('et-buttonLabel').value,
+          buttonUrl: document.getElementById('et-buttonUrl').value,
+          accentColor: document.getElementById('et-accentColor').value,
+          showLogo: document.getElementById('et-showLogo').getAttribute('aria-pressed') === 'true'
+        };
+        const btn = document.getElementById('et-save');
+        btn.disabled = true;
+        try {
+          await fb.saveEmailTemplate(id, data);
+          _etTemplates[id] = data;
+          const savedEl = document.getElementById('et-saved');
+          savedEl.classList.add('is-visible');
+          setTimeout(() => savedEl.classList.remove('is-visible'), 1500);
+          showToast('Template saved');
+        } catch (e) { showToast('Save failed', 'error'); } finally { btn.disabled = false; }
+      });
+    }
 
     // ===== End assessment visibility =====
 
@@ -4502,6 +4806,8 @@
       return '<td class="progress-cell">' +
         '<span class="progress-dot-label">Videos</span><div class="progress-dot-row">' + (lessonDots || '<span style="color:#aaa;">—</span>') + '</div>' +
         '<span class="progress-dot-label">Exercises</span><div class="progress-dot-row">' + (exerciseDots || '<span style="color:#aaa;">—</span>') + '</div>' +
+        '<span class="progress-dot-label">Videos</span><div class="progress-dot-row">' + lessonDots + '</div>' +
+        '<span class="progress-dot-label">Exercises</span><div class="progress-dot-row">' + exerciseDots + '</div>' +
       '</td>';
     }
 
@@ -4676,7 +4982,7 @@
 
       const collapseDefaultKey = 'utl_admin_content_collapsed_default_v3';
       if (localStorage.getItem(collapseDefaultKey) !== 'done') {
-        document.querySelectorAll('[data-admin-tab-panel="content-manager"], [data-admin-tab-panel="content-library"]').forEach((section) => {
+        document.querySelectorAll('[data-admin-tab-panel="content-manager"], [data-admin-tab-panel="content-library"], [data-admin-tab-panel="engagement"]').forEach((section) => {
           if (section.id) savedStates[section.id] = false;
         });
         localStorage.setItem('utl_admin_section_states', JSON.stringify(savedStates));
@@ -5308,6 +5614,24 @@
         try {
           await fb.authorizeMember(emailVal, newMemberData);
 
+          // Retrieve the Welcome Email template settings
+          const welcomeTemplate = etGetTemplate('welcomeEmail');
+          
+          // Personalize the HTML for this specific member
+          const firstName = nameVal.split(' ')[0] || "Member";
+          const workspaceUrl = "https://theuntaughtlessons.com/member-login/";
+          const personalizedData = {
+            ...welcomeTemplate,
+            headline: welcomeTemplate.headline.replace(/{{first_name}}/g, firstName),
+            intro: welcomeTemplate.intro.replace(/{{first_name}}/g, firstName)
+              .replace(/{{login_email}}/g, emailVal)
+              .replace(/{{workspace_url}}/g, workspaceUrl),
+            buttonUrl: (welcomeTemplate.buttonUrl || workspaceUrl).replace(/{{workspace_url}}/g, workspaceUrl),
+            loginEmail: emailVal
+          };
+          
+          const renderedHtml = generateEmailHtml(personalizedData);
+
           // Always send Apps Script welcome email
           var emailSent = false;
           try {
@@ -5315,7 +5639,13 @@
               method: 'POST',
               mode: 'no-cors',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ action: 'WelcomeEmail', name: nameVal, email: emailVal })
+              body: JSON.stringify({ 
+                action: 'WelcomeEmail', 
+                name: nameVal, 
+                email: emailVal,
+                templateData: welcomeTemplate,
+                renderedHtml: renderedHtml
+              })
             });
             emailSent = true;
           } catch (emailErr) { /* non-fatal */ }

@@ -101,6 +101,22 @@ Writing rules for this file:
 
 ### 2026-05-30
 
+- Updated Google Apps Script to support multi-tab routing (Contacts, Assessments, Feedback) and rich HTML templated emails.
+- Adjusted `scroll-margin-top` for `.admin-section` in the Admin Console to prevent fixed headers from obscuring section titles when navigating.
+- Added brand guideline color swatches to the Email Template editor for quick accent color selection.
+- Implemented "Send test email" functionality in the Admin Console to preview custom templates in a real inbox.
+- Implemented "Email Templates" editor in the Admin Console under the Engagement tab.
+- Added support for editing and live-previewing the Wharton/MasterClass-styled Welcome Email.
+- Templates are stored in Firestore at `settings/emailTemplates`.
+- Added `getEmailTemplates` and `saveEmailTemplate` helper functions to `assets/firebase.js`.
+
+### 2026-05-30
+
+- Completed the "Sentence Case" standardization across all exercise titles, labels, and JSON data files (e.g., "Grocery list" instead of "Grocery List").
+- Finalized the transition to the "learner-controlled submission" model for all member practice apps.
+
+### 2026-05-30
+
 - Standardized exercise naming across the website and documentation to use sentence case (e.g., "Grocery list" and "Issue tree builder") to align with the brand voice.
 
 ### 2026-05-29
@@ -1710,10 +1726,11 @@ https://script.google.com/macros/s/AKfycbzJE--FL2kB_XDNZRnszCtlyLRPvaLAHGuF5TAOd
 
 Submission pattern:
 
-```js
+```javascript
 await fetch(SCRIPT_URL, {
   method: 'POST',
   mode: 'no-cors',
+  headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify(payload)
 });
 ```
