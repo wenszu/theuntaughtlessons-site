@@ -4506,7 +4506,7 @@
             templateData: data,
             renderedHtml: generateEmailHtml(data)
           });
-          statusEl.textContent = 'Test email queued. Check the recipient inbox and spam folder.';
+          statusEl.textContent = 'Test email queued. If a contact-form email arrives instead, deploy the Apps Script email action routes.';
           statusEl.className = 'cl-status is-success';
           showToast('Test email sent');
         } catch (e) { statusEl.textContent = 'Failed to send: ' + (e.message || 'error'); statusEl.className = 'cl-status is-error'; showToast('Test failed', 'error'); }
