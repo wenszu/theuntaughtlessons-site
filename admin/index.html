@@ -1618,6 +1618,15 @@
     .et-note { color:#777; font-size:12px; line-height:1.45; margin:5px 0 0; }
     .et-card { margin-top:4px; padding:12px 14px; border:1px solid var(--line); border-radius:8px; background:rgba(243,237,226,.35); }
     .et-card .eng-field-row { padding:0; border-bottom:0; background:transparent; }
+    .et-button-head { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; }
+    .et-button-panel { margin-top:12px; display:grid; gap:10px; }
+    .et-button-panel[hidden] { display:none; }
+    .et-button-summary { margin-top:8px; padding:8px 10px; border-radius:6px; background:var(--white); color:#777; font-size:12px; line-height:1.45; border:1px solid rgba(0,51,102,.08); }
+    .et-inline-actions { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+    .et-toolbar { display:flex; gap:6px; align-items:center; flex-wrap:wrap; margin:0 0 10px; padding:8px; border:1px solid var(--line); border-radius:8px; background:rgba(243,237,226,.45); }
+    .et-tool { min-width:32px; height:30px; padding:0 9px; border:1px solid var(--line); border-radius:6px; background:var(--white); color:var(--navy); font-family:'Roboto Mono',monospace; font-size:12px; font-weight:700; cursor:pointer; }
+    .et-tool:hover { border-color:var(--navy); background:rgba(0,51,102,.06); }
+    .et-tool-wide { width:auto; }
     .et-color-row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:8px; }
     .et-color-inputs { display:none; }
     .color-swatch { width:30px; height:30px; border-radius:50%; border:2px solid transparent; cursor:pointer; box-shadow:0 0 0 1px var(--line); }
@@ -2209,14 +2218,12 @@
               <div class="field-stack" style="margin-top:20px;">
                 <div class="mb-edit-field"><label for="et-subject">Subject line</label><input type="text" id="et-subject"><p class="et-note">What appears in the member's inbox.</p></div>
                 <div class="mb-edit-field" style="display:none"><label for="et-headline">Headline</label><input type="text" id="et-headline"></div>
-                <div class="mb-edit-field"><label for="et-intro">Opening paragraph</label><textarea id="et-intro" style="min-height:90px;"></textarea><p class="et-note">Appears below "Welcome, [First Name]." Use <code>{{first_name}}</code> to personalize.</p></div>
                 <div class="et-card">
-                  <label class="eng-toggle-name" for="et-buttonUrl">Optional extra button</label>
-                  <p class="et-note">Paste a URL to add one extra button after the opening paragraph in the preview. Leave it blank to keep only the two fixed setup buttons.</p>
-                  <div class="field-stack" style="margin-top:10px;">
-                    <div class="mb-edit-field"><label for="et-buttonLabel">Button text</label><input type="text" id="et-buttonLabel" placeholder="Open link"></div>
-                    <div class="mb-edit-field"><label for="et-buttonUrl">Button URL</label><input type="url" id="et-buttonUrl" placeholder="https://..."></div>
-                  </div>
+                  <span class="eng-toggle-name">Editable preview</span>
+                  <p class="et-note">Edit the opening paragraph directly in the live preview. Use the toolbar above the preview for formatting, links, lists, and an extra button.</p>
+                  <textarea id="et-intro" hidden></textarea>
+                  <input type="hidden" id="et-buttonLabel" value="Open link">
+                  <input type="hidden" id="et-buttonUrl">
                 </div>
                 <div class="et-card">
                   <div class="eng-field-row">
@@ -2258,6 +2265,17 @@
             </div>
             <div class="preview-area">
               <span class="section-label" style="font-size:9px; margin-bottom:8px;">Live preview</span>
+              <div class="et-toolbar" aria-label="Email editor toolbar">
+                <button class="et-tool" type="button" data-et-command="undo" title="Undo">↶</button>
+                <button class="et-tool" type="button" data-et-command="redo" title="Redo">↷</button>
+                <button class="et-tool" type="button" data-et-command="bold" title="Bold">B</button>
+                <button class="et-tool" type="button" data-et-command="italic" title="Italic"><em>I</em></button>
+                <button class="et-tool" type="button" data-et-command="insertUnorderedList" title="Bullet list">•</button>
+                <button class="et-tool" type="button" data-et-command="insertOrderedList" title="Numbered list">1.</button>
+                <button class="et-tool et-tool-wide" type="button" data-et-command="createLink" title="Add link">Link</button>
+                <button class="et-tool et-tool-wide" type="button" data-et-command="addButton" title="Add email button">Button</button>
+                <button class="et-tool et-tool-wide" type="button" data-et-command="removeButton" title="Remove email button">Remove button</button>
+              </div>
               <div style="border:1px solid var(--line); border-radius:10px; background:#fff; height:640px; overflow:hidden; box-shadow: 0 4px 12px rgba(0,0,0,.06);">
                 <iframe id="etPreview" style="width:100%; height:100%; border:none;"></iframe>
               </div>
@@ -4264,6 +4282,7 @@
     // ===== Email Templates =====
 
     let _etTemplates = {};
+    let _etPreviewRange = null;
     const EMAIL_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzJE--FL2kB_XDNZRnszCtlyLRPvaLAHGuF5TAOdXJk40atbvf5Y6ELuSK2B7CSLaMN/exec';
     const DEFAULT_WORKSPACE_URL = 'https://theuntaughtlessons.com/member-login/';
 
@@ -4296,18 +4315,65 @@
       return value.replace(/{{workspace_url}}/g, DEFAULT_WORKSPACE_URL);
     }
 
+    function sanitizeEmailRichText(html) {
+      const allowedTags = new Set(['A', 'B', 'BR', 'DIV', 'EM', 'I', 'LI', 'OL', 'P', 'SPAN', 'STRONG', 'U', 'UL']);
+      const template = document.createElement('template');
+      template.innerHTML = String(html || '');
+
+      function clean(node) {
+        if (node.nodeType === Node.TEXT_NODE) return document.createTextNode(node.textContent || '');
+        if (node.nodeType !== Node.ELEMENT_NODE) return document.createTextNode('');
+
+        const tag = node.tagName;
+        if (!allowedTags.has(tag)) {
+          const fragment = document.createDocumentFragment();
+          Array.from(node.childNodes).forEach(child => fragment.appendChild(clean(child)));
+          return fragment;
+        }
+
+        const el = document.createElement(tag.toLowerCase());
+        if (tag === 'A') {
+          const href = String(node.getAttribute('href') || '').trim();
+          if (/^https?:\/\//i.test(href) || /^mailto:/i.test(href)) {
+            el.setAttribute('href', href);
+            el.setAttribute('target', '_blank');
+          }
+        }
+        Array.from(node.childNodes).forEach(child => el.appendChild(clean(child)));
+        return el;
+      }
+
+      const output = document.createElement('div');
+      Array.from(template.content.childNodes).forEach(child => output.appendChild(clean(child)));
+      return output.innerHTML.trim();
+    }
+
+    function formatIntroHtml(intro) {
+      const value = String(intro || '');
+      if (/<[a-z][\s\S]*>/i.test(value)) return sanitizeEmailRichText(value);
+      return escapeHtml(value).replace(/\n/g, '<br>');
+    }
+
     function generateEmailHtml(data) {
       const accent = data.accentColor || '#003366';
       const intro = data.intro || '';
       const workspaceUrl = DEFAULT_WORKSPACE_URL;
       const extraButtonUrl = normalizeExtraButtonUrl(data.buttonUrl);
       const extraButtonLabel = data.buttonLabel || 'Open link';
+      const extraButtonEditing = data.extraButtonEditing === true;
+      const introHtml = formatIntroHtml(intro);
+      const introAttrs = data.editMode ? ' data-et-editable="intro" contenteditable="true"' : '';
+      const buttonLabelHtml = data.editMode ? `<span data-et-editable="buttonLabel" contenteditable="true">${escapeHtml(extraButtonLabel)}</span>` : escapeHtml(extraButtonLabel);
       const loginEmail = data.loginEmail || '';
       const headline = data.headline || 'Welcome.';
       const extraButtonBlock = extraButtonUrl ? `
           <tr><td style="padding:20px 48px 0;">
-            <table border="0" cellpadding="0" cellspacing="0"><tr><td align="center" bgcolor="${accent}" style="border-radius:6px;"><a href="${escapeHtml(extraButtonUrl)}" target="_blank" style="display:inline-block; padding:12px 24px; font-size:14px; font-weight:700; color:#FFFFFF; text-decoration:none; letter-spacing:0.5px;">${escapeHtml(extraButtonLabel)} &#8594;</a></td></tr></table>
-          </td></tr>` : '';
+            <table border="0" cellpadding="0" cellspacing="0"><tr><td align="center" bgcolor="${accent}" style="border-radius:6px;"><a data-et-button-link href="${escapeHtml(extraButtonUrl)}" target="_blank" style="display:inline-block; padding:12px 24px; font-size:14px; font-weight:700; color:#FFFFFF; text-decoration:none; letter-spacing:0.5px;">${buttonLabelHtml} &#8594;</a></td></tr></table>
+          </td></tr>` : (extraButtonEditing ? `
+          <tr><td style="padding:20px 48px 0;">
+            <table border="0" cellpadding="0" cellspacing="0"><tr><td align="center" bgcolor="${accent}" style="border-radius:6px; opacity:.55;"><span style="display:inline-block; padding:12px 24px; font-size:14px; font-weight:700; color:#FFFFFF; text-decoration:none; letter-spacing:0.5px;">${escapeHtml(extraButtonLabel)} &#8594;</span></td></tr></table>
+            <p style="margin:8px 0 0; font-family:'Courier New',Courier,monospace; font-size:11px; color:#999;">Add a Button URL to activate this button.</p>
+          </td></tr>` : '');
 
       const logoBlock = data.showLogo !== false ? `
           <tr>
@@ -4331,7 +4397,7 @@
             <p style="margin:0; font-family:Georgia,serif; font-style:italic; font-size:18px; color:#4A4A4A; line-height:1.4;">We are glad you are here.</p>
           </td></tr>
           <tr><td style="padding:20px 48px 0;">
-            <p style="margin:0; font-size:16px; color:#4A4A4A; line-height:1.7;">${escapeHtml(intro).replace(/\n/g, '<br>')}</p>
+            <div${introAttrs} style="margin:0; font-size:16px; color:#4A4A4A; line-height:1.7; min-height:24px; outline:0;">${introHtml}</div>
           </td></tr>
           ${extraButtonBlock}
           <tr><td style="padding:32px 48px 16px;">
@@ -4399,10 +4465,15 @@
         buttonUrl: document.getElementById('et-buttonUrl').value,
         accentColor: document.getElementById('et-accentColor').value,
         showLogo: document.getElementById('et-showLogo').getAttribute('aria-pressed') === 'true',
-        loginEmail: ''
+        loginEmail: '',
+        extraButtonEditing: false,
+        editMode: true
       };
       const iframe = document.getElementById('etPreview');
-      if (iframe) iframe.srcdoc = generateEmailHtml(data);
+      if (iframe) {
+        iframe.srcdoc = generateEmailHtml(data);
+        iframe.onload = bindEmailPreviewEditor;
+      }
     }
 
     async function loadEmailTemplates() {
@@ -4443,6 +4514,7 @@
       document.getElementById('et-buttonLabel').value = data.buttonLabel;
       document.getElementById('et-buttonUrl').value = normalizeExtraButtonUrl(data.buttonUrl);
       setEmailAccentColor(data.accentColor || '#003366');
+      syncExtraButtonControls(false);
       const logoBtn = document.getElementById('et-showLogo');
       const _adminEmail = adminProfileData().email || '';
       document.getElementById('et-testEmail').value = _adminEmail.includes('@') ? _adminEmail : '';
@@ -4460,11 +4532,97 @@
       });
     }
 
+    function syncExtraButtonControls(forceOpen) {
+      updateEmailPreview();
+    }
+
+    function syncEmailPreviewFields() {
+      const iframe = document.getElementById('etPreview');
+      const doc = iframe && iframe.contentDocument;
+      if (!doc) return;
+      const introEl = doc.querySelector('[data-et-editable="intro"]');
+      const labelEl = doc.querySelector('[data-et-editable="buttonLabel"]');
+      if (introEl) document.getElementById('et-intro').value = sanitizeEmailRichText(introEl.innerHTML);
+      if (labelEl) document.getElementById('et-buttonLabel').value = (labelEl.textContent || 'Open link').trim() || 'Open link';
+    }
+
+    function saveEmailSelection() {
+      const iframe = document.getElementById('etPreview');
+      const doc = iframe && iframe.contentDocument;
+      if (!doc) return;
+      const selection = doc.getSelection();
+      if (selection && selection.rangeCount) _etPreviewRange = selection.getRangeAt(0).cloneRange();
+    }
+
+    function restoreEmailSelection() {
+      const iframe = document.getElementById('etPreview');
+      const doc = iframe && iframe.contentDocument;
+      if (!doc || !_etPreviewRange) return doc;
+      const selection = doc.getSelection();
+      selection.removeAllRanges();
+      selection.addRange(_etPreviewRange);
+      return doc;
+    }
+
+    function bindEmailPreviewEditor() {
+      const iframe = document.getElementById('etPreview');
+      const doc = iframe && iframe.contentDocument;
+      if (!doc) return;
+      _etPreviewRange = null;
+      doc.addEventListener('selectionchange', saveEmailSelection);
+      doc.querySelectorAll('[data-et-editable]').forEach(el => {
+        el.addEventListener('focus', saveEmailSelection);
+        el.addEventListener('keyup', saveEmailSelection);
+        el.addEventListener('mouseup', saveEmailSelection);
+        el.addEventListener('input', syncEmailPreviewFields);
+      });
+      doc.querySelectorAll('[data-et-button-link]').forEach(link => {
+        link.addEventListener('click', event => event.preventDefault());
+      });
+    }
+
+    function runEmailToolbarCommand(command) {
+      if (command === 'addButton') {
+        const label = window.prompt('Button text', document.getElementById('et-buttonLabel').value || 'Open link');
+        if (label === null) return;
+        const url = window.prompt('Button URL', document.getElementById('et-buttonUrl').value || 'https://');
+        if (url === null) return;
+        document.getElementById('et-buttonLabel').value = label.trim() || 'Open link';
+        document.getElementById('et-buttonUrl').value = normalizeExtraButtonUrl(url);
+        updateEmailPreview();
+        return;
+      }
+
+      if (command === 'removeButton') {
+        document.getElementById('et-buttonLabel').value = 'Open link';
+        document.getElementById('et-buttonUrl').value = '';
+        updateEmailPreview();
+        return;
+      }
+
+      const doc = restoreEmailSelection();
+      if (!doc) return;
+      if (command === 'createLink') {
+        const url = window.prompt('Link URL', 'https://');
+        if (!url) return;
+        doc.execCommand('createLink', false, url);
+      } else {
+        doc.execCommand(command, false, null);
+      }
+      syncEmailPreviewFields();
+      saveEmailSelection();
+    }
+
     function initEmailTemplateListeners() {
       if (window._etListenersBound) return;
       window._etListenersBound = true;
       ['et-subject', 'et-headline', 'et-intro', 'et-buttonLabel', 'et-buttonUrl'].forEach(id => {
-        document.getElementById(id).addEventListener('input', updateEmailPreview);
+        document.getElementById(id).addEventListener('input', () => {
+          updateEmailPreview();
+        });
+      });
+      document.querySelectorAll('[data-et-command]').forEach(button => {
+        button.addEventListener('click', () => runEmailToolbarCommand(button.dataset.etCommand));
       });
       const colorInput = document.getElementById('et-accentColor');
       const hexInput = document.getElementById('et-accentColorHex');
@@ -4488,12 +4646,13 @@
         btn.disabled = true;
         statusEl.textContent = 'Sending test email...';
         statusEl.className = 'cl-status';
+        syncEmailPreviewFields();
         const data = {
           subject: document.getElementById('et-subject').value,
           headline: document.getElementById('et-headline').value,
           intro: document.getElementById('et-intro').value,
           buttonLabel: document.getElementById('et-buttonLabel').value,
-          buttonUrl: document.getElementById('et-buttonUrl').value,
+          buttonUrl: normalizeExtraButtonUrl(document.getElementById('et-buttonUrl').value),
           accentColor: document.getElementById('et-accentColor').value,
           showLogo: document.getElementById('et-showLogo').getAttribute('aria-pressed') === 'true'
         };
@@ -4506,7 +4665,7 @@
             templateData: data,
             renderedHtml: generateEmailHtml(data)
           });
-          statusEl.textContent = 'Test email queued. If a contact-form email arrives instead, deploy the Apps Script email action routes.';
+          statusEl.textContent = 'Test email request sent. Check the recipient inbox and spam folder.';
           statusEl.className = 'cl-status is-success';
           showToast('Test email sent');
         } catch (e) { statusEl.textContent = 'Failed to send: ' + (e.message || 'error'); statusEl.className = 'cl-status is-error'; showToast('Test failed', 'error'); }
@@ -4515,12 +4674,13 @@
       document.getElementById('et-save').addEventListener('click', async () => {
         const fb = window.utlFirebaseAuth;
         const id = document.getElementById('etSelect').value;
+        syncEmailPreviewFields();
         const data = {
           subject: document.getElementById('et-subject').value,
           headline: document.getElementById('et-headline').value,
           intro: document.getElementById('et-intro').value,
           buttonLabel: document.getElementById('et-buttonLabel').value,
-          buttonUrl: document.getElementById('et-buttonUrl').value,
+          buttonUrl: normalizeExtraButtonUrl(document.getElementById('et-buttonUrl').value),
           accentColor: document.getElementById('et-accentColor').value,
           showLogo: document.getElementById('et-showLogo').getAttribute('aria-pressed') === 'true'
         };
