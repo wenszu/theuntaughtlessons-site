@@ -196,6 +196,11 @@
         "apparel",
         "clothing & wellbeing"
       ]
+    },
+    "dualBucket": {
+      "Phone": ["Work Essentials", "Travel Documents & Wallet"],
+      "Power bank": ["Work Essentials", "Travel Documents & Wallet"],
+      "Headphones": ["Work Essentials", "Clothing & Personal"]
     }
   },
   {
@@ -208,7 +213,7 @@
       "rule-of-three"
     ],
     "prompt": "Sort the items into three clean buckets.",
-    "scenario": "",
+    "scenario": "You have received the annual performance review for a team member. The notes were dumped into one list. Sort them into three clear categories.",
     "sortingInstruction": "",
     "items": [
       "Consistently meets deadlines",
@@ -389,6 +394,9 @@
         "wishlist",
         "backlog & monitor"
       ]
+    },
+    "dualBucket": {
+      "Security vulnerability reported by user": ["Fix Immediately", "Investigate Further"]
     }
   },
   {
@@ -401,7 +409,7 @@
       "rule-of-three"
     ],
     "prompt": "Sort the items into three clean buckets.",
-    "scenario": "",
+    "scenario": "You are starting a new job on Monday. Sort these tasks by when you should actually tackle them.",
     "sortingInstruction": "",
     "items": [
       "Meet your manager",
@@ -484,6 +492,10 @@
         "month 1 horizon",
         "don't rush"
       ]
+    },
+    "dualBucket": {
+      "Read the team handbook": ["Do on Day 1", "Complete by End of Week"],
+      "Complete mandatory HR training": ["Do on Day 1", "Complete by End of Week"]
     }
   },
   {
@@ -587,6 +599,10 @@
         "execution & delivery",
         "delivery breakdowns"
       ]
+    },
+    "dualBucket": {
+      "Cross-functional partner had different priorities": ["People & Communication", "Process & Planning"],
+      "Feedback was vague and not actionable": ["People & Communication", "Process & Planning"]
     }
   }
 ]

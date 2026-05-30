@@ -194,7 +194,7 @@
         "clothing & wellbeing"
       ]
     },
-    "dual_bucket_items": [],
+    "dual_bucket_items": ["Phone", "Power bank", "Headphones"],
     "items": [
       {
         "item_id": "item_01",
@@ -267,7 +267,7 @@
     "exercise_id": "sort_bucket_003",
     "exercise_title": "Performance Review Feedback",
     "difficulty": "intermediate",
-    "scenario": "",
+    "scenario": "You have received the annual performance review for a team member. The notes were dumped into one list. Sort them into three clear categories.",
     "prompt": "Sort the items into three clean buckets.",
     "sorting_instruction": "",
     "correct_buckets": [
@@ -431,7 +431,7 @@
         "backlog & monitor"
       ]
     },
-    "dual_bucket_items": [],
+    "dual_bucket_items": ["Security vulnerability reported by user"],
     "items": [
       {
         "item_id": "item_01",
@@ -505,7 +505,7 @@
     "exercise_id": "sort_bucket_005",
     "exercise_title": "New Employee's First Week",
     "difficulty": "advanced",
-    "scenario": "",
+    "scenario": "You are starting a new job on Monday. Sort these tasks by when you should actually tackle them.",
     "prompt": "Sort the items into three clean buckets.",
     "sorting_instruction": "",
     "correct_buckets": [
@@ -551,7 +551,7 @@
         "don't rush"
       ]
     },
-    "dual_bucket_items": [],
+    "dual_bucket_items": ["Read the team handbook", "Complete mandatory HR training"],
     "items": [
       {
         "item_id": "item_01",
@@ -670,7 +670,7 @@
         "delivery breakdowns"
       ]
     },
-    "dual_bucket_items": [],
+    "dual_bucket_items": ["Cross-functional partner had different priorities", "Feedback was vague and not actionable"],
     "items": [
       {
         "item_id": "item_01",
