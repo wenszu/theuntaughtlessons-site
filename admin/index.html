@@ -1614,6 +1614,16 @@
     .eng-text { flex-shrink:0; width:220px; max-width:100%; padding:6px 10px; border:1px solid var(--line); border-radius:6px; font-size:13px; font-family:'Lato',sans-serif; color:var(--navy); }
     .eng-number:focus, .eng-text:focus { border-color:var(--navy); outline:none; }
     .eng-save-btn { justify-self:start; margin-top:4px; }
+    .et-layout { display:grid; grid-template-columns:minmax(320px,420px) 1fr; gap:32px; align-items:start; }
+    .et-note { color:#777; font-size:12px; line-height:1.45; margin:5px 0 0; }
+    .et-card { margin-top:4px; padding:12px 14px; border:1px solid var(--line); border-radius:8px; background:rgba(243,237,226,.35); }
+    .et-card .eng-field-row { padding:0; border-bottom:0; background:transparent; }
+    .et-color-row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:8px; }
+    .et-color-inputs { display:none; }
+    .color-swatch { width:30px; height:30px; border-radius:50%; border:2px solid transparent; cursor:pointer; box-shadow:0 0 0 1px var(--line); }
+    .color-swatch[aria-pressed="true"] { border-color:var(--white); box-shadow:0 0 0 2px var(--navy); }
+    #et-showLogo { align-self:flex-start; width:auto; min-width:56px; }
+    @media (max-width:900px) { .et-layout { grid-template-columns:1fr; } }
 
     /* ===== Content Library ===== */
     .cl-pat-wrap { display:flex; gap:8px; align-items:center; margin-top:10px; flex-wrap:wrap; }
@@ -2186,7 +2196,7 @@
 
         <div id="etStatus" class="eng-status" aria-live="polite"></div>
         <div id="etForm" hidden>
-          <div style="display:grid; grid-template-columns: minmax(320px, 420px) 1fr; gap: 32px; align-items: start;">
+          <div class="et-layout">
             <div class="eng-form">
               <div class="mb-form-field">
                 <label for="etSelect">Select template</label>
@@ -2197,28 +2207,32 @@
                 </select>
               </div>
               <div class="field-stack" style="margin-top:20px;">
-                <div class="mb-edit-field"><label for="et-subject">Subject line</label><input type="text" id="et-subject"><small style="color:#888; font-size:11px; margin-top:4px; display:block;">What appears in the member's inbox.</small></div>
+                <div class="mb-edit-field"><label for="et-subject">Subject line</label><input type="text" id="et-subject"><p class="et-note">What appears in the member's inbox.</p></div>
                 <div class="mb-edit-field" style="display:none"><label for="et-headline">Headline</label><input type="text" id="et-headline"></div>
-                <div class="mb-edit-field"><label for="et-intro">Opening paragraph</label><textarea id="et-intro" style="min-height:90px;"></textarea><small style="color:#888; font-size:11px; margin-top:4px; display:block;">Appears below "Welcome, [First Name]." Use <code>{{first_name}}</code> to personalise.</small></div>
+                <div class="mb-edit-field"><label for="et-intro">Opening paragraph</label><textarea id="et-intro" style="min-height:90px;"></textarea><p class="et-note">Appears below "Welcome, [First Name]." Use <code>{{first_name}}</code> to personalize.</p></div>
                 <div class="mb-edit-field" style="display:none"><label for="et-buttonLabel">Button label</label><input type="text" id="et-buttonLabel"></div>
-                <div class="mb-edit-field"><label for="et-buttonUrl">Workspace URL</label><input type="text" id="et-buttonUrl"><small style="color:#888; font-size:11px; margin-top:4px; display:block;">The "Sign in to your workspace" button destination. Default: <code>{{workspace_url}}</code>.</small></div>
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-                  <div class="mb-edit-field">
-                    <label for="et-accentColor">Accent color</label>
-                    <div style="display:flex; gap:8px; align-items:center;">
-                      <input type="color" id="et-accentColor" style="width:44px; height:44px; padding:2px; cursor:pointer;">
-                      <input type="text" id="et-accentColorHex" style="flex:1; font-family:'Roboto Mono',monospace;">
-                    </div>
-                    <div style="display:flex; gap:6px; margin-top:8px;">
-                      <button type="button" class="color-swatch" data-color="#003366" style="width:24px; height:24px; border-radius:50%; border:1px solid var(--line); background:#003366; cursor:pointer;" title="UTL Navy"></button>
-                      <button type="button" class="color-swatch" data-color="#EEA320" style="width:24px; height:24px; border-radius:50%; border:1px solid var(--line); background:#EEA320; cursor:pointer;" title="UTL Gold"></button>
-                      <button type="button" class="color-swatch" data-color="#4D7094" style="width:24px; height:24px; border-radius:50%; border:1px solid var(--line); background:#4D7094; cursor:pointer;" title="UTL Steel"></button>
-                      <button type="button" class="color-swatch" data-color="#4A4A4A" style="width:24px; height:24px; border-radius:50%; border:1px solid var(--line); background:#4A4A4A; cursor:pointer;" title="UTL Charcoal"></button>
-                    </div>
-                  </div>
-                  <div class="mb-edit-field">
-                    <label>Show logo</label>
+                <div class="mb-edit-field"><label for="et-buttonUrl">Workspace button link</label><input type="url" id="et-buttonUrl" placeholder="https://theuntaughtlessons.com/member-login/"><p class="et-note">This is where the <strong>Sign in to your workspace</strong> button goes. Keep the default unless the login page changes.</p></div>
+                <div class="et-card">
+                  <div class="eng-field-row">
+                    <label class="eng-toggle-label" for="et-showLogo">
+                      <span class="eng-toggle-name">Show logo</span>
+                      <span class="eng-toggle-desc">Adds the UTL logo at the top of the email.</span>
+                    </label>
                     <button class="eng-toggle" type="button" id="et-showLogo" aria-pressed="true">On</button>
+                  </div>
+                </div>
+                <div class="mb-edit-field">
+                  <label>Email accent</label>
+                  <p class="et-note">Sets the color used for the email headline, step circles, and buttons.</p>
+                  <div class="et-color-inputs">
+                    <input type="color" id="et-accentColor">
+                    <input type="text" id="et-accentColorHex">
+                  </div>
+                  <div class="et-color-row">
+                    <button type="button" class="color-swatch" data-color="#003366" style="background:#003366;" aria-label="Use UTL Navy" title="UTL Navy"></button>
+                    <button type="button" class="color-swatch" data-color="#EEA320" style="background:#EEA320;" aria-label="Use UTL Gold" title="UTL Gold"></button>
+                    <button type="button" class="color-swatch" data-color="#4D7094" style="background:#4D7094;" aria-label="Use UTL Steel" title="UTL Steel"></button>
+                    <button type="button" class="color-swatch" data-color="#4A4A4A" style="background:#4A4A4A;" aria-label="Use UTL Charcoal" title="UTL Charcoal"></button>
                   </div>
                 </div>
               </div>
@@ -4244,6 +4258,8 @@
     // ===== Email Templates =====
 
     let _etTemplates = {};
+    const EMAIL_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzJE--FL2kB_XDNZRnszCtlyLRPvaLAHGuF5TAOdXJk40atbvf5Y6ELuSK2B7CSLaMN/exec';
+    const DEFAULT_WORKSPACE_URL = 'https://theuntaughtlessons.com/member-login/';
 
     function etGetTemplate(id) {
       const defaults = {
@@ -4251,17 +4267,37 @@
         headline: 'Welcome, {{first_name}}.',
         intro: 'You now have access to The Untaught Lessons program. Before you begin, take a few minutes to complete your setup so everything works from the start.',
         buttonLabel: 'OPEN MY WORKSPACE →',
-        buttonUrl: '{{workspace_url}}',
+        buttonUrl: DEFAULT_WORKSPACE_URL,
         accentColor: '#003366',
         showLogo: true
       };
       return Object.assign({}, defaults, _etTemplates[id] || {});
     }
 
+    function buildEmailScriptPayload(action, payload) {
+      const params = new URLSearchParams();
+      params.set('action', action);
+      Object.entries(payload || {}).forEach(([key, value]) => {
+        if (value === undefined || value === null) return;
+        params.set(key, typeof value === 'string' ? value : JSON.stringify(value));
+      });
+      return params;
+    }
+
+    function postEmailScriptAction(action, payload) {
+      const params = buildEmailScriptPayload(action, payload);
+      return fetch(EMAIL_SCRIPT_URL + '?action=' + encodeURIComponent(action), {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+        body: params.toString()
+      });
+    }
+
     function generateEmailHtml(data) {
       const accent = data.accentColor || '#003366';
       const intro = data.intro || '';
-      const workspaceUrl = (data.buttonUrl || '{{workspace_url}}').replace(/{{workspace_url}}/g, 'https://theuntaughtlessons.com/member-login/');
+      const workspaceUrl = (data.buttonUrl || DEFAULT_WORKSPACE_URL).replace(/{{workspace_url}}/g, DEFAULT_WORKSPACE_URL);
       const loginEmail = data.loginEmail || '';
       const headline = data.headline || 'Welcome.';
 
@@ -4387,7 +4423,7 @@
         headline: 'Welcome, {{first_name}}.',
         intro: 'You now have access to The Untaught Lessons program. Before you begin, take a few minutes to complete your setup so everything works from the start.',
         buttonLabel: 'OPEN MY WORKSPACE →',
-        buttonUrl: '{{workspace_url}}',
+        buttonUrl: DEFAULT_WORKSPACE_URL,
         accentColor: '#003366',
         showLogo: true
       };
@@ -4396,15 +4432,23 @@
       document.getElementById('et-headline').value = data.headline;
       document.getElementById('et-intro').value = data.intro;
       document.getElementById('et-buttonLabel').value = data.buttonLabel;
-      document.getElementById('et-buttonUrl').value = data.buttonUrl;
-      document.getElementById('et-accentColor').value = data.accentColor;
-      document.getElementById('et-accentColorHex').value = data.accentColor;
+      document.getElementById('et-buttonUrl').value = (data.buttonUrl || DEFAULT_WORKSPACE_URL).replace(/{{workspace_url}}/g, DEFAULT_WORKSPACE_URL);
+      setEmailAccentColor(data.accentColor || '#003366');
       const logoBtn = document.getElementById('et-showLogo');
       const _adminEmail = adminProfileData().email || '';
       document.getElementById('et-testEmail').value = _adminEmail.includes('@') ? _adminEmail : '';
       logoBtn.setAttribute('aria-pressed', String(data.showLogo));
       logoBtn.textContent = data.showLogo ? 'On' : 'Off';
       updateEmailPreview();
+    }
+
+    function setEmailAccentColor(color) {
+      const normalized = /^#[0-9A-F]{6}$/i.test(color || '') ? color : '#003366';
+      document.getElementById('et-accentColor').value = normalized;
+      document.getElementById('et-accentColorHex').value = normalized;
+      document.querySelectorAll('.color-swatch').forEach(swatch => {
+        swatch.setAttribute('aria-pressed', String((swatch.dataset.color || '').toLowerCase() === normalized.toLowerCase()));
+      });
     }
 
     function initEmailTemplateListeners() {
@@ -4415,15 +4459,13 @@
       });
       const colorInput = document.getElementById('et-accentColor');
       const hexInput = document.getElementById('et-accentColorHex');
-      colorInput.addEventListener('input', () => { hexInput.value = colorInput.value; updateEmailPreview(); });
+      colorInput.addEventListener('input', () => { setEmailAccentColor(colorInput.value); updateEmailPreview(); });
       hexInput.addEventListener('input', () => {
-        if (/^#[0-9A-F]{6}$/i.test(hexInput.value)) { colorInput.value = hexInput.value; updateEmailPreview(); }
+        if (/^#[0-9A-F]{6}$/i.test(hexInput.value)) { setEmailAccentColor(hexInput.value); updateEmailPreview(); }
       });
       document.querySelectorAll('.color-swatch').forEach(swatch => {
         swatch.addEventListener('click', () => {
-          const color = swatch.dataset.color;
-          colorInput.value = color;
-          hexInput.value = color;
+          setEmailAccentColor(swatch.dataset.color);
           updateEmailPreview();
         });
       });
@@ -4447,17 +4489,13 @@
           showLogo: document.getElementById('et-showLogo').getAttribute('aria-pressed') === 'true'
         };
         try {
-          await fetch('https://script.google.com/macros/s/AKfycbzJE--FL2kB_XDNZRnszCtlyLRPvaLAHGuF5TAOdXJk40atbvf5Y6ELuSK2B7CSLaMN/exec', {
-            method: 'POST',
-            mode: 'no-cors',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-              action: 'TestEmailTemplate', 
-              templateId: document.getElementById('etSelect').value, 
-              recipient: email, 
-              templateData: data,
-              renderedHtml: generateEmailHtml(data)
-            })
+          await postEmailScriptAction('TestEmailTemplate', {
+            templateId: document.getElementById('etSelect').value,
+            recipient: email,
+            to: email,
+            email: email,
+            templateData: data,
+            renderedHtml: generateEmailHtml(data)
           });
           statusEl.textContent = 'Test email sent! Check your inbox.';
           statusEl.className = 'cl-status is-success';
@@ -5669,17 +5707,13 @@
           // Always send Apps Script welcome email
           var emailSent = false;
           try {
-            await fetch('https://script.google.com/macros/s/AKfycbzJE--FL2kB_XDNZRnszCtlyLRPvaLAHGuF5TAOdXJk40atbvf5Y6ELuSK2B7CSLaMN/exec', {
-              method: 'POST',
-              mode: 'no-cors',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ 
-                action: 'WelcomeEmail', 
-                name: nameVal, 
-                email: emailVal,
-                templateData: welcomeTemplate,
-                renderedHtml: renderedHtml
-              })
+            await postEmailScriptAction('WelcomeEmail', {
+              name: nameVal,
+              recipient: emailVal,
+              to: emailVal,
+              email: emailVal,
+              templateData: welcomeTemplate,
+              renderedHtml: renderedHtml
             });
             emailSent = true;
           } catch (emailErr) { /* non-fatal */ }
