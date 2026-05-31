@@ -1559,6 +1559,20 @@
     .mb-bool-yes { color:var(--green); font-weight:700; }
     .mb-bool-no { color:#bbb; }
     .mb-bool-pending { display:block; margin-top:2px; color:var(--gold); font:700 10px 'Roboto Mono',monospace; letter-spacing:.04em; text-transform:uppercase; }
+    .mb-group-cell { display:grid; gap:6px; min-width:132px; }
+    .mb-group-badge { display:inline-flex; width:max-content; max-width:100%; align-items:center; border-radius:999px; padding:3px 8px; font:700 10px 'Roboto Mono',monospace; letter-spacing:.04em; text-transform:uppercase; }
+    .mb-group-ok { background:#e8f5ed; color:var(--green); }
+    .mb-group-warn { background:#fff8e1; color:#9a6400; }
+    .mb-group-danger { background:#fdecea; color:#8A1F1F; }
+    .mb-group-muted { background:#f0f0f0; color:#777; }
+    .mb-group-hint { color:#777; font-size:11px; line-height:1.3; }
+    .mb-group-link { display:inline-block; margin-top:5px; padding:4px 7px; border-radius:999px; background:var(--navy); color:#fff; font-size:10px; font-weight:700; text-decoration:none; white-space:nowrap; }
+    .mb-group-link:hover { background:var(--gold); color:var(--navy); }
+    .mb-group-toggle { width:max-content; min-width:94px; padding:5px 9px; border:1px solid rgba(0,51,102,.22); border-radius:999px; background:#fff; color:var(--navy); font:700 10px 'Roboto Mono',monospace; cursor:pointer; text-transform:uppercase; }
+    .mb-group-toggle.is-added { border-color:rgba(45,106,79,.32); color:var(--green); background:#f0faf5; }
+    .mb-group-toggle.is-not-added { border-color:rgba(238,163,32,.4); color:#9a6400; background:#fff8e1; }
+    .mb-group-toggle:hover { border-color:var(--navy); background:#f7f2e8; }
+    .mb-group-queue { margin:0 0 12px; padding:12px 14px; border-left:3px solid var(--gold); background:#fff8e1; border-radius:6px; color:var(--charcoal); font-size:13px; line-height:1.5; }
     .mb-actions { display:flex; gap:5px; flex-wrap:wrap; }
     .mb-btn { padding:4px 9px; border:1px solid var(--line); border-radius:4px; background:var(--white); color:var(--navy); font-size:11px; font-family:'Roboto Mono',monospace; font-weight:700; cursor:pointer; white-space:nowrap; transition:border-color .12s,background .12s; }
     .mb-btn:hover { border-color:var(--navy); }
@@ -2202,7 +2216,7 @@
         <span class="section-label">Engagement</span>
         <h2>Email templates</h2>
         <div class="section-divider"></div>
-        <p class="description">Edit and preview the welcome email sent when you add a new member. The three setup steps and sign-off are fixed — only the fields below are editable. Use <code>{{first_name}}</code> in the intro for the member's first name.</p>
+        <p class="description">Edit and preview the welcome email sent when you add a new member. The three setup steps and sign-off are fixed — only the fields below are editable. Google Group access is handled internally and is not mentioned to members. Use <code>{{first_name}}</code> in the intro for the member's first name.</p>
 
         <div id="etStatus" class="eng-status" aria-live="polite"></div>
         <div id="etForm" hidden>
@@ -2480,6 +2494,7 @@
   <script type="module">
     import {
       authorizeMember,
+      auth,
       collection,
       db,
       deleteDoc,
@@ -2505,6 +2520,7 @@
       setGlobalFeedbackSetting,
       setPublicFindLevelSetting,
       setUserFeedbackEnabled,
+      signOut,
       signInWithGooglePopup,
       Timestamp
     } from "../assets/firebase.js";
@@ -2512,6 +2528,7 @@
     window.utlFirebaseAuth = {
       ...(window.utlFirebaseAuth || {}),
       authorizeMember,
+      auth,
       collection,
       db,
       deleteDoc,
@@ -2537,6 +2554,7 @@
       setGlobalFeedbackSetting,
       setPublicFindLevelSetting,
       setUserFeedbackEnabled,
+      signOut,
       signInWithGooglePopup,
       Timestamp
     };
@@ -2547,6 +2565,7 @@
     const AUTH_KEY = 'utl_admin_auth';
     const PASSWORD_KEY = 'utl_admin_password';
     const DEFAULT_ADMIN_PASSWORD = 'utl2026_admin';
+    const BOOTSTRAP_OWNER_EMAILS = ['wenszu@gmail.com'];
 
     // FIX 8 — Invite log
     const inviteSessionLog = [];
@@ -4345,6 +4364,73 @@
       return jobId;
     }
 
+    async function mbGetFirebaseAdminRole(user) {
+      const fb = window.utlFirebaseAuth;
+      if (!user || !user.email) {
+        return { email: '', role: '', isAdmin: false };
+      }
+
+      const email = String(user.email || '').trim().toLowerCase();
+      if (BOOTSTRAP_OWNER_EMAILS.includes(email)) {
+        return { email, role: 'owner', isAdmin: true, isBootstrapOwner: true };
+      }
+
+      let role = '';
+      try {
+        const snap = await fb.getDoc(fb.doc(fb.db, 'authorized_members', email));
+        role = snap.exists() ? (snap.data().role || '') : '';
+      } catch (e) {
+        role = '';
+      }
+      return {
+        email,
+        role,
+        isAdmin: role === 'admin' || role === 'owner'
+      };
+    }
+
+    async function mbSwitchFirebaseAdminAccount(currentEmail) {
+      const fb = window.utlFirebaseAuth;
+      const message = 'You are signed into Firebase as ' + currentEmail + ', but that account is not marked admin or owner. Switch Google account now?';
+      if (!window.confirm(message)) {
+        throw new Error('Your Google account (' + currentEmail + ') is not marked admin or owner in authorized_members.');
+      }
+
+      if (fb.signOut && fb.auth) {
+        await fb.signOut(fb.auth);
+      }
+
+      await fb.signInWithGooglePopup();
+      const user = await fb.getSignedInUser();
+      if (!user || !user.email) {
+        throw new Error('Sign in with your Google admin account before managing members.');
+      }
+      return user;
+    }
+
+    async function mbEnsureBootstrapOwnerRecord(email) {
+      const fb = window.utlFirebaseAuth;
+      const normalized = String(email || '').trim().toLowerCase();
+      if (!normalized || !BOOTSTRAP_OWNER_EMAILS.includes(normalized) || !fb || !fb.authorizeMember) return;
+
+      const repairKey = 'utl_bootstrap_owner_repaired_' + normalized;
+      if (sessionStorage.getItem(repairKey) === 'true') return;
+
+      try {
+        await fb.authorizeMember(normalized, {
+          email: normalized,
+          name: 'Wen-Szu',
+          role: 'owner',
+          status: 'active',
+          bootstrapOwner: true
+        });
+        sessionStorage.setItem(repairKey, 'true');
+      } catch (e) {
+        // If live Firestore rules have not been deployed yet, this will fail.
+        // The hardcoded bootstrap owner still lets the UI explain the next step.
+      }
+    }
+
     async function mbRequireFirebaseAdmin() {
       const fb = window.utlFirebaseAuth;
       if (!fb || !fb.getSignedInUser || !fb.signInWithGooglePopup || !fb.getDoc || !fb.doc || !fb.db) {
@@ -4357,15 +4443,22 @@
         user = await fb.getSignedInUser();
       }
 
-      if (!user || !user.email) {
+      let adminStatus = await mbGetFirebaseAdminRole(user);
+      if (!adminStatus.email) {
         throw new Error('Sign in with your Google admin account before managing members.');
       }
 
-      const email = String(user.email || '').trim().toLowerCase();
-      const snap = await fb.getDoc(fb.doc(fb.db, 'authorized_members', email));
-      const role = snap.exists() ? (snap.data().role || '') : '';
-      if (role !== 'admin' && role !== 'owner') {
-        throw new Error('Your Google account (' + email + ') is not marked admin or owner in authorized_members.');
+      if (!adminStatus.isAdmin && fb.signOut && fb.auth) {
+        user = await mbSwitchFirebaseAdminAccount(adminStatus.email);
+        adminStatus = await mbGetFirebaseAdminRole(user);
+      }
+
+      if (!adminStatus.isAdmin) {
+        throw new Error('Your Google account (' + adminStatus.email + ') is not marked admin or owner in authorized_members.');
+      }
+
+      if (adminStatus.isBootstrapOwner) {
+        await mbEnsureBootstrapOwnerRecord(adminStatus.email);
       }
 
       return user;
@@ -4477,10 +4570,10 @@
           <tr><td style="padding:0 48px 28px;">
             <table border="0" cellpadding="0" cellspacing="0" width="100%"><tr>
               <td width="40" valign="top" style="padding-top:2px;"><div style="width:28px; height:28px; background-color:${accent}; border-radius:50%; color:#FFFFFF; font-size:14px; font-weight:700; text-align:center; line-height:28px;">1</div></td>
-              <td><h2 style="margin:0 0 8px; font-size:17px; font-weight:700; color:${accent};">Join the member community</h2>
-                <p style="margin:0; font-size:14px; color:#4A4A4A; line-height:1.6;">This gives you access to the video library used throughout the program. Click the link below and join with the Google account this email was sent to.</p>
-                <table border="0" cellpadding="0" cellspacing="0" style="margin-top:16px;"><tr><td align="center" bgcolor="${accent}" style="border-radius:6px;"><a href="https://groups.google.com/g/utl-members" target="_blank" style="display:inline-block; padding:12px 24px; font-size:14px; font-weight:700; color:#FFFFFF; text-decoration:none; letter-spacing:0.5px;">Join the member community &#8594;</a></td></tr></table>
-                <p style="margin:6px 0 0; font-family:'Courier New',Courier,monospace; font-size:11px; color:#999;">groups.google.com/g/utl-members</p>
+              <td><h2 style="margin:0 0 8px; font-size:17px; font-weight:700; color:${accent};">Sign in to your workspace</h2>
+                <p style="margin:0; font-size:14px; color:#4A4A4A; line-height:1.6;">Go to the member login page and sign in with the Google account connected to your membership.${loginEmail ? ' Use <strong>' + escapeHtml(loginEmail) + '</strong>.' : ' Use the same email that received this welcome message.'} If a video does not load right away, refresh the page after a few minutes.</p>
+                <table border="0" cellpadding="0" cellspacing="0" style="margin-top:16px;"><tr><td align="center" bgcolor="${accent}" style="border-radius:6px;"><a href="${escapeHtml(workspaceUrl)}" target="_blank" style="display:inline-block; padding:12px 24px; font-size:14px; font-weight:700; color:#FFFFFF; text-decoration:none; letter-spacing:0.5px;">Sign in to your workspace &#8594;</a></td></tr></table>
+                <p style="margin:6px 0 0; font-family:'Courier New',Courier,monospace; font-size:11px; color:#999;">${escapeHtml(workspaceUrl.replace(/^https?:\/\//, ''))}</p>
               </td>
             </tr></table>
           </td></tr>
@@ -4488,10 +4581,8 @@
           <tr><td style="padding:0 48px 28px;">
             <table border="0" cellpadding="0" cellspacing="0" width="100%"><tr>
               <td width="40" valign="top" style="padding-top:2px;"><div style="width:28px; height:28px; background-color:${accent}; border-radius:50%; color:#FFFFFF; font-size:14px; font-weight:700; text-align:center; line-height:28px;">2</div></td>
-              <td><h2 style="margin:0 0 8px; font-size:17px; font-weight:700; color:${accent};">Sign in to your workspace</h2>
-                <p style="margin:0; font-size:14px; color:#4A4A4A; line-height:1.6;">Go to the member login page and sign in with the same Google account.${loginEmail ? ' Use <strong>' + escapeHtml(loginEmail) + '</strong>.' : ' No password needed.'}</p>
-                <table border="0" cellpadding="0" cellspacing="0" style="margin-top:16px;"><tr><td align="center" bgcolor="${accent}" style="border-radius:6px;"><a href="${escapeHtml(workspaceUrl)}" target="_blank" style="display:inline-block; padding:12px 24px; font-size:14px; font-weight:700; color:#FFFFFF; text-decoration:none; letter-spacing:0.5px;">Sign in to your workspace &#8594;</a></td></tr></table>
-                <p style="margin:6px 0 0; font-family:'Courier New',Courier,monospace; font-size:11px; color:#999;">${escapeHtml(workspaceUrl.replace(/^https?:\/\//, ''))}</p>
+              <td><h2 style="margin:0 0 8px; font-size:17px; font-weight:700; color:${accent};">Complete your orientation</h2>
+                <p style="margin:0; font-size:14px; color:#4A4A4A; line-height:1.6;">Once you are signed in, you will land on your Home page. Start with the Home section at the top. It takes about five minutes and sets you up for everything that follows.</p>
               </td>
             </tr></table>
           </td></tr>
@@ -4499,8 +4590,8 @@
           <tr><td style="padding:0 48px 40px;">
             <table border="0" cellpadding="0" cellspacing="0" width="100%"><tr>
               <td width="40" valign="top" style="padding-top:2px;"><div style="width:28px; height:28px; background-color:${accent}; border-radius:50%; color:#FFFFFF; font-size:14px; font-weight:700; text-align:center; line-height:28px;">3</div></td>
-              <td><h2 style="margin:0 0 8px; font-size:17px; font-weight:700; color:${accent};">Complete your orientation</h2>
-                <p style="margin:0; font-size:14px; color:#4A4A4A; line-height:1.6;">Once you are signed in, you will land on your Home page. Start with the Home section at the top. It takes about five minutes and sets you up for everything that follows.</p>
+              <td><h2 style="margin:0 0 8px; font-size:17px; font-weight:700; color:${accent};">Begin Phase 1</h2>
+                <p style="margin:0; font-size:14px; color:#4A4A4A; line-height:1.6;">After orientation, begin Phase 1 and work through the first lesson and practice activity at your own pace.</p>
               </td>
             </tr></table>
           </td></tr>
@@ -5194,46 +5285,36 @@
         return;
       }
 
-      // Check for a live Firebase Auth session before querying Firestore
-      wrap.innerHTML = '<p class="mb-msg">Checking sign-in status...</p>';
-      const currentUser = await fb.getSignedInUser();
-      if (!currentUser) {
-        wrap.innerHTML =
-          '<p class="mb-msg mb-err">You are not signed in with a Google account on this site.</p>' +
-          '<p class="mb-msg" style="margin-top:8px;">Student Progress requires a Firebase session. ' +
-          'Sign in with the same Google account that has admin or owner access in Firestore.</p>' +
-          '<button class="small-button" type="button" id="spSignInBtn" style="margin-top:12px;">Sign in with Google</button>';
-        document.getElementById('spSignInBtn').addEventListener('click', async function () {
-          try {
-            await fb.signInWithGooglePopup();
-            loadStudentProgress();
-          } catch (e) {
-            wrap.innerHTML = '<p class="mb-msg mb-err">Sign-in failed: ' + escapeHtml((e && e.message) || 'Unknown error') + '</p>';
-          }
-        });
-        if (status) status.textContent = 'Not signed in';
-        return;
-      }
-
       if (refresh) {
         refresh.disabled = true;
         refresh.textContent = 'Refreshing...';
       }
       if (status) status.textContent = '';
-      wrap.innerHTML = '<p class="mb-msg">Loading student progress...</p>';
+      wrap.innerHTML = '<p class="mb-msg">Checking admin access...</p>';
+      let currentUser = null;
       try {
+        currentUser = await mbRequireFirebaseAdmin();
+        wrap.innerHTML = '<p class="mb-msg">Loading student progress...</p>';
         const members = await fb.getAllMemberWorkspaceProgress();
         spAllMembers = members;
         const controls = document.getElementById('spControls');
         if (controls) controls.hidden = false;
         spApplyView();
         if (status) {
-          status.textContent = 'Signed in as ' + escapeHtml(currentUser.email) + ' · Last refreshed ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          const partial = members.usersReadError ? ' · Progress details blocked by Firestore rules' : '';
+          status.textContent = 'Signed in as ' + escapeHtml(currentUser.email) + ' · Last refreshed ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + partial;
+        }
+        if (members.usersReadError) {
+          const note = document.createElement('p');
+          note.className = 'mb-msg mb-err';
+          note.style.marginBottom = '10px';
+          note.textContent = 'Member list loaded, but progress details are blocked by Firestore rules. Deploy the bootstrap-owner rules or make this Google account admin/owner in authorized_members.';
+          wrap.prepend(note);
         }
       } catch (error) {
         const msg = (error && error.message) || 'Unknown error';
         const authHint = /permission|Missing or insufficient permissions/i.test(msg)
-          ? ' Your account (' + escapeHtml(currentUser.email) + ') may not have admin or owner role in Firestore authorized_members.'
+          ? ' The signed-in account' + (currentUser && currentUser.email ? ' (' + escapeHtml(currentUser.email) + ')' : '') + ' is not being accepted by live Firestore rules yet. Mark it admin/owner in authorized_members or deploy the bootstrap-owner Firestore rules.'
           : '';
         wrap.innerHTML = '<p class="mb-msg mb-err">Failed to load progress: ' + escapeHtml(msg) + authHint + '</p>';
         if (status) status.textContent = 'Refresh failed';
@@ -5543,6 +5624,41 @@
     // ===== Members management =====
 
     var mbMembersCache = [];
+    const MB_LOCAL_GROUP_OVERRIDES_KEY = 'utl_mb_local_group_overrides';
+
+    function mbUseLocalGroupOverrides() {
+      return ['localhost', '127.0.0.1'].includes(window.location.hostname);
+    }
+
+    function mbGetLocalGroupOverrides() {
+      try {
+        return JSON.parse(localStorage.getItem(MB_LOCAL_GROUP_OVERRIDES_KEY) || '{}') || {};
+      } catch (e) {
+        return {};
+      }
+    }
+
+    function mbSaveLocalGroupOverride(email, fields) {
+      var normalized = String(email || '').trim().toLowerCase();
+      if (!normalized) return;
+      var overrides = mbGetLocalGroupOverrides();
+      overrides[normalized] = Object.assign({}, overrides[normalized] || {}, fields);
+      localStorage.setItem(MB_LOCAL_GROUP_OVERRIDES_KEY, JSON.stringify(overrides));
+    }
+
+    function mbApplyLocalGroupOverrides(docs) {
+      var overrides = mbGetLocalGroupOverrides();
+      return docs.map(function (docSnap) {
+        var override = overrides[docSnap.id];
+        if (!override) return docSnap;
+        return {
+          id: docSnap.id,
+          data: function () {
+            return Object.assign({}, docSnap.data(), override);
+          }
+        };
+      });
+    }
 
     function mbFormatDate(ts) {
       if (!ts) return '—';
@@ -5553,12 +5669,67 @@
       } catch (e) { return '—'; }
     }
 
+    function mbFormatGroupAuditDate(ts) {
+      var formatted = mbFormatDate(ts);
+      return formatted === '—' ? '' : formatted;
+    }
+
     function mbIsExpired(ts) {
       if (!ts) return false;
       try {
         var d = ts.toDate ? ts.toDate() : new Date(ts);
         return d < new Date();
       } catch (e) { return false; }
+    }
+
+    function mbGroupNeedsManualAdd(data) {
+      var sync = String(data.googleGroupSyncStatus || '').toLowerCase();
+      return !data.googleGroupAdded && (sync === 'pending' || sync === 'processing' || sync === 'add-requested' || sync === 'add-request-failed' || sync === 'failed');
+    }
+
+    function mbGroupNeedsManualRemove(data) {
+      var sync = String(data.googleGroupSyncStatus || '').toLowerCase();
+      var action = String(data.googleGroupSyncAction || '').toLowerCase();
+      return data.googleGroupAdded && ((data.status || 'active') === 'inactive' || action === 'remove' || sync === 'remove-requested' || sync === 'remove-request-failed');
+    }
+
+    function mbGroupAuditText(data, added) {
+      var date = '';
+      var admin = '';
+      if (added) {
+        date = mbFormatGroupAuditDate(data.googleGroupAddedAt || data.googleGroupSyncConfirmedAt || data.googleGroupSyncManuallyUpdatedAt);
+        admin = data.googleGroupAddedBy || data.googleGroupSyncManuallyUpdatedBy || data.googleGroupSyncRequestedBy || '';
+        if (date || admin) {
+          return 'Added' + (date ? ' ' + date : '') + (admin ? ' by ' + admin : '');
+        }
+        return 'Added; date/admin not recorded';
+      }
+
+      date = mbFormatGroupAuditDate(data.googleGroupRemovedAt || data.googleGroupSyncManuallyUpdatedAt);
+      admin = data.googleGroupRemovedBy || data.googleGroupSyncManuallyUpdatedBy || '';
+      if (date || admin) {
+        return 'Removed' + (date ? ' ' + date : '') + (admin ? ' by ' + admin : '');
+      }
+      return 'Not added yet';
+    }
+
+    function mbGroupStatusHtml(email, data) {
+      var sync = String(data.googleGroupSyncStatus || '').toLowerCase();
+      var syncLabel = /manual-confirmed|manual-removed/i.test(sync) ? '' : sync;
+      var jobId = data.googleGroupSyncJobId ? '<span class="mb-group-hint">Job: ' + escapeHtml(data.googleGroupSyncJobId) + '</span>' : '';
+      var added = !!data.googleGroupAdded;
+      var toggleLabel = added ? 'Added' : 'Not added';
+      var toggleMode = added ? 'removed' : 'added';
+      var toggleClass = added ? 'is-added' : 'is-not-added';
+      var hint = mbGroupAuditText(data, added);
+      if (mbGroupNeedsManualRemove(data)) hint = 'Manual removal needed.';
+      if (mbGroupNeedsManualAdd(data)) hint = 'Manual add needed.';
+      return '<div class="mb-group-cell">' +
+        '<button class="mb-group-toggle ' + toggleClass + '" type="button" data-mb-group-mark="' + toggleMode + '" data-email="' + escapeHtml(email) + '">' + toggleLabel + '</button>' +
+        '<span class="mb-group-hint">' + escapeHtml(hint) + '</span>' +
+        (syncLabel ? '<span class="mb-group-hint">' + escapeHtml(syncLabel) + '</span>' : '') +
+        jobId +
+      '</div>';
     }
 
     function mbRenderTable(docs) {
@@ -5568,11 +5739,20 @@
         wrap.innerHTML = '<p class="mb-msg">No members found.</p>';
         return;
       }
+      var manualAddCount = docs.filter(function (d) { return mbGroupNeedsManualAdd(d.data()); }).length;
+      var manualRemoveCount = docs.filter(function (d) { return mbGroupNeedsManualRemove(d.data()); }).length;
+      var queueHtml = (manualAddCount || manualRemoveCount)
+        ? '<div class="mb-group-queue"><strong>Google Group manual queue:</strong> ' +
+          (manualAddCount ? manualAddCount + ' need add' : '') +
+          (manualAddCount && manualRemoveCount ? ' · ' : '') +
+          (manualRemoveCount ? manualRemoveCount + ' need remove' : '') +
+          '. Use the Group column after verifying in Google Groups.</div>'
+        : '';
       var rows = docs.map(function (d) {
         var data = d.data();
         var email = d.id;
-        var isOwner = data.role === 'owner';
-        var displayRole = (data.role === 'member' ? 'user' : data.role) || 'user';
+        var isOwner = data.role === 'owner' || BOOTSTRAP_OWNER_EMAILS.includes(String(email || '').toLowerCase());
+        var displayRole = isOwner ? 'owner' : ((data.role === 'member' ? 'user' : data.role) || 'user');
         var roleCls = displayRole === 'owner' ? 'mb-role-owner' : displayRole === 'admin' ? 'mb-role-admin' : 'mb-role-user';
         var status = data.status || 'active';
         var statusCls = status === 'inactive' ? 'mb-status-inactive' : 'mb-status-active';
@@ -5580,12 +5760,7 @@
         var expiryHtml = data.expiryDate
           ? '<span class="' + (expired ? 'mb-expiry-expired' : '') + '">' + escapeHtml(mbFormatDate(data.expiryDate)) + (expired ? ' ✗' : '') + '</span>'
           : '<span style="color:#bbb;">—</span>';
-        var groupHtml = data.googleGroupAdded
-          ? '<span class="mb-bool-yes">✓ Yes</span>'
-          : '<span class="mb-bool-no">No</span>';
-        if (data.googleGroupSyncStatus) {
-          groupHtml += '<span class="mb-bool-pending">' + escapeHtml(data.googleGroupSyncStatus) + '</span>';
-        }
+        var groupHtml = mbGroupStatusHtml(email, data);
         var actions = isOwner
           ? '<span style="color:#bbb;font-size:11px;font-family:\'Roboto Mono\',monospace;">Owner</span>'
           : '<div class="mb-actions">' +
@@ -5611,10 +5786,10 @@
         );
       }).join('');
       wrap.innerHTML =
-        '<div class="mb-table-wrap"><table class="mb-table">' +
+        queueHtml + '<div class="mb-table-wrap"><table class="mb-table">' +
           '<thead><tr>' +
             '<th>Name</th><th>Email</th><th>Role</th><th>Status</th>' +
-            '<th>Cohort</th><th>First Login</th><th>Expiry</th><th>Group</th><th>Actions</th>' +
+            '<th>Cohort</th><th>First Login</th><th>Expiry</th><th>Group<br><a class="mb-group-link" href="https://groups.google.com/g/utl-members/members" target="_blank" rel="noopener">Open group</a></th><th>Actions</th>' +
           '</tr></thead>' +
           '<tbody>' + rows + '</tbody>' +
         '</table></div>';
@@ -5689,6 +5864,66 @@
         btn.addEventListener('click', function () {
           var editRow = btn.closest('.mb-edit-panel');
           if (editRow) editRow.classList.remove('mb-open');
+        });
+      });
+
+      root.querySelectorAll('[data-mb-group-mark]').forEach(function (btn) {
+        btn.addEventListener('click', async function () {
+          var email = btn.dataset.email;
+          var mode = btn.dataset.mbGroupMark;
+          var fb = window.utlFirebaseAuth;
+          if (!fb || !fb.authorizeMember || !fb.Timestamp) { showToast('Firebase not ready', 'error'); return; }
+          if (!email) return;
+          var added = mode === 'added';
+          var label = added ? 'added to' : 'removed from';
+
+          btn.disabled = true;
+          try {
+            var adminUser = await mbRequireFirebaseAdmin();
+            var adminEmail = adminUser && adminUser.email ? adminUser.email : '';
+            if (!window.confirm(
+              'Mark ' + email + ' as manually ' + label + ' the Google Group?\n\n' +
+              'Recorded by: ' + (adminEmail || 'current admin')
+            )) return;
+            var nowDate = new Date();
+            var now = fb.Timestamp.fromDate(nowDate);
+            var nowIso = nowDate.toISOString();
+            var fields = {
+              googleGroupAdded: added,
+              googleGroupSyncStatus: added ? 'manual-confirmed' : 'manual-removed',
+              googleGroupSyncAction: added ? 'add' : 'remove',
+              googleGroupSyncError: '',
+              googleGroupSyncManuallyUpdatedAt: now,
+              googleGroupSyncManuallyUpdatedBy: adminEmail
+            };
+            if (added) {
+              fields.googleGroupAddedAt = now;
+              fields.googleGroupAddedBy = adminEmail;
+            } else {
+              fields.googleGroupRemovedAt = now;
+              fields.googleGroupRemovedBy = adminEmail;
+            }
+            if (mbUseLocalGroupOverrides()) {
+              var localFields = Object.assign({}, fields, {
+                googleGroupSyncManuallyUpdatedAt: nowIso
+              });
+              if (added) {
+                localFields.googleGroupAddedAt = nowIso;
+              } else {
+                localFields.googleGroupRemovedAt = nowIso;
+              }
+              mbSaveLocalGroupOverride(email, localFields);
+              showToast('Marked locally for this browser');
+            } else {
+              await fb.authorizeMember(email, fields);
+              showToast('Google Group status marked ' + (added ? 'added' : 'removed'));
+            }
+            await mbLoadMembers();
+          } catch (e) {
+            showToast(mbFriendlyPermissionMessage(e) || 'Update failed', 'error');
+          } finally {
+            btn.disabled = false;
+          }
         });
       });
 
@@ -5813,7 +6048,9 @@
             'This will:\n' +
             '  ✓ Revoke member workspace access\n' +
             '  ✓ Delete their Firestore profile\n' +
-            '  ✓ Request removal from Google Group (utl-members)\n\n' +
+            '  ✓ Queue/request Google Group removal\n\n' +
+            'Manual reminder:\n' +
+            '  • Open utl-members@googlegroups.com and remove this person if the group sync does not confirm.\n\n' +
             'Continue?'
           )) return;
           var fb = window.utlFirebaseAuth;
@@ -5881,6 +6118,7 @@
         var snap = await fb.getDocs(fb.collection(fb.db, 'authorized_members'));
         var docs = [];
         snap.forEach(function (d) { docs.push(d); });
+        docs = mbApplyLocalGroupOverrides(docs);
         docs.sort(function (a, b) {
           var na = (a.data().name || a.id).toLowerCase();
           var nb = (b.data().name || b.id).toLowerCase();

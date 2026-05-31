@@ -21,6 +21,9 @@ The Admin Console currently does both:
 2. Marks the member row with `googleGroupSyncStatus: pending` and the job id.
 3. Sends the existing Apps Script `AddGoogleGroupMember` / `RemoveGoogleGroupMember`
    request as a fallback.
+4. Uses the Member Management **Group** column as the manual work queue when Google API
+   automation cannot confirm membership. The Group header links to the `utl-members`
+   member list, and each row has an **Added / Not added** toggle for verified manual fixes.
 
 The Apps Script fallback should remain until the Cloud Function path is confirmed.
 
@@ -63,6 +66,7 @@ The `GOOGLE_WORKSPACE_ADMIN_EMAIL` account must be able to manage the Google Gro
 ## Verification Checklist
 
 - [x] Add Admin Console job creation in parallel with Apps Script fallback.
+- [x] Turn the Member Management Group column into a manual add/remove verification queue with a header link to Google Groups and row-level Added/Not added toggles.
 - [x] Add Firestore rules allowing admins to create/read group sync jobs.
 - [x] Add Firebase Functions scaffold.
 - [ ] Deploy Firestore rules allowing admins to create/read group sync jobs.

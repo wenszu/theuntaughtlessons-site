@@ -101,7 +101,9 @@ function handleGoogleGroupMember(data, mode) {
 }
 
 function notifyGroupSyncFailure_(email, groupEmail, mode, error) {
-  var to = typeof EMAIL_TO !== 'undefined' ? EMAIL_TO : '';
+  var to = typeof GROUP_SYNC_ALERT_TO !== 'undefined'
+    ? GROUP_SYNC_ALERT_TO
+    : (typeof EMAIL_TO !== 'undefined' ? EMAIL_TO : '');
   if (!to) return;
 
   MailApp.sendEmail({

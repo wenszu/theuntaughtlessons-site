@@ -72,7 +72,7 @@ Firestore collections:
 - `settings/publicSite` — public toggle settings (e.g. `findLevelVisible`).
 - `google_group_sync_jobs/{jobId}` — Google Group add/remove jobs queued by Admin Console and intended for Firebase Functions processing.
 
-Key `authorized_members` fields: `email`, `name`, `role` (member/admin/owner), `status`, `googleGroupAdded`, `feedbackEnabled`, `addedAt`, `updatedAt`.
+Key `authorized_members` fields: `email`, `name`, `role` (member/admin/owner), `status`, `googleGroupAdded`, `googleGroupAddedAt`, `googleGroupAddedBy`, `googleGroupRemovedAt`, `googleGroupRemovedBy`, `feedbackEnabled`, `addedAt`, `updatedAt`.
 
 Auth behavior:
 - Supports Google sign-in for emails in `authorized_members`.
@@ -147,11 +147,17 @@ Apps Script `action` routing: `WelcomeEmail`, `TestEmailTemplate`, `ResultsEmail
 - Member workspace video/context management is browser-local (localStorage). Admin content changes do not publish to other visitors unless defaults in `content-config.js` are updated in code.
 - Google Sheet admin changes are pending Google Drive connector reconnection: rename sheet `10iQByFqVCffHanZbbHLnYj7Csbet4fgOCd2FWDzEqkE`, add `Assessments` tab, add `source` column to contacts tab.
 - `googleGroupAdded` field in `authorized_members` is updated by Admin Console Google Group sync requests when Apps Script routes are deployed. If Apps Script is not updated or cannot use Admin Directory API, manage the group manually. See `GOOGLE_GROUP_SETUP.md`.
-- Embedded Google Drive videos/slides cannot expose their permission error state to site JavaScript because the iframe is cross-origin. The workspace instead shows a reusable "Video not opening?" Google Group access guide under protected embeds.
+- Embedded Google Drive videos/slides cannot expose their permission error state to site JavaScript because the iframe is cross-origin. The workspace instead shows a reusable "Video not opening?" access guide under protected embeds without exposing the internal Google Group address.
 - Firebase Auth sign-in-link email copy is controlled in Firebase Console Authentication Templates. Use `FIREBASE_EMAIL_TEMPLATE.md` for the approved template copy.
 - Passwordless invite `actionCodeSettings.url` uses the current site origin and `/member-login/`.
 - `adminProfileData().email` returns `'admin'` when using local test accounts (not a real email). Any email validation must check for `@` before using as a recipient.
 - Admin Console member-management writes require an active Firebase Google session whose `authorized_members/{email}.role` is `admin` or `owner`; the UI preflights this before add/edit/remove actions.
+- If Member Management is opened while signed into the wrong Firebase Google account, the Admin Console prompts to switch accounts instead of leaving the table stuck on an authorization error.
+- Bootstrap owner: `wenszu@gmail.com` is treated as an owner in both `firestore.rules` and the Admin Console even if its `authorized_members` row is missing or accidentally edited. The Admin Console hides edit/remove actions for this row, and Firestore rules block client-side delete/downgrade except by the bootstrap owner account itself.
+- When `wenszu@gmail.com` opens an admin-only Firebase view, Admin Console tries to repair `authorized_members/wenszu@gmail.com` back to `role: owner`, `status: active`, `bootstrapOwner: true`. This repair requires the bootstrap-owner Firestore rule to be deployed first.
+- Admin Console Member Management **Group** column is the manual Google Group queue: header links to the `utl-members` member list and each row has an `Added` / `Not added` toggle for verified manual fixes. Manual toggle clicks record the verification date and admin email. The browser cannot query Google Groups directly; confirmed automation depends on `google_group_sync_jobs` + Functions.
+- On localhost only, Member Management Group toggle changes are stored in `localStorage` (`utl_mb_local_group_overrides`) instead of Firestore so manual verification can be tested without live Firebase writes. Live site toggles still write Firestore for shared admin visibility.
+- Student Progress uses the same Firebase admin preflight/switch-account flow as Member Management. If `authorized_members` is readable but `users` progress documents are blocked by Firestore rules, it renders the member list with a rules warning instead of failing the whole table.
 - `no-cors` mode on Apps Script fetches returns opaque responses — server-side failures are invisible to the client. Always validate inputs client-side.
 - Email templates are stored in Firestore `settings/emailTemplates`. `loadEmailTemplates` in `admin/index.html` always falls back to defaults if Firestore fails, then calls `syncEmailTemplateForm` and `initEmailTemplateListeners` regardless.
 
@@ -173,7 +179,13 @@ Apps Script `action` routing: `WelcomeEmail`, `TestEmailTemplate`, `ResultsEmail
 - Added Admin Console Google Group sync requests for member add/edit/inactivate/remove flows. Requires deployed Apps Script routes `AddGoogleGroupMember` and `RemoveGoogleGroupMember` plus Apps Script Admin Directory API access before it truly adds/removes members in `utl-members@googlegroups.com`.
 - Added Firebase admin-session preflight to Admin Console member add/edit/remove flows so raw `Missing or insufficient permissions` errors become actionable sign-in/admin-role guidance.
 - Started Firestore/Cloud Functions Google Group sync migration: Admin Console queues `google_group_sync_jobs`, Firestore rules allow admins to manage jobs, and `functions/processGoogleGroupSyncJob` scaffold records confirmed/failed results once Google Admin SDK credentials are configured. Apps Script sync remains as fallback during verification.
-- Added member-facing Google Group access training under protected workspace videos/slides. The expandable guide tells members not to request access on each video, links to `https://groups.google.com/g/utl-members`, explains same-Google-account sign-in, and handles the invited-only group case.
+- Redesigned Member Management Group column into a simpler manual queue with a header link to Google Groups and row-level `Added` / `Not added` toggles that display the manual verification date/admin after use. Remove-member popup reminds admins to manually remove from `utl-members@googlegroups.com` if sync does not confirm.
+- Changed localhost Group toggle behavior to use local browser overrides instead of Firestore writes, avoiding Firebase permission errors while testing manual verification.
+- Hardened Student Progress loading: admin preflight now runs before the progress query, and blocked `users` progress reads degrade to a member-list view with a clear Firestore rules warning.
+- Removed member-facing Google Group details from the welcome email, Firebase sign-in template, and workspace video-access guidance. Google Group membership is now treated as an admin-only access mechanism.
+- Updated welcome/sign-in email copy so the "right Google account" reminder is part of the workspace sign-in instruction, not a separate setup step.
+- Added `wenszu@gmail.com` as a protected bootstrap owner in Firestore rules and Admin Console admin checks so the primary owner account cannot be locked out or removed by normal client-side admin actions.
+- Added a self-repair path that restores `authorized_members/wenszu@gmail.com` to `role: owner` when the bootstrap owner signs into Admin Console after rules allow it.
 - Fixed and deployed Google member sign-in Firestore rules: members can now update their own `firstLoginAt` and `lastLoginAt` fields on `authorized_members/{email}` during login, instead of failing with `Missing or insufficient permissions` after authorization.
 - Added `FIREBASE_EMAIL_TEMPLATE.md` with polished Firebase Authentication sign-in-link copy. Firebase's built-in email cannot fully match the custom welcome email HTML unless a server-side custom email sender is added.
 
@@ -186,7 +198,7 @@ Apps Script `action` routing: `WelcomeEmail`, `TestEmailTemplate`, `ResultsEmail
 - Added `scripts/apps-script-email-actions.gs` with the missing Apps Script routes for `TestEmailTemplate` and `WelcomeEmail`. This must be pasted into the deployed Apps Script and called before the default contact-form handler; pushing GitHub alone does not update the Apps Script web app.
 - Fixed Admin Console email-template delivery payloads: `TestEmailTemplate` and `WelcomeEmail` include explicit `recipient`, `to`, and `email` fields so the live script does not fall back to the default contact-form handler.
 - Refined the Admin Console Email Templates editor: compact standard logo toggle, clearer "Workspace button link" field with the live member-login URL, and simplified brand accent swatches that explain what they change in the preview.
-- Redesigned welcome email template (`generateEmailHtml` in `admin/index.html`): white card on `#F7F5F0` background, logo, personalized greeting, "We are glad you are here." subtitle, opening paragraph, YOUR SETUP section with 3 hardcoded steps (Join Google Group → Sign in to workspace → Complete orientation), closing sign-off, footer.
+- Redesigned welcome email template (`generateEmailHtml` in `admin/index.html`): white card on `#F7F5F0` background, logo, personalized greeting, "We are glad you are here." subtitle, opening paragraph, YOUR SETUP section with 3 hardcoded steps, closing sign-off, footer.
 - Simplified Email Templates editor UI: hidden Headline and Button Label fields, relabeled Button URL to "Workspace URL", relabeled Intro to "Opening paragraph".
 - Fixed `loadEmailTemplates` to always call `syncEmailTemplateForm` and `initEmailTemplateListeners` regardless of Firestore success/failure (fixes color swatches not working and "Could not load templates" error).
 - Fixed `et-testEmail` input to only populate when admin email contains `@` (fixes test email failing silently for local test accounts).

@@ -410,7 +410,13 @@ async function getAllMemberWorkspaceProgress() {
     throw new Error("No Firebase session found. Sign in with your Google account through the member workspace, then return to this page.");
   }
   const membersSnapshot = await getDocs(collection(readyDb, "authorized_members"));
-  const usersSnapshot = await getDocs(query(collection(readyDb, "users")));
+  let usersSnapshot = null;
+  let usersReadError = null;
+  try {
+    usersSnapshot = await getDocs(query(collection(readyDb, "users")));
+  } catch (error) {
+    usersReadError = error;
+  }
 
   const membersByEmail = new Map();
   membersSnapshot.forEach((memberDoc) => {
@@ -432,24 +438,26 @@ async function getAllMemberWorkspaceProgress() {
     });
   });
 
-  usersSnapshot.forEach((userDoc) => {
-    const data = userDoc.data() || {};
-    const email = String(data.email || "").trim().toLowerCase();
-    const key = email || userDoc.id;
-    const existing = membersByEmail.get(key) || {};
-    membersByEmail.set(key, {
-      id: existing.id || userDoc.id,
-      uid: userDoc.id,
-      email: email || existing.email || "",
-      displayName: data.displayName || existing.displayName || existing.name || "",
-      lastSeenAt: data.lastSeenAt || existing.lastSeenAt || null,
-      updatedAt: data.updatedAt || existing.updatedAt || null,
-      workspaceProgress: data.workspaceProgress || existing.workspaceProgress || null,
-      role: existing.role || data.role || "member",
-      status: existing.status || "active",
-      cohort: existing.cohort || ""
+  if (usersSnapshot) {
+    usersSnapshot.forEach((userDoc) => {
+      const data = userDoc.data() || {};
+      const email = String(data.email || "").trim().toLowerCase();
+      const key = email || userDoc.id;
+      const existing = membersByEmail.get(key) || {};
+      membersByEmail.set(key, {
+        id: existing.id || userDoc.id,
+        uid: userDoc.id,
+        email: email || existing.email || "",
+        displayName: data.displayName || existing.displayName || existing.name || "",
+        lastSeenAt: data.lastSeenAt || existing.lastSeenAt || null,
+        updatedAt: data.updatedAt || existing.updatedAt || null,
+        workspaceProgress: data.workspaceProgress || existing.workspaceProgress || null,
+        role: existing.role || data.role || "member",
+        status: existing.status || "active",
+        cohort: existing.cohort || ""
+      });
     });
-  });
+  }
 
   const allProgress = Array.from(membersByEmail.values());
   allProgress.sort((a, b) => {
@@ -458,6 +466,9 @@ async function getAllMemberWorkspaceProgress() {
     return aLabel < bLabel ? -1 : aLabel > bLabel ? 1 : 0;
   });
 
+  if (usersReadError) {
+    allProgress.usersReadError = usersReadError;
+  }
   return allProgress;
 }
 

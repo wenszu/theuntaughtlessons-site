@@ -39,9 +39,9 @@ Use this link only with the email address where you received it. It will take yo
 For your security, this link expires automatically. If it no longer works, ask Wen-Szu to send a fresh sign-in link from the Admin Console.
 
 Once you are in:
-1. Join the member community if you have not already.
-2. Open your workspace.
-3. Complete the orientation before starting Phase 1.
+1. Sign in to your workspace with the same Google account tied to your membership.
+2. Complete the orientation.
+3. Start Phase 1 when you are ready.
 
 If anything does not work as expected, reply to your welcome email and we will help you get set up.
 

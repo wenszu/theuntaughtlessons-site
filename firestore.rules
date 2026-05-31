@@ -20,7 +20,19 @@ service cloud.firestore {
 
     function isAdmin() {
       return signedInWithEmail() &&
-        get(/databases/$(database)/documents/authorized_members/$(request.auth.token.email.lower())).data.role in ['admin', 'owner'];
+        (
+          request.auth.token.email.lower() in ['wenszu@gmail.com'] ||
+          get(/databases/$(database)/documents/authorized_members/$(request.auth.token.email.lower())).data.role in ['admin', 'owner']
+        );
+    }
+
+    function isBootstrapOwner() {
+      return signedInWithEmail() &&
+        request.auth.token.email.lower() in ['wenszu@gmail.com'];
+    }
+
+    function isBootstrapOwnerEmail(email) {
+      return email.lower() in ['wenszu@gmail.com'];
     }
 
     match /users/{userId} {
@@ -35,7 +47,9 @@ service cloud.firestore {
 
     match /authorized_members/{email} {
       allow read: if signedIn();
-      allow write: if isAdmin();
+      allow create, update: if isAdmin() &&
+        (!isBootstrapOwnerEmail(email) || isBootstrapOwner());
+      allow delete: if isAdmin() && !isBootstrapOwnerEmail(email);
       // Members can update only their own preferred name and login timestamps.
       allow update: if signedInWithEmail() &&
         request.auth.token.email.lower() == email &&

@@ -59,6 +59,8 @@ To activate this automation in the deployed Apps Script:
 
 1. Paste the latest helpers from `scripts/apps-script-email-actions.gs` into the deployed
    Apps Script web app.
+   - Use `GROUP_SYNC_ALERT_TO` in Apps Script if Google Group failure emails should go to
+     a different inbox than the general contact/welcome-email reply address.
 2. In `doPost(e)`, route these actions before the default contact-form/sheet logging branch:
 
    ```js
@@ -80,6 +82,19 @@ eventually show confirmed/failed Google Group sync status. Track that rollout in
 `GOOGLE_GROUP_SYNC_MIGRATION.md`. Until the checklist there is complete, keep the Apps Script
 fallback active.
 
+The Admin Console **Group** column is also the manual verification queue. The table header
+links directly to the `utl-members` member list for quick checking:
+
+- **Not added** toggle: Add the email in Google Groups, then click it to mark **Added**.
+  The row records the verification date and admin email.
+- **Added** toggle: Remove the email in Google Groups, then click it to mark **Not added**.
+  The row records the removal date and admin email.
+- Remove-member popup: reminds the admin to manually remove the person from `utl-members@googlegroups.com` if sync does not confirm.
+
+The browser cannot query Google Groups directly. True automatic verification requires the
+Firestore/Cloud Functions migration to finish and write confirmed/failed status back to
+Firestore.
+
 ---
 
 ## 3B. Member-facing video access guidance
@@ -89,11 +104,10 @@ Google Drive videos and slides. This is intentional:
 
 - The site cannot reliably detect the Google Drive "request access" screen inside an
   embedded iframe because Google Drive is cross-origin.
-- Members should not request access on individual videos. Access should be solved once
-  through membership in `utl-members@googlegroups.com`.
+- Members should not request access on individual videos. Access is handled internally
+  through the admin member-management process.
 - The guide tells members to sign into Google with the same email used for the workspace,
-  open `https://groups.google.com/g/utl-members`, join if the group allows it, or reply to
-  their welcome email if Google says an invitation is required.
+  refresh after a few minutes, and reply to the welcome email if videos are still blocked.
 
 If you want members to fully self-serve, change the Google Group setting from **Invited
 users only** to a moderated join/request setting. If you keep **Invited users only**, the
