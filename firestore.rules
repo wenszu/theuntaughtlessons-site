@@ -36,10 +36,10 @@ service cloud.firestore {
     match /authorized_members/{email} {
       allow read: if signedIn();
       allow write: if isAdmin();
-      // Members can update only their own preferred name (set during onboarding)
+      // Members can update only their own preferred name and login timestamps.
       allow update: if signedInWithEmail() &&
         request.auth.token.email.lower() == email &&
-        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name']);
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name', 'lastLoginAt', 'firstLoginAt']);
     }
 
     match /access_requests/{requestId} {
