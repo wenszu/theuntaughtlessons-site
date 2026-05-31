@@ -47,6 +47,25 @@ this step. It does not automatically add or remove anyone from the group.
 
 ---
 
+## 3A. Member-facing video access guidance
+
+The member workspace shows an expandable **Video not opening?** guide under protected
+Google Drive videos and slides. This is intentional:
+
+- The site cannot reliably detect the Google Drive "request access" screen inside an
+  embedded iframe because Google Drive is cross-origin.
+- Members should not request access on individual videos. Access should be solved once
+  through membership in `utl-members@googlegroups.com`.
+- The guide tells members to sign into Google with the same email used for the workspace,
+  open `https://groups.google.com/g/utl-members`, join if the group allows it, or reply to
+  their welcome email if Google says an invitation is required.
+
+If you want members to fully self-serve, change the Google Group setting from **Invited
+users only** to a moderated join/request setting. If you keep **Invited users only**, the
+admin must add them manually before videos will unlock.
+
+---
+
 ## 4. Removing a member from the group
 
 1. In groups.google.com, open the UTL Members group → **Members**.
