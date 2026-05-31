@@ -136,13 +136,13 @@ Data files: `data/sort-bucket.json` (public), `data/tsa/*.json` (member TSA), `d
 
 Apps Script endpoint (all POST submissions): `https://script.google.com/macros/s/AKfycbzJE--FL2kB_XDNZRnszCtlyLRPvaLAHGuF5TAOdXJk40atbvf5Y6ELuSK2B7CSLaMN/exec`
 
-Apps Script `action` routing: `WelcomeEmail`, `TestEmailTemplate`, `ResultsEmail`. Default = lead/sheet logging.
+Apps Script `action` routing: `WelcomeEmail`, `TestEmailTemplate`, `ResultsEmail`, `AddGoogleGroupMember`, `RemoveGoogleGroupMember`. Default = lead/sheet logging.
 
 ## Known Notes
 
 - Member workspace video/context management is browser-local (localStorage). Admin content changes do not publish to other visitors unless defaults in `content-config.js` are updated in code.
 - Google Sheet admin changes are pending Google Drive connector reconnection: rename sheet `10iQByFqVCffHanZbbHLnYj7Csbet4fgOCd2FWDzEqkE`, add `Assessments` tab, add `source` column to contacts tab.
-- `googleGroupAdded` field in `authorized_members` is a manual record only — it does not add/remove anyone from Google Groups. See `GOOGLE_GROUP_SETUP.md`.
+- `googleGroupAdded` field in `authorized_members` is updated by Admin Console Google Group sync requests when Apps Script routes are deployed. If Apps Script is not updated or cannot use Admin Directory API, manage the group manually. See `GOOGLE_GROUP_SETUP.md`.
 - Embedded Google Drive videos/slides cannot expose their permission error state to site JavaScript because the iframe is cross-origin. The workspace instead shows a reusable "Video not opening?" Google Group access guide under protected embeds.
 - Firebase Auth sign-in-link email copy is controlled in Firebase Console Authentication Templates. Use `FIREBASE_EMAIL_TEMPLATE.md` for the approved template copy.
 - Passwordless invite `actionCodeSettings.url` uses the current site origin and `/member-login/`.
@@ -165,6 +165,7 @@ Apps Script `action` routing: `WelcomeEmail`, `TestEmailTemplate`, `ResultsEmail
 
 ### 2026-05-31
 
+- Added Admin Console Google Group sync requests for member add/edit/inactivate/remove flows. Requires deployed Apps Script routes `AddGoogleGroupMember` and `RemoveGoogleGroupMember` plus Apps Script Admin Directory API access before it truly adds/removes members in `utl-members@googlegroups.com`.
 - Added member-facing Google Group access training under protected workspace videos/slides. The expandable guide tells members not to request access on each video, links to `https://groups.google.com/g/utl-members`, explains same-Google-account sign-in, and handles the invited-only group case.
 - Fixed and deployed Google member sign-in Firestore rules: members can now update their own `firstLoginAt` and `lastLoginAt` fields on `authorized_members/{email}` during login, instead of failing with `Missing or insufficient permissions` after authorization.
 - Added `FIREBASE_EMAIL_TEMPLATE.md` with polished Firebase Authentication sign-in-link copy. Firebase's built-in email cannot fully match the custom welcome email HTML unless a server-side custom email sender is added.

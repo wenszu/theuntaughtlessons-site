@@ -1558,6 +1558,7 @@
     .mb-expiry-expired { color:#8A1F1F; font-weight:700; }
     .mb-bool-yes { color:var(--green); font-weight:700; }
     .mb-bool-no { color:#bbb; }
+    .mb-bool-pending { display:block; margin-top:2px; color:var(--gold); font:700 10px 'Roboto Mono',monospace; letter-spacing:.04em; text-transform:uppercase; }
     .mb-actions { display:flex; gap:5px; flex-wrap:wrap; }
     .mb-btn { padding:4px 9px; border:1px solid var(--line); border-radius:4px; background:var(--white); color:var(--navy); font-size:11px; font-family:'Roboto Mono',monospace; font-weight:700; cursor:pointer; white-space:nowrap; transition:border-color .12s,background .12s; }
     .mb-btn:hover { border-color:var(--navy); }
@@ -2033,7 +2034,7 @@
                 <ol>
                   <li><strong>Admin:</strong> Find the member in the table, click <strong>Remove</strong></li>
                   <li><strong>Automated:</strong> Removed from Firestore member list and user profile — their next page load will be rejected</li>
-                  <li><strong>Manual — you must do this:</strong> Remove them from the Google Group at <a href="https://groups.google.com/g/utl-members" target="_blank">utl-members</a></li>
+                  <li><strong>Automated after Apps Script setup:</strong> Removed from the Google Group at <a href="https://groups.google.com/g/utl-members" target="_blank">utl-members</a></li>
                   <li><em>Active sessions last up to 1 hour before expiring. Outstanding login links cannot be remotely revoked.</em></li>
                 </ol>
               </div>
@@ -4285,6 +4286,7 @@
     let _etPreviewRange = null;
     const EMAIL_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzJE--FL2kB_XDNZRnszCtlyLRPvaLAHGuF5TAOdXJk40atbvf5Y6ELuSK2B7CSLaMN/exec';
     const DEFAULT_WORKSPACE_URL = 'https://theuntaughtlessons.com/member-login/';
+    const GOOGLE_GROUP_EMAIL = 'utl-members@googlegroups.com';
 
     function etGetTemplate(id) {
       const defaults = {
@@ -4306,6 +4308,18 @@
         mode: 'no-cors',
         headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
         body: JSON.stringify(body)
+      });
+    }
+
+    function mbRequestGoogleGroupSync(email, name, mode) {
+      const action = mode === 'remove' ? 'RemoveGoogleGroupMember' : 'AddGoogleGroupMember';
+      return postEmailScriptAction(action, {
+        source: 'admin-member-management',
+        email: email,
+        memberEmail: email,
+        recipient: email,
+        name: name || '',
+        groupEmail: GOOGLE_GROUP_EMAIL
       });
     }
 
@@ -5513,6 +5527,9 @@
         var groupHtml = data.googleGroupAdded
           ? '<span class="mb-bool-yes">✓ Yes</span>'
           : '<span class="mb-bool-no">No</span>';
+        if (data.googleGroupSyncStatus) {
+          groupHtml += '<span class="mb-bool-pending">' + escapeHtml(data.googleGroupSyncStatus) + '</span>';
+        }
         var actions = isOwner
           ? '<span style="color:#bbb;font-size:11px;font-family:\'Roboto Mono\',monospace;">Owner</span>'
           : '<div class="mb-actions">' +
@@ -5651,7 +5668,33 @@
 
           btn.disabled = true;
           try {
+            var cached = mbMembersCache.find(function (d) { return d.id === email; });
+            var previousData = cached ? cached.data() : {};
+            var previousGroupAdded = !!previousData.googleGroupAdded;
+            var requestedGroupMode = '';
+            if (fields.status === 'inactive' && previousGroupAdded) {
+              requestedGroupMode = 'remove';
+            } else if (fields.googleGroupAdded !== undefined && fields.googleGroupAdded !== previousGroupAdded) {
+              requestedGroupMode = fields.googleGroupAdded ? 'add' : 'remove';
+            }
+
             await fb.authorizeMember(email, fields);
+            if (requestedGroupMode) {
+              try {
+                await mbRequestGoogleGroupSync(email, fields.name || previousData.name || '', requestedGroupMode);
+                await fb.authorizeMember(email, {
+                  googleGroupAdded: requestedGroupMode === 'add',
+                  googleGroupSyncStatus: requestedGroupMode + '-requested',
+                  googleGroupSyncRequestedAt: fb.Timestamp.fromDate(new Date())
+                });
+              } catch (groupErr) {
+                await fb.authorizeMember(email, {
+                  googleGroupSyncStatus: requestedGroupMode + '-request-failed',
+                  googleGroupSyncError: (groupErr && groupErr.message) || 'Apps Script request failed',
+                  googleGroupSyncRequestedAt: fb.Timestamp.fromDate(new Date())
+                });
+              }
+            }
             if (feedbackEnabledValue !== undefined && fb.findUserUidByEmail && fb.setUserFeedbackEnabled) {
               var uid = await fb.findUserUidByEmail(email);
               if (uid) await fb.setUserFeedbackEnabled(uid, feedbackEnabledValue);
@@ -5662,7 +5705,7 @@
               window.setTimeout(function () { statusEl.textContent = ''; }, 2000);
             }
             if (editRow) editRow.classList.remove('mb-open');
-            showToast('Member updated');
+            showToast('Member updated' + (requestedGroupMode ? ' — Google Group sync requested' : ''));
             await mbLoadMembers();
           } catch (e) {
             showToast((e && e.message) || 'Save failed', 'error');
@@ -5705,21 +5748,28 @@
             'Remove ' + email + '?\n\n' +
             'This will:\n' +
             '  ✓ Revoke member workspace access\n' +
-            '  ✓ Delete their Firestore profile\n\n' +
-            'You must also do manually:\n' +
-            '  • Remove from Google Group (utl-members)\n\n' +
+            '  ✓ Delete their Firestore profile\n' +
+            '  ✓ Request removal from Google Group (utl-members)\n\n' +
             'Continue?'
           )) return;
           var fb = window.utlFirebaseAuth;
           if (!fb || !fb.deleteDoc || !fb.doc || !fb.db) { showToast('Firebase not ready', 'error'); return; }
           btn.disabled = true;
           try {
+            var cached = mbMembersCache.find(function (d) { return d.id === email; });
+            var cachedData = cached ? cached.data() : {};
+            var groupRemoveRequested = false;
+            try {
+              await mbRequestGoogleGroupSync(email, cachedData.name || '', 'remove');
+              groupRemoveRequested = true;
+            } catch (groupErr) { /* non-fatal */ }
+
             await fb.deleteDoc(fb.doc(fb.db, 'authorized_members', email));
             try {
               var uid = await fb.findUserUidByEmail(email);
               if (uid) await fb.deleteDoc(fb.doc(fb.db, 'users', uid));
             } catch (e2) { /* non-fatal */ }
-            showToast('Member removed');
+            showToast('Member removed' + (groupRemoveRequested ? ' — Google Group removal requested' : ''));
             await mbLoadMembers();
             var notice = document.getElementById('mbRemovalNotice');
             if (notice) {
@@ -5727,10 +5777,8 @@
                 '<div style="margin-bottom:14px;padding:12px 16px;border-left:3px solid #EEA320;background:#fff8e1;border-radius:4px;">' +
                 '<strong style="display:block;margin-bottom:6px;color:#003366;">Access revoked for ' + escapeHtml(email) + '</strong>' +
                 '<p style="margin:0 0 6px;font-size:13px;color:#4A4A4A;">Automated: removed from Firestore member list and user profile.</p>' +
-                '<p style="margin:0 0 4px;font-size:13px;font-weight:700;color:#4A4A4A;">Still needed manually:</p>' +
-                '<ul style="margin:4px 0 0;padding-left:18px;font-size:13px;color:#4A4A4A;line-height:1.8;">' +
-                '<li>Remove from Google Group: <a href="https://groups.google.com/g/utl-members" target="_blank" style="color:#003366;">utl-members</a></li>' +
-                '</ul></div>';
+                '<p style="margin:0;font-size:13px;color:#4A4A4A;">Google Group removal ' + (groupRemoveRequested ? 'was requested through Apps Script.' : 'could not be requested. Remove manually at <a href="https://groups.google.com/g/utl-members" target="_blank" style="color:#003366;">utl-members</a>.') + '</p>' +
+                '</div>';
               notice.hidden = false;
               setTimeout(function () { notice.hidden = true; }, 20000);
             }
@@ -5855,6 +5903,25 @@
         try {
           await fb.authorizeMember(emailVal, newMemberData);
 
+          var groupSyncRequested = false;
+          try {
+            await mbRequestGoogleGroupSync(emailVal, nameVal, 'add');
+            groupSyncRequested = true;
+            await fb.authorizeMember(emailVal, {
+              googleGroupAdded: true,
+              googleGroupSyncStatus: 'add-requested',
+              googleGroupSyncRequestedAt: fb.Timestamp.fromDate(new Date())
+            });
+          } catch (groupErr) {
+            try {
+              await fb.authorizeMember(emailVal, {
+                googleGroupSyncStatus: 'add-request-failed',
+                googleGroupSyncError: (groupErr && groupErr.message) || 'Apps Script request failed',
+                googleGroupSyncRequestedAt: fb.Timestamp.fromDate(new Date())
+              });
+            } catch (e2) { /* non-fatal */ }
+          }
+
           // Retrieve the Welcome Email template settings
           const welcomeTemplate = etGetTemplate('welcomeEmail');
           
@@ -5897,6 +5964,7 @@
           }
 
           var toastMsg = 'Member added';
+          if (groupSyncRequested) toastMsg += ' — Google Group access requested';
           if (emailSent) toastMsg += ' — welcome email sent';
           if (linkSent) toastMsg += ' + login link sent';
           showToast(toastMsg);
@@ -5905,6 +5973,8 @@
             var lines = [];
             if (emailSent) lines.push('✉ Welcome email sent to ' + emailVal);
             else lines.push('⚠ Welcome email could not be sent — send manually');
+            if (groupSyncRequested) lines.push('✓ Google Group access requested for ' + emailVal);
+            else lines.push('⚠ Google Group access was not requested — check Apps Script setup');
             if (sendLinkChecked) {
               if (linkSent) lines.push('✉ Login link sent (Firebase email) to ' + emailVal);
               else lines.push('⚠ Login link could not be sent — use "Send login link" below');
@@ -5941,7 +6011,7 @@
       var pad = function (n) { return String(n).padStart(2, '0'); };
       var dateStr = String(now.getFullYear()) + pad(now.getMonth() + 1) + pad(now.getDate());
       var filename = dateStr + ' - utl-members download.csv';
-      var header = ['Name', 'Email', 'Role', 'Status', 'Cohort', 'First Login', 'Expiry', 'Google Group', 'Notes', 'Added By', 'Added At', 'Local Username'];
+      var header = ['Name', 'Email', 'Role', 'Status', 'Cohort', 'First Login', 'Expiry', 'Google Group', 'Google Group Sync', 'Notes', 'Added By', 'Added At', 'Local Username'];
       function csvCell(val) {
         var s = String(val === null || val === undefined ? '' : val).replace(/"/g, '""');
         return (s.search(/[,"\r\n]/) !== -1) ? '"' + s + '"' : s;
@@ -5962,6 +6032,7 @@
           csvCell(mbFormatDate(data.firstLoginAt)),
           csvCell(mbFormatDate(data.expiryDate)),
           csvCell(data.googleGroupAdded ? 'Yes' : 'No'),
+          csvCell(data.googleGroupSyncStatus || ''),
           csvCell(data.notes || ''),
           csvCell(data.addedBy || ''),
           csvCell(mbFormatDate(data.addedAt)),

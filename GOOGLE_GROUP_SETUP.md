@@ -43,11 +43,41 @@ the entire Drive folder. Removing them from the group revokes access immediately
 5. Find the member's row, click **Edit**, tick **Google Group Added → Yes**, and save.
 
 The `googleGroupAdded` field is a manual flag — it is your record that you have completed
-this step. It does not automatically add or remove anyone from the group.
+this step. It can also be updated automatically by the Apps Script route below.
 
 ---
 
-## 3A. Member-facing video access guidance
+## 3A. Automated group sync from the Admin Console
+
+The Admin Console now sends Apps Script actions when members are added, marked inactive,
+manually toggled in the Google Group field, or removed:
+
+- `AddGoogleGroupMember`
+- `RemoveGoogleGroupMember`
+
+To activate this automation in the deployed Apps Script:
+
+1. Paste the latest helpers from `scripts/apps-script-email-actions.gs` into the deployed
+   Apps Script web app.
+2. In `doPost(e)`, route these actions before the default contact-form/sheet logging branch:
+
+   ```js
+   if (action === 'AddGoogleGroupMember') return handleGoogleGroupMember(data, 'add');
+   if (action === 'RemoveGoogleGroupMember') return handleGoogleGroupMember(data, 'remove');
+   ```
+
+3. In Apps Script, enable **Services (+)** → **Admin Directory API**.
+4. In the linked Google Cloud project, enable the **Admin SDK API** if Apps Script asks for it.
+5. Deploy a new web app version.
+
+The Apps Script must run as an account that can manage `utl-members@googlegroups.com`.
+If the group is a consumer `@googlegroups.com` group rather than a Workspace/Cloud Identity
+managed group, the Admin Directory API may not be able to add/remove members. In that case,
+the script sends a failure email to the admin address and the member must be managed manually.
+
+---
+
+## 3B. Member-facing video access guidance
 
 The member workspace shows an expandable **Video not opening?** guide under protected
 Google Drive videos and slides. This is intentional:
