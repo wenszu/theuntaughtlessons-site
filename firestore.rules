@@ -47,6 +47,10 @@ service cloud.firestore {
       allow read, update, delete: if isAdmin();
     }
 
+    match /google_group_sync_jobs/{jobId} {
+      allow read, create, update, delete: if isAdmin();
+    }
+
     match /settings/{docId} {
       allow read: if docId == 'publicSite' || signedIn();
       allow write: if isAdmin();

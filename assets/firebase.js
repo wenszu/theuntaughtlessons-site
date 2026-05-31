@@ -231,6 +231,48 @@ async function authorizeMember(email, fields = {}) {
   await setDoc(memberRef, payload, { merge: true });
 }
 
+async function requestGoogleGroupSyncJob(email, action, details = {}) {
+  const normalizedEmail = String(email || "").trim().toLowerCase();
+  const normalizedAction = String(action || "").trim().toLowerCase();
+  if (!normalizedEmail) {
+    throw new Error("An email address is required to sync Google Group access.");
+  }
+  if (normalizedAction !== "add" && normalizedAction !== "remove") {
+    throw new Error("Google Group sync action must be add or remove.");
+  }
+
+  const readyDb = requireFirestore();
+  const jobRef = doc(collection(readyDb, "google_group_sync_jobs"));
+  await setDoc(jobRef, {
+    email: normalizedEmail,
+    memberEmail: normalizedEmail,
+    action: normalizedAction,
+    groupEmail: String(details.groupEmail || "utl-members@googlegroups.com").trim().toLowerCase(),
+    name: String(details.name || "").trim(),
+    requestedBy: String(details.requestedBy || "").trim(),
+    source: String(details.source || "admin-member-management").trim(),
+    status: "pending",
+    requestedAt: serverTimestamp(),
+    updatedAt: serverTimestamp()
+  });
+
+  return jobRef.id;
+}
+
+async function getGoogleGroupSyncJobs(limitCount = 50) {
+  const snapshot = await getDocs(collection(requireFirestore(), "google_group_sync_jobs"));
+  const docs = [];
+  snapshot.forEach((item) => docs.push(item));
+  docs.sort((a, b) => {
+    const av = a.data().requestedAt;
+    const bv = b.data().requestedAt;
+    const ad = av && av.toMillis ? av.toMillis() : 0;
+    const bd = bv && bv.toMillis ? bv.toMillis() : 0;
+    return bd - ad;
+  });
+  return docs.slice(0, limitCount);
+}
+
 async function saveUserProfile(user, member = {}) {
   if (!user || !user.uid) return;
 
@@ -584,6 +626,7 @@ export {
   isSignInWithEmailLink,
   onAuthStateChanged,
   requireAuthorizedMember,
+  requestGoogleGroupSyncJob,
   saveMemberWorkspaceProgress,
   saveUserProfile,
   submitAccessRequest,
@@ -595,6 +638,7 @@ export {
   getPublicAssessmentSettings,
   setPublicAssessmentSettings,
   getEngagementSettings,
+  getGoogleGroupSyncJobs,
   setEngagementSettings,
   setGlobalFeedbackSetting,
   setPublicFindLevelSetting,

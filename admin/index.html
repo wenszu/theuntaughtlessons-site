@@ -2495,9 +2495,11 @@
       getPublicAssessmentSettings,
       setPublicAssessmentSettings,
       getEngagementSettings,
+      getGoogleGroupSyncJobs,
       getGlobalFeedbackSetting,
       getPublicFindLevelSetting,
       getSignedInUser,
+      requestGoogleGroupSyncJob,
       sendSignInInvite,
       setEngagementSettings,
       setGlobalFeedbackSetting,
@@ -2525,9 +2527,11 @@
       getPublicAssessmentSettings,
       setPublicAssessmentSettings,
       getEngagementSettings,
+      getGoogleGroupSyncJobs,
       getGlobalFeedbackSetting,
       getPublicFindLevelSetting,
       getSignedInUser,
+      requestGoogleGroupSyncJob,
       sendSignInInvite,
       setEngagementSettings,
       setGlobalFeedbackSetting,
@@ -4323,6 +4327,58 @@
       });
     }
 
+    async function mbQueueGoogleGroupSync(email, name, mode) {
+      const fb = window.utlFirebaseAuth;
+      const action = mode === 'remove' ? 'remove' : 'add';
+      const admin = await mbRequireFirebaseAdmin();
+      let jobId = '';
+
+      if (fb && fb.requestGoogleGroupSyncJob) {
+        jobId = await fb.requestGoogleGroupSyncJob(email, action, {
+          name: name || '',
+          groupEmail: GOOGLE_GROUP_EMAIL,
+          requestedBy: admin && admin.email ? admin.email : '',
+          source: 'admin-member-management'
+        });
+      }
+
+      return jobId;
+    }
+
+    async function mbRequireFirebaseAdmin() {
+      const fb = window.utlFirebaseAuth;
+      if (!fb || !fb.getSignedInUser || !fb.signInWithGooglePopup || !fb.getDoc || !fb.doc || !fb.db) {
+        throw new Error('Firebase is still loading. Try again in a moment.');
+      }
+
+      let user = await fb.getSignedInUser();
+      if (!user) {
+        await fb.signInWithGooglePopup();
+        user = await fb.getSignedInUser();
+      }
+
+      if (!user || !user.email) {
+        throw new Error('Sign in with your Google admin account before managing members.');
+      }
+
+      const email = String(user.email || '').trim().toLowerCase();
+      const snap = await fb.getDoc(fb.doc(fb.db, 'authorized_members', email));
+      const role = snap.exists() ? (snap.data().role || '') : '';
+      if (role !== 'admin' && role !== 'owner') {
+        throw new Error('Your Google account (' + email + ') is not marked admin or owner in authorized_members.');
+      }
+
+      return user;
+    }
+
+    function mbFriendlyPermissionMessage(error) {
+      const msg = (error && error.message) || 'Unknown error';
+      if (/permission|Missing or insufficient permissions/i.test(msg)) {
+        return 'Firebase permission denied. Sign in with the Google account that has admin or owner role, then try again.';
+      }
+      return msg;
+    }
+
     function normalizeExtraButtonUrl(url) {
       const value = String(url || '').trim();
       if (!value || value === '{{workspace_url}}' || value === DEFAULT_WORKSPACE_URL) return '';
@@ -5668,6 +5724,7 @@
 
           btn.disabled = true;
           try {
+            await mbRequireFirebaseAdmin();
             var cached = mbMembersCache.find(function (d) { return d.id === email; });
             var previousData = cached ? cached.data() : {};
             var previousGroupAdded = !!previousData.googleGroupAdded;
@@ -5680,16 +5737,22 @@
 
             await fb.authorizeMember(email, fields);
             if (requestedGroupMode) {
+              var syncJobId = '';
+              try {
+                syncJobId = await mbQueueGoogleGroupSync(email, fields.name || previousData.name || '', requestedGroupMode);
+              } catch (jobErr) { /* fall through to Apps Script fallback */ }
+
               try {
                 await mbRequestGoogleGroupSync(email, fields.name || previousData.name || '', requestedGroupMode);
                 await fb.authorizeMember(email, {
-                  googleGroupAdded: requestedGroupMode === 'add',
-                  googleGroupSyncStatus: requestedGroupMode + '-requested',
+                  googleGroupSyncStatus: syncJobId ? 'pending' : requestedGroupMode + '-requested',
+                  googleGroupSyncJobId: syncJobId || '',
                   googleGroupSyncRequestedAt: fb.Timestamp.fromDate(new Date())
                 });
               } catch (groupErr) {
                 await fb.authorizeMember(email, {
-                  googleGroupSyncStatus: requestedGroupMode + '-request-failed',
+                  googleGroupSyncStatus: syncJobId ? 'pending' : requestedGroupMode + '-request-failed',
+                  googleGroupSyncJobId: syncJobId || '',
                   googleGroupSyncError: (groupErr && groupErr.message) || 'Apps Script request failed',
                   googleGroupSyncRequestedAt: fb.Timestamp.fromDate(new Date())
                 });
@@ -5708,7 +5771,7 @@
             showToast('Member updated' + (requestedGroupMode ? ' — Google Group sync requested' : ''));
             await mbLoadMembers();
           } catch (e) {
-            showToast((e && e.message) || 'Save failed', 'error');
+            showToast(mbFriendlyPermissionMessage(e) || 'Save failed', 'error');
           } finally {
             btn.disabled = false;
           }
@@ -5730,11 +5793,12 @@
 
           btn.disabled = true;
           try {
+            await mbRequireFirebaseAdmin();
             await fb.authorizeMember(email, { expiryDate: fb.Timestamp.fromDate(newExpiry) });
             showToast('Expiry extended by 1 year');
             await mbLoadMembers();
           } catch (e) {
-            showToast((e && e.message) || 'Extend failed', 'error');
+            showToast(mbFriendlyPermissionMessage(e) || 'Extend failed', 'error');
           } finally {
             btn.disabled = false;
           }
@@ -5756,9 +5820,15 @@
           if (!fb || !fb.deleteDoc || !fb.doc || !fb.db) { showToast('Firebase not ready', 'error'); return; }
           btn.disabled = true;
           try {
+            await mbRequireFirebaseAdmin();
             var cached = mbMembersCache.find(function (d) { return d.id === email; });
             var cachedData = cached ? cached.data() : {};
             var groupRemoveRequested = false;
+            var groupRemoveJobId = '';
+            try {
+              groupRemoveJobId = await mbQueueGoogleGroupSync(email, cachedData.name || '', 'remove');
+              groupRemoveRequested = true;
+            } catch (jobErr) { /* fall through to Apps Script fallback */ }
             try {
               await mbRequestGoogleGroupSync(email, cachedData.name || '', 'remove');
               groupRemoveRequested = true;
@@ -5777,13 +5847,13 @@
                 '<div style="margin-bottom:14px;padding:12px 16px;border-left:3px solid #EEA320;background:#fff8e1;border-radius:4px;">' +
                 '<strong style="display:block;margin-bottom:6px;color:#003366;">Access revoked for ' + escapeHtml(email) + '</strong>' +
                 '<p style="margin:0 0 6px;font-size:13px;color:#4A4A4A;">Automated: removed from Firestore member list and user profile.</p>' +
-                '<p style="margin:0;font-size:13px;color:#4A4A4A;">Google Group removal ' + (groupRemoveRequested ? 'was requested through Apps Script.' : 'could not be requested. Remove manually at <a href="https://groups.google.com/g/utl-members" target="_blank" style="color:#003366;">utl-members</a>.') + '</p>' +
+                '<p style="margin:0;font-size:13px;color:#4A4A4A;">Google Group removal ' + (groupRemoveRequested ? 'was queued' + (groupRemoveJobId ? ' in Firestore.' : ' through Apps Script fallback.') : 'could not be requested. Remove manually at <a href="https://groups.google.com/g/utl-members" target="_blank" style="color:#003366;">utl-members</a>.') + '</p>' +
                 '</div>';
               notice.hidden = false;
               setTimeout(function () { notice.hidden = true; }, 20000);
             }
           } catch (e) {
-            showToast((e && e.message) || 'Remove failed', 'error');
+            showToast(mbFriendlyPermissionMessage(e) || 'Remove failed', 'error');
           } finally {
             btn.disabled = false;
           }
@@ -5807,6 +5877,7 @@
       }
 
       try {
+        await mbRequireFirebaseAdmin();
         var snap = await fb.getDocs(fb.collection(fb.db, 'authorized_members'));
         var docs = [];
         snap.forEach(function (d) { docs.push(d); });
@@ -5818,11 +5889,8 @@
         mbMembersCache = docs;
         mbRenderTable(docs);
       } catch (e) {
-        var msg = (e && e.message) || 'Unknown error';
-        var hint = msg.includes('permission') || msg.includes('Missing')
-          ? ' Sign in with Google in the member workspace first to authenticate.'
-          : '';
-        wrap.innerHTML = '<p class="mb-msg mb-err">Failed to load: ' + escapeHtml(msg) + escapeHtml(hint) + '</p>';
+        var msg = mbFriendlyPermissionMessage(e);
+        wrap.innerHTML = '<p class="mb-msg mb-err">Failed to load: ' + escapeHtml(msg) + '</p>';
       }
     }
 
@@ -5901,21 +5969,29 @@
         var emailStatusEl = document.getElementById('mbAddEmailStatus');
         if (emailStatusEl) { emailStatusEl.textContent = ''; emailStatusEl.hidden = true; }
         try {
+          await mbRequireFirebaseAdmin();
           await fb.authorizeMember(emailVal, newMemberData);
 
           var groupSyncRequested = false;
+          var groupSyncJobId = '';
+          try {
+            groupSyncJobId = await mbQueueGoogleGroupSync(emailVal, nameVal, 'add');
+            groupSyncRequested = true;
+          } catch (jobErr) { /* fall through to Apps Script fallback */ }
+
           try {
             await mbRequestGoogleGroupSync(emailVal, nameVal, 'add');
             groupSyncRequested = true;
             await fb.authorizeMember(emailVal, {
-              googleGroupAdded: true,
-              googleGroupSyncStatus: 'add-requested',
+              googleGroupSyncStatus: groupSyncJobId ? 'pending' : 'add-requested',
+              googleGroupSyncJobId: groupSyncJobId || '',
               googleGroupSyncRequestedAt: fb.Timestamp.fromDate(new Date())
             });
           } catch (groupErr) {
             try {
               await fb.authorizeMember(emailVal, {
-                googleGroupSyncStatus: 'add-request-failed',
+                googleGroupSyncStatus: groupSyncJobId ? 'pending' : 'add-request-failed',
+                googleGroupSyncJobId: groupSyncJobId || '',
                 googleGroupSyncError: (groupErr && groupErr.message) || 'Apps Script request failed',
                 googleGroupSyncRequestedAt: fb.Timestamp.fromDate(new Date())
               });
@@ -5964,7 +6040,7 @@
           }
 
           var toastMsg = 'Member added';
-          if (groupSyncRequested) toastMsg += ' — Google Group access requested';
+          if (groupSyncRequested) toastMsg += groupSyncJobId ? ' — Google Group sync queued' : ' — Google Group access requested';
           if (emailSent) toastMsg += ' — welcome email sent';
           if (linkSent) toastMsg += ' + login link sent';
           showToast(toastMsg);
@@ -5973,7 +6049,7 @@
             var lines = [];
             if (emailSent) lines.push('✉ Welcome email sent to ' + emailVal);
             else lines.push('⚠ Welcome email could not be sent — send manually');
-            if (groupSyncRequested) lines.push('✓ Google Group access requested for ' + emailVal);
+            if (groupSyncRequested) lines.push(groupSyncJobId ? '✓ Google Group sync queued for ' + emailVal : '✓ Google Group access requested for ' + emailVal);
             else lines.push('⚠ Google Group access was not requested — check Apps Script setup');
             if (sendLinkChecked) {
               if (linkSent) lines.push('✉ Login link sent (Firebase email) to ' + emailVal);
@@ -5998,7 +6074,7 @@
           addBtn.textContent = '+ Add member';
           await mbLoadMembers();
         } catch (e) {
-          showToast((e && e.message) || 'Add failed', 'error');
+          showToast(mbFriendlyPermissionMessage(e) || 'Add failed', 'error');
         } finally {
           saveBtn.disabled = false;
         }

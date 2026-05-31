@@ -17,6 +17,7 @@ Single source of truth for agents working on this repo. Read before making chang
 
 Related files: `context/brand.md` (brand/UI rules), `context/voice-editor.md` (writing voice), `context/claude.md` (Claude-specific reminders).
 Operational docs: `GOOGLE_GROUP_SETUP.md`, `FIREBASE_EMAIL_TEMPLATE.md`.
+Migration trackers: `GOOGLE_GROUP_SYNC_MIGRATION.md`.
 
 ## Working Rules
 
@@ -69,6 +70,7 @@ Firestore collections:
 - `settings/emailTemplates` — welcome email template. Read/written by `getEmailTemplates`/`saveEmailTemplate` in `assets/firebase.js`.
 - `settings/feedback` — global `defaultFeedbackEnabled` boolean.
 - `settings/publicSite` — public toggle settings (e.g. `findLevelVisible`).
+- `google_group_sync_jobs/{jobId}` — Google Group add/remove jobs queued by Admin Console and intended for Firebase Functions processing.
 
 Key `authorized_members` fields: `email`, `name`, `role` (member/admin/owner), `status`, `googleGroupAdded`, `feedbackEnabled`, `addedAt`, `updatedAt`.
 
@@ -84,6 +86,8 @@ Passwordless invites: Admin sends Firebase email-link invites from `admin/index.
 Emulators (Auth: 9099, Firestore: 8085, Hosting: 5000): enable with `localStorage.setItem("utl_use_firebase_emulators", "true")` or `?emulators=true`.
 
 Firestore rules pattern for settings: `allow read: if docId == 'publicSite' || signedIn();`
+
+Firebase Functions: `functions/processGoogleGroupSyncJob` watches `google_group_sync_jobs/{jobId}`. It requires Google Admin SDK credentials and is being introduced in parallel with Apps Script group sync. See `GOOGLE_GROUP_SYNC_MIGRATION.md`.
 
 ## Quick Reference — Pages
 
@@ -147,6 +151,7 @@ Apps Script `action` routing: `WelcomeEmail`, `TestEmailTemplate`, `ResultsEmail
 - Firebase Auth sign-in-link email copy is controlled in Firebase Console Authentication Templates. Use `FIREBASE_EMAIL_TEMPLATE.md` for the approved template copy.
 - Passwordless invite `actionCodeSettings.url` uses the current site origin and `/member-login/`.
 - `adminProfileData().email` returns `'admin'` when using local test accounts (not a real email). Any email validation must check for `@` before using as a recipient.
+- Admin Console member-management writes require an active Firebase Google session whose `authorized_members/{email}.role` is `admin` or `owner`; the UI preflights this before add/edit/remove actions.
 - `no-cors` mode on Apps Script fetches returns opaque responses — server-side failures are invisible to the client. Always validate inputs client-side.
 - Email templates are stored in Firestore `settings/emailTemplates`. `loadEmailTemplates` in `admin/index.html` always falls back to defaults if Firestore fails, then calls `syncEmailTemplateForm` and `initEmailTemplateListeners` regardless.
 
@@ -166,6 +171,8 @@ Apps Script `action` routing: `WelcomeEmail`, `TestEmailTemplate`, `ResultsEmail
 ### 2026-05-31
 
 - Added Admin Console Google Group sync requests for member add/edit/inactivate/remove flows. Requires deployed Apps Script routes `AddGoogleGroupMember` and `RemoveGoogleGroupMember` plus Apps Script Admin Directory API access before it truly adds/removes members in `utl-members@googlegroups.com`.
+- Added Firebase admin-session preflight to Admin Console member add/edit/remove flows so raw `Missing or insufficient permissions` errors become actionable sign-in/admin-role guidance.
+- Started Firestore/Cloud Functions Google Group sync migration: Admin Console queues `google_group_sync_jobs`, Firestore rules allow admins to manage jobs, and `functions/processGoogleGroupSyncJob` scaffold records confirmed/failed results once Google Admin SDK credentials are configured. Apps Script sync remains as fallback during verification.
 - Added member-facing Google Group access training under protected workspace videos/slides. The expandable guide tells members not to request access on each video, links to `https://groups.google.com/g/utl-members`, explains same-Google-account sign-in, and handles the invited-only group case.
 - Fixed and deployed Google member sign-in Firestore rules: members can now update their own `firstLoginAt` and `lastLoginAt` fields on `authorized_members/{email}` during login, instead of failing with `Missing or insufficient permissions` after authorization.
 - Added `FIREBASE_EMAIL_TEMPLATE.md` with polished Firebase Authentication sign-in-link copy. Firebase's built-in email cannot fully match the custom welcome email HTML unless a server-side custom email sender is added.

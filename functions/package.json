@@ -1,0 +1,17 @@
+{
+  "name": "theuntaughtlessons-functions",
+  "description": "Firebase Functions for The Untaught Lessons website automation.",
+  "private": true,
+  "engines": {
+    "node": "20"
+  },
+  "main": "index.js",
+  "scripts": {
+    "lint": "node --check index.js"
+  },
+  "dependencies": {
+    "firebase-admin": "^12.7.0",
+    "firebase-functions": "^5.1.1",
+    "googleapis": "^144.0.0"
+  }
+}

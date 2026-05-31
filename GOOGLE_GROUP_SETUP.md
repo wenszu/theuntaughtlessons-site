@@ -75,6 +75,11 @@ If the group is a consumer `@googlegroups.com` group rather than a Workspace/Clo
 managed group, the Admin Directory API may not be able to add/remove members. In that case,
 the script sends a failure email to the admin address and the member must be managed manually.
 
+The Firestore/Cloud Functions migration is being added in parallel so the Admin Console can
+eventually show confirmed/failed Google Group sync status. Track that rollout in
+`GOOGLE_GROUP_SYNC_MIGRATION.md`. Until the checklist there is complete, keep the Apps Script
+fallback active.
+
 ---
 
 ## 3B. Member-facing video access guidance
