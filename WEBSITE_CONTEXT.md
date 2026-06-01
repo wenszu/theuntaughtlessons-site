@@ -193,6 +193,8 @@ Apps Script `action` routing: `WelcomeEmail`, `TestEmailTemplate`, `ResultsEmail
 - Hardened Admin Console lesson video editing: URL fields are read-only until Edit is clicked, bad old local overrides are ignored, and admins can reset a row back to the current backend config URL.
 - Paused the old score-brand language across public/member-facing copy. The site should encourage `Find your level` without mentioning the paused score brand.
 - Standardized the program name capitalization to `Think, speak and act like an executive` (with ™ on first use where appropriate).
+- Hardened member records: `authorized_members` should use one canonical lowercase email document per person. Admin Console now blocks adding an email that already exists, hides duplicate normalized-email rows in the table, and `authorizeMember` refuses to create a second account or save an existing admin/owner as a user.
+- Student Progress only shows Firebase `users` progress documents that have an email and can map back to a member; orphan UID-only progress documents are ignored so raw Firebase IDs do not appear as learners.
 - Reorganized `Site & Content` IA so `Visibility` and `Assessment access` appear in the same order in the left nav and page body; moved preview/QA utilities to `Admin Tools` and engagement defaults to `Engagement`.
 
 ### 2026-05-31

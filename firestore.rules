@@ -35,6 +35,12 @@ service cloud.firestore {
       return email.lower() in ['wenszu@gmail.com'];
     }
 
+    function isCanonicalMemberRecord(email) {
+      return email == email.lower() &&
+        request.resource.data.email is string &&
+        request.resource.data.email == email;
+    }
+
     match /users/{userId} {
       allow read: if isSelfUserDocument(userId) || isAdmin();
       allow write: if isSelfUserDocument(userId) || isAdmin();
@@ -48,6 +54,7 @@ service cloud.firestore {
     match /authorized_members/{email} {
       allow read: if signedIn();
       allow create, update: if isAdmin() &&
+        isCanonicalMemberRecord(email) &&
         (!isBootstrapOwnerEmail(email) || isBootstrapOwner());
       allow delete: if isAdmin() && !isBootstrapOwnerEmail(email);
       // Members can update only their own preferred name and login timestamps.

@@ -5963,6 +5963,63 @@
       return data.googleGroupAdded && ((data.status || 'active') === 'inactive' || action === 'remove' || sync === 'remove-requested' || sync === 'remove-request-failed');
     }
 
+    function mbNormalizeEmail(value) {
+      return String(value || '').trim().toLowerCase();
+    }
+
+    function mbCanonicalEmailFromDoc(docSnap) {
+      var data = docSnap && docSnap.data ? (docSnap.data() || {}) : {};
+      return mbNormalizeEmail(data.email || (docSnap && docSnap.id) || '');
+    }
+
+    function mbRoleRank(role) {
+      role = String(role || '').toLowerCase();
+      if (role === 'owner') return 4;
+      if (role === 'admin') return 3;
+      if (role === 'member' || role === 'user') return 2;
+      return 1;
+    }
+
+    function mbChooseCanonicalMemberDoc(current, candidate) {
+      if (!current) return candidate;
+      var currentData = current.data() || {};
+      var candidateData = candidate.data() || {};
+      var currentEmail = mbCanonicalEmailFromDoc(current);
+      var candidateEmail = mbCanonicalEmailFromDoc(candidate);
+      var currentRank = mbRoleRank(currentData.role);
+      var candidateRank = mbRoleRank(candidateData.role);
+      if (candidateRank !== currentRank) return candidateRank > currentRank ? candidate : current;
+      var currentExact = mbNormalizeEmail(current.id) === currentEmail;
+      var candidateExact = mbNormalizeEmail(candidate.id) === candidateEmail;
+      if (candidateExact !== currentExact) return candidateExact ? candidate : current;
+      var currentActive = (currentData.status || 'active') === 'active';
+      var candidateActive = (candidateData.status || 'active') === 'active';
+      if (candidateActive !== currentActive) return candidateActive ? candidate : current;
+      return current;
+    }
+
+    function mbDedupeMemberDocs(docs) {
+      var byEmail = new Map();
+      var duplicates = [];
+      (docs || []).forEach(function (docSnap) {
+        var email = mbCanonicalEmailFromDoc(docSnap);
+        if (!email) return;
+        var existing = byEmail.get(email);
+        if (existing) duplicates.push({ email: email, existing: existing, duplicate: docSnap });
+        byEmail.set(email, mbChooseCanonicalMemberDoc(existing, docSnap));
+      });
+      var deduped = Array.from(byEmail.values());
+      deduped.duplicates = duplicates;
+      return deduped;
+    }
+
+    function mbFindCachedMemberByEmail(email) {
+      var normalized = mbNormalizeEmail(email);
+      return (mbMembersCache || []).find(function (docSnap) {
+        return mbCanonicalEmailFromDoc(docSnap) === normalized;
+      }) || null;
+    }
+
     function mbGroupAuditText(data, added) {
       var date = '';
       var admin = '';
@@ -6020,7 +6077,7 @@
         : '';
       var rows = docs.map(function (d) {
         var data = d.data();
-        var email = d.id;
+        var email = mbCanonicalEmailFromDoc(d) || mbNormalizeEmail(d.id);
         var isOwner = data.role === 'owner' || BOOTSTRAP_OWNER_EMAILS.includes(String(email || '').toLowerCase());
         var displayRole = isOwner ? 'owner' : ((data.role === 'member' ? 'user' : data.role) || 'user');
         var roleCls = displayRole === 'owner' ? 'mb-role-owner' : displayRole === 'admin' ? 'mb-role-admin' : 'mb-role-user';
@@ -6230,7 +6287,7 @@
           btn.disabled = true;
           try {
             await mbRequireFirebaseAdmin();
-            var cached = mbMembersCache.find(function (d) { return d.id === email; });
+        var cached = mbFindCachedMemberByEmail(email);
             var previousData = cached ? cached.data() : {};
             var previousGroupAdded = !!previousData.googleGroupAdded;
             var requestedGroupMode = '';
@@ -6289,7 +6346,7 @@
           var fb = window.utlFirebaseAuth;
           if (!fb || !fb.authorizeMember || !fb.Timestamp) { showToast('Firebase not ready', 'error'); return; }
 
-          var cached = mbMembersCache.find(function (d) { return d.id === email; });
+          var cached = mbFindCachedMemberByEmail(email);
           var currentExpiry = cached && cached.data().expiryDate;
           var base = currentExpiry
             ? (currentExpiry.toDate ? currentExpiry.toDate() : new Date(currentExpiry))
@@ -6328,7 +6385,7 @@
           btn.disabled = true;
           try {
             await mbRequireFirebaseAdmin();
-            var cached = mbMembersCache.find(function (d) { return d.id === email; });
+            var cached = mbFindCachedMemberByEmail(email);
             var cachedData = cached ? cached.data() : {};
             var groupRemoveRequested = false;
             var groupRemoveJobId = '';
@@ -6392,6 +6449,8 @@
         var docs = [];
         snap.forEach(function (d) { docs.push(d); });
         docs = mbApplyLocalGroupOverrides(docs);
+        docs = mbDedupeMemberDocs(docs);
+        var duplicateCount = docs.duplicates ? docs.duplicates.length : 0;
         docs.sort(function (a, b) {
           var na = (a.data().name || a.id).toLowerCase();
           var nb = (b.data().name || b.id).toLowerCase();
@@ -6399,6 +6458,9 @@
         });
         mbMembersCache = docs;
         mbRenderTable(docs);
+        if (duplicateCount) {
+          showToast(duplicateCount + ' duplicate member email' + (duplicateCount === 1 ? '' : 's') + ' hidden. Keep the admin/owner record and remove the extra user record from Firestore.', 'error');
+        }
       } catch (e) {
         var msg = mbFriendlyPermissionMessage(e);
         wrap.innerHTML = '<p class="mb-msg mb-err">Failed to load: ' + escapeHtml(msg) + '</p>';
@@ -6447,7 +6509,7 @@
         if (!fb || !fb.authorizeMember || !fb.Timestamp) { showToast('Firebase not ready', 'error'); return; }
 
         var nameVal = (document.getElementById('mbNewName') || {}).value.trim();
-        var emailVal = ((document.getElementById('mbNewEmail') || {}).value || '').trim().toLowerCase();
+        var emailVal = mbNormalizeEmail((document.getElementById('mbNewEmail') || {}).value || '');
         var roleVal = (document.getElementById('mbNewRole') || {}).value || 'user';
         var cohortVal = (document.getElementById('mbNewCohort') || {}).value.trim();
         var notesVal = (document.getElementById('mbNewNotes') || {}).value.trim();
@@ -6456,6 +6518,13 @@
 
         if (!nameVal) { showToast('Name is required', 'error'); return; }
         if (!emailVal) { showToast('Email is required', 'error'); return; }
+        var existingMember = mbFindCachedMemberByEmail(emailVal);
+        if (existingMember) {
+          var existingData = existingMember.data() || {};
+          var existingRole = existingData.role === 'member' ? 'user' : (existingData.role || 'user');
+          showToast('This email already exists as ' + existingRole + '. Edit the existing row instead.', 'error');
+          return;
+        }
 
         var adminProfile = {};
         try { adminProfile = JSON.parse(localStorage.getItem('utl_member_profile') || '{}'); } catch (e) {}

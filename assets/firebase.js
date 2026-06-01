@@ -209,9 +209,26 @@ async function authorizeMember(email, fields = {}) {
     throw new Error("An email address is required to authorize a member.");
   }
 
-  const memberRef = doc(requireFirestore(), "authorized_members", normalizedEmail);
+  const readyDb = requireFirestore();
+  const memberRef = doc(readyDb, "authorized_members", normalizedEmail);
   const existing = await getDoc(memberRef);
   const isNew = !existing.exists();
+  const requestedRole = String(fields.role || "").trim().toLowerCase();
+
+  if (existing.exists()) {
+    const currentRole = String((existing.data() || {}).role || "").trim().toLowerCase();
+    if ((currentRole === "admin" || currentRole === "owner") && (requestedRole === "user" || requestedRole === "member")) {
+      throw new Error("This email is already an admin or owner. It cannot be saved as a user.");
+    }
+  } else {
+    const duplicateSnapshot = await getDocs(query(
+      collection(readyDb, "authorized_members"),
+      where("email", "==", normalizedEmail)
+    ));
+    if (!duplicateSnapshot.empty) {
+      throw new Error("This email already exists in the member database. Edit the existing record instead of adding a second account.");
+    }
+  }
 
   const payload = {
     email: normalizedEmail,
@@ -442,7 +459,8 @@ async function getAllMemberWorkspaceProgress() {
     usersSnapshot.forEach((userDoc) => {
       const data = userDoc.data() || {};
       const email = String(data.email || "").trim().toLowerCase();
-      const key = email || userDoc.id;
+      if (!email) return;
+      const key = email;
       const existing = membersByEmail.get(key) || {};
       membersByEmail.set(key, {
         id: existing.id || userDoc.id,
