@@ -64,6 +64,7 @@ To activate this automation in the deployed Apps Script:
 2. In `doPost(e)`, route these actions before the default contact-form/sheet logging branch:
 
    ```js
+   if (action === 'RemovedMember') return handleRemovedMemberLog(data);
    if (action === 'AddGoogleGroupMember') return handleGoogleGroupMember(data, 'add');
    if (action === 'RemoveGoogleGroupMember') return handleGoogleGroupMember(data, 'remove');
    ```

@@ -548,15 +548,26 @@
     const timerDisplay = document.getElementById('timerDisplay');
     const CONTACT_SESSION_KEY = 'utl_contact_shared';
     const CONTACT_PROFILE_KEY = 'utl_contact_profile';
+    const MEMBER_PROFILE_KEY = 'utl_member_profile';
+    const ADMIN_AUTH_KEY = 'utl_admin_auth';
+    const ADMIN_BYPASS_KEY = 'utl_find_level_admin_bypass';
+    const BOOTSTRAP_OWNER_EMAILS = ['wenszu@gmail.com'];
+    let firebaseModulePromise = null;
     let exercise = null;
     let selectedItem = null;
     let timerStartedAt = null;
     let timerInterval = null;
     const state = {
       participant: { name: '', email: '' },
+      adminPreview: false,
       bucketLabels: ['', '', ''],
       placements: {}
     };
+
+    function loadFirebaseModule() {
+      if (!firebaseModulePromise) firebaseModulePromise = import('../../assets/firebase.js');
+      return firebaseModulePromise;
+    }
 
     function readContactProfile() {
       if (sessionStorage.getItem(CONTACT_SESSION_KEY) !== 'true') return null;
@@ -566,6 +577,71 @@
       } catch (error) {
         return null;
       }
+    }
+
+    function readMemberProfile() {
+      try {
+        return JSON.parse(localStorage.getItem(MEMBER_PROFILE_KEY) || '{}') || {};
+      } catch (error) {
+        return {};
+      }
+    }
+
+    function profileName(profile, fallback) {
+      return [profile.firstName, profile.lastName].filter(Boolean).join(' ').trim() ||
+        profile.displayName ||
+        profile.name ||
+        fallback ||
+        'Admin';
+    }
+
+    function localAdminPreviewProfile() {
+      const profile = readMemberProfile();
+      const role = String(profile.role || '').toLowerCase();
+      if (role === 'admin' || role === 'owner' || localStorage.getItem(ADMIN_AUTH_KEY) === 'true') {
+        const email = profile.email || localStorage.getItem('utl_member_username') || '';
+        return {
+          name: profileName(profile, email || 'Admin'),
+          email,
+          role: role || 'admin'
+        };
+      }
+      return null;
+    }
+
+    async function firebaseAdminPreviewProfile() {
+      try {
+        const fb = await loadFirebaseModule();
+        const user = fb.getSignedInUser ? await fb.getSignedInUser() : null;
+        const email = user && user.email ? String(user.email).trim().toLowerCase() : '';
+        if (!email) return null;
+        if (BOOTSTRAP_OWNER_EMAILS.includes(email)) {
+          return { name: user.displayName || email, email, role: 'owner' };
+        }
+        const member = fb.getAuthorizedMember ? await fb.getAuthorizedMember(email) : null;
+        const role = String((member && member.role) || '').toLowerCase();
+        if (role === 'admin' || role === 'owner') {
+          return { name: user.displayName || member.name || email, email, role };
+        }
+      } catch (error) {
+        console.warn('Could not check admin preview role.', error);
+      }
+      return null;
+    }
+
+    async function adminLeadGateBypassEnabled() {
+      let enabled = localStorage.getItem(ADMIN_BYPASS_KEY) !== 'off';
+      try {
+        const fb = await loadFirebaseModule();
+        if (fb.getAdminVisibilitySettings) {
+          const settings = await fb.getAdminVisibilitySettings();
+          enabled = settings.findLevelLeadGateBypass !== false;
+          localStorage.setItem(ADMIN_BYPASS_KEY, enabled ? 'on' : 'off');
+        }
+      } catch (error) {
+        // Keep the local/default setting if Firebase is unavailable.
+      }
+      return enabled;
     }
 
     function rememberContact(payload) {
@@ -830,6 +906,7 @@
     }
 
     async function submitAssessmentResult(score) {
+      if (state.adminPreview) return;
       // The current Apps Script endpoint must route this payload to the Assessments tab.
       // If the deployed script only writes contact leads today, update it to branch on assessment_type.
       const payload = {
@@ -852,6 +929,22 @@
       import('../../assets/firebase.js')
         .then(({ saveUserProgress }) => saveUserProgress('find-your-level', 'Find your level', payload))
         .catch((error) => console.warn('Firestore progress save failed.', error));
+    }
+
+    async function startExerciseForParticipant(profile, options = {}) {
+      state.participant = {
+        name: profile.name || '',
+        email: profile.email || ''
+      };
+      state.adminPreview = Boolean(options.adminPreview);
+      sessionStorage.setItem('find_your_level_name', state.participant.name);
+      sessionStorage.setItem('find_your_level_email', state.participant.email);
+      await loadExercise();
+      gate.classList.add('is-hidden');
+      document.body.classList.remove('tsa-locked');
+      app.hidden = false;
+      startTimer();
+      renderSorting();
     }
 
     function renderAnswerKey() {
@@ -932,12 +1025,7 @@
           body: JSON.stringify(payload)
         });
         rememberContact(payload);
-        await loadExercise();
-        gate.classList.add('is-hidden');
-        document.body.classList.remove('tsa-locked');
-        app.hidden = false;
-        startTimer();
-        renderSorting();
+        await startExerciseForParticipant(state.participant);
       } catch (error) {
         startButton.disabled = false;
         startButton.textContent = 'Start the exercise';
@@ -948,22 +1036,30 @@
     async function initializeFromSharedContact() {
       const profile = readContactProfile();
       if (!profile) return;
-      state.participant = { name: profile.name, email: profile.email };
-      sessionStorage.setItem('find_your_level_name', profile.name);
-      sessionStorage.setItem('find_your_level_email', profile.email);
       try {
-        await loadExercise();
-        gate.classList.add('is-hidden');
-        document.body.classList.remove('tsa-locked');
-        app.hidden = false;
-        startTimer();
-        renderSorting();
+        await startExerciseForParticipant(profile);
       } catch (error) {
         console.warn('We could not reuse the saved contact session.', error);
       }
     }
 
-    initializeFromSharedContact();
+    async function initialize() {
+      const profile = readContactProfile();
+      if (profile) {
+        await initializeFromSharedContact();
+        return;
+      }
+      if (!await adminLeadGateBypassEnabled()) return;
+      const adminProfile = localAdminPreviewProfile() || await firebaseAdminPreviewProfile();
+      if (!adminProfile) return;
+      try {
+        await startExerciseForParticipant(adminProfile, { adminPreview: true });
+      } catch (error) {
+        console.warn('Could not start admin preview without the data form.', error);
+      }
+    }
+
+    initialize();
   </script>
   <script type="module" src="../../assets/feedback-widget.js?v=4"></script>
 </body>

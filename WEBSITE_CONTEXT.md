@@ -1,6 +1,6 @@
 # The Untaught Lessons Website Context
 
-Last updated: 2026-05-30
+Last updated: 2026-06-01
 
 Single source of truth for agents working on this repo. Read before making changes, update after structural changes. Detailed historical entries and full page/app maps are in `archive/WEBSITE_CONTEXT_ARCHIVE.md`.
 
@@ -70,6 +70,7 @@ Firestore collections:
 - `settings/emailTemplates` — welcome email template. Read/written by `getEmailTemplates`/`saveEmailTemplate` in `assets/firebase.js`.
 - `settings/feedback` — global `defaultFeedbackEnabled` boolean.
 - `settings/publicSite` — public toggle settings (e.g. `findLevelVisible`).
+- `settings/admin_visibility` — admin/owner preview-only visibility settings, including whether admins/owners can bypass the public Find your level data form.
 - `google_group_sync_jobs/{jobId}` — Google Group add/remove jobs queued by Admin Console and intended for Firebase Functions processing.
 
 Key `authorized_members` fields: `email`, `name`, `role` (member/admin/owner), `status`, `googleGroupAdded`, `googleGroupAddedAt`, `googleGroupAddedBy`, `googleGroupRemovedAt`, `googleGroupRemovedBy`, `feedbackEnabled`, `addedAt`, `updatedAt`.
@@ -97,7 +98,7 @@ Firebase Functions: `functions/processGoogleGroupSyncJob` watches `google_group_
 | `about.html` | Founder story and credibility |
 | `programs.html` | Program overview and CTA |
 | `contact.html` | Contact form |
-| `tsa-score.html` | Find Your Level routing page (public + member cards) |
+| `tsa-score.html` | Find your level routing page (public + member cards) |
 | `member-login/index.html` | Member dashboard (phase cards, progress) |
 | `member-login/orientation.html` | Orientation page |
 | `member-login/phase-1.html` | Think Clearly watch + practice |
@@ -140,7 +141,7 @@ Data files: `data/sort-bucket.json` (public), `data/tsa/*.json` (member TSA), `d
 
 Apps Script endpoint (all POST submissions): `https://script.google.com/macros/s/AKfycbzJE--FL2kB_XDNZRnszCtlyLRPvaLAHGuF5TAOdXJk40atbvf5Y6ELuSK2B7CSLaMN/exec`
 
-Apps Script `action` routing: `WelcomeEmail`, `TestEmailTemplate`, `ResultsEmail`, `AddGoogleGroupMember`, `RemoveGoogleGroupMember`. Default = lead/sheet logging.
+Apps Script `action` routing: `WelcomeEmail`, `TestEmailTemplate`, `ResultsEmail`, `RemovedMember`, `AddGoogleGroupMember`, `RemoveGoogleGroupMember`. Default = lead/sheet logging.
 
 ## Known Notes
 
@@ -156,8 +157,12 @@ Apps Script `action` routing: `WelcomeEmail`, `TestEmailTemplate`, `ResultsEmail
 - Bootstrap owner: `wenszu@gmail.com` is treated as an owner in both `firestore.rules` and the Admin Console even if its `authorized_members` row is missing or accidentally edited. The Admin Console hides edit/remove actions for this row, and Firestore rules block client-side delete/downgrade except by the bootstrap owner account itself.
 - When `wenszu@gmail.com` opens an admin-only Firebase view, Admin Console tries to repair `authorized_members/wenszu@gmail.com` back to `role: owner`, `status: active`, `bootstrapOwner: true`. This repair requires the bootstrap-owner Firestore rule to be deployed first.
 - Admin Console Member Management **Group** column is the manual Google Group queue: header links to the `utl-members` member list and each row has an `Added` / `Not added` toggle for verified manual fixes. Manual toggle clicks record the verification date and admin email. The browser cannot query Google Groups directly; confirmed automation depends on `google_group_sync_jobs` + Functions.
+- Admin Console remove-member flow sends a non-blocking Apps Script `RemovedMember` audit action for non-admin/non-owner members before deleting Firestore records. The Apps Script writes to the `Removed members` tab in the same Google Sheet as leads/feedback and skips admin/owner roles.
 - On localhost only, Member Management Group toggle changes are stored in `localStorage` (`utl_mb_local_group_overrides`) instead of Firestore so manual verification can be tested without live Firebase writes. Live site toggles still write Firestore for shared admin visibility.
 - Student Progress uses the same Firebase admin preflight/switch-account flow as Member Management. If `authorized_members` is readable but `users` progress documents are blocked by Firestore rules, it renders the member list with a rules warning instead of failing the whole table.
+- Admin Console IA: `Site & Content` owns public/member visibility and content controls; `Visibility` is the single place for public homepage/Find your level/page-card visibility, Mission card visibility, learner release gates, and the read-only visibility status summary. `Assessment access` controls Firestore-backed assessment visibility for members/admins. `Admin Tools` owns preview/QA utilities; `Engagement` owns nudges, email, certificates, and feedback defaults; `Member Management` owns member access/password operations.
+- Admin Console binary settings use right-aligned checkbox controls. Keep multi-state controls such as `Show / Coming soon / Hide` as segmented controls because they are not true yes/no settings.
+- Admin Console `Site & Content > Visibility > Admin / owner preview` controls admin/owner-only preview behavior. `Skip Find your level data form` writes `settings/admin_visibility.findLevelLeadGateBypass` and mirrors to localStorage key `utl_find_level_admin_bypass`; public visitors are not affected.
 - `no-cors` mode on Apps Script fetches returns opaque responses — server-side failures are invisible to the client. Always validate inputs client-side.
 - Email templates are stored in Firestore `settings/emailTemplates`. `loadEmailTemplates` in `admin/index.html` always falls back to defaults if Firestore fails, then calls `syncEmailTemplateForm` and `initEmailTemplateListeners` regardless.
 
@@ -174,6 +179,13 @@ Apps Script `action` routing: `WelcomeEmail`, `TestEmailTemplate`, `ResultsEmail
 
 ## Change Log
 
+### 2026-06-01
+
+- Standardized Admin Console binary setting controls to checkboxes across Visibility, Assessment access, Engagement, Email templates, and Certificate sections. Multi-state controls remain segmented controls.
+- Added admin/owner-only Find your level form bypass: Admin Console Visibility has a checkbox for `Skip Find your level data form`, and `apps/find-your-level/index.html` skips the lead form only for admin/owner sessions when that setting is enabled.
+- Added removed-member audit logging: non-admin/non-owner removals now post a `RemovedMember` action to Apps Script before Firestore deletion so the shared Leads/Feedback spreadsheet keeps add/remove history.
+- Reorganized `Site & Content` IA so `Visibility` and `Assessment access` appear in the same order in the left nav and page body; moved preview/QA utilities to `Admin Tools` and engagement defaults to `Engagement`.
+
 ### 2026-05-31
 
 - Added Admin Console Google Group sync requests for member add/edit/inactivate/remove flows. Requires deployed Apps Script routes `AddGoogleGroupMember` and `RemoveGoogleGroupMember` plus Apps Script Admin Directory API access before it truly adds/removes members in `utl-members@googlegroups.com`.
@@ -182,6 +194,7 @@ Apps Script `action` routing: `WelcomeEmail`, `TestEmailTemplate`, `ResultsEmail
 - Redesigned Member Management Group column into a simpler manual queue with a header link to Google Groups and row-level `Added` / `Not added` toggles that display the manual verification date/admin after use. Remove-member popup reminds admins to manually remove from `utl-members@googlegroups.com` if sync does not confirm.
 - Changed localhost Group toggle behavior to use local browser overrides instead of Firestore writes, avoiding Firebase permission errors while testing manual verification.
 - Hardened Student Progress loading: admin preflight now runs before the progress query, and blocked `users` progress reads degrade to a member-list view with a clear Firestore rules warning.
+- Cleaned up Admin Console section organization: removed the duplicate standalone Mission card section because Mission visibility lives in `Site & Content > Visibility`; folded Public pages and Find your level controls into `Visibility`; made public assessment and assessment-access toggles visible before Firebase hydration; labeled the status box as a read-only visibility summary; moved Site sync check and Quick links into `Admin Tools`; and moved Global defaults into `Engagement`.
 - Removed member-facing Google Group details from the welcome email, Firebase sign-in template, and workspace video-access guidance. Google Group membership is now treated as an admin-only access mechanism.
 - Updated welcome/sign-in email copy so the "right Google account" reminder is part of the workspace sign-in instruction, not a separate setup step.
 - Added `wenszu@gmail.com` as a protected bootstrap owner in Firestore rules and Admin Console admin checks so the primary owner account cannot be locked out or removed by normal client-side admin actions.

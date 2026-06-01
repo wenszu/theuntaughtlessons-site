@@ -10,6 +10,7 @@
  *
  *   if (action === 'TestEmailTemplate') return handleTemplateEmail(data, true);
  *   if (action === 'WelcomeEmail') return handleTemplateEmail(data, false);
+ *   if (action === 'RemovedMember') return handleRemovedMemberLog(data);
  *   if (action === 'AddGoogleGroupMember') return handleGoogleGroupMember(data, 'add');
  *   if (action === 'RemoveGoogleGroupMember') return handleGoogleGroupMember(data, 'remove');
  *
@@ -54,6 +55,74 @@ function handleTemplateEmail(data, isTest) {
 
 function handleWelcomeEmail(data) {
   return handleTemplateEmail(data, false);
+}
+
+function handleRemovedMemberLog(data) {
+  if (typeof SHEET_ID === 'undefined' || !SHEET_ID) {
+    return ContentService.createTextOutput('missing sheet id');
+  }
+
+  var email = String(data.memberEmail || data.email || '').trim().toLowerCase();
+  var role = String(data.role || '').trim().toLowerCase();
+  if (!email) return ContentService.createTextOutput('missing member email');
+  if (role === 'admin' || role === 'owner') {
+    return ContentService.createTextOutput('ok: skipped admin/owner');
+  }
+
+  var ss = SpreadsheetApp.openById(SHEET_ID);
+  var sheetName = 'Removed members';
+  var sheet = ss.getSheetByName(sheetName) || ss.insertSheet(sheetName);
+  var headers = [
+    'Logged at',
+    'Member email',
+    'Name',
+    'Role',
+    'Status before removal',
+    'Added at',
+    'Added by',
+    'Updated at',
+    'Expiry date',
+    'First login at',
+    'Last login at',
+    'Google Group added',
+    'Google Group sync status',
+    'Removed at',
+    'Removed by',
+    'Source',
+    'Notes'
+  ];
+  ensureSheetHeaders_(sheet, headers);
+
+  sheet.appendRow([
+    new Date(),
+    email,
+    data.name || '',
+    data.role || '',
+    data.status || '',
+    data.addedAt || '',
+    data.addedBy || '',
+    data.updatedAt || '',
+    data.expiryDate || '',
+    data.firstLoginAt || '',
+    data.lastLoginAt || '',
+    data.googleGroupAdded === true ? 'TRUE' : 'FALSE',
+    data.googleGroupSyncStatus || '',
+    data.removedAt || new Date().toISOString(),
+    data.removedBy || '',
+    data.source || 'admin-member-management',
+    data.notes || ''
+  ]);
+
+  return ContentService.createTextOutput('ok');
+}
+
+function ensureSheetHeaders_(sheet, headers) {
+  var existing = sheet.getRange(1, 1, 1, headers.length).getValues()[0];
+  var hasHeaders = existing.some(function (value) { return String(value || '').trim(); });
+  if (!hasHeaders) {
+    sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+    sheet.setFrozenRows(1);
+  }
 }
 
 function handleGoogleGroupMember(data, mode) {

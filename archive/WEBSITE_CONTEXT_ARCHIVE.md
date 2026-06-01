@@ -105,7 +105,7 @@ Current implementation facts live in `WEBSITE_CONTEXT.md`.
 - Restructured the member dashboard with core section order: TSA Score™, Orientation, Phase 1, Phase 2, Phase 3.
 - Created `apps/find-your-level/index.html` — public email-gated Sort & Bucket exercise.
 - Created `data/sort-bucket.json` — root-level public Sort & Bucket question bank (six variations, stable `exercise_id` values).
-- Updated `tsa-score.html` with Find Your Level positioning and locked member assessment cards.
+- Updated `tsa-score.html` with Find your level positioning and locked member assessment cards.
 - Migrated testimonials from `assets/testimonials.js` into `data/testimonials.json`.
 - Refactored TSA assessment content into `data/tsa/`: `sort-bucket.json`, `spot-the-problem.json`, `speak-concisely.json`, `act-confidently.json`.
 - Refactored member practice content into `data/practice/`: `grocery-list.json`, `messy-notes.json`, `issue-tree-builder.json`, `scqa-builder.json`.
@@ -152,7 +152,7 @@ Homepage. Sticky nav, hero, sound-familiar section, three learning pillars, TSA 
 
 ### `tsa-score.html`
 
-Find Your Level page. Routes public visitors to `apps/find-your-level/index.html`. Shows The Diagnostic and The Checkpoint as member-only locked cards. CSS scoped with `tsa-` prefixes.
+Find your level page. Routes public visitors to `apps/find-your-level/index.html`. Shows The Diagnostic and The Checkpoint as member-only locked cards. CSS scoped with `tsa-` prefixes.
 
 ### `apps/find-your-level/index.html`
 
@@ -172,7 +172,7 @@ Contact page. Full contact form and contact details. Public nav and footer.
 
 ### `tools.html`
 
-Tools page. Public/free tools. Uses older navigation pattern. Still includes Find Your Level and Member Login links.
+Tools page. Public/free tools. Uses older navigation pattern. Still includes Find your level and Member Login links.
 
 ### `member-login/index.html`
 
@@ -326,7 +326,7 @@ data/tsa/sort-bucket.json
 data/tsa/spot-the-problem.json
 data/tsa/speak-concisely.json
 data/tsa/act-confidently.json
-data/sort-bucket.json  ← public Find Your Level only (locks to sort_bucket_001)
+data/sort-bucket.json  ← public Find your level only (locks to sort_bucket_001)
 ```
 
 Sort & Bucket schema: `id`, `title`, `difficulty`, `tags`, `prompt`, `scenario`, `sortingInstruction`, `items`, `bucketOptions`, `correctBuckets`, `answerKey`, `scoring`. `answerKey` maps correct bucket labels to item text strings.

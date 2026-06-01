@@ -607,6 +607,22 @@ async function setPublicAssessmentSettings(partial) {
   await setDoc(doc(requireFirestore(), "settings", "public_assessments"), partial, { merge: true });
 }
 
+function getDefaultAdminVisibilitySettings() {
+  return { findLevelLeadGateBypass: true };
+}
+async function getAdminVisibilitySettings() {
+  try {
+    const snap = await getDoc(doc(requireFirestore(), "settings", "admin_visibility"));
+    if (!snap.exists()) return getDefaultAdminVisibilitySettings();
+    return Object.assign({}, getDefaultAdminVisibilitySettings(), snap.data() || {});
+  } catch {
+    return getDefaultAdminVisibilitySettings();
+  }
+}
+async function setAdminVisibilitySettings(partial) {
+  await setDoc(doc(requireFirestore(), "settings", "admin_visibility"), partial, { merge: true });
+}
+
 export {
   actionCodeSettings,
   app,
@@ -645,7 +661,9 @@ export {
   sendSignInLinkToEmail,
   saveUserProgress,
   getAssessmentVisibility,
+  getAdminVisibilitySettings,
   setAssessmentVisibility,
+  setAdminVisibilitySettings,
   getPublicAssessmentSettings,
   setPublicAssessmentSettings,
   getEngagementSettings,

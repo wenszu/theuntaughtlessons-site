@@ -1172,8 +1172,8 @@
 
     .visibility-check {
       display: grid;
-      grid-template-columns: auto 1fr;
-      gap: 10px;
+      grid-template-columns: 1fr auto;
+      gap: 14px;
       align-items: start;
       padding: 10px 0;
       border-bottom: 1px solid rgba(0, 0, 0, .06);
@@ -1185,9 +1185,10 @@
     }
 
     .visibility-check input {
+      justify-self: end;
       width: 18px;
       height: 18px;
-      margin-top: 1px;
+      margin-top: 2px;
       accent-color: var(--gold);
     }
 
@@ -1225,11 +1226,35 @@
     .visibility-card {
       display: grid;
       gap: 10px;
-      margin-top: 14px;
+      margin-top: 10px;
       padding: 14px;
       border: 1px solid rgba(0, 51, 102, .08);
       border-radius: 8px;
       background: rgba(255, 255, 255, .7);
+    }
+
+    .visibility-summary-head {
+      margin-top: 24px;
+      padding-top: 18px;
+      border-top: 1px solid var(--line);
+    }
+
+    .visibility-summary-head h3 {
+      margin: 0 0 4px;
+      color: var(--navy);
+      font-family: 'Playfair Display', serif;
+      font-size: 18px;
+    }
+
+    .visibility-summary-head p {
+      margin: 0;
+      color: #777;
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .visibility-actions {
+      margin-top: 16px;
     }
 
     .visibility-row {
@@ -1623,8 +1648,8 @@
     .eng-toggle-label { flex:1; min-width:0; display:grid; gap:3px; }
     .eng-toggle-name { color:var(--navy); font-size:13px; font-weight:700; line-height:1.2; }
     .eng-toggle-desc { color:#777; font-size:12px; line-height:1.45; }
-    .eng-toggle { flex-shrink:0; min-width:56px; padding:5px 12px; border:1px solid var(--line); border-radius:20px; background:var(--white); color:#777; font-family:'Roboto Mono',monospace; font-size:11px; font-weight:700; cursor:pointer; transition:all .15s; white-space:nowrap; }
-    .eng-toggle[aria-pressed="true"] { border-color:var(--green); background:var(--green); color:#fff; }
+    .eng-toggle { flex-shrink:0; width:18px; height:18px; margin-top:2px; accent-color:var(--gold); cursor:pointer; }
+    .eng-toggle:focus-visible { outline:2px solid var(--navy); outline-offset:3px; }
     .eng-number { width:72px; flex-shrink:0; padding:6px 10px; border:1px solid var(--line); border-radius:6px; font-size:13px; font-family:'Lato',sans-serif; color:var(--navy); text-align:right; }
     .eng-text { flex-shrink:0; width:220px; max-width:100%; padding:6px 10px; border:1px solid var(--line); border-radius:6px; font-size:13px; font-family:'Lato',sans-serif; color:var(--navy); }
     .eng-number:focus, .eng-text:focus { border-color:var(--navy); outline:none; }
@@ -1646,7 +1671,7 @@
     .et-color-inputs { display:none; }
     .color-swatch { width:30px; height:30px; border-radius:50%; border:2px solid transparent; cursor:pointer; box-shadow:0 0 0 1px var(--line); }
     .color-swatch[aria-pressed="true"] { border-color:var(--white); box-shadow:0 0 0 2px var(--navy); }
-    #et-showLogo { align-self:flex-start; width:auto; min-width:56px; }
+    #et-showLogo { align-self:flex-start; min-width:0; width:18px; }
     @media (max-width:900px) { .et-layout { grid-template-columns:1fr; } }
 
     /* ===== Content Library ===== */
@@ -1740,9 +1765,8 @@
       <div class="sidebar-divider"></div>
 
       <span class="nav-group-label" data-admin-nav-group="content-manager">Site</span>
-      <button class="admin-nav-item active" data-admin-tab-scope="content-manager" data-target="section-mission">Mission card</button>
-      <button class="admin-nav-item" data-admin-tab-scope="content-manager" data-target="section-sync">Site sync check</button>
-      <button class="admin-nav-item" data-admin-tab-scope="content-manager" data-target="section-visibility">Visibility</button>
+      <button class="admin-nav-item active" data-admin-tab-scope="content-manager" data-target="section-visibility">Visibility</button>
+      <button class="admin-nav-item" data-admin-tab-scope="content-manager" data-target="section-access-controls">Assessment access</button>
 
       <span class="nav-group-label" data-admin-nav-group="content-manager">Content</span>
       <button class="admin-nav-item" data-admin-tab-scope="content-manager" data-target="section-orientation">Orientation</button>
@@ -1751,7 +1775,6 @@
       <button class="admin-nav-item" data-admin-tab-scope="content-manager" data-target="section-phase3">Phase 3</button>
       <button class="admin-nav-item" data-admin-tab-scope="content-manager" data-target="section-tsa">Assessments</button>
       <button class="admin-nav-item" data-admin-tab-scope="content-manager" data-target="section-send-instructor">Send to instructor</button>
-      <button class="admin-nav-item" data-admin-tab-scope="content-manager" data-target="section-global-defaults">Global defaults</button>
 
       <span class="nav-group-label" data-admin-nav-group="student-progress">Progress</span>
       <button class="admin-nav-item" data-admin-tab-scope="student-progress" data-target="section-student-progress">Student dashboard</button>
@@ -1760,37 +1783,27 @@
       <button class="admin-nav-item" data-admin-tab-scope="member-management" data-target="section-members">Members</button>
       <button class="admin-nav-item" data-admin-tab-scope="member-management" data-target="section-passwords">Passwords</button>
 
-      <span class="nav-group-label" data-admin-nav-group="admin-tools">Preview</span>
+      <span class="nav-group-label" data-admin-nav-group="admin-tools">Preview &amp; QA</span>
       <button class="admin-nav-item" data-admin-tab-scope="admin-tools" data-target="section-admin-preview">Unlock phases</button>
-      <button class="admin-nav-item" data-admin-tab-scope="admin-tools" data-target="section-public-homepage">Public homepage</button>
+      <button class="admin-nav-item" data-admin-tab-scope="admin-tools" data-target="section-sync">Site sync check</button>
+      <button class="admin-nav-item" data-admin-tab-scope="admin-tools" data-target="section-links">Quick links</button>
 
       <span class="nav-group-label" data-admin-nav-group="engagement">Engagement</span>
       <button class="admin-nav-item" data-admin-tab-scope="engagement" data-target="section-inapp-nudges">In-app nudges</button>
       <button class="admin-nav-item" data-admin-tab-scope="engagement" data-target="section-email-templates">Email templates</button>
       <button class="admin-nav-item" data-admin-tab-scope="engagement" data-target="section-email-nudges">Email nudges</button>
       <button class="admin-nav-item" data-admin-tab-scope="engagement" data-target="section-certificate">Certificate</button>
-      <button class="admin-nav-item" data-admin-tab-scope="engagement" data-target="section-access-controls">Access controls</button>
+      <button class="admin-nav-item" data-admin-tab-scope="engagement" data-target="section-global-defaults">Global defaults</button>
 
       <span class="nav-group-label" data-admin-nav-group="content-library">Content Library</span>
       <button class="admin-nav-item" data-admin-tab-scope="content-library" data-target="section-cl-files">Data files</button>
       <button class="admin-nav-item" data-admin-tab-scope="content-library" data-target="section-cl-setup">GitHub setup</button>
 
-      <span class="nav-group-label" data-admin-nav-group="content-manager">Links</span>
-      <button class="admin-nav-item" data-admin-tab-scope="content-manager" data-target="section-links">Quick links</button>
-
     </aside>
 
     <main class="admin-main">
-      <section class="admin-section" id="section-mission" data-admin-tab-panel="content-manager">
-        <span class="section-label">Site</span>
-        <h2>Mission card</h2>
-        <div class="section-divider"></div>
-        <p class="description">Controls the MA storyline card shown at the top of the member hub.</p>
-        <div class="toggle-row" data-key="utl_mission_card" data-default="show" data-options="show:Show,hide:Hide"></div>
-      </section>
-
-      <section class="admin-section" id="section-sync" data-admin-tab-panel="content-manager">
-        <span class="section-label">Site</span>
+      <section class="admin-section" id="section-sync" data-admin-tab-panel="admin-tools">
+        <span class="section-label">Admin Tools</span>
         <h2>Site sync check</h2>
         <div class="section-divider"></div>
         <p class="description">Checks whether the member hub still matches the admin panel's expected accordions, exercise cards, app links, completion keys, and embed keys.</p>
@@ -1809,10 +1822,85 @@
         <div class="section-divider"></div>
         <p class="description">Choose which public and member-facing areas are visible. Phase 2 and Phase 3 still unlock automatically for participants based on completion.</p>
         <div class="visibility-checklist" id="visibilityChecklist"></div>
+        <div class="section-divider" style="margin-top:20px"></div>
+        <p class="description" style="margin-top:12px"><strong>Public homepage</strong> — controls public navigation and homepage sections.</p>
+        <div class="visibility-checklist" id="publicHomepageChecklist"></div>
+        <span id="publicHomepageStatus" style="font-size:12px;color:#555;display:block;margin-top:6px;min-height:16px;"></span>
+        <div class="section-divider" style="margin-top:20px"></div>
+        <p class="description" style="margin-top:12px"><strong>Admin / owner preview</strong> — controls what admins and owners see while testing the public site. Regular visitors are not affected.</p>
+        <div id="adminVisibilityStatus" class="eng-status" aria-live="polite"></div>
+        <div id="adminVisibilityForm">
+          <div class="eng-field-group">
+            <div class="eng-field-row">
+              <label class="eng-toggle-label">
+                <span class="eng-toggle-name">Skip Find your level data form</span>
+                <span class="eng-toggle-desc">When checked, admins and owners can open the public Find your level exercise without entering name, email, role, or reason.</span>
+              </label>
+              <input class="eng-toggle" type="checkbox" data-admin-vis-key="findLevelLeadGateBypass" aria-label="Skip Find your level data form for admins and owners" checked>
+            </div>
+          </div>
+          <button class="small-button" type="button" id="adminVisibilitySave" style="margin-top:4px">Save admin preview settings</button>
+          <span class="saved" id="adminVisibilitySaved">Saved</span>
+        </div>
+        <div class="section-divider" style="margin-top:20px"></div>
+        <p class="description" style="margin-top:12px"><strong>Find your level page</strong> — show or hide each assessment card on the public <a href="../tsa-score.html" target="_blank">tsa-score.html</a> page. Defaults to shown.</p>
+        <div id="publicAssessmentStatus" class="eng-status" aria-live="polite"></div>
+        <div id="publicAssessmentForm">
+          <div class="eng-field-group">
+            <div class="eng-field-row">
+              <label class="eng-toggle-label">
+                <span class="eng-toggle-name">Show Diagnostic card</span>
+                <span class="eng-toggle-desc">"The Diagnostic" card on the public Find your level page.</span>
+              </label>
+              <input class="eng-toggle" type="checkbox" data-pub-assess-key="diagnosticVisible" aria-label="Show Diagnostic card" checked>
+            </div>
+            <div class="eng-field-row">
+              <label class="eng-toggle-label">
+                <span class="eng-toggle-name">Show Checkpoint card</span>
+                <span class="eng-toggle-desc">"The Checkpoint" card on the public Find your level page.</span>
+              </label>
+              <input class="eng-toggle" type="checkbox" data-pub-assess-key="checkpointVisible" aria-label="Show Checkpoint card" checked>
+            </div>
+          </div>
+          <button class="small-button" type="button" id="publicAssessmentSave" style="margin-top:4px">Save card visibility</button>
+          <span class="saved" id="publicAssessmentSaved">Saved</span>
+        </div>
+        <div class="visibility-summary-head">
+          <h3>Visibility status summary</h3>
+          <p>Read-only snapshot of the current local/admin preview state. Use this to confirm what the site should show after changing the controls above.</p>
+        </div>
         <div class="visibility-card" id="visibilityStatus"></div>
-        <div class="sync-actions">
+        <div class="sync-actions visibility-actions">
           <button class="small-button secondary-button" type="button" id="refreshVisibility">Refresh status</button>
           <a class="small-button" href="../member-login/index.html?mode=admin" target="_blank" id="memberHubPreviewLink" style="display:inline-flex;align-items:center;text-decoration:none;">Open member hub in admin mode</a>
+        </div>
+      </section>
+
+      <section class="admin-section" id="section-access-controls" data-admin-tab-panel="content-manager">
+        <span class="section-label">Site</span>
+        <h2>Assessment access</h2>
+        <div class="section-divider"></div>
+        <p class="description">Control who can see the assessments section. When turned off for members, the nav link, dashboard section, and results tab are all hidden. Changes take effect on the member's next page load.</p>
+        <div id="tsaVisibilityStatus" class="eng-status" aria-live="polite"></div>
+        <div id="tsaVisibilityForm">
+          <div class="eng-field-group">
+            <div class="eng-field-row">
+              <label class="eng-toggle-label">
+                <span class="eng-toggle-name">Members can see assessments</span>
+                <span class="eng-toggle-desc">When off, the nav link, dashboard section, and results tab are hidden for regular members.</span>
+              </label>
+              <input class="eng-toggle" type="checkbox" data-tsa-vis-key="userEnabled" aria-label="Members can see assessments" checked>
+            </div>
+            <div class="eng-field-row">
+              <label class="eng-toggle-label">
+                <span class="eng-toggle-name">Admins can see assessments when off for members</span>
+                <span class="eng-toggle-desc">When on, admins can still access and test assessments even if they are hidden for regular members.</span>
+              </label>
+              <input class="eng-toggle" type="checkbox" data-tsa-vis-key="adminEnabled" aria-label="Admins can see assessments when off for members" checked>
+            </div>
+          </div>
+          <button class="small-button" type="button" id="tsaVisibilitySave" style="margin-top:4px">Save access settings</button>
+          <span class="saved" id="tsaVisibilitySaved">Saved</span>
         </div>
       </section>
 
@@ -1909,8 +1997,8 @@
         </div>
       </section>
 
-      <section class="admin-section" id="section-global-defaults" data-admin-tab-panel="content-manager">
-        <span class="section-label">Site &amp; Content</span>
+      <section class="admin-section" id="section-global-defaults" data-admin-tab-panel="engagement">
+        <span class="section-label">Engagement</span>
         <h2>Global defaults</h2>
         <div class="section-divider"></div>
         <p class="description">Default settings applied to new members when they first sign in. Individual members can be overridden from the Members tab.</p>
@@ -1934,38 +2022,6 @@
         <div class="section-divider"></div>
         <p class="description">Controls your own view of the member area. Turning this on lets you browse Phase 2 and Phase 3 without completing Phase 1 first. Members are not affected — they still follow the normal unlock sequence.</p>
         <div class="visibility-checklist" id="adminPreviewChecklist"></div>
-      </section>
-
-      <section class="admin-section" id="section-public-homepage" data-admin-tab-panel="admin-tools">
-        <span class="section-label">Admin Tools</span>
-        <h2>Public pages</h2>
-        <div class="section-divider"></div>
-        <p class="description"><strong>Homepage</strong> — controls which sections appear on the public homepage.</p>
-        <div class="visibility-checklist" id="publicHomepageChecklist"></div>
-        <span id="publicHomepageStatus" style="font-size:12px;color:#555;display:block;margin-top:6px;min-height:16px;"></span>
-        <div class="section-divider" style="margin-top:20px"></div>
-        <p class="description" style="margin-top:12px"><strong>Find Your Level page</strong> — show or hide each assessment card on the public <a href="../tsa-score.html" target="_blank">tsa-score.html</a> page. Defaults to shown.</p>
-        <div id="publicAssessmentStatus" class="eng-status" aria-live="polite"></div>
-        <div id="publicAssessmentForm" hidden>
-          <div class="eng-field-group">
-            <div class="eng-field-row">
-              <label class="eng-toggle-label">
-                <span class="eng-toggle-name">Show Diagnostic card</span>
-                <span class="eng-toggle-desc">"The Diagnostic" card on the public Find Your Level page.</span>
-              </label>
-              <button class="eng-toggle" type="button" data-pub-assess-key="diagnosticVisible" aria-pressed="true">On</button>
-            </div>
-            <div class="eng-field-row">
-              <label class="eng-toggle-label">
-                <span class="eng-toggle-name">Show Checkpoint card</span>
-                <span class="eng-toggle-desc">"The Checkpoint" card on the public Find Your Level page.</span>
-              </label>
-              <button class="eng-toggle" type="button" data-pub-assess-key="checkpointVisible" aria-pressed="true">On</button>
-            </div>
-          </div>
-          <button class="small-button" type="button" id="publicAssessmentSave" style="margin-top:4px">Save card visibility</button>
-          <span class="saved" id="publicAssessmentSaved">Saved</span>
-        </div>
       </section>
 
       <section class="admin-section" id="section-student-progress" data-admin-tab-panel="student-progress">
@@ -2147,8 +2203,8 @@
         <div class="warning-callout">If you change the admin console password and forget it, you will need to edit admin/index.html directly to regain access.</div>
       </section>
 
-      <section class="admin-section" id="section-links" data-admin-tab-panel="content-manager">
-        <span class="section-label">Links</span>
+      <section class="admin-section" id="section-links" data-admin-tab-panel="admin-tools">
+        <span class="section-label">Admin Tools</span>
         <h2>Quick links</h2>
         <div class="section-divider"></div>
         <p class="description">Open these links in a new tab to verify your changes.</p>
@@ -2169,14 +2225,14 @@
                 <span class="eng-toggle-name">Continue card</span>
                 <span class="eng-toggle-desc">Shows a &ldquo;Continue where you left off&rdquo; card at the top of the dashboard.</span>
               </label>
-              <button class="eng-toggle" type="button" data-eng-key="inApp.continueCard" aria-pressed="true">On</button>
+              <input class="eng-toggle" type="checkbox" data-eng-key="inApp.continueCard" aria-label="Continue card" checked>
             </div>
             <div class="eng-field-row">
               <label class="eng-toggle-label">
                 <span class="eng-toggle-name">Days-since banner</span>
                 <span class="eng-toggle-desc">Shows a &ldquo;You were last here N days ago&rdquo; banner after inactivity.</span>
               </label>
-              <button class="eng-toggle" type="button" data-eng-key="inApp.daysSinceBanner" aria-pressed="true">On</button>
+              <input class="eng-toggle" type="checkbox" data-eng-key="inApp.daysSinceBanner" aria-label="Days-since banner" checked>
             </div>
             <div class="eng-field-row eng-indent" id="engDaysSinceThresholdRow">
               <label class="eng-toggle-label" for="engDaysSinceThreshold">
@@ -2190,7 +2246,7 @@
                 <span class="eng-toggle-name">Almost-there prompt</span>
                 <span class="eng-toggle-desc">Highlights the last N exercises remaining in a phase to encourage completion.</span>
               </label>
-              <button class="eng-toggle" type="button" data-eng-key="inApp.almostThere" aria-pressed="true">On</button>
+              <input class="eng-toggle" type="checkbox" data-eng-key="inApp.almostThere" aria-label="Almost-there prompt" checked>
             </div>
             <div class="eng-field-row eng-indent" id="engAlmostThereThresholdRow">
               <label class="eng-toggle-label" for="engAlmostThereThreshold">
@@ -2204,7 +2260,7 @@
                 <span class="eng-toggle-name">Phase completion modal</span>
                 <span class="eng-toggle-desc">Shows a congratulations modal the first time a member completes all exercises in a phase.</span>
               </label>
-              <button class="eng-toggle" type="button" data-eng-key="inApp.phaseCompletionModal" aria-pressed="true">On</button>
+              <input class="eng-toggle" type="checkbox" data-eng-key="inApp.phaseCompletionModal" aria-label="Phase completion modal" checked>
             </div>
           </div>
           <button class="small-button eng-save-btn" type="button" id="engInAppSave">Save in-app settings</button>
@@ -2246,7 +2302,7 @@
                       <span class="eng-toggle-name">Show logo</span>
                       <span class="eng-toggle-desc">Adds the UTL logo at the top of the email.</span>
                     </label>
-                    <button class="eng-toggle" type="button" id="et-showLogo" aria-pressed="true">On</button>
+                    <input class="eng-toggle" type="checkbox" id="et-showLogo" aria-label="Show logo" checked>
                   </div>
                 </div>
                 <div class="mb-edit-field">
@@ -2312,7 +2368,7 @@
                 <span class="eng-toggle-name">Enable email nudges</span>
                 <span class="eng-toggle-desc">Master switch. No email nudges are sent while this is off.</span>
               </label>
-              <button class="eng-toggle" type="button" data-eng-key="email.enabled" aria-pressed="false">Off</button>
+              <input class="eng-toggle" type="checkbox" data-eng-key="email.enabled" aria-label="Enable email nudges">
             </div>
             <div id="engEmailSubfields">
               <div class="eng-field-row">
@@ -2320,7 +2376,7 @@
                   <span class="eng-toggle-name">Re-engagement nudge</span>
                   <span class="eng-toggle-desc">Sends an email after a member has been inactive for N days.</span>
                 </label>
-                <button class="eng-toggle" type="button" data-eng-key="email.reEngagement.enabled" aria-pressed="false">Off</button>
+                <input class="eng-toggle" type="checkbox" data-eng-key="email.reEngagement.enabled" aria-label="Re-engagement nudge">
               </div>
               <div class="eng-field-row eng-indent">
                 <label class="eng-toggle-label" for="engReEngageDays">
@@ -2334,14 +2390,14 @@
                   <span class="eng-toggle-name">Phase completion email</span>
                   <span class="eng-toggle-desc">Sends a congratulations email when a member finishes a phase.</span>
                 </label>
-                <button class="eng-toggle" type="button" data-eng-key="email.phaseCompletion.enabled" aria-pressed="false">Off</button>
+                <input class="eng-toggle" type="checkbox" data-eng-key="email.phaseCompletion.enabled" aria-label="Phase completion email">
               </div>
               <div class="eng-field-row">
                 <label class="eng-toggle-label">
                   <span class="eng-toggle-name">Finish-line email</span>
                   <span class="eng-toggle-desc">Sends an email when a member completes the full program.</span>
                 </label>
-                <button class="eng-toggle" type="button" data-eng-key="email.finishLine.enabled" aria-pressed="false">Off</button>
+                <input class="eng-toggle" type="checkbox" data-eng-key="email.finishLine.enabled" aria-label="Finish-line email">
               </div>
               <div class="eng-field-row">
                 <label class="eng-toggle-label" for="engSenderName">
@@ -2377,7 +2433,7 @@
                 <span class="eng-toggle-name">Enable certificate</span>
                 <span class="eng-toggle-desc">Show the certificate link to members who have completed the full program.</span>
               </label>
-              <button class="eng-toggle" type="button" data-eng-key="certificate.enabled" aria-pressed="true">On</button>
+              <input class="eng-toggle" type="checkbox" data-eng-key="certificate.enabled" aria-label="Enable certificate" checked>
             </div>
             <div class="eng-field-row">
               <label class="eng-toggle-label" for="engCredentialTitle">
@@ -2403,34 +2459,6 @@
           </div>
           <button class="small-button eng-save-btn" type="button" id="engCertSave">Save certificate settings</button>
           <span class="saved" id="engCertSaved">Saved</span>
-        </div>
-      </section>
-
-      <section class="admin-section" id="section-access-controls" data-admin-tab-panel="engagement">
-        <span class="section-label">Engagement</span>
-        <h2>Access controls</h2>
-        <div class="section-divider"></div>
-        <p class="description">Control who can see the assessments section. When turned off for members, the nav link, dashboard section, and results tab are all hidden. Changes take effect on the member's next page load.</p>
-        <div id="tsaVisibilityStatus" class="eng-status" aria-live="polite"></div>
-        <div id="tsaVisibilityForm" hidden>
-          <div class="eng-field-group">
-            <div class="eng-field-row">
-              <label class="eng-toggle-label">
-                <span class="eng-toggle-name">Members can see assessments</span>
-                <span class="eng-toggle-desc">When off, the nav link, dashboard section, and results tab are hidden for regular members.</span>
-              </label>
-              <button class="eng-toggle" type="button" data-tsa-vis-key="userEnabled" aria-pressed="true">On</button>
-            </div>
-            <div class="eng-field-row">
-              <label class="eng-toggle-label">
-                <span class="eng-toggle-name">Admins can see assessments when off for members</span>
-                <span class="eng-toggle-desc">When on, admins can still access and test assessments even if they are hidden for regular members.</span>
-              </label>
-              <button class="eng-toggle" type="button" data-tsa-vis-key="adminEnabled" aria-pressed="true">On</button>
-            </div>
-          </div>
-          <button class="small-button" type="button" id="tsaVisibilitySave" style="margin-top:4px">Save access settings</button>
-          <span class="saved" id="tsaVisibilitySaved">Saved</span>
         </div>
       </section>
 
@@ -2504,9 +2532,11 @@
       getDoc,
       getDocs,
       getAssessmentVisibility,
+      getAdminVisibilitySettings,
       getEmailTemplates,
       saveEmailTemplate,
       setAssessmentVisibility,
+      setAdminVisibilitySettings,
       getPublicAssessmentSettings,
       setPublicAssessmentSettings,
       getEngagementSettings,
@@ -2540,7 +2570,9 @@
       getDoc,
       getDocs,
       getAssessmentVisibility,
+      getAdminVisibilitySettings,
       setAssessmentVisibility,
+      setAdminVisibilitySettings,
       getPublicAssessmentSettings,
       setPublicAssessmentSettings,
       getEngagementSettings,
@@ -3124,11 +3156,11 @@
             const checked = current === item.checkedValue;
             return `
               <label class="visibility-check">
-                <input type="checkbox" data-visibility-key="${item.key}" ${checked ? 'checked' : ''}>
                 <span>
                   <strong>${item.label}</strong>
                   <span>${item.description}</span>
                 </span>
+                <input type="checkbox" data-visibility-key="${item.key}" aria-label="${item.label}" ${checked ? 'checked' : ''}>
               </label>
             `;
           }).join('')}
@@ -3166,6 +3198,24 @@
       }
     ];
 
+    function setBinaryControl(control, on) {
+      if (!control) return;
+      const next = Boolean(on);
+      if (control.matches && control.matches('input[type="checkbox"]')) {
+        control.checked = next;
+        control.setAttribute('aria-checked', String(next));
+        return;
+      }
+      control.setAttribute('aria-pressed', String(next));
+      control.textContent = next ? 'On' : 'Off';
+    }
+
+    function getBinaryControl(control) {
+      if (!control) return false;
+      if (control.matches && control.matches('input[type="checkbox"]')) return Boolean(control.checked);
+      return control.getAttribute('aria-pressed') === 'true';
+    }
+
     function renderAdminPreviewChecklist() {
       const target = document.getElementById('adminPreviewChecklist');
       if (!target) return;
@@ -3178,17 +3228,15 @@
               <span class="eng-toggle-name">${item.label}</span>
               <span class="eng-toggle-desc">${item.description}</span>
             </label>
-            <button class="eng-toggle" type="button" data-admin-preview-key="${item.key}" aria-pressed="${on}">${on ? 'On' : 'Off'}</button>
+            <input class="eng-toggle" type="checkbox" data-admin-preview-key="${item.key}" aria-label="${item.label}" ${on ? 'checked' : ''}>
           </div>`;
       }).join('')}</div>`;
 
-      target.querySelectorAll('[data-admin-preview-key]').forEach((btn) => {
-        btn.addEventListener('click', function(e) {
+      target.querySelectorAll('[data-admin-preview-key]').forEach((input) => {
+        input.addEventListener('change', function(e) {
           e.stopPropagation();
-          const newOn = btn.getAttribute('aria-pressed') !== 'true';
-          btn.setAttribute('aria-pressed', String(newOn));
-          btn.textContent = newOn ? 'On' : 'Off';
-          const item = ADMIN_PREVIEW_ITEMS.find((entry) => entry.key === btn.dataset.adminPreviewKey);
+          const newOn = input.checked;
+          const item = ADMIN_PREVIEW_ITEMS.find((entry) => entry.key === input.dataset.adminPreviewKey);
           if (item) setChecklistValue(item, newOn);
           renderVisibilityStatus();
         });
@@ -3207,17 +3255,15 @@
               <span class="eng-toggle-name">${item.label}</span>
               <span class="eng-toggle-desc">${item.description}</span>
             </label>
-            <button class="eng-toggle" type="button" data-public-homepage-key="${item.key}" aria-pressed="${on}">${on ? 'On' : 'Off'}</button>
+            <input class="eng-toggle" type="checkbox" data-public-homepage-key="${item.key}" aria-label="${item.label}" ${on ? 'checked' : ''}>
           </div>`;
       }).join('')}</div>`;
 
-      target.querySelectorAll('[data-public-homepage-key]').forEach((btn) => {
-        btn.addEventListener('click', function(e) {
+      target.querySelectorAll('[data-public-homepage-key]').forEach((input) => {
+        input.addEventListener('change', function(e) {
           e.stopPropagation();
-          const newOn = btn.getAttribute('aria-pressed') !== 'true';
-          btn.setAttribute('aria-pressed', String(newOn));
-          btn.textContent = newOn ? 'On' : 'Off';
-          const item = PUBLIC_HOMEPAGE_ITEMS.find((entry) => entry.key === btn.dataset.publicHomepageKey);
+          const newOn = input.checked;
+          const item = PUBLIC_HOMEPAGE_ITEMS.find((entry) => entry.key === input.dataset.publicHomepageKey);
           if (item) setPublicHomepageValue(item, newOn);
         });
       });
@@ -3232,8 +3278,7 @@
       try {
         const visible = await fb.getPublicFindLevelSetting();
         localStorage.setItem('utl_public_find_level', visible ? 'show' : 'hide');
-        btn.setAttribute('aria-pressed', String(visible));
-        btn.textContent = visible ? 'On' : 'Off';
+        setBinaryControl(btn, visible);
         renderVisibilityStatus();
         if (status) status.textContent = visible ? 'Live setting: Find your level is shown.' : 'Live setting: Find your level is hidden.';
       } catch (error) {
@@ -4139,10 +4184,9 @@
       document.querySelectorAll('[data-eng-key]').forEach(function(el) {
         var key = el.dataset.engKey;
         var val = getNestedValue(settings, key);
-        if (el.tagName === 'BUTTON') {
+        if (el.classList.contains('eng-toggle')) {
           var on = val === true || val === 'true';
-          el.setAttribute('aria-pressed', on ? 'true' : 'false');
-          el.textContent = on ? 'On' : 'Off';
+          setBinaryControl(el, on);
         } else if (el.tagName === 'INPUT') {
           el.value = (val !== undefined && val !== null) ? val : '';
         }
@@ -4154,8 +4198,8 @@
       document.querySelectorAll('[data-eng-key]').forEach(function(el) {
         var key = el.dataset.engKey;
         var val;
-        if (el.tagName === 'BUTTON') {
-          val = el.getAttribute('aria-pressed') === 'true';
+        if (el.classList.contains('eng-toggle')) {
+          val = getBinaryControl(el);
         } else if (el.type === 'number') {
           val = parseInt(el.value, 10) || 0;
         } else {
@@ -4249,12 +4293,10 @@
       saveEngSection(this, 'engCertSaved', ['certificate']);
     });
 
-    document.addEventListener('click', function(e) {
-      var btn = e.target.closest('.eng-toggle');
-      if (!btn) return;
-      var pressed = btn.getAttribute('aria-pressed') === 'true';
-      btn.setAttribute('aria-pressed', pressed ? 'false' : 'true');
-      btn.textContent = pressed ? 'Off' : 'On';
+    document.addEventListener('change', function(e) {
+      var input = e.target.closest('input.eng-toggle');
+      if (!input) return;
+      input.setAttribute('aria-checked', String(input.checked));
     });
 
     // ===== End engagement tab =====
@@ -4263,20 +4305,26 @@
 
     async function loadTsaVisibility() {
       var fb = window.utlFirebaseAuth;
-      if (!fb || !fb.getAssessmentVisibility) return;
       var statusEl = document.getElementById('tsaVisibilityStatus');
       var formEl = document.getElementById('tsaVisibilityForm');
       if (!statusEl || !formEl) return;
+      formEl.hidden = false;
+      if (!fb || !fb.getAssessmentVisibility) {
+        statusEl.textContent = 'Using default shown state until Firebase loads...';
+        window.addEventListener('utlFirebaseAuthReady', function handler() {
+          window.removeEventListener('utlFirebaseAuthReady', handler);
+          loadTsaVisibility();
+        });
+        return;
+      }
       statusEl.textContent = 'Loading...';
       try {
         var settings = await fb.getAssessmentVisibility();
         document.querySelectorAll('[data-tsa-vis-key]').forEach(function(btn) {
           var key = btn.dataset.tsaVisKey;
           var val = settings[key] !== false;
-          btn.setAttribute('aria-pressed', val ? 'true' : 'false');
-          btn.textContent = val ? 'On' : 'Off';
+          setBinaryControl(btn, val);
         });
-        formEl.hidden = false;
         statusEl.textContent = '';
       } catch(e) {
         statusEl.textContent = 'Could not load: ' + ((e && e.message) || 'Unknown error');
@@ -4285,10 +4333,13 @@
 
     document.getElementById('tsaVisibilitySave')?.addEventListener('click', async function() {
       var fb = window.utlFirebaseAuth;
-      if (!fb || !fb.setAssessmentVisibility) return;
+      if (!fb || !fb.setAssessmentVisibility) {
+        showToast('Firebase not ready', 'error');
+        return;
+      }
       var partial = {};
       document.querySelectorAll('[data-tsa-vis-key]').forEach(function(btn) {
-        partial[btn.dataset.tsaVisKey] = btn.getAttribute('aria-pressed') === 'true';
+        partial[btn.dataset.tsaVisKey] = getBinaryControl(btn);
       });
       this.disabled = true;
       try {
@@ -4343,6 +4394,49 @@
         recipient: email,
         name: name || '',
         groupEmail: GOOGLE_GROUP_EMAIL
+      });
+    }
+
+    function mbDateToIso(value) {
+      if (!value) return '';
+      if (value instanceof Date) return value.toISOString();
+      if (value.toDate) {
+        try { return value.toDate().toISOString(); } catch (e) { return ''; }
+      }
+      if (value.seconds) return new Date(value.seconds * 1000).toISOString();
+      if (typeof value === 'string') return value;
+      return '';
+    }
+
+    async function mbLogRemovedMember(email, data) {
+      const role = String((data && data.role) || '').toLowerCase();
+      if (role === 'admin' || role === 'owner') return;
+
+      let removedBy = adminProfileData().email || '';
+      try {
+        const fb = window.utlFirebaseAuth;
+        const user = fb && fb.getSignedInUser ? await fb.getSignedInUser() : null;
+        if (user && user.email) removedBy = user.email;
+      } catch (e) { /* use local admin profile fallback */ }
+
+      return postEmailScriptAction('RemovedMember', {
+        source: 'admin-member-management',
+        email: email,
+        memberEmail: email,
+        name: data.name || data.displayName || '',
+        role: data.role || 'member',
+        status: data.status || '',
+        addedAt: mbDateToIso(data.addedAt),
+        addedBy: data.addedBy || '',
+        updatedAt: mbDateToIso(data.updatedAt),
+        expiryDate: mbDateToIso(data.expiryDate),
+        firstLoginAt: mbDateToIso(data.firstLoginAt),
+        lastLoginAt: mbDateToIso(data.lastLoginAt),
+        googleGroupAdded: data.googleGroupAdded === true,
+        googleGroupSyncStatus: data.googleGroupSyncStatus || '',
+        removedAt: new Date().toISOString(),
+        removedBy: removedBy || 'admin',
+        notes: 'Removed from Admin Console'
       });
     }
 
@@ -4625,7 +4719,7 @@
         buttonLabel: document.getElementById('et-buttonLabel').value,
         buttonUrl: document.getElementById('et-buttonUrl').value,
         accentColor: document.getElementById('et-accentColor').value,
-        showLogo: document.getElementById('et-showLogo').getAttribute('aria-pressed') === 'true',
+        showLogo: getBinaryControl(document.getElementById('et-showLogo')),
         loginEmail: '',
         extraButtonEditing: false,
         editMode: true
@@ -4679,8 +4773,7 @@
       const logoBtn = document.getElementById('et-showLogo');
       const _adminEmail = adminProfileData().email || '';
       document.getElementById('et-testEmail').value = _adminEmail.includes('@') ? _adminEmail : '';
-      logoBtn.setAttribute('aria-pressed', String(data.showLogo));
-      logoBtn.textContent = data.showLogo ? 'On' : 'Off';
+      setBinaryControl(logoBtn, data.showLogo);
       updateEmailPreview();
     }
 
@@ -4797,7 +4890,7 @@
           updateEmailPreview();
         });
       });
-      document.getElementById('et-showLogo').addEventListener('click', () => { setTimeout(updateEmailPreview, 10); });
+      document.getElementById('et-showLogo').addEventListener('change', updateEmailPreview);
       document.getElementById('et-sendTest').addEventListener('click', async () => {
         const emailInput = document.getElementById('et-testEmail');
         const statusEl = document.getElementById('etTestStatus');
@@ -4815,7 +4908,7 @@
           buttonLabel: document.getElementById('et-buttonLabel').value,
           buttonUrl: normalizeExtraButtonUrl(document.getElementById('et-buttonUrl').value),
           accentColor: document.getElementById('et-accentColor').value,
-          showLogo: document.getElementById('et-showLogo').getAttribute('aria-pressed') === 'true'
+          showLogo: getBinaryControl(document.getElementById('et-showLogo'))
         };
         try {
           await postEmailScriptAction('TestEmailTemplate', {
@@ -4843,7 +4936,7 @@
           buttonLabel: document.getElementById('et-buttonLabel').value,
           buttonUrl: normalizeExtraButtonUrl(document.getElementById('et-buttonUrl').value),
           accentColor: document.getElementById('et-accentColor').value,
-          showLogo: document.getElementById('et-showLogo').getAttribute('aria-pressed') === 'true'
+          showLogo: getBinaryControl(document.getElementById('et-showLogo'))
         };
         const btn = document.getElementById('et-save');
         btn.disabled = true;
@@ -4864,19 +4957,25 @@
 
     async function loadPublicAssessmentSettings() {
       var fb = window.utlFirebaseAuth;
-      if (!fb || !fb.getPublicAssessmentSettings) return;
       var statusEl = document.getElementById('publicAssessmentStatus');
       var formEl = document.getElementById('publicAssessmentForm');
       if (!statusEl || !formEl) return;
+      formEl.hidden = false;
+      if (!fb || !fb.getPublicAssessmentSettings) {
+        statusEl.textContent = 'Using default shown state until Firebase loads...';
+        window.addEventListener('utlFirebaseAuthReady', function handler() {
+          window.removeEventListener('utlFirebaseAuthReady', handler);
+          loadPublicAssessmentSettings();
+        });
+        return;
+      }
       statusEl.textContent = 'Loading...';
       try {
         var settings = await fb.getPublicAssessmentSettings();
         document.querySelectorAll('[data-pub-assess-key]').forEach(function(btn) {
           var val = settings[btn.dataset.pubAssessKey] !== false;
-          btn.setAttribute('aria-pressed', val ? 'true' : 'false');
-          btn.textContent = val ? 'On' : 'Off';
+          setBinaryControl(btn, val);
         });
-        formEl.hidden = false;
         statusEl.textContent = '';
       } catch(e) {
         statusEl.textContent = 'Could not load: ' + ((e && e.message) || 'Unknown error');
@@ -4888,7 +4987,7 @@
       if (!fb || !fb.setPublicAssessmentSettings) return;
       var partial = {};
       document.querySelectorAll('[data-pub-assess-key]').forEach(function(btn) {
-        partial[btn.dataset.pubAssessKey] = btn.getAttribute('aria-pressed') === 'true';
+        partial[btn.dataset.pubAssessKey] = getBinaryControl(btn);
       });
       this.disabled = true;
       try {
@@ -4904,6 +5003,75 @@
     });
 
     // ===== End public assessment card visibility =====
+
+    // ===== Admin / owner preview visibility =====
+
+    const ADMIN_VISIBILITY_LOCAL_KEYS = {
+      findLevelLeadGateBypass: 'utl_find_level_admin_bypass'
+    };
+
+    function syncAdminVisibilityLocal(key, value) {
+      const localKey = ADMIN_VISIBILITY_LOCAL_KEYS[key];
+      if (!localKey) return;
+      localStorage.setItem(localKey, value ? 'on' : 'off');
+    }
+
+    async function loadAdminVisibilitySettings() {
+      var fb = window.utlFirebaseAuth;
+      var statusEl = document.getElementById('adminVisibilityStatus');
+      var formEl = document.getElementById('adminVisibilityForm');
+      if (!statusEl || !formEl) return;
+      formEl.hidden = false;
+      if (!fb || !fb.getAdminVisibilitySettings) {
+        statusEl.textContent = 'Using default admin preview settings until Firebase loads...';
+        window.addEventListener('utlFirebaseAuthReady', function handler() {
+          window.removeEventListener('utlFirebaseAuthReady', handler);
+          loadAdminVisibilitySettings();
+        });
+        return;
+      }
+      statusEl.textContent = 'Loading...';
+      try {
+        var settings = await fb.getAdminVisibilitySettings();
+        document.querySelectorAll('[data-admin-vis-key]').forEach(function(input) {
+          var key = input.dataset.adminVisKey;
+          var val = settings[key] !== false;
+          setBinaryControl(input, val);
+          syncAdminVisibilityLocal(key, val);
+        });
+        statusEl.textContent = '';
+      } catch(e) {
+        statusEl.textContent = 'Could not load: ' + ((e && e.message) || 'Unknown error');
+      }
+    }
+
+    document.getElementById('adminVisibilitySave')?.addEventListener('click', async function() {
+      var fb = window.utlFirebaseAuth;
+      if (!fb || !fb.setAdminVisibilitySettings) {
+        showToast('Firebase not ready', 'error');
+        return;
+      }
+      var partial = {};
+      document.querySelectorAll('[data-admin-vis-key]').forEach(function(input) {
+        var key = input.dataset.adminVisKey;
+        var val = getBinaryControl(input);
+        partial[key] = val;
+        syncAdminVisibilityLocal(key, val);
+      });
+      this.disabled = true;
+      try {
+        await fb.setAdminVisibilitySettings(partial);
+        var savedEl = document.getElementById('adminVisibilitySaved');
+        if (savedEl) { savedEl.classList.add('is-visible'); setTimeout(function(){ savedEl.classList.remove('is-visible'); }, 1500); }
+        showToast('Saved');
+      } catch(e) {
+        showToast('Save failed', true);
+      } finally {
+        this.disabled = false;
+      }
+    });
+
+    // ===== End admin / owner preview visibility =====
 
     // ===== Content Library =====
 
@@ -5356,7 +5524,11 @@
       if (activeTab === 'student-progress') loadStudentProgress();
       if (activeTab === 'member-management' && !mbMembersCache.length) mbLoadMembers();
       if (activeTab === 'engagement') loadEngagementSettings();
-      if (activeTab === 'admin-tools') loadPublicAssessmentSettings();
+      if (activeTab === 'content-manager') {
+        loadAdminVisibilitySettings();
+        loadPublicAssessmentSettings();
+        loadTsaVisibility();
+      }
       if (activeTab === 'content-library') clUpdatePatStatus();
 
       if (options.scroll !== false) {
@@ -5382,7 +5554,7 @@
       }
 
       const activeNavItem = document.querySelector('.admin-nav-item.active');
-      const defaultOpenId = activeNavItem ? activeNavItem.dataset.target : 'section-mission';
+      const defaultOpenId = activeNavItem ? activeNavItem.dataset.target : 'section-visibility';
       const hasSavedStates = Object.keys(savedStates).length > 0;
 
       document.querySelectorAll('.admin-section[id]').forEach((section) => {
@@ -5526,6 +5698,7 @@
     mbInitAddForm();
     initGlobalDefaults();
     loadPublicHomepageSetting();
+    loadAdminVisibilitySettings();
     loadPublicAssessmentSettings();
     clInit();
     window.setTimeout(runSyncCheck, 400);
@@ -5578,6 +5751,11 @@
     });
     document.getElementById('refreshVisibility')?.addEventListener('click', () => {
       renderVisibilityChecklist();
+      renderPublicHomepageChecklist();
+      loadPublicHomepageSetting();
+      loadAdminVisibilitySettings();
+      loadPublicAssessmentSettings();
+      loadTsaVisibility();
       renderVisibilityStatus();
     });
     document.querySelectorAll('[data-add-context]').forEach((button) => {
@@ -6070,6 +6248,9 @@
               await mbRequestGoogleGroupSync(email, cachedData.name || '', 'remove');
               groupRemoveRequested = true;
             } catch (groupErr) { /* non-fatal */ }
+            try {
+              await mbLogRemovedMember(email, cachedData);
+            } catch (logErr) { /* non-fatal: removal should not be blocked by sheet logging */ }
 
             await fb.deleteDoc(fb.doc(fb.db, 'authorized_members', email));
             try {
