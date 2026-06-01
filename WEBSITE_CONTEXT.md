@@ -57,7 +57,7 @@ Logos: `assets/logo.png` (main) · `assets/utl-logo-nav-white.png` (app header w
 
 Favicon: `assets/favicon-bluebg-whitedoor-thicker-32.png?v=6`
 
-Trademarks: `TSA Score™` · `C³ Rubric™` — use ™ on first use per page. Program name: `Think, Speak, and Act Like an Executive`.
+Trademarks: `TSA Score™` · `C³ Rubric™` · `Think, speak, and act like an executive™` — use ™ on first use per public page/email, then omit on later shorthand references.
 
 ## Firebase Member System
 
@@ -86,7 +86,7 @@ Passwordless invites: Admin sends Firebase email-link invites from `admin/index.
 
 Emulators (Auth: 9099, Firestore: 8085, Hosting: 5000): enable with `localStorage.setItem("utl_use_firebase_emulators", "true")` or `?emulators=true`.
 
-Firestore rules pattern for settings: `allow read: if docId == 'publicSite' || signedIn();`
+Firestore rules pattern for settings: public pages can read `publicSite` and `public_assessments`; other settings require sign-in.
 
 Firebase Functions: `functions/processGoogleGroupSyncJob` watches `google_group_sync_jobs/{jobId}`. It requires Google Admin SDK credentials and is being introduced in parallel with Apps Script group sync. See `GOOGLE_GROUP_SYNC_MIGRATION.md`.
 
@@ -163,6 +163,8 @@ Apps Script `action` routing: `WelcomeEmail`, `TestEmailTemplate`, `ResultsEmail
 - Admin Console IA: `Site & Content` owns public/member visibility and content controls; `Visibility` is the single place for public homepage/Find your level/page-card visibility, Mission card visibility, learner release gates, and the read-only visibility status summary. `Assessment access` controls Firestore-backed assessment visibility for members/admins. `Admin Tools` owns preview/QA utilities; `Engagement` owns nudges, email, certificates, and feedback defaults; `Member Management` owns member access/password operations.
 - Admin Console binary settings use right-aligned checkbox controls. Keep multi-state controls such as `Show / Coming soon / Hide` as segmented controls because they are not true yes/no settings.
 - Admin Console `Site & Content > Visibility > Admin / owner preview` controls admin/owner-only preview behavior. `Skip Find your level data form` writes `settings/admin_visibility.findLevelLeadGateBypass` and mirrors to localStorage key `utl_find_level_admin_bypass`; public visitors are not affected.
+- Admin Console `Find your level page` card visibility writes `settings/public_assessments` and mirrors to localStorage keys `utl_public_assessment_diagnostic_visible` / `utl_public_assessment_checkpoint_visible` for localhost preview. Live public reads require deployed Firestore rules that allow public read of `settings/public_assessments`.
+- Lesson video URLs are sourced from `member-login/content-config.js`. The Admin Console Content Manager can save local browser preview overrides, but permanent video link changes must update `member-login/content-config.js` and be committed/pushed.
 - `no-cors` mode on Apps Script fetches returns opaque responses — server-side failures are invisible to the client. Always validate inputs client-side.
 - Email templates are stored in Firestore `settings/emailTemplates`. `loadEmailTemplates` in `admin/index.html` always falls back to defaults if Firestore fails, then calls `syncEmailTemplateForm` and `initEmailTemplateListeners` regardless.
 
@@ -184,6 +186,11 @@ Apps Script `action` routing: `WelcomeEmail`, `TestEmailTemplate`, `ResultsEmail
 - Standardized Admin Console binary setting controls to checkboxes across Visibility, Assessment access, Engagement, Email templates, and Certificate sections. Multi-state controls remain segmented controls.
 - Added admin/owner-only Find your level form bypass: Admin Console Visibility has a checkbox for `Skip Find your level data form`, and `apps/find-your-level/index.html` skips the lead form only for admin/owner sessions when that setting is enabled.
 - Added removed-member audit logging: non-admin/non-owner removals now post a `RemovedMember` action to Apps Script before Firestore deletion so the shared Leads/Feedback spreadsheet keeps add/remove history.
+- Fixed public Find your level card visibility by allowing public reads of Firestore `settings/public_assessments` and adding localhost localStorage fallback keys for Diagnostic/Checkpoint card visibility.
+- Updated program timing from `[2026] UTL - Workshop flow (for scale)`: member lesson durations in `content-config.js` use exact minutes/seconds from the PDF. Public page uses clean estimates: 7 hours total, with about 2.5 hours of videos and 4.5 hours of exercises.
+- Fixed member workspace video controls by moving the lesson title/kicker strip below the Google Drive iframe instead of overlaying the bottom of the video player.
+- Updated the Phase 1 KonMari lesson video URL to the canonical Google Drive `/file/d/.../view?usp=sharing` format.
+- Hardened Admin Console lesson video editing: URL fields are read-only until Edit is clicked, bad old local overrides are ignored, and admins can reset a row back to the current backend config URL.
 - Reorganized `Site & Content` IA so `Visibility` and `Assessment access` appear in the same order in the left nav and page body; moved preview/QA utilities to `Admin Tools` and engagement defaults to `Engagement`.
 
 ### 2026-05-31

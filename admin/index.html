@@ -1547,6 +1547,11 @@
     /* FIX 7 — Lesson video empty state */
     .phase-layout-row.has-empty-video { border-left:3px solid var(--gold); }
     .no-video-note { margin-top:3px; color:var(--gold); font-family:'Roboto Mono',monospace; font-size:10px; font-weight:700; opacity:.8; }
+    .phase-layout-field input.is-readonly { background:#f7f2e9; color:#315f8c; cursor:default; }
+    .phase-layout-actions { align-self:end; display:flex; flex-wrap:wrap; align-items:flex-end; gap:8px; }
+    .phase-layout-actions label { flex:0 0 100%; }
+    .phase-layout-actions .saved { align-self:center; }
+    .phase-layout-row.is-editing-video { border-left:3px solid var(--navy); }
 
     /* FIX 8 — Invite log */
     .invite-log { margin-top:16px; }
@@ -3301,7 +3306,19 @@
     }
 
     function learningVideoValue(key, fallback = '') {
-      return localStorage.getItem(key) || fallback || '';
+      const saved = localStorage.getItem(key);
+      return isSupportedMediaUrl(saved) ? saved : (fallback || '');
+    }
+
+    function isSupportedMediaUrl(value) {
+      const url = String(value || '').trim();
+      if (!url) return false;
+      return /^https?:\/\/.+/i.test(url);
+    }
+
+    function hasIgnoredVideoOverride(key) {
+      const saved = localStorage.getItem(key);
+      return Boolean(saved && !isSupportedMediaUrl(saved));
     }
 
     function lessonOrderForPhase(phaseId, lessons) {
@@ -3379,11 +3396,65 @@
         if (row.dataset.bound === 'true') return;
         row.dataset.bound = 'true';
         const key = row.dataset.learningVideo;
-        const input = row.querySelector('input');
+        const input = row.querySelector('input[data-video-url]');
         const saved = row.querySelector('.saved');
-        row.querySelector('button').addEventListener('click', () => {
+        const editButton = row.querySelector('[data-video-action="edit"]');
+        const cancelButton = row.querySelector('[data-video-action="cancel"]');
+        const saveButton = row.querySelector('[data-video-action="save"]');
+        const resetButton = row.querySelector('[data-video-action="reset"]');
+        const fieldNote = row.querySelector('[data-video-note]');
+        const fallback = row.dataset.defaultUrl || '';
+
+        function setEditing(isEditing) {
+          row.classList.toggle('is-editing-video', isEditing);
+          input.readOnly = !isEditing;
+          input.classList.toggle('is-readonly', !isEditing);
+          if (editButton) editButton.hidden = isEditing;
+          if (cancelButton) cancelButton.hidden = !isEditing;
+          if (saveButton) saveButton.disabled = !isEditing;
+        }
+
+        function updateNote(message) {
+          if (fieldNote) fieldNote.textContent = message || '';
+        }
+
+        if (editButton) {
+          editButton.addEventListener('click', () => {
+            setEditing(true);
+            input.focus();
+            input.select();
+            updateNote('Editing a local preview override. To make a permanent site change, update member-login/content-config.js in Git.');
+          });
+        }
+
+        if (cancelButton) {
+          cancelButton.addEventListener('click', () => {
+            input.value = learningVideoValue(key, fallback);
+            setEditing(false);
+            updateNote(hasIgnoredVideoOverride(key) ? 'Ignored an old local override because it is not a URL.' : '');
+          });
+        }
+
+        if (resetButton) {
+          resetButton.addEventListener('click', () => {
+            localStorage.removeItem(key);
+            input.value = fallback;
+            setEditing(false);
+            updateNote('Using the current backend config URL.');
+            showSaved(saved);
+          });
+        }
+
+        if (saveButton) saveButton.addEventListener('click', () => {
+          if (!isSupportedMediaUrl(input.value)) {
+            updateNote('Enter a full URL before saving.');
+            input.focus();
+            return;
+          }
           if (input.value.trim()) localStorage.setItem(key, input.value.trim());
           else localStorage.removeItem(key);
+          setEditing(false);
+          updateNote('Local preview override saved. Permanent changes still belong in member-login/content-config.js.');
           showSaved(saved);
         });
       });
@@ -3401,8 +3472,9 @@
           ${orderedLessons.map((lesson, index) => {
             const videoVal = learningVideoValue(`utl_url_${lesson.id}`, lesson.videoUrl || '');
             const isEmpty = !videoVal;
+            const hasIgnoredOverride = hasIgnoredVideoOverride(`utl_url_${lesson.id}`);
             return `
-            <div class="phase-layout-row is-video${isEmpty ? ' has-empty-video' : ''}" data-learning-video="utl_url_${lesson.id}" data-lesson-id="${lesson.id}" data-index="${index}">
+            <div class="phase-layout-row is-video${isEmpty ? ' has-empty-video' : ''}" data-learning-video="utl_url_${lesson.id}" data-lesson-id="${lesson.id}" data-index="${index}" data-default-url="${escapeHtml(lesson.videoUrl || '')}">
               <span class="phase-layout-handle" draggable="true" title="Drag to reorder" aria-label="Drag to reorder">⠿</span>
               <div class="phase-layout-content">
                 <div class="phase-layout-top">
@@ -3416,11 +3488,15 @@
                   </div>
                   <div class="phase-layout-field">
                     <label>Video URL</label>
-                    <input type="url" value="${escapeHtml(videoVal)}" placeholder="Paste Google Drive or Vimeo URL">${isEmpty ? '<span class="no-video-note">No video saved</span>' : ''}
+                    <input type="url" data-video-url value="${escapeHtml(videoVal)}" placeholder="Paste Google Drive or Vimeo URL" readonly class="is-readonly">${isEmpty ? '<span class="no-video-note">No video saved</span>' : ''}
+                    <span class="field-note" data-video-note>${hasIgnoredOverride ? 'Ignored an old local override because it is not a URL.' : ''}</span>
                   </div>
-                  <div class="phase-layout-field">
-                    <label>&nbsp;</label>
-                    <button class="small-button" type="button">Save video</button>
+                  <div class="phase-layout-field phase-layout-actions">
+                    <label>Actions</label>
+                    <button class="small-button secondary-button" type="button" data-video-action="edit">Edit</button>
+                    <button class="small-button" type="button" data-video-action="save" disabled>Save override</button>
+                    <button class="small-button secondary-button" type="button" data-video-action="cancel" hidden>Cancel</button>
+                    <button class="small-button secondary-button" type="button" data-video-action="reset">Use config</button>
                     <span class="saved">Saved ✓</span>
                   </div>
                 </div>
@@ -4366,7 +4442,7 @@
       const defaults = {
         subject: 'Welcome to The Untaught Lessons',
         headline: 'Welcome, {{first_name}}.',
-        intro: 'You now have access to The Untaught Lessons program. Before you begin, take a few minutes to complete your setup so everything works from the start.',
+        intro: 'You now have access to the Think, speak, and act like an executive™ program. Before you begin, take a few minutes to complete your setup so everything works from the start.',
         buttonLabel: 'Open link',
         buttonUrl: '',
         accentColor: '#003366',
@@ -4756,7 +4832,7 @@
       const def = {
         subject: 'Welcome to The Untaught Lessons',
         headline: 'Welcome, {{first_name}}.',
-        intro: 'You now have access to The Untaught Lessons program. Before you begin, take a few minutes to complete your setup so everything works from the start.',
+        intro: 'You now have access to the Think, speak, and act like an executive™ program. Before you begin, take a few minutes to complete your setup so everything works from the start.',
         buttonLabel: 'Open link',
         buttonUrl: '',
         accentColor: '#003366',
@@ -4955,6 +5031,17 @@
 
     // ===== Public assessment card visibility =====
 
+    const PUBLIC_ASSESSMENT_LOCAL_KEYS = {
+      diagnosticVisible: 'utl_public_assessment_diagnostic_visible',
+      checkpointVisible: 'utl_public_assessment_checkpoint_visible'
+    };
+
+    function syncPublicAssessmentLocal(key, value) {
+      const localKey = PUBLIC_ASSESSMENT_LOCAL_KEYS[key];
+      if (!localKey) return;
+      localStorage.setItem(localKey, value ? 'show' : 'hide');
+    }
+
     async function loadPublicAssessmentSettings() {
       var fb = window.utlFirebaseAuth;
       var statusEl = document.getElementById('publicAssessmentStatus');
@@ -4973,8 +5060,10 @@
       try {
         var settings = await fb.getPublicAssessmentSettings();
         document.querySelectorAll('[data-pub-assess-key]').forEach(function(btn) {
-          var val = settings[btn.dataset.pubAssessKey] !== false;
+          var key = btn.dataset.pubAssessKey;
+          var val = settings[key] !== false;
           setBinaryControl(btn, val);
+          syncPublicAssessmentLocal(key, val);
         });
         statusEl.textContent = '';
       } catch(e) {
@@ -4987,7 +5076,10 @@
       if (!fb || !fb.setPublicAssessmentSettings) return;
       var partial = {};
       document.querySelectorAll('[data-pub-assess-key]').forEach(function(btn) {
-        partial[btn.dataset.pubAssessKey] = getBinaryControl(btn);
+        var key = btn.dataset.pubAssessKey;
+        var val = getBinaryControl(btn);
+        partial[key] = val;
+        syncPublicAssessmentLocal(key, val);
       });
       this.disabled = true;
       try {

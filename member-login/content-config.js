@@ -31,9 +31,9 @@ const UTL_CONTENT = {
     title: "Think clearly",
     description: "Build clean structure before you communicate. Watch the lessons, then practice turning messy inputs into clear thinking.",
     lessons: [
-      { id: "p1-l1", title: "KonMari for the cluttered mind", duration: "9 min", videoUrl: "https://drive.google.com/open?id=1JogKtDiCfhNjNckFLhOEJCCw7gh7eORq&usp=drive_copy" },
-      { id: "p1-l2", title: "Rule of three", duration: "8 min", videoUrl: "https://drive.google.com/open?id=1fFBBPC0JbHf1IPeHIz_9yKrp173coxJM&usp=drive_copy" },
-      { id: "p1-l3", title: "Bolded summary phrases (BSP)", duration: "8 min", videoUrl: "https://drive.google.com/open?id=1ZSKGHTUSZs2T3g3aTMgQ9fk9lHg_fN34&usp=drive_copy" }
+      { id: "p1-l1", title: "KonMari for the cluttered mind", duration: "9 min 35 sec", videoUrl: "https://drive.google.com/file/d/1JogKtDiCfhNjNckFLhOEJCCw7gh7eORq/view?usp=sharing" },
+      { id: "p1-l2", title: "Rule of three", duration: "8 min 26 sec", videoUrl: "https://drive.google.com/open?id=1fFBBPC0JbHf1IPeHIz_9yKrp173coxJM&usp=drive_copy" },
+      { id: "p1-l3", title: "Bolded summary phrases (BSP)", duration: "8 min 21 sec", videoUrl: "https://drive.google.com/open?id=1ZSKGHTUSZs2T3g3aTMgQ9fk9lHg_fN34&usp=drive_copy" }
     ],
     introContexts: [
       {
@@ -130,10 +130,10 @@ const UTL_CONTENT = {
     title: "Speak concisely",
     description: "Move from structured thinking to sharp communication. Practice making the point first and making the logic easy to follow.",
     lessons: [
-      { id: "p1-l4", title: "Wait, what's the problem again?", duration: "10 min", videoUrl: "https://drive.google.com/open?id=1b2nAA0d-Rq-jetDuRQeAusttazKQa-Si&usp=drive_copy" },
-      { id: "p1-l5", title: "Divide and conquer", duration: "6 min", videoUrl: "https://drive.google.com/open?id=1hsdZTxdjNF2Yqsy9JRdC9jkc7wk5uGEO&usp=drive_copy" },
-      { id: "p2-l1", title: "The executive storyline", duration: "7 min", videoUrl: "https://drive.google.com/open?id=1BONR9sIQM-Mscia3ZaG-06lP6G2dTZP_&usp=drive_copy" },
-      { id: "p2-l3", title: "The art of persuasion", duration: "12 min", videoUrl: "https://drive.google.com/open?id=1Qxo0Mf_1I3_J_CLXf4CzKJvtZdxyz2kL&usp=drive_copy" }
+      { id: "p1-l4", title: "Wait, what's the problem again?", duration: "10 min 21 sec", videoUrl: "https://drive.google.com/open?id=1b2nAA0d-Rq-jetDuRQeAusttazKQa-Si&usp=drive_copy" },
+      { id: "p1-l5", title: "Divide and conquer", duration: "6 min 1 sec", videoUrl: "https://drive.google.com/open?id=1hsdZTxdjNF2Yqsy9JRdC9jkc7wk5uGEO&usp=drive_copy" },
+      { id: "p2-l1", title: "The executive storyline", duration: "7 min 38 sec", videoUrl: "https://drive.google.com/open?id=1BONR9sIQM-Mscia3ZaG-06lP6G2dTZP_&usp=drive_copy" },
+      { id: "p2-l3", title: "The art of persuasion", duration: "12 min 38 sec", videoUrl: "https://drive.google.com/open?id=1Qxo0Mf_1I3_J_CLXf4CzKJvtZdxyz2kL&usp=drive_copy" }
     ],
     introContexts: [
       {
@@ -230,11 +230,11 @@ const UTL_CONTENT = {
     title: "Act confidently",
     description: "Practice judgment under pressure. Decide what matters, read the room, and speak with steadiness when the stakes rise.",
     lessons: [
-      { id: "p3-l1", title: "How to read people", duration: "11 min", videoUrl: "https://drive.google.com/open?id=1YUxx3D7GsLXzKZLG4SlvNrk8jWVgvM0_&usp=drive_copy" },
-      { id: "p3-l2", title: "Let's switch hats", duration: "9 min", videoUrl: "https://drive.google.com/open?id=1h9r_4E7IkQ_aTKtHd3bl6IYHxF3dozhO&usp=drive_copy" },
-      { id: "p3-l3", title: "Speak like Obama", duration: "13 min", videoUrl: "https://drive.google.com/open?id=1sYAwaMxQE85_rvxRMabJvDm5a3yjZ6oz&usp=drive_copy" },
-      { id: "p3-l4", title: "The art of saying no", duration: "10 min", videoUrl: "https://drive.google.com/open?id=1XCOBAWDlcTht8w_utWZKwkw8wfBO_gC5&usp=drive_copy" },
-      { id: "p3-l5", title: "I have bad news...", duration: "12 min", videoUrl: "https://drive.google.com/open?id=1RZxxq34xb3C6lpLxVYt5399a66ganrHG&usp=drive_copy" }
+      { id: "p3-l1", title: "How to read people", duration: "7 min 19 sec", videoUrl: "https://drive.google.com/open?id=1YUxx3D7GsLXzKZLG4SlvNrk8jWVgvM0_&usp=drive_copy" },
+      { id: "p3-l2", title: "Let's switch hats", duration: "7 min 19 sec", videoUrl: "https://drive.google.com/open?id=1h9r_4E7IkQ_aTKtHd3bl6IYHxF3dozhO&usp=drive_copy" },
+      { id: "p3-l3", title: "Speak like Obama", duration: "21 min 47 sec", videoUrl: "https://drive.google.com/open?id=1sYAwaMxQE85_rvxRMabJvDm5a3yjZ6oz&usp=drive_copy" },
+      { id: "p3-l4", title: "The art of saying no", duration: "18 min 25 sec", videoUrl: "https://drive.google.com/open?id=1XCOBAWDlcTht8w_utWZKwkw8wfBO_gC5&usp=drive_copy" },
+      { id: "p3-l5", title: "I have bad news...", duration: "7 min 7 sec", videoUrl: "https://drive.google.com/open?id=1RZxxq34xb3C6lpLxVYt5399a66ganrHG&usp=drive_copy" }
     ],
     introContexts: [
       {
@@ -607,7 +607,14 @@ const UTL_CONTENT = {
   }
 
   function lessonUrl(lesson) {
-    return localStorage.getItem("utl_url_" + lesson.id) || lesson.videoUrl || "";
+    var saved = localStorage.getItem("utl_url_" + lesson.id);
+    return supportedMediaUrl(saved) ? saved : (lesson.videoUrl || "");
+  }
+
+  function supportedMediaUrl(value) {
+    var url = String(value || "").trim();
+    if (!url) return false;
+    return /^https?:\/\/.+/i.test(url);
   }
 
   function legacyEmbedConfig(item) {
@@ -773,7 +780,7 @@ const UTL_CONTENT = {
       ".ws-phase-list{display:grid;gap:18px}.ws-phase-card{position:relative;display:grid;grid-template-columns:8px 92px 1fr auto;align-items:center;gap:22px;min-height:178px;background:#fff;border:1px solid var(--ws-line);border-radius:12px;overflow:hidden;padding:22px 24px 22px 0;text-decoration:none;color:inherit;box-shadow:0 12px 28px rgba(0,51,102,.06)}.ws-phase-card.ws-locked{opacity:.72}.ws-phase-stripe{align-self:stretch;background:var(--ws-gold)}.ws-locked .ws-phase-stripe{background:#d5d5d5}.ws-phase-number{color:rgba(0,51,102,.08);font:700 74px/1 'Playfair Display',serif;text-align:center}.ws-phase-content h2{margin:6px 0;color:var(--ws-navy);font:700 34px/1.05 'Playfair Display',serif}.ws-phase-content p{margin:0;color:var(--ws-steel);line-height:1.45}.ws-trail{display:flex;align-items:center;gap:8px;margin-top:16px;color:var(--ws-navy);font:700 10px 'Roboto Mono',monospace;text-transform:uppercase;letter-spacing:.07em}.ws-dot{width:10px;height:10px;border-radius:99px;background:var(--ws-gold)}.ws-arrow{color:var(--ws-steel)}.ws-pill{display:inline-flex;align-items:center;border-radius:999px;padding:5px 9px;font:700 10px 'Roboto Mono',monospace;letter-spacing:.06em;text-transform:uppercase}.ws-pill-gold{background:rgba(238,163,32,.18);color:var(--ws-navy)}.ws-pill-muted{background:#E8EEF4;color:var(--ws-steel)}.ws-pill-green{background:rgba(44,122,75,.12);color:var(--ws-green)}.ws-phase-actions{display:grid;gap:10px;justify-items:end}.ws-lock-note{font:400 12px Lato,sans-serif;color:var(--ws-steel);text-align:right;line-height:1.3;max-width:160px}",
       ".ws-stepper{display:flex;gap:10px;margin:28px 0;align-items:center}.ws-step{display:flex;align-items:center;gap:8px;border:0;border-bottom:2px solid var(--ws-line);background:transparent;padding:8px 2px;color:var(--ws-steel);font:700 11px 'Roboto Mono',monospace;text-transform:uppercase;letter-spacing:.06em}.ws-step.ws-active{border-bottom-color:var(--ws-navy);color:var(--ws-navy)}.ws-step.ws-done{border-bottom-color:var(--ws-green);color:var(--ws-green)}",
       ".ws-section{margin-top:30px}.ws-section-head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:14px}.ws-section-head h2{margin:0;color:var(--ws-navy);font:700 31px 'Playfair Display',serif}.ws-count{color:var(--ws-steel);font:700 11px 'Roboto Mono',monospace;text-transform:uppercase;letter-spacing:.08em}",
-      ".ws-player-card{background:#fff;border:1px solid var(--ws-line);border-radius:12px;overflow:hidden}.ws-player{position:relative;background:linear-gradient(135deg,#002448,#003366 55%,#244F78);color:#fff}.ws-player-placeholder{text-align:center;padding:22px}.ws-play-icon{width:58px;height:58px;border-radius:999px;background:var(--ws-gold);color:var(--ws-navy);display:grid;place-items:center;margin:0 auto 14px;font-size:24px}.ws-player-meta{position:absolute;left:22px;bottom:20px;right:22px;text-shadow:0 2px 8px rgba(0,0,0,.35)}.ws-player-meta h3{margin:6px 0 0;color:#fff;font:700 25px 'Playfair Display',serif}.ws-player-actions{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:16px}",
+      ".ws-player-card{background:#fff;border:1px solid var(--ws-line);border-radius:12px;overflow:hidden}.ws-player{position:relative;background:linear-gradient(135deg,#002448,#003366 55%,#244F78);color:#fff}.ws-player-placeholder{text-align:center;padding:22px}.ws-play-icon{width:58px;height:58px;border-radius:999px;background:var(--ws-gold);color:var(--ws-navy);display:grid;place-items:center;margin:0 auto 14px;font-size:24px}.ws-player-meta{position:static;padding:14px 18px 16px;background:var(--ws-navy);text-shadow:none}.ws-player-meta h3{margin:6px 0 0;color:#fff;font:700 25px 'Playfair Display',serif}.ws-player-actions{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:16px}",
       ".ws-video-access-help{background:#fff;color:var(--ws-charcoal);border-top:1px solid var(--ws-line)}.ws-video-access-help summary{display:flex;align-items:center;justify-content:space-between;gap:12px;list-style:none;cursor:pointer;padding:13px 16px;color:var(--ws-navy);font-weight:700}.ws-video-access-help summary::-webkit-details-marker{display:none}.ws-video-access-help summary span{display:inline-flex;align-items:center;gap:8px}.ws-video-access-help summary span:before{content:'?';width:22px;height:22px;border-radius:999px;background:rgba(238,163,32,.18);color:var(--ws-navy);display:inline-grid;place-items:center;font:700 13px Lato,sans-serif}.ws-video-access-help summary small{color:var(--ws-steel);font:700 10px 'Roboto Mono',monospace;letter-spacing:.08em;text-transform:uppercase;text-align:right}.ws-access-help-body{padding:0 16px 16px}.ws-access-help-body p{margin:0 0 10px;line-height:1.45}.ws-access-help-body ol{margin:0;padding-left:20px;display:grid;gap:8px;line-height:1.45}.ws-access-help-body li strong{color:var(--ws-navy)}.ws-access-help-body a{color:var(--ws-navy);font-weight:700;text-underline-offset:3px}.ws-access-warning{position:relative;background:#fff6f4;border:1px solid rgba(154,42,42,.24);border-left:4px solid #B44A42;border-radius:8px;padding:10px 12px 10px 14px;color:#6f2d2a;font-weight:700}.ws-access-warning strong{color:#8A2E29}.ws-access-shot-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:14px}.ws-access-shot{min-height:86px;border:1px solid var(--ws-line);border-radius:8px;background:var(--ws-cream);padding:10px 11px}.ws-access-shot strong{display:block;color:var(--ws-navy);font:700 12px 'Roboto Mono',monospace;letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px}.ws-access-shot span{display:block;color:var(--ws-charcoal);font-size:14px;line-height:1.35}",
       ".ws-rail-wrap{padding:22px 22px 24px;border-top:1px solid rgba(0,51,102,.08);background:#fff}.ws-scroll-hint{display:none;color:var(--ws-steel);font:700 10px 'Roboto Mono',monospace;letter-spacing:.08em;text-transform:uppercase;margin:0 0 8px}.ws-lesson-rail{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px}.ws-lesson-tile{min-height:108px;border:1px solid var(--ws-line);border-radius:10px;background:#fff;color:var(--ws-navy);padding:14px 38px 14px 14px;text-align:left;cursor:pointer}.ws-lesson-tile.ws-active{background:var(--ws-navy);color:#fff}.ws-lesson-tile strong{display:block;font:700 10px 'Roboto Mono',monospace;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px}.ws-lesson-tile span{display:block;font-size:13px;line-height:1.25}.ws-lesson-tile small{display:block;margin-top:9px;color:inherit;opacity:.75}.ws-check{color:var(--ws-gold);font-weight:700}",
       ".ws-collapsed{background:#fff;border:1px solid var(--ws-line);border-radius:12px;padding:18px;display:grid;grid-template-columns:auto 1fr auto auto;align-items:center;gap:14px;cursor:pointer}.ws-green-circle{width:34px;height:34px;border-radius:999px;background:var(--ws-green);color:#fff;display:grid;place-items:center;font-weight:700}.ws-video-toggle-icon{width:34px;height:34px;border-radius:9px;background:rgba(77,112,148,.16);color:var(--ws-navy);display:grid;place-items:center;font-size:16px;font-weight:700}.ws-collapsed h3{margin:0;color:var(--ws-navy);font:700 24px 'Playfair Display',serif}.ws-collapsed p{margin:2px 0 0;color:var(--ws-steel)}.ws-rewatch{display:none;background:#fff;border:1px solid var(--ws-line);border-top:0;border-radius:0 0 12px 12px;padding:22px}.ws-rewatch.ws-open{display:block}.ws-rewatch .ws-lesson-rail a{text-decoration:none}",

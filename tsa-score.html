@@ -271,17 +271,30 @@
   <script type="module" src="assets/feedback-widget.js?v=4"></script>
   <script type="module">
     import { getPublicAssessmentSettings } from './assets/firebase.js';
+    const PUBLIC_ASSESSMENT_LOCAL_KEYS = {
+      diagnosticVisible: 'utl_public_assessment_diagnostic_visible',
+      checkpointVisible: 'utl_public_assessment_checkpoint_visible'
+    };
+    function applyPublicAssessmentSettings(settings) {
+      const diagnostic = document.querySelector('[data-pub-card="diagnostic"]');
+      const checkpoint = document.querySelector('[data-pub-card="checkpoint"]');
+      if (diagnostic) diagnostic.hidden = settings.diagnosticVisible === false;
+      if (checkpoint) checkpoint.hidden = settings.checkpointVisible === false;
+    }
+    function localPublicAssessmentSettings() {
+      const settings = {};
+      Object.keys(PUBLIC_ASSESSMENT_LOCAL_KEYS).forEach((key) => {
+        const value = localStorage.getItem(PUBLIC_ASSESSMENT_LOCAL_KEYS[key]);
+        if (value === 'hide') settings[key] = false;
+        if (value === 'show') settings[key] = true;
+      });
+      return settings;
+    }
+    applyPublicAssessmentSettings(localPublicAssessmentSettings());
     (async () => {
       try {
         const settings = await getPublicAssessmentSettings();
-        if (settings.diagnosticVisible === false) {
-          const el = document.querySelector('[data-pub-card="diagnostic"]');
-          if (el) el.hidden = true;
-        }
-        if (settings.checkpointVisible === false) {
-          const el = document.querySelector('[data-pub-card="checkpoint"]');
-          if (el) el.hidden = true;
-        }
+        applyPublicAssessmentSettings(settings);
       } catch {}
     })();
   </script>
