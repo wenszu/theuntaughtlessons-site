@@ -30,7 +30,7 @@ Your one-click sign-in link for The Untaught Lessons
 ```text
 Hi,
 
-Here is your one-click sign-in link for the Think, speak, and act like an executive™ program.
+Here is your one-click sign-in link for the Think, speak and act like an executive™ program.
 
 Use this link only with the email address where you received it. It will take you directly to your member workspace.
 

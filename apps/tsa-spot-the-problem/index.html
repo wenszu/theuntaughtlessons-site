@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="TSA Score™ Spot the problem diagnostic assessment from The Untaught Lessons." />
-  <title>Spot the problem | TSA Score™</title>
+  <meta name="description" content="Find your level Spot the problem diagnostic assessment from The Untaught Lessons." />
+  <title>Spot the problem | Find your level</title>
   <link rel="icon" type="image/png" sizes="32x32" href="../../assets/favicon-bluebg-whitedoor-thicker-32.png?v=6">
   <link rel="shortcut icon" type="image/png" href="../../assets/favicon-bluebg-whitedoor-thicker-32.png?v=6">
   <link rel="apple-touch-icon" sizes="180x180" href="../../assets/apple-touch-icon.png?v=3">
@@ -713,7 +713,7 @@
     </a>
     <div class="tsa-stp-divider" aria-hidden="true"></div>
     <div>
-      <span class="tsa-stp-kicker">TSA Score™</span>
+      <span class="tsa-stp-kicker">Find your level</span>
       <span class="tsa-stp-title">Spot the problem</span>
     </div>
   </header>
@@ -722,7 +722,7 @@
     <div class="tsa-stp-gate-card">
       <img class="tsa-stp-gate-logo" src="../../assets/logo.png" alt="The Untaught Lessons" />
       <h1 id="gateTitle">Before we begin</h1>
-      <p>Enter your details to get your TSA Score™ and track your progress.</p>
+      <p>Enter your details to get your Find your level and track your progress.</p>
       <form class="tsa-stp-form" id="gateForm">
         <label for="fullName">Full name</label>
         <input id="fullName" name="name" type="text" autocomplete="name" required>
@@ -898,7 +898,7 @@
         name: state.participant.name,
         email: state.participant.email,
         role: formData.get('role').trim(),
-        message: `Submitted via TSA ${assessmentMode}`,
+        message: `Submitted via ${assessmentMode}`,
         page: window.location.href,
         source: 'tsa-assessment'
       };
@@ -1187,7 +1187,7 @@
       sessionStorage.setItem(SPOT_SCORE_KEY, JSON.stringify(storagePayload));
       localStorage.setItem(SPOT_SCORE_KEY, JSON.stringify(storagePayload));
       import('../../assets/firebase.js')
-        .then(({ saveUserProgress }) => saveUserProgress(SPOT_SCORE_KEY, `TSA Spot the problem (${assessmentMode})`, storagePayload))
+        .then(({ saveUserProgress }) => saveUserProgress(SPOT_SCORE_KEY, `Spot the problem (${assessmentMode})`, storagePayload))
         .catch((error) => console.warn('Firestore progress save failed.', error));
       showScore();
     }
@@ -1237,11 +1237,11 @@
       const combinedLine = combined !== null
         ? `Think clearly Total: ${formatScore(combined)} / 40 (${Math.round((combined / 40) * 100)}%)`
         : 'Think clearly Total: Complete Sort & Bucket to see your full Part 1 score.';
-      const subject = 'Your The Untaught Lessons TSA Score results';
+      const subject = 'Your Find your level results from The Untaught Lessons';
       const siteRoot = 'https://theuntaughtlessons.com';
       const body = [
         'The Untaught Lessons',
-        'TSA Score™ Results',
+        'Find your level results',
         '',
         `Name: ${participantName()}`,
         '',

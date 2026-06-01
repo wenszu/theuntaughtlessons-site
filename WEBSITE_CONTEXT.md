@@ -57,7 +57,7 @@ Logos: `assets/logo.png` (main) · `assets/utl-logo-nav-white.png` (app header w
 
 Favicon: `assets/favicon-bluebg-whitedoor-thicker-32.png?v=6`
 
-Trademarks: `TSA Score™` · `C³ Rubric™` · `Think, speak, and act like an executive™` — use ™ on first use per public page/email, then omit on later shorthand references.
+Trademarks: `C³ Rubric™` · `Think, speak and act like an executive™` — use ™ on first use per public page/email, then omit on later shorthand references. The previous score brand is paused; use `Find your level`, `Diagnostic`, `Checkpoint`, or `Assessments` instead.
 
 ## Firebase Member System
 
@@ -94,7 +94,7 @@ Firebase Functions: `functions/processGoogleGroupSyncJob` watches `google_group_
 
 | File | Purpose |
 | --- | --- |
-| `index.html` | Homepage with lead modal, testimonials, TSA teaser |
+| `index.html` | Homepage with lead modal, testimonials, Find your level teaser |
 | `about.html` | Founder story and credibility |
 | `programs.html` | Program overview and CTA |
 | `contact.html` | Contact form |
@@ -131,13 +131,13 @@ Firebase Functions: `functions/processGoogleGroupSyncJob` watches `google_group_
 | `apps/i-have-bad-news/` | Phase 3 | Difficult conversations launch page |
 | `apps/lets-switch-hats/` | Phase 3 | Perspective-taking launch page |
 | `apps/speak-like-obama/` | Phase 3 | Speech delivery launch page |
-| `apps/tsa-diagnostic/` | TSA | Diagnostic hub (Sort & Bucket, Spot Problem, Short Talk) |
-| `apps/tsa-sort-bucket/` | TSA | Exercise A Think Clearly — contact gate, 6 sets, score/20 |
-| `apps/tsa-spot-the-problem/` | TSA | Exercise B Think Clearly — Part A overlaps, Part B gaps |
-| `apps/tsa-checkpoint/` | TSA | Checkpoint hub (same exercises, `?assessment=checkpoint`) |
-| `apps/tsa-speak/` | TSA | Speak Concisely short talk assessment |
+| `apps/tsa-diagnostic/` | Assessment | Diagnostic hub (Sort & Bucket, Spot Problem, Short Talk) |
+| `apps/tsa-sort-bucket/` | Assessment | Exercise A Think clearly — contact gate, 6 sets, score/20 |
+| `apps/tsa-spot-the-problem/` | Assessment | Exercise B Think clearly — Part A overlaps, Part B gaps |
+| `apps/tsa-checkpoint/` | Assessment | Checkpoint hub (same exercises, `?assessment=checkpoint`) |
+| `apps/tsa-speak/` | Assessment | Speak concisely short talk assessment |
 
-Data files: `data/sort-bucket.json` (public), `data/tsa/*.json` (member TSA), `data/practice/*.json` (member practice), `data/testimonials.json`. See archive for schemas.
+Data files: `data/sort-bucket.json` (public), `data/tsa/*.json` (member assessments), `data/practice/*.json` (member practice), `data/testimonials.json`. See archive for schemas.
 
 Apps Script endpoint (all POST submissions): `https://script.google.com/macros/s/AKfycbzJE--FL2kB_XDNZRnszCtlyLRPvaLAHGuF5TAOdXJk40atbvf5Y6ELuSK2B7CSLaMN/exec`
 
@@ -191,6 +191,8 @@ Apps Script `action` routing: `WelcomeEmail`, `TestEmailTemplate`, `ResultsEmail
 - Fixed member workspace video controls by moving the lesson title/kicker strip below the Google Drive iframe instead of overlaying the bottom of the video player.
 - Updated the Phase 1 KonMari lesson video URL to the canonical Google Drive `/file/d/.../view?usp=sharing` format.
 - Hardened Admin Console lesson video editing: URL fields are read-only until Edit is clicked, bad old local overrides are ignored, and admins can reset a row back to the current backend config URL.
+- Paused the old score-brand language across public/member-facing copy. The site should encourage `Find your level` without mentioning the paused score brand.
+- Standardized the program name capitalization to `Think, speak and act like an executive` (with ™ on first use where appropriate).
 - Reorganized `Site & Content` IA so `Visibility` and `Assessment access` appear in the same order in the left nav and page body; moved preview/QA utilities to `Admin Tools` and engagement defaults to `Engagement`.
 
 ### 2026-05-31

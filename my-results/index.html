@@ -1687,8 +1687,8 @@
         const delta = cScore - dScore;
         assBody += `<div class="before-after-row">Diagnostic: ${dScore}% → Checkpoint: ${cScore}% · <span class="${delta >= 0 ? 'score-increase' : 'score-decrease'}">${delta >= 0 ? '+' : ''}${delta} points</span></div>`;
       }
-      const assContent = `<div class="exercise-progress-section"><div class="exercise-section-header"><h4>TSA Score™ Assessments</h4></div><div class="exercise-list">${assBody}</div></div>`;
-      html += renderAccordion('assessment', 'TSA Score™ assessments', getSummary('assessment'), assContent);
+      const assContent = `<div class="exercise-progress-section"><div class="exercise-section-header"><h4>Assessments</h4></div><div class="exercise-list">${assBody}</div></div>`;
+      html += renderAccordion('assessment', 'assessments', getSummary('assessment'), assContent);
 
       mount.innerHTML = html;
     }
@@ -1755,7 +1755,7 @@
       }));
 
       return phaseEntries.concat({
-        section: 'TSA Score™ Assessments',
+        section: 'Assessments',
         items: ASSESSMENTS.map((assessment) => {
           const record = assessmentRecord(assessment);
           return {

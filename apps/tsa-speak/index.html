@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="TSA Score™ Speak concisely assessment from The Untaught Lessons." />
-  <title>Speak concisely | TSA Score™</title>
+  <meta name="description" content="Find your level Speak concisely assessment from The Untaught Lessons." />
+  <title>Speak concisely | Find your level</title>
   <link rel="icon" type="image/png" sizes="32x32" href="../../assets/favicon-bluebg-whitedoor-thicker-32.png?v=6">
   <link rel="shortcut icon" type="image/png" href="../../assets/favicon-bluebg-whitedoor-thicker-32.png?v=6">
   <link rel="apple-touch-icon" sizes="180x180" href="../../assets/apple-touch-icon.png?v=3">
@@ -668,7 +668,7 @@
     </a>
     <div class="tsa-speak-divider" aria-hidden="true"></div>
     <div>
-      <span class="tsa-speak-kicker">TSA Score™</span>
+      <span class="tsa-speak-kicker">Find your level</span>
       <span class="tsa-speak-title" id="headerTitle">Speak concisely</span>
     </div>
   </header>
@@ -677,7 +677,7 @@
     <div class="tsa-speak-gate-card">
       <img class="tsa-speak-gate-logo" src="../../assets/logo.png" alt="The Untaught Lessons" />
       <h1 id="gateTitle">Before we begin</h1>
-      <p>Enter your details to get your TSA Score™ and track your progress.</p>
+      <p>Enter your details to get your Find your level and track your progress.</p>
       <form class="tsa-speak-form" id="gateForm">
         <label for="fullName">Full name</label>
         <input id="fullName" name="name" type="text" autocomplete="name" required>
@@ -713,7 +713,7 @@
     const versionLabel = isCheckpoint ? 'Checkpoint' : 'Diagnostic';
     document.getElementById('headerTitle').textContent = isCheckpoint ? 'Speak concisely: Checkpoint' : 'Speak concisely';
 
-    const SCORER_SYSTEM_PROMPT = `You are a scoring assistant for the TSA Score™ assessment by The Untaught Lessons™.
+    const SCORER_SYSTEM_PROMPT = `You are a scoring assistant for the Find your level assessment by The Untaught Lessons.
 
 You are scoring a Phase 2 Speak concisely submission — a participant's spoken transcript delivered under a time limit.
 
@@ -848,7 +848,7 @@ Return only JSON with C1, C4, C5, C6, C7, C8, msg1, msg2, msg3, feedback, and co
         name: state.participant.name,
         email: state.participant.email,
         role: formData.get('role').trim(),
-        message: 'Submitted via TSA Diagnostic — Phase 2 Speak concisely',
+        message: 'Submitted via Diagnostic — Phase 2 Speak concisely',
         page: window.location.href,
         source: 'tsa-assessment'
       };
@@ -1303,7 +1303,7 @@ Return only JSON with C1, C4, C5, C6, C7, C8, msg1, msg2, msg3, feedback, and co
       sessionStorage.setItem(SPEAK_SCORE_KEY, JSON.stringify(result));
       localStorage.setItem(SPEAK_SCORE_KEY, JSON.stringify(result));
       import('../../assets/firebase.js')
-        .then(({ saveUserProgress }) => saveUserProgress(SPEAK_SCORE_KEY, `TSA Speak concisely (${versionLabel})`, result))
+        .then(({ saveUserProgress }) => saveUserProgress(SPEAK_SCORE_KEY, `Speak concisely (${versionLabel})`, result))
         .catch((error) => console.warn('Firestore progress save failed.', error));
       showScore(result);
     }
@@ -1324,7 +1324,7 @@ Return only JSON with C1, C4, C5, C6, C7, C8, msg1, msg2, msg3, feedback, and co
       const running = combined !== null ? combined + result.score : null;
       const combinedMarkup = combined !== null ? `
         <div class="tsa-speak-combined">
-          <h2>Running TSA Score</h2>
+          <h2>Checking your response</h2>
           <div>Part 1: Think clearly: ${combined} / 40</div>
           <div>Part 2: Speak concisely: ${result.score} / 30</div>
           <div><strong>Running total: ${running} / 70</strong></div>

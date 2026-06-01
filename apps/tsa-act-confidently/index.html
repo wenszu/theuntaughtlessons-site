@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Act confidently TSA Score placeholder from The Untaught Lessons." />
-  <title>Act confidently | TSA Score™</title>
+  <meta name="description" content="Act confidently assessment placeholder from The Untaught Lessons." />
+  <title>Act confidently | Find your level</title>
   <link rel="icon" type="image/png" sizes="32x32" href="../../assets/favicon-bluebg-whitedoor-thicker-32.png?v=6">
   <link rel="shortcut icon" type="image/png" href="../../assets/favicon-bluebg-whitedoor-thicker-32.png?v=6">
   <link rel="apple-touch-icon" sizes="180x180" href="../../assets/apple-touch-icon.png?v=3">
@@ -179,7 +179,7 @@
     </a>
     <div class="brand-divider" aria-hidden="true"></div>
     <div>
-      <span class="app-kicker">TSA Score™ · Section 3</span>
+      <span class="app-kicker">Find your level · Section 3</span>
       <span class="app-title">Act confidently</span>
     </div>
   </header>
@@ -188,7 +188,7 @@
     <section class="placeholder-card">
       <p class="placeholder-label" id="assessmentMode">Checkpoint · Section 3</p>
       <h1 id="placeholderTitle">Act confidently is coming soon.</h1>
-      <p id="placeholderPrompt">This holding page is where Section 3 of the TSA Score™ will live. It will measure how someone responds to pressure, pushback, and difficult conversations.</p>
+      <p id="placeholderPrompt">This holding page is where Section 3 of the member assessment will live. It will measure how someone responds to pressure, pushback, and difficult conversations.</p>
       <div class="placeholder-actions">
         <a class="placeholder-button" id="backLink" href="../tsa-checkpoint/index.html">Back to Checkpoint</a>
         <a class="placeholder-button secondary" href="../../index.html">Back to Home</a>
@@ -203,7 +203,7 @@
     const exercise = params.get('exercise') === 'b' ? 'Exercise B' : 'Exercise A';
     document.getElementById('assessmentMode').textContent = `${mode} · Section 3 · ${exercise}`;
     document.getElementById('backLink').href = mode === 'Checkpoint' ? '../tsa-checkpoint/index.html' : '../../tsa-score.html';
-    document.getElementById('backLink').textContent = mode === 'Checkpoint' ? 'Back to Checkpoint' : 'Back to TSA Score';
+    document.getElementById('backLink').textContent = mode === 'Checkpoint' ? 'Back to Checkpoint' : 'Back to Find your level';
 
     // Placeholder content is loaded from ../../data/tsa/act-confidently.json.
     // Add future Act confidently assessment scenarios to that JSON file, then

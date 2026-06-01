@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="TSA Score™ Sort & Bucket diagnostic assessment from The Untaught Lessons." />
-  <title>Sort & Bucket | TSA Score™</title>
+  <meta name="description" content="Find your level Sort & Bucket diagnostic assessment from The Untaught Lessons." />
+  <title>Sort & Bucket | Find your level</title>
   <link rel="icon" type="image/png" sizes="32x32" href="../../assets/favicon-bluebg-whitedoor-thicker-32.png?v=6">
   <link rel="shortcut icon" type="image/png" href="../../assets/favicon-bluebg-whitedoor-thicker-32.png?v=6">
   <link rel="apple-touch-icon" sizes="180x180" href="../../assets/apple-touch-icon.png?v=3">
@@ -654,7 +654,7 @@
     </a>
     <div class="tsa-diag-divider" aria-hidden="true"></div>
     <div>
-      <span class="tsa-diag-kicker">TSA Score™</span>
+      <span class="tsa-diag-kicker">Find your level</span>
       <span class="tsa-diag-title">Sort &amp; Bucket</span>
     </div>
   </header>
@@ -663,7 +663,7 @@
     <div class="tsa-diag-gate-card">
       <img class="tsa-diag-gate-logo" src="../../assets/logo.png" alt="The Untaught Lessons" />
       <h1 id="gateTitle">Before we begin</h1>
-      <p>Enter your details to get your TSA Score™ and track your progress.</p>
+      <p>Enter your details to get your Find your level and track your progress.</p>
       <form class="tsa-diag-form" id="gateForm">
         <label for="fullName">Full name</label>
         <input id="fullName" name="name" type="text" autocomplete="name" required>
@@ -839,7 +839,7 @@
         name: state.participant.name,
         email: state.participant.email,
         role: formData.get('role').trim(),
-        message: `Submitted via TSA ${assessmentMode}`,
+        message: `Submitted via ${assessmentMode}`,
         page: window.location.href,
         source: 'tsa-assessment'
       };
@@ -1131,7 +1131,7 @@
       sessionStorage.setItem(SORT_SCORE_KEY, JSON.stringify(storagePayload));
       localStorage.setItem(SORT_SCORE_KEY, JSON.stringify(storagePayload));
       import('../../assets/firebase.js')
-        .then(({ saveUserProgress }) => saveUserProgress(SORT_SCORE_KEY, `TSA Sort & Bucket (${assessmentMode})`, storagePayload))
+        .then(({ saveUserProgress }) => saveUserProgress(SORT_SCORE_KEY, `Sort & Bucket (${assessmentMode})`, storagePayload))
         .catch((error) => console.warn('Firestore progress save failed.', error));
 
       renderShell(`
