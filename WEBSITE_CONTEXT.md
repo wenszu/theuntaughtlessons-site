@@ -1,6 +1,6 @@
 # The Untaught Lessons Website Context
 
-Last updated: 2026-06-01
+Last updated: 2026-06-03
 
 Single source of truth for agents working on this repo. Read before making changes, update after structural changes. Detailed historical entries and full page/app maps are in `archive/WEBSITE_CONTEXT_ARCHIVE.md`.
 
@@ -18,6 +18,7 @@ Single source of truth for agents working on this repo. Read before making chang
 Related files: `context/brand.md` (brand/UI rules), `context/voice-editor.md` (writing voice), `context/claude.md` (Claude-specific reminders).
 Operational docs: `GOOGLE_GROUP_SETUP.md`, `FIREBASE_EMAIL_TEMPLATE.md`.
 Migration trackers: `GOOGLE_GROUP_SYNC_MIGRATION.md`.
+Assessment reference: `ASSESSMENTS_AND_GROCERY_REFERENCE.md`.
 
 ## Working Rules
 
@@ -70,7 +71,7 @@ Firestore collections:
 - `settings/emailTemplates` — welcome email template. Read/written by `getEmailTemplates`/`saveEmailTemplate` in `assets/firebase.js`.
 - `settings/feedback` — global `defaultFeedbackEnabled` boolean.
 - `settings/publicSite` — public toggle settings (e.g. `findLevelVisible`).
-- `settings/admin_visibility` — admin/owner preview-only visibility settings, including whether admins/owners can bypass the public Find your level data form.
+- `settings/admin_visibility` — admin/owner preview-only visibility settings, including whether admins/owners can preview hidden public Find your level cards and bypass the public Find your level data form.
 - `google_group_sync_jobs/{jobId}` — Google Group add/remove jobs queued by Admin Console and intended for Firebase Functions processing.
 
 Key `authorized_members` fields: `email`, `name`, `role` (member/admin/owner), `status`, `googleGroupAdded`, `googleGroupAddedAt`, `googleGroupAddedBy`, `googleGroupRemovedAt`, `googleGroupRemovedBy`, `feedbackEnabled`, `addedAt`, `updatedAt`.
@@ -160,9 +161,9 @@ Apps Script `action` routing: `WelcomeEmail`, `TestEmailTemplate`, `ResultsEmail
 - Admin Console remove-member flow sends a non-blocking Apps Script `RemovedMember` audit action for non-admin/non-owner members before deleting Firestore records. The Apps Script writes to the `Removed members` tab in the same Google Sheet as leads/feedback and skips admin/owner roles.
 - On localhost only, Member Management Group toggle changes are stored in `localStorage` (`utl_mb_local_group_overrides`) instead of Firestore so manual verification can be tested without live Firebase writes. Live site toggles still write Firestore for shared admin visibility.
 - Student Progress uses the same Firebase admin preflight/switch-account flow as Member Management. If `authorized_members` is readable but `users` progress documents are blocked by Firestore rules, it renders the member list with a rules warning instead of failing the whole table.
-- Admin Console IA: `Site & Content` owns public/member visibility and content controls; `Visibility` is the single place for public homepage/Find your level/page-card visibility, Mission card visibility, learner release gates, and the read-only visibility status summary. `Assessment access` controls Firestore-backed assessment visibility for members/admins. `Admin Tools` owns preview/QA utilities; `Engagement` owns nudges, email, certificates, and feedback defaults; `Member Management` owns member access/password operations.
+- Admin Console IA: `Site & Content` owns public/member visibility and content controls; `Visibility` owns general learner release gates and the read-only visibility status summary. `Assessment visibility & access` owns assessment controls in Public -> Members -> Admin/ owner order, including public Find your level visibility, public Diagnostic/Checkpoint card visibility, member assessment access, member assessment card status, and Admin/ owner preview access. `Admin Tools` owns preview/QA utilities but is reached from the top nav/profile path, not the Site & Content left sidebar. `Engagement` owns nudges, email, certificates, and feedback defaults; `Member Management` owns member access/password operations.
 - Admin Console binary settings use right-aligned checkbox controls. Keep multi-state controls such as `Show / Coming soon / Hide` as segmented controls because they are not true yes/no settings.
-- Admin Console `Site & Content > Visibility > Admin / owner preview` controls admin/owner-only preview behavior. `Skip Find your level data form` writes `settings/admin_visibility.findLevelLeadGateBypass` and mirrors to localStorage key `utl_find_level_admin_bypass`; public visitors are not affected.
+- Admin Console `Site & Content > Assessment visibility & access > Admin/ owner` controls admin/owner-only assessment preview behavior. `Admin/ owner can preview hidden public assessment cards` writes `settings/admin_visibility.publicFindLevelPreview` and mirrors to localStorage key `utl_find_level_admin_public_preview`; `Skip Find your level data form` writes `settings/admin_visibility.findLevelLeadGateBypass` and mirrors to localStorage key `utl_find_level_admin_bypass`; public visitors are not affected.
 - Admin Console `Find your level page` card visibility writes `settings/public_assessments` and mirrors to localStorage keys `utl_public_assessment_diagnostic_visible` / `utl_public_assessment_checkpoint_visible` for localhost preview. Live public reads require deployed Firestore rules that allow public read of `settings/public_assessments`.
 - Lesson video URLs are sourced from `member-login/content-config.js`. The Admin Console Content Manager can save local browser preview overrides, but permanent video link changes must update `member-login/content-config.js` and be committed/pushed.
 - `no-cors` mode on Apps Script fetches returns opaque responses — server-side failures are invisible to the client. Always validate inputs client-side.
@@ -180,6 +181,15 @@ Apps Script `action` routing: `WelcomeEmail`, `TestEmailTemplate`, `ResultsEmail
 - Logo clicks in app headers link back to the homepage.
 
 ## Change Log
+
+### 2026-06-03
+
+- Reorganized Admin Console `Site & Content` assessment controls into `Assessment visibility & access`, ordered as Public, Members, then Admin/ owner. Public Find your level/card visibility, member assessment access, member Diagnostic/Checkpoint card status, and Admin/ owner preview controls now live together; the duplicate standalone `Assessments` left-nav item was removed. Admin/ owner preview can keep hidden public Diagnostic/Checkpoint cards visible on `tsa-score.html`. The Admin Tools section remains reachable from the top nav/profile path but no longer appears in the left sidebar.
+
+### 2026-06-02
+
+- Added `ASSESSMENTS_AND_GROCERY_REFERENCE.md` as a shareable reference for all current assessment content, answer keys, and scoring methodology, including public/member Sort & Bucket, Spot the Problem, Speak Concisely, Act Confidently placeholder status, and the Phase 1 Grocery list practice exercise.
+- Added richer member video troubleshooting in `member-login/content-config.js`: each embedded Drive/Slides media block now includes an `Open in Google Drive` fallback plus desktop/mobile guidance for wrong Google account, Brave/ Safari privacy settings, third-party cookies, mobile Drive account switcher, and Google Group propagation delays.
 
 ### 2026-06-01
 

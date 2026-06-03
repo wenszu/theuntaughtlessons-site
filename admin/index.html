@@ -1771,14 +1771,13 @@
 
       <span class="nav-group-label" data-admin-nav-group="content-manager">Site</span>
       <button class="admin-nav-item active" data-admin-tab-scope="content-manager" data-target="section-visibility">Visibility</button>
-      <button class="admin-nav-item" data-admin-tab-scope="content-manager" data-target="section-access-controls">Assessment access</button>
+      <button class="admin-nav-item" data-admin-tab-scope="content-manager" data-target="section-access-controls">Assessment visibility &amp; access</button>
 
       <span class="nav-group-label" data-admin-nav-group="content-manager">Content</span>
       <button class="admin-nav-item" data-admin-tab-scope="content-manager" data-target="section-orientation">Orientation</button>
       <button class="admin-nav-item" data-admin-tab-scope="content-manager" data-target="section-phase1">Phase 1</button>
       <button class="admin-nav-item" data-admin-tab-scope="content-manager" data-target="section-phase2">Phase 2</button>
       <button class="admin-nav-item" data-admin-tab-scope="content-manager" data-target="section-phase3">Phase 3</button>
-      <button class="admin-nav-item" data-admin-tab-scope="content-manager" data-target="section-tsa">Assessments</button>
       <button class="admin-nav-item" data-admin-tab-scope="content-manager" data-target="section-send-instructor">Send to instructor</button>
 
       <span class="nav-group-label" data-admin-nav-group="student-progress">Progress</span>
@@ -1787,11 +1786,6 @@
       <span class="nav-group-label" data-admin-nav-group="member-management">Access</span>
       <button class="admin-nav-item" data-admin-tab-scope="member-management" data-target="section-members">Members</button>
       <button class="admin-nav-item" data-admin-tab-scope="member-management" data-target="section-passwords">Passwords</button>
-
-      <span class="nav-group-label" data-admin-nav-group="admin-tools">Preview &amp; QA</span>
-      <button class="admin-nav-item" data-admin-tab-scope="admin-tools" data-target="section-admin-preview">Unlock phases</button>
-      <button class="admin-nav-item" data-admin-tab-scope="admin-tools" data-target="section-sync">Site sync check</button>
-      <button class="admin-nav-item" data-admin-tab-scope="admin-tools" data-target="section-links">Quick links</button>
 
       <span class="nav-group-label" data-admin-nav-group="engagement">Engagement</span>
       <button class="admin-nav-item" data-admin-tab-scope="engagement" data-target="section-inapp-nudges">In-app nudges</button>
@@ -1827,49 +1821,6 @@
         <div class="section-divider"></div>
         <p class="description">Choose which public and member-facing areas are visible. Phase 2 and Phase 3 still unlock automatically for participants based on completion.</p>
         <div class="visibility-checklist" id="visibilityChecklist"></div>
-        <div class="section-divider" style="margin-top:20px"></div>
-        <p class="description" style="margin-top:12px"><strong>Public homepage</strong> — controls public navigation and homepage sections.</p>
-        <div class="visibility-checklist" id="publicHomepageChecklist"></div>
-        <span id="publicHomepageStatus" style="font-size:12px;color:#555;display:block;margin-top:6px;min-height:16px;"></span>
-        <div class="section-divider" style="margin-top:20px"></div>
-        <p class="description" style="margin-top:12px"><strong>Admin / owner preview</strong> — controls what admins and owners see while testing the public site. Regular visitors are not affected.</p>
-        <div id="adminVisibilityStatus" class="eng-status" aria-live="polite"></div>
-        <div id="adminVisibilityForm">
-          <div class="eng-field-group">
-            <div class="eng-field-row">
-              <label class="eng-toggle-label">
-                <span class="eng-toggle-name">Skip Find your level data form</span>
-                <span class="eng-toggle-desc">When checked, admins and owners can open the public Find your level exercise without entering name, email, role, or reason.</span>
-              </label>
-              <input class="eng-toggle" type="checkbox" data-admin-vis-key="findLevelLeadGateBypass" aria-label="Skip Find your level data form for admins and owners" checked>
-            </div>
-          </div>
-          <button class="small-button" type="button" id="adminVisibilitySave" style="margin-top:4px">Save admin preview settings</button>
-          <span class="saved" id="adminVisibilitySaved">Saved</span>
-        </div>
-        <div class="section-divider" style="margin-top:20px"></div>
-        <p class="description" style="margin-top:12px"><strong>Find your level page</strong> — show or hide each assessment card on the public <a href="../tsa-score.html" target="_blank">tsa-score.html</a> page. Defaults to shown.</p>
-        <div id="publicAssessmentStatus" class="eng-status" aria-live="polite"></div>
-        <div id="publicAssessmentForm">
-          <div class="eng-field-group">
-            <div class="eng-field-row">
-              <label class="eng-toggle-label">
-                <span class="eng-toggle-name">Show Diagnostic card</span>
-                <span class="eng-toggle-desc">"The Diagnostic" card on the public Find your level page.</span>
-              </label>
-              <input class="eng-toggle" type="checkbox" data-pub-assess-key="diagnosticVisible" aria-label="Show Diagnostic card" checked>
-            </div>
-            <div class="eng-field-row">
-              <label class="eng-toggle-label">
-                <span class="eng-toggle-name">Show Checkpoint card</span>
-                <span class="eng-toggle-desc">"The Checkpoint" card on the public Find your level page.</span>
-              </label>
-              <input class="eng-toggle" type="checkbox" data-pub-assess-key="checkpointVisible" aria-label="Show Checkpoint card" checked>
-            </div>
-          </div>
-          <button class="small-button" type="button" id="publicAssessmentSave" style="margin-top:4px">Save card visibility</button>
-          <span class="saved" id="publicAssessmentSaved">Saved</span>
-        </div>
         <div class="visibility-summary-head">
           <h3>Visibility status summary</h3>
           <p>Read-only snapshot of the current local/admin preview state. Use this to confirm what the site should show after changing the controls above.</p>
@@ -1883,9 +1834,37 @@
 
       <section class="admin-section" id="section-access-controls" data-admin-tab-panel="content-manager">
         <span class="section-label">Site</span>
-        <h2>Assessment access</h2>
+        <h2>Assessment visibility &amp; access</h2>
         <div class="section-divider"></div>
-        <p class="description">Control who can see the assessments section. When turned off for members, the nav link, dashboard section, and results tab are all hidden. Changes take effect on the member's next page load.</p>
+        <p class="description">Controls assessment visibility by audience: public visitors first, then members, then Admin/ owner preview settings. Changes take effect on the next page load for each audience.</p>
+
+        <p class="description" style="margin-top:12px"><strong>Public</strong> — controls what non-logged-in visitors see on the public site and <a href="../tsa-score.html" target="_blank">tsa-score.html</a>.</p>
+        <div class="visibility-checklist" id="publicHomepageChecklist"></div>
+        <span id="publicHomepageStatus" style="font-size:12px;color:#555;display:block;margin-top:6px;min-height:16px;"></span>
+        <div id="publicAssessmentStatus" class="eng-status" aria-live="polite"></div>
+        <div id="publicAssessmentForm">
+          <div class="eng-field-group">
+            <div class="eng-field-row">
+              <label class="eng-toggle-label">
+                <span class="eng-toggle-name">Show Diagnostic card</span>
+                <span class="eng-toggle-desc">Shows the Diagnostic card on the public Find your level page.</span>
+              </label>
+              <input class="eng-toggle" type="checkbox" data-pub-assess-key="diagnosticVisible" aria-label="Show Diagnostic card" checked>
+            </div>
+            <div class="eng-field-row">
+              <label class="eng-toggle-label">
+                <span class="eng-toggle-name">Show Checkpoint card</span>
+                <span class="eng-toggle-desc">Shows the Checkpoint card on the public Find your level page.</span>
+              </label>
+              <input class="eng-toggle" type="checkbox" data-pub-assess-key="checkpointVisible" aria-label="Show Checkpoint card" checked>
+            </div>
+          </div>
+          <button class="small-button" type="button" id="publicAssessmentSave" style="margin-top:4px">Save public card visibility</button>
+          <span class="saved" id="publicAssessmentSaved">Saved</span>
+        </div>
+
+        <div class="section-divider" style="margin-top:20px"></div>
+        <p class="description" style="margin-top:12px"><strong>Members</strong> — controls what regular logged-in members see in the member workspace.</p>
         <div id="tsaVisibilityStatus" class="eng-status" aria-live="polite"></div>
         <div id="tsaVisibilityForm">
           <div class="eng-field-group">
@@ -1896,16 +1875,50 @@
               </label>
               <input class="eng-toggle" type="checkbox" data-tsa-vis-key="userEnabled" aria-label="Members can see assessments" checked>
             </div>
+          </div>
+          <div class="toggle-row" data-key="utl_tsa_status" data-default="live" data-options="live:Show,placeholder:Coming soon,hidden:Hide" data-labels="live:Assessment section shown in the member hub,placeholder:Whole section shows coming soon buttons,hidden:Assessment section removed from the page entirely"></div>
+          <div class="toggle-row" data-key="utl_tsa_diagnostic_status" data-default="live" data-options="live:Show,placeholder:Coming soon,hidden:Hide" data-labels="live:The diagnostic card links to its assessment hub,placeholder:The diagnostic card shows a Coming soon badge,hidden:The diagnostic card is hidden"></div>
+          <div class="toggle-row" data-key="utl_tsa_checkpoint_status" data-default="live" data-options="live:Show,placeholder:Coming soon,hidden:Hide" data-labels="live:The checkpoint card links to its assessment hub,placeholder:The checkpoint card shows a Coming soon badge,hidden:The checkpoint card is hidden"></div>
+          <div class="sync-actions" style="margin-top: 14px;">
+            <button class="small-button" type="button" id="showReadyAssessments">Set ready assessment apps live</button>
+            <a class="small-button secondary-button" href="../member-login/index.html?mode=admin#assessments" target="_blank" style="display:inline-flex;align-items:center;text-decoration:none;">Preview assessments</a>
+          </div>
+
+          <div class="section-divider" style="margin-top:20px"></div>
+          <p class="description" style="margin-top:12px"><strong>Admin/ owner</strong> — controls preview and testing behavior for admin and owner roles only. Regular visitors and members are not affected.</p>
+          <div class="eng-field-group">
             <div class="eng-field-row">
               <label class="eng-toggle-label">
-                <span class="eng-toggle-name">Admins can see assessments when off for members</span>
-                <span class="eng-toggle-desc">When on, admins can still access and test assessments even if they are hidden for regular members.</span>
+                <span class="eng-toggle-name">Admin/ owner can access member assessments hidden from members</span>
+                <span class="eng-toggle-desc">When on, admin and owner roles can still access the member Diagnostic and Checkpoint area when it is hidden for regular members.</span>
               </label>
-              <input class="eng-toggle" type="checkbox" data-tsa-vis-key="adminEnabled" aria-label="Admins can see assessments when off for members" checked>
+              <input class="eng-toggle" type="checkbox" data-tsa-vis-key="adminEnabled" aria-label="Admin/ owner can access member assessments hidden from members" checked>
             </div>
           </div>
-          <button class="small-button" type="button" id="tsaVisibilitySave" style="margin-top:4px">Save access settings</button>
+          <button class="small-button" type="button" id="tsaVisibilitySave" style="margin-top:4px">Save assessment access settings</button>
           <span class="saved" id="tsaVisibilitySaved">Saved</span>
+        </div>
+
+        <div id="adminVisibilityStatus" class="eng-status" aria-live="polite"></div>
+        <div id="adminVisibilityForm">
+          <div class="eng-field-group">
+            <div class="eng-field-row">
+              <label class="eng-toggle-label">
+                <span class="eng-toggle-name">Admin/ owner can preview hidden public assessment cards</span>
+                <span class="eng-toggle-desc">When checked, admin and owner roles can still see the public Diagnostic and Checkpoint cards even when those cards are hidden for visitors.</span>
+              </label>
+              <input class="eng-toggle" type="checkbox" data-admin-vis-key="publicFindLevelPreview" aria-label="Admin/ owner can preview hidden public assessment cards" checked>
+            </div>
+            <div class="eng-field-row">
+              <label class="eng-toggle-label">
+                <span class="eng-toggle-name">Skip Find your level data form for Admin/ owner</span>
+                <span class="eng-toggle-desc">When checked, admin and owner roles can open the public Find your level exercise without entering name, email, role, or reason.</span>
+              </label>
+              <input class="eng-toggle" type="checkbox" data-admin-vis-key="findLevelLeadGateBypass" aria-label="Skip Find your level data form for Admin/ owner" checked>
+            </div>
+          </div>
+          <button class="small-button" type="button" id="adminVisibilitySave" style="margin-top:4px">Save Admin/ owner preview settings</button>
+          <span class="saved" id="adminVisibilitySaved">Saved</span>
         </div>
       </section>
 
@@ -1963,20 +1976,6 @@
           <span class="layout-status" data-layout-status="phase3" aria-live="polite"></span>
         </div>
         <div id="embed-phase3"></div>
-      </section>
-
-      <section class="admin-section" id="section-tsa" data-admin-tab-panel="content-manager">
-        <span class="section-label">Members</span>
-        <h2>Find your level</h2>
-        <div class="section-divider"></div>
-        <p class="description">Controls the assessment cards in the member hub. Choose whether the section is shown, shown as coming soon, or hidden.</p>
-        <div class="toggle-row" data-key="utl_tsa_status" data-default="live" data-options="live:Show,placeholder:Coming soon,hidden:Hide" data-labels="live:Assessment section shown in the member hub,placeholder:Whole section shows coming soon buttons,hidden:Assessment section removed from the page entirely"></div>
-        <div class="toggle-row" data-key="utl_tsa_diagnostic_status" data-default="live" data-options="live:Show,placeholder:Coming soon,hidden:Hide" data-labels="live:The diagnostic card links to its assessment hub,placeholder:The diagnostic card shows a Coming soon badge,hidden:The diagnostic card is hidden"></div>
-        <div class="toggle-row" data-key="utl_tsa_checkpoint_status" data-default="live" data-options="live:Show,placeholder:Coming soon,hidden:Hide" data-labels="live:The checkpoint card links to its assessment hub,placeholder:The checkpoint card shows a Coming soon badge,hidden:The checkpoint card is hidden"></div>
-        <div class="sync-actions" style="margin-top: 14px;">
-          <button class="small-button" type="button" id="showReadyAssessments">Set ready assessment apps live</button>
-          <a class="small-button secondary-button" href="../member-login/index.html?mode=admin#assessments" target="_blank" style="display:inline-flex;align-items:center;text-decoration:none;">Preview Assessments</a>
-        </div>
       </section>
 
       <section class="admin-section" id="section-send-instructor" data-admin-tab-panel="content-manager">
@@ -2818,14 +2817,6 @@
             fallback: 'show',
             label: 'Release Phase 3 after Phase 2 is complete',
             description: 'Use this to hold Phase 3 until its videos, context, and exercises are ready. Learners still need to complete Phase 2 before it opens.'
-          },
-          {
-            key: 'utl_tsa_status',
-            checkedValue: 'live',
-            uncheckedValue: 'hidden',
-            fallback: 'live',
-            label: 'Show Assessments area',
-            description: 'Shows the Diagnostic and Checkpoint section in the member workspace.'
           }
         ]
       },
@@ -3198,8 +3189,8 @@
         checkedValue: 'show',
         uncheckedValue: 'hide',
         fallback: 'hide',
-        label: 'Show Find your level',
-        description: 'Shows the public Find your level nav link and homepage CTA on index.html.'
+        label: 'Show Find your level on public site',
+        description: 'Shows the public Find your level nav link and homepage CTA.'
       }
     ];
 
@@ -5096,9 +5087,10 @@
 
     // ===== End public assessment card visibility =====
 
-    // ===== Admin / owner preview visibility =====
+    // ===== Admin/ owner preview visibility =====
 
     const ADMIN_VISIBILITY_LOCAL_KEYS = {
+      publicFindLevelPreview: 'utl_find_level_admin_public_preview',
       findLevelLeadGateBypass: 'utl_find_level_admin_bypass'
     };
 
@@ -5163,7 +5155,7 @@
       }
     });
 
-    // ===== End admin / owner preview visibility =====
+    // ===== End Admin/ owner preview visibility =====
 
     // ===== Content Library =====
 
@@ -6043,7 +6035,6 @@
     function mbGroupStatusHtml(email, data) {
       var sync = String(data.googleGroupSyncStatus || '').toLowerCase();
       var syncLabel = /manual-confirmed|manual-removed/i.test(sync) ? '' : sync;
-      var jobId = data.googleGroupSyncJobId ? '<span class="mb-group-hint">Job: ' + escapeHtml(data.googleGroupSyncJobId) + '</span>' : '';
       var added = !!data.googleGroupAdded;
       var toggleLabel = added ? 'Added' : 'Not added';
       var toggleMode = added ? 'removed' : 'added';
@@ -6055,7 +6046,19 @@
         '<button class="mb-group-toggle ' + toggleClass + '" type="button" data-mb-group-mark="' + toggleMode + '" data-email="' + escapeHtml(email) + '">' + toggleLabel + '</button>' +
         '<span class="mb-group-hint">' + escapeHtml(hint) + '</span>' +
         (syncLabel ? '<span class="mb-group-hint">' + escapeHtml(syncLabel) + '</span>' : '') +
-        jobId +
+      '</div>';
+    }
+
+    function mbDuplicateWarningHtml(duplicates) {
+      if (!duplicates || !duplicates.length) return '';
+      var emails = duplicates.map(function (entry) {
+        return escapeHtml(entry.email || mbCanonicalEmailFromDoc(entry.duplicate) || '');
+      }).filter(Boolean).join(', ');
+      return '<div class="mb-group-queue mb-err" style="border-left-color:#A33A52;background:#fff4f6;">' +
+        '<strong>Duplicate member records hidden:</strong> ' +
+        escapeHtml(String(duplicates.length)) + ' duplicate email' + (duplicates.length === 1 ? '' : 's') +
+        (emails ? ' (' + emails + ')' : '') +
+        '. The table keeps the highest-priority row, usually admin/owner, and hides the duplicate user row. Remove the extra record from Firestore when convenient.' +
       '</div>';
     }
 
@@ -6075,6 +6078,7 @@
           (manualRemoveCount ? manualRemoveCount + ' need remove' : '') +
           '. Use the Group column after verifying in Google Groups.</div>'
         : '';
+      var duplicateHtml = mbDuplicateWarningHtml(docs.duplicates || []);
       var rows = docs.map(function (d) {
         var data = d.data();
         var email = mbCanonicalEmailFromDoc(d) || mbNormalizeEmail(d.id);
@@ -6113,7 +6117,7 @@
         );
       }).join('');
       wrap.innerHTML =
-        queueHtml + '<div class="mb-table-wrap"><table class="mb-table">' +
+        duplicateHtml + queueHtml + '<div class="mb-table-wrap"><table class="mb-table">' +
           '<thead><tr>' +
             '<th>Name</th><th>Email</th><th>Role</th><th>Status</th>' +
             '<th>Cohort</th><th>First Login</th><th>Expiry</th><th>Group<br><a class="mb-group-link" href="https://groups.google.com/g/utl-members/members" target="_blank" rel="noopener">Open group</a></th><th>Actions</th>' +
@@ -6450,7 +6454,6 @@
         snap.forEach(function (d) { docs.push(d); });
         docs = mbApplyLocalGroupOverrides(docs);
         docs = mbDedupeMemberDocs(docs);
-        var duplicateCount = docs.duplicates ? docs.duplicates.length : 0;
         docs.sort(function (a, b) {
           var na = (a.data().name || a.id).toLowerCase();
           var nb = (b.data().name || b.id).toLowerCase();
@@ -6458,9 +6461,6 @@
         });
         mbMembersCache = docs;
         mbRenderTable(docs);
-        if (duplicateCount) {
-          showToast(duplicateCount + ' duplicate member email' + (duplicateCount === 1 ? '' : 's') + ' hidden. Keep the admin/owner record and remove the extra user record from Firestore.', 'error');
-        }
       } catch (e) {
         var msg = mbFriendlyPermissionMessage(e);
         wrap.innerHTML = '<p class="mb-msg mb-err">Failed to load: ' + escapeHtml(msg) + '</p>';

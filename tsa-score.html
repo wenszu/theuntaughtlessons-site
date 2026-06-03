@@ -270,17 +270,28 @@
   </script>
   <script type="module" src="assets/feedback-widget.js?v=4"></script>
   <script type="module">
-    import { getPublicAssessmentSettings } from './assets/firebase.js';
+    import {
+      getAdminVisibilitySettings,
+      getAuthorizedMember,
+      getPublicAssessmentSettings,
+      getSignedInUser
+    } from './assets/firebase.js';
     const PUBLIC_ASSESSMENT_LOCAL_KEYS = {
       diagnosticVisible: 'utl_public_assessment_diagnostic_visible',
       checkpointVisible: 'utl_public_assessment_checkpoint_visible'
     };
-    function applyPublicAssessmentSettings(settings) {
+    const ADMIN_AUTH_KEY = 'utl_admin_auth';
+    const MEMBER_PROFILE_KEY = 'utl_member_profile';
+    const ADMIN_PUBLIC_PREVIEW_KEY = 'utl_find_level_admin_public_preview';
+    const BOOTSTRAP_OWNER_EMAILS = ['wenszu@gmail.com'];
+
+    function applyPublicAssessmentSettings(settings, adminPreview = false) {
       const diagnostic = document.querySelector('[data-pub-card="diagnostic"]');
       const checkpoint = document.querySelector('[data-pub-card="checkpoint"]');
-      if (diagnostic) diagnostic.hidden = settings.diagnosticVisible === false;
-      if (checkpoint) checkpoint.hidden = settings.checkpointVisible === false;
+      if (diagnostic) diagnostic.hidden = !adminPreview && settings.diagnosticVisible === false;
+      if (checkpoint) checkpoint.hidden = !adminPreview && settings.checkpointVisible === false;
     }
+
     function localPublicAssessmentSettings() {
       const settings = {};
       Object.keys(PUBLIC_ASSESSMENT_LOCAL_KEYS).forEach((key) => {
@@ -290,11 +301,48 @@
       });
       return settings;
     }
+
+    function localAdminPreviewRole() {
+      if (localStorage.getItem(ADMIN_AUTH_KEY) === 'true') return true;
+      try {
+        const profile = JSON.parse(localStorage.getItem(MEMBER_PROFILE_KEY) || '{}') || {};
+        const role = String(profile.role || '').toLowerCase();
+        return role === 'admin' || role === 'owner';
+      } catch {
+        return false;
+      }
+    }
+
+    async function canAdminPreviewPublicAssessments() {
+      let enabled = localStorage.getItem(ADMIN_PUBLIC_PREVIEW_KEY) !== 'off';
+      try {
+        const settings = await getAdminVisibilitySettings();
+        enabled = settings.publicFindLevelPreview !== false;
+        localStorage.setItem(ADMIN_PUBLIC_PREVIEW_KEY, enabled ? 'on' : 'off');
+      } catch {}
+
+      if (!enabled) return false;
+      if (localAdminPreviewRole()) return true;
+
+      try {
+        const user = await getSignedInUser();
+        const email = user && user.email ? String(user.email).trim().toLowerCase() : '';
+        if (!email) return false;
+        if (BOOTSTRAP_OWNER_EMAILS.includes(email)) return true;
+        const member = await getAuthorizedMember(email);
+        const role = String((member && member.role) || '').toLowerCase();
+        return role === 'admin' || role === 'owner';
+      } catch {
+        return false;
+      }
+    }
+
     applyPublicAssessmentSettings(localPublicAssessmentSettings());
     (async () => {
+      const adminPreview = await canAdminPreviewPublicAssessments();
       try {
         const settings = await getPublicAssessmentSettings();
-        applyPublicAssessmentSettings(settings);
+        applyPublicAssessmentSettings(settings, adminPreview);
       } catch {}
     })();
   </script>

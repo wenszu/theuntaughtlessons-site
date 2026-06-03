@@ -626,7 +626,7 @@ async function setPublicAssessmentSettings(partial) {
 }
 
 function getDefaultAdminVisibilitySettings() {
-  return { findLevelLeadGateBypass: true };
+  return { publicFindLevelPreview: true, findLevelLeadGateBypass: true };
 }
 async function getAdminVisibilitySettings() {
   try {
