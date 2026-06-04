@@ -87,6 +87,11 @@ body {
   letter-spacing: 2px;
   text-transform: uppercase;
   color: var(--gold);
+  text-decoration: none;
+}
+
+.portal-program-name:hover {
+  opacity: .8;
 }
 
 .portal-breadcrumb {
