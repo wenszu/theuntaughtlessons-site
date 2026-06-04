@@ -114,7 +114,7 @@ Firebase Functions: `functions/processGoogleGroupSyncJob` watches `google_group_
 
 | File | Phase | Purpose |
 | --- | --- | --- |
-| `apps/find-your-level/` | Public | Lead gate + Sort & Bucket exercise (`sort_bucket_001`) |
+| `apps/find-your-level/` | Public | Lead gate + random/fixed Sort & Bucket exercise using `data/sort-bucket.json` |
 | `apps/grocery-list/` | Phase 1 | Sort messy grocery list into MECE buckets |
 | `apps/grocery-list-ai/` | Phase 1 | AI-assisted grocery list structuring |
 | `apps/messy-notes/` | Phase 1 | Turn manager notes into structured response |
@@ -138,11 +138,43 @@ Firebase Functions: `functions/processGoogleGroupSyncJob` watches `google_group_
 | `apps/tsa-checkpoint/` | Assessment | Checkpoint hub (same exercises, `?assessment=checkpoint`) |
 | `apps/tsa-speak/` | Assessment | Speak concisely short talk assessment |
 
-Data files: `data/sort-bucket.json` (public), `data/tsa/*.json` (member assessments), `data/practice/*.json` (member practice), `data/testimonials.json`. See archive for schemas.
+Data files: `data/sort-bucket.json` (public concept-scored Find your level exercises), `data/tsa-score-bands.js` (public score bands/scoring helpers), `data/tsa/*.json` (member assessments), `data/practice/*.json` (member practice), `data/testimonials.json`. See archive for schemas.
 
 Apps Script endpoint (all POST submissions): `https://script.google.com/macros/s/AKfycbzJE--FL2kB_XDNZRnszCtlyLRPvaLAHGuF5TAOdXJk40atbvf5Y6ELuSK2B7CSLaMN/exec`
 
 Apps Script `action` routing: `WelcomeEmail`, `TestEmailTemplate`, `ResultsEmail`, `RemovedMember`, `AddGoogleGroupMember`, `RemoveGoogleGroupMember`. Default = lead/sheet logging.
+
+## Assessment Documentation
+
+Two reference files govern all assessment design, scoring logic, and exercise content. Load these files when working on anything related to the TSA Score™, C³ Rubric™, Find Your Level, the Diagnostic, the Checkpoint, or individual exercises.
+
+### UTL_TSA_scoring_framework.md
+The stable reference for the TSA Score™ structure, the C³ Rubric™ (C1–C10), tier scoring rules (Tier 1/2/3), the points model per exercise type, scoring type reference (Type 1 rule-based vs Type 2 AI rubric), assessment versions (Diagnostic, Checkpoint, Find Your Level), score bands, and the results page methodology.
+
+Load this file when:
+- Designing a new exercise type
+- Writing or updating Gem prompts that involve scoring
+- Working on the white paper series (Papers 1–5)
+- Explaining the TSA Score or C³ Rubric to anyone
+- Building the results page or score report UI
+
+This file changes rarely. It is the philosophy layer.
+
+### UTL_assessment_exercises.md
+The working register for all exercises across all three phases. Contains the exercise bank status, type-level design rules, the full exercise register table, and per-exercise detail sections including concepts, Tier 1 items, trap items, panel decisions, and open questions.
+
+Source of truth for exercise content is the JSON files (data/sort-bucket.json and equivalents per exercise type). This file documents decisions and registers exercises — the JSON is the implementation.
+
+Load this file when:
+- Building or refining any exercise
+- Running panel tests on new exercises
+- Checking which exercises are available for each assessment version
+- Updating the question bank
+
+This file changes every time a new exercise is built or a decision is made. It is the build layer.
+
+### Handoff rule
+Decisions are made in Claude (claude.ai). JSON updates are handled in Codex. Documentation updates to both .md files are handled in Claude Code. WEBSITE_CONTEXT.md is the entry point that routes to the right file for the task.
 
 ## Known Notes
 
@@ -165,6 +197,7 @@ Apps Script `action` routing: `WelcomeEmail`, `TestEmailTemplate`, `ResultsEmail
 - Admin Console binary settings use right-aligned checkbox controls. Keep multi-state controls such as `Show / Coming soon / Hide` as segmented controls because they are not true yes/no settings.
 - Admin Console `Site & Content > Assessment visibility & access > Admin/ owner` controls admin/owner-only assessment preview behavior. `Admin/ owner can preview hidden public assessment cards` writes `settings/admin_visibility.publicFindLevelPreview` and mirrors to localStorage key `utl_find_level_admin_public_preview`; `Skip Find your level data form` writes `settings/admin_visibility.findLevelLeadGateBypass` and mirrors to localStorage key `utl_find_level_admin_bypass`; public visitors are not affected.
 - Admin Console `Find your level page` card visibility writes `settings/public_assessments` and mirrors to localStorage keys `utl_public_assessment_diagnostic_visible` / `utl_public_assessment_checkpoint_visible` for localhost preview. Live public reads require deployed Firestore rules that allow public read of `settings/public_assessments`.
+- Admin Console `Assessment visibility & access > Public` also controls public Find your level exercise rotation through `settings/public_assessments.findLevelExerciseMode` (`random` or `fixed`) and `settings/public_assessments.findLevelExerciseId`; localhost mirrors use `utl_find_level_exercise_mode` and `utl_find_level_exercise_id`.
 - Lesson video URLs are sourced from `member-login/content-config.js`. The Admin Console Content Manager can save local browser preview overrides, but permanent video link changes must update `member-login/content-config.js` and be committed/pushed.
 - `no-cors` mode on Apps Script fetches returns opaque responses — server-side failures are invisible to the client. Always validate inputs client-side.
 - Email templates are stored in Firestore `settings/emailTemplates`. `loadEmailTemplates` in `admin/index.html` always falls back to defaults if Firestore fails, then calls `syncEmailTemplateForm` and `initEmailTemplateListeners` regardless.
@@ -184,6 +217,7 @@ Apps Script `action` routing: `WelcomeEmail`, `TestEmailTemplate`, `ResultsEmail
 
 ### 2026-06-03
 
+- Updated public Find your level scoring: `apps/find-your-level/index.html` now supports random/fixed exercise selection from all eight public Sort & Bucket sets, uses concept-based 100-point scoring from `data/tsa-score-bands.js`, and shows the learner's score plus band explanation on the result screen. Admin Console `Assessment visibility & access > Public` controls random vs fixed exercise selection.
 - Reorganized Admin Console `Site & Content` assessment controls into `Assessment visibility & access`, ordered as Public, Members, then Admin/ owner. Public Find your level/card visibility, member assessment access, member Diagnostic/Checkpoint card status, and Admin/ owner preview controls now live together; the duplicate standalone `Assessments` left-nav item was removed. Admin/ owner preview can keep hidden public Diagnostic/Checkpoint cards visible on `tsa-score.html`. The Admin Tools section remains reachable from the top nav/profile path but no longer appears in the left sidebar.
 
 ### 2026-06-02

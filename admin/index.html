@@ -1657,8 +1657,15 @@
     .eng-toggle:focus-visible { outline:2px solid var(--navy); outline-offset:3px; }
     .eng-number { width:72px; flex-shrink:0; padding:6px 10px; border:1px solid var(--line); border-radius:6px; font-size:13px; font-family:'Lato',sans-serif; color:var(--navy); text-align:right; }
     .eng-text { flex-shrink:0; width:220px; max-width:100%; padding:6px 10px; border:1px solid var(--line); border-radius:6px; font-size:13px; font-family:'Lato',sans-serif; color:var(--navy); }
-    .eng-number:focus, .eng-text:focus { border-color:var(--navy); outline:none; }
+    .eng-select { flex-shrink:0; width:280px; max-width:100%; min-height:38px; padding:7px 34px 7px 10px; border:1px solid var(--line); border-radius:6px; background:var(--white); color:var(--navy); font-size:13px; font-family:'Lato',sans-serif; font-weight:700; line-height:1.25; }
+    .eng-select-wide { width:360px; }
+    .eng-number:focus, .eng-text:focus, .eng-select:focus { border-color:var(--navy); outline:none; box-shadow:0 0 0 2px rgba(0,51,102,.08); }
     .eng-save-btn { justify-self:start; margin-top:4px; }
+    @media (max-width: 720px) {
+      .eng-field-row { flex-direction:column; align-items:stretch; }
+      .eng-toggle { align-self:flex-end; }
+      .eng-select, .eng-select-wide, .eng-text, .eng-number { width:100%; }
+    }
     .et-layout { display:grid; grid-template-columns:minmax(320px,420px) 1fr; gap:32px; align-items:start; }
     .et-note { color:#777; font-size:12px; line-height:1.45; margin:5px 0 0; }
     .et-card { margin-top:4px; padding:12px 14px; border:1px solid var(--line); border-radius:8px; background:rgba(243,237,226,.35); }
@@ -1858,8 +1865,40 @@
               </label>
               <input class="eng-toggle" type="checkbox" data-pub-assess-key="checkpointVisible" aria-label="Show Checkpoint card" checked>
             </div>
+            <div class="eng-field-row">
+              <label class="eng-toggle-label" for="publicFindLevelMode">
+                <span class="eng-toggle-name">Find your level exercise rotation</span>
+                <span class="eng-toggle-desc">Choose whether visitors receive a random exercise or the same fixed exercise every time.</span>
+              </label>
+              <select id="publicFindLevelMode" class="eng-select" data-pub-assess-field="findLevelExerciseMode" aria-label="Find your level exercise rotation">
+                <option value="random">Random rotation</option>
+                <option value="fixed">Fixed exercise</option>
+              </select>
+            </div>
+            <div class="eng-field-row" id="publicFindLevelFixedRow" hidden>
+              <label class="eng-toggle-label" for="publicFindLevelExercise">
+                <span class="eng-toggle-name">Fixed exercise</span>
+                <span class="eng-toggle-desc">Used only when rotation is set to Fixed exercise.</span>
+              </label>
+              <select id="publicFindLevelExercise" class="eng-select eng-select-wide" data-pub-assess-field="findLevelExerciseId" aria-label="Fixed Find your level exercise">
+                <optgroup label="Beginner">
+                  <option value="sort_bucket_001">Meeting agenda from hell</option>
+                  <option value="sort_bucket_002">Work trip packing list</option>
+                  <option value="sort_bucket_007">One week until the exam</option>
+                  <option value="sort_bucket_008">The group trip</option>
+                </optgroup>
+                <optgroup label="Intermediate">
+                  <option value="sort_bucket_003">Performance review feedback</option>
+                  <option value="sort_bucket_004">Customer complaint inbox</option>
+                </optgroup>
+                <optgroup label="Advanced">
+                  <option value="sort_bucket_005">New employee's first week</option>
+                  <option value="sort_bucket_006">Reasons a project is off track</option>
+                </optgroup>
+              </select>
+            </div>
           </div>
-          <button class="small-button" type="button" id="publicAssessmentSave" style="margin-top:4px">Save public card visibility</button>
+          <button class="small-button" type="button" id="publicAssessmentSave" style="margin-top:4px">Save public assessment settings</button>
           <span class="saved" id="publicAssessmentSaved">Saved</span>
         </div>
 
@@ -5027,10 +5066,27 @@
       checkpointVisible: 'utl_public_assessment_checkpoint_visible'
     };
 
+    const PUBLIC_ASSESSMENT_FIELD_LOCAL_KEYS = {
+      findLevelExerciseMode: 'utl_find_level_exercise_mode',
+      findLevelExerciseId: 'utl_find_level_exercise_id'
+    };
+
     function syncPublicAssessmentLocal(key, value) {
       const localKey = PUBLIC_ASSESSMENT_LOCAL_KEYS[key];
       if (!localKey) return;
       localStorage.setItem(localKey, value ? 'show' : 'hide');
+    }
+
+    function syncPublicAssessmentFieldLocal(key, value) {
+      const localKey = PUBLIC_ASSESSMENT_FIELD_LOCAL_KEYS[key];
+      if (!localKey) return;
+      localStorage.setItem(localKey, String(value || ''));
+    }
+
+    function updatePublicFindLevelFixedVisibility() {
+      var mode = document.querySelector('[data-pub-assess-field="findLevelExerciseMode"]')?.value || 'random';
+      var row = document.getElementById('publicFindLevelFixedRow');
+      if (row) row.hidden = mode !== 'fixed';
     }
 
     async function loadPublicAssessmentSettings() {
@@ -5056,6 +5112,14 @@
           setBinaryControl(btn, val);
           syncPublicAssessmentLocal(key, val);
         });
+        document.querySelectorAll('[data-pub-assess-field]').forEach(function(field) {
+          var key = field.dataset.pubAssessField;
+          var fallback = key === 'findLevelExerciseMode' ? 'random' : 'sort_bucket_001';
+          var val = settings[key] || localStorage.getItem(PUBLIC_ASSESSMENT_FIELD_LOCAL_KEYS[key]) || fallback;
+          field.value = val;
+          syncPublicAssessmentFieldLocal(key, val);
+        });
+        updatePublicFindLevelFixedVisibility();
         statusEl.textContent = '';
       } catch(e) {
         statusEl.textContent = 'Could not load: ' + ((e && e.message) || 'Unknown error');
@@ -5072,6 +5136,12 @@
         partial[key] = val;
         syncPublicAssessmentLocal(key, val);
       });
+      document.querySelectorAll('[data-pub-assess-field]').forEach(function(field) {
+        var key = field.dataset.pubAssessField;
+        var val = field.value || (key === 'findLevelExerciseMode' ? 'random' : 'sort_bucket_001');
+        partial[key] = val;
+        syncPublicAssessmentFieldLocal(key, val);
+      });
       this.disabled = true;
       try {
         await fb.setPublicAssessmentSettings(partial);
@@ -5084,6 +5154,8 @@
         this.disabled = false;
       }
     });
+
+    document.getElementById('publicFindLevelMode')?.addEventListener('change', updatePublicFindLevelFixedVisibility);
 
     // ===== End public assessment card visibility =====
 

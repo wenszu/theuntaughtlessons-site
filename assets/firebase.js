@@ -610,7 +610,12 @@ async function setAssessmentVisibility(partial) {
 }
 
 function getDefaultPublicAssessmentSettings() {
-  return { diagnosticVisible: true, checkpointVisible: true };
+  return {
+    diagnosticVisible: true,
+    checkpointVisible: true,
+    findLevelExerciseMode: "random",
+    findLevelExerciseId: "sort_bucket_001"
+  };
 }
 async function getPublicAssessmentSettings() {
   try {

@@ -3,6 +3,11 @@
     "exercise_id": "sort_bucket_001",
     "exercise_title": "Meeting agenda from hell",
     "difficulty": "beginner",
+    "pool": "work",
+    "suitable_for": [
+      "find_your_level",
+      "diagnostic"
+    ],
     "scenario": "You are five minutes away from a leadership team meeting. Someone has sent you the agenda — 12 items, no structure, no priorities. Before everyone walks into the room, you need to sort them: what actually needs a decision today, what is just an update, and what should never have been on the agenda in the first place.",
     "prompt": "Sort the 12 agenda items into three clean buckets.",
     "sorting_instruction": "",
@@ -11,144 +16,154 @@
       "Updates only",
       "Parking lot"
     ],
+    "concept_map": {
+      "decide": [
+        "Decisions needed",
+        "Discussion topics",
+        "Action items"
+      ],
+      "inform": [
+        "Updates only",
+        "Information share",
+        "Announcements"
+      ],
+      "defer": [
+        "Parking lot",
+        "Follow-ups",
+        "Next steps",
+        "Open issues"
+      ]
+    },
     "label_word_bank": [
       "Decisions needed",
+      "Discussion topics",
       "Updates only",
       "Parking lot",
       "Action items",
-      "Discussion topics",
-      "Information share",
-      "Open issues",
-      "Follow-ups",
       "Announcements",
-      "Next steps"
+      "Follow-ups"
     ],
-    "label_equivalents": {
-      "Decisions needed": [
-        "decisions",
-        "decisions required",
-        "needs decision",
-        "action decisions",
-        "decision items",
-        "what we decide"
-      ],
-      "Updates only": [
-        "updates",
-        "for information only",
-        "status updates",
-        "information share",
-        "fyi items",
-        "info only"
-      ],
-      "Parking lot": [
-        "parking lot",
-        "out of scope",
-        "deferred",
-        "not now",
-        "hold",
-        "off agenda"
-      ]
-    },
-    "dual_bucket_items": [
+    "tier_1_items": [
       "Debate over office layout"
     ],
+    "tier_2_adjacent_pairs": [],
     "items": [
       {
         "item_id": "item_01",
         "text": "Q3 budget approval vote",
-        "correct_bucket": "Decisions needed"
+        "correct_bucket": "Decisions needed",
+        "concept": "decide"
       },
       {
         "item_id": "item_02",
         "text": "Project status from team leads",
-        "correct_bucket": "Updates only"
+        "correct_bucket": "Updates only",
+        "concept": "inform"
       },
       {
         "item_id": "item_03",
         "text": "Someone's vacation dates",
-        "correct_bucket": "Parking lot"
+        "correct_bucket": "Parking lot",
+        "concept": "defer"
       },
       {
         "item_id": "item_04",
         "text": "New org chart announcement",
-        "correct_bucket": "Updates only"
+        "correct_bucket": "Updates only",
+        "concept": "inform"
       },
       {
         "item_id": "item_05",
         "text": "Decision on vendor contract",
-        "correct_bucket": "Decisions needed"
+        "correct_bucket": "Decisions needed",
+        "concept": "decide"
       },
       {
         "item_id": "item_06",
         "text": "Team birthday celebration",
-        "correct_bucket": "Parking lot"
+        "correct_bucket": "Parking lot",
+        "concept": "defer"
       },
       {
         "item_id": "item_07",
         "text": "Policy change effective next month",
-        "correct_bucket": "Updates only"
+        "correct_bucket": "Updates only",
+        "concept": "inform"
       },
       {
         "item_id": "item_08",
         "text": "Uploading team photos from last offsite",
         "correct_bucket": "Parking lot",
-        "replacement_note": "Replaced v1.1: panel test showed original item was ambiguous across buckets."
+        "concept": "defer",
+        "replacement_note": "Replaced v1.1"
       },
       {
         "item_id": "item_09",
         "text": "Request for IT equipment",
-        "correct_bucket": "Parking lot"
+        "correct_bucket": "Parking lot",
+        "concept": "defer"
       },
       {
         "item_id": "item_10",
         "text": "Product launch go/no-go",
-        "correct_bucket": "Decisions needed"
+        "correct_bucket": "Decisions needed",
+        "concept": "decide"
       },
       {
         "item_id": "item_11",
         "text": "Action items from last week",
-        "correct_bucket": "Updates only"
+        "correct_bucket": "Updates only",
+        "concept": "inform"
       },
       {
         "item_id": "item_12",
         "text": "Debate over office layout",
-        "correct_bucket": "Decisions needed"
+        "correct_bucket": "Decisions needed",
+        "concept": "decide",
+        "dual_concept": "defer",
+        "tier": 1
       }
     ],
     "scoring": {
-      "total_pts": 20,
-      "bucket_label_pts": 6,
-      "item_placement_pts": 14
+      "total_pts": 100,
+      "label_pts": 30,
+      "label_pts_per_bucket": 10,
+      "placement_pts": 60,
+      "placement_pts_per_item": 5,
+      "precision_bonus": 10,
+      "tier_1_rule": "Full credit (5pts) in either concept or dual_concept bucket",
+      "tier_2_rule": "Half credit (2.5pts) for adjacent concept placement",
+      "tier_3_rule": "Zero credit for clearly wrong placement"
+    },
+    "feedback": {
+      "pattern_labels": {
+        "strong": "Your bucket labels were well-chosen — you identified the right underlying categories.",
+        "partial": "Your labels were in the right direction but one or two were slightly off from the core concept.",
+        "weak": "Your label choices suggest the three categories were not yet fully distinct in your thinking."
+      },
+      "pattern_placement": {
+        "strong": "Your item placements were accurate and decisive.",
+        "partial": "Most items landed correctly, but a few ended up in adjacent buckets — close, but not quite precise.",
+        "weak": "Several items were placed in buckets that did not match their category — a clearer framework helps here."
+      },
+      "trap_item_insight": {
+        "item": "Debate over office layout",
+        "insight": "This one trips most people up. An open debate is a decision waiting to happen — either call it now or formally park it. Leaving it as an unresolved debate is what creates the cluttered meetings this exercise is about."
+      }
     },
     "sample_answer": {
       "rationale": "The test is one question: does the room need to make a call today? If yes, it is a decision. If it is a report-out with no vote required, it is an update. If it does not belong in a leadership meeting at all, it is a parking lot item.",
-      "buckets": {
-        "Decisions needed": [
-          { "item": "Q3 budget approval vote", "reason": "The word approval tells you a decision is required — the room needs to vote yes or no." },
-          { "item": "Decision on vendor contract", "reason": "The word decision is in the name. Approve, reject, or renegotiate — but do it now." },
-          { "item": "Product launch go/no-go", "reason": "The most classic leadership decision. Binary, time-sensitive, and requires the full room." },
-          { "item": "Debate over office layout", "reason": "A debate that is still open is a decision waiting to happen. Either call it now or formally park it — leaving it as an unresolved debate wastes everyone's time." }
-        ],
-        "Updates only": [
-          { "item": "Project status from team leads", "reason": "A report-out. The room listens and asks questions — no vote is required." },
-          { "item": "New org chart announcement", "reason": "Already decided by leadership. This slot is communication, not a choice." },
-          { "item": "Policy change effective next month", "reason": "The policy is set. This is a notification so people are not caught off guard." },
-          { "item": "Action items from last week", "reason": "A status check — done or not done. No new decisions are made here." }
-        ],
-        "Parking lot": [
-          { "item": "Someone's vacation dates", "reason": "A personal matter handled between the person and their manager. Not a leadership team agenda item." },
-          { "item": "Team birthday celebration", "reason": "Real life, wrong room. A group chat handles this in thirty seconds." },
-          { "item": "Uploading team photos from last offsite", "reason": "An admin task. Putting it on the leadership agenda is what creates the cluttered meetings this exercise is about." },
-          { "item": "Request for IT equipment", "reason": "Operational request that belongs in the normal procurement channel, not on the leadership agenda." }
-        ]
-      },
-      "edge_note": "Debate over office layout is the one item where parking lot is equally defensible — if the debate has no proposal behind it yet, the right move is to remove it until someone brings a concrete recommendation. Either placement shows clear thinking."
+      "edge_note": "Debate over office layout is the one item where parking lot is equally defensible — if the debate has no proposal behind it yet, the right move is to remove it until someone brings a concrete recommendation."
     }
   },
   {
     "exercise_id": "sort_bucket_002",
-    "exercise_title": "Work Trip Packing List",
+    "exercise_title": "Work trip packing list",
     "difficulty": "beginner",
+    "pool": "work",
+    "suitable_for": [
+      "diagnostic"
+    ],
     "scenario": "You are packing for a 2-day client presentation trip.",
     "prompt": "Sort the items into three clean buckets.",
     "sorting_instruction": "",
@@ -157,473 +172,666 @@
       "Travel documents & wallet",
       "Clothing & personal"
     ],
-    "label_word_bank": [
-      "Work essentials",
-      "Travel documents & wallet",
-      "Clothing & personal",
-      "Tech & gadgets",
-      "Business gear",
-      "Health & comfort",
-      "Accessories",
-      "Everyday carry",
-      "Professional items",
-      "Personal care"
-    ],
-    "label_equivalents": {
-      "Work essentials": [
-        "work essentials",
-        "work gear",
-        "work tools",
-        "business tools",
-        "office supplies",
-        "work kit"
+    "concept_map": {
+      "work": [
+        "Work essentials",
+        "Business tools",
+        "Business gear",
+        "Professional items",
+        "Office supplies",
+        "Work kit"
       ],
-      "Travel documents & wallet": [
-        "travel documents",
-        "travel docs",
-        "documents",
-        "id & payment",
-        "wallet & docs",
-        "travel & id"
+      "travel": [
+        "Travel documents & wallet",
+        "Travel docs",
+        "Documents",
+        "Id & payment",
+        "Wallet & docs",
+        "Everyday carry"
       ],
-      "Clothing & personal": [
-        "clothing & personal",
-        "personal items",
-        "clothes & personal",
-        "apparel",
-        "clothing & wellbeing"
+      "personal": [
+        "Clothing & personal",
+        "Personal items",
+        "Clothes & personal",
+        "Apparel",
+        "Health & comfort",
+        "Accessories",
+        "Personal care"
       ]
     },
-    "dual_bucket_items": ["Phone", "Power bank", "Headphones"],
+    "label_word_bank": [
+      "Work essentials",
+      "Business gear",
+      "Travel documents & wallet",
+      "Clothing & personal",
+      "Everyday carry",
+      "Accessories",
+      "Professional items"
+    ],
+    "tier_1_items": [
+      "Phone",
+      "Power bank",
+      "Headphones"
+    ],
+    "tier_2_adjacent_pairs": [],
     "items": [
       {
         "item_id": "item_01",
         "text": "Laptop",
-        "correct_bucket": "Work essentials"
+        "correct_bucket": "Work essentials",
+        "concept": "work"
       },
       {
         "item_id": "item_02",
         "text": "Charger",
-        "correct_bucket": "Work essentials"
+        "correct_bucket": "Work essentials",
+        "concept": "work"
       },
       {
         "item_id": "item_03",
         "text": "Passport",
-        "correct_bucket": "Travel documents & wallet"
+        "correct_bucket": "Travel documents & wallet",
+        "concept": "travel"
       },
       {
         "item_id": "item_04",
         "text": "Wallet",
-        "correct_bucket": "Travel documents & wallet"
+        "correct_bucket": "Travel documents & wallet",
+        "concept": "travel"
       },
       {
         "item_id": "item_05",
         "text": "Dress shoes",
-        "correct_bucket": "Clothing & personal"
+        "correct_bucket": "Clothing & personal",
+        "concept": "personal"
       },
       {
         "item_id": "item_06",
         "text": "Vitamins",
-        "correct_bucket": "Clothing & personal"
+        "correct_bucket": "Clothing & personal",
+        "concept": "personal"
       },
       {
         "item_id": "item_07",
         "text": "Notebook",
-        "correct_bucket": "Work essentials"
+        "correct_bucket": "Work essentials",
+        "concept": "work"
       },
       {
         "item_id": "item_08",
         "text": "Phone",
-        "correct_bucket": "Travel documents & wallet"
+        "correct_bucket": "Travel documents & wallet",
+        "concept": "travel",
+        "dual_concept": "work",
+        "tier": 1
       },
       {
         "item_id": "item_09",
         "text": "Suit jacket",
-        "correct_bucket": "Clothing & personal"
+        "correct_bucket": "Clothing & personal",
+        "concept": "personal"
       },
       {
         "item_id": "item_10",
         "text": "Headphones",
-        "correct_bucket": "Clothing & personal"
+        "correct_bucket": "Clothing & personal",
+        "concept": "personal",
+        "dual_concept": "work",
+        "tier": 1
       },
       {
         "item_id": "item_11",
         "text": "Pen",
-        "correct_bucket": "Work essentials"
+        "correct_bucket": "Work essentials",
+        "concept": "work"
       },
       {
         "item_id": "item_12",
         "text": "Power bank",
-        "correct_bucket": "Travel documents & wallet"
+        "correct_bucket": "Travel documents & wallet",
+        "concept": "travel",
+        "dual_concept": "work",
+        "tier": 1
       }
     ],
     "scoring": {
-      "total_pts": 20,
-      "bucket_label_pts": 6,
-      "item_placement_pts": 14
+      "total_pts": 100,
+      "label_pts": 30,
+      "label_pts_per_bucket": 10,
+      "placement_pts": 60,
+      "placement_pts_per_item": 5,
+      "precision_bonus": 10,
+      "tier_1_rule": "Full credit in either concept or dual_concept bucket",
+      "tier_2_rule": "Half credit for adjacent concept placement",
+      "tier_3_rule": "Zero credit for clearly wrong placement"
+    },
+    "feedback": {
+      "pattern_labels": {
+        "strong": "Your three categories were cleanly distinct — you named them with precision.",
+        "partial": "Your labels were broadly right but one was a bit loose — overlapping with another category.",
+        "weak": "Two or more of your labels pointed at the same underlying concept, which made clean sorting harder."
+      },
+      "pattern_placement": {
+        "strong": "Items landed in the right buckets — your framework was consistent throughout.",
+        "partial": "Most placements were correct. The tech items were the trickiest, and that is expected.",
+        "weak": "Several items were placed inconsistently — the line between work tools and personal gear needs a clearer rule."
+      },
+      "trap_item_insight": {
+        "item": "Phone",
+        "insight": "Phone, power bank, and headphones all sit at the work/travel boundary — there is no single right bucket. What matters is that you applied a consistent rule across all three."
+      }
+    },
+    "sample_answer": {
+      "rationale": "The test is function on this specific trip. Laptop, notebook, and pen exist for the client presentation. Passport, wallet, and phone are how you move and pay. Everything else is personal. Tech items that serve both functions are defensible in either bucket.",
+      "edge_note": "Phone, power bank, and headphones are genuine dual-bucket items — either work or travel is defensible. Consistent placement across all three is what shows structural thinking."
     }
   },
   {
     "exercise_id": "sort_bucket_003",
-    "exercise_title": "Performance Review Feedback",
+    "exercise_title": "Performance review feedback",
     "difficulty": "intermediate",
+    "pool": "work",
+    "suitable_for": [
+      "diagnostic",
+      "checkpoint"
+    ],
     "scenario": "You have received the annual performance review for a team member. The notes were dumped into one list. Sort them into three clear categories.",
     "prompt": "Sort the items into three clean buckets.",
-    "sorting_instruction": "",
     "correct_buckets": [
       "Strengths to celebrate",
       "Areas to develop",
       "Actions to take"
     ],
-    "label_word_bank": [
-      "Strengths to celebrate",
-      "Areas to develop",
-      "Actions to take",
-      "What's working",
-      "What needs work",
-      "Next steps",
-      "Keep doing",
-      "Stop doing",
-      "Start doing",
-      "Development areas"
-    ],
-    "label_equivalents": {
-      "Strengths to celebrate": [
-        "strengths",
-        "what's working",
-        "keep doing",
-        "positives",
-        "demonstrated strengths"
+    "concept_map": {
+      "strength": [
+        "Strengths to celebrate",
+        "What's working",
+        "Keep doing",
+        "Positives",
+        "Demonstrated strengths"
       ],
-      "Areas to develop": [
-        "areas to develop",
-        "development areas",
-        "what needs work",
-        "improve",
-        "growth areas",
-        "development priorities"
+      "develop": [
+        "Areas to develop",
+        "Development areas",
+        "What needs work",
+        "Growth areas",
+        "Development priorities",
+        "Stop doing"
       ],
-      "Actions to take": [
-        "actions",
-        "next steps",
-        "action items",
-        "to do",
-        "follow-ups",
-        "committed actions",
-        "action plan"
+      "action": [
+        "Actions to take",
+        "Next steps",
+        "Action items",
+        "To do",
+        "Follow-ups",
+        "Committed actions",
+        "Action plan",
+        "Start doing"
       ]
     },
-    "dual_bucket_items": [],
+    "label_word_bank": [
+      "Strengths to celebrate",
+      "What's working",
+      "Areas to develop",
+      "Actions to take",
+      "Development areas",
+      "Start doing",
+      "Keep doing"
+    ],
+    "tier_1_items": [
+      "Enroll in leadership training by Q3",
+      "Complete conflict resolution workshop"
+    ],
+    "tier_2_adjacent_pairs": [],
     "items": [
       {
         "item_id": "item_01",
         "text": "Consistently meets deadlines",
-        "correct_bucket": "Strengths to celebrate"
+        "correct_bucket": "Strengths to celebrate",
+        "concept": "strength"
       },
       {
         "item_id": "item_02",
         "text": "Strong cross-team communicator",
-        "correct_bucket": "Strengths to celebrate"
+        "correct_bucket": "Strengths to celebrate",
+        "concept": "strength"
       },
       {
         "item_id": "item_03",
         "text": "Takes initiative without prompting",
-        "correct_bucket": "Strengths to celebrate"
+        "correct_bucket": "Strengths to celebrate",
+        "concept": "strength"
       },
       {
         "item_id": "item_04",
         "text": "Positive team culture contributor",
-        "correct_bucket": "Strengths to celebrate"
+        "correct_bucket": "Strengths to celebrate",
+        "concept": "strength"
       },
       {
         "item_id": "item_05",
         "text": "Needs to improve executive communication",
-        "correct_bucket": "Areas to develop"
+        "correct_bucket": "Areas to develop",
+        "concept": "develop"
       },
       {
         "item_id": "item_06",
         "text": "Presentation skills require work",
-        "correct_bucket": "Areas to develop"
+        "correct_bucket": "Areas to develop",
+        "concept": "develop"
       },
       {
         "item_id": "item_07",
         "text": "Can be too detail-oriented in senior meetings",
-        "correct_bucket": "Areas to develop"
+        "correct_bucket": "Areas to develop",
+        "concept": "develop"
       },
       {
         "item_id": "item_08",
         "text": "Struggles to prioritize under pressure",
-        "correct_bucket": "Areas to develop"
+        "correct_bucket": "Areas to develop",
+        "concept": "develop"
       },
       {
         "item_id": "item_09",
         "text": "Enroll in leadership training by Q3",
-        "correct_bucket": "Actions to take"
+        "correct_bucket": "Actions to take",
+        "concept": "action",
+        "dual_concept": "develop",
+        "tier": 1
       },
       {
         "item_id": "item_10",
         "text": "Shadow a director in stakeholder meetings",
-        "correct_bucket": "Actions to take"
+        "correct_bucket": "Actions to take",
+        "concept": "action"
       },
       {
         "item_id": "item_11",
         "text": "Set monthly check-ins with manager",
-        "correct_bucket": "Actions to take"
+        "correct_bucket": "Actions to take",
+        "concept": "action"
       },
       {
         "item_id": "item_12",
         "text": "Complete conflict resolution workshop",
-        "correct_bucket": "Actions to take"
+        "correct_bucket": "Actions to take",
+        "concept": "action",
+        "dual_concept": "develop",
+        "tier": 1
       }
     ],
     "scoring": {
-      "total_pts": 20,
-      "bucket_label_pts": 6,
-      "item_placement_pts": 14
+      "total_pts": 100,
+      "label_pts": 30,
+      "label_pts_per_bucket": 10,
+      "placement_pts": 60,
+      "placement_pts_per_item": 5,
+      "precision_bonus": 10,
+      "tier_1_rule": "Full credit in either concept or dual_concept bucket",
+      "tier_2_rule": "Half credit for adjacent concept placement",
+      "tier_3_rule": "Zero credit for clearly wrong placement"
+    },
+    "feedback": {
+      "pattern_labels": {
+        "strong": "You named the three categories cleanly — observation, gap, and action are distinct in your thinking.",
+        "partial": "Your labels were close. The trickiest distinction is between a gap and the action that closes it.",
+        "weak": "The line between what someone needs to work on and what they need to do next is worth sharpening."
+      },
+      "pattern_placement": {
+        "strong": "Strong placements throughout — you separated observations from commitments clearly.",
+        "partial": "Most items landed well. The training items sit at the boundary of gap and action — both are defensible.",
+        "weak": "A few items that describe what to do ended up in the gap bucket. The distinction is: a gap describes the problem, an action names the solution."
+      },
+      "trap_item_insight": {
+        "item": "Enroll in leadership training by Q3",
+        "insight": "This item sits right at the boundary of Areas to develop and Actions to take — it describes both a gap and a specific commitment to close it. Either bucket is defensible. What matters is that you applied a consistent rule: did you sort by what the note describes, or by what needs to happen next?"
+      }
+    },
+    "sample_answer": {
+      "rationale": "The test is: what kind of information is this? Strengths are observable behaviors the person already demonstrates. Development areas are gaps — things not yet present or calibrated. Actions are specific commitments with a clear owner and timeline.",
+      "edge_note": "Enroll in leadership training and Complete conflict resolution workshop sit at the boundary of develop and action — they name both the gap and the solution. Either bucket is correct as long as the placement is consistent with how you handled the other training-related items."
     }
   },
   {
     "exercise_id": "sort_bucket_004",
-    "exercise_title": "Customer Complaint Inbox",
+    "exercise_title": "Customer complaint inbox",
     "difficulty": "intermediate",
+    "pool": "work",
+    "suitable_for": [
+      "diagnostic",
+      "checkpoint"
+    ],
     "scenario": "These are support tickets from your product team. Sort them by how they should be handled.",
     "prompt": "Sort the items into three clean buckets.",
-    "sorting_instruction": "",
     "correct_buckets": [
       "Fix immediately",
       "Investigate further",
       "Backlog & monitor"
     ],
-    "label_word_bank": [
-      "Fix immediately",
-      "Investigate further",
-      "Backlog & monitor",
-      "Critical issues",
-      "Nice to have",
-      "Bugs",
-      "Feature requests",
-      "High priority",
-      "Low priority",
-      "Enhancements"
-    ],
-    "label_equivalents": {
-      "Fix immediately": [
-        "fix immediately",
-        "critical",
-        "p0",
-        "urgent",
-        "immediate action",
-        "fix now"
+    "concept_map": {
+      "critical": [
+        "Fix immediately",
+        "Critical issues",
+        "Bugs",
+        "High priority",
+        "Urgent",
+        "Immediate action"
       ],
-      "Investigate further": [
-        "investigate further",
-        "needs investigation",
-        "look into",
-        "monitor",
-        "investigate"
+      "investigate": [
+        "Investigate further",
+        "Needs investigation",
+        "Look into",
+        "Monitor"
       ],
-      "Backlog & monitor": [
-        "backlog",
-        "nice to have",
-        "low priority",
-        "future",
-        "wishlist",
-        "backlog & monitor"
+      "backlog": [
+        "Backlog & monitor",
+        "Nice to have",
+        "Low priority",
+        "Future",
+        "Wishlist",
+        "Feature requests",
+        "Enhancements"
       ]
     },
-    "dual_bucket_items": ["Security vulnerability reported by user"],
+    "label_word_bank": [
+      "Fix immediately",
+      "Critical issues",
+      "Investigate further",
+      "Backlog & monitor",
+      "Bugs",
+      "High priority"
+    ],
+    "tier_1_items": [
+      "Security vulnerability reported by user",
+      "Export function missing some records"
+    ],
+    "tier_2_adjacent_pairs": [],
     "items": [
       {
         "item_id": "item_01",
         "text": "App crashes on login for 30% of users",
-        "correct_bucket": "Fix immediately"
+        "correct_bucket": "Fix immediately",
+        "concept": "critical"
       },
       {
         "item_id": "item_02",
         "text": "Payment processing failing at checkout",
-        "correct_bucket": "Fix immediately"
+        "correct_bucket": "Fix immediately",
+        "concept": "critical"
       },
       {
         "item_id": "item_03",
         "text": "Data not saving — users losing work",
-        "correct_bucket": "Fix immediately"
+        "correct_bucket": "Fix immediately",
+        "concept": "critical"
       },
       {
         "item_id": "item_04",
         "text": "Security vulnerability reported by user",
-        "correct_bucket": "Fix immediately"
+        "correct_bucket": "Fix immediately",
+        "concept": "critical",
+        "dual_concept": "investigate",
+        "tier": 1
       },
       {
         "item_id": "item_05",
         "text": "Search bar shows no results for common queries",
         "correct_bucket": "Investigate further",
-        "replacement_note": "Replaced v1.1: panel test showed original item was ambiguous across buckets."
+        "concept": "investigate",
+        "replacement_note": "Replaced v1.1"
       },
       {
         "item_id": "item_06",
         "text": "Feature X behaves differently on iOS vs Android",
-        "correct_bucket": "Investigate further"
+        "correct_bucket": "Investigate further",
+        "concept": "investigate"
       },
       {
         "item_id": "item_07",
         "text": "Search results seem inconsistent",
-        "correct_bucket": "Investigate further"
+        "correct_bucket": "Investigate further",
+        "concept": "investigate"
       },
       {
         "item_id": "item_08",
         "text": "Export function missing some records",
-        "correct_bucket": "Investigate further"
+        "correct_bucket": "Investigate further",
+        "concept": "investigate",
+        "dual_concept": "critical",
+        "tier": 1
       },
       {
         "item_id": "item_09",
         "text": "User wants dark mode",
-        "correct_bucket": "Backlog & monitor"
+        "correct_bucket": "Backlog & monitor",
+        "concept": "backlog"
       },
       {
         "item_id": "item_10",
         "text": "Font size too small on mobile",
-        "correct_bucket": "Backlog & monitor"
+        "correct_bucket": "Backlog & monitor",
+        "concept": "backlog"
       },
       {
         "item_id": "item_11",
         "text": "Request to add keyboard shortcut",
-        "correct_bucket": "Backlog & monitor"
+        "correct_bucket": "Backlog & monitor",
+        "concept": "backlog"
       },
       {
         "item_id": "item_12",
         "text": "Onboarding tutorial feels outdated",
-        "correct_bucket": "Backlog & monitor"
+        "correct_bucket": "Backlog & monitor",
+        "concept": "backlog"
       }
     ],
     "scoring": {
-      "total_pts": 20,
-      "bucket_label_pts": 6,
-      "item_placement_pts": 14
+      "total_pts": 100,
+      "label_pts": 30,
+      "label_pts_per_bucket": 10,
+      "placement_pts": 60,
+      "placement_pts_per_item": 5,
+      "precision_bonus": 10,
+      "tier_1_rule": "Full credit in either concept or dual_concept bucket",
+      "tier_2_rule": "Half credit for adjacent concept placement",
+      "tier_3_rule": "Zero credit for clearly wrong placement"
+    },
+    "feedback": {
+      "pattern_labels": {
+        "strong": "You named the triage categories cleanly — urgency, uncertainty, and low priority are clearly distinct.",
+        "partial": "Your labels were close. The trickiest call is the line between fix immediately and investigate — both signal urgency.",
+        "weak": "The distinction between something that needs immediate action and something that needs more information first is worth sharpening."
+      },
+      "pattern_placement": {
+        "strong": "Clean triage — you separated user-blocking issues from ambiguous ones from feature requests consistently.",
+        "partial": "Strong on the extremes — critical and backlog were clear. The investigate bucket is where the nuance lives.",
+        "weak": "A few critical items ended up in investigate, or backlog items were escalated. The question to ask: is a user blocked right now?"
+      },
+      "trap_item_insight": {
+        "item": "Security vulnerability reported by user",
+        "insight": "Security vulnerabilities feel like they need investigation — you need to understand the scope before you act. But the standard practice is to treat any reported vulnerability as critical until proven otherwise. The cost of under-reacting is too high."
+      }
+    },
+    "sample_answer": {
+      "rationale": "The test is: is a user blocked right now? If yes, fix immediately. If something is wrong but the scope is unclear, investigate. If it is a preference or enhancement with no current impact, backlog it.",
+      "edge_note": "Security vulnerability and export missing records are genuine judgment calls — both could be critical or investigative depending on severity. Either placement is correct as long as the reasoning is consistent."
     }
   },
   {
     "exercise_id": "sort_bucket_005",
-    "exercise_title": "New Employee's First Week",
+    "exercise_title": "New employee's first week",
     "difficulty": "advanced",
+    "pool": "work",
+    "suitable_for": [
+      "diagnostic",
+      "checkpoint"
+    ],
     "scenario": "You are starting a new job on Monday. Sort these tasks by when you should actually tackle them.",
     "prompt": "Sort the items into three clean buckets.",
-    "sorting_instruction": "",
     "correct_buckets": [
       "Do on Day 1",
       "Complete by end of week",
       "Don't rush — first month"
     ],
-    "label_word_bank": [
-      "Do on Day 1",
-      "Complete by end of week",
-      "Don't rush — first month",
-      "Urgent",
-      "This week",
-      "Later",
-      "Immediate",
-      "Short-term",
-      "Long-term",
-      "Onboarding essentials"
-    ],
-    "label_equivalents": {
-      "Do on Day 1": [
-        "do on day 1",
-        "day 1",
-        "immediate",
-        "first day",
-        "day one",
-        "day 1 essentials"
+    "concept_map": {
+      "day1": [
+        "Do on Day 1",
+        "Immediate",
+        "First day",
+        "Day one",
+        "Day 1 essentials"
       ],
-      "Complete by end of week": [
-        "complete by end of week",
-        "this week",
-        "week 1",
-        "first week",
-        "short-term",
-        "week 1 goals"
+      "week1": [
+        "Complete by end of week",
+        "This week",
+        "Week 1",
+        "First week",
+        "Short-term",
+        "Week 1 goals",
+        "Onboarding essentials"
       ],
-      "Don't rush — first month": [
-        "first month",
-        "long-term",
-        "take time",
-        "month 1",
-        "month 1 horizon",
-        "don't rush"
+      "month1": [
+        "Don't rush — first month",
+        "Long-term",
+        "Take time",
+        "Month 1",
+        "Month 1 horizon"
       ]
     },
-    "dual_bucket_items": ["Read the team handbook", "Complete mandatory HR training"],
+    "label_word_bank": [
+      "Do on Day 1",
+      "Immediate",
+      "Complete by end of week",
+      "Don't rush — first month",
+      "This week",
+      "Onboarding essentials",
+      "Short-term"
+    ],
+    "tier_1_items": [
+      "Read the team handbook",
+      "Complete mandatory HR training"
+    ],
+    "tier_2_adjacent_pairs": [],
     "items": [
       {
         "item_id": "item_01",
         "text": "Meet your manager",
-        "correct_bucket": "Do on Day 1"
+        "correct_bucket": "Do on Day 1",
+        "concept": "day1"
       },
       {
         "item_id": "item_02",
         "text": "Get laptop and access set up",
-        "correct_bucket": "Do on Day 1"
+        "correct_bucket": "Do on Day 1",
+        "concept": "day1"
       },
       {
         "item_id": "item_03",
         "text": "Read the team handbook",
-        "correct_bucket": "Do on Day 1"
+        "correct_bucket": "Do on Day 1",
+        "concept": "day1",
+        "dual_concept": "week1",
+        "tier": 1
       },
       {
         "item_id": "item_04",
         "text": "Introduce yourself to the team",
-        "correct_bucket": "Do on Day 1"
+        "correct_bucket": "Do on Day 1",
+        "concept": "day1"
       },
       {
         "item_id": "item_05",
         "text": "Schedule 1:1s with key stakeholders",
-        "correct_bucket": "Complete by end of week"
+        "correct_bucket": "Complete by end of week",
+        "concept": "week1"
       },
       {
         "item_id": "item_06",
         "text": "Review last quarter's goals",
-        "correct_bucket": "Complete by end of week"
+        "correct_bucket": "Complete by end of week",
+        "concept": "week1"
       },
       {
         "item_id": "item_07",
         "text": "Shadow a team meeting",
-        "correct_bucket": "Complete by end of week"
+        "correct_bucket": "Complete by end of week",
+        "concept": "week1"
       },
       {
         "item_id": "item_08",
         "text": "Complete mandatory HR training",
-        "correct_bucket": "Complete by end of week"
+        "correct_bucket": "Complete by end of week",
+        "concept": "week1",
+        "dual_concept": "day1",
+        "tier": 1
       },
       {
         "item_id": "item_09",
         "text": "Form an opinion on team strategy",
-        "correct_bucket": "Don't rush — first month"
+        "correct_bucket": "Don't rush — first month",
+        "concept": "month1"
       },
       {
         "item_id": "item_10",
         "text": "Build relationships with cross-functional teams",
-        "correct_bucket": "Don't rush — first month"
+        "correct_bucket": "Don't rush — first month",
+        "concept": "month1"
       },
       {
         "item_id": "item_11",
         "text": "Propose any process changes",
-        "correct_bucket": "Don't rush — first month"
+        "correct_bucket": "Don't rush — first month",
+        "concept": "month1"
       },
       {
         "item_id": "item_12",
         "text": "Learn the unwritten rules of the culture",
-        "correct_bucket": "Don't rush — first month"
+        "correct_bucket": "Don't rush — first month",
+        "concept": "month1"
       }
     ],
     "scoring": {
-      "total_pts": 20,
-      "bucket_label_pts": 6,
-      "item_placement_pts": 14
+      "total_pts": 100,
+      "label_pts": 30,
+      "label_pts_per_bucket": 10,
+      "placement_pts": 60,
+      "placement_pts_per_item": 5,
+      "precision_bonus": 10,
+      "tier_1_rule": "Full credit in either concept or dual_concept bucket",
+      "tier_2_rule": "Half credit for adjacent concept placement",
+      "tier_3_rule": "Zero credit for clearly wrong placement"
+    },
+    "feedback": {
+      "pattern_labels": {
+        "strong": "Clean time-horizon thinking — you separated immediate, short-term, and longer-term clearly.",
+        "partial": "Your labels were mostly right. The trickiest call is the line between Day 1 and end of week.",
+        "weak": "The three time horizons were not fully distinct in your sorting — some tasks jumped categories."
+      },
+      "pattern_placement": {
+        "strong": "Excellent prioritization — you understood what needs to happen first versus what benefits from more context.",
+        "partial": "Strong on the month-1 bucket — you correctly held back the strategic tasks. A few Day 1 vs week 1 calls were close.",
+        "weak": "A few items that require time and context — like forming opinions or proposing changes — were placed too early. New environments need listening time before judgment."
+      },
+      "trap_item_insight": {
+        "item": "Propose any process changes",
+        "insight": "This is the most common mistake new employees make — acting before they have enough context to be credible. Day 1 enthusiasm is valuable. Day 1 recommendations are usually premature. The first month is for listening."
+      }
+    },
+    "sample_answer": {
+      "rationale": "The test is: do you have enough information to do this well yet? Day 1 tasks are about showing up, orienting, and making a good first impression. Week 1 is about understanding the landscape. Month 1 is about earning the right to have opinions.",
+      "edge_note": "Read the team handbook and Complete mandatory HR training are both defensible in Day 1 or end of week — the former depends on whether it is assigned reading, the latter on company policy."
     }
   },
   {
     "exercise_id": "sort_bucket_006",
-    "exercise_title": "Reasons a Project Is Off Track",
+    "exercise_title": "Reasons a project is off track",
     "difficulty": "advanced",
+    "pool": "work",
+    "suitable_for": [
+      "diagnostic",
+      "checkpoint"
+    ],
     "scenario": "These are findings from a project post-mortem. Sort them by root cause category.",
     "prompt": "Sort the items into three clean buckets.",
     "sorting_instruction": "Think about the category each reason belongs to, not who caused it.",
@@ -632,113 +840,493 @@
       "Process & planning",
       "Execution & delivery"
     ],
-    "label_word_bank": [
-      "People & communication",
-      "Process & planning",
-      "Execution & delivery",
-      "Team issues",
-      "Planning failures",
-      "Output problems",
-      "Human factors",
-      "Structural problems",
-      "Delivery gaps",
-      "Root causes"
-    ],
-    "label_equivalents": {
-      "People & communication": [
-        "people",
-        "communication",
-        "human factors",
-        "team issues",
-        "relationship",
-        "people & communication"
+    "concept_map": {
+      "people": [
+        "People & communication",
+        "Team issues",
+        "Human factors",
+        "Communication",
+        "Relationship"
       ],
-      "Process & planning": [
-        "process",
-        "planning",
-        "structural problems",
-        "setup issues",
-        "process & planning",
-        "structural & planning"
+      "process": [
+        "Process & planning",
+        "Planning failures",
+        "Structural problems",
+        "Setup issues",
+        "Structural & planning"
       ],
-      "Execution & delivery": [
-        "execution",
-        "delivery",
-        "output problems",
-        "delivery gaps",
-        "execution & delivery",
-        "delivery breakdowns"
+      "execution": [
+        "Execution & delivery",
+        "Output problems",
+        "Delivery gaps",
+        "Delivery breakdowns"
       ]
     },
-    "dual_bucket_items": ["Cross-functional partner had different priorities", "Feedback was vague and not actionable"],
+    "label_word_bank": [
+      "People & communication",
+      "Team issues",
+      "Process & planning",
+      "Execution & delivery",
+      "Planning failures",
+      "Human factors",
+      "Communication"
+    ],
+    "tier_1_items": [
+      "Cross-functional partner had different priorities",
+      "Feedback was vague and not actionable",
+      "Sign-off process was never agreed at kickoff"
+    ],
+    "tier_2_adjacent_pairs": [],
     "items": [
       {
         "item_id": "item_01",
         "text": "Stakeholder wasn't looped in early enough",
-        "correct_bucket": "People & communication"
+        "correct_bucket": "People & communication",
+        "concept": "people"
       },
       {
         "item_id": "item_02",
         "text": "Team didn't flag risks to the manager",
-        "correct_bucket": "People & communication"
+        "correct_bucket": "People & communication",
+        "concept": "people"
       },
       {
         "item_id": "item_03",
         "text": "Cross-functional partner had different priorities",
-        "correct_bucket": "People & communication"
+        "correct_bucket": "People & communication",
+        "concept": "people",
+        "dual_concept": "process",
+        "tier": 1
       },
       {
         "item_id": "item_04",
         "text": "Feedback was vague and not actionable",
-        "correct_bucket": "People & communication"
+        "correct_bucket": "People & communication",
+        "concept": "people",
+        "dual_concept": "execution",
+        "tier": 1
       },
       {
         "item_id": "item_05",
         "text": "Scope was not defined clearly at the start",
-        "correct_bucket": "Process & planning"
+        "correct_bucket": "Process & planning",
+        "concept": "process"
       },
       {
         "item_id": "item_06",
         "text": "Timeline was too aggressive given resources",
-        "correct_bucket": "Process & planning"
+        "correct_bucket": "Process & planning",
+        "concept": "process"
       },
       {
         "item_id": "item_07",
         "text": "Dependencies weren't mapped before kickoff",
-        "correct_bucket": "Process & planning"
+        "correct_bucket": "Process & planning",
+        "concept": "process"
       },
       {
         "item_id": "item_08",
         "text": "Sign-off process was never agreed at kickoff",
         "correct_bucket": "Process & planning",
-        "replacement_note": "Replaced v1.1: panel test showed original item was ambiguous across buckets."
+        "concept": "process",
+        "dual_concept": "people",
+        "tier": 1,
+        "replacement_note": "Replaced v1.1"
       },
       {
         "item_id": "item_09",
         "text": "Deliverable quality didn't meet expectations",
-        "correct_bucket": "Execution & delivery"
+        "correct_bucket": "Execution & delivery",
+        "concept": "execution"
       },
       {
         "item_id": "item_10",
         "text": "Final deliverable was submitted without a quality review",
         "correct_bucket": "Execution & delivery",
-        "replacement_note": "Replaced v1.1: panel test showed original item was ambiguous across buckets."
+        "concept": "execution",
+        "replacement_note": "Replaced v1.1"
       },
       {
         "item_id": "item_11",
         "text": "Final output didn't match the brief",
-        "correct_bucket": "Execution & delivery"
+        "correct_bucket": "Execution & delivery",
+        "concept": "execution"
       },
       {
         "item_id": "item_12",
         "text": "Testing was skipped due to time pressure",
-        "correct_bucket": "Execution & delivery"
+        "correct_bucket": "Execution & delivery",
+        "concept": "execution"
       }
     ],
     "scoring": {
-      "total_pts": 20,
-      "bucket_label_pts": 6,
-      "item_placement_pts": 14
+      "total_pts": 100,
+      "label_pts": 30,
+      "label_pts_per_bucket": 10,
+      "placement_pts": 60,
+      "placement_pts_per_item": 5,
+      "precision_bonus": 10,
+      "tier_1_rule": "Full credit in either concept or dual_concept bucket",
+      "tier_2_rule": "Half credit for adjacent concept placement",
+      "tier_3_rule": "Zero credit for clearly wrong placement"
+    },
+    "feedback": {
+      "pattern_labels": {
+        "strong": "You identified the three root cause categories cleanly — people, structure, and output are distinct lenses.",
+        "partial": "Your labels were on the right track. The hardest distinction is between a process failure and an execution failure.",
+        "weak": "Root cause analysis requires separating the category of failure from who caused it. That distinction is worth practicing."
+      },
+      "pattern_placement": {
+        "strong": "Strong root cause thinking — you categorized by the type of failure, not by who was involved.",
+        "partial": "Most placements were accurate. The items that sit at the people/process boundary are the toughest calls in any post-mortem.",
+        "weak": "A few items were placed based on who was involved rather than what type of failure it represents. Root cause analysis is about the system, not the person."
+      },
+      "trap_item_insight": {
+        "item": "Cross-functional partner had different priorities",
+        "insight": "This looks like a people problem — someone was not aligned. But it is equally a process problem — alignment across functions should have been confirmed at kickoff, not discovered mid-project. Both placements are correct."
+      }
+    },
+    "sample_answer": {
+      "rationale": "The test is: what category of failure does this represent? People failures are about communication, relationships, and alignment. Process failures are about how the work was set up. Execution failures are about how the work was actually delivered.",
+      "edge_note": "Three items have dual placements: cross-functional priorities (people/process), vague feedback (people/execution), and sign-off process (process/people). All three reflect the reality that root causes rarely sit in a single category."
+    }
+  },
+  {
+    "exercise_id": "sort_bucket_007",
+    "exercise_title": "One week until the exam",
+    "difficulty": "beginner",
+    "pool": "universal",
+    "suitable_for": [
+      "find_your_level",
+      "diagnostic"
+    ],
+    "scenario": "Your most important exam is in exactly one week. You have a full list of things you could do to prepare. Not everything on the list actually helps — and some things feel productive but are really just procrastination. Sort them by when they actually make a difference.",
+    "prompt": "Sort the 12 tasks into three clean buckets.",
+    "correct_buckets": [
+      "Do this week",
+      "The night before",
+      "Skip it entirely"
+    ],
+    "concept_map": {
+      "now": [
+        "Do this week",
+        "Start now",
+        "This week",
+        "Active preparation",
+        "Priority tasks",
+        "Preparation"
+      ],
+      "week_before": [
+        "The night before",
+        "Night before",
+        "Day before",
+        "Final review",
+        "Last-minute prep",
+        "Consolidation"
+      ],
+      "skip": [
+        "Skip it entirely",
+        "Not helpful",
+        "Procrastination",
+        "Cut it",
+        "Waste of time",
+        "Skip"
+      ]
+    },
+    "label_word_bank": [
+      "Do this week",
+      "Active preparation",
+      "The night before",
+      "Skip it entirely",
+      "Consolidation",
+      "Final review",
+      "Start now"
+    ],
+    "tier_1_items": [
+      "Sleep 8 hours",
+      "Form a study group"
+    ],
+    "tier_2_adjacent_pairs": [],
+    "items": [
+      {
+        "item_id": "item_01",
+        "text": "Make a study schedule",
+        "correct_bucket": "Do this week",
+        "concept": "now"
+      },
+      {
+        "item_id": "item_02",
+        "text": "Review your notes from the whole semester",
+        "correct_bucket": "Do this week",
+        "concept": "now"
+      },
+      {
+        "item_id": "item_03",
+        "text": "Form a study group",
+        "correct_bucket": "Do this week",
+        "concept": "now",
+        "dual_concept": "week_before",
+        "tier": 1
+      },
+      {
+        "item_id": "item_04",
+        "text": "Practice past exam papers",
+        "correct_bucket": "Do this week",
+        "concept": "now"
+      },
+      {
+        "item_id": "item_05",
+        "text": "Re-read the textbook cover to cover",
+        "correct_bucket": "Skip it entirely",
+        "concept": "skip"
+      },
+      {
+        "item_id": "item_06",
+        "text": "Watch a full lecture recording you already attended",
+        "correct_bucket": "Skip it entirely",
+        "concept": "skip"
+      },
+      {
+        "item_id": "item_07",
+        "text": "Sleep 8 hours",
+        "correct_bucket": "The night before",
+        "concept": "week_before",
+        "dual_concept": "now",
+        "tier": 1
+      },
+      {
+        "item_id": "item_08",
+        "text": "Skim your summary notes",
+        "correct_bucket": "The night before",
+        "concept": "week_before"
+      },
+      {
+        "item_id": "item_09",
+        "text": "Eat a proper meal",
+        "correct_bucket": "The night before",
+        "concept": "week_before"
+      },
+      {
+        "item_id": "item_10",
+        "text": "Memorize key formulas",
+        "correct_bucket": "The night before",
+        "concept": "week_before"
+      },
+      {
+        "item_id": "item_11",
+        "text": "Watch a YouTube explainer on a topic you are weak on",
+        "correct_bucket": "Do this week",
+        "concept": "now"
+      },
+      {
+        "item_id": "item_12",
+        "text": "Color-code your highlighters",
+        "correct_bucket": "Skip it entirely",
+        "concept": "skip"
+      }
+    ],
+    "scoring": {
+      "total_pts": 100,
+      "label_pts": 30,
+      "label_pts_per_bucket": 10,
+      "placement_pts": 60,
+      "placement_pts_per_item": 5,
+      "precision_bonus": 10,
+      "tier_1_rule": "Full credit in either concept or dual_concept bucket",
+      "tier_2_rule": "Half credit for adjacent concept placement",
+      "tier_3_rule": "Zero credit for clearly wrong placement"
+    },
+    "feedback": {
+      "pattern_labels": {
+        "strong": "You named the three categories precisely — active preparation, consolidation, and elimination are distinct.",
+        "partial": "Your labels were broadly right. The skip bucket is the trickiest to name — it has to mean something specific, not just leftover.",
+        "weak": "The three categories were not fully distinct in your naming — consider what makes each one different from the others."
+      },
+      "pattern_placement": {
+        "strong": "Strong prioritization — you separated active learning from consolidation from procrastination cleanly.",
+        "partial": "Mostly accurate. The dual-bucket items — sleep, formulas, study group — all have defensible placements in two buckets.",
+        "weak": "A few items that feel productive ended up in the wrong bucket. The test is: does this build retrieval ability, or does it create the feeling of studying without the result?"
+      },
+      "trap_item_insight": {
+        "item": "Re-read the textbook cover to cover",
+        "insight": "This feels like serious studying. It is not. Passive re-reading is one of the least effective preparation techniques — it creates familiarity without building the recall you need in the exam room. Practice papers beat re-reading every time."
+      }
+    },
+    "sample_answer": {
+      "rationale": "The test is: does this activity build actual retrieval ability, or does it create the feeling of studying without the result? Active recall — practice papers, reviewing notes, filling gaps — builds the mental pathways you need. Consolidation the night before works for things already learned. Everything else is procrastination dressed as preparation.",
+      "edge_note": "Sleep, formulas, study group, and YouTube explainers all have defensible placements in two buckets. What matters is that you applied a consistent logic: when does this activity produce the most value?"
+    }
+  },
+  {
+    "exercise_id": "sort_bucket_008",
+    "exercise_title": "The group trip",
+    "difficulty": "beginner",
+    "pool": "universal",
+    "suitable_for": [
+      "find_your_level",
+      "diagnostic"
+    ],
+    "scenario": "You and four friends are planning a trip two months from now. Everyone is excited but no one has done anything yet. Some things need to be locked in immediately or you will lose them. Some things require everyone to agree before anyone can move. Some things do not need a decision until you are actually there. Sort them correctly before the trip falls apart.",
+    "prompt": "Sort the 12 tasks into three clean buckets.",
+    "correct_buckets": [
+      "Book it now",
+      "Decide as a group",
+      "Figure it out when we get there"
+    ],
+    "concept_map": {
+      "book_now": [
+        "Book it now",
+        "Do immediately",
+        "Lock it in",
+        "Time-sensitive",
+        "Book now",
+        "Confirm now",
+        "Act now"
+      ],
+      "decide_together": [
+        "Decide as a group",
+        "Group decision",
+        "Align first",
+        "Discuss together",
+        "Needs consensus",
+        "Team decision",
+        "Agree first"
+      ],
+      "figure_it_out": [
+        "Figure it out when we get there",
+        "Decide on arrival",
+        "Not urgent",
+        "Low priority",
+        "Sort it out there",
+        "Handle on the day",
+        "No rush"
+      ]
+    },
+    "label_word_bank": [
+      "Book it now",
+      "Lock it in",
+      "Decide as a group",
+      "Figure it out when we get there",
+      "Not urgent",
+      "Needs consensus",
+      "Time-sensitive"
+    ],
+    "tier_1_items": [
+      "Which activities to do",
+      "Airport transfers",
+      "Who is responsible for booking what"
+    ],
+    "tier_2_adjacent_pairs": [],
+    "items": [
+      {
+        "item_id": "item_01",
+        "text": "Flights",
+        "correct_bucket": "Book it now",
+        "concept": "book_now"
+      },
+      {
+        "item_id": "item_02",
+        "text": "Accommodation",
+        "correct_bucket": "Book it now",
+        "concept": "book_now"
+      },
+      {
+        "item_id": "item_03",
+        "text": "Travel insurance",
+        "correct_bucket": "Book it now",
+        "concept": "book_now"
+      },
+      {
+        "item_id": "item_04",
+        "text": "Travel vaccinations",
+        "correct_bucket": "Book it now",
+        "concept": "book_now"
+      },
+      {
+        "item_id": "item_05",
+        "text": "Agreeing on a budget",
+        "correct_bucket": "Decide as a group",
+        "concept": "decide_together"
+      },
+      {
+        "item_id": "item_06",
+        "text": "Deciding which days everyone can go",
+        "correct_bucket": "Decide as a group",
+        "concept": "decide_together"
+      },
+      {
+        "item_id": "item_07",
+        "text": "Who is responsible for booking what",
+        "correct_bucket": "Decide as a group",
+        "concept": "decide_together",
+        "dual_concept": "book_now",
+        "tier": 1
+      },
+      {
+        "item_id": "item_08",
+        "text": "Which activities to do",
+        "correct_bucket": "Decide as a group",
+        "concept": "decide_together",
+        "dual_concept": "book_now",
+        "tier": 1
+      },
+      {
+        "item_id": "item_09",
+        "text": "Airport transfers",
+        "correct_bucket": "Figure it out when we get there",
+        "concept": "figure_it_out",
+        "dual_concept": "book_now",
+        "tier": 1
+      },
+      {
+        "item_id": "item_10",
+        "text": "Where to eat lunch on Day 2",
+        "correct_bucket": "Figure it out when we get there",
+        "concept": "figure_it_out"
+      },
+      {
+        "item_id": "item_11",
+        "text": "Packing list",
+        "correct_bucket": "Figure it out when we get there",
+        "concept": "figure_it_out"
+      },
+      {
+        "item_id": "item_12",
+        "text": "Which coffee shop to work from",
+        "correct_bucket": "Figure it out when we get there",
+        "concept": "figure_it_out"
+      }
+    ],
+    "scoring": {
+      "total_pts": 100,
+      "label_pts": 30,
+      "label_pts_per_bucket": 10,
+      "placement_pts": 60,
+      "placement_pts_per_item": 5,
+      "precision_bonus": 10,
+      "tier_1_rule": "Full credit in either concept or dual_concept bucket",
+      "tier_2_rule": "Half credit for adjacent concept placement",
+      "tier_3_rule": "Zero credit for clearly wrong placement"
+    },
+    "feedback": {
+      "pattern_labels": {
+        "strong": "Clean categories — you separated urgency, alignment, and flexibility clearly.",
+        "partial": "Your labels were close. The trickiest call is the line between things that need group agreement and things you can just book.",
+        "weak": "The three categories — time-sensitive, needs alignment, low urgency — were not fully distinct in your naming."
+      },
+      "pattern_placement": {
+        "strong": "Excellent. You identified what has a hard external deadline, what needs the group first, and what can wait.",
+        "partial": "Strong on flights and accommodation — those were clear. The trap items like travel insurance and vaccinations are where the nuance lives.",
+        "weak": "A few items with hard deadlines ended up in the group decision or figure-it-out buckets. The test is: does the outside world impose a deadline, or does the group?"
+      },
+      "trap_item_insight": {
+        "item": "Travel insurance",
+        "insight": "This feels like a group conversation — but it is actually an individual purchase with a deadline. Each person books their own, and it needs to be done before departure. The external deadline makes it a book-now item, not a group decision."
+      }
+    },
+    "sample_answer": {
+      "rationale": "The test is: who or what sets the deadline? Some tasks have a deadline imposed by the outside world — seats fill up, vaccines need lead time, insurance must precede the trip. Some require group alignment before anyone can act. Everything else can wait until you have real information on the ground.",
+      "edge_note": "Airport transfers, which activities to do, and who books what all have defensible placements in two buckets depending on destination and group style. Consistent application of your rule is what the scoring rewards."
     }
   }
 ]

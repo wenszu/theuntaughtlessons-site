@@ -18,10 +18,21 @@ Source files used:
 - Phase 1 practice: Grocery list sorting exercise. This is a practice exercise, not a scored assessment.
 
 ## Scoring Methodology
-### Sort & Bucket
+### Public Find your level: Sort & Bucket
+Total score: 100 points.
+
+- Exercise selection: the public app can rotate randomly across all eight `data/sort-bucket.json` exercises, or use one fixed exercise if set in Admin Console.
+- Bucket labels: 30 points total. Labels are scored by concept match through each exercise's `concept_map`, so a learner receives credit for the right organizing idea even if the exact label differs.
+- Item placement: 60 points total, 5 points per item. Items are scored against their concept field, not just the exact bucket name.
+- Defensible partial credit: an item placed in a real but wrong selected concept earns 2.5 points instead of 0.
+- Dual-concept items: items with `dual_concept` score full credit in either valid concept.
+- Precision bonus: 10 points when all 12 items are placed with full-credit concepts.
+- Result bands: 90-100 = Executive clarity; 70-89 = Sharp instinct; 50-69 = Solid foundation; 30-49 = Building the muscle; 0-29 = Great starting point.
+
+### Member Diagnostic / Checkpoint: Sort & Bucket
 Total score: 20 points.
 
-- Bucket labels: 6 points total, 2 points per correct bucket label. The scorer accepts exact/near labels through each set's label-equivalent list. The current fuzzy match checks whether the participant label and accepted equivalent share the same first-word concept.
+- Bucket labels: 6 points total, 2 points per correct bucket label. The scorer accepts exact/near labels through each set's label-equivalent list.
 - Item placement: 14 points total. Items receive credit when placed in the canonical correct bucket. Some items are marked as dual-bucket accepted and can count in either approved bucket.
 - Placement score by number of misplaced items: 0 misplaced = 14; 1 = 11; 2 = 8; 3 = 6; more than 3 = 6 minus 1.5 points per additional misplaced item, floored at 0.
 - Final score: bucket label score plus placement score, rounded to one decimal place.
@@ -92,7 +103,7 @@ Accepted label equivalents:
 - Updates only: updates; for information only; status updates; information share; fyi items; info only
 - Parking lot: parking lot; out of scope; deferred; not now; hold; off agenda
 
-### 2. Work Trip Packing List
+### 2. Work trip packing list
 - ID: sort_bucket_002
 - Difficulty: beginner
 - Scenario: You are packing for a 2-day client presentation trip.
@@ -111,7 +122,7 @@ Accepted label equivalents:
 - Travel documents & wallet: travel documents; travel docs; documents; id & payment; wallet & docs; travel & id
 - Clothing & personal: clothing & personal; personal items; clothes & personal; apparel; clothing & wellbeing
 
-### 3. Performance Review Feedback
+### 3. Performance review feedback
 - ID: sort_bucket_003
 - Difficulty: intermediate
 - Scenario: You have received the annual performance review for a team member. The notes were dumped into one list. Sort them into three clear categories.
@@ -130,7 +141,7 @@ Accepted label equivalents:
 - Areas to develop: areas to develop; development areas; what needs work; improve; growth areas; development priorities
 - Actions to take: actions; next steps; action items; to do; follow-ups; committed actions; action plan
 
-### 4. Customer Complaint Inbox
+### 4. Customer complaint inbox
 - ID: sort_bucket_004
 - Difficulty: intermediate
 - Scenario: These are support tickets from your product team. Sort them by how they should be handled.
@@ -149,7 +160,7 @@ Accepted label equivalents:
 - Investigate further: investigate further; needs investigation; look into; monitor; investigate
 - Backlog & monitor: backlog; nice to have; low priority; future; wishlist; backlog & monitor
 
-### 5. New Employee's First Week
+### 5. New employee's first week
 - ID: sort_bucket_005
 - Difficulty: advanced
 - Scenario: You are starting a new job on Monday. Sort these tasks by when you should actually tackle them.
@@ -168,7 +179,7 @@ Accepted label equivalents:
 - Complete by end of week: complete by end of week; this week; week 1; first week; short-term; week 1 goals
 - Don't rush - first month: first month; long-term; take time; month 1; month 1 horizon; don't rush
 
-### 6. Reasons a Project Is Off Track
+### 6. Reasons a project is off track
 - ID: sort_bucket_006
 - Difficulty: advanced
 - Scenario: These are findings from a project post-mortem. Sort them by root cause category.
