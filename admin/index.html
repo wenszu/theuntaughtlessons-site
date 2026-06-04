@@ -217,37 +217,13 @@
       text-transform: uppercase;
     }
 
-    .identity-label {
-      display: inline-flex;
-      align-items: center;
-      min-height: 44px;
-      padding: 6px 8px;
-      border-radius: 8px;
+    .identity-program-name {
       font-family: 'Roboto Mono', monospace;
       font-size: 11px;
-      color: rgba(255, 255, 255, .7);
+      font-weight: 700;
       letter-spacing: .06em;
-      line-height: 1.15;
-      text-decoration: none;
       text-transform: uppercase;
-      transition: background .15s ease, box-shadow .15s ease, color .15s ease;
-    }
-
-    .identity-label:hover {
-      background: rgba(255, 255, 255, .12);
-      box-shadow: inset 0 -2px 0 var(--gold);
       color: var(--gold);
-    }
-
-    .identity-nav {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .identity-link-separator {
-      color: rgba(255, 255, 255, .35);
-      font-size: 12px;
     }
 
     .admin-profile-email {
@@ -1736,9 +1712,7 @@
         <a class="identity-logo-link" href="../index.html" aria-label="The Untaught Lessons home">
           <img class="identity-logo-image" src="../assets/utl-logo-nav-white.png" alt="The Untaught Lessons">
         </a>
-        <nav class="identity-nav" aria-label="Admin quick links">
-          <a class="identity-label" href="../member-login/index.html">Member<br>workspace</a>
-        </nav>
+        <span class="identity-program-name">Think. Speak. Act.™</span>
       </div>
       <div class="member-identity-right">
         <span class="admin-profile-email" id="adminProfileEmail">admin</span>
