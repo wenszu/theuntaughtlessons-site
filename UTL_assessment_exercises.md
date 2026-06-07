@@ -17,7 +17,7 @@ The working reference for all assessment exercises across all three phases. Load
 | Phase | Exercise type | Exercises built | Target | Status |
 |---|---|---|---|---|
 | Think Clearly | Sort & Bucket | 8 | 14 | In progress |
-| Think Clearly | Spot the Problem | 0 | 8 | Not started |
+| Think Clearly | Spot the Problem | 8 | 8 | Complete — calibration ongoing |
 | Speak Concisely | Speaking topic | 0 | 8 | Not started |
 | Act Confidently | Roleplay scenario | 0 | 10 | Not started |
 
@@ -172,13 +172,149 @@ Participant receives 12 items and selects three bucket labels from a dropdown. I
 
 ### 3B. Spot the Problem
 
-**Exercise type overview:** Not yet built. Participant receives a pre-organized list with two planted errors and must identify what is structurally wrong. Measures C2 (Structured Thinking) and C4 (Decision Clarity).
+**Exercise type overview:** Participant receives a pre-organised list with items grouped into three buckets. The exercise has two parts. Part A: some items say the same thing in different words — participant moves the duplicates out. Part B: some items are missing from the buckets — participant adds them from a left-side pool that also contains deliberate traps. Measures C2 (Structured Thinking) and C4 (Decision Clarity).
 
-**Type-level scoring rules:** To be defined when first exercise is built. Tier 1/2/3 principles apply — see `UTL_TSA_scoring_framework.md`.
+**Type-level scoring rules:** See `UTL_TSA_scoring_framework.md` Section 5 — Spot the Problem points model. Tier 1/2/3 rules apply as defined in Section 4.
 
-**JSON file:** `data/spot-the-problem.json` (to be created)
+**JSON file:** `data/tsa/spot-the-problem.json`
 
-**Exercises built:** 0 of 8 target
+**Exercises built:** 8 of 8 target
+
+**Key design principles (apply to all Spot the Problem exercises):**
+- Part A must have at least one cross-bucket duplicate pair at intermediate and advanced levels — same-bucket synonym pairs alone inflate random scores because they can be caught by visual pattern-matching without MECE reasoning
+- Cross-bucket pairs require the participant to recognise that two items in different categories are conceptually redundant — this is the MECE skill being tested
+- Near-verbatim synonym pairs (e.g., "Consistently exceeds the role" / "Goes beyond the expectations") are paradoxically easy for untrained participants — pairs must have verbal distance with conceptual overlap
+- Part B traps must be plausible enough that an untrained participant might reasonably move them; traps that are obviously wrong or negative do not create score differentiation
+- Standard structure: 2 correct items to place + 3 traps in left pool (5 items total on the left)
+
+**Pool rules:**
+- `pool: universal` exercises use everyday life contexts and are eligible for Find Your Level
+- `pool: work` exercises use professional contexts and are for the Diagnostic and Checkpoint only
+
+**Panel simulation (June 2026):**
+Three trained panelists (Analyst, Intuitive, Fast Mover) and two random participants (Thoughtful-naive, Uncertain) ran three rounds each, then a full 8-exercise calibration run. Revisions made across multiple rounds:
+- Exercise 001 Part A pair revised (original "vague language / fuzzy phrases" too verbally obvious — caught by untrained participants without MECE reasoning)
+- Exercise 001, 002, 003, 004, 005 Part B traps replaced — originals were too obviously negative and did not differentiate trained vs. untrained
+- Exercise 002 Part B answer key corrected: "Shares information openly" → Transparency (was incorrectly keyed to Integrity)
+- Exercise 002 Part B correct item updated: "Shares information openly" → "Flags issues to the right people before they become problems" (harder to categorise)
+- Exercise 003 Part B: correct item updated ("Clear roles" → "Everyone knows who owns the final call on key decisions"), trap "Works the longest hours" replaced with "Everyone is aligned before any decision is made"
+- Exercise 005 Part A pairs revised (near-verbatim synonym pairs caught by random participants — replaced with pairs requiring verbal distance and conceptual reasoning); pairTypes corrected to same-bucket × 3
+- Exercise 006 Part A pair redesigned: original cross-bucket pair was not a genuine duplicate; replaced with same-bucket pair in Timing bucket
+- Exercise 006 Part B correct items replaced: originals ("Remove one commitment", "Separate what you can control") were too intuitively obvious — replaced with items requiring knowledge of bucket structure to place correctly
+- Exercise 007 Part B trap "The work feels naturally easy today" replaced with "You have given yourself a generous time block so there is no pressure"
+- Exercise 008 Part B trap "Is naturally disciplined from the start" replaced with "Relies on motivation and momentum to keep going"
+
+**Final calibration results (all 8 exercises):**
+| Participant | Profile | Overall % | Target |
+|---|---|---|---|
+| Carlos | Trained analyst | 94.6% | 85–95% ✅ |
+| Maya | Trained intuitive | 88.1% | 80–90% ✅ |
+| Diane | Trained fast mover | 75.6% | 75–85% ✅ |
+| James | Thoughtful-naive (random) | 30.2% | 30–40% ✅ |
+| Priya | Uncertain random | 9.3% | — ⚠️ structural floor |
+
+Note on Priya: the false positive penalty in Part A compounded with trap penalties in Part B creates a structural floor for a fully uncertain participant. James (30.2%) is the meaningful random baseline — he represents a thoughtful person genuinely trying without training. Priya represents the lowest realistic case.
+
+#### Exercise Register — Spot the Problem
+
+| ID | Title (Part A / Part B) | Difficulty | Pool | Part A pairs | Pair types | Suitable for |
+|---|---|---|---|---|---|---|
+| 001 | What makes feedback useful? / Traits of a great communicator | beginner | work | 1 | cross-bucket | diagnostic |
+| 002 | What makes a strong project manager? / What builds trust at work? | beginner | work | 2 | cross-bucket, same-bucket | diagnostic |
+| 003 | What makes a presentation land? / What makes a team high-performing? | intermediate | work | 2 | cross-bucket, same-bucket | diagnostic, checkpoint |
+| 004 | Why do projects go off track? / What does executive presence look like? | intermediate | work | 3 | same-bucket × 3 | diagnostic, checkpoint |
+| 005 | What makes someone ready for promotion? / What makes a decision well-made? | advanced | work | 3 | same-bucket × 3 | diagnostic, checkpoint |
+| 006 | What goes into a successful apology? / What helps when you feel overwhelmed? | beginner | universal | 1 | same-bucket | find_your_level, diagnostic |
+| 007 | What makes a close friendship last? / What makes it easier to focus deeply? | intermediate | universal | 2 | same-bucket, cross-bucket | find_your_level, diagnostic |
+| 008 | What does emotional intelligence look like in practice? / What separates people who achieve long-term goals? | advanced | universal | 3 | cross-bucket, same-bucket, same-bucket | diagnostic, checkpoint |
+
+---
+
+#### Exercise Detail — Spot the Problem 001
+**Title:** What makes feedback useful? / Traits of a great communicator
+**Difficulty:** Beginner | **Pool:** Work
+**Part A pair (cross-bucket):** "Describes the specific behavior not the person's character" (Clarity) ↔ "Focuses on what the person can actually change" (Actionability) — both direct feedback at concrete, changeable things rather than fixed traits; cross-bucket pair requires MECE reasoning to identify as redundant
+**Part B correct placements:** "Checks whether the message landed before moving on" → Connection *(ambiguous with Clarity — key T2 differentiator)*; "Adapts the level of detail to what the listener already knows" → Clarity
+**Part B traps:** "Repeats key points multiple times to make sure they land" (sounds thorough — is over-explaining), "Keeps the conversation flowing to prevent any silence" (sounds engaging — is avoidance), "Prepares detailed talking points before every important conversation" (sounds prepared — scripts remove adaptability)
+**Panel decisions:** Part A pair revised June 2026 (original "Avoids vague language / Doesn't use fuzzy phrases" caught by untrained participants without MECE reasoning); Part B fully replaced June 2026 — original items and traps were too obviously correct or wrong
+**Open questions:** None
+
+---
+
+#### Exercise Detail — Spot the Problem 002
+**Title:** What makes a strong project manager? / What builds trust at work?
+**Difficulty:** Beginner | **Pool:** Work
+**Part A pairs:** Cross-bucket: "Defines what success looks like" (Planning) ↔ "Tells the team what winning looks like" (Communication). Same-bucket: "Updates stakeholders regularly" ↔ "Keeps everyone informed on progress" (both Communication)
+**Part B correct placements:** "Does what they say they will do" → Reliability; "Flags issues to the right people before they become problems" → Transparency *(ambiguous with Reliability — proactive flagging could seem like reliable behaviour)*
+**Part B traps:** "Tells people what they want to hear to keep things smooth" (sounds diplomatic — is dishonest), "Admits mistakes only when directly asked about them" (sounds honest — is reactive not proactive), "Changes position when pressured" (sounds flexible — is lack of integrity)
+**Panel decisions:** Answer key corrected June 2026 ("Shares information openly" was keyed to Integrity, corrected to Transparency); Part B correct item replaced June 2026 — "Shares information openly" was too intuitively obvious; new item "Flags issues before they become problems" creates genuine Reliability vs Transparency ambiguity; traps replaced June 2026
+**Open questions:** None
+
+---
+
+#### Exercise Detail — Spot the Problem 003
+**Title:** What makes a presentation land? / What makes a team high-performing?
+**Difficulty:** Intermediate | **Pool:** Work
+**Part A pairs:** Cross-bucket: "Covers only what the audience needs to know" (Structure) ↔ "Removes anything irrelevant to this specific audience" (Audience fit). Same-bucket: "Paces the talk so key points land" ↔ "Controls the rhythm so the audience can follow" (both Delivery)
+**Part B correct placements:** "Everyone knows who owns the final call on key decisions" → Structure *(ambiguous with Execution — decision authority could seem operational)*; "Psychological safety to speak up" → Culture
+**Part B traps:** "People are selected primarily for cultural fit over capability" (sounds like good culture management — overvalues fit at expense of skill), "No conflict ever" (sounds harmonious — actually suppresses honest challenge), "Everyone is aligned before any decision is made" (sounds collaborative — is over-consensus that slows execution)
+**Panel decisions:** Part B updated June 2026 — correct item "Clear roles so no one duplicates effort" replaced with harder-to-bucket item; trap "Works the longest hours" replaced with more plausible "Everyone is aligned before any decision is made"
+**Open questions:** None
+
+---
+
+#### Exercise Detail — Spot the Problem 004
+**Title:** Why do projects go off track? / What does executive presence look like?
+**Difficulty:** Intermediate | **Pool:** Work
+**Part A pairs (all same-bucket):** People: "Key stakeholder wasn't looped in early" ↔ "Important person was left out of decisions". Process: "No clear owner for key decisions" ↔ "Nobody was accountable for the final call". Execution: "Progress wasn't tracked or escalated" ↔ "Deadlines were missed and no one flagged it"
+**Part B correct placements:** "Speaks with conviction even under uncertainty" → Communication; "Reads the room and adjusts in real time" → Awareness
+**Part B traps:** "Commands the room by speaking first and setting the direction" (sounds like leadership initiative — is dominance not presence), "Maintains composure by keeping emotions off the table" (sounds like Composure — is suppression not regulation; the hardest trap in the set), "Defers to subject matter experts rather than inserting their own view" (sounds like wisdom and Awareness — lacks the executive perspective the role requires)
+**Panel decisions:** All three Part B traps replaced June 2026 — originals were too obviously negative and did not differentiate trained from untrained participants; "Maintains composure by keeping emotions off the table" is the key calibration item — even some trained participants place it in the Composure bucket
+**Open questions:** None
+
+---
+
+#### Exercise Detail — Spot the Problem 005
+**Title:** What makes someone ready for promotion? / What makes a decision well-made?
+**Difficulty:** Advanced | **Pool:** Work
+**Part A pairs (all same-bucket):** Performance: "Consistently delivers results beyond what the role demands" ↔ "Operates above the bar set for their current level". Leadership: "Takes initiative on things that fall outside their job description" ↔ "Moves the group forward when direction is unclear" *(subtlest pair — arguably distinct; even trained analysts debate this)*. Readiness: "Is already solving the problems of the job above" ↔ "Has demonstrated they can operate without the scaffolding of their current role"
+**Part B correct placements:** "Considers second-order effects not just the immediate outcome" → Thinking; "Is made at the right time — not too early or too late" → Process
+**Part B traps:** "Draws on the decision-maker's past experience rather than reopening the analysis" (sounds efficient — is anchoring bias), "Is revisited on a regular schedule to confirm it is still the right call" (sounds like Outcome — but Outcome already has "Is revisable if new information emerges"; this tests whether the participant notices the slot is already filled), "Comes from whoever has the most relevant expertise in the room" (sounds like Process / right people — misses the distinction between involving experts and having the decision originate from them)
+**Panel decisions:** Part A pairs revised June 2026 — original near-verbatim synonyms inflated random Part A scores; replaced with greater verbal distance while preserving conceptual redundancy; pairTypes corrected to same-bucket × 3; all three Part B traps replaced June 2026
+**Open questions:** None
+
+---
+
+#### Exercise Detail — Spot the Problem 006
+**Title:** What goes into a successful apology? / What helps when you feel overwhelmed?
+**Difficulty:** Beginner | **Pool:** Universal
+**Part A pair (same-bucket):** "Given as soon as the impact is understood" ↔ "Does not wait for the other person to raise it first" (both Timing) — both mean be proactive, do not delay; same-bucket pair appropriate for beginner level
+**Part B correct placements:** "Say out loud exactly what is making this moment feel unmanageable" → Get clear *(sounds like Slow down — expressing = calming; but naming the problem precisely = clarity)*; "Pick the one thing on your list that does not actually need to happen today and move it" → Act small *(sounds like Get clear — deciding what to defer = prioritising; but the concrete act of moving/deferring = doing something small)*
+**Part B traps:** "Stay busy so you do not have time to worry" (avoidance that sounds like productive coping), "Add more structure and systems right away" (sounds organised — adds cognitive load when already overwhelmed), "Push through until everything is done" (sounds like resilience — ignores the root cause of overwhelm)
+**Panel decisions:** Part A pair redesigned June 2026 — original cross-bucket pair ("Does not minimize" / "Does not wait for other person to raise it") was not a genuine duplicate; replaced with valid same-bucket pair; Part B correct items replaced June 2026 — originals ("Remove one commitment", "Separate what you can control") were too intuitively obvious even for untrained participants; new items require understanding bucket structure to place correctly
+**Open questions:** None
+
+---
+
+#### Exercise Detail — Spot the Problem 007
+**Title:** What makes a close friendship last? / What makes it easier to focus deeply?
+**Difficulty:** Intermediate | **Pool:** Universal
+**Part A pairs:** Same-bucket: "Does not need an occasion to reach out" ↔ "Reaches out without waiting for you to ask first" (both Presence). Cross-bucket: "Tells you hard truths instead of comfortable agreement" (Trust) ↔ "Challenges your thinking without dismissing your view" (Growth) — both about honest intellectual engagement, requiring MECE reasoning to identify as overlapping
+**Part B correct placements:** "All notifications are off and out of reach" → Environment; "You know exactly what done looks like for this session" → Mindset
+**Part B traps:** "You feel completely motivated before you begin" (sounds like a valid prerequisite — motivation precedes action is a common misconception), "You have cleared everything else off your list first" (sounds responsible — is procrastination disguised as preparation), "You have given yourself a generous time block so there is no pressure" (sounds like good planning — time block size does not determine focus quality)
+**Panel decisions:** Trap "The work feels naturally easy today" replaced June 2026 — was too obviously wrong; replaced with "generous time block" trap which sounds like good focus management
+**Open questions:** None
+
+---
+
+#### Exercise Detail — Spot the Problem 008
+**Title:** What does emotional intelligence look like in practice? / What separates people who achieve long-term goals?
+**Difficulty:** Advanced | **Pool:** Universal
+**Part A pairs:** Cross-bucket: "Recognizes which situations trigger them before they are already inside one" (Self-awareness) ↔ "Responds from a choice rather than a reflex" (Regulation) — both about interrupting automatic reaction; even trained analysts debate whether these are truly redundant or genuinely distinct. Same-bucket: "Can sit with discomfort without needing to resolve it immediately" ↔ "Does not need the situation to change in order to feel okay" (both Regulation). Same-bucket: "Holds their own position while genuinely hearing someone else's" ↔ "Does not need to win an argument to feel secure" (both Empathy)
+**Part B correct placements:** "Returns to the process after falling off rather than waiting to restart" → Mindset; "Their environment makes the right behavior the path of least resistance" → Systems
+**Part B traps:** "Has extraordinarily high willpower" (willpower as the secret — the training explicitly counters this), "Never misses a day once they commit" (perfectionism over consistency), "Relies on motivation and momentum to keep going" (sounds like a reasonable driver of effort — the program teaches that motivation is unreliable and systems replace it)
+**Panel decisions:** Trap "Is naturally disciplined from the start" replaced June 2026 — all three traps were the same anti-pattern (innate talent); replaced with "Relies on motivation and momentum" which is subtler — sounds like a reasonable approach, tests program-specific knowledge about systems vs motivation
+**Open questions:** None
 
 ---
 
@@ -214,8 +350,9 @@ Participant receives 12 items and selects three bucket labels from a dropdown. I
 
 - [ ] Build Sort & Bucket 009–014 (6 remaining to reach target of 14)
 - [ ] Consider 008-B as intermediate variant with team offsite scenario
-- [ ] Define Spot the Problem exercise type and build first 4 exercises
-- [ ] Confirm which C³ criteria apply to Spot the Problem
+- [x] Define Spot the Problem exercise type — done June 2026
+- [x] Build first 8 Spot the Problem exercises — done June 2026 (001–008)
+- [x] Spot the Problem calibration complete — June 2026. All 8 exercises revised across two calibration rounds. Final scores: trained 75–95%, random (thoughtful) 30%. See panel simulation results in Section 3B.
 - [ ] Define Speaking exercise type, scoring prompt, and calibration rules
 - [ ] Define Roleplay exercise type, scoring prompt, and calibration rules
 - [ ] Build anti-repeat tracking logic in website backend (tracks which exercise each participant has seen across Find Your Level, Diagnostic, Checkpoint)

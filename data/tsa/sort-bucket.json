@@ -198,9 +198,18 @@
       ]
     },
     "dualBucket": {
-      "Phone": ["Work Essentials", "Travel Documents & Wallet"],
-      "Power bank": ["Work Essentials", "Travel Documents & Wallet"],
-      "Headphones": ["Work Essentials", "Clothing & Personal"]
+      "Phone": [
+        "Work Essentials",
+        "Travel Documents & Wallet"
+      ],
+      "Power bank": [
+        "Work Essentials",
+        "Travel Documents & Wallet"
+      ],
+      "Headphones": [
+        "Work Essentials",
+        "Clothing & Personal"
+      ]
     }
   },
   {
@@ -313,7 +322,7 @@
     "items": [
       "App crashes on login for 30% of users",
       "Payment processing failing at checkout",
-      "Data not saving — users losing work",
+      "Data not saving \u2014 users losing work",
       "Security vulnerability reported by user",
       {
         "name": "Search bar shows no results for common queries",
@@ -349,7 +358,7 @@
       "Fix Immediately": [
         "App crashes on login for 30% of users",
         "Payment processing failing at checkout",
-        "Data not saving — users losing work",
+        "Data not saving \u2014 users losing work",
         "Security vulnerability reported by user"
       ],
       "Investigate Further": [
@@ -396,7 +405,10 @@
       ]
     },
     "dualBucket": {
-      "Security vulnerability reported by user": ["Fix Immediately", "Investigate Further"]
+      "Security vulnerability reported by user": [
+        "Fix Immediately",
+        "Investigate Further"
+      ]
     }
   },
   {
@@ -428,7 +440,7 @@
     "bucketOptions": [
       "Do on Day 1",
       "Complete by End of Week",
-      "Don't Rush — First Month",
+      "Don't Rush \u2014 First Month",
       "Urgent",
       "This Week",
       "Later",
@@ -440,7 +452,7 @@
     "correctBuckets": [
       "Do on Day 1",
       "Complete by End of Week",
-      "Don't Rush — First Month"
+      "Don't Rush \u2014 First Month"
     ],
     "answerKey": {
       "Do on Day 1": [
@@ -455,7 +467,7 @@
         "Shadow a team meeting",
         "Complete mandatory HR training"
       ],
-      "Don't Rush — First Month": [
+      "Don't Rush \u2014 First Month": [
         "Form an opinion on team strategy",
         "Build relationships with cross-functional teams",
         "Propose any process changes",
@@ -484,7 +496,7 @@
         "short-term",
         "week 1 goals"
       ],
-      "Don't Rush — First Month": [
+      "Don't Rush \u2014 First Month": [
         "first month",
         "long-term",
         "take time",
@@ -494,8 +506,14 @@
       ]
     },
     "dualBucket": {
-      "Read the team handbook": ["Do on Day 1", "Complete by End of Week"],
-      "Complete mandatory HR training": ["Do on Day 1", "Complete by End of Week"]
+      "Read the team handbook": [
+        "Do on Day 1",
+        "Complete by End of Week"
+      ],
+      "Complete mandatory HR training": [
+        "Do on Day 1",
+        "Complete by End of Week"
+      ]
     }
   },
   {
@@ -601,8 +619,232 @@
       ]
     },
     "dualBucket": {
-      "Cross-functional partner had different priorities": ["People & Communication", "Process & Planning"],
-      "Feedback was vague and not actionable": ["People & Communication", "Process & Planning"]
+      "Cross-functional partner had different priorities": [
+        "People & Communication",
+        "Process & Planning"
+      ],
+      "Feedback was vague and not actionable": [
+        "People & Communication",
+        "Process & Planning"
+      ]
+    }
+  },
+  {
+    "id": "sort_bucket_007",
+    "title": "One week until the exam",
+    "difficulty": "beginner",
+    "tags": [
+      "think-clearly",
+      "mece",
+      "rule-of-three"
+    ],
+    "prompt": "Sort the items into three clean buckets.",
+    "scenario": "Your exam is in exactly one week. You have limited time and need to spend it well.",
+    "sortingInstruction": "",
+    "items": [
+      "Do past exam papers under timed conditions",
+      "Form a study group",
+      "Identify your weakest topics",
+      "Watch a short YouTube explainer on a topic you're unsure about",
+      "Sleep 8 hours",
+      "Set two alarms",
+      "Memorize key formulas",
+      "Review your key summary notes",
+      "Re-read the textbook cover to cover",
+      "Watch a full lecture recording you already attended",
+      "Start a new topic you haven't studied",
+      "Reorganize all your notes from scratch"
+    ],
+    "bucketOptions": [
+      "Do this week",
+      "The night before",
+      "Skip it entirely",
+      "This week",
+      "High priority",
+      "Last minute",
+      "Night before",
+      "Day of exam",
+      "Skip",
+      "Low value",
+      "Cut it",
+      "Don't bother"
+    ],
+    "correctBuckets": [
+      "Do this week",
+      "The night before",
+      "Skip it entirely"
+    ],
+    "answerKey": {
+      "Do this week": [
+        "Do past exam papers under timed conditions",
+        "Form a study group",
+        "Identify your weakest topics",
+        "Watch a short YouTube explainer on a topic you're unsure about"
+      ],
+      "The night before": [
+        "Sleep 8 hours",
+        "Set two alarms",
+        "Memorize key formulas",
+        "Review your key summary notes"
+      ],
+      "Skip it entirely": [
+        "Re-read the textbook cover to cover",
+        "Watch a full lecture recording you already attended",
+        "Start a new topic you haven't studied",
+        "Reorganize all your notes from scratch"
+      ]
+    },
+    "scoring": {
+      "totalPoints": 20,
+      "bucketLabelPoints": 6,
+      "itemPlacementPoints": 14
+    },
+    "labelEquivalents": {
+      "Do this week": [
+        "do this week",
+        "this week",
+        "start now",
+        "high priority",
+        "do now",
+        "active study"
+      ],
+      "The night before": [
+        "the night before",
+        "night before",
+        "last minute",
+        "day before",
+        "eve of exam",
+        "day of"
+      ],
+      "Skip it entirely": [
+        "skip it entirely",
+        "skip",
+        "low value",
+        "cut it",
+        "don't bother",
+        "not worth it"
+      ]
+    },
+    "dualBucket": {
+      "Sleep 8 hours": [
+        "The night before",
+        "Do this week"
+      ],
+      "Form a study group": [
+        "Do this week",
+        "The night before"
+      ]
+    }
+  },
+  {
+    "id": "sort_bucket_008",
+    "title": "The group trip",
+    "difficulty": "beginner",
+    "tags": [
+      "think-clearly",
+      "mece",
+      "rule-of-three"
+    ],
+    "prompt": "Sort the items into three clean buckets.",
+    "scenario": "Your friend group is planning a trip. You have six weeks until departure.",
+    "sortingInstruction": "",
+    "items": [
+      "Flights",
+      "Accommodation",
+      "Travel insurance",
+      "Travel vaccinations",
+      "Which activities to do",
+      "Who is responsible for booking what",
+      "Budget per person",
+      "Which day to depart",
+      "Where to eat lunch on Day 2",
+      "What to do if it rains",
+      "Which beach to visit",
+      "Airport transfers"
+    ],
+    "bucketOptions": [
+      "Book it now",
+      "Decide as a group",
+      "Figure it out when we get there",
+      "Book now",
+      "Time-sensitive",
+      "Pre-book",
+      "Group decision",
+      "Needs a vote",
+      "Discuss first",
+      "Flexible",
+      "Spontaneous",
+      "Sort it out there"
+    ],
+    "correctBuckets": [
+      "Book it now",
+      "Decide as a group",
+      "Figure it out when we get there"
+    ],
+    "answerKey": {
+      "Book it now": [
+        "Flights",
+        "Accommodation",
+        "Travel insurance",
+        "Travel vaccinations"
+      ],
+      "Decide as a group": [
+        "Which activities to do",
+        "Who is responsible for booking what",
+        "Budget per person",
+        "Which day to depart"
+      ],
+      "Figure it out when we get there": [
+        "Where to eat lunch on Day 2",
+        "What to do if it rains",
+        "Which beach to visit",
+        "Airport transfers"
+      ]
+    },
+    "scoring": {
+      "totalPoints": 20,
+      "bucketLabelPoints": 6,
+      "itemPlacementPoints": 14
+    },
+    "labelEquivalents": {
+      "Book it now": [
+        "book it now",
+        "book now",
+        "time-sensitive",
+        "pre-book",
+        "deadline",
+        "don't delay"
+      ],
+      "Decide as a group": [
+        "decide as a group",
+        "group decision",
+        "needs a vote",
+        "discuss first",
+        "decide together",
+        "collective"
+      ],
+      "Figure it out when we get there": [
+        "figure it out",
+        "when we get there",
+        "flexible",
+        "spontaneous",
+        "sort it out there",
+        "decide there"
+      ]
+    },
+    "dualBucket": {
+      "Which activities to do": [
+        "Decide as a group",
+        "Book it now"
+      ],
+      "Who is responsible for booking what": [
+        "Decide as a group",
+        "Book it now"
+      ],
+      "Airport transfers": [
+        "Figure it out when we get there",
+        "Book it now"
+      ]
     }
   }
 ]

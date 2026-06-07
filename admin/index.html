@@ -1603,6 +1603,29 @@
     .mb-edit-status { font-size:12px; color:var(--green); font-weight:700; }
     .mb-msg { font-size:13px; margin:16px 0 0; color:#888; }
     .mb-msg.mb-err { color:#8A1F1F; font-weight:700; }
+    /* Member controls: search, filters, sort, pagination */
+    .mb-controls-area { display:flex; flex-direction:column; gap:10px; margin-bottom:14px; }
+    .mb-search-row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+    .mb-search { flex:1; min-width:180px; max-width:320px; height:32px; padding:0 10px 0 32px; border:1px solid var(--line); border-radius:6px; font-family:'Lato',sans-serif; font-size:13px; color:var(--charcoal); background:var(--white) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E") 10px center no-repeat; }
+    .mb-search:focus { border-color:var(--navy); outline:2px solid rgba(238,163,32,.25); }
+    .mb-cohort-select { height:32px; padding:0 8px; border:1px solid var(--line); border-radius:6px; font-size:12px; font-family:'Lato',sans-serif; color:var(--charcoal); background:var(--white); cursor:pointer; }
+    .mb-status-tabs { display:flex; gap:4px; flex-wrap:wrap; }
+    .mb-status-tab { padding:4px 11px; border:1px solid var(--line); border-radius:999px; background:var(--white); color:var(--charcoal); font:700 11px 'Roboto Mono',monospace; cursor:pointer; transition:all .12s; white-space:nowrap; }
+    .mb-status-tab:hover { border-color:var(--navy); color:var(--navy); }
+    .mb-status-tab.is-active { background:var(--navy); border-color:var(--navy); color:var(--white); }
+    .mb-tab-count { font-weight:400; opacity:.7; }
+    .mb-table-footer { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:10px; flex-wrap:wrap; }
+    .mb-showing { color:#888; font-family:'Roboto Mono',monospace; font-size:11px; }
+    .mb-pagination { display:flex; align-items:center; gap:6px; }
+    .mb-page-btn { padding:4px 10px; border:1px solid var(--line); border-radius:4px; background:var(--white); color:var(--navy); font:700 11px 'Roboto Mono',monospace; cursor:pointer; transition:border-color .12s; }
+    .mb-page-btn:hover:not(:disabled) { border-color:var(--navy); }
+    .mb-page-btn:disabled { opacity:.35; cursor:not-allowed; }
+    .mb-page-info { font:400 11px 'Roboto Mono',monospace; color:#888; }
+    .mb-sort-btn { background:none; border:none; color:inherit; font:inherit; letter-spacing:inherit; text-transform:inherit; cursor:pointer; padding:0; display:inline-flex; align-items:center; gap:4px; white-space:nowrap; }
+    .mb-sort-btn:hover { color:var(--gold); }
+    .mb-sort-icon { font-size:9px; opacity:.4; line-height:1; }
+    .mb-table th.mb-sort-active { color:var(--gold); }
+    .mb-table th.mb-sort-active .mb-sort-icon { opacity:1; }
     .mb-invite-form { margin:0 0 18px; }
 
     /* Member process guide */
@@ -2209,6 +2232,7 @@
         </div>
 
         <div id="mbRemovalNotice" hidden></div>
+        <div id="mbControls" class="mb-controls-area" hidden></div>
         <div id="mbTableWrap">
           <p class="mb-msg">Click Refresh to load members.</p>
         </div>
@@ -5937,6 +5961,9 @@
     // ===== Members management =====
 
     var mbMembersCache = [];
+    var mbFilterState = { search: '', cohort: 'all', status: 'all', sort: { col: 'name', dir: 'asc' }, page: 0 };
+    var MB_PAGE_SIZE = 25;
+    var mbSearchTimer = null;
     const MB_LOCAL_GROUP_OVERRIDES_KEY = 'utl_mb_local_group_overrides';
 
     function mbUseLocalGroupOverrides() {
@@ -6113,15 +6140,27 @@
       '</div>';
     }
 
-    function mbRenderTable(docs) {
+    function mbSortTh(label, col) {
+      var active = mbFilterState.sort.col === col;
+      var icon = active ? (mbFilterState.sort.dir === 'asc' ? '↑' : '↓') : '↕';
+      return '<th' + (active ? ' class="mb-sort-active"' : '') + '>' +
+        '<button class="mb-sort-btn" type="button" data-mb-sort="' + col + '">' +
+          label + ' <span class="mb-sort-icon">' + icon + '</span>' +
+        '</button></th>';
+    }
+
+    function mbRenderTable(docs, meta) {
       var wrap = document.getElementById('mbTableWrap');
       if (!wrap) return;
-      if (!docs || !docs.length) {
-        wrap.innerHTML = '<p class="mb-msg">No members found.</p>';
-        return;
-      }
-      var manualAddCount = docs.filter(function (d) { return mbGroupNeedsManualAdd(d.data()); }).length;
-      var manualRemoveCount = docs.filter(function (d) { return mbGroupNeedsManualRemove(d.data()); }).length;
+      meta = meta || {};
+      var noResults = !docs || !docs.length;
+      var emptyMsg = (meta.total > 0 && noResults)
+        ? '<p class="mb-msg">No members match your filters.</p>'
+        : '<p class="mb-msg">No members found.</p>';
+      if (noResults) { wrap.innerHTML = emptyMsg; return; }
+
+      var manualAddCount = (mbMembersCache || []).filter(function (d) { return mbGroupNeedsManualAdd(d.data()); }).length;
+      var manualRemoveCount = (mbMembersCache || []).filter(function (d) { return mbGroupNeedsManualRemove(d.data()); }).length;
       var queueHtml = (manualAddCount || manualRemoveCount)
         ? '<div class="mb-group-queue"><strong>Google Group manual queue:</strong> ' +
           (manualAddCount ? manualAddCount + ' need add' : '') +
@@ -6129,7 +6168,7 @@
           (manualRemoveCount ? manualRemoveCount + ' need remove' : '') +
           '. Use the Group column after verifying in Google Groups.</div>'
         : '';
-      var duplicateHtml = mbDuplicateWarningHtml(docs.duplicates || []);
+      var duplicateHtml = mbDuplicateWarningHtml((mbMembersCache || []).duplicates || []);
       var rows = docs.map(function (d) {
         var data = d.data();
         var email = mbCanonicalEmailFromDoc(d) || mbNormalizeEmail(d.id);
@@ -6162,20 +6201,173 @@
           '<td>' + actions + '</td>' +
         '</tr>' +
         (isOwner ? '' :
-          '<tr class="mb-edit-panel">' +
-            '<td colspan="9">' + mbEditFormHtml(email, data) + '</td>' +
-          '</tr>'
+          '<tr class="mb-edit-panel"><td colspan="9">' + mbEditFormHtml(email, data) + '</td></tr>'
         );
       }).join('');
+
+      var start = (meta.page || 0) * MB_PAGE_SIZE;
+      var end = Math.min(start + docs.length, meta.filtered || docs.length);
+      var showingText = meta.filtered !== undefined
+        ? 'Showing ' + (start + 1) + '–' + end + ' of ' + meta.filtered +
+          (meta.filtered < meta.total ? ' filtered · ' + meta.total + ' total' : ' members')
+        : docs.length + ' members';
+      var pagination = (meta.totalPages && meta.totalPages > 1)
+        ? '<div class="mb-pagination">' +
+            '<button class="mb-page-btn" type="button" data-mb-page="prev"' + (meta.page === 0 ? ' disabled' : '') + '>← Prev</button>' +
+            '<span class="mb-page-info">Page ' + (meta.page + 1) + ' of ' + meta.totalPages + '</span>' +
+            '<button class="mb-page-btn" type="button" data-mb-page="next"' + (meta.page >= meta.totalPages - 1 ? ' disabled' : '') + '>Next →</button>' +
+          '</div>'
+        : '';
+      var footer = '<div class="mb-table-footer"><span class="mb-showing">' + showingText + '</span>' + pagination + '</div>';
+
       wrap.innerHTML =
         duplicateHtml + queueHtml + '<div class="mb-table-wrap"><table class="mb-table">' +
           '<thead><tr>' +
-            '<th>Name</th><th>Email</th><th>Role</th><th>Status</th>' +
-            '<th>Cohort</th><th>First Login</th><th>Expiry</th><th>Group<br><a class="mb-group-link" href="https://groups.google.com/g/utl-members/members" target="_blank" rel="noopener">Open group</a></th><th>Actions</th>' +
+            mbSortTh('Name', 'name') + mbSortTh('Email', 'email') +
+            '<th>Role</th>' +
+            mbSortTh('Status', 'status') +
+            mbSortTh('Cohort', 'cohort') +
+            mbSortTh('First Login', 'firstLogin') +
+            mbSortTh('Expiry', 'expiry') +
+            '<th>Group<br><a class="mb-group-link" href="https://groups.google.com/g/utl-members/members" target="_blank" rel="noopener">Open group</a></th>' +
+            '<th>Actions</th>' +
           '</tr></thead>' +
           '<tbody>' + rows + '</tbody>' +
-        '</table></div>';
+        '</table></div>' + footer;
       mbBindTableActions(wrap);
+    }
+
+    function mbIsExpiringSoon(expiryDate) {
+      if (!expiryDate) return false;
+      try {
+        var d = expiryDate.toDate ? expiryDate.toDate() : new Date(expiryDate);
+        var days = (d - new Date()) / 86400000;
+        return days > 0 && days <= 30;
+      } catch (e) { return false; }
+    }
+
+    function mbSortableDate(d) {
+      if (!d) return '';
+      try {
+        var date = d.toDate ? d.toDate() : new Date(d);
+        return isNaN(date.getTime()) ? '' : date.toISOString();
+      } catch (e) { return ''; }
+    }
+
+    function mbApplyFilters(docs) {
+      var q = mbFilterState.search.toLowerCase();
+      var filtered = (docs || []).filter(function (d) {
+        var data = d.data();
+        var email = (mbCanonicalEmailFromDoc(d) || mbNormalizeEmail(d.id) || '').toLowerCase();
+        var name = (data.name || '').toLowerCase();
+        if (q && !name.includes(q) && !email.includes(q)) return false;
+        if (mbFilterState.cohort !== 'all' && (data.cohort || '') !== mbFilterState.cohort) return false;
+        var expired = mbIsExpired(data.expiryDate);
+        var expiringSoon = mbIsExpiringSoon(data.expiryDate);
+        var status = data.status || 'active';
+        if (mbFilterState.status === 'active' && (status !== 'active' || expired)) return false;
+        if (mbFilterState.status === 'inactive' && status !== 'inactive') return false;
+        if (mbFilterState.status === 'expired' && !expired) return false;
+        if (mbFilterState.status === 'expiring' && !expiringSoon) return false;
+        return true;
+      });
+      filtered.sort(function (a, b) {
+        var ad = a.data(), bd = b.data();
+        var col = mbFilterState.sort.col;
+        var aVal = '', bVal = '';
+        if (col === 'name') { aVal = (ad.name || '').toLowerCase(); bVal = (bd.name || '').toLowerCase(); }
+        else if (col === 'email') { aVal = (mbCanonicalEmailFromDoc(a) || '').toLowerCase(); bVal = (mbCanonicalEmailFromDoc(b) || '').toLowerCase(); }
+        else if (col === 'status') { aVal = ad.status || 'active'; bVal = bd.status || 'active'; }
+        else if (col === 'cohort') { aVal = (ad.cohort || '').toLowerCase(); bVal = (bd.cohort || '').toLowerCase(); }
+        else if (col === 'firstLogin') { aVal = mbSortableDate(ad.firstLoginAt); bVal = mbSortableDate(bd.firstLoginAt); }
+        else if (col === 'expiry') { aVal = mbSortableDate(ad.expiryDate); bVal = mbSortableDate(bd.expiryDate); }
+        var cmp = aVal < bVal ? -1 : aVal > bVal ? 1 : 0;
+        return mbFilterState.sort.dir === 'asc' ? cmp : -cmp;
+      });
+      return filtered;
+    }
+
+    function mbApplyAndRender() {
+      var filtered = mbApplyFilters(mbMembersCache);
+      var totalPages = Math.max(1, Math.ceil(filtered.length / MB_PAGE_SIZE));
+      if (mbFilterState.page >= totalPages) mbFilterState.page = 0;
+      var start = mbFilterState.page * MB_PAGE_SIZE;
+      mbRenderTable(filtered.slice(start, start + MB_PAGE_SIZE), {
+        total: mbMembersCache.length,
+        filtered: filtered.length,
+        page: mbFilterState.page,
+        totalPages: totalPages
+      });
+    }
+
+    function mbRenderControls() {
+      var el = document.getElementById('mbControls');
+      if (!el) return;
+      var cohorts = [];
+      mbMembersCache.forEach(function (d) {
+        var c = d.data().cohort;
+        if (c && !cohorts.includes(c)) cohorts.push(c);
+      });
+      cohorts.sort();
+      var counts = { all: 0, active: 0, inactive: 0, expired: 0, expiring: 0 };
+      mbMembersCache.forEach(function (d) {
+        var data = d.data();
+        var status = data.status || 'active';
+        var expired = mbIsExpired(data.expiryDate);
+        var soon = mbIsExpiringSoon(data.expiryDate);
+        counts.all++;
+        if (expired) counts.expired++;
+        else if (soon) { counts.expiring++; counts.active++; }
+        else if (status === 'active') counts.active++;
+        else if (status === 'inactive') counts.inactive++;
+      });
+      var statusLabels = { all: 'All', active: 'Active', inactive: 'Inactive', expired: 'Expired', expiring: 'Expiring soon' };
+      el.hidden = false;
+      el.innerHTML =
+        '<div class="mb-search-row">' +
+          '<input class="mb-search" type="search" id="mbSearchInput" placeholder="Search name or email…" value="' + escapeHtml(mbFilterState.search) + '" autocomplete="off">' +
+          (cohorts.length > 1
+            ? '<select class="mb-cohort-select" id="mbCohortFilter">' +
+                '<option value="all">All cohorts</option>' +
+                cohorts.map(function (c) {
+                  return '<option value="' + escapeHtml(c) + '"' + (mbFilterState.cohort === c ? ' selected' : '') + '>' + escapeHtml(c) + '</option>';
+                }).join('') +
+              '</select>'
+            : '') +
+        '</div>' +
+        '<div class="mb-status-tabs">' +
+          ['all', 'active', 'inactive', 'expired', 'expiring'].map(function (s) {
+            return '<button class="mb-status-tab' + (mbFilterState.status === s ? ' is-active' : '') + '" type="button" data-mb-status="' + s + '">' +
+              statusLabels[s] + ' <span class="mb-tab-count">(' + counts[s] + ')</span></button>';
+          }).join('') +
+        '</div>';
+      var searchInput = document.getElementById('mbSearchInput');
+      if (searchInput) {
+        searchInput.addEventListener('input', function () {
+          clearTimeout(mbSearchTimer);
+          mbSearchTimer = setTimeout(function () {
+            mbFilterState.search = searchInput.value.trim();
+            mbFilterState.page = 0;
+            mbApplyAndRender();
+          }, 250);
+        });
+      }
+      var cohortFilter = document.getElementById('mbCohortFilter');
+      if (cohortFilter) {
+        cohortFilter.addEventListener('change', function () {
+          mbFilterState.cohort = cohortFilter.value;
+          mbFilterState.page = 0;
+          mbApplyAndRender();
+        });
+      }
+      el.querySelectorAll('.mb-status-tab').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          mbFilterState.status = btn.dataset.mbStatus;
+          mbFilterState.page = 0;
+          el.querySelectorAll('.mb-status-tab').forEach(function (t) { t.classList.toggle('is-active', t === btn); });
+          mbApplyAndRender();
+        });
+      });
     }
 
     function mbEditFormHtml(email, data) {
@@ -6231,6 +6423,26 @@
     }
 
     function mbBindTableActions(root) {
+      root.querySelectorAll('[data-mb-sort]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var col = btn.dataset.mbSort;
+          if (mbFilterState.sort.col === col) {
+            mbFilterState.sort.dir = mbFilterState.sort.dir === 'asc' ? 'desc' : 'asc';
+          } else {
+            mbFilterState.sort.col = col;
+            mbFilterState.sort.dir = 'asc';
+          }
+          mbFilterState.page = 0;
+          mbApplyAndRender();
+        });
+      });
+      root.querySelectorAll('[data-mb-page]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          if (btn.dataset.mbPage === 'prev') mbFilterState.page = Math.max(0, mbFilterState.page - 1);
+          else mbFilterState.page++;
+          mbApplyAndRender();
+        });
+      });
       // Toggle edit panel by finding next sibling row
       root.querySelectorAll('[data-mb-edit]').forEach(function (btn) {
         btn.addEventListener('click', function () {
@@ -6505,13 +6717,9 @@
         snap.forEach(function (d) { docs.push(d); });
         docs = mbApplyLocalGroupOverrides(docs);
         docs = mbDedupeMemberDocs(docs);
-        docs.sort(function (a, b) {
-          var na = (a.data().name || a.id).toLowerCase();
-          var nb = (b.data().name || b.id).toLowerCase();
-          return na < nb ? -1 : na > nb ? 1 : 0;
-        });
         mbMembersCache = docs;
-        mbRenderTable(docs);
+        mbRenderControls();
+        mbApplyAndRender();
       } catch (e) {
         var msg = mbFriendlyPermissionMessage(e);
         wrap.innerHTML = '<p class="mb-msg mb-err">Failed to load: ' + escapeHtml(msg) + '</p>';

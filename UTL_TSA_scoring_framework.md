@@ -115,7 +115,63 @@ The tier system ensures participants are not penalized for defensible variation.
 | **Total** | **100 pts** | |
 
 ### Spot the Problem (Part 1B)
-*To be defined when exercise type is built.*
+
+Each exercise has two parts scored independently. Max 20 pts per exercise (10 + 10).
+
+**Part A — Duplicate detection (10 pts)**
+
+The participant receives a pre-organised list with items grouped into three buckets. Some items say the same thing in different words. The task: move the duplicates out of their buckets.
+
+| Component | Rule |
+|---|---|
+| Pair correctly identified | Either member of a duplicate pair moved = full pair credit |
+| Co-dependent pair | Moving both members = same credit as moving one — no bonus |
+| Score formula | `(pairs_identified / total_pairs) × 10`, then subtract false positive penalties |
+| False positive penalty | −2.5 pts per non-duplicate item moved |
+| Floor | 0 pts |
+
+Tier definitions:
+- **Tier 1 — Full credit:** Moves either member of a genuine duplicate pair. Co-dependent pairs (where either member's removal is correct) both score full credit.
+- **Tier 2 — No credit, no penalty:** Moves an item that is thematically adjacent to a duplicate pair but is not itself redundant with any item.
+- **Tier 3 — Penalty:** Moves a correct, non-duplicate item. −2.5 pts each.
+
+Pair types (recorded in exercise JSON as `pairTypes`):
+- `same-bucket`: both items are in the same bucket — visible by scanning within a group
+- `cross-bucket`: items are in different buckets — requires conceptual MECE reasoning to identify as redundant
+
+Cross-bucket pairs are harder for untrained participants because the items are assigned to different categories and appear structurally distinct. Same-bucket pairs can be caught by pattern-matching alone. Advanced exercises should use at least one cross-bucket pair.
+
+**Part B — Missing item placement (10 pts)**
+
+The participant receives a pool of items on the left (mix of correct missing items and deliberate traps). The task: move only the items that belong into the correct bucket. Not everything on the left needs to be moved.
+
+| Component | Rule |
+|---|---|
+| Correct item, correct bucket (Tier 1) | 5 pts per item |
+| Correct item, adjacent/defensible bucket (Tier 2) | 2.5 pts per item |
+| Correct item not moved | 0 pts |
+| Trap item moved to any bucket | −2.5 pts per item |
+| Floor | 0 pts |
+
+**Standard exercise structure (consistent across all exercises):**
+- Correct items to place: 2 (max Part B score = 10 pts)
+- Trap items on the left: 3
+- Total left pool: 5 items
+
+**Calibration results (validated via full 8-exercise panel simulation, June 2026):**
+- Thoughtful-naive random (James profile — trying without training): ~30%
+- Uncertain random (Priya profile — confused/guessing): ~10% structural floor — see note below
+- Fast Mover trained (Diane profile): ~76%
+- Intuitive trained (Maya profile): ~88%
+- Analyst trained (Carlos profile): ~95%
+- Post-training target: 80–90%
+
+*Note on random floor:* Spot the Problem's false positive penalty in Part A and trap penalty in Part B compound for a fully uncertain participant in a way that Sort & Bucket does not. The meaningful random baseline is the thoughtful-naive profile (~30%). The structural floor (~10%) represents a participant who is genuinely confused and guessing — valid data, not a calibration failure.
+
+**Calibration rules for exercise design:**
+- At least one cross-bucket pair in Part A at intermediate and advanced levels — same-bucket synonym pairs alone inflate random Part A scores
+- Part B traps must be plausible enough that untrained participants might move them; traps that are obviously wrong do not create score differentiation
+- Near-verbatim synonym pairs in Part A (e.g., "consistently exceeds the role" / "goes beyond the expectations") are paradoxically easy for random participants — use verbal distance with conceptual overlap instead
 
 ### Speaking Exercise (Part 2)
 *To be defined when exercise type is built. Scoring via C³ Rubric — Type 2 AI scoring.*
@@ -193,7 +249,7 @@ Type 1 is always preferred where possible. Type 2 is reserved for exercises wher
 
 ## 10. Open Framework Questions
 
-- [ ] Spot the Problem scoring model — to be defined when first exercise is built
+- [x] Spot the Problem scoring model — defined June 2026, see Section 5
 - [ ] Speaking exercise scoring rubric — Type 2 AI prompt and calibration rules to be defined
 - [ ] Roleplay scoring rubric — same as above
 - [ ] C3 criterion weighting for Part 2 and Part 3 — confirm which criteria apply and at what weight

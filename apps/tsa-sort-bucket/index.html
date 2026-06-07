@@ -867,13 +867,20 @@
 
     async function initializeApp() {
       const contactProfile = readContactProfile();
-      const gateComplete = sessionStorage.getItem(GATE_KEY) === 'true' || Boolean(contactProfile);
+      const isAdmin = localStorage.getItem('utl_admin_auth') === 'true';
+      const isMember = localStorage.getItem('utl_member_unlocked') === 'true';
+      const adminBypass = localStorage.getItem('utl_find_level_admin_bypass') === 'on';
+      const gateComplete = sessionStorage.getItem(GATE_KEY) === 'true' || Boolean(contactProfile) || isAdmin || isMember || adminBypass;
       if (gateComplete) renderLoadingState();
       try {
         await loadExerciseData();
         if (gateComplete) {
-          state.participant.name = sessionStorage.getItem('tsa_participant_name') || contactProfile?.name || '';
-          state.participant.email = sessionStorage.getItem('tsa_participant_email') || contactProfile?.email || '';
+          let memberProfile = {};
+          try { memberProfile = JSON.parse(localStorage.getItem('utl_member_profile') || '{}'); } catch (e) {}
+          const memberEmail = memberProfile.email || localStorage.getItem('utl_member_username') || '';
+          const memberName = [memberProfile.firstName, memberProfile.lastName].filter(Boolean).join(' ') || memberProfile.displayName || memberEmail;
+          state.participant.name = sessionStorage.getItem('tsa_participant_name') || contactProfile?.name || memberName || 'Admin';
+          state.participant.email = sessionStorage.getItem('tsa_participant_email') || contactProfile?.email || memberEmail || '';
           sessionStorage.setItem(GATE_KEY, 'true');
           sessionStorage.setItem('tsa_participant_name', state.participant.name);
           sessionStorage.setItem('tsa_participant_email', state.participant.email);

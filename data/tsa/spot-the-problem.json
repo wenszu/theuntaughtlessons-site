@@ -16,35 +16,35 @@
       "topic": "What makes feedback useful?",
       "buckets": {
         "Clarity": [
-          "Describes specific behavior not general traits",
-          "Uses concrete examples from real situations",
-          "Avoids vague language like \"be more professional\"",
-          "States clearly what needs to change"
+          "Describes the specific behavior not the person's character",
+          "Uses a concrete example from a real situation",
+          "States clearly what needs to change",
+          "Avoids generalizations like 'you always' or 'you never'"
         ],
         "Timing & delivery": [
           "Given close to when the event happened",
           "Delivered privately not in front of others",
-          "Doesn't use fuzzy phrases — is direct about the issue"
+          "Checks in on how the feedback landed before ending"
         ],
         "Actionability": [
           "Focuses on what the person can actually change",
           "Suggests a specific path forward",
-          "Checks for understanding after giving feedback"
+          "Ends with agreement on next steps"
         ]
       },
       "overlaps": [
-        "Avoids vague language like \"be more professional\"",
-        "Doesn't use fuzzy phrases — is direct about the issue"
+        "Describes the specific behavior not the person's character",
+        "Focuses on what the person can actually change"
       ]
     },
     "partB": {
       "topic": "Traits of a great communicator",
       "leftItems": [
-        "Listens before responding",
-        "Adjusts message to suit the audience",
-        "Speaks loudly in all situations",
-        "Uses jargon to sound expert",
-        "Avoids silence at all costs"
+        "Checks whether the message landed before moving on",
+        "Adapts the level of detail to what the listener already knows",
+        "Repeats key points multiple times to make sure they land",
+        "Keeps the conversation flowing to prevent any silence",
+        "Prepares detailed talking points before every important conversation"
       ],
       "buckets": {
         "Clarity": [
@@ -61,10 +61,15 @@
         ]
       },
       "answers": {
-        "Adjusts message to suit the audience": "Clarity",
-        "Listens before responding": "Connection"
+        "Checks whether the message landed before moving on": "Connection",
+        "Adapts the level of detail to what the listener already knows": "Clarity"
       }
-    }
+    },
+    "pool": "work",
+    "pairCount": 1,
+    "pairTypes": [
+      "cross-bucket"
+    ]
   },
   {
     "id": "spot_problem_002",
@@ -111,9 +116,9 @@
       "topic": "What builds trust at work?",
       "leftItems": [
         "Does what they say they will do",
-        "Shares information openly",
-        "Takes credit for team wins",
-        "Avoids difficult conversations",
+        "Flags issues to the right people before they become problems",
+        "Tells people what they want to hear to keep things smooth",
+        "Admits mistakes only when directly asked about them",
         "Changes position when pressured"
       ],
       "buckets": {
@@ -131,9 +136,15 @@
       },
       "answers": {
         "Does what they say they will do": "Reliability",
-        "Shares information openly": "Integrity"
+        "Flags issues to the right people before they become problems": "Transparency"
       }
-    }
+    },
+    "pool": "work",
+    "pairCount": 2,
+    "pairTypes": [
+      "cross-bucket",
+      "same-bucket"
+    ]
   },
   {
     "id": "spot_problem_003",
@@ -179,11 +190,11 @@
     "partB": {
       "topic": "What makes a team high-performing?",
       "leftItems": [
-        "Clear roles so no one duplicates effort",
+        "Everyone knows who owns the final call on key decisions",
         "Psychological safety to speak up",
-        "Everyone agrees with the leader always",
+        "People are selected primarily for cultural fit over capability",
         "No conflict ever",
-        "Works the longest hours"
+        "Everyone is aligned before any decision is made"
       ],
       "buckets": {
         "Structure": [
@@ -200,10 +211,16 @@
         ]
       },
       "answers": {
-        "Clear roles so no one duplicates effort": "Structure",
+        "Everyone knows who owns the final call on key decisions": "Structure",
         "Psychological safety to speak up": "Culture"
       }
-    }
+    },
+    "pool": "work",
+    "pairCount": 2,
+    "pairTypes": [
+      "cross-bucket",
+      "same-bucket"
+    ]
   },
   {
     "id": "spot_problem_004",
@@ -254,9 +271,9 @@
       "leftItems": [
         "Speaks with conviction even under uncertainty",
         "Reads the room and adjusts in real time",
-        "Always has the loudest voice in the room",
-        "Never shows any emotion",
-        "Agrees with the most senior person present"
+        "Commands the room by speaking first and setting the direction",
+        "Maintains composure by keeping emotions off the table",
+        "Defers to subject matter experts rather than inserting their own view"
       ],
       "buckets": {
         "Communication": [
@@ -275,7 +292,14 @@
         "Speaks with conviction even under uncertainty": "Communication",
         "Reads the room and adjusts in real time": "Awareness"
       }
-    }
+    },
+    "pool": "work",
+    "pairCount": 3,
+    "pairTypes": [
+      "same-bucket",
+      "same-bucket",
+      "same-bucket"
+    ]
   },
   {
     "id": "spot_problem_005",
@@ -294,31 +318,31 @@
       "topic": "What makes someone ready for promotion?",
       "buckets": {
         "Performance": [
-          "Consistently exceeds what the role requires",
-          "Delivers results without needing to be told",
-          "Goes beyond the expectations of the current job",
-          "Gets things done even in ambiguous situations"
+          "Consistently delivers results beyond what the role demands",
+          "Does the job without needing to be told what to do",
+          "Operates above the bar set for their current level",
+          "Gets things done in ambiguous situations without hand-holding"
         ],
         "Leadership": [
-          "Others seek them out for advice and input",
-          "Brings people together around a shared goal",
-          "Takes initiative and drives things forward",
-          "Rallies the team toward a common direction"
+          "Others seek them out for input before making decisions",
+          "Creates alignment across people with different priorities",
+          "Takes initiative on things that fall outside their job description",
+          "Moves the group forward when direction is unclear"
         ],
         "Readiness": [
-          "Has already shown they can do the next job",
-          "Understands how decisions get made at the next level",
-          "Is already operating at the level above",
-          "Knows what matters to senior stakeholders"
+          "Is already solving the problems of the job above",
+          "Understands how influence actually works at the next level",
+          "Has demonstrated they can operate without the scaffolding of their current role",
+          "Knows what matters to the people who will decide on the promotion"
         ]
       },
       "overlaps": [
-        "Consistently exceeds what the role requires",
-        "Goes beyond the expectations of the current job",
-        "Brings people together around a shared goal",
-        "Rallies the team toward a common direction",
-        "Has already shown they can do the next job",
-        "Is already operating at the level above"
+        "Consistently delivers results beyond what the role demands",
+        "Operates above the bar set for their current level",
+        "Takes initiative on things that fall outside their job description",
+        "Moves the group forward when direction is unclear",
+        "Is already solving the problems of the job above",
+        "Has demonstrated they can operate without the scaffolding of their current role"
       ]
     },
     "partB": {
@@ -326,9 +350,9 @@
       "leftItems": [
         "Considers second-order effects not just the immediate outcome",
         "Is made at the right time — not too early or too late",
-        "Is made by whoever shouts loudest",
-        "Never changes once made",
-        "Avoids any input from others"
+        "Draws on the decision-maker's past experience rather than reopening the analysis",
+        "Is revisited on a regular schedule to confirm it is still the right call",
+        "Comes from whoever has the most relevant expertise in the room"
       ],
       "buckets": {
         "Thinking": [
@@ -346,6 +370,240 @@
       "answers": {
         "Considers second-order effects not just the immediate outcome": "Thinking",
         "Is made at the right time — not too early or too late": "Process"
+      }
+    },
+    "pool": "work",
+    "pairCount": 3,
+    "pairTypes": [
+      "same-bucket",
+      "same-bucket",
+      "same-bucket"
+    ]
+  },
+  {
+    "id": "spot_problem_006",
+    "difficulty": "beginner",
+    "pool": "universal",
+    "pairCount": 1,
+    "pairTypes": [
+      "same-bucket"
+    ],
+    "tags": [
+      "think-clearly",
+      "overlap",
+      "gap"
+    ],
+    "scoring": {
+      "totalPoints": 20,
+      "partAPoints": 10,
+      "partBPoints": 10
+    },
+    "partA": {
+      "topic": "What goes into a successful apology?",
+      "buckets": {
+        "Acknowledgment": [
+          "Names the specific behavior that caused harm",
+          "Accepts responsibility without adding context as an excuse",
+          "Does not minimize what happened",
+          "States clearly what went wrong without deflecting"
+        ],
+        "Repair": [
+          "Asks what the other person needs to feel okay",
+          "Makes a specific commitment to change",
+          "Follows through on what was promised"
+        ],
+        "Timing": [
+          "Given as soon as the impact is understood",
+          "Not rushed when the other person is not yet ready to hear it",
+          "Does not wait for the other person to raise it first",
+          "Said privately without an audience"
+        ]
+      },
+      "overlaps": [
+        "Given as soon as the impact is understood",
+        "Does not wait for the other person to raise it first"
+      ]
+    },
+    "partB": {
+      "topic": "What helps when you feel overwhelmed?",
+      "leftItems": [
+        "Say out loud exactly what is making this moment feel unmanageable",
+        "Pick the one thing on your list that does not actually need to happen today and move it",
+        "Stay busy so you do not have time to worry",
+        "Add more structure and systems right away",
+        "Push through until everything is done"
+      ],
+      "buckets": {
+        "Slow down": [
+          "Take a breath before responding to anything",
+          "Step away from the situation for a short time"
+        ],
+        "Get clear": [
+          "Write down exactly what is on your mind",
+          "Identify the one thing that matters most right now"
+        ],
+        "Act small": [
+          "Choose one thing to do next",
+          "Complete something small to build momentum"
+        ]
+      },
+      "answers": {
+        "Say out loud exactly what is making this moment feel unmanageable": "Get clear",
+        "Pick the one thing on your list that does not actually need to happen today and move it": "Act small"
+      }
+    }
+  },
+  {
+    "id": "spot_problem_007",
+    "difficulty": "intermediate",
+    "pool": "universal",
+    "pairCount": 2,
+    "pairTypes": [
+      "same-bucket",
+      "cross-bucket"
+    ],
+    "tags": [
+      "think-clearly",
+      "overlap",
+      "gap"
+    ],
+    "scoring": {
+      "totalPoints": 20,
+      "partAPoints": 10,
+      "partBPoints": 10
+    },
+    "partA": {
+      "topic": "What makes a close friendship last?",
+      "buckets": {
+        "Trust": [
+          "Keeps what you share between you",
+          "Tells you hard truths instead of comfortable agreement",
+          "Does not speak for you to others without checking",
+          "Does not judge your past against who you are becoming"
+        ],
+        "Presence": [
+          "Shows up when things get difficult",
+          "Does not need an occasion to reach out",
+          "Reaches out without waiting for you to ask first",
+          "Remembers what you are going through right now"
+        ],
+        "Growth": [
+          "Makes space for who you are becoming",
+          "Challenges your thinking without dismissing your view",
+          "Is not threatened by your success or how you have changed"
+        ]
+      },
+      "overlaps": [
+        "Does not need an occasion to reach out",
+        "Reaches out without waiting for you to ask first",
+        "Tells you hard truths instead of comfortable agreement",
+        "Challenges your thinking without dismissing your view"
+      ]
+    },
+    "partB": {
+      "topic": "What makes it easier to focus deeply?",
+      "leftItems": [
+        "All notifications are off and out of reach",
+        "You know exactly what done looks like for this session",
+        "You feel completely motivated before you begin",
+        "You have cleared everything else off your list first",
+        "You have given yourself a generous time block so there is no pressure"
+      ],
+      "buckets": {
+        "Environment": [
+          "Your phone is in another room",
+          "The space signals that it is time to work"
+        ],
+        "Mindset": [
+          "You have already decided what you are doing — no choices to make mid-session",
+          "You are not fighting urgency from other open tasks"
+        ],
+        "Momentum": [
+          "You start with something small to build traction",
+          "The last session ended with clear notes on where to pick up"
+        ]
+      },
+      "answers": {
+        "All notifications are off and out of reach": "Environment",
+        "You know exactly what done looks like for this session": "Mindset"
+      }
+    }
+  },
+  {
+    "id": "spot_problem_008",
+    "difficulty": "advanced",
+    "pool": "universal",
+    "pairCount": 3,
+    "pairTypes": [
+      "cross-bucket",
+      "same-bucket",
+      "same-bucket"
+    ],
+    "tags": [
+      "think-clearly",
+      "overlap",
+      "gap"
+    ],
+    "scoring": {
+      "totalPoints": 20,
+      "partAPoints": 10,
+      "partBPoints": 10
+    },
+    "partA": {
+      "topic": "What does emotional intelligence look like in practice?",
+      "buckets": {
+        "Self-awareness": [
+          "Can name what they are actually feeling beyond stressed or fine",
+          "Notices when a reaction is bigger than the situation warrants",
+          "Recognizes which situations trigger them before they are already inside one",
+          "Tracks the gap between what they intended and the impact it had"
+        ],
+        "Regulation": [
+          "Responds from a choice rather than a reflex",
+          "Can sit with discomfort without needing to resolve it immediately",
+          "Does not need the situation to change in order to feel okay"
+        ],
+        "Empathy": [
+          "Holds their own position while genuinely hearing someone else's",
+          "Does not need to win an argument to feel secure",
+          "Can receive hard feedback without shutting down or deflecting"
+        ]
+      },
+      "overlaps": [
+        "Recognizes which situations trigger them before they are already inside one",
+        "Responds from a choice rather than a reflex",
+        "Can sit with discomfort without needing to resolve it immediately",
+        "Does not need the situation to change in order to feel okay",
+        "Holds their own position while genuinely hearing someone else's",
+        "Does not need to win an argument to feel secure"
+      ]
+    },
+    "partB": {
+      "topic": "What separates people who achieve long-term goals from those who don't?",
+      "leftItems": [
+        "Returns to the process after falling off rather than waiting to restart",
+        "Their environment makes the right behavior the path of least resistance",
+        "Has extraordinarily high willpower",
+        "Never misses a day once they commit",
+        "Relies on motivation and momentum to keep going"
+      ],
+      "buckets": {
+        "Mindset": [
+          "Sees a setback as data rather than failure",
+          "Measures progress against where they started not where they want to be"
+        ],
+        "Systems": [
+          "Has a default routine that runs without motivation",
+          "Removes decisions that drain willpower before they happen"
+        ],
+        "Identity": [
+          "Defines themselves by the process rather than the outcome",
+          "Acts as though they are already the person who does this consistently"
+        ]
+      },
+      "answers": {
+        "Returns to the process after falling off rather than waiting to restart": "Mindset",
+        "Their environment makes the right behavior the path of least resistance": "Systems"
       }
     }
   }
