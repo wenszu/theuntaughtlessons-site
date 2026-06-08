@@ -222,6 +222,9 @@ REUSE AUDIT
       padding: 24px;
       margin-bottom: 18px;
     }
+    .ab-panel h2 + .ab-button {
+      margin-top: 12px;
+    }
     .ab-work-grid {
       display: grid;
       gap: 16px;
@@ -375,6 +378,13 @@ REUSE AUDIT
       font-size: .92rem;
       line-height: 1.45;
     }
+    .ab-action-note {
+      max-width: 620px;
+      margin: 4px 0 0;
+      color: var(--ab-steel);
+      font-size: .92rem;
+      line-height: 1.45;
+    }
     .ab-error {
       display: none;
       margin-top: 10px;
@@ -382,6 +392,15 @@ REUSE AUDIT
       font-weight: 700;
     }
     .ab-error.ab-show { display: block; }
+    .ab-save-status {
+      min-height: 22px;
+      margin-top: 10px;
+      color: var(--ab-steel);
+      font-weight: 700;
+    }
+    .ab-save-status.ab-saved {
+      color: var(--ab-navy);
+    }
     .ab-two-col {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -507,7 +526,8 @@ Complication: Despite its legacy, recent Games have failed to hold the same cult
 Question: How can the Olympics reclaim its cultural relevance in a world of fractured attention and eroded trust?
 
 Answer: The Olympics needs a clarity layer with structured daily viewing routes, narrative-driven athlete coverage, and a tone and partnership system that reduces trust volatility and over-commercialization.</textarea></div>
-        <div class="ab-button-row"><button class="ab-button ab-gold" id="copyAllBtn" type="button">Copy all and continue</button></div>
+        <div class="ab-action-note">Change anything you want first. When it looks right, go to the next step and choose who should review it.</div>
+        <div class="ab-button-row"><button class="ab-button ab-gold" data-next type="button">Next</button></div>
       </div>
     </section>
 
@@ -528,8 +548,8 @@ Answer: The Olympics needs a clarity layer with structured daily viewing routes,
     </section>
 
     <section class="ab-screen" data-screen="5">
-      <div class="ab-hero"><h1>Paste your output</h1><p>Run the prompt in your AI tool, then paste the full output here.</p></div>
-      <div class="ab-panel"><textarea class="ab-textarea" id="aiOutput" style="min-height:300px" placeholder="Paste the full advisory board output from your AI tool here..."></textarea><div class="ab-button-row"><button class="ab-button ab-gold" id="organizeBtn" type="button">Organize my board</button></div><p class="ab-error" id="parseError">We couldn't organize this automatically. You can still read your output above and copy what you need.</p><div id="parsedOutput"></div></div>
+      <div class="ab-hero"><h1>Paste your output</h1><p>Run the prompt in your AI tool, then paste the full output here so you can keep the board response with this exercise.</p></div>
+      <div class="ab-panel"><textarea class="ab-textarea" id="aiOutput" style="min-height:300px" placeholder="Paste the full advisory board output from your AI tool here..."></textarea><p class="ab-action-note">Paste the full response from your AI tool here. This saves it with the exercise before you continue.</p><div class="ab-button-row"><button class="ab-button ab-gold" id="saveResponseBtn" type="button">Save response</button></div><p class="ab-error" id="parseError">Paste the board output first, then save the response.</p><div class="ab-save-status" id="responseSaveStatus" aria-live="polite"></div></div>
       <div class="ab-button-row"><button class="ab-button ab-gold" data-next type="button">Continue</button></div>
     </section>
 
@@ -694,37 +714,28 @@ For the orchestrator, explain why this person is the right one to make the final
 
 Return your recommendations in a clean list format I can easily read and act on.`;
     }
-    function mdToHtml(text) {
-      return text
-        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-        .replace(/\*(.+?)\*/g, '<em>$1</em>');
-    }
-    function organizeOutput() {
-      const text = $('aiOutput').value;
-      const output = $('parsedOutput');
+    function saveAiResponse(button) {
+      const text = $('aiOutput').value.trim();
+      const status = $('responseSaveStatus');
       $('parseError').classList.remove('ab-show');
-      if (!text.includes('What I like:') || !text.includes('ORCHESTRATOR VERDICT')) { $('parseError').classList.add('ab-show'); return; }
-      const beforeVerdict = text.split('ORCHESTRATOR VERDICT')[0];
-      const verdict = text.split('ORCHESTRATOR VERDICT')[1] || '';
-      const parts = beforeVerdict.split(/(?=\nWhat I like:)/);
-      const advisorCards = parts.filter(p => p.includes('What I like:')).map((chunk) => {
-        const nameMatch = chunk.match(/^[\s\S]*?([A-Z][^\n]+?)[\n\r]+What I like:/);
-        const name = nameMatch ? nameMatch[1].trim().replace(/^(ADVISOR|Advisor):?\s*/i, '') : '';
-        const likeMatch = chunk.match(/What I like:\s*([\s\S]*?)(?=What I would challenge|$)/i);
-        const challengeMatch = chunk.match(/What I would challenge[^:]*:\s*([\s\S]*?)(?=What I recommend:|$)/i);
-        const recommendMatch = chunk.match(/What I recommend:\s*([\s\S]*?)$/i);
-        return `<div class="ab-output-card">${name ? `<h3>${name}</h3>` : '<h3>Advisor</h3>'}<p><strong>What I like:</strong> ${mdToHtml((likeMatch?.[1] || '').trim())}</p><p><strong>What I would challenge:</strong> ${mdToHtml((challengeMatch?.[1] || '').trim())}</p><p><strong>What I recommend:</strong> ${mdToHtml((recommendMatch?.[1] || '').trim())}</p></div>`;
-      });
-      const verdictLines = verdict.split('\n').filter(l => l.trim());
-      const verdictHtml = verdictLines.map(line => {
-        const colonIdx = line.indexOf(':');
-        if (colonIdx > 0 && colonIdx < 30) {
-          return `<p><strong>${line.slice(0, colonIdx + 1)}</strong>${mdToHtml(line.slice(colonIdx + 1))}</p>`;
-        }
-        return `<p>${mdToHtml(line)}</p>`;
-      }).join('');
-      output.innerHTML = `<div class="ab-output-grid">${advisorCards.join('')}</div><div class="ab-verdict" id="verdictBlock"><h2>Orchestrator verdict</h2>${verdictHtml}</div><button class="ab-button ab-gold" id="copySummaryBtn" type="button">Copy summary</button>`;
-      $('copySummaryBtn').addEventListener('click', event => copyText(verdict.trim(), event.target));
+      status.textContent = '';
+      status.classList.remove('ab-saved');
+      if (!text) { $('parseError').classList.add('ab-show'); return; }
+      button.disabled = true;
+      const original = button.textContent;
+      button.textContent = 'Saving...';
+      saveBoardProgress()
+        .then(() => {
+          status.textContent = 'Response saved. Continue when you are ready.';
+          status.classList.add('ab-saved');
+        })
+        .catch(() => {
+          status.textContent = 'We could not save this yet. Please try again before continuing.';
+        })
+        .finally(() => {
+          button.disabled = false;
+          button.textContent = original;
+        });
     }
     function updateSummary() {
       $('summaryChips').innerHTML = `${selectedPeople().map(person => `<span class="ab-chip">${person.name}</span>`).join('')}<span class="ab-chip ab-gold-chip">${orchestrator().name}</span>`;
@@ -762,19 +773,21 @@ Return your recommendations in a clean list format I can easily read and act on.
           description: person.description
         })),
         orchestrator: orchestrator(),
-        organizedOutput: $('parsedOutput').textContent.trim(),
+        aiResponse: $('aiOutput').value.trim(),
         page: window.location.href
       };
-      import('../../assets/firebase.js')
+      return import('../../assets/firebase.js')
         .then(({ saveUserProgress }) => saveUserProgress('advisory-board', 'Advisory board with AI', payload))
-        .catch(error => console.warn('Firestore progress save failed.', error));
+        .catch(error => {
+          console.warn('Firestore progress save failed.', error);
+          throw error;
+        });
     }
 
     document.querySelectorAll('[data-copy-target]').forEach(button => button.addEventListener('click', () => copyText($(button.dataset.copyTarget).value, button)));
     document.querySelectorAll('[data-next]').forEach(button => button.addEventListener('click', () => showScreen(currentScreen + 1)));
-    $('copyAllBtn').addEventListener('click', event => { copyText(`Problem Statement\n${$('problemText').value}\n\nIssue Tree\n${$('treeText').value}\n\nSCQA\n${$('scqaText').value}`, event.target); showScreen(3); });
     $('buildPromptBtn').addEventListener('click', () => { $('boardError').classList.remove('ab-show'); if ($('buildPromptBtn').disabled) { $('boardError').classList.add('ab-show'); return; } $('modeAPrompt').value = buildModeA(); $('modeBPrompt').value = buildModeB(); showScreen(4); });
-    $('organizeBtn').addEventListener('click', organizeOutput);
+    $('saveResponseBtn').addEventListener('click', event => saveAiResponse(event.target));
     $('saveBoardBtn').addEventListener('click', event => {
       localStorage.setItem('utl-advisory-board-default', JSON.stringify({ advisors: [...selectedAdvisors], orchestrator: orchestratorId }));
       saveBoardProgress();

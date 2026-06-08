@@ -399,10 +399,19 @@
       align-self: start;
     }
 
-    .side-card { padding: 20px; }
+    .side-card {
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+    }
     .context-text { font-size: 13px; line-height: 1.55; }
     .topic-label { margin-top: 8px; color: var(--navy); font-size: 12px; font-weight: 700; }
-    .edit-link { float: right; margin-top: 10px; color: var(--steel); font-size: 11px; }
+    .edit-link {
+      align-self: flex-end;
+      margin-top: 14px;
+      color: var(--steel);
+      font-size: 11px;
+    }
 
     .reference {
       margin-top: 16px;
