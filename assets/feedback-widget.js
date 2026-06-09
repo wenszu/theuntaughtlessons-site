@@ -14,9 +14,8 @@ const FEEDBACK_TYPES = [
 const STYLES = `
   #utl-feedback-btn {
     position: fixed;
-    bottom: 24px;
     right: 24px;
-    bottom: max(24px, calc(env(safe-area-inset-bottom) + 12px));
+    bottom: max(24px, calc(env(safe-area-inset-bottom) + var(--utl-feedback-bottom-offset, 12px)));
     z-index: 9999;
     display: flex;
     align-items: center;

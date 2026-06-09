@@ -1248,6 +1248,14 @@
         sourceText: '[Voice memo transcript will be loaded here. This will be a rushed, unstructured verbal update from Aiko covering the Olympic project status, key blockers, and next steps — delivered quickly and without structure.]',
         inputPlaceholder: 'Write your structured voice memo summary here...',
         sectionPlaceholders: ['Current status', 'Key blockers', 'Next steps'],
+        scoring: {
+          ...data[0].scoring,
+          coverageKeywords: [
+            { label: 'Current status', terms: ['status', 'current', 'progress', 'project state', 'latest'] },
+            { label: 'Key blockers', terms: ['blocker', 'risk', 'issue', 'constraint', 'stuck'] },
+            { label: 'Next steps', terms: ['next step', 'action', 'owner', 'decision', 'follow up'] }
+          ]
+        },
         sampleAnswer: [
           { title: 'Current status', bullets: ['<strong>Status summary:</strong> Capture the latest project state in clear, decision-ready language.'] },
           { title: 'Key blockers', bullets: ['<strong>Blocker summary:</strong> Separate the few blockers that matter from the surrounding noise.'] },
@@ -1528,7 +1536,7 @@
         : 'Covers all key content groups.';
 
       return {
-        label: 'Coverage',
+        label: 'Content coverage',
         points,
         max: 30,
         message,

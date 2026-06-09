@@ -615,7 +615,7 @@ Best, Yutee Elle</div>
           </div>
 
           <div class="write-to-aiko-actions">
-            <button class="write-to-aiko-submit" type="button" id="writeToAikoSubmit">Submit</button>
+            <button class="write-to-aiko-submit" type="button" id="writeToAikoSubmit">Save</button>
             <button class="write-to-aiko-reset" type="button" id="writeToAikoReset">Try again</button>
           </div>
           <p class="write-to-aiko-status" id="writeToAikoStatus" role="status" aria-live="polite"></p>
@@ -794,7 +794,7 @@ Best, Yutee Elle</div>
 
       submitBtn.addEventListener('click', async () => {
         if (!wordCount(visibleText())) {
-          statusEl.textContent = 'Write your email before submitting.';
+          statusEl.textContent = 'Write your email before saving.';
           return;
         }
 
@@ -820,7 +820,7 @@ Best, Yutee Elle</div>
           const { saveUserProgress } = await import('../../assets/firebase.js');
           await saveUserProgress('write-to-aiko', 'Write to Aiko', payload);
 
-          submitBtn.textContent = 'Submit';
+          submitBtn.textContent = 'Save';
           submitBtn.disabled = true;
           statusEl.innerHTML = 'Progress saved! View your full record on the <a href="../../my-results/index.html" style="color:inherit;font-weight:700;">My Results</a> page.';
         } catch (error) {
@@ -838,7 +838,7 @@ Best, Yutee Elle</div>
         setMode('structured');
         stopTimer();
         updateCounts();
-        submitBtn.textContent = 'Submit';
+        submitBtn.textContent = 'Save';
         submitBtn.disabled = false;
         statusEl.textContent = '';
       });

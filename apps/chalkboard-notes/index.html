@@ -1223,6 +1223,14 @@
         sourceText: 'Use the chalkboard image above as your source. Write down what you notice, then organise the ideas into a clean structure.',
         inputPlaceholder: 'Write your structured chalkboard summary here...',
         sectionPlaceholders: ['Current state', 'Ideal state', 'Roadblocks'],
+        scoring: {
+          ...data[0].scoring,
+          coverageKeywords: [
+            { label: 'Current state', terms: ['current', 'today', 'now', 'known', 'state'] },
+            { label: 'Ideal state', terms: ['ideal', 'target', 'goal', 'outcome', 'future'] },
+            { label: 'Roadblocks', terms: ['roadblock', 'blocker', 'risk', 'barrier', 'challenge'] }
+          ]
+        },
         sampleAnswer: [
           { title: 'Current state', bullets: ['<strong>Current picture:</strong> Summarise what the team seems to know today.'] },
           { title: 'Ideal state', bullets: ['<strong>Target outcome:</strong> Clarify what the team is trying to create.'] },
@@ -1503,7 +1511,7 @@
         : 'Covers all key content groups.';
 
       return {
-        label: 'Coverage',
+        label: 'Content coverage',
         points,
         max: 30,
         message,
