@@ -1488,7 +1488,7 @@
     }
 
     function formatPreview(appId, record) {
-      const r = record.response || {};
+      const r = record.response || record.savedPayload || {};
       if (appId === 'grocery-list') {
         return `${r.bucket1_name || 'Bucket 1'}: ${(r.bucket1_items || []).slice(0, 3).join(', ')} · ${r.bucket2_name || 'Bucket 2'}: ${(r.bucket2_items || []).slice(0, 2).join(', ')} · ${r.bucket3_name || 'Bucket 3'}: ${(r.bucket3_items || []).slice(0, 2).join(', ')}`;
       }
@@ -1500,7 +1500,7 @@
       if (appId === 'issue-tree') return `Hypothesis: ${words(r.hypothesis, 12)}... · ${r.argument1 || 'Argument 1'}: ${(r.argument1_details || [])[0] || ''}`;
       if (appId === 'scqa-builder') return `S: ${words(r.scqa1?.situation, 10)}... · C: ${words(r.scqa1?.complication, 10)}...`;
       if (appId === 'write-to-aiko') return words(r.response || record.response, 30) + '...';
-      if (appId === 'explain-to-aiko' || appId === 'explain-to-aiko-60') return words(r.transcript || record.transcript || '', 30) + '...';
+      if (appId === 'explain-to-aiko' || appId === 'explain-to-aiko-60') return words(r.gem_feedback || r.transcript || record.gem_feedback || record.transcript || '', 30) + '...';
       return words(JSON.stringify(r), 25) + '...';
     }
 
@@ -1525,7 +1525,7 @@
         return `SCQA #1\nSituation: ${r.scqa1?.situation || ''}\nComplication: ${r.scqa1?.complication || ''}\nQuestion: ${r.scqa1?.question || ''}\nAnswer: ${r.scqa1?.answer || ''}\n\nSCQA #2\nSituation: ${r.scqa2?.situation || ''}\nComplication: ${r.scqa2?.complication || ''}\nQuestion: ${r.scqa2?.question || ''}\nAnswer: ${r.scqa2?.answer || ''}`;
       }
       if (appId === 'write-to-aiko') return r.response || record.response || '';
-      if (appId === 'explain-to-aiko' || appId === 'explain-to-aiko-60') return r.transcript || record.transcript || '';
+      if (appId === 'explain-to-aiko' || appId === 'explain-to-aiko-60') return r.gem_feedback || r.transcript || record.gem_feedback || record.transcript || '';
       return JSON.stringify(r, null, 2);
     }
 

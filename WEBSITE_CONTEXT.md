@@ -1,6 +1,6 @@
 # The Untaught Lessons Website Context
 
-Last updated: 2026-06-03
+Last updated: 2026-06-10
 
 Single source of truth for agents working on this repo. Read before making changes, update after structural changes. Detailed historical entries and full page/app maps are in `archive/WEBSITE_CONTEXT_ARCHIVE.md`.
 
@@ -214,6 +214,11 @@ Decisions are made in Claude (claude.ai). JSON updates are handled in Codex. Doc
 - Logo clicks in app headers link back to the homepage.
 
 ## Change Log
+
+### 2026-06-10
+
+- Redesigned the recording assessment flow for `apps/explain-to-aiko/`, `apps/explain-to-aiko-60/`, and `apps/speak-like-obama/` around the shared TSA Gemini Gem. The Aiko pages now instruct learners to record on phone in portrait mode, upload the video/audio to the Gem, and save Gem feedback/reflection in the exercise instead of transcribing into the page; `my-results/` recognizes the new `gem_feedback` field. Speak like Obama now includes a formatted recording script and a matching six-step phone-to-Gem upload flow with the same clipart style.
+- Added the missing final-screen `Mark as done` action to `apps/grocery-list-ai/`; it writes local completion keys and saves `grocery-list-ai` progress to Firestore with the learner reflection.
 
 ### 2026-06-09
 

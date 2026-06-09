@@ -552,6 +552,7 @@
       const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzJE--FL2kB_XDNZRnszCtlyLRPvaLAHGuF5TAOdXJk40atbvf5Y6ELuSK2B7CSLaMN/exec';
       const CONTACT_PROFILE_KEY = 'utl_contact_profile';
       const PREP_STORAGE_KEY = 'utl_explain_to_aiko_120_prep';
+      const TSA_GEM_URL = 'https://gemini.google.com/gem/17XcbtVlZlRPUduFmi_o3z5gunFR5NfVD?usp=sharing';
       const TARGET_SECONDS = 60;
       const TARGET_WORDS = '110-130 words';
       const EMAIL_TO_AIKO = `Hey Aiko!
@@ -778,22 +779,22 @@ Best, Yutee Elle`;
         };
         return `
           <details class="tsa-speak-record-help">
-            <summary>How to record and transcribe</summary>
+            <summary>How to record and upload to the TSA Gem</summary>
             <div class="tsa-speak-help-body">
-              <h3>How to record and transcribe your talk: 6 steps</h3>
+              <h3>How to record and upload your talk: 6 steps</h3>
               <ol class="tsa-speak-help-steps">
-                <li>${icons.camera}<strong>Open your camera app:</strong> Open your phone's native camera app and switch to video mode. Make sure sound is on and you have storage space.</li>
-                <li>${icons.record}<strong>Record your talk:</strong> Prop your phone up so it can capture you clearly. Hit record, give your talk, then stop recording when you are done.</li>
-                <li>${icons.laptop}<strong>Open ChatGPT on your laptop:</strong> Go to chatgpt.com. Click the microphone icon to start voice input. Place your phone close to the laptop microphone.</li>
-                <li>${icons.audio}<strong>Play your video out loud:</strong> Play the recorded video on your phone while ChatGPT listens through the laptop mic. It transcribes in real time.</li>
-                <li>${icons.select}<strong>Copy the transcript:</strong> Once the video ends, stop ChatGPT voice input. Select all the transcribed text and copy it.</li>
-                <li>${icons.paste}<strong>Paste and submit:</strong> Paste the transcript into the box below. Review it quickly, then submit.</li>
+                <li>${icons.camera}<strong>Set up your phone:</strong> Use your phone's camera in portrait video mode. Keep the phone vertical, sound on, your face and shoulders visible, and the room quiet.</li>
+                <li>${icons.select}<strong>Put your notes near the lens:</strong> Keep your talking points close enough to read without looking far away from the camera.</li>
+                <li>${icons.record}<strong>Record one complete take:</strong> Prop the phone at eye level, press record, deliver your explanation, then stop when you are done.</li>
+                <li>${icons.audio}<strong>Check the file:</strong> Play the first few seconds. If the audio is unclear or the framing is distracting, record one cleaner version.</li>
+                <li>${icons.laptop}<strong>Open the TSA Gem:</strong> On your laptop or phone, open <a href="${TSA_GEM_URL}" target="_blank" rel="noopener">the TSA Gem</a> and upload the video or audio file.</li>
+                <li>${icons.paste}<strong>Save what you learn:</strong> Paste the Gem feedback, or write the one change you will make next, in the box below.</li>
               </ol>
-              <p><strong>Alternative free tools if ChatGPT is unavailable:</strong></p>
+              <p><strong>If upload is unavailable:</strong></p>
               <ul>
-                <li><strong>Google Docs voice typing:</strong> Use Tools, then Voice typing. It is free and works in Chrome.</li>
-                <li><strong>Otter.ai free tier:</strong> Upload your video file directly. It transcribes automatically.</li>
-                <li><strong>Manual fallback:</strong> If transcription fails, type what you said as accurately as you can. Minimum 50 words required to submit.</li>
+                <li><strong>Try audio only:</strong> Export or share the recording as audio if the video file is too large.</li>
+                <li><strong>Use a cloud link:</strong> Upload the file to Google Drive and paste a shareable link into the Gem.</li>
+                <li><strong>Fallback:</strong> Paste a transcript and ask the Gem to assess structure, clarity, and likely delivery.</li>
               </ul>
             </div>
           </details>
@@ -805,13 +806,13 @@ Best, Yutee Elle`;
           <section class="tsa-speak-panel">
             <div class="tsa-speak-panel-head">
               <p class="tsa-speak-progress">Step 3 · Recording · 60 seconds</p>
-              <h2>Record your talk.</h2>
-              <p>Record yourself for 60 seconds or less. Aim for ${TARGET_WORDS}. When you are done, transcribe your recording and paste the result below.</p>
+              <h2>Record and upload your talk.</h2>
+              <p>Record yourself for 60 seconds or less, then upload the file to the TSA Gem for feedback. Paste the Gem feedback or your short reflection below so your progress is saved.</p>
             </div>
             <div class="tsa-speak-step">
               ${helpPanel()}
-              <label class="tsa-speak-field-label" for="explainTranscript">Your transcript</label>
-              <textarea class="tsa-speak-textarea" id="explainTranscript" placeholder="Paste your transcript here...">${escapeHtml(state.transcript)}</textarea>
+              <label class="tsa-speak-field-label" for="explainTranscript">Gem feedback or reflection</label>
+              <textarea class="tsa-speak-textarea" id="explainTranscript" placeholder="Paste the TSA Gem feedback, or write the one delivery change you will make next...">${escapeHtml(state.transcript)}</textarea>
               <div class="tsa-speak-time-grid" aria-label="Recording time">
                 <label for="explainMinutes">Minutes
                   <input id="explainMinutes" type="number" min="0" max="10" inputmode="numeric" placeholder="2">
@@ -824,7 +825,7 @@ Best, Yutee Elle`;
               <div class="tsa-speak-actions">
                 <a class="tsa-speak-link-button secondary" href="../../member-login/index.html#phase2">Back to member workspace</a>
                 <button class="tsa-speak-link-button secondary" id="backToPrep" type="button">Back to prep</button>
-                <button class="tsa-speak-button" id="submitTranscript" type="button" disabled>Submit my transcript</button>
+                <button class="tsa-speak-button" id="submitTranscript" type="button" disabled>Save Gem feedback</button>
               </div>
               <p class="explain-aiko-submit-status" id="submitStatus" role="status" aria-live="polite"></p>
             </div>
@@ -838,7 +839,7 @@ Best, Yutee Elle`;
         function update() {
           state.transcript = textarea.value;
           const chars = textarea.value.trim().length;
-          count.textContent = `${chars} characters · ${wordCount(textarea.value)} words · Target: ${TARGET_WORDS}`;
+          count.textContent = `${chars} characters · ${wordCount(textarea.value)} words`;
           submit.disabled = chars < 50;
           status.textContent = '';
         }
@@ -851,16 +852,17 @@ Best, Yutee Elle`;
           const secs = Math.min(59, Math.max(0, Number(document.getElementById('explainSeconds').value || 0)));
           state.durationSeconds = (mins * 60) + secs;
           submit.disabled = true;
-          submit.textContent = 'Submitting...';
+          submit.textContent = 'Saving...';
 
           const payload = {
             email: readProfileEmail(),
             exercise: 'explain-to-aiko-60s',
-            transcript: state.transcript.trim(),
+            gem_feedback: state.transcript.trim(),
             duration_seconds: state.durationSeconds,
             target_seconds: TARGET_SECONDS,
             recommended_words: TARGET_WORDS,
             prep_notes: state.notesMode === 'open' ? state.openNotes : sectionNotesText(),
+            gem_url: TSA_GEM_URL,
             page: window.location.href,
             submitted_at: new Date().toISOString()
           };
@@ -889,7 +891,7 @@ Best, Yutee Elle`;
           <section class="tsa-speak-panel">
             <div class="tsa-speak-panel-head">
               <p class="tsa-speak-progress">Complete</p>
-              <h2>You just delivered the elevator pitch.</h2>
+              <h2>You saved your Gem feedback.</h2>
               <p>Nice work. Compressing a full explanation into 60 seconds is the skill: keep the point, protect the logic, and cut everything else.</p>
             </div>
             <div class="tsa-speak-step">

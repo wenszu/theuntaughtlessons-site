@@ -233,7 +233,7 @@
 
     .slo-grid {
       display: grid;
-      grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr);
+      grid-template-columns: minmax(0, 1.05fr) minmax(320px, .95fr);
       gap: 18px;
       margin-top: 22px;
     }
@@ -282,6 +282,40 @@
       font-size: 16px;
       font-weight: 600;
       line-height: 1.45;
+    }
+
+    .slo-script-note {
+      margin: 0 0 14px;
+      color: var(--slo-charcoal);
+      font-size: 15px;
+      line-height: 1.5;
+    }
+
+    .slo-script {
+      display: grid;
+      gap: 15px;
+      max-height: 620px;
+      padding: 18px;
+      overflow: auto;
+      border: 1px solid var(--slo-line);
+      border-radius: 8px;
+      background: var(--slo-soft);
+    }
+
+    .slo-script p {
+      margin: 0;
+      color: #253B4F;
+      font-size: 18px;
+      line-height: 1.75;
+    }
+
+    .slo-script .slo-script-break {
+      padding-top: 12px;
+      border-top: 1px dashed rgba(0, 51, 102, .2);
+    }
+
+    .slo-script strong {
+      color: var(--slo-navy);
     }
 
     .slo-steps {
@@ -337,6 +371,52 @@
 
     .slo-step > span:not(.slo-step-number) {
       display: block;
+      font-size: 15px;
+      line-height: 1.45;
+    }
+
+    .slo-recording-steps {
+      counter-reset: slo-upload-step;
+      display: grid;
+      gap: 10px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .slo-recording-steps li {
+      counter-increment: slo-upload-step;
+      display: grid;
+      gap: 7px;
+      padding: 13px;
+      border: 1px solid var(--slo-line);
+      border-radius: 8px;
+      background: var(--slo-soft);
+    }
+
+    .slo-step-icon {
+      display: block;
+      width: 64px;
+      height: 48px;
+      margin: 0 0 4px;
+    }
+
+    .slo-recording-steps li::before {
+      content: "Step " counter(slo-upload-step);
+      color: var(--slo-gold);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+    }
+
+    .slo-recording-steps strong {
+      color: var(--slo-navy);
+      font-size: 16px;
+    }
+
+    .slo-recording-steps span {
       font-size: 15px;
       line-height: 1.45;
     }
@@ -531,33 +611,57 @@
 
     <section class="slo-grid" aria-label="Practice instructions">
       <article class="slo-panel">
-        <h2>The speech</h2>
-        <div class="slo-scenario">
-          <p>You are closing the Olympic project with a short executive speech. The content is already there: rebuild Olympic gravity through shared ritual, athlete-led story arcs, and one coherent strategic spine.</p>
-          <p>The workbook script asks you to respect the constraints: neutrality, global sensitivity, sponsorship, rights, and precision. The delivery challenge is to make those limits sound confident, not defensive.</p>
-          <p>Before opening the Gem, record one version of the speech or choose a short excerpt you want to improve.</p>
+        <h2>Your recording script</h2>
+        <p class="slo-script-note">Put this where you can read it while recording. Aim for calm authority: short pauses, steady pace, and no rush through the turns.</p>
+        <div class="slo-script" aria-label="Speak like Obama speech script">
+          <p>The Olympics is one of the few remaining promises the world still recognizes: that excellence can be earned, witnessed, and remembered—by anyone, from anywhere.</p>
+          <p>That is why this matters.</p>
+          <p>And that is why we should be honest.</p>
+          <p class="slo-script-break">The problem is gravity — it was never awareness, popularity, being seen.</p>
+          <p>The world used to gather around the Games because there was no substitute. Now there are infinite stages, infinite feeds, infinite noise. Shared moments do not happen by default. Meaning is being compressed into clips. Trust is more fragile. And when commercial signals get louder than human stakes, sacredness starts to feel rented.</p>
+          <p>There is no nobility in working to make the idea of the Olympics heard. As it is, it is loud and deafening. Our duty is to make the Olympics inevitable again.</p>
+          <p class="slo-script-break">We believe that happens through three moves.</p>
+          <p><strong>First:</strong> Ritual rebuilt—design shared moments the world can actually enter together, not “catch up on.”</p>
+          <p><strong>Second:</strong> Meaning made legible—athlete-led story arcs that restore stakes, context, and consequence over time.</p>
+          <p><strong>Third:</strong> One coherent spine—a modern thesis, a disciplined tone, and a clarity layer that tells a casual viewer, every day: what matters, why it matters, and who to care about—without losing prestige.</p>
+          <p class="slo-script-break">We will respect the cultural limitations. Neutrality is non-negotiable. Global sensitivity is mandatory. Sponsorship is real. Rights are real. We will not be naive. We will be precise.</p>
+          <p>In the next sixty to ninety days, we will propose one pilot that proves lift—not in buzz, but in gravity: live return, story retention, and trust.</p>
+          <p>The Olympics should once again feel like it is supposed to be: an open stage where human limits become history. Thank you, everyone, and let the games begin!</p>
         </div>
-        <p class="slo-prep-cue">Record or choose your speech excerpt before opening the Gem.</p>
       </article>
 
       <article class="slo-panel">
-        <h2>Your delivery loop</h2>
-        <ol class="slo-steps">
-          <li class="slo-step">
-            <span class="slo-step-number">1</span>
-            <span><strong>Upload your recording.</strong> Give the Gem the audio or transcript so it can evaluate your spoken delivery, not just your writing.</span>
+        <h2>Record and upload</h2>
+        <ol class="slo-recording-steps">
+          <li>
+            <svg class="slo-step-icon" viewBox="0 0 64 48" fill="none" aria-hidden="true"><rect x="18" y="4" width="28" height="40" rx="5" fill="#FFFFFF" stroke="#003366" stroke-width="2"/><rect x="22" y="10" width="20" height="25" rx="2" fill="#F3EDE2" stroke="#003366" stroke-width="1.5"/><path d="M27 18h8l5-3v12l-5-3h-8z" fill="#EEA320" stroke="#003366" stroke-width="1.4"/><circle cx="32" cy="39" r="1.8" fill="#003366"/></svg>
+            <strong>Set up your phone.</strong>
+            <span>Open your camera in portrait video mode. Keep the phone vertical, prop it at eye level, and make sure your face and shoulders are visible.</span>
           </li>
-          <li class="slo-step">
-            <span class="slo-step-number">2</span>
-            <span><strong>Review feedback using the rubric.</strong> Look for the biggest gap in clarity, pacing, emphasis, pauses, confidence, or executive presence.</span>
+          <li>
+            <svg class="slo-step-icon" viewBox="0 0 64 48" fill="none" aria-hidden="true"><rect x="8" y="7" width="39" height="34" rx="3" fill="#FFFFFF" stroke="#003366" stroke-width="2"/><rect x="14" y="15" width="25" height="5" rx="1" fill="#EEA320" opacity=".72"/><path d="M14 26h24M14 32h18" stroke="#003366" stroke-width="2" stroke-linecap="round"/><path d="M44 24l9 13 2-7 6-2z" fill="#F3EDE2" stroke="#003366" stroke-width="2" stroke-linejoin="round"/></svg>
+            <strong>Put the script near the lens.</strong>
+            <span>Keep the script close enough to read without looking far away from the camera.</span>
           </li>
-          <li class="slo-step">
-            <span class="slo-step-number">3</span>
-            <span><strong>Choose one or two improvements.</strong> Do not try to fix everything at once. Pick the changes that would most improve how the speech lands.</span>
+          <li>
+            <svg class="slo-step-icon" viewBox="0 0 64 48" fill="none" aria-hidden="true"><rect x="18" y="4" width="28" height="40" rx="5" fill="#FFFFFF" stroke="#003366" stroke-width="2"/><rect x="22" y="10" width="20" height="25" rx="2" fill="#F3EDE2" stroke="#003366" stroke-width="1.5"/><circle cx="32" cy="22" r="7" fill="#EEA320" stroke="#003366" stroke-width="1.5"/><circle cx="32" cy="22" r="3.5" fill="#B85B5B"/><circle cx="32" cy="39" r="1.8" fill="#003366"/></svg>
+            <strong>Record one complete take.</strong>
+            <span>Use the timer if helpful. Pause between sections and keep the final line clean.</span>
           </li>
-          <li class="slo-step">
-            <span class="slo-step-number">4</span>
-            <span><strong>Iterate until it feels ready.</strong> Refine the script, rerecord, and compare versions until your message sounds composed and deliberate.</span>
+          <li>
+            <svg class="slo-step-icon" viewBox="0 0 64 48" fill="none" aria-hidden="true"><rect x="5" y="13" width="18" height="30" rx="4" fill="#FFFFFF" stroke="#003366" stroke-width="2"/><rect x="8" y="18" width="12" height="18" rx="2" fill="#F3EDE2" stroke="#003366" stroke-width="1.4"/><rect x="37" y="10" width="21" height="21" rx="2" fill="#FFFFFF" stroke="#003366" stroke-width="2"/><path d="M33 35h29l-4-4H37z" fill="#F3EDE2" stroke="#003366" stroke-width="2" stroke-linejoin="round"/><path d="M27 21c3 2 3 8 0 10M31 17c6 5 6 14 0 18" stroke="#EEA320" stroke-width="2.4" stroke-linecap="round"/></svg>
+            <strong>Check sound and framing.</strong>
+            <span>Play the first few seconds. If the audio is muddy or the framing distracts, rerecord once.</span>
+          </li>
+          <li>
+            <svg class="slo-step-icon" viewBox="0 0 64 48" fill="none" aria-hidden="true"><rect x="13" y="9" width="38" height="26" rx="3" fill="#FFFFFF" stroke="#003366" stroke-width="2"/><path d="M8 39h48l-4-4H12z" fill="#F3EDE2" stroke="#003366" stroke-width="2" stroke-linejoin="round"/><circle cx="24" cy="22" r="5" fill="#EEA320" stroke="#003366" stroke-width="1.5"/><path d="M32 18h10M32 24h7" stroke="#003366" stroke-width="2" stroke-linecap="round"/><path d="M23 22l2 2 4-5" stroke="#003366" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <strong>Open the TSA Gem.</strong>
+            <span>Use the button below, then upload the video or audio file. If needed, move it from phone to laptop with AirDrop or Google Drive.</span>
+          </li>
+          <li>
+            <svg class="slo-step-icon" viewBox="0 0 64 48" fill="none" aria-hidden="true"><rect x="9" y="9" width="22" height="30" rx="3" fill="#FFFFFF" stroke="#003366" stroke-width="2"/><path d="M16 9c0-3 8-3 8 0h4v6H12V9z" fill="#F3EDE2" stroke="#003366" stroke-width="2" stroke-linejoin="round"/><rect x="39" y="14" width="18" height="24" rx="3" fill="#FFFFFF" stroke="#003366" stroke-width="2"/><path d="M17 23h8M17 29h8M32 24h12" stroke="#003366" stroke-width="2" stroke-linecap="round"/><path d="M40 19l5 5-5 5" stroke="#EEA320" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <strong>Use the feedback for one better take.</strong>
+            <span>Ask the Gem what to fix first, then rerecord with that one change in mind.</span>
           </li>
         </ol>
       </article>
@@ -566,8 +670,8 @@
     <section class="slo-action-card" aria-label="Open Custom Gem">
       <div>
         <p class="slo-label">Practice with AI</p>
-        <h2>Open the Speak like Obama Gem.</h2>
-        <p>Upload your recording, ask for delivery feedback, and keep iterating until the speech sounds like something you would trust yourself to say in the room.</p>
+        <h2>Open the TSA Gem.</h2>
+        <p>Upload your recording and ask for feedback on presence, pacing, emphasis, pauses, and whether the message feels inevitable.</p>
       </div>
       <div class="slo-actions">
         <a class="slo-button slo-button-primary" href="https://gemini.google.com/gem/17XcbtVlZlRPUduFmi_o3z5gunFR5NfVD?usp=sharing" target="_blank" rel="noopener">Open Gem</a>
