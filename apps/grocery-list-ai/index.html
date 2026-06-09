@@ -596,8 +596,10 @@
           </div>
           <div class="buttons">
             <button type="button" data-back="2">Back</button>
+            <button type="button" class="gold" id="markDoneBtn">Mark as done</button>
             <a class="button-link primary" href="../../member-login/phase-1/practice/index.html">Back to workspace</a>
           </div>
+          <p class="small" id="completionStatus" role="status" aria-live="polite"></p>
         </div>
       </article>
     </section>
@@ -705,6 +707,9 @@ ${SUPPLY_LIST_FOR_PROMPT}`
 
     let activityTimer = null;
     let timerMetricHidden = false;
+    const COMPLETION_KEYS = ['utl_done_grocery-list-ai', 'utl_p1_ex2_done'];
+    const APP_ID = 'grocery-list-ai';
+    const EXERCISE_NAME = 'Grocery list with AI';
 
     function copyText(text, button) {
       const done = () => {
@@ -824,6 +829,42 @@ ${SUPPLY_LIST_FOR_PROMPT}`
       document.getElementById('timerResetIconBtn').addEventListener('click', () => {
         activityTimer.reset();
       });
+
+      document.getElementById('markDoneBtn').addEventListener('click', markExerciseDone);
+    }
+
+    function syncDoneButton() {
+      const done = COMPLETION_KEYS.some((key) => localStorage.getItem(key) === 'true');
+      const button = document.getElementById('markDoneBtn');
+      const status = document.getElementById('completionStatus');
+      if (!button || !status) return;
+      button.textContent = done ? 'Done' : 'Mark as done';
+      button.disabled = done;
+      status.textContent = done ? 'Saved to your workspace.' : '';
+    }
+
+    function markExerciseDone() {
+      const reflection = document.getElementById('reflectionText').value.trim();
+      const elapsedSeconds = activityTimer ? activityTimer.elapsedSeconds() : 0;
+      const record = {
+        app_id: APP_ID,
+        phase: 1,
+        exercise: EXERCISE_NAME,
+        completed_at: new Date().toISOString(),
+        duration_seconds: Math.round(elapsedSeconds),
+        marked_done: true,
+        response: {
+          reflection
+        }
+      };
+
+      COMPLETION_KEYS.forEach((key) => localStorage.setItem(key, 'true'));
+      localStorage.setItem('utl_result_' + APP_ID, JSON.stringify(record));
+      syncDoneButton();
+
+      import('../../assets/firebase.js')
+        .then(({ saveUserProgress }) => saveUserProgress(APP_ID, EXERCISE_NAME, record))
+        .catch((error) => console.warn('Firestore progress save failed.', error));
     }
 
     function initializeApp() {
@@ -846,6 +887,7 @@ ${SUPPLY_LIST_FOR_PROMPT}`
       setInterval(syncHeaderTimerIcons, 500);
       syncHeaderTimerIcons();
       wireEvents();
+      syncDoneButton();
     }
 
     initializeApp();
