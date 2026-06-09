@@ -215,6 +215,12 @@ Decisions are made in Claude (claude.ai). JSON updates are handled in Codex. Doc
 
 ## Change Log
 
+### 2026-06-09
+
+- Hardened member workspace progress hydration: `assets/firebase.js#getMemberWorkspaceProgress` now merges `users/{uid}/completed_exercises` into `workspaceProgress.exercises` so Phase unlocks can recover if the summary progress map is stale. `member-login/content-config.js` no longer lets remote `completed: false` clear an existing local completed exercise during hydration.
+- Updated Phase 3 AI assistant launch links: `apps/speak-like-obama/` now opens the shared TSA Gemini Gem, and `apps/lets-switch-hats/` now opens the Gemini Gem version instead of the older ChatGPT link.
+- Fixed Phase 1 feedback items from `[2026] Weekly goals for Aldon`: `apps/rushed-voice-memo/` and `apps/chalkboard-notes/` now override inherited launch-specific coverage keywords with task-specific content coverage criteria; `apps/rushed-voice-memo-ai/` no longer starts with a body scroll lock that can hide the bottom action buttons.
+
 ### 2026-06-03
 
 - Updated public Find your level scoring: `apps/find-your-level/index.html` now supports random/fixed exercise selection from all eight public Sort & Bucket sets, uses concept-based 100-point scoring from `data/tsa-score-bands.js`, and shows the learner's score plus band explanation on the result screen. Admin Console `Assessment visibility & access > Public` controls random vs fixed exercise selection.

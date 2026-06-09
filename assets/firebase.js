@@ -336,10 +336,44 @@ async function getMemberWorkspaceProgress() {
   const user = await getSignedInUser();
   if (!user || !user.uid) return null;
 
-  const userSnap = await getDoc(doc(requireFirestore(), "users", user.uid));
+  const readyDb = requireFirestore();
+  const userSnap = await getDoc(doc(readyDb, "users", user.uid));
   if (!userSnap.exists()) return null;
   const data = userSnap.data() || {};
-  return data.workspaceProgress || null;
+  const progress = data.workspaceProgress || {};
+  progress.exercises = progress.exercises || {};
+
+  try {
+    const completedSnapshot = await getDocs(collection(readyDb, "users", user.uid, "completed_exercises"));
+    completedSnapshot.forEach((exerciseDoc) => {
+      const exerciseId = exerciseDoc.id;
+      const exerciseData = exerciseDoc.data() || {};
+      const isDone = String(exerciseData.status || "").toLowerCase() === "done";
+      if (!isDone) return;
+      const canonicalId = exerciseProgressIds[exerciseId] || exerciseId;
+      const title = exerciseData.exerciseName || progress.exercises[exerciseId]?.title || progress.exercises[canonicalId]?.title || exerciseId;
+      const completedAt = exerciseData.updatedAt || exerciseData.savedPayload?.completed_at || progress.exercises[exerciseId]?.completedAt || progress.exercises[canonicalId]?.completedAt || null;
+      progress.exercises[exerciseId] = {
+        ...(progress.exercises[exerciseId] || {}),
+        visited: true,
+        completed: true,
+        completedAt,
+        title
+      };
+      progress.exercises[canonicalId] = {
+        ...(progress.exercises[canonicalId] || {}),
+        visited: true,
+        completed: true,
+        completedAt,
+        title,
+        appKey: exerciseId
+      };
+    });
+  } catch (error) {
+    console.warn("Completed exercise progress load failed:", error);
+  }
+
+  return progress;
 }
 
 async function getEmailTemplates() {

@@ -31,7 +31,7 @@
       font-family: 'Lato', sans-serif;
     }
 
-    body.tsa-speak-locked { overflow: hidden; }
+    body.tsa-speak-locked:has(.tsa-speak-gate:not(.is-hidden)) { overflow: hidden; }
 
     .tsa-speak-header {
       position: sticky;
@@ -709,7 +709,7 @@
     }
   </style>
 </head>
-<body class="tsa-speak-locked">
+<body>
   <header class="tsa-speak-header">
     <a class="tsa-speak-logo" href="../../index.html" aria-label="The Untaught Lessons home">
       <img src="../../assets/utl-logo-nav-white.png" alt="The Untaught Lessons" />

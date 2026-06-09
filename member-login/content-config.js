@@ -292,7 +292,7 @@ const UTL_CONTENT = {
         legacyEmbedKey: "utl_embed_p3_eyes_on_you",
         title: "Speak like Obama",
         type: "Executive presence",
-        description: "Your task involves two things: being clear, and being impactful. Make it land like Obama.",
+        description: "Your task involves two things: being clear and being impactful. In short, deliver it with Obama-level presence.",
         appUrl: "../apps/speak-like-obama/index.html",
         contextType: "video",
         contextUrl: "https://drive.google.com/file/d/1ndtAyGJpud5jDA5pLyYoGmqOJOeFabPO/view?usp=vids_web",
@@ -462,7 +462,8 @@ const UTL_CONTENT = {
       var saved = remoteExercises[exercise.id] || (appKey ? remoteExercises[appKey] : null);
       if (!saved) return;
       if (typeof saved.visited === "boolean") writeBool(visitedKey(exercise.id), saved.visited);
-      if (typeof saved.completed === "boolean") writeExerciseDone(exercise, saved.completed);
+      if (saved.completed === true) writeExerciseDone(exercise, true);
+      else if (saved.completed === false && !exerciseDone(exercise)) writeExerciseDone(exercise, false);
     });
 
     phases.forEach(function (phaseKey) {
@@ -1327,8 +1328,8 @@ const UTL_CONTENT = {
 
   function assessmentsSection() {
     if (localStorage.getItem("utl_tsa_status") === "hidden") return "";
-    var phase1Done = exercisesDone("phase1");
-    var checkpointCard = phase1Done ? '<article class="ws-phase-card"><div class="ws-phase-stripe"></div><div class="ws-phase-number">B</div><div class="ws-phase-content"><span class="ws-kicker">Assessment</span><h2>The checkpoint</h2><p>Take the mid-program checkpoint after finishing Phase 1 to see how your thinking has shifted.</p></div><div class="ws-phase-actions"><a class="ws-button" href="../apps/tsa-checkpoint/index.html">Open &rarr;</a></div></article>' : '<article class="ws-phase-card ws-locked"><div class="ws-phase-stripe"></div><div class="ws-phase-number">B</div><div class="ws-phase-content"><span class="ws-kicker">Assessment</span><h2>The checkpoint</h2><p>Complete all Phase 1 exercises to unlock this mid-program assessment.</p></div><div class="ws-phase-actions"><span class="ws-pill ws-pill-locked">Locked</span><span class="ws-button ws-disabled">Open &rarr;</span></div></article>';
+    var phase3Done = exercisesDone("phase3");
+    var checkpointCard = phase3Done ? '<article class="ws-phase-card"><div class="ws-phase-stripe"></div><div class="ws-phase-number">B</div><div class="ws-phase-content"><span class="ws-kicker">Assessment</span><h2>The checkpoint</h2><p>Take the post-program checkpoint after finishing all three phases to see how far you have come.</p></div><div class="ws-phase-actions"><a class="ws-button" href="../apps/tsa-checkpoint/index.html">Open &rarr;</a></div></article>' : '<article class="ws-phase-card ws-locked"><div class="ws-phase-stripe"></div><div class="ws-phase-number">B</div><div class="ws-phase-content"><span class="ws-kicker">Assessment</span><h2>The checkpoint</h2><p>Complete all three phases to unlock this post-program assessment.</p></div><div class="ws-phase-actions"><span class="ws-pill ws-pill-locked">Locked</span><span class="ws-button ws-disabled">Open &rarr;</span></div></article>';
     return '<section class="ws-section" id="assessments"><div class="ws-section-head"><h2>Assessments</h2><span class="ws-count">Find your level</span></div><div class="ws-phase-list"><article class="ws-phase-card"><div class="ws-phase-stripe"></div><div class="ws-phase-number">A</div><div class="ws-phase-content"><span class="ws-kicker">Assessment</span><h2>The diagnostic</h2><p>Take the starting assessment when you are ready.</p></div><div class="ws-phase-actions"><a class="ws-button" href="../apps/tsa-diagnostic/index.html">Open &rarr;</a></div></article>' + checkpointCard + '</div></section>';
   }
 
