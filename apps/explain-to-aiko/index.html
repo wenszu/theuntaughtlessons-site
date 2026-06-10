@@ -552,7 +552,7 @@
       const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzJE--FL2kB_XDNZRnszCtlyLRPvaLAHGuF5TAOdXJk40atbvf5Y6ELuSK2B7CSLaMN/exec';
       const CONTACT_PROFILE_KEY = 'utl_contact_profile';
       const PREP_STORAGE_KEY = 'utl_explain_to_aiko_120_prep';
-      const TSA_GEM_URL = 'https://gemini.google.com/gem/17XcbtVlZlRPUduFmi_o3z5gunFR5NfVD?usp=sharing';
+      const PLAYBACK_GEM_URL = 'https://gemini.google.com/gem/17XcbtVlZlRPUduFmi_o3z5gunFR5NfVD?usp=sharing';
       const TARGET_SECONDS = 120;
       const TARGET_WORDS = '220-260 words';
       const EMAIL_TO_AIKO = `Hey Aiko!
@@ -780,7 +780,7 @@ Best, Yutee Elle`;
         };
         return `
           <details class="tsa-speak-record-help">
-            <summary>How to record and upload to the TSA Gem</summary>
+            <summary>How to record and upload to the Playback Gem</summary>
             <div class="tsa-speak-help-body">
               <h3>How to record and upload your talk: 6 steps</h3>
               <ol class="tsa-speak-help-steps">
@@ -788,14 +788,14 @@ Best, Yutee Elle`;
                 <li>${icons.select}<strong>Put your notes near the lens:</strong> Keep your talking points close enough to read without looking far away from the camera.</li>
                 <li>${icons.record}<strong>Record one complete take:</strong> Prop the phone at eye level, press record, deliver your explanation, then stop when you are done.</li>
                 <li>${icons.audio}<strong>Check the file:</strong> Play the first few seconds. If the audio is unclear or the framing is distracting, record one cleaner version.</li>
-                <li>${icons.laptop}<strong>Open the TSA Gem:</strong> On your laptop or phone, open <a href="${TSA_GEM_URL}" target="_blank" rel="noopener">the TSA Gem</a> and upload the video or audio file.</li>
-                <li>${icons.paste}<strong>Save what you learn:</strong> Paste the Gem feedback, or write the one change you will make next, in the box below.</li>
+                <li>${icons.laptop}<strong>Open the Playback Gem:</strong> On your laptop or phone, open <a href="${PLAYBACK_GEM_URL}" target="_blank" rel="noopener">the Playback Gem</a> and upload the video or audio file.</li>
+                <li>${icons.paste}<strong>Save what you learn:</strong> Paste the Playback feedback, or write the one change you will make next, in the box below.</li>
               </ol>
               <p><strong>If upload is unavailable:</strong></p>
               <ul>
                 <li><strong>Try audio only:</strong> Export or share the recording as audio if the video file is too large.</li>
-                <li><strong>Use a cloud link:</strong> Upload the file to Google Drive and paste a shareable link into the Gem.</li>
-                <li><strong>Fallback:</strong> Paste a transcript and ask the Gem to assess structure, clarity, and likely delivery.</li>
+                <li><strong>Use a cloud link:</strong> Upload the file to Google Drive and paste a shareable link into the Playback Gem.</li>
+                <li><strong>Fallback:</strong> Paste a transcript and ask the Playback Gem to assess structure, clarity, and likely delivery.</li>
               </ul>
             </div>
           </details>
@@ -808,12 +808,12 @@ Best, Yutee Elle`;
             <div class="tsa-speak-panel-head">
               <p class="tsa-speak-progress">Step 3 · Recording · 120 seconds</p>
               <h2>Record and upload your talk.</h2>
-              <p>Record yourself for up to 120 seconds, then upload the file to the TSA Gem for feedback. Paste the Gem feedback or your short reflection below so your progress is saved.</p>
+              <p>Record yourself for up to 120 seconds, then upload the file to the Playback Gem for feedback. Paste the Playback feedback or your short reflection below so your progress is saved.</p>
             </div>
             <div class="tsa-speak-step">
               ${helpPanel()}
-              <label class="tsa-speak-field-label" for="explainTranscript">Gem feedback or reflection</label>
-              <textarea class="tsa-speak-textarea" id="explainTranscript" placeholder="Paste the TSA Gem feedback, or write the one delivery change you will make next...">${escapeHtml(state.transcript)}</textarea>
+              <label class="tsa-speak-field-label" for="explainTranscript">Playback feedback or reflection</label>
+              <textarea class="tsa-speak-textarea" id="explainTranscript" placeholder="Paste the Playback feedback, or write the one delivery change you will make next...">${escapeHtml(state.transcript)}</textarea>
               <div class="tsa-speak-time-grid" aria-label="Recording time">
                 <label for="explainMinutes">Minutes
                   <input id="explainMinutes" type="number" min="0" max="10" inputmode="numeric" placeholder="2">
@@ -826,7 +826,7 @@ Best, Yutee Elle`;
               <div class="tsa-speak-actions">
                 <a class="tsa-speak-link-button secondary" href="../../member-login/index.html#phase2">Back to member workspace</a>
                 <button class="tsa-speak-link-button secondary" id="backToPrep" type="button">Back to prep</button>
-                <button class="tsa-speak-button" id="submitTranscript" type="button" disabled>Save Gem feedback</button>
+                <button class="tsa-speak-button" id="submitTranscript" type="button" disabled>Save Playback feedback</button>
               </div>
               <p class="explain-aiko-submit-status" id="submitStatus" role="status" aria-live="polite"></p>
             </div>
@@ -863,7 +863,7 @@ Best, Yutee Elle`;
             target_seconds: TARGET_SECONDS,
             recommended_words: TARGET_WORDS,
             prep_notes: state.notesMode === 'open' ? state.openNotes : sectionNotesText(),
-            gem_url: TSA_GEM_URL,
+            gem_url: PLAYBACK_GEM_URL,
             page: window.location.href,
             submitted_at: new Date().toISOString()
           };
