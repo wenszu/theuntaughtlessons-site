@@ -1250,13 +1250,13 @@
     <div class="results-actions-row">
       <div class="results-actions-left">
         <div class="results-actions-title">Save your results</div>
-        <div class="results-actions-sub">Download a clean text copy of your workbook record, or email the same file content to yourself and anyone else who should receive it.</div>
+      <div class="results-actions-sub">Download a clean text copy of your workbook record, or send a thank-you note with your progress summary and key takeaways.</div>
         <div class="send-status" id="sendStatus" aria-live="polite"></div>
       </div>
       <div class="results-email-form">
         <label class="results-email-label" for="resultsEmailRecipients">Email results to</label>
         <input class="results-email-input" id="resultsEmailRecipients" type="text" autocomplete="email" placeholder="you@example.com, instructor@example.com">
-        <p class="results-email-hint">Separate multiple emails with commas or spaces.</p>
+        <p class="results-email-hint">Separate multiple emails with commas or spaces. The email includes your completion summary and workbook record.</p>
         <div class="results-actions-buttons">
           <button class="btn-download" onclick="downloadResults()">Download my results</button>
           <button class="btn-send" id="btn-send-instructor" onclick="emailMyResults()">Email my results</button>
@@ -1651,7 +1651,7 @@
 
       // 1. Orientation
       const orientContent = renderVideoGrid('orientation') + `<div class="exercise-progress-section"><div class="exercise-section-header"><h4>Activity</h4></div><div class="ex-result-card ${localStorage.getItem('utl_orientation_ready') === 'true' ? '' : 'ex-result-pending'}"><div class="ex-result-header"><div><div class="ex-result-title">Onboarding Readiness</div><div class="ex-result-meta">${localStorage.getItem('utl_orientation_ready') === 'true' ? 'Confirmed' : 'Not yet confirmed'}</div></div><span class="${localStorage.getItem('utl_orientation_ready') === 'true' ? 'ex-badge-done' : 'ex-badge-pending'}">${localStorage.getItem('utl_orientation_ready') === 'true' ? 'Ready' : 'Pending'}</span></div></div></div>`;
-      html += renderAccordion('orientation', 'Home & Orientation', getSummary('orientation'), orientContent);
+      html += renderAccordion('orientation', 'Home & orientation', getSummary('orientation'), orientContent);
 
       // 2. Phases
       const phases = [
@@ -1688,7 +1688,7 @@
         assBody += `<div class="before-after-row">Diagnostic: ${dScore}% → Checkpoint: ${cScore}% · <span class="${delta >= 0 ? 'score-increase' : 'score-decrease'}">${delta >= 0 ? '+' : ''}${delta} points</span></div>`;
       }
       const assContent = `<div class="exercise-progress-section"><div class="exercise-section-header"><h4>Assessments</h4></div><div class="exercise-list">${assBody}</div></div>`;
-      html += renderAccordion('assessment', 'assessments', getSummary('assessment'), assContent);
+      html += renderAccordion('assessment', 'Assessments', getSummary('assessment'), assContent);
 
       mount.innerHTML = html;
     }
@@ -1869,10 +1869,11 @@
           user_email: currentUserEmail(),
           recipients,
           filename: resultsFilename(),
-          results_text: buildResultsText()
+          results_text: buildResultsText(),
+          email_intro: 'Thank you for completing your Untaught Lessons work. Here is a progress summary and the workbook record for reference.'
         })
       }).then(() => {
-        setSendStatus('Sent. Your results email has been queued.', 'success');
+        setSendStatus('Sent. Your thank-you summary email has been queued.', 'success');
       }).catch(() => {
         setSendStatus('Could not send. Please download your results and email them instead.', 'error');
       }).finally(() => {

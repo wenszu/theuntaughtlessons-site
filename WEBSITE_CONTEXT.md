@@ -1,6 +1,6 @@
 # The Untaught Lessons Website Context
 
-Last updated: 2026-06-10
+Last updated: 2026-06-11
 
 Single source of truth for agents working on this repo. Read before making changes, update after structural changes. Detailed historical entries and full page/app maps are in `archive/WEBSITE_CONTEXT_ARCHIVE.md`.
 
@@ -214,6 +214,13 @@ Decisions are made in Claude (claude.ai). JSON updates are handled in Codex. Doc
 - Logo clicks in app headers link back to the homepage.
 
 ## Change Log
+
+### 2026-06-11
+
+- Implemented Aldon feedback batch: phase cards now show `Completed` when exercises are done; member practice apps now load `assets/app-access-guard.js` so direct app URLs require a member session and respect phase locks; the guard also checks individual exercise completion keys when aggregate phase keys are stale.
+- Moved the global feedback widget to the bottom-left and made it more compact to reduce overlap with sticky/final action buttons.
+- Added local completion-key writes to Phase 2/3 save flows where they were missing, added explicit completion handling to Advisory board and Eisenhower, allowed the Advisory board orchestrator to be selected from the existing board, added Advisory board back navigation and a final debrief step, and updated SCQA sample answers from the Aldon notes.
+- Updated My Results capitalization (`Home & orientation`, `Assessments`) and reframed the email action as a thank-you summary with progress and workbook details.
 
 ### 2026-06-10
 

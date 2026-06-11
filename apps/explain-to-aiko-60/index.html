@@ -877,6 +877,7 @@ Best, Yutee Elle`;
             console.warn('Submission failed.', error);
           } finally {
             localStorage.setItem('utl_result_explain_to_aiko_60', JSON.stringify(payload));
+            localStorage.setItem('utl_p2_ex6_done', 'true');
             import('../../assets/firebase.js')
               .then(({ saveUserProgress }) => saveUserProgress('explain-to-aiko-60', 'Explain to Aiko (60s)', payload))
               .catch((error) => console.warn('Firestore progress save failed.', error));
@@ -917,6 +918,7 @@ Best, Yutee Elle`;
       renderTopicCard();
     })();
   </script>
+  <script type="module" src="../../assets/app-access-guard.js?v=1"></script>
   <script type="module" src="../../assets/feedback-widget.js?v=4"></script>
 </body>
 </html>

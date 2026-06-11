@@ -715,6 +715,7 @@ const UTL_CONTENT = {
 
   function phaseStatus(phaseKey) {
     if (!phaseUnlocked(phaseKey)) return "Locked";
+    if (exercisesDone(phaseKey)) return "Completed";
     if (phaseStepState(phaseKey, "watch") === "empty" && phaseStepState(phaseKey, "practice") === "empty") return "Not started";
     return "In progress";
   }
@@ -1321,7 +1322,10 @@ const UTL_CONTENT = {
       var prereqKey = phaseKey === "phase2" ? "phase1" : "phase2";
       var prereqPhase = getPhase(prereqKey);
       var remaining = prereqPhase.exercises.filter(function (ex) { return !exerciseDone(ex); }).length;
-      lockNote = '<span class="ws-lock-note">' + remaining + ' exercise' + (remaining !== 1 ? 's' : '') + ' left in ' + phaseLabels[prereqKey] + ' to unlock</span>';
+      var releaseHidden = (phaseKey === "phase2" && localStorage.getItem("utl_phase2_status") === "hide") || (phaseKey === "phase3" && localStorage.getItem("utl_phase3_status") === "hide");
+      lockNote = releaseHidden && remaining === 0
+        ? '<span class="ws-lock-note">' + phaseLabels[phaseKey] + ' is not released yet</span>'
+        : '<span class="ws-lock-note">' + remaining + ' exercise' + (remaining !== 1 ? 's' : '') + ' left in ' + phaseLabels[prereqKey] + ' to unlock</span>';
     }
     return '<article class="ws-phase-card ' + (unlocked ? "" : "ws-locked") + '"><div class="ws-phase-stripe"></div><div class="ws-phase-number">0' + number + '</div><div class="ws-phase-content"><span class="ws-kicker">' + phaseLabels[phaseKey] + '</span><h2>' + escapeHtml(phase.title) + '</h2><p>' + escapeHtml(phaseDescriptions[phaseKey]) + '</p><div class="ws-trail"><span class="ws-dot ' + phaseStepState(phaseKey, "watch") + '"></span>Watch<span class="ws-arrow">&rarr;</span><span class="ws-dot ' + phaseStepState(phaseKey, "practice") + '"></span>Practice</div></div><div class="ws-phase-actions"><span class="ws-pill ' + pillClass + '">' + status + '</span>' + (unlocked ? '<a class="ws-button" href="' + href + '">Continue &rarr;</a>' : '<span class="ws-button ws-disabled">Continue &rarr;</span>') + lockNote + '</div></article>';
   }

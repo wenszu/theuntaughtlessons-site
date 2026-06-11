@@ -815,6 +815,7 @@ Best, Yutee Elle</div>
         try {
           // 1. Save to LocalStorage so "My Results" can see the text
           localStorage.setItem('utl_result_write-to-aiko', JSON.stringify(payload));
+          localStorage.setItem('utl_p2_ex4_done', 'true');
           
           // 2. Save to Firestore for the permanent member record
           const { saveUserProgress } = await import('../../assets/firebase.js');
@@ -847,6 +848,7 @@ Best, Yutee Elle</div>
       updateCounts();
     })();
   </script>
+  <script type="module" src="../../assets/app-access-guard.js?v=1"></script>
   <script type="module" src="../../assets/feedback-widget.js?v=4"></script>
 </body>
 </html>

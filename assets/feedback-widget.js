@@ -14,7 +14,7 @@ const FEEDBACK_TYPES = [
 const STYLES = `
   #utl-feedback-btn {
     position: fixed;
-    right: 24px;
+    left: 24px;
     bottom: max(24px, calc(env(safe-area-inset-bottom) + var(--utl-feedback-bottom-offset, 12px)));
     z-index: 9999;
     display: flex;
@@ -23,8 +23,8 @@ const STYLES = `
     background: #EEA320;
     color: #003366;
     border: none;
-    border-radius: 20px;
-    padding: 10px 18px;
+    border-radius: 999px;
+    padding: 10px 14px;
     font-family: 'Roboto Mono', monospace;
     font-size: 11px;
     font-weight: 700;
@@ -154,7 +154,7 @@ const STYLES = `
   }
   @media (max-width: 600px) {
     #utl-feedback-btn {
-      right: 16px;
+      left: 16px;
       padding: 10px 14px;
     }
     #utl-feedback-overlay {

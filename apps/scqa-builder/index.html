@@ -1224,6 +1224,7 @@
         response: responseObj
       };
       localStorage.setItem('utl_result_' + appId, JSON.stringify(record));
+      if (appId === 'scqa-builder') localStorage.setItem('utl_p2_ex2_done', 'true');
       import('../../assets/firebase.js')
         .then(({ saveUserProgress }) => saveUserProgress(appId, exerciseName, record))
         .catch((error) => console.warn('Firestore progress save failed.', error));
@@ -1455,6 +1456,7 @@
 
     initializeApp();
   </script>
+  <script type="module" src="../../assets/app-access-guard.js?v=1"></script>
   <script type="module" src="../../assets/feedback-widget.js?v=4"></script>
 </body>
 </html>

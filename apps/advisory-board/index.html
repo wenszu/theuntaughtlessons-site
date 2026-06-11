@@ -482,7 +482,7 @@ REUSE AUDIT
   </header>
 
   <main class="ab-main">
-    <div class="ab-progress" id="progressText">Step 1 of 6</div>
+    <div class="ab-progress" id="progressText">Step 1 of 7</div>
 
     <section class="ab-screen ab-active" data-screen="1">
       <div class="ab-hero"><h1>Advisory board with AI</h1><p>Before you build one, it helps to understand what this tool is doing. Think of it as a structured way to ask AI for multiple perspectives without letting the conversation become noise.</p></div>
@@ -527,7 +527,7 @@ Question: How can the Olympics reclaim its cultural relevance in a world of frac
 
 Answer: The Olympics needs a clarity layer with structured daily viewing routes, narrative-driven athlete coverage, and a tone and partnership system that reduces trust volatility and over-commercialization.</textarea></div>
         <div class="ab-action-note">Change anything you want first. When it looks right, go to the next step and choose who should review it.</div>
-        <div class="ab-button-row"><button class="ab-button ab-gold" data-next type="button">Next</button></div>
+        <div class="ab-button-row"><button class="ab-button" data-back type="button">Back</button><button class="ab-button ab-gold" data-next type="button">Next</button></div>
       </div>
     </section>
 
@@ -535,7 +535,7 @@ Answer: The Olympics needs a clarity layer with structured daily viewing routes,
       <div class="ab-hero"><h1>Build your virtual board</h1><p>Choose the advisors who will pressure-test the work, then choose one orchestrator who will make the final call after everyone has spoken.</p></div>
       <div class="ab-panel" id="savedBanner" hidden><strong>You have a saved board.</strong> It is pre-selected below. Swap anyone out if this problem needs a different perspective.</div>
       <div class="ab-panel"><div class="ab-label">Select at least 3 advisors. You can add more.</div><div class="ab-card-grid" id="advisorGrid"></div></div>
-      <div class="ab-panel"><div class="ab-label">Now choose your orchestrator. This person makes the final call.</div><div class="ab-card-grid" id="orchestratorGrid"></div><p class="ab-note" id="roleNote"></p><div class="ab-button-row"><button class="ab-button ab-gold" id="buildPromptBtn" type="button" disabled>Build my prompt</button></div><p class="ab-error" id="boardError">Select at least 3 advisors and 1 orchestrator first.</p></div>
+      <div class="ab-panel"><div class="ab-label">Now choose your orchestrator. This person makes the final call.</div><div class="ab-card-grid" id="orchestratorGrid"></div><p class="ab-note" id="roleNote"></p><div class="ab-button-row"><button class="ab-button" data-back type="button">Back</button><button class="ab-button ab-gold" id="buildPromptBtn" type="button" disabled>Build my prompt</button></div><p class="ab-error" id="boardError">Select at least 3 advisors and 1 orchestrator first.</p></div>
     </section>
 
     <section class="ab-screen" data-screen="4">
@@ -544,19 +544,25 @@ Answer: The Olympics needs a clarity layer with structured daily viewing routes,
         <div class="ab-panel"><div class="ab-label">Option A. Run your board</div><p>You have built your board. This prompt packages your work, your advisors, and the output format so your AI tool knows exactly what to do.</p><textarea class="ab-prompt-box" id="modeAPrompt" readonly></textarea><button class="ab-button ab-gold" data-copy-target="modeAPrompt" type="button">Copy prompt</button></div>
         <div class="ab-panel"><div class="ab-label">Option B. Build your board with AI first</div><p>Not sure who should be on your panel? Paste this prompt into your AI tool. It will recommend a board of six suited to your specific problem. Then come back and add them as custom advisors.</p><textarea class="ab-prompt-box" id="modeBPrompt" readonly></textarea><button class="ab-button ab-gold" data-copy-target="modeBPrompt" type="button">Copy prompt</button></div>
       </div>
-      <div class="ab-button-row"><button class="ab-button ab-gold" data-next type="button">Continue</button></div>
+      <div class="ab-button-row"><button class="ab-button" data-back type="button">Back</button><button class="ab-button ab-gold" data-next type="button">Continue</button></div>
     </section>
 
     <section class="ab-screen" data-screen="5">
       <div class="ab-hero"><h1>Paste your output</h1><p>Run the prompt in your AI tool, then paste the full output here so you can keep the board response with this exercise.</p></div>
       <div class="ab-panel"><textarea class="ab-textarea" id="aiOutput" style="min-height:300px" placeholder="Paste the full advisory board output from your AI tool here..."></textarea><p class="ab-action-note">Paste the full response from your AI tool here. This saves it with the exercise before you continue.</p><div class="ab-button-row"><button class="ab-button ab-gold" id="saveResponseBtn" type="button">Save response</button></div><p class="ab-error" id="parseError">Paste the board output first, then save the response.</p><div class="ab-save-status" id="responseSaveStatus" aria-live="polite"></div></div>
-      <div class="ab-button-row"><button class="ab-button ab-gold" data-next type="button">Continue</button></div>
+      <div class="ab-button-row"><button class="ab-button" data-back type="button">Back</button><button class="ab-button ab-gold" data-next type="button">Continue</button></div>
     </section>
 
     <section class="ab-screen" data-screen="6">
       <div class="ab-hero"><h1>Save your board</h1><p>You just ran your first advisory board. The most effective leaders keep one on standby. It becomes a trusted panel they can bring to any problem, not just this one.</p></div>
       <div class="ab-panel"><h2>Save this board</h2><div class="ab-chip-row" id="summaryChips"></div><div class="ab-button-row"><button class="ab-button ab-gold" id="saveBoardBtn" type="button">Save as my default board</button></div><p class="ab-note">Next time you open this app, your board will be pre-selected. You can always swap individual members out for a new problem.</p></div>
       <div class="ab-panel"><h2>Build a new board</h2><button class="ab-button" id="newBoardBtn" type="button">Build a different board</button></div>
+      <div class="ab-button-row"><button class="ab-button" data-back type="button">Back</button><button class="ab-button ab-gold" data-next type="button">Continue</button></div>
+    </section>
+
+    <section class="ab-screen" data-screen="7">
+      <div class="ab-hero"><h1>Why this matters</h1><p>The point is not to collect more opinions. The point is to separate useful pressure from noise, then make a sharper call.</p></div>
+      <div class="ab-panel"><h2>What you practiced</h2><p>You gave AI a real work product, assigned distinct lenses, asked for role-specific critique, and used an orchestrator to turn disagreement into a decision. That is the executive skill: not asking AI to decide, but designing the room so your judgment gets better.</p><div class="ab-button-row"><button class="ab-button" data-back type="button">Back</button><button class="ab-button ab-gold" id="markDoneBtn" type="button">Mark as done</button><a class="ab-button" href="../../member-login/phase-2.html#exercises">Back to workspace</a></div><div class="ab-save-status" id="doneStatus" aria-live="polite"></div></div>
     </section>
   </main>
 
@@ -585,7 +591,7 @@ Answer: The Olympics needs a clarity layer with structured daily viewing routes,
     function showScreen(number) {
       currentScreen = number;
       document.querySelectorAll('.ab-screen').forEach(screen => screen.classList.toggle('ab-active', screen.dataset.screen === String(number)));
-      $('progressText').textContent = `Step ${number} of 6`;
+      $('progressText').textContent = `Step ${number} of 7`;
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
     function fallbackCopy(text) {
@@ -599,7 +605,7 @@ Answer: The Olympics needs a clarity layer with structured daily viewing routes,
     function copyText(text, button) {
       const done = () => {
         const original = button.textContent;
-        button.textContent = 'Saved.';
+        button.textContent = 'Copied.';
         window.setTimeout(() => { button.textContent = original; }, 2000);
       };
       if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done).catch(() => { fallbackCopy(text); done(); });
@@ -646,8 +652,8 @@ Answer: The Olympics needs a clarity layer with structured daily viewing routes,
       orchestratorGrid.innerHTML = '';
       board.forEach(person => advisorGrid.appendChild(advisorCard(person, 'advisor')));
       board.forEach(person => orchestratorGrid.appendChild(advisorCard(person, 'orchestrator')));
-      $('roleNote').textContent = selectedAdvisors.has(orchestratorId) ? 'This person is already on your board as an advisor. Choose a different orchestrator or swap their role.' : '';
-      $('buildPromptBtn').disabled = selectedAdvisors.size < 3 || !orchestratorId || selectedAdvisors.has(orchestratorId);
+      $('roleNote').textContent = orchestratorId ? 'The orchestrator can be part of the board or separate from it. Their job is to make the final call after all advisor voices are heard.' : '';
+      $('buildPromptBtn').disabled = selectedAdvisors.size < 3 || !orchestratorId;
     }
     function selectedPeople() { return board.filter(person => selectedAdvisors.has(person.id)); }
     function orchestrator() { return board.find(person => person.id === orchestratorId); }
@@ -774,8 +780,11 @@ Return your recommendations in a clean list format I can easily read and act on.
         })),
         orchestrator: orchestrator(),
         aiResponse: $('aiOutput').value.trim(),
+        completed_at: new Date().toISOString(),
         page: window.location.href
       };
+      localStorage.setItem('utl_p2_ex3_done', 'true');
+      localStorage.setItem('utl_result_advisory-board', JSON.stringify(payload));
       return import('../../assets/firebase.js')
         .then(({ saveUserProgress }) => saveUserProgress('advisory-board', 'Advisory board with AI', payload))
         .catch(error => {
@@ -786,6 +795,7 @@ Return your recommendations in a clean list format I can easily read and act on.
 
     document.querySelectorAll('[data-copy-target]').forEach(button => button.addEventListener('click', () => copyText($(button.dataset.copyTarget).value, button)));
     document.querySelectorAll('[data-next]').forEach(button => button.addEventListener('click', () => showScreen(currentScreen + 1)));
+    document.querySelectorAll('[data-back]').forEach(button => button.addEventListener('click', () => showScreen(Math.max(1, currentScreen - 1))));
     $('buildPromptBtn').addEventListener('click', () => { $('boardError').classList.remove('ab-show'); if ($('buildPromptBtn').disabled) { $('boardError').classList.add('ab-show'); return; } $('modeAPrompt').value = buildModeA(); $('modeBPrompt').value = buildModeB(); showScreen(4); });
     $('saveResponseBtn').addEventListener('click', event => saveAiResponse(event.target));
     $('saveBoardBtn').addEventListener('click', event => {
@@ -794,6 +804,20 @@ Return your recommendations in a clean list format I can easily read and act on.
       copyText('Board saved', event.target);
     });
     $('newBoardBtn').addEventListener('click', () => { selectedAdvisors.clear(); orchestratorId = ''; renderBoard(); showScreen(3); });
+    $('markDoneBtn').addEventListener('click', event => {
+      event.target.disabled = true;
+      event.target.textContent = 'Saving...';
+      saveBoardProgress()
+        .then(() => {
+          event.target.textContent = 'Done';
+          $('doneStatus').textContent = 'Saved to your workspace.';
+        })
+        .catch(() => {
+          event.target.disabled = false;
+          event.target.textContent = 'Mark as done';
+          $('doneStatus').textContent = 'Could not save. Please try again.';
+        });
+    });
     $('timerPauseIconBtn').addEventListener('click', pauseTimer);
     $('timerPlayIconBtn').addEventListener('click', () => timerStarted ? startTimer() : startTimer());
     $('timerResetIconBtn').addEventListener('click', resetTimer);
@@ -804,6 +828,7 @@ Return your recommendations in a clean list format I can easily read and act on.
     renderTimer();
     setInterval(renderTimer, 1000);
   </script>
+  <script type="module" src="../../assets/app-access-guard.js?v=1"></script>
   <script type="module" src="../../assets/feedback-widget.js?v=4"></script>
 </body>
 </html>

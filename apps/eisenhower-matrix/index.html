@@ -649,7 +649,9 @@
 
   <footer class="eisenhower-actions">
     <button class="eisenhower-button navy" id="showExample" type="button">Show example placement</button>
+    <button class="eisenhower-button gold" id="markDone" type="button">Mark as done</button>
     <button class="eisenhower-button gold" id="tryAgain" type="button">Try again</button>
+    <span class="eisenhower-context-copy" id="doneStatus" role="status" aria-live="polite"></span>
   </footer>
 
   <script>
@@ -914,9 +916,21 @@
         const signature = JSON.stringify({ scenarioId: state.scenarioId, placements: state.placements });
         if (state.lastSavedSignature === signature) return;
         state.lastSavedSignature = signature;
+        localStorage.setItem('utl_p3_ex1_done', 'true');
+        localStorage.setItem('utl_result_eisenhower-matrix', JSON.stringify(completionPayload()));
         import('../../assets/firebase.js')
           .then(({ saveUserProgress }) => saveUserProgress('eisenhower-matrix', 'The art of saying no', completionPayload()))
           .catch((error) => console.warn('Firestore progress save failed.', error));
+      }
+
+      function markDone() {
+        const status = document.getElementById('doneStatus');
+        if (Object.keys(state.placements).length !== scenario().tasks.length) {
+          status.textContent = 'Place all 10 tasks before marking this exercise done.';
+          return;
+        }
+        saveCompletionIfReady();
+        status.textContent = 'Saved to your workspace.';
       }
 
       function moveItem(id, zone) {
@@ -1025,6 +1039,7 @@
       });
       showExample.addEventListener('click', showExamplePlacement);
       backToAnswer.addEventListener('click', restoreAnswer);
+      document.getElementById('markDone').addEventListener('click', markDone);
       tryAgain.addEventListener('click', resetBoard);
       timerReset.addEventListener('click', resetTimer);
       timerToggle.addEventListener('click', () => {
@@ -1048,6 +1063,7 @@
       setInterval(renderTimer, 1000);
     })();
   </script>
+  <script type="module" src="../../assets/app-access-guard.js?v=1"></script>
   <script type="module" src="../../assets/feedback-widget.js?v=4"></script>
 </body>
 </html>
