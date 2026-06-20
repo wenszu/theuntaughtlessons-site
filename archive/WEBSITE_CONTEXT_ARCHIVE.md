@@ -236,7 +236,7 @@ Phase 1, Think Clearly. Transcribe voice file via ChatGPT then structure with AI
 
 ### `apps/chalkboard-notes/index.html`
 
-Phase 1, Think Clearly. Take chalkboard image notes and organise into MECE buckets. Image placeholder: `assets/chalkboard-notes.jpg`. Sections: Current state, Ideal state, Roadblocks.
+Phase 1, Think Clearly. Take chalkboard image notes and organise into MECE buckets. Exercise image: `apps/chalkboard-notes/assets/chalkboard-notes.jpg`. Sections: Current state, Ideal state, Roadblocks.
 
 ### `apps/issue-tree-builder/index.html`
 

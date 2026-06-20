@@ -120,7 +120,7 @@ Firebase Functions: `functions/processGoogleGroupSyncJob` watches `google_group_
 | `apps/messy-notes/` | Phase 1 | Turn manager notes into structured response |
 | `apps/rushed-voice-memo/` | Phase 1 | Structure a rushed verbal update |
 | `apps/rushed-voice-memo-ai/` | Phase 1 | Transcribe voice then structure with AI |
-| `apps/chalkboard-notes/` | Phase 1 | Organise chalkboard image notes into MECE |
+| `apps/chalkboard-notes/` | Phase 1 | Organise chalkboard image notes into MECE; exercise media lives in `apps/chalkboard-notes/assets/` |
 | `apps/issue-tree-builder/` | Phase 2 | Build issue tree from question + arguments |
 | `apps/scqa-builder/` | Phase 2 | Write two SCQA formulations from one context |
 | `apps/advisory-board/` | Phase 2 | Virtual advisory board builder (CSS: `ab-`) |
