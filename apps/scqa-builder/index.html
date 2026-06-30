@@ -374,6 +374,7 @@
 
     .btn-secondary:hover { background: var(--tan); }
     .btn:disabled { cursor: not-allowed; opacity: .4; }
+    .btn[hidden], .clear-link[hidden] { display: none; }
 
     .clear-link {
       display: inline-block;
@@ -833,8 +834,6 @@
         <div class="timer-display" id="timerDisplay">00:00</div>
       </div>
       <div class="utility-controls">
-        <button class="icon-timer-btn" id="timerPauseBtn" type="button" aria-label="Pause timer">⏸</button>
-        <button class="icon-timer-btn" id="timerPlayBtn" type="button" aria-label="Start timer">▶</button>
         <button class="icon-timer-btn reset" id="timerResetBtn" type="button" aria-label="Reset timer">↺</button>
       </div>
     </div>
@@ -876,7 +875,7 @@
       <div class="cta-area">
         <button class="btn btn-primary" type="button" id="toScqa1" disabled>Write SCQA #1 →</button>
         <br>
-        <button class="clear-link" type="button" id="clearFresh">Clear and start fresh</button>
+        <button class="clear-link" type="button" id="clearFresh" hidden>Clear and start fresh</button>
       </div>
     </section>
 
@@ -901,7 +900,7 @@
         <button class="btn btn-secondary" type="button" id="editScqa1">Edit SCQA #1</button>
         <button class="btn btn-secondary" type="button" id="checkAnswers">Check my answers</button>
         <button class="btn btn-secondary" type="button" id="showSamples">Show sample answers</button>
-        <button class="btn btn-secondary" type="button" id="startOver">Start over →</button>
+        <button class="btn btn-secondary" type="button" id="startOver" hidden>Start over →</button>
         <a class="btn btn-primary" href="../../member-login/phase-1/practice/index.html">End exercise</a>
       </div>
       <div id="feedbackMount"></div>
@@ -1003,9 +1002,6 @@
       const elapsed = elapsedSeconds();
       $("#timerDisplay").textContent = formatSeconds(elapsed);
       $("#timerDisplay").style.color = elapsed > TIMER_TARGET ? "var(--gold)" : "";
-      $("#timerPauseBtn").disabled = !timerRunning;
-      $("#timerPlayBtn").disabled = timerRunning;
-      $("#timerPlayBtn").setAttribute("aria-label", timerStarted ? "Resume timer" : "Start timer");
       $("#timerMetric").classList.toggle("time-hidden", timerMetricHidden);
       $("#timerMetricToggleBtn").setAttribute("aria-label", timerMetricHidden ? "Show elapsed time" : "Hide elapsed time");
       $("#timerMetricToggleBtn").setAttribute("aria-pressed", timerMetricHidden ? "true" : "false");
@@ -1209,6 +1205,7 @@
       $("#reviewTopic").style.display = state.topicLabel ? "block" : "none";
       $("#reviewGrid").innerHTML = [1, 2].map((n) => reviewColumn(`FORMULATION 0${n}`, state[`scqa${n}`])).join("");
       $("#saveNoticeMount").innerHTML = completionSaveNotice();
+      $("#startOver").hidden = false;
     }
 
     function saveResult(appId, phase, exerciseName, durationSeconds, responseObj) {
@@ -1284,6 +1281,7 @@
       resetTimer();
       renderAll();
       goToScreen(1);
+      $("#startOver").hidden = true;
     }
 
     function normalizeWords(text) { return String(text).toLowerCase().replace(/[^\w\s'-]/g, " ").split(/\s+/).filter(Boolean); }
@@ -1421,8 +1419,6 @@
     $("#cancelStartOver").addEventListener("click", () => $("#confirmModal").classList.remove("show"));
     $("#confirmStartOver").addEventListener("click", () => { $("#confirmModal").classList.remove("show"); clearAll(); });
     $("#confirmModal").addEventListener("click", (event) => { if (event.target.id === "confirmModal") $("#confirmModal").classList.remove("show"); });
-    $("#timerPauseBtn").addEventListener("click", pauseTimer);
-    $("#timerPlayBtn").addEventListener("click", () => timerStarted ? resumeTimer() : startTimer());
     $("#timerResetBtn").addEventListener("click", () => resetTimer());
     $("#timerMetricToggleBtn").addEventListener("click", () => {
       timerMetricHidden = !timerMetricHidden;

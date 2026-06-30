@@ -508,6 +508,22 @@
       color: var(--eisenhower-navy);
     }
 
+    .eisenhower-button.primary-action {
+      border: 1px solid var(--eisenhower-gold);
+      background: var(--eisenhower-gold);
+      color: var(--eisenhower-navy);
+    }
+
+    .eisenhower-button.secondary-action {
+      border: 1px solid rgba(0, 51, 102, .28);
+      background: transparent;
+      color: var(--eisenhower-navy);
+    }
+
+    .eisenhower-button[hidden] {
+      display: none;
+    }
+
     @media (max-width: 940px) {
       .eisenhower-header,
       .eisenhower-context {
@@ -606,7 +622,6 @@
     <div class="eisenhower-timer" aria-label="Timer">
       <span class="eisenhower-timer-label">Timer</span>
       <span class="eisenhower-timer-value" id="timerValue">00:00</span>
-      <button class="eisenhower-icon-button" id="timerToggle" type="button" aria-label="Pause timer">Ⅱ</button>
       <button class="eisenhower-icon-button" id="timerReset" type="button" aria-label="Reset timer">↻</button>
     </div>
   </section>
@@ -649,8 +664,8 @@
 
   <footer class="eisenhower-actions">
     <button class="eisenhower-button navy" id="showExample" type="button">Show example placement</button>
-    <button class="eisenhower-button gold" id="markDone" type="button">Mark as done</button>
-    <button class="eisenhower-button gold" id="tryAgain" type="button">Try again</button>
+    <button class="eisenhower-button primary-action" id="markDone" type="button">Mark as done</button>
+    <button class="eisenhower-button secondary-action" id="tryAgain" type="button" hidden>Try again</button>
     <span class="eisenhower-context-copy" id="doneStatus" role="status" aria-live="polite"></span>
   </footer>
 
@@ -796,7 +811,6 @@
       const backToAnswer = document.getElementById('backToAnswer');
       const tryAgain = document.getElementById('tryAgain');
       const timerValue = document.getElementById('timerValue');
-      const timerToggle = document.getElementById('timerToggle');
       const timerReset = document.getElementById('timerReset');
 
       function scenario() {
@@ -832,8 +846,6 @@
         state.elapsedBeforePause = 0;
         state.timerStartedAt = Date.now();
         state.timerRunning = true;
-        timerToggle.textContent = 'Ⅱ';
-        timerToggle.setAttribute('aria-label', 'Pause timer');
         renderTimer();
       }
 
@@ -930,6 +942,7 @@
           return;
         }
         saveCompletionIfReady();
+        tryAgain.hidden = false;
         status.textContent = 'Saved to your workspace.';
       }
 
@@ -947,6 +960,7 @@
         state.exampleMode = false;
         state.savedPlacements = null;
         state.lastSavedSignature = '';
+        tryAgain.hidden = true;
         resetTimer();
         renderAll();
       }
@@ -1042,20 +1056,6 @@
       document.getElementById('markDone').addEventListener('click', markDone);
       tryAgain.addEventListener('click', resetBoard);
       timerReset.addEventListener('click', resetTimer);
-      timerToggle.addEventListener('click', () => {
-        if (state.timerRunning) {
-          state.elapsedBeforePause = elapsedSeconds();
-          state.timerRunning = false;
-          timerToggle.textContent = '▶';
-          timerToggle.setAttribute('aria-label', 'Resume timer');
-        } else {
-          state.timerStartedAt = Date.now();
-          state.timerRunning = true;
-          timerToggle.textContent = 'Ⅱ';
-          timerToggle.setAttribute('aria-label', 'Pause timer');
-        }
-        renderTimer();
-      });
 
       renderScenarioOptions();
       renderAll();

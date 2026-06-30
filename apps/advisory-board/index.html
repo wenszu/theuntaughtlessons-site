@@ -474,8 +474,6 @@ REUSE AUDIT
         <div class="ab-time-display activity-timer-display" id="timerDisplay">00:00</div>
       </div>
       <div class="ab-controls">
-        <button class="ab-icon-btn" id="timerPauseIconBtn" type="button" aria-label="Pause timer">⏸</button>
-        <button class="ab-icon-btn" id="timerPlayIconBtn" type="button" aria-label="Start timer">▶</button>
         <button class="ab-icon-btn" id="timerResetIconBtn" type="button" aria-label="Reset timer">↺</button>
       </div>
     </div>
@@ -759,8 +757,6 @@ Return your recommendations in a clean list format I can easily read and act on.
     function fmt(total) { return `${String(Math.floor(total / 60)).padStart(2,'0')}:${String(total % 60).padStart(2,'0')}`; }
     function renderTimer() {
       $('timerDisplay').textContent = fmt(seconds());
-      $('timerPauseIconBtn').disabled = !timerRunning;
-      $('timerPlayIconBtn').disabled = timerRunning;
       $('timerMetric').classList.toggle('ab-time-hidden', timerHidden);
       $('timerMetricToggleBtn').innerHTML = timerHidden ? '<svg viewBox="0 0 24 24" fill="none"><path d="M3 3l18 18" stroke="currentColor" stroke-linecap="round"/><path d="M10.6 10.6A2 2 0 0012 14a2 2 0 001.4-.6" stroke="currentColor" stroke-linecap="round"/><path d="M6.5 6.9C4.1 8.5 2.5 12 2.5 12s3.5 6 9.5 6c1.5 0 2.8-.4 3.9-1" stroke="currentColor" stroke-linecap="round"/></svg>' : '<svg viewBox="0 0 24 24" fill="none"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6z" stroke="currentColor"/><circle cx="12" cy="12" r="3" stroke="currentColor"/></svg>';
     }
@@ -818,8 +814,6 @@ Return your recommendations in a clean list format I can easily read and act on.
           $('doneStatus').textContent = 'Could not save. Please try again.';
         });
     });
-    $('timerPauseIconBtn').addEventListener('click', pauseTimer);
-    $('timerPlayIconBtn').addEventListener('click', () => timerStarted ? startTimer() : startTimer());
     $('timerResetIconBtn').addEventListener('click', resetTimer);
     $('timerMetricToggleBtn').addEventListener('click', () => { timerHidden = !timerHidden; renderTimer(); });
     document.addEventListener('input', () => { if (!timerStarted) startTimer(); });

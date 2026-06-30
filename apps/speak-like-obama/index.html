@@ -589,7 +589,6 @@
     <div class="slo-timer" aria-label="Exercise timer">
       <span class="slo-timer-label">Timer</span>
       <span class="slo-timer-value" id="timerValue">00:00</span>
-      <button class="slo-icon-button" id="timerToggle" type="button" aria-label="Start timer" title="Start timer">▶</button>
       <button class="slo-icon-button" id="timerReset" type="button" aria-label="Reset timer" title="Reset timer">↺</button>
     </div>
   </header>
@@ -683,7 +682,6 @@
   <script>
     (() => {
       const timerValue = document.getElementById('timerValue');
-      const timerToggle = document.getElementById('timerToggle');
       const timerReset = document.getElementById('timerReset');
       let elapsed = 0;
       let intervalId = null;
@@ -696,9 +694,6 @@
 
       function renderTimer() {
         timerValue.textContent = formatTime(elapsed);
-        timerToggle.textContent = intervalId ? 'Ⅱ' : '▶';
-        timerToggle.setAttribute('aria-label', intervalId ? 'Pause timer' : 'Start timer');
-        timerToggle.setAttribute('title', intervalId ? 'Pause timer' : 'Start timer');
       }
 
       function stopTimer() {
@@ -708,27 +703,24 @@
         }
       }
 
-      timerToggle.addEventListener('click', () => {
-        if (intervalId) {
-          stopTimer();
-          renderTimer();
-          return;
-        }
-
+      function startTimer() {
+        if (intervalId) return;
         intervalId = window.setInterval(() => {
           elapsed += 1;
           renderTimer();
         }, 1000);
         renderTimer();
-      });
+      }
 
       timerReset.addEventListener('click', () => {
         stopTimer();
         elapsed = 0;
+        startTimer();
         renderTimer();
       });
 
       renderTimer();
+      startTimer();
     })();
   </script>
   <script type="module" src="../../assets/app-access-guard.js?v=1"></script>

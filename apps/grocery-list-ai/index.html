@@ -493,8 +493,6 @@
         </div>
       </div>
       <div class="utility-controls">
-        <button class="icon-timer-btn" id="timerPauseIconBtn" type="button" aria-label="Pause timer">⏸</button>
-        <button class="icon-timer-btn" id="timerPlayIconBtn" type="button" aria-label="Start timer">▶</button>
         <button class="icon-timer-btn reset" id="timerResetIconBtn" type="button" aria-label="Reset timer">↺</button>
       </div>
       <div class="activity-timer-row minimized timer-compat" id="timerRow">
@@ -780,9 +778,6 @@ ${SUPPLY_LIST_FOR_PROMPT}`
     }
 
     function syncHeaderTimerIcons() {
-      document.getElementById('timerPauseIconBtn').disabled = !activityTimer.isRunning();
-      document.getElementById('timerPlayIconBtn').disabled = activityTimer.isRunning();
-      document.getElementById('timerPlayIconBtn').setAttribute('aria-label', activityTimer.hasStarted() ? 'Resume timer' : 'Start timer');
       document.getElementById('timerMetric').classList.toggle('time-hidden', timerMetricHidden);
       document.getElementById('timerMetricToggleBtn').setAttribute('aria-label', timerMetricHidden ? 'Show elapsed time' : 'Hide elapsed time');
       document.getElementById('timerMetricToggleBtn').setAttribute('aria-pressed', timerMetricHidden ? 'true' : 'false');
@@ -816,15 +811,9 @@ ${SUPPLY_LIST_FOR_PROMPT}`
           : 'Ready to continue.';
       });
 
-      document.getElementById('timerPauseIconBtn').addEventListener('click', () => {
-        activityTimer.pause();
-      });
       document.getElementById('timerMetricToggleBtn').addEventListener('click', () => {
         timerMetricHidden = !timerMetricHidden;
         syncHeaderTimerIcons();
-      });
-      document.getElementById('timerPlayIconBtn').addEventListener('click', () => {
-        activityTimer.hasStarted() ? activityTimer.resume() : activityTimer.start();
       });
       document.getElementById('timerResetIconBtn').addEventListener('click', () => {
         activityTimer.reset();

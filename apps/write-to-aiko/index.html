@@ -424,6 +424,10 @@
       color: var(--write-to-aiko-navy);
     }
 
+    .write-to-aiko-reset[hidden] {
+      display: none;
+    }
+
     .write-to-aiko-status {
       min-height: 18px;
       margin: 8px 0 0;
@@ -616,7 +620,7 @@ Best, Yutee Elle</div>
 
           <div class="write-to-aiko-actions">
             <button class="write-to-aiko-submit" type="button" id="writeToAikoSubmit">Save</button>
-            <button class="write-to-aiko-reset" type="button" id="writeToAikoReset">Try again</button>
+            <button class="write-to-aiko-reset" type="button" id="writeToAikoReset" hidden>Try again</button>
           </div>
           <p class="write-to-aiko-status" id="writeToAikoStatus" role="status" aria-live="polite"></p>
         </div>
@@ -823,6 +827,7 @@ Best, Yutee Elle</div>
 
           submitBtn.textContent = 'Save';
           submitBtn.disabled = true;
+          resetBtn.hidden = false;
           statusEl.innerHTML = 'Progress saved! View your full record on the <a href="../../my-results/index.html" style="color:inherit;font-weight:700;">My Results</a> page.';
         } catch (error) {
           console.warn('Firestore progress save failed.', error);
@@ -841,6 +846,7 @@ Best, Yutee Elle</div>
         updateCounts();
         submitBtn.textContent = 'Save';
         submitBtn.disabled = false;
+        resetBtn.hidden = true;
         statusEl.textContent = '';
       });
 

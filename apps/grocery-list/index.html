@@ -20,7 +20,9 @@
       --white: #fff;
       --line: rgba(0, 51, 102, 0.18);
       --shadow: 0 10px 26px rgba(0, 51, 102, 0.08);
-      --radius: 14px;
+      --radius: 8px;
+      --header-height: 76px;
+      --workbench-gap: 12px;
     }
 
     * { box-sizing: border-box; }
@@ -295,9 +297,15 @@
 
     .layout {
       display: grid;
-      grid-template-columns: minmax(260px, 1fr) minmax(560px, 2.2fr);
+      grid-template-columns: minmax(250px, .8fr) minmax(640px, 2.2fr);
       gap: 18px;
       align-items: start;
+      position: sticky;
+      top: calc(var(--header-height) + var(--workbench-gap));
+      z-index: 1;
+      height: clamp(560px, calc(100svh - var(--header-height) - (var(--workbench-gap) * 2)), 720px);
+      min-height: 0;
+      scroll-margin-top: calc(var(--header-height) + var(--workbench-gap));
     }
 
     .panel {
@@ -305,6 +313,14 @@
       border: 1px solid var(--line);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
+    }
+
+    .sorting-panel {
+      display: flex;
+      min-height: 0;
+      height: 100%;
+      flex-direction: column;
+      overflow: hidden;
     }
 
     .panel-head {
@@ -323,16 +339,27 @@
 
     .panel-body { padding: 14px 14px 16px; }
 
+    .sorting-list-body,
+    .sorting-buckets-body {
+      display: flex;
+      flex: 1;
+      min-height: 0;
+      flex-direction: column;
+    }
+
     .item-zone {
-      min-height: 520px;
+      min-height: 0;
+      flex: 1;
+      overflow-y: auto;
       border: 1px dashed rgba(0, 51, 102, 0.25);
-      border-radius: 12px;
+      border-radius: 8px;
       padding: 10px;
       background: linear-gradient(180deg, rgba(243,237,226,.75), rgba(255,255,255,.95));
       transition: .15s ease;
     }
 
     .item-zone.drag-over,
+    .bucket.drag-over,
     .bucket-items.drag-over,
     .item-zone.tap-target,
     .bucket-items.tap-target {
@@ -341,10 +368,14 @@
       box-shadow: 0 0 0 2px rgba(238, 163, 32, .22);
     }
 
+    .bucket.drag-over .bucket-head {
+      background: #fff1d2;
+    }
+
     .item-card {
       background: #fff;
       border: 1px solid rgba(0, 51, 102, 0.16);
-      border-radius: 10px;
+      border-radius: 8px;
       margin-bottom: 8px;
       padding: 10px 12px;
       cursor: grab;
@@ -376,18 +407,57 @@
       display: block;
     }
 
+    .selected-move-bar {
+      display: none;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 10px;
+      padding: 10px;
+      border: 1px solid rgba(238, 163, 32, .45);
+      border-radius: 8px;
+      background: #fff7e9;
+      box-shadow: 0 8px 18px rgba(0, 51, 102, .08);
+    }
+
+    .selected-move-bar.show {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+    }
+
+    .selected-move-text {
+      color: var(--navy);
+      font-size: .92rem;
+      font-weight: 700;
+      line-height: 1.35;
+    }
+
+    .selected-move-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      justify-content: flex-end;
+    }
+
+    .selected-move-actions button {
+      padding: 8px 10px;
+      font-size: .88rem;
+    }
+
     .buckets-wrap {
       display: grid;
       grid-template-columns: repeat(3, minmax(170px, 1fr));
       gap: 10px;
+      flex: 1;
+      min-height: 0;
       margin-bottom: 12px;
     }
 
     .bucket {
       border: 1px solid var(--line);
-      border-radius: 12px;
+      border-radius: 8px;
       background: #fff;
-      min-height: 380px;
+      min-height: 0;
       display: flex;
       flex-direction: column;
     }
@@ -418,14 +488,21 @@
     }
 
     .bucket-items {
-      min-height: 290px;
+      min-height: 0;
       padding: 8px;
       flex: 1;
+      overflow-y: auto;
       margin: 10px;
       border: 2px dashed rgba(0, 51, 102, .18);
-      border-radius: 10px;
+      border-radius: 8px;
       background: #FAF8F3;
       transition: .15s ease;
+    }
+
+    .bucket.drag-over .bucket-items {
+      border-color: var(--gold);
+      background: #fff7e9;
+      box-shadow: 0 0 0 2px rgba(238, 163, 32, .22);
     }
 
     .bucket-empty {
@@ -437,16 +514,53 @@
       text-align: center;
     }
 
+    .bucket-add-target {
+      width: 100%;
+      margin-top: 8px;
+      border-style: dashed;
+      border-color: rgba(0, 51, 102, .25);
+      background: rgba(255, 255, 255, .72);
+      color: var(--navy);
+      font-size: .88rem;
+    }
+
+    .bucket-add-target.is-active {
+      border-color: var(--gold);
+      background: #fff7e9;
+    }
+
+    .bucket-add-target:disabled {
+      display: none;
+    }
+
     textarea {
       width: 100%;
       min-height: 85px;
       border: 1px solid rgba(0,51,102,.2);
-      border-radius: 10px;
+      border-radius: 8px;
       padding: 10px;
       resize: vertical;
       font-family: inherit;
       font-size: .95rem;
       margin-top: 8px;
+    }
+
+    .reflection-panel {
+      flex: 0 0 auto;
+      max-height: 38%;
+      overflow-y: auto;
+      margin-top: 0;
+      background: var(--white);
+      border: 0;
+      border-top: 1px solid var(--line);
+      border-radius: 0 0 var(--radius) var(--radius);
+      box-shadow: none;
+      padding: 14px 16px 16px;
+      scroll-margin-top: calc(var(--header-height) + var(--workbench-gap));
+    }
+
+    .reflection-panel textarea {
+      min-height: 72px;
     }
 
     .buttons {
@@ -479,13 +593,19 @@
       color: #2e2107;
     }
 
+    button.secondary-action {
+      background: #fff;
+      border-color: rgba(0, 51, 102, .28);
+      color: var(--navy);
+    }
+
     button:disabled { opacity: .45; cursor: not-allowed; }
 
     .feedback,
     .sample-answer {
       margin-top: 14px;
       border: 1px solid var(--line);
-      border-radius: 12px;
+      border-radius: 8px;
       background: #fff;
       padding: 12px 14px;
       line-height: 1.45;
@@ -563,14 +683,36 @@
       }
 
       .header-grid { grid-template-columns: 1fr; }
-      .layout { grid-template-columns: 1fr; }
-      .item-zone { min-height: 260px; }
-      .bucket { min-height: 280px; }
-      .bucket-items { min-height: 170px; }
+      .layout {
+        grid-template-columns: 1fr;
+        position: static;
+        height: auto;
+        min-height: auto;
+      }
+      .sorting-panel { height: auto; }
+      .sorting-panel { overflow: visible; }
+      .reflection-panel {
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        margin-top: 18px;
+        max-height: none;
+        overflow: visible;
+      }
+      .item-zone {
+        max-height: 280px;
+        min-height: 220px;
+      }
+      .buckets-wrap {
+        min-height: 360px;
+      }
+      .bucket-items { min-height: 220px; }
     }
 
-    @media (max-width: 720px) {
-      .buckets-wrap { grid-template-columns: 1fr; }
+    @media (min-width: 721px) and (max-width: 980px) {
+      .buckets-wrap {
+        grid-template-columns: repeat(3, minmax(190px, 1fr));
+      }
     }
 
     /* === MOBILE RESPONSIVE — May 2026 === */
@@ -661,6 +803,19 @@
         min-height: 160px;
       }
 
+      .selected-move-bar.show {
+        position: sticky;
+        bottom: 12px;
+        z-index: 10;
+        grid-template-columns: 1fr;
+      }
+
+      .selected-move-actions {
+        display: grid;
+        grid-template-columns: 1fr;
+        width: 100%;
+      }
+
       .buttons {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(min(100%, 160px), 1fr));
@@ -702,8 +857,6 @@
         </div>
       </div>
       <div class="utility-controls">
-        <button class="icon-timer-btn" id="timerPauseIconBtn" type="button" aria-label="Pause timer">⏸</button>
-        <button class="icon-timer-btn" id="timerPlayIconBtn" type="button" aria-label="Start timer">▶</button>
         <button class="icon-timer-btn reset" id="timerResetIconBtn" type="button" aria-label="Reset timer">↺</button>
       </div>
       <div class="activity-timer-row minimized timer-compat" id="timerRow">
@@ -734,27 +887,33 @@
     </header>
 
     <section id="exercise" class="layout">
-      <article id="messy-list" class="panel">
+      <article id="messy-list" class="panel sorting-panel">
         <div class="panel-head">
           <h2>Grocery list</h2>
           <span class="small" id="listCount"></span>
         </div>
-        <div class="panel-body">
+        <div class="panel-body sorting-list-body">
           <div id="messyList" class="item-zone" data-zone="list">
             <p class="small">Loading exercise...</p>
           </div>
           <p class="small">Tip: Drag items on desktop. On mobile, tap an item, then tap a bucket or the list to move it.</p>
           <p class="tap-move-hint" id="tapMoveHint" aria-live="polite"></p>
+          <div class="selected-move-bar" id="selectedMoveBar" aria-live="polite">
+            <div class="selected-move-text" id="selectedMoveText"></div>
+            <div class="selected-move-actions" id="selectedMoveActions"></div>
+          </div>
         </div>
       </article>
 
-      <article id="buckets" class="panel">
+      <article id="buckets" class="panel sorting-panel">
         <div class="panel-head">
           <h2>Your three buckets</h2>
         </div>
-        <div class="panel-body">
+        <div class="panel-body sorting-buckets-body">
           <div class="buckets-wrap" id="bucketsWrap"></div>
+        </div>
 
+        <section class="reflection-panel" aria-label="Reflection and answer controls">
           <label for="whyText"><strong>Why did you choose these three buckets?</strong></label>
           <textarea id="whyText" placeholder="Explain your logic in 2–3 sentences..."></textarea>
 
@@ -762,12 +921,12 @@
             <button id="generateBtn">Generate new list</button>
             <button id="checkBtn" class="primary" disabled>Check my answer</button>
             <button id="sampleBtn">Show sample answer</button>
-            <button id="resetBtn" class="gold">Reset</button>
+            <button id="resetBtn" class="secondary-action hidden">Reset</button>
           </div>
 
           <div id="feedback" class="feedback hidden"></div>
           <div id="sampleAnswer" class="sample-answer hidden"></div>
-        </div>
+        </section>
       </article>
     </section>
   </main>
@@ -794,6 +953,8 @@
     let activityTimer = null;
     let timerMetricHidden = false;
     let selectedItemId = null;
+    let activeDragZone = null;
+    const dragDepthByZone = new WeakMap();
     const COMPLETION_KEYS = ['utl_done_grocery-list', 'utl_done_p1-e1', 'utl_p1_ex1_done'];
 
     // -------------------------
@@ -898,6 +1059,7 @@
 
       renderAll();
       clearFeedback();
+      document.getElementById('resetBtn')?.classList.add('hidden');
       if (activityTimer) activityTimer.reset();
     }
 
@@ -912,7 +1074,7 @@
             <label for="${bucketKey}Input">Name this bucket</label>
             <input id="${bucketKey}Input" class="bucket-name" type="text" placeholder="Bucket ${index + 1}" />
           </div>
-          <div class="bucket-items" data-zone="${bucketKey}"></div>
+          <div class="bucket-items" data-zone="${bucketKey}" data-zone-label="Bucket ${index + 1}"></div>
         `;
         wrap.appendChild(bucket);
       });
@@ -960,6 +1122,14 @@
         empty.textContent = 'Drop or tap items here.';
         zoneEl.appendChild(empty);
       }
+      if (zoneKey !== 'list') {
+        const addTarget = document.createElement('button');
+        addTarget.className = `bucket-add-target${selectedItemId ? ' is-active' : ''}`;
+        addTarget.type = 'button';
+        addTarget.disabled = !selectedItemId || findItemZone(selectedItemId) === zoneKey;
+        addTarget.textContent = selectedItemId ? 'Add selected item here' : 'Select an item first';
+        zoneEl.appendChild(addTarget);
+      }
     }
 
     // -------------------------
@@ -990,10 +1160,49 @@
       document.querySelectorAll('[data-zone]').forEach((zone) => {
         zone.classList.toggle('tap-target', Boolean(selectedItemId) && zone.dataset.zone !== selectedZone);
       });
+      document.querySelectorAll('.bucket-add-target').forEach((button) => {
+        const zone = button.closest('[data-zone]');
+        const isCurrentZone = zone?.dataset.zone === selectedZone;
+        button.disabled = !selectedItemId || isCurrentZone;
+        button.classList.toggle('is-active', Boolean(selectedItemId) && !isCurrentZone);
+        button.textContent = selectedItemId ? 'Add selected item here' : 'Select an item first';
+      });
       const hint = document.getElementById('tapMoveHint');
-      if (!hint) return;
-      hint.classList.toggle('show', Boolean(selectedItem));
-      hint.textContent = selectedItem ? `${selectedItem.name} selected. Tap a bucket or the list to move it.` : '';
+      if (hint) {
+        hint.classList.toggle('show', Boolean(selectedItem));
+        hint.textContent = selectedItem ? `${selectedItem.name} selected. Tap a bucket or the list to move it.` : '';
+      }
+      renderSelectedMoveBar(selectedItem, selectedZone);
+    }
+
+    function getZoneLabel(zoneKey) {
+      if (zoneKey === 'list') return 'Grocery list';
+      const input = document.getElementById(`${zoneKey}Input`);
+      const fallback = document.querySelector(`[data-zone="${zoneKey}"]`)?.dataset.zoneLabel || zoneKey;
+      return input && input.value.trim() ? input.value.trim() : fallback;
+    }
+
+    function renderSelectedMoveBar(selectedItem, selectedZone) {
+      const bar = document.getElementById('selectedMoveBar');
+      const text = document.getElementById('selectedMoveText');
+      const actions = document.getElementById('selectedMoveActions');
+      if (!bar || !text || !actions) return;
+      bar.classList.toggle('show', Boolean(selectedItem));
+      actions.innerHTML = '';
+      if (!selectedItem) {
+        text.textContent = '';
+        return;
+      }
+      text.textContent = `Selected: ${selectedItem.name}`;
+      ['bucket1', 'bucket2', 'bucket3', 'list'].forEach((zoneKey) => {
+        if (zoneKey === selectedZone) return;
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = zoneKey === 'list' ? 'secondary-action' : 'primary';
+        button.dataset.moveSelectedTo = zoneKey;
+        button.textContent = `Move to ${getZoneLabel(zoneKey)}`;
+        actions.appendChild(button);
+      });
     }
 
     function selectItem(itemId) {
@@ -1008,6 +1217,14 @@
         if (itemCard) {
           e.preventDefault();
           selectItem(itemCard.dataset.itemId);
+          return;
+        }
+
+        const moveButton = e.target.closest('[data-move-selected-to]');
+        if (moveButton && selectedItemId) {
+          e.preventDefault();
+          activityTimer.startFromInteraction();
+          moveItem(selectedItemId, moveButton.dataset.moveSelectedTo);
           return;
         }
 
@@ -1033,41 +1250,72 @@
     }
 
     function wireDragAndDrop() {
+      function setDragZone(zone) {
+        if (activeDragZone && activeDragZone !== zone) {
+          activeDragZone.classList.remove('drag-over');
+          activeDragZone.closest('.bucket')?.classList.remove('drag-over');
+          dragDepthByZone.set(activeDragZone, 0);
+        }
+        activeDragZone = zone;
+        if (zone) {
+          zone.classList.add('drag-over');
+          zone.closest('.bucket')?.classList.add('drag-over');
+        }
+      }
+
+      function clearDragZone(zone = activeDragZone) {
+        if (!zone) return;
+        zone.classList.remove('drag-over');
+        zone.closest('.bucket')?.classList.remove('drag-over');
+        dragDepthByZone.set(zone, 0);
+        if (activeDragZone === zone) activeDragZone = null;
+      }
+
       document.addEventListener('dragstart', (e) => {
         if (!e.target.classList.contains('item-card')) return;
         selectedItemId = null;
         renderSelectionState();
         activityTimer.startFromInteraction();
         e.dataTransfer.setData('text/plain', e.target.dataset.itemId);
+        e.dataTransfer.effectAllowed = 'move';
       });
 
       document.addEventListener('dragover', (e) => {
         const zone = e.target.closest('[data-zone]');
         if (!zone) return;
         e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        setDragZone(zone);
       });
 
       document.addEventListener('dragenter', (e) => {
         const zone = e.target.closest('[data-zone]');
         if (!zone) return;
-        zone.classList.add('drag-over');
+        dragDepthByZone.set(zone, (dragDepthByZone.get(zone) || 0) + 1);
+        setDragZone(zone);
       });
 
       document.addEventListener('dragleave', (e) => {
         const zone = e.target.closest('[data-zone]');
         if (!zone) return;
-        zone.classList.remove('drag-over');
+        const nextDepth = Math.max(0, (dragDepthByZone.get(zone) || 1) - 1);
+        dragDepthByZone.set(zone, nextDepth);
+        if (nextDepth === 0) clearDragZone(zone);
       });
 
       document.addEventListener('drop', (e) => {
         const zone = e.target.closest('[data-zone]');
         if (!zone) return;
         e.preventDefault();
-        zone.classList.remove('drag-over');
+        clearDragZone(zone);
         const itemId = e.dataTransfer.getData('text/plain');
         if (!itemId) return;
         activityTimer.startFromInteraction();
         moveItem(itemId, zone.dataset.zone);
+      });
+
+      document.addEventListener('dragend', () => {
+        clearDragZone();
       });
     }
 
@@ -1334,6 +1582,7 @@
         activityTimer.pause();
         const result = evaluate();
         showFeedback(result);
+        document.getElementById('resetBtn').classList.remove('hidden');
       });
 
       document.getElementById('sampleBtn').addEventListener('click', () => {
@@ -1350,6 +1599,7 @@
         selectedItemId = null;
         document.getElementById('whyText').value = '';
         clearFeedback();
+        document.getElementById('resetBtn').classList.add('hidden');
         activityTimer.reset();
         renderAll();
       });
@@ -1358,15 +1608,9 @@
         setExerciseDone(!isExerciseDone());
       });
 
-      document.getElementById('timerPauseIconBtn').addEventListener('click', () => {
-        activityTimer.pause();
-      });
       document.getElementById('timerMetricToggleBtn').addEventListener('click', () => {
         timerMetricHidden = !timerMetricHidden;
         syncHeaderTimerIcons();
-      });
-      document.getElementById('timerPlayIconBtn').addEventListener('click', () => {
-        activityTimer.hasStarted() ? activityTimer.resume() : activityTimer.start();
       });
       document.getElementById('timerResetIconBtn').addEventListener('click', () => {
         activityTimer.reset();
@@ -1374,9 +1618,6 @@
     }
 
     function syncHeaderTimerIcons() {
-      document.getElementById('timerPauseIconBtn').disabled = !activityTimer.isRunning();
-      document.getElementById('timerPlayIconBtn').disabled = activityTimer.isRunning();
-      document.getElementById('timerPlayIconBtn').setAttribute('aria-label', activityTimer.hasStarted() ? 'Resume timer' : 'Start timer');
       document.getElementById('timerMetric').classList.toggle('time-hidden', timerMetricHidden);
       document.getElementById('timerMetricToggleBtn').setAttribute('aria-label', timerMetricHidden ? 'Show elapsed time' : 'Hide elapsed time');
       document.getElementById('timerMetricToggleBtn').setAttribute('aria-pressed', timerMetricHidden ? 'true' : 'false');

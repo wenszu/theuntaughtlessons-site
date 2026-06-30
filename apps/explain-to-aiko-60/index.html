@@ -160,7 +160,7 @@
       overflow: hidden;
       border: 1px solid var(--line);
       border-top: 4px solid var(--gold);
-      border-radius: 12px;
+      border-radius: 8px;
       background: var(--white);
       box-shadow: var(--shadow);
     }
@@ -205,7 +205,7 @@
       margin: 22px 0 0;
       padding: 20px;
       border: 1px solid rgba(0, 51, 102, .12);
-      border-radius: 10px;
+      border-radius: 8px;
       background: var(--white);
     }
 
@@ -242,7 +242,7 @@
       min-height: 100%;
       padding: 18px;
       border: 1px solid var(--line);
-      border-radius: 12px;
+      border-radius: 8px;
       background: var(--white);
     }
 
@@ -304,7 +304,7 @@
       margin: 0 0 18px;
       padding: 6px;
       border: 1px solid rgba(0, 51, 102, .18);
-      border-radius: 12px;
+      border-radius: 8px;
       background: var(--white);
     }
 
@@ -324,6 +324,22 @@
       color: var(--white);
     }
 
+    .mode-guidance {
+      margin: -6px 0 18px;
+      padding: 10px 12px;
+      border: 1px solid rgba(0, 51, 102, .14);
+      border-left: 4px solid var(--gold);
+      border-radius: 8px;
+      background: #FAF8F3;
+      color: #5e5e5e;
+      font-size: 15px;
+      line-height: 1.45;
+    }
+
+    .mode-guidance strong {
+      color: var(--navy);
+    }
+
     .tsa-speak-notes-grid {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -335,7 +351,7 @@
       gap: 8px;
       padding: 10px;
       border: 1px solid var(--line);
-      border-radius: 12px;
+      border-radius: 8px;
       background: var(--white);
     }
 
@@ -348,7 +364,7 @@
     .tsa-speak-record-help {
       margin-bottom: 20px;
       border: 1px solid var(--line);
-      border-radius: 10px;
+      border-radius: 8px;
       background: #FAF8F3;
       overflow: hidden;
     }
@@ -390,7 +406,7 @@
       margin: 0;
       padding: 14px;
       border: 1px solid rgba(0, 51, 102, .12);
-      border-radius: 10px;
+      border-radius: 8px;
       background: var(--white);
     }
 
@@ -710,6 +726,7 @@ Best, Yutee Elle`;
             <button class="tsa-speak-mode-btn ${state.notesMode === 'open' ? 'is-active' : ''}" type="button" data-mode-value="open">Open response</button>
             <button class="tsa-speak-mode-btn ${state.notesMode === 'sections' ? 'is-active' : ''}" type="button" data-mode-value="sections">Three-section response</button>
           </div>
+          <p class="mode-guidance"><strong>Choose one format.</strong> Use <strong>Open response</strong> if you want to write in your own free-form structure; this is the more difficult option. Use <strong>Three-section response</strong> if you want the easier guided option. In both formats, use BSP and the Rule of three.</p>
         `;
       }
 

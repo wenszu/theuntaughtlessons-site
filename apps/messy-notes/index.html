@@ -22,7 +22,7 @@
       --paper: #FAF8F4;
       --line: rgba(0, 51, 102, 0.18);
       --shadow: 0 10px 26px rgba(0, 51, 102, 0.08);
-      --radius: 14px;
+      --radius: 8px;
     }
 
     * { box-sizing: border-box; }
@@ -309,7 +309,11 @@
     .reference-panel {
       position: sticky;
       top: 96px;
-      z-index: 2;
+    }
+
+    .reference-panel .panel-body {
+      max-height: calc(100vh - 170px);
+      overflow-y: auto;
     }
 
     .panel-head {
@@ -337,7 +341,7 @@
     .comparison-box,
     .attempt-card {
       border: 1px solid var(--line);
-      border-radius: 12px;
+      border-radius: 8px;
       background: var(--paper);
     }
 
@@ -447,7 +451,7 @@
     .mode-switch {
       display: inline-flex;
       border: 1px solid var(--line);
-      border-radius: 10px;
+      border-radius: 8px;
       padding: 3px;
       background: var(--paper);
       margin-bottom: 12px;
@@ -468,11 +472,27 @@
       color: #fff;
     }
 
+    .mode-guidance {
+      margin: -2px 0 14px;
+      padding: 10px 12px;
+      border: 1px solid rgba(0, 51, 102, .14);
+      border-left: 4px solid var(--gold);
+      border-radius: 8px;
+      background: #FAF8F3;
+      color: #5e5e5e;
+      font-size: .92rem;
+      line-height: 1.45;
+    }
+
+    .mode-guidance strong {
+      color: var(--navy);
+    }
+
     .response-area {
       width: 100%;
       min-height: 330px;
       border: 1px solid rgba(0,51,102,.2);
-      border-radius: 10px;
+      border-radius: 8px;
       padding: 12px;
       resize: vertical;
       color: var(--charcoal);
@@ -488,7 +508,7 @@
 
     .section-box {
       border: 1px solid var(--line);
-      border-radius: 12px;
+      border-radius: 8px;
       background: #fff;
       padding: 10px;
     }
@@ -522,6 +542,11 @@
       gap: 8px;
     }
 
+    .response-actions {
+      margin-top: 16px;
+      margin-bottom: 24px;
+    }
+
     button {
       border: 1px solid var(--navy);
       border-radius: 8px;
@@ -544,6 +569,18 @@
       color: #2e2107;
     }
 
+    button.primary-action {
+      background: var(--gold);
+      border-color: var(--gold);
+      color: #2e2107;
+    }
+
+    button.secondary-action {
+      background: #fff;
+      border-color: rgba(0, 51, 102, .28);
+      color: var(--navy);
+    }
+
     button:disabled {
       opacity: .45;
       cursor: not-allowed;
@@ -556,7 +593,7 @@
     .attempts-panel {
       margin-top: 14px;
       border: 1px solid var(--line);
-      border-radius: 12px;
+      border-radius: 8px;
       background: #fff;
       padding: 12px 14px;
       line-height: 1.45;
@@ -674,7 +711,7 @@
       display: none;
       margin-top: 14px;
       border: 1px solid var(--line);
-      border-radius: 10px;
+      border-radius: 8px;
       background: var(--paper);
       padding: 4px;
       gap: 4px;
@@ -758,7 +795,7 @@
     .recent-attempts {
       margin: 0 0 14px;
       border: 1px solid var(--line);
-      border-radius: 12px;
+      border-radius: 8px;
       background: var(--paper);
       padding: 10px 12px;
     }
@@ -922,6 +959,8 @@
 
       aside .reference-panel .panel-body {
         display: block;
+        max-height: none;
+        overflow: visible;
       }
 
       aside .panel.open .panel-body {
@@ -987,6 +1026,17 @@
       body[data-mobile-tab="answer"] .comparison-grid,
       body[data-mobile-tab="sample"] .comparison-grid {
         display: block;
+      }
+    }
+
+    @media (min-width: 981px) and (max-height: 760px) {
+      .reference-panel {
+        position: static;
+      }
+
+      .reference-panel .panel-body {
+        max-height: none;
+        overflow: visible;
       }
     }
 
@@ -1120,8 +1170,6 @@
         <div class="timer-display activity-timer-display" id="timerDisplay">00:00</div>
       </div>
       <div class="utility-controls">
-        <button class="icon-timer-btn" id="timerPauseIconBtn" type="button" aria-label="Pause timer">⏸</button>
-        <button class="icon-timer-btn" id="timerPlayIconBtn" type="button" aria-label="Start timer">▶</button>
         <button class="icon-timer-btn reset" id="timerResetIconBtn" type="button" aria-label="Reset timer">↺</button>
       </div>
       <div class="timer-row activity-timer-row minimized timer-compat" id="timerRow">
@@ -1208,6 +1256,7 @@
               <button class="mode-btn active" id="openModeBtn" type="button" data-response-mode="open" onclick="window.switchMessyNotesMode && window.switchMessyNotesMode('open')">Open response</button>
               <button class="mode-btn" id="sectionModeBtn" type="button" data-response-mode="sections" onclick="window.switchMessyNotesMode && window.switchMessyNotesMode('sections')">Three-section response</button>
             </div>
+            <p class="mode-guidance"><strong>Choose one format.</strong> Use <strong>Open response</strong> if you want to write in your own free-form structure; this is the more difficult option. Use <strong>Three-section response</strong> if you want the easier guided option. In both formats, use BSP and the Rule of three.</p>
 
             <div id="openMode">
               <textarea id="openResponse" class="response-area" placeholder=""></textarea>
@@ -1239,9 +1288,9 @@
               });
             </script>
 
-            <div class="buttons">
-              <button id="submitBtn" class="primary" type="button">Submit</button>
-              <button id="tryAgainBtn" class="gold" type="button">Try again</button>
+            <div class="buttons response-actions">
+              <button id="submitBtn" class="primary-action" type="button">Submit</button>
+              <button id="tryAgainBtn" class="secondary-action hidden" type="button">Try again</button>
             </div>
 
             <div id="confirmation" class="confirmation hidden"></div>
@@ -1822,6 +1871,7 @@
       els.submittedAnswer.textContent = response.text;
       els.confirmation.classList.remove('hidden');
       els.confirmation.innerHTML = `<strong>Attempt saved locally.</strong> Submitted ${withinTarget ? 'within' : 'after'} the 5-minute target. Time used: ${formatSeconds(elapsedSeconds)}.${completionSaveNotice()}`;
+      els.tryAgainBtn.classList.remove('hidden');
       els.mobileResultTabs.classList.add('visible');
       els.checklistPanel.classList.remove('hidden');
       renderScore(score);
@@ -1839,6 +1889,7 @@
       state.lastScore = null;
       state.sampleRevealed = false;
       els.confirmation.classList.add('hidden');
+      els.tryAgainBtn.classList.add('hidden');
       els.mobileResultTabs.classList.remove('visible');
       els.checklistPanel.classList.add('hidden');
       els.scorePanel.classList.add('hidden');
@@ -1948,12 +1999,6 @@
         renderAttempts();
       });
 
-      els.timerPauseIconBtn.addEventListener('click', () => {
-        pauseTimer();
-      });
-      els.timerPlayIconBtn.addEventListener('click', () => {
-        activityTimer.hasStarted() ? resumeTimer() : startTimer();
-      });
       els.timerResetIconBtn.addEventListener('click', () => {
         resetTimer();
       });
@@ -1966,9 +2011,6 @@
     }
 
     function syncHeaderTimerIcons() {
-      els.timerPauseIconBtn.disabled = !activityTimer.isRunning();
-      els.timerPlayIconBtn.disabled = activityTimer.isRunning();
-      els.timerPlayIconBtn.setAttribute('aria-label', activityTimer.hasStarted() ? 'Resume timer' : 'Start timer');
       els.timerMetric.classList.toggle('time-hidden', timerMetricHidden);
       els.timerMetricToggleBtn.setAttribute('aria-label', timerMetricHidden ? 'Show elapsed time' : 'Hide elapsed time');
       els.timerMetricToggleBtn.setAttribute('aria-pressed', timerMetricHidden ? 'true' : 'false');
@@ -1995,8 +2037,6 @@
         'pauseTimerBtn',
         'resumeTimerBtn',
         'resetTimerBtn',
-        'timerPauseIconBtn',
-        'timerPlayIconBtn',
         'timerResetIconBtn',
         'timerMetric',
         'timerMetricToggleBtn',
