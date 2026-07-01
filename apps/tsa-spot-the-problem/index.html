@@ -316,6 +316,31 @@
       box-shadow: 0 0 0 3px rgba(238, 163, 32, .28);
     }
 
+    .tsa-stp-add-slot {
+      width: 100%;
+      min-height: 42px;
+      margin-bottom: 10px;
+      padding: 10px 12px;
+      border: 2px dashed rgba(238, 163, 32, .72);
+      border-radius: 8px;
+      background: rgba(255, 248, 233, .86);
+      color: var(--navy);
+      cursor: pointer;
+      font-family: 'Lato', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 1.3;
+      text-align: center;
+      transition: background .15s ease, border-color .15s ease, box-shadow .15s ease;
+    }
+
+    .tsa-stp-add-slot:hover,
+    .tsa-stp-add-slot:focus-visible {
+      border-color: var(--gold);
+      background: #FFF1D2;
+      box-shadow: 0 0 0 2px rgba(238, 163, 32, .18);
+    }
+
     .tsa-stp-part-steel .tsa-stp-left-zone.is-target,
     .tsa-stp-part-steel .tsa-stp-drop-zone.is-target {
       box-shadow: 0 0 0 3px rgba(77, 112, 148, .28);
@@ -1014,6 +1039,7 @@
 
     function renderWorkspace(config) {
       const names = Object.keys(config.sourceBuckets);
+      const selectedZone = selectedItemZone();
       return `
         <section class="tsa-stp-panel">
           <div class="tsa-stp-panel-head">
@@ -1037,6 +1063,7 @@
                       <h3>${escapeHtml(bucket)}</h3>
                       <div class="tsa-stp-drop-zone" data-zone="${escapeHtml(bucket)}">
                         <div class="tsa-stp-items">
+                          ${state.selectedItem && selectedZone !== bucket ? `<button class="tsa-stp-add-slot" type="button" data-move-selected-to="${escapeHtml(bucket)}">Add selected item here</button>` : ''}
                           ${visibleItems.map(item => itemChip(item, bucket, state.part === 'B' && !moved.includes(item) ? 'is-static' : '')).join('')}
                         </div>
                         ${config.showEmptySlots && Object.values(activePartBSet().partB.answers).includes(bucket) ? '<p class="tsa-stp-slot">Missing item slot</p>' : ''}
@@ -1060,12 +1087,20 @@
       return `<button class="tsa-stp-chip ${selected} ${extraClass}" type="button" draggable="${draggable}" data-item="${escapeHtml(item)}" data-zone="${escapeHtml(zone)}">${escapeHtml(item)}</button>`;
     }
 
+    function selectedItemZone() {
+      if (!state.selectedItem) return '';
+      const data = activePartState();
+      if (data.left.includes(state.selectedItem)) return 'left';
+      return Object.entries(data.buckets).find(([, items]) => items.includes(state.selectedItem))?.[0] || '';
+    }
+
     function wireWorkspace() {
       document.querySelectorAll('.tsa-stp-chip:not(.is-static)').forEach(chip => {
         chip.addEventListener('click', handleChipClick);
         chip.addEventListener('dragstart', event => {
           state.selectedItem = null;
           event.dataTransfer.setData('text/plain', chip.dataset.item);
+          state.part === 'A' ? renderPartA() : renderPartB();
         });
       });
 
@@ -1094,7 +1129,7 @@
         return;
       }
       state.selectedItem = state.selectedItem === item ? null : item;
-      refreshSelectedState();
+      state.part === 'A' ? renderPartA() : renderPartB();
     }
 
     function handleZoneClick(event) {

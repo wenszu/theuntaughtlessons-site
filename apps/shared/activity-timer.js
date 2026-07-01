@@ -99,6 +99,7 @@
 
     function startFromInteraction() {
       if (!state.started) start();
+      else if (!state.running) resume();
     }
 
     els.toggleBtn.addEventListener('click', () => setHidden(!state.hidden));

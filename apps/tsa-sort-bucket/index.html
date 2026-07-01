@@ -433,6 +433,30 @@
       text-align: center;
     }
 
+    .tsa-diag-add-slot {
+      width: 100%;
+      min-height: 44px;
+      padding: 10px 12px;
+      border: 2px dashed rgba(238, 163, 32, .72);
+      border-radius: 8px;
+      background: rgba(255, 248, 233, .86);
+      color: var(--navy);
+      cursor: pointer;
+      font-family: 'Lato', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 1.3;
+      text-align: center;
+      transition: background .15s ease, border-color .15s ease, box-shadow .15s ease;
+    }
+
+    .tsa-diag-add-slot:hover,
+    .tsa-diag-add-slot:focus-visible {
+      border-color: var(--gold);
+      background: #FFF1D2;
+      box-shadow: 0 0 0 2px rgba(238, 163, 32, .18);
+    }
+
     .tsa-diag-pill {
       width: 100%;
       padding: 12px 13px;
@@ -971,12 +995,19 @@
 
     function renderPlacements() {
       const unplaced = state.shuffledItems.filter(item => getItemLocation(item) === 'unplaced');
-      document.getElementById('unplacedItems').innerHTML = unplaced.map(item => itemButton(item)).join('');
+      const selectedLocation = state.selectedItem ? getItemLocation(state.selectedItem) : '';
+      const unplacedSlot = state.selectedItem && selectedLocation !== 'unplaced'
+        ? '<button class="tsa-diag-add-slot" type="button" data-move-selected-to="unplaced">Move selected item here</button>'
+        : '';
+      document.getElementById('unplacedItems').innerHTML = unplacedSlot + unplaced.map(item => itemButton(item)).join('');
       document.getElementById('unplacedCount').textContent = `${unplaced.length} left`;
       document.getElementById('bucketGrid').innerHTML = [0, 1, 2].map(index => {
         const bucketId = `bucket-${index}`;
         const label = state.labels[index] || `Bucket ${index + 1}`;
         const bucketItems = state.shuffledItems.filter(item => getItemLocation(item) === bucketId);
+        const addSlot = state.selectedItem && selectedLocation !== bucketId
+          ? `<button class="tsa-diag-add-slot" type="button" data-move-selected-to="${bucketId}">Add selected item here</button>`
+          : '';
         return `
           <div class="tsa-diag-bucket" data-drop-zone="${bucketId}">
             <div class="tsa-diag-select-card">
@@ -988,7 +1019,7 @@
             </div>
             <p class="tsa-diag-list-title">${escapeHtml(label)} <span class="tsa-diag-count">${bucketItems.length}</span></p>
             <div class="tsa-diag-bucket-drop">
-              <div class="tsa-diag-items">${bucketItems.map(item => itemButton(item)).join('')}</div>
+              <div class="tsa-diag-items">${addSlot}${bucketItems.map(item => itemButton(item)).join('')}</div>
               ${bucketItems.length ? '' : '<p class="tsa-diag-empty">Drop or tap items here.</p>'}
             </div>
           </div>
@@ -1003,7 +1034,16 @@
       document.querySelectorAll('.tsa-diag-pill').forEach(button => {
         button.addEventListener('click', handleItemClick);
         button.addEventListener('dragstart', event => {
+          state.selectedItem = null;
           event.dataTransfer.setData('text/plain', button.dataset.item);
+          renderPlacements();
+        });
+      });
+
+      document.querySelectorAll('[data-move-selected-to]').forEach(button => {
+        button.addEventListener('click', event => {
+          event.stopPropagation();
+          if (state.selectedItem) moveItem(state.selectedItem, button.dataset.moveSelectedTo);
         });
       });
 
@@ -1052,7 +1092,7 @@
         return;
       }
       state.selectedItem = state.selectedItem === item ? null : item;
-      refreshSelectedState();
+      renderPlacements();
     }
 
     function handleZoneClick(event) {

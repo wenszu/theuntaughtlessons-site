@@ -214,6 +214,13 @@
       padding: 0;
     }
 
+    .eisenhower-icon-button svg {
+      width: 17px;
+      height: 17px;
+      stroke-width: 2.2;
+      vertical-align: middle;
+    }
+
     .eisenhower-main {
       width: min(1200px, calc(100% - 56px));
       margin: 0 auto;
@@ -326,6 +333,29 @@
 
     .eisenhower-chip[draggable="true"]:active {
       cursor: grabbing;
+    }
+
+    .eisenhower-add-slot {
+      width: 100%;
+      min-height: 38px;
+      border: 2px dashed rgba(238, 163, 32, .72);
+      border-radius: 6px;
+      background: rgba(255, 247, 233, .86);
+      color: var(--eisenhower-navy);
+      cursor: pointer;
+      font-family: 'Lato', Arial, sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 1.25;
+      text-align: center;
+      padding: 8px 10px;
+    }
+
+    .eisenhower-add-slot:hover,
+    .eisenhower-add-slot:focus-visible {
+      background: #fff1d2;
+      border-color: var(--eisenhower-gold);
+      box-shadow: 0 0 0 2px rgba(238, 163, 32, .18);
     }
 
     .eisenhower-handle {
@@ -622,7 +652,8 @@
     <div class="eisenhower-timer" aria-label="Timer">
       <span class="eisenhower-timer-label">Timer</span>
       <span class="eisenhower-timer-value" id="timerValue">00:00</span>
-      <button class="eisenhower-icon-button" id="timerReset" type="button" aria-label="Reset timer">↻</button>
+      <button class="eisenhower-icon-button" id="timerPause" type="button" aria-label="Pause timer"></button>
+      <button class="eisenhower-icon-button" id="timerReset" type="button" aria-label="Reset timer"></button>
     </div>
   </section>
 
@@ -811,6 +842,7 @@
       const backToAnswer = document.getElementById('backToAnswer');
       const tryAgain = document.getElementById('tryAgain');
       const timerValue = document.getElementById('timerValue');
+      const timerPause = document.getElementById('timerPause');
       const timerReset = document.getElementById('timerReset');
 
       function scenario() {
@@ -851,6 +883,30 @@
 
       function renderTimer() {
         timerValue.textContent = formatSeconds(elapsedSeconds());
+        timerPause.setAttribute('aria-label', state.timerRunning ? 'Pause timer' : 'Resume timer');
+        timerPause.innerHTML = state.timerRunning
+          ? '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round"><path d="M8 5v14"/><path d="M16 5v14"/></svg>'
+          : '<svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
+        timerReset.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>';
+      }
+
+      function pauseTimer() {
+        if (!state.timerRunning) return;
+        state.elapsedBeforePause = elapsedSeconds();
+        state.timerStartedAt = null;
+        state.timerRunning = false;
+        renderTimer();
+      }
+
+      function resumeTimer() {
+        if (state.timerRunning) return;
+        state.timerStartedAt = Date.now();
+        state.timerRunning = true;
+        renderTimer();
+      }
+
+      function resumeTimerFromInteraction() {
+        if (!state.timerRunning) resumeTimer();
       }
 
       function placedIdsIn(zone) {
@@ -878,7 +934,11 @@
 
       function renderTaskList() {
         const ids = unplacedIds();
-        taskList.innerHTML = ids.map((id) => makeChip(id)).join('');
+        const current = state.selectedId ? (state.placements[state.selectedId] || 'list') : '';
+        const addSlot = state.selectedId && current !== 'list'
+          ? '<button class="eisenhower-add-slot" type="button" data-move-selected-to="list">Move selected task here</button>'
+          : '';
+        taskList.innerHTML = addSlot + ids.map((id) => makeChip(id)).join('');
         emptyState.classList.toggle('is-visible', ids.length === 0);
       }
 
@@ -888,6 +948,9 @@
             <h3>${quad.title}</h3>
             <p class="eisenhower-quadrant-sub">${quad.sub}</p>
             <div class="eisenhower-zone">
+              ${state.selectedId && (state.placements[state.selectedId] || 'list') !== quad.id
+                ? `<button class="eisenhower-add-slot" type="button" data-move-selected-to="${quad.id}">Add selected task here</button>`
+                : ''}
               ${placedIdsIn(quad.id).map((id) => {
                 const note = state.exampleMode && scenario().sample.ambiguous.includes(taskIndex(id) + 1)
                   ? '<span class="eisenhower-note">Context-dependent. Both placements can be right.</span>'
@@ -1002,13 +1065,21 @@
       document.addEventListener('click', (event) => {
         const chip = event.target.closest('.eisenhower-chip');
         if (chip && !state.exampleMode) {
+          resumeTimerFromInteraction();
           const id = chip.dataset.itemId;
           state.selectedId = state.selectedId === id ? null : id;
-          updateTapTargets();
+          renderAll();
+          return;
+        }
+        const addSlot = event.target.closest('[data-move-selected-to]');
+        if (addSlot && state.selectedId && !state.exampleMode) {
+          resumeTimerFromInteraction();
+          moveItem(state.selectedId, addSlot.dataset.moveSelectedTo);
           return;
         }
         const zone = event.target.closest('[data-zone]');
         if (zone && state.selectedId && !state.exampleMode) {
+          resumeTimerFromInteraction();
           moveItem(state.selectedId, zone.dataset.zone);
         }
       });
@@ -1016,8 +1087,10 @@
       document.addEventListener('dragstart', (event) => {
         const chip = event.target.closest('.eisenhower-chip');
         if (!chip || state.exampleMode) return;
+        resumeTimerFromInteraction();
         state.selectedId = null;
         event.dataTransfer.setData('text/plain', chip.dataset.itemId);
+        renderAll();
       });
 
       document.addEventListener('dragover', (event) => {
@@ -1044,7 +1117,10 @@
         event.preventDefault();
         zone.classList.remove('drag-over');
         const id = event.dataTransfer.getData('text/plain');
-        if (id) moveItem(id, zone.dataset.zone);
+        if (id) {
+          resumeTimerFromInteraction();
+          moveItem(id, zone.dataset.zone);
+        }
       });
 
       scenarioSelect.addEventListener('change', () => {
@@ -1055,6 +1131,9 @@
       backToAnswer.addEventListener('click', restoreAnswer);
       document.getElementById('markDone').addEventListener('click', markDone);
       tryAgain.addEventListener('click', resetBoard);
+      timerPause.addEventListener('click', () => {
+        state.timerRunning ? pauseTimer() : resumeTimer();
+      });
       timerReset.addEventListener('click', resetTimer);
 
       renderScenarioOptions();

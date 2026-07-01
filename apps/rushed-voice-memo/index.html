@@ -209,6 +209,13 @@
       font-size: 21px;
     }
 
+    .icon-timer-btn svg {
+      width: 17px;
+      height: 17px;
+      stroke-width: 2.2;
+      vertical-align: middle;
+    }
+
     .icon-timer-btn:disabled {
       cursor: not-allowed;
       opacity: .45;
@@ -1092,7 +1099,8 @@
         <div class="timer-display activity-timer-display" id="timerDisplay">00:00</div>
       </div>
       <div class="utility-controls">
-        <button class="icon-timer-btn reset" id="timerResetIconBtn" type="button" aria-label="Reset timer">↺</button>
+        <button class="icon-timer-btn" id="timerPauseIconBtn" type="button" aria-label="Pause timer" disabled></button>
+        <button class="icon-timer-btn reset" id="timerResetIconBtn" type="button" aria-label="Reset timer"></button>
       </div>
       <div class="timer-row activity-timer-row minimized timer-compat" id="timerRow">
         <div class="timer-main activity-timer-main">
@@ -1244,9 +1252,6 @@
 
             <div id="recentAttempts" class="recent-attempts hidden"></div>
 
-            <div class="buttons">
-              <a class="button-link" href="../../member-login/phase-1/practice/index.html">End exercise</a>
-            </div>
           </div>
         </article>
       </section>
@@ -1392,6 +1397,7 @@
             <i class="ti ti-device-floppy" aria-hidden="true"></i>
             Your response has been saved to this browser.
             <a href="../../my-results/index.html" class="save-notice-link">View all your results →</a>
+            <a href="../../member-login/phase-1/practice/index.html" class="save-notice-link">Back to Phase 1 exercises →</a>
           </div>
           <div class="save-notice-caveat">Saved on this device only. Copy your response into your companion workbook to keep a permanent record.</div>
         </div>
@@ -1984,6 +1990,11 @@
       els.timerResetIconBtn.addEventListener('click', () => {
         resetTimer();
       });
+      els.timerPauseIconBtn.addEventListener('click', () => {
+        if (!activityTimer.hasStarted()) return;
+        activityTimer.isRunning() ? pauseTimer() : resumeTimer();
+        syncHeaderTimerIcons();
+      });
       els.timerMetricToggleBtn.addEventListener('click', () => {
         timerMetricHidden = !timerMetricHidden;
         syncHeaderTimerIcons();
@@ -1993,12 +2004,20 @@
     }
 
     function syncHeaderTimerIcons() {
+      const timerStarted = activityTimer && activityTimer.hasStarted();
+      const timerRunning = activityTimer && activityTimer.isRunning();
       els.timerMetric.classList.toggle('time-hidden', timerMetricHidden);
       els.timerMetricToggleBtn.setAttribute('aria-label', timerMetricHidden ? 'Show elapsed time' : 'Hide elapsed time');
       els.timerMetricToggleBtn.setAttribute('aria-pressed', timerMetricHidden ? 'true' : 'false');
       els.timerMetricToggleBtn.innerHTML = timerMetricHidden
         ? '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.7 10.7 0 0 1 12 20C5 20 2 12 2 12a18.4 18.4 0 0 1 5.06-5.94"/><path d="M9.9 4.24A10.3 10.3 0 0 1 12 4c7 0 10 8 10 8a18.5 18.5 0 0 1-2.16 3.19"/><path d="M14.12 14.12A3 3 0 0 1 9.88 9.88"/><path d="M1 1l22 22"/></svg>'
         : '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-8 10-8 10 8 10 8-3 8-10 8-10-8-10-8Z"/><circle cx="12" cy="12" r="3"/></svg>';
+      els.timerPauseIconBtn.disabled = !timerStarted;
+      els.timerPauseIconBtn.setAttribute('aria-label', timerRunning ? 'Pause timer' : 'Resume timer');
+      els.timerPauseIconBtn.innerHTML = timerRunning
+        ? '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round"><path d="M8 5v14"/><path d="M16 5v14"/></svg>'
+        : '<svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
+      els.timerResetIconBtn.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>';
     }
 
     function cacheElements() {
@@ -2018,6 +2037,7 @@
         'pauseTimerBtn',
         'resumeTimerBtn',
         'resetTimerBtn',
+        'timerPauseIconBtn',
         'timerResetIconBtn',
         'timerMetric',
         'timerMetricToggleBtn',

@@ -216,6 +216,12 @@
     }
 
     .icon-timer-btn.reset { font-size: 21px; }
+    .icon-timer-btn svg {
+      width: 17px;
+      height: 17px;
+      stroke-width: 2.2;
+      vertical-align: middle;
+    }
     .icon-timer-btn:disabled { cursor: not-allowed; opacity: .45; }
 
     .screen { display: none; }
@@ -834,7 +840,8 @@
         <div class="timer-display" id="timerDisplay">00:00</div>
       </div>
       <div class="utility-controls">
-        <button class="icon-timer-btn reset" id="timerResetBtn" type="button" aria-label="Reset timer">↺</button>
+        <button class="icon-timer-btn" id="timerPauseBtn" type="button" aria-label="Pause timer" disabled></button>
+        <button class="icon-timer-btn reset" id="timerResetBtn" type="button" aria-label="Reset timer"></button>
       </div>
     </div>
   </header>
@@ -901,7 +908,7 @@
         <button class="btn btn-secondary" type="button" id="checkAnswers">Check my answers</button>
         <button class="btn btn-secondary" type="button" id="showSamples">Show sample answers</button>
         <button class="btn btn-secondary" type="button" id="startOver" hidden>Start over →</button>
-        <a class="btn btn-primary" href="../../member-login/phase-1/practice/index.html">End exercise</a>
+        <a class="btn btn-primary" href="../../member-login/phase-2.html#exercises">Back to Phase 2 exercises</a>
       </div>
       <div id="feedbackMount"></div>
       <div id="sampleMount"></div>
@@ -1008,6 +1015,12 @@
       $("#timerMetricToggleBtn").innerHTML = timerMetricHidden
         ? '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.7 10.7 0 0 1 12 20C5 20 2 12 2 12a18.4 18.4 0 0 1 5.06-5.94"/><path d="M9.9 4.24A10.3 10.3 0 0 1 12 4c7 0 10 8 10 8a18.5 18.5 0 0 1-2.16 3.19"/><path d="M14.12 14.12A3 3 0 0 1 9.88 9.88"/><path d="M1 1l22 22"/></svg>'
         : '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-8 10-8 10 8 10 8-3 8-10 8-10-8-10-8Z"/><circle cx="12" cy="12" r="3"/></svg>';
+      $("#timerPauseBtn").disabled = !timerStarted;
+      $("#timerPauseBtn").setAttribute("aria-label", timerRunning ? "Pause timer" : "Resume timer");
+      $("#timerPauseBtn").innerHTML = timerRunning
+        ? '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round"><path d="M8 5v14"/><path d="M16 5v14"/></svg>'
+        : '<svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
+      $("#timerResetBtn").innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>';
     }
 
     function startTimer() {
@@ -1042,7 +1055,11 @@
       if (start) startTimer();
     }
 
-    function startTimerFromInteraction() { if (currentScreen === 2 || currentScreen === 3) startTimer(); }
+    function startTimerFromInteraction() {
+      if (currentScreen !== 2 && currentScreen !== 3) return;
+      if (!timerStarted) startTimer();
+      else if (!timerRunning) resumeTimer();
+    }
 
     function updateFromDom() {
       const contextInput = $("#contextInput");
@@ -1419,6 +1436,10 @@
     $("#cancelStartOver").addEventListener("click", () => $("#confirmModal").classList.remove("show"));
     $("#confirmStartOver").addEventListener("click", () => { $("#confirmModal").classList.remove("show"); clearAll(); });
     $("#confirmModal").addEventListener("click", (event) => { if (event.target.id === "confirmModal") $("#confirmModal").classList.remove("show"); });
+    $("#timerPauseBtn").addEventListener("click", () => {
+      if (!timerStarted) return;
+      timerRunning ? pauseTimer() : resumeTimer();
+    });
     $("#timerResetBtn").addEventListener("click", () => resetTimer());
     $("#timerMetricToggleBtn").addEventListener("click", () => {
       timerMetricHidden = !timerMetricHidden;

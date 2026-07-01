@@ -163,6 +163,13 @@
       padding: 0;
     }
 
+    .slo-icon-button svg {
+      width: 17px;
+      height: 17px;
+      stroke-width: 2.2;
+      vertical-align: middle;
+    }
+
     .slo-main {
       width: min(1120px, calc(100% - 56px));
       margin: 0 auto;
@@ -589,7 +596,8 @@
     <div class="slo-timer" aria-label="Exercise timer">
       <span class="slo-timer-label">Timer</span>
       <span class="slo-timer-value" id="timerValue">00:00</span>
-      <button class="slo-icon-button" id="timerReset" type="button" aria-label="Reset timer" title="Reset timer">↺</button>
+      <button class="slo-icon-button" id="timerPause" type="button" aria-label="Pause timer" title="Pause timer"></button>
+      <button class="slo-icon-button" id="timerReset" type="button" aria-label="Reset timer" title="Reset timer"></button>
     </div>
   </header>
 
@@ -682,6 +690,7 @@
   <script>
     (() => {
       const timerValue = document.getElementById('timerValue');
+      const timerPause = document.getElementById('timerPause');
       const timerReset = document.getElementById('timerReset');
       let elapsed = 0;
       let intervalId = null;
@@ -694,6 +703,12 @@
 
       function renderTimer() {
         timerValue.textContent = formatTime(elapsed);
+        timerPause.setAttribute('aria-label', intervalId ? 'Pause timer' : 'Resume timer');
+        timerPause.setAttribute('title', intervalId ? 'Pause timer' : 'Resume timer');
+        timerPause.innerHTML = intervalId
+          ? '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round"><path d="M8 5v14"/><path d="M16 5v14"/></svg>'
+          : '<svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
+        timerReset.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>';
       }
 
       function stopTimer() {
@@ -716,6 +731,11 @@
         stopTimer();
         elapsed = 0;
         startTimer();
+        renderTimer();
+      });
+
+      timerPause.addEventListener('click', () => {
+        intervalId ? stopTimer() : startTimer();
         renderTimer();
       });
 

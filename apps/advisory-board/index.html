@@ -391,6 +391,13 @@ REUSE AUDIT
       color: var(--ab-navy);
       font-weight: 700;
     }
+
+    .ab-icon-btn svg {
+      width: 17px;
+      height: 17px;
+      stroke-width: 2.2;
+      vertical-align: middle;
+    }
     .ab-error.ab-show { display: block; }
     .ab-save-status {
       min-height: 22px;
@@ -474,7 +481,8 @@ REUSE AUDIT
         <div class="ab-time-display activity-timer-display" id="timerDisplay">00:00</div>
       </div>
       <div class="ab-controls">
-        <button class="ab-icon-btn" id="timerResetIconBtn" type="button" aria-label="Reset timer">↺</button>
+        <button class="ab-icon-btn" id="timerPauseIconBtn" type="button" aria-label="Pause timer" disabled></button>
+        <button class="ab-icon-btn" id="timerResetIconBtn" type="button" aria-label="Reset timer"></button>
       </div>
     </div>
   </header>
@@ -759,10 +767,18 @@ Return your recommendations in a clean list format I can easily read and act on.
       $('timerDisplay').textContent = fmt(seconds());
       $('timerMetric').classList.toggle('ab-time-hidden', timerHidden);
       $('timerMetricToggleBtn').innerHTML = timerHidden ? '<svg viewBox="0 0 24 24" fill="none"><path d="M3 3l18 18" stroke="currentColor" stroke-linecap="round"/><path d="M10.6 10.6A2 2 0 0012 14a2 2 0 001.4-.6" stroke="currentColor" stroke-linecap="round"/><path d="M6.5 6.9C4.1 8.5 2.5 12 2.5 12s3.5 6 9.5 6c1.5 0 2.8-.4 3.9-1" stroke="currentColor" stroke-linecap="round"/></svg>' : '<svg viewBox="0 0 24 24" fill="none"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6z" stroke="currentColor"/><circle cx="12" cy="12" r="3" stroke="currentColor"/></svg>';
+      $('timerPauseIconBtn').disabled = !timerStarted;
+      $('timerPauseIconBtn').setAttribute('aria-label', timerRunning ? 'Pause timer' : 'Resume timer');
+      $('timerPauseIconBtn').innerHTML = timerRunning
+        ? '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round"><path d="M8 5v14"/><path d="M16 5v14"/></svg>'
+        : '<svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
+      $('timerResetIconBtn').innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>';
     }
     function startTimer() { if (timerRunning) return; timerStarted = true; timerRunning = true; timerStartedAt = Date.now(); renderTimer(); }
     function pauseTimer() { if (!timerRunning) return; timerElapsed = seconds(); timerRunning = false; renderTimer(); }
+    function resumeTimer() { if (!timerStarted || timerRunning) return; timerRunning = true; timerStartedAt = Date.now(); renderTimer(); }
     function resetTimer() { timerStarted = false; timerRunning = false; timerElapsed = 0; renderTimer(); }
+    function startTimerFromInteraction() { if (!timerStarted) startTimer(); else if (!timerRunning) resumeTimer(); }
 
     function saveBoardProgress() {
       const payload = {
@@ -814,9 +830,13 @@ Return your recommendations in a clean list format I can easily read and act on.
           $('doneStatus').textContent = 'Could not save. Please try again.';
         });
     });
+    $('timerPauseIconBtn').addEventListener('click', () => {
+      if (!timerStarted) return;
+      timerRunning ? pauseTimer() : resumeTimer();
+    });
     $('timerResetIconBtn').addEventListener('click', resetTimer);
     $('timerMetricToggleBtn').addEventListener('click', () => { timerHidden = !timerHidden; renderTimer(); });
-    document.addEventListener('input', () => { if (!timerStarted) startTimer(); });
+    document.addEventListener('input', startTimerFromInteraction);
     loadSaved();
     renderBoard();
     renderTimer();

@@ -160,6 +160,38 @@
       line-height: 1;
     }
 
+    .write-to-aiko-timer-controls {
+      display: flex;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .write-to-aiko-icon-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px;
+      height: 30px;
+      border: 1px solid rgba(255, 255, 255, .34);
+      border-radius: 6px;
+      background: transparent;
+      color: var(--write-to-aiko-white);
+      cursor: pointer;
+      padding: 0;
+    }
+
+    .write-to-aiko-icon-button svg {
+      width: 17px;
+      height: 17px;
+      stroke-width: 2.2;
+      vertical-align: middle;
+    }
+
+    .write-to-aiko-icon-button:disabled {
+      cursor: not-allowed;
+      opacity: .45;
+    }
+
     .write-to-aiko-main {
       width: min(1220px, calc(100% - 40px));
       margin: 0 auto;
@@ -508,6 +540,10 @@
       <div class="write-to-aiko-utility">
         <span class="write-to-aiko-small-label">Timer</span>
         <span class="write-to-aiko-utility-value" id="writeToAikoTimer">00:00</span>
+        <div class="write-to-aiko-timer-controls">
+          <button class="write-to-aiko-icon-button" type="button" id="writeToAikoTimerPause" aria-label="Pause timer" disabled></button>
+          <button class="write-to-aiko-icon-button" type="button" id="writeToAikoTimerReset" aria-label="Reset timer"></button>
+        </div>
       </div>
       <div class="write-to-aiko-utility">
         <span class="write-to-aiko-small-label">Words</span>
@@ -635,10 +671,13 @@ Best, Yutee Elle</div>
         mode: 'structured',
         timerStarted: false,
         startedAt: null,
+        elapsedBeforePause: 0,
         timerId: null
       };
 
       const timerEl = document.getElementById('writeToAikoTimer');
+      const timerPauseBtn = document.getElementById('writeToAikoTimerPause');
+      const timerResetBtn = document.getElementById('writeToAikoTimerReset');
       const headerCount = document.getElementById('writeToAikoHeaderCount');
       const footerCount = document.getElementById('writeToAikoFooterCount');
       const submitBtn = document.getElementById('writeToAikoSubmit');
@@ -659,24 +698,57 @@ Best, Yutee Elle</div>
       }
 
       function startTimer() {
-        if (state.timerStarted) return;
         state.timerStarted = true;
+        if (state.timerId) return;
         state.startedAt = Date.now();
         state.timerId = window.setInterval(updateTimer, 1000);
         updateTimer();
       }
 
-      function stopTimer() {
+      function elapsedSeconds() {
+        if (!state.timerStarted) return 0;
+        if (!state.timerId) return state.elapsedBeforePause;
+        return state.elapsedBeforePause + Math.floor((Date.now() - state.startedAt) / 1000);
+      }
+
+      function pauseTimer() {
+        if (!state.timerId) return;
+        state.elapsedBeforePause = elapsedSeconds();
+        window.clearInterval(state.timerId);
+        state.timerId = null;
+        state.startedAt = null;
+        updateTimer();
+      }
+
+      function resumeTimer() {
+        if (!state.timerStarted || state.timerId) return;
+        state.startedAt = Date.now();
+        state.timerId = window.setInterval(updateTimer, 1000);
+        updateTimer();
+      }
+
+      function resetTimer() {
         if (state.timerId) window.clearInterval(state.timerId);
         state.timerStarted = false;
         state.startedAt = null;
+        state.elapsedBeforePause = 0;
         state.timerId = null;
-        timerEl.textContent = '00:00';
+        updateTimer();
+      }
+
+      function startTimerFromInteraction() {
+        if (!state.timerStarted) startTimer();
+        else if (!state.timerId) resumeTimer();
       }
 
       function updateTimer() {
-        const elapsed = state.startedAt ? Math.floor((Date.now() - state.startedAt) / 1000) : 0;
-        timerEl.textContent = formatSeconds(elapsed);
+        timerEl.textContent = formatSeconds(elapsedSeconds());
+        timerPauseBtn.disabled = !state.timerStarted;
+        timerPauseBtn.setAttribute('aria-label', state.timerId ? 'Pause timer' : 'Resume timer');
+        timerPauseBtn.innerHTML = state.timerId
+          ? '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round"><path d="M8 5v14"/><path d="M16 5v14"/></svg>'
+          : '<svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
+        timerResetBtn.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>';
       }
 
       function visibleText() {
@@ -789,12 +861,18 @@ Best, Yutee Elle</div>
 
       document.querySelectorAll('textarea').forEach((textarea) => {
         textarea.addEventListener('input', () => {
-          startTimer();
+          startTimerFromInteraction();
           updateCounts();
           statusEl.textContent = '';
           submitBtn.disabled = false;
         });
       });
+
+      timerPauseBtn.addEventListener('click', () => {
+        state.timerId ? pauseTimer() : resumeTimer();
+      });
+
+      timerResetBtn.addEventListener('click', resetTimer);
 
       submitBtn.addEventListener('click', async () => {
         if (!wordCount(visibleText())) {
@@ -813,7 +891,7 @@ Best, Yutee Elle</div>
           mode: state.mode,
           page: window.location.href,
           completed_at: new Date().toISOString(),
-          duration_seconds: state.startedAt ? Math.floor((Date.now() - state.startedAt) / 1000) : 0
+          duration_seconds: elapsedSeconds()
         };
 
         try {
@@ -825,6 +903,7 @@ Best, Yutee Elle</div>
           const { saveUserProgress } = await import('../../assets/firebase.js');
           await saveUserProgress('write-to-aiko', 'Write to Aiko', payload);
 
+          pauseTimer();
           submitBtn.textContent = 'Save';
           submitBtn.disabled = true;
           resetBtn.hidden = false;
@@ -842,7 +921,7 @@ Best, Yutee Elle</div>
         });
         openText.value = '';
         setMode('structured');
-        stopTimer();
+        resetTimer();
         updateCounts();
         submitBtn.textContent = 'Save';
         submitBtn.disabled = false;
@@ -852,6 +931,7 @@ Best, Yutee Elle</div>
 
       setMode('structured');
       updateCounts();
+      updateTimer();
     })();
   </script>
   <script type="module" src="../../assets/app-access-guard.js?v=1"></script>
