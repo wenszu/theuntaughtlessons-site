@@ -2557,8 +2557,36 @@
       };
     }
 
+    function completionRequirements() {
+      const argumentCount = state.arguments.filter((arg) => filled(arg.text)).length;
+      const detailCount = state.arguments.flatMap((arg) => arg.details).filter((detail) => filled(detail)).length;
+      return {
+        argumentCount,
+        detailCount,
+        missingArguments: Math.max(0, 3 - argumentCount),
+        missingDetails: Math.max(0, 9 - detailCount)
+      };
+    }
+
     function saveIssueTreeAnswer() {
       updateFromDom();
+      const requirements = completionRequirements();
+      if (requirements.missingArguments || requirements.missingDetails) {
+        renderProgress();
+        const pieces = [];
+        if (requirements.missingArguments) pieces.push(`${requirements.missingArguments} argument heading${requirements.missingArguments === 1 ? "" : "s"}`);
+        if (requirements.missingDetails) pieces.push(`${requirements.missingDetails} supporting detail${requirements.missingDetails === 1 ? "" : "s"}`);
+        $("#saveNoticeMount").innerHTML = `
+          <div class="completion-save-notice">
+            <div class="save-notice-text">
+              Add ${pieces.join(" and ")} before saving.
+            </div>
+            <div class="save-notice-caveat">Your issue tree needs all 3 argument headings and 9 supporting details.</div>
+          </div>
+        `;
+        setSaveButtonSaved(false);
+        return;
+      }
       saveResult('issue-tree', 2, 'Issue tree builder', elapsedSeconds(), {
         ...issueTreePayload()
       });
@@ -3140,6 +3168,6 @@
     initializeApp();
   </script>
   <script type="module" src="../../assets/app-access-guard.js?v=1"></script>
-  <script type="module" src="../../assets/feedback-widget.js?v=4"></script>
+  <script type="module" src="../../assets/feedback-widget.js?v=5"></script>
 </body>
 </html>

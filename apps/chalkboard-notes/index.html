@@ -1094,7 +1094,7 @@
           <span class="small-label">Elapsed time</span>
         </div>
         <div>
-          <p class="timer-note activity-timer-note" id="timerNote">Timer starts when you begin writing. Target: 5 minutes.</p>
+          <p class="timer-note activity-timer-note" id="timerNote">Untimed practice. Timer starts when you begin. The 5-minute target is only a guide.</p>
           <div class="timer-controls activity-timer-controls">
             <button id="toggleTimerBtn" type="button">Hide timer</button>
             <button id="startTimerBtn" type="button">Start</button>
@@ -1175,7 +1175,7 @@
             <p class="mode-guidance"><strong>Choose one format.</strong> Use <strong>Open response</strong> if you want to write in your own free-form structure; this is the more difficult option. Use <strong>Three-section response</strong> if you want the easier guided option. In both formats, use BSP and the Rule of three.</p>
 
             <div id="openMode">
-              <textarea id="openResponse" class="response-area" placeholder=""></textarea>
+              <textarea id="openResponse" class="response-area" aria-label="Open response" placeholder=""></textarea>
             </div>
 
             <div id="sectionMode" class="hidden">
@@ -1248,7 +1248,7 @@
     </section>
   </main>
 
-  <script src="../shared/activity-timer.js"></script>
+  <script src="../shared/activity-timer.js?v=20260701-audit-1"></script>
   <script>
     // Activity config: copy this object to create the next standalone practice.
     const DATA_URL = '../../data/practice/messy-notes.json';
@@ -1689,8 +1689,8 @@
         return `
           <div class="section-box">
             <label for="sectionTitle${num}">Section ${num}</label>
-            <input id="sectionTitle${num}" class="section-title" type="text" placeholder="${escapeHtml(placeholder)}" />
-            <textarea id="sectionBody${num}" class="response-area section-response" placeholder="Bullet responses..."></textarea>
+            <input id="sectionTitle${num}" class="section-title" type="text" aria-label="Section ${num} heading" placeholder="${escapeHtml(placeholder)}" />
+            <textarea id="sectionBody${num}" class="response-area section-response" aria-label="Section ${num} bullet response" placeholder="Bullet responses..."></textarea>
           </div>
         `;
       }).join('');
@@ -1724,7 +1724,7 @@
       els.scorePanel.innerHTML = `
         <div class="score-head">
           <div>
-            <div class="score-title">Practice score</div>
+            <div class="score-title">Automated practice score (out of 100)</div>
             <p class="score-insight">${escapeHtml(score.insight)}</p>
           </div>
           <div class="score-total">${score.total} / ${score.max}</div>
@@ -1775,7 +1775,7 @@
             return `
               <div class="recent-item">
                 <span>${escapeHtml(date)}${trendText ? ` <span class="trend">${escapeHtml(trendText)}</span>` : ''}<br><span class="small">${formatSeconds(elapsed || 0)}</span></span>
-                <span class="recent-score">${typeof attempt.score === 'number' ? `${attempt.score} / 100` : 'No score'}</span>
+                <span class="recent-score">${typeof attempt.score === 'number' ? `Score: ${attempt.score} / 100` : 'No score'}</span>
               </div>
             `;
           }).join('')}
@@ -1823,7 +1823,7 @@
 
       els.submittedAnswer.textContent = response.text;
       els.confirmation.classList.remove('hidden');
-      els.confirmation.innerHTML = `<strong>Attempt saved locally.</strong> Submitted ${withinTarget ? 'within' : 'after'} the 5-minute target. Time used: ${formatSeconds(elapsedSeconds)}.${completionSaveNotice()}`;
+      els.confirmation.innerHTML = `<strong>Saved ✓.</strong> Time used: ${formatSeconds(elapsedSeconds)}. Now run the self-check.${completionSaveNotice()}`;
       els.tryAgainBtn.classList.remove('hidden');
       els.mobileResultTabs.classList.add('visible');
       els.checklistPanel.classList.remove('hidden');
@@ -1870,7 +1870,7 @@
           minute: '2-digit'
         });
         const status = attempt.submittedWithinTarget ? 'Within 5 minutes' : 'Over 5 minutes';
-        const scoreText = typeof attempt.score === 'number' ? ` · ${attempt.score} / 100` : '';
+        const scoreText = typeof attempt.score === 'number' ? ` · Score: ${attempt.score} / 100` : '';
         const elapsed = attempt.timingResult ? attempt.timingResult.elapsedSeconds : attempt.elapsedSeconds;
         const answer = attempt.userResponse && attempt.userResponse.text
           ? attempt.userResponse.text
@@ -2074,6 +2074,6 @@
     init();
   </script>
   <script type="module" src="../../assets/app-access-guard.js?v=1"></script>
-  <script type="module" src="../../assets/feedback-widget.js?v=4"></script>
+  <script type="module" src="../../assets/feedback-widget.js?v=5"></script>
 </body>
 </html>

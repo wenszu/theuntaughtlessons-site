@@ -148,6 +148,14 @@
       line-height: 1;
     }
 
+    .utility-timer-purpose {
+      margin: 5px 0 0;
+      color: rgba(255, 255, 255, .72);
+      font-size: 11px;
+      font-weight: 700;
+      line-height: 1.25;
+    }
+
     .metric-hide-btn {
       display: inline-flex;
       align-items: center;
@@ -412,6 +420,18 @@
 
     .tap-move-hint.show {
       display: block;
+    }
+
+    .answer-requirement {
+      margin: 8px 0 0;
+      color: var(--steel);
+      font-size: .9rem;
+      font-weight: 700;
+      line-height: 1.35;
+    }
+
+    .answer-requirement.ready {
+      color: #2C7A4B;
     }
 
     .buckets-wrap {
@@ -824,6 +844,7 @@
         <div class="utility-metric-row">
           <div class="activity-timer-display" id="timerDisplay">00:00</div>
         </div>
+        <p class="utility-timer-purpose">Untimed practice · 5-minute guide</p>
       </div>
       <div class="utility-controls">
         <button class="icon-timer-btn" id="timerPauseIconBtn" type="button" aria-label="Pause timer" disabled></button>
@@ -834,7 +855,7 @@
           <span class="small-label">Elapsed time</span>
         </div>
         <div>
-          <p class="activity-timer-note" id="timerNote">Timer starts when you begin sorting. Target: 5 minutes.</p>
+          <p class="activity-timer-note" id="timerNote">Untimed practice. Timer starts when you begin. The 5-minute target is only a guide.</p>
           <div class="activity-timer-controls">
             <button id="toggleTimerBtn" type="button">Hide timer</button>
             <button id="startTimerBtn" type="button">Start</button>
@@ -859,7 +880,7 @@
     <section id="exercise" class="layout">
       <article id="messy-list" class="panel sorting-panel">
         <div class="panel-head">
-          <h2>Grocery list</h2>
+          <h2>Source items</h2>
           <span class="small" id="listCount"></span>
         </div>
         <div class="panel-body sorting-list-body">
@@ -889,6 +910,7 @@
             <button id="sampleBtn">Show sample answer</button>
             <button id="resetBtn" class="secondary-action hidden">Reset</button>
           </div>
+          <p class="answer-requirement" id="answerRequirement" aria-live="polite">Sort every item into one of the three buckets to check your answer.</p>
 
           <div id="feedback" class="feedback hidden"></div>
           <div id="sampleAnswer" class="sample-answer hidden"></div>
@@ -897,7 +919,7 @@
     </section>
   </main>
 
-  <script src="../shared/activity-timer.js"></script>
+  <script src="../shared/activity-timer.js?v=20260701-audit-1"></script>
   <script>
     // -------------------------
     // Data layer
@@ -1063,7 +1085,15 @@
       });
 
       const movedCount = state.placements.bucket1.length + state.placements.bucket2.length + state.placements.bucket3.length;
-      document.getElementById('checkBtn').disabled = movedCount === 0;
+      const allSorted = movedCount === state.generatedItems.length;
+      document.getElementById('checkBtn').disabled = !allSorted;
+      const requirement = document.getElementById('answerRequirement');
+      if (requirement) {
+        requirement.classList.toggle('ready', allSorted);
+        requirement.textContent = allSorted
+          ? 'Ready to check. All items are sorted into buckets.'
+          : `Sort every item into one of the three buckets to check your answer. ${movedCount} of ${state.generatedItems.length} sorted.`;
+      }
       renderSelectionState();
     }
 
@@ -1493,11 +1523,21 @@
 
     function renderSampleAnswer() {
       const sample = document.getElementById('sampleAnswer');
+      const grouped = {
+        fresh_cold: [],
+        pantry: [],
+        supplies: []
+      };
+      state.generatedItems.forEach((item) => {
+        if (grouped[item.idealBucket]) grouped[item.idealBucket].push(item.name);
+      });
+      const formatItems = (items) => items.length ? items.join(', ') : 'None from this generated list';
       sample.innerHTML = `
         <h3>Sample answer</h3>
-        <p><strong>Fresh / cold food:</strong> Carrots, Frozen meatballs, Cheese, Chicken, Potatoes, Milk, Sausages, Butter, Beef, Bell peppers, Lettuce, Spinach, Cream, Grapes, Garlic, Ice cream, Onions</p>
-        <p><strong>Pantry items:</strong> Pasta, Canned tomatoes, Paprika, Rice, Sugar, Salt, Bottled olives, Olive oil</p>
-        <p><strong>Non-food supplies:</strong> Bathroom tissue, Candles, Charcoal, Kitchen towels, Paper plates</p>
+        <p class="small">This sample uses only the items currently shown in your generated list.</p>
+        <p><strong>Fresh / cold food:</strong> ${formatItems(grouped.fresh_cold)}</p>
+        <p><strong>Pantry items:</strong> ${formatItems(grouped.pantry)}</p>
+        <p><strong>Non-food supplies:</strong> ${formatItems(grouped.supplies)}</p>
       `;
     }
 
@@ -1528,6 +1568,13 @@
       });
 
       document.getElementById('sampleBtn').addEventListener('click', () => {
+        const movedCount = state.placements.bucket1.length + state.placements.bucket2.length + state.placements.bucket3.length;
+        if (!movedCount) {
+          const feedback = document.getElementById('feedback');
+          feedback.className = 'feedback';
+          feedback.innerHTML = '<strong>Try one move first.</strong><br>Move at least one item into a bucket before opening the sample answer.';
+          return;
+        }
         const sample = document.getElementById('sampleAnswer');
         sample.classList.toggle('hidden');
         document.getElementById('sampleBtn').textContent = sample.classList.contains('hidden')
@@ -1600,7 +1647,7 @@
             resetBtn: document.getElementById('resetTimerBtn')
           },
           targetSeconds: 300,
-          idleMessage: 'Timer starts when you begin sorting. Target: 5 minutes.'
+          idleMessage: 'Untimed practice. Timer starts when you begin. The 5-minute target is only a guide.'
         });
         setInterval(syncHeaderTimerIcons, 500);
         syncHeaderTimerIcons();
@@ -1620,6 +1667,6 @@
     initializeApp();
   </script>
   <script type="module" src="../../assets/app-access-guard.js?v=1"></script>
-  <script type="module" src="../../assets/feedback-widget.js?v=4"></script>
+  <script type="module" src="../../assets/feedback-widget.js?v=5"></script>
 </body>
 </html>

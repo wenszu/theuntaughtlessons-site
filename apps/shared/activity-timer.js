@@ -8,9 +8,9 @@
   function createActivityTimer(options) {
     const config = {
       targetSeconds: 300,
-      idleMessage: 'Timer starts when you begin writing. Target: 5 minutes.',
-      runningMessage: 'Target: submit within 5 minutes. Hiding the timer keeps time running.',
-      overTargetMessage: 'Past the 5-minute target, but you can still submit when ready.',
+      idleMessage: 'Untimed practice. Timer starts when you begin. The 5-minute target is only a guide.',
+      runningMessage: 'Untimed practice. The 5-minute target is only a guide.',
+      overTargetMessage: 'Past the 5-minute guide, but you can still submit when ready.',
       startHiddenOnMobile: true,
       mobileQuery: '(max-width: 640px)',
       ...options

@@ -14,7 +14,7 @@ const FEEDBACK_TYPES = [
 const STYLES = `
   #utl-feedback-btn {
     position: fixed;
-    left: 24px;
+    right: 24px;
     bottom: max(24px, calc(env(safe-area-inset-bottom) + var(--utl-feedback-bottom-offset, 12px)));
     z-index: 9999;
     display: flex;
@@ -154,7 +154,7 @@ const STYLES = `
   }
   @media (max-width: 600px) {
     #utl-feedback-btn {
-      left: 16px;
+      right: 16px;
       padding: 10px 14px;
     }
     #utl-feedback-overlay {

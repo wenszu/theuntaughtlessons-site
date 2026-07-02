@@ -507,7 +507,7 @@
           <span class="small-label">Elapsed time</span>
         </div>
         <div>
-          <p class="activity-timer-note" id="timerNote">Timer starts when you begin using the AI prompt. Target: 5 minutes.</p>
+          <p class="activity-timer-note" id="timerNote">Untimed practice. Timer starts when you begin. The 5-minute target is only a guide.</p>
           <div class="activity-timer-controls">
             <button id="toggleTimerBtn" type="button">Hide timer</button>
             <button id="startTimerBtn" type="button">Start</button>
@@ -566,7 +566,7 @@
         </div>
         <div class="panel-body">
           <p><strong>Did the AI output feel MECE to you? Was anything bucketed in a way you would have done differently?</strong></p>
-          <textarea id="reflectionText" class="response-area" placeholder="Write your thoughts here..."></textarea>
+          <textarea id="reflectionText" class="response-area" aria-label="Reflection on the AI output" placeholder="Write your thoughts here..."></textarea>
           <p class="small" id="reflectionHint">Minimum 20 characters to continue.</p>
           <div class="buttons">
             <button type="button" data-back="1">Back</button>
@@ -610,7 +610,7 @@
     </section>
   </main>
 
-  <script src="../shared/activity-timer.js"></script>
+  <script src="../shared/activity-timer.js?v=20260701-audit-1"></script>
   <script>
     const SUPPLY_ITEMS = [
       'Bottled water',
@@ -892,7 +892,7 @@ ${SUPPLY_LIST_FOR_PROMPT}`
           resetBtn: document.getElementById('resetTimerBtn')
         },
         targetSeconds: 300,
-        idleMessage: 'Timer starts when you begin using the AI prompt. Target: 5 minutes.'
+        idleMessage: 'Untimed practice. Timer starts when you begin. The 5-minute target is only a guide.'
       });
       setInterval(syncHeaderTimerIcons, 500);
       syncHeaderTimerIcons();
@@ -903,6 +903,6 @@ ${SUPPLY_LIST_FOR_PROMPT}`
     initializeApp();
   </script>
   <script type="module" src="../../assets/app-access-guard.js?v=1"></script>
-  <script type="module" src="../../assets/feedback-widget.js?v=4"></script>
+  <script type="module" src="../../assets/feedback-widget.js?v=5"></script>
 </body>
 </html>
