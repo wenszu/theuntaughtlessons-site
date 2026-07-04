@@ -6,3 +6,8 @@ firebase-debug.log
 public/
 functions/node_modules/
 functions/.runtimeconfig.json
+.env
+.env.*
+*.pem
+*.key
+secrets/

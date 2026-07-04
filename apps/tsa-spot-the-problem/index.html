@@ -37,7 +37,7 @@
     }
 
     body.tsa-stp-locked {
-      overflow: hidden;
+      overflow: auto;
     }
 
     .tsa-stp-header {
@@ -96,8 +96,10 @@
       position: fixed;
       inset: 0;
       z-index: 100;
-      display: grid;
-      place-items: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: auto;
       padding: 24px;
       background: var(--cream);
     }
@@ -108,6 +110,7 @@
 
     .tsa-stp-gate-card {
       width: min(100%, 520px);
+      margin: auto 0;
       padding: 36px;
       border: 1px solid var(--line);
       border-top: 4px solid var(--gold);
@@ -402,10 +405,83 @@
       background: rgba(255, 255, 255, .72);
     }
 
+    .tsa-stp-chip.is-correct {
+      border-color: #2C7A4B;
+      background: #EAF5ED;
+      color: #1D5C38;
+      box-shadow: 0 0 0 2px rgba(44, 122, 75, .12);
+    }
+
+    .tsa-stp-chip.is-wrong {
+      border-color: var(--red);
+      background: var(--red-bg);
+      color: #7A302D;
+      box-shadow: 0 0 0 2px rgba(184, 91, 91, .12);
+    }
+
     .tsa-stp-chip.is-static {
       cursor: default;
       opacity: .78;
       box-shadow: none;
+    }
+
+    .tsa-stp-feedback,
+    .tsa-stp-group-status {
+      margin: 10px 0 0;
+      color: var(--steel);
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 1.4;
+    }
+
+    .tsa-stp-feedback.is-good,
+    .tsa-stp-group-status.is-complete {
+      color: #2C7A4B;
+    }
+
+    .tsa-stp-feedback.is-wrong {
+      color: var(--red);
+    }
+
+    .tsa-stp-group-status {
+      padding: 8px 10px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, .72);
+      font-size: 13px;
+    }
+
+    .tsa-stp-group-status.is-complete {
+      background: #EAF5ED;
+    }
+
+    .tsa-stp-part-tracker {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: -8px 0 18px;
+    }
+
+    .tsa-stp-part-pill {
+      border-radius: 999px;
+      background: #F7F1E7;
+      color: var(--steel);
+      padding: 7px 11px;
+      font-family: 'Roboto Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      line-height: 1.2;
+      text-transform: uppercase;
+    }
+
+    .tsa-stp-part-pill.is-active {
+      background: #FFF1D2;
+      color: var(--navy);
+    }
+
+    .tsa-stp-part-pill.is-done {
+      background: #EAF5ED;
+      color: #2C7A4B;
     }
 
     .tsa-stp-part-gold .tsa-stp-chip.is-selected {
@@ -731,7 +807,7 @@
     }
   </style>
 </head>
-<body class="tsa-stp-locked">
+<body>
   <header class="tsa-stp-header">
     <a class="tsa-stp-logo" href="../../index.html" aria-label="The Untaught Lessons home">
       <img src="../../assets/utl-logo-nav-white.png" alt="The Untaught Lessons" />
@@ -743,11 +819,11 @@
     </div>
   </header>
 
-  <section class="tsa-stp-gate" id="contactGate" aria-labelledby="gateTitle">
+  <section class="tsa-stp-gate is-hidden" id="contactGate" aria-labelledby="gateTitle">
     <div class="tsa-stp-gate-card">
       <img class="tsa-stp-gate-logo" src="../../assets/logo.png" alt="The Untaught Lessons" />
       <h1 id="gateTitle">Before we begin</h1>
-      <p>Enter your details to get your Find your level and track your progress.</p>
+      <p>Enter your details to find your level and track your progress.</p>
       <form class="tsa-stp-form" id="gateForm">
         <label for="fullName">Full name</label>
         <input id="fullName" name="name" type="text" autocomplete="name" required>
@@ -882,6 +958,12 @@
       `;
     }
 
+    function showGate() {
+      app.hidden = true;
+      contactGate.classList.remove('is-hidden');
+      document.body.classList.add('tsa-stp-locked');
+    }
+
     // Exercise data is loaded from ../../data/tsa/spot-the-problem.json.
     // Add new overlap/gap sets in that JSON file, not in this HTML.
     // Expected schema: an array of set objects with partA buckets/overlaps
@@ -951,22 +1033,46 @@
 
     async function initializeApp() {
       const contactProfile = readContactProfile();
-      const gateComplete = sessionStorage.getItem(GATE_KEY) === 'true' || Boolean(contactProfile);
-      if (gateComplete) renderLoadingState();
+      const isAdmin = localStorage.getItem('utl_admin_auth') === 'true';
+      const isMember = localStorage.getItem('utl_member_unlocked') === 'true';
+      const adminBypass = localStorage.getItem('utl_find_level_admin_bypass') === 'on';
+      const gateComplete = sessionStorage.getItem(GATE_KEY) === 'true' || Boolean(contactProfile) || isAdmin || isMember || adminBypass;
+      renderLoadingState();
       try {
         await loadExerciseData();
         if (gateComplete) {
-          state.participant.name = sessionStorage.getItem('tsa_participant_name') || contactProfile?.name || '';
-          state.participant.email = sessionStorage.getItem('tsa_participant_email') || contactProfile?.email || '';
+          let memberProfile = {};
+          try { memberProfile = JSON.parse(localStorage.getItem('utl_member_profile') || '{}'); } catch (e) {}
+          const memberEmail = memberProfile.email || localStorage.getItem('utl_member_username') || '';
+          const memberName = [memberProfile.firstName, memberProfile.lastName].filter(Boolean).join(' ') || memberProfile.displayName || memberEmail;
+          state.participant.name = sessionStorage.getItem('tsa_participant_name') || contactProfile?.name || memberName || 'Admin';
+          state.participant.email = sessionStorage.getItem('tsa_participant_email') || contactProfile?.email || memberEmail || '';
           sessionStorage.setItem(GATE_KEY, 'true');
           sessionStorage.setItem('tsa_participant_name', state.participant.name);
           sessionStorage.setItem('tsa_participant_email', state.participant.email);
           startAssessment();
+        } else {
+          showGate();
         }
       } catch (error) {
         console.error(error);
         renderDataError();
       }
+    }
+
+    function scrollToQuestion() {
+      window.requestAnimationFrame(() => document.getElementById('app')?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+    }
+
+    function partTrackerHtml() {
+      const partAComplete = state.part === 'B' || state.partAScores.length === selectedPartA.length;
+      const partBComplete = state.partBScores.length === selectedPartB.length;
+      return `
+        <div class="tsa-stp-part-tracker" aria-label="Assessment progress">
+          <span class="tsa-stp-part-pill ${partAComplete ? 'is-done' : state.part === 'A' ? 'is-active' : ''}">Part 1: ${partAComplete ? 'complete' : `${state.partAIndex + 1} of ${selectedPartA.length}`}</span>
+          <span class="tsa-stp-part-pill ${partBComplete ? 'is-done' : state.part === 'B' ? 'is-active' : ''}">Part 2: ${partBComplete ? 'complete' : state.part === 'B' ? `${state.partBIndex + 1} of ${selectedPartB.length}` : 'locked'}</span>
+        </div>
+      `;
     }
 
     function renderShell(innerHtml) {
@@ -978,6 +1084,7 @@
             <p>Find structural problems in grouped information. First remove duplicate ideas. Then add the missing items where they belong.</p>
           </div>
         </section>
+        ${partTrackerHtml()}
         ${innerHtml}
       `;
     }
@@ -1007,7 +1114,7 @@
       renderShell(renderWorkspace({
         title: `Part A · Problem ${state.partAIndex + 1} of ${selectedPartA.length}`,
         themeClass: 'tsa-stp-part-gold',
-        instruction: 'Some items in these groups say the same thing in different words. Move the duplicates back to the left.',
+        instruction: 'Find duplicate ideas inside this set of groups. A duplicate means two items say the same idea in different words, even if they sit in different groups. Move both matching items back to the left.',
         leftTitle: 'Duplicates you found',
         data: state.partA,
         sourceBuckets: problem.buckets,
@@ -1024,7 +1131,7 @@
       renderShell(renderWorkspace({
         title: `Part B · Problem ${state.partBIndex + 1} of ${selectedPartB.length}`,
         themeClass: 'tsa-stp-part-steel',
-        instruction: 'Some groups are missing items. Move some items from the left into the correct group on the right. Please note not everything on the left need to be moved.',
+        instruction: 'Some groups are missing items. Tap an item on the left, then tap the group it belongs to. Please note that not everything on the left needs to be moved.',
         leftTitle: 'Possible missing items',
         data: state.partB,
         sourceBuckets: problem.buckets,
@@ -1034,7 +1141,7 @@
       }));
       wireWorkspace();
       document.getElementById('submitPart').addEventListener('click', submitPartB);
-      window.requestAnimationFrame(() => document.getElementById('app')?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+      scrollToQuestion();
     }
 
     function renderWorkspace(config) {
@@ -1053,6 +1160,8 @@
                 <p class="tsa-stp-zone-title">${escapeHtml(config.leftTitle)} <span>${config.data.left.length}</span></p>
                 <div class="tsa-stp-items">${config.data.left.map(item => itemChip(item, 'left')).join('')}</div>
                 ${config.data.left.length ? '' : '<p class="tsa-stp-empty">Move items here.</p>'}
+                ${leftFeedbackHtml()}
+                <p class="tsa-stp-feedback">Tap an item, then tap a group or the left area to move it.</p>
               </section>
               <div class="tsa-stp-bucket-grid work">
                 ${names.map(bucket => {
@@ -1066,7 +1175,8 @@
                           ${state.selectedItem && selectedZone !== bucket ? `<button class="tsa-stp-add-slot" type="button" data-move-selected-to="${escapeHtml(bucket)}">Add selected item here</button>` : ''}
                           ${visibleItems.map(item => itemChip(item, bucket, state.part === 'B' && !moved.includes(item) ? 'is-static' : '')).join('')}
                         </div>
-                        ${config.showEmptySlots && Object.values(activePartBSet().partB.answers).includes(bucket) ? '<p class="tsa-stp-slot">Missing item slot</p>' : ''}
+                        ${missingSlotHtml(bucket, moved)}
+                        ${groupStatusHtml(bucket, moved)}
                       </div>
                     </section>
                   `;
@@ -1084,7 +1194,59 @@
     function itemChip(item, zone, extraClass = '') {
       const selected = state.selectedItem === item ? 'is-selected' : '';
       const draggable = extraClass.includes('is-static') ? 'false' : 'true';
-      return `<button class="tsa-stp-chip ${selected} ${extraClass}" type="button" draggable="${draggable}" data-item="${escapeHtml(item)}" data-zone="${escapeHtml(zone)}">${escapeHtml(item)}</button>`;
+      const feedbackClass = itemFeedbackClass(item, zone, extraClass);
+      return `<button class="tsa-stp-chip ${selected} ${extraClass} ${feedbackClass}" type="button" draggable="${draggable}" data-item="${escapeHtml(item)}" data-zone="${escapeHtml(zone)}">${escapeHtml(item)}</button>`;
+    }
+
+    function itemFeedbackClass(item, zone, extraClass = '') {
+      if (state.part === 'A' && zone === 'left') {
+        return activePartASet().partA.overlaps.includes(item) ? 'is-correct' : 'is-wrong';
+      }
+      if (state.part === 'B' && !extraClass.includes('is-static') && zone !== 'left') {
+        return activePartBSet().partB.answers[item] === zone ? 'is-correct' : 'is-wrong';
+      }
+      return '';
+    }
+
+    function leftFeedbackHtml() {
+      if (state.part === 'A') {
+        const overlaps = new Set(activePartASet().partA.overlaps);
+        const correct = state.partA.left.filter(item => overlaps.has(item)).length;
+        const wrong = state.partA.left.filter(item => !overlaps.has(item)).length;
+        if (!state.partA.left.length) return '';
+        if (wrong) return `<p class="tsa-stp-feedback is-wrong">${wrong} item${wrong === 1 ? '' : 's'} on the left ${wrong === 1 ? 'is' : 'are'} not a duplicate. Move ${wrong === 1 ? 'it' : 'them'} back into a group.</p>`;
+        return `<p class="tsa-stp-feedback is-good">${correct} of ${overlaps.size} duplicate items found.</p>`;
+      }
+      const movedWrong = state.partB.left.filter(item => activePartBSet().partB.answers[item]);
+      if (!movedWrong.length) return '';
+      return `<p class="tsa-stp-feedback">${movedWrong.length} possible missing item${movedWrong.length === 1 ? '' : 's'} still on the left.</p>`;
+    }
+
+    function groupStatusHtml(bucket, moved) {
+      if (state.part === 'A') {
+        const overlaps = new Set(activePartASet().partA.overlaps);
+        const sourceItems = activePartASet().partA.buckets[bucket] || [];
+        const total = sourceItems.filter(item => overlaps.has(item)).length;
+        if (!total) return '<p class="tsa-stp-group-status is-complete">No duplicate expected here.</p>';
+        const found = sourceItems.filter(item => overlaps.has(item) && state.partA.left.includes(item)).length;
+        return `<p class="tsa-stp-group-status ${found === total ? 'is-complete' : ''}">${found} of ${total} duplicate item${total === 1 ? '' : 's'} found in this group.</p>`;
+      }
+      const answers = activePartBSet().partB.answers;
+      const needed = Object.values(answers).filter(value => value === bucket).length;
+      const correct = moved.filter(item => answers[item] === bucket).length;
+      const wrong = moved.filter(item => answers[item] && answers[item] !== bucket).length;
+      if (!needed) return '<p class="tsa-stp-group-status is-complete">No missing item needed here.</p>';
+      if (wrong) return `<p class="tsa-stp-group-status">${correct} of ${needed} correct. ${wrong} item${wrong === 1 ? '' : 's'} ${wrong === 1 ? 'belongs' : 'belong'} somewhere else.</p>`;
+      return `<p class="tsa-stp-group-status ${correct >= needed ? 'is-complete' : ''}">${correct >= needed ? 'This group looks complete.' : `${correct} of ${needed} missing item${needed === 1 ? '' : 's'} placed.`}</p>`;
+    }
+
+    function missingSlotHtml(bucket, moved) {
+      if (state.part !== 'B') return '';
+      const answers = activePartBSet().partB.answers;
+      const needed = Object.values(answers).filter(value => value === bucket).length;
+      const correct = moved.filter(item => answers[item] === bucket).length;
+      const missing = Math.max(0, needed - correct);
+      return Array.from({ length: missing }, () => '<p class="tsa-stp-slot">Missing item slot</p>').join('');
     }
 
     function selectedItemZone() {
@@ -1116,6 +1278,13 @@
           zone.classList.remove('is-target');
           const item = event.dataTransfer.getData('text/plain');
           if (item) moveItem(item, zone.dataset.zone);
+        });
+      });
+
+      document.querySelectorAll('[data-move-selected-to]').forEach(slot => {
+        slot.addEventListener('click', event => {
+          event.stopPropagation();
+          if (state.selectedItem) moveItem(state.selectedItem, slot.dataset.moveSelectedTo);
         });
       });
     }
@@ -1177,10 +1346,31 @@
         state.partAIndex += 1;
         initializePartA();
         renderPartA();
+        scrollToQuestion();
         return;
       }
-      initializePartB();
-      renderPartB();
+      showPartAComplete();
+    }
+
+    function showPartAComplete() {
+      renderShell(`
+        <section class="tsa-stp-panel">
+          <div class="tsa-stp-score-card">
+            <p class="tsa-stp-progress">Part 1 complete</p>
+            <h1>You found the overlaps.</h1>
+            <p class="tsa-stp-interpretation">Next, you will practice spotting what is missing from a set of groups and placing each item where it belongs.</p>
+            <div class="tsa-stp-actions">
+              <button class="tsa-stp-primary" id="continueToPartB" type="button">Continue to Part 2</button>
+            </div>
+          </div>
+        </section>
+      `);
+      document.getElementById('continueToPartB').addEventListener('click', () => {
+        initializePartB();
+        renderPartB();
+        scrollToQuestion();
+      });
+      scrollToQuestion();
     }
 
     function overlapPairs() {

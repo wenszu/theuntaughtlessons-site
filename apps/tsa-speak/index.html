@@ -31,7 +31,7 @@
       font-family: 'Lato', sans-serif;
     }
 
-    body.tsa-speak-locked { overflow: hidden; }
+    body.tsa-speak-locked { overflow: auto; }
 
     .tsa-speak-header {
       position: sticky;
@@ -102,8 +102,10 @@
       position: fixed;
       inset: 0;
       z-index: 100;
-      display: grid;
-      place-items: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: auto;
       padding: 24px;
       background: var(--cream);
     }
@@ -122,6 +124,7 @@
 
     .tsa-speak-gate-card {
       width: min(100%, 520px);
+      margin: auto 0;
       padding: 36px;
     }
 
@@ -410,6 +413,61 @@
       color: var(--navy);
     }
 
+    .tsa-speak-topic-hero {
+      display: grid;
+      grid-template-columns: 118px minmax(0, 1fr);
+      gap: 18px;
+      align-items: center;
+      margin-top: 18px;
+    }
+
+    .tsa-speak-topic-visual {
+      display: grid;
+      place-items: center;
+      width: 112px;
+      height: 112px;
+      border: 1px solid rgba(238, 163, 32, .45);
+      border-radius: 16px;
+      background: #FFF1D2;
+      color: var(--navy);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: 1.4px;
+      text-transform: uppercase;
+    }
+
+    .tsa-speak-topic-copy h3 {
+      margin: 0 0 8px;
+      font-size: 25px;
+      line-height: 1.15;
+    }
+
+    .tsa-speak-topic-copy p {
+      margin: 0;
+      font-size: 16px;
+      line-height: 1.55;
+    }
+
+    .tsa-speak-fact-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .tsa-speak-fact-chip {
+      border: 1px solid rgba(0, 51, 102, .16);
+      border-radius: 999px;
+      background: var(--white);
+      color: var(--navy);
+      padding: 7px 10px;
+      font-family: 'Roboto Mono', monospace;
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
     .tsa-speak-prep-grid {
       display: grid;
       grid-template-columns: minmax(280px, .95fr) minmax(560px, 2.05fr);
@@ -545,6 +603,36 @@
       margin: 0 0 10px;
     }
 
+    .tsa-speak-record-grid {
+      display: grid;
+      grid-template-columns: minmax(280px, .9fr) minmax(0, 1.4fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .tsa-speak-record-context {
+      position: sticky;
+      top: 96px;
+      align-self: start;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #FAF8F3;
+    }
+
+    .tsa-speak-record-context .tsa-speak-topic-hero {
+      grid-template-columns: 76px minmax(0, 1fr);
+      margin-top: 0;
+    }
+
+    .tsa-speak-record-context .tsa-speak-topic-visual {
+      width: 72px;
+      height: 72px;
+      border-radius: 12px;
+      font-size: 12px;
+      letter-spacing: .8px;
+    }
+
     .tsa-speak-count {
       margin: 8px 0 0;
       color: var(--steel);
@@ -651,10 +739,25 @@
 
       .tsa-speak-notes-grid,
       .tsa-speak-prep-grid,
+      .tsa-speak-record-grid,
       .tsa-speak-score-rows,
       .tsa-speak-feedback-grid,
       .tsa-speak-help-steps {
         grid-template-columns: 1fr;
+      }
+
+      .tsa-speak-topic-hero {
+        grid-template-columns: 1fr;
+      }
+
+      .tsa-speak-topic-visual {
+        width: 84px;
+        height: 84px;
+        font-size: 13px;
+      }
+
+      .tsa-speak-record-context {
+        position: static;
       }
 
       .tsa-speak-button,
@@ -677,7 +780,7 @@
     }
   </style>
 </head>
-<body class="tsa-speak-locked">
+<body>
   <header class="tsa-speak-header">
     <a class="tsa-speak-logo" href="../../index.html" aria-label="The Untaught Lessons home">
       <img src="../../assets/utl-logo-nav-white.png" alt="The Untaught Lessons" />
@@ -689,11 +792,11 @@
     </div>
   </header>
 
-  <section class="tsa-speak-gate" id="contactGate" aria-labelledby="gateTitle">
+  <section class="tsa-speak-gate is-hidden" id="contactGate" aria-labelledby="gateTitle">
     <div class="tsa-speak-gate-card">
       <img class="tsa-speak-gate-logo" src="../../assets/logo.png" alt="The Untaught Lessons" />
       <h1 id="gateTitle">Before we begin</h1>
-      <p>Enter your details to get your Find your level and track your progress.</p>
+      <p>Enter your details to find your level and track your progress.</p>
       <form class="tsa-speak-form" id="gateForm">
         <label for="fullName">Full name</label>
         <input id="fullName" name="name" type="text" autocomplete="name" required>
@@ -824,6 +927,12 @@ Return only JSON with C1, C4, C5, C6, C7, C8, msg1, msg2, msg3, feedback, and co
       `;
     }
 
+    function showGate() {
+      app.hidden = true;
+      contactGate.classList.remove('is-hidden');
+      document.body.classList.add('tsa-speak-locked');
+    }
+
     // Exercise data is loaded from ../../data/tsa/speak-concisely.json.
     // Add new Speak concisely topics in that JSON file, not in this HTML.
     // Expected schema: an array of topic objects with title, scenario, points,
@@ -891,17 +1000,26 @@ Return only JSON with C1, C4, C5, C6, C7, C8, msg1, msg2, msg3, feedback, and co
 
     async function initializeApp() {
       const contactProfile = readContactProfile();
-      const gateComplete = sessionStorage.getItem(GATE_KEY) === 'true' || Boolean(contactProfile);
-      if (gateComplete) renderLoadingState();
+      const isAdmin = localStorage.getItem('utl_admin_auth') === 'true';
+      const isMember = localStorage.getItem('utl_member_unlocked') === 'true';
+      const adminBypass = localStorage.getItem('utl_find_level_admin_bypass') === 'on';
+      const gateComplete = sessionStorage.getItem(GATE_KEY) === 'true' || Boolean(contactProfile) || isAdmin || isMember || adminBypass;
+      renderLoadingState();
       try {
         await loadExerciseData();
         if (gateComplete) {
-          state.participant.name = sessionStorage.getItem('tsa_participant_name') || contactProfile?.name || '';
-          state.participant.email = sessionStorage.getItem('tsa_participant_email') || contactProfile?.email || '';
+          let memberProfile = {};
+          try { memberProfile = JSON.parse(localStorage.getItem('utl_member_profile') || '{}'); } catch (e) {}
+          const memberEmail = memberProfile.email || localStorage.getItem('utl_member_username') || '';
+          const memberName = [memberProfile.firstName, memberProfile.lastName].filter(Boolean).join(' ') || memberProfile.displayName || memberEmail;
+          state.participant.name = sessionStorage.getItem('tsa_participant_name') || contactProfile?.name || memberName || 'Admin';
+          state.participant.email = sessionStorage.getItem('tsa_participant_email') || contactProfile?.email || memberEmail || '';
           sessionStorage.setItem(GATE_KEY, 'true');
           sessionStorage.setItem('tsa_participant_name', state.participant.name);
           sessionStorage.setItem('tsa_participant_email', state.participant.email);
           startAssessment();
+        } else {
+          showGate();
         }
       } catch (error) {
         console.error(error);
@@ -924,6 +1042,36 @@ Return only JSON with C1, C4, C5, C6, C7, C8, msg1, msg2, msg3, feedback, and co
       return `<ul>${points.map(point => `<li><strong>${escapeHtml(point.summary)}:</strong> ${escapeHtml(point.detail)}</li>`).join('')}</ul>`;
     }
 
+    function topicLabel() {
+      const category = currentTopic.category || 'Brief';
+      return category.split(/\s+/).slice(0, 2).join(' ');
+    }
+
+    function factChips(points = currentTopic.points) {
+      const chips = [];
+      points.forEach(point => {
+        const text = `${point.summary || ''} ${point.detail || ''}`;
+        const matches = text.match(/\b\d+(?:[.,]\d+)?%?|\bQ[1-4]\b|\b\d+x\b/gi) || [];
+        matches.slice(0, 2).forEach(match => chips.push(match));
+      });
+      return [...new Set(chips)].slice(0, 6);
+    }
+
+    function topicSnapshot(compact = false) {
+      const chips = factChips();
+      return `
+        <div class="tsa-speak-topic-hero">
+          <div class="tsa-speak-topic-visual" aria-hidden="true">${escapeHtml(topicLabel())}</div>
+          <div class="tsa-speak-topic-copy">
+            <h3>${escapeHtml(currentTopic.title)}</h3>
+            <p>${escapeHtml(currentTopic.scenario)}</p>
+            ${chips.length ? `<div class="tsa-speak-fact-chips" aria-label="Important facts">${chips.map(chip => `<span class="tsa-speak-fact-chip">${escapeHtml(chip)}</span>`).join('')}</div>` : ''}
+          </div>
+        </div>
+        ${compact ? '' : `<div class="tsa-speak-info"><h3>Information given to you</h3>${infoList(currentTopic.points)}</div>`}
+      `;
+    }
+
     function renderTopicCard() {
       renderShell(`
         <section class="tsa-speak-panel">
@@ -933,10 +1081,7 @@ Return only JSON with C1, C4, C5, C6, C7, C8, msg1, msg2, msg3, feedback, and co
             <p>${escapeHtml(currentTopic.scenario)}</p>
           </div>
           <div class="tsa-speak-step">
-            <div class="tsa-speak-info">
-              <h3>Information given to you</h3>
-              ${infoList(currentTopic.points)}
-            </div>
+            ${topicSnapshot()}
             <div class="tsa-speak-actions">
               <button class="tsa-speak-button" id="readyButton" type="button">I'm ready to start preparing</button>
             </div>
@@ -998,11 +1143,7 @@ Return only JSON with C1, C4, C5, C6, C7, C8, msg1, msg2, msg3, feedback, and co
             <div class="tsa-speak-prep-grid">
               <section class="tsa-speak-prep-topic">
                 <h3>Talk details</h3>
-                <p><strong>${escapeHtml(currentTopic.title)}:</strong> ${escapeHtml(currentTopic.scenario)}</p>
-                <div class="tsa-speak-info">
-                  <h3>Information given to you</h3>
-                  ${infoList(currentTopic.points)}
-                </div>
+                ${topicSnapshot()}
               </section>
               <section class="tsa-speak-prep-notes">
                 <h3>Your response</h3>
@@ -1103,8 +1244,15 @@ Return only JSON with C1, C4, C5, C6, C7, C8, msg1, msg2, msg3, feedback, and co
             <p>Record yourself for up to 1 minute. Cover the most important messages from the topic card. When you are done, transcribe your recording and paste the result below.</p>
           </div>
           <div class="tsa-speak-step">
-            ${helpPanel()}
-            ${transcriptBox({ id: 'diagnosticTranscript', label: 'Your transcript', buttonId: 'submitTranscript', buttonText: 'Submit my transcript' })}
+            <div class="tsa-speak-record-grid">
+              <aside class="tsa-speak-record-context">
+                ${topicSnapshot(true)}
+              </aside>
+              <section>
+                ${helpPanel()}
+                ${transcriptBox({ id: 'diagnosticTranscript', label: 'Your transcript', buttonId: 'submitTranscript', buttonText: 'Submit my transcript' })}
+              </section>
+            </div>
           </div>
         </section>
       `);
@@ -1123,8 +1271,15 @@ Return only JSON with C1, C4, C5, C6, C7, C8, msg1, msg2, msg3, feedback, and co
             <p>Record yourself for up to 2 minutes. Cover all the key messages from the topic card. When you are done, transcribe your recording and paste the result below.</p>
           </div>
           <div class="tsa-speak-step">
-            ${helpPanel()}
-            ${transcriptBox({ id: 'transcriptA', label: 'Recording A: your transcript', buttonId: 'continueToReflection', buttonText: 'Recording A done. Continue' })}
+            <div class="tsa-speak-record-grid">
+              <aside class="tsa-speak-record-context">
+                ${topicSnapshot(true)}
+              </aside>
+              <section>
+                ${helpPanel()}
+                ${transcriptBox({ id: 'transcriptA', label: 'Recording A: your transcript', buttonId: 'continueToReflection', buttonText: 'Recording A done. Continue' })}
+              </section>
+            </div>
           </div>
         </section>
       `);
@@ -1166,7 +1321,14 @@ Return only JSON with C1, C4, C5, C6, C7, C8, msg1, msg2, msg3, feedback, and co
             <p>Same talk. Same key messages. 1 minute or less. Transcribe and paste below.</p>
           </div>
           <div class="tsa-speak-step">
-            ${transcriptBox({ id: 'transcriptB', label: 'Recording B: your transcript', buttonId: 'submitBoth', buttonText: 'Submit both transcripts' })}
+            <div class="tsa-speak-record-grid">
+              <aside class="tsa-speak-record-context">
+                ${topicSnapshot(true)}
+              </aside>
+              <section>
+                ${transcriptBox({ id: 'transcriptB', label: 'Recording B: your transcript', buttonId: 'submitBoth', buttonText: 'Submit both transcripts' })}
+              </section>
+            </div>
           </div>
         </section>
       `);

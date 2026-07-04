@@ -345,8 +345,12 @@ const UTL_CONTENT = {
   }
 
   function homeHref() {
-    if (inPhasePracticeRoot()) return "../../index.html";
-    return inAdminRoot() ? "../index.html" : "../index.html";
+    return memberHref("index.html");
+  }
+
+  function publicSiteHref() {
+    if (inPhasePracticeRoot()) return "../../../index.html";
+    return "../index.html";
   }
 
   function adminHref() {
@@ -360,7 +364,7 @@ const UTL_CONTENT = {
   }
 
   function firebaseHref() {
-    var version = "?v=20260525-progress-save";
+    var version = "?v=20260703-auth-fixes-1";
     if (inPhasePracticeRoot()) return "../../../assets/firebase.js" + version;
     return (inAdminRoot() ? "../assets/firebase.js" : "../assets/firebase.js") + version;
   }
@@ -542,6 +546,25 @@ const UTL_CONTENT = {
       photoURL: profile.photoURL || "",
       role: profile.role || (localStorage.getItem(ADMIN_KEY) === "true" ? "admin" : "member")
     };
+  }
+
+  async function clearWorkspaceSession() {
+    try {
+      var firebaseAuth = _preloadedFirebase || await import(firebaseHref());
+      _preloadedFirebase = firebaseAuth;
+      if (firebaseAuth.signOut && firebaseAuth.auth) {
+        await firebaseAuth.signOut(firebaseAuth.auth);
+      }
+    } catch (error) {
+      console.warn("Firebase sign-out did not complete:", error && error.message);
+    }
+    localStorage.removeItem(SESSION_KEY);
+    localStorage.removeItem(ADMIN_KEY);
+    localStorage.removeItem(USER_KEY);
+    localStorage.removeItem(PROFILE_KEY);
+    sessionStorage.removeItem(SESSION_KEY);
+    sessionStorage.removeItem("utl_google_login_pending");
+    localStorage.removeItem("utl_google_login_pending");
   }
 
   function getPhase(key) {
@@ -824,7 +847,7 @@ const UTL_CONTENT = {
       ".ws-hidden{display:none}",
       ".ws-nav{position:sticky;top:0;z-index:30;background:var(--ws-navy);color:var(--ws-white);box-shadow:0 10px 28px rgba(0,51,102,.14)}",
       ".ws-nav-inner{height:54px;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:22px;width:min(1180px,calc(100% - 32px));margin:0 auto}",
-      ".ws-brand{display:flex;align-items:center;gap:14px;min-width:0}.ws-logo-link{display:flex;align-items:center;border-radius:6px}.ws-logo-link:hover{background:rgba(238,163,32,.18)}.ws-logo{height:31px;width:auto;display:block}.ws-brand-sep,.ws-workspace-link,.ws-nav-divider{display:none}.ws-program-name{font:700 11px 'Roboto Mono',monospace;letter-spacing:.06em;text-transform:uppercase;color:var(--ws-gold);text-decoration:none}.ws-program-name:hover{opacity:.8}",
+      ".ws-brand{display:flex;align-items:center;gap:14px;min-width:0}.ws-logo-link{display:flex;align-items:center;border-radius:6px}.ws-logo-link:hover{background:rgba(238,163,32,.18)}.ws-logo{height:31px;width:auto;display:block}.ws-brand-sep,.ws-workspace-link,.ws-nav-divider{display:none}",
       ".ws-links{display:flex;align-items:center;justify-content:center;gap:16px;min-width:0}.ws-link{min-height:54px;display:inline-flex;align-items:center;border-bottom:3px solid transparent;color:rgba(255,255,255,.72);font:700 13px Lato,sans-serif;letter-spacing:0;text-decoration:none;white-space:nowrap}.ws-link:hover,.ws-link.ws-active{color:var(--ws-white);border-bottom-color:var(--ws-gold)}.ws-sep{color:rgba(255,255,255,.32);font-family:Lato,sans-serif}",
       ".ws-nav-drop{position:relative;display:inline-flex}.ws-nav-trigger{border-left:0;border-right:0;border-top:0;background:transparent;padding:0;cursor:pointer}.ws-phase-menu{position:absolute;top:52px;left:0;width:300px;background:#fff;color:var(--ws-navy);border:1px solid var(--ws-line);border-radius:8px;box-shadow:0 18px 40px rgba(0,51,102,.22);overflow:hidden;z-index:80;display:none}.ws-nav-drop:hover .ws-phase-menu,.ws-nav-drop:focus-within .ws-phase-menu{display:block}.ws-phase-menu:before{content:attr(data-label);display:block;padding:12px 16px 8px;color:var(--ws-steel);font:700 11px 'Roboto Mono',monospace;letter-spacing:.14em;text-transform:uppercase}.ws-phase-menu a{display:flex;gap:12px;align-items:center;padding:13px 16px;color:var(--ws-navy);text-decoration:none}.ws-phase-menu a:hover{background:#f4eddf}.ws-phase-menu strong{display:block;font-size:16px}.ws-phase-menu small{display:block;margin-top:2px;color:var(--ws-steel);font-size:13px}.ws-phase-menu .ws-media-icon{margin:0;width:36px;height:36px;border-radius:8px}",
       ".ws-user{position:relative;display:flex;align-items:center;gap:10px;justify-content:flex-end}.ws-user-email{max-width:170px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:rgba(255,255,255,.72);font:700 12px Lato,sans-serif;letter-spacing:0}.ws-avatar{width:36px;height:36px;border-radius:999px;border:0;background:var(--ws-gold);color:var(--ws-navy);display:grid;place-items:center;font:700 12px 'Roboto Mono',monospace;cursor:pointer;overflow:hidden;padding:0}.ws-avatar img,.ws-profile-avatar img{width:100%;height:100%;object-fit:cover;display:block}.ws-profile-menu{position:absolute;right:0;top:100%;min-width:200px;max-width:240px;background:#fff;color:var(--ws-charcoal);border:1px solid var(--ws-line);border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.15);padding:0;z-index:200;overflow:hidden}.ws-profile-menu:before{content:'';position:absolute;top:-8px;right:18px;width:16px;height:16px;background:var(--ws-navy);transform:rotate(45deg)}.ws-profile-menu[hidden]{display:none}.ws-profile-head{position:relative;display:flex;align-items:center;gap:13px;background:var(--ws-navy);color:#fff;padding:14px 16px 13px;border-bottom:3px solid var(--ws-gold)}.ws-profile-avatar{width:46px;height:46px;border-radius:999px;background:var(--ws-gold);color:var(--ws-navy);display:grid;place-items:center;overflow:hidden;font:700 14px 'Roboto Mono',monospace;flex:0 0 auto}.ws-profile-name{margin:0;color:#fff;font-size:15px;font-weight:700;line-height:1.15}.ws-profile-role{margin:4px 0 0;color:var(--ws-gold);font:700 9.5px 'Roboto Mono',monospace;letter-spacing:.12em;text-transform:uppercase}.ws-profile-section{padding:11px 16px 10px;border-bottom:1px solid var(--ws-line)}.ws-profile-section:last-child{border-bottom:0}.ws-profile-section-label{display:block;margin:0 0 7px;color:var(--ws-gold);font:700 9.5px 'Roboto Mono',monospace;letter-spacing:.12em;text-transform:uppercase}.ws-profile-menu a,.ws-profile-menu button{width:100%;min-height:36px;display:flex;align-items:center;gap:12px;border:0;background:transparent;color:var(--ws-navy);font:700 14px Lato,sans-serif;text-align:left;text-decoration:none;cursor:pointer;padding:4px 0}.ws-profile-menu a:hover,.ws-profile-menu button:hover{text-decoration:underline}.ws-profile-icon{width:18px;color:var(--ws-steel);display:inline-flex;justify-content:center;font-size:16px;line-height:1}.ws-profile-menu .ws-admin-link .ws-profile-icon{color:var(--ws-gold)}.ws-profile-menu .ws-logout{color:var(--ws-steel)}",
@@ -879,14 +902,14 @@ const UTL_CONTENT = {
     ].filter(function (link) { return !link.hidden; });
     if (active === "admin") links.push({ key: "admin", label: "Admin", href: adminHref() });
     return '<header class="ws-nav"><div class="ws-nav-inner">' +
-      '<div class="ws-brand"><a class="ws-logo-link" href="' + homeHref() + '" aria-label="The Untaught Lessons home"><img class="ws-logo" src="' + assetHref("../assets/utl-logo-nav-white.png") + '" alt="The Untaught Lessons"></a><a class="ws-program-name" href="index.html">Think. Speak. Act.™</a></div>' +
+      '<div class="ws-brand"><a class="ws-logo-link" href="' + homeHref() + '" aria-label="The Untaught Lessons member home"><img class="ws-logo" src="' + assetHref("../assets/utl-logo-nav-white.png") + '" alt="The Untaught Lessons"></a></div>' +
       '<nav class="ws-links" aria-label="Member workspace">' + links.map(function (link, index) {
         if (link.dropdown) {
           return (index ? '<span class="ws-sep">|</span>' : "") + phaseDropdownHtml(link, active);
         }
         return (index ? '<span class="ws-sep">|</span>' : "") + '<a class="ws-link ' + (active === link.key ? "ws-active" : "") + '" href="' + link.href + '">' + link.label + '</a>';
       }).join("") + '</nav>' +
-      '<div class="ws-user"><span class="ws-user-email">' + escapeHtml(user.email) + '</span><button class="ws-avatar" type="button" aria-label="Open profile menu" aria-expanded="false">' + avatar + '</button><div class="ws-profile-menu" hidden><div class="ws-profile-head"><span class="ws-profile-avatar">' + avatar + '</span><div><p class="ws-profile-name">' + escapeHtml(user.label) + '</p><p class="ws-profile-role">' + roleLabel + '</p></div></div><div class="ws-profile-section"><span class="ws-profile-section-label">Your space</span><a href="' + appHref("../my-results/index.html") + '"><span class="ws-profile-icon">&#9638;</span><span>My results</span></a><a href="' + appHref("../apps/toolkit/index.html") + '"><span class="ws-profile-icon">&#8962;</span><span>Toolkit</span></a></div>' + adminSection + '<div class="ws-profile-section"><button class="ws-logout" type="button"><span class="ws-profile-icon">&#8618;</span><span>Log out</span></button></div></div></div>' +
+      '<div class="ws-user"><span class="ws-user-email">' + escapeHtml(user.email) + '</span><button class="ws-avatar" type="button" aria-label="Open profile menu" aria-expanded="false">' + avatar + '</button><div class="ws-profile-menu" hidden><div class="ws-profile-head"><span class="ws-profile-avatar">' + avatar + '</span><div><p class="ws-profile-name">' + escapeHtml(user.label) + '</p><p class="ws-profile-role">' + roleLabel + '</p></div></div><div class="ws-profile-section"><span class="ws-profile-section-label">Your space</span><a href="' + appHref("../my-results/index.html") + '"><span class="ws-profile-icon">&#9638;</span><span>My results</span></a><a href="' + appHref("../apps/toolkit/index.html") + '"><span class="ws-profile-icon">&#8962;</span><span>Toolkit</span></a></div><div class="ws-profile-section"><span class="ws-profile-section-label">Program</span><a href="' + publicSiteHref() + '"><span class="ws-profile-icon">&#8599;</span><span>Public website</span></a></div>' + adminSection + '<div class="ws-profile-section"><button class="ws-logout" type="button"><span class="ws-profile-icon">&#8618;</span><span>Log out</span></button></div></div></div>' +
       '</div></header>';
   }
 
@@ -921,11 +944,9 @@ const UTL_CONTENT = {
       qsa(".ws-avatar").forEach(function (button) { button.setAttribute("aria-expanded", "false"); });
     });
     qsa(".ws-logout").forEach(function (button) {
-      button.addEventListener("click", function () {
-        localStorage.removeItem(SESSION_KEY);
-        localStorage.removeItem(ADMIN_KEY);
-        localStorage.removeItem(USER_KEY);
-        localStorage.removeItem(PROFILE_KEY);
+      button.addEventListener("click", async function () {
+        button.disabled = true;
+        await clearWorkspaceSession();
         window.location.href = memberHref("index.html");
       });
     });
@@ -1079,6 +1100,27 @@ const UTL_CONTENT = {
     }).catch(function () {
       message.textContent = "That username or password did not match.";
     });
+  }
+
+  async function handlePasswordReset(message) {
+    if (!message) return;
+    var email = (qs("#wsUsername") && qs("#wsUsername").value || "").trim().toLowerCase();
+    message.classList.remove("ws-success");
+    if (!email || email.indexOf("@") === -1) {
+      message.textContent = "Enter your email address above, then tap Forgot password again.";
+      return;
+    }
+    message.textContent = "Sending password reset email...";
+    try {
+      var fb = _preloadedFirebase || await import(firebaseHref());
+      _preloadedFirebase = fb;
+      await fb.sendMemberPasswordReset(email);
+      message.classList.add("ws-success");
+      message.textContent = "Password reset email sent. Check your inbox.";
+    } catch (error) {
+      console.error("Password reset failed.", error);
+      message.textContent = "Could not send a reset email. Check the address or use the email-link sign-in option.";
+    }
   }
 
   var _preloadedFirebase = null;
@@ -1247,7 +1289,7 @@ const UTL_CONTENT = {
     injectStyles();
     document.body.classList.add("ws-page");
     if (!isMemberUnlocked()) {
-      document.body.innerHTML = '<section class="ws-login-wrap"><article class="ws-login-card"><span class="ws-kicker">Member login</span><h1 class="ws-title">Welcome back.</h1><p class="ws-subtitle">Sign in to open your Untaught Lessons workspace.</p><form class="ws-form" id="wsLoginForm"><label for="wsUsername">Username or email</label><input class="ws-input" id="wsUsername" autocomplete="username" required><label for="wsPassword">Password</label><input class="ws-input" id="wsPassword" type="password" autocomplete="current-password" required><button class="ws-button" type="submit">Sign in</button><p class="ws-message" id="wsLoginMessage" aria-live="polite"></p></form><div class="ws-login-divider">or</div><button class="ws-button ws-google-button" id="wsGoogleLogin" type="button"><span class="ws-google-mark" aria-hidden="true"></span><span>Sign in with Google</span></button><div class="ws-login-divider">or</div><div id="wsEmailSignInSection"><button class="ws-button ws-button-secondary" id="wsShowEmailSignIn" type="button" style="width:100%">Sign in with email link</button></div></article></section>';
+      document.body.innerHTML = '<section class="ws-login-wrap"><article class="ws-login-card"><span class="ws-kicker">Member login</span><h1 class="ws-title">Welcome back.</h1><p class="ws-subtitle">Sign in to open your Untaught Lessons workspace.</p><form class="ws-form" id="wsLoginForm"><label for="wsUsername">Username or email</label><input class="ws-input" id="wsUsername" autocomplete="username" required><label for="wsPassword">Password</label><input class="ws-input" id="wsPassword" type="password" autocomplete="current-password" required><button class="ws-button" type="submit">Sign in</button><button type="button" id="wsForgotPassword" style="width:max-content;background:none;border:0;color:var(--ws-steel);font-weight:700;text-decoration:underline;text-underline-offset:3px;cursor:pointer;padding:0">Forgot password?</button><p class="ws-message" id="wsLoginMessage" aria-live="polite"></p></form><div class="ws-login-divider">or</div><button class="ws-button ws-google-button" id="wsGoogleLogin" type="button"><span class="ws-google-mark" aria-hidden="true"></span><span>Sign in with Google</span></button><div class="ws-login-divider">or</div><div id="wsEmailSignInSection"><button class="ws-button ws-button-secondary" id="wsShowEmailSignIn" type="button" style="width:100%">Sign in with email link</button></div></article></section>';
       qs("#wsLoginForm").addEventListener("submit", function (event) {
         event.preventDefault();
         handleLogin(event.currentTarget, qs("#wsLoginMessage"));
@@ -1255,6 +1297,9 @@ const UTL_CONTENT = {
       qs("#wsGoogleLogin").addEventListener("click", function (event) {
         event.preventDefault();
         handleGoogleLogin(event.currentTarget, qs("#wsLoginMessage"));
+      });
+      qs("#wsForgotPassword").addEventListener("click", function () {
+        handlePasswordReset(qs("#wsLoginMessage"));
       });
       qs("#wsShowEmailSignIn").addEventListener("click", function () {
         var section = qs("#wsEmailSignInSection");
@@ -1330,7 +1375,7 @@ const UTL_CONTENT = {
     var readiness = orientationDone
       ? "You have completed orientation. Use the phase cards below to continue."
       : "Ready to begin? Move to the Orientation section next.";
-    return '<article class="ws-journey-card ' + (open ? "ws-open" : "") + '" id="program-journey"><button class="ws-journey-head" type="button" data-journey-toggle><span><span class="ws-kicker">Start here</span><h2 class="ws-journey-title">Think, speak, and act like an executive.</h2><p class="ws-journey-sub">This program builds the habits behind executive judgment: clear thinking, concise communication, and confident action when the answer is not obvious.</p></span><span class="ws-disclosure-icon ws-journey-chevron">' + (open ? "&minus;" : "+") + '</span></button><div class="ws-journey-body"><div class="ws-journey-map"><article class="ws-journey-step"><span class="ws-journey-step-num">1</span><strong>Orientation</strong><span>Start here so the MA storyline and your role are clear.</span></article><article class="ws-journey-step"><span class="ws-journey-step-num">2</span><strong>Lessons</strong><span>Watch the lessons before using each framework in practice.</span></article><article class="ws-journey-step"><span class="ws-journey-step-num">3</span><strong>Practice</strong><span>Use the exercises to turn messy situations into executive-ready work.</span></article><article class="ws-journey-step"><span class="ws-journey-step-num">4</span><strong>Progress</strong><span>Track completion and move phase by phase as your judgment sharpens.</span></article></div><div class="ws-journey-actions"><p class="ws-journey-ready">' + readiness + '<small>' + progress.done + ' of ' + progress.total + ' exercises complete</small></p><a class="ws-journey-cue" href="' + (orientationDone ? "#learning-journey" : "#orientation") + '" data-journey-link>' + (orientationDone ? "View phases" : "Orientation is below") + '<span>&darr;</span></a></div></div></article>';
+    return '<article class="ws-journey-card ' + (open ? "ws-open" : "") + '" id="program-journey"><button class="ws-journey-head" type="button" data-journey-toggle><span><span class="ws-kicker">Start here</span><h1 class="ws-journey-title">Think, speak, and act like an executive.</h1><p class="ws-journey-sub">This program builds the habits behind executive judgment: clear thinking, concise communication, and confident action when the answer is not obvious.</p></span><span class="ws-disclosure-icon ws-journey-chevron">' + (open ? "&minus;" : "+") + '</span></button><div class="ws-journey-body"><div class="ws-journey-map"><article class="ws-journey-step"><span class="ws-journey-step-num">1</span><strong>Orientation</strong><span>Start here so the MA storyline and your role are clear.</span></article><article class="ws-journey-step"><span class="ws-journey-step-num">2</span><strong>Lessons</strong><span>Watch the lessons before using each framework in practice.</span></article><article class="ws-journey-step"><span class="ws-journey-step-num">3</span><strong>Practice</strong><span>Use the exercises to turn messy situations into executive-ready work.</span></article><article class="ws-journey-step"><span class="ws-journey-step-num">4</span><strong>Progress</strong><span>Track completion and move phase by phase as your judgment sharpens.</span></article></div><div class="ws-journey-actions"><p class="ws-journey-ready">' + readiness + '<small>' + progress.done + ' of ' + progress.total + ' exercises complete</small></p><a class="ws-journey-cue" href="' + (orientationDone ? "#learning-journey" : "#orientation") + '" data-journey-link>' + (orientationDone ? "View phases" : "Orientation is below") + '<span>&darr;</span></a></div></div></article>';
   }
 
   function orientationCardHtml() {
@@ -1681,7 +1726,7 @@ const UTL_CONTENT = {
       ? '<div class="ws-complete-banner">&#10003; Phase practice complete. You can review any finished exercise whenever you want.</div>'
       : '<div class="ws-next-action"><span>' + escapeHtml(nextText || "Keep going when you are ready") + '</span>' + (nextHref ? '<a class="ws-button ws-button-navy" href="' + escapeHtml(nextHref) + '"' + (next && videosComplete ? ' data-exercise-visit="' + next.id + '"' : '') + '>Open next step &rarr;</a>' : '') + '</div>';
     return '<section class="ws-phase-progress-panel" aria-label="' + escapeHtml(phaseLabels[phaseKey]) + ' progress">' +
-      '<div class="ws-phase-progress-top"><div><span class="ws-kicker">' + escapeHtml(mode === "practice" ? "Practice progress" : "Phase progress") + '</span><h2>' + escapeHtml(phase.title) + '</h2><p>Track videos and exercises separately so it is clear what has been finished and what comes next.</p></div></div>' +
+      '<div class="ws-phase-progress-top"><div><span class="ws-kicker">' + escapeHtml(mode === "practice" ? "Practice progress" : "Phase progress") + '</span><h2>' + escapeHtml(mode === "practice" ? "Exercise progress" : "Your progress") + '</h2><p>Track videos and exercises separately so it is clear what has been finished and what comes next.</p></div></div>' +
       '<div class="ws-progress-split">' +
         '<article class="ws-progress-metric ' + (videosComplete ? "ws-complete" : "") + '"><div class="ws-progress-metric-head"><span><strong>Videos</strong><small>' + progress.watched + ' of ' + progress.lessonsTotal + ' watched</small></span><span class="ws-progress-value">' + videoPercent + '%</span></div><div class="ws-metric-track" aria-hidden="true"><span style="width:' + videoPercent + '%"></span></div></article>' +
         '<article class="ws-progress-metric ' + (practiceComplete ? "ws-complete" : "") + '"><div class="ws-progress-metric-head"><span><strong>Exercises</strong><small>' + progress.exercisesComplete + ' of ' + progress.exercisesTotal + ' complete</small></span><span class="ws-progress-value">' + exercisePercent + '%</span></div><div class="ws-metric-track" aria-hidden="true"><span style="width:' + exercisePercent + '%"></span></div></article>' +

@@ -8,6 +8,7 @@ import {
   GoogleAuthProvider,
   isSignInWithEmailLink,
   onAuthStateChanged,
+  sendPasswordResetEmail,
   sendSignInLinkToEmail,
   setPersistence,
   signInWithEmailAndPassword,
@@ -170,6 +171,14 @@ async function requireAuthorizedMember(user) {
 async function sendSignInInvite(email) {
   await sendSignInLinkToEmail(requireFirebaseAuth(), email, actionCodeSettings);
   window.localStorage.setItem("emailForSignIn", email);
+}
+
+async function sendMemberPasswordReset(email) {
+  const normalizedEmail = String(email || "").trim().toLowerCase();
+  if (!normalizedEmail) {
+    throw new Error("Please enter your email address first.");
+  }
+  await sendPasswordResetEmail(requireFirebaseAuth(), normalizedEmail);
 }
 
 async function submitAccessRequest(fullName, email, notes = "") {
@@ -715,6 +724,7 @@ export {
   saveUserProfile,
   submitAccessRequest,
   sendSignInInvite,
+  sendMemberPasswordReset,
   sendSignInLinkToEmail,
   saveUserProgress,
   getAssessmentVisibility,

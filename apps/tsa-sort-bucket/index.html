@@ -34,7 +34,7 @@
     }
 
     body.tsa-diag-locked {
-      overflow: hidden;
+      overflow: auto;
     }
 
     .tsa-diag-header {
@@ -93,8 +93,10 @@
       position: fixed;
       inset: 0;
       z-index: 100;
-      display: grid;
-      place-items: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: auto;
       padding: 24px;
       background: var(--cream);
     }
@@ -105,6 +107,7 @@
 
     .tsa-diag-gate-card {
       width: min(100%, 520px);
+      margin: auto 0;
       padding: 36px;
       border: 1px solid var(--line);
       border-top: 4px solid var(--gold);
@@ -671,7 +674,7 @@
     }
   </style>
 </head>
-<body class="tsa-diag-locked">
+<body>
   <header class="tsa-diag-header">
     <a class="tsa-diag-logo" href="../../index.html" aria-label="The Untaught Lessons home">
       <img src="../../assets/utl-logo-nav-white.png" alt="The Untaught Lessons" />
@@ -683,11 +686,11 @@
     </div>
   </header>
 
-  <section class="tsa-diag-gate" id="contactGate" aria-labelledby="gateTitle">
+  <section class="tsa-diag-gate is-hidden" id="contactGate" aria-labelledby="gateTitle">
     <div class="tsa-diag-gate-card">
       <img class="tsa-diag-gate-logo" src="../../assets/logo.png" alt="The Untaught Lessons" />
       <h1 id="gateTitle">Before we begin</h1>
-      <p>Enter your details to get your Find your level and track your progress.</p>
+      <p>Enter your details to find your level and track your progress.</p>
       <form class="tsa-diag-form" id="gateForm">
         <label for="fullName">Full name</label>
         <input id="fullName" name="name" type="text" autocomplete="name" required>
@@ -804,6 +807,12 @@
       `;
     }
 
+    function showGate() {
+      app.hidden = true;
+      contactGate.classList.remove('is-hidden');
+      document.body.classList.add('tsa-diag-locked');
+    }
+
     function normalizeSortSet(set, index) {
       const answerKey = set.answerKey || {};
       const itemTexts = (set.items || []).map(item => typeof item === 'string' ? item : item.text || item.name);
@@ -895,7 +904,7 @@
       const isMember = localStorage.getItem('utl_member_unlocked') === 'true';
       const adminBypass = localStorage.getItem('utl_find_level_admin_bypass') === 'on';
       const gateComplete = sessionStorage.getItem(GATE_KEY) === 'true' || Boolean(contactProfile) || isAdmin || isMember || adminBypass;
-      if (gateComplete) renderLoadingState();
+      renderLoadingState();
       try {
         await loadExerciseData();
         if (gateComplete) {
@@ -909,6 +918,8 @@
           sessionStorage.setItem('tsa_participant_name', state.participant.name);
           sessionStorage.setItem('tsa_participant_email', state.participant.email);
           startAssessment();
+        } else {
+          showGate();
         }
       } catch (error) {
         console.error(error);

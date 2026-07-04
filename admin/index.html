@@ -1737,7 +1737,7 @@
   <div class="admin-app" id="adminApp">
     <div class="member-identity-bar">
       <div class="member-identity-left">
-        <a class="identity-logo-link" href="../index.html" aria-label="The Untaught Lessons home">
+        <a class="identity-logo-link" href="index.html" aria-label="The Untaught Lessons admin home">
           <img class="identity-logo-image" src="../assets/utl-logo-nav-white.png" alt="The Untaught Lessons">
         </a>
         <a class="identity-program-name" href="../member-login/index.html">Think. Speak. Act.™</a>
@@ -2542,19 +2542,15 @@
         <span class="section-label">Content Library</span>
         <h2>GitHub setup</h2>
         <div class="section-divider"></div>
-        <p class="description">Connect to GitHub so this admin panel can read and write data files directly. Your token is stored only in this browser — it never goes into the code or git history.</p>
+        <p class="description"><strong>Direct browser publishing is disabled.</strong> GitHub tokens must not be stored in localStorage or sent from client-side code. Use a server-side publishing function with a secret-managed token before re-enabling this workflow.</p>
         <div class="section-divider" style="margin-top:12px"></div>
-        <p class="description" style="margin-top:12px"><strong>Step 1 — Create a fine-grained token.</strong><br>
-          Go to <strong>github.com → Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token</strong>.<br>
-          Set repository access to <em>Only select repositories → theuntaughtlessons-site</em>.<br>
-          Under Permissions → Repository permissions, set <em>Contents → Read and write</em>. Everything else stays None.</p>
-        <p class="description" style="margin-top:8px"><strong>Step 2 — Paste the token below and click Save.</strong></p>
+        <p class="description" style="margin-top:12px"><strong>Next implementation:</strong> move GitHub reads/writes into a Firebase Cloud Function or other backend endpoint. Store the GitHub token as an environment secret there, and have this admin panel call that endpoint after verifying the current user is an admin.</p>
         <div class="cl-pat-wrap">
-          <input type="password" class="cl-pat-input" id="clPatInput" placeholder="github_pat_…" autocomplete="off">
+          <input type="password" class="cl-pat-input" id="clPatInput" placeholder="Server-side publishing required" autocomplete="off" disabled>
           <button class="password-toggle" type="button" aria-label="Show token" aria-pressed="false" data-password-toggle="clPatInput">
             <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/></svg>
           </button>
-          <button class="small-button" type="button" id="clPatSave">Save token</button>
+          <button class="small-button" type="button" id="clPatSave" disabled>Disabled</button>
           <button class="small-button secondary-button" type="button" id="clPatClear" hidden>Clear token</button>
         </div>
         <p id="clPatStatus" class="cl-status" aria-live="polite"></p>
@@ -5235,7 +5231,7 @@
     // ===== Content Library =====
 
     const CL_REPO = 'wenszu/theuntaughtlessons-site';
-    const CL_PAT_KEY = 'utl_github_pat';
+    const CL_LEGACY_PAT_KEY = ['utl', 'github', 'pat'].join('_');
     const CL_FILES = [
       { name: 'Grocery list',        path: 'data/practice/grocery-list.json',      category: 'Practice exercises', desc: 'MECE sort exercise with item bank and ideal bucket mappings' },
       { name: 'Issue tree builder',  path: 'data/practice/issue-tree-builder.json', category: 'Practice exercises', desc: 'Problem decomposition with hypothesis and sample answer' },
@@ -5250,22 +5246,14 @@
 
     let clEditing = null;
 
-    function clGetPat() { return localStorage.getItem(CL_PAT_KEY) || ''; }
-
     function clUpdatePatStatus() {
-      const hasPat = !!clGetPat();
       const status = document.getElementById('clPatStatus');
       const clearBtn = document.getElementById('clPatClear');
       const input = document.getElementById('clPatInput');
-      if (hasPat) {
-        if (status) { status.textContent = 'Token saved. Ready to load and edit files.'; status.className = 'cl-status is-success'; }
-        if (clearBtn) clearBtn.hidden = false;
-        if (input) input.placeholder = '(token saved — paste a new one to replace)';
-      } else {
-        if (status) { status.textContent = ''; status.className = 'cl-status'; }
-        if (clearBtn) clearBtn.hidden = true;
-        if (input) input.placeholder = 'github_pat_…';
-      }
+      localStorage.removeItem(CL_LEGACY_PAT_KEY);
+      if (status) { status.textContent = 'Browser-based GitHub publishing is disabled until a server-side publishing function is available.'; status.className = 'cl-status'; }
+      if (clearBtn) clearBtn.hidden = true;
+      if (input) input.placeholder = 'Server-side publishing required';
     }
 
     function clRenderFileList() {
@@ -5293,79 +5281,13 @@
     }
 
     async function clLoadFile(file) {
-      const pat = clGetPat();
-      if (!pat) { showToast('Set up your GitHub PAT in the GitHub Setup section first.', true); openAndScrollToSection('section-cl-setup'); return; }
-      const fileList = document.getElementById('clFileList');
-      const editor = document.getElementById('clEditor');
-      const textarea = document.getElementById('clTextarea');
-      const titleEl = document.getElementById('clEditorTitle');
-      const pathEl = document.getElementById('clEditorPath');
-      const statusEl = document.getElementById('clEditorStatus');
-      if (fileList) fileList.hidden = true;
-      if (editor) editor.hidden = false;
-      if (titleEl) titleEl.textContent = file.name;
-      if (pathEl) pathEl.textContent = file.path;
-      if (textarea) { textarea.value = 'Loading…'; textarea.disabled = true; }
-      if (statusEl) { statusEl.textContent = 'Fetching from GitHub…'; statusEl.className = 'cl-status'; }
-      try {
-        const res = await fetch(`https://api.github.com/repos/${CL_REPO}/contents/${file.path}`, {
-          headers: { Authorization: `Bearer ${pat}`, Accept: 'application/vnd.github.v3+json' }
-        });
-        if (!res.ok) {
-          const err = await res.json().catch(() => ({}));
-          throw new Error(res.status === 401 ? 'Token is invalid or expired — check your PAT in GitHub Setup.' :
-                          res.status === 404 ? 'File not found in the repo.' :
-                          err.message || `HTTP ${res.status}`);
-        }
-        const data = await res.json();
-        const raw = decodeURIComponent(escape(atob(data.content.replace(/\n/g, ''))));
-        const parsed = JSON.parse(raw);
-        clEditing = { ...file, sha: data.sha };
-        if (textarea) { textarea.value = JSON.stringify(parsed, null, 2); textarea.disabled = false; }
-        if (statusEl) { statusEl.textContent = ''; statusEl.className = 'cl-status'; }
-      } catch (e) {
-        if (statusEl) { statusEl.textContent = 'Failed to load: ' + e.message; statusEl.className = 'cl-status is-error'; }
-        if (textarea) { textarea.value = ''; textarea.disabled = false; }
-      }
+      showToast('GitHub loading is disabled until server-side publishing is implemented.', true);
+      openAndScrollToSection('section-cl-setup');
     }
 
     async function clSaveFile() {
-      const pat = clGetPat();
-      if (!pat || !clEditing) return;
-      const textarea = document.getElementById('clTextarea');
-      const statusEl = document.getElementById('clEditorStatus');
-      const saveBtn = document.getElementById('clSaveBtn');
-      let parsed;
-      try { parsed = JSON.parse(textarea.value); }
-      catch (e) {
-        if (statusEl) { statusEl.textContent = 'Cannot save — invalid JSON: ' + e.message; statusEl.className = 'cl-status is-error'; }
-        return;
-      }
-      const content = btoa(unescape(encodeURIComponent(JSON.stringify(parsed, null, 2))));
-      if (saveBtn) saveBtn.disabled = true;
-      if (statusEl) { statusEl.textContent = 'Saving to GitHub…'; statusEl.className = 'cl-status'; }
-      try {
-        const res = await fetch(`https://api.github.com/repos/${CL_REPO}/contents/${clEditing.path}`, {
-          method: 'PUT',
-          headers: { Authorization: `Bearer ${pat}`, Accept: 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: `Update ${clEditing.path} via admin panel`, content, sha: clEditing.sha })
-        });
-        if (!res.ok) {
-          const err = await res.json().catch(() => ({}));
-          throw new Error(res.status === 409 ? 'Conflict — someone else edited this file. Reload it and try again.' :
-                          res.status === 422 ? 'SHA mismatch — reload the file and try again.' :
-                          err.message || `HTTP ${res.status}`);
-        }
-        const data = await res.json();
-        clEditing.sha = data.content.sha;
-        if (statusEl) { statusEl.textContent = 'Saved. GitHub Pages will update in about 60 seconds.'; statusEl.className = 'cl-status is-success'; }
-        showToast('Saved to GitHub');
-      } catch (e) {
-        if (statusEl) { statusEl.textContent = 'Save failed: ' + e.message; statusEl.className = 'cl-status is-error'; }
-        showToast('Save failed', true);
-      } finally {
-        if (saveBtn) saveBtn.disabled = false;
-      }
+      showToast('GitHub saving is disabled until server-side publishing is implemented.', true);
+      openAndScrollToSection('section-cl-setup');
     }
 
     function clValidateJSON() {
@@ -5401,18 +5323,13 @@
       clUpdatePatStatus();
       clRenderFileList();
       document.getElementById('clPatSave')?.addEventListener('click', () => {
-        const input = document.getElementById('clPatInput');
-        const val = (input?.value || '').trim();
-        if (!val) { showToast('Paste your token first', true); return; }
-        localStorage.setItem(CL_PAT_KEY, val);
-        if (input) input.value = '';
         clUpdatePatStatus();
-        showToast('Token saved');
+        showToast('GitHub publishing must be handled server-side.', true);
       });
       document.getElementById('clPatClear')?.addEventListener('click', () => {
-        localStorage.removeItem(CL_PAT_KEY);
+        localStorage.removeItem(CL_LEGACY_PAT_KEY);
         clUpdatePatStatus();
-        showToast('Token cleared');
+        showToast('Legacy token cleared');
       });
       document.getElementById('clEditorBack')?.addEventListener('click', clShowFileList);
       document.getElementById('clSaveBtn')?.addEventListener('click', clSaveFile);
@@ -5813,12 +5730,21 @@
       adminError.classList.add('is-visible');
     });
 
-    document.getElementById('logoutLink').addEventListener('click', (event) => {
+    document.getElementById('logoutLink').addEventListener('click', async (event) => {
       event.preventDefault();
+      const button = event.currentTarget;
+      if (button) button.disabled = true;
+      try {
+        const fb = window.utlFirebaseAuth || {};
+        if (fb.signOut && fb.auth) await fb.signOut(fb.auth);
+      } catch (error) {
+        console.warn('Firebase sign-out did not complete:', error && error.message);
+      }
       localStorage.removeItem(AUTH_KEY);
       localStorage.removeItem('utl_member_unlocked');
       localStorage.removeItem('utl_member_username');
       localStorage.removeItem('utl_member_profile');
+      sessionStorage.removeItem('utl_member_unlocked');
       window.location.reload();
     });
 

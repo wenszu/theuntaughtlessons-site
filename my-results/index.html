@@ -1153,7 +1153,7 @@
 <body>
   <div class="member-identity-bar">
     <div class="member-identity-left">
-      <a class="identity-logo-link" href="../index.html" aria-label="The Untaught Lessons home">
+      <a class="identity-logo-link" href="../member-login/index.html" aria-label="The Untaught Lessons member home">
         <img class="identity-logo-image" src="../assets/utl-logo-nav-white.png" alt="The Untaught Lessons">
       </a>
     </div>
@@ -1450,11 +1450,19 @@
         if (toggle) toggle.setAttribute('aria-expanded', 'false');
       });
       if (logout) {
-        logout.addEventListener('click', () => {
+        logout.addEventListener('click', async () => {
+          logout.disabled = true;
+          try {
+            const fb = await import('../assets/firebase.js');
+            if (fb.signOut && fb.auth) await fb.signOut(fb.auth);
+          } catch (error) {
+            console.warn('Firebase sign-out did not complete:', error && error.message);
+          }
           localStorage.removeItem('utl_member_unlocked');
           localStorage.removeItem('utl_admin_auth');
           localStorage.removeItem('utl_member_username');
           localStorage.removeItem('utl_member_profile');
+          sessionStorage.removeItem('utl_member_unlocked');
           window.location.href = '../member-login/index.html';
         });
       }
