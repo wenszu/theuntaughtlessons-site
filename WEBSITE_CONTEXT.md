@@ -328,4 +328,4 @@ Decisions are made in Claude (claude.ai). JSON updates are handled in Codex. Doc
 - Fixed Admin Console tab content rendering and event binding for `bindAdminContentManager()`.
 - Restored "Assessments" link in `my-results/index.html` navigation.
 - Redesigned `my-results/index.html` with stage-based summary model, collapsible accordions for each stage, video progress tracking.
-- Updated member practice apps to remove automated email triggers. Switched to learner-controlled submission via My Results dashboard.
+- Updated member practice apps to remove automated email triggers. Switched to learner-controlled submission via My Results dashboard. Added.
