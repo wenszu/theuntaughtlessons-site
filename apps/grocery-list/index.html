@@ -76,31 +76,33 @@
       text-transform: uppercase;
     }
 
-    .app-title-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-top: 3px;
-    }
-
-    .app-back-arrow {
-      color: var(--white);
-      font-size: 28px;
-      line-height: 1;
-      text-decoration: none;
-      flex-shrink: 0;
-    }
-
-    .app-back-arrow:hover {
-      color: var(--gold);
-    }
-
     .app-title {
+      display: block;
+      margin-top: 3px;
       color: var(--white);
       font-family: 'Playfair Display', serif;
       font-size: 27px;
       font-weight: 700;
       line-height: 1;
+    }
+
+    .module-back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 8px;
+      color: rgba(255, 255, 255, .82);
+      font-family: 'Lato', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      line-height: 1.25;
+      text-decoration: none;
+    }
+
+    .module-back-link:hover {
+      color: var(--gold, var(--ab-gold, var(--eisenhower-gold, #EEA320)));
+      text-decoration: underline;
+      text-underline-offset: 3px;
     }
 
     .app-timer {
@@ -250,9 +252,9 @@
 
     .header-grid {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(280px, 380px);
+      grid-template-columns: minmax(0, 1fr) auto;
       gap: 18px;
-      align-items: start;
+      align-items: center;
     }
 
     .header h1 {
@@ -269,7 +271,7 @@
     .completion-row {
       display: flex;
       justify-content: flex-end;
-      margin-top: 14px;
+      margin-top: 0;
     }
 
     .done-toggle {
@@ -776,7 +778,8 @@
       }
 
       .layout,
-      .buckets-wrap {
+      .buckets-wrap,
+      .header-grid {
         grid-template-columns: 1fr;
       }
 
@@ -810,6 +813,10 @@
         grid-template-columns: repeat(auto-fit, minmax(min(100%, 160px), 1fr));
       }
 
+      .completion-row {
+        justify-content: flex-start;
+      }
+
       button,
       .buttons button {
         min-height: 44px;
@@ -830,10 +837,8 @@
     <div class="brand-divider" aria-hidden="true"></div>
     <div>
       <a class="app-kicker" href="../../member-login/index.html" style="text-decoration:none">Think. Speak. Act.™</a>
-      <div class="app-title-row">
-        <a class="app-back-arrow" href="../../member-login/phase-1/practice/index.html" aria-label="Back to Phase 1 exercises">&#8592;</a>
-        <span class="app-title">Grocery list</span>
-      </div>
+      <span class="app-title">Grocery list</span>
+      <a class="module-back-link" href="../../member-login/phase-1/practice/index.html">← Back to Phase 1 exercises</a>
     </div>
     <div class="app-timer" aria-label="Elapsed time">
       <div class="utility-metric" id="timerMetric">
@@ -870,10 +875,14 @@
 
   <main id="content" class="page">
     <header id="hero" class="header">
-      <h1>Grocery list</h1>
-      <p>Practice structured thinking: Create exactly three clear buckets, sort the messy list, and reflect on why your structure is MECE (Mutually Exclusive, Collectively Exhaustive).</p>
-      <div class="completion-row">
-        <button class="done-toggle" id="doneToggleBtn" type="button">Mark exercise as done</button>
+      <div class="header-grid">
+        <div>
+          <h1>Grocery list</h1>
+          <p>Practice structured thinking: Create exactly three clear buckets, sort the messy list, and reflect on why your structure is MECE (Mutually Exclusive, Collectively Exhaustive).</p>
+        </div>
+        <div class="completion-row">
+          <button class="done-toggle" id="doneToggleBtn" type="button">Mark exercise as done</button>
+        </div>
       </div>
     </header>
 
@@ -1667,6 +1676,7 @@
     initializeApp();
   </script>
   <script type="module" src="../../assets/app-access-guard.js?v=1"></script>
+  <script src="../../assets/exercise-scoring-intro.js?v=1"></script>
   <script type="module" src="../../assets/feedback-widget.js?v=5"></script>
 </body>
 </html>

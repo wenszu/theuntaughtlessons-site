@@ -111,17 +111,17 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      margin-top: 9px;
+      margin-top: 8px;
       color: rgba(255, 255, 255, .82);
       font-family: 'Lato', sans-serif;
-      font-size: 13px;
+      font-size: 15px;
       font-weight: 700;
-      line-height: 1.2;
+      line-height: 1.25;
       text-decoration: none;
     }
 
     .module-back-link:hover {
-      color: var(--eisenhower-gold);
+      color: var(--gold, var(--ab-gold, var(--eisenhower-gold, #EEA320)));
       text-decoration: underline;
       text-underline-offset: 3px;
     }
@@ -695,7 +695,7 @@
 
   <footer class="eisenhower-actions">
     <button class="eisenhower-button navy" id="showExample" type="button">Show example placement</button>
-    <button class="eisenhower-button primary-action" id="markDone" type="button">Mark as done</button>
+    <button class="eisenhower-button primary-action" id="markDone" type="button">Submit</button>
     <button class="eisenhower-button secondary-action" id="tryAgain" type="button" hidden>Try again</button>
     <span class="eisenhower-context-copy" id="doneStatus" role="status" aria-live="polite"></span>
   </footer>
@@ -1001,7 +1001,7 @@
       function markDone() {
         const status = document.getElementById('doneStatus');
         if (Object.keys(state.placements).length !== scenario().tasks.length) {
-          status.textContent = 'Place all 10 tasks before marking this exercise done.';
+          status.textContent = 'Place all 10 tasks before submitting.';
           return;
         }
         saveCompletionIfReady();
@@ -1143,6 +1143,7 @@
     })();
   </script>
   <script type="module" src="../../assets/app-access-guard.js?v=1"></script>
+  <script src="../../assets/exercise-scoring-intro.js?v=1"></script>
   <script type="module" src="../../assets/feedback-widget.js?v=5"></script>
 </body>
 </html>

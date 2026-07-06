@@ -148,17 +148,17 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      margin-top: 9px;
+      margin-top: 8px;
       color: rgba(255, 255, 255, .82);
-      font-family: "Lato", sans-serif;
-      font-size: 13px;
+      font-family: 'Lato', sans-serif;
+      font-size: 15px;
       font-weight: 700;
-      line-height: 1.2;
+      line-height: 1.25;
       text-decoration: none;
     }
 
     .module-back-link:hover {
-      color: var(--gold);
+      color: var(--gold, var(--ab-gold, var(--eisenhower-gold, #EEA320)));
       text-decoration: underline;
       text-underline-offset: 3px;
     }
@@ -2154,11 +2154,12 @@
             <div class="remaining" id="remainingFields">Add 3 argument names and 9 supporting details</div>
             <div class="bottom-actions">
               <button class="btn btn-secondary" type="button" id="showSample">Show sample answer</button>
-              <button class="btn btn-primary" type="button" id="saveAnswerBtn">Save my answer →</button>
+              <button class="btn btn-primary" type="button" id="saveAnswerBtn">Submit</button>
               <button class="btn btn-secondary" type="button" id="startOver" hidden>Start over</button>
             </div>
           </div>
           <div id="saveNoticeMount"></div>
+          <div id="feedbackMount"></div>
           <div id="sampleMount"></div>
         </section>
       </div>
@@ -2538,7 +2539,7 @@
     function setSaveButtonSaved(saved) {
       const button = $("#saveAnswerBtn");
       if (!button) return;
-      button.textContent = saved ? "Saved" : "Save my answer →";
+      button.textContent = saved ? "Submitted" : "Submit";
       if (saved) button.dataset.saved = "true";
       else delete button.dataset.saved;
       const startOverButton = $("#startOver");
@@ -2568,7 +2569,7 @@
       };
     }
 
-    function saveIssueTreeAnswer() {
+    function submitIssueTreeAnswer() {
       updateFromDom();
       const requirements = completionRequirements();
       if (requirements.missingArguments || requirements.missingDetails) {
@@ -2587,7 +2588,9 @@
         setSaveButtonSaved(false);
         return;
       }
+      const score = renderFeedback();
       saveResult('issue-tree', 2, 'Issue tree builder', elapsedSeconds(), {
+        score,
         ...issueTreePayload()
       });
       $("#saveNoticeMount").innerHTML = completionSaveNotice();
@@ -2631,6 +2634,7 @@
       });
       save();
       setSaveButtonSaved(false);
+      if ($("#feedbackMount")) $("#feedbackMount").innerHTML = "";
       renderProgress();
       if ($("#startBtn")) $("#startBtn").disabled = !filled(state.problemStatement);
       setTextIfPresent("#sideQuestion", state.problemStatement || "No question yet.");
@@ -2740,49 +2744,79 @@
       return normalizeWords(text).filter((word) => word.length > 4 && !stop.has(word));
     }
 
+    const ISSUE_TREE_SOURCE_TERMS = new Set([
+      "olympic", "olympics", "games", "athlete", "athletes", "ritual", "cultural", "culture", "timestamp",
+      "unity", "geopolitics", "geopolitical", "trust", "narrative", "story", "storyline", "clip", "short-form",
+      "sponsor", "sponsors", "sponsorship", "sponsorships", "commercial", "superbowl", "attention", "fragmented",
+      "broadcast", "television", "tv", "global", "meaning", "moments", "controversies", "media"
+    ]);
+
+    function sourceTermCount(text) {
+      return normalizeWords(text).filter((word) => ISSUE_TREE_SOURCE_TERMS.has(word)).length;
+    }
+
     function runChecks() {
       const args = state.arguments;
       const details = args.flatMap((arg) => arg.details);
       const results = [];
-      const add = (status, label, points, hint = "") => results.push({ status, label, points, hint });
+      const add = (status, label, points, maxPoints, hint = "") => results.push({ status, label, points, maxPoints, hint });
 
       const missingArgs = args.map((arg, i) => filled(arg.text) ? "" : `Argument ${i + 1} is empty`).filter(Boolean);
-      add(missingArgs.length ? "fail" : "pass", missingArgs.length ? `Missing argument(s): ${missingArgs.join(", ")}` : "All 3 arguments provided", missingArgs.length ? 0 : 1, "Your issue tree needs 3 distinct buckets. Each should answer your central question.");
+      add(missingArgs.length ? "fail" : "pass", missingArgs.length ? `Missing argument(s): ${missingArgs.join(", ")}` : "All 3 arguments provided", missingArgs.length ? 0 : 10, 10, "Your issue tree needs 3 distinct buckets. Each should answer your central question.");
 
-      const overlaps = [[0, 1], [0, 2], [1, 2]].filter(([a, b]) => hasSharedPhrase(args[a].text, args[b].text));
-      add(overlaps.length ? "fail" : "pass", overlaps.length ? "Arguments may overlap" : "Arguments appear distinct", overlaps.length ? 0 : 1, "Two of your arguments seem to cover similar ground. MECE means each bucket should be distinct — if they overlap, merge or split them.");
+      const overlaps = [[0, 1], [0, 2], [1, 2]].filter(([a, b]) => filled(args[a].text) && filled(args[b].text) && hasSharedPhrase(args[a].text, args[b].text));
+      add(missingArgs.length || overlaps.length ? "fail" : "pass", missingArgs.length ? "Add all arguments before checking overlap" : overlaps.length ? "Arguments may overlap" : "Arguments appear distinct", missingArgs.length || overlaps.length ? 0 : 15, 15, "Two of your arguments seem to cover similar ground. MECE means each bucket should be distinct — if they overlap, merge or split them.");
 
       const filledDetails = details.filter((detail) => filled(detail)).length;
-      if (filledDetails >= 7) add("pass", "Strong detail coverage (7+ of 9)", 1);
-      else if (filledDetails >= 5) add("partial", "Partial detail coverage", 0.5, "Each argument needs specific evidence — vague buckets without detail are hard to defend.");
-      else add("fail", "Too many details missing", 0, "Each argument needs specific evidence — vague buckets without detail are hard to defend.");
+      if (filledDetails >= 9) add("pass", "Full detail coverage (9 of 9)", 15, 15);
+      else if (filledDetails >= 7) add("partial", "Strong detail coverage", 11, 15, "Aim for 3 specific details under each argument so every branch is defensible.");
+      else if (filledDetails >= 5) add("partial", "Partial detail coverage", 6, 15, "Each argument needs specific evidence — vague buckets without detail are hard to defend.");
+      else add("fail", "Too many details missing", 0, 15, "Each argument needs specific evidence — vague buckets without detail are hard to defend.");
 
       const longArgs = args.map((arg, i) => wordCount(arg.text) > 8 ? `Argument ${i + 1} is ${wordCount(arg.text)} words` : "").filter(Boolean);
-      add(longArgs.length ? "fail" : "pass", longArgs.length ? `Argument(s) may be too complex: ${longArgs.join(", ")}` : "Arguments are tight and focused", longArgs.length ? 0 : 1, "A good argument label is a short bucket name, not a full sentence. e.g. 'Shared ritual is breaking' not 'The shared rituals that used to unite audiences are breaking down.'");
-
       const generic = ["things", "issues", "problems", "factors", "aspects", "various", "many", "several", "some", "etc"];
-      const vague = details.some((detail) => {
+      const genericArgs = args.map((arg, i) => {
+        const words = normalizeWords(arg.text);
+        const genericWords = words.filter((word) => generic.includes(word)).length;
+        return (genericWords && significantWords(arg.text).length <= 2) || (filled(arg.text) && sourceTermCount(arg.text) === 0) ? `Argument ${i + 1}` : "";
+      }).filter(Boolean);
+      const labelProblems = longArgs.concat(genericArgs);
+      add(labelProblems.length ? "fail" : "pass", labelProblems.length ? `Argument label(s) need focus: ${labelProblems.join(", ")}` : "Arguments are tight and focused", labelProblems.length ? 0 : 15, 15, "A good argument label is a short, specific bucket name. Avoid generic labels like 'many issues' or full-sentence labels.");
+
+      const filledDetailValues = details.filter((detail) => filled(detail));
+      const vagueCount = filledDetailValues.filter((detail) => {
         const words = normalizeWords(detail);
         return words.filter((word) => generic.includes(word)).length >= 2 && significantWords(detail).length <= 2;
-      });
-      add(vague ? "fail" : "pass", vague ? "Some details may be too vague" : "Details appear specific", vague ? 0 : 1, "Specific details name things: platforms, percentages, behaviours, named trends. 'Various issues with media' is vague. 'Broadcast-first packaging clashes with how feeds work' is specific.");
+      }).length;
+      const sourceDetails = filledDetailValues.filter((detail) => sourceTermCount(detail) > 0).length;
+      if (!vagueCount && sourceDetails >= 7) add("pass", "Details are specific and source-based", 15, 15);
+      else if (vagueCount <= 2 && sourceDetails >= 4) add("partial", "Some details need stronger source connection", 8, 15, "Specific details should come from the source notes: platforms, athlete-led meaning, unity, sponsorship, culture, ritual, or media behaviour.");
+      else add("fail", "Details are too vague or disconnected", 0, 15, "Specific details should come from the source notes: platforms, athlete-led meaning, unity, sponsorship, culture, ritual, or media behaviour.");
 
       const question = state.problemStatement.trim();
       const isQuestion = question.endsWith("?") || /^(why|what|how|when|which)\b/i.test(question);
-      add(isQuestion ? "pass" : "fail", isQuestion ? "Problem is framed as a question" : "Problem statement is not a question", isQuestion ? 1 : 0, "Frame your problem as a question — 'Why is X happening?' works much better than 'X is declining.'");
+      add(isQuestion ? "pass" : "fail", isQuestion ? "Problem is framed as a question" : "Problem statement is not a question", isQuestion ? 10 : 0, 10, "Frame your problem as a question — 'Why is X happening?' works much better than 'X is declining.'");
+
+      const hypothesisWords = wordCount(state.hypothesis);
+      const hypothesisRelevant = sourceTermCount(state.hypothesis) > 0;
+      const hypothesisStatus = hypothesisWords >= 8 && hypothesisRelevant ? "pass" : hypothesisWords >= 4 && hypothesisRelevant ? "partial" : "fail";
+      add(hypothesisStatus, hypothesisStatus === "pass" ? "Hypothesis is developed" : hypothesisStatus === "partial" ? "Hypothesis needs more substance" : "Hypothesis is missing or too thin", hypothesisStatus === "pass" ? 10 : hypothesisStatus === "partial" ? 5 : 0, 10, "Use the hypothesis to state the likely answer before building the tree. It should be more than a title.");
 
       const problemWordsSet = new Set(significantWords(state.problemStatement));
-      const problemMatches = args.filter((arg) => significantWords(arg.text).some((word) => problemWordsSet.has(word))).length;
-      add(problemMatches >= 2 ? "pass" : "fail", problemMatches >= 2 ? "Arguments are anchored to your question" : "Arguments may not address your question", problemMatches >= 2 ? 1 : 0, "Your arguments should directly diagnose your problem. Re-read your question and check — does each argument explain a reason why that specific problem exists?");
+      const anchorText = args.map((arg) => `${arg.text} ${arg.details.join(" ")}`).join(" ");
+      const anchorMatches = significantWords(anchorText).filter((word) => problemWordsSet.has(word)).length;
+      const sourceMatches = sourceTermCount(anchorText);
+      const anchorStatus = anchorMatches >= 3 || sourceMatches >= 7 ? "pass" : anchorMatches >= 1 || sourceMatches >= 3 ? "partial" : "fail";
+      add(anchorStatus, anchorStatus === "pass" ? "Arguments are anchored to your question" : anchorStatus === "partial" ? "Arguments partly connect to your question" : "Arguments may not address your question", anchorStatus === "pass" ? 10 : anchorStatus === "partial" ? 5 : 0, 10, "Your arguments should directly diagnose your problem. Re-read your question and check — does each argument explain a reason why that specific problem exists?");
 
       return results;
     }
 
     function scoreMessage(score) {
-      if (score >= 9) return "Strong work. Your tree is structured, specific, and aligned. This is what clear thinking looks like.";
-      if (score >= 7) return "Solid foundation. A few refinements and this is ready to share with Aiko.";
-      if (score >= 5) return "Getting there. Focus on the flagged areas — specificity and alignment will sharpen this significantly.";
-      if (score >= 3) return "The structure is there, but the thinking needs more depth. Go back to the arguments and ask 'why?' one more time.";
+      if (score >= 90) return "Strong work. Your tree is structured, specific, and aligned. This is what clear thinking looks like.";
+      if (score >= 75) return "Solid foundation. A few refinements and this is ready to share with Aiko.";
+      if (score >= 60) return "Getting there. Focus on the flagged areas — specificity and alignment will sharpen this significantly.";
+      if (score >= 40) return "The structure is there, but the thinking needs more depth. Go back to the arguments and ask 'why?' one more time.";
       return "Start with the basics — make sure every field is filled before checking. The tree needs all its branches.";
     }
 
@@ -2793,14 +2827,14 @@
         <section class="panel" aria-live="polite">
           <button class="panel-close" type="button" data-close-panel="feedbackMount">×</button>
           <div class="label">ANSWER CHECK</div>
-          <div class="score-line">${score} / 10 <span>points</span></div>
-          <div class="score-track"><div class="score-fill" style="width: ${score * 10}%"></div></div>
+          <div class="score-line">${score} / 100 <span>points</span></div>
+          <div class="score-track"><div class="score-fill" style="width: ${score}%"></div></div>
           ${results.map((result) => `
             <div class="rule-row">
               <div class="rule-top">
                 <span class="mark ${result.status}">${result.status === "pass" ? "✓" : result.status === "partial" ? "◑" : "✗"}</span>
                 <span>${escapeHtml(result.label)}${result.hint && result.status !== "pass" ? ` <button class="hint-toggle" type="button">▾ show hint</button>` : ""}</span>
-                <span class="rule-points">[${result.points} pt]</span>
+                <span class="rule-points">[${result.points}/${result.maxPoints}]</span>
               </div>
               ${result.hint && result.status !== "pass" ? `<div class="rule-hint">${escapeHtml(result.hint)}</div>` : ""}
             </div>
@@ -2808,6 +2842,8 @@
           <p class="score-message">${escapeHtml(scoreMessage(score))}</p>
         </section>
       `;
+      $("#feedbackMount").scrollIntoView({ behavior: "smooth", block: "start" });
+      return score;
     }
 
     function renderSample() {
@@ -3115,7 +3151,7 @@
       if (event.currentTarget.dataset.saved === "true") {
         return;
       }
-      saveIssueTreeAnswer();
+      submitIssueTreeAnswer();
     });
     $("#startOver").addEventListener("click", () => $("#confirmModal").classList.add("show"));
     $("#cancelStartOver").addEventListener("click", () => $("#confirmModal").classList.remove("show"));
@@ -3168,6 +3204,7 @@
     initializeApp();
   </script>
   <script type="module" src="../../assets/app-access-guard.js?v=1"></script>
+  <script src="../../assets/exercise-scoring-intro.js?v=1"></script>
   <script type="module" src="../../assets/feedback-widget.js?v=5"></script>
 </body>
 </html>
