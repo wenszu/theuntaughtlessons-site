@@ -39,7 +39,7 @@
       top: 0;
       z-index: 20;
       display: grid;
-      grid-template-columns: auto auto minmax(220px, 1fr) auto;
+      grid-template-columns: auto auto minmax(220px, 1fr) auto auto;
       align-items: center;
       column-gap: 20px;
       min-height: 76px;
@@ -110,6 +110,120 @@
       align-items: center;
       justify-content: flex-end;
       gap: 10px;
+    }
+
+    .header-progress-chip {
+      display: grid;
+      gap: 5px;
+      min-width: 270px;
+      max-width: 330px;
+      padding: 7px 11px;
+      border: 1px solid rgba(255, 255, 255, .2);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, .08);
+      color: rgba(255, 255, 255, .88);
+    }
+
+    .header-progress-top {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .header-progress-label {
+      color: var(--gold);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .12em;
+      line-height: 1;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .header-progress-phase {
+      color: rgba(255, 255, 255, .74);
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .header-progress-message {
+      margin: 0;
+      color: rgba(255, 255, 255, .9);
+      font-size: 10px;
+      font-style: italic;
+      font-weight: 700;
+      line-height: 1.1;
+      overflow: hidden;
+      text-align: right;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .header-progress-body {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .header-progress-lines {
+      display: grid;
+      gap: 4px;
+    }
+
+    .header-progress-line {
+      display: grid;
+      grid-template-columns: minmax(112px, max-content) 1fr;
+      align-items: center;
+      gap: 9px;
+      font-size: 10px;
+      font-weight: 700;
+      line-height: 1.15;
+      white-space: nowrap;
+    }
+
+    .header-progress-percent {
+      min-width: 58px;
+      color: var(--gold);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 1.05;
+      text-align: right;
+    }
+
+    .header-progress-percent span {
+      display: block;
+      margin-top: 1px;
+      color: rgba(255, 255, 255, .68);
+      font-family: 'Lato', sans-serif;
+      font-size: 9px;
+      letter-spacing: 0;
+      text-transform: none;
+    }
+
+    .header-progress-dots {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      min-width: 0;
+    }
+
+    .header-progress-dot {
+      width: 7px;
+      height: 7px;
+      border: 1px solid rgba(255, 255, 255, .38);
+      border-radius: 50%;
+      background: transparent;
+      flex: 0 0 auto;
+    }
+
+    .header-progress-dot.is-done {
+      border-color: #2C7A4B;
+      background: #2C7A4B;
     }
 
     .timer-compat {
@@ -603,7 +717,19 @@
       color: var(--navy);
     }
 
-    button:disabled { opacity: .45; cursor: not-allowed; }
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 1;
+    }
+
+    .buttons button:disabled,
+    .buttons button.primary:disabled {
+      background: #E7E1D7;
+      border-color: #D8D0C2;
+      color: #8A8379;
+      box-shadow: none;
+      transform: none;
+    }
 
     .feedback,
     .sample-answer {
@@ -686,6 +812,12 @@
         flex-wrap: wrap;
       }
 
+      .header-progress-chip {
+        width: 100%;
+        min-width: 0;
+        max-width: none;
+      }
+
       .header-grid { grid-template-columns: 1fr; }
       .layout {
         grid-template-columns: 1fr;
@@ -758,6 +890,16 @@
         justify-content: flex-end;
         gap: 6px;
         flex-wrap: wrap;
+      }
+
+      .header-progress-chip {
+        order: 10;
+        flex: 1 0 100%;
+      }
+
+      .header-progress-line {
+        grid-template-columns: 1fr;
+        align-items: start;
       }
 
       .utility-metric {
@@ -839,6 +981,25 @@
       <a class="app-kicker" href="../../member-login/index.html" style="text-decoration:none">Think. Speak. Act.™</a>
       <span class="app-title">Grocery list</span>
       <a class="module-back-link" href="../../member-login/phase-1/practice/index.html">← Back to Phase 1 exercises</a>
+    </div>
+    <div class="header-progress-chip" id="headerProgressChip" aria-label="Phase 1 progress">
+      <div class="header-progress-top">
+        <span class="header-progress-label">Progress</span>
+        <p class="header-progress-message" id="headerProgressMessage">Start with the first video.</p>
+      </div>
+      <div class="header-progress-body">
+        <div class="header-progress-lines">
+          <div class="header-progress-line">
+            <span id="headerVideoProgressText">0/3 videos watched</span>
+            <span class="header-progress-dots" id="headerVideoProgressDots" aria-hidden="true"></span>
+          </div>
+          <div class="header-progress-line">
+            <span id="headerExerciseProgressText">0/6 exercises completed</span>
+            <span class="header-progress-dots" id="headerExerciseProgressDots" aria-hidden="true"></span>
+          </div>
+        </div>
+        <div class="header-progress-percent" id="headerProgressPercent">0%<span>completed</span></div>
+      </div>
     </div>
     <div class="app-timer" aria-label="Elapsed time">
       <div class="utility-metric" id="timerMetric">
@@ -953,6 +1114,15 @@
     let activeDragZone = null;
     const dragDepthByZone = new WeakMap();
     const COMPLETION_KEYS = ['utl_done_grocery-list', 'utl_done_p1-e1', 'utl_p1_ex1_done'];
+    const PHASE_ONE_LESSON_KEYS = ['utl_watched_p1-l1', 'utl_watched_p1-l2', 'utl_watched_p1-l3'];
+    const PHASE_ONE_EXERCISE_KEYS = [
+      ['utl_done_p1-e1', 'utl_p1_ex1_done'],
+      ['utl_done_p1-e2', 'utl_p1_ex2_done'],
+      ['utl_done_p1-e3', 'utl_p1_ex3_done'],
+      ['utl_done_p1-e4', 'utl_p1_ex4_done'],
+      ['utl_done_p1-e5', 'utl_p1_ex5_done'],
+      ['utl_done_p1-e6', 'utl_p1_ex6_done']
+    ];
 
     // -------------------------
     // Utility functions
@@ -1473,11 +1643,55 @@
       return COMPLETION_KEYS.some((key) => localStorage.getItem(key) === 'true');
     }
 
+    function countCompleted(keys) {
+      return keys.filter((key) => localStorage.getItem(key) === 'true').length;
+    }
+
+    function countCompletedGroups(groups) {
+      return groups.filter((keys) => keys.some((key) => localStorage.getItem(key) === 'true')).length;
+    }
+
+    function renderHeaderDots(containerId, total, completed) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+      container.innerHTML = Array.from({ length: total }, (_, index) => (
+        `<span class="header-progress-dot ${index < completed ? 'is-done' : ''}"></span>`
+      )).join('');
+    }
+
+    function headerProgressMessage(percent) {
+      if (percent >= 100) return 'Phase complete. Nice work!';
+      if (percent >= 75) return 'You’re almost there!';
+      if (percent >= 50) return 'You’re more than halfway there!';
+      if (percent >= 25) return 'You’re building momentum!';
+      if (percent > 0) return 'You’ve started. Keep going!';
+      return 'Start with the first video.';
+    }
+
+    function updateHeaderProgress() {
+      const videosWatched = countCompleted(PHASE_ONE_LESSON_KEYS);
+      const exercisesCompleted = countCompletedGroups(PHASE_ONE_EXERCISE_KEYS);
+      const completedItems = videosWatched + exercisesCompleted;
+      const totalItems = PHASE_ONE_LESSON_KEYS.length + PHASE_ONE_EXERCISE_KEYS.length;
+      const percent = totalItems ? Math.round((completedItems / totalItems) * 100) : 0;
+      const percentEl = document.getElementById('headerProgressPercent');
+      const message = document.getElementById('headerProgressMessage');
+      const videoText = document.getElementById('headerVideoProgressText');
+      const exerciseText = document.getElementById('headerExerciseProgressText');
+      if (percentEl) percentEl.innerHTML = `${percent}%<span>completed</span>`;
+      if (message) message.textContent = headerProgressMessage(percent);
+      if (videoText) videoText.textContent = `${videosWatched}/3 videos watched`;
+      if (exerciseText) exerciseText.textContent = `${exercisesCompleted}/6 exercises completed`;
+      renderHeaderDots('headerVideoProgressDots', 3, videosWatched);
+      renderHeaderDots('headerExerciseProgressDots', 6, exercisesCompleted);
+    }
+
     function syncDoneState() {
       const done = isExerciseDone();
       document.body.classList.toggle('exercise-done', done);
       const button = document.getElementById('doneToggleBtn');
       if (button) button.textContent = done ? 'Exercise done ✓' : 'Mark exercise as done';
+      updateHeaderProgress();
     }
 
     function setExerciseDone(done) {
@@ -1676,7 +1890,8 @@
     initializeApp();
   </script>
   <script type="module" src="../../assets/app-access-guard.js?v=1"></script>
-  <script src="../../assets/exercise-scoring-intro.js?v=1"></script>
+  <script src="../../assets/exercise-scoring-intro.js?v=3"></script>
   <script type="module" src="../../assets/feedback-widget.js?v=5"></script>
+  <script src="../../assets/tactile-buttons.js?v=2" defer></script>
 </body>
 </html>

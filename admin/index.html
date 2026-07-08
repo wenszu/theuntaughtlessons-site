@@ -5430,15 +5430,15 @@
       const progress = member.workspaceProgress || {};
       const lessons = progress.lessons || {};
       const exercises = progress.exercises || {};
-      const lessonIds = phaseLessonIds(phaseKey);
-      const exerciseIds = phaseExerciseIds(phaseKey);
-      const lessonDots = lessonIds.map((id) => progressDot(lessons[id] && lessons[id].watched, id)).join('');
-      const exerciseDots = exerciseIds.map((id) => progressDot(exercises[id] && exercises[id].completed, id)).join('');
+      const content = window.UTL_CONTENT || {};
+      const phase = content[phaseKey] || {};
+      const lessonItems = phase.lessons || [];
+      const exerciseItems = phase.exercises || [];
+      const lessonDots = lessonItems.map((lesson) => progressDot(lessons[lesson.id] && lessons[lesson.id].watched, lesson.title || lesson.id)).join('');
+      const exerciseDots = exerciseItems.map((exercise) => progressDot(exercises[exercise.id] && exercises[exercise.id].completed, exercise.title || exercise.id)).join('');
       return '<td class="progress-cell">' +
-        '<span class="progress-dot-label">Videos</span><div class="progress-dot-row">' + (lessonDots || '<span style="color:#aaa;">—</span>') + '</div>' +
-        '<span class="progress-dot-label">Exercises</span><div class="progress-dot-row">' + (exerciseDots || '<span style="color:#aaa;">—</span>') + '</div>' +
-        '<span class="progress-dot-label">Videos</span><div class="progress-dot-row">' + lessonDots + '</div>' +
-        '<span class="progress-dot-label">Exercises</span><div class="progress-dot-row">' + exerciseDots + '</div>' +
+        '<span class="progress-dot-label">Videos (' + lessonItems.length + ')</span><div class="progress-dot-row">' + (lessonDots || '<span style="color:#aaa;">—</span>') + '</div>' +
+        '<span class="progress-dot-label">Exercises (' + exerciseItems.length + ')</span><div class="progress-dot-row">' + (exerciseDots || '<span style="color:#aaa;">—</span>') + '</div>' +
       '</td>';
     }
 
@@ -6950,6 +6950,7 @@
       showAdmin();
     }
   </script>
+  <script src="../assets/tactile-buttons.js?v=2" defer></script>
   <script type="module" src="../assets/feedback-widget.js?v=4"></script>
 </body>
 </html>

@@ -36,12 +36,6 @@
     'speak-like-obama': 'completion'
   };
 
-  const CARDS = [
-    ['scored', 'Scored', 'Submit your work to get a score and feedback based on the structure.'],
-    ['reflection', 'Reflection', 'Write or paste your thinking so the system can check clarity and specificity.'],
-    ['completion', 'Completion', 'Finish the AI or practice activity, sometimes by pasting what you tried.']
-  ];
-
   function slug() {
     const match = window.location.pathname.match(/\/apps\/([^/]+)\//);
     return match ? match[1] : '';
@@ -87,42 +81,28 @@
         text-transform: uppercase;
         white-space: nowrap;
       }
-      .utl-score-type-list {
-        display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 10px;
-        margin: 0;
+      .utl-scoring-intro-copy {
+        margin: 0 0 12px;
+        color: var(--charcoal, #4A4A4A);
+        font-size: .95rem;
+        line-height: 1.45;
       }
-      .utl-score-type-card {
-        border: 1px solid rgba(232, 223, 209, .72);
+      .utl-score-method-card {
+        border: 1px solid rgba(0, 51, 102, .18);
         border-radius: 8px;
         background: #FAF9F6;
-        padding: 10px 12px;
-        color: #8A8379;
-        font-size: .9rem;
-        line-height: 1.35;
-        opacity: .68;
-      }
-      .utl-score-type-card strong {
-        display: block;
-        color: #7B756D;
-        margin-bottom: 3px;
-      }
-      .utl-score-type-card.is-active {
-        border-color: rgba(44, 122, 75, .42);
-        background: #F1FAF3;
-        box-shadow: inset 4px 0 0 #2C7A4B;
+        box-shadow: inset 4px 0 0 var(--navy, var(--ab-navy, var(--eisenhower-navy, #003366)));
+        padding: 12px 14px;
         color: var(--charcoal, #4A4A4A);
-        opacity: 1;
+        font-size: .95rem;
+        line-height: 1.42;
       }
-      .utl-score-type-card.is-active strong {
-        color: #2C7A4B;
+      .utl-score-method-card strong {
+        display: block;
+        color: var(--navy, var(--ab-navy, var(--eisenhower-navy, #003366)));
+        margin-bottom: 4px;
       }
       @media (max-width: 768px) {
-        .utl-scoring-intro-head,
-        .utl-score-type-list {
-          grid-template-columns: 1fr;
-        }
         .utl-scoring-intro-head {
           align-items: flex-start;
           flex-direction: column;
@@ -142,12 +122,9 @@
         <h2>How this exercise is checked</h2>
         <span class="utl-score-type-pill">${type.label}</span>
       </div>
-      <div class="utl-score-type-list">
-        ${CARDS.map(([key, title, copy]) => `
-          <div class="utl-score-type-card ${key === typeKey ? 'is-active' : ''}">
-            <strong>${title}</strong>${key === typeKey ? type.copy : copy}
-          </div>
-        `).join('')}
+      <p class="utl-scoring-intro-copy">The exercises are checked in different ways depending on the activity. This one is checked as:</p>
+      <div class="utl-score-method-card">
+        <strong>${type.label}</strong>${type.copy}
       </div>
     `;
     return section;

@@ -309,6 +309,7 @@ const UTL_CONTENT = {
   var phaseLabels = { phase1: "Phase 1", phase2: "Phase 2", phase3: "Phase 3" };
   var phaseFiles = { phase1: "phase-1.html", phase2: "phase-2.html", phase3: "phase-3.html" };
   var remoteProgressLoaded = false;
+  var remoteProgressLoading = false;
   var remoteProgressSaveTimer = null;
   var phaseDescriptions = {
     phase1: "Learn to sort noise into signal.",
@@ -491,6 +492,10 @@ const UTL_CONTENT = {
     }
     injectStyles();
     document.body.classList.add("ws-page");
+    remoteProgressLoaded = true;
+    callback();
+    if (remoteProgressLoading) return;
+    remoteProgressLoading = true;
     import(firebaseHref())
       .then(function (firebase) {
         return firebase.getMemberWorkspaceProgress();
@@ -503,7 +508,7 @@ const UTL_CONTENT = {
         console.warn("Firestore workspace progress load failed.", error);
       })
       .then(function () {
-        remoteProgressLoaded = true;
+        remoteProgressLoading = false;
         callback();
       });
   }
