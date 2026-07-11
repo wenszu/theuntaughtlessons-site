@@ -1264,7 +1264,7 @@
               <button class="mode-btn active" id="openModeBtn" type="button" data-response-mode="open" onclick="window.switchMessyNotesMode && window.switchMessyNotesMode('open')">Open response</button>
               <button class="mode-btn" id="sectionModeBtn" type="button" data-response-mode="sections" onclick="window.switchMessyNotesMode && window.switchMessyNotesMode('sections')">Three-section response</button>
             </div>
-            <p class="mode-guidance"><strong>Choose one format.</strong> Use <strong>Open response</strong> if you want to write in your own free-form structure; this is the more difficult option. Use <strong>Three-section response</strong> if you want the easier guided option. In both formats, use BSP and the Rule of three.</p>
+            <p class="mode-guidance"><strong>Choose one format:</strong> Use <strong>Open response</strong> if you want to write in your own free-form structure; this is the more difficult option. Use <strong>Three-section response</strong> if you want the easier guided option. In both formats, use BSP and the Rule of three.</p>
 
             <div id="openMode">
               <textarea id="openResponse" class="response-area" aria-label="Open response" placeholder=""></textarea>
@@ -1341,6 +1341,8 @@
       </section>
     </section>
   </main>
+  <script src="../../assets/app-reward-header.js?v=20260709-1"></script>
+  <script src="../../assets/reward-events.js?v=20260709-1"></script>
 
   <script src="../shared/activity-timer.js?v=20260701-audit-1"></script>
   <script>
@@ -1839,7 +1841,7 @@
     function submitAttempt() {
       if (!hasAnyContent()) {
         els.confirmation.classList.remove('hidden');
-        els.confirmation.innerHTML = '<strong>Add a response first.</strong> Then submit when you are ready.';
+        els.confirmation.innerHTML = '<strong>Add a response first:</strong> Then submit when you are ready.';
         return;
       }
 
@@ -1870,6 +1872,11 @@
       // sendAttemptToApi(attempt), sendAttemptToGoogleSheets(attempt), or sendFeedbackEmail(attempt).
       addAttempt(attempt);
       saveResult('messy-notes', 1, "Manager's messy notes", elapsedSeconds, resultPayloadFromResponse(response));
+      window.UTLRewardEvents?.awardScoredExercise({
+        appId: 'messy-notes',
+        title: "Manager's messy notes scored",
+        score: score.total
+      });
       state.lastAttemptId = attempt.attemptId;
       state.lastScore = score;
       state.sampleRevealed = false;
@@ -2129,6 +2136,6 @@
   <script type="module" src="../../assets/app-access-guard.js?v=1"></script>
   <script src="../../assets/exercise-scoring-intro.js?v=3"></script>
   <script type="module" src="../../assets/feedback-widget.js?v=5"></script>
-  <script src="../../assets/tactile-buttons.js?v=2" defer></script>
+  <script src="../../assets/tactile-buttons.js?v=4" defer></script>
 </body>
 </html>

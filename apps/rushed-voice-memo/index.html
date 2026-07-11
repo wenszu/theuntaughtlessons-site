@@ -1181,7 +1181,7 @@
               <button class="mode-btn active" id="openModeBtn" type="button" data-response-mode="open" onclick="window.switchMessyNotesMode && window.switchMessyNotesMode('open')">Open response</button>
               <button class="mode-btn" id="sectionModeBtn" type="button" data-response-mode="sections" onclick="window.switchMessyNotesMode && window.switchMessyNotesMode('sections')">Three-section response</button>
             </div>
-            <p class="mode-guidance"><strong>Choose one format.</strong> Use <strong>Open response</strong> if you want to write in your own free-form structure; this is the more difficult option. Use <strong>Three-section response</strong> if you want the easier guided option. In both formats, use BSP and the Rule of three.</p>
+            <p class="mode-guidance"><strong>Choose one format:</strong> Use <strong>Open response</strong> if you want to write in your own free-form structure; this is the more difficult option. Use <strong>Three-section response</strong> if you want the easier guided option. In both formats, use BSP and the Rule of three.</p>
 
             <div id="openMode">
               <textarea id="openResponse" class="response-area" aria-label="Open response" placeholder=""></textarea>
@@ -1258,6 +1258,8 @@
       </section>
     </section>
   </main>
+  <script src="../../assets/app-reward-header.js?v=20260709-1"></script>
+  <script src="../../assets/reward-events.js?v=20260709-1"></script>
 
   <script src="../shared/activity-timer.js?v=20260701-audit-1"></script>
   <script>
@@ -1280,10 +1282,8 @@
     let activityTimer = null;
     let timerMetricHidden = false;
 
-    // Exercise data is loaded from ../../data/practice/messy-notes.json.
-    // Add future messy-notes variations to that JSON file. This app loads the
-    // first variation by default and expects the activity config fields used by
-    // renderConfig, checklist scoring, sample answer, and local attempt storage.
+    // This exercise shares the practice schema with messy notes, then replaces
+    // the content fields with the canonical Rushed Voice Memo material.
     async function loadPracticeData() {
       const response = await fetch(DATA_URL);
       if (!response.ok) throw new Error(`Unable to load ${DATA_URL}`);
@@ -1300,21 +1300,44 @@
           '<strong>Your task:</strong> Hugh sent you a rushed voice memo. He spoke quickly and without structure and he knows that. He asked you to help him turn the verbal update into a clean, structured written summary that Aiko can act on.',
           '<strong>Make it usable:</strong> Organise the update into three clear buckets and start each bullet with a BSP.'
         ],
-        sourceText: '[Voice memo transcript will be loaded here. This will be a rushed, unstructured verbal update from Aiko covering the Olympic project status, key blockers, and next steps — delivered quickly and without structure.]',
+        sourceText: '[Listen to Hugh’s voice memo, take notes, and organise the important points into three MECE buckets.]',
         inputPlaceholder: 'Write your structured voice memo summary here...',
-        sectionPlaceholders: ['Current status', 'Key blockers', 'Next steps'],
+        sectionPlaceholders: ['Rollout plan', 'Strategic value', 'Execution risks'],
         scoring: {
           ...data[0].scoring,
           coverageKeywords: [
-            { label: 'Current status', terms: ['status', 'current', 'progress', 'project state', 'latest'] },
-            { label: 'Key blockers', terms: ['blocker', 'risk', 'issue', 'constraint', 'stuck'] },
-            { label: 'Next steps', terms: ['next step', 'action', 'owner', 'decision', 'follow up'] }
+            { label: 'Rollout plan', terms: ['Nike Run Club', 'NRC', 'group runs', 'key cities'] },
+            { label: 'Beginner on-ramp', terms: ['beginner', 'start here', 'walk/run', 'first 5K', 'welcoming'] },
+            { label: 'Progress proof', terms: ['check-ins', 'badges', 'milestones', 'pace'] },
+            { label: 'Strategic value', terms: ['community', 'belonging', 'retention', 'city into media', 'lifestyle brand'] },
+            { label: 'Execution risks', terms: ['alienation', 'cliquish', 'measurement', 'attribution', 'KPIs'] }
           ]
         },
         sampleAnswer: [
-          { title: 'Current status', bullets: ['<strong>Status summary:</strong> Capture the latest project state in clear, decision-ready language.'] },
-          { title: 'Key blockers', bullets: ['<strong>Blocker summary:</strong> Separate the few blockers that matter from the surrounding noise.'] },
-          { title: 'Next steps', bullets: ['<strong>Action summary:</strong> Clarify what Aiko should do next and who needs to act.'] }
+          {
+            title: 'Rollout plan',
+            bullets: [
+              '<strong>Nike Run Club rollout:</strong> Launch recurring group runs in key cities.',
+              '<strong>Beginner on-ramp:</strong> Offer a zero-pressure “Start Here” track with a walk/run option and first-5K plan.',
+              '<strong>Progress proof:</strong> Use NRC check-ins, badges, milestones, and before-and-after pace to make improvement visible.'
+            ]
+          },
+          {
+            title: 'Strategic value',
+            bullets: [
+              '<strong>Brand as community:</strong> Group runs create belonging, habit, and retention beyond the product.',
+              '<strong>City as media:</strong> Visible runs generate organic awareness and let the marketing reinforce itself.',
+              '<strong>Lifestyle expansion:</strong> The program gives Nike another avenue to grow as a lifestyle brand as well as a sports brand.'
+            ]
+          },
+          {
+            title: 'Execution risks',
+            bullets: [
+              '<strong>Beginner alienation:</strong> The learning curve of running could deter the people the program aims to welcome.',
+              '<strong>Cliquish experience:</strong> A high-reward community initiative could feel exclusive without deliberate facilitation.',
+              '<strong>Measurement ambiguity:</strong> Sales attribution will be difficult, so the rollout needs clear KPIs.'
+            ]
+          }
         ]
       };
       storageKey = `${STORAGE_PREFIX}${ACTIVITY.id}`;
@@ -1824,7 +1847,7 @@
     function submitAttempt() {
       if (!hasAnyContent()) {
         els.confirmation.classList.remove('hidden');
-        els.confirmation.innerHTML = '<strong>Add a response first.</strong> Then submit when you are ready.';
+        els.confirmation.innerHTML = '<strong>Add a response first:</strong> Then submit when you are ready.';
         return;
       }
 
@@ -1855,6 +1878,11 @@
       // sendAttemptToApi(attempt), sendAttemptToGoogleSheets(attempt), or sendFeedbackEmail(attempt).
       addAttempt(attempt);
       saveResult('rushed-voice-memo', 1, 'Rushed voice memo', elapsedSeconds, resultPayloadFromResponse(response));
+      window.UTLRewardEvents?.awardScoredExercise({
+        appId: 'rushed-voice-memo',
+        title: 'Rushed voice memo scored',
+        score: score.total
+      });
       state.lastAttemptId = attempt.attemptId;
       state.lastScore = score;
       state.sampleRevealed = false;
@@ -2113,6 +2141,6 @@
   <script type="module" src="../../assets/app-access-guard.js?v=1"></script>
   <script src="../../assets/exercise-scoring-intro.js?v=3"></script>
   <script type="module" src="../../assets/feedback-widget.js?v=5"></script>
-  <script src="../../assets/tactile-buttons.js?v=2" defer></script>
+  <script src="../../assets/tactile-buttons.js?v=4" defer></script>
 </body>
 </html>

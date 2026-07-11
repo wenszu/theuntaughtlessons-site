@@ -311,6 +311,18 @@ const UTL_CONTENT = {
   var remoteProgressLoaded = false;
   var remoteProgressLoading = false;
   var remoteProgressSaveTimer = null;
+  var rewardUiLoadPromise = null;
+  var REWARD_STATE_KEY = "utl_rewards_state";
+  var REWARD_SETTINGS_KEY = "utl_reward_settings";
+  var VIDEO_COMPLETE_MP = 10;
+  var CONTEXT_COMPLETE_MP = 5;
+  var REWARD_LEVELS = [
+    { name: "Intern", threshold: 0 },
+    { name: "Analyst", threshold: 300 },
+    { name: "Associate", threshold: 800 },
+    { name: "Principal", threshold: 1350 },
+    { name: "Executive", threshold: 1850 }
+  ];
   var phaseDescriptions = {
     phase1: "Learn to sort noise into signal.",
     phase2: "Turn structure into concise communication.",
@@ -370,6 +382,36 @@ const UTL_CONTENT = {
     return (inAdminRoot() ? "../assets/firebase.js" : "../assets/firebase.js") + version;
   }
 
+  function rewardUiHref() {
+    var version = "?v=20260710-rewards-ui-5";
+    if (inPhasePracticeRoot()) return "../../../assets/reward-ui.js" + version;
+    return (inAdminRoot() ? "../assets/reward-ui.js" : "../assets/reward-ui.js") + version;
+  }
+
+  function ensureRewardUiLoaded() {
+    if (window.UTLRewardUI) return Promise.resolve(window.UTLRewardUI);
+    if (rewardUiLoadPromise) return rewardUiLoadPromise;
+    rewardUiLoadPromise = new Promise(function (resolve, reject) {
+      var existing = document.querySelector('script[data-utl-reward-ui]');
+      if (existing) {
+        existing.addEventListener("load", function () { resolve(window.UTLRewardUI); });
+        existing.addEventListener("error", reject);
+        return;
+      }
+      var script = document.createElement("script");
+      script.src = rewardUiHref();
+      script.async = true;
+      script.dataset.utlRewardUi = "true";
+      script.onload = function () { resolve(window.UTLRewardUI); };
+      script.onerror = reject;
+      document.head.appendChild(script);
+    }).catch(function (error) {
+      console.warn("Reward UI failed to load.", error);
+      return null;
+    });
+    return rewardUiLoadPromise;
+  }
+
   function qs(selector, root) {
     return (root || document).querySelector(selector);
   }
@@ -384,6 +426,218 @@ const UTL_CONTENT = {
 
   function writeBool(key, value) {
     localStorage.setItem(key, value ? "true" : "false");
+  }
+
+  function rewardLevelForMp(mp) {
+    var total = Math.max(0, Number(mp || 0));
+    var current = REWARD_LEVELS[0];
+    REWARD_LEVELS.forEach(function (level) {
+      if (total >= level.threshold) current = level;
+    });
+    return current.name;
+  }
+
+  function applyRewardSettings(settings) {
+    if (!settings || typeof settings !== "object") return;
+    localStorage.setItem(REWARD_SETTINGS_KEY, JSON.stringify(settings));
+    if (Array.isArray(settings.levels) && settings.levels.length) {
+      REWARD_LEVELS = settings.levels.map(function (level) {
+        return { name: level.name || level.title || "Level", threshold: Math.max(0, Number(level.threshold || 0)) };
+      }).sort(function (a, b) { return a.threshold - b.threshold; });
+    }
+    if (settings.mp && Number.isFinite(Number(settings.mp.videoComplete))) {
+      VIDEO_COMPLETE_MP = Math.max(0, Number(settings.mp.videoComplete));
+    }
+    if (settings.mp && Number.isFinite(Number(settings.mp.contextComplete))) {
+      CONTEXT_COMPLETE_MP = Math.max(0, Number(settings.mp.contextComplete));
+    }
+  }
+
+  function rewardSettings() {
+    try {
+      return JSON.parse(localStorage.getItem(REWARD_SETTINGS_KEY) || "{}");
+    } catch (error) {
+      return {};
+    }
+  }
+
+  try {
+    applyRewardSettings(JSON.parse(localStorage.getItem(REWARD_SETTINGS_KEY) || "{}"));
+  } catch (error) {}
+
+  function readRewardState() {
+    var fallback = { mpTotal: 0, masteryPoints: 0, tokens: 0, streakDays: 0, level: "Intern", earnedEvents: {}, earnedEventIds: {}, ledger: [] };
+    try {
+      var parsed = JSON.parse(localStorage.getItem(REWARD_STATE_KEY) || "{}");
+      parsed.mpTotal = Math.max(0, Number(parsed.mpTotal || parsed.masteryPoints || 0));
+      parsed.masteryPoints = parsed.mpTotal;
+      parsed.tokens = Math.max(0, Number(parsed.tokens || 0));
+      parsed.streakDays = Math.max(0, Number(parsed.streakDays || 0));
+      parsed.level = rewardLevelForMp(parsed.mpTotal);
+      parsed.earnedEvents = Object.assign({}, parsed.earnedEventIds || {}, parsed.earnedEvents || {});
+      parsed.earnedEventIds = parsed.earnedEvents;
+      parsed.ledger = Array.isArray(parsed.ledger) ? parsed.ledger : [];
+      return Object.assign(fallback, parsed);
+    } catch (error) {
+      return fallback;
+    }
+  }
+
+  function writeRewardState(state) {
+    localStorage.setItem(REWARD_STATE_KEY, JSON.stringify(state));
+  }
+
+  function rewardSnapshot() {
+    var state = readRewardState();
+    return {
+      mpTotal: state.mpTotal,
+      masteryPoints: state.masteryPoints,
+      tokens: state.tokens,
+      streakDays: state.streakDays,
+      level: state.level,
+      streak: state.streak || {},
+      earnedEvents: state.earnedEvents,
+      earnedEventIds: state.earnedEvents,
+      ledger: state.ledger
+    };
+  }
+
+  function mergeRemoteRewards(remoteRewards) {
+    if (!remoteRewards || typeof remoteRewards !== "object") return;
+    var local = readRewardState();
+    var remoteMp = Math.max(0, Number(remoteRewards.mpTotal || remoteRewards.masteryPoints || 0));
+    local.tokens = Math.max(local.tokens, Number(remoteRewards.tokens || 0));
+    local.streakDays = Math.max(local.streakDays, Number(remoteRewards.streakDays || 0));
+    local.level = rewardLevelForMp(local.mpTotal);
+    local.earnedEvents = Object.assign({}, remoteRewards.earnedEventIds || {}, remoteRewards.earnedEvents || {}, local.earnedEventIds || {}, local.earnedEvents || {});
+    local.earnedEventIds = local.earnedEvents;
+    var ledgerById = {};
+    [].concat(remoteRewards.ledger || [], local.ledger || []).forEach(function (entry) {
+      if (!entry || !entry.id) return;
+      ledgerById[entry.id] = entry;
+    });
+    local.ledger = Object.keys(ledgerById).map(function (id) { return ledgerById[id]; })
+      .sort(function (a, b) { return String(a.earnedAt || '').localeCompare(String(b.earnedAt || '')); })
+      .slice(-500);
+    var ledgerTotal = local.ledger.reduce(function (sum, entry) {
+      return sum + Math.max(0, Number(entry.mpEarned || 0));
+    }, 0);
+    local.mpTotal = Math.max(local.mpTotal, remoteMp, ledgerTotal);
+    local.masteryPoints = local.mpTotal;
+    local.level = rewardLevelForMp(local.mpTotal);
+    var localStreak = local.streak && typeof local.streak === "object" ? local.streak : {};
+    var remoteStreak = remoteRewards.streak && typeof remoteRewards.streak === "object" ? remoteRewards.streak : {};
+    var mergedDailyActivities = {};
+    Object.keys(Object.assign({}, remoteStreak.dailyActivities || {}, localStreak.dailyActivities || {})).forEach(function (date) {
+      mergedDailyActivities[date] = Object.assign({}, (remoteStreak.dailyActivities || {})[date] || {}, (localStreak.dailyActivities || {})[date] || {});
+    });
+    local.streak = Object.assign({}, remoteStreak, localStreak, {
+      currentDays: Math.max(Number(localStreak.currentDays || 0), Number(remoteStreak.currentDays || 0), Number(local.streakDays || 0)),
+      lastQualifiedDate: String(localStreak.lastQualifiedDate || "") > String(remoteStreak.lastQualifiedDate || "") ? localStreak.lastQualifiedDate : remoteStreak.lastQualifiedDate || localStreak.lastQualifiedDate || "",
+      dailyActivities: mergedDailyActivities,
+      awardedDates: Object.assign({}, remoteStreak.awardedDates || {}, localStreak.awardedDates || {})
+    });
+    writeRewardState(local);
+  }
+
+  function awardRewardEvent(event) {
+    if (rewardSettings().enabled === false) {
+      var disabledState = readRewardState();
+      return { awarded: false, mpEarned: 0, startTotal: disabledState.mpTotal, total: disabledState.mpTotal, reason: "rewards-disabled" };
+    }
+    var state = readRewardState();
+    var startTotal = state.mpTotal;
+    if (!event || !event.id || state.earnedEvents[event.id]) {
+      return { awarded: false, mpEarned: 0, startTotal: startTotal, total: state.mpTotal };
+    }
+    var mp = Math.max(0, Number(event.mp || 0));
+    state.mpTotal += mp;
+    state.masteryPoints = state.mpTotal;
+    state.level = rewardLevelForMp(state.mpTotal);
+    state.earnedEvents[event.id] = true;
+    state.earnedEventIds = state.earnedEvents;
+    state.ledger.push({
+      id: event.id,
+      type: event.type,
+      title: event.title || "",
+      mpEarned: mp,
+      totalAfter: state.mpTotal,
+      earnedAt: new Date().toISOString()
+    });
+    state.ledger = state.ledger.slice(-500);
+    writeRewardState(state);
+    return { awarded: true, mpEarned: mp, startTotal: startTotal, total: state.mpTotal };
+  }
+
+  function awardOrientationVideo() {
+    return awardRewardEvent({
+      id: "video:orientation-welcome",
+      type: "video-completed",
+      title: "Orientation video",
+      mp: VIDEO_COMPLETE_MP
+    });
+  }
+
+  function backfillExistingProgressRewards() {
+    var settings = rewardSettings();
+    if (settings.enabled === false) return { count: 0, mp: 0 };
+    var exerciseMp = Math.max(0, Number(settings.mp && settings.mp.exerciseCompleteFallback));
+    if (!Number.isFinite(exerciseMp)) exerciseMp = 50;
+    var totalMp = 0;
+    var count = 0;
+    function add(event) {
+      var result = awardRewardEvent(event);
+      if (!result.awarded) return;
+      totalMp += result.mpEarned;
+      count += 1;
+    }
+    if (readBool("utl_orientation_ready")) add({
+      id: "video:orientation-welcome",
+      type: "video-completed",
+      title: "Orientation video",
+      mp: VIDEO_COMPLETE_MP
+    });
+    allLessons().forEach(function (lesson) {
+      if (!readBool(watchedKey(lesson.id))) return;
+      add({ id: "video:" + lesson.id, type: "video-completed", title: lesson.title, mp: VIDEO_COMPLETE_MP });
+    });
+    allExercises().forEach(function (exercise) {
+      if (!exerciseDone(exercise)) return;
+      var rewardIds = Object.keys(readRewardState().earnedEvents || {});
+      var appKey = exerciseAppKey(exercise);
+      var knownIds = [exercise.id, appKey].filter(Boolean);
+      var alreadyRewarded = rewardIds.some(function (eventId) {
+        return knownIds.some(function (id) {
+          return eventId === "completion-exercise:" + id
+            || eventId === "reflection-exercise:" + id
+            || eventId === "legacy-exercise:" + id
+            || eventId.indexOf("scored-exercise:" + id) === 0;
+        });
+      });
+      if (alreadyRewarded) return;
+      var migrationId = appKey || exercise.id;
+      var bestScoreKey = "utl_reward_best_score_" + migrationId;
+      if (localStorage.getItem(bestScoreKey) === null) localStorage.setItem(bestScoreKey, String(exerciseMp));
+      add({
+        id: "legacy-exercise:" + migrationId,
+        type: "legacy-exercise-completed",
+        title: exercise.title,
+        mp: exerciseMp
+      });
+    });
+    phases.forEach(function (phaseKey) {
+      if (!exercisesDone(phaseKey)) return;
+      var phaseMp = Number(settings.mp && settings.mp.phaseCompletion && settings.mp.phaseCompletion[phaseKey]);
+      if (!Number.isFinite(phaseMp)) phaseMp = ({ phase1: 100, phase2: 150, phase3: 200 })[phaseKey] || 0;
+      add({
+        id: "phase-completed:" + phaseKey,
+        type: "phase-completed",
+        title: phaseLabels[phaseKey] + " complete",
+        mp: phaseMp
+      });
+    });
+    if (count) queueRemoteProgressSave();
+    return { count: count, mp: totalMp };
   }
 
   function allLessons() {
@@ -409,6 +663,7 @@ const UTL_CONTENT = {
   function progressSnapshot() {
     var lessons = {};
     var exercises = {};
+    var contexts = {};
     phases.forEach(function (phaseKey) {
       orderedLessons(phaseKey).forEach(function (lesson) {
         lessons[lesson.id] = { watched: readBool(watchedKey(lesson.id)) };
@@ -423,6 +678,12 @@ const UTL_CONTENT = {
         title: exercise.title,
         appKey: appKey
       };
+      contexts[exercise.id] = { completed: readBool(contextDoneKey(exercise.id)) };
+    });
+    phases.forEach(function (phaseKey) {
+      (getPhase(phaseKey).introContexts || []).forEach(function (context) {
+        contexts[context.id] = { completed: readBool(contextDoneKey(context.id)) };
+      });
     });
     return {
       version: 1,
@@ -432,6 +693,8 @@ const UTL_CONTENT = {
       },
       lessons: lessons,
       exercises: exercises,
+      contexts: contexts,
+      rewards: rewardSnapshot(),
       phases: {
         phase1: { videosDone: readBool(phaseVideosDoneKey("phase1")), exercisesDone: readBool(phaseDoneKey("phase1")) },
         phase2: { videosDone: readBool(phaseVideosDoneKey("phase2")), exercisesDone: readBool(phaseDoneKey("phase2")) },
@@ -463,10 +726,18 @@ const UTL_CONTENT = {
       else if (saved.completed === false && !exerciseDone(exercise)) writeExerciseDone(exercise, false);
     });
 
+    var remoteContexts = progress.contexts || {};
+    Object.keys(remoteContexts).forEach(function (id) {
+      if (typeof remoteContexts[id]?.completed === "boolean") {
+        writeBool(contextDoneKey(id), remoteContexts[id].completed);
+      }
+    });
+
     phases.forEach(function (phaseKey) {
       videosDone(phaseKey);
       exercisesDone(phaseKey);
     });
+    mergeRemoteRewards(progress.rewards);
   }
 
   function saveRemoteProgressNow() {
@@ -498,11 +769,32 @@ const UTL_CONTENT = {
     remoteProgressLoading = true;
     import(firebaseHref())
       .then(function (firebase) {
-        return firebase.getMemberWorkspaceProgress();
+        return Promise.all([
+          firebase.getMemberWorkspaceProgress(),
+          firebase.getRewardSettings ? firebase.getRewardSettings() : null
+        ]);
       })
-      .then(function (progress) {
+      .then(function (results) {
+        var progress = results && results[0];
+        applyRewardSettings(results && results[1]);
         if (progress) applyRemoteProgress(progress);
-        else return saveRemoteProgressNow();
+        var backfill = backfillExistingProgressRewards();
+        if (backfill.count) {
+          setTimeout(function () {
+            var state = readRewardState();
+            showWorkspaceRewardMoment({
+              label: "Prior progress recognized",
+              title: "+" + backfill.mp + " MP added",
+              body: backfill.count + " completed item" + (backfill.count === 1 ? " was" : "s were") + " converted into Rewards.",
+              startMp: Math.max(0, state.mpTotal - backfill.mp),
+              newTotal: state.mpTotal,
+              previousLevel: rewardLevelForMp(Math.max(0, state.mpTotal - backfill.mp)),
+              currentLevel: rewardLevelForMp(state.mpTotal),
+              showLevelModal: rewardLevelForMp(Math.max(0, state.mpTotal - backfill.mp)) !== rewardLevelForMp(state.mpTotal)
+            });
+          }, 120);
+        }
+        return saveRemoteProgressNow();
       })
       .catch(function (error) {
         console.warn("Firestore workspace progress load failed.", error);
@@ -850,6 +1142,7 @@ const UTL_CONTENT = {
       "body.ws-page{margin:0;min-height:100vh;background:var(--ws-cream);color:var(--ws-charcoal);font-family:Lato,sans-serif;overflow-x:hidden}",
       ".ws-shell{width:min(1120px,calc(100% - 40px));margin:0 auto}",
       ".ws-hidden{display:none}",
+      ".ws-reward-toast{position:fixed;right:22px;top:72px;z-index:9999;width:min(330px,calc(100vw - 44px));padding:16px 18px;border:1px solid rgba(238,163,32,.46);border-radius:12px;background:#fff;color:var(--ws-navy);box-shadow:0 18px 44px rgba(0,51,102,.22);opacity:0;transform:translateY(-10px);transition:opacity .18s ease,transform .18s ease}.ws-reward-toast.ws-visible{opacity:1;transform:translateY(0)}.ws-reward-toast span{display:block;color:var(--ws-gold);font:700 10px 'Roboto Mono',monospace;letter-spacing:.12em;text-transform:uppercase}.ws-reward-toast strong{display:block;margin-top:5px;color:var(--ws-navy);font-size:18px}.ws-reward-toast p{margin:5px 0 0;color:var(--ws-steel);font-size:13px;line-height:1.4}",
       ".ws-nav{position:sticky;top:0;z-index:30;background:var(--ws-navy);color:var(--ws-white);box-shadow:0 10px 28px rgba(0,51,102,.14)}",
       ".ws-nav-inner{height:54px;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:22px;width:min(1180px,calc(100% - 32px));margin:0 auto}",
       ".ws-brand{display:flex;align-items:center;gap:14px;min-width:0}.ws-logo-link{display:flex;align-items:center;border-radius:6px}.ws-logo-link:hover{background:rgba(238,163,32,.18)}.ws-logo{height:31px;width:auto;display:block}.ws-brand-sep,.ws-workspace-link,.ws-nav-divider{display:none}",
@@ -866,7 +1159,7 @@ const UTL_CONTENT = {
       ".ws-stepper{display:flex;gap:10px;margin:28px 0;align-items:center}.ws-step{display:flex;align-items:center;gap:8px;border:0;border-bottom:2px solid var(--ws-line);background:transparent;padding:8px 2px;color:var(--ws-steel);font:700 11px 'Roboto Mono',monospace;text-transform:uppercase;letter-spacing:.06em}.ws-step.ws-active{border-bottom-color:var(--ws-navy);color:var(--ws-navy)}.ws-step.ws-done{border-bottom-color:var(--ws-green);color:var(--ws-green)}",
       ".ws-phase-flow{margin:28px 0 8px;background:#fff;border:1px solid var(--ws-line);border-left:4px solid var(--ws-gold);border-radius:12px;padding:20px;box-shadow:0 12px 28px rgba(0,51,102,.06)}.ws-phase-flow-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:16px}.ws-phase-flow h2{margin:3px 0 6px;color:var(--ws-navy);font:700 28px/1.1 'Playfair Display',serif}.ws-phase-flow p{margin:0;color:var(--ws-steel);line-height:1.5}.ws-flow-progress{flex:0 0 auto;background:rgba(238,163,32,.16);border-radius:999px;padding:7px 10px;color:var(--ws-navy);font:700 10px 'Roboto Mono',monospace;letter-spacing:.08em;text-transform:uppercase}.ws-flow-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:0 0 16px;padding:0;list-style:none}.ws-flow-step{border:1px solid var(--ws-line);border-radius:8px;background:#FAF8F3;padding:13px 14px;line-height:1.45}.ws-flow-step strong{display:block;margin-bottom:5px;color:var(--ws-navy)}.ws-flow-step.ws-current{border-color:rgba(238,163,32,.62);box-shadow:0 0 0 2px rgba(238,163,32,.16)}.ws-flow-step.ws-done{border-color:rgba(44,122,75,.38);background:#F7FBF7}.ws-flow-actions{display:flex;flex-wrap:wrap;align-items:center;gap:12px}.ws-flow-actions .ws-button{min-width:180px}.ws-flow-note{margin:0;color:var(--ws-steel);font-size:14px;font-weight:700}.ws-practice-locked{margin-top:24px;background:#fff;border:1px solid var(--ws-line);border-radius:12px;padding:26px;box-shadow:0 12px 28px rgba(0,51,102,.06)}.ws-practice-locked h2{margin:0 0 8px;color:var(--ws-navy);font:700 32px/1.1 'Playfair Display',serif}.ws-practice-locked p{max-width:760px;margin:0 0 18px;color:var(--ws-steel);font-size:17px;line-height:1.55}.ws-practice-locked-list{display:grid;gap:10px;margin:0 0 20px;padding:0;list-style:none}.ws-practice-locked-list li{border:1px solid rgba(0,51,102,.12);border-radius:8px;background:#FAF8F3;padding:12px 14px;line-height:1.45}.ws-practice-locked-list strong{color:var(--ws-navy)}",
       ".ws-section{margin-top:30px}.ws-section-head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:14px}.ws-section-head h2{margin:0;color:var(--ws-navy);font:700 31px 'Playfair Display',serif}.ws-count{color:var(--ws-steel);font:700 11px 'Roboto Mono',monospace;text-transform:uppercase;letter-spacing:.08em}",
-      ".ws-player-card{background:#fff;border:1px solid var(--ws-line);border-radius:12px;overflow:hidden}.ws-player{position:relative;background:linear-gradient(135deg,#002448,#003366 55%,#244F78);color:#fff}.ws-player-placeholder{text-align:center;padding:22px}.ws-play-icon{width:58px;height:58px;border-radius:999px;background:var(--ws-gold);color:var(--ws-navy);display:grid;place-items:center;margin:0 auto 14px;font-size:24px}.ws-player-meta{position:static;padding:14px 18px 16px;background:var(--ws-navy);text-shadow:none}.ws-player-meta h3{margin:6px 0 0;color:#fff;font:700 25px 'Playfair Display',serif}.ws-player-actions{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:16px}",
+      ".ws-player-card{background:#fff;border:1px solid var(--ws-line);border-radius:12px;overflow:hidden}.ws-player{position:relative;background:linear-gradient(135deg,#002448,#003366 55%,#244F78);color:#fff}.ws-player-placeholder{text-align:center;padding:22px}.ws-play-icon{width:58px;height:58px;border-radius:999px;background:var(--ws-gold);color:var(--ws-navy);display:grid;place-items:center;margin:0 auto 14px;font-size:24px}.ws-player-meta{position:static;padding:14px 18px 16px;background:var(--ws-navy);text-shadow:none}.ws-player-meta h3{margin:6px 0 0;color:#fff;font:700 25px 'Playfair Display',serif}.ws-player-actions{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:16px;border-top:1px solid var(--ws-line);background:#fff}.ws-player-action-text{color:var(--ws-steel);font-size:14px;line-height:1.4}.ws-player-action-text strong{display:block;color:var(--ws-navy);font-size:15px}.ws-player-actions .ws-button{flex:0 0 auto}.ws-player-actions .ws-button-secondary{border-color:rgba(44,122,75,.42);color:var(--ws-green)}",
       ".ws-video-access-help{background:#fff;color:var(--ws-charcoal);border-top:1px solid var(--ws-line)}.ws-video-access-help summary{display:flex;align-items:center;justify-content:space-between;gap:12px;list-style:none;cursor:pointer;padding:13px 16px;color:var(--ws-navy);font-weight:700}.ws-video-access-help summary::-webkit-details-marker{display:none}.ws-video-access-help summary span{display:inline-flex;align-items:center;gap:8px}.ws-video-access-help summary span:before{content:'?';width:22px;height:22px;border-radius:999px;background:rgba(238,163,32,.18);color:var(--ws-navy);display:inline-grid;place-items:center;font:700 13px Lato,sans-serif}.ws-video-access-help summary small{color:var(--ws-steel);font:700 10px 'Roboto Mono',monospace;letter-spacing:.08em;text-transform:uppercase;text-align:right}.ws-access-help-body{padding:0 16px 16px}.ws-access-help-body p{margin:0 0 10px;line-height:1.45}.ws-access-help-body ol{margin:0;padding-left:20px;display:grid;gap:8px;line-height:1.45}.ws-access-help-body li strong,.ws-access-help-body h4{color:var(--ws-navy)}.ws-access-help-body a{color:var(--ws-navy);font-weight:700;text-underline-offset:3px}.ws-access-warning{position:relative;background:#fff6f4;border:1px solid rgba(154,42,42,.24);border-left:4px solid #B44A42;border-radius:8px;padding:10px 12px 10px 14px;color:#6f2d2a;font-weight:700}.ws-access-warning strong{color:#8A2E29}.ws-access-top{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:center;margin:12px 0 14px;padding:12px;border:1px solid rgba(0,51,102,.12);border-radius:8px;background:var(--ws-cream)}.ws-access-top p{margin:0}.ws-access-direct{display:inline-flex;align-items:center;justify-content:center;min-height:38px;padding:9px 13px;border-radius:6px;background:var(--ws-gold);color:var(--ws-navy)!important;text-decoration:none;font:700 12px 'Roboto Mono',monospace;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap}.ws-access-guide{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.ws-access-guide section{border:1px solid var(--ws-line);border-radius:8px;background:#fff;padding:12px}.ws-access-guide h4{margin:0 0 8px;font:700 12px 'Roboto Mono',monospace;letter-spacing:.06em;text-transform:uppercase}.ws-access-footer{margin:12px 0 0!important;padding-top:10px;border-top:1px solid var(--ws-line)}",
       ".ws-rail-wrap{padding:22px 22px 24px;border-top:1px solid rgba(0,51,102,.08);background:#fff}.ws-scroll-hint{display:none;color:var(--ws-steel);font:700 10px 'Roboto Mono',monospace;letter-spacing:.08em;text-transform:uppercase;margin:0 0 8px}.ws-lesson-rail{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px}.ws-lesson-tile{min-height:108px;border:1px solid var(--ws-line);border-radius:10px;background:#fff;color:var(--ws-navy);padding:14px 38px 14px 14px;text-align:left;cursor:pointer}.ws-lesson-tile.ws-active{background:var(--ws-navy);color:#fff}.ws-lesson-tile strong{display:block;font:700 10px 'Roboto Mono',monospace;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px}.ws-lesson-tile span{display:block;font-size:13px;line-height:1.25}.ws-lesson-tile small{display:block;margin-top:9px;color:inherit;opacity:.75}.ws-check{color:var(--ws-gold);font-weight:700}",
       ".ws-collapsed{background:#fff;border:1px solid var(--ws-line);border-radius:12px;padding:18px;display:grid;grid-template-columns:auto 1fr auto auto;align-items:center;gap:14px;cursor:pointer}.ws-green-circle{width:34px;height:34px;border-radius:999px;background:var(--ws-green);color:#fff;display:grid;place-items:center;font-weight:700}.ws-video-toggle-icon{width:34px;height:34px;border-radius:9px;background:rgba(77,112,148,.16);color:var(--ws-navy);display:grid;place-items:center;font-size:16px;font-weight:700}.ws-collapsed h3{margin:0;color:var(--ws-navy);font:700 24px 'Playfair Display',serif}.ws-collapsed p{margin:2px 0 0;color:var(--ws-steel)}.ws-rewatch{display:none;background:#fff;border:1px solid var(--ws-line);border-top:0;border-radius:0 0 12px 12px;padding:22px}.ws-rewatch.ws-open{display:block}.ws-rewatch .ws-lesson-rail a{text-decoration:none}",
@@ -882,7 +1175,8 @@ const UTL_CONTENT = {
       ".ws-practice-card.ws-complete,.ws-unit.ws-complete{border-color:rgba(44,122,75,.42);background:#FBFEFB}.ws-practice-card.ws-complete .ws-practice-head,.ws-unit.ws-complete .ws-context-toggle{background:#F6FBF7}.ws-practice-status-row{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:6px}.ws-card-check{width:30px;height:30px;border-radius:999px;border:1px solid rgba(0,51,102,.22);background:#fff;color:transparent;display:inline-grid;place-items:center;font-weight:700;flex:0 0 auto}.ws-complete .ws-card-check,.ws-workbook-card.ws-done .ws-status-circle{border-color:var(--ws-green);background:var(--ws-green);color:#fff}.ws-card-role{display:inline-flex;align-items:center;border-radius:999px;background:var(--ws-navy);color:#fff;padding:5px 9px;font:700 10px 'Roboto Mono',monospace;letter-spacing:.08em;text-transform:uppercase}.ws-card-state{display:inline-flex;align-items:center;gap:6px;border-radius:999px;background:#F7F1E7;color:var(--ws-steel);padding:5px 9px;font:700 10px 'Roboto Mono',monospace;letter-spacing:.08em;text-transform:uppercase}.ws-card-state.ws-done{background:#EAF5ED;color:var(--ws-green)}.ws-card-state.ws-next{background:var(--ws-gold);color:var(--ws-navy);box-shadow:0 0 0 2px rgba(238,163,32,.18)}.ws-practice-state{display:flex;align-items:center;justify-content:flex-end;gap:8px;justify-self:end;white-space:nowrap}.ws-exercise-tab.ws-tab-done{color:var(--ws-green)}.ws-exercise-tab.ws-tab-done .ws-tab-badge{background:var(--ws-green);color:#fff}.ws-workbook-card.ws-done{border-color:rgba(44,122,75,.42);background:#F6FBF7}.ws-workbook-card.ws-done .ws-button:first-child{background:#fff;border-color:rgba(44,122,75,.38);color:var(--ws-navy)}",
       ".ws-practice-card{box-shadow:0 12px 28px rgba(0,51,102,.06)}.ws-practice-head{width:calc(100% - 44px);box-sizing:border-box;grid-template-columns:auto minmax(0,1fr) auto;align-items:start;background:#F0E9DD;border:1px solid rgba(0,51,102,.08);border-radius:12px;margin:22px 22px 0;padding:18px 22px;column-gap:18px;row-gap:10px}.ws-practice-head>span:not(.ws-practice-chevron):not(.ws-practice-state){min-width:0}.ws-practice-chevron{grid-column:1;width:30px;height:30px;margin-top:2px}.ws-practice-head h3{margin:7px 0 4px}.ws-practice-head p{font-size:16px}.ws-practice-card.ws-next-card{border-color:rgba(238,163,32,.55)}.ws-practice-card.ws-next-card .ws-practice-head{background:#FFF7E8;border-color:rgba(238,163,32,.58);box-shadow:inset 5px 0 0 var(--ws-gold)}.ws-practice-card.ws-complete .ws-practice-head{background:#F6FBF7;border:1px solid rgba(44,122,75,.3);box-shadow:none}.ws-practice-card.ws-complete .ws-practice-head h3{color:rgba(0,51,102,.54)}.ws-practice-card.ws-complete .ws-practice-head p{color:rgba(77,112,148,.62)}.ws-practice-card.ws-complete .ws-card-role{background:rgba(0,51,102,.62)}.ws-practice-card:not(.ws-complete) .ws-card-check{display:none}.ws-practice-body{padding:18px 22px 22px}.ws-practice-card.ws-open .ws-practice-head{border-radius:12px}.ws-practice-card:not(.ws-open) .ws-practice-head{margin-bottom:22px}.ws-context-card{border-color:rgba(77,112,148,.28);background:#F8FBFC}.ws-context-card .ws-practice-head{background:#EEF3F6;border:1px solid rgba(77,112,148,.22);box-shadow:none}.ws-context-card .ws-practice-chevron{background:#4D7094}.ws-context-card .ws-kicker{color:#4D7094}.ws-context-card .ws-practice-body{background:#F8FBFC}",
       "@media(max-width:768px){.ws-phase-flow{padding:18px}.ws-phase-flow-head{display:grid}.ws-flow-progress{width:max-content}.ws-flow-steps{grid-template-columns:1fr}.ws-flow-actions{display:grid}.ws-flow-actions .ws-button{width:100%}.ws-practice-locked{padding:22px 18px}.ws-practice-locked h2{font-size:28px}.ws-phase-progress-top,.ws-phase-milestones,.ws-progress-split{grid-template-columns:1fr}.ws-phase-percent{width:max-content}.ws-next-action{align-items:flex-start;flex-direction:column}.ws-next-action .ws-button{width:100%}.ws-card-check{width:28px;height:28px}.ws-practice-head{width:calc(100% - 32px);grid-template-columns:auto minmax(0,1fr);margin:16px 16px 0;padding:16px}.ws-practice-state{grid-column:2;justify-self:start;white-space:normal}.ws-practice-card:not(.ws-open) .ws-practice-head{margin-bottom:16px}.ws-practice-body{padding:16px 16px 16px}}",
-      "@media(max-width:768px){body.ws-page{background:var(--ws-cream)}.ws-shell{width:calc(100% - 28px)}.ws-nav-inner{height:auto;grid-template-columns:auto 1fr auto;grid-template-rows:auto auto;gap:0 10px;width:100%;padding:8px 12px 0}.ws-brand{grid-column:1;grid-row:1;height:42px;align-items:center}.ws-logo{height:30px}.ws-user{grid-column:3;grid-row:1;height:42px}.ws-user-email{display:none}.ws-avatar{width:36px;height:36px}.ws-links{grid-column:1/-1;grid-row:2;justify-content:flex-start;overflow-x:auto;white-space:nowrap;gap:10px;border-top:1px solid rgba(255,255,255,.14);scrollbar-width:none}.ws-links::-webkit-scrollbar,.ws-lesson-rail::-webkit-scrollbar,.ws-step-tabs-inner::-webkit-scrollbar,.ws-exercise-tabs::-webkit-scrollbar{display:none}.ws-link{min-height:42px;font-size:14px}.ws-sep{opacity:.55}.ws-phase-menu{position:fixed;left:12px;right:12px;top:92px;width:auto}.ws-profile-menu{position:fixed;top:56px;right:12px;left:auto;width:min(270px,calc(100vw - 24px));max-width:none}.ws-main{padding:24px 0 48px}.ws-title{font-size:40px}.ws-subtitle{font-size:17px}.ws-login-wrap{min-height:100svh;padding:28px 16px}.ws-login-card{padding:28px 24px}.ws-login-card .ws-title{font-size:54px}.ws-login-card .ws-subtitle{font-size:18px}.ws-login-card .ws-google-button{min-height:50px}.ws-journey-head{padding:16px;align-items:start}.ws-journey-title{font-size:25px}.ws-journey-body{padding:0 16px 18px}.ws-journey-map{grid-template-columns:1fr}.ws-journey-step{min-height:0}.ws-journey-actions{display:grid;justify-content:stretch}.ws-journey-cue{justify-content:space-between}.ws-orientation-head{grid-template-columns:1fr auto;align-items:start;padding:16px}.ws-start-badge{width:max-content;margin-bottom:8px}.ws-orientation-title{font-size:18px}.ws-orientation-sub{font-size:15px;line-height:1.35}.ws-orientation-body{padding:0 16px 18px}.ws-orientation-copy{font-size:16px;line-height:1.58}.ws-orientation-copy h3{font-size:28px}.ws-disclosure-icon{width:34px;height:34px}.ws-player-card,.ws-context-embed{border-radius:12px}.ws-player-meta{position:static;padding:12px 14px;background:var(--ws-navy);text-shadow:none}.ws-player-meta h3{font-size:21px}.ws-video-access-help summary{align-items:flex-start;flex-direction:column}.ws-access-top,.ws-access-guide{grid-template-columns:1fr}.ws-access-direct{width:100%;white-space:normal;text-align:center}.ws-how-toggle{padding:12px}.ws-ready-row{align-items:flex-start;font-size:16px;line-height:1.35}.ws-ready-row input{margin-top:3px;flex:0 0 auto}.ws-step-tabs{top:85px}.ws-step-tabs-inner{width:100%;padding:0 12px;overflow-x:auto;scrollbar-width:none;gap:20px}.ws-step-tab{flex:0 0 auto;min-height:42px;font-size:10px}.ws-gold-cta{align-items:flex-start;flex-direction:column}.ws-exercise-tabs{gap:14px;overflow-x:auto;scrollbar-width:none}.ws-exercise-tab{flex:0 0 auto;font-size:10px}.ws-ai-link-card{grid-template-columns:42px 1fr;gap:12px;padding:14px}.ws-ai-arrow{display:none}.ws-phase-card{grid-template-columns:6px 50px 1fr;gap:12px;min-height:150px;padding:18px 14px 18px 0}.ws-phase-actions{grid-column:2/-1;justify-items:start}.ws-phase-number{font-size:46px}.ws-phase-content h2{font-size:27px}.ws-stepper{flex-wrap:wrap}.ws-section{margin-top:24px}.ws-section-head{align-items:flex-start;flex-direction:column}.ws-player-actions{align-items:flex-start;flex-direction:column}.ws-scroll-hint{display:block}.ws-lesson-rail{display:flex;overflow-x:auto;gap:10px;padding-bottom:4px;scrollbar-width:none}.ws-lesson-tile{min-width:124px}.ws-collapsed{grid-template-columns:auto 1fr auto}.ws-collapsed .ws-pill{display:none}.ws-context-toggle{padding:14px}.ws-workbook-card{padding:24px 20px}.ws-workbook-top{font-size:11px;letter-spacing:.1em}.ws-workbook-card h3{font-size:34px}.ws-workbook-card p{font-size:17px}.ws-card-actions .ws-button{width:100%}.ws-exercise-card{grid-template-columns:1fr}.ws-bottom-nav{flex-direction:row}.ws-bottom-nav .ws-button{min-width:0;flex:1;padding:0 10px;font-size:10px}.ws-admin-toggle{grid-template-columns:48px 1fr auto}.ws-save-bar-inner{flex-direction:column;align-items:stretch}.ws-save-row{flex-direction:column}}"
+      "@media(max-width:768px){body.ws-page{background:var(--ws-cream)}.ws-shell{width:calc(100% - 28px)}.ws-nav-inner{height:auto;grid-template-columns:auto 1fr auto;grid-template-rows:auto auto;gap:0 10px;width:100%;padding:8px 12px 0}.ws-brand{grid-column:1;grid-row:1;height:42px;align-items:center}.ws-logo{height:30px}.ws-user{grid-column:3;grid-row:1;height:42px}.ws-user-email{display:none}.ws-avatar{width:36px;height:36px}.ws-links{grid-column:1/-1;grid-row:2;justify-content:flex-start;overflow-x:auto;white-space:nowrap;gap:10px;border-top:1px solid rgba(255,255,255,.14);scrollbar-width:none}.ws-links::-webkit-scrollbar,.ws-lesson-rail::-webkit-scrollbar,.ws-step-tabs-inner::-webkit-scrollbar,.ws-exercise-tabs::-webkit-scrollbar{display:none}.ws-link{min-height:42px;font-size:14px}.ws-sep{opacity:.55}.ws-phase-menu{position:fixed;left:12px;right:12px;top:92px;width:auto}.ws-profile-menu{position:fixed;top:56px;right:12px;left:auto;width:min(270px,calc(100vw - 24px));max-width:none}.ws-main{padding:24px 0 48px}.ws-title{font-size:40px}.ws-subtitle{font-size:17px}.ws-login-wrap{min-height:calc(100svh - 54px);padding:28px 16px}.ws-login-card{padding:28px 24px}.ws-login-card .ws-title{font-size:54px}.ws-login-card .ws-subtitle{font-size:18px}.ws-login-card .ws-google-button{min-height:50px}.ws-journey-head{padding:16px;align-items:start}.ws-journey-title{font-size:25px}.ws-journey-body{padding:0 16px 18px}.ws-journey-map{grid-template-columns:1fr}.ws-journey-step{min-height:0}.ws-journey-actions{display:grid;justify-content:stretch}.ws-journey-cue{justify-content:space-between}.ws-orientation-head{grid-template-columns:1fr auto;align-items:start;padding:16px}.ws-start-badge{width:max-content;margin-bottom:8px}.ws-orientation-title{font-size:18px}.ws-orientation-sub{font-size:15px;line-height:1.35}.ws-orientation-body{padding:0 16px 18px}.ws-orientation-copy{font-size:16px;line-height:1.58}.ws-orientation-copy h3{font-size:28px}.ws-disclosure-icon{width:34px;height:34px}.ws-player-card,.ws-context-embed{border-radius:12px}.ws-player-meta{position:static;padding:12px 14px;background:var(--ws-navy);text-shadow:none}.ws-player-meta h3{font-size:21px}.ws-video-access-help summary{align-items:flex-start;flex-direction:column}.ws-access-top,.ws-access-guide{grid-template-columns:1fr}.ws-access-direct{width:100%;white-space:normal;text-align:center}.ws-how-toggle{padding:12px}.ws-ready-row{align-items:flex-start;font-size:16px;line-height:1.35}.ws-ready-row input{margin-top:3px;flex:0 0 auto}.ws-step-tabs{top:85px}.ws-step-tabs-inner{width:100%;padding:0 12px;overflow-x:auto;scrollbar-width:none;gap:20px}.ws-step-tab{flex:0 0 auto;min-height:42px;font-size:10px}.ws-gold-cta{align-items:flex-start;flex-direction:column}.ws-exercise-tabs{gap:14px;overflow-x:auto;scrollbar-width:none}.ws-exercise-tab{flex:0 0 auto;font-size:10px}.ws-ai-link-card{grid-template-columns:42px 1fr;gap:12px;padding:14px}.ws-ai-arrow{display:none}.ws-phase-card{grid-template-columns:6px 50px 1fr;gap:12px;min-height:150px;padding:18px 14px 18px 0}.ws-phase-actions{grid-column:2/-1;justify-items:start}.ws-phase-number{font-size:46px}.ws-phase-content h2{font-size:27px}.ws-stepper{flex-wrap:wrap}.ws-section{margin-top:24px}.ws-section-head{align-items:flex-start;flex-direction:column}.ws-player-actions{align-items:flex-start;flex-direction:column}.ws-scroll-hint{display:block}.ws-lesson-rail{display:flex;overflow-x:auto;gap:10px;padding-bottom:4px;scrollbar-width:none}.ws-lesson-tile{min-width:124px}.ws-collapsed{grid-template-columns:auto 1fr auto}.ws-collapsed .ws-pill{display:none}.ws-context-toggle{padding:14px}.ws-workbook-card{padding:24px 20px}.ws-workbook-top{font-size:11px;letter-spacing:.1em}.ws-workbook-card h3{font-size:34px}.ws-workbook-card p{font-size:17px}.ws-card-actions .ws-button{width:100%}.ws-exercise-card{grid-template-columns:1fr}.ws-bottom-nav{flex-direction:row}.ws-bottom-nav .ws-button{min-width:0;flex:1;padding:0 10px;font-size:10px}.ws-admin-toggle{grid-template-columns:48px 1fr auto}.ws-save-bar-inner{flex-direction:column;align-items:stretch}.ws-save-row{flex-direction:column}}",
+      "@media(max-width:768px){.ws-user{gap:6px}.ws-player-actions{align-items:stretch;padding:14px}.ws-player-actions .ws-button{width:100%;min-height:48px}.ws-player-action-text{font-size:14px}}"
     ].join("\n");
     document.head.appendChild(style);
   }
@@ -892,6 +1186,46 @@ const UTL_CONTENT = {
     document.body.classList.add("ws-page");
     document.body.innerHTML = navHtml(active) + (subnavHtml || "") + '<main class="ws-main"><div class="ws-shell">' + contentHtml + "</div></main>";
     bindNav();
+    renderWorkspaceRewardCluster();
+  }
+
+  function renderWorkspaceRewardCluster() {
+    var mount = qs("#wsRewardCluster");
+    if (!mount) return;
+    ensureRewardUiLoaded().then(function (rewardUi) {
+      if (!rewardUi || !qs("#wsRewardCluster")) return;
+      rewardUi.renderCluster(qs("#wsRewardCluster"), { state: readRewardState() });
+    });
+  }
+
+  function showWorkspaceRewardMoment(details) {
+    ensureRewardUiLoaded().then(function (rewardUi) {
+      if (rewardUi && rewardUi.handleRewardMoment) {
+        rewardUi.handleRewardMoment(Object.assign({ container: qs("#wsRewardCluster") }, details || {}));
+        return;
+      }
+      showRewardToast(details);
+    });
+  }
+
+  function showRewardToast(details) {
+    if (!details) return;
+    var existing = qs(".ws-reward-toast");
+    if (existing) existing.remove();
+    var toast = document.createElement("div");
+    toast.className = "ws-reward-toast";
+    toast.setAttribute("role", "status");
+    toast.setAttribute("aria-live", "polite");
+    toast.innerHTML =
+      '<span>' + escapeHtml(details.label || "Reward") + '</span>' +
+      '<strong>' + escapeHtml(details.title || "") + '</strong>' +
+      '<p>' + escapeHtml(details.body || "") + '</p>';
+    document.body.appendChild(toast);
+    requestAnimationFrame(function () { toast.classList.add("ws-visible"); });
+    setTimeout(function () {
+      toast.classList.remove("ws-visible");
+      setTimeout(function () { toast.remove(); }, 220);
+    }, 3200);
   }
 
   function navHtml(active) {
@@ -915,7 +1249,7 @@ const UTL_CONTENT = {
         }
         return (index ? '<span class="ws-sep">|</span>' : "") + '<a class="ws-link ' + (active === link.key ? "ws-active" : "") + '" href="' + link.href + '">' + link.label + '</a>';
       }).join("") + '</nav>' +
-      '<div class="ws-user"><span class="ws-user-email">' + escapeHtml(user.email) + '</span><button class="ws-avatar" type="button" aria-label="Open profile menu" aria-expanded="false">' + avatar + '</button><div class="ws-profile-menu" hidden><div class="ws-profile-head"><span class="ws-profile-avatar">' + avatar + '</span><div><p class="ws-profile-name">' + escapeHtml(user.label) + '</p><p class="ws-profile-role">' + roleLabel + '</p></div></div><div class="ws-profile-section"><span class="ws-profile-section-label">Your space</span><a href="' + appHref("../my-results/index.html") + '"><span class="ws-profile-icon">&#9638;</span><span>My results</span></a><a href="' + appHref("../apps/toolkit/index.html") + '"><span class="ws-profile-icon">&#8962;</span><span>Toolkit</span></a></div><div class="ws-profile-section"><span class="ws-profile-section-label">Program</span><a href="' + publicSiteHref() + '"><span class="ws-profile-icon">&#8599;</span><span>Public website</span></a></div>' + adminSection + '<div class="ws-profile-section"><button class="ws-logout" type="button"><span class="ws-profile-icon">&#8618;</span><span>Log out</span></button></div></div></div>' +
+      '<div class="ws-user">' + (active === "admin" ? "" : '<div id="wsRewardCluster" class="ws-reward-cluster-shell" data-utl-reward-mount aria-label="Learning rewards"></div>') + '<span class="ws-user-email">' + escapeHtml(user.email) + '</span><button class="ws-avatar" type="button" aria-label="Open profile menu" aria-expanded="false">' + avatar + '</button><div class="ws-profile-menu" hidden><div class="ws-profile-head"><span class="ws-profile-avatar">' + avatar + '</span><div><p class="ws-profile-name">' + escapeHtml(user.label) + '</p><p class="ws-profile-role">' + roleLabel + '</p></div></div><div class="ws-profile-section"><span class="ws-profile-section-label">Your space</span><a href="' + appHref("../my-results/index.html") + '"><span class="ws-profile-icon">&#9638;</span><span>My results</span></a><a href="' + appHref("../apps/toolkit/index.html") + '"><span class="ws-profile-icon">&#8962;</span><span>Toolkit</span></a></div><div class="ws-profile-section"><span class="ws-profile-section-label">Program</span><a href="' + publicSiteHref() + '"><span class="ws-profile-icon">&#8599;</span><span>Public website</span></a></div>' + adminSection + '<div class="ws-profile-section"><button class="ws-logout" type="button"><span class="ws-profile-icon">&#8618;</span><span>Log out</span></button></div></div></div>' +
       '</div></header>';
   }
 
@@ -1392,7 +1726,13 @@ const UTL_CONTENT = {
     var orientationUrl = orientation.contextUrl || exerciseContextUrl(orientation);
     var welcomeOpen = localStorage.getItem("utl_welcome_video_open") === null ? true : readBool("utl_welcome_video_open");
     var video = orientationUrl ? '<div class="ws-context-embed">' + renderEmbeddedMedia(orientationUrl, orientation.contextTitle) + '</div>' : '<div class="ws-player-card"><div class="ws-player"><div class="ws-player-placeholder"><span class="ws-play-icon">&#9654;</span><p>Orientation video coming soon</p></div></div></div>';
-    return '<article class="ws-orientation-card ' + (open ? "ws-open" : "") + '" id="orientation"><button class="ws-orientation-head" type="button" data-orientation-toggle><span class="ws-start-badge">Start here</span><span><span class="ws-orientation-title">Orientation</span><span class="ws-orientation-sub">' + (complete ? "Orientation complete &#10003;" : "Get oriented before jumping into Phase 1") + '</span></span><span class="ws-orientation-chevron ws-disclosure-icon">' + (open ? "&minus;" : "+") + '</span></button><div class="ws-orientation-body"><div class="ws-orientation-copy"><h3>' + escapeHtml(intro.contextTitle || "Welcome") + '</h3>' + textParagraphs(intro.contextBody) + '</div><div class="ws-how-row"><button class="ws-how-toggle" type="button" data-welcome-toggle><span class="ws-media-icon">&#9654;</span><span><strong>' + escapeHtml(orientation.contextTitle || "Welcome to The Untaught Lessons") + '</strong><br><small>' + escapeHtml(orientation.contextBody || "Watch before starting") + '</small></span><span class="ws-disclosure-icon" data-welcome-icon>' + (welcomeOpen ? "&minus;" : "+") + '</span></button><div class="ws-how-body ' + (welcomeOpen ? "ws-open" : "") + '" data-welcome-body>' + video + '</div></div><label class="ws-ready-row"><input type="checkbox" data-orientation-ready ' + (complete ? "checked" : "") + '> <span>I have watched the orientation and I am ready to start.</span></label></div></article>';
+    return '<article class="ws-orientation-card ' + (open ? "ws-open" : "") + '" id="orientation"><button class="ws-orientation-head" type="button" data-orientation-toggle><span class="ws-start-badge">Start here</span><span><span class="ws-orientation-title">Orientation</span><span class="ws-orientation-sub">' + (complete ? "Orientation complete &#10003;" : "Get oriented before jumping into Phase 1") + '</span></span><span class="ws-orientation-chevron ws-disclosure-icon">' + (open ? "&minus;" : "+") + '</span></button><div class="ws-orientation-body"><div class="ws-orientation-copy"><h3>' + escapeHtml(intro.contextTitle || "Welcome") + '</h3>' + textParagraphs(intro.contextBody) + '</div><div class="ws-how-row"><button class="ws-how-toggle" type="button" data-welcome-toggle><span class="ws-media-icon">&#9654;</span><span><strong>' + escapeHtml(orientation.contextTitle || "Welcome to The Untaught Lessons") + '</strong><br><small>' + escapeHtml(orientation.contextBody || "Watch before starting") + '</small></span><span class="ws-disclosure-icon" data-welcome-icon>' + (welcomeOpen ? "&minus;" : "+") + '</span></button><div class="ws-how-body ' + (welcomeOpen ? "ws-open" : "") + '" data-welcome-body>' + video + '</div></div><div class="ws-player-actions" data-orientation-action>' + orientationWatchActionHtml(complete) + '</div></div></article>';
+  }
+
+  function orientationWatchActionHtml(watched) {
+    return watched
+      ? '<div class="ws-player-action-text"><strong>Orientation marked complete.</strong><span>You can mark it not watched if this was a mistake. MP already earned is kept.</span></div><button class="ws-button ws-button-secondary" type="button" data-orientation-watch>Mark not watched</button>'
+      : '<div class="ws-player-action-text"><strong>Finished watching?</strong><span>Mark the orientation complete to save progress and earn ' + VIDEO_COMPLETE_MP + ' MP once.</span></div><button class="ws-button" type="button" data-orientation-watch>Mark orientation complete</button>';
   }
 
   function phaseJourneyCard(phaseKey) {
@@ -1563,7 +1903,33 @@ const UTL_CONTENT = {
       if (s.daysSinceBanner && lastVisit > 0 && daysSince >= Number(s.daysSinceThreshold || 5)) insertDaysSinceBanner(stack, daysSince);
       if (s.almostThere) applyAlmostThere(Number(s.almostThereThreshold || 2));
       if (s.phaseCompletionModal && newlyComplete.length) {
-        newlyComplete.forEach(function (pk) { localStorage.setItem(NUDGE_PHASE_SEEN_PREFIX + phaseNumbers[pk], "true"); });
+        var phaseReward = null;
+        newlyComplete.forEach(function (pk) {
+          localStorage.setItem(NUDGE_PHASE_SEEN_PREFIX + phaseNumbers[pk], "true");
+          var settings = rewardSettings();
+          var phaseMp = Number(settings.mp && settings.mp.phaseCompletion && settings.mp.phaseCompletion[pk]);
+          if (!Number.isFinite(phaseMp)) phaseMp = ({ phase1: 100, phase2: 150, phase3: 200 })[pk] || 0;
+          var result = awardRewardEvent({
+            id: "phase-completed:" + pk,
+            type: "phase-completed",
+            title: phaseLabels[pk] + " complete",
+            mp: phaseMp
+          });
+          if (result.awarded) phaseReward = { phaseKey: pk, result: result };
+        });
+        if (phaseReward) {
+          queueRemoteProgressSave();
+          showWorkspaceRewardMoment({
+            label: "Phase complete",
+            title: "+" + phaseReward.result.mpEarned + " MP earned",
+            body: phaseLabels[phaseReward.phaseKey] + " completion bonus awarded. Total MP: " + phaseReward.result.total + ".",
+            startMp: phaseReward.result.startTotal,
+            newTotal: phaseReward.result.total,
+            previousLevel: rewardLevelForMp(phaseReward.result.startTotal),
+            currentLevel: rewardLevelForMp(phaseReward.result.total),
+            showLevelModal: rewardLevelForMp(phaseReward.result.startTotal) !== rewardLevelForMp(phaseReward.result.total)
+          });
+        }
         showPhaseCompletionModal(newlyComplete[newlyComplete.length - 1]);
       }
     }
@@ -1662,23 +2028,48 @@ const UTL_CONTENT = {
         }
       });
     }
-    var ready = qs("[data-orientation-ready]");
-    if (ready && orientationCard) {
-      ready.addEventListener("change", function () {
-        writeBool("utl_orientation_ready", ready.checked);
+    var orientationWatch = qs("[data-orientation-watch]");
+    if (orientationWatch && orientationCard) {
+      if (readBool("utl_orientation_ready")) {
+        var backfillReward = awardOrientationVideo();
+        if (backfillReward.awarded) queueRemoteProgressSave();
+      }
+      function handleOrientationWatch() {
+        var nowWatched = !readBool("utl_orientation_ready");
+        writeBool("utl_orientation_ready", nowWatched);
+        var orientationReward = nowWatched ? awardOrientationVideo() : null;
         queueRemoteProgressSave();
-        if (ready.checked) {
+        var action = qs("[data-orientation-action]");
+        if (action) {
+          action.innerHTML = orientationWatchActionHtml(nowWatched);
+          var nextButton = action.querySelector("[data-orientation-watch]");
+          if (nextButton) nextButton.addEventListener("click", handleOrientationWatch);
+        }
+        var sub = qs(".ws-orientation-sub");
+        if (sub) sub.innerHTML = nowWatched ? "Orientation complete &#10003;" : "Get oriented before jumping into Phase 1";
+        if (nowWatched) {
+          if (orientationReward && orientationReward.awarded) {
+            showWorkspaceRewardMoment({
+              label: "Orientation complete",
+              title: "+" + orientationReward.mpEarned + " MP earned",
+              body: "Your orientation progress was saved. Total MP: " + orientationReward.total + ".",
+              startMp: orientationReward.startTotal,
+              newTotal: orientationReward.total,
+              previousLevel: rewardLevelForMp(orientationReward.startTotal),
+              currentLevel: rewardLevelForMp(orientationReward.total),
+              showLevelModal: rewardLevelForMp(orientationReward.startTotal) !== rewardLevelForMp(orientationReward.total)
+            });
+          }
           setTimeout(function () {
             orientationCard.classList.remove("ws-open");
             writeBool("utl_orientation_open", false);
             queueRemoteProgressSave();
-            var sub = qs(".ws-orientation-sub");
             var chevron = qs(".ws-orientation-chevron");
-            if (sub) sub.innerHTML = "Orientation complete &#10003;";
             if (chevron) chevron.innerHTML = "+";
           }, 550);
         }
-      });
+      }
+      orientationWatch.addEventListener("click", handleOrientationWatch);
     }
   }
 
@@ -1833,7 +2224,83 @@ const UTL_CONTENT = {
   function mediaPreview(exercise) {
     var url = exerciseContextUrl(exercise);
     if (!url) return '<div class="ws-media-row ws-missing"><span class="ws-media-icon">&#9654;</span><span>Video coming soon</span></div>';
-    return '<div class="ws-context-embed">' + renderEmbeddedMedia(url, exercise.contextTitle || exercise.title) + '</div>';
+    return '<div class="ws-context-embed" data-context-media-id="' + escapeHtml(exercise.id || '') + '" data-context-media-title="' + escapeHtml(exercise.contextTitle || exercise.title || 'Context') + '">' + renderEmbeddedMedia(url, exercise.contextTitle || exercise.title) + '</div>';
+  }
+
+  function contextDoneKey(id) {
+    return "utl_context_complete_" + id;
+  }
+
+  function contextCompletionAction(item) {
+    var type = exerciseContextType(item);
+    var url = exerciseContextUrl(item);
+    if (!item || !item.id || !url || (type !== "video" && type !== "slides")) return "";
+    var done = readBool(contextDoneKey(item.id));
+    return '<button class="ws-button ' + (done ? 'ws-button-secondary' : '') + '" type="button" data-context-complete="' + escapeHtml(item.id) + '" data-context-title="' + escapeHtml(item.contextTitle || item.title || 'Context') + '" title="' + (done ? 'Click to mark this context incomplete. Earned MP is kept.' : 'Confirm after watching the video or reviewing the slides.') + '">' + (done ? '&#10003; Context complete' : 'Mark context complete &middot; +' + CONTEXT_COMPLETE_MP + ' MP') + '</button>';
+  }
+
+  function decorateContextCompletionActions() {
+    qsa("[data-context-media-id]").forEach(function (media) {
+      var id = media.getAttribute("data-context-media-id");
+      if (!id || document.querySelector('[data-context-complete="' + id + '"]')) return;
+      var item = allExercises().find(function (exercise) { return exercise.id === id; });
+      if (!item) {
+        phases.some(function (phaseKey) {
+          item = (getPhase(phaseKey).introContexts || []).find(function (context) { return context.id === id; });
+          return !!item;
+        });
+      }
+      if (!item) return;
+      var body = media.closest(".ws-practice-body");
+      if (!body) return;
+      var actions = body.querySelector(".ws-card-actions");
+      if (!actions) {
+        actions = document.createElement("div");
+        actions.className = "ws-card-actions";
+        media.insertAdjacentElement("afterend", actions);
+      }
+      actions.insertAdjacentHTML("afterbegin", contextCompletionAction(item));
+    });
+  }
+
+  function bindContextCompletionButtons() {
+    decorateContextCompletionActions();
+    qsa("[data-context-complete]").forEach(function (button) {
+      button.addEventListener("click", function () {
+        var id = button.getAttribute("data-context-complete");
+        var key = contextDoneKey(id);
+        var wasDone = readBool(key);
+        var nowDone = !wasDone;
+        writeBool(key, nowDone);
+        queueRemoteProgressSave();
+        button.classList.toggle("ws-button-secondary", nowDone);
+        button.innerHTML = nowDone
+          ? "&#10003; Context complete"
+          : "Mark context complete &middot; +" + CONTEXT_COMPLETE_MP + " MP";
+        button.title = nowDone
+          ? "Click to mark this context incomplete. Earned MP is kept."
+          : "Confirm after watching the video or reviewing the slides.";
+        if (!nowDone) return;
+        var reward = awardRewardEvent({
+          id: "context:" + id,
+          type: "context-completed",
+          title: button.getAttribute("data-context-title") || "Context",
+          mp: CONTEXT_COMPLETE_MP
+        });
+        if (reward && reward.awarded) {
+          showWorkspaceRewardMoment({
+            label: "Context complete",
+            title: "+" + reward.mpEarned + " MP earned",
+            body: "Your preparation was saved. Total MP: " + reward.total + ".",
+            startMp: reward.startTotal,
+            newTotal: reward.total,
+            previousLevel: rewardLevelForMp(reward.startTotal),
+            currentLevel: rewardLevelForMp(reward.total),
+            showLevelModal: rewardLevelForMp(reward.startTotal) !== rewardLevelForMp(reward.total)
+          });
+        }
+      });
+    });
   }
 
   function practiceOpenState(cardId, defaultOpen, complete) {
@@ -1878,6 +2345,7 @@ const UTL_CONTENT = {
     bindContextToggles();
     bindPracticeCardToggles();
     bindPracticeTabs();
+    bindContextCompletionButtons();
     bindExerciseVisitLinks();
   }
 
@@ -1932,12 +2400,18 @@ const UTL_CONTENT = {
     var active = lessons.find(function (lesson) { return lesson.id === activeId; }) || lessons[0];
     var activeWatched = readBool(watchedKey(active.id));
     if (done) {
-      return '<section class="ws-section" id="lessons"><div class="ws-collapsed" data-rewatch-toggle><span class="ws-video-toggle-icon">&#9654;</span><div><h3>Watch the Lessons</h3><p>All ' + lessons.length + ' watched &middot; click to rewatch</p></div><span class="ws-pill ws-pill-green">Done</span><span class="ws-context-toggle-icon" data-rewatch-symbol>+</span></div><div class="ws-rewatch" id="wsRewatch">' + rewatchPlayer(phaseKey, active.id) + '</div></section>';
+      return '<section class="ws-section" id="lessons"><div class="ws-collapsed" data-rewatch-toggle><span class="ws-video-toggle-icon">&#9654;</span><div><h3>Watch the Lessons</h3><p>All ' + lessons.length + ' watched &middot; click to rewatch or change watched status</p></div><span class="ws-pill ws-pill-green">Done</span><span class="ws-context-toggle-icon" data-rewatch-symbol>+</span></div><div class="ws-rewatch" id="wsRewatch">' + rewatchPlayer(phaseKey, active.id) + '</div></section>';
     }
     var url = lessonUrl(active);
     var player = url ? renderIframe(url, active.title) : '<div class="ws-player-placeholder"><div class="ws-play-icon">&#9654;</div><h2>' + escapeHtml(active.title) + '</h2><p>Video coming soon</p></div>';
     var help = url ? videoAccessHelp(url) : "";
-    return '<section class="ws-section ' + (activeWatched ? "ws-video-complete" : "") + '" id="lessons"><div class="ws-section-head"><h2>Watch the Lessons</h2><span class="ws-count">' + count + ' of ' + lessons.length + ' watched</span></div><div class="ws-player-card"><div class="ws-player">' + player + '<div class="ws-player-meta"><span class="ws-kicker">Lesson ' + (lessons.indexOf(active) + 1) + ' of ' + lessons.length + ' &middot; Phase ' + number + '</span><h3>' + escapeHtml(active.title) + '</h3></div></div>' + help + '<div class="ws-rail-wrap">' + lessonRail(phaseKey, active.id, false) + '</div></div></section>';
+    return '<section class="ws-section ' + (activeWatched ? "ws-video-complete" : "") + '" id="lessons"><div class="ws-section-head"><h2>Watch the Lessons</h2><span class="ws-count">' + count + ' of ' + lessons.length + ' watched</span></div><div class="ws-player-card"><div class="ws-player">' + player + '<div class="ws-player-meta"><span class="ws-kicker">Lesson ' + (lessons.indexOf(active) + 1) + ' of ' + lessons.length + ' &middot; Phase ' + number + '</span><h3>' + escapeHtml(active.title) + '</h3></div></div><div class="ws-player-actions">' + lessonWatchActionHtml(active, activeWatched) + '</div>' + help + '<div class="ws-rail-wrap">' + lessonRail(phaseKey, active.id, false) + '</div></div></section>';
+  }
+
+  function lessonWatchActionHtml(lesson, watched) {
+    return watched
+      ? '<div class="ws-player-action-text"><strong>Lesson marked complete.</strong><span>You can mark it not watched if this was a mistake. MP already earned is kept.</span></div><button class="ws-button ws-button-secondary" type="button" data-watch-id="' + lesson.id + '">Mark not watched</button>'
+      : '<div class="ws-player-action-text"><strong>Finished watching?</strong><span>Mark this lesson complete to save progress and earn ' + VIDEO_COMPLETE_MP + ' MP once.</span></div><button class="ws-button" type="button" data-watch-id="' + lesson.id + '">Mark lesson complete</button>';
   }
 
   function lessonRail(phaseKey, activeId, asLinks) {
@@ -1960,7 +2434,7 @@ const UTL_CONTENT = {
     var url = lessonUrl(active);
     var player = url ? renderIframe(url, active.title) : '<div class="ws-player-placeholder"><div class="ws-play-icon">&#9654;</div><h2>' + escapeHtml(active.title) + '</h2><p>Video coming soon</p></div>';
     var help = url ? videoAccessHelp(url) : "";
-    return '<div class="ws-player-card"><div class="ws-player">' + player + '<div class="ws-player-meta"><span class="ws-kicker">Rewatch lesson</span><h3>' + escapeHtml(active.title) + '</h3></div></div>' + help + '<div class="ws-rail-wrap">' + lessonRail(phaseKey, active.id, false) + '</div></div>';
+    return '<div class="ws-player-card"><div class="ws-player">' + player + '<div class="ws-player-meta"><span class="ws-kicker">Rewatch lesson</span><h3>' + escapeHtml(active.title) + '</h3></div></div><div class="ws-player-actions">' + lessonWatchActionHtml(active, readBool(watchedKey(active.id))) + '</div>' + help + '<div class="ws-rail-wrap">' + lessonRail(phaseKey, active.id, false) + '</div></div>';
   }
 
   function orientationContextSection() {
@@ -2034,7 +2508,7 @@ const UTL_CONTENT = {
       : '<span class="ws-button ws-disabled">' + actionLabel + '</span>';
     return '<article class="ws-practice-card ' + (done ? "ws-complete " : "") + (!done && isNext ? "ws-next-card " : "") + (open ? "ws-open" : "") + '" data-practice-card="' + cardId + '">' +
       '<button class="ws-practice-head" type="button" data-practice-toggle="' + cardId + '"><span class="ws-practice-chevron">' + (open ? "&minus;" : "+") + '</span><span><span class="ws-practice-status-row"><span class="ws-card-role">Exercise</span></span><h3>' + escapeHtml(exercise.title) + '</h3><p>' + escapeHtml(done ? "Complete. Open this card if you want to review or redo it." : exercise.description) + '</p></span><span class="ws-practice-state">' + practiceCardCheck(done) + practiceCardStatus(done, isNext) + '</span></button>' +
-      '<div class="ws-practice-body"><div class="ws-before-block"><h4>Before you start</h4><p>' + escapeHtml(exercise.contextBody) + '</p></div>' + mediaPreview(exercise) + '<div class="ws-card-actions">' + actionHtml + (enabled && done ? '<button class="ws-mark-incomplete" type="button" data-exercise-done="' + exercise.id + '">Mark incomplete</button>' : "") + '</div></div>' +
+      '<div class="ws-practice-body"><div class="ws-before-block"><h4>Before you start</h4><p>' + escapeHtml(exercise.contextBody) + '</p></div>' + mediaPreview(exercise) + '<div class="ws-card-actions">' + contextCompletionAction(exercise) + actionHtml + (enabled && done ? '<button class="ws-mark-incomplete" type="button" data-exercise-done="' + exercise.id + '">Mark incomplete</button>' : "") + '</div></div>' +
     '</article>';
   }
 
@@ -2064,6 +2538,7 @@ const UTL_CONTENT = {
     }
     bindContextToggles();
     bindPracticeCardToggles();
+    bindContextCompletionButtons();
     qsa("[data-lesson-id]").forEach(function (button) {
       button.addEventListener("click", function () {
         var wasRewatch = !!button.closest("#wsRewatch");
@@ -2082,11 +2557,48 @@ const UTL_CONTENT = {
     qsa("[data-watch-id]").forEach(function (button) {
       button.addEventListener("click", function (event) {
         event.stopPropagation();
-        var key = watchedKey(button.getAttribute("data-watch-id"));
-        writeBool(key, !readBool(key));
+        var lessonId = button.getAttribute("data-watch-id");
+        var key = watchedKey(lessonId);
+        var wasWatched = readBool(key);
+        var nowWatched = !wasWatched;
+        var lesson = orderedLessons(phaseKey).find(function (item) { return item.id === lessonId; });
+        var reward = null;
+        writeBool(key, nowWatched);
+        if (nowWatched) {
+          reward = awardRewardEvent({
+            id: "video:" + lessonId,
+            type: "video-completed",
+            title: lesson ? lesson.title : "Lesson video",
+            mp: VIDEO_COMPLETE_MP
+          });
+        }
         videosDone(phaseKey);
         queueRemoteProgressSave();
         renderPhasePage(phaseKey);
+        if (nowWatched && reward && reward.awarded) {
+          setTimeout(function () {
+            showWorkspaceRewardMoment({
+              label: "Lesson complete",
+              title: "+" + reward.mpEarned + " MP earned",
+              body: "Your progress was saved. Total MP: " + reward.total + ".",
+              startMp: reward.startTotal,
+              newTotal: reward.total,
+              previousLevel: rewardLevelForMp(reward.startTotal),
+              currentLevel: rewardLevelForMp(reward.total),
+              showLevelModal: rewardLevelForMp(reward.startTotal) !== rewardLevelForMp(reward.total)
+            });
+          }, 80);
+        } else if (wasWatched) {
+          setTimeout(function () {
+            showWorkspaceRewardMoment({
+              label: "Progress updated",
+              title: "Marked not watched",
+              body: "Your lesson progress changed. Any MP already earned is kept.",
+              startMp: readRewardState().mpTotal,
+              newTotal: readRewardState().mpTotal
+            });
+          }, 80);
+        }
       });
       button.addEventListener("keydown", function (event) {
         if (event.key !== "Enter" && event.key !== " ") return;
@@ -2097,12 +2609,42 @@ const UTL_CONTENT = {
     });
     qsa("[data-watch-all]").forEach(function (button) {
       button.addEventListener("click", function () {
+        var totalAwarded = 0;
+        var totalMp = readRewardState().mpTotal;
+        var startingMp = totalMp;
         getPhase(button.getAttribute("data-watch-all")).lessons.forEach(function (lesson) {
+          var wasWatched = readBool(watchedKey(lesson.id));
           writeBool(watchedKey(lesson.id), true);
+          if (!wasWatched) {
+            var reward = awardRewardEvent({
+              id: "video:" + lesson.id,
+              type: "video-completed",
+              title: lesson.title,
+              mp: VIDEO_COMPLETE_MP
+            });
+            if (reward.awarded) {
+              totalAwarded += reward.mpEarned;
+              totalMp = reward.total;
+            }
+          }
         });
         videosDone(phaseKey);
         queueRemoteProgressSave();
         renderPhasePage(phaseKey);
+        if (totalAwarded > 0) {
+          setTimeout(function () {
+            showWorkspaceRewardMoment({
+              label: "Lessons complete",
+              title: "+" + totalAwarded + " MP earned",
+              body: "New video completion rewards were added. Total MP: " + totalMp + ".",
+              startMp: startingMp,
+              newTotal: totalMp,
+              previousLevel: rewardLevelForMp(startingMp),
+              currentLevel: rewardLevelForMp(totalMp),
+              showLevelModal: rewardLevelForMp(startingMp) !== rewardLevelForMp(totalMp)
+            });
+          }, 80);
+        }
       });
     });
     qsa("[data-watch-reset]").forEach(function (button) {

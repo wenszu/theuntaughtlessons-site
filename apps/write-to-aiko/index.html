@@ -637,21 +637,20 @@
 
           <div class="write-to-aiko-sample-block">
             <button class="write-to-aiko-sample-toggle" type="button" id="writeToAikoSampleToggle" aria-expanded="false" aria-controls="writeToAikoSample">Show sample answer ↓</button>
-            <div class="write-to-aiko-sample" id="writeToAikoSample">Hey Aiko!
+            <div class="write-to-aiko-sample" id="writeToAikoSample">Hey Aiko,
 
-We believe the Olympics is losing cultural impact primarily due to reduced everyday relevance, fragmented attention, and weaker emotional connection with audiences.
+The Olympics is losing gravity because its shared ritual is breaking, meaning is being replaced by moment-chasing, and legitimacy is getting noisier.
 
-This is driven by three key factors:
+Shared ritual is breaking: Fragmented platforms and time zones have weakened the live, collective moment.
 
-Lower day-to-day visibility: The Olympics only peaks every four years, while audiences are now constantly engaged with always-on sports and digital content.
+Meaning is being replaced: Clip-first coverage rewards spectacle, while inconsistent athlete story arcs make the stakes harder to feel.
 
-Fragmented media landscape: Viewers are spread across platforms, making it harder for the Olympics to capture sustained, collective attention.
+Legitimacy is getting noisier: Political polarization, generic unity messaging, and heavy commercial signals are eroding trust and prestige.
 
-Weaker emotional connection: Fewer consistent athlete narratives and national storylines reduce long-term attachment and anticipation.
+I recommend rebuilding Olympic gravity through shared appointment moments, athlete-led story arcs, and one coherent editorial spine. If you agree, I will translate these into pilot options for review.
 
-As a result, the Olympics is shifting from a unifying global moment to a more episodic and less culturally central event. Happy to walk through implications and potential focus areas next.
-
-Best, Yutee Elle</div>
+Best,
+Yutee Elle</div>
           </div>
 
           <div class="write-to-aiko-actions">
@@ -904,6 +903,11 @@ Best, Yutee Elle</div>
           await saveUserProgress('write-to-aiko', 'Write to Aiko', payload);
 
           pauseTimer();
+          window.UTLRewardEvents?.awardReflectionExercise({
+            appId: 'write-to-aiko',
+            title: 'Write to Aiko complete',
+            body: 'Your written recommendation was saved.'
+          });
           submitBtn.textContent = 'Save';
           submitBtn.disabled = true;
           resetBtn.hidden = false;
@@ -936,7 +940,9 @@ Best, Yutee Elle</div>
   </script>
   <script type="module" src="../../assets/app-access-guard.js?v=1"></script>
   <script src="../../assets/exercise-scoring-intro.js?v=3"></script>
+  <script src="../../assets/app-reward-header.js?v=20260709-1"></script>
+  <script src="../../assets/reward-events.js?v=20260709-1"></script>
   <script type="module" src="../../assets/feedback-widget.js?v=5"></script>
-  <script src="../../assets/tactile-buttons.js?v=2" defer></script>
+  <script src="../../assets/tactile-buttons.js?v=4" defer></script>
 </body>
 </html>

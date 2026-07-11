@@ -563,19 +563,19 @@
         <ol class="bad-news-steps">
           <li class="bad-news-step">
             <span class="bad-news-step-number">1</span>
-            <span><strong>Lead with the news.</strong> Say the core message in the first one or two sentences. No long runway.</span>
+            <span><strong>Lead with the news:</strong> Say the core message in the first one or two sentences. No long runway.</span>
           </li>
           <li class="bad-news-step">
             <span class="bad-news-step-number">2</span>
-            <span><strong>Explain the reason, not every detail.</strong> Give the logic that matters. Avoid sounding defensive or vague.</span>
+            <span><strong>Explain the reason, not every detail:</strong> Give the logic that matters. Avoid sounding defensive or vague.</span>
           </li>
           <li class="bad-news-step">
             <span class="bad-news-step-number">3</span>
-            <span><strong>Name the impact.</strong> Show that you understand what this means for the other person or team.</span>
+            <span><strong>Name the impact:</strong> Show that you understand what this means for the other person or team.</span>
           </li>
           <li class="bad-news-step">
             <span class="bad-news-step-number">4</span>
-            <span><strong>Offer the next step.</strong> Be specific about what happens now, what support is available, or what decision is needed.</span>
+            <span><strong>Offer the next step:</strong> Be specific about what happens now, what support is available, or what decision is needed.</span>
           </li>
         </ol>
       </article>
@@ -589,6 +589,7 @@
       </div>
       <div class="bad-news-actions">
         <a class="bad-news-button bad-news-button-primary" href="https://chatgpt.com/g/g-6a3e9a1b55c08191a19cd53f882b746d-utl-difficult-conversations" target="_blank" rel="noopener">Open CustomGPT</a>
+        <button class="bad-news-button" id="completeExerciseBtn" type="button">Mark exercise complete</button>
         <a class="bad-news-exit-link" href="../../member-login/index.html#phase3">Back to member workspace</a>
       </div>
       <p>This opens ChatGPT in a new tab. You may need to sign in, then return here when you finish.</p>
@@ -653,7 +654,22 @@
   </script>
   <script type="module" src="../../assets/app-access-guard.js?v=1"></script>
   <script src="../../assets/exercise-scoring-intro.js?v=3"></script>
+  <script src="../../assets/app-reward-header.js?v=20260709-1"></script>
+  <script src="../../assets/reward-events.js?v=20260709-1"></script>
+  <script>
+    document.getElementById('completeExerciseBtn').addEventListener('click', function () {
+      localStorage.setItem('utl_p3_ex2_done', 'true');
+      localStorage.setItem('utl_done_p3-e2', 'true');
+      const result = window.UTLRewardEvents?.awardReflectionExercise({
+        appId: 'i-have-bad-news',
+        title: 'Difficult conversation complete',
+        body: 'Your reflection and exercise progress were saved.'
+      });
+      this.textContent = result?.awarded ? 'Exercise complete' : 'Already completed';
+      this.disabled = true;
+    });
+  </script>
   <script type="module" src="../../assets/feedback-widget.js?v=5"></script>
-  <script src="../../assets/tactile-buttons.js?v=2" defer></script>
+  <script src="../../assets/tactile-buttons.js?v=4" defer></script>
 </body>
 </html>

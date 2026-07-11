@@ -838,6 +838,12 @@ Here is the transcript:
         response: { ai_structured_output: text }
       };
       localStorage.setItem('utl_result_rushed-voice-memo-ai', JSON.stringify(record));
+      localStorage.setItem('utl_p1_ex5_done', 'true');
+      window.UTLRewardEvents?.awardReflectionExercise({
+        appId: 'rushed-voice-memo-ai',
+        title: 'Rushed voice memo with AI complete',
+        body: 'Your AI-structured output was saved.'
+      });
       import('../../assets/firebase.js')
         .then(({ saveUserProgress }) => saveUserProgress('rushed-voice-memo-ai', 'Rushed voice memo with AI', record))
         .catch(err => console.warn('Progress save failed.', err));
@@ -849,7 +855,9 @@ Here is the transcript:
   </script>
   <script type="module" src="../../assets/app-access-guard.js?v=1"></script>
   <script src="../../assets/exercise-scoring-intro.js?v=3"></script>
+  <script src="../../assets/app-reward-header.js?v=20260709-1"></script>
+  <script src="../../assets/reward-events.js?v=20260709-1"></script>
   <script type="module" src="../../assets/feedback-widget.js?v=5"></script>
-  <script src="../../assets/tactile-buttons.js?v=2" defer></script>
+  <script src="../../assets/tactile-buttons.js?v=4" defer></script>
 </body>
 </html>

@@ -1656,6 +1656,159 @@
       .eng-toggle { align-self:flex-end; }
       .eng-select, .eng-select-wide, .eng-text, .eng-number { width:100%; }
     }
+
+    /* Rewards tab */
+    .reward-summary-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:10px; margin:14px 0 18px; }
+    .reward-summary-card { padding:14px 16px; border:1px solid var(--line); border-radius:8px; background:var(--white); }
+    .reward-summary-card strong { display:block; color:var(--navy); font-size:18px; line-height:1.2; }
+    .reward-summary-card span { display:block; margin-top:4px; color:#777; font-size:12px; line-height:1.4; }
+    .reward-level-table { width:100%; border-collapse:collapse; margin-top:12px; font-size:13px; }
+    .reward-level-table th { padding:8px 10px; background:var(--navy); color:rgba(255,255,255,.86); font-family:'Roboto Mono',monospace; font-size:10px; letter-spacing:.06em; text-align:left; text-transform:uppercase; }
+    .reward-level-table td { padding:9px 10px; border-bottom:1px solid var(--line); background:var(--white); }
+    .reward-level-table input { max-width:150px; }
+    .reward-level-badge { display:inline-flex; align-items:center; justify-content:center; min-width:86px; padding:5px 9px; border-radius:999px; background:var(--navy); color:#fff; font:700 11px 'Roboto Mono',monospace; letter-spacing:.04em; }
+    .reward-level-badge.level-intern { background:#6F7F90; }
+    .reward-level-badge.level-analyst { background:var(--navy); box-shadow:inset 0 -2px 0 var(--gold); }
+    .reward-level-badge.level-associate { background:#8A5A00; color:#fff; }
+    .reward-level-badge.level-principal { background:var(--green); }
+    .reward-level-badge.level-executive { background:linear-gradient(135deg,var(--navy),#8A5A00); box-shadow:inset 0 -2px 0 var(--gold); }
+    .reward-rule-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:12px; margin-top:12px; }
+    .reward-rule-card { display:grid; gap:6px; padding:14px; border:1px solid var(--line); border-radius:8px; background:var(--white); }
+    .reward-rule-card label { color:var(--navy); font-size:12px; }
+    .reward-rule-card small { color:#777; font-size:12px; line-height:1.4; }
+    .reward-policy-table { width:100%; border-collapse:collapse; margin-top:14px; font-size:13px; }
+    .reward-policy-table th { padding:9px 11px; background:#F3EDE2; color:var(--navy); font:700 10px 'Roboto Mono',monospace; letter-spacing:.06em; text-align:left; text-transform:uppercase; }
+    .reward-policy-table td { padding:10px 11px; border-bottom:1px solid var(--line); background:var(--white); vertical-align:top; }
+    .reward-policy-table td:first-child { color:var(--navy); font-weight:700; }
+    .reward-storage-note { margin-top:14px; padding:13px 15px; border-left:3px solid var(--gold); border-radius:6px; background:#FFF8EC; color:var(--charcoal); font-size:13px; line-height:1.55; }
+    .reward-status { display:inline-block; min-height:18px; margin-left:8px; color:#777; font-size:12px; font-weight:700; }
+    .reward-sim-form { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; margin-top:14px; }
+    .reward-sim-field { display:grid; gap:6px; }
+    .reward-sim-field label { color:var(--navy); font-size:12px; }
+    .reward-sim-presets { display:flex; flex-wrap:wrap; gap:10px; margin-top:14px; }
+    .reward-sim-presets .secondary-button { background:#fff; }
+    .reward-sim-output { margin-top:16px; border:1px solid var(--line); border-radius:10px; background:var(--white); overflow:hidden; }
+    .reward-sim-output.is-updated { animation:rewardOutputUpdated .45s ease; }
+    .reward-sim-head { display:flex; justify-content:space-between; gap:14px; align-items:center; padding:16px 18px; background:#082C55; color:#fff; }
+    .reward-sim-head strong { color:var(--gold); font:700 24px 'Roboto Mono',monospace; }
+    .reward-sim-head span { display:block; color:rgba(255,255,255,.78); font-size:12px; margin-top:2px; }
+    .reward-sim-run-state { align-self:flex-start; padding:5px 8px; border-radius:999px; background:rgba(255,255,255,.14); color:rgba(255,255,255,.82); font:700 10px 'Roboto Mono',monospace; letter-spacing:.08em; text-transform:uppercase; white-space:nowrap; }
+    .reward-sim-body { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:10px; padding:14px 16px; }
+    .reward-sim-metric { padding:12px; border:1px solid rgba(0,51,102,.12); border-radius:8px; background:#FAF8F3; }
+    .reward-sim-metric span { display:block; color:#777; font:700 10px 'Roboto Mono',monospace; letter-spacing:.08em; text-transform:uppercase; }
+    .reward-sim-metric strong { display:block; margin-top:5px; color:var(--navy); font-size:18px; }
+    .reward-sim-callouts { display:grid; gap:8px; padding:0 16px 16px; }
+    .reward-sim-callout { padding:10px 12px; border-radius:8px; background:#F3EDE2; color:var(--charcoal); font-size:13px; font-weight:700; }
+    .reward-sim-callout.is-win { background:#EAF5ED; color:var(--green); }
+    .reward-sim-callout.is-gold { background:#FFF4DB; color:#8A5A00; }
+    .reward-sim-flow { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:10px; padding:0 16px 16px; }
+    .reward-sim-step { border:1px solid rgba(0,51,102,.12); border-radius:8px; padding:12px; background:#fff; }
+    .reward-sim-step span { display:block; margin-bottom:5px; color:#777; font:700 10px 'Roboto Mono',monospace; letter-spacing:.08em; text-transform:uppercase; }
+    .reward-sim-step strong { display:block; color:var(--navy); font-size:15px; }
+    .reward-sim-step p { margin:5px 0 0; color:#555; font-size:12px; line-height:1.45; }
+    .reward-moment-preview { margin-top:16px; border:1px solid rgba(0,51,102,.12); border-radius:12px; background:#082C55; color:#fff; overflow:hidden; }
+    .reward-moment-preview-head { display:flex; align-items:center; justify-content:space-between; gap:14px; padding:14px 16px; border-bottom:1px solid rgba(255,255,255,.14); }
+    .reward-moment-preview-head h3 { margin:0; color:#fff; font-family:'Playfair Display',serif; font-size:22px; }
+    .reward-moment-preview-head p { margin:3px 0 0; color:rgba(255,255,255,.74); font-size:12px; }
+    .reward-moment-stage { position:relative; min-height:300px; padding:18px; background:linear-gradient(180deg,#073A6D 0%,#062A50 100%); transition:min-height .2s ease; }
+    .reward-moment-stage.is-modal-visible { min-height:620px; }
+    .reward-preview-nav { display:flex; flex-wrap:wrap; align-items:center; justify-content:flex-end; gap:10px; }
+    .reward-preview-stat { position:relative; display:inline-flex; align-items:center; gap:8px; min-height:48px; padding:10px 14px; border:1px solid rgba(255,255,255,.24); border-radius:10px; background:rgba(255,255,255,.1); color:#fff; font:700 16px 'Roboto Mono',monospace; transition:transform .18s ease, background .18s ease, box-shadow .18s ease; }
+    .reward-preview-stat.mp { color:var(--gold); }
+    .reward-preview-stat.is-counting { transform:translateY(-1px) scale(1.02); background:rgba(255,255,255,.18); box-shadow:0 10px 28px rgba(0,0,0,.22), 0 0 0 1px rgba(250,166,26,.4); }
+    .reward-preview-stat.is-settled { animation:rewardSettle .38s ease; }
+    .reward-preview-stat small { color:rgba(255,255,255,.72); font:700 10px 'Roboto Mono',monospace; letter-spacing:.06em; }
+    .reward-preview-float { position:absolute; right:10px; top:-18px; color:var(--gold); font:700 13px 'Roboto Mono',monospace; opacity:0; animation:rewardFloat 1.2s ease forwards; pointer-events:none; }
+    .reward-preview-toast { position:absolute; right:18px; bottom:18px; width:min(320px,calc(100% - 36px)); padding:14px 16px; border:1px solid rgba(250,166,26,.45); border-radius:12px; background:#fff; color:var(--navy); box-shadow:0 18px 44px rgba(0,0,0,.24); opacity:0; transform:translateY(12px); transition:opacity .18s ease, transform .18s ease; }
+    .reward-preview-toast.is-visible { opacity:1; transform:translateY(0); }
+    .reward-preview-toast span { display:block; color:var(--gold); font:700 10px 'Roboto Mono',monospace; letter-spacing:.12em; text-transform:uppercase; }
+    .reward-preview-toast strong { display:block; margin-top:4px; color:var(--navy); font-size:18px; }
+    .reward-preview-toast p { margin:5px 0 0; color:#555; font-size:13px; line-height:1.45; }
+    .reward-preview-modal { position:absolute; inset:18px; display:grid; place-items:center; padding:18px; border-radius:14px; background:rgba(0,31,62,.72); opacity:0; visibility:hidden; overflow:auto; transition:opacity .2s ease, visibility .2s ease; }
+    .reward-preview-modal.is-visible { opacity:1; visibility:visible; }
+    .reward-preview-modal-card { position:relative; width:min(820px,100%); max-height:100%; overflow:auto; padding:42px 34px 34px; border:2px solid rgba(250,166,26,.82); border-radius:22px; background:radial-gradient(circle at 50% 0,rgba(255,224,156,.5),transparent 38%),linear-gradient(180deg,#fff 0%,#fffaf0 100%); color:var(--navy); text-align:center; box-shadow:0 30px 80px rgba(0,0,0,.42),0 0 0 8px rgba(250,166,26,.1); }
+    .reward-preview-modal-card::before { content:"✦       •       ✦       •       ✦"; position:absolute; inset:18px 18px auto; color:rgba(238,163,32,.65); font:700 18px 'Roboto Mono',monospace; letter-spacing:.35em; pointer-events:none; }
+    .reward-preview-streamers { position:absolute; inset:0; overflow:hidden; pointer-events:none; }
+    .reward-preview-streamer { position:absolute; top:-18%; left:var(--x); width:8px; height:54px; border-radius:999px; background:var(--color); opacity:0; transform:translate3d(0,-40px,0) rotate(var(--tilt)); }
+    .reward-preview-modal.is-visible .reward-preview-streamer { animation:rewardStreamerFall 5.8s var(--delay) cubic-bezier(.18,.65,.35,1) forwards; }
+    .reward-preview-burst { position:absolute; left:50%; top:88px; width:170px; height:170px; border-radius:999px; transform:translate(-50%,-50%) scale(.2); border:3px solid rgba(238,163,32,.5); box-shadow:0 0 0 12px rgba(238,163,32,.12),0 0 0 26px rgba(238,163,32,.06); opacity:0; pointer-events:none; }
+    .reward-preview-modal.is-visible .reward-preview-burst { animation:rewardBurst 1.25s .2s ease-out forwards; }
+    .reward-preview-modal-mark { position:relative; display:inline-grid; place-items:center; width:80px; height:80px; margin-bottom:16px; border:6px solid #fff; border-radius:999px; background:linear-gradient(145deg,#3C9563,#21653E); color:#fff; font-size:42px; box-shadow:0 0 0 5px rgba(44,122,75,.15),0 14px 28px rgba(44,122,75,.24); }
+    .reward-preview-modal-card span { display:block; color:var(--gold); font:700 11px 'Roboto Mono',monospace; letter-spacing:.12em; text-transform:uppercase; }
+    .reward-preview-modal-card strong { display:block; margin-top:8px; color:var(--navy); font-family:'Playfair Display',serif; font-size:46px; line-height:1.04; }
+    .reward-preview-modal-card p { max-width:560px; margin:12px auto 0; color:#555; font-size:16px; line-height:1.5; }
+    .reward-preview-modal-total { display:inline-flex; margin-top:18px; padding:8px 13px; border:1px solid rgba(238,163,32,.45); border-radius:999px; background:#FFF1CF; color:#8A5A00; font:700 12px 'Roboto Mono',monospace; }
+    .reward-preview-modal.is-visible .reward-preview-modal-card strong.is-celebrating { animation:rewardTitleFlash .82s ease-in-out 6; }
+    .reward-preview-modal.is-visible .reward-preview-modal-card { animation:rewardPromotionArrive .48s cubic-bezier(.2,.8,.2,1); }
+    .reward-preview-controls { display:flex; flex-wrap:wrap; gap:10px; padding:14px 16px; background:#fff; }
+    .reward-level-path { margin-top:18px; padding:14px; border:1px solid rgba(255,255,255,.18); border-radius:12px; background:rgba(255,255,255,.08); text-align:left; }
+    .reward-level-path-head { display:flex; justify-content:space-between; gap:12px; align-items:center; margin-bottom:12px; color:rgba(255,255,255,.82); font:700 10px 'Roboto Mono',monospace; letter-spacing:.1em; text-transform:uppercase; }
+    .reward-level-track { display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:8px; }
+    .reward-level-step { position:relative; min-height:94px; padding:12px 12px 11px; border:1px solid rgba(255,255,255,.12); border-radius:10px; background:rgba(255,255,255,.06); color:rgba(255,255,255,.56); overflow:hidden; }
+    .reward-level-step::before { content:""; position:absolute; inset:0 auto 0 0; width:4px; background:rgba(255,255,255,.16); }
+    .reward-level-step.is-current { border-color:rgba(250,166,26,.9); background:linear-gradient(180deg,rgba(250,166,26,.24),rgba(250,166,26,.1)); color:#fff; box-shadow:0 0 0 1px rgba(250,166,26,.2), 0 14px 28px rgba(0,0,0,.16); }
+    .reward-level-step.is-current::before { background:var(--gold); }
+    .reward-level-step.is-unlocked { border-color:rgba(46,127,82,.58); background:linear-gradient(180deg,rgba(46,127,82,.24),rgba(46,127,82,.1)); color:#fff; }
+    .reward-level-step.is-unlocked::before { background:var(--green); }
+    .reward-level-step strong { display:block; color:inherit; font-size:15px; }
+    .reward-level-step-label { display:inline-flex; align-items:center; gap:5px; margin-bottom:8px; padding:4px 7px; border-radius:999px; background:rgba(255,255,255,.1); color:rgba(255,255,255,.68); font:700 9px 'Roboto Mono',monospace; letter-spacing:.08em; text-transform:uppercase; }
+    .reward-level-step.is-current .reward-level-step-label { background:rgba(250,166,26,.22); color:#FFE6B6; }
+    .reward-level-step.is-unlocked .reward-level-step-label { background:rgba(46,127,82,.24); color:#DDF3E6; }
+    .reward-level-threshold { display:block; margin-top:6px; color:rgba(255,255,255,.8); font-size:12px; }
+    .reward-level-distance { display:block; margin-top:3px; color:rgba(255,255,255,.46); font-size:12px; }
+    .reward-level-step.is-current .reward-level-distance { color:#FFE6B6; font-weight:700; }
+    .reward-level-step.is-unlocked .reward-level-distance { color:#DDF3E6; font-weight:700; }
+    .reward-preview-modal-card .reward-level-path { margin-top:18px; border-color:rgba(0,51,102,.12); background:#F8F5EF; }
+    .reward-preview-modal-card .reward-level-path-head { color:#6B7280; }
+    .reward-preview-modal-card .reward-level-track { grid-template-columns:repeat(auto-fit,minmax(110px,1fr)); }
+    .reward-preview-modal-card .reward-level-step { min-height:86px; border-color:rgba(0,51,102,.12); background:#fff; color:#7B8794; }
+    .reward-preview-modal-card .reward-level-step::before { background:#CBD5E1; }
+    .reward-preview-modal-card .reward-level-step.is-current { border-color:rgba(250,166,26,.9); background:#FFF7E8; color:var(--navy); box-shadow:0 0 0 1px rgba(250,166,26,.18); }
+    .reward-preview-modal-card .reward-level-step.is-unlocked { border-color:rgba(46,127,82,.42); background:#EFF8F2; color:var(--navy); }
+    .reward-preview-modal-card .reward-level-step strong { color:inherit; }
+    .reward-preview-modal-card .reward-level-step-label { background:#EEF2F6; color:#64748B; }
+    .reward-preview-modal-card .reward-level-step.is-current .reward-level-step-label { background:#F5DDAF; color:#8A5A00; }
+    .reward-preview-modal-card .reward-level-step.is-unlocked .reward-level-step-label { background:#DDF3E6; color:var(--green); }
+    .reward-preview-modal-card .reward-level-threshold { color:#475569; }
+    .reward-preview-modal-card .reward-level-distance { color:#94A3B8; }
+    .reward-preview-modal-card .reward-level-step.is-current .reward-level-distance { color:#8A5A00; }
+    .reward-preview-modal-card .reward-level-step.is-unlocked .reward-level-distance { color:var(--green); }
+    @keyframes rewardFloat {
+      0% { opacity:0; transform:translateY(8px) scale(.96); }
+      20% { opacity:1; transform:translateY(0) scale(1); }
+      100% { opacity:0; transform:translateY(-18px) scale(.98); }
+    }
+    @keyframes rewardSettle {
+      0% { transform:scale(1); }
+      45% { transform:scale(1.08); }
+      100% { transform:scale(1); }
+    }
+    @keyframes rewardOutputUpdated {
+      0% { box-shadow:0 0 0 0 rgba(250,166,26,.5); transform:translateY(0); }
+      45% { box-shadow:0 0 0 4px rgba(250,166,26,.16); transform:translateY(-1px); }
+      100% { box-shadow:0 0 0 0 rgba(250,166,26,0); transform:translateY(0); }
+    }
+    @keyframes rewardPromotionArrive {
+      0% { opacity:0; transform:translateY(18px) scale(.92); }
+      70% { transform:translateY(-3px) scale(1.015); }
+      100% { opacity:1; transform:none; }
+    }
+    @keyframes rewardTitleFlash {
+      0%,100% { color:var(--navy); text-shadow:none; transform:scale(1); }
+      50% { color:#A86400; text-shadow:0 0 18px rgba(238,163,32,.42),0 0 34px rgba(238,163,32,.22); transform:scale(1.055); }
+    }
+    @keyframes rewardStreamerFall {
+      0% { opacity:0; transform:translate3d(0,-45px,0) rotate(var(--tilt)); }
+      8%,60% { opacity:1; }
+      100% { opacity:0; transform:translate3d(var(--drift),720px,0) rotate(calc(var(--tilt) + 620deg)); }
+    }
+    @keyframes rewardBurst {
+      0% { opacity:0; transform:translate(-50%,-50%) scale(.2); }
+      35% { opacity:1; }
+      100% { opacity:0; transform:translate(-50%,-50%) scale(1.35); }
+    }
+    @media (prefers-reduced-motion: reduce) { .reward-preview-modal.is-visible .reward-preview-modal-card,.reward-preview-modal.is-visible .reward-preview-modal-card strong.is-celebrating,.reward-preview-modal.is-visible .reward-preview-streamer,.reward-preview-modal.is-visible .reward-preview-burst { animation:none; } .reward-preview-streamer,.reward-preview-burst { display:none; } }
+
     .et-layout { display:grid; grid-template-columns:minmax(320px,420px) 1fr; gap:32px; align-items:start; }
     .et-note { color:#777; font-size:12px; line-height:1.45; margin:5px 0 0; }
     .et-card { margin-top:4px; padding:12px 14px; border:1px solid var(--line); border-radius:8px; background:rgba(243,237,226,.35); }
@@ -1753,6 +1906,7 @@
     <nav class="admin-tabs" aria-label="Admin console tabs">
       <button class="admin-tab active" type="button" data-admin-tab="content-manager">Site &amp; Content</button>
       <button class="admin-tab" type="button" data-admin-tab="student-progress">Student Progress</button>
+      <button class="admin-tab" type="button" data-admin-tab="rewards">Rewards</button>
       <button class="admin-tab" type="button" data-admin-tab="member-management">Member Management</button>
       <button class="admin-tab" type="button" data-admin-tab="admin-tools">Admin Tools</button>
       <button class="admin-tab" type="button" data-admin-tab="engagement">Engagement</button>
@@ -1776,6 +1930,13 @@
 
       <span class="nav-group-label" data-admin-nav-group="student-progress">Progress</span>
       <button class="admin-nav-item" data-admin-tab-scope="student-progress" data-target="section-student-progress">Student dashboard</button>
+
+      <span class="nav-group-label" data-admin-nav-group="rewards">Rewards</span>
+      <button class="admin-nav-item" data-admin-tab-scope="rewards" data-target="section-reward-levels">Levels</button>
+      <button class="admin-nav-item" data-admin-tab-scope="rewards" data-target="section-reward-overview">Rule overview</button>
+      <button class="admin-nav-item" data-admin-tab-scope="rewards" data-target="section-reward-rules">MP rules</button>
+      <button class="admin-nav-item" data-admin-tab-scope="rewards" data-target="section-reward-simulator">Reward simulator</button>
+      <button class="admin-nav-item" data-admin-tab-scope="rewards" data-target="section-reward-storage">Storage &amp; roadmap</button>
 
       <span class="nav-group-label" data-admin-nav-group="member-management">Access</span>
       <button class="admin-nav-item" data-admin-tab-scope="member-management" data-target="section-members">Members</button>
@@ -2082,6 +2243,253 @@
             <button class="small-button secondary-button" id="spDetailBack">← Back to list</button>
           </div>
           <div id="spDetailContent"></div>
+        </div>
+      </section>
+
+      <section class="admin-section" id="section-reward-levels" data-admin-tab-panel="rewards">
+        <span class="section-label">Rewards</span>
+        <h2>Level system</h2>
+        <div class="section-divider"></div>
+        <p class="description">Manage the learner titles and MP thresholds that power the sticky-nav level chip. The first promotion should feel reachable; later promotions should require stronger completion and scores.</p>
+        <div class="reward-summary-grid">
+          <div class="reward-summary-card"><strong>5 levels</strong><span>Intern → Executive keeps progression clear without making the program feel noisy.</span></div>
+          <div class="reward-summary-card"><strong>300 MP</strong><span>Recommended first promotion threshold for Analyst.</span></div>
+          <div class="reward-summary-card"><strong>Score-based</strong><span>Exercises can award MP from score improvement to prevent farming.</span></div>
+        </div>
+        <table class="reward-level-table" aria-label="Reward level thresholds">
+          <thead><tr><th>Preview</th><th>Level name</th><th>Starts at MP</th><th>Design role</th></tr></thead>
+          <tbody id="rewardLevelsBody"></tbody>
+        </table>
+        <div class="sync-actions" style="margin-top:14px;">
+          <button class="small-button" type="button" id="rewardLevelsSave">Save level settings</button>
+          <button class="small-button secondary-button" type="button" id="rewardLevelsReset">Reset recommended levels</button>
+          <span class="reward-status" id="rewardLevelsStatus" aria-live="polite"></span>
+        </div>
+      </section>
+
+      <section class="admin-section" id="section-reward-overview" data-admin-tab-panel="rewards">
+        <span class="section-label">Rewards</span>
+        <h2>Rules learners experience</h2>
+        <div class="section-divider"></div>
+        <p class="description">This live summary uses the currently loaded Reward settings, so Admin always shows the same earning rules learners experience.</p>
+        <table class="reward-policy-table" aria-label="Current learner reward rules">
+          <thead><tr><th>Learner action</th><th>Current reward</th><th>Safeguard</th></tr></thead>
+          <tbody>
+            <tr><td>Orientation or lesson video</td><td><span id="rewardPolicyVideo">10</span> MP</td><td>Once per video</td></tr>
+            <tr><td>Context video or slides</td><td><span id="rewardPolicyContext">5</span> MP</td><td>Explicit confirmation; once per item</td></tr>
+            <tr><td>Scored exercise</td><td id="rewardPolicyScored">Score improvement</td><td>Repeats only pay for genuine improvement</td></tr>
+            <tr><td>Completion-only exercise</td><td><span id="rewardPolicyCompletion">50</span> MP</td><td>Once per exercise</td></tr>
+            <tr><td>Reflection or external-AI exercise</td><td><span id="rewardPolicyReflection">30</span> MP</td><td>Once per exercise</td></tr>
+            <tr><td>Phase completion</td><td><span id="rewardPolicyPhases">100 / 150 / 200</span> MP</td><td>Once per phase</td></tr>
+            <tr><td>Diagnostic or Checkpoint</td><td><span id="rewardPolicyAssessment">100</span> MP each</td><td>Once per assessment</td></tr>
+            <tr><td>Daily streak</td><td><span id="rewardPolicyStreak">3 exercises; 5 MP × day</span></td><td>Unique exercises; one streak award per day</td></tr>
+          </tbody>
+        </table>
+        <div class="reward-storage-note"><strong>Promotion thresholds:</strong> Level names and starting MP are shown in the Level system table above. Historical awards are never recalculated when future rule values change.</div>
+      </section>
+
+      <section class="admin-section" id="section-reward-rules" data-admin-tab-panel="rewards">
+        <span class="section-label">Rewards</span>
+        <h2>MP rules</h2>
+        <div class="section-divider"></div>
+        <p class="description">Set the default MP rules. Tokens are intentionally disabled until hint content exists.</p>
+        <div id="rewardSettingsStatus" class="eng-status" aria-live="polite"></div>
+        <div class="reward-rule-grid">
+          <div class="reward-rule-card">
+            <label for="rewardSystemEnabled">Reward earning</label>
+            <select id="rewardSystemEnabled"><option value="true">Enabled</option><option value="false">Paused</option></select>
+            <small>Pause new awards without deleting existing learner MP.</small>
+          </div>
+          <div class="reward-rule-card">
+            <label for="rewardDisplayMode">Learner header display</label>
+            <select id="rewardDisplayMode"><option value="all">Level, streak, and MP</option><option value="level-mp">Level and MP</option><option value="mp">MP only</option><option value="hidden">Hidden</option></select>
+            <small>Controls the shared reward cluster without affecting stored awards.</small>
+          </div>
+          <div class="reward-rule-card">
+            <label for="rewardVideoMp">MP per completed video</label>
+            <input id="rewardVideoMp" type="number" min="0" step="1" value="10">
+            <small>Small, steady reward for orientation and lesson videos.</small>
+          </div>
+          <div class="reward-rule-card">
+            <label for="rewardContextMp">MP per completed context item</label>
+            <input id="rewardContextMp" type="number" min="0" step="1" value="5">
+            <small>One-time preparation reward for explicitly completed context videos or slides.</small>
+          </div>
+          <div class="reward-rule-card">
+            <label for="rewardExerciseFallbackMp">Fallback MP per completed exercise</label>
+            <input id="rewardExerciseFallbackMp" type="number" min="0" step="1" value="50">
+            <small>Used for completion-only exercises until they have scoring.</small>
+          </div>
+          <div class="reward-rule-card">
+            <label for="rewardReflectionMp">MP per reflection exercise</label>
+            <input id="rewardReflectionMp" type="number" min="0" step="1" value="30">
+            <small>Used for external-AI and reflection-based exercises.</small>
+          </div>
+          <div class="reward-rule-card">
+            <label for="rewardStreakEnabled">Daily streak rewards</label>
+            <select id="rewardStreakEnabled"><option value="true">Enabled</option><option value="false">Disabled</option></select>
+            <small>Disable streak awards while keeping exercise and lesson MP active.</small>
+          </div>
+          <div class="reward-rule-card">
+            <label for="rewardPhase1BonusMp">Phase 1 completion bonus</label>
+            <input id="rewardPhase1BonusMp" type="number" min="0" step="1" value="100">
+            <small>Milestone reward for finishing all Phase 1 lessons and exercises.</small>
+          </div>
+          <div class="reward-rule-card">
+            <label for="rewardPhase2BonusMp">Phase 2 completion bonus</label>
+            <input id="rewardPhase2BonusMp" type="number" min="0" step="1" value="150">
+            <small>Milestone reward for finishing all Phase 2 lessons and exercises.</small>
+          </div>
+          <div class="reward-rule-card">
+            <label for="rewardPhase3BonusMp">Phase 3 completion bonus</label>
+            <input id="rewardPhase3BonusMp" type="number" min="0" step="1" value="200">
+            <small>Milestone reward for completing the full practice journey.</small>
+          </div>
+          <div class="reward-rule-card">
+            <label for="rewardAssessmentBonusMp">Assessment completion bonus</label>
+            <input id="rewardAssessmentBonusMp" type="number" min="0" step="1" value="100">
+            <small>Reserved for Diagnostic/Checkpoint or future capstone moments.</small>
+          </div>
+          <div class="reward-rule-card">
+            <label for="rewardExerciseMode">Scored exercise MP mode</label>
+            <select id="rewardExerciseMode">
+              <option value="score-improvement">Award only score improvement</option>
+              <option value="score-total">Award full score on first valid completion</option>
+              <option value="fixed">Use fallback fixed MP</option>
+            </select>
+            <small>Recommended: score improvement, so retrying only pays when work improves.</small>
+          </div>
+          <div class="reward-rule-card">
+            <label for="rewardDailyGoal">Streak daily exercise goal</label>
+            <input id="rewardDailyGoal" type="number" min="1" step="1" value="3">
+            <small>Current recommendation: a streak day requires 3 exercises.</small>
+          </div>
+          <div class="reward-rule-card">
+            <label for="rewardStreakBaseMp">Streak bonus base MP</label>
+            <input id="rewardStreakBaseMp" type="number" min="0" step="1" value="5">
+            <small>Consecutive day bonus: base × streak day. Example: 5, 10, 15, 20 MP.</small>
+          </div>
+          <div class="reward-rule-card">
+            <label for="rewardTokenEnabled">Tokens</label>
+            <select id="rewardTokenEnabled" disabled>
+              <option value="false">Disabled until hints exist</option>
+            </select>
+            <small>Easy to add later; hard part is designing useful hints per exercise.</small>
+          </div>
+        </div>
+        <div class="sync-actions" style="margin-top:14px;">
+          <button class="small-button" type="button" id="rewardRulesSave">Save MP rules</button>
+          <button class="small-button secondary-button" type="button" id="rewardRulesReset">Reset recommended rules</button>
+          <span class="reward-status" id="rewardRulesStatus" aria-live="polite"></span>
+        </div>
+      </section>
+
+      <section class="admin-section" id="section-reward-simulator" data-admin-tab-panel="rewards">
+        <span class="section-label">Rewards</span>
+        <h2>Reward test setup</h2>
+        <div class="section-divider"></div>
+        <p class="description">Choose a reward event and starting state. The math summary checks the MP and level result; the learner preview below shows the actual reward moment.</p>
+        <div class="reward-sim-form">
+          <div class="reward-sim-field">
+            <label for="rewardSimStartMp">Starting MP</label>
+            <input id="rewardSimStartMp" type="number" min="0" step="1" value="280">
+          </div>
+          <div class="reward-sim-field">
+            <label for="rewardSimEventType">Reward event</label>
+            <select id="rewardSimEventType">
+              <option value="daily-streak">Daily streak continued</option>
+              <option value="scored-exercise">Scored exercise submitted</option>
+              <option value="completion-exercise">Completion-only exercise</option>
+              <option value="reflection-exercise">Reflection exercise</option>
+              <option value="video-completed">Video completed</option>
+              <option value="context-completed">Context completed</option>
+              <option value="phase-completed">Phase completed</option>
+              <option value="assessment-completed">Assessment completed</option>
+            </select>
+          </div>
+          <div class="reward-sim-field" data-reward-sim-field="score">
+            <label for="rewardSimScore">Exercise score</label>
+            <input id="rewardSimScore" type="number" min="0" max="100" step="1" value="82">
+          </div>
+          <div class="reward-sim-field" data-reward-sim-field="previousBest">
+            <label for="rewardSimPreviousBest">Previous best score</label>
+            <input id="rewardSimPreviousBest" type="number" min="0" max="100" step="1" value="70">
+          </div>
+          <div class="reward-sim-field" data-reward-sim-field="streakDay">
+            <label for="rewardSimStreakDay">Streak day</label>
+            <input id="rewardSimStreakDay" type="number" min="1" step="1" value="4">
+          </div>
+          <div class="reward-sim-field" data-reward-sim-field="phase">
+            <label for="rewardSimPhase">Phase</label>
+            <select id="rewardSimPhase">
+              <option value="phase1">Phase 1</option>
+              <option value="phase2">Phase 2</option>
+              <option value="phase3">Phase 3</option>
+            </select>
+          </div>
+        </div>
+        <div class="sync-actions" style="margin-top:14px;">
+          <button class="small-button" type="button" id="rewardSimRun">Run simulation</button>
+        </div>
+        <div class="reward-sim-presets" aria-label="Reward simulation presets">
+          <button class="small-button secondary-button" type="button" data-reward-sim-preset="level-up">Test level-up</button>
+          <button class="small-button secondary-button" type="button" data-reward-sim-preset="daily-login">Test daily login streak</button>
+          <button class="small-button secondary-button" type="button" data-reward-sim-preset="exercise-improvement">Test scored exercise</button>
+        </div>
+        <div class="reward-sim-output" id="rewardSimOutput" aria-live="polite"></div>
+        <div class="reward-moment-preview" aria-label="Learner reward moment preview">
+          <div class="reward-moment-preview-head">
+            <div>
+              <h3>Learner reward preview</h3>
+              <p>Preview the MP count-up, reward toast, streak popup, and level-up modal without changing learner data.</p>
+            </div>
+          </div>
+          <div class="reward-moment-stage" id="rewardMomentStage">
+            <div class="reward-preview-nav">
+              <div class="reward-preview-stat" id="rewardPreviewLevel">Level: <span id="rewardPreviewLevelValue">Intern</span></div>
+              <div class="reward-preview-stat">🔥 <span>3</span></div>
+              <div class="reward-preview-stat">● <span>7</span></div>
+              <div class="reward-preview-stat mp" id="rewardPreviewMp">✦ <span id="rewardPreviewMpValue">280</span> <small>MP</small></div>
+            </div>
+            <div class="reward-preview-toast" id="rewardPreviewToast" aria-live="polite"></div>
+            <div class="reward-preview-modal" id="rewardPreviewModal" aria-live="polite">
+              <div class="reward-preview-modal-card">
+                <div class="reward-preview-burst" aria-hidden="true"></div>
+                <div class="reward-preview-streamers" aria-hidden="true">
+                  <i class="reward-preview-streamer" style="--x:5%;--delay:.05s;--color:#EEA320;--tilt:18deg;--drift:65px"></i><i class="reward-preview-streamer" style="--x:14%;--delay:.55s;--color:#2C7A4B;--tilt:-22deg;--drift:-42px"></i><i class="reward-preview-streamer" style="--x:24%;--delay:.18s;--color:#4D7094;--tilt:32deg;--drift:48px"></i><i class="reward-preview-streamer" style="--x:34%;--delay:.8s;--color:#F5C96D;--tilt:-12deg;--drift:-58px"></i><i class="reward-preview-streamer" style="--x:45%;--delay:.34s;--color:#EEA320;--tilt:24deg;--drift:54px"></i><i class="reward-preview-streamer" style="--x:56%;--delay:.68s;--color:#2C7A4B;--tilt:-30deg;--drift:-46px"></i><i class="reward-preview-streamer" style="--x:66%;--delay:.12s;--color:#4D7094;--tilt:14deg;--drift:62px"></i><i class="reward-preview-streamer" style="--x:76%;--delay:.92s;--color:#F5C96D;--tilt:-26deg;--drift:-52px"></i><i class="reward-preview-streamer" style="--x:86%;--delay:.42s;--color:#EEA320;--tilt:36deg;--drift:38px"></i><i class="reward-preview-streamer" style="--x:94%;--delay:.2s;--color:#2C7A4B;--tilt:-18deg;--drift:-66px"></i>
+                </div>
+                <div class="reward-preview-modal-mark">✓</div>
+                <span id="rewardPreviewModalLabel">Congratulations! You have been promoted!</span>
+                <strong class="is-celebrating" id="rewardPreviewModalTitle">Analyst</strong>
+                <p id="rewardPreviewModalText">Your MP crossed the next threshold. The learner gets a clear level-up moment after the count-up finishes.</p>
+                <span class="reward-preview-modal-total" id="rewardPreviewModalTotal">✦ 300 MP total</span>
+                <div class="reward-level-path" id="rewardPreviewLevelPath" aria-label="Level path preview"></div>
+              </div>
+            </div>
+          </div>
+          <div class="reward-preview-controls">
+            <button class="small-button" type="button" data-reward-preview-action="full">Play full reward moment</button>
+            <button class="small-button secondary-button" type="button" data-reward-preview-action="count">Count MP only</button>
+            <button class="small-button secondary-button" type="button" data-reward-preview-action="toast">Show exercise toast</button>
+            <button class="small-button secondary-button" type="button" data-reward-preview-action="streak">Show streak popup</button>
+            <button class="small-button secondary-button" type="button" data-reward-preview-action="level">Show level-up popup</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="admin-section" id="section-reward-storage" data-admin-tab-panel="rewards">
+        <span class="section-label">Rewards</span>
+        <h2>Storage &amp; roadmap</h2>
+        <div class="section-divider"></div>
+        <p class="description">Rewards should sit beside student progress in Firebase, so the admin dashboard can explain both what a learner completed and what they earned.</p>
+        <div class="reward-storage-note">
+          <strong>Firebase storage:</strong> global rules are stored in <code>settings/rewards</code>. Learner rewards sync atomically to the user record with stable event IDs and a 500-entry audit ledger, preventing duplicate awards and cross-device overwrites.
+        </div>
+        <div class="reward-storage-note">
+          <strong>Not building yet:</strong> token spending and hint unlocks. The admin model keeps <code>tokens.enabled</code> false for now so we can add hints later without reworking MP, levels, or streaks.
+        </div>
+        <div class="reward-storage-note">
+          <strong>Operational rule:</strong> pause Reward earning before changing the program structure or investigating an MP incident. Pausing preserves existing totals; resetting recommended rules does not reset learner data.
         </div>
       </section>
 
@@ -2545,6 +2953,7 @@
   </div>
 
   <script src="../member-login/content-config.js"></script>
+  <script src="../assets/reward-system.js?v=1"></script>
 
   <script type="module">
     import {
@@ -2567,6 +2976,7 @@
       getPublicAssessmentSettings,
       setPublicAssessmentSettings,
       getEngagementSettings,
+      getRewardSettings,
       getGoogleGroupSyncJobs,
       getGlobalFeedbackSetting,
       getPublicFindLevelSetting,
@@ -2576,6 +2986,7 @@
       setEngagementSettings,
       setGlobalFeedbackSetting,
       setPublicFindLevelSetting,
+      setRewardSettings,
       setUserFeedbackEnabled,
       signOut,
       signInWithGooglePopup,
@@ -2603,6 +3014,7 @@
       getPublicAssessmentSettings,
       setPublicAssessmentSettings,
       getEngagementSettings,
+      getRewardSettings,
       getGoogleGroupSyncJobs,
       getGlobalFeedbackSetting,
       getPublicFindLevelSetting,
@@ -2612,6 +3024,7 @@
       setEngagementSettings,
       setGlobalFeedbackSetting,
       setPublicFindLevelSetting,
+      setRewardSettings,
       setUserFeedbackEnabled,
       signOut,
       signInWithGooglePopup,
@@ -4391,6 +4804,566 @@
 
     // ===== End engagement tab =====
 
+    // ===== Rewards tab =====
+    const DEFAULT_REWARD_SETTINGS = {
+      enabled: true,
+      display: { showLevel: true, showMp: true, showStreak: true, showTokens: false },
+      levels: [
+        { name: 'Intern', threshold: 0, role: 'Starting identity' },
+        { name: 'Analyst', threshold: 300, role: 'Reachable by completing most of Phase 1' },
+        { name: 'Associate', threshold: 800, role: 'Requires Phase 1 and a real start on Phase 2' },
+        { name: 'Principal', threshold: 1350, role: 'Requires strong Phase 2 and entry into Phase 3' },
+        { name: 'Executive', threshold: 1850, role: 'Strong completion plus assessments and sustained practice' }
+      ],
+      mp: {
+        videoComplete: 10,
+        contextComplete: 5,
+        exerciseMode: 'score-improvement',
+        exerciseCompleteFallback: 50,
+        reflectionExercise: 30,
+        phaseCompletion: { phase1: 100, phase2: 150, phase3: 200 },
+        assessmentBonus: 100
+      },
+      streak: { enabled: true, dailyExerciseGoal: 3, mpBase: 5, mpFormula: 'base*n' },
+      tokens: { enabled: false, hintCost: 1 }
+    };
+
+    let rewardSettingsCache = null;
+
+    function rewardLevelClass(name) {
+      return 'level-' + String(name || '').trim().toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    }
+
+    function normalizeRewardSettings(settings) {
+      const stored = settings || {};
+      return {
+        enabled: stored.enabled !== false,
+        display: Object.assign({}, DEFAULT_REWARD_SETTINGS.display, stored.display || {}),
+        levels: Array.isArray(stored.levels) && stored.levels.length
+          ? stored.levels.map((level, index) => ({
+              name: level.name || DEFAULT_REWARD_SETTINGS.levels[index]?.name || 'Level ' + (index + 1),
+              threshold: Number(level.threshold) || 0,
+              role: level.role || DEFAULT_REWARD_SETTINGS.levels[index]?.role || ''
+            }))
+          : DEFAULT_REWARD_SETTINGS.levels.map((level) => ({ ...level })),
+        mp: Object.assign({}, DEFAULT_REWARD_SETTINGS.mp, stored.mp || {}, {
+          phaseCompletion: Object.assign(
+            {},
+            DEFAULT_REWARD_SETTINGS.mp.phaseCompletion,
+            (stored.mp && stored.mp.phaseCompletion) || {}
+          )
+        }),
+        streak: Object.assign({}, DEFAULT_REWARD_SETTINGS.streak, stored.streak || {}),
+        tokens: Object.assign({}, DEFAULT_REWARD_SETTINGS.tokens, stored.tokens || {})
+      };
+    }
+
+    function renderRewardLevels(settings) {
+      const body = document.getElementById('rewardLevelsBody');
+      if (!body) return;
+      body.innerHTML = settings.levels.map((level, index) => `
+        <tr>
+          <td><span class="reward-level-badge ${rewardLevelClass(level.name)}">${escapeHtml(level.name)}</span></td>
+          <td><input type="text" value="${escapeHtml(level.name)}" data-reward-level-name="${index}" aria-label="Level ${index + 1} name"></td>
+          <td><input type="number" min="0" step="1" value="${Number(level.threshold) || 0}" data-reward-level-threshold="${index}" aria-label="${escapeHtml(level.name)} threshold"></td>
+          <td>${escapeHtml(level.role || '')}</td>
+        </tr>
+      `).join('');
+    }
+
+    function syncRewardForm(settings) {
+      const normalized = normalizeRewardSettings(settings);
+      rewardSettingsCache = normalized;
+      renderRewardLevels(normalized);
+      const videoMp = document.getElementById('rewardVideoMp');
+      const contextMp = document.getElementById('rewardContextMp');
+      const fallbackMp = document.getElementById('rewardExerciseFallbackMp');
+      const reflectionMp = document.getElementById('rewardReflectionMp');
+      const assessmentMp = document.getElementById('rewardAssessmentBonusMp');
+      const phase1Mp = document.getElementById('rewardPhase1BonusMp');
+      const phase2Mp = document.getElementById('rewardPhase2BonusMp');
+      const phase3Mp = document.getElementById('rewardPhase3BonusMp');
+      const exerciseMode = document.getElementById('rewardExerciseMode');
+      const dailyGoal = document.getElementById('rewardDailyGoal');
+      const streakBaseMp = document.getElementById('rewardStreakBaseMp');
+      const enabled = document.getElementById('rewardSystemEnabled');
+      const displayMode = document.getElementById('rewardDisplayMode');
+      const streakEnabled = document.getElementById('rewardStreakEnabled');
+      if (enabled) enabled.value = String(normalized.enabled !== false);
+      if (displayMode) displayMode.value = normalized.display.showMp === false ? 'hidden' : normalized.display.showLevel === false ? 'mp' : normalized.display.showStreak === false ? 'level-mp' : 'all';
+      if (streakEnabled) streakEnabled.value = String(normalized.streak.enabled !== false);
+      if (videoMp) videoMp.value = normalized.mp.videoComplete;
+      if (contextMp) contextMp.value = normalized.mp.contextComplete;
+      if (fallbackMp) fallbackMp.value = normalized.mp.exerciseCompleteFallback;
+      if (reflectionMp) reflectionMp.value = normalized.mp.reflectionExercise;
+      if (assessmentMp) assessmentMp.value = normalized.mp.assessmentBonus;
+      if (phase1Mp) phase1Mp.value = (normalized.mp.phaseCompletion || {}).phase1 ?? DEFAULT_REWARD_SETTINGS.mp.phaseCompletion.phase1;
+      if (phase2Mp) phase2Mp.value = (normalized.mp.phaseCompletion || {}).phase2 ?? DEFAULT_REWARD_SETTINGS.mp.phaseCompletion.phase2;
+      if (phase3Mp) phase3Mp.value = (normalized.mp.phaseCompletion || {}).phase3 ?? DEFAULT_REWARD_SETTINGS.mp.phaseCompletion.phase3;
+      if (exerciseMode) exerciseMode.value = normalized.mp.exerciseMode;
+      if (dailyGoal) dailyGoal.value = normalized.streak.dailyExerciseGoal;
+      if (streakBaseMp) streakBaseMp.value = normalized.streak.mpBase;
+      const policyText = (id, value) => {
+        const element = document.getElementById(id);
+        if (element) element.textContent = value;
+      };
+      policyText('rewardPolicyVideo', normalized.mp.videoComplete);
+      policyText('rewardPolicyContext', normalized.mp.contextComplete);
+      policyText('rewardPolicyCompletion', normalized.mp.exerciseCompleteFallback);
+      policyText('rewardPolicyReflection', normalized.mp.reflectionExercise);
+      policyText('rewardPolicyPhases', [normalized.mp.phaseCompletion.phase1, normalized.mp.phaseCompletion.phase2, normalized.mp.phaseCompletion.phase3].join(' / '));
+      policyText('rewardPolicyAssessment', normalized.mp.assessmentBonus);
+      policyText('rewardPolicyStreak', normalized.streak.dailyExerciseGoal + ' exercises; ' + normalized.streak.mpBase + ' MP × day');
+      policyText('rewardPolicyScored', normalized.mp.exerciseMode === 'score-improvement'
+        ? 'Score improvement only'
+        : normalized.mp.exerciseMode === 'score-total'
+          ? 'Full score on first completion'
+          : normalized.mp.exerciseCompleteFallback + ' MP fixed');
+      updateRewardSimulation();
+    }
+
+    function readRewardLevelsFromForm() {
+      const levels = (rewardSettingsCache?.levels || DEFAULT_REWARD_SETTINGS.levels).map((level, index) => {
+        const nameEl = document.querySelector(`[data-reward-level-name="${index}"]`);
+        const thresholdEl = document.querySelector(`[data-reward-level-threshold="${index}"]`);
+        return {
+          name: (nameEl && nameEl.value.trim()) || level.name,
+          threshold: Math.max(0, Number(thresholdEl && thresholdEl.value) || 0),
+          role: level.role || ''
+        };
+      });
+      const sorted = levels.sort((a, b) => a.threshold - b.threshold);
+      if (!sorted.length || sorted[0].threshold !== 0) throw new Error('The first level must start at 0 MP.');
+      if (new Set(sorted.map((level) => level.name.toLowerCase())).size !== sorted.length) throw new Error('Level names must be unique.');
+      if (new Set(sorted.map((level) => level.threshold)).size !== sorted.length) throw new Error('Level thresholds must be unique.');
+      return sorted;
+    }
+
+    function readRewardRulesFromForm() {
+      const numberValue = (id, fallback) => {
+        const el = document.getElementById(id);
+        const value = Number(el && el.value);
+        return Number.isFinite(value) ? Math.max(0, value) : fallback;
+      };
+      const displayMode = document.getElementById('rewardDisplayMode')?.value || 'all';
+      return {
+        enabled: document.getElementById('rewardSystemEnabled')?.value !== 'false',
+        display: {
+          showLevel: displayMode === 'all' || displayMode === 'level-mp',
+          showMp: displayMode !== 'hidden',
+          showStreak: displayMode === 'all',
+          showTokens: false
+        },
+        mp: {
+          videoComplete: numberValue('rewardVideoMp', DEFAULT_REWARD_SETTINGS.mp.videoComplete),
+          contextComplete: numberValue('rewardContextMp', DEFAULT_REWARD_SETTINGS.mp.contextComplete),
+          exerciseMode: document.getElementById('rewardExerciseMode')?.value || DEFAULT_REWARD_SETTINGS.mp.exerciseMode,
+          exerciseCompleteFallback: numberValue('rewardExerciseFallbackMp', DEFAULT_REWARD_SETTINGS.mp.exerciseCompleteFallback),
+          reflectionExercise: numberValue('rewardReflectionMp', DEFAULT_REWARD_SETTINGS.mp.reflectionExercise),
+          phaseCompletion: {
+            phase1: numberValue('rewardPhase1BonusMp', DEFAULT_REWARD_SETTINGS.mp.phaseCompletion.phase1),
+            phase2: numberValue('rewardPhase2BonusMp', DEFAULT_REWARD_SETTINGS.mp.phaseCompletion.phase2),
+            phase3: numberValue('rewardPhase3BonusMp', DEFAULT_REWARD_SETTINGS.mp.phaseCompletion.phase3)
+          },
+          assessmentBonus: numberValue('rewardAssessmentBonusMp', DEFAULT_REWARD_SETTINGS.mp.assessmentBonus)
+        },
+        streak: {
+          enabled: document.getElementById('rewardStreakEnabled')?.value !== 'false',
+          dailyExerciseGoal: numberValue('rewardDailyGoal', DEFAULT_REWARD_SETTINGS.streak.dailyExerciseGoal),
+          mpBase: numberValue('rewardStreakBaseMp', DEFAULT_REWARD_SETTINGS.streak.mpBase),
+          mpFormula: 'base*n'
+        },
+        tokens: { enabled: false, hintCost: 1 }
+      };
+    }
+
+    async function loadRewardSettings() {
+      const status = document.getElementById('rewardSettingsStatus');
+      const fb = window.utlFirebaseAuth;
+      if (!fb || !fb.getRewardSettings) {
+        if (status) status.textContent = 'Loading reward settings...';
+        syncRewardForm(DEFAULT_REWARD_SETTINGS);
+        window.addEventListener('utlFirebaseAuthReady', function handler() {
+          window.removeEventListener('utlFirebaseAuthReady', handler);
+          loadRewardSettings();
+        });
+        return;
+      }
+      try {
+        if (status) status.textContent = 'Loading reward settings from Firebase...';
+        const settings = await fb.getRewardSettings();
+        localStorage.setItem('utl_reward_settings', JSON.stringify(settings));
+        syncRewardForm(settings);
+        if (status) status.textContent = 'Reward settings loaded from Firebase.';
+      } catch (error) {
+        syncRewardForm(DEFAULT_REWARD_SETTINGS);
+        if (status) status.textContent = 'Using recommended defaults until Firebase settings can load.';
+      }
+    }
+
+    async function saveRewardSettings(partial, statusId) {
+      const status = document.getElementById(statusId);
+      const fb = window.utlFirebaseAuth;
+      if (!fb || !fb.setRewardSettings) {
+        if (status) status.textContent = 'Firebase is still loading. Try again in a moment.';
+        return;
+      }
+      try {
+        await fb.setRewardSettings(partial);
+        rewardSettingsCache = normalizeRewardSettings(Object.assign({}, rewardSettingsCache || DEFAULT_REWARD_SETTINGS, partial));
+        localStorage.setItem('utl_reward_settings', JSON.stringify(rewardSettingsCache));
+        syncRewardForm(rewardSettingsCache);
+        if (status) status.textContent = 'Saved to Firebase.';
+        showToast('Saved');
+      } catch (error) {
+        if (status) status.textContent = 'Save failed: ' + (error.message || 'Unknown error');
+        showToast('Save failed', true);
+      }
+    }
+
+    function bindRewardSettings() {
+      document.getElementById('rewardLevelsSave')?.addEventListener('click', () => {
+        try {
+          saveRewardSettings({ levels: readRewardLevelsFromForm() }, 'rewardLevelsStatus');
+        } catch (error) {
+          document.getElementById('rewardLevelsStatus').textContent = error.message;
+          showToast(error.message, true);
+        }
+      });
+      document.getElementById('rewardLevelsReset')?.addEventListener('click', () => {
+        const levels = DEFAULT_REWARD_SETTINGS.levels.map((level) => ({ ...level }));
+        syncRewardForm(Object.assign({}, rewardSettingsCache || DEFAULT_REWARD_SETTINGS, { levels }));
+        saveRewardSettings({ levels }, 'rewardLevelsStatus');
+      });
+      document.getElementById('rewardRulesSave')?.addEventListener('click', () => {
+        saveRewardSettings(readRewardRulesFromForm(), 'rewardRulesStatus');
+      });
+      document.getElementById('rewardRulesReset')?.addEventListener('click', () => {
+        const reset = normalizeRewardSettings(DEFAULT_REWARD_SETTINGS);
+        syncRewardForm(reset);
+        saveRewardSettings(reset, 'rewardRulesStatus');
+      });
+      document.addEventListener('click', (event) => {
+        const presetButton = event.target.closest('[data-reward-sim-preset]');
+        if (presetButton) {
+          applyRewardSimulationPreset(presetButton.dataset.rewardSimPreset);
+          return;
+        }
+        const previewButton = event.target.closest('[data-reward-preview-action]');
+        if (previewButton) {
+          playRewardPreview(previewButton.dataset.rewardPreviewAction);
+          return;
+        }
+        if (event.target.closest('#rewardSimRun')) updateRewardSimulation();
+      });
+      document.addEventListener('input', (event) => {
+        if (event.target.closest('#section-reward-simulator input, #section-reward-simulator select')) updateRewardSimulation();
+      });
+      document.addEventListener('change', (event) => {
+        if (event.target.closest('#section-reward-simulator input, #section-reward-simulator select')) updateRewardSimulation();
+      });
+    }
+
+    function currentRewardSettingsForSimulation() {
+      const fromForm = readRewardRulesFromForm();
+      return normalizeRewardSettings(Object.assign({}, rewardSettingsCache || DEFAULT_REWARD_SETTINGS, fromForm, {
+        levels: readRewardLevelsFromForm()
+      }));
+    }
+
+    function readRewardSimulationEvent() {
+      return {
+        type: document.getElementById('rewardSimEventType')?.value || 'daily-streak',
+        startMp: Number(document.getElementById('rewardSimStartMp')?.value || 0),
+        score: Number(document.getElementById('rewardSimScore')?.value || 0),
+        previousBest: Number(document.getElementById('rewardSimPreviousBest')?.value || 0),
+        streakDay: Number(document.getElementById('rewardSimStreakDay')?.value || 1),
+        phase: document.getElementById('rewardSimPhase')?.value || 'phase1'
+      };
+    }
+
+    function getCurrentRewardSimulationResult() {
+      if (!window.UTLRewardSystem) return null;
+      return window.UTLRewardSystem.simulateRewardEvent(readRewardSimulationEvent(), currentRewardSettingsForSimulation());
+    }
+
+    function updateRewardSimulationFields(type) {
+      const visibleByType = {
+        'scored-exercise': ['score', 'previousBest'],
+        'daily-streak': ['streakDay'],
+        'phase-completed': ['phase'],
+        'context-completed': []
+      };
+      const visible = visibleByType[type] || [];
+      document.querySelectorAll('[data-reward-sim-field]').forEach((field) => {
+        field.hidden = !visible.includes(field.dataset.rewardSimField);
+      });
+    }
+
+    function setRewardSimulationValue(id, value) {
+      const input = document.getElementById(id);
+      if (input) input.value = value;
+    }
+
+    function applyRewardSimulationPreset(preset) {
+      const settings = currentRewardSettingsForSimulation();
+      const levels = Array.isArray(settings.levels) && settings.levels.length ? settings.levels : DEFAULT_REWARD_SETTINGS.levels;
+      if (preset === 'level-up') {
+        const targetLevel = levels.find((level) => Number(level.threshold) > 0) || levels[levels.length - 1];
+        const streakDay = 4;
+        const base = Math.max(1, Number(settings.streak?.mpBase || DEFAULT_REWARD_SETTINGS.streak.mpBase));
+        const earned = base * streakDay;
+        setRewardSimulationValue('rewardSimEventType', 'daily-streak');
+        setRewardSimulationValue('rewardSimStreakDay', streakDay);
+        setRewardSimulationValue('rewardSimStartMp', Math.max(0, Number(targetLevel.threshold || 0) - earned));
+      } else if (preset === 'daily-login') {
+        setRewardSimulationValue('rewardSimEventType', 'daily-streak');
+        setRewardSimulationValue('rewardSimStreakDay', 3);
+        setRewardSimulationValue('rewardSimStartMp', 52);
+      } else if (preset === 'exercise-improvement') {
+        const targetLevel = levels.find((level) => Number(level.threshold) > 0) || levels[levels.length - 1];
+        setRewardSimulationValue('rewardSimEventType', 'scored-exercise');
+        setRewardSimulationValue('rewardSimScore', 86);
+        setRewardSimulationValue('rewardSimPreviousBest', 62);
+        setRewardSimulationValue('rewardSimStartMp', Math.max(0, Number(targetLevel.threshold || 0) - 18));
+      }
+      updateRewardSimulation();
+    }
+
+    function updateRewardSimulation() {
+      const output = document.getElementById('rewardSimOutput');
+      if (!output) return;
+      if (!window.UTLRewardSystem) {
+        output.innerHTML = '<div class="reward-sim-body"><div class="reward-sim-metric"><span>Status</span><strong>Reward engine did not load.</strong></div></div>';
+        return;
+      }
+      const event = readRewardSimulationEvent();
+      updateRewardSimulationFields(event.type);
+      const result = window.UTLRewardSystem.simulateRewardEvent(event, currentRewardSettingsForSimulation());
+      const eventLabel = {
+        'daily-streak': 'Daily streak continued',
+        'scored-exercise': 'Scored exercise submitted',
+        'completion-exercise': 'Completion-only exercise',
+        'reflection-exercise': 'Reflection exercise',
+        'video-completed': 'Video completed',
+        'context-completed': 'Context completed',
+        'phase-completed': 'Phase completed',
+        'assessment-completed': 'Assessment completed'
+      }[event.type] || 'Reward event';
+      const levelMovement = result.levelUp
+        ? `${escapeHtml(result.previousLevel)} → ${escapeHtml(result.currentLevel)}`
+        : `Stays ${escapeHtml(result.currentLevel)}`;
+      const momentSummary = result.showLevelModal
+        ? `Level-up modal`
+        : result.showDailyPopup
+          ? 'Daily streak popup'
+          : 'MP count-up';
+      output.innerHTML = `
+        <div class="reward-sim-head">
+          <div><strong>+${result.mpEarned} MP</strong><span>${escapeHtml(eventLabel)}</span></div>
+          <div><strong>${result.newTotal} MP</strong><span>Total after reward</span></div>
+          <div class="reward-sim-run-state">Updated now</div>
+        </div>
+        <div class="reward-sim-body">
+          <div class="reward-sim-metric"><span>Starting MP</span><strong>${result.startMp}</strong></div>
+          <div class="reward-sim-metric"><span>Level result</span><strong>${levelMovement}</strong></div>
+          <div class="reward-sim-metric"><span>Next level</span><strong>${result.nextLevel ? `${result.mpToNext} MP to ${escapeHtml(result.nextLevel)}` : 'Top level'}</strong></div>
+          <div class="reward-sim-metric"><span>Learner moment</span><strong>${escapeHtml(momentSummary)}</strong></div>
+        </div>
+      `;
+      output.classList.remove('is-updated');
+      void output.offsetWidth;
+      output.classList.add('is-updated');
+      updateRewardPreviewStatic(result);
+    }
+
+    function updateRewardPreviewStatic(result) {
+      if (!result) return;
+      const mpValue = document.getElementById('rewardPreviewMpValue');
+      const levelValue = document.getElementById('rewardPreviewLevelValue');
+      const modalTitle = document.getElementById('rewardPreviewModalTitle');
+      const modalTotal = document.getElementById('rewardPreviewModalTotal');
+      if (mpValue) mpValue.textContent = String(result.startMp);
+      if (levelValue) levelValue.textContent = result.previousLevel || result.currentLevel || 'Intern';
+      if (modalTitle) modalTitle.textContent = result.currentLevel || 'Next level';
+      if (modalTotal) modalTotal.textContent = `✦ ${result.newTotal} MP total`;
+      renderRewardLevelPath(result);
+      hideRewardPreviewMoments();
+    }
+
+    function renderRewardLevelPath(result) {
+      const path = document.getElementById('rewardPreviewLevelPath');
+      if (!path || !result) return;
+      const levels = (result.settings && Array.isArray(result.settings.levels) ? result.settings.levels : DEFAULT_REWARD_SETTINGS.levels)
+        .map((level) => ({ name: level.name || 'Level', threshold: Math.max(0, Number(level.threshold) || 0) }))
+        .sort((a, b) => a.threshold - b.threshold);
+      path.innerHTML = `
+        <div class="reward-level-path-head">
+          <span>Promotion path</span>
+          <span>${result.newTotal} MP after this reward</span>
+        </div>
+        <div class="reward-level-track">
+          ${levels.map((level) => {
+            const isCurrent = level.name === result.currentLevel;
+            const isUnlocked = result.newTotal >= level.threshold && !isCurrent;
+            const state = isCurrent ? 'is-current' : isUnlocked ? 'is-unlocked' : '';
+            const status = isCurrent ? 'Current' : isUnlocked ? 'Passed' : 'Upcoming';
+            const distance = isCurrent
+              ? 'You are here'
+              : isUnlocked
+                ? 'Previous level'
+                : `${Math.max(0, level.threshold - result.newTotal)} MP away`;
+            return `
+              <div class="reward-level-step ${state}">
+                <span class="reward-level-step-label">${escapeHtml(status)}</span>
+                <strong>${escapeHtml(level.name)}</strong>
+                <span class="reward-level-threshold">${level.threshold} MP threshold</span>
+                <span class="reward-level-distance">${escapeHtml(distance)}</span>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
+    }
+
+    function hideRewardPreviewMoments() {
+      document.getElementById('rewardPreviewToast')?.classList.remove('is-visible');
+      document.getElementById('rewardPreviewModal')?.classList.remove('is-visible');
+      document.getElementById('rewardMomentStage')?.classList.remove('is-modal-visible');
+    }
+
+    function animateRewardPreviewMp(result, options = {}) {
+      return new Promise((resolve) => {
+        const valueEl = document.getElementById('rewardPreviewMpValue');
+        const mpChip = document.getElementById('rewardPreviewMp');
+        const levelValue = document.getElementById('rewardPreviewLevelValue');
+        if (!valueEl || !mpChip || !result) {
+          resolve();
+          return;
+        }
+        const start = Number(result.startMp || 0);
+        const end = Number(result.newTotal || start);
+        const duration = options.duration || 1100;
+        const startedAt = performance.now();
+        valueEl.textContent = String(start);
+        if (levelValue) levelValue.textContent = result.previousLevel || result.currentLevel || 'Intern';
+        mpChip.classList.remove('is-settled');
+        mpChip.classList.add('is-counting');
+        const existing = mpChip.querySelector('.reward-preview-float');
+        if (existing) existing.remove();
+        if (Number(result.mpEarned || 0) > 0) {
+          const float = document.createElement('span');
+          float.className = 'reward-preview-float';
+          float.textContent = `+${result.mpEarned} MP`;
+          mpChip.appendChild(float);
+        }
+        function tick(now) {
+          const progress = Math.min(1, (now - startedAt) / duration);
+          const eased = 1 - Math.pow(1 - progress, 3);
+          const current = Math.round(start + ((end - start) * eased));
+          valueEl.textContent = String(current);
+          if (progress < 1) {
+            requestAnimationFrame(tick);
+            return;
+          }
+          valueEl.textContent = String(end);
+          mpChip.classList.remove('is-counting');
+          mpChip.classList.add('is-settled');
+          if (levelValue) levelValue.textContent = result.currentLevel || result.previousLevel || 'Intern';
+          renderRewardLevelPath(result);
+          window.setTimeout(() => {
+            mpChip.classList.remove('is-settled');
+            resolve();
+          }, 420);
+        }
+        requestAnimationFrame(tick);
+      });
+    }
+
+    function showRewardPreviewToast(kind, result) {
+      const toast = document.getElementById('rewardPreviewToast');
+      if (!toast || !result) return;
+      const copy = {
+        exercise: {
+          label: 'Exercise reward',
+          title: `+${result.mpEarned} MP earned`,
+          body: `Your MP increased from ${result.startMp} to ${result.newTotal}.`
+        },
+        streak: {
+          label: 'Daily streak',
+          title: `${readRewardSimulationEvent().streakDay || 1}-day streak!`,
+          body: `You earned +${result.mpEarned} MP for practicing today.`
+        }
+      }[kind] || {
+        label: 'Reward',
+        title: `+${result.mpEarned} MP`,
+        body: 'The learner sees the MP ticker count up in the header.'
+      };
+      toast.innerHTML = `<span>${escapeHtml(copy.label)}</span><strong>${escapeHtml(copy.title)}</strong><p>${escapeHtml(copy.body)}</p>`;
+      toast.classList.add('is-visible');
+    }
+
+    function showRewardPreviewLevelModal(result) {
+      if (!result) return;
+      const modal = document.getElementById('rewardPreviewModal');
+      const title = document.getElementById('rewardPreviewModalTitle');
+      const text = document.getElementById('rewardPreviewModalText');
+      const total = document.getElementById('rewardPreviewModalTotal');
+      if (title) title.textContent = result.currentLevel || 'Next level';
+      if (text) text.textContent = `You moved from ${result.previousLevel} to ${result.currentLevel} after reaching ${result.newTotal} MP.`;
+      if (total) {
+        total.textContent = `✦ ${result.startMp} MP total`;
+      }
+      document.getElementById('rewardMomentStage')?.classList.add('is-modal-visible');
+      modal?.classList.add('is-visible');
+      if (total) {
+        const start = Number(result.startMp || 0);
+        const end = Number(result.newTotal || start);
+        const startedAt = performance.now();
+        const duration = 3200;
+        function countPromotion(now) {
+          if (!total.isConnected || !modal?.classList.contains('is-visible')) return;
+          const progress = Math.min(1, (now - startedAt) / duration);
+          const eased = 1 - Math.pow(1 - progress, 3);
+          total.textContent = `✦ ${Math.round(start + ((end - start) * eased))} MP total`;
+          if (progress < 1) requestAnimationFrame(countPromotion);
+        }
+        requestAnimationFrame(countPromotion);
+      }
+    }
+
+    async function playRewardPreview(action = 'full') {
+      const result = getCurrentRewardSimulationResult();
+      if (!result) {
+        showToast('Reward simulator is not ready yet', 'error');
+        return;
+      }
+      hideRewardPreviewMoments();
+      if (action === 'toast') {
+        showRewardPreviewToast('exercise', result);
+        return;
+      }
+      if (action === 'streak') {
+        showRewardPreviewToast('streak', result);
+        return;
+      }
+      if (action === 'level') {
+        showRewardPreviewLevelModal(result);
+        return;
+      }
+      await animateRewardPreviewMp(result);
+      if (action === 'count') return;
+      if (result.showLevelModal) {
+        showRewardPreviewLevelModal(result);
+      } else if (result.showDailyPopup) {
+        showRewardPreviewToast('streak', result);
+      } else {
+        showRewardPreviewToast('exercise', result);
+      }
+    }
+
+    // ===== End Rewards tab =====
+
     // ===== Assessment visibility =====
 
     async function loadTsaVisibility() {
@@ -5325,7 +6298,7 @@
     // ===== End Content Library =====
 
     function validAdminTab(tab) {
-      return ['content-manager', 'student-progress', 'member-management', 'admin-tools', 'engagement', 'content-library'].includes(tab) ? tab : 'content-manager';
+      return ['content-manager', 'student-progress', 'rewards', 'member-management', 'admin-tools', 'engagement', 'content-library'].includes(tab) ? tab : 'content-manager';
     }
 
     function phaseLessonIds(phaseKey) {
@@ -5442,6 +6415,22 @@
       '</td>';
     }
 
+    function rewardsCell(member) {
+      const progressRewards = ((member.workspaceProgress || {}).rewards) || {};
+      const rewards = member.rewards || progressRewards || {};
+      const mpTotal = Number(rewards.mpTotal || rewards.masteryPoints || 0);
+      const level = rewards.currentLevel || rewards.level || '';
+      const streakDays = Number(rewards.streakDays || 0);
+      if (!mpTotal && !level && !streakDays) {
+        return '<td class="progress-cell"><span class="progress-dot-label">Rewards</span><span style="color:#aaa;">—</span></td>';
+      }
+      return '<td class="progress-cell">' +
+        '<span class="progress-dot-label">Rewards</span>' +
+        '<div><strong>' + escapeHtml(level || 'Level pending') + '</strong></div>' +
+        '<div style="font-size:12px;color:#555;">' + escapeHtml(String(mpTotal || 0)) + ' MP' + (streakDays ? ' · ' + escapeHtml(String(streakDays)) + ' day streak' : '') + '</div>' +
+      '</td>';
+    }
+
     function formatProgressDate(value) {
       if (!value) return '—';
       try {
@@ -5483,6 +6472,7 @@
           progressCell(member, 'phase2') +
           progressCell(member, 'phase3') +
           '<td class="progress-cell"><span class="progress-dot-label">Assessments</span><div class="progress-dot-row">' + progressDot(diagnosticDone, 'Diagnostic') + progressDot(checkpointDone, 'Checkpoint') + '</div></td>' +
+          rewardsCell(member) +
         '</tr>';
       }).join('');
       wrap.innerHTML = '<div class="student-progress-table-wrap"><table class="student-progress-table">' +
@@ -5494,6 +6484,7 @@
         '<th>Phase 2</th>' +
         '<th>Phase 3</th>' +
         '<th>Assessments</th>' +
+        '<th>Rewards</th>' +
         '</tr></thead>' +
         '<tbody>' + rows + '</tbody></table></div>';
     }
@@ -5583,6 +6574,7 @@
       else window.history.pushState({}, '', url);
 
       if (activeTab === 'student-progress') loadStudentProgress();
+      if (activeTab === 'rewards') loadRewardSettings();
       if (activeTab === 'member-management' && !mbMembersCache.length) mbLoadMembers();
       if (activeTab === 'engagement') loadEngagementSettings();
       if (activeTab === 'content-manager') {
@@ -5607,7 +6599,7 @@
 
       const collapseDefaultKey = 'utl_admin_content_collapsed_default_v3';
       if (localStorage.getItem(collapseDefaultKey) !== 'done') {
-        document.querySelectorAll('[data-admin-tab-panel="content-manager"], [data-admin-tab-panel="content-library"], [data-admin-tab-panel="engagement"]').forEach((section) => {
+        document.querySelectorAll('[data-admin-tab-panel="content-manager"], [data-admin-tab-panel="content-library"], [data-admin-tab-panel="engagement"], [data-admin-tab-panel="rewards"]').forEach((section) => {
           if (section.id) savedStates[section.id] = false;
         });
         localStorage.setItem('utl_admin_section_states', JSON.stringify(savedStates));
@@ -5770,6 +6762,8 @@
     loadPublicHomepageSetting();
     loadAdminVisibilitySettings();
     loadPublicAssessmentSettings();
+    bindRewardSettings();
+    loadRewardSettings();
     clInit();
     window.setTimeout(runSyncCheck, 400);
 
@@ -6950,7 +7944,7 @@
       showAdmin();
     }
   </script>
-  <script src="../assets/tactile-buttons.js?v=2" defer></script>
+  <script src="../assets/tactile-buttons.js?v=4" defer></script>
   <script type="module" src="../assets/feedback-widget.js?v=4"></script>
 </body>
 </html>

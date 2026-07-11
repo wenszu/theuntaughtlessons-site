@@ -642,32 +642,32 @@
         <ol class="slo-recording-steps">
           <li>
             <svg class="slo-step-icon" viewBox="0 0 64 48" fill="none" aria-hidden="true"><rect x="18" y="4" width="28" height="40" rx="5" fill="#FFFFFF" stroke="#003366" stroke-width="2"/><rect x="22" y="10" width="20" height="25" rx="2" fill="#F3EDE2" stroke="#003366" stroke-width="1.5"/><path d="M27 18h8l5-3v12l-5-3h-8z" fill="#EEA320" stroke="#003366" stroke-width="1.4"/><circle cx="32" cy="39" r="1.8" fill="#003366"/></svg>
-            <strong>Set up your phone.</strong>
+            <strong>Set up your phone:</strong>
             <span>Open your camera in portrait video mode. Keep the phone vertical, prop it at eye level, and make sure your face and shoulders are visible.</span>
           </li>
           <li>
             <svg class="slo-step-icon" viewBox="0 0 64 48" fill="none" aria-hidden="true"><rect x="8" y="7" width="39" height="34" rx="3" fill="#FFFFFF" stroke="#003366" stroke-width="2"/><rect x="14" y="15" width="25" height="5" rx="1" fill="#EEA320" opacity=".72"/><path d="M14 26h24M14 32h18" stroke="#003366" stroke-width="2" stroke-linecap="round"/><path d="M44 24l9 13 2-7 6-2z" fill="#F3EDE2" stroke="#003366" stroke-width="2" stroke-linejoin="round"/></svg>
-            <strong>Put the script near the lens.</strong>
+            <strong>Put the script near the lens:</strong>
             <span>Keep the script close enough to read without looking far away from the camera.</span>
           </li>
           <li>
             <svg class="slo-step-icon" viewBox="0 0 64 48" fill="none" aria-hidden="true"><rect x="18" y="4" width="28" height="40" rx="5" fill="#FFFFFF" stroke="#003366" stroke-width="2"/><rect x="22" y="10" width="20" height="25" rx="2" fill="#F3EDE2" stroke="#003366" stroke-width="1.5"/><circle cx="32" cy="22" r="7" fill="#EEA320" stroke="#003366" stroke-width="1.5"/><circle cx="32" cy="22" r="3.5" fill="#B85B5B"/><circle cx="32" cy="39" r="1.8" fill="#003366"/></svg>
-            <strong>Record one complete take.</strong>
+            <strong>Record one complete take:</strong>
             <span>Use the timer if helpful. Pause between sections and keep the final line clean.</span>
           </li>
           <li>
             <svg class="slo-step-icon" viewBox="0 0 64 48" fill="none" aria-hidden="true"><rect x="5" y="13" width="18" height="30" rx="4" fill="#FFFFFF" stroke="#003366" stroke-width="2"/><rect x="8" y="18" width="12" height="18" rx="2" fill="#F3EDE2" stroke="#003366" stroke-width="1.4"/><rect x="37" y="10" width="21" height="21" rx="2" fill="#FFFFFF" stroke="#003366" stroke-width="2"/><path d="M33 35h29l-4-4H37z" fill="#F3EDE2" stroke="#003366" stroke-width="2" stroke-linejoin="round"/><path d="M27 21c3 2 3 8 0 10M31 17c6 5 6 14 0 18" stroke="#EEA320" stroke-width="2.4" stroke-linecap="round"/></svg>
-            <strong>Check sound and framing.</strong>
+            <strong>Check sound and framing:</strong>
             <span>Play the first few seconds. If the audio is muddy or the framing distracts, rerecord once.</span>
           </li>
           <li>
             <svg class="slo-step-icon" viewBox="0 0 64 48" fill="none" aria-hidden="true"><rect x="13" y="9" width="38" height="26" rx="3" fill="#FFFFFF" stroke="#003366" stroke-width="2"/><path d="M8 39h48l-4-4H12z" fill="#F3EDE2" stroke="#003366" stroke-width="2" stroke-linejoin="round"/><circle cx="24" cy="22" r="5" fill="#EEA320" stroke="#003366" stroke-width="1.5"/><path d="M32 18h10M32 24h7" stroke="#003366" stroke-width="2" stroke-linecap="round"/><path d="M23 22l2 2 4-5" stroke="#003366" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            <strong>Open The Playback.</strong>
+            <strong>Open The Playback:</strong>
             <span>Use the button below, then upload the video or audio file. If needed, move it from phone to laptop with AirDrop or Google Drive.</span>
           </li>
           <li>
             <svg class="slo-step-icon" viewBox="0 0 64 48" fill="none" aria-hidden="true"><rect x="9" y="9" width="22" height="30" rx="3" fill="#FFFFFF" stroke="#003366" stroke-width="2"/><path d="M16 9c0-3 8-3 8 0h4v6H12V9z" fill="#F3EDE2" stroke="#003366" stroke-width="2" stroke-linejoin="round"/><rect x="39" y="14" width="18" height="24" rx="3" fill="#FFFFFF" stroke="#003366" stroke-width="2"/><path d="M17 23h8M17 29h8M32 24h12" stroke="#003366" stroke-width="2" stroke-linecap="round"/><path d="M40 19l5 5-5 5" stroke="#EEA320" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            <strong>Use the feedback for one better take.</strong>
+            <strong>Use the feedback for one better take:</strong>
             <span>Ask The Playback what to fix first, then rerecord with that one change in mind.</span>
           </li>
         </ol>
@@ -682,6 +682,7 @@
       </div>
       <div class="slo-actions">
         <a class="slo-button slo-button-primary" href="https://gemini.google.com/gem/1mwtmHhhwE2IzQ2w_EUYwxkSto4yym1CX?usp=sharing" target="_blank" rel="noopener">Open The Playback</a>
+        <button class="slo-button" id="completeExerciseBtn" type="button">Mark exercise complete</button>
         <a class="slo-exit-link" href="../../member-login/index.html#phase3">Back to member workspace</a>
       </div>
       <p>This opens Gemini in a new tab. You may need to sign in, then return here when you finish.</p>
@@ -746,7 +747,22 @@
   </script>
   <script type="module" src="../../assets/app-access-guard.js?v=1"></script>
   <script src="../../assets/exercise-scoring-intro.js?v=3"></script>
+  <script src="../../assets/app-reward-header.js?v=20260709-1"></script>
+  <script src="../../assets/reward-events.js?v=20260709-1"></script>
+  <script>
+    document.getElementById('completeExerciseBtn').addEventListener('click', function () {
+      localStorage.setItem('utl_p3_ex4_done', 'true');
+      localStorage.setItem('utl_done_p3-e4', 'true');
+      const result = window.UTLRewardEvents?.awardReflectionExercise({
+        appId: 'speak-like-obama',
+        title: 'Delivery practice complete',
+        body: 'Your reflection and exercise progress were saved.'
+      });
+      this.textContent = result?.awarded ? 'Exercise complete' : 'Already completed';
+      this.disabled = true;
+    });
+  </script>
   <script type="module" src="../../assets/feedback-widget.js?v=5"></script>
-  <script src="../../assets/tactile-buttons.js?v=2" defer></script>
+  <script src="../../assets/tactile-buttons.js?v=4" defer></script>
 </body>
 </html>

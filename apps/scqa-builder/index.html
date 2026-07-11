@@ -1217,6 +1217,11 @@
           answer: state.scqa2.a
         }
       });
+      window.UTLRewardEvents?.awardReflectionExercise({
+        appId: 'scqa-builder',
+        title: 'SCQA builder complete',
+        body: 'Your two SCQA formulations were saved.'
+      });
       $("#reviewContext").textContent = state.context || "—";
       $("#reviewTopic").textContent = state.topicLabel || "";
       $("#reviewTopic").style.display = state.topicLabel ? "block" : "none";
@@ -1475,7 +1480,9 @@
   </script>
   <script type="module" src="../../assets/app-access-guard.js?v=1"></script>
   <script src="../../assets/exercise-scoring-intro.js?v=3"></script>
+  <script src="../../assets/app-reward-header.js?v=20260709-1"></script>
+  <script src="../../assets/reward-events.js?v=20260709-1"></script>
   <script type="module" src="../../assets/feedback-widget.js?v=5"></script>
-  <script src="../../assets/tactile-buttons.js?v=2" defer></script>
+  <script src="../../assets/tactile-buttons.js?v=4" defer></script>
 </body>
 </html>

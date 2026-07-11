@@ -724,7 +724,7 @@ Best, Yutee Elle`;
             <button class="tsa-speak-mode-btn ${state.notesMode === 'open' ? 'is-active' : ''}" type="button" data-mode-value="open">Open response</button>
             <button class="tsa-speak-mode-btn ${state.notesMode === 'sections' ? 'is-active' : ''}" type="button" data-mode-value="sections">Three-section response</button>
           </div>
-          <p class="mode-guidance"><strong>Choose one format.</strong> Use <strong>Open response</strong> if you want to write in your own free-form structure; this is the more difficult option. Use <strong>Three-section response</strong> if you want the easier guided option. In both formats, use BSP and the Rule of three.</p>
+          <p class="mode-guidance"><strong>Choose one format:</strong> Use <strong>Open response</strong> if you want to write in your own free-form structure; this is the more difficult option. Use <strong>Three-section response</strong> if you want the easier guided option. In both formats, use BSP and the Rule of three.</p>
         `;
       }
 
@@ -900,6 +900,11 @@ Best, Yutee Elle`;
             import('../../assets/firebase.js')
               .then(({ saveUserProgress }) => saveUserProgress('explain-to-aiko-120', 'Explain to Aiko (120s)', payload))
               .catch((error) => console.warn('Firestore progress save failed.', error));
+            window.UTLRewardEvents?.awardCompletionExercise({
+              appId: 'explain-to-aiko-120',
+              title: 'Explain to Aiko complete',
+              body: 'Your 120-second explanation was saved.'
+            });
             submit.textContent = 'Saved';
             status.textContent = 'Saved.';
           }
@@ -912,7 +917,9 @@ Best, Yutee Elle`;
   </script>
   <script type="module" src="../../assets/app-access-guard.js?v=1"></script>
   <script src="../../assets/exercise-scoring-intro.js?v=3"></script>
+  <script src="../../assets/app-reward-header.js?v=20260709-1"></script>
+  <script src="../../assets/reward-events.js?v=20260709-1"></script>
   <script type="module" src="../../assets/feedback-widget.js?v=5"></script>
-  <script src="../../assets/tactile-buttons.js?v=2" defer></script>
+  <script src="../../assets/tactile-buttons.js?v=4" defer></script>
 </body>
 </html>

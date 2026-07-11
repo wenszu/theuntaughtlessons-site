@@ -332,6 +332,18 @@
       background: var(--gold-hover);
     }
 
+    .btn.btn-submitted,
+    .btn.btn-submitted:disabled,
+    .btn.btn-submitted.utl-tactile-button {
+      border: 1.5px solid #6B8F71;
+      background: #E7F0E8;
+      box-shadow: none !important;
+      color: #355C3A;
+      cursor: default;
+      opacity: 1;
+      transform: none !important;
+    }
+
     .btn-secondary {
       border: 1.5px solid var(--navy);
       background: transparent;
@@ -2108,7 +2120,7 @@
             </div>
             <div class="email-notes-head">
               <div class="label">CLEANED-UP NOTES</div>
-              <p>Drag or tap these notes into the supporting-detail slots. You still write the three argument labels yourself.</p>
+              <p>Choose the 9 most useful notes and drag or tap them into the 9 supporting-detail slots. Leave the extra note out. You still write the three argument labels yourself.</p>
             </div>
             <div class="email-detail-list" id="evidenceList"></div>
             <div class="tap-evidence-hint" id="tapEvidenceHint"></div>
@@ -2120,11 +2132,11 @@
           </div>
           <div class="guidance">
             <div class="label">GUIDANCE</div>
-            <p><strong>Answer the question.</strong> Each argument should directly explain your central question. Keep asking "Why?" as you go deeper.</p>
+            <p><strong>Answer the question:</strong> Each argument should directly explain your central question. Keep asking "Why?" as you go deeper.</p>
             <div class="guidance-rule"></div>
-            <p><strong>Use one bucket.</strong> If an argument covers two ideas, split it into cleaner branches.</p>
+            <p><strong>Use one bucket:</strong> If an argument covers two ideas, split it into cleaner branches.</p>
             <div class="guidance-rule"></div>
-            <p><strong>Check for overlap.</strong> If your 3 arguments repeat each other, rethink the buckets.</p>
+            <p><strong>Check for overlap:</strong> If your 3 arguments repeat each other, rethink the buckets.</p>
           </div>
         </aside>
 
@@ -2135,11 +2147,11 @@
               <div class="label">YOUR QUESTION</div>
               <p id="mobileQuestion"></p>
               <div class="guidance-rule"></div>
-              <p><strong>Answer the question.</strong> Each argument should directly explain your central question. Keep asking "Why?" as you go deeper.</p>
+              <p><strong>Answer the question:</strong> Each argument should directly explain your central question. Keep asking "Why?" as you go deeper.</p>
               <div class="guidance-rule"></div>
-              <p><strong>Use one bucket.</strong> If an argument covers two ideas, split it into cleaner branches.</p>
+              <p><strong>Use one bucket:</strong> If an argument covers two ideas, split it into cleaner branches.</p>
               <div class="guidance-rule"></div>
-              <p><strong>Check for overlap.</strong> If your 3 arguments repeat each other, rethink the buckets.</p>
+              <p><strong>Check for overlap:</strong> If your 3 arguments repeat each other, rethink the buckets.</p>
             </div>
           </details>
 
@@ -2153,7 +2165,7 @@
           <div class="bottom-bar">
             <div class="remaining" id="remainingFields">Add 3 argument names and 9 supporting details</div>
             <div class="bottom-actions">
-              <button class="btn btn-secondary" type="button" id="showSample">Show sample answer</button>
+              <button class="btn btn-secondary" type="button" id="showSample" hidden>Show sample answer</button>
               <button class="btn btn-primary" type="button" id="saveAnswerBtn">Submit</button>
               <button class="btn btn-secondary" type="button" id="startOver" hidden>Start over</button>
             </div>
@@ -2203,7 +2215,8 @@
         { text: "", details: ["", "", ""] },
         { text: "", details: ["", "", ""] }
       ],
-      currentScreen: 1
+      currentScreen: 1,
+      submitted: false
     });
 
     let templateState = null;
@@ -2260,9 +2273,10 @@
         next.problemStatement = parsed.problemStatement || "";
         next.hypothesis = parsed.hypothesis || "";
         next.currentScreen = Number(parsed.currentScreen) || 1;
+        next.submitted = parsed.submitted === true;
         next.arguments = next.arguments.map((arg, i) => {
           const savedDetails = parsed.arguments?.[i]?.details || [];
-          const details = savedDetails.length >= 3 ? savedDetails : [0, 1, 2].map((j) => savedDetails[j] || "");
+          const details = [0, 1, 2].map((j) => savedDetails[j] || "");
           return {
             text: parsed.arguments?.[i]?.text || "",
             details
@@ -2293,6 +2307,10 @@
 
     function filled(text, min = 10) {
       return text.trim().length >= min;
+    }
+
+    function hasContent(text) {
+      return String(text || "").trim().length > 0;
     }
 
     function wordCount(text) {
@@ -2331,6 +2349,12 @@
 
     function evidenceById(id) {
       return ASHLEY_DETAILS.find((item) => item.id === id);
+    }
+
+    function hasInternalDragData(dataTransfer) {
+      const types = Array.from(dataTransfer?.types || []);
+      return types.includes("application/x-issue-evidence")
+        || types.includes("application/x-issue-detail");
     }
 
     function evidenceIsUsed(item) {
@@ -2457,19 +2481,16 @@
           <div class="argument-body">
             <textarea class="argument-input" data-arg="${index}" data-word-label="Argument ${index + 1}" placeholder="Name one reason this is happening">${escapeHtml(arg.text)}</textarea>
             <div class="hint">One bucket only. If it covers two ideas, split it.</div>
-            <div class="details-section ${filled(arg.text) ? "show" : ""}">
+            <div class="details-section ${hasContent(arg.text) ? "show" : ""}">
               <div class="label">SUPPORTING DETAILS</div>
               <p class="details-sub">Add 3 specific pieces of evidence or examples.</p>
               <div class="detail-list">
                 ${arg.details.map((detail, detailIndex) => `
                   <div class="detail-wrap${detail.trim() ? " has-detail" : ""}" data-detail-zone data-arg="${index}" data-detail="${detailIndex}" ${detail.trim() ? 'draggable="true"' : ""}>
                     ${detailSlotMarkup(index, detailIndex, detail)}
-                    ${detail.trim() || detailIndex >= 3 ? `<button class="detail-remove" type="button" data-remove-detail="${index}" data-detail="${detailIndex}" aria-label="Clear supporting detail ${detailIndex + 1}">×</button>` : ""}
+                    ${detail.trim() ? `<button class="detail-remove" type="button" data-remove-detail="${index}" data-detail="${detailIndex}" aria-label="Clear supporting detail ${detailIndex + 1}">×</button>` : ""}
                   </div>
                 `).join("")}
-              </div>
-              <div class="detail-actions">
-                <button class="add-detail" type="button" data-add-detail="${index}">+ Add supporting detail</button>
               </div>
               ${index < 2 ? `<button class="advance-prompt ${arg.details.every((detail) => detail.trim()) ? "show" : ""}" type="button" data-next="${index + 1}">Argument ${index + 1} done. Open Argument ${index + 2} →</button>` : ""}
             </div>
@@ -2482,8 +2503,8 @@
     }
 
     function renderProgress() {
-      const argumentCount = state.arguments.filter((arg) => filled(arg.text)).length;
-      const detailCount = state.arguments.flatMap((arg) => arg.details).filter((detail) => filled(detail)).length;
+      const argumentCount = state.arguments.filter((arg) => hasContent(arg.text)).length;
+      const detailCount = state.arguments.flatMap((arg) => arg.details).filter(hasContent).length;
       const requiredDetailTotal = 9;
       const totalFilled = argumentCount + detailCount;
       const totalFields = 3 + requiredDetailTotal;
@@ -2539,11 +2560,16 @@
     function setSaveButtonSaved(saved) {
       const button = $("#saveAnswerBtn");
       if (!button) return;
-      button.textContent = saved ? "Submitted" : "Submit";
+      button.textContent = saved ? "✓ Submitted" : "Submit";
+      button.classList.toggle("btn-primary", !saved);
+      button.classList.toggle("btn-submitted", saved);
+      button.disabled = saved;
       if (saved) button.dataset.saved = "true";
       else delete button.dataset.saved;
       const startOverButton = $("#startOver");
       if (startOverButton) startOverButton.hidden = !saved;
+      const showSampleButton = $("#showSample");
+      if (showSampleButton) showSampleButton.hidden = !saved;
     }
 
     function issueTreePayload() {
@@ -2559,8 +2585,8 @@
     }
 
     function completionRequirements() {
-      const argumentCount = state.arguments.filter((arg) => filled(arg.text)).length;
-      const detailCount = state.arguments.flatMap((arg) => arg.details).filter((detail) => filled(detail)).length;
+      const argumentCount = state.arguments.filter((arg) => hasContent(arg.text)).length;
+      const detailCount = state.arguments.flatMap((arg) => arg.details).filter(hasContent).length;
       return {
         argumentCount,
         detailCount,
@@ -2593,6 +2619,13 @@
         score,
         ...issueTreePayload()
       });
+      window.UTLRewardEvents?.awardScoredExercise({
+        appId: 'issue-tree',
+        title: 'Issue tree builder scored',
+        score
+      });
+      state.submitted = true;
+      save();
       $("#saveNoticeMount").innerHTML = completionSaveNotice();
       setSaveButtonSaved(true);
     }
@@ -2607,7 +2640,7 @@
       renderArguments();
       renderEvidenceList();
       renderProgress();
-      setSaveButtonSaved(Boolean(localStorage.getItem("utl_result_issue-tree")));
+      setSaveButtonSaved(state.submitted === true);
       $$("#sampleMount").forEach((mount) => mount.innerHTML = "");
       $$("textarea").forEach(autoResize);
     }
@@ -2632,6 +2665,7 @@
       $$(".detail-input").forEach((input) => {
         state.arguments[Number(input.dataset.arg)].details[Number(input.dataset.detail)] = input.value;
       });
+      state.submitted = false;
       save();
       setSaveButtonSaved(false);
       if ($("#feedbackMount")) $("#feedbackMount").innerHTML = "";
@@ -2761,7 +2795,7 @@
       const results = [];
       const add = (status, label, points, maxPoints, hint = "") => results.push({ status, label, points, maxPoints, hint });
 
-      const missingArgs = args.map((arg, i) => filled(arg.text) ? "" : `Argument ${i + 1} is empty`).filter(Boolean);
+      const missingArgs = args.map((arg, i) => hasContent(arg.text) ? "" : `Argument ${i + 1} is empty`).filter(Boolean);
       add(missingArgs.length ? "fail" : "pass", missingArgs.length ? `Missing argument(s): ${missingArgs.join(", ")}` : "All 3 arguments provided", missingArgs.length ? 0 : 10, 10, "Your issue tree needs 3 distinct buckets. Each should answer your central question.");
 
       const overlaps = [[0, 1], [0, 2], [1, 2]].filter(([a, b]) => filled(args[a].text) && filled(args[b].text) && hasSharedPhrase(args[a].text, args[b].text));
@@ -2926,7 +2960,7 @@
           const card = event.target.closest(".argument-card");
           const section = $(".details-section", card);
           state.arguments[index].text = event.target.value;
-          section.classList.toggle("show", filled(event.target.value));
+          section.classList.toggle("show", hasContent(event.target.value));
           $(".argument-title-text", card).textContent = event.target.value.trim() || "Click to expand";
           save();
         }
@@ -2991,20 +3025,6 @@
       if (advance) {
         openArgument = Number(advance.dataset.next);
         renderArguments();
-        return;
-      }
-
-      const addDetail = event.target.closest(".add-detail");
-      if (addDetail) {
-        const index = Number(addDetail.dataset.addDetail);
-        updateFromDom();
-        state.arguments[index].details.push("");
-        openArgument = index;
-        save();
-        renderArguments();
-        renderProgress();
-        const newInput = $(`.detail-input[data-arg="${index}"][data-detail="${state.arguments[index].details.length - 1}"]`);
-        if (newInput) newInput.focus();
         return;
       }
 
@@ -3073,13 +3093,24 @@
       selectedEvidenceId = null;
       renderEvidenceSelectionState();
       startTimerFromInteraction();
+      event.dataTransfer.effectAllowed = "move";
+      event.dataTransfer.setData("application/x-issue-evidence", evidenceCard.dataset.evidenceId);
       event.dataTransfer.setData("text/plain", evidenceCard.dataset.evidenceId);
     });
 
     document.addEventListener("dragover", (event) => {
+      const isInternalDrag = hasInternalDragData(event.dataTransfer);
+      if (isInternalDrag && event.target.closest(".argument-input")) {
+        // Prevent browsers from inserting the dragged card ID/text into the
+        // argument textarea. Argument labels must always be written by users.
+        event.preventDefault();
+        event.dataTransfer.dropEffect = "none";
+        return;
+      }
       const zone = event.target.closest("[data-detail-zone], #evidenceList");
       if (!zone) return;
       event.preventDefault();
+      event.dataTransfer.dropEffect = "move";
     });
 
     document.addEventListener("dragenter", (event) => {
@@ -3095,6 +3126,11 @@
     });
 
     document.addEventListener("drop", (event) => {
+      const isInternalDrag = hasInternalDragData(event.dataTransfer);
+      if (isInternalDrag && event.target.closest(".argument-input")) {
+        event.preventDefault();
+        return;
+      }
       const zone = event.target.closest("[data-detail-zone], #evidenceList");
       if (!zone) return;
       event.preventDefault();
@@ -3110,7 +3146,8 @@
         }
         return;
       }
-      const evidenceId = event.dataTransfer.getData("text/plain");
+      const evidenceId = event.dataTransfer.getData("application/x-issue-evidence")
+        || event.dataTransfer.getData("text/plain");
       if (!evidenceId || zone.id === "evidenceList") return;
       applyEvidenceToDetail(evidenceId, zone);
     });
@@ -3205,7 +3242,9 @@
   </script>
   <script type="module" src="../../assets/app-access-guard.js?v=1"></script>
   <script src="../../assets/exercise-scoring-intro.js?v=3"></script>
+  <script src="../../assets/app-reward-header.js?v=20260709-1"></script>
+  <script src="../../assets/reward-events.js?v=20260709-1"></script>
   <script type="module" src="../../assets/feedback-widget.js?v=5"></script>
-  <script src="../../assets/tactile-buttons.js?v=2" defer></script>
+  <script src="../../assets/tactile-buttons.js?v=4" defer></script>
 </body>
 </html>

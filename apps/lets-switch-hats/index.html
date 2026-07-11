@@ -552,19 +552,19 @@
         <ol class="lsh-steps">
           <li class="lsh-step">
             <span class="lsh-step-number">1</span>
-            <span><strong>Name their role and pressures.</strong> What do they need to protect? What are they accountable for? What would failure look like for them?</span>
+            <span><strong>Name their role and pressures:</strong> What do they need to protect? What are they accountable for? What would failure look like for them?</span>
           </li>
           <li class="lsh-step">
             <span class="lsh-step-number">2</span>
-            <span><strong>Identify what they actually want.</strong> Not what they say they want &mdash; what outcome matters most to them in this situation?</span>
+            <span><strong>Identify what they actually want:</strong> Not what they say they want &mdash; what outcome matters most to them in this situation?</span>
           </li>
           <li class="lsh-step">
             <span class="lsh-step-number">3</span>
-            <span><strong>Spot where your view and theirs diverge.</strong> Where are you assuming they see it the same way you do? That gap is where the friction lives.</span>
+            <span><strong>Spot where your view and theirs diverge:</strong> Where are you assuming they see it the same way you do? That gap is where the friction lives.</span>
           </li>
           <li class="lsh-step">
             <span class="lsh-step-number">4</span>
-            <span><strong>Adjust how you'd approach the conversation.</strong> Given what you now know about their world, what would you say differently?</span>
+            <span><strong>Adjust how you'd approach the conversation:</strong> Given what you now know about their world, what would you say differently?</span>
           </li>
         </ol>
       </article>
@@ -590,6 +590,7 @@
       </div>
       <div class="lsh-actions">
         <a class="lsh-button lsh-button-primary" href="https://gemini.google.com/gem/1GpR19HsizMqmhE3cWsM8J2bGTOQ3SJsO?usp=sharing" target="_blank" rel="noopener">Open Gem</a>
+        <button class="lsh-button" id="completeExerciseBtn" type="button">Mark exercise complete</button>
         <a class="lsh-exit-link" href="../../member-login/index.html#phase3">Back to member workspace</a>
       </div>
       <p>This opens Gemini in a new tab. You may need to sign in, then return here when you finish.</p>
@@ -654,7 +655,22 @@
   </script>
   <script type="module" src="../../assets/app-access-guard.js?v=1"></script>
   <script src="../../assets/exercise-scoring-intro.js?v=3"></script>
+  <script src="../../assets/app-reward-header.js?v=20260709-1"></script>
+  <script src="../../assets/reward-events.js?v=20260709-1"></script>
+  <script>
+    document.getElementById('completeExerciseBtn').addEventListener('click', function () {
+      localStorage.setItem('utl_p3_ex3_done', 'true');
+      localStorage.setItem('utl_done_p3-e3', 'true');
+      const result = window.UTLRewardEvents?.awardReflectionExercise({
+        appId: 'lets-switch-hats',
+        title: 'Perspective practice complete',
+        body: 'Your reflection and exercise progress were saved.'
+      });
+      this.textContent = result?.awarded ? 'Exercise complete' : 'Already completed';
+      this.disabled = true;
+    });
+  </script>
   <script type="module" src="../../assets/feedback-widget.js?v=5"></script>
-  <script src="../../assets/tactile-buttons.js?v=2" defer></script>
+  <script src="../../assets/tactile-buttons.js?v=4" defer></script>
 </body>
 </html>

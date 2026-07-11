@@ -822,6 +822,11 @@ Return your recommendations in a clean list format I can easily read and act on.
       event.target.textContent = 'Saving...';
       saveBoardProgress()
         .then(() => {
+          window.UTLRewardEvents?.awardCompletionExercise({
+            appId: 'advisory-board',
+            title: 'Advisory board with AI complete',
+            body: 'Your advisory-board simulation was saved.'
+          });
           event.target.textContent = 'Done';
           $('doneStatus').textContent = 'Saved to your workspace.';
         })
@@ -845,7 +850,9 @@ Return your recommendations in a clean list format I can easily read and act on.
   </script>
   <script type="module" src="../../assets/app-access-guard.js?v=1"></script>
   <script src="../../assets/exercise-scoring-intro.js?v=3"></script>
+  <script src="../../assets/app-reward-header.js?v=20260709-1"></script>
+  <script src="../../assets/reward-events.js?v=20260709-1"></script>
   <script type="module" src="../../assets/feedback-widget.js?v=5"></script>
-  <script src="../../assets/tactile-buttons.js?v=2" defer></script>
+  <script src="../../assets/tactile-buttons.js?v=4" defer></script>
 </body>
 </html>

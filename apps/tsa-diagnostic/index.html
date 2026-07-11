@@ -415,6 +415,7 @@
     </section>
   </main>
 
+  <script src="../../assets/reward-events.js?v=20260710-2"></script>
   <script>
     function readScore(key) {
       const raw = localStorage.getItem(key) || sessionStorage.getItem(key);
@@ -461,10 +462,13 @@
       if (typeof speak === 'number') {
         document.getElementById('speakScore').textContent = `${Math.round(speak)}${speak <= 30 ? ' pts' : '%'}`;
       }
+      if ([sort, spot, speak].every((score) => typeof score === 'number')) {
+        window.UTLRewardEvents?.awardAssessment({ assessmentId: 'diagnostic', title: 'Diagnostic complete' });
+      }
     }
 
     updateScores();
   </script>
-  <script src="../../assets/tactile-buttons.js?v=2" defer></script>
+  <script src="../../assets/tactile-buttons.js?v=4" defer></script>
 </body>
 </html>

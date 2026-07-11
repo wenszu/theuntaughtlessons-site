@@ -26,6 +26,7 @@ import {
   getDocs,
   getFirestore,
   query,
+  runTransaction,
   serverTimestamp,
   setDoc,
   Timestamp,
@@ -350,6 +351,7 @@ async function getMemberWorkspaceProgress() {
   if (!userSnap.exists()) return null;
   const data = userSnap.data() || {};
   const progress = data.workspaceProgress || {};
+  progress.rewards = data.rewards || progress.rewards || null;
   progress.exercises = progress.exercises || {};
 
   try {
@@ -402,11 +404,50 @@ async function saveMemberWorkspaceProgress(progress = {}) {
     throw new Error("A signed-in Firebase user is required to save workspace progress.");
   }
 
+  const rewards = progress.rewards;
+  const progressWithoutRewards = Object.assign({}, progress);
+  delete progressWithoutRewards.rewards;
   await setDoc(doc(requireFirestore(), "users", user.uid), {
-    workspaceProgress: progress,
+    workspaceProgress: progressWithoutRewards,
     lastSeenAt: serverTimestamp(),
     updatedAt: serverTimestamp()
   }, { merge: true });
+  if (rewards) await saveMemberRewards(rewards);
+}
+
+async function saveMemberRewards(incoming = {}) {
+  const user = await getSignedInUser();
+  if (!user || !user.uid) throw new Error("A signed-in Firebase user is required to save rewards.");
+  const readyDb = requireFirestore();
+  const userRef = doc(readyDb, "users", user.uid);
+  await runTransaction(readyDb, async (transaction) => {
+    const snap = await transaction.get(userRef);
+    const data = snap.exists() ? (snap.data() || {}) : {};
+    const current = data.rewards || (data.workspaceProgress && data.workspaceProgress.rewards) || {};
+    const eventIds = Object.assign({}, current.earnedEvents || {}, current.earnedEventIds || {}, incoming.earnedEvents || {}, incoming.earnedEventIds || {});
+    const ledgerById = {};
+    [].concat(current.ledger || [], incoming.ledger || []).forEach((entry) => {
+      if (entry && entry.id) ledgerById[entry.id] = entry;
+    });
+    const ledger = Object.values(ledgerById)
+      .sort((a, b) => String(a.earnedAt || "").localeCompare(String(b.earnedAt || "")))
+      .slice(-500);
+    const ledgerTotal = ledger.reduce((sum, entry) => sum + Math.max(0, Number(entry.mpEarned || 0)), 0);
+    const mpTotal = Math.max(ledgerTotal, Number(current.mpTotal || current.masteryPoints || 0), Number(incoming.mpTotal || incoming.masteryPoints || 0));
+    const rewards = Object.assign({}, current, incoming, {
+      mpTotal,
+      masteryPoints: mpTotal,
+      earnedEvents: eventIds,
+      earnedEventIds: eventIds,
+      ledger
+    });
+    transaction.set(userRef, {
+      rewards,
+      workspaceProgress: { rewards },
+      lastSeenAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    }, { merge: true });
+  });
 }
 
 async function saveUserProgress(exerciseId, exerciseName, exercisePayload = {}) {
@@ -513,6 +554,7 @@ async function getAllMemberWorkspaceProgress() {
         lastSeenAt: data.lastSeenAt || existing.lastSeenAt || null,
         updatedAt: data.updatedAt || existing.updatedAt || null,
         workspaceProgress: data.workspaceProgress || existing.workspaceProgress || null,
+        rewards: data.rewards || (data.workspaceProgress && data.workspaceProgress.rewards) || existing.rewards || null,
         role: existing.role || data.role || "member",
         status: existing.status || "active",
         cohort: existing.cohort || ""
@@ -634,6 +676,73 @@ async function setEngagementSettings(partial) {
   await setDoc(doc(requireFirestore(), "settings", "engagement"), partial, { merge: true });
 }
 
+function getDefaultRewardSettings() {
+  return {
+    enabled: true,
+    display: {
+      showLevel: true,
+      showMp: true,
+      showStreak: true,
+      showTokens: false
+    },
+    levels: [
+      { name: "Intern", threshold: 0 },
+      { name: "Analyst", threshold: 300 },
+      { name: "Associate", threshold: 800 },
+      { name: "Principal", threshold: 1350 },
+      { name: "Executive", threshold: 1850 }
+    ],
+    mp: {
+      videoComplete: 10,
+      contextComplete: 5,
+      exerciseMode: "score-improvement",
+      exerciseCompleteFallback: 50,
+      reflectionExercise: 30,
+      phaseCompletion: {
+        phase1: 100,
+        phase2: 150,
+        phase3: 200
+      },
+      assessmentBonus: 100
+    },
+    streak: {
+      enabled: true,
+      dailyExerciseGoal: 3,
+      mpBase: 5,
+      mpFormula: "base*n"
+    },
+    tokens: {
+      enabled: false,
+      hintCost: 1
+    }
+  };
+}
+
+async function getRewardSettings() {
+  try {
+    const snap = await getDoc(doc(requireFirestore(), "settings", "rewards"));
+    if (!snap.exists()) return getDefaultRewardSettings();
+    const stored = snap.data() || {};
+    const def = getDefaultRewardSettings();
+    return {
+      enabled: stored.enabled !== false,
+      display: Object.assign({}, def.display, stored.display || {}),
+      levels: Array.isArray(stored.levels) && stored.levels.length ? stored.levels : def.levels,
+      mp: Object.assign({}, def.mp, stored.mp || {}, {
+        phaseCompletion: Object.assign({}, def.mp.phaseCompletion, (stored.mp && stored.mp.phaseCompletion) || {})
+      }),
+      streak: Object.assign({}, def.streak, stored.streak || {}),
+      tokens: Object.assign({}, def.tokens, stored.tokens || {})
+    };
+  } catch {
+    return getDefaultRewardSettings();
+  }
+}
+
+async function setRewardSettings(partial) {
+  await setDoc(doc(requireFirestore(), "settings", "rewards"), partial, { merge: true });
+}
+
 function getDefaultAssessmentVisibility() {
   return { userEnabled: true, adminEnabled: true };
 }
@@ -721,6 +830,7 @@ export {
   requireAuthorizedMember,
   requestGoogleGroupSyncJob,
   saveMemberWorkspaceProgress,
+  saveMemberRewards,
   saveUserProfile,
   submitAccessRequest,
   sendSignInInvite,
@@ -735,9 +845,11 @@ export {
   setPublicAssessmentSettings,
   getEngagementSettings,
   getGoogleGroupSyncJobs,
+  getRewardSettings,
   setEngagementSettings,
   setGlobalFeedbackSetting,
   setPublicFindLevelSetting,
+  setRewardSettings,
   setUserFeedbackEnabled,
   signInWithEmailAndPassword,
   signInWithEmailLink,

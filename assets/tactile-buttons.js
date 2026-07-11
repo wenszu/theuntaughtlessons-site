@@ -172,17 +172,28 @@
     return isBackLink(element);
   }
 
+  function hasGoldBackground(element) {
+    if (!window.getComputedStyle) return false;
+    var color = window.getComputedStyle(element).backgroundColor || "";
+    var match = color.match(/rgba?\((\d+)[,\s]+(\d+)[,\s]+(\d+)/i);
+    if (!match) return false;
+    var red = Number(match[1]);
+    var green = Number(match[2]);
+    var blue = Number(match[3]);
+    return red >= 190 && green >= 105 && green <= 205 && blue <= 90;
+  }
+
   function setVariant(element) {
     element.classList.remove("utl-tactile-primary", "utl-tactile-gold");
-    if (
-      element.matches(".primary, .primary-action, .btn-primary, .ws-button-navy, .bad-news-button-primary, .lsh-button-primary, .slo-button-primary, .tsa-speak-button:not(.secondary), .primary-button, .btn-download, .btn-send")
-    ) {
-      element.classList.add("utl-tactile-primary");
+    var goldAction = element.matches(".gold, .primary-action, .ab-gold, .eisenhower-button.gold, .ws-button-gold, .tsa-stp-primary") || hasGoldBackground(element);
+    if (goldAction) {
+      element.classList.add("utl-tactile-gold");
+      return;
     }
     if (
-      element.matches(".gold, .ab-gold, .eisenhower-button.gold, .ws-button-gold, .tsa-stp-primary")
+      element.matches(".primary, .btn-primary, .ws-button-navy, .bad-news-button-primary, .lsh-button-primary, .slo-button-primary, .tsa-speak-button:not(.secondary), .primary-button, .btn-download, .btn-send")
     ) {
-      element.classList.add("utl-tactile-gold");
+      element.classList.add("utl-tactile-primary");
     }
   }
 

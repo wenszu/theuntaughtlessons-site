@@ -587,13 +587,13 @@
         <div class="panel-body">
           <div class="takeaway-grid">
             <div class="takeaway-card">
-              <p><strong>The prompt shapes the structure.</strong> Each prompt angle produces a valid but different MECE output because MECE is more of a discipline rather than a concept that provides one correct answer.</p>
+              <p><strong>The prompt shapes the structure:</strong> Each prompt angle produces a valid but different MECE output because MECE is more of a discipline rather than a concept that provides one correct answer.</p>
             </div>
             <div class="takeaway-card">
-              <p><strong>AI follows your logic, not its own.</strong> The quality of the buckets reflects the clarity of your instructions. Weak prompt, weak structure.</p>
+              <p><strong>AI follows your logic, not its own:</strong> The quality of the buckets reflects the clarity of your instructions. Weak prompt, weak structure.</p>
             </div>
             <div class="takeaway-card">
-              <p><strong>Your job is not to prompt.</strong> Your job is to judge. The executive skill is knowing whether the output is actually MECE, not just whether it looks clean.</p>
+              <p><strong>Your job is not to prompt:</strong> Your job is to judge. The executive skill is knowing whether the output is actually MECE, not just whether it looks clean.</p>
             </div>
           </div>
           <div class="completion-save-notice">
@@ -609,6 +609,8 @@
       </article>
     </section>
   </main>
+  <script src="../../assets/app-reward-header.js?v=20260709-1"></script>
+  <script src="../../assets/reward-events.js?v=20260709-1"></script>
 
   <script src="../shared/activity-timer.js?v=20260701-audit-1"></script>
   <script>
@@ -871,6 +873,11 @@ ${SUPPLY_LIST_FOR_PROMPT}`
       COMPLETION_KEYS.forEach((key) => localStorage.setItem(key, 'true'));
       localStorage.setItem('utl_result_' + APP_ID, JSON.stringify(record));
       syncDoneButton();
+      window.UTLRewardEvents?.awardReflectionExercise({
+        appId: APP_ID,
+        title: 'Grocery list with AI complete',
+        body: 'Your AI comparison was saved.'
+      });
 
       import('../../assets/firebase.js')
         .then(({ saveUserProgress }) => saveUserProgress(APP_ID, EXERCISE_NAME, record))
@@ -905,6 +912,6 @@ ${SUPPLY_LIST_FOR_PROMPT}`
   <script type="module" src="../../assets/app-access-guard.js?v=1"></script>
   <script src="../../assets/exercise-scoring-intro.js?v=3"></script>
   <script type="module" src="../../assets/feedback-widget.js?v=5"></script>
-  <script src="../../assets/tactile-buttons.js?v=2" defer></script>
+  <script src="../../assets/tactile-buttons.js?v=4" defer></script>
 </body>
 </html>
