@@ -40,6 +40,7 @@ const UTL_CONTENT = {
     exercises: [
       {
         id: "p1-e1",
+        estimatedMinutes: 10,
         legacyDoneKey: "utl_p1_ex1_done",
         legacyEmbedKey: "utl_embed_p1_first_day",
         title: "Grocery list",
@@ -53,6 +54,7 @@ const UTL_CONTENT = {
       },
       {
         id: "p1-e2",
+        estimatedMinutes: 15,
         legacyDoneKey: "utl_p1_ex2_done",
         legacyEmbedKey: "utl_embed_p1_ai_grocery",
         title: "Grocery list with AI",
@@ -66,6 +68,7 @@ const UTL_CONTENT = {
       },
       {
         id: "p1-e3",
+        estimatedMinutes: 15,
         legacyDoneKey: "utl_p1_ex3_done",
         legacyEmbedKey: "utl_embed_p1_message_desk",
         title: "Manager's messy notes",
@@ -79,6 +82,7 @@ const UTL_CONTENT = {
       },
       {
         id: "p1-e4",
+        estimatedMinutes: 20,
         legacyDoneKey: "utl_p1_ex4_done",
         legacyEmbedKey: "utl_embed_p1_hugh_favour",
         title: "Rushed voice memo",
@@ -92,6 +96,7 @@ const UTL_CONTENT = {
       },
       {
         id: "p1-e5",
+        estimatedMinutes: 15,
         legacyDoneKey: "utl_p1_ex5_done",
         legacyEmbedKey: "utl_embed_p1_ai_memo",
         title: "Rushed voice memo with AI",
@@ -105,6 +110,7 @@ const UTL_CONTENT = {
       },
       {
         id: "p1-e6",
+        estimatedMinutes: 25,
         legacyDoneKey: "utl_p1_ex6_done",
         legacyEmbedKey: "utl_embed_p1_olympic_brainstorm",
         title: "Chalkboard notes",
@@ -140,6 +146,7 @@ const UTL_CONTENT = {
     exercises: [
       {
         id: "p2-e1",
+        estimatedMinutes: 15,
         legacyDoneKey: "utl_p2_ex1_done",
         legacyEmbedKey: "utl_embed_p2_aiko_question",
         title: "Issue tree builder",
@@ -153,6 +160,7 @@ const UTL_CONTENT = {
       },
       {
         id: "p2-e2",
+        estimatedMinutes: 10,
         legacyDoneKey: "utl_p2_ex2_done",
         legacyEmbedKey: "utl_embed_p2_frame_answer",
         title: "Framing the storyline",
@@ -166,6 +174,7 @@ const UTL_CONTENT = {
       },
       {
         id: "p2-e3",
+        estimatedMinutes: 20,
         legacyDoneKey: "utl_p2_ex3_done",
         legacyEmbedKey: "utl_embed_p2_outside_perspectives",
         title: "Advisory board with AI",
@@ -179,6 +188,7 @@ const UTL_CONTENT = {
       },
       {
         id: "p2-e4",
+        estimatedMinutes: 15,
         legacyDoneKey: "utl_p2_ex4_done",
         legacyEmbedKey: "utl_embed_p2_aiko_email",
         title: "Write to Aiko",
@@ -192,6 +202,7 @@ const UTL_CONTENT = {
       },
       {
         id: "p2-e5",
+        estimatedMinutes: 15,
         legacyDoneKey: "utl_p2_ex5_done",
         legacyEmbedKey: "utl_embed_p2_hallway",
         title: "Explain to Aiko (120s)",
@@ -205,6 +216,7 @@ const UTL_CONTENT = {
       },
       {
         id: "p2-e6",
+        estimatedMinutes: 15,
         legacyDoneKey: "utl_p2_ex6_done",
         legacyEmbedKey: "utl_embed_p2_compress",
         title: "Explain to Aiko (60s)",
@@ -241,6 +253,7 @@ const UTL_CONTENT = {
     exercises: [
       {
         id: "p3-e1",
+        estimatedMinutes: 30,
         legacyDoneKey: "utl_p3_ex1_done",
         legacyEmbedKey: "utl_embed_p3_lead_role",
         title: "The art of saying no",
@@ -254,6 +267,7 @@ const UTL_CONTENT = {
       },
       {
         id: "p3-e2",
+        estimatedMinutes: 20,
         legacyDoneKey: "utl_p3_ex2_done",
         legacyEmbedKey: "utl_embed_p3_bad_news",
         title: "I have bad news...",
@@ -267,6 +281,7 @@ const UTL_CONTENT = {
       },
       {
         id: "p3-e3",
+        estimatedMinutes: 15,
         legacyDoneKey: "utl_p3_ex3_done",
         legacyEmbedKey: "utl_embed_p3_read_room",
         title: "Let's switch hats",
@@ -280,6 +295,7 @@ const UTL_CONTENT = {
       },
       {
         id: "p3-e4",
+        estimatedMinutes: 15,
         legacyDoneKey: "utl_p3_ex4_done",
         legacyEmbedKey: "utl_embed_p3_eyes_on_you",
         title: "Speak like Obama",
@@ -1138,10 +1154,17 @@ const UTL_CONTENT = {
     style.textContent = [
       "@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lato:wght@300;400;700&family=Roboto+Mono:wght@400;500;700&display=swap');",
       ":root{--ws-navy:#003366;--ws-gold:#EEA320;--ws-cream:#F3EDE2;--ws-charcoal:#4A4A4A;--ws-steel:#4D7094;--ws-white:#FFFFFF;--ws-line:#E3D8C8;--ws-green:#2C7A4B;}",
+      ".ws-mission-overlay{position:fixed;inset:0;z-index:8500;display:grid;place-items:center;padding:24px;background:rgba(0,28,56,.68);overflow:auto}.ws-mission-overlay.ws-hidden{display:none}.ws-mission-dialog{position:relative;width:min(1120px,100%);max-height:calc(100vh - 48px);overflow:auto;border-radius:14px}.ws-mission-close{position:absolute;right:14px;top:14px;z-index:4;width:40px;height:40px;border:0;border-radius:999px;background:#fff;color:var(--ws-navy);font-size:27px;line-height:1;cursor:pointer;box-shadow:0 3px 12px rgba(0,51,102,.16)}.ws-mission-bonus{cursor:pointer;border:2px solid transparent}.ws-mission-bonus>input{width:20px;height:20px;accent-color:var(--ws-gold)}.ws-mission-bonus:has(input:checked){border-color:var(--ws-navy);background:#FFF8EC}.ws-mission-nav{display:inline-flex;align-items:center;gap:7px;min-height:34px;padding:0 10px;border:1px solid rgba(238,163,32,.65);border-radius:999px;color:#fff;text-decoration:none;font:700 10px 'Roboto Mono',monospace;white-space:nowrap}.ws-mission-nav b{color:var(--ws-gold)}@media(max-width:768px){.ws-mission-overlay{padding:12px}.ws-mission-dialog{max-height:calc(100vh - 24px)}.ws-mission-close{right:8px;top:8px}.ws-mission-nav span{display:none}}",
       "*{box-sizing:border-box}",
       "body.ws-page{margin:0;min-height:100vh;background:var(--ws-cream);color:var(--ws-charcoal);font-family:Lato,sans-serif;overflow-x:hidden}",
       ".ws-shell{width:min(1120px,calc(100% - 40px));margin:0 auto}",
       ".ws-hidden{display:none}",
+      ".ws-mission-action-buttons{display:flex;align-items:center;justify-content:flex-end;gap:10px;flex-wrap:wrap}@media(max-width:600px){.ws-mission-action-buttons{width:100%;display:grid}.ws-mission-action-buttons .ws-button{width:100%}}",
+      ".ws-mission-dialog .ws-mission-header{padding-right:58px}@media(max-width:768px){.ws-mission-dialog .ws-mission-header{padding-right:50px}}",
+      "body:has(.ws-mission-overlay:not(.ws-hidden)) #utl-feedback-btn{display:none!important}@media(max-width:768px){.ws-mission-dialog:has(.ws-mission-preview) .ws-mission-close{top:52px}}",
+      ".ws-challenge-intention{margin:18px 0 0;padding:12px 14px;border-radius:8px;background:#FFF8EC;color:var(--ws-navy)}.ws-challenge-form{display:grid;gap:18px;margin-top:22px}.ws-challenge-form fieldset{display:grid;gap:9px;margin:0;padding:0;border:0}.ws-challenge-form legend{margin-bottom:10px;color:var(--ws-navy);font-size:18px;font-weight:700}.ws-challenge-form fieldset label{display:flex;align-items:center;gap:10px;min-height:44px;padding:10px 12px;border:1px solid var(--ws-line);border-radius:8px;background:#FAF8F3;color:var(--ws-navy);cursor:pointer}.ws-challenge-form input[type=radio]{width:18px;height:18px;accent-color:var(--ws-gold)}.ws-challenge-note{display:grid;gap:7px;color:var(--ws-navy);font-weight:700}.ws-challenge-note textarea{width:100%;resize:vertical;border:1px solid var(--ws-line);border-radius:8px;padding:10px;font:400 15px Lato,sans-serif}",
+      ".ws-mission-bonus{grid-template-columns:auto minmax(0,1fr) auto!important}.ws-mission-bonus>span{min-width:0}.ws-mission-bonus>b{grid-column:auto!important}@media(max-width:600px){.ws-mission-bonus{grid-template-columns:auto minmax(0,1fr)!important}.ws-mission-bonus>b{grid-column:2!important;justify-self:start}}",
+      ".ws-mission-checklist{display:grid;gap:10px;margin:22px 0 0;padding:0;list-style:none}.ws-mission-checklist li{display:grid;grid-template-columns:32px 1fr auto;gap:11px;align-items:center;padding:12px 14px;border-radius:9px;background:#FAF8F3}.ws-mission-checklist li>span:first-child{width:28px;height:28px;border:1px solid var(--ws-line);border-radius:999px;display:grid;place-items:center;color:var(--ws-steel);font:700 11px 'Roboto Mono',monospace}.ws-mission-checklist li.ws-done{background:#F6FBF7}.ws-mission-checklist li.ws-done>span:first-child{background:var(--ws-green);border-color:var(--ws-green);color:#fff}.ws-mission-checklist strong{display:block;color:var(--ws-navy)}.ws-mission-checklist small{display:block;margin-top:2px;color:var(--ws-steel)}.ws-mission-checklist button{min-height:36px;border:1px solid var(--ws-gold);border-radius:7px;background:#fff;color:var(--ws-navy);font-weight:700;cursor:pointer}@media(max-width:600px){.ws-mission-checklist li{grid-template-columns:30px 1fr}.ws-mission-checklist button{grid-column:2;width:100%}}",
       ".ws-reward-toast{position:fixed;right:22px;top:72px;z-index:9999;width:min(330px,calc(100vw - 44px));padding:16px 18px;border:1px solid rgba(238,163,32,.46);border-radius:12px;background:#fff;color:var(--ws-navy);box-shadow:0 18px 44px rgba(0,51,102,.22);opacity:0;transform:translateY(-10px);transition:opacity .18s ease,transform .18s ease}.ws-reward-toast.ws-visible{opacity:1;transform:translateY(0)}.ws-reward-toast span{display:block;color:var(--ws-gold);font:700 10px 'Roboto Mono',monospace;letter-spacing:.12em;text-transform:uppercase}.ws-reward-toast strong{display:block;margin-top:5px;color:var(--ws-navy);font-size:18px}.ws-reward-toast p{margin:5px 0 0;color:var(--ws-steel);font-size:13px;line-height:1.4}",
       ".ws-nav{position:sticky;top:0;z-index:30;background:var(--ws-navy);color:var(--ws-white);box-shadow:0 10px 28px rgba(0,51,102,.14)}",
       ".ws-nav-inner{height:54px;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:22px;width:min(1180px,calc(100% - 32px));margin:0 auto}",
@@ -1152,6 +1175,7 @@ const UTL_CONTENT = {
       ".ws-main{padding:54px 0 72px}.ws-kicker{display:inline-flex;color:var(--ws-gold);font:700 11px 'Roboto Mono',monospace;letter-spacing:.1em;text-transform:uppercase}.ws-title{margin:10px 0 12px;color:var(--ws-navy);font:700 clamp(40px,6vw,66px)/.98 'Playfair Display',serif}.ws-subtitle{max-width:760px;margin:0;color:var(--ws-steel);font-size:18px;line-height:1.55}",
       ".ws-login-wrap{min-height:calc(100vh - 54px);display:grid;place-items:center;padding:48px 20px}.ws-login-card{width:min(460px,100%);background:#fff;border:1px solid var(--ws-line);border-radius:12px;padding:30px;box-shadow:0 18px 45px rgba(0,51,102,.1)}.ws-login-card .ws-subtitle{font-size:17px}.ws-form{display:grid;gap:12px;margin-top:24px}.ws-form label{color:var(--ws-navy);font-weight:700}.ws-login-card .ws-form .ws-button,.ws-login-card .ws-google-button{width:100%}.ws-login-divider{display:flex;align-items:center;gap:12px;margin:18px 0;color:var(--ws-steel);font:700 10px 'Roboto Mono',monospace;letter-spacing:.08em;text-transform:uppercase}.ws-login-divider:before,.ws-login-divider:after{content:'';height:1px;background:var(--ws-line);flex:1}.ws-input,.ws-textarea,.ws-select{width:100%;min-height:46px;border:1px solid rgba(0,51,102,.22);border-radius:8px;padding:10px 12px;background:#fff;color:var(--ws-charcoal);font:400 15px Lato,sans-serif}.ws-textarea{min-height:88px;resize:vertical}.ws-message{min-height:20px;margin:0;color:#8A1F1F;font-weight:700}.ws-message.ws-success{color:var(--ws-green)}.ws-login-card .ws-google-button{position:relative;min-height:46px;gap:10px;background:#fff;border:1px solid #747775;border-radius:8px;color:#1f1f1f;text-transform:none;font:500 14px/20px Roboto,Arial,sans-serif;letter-spacing:0;padding:0 12px;box-shadow:none}.ws-login-card .ws-google-button:hover{background:#f8fafd;border-color:#3c4043;filter:none}.ws-login-card .ws-google-button:focus-visible{outline:2px solid #4285F4;outline-offset:2px}.ws-login-card .ws-google-button[disabled]{background:#f1f3f4;color:#5f6368;border-color:#dadce0}.ws-google-mark{width:20px;height:20px;display:inline-block;flex:0 0 auto;background:center/contain no-repeat url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath fill='%23EA4335' d='M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z'/%3E%3Cpath fill='%234285F4' d='M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z'/%3E%3Cpath fill='%23FBBC05' d='M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24s.92 7.54 2.56 10.78l7.97-6.19z'/%3E%3Cpath fill='%2334A853' d='M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z'/%3E%3Cpath fill='none' d='M0 0h48v48H0z'/%3E%3C/svg%3E\")}",
       ".ws-home-stack{display:grid;gap:26px}.ws-journey-card{background:#fff;border:1px solid var(--ws-line);border-radius:12px;overflow:hidden;box-shadow:0 12px 28px rgba(0,51,102,.06)}.ws-journey-head{width:100%;border:0;background:#fff;display:grid;grid-template-columns:1fr auto;align-items:center;gap:16px;padding:20px 22px;text-align:left;cursor:pointer}.ws-journey-title{margin:3px 0 6px;color:var(--ws-navy);font:700 31px/1.1 'Playfair Display',serif}.ws-journey-sub{max-width:850px;margin:0;color:var(--ws-steel);font-size:17px;line-height:1.5}.ws-journey-body{display:none;padding:0 22px 22px}.ws-journey-card.ws-open .ws-journey-body{display:block}.ws-journey-map{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:4px 0 16px}.ws-journey-step{border:1px solid var(--ws-line);border-radius:10px;background:#FAF8F3;padding:16px 16px 15px;min-height:124px}.ws-journey-step-num{width:34px;height:34px;border-radius:999px;background:var(--ws-navy);color:#fff!important;display:flex!important;align-items:center;justify-content:center;font:700 13px/1 'Roboto Mono',monospace;margin:0 0 11px;text-align:center;letter-spacing:0}.ws-journey-step strong{display:block;color:var(--ws-navy);margin-bottom:5px;font-size:17px}.ws-journey-step span:not(.ws-journey-step-num){display:block;color:var(--ws-steel);font-size:14px;line-height:1.35}.ws-journey-actions{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;border-top:1px solid rgba(0,51,102,.1);padding-top:14px}.ws-journey-ready{margin:0;color:var(--ws-navy);font-weight:700}.ws-journey-ready small{display:block;margin-top:3px;color:var(--ws-steel);font-weight:700}.ws-journey-cue{display:inline-flex;align-items:center;gap:8px;color:var(--ws-navy);font:700 12px 'Roboto Mono',monospace;letter-spacing:.04em;text-transform:uppercase;text-decoration:none}.ws-journey-cue span{width:28px;height:28px;border-radius:999px;background:var(--ws-gold);color:var(--ws-navy);display:grid;place-items:center;font:700 16px/1 Lato,sans-serif}.ws-orientation-card{background:#fff;border:1px solid var(--ws-line);border-radius:12px;overflow:hidden}.ws-orientation-head{width:100%;border:0;background:#fff;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:14px;padding:18px 20px;text-align:left;cursor:pointer}.ws-start-badge{background:var(--ws-navy);color:var(--ws-gold);border-radius:3px;padding:5px 9px;font:700 9px 'Roboto Mono',monospace;letter-spacing:.1em;text-transform:uppercase}.ws-orientation-title{display:block;color:var(--ws-navy);font-weight:700}.ws-orientation-sub{display:block;margin-top:2px;color:var(--ws-steel);font-size:13px}.ws-disclosure-icon{width:34px;height:34px;border-radius:8px;background:var(--ws-gold);color:#fff;display:inline-grid;place-items:center;font:700 22px/1 Lato,sans-serif}.ws-orientation-body{display:none;padding:0 20px 20px}.ws-orientation-card.ws-open .ws-orientation-body{display:block}.ws-orientation-copy{max-width:820px;margin:0 0 20px;color:var(--ws-charcoal);font-size:17px;line-height:1.68}.ws-orientation-copy h3{margin:0 0 14px;color:var(--ws-navy);font:700 30px/1.1 'Playfair Display',serif}.ws-orientation-copy p{margin:0 0 13px}.ws-orientation-copy p:last-child{margin-bottom:0}.ws-ready-row{display:flex;gap:10px;align-items:center;margin-top:14px;color:var(--ws-navy);font-weight:700}.ws-ready-row input{width:18px;height:18px}.ws-how-row{margin-top:14px}.ws-how-toggle{width:100%;border:0;background:#efe7d9;border-radius:8px;display:flex;align-items:center;gap:12px;padding:12px;color:var(--ws-navy);text-align:left;cursor:pointer}.ws-how-toggle .ws-media-icon{width:26px;height:26px;font-size:12px}.ws-how-toggle .ws-disclosure-icon{margin-left:auto;width:28px;height:28px;font-size:18px}.ws-how-body{display:none;padding:14px 2px 0}.ws-how-body.ws-open{display:block}.ws-step-tabs{position:sticky;top:54px;z-index:25;background:var(--ws-cream);border-bottom:1px solid var(--ws-line)}.ws-step-tabs-inner{width:min(1180px,calc(100% - 32px));margin:0 auto;display:flex;gap:24px}.ws-step-tab{min-height:46px;display:inline-flex;align-items:center;border-bottom:3px solid transparent;color:var(--ws-steel);font:700 11px Lato,sans-serif;letter-spacing:.05em;text-transform:uppercase;text-decoration:none}.ws-step-tab.ws-active{color:var(--ws-navy);border-bottom-color:var(--ws-gold)}.ws-breadcrumb{display:none}.ws-gold-cta{margin-top:18px;background:var(--ws-gold);border-radius:10px;padding:16px 18px;display:flex;justify-content:space-between;align-items:center;gap:16px;color:var(--ws-navy);font-weight:700}.ws-gold-cta a{color:var(--ws-navy);font:700 12px Lato,sans-serif;text-transform:uppercase;text-decoration:none}.ws-phase-card .ws-dot.empty{background:#fff;border:1px solid var(--ws-line)}.ws-phase-card .ws-dot.half{background:linear-gradient(90deg,var(--ws-gold) 50%,#fff 50%);border:1px solid var(--ws-gold)}.ws-phase-card .ws-dot.solid{background:var(--ws-gold);border:1px solid var(--ws-gold)}.ws-locked .ws-dot{background:#e4e4e4!important;border-color:#d6d6d6!important}.ws-locked .ws-phase-stripe{background:#d5d5d5}.ws-locked .ws-button{background:#f7f5ef;border-color:#d8d2c8;color:#9a9389}.ws-pill-locked{background:#efefef;color:#9a9389}.ws-pill-progress{background:rgba(238,163,32,.18);color:var(--ws-navy)}.ws-orientation-prompt{display:flex;align-items:center;gap:12px;background:#FFF8EC;border:1px solid rgba(238,163,32,.45);border-radius:8px;padding:13px 16px;font-size:14px;color:var(--ws-navy)}.ws-orientation-prompt a{color:var(--ws-navy);font-weight:700}",
+      ".ws-mission-card{position:relative;overflow:hidden;background:#fff;border:1px solid var(--ws-line);border-radius:12px;box-shadow:0 12px 28px rgba(0,51,102,.06)}.ws-mission-rail{position:absolute;inset:0 auto 0 0;width:6px;background:var(--ws-gold)}.ws-mission-inner{padding:24px 26px 24px 30px}.ws-mission-preview{margin:-24px -26px 20px -30px;padding:8px 30px;background:var(--ws-navy);color:#fff;font:700 10px 'Roboto Mono',monospace;letter-spacing:.1em;text-transform:uppercase}.ws-mission-header{display:flex;justify-content:space-between;align-items:flex-start;gap:20px}.ws-mission-header h1{margin:5px 0 6px;color:var(--ws-navy);font:700 32px/1.08 'Playfair Display',serif}.ws-mission-recognition{margin:0;color:var(--ws-steel);font-size:15px}.ws-mission-mark{width:42px;height:42px;border:2px solid var(--ws-navy);border-radius:999px;color:var(--ws-gold);display:grid;place-items:center;font-weight:700}.ws-mission-prompt{display:grid;gap:4px;margin:22px 0 14px}.ws-mission-prompt strong{color:var(--ws-navy);font-size:18px}.ws-mission-prompt span{color:var(--ws-steel);font-size:14px}.ws-mission-options{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:0;padding:0;border:0}.ws-mission-option{position:relative;display:block;min-width:0;min-height:190px;padding:17px 16px 15px;border:1px solid var(--ws-line);border-radius:10px;background:#FAF8F3;cursor:pointer;transition:border-color .16s ease,background .16s ease}.ws-mission-option:hover{border-color:var(--ws-steel)}.ws-mission-option:focus-within{outline:3px solid rgba(238,163,32,.48);outline-offset:2px}.ws-mission-option.ws-selected{border:2px solid var(--ws-navy);background:#FFF8EC;padding:16px 15px 14px}.ws-mission-option>input{position:absolute;opacity:0;pointer-events:none}.ws-mission-radio{position:absolute;right:14px;top:14px;width:22px;height:22px;border:2px solid var(--ws-steel);border-radius:999px;background:#fff}.ws-selected .ws-mission-radio{border:6px solid var(--ws-navy);background:var(--ws-gold)}.ws-mission-option-head{display:flex;justify-content:space-between;gap:38px;align-items:flex-start}.ws-mission-option-head small{display:block;color:var(--ws-gold);font:700 9px 'Roboto Mono',monospace;letter-spacing:.08em;text-transform:uppercase}.ws-mission-option-head strong{display:block;margin-top:4px;color:var(--ws-navy);font:700 19px/1.15 'Playfair Display',serif}.ws-mission-option-head b{display:none}.ws-mission-option ol{display:grid;gap:9px;margin:16px 0 0;padding:0;list-style:none}.ws-mission-option li{display:grid;grid-template-columns:22px 1fr;gap:7px;align-items:start}.ws-mission-task-icon{color:var(--ws-navy);font-size:12px;line-height:18px}.ws-mission-option li strong{display:block;color:var(--ws-navy);font-size:13px;line-height:1.25}.ws-mission-option li small{display:block;margin-top:2px;color:var(--ws-steel);font-size:11px}.ws-mission-action{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:16px;padding-top:16px;border-top:1px solid var(--ws-line)}.ws-mission-action small{display:block;color:var(--ws-gold);font:700 9px 'Roboto Mono',monospace;letter-spacing:.08em;text-transform:uppercase}.ws-mission-action strong{display:block;margin-top:3px;color:var(--ws-navy);font-size:14px}.ws-mission-bonus{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;margin-top:16px;padding:13px 14px;border-radius:8px;background:#FAF8F3;color:var(--ws-navy)}.ws-mission-star{color:var(--ws-gold);font-size:23px}.ws-mission-bonus small{display:block;margin-bottom:3px;color:var(--ws-gold);font:700 9px 'Roboto Mono',monospace;letter-spacing:.08em;text-transform:uppercase}.ws-mission-bonus span span{font-size:13px;line-height:1.35}.ws-mission-bonus b{color:var(--ws-steel);font:700 11px 'Roboto Mono',monospace;white-space:nowrap}.ws-mission-complete{display:grid;gap:4px;margin-top:20px;padding:16px;border-radius:9px;background:#F6FBF7;color:var(--ws-navy)}.ws-mission-complete span{color:var(--ws-steel)}",
       ".ws-practice-reminder{margin:24px 0;background:#fff7e8;border:1px solid rgba(238,163,32,.35);border-radius:10px;padding:14px 16px;color:var(--ws-navy);font-weight:700}.ws-practice-reminder a{color:var(--ws-navy);text-decoration:underline;text-underline-offset:3px}.ws-practice-list{display:grid;gap:18px}.ws-practice-card{background:#fff;border:1px solid var(--ws-line);border-radius:12px;overflow:hidden}.ws-practice-head{width:100%;border:0;background:#fff;display:grid;grid-template-columns:1fr auto;gap:14px;padding:22px 22px 12px;text-align:left;cursor:pointer}.ws-practice-head h3{margin:6px 0;color:var(--ws-navy);font:700 30px 'Playfair Display',serif}.ws-practice-head p{margin:0;color:var(--ws-steel);line-height:1.45}.ws-practice-chevron{width:26px;height:26px;border-radius:6px;background:var(--ws-gold);color:#fff;display:inline-grid;place-items:center;font:700 20px/1 Lato,sans-serif}.ws-practice-body{display:none;padding:0 22px 22px}.ws-practice-card.ws-open .ws-practice-body{display:block}.ws-exercise-tabs{display:flex;gap:22px;border-bottom:2px solid var(--ws-line);margin:10px 0 8px}.ws-exercise-tab{border:0;border-bottom:3px solid transparent;background:transparent;color:#9a9a9a;display:inline-flex;align-items:center;gap:8px;padding:12px 0 11px;font:700 12px 'Roboto Mono',monospace;letter-spacing:.08em;text-transform:uppercase;cursor:pointer}.ws-exercise-tab.ws-active{color:var(--ws-navy);border-bottom-color:var(--ws-gold)}.ws-tab-badge{width:22px;height:22px;border-radius:999px;background:#e8e0d4;color:#9a9a9a;display:inline-grid;place-items:center;font:700 11px Lato,sans-serif}.ws-exercise-tab.ws-active .ws-tab-badge{background:var(--ws-gold);color:#fff}.ws-tab-hint{margin:0 0 18px;color:#9a9a9a;font:700 9px 'Roboto Mono',monospace;letter-spacing:.08em}.ws-tab-hint span{color:var(--ws-gold)}.ws-practice-pane{display:none}.ws-practice-pane.ws-active{display:block}.ws-before-block{background:var(--ws-cream);border:1px solid var(--ws-line);border-radius:10px;padding:18px;margin-bottom:16px}.ws-before-block h4,.ws-ai-context h4{margin:0 0 10px;font:700 12px 'Roboto Mono',monospace;letter-spacing:.12em;text-transform:uppercase}.ws-before-block h4{color:var(--ws-navy)}.ws-before-block p{margin:0;line-height:1.5}.ws-practice-pane .ws-context-embed{margin-bottom:16px}.ws-practice-pane .ws-button{width:100%}.ws-ai-context{background:var(--ws-navy);color:#fff;border-radius:10px;padding:20px 22px;margin-bottom:16px}.ws-ai-context h4{color:rgba(255,255,255,.62)}.ws-ai-context p{margin:0;color:#fff;line-height:1.55}.ws-ai-link-card{min-height:92px;border:2px solid var(--ws-line);border-radius:10px;background:#fff;color:var(--ws-navy);display:grid;grid-template-columns:54px 1fr auto;align-items:center;gap:16px;padding:16px 20px;margin-bottom:16px;text-decoration:none}.ws-ai-link-card:hover{border-color:var(--ws-gold)}.ws-ai-icon{width:42px;height:42px;border-radius:8px;background:#f3eee6;display:grid;place-items:center;font-size:22px}.ws-ai-link-card strong{display:block;color:var(--ws-navy);font-size:16px}.ws-ai-link-card small{display:block;color:var(--ws-charcoal);font-weight:700;margin-top:3px}.ws-ai-arrow{color:var(--ws-gold);font-size:22px}.ws-button-gold{background:var(--ws-gold);border-color:var(--ws-gold);color:#fff}.ws-button-dashed{background:#fff;border-style:dashed;border-color:rgba(0,51,102,.38);color:var(--ws-navy)}",
       ".ws-button{min-height:44px;border-radius:8px;border:1px solid var(--ws-gold);background:var(--ws-gold);color:var(--ws-navy);font:700 13px Lato,sans-serif;letter-spacing:.04em;text-transform:uppercase;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;padding:0 18px;cursor:pointer}.ws-button:hover{filter:brightness(.97)}.ws-button[disabled],.ws-button.ws-disabled{opacity:.45;cursor:not-allowed;filter:grayscale(.2)}.ws-button-secondary{background:#fff;border-color:rgba(0,51,102,.28);color:var(--ws-navy)}.ws-button-navy{background:var(--ws-navy);border-color:var(--ws-navy);color:#fff}",
       ".ws-progress-card{margin:34px 0 24px;background:#fff;border:1px solid var(--ws-line);border-radius:12px;padding:18px}.ws-progress-row{display:flex;justify-content:space-between;gap:16px;color:var(--ws-navy);font:700 11px 'Roboto Mono',monospace;letter-spacing:.08em;text-transform:uppercase}.ws-progress-track{height:12px;background:#EFE6D8;border-radius:999px;margin-top:12px;overflow:hidden}.ws-progress-fill{height:100%;background:linear-gradient(90deg,var(--ws-gold),#f4c15c);border-radius:999px}",
@@ -1177,6 +1201,7 @@ const UTL_CONTENT = {
       "@media(max-width:768px){.ws-phase-flow{padding:18px}.ws-phase-flow-head{display:grid}.ws-flow-progress{width:max-content}.ws-flow-steps{grid-template-columns:1fr}.ws-flow-actions{display:grid}.ws-flow-actions .ws-button{width:100%}.ws-practice-locked{padding:22px 18px}.ws-practice-locked h2{font-size:28px}.ws-phase-progress-top,.ws-phase-milestones,.ws-progress-split{grid-template-columns:1fr}.ws-phase-percent{width:max-content}.ws-next-action{align-items:flex-start;flex-direction:column}.ws-next-action .ws-button{width:100%}.ws-card-check{width:28px;height:28px}.ws-practice-head{width:calc(100% - 32px);grid-template-columns:auto minmax(0,1fr);margin:16px 16px 0;padding:16px}.ws-practice-state{grid-column:2;justify-self:start;white-space:normal}.ws-practice-card:not(.ws-open) .ws-practice-head{margin-bottom:16px}.ws-practice-body{padding:16px 16px 16px}}",
       "@media(max-width:768px){body.ws-page{background:var(--ws-cream)}.ws-shell{width:calc(100% - 28px)}.ws-nav-inner{height:auto;grid-template-columns:auto 1fr auto;grid-template-rows:auto auto;gap:0 10px;width:100%;padding:8px 12px 0}.ws-brand{grid-column:1;grid-row:1;height:42px;align-items:center}.ws-logo{height:30px}.ws-user{grid-column:3;grid-row:1;height:42px}.ws-user-email{display:none}.ws-avatar{width:36px;height:36px}.ws-links{grid-column:1/-1;grid-row:2;justify-content:flex-start;overflow-x:auto;white-space:nowrap;gap:10px;border-top:1px solid rgba(255,255,255,.14);scrollbar-width:none}.ws-links::-webkit-scrollbar,.ws-lesson-rail::-webkit-scrollbar,.ws-step-tabs-inner::-webkit-scrollbar,.ws-exercise-tabs::-webkit-scrollbar{display:none}.ws-link{min-height:42px;font-size:14px}.ws-sep{opacity:.55}.ws-phase-menu{position:fixed;left:12px;right:12px;top:92px;width:auto}.ws-profile-menu{position:fixed;top:56px;right:12px;left:auto;width:min(270px,calc(100vw - 24px));max-width:none}.ws-main{padding:24px 0 48px}.ws-title{font-size:40px}.ws-subtitle{font-size:17px}.ws-login-wrap{min-height:calc(100svh - 54px);padding:28px 16px}.ws-login-card{padding:28px 24px}.ws-login-card .ws-title{font-size:54px}.ws-login-card .ws-subtitle{font-size:18px}.ws-login-card .ws-google-button{min-height:50px}.ws-journey-head{padding:16px;align-items:start}.ws-journey-title{font-size:25px}.ws-journey-body{padding:0 16px 18px}.ws-journey-map{grid-template-columns:1fr}.ws-journey-step{min-height:0}.ws-journey-actions{display:grid;justify-content:stretch}.ws-journey-cue{justify-content:space-between}.ws-orientation-head{grid-template-columns:1fr auto;align-items:start;padding:16px}.ws-start-badge{width:max-content;margin-bottom:8px}.ws-orientation-title{font-size:18px}.ws-orientation-sub{font-size:15px;line-height:1.35}.ws-orientation-body{padding:0 16px 18px}.ws-orientation-copy{font-size:16px;line-height:1.58}.ws-orientation-copy h3{font-size:28px}.ws-disclosure-icon{width:34px;height:34px}.ws-player-card,.ws-context-embed{border-radius:12px}.ws-player-meta{position:static;padding:12px 14px;background:var(--ws-navy);text-shadow:none}.ws-player-meta h3{font-size:21px}.ws-video-access-help summary{align-items:flex-start;flex-direction:column}.ws-access-top,.ws-access-guide{grid-template-columns:1fr}.ws-access-direct{width:100%;white-space:normal;text-align:center}.ws-how-toggle{padding:12px}.ws-ready-row{align-items:flex-start;font-size:16px;line-height:1.35}.ws-ready-row input{margin-top:3px;flex:0 0 auto}.ws-step-tabs{top:85px}.ws-step-tabs-inner{width:100%;padding:0 12px;overflow-x:auto;scrollbar-width:none;gap:20px}.ws-step-tab{flex:0 0 auto;min-height:42px;font-size:10px}.ws-gold-cta{align-items:flex-start;flex-direction:column}.ws-exercise-tabs{gap:14px;overflow-x:auto;scrollbar-width:none}.ws-exercise-tab{flex:0 0 auto;font-size:10px}.ws-ai-link-card{grid-template-columns:42px 1fr;gap:12px;padding:14px}.ws-ai-arrow{display:none}.ws-phase-card{grid-template-columns:6px 50px 1fr;gap:12px;min-height:150px;padding:18px 14px 18px 0}.ws-phase-actions{grid-column:2/-1;justify-items:start}.ws-phase-number{font-size:46px}.ws-phase-content h2{font-size:27px}.ws-stepper{flex-wrap:wrap}.ws-section{margin-top:24px}.ws-section-head{align-items:flex-start;flex-direction:column}.ws-player-actions{align-items:flex-start;flex-direction:column}.ws-scroll-hint{display:block}.ws-lesson-rail{display:flex;overflow-x:auto;gap:10px;padding-bottom:4px;scrollbar-width:none}.ws-lesson-tile{min-width:124px}.ws-collapsed{grid-template-columns:auto 1fr auto}.ws-collapsed .ws-pill{display:none}.ws-context-toggle{padding:14px}.ws-workbook-card{padding:24px 20px}.ws-workbook-top{font-size:11px;letter-spacing:.1em}.ws-workbook-card h3{font-size:34px}.ws-workbook-card p{font-size:17px}.ws-card-actions .ws-button{width:100%}.ws-exercise-card{grid-template-columns:1fr}.ws-bottom-nav{flex-direction:row}.ws-bottom-nav .ws-button{min-width:0;flex:1;padding:0 10px;font-size:10px}.ws-admin-toggle{grid-template-columns:48px 1fr auto}.ws-save-bar-inner{flex-direction:column;align-items:stretch}.ws-save-row{flex-direction:column}}",
       "@media(max-width:768px){.ws-user{gap:6px}.ws-player-actions{align-items:stretch;padding:14px}.ws-player-actions .ws-button{width:100%;min-height:48px}.ws-player-action-text{font-size:14px}}"
+      ,"@media(max-width:768px){.ws-mission-rail{width:4px}.ws-mission-inner{padding:19px 16px 18px 20px}.ws-mission-preview{margin:-19px -16px 17px -20px;padding:8px 20px}.ws-mission-header h1{font-size:28px}.ws-mission-mark{width:32px;height:32px}.ws-mission-prompt{margin-top:19px}.ws-mission-options{grid-template-columns:1fr;gap:10px}.ws-mission-option{min-height:0}.ws-mission-option-head b{display:block;margin-right:28px;color:var(--ws-steel);font:700 10px 'Roboto Mono',monospace;white-space:nowrap}.ws-mission-option ol{margin-top:12px}.ws-mission-action{align-items:stretch;flex-direction:column}.ws-mission-action .ws-button{width:100%;min-height:48px}.ws-mission-bonus{grid-template-columns:auto 1fr}.ws-mission-bonus>b{grid-column:2}.ws-mission-recognition{line-height:1.45}}@media(prefers-reduced-motion:reduce){.ws-mission-option{transition:none}}"
     ].join("\n");
     document.head.appendChild(style);
   }
@@ -1187,6 +1212,7 @@ const UTL_CONTENT = {
     document.body.innerHTML = navHtml(active) + (subnavHtml || "") + '<main class="ws-main"><div class="ws-shell">' + contentHtml + "</div></main>";
     bindNav();
     renderWorkspaceRewardCluster();
+    checkMissionProgressMoment();
   }
 
   function renderWorkspaceRewardCluster() {
@@ -1249,8 +1275,17 @@ const UTL_CONTENT = {
         }
         return (index ? '<span class="ws-sep">|</span>' : "") + '<a class="ws-link ' + (active === link.key ? "ws-active" : "") + '" href="' + link.href + '">' + link.label + '</a>';
       }).join("") + '</nav>' +
-      '<div class="ws-user">' + (active === "admin" ? "" : '<div id="wsRewardCluster" class="ws-reward-cluster-shell" data-utl-reward-mount aria-label="Learning rewards"></div>') + '<span class="ws-user-email">' + escapeHtml(user.email) + '</span><button class="ws-avatar" type="button" aria-label="Open profile menu" aria-expanded="false">' + avatar + '</button><div class="ws-profile-menu" hidden><div class="ws-profile-head"><span class="ws-profile-avatar">' + avatar + '</span><div><p class="ws-profile-name">' + escapeHtml(user.label) + '</p><p class="ws-profile-role">' + roleLabel + '</p></div></div><div class="ws-profile-section"><span class="ws-profile-section-label">Your space</span><a href="' + appHref("../my-results/index.html") + '"><span class="ws-profile-icon">&#9638;</span><span>My results</span></a><a href="' + appHref("../apps/toolkit/index.html") + '"><span class="ws-profile-icon">&#8962;</span><span>Toolkit</span></a></div><div class="ws-profile-section"><span class="ws-profile-section-label">Program</span><a href="' + publicSiteHref() + '"><span class="ws-profile-icon">&#8599;</span><span>Public website</span></a></div>' + adminSection + '<div class="ws-profile-section"><button class="ws-logout" type="button"><span class="ws-profile-icon">&#8618;</span><span>Log out</span></button></div></div></div>' +
+      '<div class="ws-user">' + (active === "admin" ? "" : missionNavHtml() + '<div id="wsRewardCluster" class="ws-reward-cluster-shell" data-utl-reward-mount aria-label="Learning rewards"></div>') + '<span class="ws-user-email">' + escapeHtml(user.email) + '</span><button class="ws-avatar" type="button" aria-label="Open profile menu" aria-expanded="false">' + avatar + '</button><div class="ws-profile-menu" hidden><div class="ws-profile-head"><span class="ws-profile-avatar">' + avatar + '</span><div><p class="ws-profile-name">' + escapeHtml(user.label) + '</p><p class="ws-profile-role">' + roleLabel + '</p></div></div><div class="ws-profile-section"><span class="ws-profile-section-label">Your space</span><a href="' + appHref("../my-results/index.html") + '"><span class="ws-profile-icon">&#9638;</span><span>My results</span></a><a href="' + appHref("../apps/toolkit/index.html") + '"><span class="ws-profile-icon">&#8962;</span><span>Toolkit</span></a></div><div class="ws-profile-section"><span class="ws-profile-section-label">Program</span><a href="' + publicSiteHref() + '"><span class="ws-profile-icon">&#8599;</span><span>Public website</span></a></div>' + adminSection + '<div class="ws-profile-section"><button class="ws-logout" type="button"><span class="ws-profile-icon">&#8618;</span><span>Log out</span></button></div></div></div>' +
       '</div></header>';
+  }
+
+  function missionNavHtml() {
+    var plan = readDailyMission();
+    var preview = missionPreviewRequested();
+    var progress = plan ? missionProgress(plan) : (preview ? { done: 1, total: 3 } : null);
+    var value = !progress ? "Set" : (progress.total > 0 && progress.done === progress.total ? "&#10003;" : progress.done + ' / ' + progress.total);
+    var aria = !progress ? "Daily mission: not set" : "Daily mission: " + progress.done + " of " + progress.total + " complete";
+    return '<a class="ws-mission-nav" href="' + memberHref("index.html") + (preview ? '?mode=admin&preview=welcome' : '?open=mission') + '#todays-mission" aria-label="' + aria + '"><span>Daily mission:</span><b>' + value + '</b></a>';
   }
 
   function phaseDropdownHtml(link, active) {
@@ -1265,6 +1300,17 @@ const UTL_CONTENT = {
   }
 
   function bindNav() {
+    qsa(".ws-mission-nav").forEach(function (link) {
+      link.addEventListener("click", function (event) {
+        var overlay = qs("[data-mission-overlay]");
+        if (!overlay) return;
+        event.preventDefault();
+        localStorage.removeItem("utl_daily_mission_dismissed");
+        overlay.classList.remove("ws-hidden");
+        var close = qs("[data-mission-close]", overlay);
+        if (close) close.focus();
+      });
+    });
     qsa(".ws-avatar").forEach(function (button) {
       button.addEventListener("click", function () {
         var menu = button.parentElement.querySelector(".ws-profile-menu");
@@ -1706,7 +1752,173 @@ const UTL_CONTENT = {
     var orientationPrompt = orientationDone ? "" : '<div class="ws-orientation-prompt"><span style="font-size:18px;flex-shrink:0">&#9888;</span><span>Complete orientation before starting Phase 1 — it sets up the storyline and context for all exercises. <a href="#orientation">Open orientation &uarr;</a></span></div>';
     var allDone = phases.every(function (pk) { return exercisesDone(pk); });
     var certSection = allDone ? '<section class="ws-section"><div class="ws-section-head"><h2>Your certificate</h2></div><article class="ws-phase-card"><div class="ws-phase-stripe" style="background:#2C7A4B"></div><div class="ws-phase-number" style="color:rgba(44,122,75,.15)">&#10003;</div><div class="ws-phase-content"><span class="ws-kicker">Complete</span><h2>Certificate of completion</h2><p>You have finished the full program. Download or share your certificate.</p></div><div class="ws-phase-actions"><span class="ws-pill ws-pill-green">Done</span><a class="ws-button" href="../certificate/index.html">View certificate &rarr;</a></div></article></section>' : "";
-    return '<div class="ws-home-stack">' + learningJourneyCardHtml(progress, orientationDone) + orientationCardHtml() + orientationPrompt + '<section id="learning-journey"><div class="ws-section-head"><h2>Your learning journey</h2><span class="ws-count">' + progress.done + ' of ' + progress.total + ' complete</span></div><section class="ws-progress-card"><div class="ws-progress-row"><span>Overall progress</span><span>' + progress.percent + '%</span></div><div class="ws-progress-track"><div class="ws-progress-fill" style="width:' + progress.percent + '%"></div></div></section><section class="ws-phase-list">' + phases.map(phaseJourneyCard).join("") + '</section></section>' + certSection + assessmentsSection() + '</div>';
+    return '<div class="ws-home-stack">' + dailyWelcomePopupHtml(progress) + learningJourneyCardHtml(progress, orientationDone) + orientationCardHtml() + orientationPrompt + '<section id="learning-journey"><div class="ws-section-head"><h2>Your learning journey</h2><span class="ws-count">' + progress.done + ' of ' + progress.total + ' complete</span></div><section class="ws-progress-card"><div class="ws-progress-row"><span>Overall progress</span><span>' + progress.percent + '%</span></div><div class="ws-progress-track"><div class="ws-progress-fill" style="width:' + progress.percent + '%"></div></div></section><section class="ws-phase-list">' + phases.map(phaseJourneyCard).join("") + '</section></section>' + certSection + assessmentsSection() + '</div>';
+  }
+
+  function missionDayKey() {
+    var now = new Date();
+    return now.getFullYear() + "-" + String(now.getMonth() + 1).padStart(2, "0") + "-" + String(now.getDate()).padStart(2, "0");
+  }
+
+  function readDailyMission() {
+    try {
+      var plan = JSON.parse(localStorage.getItem("utl_daily_mission_plan") || "null");
+      return plan && plan.date === missionDayKey() ? plan : null;
+    } catch (error) { return null; }
+  }
+
+  function missionTaskIsDone(task) {
+    if (!task) return false;
+    if (task.manual) return Boolean(task.complete);
+    if (task.type === "Video") return readBool(watchedKey(task.id));
+    if (Array.isArray(task.doneKeys) && task.doneKeys.some(function (key) { return readBool(key); })) return true;
+    var exercise = null;
+    phases.some(function (phaseKey) {
+      exercise = getPhase(phaseKey).exercises.filter(function (item) { return item.id === task.id; })[0] || null;
+      return Boolean(exercise);
+    });
+    return exercise ? exerciseDone(exercise) : false;
+  }
+
+  function missionProgress(plan) {
+    var tasks = plan && Array.isArray(plan.tasks) ? plan.tasks : [];
+    var done = tasks.filter(missionTaskIsDone).length;
+    return { done: done, total: tasks.length };
+  }
+
+  function checkMissionProgressMoment() {
+    var plan = readDailyMission();
+    if (!plan) return;
+    var progress = missionProgress(plan);
+    var previous = Number(plan.lastSeenDone || 0);
+    if (progress.done <= previous) return;
+    plan.lastSeenDone = progress.done;
+    localStorage.setItem("utl_daily_mission_plan", JSON.stringify(plan));
+    setTimeout(function () {
+      showWorkspaceRewardMoment({
+        label: progress.done === progress.total ? "Mission complete" : "Activity complete",
+        title: progress.done === progress.total ? "You completed today\'s mission" : progress.done + " of " + progress.total + " complete",
+        body: progress.done === progress.total ? "You accomplished what you committed to today." : "Nice work. Continue when you are ready for the next activity."
+      });
+    }, 250);
+  }
+
+  function dailyWelcomePopupHtml(progress) {
+    var card = dailyWelcomeCardHtml(progress);
+    if (!card) return "";
+    var openRequested = new URLSearchParams(window.location.search || "").get("open") === "mission";
+    var dismissed = localStorage.getItem("utl_daily_mission_dismissed") === missionDayKey() && !openRequested;
+    return '<div class="ws-mission-overlay ' + (dismissed && !missionPreviewRequested() ? "ws-hidden" : "") + '" id="todays-mission" data-mission-overlay><div class="ws-mission-dialog" role="dialog" aria-modal="true" aria-labelledby="ws-mission-title"><button class="ws-mission-close" type="button" data-mission-close aria-label="Close Today\'s Mission">&times;</button>' + card + '</div></div>';
+  }
+
+  function durationSecondsFromLabel(label) {
+    var value = String(label || "");
+    var minutes = Number((value.match(/(\d+)\s*min/) || [0, 0])[1]);
+    var seconds = Number((value.match(/(\d+)\s*sec/) || [0, 0])[1]);
+    return (minutes * 60) + seconds;
+  }
+
+  function missionPreviewRequested() {
+    var params = new URLSearchParams(window.location.search || "");
+    return adminPreviewMode() && params.get("preview") === "welcome";
+  }
+
+  function missionTaskPool() {
+    var tasks = [];
+    phases.forEach(function (phaseKey) {
+      if (!phaseUnlocked(phaseKey)) return;
+      orderedLessons(phaseKey).forEach(function (lesson) {
+        if (readBool(watchedKey(lesson.id))) return;
+        var seconds = durationSecondsFromLabel(lesson.duration);
+        tasks.push({ id: lesson.id, type: "Video", title: lesson.title, minutes: Math.max(1, Math.ceil(seconds / 60)), durationLabel: lesson.duration, href: phaseFiles[phaseKey] + "#lessons", phaseKey: phaseKey, mp: VIDEO_COMPLETE_MP });
+      });
+      getPhase(phaseKey).exercises.forEach(function (exercise) {
+        if (exerciseDone(exercise)) return;
+        tasks.push({ id: exercise.id, type: "Exercise", title: exercise.title, minutes: Math.max(1, Number(exercise.estimatedMinutes || 0)), durationLabel: "About " + Number(exercise.estimatedMinutes || 0) + " min", href: exercise.appUrl, phaseKey: phaseKey, mp: 0, doneKeys: [doneKey(exercise.id), exercise.legacyDoneKey].filter(Boolean) });
+      });
+    });
+    if (!tasks.length && missionPreviewRequested()) {
+      var previewPhase = getPhase("phase1");
+      tasks = orderedLessons("phase1").slice(0, 2).map(function (lesson) {
+        var seconds = durationSecondsFromLabel(lesson.duration);
+        return { id: lesson.id, type: "Video", title: lesson.title, minutes: Math.ceil(seconds / 60), durationLabel: lesson.duration, href: phaseFiles.phase1 + "#lessons", phaseKey: "phase1", mp: VIDEO_COMPLETE_MP };
+      });
+      tasks.push({ id: previewPhase.exercises[0].id, type: "Exercise", title: previewPhase.exercises[0].title, minutes: previewPhase.exercises[0].estimatedMinutes, durationLabel: "About " + previewPhase.exercises[0].estimatedMinutes + " min", href: previewPhase.exercises[0].appUrl, phaseKey: "phase1", mp: 0 });
+    }
+    return tasks;
+  }
+
+  function missionOption(tasks, target, label, descriptor) {
+    var selected = [];
+    var total = 0;
+    tasks.some(function (task) {
+      if (selected.length && total + task.minutes > target) return true;
+      selected.push(task);
+      total += task.minutes;
+      return false;
+    });
+    if (!selected.length && tasks[0]) { selected.push(tasks[0]); total = tasks[0].minutes; }
+    return { target: target, label: label, descriptor: descriptor, tasks: selected, minutes: total };
+  }
+
+  function uniqueMissionOptions(tasks) {
+    var seen = {};
+    return [missionOption(tasks, 15, "About 15 minutes", "Quick start"), missionOption(tasks, 30, "About 30 minutes", "Focused session"), missionOption(tasks, 45, "About 45 minutes", "Deep dive")].filter(function (option) {
+      var signature = option.tasks.map(function (task) { return task.id; }).join("|");
+      if (seen[signature]) return false;
+      seen[signature] = true;
+      return true;
+    });
+  }
+
+  function missionOptionHtml(option, index, selectedTarget) {
+    var checked = Number(selectedTarget) === option.target;
+    var rows = option.tasks.map(function (task) {
+      return '<li><span class="ws-mission-task-icon" aria-hidden="true">' + (task.type === "Video" ? "&#9654;" : "&#9633;") + '</span><span><strong>' + escapeHtml(task.title) + '</strong><small>' + escapeHtml(task.type) + ' &middot; ' + escapeHtml(task.durationLabel) + '</small></span></li>';
+    }).join("");
+    return '<label class="ws-mission-option ' + (checked ? "ws-selected" : "") + '"><input type="radio" name="wsMissionPlan" value="' + option.target + '" ' + (checked ? "checked" : "") + '><span class="ws-mission-radio" aria-hidden="true"></span><span class="ws-mission-option-head"><span><small>' + escapeHtml(option.descriptor) + '</small><strong>About ' + option.minutes + ' minutes</strong></span><b>~' + option.minutes + ' min</b></span><ol>' + rows + '</ol></label>';
+  }
+
+  function challengeFlowCardHtml(task, firstName) {
+    var preparing = task.stage === "prepare";
+    var choices = preparing ? task.preChoices : task.postChoices;
+    var prompt = preparing ? task.prePrompt : task.postPrompt;
+    var savedIntention = task.intention ? '<p class="ws-challenge-intention">You planned to: <strong>' + escapeHtml(task.intention) + '</strong></p>' : "";
+    return '<article class="ws-mission-card"><div class="ws-mission-rail"></div><div class="ws-mission-inner"><span class="ws-kicker">Optional challenge</span><h1 id="ws-mission-title">' + (preparing ? "Set your intention, " + escapeHtml(firstName) + "." : "How did the challenge go?") + '</h1><p class="ws-mission-recognition">' + (preparing ? "A quick commitment makes it easier to follow through." : "Reflect briefly before completing today’s mission.") + '</p>' + savedIntention + '<form class="ws-challenge-form" data-challenge-' + (preparing ? "prepare" : "reflect") + '><fieldset><legend>' + escapeHtml(prompt) + '</legend>' + choices.map(function (choice, index) { return '<label><input type="radio" name="challengeChoice" value="' + escapeHtml(choice) + '" ' + (index === 0 ? "required" : "") + '><span>' + escapeHtml(choice) + '</span></label>'; }).join("") + '</fieldset><label class="ws-challenge-note"><span>' + (preparing ? "What specifically will you do differently? (optional)" : "What changed in your response? (optional)") + '</span><textarea name="challengeNote" rows="3"></textarea></label><div class="ws-mission-action"><button class="ws-button ws-button-secondary" type="button" ' + (preparing ? "data-challenge-back" : "data-mission-close") + '>' + (preparing ? "Back" : "Finish later") + '</button><button class="ws-button" type="submit">' + (preparing ? "Commit and reopen exercise →" : "Complete challenge") + '</button></div></form></div></article>';
+  }
+
+  function dailyWelcomeCardHtml(progress) {
+    if (localStorage.getItem("utl_daily_welcome_card") === "hide" && !missionPreviewRequested()) return "";
+    var tasks = missionTaskPool();
+    var user = currentUser();
+    var firstName = String(user.label || "there").split(/[\s@]/)[0] || "there";
+    var reward = readRewardState();
+    var streakSummary = reward.streakDays > 0 ? ' &middot; ' + reward.streakDays + '-day streak' : '';
+    var activePlan = readDailyMission();
+    if (activePlan && !missionPreviewRequested()) {
+      var activeProgress = missionProgress(activePlan);
+      var nextTask = activePlan.tasks.filter(function (task) { return !missionTaskIsDone(task); })[0] || null;
+      if (nextTask && nextTask.manual && (nextTask.stage === "prepare" || nextTask.stage === "active")) return challengeFlowCardHtml(nextTask, firstName);
+      var planRows = activePlan.tasks.map(function (task, index) {
+        var done = missionTaskIsDone(task);
+        return '<li class="' + (done ? "ws-done" : "") + '"><span aria-hidden="true">' + (done ? "&#10003;" : (index + 1)) + '</span><span><strong>' + escapeHtml(task.title) + '</strong><small>' + escapeHtml(task.type) + ' &middot; About ' + Number(task.minutes || 0) + ' min</small></span>' + (task.manual && !done ? '<button type="button" data-mission-start-challenge>Start challenge</button>' : '') + '</li>';
+      }).join("");
+      return '<article class="ws-mission-card"><div class="ws-mission-rail"></div><div class="ws-mission-inner">' + (missionPreviewRequested() ? '<div class="ws-mission-preview">Admin preview &middot; changes stay in this browser</div>' : '') + '<header class="ws-mission-header"><div><span class="ws-kicker">Today\'s mission</span><h1 id="ws-mission-title">' + (activeProgress.done === activeProgress.total ? "Mission complete." : "Keep going, " + escapeHtml(firstName) + ".") + '</h1><p class="ws-mission-recognition">' + activeProgress.done + ' of ' + activeProgress.total + ' activities complete</p></div></header><ol class="ws-mission-checklist">' + planRows + '</ol><div class="ws-mission-action"><span><small>Today\'s progress</small><strong>' + (activeProgress.done === activeProgress.total ? "You accomplished what you set out to do." : (activeProgress.total - activeProgress.done) + " activities remaining") + '</strong></span><div class="ws-mission-action-buttons">' + (activeProgress.done === 0 ? '<button class="ws-button ws-button-secondary" type="button" data-mission-change>Change mission</button>' : '') + (nextTask ? (nextTask.manual ? '<button class="ws-button" type="button" data-mission-start-challenge>Start challenge &rarr;</button>' : '<a class="ws-button" href="' + escapeHtml(nextTask.href) + '">Continue mission &rarr;</a>') : '<button class="ws-button" type="button" data-mission-close>Done</button>') + '</div></div></div></article>';
+    }
+    if (!tasks.length) {
+      return '<article class="ws-mission-card"><div class="ws-mission-rail"></div><div class="ws-mission-inner"><span class="ws-kicker">Today\'s mission</span><h1>Welcome back, ' + escapeHtml(firstName) + '.</h1><p class="ws-mission-recognition">' + reward.mpTotal + ' MP &middot; ' + escapeHtml(reward.level) + streakSummary + ' &middot; ' + progress.done + ' activities complete</p><div class="ws-mission-complete"><strong>Your core program work is complete.</strong><span>Use your results and toolkit to keep applying what you learned.</span></div></div></article>';
+    }
+    var storedTarget = Number(localStorage.getItem("utl_daily_mission_target") || 30);
+    var options = uniqueMissionOptions(tasks);
+    if (!options.some(function (option) { return option.target === storedTarget; })) storedTarget = (options[1] || options[0]).target;
+    var selected = options.filter(function (option) { return option.target === storedTarget; })[0] || options[0];
+    var nextPhase = phaseLabels[tasks[0].phaseKey] + " · " + getPhase(tasks[0].phaseKey).title;
+    var completedExercise = null;
+    phases.forEach(function (phaseKey) { getPhase(phaseKey).exercises.forEach(function (exercise) { if (exerciseDone(exercise)) completedExercise = exercise; }); });
+    var challenge = completedExercise
+      ? 'Revisit <strong>' + escapeHtml(completedExercise.title) + '</strong> and improve or tighten your response.'
+      : 'After your plan, write down one way you can apply today\'s idea at work.';
+    return '<article class="ws-mission-card"><div class="ws-mission-rail"></div><div class="ws-mission-inner">' + (missionPreviewRequested() ? '<div class="ws-mission-preview">Admin preview &middot; changes stay in this browser</div>' : '') + '<header class="ws-mission-header"><div><span class="ws-kicker">Today\'s mission</span><h1 id="ws-mission-title">Welcome back, ' + escapeHtml(firstName) + '.</h1><p class="ws-mission-recognition">' + reward.mpTotal + ' MP &middot; ' + escapeHtml(reward.level) + streakSummary + ' &middot; ' + progress.done + ' activities complete</p></div></header><div class="ws-mission-prompt"><strong>How much would you like to accomplish today?</strong><span>Next up: ' + escapeHtml(nextPhase) + '. Choose a plan based on the work ahead.</span></div><fieldset class="ws-mission-options"><legend class="ws-hidden">Choose today\'s mission length</legend>' + options.map(function (option, index) { return missionOptionHtml(option, index, storedTarget); }).join("") + '</fieldset><div class="ws-mission-action" aria-live="polite"><span><small>Your plan</small><strong data-mission-summary>About ' + selected.minutes + ' minutes &middot; ' + selected.tasks.length + ' activit' + (selected.tasks.length === 1 ? 'y' : 'ies') + '</strong></span><a class="ws-button" data-mission-start href="' + escapeHtml(selected.tasks[0].href) + '">Start today\'s mission &rarr;</a></div><label class="ws-mission-bonus"><input type="checkbox" data-mission-challenge data-challenge-title="' + escapeHtml(completedExercise ? "Revisit " + completedExercise.title : "Apply today\'s idea at work") + '" data-challenge-href="' + escapeHtml(completedExercise ? completedExercise.appUrl : memberHref("index.html")) + '"><span><small>Optional challenge</small><span>' + challenge + '</span></span><b>+10 min</b></label></div></article>';
   }
 
   function learningJourneyCardHtml(progress, orientationDone) {
@@ -1899,7 +2111,7 @@ const UTL_CONTENT = {
 
     function applyWithSettings(inApp) {
       var s = Object.assign({}, defaults, inApp || {});
-      if (s.continueCard && continueTarget) insertContinueCard(stack, continueTarget);
+      if (s.continueCard && continueTarget && !qs(".ws-mission-card", stack)) insertContinueCard(stack, continueTarget);
       if (s.daysSinceBanner && lastVisit > 0 && daysSince >= Number(s.daysSinceThreshold || 5)) insertDaysSinceBanner(stack, daysSince);
       if (s.almostThere) applyAlmostThere(Number(s.almostThereThreshold || 2));
       if (s.phaseCompletionModal && newlyComplete.length) {
@@ -1981,6 +2193,105 @@ const UTL_CONTENT = {
   // ===== End assessment visibility =====
 
   function bindHomePage() {
+    var missionOverlay = qs("[data-mission-overlay]");
+    function closeMissionPopup() {
+      if (!missionOverlay) return;
+      missionOverlay.classList.add("ws-hidden");
+      localStorage.setItem("utl_daily_mission_dismissed", missionDayKey());
+    }
+    qsa("[data-mission-close]").forEach(function (button) { button.addEventListener("click", closeMissionPopup); });
+    if (missionOverlay) missionOverlay.addEventListener("click", function (event) { if (event.target === missionOverlay) closeMissionPopup(); });
+
+    function selectedMissionOption() {
+      var selectedRadio = qs('input[name="wsMissionPlan"]:checked');
+      var target = Number(selectedRadio ? selectedRadio.value : 30);
+      return uniqueMissionOptions(missionTaskPool()).filter(function (option) { return option.target === target; })[0] || missionOption(missionTaskPool(), target, "", "");
+    }
+    function refreshMissionSummary() {
+      var option = selectedMissionOption();
+      var challenge = qs("[data-mission-challenge]");
+      var extra = challenge && challenge.checked ? 10 : 0;
+      var count = option.tasks.length + (extra ? 1 : 0);
+      var summary = qs("[data-mission-summary]");
+      if (summary) summary.textContent = "About " + (option.minutes + extra) + " minutes · " + count + " activit" + (count === 1 ? "y" : "ies");
+      var start = qs("[data-mission-start]");
+      if (start && option.tasks[0]) start.href = option.tasks[0].href;
+    }
+    qsa('input[name="wsMissionPlan"]').forEach(function (radio) {
+      radio.addEventListener("change", function () {
+        var target = Number(radio.value);
+        localStorage.setItem("utl_daily_mission_target", String(target));
+        qsa(".ws-mission-option").forEach(function (card) {
+          card.classList.toggle("ws-selected", Boolean(card.querySelector("input:checked")));
+        });
+        refreshMissionSummary();
+      });
+    });
+    var missionChallenge = qs("[data-mission-challenge]");
+    if (missionChallenge) missionChallenge.addEventListener("change", refreshMissionSummary);
+    var missionStart = qs("[data-mission-start]");
+    if (missionStart) missionStart.addEventListener("click", function () {
+      var option = selectedMissionOption();
+      var planTasks = option.tasks.map(function (task) { return Object.assign({}, task); });
+      if (missionChallenge && missionChallenge.checked) {
+        planTasks.push({ id: "challenge:" + missionDayKey(), type: "Challenge", title: missionChallenge.dataset.challengeTitle, href: missionChallenge.dataset.challengeHref, minutes: 10, manual: true, complete: false, stage: "pending", prePrompt: "What do you want to improve this time?", preChoices: ["Make my structure clearer", "Make my response more concise", "Strengthen my recommendation", "Try a different approach"], postPrompt: "How did it go?", postChoices: ["I made a clear improvement", "I improved it somewhat", "I need another attempt"] });
+      }
+      localStorage.setItem("utl_daily_mission_plan", JSON.stringify({ date: missionDayKey(), target: option.target, tasks: planTasks, lastSeenDone: 0 }));
+      localStorage.setItem("utl_daily_mission_dismissed", missionDayKey());
+    });
+    qsa("[data-mission-start-challenge]").forEach(function (button) { button.addEventListener("click", function () {
+      var plan = readDailyMission();
+      if (!plan) return;
+      plan.tasks.forEach(function (task) { if (task.manual) task.stage = "prepare"; });
+      localStorage.setItem("utl_daily_mission_plan", JSON.stringify(plan));
+      renderIndex();
+    }); });
+    var challengePrepare = qs("[data-challenge-prepare]");
+    if (challengePrepare) challengePrepare.addEventListener("submit", function (event) {
+      event.preventDefault();
+      var choice = new FormData(challengePrepare).get("challengeChoice");
+      if (!choice) return;
+      var plan = readDailyMission();
+      var challengeTask = plan && plan.tasks.filter(function (task) { return task.manual; })[0];
+      if (!challengeTask) return;
+      challengeTask.intention = String(choice);
+      challengeTask.preNote = String(new FormData(challengePrepare).get("challengeNote") || "");
+      challengeTask.stage = "active";
+      localStorage.setItem("utl_daily_mission_plan", JSON.stringify(plan));
+      window.location.href = challengeTask.href;
+    });
+    var challengeReflect = qs("[data-challenge-reflect]");
+    if (challengeReflect) challengeReflect.addEventListener("submit", function (event) {
+      event.preventDefault();
+      var data = new FormData(challengeReflect);
+      var choice = data.get("challengeChoice");
+      if (!choice) return;
+      var plan = readDailyMission();
+      var challengeTask = plan && plan.tasks.filter(function (task) { return task.manual; })[0];
+      if (!challengeTask) return;
+      challengeTask.outcome = String(choice);
+      challengeTask.postNote = String(data.get("challengeNote") || "");
+      challengeTask.complete = true;
+      challengeTask.stage = "complete";
+      localStorage.setItem("utl_daily_mission_plan", JSON.stringify(plan));
+      renderIndex();
+    });
+    var challengeBack = qs("[data-challenge-back]");
+    if (challengeBack) challengeBack.addEventListener("click", function () {
+      var plan = readDailyMission();
+      if (!plan) return;
+      plan.tasks.forEach(function (task) { if (task.manual) task.stage = "pending"; });
+      localStorage.setItem("utl_daily_mission_plan", JSON.stringify(plan));
+      renderIndex();
+    });
+    var changeMission = qs("[data-mission-change]");
+    if (changeMission) changeMission.addEventListener("click", function () {
+      var plan = readDailyMission();
+      if (plan && missionProgress(plan).done > 0) return;
+      localStorage.removeItem("utl_daily_mission_plan");
+      localStorage.removeItem("utl_daily_mission_dismissed");
+      renderIndex();
+    });
     var journeyToggle = qs("[data-journey-toggle]");
     var journeyCard = qs(".ws-journey-card");
     if (journeyToggle && journeyCard) {

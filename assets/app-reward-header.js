@@ -1,5 +1,38 @@
 (function () {
   var REWARD_STATE_KEY = "utl_rewards_state";
+  var DAILY_MISSION_KEY = "utl_daily_mission_plan";
+
+  function localDateString() {
+    var now = new Date();
+    return now.getFullYear() + "-" + String(now.getMonth() + 1).padStart(2, "0") + "-" + String(now.getDate()).padStart(2, "0");
+  }
+
+  function readDailyMission() {
+    try {
+      var plan = JSON.parse(localStorage.getItem(DAILY_MISSION_KEY) || "null");
+      return plan && plan.date === localDateString() ? plan : null;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  function missionTaskDone(task) {
+    if (!task) return false;
+    if (task.manual) return Boolean(task.complete);
+    if (task.type === "Video") return localStorage.getItem("utl_watched_" + task.id) === "true";
+    if (Array.isArray(task.doneKeys) && task.doneKeys.some(function (key) { return localStorage.getItem(key) === "true"; })) return true;
+    return localStorage.getItem("utl_done_" + task.id) === "true";
+  }
+
+  function missionLinkHtml() {
+    var plan = readDailyMission();
+    var hasPlan = plan && Array.isArray(plan.tasks) && plan.tasks.length;
+    var done = hasPlan ? plan.tasks.filter(missionTaskDone).length : 0;
+    var total = hasPlan ? plan.tasks.length : 0;
+    var value = !hasPlan ? "Set" : (done === total ? "&#10003;" : done + " / " + total);
+    var aria = !hasPlan ? "Daily mission: not set" : "Daily mission: " + done + " of " + total + " complete";
+    return '<a class="utl-app-mission" href="../../member-login/index.html?open=mission#todays-mission" aria-label="' + aria + '"><span>Daily mission:</span><b>' + value + '</b></a>';
+  }
 
   function loadRewardUi() {
     if (window.UTLRewardUI) return Promise.resolve(window.UTLRewardUI);
@@ -34,9 +67,13 @@
     style.id = "utl-app-reward-header-styles";
     style.textContent = [
       ".utl-app-rewards-attached{grid-template-columns:auto auto minmax(180px,1fr) auto auto!important}",
+      ".utl-app-engagement{display:flex;align-items:center;justify-self:end;gap:8px;min-width:0}",
       ".utl-app-reward-mount{justify-self:end}",
       ".utl-app-reward-mount .utl-reward-cluster{min-height:42px;border-radius:8px}",
-      "@media(max-width:1100px){.utl-app-reward-mount{display:none}}"
+      ".utl-app-mission{display:inline-flex;align-items:center;gap:7px;min-height:38px;padding:0 11px;border:1px solid rgba(238,163,32,.65);border-radius:999px;color:#fff;text-decoration:none;font:700 10px 'Roboto Mono',monospace;white-space:nowrap}",
+      ".utl-app-mission b{color:#EEA320}",
+      "@media(max-width:1100px){.utl-app-reward-mount{display:none}.utl-app-mission span{display:none}.utl-app-mission{min-width:42px;justify-content:center;padding:0 8px}}",
+      "@media(max-width:620px){.utl-app-engagement{gap:4px}.utl-app-mission{min-height:34px;font-size:9px}}"
     ].join("\n");
     document.head.appendChild(style);
   }
@@ -54,14 +91,18 @@
     ].join(","));
     if (!header) return;
     if (header.querySelector(".header-gamification-cluster")) return;
-    if (header.querySelector(".utl-app-reward-mount")) return;
+    if (header.querySelector(".utl-app-engagement")) return;
     injectStyles();
+    var engagement = document.createElement("div");
+    engagement.className = "utl-app-engagement";
+    engagement.innerHTML = missionLinkHtml();
     var mount = document.createElement("div");
     mount.className = "utl-app-reward-mount";
     mount.setAttribute("data-utl-reward-mount", "");
     mount.setAttribute("aria-label", "Learning rewards");
+    engagement.appendChild(mount);
     var timer = header.querySelector(".app-timer");
-    header.insertBefore(mount, timer || null);
+    header.insertBefore(engagement, timer || null);
     header.classList.add("utl-app-rewards-attached");
     loadRewardUi()
       .then(function (rewardUi) {
@@ -69,7 +110,7 @@
       })
       .catch(function (error) {
         console.warn("App reward header failed to load.", error);
-        mount.remove();
+        engagement.remove();
         header.classList.remove("utl-app-rewards-attached");
       });
   }
