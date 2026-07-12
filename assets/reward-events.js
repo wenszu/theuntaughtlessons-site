@@ -183,7 +183,7 @@
       });
     } else if (!document.querySelector("script[data-utl-reward-ui-loader]")) {
       const script = document.createElement("script");
-      script.src = "../../assets/reward-ui.js?v=20260710-rewards-ui-5";
+      script.src = "../../assets/reward-ui.js?v=20260711-rewards-ui-8";
       script.defer = true;
       script.dataset.utlRewardUiLoader = "true";
       script.addEventListener("load", () => showRewardMoment(detail, previousState, nextState), { once: true });

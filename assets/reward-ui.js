@@ -62,6 +62,7 @@
       tokens: Math.max(0, Math.round(numberOr(safe.tokens, 0))),
       streakDays: Math.max(0, Math.round(numberOr(safe.streakDays, 0))),
       streak: safe.streak && typeof safe.streak === "object" ? safe.streak : {},
+      ledger: Array.isArray(safe.ledger) ? safe.ledger : [],
       level: level.current.name,
       currentThreshold: level.current.threshold,
       nextLevel: level.next ? level.next.name : "",
@@ -78,7 +79,7 @@
       ".utl-reward-cluster{--reward-navy:#003366;--reward-gold:#EEA320;--reward-soft:#1F4F80;--reward-line:rgba(255,255,255,.18);display:flex;align-items:center;gap:8px;min-height:36px;padding:5px 6px;border:1px solid var(--reward-line);border-radius:12px;background:rgba(255,255,255,.08);color:#fff;box-shadow:inset 0 -1px 0 rgba(255,255,255,.07)}",
       ".utl-reward-item{position:relative;display:inline-flex;align-items:center;gap:7px;min-height:28px;border-radius:9px;padding:5px 9px;color:#fff;font:700 13px Lato,Arial,sans-serif;white-space:nowrap}",
       ".utl-reward-item.is-emphasis{background:rgba(255,255,255,.12);color:var(--reward-gold);font-family:'Roboto Mono',monospace;letter-spacing:.02em}",
-      ".utl-reward-level{max-width:118px;overflow:hidden;text-overflow:ellipsis;color:rgba(255,255,255,.92)}",
+      ".utl-reward-level{max-width:none;overflow:visible;color:rgba(255,255,255,.92)}.utl-reward-level>span:first-child{display:block;max-width:118px;overflow:hidden;text-overflow:ellipsis}",
       ".utl-reward-level strong{color:#fff}",
       ".utl-reward-icon{display:inline-flex;align-items:center;justify-content:center;min-width:16px;color:var(--reward-gold);line-height:1}",
       ".utl-reward-mp-number{display:inline-block;min-width:2ch;text-align:right;transition:transform .18s ease,color .18s ease}",
@@ -89,6 +90,8 @@
       ".utl-reward-popover span{display:block;margin-bottom:6px;color:var(--reward-gold);font:700 10px 'Roboto Mono',monospace;letter-spacing:.14em;text-transform:uppercase}",
       ".utl-reward-popover strong{display:block;color:var(--reward-navy);font:700 18px Lato,Arial,sans-serif;line-height:1.18}",
       ".utl-reward-popover p{margin:7px 0 0;color:#4D7094;font:700 13px/1.42 Lato,Arial,sans-serif}",
+      ".utl-level-popover{left:0;right:auto;width:360px}.utl-level-track{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr));gap:0;margin:16px 0 0!important;padding:0;list-style:none}.utl-level-step{position:relative;display:grid;justify-items:center;align-content:start;gap:6px;text-align:center}.utl-level-step:before{content:'';position:absolute;left:-50%;right:50%;top:14px;height:3px;background:#D9E1E8}.utl-level-step:first-child:before{display:none}.utl-level-step.is-complete:before,.utl-level-step.is-current:before{background:#EEA320}.utl-level-dot{position:relative;z-index:1;width:30px;height:30px;border:2px solid #BCC9D5;border-radius:999px;background:#fff;color:#7890A8;display:grid!important;place-items:center;margin:0!important;font:700 10px 'Roboto Mono',monospace!important;letter-spacing:0!important}.utl-level-step.is-complete .utl-level-dot{border-color:#EEA320;background:#FFF2D3;color:#003366}.utl-level-step.is-current .utl-level-dot{border-color:#003366;background:#003366;color:#EEA320;box-shadow:0 0 0 4px rgba(238,163,32,.24)}.utl-level-name{margin:0!important;color:#7890A8!important;font:700 10px/1.2 Lato,Arial,sans-serif!important;letter-spacing:0!important;text-transform:none!important}.utl-level-step.is-complete .utl-level-name,.utl-level-step.is-current .utl-level-name{color:#003366!important}.utl-level-threshold{margin:0!important;color:#7890A8!important;font:400 9px/1.2 'Roboto Mono',monospace!important;letter-spacing:0!important;text-transform:none!important}.utl-level-step.is-current .utl-level-threshold{color:#A86400!important;font-weight:700!important}.utl-level-guidance{margin-top:15px!important;padding:11px 12px;border-radius:8px;background:#FFF8EC;color:#003366!important;font:700 13px/1.4 Lato,Arial,sans-serif!important}",
+      ".utl-reward-popover.utl-mp-breakdown{width:350px}.utl-mp-list{display:grid!important;gap:0;margin:12px 0 0!important;padding:0;list-style:none}.utl-mp-list li{display:grid;grid-template-columns:24px 1fr auto;gap:8px;align-items:start;padding:8px 0;border-bottom:1px solid rgba(0,51,102,.09)}.utl-mp-list li:last-child{border-bottom:0}.utl-mp-icon{margin:0!important;color:inherit!important;font:400 16px/1.2 sans-serif!important;letter-spacing:0!important;text-transform:none!important}.utl-mp-copy{margin:0!important;color:#003366!important;font:700 13px/1.25 Lato,Arial,sans-serif!important;letter-spacing:0!important;text-transform:none!important}.utl-mp-copy small{display:block;margin-top:2px;color:#4D7094;font:400 12px/1.3 Lato,Arial,sans-serif}.utl-mp-value{margin:0!important;color:#8A5A00!important;font:700 12px/1.3 'Roboto Mono',monospace!important;letter-spacing:0!important;text-transform:none!important;white-space:nowrap}.utl-mp-meta{display:grid!important;gap:7px;margin:11px 0 0!important;padding-top:11px;border-top:1px solid rgba(238,163,32,.35)}.utl-mp-meta li{display:grid;grid-template-columns:24px 1fr;gap:8px;color:#4D7094;font:700 12px/1.35 Lato,Arial,sans-serif}.utl-mp-meta b{color:#003366}",
       ".utl-reward-toast{position:fixed;right:22px;top:76px;z-index:10000;width:min(340px,calc(100vw - 44px));padding:16px 18px;border:1px solid rgba(238,163,32,.46);border-radius:12px;background:#fff;color:#003366;box-shadow:0 18px 44px rgba(0,51,102,.22);opacity:0;transform:translateY(-10px);transition:opacity .18s ease,transform .18s ease}",
       ".utl-reward-toast.is-visible{opacity:1;transform:translateY(0)}",
       ".utl-reward-toast span{display:block;color:#EEA320;font:700 10px 'Roboto Mono',monospace;letter-spacing:.12em;text-transform:uppercase}",
@@ -124,6 +127,55 @@
     return '<span class="utl-reward-popover" role="tooltip"><span>' + escapeHtml(label) + '</span><strong>' + escapeHtml(title) + '</strong><p>' + escapeHtml(body) + '</p></span>';
   }
 
+  function mpPopoverHtml(title, rules, level) {
+    var earningRows = rules.map(function (rule) {
+      return '<li><span class="utl-mp-icon" aria-hidden="true">' + rule.icon + '</span><span class="utl-mp-copy">' + escapeHtml(rule.label) + (rule.note ? '<small>' + escapeHtml(rule.note) + '</small>' : '') + '</span><span class="utl-mp-value">' + escapeHtml(rule.value) + '</span></li>';
+    }).join("");
+    return '<span class="utl-reward-popover utl-mp-breakdown" role="tooltip"><span>Mastery Points</span><strong>' + escapeHtml(title) + '</strong><ul class="utl-mp-list">' + earningRows + '</ul><ul class="utl-mp-meta"><li><span class="utl-mp-icon" aria-hidden="true">&#127941;</span><span><b>Current level</b><br>' + escapeHtml(level) + '</span></li></ul></span>';
+  }
+
+  function levelPopoverHtml(state, settings) {
+    var levels = levelsFrom(settings);
+    var currentIndex = levels.findIndex(function (level) { return level.name === state.level; });
+    var steps = levels.map(function (level, index) {
+      var status = index < currentIndex ? "is-complete" : index === currentIndex ? "is-current" : "is-upcoming";
+      var marker = index < currentIndex ? "&#10003;" : String(index + 1);
+      return '<li class="utl-level-step ' + status + '"><span class="utl-level-dot">' + marker + '</span><span class="utl-level-name">' + escapeHtml(level.name) + '</span><span class="utl-level-threshold">' + level.threshold + ' MP</span></li>';
+    }).join("");
+    var article = /^[AEIOU]/i.test(state.nextLevel || "") ? "an" : "a";
+    var guidance = state.nextLevel
+      ? "You need " + state.mpToNext + " more MP to become " + article + " " + state.nextLevel + "!"
+      : "You have reached the highest configured level!";
+    return '<span class="utl-reward-popover utl-level-popover" role="tooltip"><span>Level progression</span><strong>' + escapeHtml(state.level) + '</strong><ul class="utl-level-track">' + steps + '</ul><p class="utl-level-guidance">' + escapeHtml(guidance) + '</p></span>';
+  }
+
+  function earnedMpBreakdown(ledger, mpTotal) {
+    var categories = [
+      { key: "scored", icon: "&#127919;", label: "Scored exercises", matches: function (type) { return type === "scored-exercise"; } },
+      { key: "completion", icon: "&#9989;", label: "Completion exercises", matches: function (type) { return type === "completion-exercise"; } },
+      { key: "reflection", icon: "&#128173;", label: "Reflections & external AI", matches: function (type) { return type === "reflection-exercise"; } },
+      { key: "video", icon: "&#127916;", label: "Lesson videos", matches: function (type) { return type === "video-completed"; } },
+      { key: "context", icon: "&#129517;", label: "Context items", matches: function (type) { return type === "context-completed"; } },
+      { key: "milestone", icon: "&#127942;", label: "Milestones & assessments", matches: function (type) { return type === "phase-completed" || type === "assessment-completed"; } },
+      { key: "streak", icon: "&#128293;", label: "Streak bonuses", matches: function (type) { return type === "daily-streak"; } }
+    ];
+    var other = 0;
+    (Array.isArray(ledger) ? ledger : []).forEach(function (entry) {
+      var amount = Math.max(0, numberOr(entry && entry.mpEarned, 0));
+      var type = String(entry && entry.type || "");
+      var category = categories.filter(function (item) { return item.matches(type); })[0];
+      if (category) category.total = numberOr(category.total, 0) + amount;
+      else other += amount;
+    });
+    var ledgerTotal = categories.reduce(function (sum, item) { return sum + numberOr(item.total, 0); }, 0) + other;
+    var recognized = Math.max(0, numberOr(mpTotal, 0) - ledgerTotal);
+    other += recognized;
+    if (other > 0) categories.push({ key: "other", icon: "&#10022;", label: "Other recognized progress", total: other });
+    return categories.filter(function (item) { return numberOr(item.total, 0) > 0; })
+      .sort(function (a, b) { return b.total - a.total; })
+      .map(function (item) { return { icon: item.icon, label: item.label, value: item.total + " MP" }; });
+  }
+
   function renderCluster(container, options) {
     if (!container) return null;
     injectStyles();
@@ -142,26 +194,18 @@
     var streakBody = todayCount >= dailyGoal
       ? "Today’s practice goal is complete. Return tomorrow to continue your streak."
       : todayCount + " of " + dailyGoal + " exercises completed today.";
-    var mpSettings = settings.mp || {};
-    var videoMp = Math.max(0, numberOr(mpSettings.videoComplete, 10));
-    var contextMp = Math.max(0, numberOr(mpSettings.contextComplete, 5));
-    var completionMp = Math.max(0, numberOr(mpSettings.exerciseCompleteFallback, 50));
-    var reflectionMp = Math.max(0, numberOr(mpSettings.reflectionExercise, 30));
-    var scoreRule = mpSettings.exerciseMode === "fixed"
-      ? completionMp + " MP per scored exercise"
-      : mpSettings.exerciseMode === "score-total"
-        ? "first score earned as MP"
-        : "score improvements earn MP";
-    var mpRulesBody = "Earn " + videoMp + " MP per lesson video, " + contextMp + " per context item, " + completionMp + " per completion exercise, and " + reflectionMp + " per reflection. Scored exercises: " + scoreRule + ". Level: " + state.level + ". Today: " + todayCount + " of " + dailyGoal + " exercises toward your streak.";
+    var mpRules = earnedMpBreakdown(state.ledger, state.mpTotal);
+    if (!mpRules.length) mpRules = [{ icon: "&#10022;", label: "No MP earned yet", value: "0 MP" }];
+    var nextLevelArticle = /^[AEIOU]/i.test(state.nextLevel || "") ? "an" : "a";
     var levelBody = state.nextLevel
-      ? state.nextLevel + " starts at " + state.nextThreshold + " MP. You need " + state.mpToNext + " more MP."
+      ? "You need " + state.mpToNext + " more MP to become " + nextLevelArticle + " " + state.nextLevel + "!"
       : "You are at the top configured level.";
     if (display.showMp === false) { container.innerHTML = ""; return null; }
     container.innerHTML = [
       '<div class="utl-reward-cluster" data-utl-reward-cluster>',
         display.showLevel ? '<span class="utl-reward-item utl-reward-level" tabindex="0">' : '',
         display.showLevel ? '<span>Level: <strong>' + escapeHtml(state.level) + '</strong></span>' : '',
-        display.showLevel ? popoverHtml("Level", state.level + " · starts at " + state.currentThreshold + " MP", levelBody) : '',
+        display.showLevel ? levelPopoverHtml(state, settings) : '',
         display.showLevel ? '</span>' : '',
         display.showStreak ? '<span class="utl-reward-item" tabindex="0">' : '',
         display.showStreak ? '<span class="utl-reward-icon" aria-hidden="true">&#128293;</span><span>' + state.streakDays + '</span>' : '',
@@ -169,7 +213,7 @@
         display.showStreak ? '</span>' : '',
         '<span class="utl-reward-item is-emphasis" tabindex="0">',
           '<span class="utl-reward-icon" aria-hidden="true">&#10022;</span><span class="utl-reward-mp-number" data-utl-mp-number>' + state.mpTotal + '</span><span>MP</span>',
-          popoverHtml("Mastery Points", state.mpTotal + " MP earned", mpRulesBody),
+          mpPopoverHtml(state.mpTotal + " MP earned", mpRules, state.level + ". " + levelBody),
         '</span>',
       '</div>'
     ].join("");
