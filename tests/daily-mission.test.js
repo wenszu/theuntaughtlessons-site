@@ -4,6 +4,14 @@ const fs = require('fs');
 const source = fs.readFileSync('member-login/content-config.js', 'utf8');
 const appHeaderSource = fs.readFileSync('assets/app-reward-header.js', 'utf8');
 const rewardUiSource = fs.readFileSync('assets/reward-ui.js', 'utf8');
+const workspacePages = [
+  'member-login/index.html',
+  'member-login/phase-1.html',
+  'member-login/phase-2.html',
+  'member-login/phase-3.html',
+  'member-login/orientation.html',
+  'member-login/phase-1/practice/index.html'
+];
 const contentBlock = source.slice(source.indexOf('const UTL_CONTENT = '), source.indexOf('\n\n(function ()'));
 const content = Function(contentBlock.replace('const UTL_CONTENT = ', 'return '))();
 
@@ -38,6 +46,10 @@ assert(source.includes('{ done: 1, total: 3 }'), 'admin preview should expose a 
 assert(source.includes('data-challenge-prepare'), 'challenge should capture an intention before reopening the exercise');
 assert(source.includes('data-challenge-reflect'), 'challenge should capture a reflection before completion');
 assert(source.includes('day streak'), 'welcome summary should support a non-zero streak');
+workspacePages.forEach((page) => {
+  const pageSource = fs.readFileSync(page, 'utf8');
+  assert(pageSource.includes('content-config.js?v=20260711-mission-1'), `${page} should load the mission-enabled workspace bundle`);
+});
 assert(appHeaderSource.includes('Daily mission:'), 'reward-enabled app headers should render daily mission progress');
 assert(appHeaderSource.includes('utl_daily_mission_plan'), 'app headers should read the saved daily mission');
 assert(appHeaderSource.includes('!hasPlan ? "Set"'), 'app headers should offer a visible mission entry point before a plan is selected');
