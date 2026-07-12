@@ -52,7 +52,7 @@ header p  { font-size: 11px; color: rgba(243,237,226,0.5); margin-top: 1px; }
 .ibpill {
   margin-left: auto; padding: 4px 12px; border-radius: 20px;
   background: rgba(238,163,32,0.15); border: 1px solid rgba(238,163,32,0.4);
-  color: #EEA320; font-size: 10px; font-weight: 700; letter-spacing: 1px;
+  color: #EEA320; font-size: 10px; font-weight: 700; letter-spacing: 0;
   font-family: 'Lato', sans-serif;
 }
 
@@ -85,15 +85,15 @@ header p  { font-size: 11px; color: rgba(243,237,226,0.5); margin-top: 1px; }
   border-radius: 12px; padding: 13px;
 }
 .card h3 {
-  font-size: 11px; font-weight: 700; text-transform: uppercase;
-  letter-spacing: 1.2px; color: var(--text3); margin-bottom: 11px;
+  font-size: 11px; font-weight: 700; text-transform: none;
+  letter-spacing: 0; color: var(--text3); margin-bottom: 11px;
   font-family: 'Lato', sans-serif;
 }
 
 /* Equation display */
 .eq-display {
   border-radius: 9px; padding: 10px 13px; margin-bottom: 10px;
-  font-family: 'Roboto Mono', monospace; font-size: 15px; font-weight: 600;
+  font-family: Lato, Arial, sans-serif; font-size: 15px; font-weight: 600;
   text-align: center;
 }
 .eq-display.line1 { background: var(--blue-l); color: var(--blue); border: 1px solid rgba(0,51,102,0.15); }
@@ -104,7 +104,7 @@ header p  { font-size: 11px; color: rgba(243,237,226,0.5); margin-top: 1px; }
 .sh { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
 .sl { font-size: 13px; font-weight: 400; color: var(--text2); }
 .sv {
-  font-family: 'Roboto Mono', monospace; font-size: 13px; font-weight: 600;
+  font-family: Lato, Arial, sans-serif; font-size: 13px; font-weight: 600;
   padding: 2px 9px; border-radius: 6px; min-width: 44px; text-align: right;
 }
 .sv.b { background: var(--blue-l); color: var(--blue); }
@@ -127,7 +127,7 @@ input[type=range].r::-webkit-slider-thumb {
 .vrow { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
 .vl { font-size: 13px; font-weight: 400; color: var(--text2); }
 .vc {
-  font-family: 'Roboto Mono', monospace; font-size: 13px; font-weight: 600;
+  font-family: Lato, Arial, sans-serif; font-size: 13px; font-weight: 600;
   padding: 3px 10px; border-radius: 7px; min-width: 90px; text-align: right;
 }
 .vc.b { background: var(--blue-l);   color: var(--blue);   border: 1px solid rgba(0,51,102,0.12); }
@@ -151,7 +151,7 @@ input[type=range].r::-webkit-slider-thumb {
 /* Step box */
 .stepbox {
   background: var(--surf3); border-radius: 9px; padding: 11px 13px;
-  font-family: 'Roboto Mono', monospace; font-size: 12px;
+  font-family: Lato, Arial, sans-serif; font-size: 12px;
   color: var(--text2); line-height: 2; margin-top: 6px;
 }
 .stepbox .hi  { color: var(--text); font-weight: 600; }
@@ -176,11 +176,11 @@ input[type=range].r::-webkit-slider-thumb {
   text-align: center; margin-bottom: 11px;
 }
 .prob .pq { font-size: 11px; color: rgba(243,237,226,0.5); margin-bottom: 5px; font-family: 'Lato', sans-serif; }
-.prob .pe { font-family: 'Roboto Mono', monospace; font-size: 16px; font-weight: 600; color: #F3EDE2; line-height: 1.8; }
+.prob .pe { font-family: Lato, Arial, sans-serif; font-size: 16px; font-weight: 600; color: #F3EDE2; line-height: 1.8; }
 .ainput {
   width: 100%; padding: 9px 13px; border-radius: 9px;
   border: 1.5px solid var(--border); background: var(--surf2);
-  font-family: 'Roboto Mono', monospace; font-size: 16px; font-weight: 600;
+  font-family: Lato, Arial, sans-serif; font-size: 16px; font-weight: 600;
   color: var(--text); outline: none; text-align: center; margin-bottom: 8px;
 }
 .ainput:focus { border-color: var(--green); }
@@ -207,8 +207,8 @@ canvas { flex: 1; display: block; cursor: crosshair; }
   padding: 11px 16px; flex-shrink: 0;
 }
 .bc { background: var(--surf2); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; }
-.bt { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: var(--text3); margin-bottom: 5px; font-family: 'Lato', sans-serif; }
-.bv { font-family: 'Roboto Mono', monospace; font-size: 12px; color: var(--text2); line-height: 1.7; }
+.bt { font-size: 10px; font-weight: 700; text-transform: none; letter-spacing: 0; color: var(--text3); margin-bottom: 5px; font-family: 'Lato', sans-serif; }
+.bv { font-family: Lato, Arial, sans-serif; font-size: 12px; color: var(--text2); line-height: 1.7; }
 
 ::-webkit-scrollbar { width: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }

@@ -82,15 +82,15 @@
     .slo-timer-label,
     .slo-timer-value,
     .slo-step-number {
-      font-family: 'Roboto Mono', monospace;
+      font-family: Lato, Arial, sans-serif;
     }
 
     .slo-kicker {
       display: block;
       color: var(--slo-gold);
       font-size: 10px;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
+      letter-spacing: 0;
+      text-transform: none;
     }
 
     .slo-title {
@@ -136,8 +136,8 @@
     .slo-timer-label {
       color: var(--slo-gold);
       font-size: 9px;
-      letter-spacing: 1.2px;
-      text-transform: uppercase;
+      letter-spacing: 0;
+      text-transform: none;
     }
 
     .slo-timer-value {
@@ -219,8 +219,8 @@
       color: var(--slo-gold);
       font-size: 11px;
       font-weight: 700;
-      letter-spacing: 1.3px;
-      text-transform: uppercase;
+      letter-spacing: 0;
+      text-transform: none;
     }
 
     .slo-brief-card strong {
@@ -411,11 +411,11 @@
     .slo-recording-steps li::before {
       content: "Step " counter(slo-upload-step);
       color: var(--slo-gold);
-      font-family: 'Roboto Mono', monospace;
+      font-family: Lato, Arial, sans-serif;
       font-size: 11px;
       font-weight: 700;
-      letter-spacing: 1.2px;
-      text-transform: uppercase;
+      letter-spacing: 0;
+      text-transform: none;
     }
 
     .slo-recording-steps strong {
@@ -748,7 +748,7 @@
   <script type="module" src="../../assets/app-access-guard.js?v=1"></script>
   <script src="../../assets/exercise-scoring-intro.js?v=3"></script>
   <script src="../../assets/app-reward-header.js?v=20260711-4"></script>
-  <script src="../../assets/reward-events.js?v=20260711-3"></script>
+  <script src="../../assets/reward-events.js?v=20260712-awards-1"></script>
   <script>
     document.getElementById('completeExerciseBtn').addEventListener('click', function () {
       localStorage.setItem('utl_p3_ex4_done', 'true');

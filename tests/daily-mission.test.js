@@ -48,7 +48,7 @@ assert(source.includes('data-challenge-reflect'), 'challenge should capture a re
 assert(source.includes('day streak'), 'welcome summary should support a non-zero streak');
 workspacePages.forEach((page) => {
   const pageSource = fs.readFileSync(page, 'utf8');
-  assert(pageSource.includes('content-config.js?v=20260711-mission-1'), `${page} should load the mission-enabled workspace bundle`);
+  assert(pageSource.includes('content-config.js?v=20260712-rewards-1'), `${page} should load the mission-enabled workspace bundle`);
 });
 assert(appHeaderSource.includes('Daily mission:'), 'reward-enabled app headers should render daily mission progress');
 assert(appHeaderSource.includes('utl_daily_mission_plan'), 'app headers should read the saved daily mission');

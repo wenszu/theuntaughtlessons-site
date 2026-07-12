@@ -24,7 +24,7 @@
   color: #003366;
   text-decoration: none;
   font-weight: 400;
-  letter-spacing: 0.01em;
+  letter-spacing: 0;
   transition: color 0.15s;
 }
 
@@ -35,7 +35,7 @@
 .brand-nav span {
   color: #4D7094;
   font-size: 11px;
-  letter-spacing: 2px;
-  text-transform: uppercase;
+  letter-spacing: 0;
+  text-transform: none;
   font-weight: 400;
 }

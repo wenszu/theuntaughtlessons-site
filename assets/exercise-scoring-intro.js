@@ -74,11 +74,11 @@
         background: #EAF5ED;
         color: #2C7A4B;
         padding: 6px 9px;
-        font-family: 'Roboto Mono', monospace;
+        font-family: Lato, Arial, sans-serif;
         font-size: .72rem;
         font-weight: 700;
-        letter-spacing: .06em;
-        text-transform: uppercase;
+        letter-spacing: 0;
+        text-transform: none;
         white-space: nowrap;
       }
       .utl-scoring-intro-copy {

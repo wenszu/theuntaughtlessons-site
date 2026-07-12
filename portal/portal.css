@@ -1,7 +1,7 @@
 /* ================================================================
    The Untaught Lessons — portal.css
    Brand: cream (#F3EDE2) · navy (#003366) · gold (#EEA320)
-   Fonts: Playfair Display · Lato · Roboto Mono
+   Fonts: Playfair Display · Lato
    ================================================================ */
 
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Lato:wght@300;400;700&family=Roboto+Mono:wght@400;500&display=swap');
@@ -71,8 +71,8 @@ body {
   font-family: 'Lato', sans-serif;
   font-weight: 400;
   font-size: 10px;
-  letter-spacing: 3px;
-  text-transform: uppercase;
+  letter-spacing: 0;
+  text-transform: none;
   color: var(--navy);
   text-decoration: none;
   transition: color 0.15s;
@@ -84,8 +84,8 @@ body {
   font-family: 'Lato', sans-serif;
   font-size: 9px;
   font-weight: 700;
-  letter-spacing: 2px;
-  text-transform: uppercase;
+  letter-spacing: 0;
+  text-transform: none;
   color: var(--gold);
   text-decoration: none;
 }
@@ -125,8 +125,8 @@ body {
   font-family: 'Lato', sans-serif;
   font-size: 10px;
   font-weight: 400;
-  letter-spacing: 2px;
-  text-transform: uppercase;
+  letter-spacing: 0;
+  text-transform: none;
   color: var(--steel);
   background: rgba(77,112,148,0.1);
   padding: 3px 9px;
@@ -170,8 +170,8 @@ body {
   font-family: 'Lato', sans-serif;
   font-weight: 400;
   font-size: 10px;
-  letter-spacing: 3.5px;
-  text-transform: uppercase;
+  letter-spacing: 0;
+  text-transform: none;
   color: var(--steel);
   margin-bottom: 16px;
 }
@@ -244,8 +244,8 @@ body {
   font-family: 'Lato', sans-serif;
   font-weight: 400;
   font-size: 10px;
-  letter-spacing: 2.5px;
-  text-transform: uppercase;
+  letter-spacing: 0;
+  text-transform: none;
   color: var(--steel);
   margin-bottom: 4px;
 }
@@ -300,8 +300,8 @@ body {
   font-family: 'Lato', sans-serif;
   font-size: 10px;
   font-weight: 400;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
+  letter-spacing: 0;
+  text-transform: none;
   padding: 4px 10px;
   border-radius: 2px;
 }
@@ -361,8 +361,8 @@ body {
   font-family: 'Lato', sans-serif;
   font-size: 10px;
   font-weight: 400;
-  letter-spacing: 2.5px;
-  text-transform: uppercase;
+  letter-spacing: 0;
+  text-transform: none;
   color: var(--steel);
   margin-bottom: 12px;
 }
@@ -420,7 +420,7 @@ body {
   font-family: 'Lato', sans-serif;
   font-weight: 700;
   font-size: 11px;
-  letter-spacing: 1px;
+  letter-spacing: 0;
   color: var(--steel);
   min-width: 24px;
 }
@@ -437,8 +437,8 @@ body {
   font-family: 'Lato', sans-serif;
   font-size: 10px;
   font-weight: 400;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
+  letter-spacing: 0;
+  text-transform: none;
   padding: 3px 8px;
   border-radius: 2px;
   flex-shrink: 0;
@@ -560,8 +560,8 @@ body {
   font-family: 'Lato', sans-serif;
   font-size: 10px;
   font-weight: 400;
-  letter-spacing: 2.5px;
-  text-transform: uppercase;
+  letter-spacing: 0;
+  text-transform: none;
   color: var(--steel);
   margin-bottom: 12px;
 }
@@ -645,8 +645,8 @@ body {
   font-family: 'Lato', sans-serif;
   font-size: 10px;
   font-weight: 400;
-  letter-spacing: 2.5px;
-  text-transform: uppercase;
+  letter-spacing: 0;
+  text-transform: none;
   color: var(--gold);
   margin-bottom: 20px;
 }
@@ -663,7 +663,7 @@ body {
   font-size: 12px;
   color: var(--navy);
   margin-bottom: 10px;
-  letter-spacing: 0.3px;
+  letter-spacing: 0;
 }
 
 .answer-block p {
@@ -708,7 +708,7 @@ body {
   font-weight: 700;
   font-size: 11px;
   color: var(--navy);
-  letter-spacing: 0.5px;
+  letter-spacing: 0;
   margin-bottom: 6px;
 }
 
@@ -741,8 +741,8 @@ body {
   font-family: 'Lato', sans-serif;
   font-size: 10px;
   font-weight: 400;
-  letter-spacing: 2.5px;
-  text-transform: uppercase;
+  letter-spacing: 0;
+  text-transform: none;
   color: var(--steel);
 }
 
@@ -771,7 +771,7 @@ body {
 }
 
 .ai-prompt {
-  font-family: 'Roboto Mono', monospace;
+  font-family: Lato, Arial, sans-serif;
   font-size: 12px;
   color: var(--navy);
   background: rgba(0,51,102,0.03);
@@ -824,8 +824,8 @@ body {
   font-family: 'Lato', sans-serif;
   font-weight: 700;
   font-size: 12px;
-  letter-spacing: 2px;
-  text-transform: uppercase;
+  letter-spacing: 0;
+  text-transform: none;
   border: none;
   border-radius: 2px;
   cursor: pointer;
@@ -874,8 +874,8 @@ body {
   font-family: 'Lato', sans-serif;
   font-weight: 400;
   font-size: 10px;
-  letter-spacing: 3.5px;
-  text-transform: uppercase;
+  letter-spacing: 0;
+  text-transform: none;
   color: var(--steel);
   margin-bottom: 20px;
 }

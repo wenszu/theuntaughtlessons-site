@@ -159,12 +159,12 @@
 
 .home-page .home-label {
   margin: 0;
-  font-family: 'Roboto Mono', monospace;
+  font-family: Lato, Arial, sans-serif;
   font-size: 11pt;
   font-weight: 400;
-  letter-spacing: 2px;
+  letter-spacing: 0;
   line-height: 1.4;
-  text-transform: uppercase;
+  text-transform: none;
   color: var(--home-gold);
 }
 
@@ -190,12 +190,12 @@
 
 .home-page .section-label-text {
   color: var(--home-gold);
-  font-family: 'Roboto Mono', monospace;
+  font-family: Lato, Arial, sans-serif;
   font-size: 11pt;
   font-weight: 400;
-  letter-spacing: 3px;
+  letter-spacing: 0;
   line-height: 1.2;
-  text-transform: uppercase;
+  text-transform: none;
 }
 
 .home-page .section-headline {
@@ -314,10 +314,10 @@
 .home-page .credibility-strip {
   margin: 28px 0 0;
   color: var(--home-gold);
-  font-family: 'Roboto Mono', monospace;
+  font-family: Lato, Arial, sans-serif;
   font-size: 11px;
   font-weight: 400;
-  letter-spacing: 2px;
+  letter-spacing: 0;
   line-height: 1.6;
   text-align: center;
   opacity: 0.85;
@@ -477,10 +477,10 @@
   display: block;
   margin-top: 18px;
   color: var(--home-cream);
-  font-family: 'Roboto Mono', monospace;
+  font-family: Lato, Arial, sans-serif;
   font-size: 10.5pt;
   font-weight: 400;
-  letter-spacing: 1.2px;
+  letter-spacing: 0;
   line-height: 1.5;
 }
 
@@ -600,9 +600,9 @@
   font-family: 'Lato', sans-serif;
   font-size: 12pt;
   font-weight: 300;
-  letter-spacing: 1.5px;
+  letter-spacing: 0;
   line-height: 1.5;
-  text-transform: uppercase;
+  text-transform: none;
 }
 
 .home-page .testimonials-section {
@@ -685,7 +685,7 @@
   color: #000;
   font-size: 17pt;
   font-weight: 700;
-  letter-spacing: .02em;
+  letter-spacing: 0;
 }
 
 @keyframes marquee-left {
@@ -1007,12 +1007,12 @@
   display: block;
   margin-top: 28px;
   color: var(--home-gold);
-  font-family: 'Roboto Mono', monospace;
+  font-family: Lato, Arial, sans-serif;
   font-size: 12pt;
   font-weight: 400;
-  letter-spacing: 1.4px;
+  letter-spacing: 0;
   line-height: 1.6;
-  text-transform: uppercase;
+  text-transform: none;
 }
 
 .tsa-explainer {
@@ -1149,12 +1149,12 @@
 
 .tsa-card-label {
   color: var(--home-gold);
-  font-family: 'Roboto Mono', monospace;
+  font-family: Lato, Arial, sans-serif;
   font-size: 10.5pt;
   font-weight: 400;
-  letter-spacing: 1.8px;
+  letter-spacing: 0;
   line-height: 1.2;
-  text-transform: uppercase;
+  text-transform: none;
 }
 
 .tsa-card h2 {
@@ -1175,10 +1175,10 @@
   display: block;
   margin-top: 24px;
   color: var(--home-charcoal);
-  font-family: 'Roboto Mono', monospace;
+  font-family: Lato, Arial, sans-serif;
   font-size: 10.5pt;
   font-weight: 400;
-  letter-spacing: .7px;
+  letter-spacing: 0;
   line-height: 1.5;
 }
 
@@ -1279,13 +1279,13 @@
 .tsa-rubric-line {
   margin: 48px 0 0;
   color: var(--home-gold);
-  font-family: 'Roboto Mono', monospace;
+  font-family: Lato, Arial, sans-serif;
   font-size: 11pt;
   font-weight: 400;
-  letter-spacing: 1.4px;
+  letter-spacing: 0;
   line-height: 1.5;
   text-align: center;
-  text-transform: uppercase;
+  text-transform: none;
 }
 
 .programs-page {
@@ -1442,12 +1442,12 @@
 .about-page .about-profile-name {
   margin: 18px 0 0;
   color: var(--home-gold);
-  font-family: 'Roboto Mono', monospace;
+  font-family: Lato, Arial, sans-serif;
   font-size: 11pt;
   font-weight: 400;
-  letter-spacing: 2px;
+  letter-spacing: 0;
   line-height: 1.4;
-  text-transform: uppercase;
+  text-transform: none;
 }
 
 .about-page .about-profile-role {
@@ -1512,12 +1512,12 @@
 .about-page .about-stat p {
   margin: 18px 0 0;
   color: var(--home-gold);
-  font-family: 'Roboto Mono', monospace;
+  font-family: Lato, Arial, sans-serif;
   font-size: 11pt;
   font-weight: 400;
-  letter-spacing: 2px;
+  letter-spacing: 0;
   line-height: 1.5;
-  text-transform: uppercase;
+  text-transform: none;
 }
 
 .about-page .about-closing-cta {
@@ -2017,8 +2017,8 @@
   font-family: 'Lato', sans-serif;
   font-weight: 700;
   font-size: 14px;
-  letter-spacing: .04em;
-  text-transform: uppercase;
+  letter-spacing: 0;
+  text-transform: none;
   border-bottom: 3px solid transparent;
   transition: color .15s ease, border-color .15s ease;
 }
@@ -2058,10 +2058,10 @@
 .ws-admin-table th {
   background: var(--ws-cream);
   color: var(--ws-navy);
-  font-family: 'Roboto Mono', monospace;
+  font-family: Lato, Arial, sans-serif;
   font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: .08em;
+  text-transform: none;
+  letter-spacing: 0;
   font-weight: 700;
 }
 
@@ -2162,8 +2162,8 @@ body {
   font-family: 'Lato', sans-serif;
   font-weight: 400;
   font-size: 10px;
-  letter-spacing: 3.5px;
-  text-transform: uppercase;
+  letter-spacing: 0;
+  text-transform: none;
   color: var(--steel);
   margin-bottom: 20px;
 }
@@ -2177,8 +2177,8 @@ body {
   font-family: 'Lato', sans-serif;
   font-weight: 700;
   font-size: 13px;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
+  letter-spacing: 0;
+  text-transform: none;
   text-decoration: none;
   border-radius: 2px;
   transition: opacity 0.15s;
@@ -2200,7 +2200,7 @@ body {
   font-size: 14px;
   color: var(--navy);
   text-decoration: none;
-  letter-spacing: 0.02em;
+  letter-spacing: 0;
   border-bottom: 1px solid rgba(0,51,102,0.25);
   padding-bottom: 1px;
   transition: color 0.15s, border-color 0.15s;
@@ -2254,7 +2254,7 @@ nav img {
   font-size: 13px;
   color: var(--charcoal);
   text-decoration: none;
-  letter-spacing: 0.02em;
+  letter-spacing: 0;
   transition: color 0.15s;
 }
 
@@ -2292,8 +2292,8 @@ nav img {
   font-family: 'Lato', sans-serif;
   font-weight: 700;
   font-size: 12px;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
+  letter-spacing: 0;
+  text-transform: none;
   text-decoration: none;
   border-radius: 2px;
   transition: opacity 0.15s;
@@ -2318,8 +2318,8 @@ nav img {
   font-family: 'Lato', sans-serif;
   font-weight: 400;
   font-size: 10px;
-  letter-spacing: 3.5px;
-  text-transform: uppercase;
+  letter-spacing: 0;
+  text-transform: none;
   color: var(--steel);
   margin-bottom: 24px;
 }
@@ -2460,8 +2460,8 @@ nav img {
   font-family: 'Lato', sans-serif;
   font-weight: 400;
   font-size: 10px;
-  letter-spacing: 2.5px;
-  text-transform: uppercase;
+  letter-spacing: 0;
+  text-transform: none;
   color: var(--steel);
   margin-bottom: 8px;
 }
@@ -2489,8 +2489,8 @@ nav img {
   font-family: 'Lato', sans-serif;
   font-size: 10px;
   font-weight: 400;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
+  letter-spacing: 0;
+  text-transform: none;
   color: var(--steel);
   background: rgba(77,112,148,0.1);
   padding: 3px 9px;
@@ -2629,8 +2629,8 @@ nav img {
   font-family: 'Lato', sans-serif;
   font-size: 10px;
   font-weight: 400;
-  letter-spacing: 2.5px;
-  text-transform: uppercase;
+  letter-spacing: 0;
+  text-transform: none;
   color: var(--steel);
   margin-bottom: 20px;
 }
@@ -2677,8 +2677,8 @@ nav img {
   font-family: 'Lato', sans-serif;
   font-size: 10px;
   font-weight: 400;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
+  letter-spacing: 0;
+  text-transform: none;
   color: var(--steel);
 }
 
@@ -2865,8 +2865,8 @@ nav img {
   font-family: 'Lato', sans-serif;
   font-size: 10px;
   font-weight: 400;
-  letter-spacing: 1.8px;
-  text-transform: uppercase;
+  letter-spacing: 0;
+  text-transform: none;
   color: var(--steel);
 }
 
@@ -3059,10 +3059,10 @@ footer p {
 .section-label,
 .section-label-text {
   color: #EEA320 !important;
-  font-family: 'Roboto Mono', monospace !important;
+  font-family: Lato, Arial, sans-serif !important;
   font-size: 11pt !important;
-  letter-spacing: 3px !important;
-  text-transform: uppercase !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
 }
 
 .section-label {
@@ -3130,7 +3130,7 @@ footer p {
     color: #EEA320;
     font-size: 9px;
     font-weight: 700;
-    letter-spacing: .1em;
+    letter-spacing: 0;
   }
 
   .member-workspace-page .profile-dropdown {
@@ -3286,7 +3286,7 @@ footer p {
     display: inline-flex;
     align-items: center;
     min-height: 44px;
-    font-family: 'Roboto Mono', monospace;
+    font-family: Lato, Arial, sans-serif;
     font-size: 11px;
     flex-shrink: 0;
     white-space: nowrap;
@@ -3313,9 +3313,9 @@ footer p {
 
   .member-workspace-page .phase-heading .section-label,
   .member-workspace-page .section-header .section-label {
-    font-family: 'Roboto Mono', monospace;
+    font-family: Lato, Arial, sans-serif;
     font-size: 10px !important;
-    letter-spacing: .08em;
+    letter-spacing: 0;
   }
 
   .member-workspace-page .phase-heading h2,
@@ -3388,11 +3388,11 @@ footer p {
     display: flex;
     align-items: center;
     min-width: 0;
-    font-family: 'Roboto Mono', monospace;
+    font-family: Lato, Arial, sans-serif;
     font-size: 10px;
     line-height: 1.2;
     white-space: nowrap;
-    letter-spacing: .06em;
+    letter-spacing: 0;
   }
 
   .member-workspace-page .ws-step-circle {

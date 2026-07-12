@@ -91,15 +91,15 @@
     }
 
     .app-kicker, .small-label, .eyebrow, .label, .hint {
-      font-family: "Roboto Mono", monospace;
+      font-family: Lato, Arial, sans-serif;
     }
 
     .app-kicker {
       display: block;
       color: var(--gold);
       font-size: 10px;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
+      letter-spacing: 0;
+      text-transform: none;
     }
 
     .app-title {
@@ -156,13 +156,13 @@
     .small-label {
       color: var(--gold);
       font-size: 9px;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
+      letter-spacing: 0;
+      text-transform: none;
     }
 
     .utility-value, .timer-display {
       color: var(--white);
-      font-family: "Roboto Mono", monospace;
+      font-family: Lato, Arial, sans-serif;
       font-size: 18px;
       font-weight: 700;
       line-height: 1;
@@ -235,8 +235,8 @@
       margin-bottom: 8px;
       color: var(--gold);
       font-size: 11px;
-      letter-spacing: 2px;
-      text-transform: uppercase;
+      letter-spacing: 0;
+      text-transform: none;
     }
 
     h1, h2, h3 {
@@ -310,8 +310,8 @@
       margin-bottom: 8px;
       color: var(--gold);
       font-size: 10px;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
+      letter-spacing: 0;
+      text-transform: none;
     }
 
     .instruction {
@@ -491,7 +491,7 @@
     .field-hint { margin: 0 0 10px; color: var(--steel); font-size: 12px; }
     .scqa-card textarea { min-height: 86px; padding: 10px 12px; }
     .scqa-card input { padding: 10px 12px; }
-    .warning { display: none; margin-top: 8px; color: var(--amber); font-family: "Roboto Mono", monospace; font-size: 10px; }
+    .warning { display: none; margin-top: 8px; color: var(--amber); font-family: Lato, Arial, sans-serif; font-size: 10px; }
     .warning.show { display: block; }
 
     .summary-toggle {
@@ -500,7 +500,7 @@
       background: transparent;
       color: var(--steel);
       cursor: pointer;
-      font-family: "Roboto Mono", monospace;
+      font-family: Lato, Arial, sans-serif;
       font-size: 10px;
       padding: 0;
     }
@@ -525,7 +525,7 @@
 
     .remaining {
       color: var(--charcoal);
-      font-family: "Roboto Mono", monospace;
+      font-family: Lato, Arial, sans-serif;
       font-size: 10px;
     }
 
@@ -577,13 +577,13 @@
     .badge.c { background: var(--red); }
     .badge.q { background: var(--steel); }
     .badge.a { background: var(--green); }
-    .row-label { display: block; margin: -23px 0 4px 34px; color: var(--steel); font-family: "Roboto Mono", monospace; font-size: 9px; letter-spacing: 1px; }
+    .row-label { display: block; margin: -23px 0 4px 34px; color: var(--steel); font-family: Lato, Arial, sans-serif; font-size: 9px; letter-spacing: 0; }
     .row-content { margin-left: 34px; font-size: 14px; line-height: 1.6; }
     .empty { color: var(--steel); font-style: italic; }
 
     .action-row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-top: 32px; padding-bottom: 12px; }
     .copy-group { display: grid; gap: 6px; }
-    .copy-note { color: var(--gold); font-family: "Roboto Mono", monospace; font-size: 10px; letter-spacing: 1px; }
+    .copy-note { color: var(--gold); font-family: Lato, Arial, sans-serif; font-size: 10px; letter-spacing: 0; }
 
     .panel { position: relative; margin-top: 18px; padding: 28px 32px; border: .5px solid var(--line); border-radius: 12px; background: var(--white); }
     .panel-close { position: absolute; top: 16px; right: 18px; border: 0; background: transparent; color: var(--charcoal); cursor: pointer; font-size: 18px; }
@@ -594,7 +594,7 @@
     .rule-top { display: grid; grid-template-columns: 24px 1fr auto; gap: 8px; align-items: center; }
     .mark.pass { color: var(--green); font-weight: 700; }
     .mark.fail { color: var(--red); font-weight: 700; }
-    .rule-points { color: var(--steel); font-family: "Roboto Mono", monospace; font-size: 11px; }
+    .rule-points { color: var(--steel); font-family: Lato, Arial, sans-serif; font-size: 11px; }
     .hint-toggle { margin-left: 8px; border: 0; background: transparent; color: var(--steel); cursor: pointer; font-size: 11px; padding: 0; }
     .rule-hint { display: none; margin-top: 6px; padding: 10px 12px; border-radius: 6px; background: var(--soft); font-size: 12px; }
     .rule-hint.show { display: block; }
@@ -605,7 +605,7 @@
 
     .sample-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
     .sample-col { padding: 16px; border-radius: 8px; background: var(--soft); }
-    .sample-notice { margin: 0 0 14px; padding: 10px 14px; border-radius: 8px; background: var(--tan); font-family: "Roboto Mono", monospace; font-size: 11px; }
+    .sample-notice { margin: 0 0 14px; padding: 10px 14px; border-radius: 8px; background: var(--tan); font-family: Lato, Arial, sans-serif; font-size: 11px; }
 
     .modal { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; padding: 20px; background: rgba(0,0,0,.4); z-index: 30; }
     .modal.show { display: flex; }
@@ -726,7 +726,7 @@
 
       .field-head .label,
       .scqa-card .label {
-        font-family: 'Roboto Mono', monospace;
+        font-family: Lato, Arial, sans-serif;
         font-size: 12px;
       }
 
@@ -849,7 +849,7 @@
   <main>
     <section class="screen active" id="screen1">
       <div class="page-title">
-        <div class="eyebrow">EXERCISE 02</div>
+        <div class="eyebrow">Exercise 02</div>
         <h1 class="title">Frame your SCQA.</h1>
         <p class="subtitle">Turn your problem into a clear, structured narrative — twice.</p>
         <div class="callout">
@@ -864,7 +864,7 @@
         </div>
       </div>
       <div class="context-card card">
-        <div class="label">YOUR CONTEXT</div>
+        <div class="label">Your context</div>
         <p class="instruction">What problem or situation are you working with? This is your raw material — you will frame it two different ways.</p>
         <textarea id="contextInput" data-word-label="Context" placeholder="e.g. The Olympics is still the world's most recognisable sports property, but recent games are struggling to capture the same cultural impact and collective attention."></textarea>
         <div class="hint">Tip: Write 2–4 sentences. Include the situation, the tension you see, and what question it raises.</div>
@@ -891,12 +891,12 @@
 
     <section class="screen review" id="screen4">
       <div class="page-title">
-        <div class="eyebrow">YOUR SCQA FORMULATIONS</div>
+        <div class="eyebrow">Your SCQA formulations</div>
         <h1 class="title">Two framings. One problem.</h1>
         <p class="subtitle">Read both side by side. Notice what changed — that gap is where your clearer thinking lives.</p>
       </div>
       <div class="context-banner">
-        <div class="label">YOUR CONTEXT</div>
+        <div class="label">Your context</div>
         <p id="reviewContext"></p>
         <strong id="reviewTopic"></strong>
       </div>
@@ -1109,7 +1109,7 @@
     function referenceMarkup(includeSummary = false) {
       return `
         <div class="reference">
-          <div class="label">WHAT EACH PART MEANS</div>
+          <div class="label">What each part means</div>
           <div class="ref-row"><strong>S</strong><span>What is still true today that makes this problem matter? This is the stable ground your audience stands on before you introduce the tension.</span></div>
           <div class="ref-row"><strong>C</strong><span>What has changed or stopped working? What is the tension that makes the problem matter now?</span></div>
           <div class="ref-row"><strong>Q</strong><span>The single most important question to answer to resolve the tension.</span></div>
@@ -1169,7 +1169,7 @@
         <div class="work-layout">
           <aside class="sidebar">
             <div class="side-card card">
-              <div class="label">YOUR CONTEXT</div>
+              <div class="label">Your context</div>
               <div class="context-text sideContext"></div>
               <div class="topic-label sideTopic"></div>
               <button class="link-button edit-link" type="button" data-go="1">Edit ↗</button>
@@ -1190,7 +1190,7 @@
               <h1>${isSecond ? "Write a different SCQA." : "Write your first SCQA."}</h1>
               <p>${isSecond ? "This is not a revision of your first SCQA. Change your angle: start from a different situation, sharpen the complication, reframe the question, or build a completely different answer." : "Use your context to frame a clear problem narrative. Start with what is true, introduce what is broken, distil it into one sharp question, then answer it directly."}</p>
             </div>
-            ${isSecond ? `<div class="callout" style="margin:0 0 20px"><div class="label">HOW TO MAKE THIS ONE DIFFERENT</div><div>Try a different entry point. Make the complication sharper. Ask a question that challenges your first answer.</div></div>` : ""}
+            ${isSecond ? `<div class="callout" style="margin:0 0 20px"><div class="label">How to make this one different</div><div>Try a different entry point. Make the complication sharper. Ask a question that challenges your first answer.</div></div>` : ""}
             ${scqaFieldsMarkup(which)}
             <div class="bottom-bar">
               <button class="btn btn-secondary" type="button" data-go="${isSecond ? 2 : 1}">${isSecond ? "← Back to SCQA #1" : "← Back"}</button>
@@ -1346,10 +1346,10 @@
       const similarS = hasSharedPhrase(state.scqa1.s, state.scqa2.s, 6);
       const similarQ = hasSharedPhrase(state.scqa1.q, state.scqa2.q, 6);
       const diffText = !similarS && !similarQ ? "Your two formulations take genuinely different angles — good work." : `${similarS ? "Your two Situations are very similar. " : ""}${similarQ ? "Your two Questions are very similar." : ""}`;
-      $("#feedbackMount").innerHTML = `<section class="panel"><button class="panel-close" data-close-panel="feedbackMount" type="button">×</button><div class="label">ANSWER CHECK</div>
+      $("#feedbackMount").innerHTML = `<section class="panel"><button class="panel-close" data-close-panel="feedbackMount" type="button">×</button><div class="label">Answer check</div>
         <div class="score-grid"><div class="score-line">SCQA #1: ${s1} / 7 <span>pts</span></div><div class="score-line">SCQA #2: ${s2} / 7 <span>pts</span></div></div>
         <div class="score-grid"><div>${rulesMarkup(r1)}<p class="score-message">${scoreMessage(s1)}</p></div><div>${rulesMarkup(r2)}<p class="score-message">${scoreMessage(s2)}</p></div></div>
-        <div class="label" style="color:var(--steel);margin-top:20px">DIFFERENTIATION CHECK</div><div class="diff-note ${!similarS && !similarQ ? "good" : "warn"}">${diffText}</div>
+        <div class="label" style="color:var(--steel);margin-top:20px">Differentiation check</div><div class="diff-note ${!similarS && !similarQ ? "good" : "warn"}">${diffText}</div>
       </section>`;
     }
 
@@ -1359,7 +1359,7 @@
 
     function renderSamples() {
       const custom = state.context.trim() !== templateState.context;
-      $("#sampleMount").innerHTML = `<section class="panel"><button class="panel-close" data-close-panel="sampleMount" type="button">×</button>${custom ? `<p class="sample-notice">These samples use the Olympics case study. Use them as a model for structure and language — not for content.</p>` : ""}<div class="sample-grid"><div class="sample-col"><div class="label" style="color:var(--steel)">SAMPLE FORMULATION 1</div>${reviewColumn("", templateState.scqa1)}</div><div class="sample-col"><div class="label" style="color:var(--steel)">SAMPLE FORMULATION 2</div>${reviewColumn("", templateState.scqa2)}</div></div></section>`;
+      $("#sampleMount").innerHTML = `<section class="panel"><button class="panel-close" data-close-panel="sampleMount" type="button">×</button>${custom ? `<p class="sample-notice">These samples use the Olympics case study. Use them as a model for structure and language — not for content.</p>` : ""}<div class="sample-grid"><div class="sample-col"><div class="label" style="color:var(--steel)">Sample formulation 1</div>${reviewColumn("", templateState.scqa1)}</div><div class="sample-col"><div class="label" style="color:var(--steel)">Sample formulation 2</div>${reviewColumn("", templateState.scqa2)}</div></div></section>`;
     }
 
     function copyText() {
@@ -1481,7 +1481,7 @@
   <script type="module" src="../../assets/app-access-guard.js?v=1"></script>
   <script src="../../assets/exercise-scoring-intro.js?v=3"></script>
   <script src="../../assets/app-reward-header.js?v=20260711-4"></script>
-  <script src="../../assets/reward-events.js?v=20260711-3"></script>
+  <script src="../../assets/reward-events.js?v=20260712-awards-1"></script>
   <script type="module" src="../../assets/feedback-widget.js?v=5"></script>
   <script src="../../assets/tactile-buttons.js?v=4" defer></script>
 </body>

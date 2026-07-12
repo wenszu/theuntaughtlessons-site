@@ -15,6 +15,7 @@
       exerciseCompleteFallback: 50,
       reflectionExercise: 30,
       phaseCompletion: { phase1: 100, phase2: 150, phase3: 200 },
+      programCompletion: 200,
       assessmentBonus: 100
     },
     streak: {
@@ -79,6 +80,7 @@
     if (type === "completion-exercise") return Math.max(0, numberOr(normalized.mp.exerciseCompleteFallback, 0));
     if (type === "reflection-exercise") return Math.max(0, numberOr(normalized.mp.reflectionExercise, 0));
     if (type === "assessment-completed") return Math.max(0, numberOr(normalized.mp.assessmentBonus, 0));
+    if (type === "program-completed") return Math.max(0, numberOr(normalized.mp.programCompletion, 0));
     if (type === "phase-completed") {
       const phaseKey = event.phase || "phase1";
       return Math.max(0, numberOr(normalized.mp.phaseCompletion[phaseKey], 0));

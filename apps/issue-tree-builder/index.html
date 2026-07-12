@@ -128,10 +128,10 @@
     .app-kicker {
       display: block;
       color: var(--gold);
-      font-family: "Roboto Mono", monospace;
+      font-family: Lato, Arial, sans-serif;
       font-size: 10px;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
+      letter-spacing: 0;
+      text-transform: none;
     }
 
     .app-title {
@@ -179,15 +179,15 @@
     .label,
     .hint,
     .mono {
-      font-family: "Roboto Mono", monospace;
+      font-family: Lato, Arial, sans-serif;
     }
 
     .eyebrow {
       margin-bottom: 8px;
       color: var(--gold);
       font-size: 11px;
-      letter-spacing: 2px;
-      text-transform: uppercase;
+      letter-spacing: 0;
+      text-transform: none;
     }
 
     h1,
@@ -256,8 +256,8 @@
       margin-bottom: 8px;
       color: var(--gold);
       font-size: 10px;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
+      letter-spacing: 0;
+      text-transform: none;
     }
 
     .instruction {
@@ -406,16 +406,16 @@
 
     .small-label {
       color: var(--gold);
-      font-family: "Roboto Mono", monospace;
+      font-family: Lato, Arial, sans-serif;
       font-size: 9px;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
+      letter-spacing: 0;
+      text-transform: none;
     }
 
     .utility-value,
     .activity-timer-display {
       color: var(--white);
-      font-family: "Roboto Mono", monospace;
+      font-family: Lato, Arial, sans-serif;
       font-size: 18px;
       font-weight: 700;
       line-height: 1;
@@ -994,7 +994,7 @@
 
     .remaining {
       color: var(--charcoal);
-      font-family: "Roboto Mono", monospace;
+      font-family: Lato, Arial, sans-serif;
       font-size: 10px;
     }
 
@@ -1108,9 +1108,9 @@
 
     .copy-note {
       color: var(--gold);
-      font-family: "Roboto Mono", monospace;
+      font-family: Lato, Arial, sans-serif;
       font-size: 10px;
-      letter-spacing: 1px;
+      letter-spacing: 0;
     }
 
     .panel {
@@ -1193,7 +1193,7 @@
 
     .rule-points {
       color: var(--steel);
-      font-family: "Roboto Mono", monospace;
+      font-family: Lato, Arial, sans-serif;
       font-size: 11px;
     }
 
@@ -1260,7 +1260,7 @@
     .sample-notice {
       margin: 0 0 14px;
       color: var(--charcoal);
-      font-family: "Roboto Mono", monospace;
+      font-family: Lato, Arial, sans-serif;
       font-size: 11px;
     }
 
@@ -1580,12 +1580,12 @@
 
       .argument-header .label {
         color: var(--navy);
-        font-family: "Roboto Mono", monospace;
+        font-family: Lato, Arial, sans-serif;
         font-size: 10px;
         font-weight: 700;
-        letter-spacing: .08em;
+        letter-spacing: 0;
         margin: 0;
-        text-transform: uppercase;
+        text-transform: none;
       }
 
       .argument-title-text,
@@ -2073,7 +2073,7 @@
   <main>
     <section class="screen" id="screen1">
       <div class="page-title">
-        <div class="eyebrow">EXERCISE</div>
+        <div class="eyebrow">Exercise</div>
         <h1 class="title">Build your issue tree.</h1>
         <p class="subtitle">Start with a question. Break it into causes. Structure your thinking.</p>
         <div class="how-strip" aria-label="How it works">
@@ -2084,7 +2084,7 @@
       </div>
 
       <div class="problem-card card">
-        <div class="label">THE PROBLEM STATEMENT</div>
+        <div class="label">The problem statement</div>
         <p class="instruction">What is the central question you are trying to diagnose?</p>
         <textarea id="problemStatement" placeholder="e.g. Why is the Olympics losing its cultural impact?"></textarea>
         <div class="hint">Tip: Frame it as a "Why" or "What" question.</div>
@@ -2108,7 +2108,7 @@
         <aside class="sidebar">
           <div class="email-card email-open">
             <button class="email-toggle" type="button" id="emailToggle" aria-expanded="true">
-              <span class="label">EMAIL FROM ASHLEY</span>
+              <span class="label">Email from Ashley</span>
               <span class="email-toggle-icon" id="emailToggleIcon">−</span>
             </button>
             <div class="email-body" id="emailBody">
@@ -2119,7 +2119,7 @@
               <div class="email-signoff">Best,<br><strong>Ashley Kat</strong><br><em>VP of partnerships</em></div>
             </div>
             <div class="email-notes-head">
-              <div class="label">CLEANED-UP NOTES</div>
+              <div class="label">Cleaned-up notes</div>
               <p>Choose the 9 most useful notes and drag or tap them into the 9 supporting-detail slots. Leave the extra note out. You still write the three argument labels yourself.</p>
             </div>
             <div class="email-detail-list" id="evidenceList"></div>
@@ -2131,7 +2131,7 @@
             <div class="progress-track"><div class="progress-fill" id="fieldProgress"></div></div>
           </div>
           <div class="guidance">
-            <div class="label">GUIDANCE</div>
+            <div class="label">Guidance</div>
             <p><strong>Answer the question:</strong> Each argument should directly explain your central question. Keep asking "Why?" as you go deeper.</p>
             <div class="guidance-rule"></div>
             <p><strong>Use one bucket:</strong> If an argument covers two ideas, split it into cleaner branches.</p>
@@ -2144,7 +2144,7 @@
           <details class="mobile-guidance card">
             <summary>Show guidance ▾</summary>
             <div class="guidance">
-              <div class="label">YOUR QUESTION</div>
+              <div class="label">Your question</div>
               <p id="mobileQuestion"></p>
               <div class="guidance-rule"></div>
               <p><strong>Answer the question:</strong> Each argument should directly explain your central question. Keep asking "Why?" as you go deeper.</p>
@@ -2482,7 +2482,7 @@
             <textarea class="argument-input" data-arg="${index}" data-word-label="Argument ${index + 1}" placeholder="Name one reason this is happening">${escapeHtml(arg.text)}</textarea>
             <div class="hint">One bucket only. If it covers two ideas, split it.</div>
             <div class="details-section ${hasContent(arg.text) ? "show" : ""}">
-              <div class="label">SUPPORTING DETAILS</div>
+              <div class="label">Supporting details</div>
               <p class="details-sub">Add 3 specific pieces of evidence or examples.</p>
               <div class="detail-list">
                 ${arg.details.map((detail, detailIndex) => `
@@ -2860,7 +2860,7 @@
       $("#feedbackMount").innerHTML = `
         <section class="panel" aria-live="polite">
           <button class="panel-close" type="button" data-close-panel="feedbackMount">×</button>
-          <div class="label">ANSWER CHECK</div>
+          <div class="label">Answer check</div>
           <div class="score-line">${score} / 100 <span>points</span></div>
           <div class="score-track"><div class="score-fill" style="width: ${score}%"></div></div>
           ${results.map((result) => `
@@ -3243,7 +3243,7 @@
   <script type="module" src="../../assets/app-access-guard.js?v=1"></script>
   <script src="../../assets/exercise-scoring-intro.js?v=3"></script>
   <script src="../../assets/app-reward-header.js?v=20260711-4"></script>
-  <script src="../../assets/reward-events.js?v=20260711-3"></script>
+  <script src="../../assets/reward-events.js?v=20260712-awards-1"></script>
   <script type="module" src="../../assets/feedback-widget.js?v=5"></script>
   <script src="../../assets/tactile-buttons.js?v=4" defer></script>
 </body>

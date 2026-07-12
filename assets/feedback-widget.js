@@ -25,10 +25,10 @@ const STYLES = `
     border: none;
     border-radius: 999px;
     padding: 10px 14px;
-    font-family: 'Roboto Mono', monospace;
+    font-family: Lato, Arial, sans-serif;
     font-size: 11px;
     font-weight: 700;
-    letter-spacing: 0.03em;
+    letter-spacing: 0;
     box-shadow: 0 4px 16px rgba(238,163,32,0.35);
     cursor: pointer;
     transition: opacity 0.2s, transform 0.15s;

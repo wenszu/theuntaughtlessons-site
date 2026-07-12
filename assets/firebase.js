@@ -703,8 +703,10 @@ function getDefaultRewardSettings() {
         phase2: 150,
         phase3: 200
       },
+      programCompletion: 200,
       assessmentBonus: 100
     },
+    exerciseReflections: {},
     streak: {
       enabled: true,
       dailyExerciseGoal: 3,
@@ -731,6 +733,7 @@ async function getRewardSettings() {
       mp: Object.assign({}, def.mp, stored.mp || {}, {
         phaseCompletion: Object.assign({}, def.mp.phaseCompletion, (stored.mp && stored.mp.phaseCompletion) || {})
       }),
+      exerciseReflections: Object.assign({}, def.exerciseReflections, stored.exerciseReflections || {}),
       streak: Object.assign({}, def.streak, stored.streak || {}),
       tokens: Object.assign({}, def.tokens, stored.tokens || {})
     };

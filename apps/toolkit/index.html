@@ -51,19 +51,19 @@ REUSE AUDIT
     }
     .tk-user { position: relative; display: flex; align-items: center; gap: 10px; }
     .tk-user-email { max-width: 170px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: rgba(255,255,255,.72); font: 700 12px Lato,sans-serif; }
-    .tk-avatar { width: 36px; height: 36px; border-radius: 999px; border: 0; background: var(--tk-gold); color: var(--tk-navy); display: grid; place-items: center; font: 700 12px 'Roboto Mono',monospace; cursor: pointer; overflow: hidden; padding: 0; }
+    .tk-avatar { width: 36px; height: 36px; border-radius: 999px; border: 0; background: var(--tk-gold); color: var(--tk-navy); display: grid; place-items: center; font: 700 12px Lato, Arial, sans-serif; cursor: pointer; overflow: hidden; padding: 0; }
     .tk-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
     .tk-profile-menu { position: absolute; right: 0; top: 100%; min-width: 210px; max-width: 248px; background: #fff; color: var(--tk-charcoal); border: 1px solid #e8e2d8; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,.15); padding: 0; z-index: 200; overflow: hidden; }
     .tk-profile-menu::before { content: ''; position: absolute; top: -8px; right: 18px; width: 16px; height: 16px; background: var(--tk-navy); transform: rotate(45deg); }
     .tk-profile-menu[hidden] { display: none; }
     .tk-profile-head { position: relative; display: flex; align-items: center; gap: 13px; background: var(--tk-navy); color: #fff; padding: 14px 16px 13px; border-bottom: 3px solid var(--tk-gold); }
-    .tk-profile-avatar { width: 46px; height: 46px; border-radius: 999px; background: var(--tk-gold); color: var(--tk-navy); display: grid; place-items: center; overflow: hidden; font: 700 14px 'Roboto Mono',monospace; flex: 0 0 auto; }
+    .tk-profile-avatar { width: 46px; height: 46px; border-radius: 999px; background: var(--tk-gold); color: var(--tk-navy); display: grid; place-items: center; overflow: hidden; font: 700 14px Lato, Arial, sans-serif; flex: 0 0 auto; }
     .tk-profile-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
     .tk-profile-name { margin: 0; color: #fff; font-size: 15px; font-weight: 700; line-height: 1.15; font-family: Lato,sans-serif; }
-    .tk-profile-role { margin: 4px 0 0; color: var(--tk-gold); font: 700 9.5px 'Roboto Mono',monospace; letter-spacing: .12em; text-transform: uppercase; }
+    .tk-profile-role { margin: 4px 0 0; color: var(--tk-gold); font: 700 9.5px Lato, Arial, sans-serif; letter-spacing: 0; text-transform: none; }
     .tk-profile-section { padding: 11px 16px 10px; border-bottom: 1px solid #e8e2d8; }
     .tk-profile-section:last-child { border-bottom: 0; }
-    .tk-profile-section-label { display: block; margin: 0 0 7px; color: var(--tk-gold); font: 700 9.5px 'Roboto Mono',monospace; letter-spacing: .12em; text-transform: uppercase; }
+    .tk-profile-section-label { display: block; margin: 0 0 7px; color: var(--tk-gold); font: 700 9.5px Lato, Arial, sans-serif; letter-spacing: 0; text-transform: none; }
     .tk-profile-menu a, .tk-profile-menu button { width: 100%; min-height: 36px; display: flex; align-items: center; gap: 12px; border: 0; background: transparent; color: var(--tk-navy); font: 700 14px Lato,sans-serif; text-align: left; text-decoration: none; cursor: pointer; padding: 4px 0; }
     .tk-profile-menu a:hover, .tk-profile-menu button:hover { text-decoration: underline; }
     .tk-profile-icon { width: 18px; color: var(--tk-steel); display: inline-flex; justify-content: center; font-size: 16px; line-height: 1; }
@@ -83,9 +83,9 @@ REUSE AUDIT
       align-items: center;
       gap: 6px;
       color: rgba(255,255,255,.72);
-      font: 700 11px 'Roboto Mono', monospace;
-      letter-spacing: .06em;
-      text-transform: uppercase;
+      font: 700 11px Lato, Arial, sans-serif;
+      letter-spacing: 0;
+      text-transform: none;
       text-decoration: none;
       white-space: nowrap;
     }
@@ -98,10 +98,10 @@ REUSE AUDIT
     .tk-kicker {
       display: block;
       color: var(--tk-gold);
-      font-family: 'Roboto Mono', monospace;
+      font-family: Lato, Arial, sans-serif;
       font-size: 10px;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
+      letter-spacing: 0;
+      text-transform: none;
     }
     .tk-title {
       display: block;
@@ -152,11 +152,11 @@ REUSE AUDIT
     }
     .tk-label {
       color: var(--tk-gold);
-      font-family: 'Roboto Mono', monospace;
+      font-family: Lato, Arial, sans-serif;
       font-size: 11px;
       font-weight: 700;
-      letter-spacing: 1px;
-      text-transform: uppercase;
+      letter-spacing: 0;
+      text-transform: none;
     }
     .tk-card h2 {
       margin: 0;
@@ -185,7 +185,7 @@ REUSE AUDIT
       border-radius: 8px;
       background: var(--tk-cream);
       color: var(--tk-charcoal);
-      font-family: 'Roboto Mono', monospace;
+      font-family: Lato, Arial, sans-serif;
       font-size: 12px;
       line-height: 1.55;
       padding: 12px;
@@ -199,7 +199,7 @@ REUSE AUDIT
       border-radius: 8px;
       background: var(--tk-cream);
       color: var(--tk-charcoal);
-      font-family: 'Roboto Mono', monospace;
+      font-family: Lato, Arial, sans-serif;
       font-size: 12px;
       line-height: 1.55;
       padding: 12px;
@@ -231,11 +231,11 @@ REUSE AUDIT
       background: transparent;
       color: var(--tk-charcoal);
       cursor: pointer;
-      font-family: 'Roboto Mono', monospace;
+      font-family: Lato, Arial, sans-serif;
       font-size: 11px;
       font-weight: 700;
       padding: 8px 12px;
-      text-transform: uppercase;
+      text-transform: none;
     }
     .tk-tab.tk-active {
       background: var(--tk-gold);
@@ -615,8 +615,8 @@ Return in a clean list I can easily read and act on.`;
           <button class="tk-tab tk-active" type="button" data-mode="a">Run your board</button>
           <button class="tk-tab" type="button" data-mode="b">Design your board first</button>
         </div>
-        <div class="tk-mode tk-active" id="mode-a"><div class="tk-label">RUN YOUR BOARD</div><p>Built your board? This prompt runs the full session — each advisor's structured feedback, and a final orchestrator verdict with a recommended next step.</p><textarea class="tk-prompt" id="advisoryA" readonly>${advisoryA}</textarea><button class="tk-button" type="button" data-copy="advisoryA">Copy prompt</button></div>
-        <div class="tk-mode" id="mode-b"><div class="tk-label">DESIGN YOUR BOARD FIRST</div><p>Not sure who should be on your panel? Paste this prompt first. It will recommend a board of six suited to your specific problem — then come back and use Mode A.</p><textarea class="tk-prompt" id="advisoryB" readonly>${advisoryB}</textarea><button class="tk-button" type="button" data-copy="advisoryB">Copy prompt</button></div>
+        <div class="tk-mode tk-active" id="mode-a"><div class="tk-label">Run your board</div><p>Built your board? This prompt runs the full session — each advisor's structured feedback, and a final orchestrator verdict with a recommended next step.</p><textarea class="tk-prompt" id="advisoryA" readonly>${advisoryA}</textarea><button class="tk-button" type="button" data-copy="advisoryA">Copy prompt</button></div>
+        <div class="tk-mode" id="mode-b"><div class="tk-label">Design your board first</div><p>Not sure who should be on your panel? Paste this prompt first. It will recommend a board of six suited to your specific problem — then come back and use Mode A.</p><textarea class="tk-prompt" id="advisoryB" readonly>${advisoryB}</textarea><button class="tk-button" type="button" data-copy="advisoryB">Copy prompt</button></div>
       </article>`;
     document.querySelectorAll('[data-example]').forEach(button => button.addEventListener('click', () => {
       const box = document.getElementById(`example-${button.dataset.example}`);

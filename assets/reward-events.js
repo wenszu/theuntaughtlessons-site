@@ -3,7 +3,7 @@
   const REWARD_SETTINGS_KEY = "utl_reward_settings";
   const LEGACY_MP_KEY = "utl_demo_mp_total";
   const FIREBASE_URL = document.currentScript && document.currentScript.src
-    ? new URL("firebase.js?v=20260710-reward-sync-1", document.currentScript.src).href
+    ? new URL("firebase.js?v=20260712-program-reward-1", document.currentScript.src).href
     : "";
   let syncTimer = null;
   const DEFAULT_LEVELS = [
@@ -22,6 +22,7 @@
       reflectionExercise: 30,
       videoComplete: 10,
       contextComplete: 5,
+      programCompletion: 200,
       assessmentBonus: 100
     },
     streak: {
@@ -175,6 +176,7 @@
         title: detail.title,
         body: detail.body,
         type: detail.type,
+        metadata: detail.metadata || {},
         levelBefore: getLevelForMp(previousState.mpTotal),
         levelAfter: getLevelForMp(nextState.mpTotal),
         previousLevel: getLevelForMp(previousState.mpTotal).title,
@@ -183,7 +185,7 @@
       });
     } else if (!document.querySelector("script[data-utl-reward-ui-loader]")) {
       const script = document.createElement("script");
-      script.src = "../../assets/reward-ui.js?v=20260711-rewards-ui-8";
+      script.src = "../../assets/reward-ui.js?v=20260712-rewards-ui-12";
       script.defer = true;
       script.dataset.utlRewardUiLoader = "true";
       script.addEventListener("load", () => showRewardMoment(detail, previousState, nextState), { once: true });
@@ -237,7 +239,8 @@
         type: event.type || "reward",
         title: event.title || "Reward earned",
         body: event.body || "Your progress was saved.",
-        mpEarned
+        mpEarned,
+        metadata: event.metadata || {}
       }, previousState, nextState);
     } else {
       refreshRewardCluster(nextState);
@@ -418,6 +421,33 @@
   };
 
   if (window.addEventListener) {
+    window.addEventListener("utl:exercise-reflection", (event) => {
+      const detail = event && event.detail || {};
+      if (!detail.appId || !detail.choice) return;
+      const state = readState();
+      const ledger = state.ledger.slice();
+      for (let index = ledger.length - 1; index >= 0; index -= 1) {
+        const entry = ledger[index];
+        if (entry && entry.metadata && entry.metadata.appId === detail.appId) {
+          ledger[index] = {
+            ...entry,
+            metadata: {
+              ...entry.metadata,
+              completionReflection: {
+                prompt: detail.prompt || "",
+                choice: detail.choice,
+                note: detail.note || "",
+                savedAt: new Date().toISOString()
+              }
+            }
+          };
+          const nextState = writeState({ ...state, ledger });
+          queueRemoteSync(nextState);
+          dispatchUpdate(nextState, { type: "exercise-reflection-saved", appId: detail.appId });
+          break;
+        }
+      }
+    });
     window.addEventListener("storage", (event) => {
       if (event.key === REWARD_STATE_KEY) refreshRewardCluster(readState());
       if (event.key === REWARD_SETTINGS_KEY) refreshRewardCluster(readState());
