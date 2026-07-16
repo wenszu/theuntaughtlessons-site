@@ -18,6 +18,11 @@ assert(appHeader.includes('overflow-x:clip'), 'shared exercise UI guards against
 assert(styles.includes('overflow-x: clip'), 'public pages guard against horizontal overflow');
 assert(workspace.includes('program’s Day '), 'workspace explains the learner’s program pace');
 assert(workspace.includes('Intern, Analyst, Associate, Principal, and Executive'), 'workspace explains the five levels');
+assert(workspace.includes('(!seen && !orientationDone)'), 'completed onboarding does not reopen the introductory journey card');
+assert(workspace.includes('journeyCard.classList.add("ws-complete")'), 'completed introductory content receives a subdued state');
+assert(workspace.includes('orientationCard.classList.add("ws-complete")'), 'completed orientation receives a subdued state');
+assert(workspace.includes('return complete ? false : defaultOpen'), 'completed practice cards stay collapsed');
+assert(workspace.includes('practiceOpenState(cardId, enabled && isNext, done)'), 'the next available exercise opens automatically');
 assert(messyNotes.includes('contextViewTab'), 'messy notes can switch between source note and context');
 assert(scqa.includes('secondScqaModal'), 'SCQA confirms the learner will take a different angle');
 assert(scqa.includes('secondScqaAcknowledged: false'), 'SCQA confirmation begins unacknowledged');

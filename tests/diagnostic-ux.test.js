@@ -24,6 +24,8 @@ assert.doesNotMatch(spot, /No duplicate expected here|This group looks complete|
 assert.match(spot, /function submitPartA\(\)/);
 assert.match(spot, /function submitPartB\(\)/);
 assert.match(spot, /Answer reveal/);
+assert.match(spot, /\.tsa-stp-header\s*\{[\s\S]*?position:\s*static/);
+assert.doesNotMatch(spot, /document\.getElementById\('submitPart'\)\.addEventListener\('click', submitPartB\);\s*scrollToQuestion\(\);/);
 assert.match(spot, /Part 1 complete/);
 assert.match(spot, /function partTrackerHtml/);
 assert.match(spot, /state\.partBIndex \+= 1;[\s\S]*renderPartB\(\);[\s\S]*scrollToQuestion\(\);/);

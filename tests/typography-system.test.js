@@ -2,7 +2,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 
-const roots = ['admin', 'apps', 'assets', 'certificate', 'member-login', 'my-results', 'portal'];
+const roots = ['admin', 'apps', 'assets', 'certificate', 'member-login', 'my-results', 'portal', 'tools'];
 const extensions = new Set(['.css', '.html', '.js']);
 const technicalMonospaceFiles = new Set([
   'admin/index.html',
@@ -19,7 +19,10 @@ function collect(directory) {
   });
 }
 
-const files = [...roots.flatMap(collect), 'programs.html', 'styles.css'];
+const topLevelUiFiles = fs.readdirSync(rootDirectory(), { withFileTypes: true })
+  .filter((entry) => entry.isFile() && extensions.has(path.extname(entry.name)))
+  .map((entry) => entry.name);
+const files = [...new Set([...roots.flatMap(collect), ...topLevelUiFiles])];
 for (const file of files) {
   const source = fs.readFileSync(file, 'utf8');
   assert(!/text-transform:\s*uppercase/.test(source), `${file} should not force ordinary interface text to uppercase`);
@@ -29,6 +32,23 @@ for (const file of files) {
   if (!technicalMonospaceFiles.has(file)) {
     assert(!/Roboto Mono|Courier New/.test(source), `${file} should reserve monospace for functional technical content`);
   }
+}
+
+const ordinaryAllCapsLabels = [
+  'WHY TWO FORMULATIONS?',
+  'PHASE 2 · SPEAK CONCISELY',
+  'NPS OF 100',
+  'GRADE 8'
+];
+for (const file of files) {
+  const source = fs.readFileSync(file, 'utf8');
+  ordinaryAllCapsLabels.forEach((label) => {
+    assert(!source.includes(`>${label}<`), `${file} should use natural capitalization for “${label}”`);
+  });
+}
+
+function rootDirectory() {
+  return path.resolve(__dirname, '..');
 }
 
 console.log('site typography uses natural casing and reserves monospace for technical content');

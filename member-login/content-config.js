@@ -1215,6 +1215,7 @@ const UTL_CONTENT = {
       "@media(max-width:768px){body.ws-page{background:var(--ws-cream)}.ws-shell{width:calc(100% - 28px)}.ws-nav-inner{height:auto;grid-template-columns:auto 1fr auto;grid-template-rows:auto auto;gap:0 10px;width:100%;padding:8px 12px 0}.ws-brand{grid-column:1;grid-row:1;height:42px;align-items:center}.ws-logo{height:30px}.ws-user{grid-column:3;grid-row:1;height:42px}.ws-user-email{display:none}.ws-avatar{width:36px;height:36px}.ws-links{grid-column:1/-1;grid-row:2;justify-content:flex-start;overflow-x:auto;white-space:nowrap;gap:10px;border-top:1px solid rgba(255,255,255,.14);scrollbar-width:none}.ws-links::-webkit-scrollbar,.ws-lesson-rail::-webkit-scrollbar,.ws-step-tabs-inner::-webkit-scrollbar,.ws-exercise-tabs::-webkit-scrollbar{display:none}.ws-link{min-height:42px;font-size:14px}.ws-sep{opacity:.55}.ws-phase-menu{position:fixed;left:12px;right:12px;top:92px;width:auto}.ws-profile-menu{position:fixed;top:56px;right:12px;left:auto;width:min(270px,calc(100vw - 24px));max-width:none}.ws-main{padding:24px 0 48px}.ws-title{font-size:40px}.ws-subtitle{font-size:17px}.ws-login-wrap{min-height:calc(100svh - 54px);padding:28px 16px}.ws-login-card{padding:28px 24px}.ws-login-card .ws-title{font-size:54px}.ws-login-card .ws-subtitle{font-size:18px}.ws-login-card .ws-google-button{min-height:50px}.ws-journey-head{padding:16px;align-items:start}.ws-journey-title{font-size:25px}.ws-journey-body{padding:0 16px 18px}.ws-journey-map{grid-template-columns:1fr}.ws-journey-step{min-height:0}.ws-journey-actions{display:grid;justify-content:stretch}.ws-journey-cue{justify-content:space-between}.ws-orientation-head{grid-template-columns:1fr auto;align-items:start;padding:16px}.ws-start-badge{width:max-content;margin-bottom:8px}.ws-orientation-title{font-size:18px}.ws-orientation-sub{font-size:15px;line-height:1.35}.ws-orientation-body{padding:0 16px 18px}.ws-orientation-copy{font-size:16px;line-height:1.58}.ws-orientation-copy h3{font-size:28px}.ws-disclosure-icon{width:34px;height:34px}.ws-player-card,.ws-context-embed{border-radius:12px}.ws-player-meta{position:static;padding:12px 14px;background:var(--ws-navy);text-shadow:none}.ws-player-meta h3{font-size:21px}.ws-video-access-help summary{align-items:flex-start;flex-direction:column}.ws-access-top,.ws-access-guide{grid-template-columns:1fr}.ws-access-direct{width:100%;white-space:normal;text-align:center}.ws-how-toggle{padding:12px}.ws-ready-row{align-items:flex-start;font-size:16px;line-height:1.35}.ws-ready-row input{margin-top:3px;flex:0 0 auto}.ws-step-tabs{top:85px}.ws-step-tabs-inner{width:100%;padding:0 12px;overflow-x:auto;scrollbar-width:none;gap:20px}.ws-step-tab{flex:0 0 auto;min-height:42px;font-size:10px}.ws-gold-cta{align-items:flex-start;flex-direction:column}.ws-exercise-tabs{gap:14px;overflow-x:auto;scrollbar-width:none}.ws-exercise-tab{flex:0 0 auto;font-size:10px}.ws-ai-link-card{grid-template-columns:42px 1fr;gap:12px;padding:14px}.ws-ai-arrow{display:none}.ws-phase-card{grid-template-columns:6px 50px 1fr;gap:12px;min-height:150px;padding:18px 14px 18px 0}.ws-phase-actions{grid-column:2/-1;justify-items:start}.ws-phase-number{font-size:46px}.ws-phase-content h2{font-size:27px}.ws-stepper{flex-wrap:wrap}.ws-section{margin-top:24px}.ws-section-head{align-items:flex-start;flex-direction:column}.ws-player-actions{align-items:flex-start;flex-direction:column}.ws-scroll-hint{display:block}.ws-lesson-rail{display:flex;overflow-x:auto;gap:10px;padding-bottom:4px;scrollbar-width:none}.ws-lesson-tile{min-width:124px}.ws-collapsed{grid-template-columns:auto 1fr auto}.ws-collapsed .ws-pill{display:none}.ws-context-toggle{padding:14px}.ws-workbook-card{padding:24px 20px}.ws-workbook-top{font-size:11px;letter-spacing: 0}.ws-workbook-card h3{font-size:34px}.ws-workbook-card p{font-size:17px}.ws-card-actions .ws-button{width:100%}.ws-exercise-card{grid-template-columns:1fr}.ws-bottom-nav{flex-direction:row}.ws-bottom-nav .ws-button{min-width:0;flex:1;padding:0 10px;font-size:10px}.ws-admin-toggle{grid-template-columns:48px 1fr auto}.ws-save-bar-inner{flex-direction:column;align-items:stretch}.ws-save-row{flex-direction:column}}",
       "@media(max-width:768px){.ws-user{gap:6px}.ws-player-actions{align-items:stretch;padding:14px}.ws-player-actions .ws-button{width:100%;min-height:48px}.ws-player-action-text{font-size:14px}}"
       ,"@media(max-width:768px){.ws-mission-rail{width:4px}.ws-mission-inner{padding:19px 16px 18px 20px}.ws-mission-preview{margin:-19px -16px 17px -20px;padding:8px 20px}.ws-mission-header h1{font-size:28px}.ws-mission-mark{width:32px;height:32px}.ws-mission-prompt{margin-top:19px}.ws-mission-options{grid-template-columns:1fr;gap:10px}.ws-mission-option{min-height:0}.ws-mission-option-head b{display:block;margin-right:28px;color:var(--ws-steel);font:700 10px Lato, Arial, sans-serif;white-space:nowrap}.ws-mission-option ol{margin-top:12px}.ws-mission-action{align-items:stretch;flex-direction:column}.ws-mission-action .ws-button{width:100%;min-height:48px}.ws-mission-bonus{grid-template-columns:auto 1fr}.ws-mission-bonus>b{grid-column:2}.ws-mission-recognition{line-height:1.45}}@media(prefers-reduced-motion:reduce){.ws-mission-option{transition:none}}"
+      ,".ws-journey-card.ws-complete,.ws-orientation-card.ws-complete{background:#f4f1ea;border-color:#d8d2c6}.ws-journey-card.ws-complete .ws-journey-head,.ws-orientation-card.ws-complete .ws-orientation-head{color:var(--ws-steel)}.ws-journey-card.ws-complete .ws-kicker,.ws-orientation-card.ws-complete .ws-start-badge{color:#68766f}"
     ].join("\n");
     document.head.appendChild(style);
   }
@@ -1935,7 +1936,7 @@ const UTL_CONTENT = {
 
   function learningJourneyCardHtml(progress, orientationDone) {
     var seen = readBool("utl_learning_journey_seen");
-    var open = localStorage.getItem("utl_learning_journey_open") === null ? !seen : readBool("utl_learning_journey_open");
+    var open = localStorage.getItem("utl_learning_journey_open") === null ? (!seen && !orientationDone) : readBool("utl_learning_journey_open");
     var readiness = orientationDone
       ? "You have completed orientation. Use the phase cards below to continue."
       : "Ready to begin? Move to the Orientation section next.";
@@ -2322,6 +2323,7 @@ const UTL_CONTENT = {
     });
     var journeyToggle = qs("[data-journey-toggle]");
     var journeyCard = qs(".ws-journey-card");
+    if (journeyCard && readBool("utl_orientation_ready")) journeyCard.classList.add("ws-complete");
     if (journeyToggle && journeyCard) {
       journeyToggle.addEventListener("click", function () {
         var open = !journeyCard.classList.contains("ws-open");
@@ -2344,6 +2346,7 @@ const UTL_CONTENT = {
     });
     var orientationToggle = qs("[data-orientation-toggle]");
     var orientationCard = qs(".ws-orientation-card");
+    if (orientationCard && readBool("utl_orientation_ready")) orientationCard.classList.add("ws-complete");
     if (orientationToggle && orientationCard) {
       orientationToggle.addEventListener("click", function () {
         var open = !orientationCard.classList.contains("ws-open");
@@ -2387,6 +2390,13 @@ const UTL_CONTENT = {
         var sub = qs(".ws-orientation-sub");
         if (sub) sub.innerHTML = nowWatched ? "Orientation complete &#10003;" : "Get oriented before jumping into Phase 1";
         if (nowWatched) {
+          orientationCard.classList.add("ws-complete");
+          if (journeyCard) {
+            journeyCard.classList.add("ws-complete");
+            journeyCard.classList.remove("ws-open");
+          }
+          writeBool("utl_learning_journey_open", false);
+          writeBool("utl_learning_journey_seen", true);
           if (orientationReward && orientationReward.awarded) {
             showWorkspaceRewardMoment({
               label: "Orientation complete",

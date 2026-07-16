@@ -41,9 +41,7 @@
     }
 
     .tsa-stp-header {
-      position: sticky;
-      top: 0;
-      z-index: 20;
+      position: static;
       display: grid;
       grid-template-columns: auto auto minmax(220px, 1fr);
       align-items: center;
@@ -1141,7 +1139,6 @@
       }));
       wireWorkspace();
       document.getElementById('submitPart').addEventListener('click', submitPartB);
-      scrollToQuestion();
     }
 
     function renderWorkspace(config) {
