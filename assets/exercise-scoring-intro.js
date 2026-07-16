@@ -91,7 +91,7 @@
         border: 1px solid rgba(0, 51, 102, .18);
         border-radius: 8px;
         background: #FAF9F6;
-        box-shadow: inset 4px 0 0 var(--navy, var(--ab-navy, var(--eisenhower-navy, #003366)));
+        border-left: 4px solid var(--navy, var(--ab-navy, var(--eisenhower-navy, #003366)));
         padding: 12px 14px;
         color: var(--charcoal, #4A4A4A);
         font-size: .95rem;

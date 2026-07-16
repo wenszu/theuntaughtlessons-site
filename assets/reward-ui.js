@@ -56,6 +56,36 @@
     return resolved;
   }
 
+  function exerciseProgressSummary(appId) {
+    var phaseByExercise = {
+      "grocery-list": 1, "grocery-list-ai": 1, "messy-notes": 1, "rushed-voice-memo": 1, "rushed-voice-memo-ai": 1,
+      "scqa-builder": 2, "issue-tree": 2, "write-to-aiko": 2, "explain-to-aiko-60": 2, "explain-to-aiko-120": 2,
+      "eisenhower-matrix": 3, "advisory-board": 3, "i-have-bad-news": 3, "lets-switch-hats": 3, "speak-like-obama": 3
+    };
+    var phase = phaseByExercise[appId] || 1;
+    var total = 6;
+    var done = 0;
+    try {
+      for (var index = 1; index <= total; index += 1) {
+        if (localStorage.getItem("utl_done_p" + phase + "-e" + index) === "true" || localStorage.getItem("utl_p" + phase + "_ex" + index + "_done") === "true") done += 1;
+      }
+    } catch (error) {}
+    return { phase: phase, done: done, total: total };
+  }
+
+  function dailyMissionSummary() {
+    try {
+      var plan = JSON.parse(localStorage.getItem("utl_daily_mission_plan") || "null");
+      if (!plan || !Array.isArray(plan.tasks)) return "";
+      var done = plan.tasks.filter(function (task) {
+        if (task.manual) return Boolean(task.complete);
+        if (task.type === "Video") return localStorage.getItem("utl_lesson_watched_" + task.id) === "true";
+        return (task.doneKeys || []).some(function (key) { return localStorage.getItem(key) === "true"; });
+      }).length;
+      return done + " of " + plan.tasks.length + " activities in today’s mission";
+    } catch (error) { return ""; }
+  }
+
   function levelsFrom(settings) {
     var cached = {};
     if (!settings) {
@@ -142,11 +172,12 @@
       ".utl-reward-modal p{position:relative;max-width:470px;margin:0 auto;color:#4A4A4A;font:700 17px/1.5 Lato,Arial,sans-serif}",
       ".utl-reward-modal-total{position:relative;display:inline-flex;margin-top:18px;padding:8px 13px;border:1px solid rgba(238,163,32,.45);border-radius:999px;background:#FFF1CF;color:#8A5A00;font:700 12px Lato, Arial, sans-serif;letter-spacing: 0}",
       ".utl-reward-modal h2.is-celebrating{animation:utlRewardTitleFlash .82s ease-in-out 6}",
-      ".utl-reward-modal button{position:relative;margin-top:26px;min-height:48px;border:0;border-radius:9px;background:#003366;color:#fff;padding:0 26px;font:700 12px Lato, Arial, sans-serif;letter-spacing: 0;text-transform: none;cursor:pointer;box-shadow:0 5px 0 #001F3F,0 12px 24px rgba(0,31,63,.18)}",
-      ".utl-exercise-award{width:min(640px,100%);border:1px solid rgba(0,51,102,.16);border-top:12px solid #EEA320;border-radius:10px;background:linear-gradient(115deg,#FFFDF8 0%,#FFFDF8 72%,#F3EDE2 72%,#F3EDE2 100%);padding:34px 42px 34px;text-align:left;box-shadow:0 30px 80px rgba(0,30,60,.38),12px 12px 0 rgba(238,163,32,.18)}.utl-exercise-award:after{content:'DONE';position:absolute;right:28px;top:48px;color:rgba(0,51,102,.09);font:900 56px/1 Lato,Arial,sans-serif;transform:rotate(90deg);transform-origin:center;pointer-events:none}.utl-exercise-award.is-reflecting{border:2px solid rgba(238,163,32,.7);border-top-width:2px;background:#fff;padding:38px 42px;text-align:left;box-shadow:0 32px 90px rgba(0,30,60,.42)}.utl-exercise-award.is-reflecting:after{display:none}.utl-exercise-award .utl-award-stage[hidden]{display:none}.utl-exercise-award [data-award-stage=celebrate] .utl-reward-modal-check{width:76px;height:76px;margin:0 0 22px;border:5px solid #fff;border-radius:999px;background:#003366;color:#EEA320;transform:none;box-shadow:0 0 0 3px #EEA320,0 10px 22px rgba(0,51,102,.2);font-size:38px}.utl-exercise-award [data-award-stage=celebrate] .utl-reward-modal-label{color:#A86400;font-size:13px}.utl-exercise-award [data-award-stage=celebrate] h2{max-width:470px;margin:7px 0 10px;color:#003366;font:800 44px/1.04 Lato,Arial,sans-serif}.utl-exercise-award [data-award-stage=celebrate] p{max-width:470px;margin:0;color:#4A4A4A;font:700 16px/1.5 Lato,Arial,sans-serif}.utl-exercise-award [data-award-stage=celebrate] p strong{color:#003366}.utl-exercise-award [data-award-stage=celebrate]>button{background:#003366;color:#fff;box-shadow:0 5px 0 #001F3F}.utl-exercise-award .utl-award-earned{display:inline-flex;align-items:center;gap:7px;margin-top:18px;padding:9px 15px;border:1px solid rgba(238,163,32,.55);border-radius:999px;background:#FFF1CF;color:#8A5A00;font:800 15px Lato,Arial,sans-serif}.utl-exercise-award .utl-award-progress{margin-top:9px;color:#4D7094;font:700 13px Lato,Arial,sans-serif}",
+      ".utl-reward-modal button{position:relative;margin-top:26px;min-height:48px;border:0;border-radius:9px;background:#003366;color:#fff;padding:0 26px;font:700 12px Lato, Arial, sans-serif;letter-spacing: 0;text-transform: none;cursor:pointer;box-shadow:none}",
+      ".utl-exercise-award{width:min(640px,100%);border:1px solid rgba(0,51,102,.16);border-top:12px solid #EEA320;border-radius:10px;background:linear-gradient(115deg,#FFFDF8 0%,#FFFDF8 72%,#F3EDE2 72%,#F3EDE2 100%);padding:34px 42px 34px;text-align:left;box-shadow:0 30px 80px rgba(0,30,60,.38)}.utl-exercise-award:after{content:'DONE';position:absolute;right:28px;top:48px;color:rgba(0,51,102,.09);font:900 56px/1 Lato,Arial,sans-serif;transform:rotate(90deg);transform-origin:center;pointer-events:none}.utl-exercise-award.is-reflecting{border:2px solid rgba(238,163,32,.7);border-top-width:2px;background:#fff;padding:38px 42px;text-align:left;box-shadow:0 32px 90px rgba(0,30,60,.42)}.utl-exercise-award.is-reflecting:after{display:none}.utl-exercise-award .utl-award-stage[hidden]{display:none}.utl-exercise-award [data-award-stage=celebrate] .utl-reward-modal-check{width:76px;height:76px;margin:0 0 22px;border:5px solid #fff;border-radius:999px;background:#003366;color:#EEA320;transform:none;box-shadow:0 0 0 3px #EEA320,0 10px 22px rgba(0,51,102,.2);font-size:38px}.utl-exercise-award [data-award-stage=celebrate] .utl-reward-modal-label{color:#A86400;font-size:13px}.utl-exercise-award [data-award-stage=celebrate] h2{max-width:470px;margin:7px 0 10px;color:#003366;font:800 44px/1.04 Lato,Arial,sans-serif}.utl-exercise-award [data-award-stage=celebrate] p{max-width:470px;margin:0;color:#4A4A4A;font:700 16px/1.5 Lato,Arial,sans-serif}.utl-exercise-award [data-award-stage=celebrate] p strong{color:#003366}.utl-exercise-award [data-award-stage=celebrate]>button{background:#003366;color:#fff;box-shadow:0 5px 0 #001F3F}.utl-exercise-award .utl-award-earned{display:inline-flex;align-items:center;gap:7px;margin-top:18px;padding:9px 15px;border:1px solid rgba(238,163,32,.55);border-radius:999px;background:#FFF1CF;color:#8A5A00;font:800 15px Lato,Arial,sans-serif}.utl-exercise-award .utl-award-progress{margin-top:9px;color:#4D7094;font:700 13px Lato,Arial,sans-serif}",
       ".utl-exercise-award .utl-reflection-head{display:grid;grid-template-columns:48px 1fr;gap:13px;align-items:center;text-align:left}.utl-reflection-icon{width:48px;height:48px;border-radius:999px;background:#FFF1CF;color:#A86400;display:grid;place-items:center;font-size:23px}.utl-exercise-award .utl-reflection-head h2{margin:0;font-size:34px}.utl-exercise-award .utl-reflection-prompt{margin:22px 0 13px;text-align:left;color:#003366;font:700 17px/1.4 Lato,Arial,sans-serif}",
       ".utl-reflection-options{display:grid;gap:9px}.utl-reflection-option{width:100%;margin:0!important;min-height:48px!important;padding:11px 14px!important;border:1px solid rgba(0,51,102,.2)!important;border-radius:9px!important;background:#fff!important;color:#003366!important;text-align:left!important;box-shadow:none!important;font:700 14px/1.35 Lato,Arial,sans-serif!important}.utl-reflection-option:hover,.utl-reflection-option.is-selected{border-color:#EEA320!important;background:#FFF8EC!important;box-shadow:0 0 0 2px rgba(238,163,32,.16)!important}",
       ".utl-reflection-note{width:100%;min-height:76px;margin-top:11px;border:1px solid rgba(0,51,102,.2);border-radius:9px;padding:11px 12px;resize:vertical;color:#4A4A4A;font:400 14px/1.4 Lato,Arial,sans-serif}.utl-reflection-actions{display:flex;justify-content:space-between;align-items:center;gap:12px}.utl-reflection-actions button{margin-top:18px}.utl-reflection-skip{background:transparent!important;color:#4D7094!important;box-shadow:none!important;padding:0 8px!important}.utl-reflection-save:disabled{opacity:.48;cursor:not-allowed}",
+      ".utl-takeaway-stage{text-align:center}.utl-takeaway-stage .utl-reflection-icon{margin:0 auto 16px}.utl-takeaway-stage h2{margin-top:8px}.utl-takeaway-stage p{max-width:480px;padding:18px 20px;border-left:4px solid #EEA320;border-radius:8px;background:#FFF8EC;color:#003366;font-size:18px}.utl-takeaway-continue{position:relative;display:inline-flex;align-items:center;justify-content:center;min-height:48px;margin-top:24px;border-radius:9px;background:#003366;color:#fff;padding:0 26px;text-decoration:none;font:700 13px Lato,Arial,sans-serif;box-shadow:none}",
       "@keyframes utlRewardPulse{0%{transform:translateY(0) scale(1)}45%{transform:translateY(-2px) scale(1.05)}100%{transform:translateY(0) scale(1)}}",
       "@keyframes utlRewardModalArrive{0%{opacity:0;transform:translateY(18px) scale(.92)}70%{transform:translateY(-3px) scale(1.015)}100%{opacity:1;transform:none}}",
       "@keyframes utlRewardSparkle{from{opacity:.35;transform:scale(.98)}to{opacity:.7;transform:scale(1.02)}}",
@@ -367,6 +398,8 @@
     var appId = metadata.appId || "exercise";
     var reflection = exerciseReflectionFor(appId, opts.reflection);
     var exerciseName = String(opts.title || "Exercise").replace(/\s+(complete|scored)$/i, "");
+    var phaseProgress = exerciseProgressSummary(appId);
+    var missionProgress = dailyMissionSummary();
     var existing = document.querySelector(".utl-reward-modal-backdrop");
     if (existing) existing.remove();
     var modal = document.createElement("div");
@@ -383,6 +416,8 @@
           '<p>You finished <strong>' + escapeHtml(exerciseName) + '</strong>. Before you move on, note what worked.</p>',
           '<span class="utl-award-earned">&#10022; +' + Math.max(0, Math.round(numberOr(opts.mpEarned, 0))) + ' MP earned</span>',
           '<div class="utl-award-progress">' + Math.max(0, Math.round(numberOr(opts.newTotal, 0))) + ' MP total</div>',
+          (phaseProgress.total ? '<div class="utl-award-progress">Phase ' + phaseProgress.phase + ': ' + phaseProgress.done + ' of ' + phaseProgress.total + ' exercises complete</div>' : ''),
+          (missionProgress ? '<div class="utl-award-progress">' + escapeHtml(missionProgress) + '</div>' : ''),
           '<button type="button" data-award-reflect>Review what worked</button>',
         '</section>',
         '<section class="utl-award-stage" data-award-stage="reflect" hidden>',
@@ -392,6 +427,13 @@
           '<textarea class="utl-reflection-note" maxlength="300" placeholder="Optional: add a note in your own words"></textarea>',
           '<div class="utl-reflection-actions"><button class="utl-reflection-skip" type="button" data-reflection-skip>Skip for now</button><button class="utl-reflection-save" type="button" data-reflection-save disabled>Save reflection and continue</button></div>',
         '</section>',
+        '<section class="utl-award-stage utl-takeaway-stage" data-award-stage="takeaway" hidden>',
+          '<span class="utl-reflection-icon" aria-hidden="true">&#10022;</span>',
+          '<span class="utl-reward-modal-label">Your takeaway</span>',
+          '<h2>Keep this in mind</h2>',
+          '<p data-reflection-takeaway>Use the main idea from this exercise in your next decision or conversation.</p>',
+          '<a class="utl-takeaway-continue" href="../../member-login/index.html">Continue in your workspace &rarr;</a>',
+        '</section>',
       '</div>'
     ].join("");
     document.body.appendChild(modal);
@@ -399,9 +441,18 @@
     var celebration = modal.querySelector('[data-award-stage="celebrate"]');
     var reflectionStage = modal.querySelector('[data-award-stage="reflect"]');
     var saveButton = modal.querySelector('[data-reflection-save]');
+    var takeawayStage = modal.querySelector('[data-award-stage="takeaway"]');
     function finish() {
       modal.remove();
       if (typeof onComplete === "function") onComplete();
+    }
+    function showTakeaway(message) {
+      modal.querySelector('.utl-exercise-award').classList.add('is-reflecting');
+      celebration.hidden = true;
+      reflectionStage.hidden = true;
+      takeawayStage.hidden = false;
+      modal.querySelector('[data-reflection-takeaway]').textContent = message || "Use the main idea from this exercise in your next decision or conversation.";
+      modal.querySelector('.utl-takeaway-continue').focus();
     }
     modal.querySelector('[data-award-reflect]').addEventListener("click", function () {
       modal.querySelector('.utl-exercise-award').classList.add('is-reflecting');
@@ -425,9 +476,9 @@
         choice: selectedChoice,
         note: modal.querySelector('.utl-reflection-note').value.trim()
       } }));
-      finish();
+      showTakeaway(selectedChoice);
     });
-    modal.querySelector('[data-reflection-skip]').addEventListener("click", finish);
+    modal.querySelector('[data-reflection-skip]').addEventListener("click", function () { showTakeaway(""); });
   }
 
   function handleRewardMoment(details) {

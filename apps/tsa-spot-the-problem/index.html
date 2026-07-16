@@ -19,7 +19,7 @@
       --steel: #4D7094;
       --white: #FFFFFF;
       --line: rgba(0, 51, 102, .14);
-      --shadow: 0 18px 44px rgba(0, 51, 102, .10);
+      --shadow: none;
       --red: #B85B5B;
       --red-bg: #F8E7E4;
       --bucket-a: #F8F3E8;
@@ -630,7 +630,7 @@
       border-top: 4px solid var(--gold);
     }
 
-    .tsa-stp-score-card h1 {
+    .tsa-stp-score-card h2 {
       margin: 0;
       font-size: clamp(34px, 5vw, 56px);
       line-height: 1.1;
@@ -1112,9 +1112,9 @@
     function renderPartA() {
       const problem = activePartASet().partA;
       renderShell(renderWorkspace({
-        title: `Part A · Problem ${state.partAIndex + 1} of ${selectedPartA.length}`,
+        title: `Part 1 · Problem ${state.partAIndex + 1} of ${selectedPartA.length}`,
         themeClass: 'tsa-stp-part-gold',
-        instruction: 'Find duplicate ideas inside this set of groups. A duplicate means two items say the same idea in different words, even if they sit in different groups. Move both matching items back to the left.',
+        instruction: 'Compare every item across the full set of three groups. Two items are duplicates when they express the same underlying idea in different words; they may be in the same group or in different groups. Move both matching items to the left.',
         leftTitle: 'Duplicates you found',
         data: state.partA,
         sourceBuckets: problem.buckets,
@@ -1129,7 +1129,7 @@
     function renderPartB() {
       const problem = activePartBSet().partB;
       renderShell(renderWorkspace({
-        title: `Part B · Problem ${state.partBIndex + 1} of ${selectedPartB.length}`,
+        title: `Part 2 · Problem ${state.partBIndex + 1} of ${selectedPartB.length}`,
         themeClass: 'tsa-stp-part-steel',
         instruction: 'Some groups are missing items. Tap an item on the left, then tap the group it belongs to. Please note that not everything on the left needs to be moved.',
         leftTitle: 'Possible missing items',
@@ -1160,7 +1160,6 @@
                 <p class="tsa-stp-zone-title">${escapeHtml(config.leftTitle)} <span>${config.data.left.length}</span></p>
                 <div class="tsa-stp-items">${config.data.left.map(item => itemChip(item, 'left')).join('')}</div>
                 ${config.data.left.length ? '' : '<p class="tsa-stp-empty">Move items here.</p>'}
-                ${leftFeedbackHtml()}
                 <p class="tsa-stp-feedback">Tap an item, then tap a group or the left area to move it.</p>
               </section>
               <div class="tsa-stp-bucket-grid work">
@@ -1175,8 +1174,6 @@
                           ${state.selectedItem && selectedZone !== bucket ? `<button class="tsa-stp-add-slot" type="button" data-move-selected-to="${escapeHtml(bucket)}">Add selected item here</button>` : ''}
                           ${visibleItems.map(item => itemChip(item, bucket, state.part === 'B' && !moved.includes(item) ? 'is-static' : '')).join('')}
                         </div>
-                        ${missingSlotHtml(bucket, moved)}
-                        ${groupStatusHtml(bucket, moved)}
                       </div>
                     </section>
                   `;
@@ -1194,59 +1191,7 @@
     function itemChip(item, zone, extraClass = '') {
       const selected = state.selectedItem === item ? 'is-selected' : '';
       const draggable = extraClass.includes('is-static') ? 'false' : 'true';
-      const feedbackClass = itemFeedbackClass(item, zone, extraClass);
-      return `<button class="tsa-stp-chip ${selected} ${extraClass} ${feedbackClass}" type="button" draggable="${draggable}" data-item="${escapeHtml(item)}" data-zone="${escapeHtml(zone)}">${escapeHtml(item)}</button>`;
-    }
-
-    function itemFeedbackClass(item, zone, extraClass = '') {
-      if (state.part === 'A' && zone === 'left') {
-        return activePartASet().partA.overlaps.includes(item) ? 'is-correct' : 'is-wrong';
-      }
-      if (state.part === 'B' && !extraClass.includes('is-static') && zone !== 'left') {
-        return activePartBSet().partB.answers[item] === zone ? 'is-correct' : 'is-wrong';
-      }
-      return '';
-    }
-
-    function leftFeedbackHtml() {
-      if (state.part === 'A') {
-        const overlaps = new Set(activePartASet().partA.overlaps);
-        const correct = state.partA.left.filter(item => overlaps.has(item)).length;
-        const wrong = state.partA.left.filter(item => !overlaps.has(item)).length;
-        if (!state.partA.left.length) return '';
-        if (wrong) return `<p class="tsa-stp-feedback is-wrong">${wrong} item${wrong === 1 ? '' : 's'} on the left ${wrong === 1 ? 'is' : 'are'} not a duplicate. Move ${wrong === 1 ? 'it' : 'them'} back into a group.</p>`;
-        return `<p class="tsa-stp-feedback is-good">${correct} of ${overlaps.size} duplicate items found.</p>`;
-      }
-      const movedWrong = state.partB.left.filter(item => activePartBSet().partB.answers[item]);
-      if (!movedWrong.length) return '';
-      return `<p class="tsa-stp-feedback">${movedWrong.length} possible missing item${movedWrong.length === 1 ? '' : 's'} still on the left.</p>`;
-    }
-
-    function groupStatusHtml(bucket, moved) {
-      if (state.part === 'A') {
-        const overlaps = new Set(activePartASet().partA.overlaps);
-        const sourceItems = activePartASet().partA.buckets[bucket] || [];
-        const total = sourceItems.filter(item => overlaps.has(item)).length;
-        if (!total) return '<p class="tsa-stp-group-status is-complete">No duplicate expected here.</p>';
-        const found = sourceItems.filter(item => overlaps.has(item) && state.partA.left.includes(item)).length;
-        return `<p class="tsa-stp-group-status ${found === total ? 'is-complete' : ''}">${found} of ${total} duplicate item${total === 1 ? '' : 's'} found in this group.</p>`;
-      }
-      const answers = activePartBSet().partB.answers;
-      const needed = Object.values(answers).filter(value => value === bucket).length;
-      const correct = moved.filter(item => answers[item] === bucket).length;
-      const wrong = moved.filter(item => answers[item] && answers[item] !== bucket).length;
-      if (!needed) return '<p class="tsa-stp-group-status is-complete">No missing item needed here.</p>';
-      if (wrong) return `<p class="tsa-stp-group-status">${correct} of ${needed} correct. ${wrong} item${wrong === 1 ? '' : 's'} ${wrong === 1 ? 'belongs' : 'belong'} somewhere else.</p>`;
-      return `<p class="tsa-stp-group-status ${correct >= needed ? 'is-complete' : ''}">${correct >= needed ? 'This group looks complete.' : `${correct} of ${needed} missing item${needed === 1 ? '' : 's'} placed.`}</p>`;
-    }
-
-    function missingSlotHtml(bucket, moved) {
-      if (state.part !== 'B') return '';
-      const answers = activePartBSet().partB.answers;
-      const needed = Object.values(answers).filter(value => value === bucket).length;
-      const correct = moved.filter(item => answers[item] === bucket).length;
-      const missing = Math.max(0, needed - correct);
-      return Array.from({ length: missing }, () => '<p class="tsa-stp-slot">Missing item slot</p>').join('');
+      return `<button class="tsa-stp-chip ${selected} ${extraClass}" type="button" draggable="${draggable}" data-item="${escapeHtml(item)}" data-zone="${escapeHtml(zone)}">${escapeHtml(item)}</button>`;
     }
 
     function selectedItemZone() {
@@ -1357,7 +1302,7 @@
         <section class="tsa-stp-panel">
           <div class="tsa-stp-score-card">
             <p class="tsa-stp-progress">Part 1 complete</p>
-            <h1>You found the overlaps.</h1>
+            <h2>You found the overlaps.</h2>
             <p class="tsa-stp-interpretation">Next, you will practice spotting what is missing from a set of groups and placing each item where it belongs.</p>
             <div class="tsa-stp-actions">
               <button class="tsa-stp-primary" id="continueToPartB" type="button">Continue to Part 2</button>
@@ -1398,6 +1343,7 @@
         state.partBIndex += 1;
         initializePartB();
         renderPartB();
+        scrollToQuestion();
         return;
       }
       const storagePayload = {
@@ -1517,7 +1463,7 @@
 
       renderShell(`
         <section class="tsa-stp-score-card">
-          <h1>Your Spot the problem score</h1>
+          <h2>Your Spot the problem score</h2>
           <div class="tsa-stp-score-summary">
             <div class="tsa-stp-score-tile featured">
               <span class="tile-label">Exercise B</span>
@@ -1564,7 +1510,7 @@
 
     initializeApp();
   </script>
-  <script type="module" src="../../assets/feedback-widget.js?v=5"></script>
-  <script src="../../assets/tactile-buttons.js?v=4" defer></script>
+  <script type="module" src="../../assets/feedback-widget.js?v=6"></script>
+  <script src="../../assets/tactile-buttons.js?v=20260714-flat-1" defer></script>
 </body>
 </html>

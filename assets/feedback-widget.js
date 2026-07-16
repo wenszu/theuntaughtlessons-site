@@ -43,6 +43,20 @@ const STYLES = `
   #utl-feedback-btn .utl-fb-label {
     display: inline;
   }
+  #utl-feedback-btn.utl-feedback-avoiding {
+    width: 46px;
+    height: 46px;
+    justify-content: center;
+    padding: 0;
+  }
+  #utl-feedback-btn.utl-feedback-avoiding .utl-fb-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
   #utl-feedback-overlay {
     position: fixed;
     inset: 0;
@@ -203,6 +217,56 @@ function buildButton() {
   return btn;
 }
 
+function installCollisionAvoidance(btn) {
+  if (btn.dataset.collisionAvoidance === "true") return;
+  btn.dataset.collisionAvoidance = "true";
+  let frame = 0;
+
+  function updatePosition() {
+    frame = 0;
+    if (!btn.isConnected) return;
+    let obstacleTop = window.innerHeight;
+    const candidates = document.querySelectorAll([
+      ".bottom-bar", ".bottom-actions", ".action-row", ".eisenhower-actions",
+      "[class*='bottom'][class*='nav']", "[class*='bottom'][class*='bar']", "[class*='bottom'][class*='dock']",
+      "[class*='sticky'][class*='action']", "[class*='fixed'][class*='action']",
+      "[class*='save-bar']", "footer"
+    ].join(","));
+
+    candidates.forEach((element) => {
+      if (element === btn || element.contains(btn)) return;
+      const style = window.getComputedStyle(element);
+      if (style.display === "none" || style.visibility === "hidden" || !["fixed", "sticky"].includes(style.position)) return;
+      const rect = element.getBoundingClientRect();
+      const sitsAtViewportBottom = rect.height > 0 && rect.top < window.innerHeight && rect.bottom >= window.innerHeight - 8 && rect.top > window.innerHeight * 0.4;
+      if (sitsAtViewportBottom) obstacleTop = Math.min(obstacleTop, rect.top);
+    });
+
+    const isAvoiding = obstacleTop < window.innerHeight;
+    const safeOffset = isAvoiding ? Math.ceil(window.innerHeight - obstacleTop + 16) : 12;
+    btn.style.setProperty("--utl-feedback-bottom-offset", safeOffset + "px");
+    btn.classList.toggle("utl-feedback-avoiding", isAvoiding);
+  }
+
+  function scheduleUpdate() {
+    if (frame) return;
+    frame = window.requestAnimationFrame(updatePosition);
+  }
+
+  window.addEventListener("resize", scheduleUpdate, { passive: true });
+  window.addEventListener("scroll", scheduleUpdate, { passive: true });
+  const layoutObserver = new MutationObserver((mutations) => {
+    if (mutations.every((mutation) => mutation.target === btn || btn.contains(mutation.target))) return;
+    scheduleUpdate();
+  });
+  layoutObserver.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["class", "style", "hidden"] });
+  if (window.ResizeObserver) {
+    const resizeObserver = new ResizeObserver(scheduleUpdate);
+    resizeObserver.observe(document.body);
+  }
+  scheduleUpdate();
+}
+
 function buildModal(userName, userEmail) {
   const overlay = document.createElement("div");
   overlay.id = "utl-feedback-overlay";
@@ -343,6 +407,7 @@ async function init() {
       if (!document.body.contains(btn)) {
         document.body.appendChild(btn);
       }
+      installCollisionAvoidance(btn);
       // Re-attach whenever the SPA replaces document.body.innerHTML
       if (!observer) {
         observer = new MutationObserver(() => {

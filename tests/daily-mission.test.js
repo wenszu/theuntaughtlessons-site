@@ -46,10 +46,19 @@ assert(source.includes('{ done: 1, total: 3 }'), 'admin preview should expose a 
 assert(source.includes('data-challenge-prepare'), 'challenge should capture an intention before reopening the exercise');
 assert(source.includes('data-challenge-reflect'), 'challenge should capture a reflection before completion');
 assert(source.includes('day streak'), 'welcome summary should support a non-zero streak');
+assert(source.includes('ws-player-actions ws-context-completion'), 'context completion should use the lesson watch-action layout');
+assert(source.includes('Context marked complete.'), 'completed context should match the lesson completed-state language');
+assert(source.includes('Mark not watched'), 'completed context should offer the same reversal pattern as lesson videos');
+assert(source.includes('class="ws-button" type="button" data-watch-id'), 'active lesson completion button should use the gold primary treatment');
+assert(source.includes("done ? 'ws-button-secondary' : ''"), 'context completion should switch between gold primary and green completed treatments');
 workspacePages.forEach((page) => {
   const pageSource = fs.readFileSync(page, 'utf8');
-  assert(pageSource.includes('content-config.js?v=20260712-rewards-1'), `${page} should load the mission-enabled workspace bundle`);
+  assert(/content-config\.js\?v=\d{8}[-\w]*/.test(pageSource), `${page} should load a cache-versioned workspace bundle`);
 });
+assert(source.includes('.ws-subtitle{width:100%;max-width:1040px'), 'phase introductions should use the available laptop width');
+assert(source.includes('@media(min-width:769px) and (max-width:1100px)'), 'workspace typography should include an explicit tablet layout');
+assert(source.includes('.ws-subtitle{max-width:none;font-size:18px'), 'tablet introductions should use the available content width');
+assert(source.includes('@media(max-width:768px)'), 'workspace typography should include a phone layout');
 assert(appHeaderSource.includes('Daily mission:'), 'reward-enabled app headers should render daily mission progress');
 assert(appHeaderSource.includes('utl_daily_mission_plan'), 'app headers should read the saved daily mission');
 assert(appHeaderSource.includes('!hasPlan ? "Set"'), 'app headers should offer a visible mission entry point before a plan is selected');

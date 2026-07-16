@@ -21,7 +21,7 @@
       --white: #fff;
       --paper: #FAF8F4;
       --line: rgba(0, 51, 102, 0.18);
-      --shadow: 0 10px 26px rgba(0, 51, 102, 0.08);
+      --shadow: none;
       --radius: 8px;
     }
 
@@ -388,6 +388,10 @@
       white-space: pre-line;
       line-height: 1.6;
     }
+    .context-view-tabs { display:flex; gap:8px; margin-bottom:10px; }
+    .context-view-tab { flex:1; border:1px solid rgba(0,51,102,.18); border-radius:8px; background:#fff; color:var(--navy); padding:9px 10px; font:700 12px Lato,Arial,sans-serif; cursor:pointer; }
+    .context-view-tab.active { border-color:var(--gold); background:#FFF8EC; box-shadow:inset 0 -2px 0 var(--gold); }
+    .context-view-hidden { display:none!important; }
 
     .constraint-list {
       list-style: none;
@@ -1206,7 +1210,11 @@
 
     <section id="exercise" class="layout">
       <aside id="context">
-        <article class="panel reference-panel">
+        <div class="context-view-tabs" role="tablist" aria-label="Exercise information">
+          <button class="context-view-tab active" id="sourceViewTab" type="button" role="tab" aria-selected="true">Source note</button>
+          <button class="context-view-tab" id="contextViewTab" type="button" role="tab" aria-selected="false">Context and constraints</button>
+        </div>
+        <article class="panel reference-panel" id="sourceViewPanel">
           <div class="panel-head">
             <h2>Source note</h2>
           </div>
@@ -1225,7 +1233,7 @@
           </div>
         </article>
 
-        <article class="panel">
+        <article class="panel context-view-hidden" id="contextViewPanel">
           <div class="panel-head">
             <h2>Context</h2>
           </div>
@@ -1341,7 +1349,7 @@
       </section>
     </section>
   </main>
-  <script src="../../assets/app-reward-header.js?v=20260711-4"></script>
+  <script src="../../assets/app-reward-header.js?v=20260714-audit-1"></script>
   <script src="../../assets/reward-events.js?v=20260712-awards-1"></script>
 
   <script src="../shared/activity-timer.js?v=20260701-audit-1"></script>
@@ -1351,6 +1359,17 @@
     let ACTIVITY = null;
 
     const STORAGE_PREFIX = 'utl_practice_attempts_';
+    function setContextView(view) {
+      const sourceActive = view === 'source';
+      document.getElementById('sourceViewPanel').classList.toggle('context-view-hidden', !sourceActive);
+      document.getElementById('contextViewPanel').classList.toggle('context-view-hidden', sourceActive);
+      document.getElementById('sourceViewTab').classList.toggle('active', sourceActive);
+      document.getElementById('contextViewTab').classList.toggle('active', !sourceActive);
+      document.getElementById('sourceViewTab').setAttribute('aria-selected', String(sourceActive));
+      document.getElementById('contextViewTab').setAttribute('aria-selected', String(!sourceActive));
+    }
+    document.getElementById('sourceViewTab').addEventListener('click', () => setContextView('source'));
+    document.getElementById('contextViewTab').addEventListener('click', () => setContextView('context'));
     const MAX_ATTEMPTS = 10;
     let storageKey = '';
 
@@ -2135,7 +2154,7 @@
   </script>
   <script type="module" src="../../assets/app-access-guard.js?v=1"></script>
   <script src="../../assets/exercise-scoring-intro.js?v=3"></script>
-  <script type="module" src="../../assets/feedback-widget.js?v=5"></script>
-  <script src="../../assets/tactile-buttons.js?v=4" defer></script>
+  <script type="module" src="../../assets/feedback-widget.js?v=6"></script>
+  <script src="../../assets/tactile-buttons.js?v=20260714-flat-1" defer></script>
 </body>
 </html>

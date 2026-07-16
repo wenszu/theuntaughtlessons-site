@@ -216,7 +216,7 @@ body {
 
 .workbook-card.clickable:hover {
   border-color: rgba(0,51,102,0.22);
-  box-shadow: 0 2px 12px rgba(0,51,102,0.06);
+  box-shadow: none;
 }
 
 .workbook-card.locked {

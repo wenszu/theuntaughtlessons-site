@@ -259,7 +259,8 @@
     }
 
     .callout {
-      max-width: 600px;
+      width: 100%;
+      max-width: none;
       margin-top: 20px;
       padding: 16px 20px;
       border-radius: 10px;
@@ -448,7 +449,7 @@
 
     .form-header { margin-bottom: 24px; }
     .form-header h1 { font-size: 26px; }
-    .form-header p { max-width: 640px; margin: 10px 0 0; line-height: 1.6; }
+    .form-header p { width: 100%; max-width: none; margin: 10px 0 0; line-height: 1.6; }
 
     .field-stack {
       display: grid;
@@ -607,7 +608,7 @@
     .sample-col { padding: 16px; border-radius: 8px; background: var(--soft); }
     .sample-notice { margin: 0 0 14px; padding: 10px 14px; border-radius: 8px; background: var(--tan); font-family: Lato, Arial, sans-serif; font-size: 11px; }
 
-    .modal { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; padding: 20px; background: rgba(0,0,0,.4); z-index: 30; }
+    .modal { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; padding: 20px; background: rgba(0,0,0,.4); z-index: 10010; }
     .modal.show { display: flex; }
     .modal-card { width: min(100%, 400px); padding: 32px; border-radius: 12px; background: var(--white); }
     .modal-actions { display: flex; gap: 12px; flex-wrap: wrap; }
@@ -924,6 +925,16 @@
       </div>
     </div>
   </div>
+  <div class="modal" id="secondScqaModal" role="dialog" aria-modal="true" aria-labelledby="secondScqaTitle">
+    <div class="modal-card">
+      <h2 id="secondScqaTitle">Before you write the second SCQA</h2>
+      <p>Your next version should test a genuinely different angle—not simply polish the first. Change the complication, reframe the question, or challenge your first answer.</p>
+      <div class="modal-actions">
+        <button class="btn btn-primary" id="confirmSecondScqa" type="button">Yes, I’ll use a different angle</button>
+        <button class="btn btn-secondary" id="cancelSecondScqa" type="button">Review my first SCQA</button>
+      </div>
+    </div>
+  </div>
   <div class="toast" id="toast"></div>
 
   <script>
@@ -931,7 +942,7 @@
     const TIMER_TARGET = 10 * 60;
     const DATA_URL = "../../data/practice/scqa-builder.json";
     const blankScqa = () => ({ s: "", c: "", q: "", a: "" });
-    const blankState = () => ({ context: "", topicLabel: "", scqa1: blankScqa(), scqa2: blankScqa(), currentScreen: 1 });
+    const blankState = () => ({ context: "", topicLabel: "", scqa1: blankScqa(), scqa2: blankScqa(), currentScreen: 1, secondScqaAcknowledged: false });
     let templateState = null;
 
     let state = blankState();
@@ -1190,7 +1201,6 @@
               <h1>${isSecond ? "Write a different SCQA." : "Write your first SCQA."}</h1>
               <p>${isSecond ? "This is not a revision of your first SCQA. Change your angle: start from a different situation, sharpen the complication, reframe the question, or build a completely different answer." : "Use your context to frame a clear problem narrative. Start with what is true, introduce what is broken, distil it into one sharp question, then answer it directly."}</p>
             </div>
-            ${isSecond ? `<div class="callout" style="margin:0 0 20px"><div class="label">How to make this one different</div><div>Try a different entry point. Make the complication sharper. Ask a question that challenges your first answer.</div></div>` : ""}
             ${scqaFieldsMarkup(which)}
             <div class="bottom-bar">
               <button class="btn btn-secondary" type="button" data-go="${isSecond ? 2 : 1}">${isSecond ? "← Back to SCQA #1" : "← Back"}</button>
@@ -1411,7 +1421,12 @@
     document.addEventListener("click", (event) => {
       const go = event.target.closest("[data-go]");
       if (go) { updateFromDom(); goToScreen(Number(go.dataset.go)); return; }
-      if (event.target.id === "toScqa2") { updateFromDom(); goToScreen(3); return; }
+      if (event.target.id === "toScqa2") {
+        updateFromDom();
+        if (state.secondScqaAcknowledged) goToScreen(3);
+        else $("#secondScqaModal").classList.add("show");
+        return;
+      }
       if (event.target.id === "toReview") { updateFromDom(); goToScreen(4); return; }
       const closePanel = event.target.dataset.closePanel;
       if (closePanel) { $(`#${closePanel}`).innerHTML = ""; return; }
@@ -1441,6 +1456,14 @@
     $("#cancelStartOver").addEventListener("click", () => $("#confirmModal").classList.remove("show"));
     $("#confirmStartOver").addEventListener("click", () => { $("#confirmModal").classList.remove("show"); clearAll(); });
     $("#confirmModal").addEventListener("click", (event) => { if (event.target.id === "confirmModal") $("#confirmModal").classList.remove("show"); });
+    $("#confirmSecondScqa").addEventListener("click", () => {
+      state.secondScqaAcknowledged = true;
+      save();
+      $("#secondScqaModal").classList.remove("show");
+      goToScreen(3);
+    });
+    $("#cancelSecondScqa").addEventListener("click", () => $("#secondScqaModal").classList.remove("show"));
+    $("#secondScqaModal").addEventListener("click", (event) => { if (event.target.id === "secondScqaModal") $("#secondScqaModal").classList.remove("show"); });
     $("#timerPauseBtn").addEventListener("click", () => {
       if (!timerStarted) return;
       timerRunning ? pauseTimer() : resumeTimer();
@@ -1480,9 +1503,9 @@
   </script>
   <script type="module" src="../../assets/app-access-guard.js?v=1"></script>
   <script src="../../assets/exercise-scoring-intro.js?v=3"></script>
-  <script src="../../assets/app-reward-header.js?v=20260711-4"></script>
+  <script src="../../assets/app-reward-header.js?v=20260714-audit-1"></script>
   <script src="../../assets/reward-events.js?v=20260712-awards-1"></script>
-  <script type="module" src="../../assets/feedback-widget.js?v=5"></script>
-  <script src="../../assets/tactile-buttons.js?v=4" defer></script>
+  <script type="module" src="../../assets/feedback-widget.js?v=6"></script>
+  <script src="../../assets/tactile-buttons.js?v=20260714-flat-1" defer></script>
 </body>
 </html>

@@ -19,7 +19,7 @@
       --steel: #4D7094;
       --white: #FFFFFF;
       --line: rgba(0, 51, 102, .14);
-      --shadow: 0 18px 44px rgba(0, 51, 102, .10);
+      --shadow: none;
       --red: #B85B5B;
       --red-bg: #F8E7E4;
     }
@@ -530,7 +530,7 @@
       box-shadow: var(--shadow);
     }
 
-    .tsa-diag-score-card h1 {
+    .tsa-diag-score-card h2 {
       margin: 0;
       font-size: clamp(34px, 5vw, 56px);
       line-height: 1.1;
@@ -1194,7 +1194,7 @@
 
       renderShell(`
         <section class="tsa-diag-score-card">
-          <h1>Your Sort &amp; Bucket Score</h1>
+          <h2>Your Sort &amp; Bucket Score</h2>
           <div class="tsa-diag-score">${score.total} / 20</div>
           <div class="tsa-diag-score-rows">
             <div class="tsa-diag-score-row">Bucket labels: ${score.labelScore} / 6</div>
@@ -1228,7 +1228,7 @@
 
     initializeApp();
   </script>
-  <script type="module" src="../../assets/feedback-widget.js?v=5"></script>
-  <script src="../../assets/tactile-buttons.js?v=4" defer></script>
+  <script type="module" src="../../assets/feedback-widget.js?v=6"></script>
+  <script src="../../assets/tactile-buttons.js?v=20260714-flat-1" defer></script>
 </body>
 </html>
