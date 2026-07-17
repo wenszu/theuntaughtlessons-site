@@ -648,7 +648,7 @@ body {
   min-height: 360px;
   margin: 0;
   padding: 32px;
-  border-left: 4px solid var(--home-navy);
+  border: 1px solid rgba(0, 51, 102, .12);
   border-radius: 12px;
   background: var(--home-white);
   box-shadow: none;
@@ -2453,13 +2453,9 @@ nav img {
   background: var(--smoke);
   border-radius: 3px;
   padding: 28px 32px 28px 36px;
-  border-left: 3px solid transparent;
   transition: border-color 0.2s;
 }
 
-.phase-card:nth-child(1) { border-left-color: var(--gold); }
-.phase-card:nth-child(2) { border-left-color: rgba(238,163,32,0.45); }
-.phase-card:nth-child(3) { border-left-color: rgba(238,163,32,0.2); }
 
 .phase-num {
   display: block;
@@ -2692,9 +2688,7 @@ nav img {
   color: var(--navy);
 }
 
-.preview-card.preview-active {
-  border-left: 3px solid var(--gold);
-}
+.preview-card.preview-active { border-color: rgba(238,163,32,.55); }
 
 .preview-card.preview-locked {
   opacity: 0.5;
@@ -2841,7 +2835,6 @@ nav img {
 .tool-card {
   background: var(--smoke);
   border: 1px solid rgba(0,51,102,0.1);
-  border-left: 3px solid var(--gold);
   border-radius: 3px;
   padding: 24px 28px;
   display: flex;
@@ -2885,11 +2878,6 @@ nav img {
   background: rgba(77,112,148,0.1);
   padding: 4px 10px;
   border-radius: 2px;
-}
-
-.tool-card.muted,
-.tool-card.locked {
-  border-left-color: rgba(77,112,148,0.28);
 }
 
 .tool-card.locked {

@@ -32,6 +32,8 @@ for (const file of files) {
   if (!technicalMonospaceFiles.has(file)) {
     assert(!/Roboto Mono|Courier New/.test(source), `${file} should reserve monospace for functional technical content`);
   }
+  assert(!/border-left:\s*(?:[3-9]|[1-9][0-9]+)px\s+solid/.test(source), `${file} should not use a thick decorative vertical color rail`);
+  assert(!/border-left-color\s*:/.test(source), `${file} should not color-code cards with a decorative left rail`);
 }
 
 const ordinaryAllCapsLabels = [
@@ -51,4 +53,4 @@ function rootDirectory() {
   return path.resolve(__dirname, '..');
 }
 
-console.log('site typography uses natural casing and reserves monospace for technical content');
+console.log('site typography uses natural casing, avoids decorative side rails, and reserves monospace for technical content');

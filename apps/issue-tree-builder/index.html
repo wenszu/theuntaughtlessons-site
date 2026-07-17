@@ -754,7 +754,7 @@
     .hypothesis-card {
       margin-bottom: 24px;
       padding: 20px;
-      border-left: 4px solid var(--gold);
+      border: 1px solid var(--line);
       border-radius: 8px;
       background: var(--white);
     }
@@ -773,19 +773,17 @@
 
     .argument-card {
       border: 1px solid var(--line);
-      border-left: 4px solid var(--navy);
       border-radius: 10px;
       background: var(--white);
       cursor: pointer;
     }
 
     .argument-card.expanded {
-      border-left-color: var(--gold);
       cursor: default;
     }
 
     .argument-card.detail-focus {
-      box-shadow: -3px 0 0 0 var(--gold);
+      box-shadow: 0 0 0 2px rgba(238, 163, 32, .25);
     }
 
     .argument-header {
@@ -1031,7 +1029,7 @@
     .review-hypothesis {
       margin-bottom: 24px;
       padding: 20px 24px;
-      border-left: 4px solid var(--gold);
+      border: 1px solid var(--line);
       border-radius: 8px;
       background: var(--white);
     }

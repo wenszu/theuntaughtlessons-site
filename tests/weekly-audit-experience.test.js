@@ -10,7 +10,11 @@ const styles = fs.readFileSync('styles.css', 'utf8');
 const tactileButtons = fs.readFileSync('assets/tactile-buttons.js', 'utf8');
 
 assert(rewardUi.includes('data-award-stage="takeaway"'), 'exercise completion includes a takeaway stage');
-assert(rewardUi.includes('Continue in your workspace'), 'exercise completion leads learners back into the program');
+assert(rewardUi.includes('Go to next exercise'), 'exercise completion leads learners directly to the next exercise');
+assert(rewardUi.includes('nextExerciseHref(phaseProgress.phase)'), 'the next-exercise action returns to the correct phase');
+assert(!rewardUi.includes("content:'DONE'"), 'exercise completion does not display a DONE watermark');
+assert(rewardUi.includes('opacity:.22'), 'completion background texture remains subtle');
+assert(rewardUi.includes('html,body{max-width:100%;overflow-x:clip}'), 'reward popovers cannot create horizontal page overflow');
 assert(rewardUi.includes('Phase '), 'exercise completion reports phase progress');
 assert(rewardUi.includes('activities in today’s mission'), 'exercise completion reports daily mission progress when set');
 assert(appHeader.includes('makeAttemptsCollapsible'), 'shared exercise UI collapses previous attempts');
@@ -18,6 +22,9 @@ assert(appHeader.includes('overflow-x:clip'), 'shared exercise UI guards against
 assert(styles.includes('overflow-x: clip'), 'public pages guard against horizontal overflow');
 assert(workspace.includes('program’s Day '), 'workspace explains the learner’s program pace');
 assert(workspace.includes('Intern, Analyst, Associate, Principal, and Executive'), 'workspace explains the five levels');
+assert(workspace.includes('Your first day at MA'), 'Phase 1 avoids repeating the orientation welcome headline');
+assert(workspace.includes('ws-phase-practice-cta'), 'Phase 1 presents practice navigation as one clear button');
+assert(!workspace.includes('<a class="ws-ai-link-card"'), 'AI practice uses one clear action instead of a redundant link bar');
 assert(workspace.includes('(!seen && !orientationDone)'), 'completed onboarding does not reopen the introductory journey card');
 assert(workspace.includes('journeyCard.classList.add("ws-complete")'), 'completed introductory content receives a subdued state');
 assert(workspace.includes('orientationCard.classList.add("ws-complete")'), 'completed orientation receives a subdued state');
