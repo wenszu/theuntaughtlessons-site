@@ -361,6 +361,70 @@
       line-height: 1.5;
     }
 
+    .lsh-voice-guide {
+      grid-column: 1 / -1;
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      gap: 14px;
+      align-items: center;
+      padding: 15px 16px;
+      border: 1px solid var(--lsh-line);
+      border-radius: 8px;
+      background: var(--lsh-soft);
+    }
+
+    .lsh-voice-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 48px;
+      height: 48px;
+      border-radius: 999px;
+      background: #050505;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    .lsh-voice-icon svg { width: 25px; height: 25px; }
+    .lsh-voice-guide strong { display:block; margin-bottom:3px; color:var(--lsh-navy); font-size:16px; }
+    .lsh-voice-guide p { color:var(--lsh-charcoal); font-size:14px; }
+
+    .lsh-voice-steps {
+      grid-column: 1 / -1;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      counter-reset: voice-step;
+    }
+
+    .lsh-voice-steps li {
+      counter-increment: voice-step;
+      padding: 12px;
+      border: 1px solid var(--lsh-line);
+      border-radius: 8px;
+      background: var(--lsh-white);
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .lsh-voice-steps li::before {
+      content: counter(voice-step);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      margin-right: 6px;
+      border-radius: 999px;
+      background: var(--lsh-navy);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
     .lsh-actions {
       display: flex;
       flex-direction: column;
@@ -465,6 +529,8 @@
         align-items: flex-start;
         justify-content: flex-start;
       }
+
+      .lsh-voice-steps { grid-template-columns: 1fr; }
     }
 
     @media (max-width: 520px) {
@@ -530,7 +596,7 @@
       <aside class="lsh-brief-card" aria-label="Exercise brief">
         <p class="lsh-label">Exercise brief</p>
         <strong>15 minutes</strong>
-        <span>Use the Let's switch hats Gem to step into someone else's perspective, practice reading their constraints and motivations, and reshape how you'd approach the conversation.</span>
+        <span>Use the Let's switch hats Custom GPT to step into someone else's perspective, practice reading their constraints and motivations, and reshape how you'd approach the conversation.</span>
         <span>When you finish, note one thing you'd say differently now that you've seen it from their side.</span>
       </aside>
     </section>
@@ -541,7 +607,7 @@
         <div class="lsh-scenario">
           <p>You are now leading the Olympic project. You will work with people who think very differently from you &mdash; different roles, different pressures, different definitions of success.</p>
           <p>What feels obvious to you may feel risky or unclear to someone else. Before you push your idea, you need to understand their world first.</p>
-          <p>You will have two custom AI bots to go through. The first one will be one given directly by Aiko. It is a gem that she uses herself to be better at understanding perspectives. The second will make you wear the Olympic project lead hat fully, by trying to get someone on your team. This person is named Michael Felipe, who Aiko named to be a perfect fit for the project. She needs you to get him on the team. Your job is to 1) practice switching hats, and 2) get Michael on board.</p>
+          <p>Choose one person involved in the Olympic project and one real conversation you need to handle. The Custom GPT will take the other person&rsquo;s perspective, question your assumptions, and help you test a better way to approach the conversation.</p>
         </div>
         <p class="lsh-prep-cue">Choose your person and situation above before opening the GPT.</p>
       </article>
@@ -572,27 +638,33 @@
     <section class="lsh-action-card" aria-label="Open Aiko's Let's switch hats CustomGPT">
       <div>
         <p class="lsh-label">Practice with AI</p>
-        <h2>Open Aiko's Let's switch hats CustomGPT for practice.</h2>
-        <p>Choose your scenario and practice until your message would actually take into account their perspectives, and correspond with them accordingly.</p>
+        <h2>Practice the conversation out loud.</h2>
+        <p>Open the Custom GPT, tell it who you are speaking with and what is at stake, then work through the conversation from the other person&rsquo;s point of view.</p>
       </div>
       <div class="lsh-actions">
         <a class="lsh-button lsh-button-primary" href="https://chatgpt.com/g/g-6a411c3c9468819194486200d74b40e4-utl-lets-switch-hats" target="_blank" rel="noopener">Open GPT</a>
       </div>
-      <p>This opens ChatGPT in a new tab. You may need to sign in, then return here when you finish.</p>
-    </section>
-
-    <section class="lsh-action-card" aria-label="Open the Let's switch hats with Michael Gem">
-      <div>
-        <p class="lsh-label">Start AI simulation</p>
-        <h2>Open the Let's switch hats with Michael Gem.</h2>
-        <p>Simulate the process of hiring Michael. He is an important asset to have on the team, so it is important that you get through this simulation.</p>
+      <div class="lsh-voice-guide">
+        <span class="lsh-voice-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M5 10v4M8.5 7v10M12 5v14M15.5 8v8M19 10v4"/>
+          </svg>
+        </span>
+        <div>
+          <strong>Use ChatGPT voice mode</strong>
+          <p>Click the black voice button with the white waveform near the message box. If asked, allow ChatGPT to use your microphone.</p>
+        </div>
       </div>
-      <div class="lsh-actions">
-        <a class="lsh-button lsh-button-primary" href="https://gemini.google.com/gem/1GpR19HsizMqmhE3cWsM8J2bGTOQ3SJsO?usp=sharing" target="_blank" rel="noopener">Open Gem</a>
+      <ol class="lsh-voice-steps">
+        <li>Say who the other person is, what they care about, and what conversation you need to have.</li>
+        <li>Respond out loud. Ask the GPT to challenge you if you are still seeing the situation only from your side.</li>
+        <li>Finish by stating what you now understand and one thing you will say differently.</li>
+      </ol>
+      <div style="grid-column:1/-1;display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap;">
         <button class="lsh-button" id="completeExerciseBtn" type="button">Mark exercise complete · +30 MP</button>
         <a class="lsh-exit-link" href="../../member-login/index.html#phase3">Back to member workspace</a>
       </div>
-      <p>This opens Gemini in a new tab. You may need to sign in, then return here when you finish.</p>
+      <p style="grid-column:1/-1;">ChatGPT opens in a new tab. Return here and mark the exercise complete after you finish the conversation.</p>
     </section>
   </main>
 
