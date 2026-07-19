@@ -438,6 +438,8 @@
       align-items: center;
       gap: 8px;
       box-shadow: none;
+      overflow-x: auto;
+      scrollbar-width: thin;
     }
 
     .admin-tab {
@@ -651,6 +653,28 @@
       margin-left: 4px;
       opacity: .7;
     }
+
+    .sp-member-button { padding:0; border:0; background:transparent; color:var(--navy); font:700 12px Lato,Arial,sans-serif; text-align:left; cursor:pointer; text-decoration:underline; text-decoration-color:rgba(0,51,102,.3); text-underline-offset:3px; }
+    .sp-member-button:hover { text-decoration-color:var(--gold); }
+    .sp-detail-header { display:flex; align-items:flex-start; justify-content:space-between; gap:18px; padding:18px; border:1px solid var(--line); border-radius:8px; background:#fff; }
+    .sp-detail-header h3 { margin:0 0 4px; color:var(--navy); font-family:'Playfair Display',serif; font-size:24px; }
+    .sp-detail-header p { margin:0; color:#777; font-size:13px; }
+    .sp-detail-summary { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin:14px 0; }
+    .sp-detail-stat { padding:14px; border:1px solid var(--line); border-radius:8px; background:#fff; }
+    .sp-detail-stat span { display:block; color:#777; font-size:11px; }
+    .sp-detail-stat strong { display:block; margin-top:4px; color:var(--navy); font-size:18px; }
+    .sp-detail-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:12px; }
+    .sp-detail-card { padding:16px; border:1px solid var(--line); border-radius:8px; background:#fff; }
+    .sp-detail-card h4 { margin:0 0 12px; color:var(--navy); font-size:15px; }
+    .sp-activity-list { display:grid; gap:7px; margin:0; padding:0; list-style:none; }
+    .sp-activity-row { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; padding-bottom:7px; border-bottom:1px solid var(--line); font-size:12px; }
+    .sp-activity-row:last-child { border-bottom:0; padding-bottom:0; }
+    .sp-activity-row small { display:block; margin-top:2px; color:#888; }
+    .sp-status-done { color:var(--green); font-weight:700; }
+    .sp-status-missing { color:#888; }
+    .sp-reward-alert { margin:0 0 14px; padding:12px 14px; border:1px solid #efd39c; border-radius:8px; background:#fff8e8; color:var(--charcoal); font-size:13px; line-height:1.5; }
+    .sp-reward-alert.is-ok { border-color:#b9d9c5; background:#edf7f0; }
+    @media (max-width:720px) { .sp-detail-header { flex-direction:column; } }
 
     .section-divider {
       height: 1px;
@@ -1651,6 +1675,13 @@
     .eng-select-wide { width:360px; }
     .eng-number:focus, .eng-text:focus, .eng-select:focus { border-color:var(--navy); outline:none; box-shadow:0 0 0 2px rgba(0,51,102,.08); }
     .eng-save-btn { justify-self:start; margin-top:4px; }
+    .control-scope { display:inline-flex; align-items:center; margin:0 0 12px; padding:5px 9px; border:1px solid var(--line); border-radius:999px; background:#fff; color:var(--navy); font-size:11px; font-weight:700; line-height:1; }
+    .control-scope.is-live { border-color:#b9d9c5; background:#edf7f0; color:#25613b; }
+    .control-scope.is-preview { border-color:#efd39c; background:#fff8e8; color:#795300; }
+    .control-scope.is-unavailable { border-color:#d7dce2; background:#f3f5f7; color:#59636e; }
+    .operational-notice { margin:12px 0 16px; padding:13px 15px; border:1px solid #d7dce2; border-radius:8px; background:#f7f8fa; color:var(--charcoal); font-size:13px; line-height:1.55; }
+    .eng-form.is-unavailable { opacity:.62; }
+    .eng-form.is-unavailable input, .eng-form.is-unavailable button { cursor:not-allowed; }
     @media (max-width: 720px) {
       .eng-field-row { flex-direction:column; align-items:stretch; }
       .eng-toggle { align-self:flex-end; }
@@ -1914,61 +1945,63 @@
     </div>
 
     <nav class="admin-tabs" aria-label="Admin console tabs">
-      <button class="admin-tab active" type="button" data-admin-tab="content-manager">Site &amp; Content</button>
+      <button class="admin-tab active" type="button" data-admin-tab="content-manager">Program</button>
       <button class="admin-tab" type="button" data-admin-tab="student-progress">Student Progress</button>
+      <button class="admin-tab" type="button" data-admin-tab="member-management">Member Access</button>
       <button class="admin-tab" type="button" data-admin-tab="rewards">Rewards</button>
-      <button class="admin-tab" type="button" data-admin-tab="member-management">Member Management</button>
-      <button class="admin-tab" type="button" data-admin-tab="admin-tools">Admin Tools</button>
-      <button class="admin-tab" type="button" data-admin-tab="engagement">Engagement</button>
-      <button class="admin-tab" type="button" data-admin-tab="content-library">Content Library</button>
+      <button class="admin-tab" type="button" data-admin-tab="engagement">Communications</button>
+      <button class="admin-tab" type="button" data-admin-tab="content-library">Content Data</button>
+      <button class="admin-tab" type="button" data-admin-tab="admin-tools">Preview &amp; Health</button>
     </nav>
 
     <aside class="admin-sidebar">
       <div class="sidebar-title">Admin</div>
       <div class="sidebar-divider"></div>
 
-      <span class="nav-group-label" data-admin-nav-group="content-manager">Site</span>
+      <span class="nav-group-label" data-admin-nav-group="content-manager">Program access</span>
       <button class="admin-nav-item active" data-admin-tab-scope="content-manager" data-target="section-visibility">Visibility</button>
       <button class="admin-nav-item" data-admin-tab-scope="content-manager" data-target="section-access-controls">Assessment visibility &amp; access</button>
 
-      <span class="nav-group-label" data-admin-nav-group="content-manager">Content</span>
+      <span class="nav-group-label" data-admin-nav-group="content-manager">Program content</span>
       <button class="admin-nav-item" data-admin-tab-scope="content-manager" data-target="section-orientation">Orientation</button>
       <button class="admin-nav-item" data-admin-tab-scope="content-manager" data-target="section-phase1">Phase 1</button>
       <button class="admin-nav-item" data-admin-tab-scope="content-manager" data-target="section-phase2">Phase 2</button>
       <button class="admin-nav-item" data-admin-tab-scope="content-manager" data-target="section-phase3">Phase 3</button>
-      <button class="admin-nav-item" data-admin-tab-scope="content-manager" data-target="section-send-instructor">Send to instructor</button>
 
       <span class="nav-group-label" data-admin-nav-group="student-progress">Progress</span>
-      <button class="admin-nav-item" data-admin-tab-scope="student-progress" data-target="section-student-progress">Student dashboard</button>
+      <button class="admin-nav-item" data-admin-tab-scope="student-progress" data-target="section-student-progress">Student Progress</button>
 
       <span class="nav-group-label" data-admin-nav-group="rewards">Rewards</span>
       <button class="admin-nav-item" data-admin-tab-scope="rewards" data-target="section-reward-levels">Levels</button>
-      <button class="admin-nav-item" data-admin-tab-scope="rewards" data-target="section-reward-overview">Rule overview</button>
-      <button class="admin-nav-item" data-admin-tab-scope="rewards" data-target="section-reward-rules">MP rules</button>
+      <button class="admin-nav-item" data-admin-tab-scope="rewards" data-target="section-reward-overview">Rules &amp; MP</button>
       <button class="admin-nav-item" data-admin-tab-scope="rewards" data-target="section-reward-simulator">Award preview</button>
-      <button class="admin-nav-item" data-admin-tab-scope="rewards" data-target="section-reward-storage">Storage &amp; roadmap</button>
 
       <span class="nav-group-label" data-admin-nav-group="member-management">Access</span>
       <button class="admin-nav-item" data-admin-tab-scope="member-management" data-target="section-members">Members</button>
-      <button class="admin-nav-item" data-admin-tab-scope="member-management" data-target="section-passwords">Passwords</button>
+      <button class="admin-nav-item" data-admin-tab-scope="member-management" data-target="section-passwords">Legacy local access</button>
 
-      <span class="nav-group-label" data-admin-nav-group="engagement">Engagement</span>
+      <span class="nav-group-label" data-admin-nav-group="engagement">Communications</span>
       <button class="admin-nav-item" data-admin-tab-scope="engagement" data-target="section-inapp-nudges">In-app nudges</button>
       <button class="admin-nav-item" data-admin-tab-scope="engagement" data-target="section-email-templates">Email templates</button>
       <button class="admin-nav-item" data-admin-tab-scope="engagement" data-target="section-email-nudges">Email nudges</button>
       <button class="admin-nav-item" data-admin-tab-scope="engagement" data-target="section-certificate">Certificate</button>
       <button class="admin-nav-item" data-admin-tab-scope="engagement" data-target="section-global-defaults">Global defaults</button>
 
-      <span class="nav-group-label" data-admin-nav-group="content-library">Content Library</span>
+      <span class="nav-group-label" data-admin-nav-group="content-library">Content data</span>
       <button class="admin-nav-item" data-admin-tab-scope="content-library" data-target="section-cl-files">Data files</button>
-      <button class="admin-nav-item" data-admin-tab-scope="content-library" data-target="section-cl-setup">GitHub setup</button>
+
+      <span class="nav-group-label" data-admin-nav-group="admin-tools">Preview</span>
+      <button class="admin-nav-item" data-admin-tab-scope="admin-tools" data-target="section-admin-preview">Unlock phases</button>
+      <button class="admin-nav-item" data-admin-tab-scope="admin-tools" data-target="section-links">Quick links</button>
+      <span class="nav-group-label" data-admin-nav-group="admin-tools">Health</span>
+      <button class="admin-nav-item" data-admin-tab-scope="admin-tools" data-target="section-sync">Site health check</button>
 
     </aside>
 
     <main class="admin-main">
       <section class="admin-section" id="section-sync" data-admin-tab-panel="admin-tools">
-        <span class="section-label">Admin Tools</span>
-        <h2>Site sync check</h2>
+        <span class="section-label">Preview &amp; Health</span>
+        <h2>Site health check</h2>
         <div class="section-divider"></div>
         <p class="description">Checks whether the member hub still matches the admin panel's expected accordions, exercise cards, app links, completion keys, and embed keys.</p>
         <div class="sync-actions">
@@ -1984,7 +2017,8 @@
         <span class="section-label">Site</span>
         <h2>Visibility</h2>
         <div class="section-divider"></div>
-        <p class="description">Choose which public and member-facing areas are visible. Phase 2 and Phase 3 still unlock automatically for participants based on completion.</p>
+        <span class="control-scope is-preview">This browser only</span>
+        <p class="description">Use these controls to test visibility in this browser. They do not publish visibility changes to every learner. Phase 2 and Phase 3 still unlock automatically based on completion.</p>
         <div class="visibility-checklist" id="visibilityChecklist"></div>
         <div class="visibility-summary-head">
           <h3>Visibility status summary</h3>
@@ -2004,6 +2038,7 @@
         <div class="section-divider"></div>
         <p class="description">Controls assessment visibility by audience: public visitors first, then members, then Admin/ owner preview settings. Changes take effect on the next page load for each audience.</p>
 
+        <span class="control-scope is-live">Live for all visitors</span>
         <p class="description" style="margin-top:12px"><strong>Public</strong> — controls what non-logged-in visitors see on the public site and <a href="../tsa-score.html" target="_blank">tsa-score.html</a>.</p>
         <div class="visibility-checklist" id="publicHomepageChecklist"></div>
         <span id="publicHomepageStatus" style="font-size:12px;color:#555;display:block;margin-top:6px;min-height:16px;"></span>
@@ -2062,7 +2097,8 @@
         </div>
 
         <div class="section-divider" style="margin-top:20px"></div>
-        <p class="description" style="margin-top:12px"><strong>Members</strong> — controls what regular logged-in members see in the member workspace.</p>
+        <span class="control-scope is-live">Member access is live; card states below are local preview</span>
+        <p class="description" style="margin-top:12px"><strong>Members</strong> — the access switch is stored centrally. The three assessment card-state controls below it are browser-only preview settings.</p>
         <div id="tsaVisibilityStatus" class="eng-status" aria-live="polite"></div>
         <div id="tsaVisibilityForm">
           <div class="eng-field-group">
@@ -2124,7 +2160,8 @@
         <span class="section-label">Members</span>
         <h2>Orientation</h2>
         <div class="section-divider"></div>
-        <p class="description">Controls the Orientation section of the member hub. Orientation does not have a separate lesson video; use the two context sub-sections below.</p>
+        <span class="control-scope is-preview">This browser only</span>
+        <p class="description">Controls the Orientation section in your local member preview. It does not publish a new layout to other learners. Orientation does not have a separate lesson video; use the two context sub-sections below.</p>
         <div class="sync-actions">
           <button class="small-button" type="button" data-add-context="orientation">Add context sub-section</button>
           <button class="small-button secondary-button" type="button" data-save-layout-default="orientation">Set current layout as default</button>
@@ -2138,7 +2175,8 @@
         <span class="section-label">Members</span>
         <h2>Phase 1</h2>
         <div class="section-divider"></div>
-        <p class="description">Controls Phase 1 — Think clearly context sections and app visibility. Move rows to change their order in the member workspace.</p>
+        <span class="control-scope is-preview">This browser only</span>
+        <p class="description">Controls Phase 1 in your local member preview. Move rows to test their order; these changes are not published to other learners.</p>
         <div class="sync-actions">
           <button class="small-button" type="button" data-add-context="phase1">Add context sub-section</button>
           <button class="small-button secondary-button" type="button" data-save-layout-default="phase1">Set current layout as default</button>
@@ -2152,7 +2190,8 @@
         <span class="section-label">Members</span>
         <h2>Phase 2</h2>
         <div class="section-divider"></div>
-        <p class="description">Controls Phase 2 — Speak concisely context sections and app visibility. Phase visibility is automatic and shown in the Visibility section.</p>
+        <span class="control-scope is-preview">This browser only</span>
+        <p class="description">Controls Phase 2 in your local member preview. Layout changes here are not published to other learners. Phase visibility is shown in the Visibility section.</p>
         <div class="sync-actions">
           <button class="small-button" type="button" data-add-context="phase2">Add context sub-section</button>
           <button class="small-button secondary-button" type="button" data-save-layout-default="phase2">Set current layout as default</button>
@@ -2166,7 +2205,8 @@
         <span class="section-label">Members</span>
         <h2>Phase 3</h2>
         <div class="section-divider"></div>
-        <p class="description">Controls Phase 3 — Act confidently context sections and app visibility. Participant completion remains automatic from the member workspace.</p>
+        <span class="control-scope is-preview">This browser only</span>
+        <p class="description">Controls Phase 3 in your local member preview. Layout changes here are not published to other learners. Participant completion remains automatic.</p>
         <div class="sync-actions">
           <button class="small-button" type="button" data-add-context="phase3">Add context sub-section</button>
           <button class="small-button secondary-button" type="button" data-save-layout-default="phase3">Set current layout as default</button>
@@ -2174,29 +2214,6 @@
           <span class="layout-status" data-layout-status="phase3" aria-live="polite"></span>
         </div>
         <div id="embed-phase3"></div>
-      </section>
-
-      <section class="admin-section" id="section-send-instructor" data-admin-tab-panel="content-manager">
-        <span class="section-label">Members</span>
-        <h2>Send to instructor</h2>
-        <div class="section-divider"></div>
-        <p class="description">When active, participants can send their results directly to you from their My results page. This requires an Apps Script URL from your connected Google Sheet.</p>
-        <div class="toggle-row" data-key="utl_send_instructor" data-default="hidden" data-options="live:Show,hidden:Hide" data-labels="live:Send to instructor button is active,hidden:Button is hidden from participants"></div>
-        <div class="url-block" data-key="utl_send_instructor_url" data-label="Apps Script endpoint URL" data-placeholder="Paste your Apps Script web app URL here"></div>
-        <div class="instruction-callout">
-          <h3>How to get this URL</h3>
-          <ol>
-            <li>Open your Google Sheet</li>
-            <li>Click Extensions → Apps Script</li>
-            <li>Paste the provided Apps Script code from the program documentation</li>
-            <li>Click Deploy → New deployment</li>
-            <li>Select type: Web app</li>
-            <li>Set access to: Anyone</li>
-            <li>Click Deploy and copy the web app URL</li>
-            <li>Paste that URL into the field above</li>
-          </ol>
-          <em>This URL acts as your private endpoint. Do not share it publicly.</em>
-        </div>
       </section>
 
       <section class="admin-section" id="section-global-defaults" data-admin-tab-panel="engagement">
@@ -2219,7 +2236,7 @@
       </section>
 
       <section class="admin-section" id="section-admin-preview" data-admin-tab-panel="admin-tools">
-        <span class="section-label">Admin Tools</span>
+        <span class="section-label">Preview &amp; Health</span>
         <h2>Unlock phases</h2>
         <div class="section-divider"></div>
         <p class="description">Controls your own view of the member area. Turning this on lets you browse Phase 2 and Phase 3 without completing Phase 1 first. Members are not affected — they still follow the normal unlock sequence.</p>
@@ -2440,22 +2457,6 @@
         </div>
       </section>
 
-      <section class="admin-section" id="section-reward-storage" data-admin-tab-panel="rewards">
-        <span class="section-label">Rewards</span>
-        <h2>Storage &amp; roadmap</h2>
-        <div class="section-divider"></div>
-        <p class="description">Rewards should sit beside student progress in Firebase, so the admin dashboard can explain both what a learner completed and what they earned.</p>
-        <div class="reward-storage-note">
-          <strong>Firebase storage:</strong> global rules are stored in <code>settings/rewards</code>. Learner rewards sync atomically to the user record with stable event IDs and a 500-entry audit ledger, preventing duplicate awards and cross-device overwrites.
-        </div>
-        <div class="reward-storage-note">
-          <strong>Not building yet:</strong> token spending and hint unlocks. The admin model keeps <code>tokens.enabled</code> false for now so we can add hints later without reworking MP, levels, or streaks.
-        </div>
-        <div class="reward-storage-note">
-          <strong>Operational rule:</strong> pause Reward earning before changing the program structure or investigating an MP incident. Pausing preserves existing totals; resetting recommended rules does not reset learner data.
-        </div>
-      </section>
-
       <section class="admin-section" id="section-members" data-admin-tab-panel="member-management">
         <span class="section-label">Access</span>
         <h2>Members</h2>
@@ -2534,8 +2535,8 @@
             <div class="mb-form-field">
               <label for="mbNewRole">Role</label>
               <select id="mbNewRole">
-                <option value="user" selected>user</option>
-                <option value="admin">admin</option>
+                <option value="member" selected>Member</option>
+                <option value="admin">Admin</option>
               </select>
             </div>
             <div class="mb-form-field">
@@ -2546,14 +2547,20 @@
               <label for="mbNewNotes">Notes</label>
               <input type="text" id="mbNewNotes" placeholder="Optional">
             </div>
-            <div class="mb-form-field">
-              <label for="mbNewLocalUsername">Username <span style="color:#555;font-weight:400;font-size:11px;">(non-Google login)</span></label>
-              <input type="text" id="mbNewLocalUsername" placeholder="e.g. jsmith" autocomplete="off">
-            </div>
-            <div class="mb-form-field">
-              <label for="mbNewLocalPassword">Password <span style="color:#555;font-weight:400;font-size:11px;">(non-Google login)</span></label>
-              <input type="password" id="mbNewLocalPassword" placeholder="Leave blank if Google only" autocomplete="new-password">
-            </div>
+            <details style="grid-column:1/-1;padding:10px 12px;border:1px solid var(--line);border-radius:6px;background:#f7f8fa;">
+              <summary style="cursor:pointer;color:var(--navy);font-weight:700;font-size:12px;">Optional legacy local login</summary>
+              <p style="margin:8px 0;color:#777;font-size:12px;">Use only for someone who cannot use Google or a Firebase email link. These credentials do not provide production admin authorization.</p>
+              <div class="mb-form-grid">
+                <div class="mb-form-field">
+                  <label for="mbNewLocalUsername">Username</label>
+                  <input type="text" id="mbNewLocalUsername" placeholder="e.g. jsmith" autocomplete="off">
+                </div>
+                <div class="mb-form-field">
+                  <label for="mbNewLocalPassword">Password</label>
+                  <input type="password" id="mbNewLocalPassword" placeholder="Leave blank if Google only" autocomplete="new-password">
+                </div>
+              </div>
+            </details>
           </div>
           <div class="mb-link-checkbox-row">
             <label>
@@ -2595,18 +2602,22 @@
       </section>
 
       <section class="admin-section" id="section-passwords" data-admin-tab-panel="member-management">
-        <span class="section-label">Access</span>
-        <h2>Passwords</h2>
+        <span class="section-label">Legacy access</span>
+        <h2>Legacy local access</h2>
         <div class="section-divider"></div>
-        <p class="description">Local (non-Google) accounts for the member workspace. Use these credentials on the member login page.</p>
+        <span class="control-scope is-preview">This browser only · legacy</span>
+        <div class="operational-notice"><strong>Not production account security.</strong> These credentials are stored only in this browser for local testing and do not replace Google/Firebase authorization. Use Member Management for production access.</div>
+        <details>
+          <summary style="cursor:pointer;color:var(--navy);font-weight:700;">Show local testing credentials</summary>
         <div class="password-block" data-key="utl_local_pw_admin" data-username="admin" data-label="Admin account" data-description="Username: admin — has admin access to this console." data-default="password123"></div>
         <div class="password-block" data-key="utl_local_pw_testuser" data-username="testuser" data-label="Test member account" data-description="Username: testuser — standard member access, no admin." data-default="member2026"></div>
         <div class="password-block" data-key="utl_admin_password" data-label="Admin console password" data-description="The password used to unlock this admin panel. Keep it private." data-default="utl2026_admin"></div>
         <div class="warning-callout">If you change the admin console password and forget it, you will need to edit admin/index.html directly to regain access.</div>
+        </details>
       </section>
 
       <section class="admin-section" id="section-links" data-admin-tab-panel="admin-tools">
-        <span class="section-label">Admin Tools</span>
+        <span class="section-label">Preview &amp; Health</span>
         <h2>Quick links</h2>
         <div class="section-divider"></div>
         <p class="description">Open these links in a new tab to verify your changes.</p>
@@ -2761,16 +2772,18 @@
         <span class="section-label">Email nudges</span>
         <h2>Email nudges</h2>
         <div class="section-divider"></div>
-        <p class="description">All email nudges are <strong>off by default</strong>. Enable the master toggle first, then turn on individual nudges. Emails are sent via the same Google Apps Script used for feedback.</p>
+        <span class="control-scope is-unavailable">Not connected</span>
+        <p class="description">Automated email nudges are planned, but no production scheduler or sending process is connected yet.</p>
+        <div class="operational-notice"><strong>No emails will be sent from these settings.</strong> The saved configuration is shown for planning only and remains locked until server-side automation is available.</div>
         <div id="engEmailStatus" class="eng-status" aria-live="polite"></div>
-        <div id="engEmailForm" class="eng-form" hidden>
+        <div id="engEmailForm" class="eng-form is-unavailable" hidden aria-disabled="true">
           <div class="eng-field-group">
             <div class="eng-field-row eng-master-toggle-row">
               <label class="eng-toggle-label">
                 <span class="eng-toggle-name">Enable email nudges</span>
                 <span class="eng-toggle-desc">Master switch. No email nudges are sent while this is off.</span>
               </label>
-              <input class="eng-toggle" type="checkbox" data-eng-key="email.enabled" aria-label="Enable email nudges">
+              <input class="eng-toggle" type="checkbox" data-eng-key="email.enabled" aria-label="Enable email nudges" disabled>
             </div>
             <div id="engEmailSubfields">
               <div class="eng-field-row">
@@ -2778,46 +2791,46 @@
                   <span class="eng-toggle-name">Re-engagement nudge</span>
                   <span class="eng-toggle-desc">Sends an email after a member has been inactive for N days.</span>
                 </label>
-                <input class="eng-toggle" type="checkbox" data-eng-key="email.reEngagement.enabled" aria-label="Re-engagement nudge">
+                <input class="eng-toggle" type="checkbox" data-eng-key="email.reEngagement.enabled" aria-label="Re-engagement nudge" disabled>
               </div>
               <div class="eng-field-row eng-indent">
                 <label class="eng-toggle-label" for="engReEngageDays">
                   <span class="eng-toggle-name">Trigger after (days)</span>
                   <span class="eng-toggle-desc">Send the nudge this many days after last activity.</span>
                 </label>
-                <input class="eng-number" type="number" id="engReEngageDays" min="1" max="90" value="7" data-eng-key="email.reEngagement.triggerDays">
+                <input class="eng-number" type="number" id="engReEngageDays" min="1" max="90" value="7" data-eng-key="email.reEngagement.triggerDays" disabled>
               </div>
               <div class="eng-field-row">
                 <label class="eng-toggle-label">
                   <span class="eng-toggle-name">Phase completion email</span>
                   <span class="eng-toggle-desc">Sends a congratulations email when a member finishes a phase.</span>
                 </label>
-                <input class="eng-toggle" type="checkbox" data-eng-key="email.phaseCompletion.enabled" aria-label="Phase completion email">
+                <input class="eng-toggle" type="checkbox" data-eng-key="email.phaseCompletion.enabled" aria-label="Phase completion email" disabled>
               </div>
               <div class="eng-field-row">
                 <label class="eng-toggle-label">
                   <span class="eng-toggle-name">Finish-line email</span>
                   <span class="eng-toggle-desc">Sends an email when a member completes the full program.</span>
                 </label>
-                <input class="eng-toggle" type="checkbox" data-eng-key="email.finishLine.enabled" aria-label="Finish-line email">
+                <input class="eng-toggle" type="checkbox" data-eng-key="email.finishLine.enabled" aria-label="Finish-line email" disabled>
               </div>
               <div class="eng-field-row">
                 <label class="eng-toggle-label" for="engSenderName">
                   <span class="eng-toggle-name">Sender name</span>
                   <span class="eng-toggle-desc">Shown as the &ldquo;From&rdquo; name in nudge emails.</span>
                 </label>
-                <input class="eng-text" type="text" id="engSenderName" placeholder="e.g. Wen-Szu" data-eng-key="email.senderName">
+                <input class="eng-text" type="text" id="engSenderName" placeholder="e.g. Wen-Szu" data-eng-key="email.senderName" disabled>
               </div>
               <div class="eng-field-row">
                 <label class="eng-toggle-label" for="engReplyTo">
                   <span class="eng-toggle-name">Reply-to address</span>
                   <span class="eng-toggle-desc">Where member replies are directed. Leave blank to use the default Apps Script account.</span>
                 </label>
-                <input class="eng-text" type="email" id="engReplyTo" placeholder="e.g. hello@theuntaughtlessons.com" data-eng-key="email.replyTo">
+                <input class="eng-text" type="email" id="engReplyTo" placeholder="e.g. hello@theuntaughtlessons.com" data-eng-key="email.replyTo" disabled>
               </div>
             </div>
           </div>
-          <button class="small-button eng-save-btn" type="button" id="engEmailSave">Save email settings</button>
+          <button class="small-button eng-save-btn" type="button" id="engEmailSave" disabled>Automation not connected</button>
           <span class="saved" id="engEmailSaved">Saved</span>
         </div>
       </section>
@@ -2826,7 +2839,8 @@
         <span class="section-label">Certificate</span>
         <h2>Certificate</h2>
         <div class="section-divider"></div>
-        <p class="description">Members who complete all three phases can access a certificate. Customise the credential title and signatory name shown on the certificate.</p>
+        <span class="control-scope is-live">Live for all learners</span>
+        <p class="description">Members who complete all three phases can access a certificate when it is enabled. Customise the credential title and signatory name shown on the certificate.</p>
         <div id="engCertStatus" class="eng-status" aria-live="polite"></div>
         <div id="engCertForm" class="eng-form" hidden>
           <div class="eng-field-group">
@@ -2867,13 +2881,13 @@
       <!-- ===== Content Library ===== -->
 
       <section class="admin-section" id="section-cl-files" data-admin-tab-panel="content-library">
-        <span class="section-label">Content Library</span>
+        <span class="section-label">Content Data</span>
         <h2>Data files</h2>
         <div class="section-divider"></div>
 
         <!-- File list view -->
         <div id="clFileList">
-          <p class="description">Each file below drives one or more exercises. Load a file to view and edit its content, then save it back to GitHub. GitHub Pages will redeploy automatically in about 60 seconds.</p>
+          <p class="description">Each file below drives one or more exercises. Load a file directly from this site to review, validate, edit, or download a revised copy. Direct publishing remains disabled until the secure server-side workflow is connected.</p>
           <div id="clFileListInner" class="cl-file-grid" style="margin-top:16px"></div>
         </div>
 
@@ -2887,29 +2901,10 @@
           <textarea class="cl-textarea" id="clTextarea" spellcheck="false" autocorrect="off" autocapitalize="off"></textarea>
           <p class="cl-status" id="clEditorStatus" aria-live="polite"></p>
           <div class="cl-editor-actions">
-            <button class="small-button" type="button" id="clSaveBtn">Save &amp; deploy</button>
             <button class="small-button secondary-button" type="button" id="clValidateBtn">Validate JSON</button>
-            <button class="small-button secondary-button" type="button" id="clDownloadBtn">Download</button>
+            <button class="small-button" type="button" id="clDownloadBtn">Download revised JSON</button>
           </div>
         </div>
-      </section>
-
-      <section class="admin-section" id="section-cl-setup" data-admin-tab-panel="content-library">
-        <span class="section-label">Content Library</span>
-        <h2>GitHub setup</h2>
-        <div class="section-divider"></div>
-        <p class="description"><strong>Direct browser publishing is disabled.</strong> GitHub tokens must not be stored in localStorage or sent from client-side code. Use a server-side publishing function with a secret-managed token before re-enabling this workflow.</p>
-        <div class="section-divider" style="margin-top:12px"></div>
-        <p class="description" style="margin-top:12px"><strong>Next implementation:</strong> move GitHub reads/writes into a Firebase Cloud Function or other backend endpoint. Store the GitHub token as an environment secret there, and have this admin panel call that endpoint after verifying the current user is an admin.</p>
-        <div class="cl-pat-wrap">
-          <input type="password" class="cl-pat-input" id="clPatInput" placeholder="Server-side publishing required" autocomplete="off" disabled>
-          <button class="password-toggle" type="button" aria-label="Show token" aria-pressed="false" data-password-toggle="clPatInput">
-            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/></svg>
-          </button>
-          <button class="small-button" type="button" id="clPatSave" disabled>Disabled</button>
-          <button class="small-button secondary-button" type="button" id="clPatClear" hidden>Clear token</button>
-        </div>
-        <p id="clPatStatus" class="cl-status" aria-live="polite"></p>
       </section>
 
     </main>
@@ -2945,6 +2940,7 @@
       getPublicFindLevelSetting,
       getSignedInUser,
       requestGoogleGroupSyncJob,
+      repairMemberProgramCompletionReward,
       sendSignInInvite,
       setEngagementSettings,
       setGlobalFeedbackSetting,
@@ -2983,6 +2979,7 @@
       getPublicFindLevelSetting,
       getSignedInUser,
       requestGoogleGroupSyncJob,
+      repairMemberProgramCompletionReward,
       sendSignInInvite,
       setEngagementSettings,
       setGlobalFeedbackSetting,
@@ -4408,10 +4405,6 @@
         addRow('visibility', 'Visibility and release settings', 'Checks learner release gates and preview settings so hidden/locked states are easier to diagnose.', phaseLabel(phaseId), name, status, 'section-visibility', detail);
       });
 
-      // 5. Submission plumbing.
-      const scriptUrl = localStorage.getItem('utl_send_instructor_url');
-      addRow('submission', 'Submission plumbing', 'Checks whether result-forwarding setup exists. This does not send a test submission yet.', phaseLabel('plumbing'), 'Apps Script URL', scriptUrl ? 'pass' : 'missing', 'section-send-instructor', scriptUrl || 'No instructor-results endpoint is configured.');
-
       const total = passCount + failCount + missingCount;
       summary.innerHTML = `<div class="sync-summary-bar">${passCount} of ${total} checks passed — ${failCount} failed, ${missingCount} missing</div>`;
       output.innerHTML = `<div class="sync-list">${groups.map(renderGroup).join('')}</div>`;
@@ -4789,7 +4782,7 @@
         { name: 'Analyst', threshold: 300, role: 'Reachable by completing most of Phase 1' },
         { name: 'Associate', threshold: 800, role: 'Requires Phase 1 and a real start on Phase 2' },
         { name: 'Principal', threshold: 1350, role: 'Requires strong Phase 2 and entry into Phase 3' },
-        { name: 'Executive', threshold: 1850, role: 'Full curriculum completion, including the program bonus' }
+        { name: 'Executive', threshold: 1800, role: 'Full curriculum completion, including the program bonus' }
       ],
       mp: {
         videoComplete: 10,
@@ -5975,7 +5968,6 @@
     // ===== Content Library =====
 
     const CL_REPO = 'wenszu/theuntaughtlessons-site';
-    const CL_LEGACY_PAT_KEY = ['utl', 'github', 'pat'].join('_');
     const CL_FILES = [
       { name: 'Grocery list',        path: 'data/practice/grocery-list.json',      category: 'Practice exercises', desc: 'MECE sort exercise with item bank and ideal bucket mappings' },
       { name: 'Issue tree builder',  path: 'data/practice/issue-tree-builder.json', category: 'Practice exercises', desc: 'Problem decomposition with hypothesis and sample answer' },
@@ -5989,16 +5981,6 @@
     ];
 
     let clEditing = null;
-
-    function clUpdatePatStatus() {
-      const status = document.getElementById('clPatStatus');
-      const clearBtn = document.getElementById('clPatClear');
-      const input = document.getElementById('clPatInput');
-      localStorage.removeItem(CL_LEGACY_PAT_KEY);
-      if (status) { status.textContent = 'Browser-based GitHub publishing is disabled until a server-side publishing function is available.'; status.className = 'cl-status'; }
-      if (clearBtn) clearBtn.hidden = true;
-      if (input) input.placeholder = 'Server-side publishing required';
-    }
 
     function clRenderFileList() {
       const container = document.getElementById('clFileListInner');
@@ -6025,13 +6007,30 @@
     }
 
     async function clLoadFile(file) {
-      showToast('GitHub loading is disabled until server-side publishing is implemented.', true);
-      openAndScrollToSection('section-cl-setup');
-    }
-
-    async function clSaveFile() {
-      showToast('GitHub saving is disabled until server-side publishing is implemented.', true);
-      openAndScrollToSection('section-cl-setup');
+      const list = document.getElementById('clFileList');
+      const editor = document.getElementById('clEditor');
+      const textarea = document.getElementById('clTextarea');
+      const title = document.getElementById('clEditorTitle');
+      const path = document.getElementById('clEditorPath');
+      const status = document.getElementById('clEditorStatus');
+      if (!list || !editor || !textarea) return;
+      if (status) { status.textContent = 'Loading data file…'; status.className = 'cl-status'; }
+      try {
+        const response = await fetch('../' + file.path, { cache: 'no-store' });
+        if (!response.ok) throw new Error('HTTP ' + response.status);
+        const raw = await response.text();
+        const parsed = JSON.parse(raw);
+        clEditing = file;
+        textarea.value = JSON.stringify(parsed, null, 2) + '\n';
+        if (title) title.textContent = file.name;
+        if (path) path.textContent = file.path;
+        list.hidden = true;
+        editor.hidden = false;
+        if (status) { status.textContent = 'Loaded from the site. Validate or download your changes; direct publishing is not yet connected.'; status.className = 'cl-status is-success'; }
+      } catch (error) {
+        if (status) { status.textContent = 'Could not load ' + file.path + ': ' + ((error && error.message) || 'Unknown error'); status.className = 'cl-status is-error'; }
+        showToast('Could not load the data file.', true);
+      }
     }
 
     function clValidateJSON() {
@@ -6064,19 +6063,8 @@
     }
 
     function clInit() {
-      clUpdatePatStatus();
       clRenderFileList();
-      document.getElementById('clPatSave')?.addEventListener('click', () => {
-        clUpdatePatStatus();
-        showToast('GitHub publishing must be handled server-side.', true);
-      });
-      document.getElementById('clPatClear')?.addEventListener('click', () => {
-        localStorage.removeItem(CL_LEGACY_PAT_KEY);
-        clUpdatePatStatus();
-        showToast('Legacy token cleared');
-      });
       document.getElementById('clEditorBack')?.addEventListener('click', clShowFileList);
-      document.getElementById('clSaveBtn')?.addEventListener('click', clSaveFile);
       document.getElementById('clValidateBtn')?.addEventListener('click', clValidateJSON);
       document.getElementById('clDownloadBtn')?.addEventListener('click', clDownload);
     }
@@ -6114,11 +6102,19 @@
       const p3 = phaseExerciseIds('phase3');
       const anyDone = (ids) => ids.some((id) => exercises[id] && exercises[id].completed);
       const allDone = (ids) => ids.length > 0 && ids.every((id) => exercises[id] && exercises[id].completed);
-      if (allDone(p3)) return 'completed';
+      if ([p1, p2, p3].every((ids) => ids.length > 0 && allDone(ids))) return 'completed';
       if (anyDone(p3)) return 'phase3';
       if (anyDone(p2)) return 'phase2';
       if (anyDone(p1)) return 'phase1';
       return 'none';
+    }
+
+    function spProgramComplete(member) {
+      const exercises = (member.workspaceProgress || {}).exercises || {};
+      return ['phase1', 'phase2', 'phase3'].every((phaseKey) => {
+        const ids = phaseExerciseIds(phaseKey);
+        return ids.length > 0 && ids.every((id) => exercises[id] && exercises[id].completed);
+      });
     }
 
     function spProgressScore(member) {
@@ -6228,6 +6224,106 @@
       }
     }
 
+    function spRewardData(member) {
+      return member.rewards || ((member.workspaceProgress || {}).rewards) || {};
+    }
+
+    function spProgramBonusCredited(member) {
+      return (spRewardData(member).ledger || []).reduce((sum, entry) => {
+        const id = String((entry && entry.id) || '');
+        return id === 'program-completed:tsa-program' || id.indexOf('program-completion-adjustment:tsa-program:') === 0
+          ? sum + Math.max(0, Number(entry.mpEarned || 0)) : sum;
+      }, 0);
+    }
+
+    function spCompletedCount(member, phaseKey, type) {
+      const progress = member.workspaceProgress || {};
+      const records = progress[type] || {};
+      const ids = type === 'lessons' ? phaseLessonIds(phaseKey) : phaseExerciseIds(phaseKey);
+      const key = type === 'lessons' ? 'watched' : 'completed';
+      return { done: ids.filter((id) => records[id] && records[id][key]).length, total: ids.length };
+    }
+
+    function spPhaseDetailHtml(member, phaseKey) {
+      const content = (window.UTL_CONTENT || {})[phaseKey] || {};
+      const progress = member.workspaceProgress || {};
+      const lessons = progress.lessons || {};
+      const exercises = progress.exercises || {};
+      const items = [];
+      (content.lessons || []).forEach((item) => items.push({ title: item.title || item.id, done: !!(lessons[item.id] && lessons[item.id].watched), type: 'Video' }));
+      (content.exercises || []).forEach((item) => items.push({ title: item.title || item.id, done: !!(exercises[item.id] && exercises[item.id].completed), type: 'Exercise' }));
+      return '<div class="sp-detail-card"><h4>' + escapeHtml((content.label || phaseKey.replace('phase', 'Phase ')) + (content.title ? ' · ' + content.title : '')) + '</h4><ul class="sp-activity-list">' +
+        (items.length ? items.map((item) => '<li class="sp-activity-row"><span>' + escapeHtml(item.title) + '<small>' + item.type + '</small></span><span class="' + (item.done ? 'sp-status-done' : 'sp-status-missing') + '">' + (item.done ? 'Complete' : 'Not complete') + '</span></li>').join('') : '<li class="sp-status-missing">No activities configured.</li>') +
+      '</ul></div>';
+    }
+
+    function spLedgerHtml(member) {
+      const ledger = Array.isArray(spRewardData(member).ledger) ? spRewardData(member).ledger.slice() : [];
+      ledger.sort((a, b) => String(b.earnedAt || '').localeCompare(String(a.earnedAt || '')));
+      if (!ledger.length) return '<p class="sp-status-missing">No MP ledger entries have been saved.</p>';
+      return '<ul class="sp-activity-list">' + ledger.slice(0, 20).map((entry) =>
+        '<li class="sp-activity-row"><span>' + escapeHtml(entry.title || entry.type || entry.id || 'Reward') + '<small>' + escapeHtml(formatProgressDate(entry.earnedAt)) + '</small></span><strong>+' + escapeHtml(String(Number(entry.mpEarned || 0))) + ' MP</strong></li>'
+      ).join('') + '</ul>';
+    }
+
+    function showStudentProgressDetail(member) {
+      const table = document.getElementById('studentProgressTable');
+      const controls = document.getElementById('spControls');
+      const detail = document.getElementById('studentProgressDetail');
+      const content = document.getElementById('spDetailContent');
+      if (!member || !table || !detail || !content) return;
+      const rewards = spRewardData(member);
+      const total = Number(rewards.mpTotal || rewards.masteryPoints || 0);
+      const level = rewards.currentLevel || rewards.level || 'Not assigned';
+      const finished = spProgramComplete(member);
+      const target = Number((rewardSettingsCache && rewardSettingsCache.mp && rewardSettingsCache.mp.programCompletion) || 200);
+      const credited = spProgramBonusCredited(member);
+      const levels = (rewardSettingsCache && rewardSettingsCache.levels) || DEFAULT_REWARD_SETTINGS.levels;
+      const executive = levels.find((item) => String(item.name || item.title || '').toLowerCase() === 'executive') || levels[levels.length - 1] || { threshold: 0 };
+      const executiveThreshold = Math.max(0, Number(executive.threshold || 0));
+      const missingAmount = Math.max(0, target - credited, executiveThreshold - total);
+      const missingBonus = finished && missingAmount > 0;
+      const p1e = spCompletedCount(member, 'phase1', 'exercises');
+      const p2e = spCompletedCount(member, 'phase2', 'exercises');
+      const p3e = spCompletedCount(member, 'phase3', 'exercises');
+      content.innerHTML =
+        '<div class="sp-detail-header"><div><h3>' + escapeHtml(member.displayName || member.name || member.email || 'Member') + '</h3><p>' + escapeHtml(member.email || '') + ' · Last active ' + escapeHtml(formatProgressDate(member.lastSeenAt || member.updatedAt)) + '</p></div><span class="mb-status-badge ' + ((member.status || 'active') === 'inactive' ? 'mb-status-inactive' : 'mb-status-active') + '">' + escapeHtml(member.status || 'active') + '</span></div>' +
+        '<div class="sp-detail-summary"><div class="sp-detail-stat"><span>Current level</span><strong>' + escapeHtml(level) + '</strong></div><div class="sp-detail-stat"><span>Mastery Points</span><strong>' + escapeHtml(String(total)) + ' MP</strong></div><div class="sp-detail-stat"><span>Exercises complete</span><strong>' + (p1e.done + p2e.done + p3e.done) + ' / ' + (p1e.total + p2e.total + p3e.total) + '</strong></div><div class="sp-detail-stat"><span>Program bonus</span><strong>' + credited + ' / ' + target + ' MP</strong></div></div>' +
+        '<div class="sp-reward-alert ' + (!missingBonus ? 'is-ok' : '') + '">' + (missingBonus
+          ? '<strong>Missing completion milestone:</strong> this student finished all phases but needs ' + missingAmount + ' MP to receive the full bonus and reach Executive. <button class="small-button" type="button" data-sp-repair-bonus style="margin-left:8px">Award missing MP</button>'
+          : finished ? '<strong>Completion reward verified.</strong> The full-program bonus is recorded and the Executive milestone is satisfied.' : '<strong>No repair needed.</strong> The full-program bonus becomes available after every phase exercise is complete.') + '</div>' +
+        '<div class="sp-detail-grid">' + ['phase1','phase2','phase3'].map((key) => spPhaseDetailHtml(member, key)).join('') + '<div class="sp-detail-card"><h4>Recent MP activity</h4>' + spLedgerHtml(member) + '</div></div>';
+      table.hidden = true;
+      if (controls) controls.hidden = true;
+      detail.hidden = false;
+      const repair = content.querySelector('[data-sp-repair-bonus]');
+      if (repair) repair.addEventListener('click', async function () {
+        const fb = window.utlFirebaseAuth;
+        if (!member.uid || !fb || !fb.repairMemberProgramCompletionReward) return showToast('Reward repair is unavailable.', true);
+        repair.disabled = true;
+        repair.textContent = 'Repairing…';
+        try {
+          const result = await fb.repairMemberProgramCompletionReward(member.uid, { programCompletion: target, levels: rewardSettingsCache && rewardSettingsCache.levels });
+          if (result && result.rewards) {
+            member.rewards = result.rewards;
+            member.workspaceProgress = Object.assign({}, member.workspaceProgress || {}, { rewards: result.rewards });
+          }
+          showToast(result && result.repaired ? 'Missing MP awarded.' : 'Completion reward already verified.');
+          showStudentProgressDetail(member);
+        } catch (error) { showToast('Repair failed: ' + ((error && error.message) || 'Unknown error'), true); repair.disabled = false; }
+      });
+    }
+
+    function hideStudentProgressDetail() {
+      const table = document.getElementById('studentProgressTable');
+      const controls = document.getElementById('spControls');
+      const detail = document.getElementById('studentProgressDetail');
+      if (table) table.hidden = false;
+      if (controls) controls.hidden = false;
+      if (detail) detail.hidden = true;
+      spApplyView();
+    }
+
     function spSortTh(label, col) {
       const active = spSort.col === col;
       const arrow = active ? '<span class="sp-sort-indicator">' + (spSort.dir === 'asc' ? '↑' : '↓') + '</span>' : '';
@@ -6251,7 +6347,7 @@
         const diagnosticDone = exercises.utl_result_tsa_diagnostic && exercises.utl_result_tsa_diagnostic.completed;
         const checkpointDone = exercises.utl_result_tsa_checkpoint && exercises.utl_result_tsa_checkpoint.completed;
         return '<tr>' +
-          '<td><strong>' + escapeHtml(member.displayName || member.name || member.email || member.id || 'Member') + '</strong><br><small>' + escapeHtml(member.email || member.id || '') + '</small></td>' +
+          '<td><button class="sp-member-button" type="button" data-sp-member="' + escapeHtml(member.email || member.id || '') + '">' + escapeHtml(member.displayName || member.name || member.email || member.id || 'Member') + '</button><br><small>' + escapeHtml(member.email || member.id || '') + '</small></td>' +
           '<td>' + escapeHtml(formatProgressDate(member.lastSeenAt || member.updatedAt)) + '</td>' +
           '<td class="progress-cell"><span class="progress-dot-label">Ready</span><div class="progress-dot-row">' + progressDot(orientationDone, 'Orientation ready') + '</div></td>' +
           progressCell(member, 'phase1') +
@@ -6273,6 +6369,11 @@
         '<th>Rewards</th>' +
         '</tr></thead>' +
         '<tbody>' + rows + '</tbody></table></div>';
+      wrap.querySelectorAll('[data-sp-member]').forEach((button) => button.addEventListener('click', () => {
+        const key = String(button.dataset.spMember || '').toLowerCase();
+        const member = spAllMembers.find((item) => String(item.email || item.id || '').toLowerCase() === key);
+        if (member) showStudentProgressDetail(member);
+      }));
     }
 
     async function loadStudentProgress() {
@@ -6302,13 +6403,27 @@
         currentUser = await mbRequireFirebaseAdmin();
         wrap.innerHTML = '<p class="mb-msg">Loading student progress...</p>';
         const members = await fb.getAllMemberWorkspaceProgress();
+        const rewardSettings = fb.getRewardSettings ? await fb.getRewardSettings() : null;
+        let repairedBonuses = 0;
+        for (const member of members) {
+          if (!member.uid || !spProgramComplete(member) || !fb.repairMemberProgramCompletionReward) continue;
+          const repair = await fb.repairMemberProgramCompletionReward(member.uid, {
+            programCompletion: rewardSettings && rewardSettings.mp && rewardSettings.mp.programCompletion,
+            levels: rewardSettings && rewardSettings.levels
+          });
+          if (!repair || !repair.repaired) continue;
+          repairedBonuses += 1;
+          member.rewards = repair.rewards;
+          member.workspaceProgress = Object.assign({}, member.workspaceProgress || {}, { rewards: repair.rewards });
+        }
         spAllMembers = members;
         const controls = document.getElementById('spControls');
         if (controls) controls.hidden = false;
         spApplyView();
         if (status) {
           const partial = members.usersReadError ? ' · Progress details blocked by Firestore rules' : '';
-          status.textContent = 'Signed in as ' + escapeHtml(currentUser.email) + ' · Last refreshed ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + partial;
+          const repairNote = repairedBonuses ? ' · Repaired ' + repairedBonuses + ' missing program completion bonus' + (repairedBonuses === 1 ? '' : 'es') : '';
+          status.textContent = 'Signed in as ' + escapeHtml(currentUser.email) + ' · Last refreshed ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + repairNote + partial;
         }
         if (members.usersReadError) {
           const note = document.createElement('p');
@@ -6368,8 +6483,6 @@
         loadPublicAssessmentSettings();
         loadTsaVisibility();
       }
-      if (activeTab === 'content-library') clUpdatePatStatus();
-
       if (options.scroll !== false) {
         const target = (currentActive || visibleNavItems[0])?.dataset.target;
         if (target) openAndScrollToSection(target);
@@ -6594,6 +6707,7 @@
     });
 
     document.getElementById('spSearch')?.addEventListener('input', () => spApplyView());
+    document.getElementById('spDetailBack')?.addEventListener('click', hideStudentProgressDetail);
     document.querySelectorAll('[data-admin-tab]').forEach((button) => {
       button.addEventListener('click', () => {
         switchAdminTab(button.dataset.adminTab);
@@ -6741,6 +6855,18 @@
       return 1;
     }
 
+    function mbCanonicalRole(role) {
+      role = String(role || '').toLowerCase();
+      if (role === 'owner') return 'owner';
+      if (role === 'admin') return 'admin';
+      return 'member';
+    }
+
+    function mbRoleLabel(role) {
+      role = mbCanonicalRole(role);
+      return role.charAt(0).toUpperCase() + role.slice(1);
+    }
+
     function mbChooseCanonicalMemberDoc(current, candidate) {
       if (!current) return candidate;
       var currentData = current.data() || {};
@@ -6864,7 +6990,7 @@
         var data = d.data();
         var email = mbCanonicalEmailFromDoc(d) || mbNormalizeEmail(d.id);
         var isOwner = data.role === 'owner' || BOOTSTRAP_OWNER_EMAILS.includes(String(email || '').toLowerCase());
-        var displayRole = isOwner ? 'owner' : ((data.role === 'member' ? 'user' : data.role) || 'user');
+        var displayRole = isOwner ? 'owner' : mbCanonicalRole(data.role);
         var roleCls = displayRole === 'owner' ? 'mb-role-owner' : displayRole === 'admin' ? 'mb-role-admin' : 'mb-role-user';
         var status = data.status || 'active';
         var statusCls = status === 'inactive' ? 'mb-status-inactive' : 'mb-status-active';
@@ -6883,7 +7009,7 @@
         return '<tr data-mb-row>' +
           '<td>' + escapeHtml(data.name || '—') + '</td>' +
           '<td>' + escapeHtml(email) + '</td>' +
-          '<td><span class="mb-role-badge ' + roleCls + '">' + escapeHtml(displayRole) + '</span></td>' +
+          '<td><span class="mb-role-badge ' + roleCls + '">' + escapeHtml(mbRoleLabel(displayRole)) + '</span></td>' +
           '<td><span class="mb-status-badge ' + statusCls + '">' + escapeHtml(status) + '</span></td>' +
           '<td>' + escapeHtml(data.cohort || '—') + '</td>' +
           '<td>' + escapeHtml(mbFormatDate(data.firstLoginAt)) + '</td>' +
@@ -7069,15 +7195,15 @@
           if (!isNaN(ed.getTime())) expiryVal = ed.toISOString().slice(0, 10);
         } catch (e) {}
       }
-      var displayRole = (data.role === 'member' ? 'user' : data.role) || 'user';
+      var displayRole = mbCanonicalRole(data.role);
       var status = data.status || 'active';
       return '<div class="mb-edit-grid">' +
         '<div class="mb-edit-field"><label>Name</label>' +
           '<input type="text" data-mb-ef="name" value="' + escapeHtml(data.name || '') + '" placeholder="Member name"></div>' +
         '<div class="mb-edit-field"><label>Role</label>' +
           '<select data-mb-ef="role">' +
-            '<option value="user"' + (displayRole === 'user' ? ' selected' : '') + '>user</option>' +
-            '<option value="admin"' + (displayRole === 'admin' ? ' selected' : '') + '>admin</option>' +
+            '<option value="member"' + (displayRole === 'member' ? ' selected' : '') + '>Member</option>' +
+            '<option value="admin"' + (displayRole === 'admin' ? ' selected' : '') + '>Admin</option>' +
           '</select></div>' +
         '<div class="mb-edit-field"><label>Status</label>' +
           '<select data-mb-ef="status">' +
@@ -7460,7 +7586,7 @@
 
         var nameVal = (document.getElementById('mbNewName') || {}).value.trim();
         var emailVal = mbNormalizeEmail((document.getElementById('mbNewEmail') || {}).value || '');
-        var roleVal = (document.getElementById('mbNewRole') || {}).value || 'user';
+        var roleVal = (document.getElementById('mbNewRole') || {}).value || 'member';
         var cohortVal = (document.getElementById('mbNewCohort') || {}).value.trim();
         var notesVal = (document.getElementById('mbNewNotes') || {}).value.trim();
         var localUsernameVal = (document.getElementById('mbNewLocalUsername') || {}).value.trim();
@@ -7471,7 +7597,7 @@
         var existingMember = mbFindCachedMemberByEmail(emailVal);
         if (existingMember) {
           var existingData = existingMember.data() || {};
-          var existingRole = existingData.role === 'member' ? 'user' : (existingData.role || 'user');
+          var existingRole = mbRoleLabel(existingData.role);
           showToast('This email already exists as ' + existingRole + '. Edit the existing row instead.', 'error');
           return;
         }
@@ -7628,7 +7754,7 @@
       ];
       mbMembersCache.forEach(function (d) {
         var data = d.data();
-        var role = (data.role === 'member' ? 'user' : data.role) || 'user';
+        var role = mbRoleLabel(data.role);
         lines.push([
           csvCell(data.name || ''),
           csvCell(d.id),

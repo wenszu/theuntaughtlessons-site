@@ -1401,7 +1401,7 @@
       const profile = getStoredMemberProfile();
       const label = profile.email || profile.username || profile.displayName || 'Member';
       const displayName = profile.displayName || label;
-      const role = profile.role === 'admin' || localStorage.getItem('utl_admin_auth') === 'true' ? 'Administrator' : 'Member';
+      const role = profile.role === 'admin' || profile.role === 'owner' || localStorage.getItem('utl_admin_auth') === 'true' ? 'Administrator' : 'Member';
       memberEmail.textContent = label;
       memberAvatar.textContent = '';
       if (profileMenuAvatar) profileMenuAvatar.textContent = '';

@@ -337,7 +337,7 @@ const UTL_CONTENT = {
     { name: "Analyst", threshold: 300 },
     { name: "Associate", threshold: 800 },
     { name: "Principal", threshold: 1350 },
-    { name: "Executive", threshold: 1850 }
+    { name: "Executive", threshold: 1800 }
   ];
   var PROGRAM_COMPLETION_MP = 200;
   var phaseDescriptions = {
@@ -595,6 +595,37 @@ const UTL_CONTENT = {
     });
   }
 
+  function awardProgramCompletionBonus(settings) {
+    var target = Number(settings && settings.mp && settings.mp.programCompletion);
+    if (!Number.isFinite(target)) target = PROGRAM_COMPLETION_MP;
+    target = Math.max(0, target);
+    var executive = REWARD_LEVELS.find(function (level) { return String(level.name || '').toLowerCase() === 'executive'; }) || REWARD_LEVELS[REWARD_LEVELS.length - 1] || { threshold: 0 };
+    var executiveThreshold = Math.max(0, Number(executive.threshold || 0));
+    var startingState = readRewardState();
+    var initialAward = Math.max(target, executiveThreshold - Math.max(0, Number(startingState.mpTotal || startingState.masteryPoints || 0)));
+    var baseResult = awardRewardEvent({
+      id: "program-completed:tsa-program",
+      type: "program-completed",
+      title: "Full program complete",
+      mp: initialAward
+    });
+    if (baseResult.awarded) return baseResult;
+    var state = readRewardState();
+    var credited = (state.ledger || []).reduce(function (total, entry) {
+      if (!entry || (entry.id !== "program-completed:tsa-program" && String(entry.id || "").indexOf("program-completion-adjustment:tsa-program:") !== 0)) return total;
+      return total + Math.max(0, Number(entry.mpEarned || 0));
+    }, 0);
+    var currentTotal = Math.max(0, Number(state.mpTotal || state.masteryPoints || 0));
+    var missing = Math.max(0, target - credited, executiveThreshold - currentTotal);
+    if (!missing) return baseResult;
+    return awardRewardEvent({
+      id: "program-completion-adjustment:tsa-program:" + target + ":executive-" + executiveThreshold,
+      type: "program-completion-adjustment",
+      title: "Full program Executive milestone adjustment",
+      mp: missing
+    });
+  }
+
   function backfillExistingProgressRewards() {
     var settings = rewardSettings();
     if (settings.enabled === false) return { count: 0, mp: 0 };
@@ -654,14 +685,11 @@ const UTL_CONTENT = {
       });
     });
     if (phases.every(function (phaseKey) { return exercisesDone(phaseKey); })) {
-      var programMp = Number(settings.mp && settings.mp.programCompletion);
-      if (!Number.isFinite(programMp)) programMp = PROGRAM_COMPLETION_MP;
-      add({
-        id: "program-completed:tsa-program",
-        type: "program-completed",
-        title: "Full program complete",
-        mp: programMp
-      });
+      var programResult = awardProgramCompletionBonus(settings);
+      if (programResult.awarded) {
+        totalMp += programResult.mpEarned;
+        count += 1;
+      }
     }
     if (count) queueRemoteProgressSave();
     return { count: count, mp: totalMp };
@@ -870,6 +898,10 @@ const UTL_CONTENT = {
       photoURL: profile.photoURL || "",
       role: profile.role || (localStorage.getItem(ADMIN_KEY) === "true" ? "admin" : "member")
     };
+  }
+
+  function isAdminUser(user) {
+    return Boolean(user && (user.role === "admin" || user.role === "owner")) || localStorage.getItem(ADMIN_KEY) === "true";
   }
 
   async function clearWorkspaceSession() {
@@ -1272,8 +1304,8 @@ const UTL_CONTENT = {
   function navHtml(active) {
     var user = currentUser();
     var avatar = user.photoURL ? '<img src="' + escapeHtml(user.photoURL) + '" alt="">' : escapeHtml(user.initials);
-    var roleLabel = user.role === "admin" ? "Administrator" : "Member";
-    var adminSection = user.role === "admin" ? '<div class="ws-profile-section"><span class="ws-profile-section-label">Admin</span><a class="ws-admin-link" href="' + adminHref() + '"><span class="ws-profile-icon">&#9788;</span><span>Admin console</span></a></div>' : "";
+    var roleLabel = isAdminUser(user) ? "Administrator" : "Member";
+    var adminSection = isAdminUser(user) ? '<div class="ws-profile-section"><span class="ws-profile-section-label">Admin</span><a class="ws-admin-link" href="' + adminHref() + '"><span class="ws-profile-icon">&#9788;</span><span>Admin console</span></a></div>' : "";
     var links = [
       { key: "home", label: "Home", href: memberHref("index.html") },
       { key: "phase1", label: "Phase 1", href: memberHref("phase-1.html"), dropdown: true },
@@ -1551,7 +1583,7 @@ const UTL_CONTENT = {
       role: member && member.role ? member.role : "member"
     }));
     await firebaseAuth.saveUserProfile(user, member || {});
-    if (member && member.role === "admin") localStorage.setItem(ADMIN_KEY, "true");
+    if (member && (member.role === "admin" || member.role === "owner")) localStorage.setItem(ADMIN_KEY, "true");
     else localStorage.removeItem(ADMIN_KEY);
     sessionStorage.removeItem("utl_google_login_pending");
     localStorage.removeItem("utl_google_login_pending");
@@ -2078,14 +2110,14 @@ const UTL_CONTENT = {
     });
   }
 
-  function showPhaseCompletionModal(phaseKey) {
+  function showPhaseCompletionModal(phaseKey, certificateEnabled) {
     if (qs(".ws-nudge-modal-overlay")) return;
     var phase = getPhase(phaseKey);
     var allDone = phases.every(function (pk) { return exercisesDone(pk); });
     var overlay = document.createElement("div");
     overlay.className = "ws-nudge-modal-overlay";
 
-    var certLink = allDone
+    var certLink = allDone && certificateEnabled !== false
       ? '<a class="ws-button" href="../certificate/index.html" style="margin-top:8px">View your certificate &rarr;</a>'
       : "";
     var nextPhaseKey = phases[phases.indexOf(phaseKey) + 1];
@@ -2123,8 +2155,20 @@ const UTL_CONTENT = {
 
     var defaults = { continueCard: true, daysSinceBanner: true, daysSinceThreshold: 5, almostThere: true, almostThereThreshold: 2, phaseCompletionModal: true };
 
-    function applyWithSettings(inApp) {
+    function applyCertificateAvailability(certificate) {
+      if (!certificate || certificate.enabled !== false) return;
+      document.querySelectorAll('a[href="../certificate/index.html"]').forEach(function (link) {
+        var section = link.closest(".ws-section");
+        if (section && section.querySelector("h2") && section.querySelector("h2").textContent.trim() === "Your certificate") section.remove();
+        else link.remove();
+      });
+    }
+
+    function applyWithSettings(settings) {
+      settings = settings || {};
+      var inApp = settings.inApp || {};
       var s = Object.assign({}, defaults, inApp || {});
+      applyCertificateAvailability(settings.certificate);
       if (s.continueCard && continueTarget && !qs(".ws-mission-card", stack)) insertContinueCard(stack, continueTarget);
       if (s.daysSinceBanner && lastVisit > 0 && daysSince >= Number(s.daysSinceThreshold || 5)) insertDaysSinceBanner(stack, daysSince);
       if (s.almostThere) applyAlmostThere(Number(s.almostThereThreshold || 2));
@@ -2146,14 +2190,7 @@ const UTL_CONTENT = {
         });
         if (phases.every(function (phaseKey) { return exercisesDone(phaseKey); })) {
           var programSettings = rewardSettings();
-          var programMp = Number(programSettings.mp && programSettings.mp.programCompletion);
-          if (!Number.isFinite(programMp)) programMp = PROGRAM_COMPLETION_MP;
-          var programResult = awardRewardEvent({
-            id: "program-completed:tsa-program",
-            type: "program-completed",
-            title: "Full program complete",
-            mp: programMp
-          });
+          var programResult = awardProgramCompletionBonus(programSettings);
           if (programResult.awarded) programReward = programResult;
         }
         if (phaseReward || programReward) {
@@ -2172,14 +2209,14 @@ const UTL_CONTENT = {
             showLevelModal: rewardLevelForMp(displayedReward.startTotal) !== rewardLevelForMp(displayedReward.total)
           });
         }
-        showPhaseCompletionModal(newlyComplete[newlyComplete.length - 1]);
+        showPhaseCompletionModal(newlyComplete[newlyComplete.length - 1], !settings.certificate || settings.certificate.enabled !== false);
       }
     }
 
     import(firebaseHref())
       .then(function (fb) { return fb.getEngagementSettings(); })
-      .then(function (settings) { applyWithSettings((settings || {}).inApp); })
-      .catch(function () { applyWithSettings({}); });
+      .then(function (settings) { applyWithSettings(settings || {}); })
+      .catch(function () { applyWithSettings({ inApp: {} }); });
   }
 
   // ===== End in-app nudges =====

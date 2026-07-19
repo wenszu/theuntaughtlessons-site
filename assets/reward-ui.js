@@ -4,7 +4,7 @@
     { name: "Analyst", threshold: 300 },
     { name: "Associate", threshold: 800 },
     { name: "Principal", threshold: 1350 },
-    { name: "Executive", threshold: 1850 }
+    { name: "Executive", threshold: 1800 }
   ];
 
   var activeTimers = {};

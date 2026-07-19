@@ -13,9 +13,9 @@ Canonical defaults for launch:
 - Diagnostic or Checkpoint completion: 100 MP each
 - Daily streak qualification: 3 unique exercises
 - Streak bonus: 5 MP × consecutive qualified day
-- Promotions: Intern 0, Analyst 300, Associate 800, Principal 1,350, Executive 1,850 MP
+- Promotions: Intern 0, Analyst 300, Associate 800, Principal 1,350, Executive 1,800 MP
 
-At maximum core-exercise scores, the expected cumulative totals are 635 MP after Phase 1, 1,170 after Phase 2, and 1,585 after Phase 3. Both assessments bring the total to 1,785 MP. Executive therefore requires at least 65 additional MP from sustained streak activity; this is intentional so Executive represents completion plus continued practice.
+At maximum core-exercise scores, the expected cumulative totals are 635 MP after Phase 1, 1,170 after Phase 2, and 1,585 after Phase 3. Both assessments bring the total to 1,785 MP, and the 200 MP full-program bonus brings the recommended completion path to 1,985 MP. The 1,800 MP Executive threshold remains challenging while allowing for variation in scored exercises and context completion.
 
 ## Automated coverage
 

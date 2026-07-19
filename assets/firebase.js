@@ -450,6 +450,67 @@ async function saveMemberRewards(incoming = {}) {
   });
 }
 
+async function repairMemberProgramCompletionReward(userId, options = {}) {
+  if (!userId) throw new Error("A user ID is required to repair the program completion reward.");
+  const configuredTarget = Number(options.programCompletion);
+  const target = Math.max(0, Number.isFinite(configuredTarget) ? configuredTarget : 200);
+  const levels = (Array.isArray(options.levels) && options.levels.length ? options.levels : [
+    { name: "Intern", threshold: 0 },
+    { name: "Analyst", threshold: 300 },
+    { name: "Associate", threshold: 800 },
+    { name: "Principal", threshold: 1350 },
+    { name: "Executive", threshold: 1800 }
+  ]).slice().sort((a, b) => Number(a.threshold || 0) - Number(b.threshold || 0));
+  const executiveLevel = levels.find((item) => String(item.name || item.title || "").toLowerCase() === "executive") || levels[levels.length - 1] || { threshold: 0 };
+  const executiveThreshold = Math.max(0, Number(executiveLevel.threshold || 0));
+  const userRef = doc(requireFirestore(), "users", userId);
+  let result = { repaired: false, mpEarned: 0, mpTotal: 0, rewards: null };
+  await runTransaction(requireFirestore(), async (transaction) => {
+    const snap = await transaction.get(userRef);
+    if (!snap.exists()) return;
+    const data = snap.data() || {};
+    const current = data.rewards || (data.workspaceProgress && data.workspaceProgress.rewards) || {};
+    const ledger = Array.isArray(current.ledger) ? current.ledger.slice() : [];
+    const credited = ledger.reduce((sum, entry) => {
+      const id = String(entry && entry.id || "");
+      if (id !== "program-completed:tsa-program" && !id.startsWith("program-completion-adjustment:tsa-program:")) return sum;
+      return sum + Math.max(0, Number(entry.mpEarned || 0));
+    }, 0);
+    const currentTotal = Math.max(0, Number(current.mpTotal || current.masteryPoints || 0));
+    const missing = Math.max(0, target - credited, executiveThreshold - currentTotal);
+    if (!missing) {
+      result = { repaired: false, mpEarned: 0, mpTotal: currentTotal, rewards: current };
+      return;
+    }
+    const adjustmentId = "program-completion-adjustment:tsa-program:" + target + ":executive-" + executiveThreshold;
+    if (ledger.some((entry) => entry && entry.id === adjustmentId)) return;
+    const mpTotal = currentTotal + missing;
+    let level = levels[0] && levels[0].name || "Intern";
+    levels.forEach((item) => { if (mpTotal >= Number(item.threshold || 0)) level = item.name; });
+    ledger.push({
+      id: adjustmentId,
+      type: "program-completion-adjustment",
+      title: "Full program Executive milestone adjustment",
+      mpEarned: missing,
+      totalAfter: mpTotal,
+      earnedAt: new Date().toISOString()
+    });
+    const earnedEvents = Object.assign({}, current.earnedEvents || {}, current.earnedEventIds || {}, { [adjustmentId]: true });
+    const rewards = Object.assign({}, current, {
+      mpTotal,
+      masteryPoints: mpTotal,
+      level,
+      currentLevel: level,
+      earnedEvents,
+      earnedEventIds: earnedEvents,
+      ledger: ledger.slice(-500)
+    });
+    transaction.set(userRef, { rewards, workspaceProgress: { rewards }, updatedAt: serverTimestamp() }, { merge: true });
+    result = { repaired: true, mpEarned: missing, mpTotal, rewards };
+  });
+  return result;
+}
+
 async function saveUserProgress(exerciseId, exerciseName, exercisePayload = {}) {
   const user = await getSignedInUser();
   if (!user || !user.uid) {
@@ -690,7 +751,7 @@ function getDefaultRewardSettings() {
       { name: "Analyst", threshold: 300 },
       { name: "Associate", threshold: 800 },
       { name: "Principal", threshold: 1350 },
-      { name: "Executive", threshold: 1850 }
+      { name: "Executive", threshold: 1800 }
     ],
     mp: {
       videoComplete: 10,
@@ -832,6 +893,7 @@ export {
   onAuthStateChanged,
   requireAuthorizedMember,
   requestGoogleGroupSyncJob,
+  repairMemberProgramCompletionReward,
   saveMemberWorkspaceProgress,
   saveMemberRewards,
   saveUserProfile,

@@ -8,7 +8,7 @@ const canonical = {
     ["Analyst", 300],
     ["Associate", 800],
     ["Principal", 1350],
-    ["Executive", 1850]
+    ["Executive", 1800]
   ],
   video: 10,
   context: 5,

@@ -11,7 +11,7 @@
     { title: "Analyst", threshold: 300 },
     { title: "Associate", threshold: 800 },
     { title: "Principal", threshold: 1350 },
-    { title: "Executive", threshold: 1850 }
+    { title: "Executive", threshold: 1800 }
   ];
   const DEFAULT_SETTINGS = {
     enabled: true,
