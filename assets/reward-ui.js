@@ -73,7 +73,24 @@
     return { phase: phase, done: done, total: total };
   }
 
-  function nextExerciseHref(phase) {
+  function nextExerciseHref(appId, phase) {
+    var sequences = {
+      "grocery-list": "../grocery-list-ai/index.html",
+      "grocery-list-ai": "../messy-notes/index.html",
+      "messy-notes": "../rushed-voice-memo/index.html",
+      "rushed-voice-memo": "../rushed-voice-memo-ai/index.html",
+      "rushed-voice-memo-ai": "../chalkboard-notes/index.html",
+      "issue-tree": "../scqa-builder/index.html",
+      "scqa-builder": "../advisory-board/index.html",
+      "advisory-board": "../write-to-aiko/index.html",
+      "write-to-aiko": "../explain-to-aiko/index.html",
+      "explain-to-aiko-120": "../explain-to-aiko-60/index.html",
+      "explain-to-aiko": "../explain-to-aiko-60/index.html",
+      "eisenhower-matrix": "../i-have-bad-news/index.html",
+      "i-have-bad-news": "../lets-switch-hats/index.html",
+      "lets-switch-hats": "../speak-like-obama/index.html"
+    };
+    if (sequences[appId]) return sequences[appId];
     if (phase === 1) return "../../member-login/phase-1/practice/index.html";
     return "../../member-login/phase-" + phase + ".html#exercises";
   }
@@ -438,7 +455,7 @@
           '<span class="utl-reward-modal-label">Your takeaway</span>',
           '<h2>Keep this in mind</h2>',
           '<p data-reflection-takeaway>Use the main idea from this exercise in your next decision or conversation.</p>',
-          '<a class="utl-takeaway-continue" href="' + nextExerciseHref(phaseProgress.phase) + '">Go to next exercise &rarr;</a>',
+          '<a class="utl-takeaway-continue" href="' + nextExerciseHref(appId, phaseProgress.phase) + '">Go to next exercise &rarr;</a>',
         '</section>',
       '</div>'
     ].join("");

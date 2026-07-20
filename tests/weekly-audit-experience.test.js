@@ -11,13 +11,15 @@ const tactileButtons = fs.readFileSync('assets/tactile-buttons.js', 'utf8');
 
 assert(rewardUi.includes('data-award-stage="takeaway"'), 'exercise completion includes a takeaway stage');
 assert(rewardUi.includes('Go to next exercise'), 'exercise completion leads learners directly to the next exercise');
-assert(rewardUi.includes('nextExerciseHref(phaseProgress.phase)'), 'the next-exercise action returns to the correct phase');
+assert(rewardUi.includes('nextExerciseHref(appId, phaseProgress.phase)'), 'the next-exercise action resolves the current exercise before falling back to its phase');
+assert(rewardUi.includes('"messy-notes": "../rushed-voice-memo/index.html"'), 'messy notes continues directly to the rushed voice memo');
 assert(!rewardUi.includes("content:'DONE'"), 'exercise completion does not display a DONE watermark');
 assert(rewardUi.includes('opacity:.22'), 'completion background texture remains subtle');
 assert(rewardUi.includes('html,body{max-width:100%;overflow-x:clip}'), 'reward popovers cannot create horizontal page overflow');
 assert(rewardUi.includes('Phase '), 'exercise completion reports phase progress');
 assert(rewardUi.includes('activities in today’s mission'), 'exercise completion reports daily mission progress when set');
 assert(appHeader.includes('makeAttemptsCollapsible'), 'shared exercise UI collapses previous attempts');
+assert(appHeader.includes('enhanceTextareas'), 'shared exercise UI adds bold and bullet controls to response fields');
 assert(appHeader.includes('overflow-x:clip'), 'shared exercise UI guards against horizontal overflow');
 assert(styles.includes('overflow-x: clip'), 'public pages guard against horizontal overflow');
 assert(workspace.includes('program’s Day '), 'workspace explains the learner’s program pace');

@@ -1471,7 +1471,7 @@
           <div class="buttons">
             <button id="generateBtn">Generate new list</button>
             <button id="checkBtn" class="primary" disabled>Check my answer</button>
-            <button id="sampleBtn">Show sample answer</button>
+            <button id="sampleBtn" disabled aria-describedby="answerRequirement">Show sample answer</button>
             <button id="resetBtn" class="secondary-action hidden">Reset</button>
           </div>
           <p class="answer-requirement" id="answerRequirement" aria-live="polite">Sort every item into one of the three buckets to check your answer.</p>
@@ -1673,6 +1673,7 @@
       const movedCount = state.placements.bucket1.length + state.placements.bucket2.length + state.placements.bucket3.length;
       const allSorted = movedCount === state.generatedItems.length;
       document.getElementById('checkBtn').disabled = !allSorted;
+      document.getElementById('sampleBtn').disabled = !allSorted;
       const requirement = document.getElementById('answerRequirement');
       if (requirement) {
         requirement.classList.toggle('ready', allSorted);
@@ -2384,10 +2385,10 @@
 
       document.getElementById('sampleBtn').addEventListener('click', () => {
         const movedCount = state.placements.bucket1.length + state.placements.bucket2.length + state.placements.bucket3.length;
-        if (!movedCount) {
+        if (movedCount !== state.generatedItems.length) {
           const feedback = document.getElementById('feedback');
           feedback.className = 'feedback';
-          feedback.innerHTML = '<strong>Try one move first:</strong><br>Move at least one item into a bucket before opening the sample answer.';
+          feedback.innerHTML = `<strong>Finish sorting first:</strong><br>Place all ${state.generatedItems.length} items into buckets before opening the sample answer. ${movedCount} sorted so far.`;
           return;
         }
         const sample = document.getElementById('sampleAnswer');

@@ -1662,6 +1662,28 @@
     .eng-field-group { display:grid; gap:0; margin-bottom:18px; border:1px solid var(--line); border-radius:8px; background:var(--white); overflow:hidden; }
     .eng-field-row { display:flex; align-items:flex-start; gap:14px; padding:14px 16px; border-bottom:1px solid var(--line); }
     .eng-field-row:last-child { border-bottom:0; }
+    .aiko-version-manager { margin-bottom:20px; padding:20px; border:1px solid var(--line); border-radius:8px; background:var(--white); }
+    .aiko-version-manager-head { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; margin-bottom:16px; }
+    .aiko-version-manager-head h3 { margin:0; color:var(--navy); }
+    .aiko-live-scope { flex:0 0 auto; display:inline-flex; padding:6px 9px; border:1px solid #efd39c; border-radius:999px; background:#fff8e8; color:#795300; font-size:11px; font-weight:700; }
+    .aiko-version-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }
+    .aiko-version-card { overflow:hidden; border:1px solid var(--line); border-radius:8px; background:#fff; }
+    .aiko-version-card-head { padding:16px; border-bottom:1px solid var(--line); background:#FAF8F3; }
+    .aiko-version-card-head h4 { margin:0 0 9px; color:var(--navy); font-size:17px; }
+    .aiko-live-version { display:inline-flex; padding:6px 9px; border-radius:999px; background:#e9f5ed; color:#25613b; font-size:12px; font-weight:700; }
+    .aiko-version-audit { margin:9px 0 0; color:#687482; font-size:12px; }
+    .aiko-version-options { display:grid; gap:10px; padding:16px; }
+    .aiko-version-option { display:grid; grid-template-columns:auto 1fr; gap:10px; padding:12px; border:1px solid var(--line); border-radius:8px; cursor:pointer; }
+    .aiko-version-option:has(input:checked) { border-color:var(--navy); background:#f2f6fa; box-shadow:inset 4px 0 0 var(--navy); }
+    .aiko-version-option input { margin-top:4px; accent-color:var(--navy); }
+    .aiko-version-option strong { display:block; color:var(--navy); }
+    .aiko-version-option span { display:block; margin-top:3px; color:#5e6873; font-size:13px; line-height:1.4; }
+    .aiko-version-preview { display:flex; flex-wrap:wrap; align-items:center; gap:8px; padding:0 16px 16px; }
+    .aiko-version-preview-note { width:100%; margin:0; color:#687482; font-size:12px; }
+    .aiko-version-change { padding:14px 16px; border-top:1px solid #efd39c; background:#fff8e8; }
+    .aiko-version-change p { margin:0 0 10px; color:var(--navy); font-weight:700; }
+    .aiko-version-change-actions { display:flex; flex-wrap:wrap; gap:8px; }
+    @media (max-width:900px) { .aiko-version-grid { grid-template-columns:1fr; } .aiko-version-manager-head { flex-direction:column; } }
     .eng-indent { padding-left:32px; background:rgba(243,237,226,.35); }
     .eng-master-toggle-row { background:rgba(0,51,102,.04); }
     .eng-toggle-label { flex:1; min-width:0; display:grid; gap:3px; }
@@ -2038,25 +2060,28 @@
         <div class="section-divider"></div>
         <p class="description">Controls assessment visibility by audience: public visitors first, then members, then Admin/ owner preview settings. Changes take effect on the next page load for each audience.</p>
 
-        <div class="eng-field-group" id="aikoVersionCard" style="margin-bottom:20px">
-          <h3 style="margin:0;color:var(--navy)">Assessment versions</h3>
-          <p class="description" style="margin:6px 0 4px">Members follow these switches on their next page load. Direct URLs to either version always work, so test v2 before switching. Flip back to v1 for instant rollback. Delete v1 only in a later cleanup once v2 is proven.</p>
+        <div class="aiko-version-manager" id="aikoVersionCard">
+          <div class="aiko-version-manager-head"><div><h3>Explain to Aiko versions</h3><p class="description" style="margin:6px 0 0"><strong>The AI feedback exercise is the primary member experience.</strong> Use the v2 self-recorded exercise only as the alternate. Changes take effect the next time members open the exercise.</p></div><span class="aiko-live-scope">Live member setting</span></div>
           <div id="aikoVersionStatus" class="eng-status" aria-live="polite"></div>
-          <div class="eng-field-row">
-            <label class="eng-toggle-label" for="aikoVersion120"><span class="eng-toggle-name">Explain to Aiko 120s</span><span class="eng-toggle-desc" id="aikoVersion120Audit">Default: v1</span></label>
-            <select class="eng-select" id="aikoVersion120" data-aiko-version-key="explainToAiko120" aria-label="Explain to Aiko 120-second version"><option value="v1">v1 · Current</option><option value="v2">v2 · Recorder and AI feedback</option></select>
-            <button class="small-button" type="button" data-save-aiko-version="explainToAiko120">Save 120s</button>
-          </div>
-          <div class="eng-field-row">
-            <label class="eng-toggle-label" for="aikoVersion60"><span class="eng-toggle-name">Explain to Aiko 60s</span><span class="eng-toggle-desc" id="aikoVersion60Audit">Default: v1</span></label>
-            <select class="eng-select" id="aikoVersion60" data-aiko-version-key="explainToAiko60" aria-label="Explain to Aiko 60-second version"><option value="v1">v1 · Current</option><option value="v2">v2 · Recorder and AI feedback</option></select>
-            <button class="small-button" type="button" data-save-aiko-version="explainToAiko60">Save 60s</button>
-          </div>
-          <div class="sync-actions" style="margin-top:12px">
-            <a class="small-button secondary-button" href="../apps/explain-to-aiko/index.html" target="_blank" style="display:inline-flex;align-items:center;text-decoration:none">Preview 120s v1</a>
-            <a class="small-button secondary-button" href="../apps/explain-to-aiko-v2/index.html" target="_blank" style="display:inline-flex;align-items:center;text-decoration:none">Preview 120s v2</a>
-            <a class="small-button secondary-button" href="../apps/explain-to-aiko-60/index.html" target="_blank" style="display:inline-flex;align-items:center;text-decoration:none">Preview 60s v1</a>
-            <a class="small-button secondary-button" href="../apps/explain-to-aiko-60-v2/index.html" target="_blank" style="display:inline-flex;align-items:center;text-decoration:none">Preview 60s v2</a>
+          <div class="aiko-version-grid">
+            <article class="aiko-version-card" data-aiko-version-card="explainToAiko120" data-live-version="v1">
+              <div class="aiko-version-card-head"><h4>Explain to Aiko — 120 seconds</h4><span class="aiko-live-version" data-aiko-live-label>Live for members: primary AI exercise</span><p class="aiko-version-audit" id="aikoVersion120Audit">Using safe default: primary AI exercise</p></div>
+              <div class="aiko-version-options" role="radiogroup" aria-label="Version for Explain to Aiko 120 seconds">
+                <label class="aiko-version-option"><input type="radio" name="aikoVersion120" value="v1" data-aiko-version-key="explainToAiko120"><span><strong>Primary · AI feedback exercise</strong>Members record in the browser, see a transcript and delivery measures, and receive feedback in the exercise.</span></label>
+                <label class="aiko-version-option"><input type="radio" name="aikoVersion120" value="v2" data-aiko-version-key="explainToAiko120"><span><strong>V2 · Self-recorded alternate</strong>Members record externally, use the Playback Gem, and paste feedback.</span></label>
+              </div>
+              <div class="aiko-version-preview"><p class="aiko-version-preview-note">Previewing does not change what members see.</p><a class="small-button secondary-button" href="../apps/explain-to-aiko/index.html" target="_blank">Preview primary AI exercise</a><a class="small-button secondary-button" href="../apps/explain-to-aiko-v2/index.html" target="_blank">Preview v2 self-recorded</a></div>
+              <div class="aiko-version-change" data-aiko-version-change hidden><p data-aiko-change-copy>Change the member experience.</p><div class="aiko-version-change-actions"><button class="small-button" type="button" data-save-aiko-version="explainToAiko120">Publish selected version</button><button class="small-button secondary-button" type="button" data-cancel-aiko-version="explainToAiko120">Cancel</button></div></div>
+            </article>
+            <article class="aiko-version-card" data-aiko-version-card="explainToAiko60" data-live-version="v1">
+              <div class="aiko-version-card-head"><h4>Explain to Aiko — 60 seconds</h4><span class="aiko-live-version" data-aiko-live-label>Live for members: primary AI exercise</span><p class="aiko-version-audit" id="aikoVersion60Audit">Using safe default: primary AI exercise</p></div>
+              <div class="aiko-version-options" role="radiogroup" aria-label="Version for Explain to Aiko 60 seconds">
+                <label class="aiko-version-option"><input type="radio" name="aikoVersion60" value="v1" data-aiko-version-key="explainToAiko60"><span><strong>Primary · AI feedback exercise</strong>Members record in the browser, see a transcript and delivery measures, and receive feedback in the exercise.</span></label>
+                <label class="aiko-version-option"><input type="radio" name="aikoVersion60" value="v2" data-aiko-version-key="explainToAiko60"><span><strong>V2 · Self-recorded alternate</strong>Members record externally, use the Playback Gem, and paste feedback.</span></label>
+              </div>
+              <div class="aiko-version-preview"><p class="aiko-version-preview-note">Previewing does not change what members see.</p><a class="small-button secondary-button" href="../apps/explain-to-aiko-60/index.html" target="_blank">Preview primary AI exercise</a><a class="small-button secondary-button" href="../apps/explain-to-aiko-60-v2/index.html" target="_blank">Preview v2 self-recorded</a></div>
+              <div class="aiko-version-change" data-aiko-version-change hidden><p data-aiko-change-copy>Change the member experience.</p><div class="aiko-version-change-actions"><button class="small-button" type="button" data-save-aiko-version="explainToAiko60">Publish selected version</button><button class="small-button secondary-button" type="button" data-cancel-aiko-version="explainToAiko60">Cancel</button></div></div>
+            </article>
           </div>
         </div>
 
@@ -5232,6 +5257,10 @@
       return value === 'v2' ? 'v2' : 'v1';
     }
 
+    function aikoVersionName(value) {
+      return normalizeAikoVersion(value) === 'v2' ? 'v2 self-recorded alternate' : 'primary AI exercise';
+    }
+
     function syncAikoVersionLocal(key, value) {
       if (AIKO_VERSION_LOCAL_KEYS[key]) localStorage.setItem(AIKO_VERSION_LOCAL_KEYS[key], normalizeAikoVersion(value));
     }
@@ -5244,27 +5273,60 @@
         const date = raw && typeof raw.toDate === 'function' ? raw.toDate() : (raw ? new Date(raw) : null);
         if (date && !Number.isNaN(date.getTime())) when = date.toLocaleString();
       } catch (_) {}
-      if (!by && !when) return 'Default: v1 · No live change recorded';
-      return ['Last changed', by ? 'by ' + by : '', when ? 'on ' + when : ''].filter(Boolean).join(' ');
+      if (!by && !when) return 'Using safe default: primary AI exercise · No version has been published yet';
+      return ['Last published', by ? 'by ' + by : '', when ? 'on ' + when : ''].filter(Boolean).join(' ');
+    }
+
+    function updateAikoVersionChoice(key) {
+      const card = document.querySelector('[data-aiko-version-card="' + key + '"]');
+      if (!card) return;
+      const live = normalizeAikoVersion(card.dataset.liveVersion);
+      const selected = card.querySelector('[data-aiko-version-key="' + key + '"]:checked');
+      const next = normalizeAikoVersion(selected && selected.value);
+      const change = card.querySelector('[data-aiko-version-change]');
+      const copy = card.querySelector('[data-aiko-change-copy]');
+      const publish = card.querySelector('[data-save-aiko-version]');
+      if (change) change.hidden = next === live;
+      if (copy) copy.textContent = 'Change the member experience from the ' + aikoVersionName(live) + ' to the ' + aikoVersionName(next) + '.';
+      if (publish) publish.textContent = 'Publish ' + aikoVersionName(next) + ' for ' + (key === 'explainToAiko120' ? '120-second' : '60-second') + ' exercise';
     }
 
     function syncAikoVersionForm(settings) {
       ['explainToAiko120', 'explainToAiko60'].forEach(function(key) {
         const value = normalizeAikoVersion(settings[key]);
-        const select = document.querySelector('[data-aiko-version-key="' + key + '"]');
-        if (select) select.value = value;
+        const card = document.querySelector('[data-aiko-version-card="' + key + '"]');
+        if (card) card.dataset.liveVersion = value;
+        document.querySelectorAll('[data-aiko-version-key="' + key + '"]').forEach(function(input) { input.checked = input.value === value; });
         syncAikoVersionLocal(key, value);
+        const liveLabel = card && card.querySelector('[data-aiko-live-label]');
+        if (liveLabel) liveLabel.textContent = value === 'v1' ? 'Live for members: primary AI exercise' : 'Live for members: v2 self-recorded alternate';
         const audit = document.getElementById(key === 'explainToAiko120' ? 'aikoVersion120Audit' : 'aikoVersion60Audit');
         if (audit) audit.textContent = formatAikoVersionAudit(settings, key);
+        updateAikoVersionChoice(key);
       });
     }
+
+    document.querySelectorAll('[data-aiko-version-key]').forEach(function(input) {
+      input.addEventListener('change', function() { updateAikoVersionChoice(input.dataset.aikoVersionKey); });
+    });
+
+    document.querySelectorAll('[data-cancel-aiko-version]').forEach(function(button) {
+      button.addEventListener('click', function() {
+        const key = button.dataset.cancelAikoVersion;
+        const card = document.querySelector('[data-aiko-version-card="' + key + '"]');
+        const live = normalizeAikoVersion(card && card.dataset.liveVersion);
+        const input = document.querySelector('[data-aiko-version-key="' + key + '"][value="' + live + '"]');
+        if (input) input.checked = true;
+        updateAikoVersionChoice(key);
+      });
+    });
 
     async function loadAikoVersionSettings() {
       const fb = window.utlFirebaseAuth;
       const status = document.getElementById('aikoVersionStatus');
       if (!status) return;
       if (!fb || !fb.getDoc || !fb.doc || !fb.db) {
-        status.textContent = 'Using v1 defaults until Firebase loads…';
+        status.textContent = 'Using the primary AI exercise until Firebase loads…';
         window.addEventListener('utlFirebaseAuthReady', function handler() {
           window.removeEventListener('utlFirebaseAuthReady', handler);
           loadAikoVersionSettings();
@@ -5275,18 +5337,23 @@
       try {
         const snapshot = await fb.getDoc(fb.doc(fb.db, 'settings', 'assessment_versions'));
         syncAikoVersionForm(snapshot.exists() ? (snapshot.data() || {}) : {});
-        status.textContent = 'Live setting loaded. Missing values default to v1.';
+        status.textContent = 'Live setting loaded. Missing values default to the primary AI exercise.';
       } catch (error) {
         syncAikoVersionForm({});
-        status.textContent = 'Could not load the live setting. Both exercises default to v1.';
+        status.textContent = 'Could not load the live setting. Both exercises default to the primary AI experience.';
       }
     }
 
     document.querySelectorAll('[data-save-aiko-version]').forEach(function(button) {
       button.addEventListener('click', async function() {
         const key = button.dataset.saveAikoVersion;
-        const select = document.querySelector('[data-aiko-version-key="' + key + '"]');
-        const value = normalizeAikoVersion(select && select.value);
+        const selected = document.querySelector('[data-aiko-version-key="' + key + '"]:checked');
+        const value = normalizeAikoVersion(selected && selected.value);
+        const card = document.querySelector('[data-aiko-version-card="' + key + '"]');
+        const live = normalizeAikoVersion(card && card.dataset.liveVersion);
+        if (value === live) return;
+        const duration = key === 'explainToAiko120' ? '120-second' : '60-second';
+        if (!window.confirm('Members will use the ' + aikoVersionName(value) + ' the next time they open the ' + duration + ' exercise. The direct link to the ' + aikoVersionName(live) + ' will still work. Publish this change?')) return;
         const profile = adminProfileData();
         const updatedBy = profile.email || profile.displayName || 'admin';
         const fb = window.utlFirebaseAuth;
@@ -5295,12 +5362,12 @@
         payload[key] = value;
         payload[key + 'UpdatedAt'] = now;
         payload[key + 'UpdatedBy'] = updatedBy;
-        syncAikoVersionLocal(key, value);
         button.disabled = true;
         try {
           if (!fb || !fb.doc || !fb.db || !fb.setDoc) throw new Error('Firebase is not ready.');
           await fb.setDoc(fb.doc(fb.db, 'settings', 'assessment_versions'), payload, { merge: true });
-          showToast((key === 'explainToAiko120' ? '120s' : '60s') + ' version set to ' + value);
+          syncAikoVersionLocal(key, value);
+          showToast(aikoVersionName(value) + ' published for the ' + duration + ' exercise');
           await loadAikoVersionSettings();
         } catch (error) {
           if (/^(localhost|127\.0\.0\.1)$/.test(window.location.hostname)) {

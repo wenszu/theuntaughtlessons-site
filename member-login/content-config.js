@@ -842,7 +842,9 @@ const UTL_CONTENT = {
     var remoteLessons = progress.lessons || {};
     allLessons().forEach(function (lesson) {
       var saved = remoteLessons[lesson.id];
-      if (saved && typeof saved.watched === "boolean") writeBool(watchedKey(lesson.id), saved.watched);
+      // A newly marked local completion can happen while the first remote load is
+      // still in flight. Never let an older remote false erase that completion.
+      if (saved && saved.watched === true) writeBool(watchedKey(lesson.id), true);
     });
 
     var remoteExercises = progress.exercises || {};
@@ -883,6 +885,14 @@ const UTL_CONTENT = {
   function queueRemoteProgressSave() {
     if (remoteProgressSaveTimer) clearTimeout(remoteProgressSaveTimer);
     remoteProgressSaveTimer = setTimeout(saveRemoteProgressNow, 250);
+  }
+
+  function flushRemoteProgressSave() {
+    if (remoteProgressSaveTimer) {
+      clearTimeout(remoteProgressSaveTimer);
+      remoteProgressSaveTimer = null;
+    }
+    return saveRemoteProgressNow();
   }
 
   function ensureRemoteProgressLoaded(callback) {
@@ -2464,7 +2474,7 @@ const UTL_CONTENT = {
         var open = !orientationCard.classList.contains("ws-open");
         orientationCard.classList.toggle("ws-open", open);
         writeBool("utl_orientation_open", open);
-        queueRemoteProgressSave();
+        flushRemoteProgressSave();
         var chevron = orientationToggle.querySelector(".ws-orientation-chevron");
         if (chevron) chevron.innerHTML = open ? "&minus;" : "+";
       });
@@ -2492,7 +2502,7 @@ const UTL_CONTENT = {
         var nowWatched = !readBool("utl_orientation_ready");
         writeBool("utl_orientation_ready", nowWatched);
         var orientationReward = nowWatched ? awardOrientationVideo() : null;
-        queueRemoteProgressSave();
+        flushRemoteProgressSave();
         var action = qs("[data-orientation-action]");
         if (action) {
           action.innerHTML = orientationWatchActionHtml(nowWatched);
@@ -3043,7 +3053,7 @@ const UTL_CONTENT = {
           });
         }
         videosDone(phaseKey);
-        queueRemoteProgressSave();
+        flushRemoteProgressSave();
         renderPhasePage(phaseKey);
         if (nowWatched && reward && reward.awarded) {
           setTimeout(function () {
@@ -3099,7 +3109,7 @@ const UTL_CONTENT = {
           }
         });
         videosDone(phaseKey);
-        queueRemoteProgressSave();
+        flushRemoteProgressSave();
         renderPhasePage(phaseKey);
         if (totalAwarded > 0) {
           setTimeout(function () {
@@ -3498,6 +3508,12 @@ const UTL_CONTENT = {
   }
 
   window.UTL_CONTENT = UTL_CONTENT;
+  window.addEventListener("pagehide", function () {
+    if (remoteProgressSaveTimer) flushRemoteProgressSave();
+  });
+  document.addEventListener("visibilitychange", function () {
+    if (document.visibilityState === "hidden" && remoteProgressSaveTimer) flushRemoteProgressSave();
+  });
   window.UTLWorkspace = {
     renderIndex: renderIndex,
     renderOrientation: renderOrientation,

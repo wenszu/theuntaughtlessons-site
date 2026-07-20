@@ -86,6 +86,7 @@
       ".utl-app-mission b{color:#EEA320}",
       ".utl-app-mission-popover{position:absolute;right:0;top:calc(100% + 10px);z-index:9990;width:280px;padding:15px 16px;border:1px solid rgba(238,163,32,.42);border-radius:11px;background:#fff;color:#4A4A4A;box-shadow:0 18px 48px rgba(0,51,102,.22);opacity:0;pointer-events:none;transform:translateY(-6px);transition:opacity .16s ease,transform .16s ease;white-space:normal}.utl-app-mission:hover .utl-app-mission-popover,.utl-app-mission:focus-within .utl-app-mission-popover{opacity:1;pointer-events:auto;transform:translateY(0)}.utl-app-mission-popover small{display:block;color:#EEA320;font:700 10px Lato, Arial, sans-serif;text-transform: none}.utl-app-mission-popover strong{display:block;margin-top:5px;color:#003366;font:700 17px Lato,sans-serif}.utl-app-mission-popover p{margin:7px 0 11px;color:#4D7094;font:700 13px/1.4 Lato,sans-serif}.utl-app-mission-popover a{display:inline-flex;min-height:36px;align-items:center;border-radius:7px;background:#EEA320;color:#003366;padding:0 11px;text-decoration:none;text-transform: none}",
       ".utl-attempts-toggle{display:inline-flex;align-items:center;gap:8px;border:0;background:transparent;color:#003366;font:700 13px Lato,Arial,sans-serif;cursor:pointer}.utl-attempts-toggle span{display:grid;place-items:center;width:24px;height:24px;border:1px solid rgba(0,51,102,.25);border-radius:999px}.utl-attempts-collapsed>.panel-body{display:none!important}",
+      ".utl-text-toolbar{display:flex;align-items:center;gap:7px;margin:0 0 7px;padding:6px;border:1px solid rgba(0,51,102,.16);border-radius:8px;background:#F8F6F1}.utl-text-tool{display:inline-flex;align-items:center;justify-content:center;min-height:34px!important;margin:0!important;padding:6px 10px!important;border:1px solid rgba(0,51,102,.2)!important;border-radius:6px!important;background:#fff!important;color:#003366!important;box-shadow:none!important;font:700 13px Lato,Arial,sans-serif!important;text-transform:none!important;letter-spacing:0!important}.utl-text-tool:hover{border-color:#EEA320!important;background:#FFF8EC!important}.utl-text-tool strong{font-weight:900}.utl-text-toolbar-note{margin-left:auto;color:#4D7094;font:400 11px Lato,Arial,sans-serif}",
       "@media(max-width:1100px){.utl-app-reward-mount{display:none}.utl-app-mission>span:first-child{display:none}.utl-app-mission{min-width:42px;justify-content:center;padding:0 8px}}",
       "@media(max-width:620px){.utl-app-engagement{gap:4px}.utl-app-mission{min-height:34px;font-size:9px}}"
     ].join("\n");
@@ -112,9 +113,65 @@
     });
   }
 
+  function replaceTextareaSelection(textarea, replacement, selectionStart, selectionEnd) {
+    var before = textarea.value.slice(0, selectionStart);
+    var after = textarea.value.slice(selectionEnd);
+    textarea.value = before + replacement + after;
+    textarea.focus();
+    textarea.setSelectionRange(selectionStart, selectionStart + replacement.length);
+    textarea.dispatchEvent(new Event("input", { bubbles: true }));
+  }
+
+  function formatTextarea(textarea, format) {
+    var start = textarea.selectionStart || 0;
+    var end = textarea.selectionEnd || start;
+    var selected = textarea.value.slice(start, end);
+    if (format === "bold") {
+      var content = selected || "important phrase";
+      replaceTextareaSelection(textarea, "**" + content + "**", start, end);
+      textarea.setSelectionRange(start + 2, start + 2 + content.length);
+      return;
+    }
+    var contentStart = textarea.value.lastIndexOf("\n", Math.max(0, start - 1)) + 1;
+    var contentEnd = textarea.value.indexOf("\n", end);
+    if (contentEnd === -1) contentEnd = textarea.value.length;
+    var block = textarea.value.slice(contentStart, contentEnd) || "List item";
+    var lines = block.split("\n");
+    var allBulleted = lines.every(function (line) { return /^\s*[-•]\s+/.test(line); });
+    var replacement = lines.map(function (line) {
+      return allBulleted ? line.replace(/^(\s*)[-•]\s+/, "$1") : (line.trim() ? "- " + line.replace(/^\s*[-•]\s+/, "") : "- ");
+    }).join("\n");
+    replaceTextareaSelection(textarea, replacement, contentStart, contentEnd);
+  }
+
+  function enhanceTextareas(root) {
+    (root || document).querySelectorAll("textarea:not([data-utl-formatting])").forEach(function (textarea) {
+      if (textarea.readOnly || textarea.disabled || textarea.classList.contains("utl-reflection-note")) return;
+      textarea.dataset.utlFormatting = "true";
+      var toolbar = document.createElement("div");
+      toolbar.className = "utl-text-toolbar";
+      toolbar.setAttribute("role", "toolbar");
+      toolbar.setAttribute("aria-label", "Text formatting");
+      toolbar.innerHTML = '<button class="utl-text-tool" type="button" data-utl-format="bold" aria-label="Bold selected text"><strong>B</strong>&nbsp; Bold</button><button class="utl-text-tool" type="button" data-utl-format="bullets" aria-label="Make a bulleted list">&#8226;&nbsp; Bullets</button><span class="utl-text-toolbar-note">Select text, then format</span>';
+      toolbar.addEventListener("click", function (event) {
+        var button = event.target.closest("[data-utl-format]");
+        if (button) formatTextarea(textarea, button.dataset.utlFormat);
+      });
+      textarea.parentNode.insertBefore(toolbar, textarea);
+    });
+  }
+
   function attach() {
     injectStyles();
     makeAttemptsCollapsible();
+    enhanceTextareas(document);
+    new MutationObserver(function (records) {
+      records.forEach(function (record) {
+        record.addedNodes.forEach(function (node) {
+          if (node.nodeType === 1) enhanceTextareas(node.matches && node.matches("textarea") ? node.parentNode : node);
+        });
+      });
+    }).observe(document.body, { childList: true, subtree: true });
     var header = document.querySelector([
       ".app-header",
       ".ab-header",

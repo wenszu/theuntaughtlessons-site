@@ -20,10 +20,18 @@
   "firestore": {
     "rules": "firestore.rules"
   },
-  "functions": {
-    "source": "functions",
-    "runtime": "nodejs20"
-  },
+  "functions": [
+    {
+      "source": "functions",
+      "codebase": "group-sync",
+      "runtime": "nodejs20"
+    },
+    {
+      "source": "functions-aiko",
+      "codebase": "aiko",
+      "runtime": "nodejs20"
+    }
+  ],
   "hosting": {
     "public": ".",
     "ignore": [
