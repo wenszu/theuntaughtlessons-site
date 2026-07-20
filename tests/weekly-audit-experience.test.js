@@ -19,7 +19,7 @@ assert(rewardUi.includes('html,body{max-width:100%;overflow-x:clip}'), 'reward p
 assert(rewardUi.includes('Phase '), 'exercise completion reports phase progress');
 assert(rewardUi.includes('activities in today’s mission'), 'exercise completion reports daily mission progress when set');
 assert(appHeader.includes('makeAttemptsCollapsible'), 'shared exercise UI collapses previous attempts');
-assert(appHeader.includes('enhanceTextareas'), 'shared exercise UI adds bold and bullet controls to response fields');
+assert(!appHeader.includes('enhanceTextareas'), 'shared exercise UI leaves response fields free of Markdown formatting controls');
 assert(appHeader.includes('overflow-x:clip'), 'shared exercise UI guards against horizontal overflow');
 assert(styles.includes('overflow-x: clip'), 'public pages guard against horizontal overflow');
 assert(workspace.includes('program’s Day '), 'workspace explains the learner’s program pace');
