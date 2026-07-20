@@ -340,6 +340,11 @@ const UTL_CONTENT = {
     { name: "Executive", threshold: 1800 }
   ];
   var PROGRAM_COMPLETION_MP = 200;
+  var AIKO_VERSION_LOCAL_KEYS = {
+    explainToAiko120: "utl_aiko_120_version",
+    explainToAiko60: "utl_aiko_60_version"
+  };
+  var aikoVersions = { explainToAiko120: "v1", explainToAiko60: "v1" };
   var phaseDescriptions = {
     phase1: "Learn to sort noise into signal.",
     phase2: "Turn structure into concise communication.",
@@ -367,6 +372,75 @@ const UTL_CONTENT = {
 
   function memberPath(file) {
     return inAdminRoot() ? "../member-login/" + file : file;
+  }
+
+  function normalizedAikoVersion(value) {
+    return value === "v2" ? "v2" : "v1";
+  }
+
+  function aikoVersionOverride() {
+    var value = new URLSearchParams(window.location.search || "").get("aikoVersion");
+    return value === "v1" || value === "v2" ? value : "";
+  }
+
+  function applyAikoVersions() {
+    var override = aikoVersionOverride();
+    var phase = UTL_CONTENT.phase2;
+    if (!phase || !Array.isArray(phase.exercises)) return;
+    phase.exercises.forEach(function (exercise) {
+      var suffixMatch = String(exercise.appUrl || "").match(/index\.html([?#].*)$/);
+      var suffix = suffixMatch ? suffixMatch[1] : "";
+      if (exercise.id === "p2-e5") exercise.appUrl = "../apps/explain-to-aiko" + (normalizedAikoVersion(override || aikoVersions.explainToAiko120) === "v2" ? "-v2" : "") + "/index.html" + suffix;
+      if (exercise.id === "p2-e6") exercise.appUrl = "../apps/explain-to-aiko-60" + (normalizedAikoVersion(override || aikoVersions.explainToAiko60) === "v2" ? "-v2" : "") + "/index.html" + suffix;
+    });
+  }
+
+  function rewriteRenderedAikoLinks() {
+    var phase = UTL_CONTENT.phase2;
+    if (!phase) return;
+    var paths = {};
+    phase.exercises.forEach(function (exercise) { if (exercise.id === "p2-e5" || exercise.id === "p2-e6") paths[exercise.id] = appHref(exercise.appUrl); });
+    document.querySelectorAll('[data-exercise-visit="p2-e5"], [data-exercise-visit="p2-e6"]').forEach(function (link) {
+      var id = link.getAttribute("data-exercise-visit");
+      if (paths[id]) link.setAttribute("href", paths[id]);
+    });
+    if (inAdminRoot()) return;
+    document.querySelectorAll('a[href*="explain-to-aiko"]').forEach(function (link) {
+      var href = link.getAttribute("href") || "";
+      var id = href.indexOf("explain-to-aiko-60") !== -1 ? "p2-e6" : "p2-e5";
+      if (paths[id]) link.setAttribute("href", paths[id]);
+    });
+  }
+
+  function loadAikoVersions() {
+    var override = aikoVersionOverride();
+    if (override) { applyAikoVersions(); return Promise.resolve(); }
+    if (/^(localhost|127\.0\.0\.1)$/.test(window.location.hostname)) {
+      aikoVersions.explainToAiko120 = normalizedAikoVersion(localStorage.getItem(AIKO_VERSION_LOCAL_KEYS.explainToAiko120));
+      aikoVersions.explainToAiko60 = normalizedAikoVersion(localStorage.getItem(AIKO_VERSION_LOCAL_KEYS.explainToAiko60));
+      applyAikoVersions();
+    }
+    var timedOut = false;
+    var timeout = new Promise(function (_, reject) { setTimeout(function () { timedOut = true; reject(new Error("Assessment version load timed out.")); }, 1800); });
+    var load = import(firebaseHref()).then(function (firebase) {
+      return firebase.getDoc(firebase.doc(firebase.db, "settings", "assessment_versions"));
+    }).then(function (snapshot) {
+      if (timedOut) return;
+      var settings = snapshot.exists() ? (snapshot.data() || {}) : {};
+      aikoVersions.explainToAiko120 = normalizedAikoVersion(settings.explainToAiko120);
+      aikoVersions.explainToAiko60 = normalizedAikoVersion(settings.explainToAiko60);
+      applyAikoVersions();
+      rewriteRenderedAikoLinks();
+    }).catch(function () {
+      aikoVersions = { explainToAiko120: "v1", explainToAiko60: "v1" };
+      applyAikoVersions();
+      rewriteRenderedAikoLinks();
+    });
+    return Promise.race([load, timeout]).catch(function () {
+      aikoVersions = { explainToAiko120: "v1", explainToAiko60: "v1" };
+      applyAikoVersions();
+      rewriteRenderedAikoLinks();
+    });
   }
 
   function appHref(path) {
@@ -3432,4 +3506,6 @@ const UTL_CONTENT = {
     renderAdmin: renderAdmin,
     getPhase: getPhase
   };
+  applyAikoVersions();
+  loadAikoVersions();
 })();

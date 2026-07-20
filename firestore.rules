@@ -73,7 +73,7 @@ service cloud.firestore {
     }
 
     match /settings/{docId} {
-      allow read: if docId in ['publicSite', 'public_assessments'] || signedIn();
+      allow read: if docId in ['publicSite', 'public_assessments', 'assessment_versions'] || signedIn();
       allow write: if isAdmin();
     }
   }

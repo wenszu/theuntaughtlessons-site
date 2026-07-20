@@ -2038,6 +2038,28 @@
         <div class="section-divider"></div>
         <p class="description">Controls assessment visibility by audience: public visitors first, then members, then Admin/ owner preview settings. Changes take effect on the next page load for each audience.</p>
 
+        <div class="eng-field-group" id="aikoVersionCard" style="margin-bottom:20px">
+          <h3 style="margin:0;color:var(--navy)">Assessment versions</h3>
+          <p class="description" style="margin:6px 0 4px">Members follow these switches on their next page load. Direct URLs to either version always work, so test v2 before switching. Flip back to v1 for instant rollback. Delete v1 only in a later cleanup once v2 is proven.</p>
+          <div id="aikoVersionStatus" class="eng-status" aria-live="polite"></div>
+          <div class="eng-field-row">
+            <label class="eng-toggle-label" for="aikoVersion120"><span class="eng-toggle-name">Explain to Aiko 120s</span><span class="eng-toggle-desc" id="aikoVersion120Audit">Default: v1</span></label>
+            <select class="eng-select" id="aikoVersion120" data-aiko-version-key="explainToAiko120" aria-label="Explain to Aiko 120-second version"><option value="v1">v1 · Current</option><option value="v2">v2 · Recorder and AI feedback</option></select>
+            <button class="small-button" type="button" data-save-aiko-version="explainToAiko120">Save 120s</button>
+          </div>
+          <div class="eng-field-row">
+            <label class="eng-toggle-label" for="aikoVersion60"><span class="eng-toggle-name">Explain to Aiko 60s</span><span class="eng-toggle-desc" id="aikoVersion60Audit">Default: v1</span></label>
+            <select class="eng-select" id="aikoVersion60" data-aiko-version-key="explainToAiko60" aria-label="Explain to Aiko 60-second version"><option value="v1">v1 · Current</option><option value="v2">v2 · Recorder and AI feedback</option></select>
+            <button class="small-button" type="button" data-save-aiko-version="explainToAiko60">Save 60s</button>
+          </div>
+          <div class="sync-actions" style="margin-top:12px">
+            <a class="small-button secondary-button" href="../apps/explain-to-aiko/index.html" target="_blank" style="display:inline-flex;align-items:center;text-decoration:none">Preview 120s v1</a>
+            <a class="small-button secondary-button" href="../apps/explain-to-aiko-v2/index.html" target="_blank" style="display:inline-flex;align-items:center;text-decoration:none">Preview 120s v2</a>
+            <a class="small-button secondary-button" href="../apps/explain-to-aiko-60/index.html" target="_blank" style="display:inline-flex;align-items:center;text-decoration:none">Preview 60s v1</a>
+            <a class="small-button secondary-button" href="../apps/explain-to-aiko-60-v2/index.html" target="_blank" style="display:inline-flex;align-items:center;text-decoration:none">Preview 60s v2</a>
+          </div>
+        </div>
+
         <span class="control-scope is-live">Live for all visitors</span>
         <p class="description" style="margin-top:12px"><strong>Public</strong> — controls what non-logged-in visitors see on the public site and <a href="../tsa-score.html" target="_blank">tsa-score.html</a>.</p>
         <div class="visibility-checklist" id="publicHomepageChecklist"></div>
@@ -2951,6 +2973,7 @@
       signInWithGooglePopup,
       Timestamp
     } from "../assets/firebase.js";
+    import { serverTimestamp, setDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
     window.utlFirebaseAuth = {
       ...(window.utlFirebaseAuth || {}),
@@ -2988,7 +3011,9 @@
       setUserFeedbackEnabled,
       signOut,
       signInWithGooglePopup,
-      Timestamp
+      Timestamp,
+      serverTimestamp,
+      setDoc
     };
     window.dispatchEvent(new CustomEvent('utlFirebaseAuthReady'));
   </script>
@@ -5196,6 +5221,102 @@
       }
     });
 
+    // ===== Explain to Aiko assessment versions =====
+
+    const AIKO_VERSION_LOCAL_KEYS = {
+      explainToAiko120: 'utl_aiko_120_version',
+      explainToAiko60: 'utl_aiko_60_version'
+    };
+
+    function normalizeAikoVersion(value) {
+      return value === 'v2' ? 'v2' : 'v1';
+    }
+
+    function syncAikoVersionLocal(key, value) {
+      if (AIKO_VERSION_LOCAL_KEYS[key]) localStorage.setItem(AIKO_VERSION_LOCAL_KEYS[key], normalizeAikoVersion(value));
+    }
+
+    function formatAikoVersionAudit(settings, key) {
+      const by = settings[key + 'UpdatedBy'] || settings.updatedBy || '';
+      const raw = settings[key + 'UpdatedAt'] || settings.updatedAt;
+      let when = '';
+      try {
+        const date = raw && typeof raw.toDate === 'function' ? raw.toDate() : (raw ? new Date(raw) : null);
+        if (date && !Number.isNaN(date.getTime())) when = date.toLocaleString();
+      } catch (_) {}
+      if (!by && !when) return 'Default: v1 · No live change recorded';
+      return ['Last changed', by ? 'by ' + by : '', when ? 'on ' + when : ''].filter(Boolean).join(' ');
+    }
+
+    function syncAikoVersionForm(settings) {
+      ['explainToAiko120', 'explainToAiko60'].forEach(function(key) {
+        const value = normalizeAikoVersion(settings[key]);
+        const select = document.querySelector('[data-aiko-version-key="' + key + '"]');
+        if (select) select.value = value;
+        syncAikoVersionLocal(key, value);
+        const audit = document.getElementById(key === 'explainToAiko120' ? 'aikoVersion120Audit' : 'aikoVersion60Audit');
+        if (audit) audit.textContent = formatAikoVersionAudit(settings, key);
+      });
+    }
+
+    async function loadAikoVersionSettings() {
+      const fb = window.utlFirebaseAuth;
+      const status = document.getElementById('aikoVersionStatus');
+      if (!status) return;
+      if (!fb || !fb.getDoc || !fb.doc || !fb.db) {
+        status.textContent = 'Using v1 defaults until Firebase loads…';
+        window.addEventListener('utlFirebaseAuthReady', function handler() {
+          window.removeEventListener('utlFirebaseAuthReady', handler);
+          loadAikoVersionSettings();
+        });
+        return;
+      }
+      status.textContent = 'Loading assessment versions…';
+      try {
+        const snapshot = await fb.getDoc(fb.doc(fb.db, 'settings', 'assessment_versions'));
+        syncAikoVersionForm(snapshot.exists() ? (snapshot.data() || {}) : {});
+        status.textContent = 'Live setting loaded. Missing values default to v1.';
+      } catch (error) {
+        syncAikoVersionForm({});
+        status.textContent = 'Could not load the live setting. Both exercises default to v1.';
+      }
+    }
+
+    document.querySelectorAll('[data-save-aiko-version]').forEach(function(button) {
+      button.addEventListener('click', async function() {
+        const key = button.dataset.saveAikoVersion;
+        const select = document.querySelector('[data-aiko-version-key="' + key + '"]');
+        const value = normalizeAikoVersion(select && select.value);
+        const profile = adminProfileData();
+        const updatedBy = profile.email || profile.displayName || 'admin';
+        const fb = window.utlFirebaseAuth;
+        const now = fb && fb.serverTimestamp ? fb.serverTimestamp() : Timestamp.now();
+        const payload = { updatedAt: now, updatedBy };
+        payload[key] = value;
+        payload[key + 'UpdatedAt'] = now;
+        payload[key + 'UpdatedBy'] = updatedBy;
+        syncAikoVersionLocal(key, value);
+        button.disabled = true;
+        try {
+          if (!fb || !fb.doc || !fb.db || !fb.setDoc) throw new Error('Firebase is not ready.');
+          await fb.setDoc(fb.doc(fb.db, 'settings', 'assessment_versions'), payload, { merge: true });
+          showToast((key === 'explainToAiko120' ? '120s' : '60s') + ' version set to ' + value);
+          await loadAikoVersionSettings();
+        } catch (error) {
+          if (/^(localhost|127\.0\.0\.1)$/.test(window.location.hostname)) {
+            showToast('Saved for localhost preview only');
+            syncAikoVersionForm(payload);
+          } else {
+            showToast((error && error.message) || 'Version save failed', 'error');
+          }
+        } finally {
+          button.disabled = false;
+        }
+      });
+    });
+
+    // ===== End Explain to Aiko assessment versions =====
+
     // ===== Email Templates =====
 
     let _etTemplates = {};
@@ -6482,6 +6603,7 @@
         loadAdminVisibilitySettings();
         loadPublicAssessmentSettings();
         loadTsaVisibility();
+        loadAikoVersionSettings();
       }
       if (options.scroll !== false) {
         const target = (currentActive || visibleNavItems[0])?.dataset.target;
@@ -6661,6 +6783,7 @@
     loadPublicHomepageSetting();
     loadAdminVisibilitySettings();
     loadPublicAssessmentSettings();
+    loadAikoVersionSettings();
     bindRewardSettings();
     loadRewardSettings();
     clInit();
