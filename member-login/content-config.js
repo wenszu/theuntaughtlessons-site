@@ -342,9 +342,11 @@ const UTL_CONTENT = {
   var PROGRAM_COMPLETION_MP = 200;
   var AIKO_VERSION_LOCAL_KEYS = {
     explainToAiko120: "utl_aiko_120_version",
-    explainToAiko60: "utl_aiko_60_version"
+    explainToAiko60: "utl_aiko_60_version",
+    eisenhowerMatrix: "utl_eisenhower_matrix_version"
   };
-  var aikoVersions = { explainToAiko120: "v1", explainToAiko60: "v1" };
+  var MATRIX_VERSION_LABEL_SCHEMA = "guided-v1-20260723";
+  var aikoVersions = { explainToAiko120: "v1", explainToAiko60: "v1", eisenhowerMatrix: "v1" };
   var phaseDescriptions = {
     phase1: "Learn to sort noise into signal.",
     phase2: "Turn structure into concise communication.",
@@ -383,6 +385,11 @@ const UTL_CONTENT = {
     return value === "v1" || value === "v2" ? value : "";
   }
 
+  function matrixVersionOverride() {
+    var value = new URLSearchParams(window.location.search || "").get("matrixVersion");
+    return value === "v1" || value === "v2" ? value : "";
+  }
+
   function applyAikoVersions() {
     var override = aikoVersionOverride();
     var phase = UTL_CONTENT.phase2;
@@ -392,6 +399,17 @@ const UTL_CONTENT = {
       var suffix = suffixMatch ? suffixMatch[1] : "";
       if (exercise.id === "p2-e5") exercise.appUrl = "../apps/explain-to-aiko" + (normalizedAikoVersion(override || aikoVersions.explainToAiko120) === "v2" ? "-v2" : "") + "/index.html" + suffix;
       if (exercise.id === "p2-e6") exercise.appUrl = "../apps/explain-to-aiko-60" + (normalizedAikoVersion(override || aikoVersions.explainToAiko60) === "v2" ? "-v2" : "") + "/index.html" + suffix;
+    });
+    var matrixOverride = matrixVersionOverride();
+    var phase3 = UTL_CONTENT.phase3;
+    if (!phase3 || !Array.isArray(phase3.exercises)) return;
+    phase3.exercises.forEach(function (exercise) {
+      if (exercise.id !== "p3-e1") return;
+      var suffixMatch = String(exercise.appUrl || "").match(/index\.html([?#].*)$/);
+      var suffix = suffixMatch ? suffixMatch[1] : "";
+      // The guided experience is the member-facing v1. Folder names stay unchanged
+      // so direct links and saved progress remain compatible with earlier releases.
+      exercise.appUrl = "../apps/eisenhower-matrix" + (normalizedAikoVersion(matrixOverride || aikoVersions.eisenhowerMatrix) === "v1" ? "-v2" : "") + "/index.html" + suffix;
     });
   }
 
@@ -410,14 +428,24 @@ const UTL_CONTENT = {
       var id = href.indexOf("explain-to-aiko-60") !== -1 ? "p2-e6" : "p2-e5";
       if (paths[id]) link.setAttribute("href", paths[id]);
     });
+    var matrix = UTL_CONTENT.phase3 && UTL_CONTENT.phase3.exercises.find(function (exercise) { return exercise.id === "p3-e1"; });
+    if (!matrix) return;
+    var matrixPath = appHref(matrix.appUrl);
+    document.querySelectorAll('[data-exercise-visit="p3-e1"], a[href*="/apps/eisenhower-matrix"]').forEach(function (link) {
+      link.setAttribute("href", matrixPath);
+    });
   }
 
   function loadAikoVersions() {
     var override = aikoVersionOverride();
-    if (override) { applyAikoVersions(); return Promise.resolve(); }
+    var matrixOverride = matrixVersionOverride();
+    if (override && matrixOverride) { applyAikoVersions(); return Promise.resolve(); }
     if (/^(localhost|127\.0\.0\.1)$/.test(window.location.hostname)) {
       aikoVersions.explainToAiko120 = normalizedAikoVersion(localStorage.getItem(AIKO_VERSION_LOCAL_KEYS.explainToAiko120));
       aikoVersions.explainToAiko60 = normalizedAikoVersion(localStorage.getItem(AIKO_VERSION_LOCAL_KEYS.explainToAiko60));
+      aikoVersions.eisenhowerMatrix = localStorage.getItem("utl_eisenhower_matrix_version_schema") === MATRIX_VERSION_LABEL_SCHEMA
+        ? normalizedAikoVersion(localStorage.getItem(AIKO_VERSION_LOCAL_KEYS.eisenhowerMatrix))
+        : "v1";
       applyAikoVersions();
     }
     var timedOut = false;
@@ -427,17 +455,22 @@ const UTL_CONTENT = {
     }).then(function (snapshot) {
       if (timedOut) return;
       var settings = snapshot.exists() ? (snapshot.data() || {}) : {};
-      aikoVersions.explainToAiko120 = normalizedAikoVersion(settings.explainToAiko120);
-      aikoVersions.explainToAiko60 = normalizedAikoVersion(settings.explainToAiko60);
+      if (!override) {
+        aikoVersions.explainToAiko120 = normalizedAikoVersion(settings.explainToAiko120);
+        aikoVersions.explainToAiko60 = normalizedAikoVersion(settings.explainToAiko60);
+      }
+      if (!matrixOverride) aikoVersions.eisenhowerMatrix = settings.eisenhowerMatrixVersionSchema === MATRIX_VERSION_LABEL_SCHEMA
+        ? normalizedAikoVersion(settings.eisenhowerMatrix)
+        : "v1";
       applyAikoVersions();
       rewriteRenderedAikoLinks();
     }).catch(function () {
-      aikoVersions = { explainToAiko120: "v1", explainToAiko60: "v1" };
+      aikoVersions = { explainToAiko120: "v1", explainToAiko60: "v1", eisenhowerMatrix: "v1" };
       applyAikoVersions();
       rewriteRenderedAikoLinks();
     });
     return Promise.race([load, timeout]).catch(function () {
-      aikoVersions = { explainToAiko120: "v1", explainToAiko60: "v1" };
+      aikoVersions = { explainToAiko120: "v1", explainToAiko60: "v1", eisenhowerMatrix: "v1" };
       applyAikoVersions();
       rewriteRenderedAikoLinks();
     });

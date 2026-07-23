@@ -72,7 +72,7 @@ Firestore collections:
 - `settings/feedback` — global `defaultFeedbackEnabled` boolean.
 - `settings/publicSite` — public toggle settings (e.g. `findLevelVisible`).
 - `settings/admin_visibility` — admin/owner preview-only visibility settings, including whether admins/owners can preview hidden public Find your level cards and bypass the public Find your level data form.
-- `settings/assessment_versions` — public-readable, admin/owner-writable rollout switches for `explainToAiko120` and `explainToAiko60`; missing values and read failures resolve to the canonical AI-feedback exercise (`v1` internally), while the self-recorded/Playback exercise is available at the `-v2` path and through the Admin Console (`v2` internally).
+- `settings/assessment_versions` — public-readable, admin/owner-writable rollout switches for `explainToAiko120`, `explainToAiko60`, and `eisenhowerMatrix`; missing values and read failures resolve safely to v1.
 - `google_group_sync_jobs/{jobId}` — Google Group add/remove jobs queued by Admin Console and intended for Firebase Functions processing.
 
 Key `authorized_members` fields: `email`, `name`, `role` (member/admin/owner), `status`, `googleGroupAdded`, `googleGroupAddedAt`, `googleGroupAddedBy`, `googleGroupRemovedAt`, `googleGroupRemovedBy`, `feedbackEnabled`, `addedAt`, `updatedAt`.
@@ -132,6 +132,7 @@ Firebase Functions: `functions/processGoogleGroupSyncJob` watches `google_group_
 | `apps/explain-to-aiko-60-v2/` | Phase 2 | Alternate 60s self-recorded/Playback exercise retained for Admin Console rollback |
 | `apps/toolkit/` | Cross-program | AI prompt toolkit reference (CSS: `tk-`) |
 | `apps/eisenhower-matrix/` | Phase 3 | Prioritization matrix, 6 scenarios |
+| `apps/eisenhower-matrix-v2/` | Phase 3 | Guided five-round prioritization and written-no exercise |
 | `apps/i-have-bad-news/` | Phase 3 | Difficult conversations launch page |
 | `apps/lets-switch-hats/` | Phase 3 | Perspective-taking launch page |
 | `apps/speak-like-obama/` | Phase 3 | Speech delivery launch page |
@@ -209,6 +210,7 @@ Decisions are made in Claude (claude.ai). JSON updates are handled in Codex. Doc
 
 - Static site — no backend, no npm, no framework, no build step.
 - Explain to Aiko's canonical apps provide in-browser recording and transcription in supported browsers, a clearly labeled paste fallback elsewhere, measured duration/WPM/fillers, and a six-criterion Gemini review through `scoreExplainToAiko`. AI failure never blocks saving or completion. The canonical AI apps are the primary experience; the `-v2` folders now hold the older self-recorded/Playback alternate. Admin Console `Assessment versions` controls 120s and 60s independently through `settings/assessment_versions`; missing settings, errors, and timeouts route to the canonical AI exercise. `?aikoVersion=v1|v2` overrides routing for private tests, where v1 selects the canonical AI exercise and v2 selects the self-recorded alternate. All four direct URLs remain available.
+- The art of saying no uses the guided five-round experience as member-facing v1 and the original free-form matrix as the v2 alternate. For URL compatibility, the guided v1 remains physically located at `apps/eisenhower-matrix-v2/`, while the free-form v2 remains at `apps/eisenhower-matrix/`; folder suffixes do not represent the member-facing version labels. Guided v1 includes per-round progress, retry queues, keyboard shortcuts, exercise points, explanations for ambiguous calls, and a 50-word written-no round. Admin Console stores `eisenhowerMatrix: "v1" | "v2"` plus `eisenhowerMatrixVersionSchema: "guided-v1-20260723"` in `settings/assessment_versions`; settings written before that schema marker, missing settings, and read errors resolve to guided v1. `?matrixVersion=v1|v2` overrides workspace routing for testing. Both versions use the same `eisenhower-matrix` completion identity and one-time completion reward so switching versions cannot award duplicate MP.
 - Member dashboard `Today’s Mission` planning screen is generated from the learner's next unfinished lesson videos and exercises and opens only through an explicit `Set mission` / `Change` action (`?open=planner`), never automatically during ordinary navigation or refresh. Choices display their actual bundled estimate; streak appears in the welcome summary only when non-zero. An optional 10-minute challenge can be added and uses a saved pre-challenge intention plus post-challenge reflection before completion. The saved plan is tracked in the sticky nav as `Daily mission: n / n` (or `Daily mission: ✓`) with activity-completion nudges; mobile hides the text label and retains the compact count. Local keys: `utl_daily_mission_target`, `utl_daily_mission_plan`, `utl_daily_mission_dismissed`; visibility key: `utl_daily_welcome_card`. Admin preview: `member-login/index.html?mode=admin&preview=welcome#todays-mission`.
 - `assets/app-reward-header.js` also renders `Daily mission` beside the reward cluster across all reward-enabled practice and assessment app headers. Before selection it shows `Daily mission: Set`; after selection it shows saved progress. Hover, focus, or click exposes a compact anchored breakdown like the MP popover. At narrower widths, the mission pill collapses to `Set`, its count, or a check.
 - The MP reward popover calculates actual MP earned by ledger category, sorts categories by earned total, and shows current-level guidance. Daily/streak progress is intentionally omitted because the adjacent Daily mission control owns that information. Promotion guidance uses direct copy such as `You need 174 more MP to become an Associate!` rather than threshold-system language.
@@ -228,6 +230,11 @@ Decisions are made in Claude (claude.ai). JSON updates are handled in Codex. Doc
 - Logo clicks in app headers link back to the homepage.
 
 ## Change Log
+
+### 2026-07-22
+
+- Added the guided The art of saying no experience at `apps/eisenhower-matrix-v2/` with five persisted rounds, retry-without-penalty scoring, keyboard play, live written-no checks, summary skill bars, and legacy-compatible progress/reward saves. It is labeled v1 for members; the folder name is retained only for URL compatibility.
+- Extended the Admin Console exercise-version manager and `settings/assessment_versions` routing with an independent `eisenhowerMatrix` switch: guided v1 is the safe default and the original free-form matrix is the v2 alternate. Audit metadata, local preview mirrors, direct preview links, and the semantic `?matrixVersion=v1|v2` testing override follow those labels.
 
 ### 2026-07-20
 
