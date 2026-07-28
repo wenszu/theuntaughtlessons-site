@@ -89,6 +89,10 @@ function requireFirestore() {
   return db;
 }
 
+function experiencePreviewActive() {
+  return window.localStorage.getItem("utl_experience_preview_active") === "true";
+}
+
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
@@ -399,6 +403,7 @@ async function saveEmailTemplate(id, data) {
 }
 
 async function saveMemberWorkspaceProgress(progress = {}) {
+  if (experiencePreviewActive()) return { preview: true, saved: false };
   const user = await getSignedInUser();
   if (!user || !user.uid) {
     throw new Error("A signed-in Firebase user is required to save workspace progress.");
@@ -416,6 +421,7 @@ async function saveMemberWorkspaceProgress(progress = {}) {
 }
 
 async function saveMemberRewards(incoming = {}) {
+  if (experiencePreviewActive()) return { preview: true, saved: false };
   const user = await getSignedInUser();
   if (!user || !user.uid) throw new Error("A signed-in Firebase user is required to save rewards.");
   const readyDb = requireFirestore();
@@ -512,6 +518,7 @@ async function repairMemberProgramCompletionReward(userId, options = {}) {
 }
 
 async function saveUserProgress(exerciseId, exerciseName, exercisePayload = {}) {
+  if (experiencePreviewActive()) return { preview: true, saved: false };
   const user = await getSignedInUser();
   if (!user || !user.uid) {
     throw new Error("A signed-in Firebase user is required to save progress.");
@@ -634,6 +641,69 @@ async function getAllMemberWorkspaceProgress() {
     allProgress.usersReadError = usersReadError;
   }
   return allProgress;
+}
+
+async function replaceMemberWorkspaceProgress(userId, nextProgress = {}, options = {}) {
+  if (!userId) throw new Error("A user UID is required.");
+  const readyDb = requireFirestore();
+  const userRef = doc(readyDb, "users", userId);
+  const userSnap = await getDoc(userRef);
+  if (!userSnap.exists()) throw new Error("The student record could not be found.");
+
+  const currentData = userSnap.data() || {};
+  const currentRewards = currentData.rewards || (currentData.workspaceProgress && currentData.workspaceProgress.rewards) || {};
+  const revision = "admin-" + Date.now() + "-" + Math.random().toString(36).slice(2, 9);
+  const progress = Object.assign({}, nextProgress || {}, {
+    adminProgressRevision: revision,
+    adminProgressReset: options.reset === true
+  });
+  const rewards = options.reset === true
+    ? { mpTotal: 0, masteryPoints: 0, tokens: 0, streakDays: 0, level: "Intern", currentLevel: "Intern", earnedEvents: {}, earnedEventIds: {}, ledger: [] }
+    : Object.assign({}, currentRewards, options.rewards || {});
+  progress.rewards = rewards;
+
+  const completedRef = collection(readyDb, "users", userId, "completed_exercises");
+  const completedSnapshot = await getDocs(completedRef);
+  const existingById = new Map();
+  completedSnapshot.forEach((exerciseDoc) => existingById.set(exerciseDoc.id, exerciseDoc.data() || {}));
+
+  const desired = new Map();
+  Object.entries(progress.exercises || {}).forEach(([exerciseId, value]) => {
+    if (!value || value.completed !== true) return;
+    const appKey = String(value.appKey || exerciseId);
+    desired.set(appKey, {
+      status: "Done",
+      exerciseName: value.title || existingById.get(appKey)?.exerciseName || exerciseId,
+      updatedAt: serverTimestamp(),
+      savedPayload: existingById.get(appKey)?.savedPayload || { adminUpdated: true }
+    });
+  });
+
+  await Promise.all(Array.from(existingById.keys()).filter((id) => !desired.has(id)).map((id) =>
+    deleteDoc(doc(readyDb, "users", userId, "completed_exercises", id))
+  ));
+  await Promise.all(Array.from(desired.entries()).filter(([id]) => !existingById.has(id)).map(([id, data]) =>
+    setDoc(doc(readyDb, "users", userId, "completed_exercises", id), data)
+  ));
+
+  await updateDoc(userRef, {
+    workspaceProgress: progress,
+    rewards,
+    progressAdminUpdatedAt: serverTimestamp(),
+    updatedAt: serverTimestamp()
+  });
+  return { workspaceProgress: progress, rewards, revision };
+}
+
+async function resetMemberWorkspaceProgress(userId) {
+  return replaceMemberWorkspaceProgress(userId, {
+    version: 1,
+    orientation: { ready: false, open: false },
+    lessons: {},
+    exercises: {},
+    contexts: {},
+    phases: {}
+  }, { reset: true });
 }
 
 async function getUserFeedbackEnabled() {
@@ -894,6 +964,8 @@ export {
   requireAuthorizedMember,
   requestGoogleGroupSyncJob,
   repairMemberProgramCompletionReward,
+  replaceMemberWorkspaceProgress,
+  resetMemberWorkspaceProgress,
   saveMemberWorkspaceProgress,
   saveMemberRewards,
   saveUserProfile,

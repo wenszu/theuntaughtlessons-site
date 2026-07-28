@@ -48,7 +48,7 @@ service cloud.firestore {
 
     match /users/{userId}/completed_exercises/{exerciseId} {
       allow read: if (signedIn() && request.auth.uid == userId) || isAdmin();
-      allow write: if signedIn() && request.auth.uid == userId;
+      allow write: if (signedIn() && request.auth.uid == userId) || isAdmin();
     }
 
     match /authorized_members/{email} {

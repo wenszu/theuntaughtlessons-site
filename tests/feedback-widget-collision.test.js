@@ -14,7 +14,7 @@ assert(widget.includes('.bottom-bar'), 'shared handling covers sticky exercise b
 assert(widget.includes('.eisenhower-actions'), 'shared handling covers fixed exercise footers');
 assert(scqa.includes('class="bottom-bar"'), 'SCQA uses a covered sticky bottom bar');
 assert(issueTree.includes('class="bottom-bar"'), 'Issue tree uses a covered sticky bottom bar');
-assert(eisenhower.includes('class="eisenhower-actions"'), 'Eisenhower uses a covered fixed footer');
+assert(eisenhower.includes('class="feedback"') && eisenhower.includes('.feedback{position:fixed'), 'Eisenhower uses a covered fixed feedback dock');
 
 const exercisePages = fs.readdirSync('apps')
   .filter((name) => fs.existsSync(`apps/${name}/index.html`))

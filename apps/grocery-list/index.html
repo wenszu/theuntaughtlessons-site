@@ -700,9 +700,30 @@
 
     .completion-row {
       display: flex;
+      flex-direction: column;
+      align-items: flex-end;
       justify-content: flex-end;
+      gap: 10px;
       margin-top: 0;
     }
+
+    .completion-next-actions {
+      display: none;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    body.exercise-done .completion-next-actions { display: flex; }
+
+    .completion-next-actions a {
+      color: var(--navy);
+      font-size: .88rem;
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .completion-next-actions a:hover { text-decoration: underline; }
 
     .done-toggle {
       border-color: var(--line);
@@ -1436,7 +1457,11 @@
           <p>Practice structured thinking: Create exactly three clear buckets, sort the messy list, and reflect on why your structure is MECE (Mutually Exclusive, Collectively Exhaustive).</p>
         </div>
         <div class="completion-row">
-          <button class="done-toggle" id="doneToggleBtn" type="button">Mark exercise as done</button>
+          <button class="done-toggle" id="doneToggleBtn" type="button">Mark exercise complete</button>
+          <nav class="completion-next-actions" aria-label="What to do next">
+            <a href="../grocery-list-ai/index.html">Go to next exercise &rarr;</a>
+            <a href="../../member-login/phase-1/practice/index.html">Back to workspace</a>
+          </nav>
         </div>
       </div>
     </header>
@@ -2283,7 +2308,7 @@
       const done = isExerciseDone();
       document.body.classList.toggle('exercise-done', done);
       const button = document.getElementById('doneToggleBtn');
-      if (button) button.textContent = done ? 'Exercise done ✓' : 'Mark exercise as done';
+      if (button) button.textContent = done ? 'Exercise complete ✓' : 'Mark exercise complete';
       updateHeaderProgress();
     }
 
@@ -2326,7 +2351,8 @@
           <div class="save-notice-text">
             <i class="ti ti-device-floppy" aria-hidden="true"></i>
             Your response has been saved to this browser.
-            <a href="../../my-results/index.html" class="save-notice-link">View all your results →</a>
+            <a href="../grocery-list-ai/index.html" class="save-notice-link">Go to next exercise →</a>
+            <a href="../../member-login/phase-1/practice/index.html" class="save-notice-link">Back to workspace</a>
           </div>
           <div class="save-notice-caveat">Saved on this device only. Copy your response into your companion workbook to keep a permanent record.</div>
         </div>

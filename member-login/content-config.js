@@ -330,6 +330,7 @@ const UTL_CONTENT = {
   var rewardUiLoadPromise = null;
   var REWARD_STATE_KEY = "utl_rewards_state";
   var REWARD_SETTINGS_KEY = "utl_reward_settings";
+  var ADMIN_PROGRESS_REVISION_KEY = "utl_admin_progress_revision";
   var VIDEO_COMPLETE_MP = 10;
   var CONTEXT_COMPLETE_MP = 5;
   var REWARD_LEVELS = [
@@ -365,6 +366,47 @@ const UTL_CONTENT = {
     var params = new URLSearchParams(window.location.search || "");
     var adminSession = params.get("mode") === "admin" || localStorage.getItem(ADMIN_KEY) === "true";
     return adminSession && localStorage.getItem("utl_admin_preview_bypass") === "on";
+  }
+
+  function experiencePreviewActive() {
+    return localStorage.getItem("utl_experience_preview_active") === "true";
+  }
+
+  function experiencePreviewLearningKey(key) {
+    if (String(key || "").indexOf("utl_") !== 0) return false;
+    if (key === "utl_experience_preview_active" || key === "utl_experience_preview_backup") return false;
+    var preserved = [
+      "utl_member_", "utl_admin_", "utl_local_pw_", "utl_aiko_",
+      "utl_eisenhower_matrix_version", "utl_feedback_", "utl_global_feedback",
+      "utl_use_firebase_", "utl_reward_settings", "utl_phase1_layout",
+      "utl_phase2_layout", "utl_phase3_layout", "utl_orientation_layout",
+      "utl_phase2_status", "utl_phase3_status", "utl_public_", "utl_find_level_"
+    ];
+    return !preserved.some(function (prefix) { return key.indexOf(prefix) === 0; });
+  }
+
+  function endExperiencePreview() {
+    var backup = {};
+    try { backup = JSON.parse(localStorage.getItem("utl_experience_preview_backup") || "{}"); } catch (error) {}
+    Object.keys(localStorage).forEach(function (key) {
+      if (experiencePreviewLearningKey(key)) localStorage.removeItem(key);
+    });
+    Object.keys(backup.learning || {}).forEach(function (key) {
+      localStorage.setItem(key, backup.learning[key]);
+    });
+    Object.keys(backup.environment || {}).forEach(function (key) {
+      var value = backup.environment[key];
+      if (value === null || value === undefined) localStorage.removeItem(key);
+      else localStorage.setItem(key, value);
+    });
+    localStorage.removeItem("utl_experience_preview_active");
+    localStorage.removeItem("utl_experience_preview_backup");
+    window.location.href = adminHref() + "?tab=student-progress";
+  }
+
+  function experiencePreviewBannerHtml() {
+    if (!experiencePreviewActive()) return "";
+    return '<aside class="ws-experience-preview" role="status"><span><strong>Student experience preview</strong>Firebase progress writes are paused. Complete activities normally to test the full flow.</span><button type="button" data-end-experience-preview>End preview and restore</button></aside>';
   }
 
   function memberHref(file) {
@@ -409,7 +451,7 @@ const UTL_CONTENT = {
       var suffix = suffixMatch ? suffixMatch[1] : "";
       // The guided experience is the member-facing v1. Folder names stay unchanged
       // so direct links and saved progress remain compatible with earlier releases.
-      exercise.appUrl = "../apps/eisenhower-matrix" + (normalizedAikoVersion(matrixOverride || aikoVersions.eisenhowerMatrix) === "v1" ? "-v2" : "") + "/index.html" + suffix;
+      exercise.appUrl = "../apps/eisenhower-matrix" + (normalizedAikoVersion(matrixOverride || aikoVersions.eisenhowerMatrix) === "v2" ? "-v2" : "") + "/index.html" + suffix;
     });
   }
 
@@ -849,6 +891,8 @@ const UTL_CONTENT = {
     });
     return {
       version: 1,
+      adminProgressRevision: localStorage.getItem(ADMIN_PROGRESS_REVISION_KEY) || "",
+      adminProgressReset: false,
       orientation: {
         ready: readBool("utl_orientation_ready"),
         open: readBool("utl_orientation_open")
@@ -868,6 +912,20 @@ const UTL_CONTENT = {
 
   function applyRemoteProgress(progress) {
     if (!progress || typeof progress !== "object") return;
+    var remoteRevision = String(progress.adminProgressRevision || "");
+    var revisionChanged = remoteRevision && remoteRevision !== localStorage.getItem(ADMIN_PROGRESS_REVISION_KEY);
+    if (revisionChanged && progress.adminProgressReset === true) {
+      var preservedPrefixes = [
+        "utl_member_", "utl_admin_", "utl_local_pw_", "utl_aiko_",
+        "utl_eisenhower_matrix_version", "utl_feedback_", "utl_global_feedback",
+        "utl_use_firebase_", "utl_reward_settings"
+      ];
+      Object.keys(localStorage).forEach(function (key) {
+        if (key.indexOf("utl_") !== 0 || key === ADMIN_PROGRESS_REVISION_KEY) return;
+        if (preservedPrefixes.some(function (prefix) { return key.indexOf(prefix) === 0; })) return;
+        localStorage.removeItem(key);
+      });
+    }
     var orientation = progress.orientation || {};
     if (typeof orientation.ready === "boolean") writeBool("utl_orientation_ready", orientation.ready);
     if (typeof orientation.open === "boolean") writeBool("utl_orientation_open", orientation.open);
@@ -878,16 +936,23 @@ const UTL_CONTENT = {
       // A newly marked local completion can happen while the first remote load is
       // still in flight. Never let an older remote false erase that completion.
       if (saved && saved.watched === true) writeBool(watchedKey(lesson.id), true);
+      else if (revisionChanged) writeBool(watchedKey(lesson.id), false);
     });
 
     var remoteExercises = progress.exercises || {};
     allExercises().forEach(function (exercise) {
       var appKey = exerciseAppKey(exercise);
       var saved = remoteExercises[exercise.id] || (appKey ? remoteExercises[appKey] : null);
-      if (!saved) return;
+      if (!saved) {
+        if (revisionChanged) {
+          writeBool(visitedKey(exercise.id), false);
+          writeExerciseDone(exercise, false);
+        }
+        return;
+      }
       if (typeof saved.visited === "boolean") writeBool(visitedKey(exercise.id), saved.visited);
       if (saved.completed === true) writeExerciseDone(exercise, true);
-      else if (saved.completed === false && !exerciseDone(exercise)) writeExerciseDone(exercise, false);
+      else if (saved.completed === false && (revisionChanged || !exerciseDone(exercise))) writeExerciseDone(exercise, false);
     });
 
     var remoteContexts = progress.contexts || {};
@@ -902,6 +967,7 @@ const UTL_CONTENT = {
       exercisesDone(phaseKey);
     });
     mergeRemoteRewards(progress.rewards);
+    if (remoteRevision) localStorage.setItem(ADMIN_PROGRESS_REVISION_KEY, remoteRevision);
   }
 
   function saveRemoteProgressNow() {
@@ -929,6 +995,12 @@ const UTL_CONTENT = {
   }
 
   function ensureRemoteProgressLoaded(callback) {
+    if (experiencePreviewActive()) {
+      if (!remoteProgressLoaded) backfillExistingProgressRewards();
+      remoteProgressLoaded = true;
+      callback();
+      return;
+    }
     if (!readBool(SESSION_KEY) || remoteProgressLoaded) {
       callback();
       return;
@@ -1152,8 +1224,8 @@ const UTL_CONTENT = {
   function phaseUnlocked(phaseKey) {
     if (phaseKey === "phase1") return true;
     if (adminPreviewMode()) return true;
-    if (phaseKey === "phase2") return exercisesDone("phase1") && localStorage.getItem("utl_phase2_status") !== "hide";
-    if (phaseKey === "phase3") return exercisesDone("phase2") && localStorage.getItem("utl_phase3_status") !== "hide";
+    if (phaseKey === "phase2") return exercisesDone("phase1") && (experiencePreviewActive() || localStorage.getItem("utl_phase2_status") !== "hide");
+    if (phaseKey === "phase3") return exercisesDone("phase2") && (experiencePreviewActive() || localStorage.getItem("utl_phase3_status") !== "hide");
     return true;
   }
 
@@ -1355,7 +1427,7 @@ const UTL_CONTENT = {
       ".ws-admin-visibility{margin-top:30px;background:#fff;border:1px solid var(--ws-line);border-radius:12px;padding:18px;display:grid;gap:12px}.ws-check-row{display:flex;align-items:flex-start;gap:10px;color:var(--ws-navy);font-weight:700}.ws-check-row input{margin-top:3px}.ws-help{margin:0;color:var(--ws-steel);font-size:14px;line-height:1.45}",
       ".ws-bottom-nav{display:flex;justify-content:space-between;gap:12px;margin-top:34px}.ws-bottom-nav .ws-button{min-width:180px}.ws-admin-grid{display:grid;gap:16px;margin-top:30px}.ws-admin-phase{background:#fff;border:1px solid var(--ws-line);border-radius:12px;overflow:hidden}.ws-admin-toggle{width:100%;display:grid;grid-template-columns:74px 1fr auto;align-items:center;gap:16px;border:0;background:#fff;padding:18px;text-align:left;cursor:pointer}.ws-admin-num{color:rgba(0,51,102,.12);font:700 54px 'Playfair Display',serif}.ws-admin-body{display:none;padding:0 18px 18px}.ws-admin-phase.ws-open .ws-admin-body{display:block}.ws-slot{border-top:1px solid var(--ws-line);padding:16px 0;display:grid;gap:10px}.ws-slot-head{display:flex;justify-content:space-between;gap:12px}.ws-type-buttons{display:flex;gap:8px}.ws-type-button{border:1px solid rgba(0,51,102,.25);background:#fff;color:var(--ws-navy);border-radius:999px;padding:7px 10px;font:700 10px Lato, Arial, sans-serif;cursor:pointer}.ws-type-button.ws-selected{background:var(--ws-navy);color:#fff}.ws-save-row{display:flex;gap:8px}.ws-save-row .ws-input{background:#fbf7ef}.ws-save-note{min-height:18px;color:var(--ws-green);font:700 11px Lato, Arial, sans-serif}.ws-save-bar{position:sticky;bottom:0;background:#fff;border-top:1px solid var(--ws-line);padding:12px 0;margin-top:32px;box-shadow:0 -8px 20px rgba(0,51,102,.07)}.ws-save-bar-inner{display:flex;justify-content:space-between;align-items:center;gap:16px}",
       ".ws-nudge-continue{display:flex;align-items:center;gap:16px;background:#fff;border:1px solid var(--ws-line);border-radius:12px;padding:18px 20px;box-shadow:none}.ws-nudge-continue-text{flex:1;min-width:0}.ws-nudge-continue-label{color:var(--ws-gold);font:700 10px Lato, Arial, sans-serif;letter-spacing: 0;text-transform: none;display:block;margin-bottom:4px}.ws-nudge-continue-title{color:var(--ws-navy);font:700 18px 'Playfair Display',serif;margin:0 0 2px}.ws-nudge-continue-sub{color:var(--ws-steel);font-size:13px;margin:0}.ws-nudge-days{display:flex;align-items:center;gap:12px;background:#F3EDE2;border:1px solid rgba(0,51,102,.12);border-radius:10px;padding:12px 16px;font-size:14px;color:var(--ws-navy)}.ws-nudge-days-icon{font-size:20px;flex-shrink:0}.ws-nudge-almost{display:block;margin-top:8px;padding:6px 10px;background:rgba(238,163,32,.12);border-radius:6px;color:var(--ws-navy);font:700 11px Lato, Arial, sans-serif;letter-spacing: 0;text-transform: none}.ws-nudge-modal-overlay{position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:24px}.ws-nudge-modal{background:#fff;border-radius:14px;max-width:420px;width:100%;padding:40px 36px 32px;text-align:center;position:relative;box-shadow:0 24px 64px rgba(0,51,102,.22)}.ws-nudge-modal-close{position:absolute;top:12px;right:14px;background:none;border:none;font-size:22px;color:#aaa;cursor:pointer;min-width:36px;min-height:36px;display:flex;align-items:center;justify-content:center}.ws-nudge-modal-icon{width:56px;height:56px;border-radius:999px;background:rgba(238,163,32,.15);display:grid;place-items:center;margin:0 auto 18px;font-size:28px}.ws-nudge-modal h2{margin:0 0 10px;color:var(--ws-navy);font:700 26px 'Playfair Display',serif}.ws-nudge-modal p{margin:0 0 24px;color:var(--ws-steel);font-size:15px;line-height:1.55}.ws-nudge-modal .ws-button{width:100%}",
-      ".ws-phase-progress-panel{margin:28px 0 24px;background:#fff;border:1px solid var(--ws-line);border-radius:12px;padding:18px;box-shadow:none}.ws-phase-progress-top{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:start}.ws-phase-progress-top h2{margin:0;color:var(--ws-navy);font:700 28px/1.1 'Playfair Display',serif}.ws-phase-progress-top p{margin:5px 0 0;color:var(--ws-steel);line-height:1.45}.ws-phase-percent{min-width:82px;min-height:48px;border-radius:999px;background:#FFF3D8;color:var(--ws-navy);display:grid;place-items:center;font:700 16px Lato, Arial, sans-serif}.ws-phase-meter{height:12px;margin:16px 0 14px;border-radius:999px;background:#EFE6D8;overflow:hidden}.ws-phase-meter span{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,var(--ws-green),#77AA81)}.ws-phase-milestones{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.ws-milestone{border:1px solid var(--ws-line);border-radius:10px;background:#FAF8F3;padding:13px 14px;display:grid;grid-template-columns:auto 1fr;gap:11px;align-items:center}.ws-milestone.ws-complete{border-color:rgba(44,122,75,.42);background:#F6FBF7}.ws-milestone-check{width:30px;height:30px;border-radius:999px;border:1px solid rgba(0,51,102,.22);background:#fff;color:transparent;display:grid;place-items:center;font-weight:700}.ws-milestone.ws-complete .ws-milestone-check{border-color:var(--ws-green);background:var(--ws-green);color:#fff}.ws-milestone strong{display:block;color:var(--ws-navy);font-size:14px}.ws-milestone small{display:block;margin-top:2px;color:var(--ws-steel);font-weight:700}.ws-next-action{margin-top:14px;display:flex;align-items:center;justify-content:space-between;gap:14px;border-top:1px solid rgba(0,51,102,.1);padding-top:14px}.ws-next-action span{color:var(--ws-navy);font-weight:700}.ws-complete-banner{margin-top:14px;border:1px solid rgba(44,122,75,.38);background:#F6FBF7;border-radius:10px;padding:12px 14px;color:var(--ws-navy);font-weight:700}",
+      ".ws-phase-progress-panel{margin:28px 0 24px;background:#fff;border:1px solid var(--ws-line);border-radius:12px;padding:18px;box-shadow:none}.ws-phase-progress-top{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:start}.ws-phase-progress-top h2{margin:0;color:var(--ws-navy);font:700 28px/1.1 'Playfair Display',serif}.ws-phase-progress-top p{margin:5px 0 0;color:var(--ws-steel);line-height:1.45}.ws-phase-percent{min-width:82px;min-height:48px;border-radius:999px;background:#FFF3D8;color:var(--ws-navy);display:grid;place-items:center;font:700 16px Lato,Arial,sans-serif}.ws-phase-meter{height:12px;margin:16px 0 14px;border-radius:999px;background:#EFE6D8;overflow:hidden}.ws-phase-meter span{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,var(--ws-green),#77AA81)}.ws-phase-milestones{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.ws-milestone{border:1px solid var(--ws-line);border-radius:10px;background:#FAF8F3;padding:13px 14px;display:grid;grid-template-columns:auto 1fr;gap:11px;align-items:center}.ws-milestone.ws-complete{border-color:rgba(44,122,75,.42);background:#F6FBF7}.ws-milestone-check{width:30px;height:30px;border-radius:999px;border:1px solid rgba(0,51,102,.22);background:#fff;color:transparent;display:grid;place-items:center;font-weight:700}.ws-milestone.ws-complete .ws-milestone-check{border-color:var(--ws-green);background:var(--ws-green);color:#fff}.ws-milestone strong{display:block;color:var(--ws-navy);font-size:14px}.ws-milestone small{display:block;margin-top:2px;color:var(--ws-steel);font-weight:700}.ws-next-action{margin-top:14px;display:flex;align-items:center;justify-content:space-between;gap:14px;border-top:1px solid rgba(0,51,102,.1);padding-top:14px}.ws-next-action span{color:var(--ws-navy);font-weight:700}.ws-complete-banner{margin-top:14px;border:1px solid rgba(44,122,75,.38);background:#F6FBF7;border-radius:10px;padding:12px 14px;color:var(--ws-navy);font-weight:700}.ws-phase-complete-action{margin:0 0 24px;border:1px solid rgba(44,122,75,.4);border-radius:12px;background:#F6FBF7;padding:16px 18px;display:flex;align-items:center;justify-content:space-between;gap:16px}.ws-phase-complete-action strong,.ws-phase-complete-action span{display:block}.ws-phase-complete-action strong{color:var(--ws-navy);font-size:18px}.ws-phase-complete-action span{margin-top:3px;color:var(--ws-steel)}@media(max-width:640px){.ws-phase-complete-action{align-items:stretch;flex-direction:column}.ws-phase-complete-action .ws-button{width:100%;text-align:center}}",
       ".ws-phase-progress-top{grid-template-columns:1fr}.ws-phase-percent,.ws-phase-meter,.ws-phase-milestones{display:none}.ws-progress-split{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:16px}.ws-progress-metric{border:1px solid var(--ws-line);border-radius:10px;background:#FAF8F3;padding:14px}.ws-progress-metric.ws-complete{border-color:rgba(44,122,75,.42);background:#F6FBF7}.ws-progress-metric-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin-bottom:10px}.ws-progress-metric strong{display:block;color:var(--ws-navy);font-size:15px}.ws-progress-metric small{display:block;margin-top:3px;color:var(--ws-steel);font-weight:700}.ws-progress-value{border-radius:999px;background:#FFF3D8;color:var(--ws-navy);padding:6px 9px;font:700 11px Lato, Arial, sans-serif;white-space:nowrap}.ws-progress-metric.ws-complete .ws-progress-value{background:#EAF5ED;color:var(--ws-green)}.ws-metric-track{height:10px;border-radius:999px;background:#EFE6D8;overflow:hidden}.ws-metric-track span{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,var(--ws-green),#77AA81)}.ws-progress-guidance{margin-top:12px;color:var(--ws-steel);font-size:14px;font-weight:700;line-height:1.45}",
       ".ws-practice-card.ws-complete,.ws-unit.ws-complete{border-color:rgba(44,122,75,.42);background:#FBFEFB}.ws-practice-card.ws-complete .ws-practice-head,.ws-unit.ws-complete .ws-context-toggle{background:#F6FBF7}.ws-practice-status-row{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:6px}.ws-card-check{width:30px;height:30px;border-radius:999px;border:1px solid rgba(0,51,102,.22);background:#fff;color:transparent;display:inline-grid;place-items:center;font-weight:700;flex:0 0 auto}.ws-complete .ws-card-check,.ws-workbook-card.ws-done .ws-status-circle{border-color:var(--ws-green);background:var(--ws-green);color:#fff}.ws-card-role{display:inline-flex;align-items:center;border-radius:999px;background:var(--ws-navy);color:#fff;padding:5px 9px;font:700 10px Lato, Arial, sans-serif;letter-spacing: 0;text-transform: none}.ws-card-state{display:inline-flex;align-items:center;gap:6px;border-radius:999px;background:#F7F1E7;color:var(--ws-steel);padding:5px 9px;font:700 10px Lato, Arial, sans-serif;letter-spacing: 0;text-transform: none}.ws-card-state.ws-done{background:#EAF5ED;color:var(--ws-green)}.ws-card-state.ws-next{background:var(--ws-gold);color:var(--ws-navy);box-shadow:0 0 0 2px rgba(238,163,32,.18)}.ws-practice-state{display:flex;align-items:center;justify-content:flex-end;gap:8px;justify-self:end;white-space:nowrap}.ws-exercise-tab.ws-tab-done{color:var(--ws-green)}.ws-exercise-tab.ws-tab-done .ws-tab-badge{background:var(--ws-green);color:#fff}.ws-workbook-card.ws-done{border-color:rgba(44,122,75,.42);background:#F6FBF7}.ws-workbook-card.ws-done .ws-button:first-child{background:#fff;border-color:rgba(44,122,75,.38);color:var(--ws-navy)}",
       ".ws-practice-card{box-shadow:none}.ws-practice-head{width:calc(100% - 44px);box-sizing:border-box;grid-template-columns:auto minmax(0,1fr) auto;align-items:start;background:#F0E9DD;border:1px solid rgba(0,51,102,.08);border-radius:12px;margin:22px 22px 0;padding:18px 22px;column-gap:18px;row-gap:10px}.ws-practice-head>span:not(.ws-practice-chevron):not(.ws-practice-state){min-width:0}.ws-practice-chevron{grid-column:1;width:30px;height:30px;margin-top:2px}.ws-practice-head h3{margin:7px 0 4px}.ws-practice-head p{font-size:16px}.ws-practice-card.ws-next-card{border-color:rgba(238,163,32,.55)}.ws-practice-card.ws-next-card .ws-practice-head{background:#FFF7E8;border-color:rgba(238,163,32,.58);border:1px solid rgba(44,122,75,.3);box-shadow:none}.ws-practice-card.ws-complete .ws-practice-head h3{color:rgba(0,51,102,.54)}.ws-practice-card.ws-complete .ws-practice-head p{color:rgba(77,112,148,.62)}.ws-practice-card.ws-complete .ws-card-role{background:rgba(0,51,102,.62)}.ws-practice-card:not(.ws-complete) .ws-card-check{display:none}.ws-practice-body{padding:18px 22px 22px}.ws-practice-card.ws-open .ws-practice-head{border-radius:12px}.ws-practice-card:not(.ws-open) .ws-practice-head{margin-bottom:22px}.ws-context-card{border-color:rgba(77,112,148,.28);background:#F8FBFC}.ws-context-card .ws-practice-head{background:#EEF3F6;border:1px solid rgba(77,112,148,.22);box-shadow:none}.ws-context-card .ws-practice-chevron{background:#4D7094}.ws-context-card .ws-kicker{color:#4D7094}.ws-context-card .ws-practice-body{background:#F8FBFC}",
@@ -1366,6 +1438,7 @@ const UTL_CONTENT = {
       ,"@media(max-width:768px){.ws-mission-rail{width:4px}.ws-mission-inner{padding:19px 16px 18px 20px}.ws-mission-preview{margin:-19px -16px 17px -20px;padding:8px 20px}.ws-mission-header h1{font-size:28px}.ws-mission-mark{width:32px;height:32px}.ws-mission-prompt{margin-top:19px}.ws-mission-options{grid-template-columns:1fr;gap:10px}.ws-mission-option{min-height:0}.ws-mission-option-head b{display:block;margin-right:28px;color:var(--ws-steel);font:700 10px Lato, Arial, sans-serif;white-space:nowrap}.ws-mission-option ol{margin-top:12px}.ws-mission-action{align-items:stretch;flex-direction:column}.ws-mission-action .ws-button{width:100%;min-height:48px}.ws-mission-bonus{grid-template-columns:auto 1fr}.ws-mission-bonus>b{grid-column:2}.ws-mission-recognition{line-height:1.45}}@media(prefers-reduced-motion:reduce){.ws-mission-option{transition:none}}"
       ,".ws-journey-card.ws-complete,.ws-orientation-card.ws-complete{background:#f4f1ea;border-color:#d8d2c6}.ws-journey-card.ws-complete .ws-journey-head,.ws-orientation-card.ws-complete .ws-orientation-head{color:var(--ws-steel)}.ws-journey-card.ws-complete .ws-kicker,.ws-orientation-card.ws-complete .ws-start-badge{color:#68766f}"
       ,".ws-phase-practice-cta{display:flex;justify-content:flex-end;margin-top:18px}.ws-phase-practice-cta .ws-button{width:auto}"
+      ,".ws-experience-preview{position:fixed;left:50%;bottom:16px;z-index:1000;width:min(720px,calc(100% - 24px));transform:translateX(-50%);display:flex;align-items:center;justify-content:space-between;gap:18px;padding:11px 13px 11px 16px;border:1px solid rgba(238,163,32,.7);border-radius:10px;background:#FFF8E8;color:var(--ws-navy);box-shadow:0 14px 36px rgba(0,30,60,.2)}.ws-experience-preview span{font-size:12px;line-height:1.35}.ws-experience-preview strong{display:block;margin-bottom:2px}.ws-experience-preview button{flex:0 0 auto;min-height:36px;padding:7px 11px;border:0;border-radius:7px;background:var(--ws-navy);color:#fff;font:700 11px Lato,Arial,sans-serif;cursor:pointer}@media(max-width:600px){.ws-experience-preview{align-items:stretch;flex-direction:column;gap:9px}.ws-experience-preview button{width:100%}}"
     ].join("\n");
     document.head.appendChild(style);
   }
@@ -1373,8 +1446,10 @@ const UTL_CONTENT = {
   function pageShell(active, contentHtml, subnavHtml) {
     injectStyles();
     document.body.classList.add("ws-page");
-    document.body.innerHTML = navHtml(active) + (subnavHtml || "") + '<main class="ws-main"><div class="ws-shell">' + contentHtml + "</div></main>";
+    document.body.innerHTML = navHtml(active) + (subnavHtml || "") + '<main class="ws-main"><div class="ws-shell">' + contentHtml + "</div></main>" + experiencePreviewBannerHtml();
     bindNav();
+    var previewEnd = qs("[data-end-experience-preview]");
+    if (previewEnd) previewEnd.addEventListener("click", endExperiencePreview);
     renderWorkspaceRewardCluster();
     checkMissionProgressMoment();
   }
@@ -2670,7 +2745,8 @@ const UTL_CONTENT = {
       pageShell(phaseKey, '<span class="ws-kicker">' + phaseLabels[phaseKey] + '</span><h1 class="ws-title">This phase is locked.</h1><p class="ws-subtitle">Complete the previous phase exercises to continue.</p><p style="margin-top:24px"><a class="ws-button" href="index.html">Back to dashboard</a></p>');
       return;
     }
-    var activeId = sessionStorage.getItem("utl_active_lesson_" + phaseKey) || getPhase(phaseKey).lessons[0].id;
+    var previewLesson = experiencePreviewActive() ? localStorage.getItem("utl_experience_preview_lesson_" + phaseKey) : "";
+    var activeId = previewLesson || sessionStorage.getItem("utl_active_lesson_" + phaseKey) || getPhase(phaseKey).lessons[0].id;
     if (phaseKey === "phase1") {
       var doneVideos = videosDone("phase1");
       var nextCta = doneVideos
@@ -2698,7 +2774,10 @@ const UTL_CONTENT = {
     var reminder = doneVideos
       ? '<div class="ws-practice-reminder">Ready to practice. Review each setup clip, then start the matching exercise.</div>'
       : '<div class="ws-practice-reminder">Recommended: finish the Phase 1 videos first. The exercises are visible here so you can preview the sequence and return when ready.</div>';
-    var body = phaseOnePracticeHeader() + phaseProgressPanel(phaseKey, "practice") + reminder + '<section class="ws-practice-list">' + phaseOnePracticeCards() + '</section>';
+    var phaseTwoCta = exercisesDone("phase1")
+      ? '<section class="ws-phase-complete-action"><div><strong>Phase 1 is complete.</strong><span>You are ready to continue to Phase 2.</span></div><a class="ws-button" href="' + memberHref("phase-2.html") + '">Continue to Phase 2 &rarr;</a></section>'
+      : "";
+    var body = phaseOnePracticeHeader() + phaseProgressPanel(phaseKey, "practice") + phaseTwoCta + reminder + '<section class="ws-practice-list">' + phaseOnePracticeCards() + '</section>' + bottomPhaseNav(phaseKey);
     pageShell("phase1", body, stepTabs("practice"));
     bindPracticePage();
     scrollToHashTarget();
@@ -3031,10 +3110,10 @@ const UTL_CONTENT = {
     var prevLabel = index === 0 ? "&larr; Orientation" : "&larr; " + phaseLabels[phases[index - 1]];
     var done = exercisesDone(phaseKey);
     if (phaseKey === "phase3") {
-      return '<nav class="ws-bottom-nav"><a class="ws-button ws-button-secondary" href="' + prevHref + '">' + prevLabel + '</a>' + (done ? '<a class="ws-button" href="../my-results/index.html">You\'re done. View your results &rarr;</a>' : '<span class="ws-button ws-disabled" title="Complete the exercises to continue">You\'re done. View your results &rarr;</span>') + '</nav>';
+      return '<nav class="ws-bottom-nav"><a class="ws-button ws-button-secondary" href="' + memberHref(prevHref) + '">' + prevLabel + '</a>' + (done ? '<a class="ws-button" href="../my-results/index.html">You\'re done. View your results &rarr;</a>' : '<span class="ws-button ws-disabled" title="Complete the exercises to continue">You\'re done. View your results &rarr;</span>') + '</nav>';
     }
     var nextKey = phases[index + 1];
-    return '<nav class="ws-bottom-nav"><a class="ws-button ws-button-secondary" href="' + prevHref + '">' + prevLabel + '</a>' + (done ? '<a class="ws-button" href="' + phaseFiles[nextKey] + '">' + phaseLabels[nextKey] + ': ' + getPhase(nextKey).title + ' &rarr;</a>' : '<span class="ws-button ws-disabled" title="Complete the exercises to continue">' + phaseLabels[nextKey] + ': ' + getPhase(nextKey).title + ' &rarr;</span>') + '</nav>';
+    return '<nav class="ws-bottom-nav"><a class="ws-button ws-button-secondary" href="' + memberHref(prevHref) + '">' + prevLabel + '</a>' + (done ? '<a class="ws-button" href="' + memberHref(phaseFiles[nextKey]) + '">' + phaseLabels[nextKey] + ': ' + getPhase(nextKey).title + ' &rarr;</a>' : '<span class="ws-button ws-disabled" title="Complete the exercises to continue">' + phaseLabels[nextKey] + ': ' + getPhase(nextKey).title + ' &rarr;</span>') + '</nav>';
   }
 
   function bindPhasePage(phaseKey) {

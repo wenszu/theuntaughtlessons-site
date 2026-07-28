@@ -674,7 +674,43 @@
     .sp-status-missing { color:#888; }
     .sp-reward-alert { margin:0 0 14px; padding:12px 14px; border:1px solid #efd39c; border-radius:8px; background:#fff8e8; color:var(--charcoal); font-size:13px; line-height:1.5; }
     .sp-reward-alert.is-ok { border-color:#b9d9c5; background:#edf7f0; }
+    .sp-detail-actions { display:flex; flex-wrap:wrap; align-items:center; justify-content:flex-end; gap:8px; margin:14px 0; }
+    .sp-danger-button { border-color:#A83832!important; color:#8E2F2A!important; background:#fff!important; }
+    .sp-danger-button:hover { background:#FFF3F1!important; }
+    .sp-dialog { width:min(760px,calc(100% - 28px)); max-height:min(86vh,820px); padding:0; border:0; border-radius:12px; color:var(--charcoal); box-shadow:0 18px 54px rgba(0,30,60,.24); }
+    .sp-dialog::backdrop { background:rgba(0,30,60,.58); backdrop-filter:blur(2px); }
+    .sp-dialog-shell { display:flex; flex-direction:column; max-height:min(86vh,820px); }
+    .sp-dialog-head { display:flex; align-items:flex-start; justify-content:space-between; gap:18px; padding:20px 22px 16px; border-bottom:1px solid var(--line); }
+    .sp-dialog-head h3 { margin:0; color:var(--navy); font:700 25px/1.15 'Playfair Display',serif; }
+    .sp-dialog-head p { margin:5px 0 0; color:#6F7880; font-size:13px; line-height:1.45; }
+    .sp-dialog-close { width:34px; height:34px; border:1px solid var(--line); border-radius:50%; background:#fff; color:var(--navy); cursor:pointer; font-size:20px; }
+    .sp-dialog-body { overflow:auto; padding:18px 22px 22px; }
+    .sp-edit-intro { margin:0 0 14px; padding:11px 13px; border-radius:8px; background:#F3F6F8; color:#4D5A66; font-size:12px; line-height:1.5; }
+    .sp-edit-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+    .sp-edit-group { padding:14px; border:1px solid var(--line); border-radius:9px; background:#fff; }
+    .sp-edit-group h4 { margin:0 0 10px; color:var(--navy); font-size:14px; }
+    .sp-edit-list { display:grid; gap:7px; }
+    .sp-edit-check { display:grid; grid-template-columns:18px minmax(0,1fr); gap:8px; align-items:start; color:var(--charcoal); font-size:12px; line-height:1.35; cursor:pointer; }
+    .sp-edit-check input { width:16px; height:16px; margin:1px 0 0; accent-color:var(--green); }
+    .sp-edit-check small { display:block; color:#899198; }
+    .sp-dialog-actions { display:flex; justify-content:flex-end; gap:9px; padding:14px 22px; border-top:1px solid var(--line); background:#FAF8F3; }
+    .sp-reset-warning { padding:14px; border:1px solid #E4B7B2; border-radius:9px; background:#FFF5F3; color:#6E302D; font-size:13px; line-height:1.55; }
+    .sp-reset-warning strong { display:block; margin-bottom:4px; color:#8E2F2A; }
+    .sp-reset-check { display:flex; align-items:flex-start; gap:9px; margin-top:16px; color:var(--charcoal); font-size:13px; cursor:pointer; }
+    .sp-reset-check input { width:17px; height:17px; margin-top:1px; accent-color:#A83832; }
+    .sp-preview-card { margin:0 0 20px; padding:18px; border:1px solid #C7D8E8; border-radius:10px; background:#F8FAFC; }
+    .sp-preview-card-head { display:flex; align-items:flex-start; justify-content:space-between; gap:18px; }
+    .sp-preview-card h3 { margin:0; color:var(--navy); font:700 21px/1.15 'Playfair Display',serif; }
+    .sp-preview-card p { margin:6px 0 0; max-width:760px; color:#64717D; font-size:13px; line-height:1.5; }
+    .sp-preview-badge { flex:0 0 auto; padding:5px 9px; border-radius:999px; background:#E8F2FA; color:var(--navy); font-size:10px; font-weight:700; }
+    .sp-preview-form { display:grid; grid-template-columns:minmax(220px,1fr) auto; gap:10px; align-items:end; margin-top:15px; }
+    .sp-preview-field span { display:block; margin-bottom:5px; color:var(--navy); font-size:11px; font-weight:700; }
+    .sp-preview-field select { width:100%; min-height:40px; padding:8px 10px; border:1px solid var(--line); border-radius:7px; background:#fff; color:var(--charcoal); font:13px Lato,Arial,sans-serif; }
+    .sp-preview-active { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px; margin-top:14px; padding:12px 13px; border:1px solid #E7C47C; border-radius:8px; background:#FFF8E8; }
+    .sp-preview-active strong { display:block; color:var(--navy); font-size:13px; }
+    .sp-preview-active span { display:block; margin-top:2px; color:#795D25; font-size:11px; }
     @media (max-width:720px) { .sp-detail-header { flex-direction:column; } }
+    @media (max-width:640px) { .sp-edit-grid,.sp-preview-form { grid-template-columns:1fr; } .sp-dialog-actions { flex-direction:column-reverse; } .sp-dialog-actions .small-button,.sp-preview-form .small-button { width:100%; } .sp-preview-card-head { flex-direction:column; } }
 
     .section-divider {
       height: 1px;
@@ -2088,7 +2124,7 @@
                 <label class="aiko-version-option"><input type="radio" name="eisenhowerMatrixVersion" value="v1" data-aiko-version-key="eisenhowerMatrix"><span><strong>V1 · Guided exercise (recommended)</strong>Members judge urgency and importance, explain ambiguous calls, and write a real no.</span></label>
                 <label class="aiko-version-option"><input type="radio" name="eisenhowerMatrixVersion" value="v2" data-aiko-version-key="eisenhowerMatrix"><span><strong>V2 · Free-form matrix alternate</strong>Members place all ten tasks into the matrix and submit the completed board.</span></label>
               </div>
-              <div class="aiko-version-preview"><p class="aiko-version-preview-note">Previewing does not change what members see. Both versions award the same one-time completion MP.</p><a class="small-button secondary-button" href="../apps/eisenhower-matrix-v2/index.html" target="_blank">Preview v1 guided exercise</a><a class="small-button secondary-button" href="../apps/eisenhower-matrix/index.html" target="_blank">Preview v2 free-form alternate</a></div>
+              <div class="aiko-version-preview"><p class="aiko-version-preview-note">Previewing does not change what members see. Both versions award the same one-time completion MP.</p><a class="small-button secondary-button" href="../apps/eisenhower-matrix/index.html" target="_blank">Preview v1 guided exercise</a><a class="small-button secondary-button" href="../apps/eisenhower-matrix-v2/index.html" target="_blank">Preview v2 free-form alternate</a></div>
               <div class="aiko-version-change" data-aiko-version-change hidden><p data-aiko-change-copy>Change the member experience.</p><div class="aiko-version-change-actions"><button class="small-button" type="button" data-save-aiko-version="eisenhowerMatrix">Publish selected version</button><button class="small-button secondary-button" type="button" data-cancel-aiko-version="eisenhowerMatrix">Cancel</button></div></div>
             </article>
           </div>
@@ -2304,6 +2340,14 @@
         <h2>Student Progress</h2>
         <div class="section-divider"></div>
         <p class="description">High-level member progress from Firestore. Dots show watched lessons and completed exercises where remote progress has been saved.</p>
+        <section class="sp-preview-card" aria-labelledby="spPreviewTitle">
+          <div class="sp-preview-card-head"><div><h3 id="spPreviewTitle">Experience preview</h3><p>Walk through the real member experience in a temporary browser sandbox. Completion cards, navigation, unlocks, and MP appear normally, but nothing is written to a student or admin Firebase record.</p></div><span class="sp-preview-badge">This browser only</span></div>
+          <div class="sp-preview-form" id="spPreviewSetup">
+            <label class="sp-preview-field"><span>Start immediately before</span><select id="spPreviewStart"></select></label>
+            <button class="small-button" type="button" id="spPreviewLaunch">Launch student preview</button>
+          </div>
+          <div class="sp-preview-active" id="spPreviewActive" hidden><div><strong>Student preview is active</strong><span id="spPreviewActiveLabel"></span></div><div class="student-progress-actions" style="margin:0"><a class="small-button" id="spPreviewContinue" href="../member-login/index.html" target="_blank" style="text-decoration:none">Continue preview</a><button class="small-button secondary-button" type="button" id="spPreviewEnd">End and restore</button></div></div>
+        </section>
         <div class="student-progress-actions">
           <button class="small-button" type="button" id="studentProgressRefresh">Refresh progress</button>
           <span class="student-progress-status" id="studentProgressStatus" aria-live="polite"></span>
@@ -2328,6 +2372,38 @@
           </div>
           <div id="spDetailContent"></div>
         </div>
+        <dialog class="sp-dialog" id="spEditDialog" aria-labelledby="spEditTitle">
+          <div class="sp-dialog-shell">
+            <div class="sp-dialog-head">
+              <div><h3 id="spEditTitle">Update student progress</h3><p id="spEditSubtitle"></p></div>
+              <button class="sp-dialog-close" type="button" data-sp-dialog-close="spEditDialog" aria-label="Close">&times;</button>
+            </div>
+            <div class="sp-dialog-body">
+              <p class="sp-edit-intro">Choose exactly what should appear as complete. This updates completion status only; existing MP stays unchanged so the reward ledger remains accurate.</p>
+              <div class="sp-edit-grid" id="spEditFields"></div>
+            </div>
+            <div class="sp-dialog-actions">
+              <button class="small-button secondary-button" type="button" data-sp-dialog-close="spEditDialog">Cancel</button>
+              <button class="small-button" type="button" id="spEditSave">Save progress</button>
+            </div>
+          </div>
+        </dialog>
+        <dialog class="sp-dialog" id="spResetDialog" aria-labelledby="spResetTitle">
+          <div class="sp-dialog-shell">
+            <div class="sp-dialog-head">
+              <div><h3 id="spResetTitle">Reset student progress?</h3><p id="spResetSubtitle"></p></div>
+              <button class="sp-dialog-close" type="button" data-sp-dialog-close="spResetDialog" aria-label="Close">&times;</button>
+            </div>
+            <div class="sp-dialog-body">
+              <div class="sp-reset-warning"><strong>This starts the student over from the beginning.</strong>It clears watched lessons, completed exercises, saved exercise responses, Mastery Points, level progress, streaks, and assessments. Their account and access remain active.</div>
+              <label class="sp-reset-check"><input type="checkbox" id="spResetConfirm"> <span>I understand that this removes the student’s saved learning progress.</span></label>
+            </div>
+            <div class="sp-dialog-actions">
+              <button class="small-button secondary-button" type="button" data-sp-dialog-close="spResetDialog">Keep progress</button>
+              <button class="small-button sp-danger-button" type="button" id="spResetSubmit" disabled>Reset progress</button>
+            </div>
+          </div>
+        </dialog>
       </section>
 
       <section class="admin-section" id="section-reward-levels" data-admin-tab-panel="rewards">
@@ -2997,6 +3073,8 @@
       getSignedInUser,
       requestGoogleGroupSyncJob,
       repairMemberProgramCompletionReward,
+      replaceMemberWorkspaceProgress,
+      resetMemberWorkspaceProgress,
       sendSignInInvite,
       setEngagementSettings,
       setGlobalFeedbackSetting,
@@ -3037,6 +3115,8 @@
       getSignedInUser,
       requestGoogleGroupSyncJob,
       repairMemberProgramCompletionReward,
+      replaceMemberWorkspaceProgress,
+      resetMemberWorkspaceProgress,
       sendSignInInvite,
       setEngagementSettings,
       setGlobalFeedbackSetting,
@@ -6299,6 +6379,161 @@
     let spAllMembers = [];
     let spSort = { col: 'name', dir: 'asc' };
     let spFilter = 'all';
+    let spActiveMember = null;
+    const SP_PREVIEW_ACTIVE_KEY = 'utl_experience_preview_active';
+    const SP_PREVIEW_BACKUP_KEY = 'utl_experience_preview_backup';
+
+    function spIsLearningKey(key) {
+      if (!String(key || '').startsWith('utl_')) return false;
+      if ([SP_PREVIEW_ACTIVE_KEY, SP_PREVIEW_BACKUP_KEY].includes(key)) return false;
+      const preserved = [
+        'utl_member_', 'utl_admin_', 'utl_local_pw_', 'utl_aiko_',
+        'utl_eisenhower_matrix_version', 'utl_feedback_', 'utl_global_feedback',
+        'utl_use_firebase_', 'utl_reward_settings', 'utl_phase1_layout',
+        'utl_phase2_layout', 'utl_phase3_layout', 'utl_orientation_layout',
+        'utl_phase2_status', 'utl_phase3_status', 'utl_public_', 'utl_find_level_'
+      ];
+      return !preserved.some((prefix) => key.startsWith(prefix));
+    }
+
+    function spPreviewSequence() {
+      const content = window.UTL_CONTENT || {};
+      const sequence = [{
+        key: 'orientation',
+        type: 'orientation',
+        title: 'Orientation',
+        detail: 'Start as a brand-new student',
+        href: '../member-login/orientation.html'
+      }];
+      ['phase1','phase2','phase3'].forEach((phaseKey) => {
+        const phase = content[phaseKey] || {};
+        (phase.lessons || []).forEach((item) => sequence.push({
+          key: 'lesson:' + item.id,
+          type: 'lesson',
+          id: item.id,
+          phaseKey,
+          title: item.title || item.id,
+          detail: (phase.label || phaseKey.replace('phase','Phase ')) + ' lesson',
+          href: '../member-login/' + phaseKey.replace('phase','phase-') + '.html#lessons'
+        }));
+        (phase.exercises || []).forEach((item) => sequence.push({
+          key: 'exercise:' + item.id,
+          type: 'exercise',
+          id: item.id,
+          phaseKey,
+          title: item.title || item.id,
+          detail: (phase.label || phaseKey.replace('phase','Phase ')) + ' exercise',
+          href: item.appUrl || '../member-login/index.html',
+          legacyDoneKey: item.legacyDoneKey || ''
+        }));
+      });
+      return sequence;
+    }
+
+    function spPopulatePreviewStarts() {
+      const select = document.getElementById('spPreviewStart');
+      if (!select) return;
+      const groups = {};
+      spPreviewSequence().forEach((item) => {
+        const group = item.type === 'orientation' ? 'Getting started' : item.detail.replace(/ (lesson|exercise)$/, '');
+        (groups[group] ||= []).push(item);
+      });
+      select.innerHTML = Object.entries(groups).map(([label, items]) =>
+        '<optgroup label="' + escapeHtml(label) + '">' + items.map((item) =>
+          '<option value="' + escapeHtml(item.key) + '">' +
+            escapeHtml(item.type === 'lesson' ? 'Video · ' : item.type === 'exercise' ? 'Exercise · ' : 'Orientation · ') +
+            escapeHtml(item.title) +
+          '</option>'
+        ).join('') + '</optgroup>'
+      ).join('');
+    }
+
+    function spClearPreviewLearningState() {
+      Object.keys(localStorage).forEach((key) => {
+        if (spIsLearningKey(key)) localStorage.removeItem(key);
+      });
+    }
+
+    function spSetPreviewProgressBefore(target) {
+      const sequence = spPreviewSequence();
+      const targetIndex = Math.max(0, sequence.findIndex((item) => item.key === target.key));
+      sequence.slice(0, targetIndex).forEach((item) => {
+        if (item.type === 'orientation') {
+          localStorage.setItem('utl_orientation_ready', 'true');
+        } else if (item.type === 'lesson') {
+          localStorage.setItem('utl_watched_' + item.id, 'true');
+        } else if (item.type === 'exercise') {
+          localStorage.setItem('utl_done_' + item.id, 'true');
+          if (item.legacyDoneKey) localStorage.setItem(item.legacyDoneKey, 'true');
+        }
+      });
+      ['phase1','phase2','phase3'].forEach((phaseKey, index) => {
+        const content = (window.UTL_CONTENT || {})[phaseKey] || {};
+        const lessonsDone = (content.lessons || []).length > 0 && (content.lessons || []).every((item) => localStorage.getItem('utl_watched_' + item.id) === 'true');
+        const exercisesDone = (content.exercises || []).length > 0 && (content.exercises || []).every((item) => localStorage.getItem('utl_done_' + item.id) === 'true' || (item.legacyDoneKey && localStorage.getItem(item.legacyDoneKey) === 'true'));
+        localStorage.setItem('utl_p' + (index + 1) + '_videos_done', lessonsDone ? 'true' : 'false');
+        localStorage.setItem('utl_p' + (index + 1) + '_done', exercisesDone ? 'true' : 'false');
+      });
+      if (target.type === 'lesson') localStorage.setItem('utl_experience_preview_lesson_' + target.phaseKey, target.id);
+    }
+
+    function spRefreshPreviewCard() {
+      const active = localStorage.getItem(SP_PREVIEW_ACTIVE_KEY) === 'true';
+      const setup = document.getElementById('spPreviewSetup');
+      const panel = document.getElementById('spPreviewActive');
+      if (setup) setup.hidden = active;
+      if (panel) panel.hidden = !active;
+      if (!active) return;
+      let backup = {};
+      try { backup = JSON.parse(localStorage.getItem(SP_PREVIEW_BACKUP_KEY) || '{}'); } catch (error) {}
+      const label = document.getElementById('spPreviewActiveLabel');
+      const link = document.getElementById('spPreviewContinue');
+      if (label) label.textContent = 'Starting before ' + (backup.targetTitle || 'the selected activity') + '. Firebase progress writes are paused.';
+      if (link) link.href = backup.targetHref || '../member-login/index.html';
+    }
+
+    function spLaunchExperiencePreview() {
+      if (localStorage.getItem(SP_PREVIEW_ACTIVE_KEY) === 'true') return spRefreshPreviewCard();
+      const selected = document.getElementById('spPreviewStart')?.value;
+      const target = spPreviewSequence().find((item) => item.key === selected) || spPreviewSequence()[0];
+      const learning = {};
+      Object.keys(localStorage).forEach((key) => {
+        if (spIsLearningKey(key)) learning[key] = localStorage.getItem(key);
+      });
+      const environmentKeys = ['utl_member_unlocked', 'utl_member_username', 'utl_member_profile', 'utl_admin_preview_bypass'];
+      const environment = {};
+      environmentKeys.forEach((key) => { environment[key] = localStorage.getItem(key); });
+      const backup = { learning, environment, targetTitle: target.title, targetHref: target.href, startedAt: new Date().toISOString() };
+      localStorage.setItem(SP_PREVIEW_BACKUP_KEY, JSON.stringify(backup));
+      localStorage.setItem(SP_PREVIEW_ACTIVE_KEY, 'true');
+      spClearPreviewLearningState();
+      localStorage.setItem('utl_member_unlocked', 'true');
+      localStorage.setItem('utl_member_username', 'preview.student@theuntaughtlessons.com');
+      localStorage.setItem('utl_member_profile', JSON.stringify({ displayName:'Preview Student', firstName:'Preview', lastName:'Student', email:'preview.student@theuntaughtlessons.com' }));
+      localStorage.setItem('utl_admin_preview_bypass', 'off');
+      localStorage.setItem('utl_rewards_state', JSON.stringify({ mpTotal:0, masteryPoints:0, tokens:0, streakDays:0, level:'Intern', earnedEvents:{}, earnedEventIds:{}, ledger:[] }));
+      spSetPreviewProgressBefore(target);
+      spRefreshPreviewCard();
+      window.open(target.href, '_blank', 'noopener');
+    }
+
+    function spEndExperiencePreview() {
+      let backup = {};
+      try { backup = JSON.parse(localStorage.getItem(SP_PREVIEW_BACKUP_KEY) || '{}'); } catch (error) {}
+      spClearPreviewLearningState();
+      Object.entries(backup.learning || {}).forEach(([key, value]) => localStorage.setItem(key, value));
+      Object.entries(backup.environment || {}).forEach(([key, value]) => {
+        if (value === null || value === undefined) localStorage.removeItem(key);
+        else localStorage.setItem(key, value);
+      });
+      localStorage.removeItem(SP_PREVIEW_ACTIVE_KEY);
+      localStorage.removeItem(SP_PREVIEW_BACKUP_KEY);
+      sessionStorage.removeItem('utl_active_lesson_phase1');
+      sessionStorage.removeItem('utl_active_lesson_phase2');
+      sessionStorage.removeItem('utl_active_lesson_phase3');
+      spRefreshPreviewCard();
+      showToast('Student preview ended. Your prior browser progress was restored.');
+    }
 
     function spToMs(val) {
       if (!val) return 0;
@@ -6467,6 +6702,137 @@
       '</ul></div>';
     }
 
+    function spEditableCheck(type, id, title, detail, checked) {
+      return '<label class="sp-edit-check"><input type="checkbox" data-sp-edit-type="' + escapeHtml(type) + '" data-sp-edit-id="' + escapeHtml(id) + '"' + (checked ? ' checked' : '') + '><span>' + escapeHtml(title) + (detail ? '<small>' + escapeHtml(detail) + '</small>' : '') + '</span></label>';
+    }
+
+    function spOpenEditDialog(member) {
+      const dialog = document.getElementById('spEditDialog');
+      const fields = document.getElementById('spEditFields');
+      if (!dialog || !fields || !member || !member.uid) return showToast('This student does not have a linked progress record yet.', true);
+      spActiveMember = member;
+      const progress = member.workspaceProgress || {};
+      const lessons = progress.lessons || {};
+      const exercises = progress.exercises || {};
+      const content = window.UTL_CONTENT || {};
+      const groups = [];
+      groups.push('<section class="sp-edit-group"><h4>Getting started</h4><div class="sp-edit-list">' +
+        spEditableCheck('orientation', 'ready', 'Orientation', 'Ready to begin', !!(progress.orientation && progress.orientation.ready)) +
+      '</div></section>');
+      ['phase1', 'phase2', 'phase3'].forEach((phaseKey) => {
+        const phase = content[phaseKey] || {};
+        const rows = [];
+        (phase.lessons || []).forEach((item) => rows.push(spEditableCheck('lesson', item.id, item.title || item.id, 'Lesson video', !!(lessons[item.id] && lessons[item.id].watched))));
+        (phase.exercises || []).forEach((item) => rows.push(spEditableCheck('exercise', item.id, item.title || item.id, 'Exercise', !!(exercises[item.id] && exercises[item.id].completed))));
+        groups.push('<section class="sp-edit-group"><h4>' + escapeHtml(phase.label || phaseKey.replace('phase', 'Phase ')) + '</h4><div class="sp-edit-list">' + rows.join('') + '</div></section>');
+      });
+      groups.push('<section class="sp-edit-group"><h4>Assessments</h4><div class="sp-edit-list">' +
+        spEditableCheck('exercise', 'utl_result_tsa_diagnostic', 'Find Your Level', 'Diagnostic assessment', !!(exercises.utl_result_tsa_diagnostic && exercises.utl_result_tsa_diagnostic.completed)) +
+        spEditableCheck('exercise', 'utl_result_tsa_checkpoint', 'Checkpoint', 'Checkpoint assessment', !!(exercises.utl_result_tsa_checkpoint && exercises.utl_result_tsa_checkpoint.completed)) +
+      '</div></section>');
+      fields.innerHTML = groups.join('');
+      document.getElementById('spEditSubtitle').textContent = (member.displayName || member.name || member.email || 'Student') + (member.email ? ' · ' + member.email : '');
+      dialog.showModal();
+    }
+
+    function spOpenResetDialog(member) {
+      const dialog = document.getElementById('spResetDialog');
+      if (!dialog || !member || !member.uid) return showToast('This student does not have a linked progress record yet.', true);
+      spActiveMember = member;
+      document.getElementById('spResetSubtitle').textContent = (member.displayName || member.name || member.email || 'Student') + (member.email ? ' · ' + member.email : '');
+      document.getElementById('spResetConfirm').checked = false;
+      document.getElementById('spResetSubmit').disabled = true;
+      dialog.showModal();
+    }
+
+    async function spSaveEditedProgress() {
+      const member = spActiveMember;
+      const dialog = document.getElementById('spEditDialog');
+      const save = document.getElementById('spEditSave');
+      const fb = window.utlFirebaseAuth;
+      if (!member || !member.uid || !dialog || !fb || !fb.replaceMemberWorkspaceProgress) return showToast('Progress editing is unavailable.', true);
+      const current = member.workspaceProgress || {};
+      const next = Object.assign({}, current, {
+        orientation: Object.assign({}, current.orientation || {}),
+        lessons: Object.assign({}, current.lessons || {}),
+        exercises: Object.assign({}, current.exercises || {}),
+        contexts: Object.assign({}, current.contexts || {}),
+        phases: Object.assign({}, current.phases || {})
+      });
+      dialog.querySelectorAll('[data-sp-edit-type]').forEach((input) => {
+        const type = input.dataset.spEditType;
+        const id = input.dataset.spEditId;
+        if (type === 'orientation') {
+          next.orientation.ready = input.checked;
+          return;
+        }
+        if (type === 'lesson') {
+          const item = ['phase1','phase2','phase3'].flatMap((key) => ((window.UTL_CONTENT || {})[key] || {}).lessons || []).find((candidate) => candidate.id === id);
+          next.lessons[id] = Object.assign({}, next.lessons[id] || {}, { id, watched: input.checked, title: item && item.title || id });
+          return;
+        }
+        const item = ['phase1','phase2','phase3'].flatMap((key) => ((window.UTL_CONTENT || {})[key] || {}).exercises || []).find((candidate) => candidate.id === id);
+        const configuredAppKey = item && String(item.appUrl || '').match(/\/apps\/([^/]+)/);
+        const appKey = next.exercises[id]?.appKey || (configuredAppKey && configuredAppKey[1]) || id;
+        next.exercises[id] = Object.assign({}, next.exercises[id] || {}, {
+          visited: input.checked,
+          completed: input.checked,
+          title: item && item.title || next.exercises[id]?.title || (id === 'utl_result_tsa_diagnostic' ? 'Find Your Level' : id === 'utl_result_tsa_checkpoint' ? 'Checkpoint' : id),
+          appKey
+        });
+        if (appKey !== id && next.exercises[appKey]) {
+          next.exercises[appKey] = Object.assign({}, next.exercises[appKey], { visited: input.checked, completed: input.checked });
+        }
+      });
+      ['phase1','phase2','phase3'].forEach((phaseKey) => {
+        const lessonIds = phaseLessonIds(phaseKey);
+        const exerciseIds = phaseExerciseIds(phaseKey);
+        next.phases[phaseKey] = {
+          videosDone: lessonIds.length > 0 && lessonIds.every((id) => next.lessons[id] && next.lessons[id].watched),
+          exercisesDone: exerciseIds.length > 0 && exerciseIds.every((id) => next.exercises[id] && next.exercises[id].completed)
+        };
+      });
+      save.disabled = true;
+      save.textContent = 'Saving…';
+      try {
+        const result = await fb.replaceMemberWorkspaceProgress(member.uid, next);
+        member.workspaceProgress = result.workspaceProgress;
+        member.rewards = result.rewards;
+        dialog.close();
+        showToast('Student progress updated.');
+        showStudentProgressDetail(member);
+      } catch (error) {
+        showToast('Progress update failed: ' + ((error && error.message) || 'Unknown error'), true);
+      } finally {
+        save.disabled = false;
+        save.textContent = 'Save progress';
+      }
+    }
+
+    async function spResetProgress() {
+      const member = spActiveMember;
+      const dialog = document.getElementById('spResetDialog');
+      const submit = document.getElementById('spResetSubmit');
+      const fb = window.utlFirebaseAuth;
+      if (!member || !member.uid || !dialog || !fb || !fb.resetMemberWorkspaceProgress) return showToast('Progress reset is unavailable.', true);
+      submit.disabled = true;
+      submit.textContent = 'Resetting…';
+      try {
+        const result = await fb.resetMemberWorkspaceProgress(member.uid);
+        member.workspaceProgress = result.workspaceProgress;
+        member.rewards = result.rewards;
+        dialog.close();
+        showToast('Student progress reset. Their account remains active.');
+        showStudentProgressDetail(member);
+      } catch (error) {
+        showToast('Reset failed: ' + ((error && error.message) || 'Unknown error'), true);
+      } finally {
+        submit.textContent = 'Reset progress';
+        const confirm = document.getElementById('spResetConfirm');
+        submit.disabled = !(confirm && confirm.checked);
+      }
+    }
+
     function spLedgerHtml(member) {
       const ledger = Array.isArray(spRewardData(member).ledger) ? spRewardData(member).ledger.slice() : [];
       ledger.sort((a, b) => String(b.earnedAt || '').localeCompare(String(a.earnedAt || '')));
@@ -6498,6 +6864,7 @@
       const p3e = spCompletedCount(member, 'phase3', 'exercises');
       content.innerHTML =
         '<div class="sp-detail-header"><div><h3>' + escapeHtml(member.displayName || member.name || member.email || 'Member') + '</h3><p>' + escapeHtml(member.email || '') + ' · Last active ' + escapeHtml(formatProgressDate(member.lastSeenAt || member.updatedAt)) + '</p></div><span class="mb-status-badge ' + ((member.status || 'active') === 'inactive' ? 'mb-status-inactive' : 'mb-status-active') + '">' + escapeHtml(member.status || 'active') + '</span></div>' +
+        '<div class="sp-detail-actions"><button class="small-button secondary-button" type="button" data-sp-edit-progress>Edit progress</button><button class="small-button sp-danger-button" type="button" data-sp-reset-progress>Reset progress</button></div>' +
         '<div class="sp-detail-summary"><div class="sp-detail-stat"><span>Current level</span><strong>' + escapeHtml(level) + '</strong></div><div class="sp-detail-stat"><span>Mastery Points</span><strong>' + escapeHtml(String(total)) + ' MP</strong></div><div class="sp-detail-stat"><span>Exercises complete</span><strong>' + (p1e.done + p2e.done + p3e.done) + ' / ' + (p1e.total + p2e.total + p3e.total) + '</strong></div><div class="sp-detail-stat"><span>Program bonus</span><strong>' + credited + ' / ' + target + ' MP</strong></div></div>' +
         '<div class="sp-reward-alert ' + (!missingBonus ? 'is-ok' : '') + '">' + (missingBonus
           ? '<strong>Missing completion milestone:</strong> this student finished all phases but needs ' + missingAmount + ' MP to receive the full bonus and reach Executive. <button class="small-button" type="button" data-sp-repair-bonus style="margin-left:8px">Award missing MP</button>'
@@ -6506,6 +6873,8 @@
       table.hidden = true;
       if (controls) controls.hidden = true;
       detail.hidden = false;
+      content.querySelector('[data-sp-edit-progress]')?.addEventListener('click', () => spOpenEditDialog(member));
+      content.querySelector('[data-sp-reset-progress]')?.addEventListener('click', () => spOpenResetDialog(member));
       const repair = content.querySelector('[data-sp-repair-bonus]');
       if (repair) repair.addEventListener('click', async function () {
         const fb = window.utlFirebaseAuth;
@@ -6868,6 +7237,8 @@
     initCollapsibleSections();
     renderInviteLog();
     mbInitAddForm();
+    spPopulatePreviewStarts();
+    spRefreshPreviewCard();
     initGlobalDefaults();
     loadPublicHomepageSetting();
     loadAdminVisibilitySettings();
@@ -6919,7 +7290,23 @@
     });
 
     document.getElementById('spSearch')?.addEventListener('input', () => spApplyView());
+    document.getElementById('spPreviewLaunch')?.addEventListener('click', spLaunchExperiencePreview);
+    document.getElementById('spPreviewEnd')?.addEventListener('click', spEndExperiencePreview);
     document.getElementById('spDetailBack')?.addEventListener('click', hideStudentProgressDetail);
+    document.querySelectorAll('[data-sp-dialog-close]').forEach((button) => button.addEventListener('click', () => {
+      document.getElementById(button.dataset.spDialogClose)?.close();
+    }));
+    document.getElementById('spEditSave')?.addEventListener('click', spSaveEditedProgress);
+    document.getElementById('spResetConfirm')?.addEventListener('change', (event) => {
+      document.getElementById('spResetSubmit').disabled = !event.target.checked;
+    });
+    document.getElementById('spResetSubmit')?.addEventListener('click', spResetProgress);
+    ['spEditDialog', 'spResetDialog'].forEach((id) => {
+      const dialog = document.getElementById(id);
+      dialog?.addEventListener('click', (event) => {
+        if (event.target === dialog) dialog.close();
+      });
+    });
     document.querySelectorAll('[data-admin-tab]').forEach((button) => {
       button.addEventListener('click', () => {
         switchAdminTab(button.dataset.adminTab);

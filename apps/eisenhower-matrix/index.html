@@ -3,1148 +3,189 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Practice prioritizing tasks with the Eisenhower Matrix.">
+  <meta name="description" content="Practice prioritizing requests and writing a clear, useful no.">
   <title>The art of saying no | The Untaught Lessons</title>
   <link rel="icon" type="image/png" sizes="32x32" href="../../assets/favicon-bluebg-whitedoor-thicker-32.png?v=6">
   <link rel="shortcut icon" type="image/png" href="../../assets/favicon-bluebg-whitedoor-thicker-32.png?v=6">
   <link rel="apple-touch-icon" sizes="180x180" href="../../assets/apple-touch-icon.png?v=3">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lato:wght@300;400;700&family=Roboto+Mono:wght@400;500;700&display=swap');
-
-    :root {
-      --eisenhower-navy: #003366;
-      --eisenhower-gold: #EEA320;
-      --eisenhower-cream: #F3EDE2;
-      --eisenhower-charcoal: #4A4A4A;
-      --eisenhower-white: #FFFFFF;
-      --eisenhower-line: #C7D8E8;
-      --eisenhower-soft: #F7F5EF;
-      --eisenhower-shadow: none;
-    }
-
-    * { box-sizing: border-box; }
-
-    body {
-      --utl-feedback-bottom-offset: 88px;
-      margin: 0;
-      background: var(--eisenhower-cream);
-      color: var(--eisenhower-charcoal);
-      font-family: 'Lato', Arial, sans-serif;
-    }
-
-    button,
-    select {
-      font: inherit;
-    }
-
-    button:focus-visible,
-    select:focus-visible {
-      outline: 2px solid var(--eisenhower-gold);
-      outline-offset: 2px;
-    }
-
-    .eisenhower-header {
-      position: sticky;
-      top: 0;
-      z-index: 30;
-      display: grid;
-      grid-template-columns: auto auto minmax(220px, 1fr);
-      align-items: center;
-      column-gap: 20px;
-      min-height: 76px;
-      padding: 12px 32px;
-      background: var(--eisenhower-navy);
-      color: var(--eisenhower-white);
-    }
-
-    .eisenhower-logo {
-      display: block;
-      width: 224px;
-      height: 46px;
-    }
-
-    .eisenhower-logo img {
-      display: block;
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-    }
-
-    .eisenhower-divider {
-      width: 1px;
-      height: 38px;
-      background: rgba(255, 255, 255, .42);
-    }
-
-    .eisenhower-kicker,
-    .eisenhower-context-label,
-    .eisenhower-context-select,
-    .eisenhower-axis,
-    .eisenhower-empty,
-    .eisenhower-button,
-    .eisenhower-timer-label,
-    .eisenhower-timer-value,
-    .eisenhower-example-banner,
-    .eisenhower-note {
-      font-family: Lato, Arial, sans-serif;
-    }
-
-    .eisenhower-kicker {
-      display: block;
-      color: var(--eisenhower-gold);
-      font-size: 10px;
-      letter-spacing: 0;
-      text-transform: none;
-    }
-
-    .eisenhower-title {
-      display: block;
-      margin-top: 3px;
-      color: var(--eisenhower-white);
-      font-family: 'Playfair Display', Georgia, serif;
-      font-size: 27px;
-      font-weight: 700;
-      line-height: 1;
-    }
-
-    .module-back-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      margin-top: 8px;
-      color: rgba(255, 255, 255, .82);
-      font-family: 'Lato', sans-serif;
-      font-size: 15px;
-      font-weight: 700;
-      line-height: 1.25;
-      text-decoration: none;
-    }
-
-    .module-back-link:hover {
-      color: var(--gold, var(--ab-gold, var(--eisenhower-gold, #EEA320)));
-      text-decoration: underline;
-      text-underline-offset: 3px;
-    }
-
-    .eisenhower-context {
-      position: sticky;
-      top: 76px;
-      z-index: 20;
-      display: grid;
-      grid-template-columns: minmax(250px, 330px) minmax(220px, 1fr) auto;
-      align-items: center;
-      gap: 16px;
-      padding: 10px 32px;
-      border-bottom: 1px solid #D8CFC1;
-      background: rgba(243, 237, 226, .96);
-      backdrop-filter: blur(8px);
-    }
-
-    .eisenhower-scenario-control {
-      display: grid;
-      gap: 5px;
-    }
-
-    .eisenhower-context-label {
-      color: var(--eisenhower-gold);
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 0;
-      text-transform: none;
-    }
-
-    .eisenhower-context-select {
-      min-height: 42px;
-      padding: 9px 10px;
-      border: 1px solid var(--eisenhower-navy);
-      border-radius: 6px;
-      background: var(--eisenhower-white);
-      color: var(--eisenhower-navy);
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 0;
-    }
-
-    .eisenhower-context-copy {
-      margin: 0;
-      color: var(--eisenhower-charcoal);
-      font-size: 15px;
-      line-height: 1.4;
-    }
-
-    .eisenhower-timer {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 7px 10px;
-      border: 1px solid var(--eisenhower-line);
-      border-radius: 6px;
-      background: var(--eisenhower-white);
-      white-space: nowrap;
-    }
-
-    .eisenhower-timer-label {
-      color: var(--eisenhower-gold);
-      font-size: 9px;
-      letter-spacing: 0;
-      text-transform: none;
-    }
-
-    .eisenhower-timer-value {
-      color: var(--eisenhower-navy);
-      font-size: 18px;
-      font-weight: 700;
-      line-height: 1;
-    }
-
-    .eisenhower-icon-button {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 30px;
-      height: 30px;
-      border: 1px solid var(--eisenhower-line);
-      border-radius: 6px;
-      background: var(--eisenhower-white);
-      color: var(--eisenhower-navy);
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: 700;
-      line-height: 1;
-      padding: 0;
-    }
-
-    .eisenhower-icon-button svg {
-      width: 17px;
-      height: 17px;
-      stroke-width: 2.2;
-      vertical-align: middle;
-    }
-
-    .eisenhower-main {
-      width: min(1200px, calc(100% - 56px));
-      margin: 0 auto;
-      padding: 12px 0 96px;
-    }
-
-    .eisenhower-page-intro {
-      margin: 0 0 16px;
-      padding-bottom: 14px;
-      border-bottom: 1px solid #D8CFC1;
-    }
-
-    .eisenhower-page-intro h1 {
-      margin: 0 0 6px;
-      color: var(--eisenhower-navy);
-      font-family: 'Playfair Display', Georgia, serif;
-      font-size: clamp(32px, 4vw, 44px);
-      line-height: 1.05;
-    }
-
-    .eisenhower-page-intro p {
-      max-width: 760px;
-      margin: 0;
-      color: var(--eisenhower-charcoal);
-      font-size: 14px;
-      line-height: 1.45;
-    }
-
-    .eisenhower-workspace {
-      display: grid;
-      grid-template-columns: minmax(260px, 286px) minmax(0, 1fr);
-      gap: 14px;
-      align-items: start;
-    }
-
-    .eisenhower-panel {
-      border: 1px solid var(--eisenhower-line);
-      border-radius: 8px;
-      background: var(--eisenhower-white);
-      box-shadow: var(--eisenhower-shadow);
-    }
-
-    .eisenhower-task-panel {
-      padding: 14px 12px 12px;
-    }
-
-    .eisenhower-panel h2 {
-      margin: 0 0 12px;
-      color: var(--eisenhower-navy);
-      font-family: 'Playfair Display', Georgia, serif;
-      font-size: 18px;
-      line-height: 1.12;
-    }
-
-    .eisenhower-panel-head {
-      display: flex;
-      align-items: baseline;
-      justify-content: space-between;
-      gap: 12px;
-      margin-bottom: 12px;
-    }
-
-    .eisenhower-count {
-      color: var(--eisenhower-charcoal);
-      font-size: 12px;
-      line-height: 1;
-    }
-
-    .eisenhower-task-list {
-      display: flex;
-      min-height: 360px;
-      flex-direction: column;
-      gap: 8px;
-      padding: 10px;
-      border: 1px dashed var(--eisenhower-line);
-      border-radius: 8px;
-      background: var(--eisenhower-soft);
-    }
-
-    .eisenhower-chip {
-      display: flex;
-      align-items: flex-start;
-      gap: 8px;
-      width: 100%;
-      border: 1px solid var(--eisenhower-line);
-      border-radius: 6px;
-      background: var(--eisenhower-white);
-      color: var(--eisenhower-navy);
-      box-shadow: none;
-      cursor: grab;
-      font-family: 'Lato', Arial, sans-serif;
-      font-size: 13px;
-      font-weight: 700;
-      line-height: 1.3;
-      text-align: left;
-      padding: 8px 10px;
-    }
-
-    .eisenhower-chip.is-small {
-      border-radius: 6px;
-      box-shadow: none;
-      font-size: 12px;
-      padding: 7px 9px;
-    }
-
-    .eisenhower-chip.is-selected {
-      border-color: var(--eisenhower-gold);
-      box-shadow: 0 0 0 2px rgba(238, 163, 32, .42);
-    }
-
-    .eisenhower-chip[draggable="true"]:active {
-      cursor: grabbing;
-    }
-
-    .eisenhower-add-slot {
-      width: 100%;
-      min-height: 38px;
-      border: 2px dashed rgba(238, 163, 32, .72);
-      border-radius: 6px;
-      background: rgba(255, 247, 233, .86);
-      color: var(--eisenhower-navy);
-      cursor: pointer;
-      font-family: 'Lato', Arial, sans-serif;
-      font-size: 12px;
-      font-weight: 700;
-      line-height: 1.25;
-      text-align: center;
-      padding: 8px 10px;
-    }
-
-    .eisenhower-add-slot:hover,
-    .eisenhower-add-slot:focus-visible {
-      background: #fff1d2;
-      border-color: var(--eisenhower-gold);
-      box-shadow: 0 0 0 2px rgba(238, 163, 32, .18);
-    }
-
-    .eisenhower-handle {
-      flex: 0 0 auto;
-      color: var(--eisenhower-gold);
-      font-weight: 700;
-      letter-spacing: -2px;
-    }
-
-    .eisenhower-empty {
-      display: none;
-      margin: 8px 0 0;
-      color: var(--eisenhower-charcoal);
-      font-size: 11px;
-      line-height: 1.5;
-    }
-
-    .eisenhower-empty.is-visible {
-      display: block;
-    }
-
-    .eisenhower-example-banner {
-      display: none;
-      margin-bottom: 12px;
-      padding: 10px 12px;
-      border: 1px solid rgba(0, 51, 102, .12);
-      border-radius: 6px;
-      background: var(--eisenhower-white);
-      color: var(--eisenhower-navy);
-      font-size: 12px;
-      line-height: 1.45;
-    }
-
-    .eisenhower-example-banner.is-visible {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-    }
-
-    .eisenhower-matrix-wrap {
-      display: grid;
-      grid-template-columns: 34px 1fr;
-      grid-template-rows: 28px 1fr;
-      gap: 6px;
-    }
-
-    .eisenhower-axis-top {
-      grid-column: 2;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-    }
-
-    .eisenhower-axis-left {
-      grid-row: 2;
-      display: grid;
-      grid-template-rows: 1fr 1fr;
-      gap: 8px;
-    }
-
-    .eisenhower-axis {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--eisenhower-gold);
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 0;
-      text-transform: none;
-    }
-
-    .eisenhower-axis-left .eisenhower-axis {
-      writing-mode: vertical-rl;
-      transform: rotate(180deg);
-    }
-
-    .eisenhower-matrix {
-      grid-column: 2;
-      grid-row: 2;
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      min-height: 640px;
-      border: 1px solid var(--eisenhower-line);
-      border-radius: 8px;
-      overflow: hidden;
-      background: var(--eisenhower-white);
-      box-shadow: var(--eisenhower-shadow);
-    }
-
-    .eisenhower-quadrant {
-      min-height: 320px;
-      padding: 14px 12px;
-      border-right: 1px solid var(--eisenhower-line);
-      border-bottom: 1px solid var(--eisenhower-line);
-      background: #FFFFFF;
-      transition: background .18s ease, box-shadow .18s ease;
-    }
-
-    .eisenhower-quadrant:nth-child(2n) { border-right: 0; }
-    .eisenhower-quadrant:nth-child(n+3) { border-bottom: 0; }
-
-    .eisenhower-quadrant.drag-over,
-    .eisenhower-task-list.drag-over,
-    .eisenhower-quadrant.tap-target,
-    .eisenhower-task-list.tap-target {
-      background: rgba(238, 163, 32, .10);
-      box-shadow: inset 0 0 0 2px rgba(238, 163, 32, .5);
-    }
-
-    .eisenhower-quadrant h3 {
-      margin: 0;
-      color: var(--eisenhower-navy);
-      font-family: 'Playfair Display', Georgia, serif;
-      font-size: clamp(20px, 2.6vw, 28px);
-      line-height: 1;
-    }
-
-    .eisenhower-quadrant-sub {
-      margin: 5px 0 14px;
-      color: var(--eisenhower-charcoal);
-      font-size: 13px;
-      line-height: 1.35;
-    }
-
-    .eisenhower-zone {
-      display: grid;
-      gap: 9px;
-      align-content: start;
-      min-height: 220px;
-      padding: 10px;
-      border: 1px dashed var(--eisenhower-line);
-      border-radius: 8px;
-      background: var(--eisenhower-soft);
-    }
-
-    .eisenhower-note {
-      display: block;
-      margin: 4px 0 0 22px;
-      color: var(--eisenhower-charcoal);
-      font-size: 10px;
-      font-style: italic;
-      line-height: 1.4;
-    }
-
-    .eisenhower-actions {
-      position: fixed;
-      right: 0;
-      bottom: 0;
-      left: 0;
-      z-index: 25;
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 12px 32px;
-      border-top: 1px solid var(--eisenhower-line);
-      background: rgba(243, 237, 226, .96);
-      backdrop-filter: blur(8px);
-    }
-
-    .eisenhower-button {
-      min-height: 42px;
-      border-radius: 6px;
-      background: transparent;
-      cursor: pointer;
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0;
-      text-transform: none;
-      padding: 10px 14px;
-    }
-
-    .eisenhower-button.navy {
-      border: 1px solid var(--eisenhower-navy);
-      color: var(--eisenhower-navy);
-    }
-
-    .eisenhower-button.gold {
-      border: 1px solid var(--eisenhower-gold);
-      color: var(--eisenhower-navy);
-    }
-
-    .eisenhower-button.primary-action {
-      border: 1px solid var(--eisenhower-gold);
-      background: var(--eisenhower-gold);
-      color: var(--eisenhower-navy);
-    }
-
-    .eisenhower-button.secondary-action {
-      border: 1px solid rgba(0, 51, 102, .28);
-      background: transparent;
-      color: var(--eisenhower-navy);
-    }
-
-    .eisenhower-button[hidden] {
-      display: none;
-    }
-
-    @media (max-width: 940px) {
-      .eisenhower-header,
-      .eisenhower-context {
-        grid-template-columns: 1fr;
-        gap: 10px;
-        padding-inline: 18px;
-      }
-
-      .eisenhower-context {
-        position: static;
-      }
-
-      .eisenhower-logo {
-        width: 178px;
-        height: 38px;
-      }
-
-      .eisenhower-divider {
-        display: none;
-      }
-
-      .eisenhower-workspace {
-        grid-template-columns: 1fr;
-      }
-
-      .eisenhower-matrix {
-        min-height: 0;
-      }
-    }
-
-    @media (max-width: 640px) {
-      .eisenhower-main {
-        width: min(100% - 24px, 1280px);
-      }
-
-      .eisenhower-matrix-wrap {
-        grid-template-columns: 24px 1fr;
-      }
-
-      .eisenhower-matrix {
-        grid-template-columns: 1fr;
-      }
-
-      .eisenhower-quadrant {
-        min-height: 240px;
-        border-right: 0;
-        border-bottom: 1px solid var(--eisenhower-line);
-      }
-
-      .eisenhower-quadrant:nth-child(n+3) {
-        border-bottom: 1px solid var(--eisenhower-line);
-      }
-
-      .eisenhower-axis-top {
-        display: none;
-      }
-
-      .eisenhower-axis-left {
-        display: none;
-      }
-
-      .eisenhower-matrix-wrap {
-        display: block;
-      }
-
-      .eisenhower-actions {
-        flex-direction: column;
-        padding: 12px;
-      }
-
-      body {
-        --utl-feedback-bottom-offset: 132px;
-      }
-    }
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lato:wght@400;700;900&display=swap');
+    :root{--navy:#003366;--gold:#EEA320;--gold-dark:#C9860F;--cream:#F3EDE2;--charcoal:#4A4A4A;--steel:#4D7094;--white:#fff;--line:#C7D8E8;--green:#2F6B3F;--amber:#8A5A16}
+    *{box-sizing:border-box}html{-webkit-text-size-adjust:100%}body{--utl-feedback-bottom-offset:92px;margin:0;min-height:100dvh;background:var(--cream);color:var(--charcoal);font:16px/1.55 Lato,Arial,sans-serif}button,textarea,input{font:inherit}button{cursor:pointer}button:focus-visible,textarea:focus-visible,input:focus-visible{outline:3px solid rgba(238,163,32,.45);outline-offset:3px}h1,h2,h3,p{margin-top:0}h1,h2,h3{color:var(--navy);font-family:'Playfair Display',Georgia,serif}
+    .game-header{position:sticky;top:0;z-index:40;background:var(--navy);color:#fff;border-bottom:3px solid var(--gold)}
+    .game-header-inner{width:min(1120px,calc(100% - 32px));min-height:78px;margin:auto;display:grid;grid-template-columns:auto minmax(180px,1fr) auto;align-items:center;gap:24px}
+    .brand{display:flex;align-items:center;gap:16px;color:#fff;text-decoration:none}.brand img{width:140px;height:48px;object-fit:contain}.brand-copy{padding-left:16px;border-left:1px solid rgba(255,255,255,.4)}.brand-copy strong{display:block;font:700 18px/1.15 'Playfair Display',Georgia,serif}.brand-copy span{display:block;margin-top:4px;color:#d6e0eb;font-size:12px}
+    .module-back-link{display:inline-flex;margin-top:6px;color:rgba(255,255,255,.82);font-size:13px;font-weight:700;text-decoration:none}.module-back-link:hover{color:var(--gold);text-decoration:underline;text-underline-offset:3px}
+    .progress-zone{min-width:0}.progress-label{text-align:center;color:#d6e0eb;font-size:13px;font-weight:700;margin-bottom:7px}.progress-track{height:8px;border-radius:20px;overflow:hidden;background:rgba(255,255,255,.2)}.progress-fill{height:100%;width:0;border-radius:inherit;background:var(--gold);transition:width .35s ease}
+    .score{display:flex;align-items:baseline;gap:6px;min-width:72px;justify-content:flex-end;color:var(--gold);font-size:24px;font-weight:900}.score small{color:#d6e0eb;font-size:11px}.score-pop{animation:score-pop .4s ease}@keyframes score-pop{45%{transform:scale(1.3)}}
+    .context-strip{position:sticky;top:var(--utl-app-header-height,76px);z-index:30;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:18px;align-items:center;padding:10px max(20px,calc((100% - 1060px)/2));background:rgba(243,237,226,.96);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}.context-strip .label{margin:0;color:var(--gold);font-size:11px}.context-copy{font-size:14px}.context-progress{min-width:180px;text-align:right;color:var(--navy);font-size:11px;font-weight:700}.context-track{height:6px;margin-top:5px;border-radius:10px;overflow:hidden;background:#D9E1E8}.context-fill{height:100%;background:var(--gold);transition:width .3s}
+    main{width:min(1060px,calc(100% - 32px));margin:0 auto;padding:26px 0 150px}.layout{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:14px;align-items:start}.primary{min-width:0}.rail{position:sticky;top:158px;display:grid;gap:12px}.card,.rail-card{background:#fff;border:1px solid var(--line);border-radius:8px;padding:20px}.card+.card{margin-top:14px}.rail-card{padding:14px 16px}.label{margin-bottom:8px;color:var(--gold);font-size:12px;font-weight:700}.intro h1{font-size:38px;line-height:1.08;margin-bottom:14px}.intro-copy{font-size:18px}.supporting{color:var(--steel)}.task{font-size:21px;font-weight:700;line-height:1.45;color:var(--navy);margin-bottom:0}
+    .goal{background:var(--navy);border-color:var(--navy)}.goal h3{margin:0 0 8px;color:#fff;font-size:18px}.goal p{margin:0;color:rgba(255,255,255,.84);font-size:13px;line-height:1.45}.goal strong{color:var(--gold)}.rail-card h3{margin:0 0 8px;font-size:17px}.rail-card p{margin:0;font-size:13px;line-height:1.45}.rail-hint{margin-top:10px!important;padding-top:10px;border-top:1px solid var(--line);color:var(--steel)!important;font-size:12px!important}.rail-hint.warn{color:#8A5A00!important}.defs{margin:0}.defs div+div{margin-top:9px}.defs dt{color:var(--navy);font-size:12px;font-weight:700}.defs dd{margin:2px 0 0;font-size:12px;line-height:1.4}.tally-row{display:grid;grid-template-columns:68px 1fr 20px;gap:7px;align-items:center;margin-top:7px;font-size:12px}.tally-track{height:6px;border-radius:9px;overflow:hidden;background:#D9E1E8}.tally-fill{height:100%;background:var(--gold)}
+    .pullquote{margin:14px 0;padding:13px 16px;border-left:2px solid var(--gold);background:#FFF8EC;color:var(--navy);font:700 19px/1.3 'Playfair Display',Georgia,serif}.round-list{list-style:none;margin:8px 0 0;padding:0}.round-list li{display:grid;grid-template-columns:28px 1fr;gap:10px;padding:8px 0;border-bottom:1px solid #EDE6D9}.round-list li:last-child{border:0}.round-num{display:grid;place-items:center;width:23px;height:23px;border:1px solid var(--line);border-radius:50%;font-size:11px;color:var(--navy)}.round-list b{display:block;color:var(--navy);font-size:14px}.round-list span span{font-size:12px}.takeaways{list-style:none;margin:0;padding:0;display:grid;gap:8px}.takeaways li{font-size:12px}.takeaways i{color:var(--gold);font-style:normal;margin-right:7px}.mini{display:grid;grid-template-columns:15px 1fr 1fr;gap:4px}.mini-col,.mini-side{color:var(--steel);font-size:9px;font-weight:700;text-align:center}.mini-side{writing-mode:vertical-rl;transform:rotate(180deg)}.mini-cell{padding:7px 4px;border:1px solid var(--line);border-radius:5px;background:#f7f5ef;text-align:center}.mini-cell b{display:block;color:var(--navy);font:700 14px 'Playfair Display',serif}.mini-cell span{font-size:9px;color:var(--steel)}
+    .record{margin-top:14px}.record ul{list-style:none;margin:0;padding:0}.record li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid #EDE6D9}.record-text{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px}.pill{padding:3px 9px;border:1px solid var(--line);border-radius:20px;background:#f7f5ef;color:var(--navy);font-size:10px;font-weight:700;white-space:nowrap}.pill.yes{border-color:var(--gold);background:#FFF2D3;color:#8A5A00}.empty{margin:0;color:var(--steel);font-size:12px;font-style:italic}
+    .button{display:inline-flex;min-height:50px;align-items:center;justify-content:center;border:0;border-radius:8px;padding:13px 24px;background:var(--gold);color:var(--navy);font-weight:900;box-shadow:0 3px 0 var(--gold-dark);transition:transform .08s,background .15s}.button:hover{background:#f3ae35}.button:active{transform:translateY(1px);box-shadow:0 2px 0 var(--gold-dark)}.button:disabled{cursor:not-allowed;background:#d8cdb6;color:#746c5e;box-shadow:none}.button.secondary{background:#fff;color:var(--navy);border:2px solid var(--navy);box-shadow:none}.button-row{display:flex;gap:14px;margin-top:24px;flex-wrap:wrap}
+    .binary{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px}.choice{min-height:104px;border:2px solid var(--navy);border-radius:10px;background:#fff;color:var(--navy);font-weight:900;font-size:17px;padding:18px;box-shadow:0 3px 0 rgba(0,51,102,.2)}.choice:hover{background:#faf7f0}.choice:active{transform:translateY(1px);box-shadow:0 2px 0 rgba(0,51,102,.2)}.key{display:block;margin-top:6px;color:var(--steel);font-size:12px;font-weight:700}
+    .quadrants{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px}.quadrant{min-height:100px;text-align:left;border:2px solid rgba(0,51,102,.18);border-radius:10px;background:#fff;padding:17px;box-shadow:0 2px 0 rgba(0,51,102,.1)}.quadrant:hover{border-color:var(--steel)}.quadrant.focused{border-color:var(--gold);background:#fff9ee}.quadrant h3{font-size:20px;margin-bottom:3px}.quadrant p{margin:0;color:var(--steel);font-size:13px;font-weight:700}.keyboard-note{text-align:center;color:var(--steel);font-size:12px;margin:10px 0 0}
+    .reason-list{display:grid;gap:10px;margin-top:18px}.reason{border:2px solid rgba(0,51,102,.17);border-radius:9px;background:#fff;color:var(--charcoal);padding:14px;text-align:left}.reason:hover{border-color:var(--steel)}.reason.selected{border-color:var(--gold);background:#fff9ee}.reason-input,.no-text{width:100%;border:1px solid var(--line);border-radius:9px;background:#fffdf9;color:var(--charcoal);padding:14px}.no-text{min-height:150px;resize:vertical;margin-top:16px;font-size:16px;line-height:1.55}.word-count{text-align:right;margin-top:5px;color:var(--steel);font-size:13px;font-weight:700}.word-count.max{color:var(--amber)}
+    .placement-summary{display:flex;align-items:center;gap:12px;margin:16px 0 20px}.placement-summary>span{color:var(--steel);font-size:13px;font-weight:700}.placement-tile{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:1px 14px;align-items:center;min-width:210px;padding:10px 13px;border:2px solid var(--gold);border-radius:8px;background:#FFF8EC;color:var(--navy);text-align:left}.placement-tile:hover{background:#FFF2D3}.placement-tile strong{font-size:16px}.placement-tile small{grid-column:1;color:var(--steel);font-size:11px;font-weight:700}.placement-edit{grid-column:2;grid-row:1/3;color:var(--gold-dark);font-size:18px;font-weight:900}
+    .checklist{list-style:none;padding:0;margin:18px 0 0;display:grid;gap:11px}.checklist li{display:flex;align-items:flex-start;gap:10px;color:var(--steel);font-size:15px}.checklist li.met{color:var(--charcoal)}.checkmark{flex:0 0 23px;height:23px;border:2px solid rgba(0,51,102,.18);border-radius:50%;display:grid;place-items:center;color:#fff;font-size:13px;font-weight:900}.met .checkmark{background:var(--green);border-color:var(--green)}
+    .comparison{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:18px}.comparison h3{font:700 14px/1.2 Lato,Arial,sans-serif}.message{height:100%;border-radius:8px;background:#f7f3eb;padding:16px;white-space:pre-wrap}.summary-main{text-align:center}.summary-score{color:var(--navy);font:700 62px/1 'Playfair Display',Georgia,serif}.summary-score small{font:700 20px Lato,Arial,sans-serif;color:var(--steel)}.bank-note{font-weight:700;color:var(--steel)}.skill{margin-top:18px}.skill-label{display:flex;justify-content:space-between;margin-bottom:6px;font-size:14px;font-weight:700}.skill-track{height:10px;overflow:hidden;border-radius:20px;background:rgba(77,112,148,.2)}.skill-fill{height:100%;width:0;border-radius:inherit;background:var(--gold);transition:width 1s ease}.saved-no{position:relative}.saved-no p{padding-right:74px;white-space:pre-wrap}.copy{position:absolute;top:18px;right:18px;border:0;border-radius:6px;background:var(--navy);color:#fff;padding:7px 12px;font-size:12px;font-weight:700}
+    .overlay{position:fixed;inset:0;z-index:70;display:grid;place-items:center;padding:24px;background:var(--navy);color:#fff}.overlay-panel{max-width:500px;text-align:center}.round-dots{display:flex;justify-content:center;gap:9px;margin-bottom:22px}.round-dot{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.25)}.round-dot.on{background:var(--gold)}.overlay .label{color:#d6e0eb}.overlay h2{color:#fff;font-size:36px;margin-bottom:12px}.overlay p{color:#d6e0eb;font-size:17px}.accuracy-chip{display:inline-block;margin-bottom:18px;border-radius:30px;background:rgba(255,255,255,.1);padding:7px 16px;color:#f4d69c;font-weight:700}
+    .feedback{position:fixed;left:0;right:0;bottom:0;z-index:60;border-top:1px solid var(--line);background:rgba(243,237,226,.96);backdrop-filter:blur(8px);transform:translateY(105%);transition:transform .3s ease}.feedback.open{transform:none}.feedback-inner{width:min(760px,100%);margin:auto;padding:16px 24px;display:grid;grid-template-columns:4px minmax(0,1fr) auto;gap:16px;align-items:center;color:var(--charcoal)}.feedback-inner:before{content:'';align-self:stretch;border-radius:4px;background:var(--steel)}.feedback.good .feedback-inner:before{background:#2C7A4B}.feedback.warn .feedback-inner:before{background:var(--gold)}.feedback-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.feedback-title{color:var(--navy);font-size:16px;font-weight:900}.chip{border-radius:30px;background:#FFF2D3;color:#8A5A00;padding:3px 9px;font-size:12px;font-weight:900}.combo{background:var(--gold);color:var(--navy)}.feedback p{margin:5px 0 0;font-size:14px}.feedback-actions{text-align:right}.feedback .button{min-height:44px}
+    .toast{position:fixed;top:82px;left:50%;z-index:80;min-width:190px;border:1px solid rgba(238,163,32,.6);border-radius:0 0 8px 8px;background:#FFF8EC;color:var(--navy);padding:10px 18px;text-align:center;font-weight:900;animation:toast 1.5s ease forwards;pointer-events:none}@keyframes toast{0%{opacity:0;transform:translate(-50%,-12px)}15%,78%{opacity:1;transform:translate(-50%,0)}100%{opacity:0;transform:translate(-50%,-12px)}}
+    .confetti{position:fixed;inset:0;z-index:90;overflow:hidden;pointer-events:none}.confetti span{position:absolute;top:-18px;width:9px;height:15px;border-radius:2px;animation:fall 1.6s ease-in forwards}@keyframes fall{to{transform:translateY(105vh) rotate(560deg);opacity:.7}}.fade{animation:fade .25s ease}@keyframes fade{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}.hidden{display:none!important}
+    @media(max-width:860px){.layout{grid-template-columns:1fr}.rail{position:static}.context-strip{position:static}.game-header-inner{width:100%;min-height:70px;padding:8px 14px;grid-template-columns:auto 1fr auto;gap:12px}.brand img{width:50px;height:40px;object-fit:cover;object-position:left}.brand-copy{display:none}.progress-zone{display:none}.score{font-size:20px}main{padding-top:20px}.card{padding:22px}.intro h1{font-size:32px}.task{font-size:19px}.comparison{grid-template-columns:1fr}}
+    @media(max-width:560px){main{width:calc(100% - 24px)}.context-strip{grid-template-columns:1fr;padding:10px 12px}.context-progress{min-width:0;text-align:left}.binary{gap:9px}.choice{min-height:96px;padding:12px 8px;font-size:14px}.quadrant{padding:14px 12px}.quadrant h3{font-size:18px}.button-row .button{width:100%}.feedback-inner{padding:14px 12px;grid-template-columns:4px 1fr}.feedback-actions{grid-column:2}.feedback-actions .button{width:100%}.saved-no p{padding-right:0;padding-top:34px}}
+    @media(max-width:560px){.placement-summary{align-items:stretch;flex-direction:column;gap:6px}.placement-tile{width:100%;min-width:0}}
+    /* Interaction clarity: one decision, one visible response, then Continue. */
+    .feedback{pointer-events:none}
+    .feedback.open{pointer-events:auto;box-shadow:0 -1px 0 rgba(0,51,102,.08);transition-duration:.18s}
+    body.has-feedback #utl-feedback-btn{display:none!important}
+    body.has-feedback .choice,body.has-feedback .quadrant,body.has-feedback .reason{opacity:.5;cursor:not-allowed;pointer-events:none}
+    body.has-feedback .primary{padding-bottom:110px}
+    .choice{min-height:82px;box-shadow:none}
+    .choice:active{box-shadow:none}
+    .quadrant{box-shadow:none}
+    .quadrant{position:relative;z-index:1;touch-action:manipulation;-webkit-tap-highlight-color:rgba(238,163,32,.18)}
+    body.has-feedback .choice,body.has-feedback .quadrant{opacity:1;cursor:pointer;pointer-events:auto}
+    .choice.selected,.quadrant.selected{border-color:var(--gold);background:#FFF8EC;box-shadow:0 0 0 3px rgba(238,163,32,.28)}
+    .feedback-guide{display:block;margin-bottom:3px;color:var(--steel);font-size:11px;font-weight:700}
+    .overlay{overflow:auto;align-items:safe center}
+    @media(max-width:860px){.game-header-inner{min-height:62px;grid-template-columns:minmax(0,1fr) auto}.brand{grid-column:1}.score{grid-column:2;grid-row:1}.brand-copy{display:block;grid-column:1/-1;grid-row:2;border-left:0;padding-left:0}.feedback{max-height:min(46dvh,310px)}.feedback-inner{align-items:start}.feedback.open{padding-bottom:env(safe-area-inset-bottom)}.choice{min-height:76px}.quadrants{gap:9px}.rail{display:none}#app[data-phase="intro"] .rail{display:grid}.card{padding:18px}.context-strip{padding-block:9px}}
+    @media(max-width:560px){body.has-feedback .primary{padding-bottom:190px}.feedback-inner{grid-template-columns:4px minmax(0,1fr)}.feedback-actions{width:100%}.feedback-title{font-size:15px}.feedback p{font-size:13px}.choice .key{font-size:11px}}
+    @media(max-width:360px){.quadrants{grid-template-columns:1fr}.quadrant{min-height:72px}}
+    @media(max-height:620px){.overlay{align-items:flex-start}}
+    /* Sticky app header mirrors Issue Tree Builder. */
+    .app-header{display:grid;grid-template-columns:auto auto minmax(240px,1fr) auto;align-items:center;column-gap:20px;width:100%;min-height:76px;padding:12px 32px;background:var(--navy);color:#fff;position:sticky;top:0;z-index:40;border-bottom:0}
+    .app-header .brand{display:inline-flex;align-items:center;gap:10px}
+    .brand-logo-frame{display:block;width:224px;height:46px}
+    .brand-logo-frame img{display:block;width:100%;height:100%;object-fit:contain}
+    .brand-divider{width:1px;height:38px;background:rgba(255,255,255,.42)}
+    .app-heading{justify-self:start;min-width:0}
+    .app-kicker{display:block;color:var(--gold);font:400 10px Lato,Arial,sans-serif;text-decoration:none}
+    .app-title{display:block;margin-top:3px;color:#fff;font:700 27px/1 'Playfair Display',Georgia,serif}
+    .utility-cluster{display:flex;align-items:center;justify-content:flex-end;gap:10px;flex:0 0 auto}
+    .utility-metric{min-width:132px;padding:7px 10px;border:1px solid rgba(255,255,255,.18);border-radius:8px;background:rgba(255,255,255,.08)}
+    .utility-label-row{display:flex;align-items:center;justify-content:space-between;gap:8px}
+    .small-label{color:var(--gold);font:400 9px Lato,Arial,sans-serif}
+    .utility-value,.activity-timer-display{color:#fff;font:700 18px/1 Lato,Arial,sans-serif}
+    .utility-controls{display:flex;align-items:center;gap:6px}
+    .icon-timer-btn{display:grid;place-items:center;width:34px;height:34px;padding:0;border:1px solid rgba(255,255,255,.3);border-radius:50%;background:rgba(255,255,255,.08);color:#fff;font-size:15px;font-weight:700;line-height:1}
+    .icon-timer-btn:hover{background:rgba(255,255,255,.16)}
+    .layout{grid-template-columns:300px minmax(0,1fr)}
+    .record-note{margin:0 0 8px;color:var(--steel);font-size:12px;line-height:1.4}
+    .record .pill.yes{border-color:var(--line);background:#f7f5ef;color:var(--navy)}
+    .feedback-inner{width:min(900px,100%);padding:9px 20px;gap:12px}
+    .feedback-guide{margin-bottom:1px;font-size:10px}
+    .feedback-title{font-size:15px}
+    .feedback p{margin-top:3px;font-size:13px;line-height:1.35}
+    .feedback .button{min-height:38px!important;padding:7px 16px!important}
+    @media(max-width:1023px){.app-header{grid-template-columns:1fr;gap:12px}.brand-divider{display:none}.app-heading,.utility-cluster{justify-self:start}.utility-cluster{width:100%;flex-wrap:wrap}}
+    @media(max-width:768px){.app-header{display:flex;align-items:center;gap:10px 12px;padding:10px 16px;flex-wrap:wrap}.brand-logo-frame{width:140px;min-width:140px;height:32px}.app-heading{flex:1 1 180px}.app-kicker{font-size:9px;line-height:1.2}.app-title{font-size:21px;line-height:1.1}.utility-cluster{margin-left:auto;justify-content:flex-start;gap:6px;width:100%}.utility-metric{min-height:44px;min-width:120px;flex:1}.icon-timer-btn{width:44px;height:44px}.feedback-inner{padding:9px 12px}}
+    @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
   </style>
 </head>
 <body>
-  <header class="eisenhower-header">
-    <a class="eisenhower-logo" href="../../member-login/index.html" aria-label="The Untaught Lessons member home">
-      <img src="../../assets/utl-logo-nav-white.png" alt="The Untaught Lessons">
-    </a>
-    <div class="eisenhower-divider" aria-hidden="true"></div>
-    <div>
-      <span class="eisenhower-kicker">Phase 3 · Act confidently</span>
-      <span class="eisenhower-title">The art of saying no</span>
-      <a class="module-back-link" href="../../member-login/phase-3.html#exercises">← Back to Phase 3 exercises</a>
+  <header class="app-header">
+    <div class="brand"><a class="brand-logo-frame" href="../../member-login/index.html" aria-label="The Untaught Lessons member home"><img src="../../assets/utl-logo-nav-white.png" alt="The Untaught Lessons"></a></div>
+    <div class="brand-divider" aria-hidden="true"></div>
+    <div class="app-heading"><a class="app-kicker" href="../../member-login/index.html">Think. Speak. Act.™</a><span class="app-title">The art of saying no</span><a class="module-back-link" href="../../member-login/phase-3.html#exercises">← Back to Phase 3 exercises</a></div>
+    <div class="utility-cluster" aria-label="Exercise utilities">
+      <div class="utility-metric"><span class="small-label">Current round</span><div class="utility-value" id="headerRound">Not started</div></div>
+      <div class="utility-metric"><div class="utility-label-row"><span class="small-label">Elapsed time</span></div><div class="activity-timer-display" id="timerDisplay">00:00</div></div>
+      <div class="utility-controls"><button class="icon-timer-btn" id="timerPauseBtn" type="button" aria-label="Pause timer">Ⅱ</button><button class="icon-timer-btn" id="timerResetBtn" type="button" aria-label="Reset timer">↻</button></div>
     </div>
   </header>
-
-  <section class="eisenhower-context" aria-label="Scenario and timer">
-    <label class="eisenhower-scenario-control">
-      <span class="eisenhower-context-label">Scenario:</span>
-      <select class="eisenhower-context-select" id="scenarioSelect"></select>
-    </label>
-    <p class="eisenhower-context-copy" id="contextSentence"></p>
-    <div class="eisenhower-timer" aria-label="Timer">
-      <span class="eisenhower-timer-label">Timer</span>
-      <span class="eisenhower-timer-value" id="timerValue">00:00</span>
-      <button class="eisenhower-icon-button" id="timerPause" type="button" aria-label="Pause timer"></button>
-      <button class="eisenhower-icon-button" id="timerReset" type="button" aria-label="Reset timer"></button>
-    </div>
-  </section>
-
-  <main class="eisenhower-main">
-    <section class="eisenhower-page-intro">
-      <h1>The art of saying no</h1>
-      <p>Practice prioritizing: sort the tasks by urgency and importance, then compare your judgment with one possible example.</p>
-    </section>
-    <section class="eisenhower-workspace">
-      <aside class="eisenhower-panel eisenhower-task-panel">
-        <div class="eisenhower-panel-head">
-          <h2>Task list</h2>
-          <span class="eisenhower-count">10 tasks</span>
-        </div>
-        <div class="eisenhower-task-list" id="taskList" data-zone="list"></div>
-        <p class="eisenhower-empty" id="emptyState">All tasks placed. Review your matrix.</p>
-      </aside>
-
-      <section aria-label="Eisenhower Matrix">
-        <div class="eisenhower-example-banner" id="exampleBanner">
-          <span>This is one strong way to prioritize. Yours may differ depending on your goals.</span>
-          <button class="eisenhower-button navy" id="backToAnswer" type="button">Back to my answer</button>
-        </div>
-        <div class="eisenhower-matrix-wrap">
-          <div aria-hidden="true"></div>
-          <div class="eisenhower-axis-top" aria-hidden="true">
-            <div class="eisenhower-axis">Important</div>
-            <div class="eisenhower-axis">Not important</div>
-          </div>
-          <div class="eisenhower-axis-left" aria-hidden="true">
-            <div class="eisenhower-axis">Urgent</div>
-            <div class="eisenhower-axis">Not urgent</div>
-          </div>
-          <div class="eisenhower-matrix" id="matrix"></div>
-        </div>
-      </section>
-    </section>
-  </main>
-
-  <footer class="eisenhower-actions">
-    <button class="eisenhower-button navy" id="showExample" type="button">Show example placement</button>
-    <button class="eisenhower-button primary-action" id="markDone" type="button">Submit</button>
-    <button class="eisenhower-button secondary-action" id="tryAgain" type="button" hidden>Try again</button>
-    <span class="eisenhower-context-copy" id="doneStatus" role="status" aria-live="polite"></span>
-  </footer>
-
+  <span id="scoreValue" hidden>0</span>
+  <div class="context-strip" id="contextStrip"></div>
+  <main id="app" aria-live="polite"></main>
+  <div id="toasts"></div>
+  <div class="feedback" id="feedback" role="status" aria-live="polite" aria-labelledby="feedbackTitle"></div>
+  <div class="confetti hidden" id="confetti" aria-hidden="true"></div>
   <script>
-    (function () {
-      const QUADRANTS = [
-        { id: 'do', title: 'Do', sub: 'Urgent + Important' },
-        { id: 'delegate', title: 'Delegate', sub: 'Urgent + Not Important' },
-        { id: 'schedule', title: 'Schedule', sub: 'Not Urgent + Important' },
-        { id: 'delete', title: 'Delete', sub: 'Not Urgent + Not Important' }
-      ];
-
-      const SCENARIOS = [
-        {
-          id: 'olympic',
-          label: 'MA / Olympic project',
-          sentence: "Requests are coming from all directions. Aiko will not tell you what to prioritize. You decide.",
-          tasks: [
-            "Finalize the Olympic committee deck for tomorrow's 9am presentation",
-            "Prepare the strategic narrative for a stakeholder meeting next week",
-            "Send follow-up notes from today's partner meeting while details are fresh",
-            "Review feedback from last week's internal review session",
-            "Respond to a journalist asking for a comment on the Olympic project",
-            "Help ops set up the meeting room for Aiko's client visit this afternoon",
-            "Draft the Q3 project roadmap Aiko asked for by end of month",
-            "Meet a potential new partner who is in town only today",
-            "Accompany a sick colleague to the clinic",
-            "Update the team's shared project tracker that has not been touched in two weeks"
-          ],
-          sample: { do: [1, 3, 9], schedule: [2, 7, 8], delegate: [6, 10], delete: [4, 5], ambiguous: [8, 9] }
-        },
-        {
-          id: 'student',
-          label: 'Student life',
-          sentence: "It is hell week. Not everything can get done. What actually moves the needle?",
-          tasks: [
-            "Study for an exam happening in two days",
-            "Write a paper due tomorrow night",
-            "Attend your student org's event that you co-planned. It is tonight",
-            "Reply to a professor's email about your research assistant application",
-            "Call your parents. They have been waiting three days",
-            "Help a close friend move apartments. They asked last week",
-            "Submit a scholarship application due in four days",
-            "Do laundry. You are down to your last outfit",
-            "Review notes from last week's lecture to fill in gaps",
-            "Watch the new episode everyone in your group chat is discussing"
-          ],
-          sample: { do: [1, 2, 3], schedule: [7, 4, 5], delegate: [8, 6], delete: [10, 9], ambiguous: [3, 5] }
-        },
-        {
-          id: 'life',
-          label: 'Personal / life admin',
-          sentence: 'Your to-do list has been growing for weeks. Time to be ruthless.',
-          tasks: [
-            "Pay a credit card bill due tomorrow. Late fee kicks in otherwise",
-            "Book a doctor's appointment for a health issue you have been ignoring for a month",
-            "Renew your passport. You have a trip in six weeks",
-            "Reply to a friend's wedding RSVP. Deadline was yesterday",
-            "Clean and organize your home workspace",
-            "Cancel a gym membership you have not used in three months",
-            "Call your bank about a suspicious charge on your statement",
-            "Buy a birthday gift for a family member whose birthday is this weekend",
-            "Sort through and delete old files on your laptop",
-            "Research and compare internet providers. Your contract renews next month"
-          ],
-          sample: { do: [1, 7, 2], schedule: [3, 8, 10], delegate: [4, 6], delete: [5, 9], ambiguous: [2, 10] }
-        },
-        {
-          id: 'manager',
-          label: 'Manager with a team',
-          sentence: 'Your team is stretched and so are you. Decide what you do, what you delegate, and what you cut.',
-          tasks: [
-            "Review and approve a team member's client deliverable due today",
-            "Prepare for a performance review conversation you have been putting off",
-            "Respond to a client escalation that came in this morning",
-            "Write the team's monthly report. Your manager needs it by Friday",
-            "Attend a cross-functional sync loosely related to your team's work",
-            "Onboard a new team member who starts tomorrow",
-            "Follow up on a proposal you sent a potential partner two weeks ago",
-            "Reorganize the team's shared drive. It is a mess",
-            "Review a junior team member's draft presentation before their client call today",
-            "Plan the team's quarter-end social event"
-          ],
-          sample: { do: [3, 9, 1], schedule: [2, 6, 7], delegate: [4, 10], delete: [5, 8], ambiguous: [1, 7] }
-        },
-        {
-          id: 'new-job',
-          label: 'New job, first 90 days',
-          sentence: "Everything feels urgent in a new role. Most of it is not.",
-          tasks: [
-            "Prepare a summary of your first-week observations for your manager",
-            "Set up introductory 1:1 meetings with all key stakeholders",
-            "Respond to a Slack message from a senior leader asking a quick question",
-            "Learn the company's internal tools and systems",
-            "Attend every optional meeting you have been invited to this week",
-            "Draft your 30-60-90 day plan. Your manager asked for it by end of month",
-            "Update your LinkedIn profile to reflect the new role",
-            "Review the last six months of team reports and meeting notes",
-            "Fix a small but visible error in a client-facing document you spotted",
-            "Accept an invitation to present at an internal all-hands next week"
-          ],
-          sample: { do: [3, 9], schedule: [1, 6, 8], delegate: [4, 2], delete: [5, 10, 7], ambiguous: [7, 8] }
-        },
-        {
-          id: 'freelancer',
-          label: 'Freelancer / consultant',
-          sentence: 'You work alone. Every hour is a decision. Not all clients are equal.',
-          tasks: [
-            "Send a revised proposal to a high-value client who asked for changes",
-            "Follow up on three unpaid invoices from last month",
-            "Prepare for a discovery call with a promising new lead. It is tomorrow",
-            "Write a LinkedIn post you have been drafting for two weeks",
-            "Schedule and batch your social media posts for the month",
-            "Reply to a low-budget client asking for significant scope changes",
-            "Protect focused work time for a project due this Friday",
-            "Attend a networking event tonight. You do not know anyone going",
-            "File your quarterly taxes. Due in one week",
-            "Research a new tool that might improve your workflow"
-          ],
-          sample: { do: [1, 9, 2], schedule: [3, 7], delegate: [5, 10, 6], delete: [8, 4], ambiguous: [2, 6] }
-        }
-      ];
-
-      const state = {
-        scenarioId: SCENARIOS[0].id,
-        placements: {},
-        selectedId: null,
-        exampleMode: false,
-        savedPlacements: null,
-        lastSavedSignature: '',
-        timerStartedAt: Date.now(),
-        elapsedBeforePause: 0,
-        timerRunning: true
-      };
-
-      const scenarioSelect = document.getElementById('scenarioSelect');
-      const contextSentence = document.getElementById('contextSentence');
-      const taskList = document.getElementById('taskList');
-      const matrix = document.getElementById('matrix');
-      const emptyState = document.getElementById('emptyState');
-      const exampleBanner = document.getElementById('exampleBanner');
-      const showExample = document.getElementById('showExample');
-      const backToAnswer = document.getElementById('backToAnswer');
-      const tryAgain = document.getElementById('tryAgain');
-      const timerValue = document.getElementById('timerValue');
-      const timerPause = document.getElementById('timerPause');
-      const timerReset = document.getElementById('timerReset');
-
-      function scenario() {
-        return SCENARIOS.find((item) => item.id === state.scenarioId) || SCENARIOS[0];
-      }
-
-      function taskId(index) {
-        return `task-${index + 1}`;
-      }
-
-      function taskIndex(id) {
-        return Number(id.replace('task-', '')) - 1;
-      }
-
-      function escapeHtml(value) {
-        return String(value).replace(/[&<>"']/g, (char) => ({
-          '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
-        }[char]));
-      }
-
-      function formatSeconds(total) {
-        const mins = Math.floor(total / 60).toString().padStart(2, '0');
-        const secs = Math.floor(total % 60).toString().padStart(2, '0');
-        return `${mins}:${secs}`;
-      }
-
-      function elapsedSeconds() {
-        if (!state.timerRunning) return state.elapsedBeforePause;
-        return state.elapsedBeforePause + Math.floor((Date.now() - state.timerStartedAt) / 1000);
-      }
-
-      function resetTimer() {
-        state.elapsedBeforePause = 0;
-        state.timerStartedAt = Date.now();
-        state.timerRunning = true;
-        renderTimer();
-      }
-
-      function renderTimer() {
-        timerValue.textContent = formatSeconds(elapsedSeconds());
-        timerPause.setAttribute('aria-label', state.timerRunning ? 'Pause timer' : 'Resume timer');
-        timerPause.innerHTML = state.timerRunning
-          ? '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round"><path d="M8 5v14"/><path d="M16 5v14"/></svg>'
-          : '<svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
-        timerReset.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>';
-      }
-
-      function pauseTimer() {
-        if (!state.timerRunning) return;
-        state.elapsedBeforePause = elapsedSeconds();
-        state.timerStartedAt = null;
-        state.timerRunning = false;
-        renderTimer();
-      }
-
-      function resumeTimer() {
-        if (state.timerRunning) return;
-        state.timerStartedAt = Date.now();
-        state.timerRunning = true;
-        renderTimer();
-      }
-
-      function resumeTimerFromInteraction() {
-        if (!state.timerRunning) resumeTimer();
-      }
-
-      function placedIdsIn(zone) {
-        return Object.entries(state.placements).filter(([, value]) => value === zone).map(([key]) => key);
-      }
-
-      function unplacedIds() {
-        return scenario().tasks.map((_, index) => taskId(index)).filter((id) => !state.placements[id]);
-      }
-
-      function makeChip(id, small = false, readonly = false) {
-        const text = scenario().tasks[taskIndex(id)];
-        return `
-          <button class="eisenhower-chip ${small ? 'is-small' : ''} ${state.selectedId === id ? 'is-selected' : ''}" type="button" data-item-id="${id}" draggable="${!readonly}">
-            <span class="eisenhower-handle" aria-hidden="true">⋮⋮</span>
-            <span>${escapeHtml(text)}</span>
-          </button>
-        `;
-      }
-
-      function renderScenarioOptions() {
-        scenarioSelect.innerHTML = SCENARIOS.map((item) => `<option value="${item.id}">${escapeHtml(item.label)}</option>`).join('');
-        scenarioSelect.value = state.scenarioId;
-      }
-
-      function renderTaskList() {
-        const ids = unplacedIds();
-        const current = state.selectedId ? (state.placements[state.selectedId] || 'list') : '';
-        const addSlot = state.selectedId && current !== 'list'
-          ? '<button class="eisenhower-add-slot" type="button" data-move-selected-to="list">Move selected task here</button>'
-          : '';
-        taskList.innerHTML = addSlot + ids.map((id) => makeChip(id)).join('');
-        emptyState.classList.toggle('is-visible', ids.length === 0);
-      }
-
-      function renderMatrix() {
-        matrix.innerHTML = QUADRANTS.map((quad) => `
-          <section class="eisenhower-quadrant" data-zone="${quad.id}">
-            <h3>${quad.title}</h3>
-            <p class="eisenhower-quadrant-sub">${quad.sub}</p>
-            <div class="eisenhower-zone">
-              ${state.selectedId && (state.placements[state.selectedId] || 'list') !== quad.id
-                ? `<button class="eisenhower-add-slot" type="button" data-move-selected-to="${quad.id}">Add selected task here</button>`
-                : ''}
-              ${placedIdsIn(quad.id).map((id) => {
-                const note = state.exampleMode && scenario().sample.ambiguous.includes(taskIndex(id) + 1)
-                  ? '<span class="eisenhower-note">Context-dependent. Both placements can be right.</span>'
-                  : '';
-                return `<div>${makeChip(id, true, state.exampleMode)}${note}</div>`;
-              }).join('')}
-            </div>
-          </section>
-        `).join('');
-        exampleBanner.classList.toggle('is-visible', state.exampleMode);
-        showExample.style.visibility = state.exampleMode ? 'hidden' : '';
-        updateTapTargets();
-      }
-
-      function renderAll() {
-        contextSentence.textContent = scenario().sentence;
-        renderTaskList();
-        renderMatrix();
-        saveCompletionIfReady();
-      }
-
-      function completionPayload() {
-        const activeScenario = scenario();
-        return {
-          scenarioId: activeScenario.id,
-          scenarioLabel: activeScenario.label,
-          placements: Object.fromEntries(Object.entries(state.placements).map(([id, zone]) => [
-            activeScenario.tasks[taskIndex(id)],
-            zone
-          ])),
-          page: window.location.href
-        };
-      }
-
-      function saveCompletionIfReady() {
-        if (state.exampleMode) return;
-        if (Object.keys(state.placements).length !== scenario().tasks.length) return;
-        const signature = JSON.stringify({ scenarioId: state.scenarioId, placements: state.placements });
-        if (state.lastSavedSignature === signature) return;
-        state.lastSavedSignature = signature;
-        localStorage.setItem('utl_p3_ex1_done', 'true');
-        localStorage.setItem('utl_result_eisenhower-matrix', JSON.stringify(completionPayload()));
-        import('../../assets/firebase.js')
-          .then(({ saveUserProgress }) => saveUserProgress('eisenhower-matrix', 'The art of saying no', completionPayload()))
-          .catch((error) => console.warn('Firestore progress save failed.', error));
-      }
-
-      function markDone() {
-        const status = document.getElementById('doneStatus');
-        if (Object.keys(state.placements).length !== scenario().tasks.length) {
-          status.textContent = 'Place all 10 tasks before submitting.';
-          return;
-        }
-        saveCompletionIfReady();
-        window.UTLRewardEvents?.awardCompletionExercise({
-          appId: 'eisenhower-matrix',
-          title: 'The art of saying no complete',
-          body: 'Your prioritization matrix was saved.'
-        });
-        tryAgain.hidden = false;
-        status.textContent = 'Saved to your workspace.';
-      }
-
-      function moveItem(id, zone) {
-        if (state.exampleMode) return;
-        if (zone === 'list') delete state.placements[id];
-        else state.placements[id] = zone;
-        state.selectedId = null;
-        renderAll();
-      }
-
-      function resetBoard() {
-        state.placements = {};
-        state.selectedId = null;
-        state.exampleMode = false;
-        state.savedPlacements = null;
-        state.lastSavedSignature = '';
-        tryAgain.hidden = true;
-        resetTimer();
-        renderAll();
-      }
-
-      function updateTapTargets() {
-        document.querySelectorAll('.eisenhower-chip').forEach((chip) => {
-          chip.classList.toggle('is-selected', chip.dataset.itemId === state.selectedId);
-          chip.setAttribute('aria-pressed', chip.dataset.itemId === state.selectedId ? 'true' : 'false');
-        });
-        document.querySelectorAll('[data-zone]').forEach((zone) => {
-          const current = state.selectedId ? (state.placements[state.selectedId] || 'list') : '';
-          zone.classList.toggle('tap-target', Boolean(state.selectedId) && zone.dataset.zone !== current);
-        });
-      }
-
-      function showExamplePlacement() {
-        if (state.exampleMode) return;
-        state.savedPlacements = { ...state.placements };
-        const samplePlacements = {};
-        Object.entries(scenario().sample).forEach(([zone, indexes]) => {
-          if (zone === 'ambiguous') return;
-          indexes.forEach((index) => {
-            samplePlacements[taskId(index - 1)] = zone;
-          });
-        });
-        state.placements = samplePlacements;
-        state.selectedId = null;
-        state.exampleMode = true;
-        renderAll();
-      }
-
-      function restoreAnswer() {
-        state.placements = { ...(state.savedPlacements || {}) };
-        state.exampleMode = false;
-        state.savedPlacements = null;
-        renderAll();
-      }
-
-      document.addEventListener('click', (event) => {
-        const chip = event.target.closest('.eisenhower-chip');
-        if (chip && !state.exampleMode) {
-          resumeTimerFromInteraction();
-          const id = chip.dataset.itemId;
-          state.selectedId = state.selectedId === id ? null : id;
-          renderAll();
-          return;
-        }
-        const addSlot = event.target.closest('[data-move-selected-to]');
-        if (addSlot && state.selectedId && !state.exampleMode) {
-          resumeTimerFromInteraction();
-          moveItem(state.selectedId, addSlot.dataset.moveSelectedTo);
-          return;
-        }
-        const zone = event.target.closest('[data-zone]');
-        if (zone && state.selectedId && !state.exampleMode) {
-          resumeTimerFromInteraction();
-          moveItem(state.selectedId, zone.dataset.zone);
-        }
-      });
-
-      document.addEventListener('dragstart', (event) => {
-        const chip = event.target.closest('.eisenhower-chip');
-        if (!chip || state.exampleMode) return;
-        resumeTimerFromInteraction();
-        state.selectedId = null;
-        event.dataTransfer.setData('text/plain', chip.dataset.itemId);
-        renderAll();
-      });
-
-      document.addEventListener('dragover', (event) => {
-        const zone = event.target.closest('[data-zone]');
-        if (!zone || state.exampleMode) return;
-        event.preventDefault();
-      });
-
-      document.addEventListener('dragenter', (event) => {
-        const zone = event.target.closest('[data-zone]');
-        if (!zone || state.exampleMode) return;
-        zone.classList.add('drag-over');
-      });
-
-      document.addEventListener('dragleave', (event) => {
-        const zone = event.target.closest('[data-zone]');
-        if (!zone) return;
-        zone.classList.remove('drag-over');
-      });
-
-      document.addEventListener('drop', (event) => {
-        const zone = event.target.closest('[data-zone]');
-        if (!zone || state.exampleMode) return;
-        event.preventDefault();
-        zone.classList.remove('drag-over');
-        const id = event.dataTransfer.getData('text/plain');
-        if (id) {
-          resumeTimerFromInteraction();
-          moveItem(id, zone.dataset.zone);
-        }
-      });
-
-      scenarioSelect.addEventListener('change', () => {
-        state.scenarioId = scenarioSelect.value;
-        resetBoard();
-      });
-      showExample.addEventListener('click', showExamplePlacement);
-      backToAnswer.addEventListener('click', restoreAnswer);
-      document.getElementById('markDone').addEventListener('click', markDone);
-      tryAgain.addEventListener('click', resetBoard);
-      timerPause.addEventListener('click', () => {
-        state.timerRunning ? pauseTimer() : resumeTimer();
-      });
-      timerReset.addEventListener('click', resetTimer);
-
-      renderScenarioOptions();
-      renderAll();
-      renderTimer();
-      setInterval(renderTimer, 1000);
+    (function(){
+      'use strict';
+      const STORAGE_KEY='utl_sayno_v2_session';
+      const SCENARIO={id:'ma-olympic',label:'MA / Olympic project',setup:'Requests are coming from all directions. Aiko will not tell you what to prioritize. You decide.',tasks:[
+        {id:1,text:"Finalize the Olympic committee deck for tomorrow's 9am presentation",urgent:true,important:true,quadrant:'do',why:"Hard deadline tomorrow morning, and it is the flagship deliverable."},
+        {id:2,text:'Prepare the strategic narrative for a stakeholder meeting next week',urgent:false,important:true,quadrant:'schedule',why:'High stakes, but next week. Block time for it; do not do it now.'},
+        {id:3,text:"Send follow-up notes from today's partner meeting while details are fresh",urgent:true,important:true,quadrant:'do',why:'Value decays by the hour; fresh details are the point.'},
+        {id:4,text:"Review feedback from last week's internal review session",urgent:false,important:false,quadrant:'delete',why:'A week old and nothing depends on it. Let it go, or batch it much later.'},
+        {id:5,text:'Respond to a journalist asking for a comment on the Olympic project',urgent:false,important:false,quadrant:'delete',why:'Press comments are not yours to give. Route it; do not work it.'},
+        {id:6,text:"Help ops set up the meeting room for Aiko's client visit this afternoon",urgent:true,important:false,quadrant:'delegate',why:'Time-bound but not your job. Ops owns this.'},
+        {id:7,text:'Draft the Q3 project roadmap Aiko asked for by end of month',urgent:false,important:true,quadrant:'schedule',why:'Directly requested and strategic, but weeks away. Schedule it.'},
+        {id:8,text:'Meet a potential new partner who is in town only today',urgent:true,important:true,quadrant:'do',ambiguous:true,why:'A closing window, but is it more important than the deck? Reasonable people differ.'},
+        {id:9,text:'Accompany a sick colleague to the clinic',urgent:true,important:true,quadrant:'do',ambiguous:true,why:'Human first. Most would drop things, but some would find help instead. A judgment call.'},
+        {id:10,text:"Update the team's shared project tracker that has not been touched in two weeks",urgent:false,important:false,quadrant:'delegate',why:'Two weeks stale already proves it can wait, and someone else can own it.'}
+      ]};
+      const QUADRANTS=[{key:'do',name:'Do',sub:'Urgent + Important'},{key:'schedule',name:'Schedule',sub:'Not urgent + Important'},{key:'delegate',name:'Delegate',sub:'Urgent + Not important'},{key:'delete',name:'Delete',sub:'Not urgent + Not important'}];
+      const QNAME={do:'Do',schedule:'Schedule',delegate:'Delegate',delete:'Delete'};
+      const REASONS={8:['A closing window beats a movable deadline; the deck can flex an hour','The deck owns tonight; send a colleague to meet the partner','Meet them briefly now, then go heads-down on the deck'],9:['People come before deliverables. Go.','Find someone closer to accompany them; stay on the deadline','Go now, and hand the deck follow-ups to Aiko tonight']};
+      const ROUNDS=[{name:'Urgent or not?',skill:'Decide whether something breaks, expires, or loses value soon if the request waits.'},{name:'Important or not?',skill:'Decide whether skipping the request would materially affect the goal.'},{name:'Place the matrix',skill:'Combine your urgency and importance decisions to place each request.'},{name:'Explain two judgment calls',skill:'Two requests could reasonably fit in more than one place. Choose where you would put each one, then explain your choice in one sentence. You earn points for a clear reason, not for matching the sample.'},{name:'Write the no',skill:'Write the message you would actually send.'}];
+      const SAMPLE_NO="I cannot take the tracker update this week; the committee deck owns my next 48 hours. Ops has the access, and I will flag it to them today.";
+      const BASE=SCENARIO.tasks,R3=BASE.filter(t=>!t.ambiguous),AMBIGUOUS=BASE.filter(t=>t.ambiguous);
+      const initial={phase:'intro',round:1,queue:[],qIdx:0,inRetry:false,retryIds:[],mp:0,streak:0,completionAwarded:false,completionSaved:false,firstTry:{},answers:{},r3Placed:{},r4:{},r4Stage:'place',noText:'',noSubmitted:false,noTaskId:null,lastAccuracy:null,focusQuad:-1,pendingBanner:null};
+      let state=loadState(),banner=state.pendingBanner||null,pickedReason=null,freeReason='',summaryAnimated=false;
+      const app=document.getElementById('app'),feedback=document.getElementById('feedback'),scoreValue=document.getElementById('scoreValue'),headerRound=document.getElementById('headerRound'),timerDisplay=document.getElementById('timerDisplay'),timerPauseBtn=document.getElementById('timerPauseBtn'),timerResetBtn=document.getElementById('timerResetBtn');
+      let elapsedSeconds=0,timerRunning=state.phase!=='intro',timerInterval=null;
+      function loadState(){try{const saved=JSON.parse(localStorage.getItem(STORAGE_KEY)||'null');return saved&&saved.phase?Object.assign({},initial,saved):Object.assign({},initial)}catch(_){return Object.assign({},initial)}}
+      function saveState(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(state))}catch(_){}}
+      function setState(patch){state=Object.assign({},state,typeof patch==='function'?patch(state):patch);saveState();render()}
+      function escapeHtml(value){return String(value==null?'':value).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
+      function words(text){return text.trim()?text.trim().split(/\s+/):[]}
+      function renderTimer(){const minutes=String(Math.floor(elapsedSeconds/60)).padStart(2,'0'),seconds=String(elapsedSeconds%60).padStart(2,'0');timerDisplay.textContent=minutes+':'+seconds;timerPauseBtn.textContent=timerRunning?'Ⅱ':'▶';timerPauseBtn.setAttribute('aria-label',timerRunning?'Pause timer':'Resume timer')}
+      function startTimer(){if(timerRunning&&timerInterval)return;timerRunning=true;if(!timerInterval)timerInterval=setInterval(()=>{if(timerRunning){elapsedSeconds++;renderTimer()}},1000);renderTimer()}
+      function taskById(id){return BASE.find(t=>t.id===Number(id))}
+      function queueFor(round){if(round===1||round===2)return BASE.map(t=>t.id);if(round===3)return R3.map(t=>t.id);if(round===4)return AMBIGUOUS.map(t=>t.id);return[]}
+      function accuracy(round){const ids=queueFor(round);if(!ids.length)return 0;return Math.round(ids.filter(id=>state.firstTry['r'+round+'-'+id]).length/ids.length*100)}
+      function noChecks(text){const sentences=text.split(/(?<=[.!?])\s+/).filter(Boolean),first=(sentences[0]||'').toLowerCase(),whole=text.toLowerCase();return{clearNo:/(^|\W)(no|can't|cannot|can not|won't|will not|unable|not able|not going to|have to pass|pass on|decline|declining)(\W|$)/.test(first)&&!/(maybe|might|perhaps)/.test(first),reason:/(because|so that|since|owns|deadline|priority|priorities|committed|my next|focus)/.test(whole),alternative:/(instead|after|\bcan\b|\bwill\b|i'll|flag|ops|aiko|tomorrow|today|next week|monday|tuesday|wednesday|thursday|friday|later)/.test(whole)}}
+      function addMp(amount){if(amount<=0)return;state.mp+=amount;saveState();scoreValue.textContent=state.mp;scoreValue.classList.remove('score-pop');void scoreValue.offsetWidth;scoreValue.classList.add('score-pop');const toast=document.createElement('div');toast.className='toast';toast.textContent='+'+amount+' exercise point'+(amount===1?'':'s');document.getElementById('toasts').appendChild(toast);setTimeout(()=>toast.remove(),1200)}
+      function showBanner(data){banner=data;state.pendingBanner=data;saveState();renderBanner()}
+      function renderBanner(){const siteFeedback=document.getElementById('utl-feedback-btn');if(!banner){document.body.classList.remove('has-feedback');if(siteFeedback)siteFeedback.hidden=false;feedback.className='feedback';feedback.innerHTML='';return}document.body.classList.add('has-feedback');if(siteFeedback)siteFeedback.hidden=true;feedback.className='feedback '+banner.type+' open';feedback.innerHTML='<div class="feedback-inner"><div><span class="feedback-guide">Selection saved. You can change it or continue.</span><div class="feedback-head"><span class="feedback-title" id="feedbackTitle">'+escapeHtml(banner.title)+'</span>'+(banner.mp?'<span class="chip">+'+banner.mp+' point'+(banner.mp===1?'':'s')+'</span>':'')+(banner.combo?'<span class="chip combo">'+escapeHtml(banner.combo)+'</span>':'')+'</div><p>'+escapeHtml(banner.why)+'</p></div><div class="feedback-actions"><button class="button" type="button" data-continue>Continue</button></div></div>';requestAnimationFrame(()=>feedback.querySelector('[data-continue]')?.focus({preventScroll:true}))}
+      function startRound(round){pickedReason=null;freeReason='';setState({phase:'play',round,queue:queueFor(round),qIdx:0,inRetry:false,retryIds:[],r4Stage:'place',streak:0,focusQuad:-1})}
+      function interstitial(round,lastAccuracy){if(round===1)startTimer();setState({phase:'interstitial',round,lastAccuracy:lastAccuracy==null?null:lastAccuracy})}
+      function startRetries(){setState(s=>({phase:'play',queue:s.retryIds.slice(),qIdx:0,inRetry:true,retryIds:[],streak:0}))}
+      function pickNoTask(){const pools=[Object.entries(state.r3Placed).filter(([,q])=>q==='delete'),Object.entries(state.r3Placed).filter(([,q])=>q==='delegate'),Object.entries(state.r4).filter(([,v])=>v.placed==='delete'||v.placed==='delegate')];for(const pool of pools)if(pool.length)return Number(pool[0][0]);return 10}
+      function advance(){banner=null;state.pendingBanner=null;saveState();renderBanner();const atEnd=state.qIdx+1>=state.queue.length;if(!atEnd){setState({qIdx:state.qIdx+1,r4Stage:'place',focusQuad:-1});return}if((state.round===1||state.round===2)&&!state.inRetry&&state.retryIds.length){setState({phase:'retryIntro'});return}if(state.round<=3){interstitial(state.round+1,accuracy(state.round));return}if(state.round===4){setState({phase:'interstitial',round:5,lastAccuracy:null,noTaskId:pickNoTask()})}}
+      function answerBinary(choice){const task=taskById(state.queue[state.qIdx]),truth=state.round===1?task.urgent:task.important,correct=choice===truth,axis=state.round===1?(task.urgent?'Urgent':'Not urgent'):(task.important?'Important':'Not important'),key='r'+state.round+'-'+task.id,revising=key in state.firstTry;state.answers[key]=choice;if(revising){saveState();showBanner({type:correct?'good':'warn',title:correct?'Matches the sample':'Different from the sample',why:'The sample calls this '+axis+'. '+task.why,mp:0,combo:''});render();return}let gained=0,combo='';if(correct){const nextStreak=state.streak+1;gained=1+(nextStreak>=3?2:0);combo=nextStreak>=3?'🔥 '+nextStreak+' in a row +2 points':'';if(!state.inRetry&&!(key in state.firstTry))state.firstTry[key]=true;state.streak=nextStreak;addMp(gained)}else{if(!state.inRetry&&!(key in state.firstTry))state.firstTry[key]=false;if(!state.inRetry&&!state.retryIds.includes(task.id))state.retryIds.push(task.id);state.streak=0;saveState()}showBanner({type:correct?'good':'warn',title:correct?'Matches the sample':'Different from the sample',why:'The sample calls this '+axis+'. '+task.why,mp:gained,combo});render()}
+      function answerQuadrant(quad){const task=taskById(state.queue[state.qIdx]);if(state.round===3){const match=quad===task.quadrant,key='r3-'+task.id,revising=key in state.firstTry;state.r3Placed[task.id]=quad;if(revising){saveState();showBanner({type:'info',title:'Selection updated to '+QNAME[quad],why:'The sample puts this in '+QNAME[task.quadrant]+'. '+task.why,mp:0});render();return}state.firstTry[key]=match;if(match)addMp(2);else saveState();state.focusQuad=-1;showBanner({type:'info',title:match?'Matches the sample: '+QNAME[quad]:'You chose '+QNAME[quad],why:'The sample puts this in '+QNAME[task.quadrant]+'. '+task.why,mp:match?2:0});render();return}state.r4[task.id]={placed:quad,reason:''};pickedReason=null;freeReason='';setState({r4Stage:'why',focusQuad:-1})}
+      function submitReason(){const task=taskById(state.queue[state.qIdx]),reason=pickedReason!==null?REASONS[task.id][pickedReason]:freeReason.trim();if(!reason)return;state.r4[task.id]={placed:state.r4[task.id].placed,reason};addMp(3);showBanner({type:'info',title:'A defensible call',why:'The sample leans '+QNAME[task.quadrant]+' — '+task.why+' Your '+QNAME[state.r4[task.id].placed]+' choice also holds with that reasoning.',mp:3});render()}
+      function submitNo(){if(noScore()<2)return;state.noSubmitted=true;state.phase='r5done';addMp(10);saveState();showConfetti();render()}
+      function noScore(){const c=noChecks(state.noText);return[c.clearNo,c.reason,c.alternative].filter(Boolean).length}
+      function showConfetti(){const layer=document.getElementById('confetti');layer.innerHTML='';for(let i=0;i<44;i++){const piece=document.createElement('span');piece.style.left=((i*137)%100)+'%';piece.style.background=['#EEA320','#003366','#4D7094','#F3EDE2'][i%4];piece.style.animationDelay=((i%10)*.07)+'s';layer.appendChild(piece)}layer.classList.remove('hidden');setTimeout(()=>layer.classList.add('hidden'),1800)}
+      function placementsPayload(){const result={};BASE.forEach(task=>{result[task.text]=(task.ambiguous?(state.r4[task.id]||{}).placed:state.r3Placed[task.id])||task.quadrant});return result}
+      function completionPayload(){return{scenarioId:SCENARIO.id,scenarioLabel:SCENARIO.label,placements:placementsPayload(),page:window.location.href,mp_total:state.mp,exercise_points:state.mp,reward_type:'completion-exercise',round_accuracies:{urgency:accuracy(1),importance:accuracy(2),quadrant:accuracy(3)},written_no:state.noText,version:1,experienceVersion:'v1-guided'}}
+      function saveCompletion(){if(state.completionSaved)return;state.completionSaved=true;saveState();const payload=completionPayload();try{localStorage.setItem('utl_p3_ex1_done','true');localStorage.setItem('utl_result_eisenhower-matrix',JSON.stringify(payload))}catch(_){}try{window.UTLRewardEvents?.awardCompletionExercise({appId: 'eisenhower-matrix',title:'The art of saying no complete',body:'Your prioritization decisions and written no were saved.'})}catch(error){console.warn('Reward save failed.',error)}import('../../assets/firebase.js').then(({saveUserProgress})=>saveUserProgress('eisenhower-matrix','The art of saying no',payload)).catch(error=>console.warn('Firestore progress save failed.',error))}
+      function showSummary(){if(!state.completionAwarded){state.completionAwarded=true;addMp(5)}state.phase='summary';saveState();saveCompletion();summaryAnimated=false;render()}
+      function restart(){try{localStorage.removeItem(STORAGE_KEY)}catch(_){}state=Object.assign({},initial);banner=null;pickedReason=null;freeReason='';summaryAnimated=false;renderBanner();render()}
+      function progress(){let label='Phase 3 practice',copy='Meet Aiko’s request list before the first decision.',count='',pct=0;if(state.phase==='interstitial'){label='Round '+state.round+' of 5 · '+ROUNDS[state.round-1].name;copy=ROUNDS[state.round-1].skill}else if(state.phase==='retryIntro'){label='Round '+state.round+' of 5 · '+ROUNDS[state.round-1].name;copy='Review the answers that did not match the sample.'}else if(state.phase==='play'){const length=state.queue.length||1;label='Round '+state.round+' of 5 · '+ROUNDS[state.round-1].name;copy=state.inRetry?'Choose again after reviewing the sample explanation.':ROUNDS[state.round-1].skill;count=state.round===5?'Final round':(state.inRetry?'Review question '+(state.qIdx+1)+' of '+length:'Question '+(state.qIdx+1)+' of '+length);pct=state.round===5?0:Math.round((state.qIdx+1)/length*100)}else if(state.phase==='r5done'||state.phase==='summary'){label='Exercise complete';copy='Your decisions and written no are ready for your workspace.';count='Done';pct=100}document.getElementById('contextStrip').innerHTML='<div><div class="label">'+escapeHtml(label)+'</div><div class="context-copy">'+escapeHtml(copy)+'</div></div>'+(state.phase==='intro'?'':'<div class="context-progress">'+escapeHtml(count)+'<div class="context-track"><div class="context-fill" style="width:'+pct+'%"></div></div></div>');headerRound.textContent=state.phase==='intro'?'Not started':(state.phase==='summary'||state.phase==='r5done'?'Complete':state.round+' of 5');scoreValue.textContent=state.mp}
+      function card(content,classes){return'<section class="card fade '+(classes||'')+'">'+content+'</section>'}
+      function goal(){return'<aside class="rail-card goal" aria-label="Exercise brief"><div class="label">Exercise brief</div><h3>Protect what actually matters.</h3><p>Everything on Aiko’s list can be justified — that is the trap. You are not picking what you like, you are deciding <strong>what gets dropped</strong>, and then saying so out loud.</p></aside>'}
+      function axes(){return'<aside class="rail-card"><h3>Keep these apart</h3><dl class="defs"><div><dt>Urgent = the clock</dt><dd>Something breaks, expires, or loses value soon.</dd></div><div><dt>Important = the consequence</dt><dd>It moves the goal, or its failure costs you.</dd></div></dl><p class="rail-hint">A loud request is not automatically either one.</p></aside>'}
+      function tallyRows(items,total){return items.map(x=>'<div class="tally-row"><b>'+x[0]+'</b><div class="tally-track"><div class="tally-fill" style="width:'+Math.min(100,x[1]/total*100)+'%"></div></div><span>'+x[1]+'</span></div>').join('')}
+      function rail(){if(state.phase==='intro')return'<div class="rail"><aside class="rail-card"><h3>The two questions</h3><div class="mini"><i></i><span class="mini-col">Urgent</span><span class="mini-col">Not urgent</span><span class="mini-side">Important</span><div class="mini-cell"><b>Do</b><span>now, yourself</span></div><div class="mini-cell"><b>Schedule</b><span>book the time</span></div><span class="mini-side">Not important</span><div class="mini-cell"><b>Delegate</b><span>someone else</span></div><div class="mini-cell"><b>Delete</b><span>say no</span></div></div><p class="rail-hint">Two independent reads. Answer them separately and the grid fills itself.</p></aside><aside class="rail-card"><h3>You will leave with</h3><ul class="takeaways"><li><i>✦</i>A defensible ranking of all ten requests.</li><li><i>✦</i>Two judgment calls you can argue either way — and did.</li><li><i>✦</i>One written no you could actually send today.</li></ul></aside></div>';let extra='';if(state.round===1||state.round===2){const yes=BASE.filter(t=>state.answers['r'+state.round+'-'+t.id]===true).length,no=BASE.filter(t=>state.answers['r'+state.round+'-'+t.id]===false).length,noun=state.round===1?'urgent':'important';extra='<aside class="rail-card"><h3>'+(state.round===1?'Read the clock only.':'Read the consequence only.')+'</h3><p>'+(state.round===1?'Ignore how big it feels. Ask one thing: does something break soon if this waits?':'Ignore the deadline. Ask one thing: if this never happened, what would it cost?')+'</p>'+(yes+no?'<p class="rail-hint">So far: <b>'+yes+'</b> '+noun+' · <b>'+no+'</b> not '+noun+'</p>':'')+(yes>=6?'<p class="rail-hint warn">If almost everything qualifies, the word stops meaning anything.</p>':'')+'</aside>'+axes()}else if(state.round===3){const q={do:0,schedule:0,delegate:0,delete:0};Object.values(state.r3Placed).forEach(x=>q[x]++);extra='<aside class="rail-card"><h3>Where your list is landing</h3>'+tallyRows([['Do',q.do],['Schedule',q.schedule],['Delegate',q.delegate],['Delete',q.delete]],8)+'<p class="rail-hint '+(q.do>=4?'warn':'')+'">'+(q.do>=4?'Do is filling up. A plan where everything is Do is not a plan.':'A real week has few Dos, several Schedules, and things you refuse to carry.')+'</p></aside>'+axes()}else if(state.round===4)extra='<aside class="rail-card"><h3>Judgment, not answers.</h3><p>These two split a room of experienced people. What separates the strong call from the weak one is not the square you pick — it is whether you can say why in one sentence.</p><p class="rail-hint">Points are for reasoning, not for matching.</p></aside>';else if(state.round===5||state.phase==='r5done')extra='<aside class="rail-card"><h3>The shape of a good no</h3><dl class="defs"><div><dt>1 · The no</dt><dd>First sentence. No throat-clearing, no “maybe”.</dd></div><div><dt>2 · The reason</dt><dd>Name the priority it loses to, not your feelings.</dd></div><div><dt>3 · The alternative</dt><dd>A person, a date, or a smaller version.</dd></div></dl><p class="rail-hint">A no without a door is a rejection. A no with one is a decision.</p></aside>';if(state.phase==='summary')extra='<aside class="rail-card"><h3>Carry this into your week</h3><p>Run the two questions on your own list before your next planning block: what breaks soon, and what actually moves the goal.</p><p class="rail-hint">Then find the one request you have been quietly carrying — and send the no.</p></aside>';return'<div class="rail">'+goal()+extra+'</div>'}
+      function record(){if(state.round===1||state.round===2){const rows=BASE.filter(t=>state.answers['r'+state.round+'-'+t.id]!==undefined);return card('<div class="label">Your choices this round</div><p class="record-note">This is a history of your choices. It does not mark them right or wrong.</p>'+(rows.length?'<ul>'+rows.map(t=>{const yes=state.answers['r'+state.round+'-'+t.id];return'<li><span class="record-text">'+escapeHtml(t.text)+'</span><span class="pill">'+(state.round===1?(yes?'Urgent':'Not urgent'):(yes?'Important':'Not important'))+'</span></li>'}).join('')+'</ul>':'<p class="empty">Your choices will appear here as you work through the round.</p>'),'record')}if(state.round===3){const rows=BASE.filter(t=>state.r3Placed[t.id]);return card('<div class="label">Your placements this round</div><p class="record-note">This is a history of where you placed each request. It does not mark them right or wrong.</p>'+(rows.length?'<ul>'+rows.map(t=>'<li><span class="record-text">'+escapeHtml(t.text)+'</span><span class="pill">'+QNAME[state.r3Placed[t.id]]+'</span></li>').join('')+'</ul>':'<p class="empty">Your placements will appear here as you build the matrix.</p>'),'record')}return''}
+      function renderOverlay(){const round=state.round;return'<div class="overlay"><div class="overlay-panel"><div class="round-dots">'+ROUNDS.map((_,i)=>'<span class="round-dot '+(i<round?'on':'')+'"></span>').join('')+'</div><div class="label">Round '+round+' of 5</div><h2>'+escapeHtml(ROUNDS[round-1].name)+'</h2><p>'+escapeHtml(ROUNDS[round-1].skill)+'</p><button class="button" type="button" data-start-round="'+round+'">'+(round===5?'Write the no':'Start round')+'</button></div></div>'}
+      function render(){progress();let html='';const task=state.phase==='play'?taskById(state.queue[state.qIdx]):null;if(state.phase==='intro')html=card('<div class="label">Phase 3 · Act confidently · about 12 minutes</div><h1>Aiko needs you to prioritize.</h1><p>Requests are coming from every direction and Aiko will not tell you what to prioritize. She expects you to decide — and to be able to defend it in one sentence when she asks.</p><div class="pullquote">Everything feels important, but not everything is.</div><p>Ten real requests are waiting. Your job is not to work harder through them; it is to sort them by two questions that most people collapse into one, then act on the answer — including telling someone no.</p><p class="supporting" style="margin:10px 0 0">Nothing here is graded on speed, and a wrong read never costs you points.</p>','intro')+card('<div class="label">How the exercise works</div><ol class="round-list">'+ROUNDS.map((r,i)=>'<li><span class="round-num">'+(i+1)+'</span><span><b>'+escapeHtml(r.name)+'</b><span>'+escapeHtml(r.skill)+'</span></span></li>').join('')+'</ol><div class="button-row"><button class="button" type="button" data-intro-start>Start the exercise</button></div>');
+        else if(state.phase==='interstitial')html=renderOverlay();
+        else if(state.phase==='retryIntro')html='<div class="overlay"><div class="overlay-panel"><div class="label">Round '+state.round+'</div><h2>Review '+state.retryIds.length+' answer'+(state.retryIds.length===1?'':'s')+'</h2><p>Your first choice did not match the sample. Review each explanation and choose again. Your score will not go down.</p><button class="button" type="button" data-start-retries>Review my answers</button></div></div>';
+        else if(state.phase==='play'&&(state.round===1||state.round===2)&&task){const selected=state.answers['r'+state.round+'-'+task.id];html=card('<div class="label">'+(state.inRetry?'Review question ':'Question ')+(state.qIdx+1)+' of '+state.queue.length+'</div><p class="task">'+escapeHtml(task.text)+'</p><p class="supporting" style="margin:12px 0 0">'+(state.round===1?'Does something break, expire, or lose value soon if this waits?':'Would skipping this materially affect the goal?')+'</p>')+'<div class="binary"><button class="choice '+(selected===true?'selected':'')+'" type="button" data-binary="true" aria-pressed="'+(selected===true)+'">'+(state.round===1?'Yes, urgent':'Yes, important')+'<span class="key">Press 1</span></button><button class="choice '+(selected===false?'selected':'')+'" type="button" data-binary="false" aria-pressed="'+(selected===false)+'">'+(state.round===1?'No, not urgent':'No, not important')+'<span class="key">Press 2</span></button></div>';}
+        else if(state.phase==='play'&&(state.round===3||(state.round===4&&state.r4Stage==='place'))&&task){const selected=state.round===3?state.r3Placed[task.id]:(state.r4[task.id]||{}).placed;html=card('<div class="label">Question '+(state.qIdx+1)+' of '+state.queue.length+'</div><p class="task">'+escapeHtml(task.text)+'</p>'+(state.round===4?'<p class="supporting" style="margin:10px 0 0">This request could reasonably fit in more than one place. Choose where you would put it. On the next screen, you will explain your choice in one sentence.</p>':'<p class="supporting" style="margin:10px 0 0">Choose the action that follows from your urgency and importance decisions.</p>'))+'<div class="quadrants">'+QUADRANTS.map((q,i)=>'<button class="quadrant '+(state.focusQuad===i?'focused ':'')+(selected===q.key?'selected':'')+'" type="button" data-quadrant="'+q.key+'" aria-pressed="'+(selected===q.key)+'" aria-label="Choose '+q.name+': '+q.sub+'"><h3>'+q.name+'</h3><p>'+q.sub+'</p></button>').join('')+'</div><p class="keyboard-note">Click a placement, or use the arrow keys and press Enter.</p>';}
+        else if(state.phase==='play'&&state.round===4&&state.r4Stage==='why'&&task){const placement=(state.r4[task.id]||{}).placed,placementOption=QUADRANTS.find(q=>q.key===placement)||QUADRANTS[0];html=card('<div class="label">Round 4 · Explain your choice</div><p class="task" style="font-size:18px">“'+escapeHtml(task.text)+'”</p><div class="placement-summary"><span>Your placement</span><button class="placement-tile" type="button" data-change-placement aria-label="Change placement from '+escapeHtml(placementOption.name)+'" title="Choose a different placement"><strong>'+escapeHtml(placementOption.name)+'</strong><small>'+escapeHtml(placementOption.sub)+'</small><span class="placement-edit" aria-hidden="true">↺</span></button></div><p class="supporting">Choose the explanation that best matches your reasoning. You can also write your own. There is no single required placement here. The goal is to make a clear, defensible decision.</p><div class="reason-list">'+REASONS[task.id].map((reason,i)=>'<button class="reason '+(pickedReason===i?'selected':'')+'" type="button" data-reason="'+i+'">'+escapeHtml(reason)+'</button>').join('')+'<input class="reason-input" id="freeReason" value="'+escapeHtml(freeReason)+'" placeholder="Or explain your choice in one sentence"></div><div class="button-row"><button class="button" type="button" data-submit-reason '+(pickedReason===null&&!freeReason.trim()?'disabled':'')+'>Save my explanation</button></div>');}
+        else if(state.phase==='play'&&state.round===5){const task5=taskById(state.noTaskId)||BASE[9],checks=noChecks(state.noText),count=words(state.noText).length;html=card('<div class="label">Final challenge · Write the no</div><p class="task" style="font-size:18px">You have decided not to do: “'+escapeHtml(task5.text)+'”.</p><p class="supporting" style="margin-top:10px">Write the message you would send. Keep it to 50 words.</p><textarea class="no-text" id="noText" placeholder="Write the actual message you would send…">'+escapeHtml(state.noText)+'</textarea><div class="word-count '+(count>=50?'max':'')+'">'+count+' / 50 words</div><ul class="checklist"><li class="'+(checks.clearNo?'met':'')+'"><span class="checkmark">'+(checks.clearNo?'✓':'')+'</span>A clear no in the first sentence, without “maybe”, “might”, or “perhaps”</li><li class="'+(checks.reason?'met':'')+'"><span class="checkmark">'+(checks.reason?'✓':'')+'</span>Gives a reason or names the priority taking precedence</li><li class="'+(checks.alternative?'met':'')+'"><span class="checkmark">'+(checks.alternative?'✓':'')+'</span>Offers an alternative or useful next step</li></ul><div class="button-row"><button class="button" type="button" data-submit-no '+(noScore()<2?'disabled':'')+'>Send the no</button></div>'+(noScore()<2?'<p class="supporting" style="margin:10px 0 0">Complete at least 2 of the 3 checks to continue.</p>':''));}
+        else if(state.phase==='r5done')html=card('<div class="label">Sent · +10 exercise points</div><h2>Your no, next to the sample</h2><div class="comparison"><div><h3>Yours</h3><div class="message">'+escapeHtml(state.noText)+'</div></div><div><h3>Sample</h3><div class="message">'+escapeHtml(SAMPLE_NO)+'</div></div></div><p class="supporting" style="margin:16px 0 0">Notice the shape: no, reason, alternative. Three sentences without an apology spiral.</p><div class="button-row"><button class="button" type="button" data-show-summary>See my results</button></div>');
+        else if(state.phase==='summary'){html=card('<div class="label">Scenario complete</div><div class="summary-score"><span id="summaryCount">0</span> <small>exercise points</small></div><p class="bank-note">Your choices and written no are saved.</p><p class="supporting">The +5 finish bonus is included in this exercise score. Completing either version earns the same one-time completion MP toward your level.</p>','summary-main')+card('<div class="label">Skill read</div>'+[['Urgency read',accuracy(1)],['Importance read',accuracy(2)],['Quadrant judgment',accuracy(3)]].map(item=>'<div class="skill"><div class="skill-label"><span>'+item[0]+'</span><span>'+item[1]+'%</span></div><div class="skill-track"><div class="skill-fill" data-width="'+item[1]+'"></div></div></div>').join(''))+card('<div class="label">Your no — keep it</div><button class="copy" type="button" data-copy>Copy</button><p>'+escapeHtml(state.noText)+'</p>','saved-no')+'<div class="button-row" style="justify-content:center"><button class="button secondary" type="button" data-restart>Restart scenario</button></div>';}
+        if(state.phase==='play'&&state.round<=3)html+=record();if(state.phase!=='interstitial'&&state.phase!=='retryIntro')html='<div class="layout">'+rail()+'<div class="primary">'+html+'</div></div>';app.dataset.phase=state.phase;app.innerHTML=html;bindDynamic();if(state.phase==='summary')animateSummary();if(state.phase==='play'&&!banner)requestAnimationFrame(()=>requestAnimationFrame(positionCurrentPrompt))}
+      function syncStickyOffsets(){const header=document.querySelector('.app-header');document.documentElement.style.setProperty('--utl-app-header-height',(header?header.offsetHeight:76)+'px')}
+      function positionCurrentPrompt(){syncStickyOffsets();const prompt=app.querySelector('.primary .card'),action=app.querySelector('.choice,.quadrant,.reason,.no-text');if(prompt){const strip=document.getElementById('contextStrip'),stripBottom=strip&&getComputedStyle(strip).position==='sticky'?strip.getBoundingClientRect().bottom:0,target=window.scrollY+prompt.getBoundingClientRect().top-stripBottom-16;window.scrollTo({top:Math.max(0,target),behavior:'auto'})}action?.focus({preventScroll:true})}
+      function bindDynamic(){app.querySelector('[data-intro-start]')?.addEventListener('click',()=>interstitial(1,null));app.querySelector('[data-start-round]')?.addEventListener('click',e=>startRound(Number(e.currentTarget.dataset.startRound)));app.querySelector('[data-start-retries]')?.addEventListener('click',startRetries);app.querySelectorAll('[data-binary]').forEach(b=>b.addEventListener('click',()=>answerBinary(b.dataset.binary==='true')));app.querySelectorAll('[data-quadrant]').forEach(b=>b.addEventListener('click',()=>answerQuadrant(b.dataset.quadrant)));app.querySelectorAll('[data-reason]').forEach(b=>b.addEventListener('click',()=>{pickedReason=Number(b.dataset.reason);freeReason='';render()}));const reasonInput=document.getElementById('freeReason');reasonInput?.addEventListener('input',()=>{freeReason=reasonInput.value;if(freeReason)pickedReason=null;const button=app.querySelector('[data-submit-reason]');if(button)button.disabled=!freeReason.trim()});app.querySelector('[data-change-placement]')?.addEventListener('click',()=>setState({r4Stage:'place'}));app.querySelector('[data-submit-reason]')?.addEventListener('click',submitReason);const noText=document.getElementById('noText');noText?.addEventListener('input',()=>{const list=words(noText.value),value=list.length>50?list.slice(0,50).join(' '):noText.value;if(noText.value!==value)noText.value=value;state.noText=value;saveState();const checks=noChecks(value),met=[checks.clearNo,checks.reason,checks.alternative],count=words(value).length,items=app.querySelectorAll('.checklist li');app.querySelector('.word-count').textContent=count+' / 50 words';app.querySelector('.word-count').classList.toggle('max',count>=50);items.forEach((item,i)=>{item.classList.toggle('met',met[i]);item.querySelector('.checkmark').textContent=met[i]?'✓':''});app.querySelector('[data-submit-no]').disabled=met.filter(Boolean).length<2});app.querySelector('[data-submit-no]')?.addEventListener('click',submitNo);app.querySelector('[data-show-summary]')?.addEventListener('click',showSummary);app.querySelector('[data-copy]')?.addEventListener('click',e=>{navigator.clipboard?.writeText(state.noText).then(()=>{e.currentTarget.textContent='Copied ✓';setTimeout(()=>{if(e.currentTarget)e.currentTarget.textContent='Copy'},1500)})});app.querySelector('[data-restart]')?.addEventListener('click',restart)}
+      function animateSummary(){if(summaryAnimated)return;summaryAnimated=true;const count=document.getElementById('summaryCount'),start=performance.now(),target=state.mp,duration=1000;function tick(now){const t=Math.min(1,(now-start)/duration);if(count)count.textContent=Math.round(target*(1-Math.pow(1-t,3)));if(t<1)requestAnimationFrame(tick)}requestAnimationFrame(tick);requestAnimationFrame(()=>document.querySelectorAll('.skill-fill').forEach(fill=>fill.style.width=fill.dataset.width+'%'))}
+      feedback.addEventListener('click',e=>{if(e.target.closest('[data-continue]'))advance()});
+      timerPauseBtn.addEventListener('click',()=>{timerRunning=!timerRunning;if(timerRunning)startTimer();else renderTimer()});
+      timerResetBtn.addEventListener('click',()=>{elapsedSeconds=0;renderTimer()});
+      window.addEventListener('resize',syncStickyOffsets);
+      window.addEventListener('keydown',e=>{if(banner){if(e.key==='Enter'){e.preventDefault();advance()}return}if(state.phase!=='play')return;if(state.round===1||state.round===2){if(e.key==='1')answerBinary(true);else if(e.key==='2')answerBinary(false);return}const active=document.activeElement&&document.activeElement.tagName;if(active==='TEXTAREA'||active==='INPUT')return;const quadrantPhase=state.round===3||(state.round===4&&state.r4Stage==='place');if(!quadrantPhase)return;if(['ArrowRight','ArrowLeft','ArrowUp','ArrowDown'].includes(e.key)){e.preventDefault();let current=state.focusQuad<0?0:state.focusQuad;if(state.focusQuad<0)current=0;else if(e.key==='ArrowRight'&&current%2===0)current++;else if(e.key==='ArrowLeft'&&current%2===1)current--;else if(e.key==='ArrowDown'&&current<2)current+=2;else if(e.key==='ArrowUp'&&current>=2)current-=2;setState({focusQuad:current})}else if(e.key==='Enter'&&state.focusQuad>=0){e.preventDefault();answerQuadrant(QUADRANTS[state.focusQuad].key)}});
+      syncStickyOffsets();if(timerRunning)startTimer();else renderTimer();renderBanner();render();
     })();
   </script>
   <script type="module" src="../../assets/app-access-guard.js?v=1"></script>

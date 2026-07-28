@@ -380,6 +380,43 @@
       padding: 28px;
     }
 
+    .voice-memo-card {
+      margin-bottom: 20px;
+      padding: 18px;
+      border: 1px solid #C7D8E8;
+      border-radius: 10px;
+      background: #F8FAFC;
+    }
+
+    .voice-memo-card h3 {
+      margin: 0 0 6px;
+      color: #003366;
+      font-family: 'Playfair Display', serif;
+      font-size: 1.35rem;
+    }
+
+    .voice-memo-card p {
+      margin: 0 0 12px;
+      color: #4D7094;
+      line-height: 1.5;
+    }
+
+    .voice-memo-frame {
+      display: block;
+      width: 100%;
+      min-height: 112px;
+      border: 1px solid #C7D8E8;
+      border-radius: 8px;
+      background: #FFFFFF;
+    }
+
+    .voice-memo-open {
+      display: inline-block;
+      margin-top: 12px;
+      color: #003366;
+      font-weight: 700;
+    }
+
     .tsa-speak-info {
       margin: 22px 0 0;
       padding: 20px;
@@ -733,9 +770,15 @@
       <div class="tsa-speak-panel-head">
         <p class="tsa-speak-progress">The task</p>
         <h2>Use AI to restructure Hugh's voice memo</h2>
-        <p>You already have the voice memo file from the previous exercise. Follow the steps below to transcribe it and use AI to structure it into a decision-ready update.</p>
+        <p>Play Hugh's voice memo below, transcribe it, and use AI to structure it into a decision-ready update.</p>
       </div>
       <div class="tsa-speak-step">
+        <section class="voice-memo-card" aria-labelledby="voiceMemoHeading">
+          <h3 id="voiceMemoHeading">Hugh's voice memo</h3>
+          <p>Play the memo here. You can also open it in another tab if you want ChatGPT to listen while this page stays open.</p>
+          <iframe class="voice-memo-frame" src="https://drive.google.com/file/d/13nvMb6RrHjzCQevI1wZtDBhL-tMYObG_/preview" title="Hugh's voice memo" allow="autoplay"></iframe>
+          <a class="voice-memo-open" href="https://drive.google.com/file/d/13nvMb6RrHjzCQevI1wZtDBhL-tMYObG_/view" target="_blank" rel="noopener">Open Hugh's voice memo in a new tab &rarr;</a>
+        </section>
 
         <details class="tsa-speak-record-help">
           <summary>How to transcribe the voice file</summary>
@@ -744,7 +787,7 @@
             <ol class="tsa-speak-help-steps">
               <li>
                 <svg class="tsa-speak-step-icon" viewBox="0 0 64 48" fill="none" aria-hidden="true"><rect x="18" y="4" width="28" height="40" rx="5" fill="#FFFFFF" stroke="#003366" stroke-width="2"/><rect x="22" y="10" width="20" height="25" rx="2" fill="#F3EDE2" stroke="#003366" stroke-width="1.5"/><path d="M27 18h8l5-3v12l-5-3h-8z" fill="#EEA320" stroke="#003366" stroke-width="1.4"/><circle cx="32" cy="39" r="1.8" fill="#003366"/></svg>
-                <strong>Open the voice file:</strong> You were sent a voice memo file via email. Open it on your phone or laptop.
+                <strong>Open the voice memo:</strong> Use the player above, or open Hugh's voice memo in a new tab.
               </li>
               <li>
                 <svg class="tsa-speak-step-icon" viewBox="0 0 64 48" fill="none" aria-hidden="true"><rect x="13" y="9" width="38" height="26" rx="3" fill="#FFFFFF" stroke="#003366" stroke-width="2"/><path d="M8 39h48l-4-4H12z" fill="#F3EDE2" stroke="#003366" stroke-width="2" stroke-linejoin="round"/><circle cx="24" cy="22" r="5" fill="#EEA320" stroke="#003366" stroke-width="1.5"/><path d="M32 18h10M32 24h7" stroke="#003366" stroke-width="2" stroke-linecap="round"/><path d="M23 22l2 2 4-5" stroke="#003366" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -802,7 +845,8 @@ Here is the transcript:
           <div class="completion-save-notice">
             <div class="save-notice-text">
               Your response has been saved.
-              <a href="../../member-login/phase-1/practice/index.html" class="save-notice-link">Return to Phase 1 exercises →</a>
+              <a href="../chalkboard-notes/index.html" class="save-notice-link">Go to next exercise →</a>
+              <a href="../../member-login/phase-1/practice/index.html" class="save-notice-link">Back to workspace</a>
             </div>
             <div class="save-notice-caveat">Saved on this device only. Copy your response into your companion workbook to keep a permanent record.</div>
           </div>
