@@ -886,6 +886,9 @@
 
     .save-notice-link:hover { text-decoration: underline; }
 
+    .save-notice-link.exit-link { color: #003366; }
+    .save-notice-link.exit-link:hover { color: #2e7d4f; }
+
     .save-notice-caveat {
       font-size: 11px;
       color: #888;
@@ -1074,7 +1077,7 @@
     <div>
       <a class="app-kicker" href="../../member-login/index.html" style="text-decoration:none">Think. Speak. Act.™</a>
       <span class="app-title">Chalkboard notes</span>
-      <a class="module-back-link" href="../../member-login/phase-1/practice/index.html">← Back to Phase 1 exercises</a>
+      <a class="module-back-link" href="../../member-login/index.html#learning-journey">← Back to Learning Journey</a>
     </div>
     <div class="app-timer" aria-label="Elapsed time">
       <div class="utility-metric" id="timerMetric">
@@ -1171,7 +1174,7 @@
               <button class="mode-btn active" id="openModeBtn" type="button" data-response-mode="open" onclick="window.switchMessyNotesMode && window.switchMessyNotesMode('open')">Open response</button>
               <button class="mode-btn" id="sectionModeBtn" type="button" data-response-mode="sections" onclick="window.switchMessyNotesMode && window.switchMessyNotesMode('sections')">Three-section response</button>
             </div>
-            <p class="mode-guidance"><strong>Choose one format:</strong> Use <strong>Open response</strong> if you want to write in your own free-form structure; this is the more difficult option. Use <strong>Three-section response</strong> if you want the easier guided option. In both formats, use BSP and the Rule of three.</p>
+            <p class="mode-guidance"><strong>Choose one format:</strong> Use <strong>"Open" response</strong> if you want to write in your own free-form structure; this is the more difficult option. Use <strong>"Three-section" response</strong> if you want the easier guided option. In both formats, use BSP and the Rule of three.</p>
 
             <div id="openMode">
               <textarea id="openResponse" class="response-area" aria-label="Open response" placeholder=""></textarea>
@@ -1246,8 +1249,8 @@
       </section>
     </section>
   </main>
-  <script src="../../assets/app-reward-header.js?v=20260714-audit-1"></script>
-  <script src="../../assets/reward-events.js?v=20260712-awards-1"></script>
+  <script src="../../assets/app-reward-header.js?v=20260730-celebration-1"></script>
+  <script src="../../assets/reward-events.js?v=20260730-celebration-1"></script>
 
   <script src="../shared/activity-timer.js?v=20260701-audit-1"></script>
   <script>
@@ -1408,7 +1411,7 @@
             <i class="ti ti-device-floppy" aria-hidden="true"></i>
             Your response has been saved to this browser.
             <a href="../../my-results/index.html" class="save-notice-link">View all your results →</a>
-            <a href="../../member-login/phase-1/practice/index.html" class="save-notice-link">Back to Phase 1 exercises →</a>
+            <a href="../../member-login/index.html#learning-journey" class="save-notice-link exit-link">Back to Learning Journey →</a>
           </div>
           <div class="save-notice-caveat">Saved on this device only. Copy your response into your companion workbook to keep a permanent record.</div>
         </div>
@@ -2101,7 +2104,7 @@
     init();
   </script>
   <script type="module" src="../../assets/app-access-guard.js?v=1"></script>
-  <script src="../../assets/exercise-scoring-intro.js?v=3"></script>
+  <script src="../../assets/exercise-scoring-intro.js?v=6"></script>
   <script type="module" src="../../assets/feedback-widget.js?v=6"></script>
   <script src="../../assets/tactile-buttons.js?v=20260714-flat-1" defer></script>
 </body>

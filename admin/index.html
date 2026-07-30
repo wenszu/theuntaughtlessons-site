@@ -2142,14 +2142,14 @@
                 <span class="eng-toggle-name">Show Diagnostic card</span>
                 <span class="eng-toggle-desc">Shows the Diagnostic card on the public Find your level page.</span>
               </label>
-              <input class="eng-toggle" type="checkbox" data-pub-assess-key="diagnosticVisible" aria-label="Show Diagnostic card" checked>
+              <input class="eng-toggle" type="checkbox" data-pub-assess-key="diagnosticVisible" aria-label="Show Diagnostic card">
             </div>
             <div class="eng-field-row">
               <label class="eng-toggle-label">
                 <span class="eng-toggle-name">Show Checkpoint card</span>
                 <span class="eng-toggle-desc">Shows the Checkpoint card on the public Find your level page.</span>
               </label>
-              <input class="eng-toggle" type="checkbox" data-pub-assess-key="checkpointVisible" aria-label="Show Checkpoint card" checked>
+              <input class="eng-toggle" type="checkbox" data-pub-assess-key="checkpointVisible" aria-label="Show Checkpoint card">
             </div>
             <div class="eng-field-row">
               <label class="eng-toggle-label" for="publicFindLevelMode">
@@ -2199,7 +2199,7 @@
                 <span class="eng-toggle-name">Members can see assessments</span>
                 <span class="eng-toggle-desc">When off, the nav link, dashboard section, and results tab are hidden for regular members.</span>
               </label>
-              <input class="eng-toggle" type="checkbox" data-tsa-vis-key="userEnabled" aria-label="Members can see assessments" checked>
+              <input class="eng-toggle" type="checkbox" data-tsa-vis-key="userEnabled" aria-label="Members can see assessments">
             </div>
           </div>
           <div class="toggle-row" data-key="utl_tsa_status" data-default="live" data-options="live:Show,placeholder:Coming soon,hidden:Hide" data-labels="live:Assessment section shown in the member hub,placeholder:Whole section shows coming soon buttons,hidden:Assessment section removed from the page entirely"></div>
@@ -2441,12 +2441,12 @@
             <tr><td>Completion-only exercise</td><td><span id="rewardPolicyCompletion">50</span> MP</td><td>Once per exercise</td></tr>
             <tr><td>Reflection or external-AI exercise</td><td><span id="rewardPolicyReflection">30</span> MP</td><td>Once per exercise</td></tr>
             <tr><td>Phase completion</td><td><span id="rewardPolicyPhases">100 / 150 / 200</span> MP</td><td>Once per phase</td></tr>
-            <tr><td>Full program completion</td><td><span id="rewardPolicyProgram">200</span> MP</td><td>Once after all three phases are complete</td></tr>
+            <tr><td>Full program completion</td><td><span id="rewardPolicyProgram">600</span> MP</td><td>Once after all three phases are complete</td></tr>
             <tr><td>Diagnostic or Checkpoint</td><td><span id="rewardPolicyAssessment">100</span> MP each</td><td>Once per assessment</td></tr>
             <tr><td>Daily streak</td><td><span id="rewardPolicyStreak">3 exercises; 5 MP × day</span></td><td>Unique exercises; one streak award per day</td></tr>
           </tbody>
         </table>
-        <div class="reward-storage-note"><strong>Completion path:</strong> The curriculum and two assessments can award up to 1,785 MP before streaks. The recommended 200 MP full-program bonus brings the total to 1,985 MP, so a learner can reach Executive by finishing the program. Historical awards are never recalculated when future rule values change.</div>
+        <div class="reward-storage-note"><strong>Completion path:</strong> Videos, orientation, context items, and exercises (at a realistic, not perfect, scoring level) add up to roughly 1,325&ndash;1,525 MP before assessments or the program bonus. The 600 MP full-program bonus brings a member who finishes the curriculum to well over 1,800 MP, so completing the program reliably reaches Executive without needing perfect scores or the streak feature. Historical awards are never recalculated when future rule values change.</div>
       </section>
 
       <section class="admin-section" id="section-reward-rules" data-admin-tab-panel="rewards">
@@ -2513,7 +2513,7 @@
           </div>
           <div class="reward-rule-card">
             <label for="rewardProgramBonusMp">Full-program completion bonus</label>
-            <input id="rewardProgramBonusMp" type="number" min="0" step="1" value="200">
+            <input id="rewardProgramBonusMp" type="number" min="0" step="1" value="600">
             <small>One-time reward that lets a learner reach Executive by finishing the curriculum.</small>
           </div>
           <div class="reward-rule-card">
@@ -2988,7 +2988,7 @@
                 <span class="eng-toggle-name">Credential title</span>
                 <span class="eng-toggle-desc">Shown on the certificate as the name of the credential.</span>
               </label>
-              <input class="eng-text" type="text" id="engCredentialTitle" placeholder="e.g. The Untaught Lessons — Full Program" data-eng-key="certificate.credentialTitle">
+              <input class="eng-text" type="text" id="engCredentialTitle" placeholder="e.g. Think, speak and act like an executive." data-eng-key="certificate.credentialTitle">
             </div>
             <div class="eng-field-row">
               <label class="eng-toggle-label" for="engSignatoryName">
@@ -3042,8 +3042,8 @@
     </main>
   </div>
 
-  <script src="../member-login/content-config.js?v=20260714-flat-1"></script>
-  <script src="../assets/reward-ui.js?v=20260714-flat-1"></script>
+  <script src="../member-login/content-config.js?v=20260730-celebration-1"></script>
+  <script src="../assets/reward-ui.js?v=20260730-celebration-1"></script>
 
   <script type="module">
     import {
@@ -4929,8 +4929,9 @@
         exerciseMode: 'score-improvement',
         exerciseCompleteFallback: 50,
         reflectionExercise: 30,
+        scoredExerciseFirstAttemptFloor: 20,
         phaseCompletion: { phase1: 100, phase2: 150, phase3: 200 },
-        programCompletion: 200,
+        programCompletion: 600,
         assessmentBonus: 100
       },
       streak: { enabled: true, dailyExerciseGoal: 3, mpBase: 5, mpFormula: 'base*n' },
@@ -5091,7 +5092,8 @@
           startMp,
           newTotal: startMp + earned,
           metadata: { appId: id },
-          reflection
+          reflection,
+          previewOnly: true
         });
       } catch (error) {
         document.getElementById('rewardReflectionStatus').textContent = error.message;
@@ -6414,7 +6416,7 @@
           phaseKey,
           title: item.title || item.id,
           detail: (phase.label || phaseKey.replace('phase','Phase ')) + ' lesson',
-          href: '../member-login/' + phaseKey.replace('phase','phase-') + '.html#lessons'
+          href: '../member-login/' + phaseKey.replace('phase','phase-') + '.html?lesson=' + encodeURIComponent(item.id) + '#lessons'
         }));
         (phase.exercises || []).forEach((item) => sequence.push({
           key: 'exercise:' + item.id,
@@ -6474,7 +6476,6 @@
         localStorage.setItem('utl_p' + (index + 1) + '_videos_done', lessonsDone ? 'true' : 'false');
         localStorage.setItem('utl_p' + (index + 1) + '_done', exercisesDone ? 'true' : 'false');
       });
-      if (target.type === 'lesson') localStorage.setItem('utl_experience_preview_lesson_' + target.phaseKey, target.id);
     }
 
     function spRefreshPreviewCard() {
@@ -6852,7 +6853,7 @@
       const total = Number(rewards.mpTotal || rewards.masteryPoints || 0);
       const level = rewards.currentLevel || rewards.level || 'Not assigned';
       const finished = spProgramComplete(member);
-      const target = Number((rewardSettingsCache && rewardSettingsCache.mp && rewardSettingsCache.mp.programCompletion) || 200);
+      const target = Number((rewardSettingsCache && rewardSettingsCache.mp && rewardSettingsCache.mp.programCompletion) || 600);
       const credited = spProgramBonusCredited(member);
       const levels = (rewardSettingsCache && rewardSettingsCache.levels) || DEFAULT_REWARD_SETTINGS.levels;
       const executive = levels.find((item) => String(item.name || item.title || '').toLowerCase() === 'executive') || levels[levels.length - 1] || { threshold: 0 };

@@ -171,7 +171,7 @@
     }
 
     .slo-main {
-      width: min(1120px, calc(100% - 56px));
+      width: min(960px, calc(100% - 56px));
       margin: 0 auto;
       padding: 28px 0 84px;
     }
@@ -242,7 +242,7 @@
       display: grid;
       grid-template-columns: minmax(0, 1.05fr) minmax(320px, .95fr);
       gap: 18px;
-      margin-top: 22px;
+      margin-top: 36px;
     }
 
     .slo-panel {
@@ -432,7 +432,7 @@
       grid-template-columns: minmax(0, 1fr) auto;
       gap: 20px;
       align-items: center;
-      margin-top: 18px;
+      margin-top: 36px;
       padding: 20px;
       border-color: var(--slo-gold);
     }
@@ -454,7 +454,7 @@
     .slo-actions {
       display: flex;
       flex-direction: column;
-      align-items: flex-end;
+      align-items: stretch;
       flex-wrap: wrap;
       gap: 10px;
       justify-content: flex-end;
@@ -483,14 +483,20 @@
       color: var(--slo-navy);
     }
 
+    .slo-button-accent {
+      border: 2px solid var(--slo-gold);
+      background: var(--slo-white);
+      color: var(--slo-navy);
+    }
+
+    .slo-button-accent:hover {
+      background: rgba(238, 163, 32, .12);
+    }
+
     .slo-exit-link {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 10px 16px;
-      border: 1.5px solid #c8c2b8;
-      border-radius: 7px;
-      background: transparent;
+      align-self: center;
+      margin-top: 2px;
+      padding: 4px 0;
       color: var(--slo-navy);
       font-family: 'Lato', Arial, sans-serif;
       font-size: 12px;
@@ -499,9 +505,8 @@
     }
 
     .slo-exit-link:hover {
-      border-color: #2e7d4f;
       color: #2e7d4f;
-      text-decoration: none;
+      text-decoration: underline;
     }
 
     @media (max-width: 860px) {
@@ -542,7 +547,7 @@
       }
 
       .slo-actions {
-        align-items: flex-start;
+        align-items: stretch;
         justify-content: flex-start;
       }
     }
@@ -590,7 +595,7 @@
     <div class="slo-heading">
       <span class="slo-kicker">PHASE 3 &middot; ACT CONFIDENTLY</span>
       <span class="slo-title">Speak like Obama</span>
-      <a class="module-back-link" href="../../member-login/phase-3.html#exercises">← Back to Phase 3 exercises</a>
+      <a class="module-back-link" href="../../member-login/index.html#learning-journey">← Back to Learning Journey</a>
     </div>
     <div class="slo-timer" aria-label="Exercise timer">
       <span class="slo-timer-label">Timer</span>
@@ -680,9 +685,9 @@
         <p>Upload your recording and ask for feedback on presence, pacing, emphasis, pauses, and whether the message feels inevitable.</p>
       </div>
       <div class="slo-actions">
-        <a class="slo-button slo-button-primary" href="https://gemini.google.com/gem/1mwtmHhhwE2IzQ2w_EUYwxkSto4yym1CX?usp=sharing" target="_blank" rel="noopener">Open The Playback</a>
-        <button class="slo-button" id="completeExerciseBtn" type="button">Mark exercise complete · +30 MP</button>
-        <a class="slo-exit-link" href="../../member-login/index.html#phase3">Back to member workspace</a>
+        <a class="slo-button slo-button-accent" href="https://gemini.google.com/gem/1mwtmHhhwE2IzQ2w_EUYwxkSto4yym1CX?usp=sharing" target="_blank" rel="noopener">Open GEM (The Playback)</a>
+        <button class="slo-button slo-button-primary" id="completeExerciseBtn" type="button">Mark exercise complete · +30 MP</button>
+        <a class="slo-exit-link" id="journeyLink" href="../../member-login/index.html#learning-journey">Back to Learning Journey</a>
       </div>
       <p>This opens Gemini in a new tab. You may need to sign in, then return here when you finish.</p>
     </section>
@@ -745,9 +750,9 @@
     })();
   </script>
   <script type="module" src="../../assets/app-access-guard.js?v=1"></script>
-  <script src="../../assets/exercise-scoring-intro.js?v=3"></script>
-  <script src="../../assets/app-reward-header.js?v=20260714-audit-1"></script>
-  <script src="../../assets/reward-events.js?v=20260712-awards-1"></script>
+  <script src="../../assets/exercise-scoring-intro.js?v=6"></script>
+  <script src="../../assets/app-reward-header.js?v=20260730-celebration-1"></script>
+  <script src="../../assets/reward-events.js?v=20260730-celebration-1"></script>
   <script>
     document.getElementById('completeExerciseBtn').addEventListener('click', function () {
       localStorage.setItem('utl_p3_ex4_done', 'true');
@@ -759,6 +764,7 @@
       });
       this.textContent = result?.awarded ? 'Exercise complete' : 'Already completed';
       this.disabled = true;
+      document.getElementById('journeyLink').className = 'slo-button slo-button-primary';
     });
   </script>
   <script type="module" src="../../assets/feedback-widget.js?v=6"></script>

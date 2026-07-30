@@ -408,6 +408,14 @@
       color: #2e2107;
     }
 
+    button.accent,
+    .button-link.accent {
+      border-width: 2px;
+      border-color: var(--gold);
+      background: #fff;
+      color: var(--navy);
+    }
+
     button:disabled {
       opacity: .45;
       cursor: not-allowed;
@@ -486,7 +494,7 @@
     <div>
       <a class="app-kicker" href="../../member-login/index.html" style="text-decoration:none">Think. Speak. Act.™</a>
       <span class="app-title">Grocery list with AI</span>
-      <a class="module-back-link" href="../../member-login/phase-1/practice/index.html">← Back to Phase 1 exercises</a>
+      <a class="module-back-link" href="../../member-login/index.html#learning-journey">← Back to Learning Journey</a>
     </div>
     <div class="app-timer" aria-label="Elapsed time">
       <div class="utility-metric" id="timerMetric">
@@ -549,7 +557,7 @@
           <p>Each prompt organizes the same list by a different logic. Copy one and paste it into your AI tool. If you have time, try two and compare.</p>
           <div class="prompt-grid" id="promptGrid"></div>
           <div class="buttons">
-            <a class="button-link" href="../../member-login/phase-1/practice/index.html">Back to workspace</a>
+            <a class="button-link" href="../../member-login/index.html#learning-journey">Back to Learning Journey</a>
             <button type="button" class="primary" data-next="2">I have tried it. Continue</button>
           </div>
         </div>
@@ -602,15 +610,15 @@
           <div class="buttons">
             <button type="button" data-back="2">Back</button>
             <button type="button" class="gold" id="markDoneBtn">Mark as done</button>
-            <a class="button-link primary" href="../../member-login/phase-1/practice/index.html">Back to workspace</a>
+            <a class="button-link" id="journeyLink" href="../../member-login/index.html#learning-journey">Back to Learning Journey</a>
           </div>
           <p class="small" id="completionStatus" role="status" aria-live="polite"></p>
         </div>
       </article>
     </section>
   </main>
-  <script src="../../assets/app-reward-header.js?v=20260714-audit-1"></script>
-  <script src="../../assets/reward-events.js?v=20260712-awards-1"></script>
+  <script src="../../assets/app-reward-header.js?v=20260730-celebration-1"></script>
+  <script src="../../assets/reward-events.js?v=20260730-celebration-1"></script>
 
   <script src="../shared/activity-timer.js?v=20260701-audit-1"></script>
   <script>
@@ -778,7 +786,7 @@ ${SUPPLY_LIST_FOR_PROMPT}`
         text.innerHTML = formatPromptForDisplay(prompt.text);
         const button = document.createElement('button');
         button.type = 'button';
-        button.className = 'gold';
+        button.className = 'accent';
         button.dataset.copyPrompt = String(index);
         button.textContent = 'Copy prompt';
         card.append(title, description, text, button);
@@ -849,10 +857,12 @@ ${SUPPLY_LIST_FOR_PROMPT}`
       const done = COMPLETION_KEYS.some((key) => localStorage.getItem(key) === 'true');
       const button = document.getElementById('markDoneBtn');
       const status = document.getElementById('completionStatus');
+      const journeyLink = document.getElementById('journeyLink');
       if (!button || !status) return;
       button.textContent = done ? 'Done' : 'Mark as done';
       button.disabled = done;
       status.textContent = done ? 'Saved to your workspace.' : '';
+      if (journeyLink) journeyLink.classList.toggle('gold', done);
     }
 
     function markExerciseDone() {
@@ -910,7 +920,7 @@ ${SUPPLY_LIST_FOR_PROMPT}`
     initializeApp();
   </script>
   <script type="module" src="../../assets/app-access-guard.js?v=1"></script>
-  <script src="../../assets/exercise-scoring-intro.js?v=3"></script>
+  <script src="../../assets/exercise-scoring-intro.js?v=6"></script>
   <script type="module" src="../../assets/feedback-widget.js?v=6"></script>
   <script src="../../assets/tactile-buttons.js?v=20260714-flat-1" defer></script>
 </body>

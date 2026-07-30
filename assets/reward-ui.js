@@ -57,13 +57,14 @@
   }
 
   function exerciseProgressSummary(appId) {
-    var phaseByExercise = {
-      "grocery-list": 1, "grocery-list-ai": 1, "messy-notes": 1, "rushed-voice-memo": 1, "rushed-voice-memo-ai": 1,
-      "scqa-builder": 2, "issue-tree": 2, "write-to-aiko": 2, "explain-to-aiko-60": 2, "explain-to-aiko-120": 2,
-      "eisenhower-matrix": 3, "advisory-board": 3, "i-have-bad-news": 3, "lets-switch-hats": 3, "speak-like-obama": 3
+    var metadataByExercise = {
+      "grocery-list": [1, 6], "grocery-list-ai": [1, 6], "messy-notes": [1, 6], "rushed-voice-memo": [1, 6], "rushed-voice-memo-ai": [1, 6], "chalkboard-notes": [1, 6],
+      "issue-tree": [2, 6], "issue-tree-builder": [2, 6], "scqa-builder": [2, 6], "advisory-board": [2, 6], "write-to-aiko": [2, 6], "explain-to-aiko": [2, 6], "explain-to-aiko-60": [2, 6], "explain-to-aiko-120": [2, 6],
+      "eisenhower-matrix": [3, 4], "i-have-bad-news": [3, 4], "lets-switch-hats": [3, 4], "speak-like-obama": [3, 4]
     };
-    var phase = phaseByExercise[appId] || 1;
-    var total = 6;
+    var metadata = metadataByExercise[appId] || [1, 6];
+    var phase = metadata[0];
+    var total = metadata[1];
     var done = 0;
     try {
       for (var index = 1; index <= total; index += 1) {
@@ -74,25 +75,7 @@
   }
 
   function nextExerciseHref(appId, phase) {
-    var sequences = {
-      "grocery-list": "../grocery-list-ai/index.html",
-      "grocery-list-ai": "../messy-notes/index.html",
-      "messy-notes": "../rushed-voice-memo/index.html",
-      "rushed-voice-memo": "../rushed-voice-memo-ai/index.html",
-      "rushed-voice-memo-ai": "../chalkboard-notes/index.html",
-      "issue-tree": "../scqa-builder/index.html",
-      "scqa-builder": "../advisory-board/index.html",
-      "advisory-board": "../write-to-aiko/index.html",
-      "write-to-aiko": "../explain-to-aiko/index.html",
-      "explain-to-aiko-120": "../explain-to-aiko-60/index.html",
-      "explain-to-aiko": "../explain-to-aiko-60/index.html",
-      "eisenhower-matrix": "../i-have-bad-news/index.html",
-      "i-have-bad-news": "../lets-switch-hats/index.html",
-      "lets-switch-hats": "../speak-like-obama/index.html"
-    };
-    if (sequences[appId]) return sequences[appId];
-    if (phase === 1) return "../../member-login/phase-1/practice/index.html";
-    return "../../member-login/phase-" + phase + ".html#exercises";
+    return "../../member-login/index.html?phase=phase" + (phase || 1) + "&completed=" + encodeURIComponent(appId || "exercise") + "#learning-journey";
   }
 
   function dailyMissionSummary() {
@@ -177,9 +160,12 @@
       ".utl-reward-popover strong{display:block;color:var(--reward-navy);font:700 18px Lato,Arial,sans-serif;line-height:1.18}",
       ".utl-reward-popover p{margin:7px 0 0;color:#4D7094;font:700 13px/1.42 Lato,Arial,sans-serif}",
       ".utl-level-popover{left:0;right:auto;width:360px}.utl-level-track{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr));gap:0;margin:16px 0 0!important;padding:0;list-style:none}.utl-level-step{position:relative;display:grid;justify-items:center;align-content:start;gap:6px;text-align:center}.utl-level-step:before{content:'';position:absolute;left:-50%;right:50%;top:14px;height:3px;background:#D9E1E8}.utl-level-step:first-child:before{display:none}.utl-level-step.is-complete:before,.utl-level-step.is-current:before{background:#EEA320}.utl-level-dot{position:relative;z-index:1;width:30px;height:30px;border:2px solid #BCC9D5;border-radius:999px;background:#fff;color:#7890A8;display:grid!important;place-items:center;margin:0!important;font:700 10px Lato, Arial, sans-serif!important;letter-spacing:0!important}.utl-level-step.is-complete .utl-level-dot{border-color:#EEA320;background:#FFF2D3;color:#003366}.utl-level-step.is-current .utl-level-dot{border-color:#003366;background:#003366;color:#EEA320;box-shadow:0 0 0 4px rgba(238,163,32,.24)}.utl-level-name{margin:0!important;color:#7890A8!important;font:700 10px/1.2 Lato,Arial,sans-serif!important;letter-spacing:0!important;text-transform:none!important}.utl-level-step.is-complete .utl-level-name,.utl-level-step.is-current .utl-level-name{color:#003366!important}.utl-level-threshold{margin:0!important;color:#7890A8!important;font:400 9px/1.2 Lato, Arial, sans-serif!important;letter-spacing:0!important;text-transform:none!important}.utl-level-step.is-current .utl-level-threshold{color:#A86400!important;font-weight:700!important}.utl-level-guidance{margin-top:15px!important;padding:11px 12px;border-radius:8px;background:#FFF8EC;color:#003366!important;font:700 13px/1.4 Lato,Arial,sans-serif!important}",
+      ".utl-level-cert-link{display:block;margin-top:10px!important;padding:11px 12px;border-radius:8px;background:#003366;color:#EEA320!important;text-align:center;text-decoration:none!important;font:700 13px/1.4 Lato,Arial,sans-serif!important}",
       ".utl-reward-popover.utl-mp-breakdown{width:350px}.utl-mp-list{display:grid!important;gap:0;margin:12px 0 0!important;padding:0;list-style:none}.utl-mp-list li{display:grid;grid-template-columns:24px 1fr auto;gap:8px;align-items:start;padding:8px 0;border-bottom:1px solid rgba(0,51,102,.09)}.utl-mp-list li:last-child{border-bottom:0}.utl-mp-icon{margin:0!important;color:inherit!important;font:400 16px/1.2 sans-serif!important;letter-spacing:0!important;text-transform:none!important}.utl-mp-copy{margin:0!important;color:#003366!important;font:700 13px/1.25 Lato,Arial,sans-serif!important;letter-spacing:0!important;text-transform:none!important}.utl-mp-copy small{display:block;margin-top:2px;color:#4D7094;font:400 12px/1.3 Lato,Arial,sans-serif}.utl-mp-value{margin:0!important;color:#8A5A00!important;font:700 12px/1.3 Lato, Arial, sans-serif!important;letter-spacing:0!important;text-transform:none!important;white-space:nowrap}.utl-mp-meta{display:grid!important;gap:7px;margin:11px 0 0!important;padding-top:11px;border-top:1px solid rgba(238,163,32,.35)}.utl-mp-meta li{display:grid;grid-template-columns:24px 1fr;gap:8px;color:#4D7094;font:700 12px/1.35 Lato,Arial,sans-serif}.utl-mp-meta b{color:#003366}",
-      ".utl-reward-toast{position:fixed;right:22px;top:76px;z-index:10000;width:min(340px,calc(100vw - 44px));padding:16px 18px;border:1px solid rgba(238,163,32,.46);border-radius:12px;background:#fff;color:#003366;box-shadow:0 18px 44px rgba(0,51,102,.22);opacity:0;transform:translateY(-10px);transition:opacity .18s ease,transform .18s ease}",
-      ".utl-reward-toast.is-visible{opacity:1;transform:translateY(0)}",
+      ".utl-reward-toast{position:fixed;right:22px;top:76px;z-index:10000;width:min(340px,calc(100vw - 44px));display:flex;align-items:flex-start;gap:12px;padding:15px 18px;border:1px solid rgba(238,163,32,.5);border-radius:12px;background:linear-gradient(135deg,#fff 0%,#FFFBF2 100%);color:#003366;box-shadow:0 18px 44px rgba(0,51,102,.22);opacity:0;transform:translateY(-14px) scale(.96);transition:opacity .32s cubic-bezier(.22,.9,.28,1.4),transform .4s cubic-bezier(.22,.9,.28,1.4)}",
+      ".utl-reward-toast.is-visible{opacity:1;transform:translateY(0) scale(1)}",
+      ".utl-reward-toast-icon{flex:none;width:32px;height:32px;border-radius:999px;background:#FFF1CF;color:#A86400;display:grid;place-items:center;font-size:15px;animation:utlRewardPulse 1.6s ease-in-out .3s 2}",
+      ".utl-reward-toast-copy{min-width:0}",
       ".utl-reward-toast span{display:block;color:#EEA320;font:700 10px Lato, Arial, sans-serif;letter-spacing: 0;text-transform: none}",
       ".utl-reward-toast strong{display:block;margin-top:5px;color:#003366;font:700 18px Lato,Arial,sans-serif}",
       ".utl-reward-toast p{margin:6px 0 0;color:#4D7094;font:700 13px/1.4 Lato,Arial,sans-serif}",
@@ -196,11 +182,14 @@
       ".utl-reward-modal-total{position:relative;display:inline-flex;margin-top:18px;padding:8px 13px;border:1px solid rgba(238,163,32,.45);border-radius:999px;background:#FFF1CF;color:#8A5A00;font:700 12px Lato, Arial, sans-serif;letter-spacing: 0}",
       ".utl-reward-modal h2.is-celebrating{animation:utlRewardTitleFlash .82s ease-in-out 6}",
       ".utl-reward-modal button{position:relative;margin-top:26px;min-height:48px;border:0;border-radius:9px;background:#003366;color:#fff;padding:0 26px;font:700 12px Lato, Arial, sans-serif;letter-spacing: 0;text-transform: none;cursor:pointer;box-shadow:none}",
+      ".utl-reward-modal-program .utl-reward-modal-check{background:linear-gradient(145deg,#F5C96D,#C97F12);box-shadow:0 0 0 5px rgba(238,163,32,.2),0 14px 28px rgba(197,127,18,.3)}",
+      ".utl-reward-cert-cta{position:relative;display:inline-flex;align-items:center;gap:8px;margin-top:22px;min-height:52px;padding:0 28px;border-radius:10px;background:linear-gradient(135deg,#EEA320,#F5C96D);color:#2E2107;font:800 15px Lato,Arial,sans-serif;text-decoration:none;box-shadow:0 10px 24px rgba(238,163,32,.4)}",
+      ".utl-reward-cert-cta:hover{filter:brightness(1.05)}",
+      ".utl-reward-modal-program button[data-utl-reward-close]{display:block;margin:14px auto 0;background:transparent;color:#4D7094;box-shadow:none}",
       ".utl-exercise-award{width:min(640px,100%);border:1px solid rgba(0,51,102,.16);border-top:12px solid #EEA320;border-radius:10px;background:linear-gradient(115deg,#FFFDF8 0%,#FFFDF8 72%,#F3EDE2 72%,#F3EDE2 100%);padding:34px 42px 34px;text-align:left;box-shadow:0 30px 80px rgba(0,30,60,.38)}.utl-exercise-award.is-reflecting{border:2px solid rgba(238,163,32,.7);border-top-width:2px;background:#fff;padding:38px 42px;text-align:left;box-shadow:0 32px 90px rgba(0,30,60,.42)}.utl-exercise-award .utl-award-stage[hidden]{display:none}.utl-exercise-award [data-award-stage=celebrate] .utl-reward-modal-check{width:76px;height:76px;margin:0 0 22px;border:5px solid #fff;border-radius:999px;background:#003366;color:#EEA320;transform:none;box-shadow:0 0 0 3px #EEA320,0 10px 22px rgba(0,51,102,.2);font-size:38px}.utl-exercise-award [data-award-stage=celebrate] .utl-reward-modal-label{color:#A86400;font-size:13px}.utl-exercise-award [data-award-stage=celebrate] h2{max-width:470px;margin:7px 0 10px;color:#003366;font:800 44px/1.04 Lato,Arial,sans-serif}.utl-exercise-award [data-award-stage=celebrate] p{max-width:470px;margin:0;color:#4A4A4A;font:700 16px/1.5 Lato,Arial,sans-serif}.utl-exercise-award [data-award-stage=celebrate] p strong{color:#003366}.utl-exercise-award [data-award-stage=celebrate]>button{background:#003366;color:#fff;box-shadow:0 5px 0 #001F3F}.utl-exercise-award .utl-award-earned{display:inline-flex;align-items:center;gap:7px;margin-top:18px;padding:9px 15px;border:1px solid rgba(238,163,32,.55);border-radius:999px;background:#FFF1CF;color:#8A5A00;font:800 15px Lato,Arial,sans-serif}.utl-exercise-award .utl-award-progress{margin-top:9px;color:#4D7094;font:700 13px Lato,Arial,sans-serif}",
       ".utl-exercise-award .utl-reflection-head{display:grid;grid-template-columns:48px 1fr;gap:13px;align-items:center;text-align:left}.utl-reflection-icon{width:48px;height:48px;border-radius:999px;background:#FFF1CF;color:#A86400;display:grid;place-items:center;font-size:23px}.utl-exercise-award .utl-reflection-head h2{margin:0;font-size:34px}.utl-exercise-award .utl-reflection-prompt{margin:22px 0 13px;text-align:left;color:#003366;font:700 17px/1.4 Lato,Arial,sans-serif}",
       ".utl-reflection-options{display:grid;gap:9px}.utl-reflection-option{width:100%;margin:0!important;min-height:48px!important;padding:11px 14px!important;border:1px solid rgba(0,51,102,.2)!important;border-radius:9px!important;background:#fff!important;color:#003366!important;text-align:left!important;box-shadow:none!important;font:700 14px/1.35 Lato,Arial,sans-serif!important}.utl-reflection-option:hover,.utl-reflection-option.is-selected{border-color:#EEA320!important;background:#FFF8EC!important;box-shadow:0 0 0 2px rgba(238,163,32,.16)!important}",
       ".utl-reflection-note{width:100%;min-height:76px;margin-top:11px;border:1px solid rgba(0,51,102,.2);border-radius:9px;padding:11px 12px;resize:vertical;color:#4A4A4A;font:400 14px/1.4 Lato,Arial,sans-serif}.utl-reflection-actions{display:flex;justify-content:space-between;align-items:center;gap:12px}.utl-reflection-actions button{margin-top:18px}.utl-reflection-skip{background:transparent!important;color:#4D7094!important;box-shadow:none!important;padding:0 8px!important}.utl-reflection-save:disabled{opacity:.48;cursor:not-allowed}",
-      ".utl-takeaway-stage{text-align:center}.utl-takeaway-stage .utl-reflection-icon{margin:0 auto 16px}.utl-takeaway-stage h2{margin-top:8px}.utl-takeaway-stage p{max-width:480px;padding:18px 20px;border-radius:8px;background:#FFF8EC;color:#003366;font-size:18px}.utl-takeaway-continue{position:relative;display:inline-flex;align-items:center;justify-content:center;min-height:48px;margin-top:24px;border-radius:9px;background:#003366;color:#fff;padding:0 26px;text-decoration:none;font:700 13px Lato,Arial,sans-serif;box-shadow:none}",
       "@keyframes utlRewardPulse{0%{transform:translateY(0) scale(1)}45%{transform:translateY(-2px) scale(1.05)}100%{transform:translateY(0) scale(1)}}",
       "@keyframes utlRewardModalArrive{0%{opacity:0;transform:translateY(18px) scale(.92)}70%{transform:translateY(-3px) scale(1.015)}100%{opacity:1;transform:none}}",
       "@keyframes utlRewardSparkle{from{opacity:.35;transform:scale(.98)}to{opacity:.7;transform:scale(1.02)}}",
@@ -209,7 +198,7 @@
       "@keyframes utlRewardTitleFlash{0%,100%{color:#003366;text-shadow:none;transform:scale(1)}50%{color:#A86400;text-shadow:0 0 18px rgba(238,163,32,.42),0 0 34px rgba(238,163,32,.22);transform:scale(1.055)}}",
       "@media(max-width:860px){.utl-reward-cluster{padding:4px;gap:4px}.utl-reward-level{display:none}.utl-reward-item{padding:5px 7px;font-size:12px}.utl-reward-popover{right:-74px;width:240px}}",
       "@media(max-width:620px){.utl-reward-cluster{display:flex;min-height:34px;padding:3px;border-radius:9px;background:rgba(255,255,255,.1)}.utl-reward-cluster>.utl-reward-item:not(.is-emphasis){display:none}.utl-reward-item.is-emphasis{min-height:28px;padding:4px 8px;font-size:11px}.utl-reward-item .utl-reward-popover{position:fixed;top:calc(env(safe-area-inset-top,0px) + 86px);right:12px;width:calc(100vw - 24px)}.utl-reward-toast{top:calc(env(safe-area-inset-top,0px) + 94px);right:12px;width:calc(100vw - 24px);padding:14px 16px;border-radius:10px}.utl-reward-toast strong{font-size:17px}.utl-reward-modal-backdrop{align-items:end;padding:16px;padding-bottom:calc(16px + env(safe-area-inset-bottom,0px))}.utl-reward-modal{max-height:calc(100svh - 32px);overflow:auto;padding:24px 20px 20px;border-radius:16px}.utl-reward-modal-check{width:54px;height:54px;font-size:30px}.utl-reward-modal h2{font-size:34px}.utl-reward-modal p{font-size:15px}.utl-reward-modal button{width:100%;min-height:46px}.utl-exercise-award .utl-reflection-head h2{font-size:28px}.utl-reflection-actions{display:grid}.utl-reflection-actions button{margin-top:8px}}",
-      "@media(prefers-reduced-motion:reduce){.utl-reward-mp-number,.utl-reward-popover,.utl-reward-toast{transition:none!important}.utl-reward-cluster.is-finished .utl-reward-item.is-emphasis,.utl-reward-modal,.utl-reward-celebration,.utl-reward-modal h2.is-celebrating,.utl-reward-streamer,.utl-reward-burst{animation:none!important}.utl-reward-streamer,.utl-reward-burst{display:none}}"
+      "@media(prefers-reduced-motion:reduce){.utl-reward-mp-number,.utl-reward-popover,.utl-reward-toast{transition:none!important}.utl-reward-cluster.is-finished .utl-reward-item.is-emphasis,.utl-reward-modal,.utl-reward-celebration,.utl-reward-modal h2.is-celebrating,.utl-reward-streamer,.utl-reward-burst,.utl-reward-toast-icon{animation:none!important}.utl-reward-streamer,.utl-reward-burst{display:none}}"
     ].join("\n");
     document.head.appendChild(style);
   }
@@ -225,6 +214,10 @@
     return '<span class="utl-reward-popover utl-mp-breakdown" role="tooltip"><span>Mastery Points</span><strong>' + escapeHtml(title) + '</strong><ul class="utl-mp-list">' + earningRows + '</ul><ul class="utl-mp-meta"><li><span class="utl-mp-icon" aria-hidden="true">&#127941;</span><span><b>Current level</b><br>' + escapeHtml(level) + '</span></li></ul></span>';
   }
 
+  function certificatePageHref() {
+    return window.location.pathname.indexOf("/apps/") !== -1 ? "../../certificate/index.html" : "../certificate/index.html";
+  }
+
   function levelPopoverHtml(state, settings) {
     var levels = levelsFrom(settings);
     var currentIndex = levels.findIndex(function (level) { return level.name === state.level; });
@@ -237,7 +230,8 @@
     var guidance = state.nextLevel
       ? "You need " + state.mpToNext + " more MP to become " + article + " " + state.nextLevel + "!"
       : "You have reached the highest configured level!";
-    return '<span class="utl-reward-popover utl-level-popover" role="tooltip"><span>Level progression</span><strong>' + escapeHtml(state.level) + '</strong><ul class="utl-level-track">' + steps + '</ul><p class="utl-level-guidance">' + escapeHtml(guidance) + '</p></span>';
+    var certLink = state.nextLevel ? "" : '<a class="utl-level-cert-link" href="' + certificatePageHref() + '">View your certificate &rarr;</a>';
+    return '<span class="utl-reward-popover utl-level-popover" role="tooltip"><span>Level progression</span><strong>' + escapeHtml(state.level) + '</strong><ul class="utl-level-track">' + steps + '</ul><p class="utl-level-guidance">' + escapeHtml(guidance) + '</p>' + certLink + '</span>';
   }
 
   function earnedMpBreakdown(ledger, mpTotal) {
@@ -320,15 +314,18 @@
     toast.setAttribute("role", "status");
     toast.setAttribute("aria-live", "polite");
     toast.innerHTML =
-      '<span>' + escapeHtml(details && details.label || "Reward") + '</span>' +
-      '<strong>' + escapeHtml(details && details.title || "") + '</strong>' +
-      '<p>' + escapeHtml(details && details.body || "") + '</p>';
+      '<span class="utl-reward-toast-icon" aria-hidden="true">&#10024;</span>' +
+      '<span class="utl-reward-toast-copy">' +
+        '<span>' + escapeHtml(details && details.label || "Reward") + '</span>' +
+        '<strong>' + escapeHtml(details && details.title || "") + '</strong>' +
+        '<p>' + escapeHtml(details && details.body || "") + '</p>' +
+      '</span>';
     document.body.appendChild(toast);
     requestAnimationFrame(function () { toast.classList.add("is-visible"); });
     setTimeout(function () {
       toast.classList.remove("is-visible");
       setTimeout(function () { if (toast.parentNode) toast.remove(); }, 220);
-    }, details && details.duration || 3600);
+    }, details && details.duration || 4200);
   }
 
   function animateMp(container, start, end, callback) {
@@ -365,7 +362,7 @@
     activeTimers[id] = requestAnimationFrame(tick);
   }
 
-  function showLevelModal(details) {
+  function showLevelModal(details, onComplete) {
     injectStyles();
     var existing = document.querySelector(".utl-reward-modal-backdrop");
     if (existing) existing.remove();
@@ -409,8 +406,62 @@
       if (progress < 1) requestAnimationFrame(countPromotion);
     }
     requestAnimationFrame(countPromotion);
+    var finished = false;
+    function finishLevelMoment() {
+      if (finished) return;
+      finished = true;
+      modal.remove();
+      if (typeof onComplete === "function") onComplete();
+    }
     modal.addEventListener("click", function (event) {
-      if (event.target === modal || event.target.closest("[data-utl-reward-close]")) modal.remove();
+      if (event.target === modal || event.target.closest("[data-utl-reward-close]")) finishLevelMoment();
+    });
+  }
+
+  function showProgramCompleteModal(details, onComplete) {
+    injectStyles();
+    var opts = details || {};
+    var existing = document.querySelector(".utl-reward-modal-backdrop");
+    if (existing) existing.remove();
+    var modal = document.createElement("div");
+    modal.className = "utl-reward-modal-backdrop";
+    var certLink = opts.certificateHref
+      ? '<a class="utl-reward-cert-cta" href="' + escapeHtml(opts.certificateHref) + '">View your certificate &rarr;</a>'
+      : "";
+    modal.innerHTML = [
+      '<div class="utl-reward-modal utl-reward-modal-program" role="dialog" aria-modal="true" aria-label="You completed the full program">',
+        '<div class="utl-reward-celebration" aria-hidden="true"></div>',
+        '<div class="utl-reward-burst" aria-hidden="true"></div>',
+        '<div class="utl-reward-streamers" aria-hidden="true">',
+          '<i class="utl-reward-streamer" style="--x:5%;--delay:.05s;--color:#EEA320;--tilt:18deg;--drift:65px"></i>',
+          '<i class="utl-reward-streamer" style="--x:14%;--delay:.55s;--color:#2C7A4B;--tilt:-22deg;--drift:-42px"></i>',
+          '<i class="utl-reward-streamer" style="--x:24%;--delay:.18s;--color:#4D7094;--tilt:32deg;--drift:48px"></i>',
+          '<i class="utl-reward-streamer" style="--x:34%;--delay:.8s;--color:#F5C96D;--tilt:-12deg;--drift:-58px"></i>',
+          '<i class="utl-reward-streamer" style="--x:45%;--delay:.34s;--color:#EEA320;--tilt:24deg;--drift:54px"></i>',
+          '<i class="utl-reward-streamer" style="--x:56%;--delay:.68s;--color:#2C7A4B;--tilt:-30deg;--drift:-46px"></i>',
+          '<i class="utl-reward-streamer" style="--x:66%;--delay:.12s;--color:#4D7094;--tilt:14deg;--drift:62px"></i>',
+          '<i class="utl-reward-streamer" style="--x:76%;--delay:.92s;--color:#F5C96D;--tilt:-26deg;--drift:-52px"></i>',
+          '<i class="utl-reward-streamer" style="--x:86%;--delay:.42s;--color:#EEA320;--tilt:36deg;--drift:38px"></i>',
+          '<i class="utl-reward-streamer" style="--x:94%;--delay:.2s;--color:#2C7A4B;--tilt:-18deg;--drift:-66px"></i>',
+        '</div>',
+        '<div class="utl-reward-modal-check" aria-hidden="true">&#127942;</div>',
+        '<span class="utl-reward-modal-label">Program complete</span>',
+        '<h2 class="is-celebrating">You did it.</h2>',
+        '<p>You finished all three phases of the Learning Journey' + (numberOr(opts.mpEarned, 0) > 0 ? ' and earned the ' + Math.round(numberOr(opts.mpEarned, 0)) + ' MP program bonus' : '') + '. Total MP: ' + Math.round(numberOr(opts.newTotal, 0)) + '.</p>',
+        certLink,
+        '<button type="button" data-utl-reward-close>Continue to the Learning Journey</button>',
+      '</div>'
+    ].join("");
+    document.body.appendChild(modal);
+    var finished = false;
+    function finish() {
+      if (finished) return;
+      finished = true;
+      modal.remove();
+      if (typeof onComplete === "function") onComplete();
+    }
+    modal.addEventListener("click", function (event) {
+      if (event.target === modal || event.target.closest("[data-utl-reward-close]")) finish();
     });
   }
 
@@ -448,14 +499,7 @@
           '<div class="utl-reflection-prompt">' + escapeHtml(reflection.prompt) + '</div>',
           '<div class="utl-reflection-options">' + reflection.choices.map(function (choice, index) { return '<button class="utl-reflection-option" type="button" data-reflection-choice="' + index + '">' + escapeHtml(choice) + '</button>'; }).join("") + '</div>',
           '<textarea class="utl-reflection-note" maxlength="300" placeholder="Optional: add a note in your own words"></textarea>',
-          '<div class="utl-reflection-actions"><button class="utl-reflection-skip" type="button" data-reflection-skip>Skip for now</button><button class="utl-reflection-save" type="button" data-reflection-save disabled>Save reflection and continue</button></div>',
-        '</section>',
-        '<section class="utl-award-stage utl-takeaway-stage" data-award-stage="takeaway" hidden>',
-          '<span class="utl-reflection-icon" aria-hidden="true">&#10022;</span>',
-          '<span class="utl-reward-modal-label">Your takeaway</span>',
-          '<h2>Keep this in mind</h2>',
-          '<p data-reflection-takeaway>Use the main idea from this exercise in your next decision or conversation.</p>',
-          '<a class="utl-takeaway-continue" href="' + nextExerciseHref(appId, phaseProgress.phase) + '">Go to next exercise &rarr;</a>',
+          '<div class="utl-reflection-actions"><button class="utl-reflection-skip" type="button" data-reflection-skip>Skip and return to Learning Journey</button><button class="utl-reflection-save" type="button" data-reflection-save disabled>Save reflection and return to Learning Journey</button></div>',
         '</section>',
       '</div>'
     ].join("");
@@ -464,18 +508,11 @@
     var celebration = modal.querySelector('[data-award-stage="celebrate"]');
     var reflectionStage = modal.querySelector('[data-award-stage="reflect"]');
     var saveButton = modal.querySelector('[data-reflection-save]');
-    var takeawayStage = modal.querySelector('[data-award-stage="takeaway"]');
+    var continueHref = nextExerciseHref(appId, phaseProgress.phase);
     function finish() {
       modal.remove();
-      if (typeof onComplete === "function") onComplete();
-    }
-    function showTakeaway(message) {
-      modal.querySelector('.utl-exercise-award').classList.add('is-reflecting');
-      celebration.hidden = true;
-      reflectionStage.hidden = true;
-      takeawayStage.hidden = false;
-      modal.querySelector('[data-reflection-takeaway]').textContent = message || "Use the main idea from this exercise in your next decision or conversation.";
-      modal.querySelector('.utl-takeaway-continue').focus();
+      if (typeof onComplete === "function") onComplete(continueHref);
+      else if (!opts.previewOnly) window.location.assign(continueHref);
     }
     modal.querySelector('[data-award-reflect]').addEventListener("click", function () {
       modal.querySelector('.utl-exercise-award').classList.add('is-reflecting');
@@ -499,12 +536,12 @@
         choice: selectedChoice,
         note: modal.querySelector('.utl-reflection-note').value.trim()
       } }));
-      showTakeaway(selectedChoice);
+      finish();
     });
-    modal.querySelector('[data-reflection-skip]').addEventListener("click", function () { showTakeaway(""); });
+    modal.querySelector('[data-reflection-skip]').addEventListener("click", finish);
   }
 
-  function handleRewardMoment(details) {
+  function handleRewardMoment(details, onComplete) {
     var opts = details || {};
     var container = opts.container || document.getElementById("wsRewardCluster") || document.querySelector("[data-utl-reward-mount]");
     var startMp = Math.max(0, Math.round(numberOr(opts.startMp, opts.newTotal || 0)));
@@ -513,8 +550,12 @@
     var isExercise = opts.type === "completion-exercise" || opts.type === "reflection-exercise" || (opts.type === "scored-exercise" && numberOr(metadata.previousBest, 0) === 0);
     if (isExercise) {
       if (container) animateMp(container, startMp, newTotal);
-      showExerciseAwardModal(Object.assign({}, opts, { startMp: startMp, newTotal: newTotal }), function () {
-        if (opts.showLevelModal) showLevelModal(opts);
+      showExerciseAwardModal(Object.assign({}, opts, { startMp: startMp, newTotal: newTotal }), function (continueHref) {
+        if (opts.showLevelModal) {
+          showLevelModal(opts, function () { window.location.assign(continueHref); });
+        } else {
+          window.location.assign(continueHref);
+        }
       });
       return;
     }
@@ -523,12 +564,18 @@
       title: opts.title || ("+" + Math.max(0, newTotal - startMp) + " MP earned"),
       body: opts.body || "Your progress was saved."
     });
+    function afterMoment() {
+      if (typeof onComplete === "function") onComplete();
+    }
     if (container) {
       animateMp(container, startMp, newTotal, function () {
-        if (opts.showLevelModal) showLevelModal(opts);
+        if (opts.showLevelModal) showLevelModal(opts, afterMoment);
+        else afterMoment();
       });
     } else if (opts.showLevelModal) {
-      showLevelModal(opts);
+      showLevelModal(opts, afterMoment);
+    } else {
+      afterMoment();
     }
   }
 
@@ -540,6 +587,7 @@
     showToast: showToast,
     animateMp: animateMp,
     showLevelModal: showLevelModal,
+    showProgramCompleteModal: showProgramCompleteModal,
     showExerciseAwardModal: showExerciseAwardModal,
     EXERCISE_REFLECTIONS: EXERCISE_REFLECTIONS,
     exerciseReflectionFor: exerciseReflectionFor,

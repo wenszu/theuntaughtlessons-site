@@ -639,7 +639,7 @@
     <div>
       <span class="eisenhower-kicker">Phase 3 · Act confidently</span>
       <span class="eisenhower-title">The art of saying no</span>
-      <a class="module-back-link" href="../../member-login/phase-3.html#exercises">← Back to Phase 3 exercises</a>
+      <a class="module-back-link" href="../../member-login/index.html#learning-journey">← Back to Learning Journey</a>
     </div>
   </header>
 
@@ -697,6 +697,7 @@
     <button class="eisenhower-button navy" id="showExample" type="button">Show example placement</button>
     <button class="eisenhower-button primary-action" id="markDone" type="button">Submit</button>
     <button class="eisenhower-button secondary-action" id="tryAgain" type="button" hidden>Try again</button>
+    <a class="eisenhower-button primary-action" id="journeyLink" href="../../member-login/index.html#learning-journey" hidden>Back to Learning Journey</a>
     <span class="eisenhower-context-copy" id="doneStatus" role="status" aria-live="polite"></span>
   </footer>
 
@@ -1011,6 +1012,7 @@
           body: 'Your prioritization matrix was saved.'
         });
         tryAgain.hidden = false;
+        document.getElementById('journeyLink').hidden = false;
         status.textContent = 'Saved to your workspace.';
       }
 
@@ -1029,6 +1031,7 @@
         state.savedPlacements = null;
         state.lastSavedSignature = '';
         tryAgain.hidden = true;
+        document.getElementById('journeyLink').hidden = true;
         resetTimer();
         renderAll();
       }
@@ -1148,9 +1151,9 @@
     })();
   </script>
   <script type="module" src="../../assets/app-access-guard.js?v=1"></script>
-  <script src="../../assets/exercise-scoring-intro.js?v=3"></script>
-  <script src="../../assets/app-reward-header.js?v=20260714-audit-1"></script>
-  <script src="../../assets/reward-events.js?v=20260712-awards-1"></script>
+  <script src="../../assets/exercise-scoring-intro.js?v=6"></script>
+  <script src="../../assets/app-reward-header.js?v=20260730-celebration-1"></script>
+  <script src="../../assets/reward-events.js?v=20260730-celebration-1"></script>
   <script type="module" src="../../assets/feedback-widget.js?v=6"></script>
   <script src="../../assets/tactile-buttons.js?v=20260714-flat-1" defer></script>
 </body>

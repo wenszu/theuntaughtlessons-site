@@ -459,7 +459,7 @@ async function saveMemberRewards(incoming = {}) {
 async function repairMemberProgramCompletionReward(userId, options = {}) {
   if (!userId) throw new Error("A user ID is required to repair the program completion reward.");
   const configuredTarget = Number(options.programCompletion);
-  const target = Math.max(0, Number.isFinite(configuredTarget) ? configuredTarget : 200);
+  const target = Math.max(0, Number.isFinite(configuredTarget) ? configuredTarget : 600);
   const levels = (Array.isArray(options.levels) && options.levels.length ? options.levels : [
     { name: "Intern", threshold: 0 },
     { name: "Analyst", threshold: 300 },
@@ -780,7 +780,7 @@ function getDefaultEngagementSettings() {
     },
     certificate: {
       enabled: true,
-      credentialTitle: "The Untaught Lessons — Full Program",
+      credentialTitle: "Think, speak and act like an executive.",
       signatoryName: "Wen-Szu Lin",
       signatoryTitle: "Founder, The Untaught Lessons"
     }
@@ -829,12 +829,13 @@ function getDefaultRewardSettings() {
       exerciseMode: "score-improvement",
       exerciseCompleteFallback: 50,
       reflectionExercise: 30,
+      scoredExerciseFirstAttemptFloor: 20,
       phaseCompletion: {
         phase1: 100,
         phase2: 150,
         phase3: 200
       },
-      programCompletion: 200,
+      programCompletion: 600,
       assessmentBonus: 100
     },
     exerciseReflections: {},
@@ -878,7 +879,7 @@ async function setRewardSettings(partial) {
 }
 
 function getDefaultAssessmentVisibility() {
-  return { userEnabled: true, adminEnabled: true };
+  return { userEnabled: false, adminEnabled: true };
 }
 
 async function getAssessmentVisibility() {
@@ -897,8 +898,8 @@ async function setAssessmentVisibility(partial) {
 
 function getDefaultPublicAssessmentSettings() {
   return {
-    diagnosticVisible: true,
-    checkpointVisible: true,
+    diagnosticVisible: false,
+    checkpointVisible: false,
     findLevelExerciseMode: "random",
     findLevelExerciseId: "sort_bucket_001"
   };

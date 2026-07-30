@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Certificate — The Untaught Lessons</title>
   <link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon-bluebg-whitedoor-thicker-32.png?v=6">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Lato:wght@300;400;700&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Lato:wght@300;400;700&family=Roboto+Mono:wght@400;700&family=Alex+Brush&display=swap" rel="stylesheet">
   <style>
     :root {
       --navy: #003366;
@@ -55,6 +55,8 @@
 
     .cert-actions {
       display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
       gap: 10px;
       align-items: center;
     }
@@ -234,6 +236,14 @@
       text-align: left;
     }
 
+    .cert-sig-cursive {
+      font-family: 'Alex Brush', cursive;
+      font-size: 36px;
+      line-height: 1;
+      color: var(--navy);
+      margin: 0 0 4px;
+    }
+
     .cert-sig-line {
       width: 160px;
       height: 1px;
@@ -313,6 +323,10 @@
         text-align: center;
       }
 
+      .cert-sig-cursive {
+        font-size: 30px;
+      }
+
       .cert-sig-line {
         margin: 0 auto 8px;
       }
@@ -333,6 +347,8 @@
     <a class="cert-back" href="../member-login/index.html">&larr; Back to portal</a>
     <div class="cert-actions" id="certActions" hidden>
       <button class="cert-btn cert-btn-secondary" id="certPrintBtn" type="button">Save as PDF</button>
+      <button class="cert-btn cert-btn-secondary" id="certDownloadBtn" type="button">Download image</button>
+      <button class="cert-btn cert-btn-secondary" id="certShareBtn" type="button" hidden>Share your achievement</button>
       <button class="cert-btn cert-btn-primary" id="certLinkedInBtn" type="button">Share on LinkedIn</button>
     </div>
   </nav>
@@ -381,6 +397,7 @@
 
         <div class="cert-footer">
           <div class="cert-sig-block">
+            <p class="cert-sig-cursive" id="certSignatureCursive">&nbsp;</p>
             <div class="cert-sig-line"></div>
             <p class="cert-sig-name" id="certSignatoryName">&nbsp;</p>
             <p class="cert-sig-title" id="certSignatoryTitle">&nbsp;</p>
@@ -469,7 +486,7 @@
         return;
       }
 
-      const credentialTitle = (settings && settings.certificate && settings.certificate.credentialTitle) || 'The Untaught Lessons — Full Program';
+      const credentialTitle = (settings && settings.certificate && settings.certificate.credentialTitle) || 'Think, speak and act like an executive.';
       const signatoryName = (settings && settings.certificate && settings.certificate.signatoryName) || 'Wen-Szu Lin';
       const signatoryTitle = (settings && settings.certificate && settings.certificate.signatoryTitle) || 'Founder, The Untaught Lessons';
 
@@ -479,9 +496,15 @@
 
       document.getElementById('certRecipientName').textContent = displayName;
       document.getElementById('certCredentialTitle').textContent = credentialTitle;
+      document.getElementById('certSignatureCursive').textContent = signatoryName;
       document.getElementById('certSignatoryName').textContent = signatoryName;
       document.getElementById('certSignatoryTitle').textContent = signatoryTitle;
-      document.getElementById('certAwardDate').textContent = formatDate(new Date());
+      let awardedAt = localStorage.getItem('utl_program_completed_at');
+      if (!awardedAt) {
+        awardedAt = new Date().toISOString();
+        localStorage.setItem('utl_program_completed_at', awardedAt);
+      }
+      document.getElementById('certAwardDate').textContent = formatDate(new Date(awardedAt));
 
       document.getElementById('certLoading').hidden = true;
       document.getElementById('certWrap').hidden = false;
@@ -499,6 +522,212 @@
         const url = `https://www.linkedin.com/profile/add?startTask=CERTIFICATION_NAME&name=${name}&organizationName=${org}&issueYear=${issueYear}&issueMonth=${issueMonth}&certUrl=${encodeURIComponent(window.location.href)}`;
         window.open(url, '_blank', 'noopener');
       });
+
+      const PUBLIC_SITE_URL = 'https://theuntaughtlessons.com/';
+      const shareText = `I just completed "${credentialTitle}" at The Untaught Lessons.`;
+      let cachedCertBlob = null;
+
+      function wrapCenteredText(ctx, text, centerX, y, maxWidth, lineHeight) {
+        const words = text.split(/\s+/);
+        let line = '';
+        const lines = [];
+        words.forEach((word) => {
+          const testLine = line ? `${line} ${word}` : word;
+          if (ctx.measureText(testLine).width > maxWidth && line) {
+            lines.push(line);
+            line = word;
+          } else {
+            line = testLine;
+          }
+        });
+        if (line) lines.push(line);
+        lines.forEach((ln, index) => ctx.fillText(ln, centerX, y + index * lineHeight));
+        return lines.length;
+      }
+
+      async function ensureFontsLoaded() {
+        const specs = [
+          '700 11px Lato', 'italic 400 15px "Playfair Display"', '400 15px "Playfair Display"',
+          '700 46px "Playfair Display"', '600 24px "Playfair Display"', '400 14px Lato',
+          '700 14px "Playfair Display"', '400 10px Lato', '40px "Alex Brush"'
+        ];
+        try {
+          await Promise.all(specs.map((spec) => document.fonts.load(spec)));
+          await document.fonts.ready;
+        } catch {}
+      }
+
+      async function renderCertificateImage() {
+        await ensureFontsLoaded();
+        const scale = 2;
+        const width = 900;
+        const height = 600;
+        const canvas = document.createElement('canvas');
+        canvas.width = width * scale;
+        canvas.height = height * scale;
+        const ctx = canvas.getContext('2d');
+        ctx.scale(scale, scale);
+        const navy = '#003366';
+        const gold = '#EEA320';
+        const charcoal = '#4A4A4A';
+
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, width, height);
+        ctx.strokeStyle = navy;
+        ctx.lineWidth = 2;
+        ctx.strokeRect(3, 3, width - 6, height - 6);
+        ctx.strokeStyle = gold;
+        ctx.lineWidth = 1;
+        ctx.strokeRect(11, 11, width - 22, height - 22);
+
+        const cornerSize = 46;
+        const cornerInset = 18;
+        [[cornerInset, cornerInset, 1, 1], [width - cornerInset, cornerInset, -1, 1], [cornerInset, height - cornerInset, 1, -1], [width - cornerInset, height - cornerInset, -1, -1]].forEach(([cx, cy, sx, sy]) => {
+          ctx.save();
+          ctx.translate(cx, cy);
+          ctx.scale(sx, sy);
+          ctx.strokeStyle = navy;
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.moveTo(0, cornerSize);
+          ctx.lineTo(0, 0);
+          ctx.lineTo(cornerSize, 0);
+          ctx.stroke();
+          ctx.strokeStyle = gold;
+          ctx.beginPath();
+          ctx.moveTo(0, cornerSize * 0.42);
+          ctx.lineTo(0, 0);
+          ctx.lineTo(cornerSize * 0.42, 0);
+          ctx.stroke();
+          ctx.restore();
+        });
+
+        const centerX = width / 2;
+        ctx.textAlign = 'center';
+
+        ctx.fillStyle = gold;
+        ctx.font = '700 11px Lato, Arial, sans-serif';
+        ctx.fillText('THE UNTAUGHT LESSONS', centerX, 78);
+
+        ctx.fillStyle = charcoal;
+        ctx.font = 'italic 400 15px "Playfair Display", Georgia, serif';
+        ctx.fillText('proudly presents this certificate to', centerX, 104);
+
+        ctx.font = '400 15px "Playfair Display", Georgia, serif';
+        ctx.fillText('Certificate of Completion', centerX, 138);
+
+        ctx.fillStyle = navy;
+        let nameSize = 46;
+        ctx.font = `700 ${nameSize}px "Playfair Display", Georgia, serif`;
+        while (ctx.measureText(displayName).width > width - 140 && nameSize > 26) {
+          nameSize -= 2;
+          ctx.font = `700 ${nameSize}px "Playfair Display", Georgia, serif`;
+        }
+        ctx.fillText(displayName, centerX, 196);
+
+        ctx.fillStyle = charcoal;
+        ctx.font = 'italic 400 15px "Playfair Display", Georgia, serif';
+        ctx.fillText('for successfully completing', centerX, 234);
+
+        ctx.fillStyle = navy;
+        let credSize = 24;
+        ctx.font = `600 ${credSize}px "Playfair Display", Georgia, serif`;
+        while (ctx.measureText(credentialTitle).width > width - 160 && credSize > 15) {
+          credSize -= 1;
+          ctx.font = `600 ${credSize}px "Playfair Display", Georgia, serif`;
+        }
+        ctx.fillText(credentialTitle, centerX, 272);
+
+        ctx.strokeStyle = gold;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(centerX - 36, 300);
+        ctx.lineTo(centerX + 36, 300);
+        ctx.stroke();
+
+        ctx.fillStyle = charcoal;
+        ctx.font = '400 14px Lato, Arial, sans-serif';
+        wrapCenteredText(
+          ctx,
+          'This certificate recognises the completion of all three phases of the programme — the skills, the practice, and the mindset that most schools never teach.',
+          centerX, 336, width - 320, 22
+        );
+
+        const footerY = height - 90;
+        ctx.textAlign = 'left';
+        ctx.fillStyle = navy;
+        ctx.font = '40px "Alex Brush", cursive';
+        ctx.fillText(signatoryName, 70, footerY - 18);
+        ctx.strokeStyle = navy;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(70, footerY);
+        ctx.lineTo(230, footerY);
+        ctx.stroke();
+        ctx.font = '700 15px "Playfair Display", Georgia, serif';
+        ctx.fillText(signatoryName, 70, footerY + 20);
+        ctx.fillStyle = charcoal;
+        ctx.font = '400 11px Lato, Arial, sans-serif';
+        ctx.fillText(signatoryTitle, 70, footerY + 36);
+
+        ctx.textAlign = 'right';
+        ctx.fillStyle = gold;
+        ctx.font = '700 9px Lato, Arial, sans-serif';
+        ctx.fillText('AWARDED', width - 70, footerY);
+        ctx.fillStyle = navy;
+        ctx.font = '400 15px "Playfair Display", Georgia, serif';
+        ctx.fillText(document.getElementById('certAwardDate').textContent, width - 70, footerY + 20);
+
+        return new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
+      }
+
+      async function getCertBlob() {
+        if (!cachedCertBlob) cachedCertBlob = await renderCertificateImage();
+        return cachedCertBlob;
+      }
+
+      document.getElementById('certDownloadBtn').addEventListener('click', async (event) => {
+        const button = event.currentTarget;
+        const originalText = button.textContent;
+        button.disabled = true;
+        button.textContent = 'Preparing…';
+        try {
+          const blob = await getCertBlob();
+          const link = document.createElement('a');
+          link.href = URL.createObjectURL(blob);
+          link.download = 'the-untaught-lessons-certificate.png';
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+          setTimeout(() => URL.revokeObjectURL(link.href), 4000);
+        } catch (error) {
+          console.warn('Certificate image render failed.', error);
+        } finally {
+          button.disabled = false;
+          button.textContent = originalText;
+        }
+      });
+
+      const shareButton = document.getElementById('certShareBtn');
+      if (navigator.share) {
+        shareButton.hidden = false;
+        shareButton.addEventListener('click', async () => {
+          shareButton.disabled = true;
+          try {
+            const blob = await getCertBlob();
+            const file = new File([blob], 'the-untaught-lessons-certificate.png', { type: 'image/png' });
+            const shareData = { title: 'The Untaught Lessons', text: shareText, url: PUBLIC_SITE_URL };
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+              shareData.files = [file];
+            }
+            await navigator.share(shareData);
+          } catch (error) {
+            if (error && error.name !== 'AbortError') console.warn('Share failed.', error);
+          } finally {
+            shareButton.disabled = false;
+          }
+        });
+      }
     }
 
     init();

@@ -14,8 +14,9 @@
       exerciseMode: "score-improvement",
       exerciseCompleteFallback: 50,
       reflectionExercise: 30,
+      scoredExerciseFirstAttemptFloor: 20,
       phaseCompletion: { phase1: 100, phase2: 150, phase3: 200 },
-      programCompletion: 200,
+      programCompletion: 600,
       assessmentBonus: 100
     },
     streak: {
@@ -98,6 +99,7 @@
         return Math.max(0, numberOr(normalized.mp.exerciseCompleteFallback, 0));
       }
       if (normalized.mp.exerciseMode === "score-total") return previousBest > 0 ? 0 : score;
+      if (previousBest === 0) return Math.max(0, score, numberOr(normalized.mp.scoredExerciseFirstAttemptFloor, 20));
       return Math.max(0, score - previousBest);
     }
     return 0;

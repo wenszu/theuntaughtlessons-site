@@ -175,6 +175,11 @@
       padding: 40px 60px 28px;
     }
 
+    main .utl-scoring-intro {
+      margin-left: 60px;
+      margin-right: 60px;
+    }
+
     .eyebrow,
     .label,
     .hint,
@@ -246,12 +251,6 @@
       border-radius: 12px;
     }
 
-    .problem-card {
-      max-width: 720px;
-      margin: 32px auto 0;
-      padding: 32px;
-    }
-
     .label {
       margin-bottom: 8px;
       color: var(--gold);
@@ -260,58 +259,10 @@
       text-transform: none;
     }
 
-    .instruction {
-      margin: 0 0 12px;
-      color: var(--steel);
-      font-size: 13px;
-    }
-
-    #problemStatement {
-      min-height: 100px;
-      padding: 12px;
-      font-size: 14px;
-    }
-
     .hint {
       margin-top: 8px;
       color: var(--gold);
       font-size: 10px;
-    }
-
-    .template-toggle,
-    .cta-area {
-      text-align: center;
-    }
-
-    .template-toggle {
-      margin-top: 16px;
-      font-size: 13px;
-    }
-
-    .link-button {
-      border: 0;
-      background: transparent;
-      color: var(--navy);
-      cursor: pointer;
-      text-decoration: underline;
-      padding: 0;
-    }
-
-    .template-status {
-      display: inline-block;
-      margin-left: 8px;
-      color: var(--charcoal);
-      font-size: 12px;
-      opacity: 0;
-    }
-
-    .template-status.show {
-      opacity: 1;
-    }
-
-    .cta-area {
-      margin-top: 28px;
-      padding-bottom: 48px;
     }
 
     .btn {
@@ -782,10 +733,6 @@
       cursor: default;
     }
 
-    .argument-card.detail-focus {
-      box-shadow: 0 0 0 2px rgba(238, 163, 32, .25);
-    }
-
     .argument-header {
       display: flex;
       justify-content: space-between;
@@ -853,51 +800,26 @@
     }
 
     .detail-list {
-      display: grid;
-      gap: 8px;
-    }
-
-    .detail-wrap {
       position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 8px;
       border: 2px dashed rgba(0, 51, 102, .18);
       border-radius: 10px;
       background: #FAF8F3;
-      padding: 8px;
       transition: .15s ease;
     }
 
-    .detail-wrap.has-detail {
-      cursor: grab;
-    }
-
-    .detail-wrap.has-detail:active {
-      cursor: grabbing;
-    }
-
-    .detail-wrap.drag-over,
-    .detail-wrap.tap-target {
+    .detail-list.drag-over,
+    .detail-list.tap-target {
       border-color: var(--gold);
       background: #fff7e9;
       box-shadow: 0 0 0 2px rgba(238, 163, 32, .22);
     }
 
-    .detail-wrap::before {
-      content: "•";
-      position: absolute;
-      top: 20px;
-      left: 18px;
-      color: var(--navy);
-      font-size: 14px;
-    }
-
-    .detail-input {
-      min-height: 62px;
-      padding: 9px 44px 9px 26px;
-      border: 1px solid transparent;
-      border-radius: 8px;
-      background: var(--white);
-      font-size: 12px;
-      line-height: 1.35;
+    .detail-list.tap-target {
+      cursor: pointer;
     }
 
     .detail-input-hidden {
@@ -905,14 +827,58 @@
     }
 
     .placed-detail-card {
+      position: relative;
       min-height: 62px;
-      padding: 10px 44px 10px 26px;
+      padding: 10px 44px 10px 14px;
       border: 1px solid rgba(0, 51, 102, .12);
       border-radius: 8px;
       background: var(--white);
       color: var(--navy);
       font-size: 12px;
       line-height: 1.35;
+      cursor: grab;
+    }
+
+    .placed-detail-card:active {
+      cursor: grabbing;
+    }
+
+    .detail-add-slot {
+      display: none;
+      width: 100%;
+      min-height: 38px;
+      padding: 8px 10px;
+      border: 2px dashed rgba(238, 163, 32, .72);
+      border-radius: 8px;
+      background: rgba(255, 247, 233, .82);
+      color: var(--navy);
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 700;
+      text-align: center;
+      transition: background .15s ease, border-color .15s ease, box-shadow .15s ease;
+    }
+
+    .detail-list.tap-target .detail-add-slot {
+      display: block;
+    }
+
+    .detail-add-slot:hover,
+    .detail-add-slot:focus-visible {
+      border-color: var(--gold);
+      background: #fff1d2;
+      box-shadow: 0 0 0 2px rgba(238, 163, 32, .18);
+    }
+
+    .detail-empty-hint {
+      margin: 0;
+      padding: 14px 0;
+      color: var(--steel);
+      font-size: 12px;
+      font-style: italic;
+      line-height: 1.4;
+      text-align: center;
     }
 
     .detail-remove {
@@ -1225,194 +1191,11 @@
       font-style: italic;
     }
 
-    .comparison-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 24px;
-    }
-
-    .compare-column {
-      display: grid;
-      gap: 12px;
-    }
-
-    .compare-column.sample {
-      padding: 16px;
-      border-radius: 8px;
-      background: var(--soft);
-    }
-
-    .compare-section {
-      padding: 14px;
-      border: 0.5px solid var(--line);
-      border-radius: 8px;
-      background: var(--white);
-    }
-
-    .compare-section h3 {
-      margin-bottom: 8px;
-      font-family: Lato, Arial, sans-serif;
-      font-size: 14px;
-    }
-
     .sample-notice {
       margin: 0 0 14px;
       color: var(--charcoal);
       font-family: Lato, Arial, sans-serif;
       font-size: 11px;
-    }
-
-    .sample-answer-panel {
-      margin-top: 24px;
-      padding: 28px 32px 34px;
-      border: 1px solid var(--line);
-      border-radius: 10px;
-      background: var(--white);
-      box-shadow: none;
-    }
-
-    .sample-answer-head {
-      display: grid;
-      gap: 10px;
-      margin-bottom: 22px;
-    }
-
-    .sample-answer-ribbon {
-      display: flex;
-      align-items: center;
-      gap: 0;
-      color: var(--white);
-      font-family: Lato, Arial, sans-serif;
-      font-size: 18px;
-      line-height: 1;
-    }
-
-    .sample-answer-ribbon span {
-      padding: 12px 18px;
-      background: var(--gold);
-    }
-
-    .sample-answer-ribbon::after {
-      content: "";
-      flex: 1;
-      height: 8px;
-      background: var(--gold);
-    }
-
-    .sample-answer-title {
-      color: var(--navy);
-      font-family: "Playfair Display", Georgia, serif;
-      font-size: clamp(36px, 5vw, 72px);
-      font-weight: 700;
-      line-height: 0.96;
-      margin: 0;
-    }
-
-    .sample-answer-tip {
-      margin: 0;
-      color: #777;
-      font-family: "Playfair Display", Georgia, serif;
-      font-size: clamp(22px, 3vw, 38px);
-      font-style: italic;
-      line-height: 1.05;
-    }
-
-    .sample-answer-bars {
-      display: grid;
-      gap: 12px;
-      margin: 20px 0 22px;
-    }
-
-    .sample-answer-bar {
-      padding: 18px 24px;
-      background: var(--gold);
-      color: var(--white);
-      font-family: Lato, Arial, sans-serif;
-      font-size: clamp(20px, 2.5vw, 34px);
-      font-weight: 700;
-      line-height: 1.2;
-      text-align: center;
-    }
-
-    .sample-answer-grid {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 26px;
-      align-items: start;
-    }
-
-    .sample-answer-column {
-      display: grid;
-      gap: 14px;
-    }
-
-    .sample-answer-arg-label,
-    .sample-answer-arg-title,
-    .sample-answer-detail {
-      background: #FCFAF5;
-      color: #000b2a;
-      text-align: center;
-    }
-
-    .sample-answer-arg-label {
-      padding: 14px 12px;
-      font-family: Lato, Arial, sans-serif;
-      font-size: 22px;
-      font-weight: 700;
-    }
-
-    .sample-answer-arg-title {
-      min-height: 92px;
-      display: grid;
-      place-items: center;
-      padding: 18px 20px;
-      font-family: Lato, Arial, sans-serif;
-      font-size: 22px;
-      font-weight: 800;
-      line-height: 1.15;
-    }
-
-    .sample-answer-details {
-      display: grid;
-      gap: 14px;
-      position: relative;
-      padding-left: 36px;
-    }
-
-    .sample-answer-details::before {
-      content: "";
-      position: absolute;
-      top: 34px;
-      bottom: 34px;
-      left: 13px;
-      width: 2px;
-      background: rgba(74, 74, 74, .65);
-    }
-
-    .sample-answer-detail {
-      min-height: 74px;
-      display: grid;
-      place-items: center;
-      padding: 12px 16px;
-      font-size: 14px;
-      font-weight: 700;
-      line-height: 1.25;
-      position: relative;
-    }
-
-    .sample-answer-detail::before {
-      content: "";
-      position: absolute;
-      left: -36px;
-      width: 36px;
-      height: 2px;
-      background: rgba(74, 74, 74, .65);
-    }
-
-    .sample-answer-actions {
-      display: flex;
-      justify-content: flex-end;
-      margin-top: 22px;
     }
 
     .modal {
@@ -1558,10 +1341,6 @@
         display: none;
       }
 
-      .argument-card.detail-focus {
-        box-shadow: none;
-      }
-
       .argument-header {
         display: block;
         min-height: 34px;
@@ -1635,65 +1414,7 @@
       }
 
       .detail-list {
-        position: relative;
-        gap: 8px;
-        padding-left: 0;
-        min-height: 260px;
-        border: 2px dashed rgba(0, 51, 102, .18);
-        border-radius: 10px;
-        background: #FAF8F3;
-        padding: 8px;
-      }
-
-      .detail-list::before {
-        display: none;
-      }
-
-      .detail-wrap {
-        position: relative;
-        display: block;
-        border: 0;
-        border-radius: 8px;
-        background: transparent;
-        padding: 0;
-      }
-
-      .detail-wrap::before {
-        display: none;
-      }
-
-      .detail-wrap.drag-over,
-      .detail-wrap.tap-target {
-        border: 0;
-        background: transparent;
-        box-shadow: none;
-      }
-
-      .detail-list:has(.detail-wrap.drag-over),
-      .argument-card:has(.detail-wrap.tap-target) .detail-list {
-        border-color: var(--gold);
-        background: #fff7e9;
-        box-shadow: 0 0 0 2px rgba(238, 163, 32, .22);
-      }
-
-      .detail-input {
-        min-height: 62px;
-        padding: 10px 44px 10px 12px;
-        background: var(--white);
-        border: 1px solid rgba(0, 51, 102, .12);
-        border-radius: 8px;
-        color: var(--navy);
-        font-size: 12px;
-        line-height: 1.35;
-        text-align: left;
-      }
-
-      .placed-detail-card {
-        padding: 10px 44px 10px 12px;
-      }
-
-      .detail-input::placeholder {
-        color: rgba(0, 11, 42, 0.58);
+        min-height: 200px;
       }
 
       .advance-prompt {
@@ -1759,6 +1480,11 @@
     }
 
     @media (max-width: 767px) {
+      main .utl-scoring-intro {
+        margin-left: 20px;
+        margin-right: 20px;
+      }
+
       .app-header,
       .page-title,
       .review,
@@ -1769,12 +1495,6 @@
 
       .title {
         font-size: 31px;
-      }
-
-      .problem-card {
-        margin-left: 20px;
-        margin-right: 20px;
-        padding: 24px;
       }
 
       .how-strip {
@@ -1796,31 +1516,8 @@
         align-items: stretch;
       }
 
-      .review-grid,
-      .comparison-grid,
-      .sample-answer-grid {
+      .review-grid {
         grid-template-columns: 1fr;
-      }
-
-      .sample-answer-panel {
-        padding: 22px 18px 24px;
-      }
-
-      .sample-answer-ribbon {
-        font-size: 14px;
-      }
-
-      .sample-answer-title {
-        font-size: 34px;
-      }
-
-      .sample-answer-tip {
-        font-size: 22px;
-      }
-
-      .sample-answer-bar {
-        padding: 14px 16px;
-        font-size: 20px;
       }
 
       .action-row,
@@ -1931,8 +1628,7 @@
         gap: 16px;
       }
 
-      .argument-card,
-      .detail-wrap {
+      .argument-card {
         width: 100%;
       }
 
@@ -1953,11 +1649,6 @@
       .details-section,
       .detail-actions {
         padding-left: 16px;
-      }
-
-      .detail-wrap {
-        display: grid;
-        gap: 8px;
       }
 
       .add-detail,
@@ -2034,6 +1725,10 @@
       font-family: 'Lato', sans-serif;
       line-height: 1.5;
     }
+
+    .save-notice-actions {
+      margin-top: 12px;
+    }
   </style>
 </head>
 <body>
@@ -2047,13 +1742,9 @@
     <div class="app-heading">
       <a class="app-kicker" href="../../member-login/index.html" style="text-decoration:none">Think. Speak. Act.™</a>
       <span class="app-title">Issue tree builder</span>
-      <a class="module-back-link" href="../../member-login/phase-2.html#exercises">← Back to Phase 2 exercises</a>
+      <a class="module-back-link" href="../../member-login/index.html#learning-journey">← Back to Learning Journey</a>
     </div>
     <div class="utility-cluster" aria-label="Writing utilities">
-      <div class="utility-metric" aria-live="polite">
-        <span class="small-label" id="wordCountLabel">Word count (in current box)</span>
-        <div class="utility-value" id="wordCountDisplay">0</div>
-      </div>
       <div class="utility-metric" id="timerMetric">
         <div class="utility-label-row">
           <span class="small-label">Elapsed time</span>
@@ -2069,37 +1760,17 @@
   </header>
 
   <main>
-    <section class="screen" id="screen1">
-      <div class="page-title">
-        <div class="eyebrow">Exercise</div>
-        <h1 class="title">Build your issue tree.</h1>
-        <p class="subtitle">Start with a question. Break it into causes. Structure your thinking.</p>
-        <div class="how-strip" aria-label="How it works">
-          <div class="how-item"><span class="num-icon">1</span><span>Set your central question</span></div>
-          <div class="how-item"><span class="num-icon">2</span><span>Build 3 arguments</span></div>
-          <div class="how-item"><span class="num-icon">3</span><span>Add evidence to each</span></div>
-        </div>
+    <div class="exercise-intro page-title">
+      <div class="eyebrow">Exercise</div>
+      <h1 class="title">Build your issue tree.</h1>
+      <p class="subtitle">Break the central question into three clean, evidence-backed arguments.</p>
+      <div class="how-strip" aria-label="How it works">
+        <div class="how-item"><span class="num-icon">1</span><span>Build 3 arguments</span></div>
+        <div class="how-item"><span class="num-icon">2</span><span>Add evidence to each</span></div>
       </div>
+    </div>
 
-      <div class="problem-card card">
-        <div class="label">The problem statement</div>
-        <p class="instruction">What is the central question you are trying to diagnose?</p>
-        <textarea id="problemStatement" placeholder="e.g. Why is the Olympics losing its cultural impact?"></textarea>
-        <div class="hint">Tip: Frame it as a "Why" or "What" question.</div>
-      </div>
-
-      <div class="template-toggle">
-        <span>Need a starting point?</span>
-        <button class="link-button" type="button" id="loadTemplate">Load the Olympics template →</button>
-        <span class="template-status" id="templateStatus">✓ Template loaded</span>
-      </div>
-
-      <div class="cta-area">
-        <button class="btn btn-primary" type="button" id="startBtn" disabled>Start building →</button>
-        <br>
-        <button class="clear-link" type="button" id="clearFresh" hidden>Clear and start fresh</button>
-      </div>
-    </section>
+    <textarea id="problemStatement" hidden></textarea>
 
     <section class="screen active" id="screen2">
       <div class="build-main">
@@ -2118,7 +1789,7 @@
             </div>
             <div class="email-notes-head">
               <div class="label">Cleaned-up notes</div>
-              <p>Choose the 9 most useful notes and drag or tap them into the 9 supporting-detail slots. Leave the extra note out. You still write the three argument labels yourself.</p>
+              <p>Drag or tap each note into one of the 9 supporting-detail slots on the right. You still write the three argument labels yourself.</p>
             </div>
             <div class="email-detail-list" id="evidenceList"></div>
             <div class="tap-evidence-hint" id="tapEvidenceHint"></div>
@@ -2195,7 +1866,6 @@
     const DATA_URL = "../../data/practice/issue-tree-builder.json";
     const ASHLEY_DETAILS = [
       { id: "ashley-tv-show", label: "Feels like a TV show", text: "Feels like a TV show: The Olympics feels highly produced. More like something you watch on screen than something you feel part of." },
-      { id: "ashley-no-meaning", label: "No lasting meaning", text: "No lasting meaning: Moments go viral quickly, but they fade fast and do not build into something bigger over time." },
       { id: "ashley-highlights", label: "Highlights over stories", text: "Highlights over stories: Big wins, clips, and controversies get attention, but deeper athlete journeys are often overlooked." },
       { id: "ashley-unity", label: "Generic unity message", text: "Generic unity message: Messaging about bringing the world together can feel surface-level, especially when global tensions are high." },
       { id: "ashley-trust", label: "Lower trust", text: "Lower trust: Depending on where people are from, politics or bias can affect how much they trust or connect with the Games." },
@@ -2228,7 +1898,6 @@
     let timerElapsedBeforePause = 0;
     let timerInterval = null;
     let timerMetricHidden = false;
-    let activeWordField = null;
     let selectedEvidenceId = null;
 
     // Exercise data is loaded from ../../data/practice/issue-tree-builder.json.
@@ -2376,8 +2045,10 @@
         card.classList.toggle("selected", isSelected);
         card.setAttribute("aria-pressed", isSelected ? "true" : "false");
       });
-      $$(".detail-wrap").forEach((zone) => {
-        zone.classList.toggle("tap-target", Boolean(selectedEvidenceId));
+      $$(".detail-list").forEach((zone) => {
+        const argIndex = Number(zone.dataset.arg);
+        const hasRoom = state.arguments[argIndex] && state.arguments[argIndex].details.some((detail) => !detail.trim());
+        zone.classList.toggle("tap-target", Boolean(selectedEvidenceId) && hasRoom);
       });
       const hint = $("#tapEvidenceHint");
       if (!hint) return;
@@ -2385,15 +2056,19 @@
       hint.textContent = selected ? `${selected.label} selected. Tap a supporting-detail slot to place it.` : "";
     }
 
-    function applyEvidenceToDetail(evidenceId, detailWrap) {
+    function applyEvidenceToDetail(evidenceId, detailZone) {
       const evidence = evidenceById(evidenceId);
-      if (!evidence || !detailWrap) return;
-      const input = $(".detail-input", detailWrap);
+      if (!evidence || !detailZone) return;
+      const argIndex = Number(detailZone.dataset.arg);
+      const details = state.arguments[argIndex] && state.arguments[argIndex].details;
+      if (!details) return;
+      const targetIndex = details.findIndex((detail) => !detail.trim());
+      if (targetIndex === -1) return;
+      const input = $(`.detail-input[data-arg="${argIndex}"][data-detail="${targetIndex}"]`, detailZone);
       if (!input) return;
       input.value = evidence.text;
-      autoResize(input);
       updateFromDom();
-      openArgument = Number(detailWrap.dataset.arg) || 0;
+      openArgument = argIndex;
       selectedEvidenceId = null;
       renderEvidenceList();
       renderArguments();
@@ -2410,30 +2085,25 @@
       renderArguments();
       renderEvidenceList();
       renderProgress();
-      renderWordCount();
     }
 
-    function moveDetailSlot(sourceArg, sourceDetail, targetWrap) {
-      if (!state.arguments[sourceArg] || !targetWrap) return;
-      const targetArg = Number(targetWrap.dataset.arg);
-      const targetDetail = Number(targetWrap.dataset.detail);
-      if (!state.arguments[targetArg]) return;
-      if (sourceArg === targetArg && sourceDetail === targetDetail) return;
+    function moveDetailSlot(sourceArg, sourceDetail, targetZone) {
+      if (!state.arguments[sourceArg] || !targetZone) return;
+      const targetArg = Number(targetZone.dataset.arg);
+      if (!state.arguments[targetArg] || sourceArg === targetArg) return;
       const sourceValue = state.arguments[sourceArg].details[sourceDetail] || "";
       if (!sourceValue.trim()) return;
-      const targetValue = state.arguments[targetArg].details[targetDetail] || "";
+      const targetDetails = state.arguments[targetArg].details;
+      const targetIndex = targetDetails.findIndex((detail) => !detail.trim());
+      if (targetIndex === -1) return;
       state.arguments[sourceArg].details[sourceDetail] = "";
-      state.arguments[targetArg].details[targetDetail] = sourceValue;
-      if (targetValue.trim()) {
-        state.arguments[sourceArg].details[sourceDetail] = targetValue;
-      }
+      targetDetails[targetIndex] = sourceValue;
       selectedEvidenceId = null;
       openArgument = targetArg;
       save();
       renderArguments();
       renderEvidenceList();
       renderProgress();
-      renderWordCount();
     }
 
     function returnDetailToAshley(sourceArg, sourceDetail) {
@@ -2445,20 +2115,27 @@
       renderArguments();
       renderEvidenceList();
       renderProgress();
-      renderWordCount();
     }
 
-    function detailSlotMarkup(argIndex, detailIndex, detail) {
-      const value = detail || "";
-      const hasValue = value.trim();
-      const sharedAttrs = `data-arg="${argIndex}" data-detail="${detailIndex}" data-word-label="Detail ${detailIndex + 1}"`;
-      if (!hasValue) {
-        return `<textarea class="detail-input" ${sharedAttrs} placeholder="Supporting detail ${detailIndex + 1}: Specific evidence or example...">${escapeHtml(value)}</textarea>`;
-      }
-      return `
-        <div class="placed-detail-card">${formatEvidenceText(value)}</div>
-        <textarea class="detail-input detail-input-hidden" ${sharedAttrs}>${escapeHtml(value)}</textarea>
-      `;
+    function detailListMarkup(argIndex, details) {
+      const filledCount = details.filter((detail) => detail.trim()).length;
+      const cards = details.map((detail, detailIndex) => {
+        if (!detail.trim()) return "";
+        return `
+          <div class="placed-detail-card" data-arg="${argIndex}" data-detail="${detailIndex}" draggable="true">
+            ${formatEvidenceText(detail)}
+            <button class="detail-remove" type="button" data-remove-detail="${argIndex}" data-detail="${detailIndex}" aria-label="Clear this supporting detail">×</button>
+          </div>
+        `;
+      }).join("");
+      const addSlot = filledCount < 3
+        ? `<button class="detail-add-slot" type="button">Add selected note here</button>`
+        : "";
+      const emptyHint = filledCount === 0
+        ? `<p class="detail-empty-hint">Drag or tap a note here</p>`
+        : "";
+      const hiddenInputs = details.map((detail, detailIndex) => `<textarea class="detail-input detail-input-hidden" data-arg="${argIndex}" data-detail="${detailIndex}" tabindex="-1" aria-hidden="true">${escapeHtml(detail)}</textarea>`).join("");
+      return `${addSlot}${cards}${emptyHint}${hiddenInputs}`;
     }
 
     function renderArguments() {
@@ -2482,13 +2159,8 @@
             <div class="details-section ${hasContent(arg.text) ? "show" : ""}">
               <div class="label">Supporting details</div>
               <p class="details-sub">Add 3 specific pieces of evidence or examples.</p>
-              <div class="detail-list">
-                ${arg.details.map((detail, detailIndex) => `
-                  <div class="detail-wrap${detail.trim() ? " has-detail" : ""}" data-detail-zone data-arg="${index}" data-detail="${detailIndex}" ${detail.trim() ? 'draggable="true"' : ""}>
-                    ${detailSlotMarkup(index, detailIndex, detail)}
-                    ${detail.trim() ? `<button class="detail-remove" type="button" data-remove-detail="${index}" data-detail="${detailIndex}" aria-label="Clear supporting detail ${detailIndex + 1}">×</button>` : ""}
-                  </div>
-                `).join("")}
+              <div class="detail-list" data-detail-zone data-arg="${index}">
+                ${detailListMarkup(index, arg.details)}
               </div>
               ${index < 2 ? `<button class="advance-prompt ${arg.details.every((detail) => detail.trim()) ? "show" : ""}" type="button" data-next="${index + 1}">Argument ${index + 1} done. Open Argument ${index + 2} →</button>` : ""}
             </div>
@@ -2497,7 +2169,7 @@
         fields.arguments.appendChild(card);
       });
 
-      $$(".argument-input, .detail-input").forEach(autoResize);
+      $$(".argument-input").forEach(autoResize);
     }
 
     function renderProgress() {
@@ -2551,6 +2223,9 @@
             Your response has been saved.
           </div>
           <div class="save-notice-caveat">If you are signed in, this also syncs to your Firestore profile.</div>
+          <div class="save-notice-actions">
+            <a class="btn btn-primary" href="../../member-login/index.html#learning-journey">Back to Learning Journey</a>
+          </div>
         </div>
       `;
     }
@@ -2634,7 +2309,6 @@
       setTextIfPresent("#sideQuestion", state.problemStatement || "No question yet.");
       setTextIfPresent("#mobileQuestion", state.problemStatement || "No question yet.");
       setTextIfPresent("#treeQuestion", state.problemStatement || "No question yet.");
-      if ($("#startBtn")) $("#startBtn").disabled = !filled(state.problemStatement);
       renderArguments();
       renderEvidenceList();
       renderProgress();
@@ -2644,13 +2318,10 @@
     }
 
     function goToScreen(screen) {
-      if (screen === 1) screen = 2;
-      currentScreen = screen;
-      state.currentScreen = screen;
+      currentScreen = 2;
+      state.currentScreen = 2;
       save();
-      $$(".screen").forEach((screenEl, index) => {
-        screenEl.classList.toggle("active", index + 1 === screen);
-      });
+      $$(".screen").forEach((screenEl) => screenEl.classList.add("active"));
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
@@ -2668,7 +2339,6 @@
       setSaveButtonSaved(false);
       if ($("#feedbackMount")) $("#feedbackMount").innerHTML = "";
       renderProgress();
-      if ($("#startBtn")) $("#startBtn").disabled = !filled(state.problemStatement);
       setTextIfPresent("#sideQuestion", state.problemStatement || "No question yet.");
       setTextIfPresent("#mobileQuestion", state.problemStatement || "No question yet.");
       setTextIfPresent("#treeQuestion", state.problemStatement || "No question yet.");
@@ -2739,19 +2409,6 @@
     function startTimerFromInteraction() {
       if (!timerStarted) startTimer();
       else if (!timerRunning) resumeTimer();
-    }
-
-    function renderWordCount(target = activeWordField) {
-      const labelEl = $("#wordCountLabel");
-      const countEl = $("#wordCountDisplay");
-      if (!labelEl || !countEl) return;
-      if (!target || !target.matches("input, textarea")) {
-        labelEl.textContent = "Word count (in current box)";
-        countEl.textContent = "0";
-        return;
-      }
-      labelEl.textContent = "Word count (in current box)";
-      countEl.textContent = wordCount(target.value);
     }
 
     function normalizeWords(text) {
@@ -2880,32 +2537,34 @@
 
     function renderSample() {
       const data = templateState || blankState();
+      const custom = Boolean(templateState && templateState.problemStatement && state.problemStatement.trim() && state.problemStatement.trim() !== templateState.problemStatement.trim());
       $("#sampleMount").innerHTML = `
-        <section class="sample-answer-panel" aria-live="polite">
-          <div class="sample-answer-head">
-            <div class="sample-answer-ribbon"><span>Core exercise | Sample answer</span></div>
-            <h2 class="sample-answer-title">Organizing thoughts: Sample answer key</h2>
-            <p class="sample-answer-tip">Tip: Good bucketing requires clear questions to be answered.</p>
+        <section class="panel" aria-live="polite">
+          <button class="panel-close" type="button" data-close-panel="sampleMount">×</button>
+          <div class="label">Sample answer key</div>
+          ${custom ? `<p class="sample-notice">This sample uses the Olympics case study. Use it as a model for structure and language — not for content.</p>` : ""}
+          <div class="question-banner">
+            <div class="label">Central question</div>
+            <h2>${escapeHtml(data.problemStatement || "Why is the Olympics losing its cultural impact?")}</h2>
           </div>
-          <div class="sample-answer-bars">
-            <div class="sample-answer-bar">${escapeHtml(data.problemStatement || "Why is the Olympics losing its cultural impact?")}</div>
-            <div class="sample-answer-bar">${escapeHtml(data.hypothesis || "The Olympics is losing gravity because of broken culture, a lost story arc, and lack of legitimate transparency.")}</div>
+          <div class="review-hypothesis">
+            <div class="label" style="color:var(--steel)">Hypothesis</div>
+            <p>${escapeHtml(data.hypothesis || "The Olympics is losing gravity because of broken culture, a lost story arc, and lack of legitimate transparency.")}</p>
           </div>
-          <div class="sample-answer-grid">
+          <div class="review-grid">
             ${data.arguments.map((arg, index) => `
-              <article class="sample-answer-column">
-                <div class="sample-answer-arg-label">Argument ${index + 1}</div>
-                <div class="sample-answer-arg-title">${escapeHtml(arg.text || "—")}</div>
-                <div class="sample-answer-details">
+              <article>
+                <div class="review-arg-header">
+                  <div class="label">Argument ${index + 1}</div>
+                  ${escapeHtml(arg.text || "—")}
+                </div>
+                <div class="review-arg-body">
                   ${arg.details.filter((detail) => detail.trim()).map((detail) => `
-                    <div class="sample-answer-detail">${formatEvidenceText(detail)}</div>
-                  `).join("")}
+                    <div class="detail-row"><span class="bullet">•</span><span>${formatEvidenceText(detail)}</span></div>
+                  `).join("") || `<p class="empty">No supporting details.</p>`}
                 </div>
               </article>
             `).join("")}
-          </div>
-          <div class="sample-answer-actions">
-            <button class="btn btn-secondary" type="button" data-close-panel="sampleMount">Hide sample answer</button>
           </div>
         </section>
       `;
@@ -2950,8 +2609,6 @@
       if (event.target.matches("textarea")) autoResize(event.target);
       if (event.target.matches("input, textarea")) {
         if (currentScreen === 2) startTimerFromInteraction();
-        activeWordField = event.target;
-        renderWordCount(event.target);
         updateFromDom();
         if (event.target.matches(".argument-input")) {
           const index = Number(event.target.dataset.arg);
@@ -2962,34 +2619,7 @@
           $(".argument-title-text", card).textContent = event.target.value.trim() || "Click to expand";
           save();
         }
-        if (event.target.matches(".detail-input")) {
-          const index = Number(event.target.dataset.arg);
-          const card = event.target.closest(".argument-card");
-          const prompt = $(".advance-prompt", card);
-          if (prompt) prompt.classList.toggle("show", state.arguments[index].details.every((detail) => detail.trim()));
-        }
       }
-    });
-
-    document.addEventListener("focusin", (event) => {
-      if (event.target.matches("input, textarea")) {
-        activeWordField = event.target;
-        renderWordCount(event.target);
-      }
-      if (event.target.matches(".detail-input")) event.target.closest(".argument-card").classList.add("detail-focus");
-    });
-
-    document.addEventListener("focusout", (event) => {
-      if (event.target.matches(".detail-input")) event.target.closest(".argument-card").classList.remove("detail-focus");
-    });
-
-    document.addEventListener("click", () => {
-      requestAnimationFrame(() => {
-        if (document.activeElement && document.activeElement.matches("input, textarea")) {
-          activeWordField = document.activeElement;
-          renderWordCount(document.activeElement);
-        }
-      });
     });
 
     document.addEventListener("click", (event) => {
@@ -3040,13 +2670,11 @@
           state.arguments[index].details[detailIndex] = "";
         }
         openArgument = index;
-        activeWordField = null;
         selectedEvidenceId = null;
         save();
         renderArguments();
         renderEvidenceList();
         renderProgress();
-        renderWordCount();
         return;
       }
 
@@ -3072,10 +2700,10 @@
     });
 
     document.addEventListener("dragstart", (event) => {
-      const detailWrap = event.target.closest(".detail-wrap.has-detail");
-      if (detailWrap) {
-        const argIndex = Number(detailWrap.dataset.arg);
-        const detailIndex = Number(detailWrap.dataset.detail);
+      const detailCard = event.target.closest(".placed-detail-card");
+      if (detailCard) {
+        const argIndex = Number(detailCard.dataset.arg);
+        const detailIndex = Number(detailCard.dataset.detail);
         const value = state.arguments[argIndex]?.details[detailIndex] || "";
         if (!value.trim()) return;
         selectedEvidenceId = null;
@@ -3150,27 +2778,6 @@
       applyEvidenceToDetail(evidenceId, zone);
     });
 
-    const loadTemplateButton = $("#loadTemplate");
-    if (loadTemplateButton) {
-      loadTemplateButton.addEventListener("click", () => {
-        state = {
-          ...blankState(),
-          problemStatement: templateState.problemStatement,
-          currentScreen: 2
-        };
-        openArgument = 0;
-        save();
-        renderAll();
-        const status = $("#templateStatus");
-        status.classList.add("show");
-        setTimeout(() => status.classList.remove("show"), 2000);
-      });
-    }
-
-    const startButton = $("#startBtn");
-    if (startButton) startButton.addEventListener("click", () => goToScreen(2));
-    const clearFreshButton = $("#clearFresh");
-    if (clearFreshButton) clearFreshButton.addEventListener("click", clearAll);
     const emailToggle = $("#emailToggle");
     if (emailToggle) {
       emailToggle.addEventListener("click", () => {
@@ -3232,16 +2839,15 @@
       timerInterval = setInterval(renderTimer, 1000);
       renderAll();
       renderTimer();
-      renderWordCount();
       goToScreen(2);
     }
 
     initializeApp();
   </script>
   <script type="module" src="../../assets/app-access-guard.js?v=1"></script>
-  <script src="../../assets/exercise-scoring-intro.js?v=3"></script>
-  <script src="../../assets/app-reward-header.js?v=20260714-audit-1"></script>
-  <script src="../../assets/reward-events.js?v=20260712-awards-1"></script>
+  <script src="../../assets/exercise-scoring-intro.js?v=6"></script>
+  <script src="../../assets/app-reward-header.js?v=20260730-celebration-1"></script>
+  <script src="../../assets/reward-events.js?v=20260730-celebration-1"></script>
   <script type="module" src="../../assets/feedback-widget.js?v=6"></script>
   <script src="../../assets/tactile-buttons.js?v=20260714-flat-1" defer></script>
 </body>

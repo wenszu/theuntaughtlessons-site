@@ -15,7 +15,7 @@ const canonical = {
   completion: 50,
   reflection: 30,
   phase: [100, 150, 200],
-  program: 200,
+  program: 600,
   assessment: 100,
   dailyGoal: 3,
   streakBase: 5
@@ -52,7 +52,7 @@ assert.equal(engine.simulateRewardEvent({ type: "context-completed" }, settings)
 assert.equal(engine.simulateRewardEvent({ type: "completion-exercise" }, settings).mpEarned, 50);
 assert.equal(engine.simulateRewardEvent({ type: "reflection-exercise" }, settings).mpEarned, 30);
 assert.equal(engine.simulateRewardEvent({ type: "phase-completed", phase: "phase3" }, settings).mpEarned, 200);
-assert.equal(engine.simulateRewardEvent({ type: "program-completed" }, settings).mpEarned, 200);
+assert.equal(engine.simulateRewardEvent({ type: "program-completed" }, settings).mpEarned, canonical.program);
 assert.equal(engine.simulateRewardEvent({ type: "assessment-completed" }, settings).mpEarned, 100);
 assert.equal(engine.simulateRewardEvent({ type: "daily-streak", streakDay: 4 }, settings).mpEarned, 20);
 
@@ -63,7 +63,8 @@ assert.equal(phase1, 635);
 assert.equal(phase2, 1170);
 assert.equal(phase3, 1585);
 assert.equal(phase3 + (2 * canonical.assessment), 1785);
-assert.equal(phase3 + (2 * canonical.assessment) + canonical.program, 1985);
-assert.ok(1985 >= canonical.levels.at(-1)[1], "full completion and the program bonus make Executive attainable without streak farming");
+assert.equal(phase3 + (2 * canonical.assessment) + canonical.program, 2385);
+assert.ok(2385 >= canonical.levels.at(-1)[1], "full completion and the program bonus make Executive attainable without streak farming");
+assert.ok(phase3 + canonical.program >= canonical.levels.at(-1)[1], "full curriculum completion plus the program bonus reaches Executive even without doing either assessment");
 
 console.log("canonical reward economy and promotion thresholds passed");

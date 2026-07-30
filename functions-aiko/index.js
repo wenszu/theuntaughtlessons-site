@@ -141,11 +141,7 @@ async function callGemini(apiKey, prompt) {
       console.error("Explain to Aiko scoring model failed:", error.message);
     }
   }
-  try {
-    return await callModel(apiKey, MODELS[MODELS.length - 1], prompt);
-  } catch (error) {
-    throw lastError || error;
-  }
+  throw lastError;
 }
 
 function normalizeResult(result) {

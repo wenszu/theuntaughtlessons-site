@@ -183,68 +183,6 @@
 
     .identity-back:hover { opacity: 1; }
 
-    .results-nav-drop {
-      position: relative;
-      display: inline-flex;
-      align-items: center;
-    }
-
-    .results-nav-drop:hover .results-phase-menu,
-    .results-nav-drop:focus-within .results-phase-menu {
-      display: block;
-    }
-
-    .results-phase-menu {
-      position: absolute;
-      top: 44px;
-      left: 0;
-      display: none;
-      width: 300px;
-      overflow: hidden;
-      background: var(--white);
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      box-shadow: 0 18px 40px rgba(0, 51, 102, .22);
-      color: var(--navy);
-      z-index: 500;
-    }
-
-    .results-phase-menu::before {
-      content: attr(data-label);
-      display: block;
-      padding: 12px 16px 8px;
-      color: #4D7094;
-      font-family: Lato, Arial, sans-serif;
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0;
-      text-transform: none;
-    }
-
-    .results-phase-menu a {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 13px 16px;
-      color: var(--navy);
-      text-decoration: none;
-    }
-
-    .results-phase-menu a:hover {
-      background: #f4eddf;
-    }
-
-    .results-phase-menu strong {
-      display: block;
-      font-size: 16px;
-    }
-
-    .results-phase-menu small {
-      display: block;
-      margin-top: 2px;
-      color: #4D7094;
-      font-size: 13px;
-    }
 
     .results-menu-icon {
       width: 36px;
@@ -574,20 +512,22 @@
     }
 
     .device-notice {
-      background: var(--white);
-
-      border-radius: 0;
-      padding: 10px 14px;
+      background: #EEF2F6;
+      border: 1px solid rgba(0, 51, 102, .14);
+      border-radius: 10px;
+      padding: 14px 16px;
       font-family: 'Lato', sans-serif;
-      font-size: 12px;
+      font-size: 13px;
       color: var(--charcoal);
       line-height: 1.6;
       margin-bottom: 1.5rem;
     }
 
-    .device-notice strong {
+    .device-notice > strong {
       color: var(--navy);
-      font-weight: 500;
+      font-weight: 700;
+      display: block;
+      margin-bottom: 2px;
     }
 
     .storage-origin-hint {
@@ -598,16 +538,17 @@
       line-height: 1.5;
     }
     .sync-notice {
-      background: #F0F7F0;
-
-      padding: 10px 14px;
+      background: #EAF5ED;
+      border: 1px solid rgba(15, 110, 86, .22);
+      border-radius: 10px;
+      padding: 14px 16px;
       font-family: 'Lato', sans-serif;
-      font-size: 12px;
+      font-size: 13px;
       color: var(--charcoal);
       line-height: 1.6;
       margin-bottom: 1.5rem;
     }
-    .sync-notice strong { color: #1a5c35; font-weight: 500; }
+    .sync-notice strong { color: #1a5c35; font-weight: 700; display: block; margin-bottom: 2px; }
 
     .storage-origin-hint.is-visible {
       display: block;
@@ -627,6 +568,61 @@
       border-radius: 10px;
       padding: 1.25rem;
       margin-bottom: 1.5rem;
+    }
+
+    .certificate-callout {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+      background: #FDF3DC;
+      border: 1px solid rgba(238, 163, 32, .55);
+      border-radius: 10px;
+      padding: 1.15rem 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .certificate-callout-copy {
+      min-width: 0;
+    }
+
+    .certificate-callout-label {
+      display: block;
+      font-family: Lato, Arial, sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--gold);
+      margin-bottom: 4px;
+    }
+
+    .certificate-callout-copy h2 {
+      margin: 0 0 4px;
+      font-family: 'Playfair Display', serif;
+      font-size: 20px;
+      color: var(--navy);
+    }
+
+    .certificate-callout-copy p {
+      margin: 0;
+      font-size: 13px;
+      color: var(--charcoal);
+    }
+
+    .certificate-callout-link {
+      flex: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 18px;
+      border-radius: 7px;
+      background: var(--navy);
+      color: #fff;
+      font-family: Lato, Arial, sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      text-decoration: none;
+      white-space: nowrap;
     }
 
     .progress-label {
@@ -674,31 +670,19 @@
       text-transform: none;
     }
 
-    .progress-track {
-      display: grid;
-      grid-template-columns: repeat(var(--progress-total, 6), minmax(18px, 1fr));
-      gap: 5px;
+    .progress-bar-track {
+      height: 6px;
+      border-radius: 999px;
+      background: var(--line);
+      overflow: hidden;
       margin-bottom: 10px;
     }
 
-    .progress-dot {
-      position: relative;
-      height: 10px;
-      border-radius: 2px;
-    }
-
-    .progress-dot.done { background: var(--gold); }
-    .progress-dot.pending { background: var(--line); }
-
-    .progress-dot::after {
-      content: attr(data-number);
-      position: absolute;
-      top: 14px;
-      left: 50%;
-      color: #aaa;
-      font-family: Lato, Arial, sans-serif;
-      font-size: 9px;
-      transform: translateX(-50%);
+    .progress-bar-track span {
+      display: block;
+      height: 100%;
+      border-radius: inherit;
+      background: var(--gold);
     }
 
     .progress-count {
@@ -764,11 +748,30 @@
     }
 
     .ex-result-header {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
+      display: grid;
+      grid-template-columns: 30px minmax(0, 1fr) auto;
+      align-items: center;
       gap: 12px;
       margin-bottom: 8px;
+    }
+
+    .ex-result-icon {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--line);
+      background: var(--white);
+      color: #bbb;
+      font-size: 12px;
+      flex-shrink: 0;
+    }
+
+    .ex-result-card:not(.ex-result-pending) .ex-result-icon {
+      background: #0F6E56;
+      border-color: #0F6E56;
+      color: var(--white);
     }
 
     .ex-result-title {
@@ -892,7 +895,6 @@
       border-radius: 12px;
       overflow: hidden;
       background: var(--white);
-      box-shadow: 0 4px 12px rgba(0, 51, 102, .03);
     }
 
     .results-accordion-head {
@@ -957,14 +959,14 @@
     }
 
     .video-progress-section { margin: 1.5rem 0 2rem; }
-    .video-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; margin-top: 10px; }
-    .video-tile { padding: 10px; background: var(--cream); border-radius: 8px; border: 1px solid transparent; display: flex; flex-direction: column; gap: 6px; font-size: 11px; color: var(--charcoal); text-decoration: none; }
-    .video-tile.is-watched { background: var(--white); border-color: #E1F5EE; }
-    .video-status-row { display: flex; align-items: center; justify-content: space-between; }
-    .video-status-check { width: 16px; height: 16px; border-radius: 50%; background: var(--parchment); display: grid; place-items: center; font-size: 9px; color: var(--white); }
-    .video-tile.is-watched .video-status-check { background: #0F6E56; }
-    .video-title { font-weight: 700; line-height: 1.3; min-height: 28px; color: var(--navy); }
-    .video-link { color: var(--gold); font-weight: 700; font-size: 9px; text-transform: none; letter-spacing: 0; margin-top: auto; }
+    .video-grid { display: grid; gap: 8px; margin-top: 10px; }
+    .video-row { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 10px 14px; background: var(--cream); border-radius: 8px; border: 1px solid transparent; text-decoration: none; min-height: 52px; }
+    .video-row.is-watched { background: var(--white); border-color: #E1F5EE; }
+    .video-row-icon { width: 22px; height: 22px; border-radius: 50%; background: var(--parchment); display: grid; place-items: center; font-size: 10px; color: var(--white); flex-shrink: 0; }
+    .video-row.is-watched .video-row-icon { background: #0F6E56; }
+    .video-row-copy { min-width: 0; font-size: 11px; color: var(--charcoal); }
+    .video-row-copy strong { display: block; font-weight: 700; line-height: 1.3; color: var(--navy); font-size: 13px; }
+    .video-row-link { color: var(--gold); font-weight: 700; font-size: 10px; text-transform: none; letter-spacing: 0; white-space: nowrap; }
 
     .exercise-section-header { margin-bottom: 12px; display: flex; align-items: center; gap: 8px; border-bottom: .5px solid var(--line); padding-bottom: 6px; }
     .exercise-section-header h4 { font-family: Lato, Arial, sans-serif; font-size: 10px; color: var(--gold); text-transform: none; letter-spacing: 0; margin: 0; }
@@ -1161,32 +1163,10 @@
       <div class="member-nav-inner">
         <div class="nav-links">
           <div class="nav-phase-links">
-            <a href="../member-login/index.html" class="nav-item">Home</a>
+            <a href="../member-login/index.html" class="nav-item">Learning Journey</a>
             <span class="nav-sep">|</span>
-            <span class="results-nav-drop">
-              <a href="../member-login/phase-1.html" class="nav-item">Phase 1</a>
-              <span class="results-phase-menu" data-label="Phase 1 - Think clearly">
-                <a href="../member-login/phase-1.html"><span class="results-menu-icon">▶</span><span><strong>Watch the lessons</strong><small>5 lessons</small></span></a>
-                <a href="../member-login/phase-1/practice/index.html"><span class="results-menu-icon">✎</span><span><strong>Practice the exercises</strong><small>6 exercises</small></span></a>
-              </span>
-            </span>
-            <span class="nav-sep">|</span>
-            <span class="results-nav-drop">
-              <a href="../member-login/phase-2.html" class="nav-item">Phase 2</a>
-              <span class="results-phase-menu" data-label="Phase 2 - Speak concisely">
-                <a href="../member-login/phase-2.html"><span class="results-menu-icon">▶</span><span><strong>Watch the lessons</strong><small>5 lessons</small></span></a>
-                <a href="../member-login/phase-2.html#exercises"><span class="results-menu-icon">✎</span><span><strong>Practice the exercises</strong><small>6 exercises</small></span></a>
-              </span>
-            </span>
-            <span class="nav-sep">|</span>
-            <span class="results-nav-drop">
-              <a href="../member-login/phase-3.html" class="nav-item">Phase 3</a>
-              <span class="results-phase-menu" data-label="Phase 3 - Act confidently">
-                <a href="../member-login/phase-3.html"><span class="results-menu-icon">▶</span><span><strong>Watch the lessons</strong><small>5 lessons</small></span></a>
-                <a href="../member-login/phase-3.html#exercises"><span class="results-menu-icon">✎</span><span><strong>Practice the exercises</strong><small>4 exercises</small></span></a>
-              </span>
-            </span>
-            <a href="../member-login/index.html#assessments" class="nav-item nav-item-results" data-assessment-nav>Assessments</a>          </div>
+            <a href="../my-results/index.html" class="nav-item nav-item-results active">My Results</a>
+          </div>
         </div>
       </div>
     </nav>
@@ -1228,6 +1208,15 @@
       <div class="results-label">My results</div>
       <h1 class="results-title">Your exercise record.</h1>
       <p class="results-subtitle">A summary of everything you have completed on this device.</p>
+    </div>
+
+    <div class="certificate-callout" id="certificateCallout" hidden>
+      <div class="certificate-callout-copy">
+        <span class="certificate-callout-label">Program complete</span>
+        <h2>Your certificate is ready.</h2>
+        <p>You finished all three phases. View, download, or share your certificate of completion.</p>
+      </div>
+      <a class="certificate-callout-link" href="../certificate/index.html">View certificate &rarr;</a>
     </div>
 
     <div class="device-notice" id="deviceNotice">
@@ -1278,7 +1267,7 @@
       { id: 'rushed-voice-memo-ai', phase: 1, number: 5, doneKey: 'utl_p1_ex5_done', name: 'Rushed voice memo with AI', path: '../apps/rushed-voice-memo-ai/index.html' },
       { id: 'chalkboard-notes', phase: 1, number: 6, doneKey: 'utl_p1_ex6_done', name: 'Chalkboard notes', path: '../apps/chalkboard-notes/index.html' },
       { id: 'issue-tree', phase: 2, number: 1, doneKey: 'utl_p2_ex1_done', name: 'Issue tree builder', path: '../apps/issue-tree-builder/index.html' },
-      { id: 'scqa-builder', phase: 2, number: 2, doneKey: 'utl_p2_ex2_done', name: 'SCQA builder', path: '../apps/scqa-builder/index.html' },
+      { id: 'scqa-builder', phase: 2, number: 2, doneKey: 'utl_p2_ex2_done', name: 'Framing the storyline', path: '../apps/scqa-builder/index.html' },
       { id: 'advisory-board', phase: 2, number: 3, doneKey: 'utl_p2_ex3_done', name: 'Advisory board with AI', path: '../apps/advisory-board/index.html' },
       { id: 'write-to-aiko', phase: 2, number: 4, doneKey: 'utl_p2_ex4_done', name: 'Write to Aiko', path: '../apps/write-to-aiko/index.html' },
       { id: 'explain-to-aiko', phase: 2, number: 5, doneKey: 'utl_p2_ex5_done', name: 'Explain to Aiko (120s)', path: '../apps/explain-to-aiko/index.html' },
@@ -1290,35 +1279,67 @@
     ];
 
     const LESSONS = {
-      orientation: [
-        { id: "orientation-welcome", title: "Welcome", path: "../member-login/index.html" },
-        { id: "orientation-howto", title: "How this program works", path: "../member-login/index.html" }
-      ],
+      orientation: [],
       phase1: [
-        { id: "p1-welcome-ma", title: "Welcome to MA", path: "../member-login/phase-1.html" },
-        { id: "p1-l1", title: "KonMari for the mind", path: "../member-login/phase-1.html" },
-        { id: "p1-l2", title: "Rule of three", path: "../member-login/phase-1.html" },
-        { id: "p1-l3", title: "Bolded summary phrase", path: "../member-login/phase-1.html" }
+        { id: "p1-l1", title: "KonMari for the cluttered mind", path: "../member-login/phase-1.html?lesson=p1-l1#lessons" },
+        { id: "p1-l2", title: "Rule of three", path: "../member-login/phase-1.html?lesson=p1-l2#lessons" },
+        { id: "p1-l3", title: "Bolded summary phrases (BSP)", path: "../member-login/phase-1.html?lesson=p1-l3#lessons" }
       ],
       phase2: [
-        { id: "p1-l4", title: "What's the problem?", path: "../member-login/phase-2.html" },
-        { id: "p1-l5", title: "Divide and conquer", path: "../member-login/phase-2.html" },
-        { id: "p2-l1", title: "The executive storyline", path: "../member-login/phase-2.html" },
-        { id: "p2-l3", title: "The art of persuasion", path: "../member-login/phase-2.html" }
+        { id: "p1-l4", title: "Wait, what's the problem again?", path: "../member-login/phase-2.html?lesson=p1-l4#lessons" },
+        { id: "p1-l5", title: "Divide and conquer", path: "../member-login/phase-2.html?lesson=p1-l5#lessons" },
+        { id: "p2-l1", title: "The executive storyline", path: "../member-login/phase-2.html?lesson=p2-l1#lessons" },
+        { id: "p2-l3", title: "The art of persuasion", path: "../member-login/phase-2.html?lesson=p2-l3#lessons" }
       ],
       phase3: [
-        { id: "p3-l1", title: "How to read people", path: "../member-login/phase-3.html" },
-        { id: "p3-l2", title: "Let's switch hats", path: "../member-login/phase-3.html" },
-        { id: "p3-l3", title: "Speak like Obama", path: "../member-login/phase-3.html" },
-        { id: "p3-l4", title: "The art of saying no", path: "../member-login/phase-3.html" },
-        { id: "p3-l5", title: "I have bad news...", path: "../member-login/phase-3.html" }
+        { id: "p3-l1", title: "How to read people", path: "../member-login/phase-3.html?lesson=p3-l1#lessons" },
+        { id: "p3-l2", title: "Let's switch hats", path: "../member-login/phase-3.html?lesson=p3-l2#lessons" },
+        { id: "p3-l3", title: "Speak like Obama", path: "../member-login/phase-3.html?lesson=p3-l3#lessons" },
+        { id: "p3-l4", title: "The art of saying no", path: "../member-login/phase-3.html?lesson=p3-l4#lessons" },
+        { id: "p3-l5", title: "I have bad news...", path: "../member-login/phase-3.html?lesson=p3-l5#lessons" }
       ]
     };
 
     const ASSESSMENTS = [
-      { key: 'utl_result_tsa_diagnostic', name: 'The diagnostic', path: '../apps/tsa-diagnostic/index.html' },
-      { key: 'utl_result_tsa_checkpoint', name: 'The checkpoint', path: '../apps/tsa-checkpoint/index.html' }
+      { name: 'The diagnostic', path: '../apps/tsa-diagnostic/index.html' },
+      { name: 'The checkpoint', path: '../apps/tsa-checkpoint/index.html' }
     ];
+
+    // The diagnostic and checkpoint both link out to the same three sub-exercise
+    // apps, which each save their score under one fixed key regardless of which
+    // assessment launched them. There is no way to keep a separate "diagnostic"
+    // score once the checkpoint is taken, so both assessments read the same
+    // current state rather than two independent snapshots.
+    const TSA_SUBSCORES = [
+      { key: 'tsa_sort_score', label: 'Sort & bucket' },
+      { key: 'tsa_spot_score', label: 'Spot the problem' },
+      { key: 'tsa_speak_score', label: 'Short talk' }
+    ];
+
+    function tsaSubscoreValue(key) {
+      try {
+        const raw = localStorage.getItem(key);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        if (typeof parsed === 'number') return parsed;
+        if (typeof parsed.score === 'number') return parsed.score;
+        if (typeof parsed.total === 'number') return parsed.total;
+        if (typeof parsed.percentage === 'number') return parsed.percentage;
+        return null;
+      } catch (error) {
+        return null;
+      }
+    }
+
+    function tsaAssessmentStatus() {
+      const scored = TSA_SUBSCORES.map((s) => ({ label: s.label, value: tsaSubscoreValue(s.key) }));
+      const done = scored.filter((s) => s.value !== null).length;
+      return { scored, done, total: TSA_SUBSCORES.length, complete: done === TSA_SUBSCORES.length };
+    }
+
+    function tsaSubscoreText(status) {
+      return status.scored.map((s) => `${s.label}: ${s.value === null ? 'Not started' : Math.round(s.value) + (s.value <= 40 ? ' pts' : '%')}`).join(' · ');
+    }
 
     function resultFor(appId) {
       try {
@@ -1509,6 +1530,9 @@
       if (appId === 'scqa-builder') return `S: ${words(r.scqa1?.situation, 10)}... · C: ${words(r.scqa1?.complication, 10)}...`;
       if (appId === 'write-to-aiko') return words(r.response || record.response, 30) + '...';
       if (appId === 'explain-to-aiko' || appId === 'explain-to-aiko-60') return words(r.gem_feedback || r.transcript || record.gem_feedback || record.transcript || '', 30) + '...';
+      if (appId === 'grocery-list-ai') return words(r.reflection, 30) + '...';
+      if (appId === 'advisory-board') return `Advisors: ${(record.advisors || []).map(a => a.name).join(', ') || 'none selected'} · AI response: ${words(record.aiResponse, 15)}...`;
+      if (appId === 'eisenhower-matrix') return words(record.written_no, 25) + '...';
       return words(JSON.stringify(r), 25) + '...';
     }
 
@@ -1534,6 +1558,14 @@
       }
       if (appId === 'write-to-aiko') return r.response || record.response || '';
       if (appId === 'explain-to-aiko' || appId === 'explain-to-aiko-60') return r.gem_feedback || r.transcript || record.gem_feedback || record.transcript || '';
+      if (appId === 'grocery-list-ai') return r.reflection || '';
+      if (appId === 'advisory-board') {
+        return `PROBLEM\n${record.problem || ''}\n\nISSUE TREE\n${record.issueTree || ''}\n\nSCQA\n${record.scqa || ''}\n\nADVISORS CONSULTED\n${bullets((record.advisors || []).map(a => `${a.name} (${a.lens})`))}\n\nORCHESTRATOR\n${record.orchestrator || ''}\n\nAI RESPONSE\n${record.aiResponse || ''}`;
+      }
+      if (appId === 'eisenhower-matrix') {
+        const acc = record.round_accuracies || {};
+        return `YOUR NO\n${record.written_no || ''}\n\nSKILL READ\nUrgency read: ${acc.urgency ?? 'n/a'}%\nImportance read: ${acc.importance ?? 'n/a'}%\nQuadrant judgment: ${acc.quadrant ?? 'n/a'}%`;
+      }
       return JSON.stringify(r, null, 2);
     }
 
@@ -1541,6 +1573,7 @@
       if (!record) {
         return `<div class="ex-result-card ex-result-marked">
           <div class="ex-result-header">
+            <span class="ex-result-icon">✓</span>
             <div>
               <div class="ex-result-title">${app.name}</div>
               <div class="ex-result-meta">Marked done in the member workspace</div>
@@ -1552,6 +1585,7 @@
       }
       return `<div class="ex-result-card">
         <div class="ex-result-header">
+          <span class="ex-result-icon">✓</span>
           <div>
             <div class="ex-result-title">${app.name}</div>
             <div class="ex-result-meta">Completed ${formatDate(record.completed_at)} · ${formatDuration(record.duration_seconds)} · attempt ${record.attempt || 1}</div>
@@ -1570,6 +1604,7 @@
     function pendingCard(app) {
       return `<div class="ex-result-card ex-result-pending">
         <div class="ex-result-header">
+          <span class="ex-result-icon">${app.number}</span>
           <div>
             <div class="ex-result-title">${app.name}</div>
             <div class="ex-result-meta">Not yet completed</div>
@@ -1585,20 +1620,19 @@
       const completedCount = APPS.filter(isComplete).length;
       document.getElementById('completed-count').textContent = completedCount;
       document.getElementById('total-count').textContent = APPS.length;
+      const certificateCallout = document.getElementById('certificateCallout');
+      if (certificateCallout) certificateCallout.hidden = completedCount < APPS.length;
 
       phaseList.innerHTML = [1, 2, 3].map((phase) => {
         const apps = APPS.filter((app) => app.phase === phase);
         const done = apps.filter(isComplete).length;
-        const dots = apps.map((app) => {
-          const complete = isComplete(app);
-          return `<span class="progress-dot ${complete ? 'done' : 'pending'}" data-number="${app.number}" title="${app.name}: ${complete ? 'Done' : 'Pending'}"></span>`;
-        }).join('');
+        const percent = apps.length ? Math.round((done / apps.length) * 100) : 0;
         return `<div class="phase-progress-row">
           <div class="phase-progress-head">
             <span>Phase ${phase}</span>
             <span class="phase-progress-count">${done} of ${apps.length} done</span>
           </div>
-          <div class="progress-track" style="--progress-total:${apps.length}">${dots}</div>
+          <div class="progress-bar-track"><span style="width:${percent}%"></span></div>
         </div>`;
       }).join('');
     }
@@ -1606,23 +1640,23 @@
     function renderVideoGrid(phaseKey) {
       const lessons = LESSONS[phaseKey] || [];
       if (!lessons.length) return '';
-      const tiles = lessons.map(lesson => {
+      const rows = lessons.map(lesson => {
         const watched = localStorage.getItem('utl_watched_' + lesson.id) === 'true';
-        return `<a href="${lesson.path}" class="video-tile ${watched ? 'is-watched' : ''}"><div class="video-status-row"><span class="video-status-check">✓</span></div><div class="video-title">${lesson.title}</div><span class="video-link">${watched ? 'Watch again' : 'Watch now'} &rarr;</span></a>`;
+        return `<a href="${lesson.path}" class="video-row ${watched ? 'is-watched' : ''}"><span class="video-row-icon">✓</span><span class="video-row-copy"><strong>${lesson.title}</strong></span><span class="video-row-link">${watched ? 'Watch again' : 'Watch now'} &rarr;</span></a>`;
       }).join('');
-      return `<div class="video-progress-section"><div class="exercise-section-header"><h4>Learning: Watch lessons</h4></div><div class="video-grid">${tiles}</div></div>`;
+      return `<div class="video-progress-section"><div class="exercise-section-header"><h4>Learning: Watch lessons</h4></div><div class="video-grid">${rows}</div></div>`;
     }
 
     function getSummary(key) {
       if (key === 'assessment') {
-        const done = ASSESSMENTS.filter(a => readKey(a.key)).length;
-        return `${done}/${ASSESSMENTS.length} Completed`;
+        const status = tsaAssessmentStatus();
+        return `${status.done}/${status.total} Sub-exercises scored`;
       }
       const lessons = LESSONS[key] || [];
       const watched = lessons.filter(l => localStorage.getItem('utl_watched_' + l.id) === 'true').length;
       if (key === 'orientation') {
         const tasks = localStorage.getItem('utl_orientation_ready') === 'true' ? 1 : 0;
-        return `${watched}/${lessons.length} Videos · ${tasks}/1 Tasks`;
+        return `${tasks}/1 Complete`;
       }
       const pNum = key.replace('phase', '');
       const apps = APPS.filter(a => a.phase == pNum);
@@ -1653,12 +1687,62 @@
       localStorage.setItem('utl_results_open_' + id, isOpen);
     };
 
+    function escapeHtml(value) {
+      return String(value == null ? '' : value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function rewardLedger() {
+      try {
+        const state = JSON.parse(localStorage.getItem('utl_rewards_state') || '{}');
+        return Array.isArray(state.ledger) ? state.ledger : [];
+      } catch {
+        return [];
+      }
+    }
+
+    function formatLedgerDate(iso) {
+      const d = new Date(iso);
+      if (Number.isNaN(d.getTime())) return '';
+      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+
+    function renderRewardHistorySection() {
+      const ledger = rewardLedger().slice().reverse();
+      const totalMp = ledger.reduce((sum, entry) => sum + Math.max(0, Number(entry && entry.mpEarned) || 0), 0);
+      const summary = ledger.length ? `${totalMp} MP · ${ledger.length} entr${ledger.length === 1 ? 'y' : 'ies'}` : 'No MP earned yet';
+      const rows = ledger.length
+        ? ledger.map((entry) => {
+            const reflection = entry && entry.metadata && entry.metadata.completionReflection;
+            const reflectionHtml = reflection
+              ? `<div class="ex-result-preview">"${escapeHtml(reflection.choice)}"${reflection.note ? '<br>' + escapeHtml(reflection.note) : ''}</div>`
+              : '';
+            return `<div class="ex-result-card ex-result-marked">
+              <div class="ex-result-header">
+                <span class="ex-result-icon">✓</span>
+                <div>
+                  <div class="ex-result-title">${escapeHtml(entry.title || 'Reward earned')}</div>
+                  <div class="ex-result-meta">${escapeHtml(formatLedgerDate(entry.earnedAt))}</div>
+                </div>
+                <span class="ex-badge-done">+${Math.max(0, Number(entry.mpEarned) || 0)} MP</span>
+              </div>
+              ${reflectionHtml}
+            </div>`;
+          }).join('')
+        : '<p class="ex-result-meta">Complete a video or exercise to start building your reward history.</p>';
+      const content = `<div class="exercise-progress-section"><div class="exercise-section-header"><h4>Every MP moment, in order</h4></div><div class="exercise-list">${rows}</div></div>`;
+      return renderAccordion('rewards', 'Reward history', summary, content);
+    }
+
     function renderAllSections() {
       const mount = document.getElementById('resultsAccordions');
       let html = '';
 
       // 1. Orientation
-      const orientContent = renderVideoGrid('orientation') + `<div class="exercise-progress-section"><div class="exercise-section-header"><h4>Activity</h4></div><div class="ex-result-card ${localStorage.getItem('utl_orientation_ready') === 'true' ? '' : 'ex-result-pending'}"><div class="ex-result-header"><div><div class="ex-result-title">Onboarding Readiness</div><div class="ex-result-meta">${localStorage.getItem('utl_orientation_ready') === 'true' ? 'Confirmed' : 'Not yet confirmed'}</div></div><span class="${localStorage.getItem('utl_orientation_ready') === 'true' ? 'ex-badge-done' : 'ex-badge-pending'}">${localStorage.getItem('utl_orientation_ready') === 'true' ? 'Ready' : 'Pending'}</span></div></div></div>`;
+      const orientContent = renderVideoGrid('orientation') + `<div class="exercise-progress-section"><div class="exercise-section-header"><h4>Activity</h4></div><div class="ex-result-card ${localStorage.getItem('utl_orientation_ready') === 'true' ? '' : 'ex-result-pending'}"><div class="ex-result-header"><span class="ex-result-icon">${localStorage.getItem('utl_orientation_ready') === 'true' ? '✓' : '–'}</span><div><div class="ex-result-title">Onboarding Readiness</div><div class="ex-result-meta">${localStorage.getItem('utl_orientation_ready') === 'true' ? 'Confirmed' : 'Not yet confirmed'}</div></div><span class="${localStorage.getItem('utl_orientation_ready') === 'true' ? 'ex-badge-done' : 'ex-badge-pending'}">${localStorage.getItem('utl_orientation_ready') === 'true' ? 'Ready' : 'Pending'}</span></div></div></div>`;
       html += renderAccordion('orientation', 'Home & orientation', getSummary('orientation'), orientContent);
 
       // 2. Phases
@@ -1678,25 +1762,24 @@
         html += renderAccordion(p.key, p.title, getSummary(p.key), content);
       });
 
-      // 3. Assessments
-      const diag = readKey('utl_result_tsa_diagnostic');
-      const check = readKey('utl_result_tsa_checkpoint');
+      // 3. Assessments — the diagnostic and checkpoint share one live set of
+      // sub-exercise scores (see TSA_SUBSCORES above), so both cards reflect the
+      // same current state rather than independent before/after snapshots.
+      const tsaStatus = tsaAssessmentStatus();
       let assBody = ASSESSMENTS.map((assessment) => {
-        const record = readKey(assessment.key);
-        if (!record) {
-          return `<div class="ex-result-card ex-result-pending"><div class="ex-result-header"><div><div class="ex-result-title">${assessment.name}</div><div class="ex-result-meta">Not yet taken</div></div><span class="ex-badge-pending">Pending</span></div><a class="take-now-link" href="${assessment.path}">Take now →</a></div>`;
+        if (!tsaStatus.done) {
+          return `<div class="ex-result-card ex-result-pending"><div class="ex-result-header"><span class="ex-result-icon">–</span><div><div class="ex-result-title">${assessment.name}</div><div class="ex-result-meta">Not yet taken</div></div><span class="ex-badge-pending">Pending</span></div><a class="take-now-link" href="${assessment.path}">Take now →</a></div>`;
         }
-        const score = record.score ?? record.response?.score ?? record.response?.percentage;
-        return `<div class="ex-result-card"><div class="ex-result-header"><div><div class="ex-result-title">${assessment.name}</div><div class="ex-result-meta">Completed ${formatDate(record.completed_at)}</div></div><span class="ex-badge-done">Done</span></div>${score !== undefined ? `<div class="ex-result-preview">Your score: ${score}%</div>` : ''}</div>`;
+        return `<div class="ex-result-card${tsaStatus.complete ? '' : ' ex-result-pending'}"><div class="ex-result-header"><span class="ex-result-icon">${tsaStatus.complete ? '✓' : tsaStatus.done}</span><div><div class="ex-result-title">${assessment.name}</div><div class="ex-result-meta">${tsaStatus.complete ? 'All sections scored' : `${tsaStatus.done} of ${tsaStatus.total} sections scored`}</div></div><span class="${tsaStatus.complete ? 'ex-badge-done' : 'ex-badge-pending'}">${tsaStatus.complete ? 'Done' : 'In progress'}</span></div><div class="ex-result-preview">${tsaSubscoreText(tsaStatus)}</div><a class="take-now-link" href="${assessment.path}">${tsaStatus.complete ? 'Retake' : 'Continue'} →</a></div>`;
       }).join('');
-      if (diag && check) {
-        const dScore = Number(diag.score ?? diag.response?.score ?? 0);
-        const cScore = Number(check.score ?? check.response?.score ?? 0);
-        const delta = cScore - dScore;
-        assBody += `<div class="before-after-row">Diagnostic: ${dScore}% → Checkpoint: ${cScore}% · <span class="${delta >= 0 ? 'score-increase' : 'score-decrease'}">${delta >= 0 ? '+' : ''}${delta} points</span></div>`;
+      if (tsaStatus.done) {
+        assBody += `<p class="assessment-shared-note">The diagnostic and checkpoint share the same three sub-exercise scores above — retaking either one updates both.</p>`;
       }
       const assContent = `<div class="exercise-progress-section"><div class="exercise-section-header"><h4>Assessments</h4></div><div class="exercise-list">${assBody}</div></div>`;
       html += renderAccordion('assessment', 'Assessments', getSummary('assessment'), assContent);
+
+      // 4. Reward history — every MP-earning moment, including saved reflections
+      html += renderRewardHistorySection();
 
       mount.innerHTML = html;
     }
@@ -1726,19 +1809,6 @@
       button.textContent = isHidden ? 'Hide response' : 'View full response';
     }
 
-    function assessmentRecord(assessment) {
-      return readKey(assessment.key);
-    }
-
-    function assessmentResponseText(record) {
-      if (!record) return '';
-      const score = record.score ?? record.response?.score ?? record.response?.percentage;
-      const lines = [];
-      if (score !== undefined) lines.push(`Score: ${score}%`);
-      if (record.response) lines.push(JSON.stringify(record.response, null, 2));
-      return lines.join('\n\n') || JSON.stringify(record, null, 2);
-    }
-
     function exerciseEntries() {
       const phaseTitles = {
         1: 'Think clearly',
@@ -1765,12 +1835,12 @@
       return phaseEntries.concat({
         section: 'Assessments',
         items: ASSESSMENTS.map((assessment) => {
-          const record = assessmentRecord(assessment);
+          const status = tsaAssessmentStatus();
           return {
             name: assessment.name,
-            status: record ? 'Completed' : 'Pending',
-            responseText: record ? assessmentResponseText(record) : '',
-            completedAt: record?.completed_at || ''
+            status: status.complete ? 'Completed' : (status.done ? 'In progress' : 'Pending'),
+            responseText: status.done ? tsaSubscoreText(status) : '',
+            completedAt: ''
           };
         })
       });

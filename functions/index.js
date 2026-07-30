@@ -48,9 +48,9 @@ exports.processGoogleGroupSyncJob = onDocumentCreated({
     if (action === "add") await addGroupMember(directory, groupEmail, email);
     else await removeGroupMember(directory, groupEmail, email);
 
-    await markJobConfirmed(jobRef, job, action, groupEmail, email);
+    await markJobConfirmed(jobRef, action, groupEmail, email);
   } catch (error) {
-    await markJobFailed(jobRef, job, action, groupEmail, email, error);
+    await markJobFailed(jobRef, action, groupEmail, email, error);
   }
 });
 
@@ -93,7 +93,7 @@ async function removeGroupMember(directory, groupEmail, email) {
   }
 }
 
-async function markJobConfirmed(jobRef, job, action, groupEmail, email) {
+async function markJobConfirmed(jobRef, action, groupEmail, email) {
   const db = admin.firestore();
   const now = admin.firestore.FieldValue.serverTimestamp();
   await jobRef.set({
@@ -118,7 +118,7 @@ async function markJobConfirmed(jobRef, job, action, groupEmail, email) {
   }, { merge: true });
 }
 
-async function markJobFailed(jobRef, job, action, groupEmail, email, error) {
+async function markJobFailed(jobRef, action, groupEmail, email, error) {
   const db = admin.firestore();
   const message = String(error && error.message || error || "Unknown Google Group sync error");
   const now = admin.firestore.FieldValue.serverTimestamp();

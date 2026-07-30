@@ -171,7 +171,7 @@
     }
 
     .lsh-main {
-      width: min(1120px, calc(100% - 56px));
+      width: min(960px, calc(100% - 56px));
       margin: 0 auto;
       padding: 28px 0 84px;
     }
@@ -242,7 +242,7 @@
       display: grid;
       grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr);
       gap: 18px;
-      margin-top: 22px;
+      margin-top: 36px;
     }
 
     .lsh-panel {
@@ -342,7 +342,7 @@
       grid-template-columns: minmax(0, 1fr) auto;
       gap: 20px;
       align-items: center;
-      margin-top: 18px;
+      margin-top: 36px;
       padding: 20px;
       border-color: var(--lsh-gold);
     }
@@ -457,6 +457,16 @@
       color: var(--lsh-navy);
     }
 
+    .lsh-button-accent {
+      border: 2px solid var(--lsh-gold);
+      background: var(--lsh-white);
+      color: var(--lsh-navy);
+    }
+
+    .lsh-button-accent:hover {
+      background: rgba(238, 163, 32, .12);
+    }
+
     .lsh-prep-cue {
       margin: 12px 0 0;
       padding-left: 0;
@@ -468,13 +478,6 @@
     }
 
     .lsh-exit-link {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 10px 16px;
-      border: 1.5px solid #c8c2b8;
-      border-radius: 7px;
-      background: transparent;
       color: var(--lsh-navy);
       font-family: 'Lato', Arial, sans-serif;
       font-size: 12px;
@@ -483,9 +486,8 @@
     }
 
     .lsh-exit-link:hover {
-      border-color: #2e7d4f;
       color: #2e7d4f;
-      text-decoration: none;
+      text-decoration: underline;
     }
 
     @media (max-width: 860px) {
@@ -576,7 +578,7 @@
     <div class="lsh-heading">
       <span class="lsh-kicker">PHASE 3 &middot; ACT CONFIDENTLY</span>
       <span class="lsh-title">Let's switch hats</span>
-      <a class="module-back-link" href="../../member-login/phase-3.html#exercises">← Back to Phase 3 exercises</a>
+      <a class="module-back-link" href="../../member-login/index.html#learning-journey">← Back to Learning Journey</a>
     </div>
     <div class="lsh-timer" aria-label="Exercise timer">
       <span class="lsh-timer-label">Timer</span>
@@ -635,14 +637,14 @@
       </article>
     </section>
 
-    <section class="lsh-action-card" aria-label="Open Aiko's Let's switch hats CustomGPT">
+    <section class="lsh-action-card" aria-label="Open CustomGPT (Let's switch hats)">
       <div>
         <p class="lsh-label">Practice with AI</p>
         <h2>Practice the conversation out loud.</h2>
-        <p>Open the Custom GPT, tell it who you are speaking with and what is at stake, then work through the conversation from the other person&rsquo;s point of view.</p>
+        <p>Open the Let&rsquo;s switch hats CustomGPT, tell it who you are speaking with and what is at stake, then work through the conversation from the other person&rsquo;s point of view.</p>
       </div>
       <div class="lsh-actions">
-        <a class="lsh-button lsh-button-primary" href="https://chatgpt.com/g/g-6a411c3c9468819194486200d74b40e4-utl-lets-switch-hats" target="_blank" rel="noopener">Open GPT</a>
+        <a class="lsh-button lsh-button-accent" href="https://chatgpt.com/g/g-6a411c3c9468819194486200d74b40e4-utl-lets-switch-hats" target="_blank" rel="noopener">Open CustomGPT (Let's switch hats)</a>
       </div>
       <div class="lsh-voice-guide">
         <span class="lsh-voice-icon" aria-hidden="true">
@@ -660,9 +662,9 @@
         <li>Respond out loud. Ask the GPT to challenge you if you are still seeing the situation only from your side.</li>
         <li>Finish by stating what you now understand and one thing you will say differently.</li>
       </ol>
-      <div style="grid-column:1/-1;display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap;">
-        <button class="lsh-button" id="completeExerciseBtn" type="button">Mark exercise complete · +30 MP</button>
-        <a class="lsh-exit-link" href="../../member-login/index.html#phase3">Back to member workspace</a>
+      <div style="grid-column:1/-1;display:flex;align-items:center;justify-content:flex-end;gap:10px;flex-wrap:wrap;">
+        <button class="lsh-button lsh-button-primary" id="completeExerciseBtn" type="button">Mark exercise complete · +30 MP</button>
+        <a class="lsh-exit-link" id="journeyLink" href="../../member-login/index.html#learning-journey">Back to Learning Journey</a>
       </div>
       <p style="grid-column:1/-1;">ChatGPT opens in a new tab. Return here and mark the exercise complete after you finish the conversation.</p>
     </section>
@@ -725,9 +727,9 @@
     })();
   </script>
   <script type="module" src="../../assets/app-access-guard.js?v=1"></script>
-  <script src="../../assets/exercise-scoring-intro.js?v=3"></script>
-  <script src="../../assets/app-reward-header.js?v=20260714-audit-1"></script>
-  <script src="../../assets/reward-events.js?v=20260712-awards-1"></script>
+  <script src="../../assets/exercise-scoring-intro.js?v=6"></script>
+  <script src="../../assets/app-reward-header.js?v=20260730-celebration-1"></script>
+  <script src="../../assets/reward-events.js?v=20260730-celebration-1"></script>
   <script>
     document.getElementById('completeExerciseBtn').addEventListener('click', function () {
       localStorage.setItem('utl_p3_ex3_done', 'true');
@@ -739,6 +741,7 @@
       });
       this.textContent = result?.awarded ? 'Exercise complete' : 'Already completed';
       this.disabled = true;
+      document.getElementById('journeyLink').className = 'lsh-button lsh-button-primary';
     });
   </script>
   <script type="module" src="../../assets/feedback-widget.js?v=6"></script>

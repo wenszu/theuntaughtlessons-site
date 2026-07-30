@@ -131,7 +131,9 @@
   }
 
   function insertionTarget(main) {
-    const preferred = main.querySelector(':scope > #hero, :scope > .hero, :scope > .header, :scope > .ab-hero, :scope > .bad-news-hero, :scope > .lsh-hero, :scope > .slo-hero, :scope > .write-to-aiko-hero, :scope > .eisenhower-hero');
+    const exerciseFlow = main.querySelector(':scope > .exercise-flow');
+    if (exerciseFlow) return exerciseFlow;
+    const preferred = main.querySelector(':scope > #hero, :scope > .hero, :scope > .header, :scope > .ab-hero, :scope > .bad-news-hero, :scope > .bad-news-intro, :scope > .lsh-hero, :scope > .lsh-intro, :scope > .slo-hero, :scope > .slo-intro, :scope > .write-to-aiko-hero, :scope > .eisenhower-hero, :scope > .aiko-intro, :scope > .tsa-speak-intro, :scope > .exercise-intro');
     return preferred;
   }
 

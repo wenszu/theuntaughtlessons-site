@@ -27,13 +27,13 @@ assert(admin.includes('Experience preview'), 'Student Progress offers a sandboxe
 assert(admin.includes('function spLaunchExperiencePreview()'), 'experience preview can launch before a selected activity');
 assert(admin.includes('function spEndExperiencePreview()'), 'experience preview restores the prior browser state');
 assert(admin.includes("item.type === 'lesson' ? 'Video · ' : item.type === 'exercise' ? 'Exercise · ' : 'Orientation · '"), 'preview dropdown clearly labels videos and exercises');
-assert(admin.includes("utl_experience_preview_lesson_"), 'lesson previews persist their target across a new browser tab');
+assert(admin.includes("'.html?lesson=' + encodeURIComponent(item.id) + '#lessons'"), 'lesson previews link straight to the real focused-lesson URL, so the target persists across a new browser tab');
 assert(admin.includes("displayName:'Preview Student'"), 'experience preview uses a clearly labeled student identity');
 assert(admin.includes("localStorage.setItem('utl_admin_preview_bypass', 'off')"), 'admin unlock-all access does not leak into student preview');
 assert(admin.includes('Object.entries(backup.environment || {})'), 'ending preview restores the prior browser identity and access settings');
 assert(firebase.includes('if (experiencePreviewActive()) return { preview: true, saved: false };'), 'Firebase progress writes pause during experience preview');
 assert(workspace.includes('if (experiencePreviewActive()) {'), 'member workspace avoids merging remote progress into preview state');
-assert(workspace.includes('localStorage.getItem("utl_experience_preview_lesson_" + phaseKey)'), 'workspace opens the lesson selected in Experience Preview');
+assert(workspace.includes('var requestedLesson = new URLSearchParams(window.location.search || "").get("lesson") || "";'), 'workspace opens whichever lesson the URL requests — the same real path a student uses, so previewing and reality never diverge');
 assert(appGuard.includes('mountExperiencePreviewBanner'), 'exercise pages show a preview safety banner');
 
 assert(admin.includes('<option value="member" selected>Member</option>'), 'new accounts use the canonical Member role');

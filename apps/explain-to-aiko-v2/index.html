@@ -490,6 +490,21 @@
       color: var(--navy);
     }
 
+    .tsa-speak-link-button.exit-link {
+      min-height: 0;
+      padding: 4px 0;
+      border: 0;
+      background: transparent;
+      color: var(--navy);
+      font-size: 14px;
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .tsa-speak-link-button.exit-link:hover {
+      text-decoration: underline;
+    }
+
     .tsa-speak-button[disabled] {
       cursor: not-allowed;
       opacity: .58;
@@ -556,7 +571,7 @@
     <div>
       <span class="tsa-speak-kicker">Phase 2 · Speak concisely</span>
       <span class="tsa-speak-title">Explain to Aiko (120s)</span>
-      <a class="module-back-link" href="../../member-login/phase-2.html#exercises">← Back to Phase 2 exercises</a>
+      <a class="module-back-link" href="../../member-login/index.html#learning-journey">← Back to Learning Journey</a>
     </div>
   </header>
 
@@ -723,7 +738,7 @@ Best, Yutee Elle`;
             <button class="tsa-speak-mode-btn ${state.notesMode === 'open' ? 'is-active' : ''}" type="button" data-mode-value="open">Open response</button>
             <button class="tsa-speak-mode-btn ${state.notesMode === 'sections' ? 'is-active' : ''}" type="button" data-mode-value="sections">Three-section response</button>
           </div>
-          <p class="mode-guidance"><strong>Choose one format:</strong> Use <strong>Open response</strong> if you want to write in your own free-form structure; this is the more difficult option. Use <strong>Three-section response</strong> if you want the easier guided option. In both formats, use BSP and the Rule of three.</p>
+          <p class="mode-guidance"><strong>Choose one format:</strong> Use <strong>"Open" response</strong> if you want to write in your own free-form structure; this is the more difficult option. Use <strong>"Three-section" response</strong> if you want the easier guided option. In both formats, use BSP and the Rule of three.</p>
         `;
       }
 
@@ -840,8 +855,8 @@ Best, Yutee Elle`;
               </div>
               <p class="tsa-speak-count" id="transcriptCount">0 characters · 0 words</p>
               <div class="tsa-speak-actions">
-                <a class="tsa-speak-link-button" href="${PLAYBACK_GEM_URL}" target="_blank" rel="noopener">Open Gem</a>
-                <a class="tsa-speak-link-button secondary" href="../../member-login/index.html#phase2">Back to member workspace</a>
+                <a class="tsa-speak-link-button secondary" href="${PLAYBACK_GEM_URL}" target="_blank" rel="noopener">Open GEM (The Playback)</a>
+                <a class="tsa-speak-link-button exit-link" href="../../member-login/index.html#learning-journey">Back to Learning Journey</a>
                 <button class="tsa-speak-link-button secondary" id="backToPrep" type="button">Back to prep</button>
                 <button class="tsa-speak-button" id="submitTranscript" type="button" disabled>Save Playback feedback</button>
               </div>
@@ -904,20 +919,46 @@ Best, Yutee Elle`;
               title: 'Explain to Aiko complete',
               body: 'Your 120-second explanation was saved.'
             });
-            submit.textContent = 'Saved';
-            status.textContent = 'Saved.';
+            renderCompletion();
           }
         });
         update();
+      }
+
+      function renderCompletion() {
+        renderShell(`
+          <section class="tsa-speak-panel">
+            <div class="tsa-speak-panel-head">
+              <p class="tsa-speak-progress">Complete</p>
+              <h2>You saved your Playback feedback.</h2>
+              <p>Nice work. Explaining Aiko's email out loud, conclusion first, is the skill: lead with the point, then back it with your strongest reasons.</p>
+            </div>
+            <div class="tsa-speak-step">
+              <div class="tsa-speak-info">
+                <h3>What you practiced</h3>
+                <ul>
+                  <li><strong>Clarity:</strong> You led with the bottom line instead of building up to it.</li>
+                  <li><strong>Structure:</strong> You organized your reasons so Aiko could follow them out loud.</li>
+                  <li><strong>Executive delivery:</strong> You turned a written email into a spoken explanation.</li>
+                </ul>
+              </div>
+              <div class="tsa-speak-actions">
+                <button class="tsa-speak-button secondary" id="tryAgain" type="button">Try again</button>
+                <a class="tsa-speak-link-button" href="../../member-login/index.html#learning-journey">Back to Learning Journey</a>
+              </div>
+            </div>
+          </section>
+        `);
+        document.getElementById('tryAgain').addEventListener('click', renderRecording);
       }
 
       renderTopicCard();
     })();
   </script>
   <script type="module" src="../../assets/app-access-guard.js?v=1"></script>
-  <script src="../../assets/exercise-scoring-intro.js?v=3"></script>
-  <script src="../../assets/app-reward-header.js?v=20260714-audit-1"></script>
-  <script src="../../assets/reward-events.js?v=20260712-awards-1"></script>
+  <script src="../../assets/exercise-scoring-intro.js?v=6"></script>
+  <script src="../../assets/app-reward-header.js?v=20260730-celebration-1"></script>
+  <script src="../../assets/reward-events.js?v=20260730-celebration-1"></script>
   <script type="module" src="../../assets/feedback-widget.js?v=6"></script>
   <script src="../../assets/tactile-buttons.js?v=20260714-flat-1" defer></script>
 </body>

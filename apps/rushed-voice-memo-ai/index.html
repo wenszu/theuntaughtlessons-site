@@ -298,6 +298,14 @@
       color: var(--navy);
     }
 
+    .tsa-speak-button.accent,
+    .tsa-speak-link-button.accent {
+      border-width: 2px;
+      border-color: var(--gold);
+      background: var(--white);
+      color: var(--navy);
+    }
+
     .tsa-speak-link-button.disabled {
       border-color: rgba(0, 51, 102, .22);
       background: #F3F0EA;
@@ -415,6 +423,75 @@
       margin-top: 12px;
       color: #003366;
       font-weight: 700;
+    }
+
+    .voice-memo-path-picker {
+      margin-bottom: 20px;
+    }
+
+    .voice-memo-path-label {
+      margin: 0 0 10px;
+      color: var(--navy);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .voice-memo-path-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .voice-memo-path-tab {
+      flex: 1 1 240px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 5px;
+      padding: 15px 17px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #FAF8F3;
+      color: var(--navy);
+      font-family: 'Lato', sans-serif;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .voice-memo-path-tab strong {
+      font-size: 15px;
+    }
+
+    .voice-memo-path-tab span {
+      font-size: 13px;
+      font-weight: 400;
+      color: #4D7094;
+      line-height: 1.4;
+    }
+
+    .voice-memo-path-tab.active {
+      border-color: var(--gold);
+      border-width: 2px;
+      background: #FFFFFF;
+    }
+
+    .voice-memo-transcript-box {
+      margin: 14px 0;
+      padding: 16px;
+      border: 1px solid #C7D8E8;
+      border-radius: 8px;
+      background: #F8FAFC;
+      color: var(--navy);
+      font-family: 'Lato', sans-serif;
+      line-height: 1.6;
+      white-space: pre-wrap;
+    }
+
+    .tsa-speak-prompt-box {
+      white-space: pre-wrap;
+      font-family: 'Lato', sans-serif;
+      line-height: 1.6;
     }
 
     .tsa-speak-info {
@@ -697,6 +774,9 @@
 
     .save-notice-link:hover { text-decoration: underline; }
 
+    .save-notice-link.exit-link { color: #003366; }
+    .save-notice-link.exit-link:hover { color: #2e7d4f; }
+
     .save-notice-caveat {
       font-size: 11px;
       color: #888;
@@ -755,7 +835,7 @@
     <div>
       <span class="tsa-speak-kicker">Phase 1 · Think clearly</span>
       <span class="tsa-speak-title" id="headerTitle">Rushed voice memo — AI summary</span>
-      <a class="module-back-link" href="../../member-login/phase-1/practice/index.html">← Back to Phase 1 exercises</a>
+      <a class="module-back-link" href="../../member-login/index.html#learning-journey">← Back to Learning Journey</a>
     </div>
   </header>
 
@@ -776,14 +856,24 @@
         <section class="voice-memo-card" aria-labelledby="voiceMemoHeading">
           <h3 id="voiceMemoHeading">Hugh's voice memo</h3>
           <p>Play the memo here. You can also open it in another tab if you want ChatGPT to listen while this page stays open.</p>
-          <iframe class="voice-memo-frame" src="https://drive.google.com/file/d/13nvMb6RrHjzCQevI1wZtDBhL-tMYObG_/preview" title="Hugh's voice memo" allow="autoplay"></iframe>
-          <a class="voice-memo-open" href="https://drive.google.com/file/d/13nvMb6RrHjzCQevI1wZtDBhL-tMYObG_/view" target="_blank" rel="noopener">Open Hugh's voice memo in a new tab &rarr;</a>
+          <iframe class="voice-memo-frame" src="https://drive.google.com/file/d/1vjcNHKWZ0uK4LPKQ8lEnd2ug3wqRR7fy/preview" title="Hugh's voice memo" allow="autoplay"></iframe>
+          <a class="voice-memo-open" href="https://drive.google.com/file/d/1vjcNHKWZ0uK4LPKQ8lEnd2ug3wqRR7fy/view" target="_blank" rel="noopener">Open Hugh's voice memo in a new tab &rarr;</a>
         </section>
 
-        <details class="tsa-speak-record-help">
-          <summary>How to transcribe the voice file</summary>
-          <div class="tsa-speak-help-body">
-            <h3>How to transcribe the voice file</h3>
+        <div class="voice-memo-path-picker">
+          <p class="voice-memo-path-label">How do you want to get the transcript?</p>
+          <div class="voice-memo-path-tabs" role="tablist">
+            <button class="voice-memo-path-tab active" type="button" data-path="diy" role="tab" aria-selected="true">
+              <strong>🎧 Transcribe it yourself</strong>
+              <span>Practice the real workflow: listen, transcribe, then structure.</span>
+            </button>
+            <button class="voice-memo-path-tab" type="button" data-path="lazy" role="tab" aria-selected="false">
+              <strong>😴 Take the lazy way</strong>
+              <span>Skip transcribing — we already did it. Just copy and go.</span>
+            </button>
+          </div>
+
+          <div class="voice-memo-path-panel" data-path-panel="diy" role="tabpanel">
             <ol class="tsa-speak-help-steps">
               <li>
                 <svg class="tsa-speak-step-icon" viewBox="0 0 64 48" fill="none" aria-hidden="true"><rect x="18" y="4" width="28" height="40" rx="5" fill="#FFFFFF" stroke="#003366" stroke-width="2"/><rect x="22" y="10" width="20" height="25" rx="2" fill="#F3EDE2" stroke="#003366" stroke-width="1.5"/><path d="M27 18h8l5-3v12l-5-3h-8z" fill="#EEA320" stroke="#003366" stroke-width="1.4"/><circle cx="32" cy="39" r="1.8" fill="#003366"/></svg>
@@ -813,23 +903,78 @@
               <li><strong>Manual fallback:</strong> If transcription fails, type what you heard. Minimum 50 words to continue.</li>
             </ul>
           </div>
-        </details>
+
+          <div class="voice-memo-path-panel" data-path-panel="lazy" role="tabpanel" hidden>
+            <p>Here's Hugh's memo, already transcribed. Copy it and paste it into the AI structuring prompt below.</p>
+            <div class="voice-memo-transcript-box" id="hughTranscript">Hey, I have a huge favor to ask for.
+
+This is just about the Nike Run Club initiative we discussed recently. Hoping you could get this to Aiko but in a cleaner format. Aside from the group run feature in key cities, we want to embrace beginners as well. So there will be a zero-pressure "Start Here" track with a simple walk/ run option, and a goal to get a 5K. We plan to gamify it as well to have badges, milestones, recaps, etc.
+
+Big upside is it turns the brand into a community. Group runs create belonging and habit. The marketing runs itself because the runs are visible in the city. Nike ends up feels more feeling more "lived" than advertised. It also gives Nike the option to lean more into lifestyle.
+
+Some risks to this… well, beginners might get alienated fast even if we hedge against it. Running has somewhat of a learning curve, and if the vibe turns cliquish, it will just backfire. And measurement is tricky—sales conversion is hard to prove, so it can turn into pure customer sentiment unless we lock clear performance metrics upfront.
+
+Thanks a lot, really appreciate you for this.</div>
+            <button class="tsa-speak-button accent" type="button" id="copyTranscriptBtn">Copy transcript</button>
+          </div>
+        </div>
+
+        <script>
+          (function () {
+            var tabs = document.querySelectorAll('.voice-memo-path-tab');
+            var panels = document.querySelectorAll('.voice-memo-path-panel');
+            tabs.forEach(function (tab) {
+              tab.addEventListener('click', function () {
+                var path = tab.dataset.path;
+                tabs.forEach(function (t) {
+                  var isActive = t === tab;
+                  t.classList.toggle('active', isActive);
+                  t.setAttribute('aria-selected', isActive ? 'true' : 'false');
+                });
+                panels.forEach(function (p) { p.hidden = p.dataset.pathPanel !== path; });
+              });
+            });
+            var copyBtn = document.getElementById('copyTranscriptBtn');
+            if (copyBtn) {
+              copyBtn.addEventListener('click', function () {
+                var text = document.getElementById('hughTranscript').textContent;
+                var done = function () {
+                  copyBtn.textContent = 'Copied!';
+                  setTimeout(function () { copyBtn.textContent = 'Copy transcript'; }, 1800);
+                };
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                  navigator.clipboard.writeText(text).then(done).catch(done);
+                } else {
+                  var textarea = document.createElement('textarea');
+                  textarea.value = text;
+                  textarea.style.position = 'fixed';
+                  textarea.style.opacity = '0';
+                  document.body.appendChild(textarea);
+                  textarea.select();
+                  try { document.execCommand('copy'); } catch (err) { /* no-op */ }
+                  document.body.removeChild(textarea);
+                  done();
+                }
+              });
+            }
+          })();
+        </script>
 
         <details class="tsa-speak-record-help">
           <summary>AI structuring prompt</summary>
           <div class="tsa-speak-help-body">
-            <pre style="white-space: pre-wrap; font-family: 'Lato', sans-serif; line-height: 1.6;">You are an expert in structured communication. I will paste a transcript of a
+            <div class="tsa-speak-prompt-box">You are an expert in structured communication. I will paste a transcript of a
 rushed verbal update below. Your job is to turn it into a clean, structured
 written summary using the following rules:
 
-1. Organise the output into exactly three MECE buckets.
-2. Use Bolded summary phrases (BSP) for every header and key point.
-3. Each bucket should have 2–3 bullet points using BSP starters.
-4. Remove filler words, repetition, and anything unclear.
-5. Keep the tone professional and decision-ready.
+1. <strong>Three MECE buckets:</strong> Organise the output into exactly three buckets.
+2. <strong>Bolded summary phrases:</strong> Use Bolded summary phrases (BSP) for every header and key point.
+3. <strong>2–3 bullets per bucket:</strong> Each bucket should have 2–3 bullet points using BSP starters.
+4. <strong>Remove the noise:</strong> Remove filler words, repetition, and anything unclear.
+5. <strong>Decision-ready tone:</strong> Keep the tone professional and decision-ready.
 
 Here is the transcript:
-[paste transcript here]</pre>
+[paste transcript here]</div>
           </div>
         </details>
 
@@ -846,7 +991,7 @@ Here is the transcript:
             <div class="save-notice-text">
               Your response has been saved.
               <a href="../chalkboard-notes/index.html" class="save-notice-link">Go to next exercise →</a>
-              <a href="../../member-login/phase-1/practice/index.html" class="save-notice-link">Back to workspace</a>
+              <a href="../../member-login/index.html#learning-journey" class="save-notice-link exit-link">Back to Learning Journey</a>
             </div>
             <div class="save-notice-caveat">Saved on this device only. Copy your response into your companion workbook to keep a permanent record.</div>
           </div>
@@ -898,9 +1043,9 @@ Here is the transcript:
 
   </script>
   <script type="module" src="../../assets/app-access-guard.js?v=1"></script>
-  <script src="../../assets/exercise-scoring-intro.js?v=3"></script>
-  <script src="../../assets/app-reward-header.js?v=20260714-audit-1"></script>
-  <script src="../../assets/reward-events.js?v=20260712-awards-1"></script>
+  <script src="../../assets/exercise-scoring-intro.js?v=6"></script>
+  <script src="../../assets/app-reward-header.js?v=20260730-celebration-1"></script>
+  <script src="../../assets/reward-events.js?v=20260730-celebration-1"></script>
   <script type="module" src="../../assets/feedback-widget.js?v=6"></script>
   <script src="../../assets/tactile-buttons.js?v=20260714-flat-1" defer></script>
 </body>

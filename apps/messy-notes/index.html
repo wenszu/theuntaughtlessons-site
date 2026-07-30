@@ -872,6 +872,9 @@
 
     .save-notice-link:hover { text-decoration: underline; }
 
+    .save-notice-link.exit-link { color: #003366; }
+    .save-notice-link.exit-link:hover { color: #2e7d4f; }
+
     .save-notice-caveat {
       font-size: 11px;
       color: #888;
@@ -1158,6 +1161,29 @@
         font-size: 14px;
       }
     }
+
+    .exercise-flow{margin:18px 0 14px;border:1px solid var(--line);border-radius:10px;background:#fff;overflow:hidden}
+    .exercise-flow-tabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));border-bottom:1px solid var(--line);background:#f2ece3}
+    .exercise-flow-tab{min-height:52px;border:0;border-right:1px solid var(--line);background:transparent;color:var(--navy);font:700 14px Lato,Arial,sans-serif;cursor:pointer}
+    .exercise-flow-tab:last-child{border-right:0}
+    .exercise-flow-tab.active{background:#fff;box-shadow:inset 0 4px 0 var(--gold)}
+    .exercise-flow-tab:disabled{color:#7890a8;cursor:not-allowed}
+    .exercise-flow-tab span{display:inline-grid;width:24px;height:24px;margin-right:7px;place-items:center;border-radius:50%;background:#fff1cf;font-size:11px}
+    .exercise-setup{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(260px,.75fr);gap:20px;padding:20px}
+    .exercise-setup[hidden],#exercise[hidden]{display:none!important}
+    .exercise-setup-video{aspect-ratio:16/9;overflow:hidden;border-radius:8px;background:var(--navy)}
+    .exercise-setup-video iframe{width:100%;height:100%;border:0}
+    .exercise-video-help{display:flex;justify-content:space-between;gap:10px;margin-top:7px;color:var(--steel);font-size:12px}
+    .exercise-video-help a{color:var(--navy);font-weight:700}
+    .exercise-setup-copy{align-self:center}
+    .exercise-setup-copy h2{margin:4px 0 9px;color:var(--navy);font:700 29px/1.12 "Playfair Display",Georgia,serif}
+    .exercise-setup-copy p{margin:0 0 14px;color:var(--steel);line-height:1.55}
+    .exercise-setup-status{display:flex;align-items:center;gap:8px;margin:0 0 12px;color:#2c7a4b;font-size:13px;font-weight:700}
+    .exercise-setup-status[hidden]{display:none}
+    .exercise-setup-copy button{width:100%;min-height:48px;border:0;border-radius:8px;background:var(--gold);color:var(--navy);font-weight:700;cursor:pointer}
+    .exercise-setup-copy button.context-complete{border:1px solid #b8d8c5;background:#fff;color:#2c7a4b}
+    .exercise-flow:has(#exerciseSetup:not([hidden])) + .utl-scoring-intro{display:none}
+    @media(max-width:760px){.exercise-setup{grid-template-columns:1fr;padding:14px}.exercise-flow-tab{min-height:48px;font-size:12px}}
   </style>
 </head>
 <body>
@@ -1169,7 +1195,7 @@
     <div>
       <a class="app-kicker" href="../../member-login/index.html" style="text-decoration:none">Think. Speak. Act.™</a>
       <span class="app-title">Manager’s messy notes</span>
-      <a class="module-back-link" href="../../member-login/phase-1/practice/index.html">← Back to Phase 1 exercises</a>
+      <a class="module-back-link" href="../../member-login/index.html?phase=phase1#learning-journey">← Back to Learning Journey</a>
     </div>
     <div class="app-timer" aria-label="Elapsed time">
       <div class="utility-metric" id="timerMetric">
@@ -1207,7 +1233,29 @@
       <p class="subtitle" id="activitySubtitle">Turn a rushed update into an Aiko-ready summary.</p>
     </header>
 
-    <section id="exercise" class="layout">
+    <section class="exercise-flow" aria-label="Exercise steps">
+      <div class="exercise-flow-tabs" role="tablist" aria-label="Manager’s messy notes steps">
+        <button class="exercise-flow-tab active" id="setupStepTab" type="button" role="tab" aria-selected="true" aria-controls="exerciseSetup"><span>1</span>Watch the setup</button>
+        <button class="exercise-flow-tab" id="exerciseStepTab" type="button" role="tab" aria-selected="false" aria-controls="exercise"><span>2</span>Complete the exercise</button>
+      </div>
+      <div class="exercise-setup" id="exerciseSetup" role="tabpanel" aria-labelledby="setupStepTab">
+        <div>
+          <div class="exercise-setup-video">
+            <iframe src="https://drive.google.com/file/d/1JpPDKz5RTyWFIJxUkeKSB5etP4W57Dax/preview" title="A message just landed on your desk" allow="autoplay; fullscreen" allowfullscreen></iframe>
+          </div>
+          <div class="exercise-video-help"><span>Video not opening?</span><a href="https://drive.google.com/file/d/1JpPDKz5RTyWFIJxUkeKSB5etP4W57Dax/view" target="_blank" rel="noopener">Open it in Google Drive</a></div>
+        </div>
+        <div class="exercise-setup-copy">
+          <span class="small-label">Before you begin</span>
+          <h2>A message just landed on your desk.</h2>
+          <p>Ashley sent Aiko a cluttered update. Watch the setup, then turn the source note into something Aiko can use.</p>
+          <p class="exercise-setup-status" id="setupCompleteStatus" hidden><span aria-hidden="true">✓</span> Setup complete. Your progress is saved.</p>
+          <button id="continueToExerciseBtn" type="button">Mark setup complete and continue · +5 MP</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercise" class="layout" hidden>
       <aside id="context">
         <div class="context-view-tabs" role="tablist" aria-label="Exercise information">
           <button class="context-view-tab active" id="sourceViewTab" type="button" role="tab" aria-selected="true">Source note</button>
@@ -1259,7 +1307,7 @@
               <button class="mode-btn active" id="openModeBtn" type="button" data-response-mode="open" onclick="window.switchMessyNotesMode && window.switchMessyNotesMode('open')">Open response</button>
               <button class="mode-btn" id="sectionModeBtn" type="button" data-response-mode="sections" onclick="window.switchMessyNotesMode && window.switchMessyNotesMode('sections')">Three-section response</button>
             </div>
-            <p class="mode-guidance"><strong>Choose one format:</strong> Use <strong>Open response</strong> if you want to write in your own free-form structure; this is the more difficult option. Use <strong>Three-section response</strong> if you want the easier guided option. In both formats, use BSP and the Rule of three.</p>
+            <p class="mode-guidance"><strong>Choose one format:</strong> Use <strong>"Open" response</strong> if you want to write in your own free-form structure; this is the more difficult option. Use <strong>"Three-section" response</strong> if you want the easier guided option. In both formats, use BSP and the Rule of three.</p>
 
             <div id="openMode">
               <textarea id="openResponse" class="response-area" aria-label="Open response" placeholder=""></textarea>
@@ -1349,8 +1397,8 @@
       </section>
     </section>
   </main>
-  <script src="../../assets/app-reward-header.js?v=20260714-audit-1"></script>
-  <script src="../../assets/reward-events.js?v=20260712-awards-1"></script>
+  <script src="../../assets/app-reward-header.js?v=20260730-celebration-1"></script>
+  <script src="../../assets/reward-events.js?v=20260730-celebration-1"></script>
 
   <script src="../shared/activity-timer.js?v=20260701-audit-1"></script>
   <script>
@@ -1370,6 +1418,66 @@
     }
     document.getElementById('sourceViewTab').addEventListener('click', () => setContextView('source'));
     document.getElementById('contextViewTab').addEventListener('click', () => setContextView('context'));
+    const CONTEXT_SEEN_KEY = 'utl_context_p1_e3_seen';
+    const CONTEXT_DONE_KEY = 'utl_context_complete_p1-e3';
+    const CONTEXT_REWARD_ID = 'context:p1-e3';
+    const setupStepTab = document.getElementById('setupStepTab');
+    const exerciseStepTab = document.getElementById('exerciseStepTab');
+    const exerciseSetup = document.getElementById('exerciseSetup');
+    const exercisePanel = document.getElementById('exercise');
+    const continueToExerciseBtn = document.getElementById('continueToExerciseBtn');
+    const setupCompleteStatus = document.getElementById('setupCompleteStatus');
+
+    function contextIsComplete() {
+      return localStorage.getItem(CONTEXT_DONE_KEY) === 'true';
+    }
+
+    function updateSetupCompletionUi() {
+      const complete = contextIsComplete();
+      setupCompleteStatus.hidden = !complete;
+      continueToExerciseBtn.classList.toggle('context-complete', complete);
+      continueToExerciseBtn.textContent = complete
+        ? 'Continue to the exercise →'
+        : 'Mark setup complete and continue · +5 MP';
+      exerciseStepTab.disabled = !complete;
+    }
+
+    function completeSetup() {
+      const alreadyComplete = contextIsComplete();
+      localStorage.setItem(CONTEXT_SEEN_KEY, 'true');
+      localStorage.setItem(CONTEXT_DONE_KEY, 'true');
+      if (!alreadyComplete && window.UTLRewardEvents?.awardEvent) {
+        window.UTLRewardEvents.awardEvent({
+          eventId: CONTEXT_REWARD_ID,
+          type: 'context-completed',
+          title: 'A message just landed on your desk',
+          body: 'Setup complete. Your preparation was saved.',
+          mpEarned: 5,
+          metadata: { contextId: 'p1-e3' }
+        });
+      }
+      updateSetupCompletionUi();
+    }
+
+    function setExerciseStep(step, remember) {
+      const showSetup = step === 'setup';
+      setupStepTab.classList.toggle('active', showSetup);
+      exerciseStepTab.classList.toggle('active', !showSetup);
+      setupStepTab.setAttribute('aria-selected', String(showSetup));
+      exerciseStepTab.setAttribute('aria-selected', String(!showSetup));
+      exerciseSetup.hidden = !showSetup;
+      exercisePanel.hidden = showSetup;
+      if (!showSetup && remember) exercisePanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    setupStepTab.addEventListener('click', () => setExerciseStep('setup', false));
+    exerciseStepTab.addEventListener('click', () => setExerciseStep('exercise', false));
+    continueToExerciseBtn.addEventListener('click', () => {
+      completeSetup();
+      setExerciseStep('exercise', true);
+    });
+    updateSetupCompletionUi();
+    setExerciseStep(contextIsComplete() && new URLSearchParams(location.search).get('setup') !== '1' ? 'exercise' : 'setup', false);
     const MAX_ATTEMPTS = 10;
     let storageKey = '';
 
@@ -1475,7 +1583,7 @@
             <i class="ti ti-device-floppy" aria-hidden="true"></i>
             Your response has been saved to this browser.
             <a href="../../my-results/index.html" class="save-notice-link">View all your results →</a>
-            <a href="../../member-login/phase-1/practice/index.html" class="save-notice-link">Back to Phase 1 exercises →</a>
+            <a href="../../member-login/index.html?phase=phase1#learning-journey" class="save-notice-link exit-link">Back to Learning Journey →</a>
           </div>
           <div class="save-notice-caveat">Saved on this device only. Copy your response into your companion workbook to keep a permanent record.</div>
         </div>
@@ -2153,7 +2261,7 @@
     init();
   </script>
   <script type="module" src="../../assets/app-access-guard.js?v=1"></script>
-  <script src="../../assets/exercise-scoring-intro.js?v=3"></script>
+  <script src="../../assets/exercise-scoring-intro.js?v=6"></script>
   <script type="module" src="../../assets/feedback-widget.js?v=6"></script>
   <script src="../../assets/tactile-buttons.js?v=20260714-flat-1" defer></script>
 </body>

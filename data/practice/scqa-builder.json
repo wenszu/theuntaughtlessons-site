@@ -12,6 +12,7 @@
     "timerMinutes": 10,
     "context": "The Olympics has historically been one of the most unifying global events. However, recent games have struggled to capture the same cultural impact and collective attention. The challenge is understanding why the Games are losing their gravity — and what can be done to restore it.",
     "topicLabel": "Olympics cultural decline",
+    "reframeLever": "question",
     "sampleAnswers": [
       {
         "s": "The Olympics remains one of the world's most recognizable sports properties, with unmatched history, global reach, athlete prestige, and symbolic power.",
@@ -20,10 +21,10 @@
         "a": "LA 2028 should rebuild Olympic gravity by treating the Games as a coherent cultural ritual, not just a content property: design shared appointment moments, build athlete-led story arcs that make stakes accumulate over time, and enforce a disciplined editorial and partner system that protects prestige, neutrality, and meaning across every channel."
       },
       {
-        "s": "The Games offer extraordinary competition across a massive program, and digital platforms now make more Olympic moments accessible to more audiences than ever before.",
-        "c": "But that abundance has created a navigation problem. Casual fans are split across platforms, time zones, formats, and short-form clips, so they can see more moments than ever but still struggle to know what matters today, why it matters, and who to care about.",
-        "q": "How can LA 2028 make the Olympics easier to follow for modern audiences while preserving the scale, prestige, neutrality, and emotional depth that make the Games distinct?",
-        "a": "LA 2028 should add a clarity layer on top of the Games: daily viewing paths that tell fans what to follow, narrative coverage that explains stakes before and after key events, and a disciplined tone and partner system that makes the experience easier to navigate without making it feel smaller, louder, or overly commercialized."
+        "s": "The Olympics remains one of the world's most recognizable sports properties, with unmatched history, global reach, athlete prestige, and symbolic power.",
+        "c": "But recognition is no longer converting into cultural gravity. Audiences now encounter the Games through fragmented feeds, isolated clips, louder political and commercial signals, and fewer shared rituals, so the Olympics risks feeling less like a rare global moment and more like another stream of optional content.",
+        "q": "Rather than trying to win back every audience at once, which single audience should LA 2028 prioritize to rebuild the Olympics' cultural gravity fastest?",
+        "a": "LA 2028 should prioritize younger, casual sports fans over legacy loyalists: this group is the most reachable through short-form and creator-led content, the most likely to turn single moments into recurring attention, and the audience whose renewed engagement would most convincingly signal that the Games still matter culturally."
       }
     ]
   }

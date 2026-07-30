@@ -135,8 +135,12 @@
     }
 
     .write-to-aiko-utility {
-      min-width: 136px;
-      padding: 7px 10px;
+      min-width: 112px;
+      height: 42px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 5px 10px;
       border: 1px solid rgba(255, 255, 255, .18);
       border-radius: 8px;
       background: rgba(255, 255, 255, .08);
@@ -163,7 +167,7 @@
     .write-to-aiko-timer-controls {
       display: flex;
       gap: 6px;
-      margin-top: 8px;
+      margin: 0;
     }
 
     .write-to-aiko-icon-button {
@@ -171,7 +175,7 @@
       align-items: center;
       justify-content: center;
       width: 30px;
-      height: 30px;
+      height: 42px;
       border: 1px solid rgba(255, 255, 255, .34);
       border-radius: 6px;
       background: transparent;
@@ -198,9 +202,29 @@
       padding: 34px 0 56px;
     }
 
+    .write-to-aiko-exercise-intro {
+      margin-bottom: 24px;
+    }
+
+    .write-to-aiko-exercise-intro h1 {
+      margin: 0 0 10px;
+      color: var(--write-to-aiko-navy);
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 34px;
+      line-height: 1.12;
+    }
+
+    .write-to-aiko-exercise-intro p {
+      margin: 0;
+      max-width: 640px;
+      color: var(--write-to-aiko-charcoal);
+      font-size: 15px;
+      line-height: 1.55;
+    }
+
     .write-to-aiko-grid {
       display: grid;
-      grid-template-columns: minmax(300px, .88fr) minmax(420px, 1.12fr);
+      grid-template-columns: 300px minmax(420px, 1fr);
       gap: 22px;
       align-items: start;
     }
@@ -339,6 +363,21 @@
       color: var(--write-to-aiko-steel);
       font-size: .92rem;
       line-height: 1.45;
+    }
+
+    .write-to-aiko-mode-guidance {
+      margin: 0 0 14px;
+      padding: 10px 12px;
+      border: 1px solid rgba(0, 51, 102, .14);
+      border-radius: 8px;
+      background: var(--write-to-aiko-paper);
+      color: var(--write-to-aiko-charcoal);
+      font-size: .92rem;
+      line-height: 1.45;
+    }
+
+    .write-to-aiko-mode-guidance strong {
+      color: var(--write-to-aiko-navy);
     }
 
     .write-to-aiko-length-note {
@@ -512,7 +551,7 @@
       }
 
       .write-to-aiko-utility {
-        min-width: 122px;
+        min-width: 104px;
       }
 
       .write-to-aiko-toggle-wrap {
@@ -534,25 +573,31 @@
     <div class="write-to-aiko-heading">
       <span class="write-to-aiko-kicker">Phase 2 · Speak concisely</span>
       <span class="write-to-aiko-title">Write to Aiko</span>
-      <a class="module-back-link" href="../../member-login/phase-2.html#exercises">← Back to Phase 2 exercises</a>
+      <a class="module-back-link" href="../../member-login/index.html#learning-journey">← Back to Learning Journey</a>
     </div>
     <div class="write-to-aiko-utilities" aria-label="Practice metrics">
       <div class="write-to-aiko-utility">
-        <span class="write-to-aiko-small-label">Timer</span>
-        <span class="write-to-aiko-utility-value" id="writeToAikoTimer">00:00</span>
-        <div class="write-to-aiko-timer-controls">
-          <button class="write-to-aiko-icon-button" type="button" id="writeToAikoTimerPause" aria-label="Pause timer" disabled></button>
-          <button class="write-to-aiko-icon-button" type="button" id="writeToAikoTimerReset" aria-label="Reset timer"></button>
-        </div>
-      </div>
-      <div class="write-to-aiko-utility">
         <span class="write-to-aiko-small-label">Words</span>
         <span class="write-to-aiko-utility-value" id="writeToAikoHeaderCount">0</span>
+      </div>
+      <div class="write-to-aiko-utility">
+        <span class="write-to-aiko-small-label">Timer</span>
+        <span class="write-to-aiko-utility-value" id="writeToAikoTimer">00:00</span>
+      </div>
+      <div class="write-to-aiko-timer-controls">
+        <button class="write-to-aiko-icon-button" type="button" id="writeToAikoTimerPause" aria-label="Pause timer" disabled></button>
+        <button class="write-to-aiko-icon-button" type="button" id="writeToAikoTimerReset" aria-label="Reset timer"></button>
       </div>
     </div>
   </header>
 
   <main class="write-to-aiko-main">
+    <div class="write-to-aiko-exercise-intro exercise-intro">
+      <span class="write-to-aiko-label">Exercise</span>
+      <h1>Write to Aiko.</h1>
+      <p>Turn your SCQA into an answer-first email. Lead with your bottom line, then build the supporting case.</p>
+    </div>
+
     <div class="write-to-aiko-grid">
       <section class="write-to-aiko-panel write-to-aiko-scqa" aria-labelledby="writeToAikoScqaTitle">
         <h1 class="write-to-aiko-panel-title" id="writeToAikoScqaTitle">Your SCQA — use this to write your email.</h1>
@@ -586,6 +631,7 @@
               <button class="write-to-aiko-toggle" type="button" role="tab" aria-selected="false" data-mode="open">Open</button>
             </div>
           </div>
+          <p class="write-to-aiko-mode-guidance"><strong>Choose one format:</strong> Use <strong>"Structured"</strong> if you want the easier guided option with labeled sections for your bottom line and supporting points. Use <strong>"Open"</strong> if you want to write in your own free-form structure; this is the more difficult option. In both formats, lead with your bottom line and build from your SCQA.</p>
           <p class="write-to-aiko-length-note">Suggested length: 80-120 words.</p>
 
           <p class="write-to-aiko-salutation">Hey Aiko,</p>
@@ -656,6 +702,7 @@ Yutee Elle</div>
           <div class="write-to-aiko-actions">
             <button class="write-to-aiko-submit" type="button" id="writeToAikoSubmit">Save</button>
             <button class="write-to-aiko-reset" type="button" id="writeToAikoReset" hidden>Try again</button>
+            <a class="write-to-aiko-submit" href="../../member-login/index.html#learning-journey" id="writeToAikoJourneyLink" hidden>Back to Learning Journey</a>
           </div>
           <p class="write-to-aiko-status" id="writeToAikoStatus" role="status" aria-live="polite"></p>
         </div>
@@ -911,6 +958,7 @@ Yutee Elle</div>
           submitBtn.textContent = 'Save';
           submitBtn.disabled = true;
           resetBtn.hidden = false;
+          document.getElementById('writeToAikoJourneyLink').hidden = false;
           statusEl.innerHTML = 'Progress saved! View your full record on the <a href="../../my-results/index.html" style="color:inherit;font-weight:700;">My Results</a> page.';
         } catch (error) {
           console.warn('Firestore progress save failed.', error);
@@ -930,6 +978,7 @@ Yutee Elle</div>
         submitBtn.textContent = 'Save';
         submitBtn.disabled = false;
         resetBtn.hidden = true;
+        document.getElementById('writeToAikoJourneyLink').hidden = true;
         statusEl.textContent = '';
       });
 
@@ -939,9 +988,9 @@ Yutee Elle</div>
     })();
   </script>
   <script type="module" src="../../assets/app-access-guard.js?v=1"></script>
-  <script src="../../assets/exercise-scoring-intro.js?v=3"></script>
-  <script src="../../assets/app-reward-header.js?v=20260714-audit-1"></script>
-  <script src="../../assets/reward-events.js?v=20260712-awards-1"></script>
+  <script src="../../assets/exercise-scoring-intro.js?v=6"></script>
+  <script src="../../assets/app-reward-header.js?v=20260730-celebration-1"></script>
+  <script src="../../assets/reward-events.js?v=20260730-celebration-1"></script>
   <script type="module" src="../../assets/feedback-widget.js?v=6"></script>
   <script src="../../assets/tactile-buttons.js?v=20260714-flat-1" defer></script>
 </body>

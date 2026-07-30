@@ -20,9 +20,10 @@
       exerciseMode: "score-improvement",
       exerciseCompleteFallback: 50,
       reflectionExercise: 30,
+      scoredExerciseFirstAttemptFloor: 20,
       videoComplete: 10,
       contextComplete: 5,
-      programCompletion: 200,
+      programCompletion: 600,
       assessmentBonus: 100
     },
     streak: {
@@ -185,7 +186,7 @@
       });
     } else if (!document.querySelector("script[data-utl-reward-ui-loader]")) {
       const script = document.createElement("script");
-      script.src = "../../assets/reward-ui.js?v=20260714-flat-1";
+      script.src = "../../assets/reward-ui.js?v=20260730-celebration-1";
       script.defer = true;
       script.dataset.utlRewardUiLoader = "true";
       script.addEventListener("load", () => showRewardMoment(detail, previousState, nextState), { once: true });
@@ -280,6 +281,7 @@
       return { awarded: false, reason: "daily-goal-not-met", count: uniqueCount, state: nextState };
     }
 
+    const isFirstEverStreak = Object.keys(previousState.streak.awardedDates || {}).length === 0;
     const yesterday = addDays(dateString, -1);
     const previousQualified = nextState.streak.lastQualifiedDate;
     const currentDays = previousQualified === yesterday ? nextState.streak.currentDays + 1 : 1;
@@ -303,9 +305,11 @@
       eventId: `daily-streak:${dateString}`,
       type: "daily-streak",
       title: `Daily streak +${mpEarned} MP`,
-      body: currentDays === 1
-        ? "You hit today's practice goal!"
-        : `You practiced ${currentDays} days in a row!`,
+      body: isFirstEverStreak
+        ? `You hit today's practice goal! Come back and hit it again tomorrow to build a streak — each consecutive day earns more bonus MP (${settings.mpBase} MP × the day count), but skipping a day resets it.`
+        : currentDays === 1
+          ? "You hit today's practice goal!"
+          : `You practiced ${currentDays} days in a row!`,
       mpEarned,
       metadata: { dateString, currentDays, dailyExerciseGoal: settings.dailyExerciseGoal }
     });
@@ -332,7 +336,9 @@
       ? Math.max(0, numberOr(settings.mp.exerciseCompleteFallback, 0))
       : mode === "score-total"
         ? (previousBest > 0 ? 0 : score)
-        : improvement;
+        : previousBest === 0
+          ? Math.max(improvement, numberOr(settings.mp.scoredExerciseFirstAttemptFloor, 20))
+          : improvement;
     const result = awardEvent({
       eventId: isOneTime ? `scored-exercise:${appId}` : `scored-exercise:${appId}:best-${score}`,
       type: "scored-exercise",

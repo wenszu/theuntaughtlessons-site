@@ -173,7 +173,7 @@
     }
 
     .bad-news-main {
-      width: min(1120px, calc(100% - 56px));
+      width: min(960px, calc(100% - 56px));
       margin: 0 auto;
       padding: 28px 0 84px;
     }
@@ -227,7 +227,7 @@
 
     .bad-news-brief-card strong {
       display: block;
-      color: var(--bad-news-navy);
+      color: var(--bad-news-gold);
       font-family: 'Playfair Display', Georgia, serif;
       font-size: 26px;
       line-height: 1.1;
@@ -244,7 +244,7 @@
       display: grid;
       grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr);
       gap: 18px;
-      margin-top: 22px;
+      margin-top: 36px;
     }
 
     .bad-news-panel {
@@ -344,7 +344,7 @@
       grid-template-columns: minmax(0, 1fr) auto;
       gap: 20px;
       align-items: center;
-      margin-top: 18px;
+      margin-top: 36px;
       padding: 20px;
       border-color: var(--bad-news-gold);
     }
@@ -366,7 +366,7 @@
     .bad-news-actions {
       display: flex;
       flex-direction: column;
-      align-items: flex-end;
+      align-items: stretch;
       flex-wrap: wrap;
       gap: 10px;
       justify-content: flex-end;
@@ -395,6 +395,16 @@
       color: var(--bad-news-navy);
     }
 
+    .bad-news-button-accent {
+      border: 2px solid var(--bad-news-gold);
+      background: var(--bad-news-white);
+      color: var(--bad-news-navy);
+    }
+
+    .bad-news-button-accent:hover {
+      background: rgba(238, 163, 32, .12);
+    }
+
     .bad-news-note {
       margin-top: 12px;
       color: var(--bad-news-navy);
@@ -415,13 +425,9 @@
     }
 
     .bad-news-exit-link {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 10px 16px;
-      border: 1.5px solid #c8c2b8;
-      border-radius: 7px;
-      background: transparent;
+      align-self: center;
+      margin-top: 2px;
+      padding: 4px 0;
       color: var(--bad-news-navy);
       font-family: 'Lato', Arial, sans-serif;
       font-size: 12px;
@@ -430,9 +436,8 @@
     }
 
     .bad-news-exit-link:hover {
-      border-color: #2e7d4f;
       color: #2e7d4f;
-      text-decoration: none;
+      text-decoration: underline;
     }
 
     @media (max-width: 860px) {
@@ -473,7 +478,7 @@
       }
 
       .bad-news-actions {
-        align-items: flex-start;
+        align-items: stretch;
         justify-content: flex-start;
       }
     }
@@ -521,7 +526,7 @@
     <div class="bad-news-heading">
       <span class="bad-news-kicker">Phase 3 · Act confidently</span>
       <span class="bad-news-title">I have bad news...</span>
-      <a class="module-back-link" href="../../member-login/phase-3.html#exercises">← Back to Phase 3 exercises</a>
+      <a class="module-back-link" href="../../member-login/index.html#learning-journey">← Back to Learning Journey</a>
     </div>
     <div class="bad-news-timer" aria-label="Exercise timer">
       <span class="bad-news-timer-label">Timer</span>
@@ -587,9 +592,9 @@
         <p>Paste your situation, ask it to role-play the other person, and revise until your message is direct, humane, and ready to say out loud.</p>
       </div>
       <div class="bad-news-actions">
-        <a class="bad-news-button bad-news-button-primary" href="https://chatgpt.com/g/g-6a3e9a1b55c08191a19cd53f882b746d-utl-difficult-conversations" target="_blank" rel="noopener">Open CustomGPT</a>
-        <button class="bad-news-button" id="completeExerciseBtn" type="button">Mark exercise complete · +30 MP</button>
-        <a class="bad-news-exit-link" href="../../member-login/index.html#phase3">Back to member workspace</a>
+        <a class="bad-news-button bad-news-button-accent" href="https://chatgpt.com/g/g-6a3e9a1b55c08191a19cd53f882b746d-utl-difficult-conversations" target="_blank" rel="noopener">Open CustomGPT (Difficult conversations)</a>
+        <button class="bad-news-button bad-news-button-primary" id="completeExerciseBtn" type="button">Mark exercise complete · +30 MP</button>
+        <a class="bad-news-exit-link" id="journeyLink" href="../../member-login/index.html#learning-journey">Back to Learning Journey</a>
       </div>
       <p>This opens ChatGPT in a new tab. You may need to sign in, then return here when you finish.</p>
     </section>
@@ -652,9 +657,9 @@
     })();
   </script>
   <script type="module" src="../../assets/app-access-guard.js?v=1"></script>
-  <script src="../../assets/exercise-scoring-intro.js?v=3"></script>
-  <script src="../../assets/app-reward-header.js?v=20260714-audit-1"></script>
-  <script src="../../assets/reward-events.js?v=20260712-awards-1"></script>
+  <script src="../../assets/exercise-scoring-intro.js?v=6"></script>
+  <script src="../../assets/app-reward-header.js?v=20260730-celebration-1"></script>
+  <script src="../../assets/reward-events.js?v=20260730-celebration-1"></script>
   <script>
     document.getElementById('completeExerciseBtn').addEventListener('click', function () {
       localStorage.setItem('utl_p3_ex2_done', 'true');
@@ -666,6 +671,7 @@
       });
       this.textContent = result?.awarded ? 'Exercise complete' : 'Already completed';
       this.disabled = true;
+      document.getElementById('journeyLink').className = 'bad-news-button bad-news-button-primary';
     });
   </script>
   <script type="module" src="../../assets/feedback-widget.js?v=6"></script>
