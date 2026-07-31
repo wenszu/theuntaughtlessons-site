@@ -1293,7 +1293,7 @@
           '<strong>Make it structured:</strong> Separate current state, ideal state, and roadblocks so Aiko can act on the summary quickly.'
         ],
         sourceText: 'Use the chalkboard image above as your source. Write down what you notice, then organise the ideas into a clean structure.',
-        inputPlaceholder: 'Write your structured chalkboard summary here...',
+        inputPlaceholder: 'Type your answer here.',
         sectionPlaceholders: ['Current state', 'Roadblocks', 'Ideal state'],
         scoring: {
           ...data[0].scoring,
@@ -1715,7 +1715,7 @@
           <div class="section-box">
             <label for="sectionTitle${num}">Section ${num}</label>
             <input id="sectionTitle${num}" class="section-title" type="text" aria-label="Section ${num} heading" placeholder="${escapeHtml(placeholder)}" />
-            <textarea id="sectionBody${num}" class="response-area section-response" aria-label="Section ${num} bullet response" placeholder="Bullet responses..."></textarea>
+            <textarea id="sectionBody${num}" class="response-area section-response" aria-label="Section ${num} bullet response" placeholder="Type your answer here."></textarea>
           </div>
         `;
       }).join('');

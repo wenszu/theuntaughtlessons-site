@@ -746,7 +746,7 @@ Best, Yutee Elle`;
 
       function notesHtml() {
         if (state.notesMode === 'open') {
-          return `<textarea class="tsa-speak-textarea" id="openNotes" placeholder="Write your 60-second talking points here...">${escapeHtml(state.openNotes)}</textarea>`;
+          return `<textarea class="tsa-speak-textarea" id="openNotes" placeholder="Type your answer here.">${escapeHtml(state.openNotes)}</textarea>`;
         }
         return `
           <div class="tsa-speak-notes-grid">
@@ -754,7 +754,7 @@ Best, Yutee Elle`;
               <label class="tsa-speak-note-card">
                 <span class="tsa-speak-field-label">Section ${index + 1}</span>
                 <input class="tsa-speak-note-title" type="text" data-note-index="${index}" value="${escapeHtml(note.title)}" />
-                <textarea class="tsa-speak-note-input" data-note-body="${index}" placeholder="Bullet responses...">${escapeHtml(note.body)}</textarea>
+                <textarea class="tsa-speak-note-input" data-note-body="${index}" placeholder="Type your answer here.">${escapeHtml(note.body)}</textarea>
               </label>
             `).join('')}
           </div>

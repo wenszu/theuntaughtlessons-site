@@ -94,8 +94,8 @@ Best, Yutee Elle`;
     state.notesMode = nextMode; renderPreparation();
   }
   function notesHtml() {
-    if (state.notesMode === 'open') return `<textarea class="aiko-textarea" id="openNotes" placeholder="Write your structured response here...">${escapeHtml(state.openNotes)}</textarea>`;
-    return `<div class="aiko-note-grid">${state.sectionNotes.map((note, index) => `<label class="aiko-note-card"><span class="aiko-field-label">Section ${index + 1}</span><input class="aiko-note-title" data-note-title="${index}" value="${escapeHtml(note.title)}"><textarea class="aiko-note-body" data-note-body="${index}" placeholder="Bullet responses...">${escapeHtml(note.body)}</textarea></label>`).join('')}</div>`;
+    if (state.notesMode === 'open') return `<textarea class="aiko-textarea" id="openNotes" placeholder="Type your answer here.">${escapeHtml(state.openNotes)}</textarea>`;
+    return `<div class="aiko-note-grid">${state.sectionNotes.map((note, index) => `<label class="aiko-note-card"><span class="aiko-field-label">Section ${index + 1}</span><input class="aiko-note-title" data-note-title="${index}" value="${escapeHtml(note.title)}"><textarea class="aiko-note-body" data-note-body="${index}" placeholder="Type your answer here.">${escapeHtml(note.body)}</textarea></label>`).join('')}</div>`;
   }
   function renderPreparation() {
     const sixty = mode === '60';

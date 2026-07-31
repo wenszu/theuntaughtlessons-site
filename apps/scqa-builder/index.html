@@ -469,6 +469,13 @@
     .mobile-guidance { display: none; margin-bottom: 18px; padding: 16px; }
     .mobile-guidance summary { cursor: pointer; color: var(--navy); font-weight: 700; }
 
+    .context-toggle { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); }
+    .context-toggle summary { cursor: pointer; color: var(--steel); font-size: 12px; font-weight: 700; text-decoration: underline; text-underline-offset: 2px; list-style: none; }
+    .context-toggle summary::-webkit-details-marker { display: none; }
+    .context-toggle[open] summary { margin-bottom: 12px; }
+    .context-toggle #contextInput { min-height: 90px; font-size: 13px; }
+    .context-toggle .reset-link { display: block; margin-top: 10px; }
+
     .form-header { margin-bottom: 24px; }
     .form-header h1 { font-size: 26px; }
     .form-header p { width: 100%; max-width: none; margin: 10px 0 0; line-height: 1.6; }
@@ -505,7 +512,9 @@
     .scqa-card.q .letter { color: var(--steel); }
     .scqa-card.a .letter { color: var(--green); }
 
-    .field-hint { margin: 0 0 10px; color: var(--steel); font-size: 12px; }
+    .field-hint { margin: 0 0 6px; color: var(--steel); font-size: 12px; }
+    .field-example { margin: 0 0 10px; color: var(--navy); font-size: 12px; font-style: italic; }
+    .field-example em { font-weight: 700; }
     .scqa-card textarea { min-height: 86px; padding: 10px 12px; }
     .scqa-card input { padding: 10px 12px; }
     .warning { display: none; margin-top: 8px; color: var(--amber); font-family: Lato, Arial, sans-serif; font-size: 10px; }
@@ -894,7 +903,7 @@
     <div class="exercise-intro page-title">
       <div class="eyebrow">Exercise 02</div>
       <h1 class="title">Frame your SCQA.</h1>
-      <p class="subtitle">Turn your problem into a clear, structured narrative — then see how much one change can shift it.</p>
+      <p class="subtitle">Turn your problem into a clear, structured narrative, then see how much one change can shift it.</p>
     </div>
 
     <section class="screen active" id="screen1"></section>
@@ -904,7 +913,7 @@
       <div class="page-title">
         <div class="eyebrow">Your SCQA formulations</div>
         <h1 class="title">One reframe. One problem.</h1>
-        <p class="subtitle">Read both side by side. The parts that stayed the same show you what was solid — the part that changed shows you what your reframe actually did.</p>
+        <p class="subtitle">Read both side by side. The parts that stayed the same show you what was solid. The part that changed shows you what your reframe actually did.</p>
       </div>
       <div class="context-banner">
         <div class="label">Your context</div>
@@ -1154,14 +1163,29 @@
       });
     }
 
+    function explanationFor(part) {
+      return {
+        s: "Start with the background that everyone can agree on.",
+        c: "Introduce the problem that makes the situation more difficult.",
+        q: "Identify the main question that needs to be answered.",
+        a: "Give the solution or recommendation."
+      }[part];
+    }
+
+    function exampleFor(part) {
+      return {
+        s: "It is dinner time, and everyone in the family is hungry.",
+        c: "No one has prepared food, and everyone wants something different.",
+        q: "What should we eat that everyone will enjoy and that will not take too long?",
+        a: "Let's order pizza because it is quick, easy to share, and everyone can choose their own toppings."
+      }[part];
+    }
+
     function referenceMarkup() {
       return `
         <div class="reference">
           <div class="label">What each part means</div>
-          <div class="ref-row"><strong>S</strong><span>What is still true today that makes this problem matter? This is the stable ground your audience stands on before you introduce the tension.</span></div>
-          <div class="ref-row"><strong>C</strong><span>What has changed or stopped working? What is the tension that makes the problem matter now?</span></div>
-          <div class="ref-row"><strong>Q</strong><span>The single most important question to answer to resolve the tension.</span></div>
-          <div class="ref-row"><strong>A</strong><span>Your clear answer, stated upfront, supported by 2–3 key ideas.</span></div>
+          ${["s", "c", "q", "a"].map((part) => `<div class="ref-row"><strong>${part.toUpperCase()}</strong><span>${explanationFor(part)} <em>Example: ${exampleFor(part)}</em></span></div>`).join("")}
           <div class="ref-row"><strong></strong><em>SC defines the problem. QA builds your recommendation. They should feel like one connected story.</em></div>
         </div>
       `;
@@ -1172,40 +1196,23 @@
       return `<div class="field-stack">${["s", "c", "q", "a"].map((part) => `
         <article class="scqa-card ${colors[part]}" data-card>
           <div class="field-head"><span class="letter">${part.toUpperCase()}</span><span class="label">${labels[part].toUpperCase()}</span></div>
-          <p class="field-hint">${hintFor(part)}</p>
+          <p class="field-hint">${explanationFor(part)}</p>
+          <p class="field-example"><em>Example:</em> ${exampleFor(part)}</p>
           ${part === "q"
-            ? `<input data-scqa="${which}" data-part="${part}" data-word-label="${labels[part]}" type="text" value="${escapeHtml(data[part])}" placeholder="${placeholderFor(part)}">`
-            : `<textarea data-scqa="${which}" data-part="${part}" data-word-label="${labels[part]}" placeholder="${placeholderFor(part)}">${escapeHtml(data[part])}</textarea>`}
+            ? `<input data-scqa="${which}" data-part="${part}" data-word-label="${labels[part]}" type="text" value="${escapeHtml(data[part])}" placeholder="Type your answer here.">`
+            : `<textarea data-scqa="${which}" data-part="${part}" data-word-label="${labels[part]}" placeholder="Type your answer here.">${escapeHtml(data[part])}</textarea>`}
           <div class="hint">${microHintFor(part)}</div>
-          ${part === "q" ? `<div class="warning" data-warning="${which}">Questions end with a question mark — don't forget it.</div>` : ""}
+          ${part === "q" ? `<div class="warning" data-warning="${which}">Questions end with a question mark. Don't forget it.</div>` : ""}
         </article>
       `).join("")}</div>`;
     }
 
-    function hintFor(part) {
-      return {
-        s: "What is still true today that makes this problem matter? This is the stable ground your audience stands on before you introduce the tension.",
-        c: "What has changed, broken, or stopped working — and why does it matter right now?",
-        q: "What is the single most important question that resolves the tension between S and C? One question only.",
-        a: "State your answer upfront, then support it with 2–3 key ideas. Lead with the conclusion."
-      }[part];
-    }
-
     function microHintFor(part) {
       return {
-        s: "Aim for 1–2 sentences. State facts your audience already accepts.",
+        s: "Aim for 1–2 sentences.",
         c: "Make the tension sharp. Vague complications produce vague answers.",
         q: "Must end with a question mark. One question only.",
         a: "Lead with your answer. Support with 2–3 numbered points."
-      }[part];
-    }
-
-    function placeholderFor(part) {
-      return {
-        s: "What is already true about this situation that your audience would accept?",
-        c: "What has changed, broken, or become harder now?",
-        q: "What single question does that tension create?",
-        a: "What is your direct answer, supported by 2–3 key ideas?"
       }[part];
     }
 
@@ -1215,11 +1222,10 @@
         <div class="page-title">
           <div class="callout">
             <div class="label">Why reframe?</div>
-            <div>Your first SCQA gets your thinking on paper. Then you'll pick one lever — the Complication, the Question, or the Answer — and rewrite just that. Everything else carries over unchanged, so you can see exactly what one different choice does to your story.</div>
+            <div>Your first SCQA gets your thinking on paper. Then you'll pick one lever: the Complication, the Question, or the Answer, and rewrite just that. Everything else carries over unchanged, so you can see exactly what one different choice does to your story.</div>
           </div>
           <div class="how-strip">
-            <div class="how-item"><span class="num-icon">A</span>Set your context</div>
-            <div class="how-item"><span class="num-icon">B</span>Write SCQA #1</div>
+            <div class="how-item"><span class="num-icon">1</span>Write your SCQA</div>
             <div class="how-item"><span class="num-icon">2</span>Pick one thing to reframe</div>
             <div class="how-item"><span class="num-icon">3</span>Review and check both</div>
           </div>
@@ -1230,11 +1236,20 @@
               <div class="label">Your context</div>
               <div class="context-text sideContext"></div>
               <div class="topic-label sideTopic"></div>
+              <details class="context-toggle">
+                <summary>Use your own situation instead</summary>
+                <p class="instruction">Replace the case study above with a real problem you want to practice on.</p>
+                <textarea id="contextInput" data-word-label="Context" placeholder="Describe the situation in 2 to 4 sentences: what's true today, what changed, and why it matters.">${escapeHtml(state.context)}</textarea>
+                <div style="margin-top:12px">
+                  <div class="label">TOPIC LABEL (OPTIONAL)</div>
+                  <input id="topicInput" type="text" data-word-label="Topic label" placeholder="Give your situation a short name" value="${escapeHtml(state.topicLabel)}">
+                </div>
+                <button class="link-button reset-link" type="button" id="resetTemplate">Reset to the Olympic case study</button>
+              </details>
             </div>
             ${referenceMarkup()}
             <div class="progress-box">
-              <div class="progress-part" id="contextStatusRow"><span class="num-icon sm">A</span><span id="contextStatus1">Context needed</span></div>
-              <div class="progress-part"><span class="num-icon sm">B</span><span id="progressText1">SCQA #1: 0 / 4 fields</span></div>
+              <div class="progress-part"><span class="num-icon sm">1</span><span id="progressText1">SCQA: 0 / 4 fields</span></div>
               <div class="progress-track"><div class="progress-fill" id="progress1"></div></div>
             </div>
           </aside>
@@ -1243,26 +1258,9 @@
               <summary>Show guidance ▾</summary>
               ${referenceMarkup()}
             </details>
-            <div class="part-heading"><span class="num-icon">A</span>Part A · Set your context</div>
-            <div class="context-card card" style="max-width:none;margin:0 0 28px">
-              <p class="instruction">What problem or situation are you working with? This is your raw material — you will frame it, then reframe part of it.</p>
-              <textarea id="contextInput" data-word-label="Context" placeholder="e.g. The Olympics is still the world's most recognisable sports property, but recent games are struggling to capture the same cultural impact and collective attention.">${escapeHtml(state.context)}</textarea>
-              <div class="hint">Tip: Write 2–4 sentences. Include the situation, the tension you see, and what question it raises.</div>
-              <div style="margin-top:16px">
-                <div class="label">TOPIC LABEL (OPTIONAL)</div>
-                <p class="instruction">Give your problem a short name.</p>
-                <input id="topicInput" type="text" data-word-label="Topic label" placeholder="e.g. Olympics cultural decline" value="${escapeHtml(state.topicLabel)}">
-              </div>
-              <div class="template-toggle">
-                <span>Need a starting point?</span>
-                <button class="link-button" type="button" id="loadTemplate">Load the Olympics template →</button>
-                <span class="template-status" id="templateStatus">✓ Template loaded</span>
-              </div>
-            </div>
-            <div class="part-heading"><span class="num-icon">B</span>Part B · Write your first SCQA</div>
             <div class="form-header">
-              <h1>Write your first SCQA.</h1>
-              <p>Use your context above to frame a clear problem narrative. Start with what is true, introduce what is broken, distil it into one sharp question, then answer it directly.</p>
+              <h1>Write your SCQA.</h1>
+              <p>Read the context on the left, then turn it into a clear problem narrative. Start with what is true, introduce what changed, distill it into one sharp question, then answer it directly.</p>
             </div>
             ${scqaFieldsMarkup("scqa1")}
             <div class="bottom-bar">
@@ -1283,7 +1281,7 @@
         <div class="page-title">
           <div class="eyebrow">FORMULATION 02 · CHOOSE YOUR ANGLE</div>
           <h1 class="title">Reframe your problem.</h1>
-          <p class="subtitle">Same context, same story — pick one thing to genuinely change. Everything else stays exactly as you wrote it.</p>
+          <p class="subtitle">Same context, same story. Pick one thing to genuinely change. Everything else stays exactly as you wrote it.</p>
         </div>
         <div class="context-card card" style="max-width:820px">
           ${reviewColumn("Your first formulation", state.scqa1)}
@@ -1307,7 +1305,7 @@
             ? `<input data-scqa="scqa2" data-part="${part}" data-word-label="${labels[part]}" type="text" value="${escapeHtml(data[part])}" placeholder="${placeholderFor(part)}">`
             : `<textarea data-scqa="scqa2" data-part="${part}" data-word-label="${labels[part]}" placeholder="${placeholderFor(part)}">${escapeHtml(data[part])}</textarea>`}
           <div class="hint">${microHintFor(part)}</div>
-          ${part === "q" ? `<div class="warning" data-warning="scqa2">Questions end with a question mark — don't forget it.</div>` : ""}
+          ${part === "q" ? `<div class="warning" data-warning="scqa2">Questions end with a question mark. Don't forget it.</div>` : ""}
         </article>
       `;
     }
@@ -1474,7 +1472,7 @@
 
     function clearAll() {
       localStorage.removeItem(STORAGE_KEY);
-      state = blankState();
+      state = { ...blankState(), context: templateState.context, topicLabel: templateState.topicLabel };
       resetTimer();
       renderAll();
       goToScreen(1);
@@ -1498,7 +1496,7 @@
       const results = [];
       const add = (pass, label, fail, hint) => results.push({ pass, label: pass ? label : fail, points: pass ? 1 : 0, hint });
       const missing = Object.entries(data).filter(([, v]) => !filled(v)).map(([k]) => labels[k]);
-      add(!missing.length, "All four fields completed", `Missing field(s) — ${missing.join(", ")}`, "Every SCQA needs all four parts — an incomplete framework leaves the story broken.");
+      add(!missing.length, "All four fields completed", `Missing field(s): ${missing.join(", ")}`, "Every SCQA needs all four parts. An incomplete framework leaves the story broken.");
       add(data.q.trim().endsWith("?"), "Question is properly framed", "Question is missing a question mark", "A question that does not end with '?' may not actually be a question.");
       add(!badStarts.some((s) => data.a.trim().toLowerCase().startsWith(s)), "Answer leads with a conclusion", "Answer may be building up instead of leading", "Lead with your answer. Do not make the reader wait for your point.");
       add(tension.some((w) => data.c.toLowerCase().includes(w)), "Complication signals real tension", "Complication may lack tension", "A strong complication should feel like something has changed or broken.");
@@ -1510,7 +1508,7 @@
 
     function scoreMessage(score) {
       if (score >= 6) return "Sharp framing. This SCQA tells a clear story from start to finish.";
-      if (score >= 4) return "Solid start. Focus on the flagged areas — tension and alignment will tighten this significantly.";
+      if (score >= 4) return "Solid start. Tightening the tension and alignment in the flagged areas will make the biggest difference.";
       if (score >= 2) return "The structure is there. Ask: does my complication really create tension? Does my answer really answer my question?";
       return "Fill in all four fields first, then re-check. The framework only works when all parts are present.";
     }
@@ -1523,7 +1521,7 @@
       const diffText = !lever
         ? "Pick a lever to reframe your SCQA, then check your answers again."
         : changedEnough
-          ? `You reframed by ${lever.title.toLowerCase()} — that's the one thing that moved between formulations.`
+          ? `You reframed by ${lever.title.toLowerCase()}. That's the one thing that moved between formulations.`
           : `Your reframed ${labels[lever.field]} reads almost the same as your first formulation. Try changing it more directly.`;
       $("#feedbackMount").innerHTML = `<section class="panel"><button class="panel-close" data-close-panel="feedbackMount" type="button">×</button><div class="label">Answer check</div>
         <div class="score-grid"><div class="score-line">SCQA #1: ${s1} / 7 <span>pts</span></div><div class="score-line">SCQA #2: ${s2} / 7 <span>pts</span></div></div>
@@ -1540,7 +1538,7 @@
       const custom = state.context.trim() !== templateState.context;
       const sampleLever = templateState.reframeLever && LEVERS[templateState.reframeLever];
       const formulation2Label = sampleLever ? `Sample formulation 2 (reframed: ${sampleLever.title})` : "Sample formulation 2";
-      $("#sampleMount").innerHTML = `<section class="panel"><button class="panel-close" data-close-panel="sampleMount" type="button">×</button>${custom ? `<p class="sample-notice">These samples use the Olympics case study. Use them as a model for structure and language — not for content.</p>` : ""}<div class="sample-grid"><div class="sample-col"><div class="label" style="color:var(--steel)">Sample formulation 1</div>${reviewColumn("", templateState.scqa1)}</div><div class="sample-col"><div class="label" style="color:var(--steel)">${escapeHtml(formulation2Label)}</div>${reviewColumn("", templateState.scqa2)}</div></div></section>`;
+      $("#sampleMount").innerHTML = `<section class="panel"><button class="panel-close" data-close-panel="sampleMount" type="button">×</button>${custom ? `<p class="sample-notice">These samples use the Olympics case study. Use them as a model for structure and language, not for content.</p>` : ""}<div class="sample-grid"><div class="sample-col"><div class="label" style="color:var(--steel)">Sample formulation 1</div>${reviewColumn("", templateState.scqa1)}</div><div class="sample-col"><div class="label" style="color:var(--steel)">${escapeHtml(formulation2Label)}</div>${reviewColumn("", templateState.scqa2)}</div></div></section>`;
     }
 
     function copyText() {
@@ -1604,17 +1602,16 @@
       if (go) { updateFromDom(); goToScreen(Number(go.dataset.go)); return; }
       if (event.target.id === "toReframe") { updateFromDom(); goToScreen(2); return; }
       if (event.target.id === "toReview") { updateFromDom(); goToScreen(3); return; }
-      if (event.target.id === "loadTemplate") {
-        state = {
-          ...blankState(),
-          context: templateState.context,
-          topicLabel: templateState.topicLabel,
-          currentScreen
-        };
+      if (event.target.id === "resetTemplate") {
+        state.context = templateState.context;
+        state.topicLabel = templateState.topicLabel;
         save();
-        renderAll();
-        $("#templateStatus").classList.add("show");
-        setTimeout(() => $("#templateStatus").classList.remove("show"), 2000);
+        const contextInput = $("#contextInput");
+        const topicInput = $("#topicInput");
+        if (contextInput) { contextInput.value = state.context; autoResize(contextInput); }
+        if (topicInput) topicInput.value = state.topicLabel;
+        renderSidebar();
+        renderControls();
         return;
       }
       if (event.target.id === "clearFresh") { clearAll(); return; }
@@ -1659,7 +1656,7 @@
       }
       setInterval(renderTimer, 1000);
       const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) state = safeState(saved);
+      state = saved ? safeState(saved) : { ...blankState(), context: templateState.context, topicLabel: templateState.topicLabel };
       renderAll();
       renderTimer();
       renderWordCount();

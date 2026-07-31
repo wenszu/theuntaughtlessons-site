@@ -1155,13 +1155,13 @@ Return only JSON with C1, C4, C5, C6, C7, C8, msg1, msg2, msg3, feedback, and co
               <label class="tsa-speak-note-card">
                 <span class="tsa-speak-field-label">Section ${number}</span>
                 <input class="tsa-speak-note-title" type="text" data-note-title="${prefix}-${number}" placeholder="Section ${number}" />
-                <textarea class="tsa-speak-note-input" data-note="${prefix}-${number}" placeholder="Bullet responses..."></textarea>
+                <textarea class="tsa-speak-note-input" data-note="${prefix}-${number}" placeholder="Type your answer here."></textarea>
               </label>
             `).join('')}
           </div>
         `;
       }
-      return `<textarea class="tsa-speak-textarea" placeholder="Write your structured response here..."></textarea>`;
+      return `<textarea class="tsa-speak-textarea" placeholder="Type your answer here."></textarea>`;
     }
 
     function wireModeSwitch(renderFunction) {

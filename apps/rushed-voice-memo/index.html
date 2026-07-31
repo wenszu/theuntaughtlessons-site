@@ -1302,7 +1302,7 @@
           '<strong>Make it usable:</strong> Organise the update into three clear buckets and start each bullet with a BSP.'
         ],
         sourceText: '[Listen to Hugh’s voice memo, take notes, and organise the important points into three MECE buckets.]',
-        inputPlaceholder: 'Write your structured voice memo summary here...',
+        inputPlaceholder: 'Type your answer here.',
         sectionPlaceholders: ['Rollout plan', 'Strategic value', 'Execution risks'],
         scoring: {
           ...data[0].scoring,
@@ -1755,7 +1755,7 @@
           <div class="section-box">
             <label for="sectionTitle${num}">Section ${num}</label>
             <input id="sectionTitle${num}" class="section-title" type="text" aria-label="Section ${num} heading" placeholder="${escapeHtml(placeholder)}" />
-            <textarea id="sectionBody${num}" class="response-area section-response" aria-label="Section ${num} bullet response" placeholder="Bullet responses..."></textarea>
+            <textarea id="sectionBody${num}" class="response-area section-response" aria-label="Section ${num} bullet response" placeholder="Type your answer here."></textarea>
           </div>
         `;
       }).join('');

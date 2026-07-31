@@ -717,12 +717,9 @@ The orchestrator does not speak during the advisory session. They observe and li
 
 INSTRUCTIONS
 
-Step 1: Have each advisor review both the issue tree and the SCQA. For each advisor, use this format:
+Step 1: Have each advisor review both the issue tree and the SCQA, in this order, using this format for each one:
 
-ADVISOR NAME
-What I like: [max 2 points]
-What I would challenge or cut: [max 2 points]
-What I recommend: [max 2 points]
+${selectedPeople().map(person => `${person.name}\nWhat I like: [max 2 points]\nWhat I would challenge or cut: [max 2 points]\nWhat I recommend: [max 2 points]`).join('\n\n')}
 
 Step 2: After all advisors have responded, the orchestrator delivers:
 

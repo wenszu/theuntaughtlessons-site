@@ -18,7 +18,7 @@
       "Make the buckets MECE"
     ],
     "durationSeconds": 300,
-    "inputPlaceholder": "Write your structured response here...",
+    "inputPlaceholder": "Type your answer here.",
     "sectionPlaceholders": [
       "What will we launch?",
       "How will we launch?",

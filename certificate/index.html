@@ -154,6 +154,13 @@
       text-align: center;
     }
 
+    .cert-logo {
+      display: block;
+      width: 46px;
+      height: 46px;
+      margin: 0 auto 10px;
+    }
+
     .cert-org {
       font-family: Lato, Arial, sans-serif;
       font-size: 11px;
@@ -382,6 +389,7 @@
       </svg>
 
       <div class="cert-inner">
+        <img class="cert-logo" src="../assets/apple-touch-icon.png" alt="The Untaught Lessons">
         <p class="cert-org">The Untaught Lessons</p>
         <p class="cert-presents">proudly presents this certificate to</p>
 
@@ -486,7 +494,7 @@
         return;
       }
 
-      const credentialTitle = (settings && settings.certificate && settings.certificate.credentialTitle) || 'Think, speak and act like an executive.';
+      const credentialTitle = (settings && settings.certificate && settings.certificate.credentialTitle) || 'Think, speak and act like an executive™.';
       const signatoryName = (settings && settings.certificate && settings.certificate.signatoryName) || 'Wen-Szu Lin';
       const signatoryTitle = (settings && settings.certificate && settings.certificate.signatoryTitle) || 'Founder, The Untaught Lessons';
 
@@ -557,8 +565,19 @@
         } catch {}
       }
 
+      function loadImage(src) {
+        return new Promise((resolve, reject) => {
+          const img = new Image();
+          img.onload = () => resolve(img);
+          img.onerror = reject;
+          img.src = src;
+        });
+      }
+
       async function renderCertificateImage() {
         await ensureFontsLoaded();
+        let logoImg = null;
+        try { logoImg = await loadImage('../assets/apple-touch-icon.png'); } catch (error) { /* certificate still renders without the logo */ }
         const scale = 2;
         const width = 900;
         const height = 600;
@@ -604,6 +623,8 @@
 
         const centerX = width / 2;
         ctx.textAlign = 'center';
+
+        if (logoImg) ctx.drawImage(logoImg, centerX - 19, 20, 38, 38);
 
         ctx.fillStyle = gold;
         ctx.font = '700 11px Lato, Arial, sans-serif';

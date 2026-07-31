@@ -780,7 +780,7 @@ function getDefaultEngagementSettings() {
     },
     certificate: {
       enabled: true,
-      credentialTitle: "Think, speak and act like an executive.",
+      credentialTitle: "Think, speak and act like an executive™.",
       signatoryName: "Wen-Szu Lin",
       signatoryTitle: "Founder, The Untaught Lessons"
     }
