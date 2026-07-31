@@ -2542,14 +2542,14 @@
         <section class="panel" aria-live="polite">
           <button class="panel-close" type="button" data-close-panel="sampleMount">×</button>
           <div class="label">Sample answer key</div>
-          ${custom ? `<p class="sample-notice">This sample uses the Olympics case study. Use it as a model for structure and language — not for content.</p>` : ""}
+          ${custom ? `<p class="sample-notice">This sample uses the Olympics case study. Use it as a model for structure and language, not for content.</p>` : ""}
           <div class="question-banner">
             <div class="label">Central question</div>
             <h2>${escapeHtml(data.problemStatement || "Why is the Olympics losing its cultural impact?")}</h2>
           </div>
           <div class="review-hypothesis">
             <div class="label" style="color:var(--steel)">Hypothesis</div>
-            <p>${escapeHtml(data.hypothesis || "The Olympics is losing gravity because of broken culture, a lost story arc, and lack of legitimate transparency.")}</p>
+            <p>${escapeHtml(data.hypothesis || "The Olympics is losing its hold on people because shared rituals are breaking, athlete stories are harder to follow, and trust is weakening.")}</p>
           </div>
           <div class="review-grid">
             ${data.arguments.map((arg, index) => `

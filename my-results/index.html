@@ -1554,7 +1554,11 @@
         return `ISSUE TREE\n\nHypothesis: ${r.hypothesis || ''}\n\nArgument 1: ${r.argument1 || ''}\n${bullets(r.argument1_details)}\n\nArgument 2: ${r.argument2 || ''}\n${bullets(r.argument2_details)}\n\nArgument 3: ${r.argument3 || ''}\n${bullets(r.argument3_details)}`;
       }
       if (appId === 'scqa-builder') {
-        return `SCQA #1\nSituation: ${r.scqa1?.situation || ''}\nComplication: ${r.scqa1?.complication || ''}\nQuestion: ${r.scqa1?.question || ''}\nAnswer: ${r.scqa1?.answer || ''}\n\nSCQA #2\nSituation: ${r.scqa2?.situation || ''}\nComplication: ${r.scqa2?.complication || ''}\nQuestion: ${r.scqa2?.question || ''}\nAnswer: ${r.scqa2?.answer || ''}`;
+        const first = `SCQA\nSituation: ${r.scqa1?.situation || ''}\nComplication: ${r.scqa1?.complication || ''}\nQuestion: ${r.scqa1?.question || ''}\nAnswer: ${r.scqa1?.answer || ''}`;
+        const hasSecond = r.scqa2 && Object.values(r.scqa2).some(Boolean);
+        return hasSecond
+          ? `${first}\n\nEarlier reframe\nSituation: ${r.scqa2?.situation || ''}\nComplication: ${r.scqa2?.complication || ''}\nQuestion: ${r.scqa2?.question || ''}\nAnswer: ${r.scqa2?.answer || ''}`
+          : first;
       }
       if (appId === 'write-to-aiko') return r.response || record.response || '';
       if (appId === 'explain-to-aiko' || appId === 'explain-to-aiko-60') return r.gem_feedback || r.transcript || record.gem_feedback || record.transcript || '';

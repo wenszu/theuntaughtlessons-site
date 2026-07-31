@@ -1,6 +1,6 @@
 # The Untaught Lessons Website Context
 
-Last updated: 2026-07-30
+Last updated: 2026-07-31
 
 Single source of truth for agents working on this repo. Read before making changes, update after structural changes. Detailed historical entries and full page/app maps are in `archive/WEBSITE_CONTEXT_ARCHIVE.md`.
 
@@ -123,7 +123,7 @@ Firebase Functions: `functions/processGoogleGroupSyncJob` watches `google_group_
 | `apps/rushed-voice-memo-ai/` | Phase 1 | Transcribe voice then structure with AI |
 | `apps/chalkboard-notes/` | Phase 1 | Organise chalkboard image notes into MECE; exercise media lives in `apps/chalkboard-notes/assets/` |
 | `apps/issue-tree-builder/` | Phase 2 | Build issue tree from question + arguments |
-| `apps/scqa-builder/` | Phase 2 | Write two SCQA formulations from one context |
+| `apps/scqa-builder/` | Phase 2 | Write and review one SCQA, with optional scenario practice |
 | `apps/advisory-board/` | Phase 2 | Virtual advisory board builder (CSS: `ab-`) |
 | `apps/write-to-aiko/` | Phase 2 | Answer-first email exercise (CSS: `write-to-aiko-`) |
 | `apps/explain-to-aiko/` | Phase 2 | Primary 120s in-browser recording, transcription, measured delivery, and Gemini scoring exercise |
@@ -250,6 +250,14 @@ Decisions are made in Claude (claude.ai). JSON updates are handled in Codex. Doc
 - Logo clicks in app headers link back to the homepage.
 
 ## Change Log
+
+### 2026-07-31 — SCQA single-build review and optional scenario practice
+
+- `apps/scqa-builder/index.html` now requires one complete SCQA instead of a second mandatory reframe. The primary action is `Review my SCQA`; the review screen shows the learner's full S/C/Q/A, a constructive rules-based connection review with bolded summary phrases, and an optional Gemini coherence review.
+- Optional scenario practice uses a compact `Your SCQAs` switcher after a second attempt is started. Desktop shows numbered attempt tabs; mobile shows one `Viewing:` selector. Each workspace retains its draft, completion status, rules review inputs, and Gemini feedback, so learners can return to the required Olympics SCQA without leaving the exercise or losing practice work.
+- Added `functions-aiko.scoreScqa`, using the existing `GEMINI_API_KEY` secret and the low-cost `gemini-2.5-flash-lite` model. It returns structured JSON, handles its own CORS, and returns `{ fallback: true }` when unavailable so AI never blocks completion. This function must be deployed before live AI review works.
+- Completion and reflection MP are awarded once after `Save and finish exercise`, not when the learner merely opens the review. Five optional non-Aiko practice contexts live in `data/practice/scqa-builder.json`; learners may add reasonable details, and practice attempts save separately without duplicate completion MP.
+- My Results displays the new single-SCQA payload cleanly while retaining compatibility with older saved two-formulation results. Reframing remains unimplemented pending a final decision on its optional advanced flow.
 
 ### 2026-07-31 (cont.) — Site-wide response-field placeholder audit: "Type your answer here."
 

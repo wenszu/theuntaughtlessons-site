@@ -168,6 +168,136 @@ function normalizeResult(result) {
   };
 }
 
+function buildScqaPrompt(input) {
+  return `You are a clear, constructive SCQA writing coach. Review one learner response without rewriting the whole answer.
+
+CONTEXT:
+${input.context}
+
+LEARNER SCQA:
+Situation: ${input.situation}
+Complication: ${input.complication}
+Question: ${input.question}
+Answer: ${input.answer}
+
+Check whether:
+1. Situation gives stable, relevant background.
+2. Complication explains a meaningful change, tension, problem, or risk.
+3. Question follows logically from the Complication.
+4. Answer responds directly to the Question.
+5. All four parts form one coherent storyline.
+
+Use direct, encouraging language suitable for a teenager or working adult. Do not use em dashes. Do not use the words "delve", "leverage", "nuanced", "robust", "landscape", "tapestry", "carry forward", or "gravity". Do not claim there is one correct business answer. Give one improvement only.
+
+Return strict JSON:
+{"summary":"Two short sentences describing the storyline and overall coherence.","connections":[{"name":"Situation","status":"strong","feedback":"Specific feedback."},{"name":"Complication","status":"review","feedback":"Specific feedback."},{"name":"Question","status":"strong","feedback":"Specific feedback."},{"name":"Answer","status":"strong","feedback":"Specific feedback."}],"improvementTitle":"Bolded summary phrase","improvement":"One specific improvement in no more than 35 words."}`;
+}
+
+function extractScqaJson(text) {
+  const source = String(text || "").replace(/^\uFEFF/, "").trim();
+  const candidates = [source];
+  const fencePattern = /```(?:json)?\s*([\s\S]*?)```/gi;
+  let fence;
+  while ((fence = fencePattern.exec(source))) candidates.push(fence[1].trim());
+  const firstBrace = source.indexOf("{");
+  const lastBrace = source.lastIndexOf("}");
+  if (firstBrace >= 0 && lastBrace > firstBrace) candidates.push(source.slice(firstBrace, lastBrace + 1));
+  for (const candidate of candidates) {
+    try {
+      const parsed = JSON.parse(candidate);
+      if (parsed && Array.isArray(parsed.connections)) return parsed;
+    } catch (_) { /* Try the next candidate. */ }
+  }
+  throw new Error("Gemini returned no valid SCQA review JSON.");
+}
+
+async function callScqaModel(apiKey, prompt) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 40000);
+  try {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      signal: controller.signal,
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: {
+          temperature: 0.2,
+          responseMimeType: "application/json"
+        }
+      })
+    });
+    if (!response.ok) throw new Error(`Gemini SCQA review returned HTTP ${response.status}.`);
+    const data = await response.json();
+    const output = (data?.candidates?.[0]?.content?.parts || []).map((part) => part.text || "").join("");
+    return extractScqaJson(output);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+function normalizeScqaResult(result) {
+  if (!result || typeof result.summary !== "string" || !Array.isArray(result.connections) || result.connections.length !== 4) {
+    throw new Error("Invalid SCQA review response.");
+  }
+  const expectedNames = ["Situation", "Complication", "Question", "Answer"];
+  return {
+    summary: result.summary.slice(0, 800),
+    connections: result.connections.map((item, index) => ({
+      name: expectedNames[index],
+      status: item?.status === "strong" ? "strong" : "review",
+      feedback: String(item?.feedback || "").slice(0, 500)
+    })),
+    improvementTitle: String(result.improvementTitle || "Strengthen the connection").slice(0, 120),
+    improvement: String(result.improvement || "").slice(0, 500),
+    fallback: false
+  };
+}
+
+exports.scoreScqa = onRequest({
+  secrets: [GEMINI_API_KEY],
+  timeoutSeconds: 60,
+  memory: "256MiB"
+}, async (request, response) => {
+  const origin = String(request.get("origin") || "");
+  if (origin && !ALLOWED_ORIGINS.has(origin)) {
+    response.status(403).json({ error: "Origin not allowed." });
+    return;
+  }
+  if (origin) response.set("Access-Control-Allow-Origin", origin);
+  response.set("Vary", "Origin");
+  response.set("Access-Control-Allow-Methods", "POST, OPTIONS");
+  response.set("Access-Control-Allow-Headers", "Content-Type");
+  response.set("Content-Type", "application/json");
+  if (request.method === "OPTIONS") { response.status(204).send(""); return; }
+  if (request.method !== "POST") { response.status(405).json({ error: "POST only." }); return; }
+
+  let body = request.body;
+  if (typeof body === "string") {
+    try { body = JSON.parse(body); } catch (_) { body = {}; }
+  }
+  const input = {
+    context: String(body?.context || "").trim().slice(0, 2500),
+    situation: String(body?.situation || "").trim().slice(0, 2000),
+    complication: String(body?.complication || "").trim().slice(0, 2000),
+    question: String(body?.question || "").trim().slice(0, 1500),
+    answer: String(body?.answer || "").trim().slice(0, 3000)
+  };
+  if (Object.values(input).some((value) => value.split(/\s+/).filter(Boolean).length < 3)) {
+    response.status(400).json({ error: "Complete all four SCQA fields before requesting AI feedback." });
+    return;
+  }
+  try {
+    const apiKey = String(GEMINI_API_KEY.value() || "").trim();
+    if (!apiKey) throw new Error("GEMINI_API_KEY is not configured.");
+    const raw = await callScqaModel(apiKey, buildScqaPrompt(input));
+    response.status(200).json(normalizeScqaResult(raw));
+  } catch (error) {
+    console.error("SCQA review unavailable:", error.message);
+    response.status(200).json({ fallback: true });
+  }
+});
+
 exports.scoreExplainToAiko = onRequest({
   secrets: [GEMINI_API_KEY],
   timeoutSeconds: 120,

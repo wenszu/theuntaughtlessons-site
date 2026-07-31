@@ -10,8 +10,65 @@
     ],
     "prompt": "Write two different SCQA formulations from the same context.",
     "timerMinutes": 10,
-    "context": "The Olympics has historically been one of the most unifying global events, drawing huge audiences and shared attention every two years. Recently, however, the Games have struggled to hold that same level of cultural relevance. The challenge is understanding why interest is fading and what could bring it back.",
+    "context": "The Olympics has historically been one of the most unifying global events. However, recent games have struggled to capture the same cultural impact and collective attention. The challenge is understanding why the Games are losing their hold on people and what can be done to win it back.",
     "topicLabel": "Olympics cultural decline",
+    "practiceScenarios": [
+      {
+        "id": "project-delay",
+        "title": "A project is falling behind",
+        "context": "A cross-functional team committed to launching a customer portal in six weeks. Two important technical dependencies are now delayed, but leadership still expects the original launch date.",
+        "sampleAnswer": {
+          "s": "The cross-functional team committed to launching a customer portal in six weeks, and leadership is planning around that date.",
+          "c": "Two critical technical dependencies are delayed, which puts the original scope and launch date at risk.",
+          "q": "How should the team adjust the plan to protect the most important customer and business outcomes?",
+          "a": "The team should keep the launch date but reduce the first release to the essential customer journey, move dependent features into a scheduled second release, and ask leadership to approve the revised scope this week."
+        }
+      },
+      {
+        "id": "service-adoption",
+        "title": "Customers are not using a new service",
+        "context": "A company launched a new support service three months ago. Customer awareness is high, but very few customers have tried it and the team does not know why.",
+        "sampleAnswer": {
+          "s": "The company launched a new support service three months ago and has already made most target customers aware of it.",
+          "c": "Trial remains low despite strong awareness, and the team does not know whether the barrier is relevance, trust, price, or the signup experience.",
+          "q": "What is preventing interested customers from trying the service?",
+          "a": "The team should interview aware non-users, review where customers leave the signup process, and test a simpler first-use offer before investing in more promotion."
+        }
+      },
+      {
+        "id": "team-priorities",
+        "title": "A team has too many priorities",
+        "context": "A manager's team has six major projects due this quarter. Everyone is busy, but progress on the two most important projects has slowed.",
+        "sampleAnswer": {
+          "s": "The team is responsible for six major projects this quarter and has people actively working across all of them.",
+          "c": "Spreading effort across every project has slowed progress on the two projects that matter most to the quarter's goals.",
+          "q": "How should the manager reset priorities so the team completes the most important work?",
+          "a": "The manager should make the top two projects the team's primary commitments, pause or reduce the lowest-value work, and assign clear owners and weekly milestones to the priorities that remain."
+        }
+      },
+      {
+        "id": "training-attendance",
+        "title": "Training attendance is declining",
+        "context": "An organization introduced a professional-development program. Initial attendance was strong, but participation has dropped each month even though employee surveys say the topic is important.",
+        "sampleAnswer": {
+          "s": "The organization introduced a professional-development program on a topic employees consistently describe as important.",
+          "c": "Attendance was strong at launch but has declined every month, suggesting that interest is not translating into continued participation.",
+          "q": "What changes would make the program easier and more worthwhile for employees to attend regularly?",
+          "a": "The organization should ask recent non-attendees about the main barriers, shorten sessions into practical modules, and schedule each session with manager-supported time to participate."
+        }
+      },
+      {
+        "id": "event-budget",
+        "title": "A community event is over budget",
+        "context": "A neighborhood organization is planning its annual festival. Vendor costs have increased, sponsorship is lower than expected, and cancelling the event would disappoint the community.",
+        "sampleAnswer": {
+          "s": "The neighborhood's annual festival is an established community event that residents and local organizations expect each year.",
+          "c": "Higher vendor costs and lower sponsorship have created a budget gap, while cancelling the festival would disappoint residents and weaken community trust.",
+          "q": "How can the organization hold a meaningful festival without exceeding the available budget?",
+          "a": "The organization should preserve the most valued community activities, remove lower-priority expenses, renegotiate vendor packages, and seek small in-kind contributions from local businesses."
+        }
+      }
+    ],
     "reframeLever": "question",
     "sampleAnswers": [
       {

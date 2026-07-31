@@ -29,6 +29,17 @@
     }
 
     * { box-sizing: border-box; }
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
 
     body {
       margin: 0;
@@ -638,6 +649,69 @@
     .copy-note { color: var(--gold); font-family: Lato, Arial, sans-serif; font-size: 10px; letter-spacing: 0; }
 
     .panel { position: relative; margin-top: 18px; padding: 28px 32px; border: .5px solid var(--line); border-radius: 12px; background: var(--white); }
+    .panel h2 { margin: 4px 0 10px; color: var(--navy); font-family: "Playfair Display", Georgia, serif; }
+    #reviewGrid { grid-template-columns: 1fr; }
+    #practiceScenarioSelect {
+      display: block;
+      width: 100%;
+      min-height: 46px;
+      margin: 10px 0 16px;
+      padding: 10px 40px 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--white);
+      color: var(--navy);
+      font: 700 14px Lato, Arial, sans-serif;
+    }
+    #practiceScenarioPreview { margin: 0 0 18px; }
+    .attempt-switcher {
+      display: none;
+      margin: -8px 60px 24px;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--white);
+    }
+    .attempt-switcher.visible { display: block; }
+    .attempt-switcher-label {
+      margin: 0 0 8px;
+      color: var(--steel);
+      font: 700 11px/1.2 Lato, Arial, sans-serif;
+    }
+    .attempt-tabs { display: flex; gap: 8px; flex-wrap: wrap; }
+    .attempt-tab {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      min-height: 36px;
+      padding: 7px 12px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: var(--white);
+      color: var(--navy);
+      cursor: pointer;
+      font: 700 12px/1.2 Lato, Arial, sans-serif;
+    }
+    .attempt-tab[aria-selected="true"] {
+      border-color: var(--gold);
+      background: #fff8ec;
+      box-shadow: 0 0 0 1px var(--gold);
+    }
+    .attempt-status { color: var(--steel); font-size: 11px; }
+    .attempt-status.complete { color: var(--green); font-weight: 800; }
+    .attempt-select-wrap { display: none; }
+    #attemptSelect {
+      width: 100%;
+      min-height: 44px;
+      padding: 9px 36px 9px 11px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: var(--white);
+      color: var(--navy);
+      font: 700 13px Lato, Arial, sans-serif;
+    }
+    #geminiFeedback:empty { display: none; }
+    #geminiFeedback { margin-top: 16px; }
     .panel-close { position: absolute; top: 16px; right: 18px; border: 0; background: transparent; color: var(--charcoal); cursor: pointer; font-size: 18px; }
     .score-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
     .score-line { color: var(--navy); font-family: "Playfair Display", Georgia, serif; font-size: 22px; font-weight: 700; }
@@ -645,7 +719,7 @@
     .rule-row { padding: 10px 0; border-top: 1px solid var(--line); }
     .rule-top { display: grid; grid-template-columns: 24px 1fr auto; gap: 8px; align-items: center; }
     .mark.pass { color: var(--green); font-weight: 700; }
-    .mark.fail { color: var(--red); font-weight: 700; }
+    .mark.fail { color: var(--gold); font-weight: 700; }
     .rule-points { color: var(--steel); font-family: Lato, Arial, sans-serif; font-size: 11px; }
     .hint-toggle { margin-left: 8px; border: 0; background: transparent; color: var(--steel); cursor: pointer; font-size: 11px; padding: 0; }
     .rule-hint { display: none; margin-top: 6px; padding: 10px 12px; border-radius: 6px; background: var(--soft); font-size: 12px; }
@@ -678,6 +752,9 @@
     @media (max-width: 767px) {
       main .utl-scoring-intro { margin-left: 20px; margin-right: 20px; }
       .page-title, .review { padding-left: 20px; padding-right: 20px; }
+      .attempt-switcher { margin: -4px 20px 20px; }
+      .attempt-tabs { display: none; }
+      .attempt-select-wrap { display: block; }
       .title { font-size: 31px; }
       .context-card { margin-left: 20px; margin-right: 20px; padding: 24px; }
       .bottom-bar { position: static; flex-direction: column; align-items: stretch; margin: 24px 0 0; padding: 16px 0 0; }
@@ -903,17 +980,25 @@
     <div class="exercise-intro page-title">
       <div class="eyebrow">Exercise 02</div>
       <h1 class="title">Frame your SCQA.</h1>
-      <p class="subtitle">Turn your problem into a clear, structured narrative, then see how much one change can shift it.</p>
+      <p class="subtitle">Turn a problem into a clear, connected Situation, Complication, Question, and Answer.</p>
     </div>
+    <nav class="attempt-switcher" id="attemptSwitcher" aria-label="Your SCQA attempts">
+      <p class="attempt-switcher-label">Your SCQAs</p>
+      <div class="attempt-tabs" id="attemptTabs" role="tablist"></div>
+      <div class="attempt-select-wrap">
+        <label class="sr-only" for="attemptSelect">View a saved SCQA</label>
+        <select id="attemptSelect"></select>
+      </div>
+    </nav>
 
     <section class="screen active" id="screen1"></section>
     <section class="screen" id="screen2"></section>
 
     <section class="screen review" id="screen3">
       <div class="page-title">
-        <div class="eyebrow">Your SCQA formulations</div>
-        <h1 class="title">One reframe. One problem.</h1>
-        <p class="subtitle">Read both side by side. The parts that stayed the same show you what was solid. The part that changed shows you what your reframe actually did.</p>
+        <div class="eyebrow">Review your work</div>
+        <h1 class="title">Your SCQA, connected.</h1>
+        <p class="subtitle">Read the full storyline, then review how well each part connects to the next.</p>
       </div>
       <div class="context-banner">
         <div class="label">Your context</div>
@@ -921,23 +1006,45 @@
         <strong id="reviewTopic"></strong>
       </div>
       <div class="review-grid" id="reviewGrid"></div>
+      <div id="feedbackMount"></div>
+      <section class="panel" id="geminiReviewPanel">
+        <div class="label">AI coherence review</div>
+        <h2>Get a second perspective</h2>
+        <p>Gemini can review whether the four parts form one connected story and suggest one useful improvement. The rules review above remains available if AI feedback cannot load.</p>
+        <button class="btn btn-secondary" type="button" id="getGeminiReview">Get AI feedback</button>
+        <div id="geminiFeedback" aria-live="polite"></div>
+      </section>
       <div id="saveNoticeMount"></div>
       <div class="action-row">
-        <button class="btn btn-secondary" type="button" id="editScqa2">← Edit your reframe</button>
-        <button class="btn btn-secondary" type="button" id="editScqa1">Edit SCQA #1</button>
-        <button class="btn btn-secondary" type="button" id="checkAnswers">Check my answers</button>
+        <button class="btn btn-secondary" type="button" id="editScqa1">← Edit my SCQA</button>
         <button class="btn btn-secondary" type="button" id="showSamples">Show sample answers</button>
-        <button class="btn btn-secondary" type="button" id="startOver" hidden>Start over →</button>
-        <a class="btn btn-primary" href="../../member-login/index.html#learning-journey">Back to Learning Journey</a>
+        <button class="btn btn-primary" type="button" id="finishScqa">Save and finish exercise</button>
       </div>
-      <div id="feedbackMount"></div>
       <div id="sampleMount"></div>
+      <section class="panel" id="afterFinishPanel" hidden>
+        <div class="label">Exercise complete</div>
+        <h2>Your SCQA has been saved.</h2>
+        <p>You can return to the Learning Journey or practice with another situation. Additional practice is optional and does not change your completion reward.</p>
+        <div class="action-row">
+          <a class="btn btn-primary" href="../../member-login/index.html#learning-journey">Back to Learning Journey</a>
+          <button class="btn btn-secondary" type="button" id="showPracticeScenarios">Practice another scenario</button>
+        </div>
+      </section>
+      <section class="panel" id="practiceScenarioPanel" hidden>
+        <div class="label">Optional practice</div>
+        <h2>Choose another situation</h2>
+        <p>Use the details provided as a starting point. Feel free to make up and add reasonable details that help you build a more complete SCQA.</p>
+        <label for="practiceScenarioSelect"><strong>Practice context</strong></label>
+        <select id="practiceScenarioSelect"></select>
+        <div class="context-banner" id="practiceScenarioPreview"></div>
+        <button class="btn btn-primary" type="button" id="startPracticeScenario">Start this SCQA →</button>
+      </section>
     </section>
   </main>
 
   <div class="modal" id="confirmModal" role="dialog" aria-modal="true">
     <div class="modal-card">
-      <p>This will clear both SCQA formulations. Are you sure?</p>
+      <p>This will clear your current SCQA. Are you sure?</p>
       <div class="modal-actions">
         <button class="btn btn-primary" id="confirmStartOver" type="button">Yes, start over</button>
         <button class="btn btn-secondary" id="cancelStartOver" type="button">Cancel</button>
@@ -949,10 +1056,14 @@
   <script>
     const STORAGE_KEY = "utl_scqa_builder_v2";
     const TIMER_TARGET = 10 * 60;
-    const DATA_URL = "../../data/practice/scqa-builder.json";
+    const DATA_URL = "../../data/practice/scqa-builder.json?v=20260731-scqa-review-1";
+    const SCQA_SCORE_URL = "https://us-central1-the-untaught-lessons.cloudfunctions.net/scoreScqa";
+    const PRACTICE_ATTEMPTS_KEY = "utl_scqa_practice_attempts";
+    const ATTEMPT_WORKSPACES_KEY = "utl_scqa_attempt_workspaces";
     const blankScqa = () => ({ s: "", c: "", q: "", a: "" });
-    const blankState = () => ({ context: "", topicLabel: "", scqa1: blankScqa(), scqa2: blankScqa(), currentScreen: 1, reframeLever: null });
+    const blankState = () => ({ context: "", topicLabel: "", scqa1: blankScqa(), scqa2: blankScqa(), currentScreen: 1, reframeLever: null, practiceScenarioId: "", practiceAttemptSaved: false, completedOnce: false, aiReview: null });
     let templateState = null;
+    let practiceScenarios = [];
 
     const LEVERS = {
       complication: {
@@ -994,6 +1105,7 @@
       const data = await response.json();
       if (!Array.isArray(data) || !data.length) throw new Error("SCQA data is empty.");
       const activity = data[0];
+      practiceScenarios = Array.isArray(activity.practiceScenarios) ? activity.practiceScenarios : [];
       templateState = {
         context: activity.context || "",
         topicLabel: activity.topicLabel || "",
@@ -1016,7 +1128,46 @@
     function wordCount(text) { return (String(text).trim().match(/\b[\w'-]+\b/g) || []).length; }
     function filled(text, min = 15) { return String(text || "").trim().length >= min; }
     function autoResize(el) { if (el.tagName === "TEXTAREA") { el.style.height = "auto"; el.style.height = `${el.scrollHeight}px`; } }
-    function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+    function activeAttemptId() { return state.practiceScenarioId || "olympics"; }
+
+    function readAttemptWorkspaces() {
+      try {
+        const parsed = JSON.parse(localStorage.getItem(ATTEMPT_WORKSPACES_KEY) || "{}");
+        return parsed && typeof parsed === "object" ? parsed : {};
+      } catch (_) {
+        return {};
+      }
+    }
+
+    function attemptIsComplete(record) {
+      return record?.id === "olympics" ? Boolean(state.completedOnce) : Boolean(record?.completed);
+    }
+
+    function persistActiveAttempt() {
+      if (!templateState) return;
+      const workspaces = readAttemptWorkspaces();
+      const id = activeAttemptId();
+      const prior = workspaces[id] || {};
+      workspaces[id] = {
+        ...prior,
+        id,
+        title: id === "olympics" ? "Olympics" : (state.topicLabel || "Practice SCQA"),
+        context: state.context,
+        scqa1: { ...state.scqa1 },
+        currentScreen: state.currentScreen === 3 ? 3 : 1,
+        completed: id === "olympics" ? Boolean(state.completedOnce) : Boolean(state.practiceAttemptSaved),
+        aiReview: state.aiReview || null,
+        createdAt: prior.createdAt || new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+      localStorage.setItem(ATTEMPT_WORKSPACES_KEY, JSON.stringify(workspaces));
+    }
+
+    function save() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      persistActiveAttempt();
+      renderAttemptSwitcher();
+    }
 
     function safeState(raw) {
       try {
@@ -1030,6 +1181,97 @@
       } catch {
         return blankState();
       }
+    }
+
+    function migrateSavedOlympicsContext(savedState) {
+      if (!templateState || savedState.practiceScenarioId) return savedState;
+      const context = String(savedState.context || "");
+      const isOlderOlympicsCopy = /The Olympics has historically been one of the most unifying global events/i.test(context)
+        && (/losing their gravity/i.test(context) || /drawing huge audiences and shared attention/i.test(context));
+      if (isOlderOlympicsCopy) savedState.context = templateState.context;
+      return savedState;
+    }
+
+    function orderedAttemptWorkspaces() {
+      const workspaces = readAttemptWorkspaces();
+      const primary = workspaces.olympics;
+      const practice = Object.values(workspaces)
+        .filter((record) => record?.id && record.id !== "olympics")
+        .sort((a, b) => String(a.createdAt || "").localeCompare(String(b.createdAt || "")));
+      return [primary, ...practice].filter(Boolean);
+    }
+
+    function renderAttemptSwitcher() {
+      const switcher = $("#attemptSwitcher");
+      const tabs = $("#attemptTabs");
+      const select = $("#attemptSelect");
+      if (!switcher || !tabs || !select) return;
+      const attempts = orderedAttemptWorkspaces();
+      switcher.classList.toggle("visible", attempts.length > 1);
+      if (attempts.length < 2) return;
+      const activeId = activeAttemptId();
+      tabs.innerHTML = attempts.map((record, index) => {
+        const complete = attemptIsComplete(record);
+        return `<button class="attempt-tab" type="button" role="tab" data-attempt-id="${escapeHtml(record.id)}" aria-selected="${record.id === activeId}">
+          <span>${index + 1} · ${escapeHtml(record.title)}</span>
+          <span class="attempt-status ${complete ? "complete" : ""}" aria-label="${complete ? "Complete" : "Draft"}">${complete ? "✓" : "•"}</span>
+        </button>`;
+      }).join("");
+      select.innerHTML = attempts.map((record, index) => {
+        const complete = attemptIsComplete(record);
+        return `<option value="${escapeHtml(record.id)}" ${record.id === activeId ? "selected" : ""}>Viewing: ${index + 1} · ${escapeHtml(record.title)} ${complete ? "✓" : "•"}</option>`;
+      }).join("");
+    }
+
+    function switchAttempt(id) {
+      if (!id || id === activeAttemptId()) return;
+      if (currentScreen === 1) updateFromDom();
+      else persistActiveAttempt();
+      const record = readAttemptWorkspaces()[id];
+      if (!record) return;
+      state.context = record.context || "";
+      state.topicLabel = record.title || "";
+      state.scqa1 = { ...blankScqa(), ...(record.scqa1 || {}) };
+      state.scqa2 = blankScqa();
+      state.reframeLever = null;
+      state.practiceScenarioId = id === "olympics" ? "" : id;
+      state.practiceAttemptSaved = id === "olympics" ? false : Boolean(record.completed);
+      state.aiReview = record.aiReview || null;
+      state.currentScreen = record.currentScreen === 3 ? 3 : 1;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      resetTimer();
+      renderAll();
+      goToScreen(state.currentScreen);
+      renderAttemptSwitcher();
+    }
+
+    function ensurePrimaryAttemptWorkspace() {
+      const workspaces = readAttemptWorkspaces();
+      if (workspaces.olympics) return;
+      let response = null;
+      try {
+        const result = JSON.parse(localStorage.getItem("utl_result_scqa-builder") || "null");
+        response = result?.response?.scqa1 || null;
+      } catch (_) { /* The current draft is still available below. */ }
+      const currentIsPrimary = !state.practiceScenarioId;
+      const source = response || (currentIsPrimary ? scqaResponse() : blankScqa());
+      workspaces.olympics = {
+        id: "olympics",
+        title: "Olympics",
+        context: templateState.context,
+        scqa1: {
+          s: source.s || source.situation || "",
+          c: source.c || source.complication || "",
+          q: source.q || source.question || "",
+          a: source.a || source.answer || ""
+        },
+        currentScreen: response || state.completedOnce ? 3 : 1,
+        completed: Boolean(response || state.completedOnce),
+        aiReview: currentIsPrimary ? state.aiReview : null,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+      localStorage.setItem(ATTEMPT_WORKSPACES_KEY, JSON.stringify(workspaces));
     }
 
     function renderWordCount(target = activeWordField) {
@@ -1104,6 +1346,7 @@
     }
 
     function updateFromDom() {
+      const previousResponse = JSON.stringify(state.scqa1);
       const contextInput = $("#contextInput");
       const topicInput = $("#topicInput");
       if (contextInput) state.context = contextInput.value;
@@ -1111,6 +1354,7 @@
       $$("[data-scqa]").forEach((field) => {
         state[field.dataset.scqa][field.dataset.part] = field.value;
       });
+      if (JSON.stringify(state.scqa1) !== previousResponse) state.aiReview = null;
       save();
       renderControls();
       renderSidebar();
@@ -1120,7 +1364,7 @@
     function renderControls() {
       const req1 = Object.values(state.scqa1).filter((v) => !filled(v)).length;
       const contextMissing = !filled(state.context, 20);
-      const next1 = $("#toReframe");
+      const next1 = $("#toReview");
       if (next1) next1.disabled = req1 > 0 || contextMissing;
       const rem1 = $("#remaining1");
       if (rem1) rem1.textContent = contextMissing ? "Add a bit more context" : (req1 ? `${req1} field${req1 === 1 ? "" : "s"} still needed` : "");
@@ -1138,21 +1382,6 @@
         fill1.style.width = `${completed * 25}%`;
       }
 
-      const next2 = $("#toReview");
-      const rem2 = $("#remaining2");
-      const fill2 = $("#progress2");
-      const text2 = $("#progressText2");
-      if (next2 && state.reframeLever) {
-        const fields = LEVERS[state.reframeLever].editable;
-        const req2 = fields.filter((part) => !filled(state.scqa2[part])).length;
-        next2.disabled = req2 > 0;
-        if (rem2) rem2.textContent = req2 ? `${req2} field${req2 === 1 ? "" : "s"} still needed` : "";
-        if (fill2 && text2) {
-          const completed = fields.filter((part) => filled(state.scqa2[part])).length;
-          text2.textContent = `Reframe: ${completed} / ${fields.length} field${fields.length === 1 ? "" : "s"}`;
-          fill2.style.width = `${Math.round((completed / fields.length) * 100)}%`;
-        }
-      }
     }
 
     function renderSidebar() {
@@ -1198,9 +1427,7 @@
           <div class="field-head"><span class="letter">${part.toUpperCase()}</span><span class="label">${labels[part].toUpperCase()}</span></div>
           <p class="field-hint">${explanationFor(part)}</p>
           <p class="field-example"><em>Example:</em> ${exampleFor(part)}</p>
-          ${part === "q"
-            ? `<input data-scqa="${which}" data-part="${part}" data-word-label="${labels[part]}" type="text" value="${escapeHtml(data[part])}" placeholder="Type your answer here.">`
-            : `<textarea data-scqa="${which}" data-part="${part}" data-word-label="${labels[part]}" placeholder="Type your answer here.">${escapeHtml(data[part])}</textarea>`}
+          <textarea data-scqa="${which}" data-part="${part}" data-word-label="${labels[part]}" placeholder="Type your answer here.">${escapeHtml(data[part])}</textarea>
           <div class="hint">${microHintFor(part)}</div>
           ${part === "q" ? `<div class="warning" data-warning="${which}">Questions end with a question mark. Don't forget it.</div>` : ""}
         </article>
@@ -1221,13 +1448,13 @@
       root.innerHTML = `
         <div class="page-title">
           <div class="callout">
-            <div class="label">Why reframe?</div>
-            <div>Your first SCQA gets your thinking on paper. Then you'll pick one lever: the Complication, the Question, or the Answer, and rewrite just that. Everything else carries over unchanged, so you can see exactly what one different choice does to your story.</div>
+            <div class="label">What you will practice</div>
+            <div>Build one clear storyline from four connected parts. The Situation sets the background, the Complication explains what changed, the Question identifies the decision, and the Answer gives your recommendation.</div>
           </div>
           <div class="how-strip">
             <div class="how-item"><span class="num-icon">1</span>Write your SCQA</div>
-            <div class="how-item"><span class="num-icon">2</span>Pick one thing to reframe</div>
-            <div class="how-item"><span class="num-icon">3</span>Review and check both</div>
+            <div class="how-item"><span class="num-icon">2</span>Review the connections</div>
+            <div class="how-item"><span class="num-icon">3</span>Finish or practice again</div>
           </div>
         </div>
         <div class="work-layout">
@@ -1266,7 +1493,7 @@
             <div class="bottom-bar">
               <button class="clear-link" type="button" id="clearFresh" hidden>Clear and start fresh</button>
               <div class="remaining" id="remaining1"></div>
-              <button class="btn btn-primary" type="button" id="toReframe">Reframe it →</button>
+              <button class="btn btn-primary" type="button" id="toReview">Review my SCQA →</button>
             </div>
           </section>
         </div>`;
@@ -1380,37 +1607,20 @@
     }
 
     function renderReview() {
-      saveResult('scqa-builder', 2, 'SCQA builder', elapsedSeconds(), {
-        context: state.context,
-        scqa1: {
-          situation: state.scqa1.s,
-          complication: state.scqa1.c,
-          question: state.scqa1.q,
-          answer: state.scqa1.a
-        },
-        scqa2: {
-          situation: state.scqa2.s,
-          complication: state.scqa2.c,
-          question: state.scqa2.q,
-          answer: state.scqa2.a
-        },
-        reframeLever: state.reframeLever
-      });
-      window.UTLRewardEvents?.awardReflectionExercise({
-        appId: 'scqa-builder',
-        title: 'SCQA builder complete',
-        body: 'Your two SCQA formulations were saved.'
-      });
       $("#reviewContext").textContent = state.context || "—";
       $("#reviewTopic").textContent = state.topicLabel || "";
       $("#reviewTopic").style.display = state.topicLabel ? "block" : "none";
-      const lever = state.reframeLever && LEVERS[state.reframeLever];
-      $("#reviewGrid").innerHTML = [
-        reviewColumn("FORMULATION 01", state.scqa1),
-        reviewColumn(lever ? `FORMULATION 02 · ${lever.title.toUpperCase()}` : "FORMULATION 02", state.scqa2)
-      ].join("");
-      $("#saveNoticeMount").innerHTML = completionSaveNotice();
-      $("#startOver").hidden = false;
+      $("#reviewGrid").innerHTML = reviewColumn("YOUR SCQA", state.scqa1);
+      renderFeedback();
+      renderSavedGeminiReview();
+      $("#saveNoticeMount").innerHTML = "";
+      $("#finishScqa").textContent = state.completedOnce ? "Save practice attempt" : "Save and finish exercise";
+      const attemptComplete = state.practiceScenarioId ? state.practiceAttemptSaved : state.completedOnce;
+      $("#finishScqa").hidden = attemptComplete;
+      $("#afterFinishPanel").hidden = !attemptComplete;
+      $("#practiceScenarioPanel").hidden = true;
+      renderPracticeScenarios();
+      renderAttemptSwitcher();
     }
 
     function saveResult(appId, phase, exerciseName, durationSeconds, responseObj) {
@@ -1456,16 +1666,13 @@
       state.currentScreen = screen;
       save();
       $$(".screen").forEach((el, index) => el.classList.toggle("active", index + 1 === screen));
-      if (screen === 2) { resetTimer(true); buildReframeScreen(); }
-      if (screen === 3) { pauseTimer(); $("#feedbackMount").innerHTML = ""; $("#sampleMount").innerHTML = ""; renderReview(); }
+      if (screen === 3) { pauseTimer(); $("#sampleMount").innerHTML = ""; renderReview(); }
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
     function renderAll() {
       buildWorkScreen();
-      buildReframeScreen();
       renderSidebar();
-      renderReview();
       renderControls();
       $$("textarea").forEach(autoResize);
     }
@@ -1494,15 +1701,20 @@
       const tension = ["however","but","yet","despite","no longer","failing","broken","lost","struggling","declining","increasingly","challenge","problem","tension","disconnect","gap","risk","threat","eroding","shifting","losing"];
       const badStarts = ["first,","firstly,","to begin","there are","we need to look at","the reason","as we can see"];
       const results = [];
-      const add = (pass, label, fail, hint) => results.push({ pass, label: pass ? label : fail, points: pass ? 1 : 0, hint });
+      const add = (pass, strong, detail, reviewStrong, reviewDetail) => results.push({
+        pass,
+        strong: pass ? strong : reviewStrong,
+        detail: pass ? detail : reviewDetail,
+        points: pass ? 1 : 0
+      });
       const missing = Object.entries(data).filter(([, v]) => !filled(v)).map(([k]) => labels[k]);
-      add(!missing.length, "All four fields completed", `Missing field(s): ${missing.join(", ")}`, "Every SCQA needs all four parts. An incomplete framework leaves the story broken.");
-      add(data.q.trim().endsWith("?"), "Question is properly framed", "Question is missing a question mark", "A question that does not end with '?' may not actually be a question.");
-      add(!badStarts.some((s) => data.a.trim().toLowerCase().startsWith(s)), "Answer leads with a conclusion", "Answer may be building up instead of leading", "Lead with your answer. Do not make the reader wait for your point.");
-      add(tension.some((w) => data.c.toLowerCase().includes(w)), "Complication signals real tension", "Complication may lack tension", "A strong complication should feel like something has changed or broken.");
-      add(!hasSharedPhrase(data.s, data.c, 5), "Situation and Complication are distinct", "Situation and Complication may overlap", "S sets stable ground. C disrupts it.");
-      add(echoCount(data.c, data.q) >= 2, "Question connects to your Complication", "Question may not address your Complication", "Your question should emerge from the tension in your complication.");
-      add(echoCount(data.q, data.a) >= 2, "Answer addresses your Question", "Answer may not address your Question", "Your answer should resolve your question directly.");
+      add(!missing.length, "Complete structure", "All four parts are present.", "Complete the structure", `Add ${missing.join(", ")} before finishing.`);
+      add(data.q.trim().endsWith("?"), "Clear question", "Your Question is written as one direct question.", "Check the Question", "End it with a question mark and keep it focused on one decision.");
+      add(!badStarts.some((s) => data.a.trim().toLowerCase().startsWith(s)), "Answer first", "Your recommendation begins directly.", "Lead with the Answer", "State the recommendation before explaining the supporting points.");
+      add(tension.some((w) => data.c.toLowerCase().includes(w)), "Visible change", "The Complication signals that something changed or created a problem.", "Clarify what changed", "Make the Complication show the shift, problem, gap, or risk.");
+      add(!hasSharedPhrase(data.s, data.c, 5), "Distinct roles", "The Situation and Complication do different jobs.", "Separate Situation and Complication", "Use the Situation for stable background and the Complication for what changed.");
+      add(echoCount(data.c, data.q) >= 2, "Connected decision", "The Question uses the central ideas from the Complication.", "Reconnect C to Q", "Make the Question address the specific tension introduced in the Complication.");
+      add(echoCount(data.q, data.a) >= 2, "Direct resolution", "The Answer responds to the Question's central idea.", "Reconnect Q to A", "Make the Answer resolve the decision raised in the Question.");
       return results;
     }
 
@@ -1514,31 +1726,161 @@
     }
 
     function renderFeedback() {
-      const r1 = checkOne(state.scqa1), r2 = checkOne(state.scqa2);
-      const s1 = r1.reduce((sum, r) => sum + r.points, 0), s2 = r2.reduce((sum, r) => sum + r.points, 0);
-      const lever = state.reframeLever && LEVERS[state.reframeLever];
-      const changedEnough = lever ? !hasSharedPhrase(state.scqa1[lever.field], state.scqa2[lever.field], 6) : false;
-      const diffText = !lever
-        ? "Pick a lever to reframe your SCQA, then check your answers again."
-        : changedEnough
-          ? `You reframed by ${lever.title.toLowerCase()}. That's the one thing that moved between formulations.`
-          : `Your reframed ${labels[lever.field]} reads almost the same as your first formulation. Try changing it more directly.`;
-      $("#feedbackMount").innerHTML = `<section class="panel"><button class="panel-close" data-close-panel="feedbackMount" type="button">×</button><div class="label">Answer check</div>
-        <div class="score-grid"><div class="score-line">SCQA #1: ${s1} / 7 <span>pts</span></div><div class="score-line">SCQA #2: ${s2} / 7 <span>pts</span></div></div>
-        <div class="score-grid"><div>${rulesMarkup(r1)}<p class="score-message">${scoreMessage(s1)}</p></div><div>${rulesMarkup(r2)}<p class="score-message">${scoreMessage(s2)}</p></div></div>
-        <div class="label" style="color:var(--steel);margin-top:20px">Differentiation check</div><div class="diff-note ${lever && changedEnough ? "good" : "warn"}">${diffText}</div>
+      const results = checkOne(state.scqa1);
+      const score = results.reduce((sum, result) => sum + result.points, 0);
+      $("#feedbackMount").innerHTML = `<section class="panel"><div class="label">Structure and connection review</div>
+        <h2>${score >= 6 ? "Strong foundation" : "Worth another look"}</h2>
+        <p>${escapeHtml(scoreMessage(score))}</p>
+        <div>${rulesMarkup(results)}</div>
       </section>`;
     }
 
     function rulesMarkup(results) {
-      return results.map((r) => `<div class="rule-row"><div class="rule-top"><span class="mark ${r.pass ? "pass" : "fail"}">${r.pass ? "✓" : "✗"}</span><span>${escapeHtml(r.label)}${!r.pass ? ` <button class="hint-toggle" type="button">▾ hint</button>` : ""}</span><span class="rule-points">[${r.points} pt]</span></div>${!r.pass ? `<div class="rule-hint">${escapeHtml(r.hint)}</div>` : ""}</div>`).join("");
+      return results.map((result) => `<div class="rule-row"><div class="rule-top"><span class="mark ${result.pass ? "pass" : "fail"}">${result.pass ? "✓" : "•"}</span><span><strong>${escapeHtml(result.strong)}:</strong> ${escapeHtml(result.detail)}</span></div></div>`).join("");
+    }
+
+    function scqaResponse() {
+      return {
+        situation: state.scqa1.s,
+        complication: state.scqa1.c,
+        question: state.scqa1.q,
+        answer: state.scqa1.a
+      };
+    }
+
+    function geminiReviewMarkup(result) {
+      const connections = Array.isArray(result?.connections) ? result.connections : [];
+      return `<div class="callout"><div class="label">Gemini's review</div><p>${escapeHtml(result?.summary)}</p></div>
+        <div>${connections.map((item) => `<div class="rule-row"><div class="rule-top"><span class="mark ${item.status === "strong" ? "pass" : "fail"}">${item.status === "strong" ? "✓" : "•"}</span><span><strong>${escapeHtml(item.name)}:</strong> ${escapeHtml(item.feedback)}</span></div></div>`).join("")}</div>
+        <div class="callout"><div class="label">One useful improvement</div><p><strong>${escapeHtml(result?.improvementTitle)}:</strong> ${escapeHtml(result?.improvement)}</p></div>`;
+    }
+
+    function renderSavedGeminiReview() {
+      const mount = $("#geminiFeedback");
+      const button = $("#getGeminiReview");
+      if (!mount || !button) return;
+      mount.innerHTML = state.aiReview ? geminiReviewMarkup(state.aiReview) : "";
+      button.textContent = state.aiReview ? "Review again" : "Get AI feedback";
+    }
+
+    async function requestGeminiReview() {
+      const button = $("#getGeminiReview");
+      const mount = $("#geminiFeedback");
+      button.disabled = true;
+      button.textContent = "Reviewing your SCQA…";
+      mount.innerHTML = '<p>Gemini is checking how the four parts connect.</p>';
+      try {
+        const response = await fetch(SCQA_SCORE_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ context: state.context, ...scqaResponse() })
+        });
+        if (!response.ok) throw new Error(`Review request failed with ${response.status}.`);
+        const result = await response.json();
+        if (result.fallback) throw new Error("AI review is temporarily unavailable.");
+        state.aiReview = result;
+        save();
+        mount.innerHTML = geminiReviewMarkup(result);
+      } catch (error) {
+        console.warn("SCQA AI review unavailable:", error);
+        mount.innerHTML = '<div class="callout"><p><strong>AI feedback is unavailable right now.</strong> Your rules review above is still available, and you can finish the exercise normally.</p></div>';
+      } finally {
+        button.disabled = false;
+        button.textContent = "Review again";
+      }
+    }
+
+    function renderPracticeScenarios() {
+      const select = $("#practiceScenarioSelect");
+      if (!select || !practiceScenarios.length) return;
+      select.innerHTML = practiceScenarios.map((scenario) => `<option value="${escapeHtml(scenario.id)}">${escapeHtml(scenario.title)}</option>`).join("");
+      updatePracticeScenarioPreview();
+    }
+
+    function selectedPracticeScenario() {
+      const selectedId = $("#practiceScenarioSelect")?.value;
+      return practiceScenarios.find((scenario) => scenario.id === selectedId) || practiceScenarios[0];
+    }
+
+    function updatePracticeScenarioPreview() {
+      const scenario = selectedPracticeScenario();
+      const preview = $("#practiceScenarioPreview");
+      if (!preview || !scenario) return;
+      preview.innerHTML = `<div class="label">Context</div><p>${escapeHtml(scenario.context)}</p>`;
+    }
+
+    function beginPracticeScenario() {
+      const scenario = selectedPracticeScenario();
+      if (!scenario) return;
+      if (currentScreen === 1) updateFromDom();
+      else persistActiveAttempt();
+      const existing = readAttemptWorkspaces()[scenario.id];
+      if (existing) {
+        switchAttempt(scenario.id);
+        return;
+      }
+      state.context = scenario.context;
+      state.topicLabel = scenario.title;
+      state.practiceScenarioId = scenario.id;
+      state.practiceAttemptSaved = false;
+      state.scqa1 = blankScqa();
+      state.aiReview = null;
+      state.currentScreen = 1;
+      save();
+      resetTimer();
+      buildWorkScreen();
+      renderSidebar();
+      renderControls();
+      goToScreen(1);
+    }
+
+    function savePracticeAttempt() {
+      let attempts = [];
+      try { attempts = JSON.parse(localStorage.getItem(PRACTICE_ATTEMPTS_KEY) || "[]"); } catch (_) { attempts = []; }
+      attempts.push({
+        scenarioId: state.practiceScenarioId,
+        context: state.context,
+        response: scqaResponse(),
+        completedAt: new Date().toISOString()
+      });
+      localStorage.setItem(PRACTICE_ATTEMPTS_KEY, JSON.stringify(attempts.slice(-20)));
+      state.practiceAttemptSaved = true;
+      save();
+      $("#saveNoticeMount").innerHTML = '<div class="completion-save-notice"><div class="save-notice-text"><strong>Practice attempt saved.</strong> You can try another situation or return to the Learning Journey.</div></div>';
+      $("#afterFinishPanel").hidden = false;
+      $("#finishScqa").hidden = true;
+      renderAttemptSwitcher();
+    }
+
+    function finishExercise() {
+      if (state.completedOnce && state.practiceScenarioId) {
+        savePracticeAttempt();
+        return;
+      }
+      if (!state.completedOnce) {
+        saveResult("scqa-builder", 2, "SCQA builder", elapsedSeconds(), {
+          context: state.context,
+          scqa1: scqaResponse()
+        });
+        window.UTLRewardEvents?.awardReflectionExercise({
+          appId: 'scqa-builder',
+          title: "SCQA builder complete",
+          body: "You built and reviewed one complete SCQA."
+        });
+        state.completedOnce = true;
+        save();
+      }
+      $("#saveNoticeMount").innerHTML = completionSaveNotice();
+      $("#afterFinishPanel").hidden = false;
+      $("#finishScqa").hidden = true;
     }
 
     function renderSamples() {
-      const custom = state.context.trim() !== templateState.context;
-      const sampleLever = templateState.reframeLever && LEVERS[templateState.reframeLever];
-      const formulation2Label = sampleLever ? `Sample formulation 2 (reframed: ${sampleLever.title})` : "Sample formulation 2";
-      $("#sampleMount").innerHTML = `<section class="panel"><button class="panel-close" data-close-panel="sampleMount" type="button">×</button>${custom ? `<p class="sample-notice">These samples use the Olympics case study. Use them as a model for structure and language, not for content.</p>` : ""}<div class="sample-grid"><div class="sample-col"><div class="label" style="color:var(--steel)">Sample formulation 1</div>${reviewColumn("", templateState.scqa1)}</div><div class="sample-col"><div class="label" style="color:var(--steel)">${escapeHtml(formulation2Label)}</div>${reviewColumn("", templateState.scqa2)}</div></div></section>`;
+      const practiceScenario = practiceScenarios.find((scenario) => scenario.id === state.practiceScenarioId);
+      const sample = practiceScenario?.sampleAnswer || templateState.scqa1;
+      const sampleLabel = practiceScenario ? `Sample for ${practiceScenario.title}` : "Sample SCQA";
+      const custom = !practiceScenario && state.context.trim() !== templateState.context;
+      $("#sampleMount").innerHTML = `<section class="panel"><button class="panel-close" data-close-panel="sampleMount" type="button">×</button>${custom ? `<p class="sample-notice">This sample uses the Olympics case study. Use it as a model for structure and language, not for content.</p>` : ""}<div class="label" style="color:var(--steel)">${escapeHtml(sampleLabel)}</div>${reviewColumn("", sample)}</section>`;
     }
 
     function copyText() {
@@ -1620,11 +1962,21 @@
       if (event.target.matches(".hint-toggle")) event.target.closest(".rule-row").querySelector(".rule-hint").classList.toggle("show");
     });
 
-    $("#editScqa2").addEventListener("click", () => goToScreen(2));
     $("#editScqa1").addEventListener("click", () => goToScreen(1));
-    $("#checkAnswers").addEventListener("click", renderFeedback);
     $("#showSamples").addEventListener("click", renderSamples);
-    $("#startOver").addEventListener("click", () => $("#confirmModal").classList.add("show"));
+    $("#getGeminiReview").addEventListener("click", requestGeminiReview);
+    $("#finishScqa").addEventListener("click", finishExercise);
+    $("#showPracticeScenarios").addEventListener("click", () => {
+      $("#practiceScenarioPanel").hidden = false;
+      $("#practiceScenarioPanel").scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+    $("#practiceScenarioSelect").addEventListener("change", updatePracticeScenarioPreview);
+    $("#startPracticeScenario").addEventListener("click", beginPracticeScenario);
+    $("#attemptTabs").addEventListener("click", (event) => {
+      const tab = event.target.closest("[data-attempt-id]");
+      if (tab) switchAttempt(tab.dataset.attemptId);
+    });
+    $("#attemptSelect").addEventListener("change", (event) => switchAttempt(event.target.value));
     $("#cancelStartOver").addEventListener("click", () => $("#confirmModal").classList.remove("show"));
     $("#confirmStartOver").addEventListener("click", () => { $("#confirmModal").classList.remove("show"); clearAll(); });
     $("#confirmModal").addEventListener("click", (event) => { if (event.target.id === "confirmModal") $("#confirmModal").classList.remove("show"); });
@@ -1656,11 +2008,16 @@
       }
       setInterval(renderTimer, 1000);
       const saved = localStorage.getItem(STORAGE_KEY);
-      state = saved ? safeState(saved) : { ...blankState(), context: templateState.context, topicLabel: templateState.topicLabel };
+      state = saved
+        ? migrateSavedOlympicsContext(safeState(saved))
+        : { ...blankState(), context: templateState.context, topicLabel: templateState.topicLabel };
+      ensurePrimaryAttemptWorkspace();
+      save();
       renderAll();
       renderTimer();
       renderWordCount();
-      goToScreen(Math.min(Math.max(state.currentScreen, 1), 3));
+      const restoredScreen = state.currentScreen === 3 ? 3 : 1;
+      goToScreen(restoredScreen);
     }
 
     initializeApp();
