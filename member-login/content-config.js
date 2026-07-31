@@ -615,6 +615,14 @@ const UTL_CONTENT = {
 
   function applyRewardSettings(settings) {
     if (!settings || typeof settings !== "object") return;
+    if (!settings.streak || !settings.streak.activityTypes) {
+      settings = Object.assign({}, settings, {
+        streak: Object.assign({}, settings.streak || {}, {
+          dailyExerciseGoal: 1,
+          activityTypes: "any-completion"
+        })
+      });
+    }
     localStorage.setItem(REWARD_SETTINGS_KEY, JSON.stringify(settings));
     if (Array.isArray(settings.levels) && settings.levels.length) {
       REWARD_LEVELS = settings.levels.map(function (level) {
@@ -745,13 +753,70 @@ const UTL_CONTENT = {
     return { awarded: true, mpEarned: mp, startTotal: startTotal, total: state.mpTotal };
   }
 
+  function localRewardDate(date) {
+    var value = date instanceof Date ? date : new Date();
+    return value.getFullYear() + "-" + String(value.getMonth() + 1).padStart(2, "0") + "-" + String(value.getDate()).padStart(2, "0");
+  }
+
+  function rewardDateOffset(dateString, amount) {
+    var parts = String(dateString || "").split("-").map(Number);
+    if (!parts[0] || !parts[1] || !parts[2]) return "";
+    var value = new Date(parts[0], parts[1] - 1, parts[2]);
+    value.setDate(value.getDate() + amount);
+    return localRewardDate(value);
+  }
+
+  function recordWorkspaceDailyActivity(activityId) {
+    var settings = rewardSettings();
+    var streakSettings = Object.assign({ enabled: true, dailyExerciseGoal: 1, mpBase: 5 }, settings.streak || {});
+    if (settings.enabled === false || streakSettings.enabled === false || !activityId) return { awarded: false };
+    var dateString = localRewardDate();
+    var state = readRewardState();
+    var streak = Object.assign({ currentDays: 0, lastQualifiedDate: "", dailyActivities: {}, awardedDates: {} }, state.streak || {});
+    var dailyActivities = Object.assign({}, streak.dailyActivities || {});
+    var todayActivities = Object.assign({}, dailyActivities[dateString] || {});
+    todayActivities[activityId] = true;
+    dailyActivities[dateString] = todayActivities;
+    streak.dailyActivities = dailyActivities;
+    state.streak = streak;
+    writeRewardState(state);
+    queueRemoteProgressSave();
+    var dailyGoal = Math.max(1, Number(streakSettings.dailyExerciseGoal || 1));
+    if (Object.keys(todayActivities).length < dailyGoal || streak.awardedDates[dateString]) return { awarded: false };
+    var currentDays = streak.lastQualifiedDate === rewardDateOffset(dateString, -1) ? Number(streak.currentDays || 0) + 1 : 1;
+    state.streakDays = currentDays;
+    state.streak = Object.assign({}, streak, {
+      currentDays: currentDays,
+      lastQualifiedDate: dateString,
+      awardedDates: Object.assign({}, streak.awardedDates || {}, { [dateString]: true })
+    });
+    writeRewardState(state);
+    var result = awardRewardEvent({
+      id: "daily-streak:" + dateString,
+      type: "daily-streak",
+      title: "Daily streak",
+      mp: Math.max(0, Number(streakSettings.mpBase || 0)) * currentDays
+    });
+    queueRemoteProgressSave();
+    return result;
+  }
+
+  function addStreakToReward(reward, streakReward) {
+    if (!reward || !streakReward || !streakReward.awarded) return reward;
+    reward.mpEarned += streakReward.mpEarned;
+    reward.total = streakReward.total;
+    reward.streakBonus = streakReward.mpEarned;
+    return reward;
+  }
+
   function awardOrientationVideo() {
-    return awardRewardEvent({
+    var reward = awardRewardEvent({
       id: "video:orientation-welcome",
       type: "video-completed",
       title: "Orientation video",
       mp: VIDEO_COMPLETE_MP
     });
+    return reward.awarded ? addStreakToReward(reward, recordWorkspaceDailyActivity("video:orientation-welcome")) : reward;
   }
 
   function awardProgramCompletionBonus(settings) {
@@ -2199,7 +2264,10 @@ const UTL_CONTENT = {
     var card = dailyWelcomeCardHtml(progress);
     if (!card) return "";
     var openRequested = new URLSearchParams(window.location.search || "").get("open") === "planner";
-    return '<div class="ws-mission-overlay ' + (!openRequested && !missionPreviewRequested() ? "ws-hidden" : "") + '" id="todays-mission" data-mission-overlay><div class="ws-mission-dialog" role="dialog" aria-modal="true" aria-labelledby="ws-mission-title"><button class="ws-mission-close" type="button" data-mission-close aria-label="Close Today\'s Mission">&times;</button>' + card + '</div></div>';
+    var dismissedToday = localStorage.getItem("utl_daily_mission_dismissed") === missionDayKey();
+    var shouldOpenToday = !readDailyMission() && !dismissedToday;
+    var visible = openRequested || missionPreviewRequested() || shouldOpenToday;
+    return '<div class="ws-mission-overlay ' + (visible ? "" : "ws-hidden") + '" id="todays-mission" data-mission-overlay><div class="ws-mission-dialog" role="dialog" aria-modal="true" aria-labelledby="ws-mission-title"><button class="ws-mission-close" type="button" data-mission-close aria-label="Close Today\'s Mission">&times;</button>' + card + '</div></div>';
   }
 
   function durationSecondsFromLabel(label) {
@@ -3111,6 +3179,7 @@ const UTL_CONTENT = {
           title: button.getAttribute("data-context-title") || "Context",
           mp: CONTEXT_COMPLETE_MP
         });
+        if (reward && reward.awarded) addStreakToReward(reward, recordWorkspaceDailyActivity("context:" + id));
         if (reward && reward.awarded) {
           showWorkspaceRewardMoment({
             label: "Context complete",
@@ -3232,6 +3301,7 @@ const UTL_CONTENT = {
             title: lesson ? lesson.title : "Lesson video",
             mp: VIDEO_COMPLETE_MP
           });
+          if (reward.awarded) addStreakToReward(reward, recordWorkspaceDailyActivity("video:" + lessonId));
         }
         videosDone(phaseKey);
         flushRemoteProgressSave();
@@ -3284,6 +3354,7 @@ const UTL_CONTENT = {
               mp: VIDEO_COMPLETE_MP
             });
             if (reward.awarded) {
+              addStreakToReward(reward, recordWorkspaceDailyActivity("video:" + lesson.id));
               totalAwarded += reward.mpEarned;
               totalMp = reward.total;
             }

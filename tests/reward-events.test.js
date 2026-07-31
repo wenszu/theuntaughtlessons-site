@@ -38,7 +38,7 @@ function createHarness(initialStorage) {
 
 {
   const { rewards } = createHarness();
-  rewards.writeSettings({ mp: { exerciseMode: "score-improvement" } });
+  rewards.writeSettings({ mp: { exerciseMode: "score-improvement" }, streak: { enabled: false, dailyExerciseGoal: 1, activityTypes: "any-completion" } });
   assert.equal(rewards.awardScoredExercise({ appId: "test", score: 60 }).mpEarned, 60);
   assert.equal(rewards.awardScoredExercise({ appId: "test", score: 80 }).mpEarned, 20);
   assert.equal(rewards.readState().mpTotal, 80, "score improvements never exceed best score");
@@ -78,10 +78,19 @@ function createHarness(initialStorage) {
 
 {
   const { rewards } = createHarness();
-  rewards.writeSettings({ mp: { exerciseMode: "fixed", exerciseCompleteFallback: 40 } });
+  rewards.writeSettings({ mp: { exerciseMode: "fixed", exerciseCompleteFallback: 40 }, streak: { enabled: false, dailyExerciseGoal: 1, activityTypes: "any-completion" } });
   assert.equal(rewards.awardScoredExercise({ appId: "fixed", score: 20 }).mpEarned, 40);
   assert.equal(rewards.awardScoredExercise({ appId: "fixed", score: 90 }).awarded, false);
   assert.equal(rewards.readState().mpTotal, 40, "fixed awards cannot be farmed");
+}
+
+{
+  const { rewards } = createHarness();
+  rewards.writeSettings({ streak: { enabled: true, dailyExerciseGoal: 1, activityTypes: "any-completion", mpBase: 5 } });
+  rewards.awardCompletionExercise({ appId: "one-small-thing", localDate: "2026-07-31" });
+  const state = rewards.readState();
+  assert.equal(state.streak.currentDays, 1, "one completed activity starts the daily streak");
+  assert.equal(state.earnedEventIds["daily-streak:2026-07-31"], true, "the streak is awarded once for that date");
 }
 
 {

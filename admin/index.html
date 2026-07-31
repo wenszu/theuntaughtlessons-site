@@ -2443,7 +2443,7 @@
             <tr><td>Phase completion</td><td><span id="rewardPolicyPhases">100 / 150 / 200</span> MP</td><td>Once per phase</td></tr>
             <tr><td>Full program completion</td><td><span id="rewardPolicyProgram">600</span> MP</td><td>Once after all three phases are complete</td></tr>
             <tr><td>Diagnostic or Checkpoint</td><td><span id="rewardPolicyAssessment">100</span> MP each</td><td>Once per assessment</td></tr>
-            <tr><td>Daily streak</td><td><span id="rewardPolicyStreak">3 exercises; 5 MP × day</span></td><td>Unique exercises; one streak award per day</td></tr>
+            <tr><td>Daily streak</td><td><span id="rewardPolicyStreak">1 completed activity; 5 MP × day</span></td><td>Any lesson, context item, exercise, or assessment; once per day</td></tr>
           </tbody>
         </table>
         <div class="reward-storage-note"><strong>Completion path:</strong> Videos, orientation, context items, and exercises (at a realistic, not perfect, scoring level) add up to roughly 1,325&ndash;1,525 MP before assessments or the program bonus. The 600 MP full-program bonus brings a member who finishes the curriculum to well over 1,800 MP, so completing the program reliably reaches Executive without needing perfect scores or the streak feature. Historical awards are never recalculated when future rule values change.</div>
@@ -2526,9 +2526,9 @@
             <small>Recommended: score improvement, so retrying only pays when work improves.</small>
           </div>
           <div class="reward-rule-card">
-            <label for="rewardDailyGoal">Streak daily exercise goal</label>
-            <input id="rewardDailyGoal" type="number" min="1" step="1" value="3">
-            <small>Current recommendation: a streak day requires 3 exercises.</small>
+            <label for="rewardDailyGoal">Completed activities needed for a streak</label>
+            <input id="rewardDailyGoal" type="number" min="1" step="1" value="1">
+            <small>Recommended: one lesson, context item, exercise, or assessment continues the streak.</small>
           </div>
           <div class="reward-rule-card">
             <label for="rewardStreakBaseMp">Streak bonus base MP</label>
@@ -4934,7 +4934,7 @@
         programCompletion: 600,
         assessmentBonus: 100
       },
-      streak: { enabled: true, dailyExerciseGoal: 3, mpBase: 5, mpFormula: 'base*n' },
+      streak: { enabled: true, dailyExerciseGoal: 1, activityTypes: 'any-completion', mpBase: 5, mpFormula: 'base*n' },
       tokens: { enabled: false, hintCost: 1 }
     };
 
@@ -5027,7 +5027,7 @@
       policyText('rewardPolicyPhases', [normalized.mp.phaseCompletion.phase1, normalized.mp.phaseCompletion.phase2, normalized.mp.phaseCompletion.phase3].join(' / '));
       policyText('rewardPolicyProgram', normalized.mp.programCompletion);
       policyText('rewardPolicyAssessment', normalized.mp.assessmentBonus);
-      policyText('rewardPolicyStreak', normalized.streak.dailyExerciseGoal + ' exercises; ' + normalized.streak.mpBase + ' MP × day');
+      policyText('rewardPolicyStreak', normalized.streak.dailyExerciseGoal + ' completed activit' + (normalized.streak.dailyExerciseGoal === 1 ? 'y' : 'ies') + '; ' + normalized.streak.mpBase + ' MP × day');
       policyText('rewardPolicyScored', normalized.mp.exerciseMode === 'score-improvement'
         ? 'Score improvement only'
         : normalized.mp.exerciseMode === 'score-total'
@@ -5192,6 +5192,7 @@
         streak: {
           enabled: document.getElementById('rewardStreakEnabled')?.value !== 'false',
           dailyExerciseGoal: numberValue('rewardDailyGoal', DEFAULT_REWARD_SETTINGS.streak.dailyExerciseGoal),
+          activityTypes: 'any-completion',
           mpBase: numberValue('rewardStreakBaseMp', DEFAULT_REWARD_SETTINGS.streak.mpBase),
           mpFormula: 'base*n'
         },

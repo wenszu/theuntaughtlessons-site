@@ -81,6 +81,7 @@
       localStorage.setItem("utl_context_complete_" + config[0], "true");
       if (!wasDone && window.UTLRewardEvents && window.UTLRewardEvents.awardEvent) {
         window.UTLRewardEvents.awardEvent({ eventId: "context:" + config[0], type: "context-completed", title: config[3], body: "Setup complete. Your preparation was saved.", mpEarned: MP, metadata: { contextId: config[0] } });
+        window.UTLRewardEvents.recordPracticeActivity?.("context:" + config[0]);
       }
       gate.remove();
       window.scrollTo(0, 0);

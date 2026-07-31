@@ -269,16 +269,21 @@
     if (!settings) {
       try { settings = JSON.parse(localStorage.getItem("utl_reward_settings") || "{}"); } catch (error) { settings = {}; }
     }
+    if (!settings.streak || !settings.streak.activityTypes) {
+      settings = Object.assign({}, settings, {
+        streak: Object.assign({}, settings.streak || {}, { dailyExerciseGoal: 1, activityTypes: "any-completion" })
+      });
+    }
     var display = Object.assign({ showLevel: true, showMp: true, showStreak: true }, settings.display || {});
     var state = normalizeState(opts.state, settings);
     var now = new Date();
     var todayKey = now.getFullYear() + "-" + String(now.getMonth() + 1).padStart(2, "0") + "-" + String(now.getDate()).padStart(2, "0");
     var todayActivities = state.streak.dailyActivities && state.streak.dailyActivities[todayKey] || {};
     var todayCount = Object.keys(todayActivities).length;
-    var dailyGoal = Math.max(1, Math.round(numberOr(settings.streak && settings.streak.dailyExerciseGoal, 3)));
+    var dailyGoal = Math.max(1, Math.round(numberOr(settings.streak && settings.streak.dailyExerciseGoal, 1)));
     var streakBody = todayCount >= dailyGoal
       ? "Today’s practice goal is complete. Return tomorrow to continue your streak."
-      : todayCount + " of " + dailyGoal + " exercises completed today.";
+      : todayCount + " of " + dailyGoal + " activities completed today.";
     var mpRules = earnedMpBreakdown(state.ledger, state.mpTotal);
     if (!mpRules.length) mpRules = [{ icon: "&#10022;", label: "No MP earned yet", value: "0 MP" }];
     var nextLevelArticle = /^[AEIOU]/i.test(state.nextLevel || "") ? "an" : "a";

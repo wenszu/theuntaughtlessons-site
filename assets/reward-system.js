@@ -21,7 +21,8 @@
     },
     streak: {
       enabled: true,
-      dailyExerciseGoal: 3,
+      dailyExerciseGoal: 1,
+      activityTypes: "any-completion",
       mpBase: 5,
       mpFormula: "base*n"
     },
@@ -36,6 +37,10 @@
   function normalizeSettings(settings) {
     const stored = settings || {};
     const def = DEFAULT_REWARD_SETTINGS;
+    const storedStreak = stored.streak || {};
+    const migratedStreak = storedStreak.activityTypes
+      ? storedStreak
+      : Object.assign({}, storedStreak, { dailyExerciseGoal: 1, activityTypes: "any-completion" });
     return {
       enabled: stored.enabled !== false,
       levels: Array.isArray(stored.levels) && stored.levels.length
@@ -47,7 +52,7 @@
       mp: Object.assign({}, def.mp, stored.mp || {}, {
         phaseCompletion: Object.assign({}, def.mp.phaseCompletion, (stored.mp && stored.mp.phaseCompletion) || {})
       }),
-      streak: Object.assign({}, def.streak, stored.streak || {}),
+      streak: Object.assign({}, def.streak, migratedStreak),
       tokens: Object.assign({}, def.tokens, stored.tokens || {})
     };
   }

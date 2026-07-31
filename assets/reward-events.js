@@ -28,7 +28,8 @@
     },
     streak: {
       enabled: true,
-      dailyExerciseGoal: 3,
+      dailyExerciseGoal: 1,
+      activityTypes: "any-completion",
       mpBase: 5
     }
   };
@@ -40,12 +41,16 @@
     } catch (error) {
       stored = {};
     }
+    const storedStreak = stored.streak || {};
+    const migratedStreak = storedStreak.activityTypes
+      ? storedStreak
+      : { ...storedStreak, dailyExerciseGoal: 1, activityTypes: "any-completion" };
     return {
       enabled: stored.enabled !== false,
       display: { showLevel: true, showMp: true, showStreak: true, showTokens: false, ...(stored.display || {}) },
       levels: Array.isArray(stored.levels) && stored.levels.length ? stored.levels : DEFAULT_SETTINGS.levels,
       mp: { ...DEFAULT_SETTINGS.mp, ...(stored.mp || {}) },
-      streak: { ...DEFAULT_SETTINGS.streak, ...(stored.streak || {}) },
+      streak: { ...DEFAULT_SETTINGS.streak, ...migratedStreak },
       tokens: { enabled: false, ...(stored.tokens || {}) }
     };
   }
@@ -277,7 +282,8 @@
     writeState(nextState);
 
     const uniqueCount = Object.keys(todayActivities).length;
-    if (uniqueCount < settings.dailyExerciseGoal || nextState.streak.awardedDates[dateString]) {
+    const dailyGoal = Math.max(1, numberOr(settings.dailyExerciseGoal, 1));
+    if (uniqueCount < dailyGoal || nextState.streak.awardedDates[dateString]) {
       return { awarded: false, reason: "daily-goal-not-met", count: uniqueCount, state: nextState };
     }
 
@@ -311,7 +317,7 @@
           ? "You hit today's practice goal!"
           : `You practiced ${currentDays} days in a row!`,
       mpEarned,
-      metadata: { dateString, currentDays, dailyExerciseGoal: settings.dailyExerciseGoal }
+      metadata: { dateString, currentDays, dailyExerciseGoal: dailyGoal }
     });
   }
 
@@ -396,7 +402,7 @@
     if (readSettings().enabled === false) return { awarded: false, reason: "rewards-disabled", state: readState() };
     const assessmentId = options && options.assessmentId;
     if (!assessmentId) return { awarded: false, reason: "missing-assessment-id" };
-    return awardEvent({
+    const result = awardEvent({
       eventId: `assessment-completed:${assessmentId}`,
       type: "assessment-completed",
       title: options.title || "Assessment complete",
@@ -404,6 +410,8 @@
       mpEarned: options.mpEarned == null ? readSettings().mp.assessmentBonus : options.mpEarned,
       metadata: { assessmentId }
     });
+    if (result.awarded) recordPracticeActivity(`assessment:${assessmentId}`, options);
+    return result;
   }
 
   window.UTLRewardEvents = {

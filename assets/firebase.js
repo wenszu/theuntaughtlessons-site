@@ -841,7 +841,8 @@ function getDefaultRewardSettings() {
     exerciseReflections: {},
     streak: {
       enabled: true,
-      dailyExerciseGoal: 3,
+      dailyExerciseGoal: 1,
+      activityTypes: "any-completion",
       mpBase: 5,
       mpFormula: "base*n"
     },
@@ -858,6 +859,10 @@ async function getRewardSettings() {
     if (!snap.exists()) return getDefaultRewardSettings();
     const stored = snap.data() || {};
     const def = getDefaultRewardSettings();
+    const storedStreak = stored.streak || {};
+    const migratedStreak = storedStreak.activityTypes
+      ? storedStreak
+      : Object.assign({}, storedStreak, { dailyExerciseGoal: 1, activityTypes: "any-completion" });
     return {
       enabled: stored.enabled !== false,
       display: Object.assign({}, def.display, stored.display || {}),
@@ -866,7 +871,7 @@ async function getRewardSettings() {
         phaseCompletion: Object.assign({}, def.mp.phaseCompletion, (stored.mp && stored.mp.phaseCompletion) || {})
       }),
       exerciseReflections: Object.assign({}, def.exerciseReflections, stored.exerciseReflections || {}),
-      streak: Object.assign({}, def.streak, stored.streak || {}),
+      streak: Object.assign({}, def.streak, migratedStreak),
       tokens: Object.assign({}, def.tokens, stored.tokens || {})
     };
   } catch {
