@@ -1416,7 +1416,7 @@
       </div>
       <div class="header-stat mp" tabindex="0">
         <span class="header-stat-icon" aria-hidden="true">✦</span><span id="headerMpValue">405 MP</span>
-        <div class="header-stat-popover" role="tooltip"><h3>Mastery Points</h3><p><strong id="headerMpPopoverValue">405 MP earned</strong>Build MP by completing lessons and exercises.</p></div>
+        <div class="header-stat-popover" role="tooltip"><h3>Mastery points</h3><p><strong id="headerMpPopoverValue">405 MP earned</strong>Build MP by completing lessons and exercises.</p></div>
       </div>
     </div>
     <div class="app-timer" aria-label="Elapsed time">
@@ -2053,7 +2053,7 @@
 
       const suggested = suggestedNamesFromMapping(evalResult.mapping);
       const mpMessage = mpResult.award > 0
-        ? `<p class="mp-earned"><strong>+${mpResult.award} MP earned</strong><span>Your Mastery Points count is rising in the header.</span></p>`
+        ? `<p class="mp-earned"><strong>+${mpResult.award} MP earned</strong><span>Your mastery points count is rising in the header.</span></p>`
         : `<p class="mp-earned muted"><strong>No new MP this attempt</strong><span>Beat your best score of ${mpResult.previousBest} to earn more MP.</span></p>`;
 
       panel.innerHTML = `

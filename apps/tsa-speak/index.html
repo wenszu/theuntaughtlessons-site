@@ -1129,7 +1129,7 @@ Return only JSON with C1, C4, C5, C6, C7, C8, msg1, msg2, msg3, feedback, and co
           <div class="tsa-speak-step">
             ${topicSnapshot()}
             <div class="tsa-speak-actions">
-              <button class="tsa-speak-button" id="readyButton" type="button">I'm ready to start preparing</button>
+              <button class="tsa-speak-button" id="readyButton" type="button">Start preparing</button>
             </div>
           </div>
         </section>
@@ -1198,7 +1198,7 @@ Return only JSON with C1, C4, C5, C6, C7, C8, msg1, msg2, msg3, feedback, and co
               </section>
             </div>
             <div class="tsa-speak-actions">
-              <button class="tsa-speak-button" id="recordButton" type="button">I'm ready to record</button>
+              <button class="tsa-speak-button" id="recordButton" type="button">Continue to recording</button>
             </div>
           </div>
         </section>
@@ -1371,7 +1371,7 @@ Return only JSON with C1, C4, C5, C6, C7, C8, msg1, msg2, msg3, feedback, and co
             ${notesModeSwitch(state.reflectionMode, 'reflection')}
             <div id="reflectionNotes">${notesHtml(state.reflectionMode, 'reflection')}</div>
             <div class="tsa-speak-actions">
-              <button class="tsa-speak-button" id="recordBButton" type="button">I'm ready for Recording B</button>
+              <button class="tsa-speak-button" id="recordBButton" type="button">Continue to Recording B</button>
             </div>
           </div>
         </section>
@@ -1442,7 +1442,7 @@ Return only JSON with C1, C4, C5, C6, C7, C8, msg1, msg2, msg3, feedback, and co
           C6: 'The wording is generally clear enough to follow.',
           C7: hasConclusion ? 'The language projects conviction because it takes a position.' : 'The delivery would feel more confident with more decisive wording.',
           C8: words <= 140 ? 'The transcript is concise for the target time.' : 'The transcript may need tighter editing to fit the target time.',
-          overall: 'This automated local score is a placeholder until a secure scoring endpoint is connected. Use it as directional feedback, not a final human-grade assessment.'
+          overall: 'This score is generated automatically from your transcript. Use it to identify what to practice next, not as a final assessment of your delivery.'
         }
       };
     }

@@ -211,7 +211,7 @@
     var earningRows = rules.map(function (rule) {
       return '<li><span class="utl-mp-icon" aria-hidden="true">' + rule.icon + '</span><span class="utl-mp-copy">' + escapeHtml(rule.label) + (rule.note ? '<small>' + escapeHtml(rule.note) + '</small>' : '') + '</span><span class="utl-mp-value">' + escapeHtml(rule.value) + '</span></li>';
     }).join("");
-    return '<span class="utl-reward-popover utl-mp-breakdown" role="tooltip"><span>Mastery Points</span><strong>' + escapeHtml(title) + '</strong><ul class="utl-mp-list">' + earningRows + '</ul><ul class="utl-mp-meta"><li><span class="utl-mp-icon" aria-hidden="true">&#127941;</span><span><b>Current level</b><br>' + escapeHtml(level) + '</span></li></ul></span>';
+    return '<span class="utl-reward-popover utl-mp-breakdown" role="tooltip"><span>Mastery points</span><strong>' + escapeHtml(title) + '</strong><ul class="utl-mp-list">' + earningRows + '</ul><ul class="utl-mp-meta"><li><span class="utl-mp-icon" aria-hidden="true">&#127941;</span><span><b>Current level</b><br>' + escapeHtml(level) + '</span></li></ul></span>';
   }
 
   function certificatePageHref() {

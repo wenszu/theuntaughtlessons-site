@@ -15,7 +15,7 @@ const workspacePages = [
 const contentBlock = source.slice(source.indexOf('const UTL_CONTENT = '), source.indexOf('\n\n(function ()'));
 const content = Function(contentBlock.replace('const UTL_CONTENT = ', 'return '))();
 
-const phaseEstimateTargets = { phase1: 100, phase2: 90, phase3: 80 };
+const phaseEstimateTargets = { phase1: 80, phase2: 80, phase3: 80 };
 let exerciseCount = 0;
 
 Object.keys(phaseEstimateTargets).forEach((phaseKey) => {

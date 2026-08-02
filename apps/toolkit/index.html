@@ -317,8 +317,8 @@ REUSE AUDIT
         example: `Arguments for why our product launch is at risk:
 - The market timing is wrong
 - Our competitor just launched something similar
-- Our internal team isn't aligned on priorities
-- The pricing hasn't been finalized
+- Our internal team is not aligned on priorities
+- The pricing has not been finalized
 - Marketing and product aren't talking to each other`,
         prompt: `You are an expert in structured thinking and MECE problem decomposition.
 
@@ -333,14 +333,14 @@ Please do the following:
 3. Suggest a cleaner MECE structure, regrouped where needed
 4. Explain in plain language what you changed and why
 
-Be direct. If the structure holds up well, say so and explain why. If it doesn't, tell me specifically where it breaks.`
+Be direct. If the structure holds up well, say so and explain why. If it does not, tell me specifically where it breaks.`
       },
       {
         phase: 'Phase 2 · Speak concisely',
         name: 'Break down any problem',
         description: 'Give AI your central question and your rough thinking. This prompt builds a clean issue tree — a hypothesis, three MECE arguments, and supporting details under each.',
         example: `Central question: Why is employee retention dropping in our mid-level management team?
-My rough thinking: people are leaving for better pay, managers feel under-supported, and there's been a lot of uncertainty since the reorg`,
+My rough thinking: people are leaving for better pay, managers feel under-supported and there has been a lot of uncertainty since the reorganization`,
         prompt: `You are an expert in structured problem decomposition using issue trees.
 
 I am going to give you a central question and some rough initial thinking. Build a clean, MECE issue tree that breaks this problem into its root causes.
@@ -431,7 +431,7 @@ Sign-off: Professional and brief.
 Rules:
 - Readable in under 90 seconds
 - No jargon, no hedging, no throat-clearing in the opening
-- Every sentence earns its place — if it doesn't add information, cut it
+- Every sentence must add information. Cut any sentence that does not.
 - Write for someone who is senior, time-poor, and will only read this once`
       },
       {
@@ -489,7 +489,7 @@ Please give me:
 
 4. Anticipated pushback — The two most likely objections or defensive responses, and how to respond to each without escalating.
 
-5. Closing ask — A specific, concrete request for what I need from this conversation. A decision, a commitment, an action — not a vague "let's think about it."
+5. Closing ask. A specific, concrete request for what I need from this conversation, such as a decision, commitment or action. Do not end with a vague request to think about it.
 
 6. Tone calibration — One sentence on how to hold the right energy: direct but not combative, confident but not dismissive.
 

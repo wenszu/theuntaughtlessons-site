@@ -14,7 +14,7 @@ const scoreBands = [
     min: 90,
     max: 100,
     color: "teal",
-    description: "This is genuinely rare. Your thinking is precise, decisive, and effortlessly organized — the kind of clarity that makes everyone in the room trust your judgment immediately. You are already operating at an executive standard on this dimension."
+    description: "This score is rare. Your categories were precise, you committed to them and you did not hedge. A senior reader could act on this structure without asking you to reorganize it first."
   },
   {
     id: "sharp",
@@ -22,7 +22,7 @@ const scoreBands = [
     min: 70,
     max: 89,
     color: "green",
-    description: "Your thinking is structured and decisive. You categorize clearly, name ideas with precision, and commit to a framework without second-guessing yourself. That is a genuine strength — and one that becomes even more powerful when paired with deliberate technique."
+    description: "Your thinking is structured and decisive. You categorize clearly, name ideas precisely and commit to a framework without second-guessing yourself. Deliberate technique will help you repeat that result under pressure."
   },
   {
     id: "solid",
@@ -30,7 +30,7 @@ const scoreBands = [
     min: 50,
     max: 69,
     color: "blue",
-    description: "You have real structural instincts and they show. The thinking is mostly there — but it softens under ambiguity or when the right categories are not immediately obvious. A cleaner framework will sharpen what you already do well."
+    description: "You have good structural instincts. Your choices become less consistent when the material is ambiguous or the right categories are not obvious at first. A repeatable framework will help you make cleaner decisions in those moments."
   },
   {
     id: "building",
@@ -38,7 +38,7 @@ const scoreBands = [
     min: 30,
     max: 49,
     color: "amber",
-    description: "You can see what matters — but translating that into a clean, committed structure is still inconsistent. That gap is exactly where most professionals live, and it is one of the most impactful things you can close. The instinct is there; the technique just needs to catch up."
+    description: "You can see what matters, but your structure is not consistent yet. You may identify the right ideas and still group or name them in a way that makes the logic hard to follow. Practice will help you turn that instinct into a repeatable method."
   },
   {
     id: "starting",
@@ -46,7 +46,7 @@ const scoreBands = [
     min: 0,
     max: 29,
     color: "coral",
-    description: "Organizing complex information into clear, decisive categories is not yet second nature — and that is completely normal before you have a repeatable structure to work with. The good news is that this is one of the most learnable skills there is, and the delta between where you are now and where you can get to is significant."
+    description: "Organizing complex information into clear categories is not second nature yet. That is expected before you have a repeatable method. Start by separating ideas that overlap and checking what is missing."
   }
 ];
 

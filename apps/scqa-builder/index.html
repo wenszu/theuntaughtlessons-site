@@ -1068,19 +1068,19 @@
     const LEVERS = {
       complication: {
         title: "Sharpen the Complication",
-        prompt: "What's an even sharper way to describe what's broken or changed?",
+        prompt: "What is an even sharper way to describe what is broken or changed?",
         field: "c",
         editable: ["c", "a"]
       },
       question: {
         title: "Reframe the Question",
-        prompt: "What's a different question this same tension could raise?",
+        prompt: "What is a different question this same tension could raise?",
         field: "q",
         editable: ["q", "a"]
       },
       answer: {
         title: "Challenge the Answer",
-        prompt: "What's a different, equally defensible answer to your original question?",
+        prompt: "What is a different, equally defensible answer to your original question?",
         field: "a",
         editable: ["a"]
       }
@@ -1406,7 +1406,7 @@
         s: "It is dinner time, and everyone in the family is hungry.",
         c: "No one has prepared food, and everyone wants something different.",
         q: "What should we eat that everyone will enjoy and that will not take too long?",
-        a: "Let's order pizza because it is quick, easy to share, and everyone can choose their own toppings."
+        a: "We should order pizza because it is quick, easy to share and everyone can choose their own toppings."
       }[part];
     }
 
@@ -1429,7 +1429,7 @@
           <p class="field-example"><em>Example:</em> ${exampleFor(part)}</p>
           <textarea data-scqa="${which}" data-part="${part}" data-word-label="${labels[part]}" placeholder="Type your answer here.">${escapeHtml(data[part])}</textarea>
           <div class="hint">${microHintFor(part)}</div>
-          ${part === "q" ? `<div class="warning" data-warning="${which}">Questions end with a question mark. Don't forget it.</div>` : ""}
+          ${part === "q" ? `<div class="warning" data-warning="${which}">Questions end with a question mark. Remember to include it.</div>` : ""}
         </article>
       `).join("")}</div>`;
     }
@@ -1466,7 +1466,7 @@
               <details class="context-toggle">
                 <summary>Use your own situation instead</summary>
                 <p class="instruction">Replace the case study above with a real problem you want to practice on.</p>
-                <textarea id="contextInput" data-word-label="Context" placeholder="Describe the situation in 2 to 4 sentences: what's true today, what changed, and why it matters.">${escapeHtml(state.context)}</textarea>
+                <textarea id="contextInput" data-word-label="Context" placeholder="Describe the situation in 2 to 4 sentences: what is true today, what changed and why it matters.">${escapeHtml(state.context)}</textarea>
                 <div style="margin-top:12px">
                   <div class="label">TOPIC LABEL (OPTIONAL)</div>
                   <input id="topicInput" type="text" data-word-label="Topic label" placeholder="Give your situation a short name" value="${escapeHtml(state.topicLabel)}">
@@ -1532,7 +1532,7 @@
             ? `<input data-scqa="scqa2" data-part="${part}" data-word-label="${labels[part]}" type="text" value="${escapeHtml(data[part])}" placeholder="${placeholderFor(part)}">`
             : `<textarea data-scqa="scqa2" data-part="${part}" data-word-label="${labels[part]}" placeholder="${placeholderFor(part)}">${escapeHtml(data[part])}</textarea>`}
           <div class="hint">${microHintFor(part)}</div>
-          ${part === "q" ? `<div class="warning" data-warning="scqa2">Questions end with a question mark. Don't forget it.</div>` : ""}
+          ${part === "q" ? `<div class="warning" data-warning="scqa2">Questions end with a question mark. Remember to include it.</div>` : ""}
         </article>
       `;
     }
@@ -1561,7 +1561,7 @@
               <button class="link-button edit-link" type="button" data-go="1">Edit ↗</button>
             </div>
             <div class="reference">
-              <div class="label">You're reframing by</div>
+              <div class="label">You are reframing by</div>
               <div class="ref-row"><strong>${lever.title}</strong><span>${lever.prompt}</span></div>
               <button class="link-button" type="button" id="changeLever">Choose a different lever</button>
             </div>
@@ -2011,6 +2011,9 @@
       state = saved
         ? migrateSavedOlympicsContext(safeState(saved))
         : { ...blankState(), context: templateState.context, topicLabel: templateState.topicLabel };
+      // Repair completions saved by older SCQA versions that updated the app's
+      // own state but did not set the Learning Journey completion flag.
+      if (state.completedOnce) localStorage.setItem('utl_p2_ex2_done', 'true');
       ensurePrimaryAttemptWorkspace();
       save();
       renderAll();
