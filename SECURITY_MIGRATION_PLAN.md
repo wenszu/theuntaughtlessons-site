@@ -136,7 +136,7 @@ source code. The public GitHub repository also exposes those files directly.
 
 ### Admin impact
 
-- Admins manage course membership in Firestore and Google Group as they do now.
+- Admins manage course membership in Firestore. Google Group automation remains an optional future layer if managed Google Workspace becomes available.
 - Deployments require both public and protected-site checks.
 - Preview links require an authenticated admin session.
 - Support needs a documented process for mismatched Firebase and Google Group

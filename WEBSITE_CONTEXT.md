@@ -73,7 +73,7 @@ Firestore collections:
 - `settings/publicSite` — public toggle settings (e.g. `findLevelVisible`).
 - `settings/admin_visibility` — admin/owner preview-only visibility settings, including whether admins/owners can preview hidden public Find your level cards and bypass the public Find your level data form.
 - `settings/assessment_versions` — public-readable, admin/owner-writable rollout switches for `explainToAiko120`, `explainToAiko60`, and `eisenhowerMatrix`; missing values and read failures resolve safely to v1.
-- `google_group_sync_jobs/{jobId}` — Google Group add/remove jobs queued by Admin Console and intended for Firebase Functions processing.
+- `google_group_sync_jobs/{jobId}` — legacy Google Group add/remove jobs retained for history. The Admin Console no longer creates these jobs because Google Workspace group automation is unavailable.
 
 Key `authorized_members` fields: `email`, `name`, `role` (member/admin/owner), `status`, `googleGroupAdded`, `googleGroupAddedAt`, `googleGroupAddedBy`, `googleGroupRemovedAt`, `googleGroupRemovedBy`, `feedbackEnabled`, `addedAt`, `updatedAt`.
 
@@ -90,7 +90,7 @@ Emulators (Auth: 9099, Firestore: 8085, Hosting: 5000): enable with `localStorag
 
 Firestore rules pattern for settings: public pages can read `publicSite` and `public_assessments`; other settings require sign-in.
 
-Firebase Functions: `functions/processGoogleGroupSyncJob` watches `google_group_sync_jobs/{jobId}`. It requires Google Admin SDK credentials and is being introduced in parallel with Apps Script group sync. See `GOOGLE_GROUP_SYNC_MIGRATION.md`.
+The repository still contains the optional `functions/processGoogleGroupSyncJob` implementation, but it is not deployed. It requires paid Google Workspace administration and domain-wide delegation. Member access does not depend on it.
 
 ## Quick Reference — Pages
 
@@ -185,7 +185,7 @@ Decisions are made in Claude (claude.ai). JSON updates are handled in Codex. Doc
 
 - Member workspace video/context management is browser-local (localStorage). Admin content changes do not publish to other visitors unless defaults in `content-config.js` are updated in code.
 - Google Sheet admin changes are pending Google Drive connector reconnection: rename sheet `10iQByFqVCffHanZbbHLnYj7Csbet4fgOCd2FWDzEqkE`, add `Assessments` tab, add `source` column to contacts tab.
-- `googleGroupAdded` field in `authorized_members` is updated by Admin Console Google Group sync requests when Apps Script routes are deployed. If Apps Script is not updated or cannot use Admin Directory API, manage the group manually. See `GOOGLE_GROUP_SETUP.md`.
+- Legacy Google Group fields in `authorized_members` are preserved but are no longer shown or changed by the Admin Console.
 - Embedded Google Drive videos/slides cannot expose their permission error state to site JavaScript because the iframe is cross-origin. The workspace instead shows a reusable "Video not opening?" access guide under protected embeds without exposing the internal Google Group address.
 - Firebase Auth sign-in-link email copy is controlled in Firebase Console Authentication Templates. Use `FIREBASE_EMAIL_TEMPLATE.md` for the approved template copy.
 - Passwordless invite `actionCodeSettings.url` uses the current site origin and `/member-login/`.
@@ -194,9 +194,8 @@ Decisions are made in Claude (claude.ai). JSON updates are handled in Codex. Doc
 - If Member Management is opened while signed into the wrong Firebase Google account, the Admin Console prompts to switch accounts instead of leaving the table stuck on an authorization error.
 - Bootstrap owner: `wenszu@gmail.com` is treated as an owner in both `firestore.rules` and the Admin Console even if its `authorized_members` row is missing or accidentally edited. The Admin Console hides edit/remove actions for this row, and Firestore rules block client-side delete/downgrade except by the bootstrap owner account itself.
 - When `wenszu@gmail.com` opens an admin-only Firebase view, Admin Console tries to repair `authorized_members/wenszu@gmail.com` back to `role: owner`, `status: active`, `bootstrapOwner: true`. This repair requires the bootstrap-owner Firestore rule to be deployed first.
-- Admin Console Member Management **Group** column is the manual Google Group queue: header links to the `utl-members` member list and each row has an `Added` / `Not added` toggle for verified manual fixes. Manual toggle clicks record the verification date and admin email. The browser cannot query Google Groups directly; confirmed automation depends on `google_group_sync_jobs` + Functions.
+- Admin Console Member Management authorizes members in Firestore and sends onboarding email without creating Google Group jobs. Group controls are hidden while Workspace automation is unavailable.
 - Admin Console remove-member flow sends a non-blocking Apps Script `RemovedMember` audit action for non-admin/non-owner members before deleting Firestore records. The Apps Script writes to the `Removed members` tab in the same Google Sheet as leads/feedback and skips admin/owner roles.
-- On localhost only, Member Management Group toggle changes are stored in `localStorage` (`utl_mb_local_group_overrides`) instead of Firestore so manual verification can be tested without live Firebase writes. Live site toggles still write Firestore for shared admin visibility.
 - Student Progress uses the same Firebase admin preflight/switch-account flow as Member Management. If `authorized_members` is readable but `users` progress documents are blocked by Firestore rules, it renders the member list with a rules warning instead of failing the whole table.
 - Student Progress detail lets admins update individual lesson, exercise, orientation, and assessment completion states without rewriting the MP ledger. Its separately confirmed reset clears remote activity records, responses, rewards, level progress, and streaks while preserving membership access. An admin revision marker makes the student's member workspace apply the change authoritatively on its next load, including clearing stale browser progress after a full reset.
 - Student Progress also provides a browser-only Experience Preview. Admins choose the activity immediately before which the walkthrough should begin; the tool backs up current local learning state, prepares prerequisite completions, pauses Firebase progress/reward writes, and opens the real member or exercise page. A persistent preview banner restores the prior browser state when the walkthrough ends.
@@ -451,4 +450,4 @@ Entries from 2026-05-27 through 2026-07-22 archived in `archive/WEBSITE_CONTEXT_
 - These changes do not make static course HTML, JavaScript, or other files private. Google Group membership protects restricted Google Drive assets, but any file published from the public site origin remains directly retrievable. The staged migration required for genuinely private course delivery, including expected member and administrator effects, is documented in `SECURITY_MIGRATION_PLAN.md`.
 - Keep browser Firebase configuration public and restricted by Firestore rules and authorized domains. Never put service-account credentials, Gemini keys, Apps Script signing secrets, or other server credentials in shipped files or Firestore settings readable by members.
 - The Admin Console password gate is now localhost-only. On production, `admin/index.html` discards the browser-only admin flag, requires Firebase Google sign-in, and opens only for an `authorized_members` account with `admin` or `owner` role (with the existing bootstrap owner retained for lockout recovery). Localhost and `127.0.0.1` keep the password preview workflow.
-- Admin welcome/test emails and removed-member logs now route through the authenticated `runAdminAction` Firebase callable. It verifies the Firebase user and admin/owner role, allowlists actions, caps payloads, and relays to Apps Script with `APPS_SCRIPT_ADMIN_RELAY_SECRET`. Google Group changes use only the existing admin-only Firestore job processor; the browser-to-Apps-Script fallback was removed. The matching Apps Script property, updated script deployment, and Firebase Function deployment are required before this path is live.
+- Admin welcome/test emails and removed-member logs now route through the authenticated `runAdminAction` Firebase callable. It verifies the Firebase user and admin/owner role, allowlists actions, caps payloads, and relays to Apps Script with `APPS_SCRIPT_ADMIN_RELAY_SECRET`. Browser-to-Apps-Script Google Group requests were removed, and the Admin Console does not create group-sync jobs while Workspace automation is unavailable.
