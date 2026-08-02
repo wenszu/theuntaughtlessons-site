@@ -651,18 +651,30 @@
     .panel { position: relative; margin-top: 18px; padding: 28px 32px; border: .5px solid var(--line); border-radius: 12px; background: var(--white); }
     .panel h2 { margin: 4px 0 10px; color: var(--navy); font-family: "Playfair Display", Georgia, serif; }
     #reviewGrid { grid-template-columns: 1fr; }
-    #practiceScenarioSelect {
-      display: block;
+    #practiceScenarioPanel { border: 1px solid rgba(238,163,32,.72); background: #FFF8EC; }
+    #practiceScenarioPanel > .label { display: inline-flex; padding: 5px 9px; border-radius: 999px; background: #FCE8B8; color: #7A5100; }
+    #practiceScenarioPanel > h2 { margin-top: 10px; }
+    .practice-scenario-grid { display: grid; gap: 10px; margin: 18px 0; }
+    .practice-scenario-option {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: center;
       width: 100%;
-      min-height: 46px;
-      margin: 10px 0 16px;
-      padding: 10px 40px 10px 12px;
+      padding: 14px 16px;
       border: 1px solid var(--line);
       border-radius: 8px;
       background: var(--white);
       color: var(--navy);
-      font: 700 14px Lato, Arial, sans-serif;
+      cursor: pointer;
+      text-align: left;
     }
+    .practice-scenario-option:hover { border-color: var(--steel); }
+    .practice-scenario-option.selected { border-color: var(--gold); background: #fff8ec; box-shadow: 0 0 0 1px var(--gold); }
+    .practice-scenario-option strong { display: block; font: 800 14px/1.3 Lato, Arial, sans-serif; }
+    .practice-scenario-option small { display: block; margin-top: 3px; color: var(--steel); font: 400 12px/1.45 Lato, Arial, sans-serif; }
+    .practice-scenario-status { color: var(--steel); font: 700 11px/1.2 Lato, Arial, sans-serif; white-space: nowrap; }
+    .practice-scenario-status.complete { color: var(--green); }
     #practiceScenarioPreview { margin: 0 0 18px; }
     .attempt-switcher {
       display: none;
@@ -724,6 +736,21 @@
     .hint-toggle { margin-left: 8px; border: 0; background: transparent; color: var(--steel); cursor: pointer; font-size: 11px; padding: 0; }
     .rule-hint { display: none; margin-top: 6px; padding: 10px 12px; border-radius: 6px; background: var(--soft); font-size: 12px; }
     .rule-hint.show { display: block; }
+    .feedback-panel { padding: 0; overflow: hidden; }
+    .feedback-panel-head { padding: 24px 32px 18px; border-bottom: 1px solid var(--line); }
+    .feedback-panel-head h2 { margin: 4px 0 7px; }
+    .feedback-panel-head p { margin: 0; color: var(--steel); }
+    .feedback-layer { padding: 22px 32px; }
+    .feedback-layer + .feedback-layer { border-top: 1px solid var(--line); background: #FCFAF6; }
+    .feedback-layer-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; }
+    .feedback-layer-head h3 { margin: 3px 0 5px; color: var(--navy); font-family: "Playfair Display", Georgia, serif; font-size: 21px; }
+    .feedback-layer-head p { max-width: 760px; margin: 0; color: var(--steel); font-size: 13px; line-height: 1.5; }
+    .feedback-status { flex: 0 0 auto; border-radius: 999px; background: #FFF2D3; color: #8A5A00; padding: 6px 10px; font-size: 11px; font-weight: 800; }
+    .feedback-status.complete { background: #E8F4EB; color: var(--green); }
+    .feedback-rules { margin-top: 14px; }
+    .passed-checks { margin-top: 10px; border-top: 1px solid var(--line); }
+    .passed-checks summary { padding: 12px 0 2px; color: var(--steel); cursor: pointer; font-size: 12px; font-weight: 700; }
+    .feedback-ai-action { margin-top: 14px; }
     .score-message { color: var(--steel); font-size: 13px; font-style: italic; }
     .diff-note { margin-top: 20px; padding: 12px; border-radius: 8px; background: var(--soft); font-size: 13px; }
     .diff-note.good { color: var(--green); }
@@ -761,6 +788,10 @@
       .review-grid, .sample-grid, .score-grid { grid-template-columns: 1fr; }
       .action-row, .modal-actions { align-items: stretch; flex-direction: column; }
       .btn, .copy-group { width: 100%; text-align: center; }
+      .practice-scenario-option { grid-template-columns: minmax(0, 1fr); }
+      .feedback-panel-head, .feedback-layer { padding: 20px; }
+      .feedback-layer-head { display: grid; }
+      .feedback-status { justify-self: start; }
     }
 
     /* === MOBILE RESPONSIVE — May 2026 === */
@@ -1006,13 +1037,20 @@
         <strong id="reviewTopic"></strong>
       </div>
       <div class="review-grid" id="reviewGrid"></div>
-      <div id="feedbackMount"></div>
-      <section class="panel" id="geminiReviewPanel">
-        <div class="label">AI coherence review</div>
-        <h2>Get a second perspective</h2>
-        <p>Gemini can review whether the four parts form one connected story and suggest one useful improvement. The rules review above remains available if AI feedback cannot load.</p>
-        <button class="btn btn-secondary" type="button" id="getGeminiReview">Get AI feedback</button>
-        <div id="geminiFeedback" aria-live="polite"></div>
+      <section class="panel feedback-panel" id="reviewFeedbackPanel">
+        <header class="feedback-panel-head">
+          <div class="label">Two ways to review</div>
+          <h2>Feedback on your SCQA</h2>
+          <p>Start with the structure check. If you want another perspective, ask AI to review how the full story connects.</p>
+        </header>
+        <div class="feedback-layer" id="feedbackMount"></div>
+        <div class="feedback-layer" id="geminiReviewPanel">
+          <div class="feedback-layer-head">
+            <div><div class="label">Optional AI review</div><h3>Get another perspective</h3><p>Gemini can review whether the four parts form one connected story and suggest one useful improvement. You can still finish if AI feedback is unavailable.</p></div>
+          </div>
+          <div class="feedback-ai-action"><button class="btn btn-secondary" type="button" id="getGeminiReview">Get AI feedback</button></div>
+          <div id="geminiFeedback" aria-live="polite"></div>
+        </div>
       </section>
       <div id="saveNoticeMount"></div>
       <div class="action-row">
@@ -1024,20 +1062,19 @@
       <section class="panel" id="afterFinishPanel" hidden>
         <div class="label">Exercise complete</div>
         <h2>Your SCQA has been saved.</h2>
-        <p>You can return to the Learning Journey or practice with another situation. Additional practice is optional and does not change your completion reward.</p>
+        <p>Your work has been saved. What would you like to do next?</p>
         <div class="action-row">
           <a class="btn btn-primary" href="../../member-login/index.html#learning-journey">Back to Learning Journey</a>
-          <button class="btn btn-secondary" type="button" id="showPracticeScenarios">Practice another scenario</button>
+          <button class="btn btn-secondary" type="button" id="showPracticeScenarios">Practice another SCQA</button>
         </div>
       </section>
       <section class="panel" id="practiceScenarioPanel" hidden>
         <div class="label">Optional practice</div>
-        <h2>Choose another situation</h2>
-        <p>Use the details provided as a starting point. Feel free to make up and add reasonable details that help you build a more complete SCQA.</p>
-        <label for="practiceScenarioSelect"><strong>Practice context</strong></label>
-        <select id="practiceScenarioSelect"></select>
+        <h2>Choose a practice topic</h2>
+        <p>Pick a situation that interests you. Use the details as a starting point, and add reasonable details if they help you build a complete SCQA.</p>
+        <div class="practice-scenario-grid" id="practiceScenarioOptions" role="group" aria-label="Practice topics"></div>
         <div class="context-banner" id="practiceScenarioPreview"></div>
-        <button class="btn btn-primary" type="button" id="startPracticeScenario">Start this SCQA →</button>
+        <button class="btn btn-primary" type="button" id="startPracticeScenario">Start this practice round →</button>
       </section>
     </section>
   </main>
@@ -1056,7 +1093,7 @@
   <script>
     const STORAGE_KEY = "utl_scqa_builder_v2";
     const TIMER_TARGET = 10 * 60;
-    const DATA_URL = "../../data/practice/scqa-builder.json?v=20260731-scqa-review-1";
+    const DATA_URL = "../../data/practice/scqa-builder.json?v=20260802-optional-practice-1";
     const SCQA_SCORE_URL = "https://us-central1-the-untaught-lessons.cloudfunctions.net/scoreScqa";
     const PRACTICE_ATTEMPTS_KEY = "utl_scqa_practice_attempts";
     const ATTEMPT_WORKSPACES_KEY = "utl_scqa_attempt_workspaces";
@@ -1094,6 +1131,7 @@
     let timerStartedAt = null;
     let timerElapsedBeforePause = 0;
     let timerMetricHidden = false;
+    let selectedPracticeScenarioId = "";
 
     // Exercise data is loaded from ../../data/practice/scqa-builder.json.
     // Add future SCQA variations to that JSON file. This app loads the first
@@ -1728,11 +1766,17 @@
     function renderFeedback() {
       const results = checkOne(state.scqa1);
       const score = results.reduce((sum, result) => sum + result.points, 0);
-      $("#feedbackMount").innerHTML = `<section class="panel"><div class="label">Structure and connection review</div>
-        <h2>${score >= 6 ? "Strong foundation" : "Worth another look"}</h2>
-        <p>${escapeHtml(scoreMessage(score))}</p>
-        <div>${rulesMarkup(results)}</div>
-      </section>`;
+      const needsReview = results.filter((result) => !result.pass);
+      const passed = results.filter((result) => result.pass);
+      const statusText = needsReview.length
+        ? `${needsReview.length} item${needsReview.length === 1 ? "" : "s"} to review`
+        : "All checks passed";
+      $("#feedbackMount").innerHTML = `<div class="feedback-layer-head">
+          <div><div class="label">Structure check</div><h3>${needsReview.length ? "Worth another look" : "Strong foundation"}</h3><p>${escapeHtml(scoreMessage(score))}</p></div>
+          <span class="feedback-status ${needsReview.length ? "" : "complete"}">${escapeHtml(statusText)}</span>
+        </div>
+        <div class="feedback-rules">${needsReview.length ? rulesMarkup(needsReview) : ""}</div>
+        ${passed.length ? `<details class="passed-checks"><summary>${passed.length} check${passed.length === 1 ? "" : "s"} passed</summary>${rulesMarkup(passed)}</details>` : ""}`;
     }
 
     function rulesMarkup(results) {
@@ -1791,15 +1835,25 @@
     }
 
     function renderPracticeScenarios() {
-      const select = $("#practiceScenarioSelect");
-      if (!select || !practiceScenarios.length) return;
-      select.innerHTML = practiceScenarios.map((scenario) => `<option value="${escapeHtml(scenario.id)}">${escapeHtml(scenario.title)}</option>`).join("");
+      const options = $("#practiceScenarioOptions");
+      if (!options || !practiceScenarios.length) return;
+      const workspaces = readAttemptWorkspaces();
+      if (!practiceScenarios.some((scenario) => scenario.id === selectedPracticeScenarioId)) {
+        selectedPracticeScenarioId = practiceScenarios.find((scenario) => !workspaces[scenario.id]?.completed)?.id || practiceScenarios[0].id;
+      }
+      options.innerHTML = practiceScenarios.map((scenario) => {
+        const selected = scenario.id === selectedPracticeScenarioId;
+        const completed = Boolean(workspaces[scenario.id]?.completed);
+        return `<button class="practice-scenario-option ${selected ? "selected" : ""}" type="button" data-practice-scenario="${escapeHtml(scenario.id)}" aria-pressed="${selected ? "true" : "false"}">
+          <span><strong>${escapeHtml(scenario.title)}</strong><small>${escapeHtml(scenario.context)}</small></span>
+          <span class="practice-scenario-status ${completed ? "complete" : ""}">${completed ? "✓ Completed" : "Not started"}</span>
+        </button>`;
+      }).join("");
       updatePracticeScenarioPreview();
     }
 
     function selectedPracticeScenario() {
-      const selectedId = $("#practiceScenarioSelect")?.value;
-      return practiceScenarios.find((scenario) => scenario.id === selectedId) || practiceScenarios[0];
+      return practiceScenarios.find((scenario) => scenario.id === selectedPracticeScenarioId) || practiceScenarios[0];
     }
 
     function updatePracticeScenarioPreview() {
@@ -1807,6 +1861,15 @@
       const preview = $("#practiceScenarioPreview");
       if (!preview || !scenario) return;
       preview.innerHTML = `<div class="label">Context</div><p>${escapeHtml(scenario.context)}</p>`;
+    }
+
+    function updatePracticeScenarioSelection() {
+      $$(".practice-scenario-option", $("#practiceScenarioOptions")).forEach((option) => {
+        const selected = option.dataset.practiceScenario === selectedPracticeScenarioId;
+        option.classList.toggle("selected", selected);
+        option.setAttribute("aria-pressed", selected ? "true" : "false");
+      });
+      updatePracticeScenarioPreview();
     }
 
     function beginPracticeScenario() {
@@ -1967,10 +2030,16 @@
     $("#getGeminiReview").addEventListener("click", requestGeminiReview);
     $("#finishScqa").addEventListener("click", finishExercise);
     $("#showPracticeScenarios").addEventListener("click", () => {
+      renderPracticeScenarios();
       $("#practiceScenarioPanel").hidden = false;
       $("#practiceScenarioPanel").scrollIntoView({ behavior: "smooth", block: "start" });
     });
-    $("#practiceScenarioSelect").addEventListener("change", updatePracticeScenarioPreview);
+    $("#practiceScenarioOptions").addEventListener("click", (event) => {
+      const option = event.target.closest("[data-practice-scenario]");
+      if (!option) return;
+      selectedPracticeScenarioId = option.dataset.practiceScenario;
+      updatePracticeScenarioSelection();
+    });
     $("#startPracticeScenario").addEventListener("click", beginPracticeScenario);
     $("#attemptTabs").addEventListener("click", (event) => {
       const tab = event.target.closest("[data-attempt-id]");
@@ -2021,6 +2090,17 @@
       renderWordCount();
       const restoredScreen = state.currentScreen === 3 ? 3 : 1;
       goToScreen(restoredScreen);
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get("attempt") === "olympics" && activeAttemptId() !== "olympics") {
+        switchAttempt("olympics");
+      }
+      const openPracticePicker = urlParams.get("practice") === "1";
+      if (openPracticePicker && state.completedOnce) {
+        goToScreen(3);
+        renderPracticeScenarios();
+        $("#practiceScenarioPanel").hidden = false;
+        window.setTimeout(() => $("#practiceScenarioPanel")?.scrollIntoView({ block: "start" }), 0);
+      }
     }
 
     initializeApp();

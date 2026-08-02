@@ -1554,6 +1554,7 @@ const UTL_CONTENT = {
       ,"@media(max-width:700px){.ws-journey-phase-tab{padding:10px 8px 8px;text-align:center}.ws-journey-phase-tab strong{font-size:13px;white-space:nowrap}.ws-journey-phase-tab em{font-size:9px}.ws-journey-phase-panel{padding:10px 8px 12px}.ws-journey-panel-head{align-items:center;padding:0 4px 8px}.ws-journey-panel-head h3{font-size:19px}.ws-journey-phase-panel .ws-journey-activity{grid-template-columns:20px minmax(0,1fr);min-height:45px}.ws-journey-phase-panel .ws-journey-activity-preview-button{grid-template-columns:28px 22px minmax(0,1fr) auto;gap:5px}.ws-journey-phase-panel .ws-journey-type{font-size:0}.ws-journey-phase-panel .ws-journey-type span{font-size:9px}.ws-journey-phase-panel .ws-journey-activity-preview-button strong{font-size:11px}.ws-journey-phase-panel .ws-journey-activity-state{display:none}.ws-journey-phase-panel .ws-journey-activity-action{display:none}}"
       ,".ws-journey-activity-locked{opacity:1}.ws-journey-activity-locked>.ws-journey-status-icon,.ws-journey-activity-locked>.ws-journey-activity-preview-button,.ws-journey-activity-locked>.ws-journey-activity-state{color:#6F7780}.ws-journey-activity-locked .ws-journey-activity-preview-button strong{color:#5D6872}.ws-journey-activity-locked .ws-journey-type-video{color:#55738F}.ws-journey-activity-locked .ws-journey-type-exercise{color:#80652F}.ws-journey-preview{color:var(--ws-charcoal)}"
       ,".ws-journey-activity-just-completed{border-color:var(--ws-green)!important;background:#EFF8F1!important;animation:wsCompletedPulse 1.8s ease 2}.ws-journey-activity-just-completed .ws-journey-activity-state{display:block!important;color:var(--ws-green)!important}@keyframes wsCompletedPulse{50%{box-shadow:0 0 0 4px rgba(44,122,75,.14)}}"
+      ,".ws-journey-preview-actions{display:grid;gap:10px}.ws-journey-preview-actions .ws-button{margin:0}.ws-journey-preview-actions .ws-button-outline{background:#fff;color:var(--ws-navy)}"
     ].join("\n");
     document.head.appendChild(style);
   }
@@ -2147,6 +2148,16 @@ const UTL_CONTENT = {
     return { done: done, total: items.length, percent: Math.round((done / Math.max(1, items.length)) * 100) };
   }
 
+  function scqaPracticeCount() {
+    try {
+      var attempts = JSON.parse(localStorage.getItem("utl_scqa_practice_attempts") || "[]");
+      if (!Array.isArray(attempts)) return 0;
+      return new Set(attempts.map(function (attempt) { return attempt && attempt.scenarioId; }).filter(Boolean)).size;
+    } catch (_) {
+      return 0;
+    }
+  }
+
   function journeyNextActivity() {
     if (!readBool("utl_orientation_ready")) {
       return { key: "orientation", kind: "Orientation", title: "Welcome to MA", duration: "About 5 min", href: "#orientation", phaseKey: "orientation" };
@@ -2174,7 +2185,11 @@ const UTL_CONTENT = {
   function journeyActivityRowHtml(activity, next, phaseIsUnlocked, activityIsUnlocked, sequenceLabel) {
     var inProgress = activity.kind === "Exercise" && activity.contextGated && activity.contextComplete && !activity.done;
     var state = activity.done ? "done" : phaseIsUnlocked && activityIsUnlocked ? (inProgress ? "progress" : "next") : "locked";
+    var practiceCount = activity.appId === "scqa-builder" ? scqaPracticeCount() : 0;
     var stateText = state === "done" ? "Completed" : state === "progress" ? "In progress" : state === "next" ? "Up next" : "Locked";
+    var visibleStateText = state === "done" && activity.appId === "scqa-builder" && practiceCount
+      ? "Completed · " + practiceCount + " practice round" + (practiceCount === 1 ? "" : "s")
+      : stateText;
     var statusIcon = state === "done" ? "&#10003;" : state === "progress" ? "&#9680;" : state === "next" ? "&#9679;" : "&#128274;";
     var typeIcon = activity.kind === "Video" ? "&#9654;" : "&#9632;";
     var action = state === "done"
@@ -2184,6 +2199,9 @@ const UTL_CONTENT = {
         : state === "next"
           ? '<a class="ws-journey-start" href="' + escapeHtml(activity.href) + '">Start</a>'
           : "";
+    if (state === "done" && activity.appId === "scqa-builder") {
+      action = '<a href="' + escapeHtml(activity.href + "&attempt=olympics") + '">Review</a>';
+    }
     var unlockCopy = phaseIsUnlocked
       ? "Complete the activity immediately before this one to unlock it."
       : "Complete the previous phase to unlock this activity.";
@@ -2195,7 +2213,11 @@ const UTL_CONTENT = {
       : "";
     var completedAppId = new URLSearchParams(window.location.search || "").get("completed");
     var justCompleted = activity.kind === "Exercise" && activity.appId === completedAppId;
-    return '<li class="ws-journey-activity ws-journey-activity-' + state + (justCompleted ? ' ws-journey-activity-just-completed' : '') + '"><span class="ws-journey-status-icon" aria-hidden="true">' + statusIcon + '</span><button class="ws-journey-activity-preview-button" type="button" data-journey-preview="' + escapeHtml(activity.key) + '" aria-expanded="false"><span class="ws-journey-sequence">' + escapeHtml(sequenceLabel) + '</span><span class="ws-journey-type ws-journey-type-' + activity.kind.toLowerCase() + '"><span aria-hidden="true">' + typeIcon + '</span>' + escapeHtml(activity.kind + (activity.aiTool ? ' (' + activity.aiTool + ')' : '')) + '</span><strong>' + escapeHtml(activity.title) + '</strong><span class="ws-journey-duration">' + escapeHtml(activity.duration.replace(/^About /, "")) + '</span></button><span class="ws-journey-activity-state">' + (justCompleted ? "Just completed" : stateText) + '</span><span class="ws-journey-activity-action">' + action + '</span><aside class="ws-journey-preview" data-journey-preview-panel="' + escapeHtml(activity.key) + '" role="dialog" aria-modal="true" aria-label="' + escapeHtml(activity.title) + ' preview" tabindex="-1" hidden><button class="ws-journey-preview-close" type="button" data-journey-preview-close aria-label="Close preview">&times;</button><span class="ws-journey-preview-overline">' + escapeHtml(sequenceLabel) + ' &middot; ' + escapeHtml(activity.kind) + '</span><h3>' + escapeHtml(activity.title) + '</h3><p>' + escapeHtml(activity.preview) + '</p><strong>Inside this activity</strong>' + activitySteps + '<dl><div><dt>Estimated time</dt><dd>' + escapeHtml(activity.duration) + '</dd></div><div><dt>Status</dt><dd>' + escapeHtml(stateText) + '</dd></div>' + (state === "locked" ? '<div><dt>To unlock</dt><dd>' + escapeHtml(unlockCopy) + '</dd></div>' : "") + '</dl>' + (state === "locked" ? lockedAction : '<a class="ws-button" href="' + escapeHtml(activity.href) + '">' + (state === "done" ? "Review " : state === "progress" ? "Resume " : "Start ") + escapeHtml(sequenceLabel) + ' &rarr;</a>') + '</aside></li>';
+    var availableAction = '<a class="ws-button" href="' + escapeHtml(activity.href) + '">' + (state === "done" ? "Review " : state === "progress" ? "Resume " : "Start ") + escapeHtml(sequenceLabel) + ' &rarr;</a>';
+    if (state === "done" && activity.appId === "scqa-builder") {
+      availableAction = '<div class="ws-journey-preview-actions"><a class="ws-button ws-button-outline" href="' + escapeHtml(activity.href + "&attempt=olympics") + '">Review my SCQA</a><a class="ws-button" href="' + escapeHtml(activity.href + "&practice=1") + '">Practice another SCQA &rarr;</a></div>';
+    }
+    return '<li class="ws-journey-activity ws-journey-activity-' + state + (justCompleted ? ' ws-journey-activity-just-completed' : '') + '"><span class="ws-journey-status-icon" aria-hidden="true">' + statusIcon + '</span><button class="ws-journey-activity-preview-button" type="button" data-journey-preview="' + escapeHtml(activity.key) + '" aria-expanded="false"><span class="ws-journey-sequence">' + escapeHtml(sequenceLabel) + '</span><span class="ws-journey-type ws-journey-type-' + activity.kind.toLowerCase() + '"><span aria-hidden="true">' + typeIcon + '</span>' + escapeHtml(activity.kind + (activity.aiTool ? ' (' + activity.aiTool + ')' : '')) + '</span><strong>' + escapeHtml(activity.title) + '</strong><span class="ws-journey-duration">' + escapeHtml(activity.duration.replace(/^About /, "")) + '</span></button><span class="ws-journey-activity-state">' + (justCompleted ? "Just completed" : visibleStateText) + '</span><span class="ws-journey-activity-action">' + action + '</span><aside class="ws-journey-preview" data-journey-preview-panel="' + escapeHtml(activity.key) + '" role="dialog" aria-modal="true" aria-label="' + escapeHtml(activity.title) + ' preview" tabindex="-1" hidden><button class="ws-journey-preview-close" type="button" data-journey-preview-close aria-label="Close preview">&times;</button><span class="ws-journey-preview-overline">' + escapeHtml(sequenceLabel) + ' &middot; ' + escapeHtml(activity.kind) + '</span><h3>' + escapeHtml(activity.title) + '</h3><p>' + escapeHtml(activity.preview) + '</p><strong>Inside this activity</strong>' + activitySteps + '<dl><div><dt>Estimated time</dt><dd>' + escapeHtml(activity.duration) + '</dd></div><div><dt>Status</dt><dd>' + escapeHtml(visibleStateText) + '</dd></div>' + (state === "locked" ? '<div><dt>To unlock</dt><dd>' + escapeHtml(unlockCopy) + '</dd></div>' : "") + '</dl>' + (state === "locked" ? lockedAction : availableAction) + '</aside></li>';
   }
 
   function journeyPhaseTabHtml(phaseKey, next, selectedPhase) {
