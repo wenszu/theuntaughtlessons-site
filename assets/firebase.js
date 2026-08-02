@@ -33,6 +33,11 @@ import {
   updateDoc,
   where
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+import {
+  connectFunctionsEmulator,
+  getFunctions,
+  httpsCallable
+} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-functions.js";
 
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
@@ -98,6 +103,7 @@ const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 provider.setCustomParameters({ prompt: "select_account" });
 const db = getFirestore(app);
+const functions = getFunctions(app, "us-central1");
 
 authPersistenceReady = setPersistence(auth, browserLocalPersistence).catch((error) => {
   firebaseInitError = error;
@@ -115,7 +121,17 @@ const useLocalFirebaseEmulators =
 if (useLocalFirebaseEmulators) {
   connectAuthEmulator(auth, "http://127.0.0.1:9099");
   connectFirestoreEmulator(db, "127.0.0.1", 8085);
+  connectFunctionsEmulator(functions, "127.0.0.1", 5001);
   console.log("⚡ Connected to local Firebase Emulators");
+}
+
+async function runAdminAction(action, payload = {}) {
+  const callable = httpsCallable(functions, "runAdminAction");
+  const result = await callable({
+    action: String(action || "").trim(),
+    payload: payload && typeof payload === "object" ? payload : {}
+  });
+  return result && result.data ? result.data : { ok: true };
 }
 
 function signInWithGooglePopup() {
@@ -189,6 +205,7 @@ async function sendMemberPasswordReset(email) {
 async function submitAccessRequest(fullName, email, notes = "") {
   const normalizedEmail = String(email || "").trim().toLowerCase();
   const cleanFullName = String(fullName || "").trim();
+  const cleanNotes = String(notes || "").trim();
 
   if (!cleanFullName) {
     throw new Error("Please enter your full name.");
@@ -198,12 +215,16 @@ async function submitAccessRequest(fullName, email, notes = "") {
     throw new Error("Please enter your email address.");
   }
 
+  if (cleanFullName.length > 200 || normalizedEmail.length > 320 || cleanNotes.length > 2000) {
+    throw new Error("Your access request is too long. Please shorten it and try again.");
+  }
+
   try {
     const docRef = doc(requireFirestore(), "access_requests", normalizedEmail);
     await setDoc(docRef, {
       fullName: cleanFullName,
       email: normalizedEmail,
-      notes: String(notes || "").trim(),
+      notes: cleanNotes,
       status: "pending",
       requestedAt: serverTimestamp()
     });
@@ -969,6 +990,7 @@ export {
   onAuthStateChanged,
   requireAuthorizedMember,
   requestGoogleGroupSyncJob,
+  runAdminAction,
   repairMemberProgramCompletionReward,
   replaceMemberWorkspaceProgress,
   resetMemberWorkspaceProgress,

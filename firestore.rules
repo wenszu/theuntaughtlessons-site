@@ -41,6 +41,24 @@ service cloud.firestore {
         request.resource.data.email == email;
     }
 
+    function isValidAccessRequest(requestId) {
+      return requestId == requestId.lower() &&
+        request.resource.data.keys().hasOnly([
+          'fullName', 'email', 'notes', 'status', 'requestedAt'
+        ]) &&
+        request.resource.data.fullName is string &&
+        request.resource.data.fullName.size() >= 1 &&
+        request.resource.data.fullName.size() <= 200 &&
+        request.resource.data.email is string &&
+        request.resource.data.email == requestId &&
+        request.resource.data.email.size() >= 3 &&
+        request.resource.data.email.size() <= 320 &&
+        request.resource.data.notes is string &&
+        request.resource.data.notes.size() <= 2000 &&
+        request.resource.data.status == 'pending' &&
+        request.resource.data.requestedAt == request.time;
+    }
+
     match /users/{userId} {
       allow read: if isSelfUserDocument(userId) || isAdmin();
       allow write: if isSelfUserDocument(userId) || isAdmin();
@@ -64,7 +82,7 @@ service cloud.firestore {
     }
 
     match /access_requests/{requestId} {
-      allow create: if true;
+      allow create: if isValidAccessRequest(requestId);
       allow read, update, delete: if isAdmin();
     }
 
@@ -73,7 +91,9 @@ service cloud.firestore {
     }
 
     match /settings/{docId} {
-      allow read: if docId in ['publicSite', 'public_assessments', 'assessment_versions'] || signedIn();
+      allow read: if docId in ['publicSite', 'public_assessments', 'assessment_versions'] ||
+        (signedIn() && docId in ['feedback', 'engagement', 'rewards']) ||
+        isAdmin();
       allow write: if isAdmin();
     }
   }

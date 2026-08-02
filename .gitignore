@@ -6,6 +6,7 @@ firebase-debug.log
 public/
 functions/node_modules/
 functions-aiko/node_modules/
+functions-admin/node_modules/
 functions/.runtimeconfig.json
 .env
 .env.*
