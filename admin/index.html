@@ -2006,7 +2006,7 @@
         <p class="error" id="adminError">Incorrect password</p>
       </form>
       <div id="adminGoogleGate" hidden>
-        <button class="primary-button" id="adminGoogleSignIn" type="button">Continue with Google</button>
+        <button class="primary-button" id="adminGoogleSignIn" type="button" disabled>Continue with Google</button>
         <p id="adminGoogleStatus" style="margin:12px 0 0;color:#666;line-height:1.5;" aria-live="polite"></p>
       </div>
     </div>
@@ -3672,13 +3672,65 @@
       }));
     }
 
+    function adminFirebaseApiReady() {
+      const fb = window.utlFirebaseAuth;
+      return !!(fb && fb.getSignedInUser && fb.signInWithGooglePopup);
+    }
+
+    function waitForAdminFirebaseApi(onReady) {
+      const status = document.getElementById('adminGoogleStatus');
+      const button = document.getElementById('adminGoogleSignIn');
+      let finished = false;
+      let pollTimer = null;
+      let timeoutTimer = null;
+
+      function cleanup() {
+        window.removeEventListener('utlFirebaseAuthReady', probe);
+        window.removeEventListener('utlFirebaseInitError', handleError);
+        if (pollTimer) window.clearInterval(pollTimer);
+        if (timeoutTimer) window.clearTimeout(timeoutTimer);
+      }
+
+      function probe() {
+        if (finished || !adminFirebaseApiReady()) return;
+        finished = true;
+        cleanup();
+        if (button) button.disabled = false;
+        if (status) status.textContent = 'Sign in with an approved administrator Google account.';
+        if (typeof onReady === 'function') onReady();
+      }
+
+      function handleError(event) {
+        if (finished) return;
+        finished = true;
+        cleanup();
+        if (button) button.disabled = true;
+        const detail = event && event.detail ? String(event.detail) : '';
+        if (status) status.textContent = detail || 'Secure sign-in could not load. Refresh the page and try again.';
+      }
+
+      if (button) button.disabled = true;
+      if (status) status.textContent = 'Loading secure sign-in…';
+      window.addEventListener('utlFirebaseAuthReady', probe);
+      window.addEventListener('utlFirebaseInitError', handleError);
+      pollTimer = window.setInterval(probe, 250);
+      timeoutTimer = window.setTimeout(function () {
+        if (finished) return;
+        finished = true;
+        cleanup();
+        if (button) button.disabled = false;
+        if (status) status.textContent = 'Secure sign-in took too long to load. Refresh the page, then try again.';
+      }, 12000);
+      probe();
+    }
+
     async function openProductionAdmin(options) {
       const settings = options || {};
       const status = document.getElementById('adminGoogleStatus');
       const button = document.getElementById('adminGoogleSignIn');
       const fb = window.utlFirebaseAuth;
       if (!fb || !fb.getSignedInUser || !fb.signInWithGooglePopup) {
-        if (status) status.textContent = 'Secure sign-in is loading. Please wait a moment.';
+        if (status) status.textContent = 'Secure sign-in is still loading. Please wait until this button is ready, then select it again.';
         return false;
       }
 
@@ -8511,11 +8563,7 @@
       function checkExistingSession() {
         openProductionAdmin({ interactive: false });
       }
-      if (window.utlFirebaseAuth) {
-        checkExistingSession();
-      } else {
-        window.addEventListener('utlFirebaseAuthReady', checkExistingSession, { once: true });
-      }
+      waitForAdminFirebaseApi(checkExistingSession);
     })();
   </script>
   <script src="../assets/tactile-buttons.js?v=20260714-flat-1" defer></script>
