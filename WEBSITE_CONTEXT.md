@@ -64,6 +64,8 @@ Trademarks: `C³ Rubric™` · `Think, speak and act like an executive™` — u
 
 Firebase project: `the-untaught-lessons` · Shared client: `assets/firebase.js`
 
+The Admin Console imports the shared Firebase client with an explicit version query. Update that version whenever the module's named exports change so a cached older module cannot prevent the admin authentication gate from starting.
+
 Firestore collections:
 - `authorized_members/{email}` — who can sign in with Google. Email keys are normalized lowercase.
 - `users/{uid}` — per-user profile and progress. Fields: `email`, `displayName`, `role`, `lastSeenAt`, `workspaceProgress`, `feedbackEnabled`.
