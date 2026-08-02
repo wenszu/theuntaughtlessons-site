@@ -17,6 +17,17 @@ const RUBRIC_NAMES = [
   "Confident language"
 ];
 const MODELS = ["gemini-flash-latest", "gemini-2.5-flash"];
+const MAX_REQUEST_BYTES = 64 * 1024;
+
+function rejectOversizedRequest(request, response) {
+  const declaredLength = Number(request.get("content-length") || 0);
+  const actualLength = request.rawBody && request.rawBody.length || 0;
+  if (declaredLength > MAX_REQUEST_BYTES || actualLength > MAX_REQUEST_BYTES) {
+    response.status(413).json({ error: "Request is too large." });
+    return true;
+  }
+  return false;
+}
 
 function levelFor(total) {
   if (total >= 28) return "Executive-ready";
@@ -271,6 +282,7 @@ exports.scoreScqa = onRequest({
   response.set("Content-Type", "application/json");
   if (request.method === "OPTIONS") { response.status(204).send(""); return; }
   if (request.method !== "POST") { response.status(405).json({ error: "POST only." }); return; }
+  if (rejectOversizedRequest(request, response)) return;
 
   let body = request.body;
   if (typeof body === "string") {
@@ -367,6 +379,7 @@ exports.runAdvisoryBoard = onRequest({
   response.set("Content-Type", "application/json");
   if (request.method === "OPTIONS") { response.status(204).send(""); return; }
   if (request.method !== "POST") { response.status(405).json({ error: "POST only." }); return; }
+  if (rejectOversizedRequest(request, response)) return;
 
   let body = request.body;
   if (typeof body === "string") { try { body = JSON.parse(body); } catch (_) { body = {}; } }
@@ -420,6 +433,7 @@ exports.scoreExplainToAiko = onRequest({
   response.set("Content-Type", "application/json");
   if (request.method === "OPTIONS") { response.status(204).send(""); return; }
   if (request.method !== "POST") { response.status(405).json({ error: "POST only." }); return; }
+  if (rejectOversizedRequest(request, response)) return;
 
   let body = request.body;
   if (typeof body === "string") {
@@ -513,6 +527,7 @@ exports.scoreTsaDiagnostic = onRequest({
   response.set("Content-Type", "application/json");
   if (request.method === "OPTIONS") { response.status(204).send(""); return; }
   if (request.method !== "POST") { response.status(405).json({ error: "POST only." }); return; }
+  if (rejectOversizedRequest(request, response)) return;
   let body = request.body;
   if (typeof body === "string") { try { body = JSON.parse(body); } catch (_) { body = {}; } }
   const input = {

@@ -1,0 +1,16 @@
+{
+  "name": "theuntaughtlessons-admin-functions",
+  "description": "Authenticated administrative actions for The Untaught Lessons.",
+  "private": true,
+  "engines": {
+    "node": "20"
+  },
+  "main": "index.js",
+  "scripts": {
+    "lint": "node --check index.js"
+  },
+  "dependencies": {
+    "firebase-admin": "^12.7.0",
+    "firebase-functions": "^5.1.1"
+  }
+}

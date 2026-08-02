@@ -30,6 +30,11 @@
       "source": "functions-aiko",
       "codebase": "aiko",
       "runtime": "nodejs20"
+    },
+    {
+      "source": "functions-admin",
+      "codebase": "admin-actions",
+      "runtime": "nodejs20"
     }
   ],
   "hosting": {

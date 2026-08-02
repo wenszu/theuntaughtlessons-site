@@ -1,0 +1,50 @@
+name: Security checks
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  static-and-dependency-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: |
+            functions/package-lock.json
+            functions-aiko/package-lock.json
+            functions-admin/package-lock.json
+      - name: Check committed files for GitHub tokens
+        run: bash scripts/check-secrets.sh
+      - name: Run repository tests
+        run: |
+          for test_file in tests/*.test.js; do
+            node "$test_file"
+          done
+      - name: Validate Cloud Functions syntax
+        run: |
+          node --check functions/index.js
+          node --check functions-aiko/index.js
+          node --check functions-admin/index.js
+      - name: Audit Google Group function dependencies
+        working-directory: functions
+        run: |
+          npm ci --ignore-scripts
+          npm audit --omit=dev --audit-level=high
+      - name: Audit AI function dependencies
+        working-directory: functions-aiko
+        run: |
+          npm ci --ignore-scripts
+          npm audit --omit=dev --audit-level=high
+      - name: Audit administrative function dependencies
+        working-directory: functions-admin
+        run: |
+          npm ci --ignore-scripts
+          npm audit --omit=dev --audit-level=high

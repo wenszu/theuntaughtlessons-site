@@ -85,6 +85,10 @@
       margin-top: 20px;
     }
 
+    [hidden] {
+      display: none !important;
+    }
+
     label {
       color: var(--navy);
       font-size: 13px;
@@ -1986,7 +1990,8 @@
     <div class="admin-gate-card">
       <span class="admin-label">Admin Access</span>
       <h1>Site configuration</h1>
-      <form class="gate-form" id="adminGateForm">
+      <p id="adminGateDescription" style="margin:0 0 18px;color:#666;line-height:1.5;"></p>
+      <form class="gate-form" id="adminGateForm" hidden>
         <label for="adminPassword">Password</label>
         <div class="password-input-wrap">
           <input id="adminPassword" type="password" autocomplete="current-password" required>
@@ -2000,6 +2005,10 @@
         <button class="primary-button" type="submit">Enter</button>
         <p class="error" id="adminError">Incorrect password</p>
       </form>
+      <div id="adminGoogleGate" hidden>
+        <button class="primary-button" id="adminGoogleSignIn" type="button">Continue with Google</button>
+        <p id="adminGoogleStatus" style="margin:12px 0 0;color:#666;line-height:1.5;" aria-live="polite"></p>
+      </div>
     </div>
   </section>
 
@@ -3162,6 +3171,7 @@
       getPublicFindLevelSetting,
       getSignedInUser,
       requestGoogleGroupSyncJob,
+      runAdminAction,
       repairMemberProgramCompletionReward,
       replaceMemberWorkspaceProgress,
       resetMemberWorkspaceProgress,
@@ -3204,6 +3214,7 @@
       getPublicFindLevelSetting,
       getSignedInUser,
       requestGoogleGroupSyncJob,
+      runAdminAction,
       repairMemberProgramCompletionReward,
       replaceMemberWorkspaceProgress,
       resetMemberWorkspaceProgress,
@@ -3227,6 +3238,7 @@
     const PASSWORD_KEY = 'utl_admin_password';
     const DEFAULT_ADMIN_PASSWORD = 'utl2026_admin';
     const BOOTSTRAP_OWNER_EMAILS = ['wenszu@gmail.com'];
+    const LOCAL_ADMIN_HOST = /^(localhost|127\.0\.0\.1)$/.test(window.location.hostname);
 
     // FIX 8 — Invite log
     const inviteSessionLog = [];
@@ -3637,8 +3649,8 @@
 
     function showAdmin() {
       localStorage.setItem('utl_member_unlocked', 'true');
-      localStorage.setItem('utl_member_username', 'admin');
-      if (!localStorage.getItem('utl_member_profile')) {
+      if (LOCAL_ADMIN_HOST) localStorage.setItem('utl_member_username', 'admin');
+      if (LOCAL_ADMIN_HOST && !localStorage.getItem('utl_member_profile')) {
         localStorage.setItem('utl_member_profile', JSON.stringify({ email: 'admin', displayName: 'admin', role: 'admin' }));
       }
       gate.style.display = 'none';
@@ -3646,6 +3658,61 @@
       renderAdminProfile();
       const requestedTab = new URLSearchParams(window.location.search).get('tab') || 'content-manager';
       switchAdminTab(requestedTab, { replace: true, scroll: false });
+    }
+
+    function setProductionAdminProfile(user, role) {
+      const email = String(user && user.email || '').trim().toLowerCase();
+      const displayName = String(user && user.displayName || email || 'Admin').trim();
+      localStorage.setItem('utl_member_unlocked', 'true');
+      localStorage.setItem('utl_member_username', email);
+      localStorage.setItem('utl_member_profile', JSON.stringify({
+        email: email,
+        displayName: displayName,
+        photoURL: user && user.photoURL || '',
+        role: role || 'admin'
+      }));
+    }
+
+    async function openProductionAdmin(options) {
+      const settings = options || {};
+      const status = document.getElementById('adminGoogleStatus');
+      const button = document.getElementById('adminGoogleSignIn');
+      const fb = window.utlFirebaseAuth;
+      if (!fb || !fb.getSignedInUser || !fb.signInWithGooglePopup) {
+        if (status) status.textContent = 'Secure sign-in is loading. Please wait a moment.';
+        return false;
+      }
+
+      if (button) button.disabled = true;
+      if (status) status.textContent = 'Checking your administrator access…';
+      try {
+        let user = await fb.getSignedInUser();
+        if (!user && settings.interactive) {
+          await fb.signInWithGooglePopup();
+          user = await fb.getSignedInUser();
+        }
+        if (!user) {
+          if (status) status.textContent = 'Sign in with an approved administrator Google account.';
+          return false;
+        }
+
+        const adminStatus = await mbGetFirebaseAdminRole(user);
+        if (!adminStatus.isAdmin) {
+          if (fb.signOut && fb.auth) await fb.signOut(fb.auth);
+          throw new Error('This Google account is not approved as an administrator.');
+        }
+        if (adminStatus.isBootstrapOwner) await mbEnsureBootstrapOwnerRecord(adminStatus.email);
+
+        localStorage.removeItem(AUTH_KEY);
+        setProductionAdminProfile(user, adminStatus.role);
+        showAdmin();
+        return true;
+      } catch (error) {
+        if (status) status.textContent = (error && error.message) || 'Administrator sign-in did not complete.';
+        return false;
+      } finally {
+        if (button) button.disabled = false;
+      }
     }
 
     function adminProfileData() {
@@ -5586,7 +5653,6 @@
 
     let _etTemplates = {};
     let _etPreviewRange = null;
-    const EMAIL_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzJE--FL2kB_XDNZRnszCtlyLRPvaLAHGuF5TAOdXJk40atbvf5Y6ELuSK2B7CSLaMN/exec';
     const DEFAULT_WORKSPACE_URL = 'https://theuntaughtlessons.com/member-login/';
     const GOOGLE_GROUP_EMAIL = 'utl-members@googlegroups.com';
 
@@ -5603,26 +5669,13 @@
       return Object.assign({}, defaults, _etTemplates[id] || {});
     }
 
-    function postEmailScriptAction(action, payload) {
-      const body = Object.assign({ action, source: 'admin-email-template' }, payload || {});
-      return fetch(EMAIL_SCRIPT_URL + '?action=' + encodeURIComponent(action), {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
-        body: JSON.stringify(body)
-      });
-    }
-
-    function mbRequestGoogleGroupSync(email, name, mode) {
-      const action = mode === 'remove' ? 'RemoveGoogleGroupMember' : 'AddGoogleGroupMember';
-      return postEmailScriptAction(action, {
-        source: 'admin-member-management',
-        email: email,
-        memberEmail: email,
-        recipient: email,
-        name: name || '',
-        groupEmail: GOOGLE_GROUP_EMAIL
-      });
+    async function postEmailScriptAction(action, payload) {
+      const fb = window.utlFirebaseAuth;
+      await mbRequireFirebaseAdmin();
+      if (!fb || !fb.runAdminAction) {
+        throw new Error('The secure administrator service is still loading. Try again in a moment.');
+      }
+      return fb.runAdminAction(action, Object.assign({ source: 'admin-email-template' }, payload || {}));
     }
 
     function mbDateToIso(value) {
@@ -7332,6 +7385,7 @@
 
     gateForm.addEventListener('submit', (event) => {
       event.preventDefault();
+      if (!LOCAL_ADMIN_HOST) return;
       const acceptedPassword = getValue(PASSWORD_KEY, DEFAULT_ADMIN_PASSWORD);
       if (document.getElementById('adminPassword').value === acceptedPassword) {
         localStorage.setItem(AUTH_KEY, 'true');
@@ -7340,6 +7394,10 @@
         return;
       }
       adminError.classList.add('is-visible');
+    });
+
+    document.getElementById('adminGoogleSignIn').addEventListener('click', () => {
+      openProductionAdmin({ interactive: true });
     });
 
     document.getElementById('logoutLink').addEventListener('click', async (event) => {
@@ -8141,20 +8199,16 @@
               var syncJobId = '';
               try {
                 syncJobId = await mbQueueGoogleGroupSync(email, fields.name || previousData.name || '', requestedGroupMode);
-              } catch (jobErr) { /* fall through to Apps Script fallback */ }
-
-              try {
-                await mbRequestGoogleGroupSync(email, fields.name || previousData.name || '', requestedGroupMode);
                 await fb.authorizeMember(email, {
-                  googleGroupSyncStatus: syncJobId ? 'pending' : requestedGroupMode + '-requested',
-                  googleGroupSyncJobId: syncJobId || '',
+                  googleGroupSyncStatus: 'pending',
+                  googleGroupSyncJobId: syncJobId,
                   googleGroupSyncRequestedAt: fb.Timestamp.fromDate(new Date())
                 });
               } catch (groupErr) {
                 await fb.authorizeMember(email, {
-                  googleGroupSyncStatus: syncJobId ? 'pending' : requestedGroupMode + '-request-failed',
+                  googleGroupSyncStatus: 'request-failed',
                   googleGroupSyncJobId: syncJobId || '',
-                  googleGroupSyncError: (groupErr && groupErr.message) || 'Apps Script request failed',
+                  googleGroupSyncError: (groupErr && groupErr.message) || 'Secure group sync request failed',
                   googleGroupSyncRequestedAt: fb.Timestamp.fromDate(new Date())
                 });
               }
@@ -8231,11 +8285,7 @@
             try {
               groupRemoveJobId = await mbQueueGoogleGroupSync(email, cachedData.name || '', 'remove');
               groupRemoveRequested = true;
-            } catch (jobErr) { /* fall through to Apps Script fallback */ }
-            try {
-              await mbRequestGoogleGroupSync(email, cachedData.name || '', 'remove');
-              groupRemoveRequested = true;
-            } catch (groupErr) { /* non-fatal */ }
+            } catch (jobErr) { /* non-fatal: show the manual removal reminder */ }
             try {
               await mbLogRemovedMember(email, cachedData);
             } catch (logErr) { /* non-fatal: removal should not be blocked by sheet logging */ }
@@ -8253,7 +8303,7 @@
                 '<div style="margin-bottom:14px;padding:12px 16px;background:#fff8e1;border-radius:4px;">' +
                 '<strong style="display:block;margin-bottom:6px;color:#003366;">Access revoked for ' + escapeHtml(email) + '</strong>' +
                 '<p style="margin:0 0 6px;font-size:13px;color:#4A4A4A;">Automated: removed from Firestore member list and user profile.</p>' +
-                '<p style="margin:0;font-size:13px;color:#4A4A4A;">Google Group removal ' + (groupRemoveRequested ? 'was queued' + (groupRemoveJobId ? ' in Firestore.' : ' through Apps Script fallback.') : 'could not be requested. Remove manually at <a href="https://groups.google.com/g/utl-members" target="_blank" style="color:#003366;">utl-members</a>.') + '</p>' +
+                '<p style="margin:0;font-size:13px;color:#4A4A4A;">Google Group removal ' + (groupRemoveRequested ? 'was queued securely in Firestore.' : 'could not be requested. Remove manually at <a href="https://groups.google.com/g/utl-members" target="_blank" style="color:#003366;">utl-members</a>.') + '</p>' +
                 '</div>';
               notice.hidden = false;
               setTimeout(function () { notice.hidden = true; }, 20000);
@@ -8388,22 +8438,17 @@
           try {
             groupSyncJobId = await mbQueueGoogleGroupSync(emailVal, nameVal, 'add');
             groupSyncRequested = true;
-          } catch (jobErr) { /* fall through to Apps Script fallback */ }
-
-          try {
-            await mbRequestGoogleGroupSync(emailVal, nameVal, 'add');
-            groupSyncRequested = true;
             await fb.authorizeMember(emailVal, {
-              googleGroupSyncStatus: groupSyncJobId ? 'pending' : 'add-requested',
-              googleGroupSyncJobId: groupSyncJobId || '',
+              googleGroupSyncStatus: 'pending',
+              googleGroupSyncJobId: groupSyncJobId,
               googleGroupSyncRequestedAt: fb.Timestamp.fromDate(new Date())
             });
           } catch (groupErr) {
             try {
               await fb.authorizeMember(emailVal, {
-                googleGroupSyncStatus: groupSyncJobId ? 'pending' : 'add-request-failed',
+                googleGroupSyncStatus: 'request-failed',
                 googleGroupSyncJobId: groupSyncJobId || '',
-                googleGroupSyncError: (groupErr && groupErr.message) || 'Apps Script request failed',
+                googleGroupSyncError: (groupErr && groupErr.message) || 'Secure group sync request failed',
                 googleGroupSyncRequestedAt: fb.Timestamp.fromDate(new Date())
               });
             } catch (e2) { /* non-fatal */ }
@@ -8427,7 +8472,7 @@
 
           const renderedHtml = generateEmailHtml(personalizedData);
 
-          // Always send Apps Script welcome email
+          // Send the welcome email through the authenticated administrator service.
           var emailSent = false;
           try {
             await postEmailScriptAction('WelcomeEmail', {
@@ -8607,9 +8652,32 @@
       window.location.reload();
     });
 
-    if (localStorage.getItem(AUTH_KEY) === 'true') {
-      showAdmin();
-    }
+    (function initializeAdminGate() {
+      const description = document.getElementById('adminGateDescription');
+      const googleGate = document.getElementById('adminGoogleGate');
+      if (LOCAL_ADMIN_HOST) {
+        description.textContent = 'Local preview only. Enter the local admin password.';
+        gateForm.hidden = false;
+        googleGate.hidden = true;
+        if (localStorage.getItem(AUTH_KEY) === 'true') showAdmin();
+        return;
+      }
+
+      // Production never trusts the browser-only password or its localStorage flag.
+      localStorage.removeItem(AUTH_KEY);
+      gateForm.hidden = true;
+      googleGate.hidden = false;
+      description.textContent = 'Sign in with an approved administrator Google account.';
+
+      function checkExistingSession() {
+        openProductionAdmin({ interactive: false });
+      }
+      if (window.utlFirebaseAuth) {
+        checkExistingSession();
+      } else {
+        window.addEventListener('utlFirebaseAuthReady', checkExistingSession, { once: true });
+      }
+    })();
   </script>
   <script src="../assets/tactile-buttons.js?v=20260714-flat-1" defer></script>
   <script type="module" src="../assets/feedback-widget.js?v=6"></script>

@@ -1596,12 +1596,12 @@
           </div>
           <span class="ex-badge-done">Done</span>
         </div>
-        <div class="ex-result-preview" id="preview-${app.id}">${formatPreview(app.id, record)}</div>
+        <div class="ex-result-preview" id="preview-${app.id}">${escapeHtml(formatPreview(app.id, record))}</div>
         <div class="ex-result-actions">
           <button class="btn-copy-workbook" onclick="copyToWorkbook('${app.id}')">Copy to workbook</button>
           <button class="btn-view-full" onclick="toggleFullResponse('${app.id}')">View full response</button>
         </div>
-        <div class="ex-result-full" id="full-${app.id}" style="display:none">${formatFullResponse(app.id, record)}</div>
+        <div class="ex-result-full" id="full-${app.id}" style="display:none">${escapeHtml(formatFullResponse(app.id, record))}</div>
       </div>`;
     }
 
