@@ -1,0 +1,880 @@
+<!--
+REUSE AUDIT
+- App header and timer: copied from apps/messy-notes/index.html
+- Screen progression and step indicator: copied from apps/grocery-list/index.html
+- Card layout and button styles: copied from apps/messy-notes/index.html
+- Pre-fill and copy-to-clipboard pattern: copied from apps/scqa-builder/index.html
+- Word count behavior: copied from apps/messy-notes/index.html
+- Show/hide toggle: copied from apps/scqa-builder/index.html
+- New code written for this file only: advisor/orchestrator selection, prompt assembly, advisory-board parser, saved-board persistence
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Build a virtual advisory board with AI and generate a structured prompt.">
+  <title>Advisory board with AI | The Untaught Lessons</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="../../assets/favicon-bluebg-whitedoor-thicker-32.png?v=6">
+  <link rel="shortcut icon" type="image/png" href="../../assets/favicon-bluebg-whitedoor-thicker-32.png?v=6">
+  <link rel="apple-touch-icon" sizes="180x180" href="../../assets/apple-touch-icon.png?v=3">
+  <link rel="stylesheet" href="../shared/activity-timer.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lato:wght@300;400;700&family=Roboto+Mono:wght@400;500;700&display=swap');
+    :root {
+      --ab-cream: #F3EDE2;
+      --ab-navy: #003366;
+      --ab-gold: #EEA320;
+      --ab-charcoal: #4A4A4A;
+      --ab-steel: #4D7094;
+      --ab-white: #FFFFFF;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--ab-cream);
+      color: var(--ab-charcoal);
+      font-family: 'Lato', sans-serif;
+    }
+    button, textarea, input { font: inherit; }
+    .ab-header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: grid;
+      grid-template-columns: auto auto minmax(220px, 1fr) auto;
+      align-items: center;
+      column-gap: 20px;
+      min-height: 76px;
+      padding: 12px 32px;
+      background: var(--ab-navy);
+      color: var(--ab-white);
+    }
+    .ab-logo {
+      display: block;
+      width: 224px;
+      height: 46px;
+    }
+    .ab-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+    .ab-divider {
+      width: 1px;
+      height: 38px;
+      background: rgba(255,255,255,.42);
+    }
+    .ab-kicker {
+      display: block;
+      color: var(--ab-gold);
+      font-family: Lato, Arial, sans-serif;
+      font-size: 10px;
+      letter-spacing: 0;
+      text-transform: none;
+    }
+    .ab-title {
+      display: block;
+      margin-top: 3px;
+      color: var(--ab-white);
+      font-family: 'Playfair Display', serif;
+      font-size: 27px;
+      font-weight: 700;
+      line-height: 1;
+    }
+    .module-back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 8px;
+      color: rgba(255, 255, 255, .82);
+      font-family: 'Lato', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      line-height: 1.25;
+      text-decoration: none;
+    }
+
+    .module-back-link:hover {
+      color: var(--gold, var(--ab-gold, var(--eisenhower-gold, #EEA320)));
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+    .ab-timer {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+    .ab-utility-metric {
+      min-width: 148px;
+      padding: 7px 10px;
+      border: 1px solid rgba(255,255,255,.18);
+      border-radius: 8px;
+      background: rgba(255,255,255,.08);
+    }
+    .ab-utility-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .ab-small-label {
+      color: var(--ab-gold);
+      font-family: Lato, Arial, sans-serif;
+      font-size: 10px;
+      letter-spacing: 0;
+      text-transform: none;
+    }
+    .ab-time-display {
+      color: var(--ab-white);
+      font-family: Lato, Arial, sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      line-height: 1;
+    }
+    .ab-hide-time,
+    .ab-icon-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(255,255,255,.32);
+      background: rgba(255,255,255,.08);
+      color: var(--ab-white);
+      cursor: pointer;
+    }
+    .ab-hide-time {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      padding: 0;
+    }
+    .ab-hide-time svg {
+      width: 14px;
+      height: 14px;
+      stroke-width: 2.2;
+    }
+    .ab-utility-metric.ab-time-hidden .ab-time-display { visibility: hidden; }
+    .ab-controls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .ab-icon-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      font-size: 15px;
+      font-weight: 700;
+      line-height: 1;
+      padding: 0;
+    }
+    .ab-icon-btn:disabled {
+      cursor: not-allowed;
+      opacity: .45;
+    }
+    .ab-main {
+      width: min(1180px, calc(100% - 40px));
+      margin: 0 auto;
+      padding: 34px 0 56px;
+    }
+    .ab-progress {
+      margin-bottom: 14px;
+      color: var(--ab-gold);
+      font-family: Lato, Arial, sans-serif;
+      font-size: 12px;
+      letter-spacing: 0;
+      text-transform: none;
+    }
+    .ab-screen {
+      display: none;
+      opacity: 0;
+      transition: opacity .2s ease;
+    }
+    .ab-screen.ab-active {
+      display: block;
+      opacity: 1;
+    }
+    .ab-hero {
+      margin-bottom: 22px;
+    }
+    .ab-hero h1, .ab-panel h2, .ab-card h3, .ab-verdict h2 {
+      margin: 0;
+      color: var(--ab-navy);
+      font-family: 'Playfair Display', serif;
+      line-height: 1.12;
+    }
+    .ab-hero h1 {
+      font-size: clamp(2.1rem, 5vw, 4rem);
+    }
+    .ab-hero p {
+      max-width: 760px;
+      margin: 10px 0 0;
+      font-size: 1.05rem;
+      line-height: 1.55;
+    }
+    .ab-panel, .ab-card, .ab-output-card {
+      background: var(--ab-white);
+      border: 1px solid rgba(0,51,102,.16);
+      border-radius: 8px;
+      box-shadow: 0 12px 30px rgba(0,51,102,.08);
+    }
+    .ab-panel {
+      padding: 24px;
+      margin-bottom: 18px;
+    }
+    .ab-panel h2 + .ab-button {
+      margin-top: 12px;
+    }
+    .ab-work-grid {
+      display: grid;
+      gap: 16px;
+    }
+    .ab-field-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+    .ab-label {
+      color: var(--ab-gold);
+      font-family: Lato, Arial, sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0;
+      text-transform: none;
+    }
+    .ab-textarea, .ab-prompt-box, .ab-input {
+      width: 100%;
+      border: 1px solid rgba(0,51,102,.22);
+      border-radius: 8px;
+      background: var(--ab-cream);
+      color: var(--ab-charcoal);
+      padding: 13px;
+      line-height: 1.55;
+    }
+    .ab-textarea {
+      min-height: 150px;
+      resize: vertical;
+    }
+    .ab-prompt-box {
+      min-height: 260px;
+      font-family: Lato, Arial, sans-serif;
+      font-size: 12px;
+      white-space: pre-wrap;
+    }
+    .ab-button-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      margin-top: 16px;
+    }
+    .ab-button, .ab-small-button {
+      min-height: 44px;
+      border: 1px solid var(--ab-navy);
+      border-radius: 7px;
+      background: var(--ab-white);
+      color: var(--ab-navy);
+      cursor: pointer;
+      font-weight: 700;
+      padding: 10px 18px;
+    }
+    .ab-button.ab-gold, .ab-small-button.ab-gold {
+      border-color: var(--ab-gold);
+      background: var(--ab-gold);
+      color: var(--ab-navy);
+    }
+    .ab-button.ab-accent, .ab-small-button.ab-accent {
+      border-color: var(--ab-gold);
+      border-width: 2px;
+    }
+    .ab-button:disabled {
+      cursor: not-allowed;
+      opacity: .55;
+    }
+    .ab-link-button {
+      border: 0;
+      background: transparent;
+      color: var(--ab-navy);
+      cursor: pointer;
+      text-decoration: underline;
+    }
+    .ab-education {
+      display: grid;
+      gap: 16px;
+      margin-bottom: 22px;
+    }
+    .ab-education h2 {
+      margin-bottom: 6px;
+    }
+    .ab-education p {
+      margin: 0;
+      line-height: 1.65;
+    }
+    .ab-details > summary {
+      cursor: pointer;
+      list-style: none;
+      color: var(--ab-navy);
+      font-family: 'Playfair Display', serif;
+      font-size: 1.15rem;
+    }
+    .ab-details > summary::-webkit-details-marker {
+      display: none;
+    }
+    .ab-details > summary::before {
+      content: '▸ ';
+      color: var(--ab-gold);
+    }
+    .ab-details[open] > summary::before {
+      content: '▾ ';
+    }
+    .ab-details .ab-qa-list {
+      margin-top: 16px;
+    }
+    .ab-qa-list {
+      display: grid;
+      gap: 14px;
+    }
+    .ab-qa-item {
+      border: 1px solid rgba(0,51,102,.14);
+      border-radius: 8px;
+      background: var(--ab-white);
+      padding: 16px;
+    }
+    .ab-qa-item h3 {
+      margin: 0 0 8px;
+      color: var(--ab-navy);
+      font-family: 'Playfair Display', serif;
+      font-size: 1.25rem;
+    }
+    .ab-qa-item p {
+      margin: 0;
+      line-height: 1.6;
+    }
+    .ab-card-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 12px;
+    }
+    .ab-card {
+      position: relative;
+      padding: 18px;
+      text-align: left;
+      cursor: pointer;
+    }
+    .ab-card.ab-selected, .ab-card.ab-orchestrator {
+      border-color: var(--ab-gold);
+      box-shadow: 0 0 0 2px rgba(238,163,32,.22);
+    }
+    .ab-card h3 {
+      font-size: 1.3rem;
+    }
+    .ab-card p {
+      margin: 10px 0 0;
+      line-height: 1.5;
+    }
+    .ab-badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      border-radius: 999px;
+      background: var(--ab-gold);
+      color: var(--ab-navy);
+      font-family: Lato, Arial, sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 4px 8px;
+      text-transform: none;
+    }
+    .ab-add-fields {
+      display: none;
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .ab-add-fields.ab-open {
+      display: grid;
+    }
+    .ab-note {
+      margin-top: 10px;
+      color: var(--ab-steel);
+      font-size: .92rem;
+      line-height: 1.45;
+    }
+    .ab-action-note {
+      max-width: 620px;
+      margin: 4px 0 0;
+      color: var(--ab-steel);
+      font-size: .92rem;
+      line-height: 1.45;
+    }
+    .ab-error {
+      display: none;
+      margin-top: 10px;
+      color: var(--ab-navy);
+      font-weight: 700;
+    }
+
+    .ab-icon-btn svg {
+      width: 17px;
+      height: 17px;
+      stroke-width: 2.2;
+      vertical-align: middle;
+    }
+    .ab-error.ab-show { display: block; }
+    .ab-save-status {
+      min-height: 22px;
+      margin-top: 10px;
+      color: var(--ab-steel);
+      font-weight: 700;
+    }
+    .ab-save-status.ab-saved {
+      color: var(--ab-navy);
+    }
+    .ab-two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+    .ab-output-grid {
+      display: grid;
+      gap: 14px;
+      margin-top: 18px;
+    }
+    .ab-output-card {
+      padding: 16px;
+    }
+    .ab-output-card h3 {
+      margin: 0 0 10px;
+      color: var(--ab-navy);
+      font-family: 'Playfair Display', serif;
+    }
+    .ab-output-card strong {
+      color: var(--ab-navy);
+    }
+    .ab-verdict {
+      margin-top: 18px;
+      padding: 18px;
+      border: 1px solid rgba(0, 51, 102, .12);
+      background: var(--ab-cream);
+    }
+    .ab-chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .ab-chip {
+      border-radius: 999px;
+      background: var(--ab-navy);
+      color: var(--ab-white);
+      font-family: Lato, Arial, sans-serif;
+      font-size: 11px;
+      padding: 6px 10px;
+    }
+    .ab-chip.ab-gold-chip {
+      background: var(--ab-gold);
+      color: var(--ab-navy);
+    }
+    @media (max-width: 768px) {
+      .ab-header {
+        grid-template-columns: auto 1fr;
+        row-gap: 10px;
+        padding: 12px 18px;
+      }
+      .ab-logo { width: 168px; }
+      .ab-divider { display: none; }
+      .ab-timer { grid-column: 1 / -1; justify-content: flex-start; }
+      .ab-main { width: min(100% - 24px, 1180px); }
+      .ab-card-grid, .ab-two-col { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header class="ab-header">
+    <a class="ab-logo" href="../../member-login/index.html" aria-label="The Untaught Lessons member home"><img src="../../assets/utl-logo-nav-white.png" alt="The Untaught Lessons"></a>
+    <div class="ab-divider" aria-hidden="true"></div>
+    <div><span class="ab-kicker">Phase 2 · Speak concisely</span><span class="ab-title">Advisory board with AI</span><a class="module-back-link" href="../../member-login/index.html#learning-journey">← Back to Learning Journey</a></div>
+    <div class="ab-timer" aria-label="Elapsed time">
+      <div class="ab-utility-metric" id="timerMetric">
+        <div class="ab-utility-row">
+          <span class="ab-small-label">Elapsed time</span>
+          <button class="ab-hide-time" id="timerMetricToggleBtn" type="button" aria-label="Hide elapsed time" aria-pressed="false"></button>
+        </div>
+        <div class="ab-time-display activity-timer-display" id="timerDisplay">00:00</div>
+      </div>
+      <div class="ab-controls">
+        <button class="ab-icon-btn" id="timerPauseIconBtn" type="button" aria-label="Pause timer" disabled></button>
+        <button class="ab-icon-btn" id="timerResetIconBtn" type="button" aria-label="Reset timer"></button>
+      </div>
+    </div>
+  </header>
+
+  <main class="ab-main">
+    <div class="exercise-intro ab-hero">
+      <h1>Advisory board with AI</h1>
+      <p>Build a virtual advisory board with AI and generate a structured prompt.</p>
+    </div>
+
+    <div class="ab-progress" id="progressText">Step 1 of 5</div>
+
+    <section class="ab-screen ab-active" data-screen="1">
+      <div class="ab-hero"><h1>Advisory board with AI</h1><p>Think of this as a structured way to ask AI for multiple perspectives without letting the conversation become noise. Below is an Olympics issue tree and SCQA from earlier Phase 2 exercises for the board to review. Edit it or use it as is.</p></div>
+      <details class="ab-panel ab-details">
+        <summary>How advisory boards work</summary>
+        <div class="ab-qa-list">
+          <div class="ab-qa-item"><h3>What is a virtual advisory board?</h3><p>A virtual advisory board is a set of AI-generated advisors, each assigned a specific role. One thinks like a CFO, another like a customer and another like the person responsible for making the project work. Giving each advisor a role produces several distinct reactions to the same work.</p></div>
+          <div class="ab-qa-item"><h3>Why do the roles matter?</h3><p>A CFO notices risks a customer may miss. A customer raises questions an operator may not ask. Clear roles make each response specific enough to compare, challenge and use in your decision.</p></div>
+          <div class="ab-qa-item"><h3>Who is the orchestrator?</h3><p>The orchestrator is not another advisor. They do not add another perspective to the pile. Their job is to listen to all the advisors, compare what they said, and decide what matters most. They are the person who turns a room full of opinions into one clear direction.</p></div>
+          <div class="ab-qa-item"><h3>Why does someone need to make the final call?</h3><p>More advice can create more confusion. The advisors widen the picture, while the orchestrator weighs the competing views and recommends what to do next. You still make the final decision.</p></div>
+          <div class="ab-qa-item"><h3>How do I choose my orchestrator?</h3><p>You can choose someone who thinks like you when the decision is yours to own. You can also choose the person best suited to the problem, even if they think differently from you. The key question is simple: do you need your best decision here, or the best decision for this specific problem? Those are not always the same answer.</p></div>
+          <div class="ab-qa-item"><h3>How do I get the most out of this?</h3><p>Give the board something real to react to. In this exercise, each advisor reviews your problem statement, issue tree and SCQA from an assigned role. Decide which feedback sharpens the work and which comments you can set aside.</p></div>
+        </div>
+      </details>
+
+      <div class="ab-panel ab-work-grid">
+        <div><div class="ab-field-head"><span class="ab-label">Problem Statement</span></div><textarea class="ab-textarea" id="problemText">Why is the Olympics losing its cultural impact?
+
+The Olympics has historically been one of the most unifying global events. However, recent games have struggled to capture the same cultural relevance, sustained attention, and emotional connection with audiences.</textarea></div>
+        <div><div class="ab-field-head"><span class="ab-label">Issue Tree</span></div><textarea class="ab-textarea" id="treeText">Central question: Why is the Olympics losing its magic?
+
+Argument 1: Shared ritual is breaking
+Fragmented attention: There is no single shared moment because audiences are split across platforms, time zones, and competing world stages.
+Broadcast-first packaging: The Olympics still feels like a TV event while audiences now consume culture through feeds and communities.
+Highlights over attendance: People catch up later, so the Games lose the live collective timestamp feeling.
+
+Argument 2: Meaning is getting replaced by moment-chasing
+Clip culture: Short-form content rewards shock, controversy, and spectacle while meaning needs arcs and buildup.
+Moment-chasing storytelling: Highlights and virality outshine training, stakes, and excellence.
+Winners are not legible: Without consistent athlete-led arcs, audiences do not feel the personal stakes behind excellence.
+
+Argument 3: Legitimacy and tone are getting noisier
+Trust volatility: Politics and polarization make the Olympics feel biased or contested.
+Sensitivity risk: Generic unity messaging can land as tone-deaf in a fractured world.
+Commercialization signal: Sponsorship and ad load can make the Games feel monetized rather than earned.</textarea></div>
+        <div><div class="ab-field-head"><span class="ab-label">SCQA</span></div><textarea class="ab-textarea" id="scqaText">Situation: The Olympics has been one of the most unifying global events for over a century, with billions tuning in across generations.
+
+Complication: Despite its legacy, recent Games have failed to hold the same cultural weight. Audiences are fragmented, emotional connection is weaker, and the event no longer commands the shared attention it once did.
+
+Question: How can the Olympics reclaim its cultural relevance in a world of fractured attention and eroded trust?
+
+Answer: The Olympics needs a clarity layer with structured daily viewing routes, narrative-driven athlete coverage, and a tone and partnership system that reduces trust volatility and over-commercialization.</textarea></div>
+        <div class="ab-action-note">Change anything you want first. When it looks right, continue and choose who should review it.</div>
+        <div class="ab-button-row"><button class="ab-button ab-gold" data-next type="button">Continue</button></div>
+      </div>
+    </section>
+
+    <section class="ab-screen" data-screen="2">
+      <div class="ab-hero"><h1>Build your virtual board</h1><p>Choose the advisors who will pressure-test the work, then choose one orchestrator who will make the final call after everyone has spoken.</p></div>
+      <div class="ab-panel" id="savedBanner" hidden><strong>You have a saved board.</strong> It is pre-selected below. Swap anyone out if this problem needs a different perspective.</div>
+      <div class="ab-panel"><div class="ab-label">Select at least 3 advisors. You can add more.</div><div class="ab-card-grid" id="advisorGrid"></div></div>
+      <div class="ab-panel"><div class="ab-label">Now choose your orchestrator. This person makes the final call.</div><div class="ab-card-grid" id="orchestratorGrid"></div><p class="ab-note" id="roleNote"></p><div class="ab-button-row"><button class="ab-button" data-back type="button">Back</button><button class="ab-button ab-gold" id="buildPromptBtn" type="button" disabled>Build my prompt</button></div><p class="ab-error" id="boardError">Select at least 3 advisors and 1 orchestrator first.</p></div>
+    </section>
+
+    <section class="ab-screen" data-screen="3">
+      <div class="ab-hero"><h1>Your prompt is ready</h1><p>Copy it and paste it into the AI tool you already use, such as Claude, ChatGPT or Gemini.</p></div>
+      <div class="ab-two-col">
+        <div class="ab-panel"><div class="ab-label">Option A. Run your board</div><p>You have built your board. This prompt packages your work, your advisors, and the output format so your AI tool knows exactly what to do.</p><textarea class="ab-prompt-box" id="modeAPrompt" readonly></textarea><button class="ab-button ab-accent" data-copy-target="modeAPrompt" type="button">Copy prompt</button></div>
+        <div class="ab-panel"><div class="ab-label">Option B. Build your board with AI first</div><p>Not sure who should be on your panel? Paste this prompt into your AI tool. It will recommend a board of six suited to your specific problem. Then come back and add them as custom advisors.</p><textarea class="ab-prompt-box" id="modeBPrompt" readonly></textarea><button class="ab-button ab-accent" data-copy-target="modeBPrompt" type="button">Copy prompt</button></div>
+      </div>
+      <div class="ab-button-row"><button class="ab-button" data-back type="button">Back</button><button class="ab-button ab-gold" data-next type="button">Continue</button></div>
+    </section>
+
+    <section class="ab-screen" data-screen="4">
+      <div class="ab-hero"><h1>Paste your output</h1><p>Run the prompt in your AI tool, then paste the full output here so you can keep the board response with this exercise.</p></div>
+      <div class="ab-panel"><textarea class="ab-textarea" id="aiOutput" style="min-height:300px" placeholder="Paste the full advisory board output from your AI tool here..."></textarea><p class="ab-action-note">Paste the full response from your AI tool here. This saves it with the exercise before you continue.</p><div class="ab-button-row"><button class="ab-button ab-gold" id="saveResponseBtn" type="button">Save response</button></div><p class="ab-error" id="parseError">Paste the board output first, then save the response.</p><div class="ab-save-status" id="responseSaveStatus" aria-live="polite"></div></div>
+      <div class="ab-button-row"><button class="ab-button" data-back type="button">Back</button><button class="ab-button ab-gold" data-next type="button">Continue</button></div>
+    </section>
+
+    <section class="ab-screen" data-screen="5">
+      <div class="ab-hero"><h1>Why this matters</h1><p>Different perspectives help you test a decision before you commit to it. Your job is to separate useful advice from noise and make the final call.</p></div>
+      <div class="ab-panel"><h2>What you practiced</h2><p>You gave AI a real work product, assigned distinct roles and compared the resulting advice. The board challenged your thinking, but you remained responsible for the decision.</p></div>
+      <div class="ab-panel"><h2>Save this board</h2><p>The most effective leaders keep a board on standby — a trusted panel they can bring to any problem, not just this one.</p><div class="ab-chip-row" id="summaryChips"></div><div class="ab-button-row"><button class="ab-button" id="saveBoardBtn" type="button">Save as my default board</button><button class="ab-button ab-link-button" id="newBoardBtn" type="button">Build a different board</button></div><p class="ab-note">Next time you open this app, your board will be pre-selected. You can always swap individual members out for a new problem.</p></div>
+      <div class="ab-button-row"><button class="ab-button" data-back type="button">Back</button><button class="ab-button ab-gold" id="markDoneBtn" type="button">Mark as done</button><a class="ab-button" id="journeyLink" href="../../member-login/index.html#learning-journey">Back to Learning Journey</a></div>
+      <div class="ab-save-status" id="doneStatus" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <script>
+    const advisors = [
+      ['Steve Jobs','Radical simplicity / Product vision',"Cuts anything that does not serve the single most important idea. He has no patience for complexity dressed up as thoroughness, and he will tell you when your argument is too clever for its own good. If the core idea is not immediately clear, he will ask you to start over."],
+      ['Jeff Bezos','Customer obsession / Long-term systems','Wants to know who this is actually for and whether it still holds up in five years. He will challenge assumptions that feel obvious and push back on any framing that prioritizes internal logic over what the end user actually experiences. Narrative is not enough for him without the mechanism behind it.'],
+      ['Sheryl Sandberg','Operational clarity / Stakeholder alignment','Asks whether this can actually be executed and whether the right people are already aligned. She is less interested in whether your argument is intellectually sound than in whether you have thought through what happens when it meets real organizations, real timelines, and real politics.'],
+      ['Ray Dalio','Radical transparency / First-principles logic',"Will surface every assumption you have not explicitly stated and ask you to prove it. He operates on the belief that most arguments collapse when people accept claims that sound true but have not been tested. Expect to be asked why at least three times in a row."],
+      ['Indra Nooyi','Global complexity / Long-term brand thinking',"Asks what gets lost when you simplify and who is not in the room. She brings a global operating lens and a deep awareness of how decisions that look clean from the inside land differently depending on where and who you are talking to."],
+      ['The Skeptical CFO','Financial discipline / ROI scrutiny',"Will not be moved by a compelling narrative alone. Wants to know what this costs, what happens if it does not work and whether the return justifies the exposure. If your argument does not survive a hard financial question, this is where you will find out."],
+      ['The Front-Line User','Ground-level reality / Lived experience',"Does not engage with the framework at all. Only cares about whether this reflects what people actually experience when they use it, buy it or live with it. This perspective exposes the gap between what looks good in a slide and what works in practice."],
+      ["The Devil's Advocate",'Stress-testing / Contrarian logic',"Takes the strongest opposing position available and stays there until the argument can hold its ground. The goal is to test whether the idea can survive its strongest critic before it leaves the room."]
+    ].map((item, index) => ({ id: `preset-${index}`, name: item[0], lens: item[1], description: item[2] }));
+    let board = [...advisors];
+    let selectedAdvisors = new Set();
+    let orchestratorId = '';
+    let currentScreen = 1;
+    let timerHidden = false;
+    let timerStarted = false;
+    let timerRunning = false;
+    let timerStartedAt = 0;
+    let timerElapsed = 0;
+
+    function $(id) { return document.getElementById(id); }
+    function showScreen(number) {
+      currentScreen = number;
+      document.querySelectorAll('.ab-screen').forEach(screen => screen.classList.toggle('ab-active', screen.dataset.screen === String(number)));
+      $('progressText').textContent = `Step ${number} of 5`;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    function fallbackCopy(text) {
+      const temp = document.createElement('textarea');
+      temp.value = text;
+      document.body.appendChild(temp);
+      temp.select();
+      document.execCommand('copy');
+      temp.remove();
+    }
+    function copyText(text, button) {
+      const done = () => {
+        const original = button.textContent;
+        button.textContent = 'Copied ✓';
+        window.setTimeout(() => { button.textContent = original; }, 2000);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done).catch(() => { fallbackCopy(text); done(); });
+      else { fallbackCopy(text); done(); }
+    }
+    function advisorCard(person, mode) {
+      const card = document.createElement('article');
+      card.className = 'ab-card';
+      card.dataset.id = person.id;
+      const selected = mode === 'advisor' ? selectedAdvisors.has(person.id) : orchestratorId === person.id;
+      card.classList.toggle(mode === 'advisor' ? 'ab-selected' : 'ab-orchestrator', selected);
+      card.innerHTML = `${selected ? `<span class="ab-badge">${mode === 'advisor' ? '✓' : 'Orchestrator'}</span>` : ''}<h3>${person.name}</h3><div class="ab-label">${person.lens}</div><p>${person.description}</p>`;
+      card.addEventListener('click', () => {
+        if (mode === 'advisor') selectedAdvisors.has(person.id) ? selectedAdvisors.delete(person.id) : selectedAdvisors.add(person.id);
+        else orchestratorId = person.id;
+        renderBoard();
+      });
+      return card;
+    }
+    function addCustomCard(container, mode) {
+      const wrap = document.createElement('article');
+      wrap.className = 'ab-card';
+      wrap.innerHTML = '<h3>+ Add your own</h3><p>Name a specific person or persona you want in the room.</p><div class="ab-add-fields"><input class="ab-input" placeholder="Name"><textarea class="ab-textarea" placeholder="How do they think and what do they challenge?"></textarea><button class="ab-small-button ab-gold" type="button">Add to board</button></div>';
+      const fields = wrap.querySelector('.ab-add-fields');
+      wrap.addEventListener('click', event => {
+        if (event.target.tagName !== 'BUTTON') fields.classList.add('ab-open');
+      });
+      wrap.querySelector('button').addEventListener('click', event => {
+        event.stopPropagation();
+        const name = wrap.querySelector('input').value.trim();
+        const description = wrap.querySelector('textarea').value.trim();
+        if (!name || !description) return;
+        const custom = { id: `custom-${Date.now()}`, name, lens: 'Custom perspective', description };
+        board.push(custom);
+        if (mode === 'advisor') selectedAdvisors.add(custom.id); else orchestratorId = custom.id;
+        renderBoard();
+      });
+      container.appendChild(wrap);
+    }
+    function renderBoard() {
+      const advisorGrid = $('advisorGrid');
+      const orchestratorGrid = $('orchestratorGrid');
+      advisorGrid.innerHTML = '';
+      orchestratorGrid.innerHTML = '';
+      board.forEach(person => advisorGrid.appendChild(advisorCard(person, 'advisor')));
+      board.forEach(person => orchestratorGrid.appendChild(advisorCard(person, 'orchestrator')));
+      $('roleNote').textContent = orchestratorId ? 'The orchestrator can be part of the board or separate from it. Their job is to make the final call after all advisor voices are heard.' : '';
+      $('buildPromptBtn').disabled = selectedAdvisors.size < 3 || !orchestratorId;
+    }
+    function selectedPeople() { return board.filter(person => selectedAdvisors.has(person.id)); }
+    function orchestrator() { return board.find(person => person.id === orchestratorId); }
+    function buildModeA() {
+      return `You are facilitating a structured advisory board session. Your job is to simulate a panel of expert advisors reviewing a piece of work, then deliver a final verdict from the orchestrator.
+
+CONTEXT
+
+${$('problemText').value}
+
+THE WORK BEING REVIEWED
+
+Issue Tree:
+${$('treeText').value}
+
+SCQA:
+${$('scqaText').value}
+
+THE ADVISORY BOARD
+
+${selectedPeople().map(person => `Advisor: ${person.name}\nRole lens: ${person.lens}\nHow they challenge: ${person.description}`).join('\n\n')}
+
+THE ORCHESTRATOR
+
+Orchestrator: ${orchestrator().name}
+Role lens: ${orchestrator().lens}
+How they decide: ${orchestrator().description}
+
+The orchestrator does not speak during the advisory session. They observe and listen to all advisor input before delivering the final verdict.
+
+INSTRUCTIONS
+
+Step 1: Have each advisor review both the issue tree and the SCQA, in this order, using this format for each one:
+
+${selectedPeople().map(person => `${person.name}\nWhat I like: [max 2 points]\nWhat I would challenge or cut: [max 2 points]\nWhat I recommend: [max 2 points]`).join('\n\n')}
+
+Step 2: After all advisors have responded, the orchestrator delivers:
+
+ORCHESTRATOR VERDICT: ${orchestrator().name}
+Synthesis: [2 to 3 sentences summarizing key tensions and agreements]
+Final decision: [1 to 2 sentences stating clearly what should be prioritized or changed]
+Recommended next step: [One specific, actionable next step]
+
+Stay in character for each voice. Do not blend advisor perspectives. The orchestrator makes a call, not a summary.`;
+    }
+    function buildModeB() {
+      return `I need help designing a virtual advisory board for the following problem:
+
+${$('problemText').value}
+
+My goal is to stress-test my thinking, identify blind spots, and get a final recommendation I can act on.
+
+Please recommend a panel of 6 people: 5 advisors and 1 orchestrator, specifically suited to this problem. For each person provide:
+
+1. Name or persona (real person, named archetype, or role-based persona)
+2. Role lens (short phrase, for example "Customer obsession / long-term systems")
+3. Why they are right for this problem (2 to 3 sentences specific to the problem above)
+4. What they are most likely to challenge (1 to 2 sentences)
+
+For the orchestrator, explain why this person is the right one to make the final call on this type of problem.
+
+Return your recommendations in a clean list format I can easily read and act on.`;
+    }
+    function saveAiResponse(button) {
+      const text = $('aiOutput').value.trim();
+      const status = $('responseSaveStatus');
+      $('parseError').classList.remove('ab-show');
+      status.textContent = '';
+      status.classList.remove('ab-saved');
+      if (!text) { $('parseError').classList.add('ab-show'); return; }
+      button.disabled = true;
+      const original = button.textContent;
+      button.textContent = 'Saving...';
+      saveBoardProgress()
+        .then(() => {
+          status.textContent = 'Response saved. Continue when you are ready.';
+          status.classList.add('ab-saved');
+        })
+        .catch(() => {
+          status.textContent = 'We could not save this yet. Please try again before continuing.';
+        })
+        .finally(() => {
+          button.disabled = false;
+          button.textContent = original;
+        });
+    }
+    function updateSummary() {
+      $('summaryChips').innerHTML = `${selectedPeople().map(person => `<span class="ab-chip">${person.name}</span>`).join('')}<span class="ab-chip ab-gold-chip">${orchestrator().name}</span>`;
+    }
+    function loadSaved() {
+      try {
+        const saved = JSON.parse(localStorage.getItem('utl-advisory-board-default') || '{}');
+        if (!saved.advisors || !saved.orchestrator) return;
+        selectedAdvisors = new Set(saved.advisors);
+        orchestratorId = saved.orchestrator;
+        $('savedBanner').hidden = false;
+      } catch (error) {}
+    }
+    function seconds() { return timerRunning ? timerElapsed + Math.floor((Date.now() - timerStartedAt) / 1000) : timerElapsed; }
+    function fmt(total) { return `${String(Math.floor(total / 60)).padStart(2,'0')}:${String(total % 60).padStart(2,'0')}`; }
+    function renderTimer() {
+      $('timerDisplay').textContent = fmt(seconds());
+      $('timerMetric').classList.toggle('ab-time-hidden', timerHidden);
+      $('timerMetricToggleBtn').innerHTML = timerHidden ? '<svg viewBox="0 0 24 24" fill="none"><path d="M3 3l18 18" stroke="currentColor" stroke-linecap="round"/><path d="M10.6 10.6A2 2 0 0012 14a2 2 0 001.4-.6" stroke="currentColor" stroke-linecap="round"/><path d="M6.5 6.9C4.1 8.5 2.5 12 2.5 12s3.5 6 9.5 6c1.5 0 2.8-.4 3.9-1" stroke="currentColor" stroke-linecap="round"/></svg>' : '<svg viewBox="0 0 24 24" fill="none"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6z" stroke="currentColor"/><circle cx="12" cy="12" r="3" stroke="currentColor"/></svg>';
+      $('timerPauseIconBtn').disabled = !timerStarted;
+      $('timerPauseIconBtn').setAttribute('aria-label', timerRunning ? 'Pause timer' : 'Resume timer');
+      $('timerPauseIconBtn').innerHTML = timerRunning
+        ? '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round"><path d="M8 5v14"/><path d="M16 5v14"/></svg>'
+        : '<svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
+      $('timerResetIconBtn').innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>';
+    }
+    function startTimer() { if (timerRunning) return; timerStarted = true; timerRunning = true; timerStartedAt = Date.now(); renderTimer(); }
+    function pauseTimer() { if (!timerRunning) return; timerElapsed = seconds(); timerRunning = false; renderTimer(); }
+    function resumeTimer() { if (!timerStarted || timerRunning) return; timerRunning = true; timerStartedAt = Date.now(); renderTimer(); }
+    function resetTimer() { timerStarted = false; timerRunning = false; timerElapsed = 0; renderTimer(); }
+    function startTimerFromInteraction() { if (!timerStarted) startTimer(); else if (!timerRunning) resumeTimer(); }
+
+    function saveBoardProgress() {
+      const payload = {
+        problem: $('problemText').value,
+        issueTree: $('treeText').value,
+        scqa: $('scqaText').value,
+        advisors: selectedPeople().map(person => ({
+          name: person.name,
+          lens: person.lens,
+          description: person.description
+        })),
+        orchestrator: orchestrator(),
+        aiResponse: $('aiOutput').value.trim(),
+        completed_at: new Date().toISOString(),
+        page: window.location.href
+      };
+      localStorage.setItem('utl_p2_ex3_done', 'true');
+      localStorage.setItem('utl_result_advisory-board', JSON.stringify(payload));
+      return import('../../assets/firebase.js')
+        .then(({ saveUserProgress }) => saveUserProgress('advisory-board', 'Advisory board with AI', payload))
+        .catch(error => {
+          console.warn('Firestore progress save failed.', error);
+          throw error;
+        });
+    }
+
+    document.querySelectorAll('[data-copy-target]').forEach(button => button.addEventListener('click', () => copyText($(button.dataset.copyTarget).value, button)));
+    document.querySelectorAll('[data-next]').forEach(button => button.addEventListener('click', () => showScreen(currentScreen + 1)));
+    document.querySelectorAll('[data-back]').forEach(button => button.addEventListener('click', () => showScreen(Math.max(1, currentScreen - 1))));
+    $('buildPromptBtn').addEventListener('click', () => { $('boardError').classList.remove('ab-show'); if ($('buildPromptBtn').disabled) { $('boardError').classList.add('ab-show'); return; } $('modeAPrompt').value = buildModeA(); $('modeBPrompt').value = buildModeB(); showScreen(3); });
+    $('saveResponseBtn').addEventListener('click', event => saveAiResponse(event.target));
+    $('saveBoardBtn').addEventListener('click', event => {
+      localStorage.setItem('utl-advisory-board-default', JSON.stringify({ advisors: [...selectedAdvisors], orchestrator: orchestratorId }));
+      saveBoardProgress();
+      copyText('Board saved', event.target);
+    });
+    $('newBoardBtn').addEventListener('click', () => { selectedAdvisors.clear(); orchestratorId = ''; renderBoard(); showScreen(2); });
+    $('markDoneBtn').addEventListener('click', event => {
+      event.target.disabled = true;
+      event.target.textContent = 'Saving...';
+      saveBoardProgress()
+        .then(() => {
+          window.UTLRewardEvents?.awardCompletionExercise({
+            appId: 'advisory-board',
+            title: 'Advisory board with AI complete',
+            body: 'Your advisory-board simulation was saved.'
+          });
+          event.target.textContent = 'Done';
+          $('journeyLink').classList.add('ab-gold');
+          $('doneStatus').textContent = 'Saved to your workspace.';
+        })
+        .catch(() => {
+          event.target.disabled = false;
+          event.target.textContent = 'Mark as done';
+          $('doneStatus').textContent = 'Could not save. Please try again.';
+        });
+    });
+    $('timerPauseIconBtn').addEventListener('click', () => {
+      if (!timerStarted) return;
+      timerRunning ? pauseTimer() : resumeTimer();
+    });
+    $('timerResetIconBtn').addEventListener('click', resetTimer);
+    $('timerMetricToggleBtn').addEventListener('click', () => { timerHidden = !timerHidden; renderTimer(); });
+    document.addEventListener('input', startTimerFromInteraction);
+    loadSaved();
+    renderBoard();
+    renderTimer();
+    setInterval(renderTimer, 1000);
+  </script>
+  <script type="module" src="../../assets/app-access-guard.js?v=1"></script>
+  <script src="../../assets/exercise-scoring-intro.js?v=6"></script>
+  <script src="../../assets/app-reward-header.js?v=20260730-celebration-1"></script>
+  <script src="../../assets/reward-events.js?v=20260730-celebration-1"></script>
+  <script type="module" src="../../assets/feedback-widget.js?v=6"></script>
+  <script src="../../assets/tactile-buttons.js?v=20260714-flat-1" defer></script>
+</body>
+</html>

@@ -3,12 +3,12 @@ import { getSignedInUser, getUserFeedbackEnabled, auth, onAuthStateChanged } fro
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzJE--FL2kB_XDNZRnszCtlyLRPvaLAHGuF5TAOdXJk40atbvf5Y6ELuSK2B7CSLaMN/exec";
 
 const FEEDBACK_TYPES = [
-  { value: "It's broken", label: "It's broken — A button, link, timer, or AI feature is not working" },
-  { value: "It's confusing", label: "It's confusing — I wasn't sure what to do or what something meant" },
+  { value: "It is broken", label: "It is broken. A button, link, timer or AI feature is not working" },
+  { value: "It is confusing", label: "It is confusing. I was not sure what to do or what something meant" },
   { value: "It looks off", label: "It looks off — The layout, spacing, or display seems wrong on my screen" },
-  { value: "Wrong content", label: "Wrong content — A typo, incorrect info, or something that doesn't read right" },
+  { value: "Wrong content", label: "Wrong content. A typo, incorrect information or something that does not read right" },
   { value: "Suggestion", label: "Suggestion — An idea for making something better" },
-  { value: "Other", label: "Other — Doesn't fit any of the above" }
+  { value: "Other", label: "Other. It does not fit any of the above" }
 ];
 
 const STYLES = `
@@ -290,7 +290,7 @@ function buildModal(userName, userEmail) {
           ${typeOptions}
         </select>
         <label for="utl-feedback-desc">Tell us more</label>
-        <textarea id="utl-feedback-desc" rows="4" placeholder="What's on your mind?"></textarea>
+        <textarea id="utl-feedback-desc" rows="4" placeholder="What is on your mind?"></textarea>
         <button id="utl-feedback-submit">Submit</button>
         <div id="utl-feedback-error">Something went wrong. Please try again.</div>
       </div>

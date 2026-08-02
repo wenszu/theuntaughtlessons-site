@@ -1702,10 +1702,10 @@
     .aiko-version-manager-head { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; margin-bottom:16px; }
     .aiko-version-manager-head h3 { margin:0; color:var(--navy); }
     .aiko-live-scope { flex:0 0 auto; display:inline-flex; padding:6px 9px; border:1px solid #efd39c; border-radius:999px; background:#fff8e8; color:#795300; font-size:11px; font-weight:700; }
-    .aiko-version-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }
+    .aiko-version-grid { display:grid; grid-template-columns:1fr; gap:10px; }
     .aiko-version-card { overflow:hidden; border:1px solid var(--line); border-radius:8px; background:#fff; }
-    .aiko-version-card-head { padding:16px; border-bottom:1px solid var(--line); background:#FAF8F3; }
-    .aiko-version-card-head h4 { margin:0 0 9px; color:var(--navy); font-size:17px; }
+    .aiko-version-card-head { padding:14px 16px; background:#FAF8F3; }
+    .aiko-version-card-head h4 { margin:0 0 7px; color:var(--navy); font-size:17px; }
     .aiko-live-version { display:inline-flex; padding:6px 9px; border-radius:999px; background:#e9f5ed; color:#25613b; font-size:12px; font-weight:700; }
     .aiko-version-audit { margin:9px 0 0; color:#687482; font-size:12px; }
     .aiko-version-options { display:grid; gap:10px; padding:16px; }
@@ -1716,9 +1716,16 @@
     .aiko-version-option span { display:block; margin-top:3px; color:#5e6873; font-size:13px; line-height:1.4; }
     .aiko-version-preview { display:flex; flex-wrap:wrap; align-items:center; gap:8px; padding:0 16px 16px; }
     .aiko-version-preview-note { width:100%; margin:0; color:#687482; font-size:12px; }
+    .aiko-version-preview-label { width:100%; margin:4px 0 0; color:#003366; font-size:13px; font-weight:700; }
     .aiko-version-change { padding:14px 16px; border-top:1px solid #efd39c; background:#fff8e8; }
     .aiko-version-change p { margin:0 0 10px; color:var(--navy); font-weight:700; }
     .aiko-version-change-actions { display:flex; flex-wrap:wrap; gap:8px; }
+    .aiko-version-details { border-top:1px solid var(--line); }
+    .aiko-version-details > summary { padding:11px 16px; color:var(--navy); cursor:pointer; font-weight:700; list-style:none; }
+    .aiko-version-details > summary::-webkit-details-marker { display:none; }
+    .aiko-version-details > summary::after { content:'+'; float:right; font-size:18px; line-height:1; }
+    .aiko-version-details[open] > summary::after { content:'\2212'; }
+    .aiko-version-details[open] > summary { border-bottom:1px solid var(--line); }
     @media (max-width:900px) { .aiko-version-grid { grid-template-columns:1fr; } .aiko-version-manager-head { flex-direction:column; } }
     .eng-indent { padding-left:32px; background:rgba(243,237,226,.35); }
     .eng-master-toggle-row { background:rgba(0,51,102,.04); }
@@ -1948,6 +1955,30 @@
     .cl-textarea { width:100%; min-height:420px; font-family:'Roboto Mono',monospace; font-size:12px; line-height:1.6; border:1px solid #ddd; border-radius:6px; padding:12px; resize:vertical; box-sizing:border-box; background:#fafaf7; color:#1a2744; }
     .cl-textarea:focus { outline:none; border-color:#1a2744; }
     .cl-editor-actions { display:flex; gap:8px; align-items:center; margin-top:10px; flex-wrap:wrap; }
+    .qb-toolbar { display:grid; grid-template-columns:minmax(220px,1fr) 150px 180px 160px; gap:10px; margin:16px 0; }
+    .qb-toolbar input,.qb-toolbar select { width:100%; min-height:42px; padding:9px 11px; border:1px solid var(--line); border-radius:7px; background:#fff; color:var(--navy); font:400 14px Lato,Arial,sans-serif; }
+    .qb-summary { display:flex; flex-wrap:wrap; gap:8px; margin:12px 0; }
+    .qb-summary span { padding:6px 9px; border-radius:999px; background:var(--soft); color:var(--steel); font-size:12px; font-weight:700; }
+    .qb-list { display:grid; gap:12px; }
+    .qb-part-heading { display:flex; justify-content:space-between; gap:12px; align-items:end; margin:18px 0 0; padding:0 2px 8px; border-bottom:1px solid var(--line); }
+    .qb-part-heading:first-child { margin-top:0; }
+    .qb-part-heading strong { color:var(--navy); font-family:Playfair Display,Georgia,serif; font-size:22px; }
+    .qb-part-heading span { color:var(--steel); font-size:12px; }
+    .qb-card { border:1px solid var(--line); border-radius:9px; background:#fff; padding:16px; }
+    .qb-card-head { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; margin-bottom:10px; }
+    .qb-card-meta { display:flex; gap:6px; flex-wrap:wrap; }
+    .qb-chip { padding:4px 7px; border-radius:999px; background:#EEF3F7; color:var(--steel); font-size:11px; font-weight:700; }
+    .qb-chip.is-part { background:#FFF2D3; color:#8A5A00; }
+    .qb-chip.is-hard { background:#FFF2D3; color:#8A5A00; }
+    .qb-prompt { color:var(--navy); font-size:16px; font-weight:700; line-height:1.45; }
+    .qb-options { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:12px; }
+    .qb-option { display:flex; gap:9px; align-items:flex-start; padding:10px 11px; border:1px solid var(--line); border-radius:7px; color:var(--charcoal); font-size:13px; line-height:1.4; }
+    .qb-option-letter { flex:0 0 22px; width:22px; height:22px; display:grid; place-items:center; border-radius:50%; background:var(--soft); color:var(--steel); font-size:11px; font-weight:700; }
+    .qb-option.is-correct { border-color:#9FC9AE; background:#F0F8F3; color:#205E38; font-weight:700; }
+    .qb-option.is-correct .qb-option-letter { background:#2C7A4B; color:#fff; }
+    .qb-rationale { margin-top:12px; padding-top:11px; border-top:1px solid var(--line); color:var(--steel); font-size:13px; line-height:1.5; }
+    .qb-empty { padding:24px; border:1px dashed var(--line); border-radius:8px; color:var(--steel); text-align:center; }
+    @media(max-width:760px){.qb-toolbar,.qb-options{grid-template-columns:1fr}.qb-card-head{display:block}.qb-card-meta{margin-top:8px}}
   </style>
 </head>
 <body>
@@ -2018,7 +2049,7 @@
 
       <span class="nav-group-label" data-admin-nav-group="content-manager">Program access</span>
       <button class="admin-nav-item active" data-admin-tab-scope="content-manager" data-target="section-visibility">Visibility</button>
-      <button class="admin-nav-item" data-admin-tab-scope="content-manager" data-target="section-access-controls">Assessment visibility &amp; access</button>
+      <button class="admin-nav-item" data-admin-tab-scope="content-manager" data-target="section-access-controls">Assessments &amp; exercise experiences</button>
 
       <span class="nav-group-label" data-admin-nav-group="content-manager">Program content</span>
       <button class="admin-nav-item" data-admin-tab-scope="content-manager" data-target="section-orientation">Orientation</button>
@@ -2036,17 +2067,16 @@
 
       <span class="nav-group-label" data-admin-nav-group="member-management">Access</span>
       <button class="admin-nav-item" data-admin-tab-scope="member-management" data-target="section-members">Members</button>
-      <button class="admin-nav-item" data-admin-tab-scope="member-management" data-target="section-passwords">Legacy local access</button>
 
       <span class="nav-group-label" data-admin-nav-group="engagement">Communications</span>
       <button class="admin-nav-item" data-admin-tab-scope="engagement" data-target="section-inapp-nudges">In-app nudges</button>
       <button class="admin-nav-item" data-admin-tab-scope="engagement" data-target="section-email-templates">Email templates</button>
-      <button class="admin-nav-item" data-admin-tab-scope="engagement" data-target="section-email-nudges">Email nudges</button>
       <button class="admin-nav-item" data-admin-tab-scope="engagement" data-target="section-certificate">Certificate</button>
       <button class="admin-nav-item" data-admin-tab-scope="engagement" data-target="section-global-defaults">Global defaults</button>
 
       <span class="nav-group-label" data-admin-nav-group="content-library">Content data</span>
       <button class="admin-nav-item" data-admin-tab-scope="content-library" data-target="section-cl-files">Data files</button>
+      <button class="admin-nav-item" data-admin-tab-scope="content-library" data-target="section-cl-question-bank">Diagnostic question bank</button>
 
       <span class="nav-group-label" data-admin-nav-group="admin-tools">Preview</span>
       <button class="admin-nav-item" data-admin-tab-scope="admin-tools" data-target="section-admin-preview">Unlock phases</button>
@@ -2092,40 +2122,68 @@
 
       <section class="admin-section" id="section-access-controls" data-admin-tab-panel="content-manager">
         <span class="section-label">Site</span>
-        <h2>Assessment visibility &amp; access</h2>
+        <h2>Assessments &amp; exercise experiences</h2>
         <div class="section-divider"></div>
         <p class="description">Controls assessment visibility by audience: public visitors first, then members, then Admin/ owner preview settings. Changes take effect on the next page load for each audience.</p>
 
         <div class="aiko-version-manager" id="aikoVersionCard">
-          <div class="aiko-version-manager-head"><div><h3>Exercise versions</h3><p class="description" style="margin:6px 0 0">Choose which experience members open from the workspace. Each exercise defaults safely to v1 if the setting cannot load, and direct links remain available for testing.</p></div><span class="aiko-live-scope">Live member setting</span></div>
+          <div class="aiko-version-manager-head"><div><h3>Live exercise experience</h3><p class="description" style="margin:6px 0 0">The live choice is shown on each row. Open a row only when you need to preview an alternate or change what members receive.</p></div><span class="aiko-live-scope">Live for members</span></div>
           <div id="aikoVersionStatus" class="eng-status" aria-live="polite"></div>
           <div class="aiko-version-grid">
             <article class="aiko-version-card" data-aiko-version-card="explainToAiko120" data-live-version="v1">
-              <div class="aiko-version-card-head"><h4>Explain to Aiko — 120 seconds</h4><span class="aiko-live-version" data-aiko-live-label>Live for members: primary AI exercise</span><p class="aiko-version-audit" id="aikoVersion120Audit">Using safe default: primary AI exercise</p></div>
-              <div class="aiko-version-options" role="radiogroup" aria-label="Version for Explain to Aiko 120 seconds">
-                <label class="aiko-version-option"><input type="radio" name="aikoVersion120" value="v1" data-aiko-version-key="explainToAiko120"><span><strong>Primary · AI feedback exercise</strong>Members record in the browser, see a transcript and delivery measures, and receive feedback in the exercise.</span></label>
-                <label class="aiko-version-option"><input type="radio" name="aikoVersion120" value="v2" data-aiko-version-key="explainToAiko120"><span><strong>V2 · Self-recorded alternate</strong>Members record externally, use the Playback Gem, and paste feedback.</span></label>
+              <div class="aiko-version-card-head"><h4>Explain to Aiko — 120 seconds</h4><span class="aiko-live-version" data-aiko-live-label>Live for members: AI feedback exercise</span><p class="aiko-version-audit" id="aikoVersion120Audit">Using safe default: AI feedback exercise</p></div>
+              <details class="aiko-version-details"><summary>Change or preview experience</summary>
+              <div class="aiko-version-options" role="radiogroup" aria-label="Experience for Explain to Aiko 120 seconds">
+                <label class="aiko-version-option"><input type="radio" name="aikoVersion120" value="v1" data-aiko-version-key="explainToAiko120"><span><strong>AI feedback exercise</strong>Members record in the browser, see a transcript and delivery measures, and receive feedback in the exercise.</span></label>
+                <label class="aiko-version-option"><input type="radio" name="aikoVersion120" value="v2" data-aiko-version-key="explainToAiko120"><span><strong>Self-recorded fallback</strong>Members record externally, use the Playback Gem, and paste feedback.</span></label>
               </div>
-              <div class="aiko-version-preview"><p class="aiko-version-preview-note">Previewing does not change what members see.</p><a class="small-button secondary-button" href="../apps/explain-to-aiko/index.html" target="_blank">Preview primary AI exercise</a><a class="small-button secondary-button" href="../apps/explain-to-aiko-v2/index.html" target="_blank">Preview v2 self-recorded</a></div>
+              <div class="aiko-version-preview"><p class="aiko-version-preview-note">Previews do not change the live member experience.</p><a class="small-button secondary-button" href="../apps/explain-to-aiko/index.html" target="_blank">Preview AI feedback</a><a class="small-button secondary-button" href="../apps/explain-to-aiko-v2/index.html" target="_blank">Preview self-recorded fallback</a></div>
               <div class="aiko-version-change" data-aiko-version-change hidden><p data-aiko-change-copy>Change the member experience.</p><div class="aiko-version-change-actions"><button class="small-button" type="button" data-save-aiko-version="explainToAiko120">Publish selected version</button><button class="small-button secondary-button" type="button" data-cancel-aiko-version="explainToAiko120">Cancel</button></div></div>
+              </details>
             </article>
             <article class="aiko-version-card" data-aiko-version-card="explainToAiko60" data-live-version="v1">
-              <div class="aiko-version-card-head"><h4>Explain to Aiko — 60 seconds</h4><span class="aiko-live-version" data-aiko-live-label>Live for members: primary AI exercise</span><p class="aiko-version-audit" id="aikoVersion60Audit">Using safe default: primary AI exercise</p></div>
-              <div class="aiko-version-options" role="radiogroup" aria-label="Version for Explain to Aiko 60 seconds">
-                <label class="aiko-version-option"><input type="radio" name="aikoVersion60" value="v1" data-aiko-version-key="explainToAiko60"><span><strong>Primary · AI feedback exercise</strong>Members record in the browser, see a transcript and delivery measures, and receive feedback in the exercise.</span></label>
-                <label class="aiko-version-option"><input type="radio" name="aikoVersion60" value="v2" data-aiko-version-key="explainToAiko60"><span><strong>V2 · Self-recorded alternate</strong>Members record externally, use the Playback Gem, and paste feedback.</span></label>
+              <div class="aiko-version-card-head"><h4>Explain to Aiko — 60 seconds</h4><span class="aiko-live-version" data-aiko-live-label>Live for members: AI feedback exercise</span><p class="aiko-version-audit" id="aikoVersion60Audit">Using safe default: AI feedback exercise</p></div>
+              <details class="aiko-version-details"><summary>Change or preview experience</summary>
+              <div class="aiko-version-options" role="radiogroup" aria-label="Experience for Explain to Aiko 60 seconds">
+                <label class="aiko-version-option"><input type="radio" name="aikoVersion60" value="v1" data-aiko-version-key="explainToAiko60"><span><strong>AI feedback exercise</strong>Members record in the browser, see a transcript and delivery measures, and receive feedback in the exercise.</span></label>
+                <label class="aiko-version-option"><input type="radio" name="aikoVersion60" value="v2" data-aiko-version-key="explainToAiko60"><span><strong>Self-recorded fallback</strong>Members record externally, use the Playback Gem, and paste feedback.</span></label>
               </div>
-              <div class="aiko-version-preview"><p class="aiko-version-preview-note">Previewing does not change what members see.</p><a class="small-button secondary-button" href="../apps/explain-to-aiko-60/index.html" target="_blank">Preview primary AI exercise</a><a class="small-button secondary-button" href="../apps/explain-to-aiko-60-v2/index.html" target="_blank">Preview v2 self-recorded</a></div>
+              <div class="aiko-version-preview"><p class="aiko-version-preview-note">Previews do not change the live member experience.</p><a class="small-button secondary-button" href="../apps/explain-to-aiko-60/index.html" target="_blank">Preview AI feedback</a><a class="small-button secondary-button" href="../apps/explain-to-aiko-60-v2/index.html" target="_blank">Preview self-recorded fallback</a></div>
               <div class="aiko-version-change" data-aiko-version-change hidden><p data-aiko-change-copy>Change the member experience.</p><div class="aiko-version-change-actions"><button class="small-button" type="button" data-save-aiko-version="explainToAiko60">Publish selected version</button><button class="small-button secondary-button" type="button" data-cancel-aiko-version="explainToAiko60">Cancel</button></div></div>
+              </details>
             </article>
             <article class="aiko-version-card" data-aiko-version-card="eisenhowerMatrix" data-live-version="v1">
-              <div class="aiko-version-card-head"><h4>The art of saying no</h4><span class="aiko-live-version" data-aiko-live-label>Live for members: v1 guided exercise</span><p class="aiko-version-audit" id="eisenhowerMatrixVersionAudit">Using safe default: v1 guided exercise</p></div>
-              <div class="aiko-version-options" role="radiogroup" aria-label="Version for The art of saying no">
-                <label class="aiko-version-option"><input type="radio" name="eisenhowerMatrixVersion" value="v1" data-aiko-version-key="eisenhowerMatrix"><span><strong>V1 · Guided exercise (recommended)</strong>Members judge urgency and importance, explain ambiguous calls, and write a real no.</span></label>
-                <label class="aiko-version-option"><input type="radio" name="eisenhowerMatrixVersion" value="v2" data-aiko-version-key="eisenhowerMatrix"><span><strong>V2 · Free-form matrix alternate</strong>Members place all ten tasks into the matrix and submit the completed board.</span></label>
+              <div class="aiko-version-card-head"><h4>The art of saying no</h4><span class="aiko-live-version" data-aiko-live-label>Live for members: guided decision exercise</span><p class="aiko-version-audit" id="eisenhowerMatrixVersionAudit">Using safe default: guided decision exercise</p></div>
+              <details class="aiko-version-details"><summary>Change or preview experience</summary>
+              <div class="aiko-version-options" role="radiogroup" aria-label="Experience for The art of saying no">
+                <label class="aiko-version-option"><input type="radio" name="eisenhowerMatrixVersion" value="v1" data-aiko-version-key="eisenhowerMatrix"><span><strong>Guided decision exercise</strong>Members judge urgency and importance, explain ambiguous calls, and write a real no.</span></label>
+                <label class="aiko-version-option"><input type="radio" name="eisenhowerMatrixVersion" value="v2" data-aiko-version-key="eisenhowerMatrix"><span><strong>Free-form matrix fallback</strong>Members place all ten tasks into the matrix and submit the completed board.</span></label>
               </div>
-              <div class="aiko-version-preview"><p class="aiko-version-preview-note">Previewing does not change what members see. Both versions award the same one-time completion MP.</p><a class="small-button secondary-button" href="../apps/eisenhower-matrix/index.html" target="_blank">Preview v1 guided exercise</a><a class="small-button secondary-button" href="../apps/eisenhower-matrix-v2/index.html" target="_blank">Preview v2 free-form alternate</a></div>
+              <div class="aiko-version-preview"><p class="aiko-version-preview-note">Previews do not change the live member experience. Both choices award the same one-time completion MP.</p><a class="small-button secondary-button" href="../apps/eisenhower-matrix/index.html" target="_blank">Preview guided exercise</a><a class="small-button secondary-button" href="../apps/eisenhower-matrix-v2/index.html" target="_blank">Preview free-form fallback</a></div>
               <div class="aiko-version-change" data-aiko-version-change hidden><p data-aiko-change-copy>Change the member experience.</p><div class="aiko-version-change-actions"><button class="small-button" type="button" data-save-aiko-version="eisenhowerMatrix">Publish selected version</button><button class="small-button secondary-button" type="button" data-cancel-aiko-version="eisenhowerMatrix">Cancel</button></div></div>
+              </details>
+            </article>
+            <article class="aiko-version-card" data-aiko-version-card="tsaDiagnostic" data-live-version="v1">
+              <div class="aiko-version-card-head"><h4>TSA diagnostic and checkpoint</h4><span class="aiko-live-version" data-aiko-live-label>Live for members: multi-page assessment</span><p class="aiko-version-audit" id="tsaDiagnosticVersionAudit">Using safe default: multi-page assessment</p></div>
+              <details class="aiko-version-details"><summary>Change or preview experience</summary>
+              <div class="aiko-version-options" role="radiogroup" aria-label="Experience for the TSA diagnostic and checkpoint">
+                <label class="aiko-version-option"><input type="radio" name="tsaDiagnosticVersion" value="v1" data-aiko-version-key="tsaDiagnostic"><span><strong>Multi-page assessment</strong>Members open the original diagnostic hub and complete separate exercises.</span></label>
+                <label class="aiko-version-option"><input type="radio" name="tsaDiagnosticVersion" value="v2" data-aiko-version-key="tsaDiagnostic"><span><strong>Unified assessment</strong>Members complete Think, Speak, and Act in one saved flow. Recording and AI failures never block completion.</span></label>
+              </div>
+              <div class="aiko-version-preview">
+                <p class="aiko-version-preview-note">Previewing does not change what members see. The three scenario sets use different situations at the same intended difficulty. Their internal letter codes are not shown to members.</p>
+                <a class="small-button secondary-button" href="../apps/tsa-diagnostic/index.html" target="_blank">Preview multi-page assessment</a>
+                <p class="aiko-version-preview-label">Unified diagnostic scenario sets</p>
+                <a class="small-button secondary-button" href="../apps/tsa-diagnostic-v2/index.html?preview=1&amp;form=A&amp;reset=1" target="_blank">Everyday decisions</a>
+                <a class="small-button secondary-button" href="../apps/tsa-diagnostic-v2/index.html?preview=1&amp;form=B&amp;reset=1" target="_blank">Planning under pressure</a>
+                <a class="small-button secondary-button" href="../apps/tsa-diagnostic-v2/index.html?preview=1&amp;form=C&amp;reset=1" target="_blank">Community choices</a>
+                <p class="aiko-version-preview-label">Unified checkpoint scenario sets</p>
+                <a class="small-button secondary-button" href="../apps/tsa-diagnostic-v2/index.html?assessment=checkpoint&amp;preview=1&amp;form=A&amp;reset=1" target="_blank">Everyday decisions</a>
+                <a class="small-button secondary-button" href="../apps/tsa-diagnostic-v2/index.html?assessment=checkpoint&amp;preview=1&amp;form=B&amp;reset=1" target="_blank">Planning under pressure</a>
+                <a class="small-button secondary-button" href="../apps/tsa-diagnostic-v2/index.html?assessment=checkpoint&amp;preview=1&amp;form=C&amp;reset=1" target="_blank">Community choices</a>
+              </div>
+              <div class="aiko-version-change" data-aiko-version-change hidden><p data-aiko-change-copy>Change the member experience.</p><div class="aiko-version-change-actions"><button class="small-button" type="button" data-save-aiko-version="tsaDiagnostic">Publish selected version</button><button class="small-button secondary-button" type="button" data-cancel-aiko-version="tsaDiagnostic">Cancel</button></div></div>
+              </details>
             </article>
           </div>
         </div>
@@ -2410,7 +2468,7 @@
         <span class="section-label">Rewards</span>
         <h2>Level system</h2>
         <div class="section-divider"></div>
-        <p class="description">Manage the learner titles and MP thresholds that power the sticky-nav level chip. The first promotion should feel reachable; later promotions should require stronger completion and scores.</p>
+        <p class="description">Manage the member titles and MP thresholds that power the sticky-nav level chip. The first promotion should feel reachable; later promotions should require stronger completion and scores.</p>
         <div class="reward-summary-grid">
           <div class="reward-summary-card"><strong>5 levels</strong><span>Intern → Executive keeps progression clear without making the program feel noisy.</span></div>
           <div class="reward-summary-card"><strong>300 MP</strong><span>Recommended first promotion threshold for Analyst.</span></div>
@@ -2429,11 +2487,11 @@
 
       <section class="admin-section" id="section-reward-overview" data-admin-tab-panel="rewards">
         <span class="section-label">Rewards</span>
-        <h2>Rules learners experience</h2>
+        <h2>Rules members experience</h2>
         <div class="section-divider"></div>
-        <p class="description">This live summary uses the currently loaded Reward settings, so Admin always shows the same earning rules learners experience.</p>
-        <table class="reward-policy-table" aria-label="Current learner reward rules">
-          <thead><tr><th>Learner action</th><th>Current reward</th><th>Safeguard</th></tr></thead>
+        <p class="description">This live summary uses the currently loaded Reward settings, so Admin always shows the same earning rules members experience.</p>
+        <table class="reward-policy-table" aria-label="Current member reward rules">
+          <thead><tr><th>Member action</th><th>Current reward</th><th>Safeguard</th></tr></thead>
           <tbody>
             <tr><td>Orientation or lesson video</td><td><span id="rewardPolicyVideo">10</span> MP</td><td>Once per video</td></tr>
             <tr><td>Context video or slides</td><td><span id="rewardPolicyContext">5</span> MP</td><td>Explicit confirmation; once per item</td></tr>
@@ -2459,10 +2517,10 @@
           <div class="reward-rule-card">
             <label for="rewardSystemEnabled">Reward earning</label>
             <select id="rewardSystemEnabled"><option value="true">Enabled</option><option value="false">Paused</option></select>
-            <small>Pause new awards without deleting existing learner MP.</small>
+            <small>Pause new awards without deleting existing member MP.</small>
           </div>
           <div class="reward-rule-card">
-            <label for="rewardDisplayMode">Learner header display</label>
+            <label for="rewardDisplayMode">Member header display</label>
             <select id="rewardDisplayMode"><option value="all">Level, streak, and MP</option><option value="level-mp">Level and MP</option><option value="mp">MP only</option><option value="hidden">Hidden</option></select>
             <small>Controls the shared reward cluster without affecting stored awards.</small>
           </div>
@@ -2514,7 +2572,7 @@
           <div class="reward-rule-card">
             <label for="rewardProgramBonusMp">Full-program completion bonus</label>
             <input id="rewardProgramBonusMp" type="number" min="0" step="1" value="600">
-            <small>One-time reward that lets a learner reach Executive by finishing the curriculum.</small>
+            <small>One-time reward that lets a member reach Executive by finishing the curriculum.</small>
           </div>
           <div class="reward-rule-card">
             <label for="rewardExerciseMode">Scored exercise MP mode</label>
@@ -2554,7 +2612,7 @@
         <span class="section-label">Rewards</span>
         <h2>Exercise award and reflection</h2>
         <div class="section-divider"></div>
-        <p class="description">Choose an exercise, review or edit the reflection wording, and open the same celebration card learners see after completing it.</p>
+        <p class="description">Choose an exercise, review or edit the reflection wording, and open the same celebration card members see after completing it.</p>
         <div class="reward-exercise-editor">
           <div class="reward-exercise-editor-body">
             <label for="rewardReflectionExercise">Exercise</label>
@@ -2570,14 +2628,14 @@
           </div>
         </div>
         <div class="reward-moment-preview reward-quick-preview" aria-label="Immediate reward previews">
-          <div class="reward-moment-preview-head"><div><h3>Quick reward previews</h3><p>Use these buttons to see each learner-facing reward immediately.</p></div></div>
+          <div class="reward-moment-preview-head"><div><h3>Quick reward previews</h3><p>Use these buttons to see each member-facing reward immediately.</p></div></div>
           <div class="reward-moment-stage">
             <div class="reward-preview-nav">
               <div class="reward-preview-stat" id="rewardQuickLevel">Level: <span>Analyst</span></div>
               <div class="reward-preview-stat">🔥 <span>3</span></div>
               <div class="reward-preview-stat mp" id="rewardQuickMp">✦ <span id="rewardQuickMpValue">626</span> <small>MP</small></div>
             </div>
-            <p class="reward-quick-preview-note">The preview does not change learner data.</p>
+            <p class="reward-quick-preview-note">The preview does not change member data.</p>
           </div>
           <div class="reward-preview-controls">
             <button class="small-button secondary-button" type="button" data-reward-quick-preview="mp">Add MP</button>
@@ -2971,7 +3029,7 @@
         <span class="section-label">Certificate</span>
         <h2>Certificate</h2>
         <div class="section-divider"></div>
-        <span class="control-scope is-live">Live for all learners</span>
+        <span class="control-scope is-live">Live for all members</span>
         <p class="description">Members who complete all three phases can access a certificate when it is enabled. Customise the credential title and signatory name shown on the certificate.</p>
         <div id="engCertStatus" class="eng-status" aria-live="polite"></div>
         <div id="engCertForm" class="eng-form" hidden>
@@ -3037,6 +3095,38 @@
             <button class="small-button" type="button" id="clDownloadBtn">Download revised JSON</button>
           </div>
         </div>
+      </section>
+
+      <section class="admin-section" id="section-cl-question-bank" data-admin-tab-panel="content-library">
+        <span class="section-label">Content Data</span>
+        <h2>Diagnostic question bank</h2>
+        <div class="section-divider"></div>
+        <p class="description">Review the 20 overlap questions used by Challenge 2 Part 1 and the 36 structure questions used by Part 2. The full bank follows an introductory-to-hard ramp: 10 accessible, 33 moderate, and 13 hard questions. Part 2 always adds “None of the above,” and the keyed answer is highlighted in green. This view is read-only and loads directly from the unified diagnostic source.</p>
+        <div class="qb-toolbar">
+          <input type="search" id="qbSearch" placeholder="Search questions or answers" aria-label="Search diagnostic questions">
+          <select id="qbPart" aria-label="Filter by diagnostic part">
+            <option value="all">Both parts</option>
+            <option value="part1">Part 1 · Overlap</option>
+            <option value="part2">Part 2 · Structure</option>
+          </select>
+          <select id="qbCategory" aria-label="Filter by category">
+            <option value="all">All categories</option>
+            <option value="overlap">Overlapping ideas</option>
+            <option value="gap">Missing categories</option>
+            <option value="level">Mixed levels</option>
+            <option value="misplaced">Misplaced ideas</option>
+            <option value="revision">Stronger revisions</option>
+          </select>
+          <select id="qbDifficulty" aria-label="Filter by intended difficulty">
+            <option value="all">All difficulty</option>
+            <option value="accessible">Accessible</option>
+            <option value="moderate">Moderate</option>
+            <option value="hard">Hard</option>
+          </select>
+        </div>
+        <div class="qb-summary" id="qbSummary" aria-live="polite"></div>
+        <p class="cl-status" id="qbStatus" aria-live="polite">Loading question bank…</p>
+        <div class="qb-list" id="qbList"></div>
       </section>
 
     </main>
@@ -5343,7 +5433,8 @@
     const AIKO_VERSION_LOCAL_KEYS = {
       explainToAiko120: 'utl_aiko_120_version',
       explainToAiko60: 'utl_aiko_60_version',
-      eisenhowerMatrix: 'utl_eisenhower_matrix_version'
+      eisenhowerMatrix: 'utl_eisenhower_matrix_version',
+      tsaDiagnostic: 'utl_tsa_diagnostic_version'
     };
     const MATRIX_VERSION_LABEL_SCHEMA = 'guided-v1-20260723';
 
@@ -5352,13 +5443,15 @@
     }
 
     function aikoVersionName(value, key) {
-      if (key === 'eisenhowerMatrix') return normalizeAikoVersion(value) === 'v2' ? 'v2 free-form alternate' : 'v1 guided exercise';
-      return normalizeAikoVersion(value) === 'v2' ? 'v2 self-recorded alternate' : 'primary AI exercise';
+      if (key === 'eisenhowerMatrix') return normalizeAikoVersion(value) === 'v2' ? 'free-form matrix fallback' : 'guided decision exercise';
+      if (key === 'tsaDiagnostic') return normalizeAikoVersion(value) === 'v2' ? 'unified assessment' : 'multi-page assessment';
+      return normalizeAikoVersion(value) === 'v2' ? 'self-recorded fallback' : 'AI feedback exercise';
     }
 
     function versionExerciseLabel(key) {
       if (key === 'explainToAiko120') return '120-second exercise';
       if (key === 'explainToAiko60') return '60-second exercise';
+      if (key === 'tsaDiagnostic') return 'the TSA diagnostic and checkpoint';
       return 'The art of saying no';
     }
 
@@ -5394,7 +5487,7 @@
     }
 
     function syncAikoVersionForm(settings) {
-      ['explainToAiko120', 'explainToAiko60', 'eisenhowerMatrix'].forEach(function(key) {
+      ['explainToAiko120', 'explainToAiko60', 'eisenhowerMatrix', 'tsaDiagnostic'].forEach(function(key) {
         const value = key === 'eisenhowerMatrix' && settings.eisenhowerMatrixVersionSchema !== MATRIX_VERSION_LABEL_SCHEMA
           ? 'v1'
           : normalizeAikoVersion(settings[key]);
@@ -5404,7 +5497,7 @@
         syncAikoVersionLocal(key, value);
         const liveLabel = card && card.querySelector('[data-aiko-live-label]');
         if (liveLabel) liveLabel.textContent = 'Live for members: ' + aikoVersionName(value, key);
-        const audit = document.getElementById(key === 'explainToAiko120' ? 'aikoVersion120Audit' : key === 'explainToAiko60' ? 'aikoVersion60Audit' : 'eisenhowerMatrixVersionAudit');
+        const audit = document.getElementById(key === 'explainToAiko120' ? 'aikoVersion120Audit' : key === 'explainToAiko60' ? 'aikoVersion60Audit' : key === 'tsaDiagnostic' ? 'tsaDiagnosticVersionAudit' : 'eisenhowerMatrixVersionAudit');
         if (audit) audit.textContent = formatAikoVersionAudit(settings, key);
         updateAikoVersionChoice(key);
       });
@@ -5430,21 +5523,21 @@
       const status = document.getElementById('aikoVersionStatus');
       if (!status) return;
       if (!fb || !fb.getDoc || !fb.doc || !fb.db) {
-        status.textContent = 'Using safe v1 defaults until Firebase loads…';
+        status.textContent = 'Loading the live member choices…';
         window.addEventListener('utlFirebaseAuthReady', function handler() {
           window.removeEventListener('utlFirebaseAuthReady', handler);
           loadAikoVersionSettings();
         });
         return;
       }
-      status.textContent = 'Loading assessment versions…';
+      status.textContent = 'Loading live exercise choices…';
       try {
         const snapshot = await fb.getDoc(fb.doc(fb.db, 'settings', 'assessment_versions'));
         syncAikoVersionForm(snapshot.exists() ? (snapshot.data() || {}) : {});
-        status.textContent = 'Live settings loaded. Missing values default safely to v1.';
+        status.textContent = 'Live member choices loaded.';
       } catch (error) {
         syncAikoVersionForm({});
-        status.textContent = 'Could not load the live settings. All versioned exercises default safely to v1.';
+        status.textContent = 'Could not load the live choices. The primary experiences will open by default.';
       }
     }
 
@@ -6355,11 +6448,72 @@
       clEditing = null;
     }
 
+    let qbBank = [];
+    const QB_CATEGORY_LABELS = { overlap:'Overlapping ideas', gap:'Missing categories', level:'Mixed levels', misplaced:'Misplaced ideas', revision:'Stronger revisions' };
+
+    function qbReadLiteral(source, pattern, label) {
+      const match = source.match(pattern);
+      if (!match) throw new Error(label + ' was not found');
+      return Function('"use strict"; return (' + match[1] + ')')();
+    }
+
+    function qbRender() {
+      const list = document.getElementById('qbList');
+      const summary = document.getElementById('qbSummary');
+      if (!list || !summary) return;
+      const search = String(document.getElementById('qbSearch')?.value || '').trim().toLowerCase();
+      const part = document.getElementById('qbPart')?.value || 'all';
+      const category = document.getElementById('qbCategory')?.value || 'all';
+      const difficulty = document.getElementById('qbDifficulty')?.value || 'all';
+      const filtered = qbBank.filter((question) => {
+        const shownOptions = question.type === 'overlap' ? question.options : [...question.options, 'None of the above'];
+        const haystack = [question.id, question.prompt, question.rationale, ...shownOptions].join(' ').toLowerCase();
+        const questionPart = question.type === 'overlap' ? 'part1' : 'part2';
+        return (!search || haystack.includes(search)) && (part === 'all' || questionPart === part) && (category === 'all' || question.type === category) && (difficulty === 'all' || question.difficulty === difficulty);
+      });
+      const part1Count = filtered.filter((question) => question.type === 'overlap').length;
+      const part2Count = filtered.length - part1Count;
+      const difficultyCounts = filtered.reduce((counts, question) => { counts[question.difficulty] += 1; return counts; }, { accessible:0, moderate:0, hard:0 });
+      summary.innerHTML = `<span>${filtered.length} of ${qbBank.length} questions shown</span><span>Part 1: ${part1Count}</span><span>Part 2: ${part2Count}</span><span>Accessible: ${difficultyCounts.accessible}</span><span>Moderate: ${difficultyCounts.moderate}</span><span>Hard: ${difficultyCounts.hard}</span><span>“None of the above” stays last</span>`;
+      let previousPart = '';
+      list.innerHTML = filtered.length ? filtered.map((question) => { const questionPart=question.type==='overlap'?'part1':'part2'; const partLabel=questionPart==='part1'?'Part 1 · Find ideas that overlap':'Part 2 · Test the structure'; const heading=questionPart!==previousPart?`<div class="qb-part-heading"><strong>${partLabel}</strong><span>${questionPart==='part1'?'5 delivered from 20':'10 delivered from 36'}</span></div>`:''; previousPart=questionPart; const shownOptions=question.type==='overlap'?question.options:[...question.options,'None of the above']; const correctIndex=question.type!=='overlap'&&question.noneCorrect?question.options.length:question.answer; return `${heading}
+        <article class="qb-card">
+          <div class="qb-card-head">
+            <div class="qb-prompt">${escapeHtml(question.prompt)}</div>
+            <div class="qb-card-meta"><span class="qb-chip is-part">${questionPart==='part1'?'Part 1':'Part 2'}</span><span class="qb-chip">${escapeHtml(question.id.toUpperCase())}</span><span class="qb-chip">${escapeHtml(QB_CATEGORY_LABELS[question.type] || question.type)}</span><span class="qb-chip ${question.difficulty === 'hard' ? 'is-hard' : ''}">${escapeHtml(question.difficulty)}</span></div>
+          </div>
+          <div class="qb-options">${shownOptions.map((option, index) => `<div class="qb-option ${index === correctIndex ? 'is-correct' : ''}"><span class="qb-option-letter">${String.fromCharCode(65 + index)}</span><span>${escapeHtml(option)}${index === correctIndex ? ' <strong>Correct answer</strong>' : ''}</span></div>`).join('')}</div>
+          <div class="qb-rationale"><strong>Why this answer:</strong> ${escapeHtml(question.rationale)}</div>
+        </article>`}).join('') : '<div class="qb-empty">No questions match these filters.</div>';
+    }
+
+    async function qbInit() {
+      const status = document.getElementById('qbStatus');
+      if (!status) return;
+      try {
+        const response = await fetch('../apps/tsa-diagnostic-v2/index.html', { cache:'no-store' });
+        if (!response.ok) throw new Error('HTTP ' + response.status);
+        const source = await response.text();
+        const bank = qbReadLiteral(source, /const MECE_QUIZ_BANK=(\[[\s\S]*?\]);\n    const QUESTION_DIFFICULTY/, 'Question bank');
+        const difficulty = qbReadLiteral(source, /const QUESTION_DIFFICULTY=(\{[^;]+\});/, 'Difficulty metadata');
+        const rationales = qbReadLiteral(source, /const QUESTION_RATIONALES=(\{[\s\S]*?\});\n    MECE_QUIZ_BANK/, 'Question rationales');
+        qbBank = bank.map((question) => ({ ...question, difficulty:difficulty[question.id], rationale:rationales[question.id] }));
+        status.textContent = 'Loaded from the unified diagnostic source.';
+        status.className = 'cl-status is-success';
+        qbRender();
+      } catch (error) {
+        status.textContent = 'Could not load the question bank: ' + ((error && error.message) || 'Unknown error');
+        status.className = 'cl-status is-error';
+      }
+      ['qbSearch','qbPart','qbCategory','qbDifficulty'].forEach((id) => document.getElementById(id)?.addEventListener(id === 'qbSearch' ? 'input' : 'change', qbRender));
+    }
+
     function clInit() {
       clRenderFileList();
       document.getElementById('clEditorBack')?.addEventListener('click', clShowFileList);
       document.getElementById('clValidateBtn')?.addEventListener('click', clValidateJSON);
       document.getElementById('clDownloadBtn')?.addEventListener('click', clDownload);
+      qbInit();
     }
 
     // ===== End Content Library =====

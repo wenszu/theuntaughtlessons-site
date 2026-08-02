@@ -1,877 +1,671 @@
-<!--
-REUSE AUDIT
-- App header and timer: copied from apps/messy-notes/index.html
-- Screen progression and step indicator: copied from apps/grocery-list/index.html
-- Card layout and button styles: copied from apps/messy-notes/index.html
-- Pre-fill and copy-to-clipboard pattern: copied from apps/scqa-builder/index.html
-- Word count behavior: copied from apps/messy-notes/index.html
-- Show/hide toggle: copied from apps/scqa-builder/index.html
-- New code written for this file only: advisor/orchestrator selection, prompt assembly, advisory-board parser, saved-board persistence
--->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Build a virtual advisory board with AI and generate a structured prompt.">
+  <meta name="description" content="Build a focused virtual advisory board and use it to make a clearer decision.">
   <title>Advisory board with AI | The Untaught Lessons</title>
   <link rel="icon" type="image/png" sizes="32x32" href="../../assets/favicon-bluebg-whitedoor-thicker-32.png?v=6">
-  <link rel="shortcut icon" type="image/png" href="../../assets/favicon-bluebg-whitedoor-thicker-32.png?v=6">
-  <link rel="apple-touch-icon" sizes="180x180" href="../../assets/apple-touch-icon.png?v=3">
   <link rel="stylesheet" href="../shared/activity-timer.css">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lato:wght@300;400;700&family=Roboto+Mono:wght@400;500;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lato:wght@400;700&display=swap');
     :root {
-      --ab-cream: #F3EDE2;
-      --ab-navy: #003366;
-      --ab-gold: #EEA320;
-      --ab-charcoal: #4A4A4A;
-      --ab-steel: #4D7094;
-      --ab-white: #FFFFFF;
+      --navy: #003366;
+      --gold: #EEA320;
+      --cream: #F3EDE2;
+      --white: #FFFFFF;
+      --charcoal: #4A4A4A;
+      --steel: #4D7094;
+      --rule: #C7D8E8;
+      --soft-gold: #FFF7E8;
+      --soft-blue: #F4F8FB;
+      --green: #2C7A4B;
     }
     * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
     body {
       margin: 0;
-      background: var(--ab-cream);
-      color: var(--ab-charcoal);
+      background: var(--cream);
+      color: var(--charcoal);
       font-family: 'Lato', sans-serif;
     }
-    button, textarea, input { font: inherit; }
-    .ab-header {
+    button, input, textarea { font: inherit; }
+    button { touch-action: manipulation; }
+    .site-header {
       position: sticky;
       top: 0;
-      z-index: 20;
+      z-index: 30;
       display: grid;
-      grid-template-columns: auto auto minmax(220px, 1fr) auto;
+      grid-template-columns: auto 1px minmax(220px, 1fr);
       align-items: center;
-      column-gap: 20px;
-      min-height: 76px;
-      padding: 12px 32px;
-      background: var(--ab-navy);
-      color: var(--ab-white);
+      gap: 20px;
+      min-height: 82px;
+      padding: 12px max(24px, calc((100vw - 1180px) / 2));
+      background: var(--navy);
+      color: var(--white);
     }
-    .ab-logo {
-      display: block;
-      width: 224px;
-      height: 46px;
+    .site-header img { display: block; width: 178px; height: 48px; object-fit: contain; }
+    .header-rule { width: 1px; height: 42px; background: rgba(255,255,255,.35); }
+    .header-kicker { color: var(--gold); font-size: 12px; font-weight: 700; }
+    .header-title { display: block; margin-top: 2px; font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 700; line-height: 1.1; }
+    .back-link { display: inline-block; margin-top: 5px; color: rgba(255,255,255,.85); font-size: 14px; font-weight: 700; text-decoration: none; }
+    .back-link:hover, .back-link:focus-visible { color: var(--gold); text-decoration: underline; text-underline-offset: 3px; }
+    .journey-strip {
+      position: sticky;
+      top: 82px;
+      z-index: 25;
+      border-bottom: 1px solid var(--rule);
+      background: rgba(243,237,226,.96);
+      backdrop-filter: blur(8px);
     }
-    .ab-logo img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-    }
-    .ab-divider {
-      width: 1px;
-      height: 38px;
-      background: rgba(255,255,255,.42);
-    }
-    .ab-kicker {
-      display: block;
-      color: var(--ab-gold);
-      font-family: Lato, Arial, sans-serif;
-      font-size: 10px;
-      letter-spacing: 0;
-      text-transform: none;
-    }
-    .ab-title {
-      display: block;
-      margin-top: 3px;
-      color: var(--ab-white);
-      font-family: 'Playfair Display', serif;
-      font-size: 27px;
-      font-weight: 700;
-      line-height: 1;
-    }
-    .module-back-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      margin-top: 8px;
-      color: rgba(255, 255, 255, .82);
-      font-family: 'Lato', sans-serif;
-      font-size: 15px;
-      font-weight: 700;
-      line-height: 1.25;
-      text-decoration: none;
-    }
-
-    .module-back-link:hover {
-      color: var(--gold, var(--ab-gold, var(--eisenhower-gold, #EEA320)));
-      text-decoration: underline;
-      text-underline-offset: 3px;
-    }
-    .ab-timer {
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      gap: 10px;
-    }
-    .ab-utility-metric {
-      min-width: 148px;
-      padding: 7px 10px;
-      border: 1px solid rgba(255,255,255,.18);
-      border-radius: 8px;
-      background: rgba(255,255,255,.08);
-    }
-    .ab-utility-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-    }
-    .ab-small-label {
-      color: var(--ab-gold);
-      font-family: Lato, Arial, sans-serif;
-      font-size: 10px;
-      letter-spacing: 0;
-      text-transform: none;
-    }
-    .ab-time-display {
-      color: var(--ab-white);
-      font-family: Lato, Arial, sans-serif;
-      font-size: 18px;
-      font-weight: 700;
-      line-height: 1;
-    }
-    .ab-hide-time,
-    .ab-icon-btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      border: 1px solid rgba(255,255,255,.32);
-      background: rgba(255,255,255,.08);
-      color: var(--ab-white);
-      cursor: pointer;
-    }
-    .ab-hide-time {
-      width: 22px;
-      height: 22px;
-      border-radius: 50%;
-      padding: 0;
-    }
-    .ab-hide-time svg {
-      width: 14px;
-      height: 14px;
-      stroke-width: 2.2;
-    }
-    .ab-utility-metric.ab-time-hidden .ab-time-display { visibility: hidden; }
-    .ab-controls {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .ab-icon-btn {
-      width: 34px;
-      height: 34px;
-      border-radius: 50%;
-      font-size: 15px;
-      font-weight: 700;
-      line-height: 1;
-      padding: 0;
-    }
-    .ab-icon-btn:disabled {
-      cursor: not-allowed;
-      opacity: .45;
-    }
-    .ab-main {
-      width: min(1180px, calc(100% - 40px));
+    .journey-inner {
+      width: min(1120px, calc(100% - 32px));
+      min-height: 58px;
       margin: 0 auto;
-      padding: 34px 0 56px;
-    }
-    .ab-progress {
-      margin-bottom: 14px;
-      color: var(--ab-gold);
-      font-family: Lato, Arial, sans-serif;
-      font-size: 12px;
-      letter-spacing: 0;
-      text-transform: none;
-    }
-    .ab-screen {
-      display: none;
-      opacity: 0;
-      transition: opacity .2s ease;
-    }
-    .ab-screen.ab-active {
-      display: block;
-      opacity: 1;
-    }
-    .ab-hero {
-      margin-bottom: 22px;
-    }
-    .ab-hero h1, .ab-panel h2, .ab-card h3, .ab-verdict h2 {
-      margin: 0;
-      color: var(--ab-navy);
-      font-family: 'Playfair Display', serif;
-      line-height: 1.12;
-    }
-    .ab-hero h1 {
-      font-size: clamp(2.1rem, 5vw, 4rem);
-    }
-    .ab-hero p {
-      max-width: 760px;
-      margin: 10px 0 0;
-      font-size: 1.05rem;
-      line-height: 1.55;
-    }
-    .ab-panel, .ab-card, .ab-output-card {
-      background: var(--ab-white);
-      border: 1px solid rgba(0,51,102,.16);
-      border-radius: 8px;
-      box-shadow: 0 12px 30px rgba(0,51,102,.08);
-    }
-    .ab-panel {
-      padding: 24px;
-      margin-bottom: 18px;
-    }
-    .ab-panel h2 + .ab-button {
-      margin-top: 12px;
-    }
-    .ab-work-grid {
       display: grid;
-      gap: 16px;
-    }
-    .ab-field-head {
-      display: flex;
-      justify-content: space-between;
+      grid-template-columns: 1fr auto;
       align-items: center;
-      gap: 12px;
-      margin-bottom: 8px;
+      gap: 20px;
     }
-    .ab-label {
-      color: var(--ab-gold);
-      font-family: Lato, Arial, sans-serif;
+    .journey-name { color: var(--navy); font-weight: 700; }
+    .journey-purpose { margin-top: 3px; color: var(--steel); font-size: 13px; }
+    .step-dots { display: flex; align-items: center; gap: 8px; }
+    .step-dot {
+      display: grid;
+      place-items: center;
+      width: 28px;
+      height: 28px;
+      border: 1px solid var(--rule);
+      border-radius: 50%;
+      background: var(--white);
+      color: var(--steel);
       font-size: 12px;
       font-weight: 700;
-      letter-spacing: 0;
-      text-transform: none;
     }
-    .ab-textarea, .ab-prompt-box, .ab-input {
-      width: 100%;
-      border: 1px solid rgba(0,51,102,.22);
-      border-radius: 8px;
-      background: var(--ab-cream);
-      color: var(--ab-charcoal);
-      padding: 13px;
-      line-height: 1.55;
+    .step-dot.is-current { border-color: var(--gold); background: var(--gold); color: var(--navy); }
+    .step-dot.is-done { border-color: var(--green); color: var(--green); }
+    main { width: min(1120px, calc(100% - 32px)); margin: 0 auto; padding: 30px 0 70px; }
+    .screen { display: none; }
+    .screen.is-active { display: block; }
+    .screen-grid { display: grid; grid-template-columns: minmax(0, 1fr) 300px; align-items: start; gap: 18px; }
+    .work-layout { display: grid; grid-template-columns: 370px minmax(0, 1fr); align-items: start; gap: 18px; }
+    .main-column, .side-column { display: grid; gap: 16px; }
+    .side-column { position: static; }
+    h1, h2, h3 { margin: 0; color: var(--navy); }
+    h1, h2 { font-family: 'Playfair Display', serif; }
+    h1 { font-size: clamp(2.2rem, 5vw, 4.2rem); line-height: 1.02; }
+    h2 { font-size: clamp(1.55rem, 3vw, 2.2rem); line-height: 1.12; }
+    h3 { font-size: 1.05rem; line-height: 1.3; }
+    p { margin: 0; line-height: 1.55; }
+    .eyebrow { margin-bottom: 8px; color: var(--gold); font-size: 14px; font-weight: 700; }
+    .lead { max-width: 760px; margin-top: 12px; color: var(--steel); font-size: 1.08rem; }
+    .panel {
+      padding: 22px;
+      border: 1px solid var(--rule);
+      border-radius: 9px;
+      background: var(--white);
     }
-    .ab-textarea {
-      min-height: 150px;
-      resize: vertical;
-    }
-    .ab-prompt-box {
-      min-height: 260px;
-      font-family: Lato, Arial, sans-serif;
-      font-size: 12px;
-      white-space: pre-wrap;
-    }
-    .ab-button-row {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 10px;
-      margin-top: 16px;
-    }
-    .ab-button, .ab-small-button {
-      min-height: 44px;
-      border: 1px solid var(--ab-navy);
+    .panel-title { margin-bottom: 12px; }
+    .button-row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 18px; }
+    .button {
+      min-height: 46px;
+      padding: 11px 18px;
+      border: 1px solid var(--navy);
       border-radius: 7px;
-      background: var(--ab-white);
-      color: var(--ab-navy);
+      background: var(--white);
+      color: var(--navy);
       cursor: pointer;
       font-weight: 700;
-      padding: 10px 18px;
     }
-    .ab-button.ab-gold, .ab-small-button.ab-gold {
-      border-color: var(--ab-gold);
-      background: var(--ab-gold);
-      color: var(--ab-navy);
-    }
-    .ab-button.ab-accent, .ab-small-button.ab-accent {
-      border-color: var(--ab-gold);
-      border-width: 2px;
-    }
-    .ab-button:disabled {
-      cursor: not-allowed;
-      opacity: .55;
-    }
-    .ab-link-button {
-      border: 0;
-      background: transparent;
-      color: var(--ab-navy);
-      cursor: pointer;
-      text-decoration: underline;
-    }
-    .ab-education {
-      display: grid;
-      gap: 16px;
-      margin-bottom: 22px;
-    }
-    .ab-education h2 {
-      margin-bottom: 6px;
-    }
-    .ab-education p {
-      margin: 0;
-      line-height: 1.65;
-    }
-    .ab-details > summary {
-      cursor: pointer;
-      list-style: none;
-      color: var(--ab-navy);
-      font-family: 'Playfair Display', serif;
-      font-size: 1.15rem;
-    }
-    .ab-details > summary::-webkit-details-marker {
-      display: none;
-    }
-    .ab-details > summary::before {
-      content: '▸ ';
-      color: var(--ab-gold);
-    }
-    .ab-details[open] > summary::before {
-      content: '▾ ';
-    }
-    .ab-details .ab-qa-list {
-      margin-top: 16px;
-    }
-    .ab-qa-list {
-      display: grid;
-      gap: 14px;
-    }
-    .ab-qa-item {
-      border: 1px solid rgba(0,51,102,.14);
-      border-radius: 8px;
-      background: var(--ab-white);
-      padding: 16px;
-    }
-    .ab-qa-item h3 {
-      margin: 0 0 8px;
-      color: var(--ab-navy);
-      font-family: 'Playfair Display', serif;
-      font-size: 1.25rem;
-    }
-    .ab-qa-item p {
-      margin: 0;
-      line-height: 1.6;
-    }
-    .ab-card-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 14px;
-      margin-top: 12px;
-    }
-    .ab-card {
-      position: relative;
-      padding: 18px;
-      text-align: left;
-      cursor: pointer;
-    }
-    .ab-card.ab-selected, .ab-card.ab-orchestrator {
-      border-color: var(--ab-gold);
-      box-shadow: 0 0 0 2px rgba(238,163,32,.22);
-    }
-    .ab-card h3 {
-      font-size: 1.3rem;
-    }
-    .ab-card p {
-      margin: 10px 0 0;
+    .button.primary { border-color: var(--gold); background: var(--gold); }
+    .button.secondary { background: transparent; }
+    .button.text { min-height: 40px; padding-inline: 4px; border: 0; background: transparent; text-decoration: underline; text-underline-offset: 3px; }
+    .button:disabled { cursor: not-allowed; opacity: .5; }
+    .button:focus-visible, .choice-card:focus-visible, .role-card:focus-visible, textarea:focus-visible, input:focus-visible { outline: 3px solid rgba(238,163,32,.42); outline-offset: 2px; }
+    .demo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .demo-card { padding: 20px; border: 1px solid var(--rule); border-radius: 8px; background: var(--white); }
+    .demo-card.board { border-color: var(--gold); background: var(--soft-gold); }
+    .demo-label { display: inline-block; margin-bottom: 12px; color: var(--steel); font-size: 12px; font-weight: 700; }
+    .demo-card.board .demo-label { color: #8A5A00; }
+    .demo-card p + p { margin-top: 10px; }
+    .voice-list { display: grid; gap: 10px; margin-top: 14px; }
+    .voice-row { padding-top: 10px; border-top: 1px solid rgba(0,51,102,.12); }
+    .voice-row strong { display: block; color: var(--navy); }
+    .lesson-list { display: grid; gap: 12px; }
+    .lesson-row { display: grid; grid-template-columns: 34px 1fr; gap: 12px; align-items: start; }
+    .lesson-number { display: grid; place-items: center; width: 30px; height: 30px; border: 1px solid var(--rule); border-radius: 50%; color: var(--navy); font-weight: 700; }
+    .lesson-row p { margin-top: 3px; color: var(--steel); font-size: 14px; }
+    .work-field { display: grid; gap: 7px; }
+    .work-field + .work-field { margin-top: 16px; }
+    label { color: var(--navy); font-weight: 700; }
+    textarea, input[type="text"] {
+      width: 100%;
+      border: 1px solid var(--rule);
+      border-radius: 7px;
+      background: #FCFBF8;
+      color: var(--charcoal);
+      padding: 13px 14px;
       line-height: 1.5;
     }
-    .ab-badge {
-      position: absolute;
-      top: 12px;
-      right: 12px;
-      border-radius: 999px;
-      background: var(--ab-gold);
-      color: var(--ab-navy);
-      font-family: Lato, Arial, sans-serif;
-      font-size: 10px;
-      font-weight: 700;
-      padding: 4px 8px;
-      text-transform: none;
-    }
-    .ab-add-fields {
-      display: none;
-      gap: 10px;
-      margin-top: 12px;
-    }
-    .ab-add-fields.ab-open {
-      display: grid;
-    }
-    .ab-note {
-      margin-top: 10px;
-      color: var(--ab-steel);
-      font-size: .92rem;
-      line-height: 1.45;
-    }
-    .ab-action-note {
-      max-width: 620px;
-      margin: 4px 0 0;
-      color: var(--ab-steel);
-      font-size: .92rem;
-      line-height: 1.45;
-    }
-    .ab-error {
-      display: none;
-      margin-top: 10px;
-      color: var(--ab-navy);
-      font-weight: 700;
-    }
-
-    .ab-icon-btn svg {
-      width: 17px;
-      height: 17px;
-      stroke-width: 2.2;
-      vertical-align: middle;
-    }
-    .ab-error.ab-show { display: block; }
-    .ab-save-status {
-      min-height: 22px;
-      margin-top: 10px;
-      color: var(--ab-steel);
-      font-weight: 700;
-    }
-    .ab-save-status.ab-saved {
-      color: var(--ab-navy);
-    }
-    .ab-two-col {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 18px;
-    }
-    .ab-output-grid {
-      display: grid;
-      gap: 14px;
-      margin-top: 18px;
-    }
-    .ab-output-card {
-      padding: 16px;
-    }
-    .ab-output-card h3 {
-      margin: 0 0 10px;
-      color: var(--ab-navy);
-      font-family: 'Playfair Display', serif;
-    }
-    .ab-output-card strong {
-      color: var(--ab-navy);
-    }
-    .ab-verdict {
-      margin-top: 18px;
+    textarea { min-height: 126px; resize: vertical; }
+    #decisionText { min-height: 112px; }
+    #contextText { min-height: 250px; }
+    .helper { color: var(--steel); font-size: 13px; }
+    .role-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+    .role-card {
+      position: relative;
+      min-height: 188px;
       padding: 18px;
-      border: 1px solid rgba(0, 51, 102, .12);
-      background: var(--ab-cream);
+      border: 1px solid var(--rule);
+      border-radius: 8px;
+      background: var(--white);
+      color: var(--charcoal);
+      cursor: pointer;
+      text-align: left;
     }
-    .ab-chip-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 12px;
+    .role-card[aria-pressed="true"] { border: 2px solid var(--gold); padding: 17px; background: var(--soft-gold); }
+    .role-card .check { position: absolute; top: 12px; right: 12px; color: var(--green); font-weight: 700; }
+    .role-name { display: block; padding-right: 22px; color: var(--navy); font-weight: 700; }
+    .role-lens { display: block; margin-top: 6px; color: var(--gold); font-size: 13px; font-weight: 700; }
+    .role-value { display: block; margin-top: 12px; line-height: 1.45; }
+    .board-summary { padding: 20px; border-radius: 8px; background: var(--navy); color: var(--white); }
+    .board-summary h2 { color: var(--white); font-size: 1.55rem; }
+    .board-summary p { margin-top: 7px; color: rgba(255,255,255,.78); font-size: 14px; }
+    .seat-list { display: grid; gap: 10px; margin-top: 16px; }
+    .seat { padding-top: 10px; border-top: 1px solid rgba(255,255,255,.18); }
+    .seat strong { display: block; color: var(--gold); }
+    .seat span { display: block; margin-top: 2px; font-size: 13px; }
+    .coverage { margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,.18); color: rgba(255,255,255,.78); font-size: 13px; }
+    .decision-maker { display: grid; gap: 9px; margin-top: 12px; }
+    .choice-card { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: start; padding: 12px; border: 1px solid var(--rule); border-radius: 7px; cursor: pointer; }
+    .choice-card:has(input:checked) { border-color: var(--gold); background: var(--soft-gold); }
+    .choice-card input { margin-top: 3px; accent-color: var(--gold); }
+    .choice-card small { display: block; margin-top: 3px; color: var(--steel); line-height: 1.35; }
+    .run-layout { display: grid; grid-template-columns: 280px minmax(0, 1fr); gap: 16px; align-items: start; }
+    .run-board { position: sticky; top: 158px; }
+    .prompt-details { margin-top: 14px; }
+    .prompt-details summary { cursor: pointer; color: var(--navy); font-weight: 700; }
+    .fallback-paths { display: grid; gap: 14px; margin-top: 16px; }
+    .fallback-option { padding: 18px; border: 1px solid var(--rule); border-radius: 8px; background: var(--white); }
+    .fallback-option h3 { color: var(--navy); font-size: 18px; }
+    .fallback-option > p { margin-top: 6px; color: var(--steel); font-size: 14px; }
+    .fallback-steps { display: grid; gap: 18px; margin-top: 16px; }
+    .fallback-step { display: grid; grid-template-columns: 30px minmax(0, 1fr); gap: 12px; align-items: start; }
+    .fallback-step-number { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--soft-gold); color: var(--navy); font-weight: 700; }
+    .fallback-step-content label { display: block; margin-bottom: 8px; }
+    .fallback-step-content .button { margin-top: 4px; }
+    .output-box { min-height: 160px; }
+    .fallback-note { margin-top: 12px; padding: 12px; border-radius: 7px; background: var(--soft-blue); color: var(--steel); font-size: 14px; }
+    .result-preview { display: grid; gap: 12px; }
+    .advisor-output { padding: 16px; border: 1px solid var(--rule); border-radius: 8px; background: var(--white); }
+    .advisor-output .output-role { color: var(--gold); font-size: 13px; font-weight: 700; }
+    .advisor-output p { margin-top: 7px; }
+    .decision-output { border-color: var(--gold); background: var(--soft-gold); }
+    .reflection-grid { display: grid; gap: 14px; }
+    .reflection-grid textarea { min-height: 94px; }
+    .success {
+      display: none;
+      margin-top: 16px;
+      padding: 16px;
+      border: 1px solid #B9D9C3;
+      border-radius: 8px;
+      background: #F4FAF6;
+      color: var(--navy);
+      font-weight: 700;
     }
-    .ab-chip {
-      border-radius: 999px;
-      background: var(--ab-navy);
-      color: var(--ab-white);
-      font-family: Lato, Arial, sans-serif;
-      font-size: 11px;
-      padding: 6px 10px;
+    .success.is-visible { display: block; }
+    .error { min-height: 20px; margin-top: 10px; color: #7A2E2E; font-size: 14px; font-weight: 700; }
+    details.help { padding: 16px 18px; border: 1px solid var(--rule); border-radius: 8px; background: var(--white); }
+    details.help summary { cursor: pointer; color: var(--navy); font-weight: 700; }
+    details.help p { margin-top: 10px; color: var(--steel); font-size: 14px; }
+    .faq-list { display: grid; gap: 10px; }
+    .faq-item { border-top: 1px solid var(--rule); }
+    .faq-item:first-child { border-top: 0; }
+    .faq-item summary { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 0; color: var(--navy); cursor: pointer; font-weight: 700; list-style: none; }
+    .faq-item summary::-webkit-details-marker { display: none; }
+    .faq-item summary::after { content: '+'; display: grid; place-items: center; flex: 0 0 auto; width: 28px; height: 28px; border: 1px solid var(--rule); border-radius: 6px; color: var(--navy); font-size: 20px; line-height: 1; }
+    .faq-item[open] summary::after { content: '−'; }
+    .faq-item p { padding: 0 42px 16px 0; color: var(--steel); }
+    .substep { display: grid; grid-template-columns: 38px minmax(0, 1fr); gap: 12px; align-items: start; }
+    .substep + .substep { margin-top: 22px; padding-top: 22px; border-top: 1px solid var(--rule); }
+    .substep-number { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: var(--navy); color: var(--white); font-weight: 700; }
+    .substep-copy p { margin-top: 5px; color: var(--steel); }
+    .ai-status { display: none; margin-top: 14px; padding: 13px 15px; border: 1px solid #E4C47E; border-radius: 8px; background: var(--soft-gold); color: var(--navy); }
+    .ai-status.is-visible { display: block; }
+    .ai-status.is-fallback { border-color: var(--rule); background: var(--soft-blue); }
+    .response-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+    @media (max-width: 900px) {
+      .screen-grid, .run-layout, .work-layout { grid-template-columns: 1fr; }
+      .side-column, .run-board { position: static; }
+      .role-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     }
-    .ab-chip.ab-gold-chip {
-      background: var(--ab-gold);
-      color: var(--ab-navy);
+    @media (max-width: 640px) {
+      .site-header { grid-template-columns: auto 1fr; gap: 12px; min-height: 74px; padding: 10px 16px; }
+      .site-header img { width: 112px; height: 42px; }
+      .header-rule { display: none; }
+      .header-title { font-size: 20px; }
+      .back-link { font-size: 13px; }
+      .journey-strip { top: 74px; }
+      .journey-inner { width: calc(100% - 24px); min-height: 56px; }
+      .journey-purpose { display: none; }
+      .step-dot { width: 26px; height: 26px; }
+      main { width: calc(100% - 24px); padding-top: 22px; }
+      .demo-grid, .role-grid { grid-template-columns: 1fr; }
+      .role-card { min-height: 0; }
+      .panel { padding: 18px; }
+      .button-row.mobile-sticky { position: sticky; bottom: 0; z-index: 10; margin-inline: -12px; padding: 12px; border-top: 1px solid var(--rule); background: rgba(243,237,226,.96); backdrop-filter: blur(8px); }
+      .button-row.mobile-sticky .primary { flex: 1; }
     }
-    @media (max-width: 768px) {
-      .ab-header {
-        grid-template-columns: auto 1fr;
-        row-gap: 10px;
-        padding: 12px 18px;
-      }
-      .ab-logo { width: 168px; }
-      .ab-divider { display: none; }
-      .ab-timer { grid-column: 1 / -1; justify-content: flex-start; }
-      .ab-main { width: min(100% - 24px, 1180px); }
-      .ab-card-grid, .ab-two-col { grid-template-columns: 1fr; }
-    }
+    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
   </style>
 </head>
 <body>
-  <header class="ab-header">
-    <a class="ab-logo" href="../../member-login/index.html" aria-label="The Untaught Lessons member home"><img src="../../assets/utl-logo-nav-white.png" alt="The Untaught Lessons"></a>
-    <div class="ab-divider" aria-hidden="true"></div>
-    <div><span class="ab-kicker">Phase 2 · Speak concisely</span><span class="ab-title">Advisory board with AI</span><a class="module-back-link" href="../../member-login/index.html#learning-journey">← Back to Learning Journey</a></div>
-    <div class="ab-timer" aria-label="Elapsed time">
-      <div class="ab-utility-metric" id="timerMetric">
-        <div class="ab-utility-row">
-          <span class="ab-small-label">Elapsed time</span>
-          <button class="ab-hide-time" id="timerMetricToggleBtn" type="button" aria-label="Hide elapsed time" aria-pressed="false"></button>
-        </div>
-        <div class="ab-time-display activity-timer-display" id="timerDisplay">00:00</div>
-      </div>
-      <div class="ab-controls">
-        <button class="ab-icon-btn" id="timerPauseIconBtn" type="button" aria-label="Pause timer" disabled></button>
-        <button class="ab-icon-btn" id="timerResetIconBtn" type="button" aria-label="Reset timer"></button>
-      </div>
+  <header class="site-header">
+    <a href="../../member-login/index.html" aria-label="The Untaught Lessons member home"><img src="../../assets/utl-logo-nav-white.png" alt="The Untaught Lessons"></a>
+    <span class="header-rule" aria-hidden="true"></span>
+    <div>
+      <span class="header-kicker">Phase 2 · Speak concisely</span>
+      <span class="header-title">Advisory board with AI</span>
+      <a class="back-link" href="../../member-login/index.html#learning-journey">← Back to Learning Journey</a>
     </div>
   </header>
 
-  <main class="ab-main">
-    <div class="exercise-intro ab-hero">
-      <h1>Advisory board with AI</h1>
-      <p>Build a virtual advisory board with AI and generate a structured prompt.</p>
+  <div class="journey-strip">
+    <div class="journey-inner">
+      <div>
+        <div class="journey-name" id="journeyName">See why a board helps</div>
+        <div class="journey-purpose" id="journeyPurpose">Compare one generic answer with a room of focused perspectives.</div>
+      </div>
+      <div class="step-dots" id="stepDots" aria-label="Exercise progress"></div>
     </div>
+  </div>
 
-    <div class="ab-progress" id="progressText">Step 1 of 5</div>
-
-    <section class="ab-screen ab-active" data-screen="1">
-      <div class="ab-hero"><h1>Advisory board with AI</h1><p>Think of this as a structured way to ask AI for multiple perspectives without letting the conversation become noise. Below is an Olympics issue tree and SCQA from earlier Phase 2 exercises for the board to review. Edit it or use it as is.</p></div>
-      <details class="ab-panel ab-details">
-        <summary>How advisory boards work</summary>
-        <div class="ab-qa-list">
-          <div class="ab-qa-item"><h3>What is a virtual advisory board?</h3><p>A set of AI-generated advisors, each assigned a specific role. One thinks like a CFO. Another thinks like a customer. Another thinks like someone responsible for making the project actually work. AI is unusually good at this because you can tell it exactly who to be, and it will respond as that person would. You are not getting one generic answer. You are getting six different people reacting to the same work.</p></div>
-          <div class="ab-qa-item"><h3>Why does having multiple roles matter?</h3><p>Most people ask AI one broad question and get one broad answer. Giving AI a role changes the quality of what comes back. A CFO notices things a customer never would. A customer notices things an operator never would. When each advisor is locked into a specific lens, the feedback stops being general and starts being useful. You can weigh it, push back on it, and decide what actually applies.</p></div>
-          <div class="ab-qa-item"><h3>Who is the orchestrator?</h3><p>The orchestrator is not another advisor. They do not add another perspective to the pile. Their job is to listen to all the advisors, compare what they said, and decide what matters most. They are the person who turns a room full of opinions into one clear direction.</p></div>
-          <div class="ab-qa-item"><h3>Why does someone need to make the final call?</h3><p>More advice can create more confusion. The advisors give you breadth. The orchestrator gives you a decision. Without someone responsible for the final call, you end up with a long list of things to fix and no way to prioritize. The orchestrator is the process having a spine.</p></div>
-          <div class="ab-qa-item"><h3>How do I choose my orchestrator?</h3><p>You can choose someone who thinks like you when the decision is yours to own. You can also choose the person best suited to the problem, even if they think differently from you. The key question is simple: do you need your best decision here, or the best decision for this specific problem? Those are not always the same answer.</p></div>
-          <div class="ab-qa-item"><h3>How do I get the most out of this?</h3><p>Give the board something real to react to. In this exercise, you will give each advisor a problem statement, an issue tree, and an SCQA. They will each respond from their assigned role. Your job is not to accept every comment. Your job is to decide which feedback sharpens the work and which feedback you can set aside.</p></div>
+  <main>
+    <section class="screen is-active" data-screen="1">
+      <div class="main-column">
+        <div>
+          <div class="eyebrow">Step 1 of 3 · Understand the approach</div>
+          <h1>Use AI to hear several useful perspectives before you decide.</h1>
+          <p class="lead">A virtual advisory board is a set of AI-generated advisors, each assigned a specific role. For example, one advisor can think like a customer while another can test whether the idea will work. You can choose other roles based on the question you need to answer. A board chair compares their advice and recommends what to do next. You make the final decision.</p>
         </div>
-      </details>
 
-      <div class="ab-panel ab-work-grid">
-        <div><div class="ab-field-head"><span class="ab-label">Problem Statement</span></div><textarea class="ab-textarea" id="problemText">Why is the Olympics losing its cultural impact?
-
-The Olympics has historically been one of the most unifying global events. However, recent games have struggled to capture the same cultural relevance, sustained attention, and emotional connection with audiences.</textarea></div>
-        <div><div class="ab-field-head"><span class="ab-label">Issue Tree</span></div><textarea class="ab-textarea" id="treeText">Central question: Why is the Olympics losing its magic?
-
-Argument 1: Shared ritual is breaking
-Fragmented attention: There is no single shared moment because audiences are split across platforms, time zones, and competing world stages.
-Broadcast-first packaging: The Olympics still feels like a TV event while audiences now consume culture through feeds and communities.
-Highlights over attendance: People catch up later, so the Games lose the live collective timestamp feeling.
-
-Argument 2: Meaning is getting replaced by moment-chasing
-Clip culture: Short-form content rewards shock, controversy, and spectacle while meaning needs arcs and buildup.
-Moment-chasing storytelling: Highlights and virality outshine training, stakes, and excellence.
-Winners are not legible: Without consistent athlete-led arcs, audiences do not feel the personal stakes behind excellence.
-
-Argument 3: Legitimacy and tone are getting noisier
-Trust volatility: Politics and polarization make the Olympics feel biased or contested.
-Sensitivity risk: Generic unity messaging can land as tone-deaf in a fractured world.
-Commercialization signal: Sponsorship and ad load can make the Games feel monetized rather than earned.</textarea></div>
-        <div><div class="ab-field-head"><span class="ab-label">SCQA</span></div><textarea class="ab-textarea" id="scqaText">Situation: The Olympics has been one of the most unifying global events for over a century, with billions tuning in across generations.
-
-Complication: Despite its legacy, recent Games have failed to hold the same cultural weight. Audiences are fragmented, emotional connection is weaker, and the event no longer commands the shared attention it once did.
-
-Question: How can the Olympics reclaim its cultural relevance in a world of fractured attention and eroded trust?
-
-Answer: The Olympics needs a clarity layer with structured daily viewing routes, narrative-driven athlete coverage, and a tone and partnership system that reduces trust volatility and over-commercialization.</textarea></div>
-        <div class="ab-action-note">Change anything you want first. When it looks right, continue and choose who should review it.</div>
-        <div class="ab-button-row"><button class="ab-button ab-gold" data-next type="button">Continue</button></div>
+        <div>
+          <div class="eyebrow">A simple example</div>
+          <h2>Where should a school hold its end-of-year celebration?</h2>
+          <p class="lead">The answer changes when the question is examined through distinct perspectives.</p>
+        </div>
+        <div class="demo-grid" aria-label="Example virtual advisory board perspectives">
+          <article class="demo-card"><span class="demo-label">Without a board</span><h3>Choose the park because it is fun and inexpensive.</h3><p>This may be reasonable, but it does not show which needs or risks were considered.</p></article>
+          <article class="demo-card board"><span class="demo-label">With a virtual advisory board</span><div class="voice-list">
+            <div class="voice-row"><strong>Student representative</strong><span>Will students enjoy it and want to attend?</span></div>
+            <div class="voice-row"><strong>Parent representative</strong><span>Is it safe and affordable for families?</span></div>
+            <div class="voice-row"><strong>Event organizer</strong><span>Is there enough capacity and a weather backup?</span></div>
+            <div class="voice-row"><strong>Board chair</strong><span>Recommend the park only if a nearby indoor backup is reserved.</span></div>
+          </div></article>
+        </div>
+        <div class="panel">
+          <h2 class="panel-title">How does a virtual advisory board work?</h2>
+          <div class="faq-list">
+            <details class="faq-item"><summary>What is a virtual advisory board?</summary><p>A set of AI-generated advisors, each assigned a specific role. One might think like a CFO. Another might think like a customer. Another might think like someone responsible for making the project work. AI is useful here because you can tell it which role to take and what that role should examine. You can also ask AI to recommend a suitable mix of advisors that would bring different perspectives and useful insights to your question, then review or change its suggestions. You receive several distinct reactions to the same decision instead of one general answer.</p></details>
+            <details class="faq-item"><summary>Why do multiple roles matter?</summary><p>Most people ask AI one broad question and receive one broad answer. Giving AI a role changes what comes back. A CFO notices things a customer may miss. A customer notices things an operator may miss. Clear roles make the feedback specific enough to compare, challenge and use. You can weigh each response, push back on it and decide what applies.</p></details>
+            <details class="faq-item"><summary>Who is the orchestrator?</summary><p>The orchestrator is the board chair, not another advisor. The chair does not add another perspective to the list. The chair listens to the advisors, compares what they said and decides what matters most. This turns several opinions into one recommended direction.</p></details>
+            <details class="faq-item"><summary>Why does someone need to make the final call?</summary><p>More advice can create more confusion. The advisors widen the picture. The board chair orders the advice and recommends a decision. Without someone responsible for that step, you can end up with a long list of things to fix and no clear priority. You remain responsible for the final call.</p></details>
+            <details class="faq-item"><summary>How do I choose my orchestrator?</summary><p>You can choose someone who thinks like you when the decision is yours to own. You can also choose the person best suited to the problem, even if that person thinks differently from you. Ask whether you need a chair who represents your judgment or one whose experience best matches this specific problem. Those are not always the same choice.</p></details>
+            <details class="faq-item"><summary>How do I get the most out of this?</summary><p>Give the board something real to react to. In this exercise, you will provide a clear question, the context the board needs and your starting view. Each advisor responds from an assigned role. Review the comments rather than accepting all of them. Decide which feedback improves the decision and which feedback you can set aside.</p></details>
+            <details class="faq-item"><summary>Can I include a well-known person?</summary><p>Yes, but AI cannot reproduce what a real person would say. A well-known name is shorthand for a broadly associated style, such as Steve Jobs on simplicity. Use an established professional role when you need technical or factual judgment.</p></details>
+            <details class="faq-item"><summary>What should I do with the board's advice?</summary><p>The board helps you see angles you may have missed. You still own the decision. Check any important claims, especially when money, health, law or safety is involved.</p></details>
+          </div>
+        </div>
+        <div class="button-row mobile-sticky"><button class="button primary" type="button" data-next>Build a virtual advisory board →</button></div>
       </div>
     </section>
 
-    <section class="ab-screen" data-screen="2">
-      <div class="ab-hero"><h1>Build your virtual board</h1><p>Choose the advisors who will pressure-test the work, then choose one orchestrator who will make the final call after everyone has spoken.</p></div>
-      <div class="ab-panel" id="savedBanner" hidden><strong>You have a saved board.</strong> It is pre-selected below. Swap anyone out if this problem needs a different perspective.</div>
-      <div class="ab-panel"><div class="ab-label">Select at least 3 advisors. You can add more.</div><div class="ab-card-grid" id="advisorGrid"></div></div>
-      <div class="ab-panel"><div class="ab-label">Now choose your orchestrator. This person makes the final call.</div><div class="ab-card-grid" id="orchestratorGrid"></div><p class="ab-note" id="roleNote"></p><div class="ab-button-row"><button class="ab-button" data-back type="button">Back</button><button class="ab-button ab-gold" id="buildPromptBtn" type="button" disabled>Build my prompt</button></div><p class="ab-error" id="boardError">Select at least 3 advisors and 1 orchestrator first.</p></div>
-    </section>
-
-    <section class="ab-screen" data-screen="3">
-      <div class="ab-hero"><h1>Your prompt is ready</h1><p>Copy it and paste it into any AI tool such as Claude, ChatGPT, Gemini, or any other tool you already use.</p></div>
-      <div class="ab-two-col">
-        <div class="ab-panel"><div class="ab-label">Option A. Run your board</div><p>You have built your board. This prompt packages your work, your advisors, and the output format so your AI tool knows exactly what to do.</p><textarea class="ab-prompt-box" id="modeAPrompt" readonly></textarea><button class="ab-button ab-accent" data-copy-target="modeAPrompt" type="button">Copy prompt</button></div>
-        <div class="ab-panel"><div class="ab-label">Option B. Build your board with AI first</div><p>Not sure who should be on your panel? Paste this prompt into your AI tool. It will recommend a board of six suited to your specific problem. Then come back and add them as custom advisors.</p><textarea class="ab-prompt-box" id="modeBPrompt" readonly></textarea><button class="ab-button ab-accent" data-copy-target="modeBPrompt" type="button">Copy prompt</button></div>
+    <section class="screen" data-screen="2">
+      <div>
+        <div class="eyebrow">Step 2 of 3 · Build the board</div>
+        <h1>Choose who should examine the problem.</h1>
+        <p class="lead">Start with the question and context. Then choose three or four board members whose perspectives will help you think through the solution. One member will serve as the board chair.</p>
       </div>
-      <div class="ab-button-row"><button class="ab-button" data-back type="button">Back</button><button class="ab-button ab-gold" data-next type="button">Continue</button></div>
+      <div class="work-layout" style="margin-top:20px">
+        <aside class="side-column">
+          <div class="panel">
+            <div class="substep"><span class="substep-number">2a</span><div class="substep-copy"><h3>Define the problem</h3><p>Give the board one question and the facts it should know.</p></div></div>
+            <div class="work-field" style="margin-top:18px"><label for="decisionText">Question for the board</label><textarea id="decisionText">Which one initiative should the Olympics pilot before the next Summer Games to increase engagement among viewers aged 18 to 30? Explain why it should come first, the main tradeoff it creates and what evidence could change your recommendation.</textarea></div>
+            <div class="work-field"><label for="contextText">What the board should know</label><textarea id="contextText">The Olympics has historically been one of the most unifying global events, but recent Games have struggled to hold the attention of younger viewers. The pilot must work across several markets, fit within existing broadcast and sponsor agreements, and be practical to test before the next Summer Games. Success means more viewers aged 18 to 30 return on multiple days, not just watch one popular event.</textarea><p class="helper">Include who the decision affects, what is happening now, important evidence or assumptions, constraints, and what success would look like.</p></div>
+            <div class="work-field"><label for="initialView">What are you leaning toward now?</label><textarea id="initialView" style="min-height:100px" placeholder="Record your starting view so you can see whether the board changes it.">Pilot short daily viewing guides that explain which stories and events matter most.</textarea></div>
+          </div>
+          <div class="board-summary"><h2>Your board</h2><p>Each seat should examine something different.</p><div class="seat-list" id="seatList"></div><div class="coverage" id="coverageText" aria-live="polite"></div></div>
+        </aside>
+        <div class="main-column">
+          <div class="panel">
+            <div class="substep"><span class="substep-number">2b</span><div class="substep-copy"><h2>Choose useful perspectives</h2><p>The three recommended members cover simplicity, the audience, and delivery. Select any card to add or remove it. Keep the board focused with no more than four members.</p></div></div>
+            <div class="role-grid" id="roleGrid" style="margin-top:18px"></div>
+            <p class="helper" style="margin-top:12px">Well-known names work best when you name the perspective you want. Role-based experts work well when the decision needs specific technical judgment.</p>
+          </div>
+          <div class="panel">
+            <div class="substep"><span class="substep-number">2c</span><div class="substep-copy"><h2>Choose the board chair</h2><p>The chair compares the different views and recommends one direction. You will review it and make the final decision.</p></div></div>
+            <div class="decision-maker" id="decisionMakerChoices"></div>
+          </div>
+          <details class="help"><summary>AI can help assemble the board</summary><p>You do not need to know every board member before you begin. Give AI your question and ask which perspectives would help you examine it from different angles.</p><p><strong>Prompt to try:</strong> “Which three perspectives would help me examine this decision? Explain what each person should focus on, what assumptions they should challenge and why that perspective belongs on the board.”</p><p>You can use professional roles, such as a customer researcher, financial advisor or operations leader. You can also use well-known people as shorthand for a recognizable style of thinking. Review the suggestions and replace any advisor who would repeat a perspective already represented.</p></details>
+          <div class="button-row mobile-sticky"><button class="button secondary" type="button" data-back>Back</button><button class="button primary" type="button" id="prepareBoardBtn">Bring the board together →</button></div>
+          <div class="error" id="boardError" aria-live="polite"></div>
+        </div>
+      </div>
     </section>
 
-    <section class="ab-screen" data-screen="4">
-      <div class="ab-hero"><h1>Paste your output</h1><p>Run the prompt in your AI tool, then paste the full output here so you can keep the board response with this exercise.</p></div>
-      <div class="ab-panel"><textarea class="ab-textarea" id="aiOutput" style="min-height:300px" placeholder="Paste the full advisory board output from your AI tool here..."></textarea><p class="ab-action-note">Paste the full response from your AI tool here. This saves it with the exercise before you continue.</p><div class="ab-button-row"><button class="ab-button ab-gold" id="saveResponseBtn" type="button">Save response</button></div><p class="ab-error" id="parseError">Paste the board output first, then save the response.</p><div class="ab-save-status" id="responseSaveStatus" aria-live="polite"></div></div>
-      <div class="ab-button-row"><button class="ab-button" data-back type="button">Back</button><button class="ab-button ab-gold" data-next type="button">Continue</button></div>
-    </section>
-
-    <section class="ab-screen" data-screen="5">
-      <div class="ab-hero"><h1>Why this matters</h1><p>The point is not to collect more opinions. The point is to separate useful pressure from noise, then make a sharper call.</p></div>
-      <div class="ab-panel"><h2>What you practiced</h2><p>You gave AI a real work product, assigned distinct lenses, asked for role-specific critique, and used an orchestrator to turn disagreement into a decision. That is the executive skill: not asking AI to decide, but designing the room so your judgment gets better.</p></div>
-      <div class="ab-panel"><h2>Save this board</h2><p>The most effective leaders keep a board on standby — a trusted panel they can bring to any problem, not just this one.</p><div class="ab-chip-row" id="summaryChips"></div><div class="ab-button-row"><button class="ab-button" id="saveBoardBtn" type="button">Save as my default board</button><button class="ab-button ab-link-button" id="newBoardBtn" type="button">Build a different board</button></div><p class="ab-note">Next time you open this app, your board will be pre-selected. You can always swap individual members out for a new problem.</p></div>
-      <div class="ab-button-row"><button class="ab-button" data-back type="button">Back</button><button class="ab-button ab-gold" id="markDoneBtn" type="button">Mark as done</button><a class="ab-button" id="journeyLink" href="../../member-login/index.html#learning-journey">Back to Learning Journey</a></div>
-      <div class="ab-save-status" id="doneStatus" aria-live="polite"></div>
+    <section class="screen" data-screen="3">
+      <div>
+        <div class="eyebrow">Step 3 of 3 · Hear the board</div>
+        <h1>Hear each perspective, then make the call.</h1>
+        <p class="lead">Run the board, review what it noticed, and make your decision.</p>
+      </div>
+      <div class="work-layout" style="margin-top:20px">
+        <aside class="side-column">
+          <div class="board-summary"><h2>The board</h2><div class="seat-list" id="runSeatList"></div></div>
+        </aside>
+        <div class="main-column">
+          <div class="panel">
+            <h2 class="panel-title">Bring the board together</h2>
+            <p>Each advisor will identify one important concern and recommend what to do. The board chair will compare the advice and recommend one direction.</p>
+            <div class="button-row"><button class="button primary" type="button" id="runBoardBtn">Hear from my board</button></div>
+            <div class="ai-status" id="aiStatus" aria-live="polite"></div>
+            <details class="prompt-details" id="pasteResponseDetails"><summary>Other ways to continue</summary><p class="helper" style="margin-top:8px">Choose one of these options if the in-page board is unavailable or you want to compare its response with another AI.</p><div class="fallback-paths"><section class="fallback-option" aria-labelledby="otherAiTitle"><h3 id="otherAiTitle">Use another AI</h3><p>Take the prepared prompt to another AI, then bring its response back here.</p><div class="fallback-steps"><div class="fallback-step"><span class="fallback-step-number">1</span><div class="fallback-step-content"><label>Copy the board prompt</label><button class="button secondary" type="button" id="copyPromptBtn">Copy prompt</button><textarea id="boardPrompt" readonly hidden aria-hidden="true"></textarea></div></div><div class="fallback-step"><span class="fallback-step-number">2</span><div class="fallback-step-content"><label for="boardOutput">Paste the response you received</label><textarea class="output-box" id="boardOutput" placeholder="Paste the response here."></textarea><button class="button secondary" type="button" id="usePastedResponseBtn">Continue with this response</button></div></div></div></section><section class="fallback-option" aria-labelledby="sampleTitle"><h3 id="sampleTitle">Continue with a sample</h3><p>Use a prepared board response if AI is unavailable. You can still review the perspectives, make your decision and complete the exercise.</p><button class="button secondary" type="button" id="useSampleBtn" style="margin-top:14px">Show a sample board response</button></section></div></details>
+          </div>
+          <div class="panel" id="reviewPanel" hidden>
+            <h2 class="panel-title">Review the board's response</h2>
+            <div class="result-preview" id="resultPreview"></div>
+          </div>
+          <div class="panel reflection-grid" id="decisionRecordPanel" hidden>
+            <h2>Your final decision</h2>
+            <p>The board recommends. You decide.</p>
+            <div class="work-field"><label for="finalDecision">My decision</label><textarea id="finalDecision" placeholder="What have you decided after hearing the board?"></textarea></div>
+            <div class="work-field"><label for="changedThinking">What changed or needs checking?</label><textarea id="changedThinking" placeholder="What useful point did the board raise, and what still needs verification?"></textarea></div>
+            <div class="work-field"><label for="nextStep">My next step</label><textarea id="nextStep" placeholder="What will you do next, who owns it, and when?"></textarea></div>
+            <div class="button-row mobile-sticky"><button class="button secondary" type="button" data-back>Back</button><button class="button primary" type="button" id="completeBtn">Save and complete</button></div>
+            <div class="error" id="completionError" aria-live="polite"></div>
+            <div class="success" id="completionSuccess" aria-live="polite">Board and decision saved. You can return to the Learning Journey.</div>
+            <div class="button-row" id="completionLinks" hidden><a class="button primary" href="../../member-login/index.html#learning-journey">Back to Learning Journey</a><button class="button secondary" type="button" id="restartBtn">Build another board</button></div>
+          </div>
+        </div>
+      </div>
     </section>
   </main>
 
   <script>
-    const advisors = [
-      ['Steve Jobs','Radical simplicity / Product vision',"Cuts anything that doesn't serve the single most important idea. He has no patience for complexity dressed up as thoroughness, and he will tell you when your argument is too clever for its own good. If the core idea isn't immediately clear, he will ask you to start over."],
-      ['Jeff Bezos','Customer obsession / Long-term systems','Wants to know who this is actually for and whether it still holds up in five years. He will challenge assumptions that feel obvious and push back on any framing that prioritizes internal logic over what the end user actually experiences. Narrative is not enough for him without the mechanism behind it.'],
-      ['Sheryl Sandberg','Operational clarity / Stakeholder alignment','Asks whether this can actually be executed and whether the right people are already aligned. She is less interested in whether your argument is intellectually sound than in whether you have thought through what happens when it meets real organizations, real timelines, and real politics.'],
-      ['Ray Dalio','Radical transparency / First-principles logic',"Will surface every assumption you haven't explicitly stated and ask you to prove it. He operates on the belief that most arguments collapse when you stop letting people get away with things that sound true but haven't been tested. Expect to be asked why at least three times in a row."],
-      ['Indra Nooyi','Global complexity / Long-term brand thinking',"Asks what gets lost when you simplify and who isn't in the room. She brings a global operating lens and a deep awareness of how decisions that look clean from the inside land differently depending on where and who you are talking to."],
-      ['The Skeptical CFO','Financial discipline / ROI scrutiny',"Will not be moved by a compelling narrative alone. Wants to know what this costs, what happens if it doesn't work, and whether the return justifies the exposure. If your argument doesn't survive a hard financial question, this is where you will find out."],
-      ['The Front-Line User','Ground-level reality / Lived experience',"Doesn't engage with the framework at all. Only cares about whether this reflects what people actually experience when they show up to use it, buy it, or live with it. The gap between what looks good in a slide and what works in practice is exactly what this perspective exists to expose."],
-      ["The Devil's Advocate",'Stress-testing / Contrarian logic',"Takes the strongest opposing position available and stays there until the argument can hold its ground. Not because they believe the counterargument is right, but because an idea that can't survive its strongest critic isn't ready to leave the room."]
-    ].map((item, index) => ({ id: `preset-${index}`, name: item[0], lens: item[1], description: item[2] }));
-    let board = [...advisors];
-    let selectedAdvisors = new Set();
-    let orchestratorId = '';
+    const roles = [
+      { id: 'jobs', name: 'Steve Jobs', category: 'simplicity', lens: 'Radical simplicity and product focus', value: 'Cuts anything that distracts from the strongest idea and asks whether people will understand the value immediately.' },
+      { id: 'nooyi', name: 'Indra Nooyi', category: 'stakeholders', lens: 'Global stakeholders and long-term brand', value: 'Examines how the decision affects different groups and whether it strengthens trust over time.' },
+      { id: 'lawyer', name: 'Corporate M&A lawyer', category: 'risk', lens: 'Risk, obligations, and negotiation', value: 'Looks for hidden commitments, legal exposure, unclear ownership, and terms that could create problems later.' },
+      { id: 'operator', name: 'Event and broadcast operator', category: 'delivery', lens: 'Delivery, ownership, and practical constraints', value: 'Tests what can actually be delivered, who must own the work, what resources it requires, and where execution could fail.' },
+      { id: 'cfo', name: 'Skeptical CFO', category: 'economics', lens: 'Cost, return, and financial exposure', value: 'Tests whether the expected benefit justifies the cost and what happens if the plan does not work.' },
+      { id: 'user', name: 'Front-line audience member', category: 'audience', lens: 'Lived experience and practical value', value: 'Ignores the framework and asks what a real person will notice, understand, and choose to do.' },
+      { id: 'devil', name: "Devil's advocate", category: 'opposition', lens: 'Strongest opposing case', value: 'Takes the best argument against the proposal and tests whether the recommendation can withstand it.' }
+    ];
+    const stages = [
+      ['Understand the approach', 'Learn how distinct perspectives change the quality of a decision.'],
+      ['Build the board', 'Define the problem, choose the perspectives, and name a board chair.'],
+      ['Hear the board', 'Review the discussion and decide which advice you will use.']
+    ];
+    const ADVISORY_BOARD_URL = 'https://us-central1-the-untaught-lessons.cloudfunctions.net/runAdvisoryBoard';
     let currentScreen = 1;
-    let timerHidden = false;
-    let timerStarted = false;
-    let timerRunning = false;
-    let timerStartedAt = 0;
-    let timerElapsed = 0;
+    let selectedRoles = new Set(['jobs', 'user', 'operator']);
+    let decisionMakerId = 'operator';
+    let structuredResponse = null;
 
-    function $(id) { return document.getElementById(id); }
+    const $ = id => document.getElementById(id);
+    const escapeHtml = value => String(value || '').replace(/[&<>'"]/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' })[character]);
+    const selectedRoleObjects = () => roles.filter(role => selectedRoles.has(role.id));
+    const decisionMaker = () => roles.find(role => role.id === decisionMakerId) || selectedRoleObjects()[0];
+    const advisorRoleObjects = () => selectedRoleObjects().filter(role => role.id !== decisionMakerId);
+
+    function renderDots() {
+      $('stepDots').innerHTML = stages.map((stage, index) => {
+        const number = index + 1;
+        const state = number === currentScreen ? 'is-current' : number < currentScreen ? 'is-done' : '';
+        const label = number < currentScreen ? '✓' : number;
+        return `<span class="step-dot ${state}" aria-label="${escapeHtml(stage[0])}${number === currentScreen ? ', current step' : number < currentScreen ? ', complete' : ''}">${label}</span>`;
+      }).join('');
+    }
+
     function showScreen(number) {
-      currentScreen = number;
-      document.querySelectorAll('.ab-screen').forEach(screen => screen.classList.toggle('ab-active', screen.dataset.screen === String(number)));
-      $('progressText').textContent = `Step ${number} of 5`;
+      currentScreen = Math.max(1, Math.min(3, number));
+      document.querySelectorAll('.screen').forEach(screen => screen.classList.toggle('is-active', Number(screen.dataset.screen) === currentScreen));
+      $('journeyName').textContent = stages[currentScreen - 1][0];
+      $('journeyPurpose').textContent = stages[currentScreen - 1][1];
+      renderDots();
       window.scrollTo({ top: 0, behavior: 'smooth' });
+      const heading = document.querySelector(`.screen[data-screen="${currentScreen}"] h1`);
+      if (heading) { heading.tabIndex = -1; setTimeout(() => heading.focus({ preventScroll: true }), 350); }
     }
-    function fallbackCopy(text) {
-      const temp = document.createElement('textarea');
-      temp.value = text;
-      document.body.appendChild(temp);
-      temp.select();
-      document.execCommand('copy');
-      temp.remove();
+
+    function renderRoles() {
+      $('roleGrid').innerHTML = roles.map(role => {
+        const selected = selectedRoles.has(role.id);
+        return `<button class="role-card" type="button" data-role="${role.id}" aria-pressed="${selected}">
+          ${selected ? '<span class="check">✓</span>' : ''}
+          <span class="role-name">${escapeHtml(role.name)}</span>
+          <span class="role-lens">${escapeHtml(role.lens)}</span>
+          <span class="role-value">${escapeHtml(role.value)}</span>
+        </button>`;
+      }).join('');
+      document.querySelectorAll('[data-role]').forEach(button => button.addEventListener('click', () => toggleRole(button.dataset.role)));
+      renderDecisionMakers();
+      renderBoardSummary();
     }
-    function copyText(text, button) {
+
+    function toggleRole(id) {
+      if (selectedRoles.has(id)) {
+        if (selectedRoles.size <= 3) {
+          $('boardError').textContent = 'Keep at least three board members so the discussion includes different perspectives.';
+          return;
+        }
+        selectedRoles.delete(id);
+        if (decisionMakerId === id) decisionMakerId = selectedRoleObjects()[0]?.id || '';
+      } else {
+        if (selectedRoles.size >= 4) {
+          $('boardError').textContent = 'Keep this board focused. Choose no more than four board members.';
+          return;
+        }
+        selectedRoles.add(id);
+      }
+      $('boardError').textContent = '';
+      renderRoles();
+    }
+
+    function renderDecisionMakers() {
+      const selected = selectedRoleObjects();
+      if (!selected.some(role => role.id === decisionMakerId)) decisionMakerId = selected[0]?.id || '';
+      $('decisionMakerChoices').innerHTML = selected.map(role => `<label class="choice-card">
+        <input type="radio" name="decision-maker" value="${role.id}" ${role.id === decisionMakerId ? 'checked' : ''}>
+        <span><strong>${escapeHtml(role.name)}</strong><small>${escapeHtml(role.lens)}. This seat will turn the different views into one recommendation.</small></span>
+      </label>`).join('');
+      document.querySelectorAll('input[name="decision-maker"]').forEach(input => input.addEventListener('change', () => { decisionMakerId = input.value; renderBoardSummary(); }));
+    }
+
+    function boardSeatsHtml(includeDecision = false) {
+      return selectedRoleObjects().map(role => `<div class="seat"><strong>${escapeHtml(role.name)}${includeDecision && role.id === decisionMakerId ? ' · Board chair' : ''}</strong><span>${escapeHtml(role.lens)}</span></div>`).join('');
+    }
+
+    function renderBoardSummary() {
+      $('seatList').innerHTML = boardSeatsHtml(true);
+      const count = selectedRoles.size;
+      const coverage = [...new Set(advisorRoleObjects().map(role => role.category))];
+      const hasChallenge = coverage.some(item => item === 'risk' || item === 'economics' || item === 'opposition');
+      const nudge = !coverage.includes('audience') ? ' Consider adding an audience lens.' : !coverage.includes('delivery') ? ' Consider adding a delivery lens.' : !hasChallenge ? ' Consider adding a risk, economics, or opposing lens.' : '';
+      $('coverageText').textContent = `${count} board members · Advisor perspectives cover ${coverage.join(', ')}.${nudge}`;
+    }
+
+    function buildPrompt() {
+      const advisorInstructions = advisorRoleObjects().map(role => `${role.name} (${role.lens})\nWhat to examine: ${role.value}\nReturn:\n- Main concern\n- Evidence or assumption\n- Recommendation`).join('\n\n');
+      return `Facilitate a short virtual advisory board meeting. Keep every voice distinct and use clear language. Use only the supplied context and clearly label assumptions.\n\nQUESTION FOR THE BOARD\n${$('decisionText').value.trim()}\n\nWHAT THE BOARD SHOULD KNOW\n${$('contextText').value.trim()}\n\nLEARNER'S STARTING VIEW\n${$('initialView').value.trim() || 'Not provided'}\n\nBOARD MEMBERS\n${advisorInstructions}\n\nBOARD CHAIR\n${decisionMaker().name} (${decisionMaker().lens})\n\nEach advisor should raise one material issue, avoid repeating another advisor, say what information could change the recommendation, and give one recommendation that answers the question.\n\nAfter every board member responds, the board chair must provide:\n- Recommended direction and decision criterion\n- Central tradeoff\n- Advice accepted and why\n- Advice declined and why\n- Important uncertainty\n- One specific next step\n\nThe chair recommends. The learner makes the final decision. Keep the response under 500 words.`;
+    }
+
+    function sampleStructuredResponse() {
+      const sampleByRole = {
+        jobs: ['The idea needs one simple reason for people to return each day.', 'A long menu of sports makes the experience harder to enter for casual viewers.', 'Create three clear daily viewing routes built around the strongest stories and moments.'],
+        nooyi: ['The plan must work for audiences with different cultures, access, and viewing habits.', 'One global format may not translate equally well in every market.', 'Keep a common structure but let local teams choose the athletes and stories that matter in their market.'],
+        lawyer: ['New storytelling formats may conflict with broadcast, sponsor, or athlete-image agreements.', 'Rights are often divided across markets and partners.', 'Map the rights needed for one limited pilot before promising a global rollout.'],
+        operator: ['The idea needs a clear owner and a format that can be delivered consistently during a live global event.', 'Production teams already work across different rights, time zones, and broadcast schedules.', 'Pilot one repeatable daily viewing route with named owners, a cost limit, and a backup plan.'],
+        cfo: ['The plan could add production cost without proving that attention will last.', 'Higher views during one event do not guarantee long-term value.', 'Set a cost limit and define the audience behavior that would justify expansion.'],
+        user: ['People need to know quickly why a moment matters.', 'Casual viewers often do not know the athlete, rivalry, or consequence.', 'Lead each viewing route with one sentence explaining the human stakes.'],
+        devil: ['The Olympics may not be losing relevance; people may simply engage through different channels.', 'Lower television attention does not capture clips, social discussion, or creator coverage.', 'Measure the full pattern of participation before trying to restore an older viewing habit.']
+      };
+      const selectedNames = advisorRoleObjects().map(role => role.name);
+      return {
+        advisors: advisorRoleObjects().map(role => ({ name: role.name, lens: role.lens, mainConcern: sampleByRole[role.id][0], evidenceOrAssumption: sampleByRole[role.id][1], recommendation: sampleByRole[role.id][2] })),
+        decision: {
+          decisionMaker: decisionMaker().name,
+          finalDecision: 'Test three simple daily viewing routes in a small number of markets, with local stories selected inside one common format.',
+          adviceAccepted: `Use the strongest recommendations from ${selectedNames.join(', ')} because they cover the audience, delivery, and the main challenge from different angles.`,
+          adviceDeclined: 'Do not begin with a broad global measurement project because it delays a small, testable improvement.',
+          decisionCriterion: 'Choose the smallest pilot that can prove whether younger viewers return on multiple days.',
+          centralTradeoff: 'A simpler format is easier to deliver, but it may not fit every market equally well.',
+          importantUncertainty: 'The team still needs evidence that daily viewing guides will change repeat viewing behavior.',
+          nextStep: 'Design one seven-day pilot and confirm the rights, cost limit, and audience measure before production begins.'
+        },
+        fallback: true
+      };
+    }
+
+    function copyPrompt() {
+      const button = $('copyPromptBtn');
+      const text = $('boardPrompt').value;
       const done = () => {
         const original = button.textContent;
-        button.textContent = 'Copied ✓';
-        window.setTimeout(() => { button.textContent = original; }, 2000);
+        button.textContent = 'Prompt copied ✓';
+        setTimeout(() => { button.textContent = original; }, 1800);
       };
-      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done).catch(() => { fallbackCopy(text); done(); });
-      else { fallbackCopy(text); done(); }
+      if (navigator.clipboard?.writeText) navigator.clipboard.writeText(text).then(done).catch(() => fallbackCopy(text, done));
+      else fallbackCopy(text, done);
     }
-    function advisorCard(person, mode) {
-      const card = document.createElement('article');
-      card.className = 'ab-card';
-      card.dataset.id = person.id;
-      const selected = mode === 'advisor' ? selectedAdvisors.has(person.id) : orchestratorId === person.id;
-      card.classList.toggle(mode === 'advisor' ? 'ab-selected' : 'ab-orchestrator', selected);
-      card.innerHTML = `${selected ? `<span class="ab-badge">${mode === 'advisor' ? '✓' : 'Orchestrator'}</span>` : ''}<h3>${person.name}</h3><div class="ab-label">${person.lens}</div><p>${person.description}</p>`;
-      card.addEventListener('click', () => {
-        if (mode === 'advisor') selectedAdvisors.has(person.id) ? selectedAdvisors.delete(person.id) : selectedAdvisors.add(person.id);
-        else orchestratorId = person.id;
-        renderBoard();
-      });
-      return card;
+
+    function fallbackCopy(text, done) {
+      const field = document.createElement('textarea');
+      field.value = text;
+      document.body.appendChild(field);
+      field.select();
+      document.execCommand('copy');
+      field.remove();
+      done();
     }
-    function addCustomCard(container, mode) {
-      const wrap = document.createElement('article');
-      wrap.className = 'ab-card';
-      wrap.innerHTML = '<h3>+ Add your own</h3><p>Name a specific person or persona you want in the room.</p><div class="ab-add-fields"><input class="ab-input" placeholder="Name"><textarea class="ab-textarea" placeholder="How do they think and what do they challenge?"></textarea><button class="ab-small-button ab-gold" type="button">Add to board</button></div>';
-      const fields = wrap.querySelector('.ab-add-fields');
-      wrap.addEventListener('click', event => {
-        if (event.target.tagName !== 'BUTTON') fields.classList.add('ab-open');
-      });
-      wrap.querySelector('button').addEventListener('click', event => {
-        event.stopPropagation();
-        const name = wrap.querySelector('input').value.trim();
-        const description = wrap.querySelector('textarea').value.trim();
-        if (!name || !description) return;
-        const custom = { id: `custom-${Date.now()}`, name, lens: 'Custom perspective', description };
-        board.push(custom);
-        if (mode === 'advisor') selectedAdvisors.add(custom.id); else orchestratorId = custom.id;
-        renderBoard();
-      });
-      container.appendChild(wrap);
+
+    function renderStructuredResult(result) {
+      const advisorCards = result.advisors.map(advisor => `<article class="advisor-output"><span class="output-role">${escapeHtml(advisor.lens || 'Perspective')}</span><h3 style="margin-top:4px">${escapeHtml(advisor.name)}</h3><p><strong>What they noticed:</strong> ${escapeHtml(advisor.mainConcern)}</p><p><strong>What they recommend:</strong> ${escapeHtml(advisor.recommendation)}</p></article>`).join('');
+      const decision = result.decision;
+      $('resultPreview').innerHTML = `${advisorCards}<article class="advisor-output decision-output"><span class="output-role">Board chair's recommendation</span><h3 style="margin-top:4px">${escapeHtml(decision.decisionMaker)}</h3><p><strong>Recommended direction:</strong> ${escapeHtml(decision.finalDecision)}</p><p><strong>Main tradeoff:</strong> ${escapeHtml(decision.centralTradeoff)}</p><p><strong>What still needs checking:</strong> ${escapeHtml(decision.importantUncertainty)}</p><p><strong>Suggested next step:</strong> ${escapeHtml(decision.nextStep)}</p></article>`;
+      $('reviewPanel').hidden = false;
+      $('decisionRecordPanel').hidden = false;
+      $('reviewPanel').scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
-    function renderBoard() {
-      const advisorGrid = $('advisorGrid');
-      const orchestratorGrid = $('orchestratorGrid');
-      advisorGrid.innerHTML = '';
-      orchestratorGrid.innerHTML = '';
-      board.forEach(person => advisorGrid.appendChild(advisorCard(person, 'advisor')));
-      board.forEach(person => orchestratorGrid.appendChild(advisorCard(person, 'orchestrator')));
-      $('roleNote').textContent = orchestratorId ? 'The orchestrator can be part of the board or separate from it. Their job is to make the final call after all advisor voices are heard.' : '';
-      $('buildPromptBtn').disabled = selectedAdvisors.size < 3 || !orchestratorId;
+
+    function renderPastedResult() {
+      const output = $('boardOutput').value.trim();
+      if (!output) { setAiStatus('Paste a response before reviewing it.', true); return; }
+      structuredResponse = null;
+      $('resultPreview').innerHTML = `<article class="advisor-output"><span class="output-role">Response from another AI</span><p style="white-space:pre-wrap">${escapeHtml(output)}</p></article>`;
+      $('reviewPanel').hidden = false;
+      $('decisionRecordPanel').hidden = false;
+      $('reviewPanel').scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
-    function selectedPeople() { return board.filter(person => selectedAdvisors.has(person.id)); }
-    function orchestrator() { return board.find(person => person.id === orchestratorId); }
-    function buildModeA() {
-      return `You are facilitating a structured advisory board session. Your job is to simulate a panel of expert advisors reviewing a piece of work, then deliver a final verdict from the orchestrator.
 
-CONTEXT
-
-${$('problemText').value}
-
-THE WORK BEING REVIEWED
-
-Issue Tree:
-${$('treeText').value}
-
-SCQA:
-${$('scqaText').value}
-
-THE ADVISORY BOARD
-
-${selectedPeople().map(person => `Advisor: ${person.name}\nRole lens: ${person.lens}\nHow they challenge: ${person.description}`).join('\n\n')}
-
-THE ORCHESTRATOR
-
-Orchestrator: ${orchestrator().name}
-Role lens: ${orchestrator().lens}
-How they decide: ${orchestrator().description}
-
-The orchestrator does not speak during the advisory session. They observe and listen to all advisor input before delivering the final verdict.
-
-INSTRUCTIONS
-
-Step 1: Have each advisor review both the issue tree and the SCQA, in this order, using this format for each one:
-
-${selectedPeople().map(person => `${person.name}\nWhat I like: [max 2 points]\nWhat I would challenge or cut: [max 2 points]\nWhat I recommend: [max 2 points]`).join('\n\n')}
-
-Step 2: After all advisors have responded, the orchestrator delivers:
-
-ORCHESTRATOR VERDICT: ${orchestrator().name}
-Synthesis: [2 to 3 sentences summarizing key tensions and agreements]
-Final decision: [1 to 2 sentences stating clearly what should be prioritized or changed]
-Recommended next step: [One specific, actionable next step]
-
-Stay in character for each voice. Do not blend advisor perspectives. The orchestrator makes a call, not a summary.`;
+    function setAiStatus(message, fallback = false) {
+      $('aiStatus').textContent = message;
+      $('aiStatus').classList.add('is-visible');
+      $('aiStatus').classList.toggle('is-fallback', fallback);
     }
-    function buildModeB() {
-      return `I need help designing a virtual advisory board for the following problem:
 
-${$('problemText').value}
-
-My goal is to stress-test my thinking, identify blind spots, and get a final recommendation I can act on.
-
-Please recommend a panel of 6 people: 5 advisors and 1 orchestrator, specifically suited to this problem. For each person provide:
-
-1. Name or persona (real person, named archetype, or role-based persona)
-2. Role lens (short phrase, for example "Customer obsession / long-term systems")
-3. Why they are right for this problem (2 to 3 sentences specific to the problem above)
-4. What they are most likely to challenge (1 to 2 sentences)
-
-For the orchestrator, explain why this person is the right one to make the final call on this type of problem.
-
-Return your recommendations in a clean list format I can easily read and act on.`;
-    }
-    function saveAiResponse(button) {
-      const text = $('aiOutput').value.trim();
-      const status = $('responseSaveStatus');
-      $('parseError').classList.remove('ab-show');
-      status.textContent = '';
-      status.classList.remove('ab-saved');
-      if (!text) { $('parseError').classList.add('ab-show'); return; }
+    async function runBoard() {
+      const button = $('runBoardBtn');
       button.disabled = true;
-      const original = button.textContent;
-      button.textContent = 'Saving...';
-      saveBoardProgress()
-        .then(() => {
-          status.textContent = 'Response saved. Continue when you are ready.';
-          status.classList.add('ab-saved');
-        })
-        .catch(() => {
-          status.textContent = 'We could not save this yet. Please try again before continuing.';
-        })
-        .finally(() => {
-          button.disabled = false;
-          button.textContent = original;
-        });
-    }
-    function updateSummary() {
-      $('summaryChips').innerHTML = `${selectedPeople().map(person => `<span class="ab-chip">${person.name}</span>`).join('')}<span class="ab-chip ab-gold-chip">${orchestrator().name}</span>`;
-    }
-    function loadSaved() {
+      button.textContent = 'The board is reviewing...';
+      setAiStatus('The board is reviewing the question from each selected perspective.');
       try {
-        const saved = JSON.parse(localStorage.getItem('utl-advisory-board-default') || '{}');
-        if (!saved.advisors || !saved.orchestrator) return;
-        selectedAdvisors = new Set(saved.advisors);
-        orchestratorId = saved.orchestrator;
-        $('savedBanner').hidden = false;
-      } catch (error) {}
+        const response = await fetch(ADVISORY_BOARD_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            question: $('decisionText').value.trim(),
+            context: $('contextText').value.trim(),
+            startingView: $('initialView').value.trim(),
+            advisors: advisorRoleObjects().map(role => ({ name: role.name, lens: role.lens, description: role.value })),
+            decisionMaker: { name: decisionMaker().name, lens: decisionMaker().lens }
+          })
+        });
+        if (!response.ok) throw new Error(`Request returned ${response.status}`);
+        const result = await response.json();
+        if (result.fallback || !Array.isArray(result.advisors) || !result.decision) throw new Error('AI response unavailable');
+        structuredResponse = result;
+        $('boardOutput').value = '';
+        setAiStatus('The board response is ready. Review the differences before making your call.');
+        renderStructuredResult(result);
+      } catch (error) {
+        setAiStatus('The in-page board is unavailable right now. You can copy the prompt into another AI or use the sample response. Your exercise is not blocked.', true);
+        $('pasteResponseDetails').open = true;
+      } finally {
+        button.disabled = false;
+        button.textContent = 'Hear from my board';
+      }
     }
-    function seconds() { return timerRunning ? timerElapsed + Math.floor((Date.now() - timerStartedAt) / 1000) : timerElapsed; }
-    function fmt(total) { return `${String(Math.floor(total / 60)).padStart(2,'0')}:${String(total % 60).padStart(2,'0')}`; }
-    function renderTimer() {
-      $('timerDisplay').textContent = fmt(seconds());
-      $('timerMetric').classList.toggle('ab-time-hidden', timerHidden);
-      $('timerMetricToggleBtn').innerHTML = timerHidden ? '<svg viewBox="0 0 24 24" fill="none"><path d="M3 3l18 18" stroke="currentColor" stroke-linecap="round"/><path d="M10.6 10.6A2 2 0 0012 14a2 2 0 001.4-.6" stroke="currentColor" stroke-linecap="round"/><path d="M6.5 6.9C4.1 8.5 2.5 12 2.5 12s3.5 6 9.5 6c1.5 0 2.8-.4 3.9-1" stroke="currentColor" stroke-linecap="round"/></svg>' : '<svg viewBox="0 0 24 24" fill="none"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6z" stroke="currentColor"/><circle cx="12" cy="12" r="3" stroke="currentColor"/></svg>';
-      $('timerPauseIconBtn').disabled = !timerStarted;
-      $('timerPauseIconBtn').setAttribute('aria-label', timerRunning ? 'Pause timer' : 'Resume timer');
-      $('timerPauseIconBtn').innerHTML = timerRunning
-        ? '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round"><path d="M8 5v14"/><path d="M16 5v14"/></svg>'
-        : '<svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
-      $('timerResetIconBtn').innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>';
-    }
-    function startTimer() { if (timerRunning) return; timerStarted = true; timerRunning = true; timerStartedAt = Date.now(); renderTimer(); }
-    function pauseTimer() { if (!timerRunning) return; timerElapsed = seconds(); timerRunning = false; renderTimer(); }
-    function resumeTimer() { if (!timerStarted || timerRunning) return; timerRunning = true; timerStartedAt = Date.now(); renderTimer(); }
-    function resetTimer() { timerStarted = false; timerRunning = false; timerElapsed = 0; renderTimer(); }
-    function startTimerFromInteraction() { if (!timerStarted) startTimer(); else if (!timerRunning) resumeTimer(); }
 
-    function saveBoardProgress() {
+    function saveProgress() {
       const payload = {
-        problem: $('problemText').value,
-        issueTree: $('treeText').value,
-        scqa: $('scqaText').value,
-        advisors: selectedPeople().map(person => ({
-          name: person.name,
-          lens: person.lens,
-          description: person.description
-        })),
-        orchestrator: orchestrator(),
-        aiResponse: $('aiOutput').value.trim(),
+        version: 'advisory-board',
+        problem: $('decisionText').value.trim(),
+        context: $('contextText').value.trim(),
+        initialView: $('initialView').value.trim(),
+        advisors: selectedRoleObjects().map(role => ({ name: role.name, lens: role.lens, description: role.value })),
+        orchestrator: { name: decisionMaker().name, lens: decisionMaker().lens, description: decisionMaker().value },
+        aiResponse: structuredResponse || $('boardOutput').value.trim(),
+        finalDecision: $('finalDecision').value.trim(),
+        changedThinking: $('changedThinking').value.trim(),
+        adviceUsed: $('changedThinking').value.trim(),
+        adviceSetAside: '',
+        nextStep: $('nextStep').value.trim(),
         completed_at: new Date().toISOString(),
         page: window.location.href
       };
       localStorage.setItem('utl_p2_ex3_done', 'true');
       localStorage.setItem('utl_result_advisory-board', JSON.stringify(payload));
+      localStorage.setItem('utl-advisory-board-draft', JSON.stringify(payload));
       return import('../../assets/firebase.js')
         .then(({ saveUserProgress }) => saveUserProgress('advisory-board', 'Advisory board with AI', payload))
-        .catch(error => {
-          console.warn('Firestore progress save failed.', error);
-          throw error;
-        });
+        .catch(error => { console.warn('Remote progress save failed. Local progress was kept.', error); return null; });
     }
 
-    document.querySelectorAll('[data-copy-target]').forEach(button => button.addEventListener('click', () => copyText($(button.dataset.copyTarget).value, button)));
     document.querySelectorAll('[data-next]').forEach(button => button.addEventListener('click', () => showScreen(currentScreen + 1)));
-    document.querySelectorAll('[data-back]').forEach(button => button.addEventListener('click', () => showScreen(Math.max(1, currentScreen - 1))));
-    $('buildPromptBtn').addEventListener('click', () => { $('boardError').classList.remove('ab-show'); if ($('buildPromptBtn').disabled) { $('boardError').classList.add('ab-show'); return; } $('modeAPrompt').value = buildModeA(); $('modeBPrompt').value = buildModeB(); showScreen(3); });
-    $('saveResponseBtn').addEventListener('click', event => saveAiResponse(event.target));
-    $('saveBoardBtn').addEventListener('click', event => {
-      localStorage.setItem('utl-advisory-board-default', JSON.stringify({ advisors: [...selectedAdvisors], orchestrator: orchestratorId }));
-      saveBoardProgress();
-      copyText('Board saved', event.target);
+    document.querySelectorAll('[data-back]').forEach(button => button.addEventListener('click', () => showScreen(currentScreen - 1)));
+    $('prepareBoardBtn').addEventListener('click', () => {
+      if (!$('decisionText').value.trim() || !$('contextText').value.trim() || !$('initialView').value.trim()) { $('boardError').textContent = 'Add the question, context, and what you are leaning toward before continuing.'; return; }
+      if (selectedRoles.size < 3 || !decisionMakerId) { $('boardError').textContent = 'Choose at least three board members, then select one of them as the board chair.'; return; }
+      $('boardError').textContent = '';
+      $('boardPrompt').value = buildPrompt();
+      $('runSeatList').innerHTML = boardSeatsHtml(true);
+      showScreen(3);
     });
-    $('newBoardBtn').addEventListener('click', () => { selectedAdvisors.clear(); orchestratorId = ''; renderBoard(); showScreen(2); });
-    $('markDoneBtn').addEventListener('click', event => {
-      event.target.disabled = true;
-      event.target.textContent = 'Saving...';
-      saveBoardProgress()
-        .then(() => {
-          window.UTLRewardEvents?.awardCompletionExercise({
-            appId: 'advisory-board',
-            title: 'Advisory board with AI complete',
-            body: 'Your advisory-board simulation was saved.'
-          });
-          event.target.textContent = 'Done';
-          $('journeyLink').classList.add('ab-gold');
-          $('doneStatus').textContent = 'Saved to your workspace.';
-        })
-        .catch(() => {
-          event.target.disabled = false;
-          event.target.textContent = 'Mark as done';
-          $('doneStatus').textContent = 'Could not save. Please try again.';
-        });
+    $('runBoardBtn').addEventListener('click', runBoard);
+    $('copyPromptBtn').addEventListener('click', copyPrompt);
+    $('usePastedResponseBtn').addEventListener('click', renderPastedResult);
+    $('useSampleBtn').addEventListener('click', () => { structuredResponse = sampleStructuredResponse(); $('boardOutput').value = ''; setAiStatus('A sample response is ready for review. You can still make your own decision and complete the exercise.', true); renderStructuredResult(structuredResponse); });
+    $('completeBtn').addEventListener('click', async event => {
+      if (!$('finalDecision').value.trim() || !$('changedThinking').value.trim() || !$('nextStep').value.trim()) {
+        $('completionError').textContent = 'Add your decision, what changed or needs checking, and your next step.';
+        return;
+      }
+      $('completionError').textContent = '';
+      event.currentTarget.disabled = true;
+      event.currentTarget.textContent = 'Saving...';
+      await saveProgress();
+      window.UTLRewardEvents?.awardCompletionExercise({ appId: 'advisory-board', title: 'Advisory board with AI complete', body: 'You turned several perspectives into one clear decision.' });
+      event.currentTarget.textContent = 'Saved';
+      $('completionSuccess').classList.add('is-visible');
+      $('completionLinks').hidden = false;
     });
-    $('timerPauseIconBtn').addEventListener('click', () => {
-      if (!timerStarted) return;
-      timerRunning ? pauseTimer() : resumeTimer();
-    });
-    $('timerResetIconBtn').addEventListener('click', resetTimer);
-    $('timerMetricToggleBtn').addEventListener('click', () => { timerHidden = !timerHidden; renderTimer(); });
-    document.addEventListener('input', startTimerFromInteraction);
-    loadSaved();
-    renderBoard();
-    renderTimer();
-    setInterval(renderTimer, 1000);
+    $('restartBtn').addEventListener('click', () => { structuredResponse = null; $('boardOutput').value = ''; $('finalDecision').value = ''; $('changedThinking').value = ''; $('nextStep').value = ''; $('reviewPanel').hidden = true; $('decisionRecordPanel').hidden = true; $('completionSuccess').classList.remove('is-visible'); $('completionLinks').hidden = true; $('completeBtn').disabled = false; $('completeBtn').textContent = 'Save and complete'; $('aiStatus').classList.remove('is-visible'); showScreen(2); });
+
+    renderRoles();
+    renderDots();
   </script>
   <script type="module" src="../../assets/app-access-guard.js?v=1"></script>
-  <script src="../../assets/exercise-scoring-intro.js?v=6"></script>
   <script src="../../assets/app-reward-header.js?v=20260730-celebration-1"></script>
   <script src="../../assets/reward-events.js?v=20260730-celebration-1"></script>
   <script type="module" src="../../assets/feedback-widget.js?v=6"></script>

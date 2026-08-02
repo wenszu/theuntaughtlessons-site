@@ -21,7 +21,7 @@ const UTL_CONTENT = {
   },
   phase1: {
     title: "Think clearly",
-    description: "Build clean structure before you communicate. Watch the lessons, then practice turning messy inputs into clear thinking.",
+    description: "Build clean structure before you communicate. Watch the lessons, then practice turning a messy update into something a busy person can read.",
     lessons: [
       { id: "p1-l1", title: "KonMari for the cluttered mind", duration: "9 min 35 sec", videoUrl: "https://drive.google.com/file/d/1JogKtDiCfhNjNckFLhOEJCCw7gh7eORq/view?usp=sharing" },
       { id: "p1-l2", title: "Rule of three", duration: "8 min 26 sec", videoUrl: "https://drive.google.com/open?id=1fFBBPC0JbHf1IPeHIz_9yKrp173coxJM&usp=drive_copy" },
@@ -54,7 +54,7 @@ const UTL_CONTENT = {
       },
       {
         id: "p1-e2",
-        estimatedMinutes: 15,
+        estimatedMinutes: 10,
         legacyDoneKey: "utl_p1_ex2_done",
         legacyEmbedKey: "utl_embed_p1_ai_grocery",
         title: "Grocery list with AI",
@@ -79,11 +79,11 @@ const UTL_CONTENT = {
         contextType: "video",
         contextUrl: "https://drive.google.com/file/d/1JpPDKz5RTyWFIJxUkeKSB5etP4W57Dax/view?usp=vids_web",
         contextTitle: "A message just landed on your desk",
-        contextBody: "One of Aiko's direct reports, Ashley, just sent a cluttered update for Aiko. She needs you to turn it into something decision-ready before she's back. Apply the lessons from Phase 1 to get this done easily."
+        contextBody: "One of Aiko's direct reports, Ashley, just sent a cluttered update meant for Aiko. Ashley needs it decision-ready before Aiko is back. Apply the lessons from Phase 1 to get this done."
       },
       {
         id: "p1-e4",
-        estimatedMinutes: 20,
+        estimatedMinutes: 15,
         legacyDoneKey: "utl_p1_ex4_done",
         legacyEmbedKey: "utl_embed_p1_hugh_favour",
         title: "Rushed voice memo",
@@ -97,7 +97,7 @@ const UTL_CONTENT = {
       },
       {
         id: "p1-e5",
-        estimatedMinutes: 15,
+        estimatedMinutes: 10,
         legacyDoneKey: "utl_p1_ex5_done",
         legacyEmbedKey: "utl_embed_p1_ai_memo",
         title: "Rushed voice memo with AI",
@@ -112,7 +112,7 @@ const UTL_CONTENT = {
       },
       {
         id: "p1-e6",
-        estimatedMinutes: 25,
+        estimatedMinutes: 20,
         legacyDoneKey: "utl_p1_ex6_done",
         legacyEmbedKey: "utl_embed_p1_olympic_brainstorm",
         title: "Chalkboard notes",
@@ -162,7 +162,7 @@ const UTL_CONTENT = {
       },
       {
         id: "p2-e2",
-        estimatedMinutes: 10,
+        estimatedMinutes: 15,
         legacyDoneKey: "utl_p2_ex2_done",
         legacyEmbedKey: "utl_embed_p2_frame_answer",
         title: "Framing the storyline (SCQA)",
@@ -176,7 +176,7 @@ const UTL_CONTENT = {
       },
       {
         id: "p2-e3",
-        estimatedMinutes: 20,
+        estimatedMinutes: 15,
         legacyDoneKey: "utl_p2_ex3_done",
         legacyEmbedKey: "utl_embed_p2_outside_perspectives",
         title: "Advisory board with AI",
@@ -191,7 +191,7 @@ const UTL_CONTENT = {
       },
       {
         id: "p2-e4",
-        estimatedMinutes: 15,
+        estimatedMinutes: 10,
         legacyDoneKey: "utl_p2_ex4_done",
         legacyEmbedKey: "utl_embed_p2_aiko_email",
         title: "Write to Aiko",
@@ -219,7 +219,7 @@ const UTL_CONTENT = {
       },
       {
         id: "p2-e6",
-        estimatedMinutes: 15,
+        estimatedMinutes: 10,
         legacyDoneKey: "utl_p2_ex6_done",
         legacyEmbedKey: "utl_embed_p2_compress",
         title: "Explain to Aiko (60s)",
@@ -256,7 +256,7 @@ const UTL_CONTENT = {
     exercises: [
       {
         id: "p3-e1",
-        estimatedMinutes: 30,
+        estimatedMinutes: 10,
         legacyDoneKey: "utl_p3_ex1_done",
         legacyEmbedKey: "utl_embed_p3_lead_role",
         title: "The art of saying no",
@@ -270,7 +270,7 @@ const UTL_CONTENT = {
       },
       {
         id: "p3-e2",
-        estimatedMinutes: 20,
+        estimatedMinutes: 25,
         legacyDoneKey: "utl_p3_ex2_done",
         legacyEmbedKey: "utl_embed_p3_bad_news",
         title: "I have bad news...",
@@ -285,7 +285,7 @@ const UTL_CONTENT = {
       },
       {
         id: "p3-e3",
-        estimatedMinutes: 15,
+        estimatedMinutes: 20,
         legacyDoneKey: "utl_p3_ex3_done",
         legacyEmbedKey: "utl_embed_p3_read_room",
         title: "Let's switch hats",
@@ -300,7 +300,7 @@ const UTL_CONTENT = {
       },
       {
         id: "p3-e4",
-        estimatedMinutes: 15,
+        estimatedMinutes: 25,
         legacyDoneKey: "utl_p3_ex4_done",
         legacyEmbedKey: "utl_embed_p3_eyes_on_you",
         title: "Speak like Obama",
@@ -350,12 +350,13 @@ const UTL_CONTENT = {
   var AIKO_VERSION_LOCAL_KEYS = {
     explainToAiko120: "utl_aiko_120_version",
     explainToAiko60: "utl_aiko_60_version",
-    eisenhowerMatrix: "utl_eisenhower_matrix_version"
+    eisenhowerMatrix: "utl_eisenhower_matrix_version",
+    tsaDiagnostic: "utl_tsa_diagnostic_version"
   };
   var MATRIX_VERSION_LABEL_SCHEMA = "guided-v1-20260723";
-  var aikoVersions = { explainToAiko120: "v1", explainToAiko60: "v1", eisenhowerMatrix: "v1" };
+  var aikoVersions = { explainToAiko120: "v1", explainToAiko60: "v1", eisenhowerMatrix: "v1", tsaDiagnostic: "v1" };
   var phaseDescriptions = {
-    phase1: "Learn to sort noise into signal.",
+    phase1: "Learn to pull signal out of noise.",
     phase2: "Turn structure into concise communication.",
     phase3: "Act with judgment when the answer is not obvious."
   };
@@ -486,6 +487,13 @@ const UTL_CONTENT = {
     document.querySelectorAll('[data-exercise-visit="p3-e1"], a[href*="/apps/eisenhower-matrix"]').forEach(function (link) {
       link.setAttribute("href", matrixPath);
     });
+    var unifiedDiagnostic = normalizedAikoVersion(aikoVersions.tsaDiagnostic) === "v2";
+    document.querySelectorAll('a[href*="/apps/tsa-diagnostic/"]').forEach(function (link) {
+      link.setAttribute("href", unifiedDiagnostic ? "../apps/tsa-diagnostic-v2/index.html" : "../apps/tsa-diagnostic/index.html");
+    });
+    document.querySelectorAll('a[href*="/apps/tsa-checkpoint/"]').forEach(function (link) {
+      link.setAttribute("href", unifiedDiagnostic ? "../apps/tsa-diagnostic-v2/index.html?assessment=checkpoint" : "../apps/tsa-checkpoint/index.html");
+    });
   }
 
   function loadAikoVersions() {
@@ -498,6 +506,7 @@ const UTL_CONTENT = {
       aikoVersions.eisenhowerMatrix = localStorage.getItem("utl_eisenhower_matrix_version_schema") === MATRIX_VERSION_LABEL_SCHEMA
         ? normalizedAikoVersion(localStorage.getItem(AIKO_VERSION_LOCAL_KEYS.eisenhowerMatrix))
         : "v1";
+      aikoVersions.tsaDiagnostic = normalizedAikoVersion(localStorage.getItem(AIKO_VERSION_LOCAL_KEYS.tsaDiagnostic));
       applyAikoVersions();
     }
     var timedOut = false;
@@ -514,15 +523,16 @@ const UTL_CONTENT = {
       if (!matrixOverride) aikoVersions.eisenhowerMatrix = settings.eisenhowerMatrixVersionSchema === MATRIX_VERSION_LABEL_SCHEMA
         ? normalizedAikoVersion(settings.eisenhowerMatrix)
         : "v1";
+      aikoVersions.tsaDiagnostic = normalizedAikoVersion(settings.tsaDiagnostic);
       applyAikoVersions();
       rewriteRenderedAikoLinks();
     }).catch(function () {
-      aikoVersions = { explainToAiko120: "v1", explainToAiko60: "v1", eisenhowerMatrix: "v1" };
+      aikoVersions = { explainToAiko120: "v1", explainToAiko60: "v1", eisenhowerMatrix: "v1", tsaDiagnostic: "v1" };
       applyAikoVersions();
       rewriteRenderedAikoLinks();
     });
     return Promise.race([load, timeout]).catch(function () {
-      aikoVersions = { explainToAiko120: "v1", explainToAiko60: "v1", eisenhowerMatrix: "v1" };
+      aikoVersions = { explainToAiko120: "v1", explainToAiko60: "v1", eisenhowerMatrix: "v1", tsaDiagnostic: "v1" };
       applyAikoVersions();
       rewriteRenderedAikoLinks();
     });
@@ -1229,7 +1239,23 @@ const UTL_CONTENT = {
   }
 
   function exerciseDone(exercise) {
-    return readBool(doneKey(exercise.id)) || (exercise.legacyDoneKey ? readBool(exercise.legacyDoneKey) : false);
+    var completed = readBool(doneKey(exercise.id)) || (exercise.legacyDoneKey ? readBool(exercise.legacyDoneKey) : false);
+    if (completed) return true;
+
+    // Older app versions sometimes saved the completed result but did not set
+    // both workspace completion flags. Treat a clearly completed result as the
+    // source of truth and repair the flags so the ordered journey can continue.
+    var appKey = exerciseAppKey(exercise);
+    if (!appKey) return false;
+    try {
+      var result = JSON.parse(localStorage.getItem("utl_result_" + appKey) || "null");
+      var resultIsComplete = Boolean(result && (result.completed === true || result.completed_at || result.completedAt));
+      if (!resultIsComplete) return false;
+      writeExerciseDone(exercise, true);
+      return true;
+    } catch (error) {
+      return false;
+    }
   }
 
   function writeExerciseDone(exercise, value) {
@@ -2145,10 +2171,9 @@ const UTL_CONTENT = {
     return '<a class="ws-learning-continue" id="ws-nudge-continue" href="' + escapeHtml(next.href) + '"><div class="ws-learning-continue-copy"><span>Continue where you left off</span><h2>' + sequence + escapeHtml(next.title) + '</h2><p>' + escapeHtml(phaseName) + ' &middot; ' + escapeHtml(next.kind) + ' &middot; ' + escapeHtml(next.duration) + '</p><div class="ws-learning-mini-progress"><span style="width:' + progress.percent + '%"></span></div><small>' + progress.done + ' of ' + progress.total + ' core activities complete &middot; <strong>' + progress.percent + '%</strong></small></div><span class="ws-button">' + (progress.done ? "Continue" : "Start") + ' ' + (next.sequence ? escapeHtml(next.sequence) + " " : "") + '&rarr;</span></a>';
   }
 
-  function journeyActivityRowHtml(activity, next, phaseIsUnlocked, sequenceLabel) {
-    var nextKey = next && next.key;
+  function journeyActivityRowHtml(activity, next, phaseIsUnlocked, activityIsUnlocked, sequenceLabel) {
     var inProgress = activity.kind === "Exercise" && activity.contextGated && activity.contextComplete && !activity.done;
-    var state = activity.done ? "done" : inProgress ? "progress" : activity.key === nextKey && phaseIsUnlocked ? "next" : "locked";
+    var state = activity.done ? "done" : phaseIsUnlocked && activityIsUnlocked ? (inProgress ? "progress" : "next") : "locked";
     var stateText = state === "done" ? "Completed" : state === "progress" ? "In progress" : state === "next" ? "Up next" : "Locked";
     var statusIcon = state === "done" ? "&#10003;" : state === "progress" ? "&#9680;" : state === "next" ? "&#9679;" : "&#128274;";
     var typeIcon = activity.kind === "Video" ? "&#9654;" : "&#9632;";
@@ -2190,8 +2215,11 @@ const UTL_CONTENT = {
     var activities = journeyPhaseActivities(phaseKey);
     var phaseIsUnlocked = phaseUnlocked(phaseKey);
     var completed = activities.filter(function (activity) { return activity.done; }).length;
+    var priorActivitiesComplete = true;
     var rows = activities.map(function (activity) {
-      return journeyActivityRowHtml(activity, next, phaseIsUnlocked, activity.sequence);
+      var activityIsUnlocked = priorActivitiesComplete;
+      if (!activity.done) priorActivitiesComplete = false;
+      return journeyActivityRowHtml(activity, next, phaseIsUnlocked, activityIsUnlocked, activity.sequence);
     }).join("");
     return '<section class="ws-journey-phase-panel" role="tabpanel" id="journey-panel-' + phaseKey + '" aria-labelledby="journey-tab-' + phaseKey + '" data-journey-phase-panel="' + phaseKey + '"' + (phaseKey === selectedPhase ? "" : " hidden") + '><header class="ws-journey-panel-head"><div><span>Phase ' + phaseNumbers[phaseKey] + '</span><h3>' + escapeHtml(phase.title) + '</h3></div><strong>' + completed + ' of ' + activities.length + ' complete</strong></header><ol class="ws-journey-activities">' + rows + '</ol></section>';
   }
@@ -2430,8 +2458,12 @@ const UTL_CONTENT = {
   function assessmentsSection() {
     if (localStorage.getItem("utl_tsa_status") === "hidden") return "";
     var phase3Done = exercisesDone("phase3");
-    var checkpointCard = phase3Done ? '<article class="ws-phase-card"><div class="ws-phase-stripe"></div><div class="ws-phase-number">B</div><div class="ws-phase-content"><span class="ws-kicker">Assessment</span><h2>The checkpoint</h2><p>Take the post-program checkpoint after finishing all three phases to see how far you have come.</p></div><div class="ws-phase-actions"><a class="ws-button" href="../apps/tsa-checkpoint/index.html">Open &rarr;</a></div></article>' : '<article class="ws-phase-card ws-locked"><div class="ws-phase-stripe"></div><div class="ws-phase-number">B</div><div class="ws-phase-content"><span class="ws-kicker">Assessment</span><h2>The checkpoint</h2><p>Complete all three phases to unlock the checkpoint — it re-tests the same skills as your diagnostic so you can see exactly how far you have come.</p></div><div class="ws-phase-actions"><span class="ws-pill ws-pill-locked">Locked</span><span class="ws-button ws-disabled">Open &rarr;</span></div></article>';
-    return '<section class="ws-section" id="assessments"><div class="ws-section-head"><h2>Assessments</h2><span class="ws-count">Find your level</span></div><div class="ws-phase-list"><article class="ws-phase-card"><div class="ws-phase-stripe"></div><div class="ws-phase-number">A</div><div class="ws-phase-content"><span class="ws-kicker">Assessment</span><h2>The diagnostic</h2><p>Take the starting assessment when you are ready.</p></div><div class="ws-phase-actions"><a class="ws-button" href="../apps/tsa-diagnostic/index.html">Open &rarr;</a></div></article>' + checkpointCard + '</div></section>';
+    var unified = normalizedAikoVersion(aikoVersions.tsaDiagnostic) === "v2";
+    var diagnosticHref = unified ? '../apps/tsa-diagnostic-v2/index.html' : '../apps/tsa-diagnostic/index.html';
+    var checkpointHref = unified ? '../apps/tsa-diagnostic-v2/index.html?assessment=checkpoint' : '../apps/tsa-checkpoint/index.html';
+    var checkpointCard = phase3Done ? '<article class="ws-phase-card"><div class="ws-phase-stripe"></div><div class="ws-phase-number">B</div><div class="ws-phase-content"><span class="ws-kicker">Assessment</span><h2>The checkpoint</h2><p>Take the post-program checkpoint after finishing all three phases to see how far you have come.</p></div><div class="ws-phase-actions"><a class="ws-button" href="' + checkpointHref + '">Open &rarr;</a></div></article>' : '<article class="ws-phase-card ws-locked"><div class="ws-phase-stripe"></div><div class="ws-phase-number">B</div><div class="ws-phase-content"><span class="ws-kicker">Assessment</span><h2>The checkpoint</h2><p>Complete all three phases to unlock the checkpoint. It tests the same skills with a different scenario.</p></div><div class="ws-phase-actions"><span class="ws-pill ws-pill-locked">Locked</span><span class="ws-button ws-disabled">Open &rarr;</span></div></article>';
+    var adminUnifiedPreview = isAdminUser() ? '<article class="ws-phase-card"><div class="ws-phase-stripe"></div><div class="ws-phase-number">C</div><div class="ws-phase-content"><span class="ws-kicker">Admin preview</span><h2>The new unified diagnostic</h2><p>Try the complete Think, Speak, and Act assessment in one saved flow. This preview does not change the version members receive.</p></div><div class="ws-phase-actions"><span class="ws-pill ws-pill-muted">Testing</span><a class="ws-button" href="../apps/tsa-diagnostic-v2/index.html?preview=1&amp;form=A&amp;reset=1">Try Assessment C &rarr;</a></div></article>' : '';
+    return '<section class="ws-section" id="assessments"><div class="ws-section-head"><h2>Assessments</h2><span class="ws-count">Find your level</span></div><div class="ws-phase-list"><article class="ws-phase-card"><div class="ws-phase-stripe"></div><div class="ws-phase-number">A</div><div class="ws-phase-content"><span class="ws-kicker">Assessment</span><h2>The diagnostic</h2><p>Take the starting assessment when you are ready.</p></div><div class="ws-phase-actions"><a class="ws-button" href="' + diagnosticHref + '">Open &rarr;</a></div></article>' + checkpointCard + adminUnifiedPreview + '</div></section>';
   }
 
   // ===== In-app nudges =====
