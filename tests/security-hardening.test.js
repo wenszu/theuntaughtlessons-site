@@ -50,6 +50,10 @@ assert.doesNotMatch(admin, /Google Group Added/);
 assert.match(admin, /const LOCAL_ADMIN_HOST = \/\^\(localhost\|127\\\.0\\\.0\\\.1\)\$\//);
 assert.match(admin, /Production never trusts the browser-only password/);
 assert.match(admin, /openProductionAdmin\(\{ interactive: true \}\)/);
+assert.match(admin, /id="adminGoogleSignIn" type="button" disabled/);
+assert.match(admin, /function waitForAdminFirebaseApi\(onReady\)/);
+assert.match(admin, /window\.setInterval\(probe, 250\)/);
+assert.match(admin, /Secure sign-in took too long to load/);
 assert.match(headers, /Content-Security-Policy-Report-Only:/);
 assert.match(headers, /X-Content-Type-Options: nosniff/);
 
