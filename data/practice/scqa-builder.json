@@ -36,36 +36,36 @@
         }
       },
       {
-        "id": "team-priorities",
-        "title": "A team has too many priorities",
-        "context": "A manager's team has six major projects due this quarter. Everyone is busy, but progress on the two most important projects has slowed.",
+        "id": "shared-home",
+        "title": "Household responsibilities feel uneven",
+        "context": "Three people share a home and agreed to divide the weekly chores. One person now handles most of the cleaning and reminders, while the others believe the arrangement is fair.",
         "sampleAnswer": {
-          "s": "The team is responsible for six major projects this quarter and has people actively working across all of them.",
-          "c": "Spreading effort across every project has slowed progress on the two projects that matter most to the quarter's goals.",
-          "q": "How should the manager reset priorities so the team completes the most important work?",
-          "a": "The manager should make the top two projects the team's primary commitments, pause or reduce the lowest-value work, and assign clear owners and weekly milestones to the priorities that remain."
+          "s": "Three people share a home and agreed that everyone would contribute to the weekly chores.",
+          "c": "One person now does most of the cleaning and reminding, while the others believe the current arrangement is balanced.",
+          "q": "How can the household divide responsibilities in a way that is clear and fair to everyone?",
+          "a": "The household should list the recurring chores, agree on the effort each one requires, assign named owners on a rotating schedule, and review the arrangement after two weeks."
         }
       },
       {
-        "id": "training-attendance",
-        "title": "Training attendance is declining",
-        "context": "An organization introduced a professional-development program. Initial attendance was strong, but participation has dropped each month even though employee surveys say the topic is important.",
+        "id": "group-trip",
+        "title": "Friends cannot agree on a group trip",
+        "context": "Five friends want to take a three-day trip together. They have different budgets, preferred activities, and available weekends, and every proposed plan leaves someone out.",
         "sampleAnswer": {
-          "s": "The organization introduced a professional-development program on a topic employees consistently describe as important.",
-          "c": "Attendance was strong at launch but has declined every month, suggesting that interest is not translating into continued participation.",
-          "q": "What changes would make the program easier and more worthwhile for employees to attend regularly?",
-          "a": "The organization should ask recent non-attendees about the main barriers, shorten sessions into practical modules, and schedule each session with manager-supported time to participate."
+          "s": "Five friends want to take a three-day trip together and are willing to plan around the needs of the group.",
+          "c": "Their budgets, interests, and available weekends differ enough that each proposed plan excludes at least one person.",
+          "q": "How can the group choose a trip that everyone can afford and attend without restarting the discussion each time?",
+          "a": "The group should first agree on a maximum budget and two possible weekends, remove destinations that fail either condition, and then vote on the remaining options using each person's top activity as a preference rather than a requirement."
         }
       },
       {
-        "id": "event-budget",
-        "title": "A community event is over budget",
-        "context": "A neighborhood organization is planning its annual festival. Vendor costs have increased, sponsorship is lower than expected, and cancelling the event would disappoint the community.",
+        "id": "school-project",
+        "title": "A school group project is off track",
+        "context": "Four students have ten days to finish a group presentation. Two students have completed their sections, one keeps changing the main idea, and one has not submitted any work.",
         "sampleAnswer": {
-          "s": "The neighborhood's annual festival is an established community event that residents and local organizations expect each year.",
-          "c": "Higher vendor costs and lower sponsorship have created a budget gap, while cancelling the festival would disappoint residents and weaken community trust.",
-          "q": "How can the organization hold a meaningful festival without exceeding the available budget?",
-          "a": "The organization should preserve the most valued community activities, remove lower-priority expenses, renegotiate vendor packages, and seek small in-kind contributions from local businesses."
+          "s": "Four students have ten days to complete one group presentation, and two sections are already drafted.",
+          "c": "The main idea keeps changing and one student has not contributed, putting the quality and deadline at risk.",
+          "q": "How should the group organize the remaining work so it submits one clear presentation on time?",
+          "a": "The group should agree on one main idea today, assign each unfinished section to a named student with a two-day deadline, combine the slides in one file, and reserve the final three days for editing and rehearsal."
         }
       }
     ],
