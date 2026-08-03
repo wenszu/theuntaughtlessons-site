@@ -170,7 +170,7 @@ const UTL_CONTENT = {
         description: "Using the issue tree, create an SCQA formulation.",
         appUrl: "../apps/scqa-builder/index.html",
         contextType: "video",
-        contextUrl: "https://drive.google.com/open?id=168tYlq9fRUKl7NrlELHuwAPwAxC2_5yD&usp=drive_copy",
+        contextUrl: "https://drive.google.com/file/d/10GgHE70T14fcp4tvGF3gsltwsGgp-HXQ/view?usp=sharing",
         contextTitle: "Create an executive-ready brief for Aiko.",
         contextBody: "You will need to make this more readable for Aiko. Use the SCQA framework to do so."
       },
@@ -1300,7 +1300,13 @@ const UTL_CONTENT = {
 
   function exerciseContextUrl(exercise) {
     var legacy = legacyEmbedConfig(exercise);
-    return localStorage.getItem("utl_ctx_url_" + exercise.id) || legacy.url || exercise.contextUrl || "";
+    var saved = localStorage.getItem("utl_ctx_url_" + exercise.id) || legacy.url || "";
+    if (exercise.id === "p2-e2" && /168tYlq9fRUKl7NrlELHuwAPwAxC2_5yD/.test(saved)) {
+      localStorage.removeItem("utl_ctx_url_" + exercise.id);
+      if (exercise.legacyEmbedKey) localStorage.removeItem(exercise.legacyEmbedKey);
+      saved = "";
+    }
+    return saved || exercise.contextUrl || "";
   }
 
   function watchedCount(phaseKey) {

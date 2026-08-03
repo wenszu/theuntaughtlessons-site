@@ -3403,7 +3403,7 @@
         { kind: 'context', key: 'utl_embed_p2_recap_storyline', label: 'Recap and storyline', visible: true, type: 'video', url: 'https://drive.google.com/open?id=1A6lCodeBWSOQLNAEMOE4bpYYB5xJXWjb&usp=drive_copy' },
         { kind: 'context', key: 'utl_embed_p2_aiko_question', label: 'Aiko liked your work. Now she has a question.', visible: true, type: 'video', url: 'https://drive.google.com/file/d/15AaNTTkiRsIVf90RfsmcSa3aEuFTqOAT/view?usp=vids_web' },
         { kind: 'app', key: 'utl_app_p2_1', title: 'Issue tree builder', visible: true },
-        { kind: 'context', key: 'utl_embed_p2_frame_answer', label: 'Before you frame your answer', visible: true, type: 'video', url: 'https://drive.google.com/open?id=168tYlq9fRUKl7NrlELHuwAPwAxC2_5yD&usp=drive_copy' },
+        { kind: 'context', key: 'utl_embed_p2_frame_answer', label: 'Before you frame your answer', visible: true, type: 'video', url: 'https://drive.google.com/file/d/10GgHE70T14fcp4tvGF3gsltwsGgp-HXQ/view?usp=sharing' },
         { kind: 'app', key: 'utl_app_p2_2', title: 'SCQA builder', visible: true },
         { kind: 'context', key: 'utl_embed_p2_outside_perspectives', label: 'Get outside perspectives before you commit', visible: true, type: 'slides', url: '' },
         { kind: 'app', key: 'utl_app_p2_3', title: 'Advisory board with AI', visible: true },
@@ -3506,7 +3506,19 @@
       localStorage.setItem(migrationKey, 'done');
     }
 
+    function migrateUpdatedScqaSetupVideo() {
+      const key = 'utl_embed_p2_frame_answer';
+      const current = builtInEmbedConfig(key);
+      if (!current?.url) return;
+      let existing = null;
+      try { existing = JSON.parse(localStorage.getItem(key) || 'null'); } catch (error) { existing = null; }
+      if (!existing?.url || /168tYlq9fRUKl7NrlELHuwAPwAxC2_5yD/.test(existing.url)) {
+        localStorage.setItem(key, JSON.stringify({ url: current.url, type: current.type }));
+      }
+    }
+
     migrateMay2026VideoEmbeds();
+    migrateUpdatedScqaSetupVideo();
 
     document.querySelectorAll('[data-password-toggle]').forEach((toggle) => {
       const target = document.getElementById(toggle.dataset.passwordToggle);
