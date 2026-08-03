@@ -9,22 +9,22 @@
 
   var activeTimers = {};
   var EXERCISE_REFLECTIONS = {
-    "advisory-board": { prompt: "What would make this advisory board useful for a real decision?", choices: ["Choose advisors who will disagree for good reasons", "Give the board one specific decision to examine", "End the discussion with a decision and next step"] },
-    "chalkboard-notes": { prompt: "Which move did the most to improve your chalkboard summary?", choices: ["Grouped related ideas before writing", "Separated the main point from supporting detail", "Put the points in an order the reader can follow"] },
-    "eisenhower-matrix": { prompt: "What will you do differently when deciding what deserves your time?", choices: ["Separate urgency from importance", "Protect time for important work before it becomes urgent", "Decline or delegate work that does not need me"] },
-    "explain-to-aiko-60": { prompt: "What made your 60-second explanation more effective?", choices: ["Led with the answer", "Kept only the evidence Aiko needed", "Ended with a clear recommendation or ask"] },
-    "explain-to-aiko-120": { prompt: "What strengthened your longer explanation without making it feel long?", choices: ["Used a clear beginning, middle, and end", "Connected each detail to the main point", "Made the recommendation easy to act on"] },
-    "grocery-list-ai": { prompt: "What did the AI comparison teach you about giving better instructions?", choices: ["Specific constraints improve the output", "A clear structure makes results easier to review", "AI still needs my judgment to check the answer"] },
-    "grocery-list": { prompt: "What was the most useful lesson from organizing the grocery list?", choices: ["Categories should not overlap", "Together, the categories should cover everything", "A clean structure makes messy information usable"] },
-    "i-have-bad-news": { prompt: "What will help you handle a difficult message with more confidence?", choices: ["State the issue directly without being harsh", "Acknowledge the impact on the other person", "Pair the message with a constructive next step"] },
-    "issue-tree": { prompt: "What made your issue tree a stronger problem-solving tool?", choices: ["Started with one precise question", "Created branches that do not overlap", "Made sure the branches cover the whole problem"] },
-    "lets-switch-hats": { prompt: "What changed when you looked at the situation from another perspective?", choices: ["I noticed an assumption I was making", "I understood what another person might value", "I found a response that works for more than one side"] },
-    "messy-notes": { prompt: "What helped you find the signal in the manager’s messy notes?", choices: ["Identified the governing idea first", "Grouped details by the question they answer", "Removed information that did not support the message"] },
-    "rushed-voice-memo-ai": { prompt: "What will you remember when using AI to structure an unclear update?", choices: ["Give AI the audience and purpose", "Ask for a specific communication structure", "Review the output for judgment, not just polish"] },
-    "rushed-voice-memo": { prompt: "What made the rushed voice memo easier to understand?", choices: ["Named the main message early", "Organized the supporting points into groups", "Ended with the action the listener should take"] },
-    "scqa-builder": { prompt: "Which part of SCQA did the most work in your message?", choices: ["The situation gave the reader enough context", "The complication showed why the issue matters now", "The question and answer focused the recommendation"] },
-    "speak-like-obama": { prompt: "Which delivery choice made the biggest difference?", choices: ["Used pauses instead of rushing", "Varied emphasis around the key idea", "Kept a steady pace and finished strongly"] },
-    "write-to-aiko": { prompt: "What made your written recommendation feel executive-ready?", choices: ["Put the answer before the explanation", "Used evidence selectively", "Made the requested decision or next step explicit"] }
+    "advisory-board": { prompt: "What will you do differently the next time you use several perspectives to make a decision?" },
+    "chalkboard-notes": { prompt: "What will you do differently the next time you turn rough notes into a clear summary?" },
+    "eisenhower-matrix": { prompt: "What will you do differently the next time you decide what deserves your time?" },
+    "explain-to-aiko-60": { prompt: "What will you do differently the next time you explain an idea in 60 seconds?" },
+    "explain-to-aiko-120": { prompt: "What will you do differently the next time you give a longer explanation?" },
+    "grocery-list-ai": { prompt: "What will you do differently the next time you ask AI to organize information?" },
+    "grocery-list": { prompt: "What will you check the next time you organize messy information?" },
+    "i-have-bad-news": { prompt: "What will you do differently the next time you deliver a difficult message?" },
+    "issue-tree": { prompt: "What will you check the next time you break a problem into parts?" },
+    "lets-switch-hats": { prompt: "What will you do differently the next time you need to understand another perspective?" },
+    "messy-notes": { prompt: "What will you do differently the next time you turn scattered details into a clear message?" },
+    "rushed-voice-memo-ai": { prompt: "What will you do differently the next time you use AI to structure an unclear update?" },
+    "rushed-voice-memo": { prompt: "What will you do differently the next time you organize a rushed spoken update?" },
+    "scqa-builder": { prompt: "What will you do differently the next time you structure a recommendation?" },
+    "speak-like-obama": { prompt: "What will you do differently the next time you deliver an important idea aloud?" },
+    "write-to-aiko": { prompt: "What will you do differently the next time you write a recommendation for a decision-maker?" }
   };
 
   function numberOr(value, fallback) {
@@ -43,8 +43,7 @@
 
   function exerciseReflectionFor(appId, supplied) {
     var fallback = EXERCISE_REFLECTIONS[appId] || {
-      prompt: "What worked best in this exercise?",
-      choices: ["Started with the main point", "Put the ideas in a useful order", "Made the next action specific"]
+      prompt: "What is one thing you learned that you will use next time?"
     };
     var saved = {};
     try {
@@ -52,7 +51,6 @@
       saved = settings.exerciseReflections && settings.exerciseReflections[appId] || {};
     } catch (error) {}
     var resolved = Object.assign({}, fallback, saved, supplied || {});
-    resolved.choices = Array.isArray(resolved.choices) && resolved.choices.length === 3 ? resolved.choices : fallback.choices;
     return resolved;
   }
 
@@ -187,9 +185,8 @@
       ".utl-reward-cert-cta:hover{filter:brightness(1.05)}",
       ".utl-reward-modal-program button[data-utl-reward-close]{display:block;margin:14px auto 0;background:transparent;color:#4D7094;box-shadow:none}",
       ".utl-exercise-award{width:min(640px,100%);border:1px solid rgba(0,51,102,.16);border-top:12px solid #EEA320;border-radius:10px;background:linear-gradient(115deg,#FFFDF8 0%,#FFFDF8 72%,#F3EDE2 72%,#F3EDE2 100%);padding:34px 42px 34px;text-align:left;box-shadow:0 30px 80px rgba(0,30,60,.38)}.utl-exercise-award.is-reflecting{border:2px solid rgba(238,163,32,.7);border-top-width:2px;background:#fff;padding:38px 42px;text-align:left;box-shadow:0 32px 90px rgba(0,30,60,.42)}.utl-exercise-award .utl-award-stage[hidden]{display:none}.utl-exercise-award [data-award-stage=celebrate] .utl-reward-modal-check{width:76px;height:76px;margin:0 0 22px;border:5px solid #fff;border-radius:999px;background:#003366;color:#EEA320;transform:none;box-shadow:0 0 0 3px #EEA320,0 10px 22px rgba(0,51,102,.2);font-size:38px}.utl-exercise-award [data-award-stage=celebrate] .utl-reward-modal-label{color:#A86400;font-size:13px}.utl-exercise-award [data-award-stage=celebrate] h2{max-width:470px;margin:7px 0 10px;color:#003366;font:800 44px/1.04 Lato,Arial,sans-serif}.utl-exercise-award [data-award-stage=celebrate] p{max-width:470px;margin:0;color:#4A4A4A;font:700 16px/1.5 Lato,Arial,sans-serif}.utl-exercise-award [data-award-stage=celebrate] p strong{color:#003366}.utl-exercise-award [data-award-stage=celebrate]>button{background:#003366;color:#fff;box-shadow:0 5px 0 #001F3F}.utl-exercise-award .utl-award-earned{display:inline-flex;align-items:center;gap:7px;margin-top:18px;padding:9px 15px;border:1px solid rgba(238,163,32,.55);border-radius:999px;background:#FFF1CF;color:#8A5A00;font:800 15px Lato,Arial,sans-serif}.utl-exercise-award .utl-award-progress{margin-top:9px;color:#4D7094;font:700 13px Lato,Arial,sans-serif}",
-      ".utl-exercise-award .utl-reflection-head{display:grid;grid-template-columns:48px 1fr;gap:13px;align-items:center;text-align:left}.utl-reflection-icon{width:48px;height:48px;border-radius:999px;background:#FFF1CF;color:#A86400;display:grid;place-items:center;font-size:23px}.utl-exercise-award .utl-reflection-head h2{margin:0;font-size:34px}.utl-exercise-award .utl-reflection-prompt{margin:22px 0 13px;text-align:left;color:#003366;font:700 17px/1.4 Lato,Arial,sans-serif}",
-      ".utl-reflection-options{display:grid;gap:9px}.utl-reflection-option{width:100%;margin:0!important;min-height:48px!important;padding:11px 14px!important;border:1px solid rgba(0,51,102,.2)!important;border-radius:9px!important;background:#fff!important;color:#003366!important;text-align:left!important;box-shadow:none!important;font:700 14px/1.35 Lato,Arial,sans-serif!important}.utl-reflection-option:hover,.utl-reflection-option.is-selected{border-color:#EEA320!important;background:#FFF8EC!important;box-shadow:0 0 0 2px rgba(238,163,32,.16)!important}",
-      ".utl-reflection-note{width:100%;min-height:76px;margin-top:11px;border:1px solid rgba(0,51,102,.2);border-radius:9px;padding:11px 12px;resize:vertical;color:#4A4A4A;font:400 14px/1.4 Lato,Arial,sans-serif}.utl-reflection-actions{display:flex;justify-content:space-between;align-items:center;gap:12px}.utl-reflection-actions button{margin-top:18px}.utl-reflection-skip{background:transparent!important;color:#4D7094!important;box-shadow:none!important;padding:0 8px!important}.utl-reflection-save:disabled{opacity:.48;cursor:not-allowed}",
+      ".utl-exercise-award .utl-reflection-head{display:grid;grid-template-columns:48px 1fr;gap:13px;align-items:center;text-align:left}.utl-reflection-icon{width:48px;height:48px;border-radius:999px;background:#FFF1CF;color:#A86400;display:grid;place-items:center;font-size:23px}.utl-exercise-award .utl-reflection-head h2{margin:0;font-size:34px}.utl-exercise-award .utl-reflection-prompt{margin:22px 0 0;text-align:left;color:#003366;font:700 17px/1.4 Lato,Arial,sans-serif}",
+      ".utl-exercise-award p.utl-reflection-guidance{max-width:none;margin:6px 0 0;text-align:left;color:#4D7094;font:italic 400 12px/1.45 Lato,Arial,sans-serif}.utl-reflection-note{width:100%;min-height:110px;margin-top:14px;border:1px solid rgba(0,51,102,.2);border-radius:9px;padding:12px;resize:vertical;color:#4A4A4A;font:400 15px/1.5 Lato,Arial,sans-serif}.utl-reflection-note:focus{border-color:#EEA320;outline:2px solid rgba(238,163,32,.18)}.utl-reflection-actions{display:flex;justify-content:space-between;align-items:center;gap:12px}.utl-reflection-actions button{margin-top:18px}.utl-reflection-skip{background:transparent!important;color:#4D7094!important;box-shadow:none!important;padding:0 8px!important}.utl-reflection-save:disabled{opacity:.48;cursor:not-allowed}",
       "@keyframes utlRewardPulse{0%{transform:translateY(0) scale(1)}45%{transform:translateY(-2px) scale(1.05)}100%{transform:translateY(0) scale(1)}}",
       "@keyframes utlRewardModalArrive{0%{opacity:0;transform:translateY(18px) scale(.92)}70%{transform:translateY(-3px) scale(1.015)}100%{opacity:1;transform:none}}",
       "@keyframes utlRewardSparkle{from{opacity:.35;transform:scale(.98)}to{opacity:.7;transform:scale(1.02)}}",
@@ -492,26 +489,26 @@
           '<div class="utl-reward-modal-check">&#10003;</div>',
           '<span class="utl-reward-modal-label">Exercise complete</span>',
           '<h2 id="utl-exercise-award-title">Congratulations!</h2>',
-          '<p>You finished <strong>' + escapeHtml(exerciseName) + '</strong>. Before you move on, note what worked.</p>',
+          '<p>You finished <strong>' + escapeHtml(exerciseName) + '</strong>. Take a moment to write down one thing you learned. Putting it in your own words helps you remember it and use it next time.</p>',
           '<span class="utl-award-earned">&#10022; +' + Math.max(0, Math.round(numberOr(opts.mpEarned, 0))) + ' MP earned</span>',
           '<div class="utl-award-progress">' + Math.max(0, Math.round(numberOr(opts.newTotal, 0))) + ' MP total</div>',
           (phaseProgress.total ? '<div class="utl-award-progress">Phase ' + phaseProgress.phase + ': ' + phaseProgress.done + ' of ' + phaseProgress.total + ' exercises complete</div>' : ''),
           (missionProgress ? '<div class="utl-award-progress">' + escapeHtml(missionProgress) + '</div>' : ''),
-          '<button type="button" data-award-reflect>Review what worked</button>',
+          '<button type="button" data-award-reflect>Write my takeaway</button>',
         '</section>',
         '<section class="utl-award-stage" data-award-stage="reflect" hidden>',
-          '<div class="utl-reflection-head"><span class="utl-reflection-icon" aria-hidden="true">&#128161;</span><div><span class="utl-reward-modal-label">Review your work</span><h2>What worked?</h2></div></div>',
+          '<div class="utl-reflection-head"><span class="utl-reflection-icon" aria-hidden="true">&#128161;</span><div><span class="utl-reward-modal-label">Before you continue</span><h2>Your takeaway</h2></div></div>',
           '<div class="utl-reflection-prompt">' + escapeHtml(reflection.prompt) + '</div>',
-          '<div class="utl-reflection-options">' + reflection.choices.map(function (choice, index) { return '<button class="utl-reflection-option" type="button" data-reflection-choice="' + index + '">' + escapeHtml(choice) + '</button>'; }).join("") + '</div>',
-          '<textarea class="utl-reflection-note" maxlength="300" placeholder="Optional: add a note in your own words"></textarea>',
-          '<div class="utl-reflection-actions"><button class="utl-reflection-skip" type="button" data-reflection-skip>Skip and return to Learning Journey</button><button class="utl-reflection-save" type="button" data-reflection-save disabled>Save reflection and return to Learning Journey</button></div>',
+          '<p class="utl-reflection-guidance">Write one or two sentences. Your response is saved with this exercise.</p>',
+          '<textarea class="utl-reflection-note" maxlength="300" placeholder="Type your takeaway here."></textarea>',
+          '<div class="utl-reflection-actions"><button class="utl-reflection-skip" type="button" data-reflection-skip>Skip for now</button><button class="utl-reflection-save" type="button" data-reflection-save disabled>Save and return to Learning Journey</button></div>',
         '</section>',
       '</div>'
     ].join("");
     document.body.appendChild(modal);
-    var selectedChoice = "";
     var celebration = modal.querySelector('[data-award-stage="celebrate"]');
     var reflectionStage = modal.querySelector('[data-award-stage="reflect"]');
+    var reflectionNote = modal.querySelector('.utl-reflection-note');
     var saveButton = modal.querySelector('[data-reflection-save]');
     var continueHref = nextExerciseHref(appId, phaseProgress.phase);
     function finish() {
@@ -523,23 +520,16 @@
       modal.querySelector('.utl-exercise-award').classList.add('is-reflecting');
       celebration.hidden = true;
       reflectionStage.hidden = false;
-      var firstChoice = reflectionStage.querySelector('[data-reflection-choice]');
-      if (firstChoice) firstChoice.focus();
+      if (reflectionNote) reflectionNote.focus();
     });
-    modal.querySelectorAll('[data-reflection-choice]').forEach(function (button) {
-      button.addEventListener("click", function () {
-        modal.querySelectorAll('[data-reflection-choice]').forEach(function (item) { item.classList.remove("is-selected"); });
-        button.classList.add("is-selected");
-        selectedChoice = reflection.choices[Number(button.dataset.reflectionChoice)] || "";
-        saveButton.disabled = !selectedChoice;
-      });
+    reflectionNote.addEventListener("input", function () {
+      saveButton.disabled = reflectionNote.value.trim().length < 10;
     });
     saveButton.addEventListener("click", function () {
       window.dispatchEvent(new CustomEvent("utl:exercise-reflection", { detail: {
         appId: appId,
         prompt: reflection.prompt,
-        choice: selectedChoice,
-        note: modal.querySelector('.utl-reflection-note').value.trim()
+        response: reflectionNote.value.trim()
       } }));
       finish();
     });

@@ -8,8 +8,7 @@ const admin = fs.readFileSync("admin/index.html", "utf8");
   "rewardReflectionMp", "rewardPhase1BonusMp", "rewardPhase2BonusMp", "rewardPhase3BonusMp",
   "rewardAssessmentBonusMp", "rewardProgramBonusMp", "rewardExerciseMode", "rewardStreakEnabled", "rewardDailyGoal",
   "rewardStreakBaseMp", "rewardLevelsSave", "rewardRulesSave", "rewardRulesReset",
-  "rewardReflectionExercise", "rewardReflectionPrompt", "rewardReflectionChoice1", "rewardReflectionChoice2",
-  "rewardReflectionChoice3", "rewardReflectionSave", "rewardReflectionPreview", "rewardReflectionReset",
+  "rewardReflectionExercise", "rewardReflectionPrompt", "rewardReflectionSave", "rewardReflectionPreview", "rewardReflectionReset",
   "rewardPolicyVideo", "rewardPolicyContext", "rewardPolicyScored", "rewardPolicyCompletion",
   "rewardPolicyReflection", "rewardPolicyPhases", "rewardPolicyProgram", "rewardPolicyAssessment", "rewardPolicyStreak"
 ].forEach((id) => assert.ok(admin.includes(`id="${id}"`), `Admin exposes ${id}`));
@@ -20,6 +19,7 @@ assert.match(admin, /Level thresholds must be unique/);
 assert.match(admin, /Number\.isFinite\(value\)/, "zero-value rules are preserved");
 assert.match(admin, /showExerciseAwardModal/, "Admin launches the real learner exercise award experience");
 assert.match(admin, /exerciseReflections/, "Admin persists exercise-specific reflection overrides");
+assert.doesNotMatch(admin, /rewardReflectionChoice[123]/, "Admin no longer asks authors to maintain preset reflection answers");
 assert.doesNotMatch(admin, /id="rewardSimRun"/, "Admin omits the unused generic reward simulator");
 assert.doesNotMatch(admin, /id="rewardSimOutput"/, "Admin omits the duplicate MP math output");
 ['mp', 'toast', 'streak', 'level', 'exercise'].forEach((preview) => {

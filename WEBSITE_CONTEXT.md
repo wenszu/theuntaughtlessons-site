@@ -1,6 +1,6 @@
 # The Untaught Lessons Website Context
 
-Last updated: 2026-07-31
+Last updated: 2026-08-03
 
 Single source of truth for agents working on this repo. Read before making changes, update after structural changes. Detailed historical entries and full page/app maps are in `archive/WEBSITE_CONTEXT_ARCHIVE.md`.
 
@@ -465,3 +465,9 @@ Entries from 2026-05-27 through 2026-07-22 archived in `archive/WEBSITE_CONTEXT_
 ### 2026-08-03 — SCQA setup video
 
 - Replaced the Phase 2 SCQA setup video with Google Drive file `10GgHE70T14fcp4tvGF3gsltwsGgp-HXQ` in the Learning Journey source, shared setup-first exercise flow and Admin Content defaults. A targeted migration replaces the former built-in file in existing browser settings while leaving genuinely customized URLs alone.
+
+### 2026-08-03 — Written completion reflections
+
+- The shared exercise award flow now asks members for one short written takeaway instead of offering three preset answers. Members can still skip, so reflection never blocks progress.
+- Each core exercise keeps a tailored reflection question. Saved responses remain attached to the exercise reward ledger, while existing historical reflections remain intact.
+- The Admin Console Rewards tab edits the question and previews the same member experience; the obsolete three-answer editor was removed.

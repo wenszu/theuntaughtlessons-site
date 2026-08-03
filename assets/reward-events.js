@@ -191,7 +191,7 @@
       });
     } else if (!document.querySelector("script[data-utl-reward-ui-loader]")) {
       const script = document.createElement("script");
-      script.src = "../../assets/reward-ui.js?v=20260730-celebration-1";
+      script.src = "../../assets/reward-ui.js?v=20260803-written-reflection-1";
       script.defer = true;
       script.dataset.utlRewardUiLoader = "true";
       script.addEventListener("load", () => showRewardMoment(detail, previousState, nextState), { once: true });
@@ -437,7 +437,8 @@
   if (window.addEventListener) {
     window.addEventListener("utl:exercise-reflection", (event) => {
       const detail = event && event.detail || {};
-      if (!detail.appId || !detail.choice) return;
+      const response = String(detail.response || detail.note || detail.choice || "").trim();
+      if (!detail.appId || !response) return;
       const state = readState();
       const ledger = state.ledger.slice();
       for (let index = ledger.length - 1; index >= 0; index -= 1) {
@@ -449,7 +450,8 @@
               ...entry.metadata,
               completionReflection: {
                 prompt: detail.prompt || "",
-                choice: detail.choice,
+                response,
+                choice: detail.choice || "",
                 note: detail.note || "",
                 savedAt: new Date().toISOString()
               }

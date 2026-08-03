@@ -569,7 +569,7 @@ const UTL_CONTENT = {
   }
 
   function rewardUiHref() {
-    var version = "?v=20260728-cadence-1";
+    var version = "?v=20260803-written-reflection-1";
     if (inPhasePracticeRoot()) return "../../../assets/reward-ui.js" + version;
     return (inAdminRoot() ? "../assets/reward-ui.js" : "../assets/reward-ui.js") + version;
   }
