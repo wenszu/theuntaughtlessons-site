@@ -74,7 +74,7 @@
         return;
       }
       var script = document.createElement("script");
-      script.src = "../../assets/exercise-context-flow.js?v=20260729-phase3-3";
+      script.src = "../../assets/exercise-context-flow.js?v=20260803-scqa-video-1";
       script.dataset.utlContextFlow = "true";
       script.onload = function () { resolve(window.UTLExerciseContextFlow); };
       script.onerror = reject;

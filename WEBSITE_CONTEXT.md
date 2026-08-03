@@ -461,3 +461,7 @@ Entries from 2026-05-27 through 2026-07-22 archived in `archive/WEBSITE_CONTEXT_
 - The completed SCQA preview in the Learning Journey offers `Review my SCQA` and `Practice another SCQA`. The second link opens the existing exercise directly at its topic picker. The journey status shows the number of distinct completed practice topics when at least one has been saved.
 - The SCQA review page presents the deterministic structure check and optional AI review inside one `Feedback on your SCQA` panel. Items needing work stay visible, while passed rules sit in one collapsed summary so the page emphasizes action rather than a long checklist.
 - The optional-practice topic picker uses a warm cream background and restrained gold border, while topic cards remain white. This visually separates optional repetition from the required review without making it look like another mandatory course step.
+
+### 2026-08-03 — SCQA setup video
+
+- Replaced the Phase 2 SCQA setup video with Google Drive file `10GgHE70T14fcp4tvGF3gsltwsGgp-HXQ` in the Learning Journey source, shared setup-first exercise flow and Admin Content defaults. A targeted migration replaces the former built-in file in existing browser settings while leaving genuinely customized URLs alone.
