@@ -1792,13 +1792,10 @@
     .reward-exercise-editor { margin-top:16px; overflow:hidden; border:1px solid rgba(0,51,102,.15); border-radius:12px; background:#fff; }
     .reward-exercise-editor .reward-moment-preview-head { background:#082C55; }
     .reward-exercise-editor-body { display:grid; gap:8px; padding:16px; }
-    .reward-exercise-editor-body>label,.reward-reflection-choice-grid label { color:var(--navy); font-size:12px; font-weight:700; }
+    .reward-exercise-editor-body>label { color:var(--navy); font-size:12px; font-weight:700; }
     .reward-exercise-editor-body textarea { width:100%; resize:vertical; }
-    .reward-reflection-choice-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; margin:4px 0 6px; }
-    .reward-reflection-choice-grid label { display:grid; gap:6px; }
     .reward-quick-preview .reward-moment-stage { min-height:150px; }
     .reward-quick-preview-note { margin:34px 0 0; color:rgba(255,255,255,.68); font-size:12px; text-align:right; }
-    @media(max-width:760px){.reward-reflection-choice-grid{grid-template-columns:1fr}}
     .reward-sim-head { display:flex; justify-content:space-between; gap:14px; align-items:center; padding:16px 18px; background:#082C55; color:#fff; }
     .reward-sim-head strong { color:var(--gold); font:700 24px Lato, Arial, sans-serif; }
     .reward-sim-head span { display:block; color:rgba(255,255,255,.78); font-size:12px; margin-top:2px; }
@@ -2621,7 +2618,7 @@
         <span class="section-label">Rewards</span>
         <h2>Exercise award and reflection</h2>
         <div class="section-divider"></div>
-        <p class="description">Choose an exercise, review or edit the reflection wording, and open the same celebration card members see after completing it.</p>
+        <p class="description">Choose an exercise, review or edit its short written-reflection question, and open the same celebration card members see after completing it.</p>
         <div class="reward-exercise-editor">
           <div class="reward-exercise-editor-body">
             <label for="rewardReflectionExercise">Exercise</label>
@@ -2630,9 +2627,7 @@
             </select>
             <label for="rewardReflectionPrompt">Reflection question</label>
             <textarea id="rewardReflectionPrompt" rows="3" maxlength="240"></textarea>
-            <div class="reward-reflection-choice-grid">
-              <label>Response 1<input id="rewardReflectionChoice1" type="text" maxlength="140"></label><label>Response 2<input id="rewardReflectionChoice2" type="text" maxlength="140"></label><label>Response 3<input id="rewardReflectionChoice3" type="text" maxlength="140"></label>
-            </div>
+            <small>Members write one or two sentences. They can skip without blocking their progress.</small>
             <div class="sync-actions"><button class="small-button" type="button" id="rewardReflectionSave">Save reflection</button><button class="small-button secondary-button" type="button" id="rewardReflectionPreview">Preview award screen</button><button class="small-button secondary-button" type="button" id="rewardReflectionReset">Restore recommended wording</button><span class="reward-status" id="rewardReflectionStatus" aria-live="polite"></span></div>
           </div>
         </div>
@@ -3141,7 +3136,7 @@
   </div>
 
   <script src="../member-login/content-config.js?v=20260730-journey-progress-1"></script>
-  <script src="../assets/reward-ui.js?v=20260730-celebration-1"></script>
+  <script src="../assets/reward-ui.js?v=20260803-written-reflection-1"></script>
 
   <script type="module">
     import {
@@ -5262,14 +5257,13 @@
 
     function recommendedExerciseReflection(id) {
       const defaults = window.UTLRewardUI?.EXERCISE_REFLECTIONS || {};
-      return defaults[id] || { prompt: '', choices: ['', '', ''] };
+      return defaults[id] || { prompt: '' };
     }
 
     function resolvedExerciseReflection(id) {
       const recommended = recommendedExerciseReflection(id);
       const custom = rewardSettingsCache?.exerciseReflections?.[id] || {};
-      const choices = Array.isArray(custom.choices) && custom.choices.length === 3 ? custom.choices : recommended.choices;
-      return { prompt: custom.prompt || recommended.prompt, choices: choices.slice(0, 3) };
+      return { prompt: custom.prompt || recommended.prompt };
     }
 
     function loadExerciseReflectionEditor(options = {}) {
@@ -5278,19 +5272,13 @@
       const id = selectedExerciseReflectionId();
       const reflection = options.recommended ? recommendedExerciseReflection(id) : resolvedExerciseReflection(id);
       document.getElementById('rewardReflectionPrompt').value = reflection.prompt || '';
-      (reflection.choices || []).slice(0, 3).forEach((choice, index) => {
-        const input = document.getElementById('rewardReflectionChoice' + (index + 1));
-        if (input) input.value = choice || '';
-      });
       document.getElementById('rewardReflectionStatus').textContent = options.recommended ? 'Recommended wording restored locally. Save to apply it.' : '';
     }
 
     function readExerciseReflectionEditor() {
       const prompt = document.getElementById('rewardReflectionPrompt')?.value.trim() || '';
-      const choices = [1, 2, 3].map((index) => document.getElementById('rewardReflectionChoice' + index)?.value.trim() || '');
       if (!prompt) throw new Error('Add a reflection prompt.');
-      if (choices.some((choice) => !choice)) throw new Error('Add all three responses.');
-      return { prompt, choices };
+      return { prompt };
     }
 
     function previewExerciseReflection() {

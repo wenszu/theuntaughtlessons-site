@@ -10,7 +10,7 @@ const styles = fs.readFileSync('styles.css', 'utf8');
 const tactileButtons = fs.readFileSync('assets/tactile-buttons.js', 'utf8');
 
 assert(!rewardUi.includes('data-award-stage="takeaway"'), 'exercise completion does not repeat the reflection in a third popup stage');
-assert(rewardUi.includes('Save reflection and return to Learning Journey'), 'exercise completion returns learners to the canonical course map');
+assert(rewardUi.includes('Save and return to Learning Journey'), 'exercise completion returns learners to the canonical course map');
 assert(rewardUi.includes('nextExerciseHref(appId, phaseProgress.phase)'), 'the completion action preserves the current phase and completed exercise');
 assert(rewardUi.includes('&completed=" + encodeURIComponent(appId || "exercise")'), 'the Learning Journey can acknowledge the activity just completed');
 assert(!rewardUi.includes("content:'DONE'"), 'exercise completion does not display a DONE watermark');

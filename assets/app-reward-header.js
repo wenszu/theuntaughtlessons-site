@@ -55,7 +55,7 @@
         return;
       }
       var script = document.createElement("script");
-      script.src = "../../assets/reward-ui.js?v=20260730-celebration-1";
+      script.src = "../../assets/reward-ui.js?v=20260803-written-reflection-1";
       script.async = true;
       script.dataset.utlRewardUi = "true";
       script.onload = function () { resolve(window.UTLRewardUI); };
