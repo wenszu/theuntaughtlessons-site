@@ -2164,6 +2164,53 @@ const UTL_CONTENT = {
     }
   }
 
+  function speakingPracticeState() {
+    var completed = 0;
+    var draft = null;
+    try {
+      var attempts = JSON.parse(localStorage.getItem("utl_speak_like_obama_practice_attempts") || "[]");
+      completed = Array.isArray(attempts) ? attempts.length : 0;
+    } catch (_) {
+      completed = 0;
+    }
+    try {
+      var workspaces = JSON.parse(localStorage.getItem("utl_speak_like_obama_practice_workspaces") || "{}");
+      var entries = workspaces && typeof workspaces === "object" ? Object.keys(workspaces).map(function (key) { return workspaces[key]; }) : [];
+      var valid = entries.filter(function (item) { return item && item.id && item.topicId; });
+      valid.sort(function (a, b) { return String(b.updatedAt || "").localeCompare(String(a.updatedAt || "")); });
+      draft = valid[0] || null;
+    } catch (_) {
+      draft = null;
+    }
+    return { completed: completed, draft: draft };
+  }
+
+  function explainAikoBothRequiredDone() {
+    return readBool("utl_p2_ex5_done") && readBool("utl_p2_ex6_done");
+  }
+
+  function explainAikoPracticeState() {
+    var completed = 0;
+    var draft = null;
+    if (!explainAikoBothRequiredDone()) return { completed: 0, draft: null };
+    try {
+      var attempts = JSON.parse(localStorage.getItem("utl_explain_aiko_practice_attempts") || "[]");
+      completed = Array.isArray(attempts) ? attempts.length : 0;
+    } catch (_) {
+      completed = 0;
+    }
+    try {
+      var workspaces = JSON.parse(localStorage.getItem("utl_explain_aiko_practice_workspaces") || "{}");
+      var entries = workspaces && typeof workspaces === "object" ? Object.keys(workspaces).map(function (key) { return workspaces[key]; }) : [];
+      var valid = entries.filter(function (item) { return item && item.id && item.topicId; });
+      valid.sort(function (a, b) { return String(b.updatedAt || "").localeCompare(String(a.updatedAt || "")); });
+      draft = valid[0] || null;
+    } catch (_) {
+      draft = null;
+    }
+    return { completed: completed, draft: draft };
+  }
+
   function journeyNextActivity() {
     if (!readBool("utl_orientation_ready")) {
       return { key: "orientation", kind: "Orientation", title: "Welcome to MA", duration: "About 5 min", href: "#orientation", phaseKey: "orientation" };
@@ -2192,9 +2239,16 @@ const UTL_CONTENT = {
     var inProgress = activity.kind === "Exercise" && activity.contextGated && activity.contextComplete && !activity.done;
     var state = activity.done ? "done" : phaseIsUnlocked && activityIsUnlocked ? (inProgress ? "progress" : "next") : "locked";
     var practiceCount = activity.appId === "scqa-builder" ? scqaPracticeCount() : 0;
+    var speakingPractice = activity.appId === "speak-like-obama" ? speakingPracticeState() : { completed: 0, draft: null };
+    var isExplainAikoRow = (activity.appId === "explain-to-aiko-120" || activity.appId === "explain-to-aiko-60") && activity.href.indexOf("-v2") === -1;
+    var explainPractice = isExplainAikoRow ? explainAikoPracticeState() : { completed: 0, draft: null };
     var stateText = state === "done" ? "Completed" : state === "progress" ? "In progress" : state === "next" ? "Up next" : "Locked";
     var visibleStateText = state === "done" && activity.appId === "scqa-builder" && practiceCount
       ? "Completed · " + practiceCount + " practice round" + (practiceCount === 1 ? "" : "s")
+      : state === "done" && activity.appId === "speak-like-obama" && speakingPractice.completed
+        ? "Completed · " + speakingPractice.completed + " practice round" + (speakingPractice.completed === 1 ? "" : "s")
+      : state === "done" && isExplainAikoRow && explainPractice.completed
+        ? "Completed · " + explainPractice.completed + " practice round" + (explainPractice.completed === 1 ? "" : "s")
       : stateText;
     var statusIcon = state === "done" ? "&#10003;" : state === "progress" ? "&#9680;" : state === "next" ? "&#9679;" : "&#128274;";
     var typeIcon = activity.kind === "Video" ? "&#9654;" : "&#9632;";
@@ -2206,6 +2260,9 @@ const UTL_CONTENT = {
           ? '<a class="ws-journey-start" href="' + escapeHtml(activity.href) + '">Start</a>'
           : "";
     if (state === "done" && activity.appId === "scqa-builder") {
+      action = '<a href="' + escapeHtml(activity.href + "&attempt=olympics") + '">Review</a>';
+    }
+    if (state === "done" && activity.appId === "speak-like-obama") {
       action = '<a href="' + escapeHtml(activity.href + "&attempt=olympics") + '">Review</a>';
     }
     var unlockCopy = phaseIsUnlocked
@@ -2222,6 +2279,21 @@ const UTL_CONTENT = {
     var availableAction = '<a class="ws-button" href="' + escapeHtml(activity.href) + '">' + (state === "done" ? "Review " : state === "progress" ? "Resume " : "Start ") + escapeHtml(sequenceLabel) + ' &rarr;</a>';
     if (state === "done" && activity.appId === "scqa-builder") {
       availableAction = '<div class="ws-journey-preview-actions"><a class="ws-button ws-button-outline" href="' + escapeHtml(activity.href + "&attempt=olympics") + '">Review my SCQA</a><a class="ws-button" href="' + escapeHtml(activity.href + "&practice=1") + '">Practice another SCQA &rarr;</a></div>';
+    }
+    if (state === "done" && activity.appId === "speak-like-obama") {
+      var optionalSpeechHref = speakingPractice.draft
+        ? activity.href + "&attempt=" + encodeURIComponent(speakingPractice.draft.id)
+        : activity.href + "&practice=1";
+      var optionalSpeechLabel = speakingPractice.draft ? "Resume practice &rarr;" : "Practice another speech &rarr;";
+      availableAction = '<div class="ws-journey-preview-actions"><a class="ws-button ws-button-outline" href="' + escapeHtml(activity.href + "&attempt=olympics") + '">Review original speech</a><a class="ws-button" href="' + escapeHtml(optionalSpeechHref) + '">' + optionalSpeechLabel + '</a></div>';
+    }
+    if (state === "done" && isExplainAikoRow && explainAikoBothRequiredDone()) {
+      var explainPracticeHref = appHref("../apps/explain-to-aiko/index.html");
+      var explainOptionalHref = explainPractice.draft
+        ? explainPracticeHref + "?practice=1&attempt=" + encodeURIComponent(explainPractice.draft.id)
+        : explainPracticeHref + "?practice=1";
+      var explainOptionalLabel = explainPractice.draft ? "Resume practice &rarr;" : "Practice another explanation &rarr;";
+      availableAction = '<div class="ws-journey-preview-actions"><a class="ws-button ws-button-outline" href="' + escapeHtml(activity.href) + '">Review</a><a class="ws-button" href="' + escapeHtml(explainOptionalHref) + '">' + explainOptionalLabel + '</a></div>';
     }
     return '<li class="ws-journey-activity ws-journey-activity-' + state + (justCompleted ? ' ws-journey-activity-just-completed' : '') + '"><span class="ws-journey-status-icon" aria-hidden="true">' + statusIcon + '</span><button class="ws-journey-activity-preview-button" type="button" data-journey-preview="' + escapeHtml(activity.key) + '" aria-expanded="false"><span class="ws-journey-sequence">' + escapeHtml(sequenceLabel) + '</span><span class="ws-journey-type ws-journey-type-' + activity.kind.toLowerCase() + '"><span aria-hidden="true">' + typeIcon + '</span>' + escapeHtml(activity.kind + (activity.aiTool ? ' (' + activity.aiTool + ')' : '')) + '</span><strong>' + escapeHtml(activity.title) + '</strong><span class="ws-journey-duration">' + escapeHtml(activity.duration.replace(/^About /, "")) + '</span></button><span class="ws-journey-activity-state">' + (justCompleted ? "Just completed" : visibleStateText) + '</span><span class="ws-journey-activity-action">' + action + '</span><aside class="ws-journey-preview" data-journey-preview-panel="' + escapeHtml(activity.key) + '" role="dialog" aria-modal="true" aria-label="' + escapeHtml(activity.title) + ' preview" tabindex="-1" hidden><button class="ws-journey-preview-close" type="button" data-journey-preview-close aria-label="Close preview">&times;</button><span class="ws-journey-preview-overline">' + escapeHtml(sequenceLabel) + ' &middot; ' + escapeHtml(activity.kind) + '</span><h3>' + escapeHtml(activity.title) + '</h3><p>' + escapeHtml(activity.preview) + '</p><strong>Inside this activity</strong>' + activitySteps + '<dl><div><dt>Estimated time</dt><dd>' + escapeHtml(activity.duration) + '</dd></div><div><dt>Status</dt><dd>' + escapeHtml(visibleStateText) + '</dd></div>' + (state === "locked" ? '<div><dt>To unlock</dt><dd>' + escapeHtml(unlockCopy) + '</dd></div>' : "") + '</dl>' + (state === "locked" ? lockedAction : availableAction) + '</aside></li>';
   }
@@ -2363,11 +2435,14 @@ const UTL_CONTENT = {
     return tasks;
   }
 
+  var MISSION_BUFFER_FACTOR = 0.8; // reserve ~20% of each target as headroom for transitions between activities (loading, permissions, context switching) instead of packing back-to-back with zero slack
+
   function missionOption(tasks, target, label, descriptor) {
+    var packingCeiling = target * MISSION_BUFFER_FACTOR;
     var selected = [];
     var total = 0;
     tasks.some(function (task) {
-      if (selected.length && total + task.minutes > target) return true;
+      if (selected.length && total + task.minutes > packingCeiling) return true;
       selected.push(task);
       total += task.minutes;
       return false;

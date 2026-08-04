@@ -33,6 +33,75 @@ As a result, the Olympics is shifting from a unifying global moment to a more ep
 
 Best, Yutee Elle`;
 
+  const PRACTICE_ATTEMPTS_KEY = 'utl_explain_aiko_practice_attempts';
+  const PRACTICE_WORKSPACES_KEY = 'utl_explain_aiko_practice_workspaces';
+  const PRACTICE_APP_URL = '../explain-to-aiko/index.html';
+  const PRACTICE_TOPICS = [
+    { id: 'weekend-plan-change', title: 'A weekend plan changed', category: 'Everyday life', brief: 'Explain to a friend why weekend plans changed and what you propose instead.', audience: 'A friend', outcome: 'They agree to the new plan', focus: 'Lead with the new plan, not the excuse' },
+    { id: 'why-skip-event', title: 'Why you are skipping an event', category: 'Everyday life', brief: 'Explain to family why you cannot make an event and what you will do to make up for it.', audience: 'Family', outcome: 'They understand and are not upset', focus: 'A clear reason and a specific make-up plan' },
+    { id: 'group-project-status', title: 'A group project update', category: 'School', brief: 'Explain to a teacher how a group project is going and what you need next.', audience: 'A teacher', outcome: 'They give you the help or time you need', focus: 'State the status first, then the ask' },
+    { id: 'study-method-switch', title: 'Switching study methods', category: 'School', brief: 'Explain to a parent why you want to change how you study for a class.', audience: 'A parent', outcome: 'They support the new approach', focus: 'Evidence for why the old method was not working' },
+    { id: 'club-idea', title: 'A new club or activity idea', category: 'Community', brief: 'Explain a new club or activity idea to the people who would need to approve it.', audience: 'An organizer or leader', outcome: 'They agree to a trial run', focus: 'What problem it solves and who it is for' },
+    { id: 'schedule-conflict', title: 'A scheduling conflict', category: 'Work or organized activities', brief: 'Explain a scheduling conflict to a team and what you recommend instead.', audience: 'Your team', outcome: 'They agree on a new time or plan', focus: 'Composure and a clear recommendation' }
+  ];
+
+  let practiceDraft = null;
+  const pr = { recording: false, finalTranscript: '', interimTranscript: '', recognition: null, startTime: 0, durationSeconds: 0, rafId: 0, usedEstimate: false, targetSeconds: 120 };
+
+  function readPracticeWorkspaces() {
+    try {
+      const parsed = JSON.parse(localStorage.getItem(PRACTICE_WORKSPACES_KEY) || '{}');
+      return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {};
+    } catch (_) { return {}; }
+  }
+  function writePracticeWorkspaces(workspaces) { localStorage.setItem(PRACTICE_WORKSPACES_KEY, JSON.stringify(workspaces)); }
+  function practiceAttempts() {
+    try { const saved = JSON.parse(localStorage.getItem(PRACTICE_ATTEMPTS_KEY) || '[]'); return Array.isArray(saved) ? saved : []; } catch (_) { return []; }
+  }
+  function practiceTopic(id) { return PRACTICE_TOPICS.find((item) => item.id === id) || PRACTICE_TOPICS[0]; }
+  function createPracticeDraft(topicId) {
+    return {
+      id: `explain-practice-${Date.now()}`, topicId, notes: '', stage: 'prepare',
+      transcript120: '', duration120: 0, wpm120: 0, fillers120: 0, score120: null,
+      transcript60: '', duration60: 0, wpm60: 0, fillers60: 0, score60: null,
+      improvement: '', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString()
+    };
+  }
+  function savePracticeDraft(next = practiceDraft) {
+    if (!next) return;
+    next.updatedAt = new Date().toISOString();
+    practiceDraft = next;
+    const workspaces = readPracticeWorkspaces();
+    workspaces[next.topicId] = next;
+    writePracticeWorkspaces(workspaces);
+  }
+  function mostRecentPracticeWorkspace() {
+    const entries = Object.values(readPracticeWorkspaces());
+    entries.sort((a, b) => String(b.updatedAt || '').localeCompare(String(a.updatedAt || '')));
+    return entries[0] || null;
+  }
+  function beginOrResumePractice(topicId) {
+    const workspaces = readPracticeWorkspaces();
+    practiceDraft = workspaces[topicId] || createPracticeDraft(topicId);
+    savePracticeDraft();
+    history.replaceState(null, '', `?practice=1&attempt=${encodeURIComponent(practiceDraft.id)}`);
+    routeToPracticeStage();
+  }
+  function routeToPracticeStage() {
+    if (!practiceDraft) return renderPracticePicker();
+    if (practiceDraft.stage === 'record120') return renderPracticeRecordScreen(120);
+    if (practiceDraft.stage === 'record60') return renderPracticeRecordScreen(60);
+    if (practiceDraft.stage === 'reflect') return renderPracticeReflect();
+    return renderPracticePrepare();
+  }
+  function loadPracticeAttempt(id) {
+    const saved = practiceAttempts().find((item) => item.id === id);
+    if (saved) return renderPracticeSaved(saved);
+    const found = Object.values(readPracticeWorkspaces()).find((item) => item.id === id);
+    if (found) { practiceDraft = found; return routeToPracticeStage(); }
+    renderPracticePicker();
+  }
+
   const app = document.getElementById('app');
   const state = {
     notesMode: 'sections', openNotes: '',
@@ -56,6 +125,19 @@ Best, Yutee Elle`;
       const value = sessionStorage.getItem(key); if (value) return value;
     }
     try { return JSON.parse(sessionStorage.getItem(CONTACT_PROFILE_KEY) || '{}').email || ''; } catch (_) { return ''; }
+  }
+  function readOwnEmail() {
+    try {
+      const saved = JSON.parse(localStorage.getItem('utl_result_write-to-aiko') || 'null');
+      return saved && saved.response ? String(saved.response).trim() : '';
+    } catch (_) { return ''; }
+  }
+  function sourceEmailHtml() {
+    const ownEmail = readOwnEmail();
+    if (ownEmail) {
+      return `<section class="aiko-source"><h3>Your email to Aiko</h3><p class="aiko-source-note">This is the email you wrote in Write to Aiko. Explain the same logic out loud instead of reading it.</p><p class="aiko-email">${escapeHtml(ownEmail)}</p><details class="aiko-example-toggle"><summary>See an example email instead</summary><p class="aiko-email">${escapeHtml(EMAIL_TO_AIKO)}</p></details></section>`;
+    }
+    return `<section class="aiko-source"><h3>Example email to Aiko</h3><p class="aiko-source-note">You have not completed Write to Aiko yet, so here is a sample email to practice with. Once you finish Write to Aiko, your own email will appear here instead.</p><p class="aiko-email">${escapeHtml(EMAIL_TO_AIKO)}</p></section>`;
   }
   function shell(inner) {
     app.innerHTML = `<section class="aiko-intro"><p class="aiko-label">Phase 2 · Speak concisely</p><h1>Explain to Aiko</h1><p>Turn your written email into a short spoken explanation. Make the logic easy to hear instead of reading the email word for word.</p><span class="aiko-target">Target: ${TARGET_SECONDS} seconds${mode === '60' ? ' or less' : ''} · Recommended: ${TARGET_WORDS}</span></section>${inner}`;
@@ -99,7 +181,11 @@ Best, Yutee Elle`;
   }
   function renderPreparation() {
     const sixty = mode === '60';
-    shell(`<section class="aiko-panel"><div class="aiko-panel-head"><p class="aiko-progress">Step 1 · Prepare your talk</p><h2>${sixty ? 'Now compress it.' : 'Aiko asks you to explain the email.'}</h2><p>${sixty ? 'Deliver the same key points in 60 seconds or less. Keep the bottom line, the strongest reasons, and a clean close.' : 'You have 120 seconds. Lead with the point, explain the three supporting reasons, and end with a clear next step or ask.'}</p></div><div class="aiko-step"><div class="aiko-info"><h3>What your talk needs to do</h3><ul><li><strong>${sixty ? 'Keep' : 'Open with'} the conclusion:</strong> Say the main point first.</li><li><strong>${sixty ? 'Choose the essentials' : 'Make the structure audible'}:</strong> ${sixty ? 'Keep only the reasons Aiko needs to hear.' : 'Use three clear signposts so Aiko can follow without reading.'}</li><li><strong>Close cleanly:</strong> End with the decision, meeting, or follow-up you want.</li></ul></div><div class="aiko-prep-grid"><section class="aiko-source"><h3>Email to Aiko</h3><p class="aiko-email">${escapeHtml(EMAIL_TO_AIKO)}</p></section><section class="aiko-notes"><h3>Your response</h3><div class="aiko-mode" aria-label="Preparation format"><button class="${state.notesMode === 'open' ? 'is-active' : ''}" data-mode="open">Open response</button><button class="${state.notesMode === 'sections' ? 'is-active' : ''}" data-mode="sections">Three-section response</button></div><p class="aiko-guidance"><strong>Choose one format:</strong> Use <strong>"Open" response</strong> if you want to write in your own free-form structure; this is the more difficult option. Use <strong>"Three-section" response</strong> if you want the easier guided option. In both formats, use BSP and the Rule of three.</p><div id="notesArea">${notesHtml()}</div></section></div>${actions('recordButton', 'I am ready to record')}</div></section>`);
+    const headIntro = sixty
+      ? 'You already explained this in 120 seconds. Now imagine Aiko is in a rush and only has 60 seconds to listen. Keep your single most important point and your strongest reason. Everything else has to go, even if it feels important.'
+      : 'You already wrote Aiko an email. Now imagine she stops by your desk and says, "Can you just tell me about that, real quick?" You would not read your email out loud from memory. You would explain your own idea in your own words, like you are talking to a real person. That is exactly what you are about to practice.';
+    const compareHtml = `<div class="aiko-compare"><div class="aiko-compare-col aiko-compare-bad"><p class="aiko-compare-label">Reading it word-for-word (avoid this)</p><p class="aiko-compare-quote">"We believe the Olympics is losing cultural impact primarily due to reduced everyday visibility, fragmented attention, and weaker emotional connection with audiences..."</p></div><div class="aiko-compare-col aiko-compare-good"><p class="aiko-compare-label">Explaining it in your own words (aim for this)</p><p class="aiko-compare-quote">"Basically, the Olympics is not grabbing people's attention like it used to. There are three reasons why, and here is what I think we should do about it..."</p></div></div>`;
+    shell(`<section class="aiko-panel"><div class="aiko-panel-head"><p class="aiko-progress">Step 1 · Prepare your talk</p><h2>${sixty ? 'Now say it in half the time.' : 'Explain your email out loud.'}</h2><p>${headIntro}</p></div><div class="aiko-step">${compareHtml}<div class="aiko-info"><h3>What your talk needs to do</h3><ul><li><strong>${sixty ? 'Keep' : 'Say'} your main point first:</strong> Do not save it for the end or build up to it. Say the one thing Aiko needs to know right away.</li><li><strong>${sixty ? 'Keep your strongest reason' : 'Give 2 to 3 short reasons'}:</strong> ${sixty ? 'Pick the one reason that matters most and cut the rest.' : 'Explain why your main point is true, one reason at a time.'}</li><li><strong>Close cleanly:</strong> End with the decision, meeting, or follow-up you want.</li></ul></div><div class="aiko-prep-grid">${sourceEmailHtml()}<section class="aiko-notes"><h3>Your response</h3><div class="aiko-mode" aria-label="Preparation format"><button class="${state.notesMode === 'open' ? 'is-active' : ''}" data-mode="open">Open response</button><button class="${state.notesMode === 'sections' ? 'is-active' : ''}" data-mode="sections">Three-section response</button></div><p class="aiko-guidance"><strong>Choose one format:</strong> Use <strong>"Open" response</strong> if you want to write in your own free-form structure; this is the more difficult option. Use <strong>"Three-section" response</strong> if you want the easier guided option. In both formats, use BSP and the Rule of three.</p><div id="notesArea">${notesHtml()}</div></section></div>${actions('recordButton', 'I am ready to record')}</div></section>`);
     document.querySelectorAll('[data-mode]').forEach((button) => button.addEventListener('click', () => changeMode(button.dataset.mode)));
     document.querySelectorAll('#notesArea input,#notesArea textarea').forEach((field) => field.addEventListener('input', captureNotes));
     document.getElementById('recordButton').addEventListener('click', () => { captureNotes(); renderRecording(); });
@@ -236,9 +322,212 @@ Best, Yutee Elle`;
     if (window.awardAikoCompletion) window.awardAikoCompletion(rewardDetail);
     else window.UTLRewardEvents?.awardCompletionExercise(Object.assign({ appId: APP_ID }, rewardDetail));
     button.textContent = 'Saved'; status.textContent = 'Saved. This exercise is complete.';
-    const complete = document.createElement('div'); complete.className = 'aiko-complete'; complete.innerHTML = `<h3>Well done.</h3><p>You turned the email into a spoken explanation and practiced making the logic easy to follow.</p><div class="aiko-actions"><a class="aiko-link" href="../../member-login/index.html#learning-journey">Back to Learning Journey</a></div>`; status.after(complete);
+    const bothRequiredDone = mode === '60' && localStorage.getItem('utl_p2_ex5_done') === 'true' && localStorage.getItem('utl_p2_ex6_done') === 'true';
+    const complete = document.createElement('div'); complete.className = 'aiko-complete'; complete.innerHTML = `<h3>Well done.</h3><p>You turned the email into a spoken explanation and practiced making the logic easy to follow.</p><div class="aiko-actions"><a class="aiko-link" href="../../member-login/index.html#learning-journey">Back to Learning Journey</a>${bothRequiredDone ? `<a class="aiko-link secondary" href="${PRACTICE_APP_URL}?practice=1">Practice another explanation</a>` : ''}</div>`; status.after(complete);
   }
 
-  if (mode === '60') loadPrep();
-  renderPreparation();
+  // ---- Optional practice: explain a new topic, then compress it. No MP, does not affect required completion. ----
+  function practiceShell(inner) {
+    app.innerHTML = `<section class="aiko-intro"><p class="aiko-label">Optional practice · no additional MP</p><h1>Explain a new idea to Aiko.</h1><p>This practice has two rounds using the same idea: first a 120-second explanation, then a 60-second compression, just like the two required exercises.</p></section>${inner}`;
+  }
+  function practiceTopicStatus(id, completedIds, workspaces) {
+    if (completedIds.has(id)) return 'Completed';
+    if (workspaces[id]) return 'In progress';
+    return 'Not started';
+  }
+  function renderPracticePicker(selectedId = PRACTICE_TOPICS[0].id) {
+    const completedIds = new Set(practiceAttempts().map((item) => item.topicId));
+    const workspaces = readPracticeWorkspaces();
+    practiceShell(`<div class="aiko-panel"><div class="aiko-panel-head"><p class="aiko-progress">Choose a topic</p><h2>Pick a situation to explain.</h2><p>You will prepare brief notes once, then explain the idea in 120 seconds, then immediately compress the same idea to 60 seconds.</p></div><div class="aiko-step"><div class="aiko-topic-list" id="practiceTopicList">${PRACTICE_TOPICS.map((item) => `<button class="aiko-topic-card" type="button" data-topic-id="${item.id}" aria-pressed="${item.id === selectedId}"><span class="aiko-topic-copy"><strong>${escapeHtml(item.title)}</strong><em>${escapeHtml(item.category)}</em><span>${escapeHtml(item.brief)}</span></span><span class="aiko-topic-status">${escapeHtml(practiceTopicStatus(item.id, completedIds, workspaces))}</span></button>`).join('')}</div><div class="aiko-actions"><a class="aiko-button secondary" href="../../member-login/index.html#learning-journey">Back to Learning Journey</a><button class="aiko-button" id="practiceStart" type="button">${workspaces[selectedId] ? 'Resume this practice round →' : 'Start this practice round →'}</button></div></div></div>`);
+    let currentId = selectedId;
+    document.getElementById('practiceTopicList').addEventListener('click', (event) => {
+      const button = event.target.closest('[data-topic-id]');
+      if (!button) return;
+      currentId = button.dataset.topicId;
+      document.querySelectorAll('#practiceTopicList [data-topic-id]').forEach((el) => el.setAttribute('aria-pressed', String(el.dataset.topicId === currentId)));
+      document.getElementById('practiceStart').textContent = workspaces[currentId] ? 'Resume this practice round →' : 'Start this practice round →';
+    });
+    document.getElementById('practiceStart').addEventListener('click', () => beginOrResumePractice(currentId));
+  }
+  function renderPracticePrepare() {
+    if (!practiceDraft) return renderPracticePicker();
+    const item = practiceTopic(practiceDraft.topicId);
+    practiceShell(`<div class="aiko-panel"><div class="aiko-panel-head"><p class="aiko-progress">Round 1 of 2 · Prepare</p><h2>Prepare your explanation.</h2><p>Write brief notes for <strong>${escapeHtml(item.title)}</strong>. You will use these same notes for both the 120-second round and the 60-second round.</p></div><div class="aiko-step"><div class="aiko-prep-grid"><section class="aiko-source"><h3>Situation</h3><p class="aiko-source-note">${escapeHtml(item.brief)}</p><p class="aiko-email"><strong>Audience:</strong> ${escapeHtml(item.audience)}\n<strong>Desired outcome:</strong> ${escapeHtml(item.outcome)}\n<strong>Focus:</strong> ${escapeHtml(item.focus)}</p></section><section class="aiko-notes"><h3>Your notes</h3><p class="aiko-guidance"><strong>Consider:</strong> What is your main point? Which reason or example makes it credible? How will you close?</p><textarea class="aiko-textarea" id="practiceNotes" placeholder="Type your answer here.">${escapeHtml(practiceDraft.notes)}</textarea></section></div><div class="aiko-actions"><button class="aiko-button secondary" id="practiceChooseTopic" type="button">Choose a different topic</button><button class="aiko-button" id="practiceReady" type="button">Ready to record round 1 (120 seconds) →</button></div></div></div>`);
+    const notes = document.getElementById('practiceNotes');
+    notes.addEventListener('input', () => { practiceDraft.notes = notes.value; savePracticeDraft(); });
+    document.getElementById('practiceChooseTopic').addEventListener('click', () => renderPracticePicker(practiceDraft.topicId));
+    document.getElementById('practiceReady').addEventListener('click', () => {
+      practiceDraft.notes = notes.value; practiceDraft.stage = 'record120'; savePracticeDraft();
+      renderPracticeRecordScreen(120);
+    });
+  }
+  function renderPracticeRecordScreen(targetSeconds) {
+    if (!practiceDraft) return renderPracticePicker();
+    const roundLabel = targetSeconds === 120 ? 'Round 1 of 2' : 'Round 2 of 2';
+    const instruction = targetSeconds === 120
+      ? 'Explain your idea in full. Right after this round, you will compress the same idea to 60 seconds.'
+      : 'Now compress the same idea to 60 seconds. Keep the main point, the strongest reason, and a clean close.';
+    practiceShell(`<div class="aiko-panel"><div class="aiko-panel-head"><p class="aiko-progress">${roundLabel} · Record · ${targetSeconds} seconds</p><h2>${targetSeconds === 120 ? 'Deliver your explanation.' : 'Compress it to 60 seconds.'}</h2><p>${instruction}</p></div><div class="aiko-step"><aside class="aiko-prep-reference"><div class="aiko-prep-reference-head"><h3>Your notes</h3><button class="aiko-text-button" id="practiceEditNotes" type="button">Edit notes</button></div>${practiceDraft.notes.trim() ? `<p class="aiko-prep-open">${escapeHtml(practiceDraft.notes)}</p>` : '<p class="aiko-prep-empty">No notes added.</p>'}</aside><div id="practiceRecordPath"><div class="aiko-recorder"><div class="aiko-ring"><svg width="220" height="220" viewBox="0 0 210 210" aria-hidden="true"><circle class="aiko-ring-track" cx="105" cy="105" r="98"></circle><circle class="aiko-ring-fill" id="practiceRingFill" cx="105" cy="105" r="98"></circle></svg><button class="aiko-mic" id="practiceMicButton" type="button" aria-label="Start recording"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2z"/></svg><span class="aiko-timer" id="practiceTimerLabel">${formatDuration(targetSeconds)}</span><span id="practiceMicState">Start recording</span></button></div><p class="aiko-rec-hint" id="practiceRecordHint">Your browser will ask for microphone access after you tap.</p></div><div class="aiko-transcript" id="practiceLiveTranscript"><span class="placeholder">Your words will appear here as you speak…</span></div><div class="aiko-live-metrics"><span>Words <b id="practiceLiveWords">0</b></span><span>Pace <b id="practiceLiveWpm">–</b> wpm</span><span>Fillers <b id="practiceLiveFillers">0</b></span></div></div><div id="practicePastePath" hidden><div class="aiko-notice">Live transcription is not supported in this browser. Record with any voice-memo app and paste the transcript below.</div><textarea class="aiko-textarea aiko-paste" id="practicePasteTranscript" placeholder="Paste your explanation transcript..."></textarea></div><div class="aiko-notice error" id="practiceRecordError" hidden></div><div class="aiko-actions"><button class="aiko-button secondary" id="practiceRecordBack" type="button">Back</button><button class="aiko-button secondary" id="practiceRetryButton" type="button" hidden>Record again</button><button class="aiko-button" id="practiceScoreButton" type="button" disabled>Get feedback</button></div></div></div>`);
+    initializePracticeRecorder(targetSeconds);
+    document.getElementById('practiceEditNotes').addEventListener('click', () => { practiceDraft.stage = 'prepare'; savePracticeDraft(); renderPracticePrepare(); });
+    document.getElementById('practiceRecordBack').addEventListener('click', () => { practiceDraft.stage = 'prepare'; savePracticeDraft(); renderPracticePrepare(); });
+  }
+  function initializePracticeRecorder(targetSeconds) {
+    pr.targetSeconds = targetSeconds; pr.recording = false; pr.finalTranscript = ''; pr.interimTranscript = ''; pr.durationSeconds = 0; pr.usedEstimate = false;
+    const ring = document.getElementById('practiceRingFill'); ring.style.strokeDasharray = RING_CIRCUMFERENCE; ring.style.strokeDashoffset = 0;
+    document.getElementById('practiceRetryButton').addEventListener('click', prResetRecording);
+    document.getElementById('practiceScoreButton').addEventListener('click', prSubmitForScoring);
+    document.getElementById('practiceMicButton').addEventListener('click', () => pr.recording ? prStopRecording('manual') : prStartRecording());
+    const pasteBox = document.getElementById('practicePasteTranscript');
+    if (!SPEECH_RECOGNITION || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      document.getElementById('practiceRecordPath').hidden = true; document.getElementById('practicePastePath').hidden = false;
+      pasteBox.addEventListener('input', (event) => { document.getElementById('practiceScoreButton').disabled = wordCount(event.target.value) < 5; });
+    }
+  }
+  function prFullTranscript() { return (pr.finalTranscript + ' ' + pr.interimTranscript).replace(/\s+/g, ' ').trim(); }
+  function prRenderLiveTranscript() {
+    const element = document.getElementById('practiceLiveTranscript'); if (!element) return;
+    const finalText = pr.finalTranscript.trim(); const interim = pr.interimTranscript.trim();
+    if (!finalText && !interim) { element.innerHTML = '<span class="placeholder">Your words will appear here as you speak…</span>'; return; }
+    element.textContent = finalText + (finalText && interim ? ' ' : '');
+    if (interim) { const span = document.createElement('span'); span.className = 'interim'; span.textContent = interim; element.appendChild(span); }
+    element.scrollTop = element.scrollHeight;
+  }
+  function prUpdateMetrics(elapsed) {
+    const text = prFullTranscript(); const words = wordCount(text);
+    document.getElementById('practiceLiveWords').textContent = words;
+    document.getElementById('practiceLiveFillers').textContent = fillerCount(text);
+    document.getElementById('practiceLiveWpm').textContent = elapsed >= 5 && words ? Math.round(words / elapsed * 60) : '–';
+  }
+  function prShowRecordError(message) { const el = document.getElementById('practiceRecordError'); el.textContent = message; el.hidden = false; }
+  function prHideRecordError() { const el = document.getElementById('practiceRecordError'); if (el) el.hidden = true; }
+  async function prStartRecording() {
+    prHideRecordError();
+    try { const stream = await navigator.mediaDevices.getUserMedia({ audio: true }); stream.getTracks().forEach((track) => track.stop()); }
+    catch (_) { prShowRecordError('Microphone access was blocked. Allow access and try again, or paste a transcript below.'); return; }
+    pr.finalTranscript = ''; pr.interimTranscript = ''; pr.durationSeconds = 0; pr.usedEstimate = false; pr.recording = true; pr.startTime = Date.now();
+    const recognition = new SPEECH_RECOGNITION(); pr.recognition = recognition; recognition.continuous = true; recognition.interimResults = true; recognition.lang = 'en-US';
+    recognition.onresult = (event) => { let interim = ''; for (let i = event.resultIndex; i < event.results.length; i += 1) { const text = event.results[i][0].transcript; if (event.results[i].isFinal) pr.finalTranscript += text + ' '; else interim += text; } pr.interimTranscript = interim; prRenderLiveTranscript(); };
+    recognition.onerror = (event) => { if (event.error === 'not-allowed' || event.error === 'service-not-allowed') { prStopRecording('error'); prShowRecordError('Microphone access was blocked. Paste a transcript below instead.'); } };
+    recognition.onend = () => { if (pr.recording) { try { recognition.start(); } catch (_) {} } };
+    try { recognition.start(); } catch (error) { pr.recording = false; prShowRecordError('Speech recognition could not start. Paste a transcript below instead.'); return; }
+    document.getElementById('practiceMicButton').classList.add('is-recording'); document.getElementById('practiceMicState').textContent = 'Stop recording'; document.getElementById('practiceRecordHint').textContent = 'Recording now — speak naturally.'; document.getElementById('practiceScoreButton').disabled = true; document.getElementById('practiceRetryButton').hidden = true; prTick();
+  }
+  function prTick() {
+    if (!pr.recording) return;
+    const elapsed = (Date.now() - pr.startTime) / 1000; const remaining = Math.max(0, pr.targetSeconds - elapsed);
+    document.getElementById('practiceTimerLabel').textContent = formatDuration(remaining);
+    document.getElementById('practiceRingFill').style.strokeDashoffset = RING_CIRCUMFERENCE * Math.min(1, elapsed / pr.targetSeconds);
+    document.getElementById('practiceRingFill').classList.toggle('is-warning', remaining <= 10);
+    prUpdateMetrics(elapsed);
+    if (elapsed >= pr.targetSeconds) { prStopRecording('auto'); return; }
+    pr.rafId = requestAnimationFrame(prTick);
+  }
+  function prStopRecording(reason) {
+    if (!pr.recording) return;
+    pr.recording = false; cancelAnimationFrame(pr.rafId); pr.durationSeconds = Math.min(pr.targetSeconds, (Date.now() - pr.startTime) / 1000);
+    if (pr.recognition) { pr.recognition.onend = null; try { pr.recognition.stop(); } catch (_) {} }
+    const text = prFullTranscript();
+    document.getElementById('practiceMicButton').classList.remove('is-recording'); document.getElementById('practiceMicState').textContent = 'Recording complete'; document.getElementById('practiceTimerLabel').textContent = formatDuration(pr.durationSeconds); document.getElementById('practiceRecordHint').textContent = reason === 'auto' ? `Time is up — ${pr.targetSeconds} seconds recorded.` : `Finished at ${formatDuration(pr.durationSeconds)}. Review the transcript, then get feedback.`;
+    document.getElementById('practiceScoreButton').disabled = wordCount(text) < 5; document.getElementById('practiceRetryButton').hidden = false; prUpdateMetrics(pr.durationSeconds); prRenderLiveTranscript();
+    if (wordCount(text) < 5 && reason !== 'error') prShowRecordError('We did not capture enough speech. Record again, speak closer to the microphone, or paste a transcript below.');
+  }
+  function prResetRecording() {
+    pr.finalTranscript = ''; pr.interimTranscript = ''; pr.durationSeconds = 0; prHideRecordError();
+    document.getElementById('practiceLiveTranscript').innerHTML = '<span class="placeholder">Your words will appear here as you speak…</span>';
+    document.getElementById('practiceTimerLabel').textContent = formatDuration(pr.targetSeconds); document.getElementById('practiceMicState').textContent = 'Start recording'; document.getElementById('practiceRecordHint').textContent = 'Your browser will ask for microphone access after you tap.';
+    document.getElementById('practiceRingFill').style.strokeDashoffset = 0; document.getElementById('practiceRingFill').classList.remove('is-warning');
+    document.getElementById('practiceLiveWords').textContent = '0'; document.getElementById('practiceLiveWpm').textContent = '–'; document.getElementById('practiceLiveFillers').textContent = '0';
+    document.getElementById('practiceScoreButton').disabled = true; document.getElementById('practiceRetryButton').hidden = true;
+  }
+  async function prSubmitForScoring() {
+    let transcript = prFullTranscript();
+    if (!SPEECH_RECOGNITION || document.getElementById('practiceRecordPath')?.hidden) {
+      transcript = document.getElementById('practicePasteTranscript').value.trim();
+      pr.usedEstimate = true; pr.durationSeconds = Math.min(pr.targetSeconds, Math.max(1, Math.round(wordCount(transcript) / 130 * 60)));
+    }
+    if (wordCount(transcript) < 5) return;
+    const duration = Math.max(1, Math.round(pr.durationSeconds)); const wpm = Math.round(wordCount(transcript) / duration * 60); const fillers = fillerCount(transcript);
+    const scoreMode = pr.targetSeconds === 60 ? '60' : '120';
+    const priorTranscript = scoreMode === '60' ? (practiceDraft.transcript120 || '') : '';
+    renderPracticeLoading(scoreMode);
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), 50000);
+    let score;
+    try {
+      const response = await fetch(SCORE_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: controller.signal, body: JSON.stringify({ mode: scoreMode, transcript, durationSeconds: duration, wpm, fillerCount: fillers, priorTranscript }) });
+      const result = await response.json().catch(() => ({ fallback: true }));
+      score = response.ok ? result : { fallback: true };
+    } catch (_) { score = { fallback: true }; }
+    finally { window.clearTimeout(timeout); }
+    if (scoreMode === '120') {
+      practiceDraft.transcript120 = transcript; practiceDraft.duration120 = duration; practiceDraft.wpm120 = wpm; practiceDraft.fillers120 = fillers; practiceDraft.score120 = score;
+    } else {
+      practiceDraft.transcript60 = transcript; practiceDraft.duration60 = duration; practiceDraft.wpm60 = wpm; practiceDraft.fillers60 = fillers; practiceDraft.score60 = score;
+    }
+    savePracticeDraft();
+    renderPracticeResults(scoreMode, { transcript, duration, wpm, fillers, score, usedEstimate: pr.usedEstimate });
+  }
+  function renderPracticeLoading() {
+    practiceShell(`<div class="aiko-panel"><div class="aiko-loading"><div class="aiko-spinner"></div><h2>Reviewing your explanation…</h2><p>Checking the message, structure, close, and measured delivery.</p></div></div>`);
+  }
+  function renderPracticeResults(scoreMode, payload) {
+    const targetSeconds = scoreMode === '60' ? 60 : 120;
+    const fallback = payload.score.fallback === true;
+    const scoreHtml = fallback
+      ? `<div class="aiko-notice"><strong>AI feedback is unavailable right now.</strong> Your recording details are safe and you can continue.</div>`
+      : `<div class="aiko-score"><div class="aiko-score-total">${Number(payload.score.total) || 0}<span>/30</span></div><div><span class="aiko-level">${escapeHtml(payload.score.level)}</span><p class="aiko-summary">${escapeHtml(payload.score.summary)}</p></div></div><h3 class="aiko-section-title">How you scored</h3><div class="aiko-criteria">${(payload.score.criteria || []).map((criterion) => `<article class="aiko-criterion"><div class="aiko-criterion-head"><h4>${escapeHtml(criterion.name)}</h4><span class="aiko-criterion-score">${Number(criterion.score) || 1}/5</span></div><div class="aiko-evidence">“${escapeHtml(criterion.evidence)}”</div><p class="aiko-improve"><strong>Try next:</strong> ${escapeHtml(criterion.feedback)}</p></article>`).join('')}</div>`;
+    const nextAction = scoreMode === '120'
+      ? `<button class="aiko-button" id="practiceContinue" type="button">Now compress it to 60 seconds →</button>`
+      : `<button class="aiko-button" id="practiceContinue" type="button">Continue →</button>`;
+    practiceShell(`<div class="aiko-panel"><div class="aiko-panel-head"><p class="aiko-progress">${scoreMode === '120' ? 'Round 1 of 2' : 'Round 2 of 2'} · Feedback</p><h2>${fallback ? 'Your explanation is ready.' : 'Here is how it landed.'}</h2></div><div class="aiko-step">${scoreHtml}<h3 class="aiko-section-title">Your delivery, ${payload.usedEstimate ? 'estimated' : 'measured'}</h3><div class="aiko-metrics"><div class="aiko-metric"><strong>${formatDuration(payload.duration)}</strong><span>Duration vs ${formatDuration(targetSeconds)}</span></div><div class="aiko-metric"><strong>${payload.wpm}</strong><span>Words per minute</span></div><div class="aiko-metric"><strong>${payload.fillers}</strong><span>Filler words</span></div></div><div class="aiko-actions"><button class="aiko-button secondary" id="practiceRetryRound" type="button">Record again</button>${nextAction}</div></div></div>`);
+    document.getElementById('practiceRetryRound').addEventListener('click', () => renderPracticeRecordScreen(targetSeconds));
+    document.getElementById('practiceContinue').addEventListener('click', () => {
+      if (scoreMode === '120') { practiceDraft.stage = 'record60'; savePracticeDraft(); renderPracticeRecordScreen(60); }
+      else { practiceDraft.stage = 'reflect'; savePracticeDraft(); renderPracticeReflect(); }
+    });
+  }
+  function renderPracticeReflect() {
+    if (!practiceDraft) return renderPracticePicker();
+    const item = practiceTopic(practiceDraft.topicId);
+    practiceShell(`<div class="aiko-panel"><div class="aiko-panel-head"><p class="aiko-progress">Wrap up</p><h2>Choose your next improvement.</h2><p>Both rounds for "${escapeHtml(item.title)}" are done. Write down one change to carry into your next explanation.</p></div><div class="aiko-step"><label for="practiceImprovement"><strong>What will you improve next time?</strong></label><textarea class="aiko-reflection-input" id="practiceImprovement" placeholder="Name one specific change you will make.">${escapeHtml(practiceDraft.improvement)}</textarea><div class="aiko-actions"><button class="aiko-button secondary" id="practiceRedo60" type="button">Record round 2 again</button><button class="aiko-button" id="practiceSave" type="button" disabled>Save practice round</button></div></div></div>`);
+    const improvement = document.getElementById('practiceImprovement');
+    const saveButton = document.getElementById('practiceSave');
+    const update = () => { practiceDraft.improvement = improvement.value; savePracticeDraft(); saveButton.disabled = practiceDraft.improvement.trim().length < 5; };
+    improvement.addEventListener('input', update);
+    update();
+    document.getElementById('practiceRedo60').addEventListener('click', () => { practiceDraft.stage = 'record60'; savePracticeDraft(); renderPracticeRecordScreen(60); });
+    saveButton.addEventListener('click', savePracticeRound);
+  }
+  function savePracticeRound() {
+    const attempts = practiceAttempts();
+    attempts.push({ ...practiceDraft, stage: 'complete', completedAt: new Date().toISOString() });
+    localStorage.setItem(PRACTICE_ATTEMPTS_KEY, JSON.stringify(attempts));
+    const workspaces = readPracticeWorkspaces();
+    delete workspaces[practiceDraft.topicId];
+    writePracticeWorkspaces(workspaces);
+    const completed = { ...practiceDraft };
+    practiceDraft = null;
+    history.replaceState(null, '', `?practice=1&attempt=${encodeURIComponent(completed.id)}`);
+    renderPracticeSaved(completed);
+  }
+  function renderPracticeSaved(record) {
+    const item = practiceTopic(record.topicId);
+    practiceShell(`<section class="aiko-complete"><h3>Practice round saved.</h3><p><strong>Topic:</strong> ${escapeHtml(item.title)}</p><p><strong>Your next improvement:</strong> ${escapeHtml(record.improvement)}</p><p>This optional round does not change your MP or required exercise completion.</p><div class="aiko-actions"><a class="aiko-link" href="../../member-login/index.html#learning-journey">Back to Learning Journey</a><button class="aiko-button secondary" id="practiceAnother" type="button">Practice another explanation</button><button class="aiko-button secondary" id="practiceRepeatTopic" type="button">Practice this topic again</button></div></section>`);
+    document.getElementById('practiceAnother').addEventListener('click', () => { history.replaceState(null, '', '?practice=1'); renderPracticePicker(); });
+    document.getElementById('practiceRepeatTopic').addEventListener('click', () => beginOrResumePractice(record.topicId));
+  }
+
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('practice') === '1') {
+    const attemptId = urlParams.get('attempt');
+    if (attemptId) loadPracticeAttempt(attemptId);
+    else {
+      const recent = mostRecentPracticeWorkspace();
+      renderPracticePicker(recent ? recent.topicId : PRACTICE_TOPICS[0].id);
+    }
+  } else {
+    if (mode === '60') loadPrep();
+    renderPreparation();
+  }
 })();

@@ -509,6 +509,303 @@
       text-decoration: underline;
     }
 
+    [hidden] { display: none !important; }
+
+    .slo-speech-switcher {
+      display: none;
+      margin-bottom: 18px;
+      padding: 10px 12px;
+      border: 1px solid var(--slo-line);
+      border-radius: 8px;
+      background: var(--slo-white);
+    }
+
+    .slo-speech-switcher.is-visible { display: block; }
+
+    .slo-speech-switcher > strong {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--slo-navy);
+      font-size: 14px;
+    }
+
+    .slo-speech-tabs {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 2px;
+    }
+
+    .slo-speech-tab {
+      flex: 0 0 auto;
+      padding: 8px 11px;
+      border: 1px solid var(--slo-line);
+      border-radius: 6px;
+      background: var(--slo-white);
+      color: var(--slo-navy);
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .slo-speech-tab[aria-current="page"] {
+      border-color: var(--slo-gold);
+      background: #FFF8EC;
+    }
+
+    .slo-practice-shell {
+      display: grid;
+      gap: 18px;
+    }
+
+    .slo-practice-heading {
+      max-width: 760px;
+    }
+
+    .slo-practice-heading h1 {
+      margin: 0 0 8px;
+      color: var(--slo-navy);
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: clamp(34px, 5vw, 50px);
+      line-height: 1.05;
+    }
+
+    .slo-practice-heading p {
+      margin: 0;
+      font-size: 17px;
+      line-height: 1.55;
+    }
+
+    .slo-topic-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    .slo-topic-card {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: center;
+      width: 100%;
+      padding: 14px 16px;
+      border: 1px solid var(--slo-line);
+      border-radius: 8px;
+      background: var(--slo-white);
+      color: var(--slo-charcoal);
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .slo-topic-card:hover,
+    .slo-topic-card[aria-pressed="true"] {
+      border-color: var(--slo-gold);
+      background: #FFF8EC;
+    }
+
+    .slo-topic-radio {
+      width: 18px;
+      height: 18px;
+      border: 1.5px solid #7894AF;
+      border-radius: 50%;
+      background: var(--slo-white);
+    }
+
+    .slo-topic-card[aria-pressed="true"] .slo-topic-radio {
+      border: 5px solid var(--slo-gold);
+    }
+
+    .slo-topic-card strong {
+      display: block;
+      margin-bottom: 3px;
+      color: var(--slo-navy);
+      font-size: 16px;
+    }
+
+    .slo-topic-card span {
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    .slo-topic-status {
+      color: #4D7094;
+      font-size: 12px !important;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .slo-topic-preview {
+      padding: 18px;
+      border-radius: 8px;
+      background: var(--slo-navy);
+      color: var(--slo-white);
+    }
+
+    .slo-topic-preview dl {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin: 14px 0 0;
+    }
+
+    .slo-topic-preview dt {
+      margin-bottom: 3px;
+      color: var(--slo-gold);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .slo-topic-preview dd {
+      margin: 0;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .slo-practice-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .slo-button-secondary {
+      border: 1px solid var(--slo-navy);
+      background: var(--slo-white);
+    }
+
+    .slo-practice-workspace {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 300px;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .slo-notes-panel,
+    .slo-context-panel,
+    .slo-completion-choice {
+      padding: 20px;
+      border: 1px solid var(--slo-line);
+      border-radius: 8px;
+      background: var(--slo-white);
+    }
+
+    .slo-notes-panel h2,
+    .slo-context-panel h2,
+    .slo-completion-choice h2 {
+      margin: 0 0 8px;
+      color: var(--slo-navy);
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 28px;
+    }
+
+    .slo-helper {
+      margin: 0 0 14px;
+      padding: 12px 14px;
+      border: 1px solid #DED6C9;
+      border-radius: 7px;
+      background: var(--slo-soft);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .slo-notes,
+    .slo-reflection-input {
+      width: 100%;
+      min-height: 320px;
+      padding: 14px;
+      border: 1px solid var(--slo-line);
+      border-radius: 8px;
+      background: var(--slo-white);
+      color: var(--slo-charcoal);
+      font: 16px/1.55 'Lato', Arial, sans-serif;
+      resize: vertical;
+    }
+
+    .slo-reflection-input { min-height: 120px; }
+
+    .slo-notes:focus,
+    .slo-reflection-input:focus {
+      border-color: var(--slo-gold);
+      outline: 2px solid rgba(238, 163, 32, .22);
+    }
+
+    .slo-context-panel {
+      position: sticky;
+      top: 96px;
+    }
+
+    .slo-context-panel p,
+    .slo-context-panel li {
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .slo-context-panel ul {
+      margin: 10px 0 0;
+      padding-left: 20px;
+    }
+
+    .slo-prep-timer {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 14px 0;
+      padding: 12px 14px;
+      border: 1px solid var(--slo-line);
+      border-radius: 8px;
+      background: #FFF8EC;
+    }
+
+    .slo-prep-timer strong {
+      min-width: 54px;
+      color: var(--slo-navy);
+      font-size: 24px;
+    }
+
+    .slo-record-brief {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 320px;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .slo-compact-list {
+      margin: 10px 0 0;
+      padding-left: 20px;
+    }
+
+    .slo-compact-list li { margin-bottom: 8px; }
+
+    .slo-review-notes {
+      padding: 16px;
+      border-radius: 8px;
+      background: var(--slo-soft);
+      white-space: pre-wrap;
+    }
+
+    .slo-completion-choice {
+      margin-top: 18px;
+      border-color: #E2C383;
+      background: #FFF8EC;
+    }
+
+    .slo-completion-choice p {
+      margin: 0 0 14px;
+      line-height: 1.5;
+    }
+
+    .slo-complete-status {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 9px 12px;
+      border: 1px solid #A9D1B7;
+      border-radius: 999px;
+      background: #EDF7F0;
+      color: #2C7A4B;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
     @media (max-width: 860px) {
       .slo-header {
         grid-template-columns: 1fr auto;
@@ -542,9 +839,13 @@
 
       .slo-intro,
       .slo-grid,
-      .slo-action-card {
+      .slo-action-card,
+      .slo-practice-workspace,
+      .slo-record-brief {
         grid-template-columns: 1fr;
       }
+
+      .slo-context-panel { position: static; }
 
       .slo-actions {
         align-items: stretch;
@@ -583,6 +884,20 @@
       .slo-exit-link {
         align-self: center;
       }
+
+      .slo-topic-card {
+        grid-template-columns: auto minmax(0, 1fr);
+      }
+
+      .slo-topic-status {
+        grid-column: 2;
+      }
+
+      .slo-topic-preview dl {
+        grid-template-columns: 1fr;
+      }
+
+      .slo-notes { min-height: 300px; }
     }
   </style>
 </head>
@@ -606,6 +921,12 @@
   </header>
 
   <main class="slo-main">
+    <nav class="slo-speech-switcher" id="speechSwitcher" aria-label="Your speeches">
+      <strong>Your speeches</strong>
+      <div class="slo-speech-tabs" id="speechTabs"></div>
+    </nav>
+
+    <div id="coreExercise">
     <section class="slo-intro" aria-labelledby="sloIntroTitle">
       <div>
         <p class="slo-label">Delivery practice</p>
@@ -687,10 +1008,23 @@
       <div class="slo-actions">
         <a class="slo-button slo-button-accent" href="https://gemini.google.com/gem/1mwtmHhhwE2IzQ2w_EUYwxkSto4yym1CX?usp=sharing" target="_blank" rel="noopener">Open GEM (The Playback)</a>
         <button class="slo-button slo-button-primary" id="completeExerciseBtn" type="button">Mark exercise complete · +30 MP</button>
+        <span class="slo-complete-status" id="completeExerciseStatus" hidden>✓ Exercise complete</span>
         <a class="slo-exit-link" id="journeyLink" href="../../member-login/index.html#learning-journey">Back to Learning Journey</a>
       </div>
       <p>This opens Gemini in a new tab. You may need to sign in, then return here when you finish.</p>
     </section>
+    <section class="slo-completion-choice" id="coreCompletionChoice" hidden>
+      <p class="slo-label">Exercise complete</p>
+      <h2>Your delivery practice is saved.</h2>
+      <p>You can return to the Learning Journey or apply the same delivery techniques to a short speech in your own words.</p>
+      <div class="slo-practice-actions">
+        <a class="slo-button slo-button-primary" href="../../member-login/index.html#learning-journey">Back to Learning Journey</a>
+        <a class="slo-button slo-button-secondary" href="?practice=1">Practice another speech</a>
+      </div>
+    </section>
+    </div>
+
+    <section class="slo-practice-shell" id="practiceApp" hidden aria-live="polite"></section>
   </main>
 
   <script>
@@ -745,8 +1079,510 @@
         renderTimer();
       });
 
+      window.SLOTimer = { start: startTimer, stop: stopTimer, reset: () => {
+        stopTimer();
+        elapsed = 0;
+        renderTimer();
+      } };
       renderTimer();
-      startTimer();
+      if (!new URLSearchParams(window.location.search).has('practice') && !new URLSearchParams(window.location.search).has('attempt')) startTimer();
+    })();
+  </script>
+  <script>
+    (() => {
+      const PRACTICE_ATTEMPTS_KEY = 'utl_speak_like_obama_practice_attempts';
+      const PRACTICE_WORKSPACES_KEY = 'utl_speak_like_obama_practice_workspaces';
+      const CORE_DONE_KEY = 'utl_p3_ex4_done';
+      const PLAYBACK_URL = 'https://gemini.google.com/gem/1mwtmHhhwE2IzQ2w_EUYwxkSto4yym1CX?usp=sharing';
+      const TOPICS = [
+        {
+          id: 'phone-free-hour',
+          title: 'A phone-free hour',
+          category: 'Everyday life',
+          brief: 'Convince your family or friends to have one phone-free hour each week.',
+          audience: 'Family or friends',
+          outcome: 'Agree to try it once',
+          focus: 'A clear reason and a memorable close'
+        },
+        {
+          id: 'try-something-new',
+          title: 'Try something new',
+          category: 'Everyday life',
+          brief: 'Convince a friend to try a hobby, sport, book, game or show that you enjoy.',
+          audience: 'A friend',
+          outcome: 'Try it with you',
+          focus: 'Enthusiasm without rushing'
+        },
+        {
+          id: 'fairer-group-projects',
+          title: 'Make group projects fair for everyone',
+          category: 'School',
+          brief: 'Recommend one change that would make group projects fair for everyone.',
+          audience: 'Students and a teacher',
+          outcome: 'Test your proposed change',
+          focus: 'Contrast the current and better approach'
+        },
+        {
+          id: 'practical-skill',
+          title: 'A practical skill',
+          category: 'School',
+          brief: 'Explain one practical skill every student should learn before leaving school.',
+          audience: 'A school leader',
+          outcome: 'Add the skill to a class or activity',
+          focus: 'A strong main point supported by examples'
+        },
+        {
+          id: 'shared-space',
+          title: 'Improve a shared space',
+          category: 'Community',
+          brief: 'Recommend one improvement to a local park, library or community space.',
+          audience: 'Community organizers',
+          outcome: 'Choose your improvement as the next priority',
+          focus: 'Calm authority and deliberate pauses'
+        },
+        {
+          id: 'food-waste',
+          title: 'Reduce food waste',
+          category: 'Community',
+          brief: 'Persuade a school, household or community group to take one practical step to reduce food waste.',
+          audience: 'The people who would carry out the change',
+          outcome: 'Commit to one practical step',
+          focus: 'Specific evidence and a direct request'
+        },
+        {
+          id: 'better-meeting',
+          title: 'A better meeting habit',
+          category: 'Work or organized activities',
+          brief: 'Recommend one meeting or teamwork habit that should change.',
+          audience: 'Your team',
+          outcome: 'Try the new habit for one week',
+          focus: 'A concise opening and steady pace'
+        },
+        {
+          id: 'delayed-project',
+          title: 'A delayed project',
+          category: 'Work or organized activities',
+          brief: 'Explain a delay clearly, take responsibility and recommend what should happen next.',
+          audience: 'People waiting for the work',
+          outcome: 'Agree on the revised next step',
+          focus: 'Composure and a decisive ending'
+        }
+      ];
+
+      const core = document.getElementById('coreExercise');
+      const practiceApp = document.getElementById('practiceApp');
+      const switcher = document.getElementById('speechSwitcher');
+      const tabs = document.getElementById('speechTabs');
+      const params = new URLSearchParams(window.location.search);
+      let draft = null;
+      let prepRemaining = 60;
+      let prepInterval = null;
+
+      function escapeHtml(value) {
+        return String(value || '').replace(/[&<>'"]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#039;', '"': '&quot;' }[char]));
+      }
+
+      function readJson(key, fallback) {
+        try {
+          const parsed = JSON.parse(localStorage.getItem(key) || 'null');
+          return parsed == null ? fallback : parsed;
+        } catch (_) {
+          return fallback;
+        }
+      }
+
+      function attempts() {
+        const saved = readJson(PRACTICE_ATTEMPTS_KEY, []);
+        return Array.isArray(saved) ? saved : [];
+      }
+
+      function readWorkspaces() {
+        const parsed = readJson(PRACTICE_WORKSPACES_KEY, {});
+        return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {};
+      }
+
+      function writeWorkspaces(workspaces) {
+        localStorage.setItem(PRACTICE_WORKSPACES_KEY, JSON.stringify(workspaces));
+      }
+
+      function topic(id) {
+        return TOPICS.find((item) => item.id === id) || TOPICS[0];
+      }
+
+      function createDraft(topicId) {
+        return {
+          id: `speech-${Date.now()}`,
+          topicId,
+          notes: '',
+          stage: 'prepare',
+          improvement: '',
+          feedback: '',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        };
+      }
+
+      function saveDraft(nextDraft = draft) {
+        if (!nextDraft) return;
+        nextDraft.updatedAt = new Date().toISOString();
+        draft = nextDraft;
+        const workspaces = readWorkspaces();
+        workspaces[nextDraft.topicId] = nextDraft;
+        writeWorkspaces(workspaces);
+      }
+
+      function clearPrepTimer() {
+        if (prepInterval) window.clearInterval(prepInterval);
+        prepInterval = null;
+      }
+
+      function renderSwitcher(activeId) {
+        const saved = attempts();
+        const inProgress = Object.values(readWorkspaces());
+        switcher.classList.toggle('is-visible', saved.length > 0 || inProgress.length > 0);
+        if (!saved.length && !inProgress.length) return;
+        const records = [{ id: 'olympics', title: 'Olympics', complete: localStorage.getItem(CORE_DONE_KEY) === 'true' }]
+          .concat(saved.map((item) => ({ id: item.id, title: topic(item.topicId).title, complete: true })))
+          .concat(inProgress.map((item) => ({ id: item.id, title: topic(item.topicId).title, complete: false })));
+        tabs.innerHTML = records.map((record, index) => {
+          const href = record.id === 'olympics' ? '?attempt=olympics' : `?attempt=${encodeURIComponent(record.id)}`;
+          return `<a class="slo-speech-tab" href="${href}" ${record.id === activeId ? 'aria-current="page"' : ''}>${index + 1} · ${escapeHtml(record.title)} ${record.complete ? '✓' : '•'}</a>`;
+        }).join('');
+      }
+
+      function showCore() {
+        clearPrepTimer();
+        core.hidden = false;
+        practiceApp.hidden = true;
+        renderSwitcher('olympics');
+        if (localStorage.getItem(CORE_DONE_KEY) === 'true') {
+          document.getElementById('coreCompletionChoice').hidden = false;
+          const button = document.getElementById('completeExerciseBtn');
+          button.hidden = true;
+          document.getElementById('completeExerciseStatus').hidden = false;
+          document.getElementById('journeyLink').hidden = true;
+        }
+      }
+
+      function pickerMarkup(selectedId) {
+        const completedTopicIds = new Set(attempts().map((item) => item.topicId));
+        const workspaces = readWorkspaces();
+        const selected = topic(selectedId);
+        return `
+          <div class="slo-practice-heading">
+            <p class="slo-label">Optional practice · no additional MP</p>
+            <h1>Choose a speaking situation.</h1>
+            <p>Pick a situation, prepare your message, record one take, then use the feedback to choose one delivery habit to improve.</p>
+          </div>
+          <div class="slo-panel">
+            <div class="slo-topic-list" id="topicList">
+              ${TOPICS.map((item) => {
+                const status = completedTopicIds.has(item.id) ? 'Completed' : workspaces[item.id] ? 'In progress' : 'Not started';
+                return `<button class="slo-topic-card" type="button" data-topic-id="${item.id}" aria-pressed="${item.id === selected.id}">
+                <span class="slo-topic-radio" aria-hidden="true"></span>
+                <span><strong>${escapeHtml(item.title)}</strong>${escapeHtml(item.category)} · ${escapeHtml(item.brief)}</span>
+                <span class="slo-topic-status">${status}</span>
+              </button>`;
+              }).join('')}
+            </div>
+          </div>
+          <div class="slo-topic-preview" id="topicPreview">
+            ${topicPreviewMarkup(selected)}
+          </div>
+          <div class="slo-practice-actions">
+            <button class="slo-button slo-button-primary" id="startPractice" type="button">Start this practice round →</button>
+            <button class="slo-button slo-button-secondary" id="surpriseTopic" type="button">Surprise me</button>
+            <a class="slo-exit-link" href="../../member-login/index.html#learning-journey">Back to Learning Journey</a>
+          </div>`;
+      }
+
+      function topicPreviewMarkup(item) {
+        return `<p class="slo-label">Selected situation</p>
+          <strong>${escapeHtml(item.title)}</strong>
+          <p>${escapeHtml(item.brief)}</p>
+          <dl>
+            <div><dt>Audience</dt><dd>${escapeHtml(item.audience)}</dd></div>
+            <div><dt>Desired outcome</dt><dd>${escapeHtml(item.outcome)}</dd></div>
+            <div><dt>Delivery focus</dt><dd>${escapeHtml(item.focus)}</dd></div>
+          </dl>`;
+      }
+
+      function showDraftStage() {
+        if (!draft) return showPicker();
+        if (draft.stage === 'record') return showRecord();
+        if (draft.stage === 'reflect') return showReflect();
+        return showPrepare();
+      }
+
+      function beginOrResumePractice(topicId) {
+        const workspaces = readWorkspaces();
+        draft = workspaces[topicId] || createDraft(topicId);
+        saveDraft();
+        window.SLOTimer?.reset();
+        history.replaceState(null, '', `?attempt=${encodeURIComponent(draft.id)}`);
+        showDraftStage();
+      }
+
+      function showPicker(selectedId = TOPICS[0].id) {
+        clearPrepTimer();
+        core.hidden = true;
+        practiceApp.hidden = false;
+        practiceApp.innerHTML = pickerMarkup(selectedId);
+        renderSwitcher('');
+        let currentId = selectedId;
+        const startButton = document.getElementById('startPractice');
+        const updateStartButton = (id) => {
+          startButton.textContent = readWorkspaces()[id] ? 'Resume this practice round →' : 'Start this practice round →';
+        };
+        const select = (id) => {
+          currentId = id;
+          practiceApp.querySelectorAll('[data-topic-id]').forEach((button) => button.setAttribute('aria-pressed', String(button.dataset.topicId === id)));
+          document.getElementById('topicPreview').innerHTML = topicPreviewMarkup(topic(id));
+          updateStartButton(id);
+        };
+        document.getElementById('topicList').addEventListener('click', (event) => {
+          const button = event.target.closest('[data-topic-id]');
+          if (button) select(button.dataset.topicId);
+        });
+        document.getElementById('surpriseTopic').addEventListener('click', () => {
+          const alternatives = TOPICS.filter((item) => item.id !== currentId);
+          select(alternatives[Math.floor(Math.random() * alternatives.length)].id);
+          document.getElementById('topicPreview').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        });
+        updateStartButton(currentId);
+        startButton.addEventListener('click', () => beginOrResumePractice(currentId));
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      function contextPanelMarkup(item) {
+        return `<aside class="slo-context-panel">
+          <p class="slo-label">Speaking situation</p>
+          <h2>${escapeHtml(item.title)}</h2>
+          <p>${escapeHtml(item.brief)}</p>
+          <ul>
+            <li><strong>Audience:</strong> ${escapeHtml(item.audience)}</li>
+            <li><strong>Desired outcome:</strong> ${escapeHtml(item.outcome)}</li>
+            <li><strong>Delivery focus:</strong> ${escapeHtml(item.focus)}</li>
+            <li><strong>Speaking time:</strong> 60 to 90 seconds</li>
+          </ul>
+        </aside>`;
+      }
+
+      function showPrepare() {
+        if (!draft) return showPicker();
+        clearPrepTimer();
+        const item = topic(draft.topicId);
+        core.hidden = true;
+        practiceApp.hidden = false;
+        practiceApp.innerHTML = `<div class="slo-practice-heading">
+            <p class="slo-label">Optional practice · preparation</p>
+            <h1>Prepare your talk.</h1>
+            <p>Prepare brief notes in your own words. You do not need to write a complete script.</p>
+          </div>
+          <div class="slo-practice-workspace">
+            <section class="slo-notes-panel">
+              <h2>Your preparation notes</h2>
+              <p class="slo-helper"><strong>Consider:</strong> What is your main point? Which reason or example makes it credible? Where will you pause or add emphasis? Which closing line should the audience remember?</p>
+              <textarea class="slo-notes" id="practiceNotes" placeholder="Write your talk, an outline or a few speaking notes…">${escapeHtml(draft.notes)}</textarea>
+              <div class="slo-prep-timer">
+                <strong id="prepCountdown">01:00</strong>
+                <span>Use the optional preparation timer when you are ready. You can begin recording before it ends.</span>
+                <button class="slo-button slo-button-secondary" id="startPrepTimer" type="button">Start 60-second preparation</button>
+              </div>
+              <div class="slo-practice-actions">
+                <button class="slo-button slo-button-primary" id="readyToRecord" type="button">Ready to record →</button>
+                <button class="slo-button slo-button-secondary" id="chooseDifferentTopic" type="button">Choose a different topic</button>
+              </div>
+            </section>
+            ${contextPanelMarkup(item)}
+          </div>`;
+        renderSwitcher(draft.id);
+        const notes = document.getElementById('practiceNotes');
+        notes.addEventListener('input', () => {
+          draft.notes = notes.value;
+          saveDraft();
+        });
+        document.getElementById('startPrepTimer').addEventListener('click', startPrepTimer);
+        document.getElementById('readyToRecord').addEventListener('click', () => {
+          draft.notes = notes.value;
+          draft.stage = 'record';
+          saveDraft();
+          showRecord();
+        });
+        document.getElementById('chooseDifferentTopic').addEventListener('click', () => showPicker(draft.topicId));
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      function startPrepTimer() {
+        const button = document.getElementById('startPrepTimer');
+        if (prepInterval) return;
+        prepRemaining = 60;
+        button.textContent = 'Preparation timer running';
+        button.disabled = true;
+        prepInterval = window.setInterval(() => {
+          prepRemaining -= 1;
+          const output = document.getElementById('prepCountdown');
+          if (output) output.textContent = `00:${String(Math.max(0, prepRemaining)).padStart(2, '0')}`;
+          if (prepRemaining <= 0) {
+            clearPrepTimer();
+            button.textContent = 'Preparation time complete';
+          }
+        }, 1000);
+      }
+
+      function showRecord() {
+        if (!draft) return showPicker();
+        clearPrepTimer();
+        const item = topic(draft.topicId);
+        window.SLOTimer?.reset();
+        window.SLOTimer?.start();
+        core.hidden = true;
+        practiceApp.hidden = false;
+        practiceApp.innerHTML = `<div class="slo-practice-heading">
+            <p class="slo-label">Optional practice · record and review</p>
+            <h1>Deliver your speech.</h1>
+            <p>Speak for 60 to 90 seconds. Use your notes as a guide rather than reading every word.</p>
+          </div>
+          <div class="slo-record-brief">
+            <section class="slo-notes-panel">
+              <h2>Your notes</h2>
+              <div class="slo-review-notes">${escapeHtml(draft.notes) || 'No preparation notes added.'}</div>
+              <div class="slo-practice-actions" style="margin-top:14px">
+                <button class="slo-button slo-button-secondary" id="editPracticeNotes" type="button">Edit notes</button>
+              </div>
+            </section>
+            ${contextPanelMarkup(item)}
+          </div>
+          <section class="slo-panel">
+            <h2>Record and use The Playback</h2>
+            <ol class="slo-compact-list">
+              <li>Record one complete take on your phone or computer.</li>
+              <li>Upload it to The Playback and review the feedback.</li>
+              <li>Choose the one delivery habit you want to improve first.</li>
+            </ol>
+            <p class="slo-helper"><strong>The Playback will examine:</strong> your main point, supporting structure, pacing, pauses, filler words, emphasis and ending.</p>
+            <div class="slo-practice-actions">
+              <a class="slo-button slo-button-accent" href="${PLAYBACK_URL}" target="_blank" rel="noopener">Open GEM (The Playback)</a>
+              <button class="slo-button slo-button-primary" id="reviewedFeedback" type="button">I reviewed my feedback →</button>
+            </div>
+          </section>`;
+        renderSwitcher(draft.id);
+        document.getElementById('editPracticeNotes').addEventListener('click', () => {
+          draft.stage = 'prepare';
+          saveDraft();
+          showPrepare();
+        });
+        document.getElementById('reviewedFeedback').addEventListener('click', () => {
+          draft.stage = 'reflect';
+          saveDraft();
+          showReflect();
+        });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      function showReflect() {
+        if (!draft) return showPicker();
+        window.SLOTimer?.stop();
+        const item = topic(draft.topicId);
+        core.hidden = true;
+        practiceApp.hidden = false;
+        practiceApp.innerHTML = `<div class="slo-practice-heading">
+            <p class="slo-label">Optional practice · reflection</p>
+            <h1>Choose your next improvement.</h1>
+            <p>Writing down one change makes the feedback easier to use in your next speech.</p>
+          </div>
+          <div class="slo-practice-workspace">
+            <section class="slo-notes-panel">
+              <label for="practiceImprovement"><strong>What will you improve in your next speech?</strong></label>
+              <textarea class="slo-reflection-input" id="practiceImprovement" placeholder="Name one specific change you will make.">${escapeHtml(draft.improvement)}</textarea>
+              <label for="practiceFeedback" style="display:block;margin:16px 0 6px"><strong>Useful feedback from The Playback</strong> <span style="font-weight:400">(optional)</span></label>
+              <textarea class="slo-reflection-input" id="practiceFeedback" placeholder="Paste or summarize one useful feedback point.">${escapeHtml(draft.feedback)}</textarea>
+              <div class="slo-practice-actions" style="margin-top:16px">
+                <button class="slo-button slo-button-primary" id="savePractice" type="button" disabled>Save practice round</button>
+                <button class="slo-button slo-button-secondary" id="retryPractice" type="button">Record one more take</button>
+              </div>
+            </section>
+            ${contextPanelMarkup(item)}
+          </div>`;
+        renderSwitcher(draft.id);
+        const improvement = document.getElementById('practiceImprovement');
+        const feedback = document.getElementById('practiceFeedback');
+        const saveButton = document.getElementById('savePractice');
+        const update = () => {
+          draft.improvement = improvement.value;
+          draft.feedback = feedback.value;
+          saveDraft();
+          saveButton.disabled = draft.improvement.trim().length < 5;
+        };
+        improvement.addEventListener('input', update);
+        feedback.addEventListener('input', update);
+        update();
+        document.getElementById('retryPractice').addEventListener('click', () => {
+          draft.stage = 'record';
+          saveDraft();
+          showRecord();
+        });
+        saveButton.addEventListener('click', savePracticeRound);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      function savePracticeRound() {
+        const saved = attempts();
+        saved.push({ ...draft, stage: 'complete', completedAt: new Date().toISOString() });
+        localStorage.setItem(PRACTICE_ATTEMPTS_KEY, JSON.stringify(saved));
+        const workspaces = readWorkspaces();
+        delete workspaces[draft.topicId];
+        writeWorkspaces(workspaces);
+        const completed = { ...draft };
+        draft = null;
+        history.replaceState(null, '', `?attempt=${encodeURIComponent(completed.id)}`);
+        showSaved(completed);
+      }
+
+      function showSaved(record) {
+        clearPrepTimer();
+        window.SLOTimer?.stop();
+        const item = topic(record.topicId);
+        core.hidden = true;
+        practiceApp.hidden = false;
+        practiceApp.innerHTML = `<section class="slo-completion-choice" style="margin-top:0">
+          <p class="slo-label">Practice round saved</p>
+          <h2>${escapeHtml(item.title)}</h2>
+          <p><strong>Your next improvement:</strong> ${escapeHtml(record.improvement)}</p>
+          <p>This optional round does not change your MP or required exercise completion.</p>
+          <div class="slo-practice-actions">
+            <a class="slo-button slo-button-primary" href="../../member-login/index.html#learning-journey">Back to Learning Journey</a>
+            <a class="slo-button slo-button-secondary" href="?practice=1">Practice another speech</a>
+            <button class="slo-button slo-button-secondary" id="repeatTopic" type="button">Practice this topic again</button>
+          </div>
+        </section>`;
+        renderSwitcher(record.id);
+        document.getElementById('repeatTopic').addEventListener('click', () => beginOrResumePractice(record.topicId));
+      }
+
+      function mostRecentWorkspace() {
+        const entries = Object.values(readWorkspaces());
+        entries.sort((a, b) => String(b.updatedAt || '').localeCompare(String(a.updatedAt || '')));
+        return entries[0] || null;
+      }
+
+      function loadAttempt(id) {
+        if (id === 'olympics') return showCore();
+        const saved = attempts().find((item) => item.id === id);
+        if (saved) return showSaved(saved);
+        const found = Object.values(readWorkspaces()).find((item) => item.id === id);
+        if (found) {
+          draft = found;
+          window.SLOTimer?.reset();
+          return showDraftStage();
+        }
+        showPicker();
+      }
+
+      const attemptId = params.get('attempt');
+      if (params.get('practice') === '1') showPicker(mostRecentWorkspace()?.topicId || TOPICS[0].id);
+      else if (attemptId) loadAttempt(attemptId);
+      else showCore();
     })();
   </script>
   <script type="module" src="../../assets/app-access-guard.js?v=1"></script>
@@ -757,14 +1593,15 @@
     document.getElementById('completeExerciseBtn').addEventListener('click', function () {
       localStorage.setItem('utl_p3_ex4_done', 'true');
       localStorage.setItem('utl_done_p3-e4', 'true');
-      const result = window.UTLRewardEvents?.awardReflectionExercise({
+      window.UTLRewardEvents?.awardReflectionExercise({
         appId: 'speak-like-obama',
         title: 'Delivery practice complete',
         body: 'Your reflection and exercise progress were saved.'
       });
-      this.textContent = result?.awarded ? 'Exercise complete' : 'Already completed';
-      this.disabled = true;
-      document.getElementById('journeyLink').className = 'slo-button slo-button-primary';
+      this.hidden = true;
+      document.getElementById('completeExerciseStatus').hidden = false;
+      document.getElementById('journeyLink').hidden = true;
+      document.getElementById('coreCompletionChoice').hidden = false;
     });
   </script>
   <script type="module" src="../../assets/feedback-widget.js?v=6"></script>
