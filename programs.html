@@ -82,7 +82,6 @@
       color: var(--program-navy);
       font-family: 'Playfair Display', serif;
       font-size: 40pt;
-      font-style: italic;
       font-weight: 700;
       letter-spacing: 0;
       line-height: 1.3;
@@ -158,7 +157,6 @@
       color: var(--program-white);
       font-family: 'Playfair Display', serif;
       font-size: 52pt;
-      font-style: italic;
       font-weight: 700;
       letter-spacing: 0;
       line-height: 1.1;
@@ -209,6 +207,40 @@
       grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 32px;
       margin-top: 40px;
+    }
+
+    .audience-grid.two-col {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      max-width: 900px;
+    }
+
+    .faq-list {
+      display: grid;
+      gap: 32px;
+      margin-top: 40px;
+    }
+
+    .faq-item h3 {
+      margin: 0 0 10px;
+      color: var(--program-navy);
+      font-family: 'Lato', sans-serif;
+      font-size: 18pt;
+      font-weight: 700;
+      line-height: 1.3;
+    }
+
+    .faq-item p {
+      margin: 0;
+      color: var(--program-charcoal);
+      font-family: 'Lato', sans-serif;
+      font-size: 15pt;
+      font-weight: 300;
+      line-height: 1.8;
+    }
+
+    .faq-item p a {
+      color: var(--program-navy);
+      font-weight: 700;
     }
 
     .audience-card {
@@ -264,7 +296,6 @@
       color: var(--program-navy);
       font-family: 'Playfair Display', serif;
       font-size: 24pt;
-      font-style: italic;
       font-weight: 700;
       line-height: 1.25;
     }
@@ -505,7 +536,6 @@
       color: var(--program-white);
       font-family: 'Playfair Display', serif;
       font-size: 36pt;
-      font-style: italic;
       font-weight: 700;
       letter-spacing: 0;
       line-height: 1.4;
@@ -574,6 +604,7 @@
       }
 
       .audience-grid,
+      .audience-grid.two-col,
       .testimonial-grid {
         grid-template-columns: 1fr;
       }
@@ -689,7 +720,7 @@
         <h1 id="hero-title">Think, speak and act like an executive™</h1>
         <p class="program-hero-subtitle">Practical lessons about life and work you wish someone had taught you sooner</p>
         <div class="program-hero-divider" aria-hidden="true"></div>
-        <p class="program-hero-copy">The same frameworks used by McKinsey consultants, media presenters and global executives, now open to anyone with the motivation to learn. This program changes how you think, communicate and show up in the room.</p>
+        <p class="program-hero-copy">Also known as Think. Speak. Act.™, this program delivers the same frameworks taught to McKinsey consultants, media-trained executives and global business leaders. It changes how you think, communicate and show up in the room.</p>
         <button class="program-cta-button" type="button" onclick="openLeadModal()">Get in touch</button>
       </div>
     </section>
@@ -702,17 +733,17 @@
         <div class="audience-grid">
           <article class="audience-card program-reveal">
             <h3>Students</h3>
-            <p>Grades are only part of what opens a great opportunity. You also need to explain your thinking clearly and stay steady under pressure. <span class="tsa-mark">Think, speak and act like an executive</span> builds skills that universities and employers look for but few schools teach. Start now and you will use them throughout your career.</p>
+            <p>Grades are only part of what opens a great opportunity. You also need to explain your thinking clearly and stay steady under pressure. <span class="tsa-mark">Think, speak and act like an executive</span> builds exactly those skills, the ones universities and employers look for but few schools ever teach.</p>
           </article>
 
           <article class="audience-card program-reveal">
             <h3>Professionals</h3>
-            <p>You have the experience and the ideas. The next challenge is getting them across to the people who decide. <span class="tsa-mark">Think, speak and act like an executive</span> teaches you to structure your thinking under pressure, make your point clearly and speak with the confidence to be heard and trusted with more.</p>
+            <p>You already have the experience and the ideas. The harder part is getting them across to the people who decide. <span class="tsa-mark">Think, speak and act like an executive</span> sharpens your thinking under pressure and gives you the confidence to be heard, and trusted with more.</p>
           </article>
 
           <article class="audience-card program-reveal">
             <h3>Organizations</h3>
-            <p>Technical skill alone does not prepare a team for pressure. People also need to think clearly, say the point and lead without hedging. <span class="tsa-mark">Think, speak and act like an executive</span> gives the team a shared language for structured thinking, sharper communication and steadier leadership.</p>
+            <p>Technical skill does not automatically prepare a team for pressure. People still need to think clearly, say the point and lead without hedging. <span class="tsa-mark">Think, speak and act like an executive</span> gives your team a shared language for structured thinking, sharper communication and steadier leadership.</p>
           </article>
         </div>
       </div>
@@ -729,19 +760,18 @@
             <div class="phase-left">
               <span class="phase-number">01</span>
               <h3 class="phase-name">Think clearly</h3>
-              <p class="phase-time">About 2 hr 20 min total<span>40 min video + 1 hr 40 min exercises</span></p>
+              <p class="phase-time">About 1 hr 45 min total<span>25 min video + 1 hr 20 min exercises</span></p>
             </div>
             <div class="phase-right">
               <p class="phase-description">Most people were never taught how to organize their thoughts before they open their mouth. Phase 1 gives you the frameworks to fix that.</p>
               <p class="phase-label">Videos</p>
               <ul class="video-list">
-                <li>Introduction</li>
                 <li>KonMari for the cluttered mind</li>
                 <li>Rule of three</li>
                 <li>Bolded summary phrases (BSP)</li>
               </ul>
               <p class="phase-label">Exercises</p>
-              <p class="exercise-copy">Seven hands-on exercises. You sort a messy update, build structure against a clock and explain a complicated idea to someone with little time.</p>
+              <p class="exercise-copy">Six hands-on exercises. You sort a messy update, build structure against a clock and explain a complicated idea to someone with little time.</p>
               <div class="ai-callout">
                 <p class="ai-label">AI integration</p>
                 <p>In this phase you will use AI as a thinking partner. You will stress-test your logic, identify gaps in your reasoning, and compress your ideas before you communicate them.</p>
@@ -753,7 +783,7 @@
             <div class="phase-left">
               <span class="phase-number">02</span>
               <h3 class="phase-name">Speak concisely</h3>
-              <p class="phase-time">About 2 hr 5 min total<span>35 min video + 1 hr 30 min exercises</span></p>
+              <p class="phase-time">About 1 hr 55 min total<span>35 min video + 1 hr 20 min exercises</span></p>
             </div>
             <div class="phase-right">
               <p class="phase-description">Clarity in your head means nothing if you cannot land it with others. Phase 2 teaches you how to structure, sequence and deliver your thinking so it moves people.</p>
@@ -765,7 +795,7 @@
                 <li>The art of persuasion</li>
               </ul>
               <p class="phase-label">Exercises</p>
-              <p class="exercise-copy">Seven exercises. You apply the Pyramid Principle, build a persuasive narrative from a blank page and deliver it when a vague answer will not work.</p>
+              <p class="exercise-copy">Six exercises. You apply the Pyramid Principle, build a persuasive narrative from a blank page and deliver it when a vague answer will not work.</p>
               <div class="ai-callout">
                 <p class="ai-label">AI integration</p>
                 <p>In this phase you will use AI to sharpen and compress your writing, then test the wording before you send it.</p>
@@ -777,7 +807,7 @@
             <div class="phase-left">
               <span class="phase-number">03</span>
               <h3 class="phase-name">Act confidently</h3>
-              <p class="phase-time">About 2 hr 35 min total<span>1 hr 15 min video + 1 hr 20 min exercises</span></p>
+              <p class="phase-time">About 2 hr 20 min total<span>1 hr video + 1 hr 20 min exercises</span></p>
             </div>
             <div class="phase-right">
               <p class="phase-description">Executive presence is a set of behaviors you can learn. Phase 3 teaches you how to read a room, hold your ground and keep your voice steady.</p>
@@ -790,7 +820,7 @@
                 <li>The art of saying no</li>
               </ul>
               <p class="phase-label">Exercises</p>
-              <p class="exercise-copy">Five exercises. You argue the other side of a conflict, practice body language and silence, then deliver difficult news clearly.</p>
+              <p class="exercise-copy">Four exercises. You argue the other side of a conflict, practice body language and silence, then deliver difficult news clearly.</p>
               <div class="ai-callout">
                 <p class="ai-label">AI integration</p>
                 <p>In this phase you will use AI to rehearse difficult conversations and practice how to read the room, respond and adjust before doing it live.</p>
@@ -799,7 +829,7 @@
           </article>
         </div>
 
-        <p class="program-total-time">Total program time: about 7 hours, including 2.5 hours of videos and 4.5 hours of exercises.</p>
+        <p class="program-total-time">Total program time: about 7 hours, including roughly 2.5 hours of video and 4.5 hours of exercises. Actual time varies by person, typically landing between 6 and 9 hours.</p>
       </div>
     </section>
 
@@ -817,16 +847,59 @@
           </article>
           <article class="expect-stat">
             <strong>7h</strong>
-            <span>Total program time</span>
+            <span>Typically 6 to 9 hours total</span>
           </article>
           <article class="expect-stat">
             <strong>Personal</strong>
             <span>Feedback on your work</span>
           </article>
         </div>
-        <p class="expect-copy">Enrollment is by application. We curate each cohort to ensure the learning experience is maximized for everyone in it. The one requirement is a genuine motivation to grow.</p>
+        <p class="expect-copy">Enrollment is by application. We curate each cohort to ensure the learning experience is maximized for everyone in it. Finish the program and you receive a certificate of completion, along with a short report on your growth across all three phases. The one requirement to start is a genuine motivation to grow.</p>
         <div class="expect-button-wrap">
           <button class="program-cta-button" type="button" onclick="openLeadModal()">Get in touch</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="how-to-join" class="program-section cream" aria-labelledby="join-title">
+      <div class="program-container">
+        <div class="program-section-label">For organizations</div>
+        <h2 id="join-title" class="program-heading">Two ways to bring this to your team.</h2>
+        <p class="program-body">Students and individual professionals join the self-paced program directly. Organizations have a choice in how their team experiences it.</p>
+        <div class="audience-grid two-col">
+          <article class="audience-card program-reveal">
+            <h3>Cohort-based learning</h3>
+            <p>Best for a facilitated pilot group. Your team moves through the program together over three weeks, with a dedicated group chat, regular engagement throughout, and one live check-in per phase to connect the lessons to real work.</p>
+          </article>
+          <article class="audience-card program-reveal">
+            <h3>Self-led program</h3>
+            <p>Best for scaling across the organization once a pilot has proven it out. Each person moves through the same videos, exercises and feedback at their own pace, with no facilitation required.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="faq" class="program-section deep-cream" aria-labelledby="faq-title">
+      <div class="program-container narrow">
+        <div class="program-section-label">Questions</div>
+        <h2 id="faq-title" class="program-heading">A few things people ask before joining.</h2>
+        <div class="faq-list">
+          <div class="faq-item">
+            <h3>Who designed this program?</h3>
+            <p>Wen-Szu Lin, our founder, spent 12 years as a Senior Director at Uber leading teams across Asia, and built this program from the material in his book, Deliver. Read more about his story on the <a href="/about.html">About page</a>.</p>
+          </div>
+          <div class="faq-item">
+            <h3>Does this program teach AI?</h3>
+            <p>Yes. AI is treated as a tool to sharpen thinking, not a shortcut around it. In select exercises you work through the problem on your own first, then use AI to compare approaches, pressure test your thinking, or go further. A few exercises are built specifically around learning to use AI well.</p>
+          </div>
+          <div class="faq-item">
+            <h3>Is there a certificate or credential at the end?</h3>
+            <p>Yes. Once you complete the program, you receive a certificate of completion along with a short report on your growth across Think clearly, Speak concisely, and Act confidently.</p>
+          </div>
+          <div class="faq-item">
+            <h3>What if someone misses a live cohort session?</h3>
+            <p>Live sessions are recorded and shared with the cohort, so missing one does not mean missing the content. You are still encouraged to bring questions to the group chat so you stay connected to the discussion.</p>
+          </div>
         </div>
       </div>
     </section>
