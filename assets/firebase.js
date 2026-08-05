@@ -624,7 +624,9 @@ async function getAllMemberWorkspaceProgress() {
       firstLoginAt: data.firstLoginAt || null,
       lastLoginAt: data.lastLoginAt || null,
       lastSeenAt: null,
-      workspaceProgress: null
+      workspaceProgress: null,
+      cohort: data.cohort || "",
+      addedAt: data.addedAt || null
     });
   });
 
@@ -646,7 +648,8 @@ async function getAllMemberWorkspaceProgress() {
         rewards: data.rewards || (data.workspaceProgress && data.workspaceProgress.rewards) || existing.rewards || null,
         role: existing.role || data.role || "member",
         status: existing.status || "active",
-        cohort: existing.cohort || ""
+        cohort: existing.cohort || "",
+        addedAt: existing.addedAt || null
       });
     });
   }
