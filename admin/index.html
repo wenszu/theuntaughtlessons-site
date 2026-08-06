@@ -2954,20 +2954,6 @@
               <label for="mbNewNotes">Notes</label>
               <input type="text" id="mbNewNotes" placeholder="Optional">
             </div>
-            <details style="grid-column:1/-1;padding:10px 12px;border:1px solid var(--line);border-radius:6px;background:#f7f8fa;">
-              <summary style="cursor:pointer;color:var(--navy);font-weight:700;font-size:12px;">Optional legacy local login</summary>
-              <p style="margin:8px 0;color:#777;font-size:12px;">Use only for someone who cannot use Google or a Firebase email link. These credentials do not provide production admin authorization.</p>
-              <div class="mb-form-grid">
-                <div class="mb-form-field">
-                  <label for="mbNewLocalUsername">Username</label>
-                  <input type="text" id="mbNewLocalUsername" placeholder="e.g. jsmith" autocomplete="off">
-                </div>
-                <div class="mb-form-field">
-                  <label for="mbNewLocalPassword">Password</label>
-                  <input type="password" id="mbNewLocalPassword" placeholder="Leave blank if Google only" autocomplete="new-password">
-                </div>
-              </div>
-            </details>
           </div>
           <div class="mb-link-checkbox-row">
             <label>
@@ -3349,7 +3335,7 @@
     </main>
   </div>
 
-  <script src="../member-login/content-config.js?v=20260730-journey-progress-1"></script>
+  <script src="../member-login/content-config.js?v=20260806-remove-local-login"></script>
   <script src="../assets/reward-ui.js?v=20260803-written-reflection-1"></script>
 
   <script type="module">
@@ -3392,7 +3378,7 @@
       signOut,
       signInWithGooglePopup,
       Timestamp
-    } from "../assets/firebase.js?v=20260806-sso-providers";
+    } from "../assets/firebase.js?v=20260806-remove-local-login";
     import { serverTimestamp, setDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
     window.utlFirebaseAuth = {
@@ -8403,10 +8389,6 @@
             '<option value="true"' + (data.feedbackEnabled === true ? ' selected' : '') + '>Enabled</option>' +
             '<option value="false"' + (data.feedbackEnabled === false ? ' selected' : '') + '>Disabled</option>' +
           '</select></div>' +
-        '<div class="mb-edit-field"><label>Local username <span style="font-weight:400;color:#888;">(non-Google login)</span></label>' +
-          '<input type="text" data-mb-ef="localUsername" value="' + escapeHtml(data.localUsername || '') + '" placeholder="e.g. jsmith" autocomplete="off"></div>' +
-        '<div class="mb-edit-field"><label>Local password <span style="font-weight:400;color:#888;">(non-Google login)</span></label>' +
-          '<input type="password" data-mb-ef="localPassword" value="' + escapeHtml(data.localPassword || '') + '" placeholder="Leave blank to keep unchanged" autocomplete="new-password"></div>' +
       '</div>' +
       '<div class="mb-edit-actions">' +
         '<button class="small-button" type="button" data-mb-save="' + escapeHtml(email) + '">Save changes</button>' +
@@ -8473,9 +8455,6 @@
                   fields.feedbackEnabled = f.value === 'true';
                   feedbackEnabledValue = f.value === 'true';
                 }
-              } else if (key === 'localPassword') {
-                if (f.value.trim()) fields.localPassword = f.value.trim();
-                // blank = don't overwrite existing password
               } else {
                 fields[key] = f.value.trim();
               }
@@ -8657,8 +8636,6 @@
         var roleVal = (document.getElementById('mbNewRole') || {}).value || 'member';
         var cohortVal = (document.getElementById('mbNewCohort') || {}).value.trim();
         var notesVal = (document.getElementById('mbNewNotes') || {}).value.trim();
-        var localUsernameVal = (document.getElementById('mbNewLocalUsername') || {}).value.trim();
-        var localPasswordVal = (document.getElementById('mbNewLocalPassword') || {}).value.trim();
 
         if (!nameVal) { showToast('Name is required', 'error'); return; }
         if (!emailVal) { showToast('Email is required', 'error'); return; }
@@ -8684,8 +8661,6 @@
           expiryDate: expiryDate,
           status: 'active'
         };
-        if (localUsernameVal) newMemberData.localUsername = localUsernameVal;
-        if (localPasswordVal) newMemberData.localPassword = localPasswordVal;
 
         var sendLinkChecked = !!(document.getElementById('mbNewSendLink') || {}).checked;
         saveBtn.disabled = true;
@@ -8760,8 +8735,6 @@
           document.getElementById('mbNewRole').value = 'user';
           document.getElementById('mbNewCohort').value = '';
           document.getElementById('mbNewNotes').value = '';
-          document.getElementById('mbNewLocalUsername').value = '';
-          document.getElementById('mbNewLocalPassword').value = '';
           var sendLinkEl = document.getElementById('mbNewSendLink');
           if (sendLinkEl) sendLinkEl.checked = false;
           form.hidden = true;
@@ -8781,7 +8754,7 @@
       var pad = function (n) { return String(n).padStart(2, '0'); };
       var dateStr = String(now.getFullYear()) + pad(now.getMonth() + 1) + pad(now.getDate());
       var filename = dateStr + ' - utl-members download.csv';
-      var header = ['Name', 'Email', 'Role', 'Status', 'Cohort', 'First Login', 'Expiry', 'Google Group', 'Google Group Sync', 'Notes', 'Added By', 'Added At', 'Local Username'];
+      var header = ['Name', 'Email', 'Role', 'Status', 'Cohort', 'First Login', 'Expiry', 'Google Group', 'Google Group Sync', 'Notes', 'Added By', 'Added At'];
       function csvCell(val) {
         var s = String(val === null || val === undefined ? '' : val).replace(/"/g, '""');
         return (s.search(/[,"\r\n]/) !== -1) ? '"' + s + '"' : s;
@@ -8805,8 +8778,7 @@
           csvCell(data.googleGroupSyncStatus || ''),
           csvCell(data.notes || ''),
           csvCell(data.addedBy || ''),
-          csvCell(mbFormatDate(data.addedAt)),
-          csvCell(data.localUsername || '')
+          csvCell(mbFormatDate(data.addedAt))
         ].join(','));
       });
       var blob = new Blob([lines.join('\r\n')], { type: 'text/csv;charset=utf-8;' });

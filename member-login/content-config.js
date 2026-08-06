@@ -324,8 +324,6 @@ const UTL_CONTENT = {
   var ADMIN_KEY = "utl_admin_auth";
   var ADMIN_PASSWORD_KEY = "utl_admin_password";
   var DEFAULT_ADMIN_PASSWORD = "utl2026_admin";
-  var LOCAL_PW_ADMIN = "utl_local_pw_admin";
-  var LOCAL_PW_TESTUSER = "utl_local_pw_testuser";
   var phases = ["phase1", "phase2", "phase3"];
   var phaseNumbers = { phase1: 1, phase2: 2, phase3: 3 };
   var phaseLabels = { phase1: "Phase 1", phase2: "Phase 2", phase3: "Phase 3" };
@@ -563,7 +561,7 @@ const UTL_CONTENT = {
   }
 
   function firebaseHref() {
-    var version = "?v=20260806-sso-providers";
+    var version = "?v=20260806-remove-local-login";
     if (inPhasePracticeRoot()) return "../../../assets/firebase.js" + version;
     return (inAdminRoot() ? "../assets/firebase.js" : "../assets/firebase.js") + version;
   }
@@ -1781,80 +1779,6 @@ const UTL_CONTENT = {
     return true;
   }
 
-  function handleLogin(form, message) {
-    var username = qs("#wsUsername", form).value.trim();
-    var password = qs("#wsPassword", form).value;
-
-    // Check built-in local accounts (passwords configurable from admin panel)
-    var adminPw = localStorage.getItem(LOCAL_PW_ADMIN) || atob("cGFzc3dvcmQxMjM=");
-    var testPw = localStorage.getItem(LOCAL_PW_TESTUSER) || atob("bWVtYmVyMjAyNg==");
-    var adminUser = atob("YWRtaW4=");
-    var testUser = atob("dGVzdHVzZXI=");
-    if ((username === adminUser && password === adminPw) || (username === testUser && password === testPw)) {
-      writeBool(SESSION_KEY, true);
-      localStorage.setItem(USER_KEY, username);
-      localStorage.setItem(PROFILE_KEY, JSON.stringify({ email: username, displayName: username, role: username === "admin" ? "admin" : "member" }));
-      if (username === "admin") localStorage.setItem(ADMIN_KEY, "true");
-      else localStorage.removeItem(ADMIN_KEY);
-      window.location.href = "index.html";
-      return;
-    }
-
-    // Check Firestore for members with a localUsername set
-    message.textContent = "Checking credentials…";
-    import(firebaseHref()).then(function (fb) {
-      return fb.getDocs(fb.query(
-        fb.collection(fb.db, "authorized_members"),
-        fb.where("localUsername", "==", username)
-      ));
-    }).then(function (snap) {
-      if (snap.empty) {
-        message.textContent = "That username or password did not match.";
-        return;
-      }
-      var memberDoc = snap.docs[0];
-      var data = memberDoc.data() || {};
-      if (!data.localPassword || data.localPassword !== password) {
-        message.textContent = "That username or password did not match.";
-        return;
-      }
-      var role = data.role || "member";
-      writeBool(SESSION_KEY, true);
-      localStorage.setItem(USER_KEY, username);
-      localStorage.setItem(PROFILE_KEY, JSON.stringify({
-        email: data.email || username,
-        displayName: data.name || username,
-        role: role
-      }));
-      if (role === "admin" || role === "owner") localStorage.setItem(ADMIN_KEY, "true");
-      else localStorage.removeItem(ADMIN_KEY);
-      window.location.href = "index.html";
-    }).catch(function () {
-      message.textContent = "That username or password did not match.";
-    });
-  }
-
-  async function handlePasswordReset(message) {
-    if (!message) return;
-    var email = (qs("#wsUsername") && qs("#wsUsername").value || "").trim().toLowerCase();
-    message.classList.remove("ws-success");
-    if (!email || email.indexOf("@") === -1) {
-      message.textContent = "Enter your email address above, then tap Forgot password again.";
-      return;
-    }
-    message.textContent = "Sending password reset email...";
-    try {
-      var fb = _preloadedFirebase || await import(firebaseHref());
-      _preloadedFirebase = fb;
-      await fb.sendMemberPasswordReset(email);
-      message.classList.add("ws-success");
-      message.textContent = "Password reset email sent. Check your inbox.";
-    } catch (error) {
-      console.error("Password reset failed.", error);
-      message.textContent = "Could not send a reset email. Check the address or use the email-link sign-in option.";
-    }
-  }
-
   var _preloadedFirebase = null;
 
   async function finishGoogleUser(firebaseAuth, user, message) {
@@ -2193,11 +2117,7 @@ const UTL_CONTENT = {
     injectStyles();
     document.body.classList.add("ws-page");
     if (!isMemberUnlocked()) {
-      document.body.innerHTML = '<section class="ws-login-wrap"><article class="ws-login-card"><span class="ws-kicker">Member login</span><h1 class="ws-title">Welcome back.</h1><p class="ws-subtitle">Sign in to open your Untaught Lessons workspace.</p><button class="ws-button ws-google-button" id="wsGoogleLogin" type="button"><span class="ws-google-mark" aria-hidden="true"></span><span>Sign in with Google</span></button><button class="ws-button ws-microsoft-button" id="wsMicrosoftLogin" type="button"><span class="ws-microsoft-mark" aria-hidden="true"></span><span>Sign in with Microsoft</span></button><button class="ws-button ws-facebook-button" id="wsFacebookLogin" type="button"><span class="ws-facebook-mark" aria-hidden="true"></span><span>Sign in with Facebook</span></button><p class="ws-message" id="wsLoginMessage" aria-live="polite"></p><div class="ws-login-divider">or</div><div id="wsEmailSignInSection"><button class="ws-button ws-button-secondary" id="wsShowEmailSignIn" type="button" style="width:100%">Sign in with email link</button></div><button type="button" id="wsTogglePasswordLogin" style="width:max-content;margin-top:18px;background:none;border:0;color:var(--ws-steel);font-weight:700;text-decoration:underline;text-underline-offset:3px;cursor:pointer;padding:0">Have a username and password instead?</button><div id="wsPasswordLoginSection" hidden><form class="ws-form" id="wsLoginForm" style="margin-top:14px"><label for="wsUsername">Username or email</label><input class="ws-input" id="wsUsername" autocomplete="username" required><label for="wsPassword">Password</label><input class="ws-input" id="wsPassword" type="password" autocomplete="current-password" required><button class="ws-button" type="submit">Sign in</button><button type="button" id="wsForgotPassword" style="width:max-content;background:none;border:0;color:var(--ws-steel);font-weight:700;text-decoration:underline;text-underline-offset:3px;cursor:pointer;padding:0">Forgot password?</button></form></div></article></section>';
-      qs("#wsLoginForm").addEventListener("submit", function (event) {
-        event.preventDefault();
-        handleLogin(event.currentTarget, qs("#wsLoginMessage"));
-      });
+      document.body.innerHTML = '<section class="ws-login-wrap"><article class="ws-login-card"><span class="ws-kicker">Member login</span><h1 class="ws-title">Welcome back.</h1><p class="ws-subtitle">Sign in to open your Untaught Lessons workspace.</p><button class="ws-button ws-google-button" id="wsGoogleLogin" type="button"><span class="ws-google-mark" aria-hidden="true"></span><span>Sign in with Google</span></button><button class="ws-button ws-microsoft-button" id="wsMicrosoftLogin" type="button"><span class="ws-microsoft-mark" aria-hidden="true"></span><span>Sign in with Microsoft</span></button><button class="ws-button ws-facebook-button" id="wsFacebookLogin" type="button"><span class="ws-facebook-mark" aria-hidden="true"></span><span>Sign in with Facebook</span></button><p class="ws-message" id="wsLoginMessage" aria-live="polite"></p><div class="ws-login-divider">or</div><div id="wsEmailSignInSection"><button class="ws-button ws-button-secondary" id="wsShowEmailSignIn" type="button" style="width:100%">Sign in with email link</button></div></article></section>';
       qs("#wsGoogleLogin").addEventListener("click", function (event) {
         event.preventDefault();
         handleGoogleLogin(event.currentTarget, qs("#wsLoginMessage"));
@@ -2209,16 +2129,6 @@ const UTL_CONTENT = {
       qs("#wsFacebookLogin").addEventListener("click", function (event) {
         event.preventDefault();
         handleFacebookLogin(event.currentTarget, qs("#wsLoginMessage"));
-      });
-      qs("#wsForgotPassword").addEventListener("click", function () {
-        handlePasswordReset(qs("#wsLoginMessage"));
-      });
-      qs("#wsTogglePasswordLogin").addEventListener("click", function (event) {
-        var section = qs("#wsPasswordLoginSection");
-        if (!section) return;
-        section.hidden = !section.hidden;
-        event.currentTarget.textContent = section.hidden ? "Have a username and password instead?" : "Hide username and password sign-in";
-        if (!section.hidden) qs("#wsUsername").focus();
       });
       qs("#wsShowEmailSignIn").addEventListener("click", function () {
         var section = qs("#wsEmailSignInSection");
