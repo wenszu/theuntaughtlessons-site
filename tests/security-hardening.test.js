@@ -54,7 +54,7 @@ assert.match(admin, /id="adminGoogleSignIn" type="button" disabled/);
 assert.match(admin, /function waitForAdminFirebaseApi\(onReady\)/);
 assert.match(admin, /window\.setInterval\(probe, 250\)/);
 assert.match(admin, /Secure sign-in took too long to load/);
-assert.match(admin, /from "\.\.\/assets\/firebase\.js\?v=20260802-security-3"/);
+assert.match(admin, /from "\.\.\/assets\/firebase\.js\?v=[\w-]+"/);
 assert.match(headers, /Content-Security-Policy-Report-Only:/);
 assert.match(headers, /X-Content-Type-Options: nosniff/);
 

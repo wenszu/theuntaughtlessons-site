@@ -3,10 +3,13 @@ import {
   browserLocalPersistence,
   connectAuthEmulator,
   createUserWithEmailAndPassword,
+  FacebookAuthProvider,
+  fetchSignInMethodsForEmail,
   getAuth,
   getRedirectResult,
   GoogleAuthProvider,
   isSignInWithEmailLink,
+  OAuthProvider,
   onAuthStateChanged,
   sendPasswordResetEmail,
   sendSignInLinkToEmail,
@@ -102,6 +105,17 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 provider.setCustomParameters({ prompt: "select_account" });
+
+// tenant: "common" allows both personal Microsoft accounts and work/school
+// (Microsoft 365 / Entra ID) accounts to sign in through the same provider.
+const microsoftProvider = new OAuthProvider("microsoft.com");
+microsoftProvider.setCustomParameters({ prompt: "select_account", tenant: "common" });
+
+// Facebook does not return an email address unless the "email" scope is
+// explicitly requested — without this, member matching by email would fail.
+const facebookProvider = new FacebookAuthProvider();
+facebookProvider.addScope("email");
+
 const db = getFirestore(app);
 const functions = getFunctions(app, "us-central1");
 
@@ -151,6 +165,66 @@ async function getGoogleRedirectResult() {
   return getRedirectResult(requireFirebaseAuth());
 }
 
+function signInWithMicrosoftPopup() {
+  // See signInWithGooglePopup — skipping the await keeps window.open() close
+  // to synchronous, required for iOS Safari's user-gesture popup policy.
+  return signInWithPopup(requireFirebaseAuth(), microsoftProvider);
+}
+
+async function signInWithMicrosoftRedirect() {
+  await authPersistenceReady;
+  return signInWithRedirect(requireFirebaseAuth(), microsoftProvider);
+}
+
+async function getMicrosoftRedirectResult() {
+  await authPersistenceReady;
+  return getRedirectResult(requireFirebaseAuth());
+}
+
+function signInWithFacebookPopup() {
+  return signInWithPopup(requireFirebaseAuth(), facebookProvider);
+}
+
+async function signInWithFacebookRedirect() {
+  await authPersistenceReady;
+  return signInWithRedirect(requireFirebaseAuth(), facebookProvider);
+}
+
+async function getFacebookRedirectResult() {
+  await authPersistenceReady;
+  return getRedirectResult(requireFirebaseAuth());
+}
+
+const ACCOUNT_EXISTS_PROVIDER_LABELS = {
+  "google.com": "Google",
+  "microsoft.com": "Microsoft",
+  "facebook.com": "Facebook",
+  password: "your username and password",
+  emailLink: "your emailed sign-in link"
+};
+
+// Firebase treats sign-ins from different providers with the same email as
+// separate accounts by default. Rather than silently merging or auto-linking
+// them (which could create confusion about which login method owns which
+// progress data), this looks up which method the existing account actually
+// uses and returns a clear message telling the member to sign in that way.
+async function describeAccountExistsError(error) {
+  const email = error && error.customData && error.customData.email;
+  if (!email) {
+    return "An account with this email already exists using a different sign-in method. Please use your original sign-in method to continue.";
+  }
+  try {
+    const methods = await fetchSignInMethodsForEmail(requireFirebaseAuth(), email);
+    const label = methods && methods.length
+      ? (ACCOUNT_EXISTS_PROVIDER_LABELS[methods[0]] || methods[0])
+      : "a different sign-in method";
+    return "An account with " + email + " already exists using " + label + ". Please sign in that way instead. If you'd like to also use this new sign-in method going forward, contact Wen-Szu to link your accounts.";
+  } catch (lookupError) {
+    console.error("Could not determine the existing sign-in method.", lookupError);
+    return "An account with " + email + " already exists using a different sign-in method. Please use your original sign-in method to continue.";
+  }
+}
+
 async function getSignedInUser() {
   const readyAuth = requireFirebaseAuth();
   await authPersistenceReady;
@@ -184,7 +258,7 @@ async function requireAuthorizedMember(user) {
       };
     }
     await signOut(requireFirebaseAuth());
-    throw new Error("This Google account does not have an active membership invite.");
+    throw new Error("This account does not have an active membership invite.");
   }
   return member;
 }
@@ -971,13 +1045,16 @@ export {
   createUserWithEmailAndPassword,
   db,
   deleteDoc,
+  describeAccountExistsError,
   doc,
   firebaseConfig,
   firebaseInitError,
   getAuthorizedMember,
   getDoc,
   getDocs,
+  getFacebookRedirectResult,
   getGoogleRedirectResult,
+  getMicrosoftRedirectResult,
   getEmailTemplates,
   saveEmailTemplate,
   getMemberExerciseResponses,
@@ -1021,8 +1098,12 @@ export {
   setUserFeedbackEnabled,
   signInWithEmailAndPassword,
   signInWithEmailLink,
+  signInWithFacebookPopup,
+  signInWithFacebookRedirect,
   signInWithGooglePopup,
   signInWithGoogleRedirect,
+  signInWithMicrosoftPopup,
+  signInWithMicrosoftRedirect,
   signInWithPopup,
   signOut,
   query,
