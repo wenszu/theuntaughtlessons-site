@@ -831,6 +831,33 @@
       .lb-controls #lbCopy { margin-left: 0; width: 100%; }
     }
 
+    .ca-flag-small {
+      display: inline-block;
+      margin-left: 6px;
+      padding: 1px 7px;
+      border-radius: 999px;
+      background: #FCEEDB;
+      color: #A15C00;
+      font-family: Lato, Arial, sans-serif;
+      font-size: 9px;
+      font-weight: 700;
+    }
+
+    .ca-cohort-row { cursor: pointer; }
+    .ca-cohort-row:hover { background: var(--cream); }
+
+    .ca-funnel-row {
+      display: grid;
+      grid-template-columns: 140px 1fr 70px;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--line);
+    }
+    .ca-funnel-row:last-child { border-bottom: 0; }
+    .ca-funnel-label { font-family: Lato, Arial, sans-serif; font-size: 12px; font-weight: 700; color: var(--navy); }
+    .ca-funnel-count { text-align: right; font-family: Lato, Arial, sans-serif; font-size: 12px; color: var(--charcoal); }
+
     .sp-sort-btn {
       background: none;
       border: none;
@@ -2258,6 +2285,7 @@
       <span class="nav-group-label" data-admin-nav-group="student-progress">Progress</span>
       <button class="admin-nav-item" data-admin-tab-scope="student-progress" data-target="section-student-progress">Student Progress</button>
       <button class="admin-nav-item" data-admin-tab-scope="student-progress" data-target="section-leaderboard">Leaderboard</button>
+      <button class="admin-nav-item" data-admin-tab-scope="student-progress" data-target="section-cohort-analytics">Cohort Analytics</button>
 
       <span class="nav-group-label" data-admin-nav-group="rewards">Rewards</span>
       <button class="admin-nav-item" data-admin-tab-scope="rewards" data-target="section-reward-levels">Levels</button>
@@ -2683,6 +2711,25 @@
           <button class="small-button secondary-button" type="button" id="lbCopy">Copy for sharing</button>
         </div>
         <div id="lbBoard"><p class="mb-msg">Click Refresh leaderboard to load rankings.</p></div>
+      </section>
+
+      <section class="admin-section" id="section-cohort-analytics" data-admin-tab-panel="student-progress">
+        <span class="section-label">Progress</span>
+        <h2>Cohort Analytics</h2>
+        <div class="section-divider"></div>
+        <p class="description">Completion, pace, and exercise bottlenecks by cohort. Counts always show alongside percentages — cohorts under 5 members are flagged as a small sample. Cohort start is estimated from the earliest member added; treat it as approximate.</p>
+        <div class="student-progress-actions">
+          <button class="small-button" type="button" id="caRefresh">Refresh analytics</button>
+          <span class="student-progress-status" id="caStatus" aria-live="polite"></span>
+        </div>
+        <div id="caOverview"><p class="mb-msg">Click Refresh analytics to load cohort data.</p></div>
+        <div id="caDetail" hidden>
+          <div class="student-progress-actions">
+            <button class="small-button secondary-button" id="caDetailBack">← Back to all cohorts</button>
+            <button class="small-button secondary-button" id="caExportCsv">Export cohort CSV</button>
+          </div>
+          <div id="caDetailContent"></div>
+        </div>
       </section>
 
       <section class="admin-section" id="section-reward-levels" data-admin-tab-panel="rewards">
@@ -7423,6 +7470,224 @@
       }
     }
 
+    // Cohort Analytics
+    let caCurrentCohort = '';
+
+    function caCohortGroups() {
+      const groups = {};
+      spAllMembers.forEach((member) => {
+        const cohort = String(member.cohort || '').trim() || 'No cohort';
+        (groups[cohort] = groups[cohort] || []).push(member);
+      });
+      return groups;
+    }
+
+    function caPhaseFullyDone(member, phaseKey) {
+      const counted = spCompletedCount(member, phaseKey, 'exercises');
+      return counted.total > 0 && counted.done === counted.total;
+    }
+
+    function caPercentComplete(member) {
+      const total = lbTotalPossibleScore();
+      return total > 0 ? Math.round((spProgressScore(member) / total) * 100) : 0;
+    }
+
+    function caDaysSince(value) {
+      const ms = spToMs(value);
+      return ms ? Math.round((Date.now() - ms) / 86400000) : null;
+    }
+
+    function caCohortSummary(name, members) {
+      const completed = members.filter(spProgramComplete).length;
+      const mpValues = members.map((m) => Number(spRewardData(m).mpTotal || spRewardData(m).masteryPoints || 0));
+      const avgMp = mpValues.length ? Math.round(mpValues.reduce((a, b) => a + b, 0) / mpValues.length) : 0;
+      let earliestAddedAt = null;
+      members.forEach((m) => {
+        const ms = spToMs(m.addedAt);
+        if (ms && (!earliestAddedAt || ms < earliestAddedAt)) earliestAddedAt = ms;
+      });
+      return {
+        name,
+        members,
+        count: members.length,
+        completed,
+        completionPercent: members.length ? Math.round((completed / members.length) * 100) : 0,
+        avgMp,
+        daysSinceStart: earliestAddedAt ? Math.round((Date.now() - earliestAddedAt) / 86400000) : null,
+        small: members.length < 5
+      };
+    }
+
+    function caFunnelStages(members) {
+      const started = members.filter((m) => spProgressScore(m) > 0).length;
+      return [
+        { label: 'Members', count: members.length },
+        { label: 'Started', count: started },
+        { label: 'Phase 1 complete', count: members.filter((m) => caPhaseFullyDone(m, 'phase1')).length },
+        { label: 'Phase 2 complete', count: members.filter((m) => caPhaseFullyDone(m, 'phase2')).length },
+        { label: 'Phase 3 complete', count: members.filter((m) => caPhaseFullyDone(m, 'phase3')).length },
+        { label: 'Full program', count: members.filter(spProgramComplete).length }
+      ];
+    }
+
+    function caExerciseBottleneck(members) {
+      const rows = [];
+      ['phase1', 'phase2', 'phase3'].forEach((phaseKey) => {
+        const content = (window.UTL_CONTENT || {})[phaseKey] || {};
+        (content.exercises || []).forEach((exercise) => {
+          const doneCount = members.filter((m) => {
+            const exercises = (m.workspaceProgress || {}).exercises || {};
+            return exercises[exercise.id] && exercises[exercise.id].completed;
+          }).length;
+          rows.push({
+            title: exercise.title || exercise.id,
+            phaseLabel: content.label || phaseKey.replace('phase', 'Phase '),
+            doneCount,
+            percent: members.length ? Math.round((doneCount / members.length) * 100) : 0
+          });
+        });
+      });
+      rows.sort((a, b) => a.percent - b.percent);
+      return rows;
+    }
+
+    function caNeedsAttention(members) {
+      return members
+        .filter((m) => !spProgramComplete(m))
+        .map((m) => ({ member: m, percent: caPercentComplete(m), daysSinceAdded: caDaysSince(m.addedAt) }))
+        .filter((entry) => entry.daysSinceAdded === null || entry.daysSinceAdded >= 7)
+        .sort((a, b) => a.percent - b.percent)
+        .slice(0, 8);
+    }
+
+    function renderCohortOverview() {
+      const wrap = document.getElementById('caOverview');
+      if (!wrap) return;
+      if (!spAllMembers.length) {
+        wrap.innerHTML = '<p class="mb-msg">No remote student progress has been saved yet.</p>';
+        return;
+      }
+      const groups = caCohortGroups();
+      const names = Object.keys(groups).sort((a, b) => a.localeCompare(b));
+      if (!names.length) {
+        wrap.innerHTML = '<p class="mb-msg">No members found.</p>';
+        return;
+      }
+      const summaries = names.map((name) => caCohortSummary(name, groups[name]));
+      const rows = summaries.map((s) =>
+        '<tr class="ca-cohort-row" data-ca-cohort="' + escapeHtml(s.name) + '">' +
+          '<td>' + escapeHtml(s.name) + (s.small ? '<span class="ca-flag-small">Small sample</span>' : '') + '</td>' +
+          '<td>' + s.count + '</td>' +
+          '<td>' + s.completed + ' of ' + s.count + ' (' + s.completionPercent + '%)</td>' +
+          '<td>' + s.avgMp + ' MP</td>' +
+          '<td>' + (s.daysSinceStart === null ? '—' : s.daysSinceStart + ' days') + '</td>' +
+        '</tr>'
+      ).join('');
+      wrap.innerHTML = '<div class="student-progress-table-wrap"><table class="student-progress-table"><thead><tr><th>Cohort</th><th>Members</th><th>Completion</th><th>Avg MP</th><th>Since cohort start (est.)</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
+      wrap.querySelectorAll('[data-ca-cohort]').forEach((row) => {
+        row.addEventListener('click', () => renderCohortDetail(row.dataset.caCohort));
+      });
+    }
+
+    function renderCohortDetail(cohortName) {
+      const overview = document.getElementById('caOverview');
+      const controls = document.querySelector('#section-cohort-analytics .student-progress-actions');
+      const detail = document.getElementById('caDetail');
+      const content = document.getElementById('caDetailContent');
+      if (!detail || !content) return;
+      const groups = caCohortGroups();
+      const members = groups[cohortName] || [];
+      caCurrentCohort = cohortName;
+      const summary = caCohortSummary(cohortName, members);
+      const funnel = caFunnelStages(members);
+      const funnelMax = Math.max(1, funnel[0].count);
+      const funnelHtml = funnel.map((stage) =>
+        '<div class="ca-funnel-row"><span class="ca-funnel-label">' + escapeHtml(stage.label) + '</span>' +
+        '<div class="lb-bar-track"><div class="lb-bar-fill" style="width:' + Math.round((stage.count / funnelMax) * 100) + '%"></div></div>' +
+        '<span class="ca-funnel-count">' + stage.count + ' of ' + summary.count + '</span></div>'
+      ).join('');
+
+      const bottleneck = caExerciseBottleneck(members).slice(0, 8);
+      const bottleneckHtml = bottleneck.length
+        ? '<ul class="sp-activity-list">' + bottleneck.map((row) =>
+            '<li class="sp-activity-row"><span>' + escapeHtml(row.title) + '<small>' + escapeHtml(row.phaseLabel) + '</small></span><strong class="' + (row.percent < 50 ? 'sp-status-missing' : 'sp-status-done') + '">' + row.doneCount + ' of ' + summary.count + ' (' + row.percent + '%)</strong></li>'
+          ).join('') + '</ul>'
+        : '<p class="sp-status-missing">No exercises configured.</p>';
+
+      const attention = caNeedsAttention(members);
+      const attentionHtml = attention.length
+        ? '<ul class="sp-activity-list">' + attention.map((entry) =>
+            '<li class="sp-activity-row"><span><button class="sp-member-button" type="button" data-ca-member="' + escapeHtml(entry.member.email || entry.member.id || '') + '">' + escapeHtml(entry.member.displayName || entry.member.name || entry.member.email || 'Member') + '</button><small>' + (entry.daysSinceAdded === null ? 'Added date unknown' : entry.daysSinceAdded + ' days since added') + '</small></span><strong class="sp-status-missing">' + entry.percent + '% complete</strong></li>'
+          ).join('') + '</ul>'
+        : '<p class="sp-status-done">Nobody in this cohort is currently flagged as behind.</p>';
+
+      content.innerHTML =
+        '<div class="sp-detail-header"><div><h3>' + escapeHtml(cohortName) + (summary.small ? '<span class="ca-flag-small">Small sample</span>' : '') + '</h3><p>' + summary.count + ' member' + (summary.count === 1 ? '' : 's') + ' · Cohort start estimated from earliest member added</p></div></div>' +
+        '<div class="sp-detail-summary"><div class="sp-detail-stat"><span>Completion</span><strong>' + summary.completed + ' of ' + summary.count + '</strong></div><div class="sp-detail-stat"><span>Completion rate</span><strong>' + summary.completionPercent + '%</strong></div><div class="sp-detail-stat"><span>Average MP</span><strong>' + summary.avgMp + '</strong></div><div class="sp-detail-stat"><span>Since cohort start</span><strong>' + (summary.daysSinceStart === null ? '—' : summary.daysSinceStart + ' days') + '</strong></div></div>' +
+        '<div class="sp-detail-grid"><div class="sp-detail-card"><h4>Phase funnel</h4>' + funnelHtml + '</div><div class="sp-detail-card"><h4>Exercise bottlenecks (lowest completion first)</h4>' + bottleneckHtml + '</div><div class="sp-detail-card"><h4>Needs attention</h4>' + attentionHtml + '</div></div>';
+
+      content.querySelectorAll('[data-ca-member]').forEach((button) => {
+        button.addEventListener('click', () => {
+          const key = String(button.dataset.caMember || '').toLowerCase();
+          const member = spAllMembers.find((item) => String(item.email || item.id || '').toLowerCase() === key);
+          if (member) showStudentProgressDetail(member);
+        });
+      });
+
+      if (overview) overview.hidden = true;
+      if (controls) controls.hidden = true;
+      detail.hidden = false;
+    }
+
+    function hideCohortDetail() {
+      const overview = document.getElementById('caOverview');
+      const controls = document.querySelector('#section-cohort-analytics .student-progress-actions');
+      const detail = document.getElementById('caDetail');
+      if (overview) overview.hidden = false;
+      if (controls) controls.hidden = false;
+      if (detail) detail.hidden = true;
+      caCurrentCohort = '';
+    }
+
+    function caExportCsv() {
+      if (!caCurrentCohort) return;
+      const groups = caCohortGroups();
+      const members = groups[caCurrentCohort] || [];
+      if (!members.length) { showToast('No members to export.', 'error'); return; }
+      function csvCell(val) {
+        const s = String(val === null || val === undefined ? '' : val).replace(/"/g, '""');
+        return (s.search(/[,"\r\n]/) !== -1) ? '"' + s + '"' : s;
+      }
+      const header = ['Name', 'Email', '% Complete', 'MP', 'Level', 'Days since added', 'Program complete'];
+      const lines = [header.map(csvCell).join(',')];
+      members.forEach((m) => {
+        const rewards = spRewardData(m);
+        lines.push([
+          csvCell(m.displayName || m.name || ''),
+          csvCell(m.email || ''),
+          csvCell(caPercentComplete(m)),
+          csvCell(Number(rewards.mpTotal || rewards.masteryPoints || 0)),
+          csvCell(rewards.currentLevel || rewards.level || ''),
+          csvCell(caDaysSince(m.addedAt) === null ? '' : caDaysSince(m.addedAt)),
+          csvCell(spProgramComplete(m) ? 'Yes' : 'No')
+        ].join(','));
+      });
+      const blob = new Blob([lines.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const pad = (n) => String(n).padStart(2, '0');
+      const now = new Date();
+      a.href = url;
+      a.download = String(now.getFullYear()) + pad(now.getMonth() + 1) + pad(now.getDate()) + ' - ' + caCurrentCohort.replace(/[^a-z0-9-]+/gi, '_') + ' cohort.csv';
+      document.body.appendChild(a); a.click();
+      document.body.removeChild(a); URL.revokeObjectURL(url);
+    }
+
+    function renderCohortAnalytics() {
+      hideCohortDetail();
+      renderCohortOverview();
+    }
+
     function showStudentProgressDetail(member) {
       const table = document.getElementById('studentProgressTable');
       const controls = document.getElementById('spControls');
@@ -7538,8 +7803,8 @@
 
     async function loadStudentProgress() {
       const wrap = document.getElementById('studentProgressTable');
-      const refreshButtons = [document.getElementById('studentProgressRefresh'), document.getElementById('lbRefresh')].filter(Boolean);
-      const statusEls = [document.getElementById('studentProgressStatus'), document.getElementById('lbStatus')].filter(Boolean);
+      const refreshButtons = [document.getElementById('studentProgressRefresh'), document.getElementById('lbRefresh'), document.getElementById('caRefresh')].filter(Boolean);
+      const statusEls = [document.getElementById('studentProgressStatus'), document.getElementById('lbStatus'), document.getElementById('caStatus')].filter(Boolean);
       if (!wrap) return;
       const fb = window.utlFirebaseAuth;
       if (!fb || !fb.getAllMemberWorkspaceProgress) {
@@ -7582,6 +7847,7 @@
         if (controls) controls.hidden = false;
         spApplyView();
         renderLeaderboard();
+        renderCohortAnalytics();
         if (statusEls.length) {
           const partial = members.usersReadError ? ' · Progress details blocked by Firestore rules' : '';
           const repairNote = repairedBonuses ? ' · Repaired ' + repairedBonuses + ' missing program completion bonus' + (repairedBonuses === 1 ? '' : 'es') : '';
@@ -7605,7 +7871,7 @@
       } finally {
         refreshButtons.forEach((button) => {
           button.disabled = false;
-          button.textContent = button.id === 'lbRefresh' ? 'Refresh leaderboard' : 'Refresh progress';
+          button.textContent = button.id === 'lbRefresh' ? 'Refresh leaderboard' : button.id === 'caRefresh' ? 'Refresh analytics' : 'Refresh progress';
         });
       }
     }
@@ -7913,6 +8179,12 @@
     document.getElementById('lbCopy')?.addEventListener('click', lbCopyForSharing);
     document.querySelector('[data-target="section-leaderboard"]')?.addEventListener('click', () => {
       if (spAllMembers.length) renderLeaderboard();
+    });
+    document.getElementById('caRefresh')?.addEventListener('click', loadStudentProgress);
+    document.getElementById('caDetailBack')?.addEventListener('click', hideCohortDetail);
+    document.getElementById('caExportCsv')?.addEventListener('click', caExportCsv);
+    document.querySelector('[data-target="section-cohort-analytics"]')?.addEventListener('click', () => {
+      if (spAllMembers.length) renderCohortAnalytics();
     });
     document.getElementById('spPreviewLaunch')?.addEventListener('click', spLaunchExperiencePreview);
     document.getElementById('spPreviewEnd')?.addEventListener('click', spEndExperiencePreview);
