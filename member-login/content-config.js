@@ -561,7 +561,7 @@ const UTL_CONTENT = {
   }
 
   function firebaseHref() {
-    var version = "?v=20260806-remove-local-login";
+    var version = "?v=20260806-emergency-access";
     if (inPhasePracticeRoot()) return "../../../assets/firebase.js" + version;
     return (inAdminRoot() ? "../assets/firebase.js" : "../assets/firebase.js") + version;
   }
@@ -1992,6 +1992,45 @@ const UTL_CONTENT = {
     }
   }
 
+  // Break-glass access, not linked from the normal login card. Only renders
+  // when explicitly navigated to with ?emergency=1, for the rare case
+  // Google, Microsoft, Facebook, and the emailed sign-in link are all
+  // unavailable. The admin console's Emergency access tool sets the password.
+  function maybeRenderEmergencyLogin() {
+    if (new URLSearchParams(window.location.search || "").get("emergency") !== "1") return;
+    var card = qs(".ws-login-card");
+    if (!card || qs("#wsEmergencyLoginSection")) return;
+    var wrap = document.createElement("div");
+    wrap.id = "wsEmergencyLoginSection";
+    wrap.style.cssText = "margin-top:24px;padding-top:18px;border-top:1px solid var(--ws-line)";
+    wrap.innerHTML = '<p style="margin:0 0 10px;color:var(--ws-steel);font:700 11px Lato, Arial, sans-serif;letter-spacing:0;">Emergency access</p><form class="ws-form" id="wsEmergencyLoginForm" style="margin-top:0"><input class="ws-input" id="wsEmergencyEmail" type="email" autocomplete="username" placeholder="Email" required><input class="ws-input" id="wsEmergencyPassword" type="password" autocomplete="current-password" placeholder="Password" required><button class="ws-button" type="submit">Sign in</button><p class="ws-message" id="wsEmergencyMessage" aria-live="polite"></p></form>';
+    card.appendChild(wrap);
+    qs("#wsEmergencyLoginForm").addEventListener("submit", async function (event) {
+      event.preventDefault();
+      var emailInput = qs("#wsEmergencyEmail");
+      var passwordInput = qs("#wsEmergencyPassword");
+      var message = qs("#wsEmergencyMessage");
+      var submitBtn = event.currentTarget.querySelector("button[type=submit]");
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Signing in...";
+      message.textContent = "";
+      message.classList.remove("ws-success");
+      try {
+        var fb = _preloadedFirebase || await import(firebaseHref());
+        _preloadedFirebase = fb;
+        var credential = await fb.signInWithEmailPassword(emailInput.value, passwordInput.value);
+        await finishGoogleUser(fb, credential.user, message);
+      } catch (error) {
+        console.error("Emergency login failed.", error);
+        message.textContent = (error && (error.code === "auth/invalid-credential" || error.code === "auth/wrong-password" || error.code === "auth/user-not-found"))
+          ? "That email or password did not match."
+          : (error && error.message ? error.message : "Sign-in did not work.");
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Sign in";
+      }
+    });
+  }
+
   async function handleGoogleLogin(button, message) {
     if (!button || !message) return;
     var originalText = button.textContent;
@@ -2175,6 +2214,7 @@ const UTL_CONTENT = {
       handleMicrosoftRedirectResult(qs("#wsLoginMessage"));
       handleFacebookRedirectResult(qs("#wsLoginMessage"));
       handleEmailLinkSignIn();
+      maybeRenderEmergencyLogin();
       return;
     }
     if (needsNameEntry()) {

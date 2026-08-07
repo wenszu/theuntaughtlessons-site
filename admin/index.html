@@ -2266,6 +2266,7 @@
 
       <span class="nav-group-label" data-admin-nav-group="member-management">Access</span>
       <button class="admin-nav-item" data-admin-tab-scope="member-management" data-target="section-members">Members</button>
+      <button class="admin-nav-item" data-admin-tab-scope="member-management" data-target="section-emergency-access">Emergency access</button>
 
       <span class="nav-group-label" data-admin-nav-group="engagement">Communications</span>
       <button class="admin-nav-item" data-admin-tab-scope="engagement" data-target="section-inapp-nudges">In-app nudges</button>
@@ -2887,16 +2888,7 @@
                 </ol>
               </div>
               <div class="mb-guide-method">
-                <p class="mb-guide-method-label">Method B — Username &amp; password (non-Google accounts)</p>
-                <ol>
-                  <li><strong>Admin:</strong> Click <strong>+ Add member</strong>, enter name, email, username, and password, click Save</li>
-                  <li><strong>Member receives:</strong> Welcome email from your Gmail</li>
-                  <li><strong>Admin:</strong> Share the username and password with the member separately (not in the welcome email)</li>
-                  <li><strong>Member:</strong> Goes to the workspace, selects "Sign in with a username", enters credentials — done</li>
-                </ol>
-              </div>
-              <div class="mb-guide-method">
-                <p class="mb-guide-method-label">Method C — Passwordless magic link (for members who cannot use Google)</p>
+                <p class="mb-guide-method-label">Method B — Passwordless magic link (for members who cannot use Google)</p>
                 <ol>
                   <li><strong>Admin:</strong> Click <strong>+ Add member</strong>, enter name and email, check <em>"Also send login link"</em>, click Save</li>
                   <li><strong>Member receives two emails:</strong>
@@ -2907,6 +2899,14 @@
                   </li>
                   <li><strong>Member:</strong> Clicks the Firebase link — lands directly in the workspace</li>
                   <li><em>The Firebase link expires after 24 hours. If it expires, use "Send login link" in the table row.</em></li>
+                </ol>
+              </div>
+              <div class="mb-guide-method">
+                <p class="mb-guide-method-label">Method C — Emergency access (admin/owner only, not for regular members)</p>
+                <ol>
+                  <li>There is no username/password option for regular members — the sign-in page only ever offers Google, Microsoft, Facebook, and the magic link above.</li>
+                  <li>A real password can be set for a break-glass account from the <strong>Emergency access</strong> tab, for the rare case all other sign-in methods are down. The email must already be an active admin or owner here in Members.</li>
+                  <li>Sign in with it at <code>/member-login/?emergency=1</code> — this URL is not linked from anywhere on the site.</li>
                 </ol>
               </div>
               <div class="mb-guide-method" style="">
@@ -2958,7 +2958,7 @@
           <div class="mb-link-checkbox-row">
             <label>
               <input type="checkbox" id="mbNewSendLink">
-              <span>Also send a one-click login link <span style="color:#888;font-size:11px;">(Method C — member also receives a Firebase magic link email)</span></span>
+              <span>Also send a one-click login link <span style="color:#888;font-size:11px;">(Method B — member also receives a Firebase magic link email)</span></span>
             </label>
           </div>
           <div class="mb-form-actions" style="margin-top:12px;">
@@ -2994,6 +2994,27 @@
         </div>
       </section>
 
+      <section class="admin-section" id="section-emergency-access" data-admin-tab-panel="member-management">
+        <span class="section-label">Access</span>
+        <h2>Emergency access</h2>
+        <div class="section-divider"></div>
+        <p class="description">Set or reset a real password for a break-glass account, for the rare case Google, Microsoft, Facebook, and the emailed sign-in link are all unavailable. This is not offered to regular members — there is no password option on the normal sign-in page. The email must already exist as an active admin or owner under Members. To sign in with it, go to <code>/member-login/?emergency=1</code>.</p>
+        <div class="mb-form-grid" style="max-width:420px;">
+          <div class="mb-form-field">
+            <label for="eaEmail">Admin or owner email</label>
+            <input type="email" id="eaEmail" placeholder="you@example.com" autocomplete="off">
+          </div>
+          <div class="mb-form-field">
+            <label for="eaPassword">New password</label>
+            <input type="password" id="eaPassword" placeholder="At least 12 characters" autocomplete="new-password">
+          </div>
+        </div>
+        <div class="student-progress-actions">
+          <button class="small-button" type="button" id="eaSubmit">Set emergency password</button>
+          <span class="student-progress-status" id="eaStatus" aria-live="polite"></span>
+        </div>
+      </section>
+
       <section class="admin-section" id="section-passwords" data-admin-tab-panel="member-management">
         <span class="section-label">Legacy access</span>
         <h2>Legacy local access</h2>
@@ -3002,8 +3023,6 @@
         <div class="operational-notice"><strong>Not production account security.</strong> These credentials are stored only in this browser for local testing and do not replace Google/Firebase authorization. Use Member Management for production access.</div>
         <details>
           <summary style="cursor:pointer;color:var(--navy);font-weight:700;">Show local testing credentials</summary>
-        <div class="password-block" data-key="utl_local_pw_admin" data-username="admin" data-label="Admin account" data-description="Username: admin — has admin access to this console." data-default="password123"></div>
-        <div class="password-block" data-key="utl_local_pw_testuser" data-username="testuser" data-label="Test member account" data-description="Username: testuser — standard member access, no admin." data-default="member2026"></div>
         <div class="password-block" data-key="utl_admin_password" data-label="Admin console password" data-description="The password used to unlock this admin panel. Keep it private." data-default="utl2026_admin"></div>
         <div class="warning-callout">If you change the admin console password and forget it, you will need to edit admin/index.html directly to regain access.</div>
         </details>
@@ -3335,7 +3354,7 @@
     </main>
   </div>
 
-  <script src="../member-login/content-config.js?v=20260806-remove-local-login"></script>
+  <script src="../member-login/content-config.js?v=20260806-emergency-access"></script>
   <script src="../assets/reward-ui.js?v=20260803-written-reflection-1"></script>
 
   <script type="module">
@@ -3378,7 +3397,7 @@
       signOut,
       signInWithGooglePopup,
       Timestamp
-    } from "../assets/firebase.js?v=20260806-remove-local-login";
+    } from "../assets/firebase.js?v=20260806-emergency-access";
     import { serverTimestamp, setDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
     window.utlFirebaseAuth = {
@@ -7834,6 +7853,31 @@
     });
     document.getElementById('mbRefreshBtn')?.addEventListener('click', mbLoadMembers);
     document.getElementById('mbDownloadCsvBtn')?.addEventListener('click', mbDownloadCsv);
+    document.getElementById('eaSubmit')?.addEventListener('click', async function () {
+      var btn = this;
+      var status = document.getElementById('eaStatus');
+      var email = (document.getElementById('eaEmail') || {}).value.trim().toLowerCase();
+      var password = (document.getElementById('eaPassword') || {}).value;
+      if (!email) { showToast('Enter an email address.', 'error'); return; }
+      if (password.length < 12) { showToast('Password must be at least 12 characters.', 'error'); return; }
+      var fb = window.utlFirebaseAuth;
+      if (!fb || !fb.setEmergencyCredential) { showToast('Firebase not ready', 'error'); return; }
+      btn.disabled = true;
+      btn.textContent = 'Saving...';
+      if (status) status.textContent = '';
+      try {
+        await mbRequireFirebaseAdmin();
+        await fb.setEmergencyCredential(email, password);
+        if (status) status.textContent = 'Emergency password set for ' + email + '.';
+        document.getElementById('eaPassword').value = '';
+        showToast('Emergency password set.');
+      } catch (error) {
+        showToast('Could not set emergency password: ' + ((error && error.message) || 'Unknown error'), 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Set emergency password';
+      }
+    });
     document.addEventListener('click', (event) => {
       if (event.target.closest('#studentProgressRefresh')) loadStudentProgress();
 
@@ -8702,7 +8746,7 @@
             emailSent = true;
           } catch (emailErr) { /* non-fatal */ }
 
-          // Optionally send Firebase login link (Method C)
+          // Optionally send Firebase login link (Method B)
           var linkSent = false;
           if (sendLinkChecked && fb.sendSignInInvite) {
             try {

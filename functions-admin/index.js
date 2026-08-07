@@ -71,3 +71,56 @@ async function isAuthorizedAdmin(email) {
   const status = String(data.status || "active").trim().toLowerCase();
   return (role === "admin" || role === "owner") && status !== "inactive";
 }
+
+const MIN_EMERGENCY_PASSWORD_LENGTH = 12;
+
+// Break-glass access: lets an authenticated admin set or reset a real
+// Firebase Auth password for an existing admin/owner member, for the rare
+// case Google, Microsoft, Facebook, and the emailed sign-in link are all
+// unavailable. This never creates a new member — the target email must
+// already be an active admin or owner in authorized_members, so this can't
+// be used to mint arbitrary accounts outside your existing member roster.
+exports.setEmergencyCredential = onCall({
+  timeoutSeconds: 30,
+  memory: "256MiB"
+}, async (request) => {
+  const callerEmail = String(request.auth && request.auth.token && request.auth.token.email || "").trim().toLowerCase();
+  const emailVerified = request.auth && request.auth.token && request.auth.token.email_verified === true;
+  if (!request.auth || !callerEmail || !emailVerified) {
+    throw new HttpsError("unauthenticated", "Sign in with an administrator account.");
+  }
+  if (!(await isAuthorizedAdmin(callerEmail))) {
+    throw new HttpsError("permission-denied", "This account is not authorized as an administrator.");
+  }
+
+  const input = request.data && typeof request.data === "object" ? request.data : {};
+  const targetEmail = String(input.email || "").trim().toLowerCase();
+  const password = String(input.password || "");
+  if (!targetEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(targetEmail)) {
+    throw new HttpsError("invalid-argument", "Enter a valid email address.");
+  }
+  if (password.length < MIN_EMERGENCY_PASSWORD_LENGTH) {
+    throw new HttpsError("invalid-argument", "Password must be at least " + MIN_EMERGENCY_PASSWORD_LENGTH + " characters.");
+  }
+  if (!(await isAuthorizedAdmin(targetEmail))) {
+    throw new HttpsError("failed-precondition", "This email must already be an active admin or owner under Members before it can be used for emergency access.");
+  }
+
+  try {
+    let userRecord;
+    try {
+      userRecord = await admin.auth().getUserByEmail(targetEmail);
+      await admin.auth().updateUser(userRecord.uid, { password, emailVerified: true });
+    } catch (lookupError) {
+      if (lookupError && lookupError.code === "auth/user-not-found") {
+        userRecord = await admin.auth().createUser({ email: targetEmail, password, emailVerified: true });
+      } else {
+        throw lookupError;
+      }
+    }
+    return { ok: true, uid: userRecord.uid };
+  } catch (error) {
+    console.error("Emergency credential update failed", { targetEmail, message: error && error.message });
+    throw new HttpsError("internal", "Could not set the emergency password.");
+  }
+});

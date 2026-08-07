@@ -147,6 +147,19 @@ async function runAdminAction(action, payload = {}) {
   return result && result.data ? result.data : { ok: true };
 }
 
+async function setEmergencyCredential(email, password) {
+  const callable = httpsCallable(functions, "setEmergencyCredential");
+  const result = await callable({
+    email: String(email || "").trim().toLowerCase(),
+    password: String(password || "")
+  });
+  return result && result.data ? result.data : { ok: true };
+}
+
+function signInWithEmailPassword(email, password) {
+  return signInWithEmailAndPassword(requireFirebaseAuth(), String(email || "").trim().toLowerCase(), String(password || ""));
+}
+
 function signInWithGooglePopup() {
   // Do not await authPersistenceReady here — it resolves on page load, well before
   // the user can tap. Skipping the await keeps window.open() as close to synchronous
@@ -1085,9 +1098,11 @@ export {
   setGlobalFeedbackSetting,
   setPublicFindLevelSetting,
   setRewardSettings,
+  setEmergencyCredential,
   setUserFeedbackEnabled,
   signInWithEmailAndPassword,
   signInWithEmailLink,
+  signInWithEmailPassword,
   signInWithFacebookPopup,
   signInWithFacebookRedirect,
   signInWithGooglePopup,
