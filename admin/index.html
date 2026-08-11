@@ -2391,26 +2391,26 @@
               <div class="aiko-version-change" data-aiko-version-change hidden><p data-aiko-change-copy>Change the member experience.</p><div class="aiko-version-change-actions"><button class="small-button" type="button" data-save-aiko-version="eisenhowerMatrix">Publish selected version</button><button class="small-button secondary-button" type="button" data-cancel-aiko-version="eisenhowerMatrix">Cancel</button></div></div>
               </details>
             </article>
-            <article class="aiko-version-card" data-aiko-version-card="tsaDiagnostic" data-live-version="v1">
-              <div class="aiko-version-card-head"><h4>TSA diagnostic and checkpoint</h4><span class="aiko-live-version" data-aiko-live-label>Live for members: multi-page assessment</span><p class="aiko-version-audit" id="tsaDiagnosticVersionAudit">Using safe default: multi-page assessment</p></div>
-              <details class="aiko-version-details"><summary>Change or preview experience</summary>
-              <div class="aiko-version-options" role="radiogroup" aria-label="Experience for the TSA diagnostic and checkpoint">
-                <label class="aiko-version-option"><input type="radio" name="tsaDiagnosticVersion" value="v1" data-aiko-version-key="tsaDiagnostic"><span><strong>Multi-page assessment</strong>Members open the original diagnostic hub and complete separate exercises.</span></label>
-                <label class="aiko-version-option"><input type="radio" name="tsaDiagnosticVersion" value="v2" data-aiko-version-key="tsaDiagnostic"><span><strong>Unified assessment</strong>Members complete Think, Speak, and Act in one saved flow. Recording and AI failures never block completion.</span></label>
-              </div>
+          </div>
+        </div>
+
+        <div class="aiko-version-manager">
+          <div class="aiko-version-manager-head"><div><h3>TSA diagnostic and checkpoint</h3><p class="description" style="margin:6px 0 0">One unified assessment covers both moments. Preview links do not change what members see.</p></div></div>
+          <div class="aiko-version-grid">
+            <article class="aiko-version-card">
+              <div class="aiko-version-card-head"><h4>TSA diagnostic and checkpoint</h4><span class="aiko-live-version" data-aiko-live-label>Live for members: unified assessment</span></div>
+              <details class="aiko-version-details"><summary>Preview scenario sets</summary>
               <div class="aiko-version-preview">
-                <p class="aiko-version-preview-note">Previewing does not change what members see. The three scenario sets use different situations at the same intended difficulty. Their internal letter codes are not shown to members.</p>
-                <a class="small-button secondary-button" href="../apps/tsa-diagnostic/index.html" target="_blank">Preview multi-page assessment</a>
-                <p class="aiko-version-preview-label">Unified diagnostic scenario sets</p>
-                <a class="small-button secondary-button" href="../apps/tsa-diagnostic-v2/index.html?preview=1&amp;form=A&amp;reset=1" target="_blank">Everyday decisions</a>
-                <a class="small-button secondary-button" href="../apps/tsa-diagnostic-v2/index.html?preview=1&amp;form=B&amp;reset=1" target="_blank">Planning under pressure</a>
-                <a class="small-button secondary-button" href="../apps/tsa-diagnostic-v2/index.html?preview=1&amp;form=C&amp;reset=1" target="_blank">Community choices</a>
-                <p class="aiko-version-preview-label">Unified checkpoint scenario sets</p>
-                <a class="small-button secondary-button" href="../apps/tsa-diagnostic-v2/index.html?assessment=checkpoint&amp;preview=1&amp;form=A&amp;reset=1" target="_blank">Everyday decisions</a>
-                <a class="small-button secondary-button" href="../apps/tsa-diagnostic-v2/index.html?assessment=checkpoint&amp;preview=1&amp;form=B&amp;reset=1" target="_blank">Planning under pressure</a>
-                <a class="small-button secondary-button" href="../apps/tsa-diagnostic-v2/index.html?assessment=checkpoint&amp;preview=1&amp;form=C&amp;reset=1" target="_blank">Community choices</a>
+                <p class="aiko-version-preview-note">The three scenario sets use different situations at the same intended difficulty. Their internal letter codes are not shown to members.</p>
+                <p class="aiko-version-preview-label">Diagnostic scenario sets</p>
+                <a class="small-button secondary-button" href="../apps/tsa-diagnostic/index.html?preview=1&amp;form=A&amp;reset=1" target="_blank">Everyday decisions</a>
+                <a class="small-button secondary-button" href="../apps/tsa-diagnostic/index.html?preview=1&amp;form=B&amp;reset=1" target="_blank">Planning under pressure</a>
+                <a class="small-button secondary-button" href="../apps/tsa-diagnostic/index.html?preview=1&amp;form=C&amp;reset=1" target="_blank">Community choices</a>
+                <p class="aiko-version-preview-label">Checkpoint scenario sets</p>
+                <a class="small-button secondary-button" href="../apps/tsa-diagnostic/index.html?assessment=checkpoint&amp;preview=1&amp;form=A&amp;reset=1" target="_blank">Everyday decisions</a>
+                <a class="small-button secondary-button" href="../apps/tsa-diagnostic/index.html?assessment=checkpoint&amp;preview=1&amp;form=B&amp;reset=1" target="_blank">Planning under pressure</a>
+                <a class="small-button secondary-button" href="../apps/tsa-diagnostic/index.html?assessment=checkpoint&amp;preview=1&amp;form=C&amp;reset=1" target="_blank">Community choices</a>
               </div>
-              <div class="aiko-version-change" data-aiko-version-change hidden><p data-aiko-change-copy>Change the member experience.</p><div class="aiko-version-change-actions"><button class="small-button" type="button" data-save-aiko-version="tsaDiagnostic">Publish selected version</button><button class="small-button secondary-button" type="button" data-cancel-aiko-version="tsaDiagnostic">Cancel</button></div></div>
               </details>
             </article>
           </div>
@@ -3370,27 +3370,14 @@
         <span class="section-label">Content Data</span>
         <h2>Diagnostic question bank</h2>
         <div class="section-divider"></div>
-        <p class="description">Review the 20 overlap questions used by Challenge 2 Part 1 and the 36 structure questions used by Part 2. The full bank follows an introductory-to-hard ramp: 10 accessible, 33 moderate, and 13 hard questions. Part 2 always adds “None of the above,” and the keyed answer is highlighted in green. This view is read-only and loads directly from the unified diagnostic source.</p>
+        <p class="description">Review the 45-question bank used by Part 1b of the diagnostic: 15 "Spot the issue," 15 "Complete the group," and 15 "Choose the best breakdown" questions. Each attempt randomly draws 5 from each format, 15 total, in random order. The keyed answer is highlighted in green. This view is read-only and loads directly from the unified diagnostic source.</p>
         <div class="qb-toolbar">
           <input type="search" id="qbSearch" placeholder="Search questions or answers" aria-label="Search diagnostic questions">
-          <select id="qbPart" aria-label="Filter by diagnostic part">
-            <option value="all">Both parts</option>
-            <option value="part1">Part 1 · Overlap</option>
-            <option value="part2">Part 2 · Structure</option>
-          </select>
-          <select id="qbCategory" aria-label="Filter by category">
-            <option value="all">All categories</option>
-            <option value="overlap">Overlapping ideas</option>
-            <option value="gap">Missing categories</option>
-            <option value="level">Mixed levels</option>
-            <option value="misplaced">Misplaced ideas</option>
-            <option value="revision">Stronger revisions</option>
-          </select>
-          <select id="qbDifficulty" aria-label="Filter by intended difficulty">
-            <option value="all">All difficulty</option>
-            <option value="accessible">Accessible</option>
-            <option value="moderate">Moderate</option>
-            <option value="hard">Hard</option>
+          <select id="qbFormat" aria-label="Filter by question format">
+            <option value="all">All formats</option>
+            <option value="1">Format 1 · Spot the issue</option>
+            <option value="2">Format 2 · Complete the group</option>
+            <option value="3">Format 3 · Choose the best breakdown</option>
           </select>
         </div>
         <div class="qb-summary" id="qbSummary" aria-live="polite"></div>
@@ -5212,15 +5199,8 @@
         ['Member hub', '../member-login/index.html'],
         ['Member hub — admin mode', '../member-login/index.html?mode=admin'],
         ['My results', '../my-results/index.html'],
-        ['Diagnostic hub', '../apps/tsa-diagnostic/index.html'],
-        ['Checkpoint hub', '../apps/tsa-checkpoint/index.html'],
-        ['Diagnostic — Sort & bucket', '../apps/tsa-sort-bucket/index.html?assessment=diagnostic'],
-        ['Checkpoint — Sort & bucket', '../apps/tsa-sort-bucket/index.html?assessment=checkpoint'],
-        ['Diagnostic — Spot the problem', '../apps/tsa-spot-the-problem/index.html?assessment=diagnostic'],
-        ['Checkpoint — Spot the problem', '../apps/tsa-spot-the-problem/index.html?assessment=checkpoint'],
-        ['Diagnostic — Speak concisely', '../apps/tsa-speak/index.html?version=diagnostic'],
-        ['Checkpoint — Speak concisely', '../apps/tsa-speak/index.html?version=checkpoint'],
-        ['Act confidently placeholder', '../apps/tsa-act-confidently/index.html'],
+        ['Diagnostic', '../apps/tsa-diagnostic/index.html'],
+        ['Checkpoint', '../apps/tsa-diagnostic/index.html?assessment=checkpoint'],
         ['Grocery list', '../apps/grocery-list/index.html'],
         ["Manager's messy notes", '../apps/messy-notes/index.html'],
         ['Rushed voice memo', '../apps/rushed-voice-memo/index.html'],
@@ -5236,7 +5216,7 @@
       const linkMap = Object.fromEntries(links.map(([name, path]) => [name, path]));
       const groups = [
         { label: 'Site', names: ['Member hub', 'Member hub — admin mode', 'My results'] },
-        { label: 'Assessments', names: ['Diagnostic hub', 'Checkpoint hub', 'Diagnostic — Sort & bucket', 'Checkpoint — Sort & bucket', 'Diagnostic — Spot the problem', 'Checkpoint — Spot the problem', 'Diagnostic — Speak concisely', 'Checkpoint — Speak concisely', 'Act confidently placeholder'] },
+        { label: 'Assessments', names: ['Diagnostic', 'Checkpoint'] },
         { label: 'Phase 1 apps', names: ['Grocery list', "Manager's messy notes", 'Rushed voice memo', 'Rushed voice memo — AI', 'Chalkboard notes'] },
         { label: 'Phase 2 apps', names: ['Issue tree builder', 'SCQA builder'] },
         { label: 'Phase 3 apps', names: ['The art of saying no', 'I have bad news...', "Let's switch hats", 'Speak like Obama'] }
@@ -5817,8 +5797,7 @@
     const AIKO_VERSION_LOCAL_KEYS = {
       explainToAiko120: 'utl_aiko_120_version',
       explainToAiko60: 'utl_aiko_60_version',
-      eisenhowerMatrix: 'utl_eisenhower_matrix_version',
-      tsaDiagnostic: 'utl_tsa_diagnostic_version'
+      eisenhowerMatrix: 'utl_eisenhower_matrix_version'
     };
     const MATRIX_VERSION_LABEL_SCHEMA = 'guided-v1-20260723';
 
@@ -5828,14 +5807,12 @@
 
     function aikoVersionName(value, key) {
       if (key === 'eisenhowerMatrix') return normalizeAikoVersion(value) === 'v2' ? 'free-form matrix fallback' : 'guided decision exercise';
-      if (key === 'tsaDiagnostic') return normalizeAikoVersion(value) === 'v2' ? 'unified assessment' : 'multi-page assessment';
       return normalizeAikoVersion(value) === 'v2' ? 'self-recorded fallback' : 'AI feedback exercise';
     }
 
     function versionExerciseLabel(key) {
       if (key === 'explainToAiko120') return '120-second exercise';
       if (key === 'explainToAiko60') return '60-second exercise';
-      if (key === 'tsaDiagnostic') return 'the TSA diagnostic and checkpoint';
       return 'The art of saying no';
     }
 
@@ -5871,7 +5848,7 @@
     }
 
     function syncAikoVersionForm(settings) {
-      ['explainToAiko120', 'explainToAiko60', 'eisenhowerMatrix', 'tsaDiagnostic'].forEach(function(key) {
+      ['explainToAiko120', 'explainToAiko60', 'eisenhowerMatrix'].forEach(function(key) {
         const value = key === 'eisenhowerMatrix' && settings.eisenhowerMatrixVersionSchema !== MATRIX_VERSION_LABEL_SCHEMA
           ? 'v1'
           : normalizeAikoVersion(settings[key]);
@@ -5881,7 +5858,7 @@
         syncAikoVersionLocal(key, value);
         const liveLabel = card && card.querySelector('[data-aiko-live-label]');
         if (liveLabel) liveLabel.textContent = 'Live for members: ' + aikoVersionName(value, key);
-        const audit = document.getElementById(key === 'explainToAiko120' ? 'aikoVersion120Audit' : key === 'explainToAiko60' ? 'aikoVersion60Audit' : key === 'tsaDiagnostic' ? 'tsaDiagnosticVersionAudit' : 'eisenhowerMatrixVersionAudit');
+        const audit = document.getElementById(key === 'explainToAiko120' ? 'aikoVersion120Audit' : key === 'explainToAiko60' ? 'aikoVersion60Audit' : 'eisenhowerMatrixVersionAudit');
         if (audit) audit.textContent = formatAikoVersionAudit(settings, key);
         updateAikoVersionChoice(key);
       });
@@ -6711,10 +6688,6 @@
       { name: 'Issue tree builder',  path: 'data/practice/issue-tree-builder.json', category: 'Practice exercises', desc: 'Problem decomposition with hypothesis and sample answer' },
       { name: 'Messy notes',         path: 'data/practice/messy-notes.json',        category: 'Practice exercises', desc: 'Structuring rushed notes into an Aiko-ready summary' },
       { name: 'SCQA builder',        path: 'data/practice/scqa-builder.json',       category: 'Practice exercises', desc: 'Situation-complication-question-answer formulation exercise' },
-      { name: 'Sort & bucket',       path: 'data/tsa/sort-bucket.json',             category: 'Member assessments', desc: 'Sorting scenarios used in the Diagnostic and Checkpoint' },
-      { name: 'Spot the problem',    path: 'data/tsa/spot-the-problem.json',        category: 'Member assessments', desc: 'MECE gap/overlap detection with scored answer key' },
-      { name: 'Speak concisely',     path: 'data/tsa/speak-concisely.json',         category: 'Member assessments', desc: 'Timed speaking scenarios with talking point guides' },
-      { name: 'Act confidently',     path: 'data/tsa/act-confidently.json',         category: 'Member assessments', desc: 'Difficult-conversation assessment (placeholder)' },
       { name: 'Find your level',     path: 'data/sort-bucket.json',                 category: 'Public exercise',    desc: 'Free public sort & bucket exercise on tsa-score.html' },
     ];
 
@@ -6801,7 +6774,7 @@
     }
 
     let qbBank = [];
-    const QB_CATEGORY_LABELS = { overlap:'Overlapping ideas', gap:'Missing categories', level:'Mixed levels', misplaced:'Misplaced ideas', revision:'Stronger revisions' };
+    const QB_FORMAT_LABELS = { 1: 'Format 1 · Spot the issue', 2: 'Format 2 · Complete the group', 3: 'Format 3 · Choose the best breakdown' };
 
     function qbReadLiteral(source, pattern, label) {
       const match = source.match(pattern);
@@ -6814,27 +6787,21 @@
       const summary = document.getElementById('qbSummary');
       if (!list || !summary) return;
       const search = String(document.getElementById('qbSearch')?.value || '').trim().toLowerCase();
-      const part = document.getElementById('qbPart')?.value || 'all';
-      const category = document.getElementById('qbCategory')?.value || 'all';
-      const difficulty = document.getElementById('qbDifficulty')?.value || 'all';
+      const format = document.getElementById('qbFormat')?.value || 'all';
       const filtered = qbBank.filter((question) => {
-        const shownOptions = question.type === 'overlap' ? question.options : [...question.options, 'None of the above'];
-        const haystack = [question.id, question.prompt, question.rationale, ...shownOptions].join(' ').toLowerCase();
-        const questionPart = question.type === 'overlap' ? 'part1' : 'part2';
-        return (!search || haystack.includes(search)) && (part === 'all' || questionPart === part) && (category === 'all' || question.type === category) && (difficulty === 'all' || question.difficulty === difficulty);
+        const haystack = [question.id, question.prompt, question.rationale, ...question.options].join(' ').toLowerCase();
+        return (!search || haystack.includes(search)) && (format === 'all' || String(question.format) === format);
       });
-      const part1Count = filtered.filter((question) => question.type === 'overlap').length;
-      const part2Count = filtered.length - part1Count;
-      const difficultyCounts = filtered.reduce((counts, question) => { counts[question.difficulty] += 1; return counts; }, { accessible:0, moderate:0, hard:0 });
-      summary.innerHTML = `<span>${filtered.length} of ${qbBank.length} questions shown</span><span>Part 1: ${part1Count}</span><span>Part 2: ${part2Count}</span><span>Accessible: ${difficultyCounts.accessible}</span><span>Moderate: ${difficultyCounts.moderate}</span><span>Hard: ${difficultyCounts.hard}</span><span>“None of the above” stays last</span>`;
-      let previousPart = '';
-      list.innerHTML = filtered.length ? filtered.map((question) => { const questionPart=question.type==='overlap'?'part1':'part2'; const partLabel=questionPart==='part1'?'Part 1 · Find ideas that overlap':'Part 2 · Test the structure'; const heading=questionPart!==previousPart?`<div class="qb-part-heading"><strong>${partLabel}</strong><span>${questionPart==='part1'?'5 delivered from 20':'10 delivered from 36'}</span></div>`:''; previousPart=questionPart; const shownOptions=question.type==='overlap'?question.options:[...question.options,'None of the above']; const correctIndex=question.type!=='overlap'&&question.noneCorrect?question.options.length:question.answer; return `${heading}
+      const formatCounts = filtered.reduce((counts, question) => { counts[question.format] = (counts[question.format] || 0) + 1; return counts; }, {});
+      summary.innerHTML = `<span>${filtered.length} of ${qbBank.length} questions shown</span><span>Format 1: ${formatCounts[1] || 0}</span><span>Format 2: ${formatCounts[2] || 0}</span><span>Format 3: ${formatCounts[3] || 0}</span>`;
+      let previousFormat = null;
+      list.innerHTML = filtered.length ? filtered.map((question) => { const heading = question.format !== previousFormat ? `<div class="qb-part-heading"><strong>${QB_FORMAT_LABELS[question.format]}</strong><span>5 drawn per attempt from 15</span></div>` : ''; previousFormat = question.format; return `${heading}
         <article class="qb-card">
           <div class="qb-card-head">
             <div class="qb-prompt">${escapeHtml(question.prompt)}</div>
-            <div class="qb-card-meta"><span class="qb-chip is-part">${questionPart==='part1'?'Part 1':'Part 2'}</span><span class="qb-chip">${escapeHtml(question.id.toUpperCase())}</span><span class="qb-chip">${escapeHtml(QB_CATEGORY_LABELS[question.type] || question.type)}</span><span class="qb-chip ${question.difficulty === 'hard' ? 'is-hard' : ''}">${escapeHtml(question.difficulty)}</span></div>
+            <div class="qb-card-meta"><span class="qb-chip is-part">Format ${question.format}</span><span class="qb-chip">${escapeHtml(question.id.toUpperCase())}</span></div>
           </div>
-          <div class="qb-options">${shownOptions.map((option, index) => `<div class="qb-option ${index === correctIndex ? 'is-correct' : ''}"><span class="qb-option-letter">${String.fromCharCode(65 + index)}</span><span>${escapeHtml(option)}${index === correctIndex ? ' <strong>Correct answer</strong>' : ''}</span></div>`).join('')}</div>
+          <div class="qb-options">${question.options.map((option, index) => `<div class="qb-option ${index === question.answer ? 'is-correct' : ''}"><span class="qb-option-letter">${String.fromCharCode(65 + index)}</span><span>${escapeHtml(option)}</span></div>`).join('')}</div>
           <div class="qb-rationale"><strong>Why this answer:</strong> ${escapeHtml(question.rationale)}</div>
         </article>`}).join('') : '<div class="qb-empty">No questions match these filters.</div>';
     }
@@ -6843,13 +6810,11 @@
       const status = document.getElementById('qbStatus');
       if (!status) return;
       try {
-        const response = await fetch('../apps/tsa-diagnostic-v2/index.html', { cache:'no-store' });
+        const response = await fetch('../apps/tsa-diagnostic/index.html', { cache:'no-store' });
         if (!response.ok) throw new Error('HTTP ' + response.status);
         const source = await response.text();
-        const bank = qbReadLiteral(source, /const MECE_QUIZ_BANK=(\[[\s\S]*?\]);\n    const QUESTION_DIFFICULTY/, 'Question bank');
-        const difficulty = qbReadLiteral(source, /const QUESTION_DIFFICULTY=(\{[^;]+\});/, 'Difficulty metadata');
-        const rationales = qbReadLiteral(source, /const QUESTION_RATIONALES=(\{[\s\S]*?\});\n    MECE_QUIZ_BANK/, 'Question rationales');
-        qbBank = bank.map((question) => ({ ...question, difficulty:difficulty[question.id], rationale:rationales[question.id] }));
+        const bank = qbReadLiteral(source, /const SPOT_QUESTION_BANK=(\[[\s\S]*?\]);\n\s*function spotAssessmentQuestions/, 'Question bank');
+        qbBank = bank;
         status.textContent = 'Loaded from the unified diagnostic source.';
         status.className = 'cl-status is-success';
         qbRender();
@@ -6857,7 +6822,7 @@
         status.textContent = 'Could not load the question bank: ' + ((error && error.message) || 'Unknown error');
         status.className = 'cl-status is-error';
       }
-      ['qbSearch','qbPart','qbCategory','qbDifficulty'].forEach((id) => document.getElementById(id)?.addEventListener(id === 'qbSearch' ? 'input' : 'change', qbRender));
+      ['qbSearch','qbFormat'].forEach((id) => document.getElementById(id)?.addEventListener(id === 'qbSearch' ? 'input' : 'change', qbRender));
     }
 
     function clInit() {

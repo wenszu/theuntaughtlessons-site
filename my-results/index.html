@@ -1301,44 +1301,26 @@
     };
 
     const ASSESSMENTS = [
-      { name: 'The diagnostic', path: '../apps/tsa-diagnostic/index.html' },
-      { name: 'The checkpoint', path: '../apps/tsa-checkpoint/index.html' }
+      { name: 'The diagnostic', kind: 'diagnostic', path: '../apps/tsa-diagnostic/index.html' },
+      { name: 'The checkpoint', kind: 'checkpoint', path: '../apps/tsa-diagnostic/index.html?assessment=checkpoint' }
     ];
 
-    // The diagnostic and checkpoint both link out to the same three sub-exercise
-    // apps, which each save their score under one fixed key regardless of which
-    // assessment launched them. There is no way to keep a separate "diagnostic"
-    // score once the checkpoint is taken, so both assessments read the same
-    // current state rather than two independent snapshots.
-    const TSA_SUBSCORES = [
-      { key: 'tsa_sort_score', label: 'Sort & bucket' },
-      { key: 'tsa_spot_score', label: 'Spot the problem' },
-      { key: 'tsa_speak_score', label: 'Short talk' }
-    ];
-
-    function tsaSubscoreValue(key) {
+    // The diagnostic and checkpoint are tracked independently — each writes its
+    // own result under a kind-specific key, so retaking one never overwrites
+    // the other's score.
+    function tsaResultFor(kind) {
       try {
-        const raw = localStorage.getItem(key);
-        if (!raw) return null;
-        const parsed = JSON.parse(raw);
-        if (typeof parsed === 'number') return parsed;
-        if (typeof parsed.score === 'number') return parsed.score;
-        if (typeof parsed.total === 'number') return parsed.total;
-        if (typeof parsed.percentage === 'number') return parsed.percentage;
-        return null;
+        const raw = localStorage.getItem('utl_result_tsa_' + kind + '_v2');
+        return raw ? JSON.parse(raw) : null;
       } catch (error) {
         return null;
       }
     }
 
-    function tsaAssessmentStatus() {
-      const scored = TSA_SUBSCORES.map((s) => ({ label: s.label, value: tsaSubscoreValue(s.key) }));
-      const done = scored.filter((s) => s.value !== null).length;
-      return { scored, done, total: TSA_SUBSCORES.length, complete: done === TSA_SUBSCORES.length };
-    }
-
-    function tsaSubscoreText(status) {
-      return status.scored.map((s) => `${s.label}: ${s.value === null ? 'Not started' : Math.round(s.value) + (s.value <= 40 ? ' pts' : '%')}`).join(' · ');
+    function tsaSummaryText(result) {
+      if (!result || !result.scores) return 'Not yet taken';
+      const s = result.scores;
+      return `${Math.round(s.total)}/100 · Think ${Math.round(s.think)}/40 · Speak ${Math.round(s.speak)}/30 · Act ${Math.round(s.act)}/30`;
     }
 
     function resultFor(appId) {
@@ -1653,8 +1635,8 @@
 
     function getSummary(key) {
       if (key === 'assessment') {
-        const status = tsaAssessmentStatus();
-        return `${status.done}/${status.total} Sub-exercises scored`;
+        const done = ASSESSMENTS.filter((assessment) => tsaResultFor(assessment.kind)).length;
+        return `${done}/${ASSESSMENTS.length} Assessments scored`;
       }
       const lessons = LESSONS[key] || [];
       const watched = lessons.filter(l => localStorage.getItem('utl_watched_' + l.id) === 'true').length;
@@ -1766,18 +1748,20 @@
         html += renderAccordion(p.key, p.title, getSummary(p.key), content);
       });
 
-      // 3. Assessments — the diagnostic and checkpoint share one live set of
-      // sub-exercise scores (see TSA_SUBSCORES above), so both cards reflect the
-      // same current state rather than independent before/after snapshots.
-      const tsaStatus = tsaAssessmentStatus();
+      // 3. Assessments — the diagnostic and checkpoint each write their own
+      // independent result, so both cards reflect a true before/after snapshot.
+      const diagnosticResult = tsaResultFor('diagnostic');
+      const checkpointResult = tsaResultFor('checkpoint');
       let assBody = ASSESSMENTS.map((assessment) => {
-        if (!tsaStatus.done) {
+        const result = assessment.kind === 'diagnostic' ? diagnosticResult : checkpointResult;
+        if (!result) {
           return `<div class="ex-result-card ex-result-pending"><div class="ex-result-header"><span class="ex-result-icon">–</span><div><div class="ex-result-title">${assessment.name}</div><div class="ex-result-meta">Not yet taken</div></div><span class="ex-badge-pending">Pending</span></div><a class="take-now-link" href="${assessment.path}">Take now →</a></div>`;
         }
-        return `<div class="ex-result-card${tsaStatus.complete ? '' : ' ex-result-pending'}"><div class="ex-result-header"><span class="ex-result-icon">${tsaStatus.complete ? '✓' : tsaStatus.done}</span><div><div class="ex-result-title">${assessment.name}</div><div class="ex-result-meta">${tsaStatus.complete ? 'All sections scored' : `${tsaStatus.done} of ${tsaStatus.total} sections scored`}</div></div><span class="${tsaStatus.complete ? 'ex-badge-done' : 'ex-badge-pending'}">${tsaStatus.complete ? 'Done' : 'In progress'}</span></div><div class="ex-result-preview">${tsaSubscoreText(tsaStatus)}</div><a class="take-now-link" href="${assessment.path}">${tsaStatus.complete ? 'Retake' : 'Continue'} →</a></div>`;
+        return `<div class="ex-result-card"><div class="ex-result-header"><span class="ex-result-icon">✓</span><div><div class="ex-result-title">${assessment.name}</div><div class="ex-result-meta">Scored</div></div><span class="ex-badge-done">Done</span></div><div class="ex-result-preview">${tsaSummaryText(result)}</div><a class="take-now-link" href="${assessment.path}">Retake →</a></div>`;
       }).join('');
-      if (tsaStatus.done) {
-        assBody += `<p class="assessment-shared-note">The diagnostic and checkpoint share the same three sub-exercise scores above — retaking either one updates both.</p>`;
+      if (diagnosticResult && checkpointResult) {
+        const delta = Math.round(checkpointResult.scores.total - diagnosticResult.scores.total);
+        assBody += `<p class="assessment-shared-note">Diagnostic and checkpoint are tracked independently. Checkpoint total is ${delta >= 0 ? '+' : ''}${delta} vs the diagnostic.</p>`;
       }
       const assContent = `<div class="exercise-progress-section"><div class="exercise-section-header"><h4>Assessments</h4></div><div class="exercise-list">${assBody}</div></div>`;
       html += renderAccordion('assessment', 'Assessments', getSummary('assessment'), assContent);
@@ -1839,12 +1823,12 @@
       return phaseEntries.concat({
         section: 'Assessments',
         items: ASSESSMENTS.map((assessment) => {
-          const status = tsaAssessmentStatus();
+          const result = tsaResultFor(assessment.kind);
           return {
             name: assessment.name,
-            status: status.complete ? 'Completed' : (status.done ? 'In progress' : 'Pending'),
-            responseText: status.done ? tsaSubscoreText(status) : '',
-            completedAt: ''
+            status: result ? 'Completed' : 'Pending',
+            responseText: result ? tsaSummaryText(result) : '',
+            completedAt: result?.completedAt || ''
           };
         })
       });

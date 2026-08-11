@@ -1,6 +1,8 @@
 # Assessments and Grocery List Reference
 Last updated: 2026-06-02
 
+> **PARTIALLY ARCHIVED (2026-08-11):** Every "Member Diagnostic / Checkpoint" section below (Sort & Bucket, Spot the Problem, Speak Concisely, Act Confidently) documents the retired v1 assessment — fully removed, it was never finished and saw no real production use. The live assessment is now `apps/tsa-diagnostic/index.html` (a single unified Think/Speak/Act flow, member-facing names unchanged), which uses different content and scoring entirely. Kept here as historical reference only. The **"Public Find your level"** sections (using `data/sort-bucket.json` at the repo root) are unrelated and still current/live — not affected by this archival.
+
 This file documents the current assessment content, answer keys, and scoring methodology used by The Untaught Lessons website. It is intended as a shareable reference for collaborators reviewing the assessment design.
 
 Source files used:
