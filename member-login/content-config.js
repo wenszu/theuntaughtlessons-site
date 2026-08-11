@@ -2697,7 +2697,6 @@ const UTL_CONTENT = {
   }
 
   function assessmentsSection() {
-    if (localStorage.getItem("utl_tsa_status") === "hidden") return "";
     var phase3Done = exercisesDone("phase3");
     var diagnosticHref = '../apps/tsa-diagnostic/index.html';
     var checkpointHref = '../apps/tsa-diagnostic/index.html?assessment=checkpoint';
