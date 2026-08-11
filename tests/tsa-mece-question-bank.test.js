@@ -20,12 +20,10 @@ for (const q of bank) {
   assert.ok(q.rationale && q.rationale.length >= 30, `${q.id} should have a substantive rationale`);
 }
 
-// --- Format 1 always uses the same four fixed options, in the same order ---
-const format1Fixed3 = ['Nothing is wrong, all three are distinct', 'Two categories describe the same thing', 'One category is broad enough to include the others', 'A category is missing entirely'];
-const format1Fixed4 = ['Nothing is wrong, all four are distinct', 'Two categories describe the same thing', 'One category is broad enough to include the others', 'A category is missing entirely'];
+// --- Format 1 asks the learner to identify one specific heading from the scenario ---
 bank.filter(q => q.format === 1).forEach(q => {
-  const matches = JSON.stringify(q.options) === JSON.stringify(format1Fixed3) || JSON.stringify(q.options) === JSON.stringify(format1Fixed4);
-  assert.ok(matches, `${q.id} should use the fixed Format 1 answer template`);
+  assert.match(q.prompt, /Which one would you change\?$/, `${q.id} should use the heading-review prompt`);
+  q.options.forEach(option => assert.ok(q.prompt.includes(option), `${q.id} option should be a heading shown in its scenario`));
 });
 
 // --- Rotation: the correct letter should be roughly even across each 15-question format, not clustered on one letter ---
@@ -44,9 +42,9 @@ bank.forEach(q => {
   q.options.forEach(o => assert.ok(!banned.test(o), `${q.id} options must not name the underlying framework`));
 });
 
-// --- Format 2: every prompt states three given categories to restate, matching the spec's worked example shape ---
+// --- Format 2 asks for the one additional category that completes the given set ---
 bank.filter(q => q.format === 2).forEach(q => {
-  assert.match(q.prompt, /other three/, `${q.id} should reference three given categories to complete`);
+  assert.match(q.prompt, /Which would you add next\?$/, `${q.id} should ask for the next category`);
 });
 
 // --- Runtime draw: 5 questions per format, 15 total, persisted with the attempt so it does not reshuffle on reload ---
