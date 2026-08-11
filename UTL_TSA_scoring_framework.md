@@ -2,6 +2,8 @@
 <!-- Part of UTL assessment documentation. See also: WEBSITE_CONTEXT.md for site overview, UTL_assessment_exercises.md for exercise details. -->
 <!-- Last updated: June 2026 -->
 
+> **ARCHIVED (2026-08-11):** This file documents the retired v1 assessment architecture — Sort & Bucket, Spot the Problem, the C³ Rubric™, and the Tier scoring system described below. That build was fully removed; it was never finished (Speak and Act were placeholder stubs) and saw no real production use. The live assessment is now `apps/tsa-diagnostic/index.html` (member-facing names unchanged: "the Diagnostic" before the program, "the Checkpoint" after), a single deterministic scoring engine — see `deterministic()`, `scoreAll()`, and `scoreText()` in that file for how Think/Speak/Act are actually scored today. Kept here as historical reference only.
+
 ---
 
 ## 1. What This File Is
