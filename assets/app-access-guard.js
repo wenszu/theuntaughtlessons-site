@@ -51,7 +51,7 @@ function previewLearningKey(key) {
   if (key === "utl_experience_preview_active" || key === "utl_experience_preview_backup") return false;
   const preserved = [
     "utl_member_", "utl_admin_", "utl_local_pw_", "utl_aiko_",
-    "utl_eisenhower_matrix_version", "utl_feedback_", "utl_global_feedback",
+    "utl_feedback_", "utl_global_feedback",
     "utl_use_firebase_", "utl_reward_settings", "utl_phase1_layout",
     "utl_phase2_layout", "utl_phase3_layout", "utl_orientation_layout",
     "utl_phase2_status", "utl_phase3_status", "utl_public_", "utl_find_level_"

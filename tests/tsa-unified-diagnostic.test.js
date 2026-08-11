@@ -68,10 +68,10 @@ assert.doesNotMatch(content, /ws-phase-number">C<\/div>/, 'The admin-only previe
 assert.doesNotMatch(content, /adminUnifiedPreview/, 'The retired admin-preview variable should no longer exist');
 assert.doesNotMatch(admin, /data-aiko-version-card="tsaDiagnostic"/, 'The retired v1/v2 toggle card should no longer exist');
 assert.doesNotMatch(admin, /<strong>Unified assessment<\/strong>/);
-assert.match(admin, /form=A&amp;reset=1[^]*Everyday decisions/, 'Admin should still be able to preview each scenario set');
-assert.match(admin, /form=B&amp;reset=1[^]*Planning under pressure/);
-assert.match(admin, /form=C&amp;reset=1[^]*Community choices/);
-assert.match(admin, /assessment=checkpoint&amp;preview=1&amp;form=C&amp;reset=1/);
+assert.match(admin, /form=A&reset=1[^]*Diagnostic — Everyday decisions/, 'Admin should still be able to preview each scenario set');
+assert.match(admin, /form=B&reset=1[^]*Diagnostic — Planning under pressure/);
+assert.match(admin, /form=C&reset=1[^]*Diagnostic — Community choices/);
+assert.match(admin, /assessment=checkpoint&preview=1&form=C&reset=1/);
 assert.match(fn, /exports\.scoreTsaDiagnostic = onRequest/);
 assert.match(fn, /Do not rescore it\. Add concise, evidence-based comments only/);
 assert.doesNotMatch(fn, /speakScore: bounded|actScore: bounded/, 'AI must not alter the official score');
