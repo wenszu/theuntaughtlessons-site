@@ -345,13 +345,6 @@ const UTL_CONTENT = {
     { name: "Executive", threshold: 1800 }
   ];
   var PROGRAM_COMPLETION_MP = 600;
-  var AIKO_VERSION_LOCAL_KEYS = {
-    explainToAiko120: "utl_aiko_120_version",
-    explainToAiko60: "utl_aiko_60_version",
-    eisenhowerMatrix: "utl_eisenhower_matrix_version"
-  };
-  var MATRIX_VERSION_LABEL_SCHEMA = "guided-v1-20260723";
-  var aikoVersions = { explainToAiko120: "v1", explainToAiko60: "v1", eisenhowerMatrix: "v1" };
   var phaseDescriptions = {
     phase1: "Learn to pull signal out of noise.",
     phase2: "Turn structure into concise communication.",
@@ -381,7 +374,7 @@ const UTL_CONTENT = {
     if (key === "utl_experience_preview_active" || key === "utl_experience_preview_backup") return false;
     var preserved = [
       "utl_member_", "utl_admin_", "utl_local_pw_", "utl_aiko_",
-      "utl_eisenhower_matrix_version", "utl_feedback_", "utl_global_feedback",
+      "utl_feedback_", "utl_global_feedback",
       "utl_use_firebase_", "utl_reward_settings", "utl_phase1_layout",
       "utl_phase2_layout", "utl_phase3_layout", "utl_orientation_layout",
       "utl_phase2_status", "utl_phase3_status", "utl_public_", "utl_find_level_"
@@ -424,106 +417,6 @@ const UTL_CONTENT = {
 
   function memberPath(file) {
     return inAdminRoot() ? "../member-login/" + file : file;
-  }
-
-  function normalizedAikoVersion(value) {
-    return value === "v2" ? "v2" : "v1";
-  }
-
-  function aikoVersionOverride() {
-    var value = new URLSearchParams(window.location.search || "").get("aikoVersion");
-    return value === "v1" || value === "v2" ? value : "";
-  }
-
-  function matrixVersionOverride() {
-    var value = new URLSearchParams(window.location.search || "").get("matrixVersion");
-    return value === "v1" || value === "v2" ? value : "";
-  }
-
-  function applyAikoVersions() {
-    var override = aikoVersionOverride();
-    var phase = UTL_CONTENT.phase2;
-    if (!phase || !Array.isArray(phase.exercises)) return;
-    phase.exercises.forEach(function (exercise) {
-      var suffixMatch = String(exercise.appUrl || "").match(/index\.html([?#].*)$/);
-      var suffix = suffixMatch ? suffixMatch[1] : "";
-      if (exercise.id === "p2-e5") exercise.appUrl = "../apps/explain-to-aiko" + (normalizedAikoVersion(override || aikoVersions.explainToAiko120) === "v2" ? "-v2" : "") + "/index.html" + suffix;
-      if (exercise.id === "p2-e6") exercise.appUrl = "../apps/explain-to-aiko-60" + (normalizedAikoVersion(override || aikoVersions.explainToAiko60) === "v2" ? "-v2" : "") + "/index.html" + suffix;
-    });
-    var matrixOverride = matrixVersionOverride();
-    var phase3 = UTL_CONTENT.phase3;
-    if (!phase3 || !Array.isArray(phase3.exercises)) return;
-    phase3.exercises.forEach(function (exercise) {
-      if (exercise.id !== "p3-e1") return;
-      var suffixMatch = String(exercise.appUrl || "").match(/index\.html([?#].*)$/);
-      var suffix = suffixMatch ? suffixMatch[1] : "";
-      // The guided experience is the member-facing v1. Folder names stay unchanged
-      // so direct links and saved progress remain compatible with earlier releases.
-      exercise.appUrl = "../apps/eisenhower-matrix" + (normalizedAikoVersion(matrixOverride || aikoVersions.eisenhowerMatrix) === "v2" ? "-v2" : "") + "/index.html" + suffix;
-    });
-  }
-
-  function rewriteRenderedAikoLinks() {
-    var phase = UTL_CONTENT.phase2;
-    if (!phase) return;
-    var paths = {};
-    phase.exercises.forEach(function (exercise) { if (exercise.id === "p2-e5" || exercise.id === "p2-e6") paths[exercise.id] = appHref(exercise.appUrl); });
-    document.querySelectorAll('[data-exercise-visit="p2-e5"], [data-exercise-visit="p2-e6"]').forEach(function (link) {
-      var id = link.getAttribute("data-exercise-visit");
-      if (paths[id]) link.setAttribute("href", paths[id]);
-    });
-    if (inAdminRoot()) return;
-    document.querySelectorAll('a[href*="explain-to-aiko"]').forEach(function (link) {
-      var href = link.getAttribute("href") || "";
-      var id = href.indexOf("explain-to-aiko-60") !== -1 ? "p2-e6" : "p2-e5";
-      if (paths[id]) link.setAttribute("href", paths[id]);
-    });
-    var matrix = UTL_CONTENT.phase3 && UTL_CONTENT.phase3.exercises.find(function (exercise) { return exercise.id === "p3-e1"; });
-    if (!matrix) return;
-    var matrixPath = appHref(matrix.appUrl);
-    document.querySelectorAll('[data-exercise-visit="p3-e1"], a[href*="/apps/eisenhower-matrix"]').forEach(function (link) {
-      link.setAttribute("href", matrixPath);
-    });
-  }
-
-  function loadAikoVersions() {
-    var override = aikoVersionOverride();
-    var matrixOverride = matrixVersionOverride();
-    if (override && matrixOverride) { applyAikoVersions(); return Promise.resolve(); }
-    if (/^(localhost|127\.0\.0\.1)$/.test(window.location.hostname)) {
-      aikoVersions.explainToAiko120 = normalizedAikoVersion(localStorage.getItem(AIKO_VERSION_LOCAL_KEYS.explainToAiko120));
-      aikoVersions.explainToAiko60 = normalizedAikoVersion(localStorage.getItem(AIKO_VERSION_LOCAL_KEYS.explainToAiko60));
-      aikoVersions.eisenhowerMatrix = localStorage.getItem("utl_eisenhower_matrix_version_schema") === MATRIX_VERSION_LABEL_SCHEMA
-        ? normalizedAikoVersion(localStorage.getItem(AIKO_VERSION_LOCAL_KEYS.eisenhowerMatrix))
-        : "v1";
-      applyAikoVersions();
-    }
-    var timedOut = false;
-    var timeout = new Promise(function (_, reject) { setTimeout(function () { timedOut = true; reject(new Error("Assessment version load timed out.")); }, 1800); });
-    var load = import(firebaseHref()).then(function (firebase) {
-      return firebase.getDoc(firebase.doc(firebase.db, "settings", "assessment_versions"));
-    }).then(function (snapshot) {
-      if (timedOut) return;
-      var settings = snapshot.exists() ? (snapshot.data() || {}) : {};
-      if (!override) {
-        aikoVersions.explainToAiko120 = normalizedAikoVersion(settings.explainToAiko120);
-        aikoVersions.explainToAiko60 = normalizedAikoVersion(settings.explainToAiko60);
-      }
-      if (!matrixOverride) aikoVersions.eisenhowerMatrix = settings.eisenhowerMatrixVersionSchema === MATRIX_VERSION_LABEL_SCHEMA
-        ? normalizedAikoVersion(settings.eisenhowerMatrix)
-        : "v1";
-      applyAikoVersions();
-      rewriteRenderedAikoLinks();
-    }).catch(function () {
-      aikoVersions = { explainToAiko120: "v1", explainToAiko60: "v1", eisenhowerMatrix: "v1" };
-      applyAikoVersions();
-      rewriteRenderedAikoLinks();
-    });
-    return Promise.race([load, timeout]).catch(function () {
-      aikoVersions = { explainToAiko120: "v1", explainToAiko60: "v1", eisenhowerMatrix: "v1" };
-      applyAikoVersions();
-      rewriteRenderedAikoLinks();
-    });
   }
 
   function appHref(path) {
@@ -990,7 +883,7 @@ const UTL_CONTENT = {
     if (revisionChanged && progress.adminProgressReset === true) {
       var preservedPrefixes = [
         "utl_member_", "utl_admin_", "utl_local_pw_", "utl_aiko_",
-        "utl_eisenhower_matrix_version", "utl_feedback_", "utl_global_feedback",
+        "utl_feedback_", "utl_global_feedback",
         "utl_use_firebase_", "utl_reward_settings"
       ];
       Object.keys(localStorage).forEach(function (key) {
@@ -4044,6 +3937,4 @@ const UTL_CONTENT = {
     renderAdmin: renderAdmin,
     getPhase: getPhase
   };
-  applyAikoVersions();
-  loadAikoVersions();
 })();

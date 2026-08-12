@@ -1802,6 +1802,21 @@
     .phase-layout-actions label { flex:0 0 100%; }
     .phase-layout-actions .saved { align-self:center; }
     .phase-layout-row.is-editing-video {  }
+    .published-content-group { margin-top:20px; }
+    .published-content-group:first-child { margin-top:14px; }
+    .published-content-group > h3 { margin:0 0 9px; color:var(--navy); font-family:'Lato',sans-serif; font-size:15px; }
+    .published-content-list { overflow:hidden; border:1px solid var(--line); border-radius:8px; background:var(--white); }
+    .published-content-row { display:grid; grid-template-columns:minmax(0,1fr) auto auto; gap:14px; align-items:center; padding:14px 16px; border-bottom:1px solid var(--line); }
+    .published-content-row:last-child { border-bottom:0; }
+    .published-content-main { display:grid; min-width:0; gap:4px; }
+    .published-content-main strong { color:var(--navy); font-size:14px; }
+    .published-content-type { color:#687482; font-size:11px; font-weight:700; }
+    .published-content-url { overflow:hidden; color:#687482; font-size:12px; line-height:1.35; text-overflow:ellipsis; white-space:nowrap; }
+    .published-status { padding:5px 8px; border-radius:999px; font-size:11px; font-weight:700; white-space:nowrap; }
+    .published-status.is-configured { background:#edf7f0; color:#25613b; }
+    .published-status.is-missing { background:#fff1ef; color:#9a352d; }
+    .published-content-actions { display:flex; flex-wrap:wrap; gap:7px; justify-content:flex-end; }
+    @media (max-width:760px) { .published-content-row { grid-template-columns:1fr; } .published-content-url { white-space:normal; overflow-wrap:anywhere; } .published-content-actions { justify-content:flex-start; } }
 
     /* FIX 8 — Invite log */
     .invite-log { margin-top:16px; }
@@ -1921,35 +1936,10 @@
     .eng-field-group { display:grid; gap:0; margin-bottom:18px; border:1px solid var(--line); border-radius:8px; background:var(--white); overflow:hidden; }
     .eng-field-row { display:flex; align-items:flex-start; gap:14px; padding:14px 16px; border-bottom:1px solid var(--line); }
     .eng-field-row:last-child { border-bottom:0; }
-    .aiko-version-manager { margin-bottom:20px; padding:20px; border:1px solid var(--line); border-radius:8px; background:var(--white); }
-    .aiko-version-manager-head { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; margin-bottom:16px; }
-    .aiko-version-manager-head h3 { margin:0; color:var(--navy); }
-    .aiko-live-scope { flex:0 0 auto; display:inline-flex; padding:6px 9px; border:1px solid #efd39c; border-radius:999px; background:#fff8e8; color:#795300; font-size:11px; font-weight:700; }
-    .aiko-version-grid { display:grid; grid-template-columns:1fr; gap:10px; }
-    .aiko-version-card { overflow:hidden; border:1px solid var(--line); border-radius:8px; background:#fff; }
-    .aiko-version-card-head { padding:14px 16px; background:#FAF8F3; }
-    .aiko-version-card-head h4 { margin:0 0 7px; color:var(--navy); font-size:17px; }
-    .aiko-live-version { display:inline-flex; padding:6px 9px; border-radius:999px; background:#e9f5ed; color:#25613b; font-size:12px; font-weight:700; }
-    .aiko-version-audit { margin:9px 0 0; color:#687482; font-size:12px; }
-    .aiko-version-options { display:grid; gap:10px; padding:16px; }
-    .aiko-version-option { display:grid; grid-template-columns:auto 1fr; gap:10px; padding:12px; border:1px solid var(--line); border-radius:8px; cursor:pointer; }
-    .aiko-version-option:has(input:checked) { border-color:var(--navy); background:#f2f6fa; box-shadow:inset 4px 0 0 var(--navy); }
-    .aiko-version-option input { margin-top:4px; accent-color:var(--navy); }
-    .aiko-version-option strong { display:block; color:var(--navy); }
-    .aiko-version-option span { display:block; margin-top:3px; color:#5e6873; font-size:13px; line-height:1.4; }
-    .aiko-version-preview { display:flex; flex-wrap:wrap; align-items:center; gap:8px; padding:0 16px 16px; }
-    .aiko-version-preview-note { width:100%; margin:0; color:#687482; font-size:12px; }
-    .aiko-version-preview-label { width:100%; margin:4px 0 0; color:#003366; font-size:13px; font-weight:700; }
-    .aiko-version-change { padding:14px 16px; border-top:1px solid #efd39c; background:#fff8e8; }
-    .aiko-version-change p { margin:0 0 10px; color:var(--navy); font-weight:700; }
-    .aiko-version-change-actions { display:flex; flex-wrap:wrap; gap:8px; }
-    .aiko-version-details { border-top:1px solid var(--line); }
-    .aiko-version-details > summary { padding:11px 16px; color:var(--navy); cursor:pointer; font-weight:700; list-style:none; }
-    .aiko-version-details > summary::-webkit-details-marker { display:none; }
-    .aiko-version-details > summary::after { content:'+'; float:right; font-size:18px; line-height:1; }
-    .aiko-version-details[open] > summary::after { content:'\2212'; }
-    .aiko-version-details[open] > summary { border-bottom:1px solid var(--line); }
-    @media (max-width:900px) { .aiko-version-grid { grid-template-columns:1fr; } .aiko-version-manager-head { flex-direction:column; } }
+    .settings-audience-heading { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; margin:22px 0 10px; }
+    .settings-audience-heading h3 { margin:0 0 4px; color:var(--navy); font-family:'Lato',sans-serif; font-size:17px; }
+    .settings-audience-heading p { margin:0; color:#687482; font-size:13px; line-height:1.45; }
+    .settings-audience-heading .control-scope { flex:0 0 auto; margin:0; }
     .eng-indent { padding-left:32px; background:rgba(243,237,226,.35); }
     .eng-master-toggle-row { background:rgba(0,51,102,.04); }
     .eng-toggle-label { flex:1; min-width:0; display:grid; gap:3px; }
@@ -2273,8 +2263,7 @@
       <div class="sidebar-divider"></div>
 
       <span class="nav-group-label" data-admin-nav-group="content-manager">Program access</span>
-      <button class="admin-nav-item active" data-admin-tab-scope="content-manager" data-target="section-visibility">Visibility</button>
-      <button class="admin-nav-item" data-admin-tab-scope="content-manager" data-target="section-access-controls">Assessments &amp; exercise experiences</button>
+      <button class="admin-nav-item active" data-admin-tab-scope="content-manager" data-target="section-access-controls">Visibility &amp; access</button>
 
       <span class="nav-group-label" data-admin-nav-group="content-manager">Program content</span>
       <button class="admin-nav-item" data-admin-tab-scope="content-manager" data-target="section-orientation">Orientation</button>
@@ -2307,6 +2296,7 @@
       <button class="admin-nav-item" data-admin-tab-scope="content-library" data-target="section-cl-question-bank">Diagnostic question bank</button>
 
       <span class="nav-group-label" data-admin-nav-group="admin-tools">Preview</span>
+      <button class="admin-nav-item" data-admin-tab-scope="admin-tools" data-target="section-visibility">Member preview settings</button>
       <button class="admin-nav-item" data-admin-tab-scope="admin-tools" data-target="section-admin-preview">Unlock phases</button>
       <button class="admin-nav-item" data-admin-tab-scope="admin-tools" data-target="section-links">Quick links</button>
       <span class="nav-group-label" data-admin-nav-group="admin-tools">Health</span>
@@ -2329,12 +2319,12 @@
         <div class="sync-list" id="syncCheckResults"></div>
       </section>
 
-      <section class="admin-section" id="section-visibility" data-admin-tab-panel="content-manager">
-        <span class="section-label">Site</span>
-        <h2>Visibility</h2>
+      <section class="admin-section" id="section-visibility" data-admin-tab-panel="admin-tools">
+        <span class="section-label">Preview &amp; Health</span>
+        <h2>Member preview settings</h2>
         <div class="section-divider"></div>
         <span class="control-scope is-preview">This browser only</span>
-        <p class="description">Use these controls to test visibility in this browser. They do not publish visibility changes to every learner. Phase 2 and Phase 3 still unlock automatically based on completion.</p>
+        <p class="description">Test member cards and release gates in this browser. Nothing here changes the live experience for other members.</p>
         <div class="visibility-checklist" id="visibilityChecklist"></div>
         <div class="visibility-summary-head">
           <h3>Visibility status summary</h3>
@@ -2349,75 +2339,12 @@
       </section>
 
       <section class="admin-section" id="section-access-controls" data-admin-tab-panel="content-manager">
-        <span class="section-label">Site</span>
-        <h2>Assessments &amp; exercise experiences</h2>
+        <span class="section-label">Program</span>
+        <h2>Visibility &amp; access</h2>
         <div class="section-divider"></div>
-        <p class="description">Controls assessment visibility by audience: public visitors first, then members, then Admin/ owner preview settings. Changes take effect on the next page load for each audience.</p>
+        <p class="description">Only live settings appear here. Diagnostic and Checkpoint use the same assessment system at two points in the member journey.</p>
 
-        <div class="aiko-version-manager" id="aikoVersionCard">
-          <div class="aiko-version-manager-head"><div><h3>Live exercise experience</h3><p class="description" style="margin:6px 0 0">The live choice is shown on each row. Open a row only when you need to preview an alternate or change what members receive.</p></div><span class="aiko-live-scope">Live for members</span></div>
-          <div id="aikoVersionStatus" class="eng-status" aria-live="polite"></div>
-          <div class="aiko-version-grid">
-            <article class="aiko-version-card" data-aiko-version-card="explainToAiko120" data-live-version="v1">
-              <div class="aiko-version-card-head"><h4>Explain to Aiko — 120 seconds</h4><span class="aiko-live-version" data-aiko-live-label>Live for members: AI feedback exercise</span><p class="aiko-version-audit" id="aikoVersion120Audit">Using safe default: AI feedback exercise</p></div>
-              <details class="aiko-version-details"><summary>Change or preview experience</summary>
-              <div class="aiko-version-options" role="radiogroup" aria-label="Experience for Explain to Aiko 120 seconds">
-                <label class="aiko-version-option"><input type="radio" name="aikoVersion120" value="v1" data-aiko-version-key="explainToAiko120"><span><strong>AI feedback exercise</strong>Members record in the browser, see a transcript and delivery measures, and receive feedback in the exercise.</span></label>
-                <label class="aiko-version-option"><input type="radio" name="aikoVersion120" value="v2" data-aiko-version-key="explainToAiko120"><span><strong>Self-recorded fallback</strong>Members record externally, use the Playback Gem, and paste feedback.</span></label>
-              </div>
-              <div class="aiko-version-preview"><p class="aiko-version-preview-note">Previews do not change the live member experience.</p><a class="small-button secondary-button" href="../apps/explain-to-aiko/index.html" target="_blank">Preview AI feedback</a><a class="small-button secondary-button" href="../apps/explain-to-aiko-v2/index.html" target="_blank">Preview self-recorded fallback</a></div>
-              <div class="aiko-version-change" data-aiko-version-change hidden><p data-aiko-change-copy>Change the member experience.</p><div class="aiko-version-change-actions"><button class="small-button" type="button" data-save-aiko-version="explainToAiko120">Publish selected version</button><button class="small-button secondary-button" type="button" data-cancel-aiko-version="explainToAiko120">Cancel</button></div></div>
-              </details>
-            </article>
-            <article class="aiko-version-card" data-aiko-version-card="explainToAiko60" data-live-version="v1">
-              <div class="aiko-version-card-head"><h4>Explain to Aiko — 60 seconds</h4><span class="aiko-live-version" data-aiko-live-label>Live for members: AI feedback exercise</span><p class="aiko-version-audit" id="aikoVersion60Audit">Using safe default: AI feedback exercise</p></div>
-              <details class="aiko-version-details"><summary>Change or preview experience</summary>
-              <div class="aiko-version-options" role="radiogroup" aria-label="Experience for Explain to Aiko 60 seconds">
-                <label class="aiko-version-option"><input type="radio" name="aikoVersion60" value="v1" data-aiko-version-key="explainToAiko60"><span><strong>AI feedback exercise</strong>Members record in the browser, see a transcript and delivery measures, and receive feedback in the exercise.</span></label>
-                <label class="aiko-version-option"><input type="radio" name="aikoVersion60" value="v2" data-aiko-version-key="explainToAiko60"><span><strong>Self-recorded fallback</strong>Members record externally, use the Playback Gem, and paste feedback.</span></label>
-              </div>
-              <div class="aiko-version-preview"><p class="aiko-version-preview-note">Previews do not change the live member experience.</p><a class="small-button secondary-button" href="../apps/explain-to-aiko-60/index.html" target="_blank">Preview AI feedback</a><a class="small-button secondary-button" href="../apps/explain-to-aiko-60-v2/index.html" target="_blank">Preview self-recorded fallback</a></div>
-              <div class="aiko-version-change" data-aiko-version-change hidden><p data-aiko-change-copy>Change the member experience.</p><div class="aiko-version-change-actions"><button class="small-button" type="button" data-save-aiko-version="explainToAiko60">Publish selected version</button><button class="small-button secondary-button" type="button" data-cancel-aiko-version="explainToAiko60">Cancel</button></div></div>
-              </details>
-            </article>
-            <article class="aiko-version-card" data-aiko-version-card="eisenhowerMatrix" data-live-version="v1">
-              <div class="aiko-version-card-head"><h4>The art of saying no</h4><span class="aiko-live-version" data-aiko-live-label>Live for members: guided decision exercise</span><p class="aiko-version-audit" id="eisenhowerMatrixVersionAudit">Using safe default: guided decision exercise</p></div>
-              <details class="aiko-version-details"><summary>Change or preview experience</summary>
-              <div class="aiko-version-options" role="radiogroup" aria-label="Experience for The art of saying no">
-                <label class="aiko-version-option"><input type="radio" name="eisenhowerMatrixVersion" value="v1" data-aiko-version-key="eisenhowerMatrix"><span><strong>Guided decision exercise</strong>Members judge urgency and importance, explain ambiguous calls, and write a real no.</span></label>
-                <label class="aiko-version-option"><input type="radio" name="eisenhowerMatrixVersion" value="v2" data-aiko-version-key="eisenhowerMatrix"><span><strong>Free-form matrix fallback</strong>Members place all ten tasks into the matrix and submit the completed board.</span></label>
-              </div>
-              <div class="aiko-version-preview"><p class="aiko-version-preview-note">Previews do not change the live member experience. Both choices award the same one-time completion MP.</p><a class="small-button secondary-button" href="../apps/eisenhower-matrix/index.html" target="_blank">Preview guided exercise</a><a class="small-button secondary-button" href="../apps/eisenhower-matrix-v2/index.html" target="_blank">Preview free-form fallback</a></div>
-              <div class="aiko-version-change" data-aiko-version-change hidden><p data-aiko-change-copy>Change the member experience.</p><div class="aiko-version-change-actions"><button class="small-button" type="button" data-save-aiko-version="eisenhowerMatrix">Publish selected version</button><button class="small-button secondary-button" type="button" data-cancel-aiko-version="eisenhowerMatrix">Cancel</button></div></div>
-              </details>
-            </article>
-          </div>
-        </div>
-
-        <div class="aiko-version-manager">
-          <div class="aiko-version-manager-head"><div><h3>TSA diagnostic and checkpoint</h3><p class="description" style="margin:6px 0 0">One unified assessment covers both moments. Preview links do not change what members see.</p></div></div>
-          <div class="aiko-version-grid">
-            <article class="aiko-version-card">
-              <div class="aiko-version-card-head"><h4>TSA diagnostic and checkpoint</h4><span class="aiko-live-version" data-aiko-live-label>Live for members: unified assessment</span></div>
-              <details class="aiko-version-details"><summary>Preview scenario sets</summary>
-              <div class="aiko-version-preview">
-                <p class="aiko-version-preview-note">The three scenario sets use different situations at the same intended difficulty. Their internal letter codes are not shown to members.</p>
-                <p class="aiko-version-preview-label">Diagnostic scenario sets</p>
-                <a class="small-button secondary-button" href="../apps/tsa-diagnostic/index.html?preview=1&amp;form=A&amp;reset=1" target="_blank">Everyday decisions</a>
-                <a class="small-button secondary-button" href="../apps/tsa-diagnostic/index.html?preview=1&amp;form=B&amp;reset=1" target="_blank">Planning under pressure</a>
-                <a class="small-button secondary-button" href="../apps/tsa-diagnostic/index.html?preview=1&amp;form=C&amp;reset=1" target="_blank">Community choices</a>
-                <p class="aiko-version-preview-label">Checkpoint scenario sets</p>
-                <a class="small-button secondary-button" href="../apps/tsa-diagnostic/index.html?assessment=checkpoint&amp;preview=1&amp;form=A&amp;reset=1" target="_blank">Everyday decisions</a>
-                <a class="small-button secondary-button" href="../apps/tsa-diagnostic/index.html?assessment=checkpoint&amp;preview=1&amp;form=B&amp;reset=1" target="_blank">Planning under pressure</a>
-                <a class="small-button secondary-button" href="../apps/tsa-diagnostic/index.html?assessment=checkpoint&amp;preview=1&amp;form=C&amp;reset=1" target="_blank">Community choices</a>
-              </div>
-              </details>
-            </article>
-          </div>
-        </div>
-
-        <span class="control-scope is-live">Live for all visitors</span>
-        <p class="description" style="margin-top:12px"><strong>Public</strong> — controls what non-logged-in visitors see on the public site and <a href="../tsa-score.html" target="_blank">tsa-score.html</a>.</p>
+        <div class="settings-audience-heading"><div><h3>Public visitors</h3><p>Controls the public homepage and <a href="../tsa-score.html" target="_blank">Find your level page</a>.</p></div><span class="control-scope is-live">Live</span></div>
         <div class="visibility-checklist" id="publicHomepageChecklist"></div>
         <span id="publicHomepageStatus" style="font-size:12px;color:#555;display:block;margin-top:6px;min-height:16px;"></span>
         <div id="publicAssessmentStatus" class="eng-status" aria-live="polite"></div>
@@ -2470,13 +2397,12 @@
               </select>
             </div>
           </div>
-          <button class="small-button" type="button" id="publicAssessmentSave" style="margin-top:4px">Save public assessment settings</button>
+          <button class="small-button" type="button" id="publicAssessmentSave" style="margin-top:4px">Save public settings</button>
           <span class="saved" id="publicAssessmentSaved">Saved</span>
         </div>
 
-        <div class="section-divider" style="margin-top:20px"></div>
-        <span class="control-scope is-live">Member access is live; card states below are local preview</span>
-        <p class="description" style="margin-top:12px"><strong>Members</strong> — the access switch is stored centrally. The three assessment card-state controls below it are browser-only preview settings.</p>
+        <div class="section-divider" style="margin-top:24px"></div>
+        <div class="settings-audience-heading"><div><h3>Members</h3><p>Controls whether regular members can see and open Diagnostic and Checkpoint.</p></div><span class="control-scope is-live">Live</span></div>
         <div id="tsaVisibilityStatus" class="eng-status" aria-live="polite"></div>
         <div id="tsaVisibilityForm">
           <div class="eng-field-group">
@@ -2488,23 +2414,19 @@
               <input class="eng-toggle" type="checkbox" data-tsa-vis-key="userEnabled" aria-label="Members can see assessments">
             </div>
           </div>
-          <div class="toggle-row" data-key="utl_tsa_status" data-default="live" data-options="live:Show,placeholder:Coming soon,hidden:Hide" data-labels="live:Assessment section shown in the member hub,placeholder:Whole section shows coming soon buttons,hidden:Assessment section removed from the page entirely"></div>
-          <div class="toggle-row" data-key="utl_tsa_diagnostic_status" data-default="live" data-options="live:Show,placeholder:Coming soon,hidden:Hide" data-labels="live:The diagnostic card links to its assessment hub,placeholder:The diagnostic card shows a Coming soon badge,hidden:The diagnostic card is hidden"></div>
-          <div class="toggle-row" data-key="utl_tsa_checkpoint_status" data-default="live" data-options="live:Show,placeholder:Coming soon,hidden:Hide" data-labels="live:The checkpoint card links to its assessment hub,placeholder:The checkpoint card shows a Coming soon badge,hidden:The checkpoint card is hidden"></div>
           <div class="sync-actions" style="margin-top: 14px;">
-            <button class="small-button" type="button" id="showReadyAssessments">Set ready assessment apps live</button>
             <a class="small-button secondary-button" href="../member-login/index.html?mode=admin#assessments" target="_blank" style="display:inline-flex;align-items:center;text-decoration:none;">Preview assessments</a>
           </div>
 
           <div class="section-divider" style="margin-top:20px"></div>
-          <p class="description" style="margin-top:12px"><strong>Admin/ owner</strong> — controls preview and testing behavior for admin and owner roles only. Regular visitors and members are not affected.</p>
+          <div class="settings-audience-heading"><div><h3>Admins and owners</h3><p>Allows administrators to test assessments while they remain hidden from regular members.</p></div><span class="control-scope is-live">Live</span></div>
           <div class="eng-field-group">
             <div class="eng-field-row">
               <label class="eng-toggle-label">
-                <span class="eng-toggle-name">Admin/ owner can access member assessments hidden from members</span>
-                <span class="eng-toggle-desc">When on, admin and owner roles can still access the member Diagnostic and Checkpoint area when it is hidden for regular members.</span>
+                <span class="eng-toggle-name">Allow assessment access when hidden from members</span>
+                <span class="eng-toggle-desc">Admins and owners can still open Diagnostic and Checkpoint when member access is off.</span>
               </label>
-              <input class="eng-toggle" type="checkbox" data-tsa-vis-key="adminEnabled" aria-label="Admin/ owner can access member assessments hidden from members" checked>
+              <input class="eng-toggle" type="checkbox" data-tsa-vis-key="adminEnabled" aria-label="Allow assessment access when hidden from members" checked>
             </div>
           </div>
           <button class="small-button" type="button" id="tsaVisibilitySave" style="margin-top:4px">Save assessment access settings</button>
@@ -2516,20 +2438,20 @@
           <div class="eng-field-group">
             <div class="eng-field-row">
               <label class="eng-toggle-label">
-                <span class="eng-toggle-name">Admin/ owner can preview hidden public assessment cards</span>
-                <span class="eng-toggle-desc">When checked, admin and owner roles can still see the public Diagnostic and Checkpoint cards even when those cards are hidden for visitors.</span>
+                <span class="eng-toggle-name">Preview public cards when hidden</span>
+                <span class="eng-toggle-desc">Admins and owners can see hidden Diagnostic and Checkpoint cards on the public page.</span>
               </label>
-              <input class="eng-toggle" type="checkbox" data-admin-vis-key="publicFindLevelPreview" aria-label="Admin/ owner can preview hidden public assessment cards" checked>
+              <input class="eng-toggle" type="checkbox" data-admin-vis-key="publicFindLevelPreview" aria-label="Preview public cards when hidden" checked>
             </div>
             <div class="eng-field-row">
               <label class="eng-toggle-label">
-                <span class="eng-toggle-name">Skip Find your level data form for Admin/ owner</span>
-                <span class="eng-toggle-desc">When checked, admin and owner roles can open the public Find your level exercise without entering name, email, role, or reason.</span>
+                <span class="eng-toggle-name">Skip the public data form</span>
+                <span class="eng-toggle-desc">Admins and owners can test Find your level without entering contact details.</span>
               </label>
-              <input class="eng-toggle" type="checkbox" data-admin-vis-key="findLevelLeadGateBypass" aria-label="Skip Find your level data form for Admin/ owner" checked>
+              <input class="eng-toggle" type="checkbox" data-admin-vis-key="findLevelLeadGateBypass" aria-label="Skip the public data form" checked>
             </div>
           </div>
-          <button class="small-button" type="button" id="adminVisibilitySave" style="margin-top:4px">Save Admin/ owner preview settings</button>
+          <button class="small-button" type="button" id="adminVisibilitySave" style="margin-top:4px">Save admin preview settings</button>
           <span class="saved" id="adminVisibilitySaved">Saved</span>
         </div>
       </section>
@@ -2538,14 +2460,8 @@
         <span class="section-label">Members</span>
         <h2>Orientation</h2>
         <div class="section-divider"></div>
-        <span class="control-scope is-preview">This browser only</span>
-        <p class="description">Controls the Orientation section in your local member preview. It does not publish a new layout to other learners. Orientation does not have a separate lesson video; use the two context sub-sections below.</p>
-        <div class="sync-actions">
-          <button class="small-button" type="button" data-add-context="orientation">Add context sub-section</button>
-          <button class="small-button secondary-button" type="button" data-save-layout-default="orientation">Set current layout as default</button>
-          <button class="small-button secondary-button" type="button" data-reset-layout="orientation">Reset Orientation layout</button>
-          <span class="layout-status" data-layout-status="orientation" aria-live="polite"></span>
-        </div>
+        <span class="control-scope is-live">Published configuration</span>
+        <p class="description">Read-only inventory of the Orientation content currently published for members. Content changes are made with the next site release.</p>
         <div id="embed-orientation"></div>
       </section>
 
@@ -2553,14 +2469,8 @@
         <span class="section-label">Members</span>
         <h2>Phase 1</h2>
         <div class="section-divider"></div>
-        <span class="control-scope is-preview">This browser only</span>
-        <p class="description">Controls Phase 1 in your local member preview. Move rows to test their order; these changes are not published to other learners.</p>
-        <div class="sync-actions">
-          <button class="small-button" type="button" data-add-context="phase1">Add context sub-section</button>
-          <button class="small-button secondary-button" type="button" data-save-layout-default="phase1">Set current layout as default</button>
-          <button class="small-button secondary-button" type="button" data-reset-layout="phase1">Reset Phase 1 layout</button>
-          <span class="layout-status" data-layout-status="phase1" aria-live="polite"></span>
-        </div>
+        <span class="control-scope is-live">Published configuration</span>
+        <p class="description">Read-only inventory of the Phase 1 lessons, videos, setup content, and exercises. Video links are updated with the next site release.</p>
         <div id="embed-phase1"></div>
       </section>
 
@@ -2568,14 +2478,8 @@
         <span class="section-label">Members</span>
         <h2>Phase 2</h2>
         <div class="section-divider"></div>
-        <span class="control-scope is-preview">This browser only</span>
-        <p class="description">Controls Phase 2 in your local member preview. Layout changes here are not published to other learners. Phase visibility is shown in the Visibility section.</p>
-        <div class="sync-actions">
-          <button class="small-button" type="button" data-add-context="phase2">Add context sub-section</button>
-          <button class="small-button secondary-button" type="button" data-save-layout-default="phase2">Set current layout as default</button>
-          <button class="small-button secondary-button" type="button" data-reset-layout="phase2">Reset Phase 2 layout</button>
-          <span class="layout-status" data-layout-status="phase2" aria-live="polite"></span>
-        </div>
+        <span class="control-scope is-live">Published configuration</span>
+        <p class="description">Read-only inventory of the Phase 2 lessons, videos, setup content, and exercises. Video links are updated with the next site release.</p>
         <div id="embed-phase2"></div>
       </section>
 
@@ -2583,14 +2487,8 @@
         <span class="section-label">Members</span>
         <h2>Phase 3</h2>
         <div class="section-divider"></div>
-        <span class="control-scope is-preview">This browser only</span>
-        <p class="description">Controls Phase 3 in your local member preview. Layout changes here are not published to other learners. Participant completion remains automatic.</p>
-        <div class="sync-actions">
-          <button class="small-button" type="button" data-add-context="phase3">Add context sub-section</button>
-          <button class="small-button secondary-button" type="button" data-save-layout-default="phase3">Set current layout as default</button>
-          <button class="small-button secondary-button" type="button" data-reset-layout="phase3">Reset Phase 3 layout</button>
-          <span class="layout-status" data-layout-status="phase3" aria-live="polite"></span>
-        </div>
+        <span class="control-scope is-live">Published configuration</span>
+        <p class="description">Read-only inventory of the Phase 3 lessons, videos, setup content, and exercises. Video links are updated with the next site release.</p>
         <div id="embed-phase3"></div>
       </section>
 
@@ -3687,14 +3585,6 @@
             description: 'Shows learners three time-based options built from their next unfinished videos and exercises. Admin preview remains available when hidden.'
           },
           {
-            key: 'utl_mission_card',
-            checkedValue: 'show',
-            uncheckedValue: 'hide',
-            fallback: 'show',
-            label: 'Show MA mission card',
-            description: 'Shows the storyline card at the top of the member workspace.'
-          },
-          {
             key: 'utl_phase2_status',
             checkedValue: 'show',
             uncheckedValue: 'hide',
@@ -4269,9 +4159,8 @@
       target.querySelectorAll('[data-public-homepage-key]').forEach((input) => {
         input.addEventListener('change', function(e) {
           e.stopPropagation();
-          const newOn = input.checked;
-          const item = PUBLIC_HOMEPAGE_ITEMS.find((entry) => entry.key === input.dataset.publicHomepageKey);
-          if (item) setPublicHomepageValue(item, newOn);
+          const status = document.getElementById('publicHomepageStatus');
+          if (status) status.textContent = 'Unsaved change. Select Save public settings below.';
         });
       });
     }
@@ -4294,16 +4183,18 @@
     }
 
     async function setPublicHomepageValue(item, checked) {
-      setChecklistValue(item, checked);
       const status = document.getElementById('publicHomepageStatus');
       const fb = window.utlFirebaseAuth;
       if (status) status.textContent = 'Saving live setting...';
       try {
         if (!fb || !fb.setPublicFindLevelSetting) throw new Error('Firebase tools are not ready.');
         await fb.setPublicFindLevelSetting(checked);
+        setChecklistValue(item, checked);
         if (status) status.textContent = checked ? 'Saved. Find your level will show on the public homepage.' : 'Saved. Find your level will be hidden on the public homepage.';
       } catch (error) {
-        if (status) status.textContent = 'Local toggle saved, but live setting failed. Sign in with a Firebase admin account and try again.';
+        const control = document.querySelector('[data-public-homepage-key="' + item.key + '"]');
+        setBinaryControl(control, !checked);
+        if (status) status.textContent = 'Could not save the live setting. Nothing changed.';
       }
     }
 
@@ -4465,46 +4356,28 @@
     function phaseLessonVideoControlsHtml(phaseId) {
       const content = window.UTL_CONTENT;
       if (!content || phaseId === 'orientation') return '';
-      const key = phaseId.replace('phase', 'phase');
-      const phase = content[key];
+      const phase = content[phaseId];
       if (!phase || !Array.isArray(phase.lessons) || !phase.lessons.length) return '';
-      const orderedLessons = lessonOrderForPhase(phaseId, phase.lessons);
       return `
-        <div class="phase-layout-videos" data-lesson-layout="${phaseId}">
-          ${orderedLessons.map((lesson, index) => {
-            const videoVal = learningVideoValue(`utl_url_${lesson.id}`, lesson.videoUrl || '');
-            const isEmpty = !videoVal;
-            const hasIgnoredOverride = hasIgnoredVideoOverride(`utl_url_${lesson.id}`);
+        <div class="published-content-group">
+          <h3>Lesson videos</h3>
+          <div class="published-content-list">
+          ${phase.lessons.map((lesson, index) => {
+            const videoUrl = String(lesson.videoUrl || '').trim();
             return `
-            <div class="phase-layout-row is-video${isEmpty ? ' has-empty-video' : ''}" data-learning-video="utl_url_${lesson.id}" data-lesson-id="${lesson.id}" data-index="${index}" data-default-url="${escapeHtml(lesson.videoUrl || '')}">
-              <span class="phase-layout-handle" draggable="true" title="Drag to reorder" aria-label="Drag to reorder">⠿</span>
-              <div class="phase-layout-content">
-                <div class="phase-layout-top">
-                  <span class="phase-layout-kind">Lesson video</span>
-                  <span class="status-line">${escapeHtml(lesson.duration || '')}</span>
-                </div>
-                <div class="phase-layout-grid">
-                  <div class="phase-layout-field">
-                    <label>Lesson name</label>
-                    <input type="text" value="${escapeHtml(`Lesson ${index + 1}: ${lesson.title}`)}" readonly>
-                  </div>
-                  <div class="phase-layout-field">
-                    <label>Video URL</label>
-                    <input type="url" data-video-url value="${escapeHtml(videoVal)}" placeholder="Paste Google Drive or Vimeo URL" readonly class="is-readonly">${isEmpty ? '<span class="no-video-note">No video saved</span>' : ''}
-                    <span class="field-note" data-video-note>${hasIgnoredOverride ? 'Ignored an old local override because it is not a URL.' : ''}</span>
-                  </div>
-                  <div class="phase-layout-field phase-layout-actions">
-                    <label>Actions</label>
-                    <button class="small-button secondary-button" type="button" data-video-action="edit">Edit</button>
-                    <button class="small-button" type="button" data-video-action="save" disabled>Save override</button>
-                    <button class="small-button secondary-button" type="button" data-video-action="cancel" hidden>Cancel</button>
-                    <button class="small-button secondary-button" type="button" data-video-action="reset">Use config</button>
-                    <span class="saved">Saved ✓</span>
-                  </div>
-                </div>
+            <div class="published-content-row">
+              <div class="published-content-main">
+                <span class="published-content-type">Lesson ${index + 1} · ${escapeHtml(lesson.duration || 'Duration not set')}</span>
+                <strong>${escapeHtml(lesson.title)}</strong>
+                <span class="published-content-url">${videoUrl ? escapeHtml(videoUrl) : 'No published video link'}</span>
+              </div>
+              <span class="published-status ${videoUrl ? 'is-configured' : 'is-missing'}">${videoUrl ? 'Configured' : 'Missing'}</span>
+              <div class="published-content-actions">
+                ${videoUrl ? `<a class="small-button secondary-button" href="${escapeHtml(videoUrl)}" target="_blank" rel="noopener">Open video</a><button class="small-button secondary-button" type="button" data-copy-published-url="${escapeHtml(videoUrl)}">Copy link</button>` : ''}
               </div>
             </div>
           `}).join('')}
+          </div>
         </div>
       `;
     }
@@ -4554,7 +4427,7 @@
             const sub = row.querySelector('.sub-label');
             if (sub) sub.textContent = labels[option.value] || '';
             if (VISIBILITY_CHECKLIST.some((group) => group.items.some((item) => item.key === key))) renderVisibilityChecklist();
-            if (key === 'utl_admin_preview_bypass' || key === 'utl_public_find_level' || key === 'utl_daily_welcome_card' || key === 'utl_mission_card' || key === 'utl_phase2_status' || key === 'utl_phase3_status' || key === 'utl_tsa_status' || /_done$/.test(key)) renderVisibilityStatus();
+            if (key === 'utl_admin_preview_bypass' || key === 'utl_public_find_level' || key === 'utl_daily_welcome_card' || key === 'utl_phase2_status' || key === 'utl_phase3_status' || /_done$/.test(key)) renderVisibilityStatus();
             showSaved(saved);
           });
           control.appendChild(button);
@@ -4677,6 +4550,33 @@
     }
 
     function renderPhaseLayoutEditors() {
+      ['orientation', 'phase1', 'phase2', 'phase3'].forEach((phaseId) => {
+        const target = document.getElementById('embed-' + phaseId);
+        if (!target) return;
+        const publishedItems = builtInPhaseLayout(phaseId);
+        const setupRows = publishedItems.map((item) => {
+          if (item.kind === 'app') {
+            return `<div class="published-content-row"><div class="published-content-main"><span class="published-content-type">Exercise</span><strong>${escapeHtml(item.title)}</strong></div><span class="published-status is-configured">Published</span></div>`;
+          }
+          const url = String(item.url || '').trim();
+          const typeLabel = item.type === 'video' ? 'Setup video' : item.type === 'slides' ? 'Setup slides' : 'Setup content';
+          return `<div class="published-content-row"><div class="published-content-main"><span class="published-content-type">${typeLabel}</span><strong>${escapeHtml(item.label)}</strong><span class="published-content-url">${url ? escapeHtml(url) : 'No published link'}</span></div><span class="published-status ${url ? 'is-configured' : 'is-missing'}">${url ? 'Configured' : 'Missing'}</span><div class="published-content-actions">${url ? `<a class="small-button secondary-button" href="${escapeHtml(url)}" target="_blank" rel="noopener">Open</a><button class="small-button secondary-button" type="button" data-copy-published-url="${escapeHtml(url)}">Copy link</button>` : ''}</div></div>`;
+        }).join('');
+        target.innerHTML = `${phaseLessonVideoControlsHtml(phaseId)}<div class="published-content-group"><h3>Exercise setup and activities</h3><div class="published-content-list">${setupRows}</div></div>`;
+      });
+      document.querySelectorAll('[data-copy-published-url]').forEach((button) => {
+        button.addEventListener('click', async () => {
+          try {
+            await navigator.clipboard.writeText(button.dataset.copyPublishedUrl || '');
+            const original = button.textContent;
+            button.textContent = 'Copied';
+            window.setTimeout(() => { button.textContent = original; }, 1400);
+          } catch (error) {
+            showToast('Could not copy the link', 'error');
+          }
+        });
+      });
+      return;
       ['orientation', 'phase1', 'phase2', 'phase3'].forEach((phaseId) => {
         const target = document.getElementById('embed-' + phaseId);
         if (!target) return;
@@ -5092,19 +4992,9 @@
           <span class="visibility-badge ${getValue('utl_public_find_level', 'hide') === 'show' ? 'is-live' : ''}">${getValue('utl_public_find_level', 'hide') === 'show' ? 'Visible' : 'Hidden'}</span>
         </div>
         <div class="visibility-row">
-          <span class="visibility-name">Mission card</span>
-          <span>${getValue('utl_mission_card', 'show') === 'show' ? 'MA storyline card is visible in the member workspace.' : 'MA storyline card is hidden in the member workspace.'}</span>
-          <span class="visibility-badge ${getValue('utl_mission_card', 'show') === 'show' ? 'is-live' : ''}">${getValue('utl_mission_card', 'show') === 'show' ? 'Visible' : 'Hidden'}</span>
-        </div>
-        <div class="visibility-row">
           <span class="visibility-name">Today’s Mission</span>
           <span>${getValue('utl_daily_welcome_card', 'show') === 'show' ? 'Today’s Mission welcome card is visible in the member workspace.' : 'Today’s Mission welcome card is hidden for learners; Admin/ owner can still preview it.'}</span>
           <span class="visibility-badge ${getValue('utl_daily_welcome_card', 'show') === 'show' ? 'is-live' : ''}">${getValue('utl_daily_welcome_card', 'show') === 'show' ? 'Visible' : 'Hidden'}</span>
-        </div>
-        <div class="visibility-row">
-          <span class="visibility-name">Assessments</span>
-          <span>${getValue('utl_tsa_status', 'live') === 'hidden' ? 'Assessment section is hidden from the member workspace.' : 'Assessment section is visible in the member workspace.'}</span>
-          <span class="visibility-badge ${getValue('utl_tsa_status', 'live') !== 'hidden' ? 'is-live' : ''}">${getValue('utl_tsa_status', 'live') !== 'hidden' ? 'Visible' : 'Hidden'}</span>
         </div>
         <div class="visibility-row">
           <span class="visibility-name">Phase 2</span>
@@ -5201,6 +5091,12 @@
         ['My results', '../my-results/index.html'],
         ['Diagnostic', '../apps/tsa-diagnostic/index.html'],
         ['Checkpoint', '../apps/tsa-diagnostic/index.html?assessment=checkpoint'],
+        ['Diagnostic — Everyday decisions', '../apps/tsa-diagnostic/index.html?preview=1&form=A&reset=1'],
+        ['Diagnostic — Planning under pressure', '../apps/tsa-diagnostic/index.html?preview=1&form=B&reset=1'],
+        ['Diagnostic — Community choices', '../apps/tsa-diagnostic/index.html?preview=1&form=C&reset=1'],
+        ['Checkpoint — Everyday decisions', '../apps/tsa-diagnostic/index.html?assessment=checkpoint&preview=1&form=A&reset=1'],
+        ['Checkpoint — Planning under pressure', '../apps/tsa-diagnostic/index.html?assessment=checkpoint&preview=1&form=B&reset=1'],
+        ['Checkpoint — Community choices', '../apps/tsa-diagnostic/index.html?assessment=checkpoint&preview=1&form=C&reset=1'],
         ['Grocery list', '../apps/grocery-list/index.html'],
         ["Manager's messy notes", '../apps/messy-notes/index.html'],
         ['Rushed voice memo', '../apps/rushed-voice-memo/index.html'],
@@ -5217,6 +5113,7 @@
       const groups = [
         { label: 'Site', names: ['Member hub', 'Member hub — admin mode', 'My results'] },
         { label: 'Assessments', names: ['Diagnostic', 'Checkpoint'] },
+        { label: 'Assessment QA forms', names: ['Diagnostic — Everyday decisions', 'Diagnostic — Planning under pressure', 'Diagnostic — Community choices', 'Checkpoint — Everyday decisions', 'Checkpoint — Planning under pressure', 'Checkpoint — Community choices'] },
         { label: 'Phase 1 apps', names: ['Grocery list', "Manager's messy notes", 'Rushed voice memo', 'Rushed voice memo — AI', 'Chalkboard notes'] },
         { label: 'Phase 2 apps', names: ['Issue tree builder', 'SCQA builder'] },
         { label: 'Phase 3 apps', names: ['The art of saying no', 'I have bad news...', "Let's switch hats", 'Speak like Obama'] }
@@ -5791,157 +5688,6 @@
         this.disabled = false;
       }
     });
-
-    // ===== Member exercise versions =====
-
-    const AIKO_VERSION_LOCAL_KEYS = {
-      explainToAiko120: 'utl_aiko_120_version',
-      explainToAiko60: 'utl_aiko_60_version',
-      eisenhowerMatrix: 'utl_eisenhower_matrix_version'
-    };
-    const MATRIX_VERSION_LABEL_SCHEMA = 'guided-v1-20260723';
-
-    function normalizeAikoVersion(value) {
-      return value === 'v2' ? 'v2' : 'v1';
-    }
-
-    function aikoVersionName(value, key) {
-      if (key === 'eisenhowerMatrix') return normalizeAikoVersion(value) === 'v2' ? 'free-form matrix fallback' : 'guided decision exercise';
-      return normalizeAikoVersion(value) === 'v2' ? 'self-recorded fallback' : 'AI feedback exercise';
-    }
-
-    function versionExerciseLabel(key) {
-      if (key === 'explainToAiko120') return '120-second exercise';
-      if (key === 'explainToAiko60') return '60-second exercise';
-      return 'The art of saying no';
-    }
-
-    function syncAikoVersionLocal(key, value) {
-      if (AIKO_VERSION_LOCAL_KEYS[key]) localStorage.setItem(AIKO_VERSION_LOCAL_KEYS[key], normalizeAikoVersion(value));
-      if (key === 'eisenhowerMatrix') localStorage.setItem('utl_eisenhower_matrix_version_schema', MATRIX_VERSION_LABEL_SCHEMA);
-    }
-
-    function formatAikoVersionAudit(settings, key) {
-      const by = settings[key + 'UpdatedBy'] || settings.updatedBy || '';
-      const raw = settings[key + 'UpdatedAt'] || settings.updatedAt;
-      let when = '';
-      try {
-        const date = raw && typeof raw.toDate === 'function' ? raw.toDate() : (raw ? new Date(raw) : null);
-        if (date && !Number.isNaN(date.getTime())) when = date.toLocaleString();
-      } catch (_) {}
-      if (!by && !when) return 'Using safe default: ' + aikoVersionName('v1', key) + ' · No version has been published yet';
-      return ['Last published', by ? 'by ' + by : '', when ? 'on ' + when : ''].filter(Boolean).join(' ');
-    }
-
-    function updateAikoVersionChoice(key) {
-      const card = document.querySelector('[data-aiko-version-card="' + key + '"]');
-      if (!card) return;
-      const live = normalizeAikoVersion(card.dataset.liveVersion);
-      const selected = card.querySelector('[data-aiko-version-key="' + key + '"]:checked');
-      const next = normalizeAikoVersion(selected && selected.value);
-      const change = card.querySelector('[data-aiko-version-change]');
-      const copy = card.querySelector('[data-aiko-change-copy]');
-      const publish = card.querySelector('[data-save-aiko-version]');
-      if (change) change.hidden = next === live;
-      if (copy) copy.textContent = 'Change the member experience from the ' + aikoVersionName(live, key) + ' to the ' + aikoVersionName(next, key) + '.';
-      if (publish) publish.textContent = 'Publish ' + aikoVersionName(next, key) + ' for ' + versionExerciseLabel(key);
-    }
-
-    function syncAikoVersionForm(settings) {
-      ['explainToAiko120', 'explainToAiko60', 'eisenhowerMatrix'].forEach(function(key) {
-        const value = key === 'eisenhowerMatrix' && settings.eisenhowerMatrixVersionSchema !== MATRIX_VERSION_LABEL_SCHEMA
-          ? 'v1'
-          : normalizeAikoVersion(settings[key]);
-        const card = document.querySelector('[data-aiko-version-card="' + key + '"]');
-        if (card) card.dataset.liveVersion = value;
-        document.querySelectorAll('[data-aiko-version-key="' + key + '"]').forEach(function(input) { input.checked = input.value === value; });
-        syncAikoVersionLocal(key, value);
-        const liveLabel = card && card.querySelector('[data-aiko-live-label]');
-        if (liveLabel) liveLabel.textContent = 'Live for members: ' + aikoVersionName(value, key);
-        const audit = document.getElementById(key === 'explainToAiko120' ? 'aikoVersion120Audit' : key === 'explainToAiko60' ? 'aikoVersion60Audit' : 'eisenhowerMatrixVersionAudit');
-        if (audit) audit.textContent = formatAikoVersionAudit(settings, key);
-        updateAikoVersionChoice(key);
-      });
-    }
-
-    document.querySelectorAll('[data-aiko-version-key]').forEach(function(input) {
-      input.addEventListener('change', function() { updateAikoVersionChoice(input.dataset.aikoVersionKey); });
-    });
-
-    document.querySelectorAll('[data-cancel-aiko-version]').forEach(function(button) {
-      button.addEventListener('click', function() {
-        const key = button.dataset.cancelAikoVersion;
-        const card = document.querySelector('[data-aiko-version-card="' + key + '"]');
-        const live = normalizeAikoVersion(card && card.dataset.liveVersion);
-        const input = document.querySelector('[data-aiko-version-key="' + key + '"][value="' + live + '"]');
-        if (input) input.checked = true;
-        updateAikoVersionChoice(key);
-      });
-    });
-
-    async function loadAikoVersionSettings() {
-      const fb = window.utlFirebaseAuth;
-      const status = document.getElementById('aikoVersionStatus');
-      if (!status) return;
-      if (!fb || !fb.getDoc || !fb.doc || !fb.db) {
-        status.textContent = 'Loading the live member choices…';
-        window.addEventListener('utlFirebaseAuthReady', function handler() {
-          window.removeEventListener('utlFirebaseAuthReady', handler);
-          loadAikoVersionSettings();
-        });
-        return;
-      }
-      status.textContent = 'Loading live exercise choices…';
-      try {
-        const snapshot = await fb.getDoc(fb.doc(fb.db, 'settings', 'assessment_versions'));
-        syncAikoVersionForm(snapshot.exists() ? (snapshot.data() || {}) : {});
-        status.textContent = 'Live member choices loaded.';
-      } catch (error) {
-        syncAikoVersionForm({});
-        status.textContent = 'Could not load the live choices. The primary experiences will open by default.';
-      }
-    }
-
-    document.querySelectorAll('[data-save-aiko-version]').forEach(function(button) {
-      button.addEventListener('click', async function() {
-        const key = button.dataset.saveAikoVersion;
-        const selected = document.querySelector('[data-aiko-version-key="' + key + '"]:checked');
-        const value = normalizeAikoVersion(selected && selected.value);
-        const card = document.querySelector('[data-aiko-version-card="' + key + '"]');
-        const live = normalizeAikoVersion(card && card.dataset.liveVersion);
-        if (value === live) return;
-        const duration = versionExerciseLabel(key);
-        if (!window.confirm('Members will use the ' + aikoVersionName(value, key) + ' the next time they open ' + duration + '. The direct link to the ' + aikoVersionName(live, key) + ' will still work. Publish this change?')) return;
-        const profile = adminProfileData();
-        const updatedBy = profile.email || profile.displayName || 'admin';
-        const fb = window.utlFirebaseAuth;
-        const now = fb && fb.serverTimestamp ? fb.serverTimestamp() : Timestamp.now();
-        const payload = { updatedAt: now, updatedBy };
-        payload[key] = value;
-        if (key === 'eisenhowerMatrix') payload.eisenhowerMatrixVersionSchema = MATRIX_VERSION_LABEL_SCHEMA;
-        payload[key + 'UpdatedAt'] = now;
-        payload[key + 'UpdatedBy'] = updatedBy;
-        button.disabled = true;
-        try {
-          if (!fb || !fb.doc || !fb.db || !fb.setDoc) throw new Error('Firebase is not ready.');
-          await fb.setDoc(fb.doc(fb.db, 'settings', 'assessment_versions'), payload, { merge: true });
-          syncAikoVersionLocal(key, value);
-          showToast(aikoVersionName(value, key) + ' published for ' + duration);
-          await loadAikoVersionSettings();
-        } catch (error) {
-          if (/^(localhost|127\.0\.0\.1)$/.test(window.location.hostname)) {
-            showToast('Saved for localhost preview only');
-            syncAikoVersionForm(payload);
-          } else {
-            showToast((error && error.message) || 'Version save failed', 'error');
-          }
-        } finally {
-          button.disabled = false;
-        }
-      });
-    });
-
-    // ===== End member exercise versions =====
 
     // ===== Email Templates =====
 
@@ -6579,28 +6325,38 @@
 
     document.getElementById('publicAssessmentSave')?.addEventListener('click', async function() {
       var fb = window.utlFirebaseAuth;
-      if (!fb || !fb.setPublicAssessmentSettings) return;
+      if (!fb || !fb.setPublicAssessmentSettings || !fb.setPublicFindLevelSetting) return;
       var partial = {};
+      var homepageControl = document.querySelector('[data-public-homepage-key="utl_public_find_level"]');
+      var homepageVisible = getBinaryControl(homepageControl);
       document.querySelectorAll('[data-pub-assess-key]').forEach(function(btn) {
         var key = btn.dataset.pubAssessKey;
         var val = getBinaryControl(btn);
         partial[key] = val;
-        syncPublicAssessmentLocal(key, val);
       });
       document.querySelectorAll('[data-pub-assess-field]').forEach(function(field) {
         var key = field.dataset.pubAssessField;
         var val = field.value || (key === 'findLevelExerciseMode' ? 'random' : 'sort_bucket_001');
         partial[key] = val;
-        syncPublicAssessmentFieldLocal(key, val);
       });
       this.disabled = true;
       try {
-        await fb.setPublicAssessmentSettings(partial);
+        await Promise.all([fb.setPublicFindLevelSetting(homepageVisible), fb.setPublicAssessmentSettings(partial)]);
+        localStorage.setItem('utl_public_find_level', homepageVisible ? 'show' : 'hide');
+        Object.keys(partial).forEach(function(key) {
+          if (PUBLIC_ASSESSMENT_LOCAL_KEYS[key]) syncPublicAssessmentLocal(key, partial[key]);
+          if (PUBLIC_ASSESSMENT_FIELD_LOCAL_KEYS[key]) syncPublicAssessmentFieldLocal(key, partial[key]);
+        });
+        var homepageStatus = document.getElementById('publicHomepageStatus');
+        if (homepageStatus) homepageStatus.textContent = homepageVisible ? 'Live setting: Find your level is shown.' : 'Live setting: Find your level is hidden.';
+        renderVisibilityStatus();
         var savedEl = document.getElementById('publicAssessmentSaved');
         if (savedEl) { savedEl.classList.add('is-visible'); setTimeout(function(){ savedEl.classList.remove('is-visible'); }, 1500); }
         showToast('Saved');
       } catch(e) {
         showToast('Save failed', true);
+        loadPublicHomepageSetting();
+        loadPublicAssessmentSettings();
       } finally {
         this.disabled = false;
       }
@@ -6862,7 +6618,7 @@
       if ([SP_PREVIEW_ACTIVE_KEY, SP_PREVIEW_BACKUP_KEY].includes(key)) return false;
       const preserved = [
         'utl_member_', 'utl_admin_', 'utl_local_pw_', 'utl_aiko_',
-        'utl_eisenhower_matrix_version', 'utl_feedback_', 'utl_global_feedback',
+        'utl_feedback_', 'utl_global_feedback',
         'utl_use_firebase_', 'utl_reward_settings', 'utl_phase1_layout',
         'utl_phase2_layout', 'utl_phase3_layout', 'utl_orientation_layout',
         'utl_phase2_status', 'utl_phase3_status', 'utl_public_', 'utl_find_level_'
@@ -7876,7 +7632,6 @@
         loadAdminVisibilitySettings();
         loadPublicAssessmentSettings();
         loadTsaVisibility();
-        loadAikoVersionSettings();
       }
       if (options.scroll !== false) {
         const target = (currentActive || visibleNavItems[0])?.dataset.target;
@@ -8063,7 +7818,6 @@
     loadPublicHomepageSetting();
     loadAdminVisibilitySettings();
     loadPublicAssessmentSettings();
-    loadAikoVersionSettings();
     bindRewardSettings();
     loadRewardSettings();
     clInit();
@@ -8181,47 +7935,6 @@
       loadPublicAssessmentSettings();
       loadTsaVisibility();
       renderVisibilityStatus();
-    });
-    document.querySelectorAll('[data-add-context]').forEach((button) => {
-      button.addEventListener('click', () => {
-        const phaseId = button.dataset.addContext;
-        const layout = readPhaseLayout(phaseId);
-        const newItem = {
-          kind: 'context',
-          key: 'utl_embed_custom_' + phaseId + '_' + Date.now(),
-          label: 'New context sub-section',
-          visible: true,
-          type: 'slides',
-          url: ''
-        };
-        layout.push(newItem);
-        pendingLayoutHighlightKey = newItem.key;
-        savePhaseLayout(phaseId, layout);
-        renderPhaseLayoutEditors();
-        showLayoutStatus(phaseId, 'New context sub-section added at the bottom.');
-        window.setTimeout(() => {
-          if (pendingLayoutHighlightKey === newItem.key) pendingLayoutHighlightKey = '';
-        }, 1600);
-      });
-    });
-    document.querySelectorAll('[data-save-layout-default]').forEach((button) => {
-      button.addEventListener('click', () => {
-        const phaseId = button.dataset.saveLayoutDefault;
-        const layout = readPhaseLayout(phaseId);
-        savePhaseLayoutDefault(phaseId, layout);
-        renderPhaseLayoutEditors();
-        renderVisibilityStatus();
-        showLayoutStatus(phaseId, 'Current layout saved as the reset default.');
-      });
-    });
-    document.querySelectorAll('[data-reset-layout]').forEach((button) => {
-      button.addEventListener('click', () => {
-        const phaseId = button.dataset.resetLayout;
-        savePhaseLayout(phaseId, defaultPhaseLayout(phaseId));
-        renderPhaseLayoutEditors();
-        renderVisibilityStatus();
-        showLayoutStatus(phaseId, 'Layout reset to the saved default.');
-      });
     });
     // ===== Members management =====
 
@@ -9136,13 +8849,6 @@
         handleSendLoginInvite();
       }
     });
-    document.getElementById('showReadyAssessments')?.addEventListener('click', () => {
-      localStorage.setItem('utl_tsa_status', 'live');
-      localStorage.setItem('utl_tsa_diagnostic_status', 'live');
-      localStorage.setItem('utl_tsa_checkpoint_status', 'live');
-      window.location.reload();
-    });
-
     (function initializeAdminGate() {
       const description = document.getElementById('adminGateDescription');
       const googleGate = document.getElementById('adminGoogleGate');
