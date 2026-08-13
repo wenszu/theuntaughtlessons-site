@@ -28,11 +28,14 @@ assert.match(app, /if\(!hasRecommendation\)total=Math\.min\(10,total\)/, 'Copied
 assert.match(app, /if\(!hasDecision\)total=Math\.min\(8,total\)/, 'Copied context without a decision must receive a low Act score');
 assert.match(app, /best:2[\s\S]*best:1[\s\S]*best:0/, 'Act answer position should be balanced across forms');
 assert.match(app, /chosenLabel===correctLabel/, 'Organize scoring should follow labels rather than fixed bucket order');
-assert.equal((app.match(/Organize the nine tasks according to when they should be handled/g) || []).length, 3, 'Every Part 1a form should state the timing-based organizing rule');
-assert.match(app, /Reserve the train tickets before prices rise/);
-assert.match(app, /Pack pens and identification the night before/);
-assert.match(app, /Buy matching storage boxes after measuring the rooms and settling in/);
+assert.match(app, /Use these organizing rules:/, 'Part 1a should explain the classification rule rather than rely on timing hints in each item');
+assert.match(app, /Reserve the train tickets while the lowest fare is still available/);
+assert.match(app, /Place the permitted pens and required identification beside the exam bag/);
+assert.match(app, /Buy matching storage boxes once room measurements and furniture positions are final/);
 assert.doesNotMatch(app, /Measure the rooms, then buy matching storage boxes later/, 'Part 1a items should not combine actions with different timing classifications');
+assert.match(app, /function mixedOrganizeItems\(items,seedText\)/, 'Part 1a source items should be mixed for each attempt');
+assert.match(app, /form\.organize\.items=mixedOrganizeItems\(form\.organize\.items,`\$\{state\.attemptId\}:\$\{state\.form\}:part1a`\)/, 'the mixed order should remain stable for the same attempt');
+assert.match(app, /if\(!hasThreeTogether\)return mixed/, 'a source list must not expose a keyed bucket as a run of three items');
 assert.equal((app.match(/\{id:'f[123]-\d+'/g) || []).length, 45, 'Part 2 should have a 45-question bank');
 for (const format of [1, 2, 3]) assert.equal((app.match(new RegExp(`format:${format},`, 'g')) || []).length, 15, `format ${format} should have fifteen questions`);
 assert.match(app, /function spotAssessmentQuestions\(\)/, 'Part 2 should draw questions at runtime rather than use fixed per-form assignments');
