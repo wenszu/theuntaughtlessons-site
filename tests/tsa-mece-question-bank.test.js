@@ -5,12 +5,16 @@ const path = require('node:path');
 const source = fs.readFileSync(path.resolve(__dirname, '../apps/tsa-diagnostic/index.html'), 'utf8');
 const admin = fs.readFileSync(path.resolve(__dirname, '../admin/index.html'), 'utf8');
 const literal = (pattern, label) => { const match = source.match(pattern); assert.ok(match, label); return Function(`"use strict"; return ${match[1]}`)(); };
-const bank = literal(/const SPOT_QUESTION_BANK=(\[[\s\S]*?\]);\n\s*const SPOT_DIFFICULTY/, 'Question bank should be readable');
+const bank = literal(/const SPOT_QUESTION_BANK=(\[[\s\S]*?\]);(?:\r?\n)/, 'Question bank should be readable');
 const promptRules = literal(/const SPOT_PROMPT_RULES=(\{[\s\S]*?\});\n\s*const SPOT_BANK_RELEASE/, 'Question prompt rules should be readable');
 const fullPrompt = q => q.prompt.replace(/Which one would you change\?|Which would you add next\?|Which headings would you use\?$/, promptRules[q.format]);
 
 // --- Structure ---
 assert.equal(bank.length, 45, 'the bank should have 45 questions');
+const legacyAdminMatch = source.match(/const SPOT_QUESTION_BANK=(\[[\s\S]*?\]);\n\s*function spotAssessmentQuestions/);
+assert.ok(legacyAdminMatch, 'the diagnostic source should remain compatible with a cached pre-release admin parser');
+assert.equal(Function('"use strict"; return (' + legacyAdminMatch[1] + ')')().length, 45, 'the cached admin parser should recover all 45 questions');
+assert.match(admin, /adminSource=20260813-question-bank-2/, 'the current admin should cache-bust its canonical diagnostic source request');
 assert.equal(new Set(bank.map(q => q.id)).size, 45, 'question ids should be unique');
 for (const format of [1, 2, 3]) assert.equal(bank.filter(q => q.format === format).length, 15, `format ${format} should have fifteen questions`);
 
@@ -95,7 +99,7 @@ assert.match(source, /Every question has exactly one correct answer/, 'the learn
 bank.forEach(q => assert.equal(bank.filter(other => other.id === q.id && other.answer === q.answer).length, 1, `${q.id} should have one stored answer key`));
 
 // --- Admin question bank viewer stays in sync with the new structure ---
-assert.match(admin, /const bank = qbReadLiteral\(source, \/const SPOT_QUESTION_BANK=.*const SPOT_DIFFICULTY=/, 'admin viewer should read the bank up to its current boundary');
+assert.match(admin, /const bank = qbReadLiteral\(source, \/const SPOT_QUESTION_BANK=.*\\r\?\\n/, 'admin viewer should read the bank without depending on its following declaration');
 assert.match(admin, /id="qbFormat"/, 'admin viewer should let reviewers isolate a format');
 assert.match(admin, /id="qbDownloadCsv"/, 'admin viewer should provide a spreadsheet download');
 assert.match(admin, /id="qbDownloadJson"/, 'admin viewer should provide a JSON download');

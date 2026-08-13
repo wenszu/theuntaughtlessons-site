@@ -7023,11 +7023,11 @@
       const status = document.getElementById('qbStatus');
       if (!status) return;
       try {
-        const response = await fetch('../apps/tsa-diagnostic/index.html', { cache:'no-store' });
+        const response = await fetch('../apps/tsa-diagnostic/index.html?adminSource=20260813-question-bank-2', { cache:'no-store' });
         if (!response.ok) throw new Error('HTTP ' + response.status);
         const source = await response.text();
         qbForms = qbReadLiteral(source, /const FORMS=(\{[\s\S]*?\});\n\s*const SPOT_QUESTION_BANK=/, 'Assessment forms');
-        const bank = qbReadLiteral(source, /const SPOT_QUESTION_BANK=(\[[\s\S]*?\]);\n\s*const SPOT_DIFFICULTY=/, 'Question bank');
+        const bank = qbReadLiteral(source, /const SPOT_QUESTION_BANK=(\[[\s\S]*?\]);(?:\r?\n)/, 'Question bank');
         qbDifficulty = qbReadLiteral(source, /const SPOT_DIFFICULTY=(\{[\s\S]*?\});\n\s*const SPOT_PROMPT_RULES=/, 'Difficulty data');
         qbBankRelease = qbReadLiteral(source, /const SPOT_BANK_RELEASE=('[^']+');/, 'Bank release');
         qbVersionOverrides = qbReadLiteral(source, /const SPOT_QUESTION_VERSION_OVERRIDES=(\{[\s\S]*?\});/, 'Question versions');
