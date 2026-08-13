@@ -59,6 +59,32 @@ service cloud.firestore {
         request.resource.data.requestedAt == request.time;
     }
 
+    function isValidAssessmentItemAttempt(attemptId) {
+      return signedIn() &&
+        attemptId.size() >= 8 &&
+        attemptId.size() <= 160 &&
+        request.resource.data.keys().hasOnly([
+          'userId', 'assessment', 'bankRelease', 'rubricVersion', 'formId',
+          'totalScore', 'items', 'completedAt', 'updatedAt'
+        ]) &&
+        request.resource.data.userId == request.auth.uid &&
+        request.resource.data.assessment in ['diagnostic', 'checkpoint'] &&
+        request.resource.data.bankRelease is string &&
+        request.resource.data.bankRelease.size() <= 80 &&
+        request.resource.data.rubricVersion is string &&
+        request.resource.data.rubricVersion.size() <= 120 &&
+        request.resource.data.formId is string &&
+        request.resource.data.formId.size() <= 20 &&
+        request.resource.data.totalScore is number &&
+        request.resource.data.totalScore >= 0 &&
+        request.resource.data.totalScore <= 100 &&
+        request.resource.data.items is list &&
+        request.resource.data.items.size() <= 45 &&
+        request.resource.data.completedAt is string &&
+        request.resource.data.completedAt.size() <= 80 &&
+        request.resource.data.updatedAt == request.time;
+    }
+
     match /users/{userId} {
       allow read: if isSelfUserDocument(userId) || isAdmin();
       allow write: if isSelfUserDocument(userId) || isAdmin();
@@ -67,6 +93,40 @@ service cloud.firestore {
     match /users/{userId}/completed_exercises/{exerciseId} {
       allow read: if (signedIn() && request.auth.uid == userId) || isAdmin();
       allow write: if (signedIn() && request.auth.uid == userId) || isAdmin();
+    }
+
+    match /assessment_item_attempts/{attemptId} {
+      allow read: if isAdmin();
+      allow create: if isValidAssessmentItemAttempt(attemptId);
+      allow update: if isValidAssessmentItemAttempt(attemptId) &&
+        resource.data.userId == request.auth.uid;
+      allow delete: if isAdmin();
+    }
+
+    match /assessment_item_reviews/{questionId} {
+      allow read, create, update, delete: if isAdmin();
+    }
+
+    match /tsa_scoring_comparisons/{attemptId} {
+      allow create, update: if signedIn() &&
+        request.resource.data.keys().hasOnly([
+          'userId', 'attemptId', 'assessment', 'formId', 'rubricVersion',
+          'enabled', 'officialSource', 'deterministic', 'genAi', 'difference',
+          'modelVersion', 'completedAt', 'updatedAt'
+        ]) &&
+        request.resource.data.userId == request.auth.uid &&
+        request.resource.data.attemptId == attemptId &&
+        request.resource.data.assessment in ['diagnostic', 'checkpoint'] &&
+        request.resource.data.formId is string &&
+        request.resource.data.formId.size() <= 20 &&
+        request.resource.data.rubricVersion is string &&
+        request.resource.data.rubricVersion.size() <= 120 &&
+        request.resource.data.modelVersion is string &&
+        request.resource.data.modelVersion.size() <= 160 &&
+        request.resource.data.completedAt is string &&
+        request.resource.data.completedAt.size() <= 80 &&
+        request.resource.data.updatedAt == request.time;
+      allow read, delete: if isAdmin();
     }
 
     match /authorized_members/{email} {
@@ -92,7 +152,7 @@ service cloud.firestore {
 
     match /settings/{docId} {
       allow read: if docId in ['publicSite', 'public_assessments'] ||
-        (signedIn() && docId in ['feedback', 'engagement', 'rewards']) ||
+        (signedIn() && docId in ['feedback', 'engagement', 'rewards', 'tsa_scoring']) ||
         isAdmin();
       allow write: if isAdmin();
     }

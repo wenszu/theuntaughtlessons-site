@@ -465,12 +465,12 @@ exports.scoreExplainToAiko = onRequest({
 });
 
 function buildTsaDiagnosticPrompt(input) {
-  return `You are a careful assessment feedback reviewer for The Untaught Lessons. Review two transcript-based responses. The official score has already been calculated with fixed rules. Do not rescore it. Add concise, evidence-based comments only. Do not infer tone, confidence, presence, accent, personality, or vocal delivery from text. Do not reward fancy vocabulary or grammar. Use only evidence in the response.
+  return `You are a careful assessment evaluator for The Untaught Lessons. Score only the sections enabled below. Use only evidence in the response. Do not infer tone, confidence, presence, accent, personality, or vocal delivery from text. Do not reward fancy vocabulary or grammar.
 
 FORM: ${input.formId}
 ATTEMPT: ${input.kind}
-DETERMINISTIC SPEAK SCORE: ${input.speakBase}/30
-DETERMINISTIC ACT SCORE: ${input.actBase}/30
+SCORE SPEAK: ${input.speakEnabled}
+SCORE ACT: ${input.actEnabled}
 
 SPEAK SCENARIO FACTS:
 ${input.speakFacts.map((fact) => `- ${fact}`).join("\n")}
@@ -485,32 +485,40 @@ ACT TASK: State a decision, respond to the concern, explain the tradeoff, and gi
 ACT TRANSCRIPT:
 """${input.actTranscript}"""
 
+Speak rubric when enabled: Leads 0–8, Supports 0–14, Focuses 0–8. Act rubric when enabled: Decides 0–10, Adapts 0–12, Advances 0–8. Each total must equal its three dimensions. A defensible Act choice can earn full credit regardless of the reference default. Return null for a disabled section.
+
 Return strict JSON only:
-{"speakEvidence":"Short verbatim quote","actEvidence":"Short verbatim quote","speakStrength":"One observed strength","speakNext":"One concrete next move","actStrength":"One observed strength","actNext":"One concrete next move"}`;
+{"scores":{"speak":{"total":0,"leads":0,"supports":0,"focuses":0},"act":{"total":0,"decides":0,"adapts":0,"advances":0}},"feedback":{"speakEvidence":"Short verbatim quote","actEvidence":"Short verbatim quote","speakStrength":"One observed strength","speakNext":"One concrete next move","actStrength":"One observed strength","actNext":"One concrete next move"}}`;
 }
 
 function normalizeTsaDiagnostic(result, input) {
   if (!result || typeof result !== "object") throw new Error("Invalid TSA diagnostic response.");
-  const required = ["speakEvidence", "actEvidence", "speakStrength", "speakNext", "actStrength", "actNext"];
-  if (required.some((key) => typeof result[key] !== "string" || !result[key].trim())) throw new Error("Incomplete TSA diagnostic feedback.");
+  const normalizeScore = (score, fields, limits) => {
+    if (!score || typeof score !== "object") throw new Error("Missing TSA section score.");
+    const output = {};
+    fields.forEach((field, index) => { const value = Number(score[field]); if (!Number.isFinite(value) || value < 0 || value > limits[index]) throw new Error("Invalid TSA dimension score."); output[field] = Math.round(value * 10) / 10; });
+    output.total = Math.round(fields.reduce((sum, field) => sum + output[field], 0) * 10) / 10;
+    return output;
+  };
+  const feedback = result.feedback || {};
   const quote = (value, transcript) => {
     const cleaned = String(value || "").trim().replace(/^[“"]|[”"]$/g, "");
     if (!cleaned || !transcript.toLowerCase().includes(cleaned.toLowerCase())) return "No relevant content found";
     return cleaned.slice(0, 400);
   };
-  const speakEvidence = quote(result.speakEvidence, input.speakTranscript);
-  const actEvidence = quote(result.actEvidence, input.actTranscript);
-  if (speakEvidence === "No relevant content found" || actEvidence === "No relevant content found") {
-    throw new Error("TSA feedback evidence was not found in the transcript.");
-  }
+  const speakEvidence = quote(feedback.speakEvidence, input.speakTranscript);
+  const actEvidence = quote(feedback.actEvidence, input.actTranscript);
   return {
-    speakEvidence,
-    actEvidence,
-    speakStrength: result.speakStrength.slice(0, 400),
-    speakNext: result.speakNext.slice(0, 400),
-    actStrength: result.actStrength.slice(0, 400),
-    actNext: result.actNext.slice(0, 400),
-    modelVersion: "gemini-flash-latest/tsa-unified-20260731",
+    scores: {
+      speak: input.speakEnabled ? normalizeScore(result.scores?.speak, ["leads", "supports", "focuses"], [8, 14, 8]) : null,
+      act: input.actEnabled ? normalizeScore(result.scores?.act, ["decides", "adapts", "advances"], [10, 12, 8]) : null
+    },
+    feedback: {
+      speakEvidence, actEvidence,
+      speakStrength: String(feedback.speakStrength || "").slice(0, 400), speakNext: String(feedback.speakNext || "").slice(0, 400),
+      actStrength: String(feedback.actStrength || "").slice(0, 400), actNext: String(feedback.actNext || "").slice(0, 400)
+    },
+    modelVersion: "gemini-flash-latest/tsa-c3-20260813",
     fallback: false
   };
 }
@@ -533,6 +541,8 @@ exports.scoreTsaDiagnostic = onRequest({
   const input = {
     formId: String(body?.formId || "").slice(0, 4),
     kind: body?.kind === "checkpoint" ? "checkpoint" : "diagnostic",
+    speakEnabled: body?.enabled?.speak === true,
+    actEnabled: body?.enabled?.act === true,
     speakTranscript: String(body?.speak?.transcript || "").trim().slice(0, 6000),
     actTranscript: String(body?.act?.transcript || "").trim().slice(0, 6000),
     actChoice: Math.max(0, Math.min(2, Math.round(Number(body?.act?.choice) || 0))),
@@ -543,7 +553,8 @@ exports.scoreTsaDiagnostic = onRequest({
     actChoiceText: String(body?.scenario?.actChoice || "").slice(0, 800),
     actPushback: String(body?.scenario?.actPushback || "").slice(0, 1000)
   };
-  if (input.speakTranscript.split(/\s+/).length < 5 || input.actTranscript.split(/\s+/).length < 5) {
+  if (!input.speakEnabled && !input.actEnabled) { response.status(200).json({ fallback: true }); return; }
+  if ((input.speakEnabled && input.speakTranscript.split(/\s+/).length < 5) || (input.actEnabled && input.actTranscript.split(/\s+/).length < 5)) {
     response.status(200).json({ fallback: true }); return;
   }
   try {

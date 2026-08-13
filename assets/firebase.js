@@ -659,6 +659,29 @@ async function saveUserProgress(exerciseId, exerciseName, exercisePayload = {}) 
   }, { merge: true });
 }
 
+async function saveAssessmentItemAttempt(attemptPayload = {}) {
+  if (experiencePreviewActive()) return { preview: true, saved: false };
+  const user = await getSignedInUser();
+  if (!user || !user.uid) {
+    throw new Error("A signed-in Firebase user is required to save assessment item results.");
+  }
+  const attemptId = String(attemptPayload.attemptId || "").trim();
+  if (!attemptId) throw new Error("An assessment attempt ID is required.");
+  const items = Array.isArray(attemptPayload.items) ? attemptPayload.items.slice(0, 45) : [];
+  await setDoc(doc(requireFirestore(), "assessment_item_attempts", attemptId), {
+    userId: user.uid,
+    assessment: attemptPayload.assessment === "checkpoint" ? "checkpoint" : "diagnostic",
+    bankRelease: String(attemptPayload.bankRelease || ""),
+    rubricVersion: String(attemptPayload.rubricVersion || ""),
+    formId: String(attemptPayload.formId || ""),
+    totalScore: Number(attemptPayload.totalScore) || 0,
+    items,
+    completedAt: String(attemptPayload.completedAt || new Date().toISOString()),
+    updatedAt: serverTimestamp()
+  }, { merge: true });
+  return { saved: true };
+}
+
 async function getMemberExerciseResponses(uid) {
   if (!uid) throw new Error("A user UID is required.");
   const readyDb = requireFirestore();
@@ -1039,6 +1062,48 @@ async function getAdminVisibilitySettings() {
 async function setAdminVisibilitySettings(partial) {
   await setDoc(doc(requireFirestore(), "settings", "admin_visibility"), partial, { merge: true });
 }
+function getDefaultTsaScoringSettings() {
+  return { speakGenAiEnabled: false, actGenAiEnabled: false };
+}
+async function getTsaScoringSettings() {
+  try {
+    const snap = await getDoc(doc(requireFirestore(), "settings", "tsa_scoring"));
+    if (!snap.exists()) return getDefaultTsaScoringSettings();
+    const data = snap.data() || {};
+    return {
+      speakGenAiEnabled: data.speakGenAiEnabled === true,
+      actGenAiEnabled: data.actGenAiEnabled === true
+    };
+  } catch {
+    return getDefaultTsaScoringSettings();
+  }
+}
+async function setTsaScoringSettings(partial) {
+  await setDoc(doc(requireFirestore(), "settings", "tsa_scoring"), partial, { merge: true });
+}
+async function saveTsaScoringComparison(payload = {}) {
+  if (experiencePreviewActive()) return { preview: true, saved: false };
+  const user = await getSignedInUser();
+  if (!user?.uid) throw new Error("A signed-in Firebase user is required to save scoring calibration data.");
+  const attemptId = String(payload.attemptId || "").trim();
+  if (!attemptId) throw new Error("An assessment attempt ID is required.");
+  await setDoc(doc(requireFirestore(), "tsa_scoring_comparisons", attemptId), {
+    userId: user.uid,
+    attemptId,
+    assessment: payload.assessment === "checkpoint" ? "checkpoint" : "diagnostic",
+    formId: String(payload.formId || "").slice(0, 20),
+    rubricVersion: String(payload.rubricVersion || "").slice(0, 120),
+    enabled: payload.enabled || {},
+    officialSource: payload.officialSource || {},
+    deterministic: payload.deterministic || {},
+    genAi: payload.genAi || {},
+    difference: payload.difference || {},
+    modelVersion: String(payload.modelVersion || "").slice(0, 160),
+    completedAt: String(payload.completedAt || new Date().toISOString()).slice(0, 80),
+    updatedAt: serverTimestamp()
+  }, { merge: true });
+  return { saved: true };
+}
 
 export {
   actionCodeSettings,
@@ -1085,10 +1150,14 @@ export {
   sendSignInInvite,
   sendSignInLinkToEmail,
   saveUserProgress,
+  saveAssessmentItemAttempt,
   getAssessmentVisibility,
   getAdminVisibilitySettings,
+  getTsaScoringSettings,
   setAssessmentVisibility,
   setAdminVisibilitySettings,
+  setTsaScoringSettings,
+  saveTsaScoringComparison,
   getPublicAssessmentSettings,
   setPublicAssessmentSettings,
   getEngagementSettings,

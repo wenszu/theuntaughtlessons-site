@@ -1,0 +1,67 @@
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+
+const root = path.resolve(__dirname, '..');
+const read = file => fs.readFileSync(path.join(root, file), 'utf8');
+const app = read('apps/tsa-diagnostic/index.html');
+const admin = read('admin/index.html');
+const firebase = read('assets/firebase.js');
+const rules = read('firestore.rules');
+
+assert.match(app, /const SPOT_BANK_RELEASE='2026-08-13-v1'/, 'the current bank should begin at a named release');
+assert.match(app, /const SPOT_QUESTION_VERSION_OVERRIDES=\{\}/, 'all current questions should begin at version 1 with explicit future overrides');
+assert.match(app, /questionVersion:spotQuestionVersion\(question\.id\)/, 'each item result should include its question version');
+assert.match(app, /intendedDifficulty:questionDifficulty\(question\.id\)/, 'each item result should include intended difficulty');
+assert.match(app, /selectedAnswer:Number\(state\.spot\.answers\[question\.id\]\)/, 'selected answers should be retained for distractor analysis');
+assert.match(app, /responseTimeMs:/, 'item timing should be retained');
+assert.match(app, /answerChanges:/, 'answer changes should be retained');
+assert.match(app, /feedbackType:/, 'optional issue categories should be retained');
+assert.match(app, /feedbackComment:/, 'optional issue detail should be retained');
+assert.doesNotMatch(app.match(/function assessmentItemPayload[\s\S]*?\n\s*function showSync/)?.[0] || '', /transcript/, 'central item telemetry should not contain Speak or Act transcripts');
+
+assert.match(firebase, /doc\(requireFirestore\(\), "assessment_item_attempts", attemptId\)/, 'item attempts should use a central admin-readable collection');
+assert.match(rules, /request\.resource\.data\.userId == request\.auth\.uid/, 'members may write only telemetry attributed to their own UID');
+assert.match(rules, /allow read: if isAdmin\(\);[\s\S]*allow create: if isValidAssessmentItemAttempt/, 'only admins should read central telemetry');
+assert.match(rules, /match \/assessment_item_reviews\/\{questionId\} \{\s*allow read, create, update, delete: if isAdmin\(\)/, 'only admins should access review decisions');
+
+assert.match(admin, /Fewer than 30 responses is collecting data; 30–49 is an early signal/, 'sample-size labels should be explained');
+assert.match(admin, /<details class="qb-health-panel" id="qbHealthPanel">/, 'question metrics should be collapsible');
+assert.match(admin, /QB_HEALTH_OPEN_KEY/, 'the admin console should remember whether question metrics are open');
+assert.match(admin, /if \(open && !qbHealthLoaded\) qbLoadHealth\(\)/, 'collapsed metrics should load only when opened');
+assert.match(admin, /fb\.getDocs\(fb\.collection\(fb\.db, 'assessment_item_attempts'\)\)/, 'health loading should use the available Firebase service namespace');
+assert.match(admin, /if \(stat\.n >= 50\)/, 'automated flags should wait for 50 responses');
+assert.match(admin, /stat\.correctRate < \.25/, 'very low correct rates should be flagged');
+assert.match(admin, /stat\.reports\.length >= 3 && stat\.reportRate > \.05/, 'quality reports should use both count and rate thresholds');
+assert.match(admin, /stat\.discrimination < 0/, 'negative discrimination should be flagged');
+assert.match(admin, /stat\.medianMs > formatMedian \* 2/, 'unusually long response time should be flagged');
+assert.match(admin, /intendedRanges = \{ accessible:\[\.60,\.90\], core:\[\.35,\.70\], stretch:\[\.15,\.50\] \}/, 'intended difficulty should be checked against explicit diagnostic ranges');
+assert.match(admin, /Diagnostic \+ checkpoint/, 'admins should be able to separate baseline and checkpoint evidence');
+assert.match(admin, /Download health CSV/, 'item-health metrics should be downloadable');
+assert.match(admin, /Active','Watch','Revise','Retired/, 'human review state should stay distinct from automated health');
+assert.match(admin, /decisionLog/, 'each item should retain a review decision history');
+assert.match(admin, /id="assessmentPart1a"/, 'Content Data should provide a collapsible Part 1a review');
+assert.match(admin, /id="assessmentPart1b"/, 'Content Data should provide a collapsible Part 1b review');
+assert.match(admin, /id="assessmentPart2"/, 'Content Data should provide a collapsible Part 2 review');
+assert.match(admin, /id="assessmentPart3"/, 'Content Data should provide a collapsible Part 3 review');
+assert.match(admin, /qbForms = qbReadLiteral\(source, \/const FORMS=/, 'all scenario review content should load from the canonical diagnostic source');
+assert.match(admin, /data-assessment-export-part="part1a"/, 'the combined export should allow Part 1a selection');
+assert.match(admin, /data-assessment-export-part="part1b"/, 'the combined export should allow Part 1b selection');
+assert.match(admin, /data-assessment-export-part="part2"/, 'the combined export should allow Part 2 selection');
+assert.match(admin, /data-assessment-export-part="part3"/, 'the combined export should allow Part 3 selection');
+assert.match(admin, /id="assessmentDownloadCsv"/, 'selected assessment content should download as separate CSV files');
+assert.match(admin, /id="assessmentDownloadJson"/, 'selected assessment content should download as JSON');
+assert.match(admin, /tsa-assessment-part-\$\{partValues\[part\]\}\.csv/, 'each selected part should receive its own named CSV file');
+assert.match(admin, /Part 1a asks the learner to organize information/, 'the review should explain the full learner journey');
+assert.match(admin, /Leads — 8 points/, 'Speak should document Leads');
+assert.match(admin, /Supports — 14 points/, 'Speak should document Supports');
+assert.match(admin, /Focuses — 8 points/, 'Speak should document Focuses');
+assert.match(admin, /Decides — 10 points/, 'Act should document Decides');
+assert.match(admin, /Adapts — 12 points/, 'Act should document Adapts');
+assert.match(admin, /Advances — 8 points/, 'Act should document Advances');
+assert.match(admin, /difference is logged privately for calibration/i, 'the review should document private GenAI comparison logging');
+assert.match(admin, /\.section-body \{ display:none; \}/, 'collapsed admin sections should be removed from layout');
+assert.match(admin, /\.section-body\.is-open \{ display:block; \}/, 'open admin sections should grow to their full content height');
+assert.doesNotMatch(admin, /\.section-body\.is-open \{ max-height:9999px; \}/, 'long question banks must not be clipped by an arbitrary open-section height');
+
+console.log('TSA item telemetry, health rules, learner feedback, and admin review contracts passed');

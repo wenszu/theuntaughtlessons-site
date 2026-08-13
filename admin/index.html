@@ -1759,8 +1759,8 @@
     .admin-section-head { display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
     .section-toggle-btn { flex-shrink:0; width:28px; height:28px; border:1px solid rgba(0,51,102,.18); border-radius:6px; background:transparent; color:var(--navy); cursor:pointer; font-size:20px; font-weight:700; line-height:1; display:inline-flex; align-items:center; justify-content:center; margin-top:4px; transition:background .15s; }
     .section-toggle-btn:hover { background:rgba(0,51,102,.06); }
-    .section-body { overflow:hidden; max-height:0; transition:max-height .35s ease; }
-    .section-body.is-open { max-height:9999px; }
+    .section-body { display:none; }
+    .section-body.is-open { display:block; }
 
     /* FIX 2 — Quick links groups */
     .ql-group { margin-top:10px; }
@@ -2187,8 +2187,68 @@
     .qb-option.is-correct { border-color:#9FC9AE; background:#F0F8F3; color:#205E38; font-weight:700; }
     .qb-option.is-correct .qb-option-letter { background:#2C7A4B; color:#fff; }
     .qb-rationale { margin-top:12px; padding-top:11px; border-top:1px solid var(--line); color:var(--steel); font-size:13px; line-height:1.5; }
+    .qb-health-panel { margin:20px 0 28px; border:1px solid var(--line); border-radius:9px; background:var(--soft); overflow:hidden; }
+    .qb-health-panel > summary { display:flex; justify-content:space-between; align-items:center; gap:16px; padding:16px 18px; color:var(--navy); cursor:pointer; list-style:none; }
+    .qb-health-panel > summary::-webkit-details-marker { display:none; }
+    .qb-health-panel > summary::after { content:'+'; display:grid; place-items:center; flex:0 0 30px; width:30px; height:30px; border:1px solid var(--line); border-radius:6px; background:#fff; font-size:20px; font-weight:700; }
+    .qb-health-panel[open] > summary::after { content:'−'; }
+    .qb-health-panel > summary h3 { margin:0 0 4px; font:700 21px Lato,Arial,sans-serif; }
+    .qb-health-panel > summary p { margin:0; max-width:780px; color:var(--steel); font-size:13px; line-height:1.5; }
+    .qb-health-body { padding:0 18px 18px; border-top:1px solid var(--line); }
+    .qb-health-head { display:flex; justify-content:space-between; gap:16px; align-items:flex-start; flex-wrap:wrap; }
+    .qb-health-head h3 { margin:0 0 5px; font:700 21px Lato,Arial,sans-serif; }
+    .qb-health-head p { margin:0; max-width:720px; color:var(--steel); font-size:13px; line-height:1.5; }
+    .qb-health-actions { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+    .qb-health-actions select { min-height:36px; padding:7px 9px; border:1px solid var(--line); border-radius:6px; background:#fff; color:var(--navy); }
+    .qb-health-table-wrap { margin-top:14px; overflow:auto; border:1px solid var(--line); border-radius:7px; background:#fff; }
+    .qb-health-table { width:100%; border-collapse:collapse; min-width:920px; font-size:12px; }
+    .qb-health-table th,.qb-health-table td { padding:9px 10px; border-bottom:1px solid var(--line); text-align:left; white-space:nowrap; }
+    .qb-health-table th { background:#EEF3F7; color:var(--navy); font-weight:700; position:sticky; top:0; }
+    .qb-health-table tr:last-child td { border-bottom:0; }
+    .qb-health-link { border:0; padding:0; background:transparent; color:var(--navy); font-weight:700; text-decoration:underline; cursor:pointer; }
+    .qb-health-state { display:inline-block; padding:4px 7px; border-radius:999px; background:#EEF3F7; color:var(--steel); font-weight:700; }
+    .qb-health-state.is-review { background:#FBE9E7; color:#8B2E25; }
+    .qb-health-state.is-early { background:#FFF2D3; color:#8A5A00; }
+    .qb-health-state.is-healthy { background:#E8F4EC; color:#205E38; }
+    .qb-card-stats { display:flex; flex-wrap:wrap; gap:7px; margin:10px 0; }
+    .qb-card-stats span { padding:5px 7px; border-radius:5px; background:#EEF3F7; color:var(--steel); font-size:11px; font-weight:700; }
+    .qb-reports { margin-top:10px; padding:10px 12px; border:1px solid #E5D4B4; border-radius:7px; background:#FFF8EC; color:#6B4A12; font-size:12px; line-height:1.5; }
+    .qb-review { margin-top:12px; border-top:1px solid var(--line); padding-top:11px; }
+    .qb-review summary { cursor:pointer; color:var(--navy); font-size:13px; font-weight:700; }
+    .qb-review-grid { display:grid; grid-template-columns:150px 1fr auto; gap:8px; align-items:end; margin-top:10px; }
+    .qb-review-grid label { color:var(--steel); font-size:11px; font-weight:700; }
+    .qb-review-grid select,.qb-review-grid textarea { width:100%; margin-top:5px; padding:8px; border:1px solid var(--line); border-radius:6px; background:#fff; color:var(--charcoal); font:400 12px Lato,Arial,sans-serif; }
+    .qb-review-grid textarea { min-height:64px; resize:vertical; }
+    .qb-history { margin:10px 0 0; padding-left:18px; color:var(--steel); font-size:12px; line-height:1.5; }
+    .assessment-export { margin:16px 0; padding:15px 16px; border:1px solid var(--line); border-radius:9px; background:#EEF3F7; }
+    .assessment-export h3 { margin:0 0 5px; font:700 18px Lato,Arial,sans-serif; }
+    .assessment-export p { margin:0; color:var(--steel); font-size:13px; }
+    .assessment-export-controls { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-top:12px; }
+    .assessment-export-controls label { display:inline-flex; align-items:center; gap:6px; color:var(--navy); font-size:13px; font-weight:700; }
+    .assessment-export-controls input { width:16px; height:16px; accent-color:var(--navy); }
+    .assessment-part { margin:12px 0; border:1px solid var(--line); border-radius:9px; background:#fff; overflow:hidden; }
+    .assessment-part > summary { display:flex; justify-content:space-between; align-items:center; gap:12px; padding:15px 16px; cursor:pointer; list-style:none; color:var(--navy); }
+    .assessment-part > summary::-webkit-details-marker { display:none; }
+    .assessment-part > summary::after { content:'+'; font-size:20px; font-weight:700; }
+    .assessment-part[open] > summary::after { content:'−'; }
+    .assessment-part-title strong { display:block; font-size:17px; }
+    .assessment-part-title span { display:block; margin-top:3px; color:var(--steel); font-size:12px; font-weight:400; }
+    .assessment-part-body { padding:16px; border-top:1px solid var(--line); }
+    .assessment-form-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
+    .assessment-form-card { padding:14px; border:1px solid var(--line); border-radius:8px; background:var(--soft); color:var(--charcoal); font-size:13px; line-height:1.5; }
+    .assessment-form-card h4 { margin:0 0 8px; color:var(--navy); font:700 16px Lato,Arial,sans-serif; }
+    .assessment-form-card h5 { margin:12px 0 5px; color:var(--navy); font:700 12px Lato,Arial,sans-serif; }
+    .assessment-form-card ul { margin:5px 0 0; padding-left:18px; }
+    .assessment-key { color:var(--green); font-weight:700; }
+    .assessment-guide { margin:14px 0 18px; padding:16px; border:1px solid var(--line); border-radius:9px; background:var(--soft); color:var(--charcoal); font-size:13px; line-height:1.55; }
+    .assessment-guide h3 { margin:0 0 7px; font:700 18px Lato,Arial,sans-serif; }
+    .assessment-guide p { margin:6px 0 0; }
+    .assessment-rubric { margin:0 0 16px; padding:14px 15px; border:1px solid #B8CDE0; border-radius:8px; background:#F3F7FA; color:var(--charcoal); font-size:13px; line-height:1.5; }
+    .assessment-rubric h4 { margin:0 0 7px; color:var(--navy); font:700 15px Lato,Arial,sans-serif; }
+    .assessment-rubric ul { margin:7px 0 0; padding-left:20px; }
+    .assessment-preview-actions { display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
     .qb-empty { padding:24px; border:1px dashed var(--line); border-radius:8px; color:var(--steel); text-align:center; }
-    @media(max-width:760px){.qb-toolbar,.qb-options{grid-template-columns:1fr}.qb-card-head{display:block}.qb-card-meta{margin-top:8px}}
+    @media(max-width:900px){.assessment-form-grid{grid-template-columns:1fr}}@media(max-width:760px){.qb-toolbar,.qb-options,.qb-review-grid{grid-template-columns:1fr}.qb-card-head{display:block}.qb-card-meta{margin-top:8px}}
   </style>
 </head>
 <body>
@@ -2293,7 +2353,7 @@
 
       <span class="nav-group-label" data-admin-nav-group="content-library">Content data</span>
       <button class="admin-nav-item" data-admin-tab-scope="content-library" data-target="section-cl-files">Data files</button>
-      <button class="admin-nav-item" data-admin-tab-scope="content-library" data-target="section-cl-question-bank">Diagnostic question bank</button>
+      <button class="admin-nav-item" data-admin-tab-scope="content-library" data-target="section-cl-question-bank">Assessment content review</button>
 
       <span class="nav-group-label" data-admin-nav-group="admin-tools">Preview</span>
       <button class="admin-nav-item" data-admin-tab-scope="admin-tools" data-target="section-visibility">Member preview settings</button>
@@ -3266,21 +3326,71 @@
 
       <section class="admin-section" id="section-cl-question-bank" data-admin-tab-panel="content-library">
         <span class="section-label">Content Data</span>
-        <h2>Diagnostic question bank</h2>
+        <h2>Assessment content review</h2>
         <div class="section-divider"></div>
-        <p class="description">Review the 45-question bank used by Part 1b of the diagnostic: 15 "Spot the issue," 15 "Complete the group," and 15 "Choose the best breakdown" questions. Each attempt randomly draws 5 from each format, 15 total, in random order. The keyed answer is highlighted in green. This view is read-only and loads directly from the unified diagnostic source.</p>
+        <p class="description">Review every learner-facing task in the unified diagnostic and checkpoint. All four parts and all three scenario forms load directly from the canonical assessment source.</p>
+        <div class="assessment-export">
+          <h3>GenAI scoring</h3><p>Each scorer is independent and off by default. When enabled, a valid GenAI result becomes official for that section; deterministic scoring still runs privately for calibration. If GenAI is unavailable, deterministic scoring takes over without interrupting the learner.</p>
+          <div class="assessment-export-controls">
+            <label><input type="checkbox" id="tsaSpeakGenAi">Use GenAI for Part 2 · Speak</label>
+            <label><input type="checkbox" id="tsaActGenAi">Use GenAI for Part 3 · Act</label>
+          </div>
+          <p class="cl-status" id="tsaScoringStatus" aria-live="polite">Loading scoring settings…</p>
+        </div>
+        <div class="assessment-guide"><h3>How the assessment works</h3><p>The same assessment structure is used twice: the diagnostic before the program and the checkpoint after it. A learner receives one of three scenario forms. Think is worth 40 points, Speak 30, and Act 30, for a total of 100.</p><p>Part 1a asks the learner to organize information. Part 1b tests whether they can diagnose, extend, and choose a logical structure. Part 2 asks for a concise recommendation based on supplied facts. Part 3 asks for a decision, a response to pushback, and a next step.</p><p>Think is always scored from keyed answers. Speak and Act use the deterministic C³ rules below unless their independent GenAI toggle is enabled and returns a valid score. When GenAI is enabled, deterministic scoring also runs and the difference is logged privately for calibration. Learners see only the official score, and GenAI failure silently falls back to deterministic scoring.</p></div>
+        <div class="assessment-export">
+          <h3>Download assessment content</h3><p>Select the parts to include in one combined review file.</p>
+          <div class="assessment-export-controls">
+            <label><input type="checkbox" data-assessment-export-part="part1a" checked>Part 1a</label>
+            <label><input type="checkbox" data-assessment-export-part="part1b" checked>Part 1b</label>
+            <label><input type="checkbox" data-assessment-export-part="part2" checked>Part 2</label>
+            <label><input type="checkbox" data-assessment-export-part="part3" checked>Part 3</label>
+            <button class="small-button secondary-button" type="button" id="assessmentDownloadCsv">Download selected CSV files</button>
+            <button class="small-button secondary-button" type="button" id="assessmentDownloadJson">Download selected JSON</button>
+          </div>
+          <p class="cl-status" id="assessmentDownloadStatus" aria-live="polite"></p>
+        </div>
+        <details class="assessment-part" id="assessmentPart1a"><summary><span class="assessment-part-title"><strong>Part 1a · Organize information</strong><span>Three form-specific sorting exercises · 20 points</span></span></summary><div class="assessment-part-body"><div class="assessment-rubric"><h4>Learner instructions and scoring</h4><p>Organize the nine tasks according to <strong>when they should be handled</strong>. Choose the best three timing headings from six options, then place every task under one heading. The timing rule is stated explicitly so the exercise tests whether the learner can build and apply that structure—not whether they happen to choose the same organizing dimension as the assessment author. Each correct heading used once earns 2 points, for 6 points total. Correct placement is worth 14 points divided equally across nine items. The Part 1a result is rounded to one decimal and capped at 20.</p><p><strong>Learner-view preview:</strong> use the button on any form card below to complete that exact sorting exercise. Preview answers are temporary and are never saved as learner results.</p></div><div class="assessment-form-grid" id="assessmentPart1aContent"></div></div></details>
+        <details class="assessment-part" id="assessmentPart1b"><summary><span class="assessment-part-title"><strong>Part 1b · Test the structure</strong><span>45-question bank · 15 questions drawn per attempt · 20 points</span></span></summary><div class="assessment-part-body">
+        <div class="assessment-rubric"><h4>Learner instructions and scoring</h4><p>Answer 15 multiple-choice questions in mixed order: five from each format. Each correct answer earns 20 ÷ 15 points, or about 1.33 points. Incorrect answers receive zero; there is no partial credit. The Part 1b score is capped at 20.</p><div class="assessment-preview-actions"><a class="small-button secondary-button" href="../apps/tsa-diagnostic/index.html?preview=1&amp;contentPreview=part1b&amp;reset=1" target="_blank" rel="noopener">Preview all 45 questions as a learner</a></div></div><div class="brief" style="margin:0 0 16px">
+          <strong>What the three formats test</strong>
+          <p style="margin:8px 0 0"><strong>Format 1:</strong> Can you spot what doesn’t belong?</p>
+          <p style="margin:5px 0 0"><strong>Format 2:</strong> Can you extend an existing structure without breaking its logic?</p>
+          <p style="margin:5px 0 0"><strong>Format 3:</strong> Can you select the best overall structure?</p>
+        </div>
         <div class="qb-toolbar">
           <input type="search" id="qbSearch" placeholder="Search questions or answers" aria-label="Search diagnostic questions">
           <select id="qbFormat" aria-label="Filter by question format">
             <option value="all">All formats</option>
-            <option value="1">Format 1 · Spot the issue</option>
-            <option value="2">Format 2 · Complete the group</option>
-            <option value="3">Format 3 · Choose the best breakdown</option>
+            <option value="1">Format 1 · Spot what doesn’t belong</option>
+            <option value="2">Format 2 · Extend the structure</option>
+            <option value="3">Format 3 · Select the best overall structure</option>
           </select>
+          <button class="small-button secondary-button" type="button" id="qbDownloadCsv">Download spreadsheet</button>
+          <button class="small-button secondary-button" type="button" id="qbDownloadJson">Download JSON</button>
         </div>
+        <details class="qb-health-panel" id="qbHealthPanel">
+          <summary><div><h3>Item health and question metrics</h3><p>Open performance, difficulty, answer-pattern, timing, and learner quality metrics for all questions.</p></div></summary>
+          <div class="qb-health-body">
+          <div class="qb-health-head">
+            <div><p>Fewer than 30 responses is collecting data; 30–49 is an early signal; automated review flags begin at 50 responses.</p></div>
+            <div class="qb-health-actions">
+              <select id="qbAssessment" aria-label="Assessment results to analyse"><option value="all">Diagnostic + checkpoint</option><option value="diagnostic">Diagnostic only</option><option value="checkpoint">Checkpoint only</option></select>
+              <button class="small-button secondary-button" type="button" id="qbRefreshHealth">Refresh</button>
+              <button class="small-button secondary-button" type="button" id="qbDownloadHealth">Download health CSV</button>
+            </div>
+          </div>
+          <div class="qb-summary" id="qbHealthSummary" aria-live="polite"></div>
+          <p class="cl-status" id="qbHealthStatus" aria-live="polite">Loading item results…</p>
+          <div class="qb-health-table-wrap"><table class="qb-health-table"><thead><tr><th>Question</th><th>Version</th><th>Intended</th><th>Responses</th><th>Correct</th><th>Diagnostic</th><th>Checkpoint</th><th>Change</th><th>Median time</th><th>Changed answer</th><th>Quality reports</th><th>Discrimination</th><th>Health</th><th>Review status</th></tr></thead><tbody id="qbHealthRows"></tbody></table></div>
+          </div>
+        </details>
         <div class="qb-summary" id="qbSummary" aria-live="polite"></div>
         <p class="cl-status" id="qbStatus" aria-live="polite">Loading question bank…</p>
         <div class="qb-list" id="qbList"></div>
+        </div></details>
+        <details class="assessment-part" id="assessmentPart2"><summary><span class="assessment-part-title"><strong>Part 2 · Speak concisely</strong><span>Three form-specific recommendation scenarios · 30 points</span></span></summary><div class="assessment-part-body"><div class="assessment-rubric"><h4>C³ scoring</h4><p>The learner recommends one option, supports it with scenario-based reasoning, and gives a practical next step. <strong>No option is keyed or preferred:</strong> a well-supported alternative can earn full credit. Typed and transcribed responses use the same content rules; punctuation and vocal delivery are not scored.</p><ul><li><strong>Leads — 8 points:</strong> identifiable recommendation, clarity, and early placement.</li><li><strong>Supports — 14 points:</strong> up to 9 for distinct scenario concepts and 5 for reasoning linkage; bare keyword lists do not earn full credit.</li><li><strong>Focuses — 8 points:</strong> up to 5 for a practical next action and 3 for broad length/focus.</li><li><strong>Safeguard:</strong> without an identifiable recommendation, the total is capped at 10.</li></ul></div><div class="assessment-form-grid" id="assessmentPart2Content"></div></div></details>
+        <details class="assessment-part" id="assessmentPart3"><summary><span class="assessment-part-title"><strong>Part 3 · Act with judgment</strong><span>Three form-specific decisions and pushback scenarios · 30 points</span></span></summary><div class="assessment-part-body"><div class="assessment-rubric"><h4>C³ scoring</h4><p>The learner chooses a first action, commits to it, adapts to pushback, and advances the situation. Every listed action is treated equally; the reference default is not required for full credit. Typed and transcribed responses use the same content rules; vocal delivery is not scored.</p><ul><li><strong>Decides — 10 points:</strong> action selection 3, explicit commitment 4, and scenario-linked rationale 3.</li><li><strong>Adapts — 12 points:</strong> concern recognition 5, mitigation 4, and connection to the decision/trade-off 3.</li><li><strong>Advances — 8 points:</strong> concrete next action 5, ownership/timing specificity 2, and broad length/focus 1.</li><li><strong>Safeguard:</strong> without an explicit decision, the total is capped at 8.</li></ul></div><div class="assessment-form-grid" id="assessmentPart3Content"></div></div></details>
       </section>
 
     </main>
@@ -3303,10 +3413,12 @@
       getDocs,
       getAssessmentVisibility,
       getAdminVisibilitySettings,
+      getTsaScoringSettings,
       getEmailTemplates,
       saveEmailTemplate,
       setAssessmentVisibility,
       setAdminVisibilitySettings,
+      setTsaScoringSettings,
       getPublicAssessmentSettings,
       setPublicAssessmentSettings,
       getEngagementSettings,
@@ -3348,8 +3460,10 @@
       getDocs,
       getAssessmentVisibility,
       getAdminVisibilitySettings,
+      getTsaScoringSettings,
       setAssessmentVisibility,
       setAdminVisibilitySettings,
+      setTsaScoringSettings,
       getPublicAssessmentSettings,
       setPublicAssessmentSettings,
       getEngagementSettings,
@@ -6530,12 +6644,253 @@
     }
 
     let qbBank = [];
-    const QB_FORMAT_LABELS = { 1: 'Format 1 · Spot the issue', 2: 'Format 2 · Complete the group', 3: 'Format 3 · Choose the best breakdown' };
+    let qbForms = {};
+    let qbAttempts = [];
+    let qbReviews = {};
+    let qbDifficulty = { accessible: [], stretch: [] };
+    let qbBankRelease = '';
+    let qbVersionOverrides = {};
+    let qbHealthLoaded = false;
+    const QB_HEALTH_OPEN_KEY = 'utl_admin_qb_health_open';
+    const QB_FORMAT_LABELS = { 1: 'Format 1 · Spot what doesn’t belong', 2: 'Format 2 · Extend the structure', 3: 'Format 3 · Select the best overall structure' };
+    const QB_PROMPT_RULES = {
+      1: 'Which heading would you change because it is at a different level, overlaps another heading, or uses a different grouping rule?',
+      2: 'Which option adds a distinct category at the same level, rather than repeating, sitting inside, or cutting across an existing category?',
+      3: 'Which option gives the clearest set of distinct, same-level headings for analysing this issue?'
+    };
+
+    function qbPrompt(question) {
+      return question.prompt.replace(/Which one would you change\?|Which would you add next\?|Which headings would you use\?$/, QB_PROMPT_RULES[question.format]);
+    }
 
     function qbReadLiteral(source, pattern, label) {
       const match = source.match(pattern);
       if (!match) throw new Error(label + ' was not found');
       return Function('"use strict"; return (' + match[1] + ')')();
+    }
+
+    function qbDifficultyFor(id) {
+      return qbDifficulty.accessible.includes(id) ? 'accessible' : qbDifficulty.stretch.includes(id) ? 'stretch' : 'core';
+    }
+
+    function qbVersionFor(id) {
+      return Number(qbVersionOverrides[id]) || 1;
+    }
+
+    function assessmentRenderForms() {
+      const organizeRoot = document.getElementById('assessmentPart1aContent');
+      const speakRoot = document.getElementById('assessmentPart2Content');
+      const actRoot = document.getElementById('assessmentPart3Content');
+      const entries = Object.entries(qbForms);
+      if (organizeRoot) organizeRoot.innerHTML = entries.map(([formId, form]) => { const task = form.organize; return `<article class="assessment-form-card"><h4>Form ${formId} · ${escapeHtml(task.title)}</h4><p><strong>Learner instruction:</strong> ${escapeHtml(task.prompt)}</p><h5>Correct headings</h5><p class="assessment-key">${task.correctLabels.map(escapeHtml).join(' · ')}</p><h5>Alternative headings</h5><p>${task.labels.filter(label => !task.correctLabels.includes(label)).map(escapeHtml).join(' · ')}</p><h5>Items and keyed group</h5><ul>${task.items.map(item => `<li>${escapeHtml(item[0])} → <span class="assessment-key">${escapeHtml(task.correctLabels[item[1]])}</span></li>`).join('')}</ul><h5>Scoring</h5><p>6 points for three correct unique headings; 14 points distributed across the nine correctly placed items.</p><div class="assessment-preview-actions"><a class="small-button secondary-button" href="../apps/tsa-diagnostic/index.html?preview=1&amp;contentPreview=part1a&amp;form=${formId}&amp;reset=1" target="_blank" rel="noopener">Preview Form ${formId} as a learner</a></div></article>`; }).join('');
+      if (speakRoot) speakRoot.innerHTML = entries.map(([formId, form]) => { const task = form.speak; return `<article class="assessment-form-card"><h4>Form ${formId} · ${escapeHtml(task.title)}</h4><p><strong>Learner task:</strong> Recommend one option. Give two or three reasons based on the information, then state a clear next step. Up to 60 seconds; minimum 25 words.</p><h5>Scenario facts</h5><ul>${task.facts.map(fact => `<li><strong>${escapeHtml(fact[0])}:</strong> ${escapeHtml(fact[1])}</li>`).join('')}</ul><h5>Official scoring evidence</h5><p>Leads: 8 · Supports: 14 · Focuses: 8. Without an identifiable recommendation, the score is capped at 10.</p><h5>Configured evidence terms</h5><p>Coverage: ${task.keywords.map(group => escapeHtml(group.join(' / '))).join(' · ')}<br>Next step: ${task.next.map(escapeHtml).join(' / ')}</p><div class="assessment-preview-actions"><a class="small-button secondary-button" href="../apps/tsa-diagnostic/index.html?preview=1&amp;contentPreview=part2&amp;form=${formId}&amp;reset=1" target="_blank" rel="noopener">Preview Form ${formId} as a learner</a></div></article>`; }).join('');
+      if (actRoot) actRoot.innerHTML = entries.map(([formId, form]) => { const task = form.act; return `<article class="assessment-form-card"><h4>Form ${formId} · ${escapeHtml(task.title)}</h4><p><strong>Situation:</strong> ${escapeHtml(task.setup)}</p><h5>First action choices</h5><ol>${task.choices.map((choice, index) => `<li class="${index === task.best ? 'assessment-key' : ''}">${escapeHtml(choice)}${index === task.best ? ' · reference default (not scored higher)' : ''}</li>`).join('')}</ol><h5>Pushback</h5><p>${escapeHtml(task.pushback)}</p><p><strong>Learner task:</strong> State the decision, respond to the concern, and explain what happens next. Up to 45 seconds; minimum 15 words.</p><h5>Official scoring evidence</h5><p>Decides: 10 · Adapts: 12 · Advances: 8. Without an explicit decision, the score is capped at 8.</p><h5>Configured evidence terms</h5><p>Situation: ${task.terms.map(escapeHtml).join(' / ')}<br>Concern: ${task.concerns.map(escapeHtml).join(' / ')}<br>Next step: ${task.next.map(escapeHtml).join(' / ')}</p><div class="assessment-preview-actions"><a class="small-button secondary-button" href="../apps/tsa-diagnostic/index.html?preview=1&amp;contentPreview=part3&amp;form=${formId}&amp;reset=1" target="_blank" rel="noopener">Preview Form ${formId} as a learner</a></div></article>`; }).join('');
+    }
+
+    async function initTsaScoringControls() {
+      const speak = document.getElementById('tsaSpeakGenAi');
+      const act = document.getElementById('tsaActGenAi');
+      const status = document.getElementById('tsaScoringStatus');
+      if (!speak || !act) return;
+      const fb = window.utlFirebaseAuth || {};
+      if (!fb.getTsaScoringSettings || !fb.setTsaScoringSettings) { if (status) status.textContent = 'Scoring settings are unavailable.'; return; }
+      try {
+        const settings = await fb.getTsaScoringSettings();
+        speak.checked = settings.speakGenAiEnabled === true;
+        act.checked = settings.actGenAiEnabled === true;
+        if (status) { status.textContent = 'Saved centrally. Both options default to off.'; status.className = 'cl-status is-success'; }
+      } catch (_) { if (status) { status.textContent = 'Could not load scoring settings.'; status.className = 'cl-status is-error'; } }
+      const save = async () => {
+        speak.disabled = true; act.disabled = true;
+        if (status) { status.textContent = 'Saving…'; status.className = 'cl-status'; }
+        try {
+          await fb.setTsaScoringSettings({ speakGenAiEnabled:speak.checked, actGenAiEnabled:act.checked });
+          if (status) { status.textContent = 'Scoring settings saved.'; status.className = 'cl-status is-success'; }
+        } catch (_) { if (status) { status.textContent = 'Could not save scoring settings.'; status.className = 'cl-status is-error'; } }
+        finally { speak.disabled = false; act.disabled = false; }
+      };
+      speak.addEventListener('change', save); act.addEventListener('change', save);
+    }
+
+    function assessmentSelectedParts() {
+      return Array.from(document.querySelectorAll('[data-assessment-export-part]:checked')).map(input => input.dataset.assessmentExportPart);
+    }
+
+    function assessmentExportData() {
+      const selected = assessmentSelectedParts();
+      const output = { exportedAt:new Date().toISOString(), bankRelease:qbBankRelease, selectedParts:selected, parts:{} };
+      if (selected.includes('part1a')) output.parts.part1a = Object.fromEntries(Object.entries(qbForms).map(([id, form]) => [id, form.organize]));
+      if (selected.includes('part1b')) output.parts.part1b = qbBank.map(question => Object.assign({}, question, { fullPrompt:qbPrompt(question), intendedDifficulty:qbDifficultyFor(question.id), version:qbVersionFor(question.id), correctAnswerLetter:String.fromCharCode(65 + question.answer), correctAnswerText:question.options[question.answer] }));
+      if (selected.includes('part2')) output.parts.part2 = Object.fromEntries(Object.entries(qbForms).map(([id, form]) => [id, form.speak]));
+      if (selected.includes('part3')) output.parts.part3 = Object.fromEntries(Object.entries(qbForms).map(([id, form]) => [id, form.act]));
+      return output;
+    }
+
+    function assessmentFlatRows(data) {
+      const rows = [];
+      Object.entries(data.parts.part1a || {}).forEach(([form, task]) => task.items.forEach((item, index) => rows.push({ part:'1a', form, record_type:'sorting item', id:`${form}-organize-${index + 1}`, title:task.title, instruction:task.prompt, content:item[0], choices:task.labels.join(' | '), keyed_answer:task.correctLabels[item[1]], rationale:'', scoring:'Correct headings: 6 points; correct placements: 14 points' })));
+      (data.parts.part1b || []).forEach(question => rows.push({ part:'1b', form:'All', record_type:QB_FORMAT_LABELS[question.format], id:question.id, title:'Test the structure', instruction:question.fullPrompt, content:question.prompt, choices:question.options.map((option,index)=>`${String.fromCharCode(65+index)}. ${option}`).join(' | '), keyed_answer:`${question.correctAnswerLetter}. ${question.correctAnswerText}`, rationale:question.rationale, scoring:`${question.intendedDifficulty}; version ${question.version}` }));
+      Object.entries(data.parts.part2 || {}).forEach(([form, task]) => rows.push({ part:'2', form, record_type:'recommendation scenario', id:`${form}-speak`, title:task.title, instruction:'Recommend one option; give two or three reasons; state a next step. Up to 60 seconds; minimum 25 words.', content:task.facts.map(fact=>`${fact[0]}: ${fact[1]}`).join(' | '), choices:'', keyed_answer:'Evidence terms: '+task.keywords.map(group=>group.join('/')).join(' | '), rationale:'Next-step terms: '+task.next.join('/'), scoring:'Leads 8; Supports 14; Focuses 8; cap 10 without recommendation' }));
+      Object.entries(data.parts.part3 || {}).forEach(([form, task]) => rows.push({ part:'3', form, record_type:'decision and pushback scenario', id:`${form}-act`, title:task.title, instruction:'Choose what to do first; state the decision; respond to the concern; explain what happens next. Up to 45 seconds; minimum 15 words.', content:`${task.setup} | Pushback: ${task.pushback}`, choices:task.choices.map((choice,index)=>`${String.fromCharCode(65+index)}. ${choice}`).join(' | '), keyed_answer:`Reference default (not scored higher): ${String.fromCharCode(65+task.best)}. ${task.choices[task.best]}`, rationale:`Situation: ${task.terms.join('/')} | Concern: ${task.concerns.join('/')} | Next: ${task.next.join('/')}`, scoring:'Decides 10; Adapts 12; Advances 8; total capped at 8 without explicit commitment' }));
+      return rows;
+    }
+
+    function assessmentCsvFiles(data) {
+      const columns = [
+        ['form','Form'],['record_type','Content type'],['id','ID'],['title','Title'],['instruction','Learner instructions'],
+        ['content','Scenario or item'],['choices','Choices or available headings'],['keyed_answer','Keyed answer or evidence'],
+        ['rationale','Rationale or configured terms'],['scoring','Scoring mechanism']
+      ];
+      const partValues = { part1a:'1a', part1b:'1b', part2:'2', part3:'3' };
+      const csvCell = value => `"${String(value ?? '').replace(/"/g, '""')}"`;
+      const rows = assessmentFlatRows(data);
+      return data.selectedParts.map(part => {
+        const sheetRows = rows.filter(row => row.part === partValues[part]);
+        const lines = [columns.map(([, label]) => csvCell(label)).join(',')].concat(sheetRows.map(row => columns.map(([key]) => csvCell(row[key])).join(',')));
+        return { filename:`tsa-assessment-part-${partValues[part]}.csv`, body:'\uFEFF' + lines.join('\r\n') + '\r\n' };
+      });
+    }
+
+    function assessmentDownload(format) {
+      const status = document.getElementById('assessmentDownloadStatus');
+      const data = assessmentExportData();
+      if (!data.selectedParts.length) { if (status) { status.textContent = 'Select at least one part to download.'; status.className = 'cl-status is-error'; } return; }
+      if (format === 'json') {
+        const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2) + '\n'], { type:'application/json' })); const link = document.createElement('a'); link.href=url; link.download='tsa-assessment-selected-parts.json'; link.click(); URL.revokeObjectURL(url);
+      } else {
+        assessmentCsvFiles(data).forEach(file => { const url = URL.createObjectURL(new Blob([file.body], { type:'text/csv;charset=utf-8' })); const link = document.createElement('a'); link.href=url; link.download=file.filename; link.click(); URL.revokeObjectURL(url); });
+      }
+      if (status) { status.textContent = `Downloaded ${data.selectedParts.length} selected part${data.selectedParts.length === 1 ? '' : 's'}.`; status.className = 'cl-status is-success'; }
+    }
+
+    function qbMedian(values) {
+      const sorted = values.filter(Number.isFinite).sort((a, b) => a - b);
+      if (!sorted.length) return null;
+      const middle = Math.floor(sorted.length / 2);
+      return sorted.length % 2 ? sorted[middle] : (sorted[middle - 1] + sorted[middle]) / 2;
+    }
+
+    function qbCorrelation(rows) {
+      if (rows.length < 10) return null;
+      const xs = rows.map((row) => row.correct ? 1 : 0);
+      const ys = rows.map((row) => Number(row.assessmentTotal) - (row.correct ? 20 / 15 : 0));
+      const meanX = xs.reduce((sum, value) => sum + value, 0) / xs.length;
+      const meanY = ys.reduce((sum, value) => sum + value, 0) / ys.length;
+      let numerator = 0, sumX = 0, sumY = 0;
+      xs.forEach((value, index) => { const dx = value - meanX, dy = ys[index] - meanY; numerator += dx * dy; sumX += dx * dx; sumY += dy * dy; });
+      return sumX && sumY ? numerator / Math.sqrt(sumX * sumY) : null;
+    }
+
+    function qbCurrentRows() {
+      const assessment = document.getElementById('qbAssessment')?.value || 'all';
+      const rows = [];
+      qbAttempts.forEach((attempt) => {
+        if (assessment !== 'all' && attempt.assessment !== assessment) return;
+        (Array.isArray(attempt.items) ? attempt.items : []).forEach((item) => rows.push(Object.assign({ assessment: attempt.assessment, attemptId: attempt.id, assessmentTotal: attempt.totalScore }, item)));
+      });
+      return rows;
+    }
+
+    function qbStats() {
+      const rows = qbCurrentRows();
+      const stats = {};
+      qbBank.forEach((question) => {
+        const current = rows.filter((row) => row.questionId === question.id && Number(row.questionVersion) === qbVersionFor(question.id));
+        const diagnostic = current.filter((row) => row.assessment === 'diagnostic');
+        const checkpoint = current.filter((row) => row.assessment === 'checkpoint');
+        const rate = sample => sample.length ? sample.filter(row => row.correct === true).length / sample.length : null;
+        const reports = current.filter((row) => row.feedbackType);
+        const optionCounts = [0, 1, 2, 3].map(option => current.filter(row => Number(row.selectedAnswer) === option).length);
+        stats[question.id] = {
+          question,
+          rows: current,
+          n: current.length,
+          correctRate: rate(current),
+          diagnosticRate: rate(diagnostic),
+          checkpointRate: rate(checkpoint),
+          medianMs: qbMedian(current.map(row => Number(row.responseTimeMs))),
+          changedRate: current.length ? current.filter(row => Number(row.answerChanges) > 0).length / current.length : null,
+          reports,
+          optionCounts,
+          reportRate: current.length ? reports.length / current.length : null,
+          discrimination: qbCorrelation(current)
+        };
+      });
+      const formatMedians = {};
+      [1, 2, 3].forEach((format) => { formatMedians[format] = qbMedian(Object.values(stats).filter(stat => stat.question.format === format && stat.medianMs !== null).map(stat => stat.medianMs)); });
+      Object.values(stats).forEach((stat) => {
+        const reasons = [];
+        if (stat.n >= 50) {
+          if (stat.correctRate !== null && stat.correctRate < .25) reasons.push('Below 25% correct');
+          if (stat.reports.length >= 3 && stat.reportRate > .05) reasons.push('Quality reports exceed 5%');
+          if (stat.discrimination !== null && stat.discrimination < 0) reasons.push('Negative discrimination');
+          const formatMedian = formatMedians[stat.question.format];
+          if (formatMedian && stat.medianMs > formatMedian * 2) reasons.push('Response time exceeds 2× format median');
+          const intendedRanges = { accessible:[.60,.90], core:[.35,.70], stretch:[.15,.50] };
+          const range = intendedRanges[qbDifficultyFor(stat.question.id)];
+          if (stat.diagnosticRate !== null && (stat.diagnosticRate < range[0] || stat.diagnosticRate > range[1])) reasons.push(`Diagnostic difficulty falls outside intended ${Math.round(range[0] * 100)}–${Math.round(range[1] * 100)}% range`);
+        }
+        stat.reasons = reasons;
+        stat.health = stat.n < 30 ? 'Collecting' : stat.n < 50 ? 'Early signal' : reasons.length ? 'Review' : 'Healthy';
+      });
+      return stats;
+    }
+
+    function qbPercent(value) {
+      return value === null || value === undefined ? '—' : Math.round(value * 100) + '%';
+    }
+
+    function qbHealthClass(health) {
+      return health === 'Review' ? 'is-review' : health === 'Early signal' ? 'is-early' : health === 'Healthy' ? 'is-healthy' : '';
+    }
+
+    function qbReportSummary(reports) {
+      if (!reports.length) return '';
+      const labels = { confusing_instructions:'Confusing instructions', multiple_answers:'Multiple answers', no_correct_answer:'No correct answer', unclear_term:'Unclear term', display_problem:'Display problem', other:'Other' };
+      const counts = reports.reduce((all, report) => { all[report.feedbackType] = (all[report.feedbackType] || 0) + 1; return all; }, {});
+      const countText = Object.entries(counts).map(([type, count]) => `${labels[type] || type}: ${count}`).join(' · ');
+      const comments = reports.filter(report => report.feedbackComment).slice(-5).map(report => `<li>${escapeHtml(report.feedbackComment)}</li>`).join('');
+      return `<div class="qb-reports"><strong>Learner quality reports:</strong> ${escapeHtml(countText)}${comments ? `<ul>${comments}</ul>` : ''}</div>`;
+    }
+
+    function qbReviewHtml(question) {
+      const review = qbReviews[question.id] || {};
+      const status = review.reviewStatus || 'Active';
+      const history = Array.isArray(review.decisionLog) ? review.decisionLog.slice().reverse() : [];
+      return `<details class="qb-review"><summary>Review status, notes, and history</summary><div class="qb-review-grid"><label>Status<select data-qb-review-status="${question.id}">${['Active','Watch','Revise','Retired'].map(value => `<option ${status === value ? 'selected' : ''}>${value}</option>`).join('')}</select></label><label>Decision note<textarea data-qb-review-note="${question.id}" maxlength="1000" placeholder="Why was this status or question changed?"></textarea></label><button class="small-button" type="button" data-qb-review-save="${question.id}">Save review</button></div><p class="cl-status" data-qb-review-message="${question.id}" aria-live="polite"></p><ul class="qb-history"><li>Version ${qbVersionFor(question.id)} · Current bank release ${escapeHtml(qbBankRelease || 'current')}</li>${history.map(entry => `<li>${escapeHtml(entry.at || '')} · ${escapeHtml(entry.status || '')}${entry.note ? ' — ' + escapeHtml(entry.note) : ''}${entry.by ? ' · ' + escapeHtml(entry.by) : ''}</li>`).join('')}</ul></details>`;
+    }
+
+    async function qbSaveReview(questionId) {
+      const statusEl = document.querySelector(`[data-qb-review-status="${questionId}"]`);
+      const noteEl = document.querySelector(`[data-qb-review-note="${questionId}"]`);
+      const message = document.querySelector(`[data-qb-review-message="${questionId}"]`);
+      const status = statusEl?.value || 'Active';
+      const note = String(noteEl?.value || '').trim().slice(0, 1000);
+      const current = qbReviews[questionId] || {};
+      const entry = { at: new Date().toISOString(), status, note, by: auth.currentUser?.email || 'Admin', questionVersion: qbVersionFor(questionId) };
+      const decisionLog = [...(Array.isArray(current.decisionLog) ? current.decisionLog : []), entry].slice(-100);
+      if (message) { message.textContent = 'Saving review…'; message.className = 'cl-status'; }
+      try {
+        await setDoc(doc(db, 'assessment_item_reviews', questionId), { questionId, reviewStatus: status, currentNote: note, questionVersion: qbVersionFor(questionId), bankRelease: qbBankRelease, decisionLog, updatedAt: serverTimestamp() }, { merge: true });
+        qbReviews[questionId] = Object.assign({}, current, { reviewStatus: status, currentNote: note, decisionLog });
+        if (message) { message.textContent = 'Review saved.'; message.className = 'cl-status is-success'; }
+        qbRenderHealth();
+      } catch (error) {
+        if (message) { message.textContent = 'Could not save review: ' + ((error && error.message) || 'Unknown error'); message.className = 'cl-status is-error'; }
+      }
+    }
+
+    function qbRenderHealth() {
+      const body = document.getElementById('qbHealthRows');
+      const summary = document.getElementById('qbHealthSummary');
+      if (!body || !summary) return;
+      const stats = qbStats();
+      const values = Object.values(stats);
+      const counts = values.reduce((all, stat) => { all[stat.health] = (all[stat.health] || 0) + 1; return all; }, {});
+      const responseCount = values.reduce((sum, stat) => sum + stat.n, 0);
+      summary.innerHTML = `<span>${qbAttempts.length} completed attempts loaded</span><span>${responseCount} current-version item responses</span><span>${counts.Review || 0} automated review flags</span><span>${values.reduce((sum, stat) => sum + stat.reports.length, 0)} learner quality reports</span>`;
+      body.innerHTML = values.map((stat) => { const change = stat.diagnosticRate !== null && stat.checkpointRate !== null ? stat.checkpointRate - stat.diagnosticRate : null; const reviewStatus = qbReviews[stat.question.id]?.reviewStatus || 'Active'; return `<tr><td><button class="qb-health-link" type="button" data-qb-jump="${stat.question.id}">${stat.question.id.toUpperCase()}</button></td><td>v${qbVersionFor(stat.question.id)}</td><td>${qbDifficultyFor(stat.question.id)}</td><td>${stat.n}</td><td>${qbPercent(stat.correctRate)}</td><td>${qbPercent(stat.diagnosticRate)}</td><td>${qbPercent(stat.checkpointRate)}</td><td>${change === null ? '—' : (change >= 0 ? '+' : '') + Math.round(change * 100) + ' pts'}</td><td>${stat.medianMs === null ? '—' : Math.round(stat.medianMs / 1000) + 's'}</td><td>${qbPercent(stat.changedRate)}</td><td>${stat.reports.length}${stat.reportRate === null ? '' : ' (' + qbPercent(stat.reportRate) + ')'}</td><td>${stat.discrimination === null ? '—' : stat.discrimination.toFixed(2)}</td><td><span title="${escapeHtml(stat.reasons.join('; '))}" class="qb-health-state ${qbHealthClass(stat.health)}">${stat.health}</span></td><td>${escapeHtml(reviewStatus)}</td></tr>`; }).join('');
+      document.querySelectorAll('[data-qb-jump]').forEach(button => button.addEventListener('click', () => document.getElementById('qb-card-' + button.dataset.qbJump)?.scrollIntoView({ behavior:'smooth', block:'start' })));
     }
 
     function qbRender() {
@@ -6544,22 +6899,124 @@
       if (!list || !summary) return;
       const search = String(document.getElementById('qbSearch')?.value || '').trim().toLowerCase();
       const format = document.getElementById('qbFormat')?.value || 'all';
+      const stats = qbStats();
       const filtered = qbBank.filter((question) => {
-        const haystack = [question.id, question.prompt, question.rationale, ...question.options].join(' ').toLowerCase();
+        const haystack = [question.id, qbPrompt(question), question.rationale, ...question.options].join(' ').toLowerCase();
         return (!search || haystack.includes(search)) && (format === 'all' || String(question.format) === format);
       });
       const formatCounts = filtered.reduce((counts, question) => { counts[question.format] = (counts[question.format] || 0) + 1; return counts; }, {});
       summary.innerHTML = `<span>${filtered.length} of ${qbBank.length} questions shown</span><span>Format 1: ${formatCounts[1] || 0}</span><span>Format 2: ${formatCounts[2] || 0}</span><span>Format 3: ${formatCounts[3] || 0}</span>`;
       let previousFormat = null;
       list.innerHTML = filtered.length ? filtered.map((question) => { const heading = question.format !== previousFormat ? `<div class="qb-part-heading"><strong>${QB_FORMAT_LABELS[question.format]}</strong><span>5 drawn per attempt from 15</span></div>` : ''; previousFormat = question.format; return `${heading}
-        <article class="qb-card">
+        <article class="qb-card" id="qb-card-${question.id}">
           <div class="qb-card-head">
-            <div class="qb-prompt">${escapeHtml(question.prompt)}</div>
-            <div class="qb-card-meta"><span class="qb-chip is-part">Format ${question.format}</span><span class="qb-chip">${escapeHtml(question.id.toUpperCase())}</span></div>
+            <div class="qb-prompt">${escapeHtml(qbPrompt(question))}</div>
+            <div class="qb-card-meta"><span class="qb-chip is-part">Format ${question.format}</span><span class="qb-chip">${escapeHtml(question.id.toUpperCase())}</span><span class="qb-chip">v${qbVersionFor(question.id)}</span><span class="qb-chip">${qbDifficultyFor(question.id)}</span><span class="qb-health-state ${qbHealthClass(stats[question.id].health)}">${stats[question.id].health}</span></div>
           </div>
+          <div class="qb-card-stats"><span>${stats[question.id].n} responses</span><span>${qbPercent(stats[question.id].correctRate)} correct</span><span>${stats[question.id].medianMs === null ? 'No timing yet' : Math.round(stats[question.id].medianMs / 1000) + 's median'}</span><span>Choices: ${stats[question.id].optionCounts.map((count,index)=>String.fromCharCode(65+index)+' '+(stats[question.id].n?Math.round(count/stats[question.id].n*100):0)+'%').join(' · ')}</span><span>${stats[question.id].reports.length} quality reports</span><span>Review: ${escapeHtml(qbReviews[question.id]?.reviewStatus || 'Active')}</span></div>
           <div class="qb-options">${question.options.map((option, index) => `<div class="qb-option ${index === question.answer ? 'is-correct' : ''}"><span class="qb-option-letter">${String.fromCharCode(65 + index)}</span><span>${escapeHtml(option)}</span></div>`).join('')}</div>
           <div class="qb-rationale"><strong>Why this answer:</strong> ${escapeHtml(question.rationale)}</div>
+          ${qbReportSummary(stats[question.id].reports)}${qbReviewHtml(question)}
         </article>`}).join('') : '<div class="qb-empty">No questions match these filters.</div>';
+      document.querySelectorAll('[data-qb-review-save]').forEach(button => button.addEventListener('click', () => qbSaveReview(button.dataset.qbReviewSave)));
+      qbRenderHealth();
+    }
+
+    function qbDownload(format) {
+      if (!qbBank.length) return;
+      const rows = qbBank.map((question) => ({
+        id: question.id,
+        version: qbVersionFor(question.id),
+        bank_release: qbBankRelease,
+        format: QB_FORMAT_LABELS[question.format],
+        intended_difficulty: qbDifficultyFor(question.id),
+        review_status: qbReviews[question.id]?.reviewStatus || 'Active',
+        question: qbPrompt(question),
+        option_a: question.options[0],
+        option_b: question.options[1],
+        option_c: question.options[2],
+        option_d: question.options[3],
+        correct_answer: String.fromCharCode(65 + question.answer),
+        correct_answer_text: question.options[question.answer],
+        rationale: question.rationale
+      }));
+      let body;
+      let type;
+      if (format === 'json') {
+        body = JSON.stringify(rows, null, 2) + '\n';
+        type = 'application/json';
+      } else {
+        const columns = Object.keys(rows[0]);
+        const csvCell = (value) => '"' + String(value ?? '').replace(/"/g, '""') + '"';
+        body = [columns, ...rows.map((row) => columns.map((column) => row[column]))].map((row) => row.map(csvCell).join(',')).join('\n') + '\n';
+        type = 'text/csv';
+      }
+      const url = URL.createObjectURL(new Blob([body], { type }));
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'tsa-diagnostic-question-bank.' + format;
+      link.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function qbDownloadHealth() {
+      const stats = qbStats();
+      const columns = ['question_id','version','format','intended_difficulty','responses','percent_correct','diagnostic_percent_correct','checkpoint_percent_correct','change_points','median_response_seconds','answer_change_percent','option_a_percent','option_b_percent','option_c_percent','option_d_percent','quality_reports','quality_report_percent','quality_report_types','quality_comments','discrimination','automated_health','automated_reasons','review_status'];
+      const rows = Object.values(stats).map((stat) => ({
+        question_id: stat.question.id,
+        version: qbVersionFor(stat.question.id),
+        format: stat.question.format,
+        intended_difficulty: qbDifficultyFor(stat.question.id),
+        responses: stat.n,
+        percent_correct: stat.correctRate === null ? '' : Math.round(stat.correctRate * 1000) / 10,
+        diagnostic_percent_correct: stat.diagnosticRate === null ? '' : Math.round(stat.diagnosticRate * 1000) / 10,
+        checkpoint_percent_correct: stat.checkpointRate === null ? '' : Math.round(stat.checkpointRate * 1000) / 10,
+        change_points: stat.diagnosticRate === null || stat.checkpointRate === null ? '' : Math.round((stat.checkpointRate - stat.diagnosticRate) * 1000) / 10,
+        median_response_seconds: stat.medianMs === null ? '' : Math.round(stat.medianMs / 100) / 10,
+        answer_change_percent: stat.changedRate === null ? '' : Math.round(stat.changedRate * 1000) / 10,
+        option_a_percent: stat.n ? Math.round(stat.optionCounts[0] / stat.n * 1000) / 10 : '',
+        option_b_percent: stat.n ? Math.round(stat.optionCounts[1] / stat.n * 1000) / 10 : '',
+        option_c_percent: stat.n ? Math.round(stat.optionCounts[2] / stat.n * 1000) / 10 : '',
+        option_d_percent: stat.n ? Math.round(stat.optionCounts[3] / stat.n * 1000) / 10 : '',
+        quality_reports: stat.reports.length,
+        quality_report_percent: stat.reportRate === null ? '' : Math.round(stat.reportRate * 1000) / 10,
+        quality_report_types: stat.reports.map(report => report.feedbackType).join('; '),
+        quality_comments: stat.reports.filter(report => report.feedbackComment).map(report => report.feedbackComment).join(' | '),
+        discrimination: stat.discrimination === null ? '' : Math.round(stat.discrimination * 1000) / 1000,
+        automated_health: stat.health,
+        automated_reasons: stat.reasons.join('; '),
+        review_status: qbReviews[stat.question.id]?.reviewStatus || 'Active'
+      }));
+      const csvCell = value => '"' + String(value ?? '').replace(/"/g, '""') + '"';
+      const body = [columns, ...rows.map(row => columns.map(column => row[column]))].map(row => row.map(csvCell).join(',')).join('\n') + '\n';
+      const url = URL.createObjectURL(new Blob([body], { type:'text/csv' }));
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'tsa-item-health.csv';
+      link.click();
+      URL.revokeObjectURL(url);
+    }
+
+    async function qbLoadHealth() {
+      const status = document.getElementById('qbHealthStatus');
+      if (status) { status.textContent = 'Loading item results…'; status.className = 'cl-status'; }
+      try {
+        const fb = window.utlFirebaseAuth || {};
+        if (!fb.getDocs || !fb.collection || !fb.db) throw new Error('Assessment data service is unavailable');
+        const [attemptSnapshot, reviewSnapshot] = await Promise.all([
+          fb.getDocs(fb.collection(fb.db, 'assessment_item_attempts')),
+          fb.getDocs(fb.collection(fb.db, 'assessment_item_reviews'))
+        ]);
+        qbAttempts = [];
+        attemptSnapshot.forEach(snapshot => qbAttempts.push(Object.assign({ id:snapshot.id }, snapshot.data() || {})));
+        qbReviews = {};
+        reviewSnapshot.forEach(snapshot => { qbReviews[snapshot.id] = snapshot.data() || {}; });
+        qbHealthLoaded = true;
+        if (status) { status.textContent = qbAttempts.length ? `Loaded ${qbAttempts.length} completed assessment attempts.` : 'No item-level attempts have been recorded yet. Data will appear after the next completed assessment.'; status.className = 'cl-status is-success'; }
+      } catch (error) {
+        if (status) { status.textContent = 'Could not load item health data: ' + ((error && error.message) || 'Unknown error'); status.className = 'cl-status is-error'; }
+      }
+      qbRender();
     }
 
     async function qbInit() {
@@ -6569,16 +7026,42 @@
         const response = await fetch('../apps/tsa-diagnostic/index.html', { cache:'no-store' });
         if (!response.ok) throw new Error('HTTP ' + response.status);
         const source = await response.text();
-        const bank = qbReadLiteral(source, /const SPOT_QUESTION_BANK=(\[[\s\S]*?\]);\n\s*function spotAssessmentQuestions/, 'Question bank');
+        qbForms = qbReadLiteral(source, /const FORMS=(\{[\s\S]*?\});\n\s*const SPOT_QUESTION_BANK=/, 'Assessment forms');
+        const bank = qbReadLiteral(source, /const SPOT_QUESTION_BANK=(\[[\s\S]*?\]);\n\s*const SPOT_DIFFICULTY=/, 'Question bank');
+        qbDifficulty = qbReadLiteral(source, /const SPOT_DIFFICULTY=(\{[\s\S]*?\});\n\s*const SPOT_PROMPT_RULES=/, 'Difficulty data');
+        qbBankRelease = qbReadLiteral(source, /const SPOT_BANK_RELEASE=('[^']+');/, 'Bank release');
+        qbVersionOverrides = qbReadLiteral(source, /const SPOT_QUESTION_VERSION_OVERRIDES=(\{[\s\S]*?\});/, 'Question versions');
         qbBank = bank;
         status.textContent = 'Loaded from the unified diagnostic source.';
         status.className = 'cl-status is-success';
+        assessmentRenderForms();
         qbRender();
+        const healthPanel = document.getElementById('qbHealthPanel');
+        if (healthPanel && localStorage.getItem(QB_HEALTH_OPEN_KEY) === 'true') {
+          healthPanel.open = true;
+          qbLoadHealth();
+        } else {
+          const healthStatus = document.getElementById('qbHealthStatus');
+          if (healthStatus) healthStatus.textContent = 'Open this section to load item results.';
+        }
       } catch (error) {
         status.textContent = 'Could not load the question bank: ' + ((error && error.message) || 'Unknown error');
         status.className = 'cl-status is-error';
       }
       ['qbSearch','qbFormat'].forEach((id) => document.getElementById(id)?.addEventListener(id === 'qbSearch' ? 'input' : 'change', qbRender));
+      document.getElementById('qbDownloadCsv')?.addEventListener('click', () => qbDownload('csv'));
+      document.getElementById('qbDownloadJson')?.addEventListener('click', () => qbDownload('json'));
+      document.getElementById('qbAssessment')?.addEventListener('change', () => { qbRender(); qbRenderHealth(); });
+      document.getElementById('qbRefreshHealth')?.addEventListener('click', qbLoadHealth);
+      document.getElementById('qbDownloadHealth')?.addEventListener('click', qbDownloadHealth);
+      document.getElementById('assessmentDownloadCsv')?.addEventListener('click', () => assessmentDownload('csv'));
+      document.getElementById('assessmentDownloadJson')?.addEventListener('click', () => assessmentDownload('json'));
+      initTsaScoringControls();
+      document.getElementById('qbHealthPanel')?.addEventListener('toggle', (event) => {
+        const open = event.currentTarget.open;
+        localStorage.setItem(QB_HEALTH_OPEN_KEY, String(open));
+        if (open && !qbHealthLoaded) qbLoadHealth();
+      });
     }
 
     function clInit() {
