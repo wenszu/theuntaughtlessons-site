@@ -48,8 +48,11 @@ assert.match(app, /state\.spot\.answers\[q\.id\]===q\.answer\?20\/15:0/, 'Part 2
 assert.match(app, /class="sort-workspace"/, 'Part 1 should use the source-and-buckets grocery-list layout');
 assert.match(app, /Every question has exactly one correct answer/, 'Part 1b should explain its deterministic format');
 assert.match(app, /Use microphone/, 'Recording mode should be described as a response method rather than the recording action');
-assert.match(app, /<h1>Give a clear recommendation<\/h1>/, 'Part 2 should separate the task from the scenario title');
-assert.match(app, /<strong>Your task<\/strong>Recommend one option/, 'Part 2 should state the response task explicitly');
+assert.match(app, /const speakContent=`<h1>\$\{esc\(data\.title\)\}<\/h1>/, 'Part 2 should make the specific task its primary heading');
+assert.match(app, /<strong>Your task<\/strong>Recommend one option/, 'Part 2 should state the response requirements explicitly');
+assert.match(app, /<strong>Information to use<\/strong>/, 'Parts 2 and 3 should distinguish supporting information from the task');
+assert.match(app, /<h1>Choose your first action<\/h1>/, 'Part 3 should make the required action its primary heading');
+assert.doesNotMatch(app, /<strong>Situation(?: ·|<\/strong>)/, 'Parts 2 and 3 should not mislabel the task or supporting information as Situation');
 assert.match(app, /keywords:\[\['library','park','community hall','hall'\]/, 'Part 2 venue scoring should accept every available recommendation');
 assert.match(app, /let decides=\(d\.choice!==null\?3:0\)\+\(hasDecision\?4:0\)/, 'Part 3 Decides should require action selection and explicit commitment');
 assert.doesNotMatch(app, /t\.match\(\/\[\.!\?\]\//, 'speech-to-text punctuation must not contribute to scoring');
