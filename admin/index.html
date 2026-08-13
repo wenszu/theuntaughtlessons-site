@@ -3441,7 +3441,7 @@
       signOut,
       signInWithGooglePopup,
       Timestamp
-    } from "../assets/firebase.js?v=20260806-emergency-access";
+    } from "../assets/firebase.js?v=20260813-tsa-scoring-2";
     import { serverTimestamp, setDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
     window.utlFirebaseAuth = {
@@ -3980,10 +3980,9 @@
       pollTimer = window.setInterval(probe, 250);
       timeoutTimer = window.setTimeout(function () {
         if (finished) return;
-        finished = true;
-        cleanup();
-        if (button) button.disabled = false;
-        if (status) status.textContent = 'Secure sign-in took too long to load. Refresh the page, then try again.';
+        timeoutTimer = null;
+        if (button) button.disabled = true;
+        if (status) status.textContent = 'Secure sign-in is still loading. This page will continue automatically.';
       }, 12000);
       probe();
     }
