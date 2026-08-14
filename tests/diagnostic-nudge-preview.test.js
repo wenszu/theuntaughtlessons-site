@@ -25,11 +25,12 @@ assert.match(admin, /The same banner position returns once/, 'program completion
 assert.match(admin, /will not include a before-and-after comparison/, 'the no-baseline edge case should be honest about comparison limits');
 assert.match(admin, /Take diagnostic · 15–20 min/, 'the diagnostic action should set a realistic time expectation');
 assert.match(admin, /Take checkpoint · 15–20 min/, 'the checkpoint action should set the same time expectation');
-assert.match(admin, /grid-template-columns:repeat\(6,minmax\(108px,1fr\)\)/, 'the mock should integrate the complete journey inside the former orientation bar height');
+assert.match(admin, /class="dn-orientation-row"/, 'the mock should preserve the Orientation row');
+assert.match(admin, /class="dn-milestone-dots"/, 'the Orientation row should contain quiet, non-clickable journey progress');
+assert.match(admin, /role="img" aria-label="Program journey:/, 'the milestone dots should expose one concise accessible summary');
+assert.match(admin, /aria-hidden="true"/, 'individual milestone dots should not create focus or screen-reader noise');
 assert.match(admin, /class="dn-phase-tabs"/, 'the original three detailed phase tabs should remain below the compact path');
-['Orientation','Diagnostic','Think clearly','Speak concisely','Act confidently','Checkpoint'].forEach((step) => {
-  assert.match(admin, new RegExp(`name:'${step}'`), `integrated program path should include ${step}`);
-});
+assert.match(admin, /milestoneNames=\['Orientation','Diagnostic','Think','Speak','Act','Checkpoint'\]/, 'the compact progress indicator should retain the full journey sequence');
 assert.doesNotMatch(member, /diagnosticNudgePreview/, 'the prototype must not leak into the live member journey');
 
 console.log('diagnostic journey nudge admin preview contracts passed');

@@ -969,25 +969,24 @@
     .dn-cue-secondary { color:var(--navy); font-size:10px; font-weight:700; }
     .dn-cue-primary { display:inline-flex; align-items:center; min-height:36px; padding:9px 13px; border-radius:7px; background:var(--gold); color:var(--navy); font-size:11px; font-weight:700; }
     .dn-program-label { margin:15px 0 7px; color:var(--navy); font-size:16px; font-weight:700; }
-    .dn-path-scroll { overflow-x:auto; border:1px solid #D9D1C5; border-radius:8px; background:#fff; scrollbar-width:thin; }
-    .dn-path-track { display:grid; grid-template-columns:repeat(6,minmax(108px,1fr)); min-width:680px; }
-    .dn-path-step { position:relative; min-height:52px; padding:8px 9px; border-right:1px solid #E2DACE; }
-    .dn-path-step:last-child { border-right:0; }
-    .dn-path-step::after { content:'→'; position:absolute; z-index:1; top:19px; right:-7px; display:grid; place-items:center; width:14px; height:14px; border-radius:50%; background:#fff; color:#A4A9AE; font-size:9px; }
-    .dn-path-step:last-child::after { display:none; }
-    .dn-path-step small { display:none; }
-    .dn-path-step strong { display:block; color:var(--navy); font-size:10px; line-height:1.2; }
-    .dn-path-step span { display:block; margin-top:4px; color:#6B7580; font-size:8px; line-height:1.2; }
-    .dn-path-step.is-complete { background:#F1F8F4; }
-    .dn-path-step.is-current { background:#FFF8E9; box-shadow:inset 0 3px 0 var(--gold); }
-    .dn-path-step.is-muted { background:#FAF9F6; opacity:.62; }
+    .dn-orientation-row { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:16px; align-items:center; min-height:52px; padding:8px 12px; border:1px solid #D9D1C5; border-radius:8px; background:#fff; }
+    .dn-orientation-copy { min-width:0; }
+    .dn-orientation-copy strong { display:block; color:var(--navy); font-size:11px; }
+    .dn-orientation-copy span { display:block; margin-top:3px; color:#4D7094; font-size:9px; }
+    .dn-milestone-summary { display:flex; align-items:center; gap:10px; }
+    .dn-milestone-label { color:var(--navy); font-size:9px; font-weight:700; white-space:nowrap; }
+    .dn-milestone-dots { position:relative; display:flex; align-items:center; gap:7px; }
+    .dn-milestone-dots::before { content:''; position:absolute; z-index:0; left:4px; right:4px; top:50%; height:1px; background:#D0D5D9; }
+    .dn-milestone-dot { position:relative; z-index:1; width:9px; height:9px; border:1px solid #AAB3BB; border-radius:50%; background:#fff; }
+    .dn-milestone-dot.is-complete { border-color:#2D7B54; background:#2D7B54; }
+    .dn-milestone-dot.is-current { border:3px solid var(--gold); background:#fff; box-shadow:0 0 0 2px #FFF4D9; }
     .dn-phase-tabs { display:grid; grid-template-columns:repeat(3,1fr); margin-top:8px; border:1px solid #D9D1C5; border-radius:8px; overflow:hidden; background:#fff; }
     .dn-phase-tab { min-height:66px; padding:10px; border-right:1px solid #E2DACE; }
     .dn-phase-tab:last-child { border-right:0; }
     .dn-phase-tab small { color:#B56E00; font-size:8px; font-weight:700; }
     .dn-phase-tab strong { display:block; margin-top:3px; color:var(--navy); font-size:12px; }
     .dn-phase-tab span { display:block; margin-top:4px; color:#6B7580; font-size:9px; }
-    @media (max-width:760px) { .dn-dialog-body { grid-template-columns:1fr; overflow:auto; } .dn-state-nav { display:flex; gap:6px; border-right:0; border-bottom:1px solid var(--line); } .dn-state-nav strong { display:none; } .dn-state-button { flex:0 0 155px; margin:0; } .dn-preview-stage { overflow:visible; } .dn-journey-cue { grid-template-columns:1fr; } .dn-cue-actions { white-space:normal; } }
+    @media (max-width:760px) { .dn-dialog-body { grid-template-columns:1fr; overflow:auto; } .dn-state-nav { display:flex; gap:6px; border-right:0; border-bottom:1px solid var(--line); } .dn-state-nav strong { display:none; } .dn-state-button { flex:0 0 155px; margin:0; } .dn-preview-stage { overflow:visible; } .dn-journey-cue { grid-template-columns:1fr; } .dn-cue-actions { white-space:normal; } .dn-orientation-row { grid-template-columns:1fr; gap:7px; } .dn-milestone-summary { justify-content:space-between; } }
 
     .section-divider {
       height: 1px;
@@ -5161,19 +5160,12 @@
     ];
 
     function diagnosticNudgeMemberHtml(state) {
-      const diagnosticStatus=state.id==='first-login'?'After orientation':state.id==='orientation-done'||state.id==='learning-started'?'Recommended':state.id==='diagnostic-progress'?'In progress':state.id==='program-no-baseline'?'Not taken':'Complete ✓';
-      const checkpointStatus=state.id==='program-done'||state.id==='program-no-baseline'?'Ready':state.id==='checkpoint-done'?'Complete ✓':'After Phase 3';
-      const steps=[
-        {overline:'Start',name:'Orientation',status:state.orientation},
-        {overline:'Before program',name:'Diagnostic',status:diagnosticStatus},
-        {overline:'Phase 1',name:'Think clearly',status:state.phases[0]},
-        {overline:'Phase 2',name:'Speak concisely',status:state.phases[1]},
-        {overline:'Phase 3',name:'Act confidently',status:state.phases[2]},
-        {overline:'After program',name:'Checkpoint',status:checkpointStatus}
-      ];
-      const stepClass=status=>/Complete/.test(status)?'is-complete':/Ready|Recommended|In progress/.test(status)?'is-current':/Locked|After/.test(status)?'is-muted':'';
+      const milestoneNames=['Orientation','Diagnostic','Think','Speak','Act','Checkpoint'];
+      const currentStep=state.id==='first-login'?1:state.id==='orientation-done'||state.id==='learning-started'||state.id==='diagnostic-progress'?2:state.id==='diagnostic-done'?3:6;
+      const journeyComplete=state.id==='checkpoint-done';
+      const currentLabel=journeyComplete?'Journey complete':`${milestoneNames[currentStep-1]} · Step ${currentStep} of 6`;
       const phaseNames=['Think clearly','Speak concisely','Act confidently'];
-      return `<div class="dn-member-frame"><div class="dn-member-nav"><span class="dn-member-logo">The Untaught Lessons</span><span>Learning Journey &nbsp; | &nbsp; My Results</span></div><div class="dn-member-content"><span class="dn-member-eyebrow">Your program</span><h4 class="dn-member-title">Learning Journey</h4><p class="dn-member-welcome">Welcome back, Preview.</p><section class="dn-journey-cue ${state.assessment?'is-assessment':''}"><div><small>${state.eyebrow}</small><h4>${state.cueTitle}</h4><p>${state.copy}</p></div><div class="dn-cue-actions">${state.secondary?`<span class="dn-cue-secondary">${state.secondary}</span>`:''}<span class="dn-cue-primary">${state.action}</span></div></section><div class="dn-program-label">Program path</div><div class="dn-path-scroll" aria-label="Complete learning journey"><div class="dn-path-track">${steps.map(step=>`<div class="dn-path-step ${stepClass(step.status)}"><small>${step.overline}</small><strong>${step.name}</strong><span>${step.status}</span></div>`).join('')}</div></div><div class="dn-phase-tabs">${phaseNames.map((name,index)=>`<div class="dn-phase-tab"><small>Phase ${index+1}</small><strong>${name}</strong><span>${state.phases[index]}</span></div>`).join('')}</div></div></div>`;
+      return `<div class="dn-member-frame"><div class="dn-member-nav"><span class="dn-member-logo">The Untaught Lessons</span><span>Learning Journey &nbsp; | &nbsp; My Results</span></div><div class="dn-member-content"><span class="dn-member-eyebrow">Your program</span><h4 class="dn-member-title">Learning Journey</h4><p class="dn-member-welcome">Welcome back, Preview.</p><section class="dn-journey-cue ${state.assessment?'is-assessment':''}"><div><small>${state.eyebrow}</small><h4>${state.cueTitle}</h4><p>${state.copy}</p></div><div class="dn-cue-actions">${state.secondary?`<span class="dn-cue-secondary">${state.secondary}</span>`:''}<span class="dn-cue-primary">${state.action}</span></div></section><div class="dn-program-label">Program path</div><div class="dn-orientation-row"><div class="dn-orientation-copy"><strong>Orientation</strong><span>${state.orientation}</span></div><div class="dn-milestone-summary" role="img" aria-label="Program journey: ${currentLabel}"><span class="dn-milestone-label">${currentLabel}</span><span class="dn-milestone-dots" aria-hidden="true">${milestoneNames.map((name,index)=>`<i class="dn-milestone-dot ${journeyComplete||index+1<currentStep?'is-complete':index+1===currentStep?'is-current':''}" title="${name}"></i>`).join('')}</span></div></div><div class="dn-phase-tabs">${phaseNames.map((name,index)=>`<div class="dn-phase-tab"><small>Phase ${index+1}</small><strong>${name}</strong><span>${state.phases[index]}</span></div>`).join('')}</div></div></div>`;
     }
 
     function initDiagnosticNudgePreview() {
