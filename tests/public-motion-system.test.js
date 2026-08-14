@@ -24,9 +24,13 @@ assert.match(programs, /requestAnimationFrame\(updateActivePhase\)/, 'the phase 
 assert.match(programs, /is-active-phase/, 'the phase content should visually follow the active rail marker');
 assert.match(programs, /--rail-progress/, 'the phase rail should show continuous progress');
 assert.match(programs, /\.programs-page main \{\s*overflow: visible;/, 'the page must not create an ancestor that breaks the sticky phase rail');
+assert.match(programs, /class="programs-document"/, 'the program document should opt out of shared clipping that breaks sticky positioning');
+assert.match(programs, /\.programs-document,[\s\S]*?overflow-x: visible;/, 'the full phase rail should remain in one viewport-fixed unit');
 assert.match(programs, /font-size: 15px/, 'program section labels should remain legible');
 assert.doesNotMatch(programs, /Best for a facilitated pilot group/, 'cohort copy should describe the actual experience directly');
 assert.match(styles, /\.home-page \.section-label-text \{[\s\S]*?color: var\(--home-navy\)/, 'public section-label colors should be consistent');
+assert.match(styles, /\.about-page \.about-results \.section-label-text \{[\s\S]*?color: var\(--home-white\) !important;/, 'labels on dark public sections should remain visible');
+assert.match(styles, /\.about-page \.about-results \.section-headline \{[\s\S]*?color: var\(--home-white\);/, 'titles on dark public sections should remain visible');
 assert.match(programs, /phase\.addEventListener\('toggle'/, 'phase disclosure labels should track open state');
 assert.match(programs, /\.motion-ready \.program-reveal/, 'program reveals should be progressively enhanced');
 assert.match(programs, /styles\.css\?v=motion-20260814-2/, 'program motion styles should be cache-busted');

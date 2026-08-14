@@ -306,6 +306,17 @@ body {
   color: var(--home-navy);
 }
 
+/* Dark public sections keep the same label system with accessible light text. */
+.home-page .stats-section .section-label-text,
+.about-page .about-results .section-label-text {
+  color: var(--home-white) !important;
+}
+
+.home-page .stats-section .section-headline,
+.about-page .about-results .section-headline {
+  color: var(--home-white);
+}
+
 .home-page .hero-button-gold {
   border-color: var(--home-gold);
   background: var(--home-gold);
