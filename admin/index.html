@@ -935,6 +935,49 @@
     @media (max-width:720px) { .sp-detail-header { flex-direction:column; } }
     @media (max-width:640px) { .sp-edit-grid,.sp-preview-form { grid-template-columns:1fr; } .sp-dialog-actions { flex-direction:column-reverse; } .sp-dialog-actions .small-button,.sp-preview-form .small-button { width:100%; } .sp-preview-card-head { flex-direction:column; } }
 
+    .dn-dialog { width:min(1080px,calc(100% - 28px)); max-height:92vh; padding:0; border:0; border-radius:12px; color:var(--charcoal); box-shadow:0 20px 64px rgba(0,30,60,.28); }
+    .dn-dialog::backdrop { background:rgba(0,30,60,.62); backdrop-filter:blur(2px); }
+    .dn-dialog-shell { display:flex; flex-direction:column; max-height:92vh; }
+    .dn-dialog-head { display:flex; align-items:flex-start; justify-content:space-between; gap:18px; padding:20px 22px 16px; border-bottom:1px solid var(--line); }
+    .dn-dialog-head h3 { margin:0; color:var(--navy); font:700 27px/1.12 'Playfair Display',serif; }
+    .dn-dialog-head p { max-width:720px; margin:6px 0 0; color:#66717C; font-size:13px; line-height:1.5; }
+    .dn-dialog-close { width:34px; height:34px; flex:0 0 auto; border:1px solid var(--line); border-radius:50%; background:#fff; color:var(--navy); cursor:pointer; font-size:20px; }
+    .dn-dialog-body { display:grid; grid-template-columns:220px minmax(0,1fr); min-height:0; overflow:hidden; }
+    .dn-state-nav { overflow:auto; padding:18px; border-right:1px solid var(--line); background:#F8F5EF; }
+    .dn-state-nav strong { display:block; margin-bottom:10px; color:var(--navy); font-size:12px; }
+    .dn-state-button { width:100%; margin:0 0 7px; padding:10px 11px; border:1px solid transparent; border-radius:7px; background:transparent; color:#56616B; cursor:pointer; font-size:12px; font-weight:700; line-height:1.35; text-align:left; }
+    .dn-state-button:hover { background:#fff; }
+    .dn-state-button.is-active { border-color:rgba(238,163,32,.55); background:#FFF8E9; color:var(--navy); }
+    .dn-preview-stage { overflow:auto; padding:22px; background:#EDE7DC; }
+    .dn-admin-note { display:flex; justify-content:space-between; gap:18px; margin-bottom:14px; padding:11px 13px; border:1px solid #D7CEBF; border-radius:8px; background:#fff; font-size:12px; line-height:1.45; }
+    .dn-admin-note strong { color:var(--navy); }
+    .dn-admin-note span { color:#66717C; text-align:right; }
+    .dn-member-frame { overflow:hidden; border:1px solid #D3C9B9; border-radius:12px; background:#F3EDE2; box-shadow:0 12px 32px rgba(0,51,102,.09); }
+    .dn-member-nav { display:flex; align-items:center; justify-content:space-between; gap:14px; padding:12px 18px; background:#003B70; color:#fff; font-size:11px; font-weight:700; }
+    .dn-member-logo { font-family:'Playfair Display',serif; font-size:15px; }
+    .dn-member-nav span:last-child { opacity:.8; font-weight:400; }
+    .dn-member-content { padding:26px; }
+    .dn-member-eyebrow { color:#B56E00; font-size:10px; font-weight:700; }
+    .dn-member-title { margin:3px 0 2px; color:var(--navy); font:700 31px/1.08 'Playfair Display',serif; }
+    .dn-member-welcome { margin:0 0 14px; color:#4D7094; font-size:13px; }
+    .dn-journey-cue { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:16px; align-items:center; min-height:74px; padding:13px 15px; border:1px solid #A9CDBD; border-radius:10px; background:#F4FAF7; }
+    .dn-journey-cue.is-assessment { border-color:#E1BD75; background:#FFF9EC; }
+    .dn-journey-cue small { display:block; margin-bottom:2px; color:#A76600; font-size:9px; font-weight:700; }
+    .dn-journey-cue h4 { margin:0; color:var(--navy); font:700 17px/1.2 Lato,Arial,sans-serif; }
+    .dn-journey-cue p { margin:3px 0 0; color:#4D6174; font-size:11px; line-height:1.4; }
+    .dn-cue-actions { display:flex; align-items:center; gap:8px; white-space:nowrap; }
+    .dn-cue-secondary { color:var(--navy); font-size:10px; font-weight:700; }
+    .dn-cue-primary { display:inline-flex; align-items:center; min-height:36px; padding:9px 13px; border-radius:7px; background:var(--gold); color:var(--navy); font-size:11px; font-weight:700; }
+    .dn-program-label { margin:15px 0 7px; color:var(--navy); font-size:16px; font-weight:700; }
+    .dn-orientation-row { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 12px; border:1px solid #D9D1C5; border-radius:8px; background:#fff; color:var(--navy); font-size:11px; }
+    .dn-phase-tabs { display:grid; grid-template-columns:repeat(3,1fr); margin-top:8px; border:1px solid #D9D1C5; border-radius:8px; overflow:hidden; background:#fff; }
+    .dn-phase-tab { min-height:66px; padding:10px; border-right:1px solid #E2DACE; }
+    .dn-phase-tab:last-child { border-right:0; }
+    .dn-phase-tab small { color:#B56E00; font-size:8px; font-weight:700; }
+    .dn-phase-tab strong { display:block; margin-top:3px; color:var(--navy); font-size:12px; }
+    .dn-phase-tab span { display:block; margin-top:4px; color:#6B7580; font-size:9px; }
+    @media (max-width:760px) { .dn-dialog-body { grid-template-columns:1fr; overflow:auto; } .dn-state-nav { display:flex; gap:6px; border-right:0; border-bottom:1px solid var(--line); } .dn-state-nav strong { display:none; } .dn-state-button { flex:0 0 155px; margin:0; } .dn-preview-stage { overflow:visible; } .dn-journey-cue { grid-template-columns:1fr; } .dn-cue-actions { white-space:normal; } }
+
     .section-divider {
       height: 1px;
       margin: 1rem 0;
@@ -2476,6 +2519,7 @@
           </div>
           <div class="sync-actions" style="margin-top: 14px;">
             <a class="small-button secondary-button" href="../member-login/index.html?mode=admin#assessments" target="_blank" style="display:inline-flex;align-items:center;text-decoration:none;">Preview assessments</a>
+            <button class="small-button secondary-button" type="button" id="diagnosticNudgePreviewOpen">Preview diagnostic journey nudge</button>
           </div>
 
           <div class="section-divider" style="margin-top:20px"></div>
@@ -2514,6 +2558,16 @@
           <button class="small-button" type="button" id="adminVisibilitySave" style="margin-top:4px">Save admin preview settings</button>
           <span class="saved" id="adminVisibilitySaved">Saved</span>
         </div>
+
+        <dialog class="dn-dialog" id="diagnosticNudgePreviewDialog" aria-labelledby="diagnosticNudgePreviewTitle">
+          <div class="dn-dialog-shell">
+            <div class="dn-dialog-head"><div><h3 id="diagnosticNudgePreviewTitle">Diagnostic journey nudge preview</h3><p>Review the proposed learner experience at each stage. This is a visual prototype only: changing states does not modify member progress, assessment settings, or the live Learning Journey.</p></div><button class="dn-dialog-close" type="button" id="diagnosticNudgePreviewClose" aria-label="Close preview">&times;</button></div>
+            <div class="dn-dialog-body">
+              <nav class="dn-state-nav" id="diagnosticNudgeStateNav" aria-label="Learner state previews"><strong>Learner state</strong></nav>
+              <div class="dn-preview-stage"><div class="dn-admin-note"><strong id="diagnosticNudgeStateTitle"></strong><span id="diagnosticNudgeStateReason"></span></div><div id="diagnosticNudgeMemberPreview"></div></div>
+            </div>
+          </div>
+        </dialog>
       </section>
 
       <section class="admin-section" id="section-orientation" data-admin-tab-panel="content-manager">
@@ -5082,6 +5136,46 @@
       if (!link) return;
       link.href = bypassEnabled ? '../member-login/index.html?mode=admin' : '../member-login/index.html';
       link.textContent = bypassEnabled ? 'Preview member workspace' : 'Open member workspace as participant';
+    }
+
+    const DIAGNOSTIC_NUDGE_PREVIEW_STATES = [
+      { id:'first-login', label:'First sign-in', title:'First sign-in · orientation not complete', reason:'No assessment nudge yet. The learner sees one clear starting action.', eyebrow:'Start here', cueTitle:'Complete orientation', copy:'Begin with the short orientation so you understand the program and how progress works.', action:'Open orientation →', secondary:'', assessment:false, orientation:'Not started', phases:['Locked','Locked','Locked'] },
+      { id:'orientation-done', label:'Orientation complete', title:'Orientation complete · no diagnostic', reason:'The existing journey banner becomes the compact baseline prompt.', eyebrow:'Before Phase 1', cueTitle:'Set your starting point', copy:'Take the 12–15 minute diagnostic before learning begins so your later checkpoint shows what changed.', action:'Take the diagnostic →', secondary:'Start Phase 1 for now', assessment:true, orientation:'Complete ✓', phases:['Ready','Locked','Locked'] },
+      { id:'learning-started', label:'Some learning completed', title:'3 videos and 2 exercises complete · no diagnostic', reason:'The same banner remains; it does not add height or block the next activity.', eyebrow:'Before you go further', cueTitle:'Save a useful baseline', copy:'You have started Phase 1. Take the diagnostic soon so it still reflects your starting point.', action:'Take the diagnostic →', secondary:'Continue Phase 1', assessment:true, orientation:'Complete ✓', phases:['5 of 10 complete','Locked','Locked'] },
+      { id:'diagnostic-progress', label:'Diagnostic in progress', title:'Diagnostic started · not submitted', reason:'A saved attempt receives a direct resume action without another explanation card.', eyebrow:'Diagnostic in progress', cueTitle:'Finish your starting point', copy:'Your responses are saved. Resume where you stopped when you are ready.', action:'Resume diagnostic →', secondary:'Continue Phase 1', assessment:true, orientation:'Complete ✓', phases:['5 of 10 complete','Locked','Locked'] },
+      { id:'diagnostic-done', label:'Diagnostic complete', title:'Diagnostic submitted · program in progress', reason:'The assessment nudge disappears completely. The normal continue-learning banner returns.', eyebrow:'Up next', cueTitle:'Continue Phase 1', copy:'Your baseline is saved. Continue with the next activity in Think clearly.', action:'Continue learning →', secondary:'', assessment:false, orientation:'Complete ✓', phases:['5 of 10 complete','Locked','Locked'] },
+      { id:'program-done', label:'Program complete', title:'Program complete · diagnostic available', reason:'The same banner position returns once, now prompting the post-program checkpoint.', eyebrow:'See what changed', cueTitle:'Take the checkpoint', copy:'Repeat the Think, Speak, and Act assessment to compare your current skills with your starting point.', action:'Take the checkpoint →', secondary:'View my results', assessment:true, orientation:'Complete ✓', phases:['Complete ✓','Complete ✓','Complete ✓'] },
+      { id:'program-no-baseline', label:'Complete, no baseline', title:'Program complete · diagnostic was never taken', reason:'The learner may still take a checkpoint, with an honest note that no before-and-after comparison exists.', eyebrow:'Finish with a snapshot', cueTitle:'Take the checkpoint', copy:'See where your skills stand now. Because no starting diagnostic was saved, this will not include a before-and-after comparison.', action:'Take the checkpoint →', secondary:'View my results', assessment:true, orientation:'Complete ✓', phases:['Complete ✓','Complete ✓','Complete ✓'] },
+      { id:'checkpoint-done', label:'Checkpoint complete', title:'Diagnostic and checkpoint complete', reason:'No assessment nudge remains. The ordinary completion banner links to results.', eyebrow:'Journey complete', cueTitle:'Your before-and-after results are ready', copy:'Review your Think, Speak, and Act scores and coaching in My Results.', action:'View my results →', secondary:'', assessment:false, orientation:'Complete ✓', phases:['Complete ✓','Complete ✓','Complete ✓'] }
+    ];
+
+    function diagnosticNudgeMemberHtml(state) {
+      const phaseNames=['Think clearly','Speak concisely','Act confidently'];
+      return `<div class="dn-member-frame"><div class="dn-member-nav"><span class="dn-member-logo">The Untaught Lessons</span><span>Learning Journey &nbsp; | &nbsp; My Results</span></div><div class="dn-member-content"><span class="dn-member-eyebrow">Your program</span><h4 class="dn-member-title">Learning Journey</h4><p class="dn-member-welcome">Welcome back, Preview.</p><section class="dn-journey-cue ${state.assessment?'is-assessment':''}"><div><small>${state.eyebrow}</small><h4>${state.cueTitle}</h4><p>${state.copy}</p></div><div class="dn-cue-actions">${state.secondary?`<span class="dn-cue-secondary">${state.secondary}</span>`:''}<span class="dn-cue-primary">${state.action}</span></div></section><div class="dn-program-label">Program path</div><div class="dn-orientation-row"><strong>Orientation</strong><span>${state.orientation}</span></div><div class="dn-phase-tabs">${phaseNames.map((name,index)=>`<div class="dn-phase-tab"><small>Phase ${index+1}</small><strong>${name}</strong><span>${state.phases[index]}</span></div>`).join('')}</div></div></div>`;
+    }
+
+    function initDiagnosticNudgePreview() {
+      const dialog=document.getElementById('diagnosticNudgePreviewDialog');
+      const open=document.getElementById('diagnosticNudgePreviewOpen');
+      const close=document.getElementById('diagnosticNudgePreviewClose');
+      const nav=document.getElementById('diagnosticNudgeStateNav');
+      const preview=document.getElementById('diagnosticNudgeMemberPreview');
+      const title=document.getElementById('diagnosticNudgeStateTitle');
+      const reason=document.getElementById('diagnosticNudgeStateReason');
+      if(!dialog||!open||!nav||!preview)return;
+      const render=(id)=>{
+        const state=DIAGNOSTIC_NUDGE_PREVIEW_STATES.find(item=>item.id===id)||DIAGNOSTIC_NUDGE_PREVIEW_STATES[0];
+        nav.querySelectorAll('[data-dn-state]').forEach(button=>button.classList.toggle('is-active',button.dataset.dnState===state.id));
+        title.textContent=state.title;
+        reason.textContent=state.reason;
+        preview.innerHTML=diagnosticNudgeMemberHtml(state);
+      };
+      nav.insertAdjacentHTML('beforeend',DIAGNOSTIC_NUDGE_PREVIEW_STATES.map((state,index)=>`<button class="dn-state-button ${index===0?'is-active':''}" type="button" data-dn-state="${state.id}">${state.label}</button>`).join(''));
+      nav.addEventListener('click',event=>{const button=event.target.closest('[data-dn-state]');if(button)render(button.dataset.dnState)});
+      open.addEventListener('click',()=>{render('first-login');dialog.showModal()});
+      close?.addEventListener('click',()=>dialog.close());
+      dialog.addEventListener('click',event=>{if(event.target===dialog)dialog.close()});
+      render('first-login');
     }
 
     function renderVisibilityStatus() {
@@ -8292,6 +8386,7 @@
     initNav();
     wrapPasswordCards();
     initCollapsibleSections();
+    initDiagnosticNudgePreview();
     renderInviteLog();
     mbInitAddForm();
     spPopulatePreviewStarts();
