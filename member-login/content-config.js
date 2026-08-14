@@ -906,6 +906,10 @@ const UTL_CONTENT = {
     });
 
     var remoteExercises = progress.exercises || {};
+    ["diagnostic", "checkpoint"].forEach(function (kind) {
+      var currentAssessment = remoteExercises["tsa-" + kind + "-v2"] || remoteExercises["tsa-" + kind];
+      if (currentAssessment && currentAssessment.completed === true) writeBool(doneKey("tsa-" + kind + "-v2"), true);
+    });
     allExercises().forEach(function (exercise) {
       var appKey = exerciseAppKey(exercise);
       var saved = remoteExercises[exercise.id] || (appKey ? remoteExercises[appKey] : null);
@@ -1451,6 +1455,7 @@ const UTL_CONTENT = {
       ,".ws-journey-activity-locked{opacity:1}.ws-journey-activity-locked>.ws-journey-status-icon,.ws-journey-activity-locked>.ws-journey-activity-preview-button,.ws-journey-activity-locked>.ws-journey-activity-state{color:#6F7780}.ws-journey-activity-locked .ws-journey-activity-preview-button strong{color:#5D6872}.ws-journey-activity-locked .ws-journey-type-video{color:#55738F}.ws-journey-activity-locked .ws-journey-type-exercise{color:#80652F}.ws-journey-preview{color:var(--ws-charcoal)}"
       ,".ws-journey-activity-just-completed{border-color:var(--ws-green)!important;background:#EFF8F1!important;animation:wsCompletedPulse 1.8s ease 2}.ws-journey-activity-just-completed .ws-journey-activity-state{display:block!important;color:var(--ws-green)!important}@keyframes wsCompletedPulse{50%{box-shadow:0 0 0 4px rgba(44,122,75,.14)}}"
       ,".ws-journey-preview-actions{display:grid;gap:10px}.ws-journey-preview-actions .ws-button{margin:0}.ws-journey-preview-actions .ws-button-outline{background:#fff;color:var(--ws-navy)}"
+      ,".ws-assessment-nudge{border-color:rgba(238,163,32,.62);background:#FFF9EC}.ws-assessment-nudge-actions{display:flex;align-items:center;gap:12px;flex:0 0 auto}.ws-assessment-nudge-actions .ws-assessment-secondary{color:var(--ws-navy);font-size:11px;font-weight:700;text-decoration:none;white-space:nowrap}.ws-assessment-fallback[hidden]{display:none}.ws-orientation-head.ws-with-milestones{grid-template-columns:auto minmax(0,1fr) auto auto}.ws-journey-milestones{display:flex;align-items:center;gap:11px}.ws-journey-milestone-label{color:var(--ws-navy);font-size:11px;font-weight:700;white-space:nowrap}.ws-journey-milestone-dots{position:relative;display:flex;align-items:center;gap:10px}.ws-journey-milestone-dots:before{content:'';position:absolute;left:5px;right:5px;top:50%;height:1px;background:#CDD4D9}.ws-journey-milestone{position:relative;z-index:1;width:12px;height:12px;border:1px solid #AAB3BB;border-radius:50%;background:#fff}.ws-journey-milestone.is-complete{border-color:var(--ws-green);background:var(--ws-green)}.ws-journey-milestone.is-current{border:3px solid var(--ws-gold);background:#fff;box-shadow:0 0 0 3px #FFF1CF}.ws-journey-milestone.is-warning{border:2px solid #B56E00;background:#fff;box-shadow:0 0 0 2px #FFF4D9}@media(max-width:760px){.ws-assessment-nudge{align-items:stretch;flex-direction:column}.ws-assessment-nudge-actions{justify-content:space-between}.ws-orientation-head.ws-with-milestones{grid-template-columns:auto minmax(0,1fr) auto}.ws-journey-milestones{grid-column:1/-1;grid-row:2;justify-content:space-between;padding-top:5px}.ws-journey-milestone-label{font-size:10px}.ws-journey-milestone-dots{gap:8px}}"
     ].join("\n");
     document.head.appendChild(style);
   }
@@ -2266,6 +2271,81 @@ const UTL_CONTENT = {
     return '<a class="ws-learning-continue" id="ws-nudge-continue" href="' + escapeHtml(next.href) + '"><div class="ws-learning-continue-copy"><span>Continue where you left off</span><h2>' + sequence + escapeHtml(next.title) + '</h2><p>' + escapeHtml(phaseName) + ' &middot; ' + escapeHtml(next.kind) + ' &middot; ' + escapeHtml(next.duration) + '</p><div class="ws-learning-mini-progress"><span style="width:' + progress.percent + '%"></span></div><small>' + progress.done + ' of ' + progress.total + ' core activities complete &middot; <strong>' + progress.percent + '%</strong></small></div><span class="ws-button">' + (progress.done ? "Continue" : "Start") + ' ' + (next.sequence ? escapeHtml(next.sequence) + " " : "") + '&rarr;</span></a>';
   }
 
+  function assessmentJourneyStatus(kind) {
+    var resultKeys = ["utl_result_tsa_" + kind + "_v2", "utl_result_tsa_" + kind];
+    var complete = resultKeys.some(function (key) {
+      try {
+        var result = JSON.parse(localStorage.getItem(key) || "null");
+        return Boolean(result && (result.completed === true || result.completedAt || result.completed_at || result.scores));
+      } catch (_) { return false; }
+    }) || readBool(doneKey("tsa-" + kind + "-v2")) || readBool(doneKey("tsa-" + kind));
+    var inProgress = false;
+    if (!complete) {
+      try {
+        var state = JSON.parse(localStorage.getItem("utl_tsa_unified_" + kind + "_v2") || "null");
+        inProgress = Boolean(state && state.stage && state.stage !== "welcome" && state.stage !== "results");
+      } catch (_) {}
+    }
+    return { complete: complete, inProgress: inProgress };
+  }
+
+  function assessmentJourneyModel(orientationDone) {
+    var diagnostic = assessmentJourneyStatus("diagnostic");
+    var checkpoint = assessmentJourneyStatus("checkpoint");
+    var phaseComplete = phases.map(function (phaseKey) {
+      var progress = phaseProgress(phaseKey);
+      return progress.total > 0 && progress.done === progress.total;
+    });
+    var programComplete = phaseComplete.every(Boolean);
+    var phaseStarted = phases.some(function (phaseKey) { return phaseProgress(phaseKey).done > 0; });
+    var statuses = [orientationDone ? "complete" : "current", "future", "future", "future", "future", "future"];
+    phaseComplete.forEach(function (complete, index) { if (complete) statuses[index + 2] = "complete"; });
+    if (orientationDone && !phaseComplete[0]) statuses[2] = "current";
+    if (phaseComplete[0] && !phaseComplete[1]) statuses[3] = "current";
+    if (phaseComplete[1] && !phaseComplete[2]) statuses[4] = "current";
+    if (diagnostic.complete) statuses[1] = "complete";
+    else if (orientationDone) statuses[1] = diagnostic.inProgress ? "current" : phaseStarted ? "warning" : "current";
+    if (checkpoint.complete) statuses[5] = "complete";
+    else if (programComplete) statuses[5] = "current";
+    var completeCount = statuses.filter(function (status) { return status === "complete"; }).length;
+    var label = !orientationDone
+      ? "0 of 6 complete · Orientation next"
+      : diagnostic.inProgress
+        ? completeCount + " of 6 complete · Diagnostic in progress"
+        : checkpoint.complete
+          ? diagnostic.complete ? "6 of 6 milestones complete" : completeCount + " of 6 complete · No baseline"
+        : programComplete && !diagnostic.complete
+          ? completeCount + " of 6 complete · Checkpoint ready · No baseline"
+          : programComplete && !checkpoint.complete
+            ? completeCount + " of 6 complete · Checkpoint next"
+            : !diagnostic.complete
+                ? completeCount + " of 6 complete · Diagnostic " + (phaseStarted ? "recommended" : "next")
+                : completeCount + " of 6 complete · " + (!phaseComplete[0] ? "Think in progress" : !phaseComplete[1] ? "Speak in progress" : "Act in progress");
+    return { diagnostic: diagnostic, checkpoint: checkpoint, programComplete: programComplete, phaseStarted: phaseStarted, statuses: statuses, label: label };
+  }
+
+  function assessmentJourneyNudgeHtml(model, next, progress) {
+    if (!readBool("utl_orientation_ready") || model.checkpoint.complete || (model.diagnostic.complete && !model.programComplete)) return journeyContinueHtml(next, progress);
+    var checkpoint = model.programComplete;
+    var inProgress = checkpoint ? model.checkpoint.inProgress : model.diagnostic.inProgress;
+    var href = appHref("../apps/tsa-diagnostic/index.html" + (checkpoint ? "?assessment=checkpoint" : ""));
+    var eyebrow = checkpoint ? "See what changed" : inProgress ? "Diagnostic in progress" : model.phaseStarted ? "Before you go further" : "Before Phase 1";
+    var title = checkpoint ? "Take the checkpoint" : inProgress ? "Finish your starting point" : model.phaseStarted ? "Save a useful baseline" : "Set your starting point";
+    var copy = checkpoint
+      ? (model.diagnostic.complete ? "Repeat the Think, Speak, and Act assessment to compare your current skills with your starting point." : "See where your skills stand now. Because no starting diagnostic was saved, this will not include a before-and-after comparison.")
+      : inProgress ? "Your responses are saved. Resume where you stopped when you are ready." : model.phaseStarted ? "You have started the program. Take the diagnostic soon so it still reflects your starting point." : "Take the diagnostic before learning begins so your later checkpoint shows what changed.";
+    var action = inProgress ? "Resume diagnostic" : checkpoint ? "Take checkpoint · 15–20 min" : "Take diagnostic · 15–20 min";
+    var secondary = checkpoint ? '<a class="ws-assessment-secondary" href="' + escapeHtml(appHref("../my-results/index.html")) + '">View my results</a>' : next ? '<a class="ws-assessment-secondary" href="' + escapeHtml(next.href) + '">' + (model.phaseStarted ? "Continue learning" : "Start Phase 1 for now") + '</a>' : "";
+    var fallback = journeyContinueHtml(next, progress).replace('id="ws-nudge-continue"', 'id="ws-nudge-continue-fallback"');
+    return '<section class="ws-learning-continue ws-assessment-nudge" id="ws-nudge-continue" data-assessment-journey><div class="ws-learning-continue-copy"><span>' + eyebrow + '</span><h2>' + title + '</h2><p>' + copy + '</p></div><div class="ws-assessment-nudge-actions">' + secondary + '<a class="ws-button" href="' + escapeHtml(href) + '">' + action + ' &rarr;</a></div></section><div class="ws-assessment-fallback" data-assessment-fallback hidden>' + fallback + '</div>';
+  }
+
+  function assessmentJourneyMilestonesHtml(model) {
+    var names = ["Orientation", "Diagnostic", "Think", "Speak", "Act", "Checkpoint"];
+    var statusLabels = { complete: "complete", current: "current", warning: "recommended but incomplete", future: "upcoming" };
+    return '<span class="ws-journey-milestones" data-assessment-journey role="img" aria-label="Program journey: ' + escapeHtml(model.label) + '"><span class="ws-journey-milestone-label">' + escapeHtml(model.label) + '</span><span class="ws-journey-milestone-dots" aria-hidden="true">' + names.map(function (name, index) { var status = model.statuses[index]; return '<i class="ws-journey-milestone is-' + status + '" title="' + name + ': ' + statusLabels[status] + '"></i>'; }).join("") + '</span></span>';
+  }
+
   function journeyActivityRowHtml(activity, next, phaseIsUnlocked, activityIsUnlocked, sequenceLabel) {
     var inProgress = activity.kind === "Exercise" && activity.contextGated && activity.contextComplete && !activity.done;
     var state = activity.done ? "done" : phaseIsUnlocked && activityIsUnlocked ? (inProgress ? "progress" : "next") : "locked";
@@ -2368,7 +2448,8 @@ const UTL_CONTENT = {
         ? savedPhase
         : (next && phases.indexOf(next.phaseKey) >= 0 ? next.phaseKey : "phase1");
     if (phases.indexOf(requestedPhase) >= 0) localStorage.setItem("utl_journey_selected_phase", requestedPhase);
-    return '<section class="ws-learning-home" id="learning-journey"><header class="ws-learning-heading"><div><span class="ws-kicker">Your program</span><h1>Learning Journey</h1><p>Welcome back, ' + escapeHtml(firstName) + '. Select any activity to preview it.</p></div></header>' + journeyContinueHtml(next, progress) + '<div class="ws-learning-path"><div class="ws-learning-path-head"><h2>Program path</h2></div>' + orientationCardHtml() + '<div class="ws-journey-tab-card"><div class="ws-journey-phase-tabs" role="tablist" aria-label="Learning journey phases">' + phases.map(function (phaseKey) { return journeyPhaseTabHtml(phaseKey, next, selectedPhase); }).join("") + '</div><div class="ws-journey-phase-panels">' + phases.map(function (phaseKey) { return journeyPhasePanelHtml(phaseKey, next, selectedPhase); }).join("") + '</div></div></div><div class="ws-journey-preview-scrim" data-journey-preview-scrim hidden></div></section>';
+    var assessmentModel = assessmentJourneyModel(orientationDone);
+    return '<section class="ws-learning-home" id="learning-journey"><header class="ws-learning-heading"><div><span class="ws-kicker">Your program</span><h1>Learning Journey</h1><p>Welcome back, ' + escapeHtml(firstName) + '. Select any activity to preview it.</p></div></header>' + assessmentJourneyNudgeHtml(assessmentModel, next, progress) + '<div class="ws-learning-path"><div class="ws-learning-path-head"><h2>Program path</h2></div>' + orientationCardHtml(assessmentModel) + '<div class="ws-journey-tab-card"><div class="ws-journey-phase-tabs" role="tablist" aria-label="Learning journey phases">' + phases.map(function (phaseKey) { return journeyPhaseTabHtml(phaseKey, next, selectedPhase); }).join("") + '</div><div class="ws-journey-phase-panels">' + phases.map(function (phaseKey) { return journeyPhasePanelHtml(phaseKey, next, selectedPhase); }).join("") + '</div></div></div><div class="ws-journey-preview-scrim" data-journey-preview-scrim hidden></div></section>';
   }
 
   function missionDayKey() {
@@ -2552,7 +2633,7 @@ const UTL_CONTENT = {
     return '<article class="ws-journey-card ' + (open ? "ws-open" : "") + '" id="program-journey"><button class="ws-journey-head" type="button" data-journey-toggle><span><span class="ws-kicker">Start here</span><h1 class="ws-journey-title">Think, speak, and act like an executive.</h1><p class="ws-journey-sub">This program builds the habits behind executive judgment: clear thinking, concise communication, and confident action when the answer is not obvious.</p><p class="ws-level-explainer">Complete lessons and exercises to earn MP. Your MP moves you through five levels: Intern, Analyst, Associate, Principal, and Executive.</p></span><span class="ws-disclosure-icon ws-journey-chevron">' + (open ? "&minus;" : "+") + '</span></button><div class="ws-journey-body"><div class="ws-journey-map"><article class="ws-journey-step"><span class="ws-journey-step-num">1</span><strong>Orientation</strong><span>Start here so the MA storyline and your role are clear.</span></article><article class="ws-journey-step"><span class="ws-journey-step-num">2</span><strong>Lessons</strong><span>Watch the lessons before using each framework in practice.</span></article><article class="ws-journey-step"><span class="ws-journey-step-num">3</span><strong>Practice</strong><span>Use the exercises to turn messy situations into executive-ready work.</span></article><article class="ws-journey-step"><span class="ws-journey-step-num">4</span><strong>Progress</strong><span>Track completion and move phase by phase as your judgment sharpens.</span></article></div><div class="ws-journey-actions"><p class="ws-journey-ready">' + readiness + '<small>' + progress.done + ' of ' + progress.total + ' exercises complete</small></p><a class="ws-journey-cue" href="' + (orientationDone ? "#learning-journey" : "#orientation") + '" data-journey-link>' + (orientationDone ? "View phases" : "Orientation is below") + '<span>&darr;</span></a></div></div></article>';
   }
 
-  function orientationCardHtml() {
+  function orientationCardHtml(assessmentModel) {
     var complete = readBool("utl_orientation_ready");
     var open = localStorage.getItem("utl_orientation_open") === null ? !complete : readBool("utl_orientation_open");
     var intro = UTL_CONTENT.orientation.contexts[0] || {};
@@ -2560,7 +2641,8 @@ const UTL_CONTENT = {
     var orientationUrl = orientation.contextUrl || exerciseContextUrl(orientation);
     var welcomeOpen = localStorage.getItem("utl_welcome_video_open") === null ? true : readBool("utl_welcome_video_open");
     var video = orientationUrl ? '<div class="ws-context-embed">' + renderEmbeddedMedia(orientationUrl, orientation.contextTitle) + '</div>' : '<div class="ws-player-card"><div class="ws-player"><div class="ws-player-placeholder"><span class="ws-play-icon">&#9654;</span><p>Orientation video coming soon</p></div></div></div>';
-    return '<article class="ws-orientation-card ' + (open ? "ws-open" : "") + '" id="orientation"><button class="ws-orientation-head" type="button" data-orientation-toggle><span class="ws-start-badge">Start here</span><span><span class="ws-orientation-title">Orientation</span><span class="ws-orientation-sub">' + (complete ? "Orientation complete &#10003;" : "Get oriented before jumping into Phase 1") + '</span></span><span class="ws-orientation-chevron ws-disclosure-icon">' + (open ? "&minus;" : "+") + '</span></button><div class="ws-orientation-body"><p class="ws-orientation-instruction">Read the story below, then watch the welcome video.</p><div class="ws-orientation-copy"><h3>' + escapeHtml(intro.contextTitle || "Welcome") + '</h3>' + textParagraphs(intro.contextBody) + '</div><div class="ws-how-row"><button class="ws-how-toggle" type="button" data-welcome-toggle><span class="ws-media-icon">&#9654;</span><span><strong>' + escapeHtml(orientation.contextTitle || "Welcome to The Untaught Lessons") + '</strong><br><small>' + escapeHtml(orientation.contextBody || "Watch before starting") + '</small></span><span class="ws-disclosure-icon" data-welcome-icon>' + (welcomeOpen ? "&minus;" : "+") + '</span></button><div class="ws-how-body ' + (welcomeOpen ? "ws-open" : "") + '" data-welcome-body>' + video + '</div></div><div class="ws-player-actions" data-orientation-action>' + orientationWatchActionHtml(complete) + '</div></div></article>';
+    var milestones = assessmentModel ? assessmentJourneyMilestonesHtml(assessmentModel) : "";
+    return '<article class="ws-orientation-card ' + (open ? "ws-open" : "") + '" id="orientation"><button class="ws-orientation-head ' + (milestones ? "ws-with-milestones" : "") + '" type="button" data-orientation-toggle><span class="ws-start-badge">Start here</span><span><span class="ws-orientation-title">Orientation</span><span class="ws-orientation-sub">' + (complete ? "Orientation complete &#10003;" : "Get oriented before jumping into Phase 1") + '</span></span>' + milestones + '<span class="ws-orientation-chevron ws-disclosure-icon">' + (open ? "&minus;" : "+") + '</span></button><div class="ws-orientation-body"><p class="ws-orientation-instruction">Read the story below, then watch the welcome video.</p><div class="ws-orientation-copy"><h3>' + escapeHtml(intro.contextTitle || "Welcome") + '</h3>' + textParagraphs(intro.contextBody) + '</div><div class="ws-how-row"><button class="ws-how-toggle" type="button" data-welcome-toggle><span class="ws-media-icon">&#9654;</span><span><strong>' + escapeHtml(orientation.contextTitle || "Welcome to The Untaught Lessons") + '</strong><br><small>' + escapeHtml(orientation.contextBody || "Watch before starting") + '</small></span><span class="ws-disclosure-icon" data-welcome-icon>' + (welcomeOpen ? "&minus;" : "+") + '</span></button><div class="ws-how-body ' + (welcomeOpen ? "ws-open" : "") + '" data-welcome-body>' + video + '</div></div><div class="ws-player-actions" data-orientation-action>' + orientationWatchActionHtml(complete) + '</div></div></article>';
   }
 
   function orientationWatchActionHtml(watched) {
@@ -2842,6 +2924,8 @@ const UTL_CONTENT = {
     // Hide dashboard section
     var section = document.getElementById("assessments");
     if (section) section.style.display = "none";
+    qsa("[data-assessment-journey]").forEach(function (element) { element.style.display = "none"; });
+    qsa("[data-assessment-fallback]").forEach(function (element) { element.hidden = false; });
   }
 
   function applyAssessmentVisibility() {
