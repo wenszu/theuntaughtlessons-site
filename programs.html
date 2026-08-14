@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=Lato:wght@300;700&family=Roboto+Mono:wght@400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=tsa-score-20260508">
+  <link rel="stylesheet" href="styles.css?v=motion-20260814">
   <style>
     .programs-page {
       --program-navy: #003366;
@@ -269,17 +269,120 @@
       line-height: 1.8;
     }
 
+    .phase-journey {
+      display: grid;
+      grid-template-columns: 190px minmax(0, 1fr);
+      gap: 48px;
+      align-items: start;
+      margin-top: 56px;
+    }
+
+    .phase-rail {
+      position: sticky;
+      top: 96px;
+      display: grid;
+      gap: 8px;
+      padding: 4px 0;
+    }
+
+    .phase-rail::before {
+      content: "";
+      position: absolute;
+      top: 16px;
+      bottom: 16px;
+      left: 16px;
+      width: 1px;
+      background: rgba(0, 51, 102, .2);
+    }
+
+    .phase-rail-link {
+      position: relative;
+      display: grid;
+      grid-template-columns: 34px 1fr;
+      gap: 10px;
+      align-items: center;
+      min-height: 54px;
+      color: var(--program-steel);
+      font-family: 'Lato', sans-serif;
+      font-size: 11pt;
+      font-weight: 700;
+      line-height: 1.25;
+      text-decoration: none;
+      transition: color .2s ease;
+    }
+
+    .phase-rail-link span:first-child {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      place-items: center;
+      width: 32px;
+      height: 32px;
+      border: 1px solid rgba(0, 51, 102, .25);
+      border-radius: 50%;
+      background: var(--program-deep-cream);
+      transition: background .2s ease, border-color .2s ease, color .2s ease;
+    }
+
+    .phase-rail-link.is-active { color: var(--program-navy); }
+    .phase-rail-link.is-active span:first-child {
+      border-color: var(--program-gold);
+      background: var(--program-gold);
+      color: var(--program-navy);
+    }
+
     .phase-list {
-      max-width: 900px;
-      margin: 56px 0 0;
+      min-width: 0;
+      margin: 0;
     }
 
     .phase-block {
+      padding: 0;
+      border-top: 1px solid var(--program-gold);
+    }
+
+    .phase-summary {
       display: grid;
       grid-template-columns: minmax(0, 35%) minmax(0, 65%);
       gap: 48px;
-      padding: 48px 0;
-      border-top: 1px solid var(--program-gold);
+      padding: 44px 0;
+      cursor: pointer;
+      list-style: none;
+    }
+
+    .phase-summary::-webkit-details-marker { display: none; }
+    .phase-summary::marker { content: ""; }
+
+    .phase-summary-main {
+      align-self: center;
+    }
+
+    .phase-toggle-copy {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 18px;
+      color: var(--program-navy);
+      font-family: 'Lato', sans-serif;
+      font-size: 12pt;
+      font-weight: 700;
+    }
+
+    .phase-toggle-copy::after {
+      content: "+";
+      display: grid;
+      place-items: center;
+      width: 26px;
+      height: 26px;
+      border: 1px solid rgba(0, 51, 102, .3);
+      border-radius: 50%;
+    }
+
+    .phase-block[open] .phase-toggle-copy::after { content: "−"; }
+
+    .phase-details {
+      margin-left: calc(35% + 48px);
+      padding: 0 0 48px;
     }
 
     .phase-number {
@@ -320,7 +423,7 @@
     }
 
     .phase-description {
-      margin: 0 0 24px;
+      margin: 0;
       color: var(--program-charcoal);
       font-family: 'Lato', sans-serif;
       font-size: 17pt;
@@ -557,12 +660,16 @@
     }
 
     .program-reveal {
-      opacity: 0;
-      transform: translateY(20px);
-      will-change: opacity, transform;
+      opacity: 1;
+      transform: none;
     }
 
-    .program-reveal.is-visible {
+    .motion-ready .program-reveal {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+
+    .motion-ready .program-reveal.is-visible {
       opacity: 1;
       transform: translateY(0);
     }
@@ -609,10 +716,10 @@
         grid-template-columns: 1fr;
       }
 
-      .phase-block {
-        grid-template-columns: 1fr;
-        gap: 28px;
-      }
+      .phase-journey { grid-template-columns: 1fr; gap: 0; }
+      .phase-rail { display: none; }
+      .phase-summary { grid-template-columns: 1fr; gap: 28px; padding: 38px 0; }
+      .phase-details { margin-left: 0; padding-bottom: 42px; }
 
       .expect-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -621,6 +728,18 @@
 
       .expect-stat {
         padding: 0 16px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .motion-ready .program-reveal,
+      .program-reveal,
+      .phase-rail-link,
+      .phase-rail-link span:first-child {
+        opacity: 1 !important;
+        transform: none !important;
+        transition: none !important;
+        animation: none !important;
       }
     }
 
@@ -755,78 +874,77 @@
         <h2 id="how-title" class="program-heading">Three phases built around skills you can use the next day.</h2>
         <p class="program-body">The exercises use practical situations rather than abstract drills. You organize messy information, prepare a clear message and practice responding when the pressure rises.</p>
 
-        <div class="phase-list">
-          <article class="phase-block program-reveal">
-            <div class="phase-left">
-              <span class="phase-number">01</span>
-              <h3 class="phase-name">Think clearly</h3>
-              <p class="phase-time">About 1 hr 45 min total<span>25 min video + 1 hr 20 min exercises</span></p>
-            </div>
-            <div class="phase-right">
-              <p class="phase-description">Most people were never taught how to organize their thoughts before they open their mouth. Phase 1 gives you the frameworks to fix that.</p>
-              <p class="phase-label">Videos</p>
-              <ul class="video-list">
-                <li>KonMari for the cluttered mind</li>
-                <li>Rule of three</li>
-                <li>Bolded summary phrases (BSP)</li>
-              </ul>
-              <p class="phase-label">Exercises</p>
-              <p class="exercise-copy">Six hands-on exercises. You sort a messy update, build structure against a clock and explain a complicated idea to someone with little time.</p>
-              <div class="ai-callout">
-                <p class="ai-label">AI integration</p>
-                <p>In this phase you will use AI as a thinking partner. You will stress-test your logic, identify gaps in your reasoning, and compress your ideas before you communicate them.</p>
-              </div>
-            </div>
-          </article>
+        <div class="phase-journey">
+          <nav class="phase-rail" aria-label="Program phases">
+            <a class="phase-rail-link is-active" href="#phase-think" data-phase-link="phase-think"><span>01</span><span>Think clearly</span></a>
+            <a class="phase-rail-link" href="#phase-speak" data-phase-link="phase-speak"><span>02</span><span>Speak concisely</span></a>
+            <a class="phase-rail-link" href="#phase-act" data-phase-link="phase-act"><span>03</span><span>Act confidently</span></a>
+          </nav>
 
-          <article class="phase-block program-reveal">
-            <div class="phase-left">
-              <span class="phase-number">02</span>
-              <h3 class="phase-name">Speak concisely</h3>
-              <p class="phase-time">About 1 hr 55 min total<span>35 min video + 1 hr 20 min exercises</span></p>
-            </div>
-            <div class="phase-right">
-              <p class="phase-description">Clarity in your head means nothing if you cannot land it with others. Phase 2 teaches you how to structure, sequence and deliver your thinking so it moves people.</p>
-              <p class="phase-label">Videos</p>
-              <ul class="video-list">
-                <li>Wait, what's the problem again?</li>
-                <li>Divide and conquer</li>
-                <li>The executive storyline</li>
-                <li>The art of persuasion</li>
-              </ul>
-              <p class="phase-label">Exercises</p>
-              <p class="exercise-copy">Six exercises. You apply the Pyramid Principle, build a persuasive narrative from a blank page and deliver it when a vague answer will not work.</p>
-              <div class="ai-callout">
-                <p class="ai-label">AI integration</p>
-                <p>In this phase you will use AI to sharpen and compress your writing, then test the wording before you send it.</p>
+          <div class="phase-list">
+            <details class="phase-block program-reveal" id="phase-think" data-phase="phase-think" open>
+              <summary class="phase-summary">
+                <div class="phase-left">
+                  <span class="phase-number">01</span>
+                  <h3 class="phase-name">Think clearly</h3>
+                  <p class="phase-time">About 1 hr 45 min total<span>25 min video + 1 hr 20 min exercises</span></p>
+                </div>
+                <div class="phase-summary-main">
+                  <p class="phase-description">Most people were never taught how to organize their thoughts before they open their mouth. Phase 1 gives you the frameworks to fix that.</p>
+                  <span class="phase-toggle-copy">View curriculum</span>
+                </div>
+              </summary>
+              <div class="phase-details">
+                <p class="phase-label">Videos</p>
+                <ul class="video-list"><li>KonMari for the cluttered mind</li><li>Rule of three</li><li>Bolded summary phrases (BSP)</li></ul>
+                <p class="phase-label">Exercises</p>
+                <p class="exercise-copy">Six hands-on exercises. You sort a messy update, build structure against a clock and explain a complicated idea to someone with little time.</p>
+                <div class="ai-callout"><p class="ai-label">AI integration</p><p>In this phase you will use AI as a thinking partner. You will stress-test your logic, identify gaps in your reasoning, and compress your ideas before you communicate them.</p></div>
               </div>
-            </div>
-          </article>
+            </details>
 
-          <article class="phase-block program-reveal">
-            <div class="phase-left">
-              <span class="phase-number">03</span>
-              <h3 class="phase-name">Act confidently</h3>
-              <p class="phase-time">About 2 hr 20 min total<span>1 hr video + 1 hr 20 min exercises</span></p>
-            </div>
-            <div class="phase-right">
-              <p class="phase-description">Executive presence is a set of behaviors you can learn. Phase 3 teaches you how to read a room, hold your ground and keep your voice steady.</p>
-              <p class="phase-label">Videos</p>
-              <ul class="video-list">
-                <li>How to read people</li>
-                <li>Let's switch hats</li>
-                <li>Speak like Obama</li>
-                <li>I have bad news...</li>
-                <li>The art of saying no</li>
-              </ul>
-              <p class="phase-label">Exercises</p>
-              <p class="exercise-copy">Four exercises. You argue the other side of a conflict, practice body language and silence, then deliver difficult news clearly.</p>
-              <div class="ai-callout">
-                <p class="ai-label">AI integration</p>
-                <p>In this phase you will use AI to rehearse difficult conversations and practice how to read the room, respond and adjust before doing it live.</p>
+            <details class="phase-block program-reveal" id="phase-speak" data-phase="phase-speak">
+              <summary class="phase-summary">
+                <div class="phase-left">
+                  <span class="phase-number">02</span>
+                  <h3 class="phase-name">Speak concisely</h3>
+                  <p class="phase-time">About 1 hr 55 min total<span>35 min video + 1 hr 20 min exercises</span></p>
+                </div>
+                <div class="phase-summary-main">
+                  <p class="phase-description">Clarity in your head means nothing if you cannot land it with others. Phase 2 teaches you how to structure, sequence and deliver your thinking so it moves people.</p>
+                  <span class="phase-toggle-copy">View curriculum</span>
+                </div>
+              </summary>
+              <div class="phase-details">
+                <p class="phase-label">Videos</p>
+                <ul class="video-list"><li>Wait, what's the problem again?</li><li>Divide and conquer</li><li>The executive storyline</li><li>The art of persuasion</li></ul>
+                <p class="phase-label">Exercises</p>
+                <p class="exercise-copy">Six exercises. You apply the Pyramid Principle, build a persuasive narrative from a blank page and deliver it when a vague answer will not work.</p>
+                <div class="ai-callout"><p class="ai-label">AI integration</p><p>In this phase you will use AI to sharpen and compress your writing, then test the wording before you send it.</p></div>
               </div>
-            </div>
-          </article>
+            </details>
+
+            <details class="phase-block program-reveal" id="phase-act" data-phase="phase-act">
+              <summary class="phase-summary">
+                <div class="phase-left">
+                  <span class="phase-number">03</span>
+                  <h3 class="phase-name">Act confidently</h3>
+                  <p class="phase-time">About 2 hr 20 min total<span>1 hr video + 1 hr 20 min exercises</span></p>
+                </div>
+                <div class="phase-summary-main">
+                  <p class="phase-description">Executive presence is a set of behaviors you can learn. Phase 3 teaches you how to read a room, hold your ground and keep your voice steady.</p>
+                  <span class="phase-toggle-copy">View curriculum</span>
+                </div>
+              </summary>
+              <div class="phase-details">
+                <p class="phase-label">Videos</p>
+                <ul class="video-list"><li>How to read people</li><li>Let's switch hats</li><li>Speak like Obama</li><li>I have bad news...</li><li>The art of saying no</li></ul>
+                <p class="phase-label">Exercises</p>
+                <p class="exercise-copy">Four exercises. You argue the other side of a conflict, practice body language and silence, then deliver difficult news clearly.</p>
+                <div class="ai-callout"><p class="ai-label">AI integration</p><p>In this phase you will use AI to rehearse difficult conversations and practice how to read the room, respond and adjust before doing it live.</p></div>
+              </div>
+            </details>
+          </div>
         </div>
 
         <p class="program-total-time">Total program time: about 7 hours, including roughly 2.5 hours of video and 4.5 hours of exercises. Actual time varies by person, typically landing between 6 and 9 hours.</p>
@@ -1061,13 +1179,15 @@
       if (event.key === 'Escape' && leadModal.classList.contains('is-open')) closeLeadModal();
     });
 
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    document.documentElement.classList.add('motion-ready');
     const revealObserver = new IntersectionObserver((entries, observer) => {
       entries.forEach((entry) => {
         if (!entry.isIntersecting) return;
         entry.target.classList.add('is-visible');
         observer.unobserve(entry.target);
       });
-    }, { threshold: 0.2 });
+    }, { threshold: 0.12, rootMargin: '0px 0px -10% 0px' });
 
     function escapeText(value) {
       return String(value)
@@ -1095,7 +1215,7 @@
 
     function observeProgramTestimonials() {
       document.querySelectorAll('.testimonial-card-static.program-reveal').forEach((card, index) => {
-        card.style.transitionDelay = `${index * 0.2}s`;
+        card.style.transitionDelay = `${Math.min(index * 80, 240)}ms`;
         revealObserver.observe(card);
       });
     }
@@ -1115,14 +1235,34 @@
     }
 
     document.querySelectorAll('.audience-card.program-reveal').forEach((card, index) => {
-      card.style.transitionDelay = `${index * 0.2}s`;
+      card.style.transitionDelay = `${Math.min(index * 80, 240)}ms`;
       revealObserver.observe(card);
     });
 
-    document.querySelectorAll('.phase-block.program-reveal').forEach((phase, index) => {
-      phase.style.transitionDelay = `${index * 0.15}s`;
+    const phaseBlocks = [...document.querySelectorAll('.phase-block.program-reveal')];
+    phaseBlocks.forEach((phase, index) => {
+      phase.style.transitionDelay = `${Math.min(index * 80, 160)}ms`;
       revealObserver.observe(phase);
+      const copy = phase.querySelector('.phase-toggle-copy');
+      const updateCopy = () => { if (copy) copy.textContent = phase.open ? 'Hide curriculum' : 'View curriculum'; };
+      phase.addEventListener('toggle', updateCopy);
+      updateCopy();
     });
+
+    const phaseLinks = [...document.querySelectorAll('[data-phase-link]')];
+    const setActivePhase = id => phaseLinks.forEach(link => link.classList.toggle('is-active', link.dataset.phaseLink === id));
+    if (!reduceMotion && phaseBlocks.length) {
+      const phaseObserver = new IntersectionObserver(entries => {
+        const visible = entries.filter(entry => entry.isIntersecting).sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+        if (visible) setActivePhase(visible.target.id);
+      }, { threshold: [0.2, 0.45, 0.7], rootMargin: '-22% 0px -48% 0px' });
+      phaseBlocks.forEach(phase => phaseObserver.observe(phase));
+    }
+    phaseLinks.forEach(link => link.addEventListener('click', () => {
+      const target = document.getElementById(link.dataset.phaseLink);
+      if (target) target.open = true;
+      setActivePhase(link.dataset.phaseLink);
+    }));
 
     loadProgramTestimonials();
   </script>

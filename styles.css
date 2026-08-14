@@ -396,6 +396,8 @@ body {
 }
 
 .home-page .reveal-question {
+  --question-scale: 1;
+  --question-opacity: 1;
   max-width: 720px;
   margin: 0 auto;
   font-family: 'Playfair Display', serif;
@@ -404,12 +406,24 @@ body {
   font-weight: 400;
   line-height: 1.5;
   color: var(--home-navy);
-  opacity: 0;
-  transform: translateY(20px);
-  transition: opacity .65s ease, transform .65s ease;
+  opacity: var(--question-opacity);
+  transform: scale(var(--question-scale));
+  transform-origin: center left;
+  transition: opacity .18s linear, transform .18s linear;
 }
 
-.home-page .reveal-question.is-visible {
+.home-page .motion-reveal {
+  opacity: 1;
+  transform: none;
+}
+
+.motion-ready .home-page .motion-reveal {
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity .46s ease-out var(--reveal-delay, 0ms), transform .46s ease-out var(--reveal-delay, 0ms);
+}
+
+.motion-ready .home-page .motion-reveal.is-visible {
   opacity: 1;
   transform: translateY(0);
 }
@@ -498,48 +512,22 @@ body {
   margin-top: 56px;
 }
 
-.home-page .flip-card {
+.home-page .pillar-card {
   width: min(100%, 340px);
-  height: 420px;
-  perspective: 1100px;
-}
-
-.home-page .flip-card-inner {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  transition: transform .7s ease;
-  transform-style: preserve-3d;
-}
-
-.home-page .flip-card:hover .flip-card-inner,
-.home-page .flip-card:focus-within .flip-card-inner,
-.home-page .flip-card.flipped .flip-card-inner {
-  transform: rotateY(180deg);
-}
-
-.home-page .flip-face {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: flex-start;
   padding: 40px;
+  border: 1px solid rgba(255, 255, 255, .13);
   border-radius: 12px;
-  backface-visibility: hidden;
-  text-align: left;
-}
-
-.home-page .flip-front {
   background: var(--home-navy);
   color: var(--home-white);
+  text-align: left;
+  transition: border-color .18s ease, box-shadow .18s ease, translate .18s ease;
 }
 
-.home-page .flip-back {
-  background: var(--home-cream);
-  color: var(--home-navy);
-  transform: rotateY(180deg);
+.home-page .pillar-card:hover,
+.home-page .pillar-card:focus-within {
+  border-color: rgba(238, 163, 32, .72);
+  box-shadow: 0 18px 36px rgba(0, 51, 102, .12);
+  translate: 0 -2px;
 }
 
 .home-page .pillar-icon {
@@ -550,7 +538,7 @@ body {
   margin-bottom: 24px;
 }
 
-.home-page .flip-card h2 {
+.home-page .pillar-card h2 {
   margin: 0 0 16px;
   color: var(--home-white);
   font-family: 'Playfair Display', serif;
@@ -559,7 +547,7 @@ body {
   line-height: 1.15;
 }
 
-.home-page .flip-front p {
+.home-page .pillar-summary {
   margin: 0;
   color: var(--home-white);
   font-family: 'Lato', sans-serif;
@@ -568,13 +556,42 @@ body {
   line-height: 1.5;
 }
 
-.home-page .flip-back p {
-  margin: 0;
-  color: var(--home-navy);
+.home-page .pillar-detail {
+  margin: 24px 0 0;
+  padding-top: 24px;
+  border-top: 1px solid rgba(238, 163, 32, .5);
+  color: var(--home-cream);
   font-family: 'Lato', sans-serif;
-  font-size: 15pt;
+  font-size: 13.5pt;
   font-weight: 300;
-  line-height: 1.7;
+  line-height: 1.65;
+}
+
+@media (max-width: 768px) {
+  .home-page .reveal-question {
+    opacity: 1;
+    transform: none;
+    transition: opacity .42s ease-out, transform .42s ease-out;
+  }
+
+  .motion-ready .home-page .reveal-question:not(.is-visible) {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto !important; }
+  .home-page .reveal-question,
+  .motion-ready .home-page .motion-reveal,
+  .home-page .pillar-card,
+  .home-page .testimonial-card {
+    opacity: 1 !important;
+    transform: none !important;
+    translate: none !important;
+    transition: none !important;
+    animation: none !important;
+  }
 }
 
 .home-page .stats-section {
@@ -617,30 +634,20 @@ body {
   background: var(--home-cream);
 }
 
-.home-page .marquee-wrap {
-  display: grid;
-  gap: 24px;
-  margin-top: 0;
+.home-page .testimonial-browser {
+  width: min(100%, 1200px);
+  margin: 40px auto 0;
+  padding: 0 24px 14px;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scrollbar-color: var(--home-gold) transparent;
 }
 
-.home-page .marquee-row {
+.home-page .testimonial-track {
   display: flex;
+  gap: 24px;
   width: max-content;
-  gap: 24px;
 }
-
-.home-page .marquee-track {
-  display: flex;
-  gap: 24px;
-  animation-duration: 540s;
-  animation-timing-function: linear;
-  animation-iteration-count: infinite;
-  animation-play-state: paused;
-}
-
-.home-page .is-running .marquee-track { animation-play-state: running; }
-.home-page .marquee-left .marquee-track { animation-name: marquee-left; }
-.home-page .marquee-right .marquee-track { animation-name: marquee-right; }
 
 .home-page .testimonial-card {
   flex: 0 0 420px;
@@ -652,6 +659,14 @@ body {
   border-radius: 12px;
   background: var(--home-white);
   box-shadow: none;
+  scroll-snap-align: start;
+  transition: border-color .18s ease, translate .18s ease;
+}
+
+.home-page .testimonial-card:hover,
+.home-page .testimonial-card:focus-within {
+  border-color: rgba(238, 163, 32, .7);
+  translate: 0 -2px;
 }
 
 .home-page .testimonial-card p {
@@ -692,16 +707,6 @@ body {
   font-size: 17pt;
   font-weight: 700;
   letter-spacing: 0;
-}
-
-@keyframes marquee-left {
-  from { transform: translateX(0); }
-  to { transform: translateX(calc(-100% - 24px)); }
-}
-
-@keyframes marquee-right {
-  from { transform: translateX(calc(-100% - 24px)); }
-  to { transform: translateX(0); }
 }
 
 .home-page .closing-cta {
@@ -1845,15 +1850,6 @@ body {
     margin-left: 0;
   }
 
-  .home-page .flip-card:hover .flip-card-inner,
-  .home-page .flip-card:focus-within .flip-card-inner {
-    transform: none;
-  }
-
-  .home-page .flip-card.flipped .flip-card-inner {
-    transform: rotateY(180deg);
-  }
-
   .home-page .home-hero { padding: 96px 24px; }
   .home-page .member-tools-panel {
     grid-template-columns: 1fr;
@@ -1957,8 +1953,7 @@ body {
   .home-page .member-tools-panel { padding: 24px; }
   .home-page .member-tools-copy { font-size: 14pt; }
   .home-page .questions-close { font-size: 15pt; }
-  .home-page .flip-card { height: 450px; }
-  .home-page .flip-face { padding: 32px; }
+  .home-page .pillar-card { padding: 32px; }
   .home-page .stats-grid { gap: 36px 18px; }
   .home-page .stat-number { font-size: 40pt; }
   .home-page .stat-item p { font-size: 10pt; }

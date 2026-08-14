@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=Lato:wght@300;700&family=Roboto+Mono:wght@400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=tsa-score-20260508">
+  <link rel="stylesheet" href="styles.css?v=motion-20260814">
 </head>
 <body class="home-page">
   <nav id="navigation" class="site-nav" aria-label="Primary navigation">
@@ -80,43 +80,25 @@
           </h2>
         </div>
         <div class="pillar-grid" style="margin-top: 16px;">
-          <article class="flip-card">
-            <div class="flip-card-inner">
-              <div class="flip-face flip-front">
-                <div class="pillar-icon" aria-hidden="true">✧</div>
-                <h2>Think clearly</h2>
-                <p>Structure your thoughts before you open your mouth.</p>
-              </div>
-              <div class="flip-face flip-back">
-                <p>Learn the structured thinking frameworks used by McKinsey consultants and top decision makers. You will know how to break down complex problems, sequence your logic, and communicate a clear point of view even under pressure.</p>
-              </div>
-            </div>
+          <article class="pillar-card motion-reveal">
+            <div class="pillar-icon" aria-hidden="true">✧</div>
+            <h2>Think clearly</h2>
+            <p class="pillar-summary">Structure your thoughts before you open your mouth.</p>
+            <p class="pillar-detail">Learn the structured thinking frameworks used by McKinsey consultants and top decision makers. Break down complex problems, sequence your logic and communicate a clear point of view under pressure.</p>
           </article>
 
-          <article class="flip-card">
-            <div class="flip-card-inner">
-              <div class="flip-face flip-front">
-                <div class="pillar-icon" aria-hidden="true">◇</div>
-                <h2>Speak concisely</h2>
-                <p>Say more with less and make it stick.</p>
-              </div>
-              <div class="flip-face flip-back">
-                <p>Learn persuasion, structured storytelling and the Pyramid Principle. You will practice writing and speaking so the point is clear, the decision is easier to make and the message is remembered after the meeting.</p>
-              </div>
-            </div>
+          <article class="pillar-card motion-reveal">
+            <div class="pillar-icon" aria-hidden="true">◇</div>
+            <h2>Speak concisely</h2>
+            <p class="pillar-summary">Say more with less and make it stick.</p>
+            <p class="pillar-detail">Learn persuasion, structured storytelling and the Pyramid Principle. Practice writing and speaking so the point is clear, the decision is easier and the message is remembered.</p>
           </article>
 
-          <article class="flip-card">
-            <div class="flip-card-inner">
-              <div class="flip-face flip-front">
-                <div class="pillar-icon" aria-hidden="true">⌁</div>
-                <h2>Act confidently</h2>
-                <p>Executive presence can be learned.</p>
-              </div>
-              <div class="flip-face flip-back">
-                <p>Develop the body language and composure strong leaders use. Learn how to read a room, manage your energy, keep your voice steady and hold your ground whether you are pitching to a board or walking into your first big meeting.</p>
-              </div>
-            </div>
+          <article class="pillar-card motion-reveal">
+            <div class="pillar-icon" aria-hidden="true">⌁</div>
+            <h2>Act confidently</h2>
+            <p class="pillar-summary">Executive presence can be learned.</p>
+            <p class="pillar-detail">Develop the body language and composure strong leaders use. Read the room, manage your energy, keep your voice steady and hold your ground when the pressure rises.</p>
           </article>
         </div>
       </div>
@@ -139,19 +121,19 @@
         <h2 class="section-headline" id="stats-title">5,000+ professionals. 100% would recommend it.</h2>
         <div class="stats-grid">
           <article class="stat-item">
-            <strong class="stat-number" data-target="5000" data-suffix="+">0</strong>
+            <strong class="stat-number" data-target="5000" data-suffix="+">5,000+</strong>
             <p>Professionals Reached</p>
           </article>
           <article class="stat-item">
-            <strong class="stat-number" data-target="25" data-suffix="+">0</strong>
+            <strong class="stat-number" data-target="25" data-suffix="+">25+</strong>
             <p>Years of Real World Application</p>
           </article>
           <article class="stat-item">
-            <strong class="stat-number" data-target="100" data-suffix="%">0</strong>
+            <strong class="stat-number" data-target="100" data-suffix="%">100%</strong>
             <p>Would Recommend to Peers</p>
           </article>
           <article class="stat-item">
-            <strong class="stat-number" data-target="5" data-suffix=" / 5">0</strong>
+            <strong class="stat-number" data-target="5" data-suffix=" / 5">5 / 5</strong>
             <p>Average Satisfaction Score</p>
           </article>
         </div>
@@ -166,9 +148,8 @@
         <h2 class="section-headline" id="testimonials-title">In their own words</h2>
       </div>
 
-      <div class="marquee-wrap" aria-label="Testimonials">
-        <div class="marquee-row marquee-left" id="testimonialRowOne"></div>
-        <div class="marquee-row marquee-right" id="testimonialRowTwo"></div>
+      <div class="testimonial-browser" aria-label="Testimonials">
+        <div class="testimonial-track" id="testimonialTrack"></div>
       </div>
     </section>
 
@@ -276,14 +257,10 @@
       `;
     }
 
-    function renderTestimonialRow(rowId, items) {
-      const row = document.getElementById(rowId);
-      if (!row) return;
-      const cards = items.map(testimonialCard).join('');
-      row.innerHTML = `
-        <div class="marquee-track">${cards}</div>
-        <div class="marquee-track" aria-hidden="true">${cards}</div>
-      `;
+    function renderTestimonials(items) {
+      const track = document.getElementById('testimonialTrack');
+      if (!track) return;
+      track.innerHTML = items.map(testimonialCard).join('');
     }
 
     async function loadTestimonials() {
@@ -291,9 +268,7 @@
         const response = await fetch(TESTIMONIALS_URL);
         if (!response.ok) throw new Error('Unable to load testimonials.');
         const testimonials = await response.json();
-        const midpoint = Math.ceil(testimonials.length / 2);
-        renderTestimonialRow('testimonialRowOne', testimonials.slice(0, midpoint));
-        renderTestimonialRow('testimonialRowTwo', testimonials.slice(midpoint));
+        renderTestimonials(testimonials);
       } catch (error) {
         console.warn('Testimonials could not be loaded.', error);
       }
@@ -384,13 +359,8 @@
       if (event.key === 'Escape' && leadModal.classList.contains('is-open')) closeLeadModal();
     });
 
-    if ('ontouchstart' in window) {
-      document.querySelectorAll('.flip-card').forEach(card => {
-        card.addEventListener('click', () => {
-          card.classList.toggle('flipped');
-        });
-      });
-    }
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    document.documentElement.classList.add('motion-ready');
 
     const revealObserver = new IntersectionObserver((entries, observer) => {
       entries.forEach((entry) => {
@@ -398,49 +368,55 @@
         entry.target.classList.add('is-visible');
         observer.unobserve(entry.target);
       });
-    }, { threshold: 0.35 });
+    }, { threshold: 0.12, rootMargin: '0px 0px -10% 0px' });
 
-    document.querySelectorAll('.reveal-question').forEach((question, index) => {
-      question.style.transitionDelay = `${index * 0.2}s`;
-      revealObserver.observe(question);
+    document.querySelectorAll('.motion-reveal').forEach((element, index) => {
+      element.style.setProperty('--reveal-delay', `${Math.min(index * 80, 240)}ms`);
+      revealObserver.observe(element);
     });
 
-    const statsSection = document.getElementById('stats');
-    const statsObserver = new IntersectionObserver((entries, observer) => {
-      entries.forEach((entry) => {
-        if (!entry.isIntersecting) return;
-        document.querySelectorAll('.stat-number').forEach((numberEl) => {
-          const target = Number(numberEl.dataset.target);
-          const suffix = numberEl.dataset.suffix || '';
-          const startTime = performance.now();
-          const duration = 2000;
-
-          function tick(now) {
-            const progress = Math.min((now - startTime) / duration, 1);
-            const eased = 1 - Math.pow(1 - progress, 3);
-            const value = Math.round(target * eased);
-            numberEl.textContent = value.toLocaleString() + suffix;
-            if (progress < 1) requestAnimationFrame(tick);
-          }
-
-          requestAnimationFrame(tick);
+    const questions = [...document.querySelectorAll('.reveal-question')];
+    if (!reduceMotion && window.matchMedia('(min-width: 769px)').matches) {
+      let questionFrame = 0;
+      const updateQuestionFocus = () => {
+        questionFrame = 0;
+        const focusLine = window.innerHeight * 0.5;
+        questions.forEach((question) => {
+          const center = question.getBoundingClientRect().top + question.offsetHeight / 2;
+          const proximity = Math.max(0, 1 - Math.abs(center - focusLine) / (window.innerHeight * 0.55));
+          question.style.setProperty('--question-scale', String(0.96 + proximity * 0.07));
+          question.style.setProperty('--question-opacity', String(0.42 + proximity * 0.58));
         });
-        observer.unobserve(entry.target);
-      });
-    }, { threshold: 0.35 });
+      };
+      const requestQuestionFocus = () => {
+        if (!questionFrame) questionFrame = requestAnimationFrame(updateQuestionFocus);
+      };
+      addEventListener('scroll', requestQuestionFocus, { passive: true });
+      addEventListener('resize', requestQuestionFocus);
+      updateQuestionFocus();
+    } else {
+      questions.forEach((question) => revealObserver.observe(question));
+    }
 
-    statsObserver.observe(statsSection);
-
-    const testimonialSection = document.getElementById('testimonials');
-    const marqueeObserver = new IntersectionObserver((entries, observer) => {
-      entries.forEach((entry) => {
-        if (!entry.isIntersecting) return;
-        testimonialSection.classList.add('is-running');
-        observer.unobserve(entry.target);
-      });
-    }, { threshold: 0.2 });
-
-    marqueeObserver.observe(testimonialSection);
+    const statsSection = document.getElementById('stats');
+    if (!reduceMotion && statsSection) {
+      const statsObserver = new IntersectionObserver((entries, observer) => {
+        if (!entries.some(entry => entry.isIntersecting)) return;
+        const numbers = [...document.querySelectorAll('.stat-number')];
+        const startTime = performance.now(), duration = 800;
+        const tick = now => {
+          const progress = Math.min((now - startTime) / duration, 1), eased = 1 - Math.pow(1 - progress, 3);
+          numbers.forEach(numberEl => {
+            const value = Math.round(Number(numberEl.dataset.target) * eased);
+            numberEl.textContent = value.toLocaleString() + (numberEl.dataset.suffix || '');
+          });
+          if (progress < 1) requestAnimationFrame(tick);
+        };
+        requestAnimationFrame(tick);
+        observer.disconnect();
+      }, { threshold: 0.35 });
+      statsObserver.observe(statsSection);
+    }
   </script>
   <script type="module" src="assets/public-site-settings.js?v=1"></script>
   <script type="module" src="assets/feedback-widget.js?v=6"></script>
