@@ -465,7 +465,7 @@ exports.scoreExplainToAiko = onRequest({
 });
 
 function buildTsaDiagnosticPrompt(input) {
-  return `You are a careful assessment evaluator for The Untaught Lessons. Score only the sections enabled below. Use only evidence in the response. Do not infer tone, confidence, presence, accent, personality, or vocal delivery from text. Do not reward fancy vocabulary or grammar.
+  return `You are a careful assessment evaluator and concise developmental coach for The Untaught Lessons. Score only the sections enabled below. Use only evidence in the response. Do not infer tone, confidence, presence, accent, personality, or vocal delivery from text. Do not reward fancy vocabulary or grammar. Give direct, encouraging feedback suitable for a teenager or working adult. For each enabled section, identify one specific strength, one most important improvement, and one small practical exercise the learner can try next. Keep the improvement and exercise distinct.
 
 FORM: ${input.formId}
 ATTEMPT: ${input.kind}
@@ -488,7 +488,7 @@ ACT TRANSCRIPT:
 Speak rubric when enabled: Leads 0–8, Supports 0–14, Focuses 0–8. Act rubric when enabled: Decides 0–10, Adapts 0–12, Advances 0–8. Each total must equal its three dimensions. A defensible Act choice can earn full credit regardless of the reference default. Return null for a disabled section.
 
 Return strict JSON only:
-{"scores":{"speak":{"total":0,"leads":0,"supports":0,"focuses":0},"act":{"total":0,"decides":0,"adapts":0,"advances":0}},"feedback":{"speakEvidence":"Short verbatim quote","actEvidence":"Short verbatim quote","speakStrength":"One observed strength","speakNext":"One concrete next move","actStrength":"One observed strength","actNext":"One concrete next move"}}`;
+{"scores":{"speak":{"total":0,"leads":0,"supports":0,"focuses":0},"act":{"total":0,"decides":0,"adapts":0,"advances":0}},"feedback":{"speakEvidence":"Short verbatim quote","actEvidence":"Short verbatim quote","speakStrength":"One observed strength","speakImprovement":"One specific improvement area","speakPractice":"One small practical exercise","actStrength":"One observed strength","actImprovement":"One specific improvement area","actPractice":"One small practical exercise"}}`;
 }
 
 function normalizeTsaDiagnostic(result, input) {
@@ -515,10 +515,10 @@ function normalizeTsaDiagnostic(result, input) {
     },
     feedback: {
       speakEvidence, actEvidence,
-      speakStrength: String(feedback.speakStrength || "").slice(0, 400), speakNext: String(feedback.speakNext || "").slice(0, 400),
-      actStrength: String(feedback.actStrength || "").slice(0, 400), actNext: String(feedback.actNext || "").slice(0, 400)
+      speakStrength: String(feedback.speakStrength || "").slice(0, 400), speakImprovement: String(feedback.speakImprovement || "").slice(0, 400), speakPractice: String(feedback.speakPractice || "").slice(0, 400),
+      actStrength: String(feedback.actStrength || "").slice(0, 400), actImprovement: String(feedback.actImprovement || "").slice(0, 400), actPractice: String(feedback.actPractice || "").slice(0, 400)
     },
-    modelVersion: "gemini-flash-latest/tsa-c3-20260813",
+    modelVersion: "gemini-flash-latest/tsa-c3-20260814-coach",
     fallback: false
   };
 }

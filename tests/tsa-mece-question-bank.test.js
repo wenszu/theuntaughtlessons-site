@@ -87,7 +87,8 @@ assert.match(byId['f2-15'].prompt, /one primary category/, 'f2-15 should define 
 
 // --- Runtime draw: 5 questions per format, 15 total, persisted with the attempt so it does not reshuffle on reload ---
 assert.match(source, /if\(!Array\.isArray\(state\.spot\.questionIds\)\|\|state\.spot\.questionIds\.length!==15\)/, 'the normal learner draw should persist exactly 15 questions once chosen');
-assert.match(source, /if\(contentPreview==='part1b'\).*SPOT_QUESTION_BANK\.map/, 'the admin learner-view preview should include all 45 questions');
+assert.match(source, /const previewBank=previewFormat\?SPOT_QUESTION_BANK\.filter/, 'the admin learner-view preview should support one question format at a time');
+assert.match(source, /:SPOT_QUESTION_BANK;state\.spot\.questionIds=previewBank\.map/, 'the all-formats preview should still include all 45 questions');
 assert.match(source, /function pick5\(ids\)/, 'each format should contribute five questions');
 assert.match(source, /take\(candidates\('accessible'\),1\).*take\(candidates\('core'\),2\).*take\(candidates\('stretch'\),2\)/, 'each format should draw one accessible, two core, and two stretch questions');
 assert.match(source, /const picked=\[\.\.\.pick5\(byFormat\[1\]\),\.\.\.pick5\(byFormat\[2\]\),\.\.\.pick5\(byFormat\[3\]\)\]/, 'the draw should pull five questions from each of the three formats');

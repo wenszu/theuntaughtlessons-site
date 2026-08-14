@@ -75,8 +75,13 @@ assert.match(app, /state\.syncStatus='pending'/, 'Central saving should have a v
 assert.match(app, /state\.syncStatus='saved'/, 'Central saving should confirm success');
 assert.match(app, /state\.syncStatus='failed'/, 'Central saving should retain a retryable failure state');
 assert.match(app, /addEventListener\('online'/, 'A failed central save should retry when connectivity returns');
+assert.match(app, /<h2>Your coaching<\/h2>/, 'the results page should give Speak and Act feedback a clear section');
+assert.match(app, /What you did well/, 'each coaching card should identify one strength');
+assert.match(app, /One area to improve/, 'each coaching card should identify one improvement');
+assert.match(app, /Try this next/, 'each coaching card should include a practical exercise');
+assert.match(app, /class="evidence-quote"/, 'GenAI coaching should support the strength with a learner quote');
 assert.match(app, /function validAiSection\(value,type\)/, 'GenAI section scores must be validated independently');
-assert.match(app, /\$\{esc\(moves\[weakest\]\)\}/);
+assert.match(app, /ai\[type\+'Improvement'\]\|\|ai\[type\+'Next'\]\|\|fallback\.improvement/, 'results should prefer GenAI coaching while retaining rules-based fallback advice');
 assert.match(app, /awardAssessment\(\{assessmentId:kind/);
 assert.match(app, /const SPOT_BANK_RELEASE='[^']+'/ , 'the question bank should have a release identifier');
 assert.match(app, /function spotQuestionVersion\(id\)/, 'question versions should be tracked independently');
@@ -114,14 +119,19 @@ assert.match(rules, /match \/tsa_scoring_comparisons\/\{attemptId\}/, 'Firestore
 assert.match(app, /settings\.speakGenAiEnabled\|\|settings\.actGenAiEnabled/, 'GenAI should only be called when at least one section is enabled');
 assert.doesNotMatch(app, /AI comments were unavailable/, 'GenAI fallback should be invisible to learners');
 assert.match(admin, /contentPreview=part1b/, 'Admin Content Data should link to the all-question learner preview');
+for (const format of [1, 2, 3]) assert.match(admin, new RegExp(`contentPreview=part1b&amp;questionFormat=${format}`), `Admin Content Data should link to Format ${format} learner preview`);
 assert.match(admin, /contentPreview=part1a/, 'Admin Content Data should provide form-specific Part 1a previews');
 assert.match(admin, /contentPreview=part2/, 'Admin Content Data should provide form-specific Part 2 previews');
 assert.match(admin, /contentPreview=part3/, 'Admin Content Data should provide form-specific Part 3 previews');
-assert.match(app, /state\.spot\.questionIds=SPOT_QUESTION_BANK\.map/, 'Part 1b preview should show the full 45-question bank');
+assert.match(app, /previewFormat\?SPOT_QUESTION_BANK\.filter/, 'Part 1b preview should support format filtering');
+assert.match(app, /:SPOT_QUESTION_BANK;state\.spot\.questionIds=previewBank\.map/, 'Part 1b all-formats preview should still show the full 45-question bank');
 assert.match(app, /Admin preview · responses are not saved/, 'learner-view previews must not write assessment progress');
 assert.match(fn, /exports\.scoreTsaDiagnostic = onRequest/);
 assert.match(fn, /Speak rubric when enabled: Leads 0–8, Supports 0–14, Focuses 0–8/);
 assert.match(fn, /Act rubric when enabled: Decides 0–10, Adapts 0–12, Advances 0–8/);
+assert.match(fn, /assessment evaluator and concise developmental coach/, 'GenAI should have both evaluator and coaching roles');
+assert.match(fn, /speakPractice/, 'GenAI should return a distinct practical Speak exercise');
+assert.match(fn, /actPractice/, 'GenAI should return a distinct practical Act exercise');
 assert.match(fn, /No relevant content found/);
 assert.match(fn, /fallback: true/);
 
