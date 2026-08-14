@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=Lato:wght@300;700&family=Roboto+Mono:wght@400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=motion-20260814-4">
+  <link rel="stylesheet" href="styles.css?v=motion-20260814-5">
 </head>
 <body class="home-page">
   <nav id="navigation" class="site-nav" aria-label="Primary navigation">
@@ -422,45 +422,20 @@
     const statsSection = document.getElementById('stats');
     if (!reduceMotion && statsSection) {
       const numbers = [...document.querySelectorAll('.stat-number')];
-      let statsVisible = false, statsRun = 0;
-      const showFinalStats = () => numbers.forEach(numberEl => {
-        const target = Number(numberEl.dataset.target);
-        numberEl.textContent = target.toLocaleString() + (numberEl.dataset.suffix || '');
-      });
-      const runStatsCycle = () => {
-        if (!statsVisible) return;
-        const run = ++statsRun, startTime = performance.now(), duration = 7000;
-        statsSection.classList.remove('metrics-resetting');
+      const statsObserver = new IntersectionObserver((entries, observer) => {
+        if (!entries.some(entry => entry.isIntersecting)) return;
+        const startTime = performance.now(), duration = 5600;
         const tick = now => {
-          if (!statsVisible || run !== statsRun) return;
           const progress = Math.min((now - startTime) / duration, 1);
-          const eased = 1 - Math.pow(1 - progress, 3);
+          const eased = progress * progress * (3 - 2 * progress);
           numbers.forEach(numberEl => {
             const value = Math.round(Number(numberEl.dataset.target) * eased);
             numberEl.textContent = value.toLocaleString() + (numberEl.dataset.suffix || '');
           });
           if (progress < 1) requestAnimationFrame(tick);
-          else setTimeout(() => {
-            if (!statsVisible || run !== statsRun) return;
-            statsSection.classList.add('metrics-resetting');
-            setTimeout(() => {
-              if (!statsVisible || run !== statsRun) return;
-              runStatsCycle();
-            }, 650);
-          }, 5000);
         };
         requestAnimationFrame(tick);
-      };
-      const statsObserver = new IntersectionObserver(entries => {
-        const visible = entries.some(entry => entry.isIntersecting);
-        if (visible === statsVisible) return;
-        statsVisible = visible;
-        if (visible) runStatsCycle();
-        else {
-          statsRun += 1;
-          statsSection.classList.remove('metrics-resetting');
-          showFinalStats();
-        }
+        observer.disconnect();
       }, { threshold: 0.25 });
       statsObserver.observe(statsSection);
     }

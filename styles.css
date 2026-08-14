@@ -632,15 +632,8 @@ body {
   font-family: 'Playfair Display', serif;
   font-size: 56pt;
   font-weight: 700;
+  font-variant-numeric: lining-nums tabular-nums;
   line-height: 1;
-  opacity: 1;
-  transform: translateY(0);
-  transition: opacity .6s ease, transform .6s ease;
-}
-
-.home-page .stats-section.metrics-resetting .stat-number {
-  opacity: 0;
-  transform: translateY(4px);
 }
 
 .home-page .stat-item p {

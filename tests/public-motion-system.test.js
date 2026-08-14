@@ -15,9 +15,11 @@ assert.match(home, /id="testimonialTrack"/, 'testimonials should use a user-cont
 assert.doesNotMatch(home, /marquee-track/, 'testimonials should not move perpetually');
 assert.match(home, />5,000\+<\/strong>/, 'meaningful statistic values should exist without JavaScript');
 assert.doesNotMatch(home, /5,000\+ professionals\. 100% would recommend it\./, 'the metrics section should not repeat its values in an extra heading');
-assert.match(home, /duration = 7000/, 'metric counting should run at a calm pace');
-assert.match(home, /setTimeout\(\(\) => \{[\s\S]*?runStatsCycle\(\)/, 'metric counting should repeat while the section remains visible');
-assert.match(styles, /metrics-resetting/, 'repeating metrics should reset without an abrupt visible jump');
+assert.match(home, /duration = 5600/, 'metric counting should run once at the revised 20-percent-faster pace');
+assert.match(home, /progress \* progress \* \(3 - 2 \* progress\)/, 'metric counting should ease smoothly at both ends');
+assert.match(home, /observer\.disconnect\(\)/, 'metric counting should stop permanently at its final values');
+assert.doesNotMatch(home, /runStatsCycle|metrics-resetting/, 'metrics should not reset or repeat');
+assert.match(styles, /font-variant-numeric: lining-nums tabular-nums/, 'metric digits should not shift horizontally as values change');
 assert.match(styles, /prefers-reduced-motion: reduce/, 'the motion system should honor reduced-motion preferences');
 assert.match(styles, /scroll-snap-type: x proximity/, 'testimonial cards should support controlled horizontal browsing');
 
@@ -39,7 +41,7 @@ assert.match(styles, /\.about-page \.about-results \.section-label-text \{[\s\S]
 assert.match(styles, /\.about-page \.about-results \.section-headline \{[\s\S]*?color: var\(--home-white\);/, 'titles on dark public sections should remain visible');
 assert.match(programs, /phase\.addEventListener\('toggle'/, 'phase disclosure labels should track open state');
 assert.match(programs, /\.motion-ready \.program-reveal/, 'program reveals should be progressively enhanced');
-assert.match(programs, /styles\.css\?v=motion-20260814-4/, 'program motion styles should be cache-busted');
-assert.match(home, /styles\.css\?v=motion-20260814-4/, 'homepage motion styles should be cache-busted');
+assert.match(programs, /styles\.css\?v=motion-20260814-5/, 'program motion styles should be cache-busted');
+assert.match(home, /styles\.css\?v=motion-20260814-5/, 'homepage motion styles should be cache-busted');
 
 console.log('public homepage and program motion system contracts passed');
