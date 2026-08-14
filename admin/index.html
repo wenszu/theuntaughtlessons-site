@@ -980,6 +980,7 @@
     .dn-milestone-dot { position:relative; z-index:1; width:9px; height:9px; border:1px solid #AAB3BB; border-radius:50%; background:#fff; }
     .dn-milestone-dot.is-complete { border-color:#2D7B54; background:#2D7B54; }
     .dn-milestone-dot.is-current { border:3px solid var(--gold); background:#fff; box-shadow:0 0 0 2px #FFF4D9; }
+    .dn-milestone-dot.is-warning { border:2px solid #B56E00; background:#FFF4D9; }
     .dn-phase-tabs { display:grid; grid-template-columns:repeat(3,1fr); margin-top:8px; border:1px solid #D9D1C5; border-radius:8px; overflow:hidden; background:#fff; }
     .dn-phase-tab { min-height:66px; padding:10px; border-right:1px solid #E2DACE; }
     .dn-phase-tab:last-child { border-right:0; }
@@ -5161,11 +5162,20 @@
 
     function diagnosticNudgeMemberHtml(state) {
       const milestoneNames=['Orientation','Diagnostic','Think','Speak','Act','Checkpoint'];
-      const currentStep=state.id==='first-login'?1:state.id==='orientation-done'||state.id==='learning-started'||state.id==='diagnostic-progress'?2:state.id==='diagnostic-done'?3:6;
-      const journeyComplete=state.id==='checkpoint-done';
-      const currentLabel=journeyComplete?'Journey complete':`${milestoneNames[currentStep-1]} · Step ${currentStep} of 6`;
+      const milestoneModels={
+        'first-login':{statuses:['current','future','future','future','future','future'],label:'0 of 6 complete · Orientation next'},
+        'orientation-done':{statuses:['complete','current','future','future','future','future'],label:'1 of 6 complete · Diagnostic next'},
+        'learning-started':{statuses:['complete','warning','current','future','future','future'],label:'1 of 6 complete · Diagnostic recommended'},
+        'diagnostic-progress':{statuses:['complete','current','future','future','future','future'],label:'1 of 6 complete · Diagnostic in progress'},
+        'diagnostic-done':{statuses:['complete','complete','current','future','future','future'],label:'2 of 6 complete · Think in progress'},
+        'program-done':{statuses:['complete','complete','complete','complete','complete','current'],label:'5 of 6 complete · Checkpoint next'},
+        'program-no-baseline':{statuses:['complete','warning','complete','complete','complete','current'],label:'4 of 6 complete · Checkpoint ready · No baseline'},
+        'checkpoint-done':{statuses:['complete','complete','complete','complete','complete','complete'],label:'6 of 6 milestones complete'}
+      };
+      const milestoneModel=milestoneModels[state.id]||milestoneModels['first-login'];
+      const statusLabels={complete:'complete',current:'current',warning:'recommended but incomplete',future:'upcoming'};
       const phaseNames=['Think clearly','Speak concisely','Act confidently'];
-      return `<div class="dn-member-frame"><div class="dn-member-nav"><span class="dn-member-logo">The Untaught Lessons</span><span>Learning Journey &nbsp; | &nbsp; My Results</span></div><div class="dn-member-content"><span class="dn-member-eyebrow">Your program</span><h4 class="dn-member-title">Learning Journey</h4><p class="dn-member-welcome">Welcome back, Preview.</p><section class="dn-journey-cue ${state.assessment?'is-assessment':''}"><div><small>${state.eyebrow}</small><h4>${state.cueTitle}</h4><p>${state.copy}</p></div><div class="dn-cue-actions">${state.secondary?`<span class="dn-cue-secondary">${state.secondary}</span>`:''}<span class="dn-cue-primary">${state.action}</span></div></section><div class="dn-program-label">Program path</div><div class="dn-orientation-row"><div class="dn-orientation-copy"><strong>Orientation</strong><span>${state.orientation}</span></div><div class="dn-milestone-summary" role="img" aria-label="Program journey: ${currentLabel}"><span class="dn-milestone-label">${currentLabel}</span><span class="dn-milestone-dots" aria-hidden="true">${milestoneNames.map((name,index)=>`<i class="dn-milestone-dot ${journeyComplete||index+1<currentStep?'is-complete':index+1===currentStep?'is-current':''}" title="${name}"></i>`).join('')}</span></div></div><div class="dn-phase-tabs">${phaseNames.map((name,index)=>`<div class="dn-phase-tab"><small>Phase ${index+1}</small><strong>${name}</strong><span>${state.phases[index]}</span></div>`).join('')}</div></div></div>`;
+      return `<div class="dn-member-frame"><div class="dn-member-nav"><span class="dn-member-logo">The Untaught Lessons</span><span>Learning Journey &nbsp; | &nbsp; My Results</span></div><div class="dn-member-content"><span class="dn-member-eyebrow">Your program</span><h4 class="dn-member-title">Learning Journey</h4><p class="dn-member-welcome">Welcome back, Preview.</p><section class="dn-journey-cue ${state.assessment?'is-assessment':''}"><div><small>${state.eyebrow}</small><h4>${state.cueTitle}</h4><p>${state.copy}</p></div><div class="dn-cue-actions">${state.secondary?`<span class="dn-cue-secondary">${state.secondary}</span>`:''}<span class="dn-cue-primary">${state.action}</span></div></section><div class="dn-program-label">Program path</div><div class="dn-orientation-row"><div class="dn-orientation-copy"><strong>Orientation</strong><span>${state.orientation}</span></div><div class="dn-milestone-summary" role="img" aria-label="Program journey: ${milestoneModel.label}"><span class="dn-milestone-label">${milestoneModel.label}</span><span class="dn-milestone-dots" aria-hidden="true">${milestoneNames.map((name,index)=>`<i class="dn-milestone-dot is-${milestoneModel.statuses[index]}" title="${name}: ${statusLabels[milestoneModel.statuses[index]]}"></i>`).join('')}</span></div></div><div class="dn-phase-tabs">${phaseNames.map((name,index)=>`<div class="dn-phase-tab"><small>Phase ${index+1}</small><strong>${name}</strong><span>${state.phases[index]}</span></div>`).join('')}</div></div></div>`;
     }
 
     function initDiagnosticNudgePreview() {

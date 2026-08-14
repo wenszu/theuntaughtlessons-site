@@ -31,6 +31,11 @@ assert.match(admin, /role="img" aria-label="Program journey:/, 'the milestone do
 assert.match(admin, /aria-hidden="true"/, 'individual milestone dots should not create focus or screen-reader noise');
 assert.match(admin, /class="dn-phase-tabs"/, 'the original three detailed phase tabs should remain below the compact path');
 assert.match(admin, /milestoneNames=\['Orientation','Diagnostic','Think','Speak','Act','Checkpoint'\]/, 'the compact progress indicator should retain the full journey sequence');
+assert.match(admin, /\.dn-milestone-dot\.is-warning/, 'a skipped recommended assessment should have a distinct warning state');
+assert.match(admin, /1 of 6 complete · Diagnostic recommended/, 'learning before the diagnostic should call out the missing baseline');
+assert.match(admin, /4 of 6 complete · Checkpoint ready · No baseline/, 'completed phases should remain complete when the diagnostic was skipped');
+assert.match(admin, /'program-no-baseline':\{statuses:\['complete','warning','complete','complete','complete','current'\]/, 'the no-baseline path should independently represent completed phases and the missing diagnostic');
+assert.doesNotMatch(admin, /Step \$\{currentStep\} of 6/, 'the journey should not imply that milestones can only be completed in strict order');
 assert.doesNotMatch(member, /diagnosticNudgePreview/, 'the prototype must not leak into the live member journey');
 
 console.log('diagnostic journey nudge admin preview contracts passed');
