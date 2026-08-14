@@ -3,6 +3,8 @@ const fs = require('node:fs');
 
 const home = fs.readFileSync('index.html', 'utf8');
 const programs = fs.readFileSync('programs.html', 'utf8');
+const about = fs.readFileSync('about.html', 'utf8');
+const contact = fs.readFileSync('contact.html', 'utf8');
 const styles = fs.readFileSync('styles.css', 'utf8');
 
 assert.match(home, /--question-scale/, 'homepage questions should respond to scroll proximity');
@@ -22,6 +24,10 @@ assert.doesNotMatch(home, /runStatsCycle|metrics-resetting/, 'metrics should not
 assert.match(styles, /font-variant-numeric: lining-nums tabular-nums/, 'metric digits should not shift horizontally as values change');
 assert.match(styles, /prefers-reduced-motion: reduce/, 'the motion system should honor reduced-motion preferences');
 assert.match(styles, /scroll-snap-type: x proximity/, 'testimonial cards should support controlled horizontal browsing');
+for (const [name, page] of Object.entries({ home, programs, about, contact })) {
+  assert.doesNotMatch(page, /class="footer-tagline"/, `${name} should use the concise public footer`);
+  assert.match(page, /styles\.css\?v=public-20260814-6/, `${name} should load the current public styles`);
+}
 
 assert.match(programs, /class="phase-rail"/, 'desktop programs should expose a phase progress rail');
 assert.equal((programs.match(/<details class="phase-block program-reveal"/g) || []).length, 3, 'all three phases should be keyboard-accessible disclosures');
@@ -41,7 +47,5 @@ assert.match(styles, /\.about-page \.about-results \.section-label-text \{[\s\S]
 assert.match(styles, /\.about-page \.about-results \.section-headline \{[\s\S]*?color: var\(--home-white\);/, 'titles on dark public sections should remain visible');
 assert.match(programs, /phase\.addEventListener\('toggle'/, 'phase disclosure labels should track open state');
 assert.match(programs, /\.motion-ready \.program-reveal/, 'program reveals should be progressively enhanced');
-assert.match(programs, /styles\.css\?v=motion-20260814-5/, 'program motion styles should be cache-busted');
-assert.match(home, /styles\.css\?v=motion-20260814-5/, 'homepage motion styles should be cache-busted');
 
 console.log('public homepage and program motion system contracts passed');

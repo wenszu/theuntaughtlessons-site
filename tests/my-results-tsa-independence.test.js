@@ -13,5 +13,8 @@ assert.match(source, /kind:\s*'diagnostic'/);
 assert.match(source, /kind:\s*'checkpoint'/);
 assert.match(source, /tsa-diagnostic\/index\.html\?assessment=checkpoint/, 'the checkpoint should route through the sole assessment via the assessment query param');
 assert.match(source, /diagnosticResult\s*&&\s*checkpointResult/, 'a comparison should only render once both independent results exist');
+assert.match(source, /class="assessment-total"/, 'assessment cards should make the total score visually primary');
+assert.match(source, /class="assessment-breakdown"/, 'assessment cards should separate the Think, Speak, and Act breakdown');
+assert.match(source, /score\('Think', s\.think, 40\).*score\('Speak', s\.speak, 30\).*score\('Act', s\.act, 30\)/s, 'assessment scorecards should preserve the official dimensions and maxima');
 
 console.log('my-results TSA independence contract passed');

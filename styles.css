@@ -783,28 +783,17 @@ body {
 .home-page .footer-grid {
   width: min(100%, 1160px);
   margin: 0 auto;
-  padding: 72px 24px;
+  padding: 34px 24px;
   display: grid;
   grid-template-columns: 1fr auto;
   gap: 48px;
-  align-items: start;
+  align-items: center;
 }
 
 .home-page .footer-logo {
   width: 160px;
   height: auto;
   filter: brightness(0) invert(1);
-}
-
-.home-page .footer-tagline {
-  max-width: 360px;
-  margin: 22px 0 0;
-  color: var(--home-white);
-  font-family: 'Lato', sans-serif;
-  font-size: 12pt;
-  font-style: italic;
-  font-weight: 300;
-  line-height: 1.6;
 }
 
 .home-page .footer-links {
@@ -825,7 +814,7 @@ body {
 
 .home-page .footer-bottom {
   border-top: 1px solid rgba(255,255,255,0.1);
-  padding: 18px 24px;
+  padding: 14px 24px;
   text-align: center;
 }
 
