@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=Lato:wght@300;700&family=Roboto+Mono:wght@400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=motion-20260814-3">
+  <link rel="stylesheet" href="styles.css?v=motion-20260814-4">
 </head>
 <body class="home-page">
   <nav id="navigation" class="site-nav" aria-label="Primary navigation">
@@ -115,10 +115,9 @@
 
     <section id="stats" class="stats-section" aria-labelledby="stats-title">
       <div class="home-container wide">
-        <div class="section-label">
+        <div class="section-label" id="stats-title">
           <span class="section-label-text">By the numbers</span>
         </div>
-        <h2 class="section-headline" id="stats-title">5,000+ professionals. 100% would recommend it.</h2>
         <div class="stats-grid">
           <article class="stat-item">
             <strong class="stat-number" data-target="5000" data-suffix="+">5,000+</strong>
@@ -422,22 +421,47 @@
 
     const statsSection = document.getElementById('stats');
     if (!reduceMotion && statsSection) {
-      const statsObserver = new IntersectionObserver((entries, observer) => {
-        if (!entries.some(entry => entry.isIntersecting)) return;
-        const numbers = [...document.querySelectorAll('.stat-number')];
-        const startTime = performance.now(), duration = 800;
+      const numbers = [...document.querySelectorAll('.stat-number')];
+      let statsVisible = false, statsRun = 0;
+      const showFinalStats = () => numbers.forEach(numberEl => {
+        const target = Number(numberEl.dataset.target);
+        numberEl.textContent = target.toLocaleString() + (numberEl.dataset.suffix || '');
+      });
+      const runStatsCycle = () => {
+        if (!statsVisible) return;
+        const run = ++statsRun, startTime = performance.now(), duration = 7000;
+        statsSection.classList.remove('metrics-resetting');
         const tick = now => {
-          const progress = Math.min((now - startTime) / duration, 1), eased = 1 - Math.pow(1 - progress, 3);
+          if (!statsVisible || run !== statsRun) return;
+          const progress = Math.min((now - startTime) / duration, 1);
+          const eased = 1 - Math.pow(1 - progress, 3);
           numbers.forEach(numberEl => {
             const value = Math.round(Number(numberEl.dataset.target) * eased);
             numberEl.textContent = value.toLocaleString() + (numberEl.dataset.suffix || '');
           });
           if (progress < 1) requestAnimationFrame(tick);
-          else statsSection.classList.add('metrics-alive');
+          else setTimeout(() => {
+            if (!statsVisible || run !== statsRun) return;
+            statsSection.classList.add('metrics-resetting');
+            setTimeout(() => {
+              if (!statsVisible || run !== statsRun) return;
+              runStatsCycle();
+            }, 650);
+          }, 5000);
         };
         requestAnimationFrame(tick);
-        observer.disconnect();
-      }, { threshold: 0.35 });
+      };
+      const statsObserver = new IntersectionObserver(entries => {
+        const visible = entries.some(entry => entry.isIntersecting);
+        if (visible === statsVisible) return;
+        statsVisible = visible;
+        if (visible) runStatsCycle();
+        else {
+          statsRun += 1;
+          statsSection.classList.remove('metrics-resetting');
+          showFinalStats();
+        }
+      }, { threshold: 0.25 });
       statsObserver.observe(statsSection);
     }
   </script>

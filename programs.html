@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=Lato:wght@300;700&family=Roboto+Mono:wght@400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=motion-20260814-3">
+  <link rel="stylesheet" href="styles.css?v=motion-20260814-4">
   <style>
     .programs-page {
       --program-navy: #003366;
@@ -280,6 +280,7 @@
     }
 
     .phase-journey {
+      position: relative;
       display: grid;
       grid-template-columns: 190px minmax(0, 1fr);
       gap: 48px;
@@ -293,6 +294,22 @@
       display: grid;
       gap: 8px;
       padding: 4px 0;
+    }
+
+    .phase-rail.is-fixed {
+      position: fixed;
+      z-index: 12;
+      top: 96px;
+      width: 190px;
+    }
+
+    .phase-rail.is-past {
+      position: absolute;
+      z-index: 12;
+      top: auto;
+      bottom: 0;
+      left: 0 !important;
+      width: 190px;
     }
 
     .phase-rail::before {
@@ -355,6 +372,7 @@
     }
 
     .phase-list {
+      grid-column: 2;
       min-width: 0;
       margin: 0;
     }
@@ -760,6 +778,7 @@
 
       .phase-journey { grid-template-columns: 1fr; gap: 0; }
       .phase-rail { display: none; }
+      .phase-list { grid-column: 1; }
       .phase-summary { grid-template-columns: 1fr; gap: 28px; padding: 38px 0; }
       .phase-details { margin-left: 0; padding-bottom: 42px; }
 
@@ -1293,7 +1312,7 @@
       updateCopy();
     });
 
-    const phaseLinks = [...document.querySelectorAll('[data-phase-link]')],phaseJourney=document.querySelector('.phase-journey');
+    const phaseLinks = [...document.querySelectorAll('[data-phase-link]')],phaseJourney=document.querySelector('.phase-journey'),phaseRail=document.querySelector('.phase-rail');
     const setActivePhase = id => {
       phaseLinks.forEach(link => link.classList.toggle('is-active', link.dataset.phaseLink === id));
       phaseBlocks.forEach(phase => phase.classList.toggle('is-active-phase', phase.id === id));
@@ -1305,6 +1324,20 @@
     const updateActivePhase=()=>{
       phaseFrame=0;
       if(!phaseBlocks.length)return;
+      if(phaseJourney&&phaseRail){
+        if(window.innerWidth<=768){
+          phaseRail.classList.remove('is-fixed','is-past');
+          phaseRail.style.removeProperty('left');
+        }else{
+          const journeyRect=phaseJourney.getBoundingClientRect(),railHeight=phaseRail.offsetHeight,railTop=96;
+          const fixed=journeyRect.top<=railTop&&journeyRect.bottom>railTop+railHeight;
+          const past=journeyRect.bottom<=railTop+railHeight;
+          phaseRail.classList.toggle('is-fixed',fixed);
+          phaseRail.classList.toggle('is-past',past);
+          if(fixed)phaseRail.style.left=`${journeyRect.left}px`;
+          else phaseRail.style.removeProperty('left');
+        }
+      }
       const focusLine=window.innerHeight*.42;
       const closest=phaseBlocks.map(phase=>{const summary=phase.querySelector('.phase-summary'),rect=summary.getBoundingClientRect();return{phase,distance:Math.abs(rect.top+rect.height/2-focusLine)}}).sort((a,b)=>a.distance-b.distance)[0];
       if(closest)setActivePhase(closest.phase.id);
