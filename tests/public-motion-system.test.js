@@ -7,6 +7,8 @@ const styles = fs.readFileSync('styles.css', 'utf8');
 
 assert.match(home, /--question-scale/, 'homepage questions should respond to scroll proximity');
 assert.match(home, /requestAnimationFrame\(updateQuestionFocus\)/, 'question motion should use one throttled animation frame');
+assert.match(home, /--pillar-scale/, 'pillar cards should grow deliberately as their section reaches focus');
+assert.match(home, /0\.92 \+ proximity \* 0\.16/, 'question focus should be visually apparent');
 assert.doesNotMatch(home, /class="flip-card"/, 'essential pillar content must not be hidden behind flip cards');
 assert.equal((home.match(/class="pillar-card motion-reveal"/g) || []).length, 3, 'all three pillars should use the shared reveal system');
 assert.match(home, /id="testimonialTrack"/, 'testimonials should use a user-controlled track');
@@ -18,10 +20,14 @@ assert.match(styles, /scroll-snap-type: x proximity/, 'testimonial cards should 
 assert.match(programs, /class="phase-rail"/, 'desktop programs should expose a phase progress rail');
 assert.equal((programs.match(/<details class="phase-block program-reveal"/g) || []).length, 3, 'all three phases should be keyboard-accessible disclosures');
 assert.equal((programs.match(/<details class="phase-block program-reveal"[^>]* open>/g) || []).length, 1, 'only the first curriculum should begin expanded');
-assert.match(programs, /new IntersectionObserver\(entries =>/, 'the phase rail should follow reading progress');
+assert.match(programs, /requestAnimationFrame\(updateActivePhase\)/, 'the phase rail should follow reading progress in one throttled frame');
+assert.match(programs, /is-active-phase/, 'the phase content should visually follow the active rail marker');
+assert.match(programs, /--rail-progress/, 'the phase rail should show continuous progress');
+assert.match(programs, /overflow-y: visible/, 'the page must not break the sticky phase rail');
+assert.match(programs, /font-size: 15px/, 'program section labels should remain legible');
 assert.match(programs, /phase\.addEventListener\('toggle'/, 'phase disclosure labels should track open state');
 assert.match(programs, /\.motion-ready \.program-reveal/, 'program reveals should be progressively enhanced');
-assert.match(programs, /styles\.css\?v=motion-20260814/, 'program motion styles should be cache-busted');
-assert.match(home, /styles\.css\?v=motion-20260814/, 'homepage motion styles should be cache-busted');
+assert.match(programs, /styles\.css\?v=motion-20260814-2/, 'program motion styles should be cache-busted');
+assert.match(home, /styles\.css\?v=motion-20260814-2/, 'homepage motion styles should be cache-busted');
 
 console.log('public homepage and program motion system contracts passed');

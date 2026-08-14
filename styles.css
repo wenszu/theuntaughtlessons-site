@@ -513,6 +513,7 @@ body {
 }
 
 .home-page .pillar-card {
+  --pillar-scale: 1;
   width: min(100%, 340px);
   padding: 40px;
   border: 1px solid rgba(255, 255, 255, .13);
@@ -520,7 +521,9 @@ body {
   background: var(--home-navy);
   color: var(--home-white);
   text-align: left;
-  transition: border-color .18s ease, box-shadow .18s ease, translate .18s ease;
+  scale: var(--pillar-scale);
+  transform-origin: center bottom;
+  transition: border-color .18s ease, box-shadow .18s ease, translate .18s ease, scale .2s linear;
 }
 
 .home-page .pillar-card:hover,
@@ -589,6 +592,7 @@ body {
     opacity: 1 !important;
     transform: none !important;
     translate: none !important;
+    scale: none !important;
     transition: none !important;
     animation: none !important;
   }

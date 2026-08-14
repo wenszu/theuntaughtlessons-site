@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=Lato:wght@300;700&family=Roboto+Mono:wght@400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=motion-20260814">
+  <link rel="stylesheet" href="styles.css?v=motion-20260814-2">
 </head>
 <body class="home-page">
   <nav id="navigation" class="site-nav" aria-label="Primary navigation">
@@ -384,8 +384,8 @@
         questions.forEach((question) => {
           const center = question.getBoundingClientRect().top + question.offsetHeight / 2;
           const proximity = Math.max(0, 1 - Math.abs(center - focusLine) / (window.innerHeight * 0.55));
-          question.style.setProperty('--question-scale', String(0.96 + proximity * 0.07));
-          question.style.setProperty('--question-opacity', String(0.42 + proximity * 0.58));
+          question.style.setProperty('--question-scale', String(0.92 + proximity * 0.16));
+          question.style.setProperty('--question-opacity', String(0.34 + proximity * 0.66));
         });
       };
       const requestQuestionFocus = () => {
@@ -396,6 +396,28 @@
       updateQuestionFocus();
     } else {
       questions.forEach((question) => revealObserver.observe(question));
+    }
+
+    const pillarGrid = document.querySelector('.pillar-grid');
+    const pillarCards = [...document.querySelectorAll('.pillar-card')];
+    if (!reduceMotion && pillarGrid && window.matchMedia('(min-width: 769px)').matches) {
+      let pillarFrame = 0;
+      const updatePillarFocus = () => {
+        pillarFrame = 0;
+        const rect = pillarGrid.getBoundingClientRect();
+        const center = rect.top + rect.height / 2;
+        const proximity = Math.max(0, 1 - Math.abs(center - window.innerHeight * 0.52) / (window.innerHeight * 0.7));
+        pillarCards.forEach((card, index) => {
+          const stagger = Math.max(0, proximity - index * 0.035);
+          card.style.setProperty('--pillar-scale', String(0.93 + stagger * 0.07));
+        });
+      };
+      const requestPillarFocus = () => {
+        if (!pillarFrame) pillarFrame = requestAnimationFrame(updatePillarFocus);
+      };
+      addEventListener('scroll', requestPillarFocus, { passive: true });
+      addEventListener('resize', requestPillarFocus);
+      updatePillarFocus();
     }
 
     const statsSection = document.getElementById('stats');

@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=Lato:wght@300;700&family=Roboto+Mono:wght@400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=motion-20260814">
+  <link rel="stylesheet" href="styles.css?v=motion-20260814-2">
   <style>
     .programs-page {
       --program-navy: #003366;
@@ -24,8 +24,14 @@
       background: var(--program-navy);
     }
 
+    .programs-page,
+    .programs-page * {
+      box-sizing: border-box;
+    }
+
     .programs-page main {
-      overflow: hidden;
+      overflow-x: clip;
+      overflow-y: visible;
     }
 
     .program-section {
@@ -58,11 +64,11 @@
       display: flex;
       align-items: center;
       gap: 16px;
-      margin: 0 0 56px;
-      color: var(--program-gold);
+      margin: 0 0 44px;
+      color: var(--program-navy);
       font-family: Lato, Arial, sans-serif;
-      font-size: 10pt;
-      font-weight: 400;
+      font-size: 15px;
+      font-weight: 700;
       letter-spacing: 0;
       line-height: 1.4;
       text-transform: none;
@@ -70,7 +76,7 @@
 
     .program-section-label::before {
       content: "";
-      width: 48px;
+      width: 36px;
       height: 1px;
       background: var(--program-gold);
       flex: 0 0 auto;
@@ -245,10 +251,10 @@
 
     .audience-card {
       padding: 40px;
-      border-top: 3px solid var(--program-gold);
-      border-radius: 4px;
-      background: var(--program-white);
-      box-shadow: none;
+      border: 1px solid rgba(0, 51, 102, .12);
+      border-radius: 10px;
+      background: #FFFEFB;
+      box-shadow: 0 8px 24px rgba(0, 33, 66, .06);
     }
 
     .audience-card h3 {
@@ -295,6 +301,19 @@
       background: rgba(0, 51, 102, .2);
     }
 
+    .phase-rail::after {
+      content: "";
+      position: absolute;
+      z-index: 0;
+      top: 16px;
+      left: 15.5px;
+      width: 2px;
+      height: var(--rail-progress, 0%);
+      border-radius: 2px;
+      background: var(--program-gold);
+      transition: height .45s ease;
+    }
+
     .phase-rail-link {
       position: relative;
       display: grid;
@@ -338,7 +357,9 @@
 
     .phase-block {
       padding: 0;
-      border-top: 1px solid var(--program-gold);
+      border-top: 1px solid rgba(0, 51, 102, .18);
+      transform-origin: center left;
+      transition: opacity .5s ease, transform .5s ease, background .5s ease, box-shadow .5s ease;
     }
 
     .phase-summary {
@@ -348,6 +369,7 @@
       padding: 44px 0;
       cursor: pointer;
       list-style: none;
+      transition: opacity .5s ease, transform .5s ease;
     }
 
     .phase-summary::-webkit-details-marker { display: none; }
@@ -379,6 +401,22 @@
     }
 
     .phase-block[open] .phase-toggle-copy::after { content: "−"; }
+
+    .phase-journey.has-active .phase-block:not(.is-active-phase) .phase-summary {
+      opacity: .76;
+      transform: scale(.98);
+      transform-origin: center left;
+    }
+
+    .phase-block.is-active-phase {
+      position: relative;
+      z-index: 1;
+      transform: scale(1.025);
+    }
+
+    .phase-block.is-active-phase .phase-summary {
+      opacity: 1;
+    }
 
     .phase-details {
       margin-left: calc(35% + 48px);
@@ -573,9 +611,9 @@
     .testimonial-card-static {
       padding: 40px;
       border: 1px solid rgba(0, 51, 102, .12);
-      border-radius: 4px;
-      background: var(--program-white);
-      box-shadow: none;
+      border-radius: 10px;
+      background: #FFFEFB;
+      box-shadow: 0 8px 24px rgba(0, 33, 66, .06);
     }
 
     .testimonial-card-static blockquote {
@@ -735,7 +773,9 @@
       .motion-ready .program-reveal,
       .program-reveal,
       .phase-rail-link,
-      .phase-rail-link span:first-child {
+      .phase-rail-link span:first-child,
+      .phase-block,
+      .phase-summary {
         opacity: 1 !important;
         transform: none !important;
         transition: none !important;
@@ -1249,15 +1289,29 @@
       updateCopy();
     });
 
-    const phaseLinks = [...document.querySelectorAll('[data-phase-link]')];
-    const setActivePhase = id => phaseLinks.forEach(link => link.classList.toggle('is-active', link.dataset.phaseLink === id));
+    const phaseLinks = [...document.querySelectorAll('[data-phase-link]')],phaseJourney=document.querySelector('.phase-journey');
+    const setActivePhase = id => {
+      phaseLinks.forEach(link => link.classList.toggle('is-active', link.dataset.phaseLink === id));
+      phaseBlocks.forEach(phase => phase.classList.toggle('is-active-phase', phase.id === id));
+      phaseJourney?.classList.add('has-active');
+      const activeIndex=phaseLinks.findIndex(link=>link.dataset.phaseLink===id);
+      document.querySelector('.phase-rail')?.style.setProperty('--rail-progress',['0%','42%','84%'][activeIndex]||'0%');
+    };
+    let phaseFrame=0;
+    const updateActivePhase=()=>{
+      phaseFrame=0;
+      if(!phaseBlocks.length)return;
+      const focusLine=window.innerHeight*.42;
+      const closest=phaseBlocks.map(phase=>{const summary=phase.querySelector('.phase-summary'),rect=summary.getBoundingClientRect();return{phase,distance:Math.abs(rect.top+rect.height/2-focusLine)}}).sort((a,b)=>a.distance-b.distance)[0];
+      if(closest)setActivePhase(closest.phase.id);
+    };
+    const requestActivePhase=()=>{if(!phaseFrame)phaseFrame=requestAnimationFrame(updateActivePhase)};
     if (!reduceMotion && phaseBlocks.length) {
-      const phaseObserver = new IntersectionObserver(entries => {
-        const visible = entries.filter(entry => entry.isIntersecting).sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
-        if (visible) setActivePhase(visible.target.id);
-      }, { threshold: [0.2, 0.45, 0.7], rootMargin: '-22% 0px -48% 0px' });
-      phaseBlocks.forEach(phase => phaseObserver.observe(phase));
-    }
+      addEventListener('scroll',requestActivePhase,{passive:true});
+      addEventListener('resize',requestActivePhase);
+      phaseBlocks.forEach(phase=>phase.addEventListener('toggle',requestActivePhase));
+      updateActivePhase();
+    } else if(phaseBlocks.length) setActivePhase(phaseBlocks[0].id);
     phaseLinks.forEach(link => link.addEventListener('click', () => {
       const target = document.getElementById(link.dataset.phaseLink);
       if (target) target.open = true;
