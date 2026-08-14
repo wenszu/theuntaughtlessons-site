@@ -176,29 +176,30 @@ body {
 
 .home-page .section-label {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+  flex-direction: row;
+  align-items: center;
+  gap: 16px;
   width: 100%;
   max-width: inherit;
-  margin: 0 0 20px;
+  margin: 0 0 32px;
   text-align: left;
 }
 
 .home-page .section-label::before {
   content: '';
   display: block;
-  width: 100%;
+  width: 36px;
   height: 1px;
   background-color: var(--home-gold);
-  margin-bottom: 16px;
+  margin-bottom: 0;
   flex-shrink: 0;
 }
 
 .home-page .section-label-text {
-  color: var(--home-gold);
+  color: var(--home-navy);
   font-family: Lato, Arial, sans-serif;
-  font-size: 11pt;
-  font-weight: 400;
+  font-size: 15px;
+  font-weight: 700;
   letter-spacing: 0;
   line-height: 1.2;
   text-transform: none;
@@ -3049,32 +3050,34 @@ footer p {
 }
 
 /* Force current section label treatment above legacy page styles. */
-.section-label,
-.section-label-text {
-  color: #EEA320 !important;
+.home-page .section-label,
+.home-page .section-label-text {
+  color: #003366 !important;
   font-family: Lato, Arial, sans-serif !important;
-  font-size: 11pt !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
   letter-spacing: 0 !important;
   text-transform: none !important;
 }
 
-.section-label {
+.home-page .section-label {
   display: flex !important;
-  flex-direction: column !important;
-  align-items: flex-start !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 16px !important;
   width: 100% !important;
   max-width: inherit !important;
-  margin-bottom: 20px !important;
+  margin-bottom: 32px !important;
   text-align: left !important;
 }
 
-.section-label::before {
+.home-page .section-label::before {
   content: '' !important;
   display: block !important;
-  width: 100% !important;
+  width: 36px !important;
   height: 1px !important;
   background-color: #EEA320 !important;
-  margin-bottom: 16px !important;
+  margin-bottom: 0 !important;
 }
 
 .member-workspace-page .phase-section,

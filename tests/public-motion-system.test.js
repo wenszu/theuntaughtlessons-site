@@ -23,8 +23,10 @@ assert.equal((programs.match(/<details class="phase-block program-reveal"[^>]* o
 assert.match(programs, /requestAnimationFrame\(updateActivePhase\)/, 'the phase rail should follow reading progress in one throttled frame');
 assert.match(programs, /is-active-phase/, 'the phase content should visually follow the active rail marker');
 assert.match(programs, /--rail-progress/, 'the phase rail should show continuous progress');
-assert.match(programs, /overflow-y: visible/, 'the page must not break the sticky phase rail');
+assert.match(programs, /\.programs-page main \{\s*overflow: visible;/, 'the page must not create an ancestor that breaks the sticky phase rail');
 assert.match(programs, /font-size: 15px/, 'program section labels should remain legible');
+assert.doesNotMatch(programs, /Best for a facilitated pilot group/, 'cohort copy should describe the actual experience directly');
+assert.match(styles, /\.home-page \.section-label-text \{[\s\S]*?color: var\(--home-navy\)/, 'public section-label colors should be consistent');
 assert.match(programs, /phase\.addEventListener\('toggle'/, 'phase disclosure labels should track open state');
 assert.match(programs, /\.motion-ready \.program-reveal/, 'program reveals should be progressively enhanced');
 assert.match(programs, /styles\.css\?v=motion-20260814-2/, 'program motion styles should be cache-busted');
