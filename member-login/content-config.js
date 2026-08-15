@@ -23,9 +23,9 @@ const UTL_CONTENT = {
     title: "Think clearly",
     description: "Build clean structure before you communicate. Watch the lessons, then practice turning a messy update into something a busy person can read.",
     lessons: [
-      { id: "p1-l1", title: "KonMari for the cluttered mind", duration: "9 min 35 sec", videoUrl: "https://drive.google.com/file/d/1JogKtDiCfhNjNckFLhOEJCCw7gh7eORq/view?usp=sharing" },
-      { id: "p1-l2", title: "Rule of three", duration: "8 min 26 sec", videoUrl: "https://drive.google.com/open?id=1fFBBPC0JbHf1IPeHIz_9yKrp173coxJM&usp=drive_copy" },
-      { id: "p1-l3", title: "Bolded summary phrases (BSP)", duration: "8 min 21 sec", videoUrl: "https://drive.google.com/open?id=1ZSKGHTUSZs2T3g3aTMgQ9fk9lHg_fN34&usp=drive_copy" }
+      { id: "p1-l1", title: "KonMari for the cluttered mind", duration: "9 min 35 sec", videoUrl: "https://drive.google.com/file/d/1JogKtDiCfhNjNckFLhOEJCCw7gh7eORq/view?usp=sharing", description: "Apply the declutter-and-keep-what-matters method to your own messy thinking before you write or speak." },
+      { id: "p1-l2", title: "Rule of three", duration: "8 min 26 sec", videoUrl: "https://drive.google.com/open?id=1fFBBPC0JbHf1IPeHIz_9yKrp173coxJM&usp=drive_copy", description: "Group your points into threes so they are easier to remember, follow, and act on." },
+      { id: "p1-l3", title: "Bolded summary phrases (BSP)", duration: "8 min 21 sec", videoUrl: "https://drive.google.com/open?id=1ZSKGHTUSZs2T3g3aTMgQ9fk9lHg_fN34&usp=drive_copy", description: "Write a one-line bolded takeaway for every section so a skimming reader still gets the point." }
     ],
     introContexts: [
       {
@@ -130,10 +130,10 @@ const UTL_CONTENT = {
     title: "Speak concisely",
     description: "Move from structured thinking to sharp communication. Practice making the point first and making the logic easy to follow.",
     lessons: [
-      { id: "p1-l4", title: "Wait, what's the problem again?", duration: "10 min 21 sec", videoUrl: "https://drive.google.com/open?id=1b2nAA0d-Rq-jetDuRQeAusttazKQa-Si&usp=drive_copy" },
-      { id: "p1-l5", title: "Divide and conquer", duration: "6 min 1 sec", videoUrl: "https://drive.google.com/open?id=1hsdZTxdjNF2Yqsy9JRdC9jkc7wk5uGEO&usp=drive_copy" },
-      { id: "p2-l1", title: "The executive storyline", duration: "7 min 38 sec", videoUrl: "https://drive.google.com/open?id=1BONR9sIQM-Mscia3ZaG-06lP6G2dTZP_&usp=drive_copy" },
-      { id: "p2-l3", title: "The art of persuasion", duration: "12 min 38 sec", videoUrl: "https://drive.google.com/open?id=1Qxo0Mf_1I3_J_CLXf4CzKJvtZdxyz2kL&usp=drive_copy" }
+      { id: "p1-l4", title: "Wait, what's the problem again?", duration: "10 min 21 sec", videoUrl: "https://drive.google.com/open?id=1b2nAA0d-Rq-jetDuRQeAusttazKQa-Si&usp=drive_copy", description: "Pin down the real problem before you start solving, so you don't waste effort on the wrong thing." },
+      { id: "p1-l5", title: "Divide and conquer", duration: "6 min 1 sec", videoUrl: "https://drive.google.com/open?id=1hsdZTxdjNF2Yqsy9JRdC9jkc7wk5uGEO&usp=drive_copy", description: "Break a large, tangled problem into smaller pieces you can actually tackle one at a time." },
+      { id: "p2-l1", title: "The executive storyline", duration: "7 min 38 sec", videoUrl: "https://drive.google.com/open?id=1BONR9sIQM-Mscia3ZaG-06lP6G2dTZP_&usp=drive_copy", description: "Structure a message the way executives expect: the answer first, then the supporting logic." },
+      { id: "p2-l3", title: "The art of persuasion", duration: "12 min 38 sec", videoUrl: "https://drive.google.com/open?id=1Qxo0Mf_1I3_J_CLXf4CzKJvtZdxyz2kL&usp=drive_copy", description: "Frame a recommendation so people are moved to agree, not just informed." }
     ],
     introContexts: [
       {
@@ -237,11 +237,11 @@ const UTL_CONTENT = {
     title: "Act confidently",
     description: "Practice judgment under pressure. Decide what matters, read the room, and speak with steadiness when the stakes rise.",
     lessons: [
-      { id: "p3-l1", title: "How to read people", duration: "7 min 19 sec", videoUrl: "https://drive.google.com/open?id=1YUxx3D7GsLXzKZLG4SlvNrk8jWVgvM0_&usp=drive_copy" },
-      { id: "p3-l2", title: "Let's switch hats", duration: "7 min 19 sec", videoUrl: "https://drive.google.com/open?id=1h9r_4E7IkQ_aTKtHd3bl6IYHxF3dozhO&usp=drive_copy" },
-      { id: "p3-l3", title: "Speak like Obama", duration: "21 min 47 sec", videoUrl: "https://drive.google.com/open?id=1sYAwaMxQE85_rvxRMabJvDm5a3yjZ6oz&usp=drive_copy" },
-      { id: "p3-l4", title: "The art of saying no", duration: "18 min 25 sec", videoUrl: "https://drive.google.com/open?id=1XCOBAWDlcTht8w_utWZKwkw8wfBO_gC5&usp=drive_copy" },
-      { id: "p3-l5", title: "I have bad news...", duration: "7 min 7 sec", videoUrl: "https://drive.google.com/open?id=1RZxxq34xb3C6lpLxVYt5399a66ganrHG&usp=drive_copy" }
+      { id: "p3-l1", title: "How to read people", duration: "7 min 19 sec", videoUrl: "https://drive.google.com/open?id=1YUxx3D7GsLXzKZLG4SlvNrk8jWVgvM0_&usp=drive_copy", description: "Pick up on the cues that tell you what someone actually thinks, even when they don't say it." },
+      { id: "p3-l2", title: "Let's switch hats", duration: "7 min 19 sec", videoUrl: "https://drive.google.com/open?id=1h9r_4E7IkQ_aTKtHd3bl6IYHxF3dozhO&usp=drive_copy", description: "Argue the other side of a decision so you can spot the gaps in your own thinking." },
+      { id: "p3-l3", title: "Speak like Obama", duration: "21 min 47 sec", videoUrl: "https://drive.google.com/open?id=1sYAwaMxQE85_rvxRMabJvDm5a3yjZ6oz&usp=drive_copy", description: "Break down the pacing, pauses, and emphasis that make a speaker sound confident." },
+      { id: "p3-l4", title: "The art of saying no", duration: "18 min 25 sec", videoUrl: "https://drive.google.com/open?id=1XCOBAWDlcTht8w_utWZKwkw8wfBO_gC5&usp=drive_copy", description: "Decline a request firmly and professionally without damaging the relationship." },
+      { id: "p3-l5", title: "I have bad news...", duration: "7 min 7 sec", videoUrl: "https://drive.google.com/open?id=1RZxxq34xb3C6lpLxVYt5399a66ganrHG&usp=drive_copy", description: "Deliver difficult news directly and with composure, without softening it into confusion." }
     ],
     introContexts: [
       {
@@ -2150,7 +2150,7 @@ const UTL_CONTENT = {
         minutes: Math.max(1, Math.ceil(seconds / 60)),
         done: readBool(watchedKey(lesson.id)),
         href: memberHref(phaseFiles[phaseKey]) + "?lesson=" + encodeURIComponent(lesson.id) + "#lessons",
-        preview: phase.description
+        preview: lesson.description || phase.description
       };
     });
     var exercises = phase.exercises.map(function (exercise) {
@@ -2415,7 +2415,13 @@ const UTL_CONTENT = {
     var phaseIsUnlocked = phaseUnlocked(phaseKey);
     var completed = activities.filter(function (activity) { return activity.done; }).length;
     var current = next && next.phaseKey === phaseKey;
-    var status = completed === activities.length ? "Complete" : current ? "Current" : completed > 0 ? "In progress" : phaseIsUnlocked ? "Not started" : "Locked — " + (phase.description || "complete the previous phase to unlock");
+    var prevPhaseKey = phases[phases.indexOf(phaseKey) - 1];
+    var prevPhase = prevPhaseKey ? getPhase(prevPhaseKey) : null;
+    var prevRemaining = prevPhase ? prevPhase.exercises.filter(function (exercise) { return !exerciseDone(exercise); }).length : 0;
+    var lockedStatus = prevPhase
+      ? "Locked — finish " + prevRemaining + " more " + (prevRemaining === 1 ? "exercise" : "exercises") + " in Phase " + phaseNumbers[prevPhaseKey] + " to unlock"
+      : "Locked";
+    var status = completed === activities.length ? "Complete" : current ? "Current" : completed > 0 ? "In progress" : phaseIsUnlocked ? "Not started" : lockedStatus;
     var phasePercent = Math.round((completed / Math.max(1, activities.length)) * 100);
     var selected = phaseKey === selectedPhase;
     return '<button class="ws-journey-phase-tab ' + (selected ? "ws-active " : "") + (!phaseIsUnlocked ? "ws-tab-locked" : "") + '" type="button" role="tab" id="journey-tab-' + phaseKey + '" aria-controls="journey-panel-' + phaseKey + '" aria-selected="' + (selected ? "true" : "false") + '" tabindex="' + (selected ? "0" : "-1") + '" data-journey-phase-tab="' + phaseKey + '"><span><small>' + (completed === activities.length ? "&#10003; " : !phaseIsUnlocked ? "&#128274; " : "") + 'Phase ' + phaseNumbers[phaseKey] + '</small><strong>' + escapeHtml(phase.title) + '</strong><em>' + status + '</em></span><span class="ws-journey-phase-progress"><i style="width:' + phasePercent + '%"></i></span></button>';
