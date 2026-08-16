@@ -22,6 +22,6 @@ assert.match(member, /\.ws-journey-milestones\{[^}]*border:1px/, 'the learning j
 assert.match(member, /<div class="ws-orientation-head[^>]*><button class="ws-orientation-toggle"/, 'the milestone tooltip targets should be siblings of, not nested inside, the Orientation button');
 assert.match(member, /data-assessment-fallback/, 'assessment-disabled members should retain the regular continue-learning banner');
 assert.match(member, /qsa\("\[data-assessment-journey\]"\)/, 'the existing assessment visibility control should hide the live assessment journey');
-assert.match(memberHome, /content-config\.js\?v=20260814-journey-tooltips/, 'the live member page should bypass older cached journey code');
+assert.match(memberHome, /content-config\.js\?v=20260816-walkthrough-content-v2/, 'the live member page should bypass older cached journey code');
 
 console.log('live assessment journey contracts passed');

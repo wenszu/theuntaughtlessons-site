@@ -2415,6 +2415,7 @@
       <button class="admin-nav-item" data-admin-tab-scope="admin-tools" data-target="section-links">Quick links</button>
       <span class="nav-group-label" data-admin-nav-group="admin-tools">Health</span>
       <button class="admin-nav-item" data-admin-tab-scope="admin-tools" data-target="section-sync">Site health check</button>
+      <button class="admin-nav-item" data-admin-tab-scope="admin-tools" data-target="section-walkthrough-screenshots">Welcome walkthrough screenshots</button>
 
     </aside>
 
@@ -2433,6 +2434,15 @@
         <div class="sync-list" id="syncCheckResults"></div>
       </section>
 
+      <section class="admin-section" id="section-walkthrough-screenshots" data-admin-tab-panel="admin-tools">
+        <span class="section-label">Preview &amp; Health</span>
+        <h2>Welcome walkthrough screenshots</h2>
+        <div class="section-divider"></div>
+        <p class="description">The welcome walkthrough embeds real screenshots of the Learning Journey page. These go stale if that page's design changes. Review them periodically. After any redesign of the Program path section, the diagnostic nudge card, the Today's Mission popup, or the header reward cluster, re-run <code>node scripts/capture-walkthrough-screenshots.js</code> (see <code>scripts/README.md</code>) and this list will pick up the new files and dates automatically.</p>
+        <p class="cl-status" id="wtShotsStatus" aria-live="polite">Loading&hellip;</p>
+        <div class="cl-file-grid" id="wtShotsList"></div>
+      </section>
+
       <section class="admin-section" id="section-visibility" data-admin-tab-panel="admin-tools">
         <span class="section-label">Preview &amp; Health</span>
         <h2>Member preview settings</h2>
@@ -2449,6 +2459,7 @@
           <button class="small-button secondary-button" type="button" id="refreshVisibility">Refresh status</button>
           <a class="small-button secondary-button" href="../member-login/index.html?mode=admin" target="_blank" id="memberHubPreviewLink" style="display:inline-flex;align-items:center;text-decoration:none;">Open member hub in admin mode</a>
           <a class="small-button secondary-button" href="../member-login/index.html?mode=admin&amp;preview=welcome#todays-mission" target="_blank" id="welcomeCardPreviewLink" style="display:inline-flex;align-items:center;text-decoration:none;">Preview Today’s Mission card</a>
+          <a class="small-button secondary-button" href="../member-login/index.html?mode=admin&amp;preview=walkthrough#welcome-walkthrough" target="_blank" id="welcomeWalkthroughPreviewLink" style="display:inline-flex;align-items:center;text-decoration:none;">Preview welcome walkthrough</a>
         </div>
       </section>
 
@@ -3461,7 +3472,7 @@
     </main>
   </div>
 
-  <script src="../member-login/content-config.js?v=20260814-journey-tooltips"></script>
+  <script src="../member-login/content-config.js?v=20260816-walkthrough-content-v2"></script>
   <script src="../assets/reward-ui.js?v=20260803-written-reflection-1"></script>
 
   <script type="module">
@@ -7189,6 +7200,51 @@
       qbInit();
     }
 
+    async function wtShotsInit() {
+      const status = document.getElementById('wtShotsStatus');
+      const list = document.getElementById('wtShotsList');
+      if (!status || !list) return;
+      try {
+        const response = await fetch('../member-login/content-config.js', { cache: 'no-store' });
+        if (!response.ok) throw new Error('HTTP ' + response.status);
+        const source = await response.text();
+        const match = source.match(/welcomeWalkthrough:\s*(\{[\s\S]*?\n  \}),\n  orientation:/);
+        if (!match) throw new Error('welcomeWalkthrough content was not found in content-config.js');
+        const data = Function('"use strict"; return (' + match[1] + ')')();
+        const shots = data.steps.filter((step) => step.screenshot);
+        if (!shots.length) {
+          status.textContent = 'No walkthrough steps currently have a screenshot.';
+          status.className = 'cl-status';
+          list.innerHTML = '';
+          return;
+        }
+        const today = new Date();
+        list.innerHTML = shots.map((step) => {
+          const shot = step.screenshot;
+          const captured = new Date(shot.capturedOn + 'T00:00:00');
+          const ageDays = Math.round((today - captured) / 86400000);
+          const ageLabel = ageDays + (ageDays === 1 ? ' day old' : ' days old');
+          const ageNote = ageDays > 90
+            ? '<strong style="color:#8A1F1F">' + ageLabel + ' &mdash; worth a look</strong>'
+            : ageLabel;
+          return '<div class="cl-file-card">'
+            + '<img src="' + escapeHtml(shot.src) + '" alt="" loading="lazy" style="width:100%;max-width:320px;display:block;border:1px solid var(--line);border-radius:6px;margin-bottom:10px">'
+            + '<div class="cl-file-info">'
+            + '<div class="cl-file-name">"' + escapeHtml(step.id) + '" step</div>'
+            + '<div class="cl-file-path">' + escapeHtml(shot.src) + '</div>'
+            + '<div class="cl-file-desc">Captured ' + escapeHtml(shot.capturedOn) + ' &middot; ' + ageNote + '</div>'
+            + '</div>'
+            + '<a class="small-button secondary-button" href="' + escapeHtml(shot.src) + '" target="_blank" style="display:inline-flex;align-items:center;text-decoration:none;margin-top:8px">View full size</a>'
+            + '</div>';
+        }).join('');
+        status.textContent = shots.length + ' walkthrough screenshot' + (shots.length === 1 ? '' : 's') + ' found. Compare each against the live Learning Journey page (use the "Preview welcome walkthrough" link above) and re-capture if the design has moved.';
+        status.className = 'cl-status is-success';
+      } catch (error) {
+        status.textContent = 'Could not load walkthrough screenshot data: ' + error.message;
+        status.className = 'cl-status is-error';
+      }
+    }
+
     // ===== End Content Library =====
 
     function validAdminTab(tab) {
@@ -8422,6 +8478,7 @@
     bindRewardSettings();
     loadRewardSettings();
     clInit();
+    wtShotsInit();
     window.setTimeout(runSyncCheck, 400);
 
     // Persistent event delegation for Fix → buttons in sync results
