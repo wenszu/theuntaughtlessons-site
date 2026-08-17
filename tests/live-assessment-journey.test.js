@@ -14,14 +14,15 @@ assert.match(member, /Checkpoint ready · No baseline/, 'program completion with
 assert.match(member, /statuses\[1\] = diagnostic\.inProgress \? "current" : phaseStarted \? "warning" : "current"/, 'a skipped diagnostic should remain independently incomplete');
 assert.match(member, /phaseComplete\.forEach\(function \(complete, index\) \{ if \(complete\) statuses\[index \+ 2\] = "complete"; \}\)/, 'completed phases should stay complete when the diagnostic was skipped');
 assert.match(member, /ws-journey-milestone\.is-warning:before\{[^}]*background:#fff/, 'the skipped diagnostic should render as a hollow dot');
-assert.match(member, /<strong>Learning journey<\/strong>/, 'the milestone path should be labeled as separate from Orientation');
+assert.doesNotMatch(member, /<strong>Learning journey<\/strong>/, 'the milestone summary should not repeat the page title, since it now lives inside the Learning Journey header');
 assert.match(member, /data-tooltip="' \+ escapeHtml\(tooltip\)/, 'each milestone should expose a designed hover tooltip');
 assert.match(member, /<ol class="ws-journey-milestone-dots" aria-label="Learning journey milestones">/, 'the milestone sequence should use semantic ordered-list markup');
 assert.match(member, /<li class="ws-journey-milestone is-' \+ status \+ '" tabindex="0" aria-label=/, 'each milestone tooltip should also be available to keyboard and screen-reader users');
-assert.match(member, /\.ws-journey-milestones\{[^}]*border:1px/, 'the learning journey summary should have its own outlined container');
-assert.match(member, /<div class="ws-orientation-head[^>]*><button class="ws-orientation-toggle"/, 'the milestone tooltip targets should be siblings of, not nested inside, the Orientation button');
+assert.match(member, /\.ws-learning-heading\{[^}]*border:1px solid var\(--ws-line\)/, 'the milestone summary should share one outlined header card with the page title, not its own separate box');
+assert.match(member, /Select any activity to preview it\.<\/p><\/div>' \+ assessmentJourneyMilestonesHtml\(assessmentModel\) \+ '<\/header>/, 'the milestone summary should render inside the Learning Journey page header, not nested inside the Orientation card');
+assert.match(member, /function orientationCardHtml\(\) \{/, 'the Orientation card should no longer take or render the milestone summary itself');
 assert.match(member, /data-assessment-fallback/, 'assessment-disabled members should retain the regular continue-learning banner');
 assert.match(member, /qsa\("\[data-assessment-journey\]"\)/, 'the existing assessment visibility control should hide the live assessment journey');
-assert.match(memberHome, /content-config\.js\?v=20260816-walkthrough-content-v2/, 'the live member page should bypass older cached journey code');
+assert.match(memberHome, /content-config\.js\?v=20260817-header-card/, 'the live member page should bypass older cached journey code');
 
 console.log('live assessment journey contracts passed');

@@ -2,7 +2,7 @@
  * Recaptures the four annotated screenshots used inside the welcome walkthrough
  * (member-login/content-config.js -> UTL_CONTENT.welcomeWalkthrough.steps):
  *   - the "diagnostic" step's diagnostic-nudge card
- *   - the "phases" step's Program path / progress-dots row
+ *   - the "phases" step's Learning Journey header / progress-dots row
  *   - the "dailyGoal" step's Today's Mission plan-picker card
  *   - the "levels" step's header Level/MP reward cluster
  *
@@ -65,7 +65,7 @@ function pct(part, whole) {
   const page = await (await browser.newContext({ viewport: { width: 1000, height: 900 }, deviceScaleFactor: 2 })).newPage();
   const results = [];
 
-  // --- "phases" step: Program path heading + orientation head (with progress dots) + phase tabs ---
+  // --- "phases" step: Learning Journey header (with progress dots) ---
   await page.goto(`${BASE_URL}/member-login/index.html`);
   await page.evaluate(() => {
     localStorage.clear();
@@ -76,31 +76,29 @@ function pct(part, whole) {
     localStorage.setItem('utl_orientation_open', 'false'); // collapsed, for a compact shot
   });
   await page.reload();
-  await page.waitForSelector('.ws-learning-path', { state: 'attached' });
+  await page.waitForSelector('.ws-learning-heading', { state: 'attached' });
   await page.waitForTimeout(700);
   await forceShowAssessmentJourneyAndHidePopups(page);
   await page.waitForTimeout(200);
 
   {
-    const pathBox = await (await page.$('.ws-learning-path')).boundingBox();
-    const headBox = await (await page.$('.ws-learning-path-head')).boundingBox();
-    const tabsBox = await (await page.$('.ws-journey-phase-tabs')).boundingBox();
+    const headerEl = await page.$('.ws-learning-heading');
+    const headerBox = await headerEl.boundingBox();
     const dotsBox = await (await page.$('.ws-journey-milestone-dots')).boundingBox();
-    const clip = { x: pathBox.x, y: headBox.y, width: pathBox.width, height: (tabsBox.y + tabsBox.height) - headBox.y };
-    const file = `program-path-${DATE_STAMP}.png`;
-    await page.screenshot({ path: path.join(OUT_DIR, file), clip });
+    const file = `learning-journey-header-${DATE_STAMP}.png`;
+    await headerEl.screenshot({ path: path.join(OUT_DIR, file) });
     results.push({
       step: 'phases',
       file,
       screenshot: {
         src: `../assets/walkthrough/${file}`,
-        alt: 'The Program path section on the Learning Journey page, with the 6-step progress dots highlighted',
+        alt: 'The Learning Journey page header, with the 6-step progress dots highlighted',
         capturedOn: DATE,
         cutout: {
-          top: pct(dotsBox.y - clip.y, clip.height),
-          left: pct(dotsBox.x - clip.x, clip.width),
-          width: pct(dotsBox.width, clip.width),
-          height: pct(dotsBox.height, clip.height)
+          top: pct(dotsBox.y - headerBox.y, headerBox.height),
+          left: pct(dotsBox.x - headerBox.x, headerBox.width),
+          width: pct(dotsBox.width, headerBox.width),
+          height: pct(dotsBox.height, headerBox.height)
         }
       }
     });
