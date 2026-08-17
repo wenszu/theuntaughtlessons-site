@@ -59,7 +59,7 @@ assert.doesNotMatch(source, /kicker:\s*"/, 'individual steps should not hardcode
 // --- Replay link: natural, discoverable, non-intrusive entry point back into the walkthrough ---
 assert.match(source, /data-walkthrough-replay/, 'a replay entry point should exist');
 assert.match(source, /Replay welcome tour/);
-assert.match(source, /Program path<\/h2><button class="ws-walkthrough-replay" type="button" data-walkthrough-replay/, 'the replay link should live next to the Program path heading');
+assert.match(source, /Program path<\/h2>[^<]*<p class="ws-learning-path-sub">[^<]*<\/p><\/div><button class="ws-walkthrough-replay" type="button" data-walkthrough-replay/, 'the replay link should live next to the Program path heading');
 assert.match(source, /replayButton\.addEventListener\("click"/, 'the replay link should reopen the walkthrough from the first step');
 
 // --- First-visit persistence ---
