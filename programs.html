@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en" class="programs-document">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Think, speak and act like an executive™ from The Untaught Lessons teaches structured thinking, concise communication, and confident presence." />
+  <meta name="description" content="Browse The Untaught Lessons' programs: practical lessons about life and work, taught the way school never did." />
   <title>Programs - The Untaught Lessons</title>
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-bluebg-whitedoor-thicker-32.png?v=6">
   <link rel="shortcut icon" type="image/png" href="/assets/favicon-bluebg-whitedoor-thicker-32.png?v=6">
@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=Lato:wght@300;700&family=Roboto+Mono:wght@400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=public-20260814-6">
+  <link rel="stylesheet" href="styles.css?v=public-20260819-9">
   <style>
     .programs-page {
       --program-navy: #003366;
@@ -21,854 +21,196 @@
       --program-charcoal: #4A4A4A;
       --program-steel: #4D7094;
       --program-white: #FFFFFF;
-      background: var(--program-navy);
+      background: var(--program-cream);
     }
 
-    .programs-document,
-    .programs-page {
-      overflow-x: visible;
-    }
-
-    .programs-page,
     .programs-page * {
       box-sizing: border-box;
     }
 
-    .programs-page main {
-      overflow: visible;
-    }
-
-    .program-section {
-      padding: 100px 0;
-    }
-
-    .program-section.navy {
+    .catalog-hero {
+      padding: 100px 24px;
       background: var(--program-navy);
+      text-align: center;
     }
 
-    .program-section.cream {
-      background: var(--program-cream);
+    .catalog-hero-inner {
+      max-width: 680px;
+      margin: 0 auto;
     }
 
-    .program-section.deep-cream {
-      background: var(--program-deep-cream);
+    .catalog-hero-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+      margin: 0 0 20px;
+      color: var(--program-gold);
+      font-family: Lato, Arial, sans-serif;
+      font-size: 13px;
+      font-weight: 700;
     }
 
-    .program-container {
+    .catalog-hero-label::before,
+    .catalog-hero-label::after {
+      content: "";
+      width: 28px;
+      height: 1px;
+      background: var(--program-gold);
+    }
+
+    .catalog-hero h1 {
+      margin: 0;
+      color: var(--program-white);
+      font-family: 'Playfair Display', serif;
+      font-size: 44pt;
+      font-weight: 700;
+      line-height: 1.15;
+    }
+
+    .catalog-hero p {
+      max-width: 560px;
+      margin: 20px auto 0;
+      color: rgba(255, 255, 255, .82);
+      font-family: 'Lato', sans-serif;
+      font-size: 16pt;
+      font-weight: 300;
+      line-height: 1.7;
+    }
+
+    .catalog-section {
+      padding: 90px 24px;
+    }
+
+    .catalog-container {
       width: min(100%, 1120px);
       margin: 0 auto;
-      padding: 0 24px;
     }
 
-    .program-container.narrow {
-      width: min(100%, 768px);
+    .catalog-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 28px;
     }
 
-    .program-section-label {
+    .catalog-card {
       display: flex;
-      align-items: center;
-      gap: 16px;
-      margin: 0 0 44px;
-      color: var(--program-navy);
-      font-family: Lato, Arial, sans-serif;
-      font-size: 15px;
-      font-weight: 700;
-      letter-spacing: 0;
-      line-height: 1.4;
-      text-transform: none;
-    }
-
-    .program-section-label::before {
-      content: "";
-      width: 36px;
-      height: 1px;
-      background: var(--program-gold);
-      flex: 0 0 auto;
-    }
-
-    .program-heading {
-      max-width: 720px;
-      margin: 0;
-      color: var(--program-navy);
-      font-family: 'Playfair Display', serif;
-      font-size: 40pt;
-      font-weight: 700;
-      letter-spacing: 0;
-      line-height: 1.3;
-      text-align: left;
-    }
-
-    .program-body {
-      max-width: 720px;
-      margin: 24px 0 0;
-      color: var(--program-charcoal);
-      font-family: 'Lato', sans-serif;
-      font-size: 17pt;
-      font-weight: 300;
-      line-height: 1.8;
-      text-align: left;
-    }
-
-    .program-cta-button {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 56px;
-      padding: 16px 40px;
-      border: 0;
-      border-radius: 4px;
-      background: var(--program-gold);
-      color: var(--program-navy);
-      font-family: 'Lato', sans-serif;
-      font-size: 15pt;
-      font-weight: 700;
-      line-height: 1;
-      cursor: pointer;
+      flex-direction: column;
+      align-items: flex-start;
+      padding: 40px;
+      border: 1px solid rgba(0, 51, 102, .12);
+      border-radius: 12px;
+      background: #FFFEFB;
+      box-shadow: 0 8px 24px rgba(0, 33, 66, .06);
       text-decoration: none;
-      transition: filter .2s ease;
+      transition: box-shadow .25s ease, transform .25s ease, border-color .25s ease;
     }
 
-    .program-cta-button:hover {
-      filter: brightness(1.08);
+    .catalog-card:hover {
+      border-color: rgba(238, 163, 32, .55);
+      box-shadow: 0 26px 52px rgba(0, 33, 66, .18);
+      transform: translateY(-8px);
     }
 
-    .tsa-mark {
-      font-family: 'Playfair Display', serif;
-      font-style: italic;
-      font-weight: 400;
+    .catalog-card-mark-heading {
+      width: 100%;
+      margin: 0 0 28px;
     }
 
-    .tsa-mark .trademark,
-    .program-trademark {
-      font-family: 'Playfair Display', serif;
-      font-style: normal;
-      font-weight: 400;
-      vertical-align: super;
-      line-height: 0;
-    }
-
-    .tsa-mark .trademark {
-      font-size: .72em;
-    }
-
-    .program-hero {
-      padding: 120px 24px;
-      background: var(--program-navy);
-      text-align: center;
-    }
-
-    .program-hero-inner {
-      max-width: 720px;
+    .catalog-card-mark {
+      display: block;
+      height: 68px;
+      width: auto;
       margin: 0 auto;
     }
 
-    .program-hero h1 {
-      margin: 0;
-      color: var(--program-white);
-      font-family: 'Playfair Display', serif;
-      font-size: 52pt;
-      font-weight: 700;
-      letter-spacing: 0;
-      line-height: 1.1;
-      text-align: center;
-    }
-
-    .program-hero h1 .program-trademark {
-      color: var(--program-white);
-      font-size: 22pt;
-    }
-
-    .program-hero-subtitle {
-      margin: 16px 0 0;
-      color: var(--program-gold);
+    .catalog-card h2 {
+      margin: 0 0 12px;
+      color: var(--program-navy);
       font-family: 'Playfair Display', serif;
       font-size: 22pt;
-      font-style: italic;
-      font-weight: 400;
-      line-height: 1.35;
-      text-align: center;
-    }
-
-    .program-hero-divider {
-      width: 80px;
-      height: 1px;
-      margin: 48px auto 0;
-      background: var(--program-gold);
-    }
-
-    .program-hero-copy {
-      max-width: 640px;
-      margin: 32px auto 0;
-      color: var(--program-white);
-      font-family: 'Lato', sans-serif;
-      font-size: 17pt;
-      font-weight: 300;
-      line-height: 1.8;
-      text-align: center;
-    }
-
-    .program-hero .program-cta-button {
-      margin-top: 40px;
-    }
-
-    .audience-grid,
-    .testimonial-grid {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 32px;
-      margin-top: 40px;
-    }
-
-    .audience-grid.two-col {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      max-width: 900px;
-    }
-
-    .faq-list {
-      display: grid;
-      gap: 32px;
-      margin-top: 40px;
-    }
-
-    .faq-item h3 {
-      margin: 0 0 10px;
-      color: var(--program-navy);
-      font-family: 'Lato', sans-serif;
-      font-size: 18pt;
-      font-weight: 700;
-      line-height: 1.3;
-    }
-
-    .faq-item p {
-      margin: 0;
-      color: var(--program-charcoal);
-      font-family: 'Lato', sans-serif;
-      font-size: 15pt;
-      font-weight: 300;
-      line-height: 1.8;
-    }
-
-    .faq-item p a {
-      color: var(--program-navy);
-      font-weight: 700;
-    }
-
-    .audience-card {
-      padding: 40px;
-      border: 1px solid rgba(0, 51, 102, .12);
-      border-radius: 10px;
-      background: #FFFEFB;
-      box-shadow: 0 8px 24px rgba(0, 33, 66, .06);
-    }
-
-    .audience-card h3 {
-      margin: 0 0 16px;
-      color: var(--program-navy);
-      font-family: 'Lato', sans-serif;
-      font-size: 18pt;
-      font-weight: 700;
-      line-height: 1.3;
-    }
-
-    .audience-card p {
-      margin: 0;
-      color: var(--program-charcoal);
-      font-family: 'Lato', sans-serif;
-      font-size: 15pt;
-      font-weight: 300;
-      line-height: 1.8;
-    }
-
-    .phase-journey {
-      position: relative;
-      display: grid;
-      grid-template-columns: 190px minmax(0, 1fr);
-      gap: 48px;
-      align-items: start;
-      margin-top: 56px;
-    }
-
-    .phase-rail {
-      position: sticky;
-      top: 96px;
-      display: grid;
-      gap: 8px;
-      padding: 4px 0;
-    }
-
-    .phase-rail.is-fixed {
-      position: fixed;
-      z-index: 12;
-      top: 96px;
-      width: 190px;
-    }
-
-    .phase-rail.is-past {
-      position: absolute;
-      z-index: 12;
-      top: auto;
-      bottom: 0;
-      left: 0 !important;
-      width: 190px;
-    }
-
-    .phase-rail::before {
-      content: "";
-      position: absolute;
-      top: 16px;
-      bottom: 16px;
-      left: 16px;
-      width: 1px;
-      background: rgba(0, 51, 102, .2);
-    }
-
-    .phase-rail::after {
-      content: "";
-      position: absolute;
-      z-index: 0;
-      top: 16px;
-      left: 15.5px;
-      width: 2px;
-      height: var(--rail-progress, 0%);
-      border-radius: 2px;
-      background: var(--program-gold);
-      transition: height .45s ease;
-    }
-
-    .phase-rail-link {
-      position: relative;
-      display: grid;
-      grid-template-columns: 34px 1fr;
-      gap: 10px;
-      align-items: center;
-      min-height: 54px;
-      color: var(--program-steel);
-      font-family: 'Lato', sans-serif;
-      font-size: 11pt;
       font-weight: 700;
       line-height: 1.25;
-      text-decoration: none;
-      transition: color .2s ease;
     }
 
-    .phase-rail-link span:first-child {
-      position: relative;
-      z-index: 1;
-      display: grid;
-      place-items: center;
-      width: 32px;
-      height: 32px;
-      border: 1px solid rgba(0, 51, 102, .25);
-      border-radius: 50%;
-      background: var(--program-deep-cream);
-      transition: background .2s ease, border-color .2s ease, color .2s ease;
-    }
-
-    .phase-rail-link.is-active { color: var(--program-navy); }
-    .phase-rail-link.is-active span:first-child {
-      border-color: var(--program-gold);
-      background: var(--program-gold);
-      color: var(--program-navy);
-    }
-
-    .phase-list {
-      grid-column: 2;
-      min-width: 0;
+    .catalog-card p {
       margin: 0;
+      color: var(--program-charcoal);
+      font-family: 'Lato', sans-serif;
+      font-size: 14pt;
+      font-weight: 300;
+      line-height: 1.7;
     }
 
-    .phase-block {
-      padding: 0;
-      border-top: 1px solid rgba(0, 51, 102, .18);
-      transform-origin: center left;
-      transition: opacity .5s ease, transform .5s ease, background .5s ease, box-shadow .5s ease;
-    }
-
-    .phase-summary {
-      display: grid;
-      grid-template-columns: minmax(0, 35%) minmax(0, 65%);
-      gap: 48px;
-      padding: 44px 0;
-      cursor: pointer;
-      list-style: none;
-      transition: opacity .5s ease, transform .5s ease;
-    }
-
-    .phase-summary::-webkit-details-marker { display: none; }
-    .phase-summary::marker { content: ""; }
-
-    .phase-summary-main {
-      align-self: center;
-    }
-
-    .phase-toggle-copy {
+    .catalog-card-link {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      margin-top: 18px;
+      margin-top: 24px;
       color: var(--program-navy);
       font-family: 'Lato', sans-serif;
       font-size: 12pt;
       font-weight: 700;
     }
 
-    .phase-toggle-copy::after {
-      content: "+";
-      display: grid;
-      place-items: center;
-      width: 26px;
-      height: 26px;
-      border: 1px solid rgba(0, 51, 102, .3);
-      border-radius: 50%;
+    .catalog-card:hover .catalog-card-link {
+      text-decoration: underline;
     }
 
-    .phase-block[open] .phase-toggle-copy::after { content: "−"; }
-
-    .phase-journey.has-active .phase-block:not(.is-active-phase) .phase-summary {
-      opacity: .76;
-      transform: scale(.98);
-      transform-origin: center left;
-    }
-
-    .phase-block.is-active-phase {
+    .catalog-card-soon {
       position: relative;
-      z-index: 1;
-      transform: scale(1.025);
+      border-style: dashed;
+      border-color: rgba(0, 51, 102, .16);
+      background: rgba(255, 254, 251, .32);
+      box-shadow: none;
+      cursor: default;
     }
 
-    .phase-block.is-active-phase .phase-summary {
-      opacity: 1;
-    }
-
-    .phase-details {
-      margin-left: calc(35% + 48px);
-      padding: 0 0 48px;
-    }
-
-    .phase-number {
-      display: block;
-      color: var(--program-gold);
-      font-family: 'Playfair Display', serif;
-      font-size: 64pt;
-      font-weight: 700;
-      line-height: 1;
-    }
-
-    .phase-name {
-      margin: 8px 0 0;
-      color: var(--program-navy);
-      font-family: 'Playfair Display', serif;
-      font-size: 24pt;
-      font-weight: 700;
-      line-height: 1.25;
-    }
-
-    .phase-time {
-      margin: 8px 0 0;
-      color: var(--program-charcoal);
-      font-family: 'Lato', sans-serif;
-      font-size: 13pt;
-      font-style: italic;
-      font-weight: 300;
-      line-height: 1.5;
-    }
-
-    .phase-time span {
-      display: block;
-      margin-top: 2px;
-      color: var(--program-steel);
-      font-size: 11pt;
-      font-style: normal;
-      font-weight: 700;
-    }
-
-    .phase-description {
-      margin: 0;
-      color: var(--program-charcoal);
-      font-family: 'Lato', sans-serif;
-      font-size: 17pt;
-      font-style: italic;
-      font-weight: 300;
-      line-height: 1.8;
-    }
-
-    .phase-label,
-    .ai-label {
-      margin: 0 0 12px;
-      color: var(--program-gold);
-      font-family: Lato, Arial, sans-serif;
-      font-size: 10pt;
-      font-weight: 400;
-      letter-spacing: 0;
-      line-height: 1.4;
-      text-transform: none;
-    }
-
-    .video-list {
-      display: grid;
-      gap: 0;
-      margin: 0 0 24px;
-      padding: 0;
-      list-style: none;
-      color: var(--program-charcoal);
-      font-family: 'Lato', sans-serif;
-      font-size: 15pt;
-      font-weight: 300;
-      line-height: 2;
-    }
-
-    .video-list li {
-      position: relative;
-      padding-left: 20px;
-    }
-
-    .video-list li::before {
-      content: "";
-      position: absolute;
-      top: .92em;
-      left: 0;
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: var(--program-gold);
-    }
-
-    .exercise-copy {
-      margin: 0 0 24px;
-      color: var(--program-charcoal);
-      font-family: 'Lato', sans-serif;
-      font-size: 15pt;
-      font-weight: 300;
-      line-height: 1.8;
-    }
-
-    .ai-callout {
-      padding: 20px 24px;
-      border: 1px solid rgba(0, 51, 102, .12);
-      border-radius: 4px;
-      background: var(--program-white);
-    }
-
-    .ai-callout p:last-child {
-      margin: 0;
-      color: var(--program-charcoal);
-      font-family: 'Lato', sans-serif;
-      font-size: 15pt;
-      font-style: italic;
-      font-weight: 300;
-      line-height: 1.7;
-    }
-
-    .program-total-time {
-      max-width: 760px;
-      margin: 56px auto 0;
-      color: var(--program-navy);
-      font-family: 'Playfair Display', serif;
-      font-size: 20pt;
-      font-style: italic;
-      font-weight: 400;
-      line-height: 1.5;
-      text-align: center;
-    }
-
-    .expect-grid {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 32px;
-      max-width: 900px;
-      margin: 0 auto;
-    }
-
-    .expect-stat {
-      padding: 0 32px;
-      text-align: center;
-    }
-
-    .expect-stat strong {
-      display: block;
-      color: var(--program-white);
-      font-family: 'Playfair Display', serif;
-      font-size: 40pt;
-      font-weight: 700;
-      letter-spacing: 0;
-      line-height: 1.15;
-    }
-
-    .expect-stat span {
-      display: block;
-      margin-top: 14px;
-      color: var(--program-gold);
-      font-family: Lato, Arial, sans-serif;
-      font-size: 11pt;
-      font-weight: 400;
-      letter-spacing: 0;
-      line-height: 1.5;
-      text-transform: none;
-    }
-
-    .expect-copy {
-      max-width: 640px;
-      margin: 56px auto 0;
-      color: var(--program-white);
-      font-family: 'Lato', sans-serif;
-      font-size: 17pt;
-      font-weight: 300;
-      line-height: 1.8;
-      text-align: center;
-    }
-
-    .expect-button-wrap {
-      margin-top: 40px;
-      text-align: center;
-    }
-
-    .program-section.navy .program-section-label {
-      color: var(--program-white);
-    }
-
-    .testimonial-grid {
-      margin-top: 48px;
-    }
-
-    .testimonial-card-static {
-      padding: 40px;
-      border: 1px solid rgba(0, 51, 102, .12);
-      border-radius: 10px;
-      background: #FFFEFB;
-      box-shadow: 0 8px 24px rgba(0, 33, 66, .06);
-    }
-
-    .testimonial-card-static blockquote {
-      margin: 0;
-    }
-
-    .testimonial-card-static p {
-      margin: 0;
-      color: var(--program-charcoal);
-      font-family: 'Lato', sans-serif;
-      font-size: 15pt;
-      font-style: italic;
-      font-weight: 300;
-      line-height: 1.8;
-    }
-
-    .testimonial-card-static footer {
-      margin-top: 24px;
-    }
-
-    .testimonial-card-static strong {
-      display: block;
-      color: var(--program-navy);
-      font-family: 'Lato', sans-serif;
-      font-size: 14pt;
-      font-weight: 700;
-      line-height: 1.4;
-    }
-
-    .testimonial-card-static span {
-      display: block;
-      margin-top: 4px;
-      color: var(--program-gold);
-      font-family: 'Lato', sans-serif;
-      font-size: 13pt;
-      font-weight: 300;
-      line-height: 1.4;
-    }
-
-    .testimonial-card-static .testimonial-title {
-      color: var(--program-charcoal);
-      font-style: italic;
-    }
-
-    .testimonial-card-static .testimonial-company {
-      margin-top: 12px;
-      color: #000000;
-      font-size: 15pt;
-      font-weight: 700;
-    }
-
-    .closing-program-cta {
-      padding: 120px 24px;
-      background: var(--program-navy);
-      text-align: center;
-    }
-
-    .closing-program-cta h2 {
-      max-width: 600px;
-      margin: 0 auto;
-      color: var(--program-white);
-      font-family: 'Playfair Display', serif;
-      font-size: 36pt;
-      font-weight: 700;
-      letter-spacing: 0;
-      line-height: 1.4;
-      text-align: center;
-    }
-
-    .closing-program-cta p {
-      margin: 24px 0 0;
-      color: var(--program-gold);
-      font-family: 'Lato', sans-serif;
-      font-size: 17pt;
-      font-weight: 300;
-      line-height: 1.6;
-      text-align: center;
-    }
-
-    .closing-program-cta .program-cta-button {
-      margin-top: 40px;
-    }
-
-    .program-reveal {
-      opacity: 1;
+    .catalog-card-soon:hover {
+      box-shadow: none;
       transform: none;
     }
 
-    .motion-ready .program-reveal {
-      opacity: 0;
-      transform: translateY(12px);
+    .catalog-card-soon-badge {
+      display: inline-flex;
+      align-self: center;
+      align-items: center;
+      margin: 0 0 28px;
+      padding: 5px 12px;
+      border-radius: 999px;
+      background: rgba(238, 163, 32, .16);
+      color: #9B6500;
+      font-family: 'Lato', sans-serif;
+      font-size: 10.5pt;
+      font-weight: 700;
     }
 
-    .motion-ready .program-reveal.is-visible {
-      opacity: 1;
-      transform: translateY(0);
+    .catalog-card-soon h2 {
+      color: var(--program-steel);
     }
 
-    .audience-card.program-reveal,
-    .testimonial-card-static.program-reveal {
-      transition: opacity .4s ease, transform .4s ease;
-    }
-
-    .phase-block.program-reveal {
-      transition: opacity .5s ease, transform .5s ease;
+    .catalog-card-soon p {
+      color: var(--program-steel);
     }
 
     @media (max-width: 768px) {
-      .program-section {
-        padding: 84px 0;
-      }
-
-      .program-hero,
-      .closing-program-cta {
-        padding: 96px 24px;
-      }
-
-      .program-hero h1 {
-        font-size: 40pt;
-      }
-
-      .program-hero h1 .program-trademark {
-        font-size: 17pt;
-      }
-
-      .program-hero-subtitle,
-      .program-total-time {
-        font-size: 19pt;
-      }
-
-      .program-heading {
-        font-size: 32pt;
-      }
-
-      .audience-grid,
-      .audience-grid.two-col,
-      .testimonial-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .phase-journey { grid-template-columns: 1fr; gap: 0; }
-      .phase-rail { display: none; }
-      .phase-list { grid-column: 1; }
-      .phase-summary { grid-template-columns: 1fr; gap: 28px; padding: 38px 0; }
-      .phase-details { margin-left: 0; padding-bottom: 42px; }
-
-      .expect-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 42px 18px;
-      }
-
-      .expect-stat {
-        padding: 0 16px;
-      }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .motion-ready .program-reveal,
-      .program-reveal,
-      .phase-rail-link,
-      .phase-rail-link span:first-child,
-      .phase-block,
-      .phase-summary {
-        opacity: 1 !important;
-        transform: none !important;
-        transition: none !important;
-        animation: none !important;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .program-container {
-        padding: 0 20px;
-      }
-
-      .program-section {
-        padding: 72px 0;
-      }
-
-      .program-hero,
-      .closing-program-cta {
+      .catalog-hero {
         padding: 80px 20px;
       }
 
-      .program-hero h1 {
-        font-size: 31pt;
+      .catalog-hero h1 {
+        font-size: 34pt;
       }
 
-      .program-hero h1 .program-trademark {
-        font-size: 13pt;
-      }
-
-      .program-hero-subtitle {
-        font-size: 17pt;
-      }
-
-      .program-hero-copy,
-      .program-body,
-      .expect-copy {
+      .catalog-hero p {
         font-size: 15pt;
       }
 
-      .program-heading {
-        font-size: 27pt;
+      .catalog-section {
+        padding: 64px 20px;
       }
 
-      .audience-card,
-      .testimonial-card-static {
-        padding: 32px 24px;
-      }
-
-      .phase-number {
-        font-size: 52pt;
-      }
-
-      .phase-name {
-        font-size: 22pt;
-      }
-
-      .phase-description {
-        font-size: 15pt;
-      }
-
-      .expect-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .expect-stat strong {
-        font-size: 32pt;
-      }
-
-      .closing-program-cta h2 {
-        font-size: 28pt;
+      .catalog-card {
+        padding: 30px;
       }
     }
   </style>
@@ -886,7 +228,7 @@
     </button>
 
     <div id="navMenu" class="nav-menu">
-      <a href="#hero">Home</a>
+      <a href="/">Home</a>
       <a href="/about.html">About</a>
       <a class="nav-link-active" href="/programs.html" aria-current="page">Programs</a>
       <a href="/contact.html">Contact</a>
@@ -897,207 +239,30 @@
   </nav>
 
   <main id="content">
-    <section id="hero" class="program-hero" aria-labelledby="hero-title">
-      <div class="program-hero-inner">
-        <h1 id="hero-title">Think, speak and act like an executive™</h1>
-        <p class="program-hero-subtitle">Practical lessons about life and work you wish someone had taught you sooner</p>
-        <div class="program-hero-divider" aria-hidden="true"></div>
-        <p class="program-hero-copy">Also known as Think. Speak. Act.™, this program delivers the same frameworks taught to McKinsey consultants, media-trained executives and global business leaders. It changes how you think, communicate and show up in the room.</p>
-        <button class="program-cta-button" type="button" onclick="openLeadModal()">Get in touch</button>
+    <section class="catalog-hero" aria-labelledby="catalog-hero-title">
+      <div class="catalog-hero-inner">
+        <span class="catalog-hero-label">Programs</span>
+        <h1 id="catalog-hero-title">Practical skills, taught the way school never did.</h1>
+        <p>Browse our programs and find the one built for where you are right now.</p>
       </div>
     </section>
 
-    <section id="audience" class="program-section cream" aria-labelledby="audience-title">
-      <div class="program-container">
-        <div class="program-section-label">Who this is for</div>
-        <h2 id="audience-title" class="program-heading">This program was built for people who are done waiting to be taught.</h2>
+    <section class="catalog-section" aria-label="All programs">
+      <div class="catalog-container">
+        <div class="catalog-grid">
+          <a class="catalog-card" href="/programs/think-speak-act.html">
+            <h2 class="catalog-card-mark-heading"><img class="catalog-card-mark" src="assets/program-logo-tsa.png?v=1" alt="Think, Speak, Act like an Executive"></h2>
+            <p>Structured thinking, concise communication and executive presence, taught through the same frameworks used by McKinsey consultants and global business leaders.</p>
+            <span class="catalog-card-link">Learn more &rarr;</span>
+          </a>
 
-        <div class="audience-grid">
-          <article class="audience-card program-reveal">
-            <h3>Students</h3>
-            <p>Grades are only part of what opens a great opportunity. You also need to explain your thinking clearly and stay steady under pressure. <span class="tsa-mark">Think, speak and act like an executive</span> builds exactly those skills, the ones universities and employers look for but few schools ever teach.</p>
-          </article>
-
-          <article class="audience-card program-reveal">
-            <h3>Professionals</h3>
-            <p>You already have the experience and the ideas. The harder part is getting them across to the people who decide. <span class="tsa-mark">Think, speak and act like an executive</span> sharpens your thinking under pressure and gives you the confidence to be heard, and trusted with more.</p>
-          </article>
-
-          <article class="audience-card program-reveal">
-            <h3>Organizations</h3>
-            <p>Technical skill does not automatically prepare a team for pressure. People still need to think clearly, say the point and lead without hedging. <span class="tsa-mark">Think, speak and act like an executive</span> gives your team a shared language for structured thinking, sharper communication and steadier leadership.</p>
+          <article class="catalog-card catalog-card-soon">
+            <span class="catalog-card-soon-badge">Coming soon</span>
+            <h2>Understand, build and close<br>like a rainmaker</h2>
+            <p>A new program is on the way, built for sales teams who want to understand their buyer, build a case that holds up and close with confidence. More coming soon.</p>
           </article>
         </div>
       </div>
-    </section>
-
-    <section id="how-it-works" class="program-section deep-cream" aria-labelledby="how-title">
-      <div class="program-container">
-        <div class="program-section-label">How it works</div>
-        <h2 id="how-title" class="program-heading">Three phases built around skills you can use the next day.</h2>
-        <p class="program-body">The exercises use practical situations rather than abstract drills. You organize messy information, prepare a clear message and practice responding when the pressure rises.</p>
-
-        <div class="phase-journey">
-          <nav class="phase-rail" aria-label="Program phases">
-            <a class="phase-rail-link is-active" href="#phase-think" data-phase-link="phase-think"><span>01</span><span>Think clearly</span></a>
-            <a class="phase-rail-link" href="#phase-speak" data-phase-link="phase-speak"><span>02</span><span>Speak concisely</span></a>
-            <a class="phase-rail-link" href="#phase-act" data-phase-link="phase-act"><span>03</span><span>Act confidently</span></a>
-          </nav>
-
-          <div class="phase-list">
-            <details class="phase-block program-reveal" id="phase-think" data-phase="phase-think" open>
-              <summary class="phase-summary">
-                <div class="phase-left">
-                  <span class="phase-number">01</span>
-                  <h3 class="phase-name">Think clearly</h3>
-                  <p class="phase-time">About 1 hr 45 min total<span>25 min video + 1 hr 20 min exercises</span></p>
-                </div>
-                <div class="phase-summary-main">
-                  <p class="phase-description">Most people were never taught how to organize their thoughts before they open their mouth. Phase 1 gives you the frameworks to fix that.</p>
-                  <span class="phase-toggle-copy">View curriculum</span>
-                </div>
-              </summary>
-              <div class="phase-details">
-                <p class="phase-label">Videos</p>
-                <ul class="video-list"><li>KonMari for the cluttered mind</li><li>Rule of three</li><li>Bolded summary phrases (BSP)</li></ul>
-                <p class="phase-label">Exercises</p>
-                <p class="exercise-copy">Six hands-on exercises. You sort a messy update, build structure against a clock and explain a complicated idea to someone with little time.</p>
-                <div class="ai-callout"><p class="ai-label">AI integration</p><p>In this phase you will use AI as a thinking partner. You will stress-test your logic, identify gaps in your reasoning, and compress your ideas before you communicate them.</p></div>
-              </div>
-            </details>
-
-            <details class="phase-block program-reveal" id="phase-speak" data-phase="phase-speak">
-              <summary class="phase-summary">
-                <div class="phase-left">
-                  <span class="phase-number">02</span>
-                  <h3 class="phase-name">Speak concisely</h3>
-                  <p class="phase-time">About 1 hr 55 min total<span>35 min video + 1 hr 20 min exercises</span></p>
-                </div>
-                <div class="phase-summary-main">
-                  <p class="phase-description">Clarity in your head means nothing if you cannot land it with others. Phase 2 teaches you how to structure, sequence and deliver your thinking so it moves people.</p>
-                  <span class="phase-toggle-copy">View curriculum</span>
-                </div>
-              </summary>
-              <div class="phase-details">
-                <p class="phase-label">Videos</p>
-                <ul class="video-list"><li>Wait, what's the problem again?</li><li>Divide and conquer</li><li>The executive storyline</li><li>The art of persuasion</li></ul>
-                <p class="phase-label">Exercises</p>
-                <p class="exercise-copy">Six exercises. You apply the Pyramid Principle, build a persuasive narrative from a blank page and deliver it when a vague answer will not work.</p>
-                <div class="ai-callout"><p class="ai-label">AI integration</p><p>In this phase you will use AI to sharpen and compress your writing, then test the wording before you send it.</p></div>
-              </div>
-            </details>
-
-            <details class="phase-block program-reveal" id="phase-act" data-phase="phase-act">
-              <summary class="phase-summary">
-                <div class="phase-left">
-                  <span class="phase-number">03</span>
-                  <h3 class="phase-name">Act confidently</h3>
-                  <p class="phase-time">About 2 hr 20 min total<span>1 hr video + 1 hr 20 min exercises</span></p>
-                </div>
-                <div class="phase-summary-main">
-                  <p class="phase-description">Executive presence is a set of behaviors you can learn. Phase 3 teaches you how to read a room, hold your ground and keep your voice steady.</p>
-                  <span class="phase-toggle-copy">View curriculum</span>
-                </div>
-              </summary>
-              <div class="phase-details">
-                <p class="phase-label">Videos</p>
-                <ul class="video-list"><li>How to read people</li><li>Let's switch hats</li><li>Speak like Obama</li><li>I have bad news...</li><li>The art of saying no</li></ul>
-                <p class="phase-label">Exercises</p>
-                <p class="exercise-copy">Four exercises. You argue the other side of a conflict, practice body language and silence, then deliver difficult news clearly.</p>
-                <div class="ai-callout"><p class="ai-label">AI integration</p><p>In this phase you will use AI to rehearse difficult conversations and practice how to read the room, respond and adjust before doing it live.</p></div>
-              </div>
-            </details>
-          </div>
-        </div>
-
-        <p class="program-total-time">Total program time: about 7 hours, including roughly 2.5 hours of video and 4.5 hours of exercises. Actual time varies by person, typically landing between 6 and 9 hours.</p>
-      </div>
-    </section>
-
-    <section id="what-to-expect" class="program-section navy" aria-labelledby="expect-title">
-      <div class="program-container">
-        <div class="program-section-label" id="expect-title">What to expect</div>
-        <div class="expect-grid">
-          <article class="expect-stat">
-            <strong>Self-paced</strong>
-            <span>Learn on your own schedule</span>
-          </article>
-          <article class="expect-stat">
-            <strong>3</strong>
-            <span>Progressive phases</span>
-          </article>
-          <article class="expect-stat">
-            <strong>7h</strong>
-            <span>Typically 6 to 9 hours total</span>
-          </article>
-          <article class="expect-stat">
-            <strong>Personal</strong>
-            <span>Feedback on your work</span>
-          </article>
-        </div>
-        <p class="expect-copy">Enrollment is by application. We curate each cohort to ensure the learning experience is maximized for everyone in it. Finish the program and you receive a certificate of completion, along with a short report on your growth across all three phases. The one requirement to start is a genuine motivation to grow.</p>
-        <div class="expect-button-wrap">
-          <button class="program-cta-button" type="button" onclick="openLeadModal()">Get in touch</button>
-        </div>
-      </div>
-    </section>
-
-    <section id="how-to-join" class="program-section cream" aria-labelledby="join-title">
-      <div class="program-container">
-        <div class="program-section-label">For organizations</div>
-        <h2 id="join-title" class="program-heading">Two ways to bring this to your team.</h2>
-        <p class="program-body">Students and individual professionals join the self-paced program directly. Organizations have a choice in how their team experiences it.</p>
-        <div class="audience-grid two-col">
-          <article class="audience-card program-reveal">
-            <h3>Cohort-based learning</h3>
-            <p>A facilitated three-week experience for teams learning together. Participants share a dedicated group chat, stay engaged between lessons and join one live check-in per phase to connect the material to real work.</p>
-          </article>
-          <article class="audience-card program-reveal">
-            <h3>Self-led program</h3>
-            <p>Best for scaling across the organization once a pilot has proven it out. Each person moves through the same videos, exercises and feedback at their own pace, with no facilitation required.</p>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <section id="faq" class="program-section deep-cream" aria-labelledby="faq-title">
-      <div class="program-container narrow">
-        <div class="program-section-label">Questions</div>
-        <h2 id="faq-title" class="program-heading">A few things people ask before joining.</h2>
-        <div class="faq-list">
-          <div class="faq-item">
-            <h3>Who designed this program?</h3>
-            <p>Wen-Szu Lin, our founder, spent 12 years as a Senior Director at Uber leading teams across Asia, and built this program from the material in his book, Deliver. Read more about his story on the <a href="/about.html">About page</a>.</p>
-          </div>
-          <div class="faq-item">
-            <h3>Does this program teach AI?</h3>
-            <p>Yes. AI is treated as a tool to sharpen thinking, not a shortcut around it. In select exercises you work through the problem on your own first, then use AI to compare approaches, pressure test your thinking, or go further. A few exercises are built specifically around learning to use AI well.</p>
-          </div>
-          <div class="faq-item">
-            <h3>Is there a certificate or credential at the end?</h3>
-            <p>Yes. Once you complete the program, you receive a certificate of completion along with a short report on your growth across Think clearly, Speak concisely, and Act confidently.</p>
-          </div>
-          <div class="faq-item">
-            <h3>What if someone misses a live cohort session?</h3>
-            <p>Live sessions are recorded and shared with the cohort, so missing one does not mean missing the content. You are still encouraged to bring questions to the group chat so you stay connected to the discussion.</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section id="testimonials" class="program-section cream" aria-labelledby="testimonials-title">
-      <div class="program-container">
-        <div class="program-section-label">What people say</div>
-        <h2 id="testimonials-title" class="program-heading">Hear it from the people who went through it.</h2>
-
-        <div class="testimonial-grid" id="programTestimonials"></div>
-      </div>
-    </section>
-
-    <section id="cta" class="closing-program-cta" aria-labelledby="cta-title">
-      <h2 id="cta-title">Ready to close the gap?</h2>
-      <p>Join thousands of professionals, students, and teams who have.</p>
-      <button class="program-cta-button" type="button" onclick="openLeadModal()">Get in touch</button>
     </section>
   </main>
 
@@ -1108,7 +273,7 @@
       </div>
 
       <div class="footer-links" aria-label="Footer navigation">
-        <a href="#hero">Home</a>
+        <a href="/">Home</a>
         <a href="/about.html">About</a>
         <a href="/programs.html">Programs</a>
         <a href="/contact.html">Contact</a>
@@ -1154,7 +319,6 @@
 
   <script>
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzJE--FL2kB_XDNZRnszCtlyLRPvaLAHGuF5TAOdXJk40atbvf5Y6ELuSK2B7CSLaMN/exec';
-    const TESTIMONIALS_URL = 'data/testimonials.json';
     const navToggle = document.querySelector('.nav-toggle');
     const navMenu = document.getElementById('navMenu');
     const leadModal = document.getElementById('leadModal');
@@ -1240,121 +404,6 @@
     document.addEventListener('keydown', (event) => {
       if (event.key === 'Escape' && leadModal.classList.contains('is-open')) closeLeadModal();
     });
-
-    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    document.documentElement.classList.add('motion-ready');
-    const revealObserver = new IntersectionObserver((entries, observer) => {
-      entries.forEach((entry) => {
-        if (!entry.isIntersecting) return;
-        entry.target.classList.add('is-visible');
-        observer.unobserve(entry.target);
-      });
-    }, { threshold: 0.12, rootMargin: '0px 0px -10% 0px' });
-
-    function escapeText(value) {
-      return String(value)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
-    }
-
-    function programTestimonialCard(testimonial) {
-      return `
-        <article class="testimonial-card-static program-reveal">
-          <blockquote>
-            <p>"${escapeText(testimonial.quote)}"</p>
-            <footer>
-              <strong>${escapeText(testimonial.name)}</strong>
-              <span class="testimonial-title">${escapeText(testimonial.title)}</span>
-              <span class="testimonial-company">${escapeText(testimonial.company)}</span>
-            </footer>
-          </blockquote>
-        </article>
-      `;
-    }
-
-    function observeProgramTestimonials() {
-      document.querySelectorAll('.testimonial-card-static.program-reveal').forEach((card, index) => {
-        card.style.transitionDelay = `${Math.min(index * 80, 240)}ms`;
-        revealObserver.observe(card);
-      });
-    }
-
-    async function loadProgramTestimonials() {
-      const grid = document.getElementById('programTestimonials');
-      if (!grid) return;
-      try {
-        const response = await fetch(TESTIMONIALS_URL);
-        if (!response.ok) throw new Error('Unable to load testimonials.');
-        const testimonials = await response.json();
-        grid.innerHTML = testimonials.slice(0, 6).map(programTestimonialCard).join('');
-        observeProgramTestimonials();
-      } catch (error) {
-        console.warn('Program testimonials could not be loaded.', error);
-      }
-    }
-
-    document.querySelectorAll('.audience-card.program-reveal').forEach((card, index) => {
-      card.style.transitionDelay = `${Math.min(index * 80, 240)}ms`;
-      revealObserver.observe(card);
-    });
-
-    const phaseBlocks = [...document.querySelectorAll('.phase-block.program-reveal')];
-    phaseBlocks.forEach((phase, index) => {
-      phase.style.transitionDelay = `${Math.min(index * 80, 160)}ms`;
-      revealObserver.observe(phase);
-      const copy = phase.querySelector('.phase-toggle-copy');
-      const updateCopy = () => { if (copy) copy.textContent = phase.open ? 'Hide curriculum' : 'View curriculum'; };
-      phase.addEventListener('toggle', updateCopy);
-      updateCopy();
-    });
-
-    const phaseLinks = [...document.querySelectorAll('[data-phase-link]')],phaseJourney=document.querySelector('.phase-journey'),phaseRail=document.querySelector('.phase-rail');
-    const setActivePhase = id => {
-      phaseLinks.forEach(link => link.classList.toggle('is-active', link.dataset.phaseLink === id));
-      phaseBlocks.forEach(phase => phase.classList.toggle('is-active-phase', phase.id === id));
-      phaseJourney?.classList.add('has-active');
-      const activeIndex=phaseLinks.findIndex(link=>link.dataset.phaseLink===id);
-      document.querySelector('.phase-rail')?.style.setProperty('--rail-progress',['0%','42%','84%'][activeIndex]||'0%');
-    };
-    let phaseFrame=0;
-    const updateActivePhase=()=>{
-      phaseFrame=0;
-      if(!phaseBlocks.length)return;
-      if(phaseJourney&&phaseRail){
-        if(window.innerWidth<=768){
-          phaseRail.classList.remove('is-fixed','is-past');
-          phaseRail.style.removeProperty('left');
-        }else{
-          const journeyRect=phaseJourney.getBoundingClientRect(),railHeight=phaseRail.offsetHeight,railTop=96;
-          const fixed=journeyRect.top<=railTop&&journeyRect.bottom>railTop+railHeight;
-          const past=journeyRect.bottom<=railTop+railHeight;
-          phaseRail.classList.toggle('is-fixed',fixed);
-          phaseRail.classList.toggle('is-past',past);
-          if(fixed)phaseRail.style.left=`${journeyRect.left}px`;
-          else phaseRail.style.removeProperty('left');
-        }
-      }
-      const focusLine=window.innerHeight*.42;
-      const closest=phaseBlocks.map(phase=>{const summary=phase.querySelector('.phase-summary'),rect=summary.getBoundingClientRect();return{phase,distance:Math.abs(rect.top+rect.height/2-focusLine)}}).sort((a,b)=>a.distance-b.distance)[0];
-      if(closest)setActivePhase(closest.phase.id);
-    };
-    const requestActivePhase=()=>{if(!phaseFrame)phaseFrame=requestAnimationFrame(updateActivePhase)};
-    if (!reduceMotion && phaseBlocks.length) {
-      addEventListener('scroll',requestActivePhase,{passive:true});
-      addEventListener('resize',requestActivePhase);
-      phaseBlocks.forEach(phase=>phase.addEventListener('toggle',requestActivePhase));
-      updateActivePhase();
-    } else if(phaseBlocks.length) setActivePhase(phaseBlocks[0].id);
-    phaseLinks.forEach(link => link.addEventListener('click', () => {
-      const target = document.getElementById(link.dataset.phaseLink);
-      if (target) target.open = true;
-      setActivePhase(link.dataset.phaseLink);
-    }));
-
-    loadProgramTestimonials();
   </script>
   <script type="module" src="assets/public-site-settings.js?v=1"></script>
   <script type="module" src="assets/feedback-widget.js?v=6"></script>

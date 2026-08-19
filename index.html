@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=Lato:wght@300;700&family=Roboto+Mono:wght@400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=public-20260814-6">
+  <link rel="stylesheet" href="styles.css?v=public-20260819-9">
 </head>
 <body class="home-page">
   <nav id="navigation" class="site-nav" aria-label="Primary navigation">
@@ -52,8 +52,20 @@
       </div>
     </section>
 
+    <section id="program-highlight" class="program-highlight-section" aria-label="Featured program">
+      <div class="home-container wide">
+        <div class="section-label">
+          <span class="section-label-text">Featured program</span>
+        </div>
+        <div class="program-highlight-spotlight">
+          <span class="program-highlight-glow" aria-hidden="true"></span>
+          <img class="program-highlight-logo" src="assets/program-logo-tsa-white.png?v=1" alt="Think, Speak, Act like an Executive">
+        </div>
+      </div>
+    </section>
+
     <section id="questions" class="questions-section" aria-labelledby="questions-title">
-      <div class="home-container">
+      <div class="home-container wide">
         <div class="section-label" id="questions-title">
           <span class="section-label-text">Sound familiar?</span>
         </div>
@@ -101,6 +113,10 @@
             <p class="pillar-detail">Develop the body language and composure strong leaders use. Read the room, manage your energy, keep your voice steady and hold your ground when the pressure rises.</p>
           </article>
         </div>
+        <div class="pillars-cta-row">
+          <a class="pillars-cta-primary" href="/programs/think-speak-act.html">Explore this program &rarr;</a>
+          <a class="pillars-cta-secondary" href="/programs.html">View all programs</a>
+        </div>
       </div>
     </section>
 
@@ -147,8 +163,12 @@
         <h2 class="section-headline" id="testimonials-title">In their own words</h2>
       </div>
 
-      <div class="testimonial-browser" aria-label="Testimonials">
-        <div class="testimonial-track" id="testimonialTrack"></div>
+      <div class="testimonial-browser-wrap">
+        <button class="testimonial-nav testimonial-nav-prev" type="button" aria-label="Previous testimonials">&larr;</button>
+        <div class="testimonial-browser" aria-label="Testimonials">
+          <div class="testimonial-track" id="testimonialTrack"></div>
+        </div>
+        <button class="testimonial-nav testimonial-nav-next" type="button" aria-label="Next testimonials">&rarr;</button>
       </div>
     </section>
 
@@ -214,7 +234,7 @@
 
   <script>
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzJE--FL2kB_XDNZRnszCtlyLRPvaLAHGuF5TAOdXJk40atbvf5Y6ELuSK2B7CSLaMN/exec';
-    const TESTIMONIALS_URL = 'data/testimonials.json';
+    const TESTIMONIALS_URL = 'data/testimonials.json?v=20260819-2';
     const navToggle = document.querySelector('.nav-toggle');
     const navMenu = document.getElementById('navMenu');
     const leadModal = document.getElementById('leadModal');
@@ -257,8 +277,75 @@
 
     function renderTestimonials(items) {
       const track = document.getElementById('testimonialTrack');
-      if (!track) return;
-      track.innerHTML = items.map(testimonialCard).join('');
+      if (!track || !items.length) return;
+      const cardsHtml = items.map(testimonialCard).join('');
+      track.innerHTML = cardsHtml + cardsHtml;
+      initTestimonialAutoScroll();
+    }
+
+    function initTestimonialAutoScroll() {
+      const browser = document.querySelector('.testimonial-browser');
+      const track = document.getElementById('testimonialTrack');
+      const prevBtn = document.querySelector('.testimonial-nav-prev');
+      const nextBtn = document.querySelector('.testimonial-nav-next');
+      if (!browser || !track) return;
+
+      let halfWidth = track.scrollWidth / 2;
+      window.addEventListener('resize', () => { halfWidth = track.scrollWidth / 2; });
+
+      let position = browser.scrollLeft;
+      function normalize() {
+        if (halfWidth <= 0) return;
+        while (position < 0) position += halfWidth;
+        while (position >= halfWidth) position -= halfWidth;
+      }
+
+      let paused = false;
+      let resumeTimer = null;
+      const pause = () => { paused = true; };
+      const resumeSoon = () => {
+        clearTimeout(resumeTimer);
+        resumeTimer = setTimeout(() => { paused = false; }, 2600);
+      };
+      browser.addEventListener('pointerenter', pause);
+      browser.addEventListener('pointerleave', resumeSoon);
+      browser.addEventListener('pointerdown', pause);
+      browser.addEventListener('pointerup', resumeSoon);
+      browser.addEventListener('touchstart', pause, { passive: true });
+      browser.addEventListener('touchend', resumeSoon, { passive: true });
+      browser.addEventListener('focusin', pause);
+      browser.addEventListener('focusout', resumeSoon);
+
+      function cardStep() {
+        const firstCard = track.querySelector('.testimonial-card');
+        if (!firstCard) return 444;
+        const gap = parseFloat(getComputedStyle(track).columnGap || '24');
+        return firstCard.getBoundingClientRect().width + gap;
+      }
+
+      function nudge(direction) {
+        pause();
+        position += direction * cardStep();
+        normalize();
+        browser.scrollLeft = position;
+        resumeSoon();
+      }
+
+      if (prevBtn) prevBtn.addEventListener('click', () => nudge(-1));
+      if (nextBtn) nextBtn.addEventListener('click', () => nudge(1));
+
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+      const pxPerFrame = 1;
+      function step() {
+        if (!paused && halfWidth > 0) {
+          position += pxPerFrame;
+          if (position >= halfWidth) position -= halfWidth;
+          browser.scrollLeft = position;
+        }
+        requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
     }
 
     async function loadTestimonials() {
