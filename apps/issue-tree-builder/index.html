@@ -2454,13 +2454,13 @@
       add(missingArgs.length ? "fail" : "pass", missingArgs.length ? `Missing argument(s): ${missingArgs.join(", ")}` : "All 3 arguments provided", missingArgs.length ? 0 : 10, 10, "Your issue tree needs 3 distinct buckets. Each should answer your central question.");
 
       const overlaps = [[0, 1], [0, 2], [1, 2]].filter(([a, b]) => filled(args[a].text) && filled(args[b].text) && hasSharedPhrase(args[a].text, args[b].text));
-      add(missingArgs.length || overlaps.length ? "fail" : "pass", missingArgs.length ? "Add all arguments before checking overlap" : overlaps.length ? "Arguments may overlap" : "Arguments appear distinct", missingArgs.length || overlaps.length ? 0 : 15, 15, "Two of your arguments seem to cover similar ground. MECE means each bucket should be distinct — if they overlap, merge or split them.");
+      add(missingArgs.length || overlaps.length ? "fail" : "pass", missingArgs.length ? "Add all arguments before checking overlap" : overlaps.length ? "Arguments may overlap" : "Arguments appear distinct", missingArgs.length || overlaps.length ? 0 : 15, 15, "Two of your arguments seem to address the same point. MECE means each bucket should be distinct. If they overlap, merge or split them.");
 
       const filledDetails = details.filter((detail) => filled(detail)).length;
       if (filledDetails >= 9) add("pass", "Full detail coverage (9 of 9)", 15, 15);
       else if (filledDetails >= 7) add("partial", "Strong detail coverage", 11, 15, "Aim for 3 specific details under each argument so every branch is defensible.");
-      else if (filledDetails >= 5) add("partial", "Partial detail coverage", 6, 15, "Each argument needs specific evidence — vague buckets without detail are hard to defend.");
-      else add("fail", "Too many details missing", 0, 15, "Each argument needs specific evidence — vague buckets without detail are hard to defend.");
+      else if (filledDetails >= 5) add("partial", "Partial detail coverage", 6, 15, "Each argument needs specific evidence. Vague buckets without detail are hard to defend.");
+      else add("fail", "Too many details missing", 0, 15, "Each argument needs specific evidence. Vague buckets without detail are hard to defend.");
 
       const longArgs = args.map((arg, i) => wordCount(arg.text) > 8 ? `Argument ${i + 1} is ${wordCount(arg.text)} words` : "").filter(Boolean);
       const generic = ["things", "issues", "problems", "factors", "aspects", "various", "many", "several", "some", "etc"];
@@ -2484,7 +2484,7 @@
 
       const question = state.problemStatement.trim();
       const isQuestion = question.endsWith("?") || /^(why|what|how|when|which)\b/i.test(question);
-      add(isQuestion ? "pass" : "fail", isQuestion ? "Problem is framed as a question" : "Problem statement is not a question", isQuestion ? 10 : 0, 10, "Frame your problem as a question — 'Why is X happening?' works much better than 'X is declining.'");
+      add(isQuestion ? "pass" : "fail", isQuestion ? "Problem is framed as a question" : "Problem statement is not a question", isQuestion ? 10 : 0, 10, "Frame your problem as a question. 'Why is X happening?' works much better than 'X is declining.'");
 
       const hypothesisWords = wordCount(state.hypothesis);
       const hypothesisRelevant = sourceTermCount(state.hypothesis) > 0;
@@ -2496,7 +2496,7 @@
       const anchorMatches = significantWords(anchorText).filter((word) => problemWordsSet.has(word)).length;
       const sourceMatches = sourceTermCount(anchorText);
       const anchorStatus = anchorMatches >= 3 || sourceMatches >= 7 ? "pass" : anchorMatches >= 1 || sourceMatches >= 3 ? "partial" : "fail";
-      add(anchorStatus, anchorStatus === "pass" ? "Arguments are anchored to your question" : anchorStatus === "partial" ? "Arguments partly connect to your question" : "Arguments may not address your question", anchorStatus === "pass" ? 10 : anchorStatus === "partial" ? 5 : 0, 10, "Your arguments should directly diagnose your problem. Re-read your question and check — does each argument explain a reason why that specific problem exists?");
+      add(anchorStatus, anchorStatus === "pass" ? "Arguments are anchored to your question" : anchorStatus === "partial" ? "Arguments partly connect to your question" : "Arguments may not address your question", anchorStatus === "pass" ? 10 : anchorStatus === "partial" ? 5 : 0, 10, "Your arguments should directly diagnose your problem. Re-read your question and check whether each argument explains a reason why that specific problem exists.");
 
       return results;
     }
@@ -2506,7 +2506,7 @@
       if (score >= 75) return "Solid foundation. A few refinements and this is ready to share with Aiko.";
       if (score >= 60) return "Getting there. Work through the flagged areas. Add specific detail and check that every branch answers the main question.";
       if (score >= 40) return "The structure is there, but the thinking needs more depth. Go back to the arguments and ask 'why?' one more time.";
-      return "Start with the basics — make sure every field is filled before checking. The tree needs all its branches.";
+      return "Start with the basics. Make sure every field is filled before checking. The tree needs all its branches.";
     }
 
     function renderFeedback() {
