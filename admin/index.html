@@ -858,6 +858,79 @@
     .ca-funnel-label { font-family: Lato, Arial, sans-serif; font-size: 12px; font-weight: 700; color: var(--navy); }
     .ca-funnel-count { text-align: right; font-family: Lato, Arial, sans-serif; font-size: 12px; color: var(--charcoal); }
 
+    .ca-print-report { display: none; }
+
+    @media print {
+      @page { margin: 14mm 12mm; }
+
+      #adminGate, .admin-app { display: none !important; }
+
+      #caPrintReport, #caPrintReport * {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      #caPrintReport {
+        display: block;
+        font-family: Lato, Arial, sans-serif;
+        color: #4A4A4A;
+        font-size: 12px;
+      }
+
+      #caPrintReport .ca-print-header {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        margin: -14mm -12mm 0;
+        padding: 12mm 12mm 16px;
+        background: #003366;
+        background-image: linear-gradient(135deg, #003366 0%, #002548 100%);
+        color: #fff;
+      }
+      #caPrintReport .ca-print-header img { height: 26px; flex: 0 0 auto; }
+      #caPrintReport .ca-print-header-text { flex: 1 1 auto; min-width: 0; }
+      #caPrintReport .ca-print-header-text span { display: block; color: #EEA320; font-size: 10px; font-weight: 700; letter-spacing: 0; }
+      #caPrintReport .ca-print-header-text h1 { margin: 3px 0 0; color: #fff; font-family: 'Playfair Display', serif; font-size: 25px; line-height: 1.15; }
+      #caPrintReport .ca-print-header-meta { flex: 0 0 auto; text-align: right; font-size: 9px; line-height: 1.5; color: rgba(255,255,255,.72); border-left: 1px solid rgba(255,255,255,.25); padding-left: 16px; }
+
+      #caPrintReport .ca-print-program {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        margin: 0 -12mm 20px;
+        padding: 10px 12mm;
+        background: #F3EDE2;
+        border-bottom: 1px solid #d4ccbf;
+      }
+      #caPrintReport .ca-print-program span { font-size: 9px; font-weight: 700; letter-spacing: 0; color: #4A4A4A; }
+      #caPrintReport .ca-print-program img { height: 30px; }
+
+      #caPrintReport .ca-print-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 6px; page-break-inside: avoid; break-inside: avoid; }
+      #caPrintReport .ca-print-stats div { border: 1px solid #d4ccbf; border-top: 3px solid #EEA320; border-radius: 6px; padding: 10px 12px; background: #fff; }
+      #caPrintReport .ca-print-stats span { display: block; font-size: 9px; color: #777; }
+      #caPrintReport .ca-print-stats strong { display: block; margin-top: 4px; font-family: 'Playfair Display', serif; font-size: 21px; color: #003366; line-height: 1; }
+      #caPrintReport .ca-print-stats small { display: block; margin-top: 2px; font-size: 9px; color: #777; }
+
+      #caPrintReport section.ca-print-block { margin-top: 24px; page-break-inside: avoid; break-inside: avoid; }
+      #caPrintReport .ca-print-kicker { color: #EEA320; font-size: 9px; font-weight: 700; letter-spacing: 0; }
+      #caPrintReport h2 { margin: 2px 0 10px; padding-bottom: 8px; color: #003366; font-family: 'Playfair Display', serif; font-size: 16px; border-bottom: 2px solid #EEA320; }
+
+      #caPrintReport table { width: 100%; border-collapse: collapse; margin-bottom: 4px; font-size: 10.5px; }
+      #caPrintReport th, #caPrintReport td { border-bottom: 1px solid #d4ccbf; padding: 6px 9px; text-align: left; }
+      #caPrintReport th { background: #003366; color: #fff; font-size: 9px; font-weight: 700; letter-spacing: 0; }
+      #caPrintReport tbody tr:nth-child(even) { background: #F3EDE2; }
+      #caPrintReport tr { page-break-inside: avoid; break-inside: avoid; }
+
+      #caPrintReport .ca-print-bar-cell { width: 30%; }
+      #caPrintReport .ca-print-bar-track { height: 6px; border-radius: 99px; background: #e9e4da; overflow: hidden; }
+      #caPrintReport .ca-print-bar-fill { height: 100%; background: #EEA320; }
+
+      #caPrintReport .ca-print-footer { margin-top: 22px; padding-top: 10px; border-top: 1px solid #EEA320; page-break-inside: avoid; break-inside: avoid; }
+      #caPrintReport .ca-print-footer p { margin: 0 0 4px; font-size: 9px; color: #888; }
+      #caPrintReport .ca-print-footer p:last-child { margin: 0; font-weight: 700; color: #003366; }
+    }
+
     .sp-sort-btn {
       background: none;
       border: none;
@@ -2761,6 +2834,7 @@
           <div class="student-progress-actions">
             <button class="small-button secondary-button" id="caDetailBack">← Back to all cohorts</button>
             <button class="small-button secondary-button" id="caExportCsv">Export cohort CSV</button>
+            <button class="small-button secondary-button" id="caExportPdf">Export cohort PDF</button>
           </div>
           <div id="caDetailContent"></div>
         </div>
@@ -3451,7 +3525,7 @@
           <div class="qb-health-head">
             <div><p>Fewer than 30 responses is collecting data; 30–49 is an early signal; automated review flags begin at 50 responses.</p></div>
             <div class="qb-health-actions">
-              <select id="qbAssessment" aria-label="Assessment results to analyse"><option value="all">Diagnostic + checkpoint</option><option value="diagnostic">Diagnostic only</option><option value="checkpoint">Checkpoint only</option></select>
+              <select id="qbAssessment" aria-label="Assessment results to analyze"><option value="all">Diagnostic + checkpoint</option><option value="diagnostic">Diagnostic only</option><option value="checkpoint">Checkpoint only</option></select>
               <button class="small-button secondary-button" type="button" id="qbRefreshHealth">Refresh</button>
               <button class="small-button secondary-button" type="button" id="qbDownloadHealth">Download health CSV</button>
             </div>
@@ -3682,7 +3756,7 @@
       ['embed-phase1', 'utl_embed_p1_first_day', 'Before your first day'],
       ['embed-phase1', 'utl_embed_p1_ai_grocery', 'Try the same task with AI'],
       ['embed-phase1', 'utl_embed_p1_message_desk', 'A message just landed on your desk'],
-      ['embed-phase1', 'utl_embed_p1_hugh_favour', 'Hugh needs a favour'],
+      ['embed-phase1', 'utl_embed_p1_hugh_favour', 'Hugh needs a favor'],
       ['embed-phase1', 'utl_embed_p1_ai_memo', 'Try the same memo with AI'],
       ['embed-phase1', 'utl_embed_p1_olympic_brainstorm', 'Aiko needs the Olympic brainstorm session sorted'],
       ['embed-phase2', 'utl_embed_p2_recap_storyline', 'Recap and storyline'],
@@ -3728,7 +3802,7 @@
         { kind: 'app', key: 'utl_app_p1_2', title: 'Grocery list with AI', visible: true },
         { kind: 'context', key: 'utl_embed_p1_message_desk', label: 'A message just landed on your desk', visible: true, type: 'video', url: 'https://drive.google.com/file/d/1JpPDKz5RTyWFIJxUkeKSB5etP4W57Dax/view?usp=vids_web' },
         { kind: 'app', key: 'utl_app_p1_3', title: "Manager's messy notes", visible: true },
-        { kind: 'context', key: 'utl_embed_p1_hugh_favour', label: 'Hugh needs a favour', visible: true, type: 'video', url: 'https://drive.google.com/file/d/1EZe8wYzQvic6DaFJwraixATYR6Kx18oM/view?usp=vids_web' },
+        { kind: 'context', key: 'utl_embed_p1_hugh_favour', label: 'Hugh needs a favor', visible: true, type: 'video', url: 'https://drive.google.com/file/d/1EZe8wYzQvic6DaFJwraixATYR6Kx18oM/view?usp=vids_web' },
         { kind: 'app', key: 'utl_app_p1_4', title: 'Rushed voice memo', visible: true },
         { kind: 'context', key: 'utl_embed_p1_ai_memo', label: 'Try the same memo with AI', visible: true, type: 'slides', url: '' },
         { kind: 'app', key: 'utl_app_p1_5', title: 'Rushed voice memo with AI', visible: true },
@@ -6784,7 +6858,7 @@
     const QB_PROMPT_RULES = {
       1: 'Which heading would you change because it is at a different level, overlaps another heading, or uses a different grouping rule?',
       2: 'Which option adds a distinct category at the same level, rather than repeating, sitting inside, or cutting across an existing category?',
-      3: 'Which option gives the clearest set of distinct, same-level headings for analysing this issue?'
+      3: 'Which option gives the clearest set of distinct, same-level headings for analyzing this issue?'
     };
 
     function qbPrompt(question) {
@@ -6812,7 +6886,7 @@
       const entries = Object.entries(qbForms);
       if (organizeRoot) organizeRoot.innerHTML = entries.map(([formId, form]) => { const task = form.organize; return `<article class="assessment-form-card"><h4>Form ${formId} · ${escapeHtml(task.title)}</h4><p><strong>Learner instruction:</strong> ${escapeHtml(task.prompt)}</p><h5>Correct headings</h5><p class="assessment-key">${task.correctLabels.map(escapeHtml).join(' · ')}</p><h5>Alternative headings</h5><p>${task.labels.filter(label => !task.correctLabels.includes(label)).map(escapeHtml).join(' · ')}</p><h5>Items and keyed group</h5><ul>${task.items.map(item => `<li>${escapeHtml(item[0])} → <span class="assessment-key">${escapeHtml(task.correctLabels[item[1]])}</span></li>`).join('')}</ul><h5>Scoring</h5><p>6 points for three correct unique headings; 14 points distributed across the nine correctly placed items.</p><div class="assessment-preview-actions"><a class="small-button secondary-button" href="../apps/tsa-diagnostic/index.html?preview=1&amp;contentPreview=part1a&amp;form=${formId}&amp;reset=1" target="_blank" rel="noopener">Preview Form ${formId} as a learner</a></div></article>`; }).join('');
       if (speakRoot) speakRoot.innerHTML = entries.map(([formId, form]) => { const task = form.speak; return `<article class="assessment-form-card"><h4>Form ${formId} · ${escapeHtml(task.title)}</h4><p><strong>Learner task:</strong> Recommend one option. Give two or three reasons based on the information, then state a clear next step. Up to 60 seconds; minimum 25 words.</p><h5>Scenario facts</h5><ul>${task.facts.map(fact => `<li><strong>${escapeHtml(fact[0])}:</strong> ${escapeHtml(fact[1])}</li>`).join('')}</ul><h5>Official scoring evidence</h5><p>Leads: 8 · Supports: 14 · Focuses: 8. Without an identifiable recommendation, the score is capped at 10.</p><h5>Configured evidence terms</h5><p>Coverage: ${task.keywords.map(group => escapeHtml(group.join(' / '))).join(' · ')}<br>Next step: ${task.next.map(escapeHtml).join(' / ')}</p><div class="assessment-preview-actions"><a class="small-button secondary-button" href="../apps/tsa-diagnostic/index.html?preview=1&amp;contentPreview=part2&amp;form=${formId}&amp;reset=1" target="_blank" rel="noopener">Preview Form ${formId} as a learner</a></div></article>`; }).join('');
-      if (actRoot) actRoot.innerHTML = entries.map(([formId, form]) => { const task = form.act; return `<article class="assessment-form-card"><h4>Form ${formId} · ${escapeHtml(task.title)}</h4><p><strong>Situation:</strong> ${escapeHtml(task.setup)}</p><h5>First action choices</h5><ol>${task.choices.map((choice, index) => `<li class="${index === task.best ? 'assessment-key' : ''}">${escapeHtml(choice)}${index === task.best ? ' · reference default (not scored higher)' : ''}</li>`).join('')}</ol><h5>Pushback</h5><p>${escapeHtml(task.pushback)}</p><p><strong>Learner task:</strong> State the decision, respond to the concern, and explain what happens next. Up to 45 seconds; minimum 15 words.</p><h5>Official scoring evidence</h5><p>Decides: 10 · Adapts: 12 · Advances: 8. Without an explicit decision, the score is capped at 8.</p><h5>Configured evidence terms</h5><p>Situation: ${task.terms.map(escapeHtml).join(' / ')}<br>Concern: ${task.concerns.map(escapeHtml).join(' / ')}<br>Next step: ${task.next.map(escapeHtml).join(' / ')}</p><div class="assessment-preview-actions"><a class="small-button secondary-button" href="../apps/tsa-diagnostic/index.html?preview=1&amp;contentPreview=part3&amp;form=${formId}&amp;reset=1" target="_blank" rel="noopener">Preview Form ${formId} as a learner</a></div></article>`; }).join('');
+      if (actRoot) actRoot.innerHTML = entries.map(([formId, form]) => { const task = form.act; return `<article class="assessment-form-card"><h4>Form ${formId} · ${escapeHtml(task.title)}</h4><p><strong>Situation:</strong> ${escapeHtml(task.setup)}</p><h5>First action choices, pushback, and concern terms</h5><ol>${task.choices.map((choice, index) => `<li class="${index === task.best ? 'assessment-key' : ''}"><strong>${escapeHtml(choice)}</strong>${index === task.best ? ' · reference default (not scored higher)' : ''}<br>Pushback: ${escapeHtml(task.pushback[index])}<br>Concern terms: ${task.concerns[index].map(escapeHtml).join(' / ')}</li>`).join('')}</ol><p><strong>Learner task:</strong> State the decision, respond to the concern, and explain what happens next. Up to 45 seconds; minimum 15 words.</p><h5>Official scoring evidence</h5><p>Decides: 10 · Adapts: 12 · Advances: 8. Without an explicit decision, the score is capped at 8.</p><h5>Configured evidence terms</h5><p>Situation: ${task.terms.map(escapeHtml).join(' / ')}<br>Next step: ${task.next.map(escapeHtml).join(' / ')}</p><div class="assessment-preview-actions"><a class="small-button secondary-button" href="../apps/tsa-diagnostic/index.html?preview=1&amp;contentPreview=part3&amp;form=${formId}&amp;reset=1" target="_blank" rel="noopener">Preview Form ${formId} as a learner</a></div></article>`; }).join('');
     }
 
     async function initTsaScoringControls() {
@@ -6859,7 +6933,7 @@
       Object.entries(data.parts.part1a || {}).forEach(([form, task]) => task.items.forEach((item, index) => rows.push({ part:'1a', form, record_type:'sorting item', id:`${form}-organize-${index + 1}`, title:task.title, instruction:task.prompt, content:item[0], choices:task.labels.join(' | '), keyed_answer:task.correctLabels[item[1]], rationale:'', scoring:'Correct headings: 6 points; correct placements: 14 points' })));
       (data.parts.part1b || []).forEach(question => rows.push({ part:'1b', form:'All', record_type:QB_FORMAT_LABELS[question.format], id:question.id, title:'Test the structure', instruction:question.fullPrompt, content:question.prompt, choices:question.options.map((option,index)=>`${String.fromCharCode(65+index)}. ${option}`).join(' | '), keyed_answer:`${question.correctAnswerLetter}. ${question.correctAnswerText}`, rationale:question.rationale, scoring:`${question.intendedDifficulty}; version ${question.version}` }));
       Object.entries(data.parts.part2 || {}).forEach(([form, task]) => rows.push({ part:'2', form, record_type:'recommendation scenario', id:`${form}-speak`, title:task.title, instruction:'Recommend one option; give two or three reasons; state a next step. Up to 60 seconds; minimum 25 words.', content:task.facts.map(fact=>`${fact[0]}: ${fact[1]}`).join(' | '), choices:'', keyed_answer:'Evidence terms: '+task.keywords.map(group=>group.join('/')).join(' | '), rationale:'Next-step terms: '+task.next.join('/'), scoring:'Leads 8; Supports 14; Focuses 8; cap 10 without recommendation' }));
-      Object.entries(data.parts.part3 || {}).forEach(([form, task]) => rows.push({ part:'3', form, record_type:'decision and pushback scenario', id:`${form}-act`, title:task.title, instruction:'Choose what to do first; state the decision; respond to the concern; explain what happens next. Up to 45 seconds; minimum 15 words.', content:`${task.setup} | Pushback: ${task.pushback}`, choices:task.choices.map((choice,index)=>`${String.fromCharCode(65+index)}. ${choice}`).join(' | '), keyed_answer:`Reference default (not scored higher): ${String.fromCharCode(65+task.best)}. ${task.choices[task.best]}`, rationale:`Situation: ${task.terms.join('/')} | Concern: ${task.concerns.join('/')} | Next: ${task.next.join('/')}`, scoring:'Decides 10; Adapts 12; Advances 8; total capped at 8 without explicit commitment' }));
+      Object.entries(data.parts.part3 || {}).forEach(([form, task]) => rows.push({ part:'3', form, record_type:'decision and pushback scenario', id:`${form}-act`, title:task.title, instruction:'Choose what to do first; state the decision; respond to the concern; explain what happens next. Up to 45 seconds; minimum 15 words.', content:`${task.setup} | Pushback by choice: ${task.choices.map((choice,index)=>`(${String.fromCharCode(65+index)}) ${task.pushback[index]}`).join(' ')}`, choices:task.choices.map((choice,index)=>`${String.fromCharCode(65+index)}. ${choice}`).join(' | '), keyed_answer:`Reference default (not scored higher): ${String.fromCharCode(65+task.best)}. ${task.choices[task.best]}`, rationale:`Situation: ${task.terms.join('/')} | Concern terms by choice: ${task.choices.map((choice,index)=>`(${String.fromCharCode(65+index)}) ${task.concerns[index].join('/')}`).join(' ; ')} | Next: ${task.next.join('/')}`, scoring:'Decides 10; Adapts 12; Advances 8; total capped at 8 without explicit commitment' }));
       return rows;
     }
 
@@ -7489,6 +7563,12 @@
         } else if (spSort.col === 'progress') {
           av = spProgressScore(a);
           bv = spProgressScore(b);
+        } else if (spSort.col === 'cohort') {
+          av = (a.cohort || '').toLowerCase();
+          bv = (b.cohort || '').toLowerCase();
+        } else if (spSort.col === 'signup') {
+          av = spToMs(a.addedAt);
+          bv = spToMs(b.addedAt);
         } else {
           av = (a.displayName || a.name || a.email || '').toLowerCase();
           bv = (b.displayName || b.name || b.email || '').toLowerCase();
@@ -7612,8 +7692,8 @@
         groups.push('<section class="sp-edit-group"><h4>' + escapeHtml(phase.label || phaseKey.replace('phase', 'Phase ')) + '</h4><div class="sp-edit-list">' + rows.join('') + '</div></section>');
       });
       groups.push('<section class="sp-edit-group"><h4>Assessments</h4><div class="sp-edit-list">' +
-        spEditableCheck('exercise', 'utl_result_tsa_diagnostic', 'Find Your Level', 'Diagnostic assessment', !!(exercises.utl_result_tsa_diagnostic && exercises.utl_result_tsa_diagnostic.completed)) +
-        spEditableCheck('exercise', 'utl_result_tsa_checkpoint', 'Checkpoint', 'Checkpoint assessment', !!(exercises.utl_result_tsa_checkpoint && exercises.utl_result_tsa_checkpoint.completed)) +
+        spEditableCheck('exercise', 'tsa-diagnostic-v2', 'Diagnostic', 'Diagnostic assessment', !!((exercises['tsa-diagnostic-v2'] && exercises['tsa-diagnostic-v2'].completed) || (exercises.utl_result_tsa_diagnostic && exercises.utl_result_tsa_diagnostic.completed))) +
+        spEditableCheck('exercise', 'tsa-checkpoint-v2', 'Checkpoint', 'Checkpoint assessment', !!((exercises['tsa-checkpoint-v2'] && exercises['tsa-checkpoint-v2'].completed) || (exercises.utl_result_tsa_checkpoint && exercises.utl_result_tsa_checkpoint.completed))) +
       '</div></section>');
       fields.innerHTML = groups.join('');
       document.getElementById('spEditSubtitle').textContent = (member.displayName || member.name || member.email || 'Student') + (member.email ? ' · ' + member.email : '');
@@ -7662,7 +7742,7 @@
         next.exercises[id] = Object.assign({}, next.exercises[id] || {}, {
           visited: input.checked,
           completed: input.checked,
-          title: item && item.title || next.exercises[id]?.title || (id === 'utl_result_tsa_diagnostic' ? 'Find Your Level' : id === 'utl_result_tsa_checkpoint' ? 'Checkpoint' : id),
+          title: item && item.title || next.exercises[id]?.title || (id === 'tsa-diagnostic-v2' ? 'Diagnostic' : id === 'tsa-checkpoint-v2' ? 'Checkpoint' : id),
           appKey
         });
         if (appKey !== id && next.exercises[appKey]) {
@@ -7849,6 +7929,65 @@
 
     // Cohort Analytics
     let caCurrentCohort = '';
+    let caCohortDetailsCache = {};
+    let caRosterFilter = 'all';
+    let caRosterSort = { col: 'name', dir: 'asc' };
+    const CA_LEVEL_RANK = { Intern: 0, Analyst: 1, Associate: 2, Principal: 3, Executive: 4 };
+    const CA_STATUS_RANK = { 'not-started': 0, 'in-progress': 1, complete: 2 };
+    const CA_STATUS_LABEL = { complete: 'Complete', 'in-progress': 'In progress', 'not-started': 'Not started' };
+
+    function caRosterStatus(member) {
+      if (spProgramComplete(member)) return 'complete';
+      return spProgressScore(member) > 0 ? 'in-progress' : 'not-started';
+    }
+
+    function caFilteredRoster(members) {
+      if (caRosterFilter === 'all') return members;
+      return members.filter((m) => caRosterStatus(m) === caRosterFilter);
+    }
+
+    function caRosterSortValue(member, col) {
+      const rewards = spRewardData(member);
+      switch (col) {
+        case 'email': return String(member.email || '').toLowerCase();
+        case 'percent': return caPercentComplete(member);
+        case 'mp': return Number(rewards.mpTotal || rewards.masteryPoints || 0);
+        case 'level': return CA_LEVEL_RANK[rewards.currentLevel || rewards.level] ?? -1;
+        case 'status': return CA_STATUS_RANK[caRosterStatus(member)] ?? -1;
+        default: return String(member.displayName || member.name || '').toLowerCase();
+      }
+    }
+
+    function caSortedRoster(members) {
+      const sorted = members.slice().sort((a, b) => {
+        const aVal = caRosterSortValue(a, caRosterSort.col);
+        const bVal = caRosterSortValue(b, caRosterSort.col);
+        if (aVal < bVal) return -1;
+        if (aVal > bVal) return 1;
+        return 0;
+      });
+      if (caRosterSort.dir === 'desc') sorted.reverse();
+      return sorted;
+    }
+
+    function caRosterSortTh(label, col) {
+      const active = caRosterSort.col === col;
+      const arrow = active ? '<span class="sp-sort-indicator">' + (caRosterSort.dir === 'asc' ? '↑' : '↓') + '</span>' : '';
+      return '<th><button class="sp-sort-btn" type="button" data-ca-roster-sort="' + col + '">' + label + arrow + '</button></th>';
+    }
+
+    function caRosterTableHtml(members) {
+      const filtered = caSortedRoster(caFilteredRoster(members));
+      if (!filtered.length) return '<p class="sp-status-missing">No members match this filter.</p>';
+      const rows = filtered.map((m) => {
+        const rewards = spRewardData(m);
+        const status = caRosterStatus(m);
+        return '<tr><td>' + escapeHtml(m.displayName || m.name || 'Member') + '</td><td>' + escapeHtml(m.email || '') + '</td><td>' + caPercentComplete(m) + '%</td><td>' + Number(rewards.mpTotal || rewards.masteryPoints || 0) + ' MP</td><td>' + escapeHtml(rewards.currentLevel || rewards.level || '—') + '</td><td class="' + (status === 'complete' ? 'sp-status-done' : 'sp-status-missing') + '">' + CA_STATUS_LABEL[status] + '</td></tr>';
+      }).join('');
+      return '<div class="student-progress-table-wrap"><table class="student-progress-table"><thead><tr>' +
+        caRosterSortTh('Name', 'name') + caRosterSortTh('Email', 'email') + caRosterSortTh('% Complete', 'percent') + caRosterSortTh('MP', 'mp') + caRosterSortTh('Level', 'level') + caRosterSortTh('Status', 'status') +
+        '</tr></thead><tbody>' + rows + '</tbody></table></div>';
+    }
 
     function caCohortGroups() {
       const groups = {};
@@ -7883,6 +8022,9 @@
         const ms = spToMs(m.addedAt);
         if (ms && (!earliestAddedAt || ms < earliestAddedAt)) earliestAddedAt = ms;
       });
+      const details = caCohortDetailsCache[name] || {};
+      const explicitStart = details.startDate ? spToMs(details.startDate) : null;
+      const startMs = explicitStart || earliestAddedAt;
       return {
         name,
         members,
@@ -7890,7 +8032,9 @@
         completed,
         completionPercent: members.length ? Math.round((completed / members.length) * 100) : 0,
         avgMp,
-        daysSinceStart: earliestAddedAt ? Math.round((Date.now() - earliestAddedAt) / 86400000) : null,
+        daysSinceStart: startMs ? Math.round((Date.now() - startMs) / 86400000) : null,
+        startDateIsEstimate: !explicitStart,
+        details,
         small: members.length < 5
       };
     }
@@ -7975,6 +8119,8 @@
       const groups = caCohortGroups();
       const members = groups[cohortName] || [];
       caCurrentCohort = cohortName;
+      caRosterFilter = 'all';
+      caRosterSort = { col: 'name', dir: 'asc' };
       const summary = caCohortSummary(cohortName, members);
       const funnel = caFunnelStages(members);
       const funnelMax = Math.max(1, funnel[0].count);
@@ -7998,10 +8144,67 @@
           ).join('') + '</ul>'
         : '<p class="sp-status-done">Nobody in this cohort is currently flagged as behind.</p>';
 
+      const details = summary.details || {};
       content.innerHTML =
-        '<div class="sp-detail-header"><div><h3>' + escapeHtml(cohortName) + (summary.small ? '<span class="ca-flag-small">Small sample</span>' : '') + '</h3><p>' + summary.count + ' member' + (summary.count === 1 ? '' : 's') + ' · Cohort start estimated from earliest member added</p></div></div>' +
+        '<div class="sp-detail-header"><div><h3>' + escapeHtml(cohortName) + (summary.small ? '<span class="ca-flag-small">Small sample</span>' : '') + '</h3><p>' + summary.count + ' member' + (summary.count === 1 ? '' : 's') + ' · ' + (summary.startDateIsEstimate ? 'Cohort start estimated from earliest member added' : 'Cohort start set manually') + '</p></div></div>' +
         '<div class="sp-detail-summary"><div class="sp-detail-stat"><span>Completion</span><strong>' + summary.completed + ' of ' + summary.count + '</strong></div><div class="sp-detail-stat"><span>Completion rate</span><strong>' + summary.completionPercent + '%</strong></div><div class="sp-detail-stat"><span>Average MP</span><strong>' + summary.avgMp + '</strong></div><div class="sp-detail-stat"><span>Since cohort start</span><strong>' + (summary.daysSinceStart === null ? '—' : summary.daysSinceStart + ' days') + '</strong></div></div>' +
-        '<div class="sp-detail-grid"><div class="sp-detail-card"><h4>Phase funnel</h4>' + funnelHtml + '</div><div class="sp-detail-card"><h4>Exercise bottlenecks (lowest completion first)</h4>' + bottleneckHtml + '</div><div class="sp-detail-card"><h4>Needs attention</h4>' + attentionHtml + '</div></div>';
+        '<div class="sp-detail-card" style="margin:12px 0"><h4>Cohort details</h4><p class="description" style="margin-top:-6px">Internal organization only. Contact and notes never appear in the exported CSV or PDF.</p>' +
+          '<div class="mb-form-grid"><div class="mb-form-field"><label for="caDetailContact">Contact name</label><input type="text" id="caDetailContact" placeholder="e.g. Priya Shah" value="' + escapeHtml(details.contactName || '') + '"></div>' +
+          '<div class="mb-form-field"><label for="caDetailContactEmail">Contact email</label><input type="email" id="caDetailContactEmail" placeholder="name@company.com" value="' + escapeHtml(details.contactEmail || '') + '"></div>' +
+          '<div class="mb-form-field"><label for="caDetailStartDate">Cohort start date</label><input type="date" id="caDetailStartDate" value="' + escapeHtml(details.startDate || '') + '"></div></div>' +
+          '<div class="mb-form-field" style="margin-top:12px"><label for="caDetailNotes">Notes</label><textarea id="caDetailNotes" rows="3" placeholder="Anything worth remembering about this cohort: which firm, contract terms, how the rollout is going.">' + escapeHtml(details.notes || '') + '</textarea></div>' +
+          '<div class="student-progress-actions"><button class="small-button" type="button" id="caDetailsSave">Save cohort details</button><span class="student-progress-status" id="caDetailsStatus"></span></div>' +
+          '<div class="mb-form-field" style="margin-top:16px;padding-top:14px;border-top:1px solid var(--line)"><label for="caRenameInput">Rename this cohort</label><div style="display:flex;gap:8px"><input type="text" id="caRenameInput" value="' + escapeHtml(cohortName) + '" style="flex:1"><button class="small-button secondary-button" type="button" id="caRenameSave">Rename</button></div><span class="student-progress-status" id="caRenameStatus"></span></div>' +
+        '</div>' +
+        '<div class="sp-detail-grid"><div class="sp-detail-card"><h4>Phase funnel</h4>' + funnelHtml + '</div><div class="sp-detail-card"><h4>Exercise bottlenecks (lowest completion first)</h4>' + bottleneckHtml + '</div><div class="sp-detail-card"><h4>Needs attention</h4>' + attentionHtml + '</div></div>' +
+        '<div class="sp-detail-card" style="margin-top:12px"><div class="sp-detail-actions" style="justify-content:space-between"><h4 style="margin:0">Member roster</h4><label class="lb-field"><span>Show</span><select id="caRosterFilter"><option value="all">All members</option><option value="complete">Completed</option><option value="in-progress">In progress</option><option value="not-started">Not started</option></select></label></div><div id="caRosterTable">' + caRosterTableHtml(members) + '</div></div>';
+
+      const detailsSaveBtn = document.getElementById('caDetailsSave');
+      if (detailsSaveBtn) detailsSaveBtn.addEventListener('click', async () => {
+        const fb = window.utlFirebaseAuth;
+        const status = document.getElementById('caDetailsStatus');
+        if (!fb || !fb.setCohortDetails) { if (status) status.textContent = 'Firebase not ready.'; return; }
+        detailsSaveBtn.disabled = true;
+        if (status) status.textContent = 'Saving...';
+        try {
+          const payload = {
+            contactName: document.getElementById('caDetailContact').value.trim(),
+            contactEmail: document.getElementById('caDetailContactEmail').value.trim(),
+            startDate: document.getElementById('caDetailStartDate').value,
+            notes: document.getElementById('caDetailNotes').value.trim()
+          };
+          await fb.setCohortDetails(cohortName, payload);
+          caCohortDetailsCache[cohortName] = payload;
+          if (status) status.textContent = 'Saved.';
+          renderCohortDetail(cohortName);
+        } catch (error) {
+          if (status) status.textContent = 'Save failed: ' + ((error && error.message) || 'Unknown error');
+          detailsSaveBtn.disabled = false;
+        }
+      });
+
+      const renameBtn = document.getElementById('caRenameSave');
+      if (renameBtn) renameBtn.addEventListener('click', async () => {
+        const fb = window.utlFirebaseAuth;
+        const status = document.getElementById('caRenameStatus');
+        const input = document.getElementById('caRenameInput');
+        const newName = (input.value || '').trim();
+        if (!fb || !fb.renameCohort) { if (status) status.textContent = 'Firebase not ready.'; return; }
+        if (!newName || newName === cohortName) return;
+        if (!window.confirm('Rename "' + cohortName + '" to "' + newName + '" for all ' + members.length + ' member(s)? This updates their records immediately.')) return;
+        renameBtn.disabled = true;
+        if (status) status.textContent = 'Renaming...';
+        try {
+          await fb.renameCohort(cohortName, newName, members.map((m) => m.email || m.id).filter(Boolean));
+          members.forEach((m) => { m.cohort = newName; });
+          renderCohortAnalytics();
+          renderCohortDetail(newName);
+          showToast('Cohort renamed to "' + newName + '".');
+        } catch (error) {
+          if (status) status.textContent = 'Rename failed: ' + ((error && error.message) || 'Unknown error');
+          renameBtn.disabled = false;
+        }
+      });
 
       content.querySelectorAll('[data-ca-member]').forEach((button) => {
         button.addEventListener('click', () => {
@@ -8010,6 +8213,16 @@
           if (member) showStudentProgressDetail(member);
         });
       });
+
+      const rosterFilterSelect = document.getElementById('caRosterFilter');
+      if (rosterFilterSelect) {
+        rosterFilterSelect.value = caRosterFilter;
+        rosterFilterSelect.addEventListener('change', () => {
+          caRosterFilter = rosterFilterSelect.value;
+          const table = document.getElementById('caRosterTable');
+          if (table) table.innerHTML = caRosterTableHtml(members);
+        });
+      }
 
       if (overview) overview.hidden = true;
       if (controls) controls.hidden = true;
@@ -8035,9 +8248,20 @@
         const s = String(val === null || val === undefined ? '' : val).replace(/"/g, '""');
         return (s.search(/[,"\r\n]/) !== -1) ? '"' + s + '"' : s;
       }
+      const summary = caCohortSummary(caCurrentCohort, members);
+      const generated = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+      const lines = [
+        ['The Untaught Lessons'].map(csvCell).join(','),
+        ['Cohort completion report'].map(csvCell).join(','),
+        ['Cohort', caCurrentCohort].map(csvCell).join(','),
+        ['Generated', generated].map(csvCell).join(','),
+        ['Members', summary.count, 'Completed', summary.completed + ' of ' + summary.count + ' (' + summary.completionPercent + '%)', 'Average MP', summary.avgMp].map(csvCell).join(','),
+        ['Rows below', caFilterLabel(caRosterFilter)].map(csvCell).join(','),
+        ''
+      ];
       const header = ['Name', 'Email', '% Complete', 'MP', 'Level', 'Days since added', 'Program complete'];
-      const lines = [header.map(csvCell).join(',')];
-      members.forEach((m) => {
+      lines.push(header.map(csvCell).join(','));
+      caSortedRoster(caFilteredRoster(members)).forEach((m) => {
         const rewards = spRewardData(m);
         lines.push([
           csvCell(m.displayName || m.name || ''),
@@ -8058,6 +8282,45 @@
       a.download = String(now.getFullYear()) + pad(now.getMonth() + 1) + pad(now.getDate()) + ' - ' + caCurrentCohort.replace(/[^a-z0-9-]+/gi, '_') + ' cohort.csv';
       document.body.appendChild(a); a.click();
       document.body.removeChild(a); URL.revokeObjectURL(url);
+    }
+
+    function caFilterLabel(filter) {
+      return filter === 'all' ? 'All members' : filter === 'complete' ? 'Completed only' : filter === 'in-progress' ? 'In progress only' : 'Not started only';
+    }
+
+    function caExportPdf() {
+      if (!caCurrentCohort) return;
+      const groups = caCohortGroups();
+      const members = groups[caCurrentCohort] || [];
+      if (!members.length) { showToast('No members to export.', 'error'); return; }
+      const summary = caCohortSummary(caCurrentCohort, members);
+      const funnel = caFunnelStages(members);
+      const bottleneck = caExerciseBottleneck(members).slice(0, 8);
+      const generated = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+      const funnelMax = Math.max(1, funnel[0].count);
+      const funnelRows = funnel.map((stage) =>
+        '<tr><td>' + escapeHtml(stage.label) + '</td><td class="ca-print-bar-cell"><div class="ca-print-bar-track"><div class="ca-print-bar-fill" style="width:' + Math.round((stage.count / funnelMax) * 100) + '%"></div></div></td><td>' + stage.count + ' of ' + summary.count + '</td></tr>'
+      ).join('');
+      const bottleneckRows = bottleneck.length
+        ? bottleneck.map((row) => '<tr><td>' + escapeHtml(row.title) + '</td><td>' + escapeHtml(row.phaseLabel) + '</td><td>' + row.doneCount + ' of ' + summary.count + ' (' + row.percent + '%)</td></tr>').join('')
+        : '<tr><td colspan="3">No exercises configured.</td></tr>';
+      const rosterRows = caSortedRoster(caFilteredRoster(members)).map((m) => {
+        const rewards = spRewardData(m);
+        const status = caRosterStatus(m);
+        return '<tr><td>' + escapeHtml(m.displayName || m.name || 'Member') + '</td><td>' + escapeHtml(m.email || '') + '</td><td>' + caPercentComplete(m) + '%</td><td>' + Number(rewards.mpTotal || rewards.masteryPoints || 0) + '</td><td>' + escapeHtml(rewards.currentLevel || rewards.level || '—') + '</td><td>' + CA_STATUS_LABEL[status] + '</td></tr>';
+      }).join('');
+      document.getElementById('caPrintReport').innerHTML =
+        '<header class="ca-print-header"><img src="../assets/utl-logo-nav-white.png" alt="The Untaught Lessons"><div class="ca-print-header-text"><span>Cohort completion report</span><h1>' + escapeHtml(caCurrentCohort) + '</h1></div><div class="ca-print-header-meta">Generated<br>' + generated + '</div></header>' +
+        '<div class="ca-print-program"><span>Program</span><img src="../assets/program-logo-tsa.png" alt="Think, Speak, Act like an Executive"></div>' +
+        '<section class="ca-print-stats"><div><span>Members</span><strong>' + summary.count + '</strong></div><div><span>Completed</span><strong>' + summary.completed + ' of ' + summary.count + '</strong><small>' + summary.completionPercent + '%</small></div><div><span>Average MP</span><strong>' + summary.avgMp + '</strong></div><div><span>Since cohort start</span><strong>' + (summary.daysSinceStart === null ? '—' : summary.daysSinceStart) + '</strong><small>' + (summary.daysSinceStart === null ? 'unknown' : summary.startDateIsEstimate ? 'days (est.)' : 'days') + '</small></div></section>' +
+        '<section class="ca-print-block"><h2>Phase funnel</h2><table><thead><tr><th>Stage</th><th></th><th>Members</th></tr></thead><tbody>' + funnelRows + '</tbody></table></section>' +
+        '<section class="ca-print-block"><h2>Exercise bottlenecks</h2><table><thead><tr><th>Exercise</th><th>Phase</th><th>Completed</th></tr></thead><tbody>' + bottleneckRows + '</tbody></table></section>' +
+        '<section class="ca-print-block"><h2>Member roster &middot; ' + escapeHtml(caFilterLabel(caRosterFilter)) + '</h2><table><thead><tr><th>Name</th><th>Email</th><th>% Complete</th><th>MP</th><th>Level</th><th>Status</th></tr></thead><tbody>' + rosterRows + '</tbody></table></section>' +
+        ('<footer class="ca-print-footer"><p>' + (summary.startDateIsEstimate ? 'Cohort start is estimated from the earliest member added and should be treated as approximate.' : 'Cohort start reflects the date entered for this cohort.') + ' "Cohort" reflects the group label set in Member Management.</p><p>The Untaught Lessons &middot; Confidential, prepared for internal program review</p></footer>');
+      const previousTitle = document.title;
+      document.title = 'Cohort report, ' + caCurrentCohort;
+      window.print();
+      document.title = previousTitle;
     }
 
     function renderCohortAnalytics() {
@@ -8146,10 +8409,12 @@
         const progress = member.workspaceProgress || {};
         const exercises = progress.exercises || {};
         const orientationDone = progress.orientation && progress.orientation.ready;
-        const diagnosticDone = exercises.utl_result_tsa_diagnostic && exercises.utl_result_tsa_diagnostic.completed;
-        const checkpointDone = exercises.utl_result_tsa_checkpoint && exercises.utl_result_tsa_checkpoint.completed;
+        const diagnosticDone = (exercises['tsa-diagnostic-v2'] && exercises['tsa-diagnostic-v2'].completed) || (exercises.utl_result_tsa_diagnostic && exercises.utl_result_tsa_diagnostic.completed);
+        const checkpointDone = (exercises['tsa-checkpoint-v2'] && exercises['tsa-checkpoint-v2'].completed) || (exercises.utl_result_tsa_checkpoint && exercises.utl_result_tsa_checkpoint.completed);
         return '<tr>' +
           '<td><button class="sp-member-button" type="button" data-sp-member="' + escapeHtml(member.email || member.id || '') + '">' + escapeHtml(member.displayName || member.name || member.email || member.id || 'Member') + '</button><br><small>' + escapeHtml(member.email || member.id || '') + '</small></td>' +
+          '<td>' + escapeHtml(member.cohort || '—') + '</td>' +
+          '<td>' + escapeHtml(formatProgressDate(member.addedAt)) + '</td>' +
           '<td>' + escapeHtml(formatProgressDate(member.lastSeenAt || member.updatedAt)) + '</td>' +
           '<td class="progress-cell"><span class="progress-dot-label">Ready</span><div class="progress-dot-row">' + progressDot(orientationDone, 'Orientation ready') + '</div></td>' +
           progressCell(member, 'phase1') +
@@ -8162,6 +8427,8 @@
       wrap.innerHTML = '<div class="student-progress-table-wrap"><table class="student-progress-table">' +
         '<thead><tr>' +
         spSortTh('Member', 'name') +
+        spSortTh('Cohort', 'cohort') +
+        spSortTh('Signed up', 'signup') +
         spSortTh('Last active', 'lastActive') +
         '<th>Orientation</th>' +
         spSortTh('Phase 1', 'progress') +
@@ -8220,6 +8487,7 @@
         }
         spAllMembers = members;
         lbMaxScoreCache = null;
+        try { caCohortDetailsCache = (await fb.getCohortDetails?.()) || {}; } catch (_) { caCohortDetailsCache = {}; }
         const controls = document.getElementById('spControls');
         if (controls) controls.hidden = false;
         spApplyView();
@@ -8540,9 +8808,24 @@
           spSort.dir = spSort.dir === 'asc' ? 'desc' : 'asc';
         } else {
           spSort.col = col;
-          spSort.dir = col === 'lastActive' || col === 'progress' ? 'desc' : 'asc';
+          spSort.dir = col === 'lastActive' || col === 'progress' || col === 'signup' ? 'desc' : 'asc';
         }
         spApplyView();
+      }
+
+      // Cohort roster column sort
+      const rosterSortBtn = event.target.closest('[data-ca-roster-sort]');
+      if (rosterSortBtn) {
+        const col = rosterSortBtn.dataset.caRosterSort;
+        if (caRosterSort.col === col) {
+          caRosterSort.dir = caRosterSort.dir === 'asc' ? 'desc' : 'asc';
+        } else {
+          caRosterSort.col = col;
+          caRosterSort.dir = col === 'percent' || col === 'mp' || col === 'level' ? 'desc' : 'asc';
+        }
+        const groups = caCohortGroups();
+        const table = document.getElementById('caRosterTable');
+        if (table && caCurrentCohort) table.innerHTML = caRosterTableHtml(groups[caCurrentCohort] || []);
       }
     });
 
@@ -8560,6 +8843,7 @@
     document.getElementById('caRefresh')?.addEventListener('click', loadStudentProgress);
     document.getElementById('caDetailBack')?.addEventListener('click', hideCohortDetail);
     document.getElementById('caExportCsv')?.addEventListener('click', caExportCsv);
+    document.getElementById('caExportPdf')?.addEventListener('click', caExportPdf);
     document.querySelector('[data-target="section-cohort-analytics"]')?.addEventListener('click', () => {
       if (spAllMembers.length) renderCohortAnalytics();
     });
@@ -9532,5 +9816,6 @@
   </script>
   <script src="../assets/tactile-buttons.js?v=20260714-flat-1" defer></script>
   <script type="module" src="../assets/feedback-widget.js?v=6"></script>
+  <div id="caPrintReport" class="ca-print-report"></div>
 </body>
 </html>

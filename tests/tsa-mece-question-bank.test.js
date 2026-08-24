@@ -56,7 +56,7 @@ bank.filter(q => q.format === 2).forEach(q => {
 });
 
 bank.filter(q => q.format === 3).forEach(q => {
-  assert.match(fullPrompt(q), /distinct, same-level headings for analysing this issue\?$/, `${q.id} should define a valid breakdown`);
+  assert.match(fullPrompt(q), /distinct, same-level headings for analyzing this issue\?$/, `${q.id} should define a valid breakdown`);
 });
 
 // --- Expert pressure-test regressions: potentially exhaustive frameworks need an explicit boundary ---
@@ -78,7 +78,7 @@ assert.match(byId['f3-13'].options[byId['f3-13'].answer], /Confidence in care/, 
 assert.match(byId['f3-15'].options[byId['f3-15'].answer], /Customer arrival pattern/, 'f3-15 should use the precise queueing variable');
 assert.equal(byId['f2-13'].options[byId['f2-13'].answer], 'Cleaning quality below standard', 'f2-13 should separate cleaning quality from amenities and linen condition');
 assert.match(byId['f3-05'].rationale, /one possible explanation for it/, 'f3-05 should treat optimistic estimates as a possible explanation, not a subset');
-assert.match(byId['f3-15'].rationale, /upstream factor that may affect/, 'f3-15 should not claim staffing alone determines open tills');
+assert.match(byId['f3-15'].rationale, /upstream factor that may affect/, 'f3-15 should not claim staffing alone determines open registers');
 assert.match(byId['f3-01'].rationale, /introduces an ambiguous factor/, 'f3-01 should not imply that rising selling prices contain food and staff costs');
 assert.match(byId['f1-06'].rationale, /different grouping rule/, 'f1-06 should explain the mixed information-versus-outcome axis');
 assert.doesNotMatch(byId['f1-06'].rationale, /sits inside/, 'f1-06 should not claim an incomplete address always prevents location');

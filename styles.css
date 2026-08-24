@@ -329,6 +329,26 @@ body {
   color: var(--home-navy);
 }
 
+.home-page .hero-member-link {
+  margin: 18px 0 0;
+  color: var(--home-white);
+  font-family: Lato, Arial, sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  opacity: 0.75;
+  text-align: center;
+}
+
+.home-page .hero-member-link a {
+  color: var(--home-gold);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.home-page .hero-member-link a:hover {
+  text-decoration: underline;
+}
+
 .home-page .credibility-strip {
   margin: 28px 0 0;
   color: var(--home-gold);

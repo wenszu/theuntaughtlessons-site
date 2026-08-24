@@ -43,9 +43,9 @@
         <h1 id="hero-title">Practical lessons about life and work you wish someone had taught you sooner.</h1>
         <div class="hero-divider" aria-hidden="true"></div>
         <div class="hero-button-row">
-          <a class="hero-button" href="/programs.html">Explore Programs</a>
-          <a class="hero-button hero-button-gold" href="/member-login/">Member login</a>
+          <a class="hero-button hero-button-gold" href="/programs.html">Explore Programs</a>
         </div>
+        <p class="hero-member-link">Already a member? <a href="/member-login/">Log in &rarr;</a></p>
         <p class="credibility-strip">
           TRUSTED BY 5,000+ PROFESSIONALS &nbsp;·&nbsp; 25+ YEARS OF REAL-WORLD APPLICATION
         </p>
@@ -219,6 +219,7 @@
             <option value="Student">Student</option>
             <option value="Professional">Professional</option>
             <option value="Manager">Manager</option>
+            <option value="Organization">Organization (buying for a team)</option>
             <option value="Other">Other</option>
           </select>
 
@@ -508,10 +509,14 @@
     const statsSection = document.getElementById('stats');
     if (!reduceMotion && statsSection) {
       const numbers = [...document.querySelectorAll('.stat-number')];
+      const finalizeStats = () => numbers.forEach(numberEl => {
+        numberEl.textContent = Number(numberEl.dataset.target).toLocaleString() + (numberEl.dataset.suffix || '');
+      });
       const statsObserver = new IntersectionObserver((entries, observer) => {
         if (!entries.some(entry => entry.isIntersecting)) return;
         const startTime = performance.now(), duration = 5600;
         const tick = now => {
+          if (document.hidden) { finalizeStats(); return; }
           const progress = Math.min((now - startTime) / duration, 1);
           const eased = progress * progress * (3 - 2 * progress);
           numbers.forEach(numberEl => {

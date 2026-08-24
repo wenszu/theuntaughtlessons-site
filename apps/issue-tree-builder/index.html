@@ -2479,8 +2479,8 @@
       }).length;
       const sourceDetails = filledDetailValues.filter((detail) => sourceTermCount(detail) > 0).length;
       if (!vagueCount && sourceDetails >= 7) add("pass", "Details are specific and source-based", 15, 15);
-      else if (vagueCount <= 2 && sourceDetails >= 4) add("partial", "Some details need stronger source connection", 8, 15, "Specific details should come from the source notes: platforms, athlete-led meaning, unity, sponsorship, culture, ritual, or media behaviour.");
-      else add("fail", "Details are too vague or disconnected", 0, 15, "Specific details should come from the source notes: platforms, athlete-led meaning, unity, sponsorship, culture, ritual, or media behaviour.");
+      else if (vagueCount <= 2 && sourceDetails >= 4) add("partial", "Some details need stronger source connection", 8, 15, "Specific details should come from the source notes: platforms, athlete-led meaning, unity, sponsorship, culture, ritual, or media behavior.");
+      else add("fail", "Details are too vague or disconnected", 0, 15, "Specific details should come from the source notes: platforms, athlete-led meaning, unity, sponsorship, culture, ritual, or media behavior.");
 
       const question = state.problemStatement.trim();
       const isQuestion = question.endsWith("?") || /^(why|what|how|when|which)\b/i.test(question);

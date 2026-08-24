@@ -30,9 +30,10 @@ const punctuationFree = strongSpeak.replace(/[.!?]/g, '');
 assert.equal(scoreText({ transcript:punctuationFree }, speak, false).total, strongScore.total, 'punctuation must not affect speech-to-text scoring');
 assert.ok(scoreText({ transcript:'The hall, park, and library each have trade-offs because capacity, weather, and cost differ.' }, speak, false).total <= 10, 'Speak recommendation gate should cap discussion without a recommendation');
 
+const actConcerns = ['overwhelmed','overloaded','workload','busy','too busy','stretched','stretched thin','capacity','bandwidth','too much','too much on your plate','cannot finish','struggling','wait'];
 const act = {
   terms: ['deadline','tomorrow','handoff','section'],
-  concerns: ['overwhelmed','overloaded','workload','busy','too busy','stretched','stretched thin','capacity','bandwidth','too much','too much on your plate','cannot finish','struggling','wait'],
+  concerns: [actConcerns, actConcerns, actConcerns],
   next: ['send','share','finish','time','today']
 };
 const weakAdapt = scoreText({ choice:2, transcript:"I understand you're overwhelmed. I choose C." }, act, true);

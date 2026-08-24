@@ -768,6 +768,37 @@ async function getAllMemberWorkspaceProgress() {
   return allProgress;
 }
 
+async function getCohortDetails() {
+  const readyDb = requireFirestore();
+  const snap = await getDoc(doc(readyDb, "settings", "cohorts"));
+  return snap.exists() ? snap.data() || {} : {};
+}
+
+async function setCohortDetails(cohortName, details) {
+  const key = String(cohortName || "").trim();
+  if (!key) throw new Error("A cohort name is required.");
+  const readyDb = requireFirestore();
+  await setDoc(doc(readyDb, "settings", "cohorts"), { [key]: details }, { merge: true });
+}
+
+async function renameCohort(oldName, newName, memberEmails) {
+  const from = String(oldName || "").trim();
+  const to = String(newName || "").trim();
+  if (!from || !to) throw new Error("Both the current and new cohort name are required.");
+  if (from === to) return { renamed: 0 };
+  const readyDb = requireFirestore();
+  const emails = Array.isArray(memberEmails) ? memberEmails : [];
+  await Promise.all(emails.map((email) => updateDoc(doc(readyDb, "authorized_members", email), { cohort: to })));
+  const details = await getCohortDetails();
+  if (details[from]) {
+    const next = Object.assign({}, details);
+    next[to] = Object.assign({}, next[from], next[to] || {});
+    delete next[from];
+    await setDoc(doc(readyDb, "settings", "cohorts"), next);
+  }
+  return { renamed: emails.length };
+}
+
 async function replaceMemberWorkspaceProgress(userId, nextProgress = {}, options = {}) {
   if (!userId) throw new Error("A user UID is required.");
   const readyDb = requireFirestore();
@@ -1129,6 +1160,9 @@ export {
   getMemberExerciseResponses,
   findUserUidByEmail,
   getAllMemberWorkspaceProgress,
+  getCohortDetails,
+  setCohortDetails,
+  renameCohort,
   getGlobalFeedbackSetting,
   getMemberWorkspaceProgress,
   getPublicFindLevelSetting,
