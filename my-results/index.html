@@ -2049,7 +2049,7 @@
     applySendInstructorStatus();
   </script>
   <script type="module">
-    import { getSignedInUser, getAssessmentVisibility } from '../assets/firebase.js';
+    import { getSignedInUser, getAssessmentVisibility, getMemberExerciseResponses } from '../assets/firebase.js';
     (async () => {
       try {
         const user = await getSignedInUser();
@@ -2058,6 +2058,30 @@
         if (!syncNotice) return;
         syncNotice.innerHTML = '<strong>Also backed up to your account.</strong> Your exercise completion status is synced to your Untaught Lessons account and accessible from any device you sign in to. Your written responses are stored in this browser only — download or email them to keep a permanent copy.';
         syncNotice.style.display = 'block';
+      } catch {}
+    })();
+    (async () => {
+      // The diagnostic/checkpoint result (with full scores) is written to this browser's
+      // localStorage at completion time, but that is the only place it lives locally.
+      // If it is missing here (a different device, cleared site data, a local reset),
+      // recover it from the account's completed_exercises record so this page and the
+      // Learning Journey's completion state never disagree.
+      try {
+        const user = await getSignedInUser();
+        if (!user || !user.uid) return;
+        const needsRepair = ['diagnostic', 'checkpoint'].filter((kind) => !tsaResultFor(kind));
+        if (!needsRepair.length) return;
+        const responses = await getMemberExerciseResponses(user.uid);
+        let repaired = false;
+        needsRepair.forEach((kind) => {
+          const remote = responses['tsa-' + kind + '-v2'] || responses['tsa-' + kind];
+          const payload = remote && remote.savedPayload;
+          if (payload && payload.scores) {
+            localStorage.setItem('utl_result_tsa_' + kind + '_v2', JSON.stringify(payload));
+            repaired = true;
+          }
+        });
+        if (repaired && typeof renderAllSections === 'function') renderAllSections();
       } catch {}
     })();
     (async () => {
