@@ -1401,6 +1401,50 @@
       return `<div class="assessment-scorecard" aria-label="Assessment score breakdown"><div class="assessment-total"><span>Total score</span><strong>${Math.round(s.total)} <small>/ 100</small></strong></div><div class="assessment-breakdown">${score('Think', s.think, 40)}${score('Speak', s.speak, 30)}${score('Act', s.act, 30)}</div></div>`;
     }
 
+    function tsaResponseCard(kind, section, label, entry) {
+      const id = 'tsa-' + kind + '-' + section;
+      const transcript = ((entry && entry.transcript) || '').trim();
+      if (!transcript) {
+        return `<div class="ex-result-card ex-result-pending"><div class="ex-result-header"><span class="ex-result-icon">–</span><div><div class="ex-result-title">${label}</div><div class="ex-result-meta">No written response saved in this browser</div></div></div></div>`;
+      }
+      const meta = (entry.mode === 'record' ? 'Recorded' : 'Typed') + (entry.duration ? ' · ' + formatDuration(entry.duration) : '');
+      const allWords = transcript.split(/\s+/).filter(Boolean);
+      const preview = allWords.slice(0, 30).join(' ') + (allWords.length > 30 ? '…' : '');
+      return `<div class="ex-result-card">
+        <div class="ex-result-header"><span class="ex-result-icon">✓</span><div><div class="ex-result-title">${label}</div><div class="ex-result-meta">${meta}</div></div></div>
+        <div class="ex-result-preview">${escapeHtml(preview)}</div>
+        <div class="ex-result-actions">
+          <button class="btn-copy-workbook" onclick="tsaCopyResponse('full-${id}')">Copy to workbook</button>
+          <button class="btn-view-full" onclick="tsaToggleFull('full-${id}')">View full response</button>
+        </div>
+        <div class="ex-result-full" id="full-${id}" style="display:none">${escapeHtml(transcript)}</div>
+      </div>`;
+    }
+
+    function tsaCopyResponse(elementId) {
+      const full = document.getElementById(elementId);
+      if (!full) return;
+      const text = full.textContent;
+      const button = event.target;
+      navigator.clipboard.writeText(text).then(() => {
+        const original = button.textContent;
+        button.textContent = 'Copied ✓';
+        setTimeout(() => button.textContent = original, 2000);
+      }).catch(() => {
+        alert('Could not copy automatically. Select the text below and copy manually.');
+        full.style.display = 'block';
+      });
+    }
+
+    function tsaToggleFull(elementId) {
+      const full = document.getElementById(elementId);
+      if (!full) return;
+      const button = event.target;
+      const isHidden = full.style.display === 'none';
+      full.style.display = isHidden ? 'block' : 'none';
+      button.textContent = isHidden ? 'Hide response' : 'View full response';
+    }
+
     function resultFor(appId) {
       try {
         const aliases = {
@@ -1835,7 +1879,8 @@
         if (!result) {
           return `<div class="ex-result-card ex-result-pending"><div class="ex-result-header"><span class="ex-result-icon">–</span><div><div class="ex-result-title">${assessment.name}</div><div class="ex-result-meta">Not yet taken</div></div><span class="ex-badge-pending">Pending</span></div><a class="take-now-link" href="${assessment.path}">Take now →</a></div>`;
         }
-        return `<div class="ex-result-card"><div class="ex-result-header"><span class="ex-result-icon">✓</span><div><div class="ex-result-title">${assessment.name}</div><div class="ex-result-meta">Scored</div></div><span class="ex-badge-done">Done</span></div>${tsaScorecardHtml(result)}<a class="take-now-link" href="${assessment.path}">Retake →</a></div>`;
+        const responses = result.responses || {};
+        return `<div class="ex-result-card"><div class="ex-result-header"><span class="ex-result-icon">✓</span><div><div class="ex-result-title">${assessment.name}</div><div class="ex-result-meta">Scored</div></div><span class="ex-badge-done">Done</span></div>${tsaScorecardHtml(result)}${tsaResponseCard(assessment.kind, 'speak', 'Your Speak response', responses.speak)}${tsaResponseCard(assessment.kind, 'act', 'Your Act response', responses.act)}<a class="take-now-link" href="${assessment.path}">Retake →</a></div>`;
       }).join('');
       if (diagnosticResult && checkpointResult) {
         const delta = Math.round(checkpointResult.scores.total - diagnosticResult.scores.total);
