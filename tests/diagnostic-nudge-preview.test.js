@@ -23,8 +23,8 @@ states.forEach((state) => assert.match(admin, new RegExp(`id:'${state}'`), `prev
 assert.match(admin, /The assessment nudge disappears completely/, 'completion should remove the diagnostic nudge during learning');
 assert.match(admin, /The same banner position returns once/, 'program completion should reuse the same compact banner position');
 assert.match(admin, /will not include a before-and-after comparison/, 'the no-baseline edge case should be honest about comparison limits');
-assert.match(admin, /Take diagnostic · 15–20 min/, 'the diagnostic action should set a realistic time expectation');
-assert.match(admin, /Take checkpoint · 15–20 min/, 'the checkpoint action should set the same time expectation');
+assert.match(admin, /Take diagnostic · about 30 min/, 'the diagnostic action should set a realistic time expectation');
+assert.match(admin, /Take checkpoint · about 30 min/, 'the checkpoint action should set the same time expectation');
 assert.match(admin, /class="dn-orientation-row"/, 'the mock should preserve the Orientation row');
 assert.match(admin, /class="dn-milestone-dots"/, 'the Orientation row should contain quiet, non-clickable journey progress');
 assert.match(admin, /role="img" aria-label="Program journey:/, 'the milestone dots should expose one concise accessible summary');

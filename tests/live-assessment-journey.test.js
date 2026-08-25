@@ -8,8 +8,8 @@ assert.match(member, /function assessmentJourneyStatus\(kind\)/, 'the live journ
 assert.match(member, /remoteExercises\["tsa-" \+ kind \+ "-v2"\]/, 'assessment completion should be restored from cloud progress on another device');
 assert.match(member, /function assessmentJourneyModel\(orientationDone\)/, 'the live journey should derive independent milestone states');
 assert.match(member, /function assessmentJourneyNudgeHtml\(model, next, progress\)/, 'the live journey should show the approved assessment nudge');
-assert.match(member, /Take diagnostic · 15–20 min/, 'the live diagnostic nudge should set a realistic time expectation');
-assert.match(member, /Take checkpoint · 15–20 min/, 'the live checkpoint nudge should set a realistic time expectation');
+assert.match(member, /Take diagnostic · about 30 min/, 'the live diagnostic nudge should set a realistic time expectation');
+assert.match(member, /Take checkpoint · about 30 min/, 'the live checkpoint nudge should set a realistic time expectation');
 assert.match(member, /Checkpoint ready · No baseline/, 'program completion without a diagnostic should be explained honestly');
 assert.match(member, /statuses\[1\] = diagnostic\.inProgress \? "current" : phaseStarted \? "warning" : "current"/, 'a skipped diagnostic should remain independently incomplete');
 assert.match(member, /phaseComplete\.forEach\(function \(complete, index\) \{ if \(complete\) statuses\[index \+ 2\] = "complete"; \}\)/, 'completed phases should stay complete when the diagnostic was skipped');
