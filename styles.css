@@ -90,6 +90,28 @@ body {
 
 .home-page .nav-menu a:hover { color: var(--home-gold); }
 
+.home-page .nav-menu a:not(.nav-button):not(.nav-link-active) {
+  position: relative;
+  transition: color 0.3s ease-in-out;
+}
+
+.home-page .nav-menu a:not(.nav-button):not(.nav-link-active)::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -6px;
+  width: 0;
+  height: 2px;
+  border-radius: 2px;
+  background-color: var(--home-gold);
+  transition: left 0.3s ease-in-out, width 0.3s ease-in-out;
+}
+
+.home-page .nav-menu a:not(.nav-button):not(.nav-link-active):hover::after {
+  left: 0;
+  width: 100%;
+}
+
 .home-page .nav-menu a.nav-link-active {
   color: var(--home-navy);
   text-decoration: underline;
@@ -955,14 +977,30 @@ body {
 }
 
 .home-page .footer-links a {
+  position: relative;
   color: var(--home-white);
   font-family: 'Lato', sans-serif;
   font-size: 13pt;
   font-weight: 300;
   text-decoration: none;
+  transition: color 0.3s ease-in-out;
+}
+
+.home-page .footer-links a::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -6px;
+  width: 0;
+  height: 2px;
+  border-radius: 2px;
+  background-color: var(--home-gold);
+  transition: left 0.3s ease-in-out, width 0.3s ease-in-out;
 }
 
 .home-page .footer-links a:hover { color: var(--home-gold); }
+
+.home-page .footer-links a:hover::after { left: 0; width: 100%; }
 
 .home-page .footer-bottom {
   border-top: 1px solid rgba(255,255,255,0.1);
@@ -2426,10 +2464,31 @@ nav img {
   color: var(--charcoal);
   text-decoration: none;
   letter-spacing: 0;
-  transition: color 0.15s;
+  transition: color 0.3s ease-in-out;
 }
 
 .nav-links li a:hover { color: var(--navy); }
+
+.nav-links li a:not(.active):not([href$="portal.html"]) {
+  position: relative;
+}
+
+.nav-links li a:not(.active):not([href$="portal.html"])::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -6px;
+  width: 0;
+  height: 2px;
+  border-radius: 2px;
+  background-color: var(--gold);
+  transition: left 0.3s ease-in-out, width 0.3s ease-in-out;
+}
+
+.nav-links li a:not(.active):not([href$="portal.html"]):hover::after {
+  left: 0;
+  width: 100%;
+}
 
 .nav-links li a[href$="portal.html"] {
   display: inline-block;
@@ -3084,13 +3143,28 @@ footer p {
 }
 
 .footer-links a {
+  position: relative;
   font-family: 'Lato', sans-serif;
   font-weight: 300;
   font-size: 13px;
   color: var(--steel);
   text-decoration: none;
-  transition: color 0.15s;
+  transition: color 0.3s ease-in-out;
 }
+
+.footer-links a::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -6px;
+  width: 0;
+  height: 2px;
+  border-radius: 2px;
+  background-color: var(--gold);
+  transition: left 0.3s ease-in-out, width 0.3s ease-in-out;
+}
+
+.footer-links a:hover::after { left: 0; width: 100%; }
 
 .footer-links a:hover { color: var(--gold); }
 
