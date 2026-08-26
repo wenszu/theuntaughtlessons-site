@@ -75,7 +75,7 @@ const UTL_CONTENT = {
         description: "Use AI to improve your grocery-list structure and compare the result against your own MECE logic.",
         appUrl: "../apps/grocery-list-ai/index.html",
         contextType: "video",
-        contextUrl: "https://drive.google.com/file/d/1gnQt4DosE77dUAlRw_Lz7Zg0iM7WoqSH/view?usp=vids_web",
+        contextUrl: "https://drive.google.com/file/d/119sJkFz6imeWn51g44qTfqjTQIEXs2OJ/view",
         contextTitle: "Try the same task with AI",
         contextBody: "Now that you have practiced sorting the list yourself, try the same task with AI and pay attention to what the prompt does or does not make clear."
       },
@@ -89,7 +89,7 @@ const UTL_CONTENT = {
         description: "Turn a disorganized message into a structured, decision-ready response using MECE, Rule of three, and BSP.",
         appUrl: "../apps/messy-notes/index.html",
         contextType: "video",
-        contextUrl: "https://drive.google.com/file/d/1GVQY9kOa9FYJnjIXDNhjROSg5zYa1ZSJ/view?usp=vids_web",
+        contextUrl: "https://drive.google.com/file/d/1QDiVqzY8xiQDpBoGq0UOpwzm1GxN2bDO/view",
         contextTitle: "A message just landed on your desk",
         contextBody: "One of Aiko's direct reports, Ashley, just sent a cluttered update meant for Aiko. Ashley needs it decision-ready before Aiko is back. Apply the lessons from Phase 1 to get this done."
       },
@@ -103,7 +103,7 @@ const UTL_CONTENT = {
         description: "Turn a rushed spoken update into a clear, actionable update using the principles of MECE, Rule of three, and BSP.",
         appUrl: "../apps/rushed-voice-memo/index.html",
         contextType: "video",
-        contextUrl: "https://drive.google.com/file/d/1UlgI50nxlmc-K5DcrjUnnn_-yjghwlQM/view?usp=vids_web",
+        contextUrl: "https://drive.google.com/file/d/1ZomeBoyk0SS1iFNV2eXobRfJQWDwyhEz/view",
         contextTitle: "Hugh needs a favor",
         contextBody: "Hugh needs a favor and the information is messy. Your job is to slow the situation down and make the request easier to understand."
       },
@@ -118,7 +118,7 @@ const UTL_CONTENT = {
         description: "Use AI to pressure-test and improve the structure of a rushed memo response.",
         appUrl: "../apps/rushed-voice-memo-ai/index.html",
         contextType: "video",
-        contextUrl: "https://drive.google.com/file/d/1S37Vsw2Ga4noX0nVFxv44_9-8uxfqdrS/view?usp=vids_web",
+        contextUrl: "https://drive.google.com/file/d/1wU42aEuW-_XjVMrL479CUtAizs3BkAj5/view",
         contextTitle: "Try the same memo with AI",
         contextBody: "Use the AI version to compare your own restructuring choices against another structured draft."
       },
@@ -132,7 +132,7 @@ const UTL_CONTENT = {
         description: "Practice how to think clearly by cleaning up visual clutter into actionable and MECE insights.",
         appUrl: "../apps/chalkboard-notes/index.html",
         contextType: "video",
-        contextUrl: "https://drive.google.com/file/d/1hYPC8eCn9fCDFDEo0WgMt3qva2pyQXV7/view?usp=vids_web",
+        contextUrl: "https://drive.google.com/file/d/1BHO2za_2AtxJvyKVOh-B19gDUwvVMnYy/view",
         contextTitle: "Aiko needs the Olympic brainstorm session sorted",
         contextBody: "Aiko needs the Olympic brainstorm session turned into something the team can use. Clean up the fragments and make the structure visible."
       }
