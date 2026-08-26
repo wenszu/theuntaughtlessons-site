@@ -1985,6 +1985,10 @@
     .mb-bulk-file { display:grid; place-items:center; min-height:130px; padding:20px; border:1px dashed rgba(0,51,102,.35); border-radius:8px; background:#FAF8F3; text-align:center; }
     .mb-bulk-file input { max-width:100%; }
     .mb-bulk-help { margin:7px 0 0; color:#777; font-size:11px; line-height:1.45; }
+    .mb-bulk-format-guide { margin-top:12px; padding:13px 15px; border:1px solid rgba(0,51,102,.18); border-radius:8px; background:#F3F7FA; color:var(--charcoal); font-size:12px; line-height:1.5; }
+    .mb-bulk-format-guide strong { color:var(--navy); }
+    .mb-bulk-format-guide ul { margin:7px 0 10px; padding-left:18px; }
+    .mb-bulk-format-guide pre { margin:0; padding:10px 12px; overflow:auto; border-radius:6px; background:#fff; border:1px solid var(--line); font:400 11px/1.55 'Roboto Mono',monospace; }
     .mb-bulk-actions { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-top:14px; }
     .mb-bulk-summary { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
     .mb-bulk-summary span { padding:5px 9px; border-radius:999px; background:#F2ECE3; color:var(--charcoal); font-size:11px; font-weight:700; }
@@ -2106,6 +2110,14 @@
     .eng-field-group { display:grid; gap:0; margin-bottom:18px; border:1px solid var(--line); border-radius:8px; background:var(--white); overflow:hidden; }
     .eng-field-row { display:flex; align-items:flex-start; gap:14px; padding:14px 16px; border-bottom:1px solid var(--line); }
     .eng-field-row:last-child { border-bottom:0; }
+    .credential-admin { margin-top:22px; padding-top:20px; border-top:1px solid var(--line); }
+    .credential-admin h3 { margin:0 0 6px; color:var(--navy); font:700 18px 'Playfair Display',serif; }
+    .credential-admin-search { display:flex; gap:8px; margin-top:12px; }
+    .credential-admin-search input { flex:1; min-width:0; border:1px solid var(--line); border-radius:6px; padding:10px 12px; font:500 12px 'Roboto Mono',monospace; }
+    .credential-admin-result { margin-top:12px; padding:14px; border-radius:7px; background:#F7F5F0; border:1px solid var(--line); font-size:12px; line-height:1.55; }
+    .credential-admin-result[hidden] { display:none; }
+    .credential-admin-result strong { color:var(--navy); }
+    .credential-admin-actions { display:flex; gap:8px; margin-top:10px; }
     .settings-audience-heading { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; margin:22px 0 10px; }
     .settings-audience-heading h3 { margin:0 0 4px; color:var(--navy); font-family:'Lato',sans-serif; font-size:17px; }
     .settings-audience-heading p { margin:0; color:#687482; font-size:13px; line-height:1.45; }
@@ -3142,8 +3154,10 @@
               <label><input type="checkbox" id="mbBulkGoogleGroup" checked>Request Google Group access</label>
             </div>
             <div class="mb-bulk-tabs" role="tablist" aria-label="Choose how to add learners"><button class="mb-bulk-tab is-active" type="button" role="tab" aria-selected="true" data-mb-bulk-input="paste">Paste list</button><button class="mb-bulk-tab" type="button" role="tab" aria-selected="false" data-mb-bulk-input="file">Upload CSV</button></div>
-            <div class="mb-bulk-input-panel" data-mb-bulk-input-panel="paste"><label for="mbBulkPaste" class="invite-email-label">Paste names and emails</label><textarea class="mb-bulk-textarea" id="mbBulkPaste" placeholder="Wen-Szu Lin&#9;wenszu@example.com&#10;Aldon Smith&#9;aldon@example.com"></textarea><p class="mb-bulk-help">Copy two columns from Google Sheets or Excel, or paste comma-separated rows. The first row may contain headings.</p></div>
-            <div class="mb-bulk-input-panel" data-mb-bulk-input-panel="file" hidden><div class="mb-bulk-file"><div><label for="mbBulkFile"><strong>Choose a CSV file</strong></label><br><input type="file" id="mbBulkFile" accept=".csv,text/csv"><p class="mb-bulk-help" id="mbBulkFileName">Required columns: name and email. Maximum 500 rows.</p></div></div><button class="small-button secondary-button" type="button" id="mbBulkTemplate" style="margin-top:10px">Download CSV template</button></div>
+            <div class="mb-bulk-input-panel" data-mb-bulk-input-panel="paste"><label for="mbBulkPaste" class="invite-email-label">Paste names and emails</label><textarea class="mb-bulk-textarea" id="mbBulkPaste" placeholder="Albert Einstein&#9;albert.einstein@example.com&#10;Marie Curie&#9;marie.curie@example.com"></textarea><p class="mb-bulk-help">Copy two columns from Google Sheets or Excel, or paste comma-separated rows. The first row may contain headings.</p></div>
+            <div class="mb-bulk-input-panel" data-mb-bulk-input-panel="file" hidden><div class="mb-bulk-file"><div><label for="mbBulkFile"><strong>Choose a CSV file</strong></label><br><input type="file" id="mbBulkFile" accept=".csv,text/csv"><p class="mb-bulk-help" id="mbBulkFileName">No file selected.</p></div></div><div class="mb-bulk-format-guide"><strong>CSV format</strong><ul><li>Use exactly two columns headed <strong>name</strong> and <strong>email</strong>.</li><li>Put one learner on each row and save the file as a UTF-8 CSV.</li><li>Names containing commas may be enclosed in quotation marks. Maximum 500 learners.</li><li>Cohort, expiry and onboarding choices above apply to everyone in the file.</li></ul><pre aria-label="CSV example">name,email
+Albert Einstein,albert.einstein@example.com
+Marie Curie,marie.curie@example.com</pre></div><button class="small-button secondary-button" type="button" id="mbBulkTemplate" style="margin-top:10px">Download CSV template</button></div>
             <div class="mb-bulk-actions"><button class="small-button" type="button" id="mbBulkReview">Review learners</button><span class="student-progress-status" id="mbBulkPrepareStatus" aria-live="polite"></span></div>
           </div>
           <div class="mb-bulk-panel" data-mb-bulk-panel="2" hidden>
@@ -3517,6 +3531,12 @@
           </div>
           <button class="small-button eng-save-btn" type="button" id="engCertSave">Save certificate settings</button>
           <span class="saved" id="engCertSaved">Saved</span>
+          <div class="credential-admin">
+            <h3>Credential registry</h3>
+            <p class="description">Look up the live public record for a credential. Revoke an ID if it was issued in error; reactivation restores the same record.</p>
+            <div class="credential-admin-search"><input id="engCredentialLookupId" aria-label="Credential ID" placeholder="UTL-TSA-7K4M9Q2D8R6C"><button class="small-button secondary-button" type="button" id="engCredentialLookup">Look up</button></div>
+            <div class="credential-admin-result" id="engCredentialResult" hidden aria-live="polite"></div>
+          </div>
         </div>
       </section>
 
@@ -3652,6 +3672,7 @@
       getGlobalFeedbackSetting,
       getPublicFindLevelSetting,
       getSignedInUser,
+      manageVerifiedCredential,
       requestGoogleGroupSyncJob,
       runAdminAction,
       repairMemberProgramCompletionReward,
@@ -3697,6 +3718,7 @@
       getGlobalFeedbackSetting,
       getPublicFindLevelSetting,
       getSignedInUser,
+      manageVerifiedCredential,
       requestGoogleGroupSyncJob,
       runAdminAction,
       repairMemberProgramCompletionReward,
@@ -5652,6 +5674,28 @@
     document.getElementById('engCertSave')?.addEventListener('click', function() {
       saveEngSection(this, 'engCertSaved', ['certificate']);
     });
+
+    async function engCredentialAction(action) {
+      var fb = window.utlFirebaseAuth;
+      var input = document.getElementById('engCredentialLookupId');
+      var output = document.getElementById('engCredentialResult');
+      var id = String(input?.value || '').trim().toUpperCase();
+      if (!output || !fb?.manageVerifiedCredential) return;
+      output.hidden = false;
+      output.textContent = action === 'lookup' ? 'Checking the live registry…' : 'Updating the credential…';
+      try {
+        var response = await fb.manageVerifiedCredential(action, id);
+        if (!response || !response.found) { output.innerHTML = '<strong>Not found.</strong> Check the ID and try again.'; return; }
+        var item = response.credential || {};
+        var nextAction = item.status === 'active' ? 'revoke' : 'reactivate';
+        var nextLabel = item.status === 'active' ? 'Revoke credential' : 'Reactivate credential';
+        input.value = item.credentialId || id;
+        output.innerHTML = '<label for="engCredentialRecipientName"><strong>Recipient name</strong></label><input class="eng-text" id="engCredentialRecipientName" value="' + escapeHtml(item.recipientName || '') + '" style="width:100%;margin:6px 0 10px"><br>' + escapeHtml(item.credentialTitle || '') + '<br><span style="font-family:Roboto Mono,monospace">' + escapeHtml(item.credentialId || id) + '</span> · Status: <strong>' + escapeHtml(item.status || 'unknown') + '</strong><div class="credential-admin-actions"><a class="small-button secondary-button" target="_blank" rel="noopener" href="../verify/?id=' + encodeURIComponent(item.credentialId || id) + '">Open public record</a><button class="small-button secondary-button" type="button" data-credential-action="update-name">Save corrected name</button><button class="small-button secondary-button" type="button" data-credential-action="' + nextAction + '">' + nextLabel + '</button><button class="small-button secondary-button" type="button" data-credential-action="reissue">Replace with new ID</button></div>';
+      } catch (error) { output.textContent = error && error.message ? error.message : 'Credential action failed.'; }
+    }
+    document.getElementById('engCredentialLookup')?.addEventListener('click', function(){ engCredentialAction('lookup'); });
+    document.getElementById('engCredentialLookupId')?.addEventListener('keydown', function(event){ if(event.key === 'Enter'){ event.preventDefault(); engCredentialAction('lookup'); } });
+    document.getElementById('engCredentialResult')?.addEventListener('click', async function(event){ var button=event.target.closest('[data-credential-action]'); if(!button) return; var action=button.dataset.credentialAction; if(action==='revoke' && !window.confirm('Revoke this credential? Its public verification page will immediately show that it is not active.')) return; if(action==='reissue' && !window.confirm('Replace this credential with a new ID? The old public record will show that it was replaced.')) return; if(action==='update-name'){ var fb=window.utlFirebaseAuth; var id=String(document.getElementById('engCredentialLookupId')?.value||'').trim().toUpperCase(); var recipientName=String(document.getElementById('engCredentialRecipientName')?.value||'').trim(); try{ await fb.manageVerifiedCredential(action,id,{recipientName:recipientName}); showToast('Credential name updated'); engCredentialAction('lookup'); }catch(error){ showToast(error.message||'Update failed',true); } return; } engCredentialAction(action); });
 
     document.addEventListener('change', function(e) {
       var input = e.target.closest('input.eng-toggle');
@@ -9819,8 +9863,8 @@
           document.querySelectorAll('[data-mb-bulk-input-panel]').forEach(function (panel) { panel.hidden = panel.dataset.mbBulkInputPanel !== mbBulkInputMode; });
         });
       });
-      document.getElementById('mbBulkFile')?.addEventListener('change', function (event) { document.getElementById('mbBulkFileName').textContent = event.target.files[0] ? event.target.files[0].name : 'Required columns: name and email. Maximum 500 rows.'; });
-      document.getElementById('mbBulkTemplate')?.addEventListener('click', function () { mbBulkDownload('utl-bulk-learners-template.csv', 'name,email\r\nWen-Szu Lin,wenszu@example.com\r\nAldon Smith,aldon@example.com\r\n'); });
+      document.getElementById('mbBulkFile')?.addEventListener('change', function (event) { document.getElementById('mbBulkFileName').textContent = event.target.files[0] ? event.target.files[0].name : 'No file selected.'; });
+      document.getElementById('mbBulkTemplate')?.addEventListener('click', function () { mbBulkDownload('utl-bulk-learners-template.csv', 'name,email\r\nAlbert Einstein,albert.einstein@example.com\r\nMarie Curie,marie.curie@example.com\r\n'); });
       document.getElementById('mbBulkReview')?.addEventListener('click', async function () {
         var status = document.getElementById('mbBulkPrepareStatus');
         try {

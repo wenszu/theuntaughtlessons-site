@@ -141,6 +141,17 @@ service cloud.firestore {
         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name', 'lastLoginAt', 'firstLoginAt']);
     }
 
+    // Public credentials intentionally contain only verification-safe fields.
+    // Issuance records and all writes are handled by trusted server functions.
+    match /public_credentials/{credentialId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    match /credential_issuance/{issuanceId} {
+      allow read, write: if false;
+    }
+
     match /access_requests/{requestId} {
       allow create: if isValidAccessRequest(requestId);
       allow read, update, delete: if isAdmin();

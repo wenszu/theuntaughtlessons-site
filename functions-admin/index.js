@@ -1,4 +1,5 @@
 const admin = require("firebase-admin");
+const crypto = require("crypto");
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const { defineSecret, defineString } = require("firebase-functions/params");
 
@@ -11,6 +12,167 @@ const APPS_SCRIPT_ADMIN_URL = defineString("APPS_SCRIPT_ADMIN_URL", {
 const BOOTSTRAP_OWNER_EMAILS = new Set(["wenszu@gmail.com"]);
 const ALLOWED_ADMIN_ACTIONS = new Set(["WelcomeEmail", "TestEmailTemplate", "RemovedMember"]);
 const MAX_ADMIN_ACTION_BYTES = 64 * 1024;
+const CREDENTIAL_PROGRAM_VERSION = "tsa-2026-v1";
+const CREDENTIAL_ID_ALPHABET = "0123456789ABCDEFGHJKMNPQRSTVWXYZ";
+const REQUIRED_EXERCISES = [
+  "grocery-list", "grocery-list-ai", "messy-notes", "rushed-voice-memo", "rushed-voice-memo-ai", "chalkboard-notes",
+  "issue-tree-builder", "scqa-builder", "advisory-board", "write-to-aiko", "explain-to-aiko", "explain-to-aiko-60",
+  "eisenhower-matrix", "i-have-bad-news", "lets-switch-hats", "speak-like-obama"
+];
+
+function newCredentialId() {
+  const bytes = crypto.randomBytes(12);
+  let suffix = "";
+  for (let i = 0; i < 12; i += 1) suffix += CREDENTIAL_ID_ALPHABET[bytes[i] % CREDENTIAL_ID_ALPHABET.length];
+  return "UTL-TSA-" + suffix;
+}
+
+function timestampToIso(value) {
+  return value && typeof value.toDate === "function" ? value.toDate().toISOString() : new Date().toISOString();
+}
+
+async function requireVerifiedCaller(request) {
+  const email = String(request.auth && request.auth.token && request.auth.token.email || "").trim().toLowerCase();
+  if (!request.auth || !email || request.auth.token.email_verified !== true) {
+    throw new HttpsError("unauthenticated", "Sign in with your verified member account.");
+  }
+  return { uid: request.auth.uid, email };
+}
+
+async function credentialSettings() {
+  const snap = await admin.firestore().collection("settings").doc("engagement").get();
+  const certificate = snap.exists && snap.data() && snap.data().certificate || {};
+  return {
+    enabled: certificate.enabled !== false,
+    credentialTitle: String(certificate.credentialTitle || "Think, speak and act like an executive™."),
+    signatoryName: String(certificate.signatoryName || "Wen-Szu Lin"),
+    signatoryTitle: String(certificate.signatoryTitle || "Founder, The Untaught Lessons")
+  };
+}
+
+async function completedExerciseEvidence(uid) {
+  const snapshot = await admin.firestore().collection("users").doc(uid).collection("completed_exercises").get();
+  const done = new Map();
+  snapshot.forEach((document) => {
+    const data = document.data() || {};
+    if (String(data.status || "").toLowerCase() === "done") done.set(document.id, data.updatedAt || null);
+  });
+  const missing = REQUIRED_EXERCISES.filter((id) => !done.has(id));
+  let latest = null;
+  done.forEach((value, id) => {
+    if (!REQUIRED_EXERCISES.includes(id) || !value || typeof value.toMillis !== "function") return;
+    if (!latest || value.toMillis() > latest.toMillis()) latest = value;
+  });
+  return { missing, latest };
+}
+
+exports.issueVerifiedCredential = onCall({ timeoutSeconds: 30, memory: "256MiB" }, async (request) => {
+  const caller = await requireVerifiedCaller(request);
+  const settings = await credentialSettings();
+  if (!settings.enabled) throw new HttpsError("failed-precondition", "Certificates are not currently available.");
+  const memberSnap = await admin.firestore().collection("authorized_members").doc(caller.email).get();
+  if (!memberSnap.exists || String(memberSnap.data().status || "active").toLowerCase() === "inactive") {
+    throw new HttpsError("permission-denied", "This account does not have active member access.");
+  }
+  const evidence = await completedExerciseEvidence(caller.uid);
+  if (evidence.missing.length) {
+    throw new HttpsError("failed-precondition", "Complete all program exercises before requesting a certificate.");
+  }
+  const db = admin.firestore();
+  const issuanceRef = db.collection("credential_issuance").doc(caller.uid + "_" + CREDENTIAL_PROGRAM_VERSION);
+  const existing = await issuanceRef.get();
+  if (existing.exists) {
+    const data = existing.data() || {};
+    const publicSnap = data.credentialId ? await db.collection("public_credentials").doc(data.credentialId).get() : null;
+    if (publicSnap && publicSnap.exists && String(publicSnap.data().status || "") === "active") {
+      const publicData = publicSnap.data() || {};
+      return { ok: true, credential: { ...publicData, issuedAt: timestampToIso(publicData.issuedAt) } };
+    }
+  }
+  const recipientName = String(memberSnap.data().name || request.auth.token.name || caller.email.split("@")[0]).trim().slice(0, 160);
+  const issuedAt = evidence.latest || admin.firestore.Timestamp.now();
+  let credentialId;
+  let publicRef;
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    credentialId = newCredentialId();
+    publicRef = db.collection("public_credentials").doc(credentialId);
+    if (!(await publicRef.get()).exists) break;
+  }
+  const publicCredential = {
+    credentialId,
+    recipientName,
+    credentialTitle: settings.credentialTitle,
+    issuer: "The Untaught Lessons",
+    issuedAt,
+    status: "active",
+    programVersion: CREDENTIAL_PROGRAM_VERSION,
+    signatoryName: settings.signatoryName,
+    signatoryTitle: settings.signatoryTitle,
+    verificationUrl: "https://theuntaughtlessons.com/verify/?id=" + encodeURIComponent(credentialId)
+  };
+  const batch = db.batch();
+  batch.set(publicRef, publicCredential);
+  batch.set(issuanceRef, {
+    userId: caller.uid, email: caller.email, credentialId, programVersion: CREDENTIAL_PROGRAM_VERSION,
+    completionVerifiedAt: admin.firestore.FieldValue.serverTimestamp(), issuedAt, status: "active",
+    requiredExercises: REQUIRED_EXERCISES, createdAt: admin.firestore.FieldValue.serverTimestamp()
+  });
+  await batch.commit();
+  return { ok: true, credential: { ...publicCredential, issuedAt: timestampToIso(issuedAt) } };
+});
+
+exports.manageVerifiedCredential = onCall({ timeoutSeconds: 30, memory: "256MiB" }, async (request) => {
+  const caller = await requireVerifiedCaller(request);
+  if (!(await isAuthorizedAdmin(caller.email))) throw new HttpsError("permission-denied", "Administrator access is required.");
+  const input = request.data && typeof request.data === "object" ? request.data : {};
+  const action = String(input.action || "lookup").trim().toLowerCase();
+  const credentialId = String(input.credentialId || "").trim().toUpperCase();
+  if (!/^UTL-TSA-[0-9A-HJKMNP-TV-Z]{12}$/.test(credentialId)) throw new HttpsError("invalid-argument", "Enter a valid UTL credential ID.");
+  const ref = admin.firestore().collection("public_credentials").doc(credentialId);
+  const snap = await ref.get();
+  if (!snap.exists) return { ok: true, found: false };
+  if (action === "revoke") {
+    await ref.update({ status: "revoked", revokedAt: admin.firestore.FieldValue.serverTimestamp() });
+  } else if (action === "reactivate") {
+    await ref.update({ status: "active", reactivatedAt: admin.firestore.FieldValue.serverTimestamp() });
+  } else if (action === "update-name") {
+    const recipientName = String(input.recipientName || "").trim().slice(0, 160);
+    if (!recipientName) throw new HttpsError("invalid-argument", "Enter the recipient's name.");
+    await ref.update({ recipientName, correctedAt: admin.firestore.FieldValue.serverTimestamp() });
+  } else if (action === "reissue") {
+    const oldData = snap.data() || {};
+    let replacementId;
+    let replacementRef;
+    for (let attempt = 0; attempt < 5; attempt += 1) {
+      replacementId = newCredentialId();
+      replacementRef = admin.firestore().collection("public_credentials").doc(replacementId);
+      if (!(await replacementRef.get()).exists) break;
+    }
+    const replacement = {
+      ...oldData,
+      credentialId: replacementId,
+      status: "active",
+      verificationUrl: "https://theuntaughtlessons.com/verify/?id=" + encodeURIComponent(replacementId),
+      reissuedAt: admin.firestore.FieldValue.serverTimestamp()
+    };
+    delete replacement.revokedAt;
+    delete replacement.revokedBy;
+    const issuanceQuery = await admin.firestore().collection("credential_issuance").where("credentialId", "==", credentialId).limit(1).get();
+    const batch = admin.firestore().batch();
+    batch.set(replacementRef, replacement);
+    batch.update(ref, { status: "replaced", replacementCredentialId: replacementId, replacedAt: admin.firestore.FieldValue.serverTimestamp() });
+    if (!issuanceQuery.empty) batch.update(issuanceQuery.docs[0].ref, { credentialId: replacementId, status: "active", reissuedAt: admin.firestore.FieldValue.serverTimestamp() });
+    await batch.commit();
+    const replacementSnap = await replacementRef.get();
+    const replacementData = replacementSnap.data() || {};
+    return { ok: true, found: true, credential: { ...replacementData, issuedAt: timestampToIso(replacementData.issuedAt) }, replacedCredentialId: credentialId };
+  } else if (action !== "lookup") {
+    throw new HttpsError("invalid-argument", "Unsupported credential action.");
+  }
+  const current = await ref.get();
+  const data = current.data() || {};
+  return { ok: true, found: true, credential: { ...data, issuedAt: timestampToIso(data.issuedAt) } };
+});
 
 exports.runAdminAction = onCall({
   secrets: [APPS_SCRIPT_ADMIN_RELAY_SECRET],

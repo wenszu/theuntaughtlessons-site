@@ -156,6 +156,18 @@ async function setEmergencyCredential(email, password) {
   return result && result.data ? result.data : { ok: true };
 }
 
+async function issueVerifiedCredential() {
+  const callable = httpsCallable(functions, "issueVerifiedCredential");
+  const result = await callable({});
+  return result && result.data ? result.data : null;
+}
+
+async function manageVerifiedCredential(action, credentialId, details = {}) {
+  const callable = httpsCallable(functions, "manageVerifiedCredential");
+  const result = await callable({ action, credentialId, ...(details && typeof details === "object" ? details : {}) });
+  return result && result.data ? result.data : null;
+}
+
 function signInWithEmailPassword(email, password) {
   return signInWithEmailAndPassword(requireFirebaseAuth(), String(email || "").trim().toLowerCase(), String(password || ""));
 }
@@ -1170,6 +1182,8 @@ export {
   getUserFeedbackEnabled,
   GoogleAuthProvider,
   isSignInWithEmailLink,
+  issueVerifiedCredential,
+  manageVerifiedCredential,
   onAuthStateChanged,
   requireAuthorizedMember,
   requestGoogleGroupSyncJob,

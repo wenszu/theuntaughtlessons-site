@@ -7,6 +7,10 @@ assert.match(admin, /id="mbBulkAddBtn">Bulk add learners</, 'Member Management s
 assert.match(admin, /data-mb-bulk-input="paste"/, 'paste-from-spreadsheet should be the primary bulk input');
 assert.match(admin, /data-mb-bulk-input="file"/, 'CSV upload should be available for larger batches');
 assert.match(admin, /id="mbBulkTemplate"/, 'admins should be able to download a CSV template');
+assert.match(admin, /Use exactly two columns headed <strong>name<\/strong> and <strong>email<\/strong>/, 'CSV mode should explain its required columns');
+assert.match(admin, /save the file as a UTF-8 CSV/, 'CSV mode should explain the expected encoding');
+assert.match(admin, /Albert Einstein,albert\.einstein@example\.com/, 'bulk examples should use a clearly fictional famous-person example');
+assert.match(admin, /Marie Curie,marie\.curie@example\.com/, 'manual and CSV examples should include a second famous person');
 assert.match(admin, /Nothing is saved and no emails are sent until you confirm the review/, 'the import should explain its preflight boundary');
 assert.match(admin, /slice\(0, 500\)/, 'browser imports should have a bounded row count');
 assert.match(admin, /Duplicate in this batch/, 'duplicate rows should be detected before writing');
