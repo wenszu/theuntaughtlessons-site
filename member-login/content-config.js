@@ -168,7 +168,7 @@ const UTL_CONTENT = {
         description: "Build an issue tree to break down the problem into solvable parts.",
         appUrl: "../apps/issue-tree-builder/index.html",
         contextType: "video",
-        contextUrl: "https://drive.google.com/file/d/15AaNTTkiRsIVf90RfsmcSa3aEuFTqOAT/view?usp=vids_web",
+        contextUrl: "https://drive.google.com/file/d/1goMjwwkp_dGav6LyORBGMMFvBC27xTR8/view",
         contextTitle: "Aiko liked your work. Now she has a question.",
         contextBody: "Create an issue tree to break problems down into MECE parts for your answer to Aiko."
       },
@@ -182,7 +182,7 @@ const UTL_CONTENT = {
         description: "Using the issue tree, create an SCQA formulation.",
         appUrl: "../apps/scqa-builder/index.html",
         contextType: "video",
-        contextUrl: "https://drive.google.com/file/d/10GgHE70T14fcp4tvGF3gsltwsGgp-HXQ/view?usp=sharing",
+        contextUrl: "https://drive.google.com/open?id=1qrngkvMOp3wkzrPnIuIe2CX9z7Tk1_NU&usp=drive_copy",
         contextTitle: "Create an executive-ready brief for Aiko.",
         contextBody: "You will need to make this more readable for Aiko. Use the SCQA framework to do so."
       },
@@ -197,7 +197,7 @@ const UTL_CONTENT = {
         description: "Use AI to simulate outside perspectives before committing to a recommendation.",
         appUrl: "../apps/advisory-board/index.html",
         contextType: "video",
-        contextUrl: "https://drive.google.com/file/d/1hNWuA1HBbZI57fUfDgdjlqLkJHYHjf1Q/view?usp=vids_web",
+        contextUrl: "https://drive.google.com/file/d/1tNJgprewm7bCJ29EYzRBbW-AIf_kjAuk/view",
         contextTitle: "Get outside perspectives before you commit",
         contextBody: "Find expert opinions on your outputs."
       },
@@ -211,7 +211,7 @@ const UTL_CONTENT = {
         description: "Write a concise, answer-first email to Aiko using your SCQA logic.",
         appUrl: "../apps/write-to-aiko/index.html",
         contextType: "video",
-        contextUrl: "https://drive.google.com/open?id=1Tw0MhCjy5Tkdodjy8LvIEB-XEEuK4Di3&usp=drive_copy",
+        contextUrl: "https://drive.google.com/file/d/1zbduNG5_xM2meZU0X8iI9vPJGgJvqdFd/view",
         contextTitle: "Aiko does not have time to read everything",
         contextBody: "Aiko needed the reply yesterday. She needs the email ASAP."
       },
@@ -225,8 +225,8 @@ const UTL_CONTENT = {
         description: "Prepare and record a 120-second spoken explanation of the same answer.",
         appUrl: "../apps/explain-to-aiko/index.html",
         contextType: "video",
-        contextUrl: "https://drive.google.com/file/d/17Nbk0w7C3MuEfwb_gsBn9oipmZ85exJ4/view",
-        contextTitle: "You bumped into Aiko",
+        contextUrl: "https://drive.google.com/file/d/1_qeA-dLRKfSgoxcXvXZ6WC0HfxfC6E3n/view?usp=vids_web",
+        contextTitle: "Aiko asks for a quick explanation",
         contextBody: "Aiko said you can send her a quick voice message; she does not mind this time."
       },
       {
@@ -239,7 +239,7 @@ const UTL_CONTENT = {
         description: "Compress the same message into 60 seconds or less.",
         appUrl: "../apps/explain-to-aiko-60/index.html",
         contextType: "video",
-        contextUrl: "https://drive.google.com/file/d/1LSc2dnbgk855FeG7R4WvWvf8P0kLJCpb/view",
+        contextUrl: "https://drive.google.com/file/d/1SfgGyNExQfTOYpMx7AveLRvpRA4_I7qS/view?usp=vids_web",
         contextTitle: "Now compress it",
         contextBody: "Now, instead of 120 seconds, see if you can deliver the key points in 60 seconds or less."
       }
@@ -276,7 +276,7 @@ const UTL_CONTENT = {
         description: "Everything feels important, but not everything is.",
         appUrl: "../apps/eisenhower-matrix/index.html",
         contextType: "video",
-        contextUrl: "https://drive.google.com/open?id=18UnP9dxWd31EeCfEfODiPBQ-Jfyxbd8Q&usp=drive_copy",
+        contextUrl: "https://drive.google.com/file/d/11RSuu5359pONf0sCef9TKnKMrzCPJE_R/view",
         contextTitle: "You just got the lead role.",
         contextBody: "Requests are coming from every direction and Aiko will not tell you what to prioritize. She expects you to decide."
       },
@@ -291,7 +291,7 @@ const UTL_CONTENT = {
         description: "Learn the art of being comfortable with difficult conversations.",
         appUrl: "../apps/i-have-bad-news/index.html",
         contextType: "video",
-        contextUrl: "https://drive.google.com/file/d/1m04hT3TUZkaKZN8-f0zlWWOBLA1DS6fF/view?usp=vids_web",
+        contextUrl: "https://drive.google.com/file/d/1vkri9tmOfrQA0TNun7zmKvpwzgje3NLG/view",
         contextTitle: "You have to be the one to say it",
         contextBody: "Something has gone wrong, and you need to say it plainly without making the conversation worse."
       },
@@ -306,7 +306,7 @@ const UTL_CONTENT = {
         description: "You will need to understand how others think.",
         appUrl: "../apps/lets-switch-hats/index.html",
         contextType: "video",
-        contextUrl: "https://drive.google.com/file/d/1UVaAj5EG7Kg4c1uZhXaR0bqwasgtjQgS/view?usp=vids_web",
+        contextUrl: "https://drive.google.com/file/d/1MQNwwMRxfP_q6_5JEXe1MpTEN6OKbOfa/view",
         contextTitle: "Read the room before you speak",
         contextBody: "Before pushing your point, understand the other person's constraints, incentives, and version of success."
       },
@@ -321,7 +321,7 @@ const UTL_CONTENT = {
         description: "Your task involves two things: being clear and being impactful. In short, deliver it with Obama-level presence.",
         appUrl: "../apps/speak-like-obama/index.html",
         contextType: "video",
-        contextUrl: "https://drive.google.com/file/d/1ndtAyGJpud5jDA5pLyYoGmqOJOeFabPO/view?usp=vids_web",
+        contextUrl: "https://drive.google.com/file/d/1Px3vppQ2z-Z-HrrpzykosGN7aWF6xnqs/view",
         contextTitle: "All eyes are on you",
         contextBody: "Act as your team's voice and lead with confidence."
       }
@@ -1198,7 +1198,8 @@ const UTL_CONTENT = {
   function exerciseContextUrl(exercise) {
     var legacy = legacyEmbedConfig(exercise);
     var saved = localStorage.getItem("utl_ctx_url_" + exercise.id) || legacy.url || "";
-    if (exercise.id === "p2-e2" && /168tYlq9fRUKl7NrlELHuwAPwAxC2_5yD/.test(saved)) {
+    var retiredContextVideo = /(?:168tYlq9fRUKl7NrlELHuwAPwAxC2_5yD|15AaNTTkiRsIVf90RfsmcSa3aEuFTqOAT|10GgHE70T14fcp4tvGF3gsltwsGgp-HXQ|1hNWuA1HBbZI57fUfDgdjlqLkJHYHjf1Q|1Tw0MhCjy5Tkdodjy8LvIEB-XEEuK4Di3|10b0x6cTO1rf3DYlTBbDm4tNQ4cirhWzh|17Nbk0w7C3MuEfwb_gsBn9oipmZ85exJ4|1LSc2dnbgk855FeG7R4WvWvf8P0kLJCpb|18UnP9dxWd31EeCfEfODiPBQ-Jfyxbd8Q|1m04hT3TUZkaKZN8-f0zlWWOBLA1DS6fF|1UVaAj5EG7Kg4c1uZhXaR0bqwasgtjQgS|1ndtAyGJpud5jDA5pLyYoGmqOJOeFabPO)/.test(saved);
+    if (retiredContextVideo) {
       localStorage.removeItem("utl_ctx_url_" + exercise.id);
       if (exercise.legacyEmbedKey) localStorage.removeItem(exercise.legacyEmbedKey);
       saved = "";
