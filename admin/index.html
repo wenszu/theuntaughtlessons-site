@@ -1965,6 +1965,49 @@
     .mb-add-email-status { margin-top:10px; font-family:'Lato',sans-serif; font-size:13px; padding:8px 10px; border-radius:4px; }
     .mb-add-email-status.is-sent { background:#f0faf5; color:#0F6E56; border:1px solid #b7e4cf; }
     .mb-add-email-status.is-error { background:#fdf3f3; color:#8A1F1F; border:1px solid #f0c0c0; }
+    .mb-bulk-form { margin:0 0 18px; padding:18px; border:1px solid var(--line); border-radius:10px; background:var(--white); }
+    .mb-bulk-head { display:flex; align-items:flex-start; justify-content:space-between; gap:18px; margin-bottom:14px; }
+    .mb-bulk-head h3 { margin:0; color:var(--navy); font:700 22px/1.2 'Playfair Display',serif; }
+    .mb-bulk-head p { margin:4px 0 0; color:#777; font-size:13px; line-height:1.45; }
+    .mb-bulk-steps { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; margin:0 0 16px; padding:0; list-style:none; }
+    .mb-bulk-steps li { padding:8px 10px; border-radius:7px; background:#F4F0E9; color:#777; font-size:11px; font-weight:700; }
+    .mb-bulk-steps li.is-active { background:#FFF1CF; color:var(--navy); box-shadow:inset 0 0 0 1px rgba(238,163,32,.45); }
+    .mb-bulk-panel[hidden] { display:none; }
+    .mb-bulk-options { display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:10px; margin-bottom:14px; }
+    .mb-bulk-checks { display:flex; flex-wrap:wrap; gap:8px 18px; margin:12px 0; }
+    .mb-bulk-checks label { display:flex; align-items:flex-start; gap:7px; color:var(--charcoal); font-size:12px; line-height:1.35; }
+    .mb-bulk-tabs { display:flex; gap:5px; margin-top:14px; border-bottom:1px solid var(--line); }
+    .mb-bulk-tab { padding:9px 13px; border:0; border-bottom:3px solid transparent; background:transparent; color:#777; font-weight:700; cursor:pointer; }
+    .mb-bulk-tab.is-active { border-bottom-color:var(--gold); color:var(--navy); }
+    .mb-bulk-input-panel { padding-top:12px; }
+    .mb-bulk-input-panel[hidden] { display:none; }
+    .mb-bulk-textarea { width:100%; min-height:150px; resize:vertical; border:1px solid var(--line); border-radius:8px; padding:12px; color:var(--charcoal); font:400 13px/1.5 'Roboto Mono',monospace; }
+    .mb-bulk-file { display:grid; place-items:center; min-height:130px; padding:20px; border:1px dashed rgba(0,51,102,.35); border-radius:8px; background:#FAF8F3; text-align:center; }
+    .mb-bulk-file input { max-width:100%; }
+    .mb-bulk-help { margin:7px 0 0; color:#777; font-size:11px; line-height:1.45; }
+    .mb-bulk-actions { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-top:14px; }
+    .mb-bulk-summary { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .mb-bulk-summary span { padding:5px 9px; border-radius:999px; background:#F2ECE3; color:var(--charcoal); font-size:11px; font-weight:700; }
+    .mb-bulk-summary .is-ready { background:#EAF5ED; color:#1E6B43; }
+    .mb-bulk-summary .is-error { background:#FDECEC; color:#8A1F1F; }
+    .mb-bulk-table-wrap { max-height:390px; overflow:auto; border:1px solid var(--line); border-radius:8px; }
+    .mb-bulk-table { width:100%; border-collapse:collapse; font-size:12px; }
+    .mb-bulk-table th { position:sticky; top:0; z-index:1; padding:8px 9px; background:var(--navy); color:#fff; text-align:left; font-size:10px; }
+    .mb-bulk-table td { padding:7px 9px; border-bottom:1px solid var(--line); vertical-align:top; }
+    .mb-bulk-table tr:last-child td { border-bottom:0; }
+    .mb-bulk-table input { width:100%; min-width:130px; border:1px solid rgba(0,51,102,.2); border-radius:5px; padding:6px 7px; font:inherit; }
+    .mb-bulk-state { display:block; font-size:11px; font-weight:700; }
+    .mb-bulk-state.is-ready { color:#1E6B43; }
+    .mb-bulk-state.is-skip { color:#8A5A00; }
+    .mb-bulk-state.is-error { color:#8A1F1F; }
+    .mb-bulk-progress { height:9px; overflow:hidden; border-radius:999px; background:#E8E2D8; }
+    .mb-bulk-progress span { display:block; height:100%; width:0; border-radius:inherit; background:var(--gold); transition:width .2s ease; }
+    .mb-bulk-result-list { display:grid; gap:7px; margin-top:12px; }
+    .mb-bulk-result { display:grid; grid-template-columns:minmax(180px,1fr) repeat(4,minmax(86px,auto)); gap:8px; align-items:center; padding:8px 10px; border:1px solid var(--line); border-radius:7px; font-size:11px; }
+    .mb-bulk-result strong { color:var(--navy); }
+    .mb-bulk-result .is-ok { color:#1E6B43; font-weight:700; }
+    .mb-bulk-result .is-failed { color:#8A1F1F; font-weight:700; }
+    @media(max-width:700px){.mb-bulk-steps{grid-template-columns:1fr}.mb-bulk-result{grid-template-columns:1fr 1fr}.mb-bulk-result strong{grid-column:1/-1}.mb-bulk-head{display:block}}
     .mb-table-wrap { overflow-x:auto; border:1px solid var(--line); border-radius:8px; }
     .mb-table { width:100%; border-collapse:collapse; font-size:12px; white-space:nowrap; }
     .mb-table th { padding:8px 12px; background:var(--navy); color:rgba(255,255,255,.85); font-family:Lato, Arial, sans-serif; font-size:10px; font-weight:700; letter-spacing: 0; text-transform: none; text-align:left; }
@@ -3078,9 +3121,41 @@
 
         <div class="mb-toolbar">
           <button class="small-button" type="button" id="mbAddMemberBtn">+ Add member</button>
+          <button class="small-button" type="button" id="mbBulkAddBtn">Bulk add learners</button>
           <button class="small-button secondary-button" type="button" id="mbInviteBtn">Send login link</button>
           <button class="small-button secondary-button" type="button" id="mbRefreshBtn">Refresh</button>
           <button class="small-button secondary-button" type="button" id="mbDownloadCsvBtn">Download CSV</button>
+        </div>
+
+        <div id="mbBulkAddForm" class="mb-bulk-form" hidden>
+          <div class="mb-bulk-head"><div><h3>Bulk add learners</h3><p>Add ordinary members in one reviewed batch. Nothing is saved and no emails are sent until you confirm the review.</p></div><button class="small-button secondary-button" type="button" id="mbBulkClose">Close</button></div>
+          <ol class="mb-bulk-steps" aria-label="Bulk import progress"><li class="is-active" data-mb-bulk-step="1">1 · Prepare</li><li data-mb-bulk-step="2">2 · Review</li><li data-mb-bulk-step="3">3 · Results</li></ol>
+          <div class="mb-bulk-panel" data-mb-bulk-panel="1">
+            <div class="mb-bulk-options">
+              <div class="mb-form-field"><label for="mbBulkCohort">Cohort</label><input type="text" id="mbBulkCohort" placeholder="e.g. September 2026 pilot"></div>
+              <div class="mb-form-field"><label for="mbBulkExpiry">Access expires</label><input type="date" id="mbBulkExpiry"></div>
+              <div class="mb-form-field"><label for="mbBulkNotes">Batch note</label><input type="text" id="mbBulkNotes" placeholder="Optional note applied to everyone"></div>
+            </div>
+            <div class="mb-bulk-checks">
+              <label><input type="checkbox" id="mbBulkWelcome" checked>Send each learner the welcome email</label>
+              <label><input type="checkbox" id="mbBulkLoginLink">Also send a one-click Firebase login link</label>
+              <label><input type="checkbox" id="mbBulkGoogleGroup" checked>Request Google Group access</label>
+            </div>
+            <div class="mb-bulk-tabs" role="tablist" aria-label="Choose how to add learners"><button class="mb-bulk-tab is-active" type="button" role="tab" aria-selected="true" data-mb-bulk-input="paste">Paste list</button><button class="mb-bulk-tab" type="button" role="tab" aria-selected="false" data-mb-bulk-input="file">Upload CSV</button></div>
+            <div class="mb-bulk-input-panel" data-mb-bulk-input-panel="paste"><label for="mbBulkPaste" class="invite-email-label">Paste names and emails</label><textarea class="mb-bulk-textarea" id="mbBulkPaste" placeholder="Wen-Szu Lin&#9;wenszu@example.com&#10;Aldon Smith&#9;aldon@example.com"></textarea><p class="mb-bulk-help">Copy two columns from Google Sheets or Excel, or paste comma-separated rows. The first row may contain headings.</p></div>
+            <div class="mb-bulk-input-panel" data-mb-bulk-input-panel="file" hidden><div class="mb-bulk-file"><div><label for="mbBulkFile"><strong>Choose a CSV file</strong></label><br><input type="file" id="mbBulkFile" accept=".csv,text/csv"><p class="mb-bulk-help" id="mbBulkFileName">Required columns: name and email. Maximum 500 rows.</p></div></div><button class="small-button secondary-button" type="button" id="mbBulkTemplate" style="margin-top:10px">Download CSV template</button></div>
+            <div class="mb-bulk-actions"><button class="small-button" type="button" id="mbBulkReview">Review learners</button><span class="student-progress-status" id="mbBulkPrepareStatus" aria-live="polite"></span></div>
+          </div>
+          <div class="mb-bulk-panel" data-mb-bulk-panel="2" hidden>
+            <div class="mb-bulk-summary" id="mbBulkSummary"></div>
+            <div class="mb-bulk-table-wrap"><table class="mb-bulk-table"><thead><tr><th>#</th><th>Name</th><th>Email</th><th>Action</th></tr></thead><tbody id="mbBulkReviewBody"></tbody></table></div>
+            <p class="mb-bulk-help">Correct names or emails directly in the table, then recheck. Existing active members and duplicate rows are skipped; inactive ordinary members are reactivated.</p>
+            <div class="mb-bulk-actions"><button class="small-button secondary-button" type="button" id="mbBulkBack">Back</button><button class="small-button secondary-button" type="button" id="mbBulkRecheck">Recheck changes</button><button class="small-button" type="button" id="mbBulkConfirm">Add ready learners</button><span class="student-progress-status" id="mbBulkReviewStatus" aria-live="polite"></span></div>
+          </div>
+          <div class="mb-bulk-panel" data-mb-bulk-panel="3" hidden>
+            <div class="mb-bulk-summary" id="mbBulkResultSummary"></div><div class="mb-bulk-progress" aria-label="Bulk import progress"><span id="mbBulkProgressBar"></span></div><div class="mb-bulk-result-list" id="mbBulkResults" aria-live="polite"></div>
+            <div class="mb-bulk-actions"><button class="small-button" type="button" id="mbBulkRetry" hidden>Retry failed items</button><button class="small-button secondary-button" type="button" id="mbBulkDownloadResults" hidden>Download results CSV</button><button class="small-button secondary-button" type="button" id="mbBulkViewCohort" hidden>View cohort members</button><button class="small-button secondary-button" type="button" id="mbBulkDone">Done</button></div>
+          </div>
         </div>
 
         <div id="mbAddMemberForm" class="mb-add-form" hidden>
@@ -8737,6 +8812,7 @@
     initDiagnosticNudgePreview();
     renderInviteLog();
     mbInitAddForm();
+    mbInitBulkAdd();
     spPopulatePreviewStarts();
     spRefreshPreviewCard();
     initGlobalDefaults();
@@ -9526,6 +9602,249 @@
       }
     }
 
+    var mbBulkRows = [];
+    var mbBulkResults = [];
+    var mbBulkInputMode = 'paste';
+
+    function mbBulkCsvCell(value) {
+      var text = String(value === null || value === undefined ? '' : value).replace(/"/g, '""');
+      return /[",\r\n]/.test(text) ? '"' + text + '"' : text;
+    }
+
+    function mbBulkDownload(filename, content) {
+      var blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+      var url = URL.createObjectURL(blob);
+      var link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    function mbBulkParseDelimited(text) {
+      text = String(text || '').replace(/^\uFEFF/, '').trim();
+      if (!text) return [];
+      var firstLine = text.split(/\r?\n/, 1)[0] || '';
+      var delimiter = firstLine.indexOf('\t') !== -1 ? '\t' : ',';
+      var rows = [];
+      var row = [];
+      var field = '';
+      var quoted = false;
+      for (var i = 0; i < text.length; i += 1) {
+        var char = text[i];
+        if (char === '"') {
+          if (quoted && text[i + 1] === '"') { field += '"'; i += 1; }
+          else quoted = !quoted;
+        } else if (char === delimiter && !quoted) {
+          row.push(field.trim()); field = '';
+        } else if ((char === '\n' || char === '\r') && !quoted) {
+          if (char === '\r' && text[i + 1] === '\n') i += 1;
+          row.push(field.trim()); field = '';
+          if (row.some(Boolean)) rows.push(row);
+          row = [];
+        } else field += char;
+      }
+      row.push(field.trim());
+      if (row.some(Boolean)) rows.push(row);
+      if (!rows.length) return [];
+      var header = rows[0].map(function (value) { return String(value).trim().toLowerCase().replace(/[^a-z]/g, ''); });
+      var nameIndex = header.findIndex(function (value) { return value === 'name' || value === 'fullname' || value === 'studentname' || value === 'learnername'; });
+      var emailIndex = header.findIndex(function (value) { return value === 'email' || value === 'emailaddress' || value === 'studentemail' || value === 'learneremail'; });
+      var hasHeader = nameIndex !== -1 || emailIndex !== -1;
+      if (!hasHeader) { nameIndex = 0; emailIndex = 1; }
+      return rows.slice(hasHeader ? 1 : 0).slice(0, 500).map(function (values, index) {
+        return { sourceIndex: index + 1, name: String(values[nameIndex] || '').trim(), email: mbNormalizeEmail(values[emailIndex] || ''), action: '', message: '', state: '' };
+      }).filter(function (item) { return item.name || item.email; });
+    }
+
+    function mbBulkReadEditedRows() {
+      var body = document.getElementById('mbBulkReviewBody');
+      if (!body) return;
+      body.querySelectorAll('[data-mb-bulk-row]').forEach(function (rowEl) {
+        var index = Number(rowEl.dataset.mbBulkRow);
+        if (!mbBulkRows[index]) return;
+        mbBulkRows[index].name = String(rowEl.querySelector('[data-mb-bulk-name]')?.value || '').trim();
+        mbBulkRows[index].email = mbNormalizeEmail(rowEl.querySelector('[data-mb-bulk-email]')?.value || '');
+      });
+    }
+
+    function mbBulkValidateRows() {
+      var seen = new Set();
+      mbBulkRows.forEach(function (row) {
+        row.email = mbNormalizeEmail(row.email);
+        row.action = '';
+        row.state = 'error';
+        if (!row.name) { row.message = 'Name is required'; return; }
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(row.email)) { row.message = 'Enter a valid email'; return; }
+        if (seen.has(row.email)) { row.state = 'skip'; row.message = 'Duplicate in this batch'; row.action = 'skip'; return; }
+        seen.add(row.email);
+        var existing = mbFindCachedMemberByEmail(row.email);
+        if (existing) {
+          var data = existing.data() || {};
+          var role = mbCanonicalRole(data.role);
+          if (role === 'admin' || role === 'owner') { row.state = 'error'; row.message = 'Existing ' + role + ' cannot be changed in bulk'; row.action = 'skip'; return; }
+          if ((data.status || 'active') === 'inactive') { row.state = 'ready'; row.message = 'Reactivate existing member'; row.action = 'reactivate'; return; }
+          row.state = 'skip'; row.message = 'Already an active member'; row.action = 'skip'; return;
+        }
+        row.state = 'ready'; row.message = 'Add new learner'; row.action = 'add';
+      });
+    }
+
+    function mbBulkCounts() {
+      return mbBulkRows.reduce(function (counts, row) { counts[row.state] = (counts[row.state] || 0) + 1; return counts; }, { ready: 0, skip: 0, error: 0 });
+    }
+
+    function mbBulkRenderReview() {
+      mbBulkValidateRows();
+      var counts = mbBulkCounts();
+      var summary = document.getElementById('mbBulkSummary');
+      if (summary) summary.innerHTML = '<span>' + mbBulkRows.length + ' rows</span><span class="is-ready">' + counts.ready + ' ready</span><span>' + counts.skip + ' skipped</span><span class="is-error">' + counts.error + ' need correction</span>';
+      var body = document.getElementById('mbBulkReviewBody');
+      if (body) body.innerHTML = mbBulkRows.map(function (row, index) {
+        return '<tr data-mb-bulk-row="' + index + '"><td>' + (index + 1) + '</td><td><input data-mb-bulk-name value="' + escapeHtml(row.name) + '" aria-label="Learner name ' + (index + 1) + '"></td><td><input data-mb-bulk-email value="' + escapeHtml(row.email) + '" aria-label="Learner email ' + (index + 1) + '"></td><td><span class="mb-bulk-state is-' + row.state + '">' + escapeHtml(row.message) + '</span></td></tr>';
+      }).join('');
+      var confirm = document.getElementById('mbBulkConfirm');
+      if (confirm) { confirm.disabled = counts.ready === 0; confirm.textContent = 'Add ' + counts.ready + ' ready learner' + (counts.ready === 1 ? '' : 's'); }
+    }
+
+    function mbBulkShowStep(step) {
+      document.querySelectorAll('[data-mb-bulk-step]').forEach(function (item) { item.classList.toggle('is-active', item.dataset.mbBulkStep === String(step)); });
+      document.querySelectorAll('[data-mb-bulk-panel]').forEach(function (panel) { panel.hidden = panel.dataset.mbBulkPanel !== String(step); });
+    }
+
+    async function mbBulkWelcomeEmail(name, email) {
+      var welcomeTemplate = etGetTemplate('welcomeEmail');
+      var firstName = String(name || 'Member').split(/\s+/)[0] || 'Member';
+      var workspaceUrl = 'https://theuntaughtlessons.com/member-login/';
+      var personalizedData = Object.assign({}, welcomeTemplate, {
+        headline: String(welcomeTemplate.headline || '').replace(/{{first_name}}/g, firstName),
+        intro: String(welcomeTemplate.intro || '').replace(/{{first_name}}/g, firstName).replace(/{{login_email}}/g, email).replace(/{{workspace_url}}/g, workspaceUrl),
+        buttonUrl: String(welcomeTemplate.buttonUrl || '').replace(/{{workspace_url}}/g, workspaceUrl),
+        loginEmail: email
+      });
+      return postEmailScriptAction('WelcomeEmail', { name: name, recipient: email, to: email, email: email, templateData: welcomeTemplate, renderedHtml: generateEmailHtml(personalizedData) });
+    }
+
+    function mbBulkRenderResults(processed, total) {
+      var list = document.getElementById('mbBulkResults');
+      if (list) list.innerHTML = mbBulkResults.map(function (result) {
+        function state(label, value) { return '<span class="' + (value === true ? 'is-ok' : value === false ? 'is-failed' : '') + '">' + label + ': ' + (value === true ? 'Done' : value === false ? 'Failed' : 'Not requested') + '</span>'; }
+        return '<div class="mb-bulk-result"><strong>' + escapeHtml(result.name) + '<br><small>' + escapeHtml(result.email) + '</small></strong>' + state('Access', result.access) + state('Welcome', result.welcome) + state('Login link', result.loginLink) + state('Group', result.group) + '</div>';
+      }).join('');
+      var bar = document.getElementById('mbBulkProgressBar');
+      if (bar) bar.style.width = Math.round((processed / Math.max(1, total)) * 100) + '%';
+      var succeeded = mbBulkResults.filter(function (result) { return result.access === true; }).length;
+      var failed = mbBulkResults.filter(function (result) { return result.access === false || result.welcome === false || result.loginLink === false || result.group === false; }).length;
+      var summary = document.getElementById('mbBulkResultSummary');
+      if (summary) summary.innerHTML = '<span class="is-ready">' + succeeded + ' access records ready</span><span class="' + (failed ? 'is-error' : '') + '">' + failed + ' with an item to retry</span>';
+      var retry = document.getElementById('mbBulkRetry');
+      if (retry) retry.hidden = failed === 0 || processed < total;
+      var download = document.getElementById('mbBulkDownloadResults');
+      if (download) download.hidden = processed < total;
+      var view = document.getElementById('mbBulkViewCohort');
+      if (view) view.hidden = processed < total || !String(document.getElementById('mbBulkCohort')?.value || '').trim();
+    }
+
+    async function mbBulkProcess(rows, retryOnly) {
+      var fb = window.utlFirebaseAuth;
+      if (!fb || !fb.authorizeMember || !fb.Timestamp) { showToast('Firebase not ready', 'error'); return; }
+      await mbRequireFirebaseAdmin();
+      var cohort = String(document.getElementById('mbBulkCohort')?.value || '').trim();
+      var notes = String(document.getElementById('mbBulkNotes')?.value || '').trim();
+      var expiryValue = String(document.getElementById('mbBulkExpiry')?.value || '');
+      var expiryDate = expiryValue ? new Date(expiryValue + 'T23:59:59') : new Date(Date.now() + 365 * 86400000);
+      var sendWelcome = !!document.getElementById('mbBulkWelcome')?.checked;
+      var sendLink = !!document.getElementById('mbBulkLoginLink')?.checked;
+      var requestGroup = !!document.getElementById('mbBulkGoogleGroup')?.checked;
+      var profile = {};
+      try { profile = JSON.parse(localStorage.getItem('utl_member_profile') || '{}'); } catch (_) {}
+      var addedBy = profile.email || 'admin';
+      if (!retryOnly) mbBulkResults = [];
+      mbBulkShowStep(3);
+      for (var index = 0; index < rows.length; index += 1) {
+        var row = rows[index];
+        var previous = retryOnly ? mbBulkResults.find(function (item) { return item.email === row.email; }) : null;
+        var result = previous || { name: row.name, email: row.email, action: row.action, access: null, welcome: null, loginLink: null, group: null, error: '' };
+        result.error = '';
+        try {
+          if (!retryOnly || result.access === false) {
+            var memberFields = { name: row.name, role: 'member', addedBy: addedBy, expiryDate: fb.Timestamp.fromDate(expiryDate), status: 'active' };
+            if (cohort) memberFields.cohort = cohort;
+            if (notes) memberFields.notes = notes;
+            await fb.authorizeMember(row.email, memberFields);
+            result.access = true;
+          }
+          if (sendWelcome && (!retryOnly || result.welcome === false)) { try { await mbBulkWelcomeEmail(row.name, row.email); result.welcome = true; } catch (error) { result.welcome = false; result.error = error.message || 'Welcome email failed'; } }
+          if (!sendWelcome) result.welcome = null;
+          if (sendLink && (!retryOnly || result.loginLink === false)) { try { await fb.sendSignInInvite(row.email); result.loginLink = true; } catch (error) { result.loginLink = false; result.error = error.message || 'Login link failed'; } }
+          if (!sendLink) result.loginLink = null;
+          if (requestGroup && (!retryOnly || result.group === false)) { try { await fb.requestGoogleGroupSyncJob(row.email, 'add', { name: row.name, requestedBy: addedBy, source: 'admin-bulk-member-import' }); result.group = true; } catch (error) { result.group = false; result.error = error.message || 'Group request failed'; } }
+          if (!requestGroup) result.group = null;
+        } catch (error) {
+          result.access = false;
+          result.error = error.message || 'Access could not be added';
+        }
+        if (!previous) mbBulkResults.push(result);
+        mbBulkRenderResults(index + 1, rows.length);
+      }
+      await mbLoadMembers();
+      showToast('Bulk learner import finished');
+    }
+
+    function mbInitBulkAdd() {
+      var openButton = document.getElementById('mbBulkAddBtn');
+      var form = document.getElementById('mbBulkAddForm');
+      if (!openButton || !form) return;
+      var expiry = document.getElementById('mbBulkExpiry');
+      if (expiry && !expiry.value) expiry.value = new Date(Date.now() + 365 * 86400000).toISOString().slice(0, 10);
+      function close() { form.hidden = true; openButton.textContent = 'Bulk add learners'; }
+      openButton.addEventListener('click', function () {
+        var opening = form.hidden;
+        document.getElementById('mbAddMemberForm').hidden = true;
+        document.getElementById('mbInviteForm').hidden = true;
+        document.getElementById('mbAddMemberBtn').textContent = '+ Add member';
+        document.getElementById('mbInviteBtn').textContent = 'Send login link';
+        form.hidden = !opening;
+        openButton.textContent = opening ? '✕ Cancel bulk add' : 'Bulk add learners';
+        if (opening) mbBulkShowStep(1);
+      });
+      document.getElementById('mbBulkClose')?.addEventListener('click', close);
+      document.getElementById('mbBulkDone')?.addEventListener('click', close);
+      document.querySelectorAll('[data-mb-bulk-input]').forEach(function (button) {
+        button.addEventListener('click', function () {
+          mbBulkInputMode = button.dataset.mbBulkInput;
+          document.querySelectorAll('[data-mb-bulk-input]').forEach(function (tab) { var active = tab === button; tab.classList.toggle('is-active', active); tab.setAttribute('aria-selected', active ? 'true' : 'false'); });
+          document.querySelectorAll('[data-mb-bulk-input-panel]').forEach(function (panel) { panel.hidden = panel.dataset.mbBulkInputPanel !== mbBulkInputMode; });
+        });
+      });
+      document.getElementById('mbBulkFile')?.addEventListener('change', function (event) { document.getElementById('mbBulkFileName').textContent = event.target.files[0] ? event.target.files[0].name : 'Required columns: name and email. Maximum 500 rows.'; });
+      document.getElementById('mbBulkTemplate')?.addEventListener('click', function () { mbBulkDownload('utl-bulk-learners-template.csv', 'name,email\r\nWen-Szu Lin,wenszu@example.com\r\nAldon Smith,aldon@example.com\r\n'); });
+      document.getElementById('mbBulkReview')?.addEventListener('click', async function () {
+        var status = document.getElementById('mbBulkPrepareStatus');
+        try {
+          var text = '';
+          if (mbBulkInputMode === 'file') {
+            var file = document.getElementById('mbBulkFile')?.files[0];
+            if (!file) throw new Error('Choose a CSV file first.');
+            text = await file.text();
+          } else text = document.getElementById('mbBulkPaste')?.value || '';
+          mbBulkRows = mbBulkParseDelimited(text);
+          if (!mbBulkRows.length) throw new Error('Add at least one learner name and email.');
+          if (status) status.textContent = '';
+          mbBulkRenderReview();
+          mbBulkShowStep(2);
+        } catch (error) { if (status) status.textContent = error.message; }
+      });
+      document.getElementById('mbBulkBack')?.addEventListener('click', function () { mbBulkShowStep(1); });
+      document.getElementById('mbBulkRecheck')?.addEventListener('click', function () { mbBulkReadEditedRows(); mbBulkRenderReview(); });
+      document.getElementById('mbBulkConfirm')?.addEventListener('click', function () { mbBulkReadEditedRows(); mbBulkValidateRows(); var ready = mbBulkRows.filter(function (row) { return row.state === 'ready'; }); if (ready.length && window.confirm('Add ' + ready.length + ' learner' + (ready.length === 1 ? '' : 's') + ' and send the selected onboarding messages?')) mbBulkProcess(ready, false); });
+      document.getElementById('mbBulkRetry')?.addEventListener('click', function () { var failedEmails = new Set(mbBulkResults.filter(function (result) { return result.access === false || result.welcome === false || result.loginLink === false || result.group === false; }).map(function (result) { return result.email; })); mbBulkProcess(mbBulkRows.filter(function (row) { return failedEmails.has(row.email); }), true); });
+      document.getElementById('mbBulkDownloadResults')?.addEventListener('click', function () { var lines = [['Name','Email','Access','Welcome email','Login link','Google Group request','Error'].map(mbBulkCsvCell).join(',')].concat(mbBulkResults.map(function (result) { return [result.name,result.email,result.access === true ? 'Done' : 'Failed',result.welcome === null ? 'Not requested' : result.welcome ? 'Done' : 'Failed',result.loginLink === null ? 'Not requested' : result.loginLink ? 'Done' : 'Failed',result.group === null ? 'Not requested' : result.group ? 'Queued' : 'Failed',result.error || ''].map(mbBulkCsvCell).join(','); })); mbBulkDownload(new Date().toISOString().slice(0,10) + ' - UTL bulk learner results.csv', lines.join('\r\n')); });
+      document.getElementById('mbBulkViewCohort')?.addEventListener('click', function () { var cohort = String(document.getElementById('mbBulkCohort')?.value || '').trim(); close(); mbFilterState.cohort = cohort || 'all'; mbFilterState.page = 0; mbRenderControls(); mbApplyAndRender(); document.getElementById('mbTableWrap')?.scrollIntoView({ behavior:'smooth', block:'start' }); });
+    }
+
     function mbInitAddForm() {
       var addBtn = document.getElementById('mbAddMemberBtn');
       var form = document.getElementById('mbAddMemberForm');
@@ -9538,6 +9857,10 @@
       function closeAll() {
         if (form) { form.hidden = true; }
         if (addBtn) addBtn.textContent = '+ Add member';
+        var bulkForm = document.getElementById('mbBulkAddForm');
+        var bulkButton = document.getElementById('mbBulkAddBtn');
+        if (bulkForm) bulkForm.hidden = true;
+        if (bulkButton) bulkButton.textContent = 'Bulk add learners';
         if (inviteForm) { inviteForm.hidden = true; }
         if (inviteBtn) inviteBtn.textContent = 'Send login link';
       }
