@@ -3533,8 +3533,8 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
           <span class="saved" id="engCertSaved">Saved</span>
           <div class="credential-admin">
             <h3>Credential registry</h3>
-            <p class="description">Look up the live public record for a credential. Revoke an ID if it was issued in error; reactivation restores the same record.</p>
-            <div class="credential-admin-search"><input id="engCredentialLookupId" aria-label="Credential ID" placeholder="UTL-TSA-7K4M9Q2D8R6C"><button class="small-button secondary-button" type="button" id="engCredentialLookup">Look up</button></div>
+            <p class="description">Find a graduate by name, email, or credential ID. Open their public verification link, correct the displayed name, or manage the credential status.</p>
+            <div class="credential-admin-search"><input id="engCredentialLookupId" aria-label="Learner name, email, or credential ID" placeholder="e.g. Albert Einstein, learner@example.com, or UTL-TSA-…"><button class="small-button secondary-button" type="button" id="engCredentialLookup">Search</button></div>
             <div class="credential-admin-result" id="engCredentialResult" hidden aria-live="polite"></div>
           </div>
         </div>
@@ -3673,6 +3673,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       getPublicFindLevelSetting,
       getSignedInUser,
       manageVerifiedCredential,
+      searchVerifiedCredentials,
       requestGoogleGroupSyncJob,
       runAdminAction,
       repairMemberProgramCompletionReward,
@@ -3719,6 +3720,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       getPublicFindLevelSetting,
       getSignedInUser,
       manageVerifiedCredential,
+      searchVerifiedCredentials,
       requestGoogleGroupSyncJob,
       runAdminAction,
       repairMemberProgramCompletionReward,
@@ -5741,9 +5743,25 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         output.innerHTML = '<label for="engCredentialRecipientName"><strong>Recipient name</strong></label><input class="eng-text" id="engCredentialRecipientName" value="' + escapeHtml(item.recipientName || '') + '" style="width:100%;margin:6px 0 10px"><br>' + escapeHtml(item.credentialTitle || '') + '<br><span style="font-family:Roboto Mono,monospace">' + escapeHtml(item.credentialId || id) + '</span> · Status: <strong>' + escapeHtml(item.status || 'unknown') + '</strong><div class="credential-admin-actions"><a class="small-button secondary-button" target="_blank" rel="noopener" href="../verify/?id=' + encodeURIComponent(item.credentialId || id) + '">Open public record</a><button class="small-button secondary-button" type="button" data-credential-action="update-name">Save corrected name</button><button class="small-button secondary-button" type="button" data-credential-action="' + nextAction + '">' + nextLabel + '</button><button class="small-button secondary-button" type="button" data-credential-action="reissue">Replace with new ID</button></div>';
       } catch (error) { output.textContent = error && error.message ? error.message : 'Credential action failed.'; }
     }
-    document.getElementById('engCredentialLookup')?.addEventListener('click', function(){ engCredentialAction('lookup'); });
-    document.getElementById('engCredentialLookupId')?.addEventListener('keydown', function(event){ if(event.key === 'Enter'){ event.preventDefault(); engCredentialAction('lookup'); } });
-    document.getElementById('engCredentialResult')?.addEventListener('click', async function(event){ var button=event.target.closest('[data-credential-action]'); if(!button) return; var action=button.dataset.credentialAction; if(action==='revoke' && !window.confirm('Revoke this credential? Its public verification page will immediately show that it is not active.')) return; if(action==='reissue' && !window.confirm('Replace this credential with a new ID? The old public record will show that it was replaced.')) return; if(action==='update-name'){ var fb=window.utlFirebaseAuth; var id=String(document.getElementById('engCredentialLookupId')?.value||'').trim().toUpperCase(); var recipientName=String(document.getElementById('engCredentialRecipientName')?.value||'').trim(); try{ await fb.manageVerifiedCredential(action,id,{recipientName:recipientName}); showToast('Credential name updated'); engCredentialAction('lookup'); }catch(error){ showToast(error.message||'Update failed',true); } return; } engCredentialAction(action); });
+    async function engCredentialSearch() {
+      var fb = window.utlFirebaseAuth;
+      var input = document.getElementById('engCredentialLookupId');
+      var output = document.getElementById('engCredentialResult');
+      var query = String(input?.value || '').trim();
+      if (!output || !query) return;
+      if (/^UTL-TSA-[0-9A-HJKMNP-TV-Z]{12}$/i.test(query)) { input.value = query.toUpperCase(); engCredentialAction('lookup'); return; }
+      output.hidden = false;
+      output.textContent = 'Searching credential records…';
+      try {
+        var response = await fb.searchVerifiedCredentials(query);
+        var items = response?.credentials || [];
+        if (!items.length) { output.innerHTML = '<strong>No credentials found.</strong> The learner may not have completed the program or opened My Results since verified credentials were introduced.'; return; }
+        output.innerHTML = items.map(function(item){ return '<div style="padding:10px 0;border-bottom:1px solid var(--line)"><strong>' + escapeHtml(item.recipientName || 'Unknown recipient') + '</strong><br><span style="font-family:Roboto Mono,monospace">' + escapeHtml(item.credentialId || '') + '</span> · ' + escapeHtml(item.status || 'unknown') + '<div class="credential-admin-actions"><button class="small-button secondary-button" type="button" data-credential-open="' + escapeHtml(item.credentialId || '') + '">Manage</button><a class="small-button secondary-button" target="_blank" rel="noopener" href="../verify/?id=' + encodeURIComponent(item.credentialId || '') + '">View verification</a></div></div>'; }).join('');
+      } catch (error) { output.textContent = error?.message || 'Credential search failed.'; }
+    }
+    document.getElementById('engCredentialLookup')?.addEventListener('click', engCredentialSearch);
+    document.getElementById('engCredentialLookupId')?.addEventListener('keydown', function(event){ if(event.key === 'Enter'){ event.preventDefault(); engCredentialSearch(); } });
+    document.getElementById('engCredentialResult')?.addEventListener('click', async function(event){ var openButton=event.target.closest('[data-credential-open]'); if(openButton){ document.getElementById('engCredentialLookupId').value=openButton.dataset.credentialOpen; engCredentialAction('lookup'); return; } var button=event.target.closest('[data-credential-action]'); if(!button) return; var action=button.dataset.credentialAction; if(action==='revoke' && !window.confirm('Revoke this credential? Its public verification page will immediately show that it is not active.')) return; if(action==='reissue' && !window.confirm('Replace this credential with a new ID? The old public record will show that it was replaced.')) return; if(action==='update-name'){ var fb=window.utlFirebaseAuth; var id=String(document.getElementById('engCredentialLookupId')?.value||'').trim().toUpperCase(); var recipientName=String(document.getElementById('engCredentialRecipientName')?.value||'').trim(); try{ await fb.manageVerifiedCredential(action,id,{recipientName:recipientName}); showToast('Credential name updated'); engCredentialAction('lookup'); }catch(error){ showToast(error.message||'Update failed',true); } return; } engCredentialAction(action); });
 
     document.addEventListener('change', function(e) {
       var input = e.target.closest('input.eng-toggle');

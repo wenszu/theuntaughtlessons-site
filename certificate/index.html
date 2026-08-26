@@ -311,7 +311,7 @@
     .cert-verification-copy { min-width: 0; }
     .cert-verification-label { display:block; margin-bottom:5px; color:var(--gold); font-size:10px; font-weight:700; }
     .cert-verification-id { display:block; color:var(--navy); font:700 12px Lato,Arial,sans-serif; word-break:break-all; }
-    .cert-verification a { display:inline-block; margin-top:6px; color:var(--navy); font-size:11px; font-weight:700; }
+    .cert-verification a, .cert-verification button { display:inline-block; margin:6px 10px 0 0; padding:0; border:0; background:transparent; color:var(--navy); font:700 11px Lato,Arial,sans-serif; text-decoration:underline; cursor:pointer; }
 
     .cert-corner {
       position: absolute;
@@ -437,7 +437,7 @@
     </div>
     <div class="cert-verification" id="certVerification" hidden>
       <img id="certQr" alt="QR code to verify this credential">
-      <div class="cert-verification-copy"><span class="cert-verification-label">VERIFIED DIGITAL CREDENTIAL</span><span class="cert-verification-id" id="certCredentialId"></span><a id="certVerifyLink" target="_blank" rel="noopener">Open official verification record &rarr;</a></div>
+      <div class="cert-verification-copy"><span class="cert-verification-label">VERIFIED DIGITAL CREDENTIAL</span><span class="cert-verification-id" id="certCredentialId"></span><a id="certVerifyLink" target="_blank" rel="noopener">Open official verification record</a><button id="certCopyVerifyLink" type="button">Copy link for LinkedIn or CV</button></div>
     </div>
   </div>
 
@@ -527,6 +527,11 @@
       const verificationUrl = credential.verificationUrl || ('https://theuntaughtlessons.com/verify/?id=' + encodeURIComponent(credential.credentialId));
       document.getElementById('certCredentialId').textContent = credential.credentialId;
       document.getElementById('certVerifyLink').href = verificationUrl;
+      document.getElementById('certCopyVerifyLink').addEventListener('click', async (event) => {
+        const button = event.currentTarget;
+        try { await navigator.clipboard.writeText(verificationUrl); button.textContent = 'Verification link copied'; setTimeout(() => { button.textContent = 'Copy link for LinkedIn or CV'; }, 1800); }
+        catch { window.prompt('Copy this verification link:', verificationUrl); }
+      });
       document.getElementById('certQr').src = 'https://api.qrserver.com/v1/create-qr-code/?size=136x136&margin=0&data=' + encodeURIComponent(verificationUrl);
       document.getElementById('certVerification').hidden = false;
 

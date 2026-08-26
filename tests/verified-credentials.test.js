@@ -7,6 +7,7 @@ const rules = fs.readFileSync('firestore.rules', 'utf8');
 const certificate = fs.readFileSync('certificate/index.html', 'utf8');
 const verification = fs.readFileSync('verify/index.html', 'utf8');
 const admin = fs.readFileSync('admin/index.html', 'utf8');
+const results = fs.readFileSync('my-results/index.html', 'utf8');
 
 assert.match(functions, /exports\.issueVerifiedCredential = onCall/, 'credentials must be issued by a trusted server function');
 assert.match(functions, /"UTL-TSA-" \+ suffix/, 'credential IDs should use the approved UTL-TSA nomenclature');
@@ -28,5 +29,14 @@ assert.match(admin, /id="engCredentialLookup"/, 'administrators should be able t
 assert.match(admin, /data-credential-action/, 'administrators should be able to revoke or reactivate credentials');
 assert.match(functions, /action === "reissue"/, 'administrators should be able to replace a compromised or incorrect ID');
 assert.match(functions, /action === "update-name"/, 'administrators should be able to correct the public recipient name');
+assert.match(functions, /exports\.searchVerifiedCredentials = onCall/, 'admins should have a secure learner credential search');
+assert.match(functions, /collection\("credential_issuance"\)\.where\("email"/, 'admin search should connect learner email to its private issuance record');
+assert.match(admin, /learner name, email, or credential ID/i, 'the admin registry should explain all supported search methods');
+assert.match(admin, /searchVerifiedCredentials\(query\)/, 'the admin registry should search without requiring a known ID');
+assert.match(results, /id="resultsCredentialId"/, 'My Results should display the graduate credential ID');
+assert.match(results, /id="resultsCopyCredential"/, 'My Results should offer a copyable verification URL');
+assert.match(results, /certId=' \+ encodeURIComponent\(credential\.credentialId\)/, 'My Results should send the ID to LinkedIn');
+assert.match(results, /certUrl=' \+ encodeURIComponent\(verificationUrl\)/, 'My Results should send the direct verification link to LinkedIn');
+assert.match(certificate, /id="certCopyVerifyLink"/, 'the certificate should make its direct verification URL copyable');
 
 console.log('verified credential contracts passed');

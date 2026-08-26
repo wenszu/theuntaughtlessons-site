@@ -31,6 +31,11 @@ function timestampToIso(value) {
   return value && typeof value.toDate === "function" ? value.toDate().toISOString() : new Date().toISOString();
 }
 
+function serializeCredential(data) {
+  const value = data || {};
+  return { ...value, issuedAt: timestampToIso(value.issuedAt) };
+}
+
 async function requireVerifiedCaller(request) {
   const email = String(request.auth && request.auth.token && request.auth.token.email || "").trim().toLowerCase();
   if (!request.auth || !email || request.auth.token.email_verified !== true) {
@@ -172,6 +177,32 @@ exports.manageVerifiedCredential = onCall({ timeoutSeconds: 30, memory: "256MiB"
   const current = await ref.get();
   const data = current.data() || {};
   return { ok: true, found: true, credential: { ...data, issuedAt: timestampToIso(data.issuedAt) } };
+});
+
+exports.searchVerifiedCredentials = onCall({ timeoutSeconds: 30, memory: "256MiB" }, async (request) => {
+  const caller = await requireVerifiedCaller(request);
+  if (!(await isAuthorizedAdmin(caller.email))) throw new HttpsError("permission-denied", "Administrator access is required.");
+  const queryText = String(request.data && request.data.query || "").trim().toLowerCase().slice(0, 200);
+  if (queryText.length < 2) throw new HttpsError("invalid-argument", "Enter a learner name, email, or credential ID.");
+  const db = admin.firestore();
+  const found = new Map();
+  if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(queryText)) {
+    const issuance = await db.collection("credential_issuance").where("email", "==", queryText).limit(10).get();
+    for (const document of issuance.docs) {
+      const credentialId = String(document.data().credentialId || "");
+      if (!credentialId) continue;
+      const publicSnap = await db.collection("public_credentials").doc(credentialId).get();
+      if (publicSnap.exists) found.set(credentialId, serializeCredential(publicSnap.data()));
+    }
+  } else {
+    const snapshot = await db.collection("public_credentials").limit(250).get();
+    snapshot.forEach((document) => {
+      const data = document.data() || {};
+      const haystack = [data.recipientName, data.credentialId, data.credentialTitle].map((value) => String(value || "").toLowerCase()).join(" ");
+      if (haystack.includes(queryText)) found.set(document.id, serializeCredential(data));
+    });
+  }
+  return { ok: true, credentials: Array.from(found.values()).slice(0, 25) };
 });
 
 exports.runAdminAction = onCall({

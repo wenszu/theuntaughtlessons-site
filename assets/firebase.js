@@ -168,6 +168,12 @@ async function manageVerifiedCredential(action, credentialId, details = {}) {
   return result && result.data ? result.data : null;
 }
 
+async function searchVerifiedCredentials(queryText) {
+  const callable = httpsCallable(functions, "searchVerifiedCredentials");
+  const result = await callable({ query: String(queryText || "").trim() });
+  return result && result.data ? result.data : { ok: true, credentials: [] };
+}
+
 function signInWithEmailPassword(email, password) {
   return signInWithEmailAndPassword(requireFirebaseAuth(), String(email || "").trim().toLowerCase(), String(password || ""));
 }
@@ -1184,6 +1190,7 @@ export {
   isSignInWithEmailLink,
   issueVerifiedCredential,
   manageVerifiedCredential,
+  searchVerifiedCredentials,
   onAuthStateChanged,
   requireAuthorizedMember,
   requestGoogleGroupSyncJob,

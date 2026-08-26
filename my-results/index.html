@@ -625,6 +625,12 @@
       font-size: 13px;
       color: var(--charcoal);
     }
+    .credential-summary { margin-top:10px; padding-top:10px; border-top:1px solid rgba(0,51,102,.14); }
+    .credential-summary[hidden] { display:none; }
+    .credential-summary-id { display:block; margin-bottom:4px; color:var(--navy); font:700 12px Lato,Arial,sans-serif; }
+    .credential-summary-url { display:block; max-width:620px; overflow:hidden; text-overflow:ellipsis; color:#567; font-size:11px; white-space:nowrap; }
+    .certificate-callout-actions { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:8px; }
+    .certificate-callout-link.is-secondary { background:#fff; color:var(--navy); border:1px solid rgba(0,51,102,.25); cursor:pointer; }
 
     .certificate-callout-link {
       flex: none;
@@ -1302,9 +1308,10 @@
       <div class="certificate-callout-copy">
         <span class="certificate-callout-label">Program complete</span>
         <h2>Your certificate is ready.</h2>
-        <p>Congratulations! You finished all three phases. View, download, or share your certificate of completion.</p>
+        <p>Congratulations! You finished all three phases. Your verified link can be added directly to LinkedIn, a CV, or an application.</p>
+        <div class="credential-summary" id="credentialSummary" hidden><span class="credential-summary-id" id="resultsCredentialId"></span><span class="credential-summary-url" id="resultsCredentialUrl"></span></div>
       </div>
-      <a class="certificate-callout-link" href="../certificate/index.html">View certificate &rarr;</a>
+      <div class="certificate-callout-actions"><a class="certificate-callout-link" href="../certificate/index.html">View certificate</a><a class="certificate-callout-link is-secondary" id="resultsVerifyLink" target="_blank" rel="noopener" hidden>View verification</a><button class="certificate-callout-link is-secondary" id="resultsCopyCredential" type="button" hidden>Copy verification link</button><button class="certificate-callout-link is-secondary" id="resultsLinkedIn" type="button" hidden>Add to LinkedIn</button></div>
     </div>
 
     <div class="device-notice" id="deviceNotice">
@@ -2111,7 +2118,38 @@
     applySendInstructorStatus();
   </script>
   <script type="module">
-    import { getSignedInUser, getAssessmentVisibility, getMemberExerciseResponses } from '../assets/firebase.js';
+    import { getSignedInUser, getAssessmentVisibility, getMemberExerciseResponses, issueVerifiedCredential } from '../assets/firebase.js';
+    (async () => {
+      const callout = document.getElementById('certificateCallout');
+      if (!callout || callout.hidden) return;
+      try {
+        const issued = await issueVerifiedCredential();
+        const credential = issued?.credential;
+        if (!credential?.credentialId) return;
+        const verificationUrl = credential.verificationUrl || ('https://theuntaughtlessons.com/verify/?id=' + encodeURIComponent(credential.credentialId));
+        document.getElementById('resultsCredentialId').textContent = 'Credential ID: ' + credential.credentialId;
+        document.getElementById('resultsCredentialUrl').textContent = verificationUrl;
+        document.getElementById('credentialSummary').hidden = false;
+        const verifyLink = document.getElementById('resultsVerifyLink');
+        verifyLink.href = verificationUrl;
+        verifyLink.hidden = false;
+        const copyButton = document.getElementById('resultsCopyCredential');
+        copyButton.hidden = false;
+        copyButton.addEventListener('click', async () => {
+          try { await navigator.clipboard.writeText(verificationUrl); copyButton.textContent = 'Link copied'; setTimeout(() => { copyButton.textContent = 'Copy verification link'; }, 1800); }
+          catch { window.prompt('Copy this verification link:', verificationUrl); }
+        });
+        const linkedIn = document.getElementById('resultsLinkedIn');
+        linkedIn.hidden = false;
+        linkedIn.addEventListener('click', () => {
+          const issuedDate = new Date(credential.issuedAt);
+          const url = 'https://www.linkedin.com/profile/add?startTask=CERTIFICATION_NAME&name=' + encodeURIComponent(credential.credentialTitle || 'The Untaught Lessons') + '&organizationName=' + encodeURIComponent('The Untaught Lessons') + '&issueYear=' + issuedDate.getFullYear() + '&issueMonth=' + (issuedDate.getMonth() + 1) + '&certId=' + encodeURIComponent(credential.credentialId) + '&certUrl=' + encodeURIComponent(verificationUrl);
+          window.open(url, '_blank', 'noopener');
+        });
+      } catch (error) {
+        console.warn('Verified credential could not be loaded on My Results.', error);
+      }
+    })();
     (async () => {
       try {
         const user = await getSignedInUser();
