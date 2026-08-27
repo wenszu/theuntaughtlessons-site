@@ -9089,6 +9089,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
     // ===== Members management =====
 
     var mbMembersCache = [];
+    var mbCredentialByEmail = new Map();
     var mbFilterState = { search: '', cohort: 'all', status: 'all', sort: { col: 'name', dir: 'asc' }, page: 0 };
     var MB_PAGE_SIZE = 25;
     var mbSearchTimer = null;
@@ -9319,6 +9320,10 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
               '<button class="mb-btn mb-btn-extend" type="button" data-mb-extend="' + escapeHtml(email) + '">+1 yr</button>' +
               '<button class="mb-btn mb-btn-danger" type="button" data-mb-remove="' + escapeHtml(email) + '">Remove</button>' +
             '</div>';
+        var credential = mbCredentialByEmail.get(email) || null;
+        var credentialHtml = credential && credential.credentialId
+          ? '<a href="../verify/?id=' + encodeURIComponent(credential.credentialId) + '" target="_blank" rel="noopener" style="font-size:11px;font-weight:700;white-space:nowrap;">' + escapeHtml(credential.credentialId) + '</a><br><small>' + escapeHtml(credential.status || 'unknown') + '</small>'
+          : '<span style="color:#888;font-size:11px;">Not issued</span>';
         return '<tr data-mb-row>' +
           '<td>' + escapeHtml(data.name || '—') + '</td>' +
           '<td>' + escapeHtml(email) + '</td>' +
@@ -9327,10 +9332,11 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
           '<td>' + escapeHtml(data.cohort || '—') + '</td>' +
           '<td>' + escapeHtml(mbFormatDate(data.firstLoginAt)) + '</td>' +
           '<td>' + expiryHtml + '</td>' +
+          '<td>' + credentialHtml + '</td>' +
           '<td>' + actions + '</td>' +
         '</tr>' +
         (isOwner ? '' :
-          '<tr class="mb-edit-panel"><td colspan="8">' + mbEditFormHtml(email, data) + '</td></tr>'
+          '<tr class="mb-edit-panel"><td colspan="9">' + mbEditFormHtml(email, data) + '</td></tr>'
         );
       }).join('');
 
@@ -9358,6 +9364,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
             mbSortTh('Cohort', 'cohort') +
             mbSortTh('First Login', 'firstLogin') +
             mbSortTh('Expiry', 'expiry') +
+            '<th>Credential ID</th>' +
             '<th>Actions</th>' +
           '</tr></thead>' +
           '<tbody>' + rows + '</tbody>' +
@@ -9388,7 +9395,8 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         var data = d.data();
         var email = (mbCanonicalEmailFromDoc(d) || mbNormalizeEmail(d.id) || '').toLowerCase();
         var name = (data.name || '').toLowerCase();
-        if (q && !name.includes(q) && !email.includes(q)) return false;
+        var credentialId = String((mbCredentialByEmail.get(email) || {}).credentialId || '').toLowerCase();
+        if (q && !name.includes(q) && !email.includes(q) && !credentialId.includes(q)) return false;
         if (mbFilterState.cohort !== 'all' && (data.cohort || '') !== mbFilterState.cohort) return false;
         var expired = mbIsExpired(data.expiryDate);
         var expiringSoon = mbIsExpiringSoon(data.expiryDate);
@@ -9453,7 +9461,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       el.hidden = false;
       el.innerHTML =
         '<div class="mb-search-row">' +
-          '<input class="mb-search" type="search" id="mbSearchInput" placeholder="Search name or email…" value="' + escapeHtml(mbFilterState.search) + '" autocomplete="off">' +
+          '<input class="mb-search" type="search" id="mbSearchInput" placeholder="Search name, email, or credential ID…" value="' + escapeHtml(mbFilterState.search) + '" autocomplete="off">' +
           (cohorts.length > 1
             ? '<select class="mb-cohort-select" id="mbCohortFilter">' +
                 '<option value="all">All cohorts</option>' +
@@ -9725,6 +9733,13 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         snap.forEach(function (d) { docs.push(d); });
         docs = mbApplyLocalGroupOverrides(docs);
         docs = mbDedupeMemberDocs(docs);
+        try {
+          var registry = await fb.getMemberCredentialRegistry();
+          mbCredentialByEmail = new Map((registry.credentials || []).map(function (item) { return [String(item.email || '').toLowerCase(), item]; }));
+        } catch (credentialError) {
+          mbCredentialByEmail = new Map();
+          console.warn('Credential registry could not be loaded in Member Access.', credentialError);
+        }
         mbMembersCache = docs;
         mbRenderControls();
         mbApplyAndRender();
