@@ -717,13 +717,26 @@
     body.exercise-done .completion-next-actions { display: flex; }
 
     .completion-next-actions a {
+      min-height: 36px;
+      padding: 8px 12px;
+      border: 1px solid rgba(0, 51, 102, .24);
+      border-radius: 7px;
+      background: var(--white);
       color: var(--navy);
-      font-size: .88rem;
+      display: inline-flex;
+      align-items: center;
+      font-size: .84rem;
       font-weight: 700;
       text-decoration: none;
     }
 
-    .completion-next-actions a:hover { text-decoration: underline; }
+    .completion-next-actions a:first-child {
+      border-color: var(--gold);
+      background: var(--gold);
+      color: #2e2107;
+    }
+
+    .completion-next-actions a:hover { border-color: var(--navy); }
 
     .done-toggle {
       border-color: var(--line);
@@ -1040,6 +1053,7 @@
       background: var(--navy);
       color: #fff;
       border-color: var(--navy);
+      min-width: 170px;
     }
 
     button.gold {
@@ -1061,9 +1075,9 @@
 
     .buttons button:disabled,
     .buttons button.primary:disabled {
-      background: #E7E1D7;
-      border-color: #D8D0C2;
-      color: #8A8379;
+      background: #F1EDE6;
+      border: 1px dashed #91887B;
+      color: #625B52;
       box-shadow: none;
       transform: none;
     }
@@ -1143,23 +1157,31 @@
       font-family: 'Lato', sans-serif;
       font-size: 13px;
       color: #003366;
-      display: flex;
+      display: block;
       align-items: center;
       gap: 8px;
       margin-bottom: 4px;
     }
 
     .save-notice-link {
-      color: #EEA320;
+      min-height: 36px;
+      padding: 8px 12px;
+      border: 1px solid var(--gold);
+      border-radius: 7px;
+      background: var(--gold);
+      color: #2e2107;
+      display: inline-flex;
+      align-items: center;
       text-decoration: none;
-      font-weight: 500;
-      margin-left: 4px;
+      font-weight: 700;
     }
 
-    .save-notice-link:hover { text-decoration: underline; }
+    .save-notice-actions { display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 7px; }
 
-    .save-notice-link.exit-link { color: #003366; }
-    .save-notice-link.exit-link:hover { color: #2e7d4f; }
+    .save-notice-link:hover { border-color: var(--navy); }
+
+    .save-notice-link.exit-link { border-color:rgba(0,51,102,.28);background:#fff;color:#003366; }
+    .save-notice-link.exit-link:hover { border-color:#003366;color:#003366; }
 
     .save-notice-caveat {
       font-size: 11px;
@@ -1462,8 +1484,8 @@
         <div class="completion-row">
           <button class="done-toggle" id="doneToggleBtn" type="button">Mark exercise complete</button>
           <nav class="completion-next-actions" aria-label="What to do next">
-            <a href="../grocery-list-ai/index.html">Go to next exercise &rarr;</a>
-            <a href="../../member-login/index.html#learning-journey">Back to Learning Journey</a>
+            <a href="../grocery-list-ai/index.html">Next: Grocery list with AI &rarr;</a>
+            <a href="../../member-login/index.html#learning-journey">&larr; Learning Journey</a>
           </nav>
         </div>
       </div>
@@ -1498,7 +1520,7 @@
 
           <div class="buttons">
             <button id="generateBtn">Generate new list</button>
-            <button id="checkBtn" class="primary" disabled>Check my answer</button>
+            <button id="checkBtn" class="primary" disabled>Submit for feedback</button>
             <button id="sampleBtn" disabled aria-describedby="answerRequirement">Show sample answer</button>
             <button id="resetBtn" class="secondary-action hidden">Reset</button>
           </div>
@@ -1706,8 +1728,8 @@
       if (requirement) {
         requirement.classList.toggle('ready', allSorted);
         requirement.textContent = allSorted
-          ? 'Ready to check. All items are sorted into buckets.'
-          : `Sort every item into one of the three buckets to check your answer. ${movedCount} of ${state.generatedItems.length} sorted.`;
+          ? 'Ready to submit. All items are sorted into buckets.'
+          : `Complete the sort to submit: ${state.generatedItems.length - movedCount} items remaining (${movedCount} of ${state.generatedItems.length} sorted).`;
       }
       renderSelectionState();
     }
@@ -2311,7 +2333,7 @@
       const done = isExerciseDone();
       document.body.classList.toggle('exercise-done', done);
       const button = document.getElementById('doneToggleBtn');
-      if (button) button.textContent = done ? 'Exercise complete ✓' : 'Mark exercise complete';
+      if (button) button.textContent = done ? 'Completed in Learning Journey ✓' : 'Mark exercise complete';
       updateHeaderProgress();
     }
 
@@ -2354,9 +2376,8 @@
           <div class="save-notice-text">
             <i class="ti ti-device-floppy" aria-hidden="true"></i>
             Your response has been saved to this browser.
-            <a href="../grocery-list-ai/index.html" class="save-notice-link">Go to next exercise →</a>
-            <a href="../../member-login/index.html#learning-journey" class="save-notice-link exit-link">Back to Learning Journey</a>
           </div>
+          <div class="save-notice-actions"><a href="../grocery-list-ai/index.html" class="save-notice-link">Next: Grocery list with AI →</a><a href="../../member-login/index.html#learning-journey" class="save-notice-link exit-link">← Learning Journey</a></div>
           <div class="save-notice-caveat">Saved on this device only. Copy your response into your companion workbook to keep a permanent record.</div>
         </div>
       `;
