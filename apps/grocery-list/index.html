@@ -1551,7 +1551,9 @@
     const state = {
       generatedItems: [],
       placements: { list: [], bucket1: [], bucket2: [], bucket3: [] },
-      bucketNames: { bucket1: '', bucket2: '', bucket3: '' }
+      bucketNames: { bucket1: '', bucket2: '', bucket3: '' },
+      submitted: false,
+      changedAfterSubmit: false
     };
 
     let activityTimer = null;
@@ -1679,6 +1681,8 @@
       state.generatedItems = finalItems;
       state.placements = { list: finalItems.map((i) => i.id), bucket1: [], bucket2: [], bucket3: [] };
       state.bucketNames = { bucket1: '', bucket2: '', bucket3: '' };
+      state.submitted = false;
+      state.changedAfterSubmit = false;
       selectedItemId = null;
 
       renderAll();
@@ -1722,13 +1726,24 @@
 
       const movedCount = state.placements.bucket1.length + state.placements.bucket2.length + state.placements.bucket3.length;
       const allSorted = movedCount === state.generatedItems.length;
-      document.getElementById('checkBtn').disabled = !allSorted;
+      const submissionIsCurrent = state.submitted && !state.changedAfterSubmit;
+      const checkButton = document.getElementById('checkBtn');
+      checkButton.disabled = !allSorted || submissionIsCurrent;
+      checkButton.textContent = submissionIsCurrent
+        ? 'Submitted ✓'
+        : state.changedAfterSubmit
+          ? 'Resubmit for feedback'
+          : 'Submit for feedback';
       document.getElementById('sampleBtn').disabled = !allSorted;
       const requirement = document.getElementById('answerRequirement');
       if (requirement) {
-        requirement.classList.toggle('ready', allSorted);
-        requirement.textContent = allSorted
-          ? 'Ready to submit. All items are sorted into buckets.'
+        requirement.classList.toggle('ready', allSorted || submissionIsCurrent);
+        requirement.textContent = submissionIsCurrent
+          ? 'Submitted. Your score and feedback are shown below.'
+          : allSorted
+            ? state.changedAfterSubmit
+              ? 'Your response changed after submission. Resubmit to update your score and feedback.'
+              : 'Ready to submit. All items are sorted into buckets.'
           : `Complete the sort to submit: ${state.generatedItems.length - movedCount} items remaining (${movedCount} of ${state.generatedItems.length} sorted).`;
       }
       renderSelectionState();
@@ -1771,6 +1786,7 @@
     // -------------------------
     function moveItem(itemId, targetZone) {
       if (!state.placements[targetZone]) return;
+      if (state.submitted) state.changedAfterSubmit = true;
       Object.keys(state.placements).forEach((zone) => {
         state.placements[zone] = state.placements[zone].filter((id) => id !== itemId);
       });
@@ -2416,12 +2432,20 @@
           if (e.target.id === `${bucketKey}Input`) {
             activityTimer.startFromInteraction();
             state.bucketNames[bucketKey] = e.target.value;
+            if (state.submitted) {
+              state.changedAfterSubmit = true;
+              renderAll();
+            }
           }
         });
       });
 
       document.getElementById('whyText').addEventListener('input', () => {
         activityTimer.startFromInteraction();
+        if (state.submitted) {
+          state.changedAfterSubmit = true;
+          renderAll();
+        }
       });
 
       document.getElementById('generateBtn').addEventListener('click', generateList);
@@ -2430,6 +2454,9 @@
         activityTimer.pause();
         const result = evaluate();
         showFeedback(result);
+        state.submitted = true;
+        state.changedAfterSubmit = false;
+        renderAll();
         document.getElementById('resetBtn').classList.remove('hidden');
       });
 
@@ -2451,6 +2478,8 @@
       document.getElementById('resetBtn').addEventListener('click', () => {
         state.placements = { list: state.generatedItems.map((i) => i.id), bucket1: [], bucket2: [], bucket3: [] };
         state.bucketNames = { bucket1: '', bucket2: '', bucket3: '' };
+        state.submitted = false;
+        state.changedAfterSubmit = false;
         selectedItemId = null;
         document.getElementById('whyText').value = '';
         clearFeedback();
