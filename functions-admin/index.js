@@ -1,6 +1,7 @@
 const admin = require("firebase-admin");
 const crypto = require("crypto");
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
+const { onDocumentWritten } = require("firebase-functions/v2/firestore");
 const { defineSecret, defineString } = require("firebase-functions/params");
 
 admin.initializeApp();
@@ -12,6 +13,8 @@ const APPS_SCRIPT_ADMIN_URL = defineString("APPS_SCRIPT_ADMIN_URL", {
 const BOOTSTRAP_OWNER_EMAILS = new Set(["wenszu@gmail.com"]);
 const ALLOWED_ADMIN_ACTIONS = new Set(["WelcomeEmail", "TestEmailTemplate", "RemovedMember"]);
 const MAX_ADMIN_ACTION_BYTES = 64 * 1024;
+const CREDENTIAL_PROGRAM_ID = "think-speak-act-executive";
+const CREDENTIAL_CODE = "TSA";
 const CREDENTIAL_PROGRAM_VERSION = "tsa-2026-v1";
 const CREDENTIAL_ID_ALPHABET = "0123456789ABCDEFGHJKMNPQRSTVWXYZ";
 const REQUIRED_EXERCISES = [
@@ -90,59 +93,75 @@ async function completedExerciseEvidence(uid) {
   return { missing, latest };
 }
 
-exports.issueVerifiedCredential = onCall({ timeoutSeconds: 30, memory: "256MiB" }, async (request) => {
-  const caller = await requireVerifiedCaller(request);
+async function issueCredentialForUser(uid, email, fallbackName, options = {}) {
+  const normalizedEmail = String(email || "").trim().toLowerCase();
+  const fail = (code, message) => {
+    if (options.throwOnIneligible) throw new HttpsError(code, message);
+    return { ok: true, issued: false, reason: code, message };
+  };
   const settings = await credentialSettings();
-  if (!settings.enabled) throw new HttpsError("failed-precondition", "Certificates are not currently available.");
-  const memberSnap = await admin.firestore().collection("authorized_members").doc(caller.email).get();
+  if (!settings.enabled) return fail("failed-precondition", "Certificates are not currently available.");
+  const memberSnap = await admin.firestore().collection("authorized_members").doc(normalizedEmail).get();
   if (!memberSnap.exists || String(memberSnap.data().status || "active").toLowerCase() === "inactive") {
-    throw new HttpsError("permission-denied", "This account does not have active member access.");
+    return fail("permission-denied", "This account does not have active member access.");
   }
-  const evidence = await completedExerciseEvidence(caller.uid);
+  const evidence = await completedExerciseEvidence(uid);
   if (evidence.missing.length) {
-    throw new HttpsError("failed-precondition", "Complete all program exercises before requesting a certificate.");
+    return fail("failed-precondition", "Complete all program exercises before requesting a certificate.");
   }
   const db = admin.firestore();
-  const issuanceRef = db.collection("credential_issuance").doc(caller.uid + "_" + CREDENTIAL_PROGRAM_VERSION);
-  const existing = await issuanceRef.get();
-  if (existing.exists) {
-    const data = existing.data() || {};
-    const publicSnap = data.credentialId ? await db.collection("public_credentials").doc(data.credentialId).get() : null;
-    if (publicSnap && publicSnap.exists && String(publicSnap.data().status || "") === "active") {
-      const publicData = publicSnap.data() || {};
-      return { ok: true, credential: { ...publicData, issuedAt: timestampToIso(publicData.issuedAt) } };
-    }
-  }
-  const recipientName = String(memberSnap.data().name || request.auth.token.name || caller.email.split("@")[0]).trim().slice(0, 160);
+  const issuanceRef = db.collection("credential_issuance").doc(uid + "_" + CREDENTIAL_PROGRAM_VERSION);
+  const recipientName = String(memberSnap.data().name || fallbackName || normalizedEmail.split("@")[0]).trim().slice(0, 160);
   const issuedAt = evidence.latest || admin.firestore.Timestamp.now();
-  let credentialId;
-  let publicRef;
-  for (let attempt = 0; attempt < 5; attempt += 1) {
-    credentialId = newCredentialId();
-    publicRef = db.collection("public_credentials").doc(credentialId);
-    if (!(await publicRef.get()).exists) break;
-  }
-  const publicCredential = {
-    credentialId,
-    recipientName,
-    credentialTitle: settings.credentialTitle,
-    issuer: "The Untaught Lessons",
-    issuedAt,
-    status: "active",
-    programVersion: CREDENTIAL_PROGRAM_VERSION,
-    signatoryName: settings.signatoryName,
-    signatoryTitle: settings.signatoryTitle,
-    verificationUrl: "https://theuntaughtlessons.com/verify/?id=" + encodeURIComponent(credentialId)
-  };
-  const batch = db.batch();
-  batch.set(publicRef, publicCredential);
-  batch.set(issuanceRef, {
-    userId: caller.uid, email: caller.email, credentialId, programVersion: CREDENTIAL_PROGRAM_VERSION,
-    completionVerifiedAt: admin.firestore.FieldValue.serverTimestamp(), issuedAt, status: "active",
-    requiredExercises: REQUIRED_EXERCISES, createdAt: admin.firestore.FieldValue.serverTimestamp()
+  const credential = await db.runTransaction(async (transaction) => {
+    const existing = await transaction.get(issuanceRef);
+    if (existing.exists) {
+      const data = existing.data() || {};
+      if (data.credentialId) {
+        const publicSnap = await transaction.get(db.collection("public_credentials").doc(data.credentialId));
+        if (publicSnap.exists) return publicSnap.data() || {};
+      }
+    }
+    const credentialId = newCredentialId();
+    const publicRef = db.collection("public_credentials").doc(credentialId);
+    const collision = await transaction.get(publicRef);
+    if (collision.exists) throw new Error("Credential ID collision. Retry issuance.");
+    const publicCredential = {
+      credentialId, recipientName, credentialTitle: settings.credentialTitle, issuer: "The Untaught Lessons", issuedAt,
+      status: "active", programId: CREDENTIAL_PROGRAM_ID, credentialCode: CREDENTIAL_CODE,
+      programVersion: CREDENTIAL_PROGRAM_VERSION, signatoryName: settings.signatoryName,
+      signatoryTitle: settings.signatoryTitle,
+      verificationUrl: "https://theuntaughtlessons.com/verify/?id=" + encodeURIComponent(credentialId)
+    };
+    transaction.set(publicRef, publicCredential);
+    transaction.set(issuanceRef, {
+      userId: uid, email: normalizedEmail, credentialId, programId: CREDENTIAL_PROGRAM_ID,
+      credentialCode: CREDENTIAL_CODE, programVersion: CREDENTIAL_PROGRAM_VERSION,
+      completionVerifiedAt: admin.firestore.FieldValue.serverTimestamp(), issuedAt, status: "active",
+      requiredExercises: REQUIRED_EXERCISES, createdAt: admin.firestore.FieldValue.serverTimestamp()
+    });
+    return publicCredential;
   });
-  await batch.commit();
-  return { ok: true, credential: { ...publicCredential, issuedAt: timestampToIso(issuedAt) } };
+  return { ok: true, issued: true, credential: { ...credential, issuedAt: timestampToIso(credential.issuedAt) } };
+}
+
+exports.issueVerifiedCredential = onCall({ timeoutSeconds: 30, memory: "256MiB" }, async (request) => {
+  const caller = await requireVerifiedCaller(request);
+  return issueCredentialForUser(caller.uid, caller.email, request.auth.token.name, { throwOnIneligible: true });
+});
+
+exports.autoIssueVerifiedCredential = onDocumentWritten({
+  document: "users/{userId}/completed_exercises/{exerciseId}", timeoutSeconds: 30, memory: "256MiB"
+}, async (event) => {
+  const after = event.data && event.data.after;
+  if (!after || !after.exists || String((after.data() || {}).status || "").toLowerCase() !== "done") return;
+  const uid = event.params.userId;
+  const userSnap = await admin.firestore().collection("users").doc(uid).get();
+  const userData = userSnap.exists ? userSnap.data() || {} : {};
+  const email = String(userData.email || "").trim().toLowerCase();
+  if (!email) return;
+  const result = await issueCredentialForUser(uid, email, userData.displayName || "");
+  if (result && result.issued) console.log("Credential ready", { uid, programVersion: CREDENTIAL_PROGRAM_VERSION, credentialId: result.credential.credentialId });
 });
 
 exports.manageVerifiedCredential = onCall({ timeoutSeconds: 30, memory: "256MiB" }, async (request) => {

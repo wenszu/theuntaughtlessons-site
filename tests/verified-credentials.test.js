@@ -10,12 +10,15 @@ const admin = fs.readFileSync('admin/index.html', 'utf8');
 const results = fs.readFileSync('my-results/index.html', 'utf8');
 
 assert.match(functions, /exports\.issueVerifiedCredential = onCall/, 'credentials must be issued by a trusted server function');
+assert.match(functions, /exports\.autoIssueVerifiedCredential = onDocumentWritten/, 'credentials should be issued automatically when completion records change');
+assert.match(functions, /CREDENTIAL_PROGRAM_ID = "think-speak-act-executive"/, 'credential records should identify their program independently from the learner');
+assert.match(functions, /credentialCode: CREDENTIAL_CODE/, 'credential records should carry a program-specific credential code for future programs');
 assert.match(functions, /"UTL-TSA-" \+ suffix/, 'credential IDs should use the approved UTL-TSA nomenclature');
 assert.match(functions, /crypto\.randomBytes\(12\)/, 'credential IDs should be non-sequential and cryptographically random');
 assert.match(functions, /REQUIRED_EXERCISES\.filter/, 'issuance should verify all required exercise completion records');
 assert.match(functions, /collection\("credential_issuance"\)/, 'private issuance evidence should be stored separately');
 assert.match(functions, /collection\("public_credentials"\)/, 'public verification data should have a dedicated collection');
-assert.doesNotMatch(functions.match(/const publicCredential = \{[\s\S]*?\n  \};/)[0], /email|userId/, 'public records must not disclose account identifiers');
+assert.doesNotMatch(functions.match(/const publicCredential = \{[\s\S]*?\n\s*\};/)[0], /email|userId/, 'public records must not disclose account identifiers');
 assert.match(rules, /match \/public_credentials\/{credentialId} \{\s*allow read: if true;\s*allow write: if false;/, 'public records should be readable but server-write-only');
 assert.match(rules, /match \/credential_issuance\/{issuanceId} \{\s*allow read, write: if false;/, 'private issuance records should not be client accessible');
 assert.match(firebase, /httpsCallable\(functions, "issueVerifiedCredential"\)/, 'the member certificate should use callable issuance');
