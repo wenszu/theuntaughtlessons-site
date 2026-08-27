@@ -3641,7 +3641,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
     </main>
   </div>
 
-  <script src="../member-login/content-config.js?v=20260819-program-icon-size"></script>
+  <script src="../member-login/content-config.js?v=20260827-support-preview-1"></script>
   <script src="../assets/reward-ui.js?v=20260803-written-reflection-1"></script>
 
   <script type="module">
@@ -3655,6 +3655,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       findUserUidByEmail,
       getAllMemberWorkspaceProgress,
       getMemberCredentialRegistry,
+      getMemberSupportSnapshot,
       getDoc,
       getDocs,
       getAssessmentVisibility,
@@ -3674,6 +3675,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       getPublicFindLevelSetting,
       getSignedInUser,
       manageVerifiedCredential,
+      logMemberSupportPreview,
       searchVerifiedCredentials,
       requestGoogleGroupSyncJob,
       runAdminAction,
@@ -3689,7 +3691,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       signOut,
       signInWithGooglePopup,
       Timestamp
-    } from "../assets/firebase.js?v=20260827-credentials-1";
+    } from "../assets/firebase.js?v=20260827-assessment-visibility-fix";
     import { serverTimestamp, setDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
     window.utlFirebaseAuth = {
@@ -3705,6 +3707,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       findUserUidByEmail,
       getAllMemberWorkspaceProgress,
       getMemberCredentialRegistry,
+      getMemberSupportSnapshot,
       getDoc,
       getDocs,
       getAssessmentVisibility,
@@ -3722,6 +3725,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       getPublicFindLevelSetting,
       getSignedInUser,
       manageVerifiedCredential,
+      logMemberSupportPreview,
       searchVerifiedCredentials,
       requestGoogleGroupSyncJob,
       runAdminAction,
@@ -7634,7 +7638,9 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       try { backup = JSON.parse(localStorage.getItem(SP_PREVIEW_BACKUP_KEY) || '{}'); } catch (error) {}
       const label = document.getElementById('spPreviewActiveLabel');
       const link = document.getElementById('spPreviewContinue');
-      if (label) label.textContent = 'Starting before ' + (backup.targetTitle || 'the selected activity') + '. Firebase progress writes are paused.';
+      if (label) label.textContent = backup.mode === 'member-support'
+        ? 'Viewing ' + (backup.memberName || backup.memberEmail || 'member') + ' from their saved cloud progress. All interactions are temporary.'
+        : 'Starting before ' + (backup.targetTitle || 'the selected activity') + '. Firebase progress writes are paused.';
       if (link) link.href = backup.targetHref || '../member-login/index.html';
     }
 
@@ -7661,6 +7667,91 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       spSetPreviewProgressBefore(target);
       spRefreshPreviewCard();
       window.open(target.href, '_blank', 'noopener');
+    }
+
+    function spSupportExerciseAppKey(exercise) {
+      const match = String(exercise && exercise.appUrl || '').match(/\/apps\/([^/]+)/);
+      return match ? match[1] : '';
+    }
+
+    function spApplyMemberSupportProgress(progress) {
+      progress = progress && typeof progress === 'object' ? progress : {};
+      const orientation = progress.orientation || {};
+      localStorage.setItem('utl_orientation_ready', orientation.ready === true ? 'true' : 'false');
+      localStorage.setItem('utl_orientation_open', orientation.open === true ? 'true' : 'false');
+      const remoteLessons = progress.lessons || {};
+      const remoteExercises = progress.exercises || {};
+      ['diagnostic','checkpoint'].forEach((kind) => {
+        const saved = remoteExercises['tsa-' + kind + '-v2'] || remoteExercises['tsa-' + kind];
+        localStorage.setItem('utl_done_tsa-' + kind + '-v2', saved?.completed === true ? 'true' : 'false');
+        if (saved?.savedPayload) localStorage.setItem('utl_result_tsa_' + kind + '_v2', JSON.stringify(saved.savedPayload));
+      });
+      ['phase1','phase2','phase3'].forEach((phaseKey, phaseIndex) => {
+        const phase = (window.UTL_CONTENT || {})[phaseKey] || {};
+        (phase.lessons || []).forEach((lesson) => {
+          localStorage.setItem('utl_watched_' + lesson.id, remoteLessons[lesson.id]?.watched === true ? 'true' : 'false');
+        });
+        (phase.exercises || []).forEach((exercise) => {
+          const appKey = spSupportExerciseAppKey(exercise);
+          const saved = remoteExercises[exercise.id] || (appKey ? remoteExercises[appKey] : null) || {};
+          localStorage.setItem('utl_visited_' + exercise.id, saved.visited === true ? 'true' : 'false');
+          localStorage.setItem('utl_done_' + exercise.id, saved.completed === true ? 'true' : 'false');
+          if (appKey) {
+            localStorage.setItem('utl_visited_' + appKey, saved.visited === true ? 'true' : 'false');
+            localStorage.setItem('utl_done_' + appKey, saved.completed === true ? 'true' : 'false');
+            if (saved.savedPayload) localStorage.setItem('utl_result_' + appKey, JSON.stringify(saved.savedPayload));
+          }
+          if (exercise.legacyDoneKey) localStorage.setItem(exercise.legacyDoneKey, saved.completed === true ? 'true' : 'false');
+        });
+        const lessonsDone = (phase.lessons || []).length > 0 && (phase.lessons || []).every((lesson) => remoteLessons[lesson.id]?.watched === true);
+        const exercisesDone = (phase.exercises || []).length > 0 && (phase.exercises || []).every((exercise) => {
+          const appKey = spSupportExerciseAppKey(exercise);
+          return (remoteExercises[exercise.id] || (appKey ? remoteExercises[appKey] : null))?.completed === true;
+        });
+        localStorage.setItem('utl_p' + (phaseIndex + 1) + '_videos_done', lessonsDone ? 'true' : 'false');
+        localStorage.setItem('utl_p' + (phaseIndex + 1) + '_done', exercisesDone ? 'true' : 'false');
+      });
+      Object.entries(progress.contexts || {}).forEach(([id, saved]) => {
+        localStorage.setItem('utl_context_complete_' + id, saved?.completed === true ? 'true' : 'false');
+      });
+      const rewards = progress.rewards || { mpTotal:0, masteryPoints:0, tokens:0, streakDays:0, level:'Intern', earnedEvents:{}, earnedEventIds:{}, ledger:[] };
+      localStorage.setItem('utl_rewards_state', JSON.stringify(rewards));
+    }
+
+    async function spLaunchMemberSupportPreview(memberOrEmail) {
+      const email = String(typeof memberOrEmail === 'string' ? memberOrEmail : memberOrEmail?.email || '').trim().toLowerCase();
+      if (!email) return showToast('This member does not have an email address.', true);
+      const fb = window.utlFirebaseAuth;
+      if (!fb?.getMemberSupportSnapshot) return showToast('Support preview is still loading. Try again in a moment.', true);
+      if (localStorage.getItem(SP_PREVIEW_ACTIVE_KEY) === 'true') spEndExperiencePreview();
+      const previewWindow = window.open('', '_blank');
+      try {
+        const snapshot = await fb.getMemberSupportSnapshot(email);
+        const learning = {};
+        Object.keys(localStorage).forEach((key) => { if (spIsLearningKey(key)) learning[key] = localStorage.getItem(key); });
+        const environmentKeys = ['utl_member_unlocked', 'utl_member_username', 'utl_member_profile', 'utl_admin_preview_bypass'];
+        const environment = {};
+        environmentKeys.forEach((key) => { environment[key] = localStorage.getItem(key); });
+        const targetHref = '../member-login/index.html?supportPreview=1#learning-journey';
+        const backup = { learning, environment, mode:'member-support', memberUid:snapshot.uid || '', memberEmail:snapshot.email, memberName:snapshot.displayName, targetTitle:snapshot.displayName, targetHref, startedAt:new Date().toISOString() };
+        localStorage.setItem(SP_PREVIEW_BACKUP_KEY, JSON.stringify(backup));
+        localStorage.setItem(SP_PREVIEW_ACTIVE_KEY, 'true');
+        spClearPreviewLearningState();
+        localStorage.setItem('utl_member_unlocked', 'true');
+        localStorage.setItem('utl_member_username', snapshot.email);
+        const nameParts = String(snapshot.displayName || '').trim().split(/\s+/);
+        localStorage.setItem('utl_member_profile', JSON.stringify({ displayName:snapshot.displayName, firstName:nameParts[0] || '', lastName:nameParts.slice(1).join(' '), email:snapshot.email }));
+        localStorage.setItem('utl_admin_preview_bypass', 'off');
+        spApplyMemberSupportProgress(snapshot.workspaceProgress);
+        if (fb.logMemberSupportPreview) fb.logMemberSupportPreview(snapshot).catch((error) => console.warn('Support preview audit failed.', error));
+        spRefreshPreviewCard();
+        if (previewWindow) previewWindow.location.href = targetHref;
+        else window.open(targetHref, '_blank', 'noopener');
+        showToast('Opening read-only support preview for ' + snapshot.displayName + '.');
+      } catch (error) {
+        if (previewWindow) previewWindow.close();
+        showToast('Could not open support preview: ' + ((error && error.message) || 'Unknown error'), true);
+      }
     }
 
     function spEndExperiencePreview() {
@@ -8547,7 +8638,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         : '<div class="sp-detail-card"><h4>Verified credential</h4><p class="sp-status-missing">Not issued yet. After this learner completes the program, opening My Results or the certificate creates their credential ID.</p></div>';
       content.innerHTML =
         '<div class="sp-detail-header"><div><h3>' + escapeHtml(member.displayName || member.name || member.email || 'Member') + '</h3><p>' + escapeHtml(member.email || '') + ' · Last active ' + escapeHtml(formatProgressDate(member.lastSeenAt || member.updatedAt)) + '</p></div><span class="mb-status-badge ' + ((member.status || 'active') === 'inactive' ? 'mb-status-inactive' : 'mb-status-active') + '">' + escapeHtml(member.status || 'active') + '</span></div>' +
-        '<div class="sp-detail-actions"><button class="small-button secondary-button" type="button" data-sp-edit-progress>Edit progress</button><button class="small-button sp-danger-button" type="button" data-sp-reset-progress>Reset progress</button></div>' +
+        '<div class="sp-detail-actions"><button class="small-button" type="button" data-sp-support-preview>Preview as member</button><button class="small-button secondary-button" type="button" data-sp-edit-progress>Edit progress</button><button class="small-button sp-danger-button" type="button" data-sp-reset-progress>Reset progress</button></div>' +
         '<div class="sp-detail-summary"><div class="sp-detail-stat"><span>Current level</span><strong>' + escapeHtml(level) + '</strong></div><div class="sp-detail-stat"><span>Mastery Points</span><strong>' + escapeHtml(String(total)) + ' MP</strong></div><div class="sp-detail-stat"><span>Exercises complete</span><strong>' + (p1e.done + p2e.done + p3e.done) + ' / ' + (p1e.total + p2e.total + p3e.total) + '</strong></div><div class="sp-detail-stat"><span>Program bonus</span><strong>' + credited + ' / ' + target + ' MP</strong></div></div>' +
         '<div class="sp-reward-alert ' + (!missingBonus ? 'is-ok' : '') + '">' + (missingBonus
           ? '<strong>Missing completion milestone:</strong> this student finished all phases but needs ' + missingAmount + ' MP to receive the full bonus and reach Executive. <button class="small-button" type="button" data-sp-repair-bonus style="margin-left:8px">Award missing MP</button>'
@@ -8556,6 +8647,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       table.hidden = true;
       if (controls) controls.hidden = true;
       detail.hidden = false;
+      content.querySelector('[data-sp-support-preview]')?.addEventListener('click', () => spLaunchMemberSupportPreview(member));
       content.querySelector('[data-sp-edit-progress]')?.addEventListener('click', () => spOpenEditDialog(member));
       content.querySelector('[data-sp-reset-progress]')?.addEventListener('click', () => spOpenResetDialog(member));
       const repair = content.querySelector('[data-sp-repair-bonus]');
@@ -9314,8 +9406,9 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
           ? '<span class="' + (expired ? 'mb-expiry-expired' : '') + '">' + escapeHtml(mbFormatDate(data.expiryDate)) + (expired ? ' ✗' : '') + '</span>'
           : '<span style="color:#bbb;">—</span>';
         var actions = isOwner
-          ? '<span style="color:#bbb;font-size:11px;font-family:Lato,Arial,sans-serif;">Owner</span>'
+          ? '<div class="mb-actions"><button class="mb-btn" type="button" data-mb-support-preview="' + escapeHtml(email) + '">Preview as member</button><span style="color:#888;font-size:11px;font-family:Lato,Arial,sans-serif;">Owner</span></div>'
           : '<div class="mb-actions">' +
+              '<button class="mb-btn" type="button" data-mb-support-preview="' + escapeHtml(email) + '">Preview as member</button>' +
               '<button class="mb-btn" type="button" data-mb-edit>Edit</button>' +
               '<button class="mb-btn mb-btn-extend" type="button" data-mb-extend="' + escapeHtml(email) + '">+1 yr</button>' +
               '<button class="mb-btn mb-btn-danger" type="button" data-mb-remove="' + escapeHtml(email) + '">Remove</button>' +
@@ -9550,6 +9643,9 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
     }
 
     function mbBindTableActions(root) {
+      root.querySelectorAll('[data-mb-support-preview]').forEach(function (btn) {
+        btn.addEventListener('click', function () { spLaunchMemberSupportPreview(btn.dataset.mbSupportPreview); });
+      });
       root.querySelectorAll('[data-mb-sort]').forEach(function (btn) {
         btn.addEventListener('click', function () {
           var col = btn.dataset.mbSort;

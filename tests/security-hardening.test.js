@@ -53,7 +53,7 @@ assert.match(admin, /openProductionAdmin\(\{ interactive: true \}\)/);
 assert.match(admin, /id="adminGoogleSignIn" type="button" disabled/);
 assert.match(admin, /function waitForAdminFirebaseApi\(onReady\)/);
 assert.match(admin, /window\.setInterval\(probe, 250\)/);
-assert.match(admin, /firebase\.js\?v=20260827-credentials-1/, 'admin should cache-bust Firebase when its named exports change');
+assert.match(admin, /firebase\.js\?v=20260827-assessment-visibility-fix/, 'admin should cache-bust Firebase when its named exports change');
 assert.match(admin, /Secure sign-in is still loading\. This page will continue automatically\./, 'slow authentication bootstrap should remain recoverable');
 assert.doesNotMatch(admin, /Secure sign-in took too long to load/, 'a slow module load must not enter a terminal refresh-required state');
 assert.match(admin, /from "\.\.\/assets\/firebase\.js\?v=[\w-]+"/);

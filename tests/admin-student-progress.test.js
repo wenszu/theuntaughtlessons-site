@@ -35,6 +35,15 @@ assert(firebase.includes('if (experiencePreviewActive()) return { preview: true,
 assert(workspace.includes('if (experiencePreviewActive()) {'), 'member workspace avoids merging remote progress into preview state');
 assert(workspace.includes('var requestedLesson = new URLSearchParams(window.location.search || "").get("lesson") || "";'), 'workspace opens whichever lesson the URL requests — the same real path a student uses, so previewing and reality never diverge');
 assert(appGuard.includes('mountExperiencePreviewBanner'), 'exercise pages show a preview safety banner');
+assert(admin.includes('function spLaunchMemberSupportPreview(memberOrEmail)'), 'admins can launch a selected member support preview');
+assert(admin.includes('data-sp-support-preview'), 'Student Progress exposes Preview as member');
+assert(admin.includes('data-mb-support-preview'), 'Member Access exposes Preview as member');
+assert(firebase.includes('async function getMemberSupportSnapshot(email)'), 'support preview loads the selected member cloud snapshot');
+assert(firebase.includes('async function logMemberSupportPreview(snapshot = {})'), 'support preview openings are audited');
+assert(rules.includes('match /support_preview_audit/{eventId}'), 'support preview audits have an explicit Firestore rule');
+assert(workspace.includes('Support preview · '), 'member workspace names the support-preview state');
+assert(workspace.includes('preview=1'), 'assessment links use non-saving preview mode during member support');
+assert(appGuard.includes("details.mode === \"member-support\""), 'exercise pages distinguish selected-member support previews');
 
 assert(admin.includes('<option value="member" selected>Member</option>'), 'new accounts use the canonical Member role');
 assert(!admin.includes('<option value="user"'), 'role controls no longer expose the legacy user label');

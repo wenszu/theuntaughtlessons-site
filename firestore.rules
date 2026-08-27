@@ -161,6 +161,11 @@ service cloud.firestore {
       allow read, create, update, delete: if isAdmin();
     }
 
+    match /support_preview_audit/{eventId} {
+      allow read, create: if isAdmin();
+      allow update, delete: if false;
+    }
+
     match /settings/{docId} {
       allow read: if docId in ['publicSite', 'public_assessments'] ||
         (signedIn() && docId in ['feedback', 'engagement', 'rewards', 'tsa_scoring']) ||

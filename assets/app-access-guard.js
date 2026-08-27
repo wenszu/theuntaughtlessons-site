@@ -77,12 +77,18 @@ function endExperiencePreview() {
 
 function mountExperiencePreviewBanner() {
   if (localStorage.getItem("utl_experience_preview_active") !== "true" || document.getElementById("utlExperiencePreview")) return;
+  let details = {};
+  try { details = JSON.parse(localStorage.getItem("utl_experience_preview_backup") || "{}"); } catch (error) {}
+  const supportMode = details.mode === "member-support";
+  const memberName = String(details.memberName || details.memberEmail || "Member").replace(/[&<>"']/g, (character) => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[character]));
   const style = document.createElement("style");
   style.textContent = "#utlExperiencePreview{position:fixed;left:50%;bottom:16px;z-index:2147483646;width:min(720px,calc(100% - 24px));transform:translateX(-50%);display:flex;align-items:center;justify-content:space-between;gap:18px;padding:11px 13px 11px 16px;border:1px solid rgba(238,163,32,.75);border-radius:10px;background:#FFF8E8;color:#003366;box-shadow:0 14px 36px rgba(0,30,60,.2);font:12px/1.35 Lato,Arial,sans-serif}#utlExperiencePreview strong{display:block;margin-bottom:2px}#utlExperiencePreview button{flex:0 0 auto;min-height:36px;padding:7px 11px;border:0;border-radius:7px;background:#003366;color:#fff;font:700 11px Lato,Arial,sans-serif;cursor:pointer}@media(max-width:600px){#utlExperiencePreview{align-items:stretch;flex-direction:column;gap:9px}#utlExperiencePreview button{width:100%}}";
   document.head.appendChild(style);
   const banner = document.createElement("aside");
   banner.id = "utlExperiencePreview";
-  banner.innerHTML = "<span><strong>Student experience preview</strong>Firebase progress writes are paused. Complete this activity normally to test the full flow.</span><button type=\"button\">End preview and restore</button>";
+  banner.innerHTML = supportMode
+    ? `<span><strong>Support preview · ${memberName}</strong>This is a temporary sandbox. Submissions, completions and MP cannot update the member's account.</span><button type="button">Exit support preview</button>`
+    : "<span><strong>Student experience preview</strong>Firebase progress writes are paused. Complete this activity normally to test the full flow.</span><button type=\"button\">End preview and restore</button>";
   banner.querySelector("button").addEventListener("click", endExperiencePreview);
   document.body.appendChild(banner);
 }

@@ -914,6 +914,72 @@ async function findUserUidByEmail(email) {
   return usersSnap.docs[0].id;
 }
 
+async function getMemberSupportSnapshot(email) {
+  const normalizedEmail = String(email || "").trim().toLowerCase();
+  if (!normalizedEmail) throw new Error("A member email is required.");
+  const readyDb = requireFirestore();
+  const memberSnap = await getDoc(doc(readyDb, "authorized_members", normalizedEmail));
+  if (!memberSnap.exists()) throw new Error("The member access record could not be found.");
+  const member = memberSnap.data() || {};
+  const uid = await findUserUidByEmail(normalizedEmail);
+  if (!uid) {
+    return {
+      uid: "",
+      email: normalizedEmail,
+      displayName: member.name || normalizedEmail,
+      workspaceProgress: null,
+      hasSignedIn: false
+    };
+  }
+
+  const userSnap = await getDoc(doc(readyDb, "users", uid));
+  const userData = userSnap.exists() ? (userSnap.data() || {}) : {};
+  const progress = Object.assign({}, userData.workspaceProgress || {});
+  progress.rewards = userData.rewards || progress.rewards || null;
+  progress.exercises = Object.assign({}, progress.exercises || {});
+  const completedSnapshot = await getDocs(collection(readyDb, "users", uid, "completed_exercises"));
+  completedSnapshot.forEach((exerciseDoc) => {
+    const exerciseId = exerciseDoc.id;
+    const exerciseData = exerciseDoc.data() || {};
+    if (String(exerciseData.status || "").toLowerCase() !== "done") return;
+    const canonicalId = exerciseProgressIds[exerciseId] || exerciseId;
+    const completedAt = exerciseData.updatedAt || exerciseData.savedPayload?.completed_at || null;
+    const completed = {
+      visited: true,
+      completed: true,
+      completedAt,
+      title: exerciseData.exerciseName || exerciseId,
+      appKey: exerciseId,
+      savedPayload: exerciseData.savedPayload || null
+    };
+    progress.exercises[exerciseId] = Object.assign({}, progress.exercises[exerciseId] || {}, completed);
+    progress.exercises[canonicalId] = Object.assign({}, progress.exercises[canonicalId] || {}, completed);
+  });
+  return {
+    uid,
+    email: normalizedEmail,
+    displayName: userData.displayName || member.name || normalizedEmail,
+    workspaceProgress: progress,
+    hasSignedIn: true
+  };
+}
+
+async function logMemberSupportPreview(snapshot = {}) {
+  const adminUser = await getSignedInUser();
+  if (!adminUser?.uid) throw new Error("An administrator session is required.");
+  const eventId = `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+  await setDoc(doc(requireFirestore(), "support_preview_audit", eventId), {
+    action: "opened",
+    adminUid: adminUser.uid,
+    adminEmail: String(adminUser.email || "").trim().toLowerCase(),
+    memberUid: String(snapshot.uid || ""),
+    memberEmail: String(snapshot.email || "").trim().toLowerCase(),
+    memberName: String(snapshot.displayName || "").slice(0, 200),
+    createdAt: serverTimestamp()
+  });
+  return { logged: true, eventId };
+}
+
 async function getGlobalFeedbackSetting() {
   const snap = await getDoc(doc(requireFirestore(), "settings", "feedback"));
   if (!snap.exists()) return true;
@@ -1068,13 +1134,9 @@ function getDefaultAssessmentVisibility() {
 }
 
 async function getAssessmentVisibility() {
-  try {
-    const snap = await getDoc(doc(requireFirestore(), "settings", "assessments"));
-    if (!snap.exists()) return getDefaultAssessmentVisibility();
-    return Object.assign({}, getDefaultAssessmentVisibility(), snap.data() || {});
-  } catch {
-    return getDefaultAssessmentVisibility();
-  }
+  const snap = await getDoc(doc(requireFirestore(), "settings", "assessments"));
+  if (!snap.exists()) return getDefaultAssessmentVisibility();
+  return Object.assign({}, getDefaultAssessmentVisibility(), snap.data() || {});
 }
 
 async function setAssessmentVisibility(partial) {
@@ -1183,6 +1245,8 @@ export {
   saveEmailTemplate,
   getMemberExerciseResponses,
   getMemberCredentialRegistry,
+  getMemberSupportSnapshot,
+  logMemberSupportPreview,
   findUserUidByEmail,
   getAllMemberWorkspaceProgress,
   getCohortDetails,

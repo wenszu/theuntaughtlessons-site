@@ -381,6 +381,11 @@ const UTL_CONTENT = {
     return localStorage.getItem("utl_experience_preview_active") === "true";
   }
 
+  function experiencePreviewDetails() {
+    try { return JSON.parse(localStorage.getItem("utl_experience_preview_backup") || "{}"); }
+    catch (error) { return {}; }
+  }
+
   function experiencePreviewLearningKey(key) {
     if (String(key || "").indexOf("utl_") !== 0) return false;
     if (key === "utl_experience_preview_active" || key === "utl_experience_preview_backup") return false;
@@ -415,6 +420,10 @@ const UTL_CONTENT = {
 
   function experiencePreviewBannerHtml() {
     if (!experiencePreviewActive()) return "";
+    var details = experiencePreviewDetails();
+    if (details.mode === "member-support") {
+      return '<aside class="ws-experience-preview" role="status"><span><strong>Support preview · ' + escapeHtml(details.memberName || details.memberEmail || "Member") + '</strong>Showing this member\'s saved cloud progress. Actions and MP changes in this browser are temporary and cannot update their account.</span><button type="button" data-end-experience-preview>Exit support preview</button></aside>';
+    }
     return '<aside class="ws-experience-preview" role="status"><span><strong>Student experience preview</strong>Firebase progress writes are paused. Complete activities normally to test the full flow.</span><button type="button" data-end-experience-preview>End preview and restore</button></aside>';
   }
 
@@ -456,7 +465,7 @@ const UTL_CONTENT = {
   }
 
   function firebaseHref() {
-    var version = "?v=20260806-emergency-access";
+    var version = "?v=20260827-assessment-visibility-fix";
     if (inPhasePracticeRoot()) return "../../../assets/firebase.js" + version;
     return (inAdminRoot() ? "../assets/firebase.js" : "../assets/firebase.js") + version;
   }
@@ -2344,6 +2353,7 @@ const UTL_CONTENT = {
     var checkpoint = model.programComplete;
     var inProgress = checkpoint ? model.checkpoint.inProgress : model.diagnostic.inProgress;
     var href = appHref("../apps/tsa-diagnostic/index.html" + (checkpoint ? "?assessment=checkpoint" : ""));
+    if (experiencePreviewDetails().mode === "member-support") href += (href.indexOf("?") >= 0 ? "&" : "?") + "preview=1";
     var eyebrow = checkpoint ? "See what changed" : inProgress ? "Diagnostic in progress" : model.phaseStarted ? "Before you go further" : "Before Phase 1";
     var title = checkpoint ? "Take the checkpoint" : inProgress ? "Finish your starting point" : model.phaseStarted ? "Save a useful baseline" : "Set your starting point";
     var copy = checkpoint
@@ -2716,8 +2726,9 @@ const UTL_CONTENT = {
 
   function assessmentsSection() {
     var phase3Done = exercisesDone("phase3");
-    var diagnosticHref = '../apps/tsa-diagnostic/index.html';
-    var checkpointHref = '../apps/tsa-diagnostic/index.html?assessment=checkpoint';
+    var supportPreviewQuery = experiencePreviewDetails().mode === "member-support" ? '?preview=1' : '';
+    var diagnosticHref = '../apps/tsa-diagnostic/index.html' + supportPreviewQuery;
+    var checkpointHref = '../apps/tsa-diagnostic/index.html?assessment=checkpoint' + (supportPreviewQuery ? '&preview=1' : '');
     var resultsHref = '../my-results/index.html#accordion-assessment';
     var diagnostic = assessmentJourneyStatus("diagnostic");
     var checkpoint = assessmentJourneyStatus("checkpoint");
