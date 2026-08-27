@@ -15,10 +15,17 @@ const MAX_ADMIN_ACTION_BYTES = 64 * 1024;
 const CREDENTIAL_PROGRAM_VERSION = "tsa-2026-v1";
 const CREDENTIAL_ID_ALPHABET = "0123456789ABCDEFGHJKMNPQRSTVWXYZ";
 const REQUIRED_EXERCISES = [
-  "grocery-list", "grocery-list-ai", "messy-notes", "rushed-voice-memo", "rushed-voice-memo-ai", "chalkboard-notes",
-  "issue-tree-builder", "scqa-builder", "advisory-board", "write-to-aiko", "explain-to-aiko", "explain-to-aiko-60",
-  "eisenhower-matrix", "i-have-bad-news", "lets-switch-hats", "speak-like-obama"
+  "p1-e1", "p1-e2", "p1-e3", "p1-e4", "p1-e5", "p1-e6",
+  "p2-e1", "p2-e2", "p2-e3", "p2-e4", "p2-e5", "p2-e6",
+  "p3-e1", "p3-e2", "p3-e3", "p3-e4"
 ];
+const EXERCISE_ALIASES = {
+  "grocery-list": "p1-e1", "grocery-list-ai": "p1-e2", "messy-notes": "p1-e3", "rushed-voice-memo": "p1-e4",
+  "rushed-voice-memo-ai": "p1-e5", "chalkboard-notes": "p1-e6", "issue-tree": "p2-e1", "issue-tree-builder": "p2-e1",
+  "scqa-builder": "p2-e2", "advisory-board": "p2-e3", "write-to-aiko": "p2-e4", "explain-to-aiko": "p2-e5",
+  "explain-to-aiko-120": "p2-e5", "explain-to-aiko-60": "p2-e6", "eisenhower-matrix": "p3-e1",
+  "i-have-bad-news": "p3-e2", "lets-switch-hats": "p3-e3", "speak-like-obama": "p3-e4"
+};
 
 function newCredentialId() {
   const bytes = crypto.randomBytes(12);
@@ -56,17 +63,29 @@ async function credentialSettings() {
 }
 
 async function completedExerciseEvidence(uid) {
-  const snapshot = await admin.firestore().collection("users").doc(uid).collection("completed_exercises").get();
+  const userRef = admin.firestore().collection("users").doc(uid);
+  const [snapshot, userSnap] = await Promise.all([userRef.collection("completed_exercises").get(), userRef.get()]);
   const done = new Map();
   snapshot.forEach((document) => {
     const data = document.data() || {};
-    if (String(data.status || "").toLowerCase() === "done") done.set(document.id, data.updatedAt || null);
+    if (String(data.status || "").toLowerCase() !== "done") return;
+    const canonicalId = EXERCISE_ALIASES[document.id] || document.id;
+    done.set(canonicalId, data.updatedAt || null);
+  });
+  const workspaceExercises = userSnap.exists && userSnap.data() && userSnap.data().workspaceProgress && userSnap.data().workspaceProgress.exercises || {};
+  Object.entries(workspaceExercises).forEach(([id, value]) => {
+    if (!value || value.completed !== true) return;
+    const canonicalId = EXERCISE_ALIASES[id] || id;
+    if (REQUIRED_EXERCISES.includes(canonicalId) && !done.has(canonicalId)) done.set(canonicalId, value.completedAt || null);
   });
   const missing = REQUIRED_EXERCISES.filter((id) => !done.has(id));
   let latest = null;
   done.forEach((value, id) => {
-    if (!REQUIRED_EXERCISES.includes(id) || !value || typeof value.toMillis !== "function") return;
-    if (!latest || value.toMillis() > latest.toMillis()) latest = value;
+    if (!REQUIRED_EXERCISES.includes(id) || !value) return;
+    const parsed = typeof value.toMillis === "function" ? null : new Date(value);
+    if (parsed && Number.isNaN(parsed.getTime())) return;
+    const candidate = typeof value.toMillis === "function" ? value : admin.firestore.Timestamp.fromDate(parsed);
+    if (!latest || candidate.toMillis() > latest.toMillis()) latest = candidate;
   });
   return { missing, latest };
 }
@@ -203,6 +222,31 @@ exports.searchVerifiedCredentials = onCall({ timeoutSeconds: 30, memory: "256MiB
     });
   }
   return { ok: true, credentials: Array.from(found.values()).slice(0, 25) };
+});
+
+exports.getMemberCredentialRegistry = onCall({ timeoutSeconds: 30, memory: "256MiB" }, async (request) => {
+  const caller = await requireVerifiedCaller(request);
+  if (!(await isAuthorizedAdmin(caller.email))) throw new HttpsError("permission-denied", "Administrator access is required.");
+  const db = admin.firestore();
+  const issuance = await db.collection("credential_issuance").limit(500).get();
+  const credentials = [];
+  for (const document of issuance.docs) {
+    const privateData = document.data() || {};
+    const credentialId = String(privateData.credentialId || "");
+    if (!credentialId) continue;
+    const publicSnap = await db.collection("public_credentials").doc(credentialId).get();
+    const publicData = publicSnap.exists ? publicSnap.data() || {} : {};
+    credentials.push({
+      email: String(privateData.email || "").toLowerCase(),
+      userId: String(privateData.userId || ""),
+      credentialId,
+      recipientName: String(publicData.recipientName || ""),
+      status: String(publicData.status || privateData.status || "unknown"),
+      issuedAt: timestampToIso(publicData.issuedAt || privateData.issuedAt),
+      verificationUrl: String(publicData.verificationUrl || ("https://theuntaughtlessons.com/verify/?id=" + encodeURIComponent(credentialId)))
+    });
+  }
+  return { ok: true, credentials };
 });
 
 exports.runAdminAction = onCall({

@@ -174,6 +174,12 @@ async function searchVerifiedCredentials(queryText) {
   return result && result.data ? result.data : { ok: true, credentials: [] };
 }
 
+async function getMemberCredentialRegistry() {
+  const callable = httpsCallable(functions, "getMemberCredentialRegistry");
+  const result = await callable({});
+  return result && result.data ? result.data : { ok: true, credentials: [] };
+}
+
 function signInWithEmailPassword(email, password) {
   return signInWithEmailAndPassword(requireFirebaseAuth(), String(email || "").trim().toLowerCase(), String(password || ""));
 }
@@ -1176,6 +1182,7 @@ export {
   getEmailTemplates,
   saveEmailTemplate,
   getMemberExerciseResponses,
+  getMemberCredentialRegistry,
   findUserUidByEmail,
   getAllMemberWorkspaceProgress,
   getCohortDetails,

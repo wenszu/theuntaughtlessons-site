@@ -3654,6 +3654,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       doc,
       findUserUidByEmail,
       getAllMemberWorkspaceProgress,
+      getMemberCredentialRegistry,
       getDoc,
       getDocs,
       getAssessmentVisibility,
@@ -3703,6 +3704,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       saveEmailTemplate,
       findUserUidByEmail,
       getAllMemberWorkspaceProgress,
+      getMemberCredentialRegistry,
       getDoc,
       getDocs,
       getAssessmentVisibility,
@@ -7808,6 +7810,12 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       '</td>';
     }
 
+    function credentialCell(member) {
+      const credential = member.credential;
+      if (!credential || !credential.credentialId) return '<td class="progress-cell"><span class="progress-dot-label">Credential</span><span style="color:#777;">Not issued</span></td>';
+      return '<td class="progress-cell"><span class="progress-dot-label">Credential ID</span><a href="../verify/?id=' + encodeURIComponent(credential.credentialId) + '" target="_blank" rel="noopener" style="font-size:11px;font-weight:700;white-space:nowrap;">' + escapeHtml(credential.credentialId) + '</a><div style="font-size:11px;color:#555;">' + escapeHtml(credential.status || 'unknown') + '</div></td>';
+    }
+
     function formatProgressDate(value) {
       if (!value) return '—';
       try {
@@ -8533,6 +8541,10 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       const p1e = spCompletedCount(member, 'phase1', 'exercises');
       const p2e = spCompletedCount(member, 'phase2', 'exercises');
       const p3e = spCompletedCount(member, 'phase3', 'exercises');
+      const credential = member.credential;
+      const credentialHtml = credential && credential.credentialId
+        ? '<div class="sp-detail-card"><h4>Verified credential</h4><p><strong style="font-family:monospace;">' + escapeHtml(credential.credentialId) + '</strong></p><p>Status: <strong>' + escapeHtml(credential.status || 'unknown') + '</strong> · Issued ' + escapeHtml(formatProgressDate(credential.issuedAt)) + '</p><p><a class="small-button secondary-button" target="_blank" rel="noopener" href="../verify/?id=' + encodeURIComponent(credential.credentialId) + '">Open verification page</a></p></div>'
+        : '<div class="sp-detail-card"><h4>Verified credential</h4><p class="sp-status-missing">Not issued yet. After this learner completes the program, opening My Results or the certificate creates their credential ID.</p></div>';
       content.innerHTML =
         '<div class="sp-detail-header"><div><h3>' + escapeHtml(member.displayName || member.name || member.email || 'Member') + '</h3><p>' + escapeHtml(member.email || '') + ' · Last active ' + escapeHtml(formatProgressDate(member.lastSeenAt || member.updatedAt)) + '</p></div><span class="mb-status-badge ' + ((member.status || 'active') === 'inactive' ? 'mb-status-inactive' : 'mb-status-active') + '">' + escapeHtml(member.status || 'active') + '</span></div>' +
         '<div class="sp-detail-actions"><button class="small-button secondary-button" type="button" data-sp-edit-progress>Edit progress</button><button class="small-button sp-danger-button" type="button" data-sp-reset-progress>Reset progress</button></div>' +
@@ -8540,7 +8552,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         '<div class="sp-reward-alert ' + (!missingBonus ? 'is-ok' : '') + '">' + (missingBonus
           ? '<strong>Missing completion milestone:</strong> this student finished all phases but needs ' + missingAmount + ' MP to receive the full bonus and reach Executive. <button class="small-button" type="button" data-sp-repair-bonus style="margin-left:8px">Award missing MP</button>'
           : finished ? '<strong>Completion reward verified.</strong> The full-program bonus is recorded and the Executive milestone is satisfied.' : '<strong>No repair needed.</strong> The full-program bonus becomes available after every phase exercise is complete.') + '</div>' +
-        '<div class="sp-detail-grid">' + ['phase1','phase2','phase3'].map((key) => spPhaseDetailHtml(member, key)).join('') + '<div class="sp-detail-card"><h4>Recent MP activity</h4>' + spLedgerHtml(member) + '</div></div>';
+        '<div class="sp-detail-grid">' + credentialHtml + ['phase1','phase2','phase3'].map((key) => spPhaseDetailHtml(member, key)).join('') + '<div class="sp-detail-card"><h4>Recent MP activity</h4>' + spLedgerHtml(member) + '</div></div>';
       table.hidden = true;
       if (controls) controls.hidden = true;
       detail.hidden = false;
@@ -8606,6 +8618,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
           progressCell(member, 'phase2') +
           progressCell(member, 'phase3') +
           '<td class="progress-cell"><span class="progress-dot-label">Assessments</span><div class="progress-dot-row">' + progressDot(diagnosticDone, 'Diagnostic') + progressDot(checkpointDone, 'Checkpoint') + '</div></td>' +
+          credentialCell(member) +
           rewardsCell(member) +
         '</tr>';
       }).join('');
@@ -8620,6 +8633,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         '<th>Phase 2</th>' +
         '<th>Phase 3</th>' +
         '<th>Assessments</th>' +
+        '<th>Credential</th>' +
         '<th>Rewards</th>' +
         '</tr></thead>' +
         '<tbody>' + rows + '</tbody></table></div>';
@@ -8657,6 +8671,14 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         currentUser = await mbRequireFirebaseAdmin();
         wrap.innerHTML = '<p class="mb-msg">Loading student progress...</p>';
         const members = await fb.getAllMemberWorkspaceProgress();
+        try {
+          const registry = await fb.getMemberCredentialRegistry();
+          const byEmail = new Map((registry.credentials || []).map((item) => [String(item.email || '').toLowerCase(), item]));
+          const byUserId = new Map((registry.credentials || []).map((item) => [String(item.userId || ''), item]));
+          members.forEach((member) => { member.credential = byEmail.get(String(member.email || '').toLowerCase()) || byUserId.get(String(member.uid || '')) || null; });
+        } catch (credentialError) {
+          console.warn('Credential registry could not be loaded in Member Access.', credentialError);
+        }
         const rewardSettings = fb.getRewardSettings ? await fb.getRewardSettings() : null;
         let repairedBonuses = 0;
         for (const member of members) {
