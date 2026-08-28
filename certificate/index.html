@@ -310,6 +310,7 @@
     .cert-verification img { width: 68px; height: 68px; border: 5px solid #fff; }
     .cert-verification-copy { min-width: 0; }
     .cert-verification-label { display:block; margin-bottom:5px; color:var(--gold); font-size:10px; font-weight:700; }
+    .cert-verification-copy p { margin:4px 0 0;color:#59636d;font-size:12px;line-height:1.45; }
     .cert-verification-id { display:block; color:var(--navy); font:700 12px Lato,Arial,sans-serif; word-break:break-all; }
     .cert-verification a, .cert-verification button { display:inline-block; margin:6px 10px 0 0; padding:0; border:0; background:transparent; color:var(--navy); font:700 11px Lato,Arial,sans-serif; text-decoration:underline; cursor:pointer; }
 
@@ -373,8 +374,8 @@
     <div class="cert-actions" id="certActions" hidden>
       <button class="cert-btn cert-btn-secondary" id="certPrintBtn" type="button">Save as PDF</button>
       <button class="cert-btn cert-btn-secondary" id="certDownloadBtn" type="button">Download image</button>
-      <button class="cert-btn cert-btn-secondary" id="certShareBtn" type="button" hidden>Share your achievement</button>
-      <button class="cert-btn cert-btn-primary" id="certLinkedInBtn" type="button">Share on LinkedIn</button>
+      <button class="cert-btn cert-btn-secondary" id="certShareBtn" type="button">Share credential</button>
+      <button class="cert-btn cert-btn-primary" id="certLinkedInBtn" type="button">Add to LinkedIn</button>
     </div>
   </nav>
 
@@ -437,7 +438,7 @@
     </div>
     <div class="cert-verification" id="certVerification" hidden>
       <img id="certQr" alt="QR code to verify this credential">
-      <div class="cert-verification-copy"><span class="cert-verification-label">VERIFIED DIGITAL CREDENTIAL</span><span class="cert-verification-id" id="certCredentialId"></span><a id="certVerifyLink" target="_blank" rel="noopener">Open official verification record</a><button id="certCopyVerifyLink" type="button">Copy link for LinkedIn or CV</button></div>
+      <div class="cert-verification-copy"><span class="cert-verification-label">YOUR VERIFIED CREDENTIAL</span><span class="cert-verification-id" id="certCredentialId"></span><p>The certificate above is your downloadable visual record. This verification link is the public, authenticated record an employer can check. Add it to LinkedIn or a CV, or use <strong>Share credential</strong> to send it through Facebook, WhatsApp, email, and other apps.</p><a id="certVerifyLink" target="_blank" rel="noopener">View public verification ↗</a><button id="certCopyVerifyLink" type="button">Copy verification link</button></div>
     </div>
   </div>
 
@@ -553,7 +554,6 @@
         window.open(url, '_blank', 'noopener');
       });
 
-      const PUBLIC_SITE_URL = 'https://theuntaughtlessons.com/';
       const shareText = `I just completed "${credentialTitle}" at The Untaught Lessons.`;
       let cachedCertBlob = null;
 
@@ -757,25 +757,27 @@
       });
 
       const shareButton = document.getElementById('certShareBtn');
-      if (navigator.share) {
-        shareButton.hidden = false;
-        shareButton.addEventListener('click', async () => {
-          shareButton.disabled = true;
-          try {
+      shareButton.addEventListener('click', async () => {
+        shareButton.disabled = true;
+        const originalText = shareButton.textContent;
+        try {
+          if (navigator.share) {
             const blob = await getCertBlob();
             const file = new File([blob], 'the-untaught-lessons-certificate.png', { type: 'image/png' });
-            const shareData = { title: 'The Untaught Lessons', text: shareText, url: PUBLIC_SITE_URL };
-            if (navigator.canShare && navigator.canShare({ files: [file] })) {
-              shareData.files = [file];
-            }
+            const shareData = { title: 'The Untaught Lessons credential', text: shareText, url: verificationUrl };
+            if (navigator.canShare && navigator.canShare({ files: [file] })) shareData.files = [file];
             await navigator.share(shareData);
-          } catch (error) {
-            if (error && error.name !== 'AbortError') console.warn('Share failed.', error);
-          } finally {
-            shareButton.disabled = false;
+          } else {
+            await navigator.clipboard.writeText(verificationUrl);
+            shareButton.textContent = 'Verification link copied';
+            setTimeout(() => { shareButton.textContent = originalText; }, 1800);
           }
-        });
-      }
+        } catch (error) {
+          if (error && error.name !== 'AbortError') window.prompt('Copy this verification link to share:', verificationUrl);
+        } finally {
+          shareButton.disabled = false;
+        }
+      });
     }
 
     init();

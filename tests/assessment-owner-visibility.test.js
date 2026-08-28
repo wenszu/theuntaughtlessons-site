@@ -19,6 +19,6 @@ assert.doesNotMatch(section[1], /utl_tsa_status/, 'legacy browser-only visibilit
 assert.match(source, /profile\.role === "admin" \|\| profile\.role === "owner"/, 'owner and admin roles should both receive administrative visibility');
 assert.match(source, /var canSee = admin \? \(userEnabled \|\| adminEnabled\) : userEnabled/, 'admin access should override disabled member access when enabled');
 assert.match(source, /if \(!canSee\) hideAssessmentsFromPage\(\)/, 'regular members should still have the section hidden centrally');
-memberShells.forEach(shell => assert.match(shell, /content-config\.js\?v=20260827-support-preview-1/, 'every member shell should load the current role-aware assessment journey code'));
+memberShells.forEach(shell => assert.match(shell, /content-config\.js\?v=20260828-credential-sharing-1/, 'every member shell should load the current role-aware assessment journey code'));
 
 console.log('assessment owner visibility precedence contract passed');

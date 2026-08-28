@@ -36,10 +36,15 @@ assert.match(functions, /exports\.searchVerifiedCredentials = onCall/, 'admins s
 assert.match(functions, /collection\("credential_issuance"\)\.where\("email"/, 'admin search should connect learner email to its private issuance record');
 assert.match(admin, /learner name, email, or credential ID/i, 'the admin registry should explain all supported search methods');
 assert.match(admin, /searchVerifiedCredentials\(query\)/, 'the admin registry should search without requiring a known ID');
-assert.match(results, /id="resultsCredentialId"/, 'My Results should display the graduate credential ID');
-assert.match(results, /id="resultsCopyCredential"/, 'My Results should offer a copyable verification URL');
+assert.match(results, /id="resultsVerifyLink"/, 'My Results should display the graduate credential ID as a direct verification link');
+assert.match(results, /id="resultsShareCredential"/, 'My Results should offer one clear cross-platform sharing action');
+assert.match(results, /Your certificate/, 'My Results should explain the downloadable certificate');
+assert.match(results, /Your verified credential/, 'My Results should explain the authenticated public record');
 assert.match(results, /certId=' \+ encodeURIComponent\(credential\.credentialId\)/, 'My Results should send the ID to LinkedIn');
 assert.match(results, /certUrl=' \+ encodeURIComponent\(verificationUrl\)/, 'My Results should send the direct verification link to LinkedIn');
 assert.match(certificate, /id="certCopyVerifyLink"/, 'the certificate should make its direct verification URL copyable');
+assert.match(certificate, />Add to LinkedIn</, 'the certificate should describe the LinkedIn action accurately');
+assert.match(certificate, />Share credential</, 'the certificate should provide one cross-platform sharing action');
+assert.match(certificate, /url: verificationUrl/, 'cross-platform sharing should use the authenticated verification record');
 
 console.log('verified credential contracts passed');

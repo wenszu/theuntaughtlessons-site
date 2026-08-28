@@ -625,12 +625,18 @@
       font-size: 13px;
       color: var(--charcoal);
     }
+    .credential-explainer { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px; }
+    .credential-explainer div { padding:9px 11px;border:1px solid rgba(0,51,102,.13);border-radius:7px;background:rgba(255,255,255,.58); }
+    .credential-explainer strong { display:block;margin-bottom:2px;color:var(--navy);font-size:11px; }
+    .credential-explainer span { display:block;color:#59636d;font-size:11px;line-height:1.4; }
     .credential-summary { margin-top:10px; padding-top:10px; border-top:1px solid rgba(0,51,102,.14); }
     .credential-summary[hidden] { display:none; }
-    .credential-summary-id { display:block; margin-bottom:4px; color:var(--navy); font:700 12px Lato,Arial,sans-serif; }
-    .credential-summary-url { display:block; max-width:620px; overflow:hidden; text-overflow:ellipsis; color:#567; font-size:11px; white-space:nowrap; }
+    .credential-summary-id { display:inline-flex;align-items:center;gap:5px;margin-bottom:3px;color:var(--navy);font:700 12px Lato,Arial,sans-serif; }
+    .credential-summary-id:hover { color:#285f91; }
+    .credential-summary-help { display:block;max-width:650px;color:#59636d;font-size:11px;line-height:1.4; }
     .certificate-callout-actions { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:8px; }
     .certificate-callout-link.is-secondary { background:#fff; color:var(--navy); border:1px solid rgba(0,51,102,.25); cursor:pointer; }
+    .certificate-callout-link.is-primary { background:var(--gold);color:var(--navy);border:1px solid var(--gold);cursor:pointer; }
 
     .certificate-callout-link {
       flex: none;
@@ -646,6 +652,12 @@
       font-weight: 700;
       text-decoration: none;
       white-space: nowrap;
+    }
+
+    @media (max-width: 700px) {
+      .credential-explainer { grid-template-columns:1fr; }
+      .certificate-callout-actions { width:100%;justify-content:stretch; }
+      .certificate-callout-link { flex:1 1 100%;justify-content:center; }
     }
 
     .progress-label {
@@ -1307,11 +1319,12 @@
     <div class="certificate-callout" id="certificateCallout" hidden>
       <div class="certificate-callout-copy">
         <span class="certificate-callout-label">Program complete</span>
-        <h2>Your certificate is ready.</h2>
-        <p>Congratulations! You finished all three phases. Your verified link can be added directly to LinkedIn, a CV, or an application.</p>
-        <div class="credential-summary" id="credentialSummary" hidden><span class="credential-summary-id" id="resultsCredentialId"></span><span class="credential-summary-url" id="resultsCredentialUrl"></span></div>
+        <h2>Your credential is ready.</h2>
+        <p>Congratulations! You finished all three phases and earned both a certificate and a verified credential.</p>
+        <div class="credential-explainer"><div><strong>Your certificate</strong><span>A visual record you can download as a PDF or image and keep for your files.</span></div><div><strong>Your verified credential</strong><span>A public, authenticated link that employers can check. Use it on LinkedIn, a CV, an application, or a social post.</span></div></div>
+        <div class="credential-summary" id="credentialSummary" hidden><a class="credential-summary-id" id="resultsVerifyLink" target="_blank" rel="noopener"></a><span class="credential-summary-help">Anyone with this link can confirm who earned the credential, when it was issued, and that it is active.</span></div>
       </div>
-      <div class="certificate-callout-actions"><a class="certificate-callout-link" href="../certificate/index.html">View certificate</a><a class="certificate-callout-link is-secondary" id="resultsVerifyLink" target="_blank" rel="noopener" hidden>View verification</a><button class="certificate-callout-link is-secondary" id="resultsCopyCredential" type="button" hidden>Copy verification link</button><button class="certificate-callout-link is-secondary" id="resultsLinkedIn" type="button" hidden>Add to LinkedIn</button></div>
+      <div class="certificate-callout-actions"><button class="certificate-callout-link is-primary" id="resultsLinkedIn" type="button" hidden>Add to LinkedIn</button><button class="certificate-callout-link is-secondary" id="resultsShareCredential" type="button" hidden>Share credential</button><a class="certificate-callout-link is-secondary" href="../certificate/index.html">View or download certificate</a></div>
     </div>
 
     <div class="device-notice" id="deviceNotice">
@@ -2127,24 +2140,26 @@
         const credential = issued?.credential;
         if (!credential?.credentialId) return;
         const verificationUrl = credential.verificationUrl || ('https://theuntaughtlessons.com/verify/?id=' + encodeURIComponent(credential.credentialId));
-        document.getElementById('resultsCredentialId').textContent = 'Credential ID: ' + credential.credentialId;
-        document.getElementById('resultsCredentialUrl').textContent = verificationUrl;
-        document.getElementById('credentialSummary').hidden = false;
         const verifyLink = document.getElementById('resultsVerifyLink');
         verifyLink.href = verificationUrl;
-        verifyLink.hidden = false;
-        const copyButton = document.getElementById('resultsCopyCredential');
-        copyButton.hidden = false;
-        copyButton.addEventListener('click', async () => {
-          try { await navigator.clipboard.writeText(verificationUrl); copyButton.textContent = 'Link copied'; setTimeout(() => { copyButton.textContent = 'Copy verification link'; }, 1800); }
-          catch { window.prompt('Copy this verification link:', verificationUrl); }
-        });
+        verifyLink.textContent = 'Credential ID: ' + credential.credentialId + ' · View verification ↗';
+        document.getElementById('credentialSummary').hidden = false;
         const linkedIn = document.getElementById('resultsLinkedIn');
         linkedIn.hidden = false;
         linkedIn.addEventListener('click', () => {
           const issuedDate = new Date(credential.issuedAt);
           const url = 'https://www.linkedin.com/profile/add?startTask=CERTIFICATION_NAME&name=' + encodeURIComponent(credential.credentialTitle || 'The Untaught Lessons') + '&organizationName=' + encodeURIComponent('The Untaught Lessons') + '&issueYear=' + issuedDate.getFullYear() + '&issueMonth=' + (issuedDate.getMonth() + 1) + '&certId=' + encodeURIComponent(credential.credentialId) + '&certUrl=' + encodeURIComponent(verificationUrl);
           window.open(url, '_blank', 'noopener');
+        });
+        const shareButton = document.getElementById('resultsShareCredential');
+        shareButton.hidden = false;
+        shareButton.addEventListener('click', async () => {
+          const shareData = { title: credential.credentialTitle || 'The Untaught Lessons credential', text: 'I completed ' + (credential.credentialTitle || 'The Untaught Lessons program') + '.', url: verificationUrl };
+          if (navigator.share) {
+            try { await navigator.share(shareData); return; } catch (error) { if (error?.name === 'AbortError') return; }
+          }
+          try { await navigator.clipboard.writeText(verificationUrl); shareButton.textContent = 'Verification link copied'; setTimeout(() => { shareButton.textContent = 'Share credential'; }, 1800); }
+          catch { window.prompt('Copy this verification link to share:', verificationUrl); }
         });
       } catch (error) {
         console.warn('Verified credential could not be loaded on My Results.', error);
