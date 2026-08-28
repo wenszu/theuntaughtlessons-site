@@ -600,6 +600,25 @@
       border-color: var(--navy);
     }
 
+    .sp-cohort-filter {
+      flex: 0 1 190px;
+      min-width: 145px;
+      max-width: 210px;
+      padding: 7px 30px 7px 10px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--white);
+      color: var(--navy);
+      font-family: Lato, Arial, sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .sp-cohort-filter:focus {
+      border-color: var(--navy);
+      outline: none;
+    }
+
     .sp-filter-chips {
       display: flex;
       flex-wrap: wrap;
@@ -2802,6 +2821,7 @@
         </div>
         <div class="sp-controls" id="spControls" hidden>
           <input type="search" class="sp-search" id="spSearch" placeholder="Search by name or email…" aria-label="Search members">
+          <select class="sp-cohort-filter" id="spCohortFilter" aria-label="Filter students by cohort"><option value="all">All cohorts</option></select>
           <div class="sp-filter-chips" role="group" aria-label="Filter by phase">
             <button class="sp-chip active" type="button" data-sp-filter="all">All</button>
             <button class="sp-chip" type="button" data-sp-filter="phase1">Phase 1+</button>
@@ -7530,6 +7550,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
     let spAllMembers = [];
     let spSort = { col: 'name', dir: 'asc' };
     let spFilter = 'all';
+    let spCohortFilter = 'all';
     let spActiveMember = null;
     const SP_PREVIEW_ACTIVE_KEY = 'utl_experience_preview_active';
     const SP_PREVIEW_BACKUP_KEY = 'utl_experience_preview_backup';
@@ -7822,6 +7843,13 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         });
       }
 
+      if (spCohortFilter !== 'all') {
+        members = members.filter((m) => {
+          const cohort = String(m.cohort || '').trim();
+          return spCohortFilter === '__none__' ? !cohort : cohort === spCohortFilter;
+        });
+      }
+
       if (spFilter !== 'all') {
         members = members.filter((m) => {
           const phase = spFurthestPhase(m);
@@ -7863,6 +7891,20 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       }
 
       renderStudentProgressTable(members);
+    }
+
+    function spPopulateCohortFilter() {
+      const select = document.getElementById('spCohortFilter');
+      if (!select) return;
+      const cohorts = Array.from(new Set(spAllMembers.map((member) => String(member.cohort || '').trim()).filter(Boolean)))
+        .sort((a, b) => a.localeCompare(b));
+      const hasNoCohort = spAllMembers.some((member) => !String(member.cohort || '').trim());
+      select.innerHTML = '<option value="all">All cohorts</option>' +
+        cohorts.map((cohort) => '<option value="' + escapeHtml(cohort) + '">' + escapeHtml(cohort) + '</option>').join('') +
+        (hasNoCohort ? '<option value="__none__">No cohort</option>' : '');
+      const available = ['all', ...cohorts, ...(hasNoCohort ? ['__none__'] : [])];
+      if (!available.includes(spCohortFilter)) spCohortFilter = 'all';
+      select.value = spCohortFilter;
     }
 
     function progressDot(done, label) {
@@ -8785,6 +8827,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
           member.workspaceProgress = Object.assign({}, member.workspaceProgress || {}, { rewards: repair.rewards });
         }
         spAllMembers = members;
+        spPopulateCohortFilter();
         lbMaxScoreCache = null;
         try { caCohortDetailsCache = (await fb.getCohortDetails?.()) || {}; } catch (_) { caCohortDetailsCache = {}; }
         const controls = document.getElementById('spControls');
@@ -9130,6 +9173,10 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
     });
 
     document.getElementById('spSearch')?.addEventListener('input', () => spApplyView());
+    document.getElementById('spCohortFilter')?.addEventListener('change', (event) => {
+      spCohortFilter = event.target.value || 'all';
+      spApplyView();
+    });
     document.getElementById('lbRefresh')?.addEventListener('click', loadStudentProgress);
     document.getElementById('lbCohort')?.addEventListener('change', (event) => {
       lbSelectedCohort = event.target.value;

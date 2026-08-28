@@ -16,6 +16,9 @@ assert(admin.includes('function spProgramComplete(member)'), 'program completion
 assert(admin.includes("!spProgramComplete(member)"), 'automatic reward repair only runs for fully completed students');
 assert(admin.includes('data-sp-edit-progress'), 'student detail offers individual progress editing');
 assert(admin.includes('data-sp-reset-progress'), 'student detail offers a deliberate reset action');
+assert(admin.includes('id="spCohortFilter"'), 'Student Progress has an in-row cohort filter');
+assert(admin.includes('function spPopulateCohortFilter()'), 'cohort filter options are derived from loaded members');
+assert(admin.includes("spCohortFilter === '__none__' ? !cohort : cohort === spCohortFilter"), 'cohort filtering supports named and unassigned members');
 assert(admin.includes('id="spResetDialog"'), 'reset uses a confirmation dialog');
 assert(admin.includes('id="spResetConfirm"'), 'reset requires explicit acknowledgement');
 assert(admin.includes('replaceMemberWorkspaceProgress'), 'individual edits write through the shared Firebase helper');
