@@ -861,6 +861,28 @@
       font-size: 9px;
       font-weight: 700;
     }
+    .ei-summary { display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:10px; margin:14px 0; }
+    .ei-metric { padding:15px; border:1px solid var(--line); border-radius:8px; background:#fff; }
+    .ei-metric-label { color:#777; font-size:11px; font-weight:700; }
+    .ei-metric strong { display:block; margin-top:5px; color:var(--navy); font:700 24px 'Playfair Display',serif; }
+    .ei-metric details,.ei-glossary details { margin-top:8px; color:#555; font-size:11px; line-height:1.45; }
+    .ei-metric summary,.ei-glossary summary { color:var(--navy); font-weight:700; cursor:pointer; }
+    .ei-explanation { margin-top:7px; padding:9px 10px; border:1px solid #E7C47C; border-radius:6px; background:#FFF8E8; }
+    .ei-explanation b { color:var(--navy); }
+    .ei-glossary { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:8px; margin-top:14px; }
+    .ei-glossary details { margin:0; padding:10px 12px; border:1px solid var(--line); border-radius:7px; background:#fff; }
+    .ei-note { margin-top:12px; color:#777; font-size:11px; }
+    .ei-view-tabs { display:flex; gap:5px; margin:14px 0; border-bottom:1px solid var(--line); }
+    .ei-view-tab { padding:10px 15px; border:0; border-bottom:3px solid transparent; background:transparent; color:#667; font-weight:700; cursor:pointer; }
+    .ei-view-tab.is-active { border-bottom-color:var(--gold); color:var(--navy); }
+    .ei-view-panel[hidden] { display:none; }
+    .ei-section-intro { display:flex; justify-content:space-between; gap:16px; align-items:flex-start; margin-bottom:12px; }
+    .ei-section-intro h3 { margin:0 0 4px; color:var(--navy); font-size:18px; }
+    .ei-section-intro p { margin:0; color:#666; font-size:12px; }
+    .ei-status-chip { display:inline-block; margin-top:4px; padding:3px 8px; border-radius:999px; background:#F0ECE5; color:#666; font-size:10px; font-weight:700; }
+    .ei-status-chip.is-active { background:#E6F4EC; color:#27633F; }
+    .ei-status-chip.needs-support { background:#FFF1CF; color:#8A5A00; }
+    @media(max-width:680px){.ei-view-tabs{overflow:auto}.ei-view-tab{white-space:nowrap}.ei-section-intro{display:block}}
 
     .ca-cohort-row { cursor: pointer; }
     .ca-cohort-row:hover { background: var(--cream); }
@@ -980,6 +1002,14 @@
     .sp-detail-stat strong { display:block; margin-top:4px; color:var(--navy); font-size:18px; }
     .sp-detail-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:12px; }
     .sp-detail-card { padding:16px; border:1px solid var(--line); border-radius:8px; background:#fff; }
+    #eiStudentDetail { display:grid; gap:18px; }
+    #eiStudentDetail[hidden] { display:none; }
+    #eiStudentDetail .sp-detail-card { margin:0; }
+    #caDetailContent { display:grid; gap:16px; }
+    #caDetailContent > * { margin-top:0!important; margin-bottom:0!important; }
+    #caDetailContent .mb-form-grid { row-gap:16px; }
+    #caDetailContent .mb-form-field { gap:8px; }
+    #caDetailContent .student-progress-actions { margin-top:16px; }
     .sp-detail-card h4 { margin:0 0 12px; color:var(--navy); font-size:15px; }
     .sp-activity-list { display:grid; gap:7px; margin:0; padding:0; list-style:none; }
     .sp-activity-row { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; padding-bottom:7px; border-bottom:1px solid var(--line); font-size:12px; }
@@ -2535,6 +2565,7 @@
       <span class="nav-group-label" data-admin-nav-group="student-progress">Progress</span>
       <button class="admin-nav-item" data-admin-tab-scope="student-progress" data-target="section-student-progress">Student Progress</button>
       <button class="admin-nav-item" data-admin-tab-scope="student-progress" data-target="section-leaderboard">Leaderboard</button>
+      <button class="admin-nav-item" data-admin-tab-scope="student-progress" data-target="section-engagement-insights">Engagement Insights</button>
       <button class="admin-nav-item" data-admin-tab-scope="student-progress" data-target="section-cohort-analytics">Cohort Analytics</button>
 
       <span class="nav-group-label" data-admin-nav-group="rewards">Rewards</span>
@@ -2895,11 +2926,26 @@
         <div id="lbBoard"><p class="mb-msg">Click Refresh leaderboard to load rankings.</p></div>
       </section>
 
+      <section class="admin-section" id="section-engagement-insights" data-admin-tab-panel="student-progress">
+        <span class="section-label">Progress</span>
+        <h2>Engagement Insights</h2>
+        <div class="section-divider"></div>
+        <p class="description"><strong>Use this for learner behavior and support:</strong> focused-time estimates, resumptions, incomplete activities, and transparent signals that someone may benefit from help. For completion rates, phase funnels, and cohort outcomes, use Cohort Analytics below. These signals are not grades or proof of attention.</p>
+        <div class="student-progress-actions">
+          <button class="small-button" type="button" id="eiRefresh">Refresh insights</button>
+          <button class="small-button secondary-button" type="button" id="eiGlossaryToggle">How engagement metrics work</button>
+          <span class="student-progress-status" id="eiStatus" aria-live="polite"></span>
+        </div>
+        <div id="eiContent"><p class="mb-msg">Click Refresh insights to load tracked engagement.</p></div>
+        <div class="ei-glossary" id="eiGlossary" hidden></div>
+        <p class="ei-note">Times are estimates. Background tabs are excluded; thinking or note-taking may appear idle. Video timing currently measures lesson-page engagement because Google Drive does not expose playback position.</p>
+      </section>
+
       <section class="admin-section" id="section-cohort-analytics" data-admin-tab-panel="student-progress">
         <span class="section-label">Progress</span>
         <h2>Cohort Analytics</h2>
         <div class="section-divider"></div>
-        <p class="description">Completion, pace, and exercise bottlenecks by cohort. Counts always show alongside percentages — cohorts under 5 members are flagged as a small sample. Cohort start is estimated from the earliest member added; treat it as approximate.</p>
+        <p class="description"><strong>Use this for completion and cohort outcomes:</strong> phase funnels, exercise completion bottlenecks, pace, and overall progress by cohort. For focused time, inactivity, resumptions, and individual support signals, use Engagement Insights above. Counts always show alongside percentages — cohorts under 5 members are flagged as a small sample.</p>
         <div class="student-progress-actions">
           <button class="small-button" type="button" id="caRefresh">Refresh analytics</button>
           <span class="student-progress-status" id="caStatus" aria-live="polite"></span>
@@ -3674,6 +3720,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       doc,
       findUserUidByEmail,
       getAllMemberWorkspaceProgress,
+      getAllEngagementAnalytics,
       getMemberCredentialRegistry,
       getMemberSupportSnapshot,
       getDoc,
@@ -3726,6 +3773,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       saveEmailTemplate,
       findUserUidByEmail,
       getAllMemberWorkspaceProgress,
+      getAllEngagementAnalytics,
       getMemberCredentialRegistry,
       getMemberSupportSnapshot,
       getDoc,
@@ -8253,6 +8301,155 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       }
     }
 
+    // Engagement Insights
+    let eiData = { sessions: [], activities: [] };
+    const EI_METRICS = {
+      activeLearners: ['Active learners (7d)', 'Unique learners with meaningful interaction during the last 7 days; page views alone are excluded.', 'Shows the recent participating population.', 'Completion rate reveals whether activity is translating into progress.'],
+      medianSession: ['Median active session', 'The middle active-time total across tracked sessions. Active time requires a visible page and interaction within 60 seconds.', 'Shows a typical focused visit without long sessions distorting the result.', 'Activities completed per session distinguishes productive focus from friction.'],
+      needsSupport: ['Learners to check in with', 'Incomplete tracked activity plus no meaningful engagement for at least 3 days.', 'Creates a human-review queue, not an automatic risk label.', 'Last step, prior resumptions, and nudge history should be reviewed before contacting.'],
+      resumed: ['Resumed activities', 'A meaningful return to an activity previously left incomplete, recorded in a later page visit.', 'Shows learners successfully coming back to continue.', 'Subsequent completion indicates recovery; repeated resume without completion can indicate friction.'],
+      activeTime: ['Active time', 'Visible-page time while meaningful interaction occurred within the previous 60 seconds.', 'Approximates focused learning time.', 'Completion and exit step distinguish productive effort from friction.'],
+      idleTime: ['Idle foreground time', 'Visible-page time after 60 seconds without detectable interaction.', 'Shows that a page remained open; it does not prove inattention.', 'Active time and exit step add context. High idle alone is not a problem.'],
+      lastMeaningful: ['Last meaningful engagement', 'Latest interaction, progress action, or completion. Page views alone are excluded.', 'Shows when the learner last demonstrably participated.', 'Incomplete activity and days inactive can support a resume nudge.'],
+      incomplete: ['Incomplete activity', 'An activity with meaningful interaction that has not recorded completion.', 'May indicate interruption or friction, not failure.', 'Repeated exits, active time, and last stable step strengthen the support signal.'],
+      sessionCount: ['Sessions', 'Distinct tracked visits containing at least one meaningful interaction.', 'Shows how often the student returned to participate.', 'Active time and completions show the depth and outcome of those visits.'],
+      hiddenTime: ['Hidden time', 'Time while the learning tab or app was in the background.', 'Defines time deliberately excluded from focused and idle estimates.', 'Elapsed, active, and idle time reconcile the full visit span.'],
+      elapsedTime: ['Elapsed time', 'Total session span, including active, idle-foreground, and hidden intervals.', 'Shows the overall visit window, including interruptions.', 'Active-to-elapsed ratio adds context but should never be used as a judgment of attention.'],
+      activityStarts: ['Activity starts', 'Distinct activity visits with at least one meaningful interaction; page opens without interaction are excluded.', 'Shows how many genuine attempts entered the activity.', 'Completion rate turns starts into a useful conversion measure.'],
+      completionRate: ['Completion rate', 'Completed tracked activity visits divided by meaningful activity starts.', 'Shows how often an attempted activity reaches completion.', 'Median active time, help use, and validation errors help explain a low rate.'],
+      helpRate: ['Help use', 'Tracked help, hint, example, or tips openings across meaningful starts.', 'Shows where students seek additional guidance.', 'High help with high completion may mean help works; high help with low completion suggests deeper friction.'],
+      validationRate: ['Validation errors', 'Browser validation failures recorded during tracked activity visits.', 'Shows where required inputs or submission rules block progress.', 'Combine with submissions and completion to distinguish a recoverable error from abandonment.'],
+      restartRate: ['Restarts and retries', 'Tracked restart, reset, start-over, or try-again actions.', 'Shows repeated attempts or deliberate practice.', 'Completion and active time distinguish healthy retrying from confusing interaction design.']
+      ,dropOffStep: ['Most common exit step', 'The last named journey step reached in incomplete, meaningful activity visits. Completed visits are excluded.', 'Shows the part of an exercise where learners most often stop.', 'Completion rate, active time, help use, and validation errors help distinguish interruption from design friction.']
+    };
+
+    function eiExplanation(key) {
+      const metric = EI_METRICS[key];
+      return '<div class="ei-explanation"><div><b>Measured as:</b> ' + escapeHtml(metric[1]) + '</div><div><b>What it tells you:</b> ' + escapeHtml(metric[2]) + '</div><div><b>Combine with:</b> ' + escapeHtml(metric[3]) + '</div></div>';
+    }
+
+    function eiMetricCard(key, value) {
+      return '<div class="ei-metric"><span class="ei-metric-label">' + escapeHtml(EI_METRICS[key][0]) + '</span><strong>' + escapeHtml(value) + '</strong><details><summary>How to interpret this metric</summary>' + eiExplanation(key) + '</details></div>';
+    }
+
+    function eiFormatDuration(seconds) {
+      const mins = Math.round((Number(seconds) || 0) / 60);
+      if (mins < 1) return '<1 min';
+      return mins < 60 ? mins + ' min' : Math.floor(mins / 60) + 'h ' + (mins % 60) + 'm';
+    }
+
+    function eiMedian(values) {
+      const sorted = values.filter((value) => Number(value) >= 0).map(Number).sort((a,b) => a-b);
+      if (!sorted.length) return 0;
+      const middle = Math.floor(sorted.length / 2);
+      return sorted.length % 2 ? sorted[middle] : (sorted[middle - 1] + sorted[middle]) / 2;
+    }
+
+    function eiStepLabel(stepId) {
+      const value = String(stepId || 'unknown').replace(/[-_]+/g, ' ');
+      return value.charAt(0).toUpperCase() + value.slice(1);
+    }
+
+    function eiCommonExitStep(items) {
+      const counts = {};
+      items.filter((item) => !item.completed && item.lastStepId).forEach((item) => { counts[item.lastStepId] = (counts[item.lastStepId] || 0) + 1; });
+      const top = Object.entries(counts).sort((a, b) => b[1] - a[1])[0];
+      return top ? eiStepLabel(top[0]) + ' (' + top[1] + ')' : '—';
+    }
+
+    function eiLatestActivitiesByUid() {
+      const result = new Map();
+      eiData.activities.forEach((activity) => {
+        if (!activity.uid || activity.meaningfulInteractions < 1) return;
+        const current = result.get(activity.uid);
+        if (!current || Number(activity.lastMeaningfulAtMs || 0) > Number(current.lastMeaningfulAtMs || 0)) result.set(activity.uid, activity);
+      });
+      return result;
+    }
+
+    function eiMemberMetrics(member, now = Date.now()) {
+      const sessions = eiData.sessions.filter((session) => session.uid === member.uid && session.meaningfulInteractions > 0);
+      const activities = eiData.activities.filter((activity) => activity.uid === member.uid && activity.meaningfulInteractions > 0).sort((a,b) => Number(b.lastMeaningfulAtMs || 0) - Number(a.lastMeaningfulAtMs || 0));
+      const latest = activities[0] || null;
+      const active7 = sessions.filter((session) => Number(session.lastMeaningfulAtMs || 0) >= now - 7*86400000).reduce((sum, session) => sum + Number(session.activeSeconds || 0), 0);
+      const inactiveDays = latest ? Math.max(0, Math.floor((now - Number(latest.lastMeaningfulAtMs || now)) / 86400000)) : null;
+      return { member, sessions, activities, latest, active7, medianSession:eiMedian(sessions.map((session)=>session.activeSeconds)), resumed:activities.filter((activity)=>activity.resumed).length, needsSupport:!!(latest && !latest.completed && inactiveDays >= 3), inactiveDays, tracked:sessions.length > 0 || activities.length > 0 };
+    }
+
+    function eiStudentRows(items) {
+      return items.map((item) => {
+        const latest = item.latest;
+        const signal = !item.tracked ? '<span class="ei-status-chip">No tracked activity</span>' : item.needsSupport ? '<span class="ei-status-chip needs-support">Needs check-in</span>' : Number(latest?.lastMeaningfulAtMs || 0) >= Date.now()-7*86400000 ? '<span class="ei-status-chip is-active">Active this week</span>' : '<span class="ei-status-chip">No recent activity</span>';
+        return '<tr><td><button class="sp-member-button" type="button" data-ei-student="' + escapeHtml(item.member.uid || '') + '">' + escapeHtml(item.member.displayName || item.member.name || item.member.email || 'Student') + '</button><br><small>' + escapeHtml(item.member.email || '') + '</small></td><td>' + escapeHtml(item.member.cohort || 'No cohort') + '</td><td>' + signal + '</td><td>' + (latest ? escapeHtml(formatProgressDate(latest.lastMeaningfulAtClient)) : '—') + '</td><td>' + (item.tracked ? eiFormatDuration(item.active7) : '—') + '</td><td>' + (latest ? escapeHtml(latest.activityTitle || latest.activityId) + '<br><small>' + (latest.completed ? 'Completed' : 'Incomplete · ' + escapeHtml(eiStepLabel(latest.lastStepId))) + '</small>' : '—') + '</td><td>' + (item.tracked ? item.resumed : '—') + '</td></tr>';
+      }).join('') || '<tr><td colspan="7">No students found.</td></tr>';
+    }
+
+    function renderEngagementInsights() {
+      const wrap = document.getElementById('eiContent');
+      if (!wrap) return;
+      const now = Date.now();
+      const sevenDaysAgo = now - 7 * 86400000;
+      const activeUids = new Set(eiData.sessions.filter((session) => Number(session.lastMeaningfulAtMs || 0) >= sevenDaysAgo && session.meaningfulInteractions > 0).map((session) => session.uid));
+      const median = eiMedian(eiData.sessions.filter((session) => session.meaningfulInteractions > 0).map((session) => session.activeSeconds));
+      const resumed = eiData.activities.filter((activity) => activity.resumed && activity.meaningfulInteractions > 0).length;
+      const studentMetrics = spAllMembers.map((member) => eiMemberMetrics(member, now)).sort((a,b) => String(a.member.displayName || a.member.email || '').localeCompare(String(b.member.displayName || b.member.email || '')));
+      const support = studentMetrics.filter((item) => item.needsSupport).sort((a,b) => b.inactiveDays - a.inactiveDays);
+      const cards = eiMetricCard('activeLearners', String(activeUids.size)) + eiMetricCard('medianSession', eiFormatDuration(median)) + eiMetricCard('needsSupport', String(support.length)) + eiMetricCard('resumed', String(resumed));
+      let queue = '<p class="mb-msg">No learner currently meets the Phase 1 check-in rule.</p>';
+      if (support.length) {
+        const rows = support.map((entry) => {
+          const member = entry.member;
+          return '<tr><td><button class="sp-member-button" type="button" data-ei-student="' + escapeHtml(member.uid || '') + '">' + escapeHtml(member.displayName || member.name || member.email || 'Student') + '</button></td><td><span class="sp-status-missing">Incomplete · inactive ' + entry.inactiveDays + ' days</span></td><td>' + escapeHtml(entry.latest.activityTitle || entry.latest.activityId) + '<br><small>Last step: ' + escapeHtml(eiStepLabel(entry.latest.lastStepId)) + '</small></td><td>' + eiFormatDuration(entry.latest.activeSeconds) + '</td><td>Review context, then send a gentle resume nudge.</td></tr>';
+        }).join('');
+        queue = '<div class="student-progress-table-wrap"><table class="student-progress-table"><thead><tr><th>Learner</th><th>Why they are here</th><th>Current activity</th><th>Focused time</th><th>Suggested action</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
+      }
+      const groups = {};
+      studentMetrics.forEach((item) => { const name=String(item.member.cohort||'').trim()||'No cohort'; (groups[name] ||= []).push(item); });
+      const cohortRows = Object.entries(groups).sort(([a],[b])=>a.localeCompare(b)).map(([name,items]) => '<tr><td><button class="sp-member-button" type="button" data-ei-cohort="' + escapeHtml(name) + '">' + escapeHtml(name) + '</button></td><td>' + items.length + '</td><td>' + items.filter((item)=>item.tracked).length + '</td><td>' + items.filter((item)=>Number(item.latest?.lastMeaningfulAtMs||0)>=sevenDaysAgo).length + '</td><td>' + (items.some((item)=>item.tracked)?eiFormatDuration(eiMedian(items.flatMap((item)=>item.sessions.map((session)=>session.activeSeconds)))):'—') + '</td><td>' + items.filter((item)=>item.needsSupport).length + '</td><td>' + items.reduce((sum,item)=>sum+item.resumed,0) + '</td></tr>').join('');
+      const activityGroups = {};
+      eiData.activities.filter((activity)=>activity.meaningfulInteractions>0).forEach((activity)=>{const key=activity.activityId||'unknown';(activityGroups[key] ||= []).push(activity);});
+      const activityRows = Object.entries(activityGroups).map(([id,items])=>{const starts=items.length,completed=items.filter((item)=>item.completed).length,help=items.reduce((sum,item)=>sum+Number(item.helpOpenedCount||0),0),errors=items.reduce((sum,item)=>sum+Number(item.validationErrorCount||0),0),submits=items.reduce((sum,item)=>sum+Number(item.submitCount||0),0),restarts=items.reduce((sum,item)=>sum+Number(item.restartCount||0),0),resumes=items.filter((item)=>item.resumed).length,title=items.find((item)=>item.activityTitle)?.activityTitle||id;return '<tr><td>'+escapeHtml(title)+'<br><small>'+escapeHtml(id)+'</small></td><td>'+starts+'</td><td>'+completed+' ('+Math.round(completed/starts*100)+'%)</td><td>'+escapeHtml(eiCommonExitStep(items))+'</td><td>'+eiFormatDuration(eiMedian(items.map((item)=>item.activeSeconds)))+'</td><td>'+help+'</td><td>'+errors+'</td><td>'+submits+'</td><td>'+restarts+'</td><td>'+resumes+'</td></tr>';}).join('') || '<tr><td colspan="10">No meaningful activity attempts have been tracked yet.</td></tr>';
+      const noData = !eiData.sessions.length ? '<div class="sp-detail-card"><h4>No engagement recorded yet</h4><p>All students are listed in the Students view, but timing begins only on their next instrumented visit. Open a student workspace and interact with an activity to create test data.</p></div>' : '';
+      wrap.innerHTML = '<div class="ei-view-tabs" role="tablist"><button class="ei-view-tab is-active" type="button" data-ei-view="overview">Overview</button><button class="ei-view-tab" type="button" data-ei-view="students">Students (' + studentMetrics.length + ')</button><button class="ei-view-tab" type="button" data-ei-view="cohorts">Cohorts (' + Object.keys(groups).length + ')</button><button class="ei-view-tab" type="button" data-ei-view="activities">Activities (' + Object.keys(activityGroups).length + ')</button></div>' +
+        '<div class="ei-view-panel" data-ei-panel="overview">' + noData + '<div class="ei-summary">' + cards + '</div><div class="sp-detail-card"><h4>Needs attention</h4><p class="description">Incomplete activity with no meaningful engagement for at least 3 days. Review the evidence before contacting anyone.</p>' + queue + '</div></div>' +
+        '<div class="ei-view-panel" data-ei-panel="students" hidden><div class="ei-section-intro"><div><h3>Student engagement</h3><p>Every student appears here, including those with no tracked activity. Select a student for their recent engagement detail.</p></div></div><div id="eiStudentList"><div class="student-progress-table-wrap"><table class="student-progress-table"><thead><tr><th>Student</th><th>Cohort</th><th>Signal</th><th>Last meaningful</th><th>Focused · 7d</th><th>Latest activity</th><th>Resumes</th></tr></thead><tbody>' + eiStudentRows(studentMetrics) + '</tbody></table></div></div><div id="eiStudentDetail" hidden></div></div>' +
+        '<div class="ei-view-panel" data-ei-panel="cohorts" hidden><div class="ei-section-intro"><div><h3>Cohort engagement</h3><p>Compare behavioral engagement here. Completion funnels and curriculum outcomes remain in Cohort Analytics.</p></div></div><div id="eiCohortList"><div class="student-progress-table-wrap"><table class="student-progress-table"><thead><tr><th>Cohort</th><th>Students</th><th>Tracked</th><th>Active · 7d</th><th>Median session</th><th>Needs check-in</th><th>Resumes</th></tr></thead><tbody>' + cohortRows + '</tbody></table></div></div><div id="eiCohortDetail" hidden></div></div>' +
+        '<div class="ei-view-panel" data-ei-panel="activities" hidden><div class="ei-section-intro"><div><h3>Activity friction</h3><p>Shared Phase 2 signals across exercises and assessments. Counts are interaction milestones, not raw clickstream data.</p></div></div><div class="student-progress-table-wrap"><table class="student-progress-table"><thead><tr><th>Activity</th><th>Starts</th><th>Completed</th><th>Common exit step</th><th>Median active</th><th>Help opened</th><th>Validation errors</th><th>Submissions</th><th>Restarts</th><th>Resumes</th></tr></thead><tbody>' + activityRows + '</tbody></table></div><details style="margin-top:16px"><summary>How activity-friction metrics work</summary>' + eiExplanation('activityStarts') + eiExplanation('completionRate') + eiExplanation('dropOffStep') + eiExplanation('helpRate') + eiExplanation('validationRate') + eiExplanation('restartRate') + '</details></div>';
+      wrap.querySelectorAll('[data-ei-view]').forEach((button)=>button.addEventListener('click',()=>{wrap.querySelectorAll('[data-ei-view]').forEach((item)=>item.classList.toggle('is-active',item===button));wrap.querySelectorAll('[data-ei-panel]').forEach((panel)=>panel.hidden=panel.dataset.eiPanel!==button.dataset.eiView);}));
+      function openStudent(uid) { const member=spAllMembers.find((item)=>item.uid===uid); const list=document.getElementById('eiStudentList'); const detail=document.getElementById('eiStudentDetail'); if(!member||!detail)return; wrap.querySelector('[data-ei-view="students"]')?.click(); if(list)list.hidden=true; detail.hidden=false; detail.innerHTML='<div class="student-progress-actions"><button class="small-button secondary-button" type="button" data-ei-back>← Back to all students</button></div><div class="sp-detail-header"><div><h3>'+escapeHtml(member.displayName||member.name||member.email||'Student')+'</h3><p>'+escapeHtml(member.email||'')+' · '+escapeHtml(member.cohort||'No cohort')+'</p></div></div>'+eiMemberCardHtml(member); detail.querySelector('[data-ei-back]')?.addEventListener('click',()=>{detail.hidden=true;if(list)list.hidden=false;}); }
+      wrap.querySelectorAll('[data-ei-student]').forEach((button)=>button.addEventListener('click',()=>openStudent(button.dataset.eiStudent)));
+      wrap.querySelectorAll('[data-ei-cohort]').forEach((button)=>button.addEventListener('click',()=>{const items=groups[button.dataset.eiCohort]||[];const list=document.getElementById('eiCohortList');const detail=document.getElementById('eiCohortDetail');if(!detail)return;if(list)list.hidden=true;detail.hidden=false;detail.innerHTML='<div class="student-progress-actions"><button class="small-button secondary-button" type="button" data-ei-cohort-back>← Back to all cohorts</button></div><div class="sp-detail-header"><div><h3>'+escapeHtml(button.dataset.eiCohort)+'</h3><p>'+items.length+' students · engagement detail</p></div></div><div class="student-progress-table-wrap"><table class="student-progress-table"><thead><tr><th>Student</th><th>Cohort</th><th>Signal</th><th>Last meaningful</th><th>Focused · 7d</th><th>Latest activity</th><th>Resumes</th></tr></thead><tbody>'+eiStudentRows(items)+'</tbody></table></div>';detail.querySelector('[data-ei-cohort-back]')?.addEventListener('click',()=>{detail.hidden=true;if(list)list.hidden=false;});detail.querySelectorAll('[data-ei-student]').forEach((student)=>student.addEventListener('click',()=>openStudent(student.dataset.eiStudent)));}));
+      const glossary = document.getElementById('eiGlossary');
+      if (glossary) glossary.innerHTML = Object.keys(EI_METRICS).map((key) => '<details><summary>' + escapeHtml(EI_METRICS[key][0]) + '</summary>' + eiExplanation(key) + '</details>').join('');
+    }
+
+    async function loadEngagementInsights() {
+      const status = document.getElementById('eiStatus');
+      const button = document.getElementById('eiRefresh');
+      const fb = window.utlFirebaseAuth;
+      if (!fb?.getAllEngagementAnalytics) {
+        if (status) status.textContent = 'Analytics service is loading…';
+        window.addEventListener('utlFirebaseAuthReady', function handler() {
+          window.removeEventListener('utlFirebaseAuthReady', handler);
+          loadEngagementInsights();
+        });
+        return;
+      }
+      if (button) { button.disabled = true; button.textContent = 'Refreshing…'; }
+      if (status) status.textContent = 'Loading tracked sessions…';
+      try {
+        await mbRequireFirebaseAdmin();
+        const members = spAllMembers.length ? spAllMembers : await fb.getAllMemberWorkspaceProgress();
+        const analytics = await fb.getAllEngagementAnalytics(members.map((member) => member.uid).filter(Boolean));
+        eiData = analytics;
+        if (!spAllMembers.length) spAllMembers = members;
+        renderEngagementInsights();
+        if (status) status.textContent = analytics.sessions.length + ' tracked session' + (analytics.sessions.length === 1 ? '' : 's') + ' · refreshed ' + new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+      } catch (error) {
+        if (status) status.textContent = 'Could not load insights: ' + ((error && error.message) || 'Unknown error');
+      } finally { if (button) { button.disabled = false; button.textContent = 'Refresh insights'; } }
+    }
+
     // Cohort Analytics
     let caCurrentCohort = '';
     let caCohortDetailsCache = {};
@@ -8654,6 +8851,32 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       renderCohortOverview();
     }
 
+    function eiMemberCardHtml(member) {
+      if (!member.uid) return '';
+      const now = Date.now();
+      const sessions = eiData.sessions.filter((session) => session.uid === member.uid && session.meaningfulInteractions > 0).sort((a,b) => Number(b.lastMeaningfulAtMs || 0) - Number(a.lastMeaningfulAtMs || 0));
+      const activities = eiData.activities.filter((activity) => activity.uid === member.uid && activity.meaningfulInteractions > 0).sort((a,b) => Number(b.lastMeaningfulAtMs || 0) - Number(a.lastMeaningfulAtMs || 0));
+      if (!sessions.length && !activities.length) return '<div class="sp-detail-card"><h4>Engagement</h4><p class="sp-status-missing">No engagement has been tracked yet. Metrics will begin on this student’s next instrumented visit.</p></div>';
+      const active7 = sessions.filter((session) => Number(session.lastMeaningfulAtMs || 0) >= now - 7*86400000).reduce((sum, session) => sum + Number(session.activeSeconds || 0), 0);
+      const active30 = sessions.filter((session) => Number(session.lastMeaningfulAtMs || 0) >= now - 30*86400000).reduce((sum, session) => sum + Number(session.activeSeconds || 0), 0);
+      const idle30 = sessions.filter((session) => Number(session.lastMeaningfulAtMs || 0) >= now - 30*86400000).reduce((sum, session) => sum + Number(session.idleSeconds || 0), 0);
+      const hidden30 = sessions.filter((session) => Number(session.lastMeaningfulAtMs || 0) >= now - 30*86400000).reduce((sum, session) => sum + Number(session.hiddenSeconds || 0), 0);
+      const elapsed30 = sessions.filter((session) => Number(session.lastMeaningfulAtMs || 0) >= now - 30*86400000).reduce((sum, session) => sum + Number(session.elapsedSeconds || 0), 0);
+      const sessions7 = sessions.filter((session) => Number(session.lastMeaningfulAtMs || 0) >= now - 7*86400000).length;
+      const latest = activities[0];
+      const typical = eiMedian(sessions.slice(0, 20).map((session) => session.activeSeconds));
+      const resumedCount = activities.filter((activity) => activity.resumed).length;
+      const incompleteCount = activities.filter((activity) => !activity.completed).length;
+      const helpCount = activities.reduce((sum,activity) => sum + Number(activity.helpOpenedCount || 0), 0);
+      const validationCount = activities.reduce((sum,activity) => sum + Number(activity.validationErrorCount || 0), 0);
+      const submitCount = activities.reduce((sum,activity) => sum + Number(activity.submitCount || 0), 0);
+      const restartCount = activities.reduce((sum,activity) => sum + Number(activity.restartCount || 0), 0);
+      const recent = sessions.slice(0, 8).map((session) => '<tr><td>' + escapeHtml(formatProgressDate(session.lastMeaningfulAtClient)) + '</td><td>' + escapeHtml(session.activityTitle || session.activityId || 'Learning session') + '</td><td>' + eiFormatDuration(session.activeSeconds) + '</td><td>' + eiFormatDuration(session.idleSeconds) + '</td><td>' + eiFormatDuration(session.hiddenSeconds) + '</td><td>' + eiFormatDuration(session.elapsedSeconds) + '</td></tr>').join('');
+      const inactiveDays = latest ? Math.floor((now - Number(latest.lastMeaningfulAtMs || now)) / 86400000) : 0;
+      const support = latest && !latest.completed && inactiveDays >= 3 ? '<p class="sp-status-missing"><strong>Review for support:</strong> incomplete at “' + escapeHtml(eiStepLabel(latest.lastStepId)) + '” and inactive ' + inactiveDays + ' days.</p>' : '<p class="sp-status-done">No current Phase 1 support flag.</p>';
+      return '<div class="sp-detail-card"><h4>Engagement overview</h4>' + support + '<div class="sp-detail-summary"><div class="sp-detail-stat"><span>Focused time · 7d</span><strong>' + eiFormatDuration(active7) + '</strong></div><div class="sp-detail-stat"><span>Focused time · 30d</span><strong>' + eiFormatDuration(active30) + '</strong></div><div class="sp-detail-stat"><span>Median active session</span><strong>' + eiFormatDuration(typical) + '</strong></div><div class="sp-detail-stat"><span>Last meaningful</span><strong>' + (latest ? escapeHtml(formatProgressDate(latest.lastMeaningfulAtClient)) : '—') + '</strong></div><div class="sp-detail-stat"><span>Sessions · 7d</span><strong>' + sessions7 + '</strong></div><div class="sp-detail-stat"><span>Resumed activities</span><strong>' + resumedCount + '</strong></div><div class="sp-detail-stat"><span>Incomplete activities</span><strong>' + incompleteCount + '</strong></div></div>' + (latest ? '<div class="sp-detail-card" style="margin-top:18px"><h4>Latest activity</h4><p><strong>' + escapeHtml(latest.activityTitle || latest.activityId) + '</strong></p><p>Status: ' + (latest.completed ? 'Completed' : 'Incomplete') + ' · Last step: ' + escapeHtml(eiStepLabel(latest.lastStepId)) + ' · Active: ' + eiFormatDuration(latest.activeSeconds) + ' · Idle: ' + eiFormatDuration(latest.idleSeconds) + '</p></div>' : '') + '<div class="sp-detail-card" style="margin-top:18px"><h4>Exercise friction signals</h4><div class="sp-detail-summary"><div class="sp-detail-stat"><span>Help opened</span><strong>' + helpCount + '</strong></div><div class="sp-detail-stat"><span>Validation errors</span><strong>' + validationCount + '</strong></div><div class="sp-detail-stat"><span>Submissions</span><strong>' + submitCount + '</strong></div><div class="sp-detail-stat"><span>Restarts / retries</span><strong>' + restartCount + '</strong></div></div></div><div class="sp-detail-card" style="margin-top:18px"><h4>Time breakdown · last 30 days</h4><div class="sp-detail-summary"><div class="sp-detail-stat"><span>Active</span><strong>' + eiFormatDuration(active30) + '</strong></div><div class="sp-detail-stat"><span>Idle foreground</span><strong>' + eiFormatDuration(idle30) + '</strong></div><div class="sp-detail-stat"><span>Hidden</span><strong>' + eiFormatDuration(hidden30) + '</strong></div><div class="sp-detail-stat"><span>Elapsed</span><strong>' + eiFormatDuration(elapsed30) + '</strong></div></div><p class="ei-note">Idle time can include thinking, note-taking, or interruptions. Hidden time is excluded from focused and idle estimates.</p></div><div class="sp-detail-card" style="margin-top:18px"><h4>Recent sessions</h4><div class="student-progress-table-wrap"><table class="student-progress-table"><thead><tr><th>Date</th><th>Activity</th><th>Active</th><th>Idle</th><th>Hidden</th><th>Elapsed</th></tr></thead><tbody>' + recent + '</tbody></table></div></div><details style="margin-top:18px"><summary>How all student metrics are measured</summary>' + eiExplanation('activeTime') + eiExplanation('idleTime') + eiExplanation('hiddenTime') + eiExplanation('elapsedTime') + eiExplanation('sessionCount') + eiExplanation('resumed') + eiExplanation('lastMeaningful') + eiExplanation('incomplete') + eiExplanation('helpRate') + eiExplanation('validationRate') + eiExplanation('restartRate') + '</details></div>';
+    }
+
     function showStudentProgressDetail(member) {
       const table = document.getElementById('studentProgressTable');
       const controls = document.getElementById('spControls');
@@ -8685,7 +8908,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         '<div class="sp-reward-alert ' + (!missingBonus ? 'is-ok' : '') + '">' + (missingBonus
           ? '<strong>Missing completion milestone:</strong> this student finished all phases but needs ' + missingAmount + ' MP to receive the full bonus and reach Executive. <button class="small-button" type="button" data-sp-repair-bonus style="margin-left:8px">Award missing MP</button>'
           : finished ? '<strong>Completion reward verified.</strong> The full-program bonus is recorded and the Executive milestone is satisfied.' : '<strong>No repair needed.</strong> The full-program bonus becomes available after every phase exercise is complete.') + '</div>' +
-        '<div class="sp-detail-grid">' + credentialHtml + ['phase1','phase2','phase3'].map((key) => spPhaseDetailHtml(member, key)).join('') + '<div class="sp-detail-card"><h4>Recent MP activity</h4>' + spLedgerHtml(member) + '</div></div>';
+        '<div class="sp-detail-grid">' + credentialHtml + eiMemberCardHtml(member) + ['phase1','phase2','phase3'].map((key) => spPhaseDetailHtml(member, key)).join('') + '<div class="sp-detail-card"><h4>Recent MP activity</h4>' + spLedgerHtml(member) + '</div></div>';
       table.hidden = true;
       if (controls) controls.hidden = true;
       detail.hidden = false;
@@ -8804,32 +9027,48 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       try {
         currentUser = await mbRequireFirebaseAdmin();
         wrap.innerHTML = '<p class="mb-msg">Loading student progress...</p>';
-        const members = await fb.getAllMemberWorkspaceProgress();
+        const [members, metadataResults] = await Promise.all([
+          fb.getAllMemberWorkspaceProgress(),
+          Promise.allSettled([
+            fb.getMemberCredentialRegistry(),
+            fb.getRewardSettings ? fb.getRewardSettings() : Promise.resolve(null),
+            fb.getCohortDetails ? fb.getCohortDetails() : Promise.resolve({})
+          ])
+        ]);
+        const [registryResult, rewardSettingsResult, cohortDetailsResult] = metadataResults;
         try {
-          const registry = await fb.getMemberCredentialRegistry();
+          if (registryResult.status === 'rejected') throw registryResult.reason;
+          const registry = registryResult.value;
           const byEmail = new Map((registry.credentials || []).map((item) => [String(item.email || '').toLowerCase(), item]));
           const byUserId = new Map((registry.credentials || []).map((item) => [String(item.userId || ''), item]));
           members.forEach((member) => { member.credential = byEmail.get(String(member.email || '').toLowerCase()) || byUserId.get(String(member.uid || '')) || null; });
         } catch (credentialError) {
           console.warn('Credential registry could not be loaded in Member Access.', credentialError);
         }
-        const rewardSettings = fb.getRewardSettings ? await fb.getRewardSettings() : null;
-        let repairedBonuses = 0;
-        for (const member of members) {
-          if (!member.uid || !spProgramComplete(member) || !fb.repairMemberProgramCompletionReward) continue;
+        const rewardSettings = rewardSettingsResult.status === 'fulfilled' ? rewardSettingsResult.value : null;
+        if (rewardSettingsResult.status === 'rejected') console.warn('Reward settings could not be loaded in Student Progress.', rewardSettingsResult.reason);
+        const repairCandidates = members.filter((member) => {
+          if (!member.uid || !spProgramComplete(member) || !fb.repairMemberProgramCompletionReward) return false;
+          return true;
+        });
+        const repairResults = await Promise.all(repairCandidates.map(async (member) => {
           const repair = await fb.repairMemberProgramCompletionReward(member.uid, {
             programCompletion: rewardSettings && rewardSettings.mp && rewardSettings.mp.programCompletion,
             levels: rewardSettings && rewardSettings.levels
           });
-          if (!repair || !repair.repaired) continue;
+          return { member, repair };
+        }));
+        let repairedBonuses = 0;
+        repairResults.forEach(({ member, repair }) => {
+          if (!repair || !repair.repaired) return;
           repairedBonuses += 1;
           member.rewards = repair.rewards;
           member.workspaceProgress = Object.assign({}, member.workspaceProgress || {}, { rewards: repair.rewards });
-        }
+        });
         spAllMembers = members;
         spPopulateCohortFilter();
         lbMaxScoreCache = null;
-        try { caCohortDetailsCache = (await fb.getCohortDetails?.()) || {}; } catch (_) { caCohortDetailsCache = {}; }
+        caCohortDetailsCache = cohortDetailsResult.status === 'fulfilled' ? (cohortDetailsResult.value || {}) : {};
         const controls = document.getElementById('spControls');
         if (controls) controls.hidden = false;
         spApplyView();
@@ -8890,7 +9129,10 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       if (options.replace) window.history.replaceState({}, '', url);
       else window.history.pushState({}, '', url);
 
-      if (activeTab === 'student-progress') loadStudentProgress();
+      if (activeTab === 'student-progress') {
+        loadStudentProgress();
+        loadEngagementInsights();
+      }
       if (activeTab === 'rewards') loadRewardSettings();
       if (activeTab === 'member-management' && !mbMembersCache.length) mbLoadMembers();
       if (activeTab === 'engagement') loadEngagementSettings();
@@ -9188,6 +9430,14 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       if (spAllMembers.length) renderLeaderboard();
     });
     document.getElementById('caRefresh')?.addEventListener('click', loadStudentProgress);
+    document.getElementById('eiRefresh')?.addEventListener('click', loadEngagementInsights);
+    document.getElementById('eiGlossaryToggle')?.addEventListener('click', function () {
+      const glossary = document.getElementById('eiGlossary');
+      if (!glossary) return;
+      glossary.hidden = !glossary.hidden;
+      this.textContent = glossary.hidden ? 'How engagement metrics work' : 'Hide metric explanations';
+      this.setAttribute('aria-expanded', String(!glossary.hidden));
+    });
     document.getElementById('caDetailBack')?.addEventListener('click', hideCohortDetail);
     document.getElementById('caExportCsv')?.addEventListener('click', caExportCsv);
     document.getElementById('caExportPdf')?.addEventListener('click', caExportPdf);

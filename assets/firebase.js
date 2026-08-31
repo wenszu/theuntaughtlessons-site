@@ -681,6 +681,89 @@ async function saveUserProgress(exerciseId, exerciseName, exercisePayload = {}) 
     lastSeenAt: serverTimestamp(),
     updatedAt: serverTimestamp()
   }, { merge: true });
+  window.dispatchEvent(new CustomEvent("utl:activity-completed", { detail: { activityId: exerciseId, activityTitle: exerciseName } }));
+}
+
+function analyticsText(value, max = 160) {
+  return String(value || "").trim().slice(0, max);
+}
+
+function analyticsSeconds(value) {
+  return Math.max(0, Math.min(43200, Math.round(Number(value) || 0)));
+}
+
+function analyticsCount(value) {
+  return Math.max(0, Math.min(10000, Math.round(Number(value) || 0)));
+}
+
+function normalizedAnalyticsPayload(input = {}) {
+  return {
+    schemaVersion: 1,
+    sessionId: analyticsText(input.sessionId, 100),
+    startedAtClient: analyticsText(input.startedAtClient, 40),
+    updatedAtClient: analyticsText(input.updatedAtClient, 40),
+    lastMeaningfulAtClient: analyticsText(input.lastMeaningfulAtClient, 40),
+    lastMeaningfulAtMs: Math.max(0, Math.round(Number(input.lastMeaningfulAtMs) || 0)),
+    elapsedSeconds: analyticsSeconds(input.elapsedSeconds),
+    activeSeconds: analyticsSeconds(input.activeSeconds),
+    idleSeconds: analyticsSeconds(input.idleSeconds),
+    hiddenSeconds: analyticsSeconds(input.hiddenSeconds),
+    meaningfulInteractions: Math.max(0, Math.min(100000, Math.round(Number(input.meaningfulInteractions) || 0))),
+    deviceClass: ["mobile", "tablet", "desktop"].includes(input.deviceClass) ? input.deviceClass : "desktop",
+    pagePath: analyticsText(input.pagePath, 240),
+    activityId: analyticsText(input.activityId, 100),
+    activityType: analyticsText(input.activityType, 40),
+    activityTitle: analyticsText(input.activityTitle, 160),
+    lastStepId: analyticsText(input.lastStepId, 100),
+    progressPercent: Math.max(0, Math.min(100, Math.round(Number(input.progressPercent) || 0))),
+    completed: input.completed === true,
+    resumed: input.resumed === true,
+    exitReason: ["", "pagehide", "completed"].includes(input.exitReason) ? input.exitReason : "",
+    endedAtClient: analyticsText(input.endedAtClient, 40),
+    helpOpenedCount: analyticsCount(input.helpOpenedCount),
+    validationErrorCount: analyticsCount(input.validationErrorCount),
+    submitCount: analyticsCount(input.submitCount),
+    restartCount: analyticsCount(input.restartCount),
+    lastEventName: ["activity_opened", "working_started", "help_opened", "validation_failed", "submitted", "restarted", "completed"].includes(input.lastEventName) ? input.lastEventName : "activity_opened",
+    receivedAt: serverTimestamp()
+  };
+}
+
+async function saveEngagementAnalytics(payload = {}) {
+  if (experiencePreviewActive()) return { saved: false, reason: "preview" };
+  const user = await getSignedInUser();
+  if (!user?.uid) return { saved: false, reason: "signed-out" };
+  const session = normalizedAnalyticsPayload(payload.session || {});
+  const activity = normalizedAnalyticsPayload(payload.activity || {});
+  const sessionId = analyticsText(session.sessionId, 100);
+  const activitySessionId = analyticsText(payload.activity?.activitySessionId, 100);
+  if (!sessionId || !activitySessionId || !activity.activityId) return { saved: false, reason: "invalid" };
+  await Promise.all([
+    setDoc(doc(requireFirestore(), "users", user.uid, "analytics_sessions", sessionId), Object.assign({ userId: user.uid }, session), { merge: true }),
+    setDoc(doc(requireFirestore(), "users", user.uid, "analytics_activity_sessions", activitySessionId), Object.assign({ userId: user.uid, activitySessionId }, activity), { merge: true })
+  ]);
+  return { saved: true, sessionId };
+}
+
+async function getAllEngagementAnalytics(memberUids = []) {
+  const readyDb = requireFirestore();
+  const user = await getSignedInUser();
+  if (!user) throw new Error("An administrator session is required.");
+  const uids = [...new Set((memberUids || []).map((uid) => analyticsText(uid, 128)).filter(Boolean))];
+  if (!uids.length) return { sessions: [], activities: [] };
+  const results = await Promise.all(uids.map(async (uid) => {
+    const [sessionsSnapshot, activitiesSnapshot] = await Promise.all([
+      getDocs(collection(readyDb, "users", uid, "analytics_sessions")),
+      getDocs(collection(readyDb, "users", uid, "analytics_activity_sessions"))
+    ]);
+    const withUid = (entry) => Object.assign({ uid, id: entry.id }, entry.data() || {});
+    return { sessions: sessionsSnapshot.docs.map(withUid), activities: activitiesSnapshot.docs.map(withUid) };
+  }));
+  return results.reduce((all, result) => {
+    all.sessions.push(...result.sessions);
+    all.activities.push(...result.activities);
+    return all;
+  }, { sessions: [], activities: [] });
 }
 
 async function saveAssessmentItemAttempt(attemptPayload = {}) {
@@ -724,14 +807,16 @@ async function getAllMemberWorkspaceProgress() {
   if (!user) {
     throw new Error("No Firebase session found. Sign in with your Google account through the member workspace, then return to this page.");
   }
-  const membersSnapshot = await getDocs(collection(readyDb, "authorized_members"));
-  let usersSnapshot = null;
-  let usersReadError = null;
-  try {
-    usersSnapshot = await getDocs(query(collection(readyDb, "users")));
-  } catch (error) {
-    usersReadError = error;
-  }
+  // These are independent collection reads. Starting them together avoids paying
+  // both network round trips serially while retaining the users-read fallback.
+  const [membersSnapshot, usersResult] = await Promise.all([
+    getDocs(collection(readyDb, "authorized_members")),
+    getDocs(query(collection(readyDb, "users")))
+      .then((snapshot) => ({ snapshot, error: null }))
+      .catch((error) => ({ snapshot: null, error }))
+  ]);
+  const usersSnapshot = usersResult.snapshot;
+  const usersReadError = usersResult.error;
 
   const membersByEmail = new Map();
   membersSnapshot.forEach((memberDoc) => {
@@ -1249,6 +1334,7 @@ export {
   logMemberSupportPreview,
   findUserUidByEmail,
   getAllMemberWorkspaceProgress,
+  getAllEngagementAnalytics,
   getCohortDetails,
   setCohortDetails,
   renameCohort,
@@ -1276,6 +1362,7 @@ export {
   sendSignInInvite,
   sendSignInLinkToEmail,
   saveUserProgress,
+  saveEngagementAnalytics,
   saveAssessmentItemAttempt,
   getAssessmentVisibility,
   getAdminVisibilitySettings,

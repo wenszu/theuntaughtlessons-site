@@ -1891,6 +1891,7 @@
 
     let state = blankState();
     let currentScreen = 1;
+    const analyticsStep = (stepId, progressPercent) => window.dispatchEvent(new CustomEvent("utl:activity-step", { detail: { stepId, progressPercent } }));
     let openArgument = 0;
     let timerStarted = false;
     let timerRunning = false;
@@ -2272,6 +2273,7 @@
       updateFromDom();
       const requirements = completionRequirements();
       if (requirements.missingArguments || requirements.missingDetails) {
+        analyticsStep("complete-structure", 75);
         renderProgress();
         const pieces = [];
         if (requirements.missingArguments) pieces.push(`${requirements.missingArguments} argument heading${requirements.missingArguments === 1 ? "" : "s"}`);
@@ -2288,6 +2290,7 @@
         return;
       }
       const score = renderFeedback();
+      analyticsStep("review-tree", 90);
       saveResult('issue-tree', 2, 'Issue tree builder', elapsedSeconds(), {
         score,
         ...issueTreePayload()

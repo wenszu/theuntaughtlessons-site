@@ -1125,6 +1125,7 @@
 
     let state = blankState();
     let currentScreen = 1;
+    const analyticsStep = (stepId, progressPercent) => window.dispatchEvent(new CustomEvent("utl:activity-step", { detail: { stepId, progressPercent } }));
     let activeWordField = null;
     let timerStarted = false;
     let timerRunning = false;
@@ -1705,6 +1706,7 @@
       save();
       $$(".screen").forEach((el, index) => el.classList.toggle("active", index + 1 === screen));
       if (screen === 3) { pauseTimer(); $("#sampleMount").innerHTML = ""; renderReview(); }
+      analyticsStep(screen === 3 ? "review-scqa" : "build-scqa", screen === 3 ? 75 : 15);
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
@@ -1921,6 +1923,7 @@
         return;
       }
       if (!state.completedOnce) {
+        analyticsStep("save-scqa", 95);
         saveResult("scqa-builder", 2, "SCQA builder", elapsedSeconds(), {
           context: state.context,
           scqa1: scqaResponse()

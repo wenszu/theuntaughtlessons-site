@@ -96,6 +96,9 @@ function mountExperiencePreviewBanner() {
 const slug = appSlug();
 const phase = APP_PHASES[slug];
 
+// Shared engagement instrumentation for every guarded exercise.
+import("./engagement-analytics.js").catch((error) => console.warn("Engagement analytics could not start.", error));
+
 if (phase && !hasMemberSession()) {
   redirect("signin");
 } else if (phase && !hasPhaseAccess(phase)) {

@@ -18,6 +18,35 @@ service cloud.firestore {
       );
     }
 
+    function validAnalyticsSeconds(value) {
+      return value is int && value >= 0 && value <= 43200;
+    }
+
+    function validAnalyticsCommon(userId) {
+      return request.resource.data.userId == userId &&
+        request.resource.data.schemaVersion == 1 &&
+        request.resource.data.sessionId is string && request.resource.data.sessionId.size() >= 8 && request.resource.data.sessionId.size() <= 100 &&
+        request.resource.data.lastMeaningfulAtMs is int && request.resource.data.lastMeaningfulAtMs >= 0 &&
+        validAnalyticsSeconds(request.resource.data.elapsedSeconds) &&
+        validAnalyticsSeconds(request.resource.data.activeSeconds) &&
+        validAnalyticsSeconds(request.resource.data.idleSeconds) &&
+        validAnalyticsSeconds(request.resource.data.hiddenSeconds) &&
+        request.resource.data.meaningfulInteractions is int && request.resource.data.meaningfulInteractions >= 0 && request.resource.data.meaningfulInteractions <= 100000 &&
+        request.resource.data.progressPercent is int && request.resource.data.progressPercent >= 0 && request.resource.data.progressPercent <= 100 &&
+        request.resource.data.deviceClass in ['mobile', 'tablet', 'desktop'] &&
+        request.resource.data.activityId is string && request.resource.data.activityId.size() <= 100 &&
+        request.resource.data.activityTitle is string && request.resource.data.activityTitle.size() <= 160 &&
+        request.resource.data.lastStepId is string && request.resource.data.lastStepId.size() <= 100 &&
+        request.resource.data.completed is bool && request.resource.data.resumed is bool &&
+        request.resource.data.exitReason in ['', 'pagehide', 'completed'] &&
+        request.resource.data.helpOpenedCount is int && request.resource.data.helpOpenedCount >= 0 && request.resource.data.helpOpenedCount <= 10000 &&
+        request.resource.data.validationErrorCount is int && request.resource.data.validationErrorCount >= 0 && request.resource.data.validationErrorCount <= 10000 &&
+        request.resource.data.submitCount is int && request.resource.data.submitCount >= 0 && request.resource.data.submitCount <= 10000 &&
+        request.resource.data.restartCount is int && request.resource.data.restartCount >= 0 && request.resource.data.restartCount <= 10000 &&
+        request.resource.data.lastEventName in ['activity_opened', 'working_started', 'help_opened', 'validation_failed', 'submitted', 'restarted', 'completed'] &&
+        request.resource.data.receivedAt == request.time;
+    }
+
     function isAdmin() {
       return signedInWithEmail() &&
         (
@@ -93,6 +122,34 @@ service cloud.firestore {
     match /users/{userId}/completed_exercises/{exerciseId} {
       allow read: if (signedIn() && request.auth.uid == userId) || isAdmin();
       allow write: if (signedIn() && request.auth.uid == userId) || isAdmin();
+    }
+
+    match /users/{userId}/analytics_sessions/{sessionId} {
+      allow read: if (signedIn() && request.auth.uid == userId) || isAdmin();
+      allow create, update: if signedIn() && request.auth.uid == userId &&
+        request.resource.data.keys().hasOnly([
+          'userId', 'schemaVersion', 'sessionId', 'startedAtClient', 'updatedAtClient',
+          'lastMeaningfulAtClient', 'lastMeaningfulAtMs', 'elapsedSeconds', 'activeSeconds',
+          'idleSeconds', 'hiddenSeconds', 'meaningfulInteractions', 'deviceClass', 'pagePath',
+          'activityId', 'activityType', 'activityTitle', 'lastStepId', 'progressPercent',
+          'completed', 'resumed', 'exitReason', 'endedAtClient', 'helpOpenedCount',
+          'validationErrorCount', 'submitCount', 'restartCount', 'lastEventName', 'receivedAt'
+        ]) && request.resource.data.sessionId == sessionId && validAnalyticsCommon(userId);
+      allow delete: if false;
+    }
+
+    match /users/{userId}/analytics_activity_sessions/{activitySessionId} {
+      allow read: if (signedIn() && request.auth.uid == userId) || isAdmin();
+      allow create, update: if signedIn() && request.auth.uid == userId &&
+        request.resource.data.keys().hasOnly([
+          'userId', 'activitySessionId', 'schemaVersion', 'sessionId', 'startedAtClient', 'updatedAtClient',
+          'lastMeaningfulAtClient', 'lastMeaningfulAtMs', 'elapsedSeconds', 'activeSeconds',
+          'idleSeconds', 'hiddenSeconds', 'meaningfulInteractions', 'deviceClass', 'pagePath',
+          'activityId', 'activityType', 'activityTitle', 'lastStepId', 'progressPercent',
+          'completed', 'resumed', 'exitReason', 'endedAtClient', 'helpOpenedCount',
+          'validationErrorCount', 'submitCount', 'restartCount', 'lastEventName', 'receivedAt'
+        ]) && request.resource.data.activitySessionId == activitySessionId && validAnalyticsCommon(userId);
+      allow delete: if false;
     }
 
     match /assessment_item_attempts/{attemptId} {

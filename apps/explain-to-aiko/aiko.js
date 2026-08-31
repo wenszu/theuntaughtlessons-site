@@ -47,6 +47,7 @@ Best, Yutee Elle`;
 
   let practiceDraft = null;
   const pr = { recording: false, finalTranscript: '', interimTranscript: '', recognition: null, startTime: 0, durationSeconds: 0, rafId: 0, usedEstimate: false, targetSeconds: 120 };
+  const analyticsStep = (stepId, progressPercent) => window.dispatchEvent(new CustomEvent('utl:activity-step', { detail: { stepId, progressPercent } }));
 
   function readPracticeWorkspaces() {
     try {
@@ -180,6 +181,7 @@ Best, Yutee Elle`;
     return `<div class="aiko-note-grid">${state.sectionNotes.map((note, index) => `<label class="aiko-note-card"><span class="aiko-field-label">Section ${index + 1}</span><input class="aiko-note-title" data-note-title="${index}" value="${escapeHtml(note.title)}"><textarea class="aiko-note-body" data-note-body="${index}" placeholder="Type your answer here.">${escapeHtml(note.body)}</textarea></label>`).join('')}</div>`;
   }
   function renderPreparation() {
+    analyticsStep('prepare-talk', 15);
     const sixty = mode === '60';
     const headIntro = sixty
       ? 'You already explained this in 120 seconds. Now imagine Aiko is in a rush and only has 60 seconds to listen. Keep your single most important point and your strongest reason. Everything else has to go, even if it feels important.'
@@ -203,6 +205,7 @@ Best, Yutee Elle`;
     return `<aside class="aiko-prep-reference"><div class="aiko-prep-reference-head"><h3>Your preparation notes</h3><button class="aiko-text-button" id="editPrepNotes" type="button">Edit notes</button></div>${notes.length ? `<div class="aiko-prep-reference-grid">${notes.map((note) => `<section><strong>${escapeHtml(note.title || 'Section')}</strong><p>${escapeHtml(note.body || 'No notes added.')}</p></section>`).join('')}</div>` : '<p class="aiko-prep-empty">No notes entered. You can go back and add them before recording.</p>'}</aside>`;
   }
   function renderRecording() {
+    analyticsStep('record-talk', 45);
     shell(`<section class="aiko-panel"><div class="aiko-panel-head"><p class="aiko-progress">Step 2 · Record · ${TARGET_SECONDS} seconds</p><h2>Deliver your explanation.</h2><p>Use your preparation notes below. Tap the microphone and speak as if Aiko is listening. Your words appear live, and recording stops at ${TARGET_SECONDS} seconds.</p></div><div class="aiko-step">${preparationReferenceHtml()}<div id="recordPath"><div class="aiko-recorder"><div class="aiko-ring"><svg width="220" height="220" viewBox="0 0 210 210" aria-hidden="true"><circle class="aiko-ring-track" cx="105" cy="105" r="98"></circle><circle class="aiko-ring-fill" id="ringFill" cx="105" cy="105" r="98"></circle></svg><button class="aiko-mic" id="micButton" type="button" aria-label="Start recording"><svg id="micIcon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2z"/></svg><span class="aiko-timer" id="timerLabel">${formatDuration(TARGET_SECONDS)}</span><span id="micState">Start recording</span></button></div><p class="aiko-rec-hint" id="recordHint">Your browser will ask for microphone access after you tap.</p></div><div class="aiko-transcript" id="liveTranscript"><span class="placeholder">Your words will appear here as you speak…</span></div><div class="aiko-live-metrics"><span>Words <b id="liveWords">0</b></span><span>Pace <b id="liveWpm">–</b> wpm</span><span>Fillers <b id="liveFillers">0</b></span></div></div><div id="pastePath" hidden><div class="aiko-notice">Live transcription is not supported in this browser. Record with any voice-memo app and paste the transcript below. Duration will be clearly labeled as an estimate.</div><label class="aiko-field-label" for="pasteTranscript">Paste your transcript</label><textarea class="aiko-textarea aiko-paste" id="pasteTranscript" placeholder="Paste your explanation transcript..."></textarea></div><div class="aiko-notice error" id="recordError" hidden></div><div class="aiko-actions"><button class="aiko-button secondary" id="prepBack" type="button">Back to prep</button><button class="aiko-button secondary" id="retryButton" type="button" hidden>Record again</button><button class="aiko-button" id="scoreButton" type="button" disabled>Get feedback</button></div>${phoneFallbackHtml()}</div></section>`);
     initializeRecorder();
   }
@@ -273,6 +276,7 @@ Best, Yutee Elle`;
     let transcript = fullTranscript();
     if (!SPEECH_RECOGNITION || document.getElementById('recordPath')?.hidden) { transcript = document.getElementById('pasteTranscript').value.trim(); state.usedEstimate = true; state.durationSeconds = Math.min(TARGET_SECONDS, Math.max(1, Math.round(wordCount(transcript) / 130 * 60))); }
     if (wordCount(transcript) < 5) return;
+    analyticsStep(state.usedEstimate ? 'submit-transcript' : 'submit-recording', 70);
     const duration = Math.max(1, Math.round(state.durationSeconds)); const wpm = Math.round(wordCount(transcript) / duration * 60); const fillers = fillerCount(transcript);
     state.submitted = { transcript, durationSeconds: duration, wpm, fillerCount: fillers, priorTranscript: mode === '60' ? readPriorTranscript() : '' };
     renderLoading();
@@ -294,6 +298,7 @@ Best, Yutee Elle`;
   }
   const LEVELS = [{ name: 'Foundational', range: '0–14' }, { name: 'Developing', range: '15–22' }, { name: 'Strong', range: '23–27' }, { name: 'Executive-ready', range: '28–30' }];
   function renderResults() {
+    analyticsStep('review-feedback', 85);
     const result = state.score || { fallback: true }; const fallback = result.fallback === true;
     const scoreHtml = fallback ? `<div class="aiko-notice"><strong>AI feedback is unavailable right now.</strong> Your recording and measured delivery details are safe. You can still save and complete this exercise, or try feedback again later.</div>` : `<div class="aiko-score"><div class="aiko-score-total">${Number(result.total) || 0}<span>/30</span></div><div><span class="aiko-level">${escapeHtml(result.level)}</span><p class="aiko-summary">${escapeHtml(result.summary)}</p></div></div><div class="aiko-levels">${LEVELS.map((level) => `<div class="aiko-level-cell ${level.name === result.level ? 'is-current' : ''}"><strong>${level.name}</strong>${level.range}</div>`).join('')}</div><h3 class="aiko-section-title">How you scored</h3><p class="aiko-muted">Each criterion uses a quote from your own transcript.</p><div class="aiko-criteria">${(result.criteria || []).map((criterion) => `<article class="aiko-criterion"><div class="aiko-criterion-head"><h4>${escapeHtml(criterion.name)}</h4><span class="aiko-criterion-score">${Number(criterion.score) || 1}/5</span></div><div class="aiko-evidence">“${escapeHtml(criterion.evidence)}”</div><p class="aiko-improve"><strong>Try next:</strong> ${escapeHtml(criterion.feedback)}</p></article>`).join('')}</div><h3 class="aiko-section-title">What Aiko would still ask</h3><ul class="aiko-missed">${(result.missed || []).length ? result.missed.map((item) => `<li>${escapeHtml(item)}</li>`).join('') : '<li>You covered the core questions Aiko would ask.</li>'}</ul><h3 class="aiko-section-title">A 5/5 opening for your talk</h3><p class="aiko-opening">${escapeHtml(result.exemplar_opening)}</p>`;
     const s = state.submitted;
@@ -304,6 +309,7 @@ Best, Yutee Elle`;
   }
 
   async function saveResult() {
+    analyticsStep('save-explanation', 95);
     const button = document.getElementById('saveResult'); const status = document.getElementById('saveStatus'); button.disabled = true; button.textContent = 'Saving…';
     const score = state.score || { fallback: true }; const aiSummary = score.fallback ? 'AI feedback unavailable; exercise saved with measured delivery metrics.' : `${score.summary || ''} Total: ${score.total}/30 (${score.level}).`;
     const payload = {

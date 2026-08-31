@@ -361,9 +361,10 @@
   }
 
   function awardCompletionExercise(options) {
-    if (readSettings().enabled === false) return { awarded: false, reason: "rewards-disabled", state: readState() };
     const appId = options && options.appId;
     if (!appId) return { awarded: false, reason: "missing-app-id" };
+    window.dispatchEvent(new CustomEvent("utl:activity-completed", { detail: { activityId: appId, activityTitle: options.title || "Exercise complete" } }));
+    if (readSettings().enabled === false) return { awarded: false, reason: "rewards-disabled", state: readState() };
     if (readState().earnedEventIds[`legacy-exercise:${appId}`]) {
       return { awarded: false, reason: "already-awarded", state: readState() };
     }
@@ -380,9 +381,10 @@
   }
 
   function awardReflectionExercise(options) {
-    if (readSettings().enabled === false) return { awarded: false, reason: "rewards-disabled", state: readState() };
     const appId = options && options.appId;
     if (!appId) return { awarded: false, reason: "missing-app-id" };
+    window.dispatchEvent(new CustomEvent("utl:activity-completed", { detail: { activityId: appId, activityTitle: options.title || "Reflection saved" } }));
+    if (readSettings().enabled === false) return { awarded: false, reason: "rewards-disabled", state: readState() };
     if (readState().earnedEventIds[`legacy-exercise:${appId}`]) {
       return { awarded: false, reason: "already-awarded", state: readState() };
     }
@@ -399,9 +401,10 @@
   }
 
   function awardAssessment(options) {
-    if (readSettings().enabled === false) return { awarded: false, reason: "rewards-disabled", state: readState() };
     const assessmentId = options && options.assessmentId;
     if (!assessmentId) return { awarded: false, reason: "missing-assessment-id" };
+    window.dispatchEvent(new CustomEvent("utl:activity-completed", { detail: { activityId: "assessment-" + assessmentId, activityTitle: options.title || "Assessment complete" } }));
+    if (readSettings().enabled === false) return { awarded: false, reason: "rewards-disabled", state: readState() };
     const result = awardEvent({
       eventId: `assessment-completed:${assessmentId}`,
       type: "assessment-completed",

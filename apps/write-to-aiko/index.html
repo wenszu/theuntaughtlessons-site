@@ -731,6 +731,7 @@ Yutee Elle</div>
       const statusEl = document.getElementById('writeToAikoStatus');
       const openText = document.getElementById('writeToAikoOpenText');
       const structuredFields = Array.prototype.slice.call(document.querySelectorAll('[data-structured-field]'));
+      const analyticsStep = (stepId, progressPercent) => window.dispatchEvent(new CustomEvent('utl:activity-step', { detail: { stepId, progressPercent } }));
 
       function wordCount(text) {
         const words = text.trim().match(/\b[\w'-]+\b/g);
@@ -885,6 +886,7 @@ Yutee Elle</div>
           panel.classList.toggle('is-active', panel.dataset.modePanel === mode);
         });
         updateCounts();
+        analyticsStep(mode === 'open' ? 'draft-open-email' : 'draft-structured-email', 25);
       }
 
       document.getElementById('writeToAikoScqaToggle').addEventListener('click', (event) => {
@@ -899,6 +901,7 @@ Yutee Elle</div>
         const isOpen = sample.classList.toggle('is-open');
         event.currentTarget.textContent = isOpen ? 'Hide sample answer ↑' : 'Show sample answer ↓';
         event.currentTarget.setAttribute('aria-expanded', String(isOpen));
+        if (isOpen) analyticsStep('review-sample', 35);
       });
 
       document.querySelectorAll('.write-to-aiko-toggle').forEach((button) => {
@@ -927,6 +930,7 @@ Yutee Elle</div>
         }
 
         submitBtn.disabled = true;
+        analyticsStep('save-email', 90);
         submitBtn.textContent = 'Saving...';
         statusEl.textContent = '';
 

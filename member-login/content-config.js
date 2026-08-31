@@ -37,7 +37,7 @@ const UTL_CONTENT = {
     lessons: [
       { id: "p1-l1", title: "KonMari for the cluttered mind", duration: "9 min 35 sec", videoUrl: "https://drive.google.com/file/d/1JogKtDiCfhNjNckFLhOEJCCw7gh7eORq/view?usp=sharing", description: "Apply the declutter-and-keep-what-matters method to your own messy thinking before you write or speak." },
       { id: "p1-l2", title: "Rule of three", duration: "8 min 26 sec", videoUrl: "https://drive.google.com/open?id=1fFBBPC0JbHf1IPeHIz_9yKrp173coxJM&usp=drive_copy", description: "Group your points into threes so they are easier to remember, follow, and act on." },
-      { id: "p1-l3", title: "Bolded summary phrases (BSP)", duration: "8 min 21 sec", videoUrl: "https://drive.google.com/open?id=1ZSKGHTUSZs2T3g3aTMgQ9fk9lHg_fN34&usp=drive_copy", description: "Write a one-line bolded takeaway for every section so a skimming reader still gets the point." }
+      { id: "p1-l3", title: "Bolded Summary Phrase (BSP)", duration: "8 min 21 sec", videoUrl: "https://drive.google.com/open?id=1ZSKGHTUSZs2T3g3aTMgQ9fk9lHg_fN34&usp=drive_copy", description: "Write a one-line bolded takeaway for every section so a skimming reader still gets the point." }
     ],
     introContexts: [
       {
@@ -469,6 +469,15 @@ const UTL_CONTENT = {
     if (inPhasePracticeRoot()) return "../../../assets/firebase.js" + version;
     return (inAdminRoot() ? "../assets/firebase.js" : "../assets/firebase.js") + version;
   }
+
+  function engagementAnalyticsHref() {
+    if (inPhasePracticeRoot()) return "../../../assets/engagement-analytics.js?v=20260831-phase2-part2";
+    return "../assets/engagement-analytics.js?v=20260831-phase2-part2";
+  }
+
+  if (!inAdminRoot()) import(engagementAnalyticsHref()).catch(function (error) {
+    console.warn("Engagement analytics could not start.", error);
+  });
 
   function rewardUiHref() {
     var version = "?v=20260803-written-reflection-1";
@@ -3623,6 +3632,8 @@ const UTL_CONTENT = {
       button.addEventListener("click", function () {
         var wasRewatch = !!button.closest("#wsRewatch");
         sessionStorage.setItem("utl_active_lesson_" + phaseKey, button.getAttribute("data-lesson-id"));
+        var selectedLesson = orderedLessons(phaseKey).find(function (item) { return item.id === button.getAttribute("data-lesson-id"); });
+        window.UTLEngagementAnalytics?.setActivity({ activityId: button.getAttribute("data-lesson-id"), activityType: "video", activityTitle: selectedLesson ? selectedLesson.title : "Lesson video" });
         renderPhasePage(phaseKey);
         if (wasRewatch) {
           setTimeout(function () {
@@ -3645,6 +3656,7 @@ const UTL_CONTENT = {
         var reward = null;
         writeBool(key, nowWatched);
         if (nowWatched) {
+          window.dispatchEvent(new CustomEvent("utl:activity-completed", { detail: { activityId: lessonId, activityTitle: lesson ? lesson.title : "Lesson video" } }));
           reward = awardRewardEvent({
             id: "video:" + lessonId,
             type: "video-completed",

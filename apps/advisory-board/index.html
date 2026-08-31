@@ -411,6 +411,7 @@
     let selectedRoles = new Set(['jobs', 'user', 'operator']);
     let decisionMakerId = 'operator';
     let structuredResponse = null;
+    const analyticsStep = (stepId, progressPercent) => window.dispatchEvent(new CustomEvent('utl:activity-step', { detail: { stepId, progressPercent } }));
 
     const $ = id => document.getElementById(id);
     const escapeHtml = value => String(value || '').replace(/[&<>'"]/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' })[character]);
@@ -433,6 +434,8 @@
       $('journeyName').textContent = stages[currentScreen - 1][0];
       $('journeyPurpose').textContent = stages[currentScreen - 1][1];
       renderDots();
+      const analyticsStages = [['understand-approach', 10], ['build-board', 40], ['hear-board', 70]];
+      analyticsStep(analyticsStages[currentScreen - 1][0], analyticsStages[currentScreen - 1][1]);
       window.scrollTo({ top: 0, behavior: 'smooth' });
       const heading = document.querySelector(`.screen[data-screen="${currentScreen}"] h1`);
       if (heading) { heading.tabIndex = -1; setTimeout(() => heading.focus({ preventScroll: true }), 350); }
@@ -652,6 +655,7 @@
         return;
       }
       $('completionError').textContent = '';
+      analyticsStep('record-decision', 90);
       event.currentTarget.disabled = true;
       event.currentTarget.textContent = 'Saving...';
       await saveProgress();
