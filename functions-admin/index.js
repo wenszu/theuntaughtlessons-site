@@ -29,6 +29,13 @@ const EXERCISE_ALIASES = {
   "explain-to-aiko-120": "p2-e5", "explain-to-aiko-60": "p2-e6", "eisenhower-matrix": "p3-e1",
   "i-have-bad-news": "p3-e2", "lets-switch-hats": "p3-e3", "speak-like-obama": "p3-e4"
 };
+const COHORT_LESSONS = [
+  "p1-l1", "p1-l2", "p1-l3", "p1-l4", "p1-l5", "p2-l1", "p2-l3",
+  "p3-l1", "p3-l2", "p3-l3", "p3-l4", "p3-l5"
+];
+const COHORT_MINIMUM_SIZE = 5;
+const COHORT_STANDING_CACHE_MS = 30000;
+const cohortStandingCache = new Map();
 
 function newCredentialId() {
   const bytes = crypto.randomBytes(12);
@@ -148,6 +155,121 @@ async function issueCredentialForUser(uid, email, fallbackName, options = {}) {
 exports.issueVerifiedCredential = onCall({ timeoutSeconds: 30, memory: "256MiB" }, async (request) => {
   const caller = await requireVerifiedCaller(request);
   return issueCredentialForUser(caller.uid, caller.email, request.auth.token.name, { throwOnIneligible: true });
+});
+
+function cohortProgress(data) {
+  const workspace = data && data.workspaceProgress || {};
+  const orientationDone = workspace.orientation && workspace.orientation.ready === true ? 1 : 0;
+  const lessons = workspace.lessons || {};
+  const exercises = workspace.exercises || {};
+  const lessonDone = COHORT_LESSONS.filter((id) => lessons[id] && lessons[id].watched === true).length;
+  const exerciseDone = REQUIRED_EXERCISES.filter((id) => exercises[id] && exercises[id].completed === true).length;
+  const done = orientationDone + lessonDone + exerciseDone;
+  const total = 1 + COHORT_LESSONS.length + REQUIRED_EXERCISES.length;
+  return { done, total, percent: total ? Math.round(done / total * 100) : 0 };
+}
+
+function cohortReward(data) {
+  const workspace = data && data.workspaceProgress || {};
+  const rewards = data && data.rewards || workspace.rewards || {};
+  return {
+    mp: Math.max(0, Math.round(Number(rewards.mpTotal || rewards.masteryPoints || 0))),
+    level: String(rewards.currentLevel || rewards.level || "Intern").slice(0, 40)
+  };
+}
+
+function rankCohort(entries, metric) {
+  const key = metric === "mp" ? "mp" : "percent";
+  entries.sort((a, b) => (b[key] - a[key]) || a.uid.localeCompare(b.uid));
+  let previousScore = null;
+  let previousRank = 0;
+  entries.forEach((entry, index) => {
+    const score = entry[key];
+    entry.rank = score === previousScore ? previousRank : index + 1;
+    previousScore = score;
+    previousRank = entry.rank;
+  });
+  return entries;
+}
+
+if (process.env.NODE_ENV === "test") {
+  exports.__cohortStandingTest = { cohortProgress, cohortReward, rankCohort };
+}
+
+exports.getCohortStanding = onCall({ timeoutSeconds: 30, memory: "256MiB" }, async (request) => {
+  const caller = await requireVerifiedCaller(request);
+  const metric = String(request.data && request.data.metric || "completion") === "mp" ? "mp" : "completion";
+  const previewEmail = String(request.data && request.data.previewEmail || "").trim().toLowerCase();
+  if (previewEmail && !(await isAuthorizedAdmin(caller.email))) {
+    throw new HttpsError("permission-denied", "Administrator access is required for support preview.");
+  }
+  const targetEmail = previewEmail || caller.email;
+  const cacheKey = targetEmail + ":" + metric;
+  const cached = cohortStandingCache.get(cacheKey);
+  if (cached && Date.now() - cached.savedAt < COHORT_STANDING_CACHE_MS) return cached.value;
+  const db = admin.firestore();
+  const callerMember = await db.collection("authorized_members").doc(targetEmail).get();
+  if (!callerMember.exists || String(callerMember.data().status || "active").toLowerCase() === "inactive") {
+    throw new HttpsError("permission-denied", "Active member access is required.");
+  }
+  const cohort = String(callerMember.data().cohort || "").trim();
+  if (!cohort) return { ok: true, state: "no-cohort", metric };
+
+  const membersSnap = await db.collection("authorized_members").where("cohort", "==", cohort).get();
+  const cohortEmails = membersSnap.docs.map((document) => String((document.data() || {}).email || document.id || "").trim().toLowerCase()).filter(Boolean);
+  const emailChunks = [];
+  for (let index = 0; index < cohortEmails.length; index += 30) emailChunks.push(cohortEmails.slice(index, index + 30));
+  const userSnapshots = await Promise.all(emailChunks.map((emails) => db.collection("users").where("email", "in", emails).get()));
+  const usersByEmail = new Map();
+  userSnapshots.forEach((snapshot) => snapshot.forEach((document) => {
+      const data = document.data() || {};
+      const email = String(data.email || "").trim().toLowerCase();
+      if (email) usersByEmail.set(email, { uid: document.id, data });
+    }));
+  const entries = [];
+  membersSnap.forEach((document) => {
+    const member = document.data() || {};
+    const email = String(member.email || document.id || "").trim().toLowerCase();
+    const role = String(member.role || "member").trim().toLowerCase();
+    if (String(member.status || "active").toLowerCase() === "inactive" || role === "admin" || role === "owner") return;
+    const user = usersByEmail.get(email);
+    if (!user) return;
+    const progress = cohortProgress(user.data);
+    const reward = cohortReward(user.data);
+    entries.push({ uid: user.uid, email, done: progress.done, total: progress.total, percent: progress.percent, mp: reward.mp, level: reward.level });
+  });
+  if (entries.length < COHORT_MINIMUM_SIZE) return { ok: true, state: "small-cohort", metric, minimumSize: COHORT_MINIMUM_SIZE };
+  const ranked = rankCohort(entries, metric);
+  const callerIndex = ranked.findIndex((entry) => entry.email === targetEmail || (!previewEmail && entry.uid === caller.uid));
+  if (callerIndex < 0) return { ok: true, state: "no-progress", metric };
+  const own = ranked[callerIndex];
+  const key = metric === "mp" ? "mp" : "percent";
+  const tiedCount = ranked.filter((entry) => entry[key] === own[key]).length;
+  const next = ranked.slice(0, callerIndex).reverse().find((entry) => entry[key] > own[key]) || null;
+  const displayRanked = ranked.slice().sort((a, b) => (a.rank - b.rank) || (a.uid === own.uid ? -1 : b.uid === own.uid ? 1 : a.uid.localeCompare(b.uid)));
+  const displayIndex = displayRanked.findIndex((entry) => entry.uid === own.uid);
+  const start = Math.max(0, Math.min(displayIndex - 2, displayRanked.length - 5));
+  const windowEntries = displayRanked.slice(start, Math.min(displayRanked.length, start + 5)).map((entry) => ({
+    rank: entry.rank,
+    isTied: ranked.filter((candidate) => candidate[key] === entry[key]).length > 1,
+    isYou: entry.uid === own.uid,
+    value: entry[key]
+  }));
+  const response = {
+    ok: true,
+    state: "ready",
+    metric,
+    cohortSize: ranked.length,
+    generatedAt: new Date().toISOString(),
+    you: { rank: own.rank, tiedCount, percent: own.percent, mp: own.mp, level: own.level, done: own.done, total: own.total },
+    next: next ? {
+      difference: Math.max(0, next[key] - own[key]),
+      activities: metric === "completion" ? Math.max(1, next.done - own.done + 1) : null
+    } : null,
+    entries: windowEntries
+  };
+  cohortStandingCache.set(cacheKey, { savedAt: Date.now(), value: response });
+  return response;
 });
 
 exports.autoIssueVerifiedCredential = onDocumentWritten({

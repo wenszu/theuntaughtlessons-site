@@ -7,6 +7,7 @@ const UTL_CONTENT = {
       { id: "phases", title: "Think clearly, speak concisely, act confidently.", body: "Each phase pairs a few short videos with hands on exercises. Watch a video, then immediately put it to work on a task set inside Aiko's company. Move through all three phases at your own pace, whenever you have time.", screenshot: { src: "../assets/walkthrough/learning-journey-header-20260816.png", alt: "The Learning Journey page header, with the 6-step progress dots highlighted", capturedOn: "2026-08-16", cutout: { top: "40.11%", left: "83.72%", width: "15.13%", height: "26.37%" } } },
       { id: "dailyGoal", title: "Pick a plan every time you log in.", body: "Each time you come back, we will ask how much time you have today. Choose a quick plan, a focused session, or a deeper dive, and we will line up the right videos and exercises for you. It is an easy way to keep making progress, a little at a time.", screenshot: { src: "../assets/walkthrough/daily-goal-20260816.png", alt: "The Today's Mission plan picker, with the \"Start today's mission\" button highlighted", capturedOn: "2026-08-16", cutout: { top: "73.66%", left: "78.89%", width: "18.27%", height: "7.75%" } } },
       { id: "levels", title: "Earn Mastery Points. Climb the ranks.", body: "You earn Mastery Points, called MP, for almost everything you do. Watching a short video earns about ten MP, finishing an exercise earns more, and completing an assessment earns even more. As your MP add up, you rise from Intern toward Analyst, Associate, Principal, and finally Executive. Keep going and see how high you can climb.", screenshot: { src: "../assets/walkthrough/levels-20260816.png", alt: "The Level and Mastery Points display in the member workspace header", capturedOn: "2026-08-16", cutout: { top: "12.96%", left: "56.21%", width: "26.07%", height: "74.07%" } } },
+      { id: "cohortStanding", title: "See your private cohort standing.", body: "If you are participating in a cohort, select your MP in the header and open Cohort standing. You can compare your total program completion or Mastery Points with your cohort, while every other learner stays anonymous. If you are participating individually, this view does not appear.", screenshot: { src: "../assets/walkthrough/cohort-standing-20260902.png", alt: "The anonymous Cohort standing panel opened from the Mastery Points display", capturedOn: "2026-09-02", cutout: { top: "8.50%", left: "51.50%", width: "44.00%", height: "88.00%" } } },
       { id: "checkpoint", title: "See how far you've come.", body: "After all three phases, you will retake the same kind of assessment, with a new scenario but the same standard. This is where you see, in your own numbers, exactly how far you have come since your Diagnostic." },
       { id: "closing", title: "Let's start with Orientation.", body: "That is the whole picture. Meet Aiko, take your Diagnostic, work through three short phases, and finish with your Checkpoint to see how much you have grown.", cta: "Start Orientation &rarr;" }
     ]
@@ -465,7 +466,7 @@ const UTL_CONTENT = {
   }
 
   function firebaseHref() {
-    var version = "?v=20260827-assessment-visibility-fix";
+    var version = "?v=20260902-cohort-standing-interaction-fix";
     if (inPhasePracticeRoot()) return "../../../assets/firebase.js" + version;
     return (inAdminRoot() ? "../assets/firebase.js" : "../assets/firebase.js") + version;
   }
@@ -480,7 +481,7 @@ const UTL_CONTENT = {
   });
 
   function rewardUiHref() {
-    var version = "?v=20260803-written-reflection-1";
+    var version = "?v=20260902-cohort-standing-tour";
     if (inPhasePracticeRoot()) return "../../../assets/reward-ui.js" + version;
     return (inAdminRoot() ? "../assets/reward-ui.js" : "../assets/reward-ui.js") + version;
   }
@@ -1507,7 +1508,21 @@ const UTL_CONTENT = {
     if (!mount) return;
     ensureRewardUiLoaded().then(function (rewardUi) {
       if (!rewardUi || !qs("#wsRewardCluster")) return;
-      rewardUi.renderCluster(qs("#wsRewardCluster"), { state: readRewardState() });
+      rewardUi.renderCluster(qs("#wsRewardCluster"), {
+        state: readRewardState(),
+        cohortLoader: function (metric) {
+          var previewDetails = experiencePreviewActive() ? experiencePreviewDetails() : {};
+          if (experiencePreviewActive() && (previewDetails.mode !== "member-support" || !previewDetails.memberEmail)) {
+            return Promise.resolve({ state: "unavailable" });
+          }
+          return import(firebaseHref()).then(function (firebaseAuth) {
+            if (!firebaseAuth || typeof firebaseAuth.getCohortStanding !== "function") {
+              throw new Error("The cohort-standing Firebase client is unavailable. Refresh the page to load the latest version.");
+            }
+            return firebaseAuth.getCohortStanding(metric, previewDetails.memberEmail || "");
+          });
+        }
+      });
     });
   }
 

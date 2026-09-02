@@ -1,10 +1,11 @@
 /**
- * Recaptures the four annotated screenshots used inside the welcome walkthrough
+ * Recaptures the five annotated screenshots used inside the welcome walkthrough
  * (member-login/content-config.js -> UTL_CONTENT.welcomeWalkthrough.steps):
  *   - the "diagnostic" step's diagnostic-nudge card
  *   - the "phases" step's Learning Journey header / progress-dots row
  *   - the "dailyGoal" step's Today's Mission plan-picker card
  *   - the "levels" step's header Level/MP reward cluster
+ *   - the "cohortStanding" step's anonymous cohort panel
  *
  * Run this after any redesign of the Learning Journey header, the Program path
  * section, the journey progress dots, the diagnostic nudge card, the Today's
@@ -99,6 +100,58 @@ function pct(part, whole) {
           left: pct(dotsBox.x - headerBox.x, headerBox.width),
           width: pct(dotsBox.width, headerBox.width),
           height: pct(dotsBox.height, headerBox.height)
+        }
+      }
+    });
+  }
+
+  // --- "cohortStanding" step: the anonymized ranking panel opened from MP ---
+  await page.evaluate(() => {
+    const mount = document.querySelector('#wsRewardCluster');
+    window.UTLRewardUI.renderCluster(mount, {
+      state: { mpTotal: 540, streakDays: 2, level: 'Analyst', earnedByType: {} },
+      cohortLoader: async (metric) => ({
+        state: 'ready', metric, cohortSize: 6, generatedAt: new Date().toISOString(),
+        you: { rank: 3, tiedCount: 1, percent: 42, mp: 540, level: 'Analyst', done: 12, total: 29 },
+        next: metric === 'mp' ? { difference: 35 } : { difference: 3, activities: 2 },
+        entries: [
+          { rank: 1, value: metric === 'mp' ? 640 : 55 },
+          { rank: 2, value: metric === 'mp' ? 575 : 48 },
+          { rank: 3, isYou: true, value: metric === 'mp' ? 540 : 42 },
+          { rank: 4, isTied: true, value: metric === 'mp' ? 510 : 35 },
+          { rank: 4, isTied: true, value: metric === 'mp' ? 510 : 35 }
+        ]
+      })
+    });
+    mount.querySelector('[data-utl-reward-tab="cohort"]').click();
+  });
+  await page.waitForSelector('.utl-standing-list', { state: 'attached' });
+  await page.waitForTimeout(200);
+
+  {
+    const panelEl = await page.$('.utl-mp-breakdown.is-cohort-enabled');
+    const panelBox = await panelEl.boundingBox();
+    const padding = 24;
+    const clip = {
+      x: Math.max(0, panelBox.x - 430),
+      y: Math.max(0, panelBox.y - padding),
+      width: Math.min(1000, panelBox.width + 430 + padding),
+      height: Math.min(900, panelBox.height + padding * 2)
+    };
+    const file = `cohort-standing-${DATE_STAMP}.png`;
+    await page.screenshot({ path: path.join(OUT_DIR, file), clip });
+    results.push({
+      step: 'cohortStanding',
+      file,
+      screenshot: {
+        src: `../assets/walkthrough/${file}`,
+        alt: 'The anonymous Cohort standing panel opened from the Mastery Points display',
+        capturedOn: DATE,
+        cutout: {
+          top: pct(panelBox.y - clip.y, clip.height),
+          left: pct(panelBox.x - clip.x, clip.width),
+          width: pct(panelBox.width, clip.width),
+          height: pct(panelBox.height, clip.height)
         }
       }
     });

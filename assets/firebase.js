@@ -127,8 +127,9 @@ authPersistenceReady = setPersistence(auth, browserLocalPersistence).catch((erro
   throw error;
 });
 
+// Emulator routing must be explicit per page load. A persistent localStorage flag
+// can silently strand normal previews on closed emulator ports across accounts.
 const useLocalFirebaseEmulators =
-  window.localStorage.getItem("utl_use_firebase_emulators") === "true" ||
   new URLSearchParams(window.location.search || "").get("emulators") === "true";
 
 if (useLocalFirebaseEmulators) {
@@ -178,6 +179,15 @@ async function getMemberCredentialRegistry() {
   const callable = httpsCallable(functions, "getMemberCredentialRegistry");
   const result = await callable({});
   return result && result.data ? result.data : { ok: true, credentials: [] };
+}
+
+async function getCohortStanding(metric = "completion", previewEmail = "") {
+  const callable = httpsCallable(functions, "getCohortStanding");
+  const result = await callable({
+    metric: metric === "mp" ? "mp" : "completion",
+    previewEmail: String(previewEmail || "").trim().toLowerCase()
+  });
+  return result && result.data ? result.data : { ok: false, state: "unavailable" };
 }
 
 function signInWithEmailPassword(email, password) {
@@ -1330,6 +1340,7 @@ export {
   saveEmailTemplate,
   getMemberExerciseResponses,
   getMemberCredentialRegistry,
+  getCohortStanding,
   getMemberSupportSnapshot,
   logMemberSupportPreview,
   findUserUidByEmail,

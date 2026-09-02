@@ -187,7 +187,9 @@ service cloud.firestore {
     }
 
     match /authorized_members/{email} {
-      allow read: if signedIn();
+      allow read: if isAdmin() || (
+        signedInWithEmail() && request.auth.token.email.lower() == email.lower()
+      );
       allow create, update: if isAdmin() &&
         isCanonicalMemberRecord(email) &&
         (!isBootstrapOwnerEmail(email) || isBootstrapOwner());

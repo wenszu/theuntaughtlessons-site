@@ -153,13 +153,15 @@
       ".utl-reward-cluster.is-counting .utl-reward-mp-number{color:#fff;transform:translateY(-1px) scale(1.08)}",
       ".utl-reward-cluster.is-finished .utl-reward-item.is-emphasis{animation:utlRewardPulse .52s ease}",
       ".utl-reward-popover{position:absolute;right:0;top:calc(100% + 12px);z-index:9990;width:300px;padding:16px 18px;border:1px solid rgba(238,163,32,.42);border-radius:12px;background:#fff;color:#4A4A4A;box-shadow:0 18px 48px rgba(0,51,102,.22);opacity:0;pointer-events:none;transform:translateY(-6px);transition:opacity .16s ease,transform .16s ease;white-space:normal}",
-      ".utl-reward-item:hover .utl-reward-popover,.utl-reward-item:focus-within .utl-reward-popover{opacity:1;transform:translateY(0)}",
+      ".utl-reward-item:hover .utl-reward-popover,.utl-reward-item:focus-within .utl-reward-popover,.utl-reward-item.is-popover-open .utl-reward-popover{opacity:1;pointer-events:auto;transform:translateY(0)}",
       ".utl-reward-popover span{display:block;margin-bottom:6px;color:var(--reward-gold);font:700 10px Lato, Arial, sans-serif;letter-spacing: 0;text-transform: none}",
       ".utl-reward-popover strong{display:block;color:var(--reward-navy);font:700 18px Lato,Arial,sans-serif;line-height:1.18}",
       ".utl-reward-popover p{margin:7px 0 0;color:#4D7094;font:700 13px/1.42 Lato,Arial,sans-serif}",
       ".utl-level-popover{left:0;right:auto;width:360px}.utl-level-track{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr));gap:0;margin:16px 0 0!important;padding:0;list-style:none}.utl-level-step{position:relative;display:grid;justify-items:center;align-content:start;gap:6px;text-align:center}.utl-level-step:before{content:'';position:absolute;left:-50%;right:50%;top:14px;height:3px;background:#D9E1E8}.utl-level-step:first-child:before{display:none}.utl-level-step.is-complete:before,.utl-level-step.is-current:before{background:#EEA320}.utl-level-dot{position:relative;z-index:1;width:30px;height:30px;border:2px solid #BCC9D5;border-radius:999px;background:#fff;color:#7890A8;display:grid!important;place-items:center;margin:0!important;font:700 10px Lato, Arial, sans-serif!important;letter-spacing:0!important}.utl-level-step.is-complete .utl-level-dot{border-color:#EEA320;background:#FFF2D3;color:#003366}.utl-level-step.is-current .utl-level-dot{border-color:#003366;background:#003366;color:#EEA320;box-shadow:0 0 0 4px rgba(238,163,32,.24)}.utl-level-name{margin:0!important;color:#7890A8!important;font:700 10px/1.2 Lato,Arial,sans-serif!important;letter-spacing:0!important;text-transform:none!important}.utl-level-step.is-complete .utl-level-name,.utl-level-step.is-current .utl-level-name{color:#003366!important}.utl-level-threshold{margin:0!important;color:#7890A8!important;font:400 9px/1.2 Lato, Arial, sans-serif!important;letter-spacing:0!important;text-transform:none!important}.utl-level-step.is-current .utl-level-threshold{color:#A86400!important;font-weight:700!important}.utl-level-guidance{margin-top:15px!important;padding:11px 12px;border-radius:8px;background:#FFF8EC;color:#003366!important;font:700 13px/1.4 Lato,Arial,sans-serif!important}",
       ".utl-level-cert-link{display:block;margin-top:10px!important;padding:11px 12px;border-radius:8px;background:#003366;color:#EEA320!important;text-align:center;text-decoration:none!important;font:700 13px/1.4 Lato,Arial,sans-serif!important}",
       ".utl-reward-popover.utl-mp-breakdown{width:350px}.utl-mp-list{display:grid!important;gap:0;margin:12px 0 0!important;padding:0;list-style:none}.utl-mp-list li{display:grid;grid-template-columns:24px 1fr auto;gap:8px;align-items:start;padding:8px 0;border-bottom:1px solid rgba(0,51,102,.09)}.utl-mp-list li:last-child{border-bottom:0}.utl-mp-icon{margin:0!important;color:inherit!important;font:400 16px/1.2 sans-serif!important;letter-spacing:0!important;text-transform:none!important}.utl-mp-copy{margin:0!important;color:#003366!important;font:700 13px/1.25 Lato,Arial,sans-serif!important;letter-spacing:0!important;text-transform:none!important}.utl-mp-copy small{display:block;margin-top:2px;color:#4D7094;font:400 12px/1.3 Lato,Arial,sans-serif}.utl-mp-value{margin:0!important;color:#8A5A00!important;font:700 12px/1.3 Lato, Arial, sans-serif!important;letter-spacing:0!important;text-transform:none!important;white-space:nowrap}.utl-mp-meta{display:grid!important;gap:7px;margin:11px 0 0!important;padding-top:11px;border-top:1px solid rgba(238,163,32,.35)}.utl-mp-meta li{display:grid;grid-template-columns:24px 1fr;gap:8px;color:#4D7094;font:700 12px/1.35 Lato,Arial,sans-serif}.utl-mp-meta b{color:#003366}",
+      ".utl-mp-breakdown.is-cohort-enabled{width:390px;padding:0;overflow:hidden}.utl-reward-tabs{display:grid!important;grid-template-columns:1fr 1fr;margin:0!important;border-bottom:1px solid rgba(0,51,102,.12)}.utl-reward-tab{min-height:43px;border:0;border-bottom:3px solid transparent;background:#F8F5EF;color:#65778A;font:700 11px Lato,Arial,sans-serif;cursor:pointer}.utl-reward-tab.is-active{border-bottom-color:#EEA320;background:#fff;color:#003366}.utl-reward-panel{padding:16px 18px}.utl-reward-panel[hidden]{display:none}.utl-standing-head{display:grid!important;grid-template-columns:1fr auto;gap:5px 12px;align-items:center}.utl-standing-head>span{grid-column:1/-1}.utl-standing-rank{margin:0!important;color:#003366!important;font:700 29px/1 'Playfair Display',serif!important}.utl-standing-score{margin:0!important;padding:5px 9px;border-radius:999px;background:#FFF1CF;color:#8A5A00!important;font:700 11px Lato,Arial,sans-serif!important}.utl-standing-summary{margin-top:8px!important;font-weight:400!important}.utl-standing-toggle{display:grid!important;grid-template-columns:1fr 1fr;gap:4px;margin:13px 0 8px!important;padding:4px;border-radius:8px;background:#F2ECE3}.utl-standing-metric{min-height:34px;border:0;border-radius:6px;background:transparent;color:#65778A;font:700 11px Lato,Arial,sans-serif;cursor:pointer}.utl-standing-metric.is-active{background:#fff;color:#003366;box-shadow:0 1px 4px rgba(0,51,102,.12)}.utl-standing-next{margin:10px 0!important;padding:9px 10px;border:1px solid rgba(238,163,32,.45);border-radius:6px;background:#FFF9EC;color:#4A4A4A!important;font:400 12px/1.4 Lato,Arial,sans-serif!important}.utl-standing-list{display:grid!important;gap:4px;margin:8px 0 0!important;padding:0!important;list-style:none}.utl-standing-row{display:grid;grid-template-columns:38px 1fr auto;gap:8px;align-items:center;min-height:36px;padding:6px 9px;border-radius:7px;background:#F8F6F1;color:#4D7094;font:700 11px Lato,Arial,sans-serif}.utl-standing-row.is-you{background:#003366;color:#fff}.utl-standing-row b{color:inherit}.utl-standing-row em{font-style:normal;color:inherit}.utl-standing-note{margin-top:10px!important;color:#718090!important;font:400 10px/1.4 Lato,Arial,sans-serif!important}.utl-standing-state{padding:20px 4px;text-align:center}.utl-standing-state strong{font-size:16px}.utl-standing-state p{font-weight:400}.utl-standing-refresh{margin-top:12px;min-height:34px;border:1px solid #003366;border-radius:7px;background:#fff;color:#003366;font:700 11px Lato,Arial,sans-serif;cursor:pointer}",
+      ".utl-reward-tab{color:#4D7094;transition:background .15s ease,color .15s ease,border-color .15s ease}.utl-reward-tab:hover{background:#FFF8EC;color:#003366}.utl-reward-tab:focus-visible{position:relative;z-index:1;outline:3px solid rgba(238,163,32,.5);outline-offset:-3px}",
       ".utl-reward-toast{position:fixed;right:22px;top:76px;z-index:10000;width:min(340px,calc(100vw - 44px));display:flex;align-items:flex-start;gap:12px;padding:15px 18px;border:1px solid rgba(238,163,32,.5);border-radius:12px;background:linear-gradient(135deg,#fff 0%,#FFFBF2 100%);color:#003366;box-shadow:0 18px 44px rgba(0,51,102,.22);opacity:0;transform:translateY(-14px) scale(.96);transition:opacity .32s cubic-bezier(.22,.9,.28,1.4),transform .4s cubic-bezier(.22,.9,.28,1.4)}",
       ".utl-reward-toast.is-visible{opacity:1;transform:translateY(0) scale(1)}",
       ".utl-reward-toast-icon{flex:none;width:32px;height:32px;border-radius:999px;background:#FFF1CF;color:#A86400;display:grid;place-items:center;font-size:15px;animation:utlRewardPulse 1.6s ease-in-out .3s 2}",
@@ -204,11 +206,106 @@
     return '<span class="utl-reward-popover" role="tooltip"><span>' + escapeHtml(label) + '</span><strong>' + escapeHtml(title) + '</strong><p>' + escapeHtml(body) + '</p></span>';
   }
 
-  function mpPopoverHtml(title, rules, level) {
+  function mpPopoverHtml(title, rules, level, cohortEnabled) {
     var earningRows = rules.map(function (rule) {
       return '<li><span class="utl-mp-icon" aria-hidden="true">' + rule.icon + '</span><span class="utl-mp-copy">' + escapeHtml(rule.label) + (rule.note ? '<small>' + escapeHtml(rule.note) + '</small>' : '') + '</span><span class="utl-mp-value">' + escapeHtml(rule.value) + '</span></li>';
     }).join("");
-    return '<span class="utl-reward-popover utl-mp-breakdown" role="tooltip"><span>Mastery points</span><strong>' + escapeHtml(title) + '</strong><ul class="utl-mp-list">' + earningRows + '</ul><ul class="utl-mp-meta"><li><span class="utl-mp-icon" aria-hidden="true">&#127941;</span><span><b>Current level</b><br>' + escapeHtml(level) + '</span></li></ul></span>';
+    var progressPanel = '<div class="utl-reward-panel" data-utl-reward-panel="progress"><span>Mastery points</span><strong>' + escapeHtml(title) + '</strong><ul class="utl-mp-list">' + earningRows + '</ul><ul class="utl-mp-meta"><li><span class="utl-mp-icon" aria-hidden="true">&#127941;</span><span><b>Current level</b><br>' + escapeHtml(level) + '</span></li></ul></div>';
+    if (!cohortEnabled) return '<div class="utl-reward-popover utl-mp-breakdown" role="tooltip">' + progressPanel + '</div>';
+    return '<div class="utl-reward-popover utl-mp-breakdown is-cohort-enabled" role="dialog" aria-label="Progress and cohort standing"><div class="utl-reward-tabs" role="tablist"><button class="utl-reward-tab is-active" type="button" role="tab" aria-selected="true" data-utl-reward-tab="progress">My progress</button><button class="utl-reward-tab" type="button" role="tab" aria-selected="false" data-utl-reward-tab="cohort">Cohort standing</button></div>' + progressPanel + '<div class="utl-reward-panel" data-utl-reward-panel="cohort" hidden><div class="utl-standing-state"><strong>Ready when you are</strong><p>Open your anonymous position within your cohort.</p></div></div></div>';
+  }
+
+  function standingStateHtml(title, body, retry) {
+    return '<div class="utl-standing-state"><strong>' + escapeHtml(title) + '</strong><p>' + escapeHtml(body) + '</p>' + (retry ? '<button class="utl-standing-refresh" type="button" data-utl-standing-refresh>Try again</button>' : '') + '</div>';
+  }
+
+  function standingHtml(data) {
+    if (!data || data.state === "unavailable") return standingStateHtml("Standing unavailable", "We could not load your cohort standing right now.", true);
+    if (data.state === "no-cohort") return standingStateHtml("No cohort assigned", "Your standing will appear after an administrator assigns your cohort.");
+    if (data.state === "small-cohort") return standingStateHtml("Standing stays private", "At least " + Number(data.minimumSize || 5) + " eligible learners are needed before rankings appear.");
+    if (data.state === "no-progress") return standingStateHtml("No saved progress yet", "Complete your first required lesson or exercise to enter the standings.");
+    if (data.state !== "ready" || !data.you) return standingStateHtml("Standing unavailable", "We could not load your cohort standing right now.", true);
+    var metric = data.metric === "mp" ? "mp" : "completion";
+    var suffix = metric === "mp" ? " MP" : "%";
+    var tied = Number(data.you.tiedCount || 1) > 1;
+    var rankLabel = (tied ? "Tied #" : "#") + Number(data.you.rank || 0);
+    var rows = (data.entries || []).map(function (entry) {
+      var rowRank = entry.isTied ? "Tied #" + Number(entry.rank || 0) : "#" + Number(entry.rank || 0);
+      return '<li class="utl-standing-row ' + (entry.isYou ? 'is-you' : '') + '"><b>' + rowRank + '</b><span>' + (entry.isYou ? 'You' : 'Cohort member') + '</span><em>' + Number(entry.value || 0) + suffix + '</em></li>';
+    }).join("");
+    var activityCount = data.next && Number(data.next.activities || 1);
+    var next = !data.next ? (tied ? "You share the highest score with " + (Number(data.you.tiedCount) - 1) + " other cohort member" + (Number(data.you.tiedCount) === 2 ? "." : "s.") : "You currently hold the highest score for this measure.") : metric === "mp" ? "The next higher score is " + Number(data.next.difference || 0) + " MP away." : "Complete about " + activityCount + " more required activit" + (activityCount === 1 ? "y" : "ies") + " to move beyond the next score as it stands now.";
+    var updated = data.generatedAt ? new Date(data.generatedAt).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }) : "just now";
+    return '<div class="utl-standing-head"><span>Your cohort standing</span><strong class="utl-standing-rank">' + rankLabel + ' of ' + Number(data.cohortSize || 0) + '</strong><b class="utl-standing-score">' + Number(metric === "mp" ? data.you.mp : data.you.percent) + suffix + '</b></div><p class="utl-standing-summary">Your exact progress: ' + Number(data.you.done || 0) + ' of ' + Number(data.you.total || 29) + ' required activities &middot; ' + Number(data.you.percent || 0) + '% &middot; ' + Number(data.you.mp || 0) + ' MP &middot; ' + escapeHtml(data.you.level || 'Level pending') + '</p><span class="utl-standing-toggle"><button class="utl-standing-metric ' + (metric === "completion" ? 'is-active' : '') + '" type="button" data-utl-standing-metric="completion">Program completion</button><button class="utl-standing-metric ' + (metric === "mp" ? 'is-active' : '') + '" type="button" data-utl-standing-metric="mp">Mastery Points</button></span><p class="utl-standing-next">' + escapeHtml(next) + '</p><ol class="utl-standing-list">' + rows + '</ol><p class="utl-standing-note">Program completion includes Orientation and all required lessons and exercises. Other learners are anonymous. Updated ' + escapeHtml(updated) + '.</p>';
+  }
+
+  function bindCohortStanding(container, loader) {
+    if (!container || typeof loader !== "function") return;
+    var host = container.querySelector(".utl-reward-item.is-emphasis");
+    var loaded = false;
+    var loading = false;
+    var resultsByMetric = {};
+    function keepOpen() {
+      if (!host) return;
+      host.classList.add("is-popover-open");
+      host.setAttribute("aria-expanded", "true");
+    }
+    function close() {
+      if (!host) return;
+      host.classList.remove("is-popover-open");
+      host.setAttribute("aria-expanded", "false");
+    }
+    function cohortPanel() { return container.querySelector('[data-utl-reward-panel="cohort"]'); }
+    async function load(metric) {
+      if (loading || !cohortPanel()) return;
+      metric = metric === "mp" ? "mp" : "completion";
+      if (resultsByMetric[metric]) {
+        cohortPanel().innerHTML = standingHtml(resultsByMetric[metric]);
+        loaded = true;
+        return;
+      }
+      loading = true;
+      cohortPanel().innerHTML = standingStateHtml("Loading your standing", "Comparing anonymous cohort scores…");
+      try {
+        resultsByMetric[metric] = await loader(metric);
+        cohortPanel().innerHTML = standingHtml(resultsByMetric[metric]);
+      }
+      catch (error) {
+        var rawCode = String(error && error.code || "client-error").replace(/^functions\//, "");
+        var safeCode = /^[a-z0-9-]{1,40}$/i.test(rawCode) ? rawCode : "client-error";
+        console.error("Cohort standing could not load.", error);
+        cohortPanel().innerHTML = standingStateHtml("Standing unavailable", "We could not load your cohort standing right now. Reference: " + safeCode + ".", true);
+      }
+      loading = false;
+      loaded = true;
+    }
+    container.querySelectorAll("[data-utl-reward-tab]").forEach(function (button) {
+      button.addEventListener("click", function () {
+        keepOpen();
+        var selected = button.dataset.utlRewardTab;
+        container.querySelectorAll("[data-utl-reward-tab]").forEach(function (tab) { var active = tab === button; tab.classList.toggle("is-active", active); tab.setAttribute("aria-selected", String(active)); });
+        container.querySelectorAll("[data-utl-reward-panel]").forEach(function (item) { item.hidden = item.dataset.utlRewardPanel !== selected; });
+        if (selected === "cohort" && !loaded) load("completion");
+      });
+    });
+    container.addEventListener("click", function (event) {
+      var metric = event.target.closest("[data-utl-standing-metric]");
+      if (metric) { keepOpen(); load(metric.dataset.utlStandingMetric); }
+      if (event.target.closest("[data-utl-standing-refresh]")) { keepOpen(); load("completion"); }
+    });
+    document.addEventListener("pointerdown", function (event) {
+      if (host && !host.contains(event.target)) close();
+    }, true);
+    if (host) host.addEventListener("keydown", function (event) {
+      if (event.key !== "Escape") return;
+      close();
+      host.focus();
+    });
+    if (host) {
+      var prefetch = function () { if (!loaded && !loading) load("completion"); };
+      host.addEventListener("pointerenter", prefetch, { once: true });
+      host.addEventListener("focus", prefetch, { once: true });
+    }
   }
 
   function certificatePageHref() {
@@ -298,13 +395,15 @@
         display.showStreak ? '<span class="utl-reward-icon" aria-hidden="true">&#128293;</span><span>' + state.streakDays + '</span>' : '',
         display.showStreak ? popoverHtml("Streak", state.streakDays + " day" + (state.streakDays === 1 ? "" : "s"), streakBody) : '',
         display.showStreak ? '</span>' : '',
-        '<span class="utl-reward-item is-emphasis" tabindex="0">',
+        '<div class="utl-reward-item is-emphasis" tabindex="0">',
           '<span class="utl-reward-icon" aria-hidden="true">&#10022;</span><span class="utl-reward-mp-number" data-utl-mp-number>' + state.mpTotal + '</span><span>MP</span>',
-          mpPopoverHtml(state.mpTotal + " MP earned", mpRules, state.level + ". " + levelBody),
-        '</span>',
+          mpPopoverHtml(state.mpTotal + " MP earned", mpRules, state.level + ". " + levelBody, typeof opts.cohortLoader === "function"),
+        '</div>',
       '</div>'
     ].join("");
-    return container.querySelector("[data-utl-reward-cluster]");
+    var cluster = container.querySelector("[data-utl-reward-cluster]");
+    bindCohortStanding(container, opts.cohortLoader);
+    return cluster;
   }
 
   function showToast(details) {

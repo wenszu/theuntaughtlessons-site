@@ -7,9 +7,9 @@ const source = fs.readFileSync(path.resolve(root, 'member-login/content-config.j
 const admin = fs.readFileSync(path.resolve(root, 'admin/index.html'), 'utf8');
 const literal = (pattern, label) => { const match = source.match(pattern); assert.ok(match, label); return Function(`"use strict"; return (${match[1]})`)(); };
 
-// --- Content data exists with all 8 steps ---
+// --- Content data exists with all 9 steps ---
 assert.match(source, /welcomeWalkthrough:\s*\{\s*steps:\s*\[/, 'welcomeWalkthrough content should exist in UTL_CONTENT');
-['welcome', 'orientation', 'diagnostic', 'phases', 'dailyGoal', 'levels', 'checkpoint', 'closing'].forEach((id) => {
+['welcome', 'orientation', 'diagnostic', 'phases', 'dailyGoal', 'levels', 'cohortStanding', 'checkpoint', 'closing'].forEach((id) => {
   assert.match(source, new RegExp(`id:\\s*"${id}"`), `welcomeWalkthrough should include the ${id} step`);
 });
 [
@@ -19,6 +19,7 @@ assert.match(source, /welcomeWalkthrough:\s*\{\s*steps:\s*\[/, 'welcomeWalkthrou
   'Think clearly, speak concisely, act confidently.',
   'Pick a plan every time you log in.',
   'Earn Mastery Points. Climb the ranks.',
+  'See your private cohort standing.',
   "See how far you've come.",
   "Let's start with Orientation."
 ].forEach((title) => {
@@ -39,6 +40,9 @@ const levelsStepText = source.slice(levelsStepIndex, checkpointStepIndex);
 assert.match(levelsStepText, /Mastery Points/, 'the levels step should spell out what MP stands for on first use');
 assert.match(levelsStepText, /Intern/);
 assert.match(levelsStepText, /Executive/);
+assert.match(levelsStepText, /participating in a cohort/);
+assert.match(levelsStepText, /participating individually/);
+assert.match(levelsStepText, /every other learner stays anonymous/);
 const walkthroughBlockText = source.slice(source.indexOf('welcomeWalkthrough:'), source.indexOf('orientation:'));
 assert.doesNotMatch(walkthroughBlockText, /&mdash;|&ndash;|[–—]/, 'walkthrough copy should not use dash punctuation');
 
@@ -78,7 +82,7 @@ assert.match(admin, /Preview welcome walkthrough/);
 // --- Screenshot spotlight: content data + rendering ---
 const walkthrough = literal(/welcomeWalkthrough:\s*(\{[\s\S]*?\n  \}),\n  orientation:/, 'welcomeWalkthrough content should be readable');
 const withShots = walkthrough.steps.filter((step) => step.screenshot);
-assert.equal(withShots.length, 4, 'diagnostic, phases, dailyGoal, and levels should each carry an illustrative screenshot');
+assert.equal(withShots.length, 5, 'diagnostic, phases, dailyGoal, levels, and cohort standing should each carry an illustrative screenshot');
 withShots.forEach((step) => {
   const shot = step.screenshot;
   assert.match(shot.src, /^\.\.\/assets\/walkthrough\/.+\.png$/, `${step.id} screenshot should live under assets/walkthrough/`);
