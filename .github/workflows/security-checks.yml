@@ -23,6 +23,9 @@ jobs:
             functions-admin/package-lock.json
       - name: Check committed files for GitHub tokens
         run: bash scripts/check-secrets.sh
+      - name: Install administrative function dependencies
+        working-directory: functions-admin
+        run: npm ci --ignore-scripts
       - name: Run repository tests
         run: |
           for test_file in tests/*.test.js; do
@@ -45,6 +48,4 @@ jobs:
           npm audit --omit=dev --audit-level=high
       - name: Audit administrative function dependencies
         working-directory: functions-admin
-        run: |
-          npm ci --ignore-scripts
-          npm audit --omit=dev --audit-level=high
+        run: npm audit --omit=dev --audit-level=high
