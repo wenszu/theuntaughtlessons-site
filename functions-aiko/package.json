@@ -10,6 +10,6 @@
     "lint": "node --check index.js"
   },
   "dependencies": {
-    "firebase-functions": "^5.1.1"
+    "firebase-functions": "^7.3.2"
   }
 }
