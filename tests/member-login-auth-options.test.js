@@ -16,10 +16,12 @@ assert.ok(
   loginMarkup.indexOf('id="wsEmailLinkForm"') < loginMarkup.indexOf('id="wsGoogleLogin"'),
   'email-link sign-in should appear before social providers'
 );
-assert.doesNotMatch(loginMarkup, /id="wsMicrosoftLogin"/, 'broken Microsoft sign-in should not be offered');
+assert.match(loginMarkup, /id="wsMicrosoftLogin"/, 'configured Microsoft sign-in should be offered');
+assert.match(memberLogin, /handleMicrosoftLogin\(event\.currentTarget, qs\("#wsLoginMessage"\)\)/, 'Microsoft sign-in button should be wired');
 assert.doesNotMatch(memberLogin, /var member = await fb\.getAuthorizedMember\(email\)/, 'email-link requests must not perform an unauthenticated member lookup');
 assert.match(memberLogin, /finishGoogleUser\(firebaseAuth, credential\.user, linkMessage, "emailLink"\)/, 'email-link sign-ins should record their provider');
 assert.match(memberLogin, /finishGoogleCredential\(firebaseAuth, credential, message, "google\.com"\)/, 'Google sign-ins should record their provider');
+assert.match(memberLogin, /finishGoogleCredential\(firebaseAuth, credential, message, "microsoft\.com"\)/, 'Microsoft sign-ins should record their provider');
 assert.match(memberLogin, /finishGoogleCredential\(firebaseAuth, credential, message, "facebook\.com"\)/, 'Facebook sign-ins should record their provider');
 assert.match(admin, /id="mbNewSendLink" checked/, 'new members should receive a sign-in link by default');
 assert.match(admin, /Passwordless email link \(recommended for corporate members\)/, 'admin guidance should recommend email links for corporate learners');

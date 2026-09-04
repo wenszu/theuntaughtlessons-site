@@ -481,7 +481,7 @@ const UTL_CONTENT = {
   });
 
   function rewardUiHref() {
-    var version = "?v=20260904-login-methods";
+    var version = "?v=20260904-microsoft-restored";
     if (inPhasePracticeRoot()) return "../../../assets/reward-ui.js" + version;
     return (inAdminRoot() ? "../assets/reward-ui.js" : "../assets/reward-ui.js") + version;
   }
@@ -2099,10 +2099,14 @@ const UTL_CONTENT = {
     injectStyles();
     document.body.classList.add("ws-page");
     if (!isMemberUnlocked()) {
-      document.body.innerHTML = '<section class="ws-login-wrap"><article class="ws-login-card"><span class="ws-kicker">Member login</span><h1 class="ws-title">Welcome back.</h1><p class="ws-subtitle">Sign in to open your Untaught Lessons workspace.</p><div id="wsEmailSignInSection"><form class="ws-form" id="wsEmailLinkForm"><label for="wsEmailLinkAddr">Work or personal email</label><input class="ws-input" id="wsEmailLinkAddr" type="email" autocomplete="email" placeholder="you@company.com" required><button class="ws-button" type="submit" style="width:100%">Email me a sign-in link</button><p style="margin:0;color:var(--ws-steel);font-size:13px;line-height:1.45;">Recommended for corporate email. Use the exact address registered for your membership.</p><p class="ws-message" id="wsEmailLinkMsg" aria-live="polite"></p></form></div><div class="ws-login-divider">or sign in with</div><button class="ws-button ws-google-button" id="wsGoogleLogin" type="button"><span class="ws-google-mark" aria-hidden="true"></span><span>Google</span></button><button class="ws-button ws-facebook-button" id="wsFacebookLogin" type="button"><span class="ws-facebook-mark" aria-hidden="true"></span><span>Facebook</span></button><p class="ws-message" id="wsLoginMessage" aria-live="polite"></p></article></section>';
+      document.body.innerHTML = '<section class="ws-login-wrap"><article class="ws-login-card"><span class="ws-kicker">Member login</span><h1 class="ws-title">Welcome back.</h1><p class="ws-subtitle">Sign in to open your Untaught Lessons workspace.</p><div id="wsEmailSignInSection"><form class="ws-form" id="wsEmailLinkForm"><label for="wsEmailLinkAddr">Work or personal email</label><input class="ws-input" id="wsEmailLinkAddr" type="email" autocomplete="email" placeholder="you@company.com" required><button class="ws-button" type="submit" style="width:100%">Email me a sign-in link</button><p style="margin:0;color:var(--ws-steel);font-size:13px;line-height:1.45;">Recommended for corporate email. Use the exact address registered for your membership.</p><p class="ws-message" id="wsEmailLinkMsg" aria-live="polite"></p></form></div><div class="ws-login-divider">or sign in with</div><button class="ws-button ws-google-button" id="wsGoogleLogin" type="button"><span class="ws-google-mark" aria-hidden="true"></span><span>Google</span></button><button class="ws-button ws-microsoft-button" id="wsMicrosoftLogin" type="button"><span class="ws-microsoft-mark" aria-hidden="true"></span><span>Microsoft</span></button><button class="ws-button ws-facebook-button" id="wsFacebookLogin" type="button"><span class="ws-facebook-mark" aria-hidden="true"></span><span>Facebook</span></button><p class="ws-message" id="wsLoginMessage" aria-live="polite"></p></article></section>';
       qs("#wsGoogleLogin").addEventListener("click", function (event) {
         event.preventDefault();
         handleGoogleLogin(event.currentTarget, qs("#wsLoginMessage"));
+      });
+      qs("#wsMicrosoftLogin").addEventListener("click", function (event) {
+        event.preventDefault();
+        handleMicrosoftLogin(event.currentTarget, qs("#wsLoginMessage"));
       });
       qs("#wsFacebookLogin").addEventListener("click", function (event) {
         event.preventDefault();

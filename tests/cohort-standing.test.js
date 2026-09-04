@@ -20,9 +20,9 @@ assert.match(rewards, /is-popover-open \.utl-reward-popover\{opacity:1;pointer-e
 assert.match(rewards, /Cohort member/);
 assert.match(rewards, /Program completion includes Orientation/);
 assert.match(workspace, /cohortLoader/);
-assert.match(workspace, /20260904-login-methods/);
+assert.match(workspace, /20260904-microsoft-restored/);
 assert.match(workspace, /typeof firebaseAuth\.getCohortStanding !== "function"/);
-assert.match(memberHome, /content-config\.js\?v=20260904-login-methods/);
+assert.match(memberHome, /content-config\.js\?v=20260904-microsoft-restored/);
 assert.doesNotMatch(firebase, /localStorage\.getItem\("utl_use_firebase_emulators"\)/);
 assert.match(rewards, /Reference: " \+ safeCode/);
 assert.match(backend, /previewEmail && !\(await isAuthorizedAdmin\(caller\.email\)\)/);
