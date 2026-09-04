@@ -3154,32 +3154,26 @@
           <div class="mb-guide-body" id="mbGuideBody">
             <div class="mb-guide-methods">
               <div class="mb-guide-method">
-                <p class="mb-guide-method-label">Method A — Google sign-in (recommended for most members)</p>
+                <p class="mb-guide-method-label">Method A: Passwordless email link (recommended for corporate members)</p>
                 <ol>
-                  <li><strong>Admin:</strong> Click <strong>+ Add member</strong>, enter name and email, click Save</li>
-                  <li><strong>Member receives:</strong> A welcome email from your Gmail with a link to the workspace</li>
-                  <li><strong>Member:</strong> Clicks the link, signs in with their Google account — done</li>
-                  <li><em>No username or password needed. No Firebase email.</em></li>
+                  <li><strong>Admin:</strong> Click <strong>+ Add member</strong>, enter the learner's name and exact corporate email, keep <strong>Also send a one-click login link</strong> selected, then click <strong>Add member</strong>.</li>
+                  <li><strong>Member receives:</strong> The welcome email and a separate sign-in email from Firebase.</li>
+                  <li><strong>Member:</strong> Opens the Firebase email, clicks the sign-in link and confirms the same email address if asked.</li>
+                  <li><strong>Next visit:</strong> Select <strong>Email me a sign-in link</strong> on the login page and request a fresh link using the same registered address.</li>
                 </ol>
               </div>
               <div class="mb-guide-method">
-                <p class="mb-guide-method-label">Method B — Passwordless magic link (for members who cannot use Google)</p>
+                <p class="mb-guide-method-label">Method B: Google or Facebook sign-in</p>
                 <ol>
-                  <li><strong>Admin:</strong> Click <strong>+ Add member</strong>, enter name and email, check <em>"Also send login link"</em>, click Save</li>
-                  <li><strong>Member receives two emails:</strong>
-                    <ul style="margin:4px 0 0;padding-left:16px;">
-                      <li><strong>Welcome email:</strong> Your welcome email from Gmail</li>
-                      <li><strong>Magic link:</strong> A one-click login link from Firebase (<em>noreply@the-untaught-lessons.firebaseapp.com</em>)</li>
-                    </ul>
-                  </li>
-                  <li><strong>Member:</strong> Clicks the Firebase link — lands directly in the workspace</li>
-                  <li><em>The Firebase link expires after 24 hours. If it expires, use "Send login link" in the table row.</em></li>
+                  <li><strong>Admin:</strong> Add the member using the exact email address attached to the account they will use.</li>
+                  <li><strong>Member:</strong> Selects Google or Facebook and signs in with that same address.</li>
+                  <li><strong>Important:</strong> Learners should continue with their original sign-in method unless their accounts have been linked.</li>
                 </ol>
               </div>
               <div class="mb-guide-method">
                 <p class="mb-guide-method-label">Method C — Emergency access (admin/owner only, not for regular members)</p>
                 <ol>
-                  <li>There is no username/password option for regular members — the sign-in page only ever offers Google, Microsoft, Facebook, and the magic link above.</li>
+                  <li>There is no username/password option for regular members. The sign-in page offers passwordless email, Google and Facebook.</li>
                   <li>A real password can be set for a break-glass account from the <strong>Emergency access</strong> tab, for the rare case all other sign-in methods are down. The email must already be an active admin or owner here in Members.</li>
                   <li>Sign in with it at <code>/member-login/?emergency=1</code> — this URL is not linked from anywhere on the site.</li>
                 </ol>
@@ -3266,8 +3260,8 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
           </div>
           <div class="mb-link-checkbox-row">
             <label>
-              <input type="checkbox" id="mbNewSendLink">
-              <span>Also send a one-click login link <span style="color:#888;font-size:11px;">(Method B — member also receives a Firebase magic link email)</span></span>
+              <input type="checkbox" id="mbNewSendLink" checked>
+              <span>Also send a one-click login link <span style="color:#888;font-size:11px;">(recommended for corporate members)</span></span>
             </label>
           </div>
           <div class="mb-form-actions" style="margin-top:12px;">
@@ -3307,7 +3301,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         <span class="section-label">Access</span>
         <h2>Emergency access</h2>
         <div class="section-divider"></div>
-        <p class="description">Set or reset a real password for a break-glass account, for the rare case Google, Microsoft, Facebook, and the emailed sign-in link are all unavailable. This is not offered to regular members — there is no password option on the normal sign-in page. The email must already exist as an active admin or owner under Members. To sign in with it, go to <code>/member-login/?emergency=1</code>.</p>
+        <p class="description">Set or reset a real password for a break-glass account, for the rare case Google, Facebook, and the emailed sign-in link are all unavailable. This is not offered to regular members. There is no password option on the normal sign-in page. The email must already exist as an active admin or owner under Members. To sign in with it, go to <code>/member-login/?emergency=1</code>.</p>
         <div class="mb-form-grid" style="max-width:420px;">
           <div class="mb-form-field">
             <label for="eaEmail">Admin or owner email</label>

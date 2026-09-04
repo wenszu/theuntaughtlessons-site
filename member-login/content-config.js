@@ -2099,24 +2099,16 @@ const UTL_CONTENT = {
     injectStyles();
     document.body.classList.add("ws-page");
     if (!isMemberUnlocked()) {
-      document.body.innerHTML = '<section class="ws-login-wrap"><article class="ws-login-card"><span class="ws-kicker">Member login</span><h1 class="ws-title">Welcome back.</h1><p class="ws-subtitle">Sign in to open your Untaught Lessons workspace.</p><button class="ws-button ws-google-button" id="wsGoogleLogin" type="button"><span class="ws-google-mark" aria-hidden="true"></span><span>Sign in with Google</span></button><button class="ws-button ws-microsoft-button" id="wsMicrosoftLogin" type="button"><span class="ws-microsoft-mark" aria-hidden="true"></span><span>Sign in with Microsoft</span></button><button class="ws-button ws-facebook-button" id="wsFacebookLogin" type="button"><span class="ws-facebook-mark" aria-hidden="true"></span><span>Sign in with Facebook</span></button><p class="ws-message" id="wsLoginMessage" aria-live="polite"></p><div class="ws-login-divider">or</div><div id="wsEmailSignInSection"><button class="ws-button ws-button-secondary" id="wsShowEmailSignIn" type="button" style="width:100%">Sign in with email link</button></div></article></section>';
+      document.body.innerHTML = '<section class="ws-login-wrap"><article class="ws-login-card"><span class="ws-kicker">Member login</span><h1 class="ws-title">Welcome back.</h1><p class="ws-subtitle">Sign in to open your Untaught Lessons workspace.</p><div id="wsEmailSignInSection"><form class="ws-form" id="wsEmailLinkForm"><label for="wsEmailLinkAddr">Work or personal email</label><input class="ws-input" id="wsEmailLinkAddr" type="email" autocomplete="email" placeholder="you@company.com" required><button class="ws-button" type="submit" style="width:100%">Email me a sign-in link</button><p style="margin:0;color:var(--ws-steel);font-size:13px;line-height:1.45;">Recommended for corporate email. Use the exact address registered for your membership.</p><p class="ws-message" id="wsEmailLinkMsg" aria-live="polite"></p></form></div><div class="ws-login-divider">or sign in with</div><button class="ws-button ws-google-button" id="wsGoogleLogin" type="button"><span class="ws-google-mark" aria-hidden="true"></span><span>Google</span></button><button class="ws-button ws-facebook-button" id="wsFacebookLogin" type="button"><span class="ws-facebook-mark" aria-hidden="true"></span><span>Facebook</span></button><p class="ws-message" id="wsLoginMessage" aria-live="polite"></p></article></section>';
       qs("#wsGoogleLogin").addEventListener("click", function (event) {
         event.preventDefault();
         handleGoogleLogin(event.currentTarget, qs("#wsLoginMessage"));
-      });
-      qs("#wsMicrosoftLogin").addEventListener("click", function (event) {
-        event.preventDefault();
-        handleMicrosoftLogin(event.currentTarget, qs("#wsLoginMessage"));
       });
       qs("#wsFacebookLogin").addEventListener("click", function (event) {
         event.preventDefault();
         handleFacebookLogin(event.currentTarget, qs("#wsLoginMessage"));
       });
-      qs("#wsShowEmailSignIn").addEventListener("click", function () {
-        var section = qs("#wsEmailSignInSection");
-        if (!section) return;
-        section.innerHTML = '<form class="ws-form" id="wsEmailLinkForm" style="margin-top:0"><label for="wsEmailLinkAddr">Your email address</label><input class="ws-input" id="wsEmailLinkAddr" type="email" autocomplete="email" placeholder="you@example.com" required><button class="ws-button" type="submit" style="width:100%">Send sign-in link</button><p class="ws-message" id="wsEmailLinkMsg" aria-live="polite"></p></form>';
-        qs("#wsEmailLinkForm").addEventListener("submit", async function (event) {
+      qs("#wsEmailLinkForm").addEventListener("submit", async function (event) {
           event.preventDefault();
           var email = qs("#wsEmailLinkAddr").value.trim().toLowerCase();
           var msg = qs("#wsEmailLinkMsg");
@@ -2133,7 +2125,7 @@ const UTL_CONTENT = {
             if (!member) {
               msg.textContent = "That email is not in our member list. Check your spelling or contact Wen-Szu.";
               btn.disabled = false;
-              btn.textContent = "Send sign-in link";
+              btn.textContent = "Email me a sign-in link";
               return;
             }
             await fb.sendSignInInvite(email);
@@ -2144,11 +2136,9 @@ const UTL_CONTENT = {
             console.error("Email sign-in link failed.", err);
             msg.textContent = "Could not send sign-in link. Please try again.";
             btn.disabled = false;
-            btn.textContent = "Send sign-in link";
+            btn.textContent = "Email me a sign-in link";
           }
         });
-        qs("#wsEmailLinkAddr").focus();
-      });
       // Preload firebase eagerly so signInWithGooglePopup() opens with minimal async delay
       if (!_preloadedFirebase) {
         import(firebaseHref()).then(function(m) { _preloadedFirebase = m; }).catch(function(){});
