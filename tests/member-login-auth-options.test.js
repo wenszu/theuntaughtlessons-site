@@ -23,9 +23,17 @@ assert.match(memberLogin, /finishGoogleUser\(firebaseAuth, credential\.user, lin
 assert.match(memberLogin, /finishGoogleCredential\(firebaseAuth, credential, message, "google\.com"\)/, 'Google sign-ins should record their provider');
 assert.match(memberLogin, /finishGoogleCredential\(firebaseAuth, credential, message, "microsoft\.com"\)/, 'Microsoft sign-ins should record their provider');
 assert.match(memberLogin, /finishGoogleCredential\(firebaseAuth, credential, message, "facebook\.com"\)/, 'Facebook sign-ins should record their provider');
-assert.match(admin, /id="mbNewSendLink" checked/, 'new members should receive a sign-in link by default');
+assert.match(admin, /name="mbNewSignInMethod" value="emailLink" checked/, 'email link should be the clear default first sign-in method');
+assert.match(admin, /name="mbNewSignInMethod" value="google\.com"/, 'individual onboarding should offer Google explicitly');
+assert.match(admin, /name="mbNewSignInMethod" value="microsoft\.com"/, 'individual onboarding should offer Microsoft explicitly');
+assert.match(admin, /name="mbNewSignInMethod" value="facebook\.com"/, 'individual onboarding should offer Facebook explicitly');
+assert.doesNotMatch(admin, /id="mbNewSendLink"/, 'individual onboarding should not use an ambiguous login-link checkbox');
+assert.match(admin, /invitedSignInMethod: signInMethod/, 'member records should retain the planned first sign-in method');
+assert.match(admin, /loginLinkSentAt: serverTimestamp\(\)/, 'successfully sent email links should be recorded');
+assert.match(admin, /Older record; no reliable setup history/, 'legacy rows should not be assigned an unsupported method');
 assert.match(admin, /Passwordless email link \(recommended for corporate members\)/, 'admin guidance should recommend email links for corporate learners');
 assert.match(admin, /<th>Sign-in method<\/th>/, 'Member Access should show the last sign-in method');
-assert.match(admin, /Last Sign-in Method/, 'member CSV export should include the last sign-in method');
+assert.match(admin, /Confirmed Sign-in Method/, 'member CSV export should distinguish the confirmed sign-in method');
+assert.match(admin, /Planned First Sign-in Method/, 'member CSV export should include the planned first sign-in method');
 
 console.log('member login and corporate email-link onboarding contracts passed');

@@ -2025,6 +2025,18 @@
     .mb-bulk-options { display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:10px; margin-bottom:14px; }
     .mb-bulk-checks { display:flex; flex-wrap:wrap; gap:8px 18px; margin:12px 0; }
     .mb-bulk-checks label { display:flex; align-items:flex-start; gap:7px; color:var(--charcoal); font-size:12px; line-height:1.35; }
+    .mb-signin-choice { margin:14px 0; padding:14px; border:1px solid var(--line); border-radius:9px; background:#FAF8F3; }
+    .mb-signin-choice h4 { margin:0; color:var(--navy); font:700 14px/1.35 Lato,Arial,sans-serif; }
+    .mb-signin-choice > p { margin:4px 0 11px; color:#5f6871; font-size:12px; line-height:1.45; }
+    .mb-signin-options { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; }
+    .mb-signin-option { position:relative; display:grid; grid-template-columns:auto 1fr; gap:4px 8px; align-items:start; min-height:76px; padding:11px; border:1px solid rgba(0,51,102,.18); border-radius:8px; background:#fff; cursor:pointer; }
+    .mb-signin-option:has(input:checked) { border-color:var(--gold); box-shadow:0 0 0 1px var(--gold); background:#FFF9EC; }
+    .mb-signin-option input { margin:2px 0 0; accent-color:var(--gold); }
+    .mb-signin-option strong { color:var(--navy); font-size:12px; line-height:1.25; }
+    .mb-signin-option small { grid-column:2; color:#687482; font-size:11px; line-height:1.35; }
+    .mb-signin-note { margin:10px 0 0; color:#6B531C; font-size:11px; line-height:1.45; }
+    @media (max-width:900px) { .mb-signin-options { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+    @media (max-width:560px) { .mb-signin-options { grid-template-columns:1fr; } }
     .mb-bulk-tabs { display:flex; gap:5px; margin-top:14px; border-bottom:1px solid var(--line); }
     .mb-bulk-tab { padding:9px 13px; border:0; border-bottom:3px solid transparent; background:transparent; color:#777; font-weight:700; cursor:pointer; }
     .mb-bulk-tab.is-active { border-bottom-color:var(--gold); color:var(--navy); }
@@ -3156,24 +3168,24 @@
               <div class="mb-guide-method">
                 <p class="mb-guide-method-label">Method A: Passwordless email link (recommended for corporate members)</p>
                 <ol>
-                  <li><strong>Admin:</strong> Click <strong>+ Add member</strong>, enter the learner's name and exact corporate email, keep <strong>Also send a one-click login link</strong> selected, then click <strong>Add member</strong>.</li>
+                  <li><strong>Admin:</strong> Click <strong>+ Add member</strong>, enter the learner's name and exact corporate email, then select <strong>Email link</strong> as their first sign-in method.</li>
                   <li><strong>Member receives:</strong> The welcome email and a separate sign-in email from Firebase.</li>
                   <li><strong>Member:</strong> Opens the Firebase email, clicks the sign-in link and confirms the same email address if asked.</li>
                   <li><strong>Next visit:</strong> Select <strong>Email me a sign-in link</strong> on the login page and request a fresh link using the same registered address.</li>
                 </ol>
               </div>
               <div class="mb-guide-method">
-                <p class="mb-guide-method-label">Method B: Google or Facebook sign-in</p>
+                <p class="mb-guide-method-label">Method B: Google, Microsoft or Facebook sign-in</p>
                 <ol>
                   <li><strong>Admin:</strong> Add the member using the exact email address attached to the account they will use.</li>
-                  <li><strong>Member:</strong> Selects Google or Facebook and signs in with that same address.</li>
+                  <li><strong>Member:</strong> Selects the provider chosen during setup and signs in with that same address.</li>
                   <li><strong>Important:</strong> Learners should continue with their original sign-in method unless their accounts have been linked.</li>
                 </ol>
               </div>
               <div class="mb-guide-method">
                 <p class="mb-guide-method-label">Method C — Emergency access (admin/owner only, not for regular members)</p>
                 <ol>
-                  <li>There is no username/password option for regular members. The sign-in page offers passwordless email, Google and Facebook.</li>
+                  <li>There is no username/password option for regular members. The sign-in page offers passwordless email, Google, Microsoft and Facebook.</li>
                   <li>A real password can be set for a break-glass account from the <strong>Emergency access</strong> tab, for the rare case all other sign-in methods are down. The email must already be an active admin or owner here in Members.</li>
                   <li>Sign in with it at <code>/member-login/?emergency=1</code> — this URL is not linked from anywhere on the site.</li>
                 </ol>
@@ -3207,9 +3219,19 @@
               <div class="mb-form-field"><label for="mbBulkExpiry">Access expires</label><input type="date" id="mbBulkExpiry"></div>
               <div class="mb-form-field"><label for="mbBulkNotes">Batch note</label><input type="text" id="mbBulkNotes" placeholder="Optional note applied to everyone"></div>
             </div>
+            <div class="mb-signin-choice" aria-labelledby="mbBulkSignInHeading">
+              <h4 id="mbBulkSignInHeading">How will these learners sign in for the first time?</h4>
+              <p>Choose one method for everyone in this batch.</p>
+              <div class="mb-signin-options">
+                <label class="mb-signin-option"><input type="radio" name="mbBulkSignInMethod" value="emailLink" checked><strong>Email link</strong><small>Sends each learner a separate passwordless sign-in email. Recommended for corporate email.</small></label>
+                <label class="mb-signin-option"><input type="radio" name="mbBulkSignInMethod" value="google.com"><strong>Google</strong><small>They sign in with a Google account using the exact member email.</small></label>
+                <label class="mb-signin-option"><input type="radio" name="mbBulkSignInMethod" value="microsoft.com"><strong>Microsoft</strong><small>They sign in with a Microsoft account using the exact member email.</small></label>
+                <label class="mb-signin-option"><input type="radio" name="mbBulkSignInMethod" value="facebook.com"><strong>Facebook</strong><small>They sign in with a Facebook account using the exact member email.</small></label>
+              </div>
+              <p class="mb-signin-note"><strong>Keep this consistent:</strong> learners should continue with their first method. Changing methods later may require their accounts to be linked.</p>
+            </div>
             <div class="mb-bulk-checks">
-              <label><input type="checkbox" id="mbBulkWelcome" checked>Send each learner the welcome email</label>
-              <label><input type="checkbox" id="mbBulkLoginLink">Also send a one-click Firebase login link</label>
+              <label><input type="checkbox" id="mbBulkWelcome" checked>Send the welcome email</label>
               <label><input type="checkbox" id="mbBulkGoogleGroup" checked>Request Google Group access</label>
             </div>
             <div class="mb-bulk-tabs" role="tablist" aria-label="Choose how to add learners"><button class="mb-bulk-tab is-active" type="button" role="tab" aria-selected="true" data-mb-bulk-input="paste">Paste list</button><button class="mb-bulk-tab" type="button" role="tab" aria-selected="false" data-mb-bulk-input="file">Upload CSV</button></div>
@@ -3258,11 +3280,16 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
               <input type="text" id="mbNewNotes" placeholder="Optional">
             </div>
           </div>
-          <div class="mb-link-checkbox-row">
-            <label>
-              <input type="checkbox" id="mbNewSendLink" checked>
-              <span>Also send a one-click login link <span style="color:#888;font-size:11px;">(recommended for corporate members)</span></span>
-            </label>
+          <div class="mb-signin-choice" aria-labelledby="mbNewSignInHeading">
+            <h4 id="mbNewSignInHeading">How will this member sign in for the first time?</h4>
+            <p>Select the method you will ask them to use.</p>
+            <div class="mb-signin-options">
+              <label class="mb-signin-option"><input type="radio" name="mbNewSignInMethod" value="emailLink" checked><strong>Email link</strong><small>Sends a separate passwordless sign-in email. Recommended for corporate email.</small></label>
+              <label class="mb-signin-option"><input type="radio" name="mbNewSignInMethod" value="google.com"><strong>Google</strong><small>They sign in with a Google account using this exact email.</small></label>
+              <label class="mb-signin-option"><input type="radio" name="mbNewSignInMethod" value="microsoft.com"><strong>Microsoft</strong><small>They sign in with a Microsoft account using this exact email.</small></label>
+              <label class="mb-signin-option"><input type="radio" name="mbNewSignInMethod" value="facebook.com"><strong>Facebook</strong><small>They sign in with a Facebook account using this exact email.</small></label>
+            </div>
+            <p class="mb-signin-note"><strong>Keep this consistent:</strong> the member should continue with their first method. Changing methods later may require their accounts to be linked.</p>
           </div>
           <div class="mb-form-actions" style="margin-top:12px;">
             <button class="small-button" type="button" id="mbAddMemberSave">Add member</button>
@@ -3274,7 +3301,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
 
         <div id="mbInviteForm" class="mb-invite-form" hidden>
           <div class="invite-card">
-            <p class="description" style="margin-bottom:0;"><strong>Send a login link to an existing member.</strong> Use this when a member is having trouble signing in or needs a fresh one-click link. This sends a Firebase email only (<em>noreply@the-untaught-lessons.firebaseapp.com</em>) — no welcome email. To onboard a new member and send both emails, use <strong>+ Add member</strong> with the "Also send login link" checkbox.</p>
+            <p class="description" style="margin-bottom:0;"><strong>Send an email sign-in link to an existing member.</strong> Use this when an email-link member needs a fresh passwordless link. This sends a Firebase email only (<em>noreply@the-untaught-lessons.firebaseapp.com</em>) and does not resend the welcome email.</p>
             <div class="mb-guide-warn" id="mbInviteNotMemberWarn" hidden>
               ⚠ This email is not in the member list yet. Add them first using <strong>+ Add member</strong>, then send a login link.
             </div>
@@ -4478,6 +4505,10 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
 
         sendLoginInvite.textContent = 'Sending...';
         await firebaseAuth.sendSignInInvite(normalizedEmail);
+        await firebaseAuth.authorizeMember(normalizedEmail, {
+          invitedSignInMethod: 'emailLink',
+          loginLinkSentAt: serverTimestamp()
+        });
         inviteEmail.value = '';
         setInviteStatus('Login link sent to ' + normalizedEmail + ' — they will receive a Firebase email.', 'success');
         logInvite(normalizedEmail);
@@ -9530,13 +9561,29 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       })[String(provider || '')] || 'Not recorded';
     }
 
+    function mbSelectedSignInMethod(groupName) {
+      var selected = document.querySelector('input[name="' + groupName + '"]:checked');
+      return selected ? selected.value : 'emailLink';
+    }
+
     function mbSignInMethodHtml(data) {
-      var latest = mbSignInProviderLabel(data.lastSignInProvider);
+      var confirmed = mbSignInProviderLabel(data.lastSignInProvider);
+      var planned = mbSignInProviderLabel(data.invitedSignInMethod);
       var providers = Array.isArray(data.signInProviders)
         ? data.signInProviders.map(mbSignInProviderLabel).filter(function (label) { return label !== 'Not recorded'; })
         : [];
-      var history = providers.length ? providers.join(', ') : 'Recorded after their next login';
-      return '<strong style="white-space:nowrap;">' + escapeHtml(latest) + '</strong><br><small>' + escapeHtml(history) + '</small>';
+      if (confirmed !== 'Not recorded') {
+        var history = providers.length > 1 ? 'Used: ' + providers.join(', ') : 'Confirmed at login';
+        return '<strong style="white-space:nowrap;">' + escapeHtml(confirmed) + '</strong><br><small>' + escapeHtml(history) + '</small>';
+      }
+      if (providers.length) {
+        return '<strong>Multiple methods</strong><br><small>' + escapeHtml('Confirmed: ' + providers.join(', ')) + '</small>';
+      }
+      if (planned !== 'Not recorded') {
+        var invitationStatus = data.loginLinkSentAt ? 'Sign-in link sent; login not completed' : 'Selected during member setup';
+        return '<strong style="white-space:nowrap;">Planned: ' + escapeHtml(planned) + '</strong><br><small>' + escapeHtml(invitationStatus) + '</small>';
+      }
+      return '<strong style="white-space:nowrap;">Unknown</strong><br><small>Older record; no reliable setup history</small>';
     }
 
     function mbFormatGroupAuditDate(ts) {
@@ -10254,7 +10301,8 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       mbBulkValidateRows();
       var counts = mbBulkCounts();
       var summary = document.getElementById('mbBulkSummary');
-      if (summary) summary.innerHTML = '<span>' + mbBulkRows.length + ' rows</span><span class="is-ready">' + counts.ready + ' ready</span><span>' + counts.skip + ' skipped</span><span class="is-error">' + counts.error + ' need correction</span>';
+      var selectedMethod = mbSignInProviderLabel(mbSelectedSignInMethod('mbBulkSignInMethod'));
+      if (summary) summary.innerHTML = '<span>' + mbBulkRows.length + ' rows</span><span class="is-ready">' + counts.ready + ' ready</span><span>' + counts.skip + ' skipped</span><span class="is-error">' + counts.error + ' need correction</span><span>First sign-in: ' + escapeHtml(selectedMethod) + '</span>';
       var body = document.getElementById('mbBulkReviewBody');
       if (body) body.innerHTML = mbBulkRows.map(function (row, index) {
         return '<tr data-mb-bulk-row="' + index + '"><td>' + (index + 1) + '</td><td><input data-mb-bulk-name value="' + escapeHtml(row.name) + '" aria-label="Learner name ' + (index + 1) + '"></td><td><input data-mb-bulk-email value="' + escapeHtml(row.email) + '" aria-label="Learner email ' + (index + 1) + '"></td><td><span class="mb-bulk-state is-' + row.state + '">' + escapeHtml(row.message) + '</span></td></tr>';
@@ -10310,7 +10358,8 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       var expiryValue = String(document.getElementById('mbBulkExpiry')?.value || '');
       var expiryDate = expiryValue ? new Date(expiryValue + 'T23:59:59') : new Date(Date.now() + 365 * 86400000);
       var sendWelcome = !!document.getElementById('mbBulkWelcome')?.checked;
-      var sendLink = !!document.getElementById('mbBulkLoginLink')?.checked;
+      var signInMethod = mbSelectedSignInMethod('mbBulkSignInMethod');
+      var sendLink = signInMethod === 'emailLink';
       var requestGroup = !!document.getElementById('mbBulkGoogleGroup')?.checked;
       var profile = {};
       try { profile = JSON.parse(localStorage.getItem('utl_member_profile') || '{}'); } catch (_) {}
@@ -10324,7 +10373,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         result.error = '';
         try {
           if (!retryOnly || result.access === false) {
-            var memberFields = { name: row.name, role: 'member', addedBy: addedBy, expiryDate: fb.Timestamp.fromDate(expiryDate), status: 'active' };
+            var memberFields = { name: row.name, role: 'member', addedBy: addedBy, expiryDate: fb.Timestamp.fromDate(expiryDate), status: 'active', invitedSignInMethod: signInMethod };
             if (cohort) memberFields.cohort = cohort;
             if (notes) memberFields.notes = notes;
             await fb.authorizeMember(row.email, memberFields);
@@ -10332,7 +10381,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
           }
           if (sendWelcome && (!retryOnly || result.welcome === false)) { try { await mbBulkWelcomeEmail(row.name, row.email); result.welcome = true; } catch (error) { result.welcome = false; result.error = error.message || 'Welcome email failed'; } }
           if (!sendWelcome) result.welcome = null;
-          if (sendLink && (!retryOnly || result.loginLink === false)) { try { await fb.sendSignInInvite(row.email); result.loginLink = true; } catch (error) { result.loginLink = false; result.error = error.message || 'Login link failed'; } }
+          if (sendLink && (!retryOnly || result.loginLink === false)) { try { await fb.sendSignInInvite(row.email); await fb.authorizeMember(row.email, { invitedSignInMethod: 'emailLink', loginLinkSentAt: serverTimestamp() }); result.loginLink = true; } catch (error) { result.loginLink = false; result.error = error.message || 'Login link failed'; } }
           if (!sendLink) result.loginLink = null;
           if (requestGroup && (!retryOnly || result.group === false)) { try { await fb.requestGoogleGroupSyncJob(row.email, 'add', { name: row.name, requestedBy: addedBy, source: 'admin-bulk-member-import' }); result.group = true; } catch (error) { result.group = false; result.error = error.message || 'Group request failed'; } }
           if (!requestGroup) result.group = null;
@@ -10449,6 +10498,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         var roleVal = (document.getElementById('mbNewRole') || {}).value || 'member';
         var cohortVal = (document.getElementById('mbNewCohort') || {}).value.trim();
         var notesVal = (document.getElementById('mbNewNotes') || {}).value.trim();
+        var signInMethod = mbSelectedSignInMethod('mbNewSignInMethod');
 
         if (!nameVal) { showToast('Name is required', 'error'); return; }
         if (!emailVal) { showToast('Email is required', 'error'); return; }
@@ -10472,10 +10522,11 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
           notes: notesVal,
           addedBy: addedBy,
           expiryDate: expiryDate,
-          status: 'active'
+          status: 'active',
+          invitedSignInMethod: signInMethod
         };
 
-        var sendLinkChecked = !!(document.getElementById('mbNewSendLink') || {}).checked;
+        var sendLinkChecked = signInMethod === 'emailLink';
         saveBtn.disabled = true;
         var emailStatusEl = document.getElementById('mbAddEmailStatus');
         if (emailStatusEl) { emailStatusEl.textContent = ''; emailStatusEl.hidden = true; }
@@ -10520,6 +10571,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
           if (sendLinkChecked && fb.sendSignInInvite) {
             try {
               await fb.sendSignInInvite(emailVal);
+              await fb.authorizeMember(emailVal, { invitedSignInMethod: 'emailLink', loginLinkSentAt: serverTimestamp() });
               linkSent = true;
             } catch (linkErr) { /* non-fatal */ }
           }
@@ -10548,8 +10600,8 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
           document.getElementById('mbNewRole').value = 'user';
           document.getElementById('mbNewCohort').value = '';
           document.getElementById('mbNewNotes').value = '';
-          var sendLinkEl = document.getElementById('mbNewSendLink');
-          if (sendLinkEl) sendLinkEl.checked = false;
+          var emailLinkChoice = document.querySelector('input[name="mbNewSignInMethod"][value="emailLink"]');
+          if (emailLinkChoice) emailLinkChoice.checked = true;
           form.hidden = true;
           addBtn.textContent = '+ Add member';
           await mbLoadMembers();
@@ -10567,7 +10619,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       var pad = function (n) { return String(n).padStart(2, '0'); };
       var dateStr = String(now.getFullYear()) + pad(now.getMonth() + 1) + pad(now.getDate());
       var filename = dateStr + ' - utl-members download.csv';
-      var header = ['Name', 'Email', 'Role', 'Status', 'Cohort', 'First Login', 'Last Sign-in Method', 'Sign-in Methods Used', 'Expiry', 'Google Group', 'Google Group Sync', 'Notes', 'Added By', 'Added At'];
+      var header = ['Name', 'Email', 'Role', 'Status', 'Cohort', 'First Login', 'Confirmed Sign-in Method', 'Sign-in Methods Used', 'Planned First Sign-in Method', 'Email Link Sent', 'Expiry', 'Google Group', 'Google Group Sync', 'Notes', 'Added By', 'Added At'];
       function csvCell(val) {
         var s = String(val === null || val === undefined ? '' : val).replace(/"/g, '""');
         return (s.search(/[,"\r\n]/) !== -1) ? '"' + s + '"' : s;
@@ -10588,6 +10640,8 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
           csvCell(mbFormatDate(data.firstLoginAt)),
           csvCell(mbSignInProviderLabel(data.lastSignInProvider)),
           csvCell(Array.isArray(data.signInProviders) ? data.signInProviders.map(mbSignInProviderLabel).join(', ') : ''),
+          csvCell(mbSignInProviderLabel(data.invitedSignInMethod)),
+          csvCell(data.loginLinkSentAt ? mbFormatDate(data.loginLinkSentAt) : ''),
           csvCell(mbFormatDate(data.expiryDate)),
           csvCell(data.googleGroupAdded ? 'Yes' : 'No'),
           csvCell(data.googleGroupSyncStatus || ''),

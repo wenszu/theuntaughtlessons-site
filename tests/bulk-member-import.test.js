@@ -12,6 +12,11 @@ assert.match(admin, /save the file as a UTF-8 CSV/, 'CSV mode should explain the
 assert.match(admin, /Albert Einstein,albert\.einstein@example\.com/, 'bulk examples should use a clearly fictional famous-person example');
 assert.match(admin, /Marie Curie,marie\.curie@example\.com/, 'manual and CSV examples should include a second famous person');
 assert.match(admin, /Nothing is saved and no emails are sent until you confirm the review/, 'the import should explain its preflight boundary');
+assert.match(admin, /name="mbBulkSignInMethod" value="emailLink" checked/, 'bulk onboarding should use the same explicit email-link default');
+assert.match(admin, /name="mbBulkSignInMethod" value="google\.com"/, 'bulk onboarding should offer Google explicitly');
+assert.match(admin, /name="mbBulkSignInMethod" value="microsoft\.com"/, 'bulk onboarding should offer Microsoft explicitly');
+assert.match(admin, /name="mbBulkSignInMethod" value="facebook\.com"/, 'bulk onboarding should offer Facebook explicitly');
+assert.doesNotMatch(admin, /id="mbBulkLoginLink"/, 'bulk onboarding should not use an ambiguous login-link checkbox');
 assert.match(admin, /slice\(0, 500\)/, 'browser imports should have a bounded row count');
 assert.match(admin, /Duplicate in this batch/, 'duplicate rows should be detected before writing');
 assert.match(admin, /Already an active member/, 'existing active members should be skipped');
