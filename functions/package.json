@@ -13,5 +13,9 @@
     "firebase-admin": "^12.7.0",
     "firebase-functions": "^5.1.1",
     "googleapis": "^144.0.0"
+  },
+  "overrides": {
+    "qs": "6.16.0",
+    "uuid": "11.1.1"
   }
 }
