@@ -31,6 +31,8 @@ assert.match(admin, /invitedSignInMethod: signInMethod/, 'member records should 
 assert.match(admin, /loginLinkSentAt: serverTimestamp\(\)/, 'successfully sent email links should be recorded');
 assert.match(admin, /Older record; no reliable setup history/, 'legacy rows should not be assigned an unsupported method');
 assert.match(admin, /Passwordless email link \(recommended for corporate members\)/, 'admin guidance should recommend email links for corporate learners');
+assert.doesNotMatch(admin, /sign in with the Google account connected to your membership/, 'welcome email should not assume Google is the only sign-in method');
+assert.match(admin, /email sign-in link or continue with Google, Microsoft or Facebook/, 'welcome email should explain every available sign-in path');
 assert.match(admin, /<th>Sign-in method<\/th>/, 'Member Access should show the last sign-in method');
 assert.match(admin, /Confirmed Sign-in Method/, 'member CSV export should distinguish the confirmed sign-in method');
 assert.match(admin, /Planned First Sign-in Method/, 'member CSV export should include the planned first sign-in method');

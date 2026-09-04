@@ -4,6 +4,8 @@ on:
   pull_request:
   push:
     branches: [main]
+  schedule:
+    - cron: "17 2 * * *"
 
 permissions:
   contents: read
@@ -40,12 +42,12 @@ jobs:
         working-directory: functions
         run: |
           npm ci --ignore-scripts
-          npm audit --omit=dev --audit-level=high
+          node ../scripts/npm-audit-with-retry.js
       - name: Audit AI function dependencies
         working-directory: functions-aiko
         run: |
           npm ci --ignore-scripts
-          npm audit --omit=dev --audit-level=high
+          node ../scripts/npm-audit-with-retry.js
       - name: Audit administrative function dependencies
         working-directory: functions-admin
-        run: npm audit --omit=dev --audit-level=high
+        run: node ../scripts/npm-audit-with-retry.js
