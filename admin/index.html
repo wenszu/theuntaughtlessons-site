@@ -2028,14 +2028,13 @@
     .mb-signin-choice { margin:14px 0; padding:14px; border:1px solid var(--line); border-radius:9px; background:#FAF8F3; }
     .mb-signin-choice h4 { margin:0; color:var(--navy); font:700 14px/1.35 Lato,Arial,sans-serif; }
     .mb-signin-choice > p { margin:4px 0 11px; color:#5f6871; font-size:12px; line-height:1.45; }
-    .mb-signin-options { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; }
+    .mb-signin-options { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
     .mb-signin-option { position:relative; display:grid; grid-template-columns:auto 1fr; gap:4px 8px; align-items:start; min-height:76px; padding:11px; border:1px solid rgba(0,51,102,.18); border-radius:8px; background:#fff; cursor:pointer; }
     .mb-signin-option:has(input:checked) { border-color:var(--gold); box-shadow:0 0 0 1px var(--gold); background:#FFF9EC; }
     .mb-signin-option input { margin:2px 0 0; accent-color:var(--gold); }
     .mb-signin-option strong { color:var(--navy); font-size:12px; line-height:1.25; }
     .mb-signin-option small { grid-column:2; color:#687482; font-size:11px; line-height:1.35; }
     .mb-signin-note { margin:10px 0 0; color:#6B531C; font-size:11px; line-height:1.45; }
-    @media (max-width:900px) { .mb-signin-options { grid-template-columns:repeat(2,minmax(0,1fr)); } }
     @media (max-width:560px) { .mb-signin-options { grid-template-columns:1fr; } }
     .mb-bulk-tabs { display:flex; gap:5px; margin-top:14px; border-bottom:1px solid var(--line); }
     .mb-bulk-tab { padding:9px 13px; border:0; border-bottom:3px solid transparent; background:transparent; color:#777; font-weight:700; cursor:pointer; }
@@ -3221,14 +3220,12 @@
             </div>
             <div class="mb-signin-choice" aria-labelledby="mbBulkSignInHeading">
               <h4 id="mbBulkSignInHeading">How will these learners sign in for the first time?</h4>
-              <p>Choose one method for everyone in this batch.</p>
+              <p>Choose how everyone in this batch should begin.</p>
               <div class="mb-signin-options">
                 <label class="mb-signin-option"><input type="radio" name="mbBulkSignInMethod" value="emailLink" checked><strong>Email link</strong><small>Sends each learner a separate passwordless sign-in email. Recommended for corporate email.</small></label>
-                <label class="mb-signin-option"><input type="radio" name="mbBulkSignInMethod" value="google.com"><strong>Google</strong><small>They sign in with a Google account using the exact member email.</small></label>
-                <label class="mb-signin-option"><input type="radio" name="mbBulkSignInMethod" value="microsoft.com"><strong>Microsoft</strong><small>They sign in with a Microsoft account using the exact member email.</small></label>
-                <label class="mb-signin-option"><input type="radio" name="mbBulkSignInMethod" value="facebook.com"><strong>Facebook</strong><small>They sign in with a Facebook account using the exact member email.</small></label>
+                <label class="mb-signin-option"><input type="radio" name="mbBulkSignInMethod" value="federated"><strong>Google, Microsoft or Facebook</strong><small>Learners choose one of these services on the login page and use the exact member email.</small></label>
               </div>
-              <p class="mb-signin-note"><strong>Keep this consistent:</strong> learners should continue with their first method. Changing methods later may require their accounts to be linked.</p>
+              <p class="mb-signin-note"><strong>For future access:</strong> the specific service used will be recorded after login. You can send an email link later; some accounts may need the learner to confirm their original service once.</p>
             </div>
             <div class="mb-bulk-checks">
               <label><input type="checkbox" id="mbBulkWelcome" checked>Send the welcome email</label>
@@ -3282,14 +3279,12 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
           </div>
           <div class="mb-signin-choice" aria-labelledby="mbNewSignInHeading">
             <h4 id="mbNewSignInHeading">How will this member sign in for the first time?</h4>
-            <p>Select the method you will ask them to use.</p>
+            <p>Choose how they should begin.</p>
             <div class="mb-signin-options">
               <label class="mb-signin-option"><input type="radio" name="mbNewSignInMethod" value="emailLink" checked><strong>Email link</strong><small>Sends a separate passwordless sign-in email. Recommended for corporate email.</small></label>
-              <label class="mb-signin-option"><input type="radio" name="mbNewSignInMethod" value="google.com"><strong>Google</strong><small>They sign in with a Google account using this exact email.</small></label>
-              <label class="mb-signin-option"><input type="radio" name="mbNewSignInMethod" value="microsoft.com"><strong>Microsoft</strong><small>They sign in with a Microsoft account using this exact email.</small></label>
-              <label class="mb-signin-option"><input type="radio" name="mbNewSignInMethod" value="facebook.com"><strong>Facebook</strong><small>They sign in with a Facebook account using this exact email.</small></label>
+              <label class="mb-signin-option"><input type="radio" name="mbNewSignInMethod" value="federated"><strong>Google, Microsoft or Facebook</strong><small>They choose one of these services on the login page and use this exact email.</small></label>
             </div>
-            <p class="mb-signin-note"><strong>Keep this consistent:</strong> the member should continue with their first method. Changing methods later may require their accounts to be linked.</p>
+            <p class="mb-signin-note"><strong>For future access:</strong> the specific service used will be recorded after login. You can send an email link later; some accounts may need the member to confirm their original service once.</p>
           </div>
           <div class="mb-form-actions" style="margin-top:12px;">
             <button class="small-button" type="button" id="mbAddMemberSave">Add member</button>
@@ -9554,6 +9549,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
     function mbSignInProviderLabel(provider) {
       return ({
         emailLink: 'Email link',
+        federated: 'Google, Microsoft or Facebook',
         'google.com': 'Google',
         'microsoft.com': 'Microsoft',
         'facebook.com': 'Facebook',

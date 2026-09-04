@@ -24,9 +24,8 @@ assert.match(memberLogin, /finishGoogleCredential\(firebaseAuth, credential, mes
 assert.match(memberLogin, /finishGoogleCredential\(firebaseAuth, credential, message, "microsoft\.com"\)/, 'Microsoft sign-ins should record their provider');
 assert.match(memberLogin, /finishGoogleCredential\(firebaseAuth, credential, message, "facebook\.com"\)/, 'Facebook sign-ins should record their provider');
 assert.match(admin, /name="mbNewSignInMethod" value="emailLink" checked/, 'email link should be the clear default first sign-in method');
-assert.match(admin, /name="mbNewSignInMethod" value="google\.com"/, 'individual onboarding should offer Google explicitly');
-assert.match(admin, /name="mbNewSignInMethod" value="microsoft\.com"/, 'individual onboarding should offer Microsoft explicitly');
-assert.match(admin, /name="mbNewSignInMethod" value="facebook\.com"/, 'individual onboarding should offer Facebook explicitly');
+assert.match(admin, /name="mbNewSignInMethod" value="federated"/, 'individual onboarding should group the enabled identity providers');
+assert.equal((admin.match(/<input type="radio" name="mbNewSignInMethod"/g) || []).length, 2, 'individual onboarding should present two clear sign-in paths');
 assert.doesNotMatch(admin, /id="mbNewSendLink"/, 'individual onboarding should not use an ambiguous login-link checkbox');
 assert.match(admin, /invitedSignInMethod: signInMethod/, 'member records should retain the planned first sign-in method');
 assert.match(admin, /loginLinkSentAt: serverTimestamp\(\)/, 'successfully sent email links should be recorded');
