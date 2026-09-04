@@ -23,6 +23,6 @@ assert.match(member, /Select any activity to preview it\.<\/p><\/div>' \+ assess
 assert.match(member, /function orientationCardHtml\(\) \{/, 'the Orientation card should no longer take or render the milestone summary itself');
 assert.match(member, /data-assessment-fallback/, 'assessment-disabled members should retain the regular continue-learning banner');
 assert.match(member, /qsa\("\[data-assessment-journey\]"\)/, 'the existing assessment visibility control should hide the live assessment journey');
-assert.match(memberHome, /content-config\.js\?v=20260902-cohort-standing-tour/, 'the live member page should bypass older cached journey code');
+assert.match(memberHome, /content-config\.js\?v=20260904-login-methods/, 'the live member page should bypass older cached journey code');
 
 console.log('live assessment journey contracts passed');

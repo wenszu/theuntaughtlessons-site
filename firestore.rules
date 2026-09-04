@@ -223,10 +223,16 @@ service cloud.firestore {
         isCanonicalMemberRecord(email) &&
         (!isBootstrapOwnerEmail(email) || isBootstrapOwner());
       allow delete: if isAdmin() && !isBootstrapOwnerEmail(email);
-      // Members can update only their own preferred name and login timestamps.
+      // Members can update only their own preferred name and login audit fields.
       allow update: if signedInWithEmail() &&
         request.auth.token.email.lower() == email &&
-        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name', 'lastLoginAt', 'firstLoginAt']);
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'name', 'lastLoginAt', 'firstLoginAt', 'lastSignInProvider', 'signInProviders'
+        ]) &&
+        (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['lastSignInProvider']) ||
+          request.resource.data.lastSignInProvider in ['emailLink', 'google.com', 'microsoft.com', 'facebook.com', 'password']) &&
+        (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['signInProviders']) ||
+          (request.resource.data.signInProviders is list && request.resource.data.signInProviders.size() <= 5));
     }
 
     // Public credentials intentionally contain only verification-safe fields.

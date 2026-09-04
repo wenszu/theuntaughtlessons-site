@@ -481,7 +481,7 @@ const UTL_CONTENT = {
   });
 
   function rewardUiHref() {
-    var version = "?v=20260902-cohort-standing-tour";
+    var version = "?v=20260904-login-methods";
     if (inPhasePracticeRoot()) return "../../../assets/reward-ui.js" + version;
     return (inAdminRoot() ? "../assets/reward-ui.js" : "../assets/reward-ui.js") + version;
   }
@@ -1724,7 +1724,7 @@ const UTL_CONTENT = {
 
   var _preloadedFirebase = null;
 
-  async function finishGoogleUser(firebaseAuth, user, message) {
+  async function finishGoogleUser(firebaseAuth, user, message, signInProvider) {
     if (!user) throw new Error("Google sign-in did not return a user.");
     var member = await firebaseAuth.requireAuthorizedMember(user);
     // Status and expiry checks — skipped for localhost emulator bypass
@@ -1751,7 +1751,7 @@ const UTL_CONTENT = {
       photoURL: user && user.photoURL ? user.photoURL : "",
       role: member && member.role ? member.role : "member"
     }));
-    await firebaseAuth.saveUserProfile(user, member || {});
+    await firebaseAuth.saveUserProfile(user, member || {}, signInProvider || "");
     if (member && (member.role === "admin" || member.role === "owner")) localStorage.setItem(ADMIN_KEY, "true");
     else localStorage.removeItem(ADMIN_KEY);
     sessionStorage.removeItem("utl_google_login_pending");
@@ -1763,8 +1763,8 @@ const UTL_CONTENT = {
     window.location.href = "index.html";
   }
 
-  async function finishGoogleCredential(firebaseAuth, credential, message) {
-    await finishGoogleUser(firebaseAuth, credential && credential.user, message);
+  async function finishGoogleCredential(firebaseAuth, credential, message, signInProvider) {
+    await finishGoogleUser(firebaseAuth, credential && credential.user, message, signInProvider);
   }
 
   async function handleGoogleRedirectResult(message) {
@@ -1795,7 +1795,7 @@ const UTL_CONTENT = {
         message.textContent = "Finishing Google sign-in...";
         message.classList.remove("ws-success");
       }
-      await finishGoogleUser(firebaseAuth, user, message);
+      await finishGoogleUser(firebaseAuth, user, message, "google.com");
     } catch (error) {
       sessionStorage.removeItem("utl_google_login_pending");
       localStorage.removeItem("utl_google_login_pending");
@@ -1836,7 +1836,7 @@ const UTL_CONTENT = {
         message.textContent = "Finishing Microsoft sign-in...";
         message.classList.remove("ws-success");
       }
-      await finishGoogleUser(firebaseAuth, user, message);
+      await finishGoogleUser(firebaseAuth, user, message, "microsoft.com");
     } catch (error) {
       sessionStorage.removeItem("utl_microsoft_login_pending");
       localStorage.removeItem("utl_microsoft_login_pending");
@@ -1877,7 +1877,7 @@ const UTL_CONTENT = {
         message.textContent = "Finishing Facebook sign-in...";
         message.classList.remove("ws-success");
       }
-      await finishGoogleUser(firebaseAuth, user, message);
+      await finishGoogleUser(firebaseAuth, user, message, "facebook.com");
     } catch (error) {
       sessionStorage.removeItem("utl_facebook_login_pending");
       localStorage.removeItem("utl_facebook_login_pending");
@@ -1915,7 +1915,7 @@ const UTL_CONTENT = {
         linkMessage.classList.remove("ws-success");
         try {
           var credential = await firebaseAuth.signInWithEmailLink(firebaseAuth.auth, email, window.location.href);
-          await finishGoogleUser(firebaseAuth, credential.user, linkMessage);
+          await finishGoogleUser(firebaseAuth, credential.user, linkMessage, "emailLink");
         } catch (err) {
           submitBtn.disabled = false;
           submitBtn.textContent = "Sign in";
@@ -1962,7 +1962,7 @@ const UTL_CONTENT = {
         var fb = _preloadedFirebase || await import(firebaseHref());
         _preloadedFirebase = fb;
         var credential = await fb.signInWithEmailPassword(emailInput.value, passwordInput.value);
-        await finishGoogleUser(fb, credential.user, message);
+        await finishGoogleUser(fb, credential.user, message, "password");
       } catch (error) {
         console.error("Emergency login failed.", error);
         message.textContent = (error && (error.code === "auth/invalid-credential" || error.code === "auth/wrong-password" || error.code === "auth/user-not-found"))
@@ -1986,7 +1986,7 @@ const UTL_CONTENT = {
       var firebaseAuth = _preloadedFirebase || await import(firebaseHref());
       _preloadedFirebase = firebaseAuth;
       var credential = await firebaseAuth.signInWithGooglePopup();
-      await finishGoogleCredential(firebaseAuth, credential, message);
+      await finishGoogleCredential(firebaseAuth, credential, message, "google.com");
     } catch (error) {
       console.error("Google member login failed.", error);
       if (error && error.code === "auth/account-exists-with-different-credential") {
@@ -2026,7 +2026,7 @@ const UTL_CONTENT = {
       var firebaseAuth = _preloadedFirebase || await import(firebaseHref());
       _preloadedFirebase = firebaseAuth;
       var credential = await firebaseAuth.signInWithMicrosoftPopup();
-      await finishGoogleCredential(firebaseAuth, credential, message);
+      await finishGoogleCredential(firebaseAuth, credential, message, "microsoft.com");
     } catch (error) {
       console.error("Microsoft member login failed.", error);
       if (error && error.code === "auth/account-exists-with-different-credential") {
@@ -2066,7 +2066,7 @@ const UTL_CONTENT = {
       var firebaseAuth = _preloadedFirebase || await import(firebaseHref());
       _preloadedFirebase = firebaseAuth;
       var credential = await firebaseAuth.signInWithFacebookPopup();
-      await finishGoogleCredential(firebaseAuth, credential, message);
+      await finishGoogleCredential(firebaseAuth, credential, message, "facebook.com");
     } catch (error) {
       console.error("Facebook member login failed.", error);
       if (error && error.code === "auth/account-exists-with-different-credential") {
@@ -2121,13 +2121,6 @@ const UTL_CONTENT = {
           try {
             var fb = _preloadedFirebase || await import(firebaseHref());
             _preloadedFirebase = fb;
-            var member = await fb.getAuthorizedMember(email);
-            if (!member) {
-              msg.textContent = "That email is not in our member list. Check your spelling or contact Wen-Szu.";
-              btn.disabled = false;
-              btn.textContent = "Email me a sign-in link";
-              return;
-            }
             await fb.sendSignInInvite(email);
             msg.classList.add("ws-success");
             msg.textContent = "Link sent. Check your email and tap the sign-in link — it opens the workspace.";

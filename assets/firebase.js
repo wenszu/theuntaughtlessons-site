@@ -437,7 +437,7 @@ async function getGoogleGroupSyncJobs(limitCount = 50) {
   return docs.slice(0, limitCount);
 }
 
-async function saveUserProfile(user, member = {}) {
+async function saveUserProfile(user, member = {}, signInProvider = "") {
   if (!user || !user.uid) return;
 
   const email = user.email ? String(user.email).trim().toLowerCase() : "";
@@ -450,6 +450,13 @@ async function saveUserProfile(user, member = {}) {
   ]);
 
   const isNewUser = !existingSnap.exists();
+  const allowedSignInProviders = new Set(["emailLink", "google.com", "microsoft.com", "facebook.com", "password"]);
+  const normalizedProvider = allowedSignInProviders.has(signInProvider) ? signInProvider : "";
+  const existingData = existingSnap.exists() ? (existingSnap.data() || {}) : {};
+  const existingProviders = Array.isArray(existingData.signInProviders) ? existingData.signInProviders : [];
+  const signInProviders = normalizedProvider
+    ? Array.from(new Set(existingProviders.concat(normalizedProvider)))
+    : existingProviders;
   const profileData = {
     email,
     displayName: user.displayName || "",
@@ -458,6 +465,10 @@ async function saveUserProfile(user, member = {}) {
     lastSeenAt: serverTimestamp(),
     updatedAt: serverTimestamp()
   };
+  if (normalizedProvider) {
+    profileData.lastSignInProvider = normalizedProvider;
+    profileData.signInProviders = signInProviders;
+  }
 
   if (isNewUser) {
     const memberData = memberSnap && memberSnap.exists() ? memberSnap.data() : null;
@@ -473,8 +484,14 @@ async function saveUserProfile(user, member = {}) {
   await setDoc(userRef, profileData, { merge: true });
 
   if (email && memberSnap && memberSnap.exists()) {
+    const memberData = memberSnap.data() || {};
+    const memberProviders = Array.isArray(memberData.signInProviders) ? memberData.signInProviders : [];
     const loginUpdate = { lastLoginAt: serverTimestamp() };
     if (!memberSnap.data().firstLoginAt) loginUpdate.firstLoginAt = serverTimestamp();
+    if (normalizedProvider) {
+      loginUpdate.lastSignInProvider = normalizedProvider;
+      loginUpdate.signInProviders = Array.from(new Set(memberProviders.concat(normalizedProvider)));
+    }
     await setDoc(doc(readyDb, "authorized_members", email), loginUpdate, { merge: true });
   }
 }

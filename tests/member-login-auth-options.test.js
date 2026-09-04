@@ -17,7 +17,13 @@ assert.ok(
   'email-link sign-in should appear before social providers'
 );
 assert.doesNotMatch(loginMarkup, /id="wsMicrosoftLogin"/, 'broken Microsoft sign-in should not be offered');
+assert.doesNotMatch(memberLogin, /var member = await fb\.getAuthorizedMember\(email\)/, 'email-link requests must not perform an unauthenticated member lookup');
+assert.match(memberLogin, /finishGoogleUser\(firebaseAuth, credential\.user, linkMessage, "emailLink"\)/, 'email-link sign-ins should record their provider');
+assert.match(memberLogin, /finishGoogleCredential\(firebaseAuth, credential, message, "google\.com"\)/, 'Google sign-ins should record their provider');
+assert.match(memberLogin, /finishGoogleCredential\(firebaseAuth, credential, message, "facebook\.com"\)/, 'Facebook sign-ins should record their provider');
 assert.match(admin, /id="mbNewSendLink" checked/, 'new members should receive a sign-in link by default');
 assert.match(admin, /Passwordless email link \(recommended for corporate members\)/, 'admin guidance should recommend email links for corporate learners');
+assert.match(admin, /<th>Sign-in method<\/th>/, 'Member Access should show the last sign-in method');
+assert.match(admin, /Last Sign-in Method/, 'member CSV export should include the last sign-in method');
 
 console.log('member login and corporate email-link onboarding contracts passed');

@@ -3700,7 +3700,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
     </main>
   </div>
 
-  <script src="../member-login/content-config.js?v=20260902-cohort-standing-tour"></script>
+  <script src="../member-login/content-config.js?v=20260904-login-methods"></script>
   <script src="../assets/reward-ui.js?v=20260803-written-reflection-1"></script>
 
   <script type="module">
@@ -9520,6 +9520,25 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       } catch (e) { return '—'; }
     }
 
+    function mbSignInProviderLabel(provider) {
+      return ({
+        emailLink: 'Email link',
+        'google.com': 'Google',
+        'microsoft.com': 'Microsoft',
+        'facebook.com': 'Facebook',
+        password: 'Emergency password'
+      })[String(provider || '')] || 'Not recorded';
+    }
+
+    function mbSignInMethodHtml(data) {
+      var latest = mbSignInProviderLabel(data.lastSignInProvider);
+      var providers = Array.isArray(data.signInProviders)
+        ? data.signInProviders.map(mbSignInProviderLabel).filter(function (label) { return label !== 'Not recorded'; })
+        : [];
+      var history = providers.length ? providers.join(', ') : 'Recorded after their next login';
+      return '<strong style="white-space:nowrap;">' + escapeHtml(latest) + '</strong><br><small>' + escapeHtml(history) + '</small>';
+    }
+
     function mbFormatGroupAuditDate(ts) {
       var formatted = mbFormatDate(ts);
       return formatted === '—' ? '' : formatted;
@@ -9714,12 +9733,13 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
           '<td><span class="mb-status-badge ' + statusCls + '">' + escapeHtml(status) + '</span></td>' +
           '<td>' + escapeHtml(data.cohort || '—') + '</td>' +
           '<td>' + escapeHtml(mbFormatDate(data.firstLoginAt)) + '</td>' +
+          '<td>' + mbSignInMethodHtml(data) + '</td>' +
           '<td>' + expiryHtml + '</td>' +
           '<td>' + credentialHtml + '</td>' +
           '<td>' + actions + '</td>' +
         '</tr>' +
         (isOwner ? '' :
-          '<tr class="mb-edit-panel"><td colspan="9">' + mbEditFormHtml(email, data) + '</td></tr>'
+          '<tr class="mb-edit-panel"><td colspan="10">' + mbEditFormHtml(email, data) + '</td></tr>'
         );
       }).join('');
 
@@ -9746,6 +9766,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
             mbSortTh('Status', 'status') +
             mbSortTh('Cohort', 'cohort') +
             mbSortTh('First Login', 'firstLogin') +
+            '<th>Sign-in method</th>' +
             mbSortTh('Expiry', 'expiry') +
             '<th>Credential ID</th>' +
             '<th>Actions</th>' +
@@ -10546,7 +10567,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       var pad = function (n) { return String(n).padStart(2, '0'); };
       var dateStr = String(now.getFullYear()) + pad(now.getMonth() + 1) + pad(now.getDate());
       var filename = dateStr + ' - utl-members download.csv';
-      var header = ['Name', 'Email', 'Role', 'Status', 'Cohort', 'First Login', 'Expiry', 'Google Group', 'Google Group Sync', 'Notes', 'Added By', 'Added At'];
+      var header = ['Name', 'Email', 'Role', 'Status', 'Cohort', 'First Login', 'Last Sign-in Method', 'Sign-in Methods Used', 'Expiry', 'Google Group', 'Google Group Sync', 'Notes', 'Added By', 'Added At'];
       function csvCell(val) {
         var s = String(val === null || val === undefined ? '' : val).replace(/"/g, '""');
         return (s.search(/[,"\r\n]/) !== -1) ? '"' + s + '"' : s;
@@ -10565,6 +10586,8 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
           csvCell(data.status || 'active'),
           csvCell(data.cohort || ''),
           csvCell(mbFormatDate(data.firstLoginAt)),
+          csvCell(mbSignInProviderLabel(data.lastSignInProvider)),
+          csvCell(Array.isArray(data.signInProviders) ? data.signInProviders.map(mbSignInProviderLabel).join(', ') : ''),
           csvCell(mbFormatDate(data.expiryDate)),
           csvCell(data.googleGroupAdded ? 'Yes' : 'No'),
           csvCell(data.googleGroupSyncStatus || ''),
