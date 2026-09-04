@@ -2,15 +2,13 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 
 const workflow = fs.readFileSync('.github/workflows/security-checks.yml', 'utf8');
-const auditScript = fs.readFileSync('scripts/npm-audit-with-retry.js', 'utf8');
 
 assert.match(workflow, /schedule:\s*\n\s*- cron:/, 'security audits should run on a daily schedule as well as code changes');
-assert.equal((workflow.match(/node \.\.\/scripts\/npm-audit-with-retry\.js/g) || []).length, 3, 'every deployed function package should use the resilient audit runner');
-assert.match(auditScript, /--audit-level=high/, 'high and critical vulnerability findings should remain blocking');
-assert.match(auditScript, /if \(!result\.timedOut && !transientPattern\.test\(result\.output\)\)/, 'confirmed audit findings should not be treated as service outages');
-assert.match(auditScript, /::error title=npm audit unavailable::/, 'persistent registry outages should remain visible and fail closed');
-assert.match(auditScript, /process\.exit\(1\);\s*\}\)\(\);\s*$/, 'the security gate should not pass without a vulnerability result');
-assert.match(auditScript, /const timeoutMs = 30_000/, 'each unavailable registry attempt should have a bounded wait');
-assert.match(auditScript, /process\.kill\(-child\.pid, 'SIGKILL'\)/, 'the timeout should terminate npm and its child processes');
+assert.match(workflow, /google\/osv-scanner-action\/.github\/workflows\/osv-scanner-reusable\.yml@v2\.5\.0/, 'dependency checks should use the official OSV Scanner workflow');
+assert.match(workflow, /--lockfile=functions\/package-lock\.json/, 'Google Group dependencies should be scanned');
+assert.match(workflow, /--lockfile=functions-aiko\/package-lock\.json/, 'AI function dependencies should be scanned');
+assert.match(workflow, /--lockfile=functions-admin\/package-lock\.json/, 'administrative function dependencies should be scanned');
+assert.match(workflow, /security-events: write/, 'OSV results should be published to GitHub code scanning');
+assert.match(workflow, /npm ci --ignore-scripts --no-audit/, 'dependency installation should not call the unavailable npm audit endpoint');
 
-console.log('security workflow outage resilience contracts passed');
+console.log('independent dependency vulnerability scan contracts passed');
