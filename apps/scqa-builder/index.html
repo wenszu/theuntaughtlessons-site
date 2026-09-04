@@ -22,6 +22,7 @@
       --line: #E8DFD1;
       --rule: #D6E4F0;
       --soft: #F9F7F3;
+      --paper: #FAF8F4;
       --tan: #EBE4D5;
       --green: #6B8F71;
       --red: #C0392B;
@@ -722,8 +723,6 @@
       color: var(--navy);
       font: 700 13px Lato, Arial, sans-serif;
     }
-    #geminiFeedback:empty { display: none; }
-    #geminiFeedback { margin-top: 16px; }
     .panel-close { position: absolute; top: 16px; right: 18px; border: 0; background: transparent; color: var(--charcoal); cursor: pointer; font-size: 18px; }
     .score-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
     .score-line { color: var(--navy); font-family: "Playfair Display", Georgia, serif; font-size: 22px; font-weight: 700; }
@@ -737,11 +736,11 @@
     .rule-hint { display: none; margin-top: 6px; padding: 10px 12px; border-radius: 6px; background: var(--soft); font-size: 12px; }
     .rule-hint.show { display: block; }
     .feedback-panel { padding: 0; overflow: hidden; }
-    .feedback-panel-head { padding: 24px 32px 18px; border-bottom: 1px solid var(--line); }
+    .feedback-panel-head { padding: 24px 32px 8px; }
     .feedback-panel-head h2 { margin: 4px 0 7px; }
     .feedback-panel-head p { margin: 0; color: var(--steel); }
     .feedback-layer { padding: 22px 32px; }
-    .feedback-layer + .feedback-layer { border-top: 1px solid var(--line); background: #FCFAF6; }
+    .feedback-layer + .feedback-layer { padding-top: 0; background: var(--white); }
     .feedback-layer-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; }
     .feedback-layer-head h3 { margin: 3px 0 5px; color: var(--navy); font-family: "Playfair Display", Georgia, serif; font-size: 21px; }
     .feedback-layer-head p { max-width: 760px; margin: 0; color: var(--steel); font-size: 13px; line-height: 1.5; }
@@ -751,6 +750,15 @@
     .passed-checks { margin-top: 10px; border-top: 1px solid var(--line); }
     .passed-checks summary { padding: 12px 0 2px; color: var(--steel); cursor: pointer; font-size: 12px; font-weight: 700; }
     .feedback-ai-action { margin-top: 14px; }
+    .feedback-summary-details { margin-top: 14px; border-top: 1px solid var(--line); }
+    .feedback-summary-details summary { padding: 12px 0 0; color: var(--steel); cursor: pointer; font-size: 12px; font-weight: 700; }
+    .feedback-summary-details .feedback-rules { margin-top: 10px; }
+    #portableAiReview .utl-coach-prompt { margin: 0; }
+    .scqa-result-footer { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-top: 16px; padding: 16px 20px; border: 1px solid var(--line); border-radius: 8px; background: var(--white); }
+    .scqa-result-footer[hidden] { display: none; }
+    .scqa-result-footer p { margin: 0; color: var(--steel); }
+    .scqa-result-footer p strong { display: block; color: var(--navy); }
+    .scqa-result-footer .action-row { margin: 0; padding: 0; }
     .score-message { color: var(--steel); font-size: 13px; font-style: italic; }
     .diff-note { margin-top: 20px; padding: 12px; border-radius: 8px; background: var(--soft); font-size: 13px; }
     .diff-note.good { color: var(--green); }
@@ -975,6 +983,17 @@
       font-family: 'Lato', sans-serif;
       line-height: 1.5;
     }
+    .scqa-results-shell { padding: 18px; border: 1px solid var(--rule); border-radius: 10px; background: var(--white); }
+    .scqa-result-tabs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin: 0; padding: 4px; border: 1px solid var(--line); border-radius: 8px; background: var(--paper); }
+    .scqa-results-shell > .scqa-result-panel { margin-top: 14px; }
+    .scqa-result-tab { min-height: 42px; border: 0; border-radius: 6px; background: transparent; color: var(--navy); font-weight: 700; cursor: pointer; }
+    .scqa-result-tab.active { background: var(--navy); color: var(--white); }
+    .scqa-result-panel[hidden] { display: none !important; }
+    .scqa-self-check-list { display: grid; gap: 10px; margin-top: 14px; }
+    .scqa-self-check-list label { display: flex; width: 100%; align-items: flex-start; justify-content: flex-start; gap: 10px; }
+    .scqa-self-check-list input { width: 16px; height: 16px; flex: 0 0 16px; margin: 3px 0 0; padding: 0; }
+    .scqa-self-check-list span { flex: 1 1 auto; text-align: left; }
+    @media (max-width: 620px) { .scqa-result-tabs { grid-template-columns: 1fr 1fr; } .scqa-result-footer { align-items: stretch; flex-direction: column; } }
   </style>
 </head>
 <body>
@@ -1027,46 +1046,51 @@
 
     <section class="screen review" id="screen3">
       <div class="page-title">
-        <div class="eyebrow">Review your work</div>
         <h1 class="title">Your SCQA, connected.</h1>
         <p class="subtitle">Read the full storyline, then review how well each part connects to the next.</p>
       </div>
-      <div class="context-banner">
-        <div class="label">Your context</div>
-        <p id="reviewContext"></p>
-        <strong id="reviewTopic"></strong>
-      </div>
-      <div class="review-grid" id="reviewGrid"></div>
-      <section class="panel feedback-panel" id="reviewFeedbackPanel">
-        <header class="feedback-panel-head">
-          <div class="label">Two ways to review</div>
-          <h2>Feedback on your SCQA</h2>
-          <p>Start with the structure check. If you want another perspective, ask AI to review how the full story connects.</p>
-        </header>
-        <div class="feedback-layer" id="feedbackMount"></div>
-        <div class="feedback-layer" id="geminiReviewPanel">
-          <div class="feedback-layer-head">
-            <div><div class="label">Optional AI review</div><h3>Get another perspective</h3><p>Gemini can review whether the four parts form one connected story and suggest one useful improvement. You can still finish if AI feedback is unavailable.</p></div>
-          </div>
-          <div class="feedback-ai-action"><button class="btn btn-secondary" type="button" id="getGeminiReview">Get AI feedback</button></div>
-          <div id="geminiFeedback" aria-live="polite"></div>
+      <section class="scqa-results-shell">
+      <nav class="scqa-result-tabs" id="scqaResultTabs" aria-label="Result sections">
+        <button class="scqa-result-tab" type="button" data-result-tab="self">Self-check</button>
+        <button class="scqa-result-tab active" type="button" data-result-tab="feedback">Feedback</button>
+        <button class="scqa-result-tab" type="button" data-result-tab="answer">Your answer</button>
+        <button class="scqa-result-tab" type="button" data-result-tab="sample">Sample</button>
+      </nav>
+      <section class="panel scqa-result-panel" id="scqaSelfPanel" data-result-panel="self" hidden>
+        <div class="label">Self-check</div>
+        <h2>Review your thinking before you compare.</h2>
+        <div class="scqa-self-check-list">
+          <label><input type="checkbox"> <span>Does the Situation include only the context the reader needs?</span></label>
+          <label><input type="checkbox"> <span>Does the Complication explain what changed and why it matters?</span></label>
+          <label><input type="checkbox"> <span>Does the Question follow directly from the Complication?</span></label>
+          <label><input type="checkbox"> <span>Does the Answer resolve the Question clearly?</span></label>
         </div>
       </section>
-      <div id="saveNoticeMount"></div>
-      <div class="action-row">
-        <button class="btn btn-secondary" type="button" id="editScqa1">← Edit my SCQA</button>
-        <button class="btn btn-secondary" type="button" id="showSamples">Show sample answers</button>
-        <button class="btn btn-primary" type="button" id="finishScqa">Save and finish exercise</button>
-      </div>
-      <div id="sampleMount"></div>
-      <section class="panel" id="afterFinishPanel" hidden>
-        <div class="label">Exercise complete</div>
-        <h2>Your SCQA has been saved.</h2>
-        <p>Your work has been saved. What would you like to do next?</p>
-        <div class="action-row">
-          <a class="btn btn-primary" href="../../member-login/index.html#learning-journey">Back to Learning Journey</a>
-          <button class="btn btn-secondary" type="button" id="showPracticeScenarios">Practice another SCQA</button>
+      <div class="scqa-result-panel" data-result-panel="answer" hidden>
+        <div class="context-banner">
+          <div class="label">Your context</div>
+          <p id="reviewContext"></p>
+          <strong id="reviewTopic"></strong>
         </div>
+        <div class="review-grid" id="reviewGrid"></div>
+      </div>
+      <section class="panel feedback-panel scqa-result-panel" id="reviewFeedbackPanel" data-result-panel="feedback">
+        <header class="feedback-panel-head">
+          <h2>Feedback on your SCQA</h2>
+        </header>
+        <div class="feedback-layer" id="feedbackMount"></div>
+        <div class="feedback-layer"><div id="portableAiReview"></div></div>
+      </section>
+      <div id="saveNoticeMount" hidden></div>
+      <div class="scqa-result-panel" id="sampleMount" data-result-panel="sample" hidden></div>
+      <section class="scqa-result-footer" id="afterFinishPanel" hidden>
+        <p><strong>Your SCQA is submitted.</strong> Review the feedback or revise your response.</p>
+        <div class="action-row">
+          <button class="btn btn-secondary" type="button" id="editScqa1">Edit SCQA</button>
+          <button class="btn btn-secondary" type="button" id="showPracticeScenarios">Practice another SCQA</button>
+          <a class="btn btn-primary" href="../../member-login/index.html#learning-journey">Back to Learning Journey</a>
+        </div>
+      </section>
       </section>
       <section class="panel" id="practiceScenarioPanel" hidden>
         <div class="label">Optional practice</div>
@@ -1090,11 +1114,11 @@
   </div>
   <div class="toast" id="toast"></div>
 
+  <script src="../../assets/exercise-feedback-coach.js?v=20260903-feedback-rollout"></script>
   <script>
     const STORAGE_KEY = "utl_scqa_builder_v2";
     const TIMER_TARGET = 10 * 60;
     const DATA_URL = "../../data/practice/scqa-builder.json?v=20260802-optional-practice-1";
-    const SCQA_SCORE_URL = "https://us-central1-the-untaught-lessons.cloudfunctions.net/scoreScqa";
     const PRACTICE_ATTEMPTS_KEY = "utl_scqa_practice_attempts";
     const ATTEMPT_WORKSPACES_KEY = "utl_scqa_attempt_workspaces";
     const blankScqa = () => ({ s: "", c: "", q: "", a: "" });
@@ -1532,7 +1556,7 @@
             <div class="bottom-bar">
               <button class="clear-link" type="button" id="clearFresh" hidden>Clear and start fresh</button>
               <div class="remaining" id="remaining1"></div>
-              <button class="btn btn-primary" type="button" id="toReview">Review my SCQA →</button>
+              <button class="btn btn-primary" type="button" id="toReview">Submit</button>
             </div>
           </section>
         </div>`;
@@ -1623,7 +1647,7 @@
             <div class="bottom-bar">
               <button class="btn btn-secondary" type="button" data-go="1">← Back to SCQA #1</button>
               <div class="remaining" id="remaining2"></div>
-              <button class="btn btn-primary" type="button" id="toReview">Review both →</button>
+              <button class="btn btn-primary" type="button" id="toReview">Submit</button>
             </div>
           </section>
         </div>`;
@@ -1651,15 +1675,23 @@
       $("#reviewTopic").style.display = state.topicLabel ? "block" : "none";
       $("#reviewGrid").innerHTML = reviewColumn("YOUR SCQA", state.scqa1);
       renderFeedback();
-      renderSavedGeminiReview();
       $("#saveNoticeMount").innerHTML = "";
-      $("#finishScqa").textContent = state.completedOnce ? "Save practice attempt" : "Save and finish exercise";
       const attemptComplete = state.practiceScenarioId ? state.practiceAttemptSaved : state.completedOnce;
-      $("#finishScqa").hidden = attemptComplete;
       $("#afterFinishPanel").hidden = !attemptComplete;
       $("#practiceScenarioPanel").hidden = true;
       renderPracticeScenarios();
       renderAttemptSwitcher();
+      setScqaResultTab("feedback");
+    }
+
+    function setScqaResultTab(tab) {
+      $$("[data-result-tab]").forEach((button) => {
+        const active = button.dataset.resultTab === tab;
+        button.classList.toggle("active", active);
+        button.setAttribute("aria-selected", String(active));
+      });
+      $$("[data-result-panel]").forEach((panel) => { panel.hidden = panel.dataset.resultPanel !== tab; });
+      if (tab === "sample") renderSamples();
     }
 
     function saveResult(appId, phase, exerciseName, durationSeconds, responseObj) {
@@ -1770,15 +1802,19 @@
       const score = results.reduce((sum, result) => sum + result.points, 0);
       const needsReview = results.filter((result) => !result.pass);
       const passed = results.filter((result) => result.pass);
-      const statusText = needsReview.length
-        ? `${needsReview.length} item${needsReview.length === 1 ? "" : "s"} to review`
-        : "All checks passed";
-      $("#feedbackMount").innerHTML = `<div class="feedback-layer-head">
-          <div><div class="label">Structure check</div><h3>${needsReview.length ? "Worth another look" : "Strong foundation"}</h3><p>${escapeHtml(scoreMessage(score))}</p></div>
-          <span class="feedback-status ${needsReview.length ? "" : "complete"}">${escapeHtml(statusText)}</span>
+      const strongest = passed[0] || results[0];
+      const firstImprovement = needsReview[0] || passed[1] || results[0];
+      const connectionCheck = needsReview[1] || passed.find((item) => /Connect|resolution|roles/i.test(item.strong)) || results[results.length - 1];
+      $("#feedbackMount").innerHTML = `<div class="utl-coach-summary">
+          <div class="utl-coach-card"><small>What is working</small><span>${escapeHtml(strongest.detail)}</span></div>
+          <div class="utl-coach-card"><small>Improve this first</small><span>${escapeHtml(firstImprovement.detail)}</span></div>
+          <div class="utl-coach-card"><small>Check the connection</small><span>${escapeHtml(connectionCheck.detail)}</span></div>
         </div>
-        <div class="feedback-rules">${needsReview.length ? rulesMarkup(needsReview) : ""}</div>
-        ${passed.length ? `<details class="passed-checks"><summary>${passed.length} check${passed.length === 1 ? "" : "s"} passed</summary>${rulesMarkup(passed)}</details>` : ""}`;
+        <details class="feedback-summary-details"><summary>View all structure checks</summary>
+          <div class="feedback-rules">${rulesMarkup(results)}</div>
+        </details>`;
+      const sample = templateState.scqa1;
+      window.UTLFeedbackCoach?.mountPrompt({mount:'#portableAiReview',title:'Framing the Storyline with SCQA',goal:'Build one connected executive storyline in which the complication creates a clear question and the answer resolves it.',criteria:['Give the Situation only the stable context the reader needs','Use the Complication to show what changed and why it matters','Write one focused Question that follows from the Complication','Lead with an Answer that directly resolves the Question'],response:()=>`Situation: ${state.scqa1.s}\nComplication: ${state.scqa1.c}\nQuestion: ${state.scqa1.q}\nAnswer: ${state.scqa1.a}`,sample:`Situation: ${sample.s}\nComplication: ${sample.c}\nQuestion: ${sample.q}\nAnswer: ${sample.a}`,signals:results.map(item=>`${item.strong}: ${item.detail}`)});
     }
 
     function rulesMarkup(results) {
@@ -1792,48 +1828,6 @@
         question: state.scqa1.q,
         answer: state.scqa1.a
       };
-    }
-
-    function geminiReviewMarkup(result) {
-      const connections = Array.isArray(result?.connections) ? result.connections : [];
-      return `<div class="callout"><div class="label">Gemini's review</div><p>${escapeHtml(result?.summary)}</p></div>
-        <div>${connections.map((item) => `<div class="rule-row"><div class="rule-top"><span class="mark ${item.status === "strong" ? "pass" : "fail"}">${item.status === "strong" ? "✓" : "•"}</span><span><strong>${escapeHtml(item.name)}:</strong> ${escapeHtml(item.feedback)}</span></div></div>`).join("")}</div>
-        <div class="callout"><div class="label">One useful improvement</div><p><strong>${escapeHtml(result?.improvementTitle)}:</strong> ${escapeHtml(result?.improvement)}</p></div>`;
-    }
-
-    function renderSavedGeminiReview() {
-      const mount = $("#geminiFeedback");
-      const button = $("#getGeminiReview");
-      if (!mount || !button) return;
-      mount.innerHTML = state.aiReview ? geminiReviewMarkup(state.aiReview) : "";
-      button.textContent = state.aiReview ? "Review again" : "Get AI feedback";
-    }
-
-    async function requestGeminiReview() {
-      const button = $("#getGeminiReview");
-      const mount = $("#geminiFeedback");
-      button.disabled = true;
-      button.textContent = "Reviewing your SCQA…";
-      mount.innerHTML = '<p>Gemini is checking how the four parts connect.</p>';
-      try {
-        const response = await fetch(SCQA_SCORE_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ context: state.context, ...scqaResponse() })
-        });
-        if (!response.ok) throw new Error(`Review request failed with ${response.status}.`);
-        const result = await response.json();
-        if (result.fallback) throw new Error("AI review is temporarily unavailable.");
-        state.aiReview = result;
-        save();
-        mount.innerHTML = geminiReviewMarkup(result);
-      } catch (error) {
-        console.warn("SCQA AI review unavailable:", error);
-        mount.innerHTML = '<div class="callout"><p><strong>AI feedback is unavailable right now.</strong> Your rules review above is still available, and you can finish the exercise normally.</p></div>';
-      } finally {
-        button.disabled = false;
-        button.textContent = "Review again";
-      }
     }
 
     function renderPracticeScenarios() {
@@ -1913,7 +1907,6 @@
       save();
       $("#saveNoticeMount").innerHTML = '<div class="completion-save-notice"><div class="save-notice-text"><strong>Practice attempt saved.</strong> You can try another situation or return to the Learning Journey.</div></div>';
       $("#afterFinishPanel").hidden = false;
-      $("#finishScqa").hidden = true;
       renderAttemptSwitcher();
     }
 
@@ -1938,7 +1931,6 @@
       }
       $("#saveNoticeMount").innerHTML = completionSaveNotice();
       $("#afterFinishPanel").hidden = false;
-      $("#finishScqa").hidden = true;
     }
 
     function renderSamples() {
@@ -1946,7 +1938,7 @@
       const sample = practiceScenario?.sampleAnswer || templateState.scqa1;
       const sampleLabel = practiceScenario ? `Sample for ${practiceScenario.title}` : "Sample SCQA";
       const custom = !practiceScenario && state.context.trim() !== templateState.context;
-      $("#sampleMount").innerHTML = `<section class="panel"><button class="panel-close" data-close-panel="sampleMount" type="button">×</button>${custom ? `<p class="sample-notice">This sample uses the Olympics case study. Use it as a model for structure and language, not for content.</p>` : ""}<div class="label" style="color:var(--steel)">${escapeHtml(sampleLabel)}</div>${reviewColumn("", sample)}</section>`;
+      $("#sampleMount").innerHTML = `<section class="panel"><button class="panel-close" data-close-panel="sampleMount" type="button">×</button><p class="sample-notice">This sample shows one way to connect the four parts. Review how each section leads into the next, then decide what would strengthen your SCQA.</p>${custom ? `<p class="sample-notice">This example uses the Olympics case study. Apply its structure and language to your own content.</p>` : ""}<div class="label" style="color:var(--steel)">${escapeHtml(sampleLabel)}</div>${reviewColumn("", sample)}</section>`;
     }
 
     function copyText() {
@@ -2009,7 +2001,7 @@
       const go = event.target.closest("[data-go]");
       if (go) { updateFromDom(); goToScreen(Number(go.dataset.go)); return; }
       if (event.target.id === "toReframe") { updateFromDom(); goToScreen(2); return; }
-      if (event.target.id === "toReview") { updateFromDom(); goToScreen(3); return; }
+      if (event.target.id === "toReview") { updateFromDom(); goToScreen(3); finishExercise(); return; }
       if (event.target.id === "resetTemplate") {
         state.context = templateState.context;
         state.topicLabel = templateState.topicLabel;
@@ -2029,9 +2021,10 @@
     });
 
     $("#editScqa1").addEventListener("click", () => goToScreen(1));
-    $("#showSamples").addEventListener("click", renderSamples);
-    $("#getGeminiReview").addEventListener("click", requestGeminiReview);
-    $("#finishScqa").addEventListener("click", finishExercise);
+    $("#scqaResultTabs").addEventListener("click", (event) => {
+      const button = event.target.closest("[data-result-tab]");
+      if (button) setScqaResultTab(button.dataset.resultTab);
+    });
     $("#showPracticeScenarios").addEventListener("click", () => {
       renderPracticeScenarios();
       $("#practiceScenarioPanel").hidden = false;
@@ -2094,6 +2087,16 @@
       const restoredScreen = state.currentScreen === 3 ? 3 : 1;
       goToScreen(restoredScreen);
       const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get("design-preview") === "scqa-results") {
+        state.scqa1 = {
+          s: "The Olympics still has global recognition and a large audience.",
+          c: "Shared viewing is fading and athlete stories are harder to follow across channels.",
+          q: "How can the Olympics become a meaningful shared event again?",
+          a: "Create appointment moments, build clearer athlete story arcs, and use one editorial direction across channels."
+        };
+        goToScreen(3);
+        setScqaResultTab(urlParams.get("view") || "feedback");
+      }
       if (urlParams.get("attempt") === "olympics" && activeAttemptId() !== "olympics") {
         switchAttempt("olympics");
       }
@@ -2108,9 +2111,9 @@
 
     initializeApp();
   </script>
-  <script type="module" src="../../assets/app-access-guard.js?v=20260827-support-preview-1"></script>
+  <script type="module" src="../../assets/app-access-guard.js?v=20260903-feedback-preview"></script>
   <script src="../../assets/exercise-scoring-intro.js?v=6"></script>
-  <script src="../../assets/app-reward-header.js?v=20260803-scqa-video-1"></script>
+  <script src="../../assets/app-reward-header.js?v=20260903-feedback-preview"></script>
   <script src="../../assets/reward-events.js?v=20260730-celebration-1"></script>
   <script type="module" src="../../assets/feedback-widget.js?v=6"></script>
   <script src="../../assets/tactile-buttons.js?v=20260714-flat-1" defer></script>

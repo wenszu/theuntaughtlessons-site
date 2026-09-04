@@ -43,6 +43,9 @@
 
   function attach() {
     if (document.getElementById("exerciseSetup")) return;
+    const designPreview = new URLSearchParams(location.search).get("design-preview");
+    const localPreview = ["127.0.0.1", "localhost"].indexOf(location.hostname) >= 0;
+    if (localPreview && ["score-history", "messy-notes-working", "messy-notes-results", "rushed-voice-memo-working", "rushed-voice-memo-results", "chalkboard-notes-working", "chalkboard-notes-results", "write-to-aiko-results", "scqa-results"].includes(designPreview)) return;
     var config = CONTEXTS[appKey()];
     if (!config) return;
     injectStyles();

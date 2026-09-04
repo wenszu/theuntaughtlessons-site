@@ -183,17 +183,16 @@
     .choice-card small { display: block; margin-top: 3px; color: var(--steel); line-height: 1.35; }
     .run-layout { display: grid; grid-template-columns: 280px minmax(0, 1fr); gap: 16px; align-items: start; }
     .run-board { position: sticky; top: 158px; }
-    .prompt-details { margin-top: 14px; }
-    .prompt-details summary { cursor: pointer; color: var(--navy); font-weight: 700; }
-    .fallback-paths { display: grid; gap: 14px; margin-top: 16px; }
-    .fallback-option { padding: 18px; border: 1px solid var(--rule); border-radius: 8px; background: var(--white); }
-    .fallback-option h3 { color: var(--navy); font-size: 18px; }
-    .fallback-option > p { margin-top: 6px; color: var(--steel); font-size: 14px; }
-    .fallback-steps { display: grid; gap: 18px; margin-top: 16px; }
-    .fallback-step { display: grid; grid-template-columns: 30px minmax(0, 1fr); gap: 12px; align-items: start; }
-    .fallback-step-number { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--soft-gold); color: var(--navy); font-weight: 700; }
-    .fallback-step-content label { display: block; margin-bottom: 8px; }
-    .fallback-step-content .button { margin-top: 4px; }
+    .board-ai-workflow { display: grid; gap: 18px; margin-top: 18px; }
+    .board-response-step { padding: 18px; border: 1px solid var(--rule); border-radius: 8px; background: var(--white); }
+    .board-response-step h3 { color: var(--navy); font-size: 18px; }
+    .board-response-step > p { margin: 6px 0 14px; color: var(--steel); font-size: 14px; }
+    .board-response-step label { display: block; margin-bottom: 8px; }
+    .board-response-step .button { margin-top: 12px; }
+    .sample-fallback { padding-top: 14px; border-top: 1px solid var(--rule); }
+    .sample-fallback strong { display: block; color: var(--navy); }
+    .sample-fallback p { margin: 4px 0 0; color: var(--steel); font-size: 13px; }
+    .sample-fallback .button { margin-top: 12px; }
     .output-box { min-height: 160px; }
     .fallback-note { margin-top: 12px; padding: 12px; border-radius: 7px; background: var(--soft-blue); color: var(--steel); font-size: 14px; }
     .result-preview { display: grid; gap: 12px; }
@@ -230,9 +229,6 @@
     .substep + .substep { margin-top: 22px; padding-top: 22px; border-top: 1px solid var(--rule); }
     .substep-number { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: var(--navy); color: var(--white); font-weight: 700; }
     .substep-copy p { margin-top: 5px; color: var(--steel); }
-    .ai-status { display: none; margin-top: 14px; padding: 13px 15px; border: 1px solid #E4C47E; border-radius: 8px; background: var(--soft-gold); color: var(--navy); }
-    .ai-status.is-visible { display: block; }
-    .ai-status.is-fallback { border-color: var(--rule); background: var(--soft-blue); }
     .response-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
     @media (max-width: 900px) {
       .screen-grid, .run-layout, .work-layout { grid-template-columns: 1fr; }
@@ -366,10 +362,19 @@
         <div class="main-column">
           <div class="panel">
             <h2 class="panel-title">Bring the board together</h2>
-            <p>Each advisor will identify one important concern and recommend what to do. The board chair will compare the advice and recommend one direction.</p>
-            <div class="button-row"><button class="button primary" type="button" id="runBoardBtn">Hear from my board</button></div>
-            <div class="ai-status" id="aiStatus" aria-live="polite"></div>
-            <details class="prompt-details" id="pasteResponseDetails"><summary>Other ways to continue</summary><p class="helper" style="margin-top:8px">Choose one of these options if the in-page board is unavailable or you want to compare its response with another AI.</p><div class="fallback-paths"><section class="fallback-option" aria-labelledby="otherAiTitle"><h3 id="otherAiTitle">Use another AI</h3><p>Take the prepared prompt to another AI, then bring its response back here.</p><div class="fallback-steps"><div class="fallback-step"><span class="fallback-step-number">1</span><div class="fallback-step-content"><label>Copy the board prompt</label><button class="button secondary" type="button" id="copyPromptBtn">Copy prompt</button><textarea id="boardPrompt" readonly hidden aria-hidden="true"></textarea></div></div><div class="fallback-step"><span class="fallback-step-number">2</span><div class="fallback-step-content"><label for="boardOutput">Paste the response you received</label><textarea class="output-box" id="boardOutput" placeholder="Paste the response here."></textarea><button class="button secondary" type="button" id="usePastedResponseBtn">Continue with this response</button></div></div></div></section><section class="fallback-option" aria-labelledby="sampleTitle"><h3 id="sampleTitle">Continue with a sample</h3><p>Use a prepared board response if AI is unavailable. You can still review the perspectives, make your decision and complete the exercise.</p><button class="button secondary" type="button" id="useSampleBtn" style="margin-top:14px">Show a sample board response</button></section></div></details>
+            <p>Prepare a prompt with your question, context, selected advisors, and board chair. Use it in the AI tool you choose, then bring the response back here.</p>
+            <div class="board-ai-workflow">
+              <div id="boardPromptMount"></div>
+              <section class="board-response-step" aria-labelledby="boardResponseTitle">
+                <h3 id="boardResponseTitle">Bring the response back</h3>
+                <p>Paste the response you received so you can review the board's advice and make your decision.</p>
+                <label for="boardOutput">Board response</label>
+                <textarea class="output-box" id="boardOutput" placeholder="Paste the response here."></textarea>
+                <button class="button primary" type="button" id="usePastedResponseBtn">Review board response</button>
+                <div class="error" id="boardResponseError" aria-live="polite"></div>
+              </section>
+              <div class="sample-fallback"><strong>Need a response to continue?</strong><p>You can use a sample board response to complete the reflection.</p><button class="button secondary" type="button" id="useSampleBtn">Use a sample board response</button></div>
+            </div>
           </div>
           <div class="panel" id="reviewPanel" hidden>
             <h2 class="panel-title">Review the board's response</h2>
@@ -381,7 +386,7 @@
             <div class="work-field"><label for="finalDecision">My decision</label><textarea id="finalDecision" placeholder="What have you decided after hearing the board?"></textarea></div>
             <div class="work-field"><label for="changedThinking">What changed or needs checking?</label><textarea id="changedThinking" placeholder="What useful point did the board raise, and what still needs verification?"></textarea></div>
             <div class="work-field"><label for="nextStep">My next step</label><textarea id="nextStep" placeholder="What will you do next, who owns it, and when?"></textarea></div>
-            <div class="button-row mobile-sticky"><button class="button secondary" type="button" data-back>Back</button><button class="button primary" type="button" id="completeBtn">Save and complete</button></div>
+            <div class="button-row mobile-sticky"><button class="button secondary" type="button" data-back>Back</button><button class="button primary" type="button" id="completeBtn">Submit</button></div>
             <div class="error" id="completionError" aria-live="polite"></div>
             <div class="success" id="completionSuccess" aria-live="polite">Board and decision saved. You can return to the Learning Journey.</div>
             <div class="button-row" id="completionLinks" hidden><a class="button primary" href="../../member-login/index.html#learning-journey">Back to Learning Journey</a><button class="button secondary" type="button" id="restartBtn">Build another board</button></div>
@@ -391,6 +396,7 @@
     </section>
   </main>
 
+  <script src="../../assets/exercise-feedback-coach.js?v=20260904-prepared-prompts"></script>
   <script>
     const roles = [
       { id: 'jobs', name: 'Steve Jobs', category: 'simplicity', lens: 'Radical simplicity and product focus', value: 'Cuts anything that distracts from the strongest idea and asks whether people will understand the value immediately.' },
@@ -406,7 +412,6 @@
       ['Build the board', 'Define the problem, choose the perspectives, and name a board chair.'],
       ['Hear the board', 'Review the discussion and decide which advice you will use.']
     ];
-    const ADVISORY_BOARD_URL = 'https://us-central1-the-untaught-lessons.cloudfunctions.net/runAdvisoryBoard';
     let currentScreen = 1;
     let selectedRoles = new Set(['jobs', 'user', 'operator']);
     let decisionMakerId = 'operator';
@@ -530,28 +535,6 @@
       };
     }
 
-    function copyPrompt() {
-      const button = $('copyPromptBtn');
-      const text = $('boardPrompt').value;
-      const done = () => {
-        const original = button.textContent;
-        button.textContent = 'Prompt copied ✓';
-        setTimeout(() => { button.textContent = original; }, 1800);
-      };
-      if (navigator.clipboard?.writeText) navigator.clipboard.writeText(text).then(done).catch(() => fallbackCopy(text, done));
-      else fallbackCopy(text, done);
-    }
-
-    function fallbackCopy(text, done) {
-      const field = document.createElement('textarea');
-      field.value = text;
-      document.body.appendChild(field);
-      field.select();
-      document.execCommand('copy');
-      field.remove();
-      done();
-    }
-
     function renderStructuredResult(result) {
       const advisorCards = result.advisors.map(advisor => `<article class="advisor-output"><span class="output-role">${escapeHtml(advisor.lens || 'Perspective')}</span><h3 style="margin-top:4px">${escapeHtml(advisor.name)}</h3><p><strong>What they noticed:</strong> ${escapeHtml(advisor.mainConcern)}</p><p><strong>What they recommend:</strong> ${escapeHtml(advisor.recommendation)}</p></article>`).join('');
       const decision = result.decision;
@@ -563,51 +546,13 @@
 
     function renderPastedResult() {
       const output = $('boardOutput').value.trim();
-      if (!output) { setAiStatus('Paste a response before reviewing it.', true); return; }
+      if (!output) { $('boardResponseError').textContent = 'Paste a response before reviewing it.'; $('boardOutput').focus(); return; }
+      $('boardResponseError').textContent = '';
       structuredResponse = null;
       $('resultPreview').innerHTML = `<article class="advisor-output"><span class="output-role">Response from another AI</span><p style="white-space:pre-wrap">${escapeHtml(output)}</p></article>`;
       $('reviewPanel').hidden = false;
       $('decisionRecordPanel').hidden = false;
       $('reviewPanel').scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-
-    function setAiStatus(message, fallback = false) {
-      $('aiStatus').textContent = message;
-      $('aiStatus').classList.add('is-visible');
-      $('aiStatus').classList.toggle('is-fallback', fallback);
-    }
-
-    async function runBoard() {
-      const button = $('runBoardBtn');
-      button.disabled = true;
-      button.textContent = 'The board is reviewing...';
-      setAiStatus('The board is reviewing the question from each selected perspective.');
-      try {
-        const response = await fetch(ADVISORY_BOARD_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            question: $('decisionText').value.trim(),
-            context: $('contextText').value.trim(),
-            startingView: $('initialView').value.trim(),
-            advisors: advisorRoleObjects().map(role => ({ name: role.name, lens: role.lens, description: role.value })),
-            decisionMaker: { name: decisionMaker().name, lens: decisionMaker().lens }
-          })
-        });
-        if (!response.ok) throw new Error(`Request returned ${response.status}`);
-        const result = await response.json();
-        if (result.fallback || !Array.isArray(result.advisors) || !result.decision) throw new Error('AI response unavailable');
-        structuredResponse = result;
-        $('boardOutput').value = '';
-        setAiStatus('The board response is ready. Review the differences before making your call.');
-        renderStructuredResult(result);
-      } catch (error) {
-        setAiStatus('The in-page board is unavailable right now. You can copy the prompt into another AI or use the sample response. Your exercise is not blocked.', true);
-        $('pasteResponseDetails').open = true;
-      } finally {
-        button.disabled = false;
-        button.textContent = 'Hear from my board';
-      }
     }
 
     function saveProgress() {
@@ -641,14 +586,11 @@
       if (!$('decisionText').value.trim() || !$('contextText').value.trim() || !$('initialView').value.trim()) { $('boardError').textContent = 'Add the question, context, and what you are leaning toward before continuing.'; return; }
       if (selectedRoles.size < 3 || !decisionMakerId) { $('boardError').textContent = 'Choose at least three board members, then select one of them as the board chair.'; return; }
       $('boardError').textContent = '';
-      $('boardPrompt').value = buildPrompt();
       $('runSeatList').innerHTML = boardSeatsHtml(true);
       showScreen(3);
     });
-    $('runBoardBtn').addEventListener('click', runBoard);
-    $('copyPromptBtn').addEventListener('click', copyPrompt);
     $('usePastedResponseBtn').addEventListener('click', renderPastedResult);
-    $('useSampleBtn').addEventListener('click', () => { structuredResponse = sampleStructuredResponse(); $('boardOutput').value = ''; setAiStatus('A sample response is ready for review. You can still make your own decision and complete the exercise.', true); renderStructuredResult(structuredResponse); });
+    $('useSampleBtn').addEventListener('click', () => { structuredResponse = sampleStructuredResponse(); $('boardOutput').value = ''; renderStructuredResult(structuredResponse); });
     $('completeBtn').addEventListener('click', async event => {
       if (!$('finalDecision').value.trim() || !$('changedThinking').value.trim() || !$('nextStep').value.trim()) {
         $('completionError').textContent = 'Add your decision, what changed or needs checking, and your next step.';
@@ -660,11 +602,22 @@
       event.currentTarget.textContent = 'Saving...';
       await saveProgress();
       window.UTLRewardEvents?.awardCompletionExercise({ appId: 'advisory-board', title: 'Advisory board with AI complete', body: 'You turned several perspectives into one clear decision.' });
-      event.currentTarget.textContent = 'Saved';
+      event.currentTarget.textContent = 'Submitted';
       $('completionSuccess').classList.add('is-visible');
       $('completionLinks').hidden = false;
     });
-    $('restartBtn').addEventListener('click', () => { structuredResponse = null; $('boardOutput').value = ''; $('finalDecision').value = ''; $('changedThinking').value = ''; $('nextStep').value = ''; $('reviewPanel').hidden = true; $('decisionRecordPanel').hidden = true; $('completionSuccess').classList.remove('is-visible'); $('completionLinks').hidden = true; $('completeBtn').disabled = false; $('completeBtn').textContent = 'Save and complete'; $('aiStatus').classList.remove('is-visible'); showScreen(2); });
+    $('restartBtn').addEventListener('click', () => { structuredResponse = null; $('boardOutput').value = ''; $('finalDecision').value = ''; $('changedThinking').value = ''; $('nextStep').value = ''; $('reviewPanel').hidden = true; $('decisionRecordPanel').hidden = true; $('completionSuccess').classList.remove('is-visible'); $('completionLinks').hidden = true; $('completeBtn').disabled = false; $('completeBtn').textContent = 'Submit'; showScreen(2); });
+
+    window.UTLFeedbackCoach?.mountPreparedPrompt({
+      mount: '#boardPromptMount',
+      heading: 'Prepare your board prompt',
+      description: 'Your question, context, selected advisors, and board chair are included. Nothing is sent automatically.',
+      buttonLabel: 'Prepare board prompt',
+      kicker: 'Use another AI',
+      dialogTitle: 'Bring the board prompt with you',
+      promptLabel: 'Your board prompt',
+      prompt: buildPrompt
+    });
 
     renderRoles();
     renderDots();

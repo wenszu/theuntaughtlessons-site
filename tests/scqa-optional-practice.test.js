@@ -12,8 +12,8 @@ assert(scqa.includes('practice-scenario-option'), 'practice topics use comparabl
 assert(scqa.includes('function updatePracticeScenarioSelection()'), 'changing a topic updates cards in place without closing the picker');
 assert(scqa.includes('data-practice-scenario=') && scqa.includes('aria-pressed='), 'topic cards use stable selection buttons instead of browser radio toggles');
 assert(!scqa.includes('input type="radio" name="practiceScenario"'), 'topic selection does not rebuild or toggle radio inputs');
-assert(scqa.includes('Feedback on your SCQA') && scqa.includes('Structure check') && scqa.includes('Optional AI review'), 'rules and optional AI feedback share one review panel');
-assert(scqa.includes('class="passed-checks"'), 'passed rules collapse so review emphasizes items needing attention');
+assert(scqa.includes('Feedback on your SCQA') && scqa.includes('What is working') && scqa.includes('id="portableAiReview"'), 'summary cards and the provider neutral AI prompt share one review panel');
+assert(scqa.includes('class="feedback-summary-details"'), 'complete structure checks remain available in a collapsed detail section');
 assert(scqa.includes('urlParams.get("practice") === "1"'), 'a direct link can open the practice picker later');
 assert(scqa.includes('urlParams.get("attempt") === "olympics"'), 'a direct review link returns to the required SCQA');
 assert(scqa.includes('if (state.completedOnce && state.practiceScenarioId)'), 'practice saves do not repeat required exercise completion');

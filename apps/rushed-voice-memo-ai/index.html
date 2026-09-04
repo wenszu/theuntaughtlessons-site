@@ -178,6 +178,11 @@
       font-weight: 700;
     }
 
+    .tsa-speak-field-label {
+      display: block;
+      margin: 20px 0 8px;
+    }
+
     .tsa-speak-form input,
     .tsa-speak-textarea,
     .tsa-speak-note-input {
@@ -488,11 +493,7 @@
       white-space: pre-wrap;
     }
 
-    .tsa-speak-prompt-box {
-      white-space: pre-wrap;
-      font-family: 'Lato', sans-serif;
-      line-height: 1.6;
-    }
+    #aiStructuringPromptMount { margin: 20px 0; }
 
     .tsa-speak-info {
       margin: 22px 0 0;
@@ -960,10 +961,8 @@ Thanks a lot, really appreciate you for this.</div>
           })();
         </script>
 
-        <details class="tsa-speak-record-help">
-          <summary>AI structuring prompt</summary>
-          <div class="tsa-speak-help-body">
-            <div class="tsa-speak-prompt-box">You are an expert in structured communication. I will paste a transcript of a
+        <div id="aiStructuringPromptMount"></div>
+        <div id="aiStructuringPromptSource" hidden>You are an expert in structured communication. I will paste a transcript of a
 rushed verbal update below. Your job is to turn it into a clean, structured
 written summary using the following rules:
 
@@ -975,8 +974,6 @@ written summary using the following rules:
 
 Here is the transcript:
 [paste transcript here]</div>
-          </div>
-        </details>
 
         <label class="tsa-speak-field-label" for="structuredOutput">Your AI-structured output</label>
         <textarea class="tsa-speak-textarea" id="structuredOutput" placeholder="Paste your AI-structured output here…"></textarea>
@@ -1001,7 +998,23 @@ Here is the transcript:
     </section>
   </main>
 
+  <script src="../../assets/exercise-feedback-coach.js?v=20260904-prepared-prompts"></script>
   <script>
+    window.UTLFeedbackCoach?.mountPreparedPrompt({
+      mount: '#aiStructuringPromptMount',
+      heading: 'Prepare your AI structuring prompt',
+      description: 'Create a prompt using the transcript and exercise instructions. Nothing is sent automatically.',
+      buttonLabel: 'Prepare AI structuring prompt',
+      kicker: 'AI structuring prompt',
+      promptLabel: 'Your structuring prompt',
+      prompt: () => {
+        const template = document.getElementById('aiStructuringPromptSource').textContent.trim();
+        const usingProvidedTranscript = !document.querySelector('[data-path-panel="lazy"]').hidden;
+        const transcript = usingProvidedTranscript ? document.getElementById('hughTranscript').textContent.trim() : '[paste transcript here]';
+        return template.replace('[paste transcript here]', transcript);
+      }
+    });
+
     function wordCount(text) {
       return (text.trim().match(/\b[\w'-]+\b/g) || []).length;
     }

@@ -1108,6 +1108,54 @@
       margin: 4px 0 8px;
     }
 
+    .attempt-comparison {
+      margin: 14px 0;
+      border: 1px solid rgba(0, 51, 102, .16);
+      border-radius: 10px;
+      background: #FBFAF7;
+      padding: 14px;
+    }
+
+    .attempt-comparison-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 12px;
+    }
+
+    .attempt-comparison-head strong { color: var(--navy); }
+    .attempt-comparison-head span { color: #5e6f80; font-size: .8rem; }
+
+    .attempt-comparison-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+      margin: 0;
+    }
+
+    .attempt-comparison-grid div {
+      border-radius: 8px;
+      background: #fff;
+      padding: 10px;
+    }
+
+    .attempt-comparison-grid dt { color: #667789; font-size: .72rem; font-weight: 700; }
+    .attempt-comparison-grid dd { margin: 3px 0 0; color: var(--navy); font-size: 1rem; font-weight: 700; }
+    .attempt-comparison-copy { margin: 12px 0 0; color: #424b53; font-size: .9rem; }
+    .attempt-history { margin-top: 10px; border-top: 1px solid rgba(0, 51, 102, .12); padding-top: 10px; }
+    .attempt-history summary { color: var(--navy); font-size: .85rem; font-weight: 700; cursor: pointer; }
+    .attempt-history-list { margin: 10px 0 0!important; padding: 0!important; list-style: none; }
+    .attempt-history-list li { display: grid; grid-template-columns: 1fr auto auto; gap: 12px; padding: 8px 0; border-bottom: 1px solid rgba(0, 51, 102, .08); font-size: .82rem; }
+    .attempt-history-list li:last-child { border-bottom: 0; }
+    .attempt-history-change { min-width: 70px; color: #526b82; text-align: right; }
+
+    @media (max-width: 600px) {
+      .attempt-comparison-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .attempt-comparison-head { display: block; }
+      .attempt-comparison-head span { display: block; margin-top: 4px; }
+    }
+
     .mp-earned {
       display: flex;
       align-items: center;
@@ -1520,7 +1568,7 @@
 
           <div class="buttons">
             <button id="generateBtn">Generate new list</button>
-            <button id="checkBtn" class="primary" disabled>Submit for feedback</button>
+            <button id="checkBtn" class="primary" disabled>Submit</button>
             <button id="sampleBtn" disabled aria-describedby="answerRequirement">Show sample answer</button>
             <button id="resetBtn" class="secondary-action hidden">Reset</button>
           </div>
@@ -1532,7 +1580,7 @@
       </article>
     </section>
   </main>
-  <script src="../../assets/app-reward-header.js?v=20260730-celebration-1"></script>
+  <script src="../../assets/app-reward-header.js?v=20260903-score-history-preview"></script>
   <script src="../../assets/reward-events.js?v=20260730-celebration-1"></script>
 
   <script src="../shared/activity-timer.js?v=20260701-audit-1"></script>
@@ -1733,7 +1781,7 @@
         ? 'Submitted ✓'
         : state.changedAfterSubmit
           ? 'Resubmit for feedback'
-          : 'Submit for feedback';
+          : 'Submit';
       document.getElementById('sampleBtn').disabled = !allSorted;
       const requirement = document.getElementById('answerRequirement');
       if (requirement) {
@@ -2074,7 +2122,7 @@
         bucket2_items: bucketItems('bucket2'),
         bucket3_name: state.bucketNames.bucket3,
         bucket3_items: bucketItems('bucket3')
-      });
+      }, evalResult.totalScore);
 
       const categoryClarity = evalResult.nameRatio >= 0.75
         ? 'Your bucket names are mostly clear and easy to interpret.'
@@ -2092,12 +2140,13 @@
       const suggested = suggestedNamesFromMapping(evalResult.mapping);
       const mpMessage = mpResult.award > 0
         ? `<p class="mp-earned"><strong>+${mpResult.award} MP earned</strong><span>Your mastery points count is rising in the header.</span></p>`
-        : `<p class="mp-earned muted"><strong>No new MP this attempt</strong><span>Beat your best score of ${mpResult.previousBest} to earn more MP.</span></p>`;
+        : `<p class="mp-earned muted"><strong>No new MP this attempt</strong><span>Apply the feedback and try another approach. A stronger result may earn additional MP.</span></p>`;
 
       panel.innerHTML = `
         <h3>Feedback</h3>
         <p class="score">Total score: ${evalResult.totalScore} / 100</p>
         ${mpMessage}
+        ${scoreComparisonHtml(loadGroceryAttempts())}
         <p><strong>Total time used:</strong> ${activityTimer.formatSeconds(elapsedSeconds)}</p>
         <ul>
           <li><strong>Category clarity:</strong> ${categoryClarity}</li>
@@ -2368,9 +2417,88 @@
         .catch((error) => console.warn('Firestore completion save failed.', error));
     }
 
-    function saveResult(appId, phase, exerciseName, durationSeconds, responseObj) {
+    const GROCERY_ATTEMPTS_KEY = 'utl_score_attempts_grocery-list';
+    const GROCERY_CONTENT_VERSION = '2026-09-03-v1';
+
+    function loadGroceryAttempts() {
+      try {
+        const attempts = JSON.parse(localStorage.getItem(GROCERY_ATTEMPTS_KEY) || '[]');
+        return Array.isArray(attempts) ? attempts.slice(-10) : [];
+      } catch (error) { return []; }
+    }
+
+    async function hydrateGroceryAttempts() {
+      if (new URLSearchParams(window.location.search).get('design-preview') === 'score-history') return;
+      try {
+        const { getExerciseAttempts } = await import('../../assets/firebase.js');
+        const cloudAttempts = await getExerciseAttempts('grocery-list');
+        const merged = new Map(loadGroceryAttempts().map((item) => [item.attemptId, item]));
+        cloudAttempts.forEach((item) => {
+          const submittedAt = item.submittedAt && item.submittedAt.toDate ? item.submittedAt.toDate().toISOString() : new Date().toISOString();
+          merged.set(item.attemptId || item.id, {
+            attemptId: item.attemptId || item.id,
+            attemptNumber: item.attemptNumber,
+            score: item.scorePercent,
+            scoreMaximum: 100,
+            contentVersion: item.contentVersion,
+            completedAt: submittedAt
+          });
+        });
+        const attempts = Array.from(merged.values()).sort((a, b) => new Date(a.completedAt) - new Date(b.completedAt)).slice(-10);
+        localStorage.setItem(GROCERY_ATTEMPTS_KEY, JSON.stringify(attempts));
+      } catch (error) {
+        console.warn('Previous score history could not be synchronized.', error);
+      }
+    }
+
+    function attemptChangeLabel(current, previous) {
+      if (!previous) return 'Baseline';
+      const difference = Number(current.score) - Number(previous.score);
+      if (Math.abs(difference) <= 5) return 'Similar';
+      return difference > 0 ? `Up ${difference}` : `Down ${Math.abs(difference)}`;
+    }
+
+    function scoreComparisonHtml(attempts) {
+      const current = attempts[attempts.length - 1];
+      if (!current) return '';
+      const previous = attempts.length > 1 ? attempts[attempts.length - 2] : null;
+      const comparable = previous && previous.contentVersion === current.contentVersion;
+      const best = Math.max(...attempts.filter((item) => item.contentVersion === current.contentVersion).map((item) => Number(item.score) || 0));
+      const change = comparable ? attemptChangeLabel(current, previous) : 'Baseline';
+      const message = !previous
+        ? 'This is your baseline. Use the feedback below to choose your next revision.'
+        : !comparable
+          ? 'Your previous attempt used a different exercise version, so we are not treating the score change as progress or decline.'
+          : change === 'Similar'
+            ? 'This attempt is in a similar range. Use the feedback below to decide what to revise next.'
+            : change.startsWith('Up')
+              ? `Your result moved ${change.toLowerCase()} from your last attempt. Use the feedback below to keep improving the underlying skill.`
+              : 'This result differs from your last attempt. Scores can vary as you try a different approach; use the feedback below to choose your revision.';
+      const recent = attempts.slice(-5).reverse();
+      return `<section class="attempt-comparison" aria-live="polite" aria-label="Score comparison">
+        <div class="attempt-comparison-head"><strong>Compared with your last attempt</strong><span>Automated practice score, not a grade</span></div>
+        <dl class="attempt-comparison-grid">
+          <div><dt>Current</dt><dd>${current.score}/100</dd></div>
+          <div><dt>Previous</dt><dd>${comparable ? `${previous.score}/100` : 'Not comparable'}</dd></div>
+          <div><dt>Change</dt><dd>${change}</dd></div>
+          <div><dt>Best</dt><dd>${best}/100</dd></div>
+        </dl>
+        <p class="attempt-comparison-copy">${message}</p>
+        <details class="attempt-history"><summary>View score history (${attempts.length})</summary><ol class="attempt-history-list">
+          ${recent.map((attempt, index) => {
+            const older = recent[index + 1];
+            const label = older && older.contentVersion === attempt.contentVersion ? attemptChangeLabel(attempt, older) : 'Baseline';
+            const date = new Date(attempt.completedAt).toLocaleDateString([], { month: 'short', day: 'numeric' });
+            return `<li><span>Attempt ${attempt.attemptNumber} · ${date}</span><strong>${attempt.score}/100</strong><span class="attempt-history-change">${label}</span></li>`;
+          }).join('')}
+        </ol></details>
+      </section>`;
+    }
+
+    function saveResult(appId, phase, exerciseName, durationSeconds, responseObj, score) {
       const existing = localStorage.getItem('utl_result_' + appId);
       const attempt = existing ? (JSON.parse(existing).attempt || 0) + 1 : 1;
+      const attemptId = window.crypto && crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
       const record = {
         app_id: appId,
         phase,
@@ -2378,12 +2506,23 @@
         completed_at: new Date().toISOString(),
         duration_seconds: Math.round(durationSeconds),
         attempt,
-        response: responseObj
+        response: responseObj,
+        score: Math.max(0, Math.min(100, Math.round(Number(score) || 0))),
+        score_maximum: 100,
+        score_content_version: GROCERY_CONTENT_VERSION,
+        attempt_id: attemptId
       };
       localStorage.setItem('utl_result_' + appId, JSON.stringify(record));
+      const history = loadGroceryAttempts();
+      history.push({ attemptId, attemptNumber: attempt, score: record.score, scoreMaximum: 100, contentVersion: GROCERY_CONTENT_VERSION, completedAt: record.completed_at });
+      localStorage.setItem(GROCERY_ATTEMPTS_KEY, JSON.stringify(history.slice(-10)));
       import('../../assets/firebase.js')
-        .then(({ saveUserProgress }) => saveUserProgress(appId, exerciseName, record))
+        .then(({ saveUserProgress, saveExerciseAttempt }) => Promise.allSettled([
+          saveUserProgress(appId, exerciseName, record),
+          saveExerciseAttempt({ attemptId, exerciseId: appId, exerciseTitle: exerciseName, contentVersion: GROCERY_CONTENT_VERSION, score: record.score, scoreMaximum: 100, attemptNumber: attempt, durationSeconds })
+        ]))
         .catch((error) => console.warn('Firestore progress save failed.', error));
+      return record;
     }
 
     function completionSaveNotice() {
@@ -2555,6 +2694,17 @@
         updateMpDisplay();
         window.addEventListener('utl:reward-update', () => updateMpDisplay());
         syncDoneState();
+        hydrateGroceryAttempts();
+        if (new URLSearchParams(window.location.search).get('design-preview') === 'score-history') {
+          const panel = document.getElementById('feedback');
+          panel.classList.remove('hidden');
+          panel.innerHTML = `<h3>Feedback</h3><p class="score">Total score: 78 / 100</p>${scoreComparisonHtml([
+            { attemptNumber: 1, score: 67, contentVersion: GROCERY_CONTENT_VERSION, completedAt: '2026-08-20T09:00:00Z' },
+            { attemptNumber: 2, score: 71, contentVersion: GROCERY_CONTENT_VERSION, completedAt: '2026-08-28T09:00:00Z' },
+            { attemptNumber: 3, score: 78, contentVersion: GROCERY_CONTENT_VERSION, completedAt: '2026-09-03T09:00:00Z' }
+          ])}<ul><li><strong>Category clarity:</strong> Your bucket names are clear and easy to interpret.</li><li><strong>Suggested revision:</strong> Make the final category label more specific.</li></ul>`;
+          panel.scrollIntoView({ behavior: 'auto', block: 'center' });
+        }
       } catch (error) {
         console.error(error);
         showDataStatus('We could not load this exercise.', 'Please refresh the page. If the issue continues, the practice data file may be missing or malformed.');
@@ -2563,7 +2713,7 @@
 
     initializeApp();
   </script>
-  <script type="module" src="../../assets/app-access-guard.js?v=20260827-support-preview-1"></script>
+  <script type="module" src="../../assets/app-access-guard.js?v=20260903-score-history-preview"></script>
   <script src="../../assets/exercise-scoring-intro.js?v=6"></script>
   <script type="module" src="../../assets/feedback-widget.js?v=6"></script>
   <script src="../../assets/tactile-buttons.js?v=20260714-flat-1" defer></script>

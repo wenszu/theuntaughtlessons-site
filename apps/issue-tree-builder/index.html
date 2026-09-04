@@ -1841,6 +1841,7 @@
           </div>
           <div id="saveNoticeMount"></div>
           <div id="feedbackMount"></div>
+          <div id="issueTreeFeedbackPrompt"></div>
           <div id="sampleMount"></div>
         </section>
       </div>
@@ -1860,6 +1861,7 @@
 
   <div class="toast" id="toast">Copied! Paste it into your email to Aiko.</div>
 
+  <script src="../../assets/exercise-feedback-coach.js?v=20260903-feedback-rollout"></script>
   <script>
     const STORAGE_KEY = "utl_issue_tree";
     const TIMER_TARGET = 15 * 60;
@@ -2303,6 +2305,7 @@
       state.submitted = true;
       save();
       $("#saveNoticeMount").innerHTML = completionSaveNotice();
+      window.UTLFeedbackCoach?.mountPrompt({mount:'#issueTreeFeedbackPrompt',title:'Issue Tree Builder',goal:'Break the problem into a complete set of distinct questions that can be investigated and answered.',criteria:['State one focused problem or decision','Use three distinct argument branches','Keep branches mutually exclusive and collectively useful','Add supporting details that help test each branch','Make the tree practical enough to guide the next analysis'],response:()=>JSON.stringify(issueTreePayload(),null,2),sample:()=>JSON.stringify(templateState,null,2),signals:[`Current rule based score: ${score}`]});
       setSaveButtonSaved(true);
     }
 

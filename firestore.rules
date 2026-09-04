@@ -114,6 +114,29 @@ service cloud.firestore {
         request.resource.data.updatedAt == request.time;
     }
 
+    function isValidExerciseAttempt(userId, attemptId) {
+      return signedIn() && request.auth.uid == userId &&
+        attemptId.size() >= 8 && attemptId.size() <= 100 &&
+        request.resource.data.keys().hasOnly([
+          'schemaVersion', 'userId', 'attemptId', 'exerciseId', 'exerciseTitle',
+          'contentVersion', 'score', 'scoreMaximum', 'scorePercent',
+          'attemptNumber', 'durationSeconds', 'submittedAt', 'createdAt'
+        ]) &&
+        request.resource.data.schemaVersion == 1 &&
+        request.resource.data.userId == userId &&
+        request.resource.data.attemptId == attemptId &&
+        request.resource.data.exerciseId is string && request.resource.data.exerciseId.size() >= 1 && request.resource.data.exerciseId.size() <= 100 &&
+        request.resource.data.exerciseTitle is string && request.resource.data.exerciseTitle.size() >= 1 && request.resource.data.exerciseTitle.size() <= 160 &&
+        request.resource.data.contentVersion is string && request.resource.data.contentVersion.size() <= 80 &&
+        request.resource.data.score is int && request.resource.data.score >= 0 && request.resource.data.score <= 1000 &&
+        request.resource.data.scoreMaximum is int && request.resource.data.scoreMaximum >= 1 && request.resource.data.scoreMaximum <= 1000 &&
+        request.resource.data.score <= request.resource.data.scoreMaximum &&
+        request.resource.data.scorePercent is int && request.resource.data.scorePercent >= 0 && request.resource.data.scorePercent <= 100 &&
+        request.resource.data.attemptNumber is int && request.resource.data.attemptNumber >= 1 && request.resource.data.attemptNumber <= 10000 &&
+        validAnalyticsSeconds(request.resource.data.durationSeconds) &&
+        request.resource.data.submittedAt == request.time && request.resource.data.createdAt == request.time;
+    }
+
     match /users/{userId} {
       allow read: if isSelfUserDocument(userId) || isAdmin();
       allow write: if isSelfUserDocument(userId) || isAdmin();
@@ -122,6 +145,12 @@ service cloud.firestore {
     match /users/{userId}/completed_exercises/{exerciseId} {
       allow read: if (signedIn() && request.auth.uid == userId) || isAdmin();
       allow write: if (signedIn() && request.auth.uid == userId) || isAdmin();
+    }
+
+    match /users/{userId}/exercise_attempts/{attemptId} {
+      allow read: if (signedIn() && request.auth.uid == userId) || isAdmin();
+      allow create: if isValidExerciseAttempt(userId, attemptId);
+      allow update, delete: if false;
     }
 
     match /users/{userId}/analytics_sessions/{sessionId} {

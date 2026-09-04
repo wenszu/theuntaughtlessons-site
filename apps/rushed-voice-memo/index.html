@@ -1078,6 +1078,46 @@
         overflow: visible;
       }
     }
+    /* Stage 1: keep source material usable in compact laptop workspaces. */
+    .reference-scroll-cue{display:none;padding:9px 14px;border-top:1px solid var(--line);background:#fff8e8;color:var(--navy);font-size:12px;font-weight:700}
+    #scorePanel{scroll-margin-top:110px;outline:none}
+    @media (min-width:769px) and (max-width:1100px) {
+      .app-header{grid-template-columns:auto minmax(220px,1fr) auto!important;min-height:68px;padding:8px 20px;gap:14px}
+      .app-logo-frame{width:150px;height:34px}.brand-divider{display:none}.app-title{font-size:22px}.module-back-link{margin-top:4px;font-size:12px}
+      .page{max-width:1100px;padding:18px 16px 34px}.hero{margin-bottom:14px}.hero h1{font-size:1.75rem}.subtitle{font-size:.95rem}
+      .layout{grid-template-columns:minmax(250px,.78fr) minmax(0,2fr);gap:14px}
+      .reference-panel{position:sticky;top:86px}.reference-panel .panel-body{max-height:calc(100dvh - 155px);overflow-y:auto;overscroll-behavior:contain}
+      .reference-scroll-cue{display:block}.mobile-result-tabs.visible{display:flex}.section-grid,.comparison-grid{grid-template-columns:1fr}.recent-attempts{display:none!important}
+      body[data-mobile-tab="self"] .score-panel,body[data-mobile-tab="self"] .comparison-panel,
+      body[data-mobile-tab="score"] .checklist,body[data-mobile-tab="score"] .self-check-copy,body[data-mobile-tab="score"] .comparison-panel,
+      body[data-mobile-tab="answer"] .checklist,body[data-mobile-tab="answer"] .self-check-copy,body[data-mobile-tab="answer"] .score-panel,
+      body[data-mobile-tab="sample"] .checklist,body[data-mobile-tab="sample"] .self-check-copy,body[data-mobile-tab="sample"] .score-panel{display:none}
+      body[data-mobile-tab="answer"] #sampleComparison,body[data-mobile-tab="sample"] #userComparison{display:none}
+      body[data-mobile-tab="answer"] .comparison-panel,body[data-mobile-tab="sample"] .comparison-panel{display:block}
+      body[data-mobile-tab="answer"] .comparison-grid,body[data-mobile-tab="sample"] .comparison-grid{display:block}
+    }
+    @media (min-width:981px) and (max-height:760px) {.reference-panel{position:sticky;top:86px}.reference-panel .panel-body{max-height:calc(100dvh - 155px);overflow-y:auto;overscroll-behavior:contain}.reference-scroll-cue{display:block}}
+    @media (max-width:420px) {.mobile-result-tabs{display:grid!important;grid-template-columns:1fr 1fr}.mobile-tab{min-height:44px}}
+    body.design-preview-results .hero,body.design-preview-results #context{display:none!important}
+    body.design-preview-results .layout{display:block!important}body.design-preview-results .page{padding-top:18px}
+    body.design-preview-results .mode-switch,body.design-preview-results .mode-guidance,body.design-preview-results #openMode,body.design-preview-results #sectionMode,body.design-preview-results .response-actions{display:none!important}
+    body.result-mode .utl-scoring-intro,body.result-mode .mode-switch,body.result-mode .mode-guidance,body.result-mode #openMode,body.result-mode #sectionMode,body.result-mode .response-actions{display:none!important}
+    body.result-mode .mobile-result-tabs.visible{display:flex}
+    body.result-mode[data-mobile-tab="self"] .score-panel,body.result-mode[data-mobile-tab="self"] .comparison-panel,
+    body.result-mode[data-mobile-tab="score"] .checklist,body.result-mode[data-mobile-tab="score"] .self-check-copy,body.result-mode[data-mobile-tab="score"] .comparison-panel,
+    body.result-mode[data-mobile-tab="answer"] .checklist,body.result-mode[data-mobile-tab="answer"] .self-check-copy,body.result-mode[data-mobile-tab="answer"] .score-panel,
+    body.result-mode[data-mobile-tab="sample"] .checklist,body.result-mode[data-mobile-tab="sample"] .self-check-copy,body.result-mode[data-mobile-tab="sample"] .score-panel{display:none}
+    body.result-mode[data-mobile-tab="answer"] #sampleComparison,body.result-mode[data-mobile-tab="sample"] #userComparison{display:none}
+    body.result-mode[data-mobile-tab="answer"] .comparison-panel,body.result-mode[data-mobile-tab="sample"] .comparison-panel{display:block}
+    body.result-mode[data-mobile-tab="answer"] .comparison-grid,body.result-mode[data-mobile-tab="sample"] .comparison-grid{display:block}
+    .result-actions{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:center;margin-top:18px;padding:20px;border:1px solid #e8bd68;border-radius:10px;background:#fff8e8}
+    .result-actions.hidden{display:none}.result-actions-copy small{display:block;margin-bottom:4px;color:#9b6500;font-weight:700}.result-actions-copy strong{display:block;color:var(--navy);font:700 22px/1.2 "Playfair Display",Georgia,serif}.result-actions-copy span{display:block;margin-top:5px;color:var(--steel);font-size:13px}
+    .result-actions-buttons{display:grid;grid-template-columns:auto auto;gap:8px;align-items:center}.result-next{grid-column:1/-1;display:inline-flex;min-height:46px;align-items:center;justify-content:center;padding:0 18px;border-radius:7px;background:var(--gold);color:var(--navy);font-weight:700;text-decoration:none}.result-retry,.result-journey{min-height:38px;padding:0 12px;border:1px solid rgba(0,51,102,.25);border-radius:7px;background:#fff;color:var(--navy);font-weight:700;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+    .feedback-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:16px 0}.feedback-card{border:1px solid var(--line);border-radius:8px;background:#fff;padding:14px}.feedback-card small{display:block;margin-bottom:6px;color:var(--steel);font-weight:700}.feedback-card>span{display:block;color:var(--charcoal);line-height:1.4}.feedback-card.next{border-color:var(--line);background:#fff}.feedback-ai-prompt{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-top:16px;padding:15px;border:1px solid #bdd2e5;border-radius:8px;background:#eef5fa}.feedback-ai-prompt strong{display:block;color:var(--navy)}.feedback-ai-prompt span{display:block;margin-top:3px;color:var(--steel);font-size:13px}.feedback-ai-prompt button{flex:0 0 auto;min-height:42px;border:0;border-radius:7px;background:var(--navy);color:#fff;padding:0 15px;font-weight:700}
+    .comparison-guide{margin-bottom:15px;border:1px solid #e8bd68;border-radius:8px;background:#fff8e8;padding:14px}.comparison-guide>strong{display:block;color:var(--navy);font-size:17px}.comparison-guide>p{margin:4px 0 12px;color:var(--steel);font-size:13px}.comparison-insights{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.comparison-insight{border-radius:7px;background:#fff;padding:10px}.comparison-insight small{display:block;color:var(--steel);font-weight:700}.comparison-insight span{display:block;margin-top:3px;color:var(--charcoal);font-size:13px;line-height:1.4}
+    .ai-prompt-dialog{width:min(720px,calc(100vw - 28px));max-height:88dvh;border:0;border-radius:12px;padding:0;box-shadow:0 22px 70px rgba(0,31,61,.3);color:var(--charcoal)}.ai-prompt-dialog::backdrop{background:rgba(0,31,61,.58)}.ai-prompt-head{display:flex;justify-content:space-between;gap:20px;padding:20px 22px 16px;border-bottom:1px solid var(--line)}.ai-prompt-head h2{margin:0;color:var(--navy);font-size:25px}.ai-prompt-close{display:grid;width:32px;height:32px;flex:0 0 32px;place-items:center;padding:0;border:1px solid #d7e0e8;border-radius:50%;background:#fff;color:var(--steel)}.ai-prompt-close:hover{border-color:var(--navy);color:var(--navy);background:#f7fafc}.ai-prompt-close svg{width:15px;height:15px;pointer-events:none}.ai-prompt-body{padding:18px 22px 22px}.ai-prompt-privacy{margin:0 0 13px;padding:11px 13px;border-radius:7px;background:#eef5fa;color:var(--navy);font-size:13px}.ai-prompt-body label{display:block;color:var(--navy);font-weight:700}.ai-prompt-text{width:100%;min-height:280px;margin-top:7px;resize:vertical;border:1px solid var(--line);border-radius:8px;padding:12px;font:13px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace}.ai-prompt-actions{display:flex;align-items:center;justify-content:flex-end;gap:10px;margin-top:12px}.ai-prompt-status{margin-right:auto;color:#2c7a4b;font-size:13px}.ai-prompt-actions button{min-height:42px;border:1px solid var(--navy);border-radius:7px;padding:0 15px;background:#fff;color:var(--navy);font-weight:700}.ai-prompt-actions .primary{background:var(--navy);color:#fff}
+    @media(max-width:700px){.result-actions{grid-template-columns:1fr}.result-actions-buttons{grid-template-columns:1fr}.result-next{grid-column:auto}.result-retry,.result-journey{min-height:44px}}
+    @media(max-width:700px){.feedback-summary,.comparison-insights{grid-template-columns:1fr}.feedback-ai-prompt{align-items:stretch;flex-direction:column}.ai-prompt-actions{align-items:stretch;flex-direction:column}.ai-prompt-status{margin:0}.ai-prompt-actions button{width:100%}}
   </style>
 </head>
 <body>
@@ -1156,6 +1196,7 @@
               <li>Make the buckets MECE</li>
             </ul>
           </div>
+          <div class="reference-scroll-cue" aria-hidden="true">Scroll here for the full voice memo details</div>
         </article>
 
         <article class="panel attempts-panel">
@@ -1182,7 +1223,7 @@
               <button class="mode-btn active" id="openModeBtn" type="button" data-response-mode="open" onclick="window.switchMessyNotesMode && window.switchMessyNotesMode('open')">Open response</button>
               <button class="mode-btn" id="sectionModeBtn" type="button" data-response-mode="sections" onclick="window.switchMessyNotesMode && window.switchMessyNotesMode('sections')">Three-section response</button>
             </div>
-            <p class="mode-guidance"><strong>Choose one format:</strong> Use <strong>"Open" response</strong> if you want to write in your own free-form structure; this is the more difficult option. Use <strong>"Three-section" response</strong> if you want the easier guided option. In both formats, use BSP and the Rule of three.</p>
+            <p class="mode-guidance"><strong>Choose one format:</strong> Use <strong>"Open response"</strong> if you want to write in your own free-form structure; this is the more difficult option. Use <strong>"Three-section response"</strong> if you want the easier guided option. In both formats, use BSP and the Rule of three.</p>
 
             <div id="openMode">
               <textarea id="openResponse" class="response-area" aria-label="Open response" placeholder=""></textarea>
@@ -1223,7 +1264,7 @@
 
             <div id="mobileResultTabs" class="mobile-result-tabs" aria-label="Result sections">
               <button class="mobile-tab active" type="button" data-tab="self">Self-check</button>
-              <button class="mobile-tab" type="button" data-tab="score">Score</button>
+              <button class="mobile-tab" type="button" data-tab="score">Feedback</button>
               <button class="mobile-tab" type="button" data-tab="answer">Your answer</button>
               <button class="mobile-tab" type="button" data-tab="sample">Sample</button>
             </div>
@@ -1234,12 +1275,13 @@
               <div class="checklist" id="checklist"></div>
               <div id="scorePanel" class="score-panel hidden"></div>
               <div class="buttons">
-                <button id="revealSampleBtn" class="primary" type="button">Reveal sample answer</button>
+                <button id="revealSampleBtn" class="primary" type="button">Review sample answer →</button>
               </div>
             </div>
 
             <div id="comparisonPanel" class="comparison-panel hidden">
-              <h3>Side-by-side comparison</h3>
+              <div id="comparisonGuide" class="comparison-guide"></div>
+              <h3>Your response and one strong approach</h3>
               <div class="comparison-grid">
                 <div class="comparison-box" id="userComparison">
                   <h3>Your answer</h3>
@@ -1254,12 +1296,42 @@
 
             <div id="recentAttempts" class="recent-attempts hidden"></div>
 
+            <aside id="resultActions" class="result-actions hidden" aria-label="What would you like to do next?">
+              <div class="result-actions-copy">
+                <small>Ready for the next step?</small>
+                <strong>Build on this response with AI.</strong>
+                <span>Compare your structure with an AI-assisted version, or stay here and try again.</span>
+              </div>
+              <div class="result-actions-buttons">
+                <a class="result-next" href="../rushed-voice-memo-ai/index.html">Continue to Rushed voice memo with AI →</a>
+                <button class="result-retry" id="resultRetryBtn" type="button">Try this exercise again</button>
+                <a class="result-journey" href="../../member-login/index.html?phase=phase1#learning-journey">Back to Learning Journey</a>
+              </div>
+            </aside>
+
           </div>
         </article>
       </section>
     </section>
   </main>
-  <script src="../../assets/app-reward-header.js?v=20260730-celebration-1"></script>
+
+  <dialog class="ai-prompt-dialog" id="aiPromptDialog" aria-labelledby="aiPromptTitle">
+    <div class="ai-prompt-head">
+      <div><span class="small-label">Optional AI coaching</span><h2 id="aiPromptTitle">Use the AI tool you prefer.</h2></div>
+      <button class="ai-prompt-close" id="aiPromptClose" type="button" aria-label="Close AI feedback prompt"><svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"><path d="M3 3l10 10M13 3L3 13"/></svg></button>
+    </div>
+    <div class="ai-prompt-body">
+      <p class="ai-prompt-privacy"><strong>Nothing is sent automatically.</strong> This prompt is prepared in your browser. Review it, copy it, and paste it into the AI tool of your choice.</p>
+      <label for="aiPromptText">Your feedback prompt</label>
+      <textarea class="ai-prompt-text" id="aiPromptText" readonly></textarea>
+      <div class="ai-prompt-actions">
+        <span class="ai-prompt-status" id="aiPromptStatus" aria-live="polite"></span>
+        <button id="aiPromptCancel" type="button">Cancel</button>
+        <button class="primary" id="copyAiPrompt" type="button">Copy prompt</button>
+      </div>
+    </div>
+  </dialog>
+  <script src="../../assets/app-reward-header.js?v=20260903-responsive-stage1"></script>
   <script src="../../assets/reward-events.js?v=20260730-celebration-1"></script>
 
   <script src="../shared/activity-timer.js?v=20260701-audit-1"></script>
@@ -1422,7 +1494,6 @@
             <i class="ti ti-device-floppy" aria-hidden="true"></i>
             Your response has been saved to this browser.
             <a href="../../my-results/index.html" class="save-notice-link">View all your results →</a>
-            <a href="../../member-login/index.html#learning-journey" class="save-notice-link exit-link">Back to Learning Journey →</a>
           </div>
           <div class="save-notice-caveat">Saved on this device only. Copy your response into your companion workbook to keep a permanent record.</div>
         </div>
@@ -1784,6 +1855,61 @@
       `).join('');
     }
 
+    function categoryByLabel(score, label) {
+      return score.categories.find((category) => category.label === label);
+    }
+
+    function plainSampleAnswer() {
+      return ACTIVITY.sampleAnswer.map((section) => `${section.title}\n${section.bullets.map((bullet, index) => `${index + 1}. ${bullet.replace(/<[^>]*>/g, '')}`).join('\n')}`).join('\n\n');
+    }
+
+    function renderComparisonGuide(score) {
+      const structure = categoryByLabel(score, 'Structure');
+      const coverage = categoryByLabel(score, 'Content coverage');
+      const bsp = categoryByLabel(score, 'BSP format');
+      const missing = coverage?.details?.missing || [];
+      els.comparisonGuide.innerHTML = `
+        <strong>How the responses differ</strong>
+        <p>The sample shows one possible way to organize the same information. Review the differences below, then decide what would improve your response.</p>
+        <div class="comparison-insights">
+          <div class="comparison-insight"><small>Organization</small><span>${structure?.details?.sectionCount === 3 ? 'Your response and the sample both use three sections.' : `Your response has ${structure?.details?.sectionCount || 0} detected sections; the sample uses three.`}</span></div>
+          <div class="comparison-insight"><small>Important Content</small><span>${missing.length ? `The sample also covers ${escapeHtml(missing.slice(0, 2).join(' and '))}.` : 'Your response covers every key content group found in the sample.'}</span></div>
+          <div class="comparison-insight"><small>Scannability</small><span>${bsp?.points === bsp?.max ? 'Your detected bullets already use BSP consistently.' : `${bsp?.details?.bspBulletCount || 0} of ${bsp?.details?.bulletCount || 0} detected bullets use BSP.`}</span></div>
+        </div>`;
+    }
+
+    function aiFeedbackPrompt() {
+      const response = getCurrentResponse().text.trim();
+      const score = state.lastScore || scorePractice(getCurrentResponse(), ACTIVITY.scoring);
+      return `You are a practical writing coach. Review my response to the Rushed Voice Memo exercise.
+
+The goal is to turn a rushed update into a concise, actionable summary for an executive. Assess the response using these criteria:
+1. Exactly three clear, mutually exclusive sections
+2. Important information is covered without inventing facts
+3. Bullets begin with a short Bolded Summary Phrase (BSP)
+4. The message is concise and ready for a decision
+
+MY RESPONSE
+${response}
+
+ONE SAMPLE APPROACH
+${plainSampleAnswer()}
+
+CURRENT RULE BASED SIGNALS
+${score.categories.map((category, index) => `${index + 1}. ${category.label}: ${category.points}/${category.max}. ${category.message}`).join('\n')}
+
+Use the sample as one possible approach. Focus on the quality of the thinking and communication.
+
+Return your feedback in five numbered sections:
+1. One specific strength, quoting a short phrase from my response
+2. The single most important improvement, with evidence from my response
+3. Important information I missed or made unclear
+4. A revised version of only my weakest section
+5. A two sentence explanation of why that revision is stronger
+
+Do not invent facts that are absent from my response or the sample. Keep the feedback concise and constructive.`;
+    }
+
     function renderScore(score) {
       els.scorePanel.classList.remove('hidden');
       els.scorePanel.innerHTML = `
@@ -1809,43 +1935,28 @@
             `;
           }).join('')}
         </div>
+        <div class="feedback-summary">
+          ${(() => {
+            const ranked = score.categories.slice().sort((a, b) => (b.points / b.max) - (a.points / a.max));
+            const strongest = ranked[0];
+            const weakest = ranked[ranked.length - 1];
+            const coverage = categoryByLabel(score, 'Content coverage');
+            const missing = coverage?.details?.missing || [];
+            return `<div class="feedback-card"><small>What is working</small><span>${escapeHtml(strongest.label)}: ${escapeHtml(strongest.message)}</span></div>
+              <div class="feedback-card next"><small>Improve this first</small><span>${escapeHtml(weakest.label)}: ${escapeHtml(weakest.message)}</span></div>
+              <div class="feedback-card"><small>Check against the source</small><span>${missing.length ? `Clarify ${escapeHtml(missing.slice(0, 2).join(' and '))}.` : 'All key content groups were detected.'}</span></div>`;
+          })()}
+        </div>
+        <div class="feedback-ai-prompt"><div><strong>Want a more personalized critique?</strong><span>Prepare a prompt with your response, the criteria, and the sample. Then use it in the AI tool you choose.</span></div><button id="prepareAiPrompt" type="button">Prepare AI feedback prompt</button></div>
       `;
+      renderComparisonGuide(score);
+      document.getElementById('prepareAiPrompt')?.addEventListener('click', openAiPromptDialog);
     }
 
     function renderRecentAttempts() {
-      const attempts = loadAttempts().slice(-3).reverse();
-      if (!attempts.length) {
-        els.recentAttempts.classList.add('hidden');
-        els.recentAttempts.innerHTML = '';
-        return;
-      }
-
-      els.recentAttempts.classList.remove('hidden');
-      els.recentAttempts.innerHTML = `
-        <h3>Recent attempts</h3>
-        <div class="recent-list">
-          ${attempts.map((attempt, index) => {
-            const date = new Date(attempt.timestamp).toLocaleString([], {
-              month: 'short',
-              day: 'numeric',
-              hour: '2-digit',
-              minute: '2-digit'
-            });
-            const previous = attempts[index + 1];
-            const trend = previous && typeof attempt.score === 'number' && typeof previous.score === 'number'
-              ? attempt.score - previous.score
-              : null;
-            const trendText = trend === null || trend === 0 ? '' : `${trend > 0 ? '+' : ''}${trend} improvement`;
-            const elapsed = attempt.timingResult ? attempt.timingResult.elapsedSeconds : attempt.elapsedSeconds;
-            return `
-              <div class="recent-item">
-                <span>${escapeHtml(date)}${trendText ? ` <span class="trend">${escapeHtml(trendText)}</span>` : ''}<br><span class="small">${formatSeconds(elapsed || 0)}</span></span>
-                <span class="recent-score">${typeof attempt.score === 'number' ? `Score: ${attempt.score} / 100` : 'No score'}</span>
-              </div>
-            `;
-          }).join('')}
-        </div>
-      `;
+      // Previous attempts already contains the complete history; avoid a duplicate summary above the form.
+      els.recentAttempts.classList.add('hidden');
+      els.recentAttempts.innerHTML = '';
     }
 
     function submitAttempt() {
@@ -1899,7 +2010,12 @@
       els.checklistPanel.classList.remove('hidden');
       renderScore(score);
       els.comparisonPanel.classList.add('hidden');
-      setMobileTab('self');
+      document.body.classList.add('result-mode');
+      els.resultActions.classList.remove('hidden');
+      setMobileTab('score');
+      els.scorePanel.setAttribute('tabindex', '-1');
+      els.scorePanel.focus({ preventScroll: true });
+      els.scorePanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
     function clearCurrentInput() {
@@ -1918,6 +2034,8 @@
       els.scorePanel.classList.add('hidden');
       els.scorePanel.innerHTML = '';
       els.comparisonPanel.classList.add('hidden');
+      document.body.classList.remove('result-mode');
+      els.resultActions.classList.add('hidden');
       setMobileTab('self');
       renderChecklist();
       resetTimer();
@@ -1961,6 +2079,7 @@
       document.body.dataset.mobileTab = tab;
       els.mobileResultTabs.querySelectorAll('.mobile-tab').forEach((button) => {
         button.classList.toggle('active', button.dataset.tab === tab);
+        button.setAttribute('aria-selected', button.dataset.tab === tab ? 'true' : 'false');
       });
     }
 
@@ -1981,6 +2100,46 @@
       activityTimer.initializeResponsiveVisibility();
     }
 
+    function showSampleAnswer() {
+      updateAttemptChecklist(collectChecklistSelections());
+      state.sampleRevealed = true;
+      els.comparisonPanel.classList.remove('hidden');
+      setMobileTab('sample');
+      const samplePanel = document.getElementById('sampleComparison');
+      if (samplePanel) {
+        samplePanel.setAttribute('tabindex', '-1');
+        samplePanel.focus({ preventScroll: true });
+        samplePanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+
+    function openAiPromptDialog() {
+      els.aiPromptText.value = aiFeedbackPrompt();
+      els.aiPromptStatus.textContent = '';
+      if (typeof els.aiPromptDialog.showModal === 'function') els.aiPromptDialog.showModal();
+      else els.aiPromptDialog.setAttribute('open', '');
+      requestAnimationFrame(() => els.copyAiPrompt.focus());
+    }
+
+    function closeAiPromptDialog() {
+      if (typeof els.aiPromptDialog.close === 'function') els.aiPromptDialog.close();
+      else els.aiPromptDialog.removeAttribute('open');
+    }
+
+    async function copyAiFeedbackPrompt() {
+      const prompt = els.aiPromptText.value;
+      try {
+        await navigator.clipboard.writeText(prompt);
+      } catch (error) {
+        els.aiPromptText.focus();
+        els.aiPromptText.select();
+        document.execCommand('copy');
+      }
+      els.aiPromptStatus.textContent = 'Copied. Paste it into the AI tool you prefer.';
+      els.copyAiPrompt.textContent = 'Copied ✓';
+      setTimeout(() => { els.copyAiPrompt.textContent = 'Copy prompt'; }, 1800);
+    }
+
     function wireEvents() {
       els.openModeBtn.addEventListener('click', () => setMode('open'));
       els.sectionModeBtn.addEventListener('click', () => setMode('sections'));
@@ -1995,20 +2154,25 @@
 
       els.submitBtn.addEventListener('click', submitAttempt);
       els.tryAgainBtn.addEventListener('click', clearCurrentInput);
-
-      els.revealSampleBtn.addEventListener('click', () => {
-        updateAttemptChecklist(collectChecklistSelections());
-        state.sampleRevealed = true;
-        els.comparisonPanel.classList.remove('hidden');
-        if (window.matchMedia('(max-width: 640px)').matches) setMobileTab('sample');
+      els.resultRetryBtn.addEventListener('click', clearCurrentInput);
+      els.aiPromptClose.addEventListener('click', closeAiPromptDialog);
+      els.aiPromptCancel.addEventListener('click', closeAiPromptDialog);
+      els.copyAiPrompt.addEventListener('click', copyAiFeedbackPrompt);
+      els.aiPromptDialog.addEventListener('click', (event) => {
+        if (event.target === els.aiPromptDialog) closeAiPromptDialog();
       });
+
+      els.revealSampleBtn.addEventListener('click', showSampleAnswer);
 
       els.mobileResultTabs.addEventListener('click', (event) => {
         const button = event.target.closest('[data-tab]');
         if (!button) return;
-        if (button.dataset.tab === 'sample' && !state.sampleRevealed) return;
+        if (button.dataset.tab === 'sample') {
+          showSampleAnswer();
+          return;
+        }
         setMobileTab(button.dataset.tab);
-        if (button.dataset.tab === 'answer' || (button.dataset.tab === 'sample' && state.sampleRevealed)) {
+        if (button.dataset.tab === 'answer') {
           els.comparisonPanel.classList.remove('hidden');
         }
       });
@@ -2091,10 +2255,19 @@
         'scorePanel',
         'revealSampleBtn',
         'comparisonPanel',
+        'comparisonGuide',
         'submittedAnswer',
         'sampleAnswer',
         'attemptsList',
         'clearAttemptsBtn'
+        ,'resultActions'
+        ,'resultRetryBtn'
+        ,'aiPromptDialog'
+        ,'aiPromptClose'
+        ,'aiPromptCancel'
+        ,'aiPromptText'
+        ,'aiPromptStatus'
+        ,'copyAiPrompt'
       ].forEach((id) => {
         els[id] = getEl(id);
       });
@@ -2138,11 +2311,32 @@
       initializeResponsiveTimer();
       setMode(state.mode);
       wireEvents();
+      const previewParams = new URLSearchParams(location.search);
+      const designPreview = previewParams.get('design-preview');
+      if (designPreview === 'rushed-voice-memo-working' || designPreview === 'rushed-voice-memo-results') {
+        els.openResponse.value = 'Launch update\n\nTimeline: The revised launch date is Friday.\nOwner: Maya will confirm the final vendor list.\nDecision needed: Approve the revised sequence by noon.';
+      }
+      if (designPreview === 'rushed-voice-memo-results') {
+        document.body.classList.add('design-preview-results', 'result-mode');
+        const score = scorePractice(getCurrentResponse(), ACTIVITY.scoring);
+        state.lastScore = score;
+        els.submittedAnswer.textContent = getCurrentResponse().text;
+        els.mobileResultTabs.classList.add('visible');
+        els.checklistPanel.classList.remove('hidden');
+        renderScore(score);
+        setMobileTab('score');
+        els.confirmation.classList.remove('hidden');
+        els.confirmation.innerHTML = '<strong>Saved ✓.</strong> Your score and next-step feedback are ready.';
+        els.scorePanel.setAttribute('tabindex', '-1');
+        els.resultActions.classList.remove('hidden');
+        if (previewParams.get('view') === 'sample') showSampleAnswer();
+        if (previewParams.get('view') === 'prompt') openAiPromptDialog();
+      }
     }
 
     init();
   </script>
-  <script type="module" src="../../assets/app-access-guard.js?v=20260827-support-preview-1"></script>
+  <script type="module" src="../../assets/app-access-guard.js?v=20260903-responsive-preview"></script>
   <script src="../../assets/exercise-scoring-intro.js?v=6"></script>
   <script type="module" src="../../assets/feedback-widget.js?v=6"></script>
   <script src="../../assets/tactile-buttons.js?v=20260714-flat-1" defer></script>

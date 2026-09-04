@@ -457,6 +457,30 @@
       display: block;
     }
 
+    .write-to-aiko-results { margin-top: 18px; }
+    .write-to-aiko-result-tabs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); padding: 4px; border: 1px solid var(--write-to-aiko-line); border-radius: 8px; background: var(--write-to-aiko-paper); }
+    .write-to-aiko-result-tab { min-height: 42px; border: 0; border-radius: 6px; background: transparent; color: var(--write-to-aiko-navy); font-weight: 700; cursor: pointer; }
+    .write-to-aiko-result-tab.is-active { background: var(--write-to-aiko-navy); color: var(--write-to-aiko-white); }
+    .write-to-aiko-result-panel { margin-top: 14px; padding: 18px; border: 1px solid var(--write-to-aiko-line); border-radius: 8px; background: var(--write-to-aiko-white); }
+    .write-to-aiko-result-panel[hidden] { display: none; }
+    .write-to-aiko-result-panel h3 { margin: 0 0 10px; color: var(--write-to-aiko-navy); font-family: 'Playfair Display', Georgia, serif; font-size: 21px; }
+    .write-to-aiko-self-check { display: grid; gap: 10px; }
+    .write-to-aiko-self-check label { display: flex; width: 100%; align-items: flex-start; justify-content: flex-start; gap: 10px; }
+    .write-to-aiko-self-check input { width: 16px; height: 16px; flex: 0 0 16px; margin: 3px 0 0; padding: 0; }
+    .write-to-aiko-self-check span { flex: 1 1 auto; text-align: left; }
+    .write-to-aiko-answer { margin: 0; white-space: pre-wrap; font: 14px/1.55 Lato, Arial, sans-serif; }
+    .write-to-aiko-result-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; margin-top: 14px; }
+    body.write-to-aiko-result .write-to-aiko-mode-row,
+    body.write-to-aiko-result .write-to-aiko-mode-guidance,
+    body.write-to-aiko-result .write-to-aiko-length-note,
+    body.write-to-aiko-result .write-to-aiko-salutation,
+    body.write-to-aiko-result [data-mode-panel],
+    body.write-to-aiko-result .write-to-aiko-signoff,
+    body.write-to-aiko-result .write-to-aiko-footer-count,
+    body.write-to-aiko-result .write-to-aiko-sample-block,
+    body.write-to-aiko-result .write-to-aiko-actions { display: none; }
+    @media (max-width: 620px) { .write-to-aiko-result-tabs { grid-template-columns: 1fr 1fr; } }
+
     .write-to-aiko-actions {
       display: flex;
       flex-wrap: wrap;
@@ -683,7 +707,11 @@
 
           <div class="write-to-aiko-sample-block">
             <button class="write-to-aiko-sample-toggle" type="button" id="writeToAikoSampleToggle" aria-expanded="false" aria-controls="writeToAikoSample">Show sample answer ↓</button>
-            <div class="write-to-aiko-sample" id="writeToAikoSample">Hey Aiko,
+            <div class="write-to-aiko-sample" id="writeToAikoSample"><strong>One strong approach</strong>
+
+Use this example to review the main point, supporting logic, and next step in your email.
+
+Hey Aiko,
 
 The Olympics is losing relevance because its shared ritual is fading, meaningful stories are being replaced by isolated moments, and trust is weakening.
 
@@ -700,16 +728,51 @@ Yutee Elle</div>
           </div>
 
           <div class="write-to-aiko-actions">
-            <button class="write-to-aiko-submit" type="button" id="writeToAikoSubmit">Save</button>
+            <button class="write-to-aiko-submit" type="button" id="writeToAikoSubmit">Submit</button>
             <button class="write-to-aiko-reset" type="button" id="writeToAikoReset" hidden>Try again</button>
             <a class="write-to-aiko-submit" href="../../member-login/index.html#learning-journey" id="writeToAikoJourneyLink" hidden>Back to Learning Journey</a>
           </div>
           <p class="write-to-aiko-status" id="writeToAikoStatus" role="status" aria-live="polite"></p>
+          <section class="write-to-aiko-results" id="writeToAikoResults" hidden>
+            <nav class="write-to-aiko-result-tabs" id="writeToAikoResultTabs" aria-label="Result sections">
+              <button class="write-to-aiko-result-tab" type="button" data-result-tab="self">Self-check</button>
+              <button class="write-to-aiko-result-tab is-active" type="button" data-result-tab="feedback">Feedback</button>
+              <button class="write-to-aiko-result-tab" type="button" data-result-tab="answer">Your answer</button>
+              <button class="write-to-aiko-result-tab" type="button" data-result-tab="sample">Sample</button>
+            </nav>
+            <div class="write-to-aiko-result-panel" data-result-panel="self" hidden>
+              <h3>Review your email.</h3>
+              <div class="write-to-aiko-self-check">
+                <label><input type="checkbox"> <span>Did I state the main point before the supporting explanation?</span></label>
+                <label><input type="checkbox"> <span>Did I organize the email around three clear supporting points?</span></label>
+                <label><input type="checkbox"> <span>Did I use BSP headings to make the email easy to scan?</span></label>
+                <label><input type="checkbox"> <span>Did I close with a clear decision or next step?</span></label>
+              </div>
+            </div>
+            <div class="write-to-aiko-result-panel" data-result-panel="feedback">
+              <h3>Feedback on your email</h3>
+              <div id="writeToAikoFeedbackSummary"></div>
+              <div id="writeToAikoFeedbackPrompt"></div>
+            </div>
+            <div class="write-to-aiko-result-panel" data-result-panel="answer" hidden>
+              <h3>Your answer</h3>
+              <pre class="write-to-aiko-answer" id="writeToAikoSubmittedAnswer"></pre>
+            </div>
+            <div class="write-to-aiko-result-panel" data-result-panel="sample" hidden>
+              <h3>One strong approach</h3>
+              <pre class="write-to-aiko-answer" id="writeToAikoResultSample"></pre>
+            </div>
+            <div class="write-to-aiko-result-actions">
+              <button class="write-to-aiko-reset" type="button" id="writeToAikoResultReset">Try this exercise again</button>
+              <a class="write-to-aiko-submit" href="../../member-login/index.html#learning-journey">Back to Learning Journey</a>
+            </div>
+          </section>
         </div>
       </section>
     </div>
   </main>
 
+  <script src="../../assets/exercise-feedback-coach.js?v=20260903-feedback-rollout"></script>
   <script>
     (function () {
       const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzJE--FL2kB_XDNZRnszCtlyLRPvaLAHGuF5TAOdXJk40atbvf5Y6ELuSK2B7CSLaMN/exec';
@@ -730,6 +793,7 @@ Yutee Elle</div>
       const resetBtn = document.getElementById('writeToAikoReset');
       const statusEl = document.getElementById('writeToAikoStatus');
       const openText = document.getElementById('writeToAikoOpenText');
+      const resultsEl = document.getElementById('writeToAikoResults');
       const structuredFields = Array.prototype.slice.call(document.querySelectorAll('[data-structured-field]'));
       const analyticsStep = (stepId, progressPercent) => window.dispatchEvent(new CustomEvent('utl:activity-step', { detail: { stepId, progressPercent } }));
 
@@ -859,6 +923,37 @@ Yutee Elle</div>
         return ['Hey Aiko,', body, 'Best,\n[Your name]'].filter(Boolean).join('\n\n');
       }
 
+      function setResultTab(tab) {
+        document.querySelectorAll('#writeToAikoResultTabs [data-result-tab]').forEach((button) => {
+          const active = button.dataset.resultTab === tab;
+          button.classList.toggle('is-active', active);
+          button.setAttribute('aria-selected', String(active));
+        });
+        document.querySelectorAll('#writeToAikoResults [data-result-panel]').forEach((panel) => {
+          panel.hidden = panel.dataset.resultPanel !== tab;
+        });
+      }
+
+      function renderResultFeedback(response) {
+        const body = emailBodyOnly(response);
+        const count = wordCount(body);
+        const paragraphs = body.split(/\n\s*\n/).map((part) => part.trim()).filter(Boolean);
+        const bspCount = paragraphs.filter((part) => /^[^:\n]{2,45}:\s+/.test(part)).length;
+        const hasNextStep = /\b(recommend|next step|if you agree|please|approve|decide|review|follow up)\b/i.test(body);
+        const summary = document.getElementById('writeToAikoFeedbackSummary');
+        summary.innerHTML = `<div class="utl-coach-summary"><div class="utl-coach-card"><small>What is working</small><span>${paragraphs.length >= 4 ? 'Your email has a clear main point and supporting structure.' : 'Your response gives Aiko a direct written recommendation.'}</span></div><div class="utl-coach-card"><small>Improve this first</small><span>${count < 80 ? 'Add enough explanation for Aiko to understand the recommendation.' : count > 120 ? 'Tighten the email so the main point remains easy to scan.' : bspCount < 2 ? 'Use clearer BSP headings for the supporting points.' : 'Check that every supporting point strengthens the main recommendation.'}</span></div><div class="utl-coach-card"><small>Check the next step</small><span>${hasNextStep ? 'A decision or next step is visible in the email.' : 'Close with the decision or next step you want from Aiko.'}</span></div></div>`;
+        document.getElementById('writeToAikoSubmittedAnswer').textContent = response;
+        document.getElementById('writeToAikoResultSample').textContent = document.getElementById('writeToAikoSample').textContent.trim();
+      }
+
+      function showResults(response, tab = 'feedback') {
+        document.body.classList.add('write-to-aiko-result');
+        resultsEl.hidden = false;
+        renderResultFeedback(response);
+        setResultTab(tab);
+        window.UTLFeedbackCoach?.mountPrompt({mount:'#writeToAikoFeedbackPrompt',title:'Write to Aiko',goal:'Write a concise email that gives Aiko the main point, the supporting logic, and a clear next step.',criteria:['State the main point before the supporting explanation','Use clear BSP headings to make the email easy to scan','Support the recommendation with the most important reasons','Close with a specific decision or next step','Keep the tone direct, useful, and professional'],response:()=>composedEmail(),sample:()=>document.getElementById('writeToAikoSample').textContent.trim()});
+      }
+
       function readProfileEmail() {
         const directKeys = ['tsa_participant_email', 'find_your_level_email'];
         for (const key of directKeys) {
@@ -959,11 +1054,12 @@ Yutee Elle</div>
             title: 'Write to Aiko complete',
             body: 'Your written recommendation was saved.'
           });
-          submitBtn.textContent = 'Save';
+          submitBtn.textContent = 'Submit';
           submitBtn.disabled = true;
           resetBtn.hidden = false;
           document.getElementById('writeToAikoJourneyLink').hidden = false;
           statusEl.innerHTML = 'Progress saved! View your full record on the <a href="../../my-results/index.html" style="color:inherit;font-weight:700;">My Results</a> page.';
+          showResults(response);
         } catch (error) {
           console.warn('Firestore progress save failed.', error);
           submitBtn.disabled = false;
@@ -979,21 +1075,36 @@ Yutee Elle</div>
         setMode('structured');
         resetTimer();
         updateCounts();
-        submitBtn.textContent = 'Save';
+        submitBtn.textContent = 'Submit';
         submitBtn.disabled = false;
         resetBtn.hidden = true;
         document.getElementById('writeToAikoJourneyLink').hidden = true;
         statusEl.textContent = '';
+        document.body.classList.remove('write-to-aiko-result');
+        resultsEl.hidden = true;
+      });
+
+      document.getElementById('writeToAikoResultReset').addEventListener('click', () => resetBtn.click());
+      document.getElementById('writeToAikoResultTabs').addEventListener('click', (event) => {
+        const button = event.target.closest('[data-result-tab]');
+        if (button) setResultTab(button.dataset.resultTab);
       });
 
       setMode('structured');
       updateCounts();
       updateTimer();
+      const preview = new URLSearchParams(location.search);
+      if (preview.get('design-preview') === 'write-to-aiko-results') {
+        structuredFields.forEach((field, index) => { field.value = ['The Olympics needs a clearer reason for audiences to return.','Shared ritual: Create appointment moments that people can experience together.','Athlete stories: Build story arcs that help audiences understand what is at stake.','One direction: Give every channel the same editorial focus.','If you agree, I will prepare three pilot options for review.'][index]; });
+        updateCounts();
+        showResults(composedEmail(), preview.get('view') || 'feedback');
+        statusEl.textContent = 'Submitted. Your feedback is ready.';
+      }
     })();
   </script>
-  <script type="module" src="../../assets/app-access-guard.js?v=20260827-support-preview-1"></script>
+  <script type="module" src="../../assets/app-access-guard.js?v=20260903-feedback-preview"></script>
   <script src="../../assets/exercise-scoring-intro.js?v=6"></script>
-  <script src="../../assets/app-reward-header.js?v=20260730-celebration-1"></script>
+  <script src="../../assets/app-reward-header.js?v=20260903-feedback-preview"></script>
   <script src="../../assets/reward-events.js?v=20260730-celebration-1"></script>
   <script type="module" src="../../assets/feedback-widget.js?v=6"></script>
   <script src="../../assets/tactile-buttons.js?v=20260714-flat-1" defer></script>

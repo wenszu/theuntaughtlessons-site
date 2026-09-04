@@ -3,17 +3,17 @@
     scored: {
       label: 'Scored exercise',
       active: 'Scored',
-      copy: 'Submit your work to get a score and feedback based on the structure.'
+      copy: 'Submit your response to receive a practice score and feedback based on the exercise criteria.'
     },
     reflection: {
       label: 'Reflection check',
       active: 'Reflection',
-      copy: 'Write or paste your thinking so the system can check clarity and specificity.'
+      copy: 'Submit a written reflection. Completion is based on providing a clear and specific response.'
     },
     completion: {
       label: 'Completion check',
       active: 'Completion',
-      copy: 'Finish the AI or practice activity, sometimes by pasting what you tried.'
+      copy: 'Complete the required steps in the activity. Some activities also ask you to submit a final response. This check confirms that you finished the exercise and does not assign a score.'
     }
   };
 

@@ -28,6 +28,12 @@ function hasMemberSession() {
     Boolean(sessionStorage.getItem("utl_member_unlocked"));
 }
 
+function localDesignPreview() {
+  const preview = new URLSearchParams(window.location.search).get("design-preview");
+  return ["127.0.0.1", "localhost"].includes(window.location.hostname) &&
+    ["score-history", "messy-notes-working", "messy-notes-results", "rushed-voice-memo-working", "rushed-voice-memo-results", "chalkboard-notes-working", "chalkboard-notes-results", "write-to-aiko-results", "scqa-results"].includes(preview);
+}
+
 function hasPhaseAccess(phase) {
   if (localStorage.getItem("utl_admin_preview_bypass") === "on") return true;
   const experiencePreview = localStorage.getItem("utl_experience_preview_active") === "true";
@@ -99,10 +105,9 @@ const phase = APP_PHASES[slug];
 // Shared engagement instrumentation for every guarded exercise.
 import("./engagement-analytics.js").catch((error) => console.warn("Engagement analytics could not start.", error));
 
-if (phase && !hasMemberSession()) {
-  redirect("signin");
-} else if (phase && !hasPhaseAccess(phase)) {
-  redirect("locked");
+if (phase && !localDesignPreview()) {
+  if (!hasMemberSession()) redirect("signin");
+  else if (!hasPhaseAccess(phase)) redirect("locked");
 }
 
 if (document.readyState === "loading") {

@@ -694,6 +694,44 @@ async function saveUserProgress(exerciseId, exerciseName, exercisePayload = {}) 
   window.dispatchEvent(new CustomEvent("utl:activity-completed", { detail: { activityId: exerciseId, activityTitle: exerciseName } }));
 }
 
+async function saveExerciseAttempt(attemptPayload = {}) {
+  if (experiencePreviewActive()) return { preview: true, saved: false };
+  const user = await getSignedInUser();
+  if (!user || !user.uid) throw new Error("A signed-in Firebase user is required to save an exercise attempt.");
+  const attemptId = String(attemptPayload.attemptId || "").trim().slice(0, 100);
+  const exerciseId = String(attemptPayload.exerciseId || "").trim().slice(0, 100);
+  if (attemptId.length < 8 || !exerciseId) throw new Error("A valid attempt and exercise ID are required.");
+  const scoreMaximum = Math.max(1, Math.min(1000, Math.round(Number(attemptPayload.scoreMaximum) || 100)));
+  const score = Math.max(0, Math.min(scoreMaximum, Math.round(Number(attemptPayload.score) || 0)));
+  await setDoc(doc(requireFirestore(), "users", user.uid, "exercise_attempts", attemptId), {
+    schemaVersion: 1,
+    userId: user.uid,
+    attemptId,
+    exerciseId,
+    exerciseTitle: String(attemptPayload.exerciseTitle || "Exercise").trim().slice(0, 160),
+    contentVersion: String(attemptPayload.contentVersion || "").trim().slice(0, 80),
+    score,
+    scoreMaximum,
+    scorePercent: Math.round(score / scoreMaximum * 100),
+    attemptNumber: Math.max(1, Math.min(10000, Math.round(Number(attemptPayload.attemptNumber) || 1))),
+    durationSeconds: Math.max(0, Math.min(43200, Math.round(Number(attemptPayload.durationSeconds) || 0))),
+    submittedAt: serverTimestamp(),
+    createdAt: serverTimestamp()
+  });
+  return { saved: true, attemptId };
+}
+
+async function getExerciseAttempts(exerciseId) {
+  const user = await getSignedInUser();
+  if (!user || !user.uid) return [];
+  const targetId = String(exerciseId || "").trim();
+  const snapshot = await getDocs(collection(requireFirestore(), "users", user.uid, "exercise_attempts"));
+  return snapshot.docs.map((item) => ({ id: item.id, ...item.data() }))
+    .filter((item) => item.exerciseId === targetId)
+    .sort((a, b) => Number(b.submittedAt && b.submittedAt.toMillis ? b.submittedAt.toMillis() : 0) - Number(a.submittedAt && a.submittedAt.toMillis ? a.submittedAt.toMillis() : 0))
+    .slice(0, 10);
+}
+
 function analyticsText(value, max = 160) {
   return String(value || "").trim().slice(0, max);
 }
@@ -1337,6 +1375,7 @@ export {
   getGoogleRedirectResult,
   getMicrosoftRedirectResult,
   getEmailTemplates,
+  getExerciseAttempts,
   saveEmailTemplate,
   getMemberExerciseResponses,
   getMemberCredentialRegistry,
@@ -1374,6 +1413,7 @@ export {
   sendSignInLinkToEmail,
   saveUserProgress,
   saveEngagementAnalytics,
+  saveExerciseAttempt,
   saveAssessmentItemAttempt,
   getAssessmentVisibility,
   getAdminVisibilitySettings,
