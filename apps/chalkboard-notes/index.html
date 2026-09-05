@@ -1444,11 +1444,11 @@
         <div class="completion-save-notice">
           <div class="save-notice-text">
             <i class="ti ti-device-floppy" aria-hidden="true"></i>
-            Your response has been saved to this browser.
+            Progress saved.
             <a href="../../my-results/index.html" class="save-notice-link">View all your results →</a>
             <a href="../../member-login/index.html#learning-journey" class="save-notice-link exit-link">Back to Learning Journey →</a>
           </div>
-          <div class="save-notice-caveat">Saved on this device only. Copy your response into your companion workbook to keep a permanent record.</div>
+          <div class="save-notice-caveat">Your completion and results are available in My Results. A copy of your response is also kept in this browser.</div>
         </div>
       `;
     }
@@ -1866,7 +1866,7 @@
 
       els.submittedAnswer.textContent = response.text;
       els.confirmation.classList.remove('hidden');
-      els.confirmation.innerHTML = `<strong>Saved ✓.</strong> Time used: ${formatSeconds(elapsedSeconds)}. Now run the self-check.${completionSaveNotice()}`;
+      els.confirmation.innerHTML = `<strong>Submitted ✓.</strong> Time used: ${formatSeconds(elapsedSeconds)}. Now run the self-check.${completionSaveNotice()}`;
       els.tryAgainBtn.classList.remove('hidden');
       els.mobileResultTabs.classList.add('visible');
       els.checklistPanel.classList.remove('hidden');
@@ -2135,7 +2135,7 @@
         renderScore(score);
         setMobileTab('score');
         els.confirmation.classList.remove('hidden');
-        els.confirmation.innerHTML = '<strong>Saved ✓.</strong> Your score and next-step feedback are ready.';
+        els.confirmation.innerHTML = '<strong>Submitted ✓.</strong> Your score and next-step feedback are ready.';
         els.scorePanel.setAttribute('tabindex', '-1');
       }
     }

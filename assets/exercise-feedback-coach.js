@@ -24,12 +24,12 @@
       .utl-coach-comparison{margin-bottom:15px;border:1px solid #e8bd68;border-radius:8px;background:#fff8e8;padding:14px}
       .utl-coach-comparison>strong{display:block;color:var(--navy,#003366);font-size:17px}.utl-coach-comparison>p{margin:4px 0 12px;color:var(--steel,#4d7094);font-size:13px}
       .utl-coach-insights{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.utl-coach-insight{border-radius:7px;background:#fff;padding:10px}.utl-coach-insight small{display:block;color:var(--steel,#4d7094);font-weight:700}.utl-coach-insight span{display:block;margin-top:3px;color:var(--charcoal,#333);font-size:13px;line-height:1.4}
-      .utl-coach-dialog{width:min(720px,calc(100vw - 28px));max-height:88dvh;border:0;border-radius:12px;padding:0;box-shadow:0 22px 70px rgba(0,31,61,.3);color:var(--charcoal,#333)}.utl-coach-dialog::backdrop{background:rgba(0,31,61,.58)}
+      .utl-coach-dialog{width:min(720px,calc(100vw - 28px));max-height:88dvh;overflow:hidden;border:0;border-radius:12px;padding:0;box-shadow:0 22px 70px rgba(0,31,61,.3);color:var(--charcoal,#333);overscroll-behavior:contain}.utl-coach-dialog::backdrop{background:rgba(0,31,61,.58)}
       .utl-coach-dialog-head{display:flex;justify-content:space-between;gap:20px;padding:20px 22px 16px;border-bottom:1px solid var(--line,#c7d8e8)}.utl-coach-dialog-head h2{margin:0;color:var(--navy,#003366);font:700 25px/1.2 "Playfair Display",Georgia,serif}
       .utl-coach-dialog-close{display:grid;width:32px;height:32px;flex:0 0 32px;place-items:center;padding:0;border:1px solid #d7e0e8;border-radius:50%;background:#fff;color:var(--steel,#4d7094);cursor:pointer}.utl-coach-dialog-close:hover{border-color:var(--navy,#003366);color:var(--navy,#003366);background:#f7fafc}.utl-coach-dialog-close svg{width:15px;height:15px;pointer-events:none}
-      .utl-coach-dialog-body{padding:18px 22px 22px}.utl-coach-privacy{margin:0 0 13px;padding:11px 13px;border-radius:7px;background:#eef5fa;color:var(--navy,#003366);font-size:13px}.utl-coach-dialog-body label{display:block;color:var(--navy,#003366);font-weight:700}.utl-coach-prompt-text{box-sizing:border-box;width:100%;min-height:280px;margin-top:7px;resize:vertical;border:1px solid var(--line,#c7d8e8);border-radius:8px;padding:12px;font:13px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace}
+      .utl-coach-dialog-body{max-height:calc(88dvh - 78px);overflow-y:auto;overscroll-behavior:contain;padding:18px 22px 22px}.utl-coach-privacy{margin:0 0 13px;padding:11px 13px;border-radius:7px;background:#eef5fa;color:var(--navy,#003366);font-size:13px}.utl-coach-dialog-body label{display:block;color:var(--navy,#003366);font-weight:700}.utl-coach-scroll-cue{display:flex;align-items:center;gap:6px;margin:5px 0 0;color:var(--steel,#4d7094);font-size:12px}.utl-coach-scroll-cue::before{content:"↓";color:var(--gold,#eea320);font-weight:700}.utl-coach-prompt-text{box-sizing:border-box;width:100%;height:min(390px,48dvh);min-height:220px;max-height:52dvh;overflow:auto;overscroll-behavior:contain;margin-top:7px;resize:vertical;border:1px solid var(--line,#c7d8e8);border-radius:8px;padding:12px;font:13px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace}
       .utl-coach-dialog-actions{display:flex;align-items:center;justify-content:flex-end;gap:10px;margin-top:12px}.utl-coach-copy-status{margin-right:auto;color:#2c7a4b;font-size:13px}.utl-coach-dialog-actions button{min-height:42px;border:1px solid var(--navy,#003366);border-radius:7px;padding:0 15px;background:#fff;color:var(--navy,#003366);font-weight:700;cursor:pointer}.utl-coach-dialog-actions .primary{background:var(--navy,#003366);color:#fff}
-      @media(max-width:700px){.utl-coach-summary,.utl-coach-insights{grid-template-columns:1fr}.utl-coach-prompt{align-items:stretch;flex-direction:column}.utl-coach-dialog-actions{align-items:stretch;flex-direction:column}.utl-coach-copy-status{margin:0}.utl-coach-dialog-actions button{width:100%}}
+      @media(max-width:700px){.utl-coach-summary,.utl-coach-insights{grid-template-columns:1fr}.utl-coach-prompt{align-items:stretch;flex-direction:column}.utl-coach-dialog-body{max-height:calc(92dvh - 72px);padding:15px}.utl-coach-prompt-text{height:42dvh;min-height:190px;max-height:48dvh}.utl-coach-dialog-actions{align-items:stretch;flex-direction:column}.utl-coach-copy-status{margin:0}.utl-coach-dialog-actions button{width:100%}}
     `;
     document.head.appendChild(style);
   }
@@ -42,12 +42,13 @@
     dialog.id = DIALOG_ID;
     dialog.className = "utl-coach-dialog";
     dialog.setAttribute("aria-labelledby", "utlCoachDialogTitle");
-    dialog.innerHTML = `<div class="utl-coach-dialog-head"><div><small id="utlCoachDialogKicker">Optional AI coaching</small><h2 id="utlCoachDialogTitle">Use the AI tool you prefer.</h2></div><button class="utl-coach-dialog-close" type="button" aria-label="Close AI prompt"><svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"><path d="M3 3l10 10M13 3L3 13"/></svg></button></div><div class="utl-coach-dialog-body"><p class="utl-coach-privacy"><strong>Nothing is sent automatically.</strong> This prompt is prepared in your browser. Review it, copy it, and paste it into the AI tool of your choice.</p><label for="utlCoachPromptText" id="utlCoachPromptLabel">Your feedback prompt</label><textarea class="utl-coach-prompt-text" id="utlCoachPromptText" readonly></textarea><div class="utl-coach-dialog-actions"><span class="utl-coach-copy-status" aria-live="polite"></span><button data-utl-coach-cancel type="button">Cancel</button><button class="primary" data-utl-coach-copy type="button">Copy prompt</button></div></div>`;
+    dialog.innerHTML = `<div class="utl-coach-dialog-head"><div><small id="utlCoachDialogKicker">Optional AI coaching</small><h2 id="utlCoachDialogTitle">Use the AI tool you prefer.</h2></div><button class="utl-coach-dialog-close" type="button" aria-label="Close AI prompt"><svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"><path d="M3 3l10 10M13 3L3 13"/></svg></button></div><div class="utl-coach-dialog-body"><p class="utl-coach-privacy"><strong>Nothing is sent automatically.</strong> This prompt is prepared in your browser. Review it, copy it, and paste it into the AI tool of your choice.</p><label for="utlCoachPromptText" id="utlCoachPromptLabel">Your feedback prompt</label><p class="utl-coach-scroll-cue">Scroll inside the prompt to read it in full.</p><textarea class="utl-coach-prompt-text" id="utlCoachPromptText" readonly></textarea><div class="utl-coach-dialog-actions"><span class="utl-coach-copy-status" aria-live="polite"></span><button data-utl-coach-cancel type="button">Cancel</button><button class="primary" data-utl-coach-copy type="button">Copy prompt</button></div></div>`;
     document.body.appendChild(dialog);
-    const close = function () { if (typeof dialog.close === "function") dialog.close(); else dialog.removeAttribute("open"); };
+    const close = function () { if (typeof dialog.close === "function") dialog.close(); else { dialog.removeAttribute("open"); restorePageScroll(); } };
     dialog.querySelector(".utl-coach-dialog-close").addEventListener("click", close);
     dialog.querySelector("[data-utl-coach-cancel]").addEventListener("click", close);
     dialog.addEventListener("click", function (event) { if (event.target === dialog) close(); });
+    dialog.addEventListener("close", restorePageScroll);
     dialog.querySelector("[data-utl-coach-copy]").addEventListener("click", async function (event) {
       const textarea = dialog.querySelector(".utl-coach-prompt-text");
       try { await navigator.clipboard.writeText(currentPrompt); }
@@ -57,6 +58,17 @@
       setTimeout(function () { event.currentTarget.textContent = "Copy prompt"; }, 1800);
     });
     return dialog;
+  }
+
+  let previousPageOverflow = "";
+
+  function lockPageScroll() {
+    previousPageOverflow = document.documentElement.style.overflow;
+    document.documentElement.style.overflow = "hidden";
+  }
+
+  function restorePageScroll() {
+    document.documentElement.style.overflow = previousPageOverflow;
   }
 
   function promptText(options) {
@@ -91,6 +103,7 @@ Use only information found in my response or the sample. Keep the feedback conci
     dialog.querySelector("#utlCoachPromptLabel").textContent = "Your feedback prompt";
     dialog.querySelector(".utl-coach-prompt-text").value = currentPrompt;
     dialog.querySelector(".utl-coach-copy-status").textContent = "";
+    lockPageScroll();
     if (typeof dialog.showModal === "function") dialog.showModal(); else dialog.setAttribute("open", "");
     requestAnimationFrame(function () { dialog.querySelector("[data-utl-coach-copy]").focus(); });
   }
@@ -104,6 +117,7 @@ Use only information found in my response or the sample. Keep the feedback conci
     dialog.querySelector("#utlCoachPromptLabel").textContent = settings.promptLabel || "Your prepared prompt";
     dialog.querySelector(".utl-coach-prompt-text").value = currentPrompt;
     dialog.querySelector(".utl-coach-copy-status").textContent = "";
+    lockPageScroll();
     if (typeof dialog.showModal === "function") dialog.showModal(); else dialog.setAttribute("open", "");
     requestAnimationFrame(function () { dialog.querySelector("[data-utl-coach-copy]").focus(); });
   }

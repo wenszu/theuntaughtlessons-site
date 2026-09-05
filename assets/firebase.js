@@ -667,20 +667,127 @@ async function repairMemberProgramCompletionReward(userId, options = {}) {
   return result;
 }
 
+const PROGRESS_SYNC_QUEUE_KEY = "utl_pending_progress_syncs";
+
+function readProgressSyncQueue() {
+  try { return JSON.parse(localStorage.getItem(PROGRESS_SYNC_QUEUE_KEY) || "{}") || {}; }
+  catch { return {}; }
+}
+
+function writeProgressSyncQueue(queue) {
+  try { localStorage.setItem(PROGRESS_SYNC_QUEUE_KEY, JSON.stringify(queue || {})); }
+  catch {}
+}
+
+function progressSyncKey(exerciseId) {
+  return String(exerciseId || "exercise").replace(/[^a-z0-9_-]+/gi, "-").slice(0, 100);
+}
+
+function queueProgressSync(exerciseId, exerciseName, exercisePayload, error) {
+  const queue = readProgressSyncQueue();
+  const key = progressSyncKey(exerciseId);
+  const previous = queue[key] || {};
+  queue[key] = {
+    exerciseId,
+    exerciseName,
+    exercisePayload,
+    failedAt: previous.failedAt || new Date().toISOString(),
+    lastAttemptAt: new Date().toISOString(),
+    attempts: Number(previous.attempts || 0) + 1,
+    error: String(error?.message || "Progress synchronization failed.").slice(0, 240)
+  };
+  writeProgressSyncQueue(queue);
+  return queue[key];
+}
+
+function clearQueuedProgressSync(exerciseId) {
+  const queue = readProgressSyncQueue();
+  delete queue[progressSyncKey(exerciseId)];
+  writeProgressSyncQueue(queue);
+  return Object.keys(queue).length;
+}
+
+function ensureProgressSyncNotice() {
+  let notice = document.getElementById("utlProgressSyncNotice");
+  if (notice) return notice;
+  const style = document.createElement("style");
+  style.id = "utl-progress-sync-style";
+  style.textContent = ".utl-progress-sync-notice{position:fixed;right:18px;top:92px;z-index:9998;width:min(410px,calc(100vw - 28px));border:1px solid #e1b967;border-radius:9px;background:#fff8e8;box-shadow:0 14px 40px rgba(0,31,61,.18);padding:14px 15px;color:#333;font:14px/1.45 Lato,Arial,sans-serif}.utl-progress-sync-notice[hidden]{display:none}.utl-progress-sync-notice strong{display:block;color:#003366;font-size:15px}.utl-progress-sync-notice p{margin:4px 0 11px}.utl-progress-sync-actions{display:flex;align-items:center;gap:9px}.utl-progress-sync-actions button{min-height:38px;border:0;border-radius:7px;background:#003366;color:#fff;padding:0 14px;font-weight:700;cursor:pointer}.utl-progress-sync-actions span{color:#4d7094;font-size:12px}.utl-progress-sync-notice.is-saved{border-color:#b8d7c3;background:#eef8f1}.utl-progress-sync-notice.is-saved p{margin-bottom:0}@media(max-width:600px){.utl-progress-sync-notice{top:auto;right:14px;bottom:14px;left:14px;width:auto}}";
+  document.head.appendChild(style);
+  notice = document.createElement("aside");
+  notice.id = "utlProgressSyncNotice";
+  notice.className = "utl-progress-sync-notice";
+  notice.setAttribute("role", "status");
+  notice.setAttribute("aria-live", "polite");
+  notice.hidden = true;
+  notice.innerHTML = '<strong>Your work is safe in this browser.</strong><p>We could not sync it to your account. Check your connection or sign in again, then retry.</p><div class="utl-progress-sync-actions"><button type="button">Retry sync</button><span></span></div>';
+  document.body.appendChild(notice);
+  return notice;
+}
+
+function showProgressSyncFailure(retry) {
+  const notice = ensureProgressSyncNotice();
+  notice.classList.remove("is-saved");
+  notice.innerHTML = '<strong>Your work is safe in this browser.</strong><p>We could not sync it to your account. Check your connection or sign in again, then retry.</p><div class="utl-progress-sync-actions"><button type="button">Retry sync</button><span></span></div>';
+  notice.hidden = false;
+  const button = notice.querySelector("button");
+  const status = notice.querySelector("span");
+  button.addEventListener("click", async () => {
+    button.disabled = true;
+    button.textContent = "Retrying…";
+    status.textContent = "Connecting to your account";
+    try {
+      const result = await retry();
+      if (Number(result?.remaining || 0) > 0) throw new Error("Progress is still waiting to sync.");
+    }
+    catch { button.disabled = false; button.textContent = "Retry sync"; status.textContent = "Still offline. Your browser copy remains safe."; }
+  });
+}
+
+function showProgressSyncSuccess() {
+  const notice = ensureProgressSyncNotice();
+  notice.classList.add("is-saved");
+  notice.innerHTML = '<strong>Progress synced ✓</strong><p>Your completion and results are now available in My Results.</p>';
+  notice.hidden = false;
+  window.setTimeout(() => { notice.hidden = true; }, 4500);
+}
+
+async function retryPendingProgressSyncs() {
+  const entries = Object.values(readProgressSyncQueue());
+  if (!entries.length) return { synced: 0, remaining: 0 };
+  let synced = 0;
+  for (const item of entries) {
+    try { await saveUserProgress(item.exerciseId, item.exerciseName, item.exercisePayload); synced += 1; }
+    catch {}
+  }
+  const remaining = Object.keys(readProgressSyncQueue()).length;
+  if (!remaining && synced) showProgressSyncSuccess();
+  return { synced, remaining };
+}
+
+if (typeof window !== "undefined") {
+  window.addEventListener("online", () => { retryPendingProgressSyncs().catch(() => {}); });
+  const showPendingSync = () => {
+    if (Object.keys(readProgressSyncQueue()).length) showProgressSyncFailure(() => retryPendingProgressSyncs());
+  };
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", showPendingSync, { once: true });
+  else showPendingSync();
+}
+
 async function saveUserProgress(exerciseId, exerciseName, exercisePayload = {}) {
   if (experiencePreviewActive()) return { preview: true, saved: false };
-  const user = await getSignedInUser();
-  if (!user || !user.uid) {
-    throw new Error("A signed-in Firebase user is required to save progress.");
-  }
-
-  const docRef = doc(requireFirestore(), "users", user.uid, "completed_exercises", exerciseId);
-  await setDoc(docRef, {
-    status: "Done",
-    exerciseName: exerciseName,
-    updatedAt: serverTimestamp(),
-    savedPayload: exercisePayload
-  }, { merge: true });
+  try {
+    const user = await getSignedInUser();
+    if (!user || !user.uid) {
+      throw new Error("Your sign-in session is no longer active.");
+    }
+    const docRef = doc(requireFirestore(), "users", user.uid, "completed_exercises", exerciseId);
+    await setDoc(docRef, {
+      status: "Done",
+      exerciseName: exerciseName,
+      updatedAt: serverTimestamp(),
+      savedPayload: exercisePayload
+    }, { merge: true });
 
   const canonicalId = exerciseProgressIds[exerciseId] || exerciseId;
   const completedAt = new Date().toISOString();
@@ -700,15 +807,31 @@ async function saveUserProgress(exerciseId, exerciseName, exercisePayload = {}) 
     appKey: exerciseId
   };
 
-  const userRef = doc(requireFirestore(), "users", user.uid);
-  await setDoc(userRef, {
-    workspaceProgress: {
-      exercises: exerciseProgress
-    },
-    lastSeenAt: serverTimestamp(),
-    updatedAt: serverTimestamp()
-  }, { merge: true });
-  window.dispatchEvent(new CustomEvent("utl:activity-completed", { detail: { activityId: exerciseId, activityTitle: exerciseName } }));
+    const queued = readProgressSyncQueue();
+    const remainingAfterSave = Object.keys(queued).filter((key) => key !== progressSyncKey(exerciseId)).length;
+    const userRef = doc(requireFirestore(), "users", user.uid);
+    const syncHealth = {
+      pendingProgressSaves: remainingAfterSave,
+      lastSyncSuccessAt: serverTimestamp()
+    };
+    if (queued[progressSyncKey(exerciseId)]) syncHealth.lastRecoveredAt = serverTimestamp();
+    await setDoc(userRef, {
+      workspaceProgress: {
+        exercises: exerciseProgress
+      },
+      syncHealth,
+      lastSeenAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    }, { merge: true });
+    const remaining = clearQueuedProgressSync(exerciseId);
+    if (!remaining && queued[progressSyncKey(exerciseId)]) showProgressSyncSuccess();
+    window.dispatchEvent(new CustomEvent("utl:activity-completed", { detail: { activityId: exerciseId, activityTitle: exerciseName } }));
+    return { saved: true };
+  } catch (error) {
+    queueProgressSync(exerciseId, exerciseName, exercisePayload, error);
+    showProgressSyncFailure(() => retryPendingProgressSyncs());
+    throw error;
+  }
 }
 
 async function saveExerciseAttempt(attemptPayload = {}) {
@@ -921,6 +1044,9 @@ async function getAllMemberWorkspaceProgress() {
         updatedAt: data.updatedAt || existing.updatedAt || null,
         workspaceProgress: data.workspaceProgress || existing.workspaceProgress || null,
         rewards: data.rewards || (data.workspaceProgress && data.workspaceProgress.rewards) || existing.rewards || null,
+        syncHealth: data.syncHealth || existing.syncHealth || null,
+        firstLoginAt: data.firstLoginAt || existing.firstLoginAt || null,
+        lastLoginAt: data.lastLoginAt || existing.lastLoginAt || null,
         role: existing.role || data.role || "member",
         status: existing.status || "active",
         cohort: existing.cohort || "",
@@ -1429,6 +1555,7 @@ export {
   sendSignInInvite,
   sendSignInLinkToEmail,
   saveUserProgress,
+  retryPendingProgressSyncs,
   saveEngagementAnalytics,
   saveExerciseAttempt,
   saveAssessmentItemAttempt,

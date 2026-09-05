@@ -8,6 +8,11 @@ assert.match(coach, /Use the sample as one possible approach/);
 assert.doesNotMatch(coach, /criteria, and the sample[—-]then/);
 assert.match(coach, /navigator\.clipboard\.writeText/);
 assert.match(coach, /function mountPreparedPrompt\(options\)/, 'shared coach supports prepared prompts for copy and paste AI activities');
+assert.match(coach, /\.utl-coach-dialog-body\{[^}]*overflow-y:auto/, 'long AI prompts scroll inside the dialog');
+assert.match(coach, /\.utl-coach-prompt-text\{[^}]*overflow:auto/, 'the prompt field itself remains scrollable');
+assert.match(coach, /document\.documentElement\.style\.overflow = "hidden"/, 'opening an AI prompt keeps the page behind it still');
+assert.match(coach, /dialog\.addEventListener\("close", restorePageScroll\)/, 'closing the AI prompt restores page scrolling');
+assert.match(coach, /Scroll inside the prompt to read it in full\./, 'shared AI prompt dialogs explain where to scroll');
 
 const rushedAi = fs.readFileSync('apps/rushed-voice-memo-ai/index.html', 'utf8');
 assert.match(rushedAi, /id="aiStructuringPromptMount"/);
@@ -15,6 +20,11 @@ assert.match(rushedAi, /mountPreparedPrompt\(\{/);
 assert.match(rushedAi, /Prepare your AI structuring prompt/);
 assert.doesNotMatch(rushedAi, /<summary>AI structuring prompt<\/summary>/, 'Rushed Voice Memo AI no longer hides the prompt action in a disclosure');
 assert.match(rushedAi, /\.tsa-speak-field-label \{[\s\S]*?margin: 20px 0 8px;/, 'Rushed Voice Memo AI separates its output label from the field');
+
+const rushedMemoPrompt = fs.readFileSync('apps/rushed-voice-memo/index.html', 'utf8');
+assert.match(rushedMemoPrompt, /Scroll inside the prompt to read it in full\./, 'the custom Rushed Voice Memo prompt explains where to scroll');
+assert.match(rushedMemoPrompt, /\.ai-prompt-text\{[^}]*overflow:auto/, 'the custom Rushed Voice Memo prompt field scrolls independently');
+assert.match(rushedMemoPrompt, /document\.documentElement\.style\.overflow = 'hidden'/, 'the custom Rushed Voice Memo prompt keeps the page behind it still');
 
 const fullFeedbackPages = [
   'apps/messy-notes/index.html',
@@ -46,6 +56,19 @@ for (const file of [
 ]) {
   assert.match(fs.readFileSync(file, 'utf8'), /exercise-feedback-coach\.js/, `${file} loads the provider neutral feedback prompt`);
 }
+
+const issueTree = fs.readFileSync('apps/issue-tree-builder/index.html', 'utf8');
+for (const label of ['Self-check', 'Feedback', 'Your answer', 'Sample']) {
+  assert.match(issueTree, new RegExp(`data-issue-result-tab="[^"]+"[^>]*>${label}`), `Issue Tree Builder includes the ${label} result tab`);
+}
+assert.match(issueTree, /class="issue-results-shell"/, 'Issue Tree Builder groups its result experience in one outlined container');
+assert.match(issueTree, /<div class="label">One strong approach<\/div>/, 'Issue Tree Builder presents the sample as one strong approach');
+assert.match(issueTree, /Review sample answer/, 'Issue Tree Builder uses the standard sample action label');
+assert.match(issueTree, /mountIssueTreePrompt/, 'Issue Tree Builder keeps optional provider neutral coaching');
+for (const label of ['What is working', 'Improve this first', 'Check the next step']) {
+  assert.match(issueTree, new RegExp(`<small>${label}<\\/small>`), `Issue Tree Builder includes the ${label} feedback card`);
+}
+assert.match(issueTree, /View all structure checks/, 'Issue Tree Builder keeps its detailed score available on demand');
 
 const speaking = fs.readFileSync('apps/explain-to-aiko/aiko.js', 'utf8');
 assert.match(speaking, /SCORE_URL/, 'Explain to Aiko keeps its built in AI grading');
@@ -94,6 +117,20 @@ for (const file of ['apps/messy-notes/index.html', 'apps/chalkboard-notes/index.
   assert.match(html, /border-radius: 8px/, `${file} uses rounded outlined result sections`);
 }
 assert.doesNotMatch(scqa, /id="showSamples"|id="finishScqa"/, 'SCQA avoids duplicate result actions');
+
+for (const file of [
+  'apps/messy-notes/index.html',
+  'apps/chalkboard-notes/index.html',
+  'apps/rushed-voice-memo/index.html',
+  'apps/scqa-builder/index.html',
+  'apps/grocery-list/index.html',
+  'apps/rushed-voice-memo-ai/index.html',
+  'apps/issue-tree-builder/index.html'
+]) {
+  const html = fs.readFileSync(file, 'utf8');
+  assert.match(html, /Your completion and results are available in My Results\./, `${file} explains where permanent results can be found`);
+  assert.doesNotMatch(html, /Saved on this device only\. Copy your response/, `${file} does not imply that signed-in progress is only local`);
+}
 
 for (const file of [
   'apps/advisory-board/index.html',

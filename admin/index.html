@@ -882,6 +882,14 @@
     .ei-status-chip { display:inline-block; margin-top:4px; padding:3px 8px; border-radius:999px; background:#F0ECE5; color:#666; font-size:10px; font-weight:700; }
     .ei-status-chip.is-active { background:#E6F4EC; color:#27633F; }
     .ei-status-chip.needs-support { background:#FFF1CF; color:#8A5A00; }
+    .lh-summary { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; margin:14px 0 18px; }
+    .lh-card { padding:15px; border:1px solid var(--line); border-radius:8px; background:#fff; }
+    .lh-card span { display:block; color:#777; font-size:11px; font-weight:700; }
+    .lh-card strong { display:block; margin-top:5px; color:var(--navy); font:700 27px 'Playfair Display',serif; }
+    .lh-card.is-warning { border-color:#E8C980; background:#FFF9EA; }
+    .lh-note { margin-top:12px; padding:11px 13px; border:1px solid var(--line); border-radius:7px; background:var(--soft); color:#555; font-size:12px; }
+    @media(max-width:900px){.lh-summary{grid-template-columns:repeat(2,minmax(0,1fr));}}
+    @media(max-width:520px){.lh-summary{grid-template-columns:1fr;}}
     @media(max-width:680px){.ei-view-tabs{overflow:auto}.ei-view-tab{white-space:nowrap}.ei-section-intro{display:block}}
 
     .ca-cohort-row { cursor: pointer; }
@@ -2575,6 +2583,7 @@
 
       <span class="nav-group-label" data-admin-nav-group="student-progress">Progress</span>
       <button class="admin-nav-item" data-admin-tab-scope="student-progress" data-target="section-student-progress">Student Progress</button>
+      <button class="admin-nav-item" data-admin-tab-scope="student-progress" data-target="section-launch-health">Launch Health</button>
       <button class="admin-nav-item" data-admin-tab-scope="student-progress" data-target="section-leaderboard">Leaderboard</button>
       <button class="admin-nav-item" data-admin-tab-scope="student-progress" data-target="section-engagement-insights">Engagement Insights</button>
       <button class="admin-nav-item" data-admin-tab-scope="student-progress" data-target="section-cohort-analytics">Cohort Analytics</button>
@@ -2914,6 +2923,19 @@
             </div>
           </div>
         </dialog>
+      </section>
+
+      <section class="admin-section" id="section-launch-health" data-admin-tab-panel="student-progress">
+        <span class="section-label">Progress</span>
+        <h2>Launch Health</h2>
+        <div class="section-divider"></div>
+        <p class="description"><strong>Use this for daily launch checks:</strong> confirm who has signed in, who still needs orientation, when learners were last seen, and whether a browser has reported a recovered progress-sync problem.</p>
+        <div class="student-progress-actions">
+          <button class="small-button" type="button" id="lhRefresh">Refresh launch health</button>
+          <span class="student-progress-status" id="lhStatus" aria-live="polite"></span>
+        </div>
+        <div id="lhContent"><p class="mb-msg">Click Refresh launch health to load the current member status.</p></div>
+        <p class="lh-note"><strong>About connection failures:</strong> work that cannot reach Firebase stays in the learner’s browser with a Retry sync action. A completely offline browser cannot report itself to this page in real time. Once it reconnects, the recovery is recorded here.</p>
       </section>
 
       <section class="admin-section" id="section-leaderboard" data-admin-tab-panel="student-progress">
@@ -3422,7 +3444,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         <span class="section-label">Engagement</span>
         <h2>Email templates</h2>
         <div class="section-divider"></div>
-        <p class="description">Edit and preview the welcome email sent when you add a new member. The three setup steps and sign-off are fixed — only the fields below are editable. Use <code>{{first_name}}</code> in the intro for the member's first name.</p>
+        <p class="description">Edit and preview the welcome email sent when you add a new member. The four setup steps and sign-off are fixed. Only the fields below are editable. Use <code>{{first_name}}</code> in the intro for the member's first name.</p>
 
         <div id="etStatus" class="eng-status" aria-live="polite"></div>
         <div id="etForm" hidden>
@@ -6561,6 +6583,21 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
           <tr><td style="padding:0 48px 28px;">
             <table border="0" cellpadding="0" cellspacing="0" width="100%"><tr>
               <td width="40" valign="top" style="padding-top:2px;"><div style="width:28px; height:28px; background-color:${accent}; border-radius:50%; color:#FFFFFF; font-size:14px; font-weight:700; text-align:center; line-height:28px;">1</div></td>
+              <td><h2 style="margin:0 0 8px; font-size:17px; font-weight:700; color:${accent};">Confirm your program access</h2>
+                <p style="margin:0 0 12px; font-size:14px; color:#4A4A4A; line-height:1.6;">We use <strong>utl-members@googlegroups.com</strong> to give you access to the program materials.</p>
+                <table border="0" cellpadding="0" cellspacing="0" width="100%" style="border-collapse:separate;">
+                  <tr><td style="padding:12px 14px; border:1px solid #C9D9E8; border-radius:6px; background-color:#F5F9FC; font-size:14px; color:#4A4A4A; line-height:1.6;"><strong style="color:${accent};">If you receive a Google Groups invitation:</strong> Open it and select <strong>Accept this invitation</strong>. Check your spam or junk folder if you cannot find it.</td></tr>
+                  <tr><td height="8" style="height:8px; font-size:0; line-height:0;">&nbsp;</td></tr>
+                  <tr><td style="padding:12px 14px; border:1px solid #C9D9E8; border-radius:6px; background-color:#F5F9FC; font-size:14px; color:#4A4A4A; line-height:1.6;"><strong style="color:${accent};">If you do not receive an invitation:</strong> No action is needed. Your access may already be active, so continue to the next step.</td></tr>
+                </table>
+                <p style="margin:12px 0 0; padding:11px 13px; border:1px solid #B8D4EA; border-radius:6px; background-color:#EAF4FB; font-size:14px; font-weight:700; color:${accent}; line-height:1.6;">The Google Groups invitation is separate from signing in to your workspace.</p>
+              </td>
+            </tr></table>
+          </td></tr>
+
+          <tr><td style="padding:0 48px 28px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="100%"><tr>
+              <td width="40" valign="top" style="padding-top:2px;"><div style="width:28px; height:28px; background-color:${accent}; border-radius:50%; color:#FFFFFF; font-size:14px; font-weight:700; text-align:center; line-height:28px;">2</div></td>
               <td><h2 style="margin:0 0 8px; font-size:17px; font-weight:700; color:${accent};">Sign in to your workspace</h2>
                 <p style="margin:0; font-size:14px; color:#4A4A4A; line-height:1.6;">Go to the member login page and use the sign-in method provided with your membership. You can use an email sign-in link or continue with Google, Microsoft or Facebook.${loginEmail ? ' Whichever option you use, enter <strong>' + escapeHtml(loginEmail) + '</strong>.' : ' Whichever option you use, enter the same email address that received this welcome message.'} If a video does not load right away, refresh the page after a few minutes.</p>
                 <table border="0" cellpadding="0" cellspacing="0" style="margin-top:16px;"><tr><td align="center" bgcolor="${accent}" style="border-radius:6px;"><a href="${escapeHtml(workspaceUrl)}" target="_blank" style="display:inline-block; padding:12px 24px; font-size:14px; font-weight:700; color:#FFFFFF; text-decoration:none; letter-spacing: 0;">Sign in to your workspace &#8594;</a></td></tr></table>
@@ -6571,7 +6608,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
 
           <tr><td style="padding:0 48px 28px;">
             <table border="0" cellpadding="0" cellspacing="0" width="100%"><tr>
-              <td width="40" valign="top" style="padding-top:2px;"><div style="width:28px; height:28px; background-color:${accent}; border-radius:50%; color:#FFFFFF; font-size:14px; font-weight:700; text-align:center; line-height:28px;">2</div></td>
+              <td width="40" valign="top" style="padding-top:2px;"><div style="width:28px; height:28px; background-color:${accent}; border-radius:50%; color:#FFFFFF; font-size:14px; font-weight:700; text-align:center; line-height:28px;">3</div></td>
               <td><h2 style="margin:0 0 8px; font-size:17px; font-weight:700; color:${accent};">Complete your orientation</h2>
                 <p style="margin:0; font-size:14px; color:#4A4A4A; line-height:1.6;">Once you are signed in, you will land on your Home page. Start with the Home section at the top. It takes about five minutes and sets you up for everything that follows.</p>
               </td>
@@ -6580,7 +6617,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
 
           <tr><td style="padding:0 48px 40px;">
             <table border="0" cellpadding="0" cellspacing="0" width="100%"><tr>
-              <td width="40" valign="top" style="padding-top:2px;"><div style="width:28px; height:28px; background-color:${accent}; border-radius:50%; color:#FFFFFF; font-size:14px; font-weight:700; text-align:center; line-height:28px;">3</div></td>
+              <td width="40" valign="top" style="padding-top:2px;"><div style="width:28px; height:28px; background-color:${accent}; border-radius:50%; color:#FFFFFF; font-size:14px; font-weight:700; text-align:center; line-height:28px;">4</div></td>
               <td><h2 style="margin:0 0 8px; font-size:17px; font-weight:700; color:${accent};">Begin Phase 1</h2>
                 <p style="margin:0; font-size:14px; color:#4A4A4A; line-height:1.6;">After orientation, begin Phase 1 and work through the first lesson and practice activity at your own pace.</p>
               </td>
@@ -8320,6 +8357,82 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       }
     }
 
+    // Launch Health
+    function lhIso(value) {
+      if (!value) return '';
+      if (typeof value.toDate === 'function') return value.toDate().toISOString();
+      if (value.seconds) return new Date(value.seconds * 1000).toISOString();
+      const parsed = new Date(value);
+      return Number.isNaN(parsed.getTime()) ? '' : parsed.toISOString();
+    }
+
+    function lhDate(value) {
+      const iso = lhIso(value);
+      return iso ? new Date(iso).toLocaleString([], {month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}) : '—';
+    }
+
+    function lhOrientationReady(member) {
+      return member.workspaceProgress?.orientation?.ready === true;
+    }
+
+    function renderLaunchHealth(members) {
+      const content = document.getElementById('lhContent');
+      if (!content) return;
+      const active = members.filter((member) => String(member.status || 'active').toLowerCase() !== 'removed');
+      const neverSignedIn = active.filter((member) => !member.uid && !member.firstLoginAt && !member.lastLoginAt);
+      const orientationOpen = active.filter((member) => (member.uid || member.firstLoginAt || member.lastLoginAt) && !lhOrientationReady(member));
+      const recovered = active.filter((member) => member.syncHealth?.lastRecoveredAt);
+      const seenRecently = active.filter((member) => {
+        const iso = lhIso(member.lastSeenAt || member.lastLoginAt || member.updatedAt);
+        return iso && Date.now() - new Date(iso).getTime() <= 24 * 60 * 60 * 1000;
+      });
+      const priority = active.filter((member) => {
+        const never = !member.uid && !member.firstLoginAt && !member.lastLoginAt;
+        const needsOrientation = !never && !lhOrientationReady(member);
+        const pending = Number(member.syncHealth?.pendingProgressSaves || 0) > 0;
+        return never || needsOrientation || pending;
+      });
+      const cards = [
+        ['Active members', active.length, false],
+        ['Seen in the last 24 hours', seenRecently.length, false],
+        ['Never signed in', neverSignedIn.length, neverSignedIn.length > 0],
+        ['Orientation incomplete', orientationOpen.length, orientationOpen.length > 0]
+      ].map((item) => '<div class="lh-card' + (item[2] ? ' is-warning' : '') + '"><span>' + escapeHtml(item[0]) + '</span><strong>' + item[1] + '</strong></div>').join('');
+      const rows = priority.map((member) => {
+        const never = !member.uid && !member.firstLoginAt && !member.lastLoginAt;
+        const pending = Number(member.syncHealth?.pendingProgressSaves || 0);
+        const state = pending ? 'Sync needs attention' : never ? 'Never signed in' : 'Orientation incomplete';
+        const action = pending ? 'Ask the learner to open the exercise and select Retry sync.' : never ? 'Confirm the welcome email and sign-in method.' : 'Send a gentle orientation reminder.';
+        return '<tr><td>' + escapeHtml(member.displayName || member.name || member.email || 'Member') + '<br><small>' + escapeHtml(member.email || '') + '</small></td><td>' + escapeHtml(member.cohort || 'No cohort') + '</td><td><span class="ei-status-chip needs-support">' + escapeHtml(state) + '</span></td><td>' + lhDate(member.lastSeenAt || member.lastLoginAt || member.updatedAt) + '</td><td>' + escapeHtml(action) + '</td></tr>';
+      }).join('') || '<tr><td colspan="5"><span class="sp-status-done">No launch issues need attention.</span></td></tr>';
+      const recoveredRows = recovered.slice().sort((a,b) => String(lhIso(b.syncHealth.lastRecoveredAt)).localeCompare(String(lhIso(a.syncHealth.lastRecoveredAt)))).slice(0,10).map((member) => '<tr><td>' + escapeHtml(member.displayName || member.name || member.email || 'Member') + '</td><td>' + escapeHtml(member.email || '') + '</td><td>' + lhDate(member.syncHealth.lastRecoveredAt) + '</td><td><span class="ei-status-chip is-active">Recovered</span></td></tr>').join('') || '<tr><td colspan="4">No recovered sync problems have been recorded.</td></tr>';
+      content.innerHTML = '<div class="lh-summary">' + cards + '</div><div class="sp-detail-card"><h4>Needs attention</h4><div class="student-progress-table-wrap"><table class="student-progress-table"><thead><tr><th>Learner</th><th>Cohort</th><th>Signal</th><th>Last seen</th><th>Suggested action</th></tr></thead><tbody>' + rows + '</tbody></table></div></div><div class="sp-detail-card"><h4>Recent sync recoveries</h4><p class="description">A recovery appears after a learner’s locally protected work successfully reaches Firebase.</p><div class="student-progress-table-wrap"><table class="student-progress-table"><thead><tr><th>Learner</th><th>Email</th><th>Recovered</th><th>Status</th></tr></thead><tbody>' + recoveredRows + '</tbody></table></div></div>';
+    }
+
+    async function loadLaunchHealth() {
+      const status = document.getElementById('lhStatus');
+      const button = document.getElementById('lhRefresh');
+      const fb = window.utlFirebaseAuth;
+      if (!fb?.getAllMemberWorkspaceProgress) {
+        if (status) status.textContent = 'Member service is loading…';
+        window.addEventListener('utlFirebaseAuthReady', function handler() { window.removeEventListener('utlFirebaseAuthReady', handler); loadLaunchHealth(); });
+        return;
+      }
+      if (button) { button.disabled = true; button.textContent = 'Refreshing…'; }
+      if (status) status.textContent = 'Loading member health…';
+      try {
+        await mbRequireFirebaseAdmin();
+        const members = await fb.getAllMemberWorkspaceProgress();
+        spAllMembers = members;
+        renderLaunchHealth(members);
+        if (status) status.textContent = members.length + ' member' + (members.length === 1 ? '' : 's') + ' · refreshed ' + new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+      } catch (error) {
+        if (status) status.textContent = 'Could not load launch health: ' + ((error && error.message) || 'Unknown error');
+      } finally {
+        if (button) { button.disabled = false; button.textContent = 'Refresh launch health'; }
+      }
+    }
+
     // Engagement Insights
     let eiData = { sessions: [], activities: [] };
     const EI_METRICS = {
@@ -9149,8 +9262,10 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       else window.history.pushState({}, '', url);
 
       if (activeTab === 'student-progress') {
-        loadStudentProgress();
-        loadEngagementInsights();
+        const progressTarget = (currentActive || visibleNavItems[0])?.dataset.target;
+        if (progressTarget === 'section-launch-health') loadLaunchHealth();
+        else if (progressTarget === 'section-engagement-insights') loadEngagementInsights();
+        else loadStudentProgress();
       }
       if (activeTab === 'rewards') loadRewardSettings();
       if (activeTab === 'member-management' && !mbMembersCache.length) mbLoadMembers();
@@ -9449,6 +9564,10 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       if (spAllMembers.length) renderLeaderboard();
     });
     document.getElementById('caRefresh')?.addEventListener('click', loadStudentProgress);
+    document.getElementById('lhRefresh')?.addEventListener('click', loadLaunchHealth);
+    document.querySelector('[data-target="section-launch-health"]')?.addEventListener('click', loadLaunchHealth);
+    document.querySelector('[data-target="section-student-progress"]')?.addEventListener('click', loadStudentProgress);
+    document.querySelector('[data-target="section-engagement-insights"]')?.addEventListener('click', loadEngagementInsights);
     document.getElementById('eiRefresh')?.addEventListener('click', loadEngagementInsights);
     document.getElementById('eiGlossaryToggle')?.addEventListener('click', function () {
       const glossary = document.getElementById('eiGlossary');

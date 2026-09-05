@@ -1729,6 +1729,133 @@
     .save-notice-actions {
       margin-top: 12px;
     }
+
+    .save-notice-link {
+      color: var(--gold-hover);
+      font-weight: 700;
+    }
+
+    .issue-results-shell {
+      margin-top: 18px;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #fff;
+    }
+
+    .issue-result-tabs {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 4px;
+      margin-bottom: 16px;
+      padding: 4px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #FAF8F4;
+    }
+
+    .issue-result-tab {
+      min-height: 42px;
+      border: 0;
+      border-radius: 7px;
+      background: transparent;
+      color: var(--navy);
+      font: 700 14px 'Lato', sans-serif;
+      cursor: pointer;
+    }
+
+    .issue-result-tab.active {
+      background: var(--navy);
+      color: #fff;
+    }
+
+    .issue-result-tab:focus-visible {
+      outline: 3px solid rgba(241, 165, 27, .35);
+      outline-offset: 2px;
+    }
+
+    .issue-result-panel[hidden] { display: none; }
+
+    .issue-result-panel > .panel {
+      margin: 0;
+      border-radius: 8px;
+      box-shadow: none;
+    }
+
+    .issue-feedback-summary {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin: 14px 0 16px;
+    }
+
+    .issue-feedback-card {
+      border: 1px solid var(--rule);
+      border-radius: 8px;
+      padding: 14px;
+      background: #fff;
+    }
+
+    .issue-feedback-card small {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--steel);
+      font-weight: 700;
+    }
+
+    .issue-feedback-card span { color: var(--charcoal); line-height: 1.45; }
+
+    .issue-structure-details {
+      margin-top: 14px;
+      border-top: 1px solid var(--line);
+      padding-top: 12px;
+    }
+
+    .issue-structure-details summary {
+      color: var(--navy);
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .issue-answer-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 18px;
+      background: #fff;
+    }
+
+    .issue-answer-card h2 { margin-bottom: 8px; }
+
+    .issue-answer-list {
+      display: grid;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .issue-answer-branch {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px;
+      background: var(--paper);
+    }
+
+    .issue-answer-branch h3 { margin: 0 0 8px; color: var(--navy); }
+    .issue-answer-branch ul { margin: 0; padding-left: 20px; }
+
+    .issue-result-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    @media (max-width: 700px) {
+      .issue-results-shell { padding: 10px; }
+      .issue-result-tabs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .issue-feedback-summary { grid-template-columns: 1fr; }
+      .issue-result-actions { align-items: stretch; flex-direction: column; }
+      .issue-result-actions .btn { width: 100%; }
+    }
   </style>
 </head>
 <body>
@@ -1834,15 +1961,46 @@
           <div class="bottom-bar">
             <div class="remaining" id="remainingFields">Add 3 argument names and 9 supporting details</div>
             <div class="bottom-actions">
-              <button class="btn btn-secondary" type="button" id="showSample" hidden>Show sample answer</button>
+              <button class="btn btn-secondary" type="button" id="showSample" hidden>Review sample answer</button>
               <button class="btn btn-primary" type="button" id="saveAnswerBtn">Submit</button>
               <button class="btn btn-secondary" type="button" id="startOver" hidden>Start over</button>
             </div>
           </div>
           <div id="saveNoticeMount"></div>
-          <div id="feedbackMount"></div>
-          <div id="issueTreeFeedbackPrompt"></div>
-          <div id="sampleMount"></div>
+          <section class="issue-results-shell" id="issueTreeResults" hidden>
+            <div class="issue-result-tabs" role="tablist" aria-label="Issue tree results">
+              <button class="issue-result-tab" type="button" role="tab" data-issue-result-tab="self" aria-selected="false">Self-check</button>
+              <button class="issue-result-tab active" type="button" role="tab" data-issue-result-tab="feedback" aria-selected="true">Feedback</button>
+              <button class="issue-result-tab" type="button" role="tab" data-issue-result-tab="answer" aria-selected="false">Your answer</button>
+              <button class="issue-result-tab" type="button" role="tab" data-issue-result-tab="sample" aria-selected="false">Sample</button>
+            </div>
+            <div class="issue-result-panel" data-issue-result-panel="self" role="tabpanel" hidden>
+              <div class="issue-answer-card">
+                <div class="label">Self-check</div>
+                <h2>Review your issue tree before you compare.</h2>
+                <ul>
+                  <li>Does each argument answer the central question?</li>
+                  <li>Are the three arguments distinct from one another?</li>
+                  <li>Do the branches cover the most important explanations?</li>
+                  <li>Does each supporting detail provide specific evidence?</li>
+                </ul>
+              </div>
+            </div>
+            <div class="issue-result-panel" data-issue-result-panel="feedback" role="tabpanel">
+              <div id="feedbackMount"></div>
+              <div id="issueTreeFeedbackPrompt"></div>
+            </div>
+            <div class="issue-result-panel" data-issue-result-panel="answer" role="tabpanel" hidden>
+              <div id="issueTreeAnswerMount"></div>
+            </div>
+            <div class="issue-result-panel" data-issue-result-panel="sample" role="tabpanel" hidden>
+              <div id="sampleMount"></div>
+            </div>
+            <div class="issue-result-actions">
+              <button class="btn btn-secondary" type="button" id="resultStartOver">Try this exercise again</button>
+              <a class="btn btn-primary" href="../../member-login/index.html#learning-journey">Back to Learning Journey</a>
+            </div>
+          </section>
         </section>
       </div>
     </section>
@@ -2223,14 +2381,57 @@
         <div class="completion-save-notice">
           <div class="save-notice-text">
             <i class="ti ti-device-floppy" aria-hidden="true"></i>
-            Your response has been saved.
+            Progress saved.
+            <a class="save-notice-link" href="../../my-results/index.html">View all your results →</a>
           </div>
-          <div class="save-notice-caveat">If you are signed in, this also syncs to your Firestore profile.</div>
-          <div class="save-notice-actions">
-            <a class="btn btn-primary" href="../../member-login/index.html#learning-journey">Back to Learning Journey</a>
-          </div>
+          <div class="save-notice-caveat">Your completion and results are available in My Results. A copy of your response is also kept in this browser.</div>
         </div>
       `;
+    }
+
+    function showIssueResultTab(tab) {
+      const allowed = ["self", "feedback", "answer", "sample"];
+      const selected = allowed.includes(tab) ? tab : "feedback";
+      if (selected === "sample") renderSample();
+      $$('[data-issue-result-tab]').forEach((button) => {
+        const active = button.dataset.issueResultTab === selected;
+        button.classList.toggle('active', active);
+        button.setAttribute('aria-selected', String(active));
+      });
+      $$('[data-issue-result-panel]').forEach((panel) => {
+        panel.hidden = panel.dataset.issueResultPanel !== selected;
+      });
+    }
+
+    function renderIssueTreeAnswer() {
+      const payload = issueTreePayload();
+      $('#issueTreeAnswerMount').innerHTML = `
+        <section class="issue-answer-card">
+          <div class="label">Your answer</div>
+          <h2>${escapeHtml(state.problemStatement || 'Your issue tree')}</h2>
+          ${payload.hypothesis ? `<p><strong>Hypothesis:</strong> ${escapeHtml(payload.hypothesis)}</p>` : ''}
+          <div class="issue-answer-list">
+            ${state.arguments.map((argument, index) => `
+              <article class="issue-answer-branch">
+                <h3>Argument ${index + 1}: ${escapeHtml(argument.text || '—')}</h3>
+                <ul>${argument.details.filter((detail) => detail.trim()).map((detail) => `<li>${escapeHtml(detail)}</li>`).join('')}</ul>
+              </article>
+            `).join('')}
+          </div>
+        </section>
+      `;
+    }
+
+    function mountIssueTreePrompt(score) {
+      window.UTLFeedbackCoach?.mountPrompt({mount:'#issueTreeFeedbackPrompt',title:'Issue Tree Builder',goal:'Break the problem into a complete set of distinct questions that can be investigated and answered.',criteria:['State one focused problem or decision','Use three distinct argument branches','Keep branches mutually exclusive and collectively useful','Add supporting details that help test each branch','Make the tree practical enough to guide the next analysis'],response:()=>JSON.stringify(issueTreePayload(),null,2),sample:()=>JSON.stringify(templateState,null,2),signals:[`Current rule based score: ${score}`]});
+    }
+
+    function revealIssueTreeResults(score, tab = 'feedback', shouldScroll = true) {
+      renderIssueTreeAnswer();
+      mountIssueTreePrompt(score);
+      $('#issueTreeResults').hidden = false;
+      showIssueResultTab(tab);
+      if (shouldScroll) $('#issueTreeResults').scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
     function setSaveButtonSaved(saved) {
@@ -2243,9 +2444,9 @@
       if (saved) button.dataset.saved = "true";
       else delete button.dataset.saved;
       const startOverButton = $("#startOver");
-      if (startOverButton) startOverButton.hidden = !saved;
+      if (startOverButton) startOverButton.hidden = true;
       const showSampleButton = $("#showSample");
-      if (showSampleButton) showSampleButton.hidden = !saved;
+      if (showSampleButton) showSampleButton.hidden = true;
     }
 
     function issueTreePayload() {
@@ -2305,7 +2506,7 @@
       state.submitted = true;
       save();
       $("#saveNoticeMount").innerHTML = completionSaveNotice();
-      window.UTLFeedbackCoach?.mountPrompt({mount:'#issueTreeFeedbackPrompt',title:'Issue Tree Builder',goal:'Break the problem into a complete set of distinct questions that can be investigated and answered.',criteria:['State one focused problem or decision','Use three distinct argument branches','Keep branches mutually exclusive and collectively useful','Add supporting details that help test each branch','Make the tree practical enough to guide the next analysis'],response:()=>JSON.stringify(issueTreePayload(),null,2),sample:()=>JSON.stringify(templateState,null,2),signals:[`Current rule based score: ${score}`]});
+      revealIssueTreeResults(score);
       setSaveButtonSaved(true);
     }
 
@@ -2319,7 +2520,13 @@
       renderEvidenceList();
       renderProgress();
       setSaveButtonSaved(state.submitted === true);
-      $$("#sampleMount").forEach((mount) => mount.innerHTML = "");
+      if (state.submitted === true) {
+        const score = renderFeedback();
+        revealIssueTreeResults(score, 'feedback', false);
+      } else {
+        $('#issueTreeResults').hidden = true;
+        $$("#sampleMount").forEach((mount) => mount.innerHTML = "");
+      }
       $$("textarea").forEach(autoResize);
     }
 
@@ -2344,6 +2551,8 @@
       save();
       setSaveButtonSaved(false);
       if ($("#feedbackMount")) $("#feedbackMount").innerHTML = "";
+      if ($('#issueTreeFeedbackPrompt')) $('#issueTreeFeedbackPrompt').innerHTML = '';
+      if ($('#issueTreeResults')) $('#issueTreeResults').hidden = true;
       renderProgress();
       setTextIfPresent("#sideQuestion", state.problemStatement || "No question yet.");
       setTextIfPresent("#mobileQuestion", state.problemStatement || "No question yet.");
@@ -2518,26 +2727,36 @@
     function renderFeedback() {
       const results = runChecks();
       const score = results.reduce((sum, result) => sum + result.points, 0);
+      const strongest = results.find((result) => result.status === 'pass') || results[0];
+      const priority = results.find((result) => result.status === 'fail') || results.find((result) => result.status === 'partial');
+      const nextStep = priority?.hint || 'Read each branch against the central question and make one useful refinement.';
       $("#feedbackMount").innerHTML = `
         <section class="panel" aria-live="polite">
-          <button class="panel-close" type="button" data-close-panel="feedbackMount">×</button>
-          <div class="label">Answer check</div>
-          <div class="score-line">${score} / 100 <span>points</span></div>
-          <div class="score-track"><div class="score-fill" style="width: ${score}%"></div></div>
-          ${results.map((result) => `
-            <div class="rule-row">
-              <div class="rule-top">
-                <span class="mark ${result.status}">${result.status === "pass" ? "✓" : result.status === "partial" ? "◑" : "✗"}</span>
-                <span>${escapeHtml(result.label)}${result.hint && result.status !== "pass" ? ` <button class="hint-toggle" type="button">▾ show hint</button>` : ""}</span>
-                <span class="rule-points">[${result.points}/${result.maxPoints}]</span>
+          <div class="label">Feedback on your issue tree</div>
+          <h2>Feedback on your structure</h2>
+          <div class="issue-feedback-summary">
+            <div class="issue-feedback-card"><small>What is working</small><span>${escapeHtml(strongest?.label || 'You completed the full issue tree.')}</span></div>
+            <div class="issue-feedback-card"><small>Improve this first</small><span>${escapeHtml(priority?.label || 'Your structure meets every automated check.')}</span></div>
+            <div class="issue-feedback-card"><small>Check the next step</small><span>${escapeHtml(nextStep)}</span></div>
+          </div>
+          <details class="issue-structure-details">
+            <summary>View all structure checks and your ${score} / 100 score</summary>
+            <div class="score-line">${score} / 100 <span>points</span></div>
+            <div class="score-track"><div class="score-fill" style="width: ${score}%"></div></div>
+            ${results.map((result) => `
+              <div class="rule-row">
+                <div class="rule-top">
+                  <span class="mark ${result.status}">${result.status === "pass" ? "✓" : result.status === "partial" ? "◑" : "✗"}</span>
+                  <span>${escapeHtml(result.label)}${result.hint && result.status !== "pass" ? ` <button class="hint-toggle" type="button">▾ show hint</button>` : ""}</span>
+                  <span class="rule-points">[${result.points}/${result.maxPoints}]</span>
+                </div>
+                ${result.hint && result.status !== "pass" ? `<div class="rule-hint">${escapeHtml(result.hint)}</div>` : ""}
               </div>
-              ${result.hint && result.status !== "pass" ? `<div class="rule-hint">${escapeHtml(result.hint)}</div>` : ""}
-            </div>
-          `).join("")}
+            `).join("")}
+          </details>
           <p class="score-message">${escapeHtml(scoreMessage(score))}</p>
         </section>
       `;
-      $("#feedbackMount").scrollIntoView({ behavior: "smooth", block: "start" });
       return score;
     }
 
@@ -2546,8 +2765,7 @@
       const custom = Boolean(templateState && templateState.problemStatement && state.problemStatement.trim() && state.problemStatement.trim() !== templateState.problemStatement.trim());
       $("#sampleMount").innerHTML = `
         <section class="panel" aria-live="polite">
-          <button class="panel-close" type="button" data-close-panel="sampleMount">×</button>
-          <div class="label">Sample answer key</div>
+          <div class="label">One strong approach</div>
           ${custom ? `<p class="sample-notice">This sample uses the Olympics case study. Use it as a model for structure and language, not for content.</p>` : ""}
           <div class="question-banner">
             <div class="label">Central question</div>
@@ -2574,7 +2792,6 @@
           </div>
         </section>
       `;
-      $("#sampleMount").scrollIntoView({ behavior: "smooth", block: "start" });
     }
 
     function copyText() {
@@ -2794,7 +3011,14 @@
         $("#emailToggleIcon").textContent = open ? "−" : "+";
       });
     }
-    $("#showSample").addEventListener("click", renderSample);
+    $("#showSample").addEventListener("click", () => {
+      renderSample();
+      showIssueResultTab('sample');
+      $('#issueTreeResults').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+    $$('[data-issue-result-tab]').forEach((button) => {
+      button.addEventListener('click', () => showIssueResultTab(button.dataset.issueResultTab));
+    });
     $("#saveAnswerBtn").addEventListener("click", (event) => {
       if (event.currentTarget.dataset.saved === "true") {
         return;
@@ -2802,6 +3026,7 @@
       submitIssueTreeAnswer();
     });
     $("#startOver").addEventListener("click", () => $("#confirmModal").classList.add("show"));
+    $("#resultStartOver").addEventListener("click", () => $("#confirmModal").classList.add("show"));
     $("#cancelStartOver").addEventListener("click", () => $("#confirmModal").classList.remove("show"));
     $("#confirmStartOver").addEventListener("click", () => {
       $("#confirmModal").classList.remove("show");

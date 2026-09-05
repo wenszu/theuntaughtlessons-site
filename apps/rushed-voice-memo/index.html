@@ -1115,7 +1115,7 @@
     .result-actions-buttons{display:grid;grid-template-columns:auto auto;gap:8px;align-items:center}.result-next{grid-column:1/-1;display:inline-flex;min-height:46px;align-items:center;justify-content:center;padding:0 18px;border-radius:7px;background:var(--gold);color:var(--navy);font-weight:700;text-decoration:none}.result-retry,.result-journey{min-height:38px;padding:0 12px;border:1px solid rgba(0,51,102,.25);border-radius:7px;background:#fff;color:var(--navy);font-weight:700;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
     .feedback-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:16px 0}.feedback-card{border:1px solid var(--line);border-radius:8px;background:#fff;padding:14px}.feedback-card small{display:block;margin-bottom:6px;color:var(--steel);font-weight:700}.feedback-card>span{display:block;color:var(--charcoal);line-height:1.4}.feedback-card.next{border-color:var(--line);background:#fff}.feedback-ai-prompt{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-top:16px;padding:15px;border:1px solid #bdd2e5;border-radius:8px;background:#eef5fa}.feedback-ai-prompt strong{display:block;color:var(--navy)}.feedback-ai-prompt span{display:block;margin-top:3px;color:var(--steel);font-size:13px}.feedback-ai-prompt button{flex:0 0 auto;min-height:42px;border:0;border-radius:7px;background:var(--navy);color:#fff;padding:0 15px;font-weight:700}
     .comparison-guide{margin-bottom:15px;border:1px solid #e8bd68;border-radius:8px;background:#fff8e8;padding:14px}.comparison-guide>strong{display:block;color:var(--navy);font-size:17px}.comparison-guide>p{margin:4px 0 12px;color:var(--steel);font-size:13px}.comparison-insights{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.comparison-insight{border-radius:7px;background:#fff;padding:10px}.comparison-insight small{display:block;color:var(--steel);font-weight:700}.comparison-insight span{display:block;margin-top:3px;color:var(--charcoal);font-size:13px;line-height:1.4}
-    .ai-prompt-dialog{width:min(720px,calc(100vw - 28px));max-height:88dvh;border:0;border-radius:12px;padding:0;box-shadow:0 22px 70px rgba(0,31,61,.3);color:var(--charcoal)}.ai-prompt-dialog::backdrop{background:rgba(0,31,61,.58)}.ai-prompt-head{display:flex;justify-content:space-between;gap:20px;padding:20px 22px 16px;border-bottom:1px solid var(--line)}.ai-prompt-head h2{margin:0;color:var(--navy);font-size:25px}.ai-prompt-close{display:grid;width:32px;height:32px;flex:0 0 32px;place-items:center;padding:0;border:1px solid #d7e0e8;border-radius:50%;background:#fff;color:var(--steel)}.ai-prompt-close:hover{border-color:var(--navy);color:var(--navy);background:#f7fafc}.ai-prompt-close svg{width:15px;height:15px;pointer-events:none}.ai-prompt-body{padding:18px 22px 22px}.ai-prompt-privacy{margin:0 0 13px;padding:11px 13px;border-radius:7px;background:#eef5fa;color:var(--navy);font-size:13px}.ai-prompt-body label{display:block;color:var(--navy);font-weight:700}.ai-prompt-text{width:100%;min-height:280px;margin-top:7px;resize:vertical;border:1px solid var(--line);border-radius:8px;padding:12px;font:13px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace}.ai-prompt-actions{display:flex;align-items:center;justify-content:flex-end;gap:10px;margin-top:12px}.ai-prompt-status{margin-right:auto;color:#2c7a4b;font-size:13px}.ai-prompt-actions button{min-height:42px;border:1px solid var(--navy);border-radius:7px;padding:0 15px;background:#fff;color:var(--navy);font-weight:700}.ai-prompt-actions .primary{background:var(--navy);color:#fff}
+    .ai-prompt-dialog{width:min(720px,calc(100vw - 28px));max-height:88dvh;overflow:hidden;overscroll-behavior:contain;border:0;border-radius:12px;padding:0;box-shadow:0 22px 70px rgba(0,31,61,.3);color:var(--charcoal)}.ai-prompt-dialog::backdrop{background:rgba(0,31,61,.58)}.ai-prompt-head{display:flex;justify-content:space-between;gap:20px;padding:20px 22px 16px;border-bottom:1px solid var(--line)}.ai-prompt-head h2{margin:0;color:var(--navy);font-size:25px}.ai-prompt-close{display:grid;width:32px;height:32px;flex:0 0 32px;place-items:center;padding:0;border:1px solid #d7e0e8;border-radius:50%;background:#fff;color:var(--steel)}.ai-prompt-close:hover{border-color:var(--navy);color:var(--navy);background:#f7fafc}.ai-prompt-close svg{width:15px;height:15px;pointer-events:none}.ai-prompt-body{max-height:calc(88dvh - 78px);overflow-y:auto;overscroll-behavior:contain;padding:18px 22px 22px}.ai-prompt-privacy{margin:0 0 13px;padding:11px 13px;border-radius:7px;background:#eef5fa;color:var(--navy);font-size:13px}.ai-prompt-body label{display:block;color:var(--navy);font-weight:700}.ai-prompt-scroll-cue{display:flex;align-items:center;gap:6px;margin:5px 0 0;color:var(--steel);font-size:12px}.ai-prompt-scroll-cue::before{content:"↓";color:var(--gold);font-weight:700}.ai-prompt-text{width:100%;height:min(390px,48dvh);min-height:220px;max-height:52dvh;overflow:auto;overscroll-behavior:contain;margin-top:7px;resize:vertical;border:1px solid var(--line);border-radius:8px;padding:12px;font:13px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace}.ai-prompt-actions{display:flex;align-items:center;justify-content:flex-end;gap:10px;margin-top:12px}.ai-prompt-status{margin-right:auto;color:#2c7a4b;font-size:13px}.ai-prompt-actions button{min-height:42px;border:1px solid var(--navy);border-radius:7px;padding:0 15px;background:#fff;color:var(--navy);font-weight:700}.ai-prompt-actions .primary{background:var(--navy);color:#fff}
     @media(max-width:700px){.result-actions{grid-template-columns:1fr}.result-actions-buttons{grid-template-columns:1fr}.result-next{grid-column:auto}.result-retry,.result-journey{min-height:44px}}
     @media(max-width:700px){.feedback-summary,.comparison-insights{grid-template-columns:1fr}.feedback-ai-prompt{align-items:stretch;flex-direction:column}.ai-prompt-actions{align-items:stretch;flex-direction:column}.ai-prompt-status{margin:0}.ai-prompt-actions button{width:100%}}
   </style>
@@ -1323,6 +1323,7 @@
     <div class="ai-prompt-body">
       <p class="ai-prompt-privacy"><strong>Nothing is sent automatically.</strong> This prompt is prepared in your browser. Review it, copy it, and paste it into the AI tool of your choice.</p>
       <label for="aiPromptText">Your feedback prompt</label>
+      <p class="ai-prompt-scroll-cue">Scroll inside the prompt to read it in full.</p>
       <textarea class="ai-prompt-text" id="aiPromptText" readonly></textarea>
       <div class="ai-prompt-actions">
         <span class="ai-prompt-status" id="aiPromptStatus" aria-live="polite"></span>
@@ -1492,10 +1493,10 @@
         <div class="completion-save-notice">
           <div class="save-notice-text">
             <i class="ti ti-device-floppy" aria-hidden="true"></i>
-            Your response has been saved to this browser.
+            Progress saved.
             <a href="../../my-results/index.html" class="save-notice-link">View all your results →</a>
           </div>
-          <div class="save-notice-caveat">Saved on this device only. Copy your response into your companion workbook to keep a permanent record.</div>
+          <div class="save-notice-caveat">Your completion and results are available in My Results. A copy of your response is also kept in this browser.</div>
         </div>
       `;
     }
@@ -2004,7 +2005,7 @@ Do not invent facts that are absent from my response or the sample. Keep the fee
 
       els.submittedAnswer.textContent = response.text;
       els.confirmation.classList.remove('hidden');
-      els.confirmation.innerHTML = `<strong>Saved ✓.</strong> Time used: ${formatSeconds(elapsedSeconds)}. Now run the self-check.${completionSaveNotice()}`;
+      els.confirmation.innerHTML = `<strong>Submitted ✓.</strong> Time used: ${formatSeconds(elapsedSeconds)}. Now run the self-check.${completionSaveNotice()}`;
       els.tryAgainBtn.classList.remove('hidden');
       els.mobileResultTabs.classList.add('visible');
       els.checklistPanel.classList.remove('hidden');
@@ -2116,6 +2117,7 @@ Do not invent facts that are absent from my response or the sample. Keep the fee
     function openAiPromptDialog() {
       els.aiPromptText.value = aiFeedbackPrompt();
       els.aiPromptStatus.textContent = '';
+      document.documentElement.style.overflow = 'hidden';
       if (typeof els.aiPromptDialog.showModal === 'function') els.aiPromptDialog.showModal();
       else els.aiPromptDialog.setAttribute('open', '');
       requestAnimationFrame(() => els.copyAiPrompt.focus());
@@ -2123,7 +2125,7 @@ Do not invent facts that are absent from my response or the sample. Keep the fee
 
     function closeAiPromptDialog() {
       if (typeof els.aiPromptDialog.close === 'function') els.aiPromptDialog.close();
-      else els.aiPromptDialog.removeAttribute('open');
+      else { els.aiPromptDialog.removeAttribute('open'); document.documentElement.style.overflow = ''; }
     }
 
     async function copyAiFeedbackPrompt() {
@@ -2161,6 +2163,7 @@ Do not invent facts that are absent from my response or the sample. Keep the fee
       els.aiPromptDialog.addEventListener('click', (event) => {
         if (event.target === els.aiPromptDialog) closeAiPromptDialog();
       });
+      els.aiPromptDialog.addEventListener('close', () => { document.documentElement.style.overflow = ''; });
 
       els.revealSampleBtn.addEventListener('click', showSampleAnswer);
 
@@ -2326,7 +2329,7 @@ Do not invent facts that are absent from my response or the sample. Keep the fee
         renderScore(score);
         setMobileTab('score');
         els.confirmation.classList.remove('hidden');
-        els.confirmation.innerHTML = '<strong>Saved ✓.</strong> Your score and next-step feedback are ready.';
+        els.confirmation.innerHTML = '<strong>Submitted ✓.</strong> Your score and next-step feedback are ready.';
         els.scorePanel.setAttribute('tabindex', '-1');
         els.resultActions.classList.remove('hidden');
         if (previewParams.get('view') === 'sample') showSampleAnswer();

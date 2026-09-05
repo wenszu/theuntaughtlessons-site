@@ -33,6 +33,15 @@ assert.match(admin, /Older record; no reliable setup history/, 'legacy rows shou
 assert.match(admin, /Passwordless email link \(recommended for corporate members\)/, 'admin guidance should recommend email links for corporate learners');
 assert.doesNotMatch(admin, /sign in with the Google account connected to your membership/, 'welcome email should not assume Google is the only sign-in method');
 assert.match(admin, /email sign-in link or continue with Google, Microsoft or Facebook/, 'welcome email should explain every available sign-in path');
+assert.match(admin, /Confirm your program access/, 'welcome email should explain program-material access before sign-in');
+assert.match(admin, /utl-members@googlegroups\.com/, 'welcome email should name the Google Group learners may need to find');
+assert.match(admin, /If you receive a Google Groups invitation:/, 'welcome email should clearly identify when an invitation needs action');
+assert.match(admin, /If you do not receive an invitation:<\/strong> No action is needed\./, 'welcome email should prevent unnecessary action when access is already active');
+assert.match(admin, /invitation is separate from signing in to your workspace/, 'welcome email should distinguish group access from authentication');
+assert.ok(
+  admin.indexOf('Confirm your program access') < admin.indexOf('Sign in to your workspace'),
+  'program access instructions should appear before workspace sign-in'
+);
 assert.match(admin, /<th>Sign-in method<\/th>/, 'Member Access should show the last sign-in method');
 assert.match(admin, /Confirmed Sign-in Method/, 'member CSV export should distinguish the confirmed sign-in method');
 assert.match(admin, /Planned First Sign-in Method/, 'member CSV export should include the planned first sign-in method');

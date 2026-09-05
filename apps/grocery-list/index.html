@@ -1569,7 +1569,7 @@
           <div class="buttons">
             <button id="generateBtn">Generate new list</button>
             <button id="checkBtn" class="primary" disabled>Submit</button>
-            <button id="sampleBtn" disabled aria-describedby="answerRequirement">Show sample answer</button>
+            <button id="sampleBtn" disabled aria-describedby="answerRequirement">Review sample answer</button>
             <button id="resetBtn" class="secondary-action hidden">Reset</button>
           </div>
           <p class="answer-requirement" id="answerRequirement" aria-live="polite">Sort every item into one of the three buckets to check your answer.</p>
@@ -2530,10 +2530,10 @@
         <div class="completion-save-notice">
           <div class="save-notice-text">
             <i class="ti ti-device-floppy" aria-hidden="true"></i>
-            Your response has been saved to this browser.
+            Progress saved.
           </div>
           <div class="save-notice-actions"><a href="../grocery-list-ai/index.html" class="save-notice-link">Next: Grocery list with AI →</a><a href="../../member-login/index.html#learning-journey" class="save-notice-link exit-link">← Learning Journey</a></div>
-          <div class="save-notice-caveat">Saved on this device only. Copy your response into your companion workbook to keep a permanent record.</div>
+          <div class="save-notice-caveat">Your completion and results are available in My Results. A copy of your response is also kept in this browser.</div>
         </div>
       `;
     }
@@ -2610,7 +2610,7 @@
         const sample = document.getElementById('sampleAnswer');
         sample.classList.toggle('hidden');
         document.getElementById('sampleBtn').textContent = sample.classList.contains('hidden')
-          ? 'Show sample answer'
+          ? 'Review sample answer'
           : 'Hide sample answer';
       });
 

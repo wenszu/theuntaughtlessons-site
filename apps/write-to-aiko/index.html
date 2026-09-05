@@ -706,7 +706,7 @@
           </div>
 
           <div class="write-to-aiko-sample-block">
-            <button class="write-to-aiko-sample-toggle" type="button" id="writeToAikoSampleToggle" aria-expanded="false" aria-controls="writeToAikoSample">Show sample answer ↓</button>
+            <button class="write-to-aiko-sample-toggle" type="button" id="writeToAikoSampleToggle" aria-expanded="false" aria-controls="writeToAikoSample">Review sample answer ↓</button>
             <div class="write-to-aiko-sample" id="writeToAikoSample"><strong>One strong approach</strong>
 
 Use this example to review the main point, supporting logic, and next step in your email.
@@ -994,7 +994,7 @@ Yutee Elle</div>
       document.getElementById('writeToAikoSampleToggle').addEventListener('click', (event) => {
         const sample = document.getElementById('writeToAikoSample');
         const isOpen = sample.classList.toggle('is-open');
-        event.currentTarget.textContent = isOpen ? 'Hide sample answer ↑' : 'Show sample answer ↓';
+        event.currentTarget.textContent = isOpen ? 'Hide sample answer ↑' : 'Review sample answer ↓';
         event.currentTarget.setAttribute('aria-expanded', String(isOpen));
         if (isOpen) analyticsStep('review-sample', 35);
       });
