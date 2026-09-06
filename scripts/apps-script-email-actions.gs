@@ -37,19 +37,20 @@ function handleTemplateEmail(data, isTest) {
     subject = '[TEST] ' + subject;
   }
 
+  var emailFormat = String(data.emailFormat || templateData.emailFormat || 'branded').toLowerCase() === 'simple' ? 'simple' : 'branded';
+  var plainBody = String(data.plainBody || '').trim();
   var htmlBody = String(data.renderedHtml || '').trim();
-  if (!htmlBody) {
-    htmlBody = '<p>Welcome to The Untaught Lessons.</p>';
-  }
+  if (!plainBody) plainBody = htmlBody ? stripHtml_(htmlBody) : 'Welcome to The Untaught Lessons.';
 
-  MailApp.sendEmail({
+  var message = {
     to: recipient,
     subject: subject,
-    body: stripHtml_(htmlBody),
-    htmlBody: htmlBody,
+    body: plainBody,
     name: typeof SENDER_NAME !== 'undefined' ? SENDER_NAME : 'The Untaught Lessons',
     replyTo: typeof EMAIL_TO !== 'undefined' ? EMAIL_TO : 'wenszu.lin@gmail.com'
-  });
+  };
+  if (emailFormat === 'branded' && htmlBody) message.htmlBody = htmlBody;
+  MailApp.sendEmail(message);
 
   return ContentService.createTextOutput('ok');
 }

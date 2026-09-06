@@ -5,6 +5,7 @@ const path = require('node:path');
 const root = path.resolve(__dirname, '..');
 const memberLogin = fs.readFileSync(path.join(root, 'member-login/content-config.js'), 'utf8');
 const admin = fs.readFileSync(path.join(root, 'admin/index.html'), 'utf8');
+const emailActions = fs.readFileSync(path.join(root, 'scripts/apps-script-email-actions.gs'), 'utf8');
 
 const renderedLogin = memberLogin.match(/document\.body\.innerHTML = '(<section class="ws-login-wrap"[\s\S]*?)';/);
 assert.ok(renderedLogin, 'member login markup should be present');
@@ -42,6 +43,18 @@ assert.ok(
   admin.indexOf('Confirm your program access') < admin.indexOf('Sign in to your workspace'),
   'program access instructions should appear before workspace sign-in'
 );
+assert.match(admin, /name="etEmailFormat" value="simple"/, 'email editor should offer a simple text format');
+assert.match(admin, /name="etEmailFormat" value="branded"/, 'email editor should retain a branded format');
+assert.match(admin, /function datedWelcomeSubject\(subject, date\)/, 'welcome subject should include the current month and year');
+assert.match(admin, /'Sept'/, 'welcome subject should use the requested September abbreviation');
+assert.match(admin, /base = 'Welcome to The Untaught Lessons!'/, 'welcome subject should use the approved wording and punctuation');
+assert.match(admin, /function generateEmailPlainText\(data\)/, 'plain email should use a deliberate readable text template');
+assert.match(admin, /'\* If you receive a Google Groups invitation:/, 'plain email should use an asterisk for the invitation path');
+assert.match(admin, /'\* If you do not receive an invitation:/, 'plain email should visually separate the no-action path');
+assert.match(admin, /emailFormat: delivery\.emailFormat/, 'welcome sends should include the selected delivery format');
+assert.match(admin, /SPF: PASS/, 'admin guidance should explain how to check sender authentication');
+assert.match(emailActions, /emailFormat === 'branded' && htmlBody/, 'only branded delivery should attach an HTML body');
+assert.match(emailActions, /body: plainBody/, 'every welcome email should include an intentional plain-text body');
 assert.match(admin, /<th>Sign-in method<\/th>/, 'Member Access should show the last sign-in method');
 assert.match(admin, /Confirmed Sign-in Method/, 'member CSV export should distinguish the confirmed sign-in method');
 assert.match(admin, /Planned First Sign-in Method/, 'member CSV export should include the planned first sign-in method');

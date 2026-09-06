@@ -2379,6 +2379,16 @@
     .et-note { color:#777; font-size:12px; line-height:1.45; margin:5px 0 0; }
     .et-card { margin-top:4px; padding:12px 14px; border:1px solid var(--line); border-radius:8px; background:rgba(243,237,226,.35); }
     .et-card .eng-field-row { padding:0; border-bottom:0; background:transparent; }
+    .et-format-options { display:grid; gap:8px; margin-top:8px; }
+    .et-format-option { display:grid; grid-template-columns:20px 1fr; gap:10px; align-items:start; padding:12px; border:1px solid var(--line); border-radius:8px; background:var(--white); cursor:pointer; }
+    .et-format-option:has(input:checked) { border-color:var(--gold); box-shadow:0 0 0 1px var(--gold); background:#FFF9ED; }
+    .et-format-option input { width:16px; height:16px; margin:2px 0 0; accent-color:var(--gold); }
+    .et-format-option strong { display:block; color:var(--navy); font-size:13px; }
+    .et-format-option span { display:block; margin-top:3px; color:#666; font-size:12px; line-height:1.45; }
+    .et-intro-text { width:100%; min-height:130px; margin-top:10px; padding:10px 12px; border:1px solid var(--line); border-radius:6px; resize:vertical; font:14px/1.55 Lato,Arial,sans-serif; color:#333; background:#fff; box-sizing:border-box; }
+    .et-delivery-guide { margin-top:20px; padding:12px 14px; border:1px solid #B8D4EA; border-radius:8px; background:#F1F7FC; color:#315B84; font-size:12px; line-height:1.55; }
+    .et-delivery-guide summary { color:var(--navy); font-size:13px; font-weight:700; cursor:pointer; }
+    .et-delivery-guide p { margin:9px 0 0; }
     .et-button-head { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; }
     .et-button-panel { margin-top:12px; display:grid; gap:10px; }
     .et-button-panel[hidden] { display:none; }
@@ -3462,12 +3472,21 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
                 <div class="mb-edit-field"><label for="et-subject">Subject line</label><input type="text" id="et-subject"><p class="et-note">What appears in the member's inbox.</p></div>
                 <div class="mb-edit-field" style="display:none"><label for="et-headline">Headline</label><input type="text" id="et-headline"></div>
                 <div class="et-card">
-                  <span class="eng-toggle-name">Editable preview</span>
-                  <p class="et-note">Edit the opening paragraph directly in the live preview. Use the toolbar above the preview for formatting, links, lists, and an extra button.</p>
-                  <textarea id="et-intro" hidden></textarea>
+                  <span class="eng-toggle-name">Email format</span>
+                  <p class="et-note">Choose how this template is delivered.</p>
+                  <div class="et-format-options" role="radiogroup" aria-label="Email format">
+                    <label class="et-format-option"><input type="radio" name="etEmailFormat" value="simple"><span><strong>Simple text</strong><span>Best for corporate mailboxes. Sends a genuine plain-text email with no images, buttons or formatting.</span></span></label>
+                    <label class="et-format-option"><input type="radio" name="etEmailFormat" value="branded"><span><strong>Branded email</strong><span>Uses the logo, colors and buttons in an Outlook-safe email layout.</span></span></label>
+                  </div>
+                </div>
+                <div class="et-card">
+                  <span class="eng-toggle-name" id="etIntroLabel">Opening message</span>
+                  <p class="et-note" id="etEditorGuidance">Edit the opening paragraph directly in the live preview. Use the toolbar above the preview for formatting, links, lists, and an extra button.</p>
+                  <textarea class="et-intro-text" id="et-intro" aria-label="Welcome email opening message" hidden></textarea>
                   <input type="hidden" id="et-buttonLabel" value="Open link">
                   <input type="hidden" id="et-buttonUrl">
                 </div>
+                <div id="etBrandedControls">
                 <div class="et-card">
                   <div class="eng-field-row">
                     <label class="eng-toggle-label" for="et-showLogo">
@@ -3491,6 +3510,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
                     <button type="button" class="color-swatch" data-color="#4A4A4A" style="background:#4A4A4A;" aria-label="Use UTL Charcoal" title="UTL Charcoal"></button>
                   </div>
                 </div>
+                </div>
               </div>
               <div class="mb-form-actions" style="margin-top:24px;">
                 <button class="small-button" id="et-save">Save template</button>
@@ -3505,10 +3525,15 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
                 </div>
                 <p id="etTestStatus" class="cl-status" style="margin-top:6px; min-height:18px;"></p>
               </div>
+              <details class="et-delivery-guide">
+                <summary>How to check email authentication</summary>
+                <p><strong>SPF</strong> confirms that the sending service is allowed to send for the From domain. <strong>DKIM</strong> adds a verified signature to the message. <strong>DMARC</strong> tells receiving systems how to handle messages that fail those checks and confirms that the authenticated domain matches the visible sender.</p>
+                <p>Send a test to Gmail and Outlook, then open the message details or original headers. Look for <strong>SPF: PASS</strong>, <strong>DKIM: PASS</strong> and <strong>DMARC: PASS</strong>. If the sender uses a personal gmail.com address, Google manages these records. A custom sending domain must publish and maintain its own DNS records.</p>
+              </details>
             </div>
             <div class="preview-area">
               <span class="section-label" style="font-size:9px; margin-bottom:8px;">Live preview</span>
-              <div class="et-toolbar" aria-label="Email editor toolbar">
+              <div class="et-toolbar" id="etToolbar" aria-label="Email editor toolbar">
                 <button class="et-tool" type="button" data-et-command="undo" title="Undo">↶</button>
                 <button class="et-tool" type="button" data-et-command="redo" title="Redo">↷</button>
                 <button class="et-tool" type="button" data-et-command="bold" title="Bold">B</button>
@@ -6312,6 +6337,16 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
     const DEFAULT_WORKSPACE_URL = 'https://theuntaughtlessons.com/member-login/';
     const GOOGLE_GROUP_EMAIL = 'utl-members@googlegroups.com';
 
+    function datedWelcomeSubject(subject, date) {
+      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'];
+      const current = date instanceof Date ? date : new Date();
+      let base = String(subject || 'Welcome to The Untaught Lessons!')
+        .replace(/^\[[A-Za-z]+\s+\d{4}\]\s*/, '')
+        .trim();
+      if (/^Welcome to The Untaught Lessons!?$/i.test(base)) base = 'Welcome to The Untaught Lessons!';
+      return '[' + monthNames[current.getMonth()] + ' ' + current.getFullYear() + '] ' + base;
+    }
+
     function etGetTemplate(id) {
       const defaults = {
         subject: 'Welcome to The Untaught Lessons',
@@ -6320,9 +6355,12 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         buttonLabel: 'Open link',
         buttonUrl: '',
         accentColor: '#003366',
-        showLogo: true
+        showLogo: true,
+        emailFormat: id === 'welcomeEmail' ? 'simple' : 'branded'
       };
-      return Object.assign({}, defaults, _etTemplates[id] || {});
+      const template = Object.assign({}, defaults, _etTemplates[id] || {});
+      if (id === 'welcomeEmail') template.subject = datedWelcomeSubject(template.subject);
+      return template;
     }
 
     async function postEmailScriptAction(action, payload) {
@@ -6530,6 +6568,90 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       return escapeHtml(value).replace(/\n/g, '<br>');
     }
 
+    function emailRichTextToPlain(value) {
+      const container = document.createElement('div');
+      container.innerHTML = sanitizeEmailRichText(String(value || ''))
+        .replace(/<br\s*\/?\s*>/gi, '\n')
+        .replace(/<\/p\s*>/gi, '\n\n')
+        .replace(/<\/div\s*>/gi, '\n')
+        .replace(/<li[^>]*>/gi, '• ')
+        .replace(/<\/li\s*>/gi, '\n');
+      return String(container.textContent || '')
+        .replace(/\u00a0/g, ' ')
+        .replace(/[ \t]+\n/g, '\n')
+        .replace(/\n{3,}/g, '\n\n')
+        .trim();
+    }
+
+    function generateEmailPlainText(data) {
+      const headline = emailRichTextToPlain(data.headline || 'Welcome.');
+      const intro = emailRichTextToPlain(data.intro || '');
+      const loginInstruction = data.loginEmail
+        ? 'Whichever option you use, enter ' + data.loginEmail + '.'
+        : 'Whichever option you use, enter the same email address that received this welcome message.';
+      return [
+        headline,
+        'We are glad you are here.',
+        '',
+        intro,
+        '',
+        'YOUR SETUP',
+        '',
+        '1. Confirm your program access',
+        'We use utl-members@googlegroups.com to give you access to the program materials.',
+        '',
+        '* If you receive a Google Groups invitation: Open it and select Accept this invitation. Check your spam or junk folder if you cannot find it.',
+        '',
+        '* If you do not receive an invitation: No action is needed. Your access may already be active, so continue to the next step.',
+        '',
+        'The Google Groups invitation is separate from signing in to your workspace.',
+        '',
+        '2. Sign in to your workspace',
+        'Go to the member login page and use the sign-in method provided with your membership. You can use an email sign-in link or continue with Google, Microsoft or Facebook. ' + loginInstruction,
+        DEFAULT_WORKSPACE_URL,
+        '',
+        '3. Complete your orientation',
+        'Once you are signed in, start with the Home section at the top of your Home page. It takes about five minutes and sets you up for everything that follows.',
+        '',
+        '4. Begin Phase 1',
+        'After orientation, begin Phase 1 and work through the first lesson and practice activity at your own pace.',
+        '',
+        'If anything does not work as expected, reply to this email and I will sort it out.',
+        '',
+        'Looking forward to seeing your progress.',
+        '',
+        'Wen-Szu',
+        'The Untaught Lessons'
+      ].filter((line, index, lines) => line !== '' || (index > 0 && lines[index - 1] !== '')).join('\n').trim();
+    }
+
+    function generatePlainEmailPreviewHtml(data) {
+      const body = generateEmailPlainText(data);
+      return '<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>' +
+        '<body style="margin:0;padding:36px 28px;background:#F7F5F0;font-family:Arial,sans-serif;color:#333;">' +
+        '<div style="max-width:680px;margin:0 auto;background:#fff;border:1px solid #E2DDD4;padding:38px;box-sizing:border-box;">' +
+        '<div style="margin:0 0 18px;color:#777;font-size:12px;">Plain-text email preview</div>' +
+        '<div style="white-space:pre-wrap;font-size:15px;line-height:1.65;">' + escapeHtml(body) + '</div></div></body></html>';
+    }
+
+    function generateSimpleEmailFallbackHtml(data) {
+      return '<!doctype html><html><body style="margin:0;padding:24px;font-family:Arial,sans-serif;color:#333;font-size:15px;line-height:1.6;">' +
+        escapeHtml(generateEmailPlainText(data)).replace(/\n/g, '<br>') + '</body></html>';
+    }
+
+    function selectedEmailFormat() {
+      return document.querySelector('input[name="etEmailFormat"]:checked')?.value === 'branded' ? 'branded' : 'simple';
+    }
+
+    function emailDeliveryPayload(data) {
+      const emailFormat = data.emailFormat === 'branded' ? 'branded' : 'simple';
+      return {
+        emailFormat: emailFormat,
+        plainBody: generateEmailPlainText(data),
+        renderedHtml: emailFormat === 'branded' ? generateEmailHtml(data) : generateSimpleEmailFallbackHtml(data)
+      };
+    }
+
     function generateEmailHtml(data) {
       const accent = data.accentColor || '#003366';
       const intro = data.intro || '';
@@ -6654,15 +6776,31 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         buttonUrl: document.getElementById('et-buttonUrl').value,
         accentColor: document.getElementById('et-accentColor').value,
         showLogo: getBinaryControl(document.getElementById('et-showLogo')),
+        emailFormat: selectedEmailFormat(),
         loginEmail: '',
         extraButtonEditing: false,
         editMode: true
       };
       const iframe = document.getElementById('etPreview');
       if (iframe) {
-        iframe.srcdoc = generateEmailHtml(data);
-        iframe.onload = bindEmailPreviewEditor;
+        iframe.srcdoc = data.emailFormat === 'branded' ? generateEmailHtml(data) : generatePlainEmailPreviewHtml(data);
+        iframe.onload = data.emailFormat === 'branded' ? bindEmailPreviewEditor : null;
       }
+    }
+
+    function syncEmailFormatUi() {
+      const simple = selectedEmailFormat() === 'simple';
+      const intro = document.getElementById('et-intro');
+      const toolbar = document.getElementById('etToolbar');
+      const brandedControls = document.getElementById('etBrandedControls');
+      const guidance = document.getElementById('etEditorGuidance');
+      if (intro) intro.hidden = !simple;
+      if (toolbar) toolbar.hidden = simple;
+      if (brandedControls) brandedControls.hidden = simple;
+      if (guidance) guidance.textContent = simple
+        ? 'Edit the opening paragraph here. It will be delivered without HTML formatting.'
+        : 'Edit the opening paragraph directly in the live preview. Use the toolbar above the preview for formatting, links, lists, and an extra button.';
+      updateEmailPreview();
     }
 
     async function loadEmailTemplates() {
@@ -6694,9 +6832,11 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         buttonLabel: 'Open link',
         buttonUrl: '',
         accentColor: '#003366',
-        showLogo: true
+        showLogo: true,
+        emailFormat: id === 'welcomeEmail' ? 'simple' : 'branded'
       };
       const data = Object.assign({}, def, t);
+      if (id === 'welcomeEmail') data.subject = datedWelcomeSubject(data.subject);
       document.getElementById('et-subject').value = data.subject;
       document.getElementById('et-headline').value = data.headline;
       document.getElementById('et-intro').value = data.intro;
@@ -6708,7 +6848,10 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       const _adminEmail = adminProfileData().email || '';
       document.getElementById('et-testEmail').value = _adminEmail.includes('@') ? _adminEmail : '';
       setBinaryControl(logoBtn, data.showLogo);
-      updateEmailPreview();
+      const format = data.emailFormat === 'branded' ? 'branded' : 'simple';
+      const formatInput = document.querySelector('input[name="etEmailFormat"][value="' + format + '"]');
+      if (formatInput) formatInput.checked = true;
+      syncEmailFormatUi();
     }
 
     function setEmailAccentColor(color) {
@@ -6809,6 +6952,9 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
           updateEmailPreview();
         });
       });
+      document.querySelectorAll('input[name="etEmailFormat"]').forEach(input => {
+        input.addEventListener('change', syncEmailFormatUi);
+      });
       document.querySelectorAll('[data-et-command]').forEach(button => {
         button.addEventListener('click', () => runEmailToolbarCommand(button.dataset.etCommand));
       });
@@ -6842,8 +6988,10 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
           buttonLabel: document.getElementById('et-buttonLabel').value,
           buttonUrl: normalizeExtraButtonUrl(document.getElementById('et-buttonUrl').value),
           accentColor: document.getElementById('et-accentColor').value,
-          showLogo: getBinaryControl(document.getElementById('et-showLogo'))
+          showLogo: getBinaryControl(document.getElementById('et-showLogo')),
+          emailFormat: selectedEmailFormat()
         };
+        const delivery = emailDeliveryPayload(data);
         try {
           await postEmailScriptAction('TestEmailTemplate', {
             templateId: document.getElementById('etSelect').value,
@@ -6851,7 +6999,9 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
             to: email,
             email: email,
             templateData: data,
-            renderedHtml: generateEmailHtml(data)
+            emailFormat: delivery.emailFormat,
+            plainBody: delivery.plainBody,
+            renderedHtml: delivery.renderedHtml
           });
           statusEl.textContent = 'Test email request sent. Check the recipient inbox and spam folder.';
           statusEl.className = 'cl-status is-success';
@@ -6870,7 +7020,8 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
           buttonLabel: document.getElementById('et-buttonLabel').value,
           buttonUrl: normalizeExtraButtonUrl(document.getElementById('et-buttonUrl').value),
           accentColor: document.getElementById('et-accentColor').value,
-          showLogo: getBinaryControl(document.getElementById('et-showLogo'))
+          showLogo: getBinaryControl(document.getElementById('et-showLogo')),
+          emailFormat: selectedEmailFormat()
         };
         const btn = document.getElementById('et-save');
         btn.disabled = true;
@@ -10441,7 +10592,8 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         buttonUrl: String(welcomeTemplate.buttonUrl || '').replace(/{{workspace_url}}/g, workspaceUrl),
         loginEmail: email
       });
-      return postEmailScriptAction('WelcomeEmail', { name: name, recipient: email, to: email, email: email, templateData: welcomeTemplate, renderedHtml: generateEmailHtml(personalizedData) });
+      var delivery = emailDeliveryPayload(personalizedData);
+      return postEmailScriptAction('WelcomeEmail', { name: name, recipient: email, to: email, email: email, templateData: welcomeTemplate, emailFormat: delivery.emailFormat, plainBody: delivery.plainBody, renderedHtml: delivery.renderedHtml });
     }
 
     function mbBulkRenderResults(processed, total) {
@@ -10665,7 +10817,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
             loginEmail: emailVal
           };
 
-          const renderedHtml = generateEmailHtml(personalizedData);
+          const delivery = emailDeliveryPayload(personalizedData);
 
           // Send the welcome email through the authenticated administrator service.
           var emailSent = false;
@@ -10676,7 +10828,9 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
               to: emailVal,
               email: emailVal,
               templateData: welcomeTemplate,
-              renderedHtml: renderedHtml
+              emailFormat: delivery.emailFormat,
+              plainBody: delivery.plainBody,
+              renderedHtml: delivery.renderedHtml
             });
             emailSent = true;
           } catch (emailErr) { /* non-fatal */ }
