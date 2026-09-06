@@ -45,7 +45,11 @@ assert(admin.includes('<th>Welcome email</th>'), 'Member Access shows persistent
 assert(admin.includes('data-mb-welcome-resend'), 'Member Access offers a welcome-email resend or retry action');
 assert(admin.includes("welcomeEmailStatus: status"), 'welcome-email send results are stored on the member record');
 assert(admin.includes("welcomeEmailSentAt = serverTimestamp()"), 'successful welcome sends retain a timestamp');
-assert(admin.includes("Older record; no send history"), 'legacy members receive an honest unknown email status');
+assert(admin.includes('function mbLegacyWelcomeEmailEstimate(data)'), 'legacy members receive a transparent estimated welcome-email date');
+assert(admin.includes("source:'based on first login'"), 'first login is the primary legacy welcome-date estimate');
+assert(admin.includes("source:'based on date added'"), 'the recorded addition date is the next legacy welcome-date estimate');
+assert(admin.includes('invited.setFullYear(invited.getFullYear() - 1)'), 'expiry provides the final one-year-back legacy estimate');
+assert(admin.includes("label = 'Estimated sent'"), 'legacy dates are not presented as confirmed delivery records');
 assert(firebase.includes('async function getMemberSupportSnapshot(email)'), 'support preview loads the selected member cloud snapshot');
 assert(firebase.includes('async function logMemberSupportPreview(snapshot = {})'), 'support preview openings are audited');
 assert(rules.includes('match /support_preview_audit/{eventId}'), 'support preview audits have an explicit Firestore rule');
