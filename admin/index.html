@@ -4546,15 +4546,23 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         }
 
         sendLoginInvite.textContent = 'Sending...';
+        try { await firebaseAuth.authorizeMember(normalizedEmail, { invitedSignInMethod:'emailLink', loginLinkStatus:'pending' }); } catch (_) {}
         await firebaseAuth.sendSignInInvite(normalizedEmail);
-        await firebaseAuth.authorizeMember(normalizedEmail, {
-          invitedSignInMethod: 'emailLink',
-          loginLinkSentAt: serverTimestamp()
-        });
+        try {
+          await firebaseAuth.authorizeMember(normalizedEmail, {
+            invitedSignInMethod: 'emailLink',
+            loginLinkStatus: 'sent',
+            loginLinkSentAt: serverTimestamp()
+          });
+        } catch (statusError) { console.warn('Login link was sent, but its status could not be recorded.', statusError); }
         inviteEmail.value = '';
         setInviteStatus('Login link sent to ' + normalizedEmail + ' — they will receive a Firebase email.', 'success');
         logInvite(normalizedEmail);
       } catch (error) {
+        try {
+          var failedEmail = String(inviteEmail.value || '').trim().toLowerCase();
+          if (failedEmail && firebaseAuth && firebaseAuth.authorizeMember) await firebaseAuth.authorizeMember(failedEmail, { invitedSignInMethod:'emailLink', loginLinkStatus:'failed', loginLinkFailedAt:serverTimestamp() });
+        } catch (_) {}
         const code = error && error.code ? error.code : '';
         let detail = error && error.message ? error.message : 'Unknown error';
         if (code === 'auth/operation-not-allowed') {
@@ -9834,20 +9842,32 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
 
     function mbSignInMethodHtml(data) {
       var confirmed = mbSignInProviderLabel(data.lastSignInProvider);
-      var planned = mbSignInProviderLabel(data.invitedSignInMethod);
+      var selected = mbSignInProviderLabel(data.invitedSignInMethod);
       var providers = Array.isArray(data.signInProviders)
         ? data.signInProviders.map(mbSignInProviderLabel).filter(function (label) { return label !== 'Not recorded'; })
         : [];
       if (confirmed !== 'Not recorded') {
         var history = providers.length > 1 ? 'Used: ' + providers.join(', ') : 'Confirmed at login';
+        if (providers.length <= 1 && selected !== 'Not recorded' && selected !== confirmed) history += ' · setup choice: ' + selected;
         return '<strong style="white-space:nowrap;">' + escapeHtml(confirmed) + '</strong><br><small>' + escapeHtml(history) + '</small>';
       }
       if (providers.length) {
         return '<strong>Multiple methods</strong><br><small>' + escapeHtml('Confirmed: ' + providers.join(', ')) + '</small>';
       }
-      if (planned !== 'Not recorded') {
-        var invitationStatus = data.loginLinkSentAt ? 'Sign-in link sent; login not completed' : 'Selected during member setup';
-        return '<strong style="white-space:nowrap;">Planned: ' + escapeHtml(planned) + '</strong><br><small>' + escapeHtml(invitationStatus) + '</small>';
+      if (selected === 'Email link') {
+        var linkStatus = String(data.loginLinkStatus || '').toLowerCase();
+        if (!linkStatus && data.loginLinkSentAt) linkStatus = 'sent';
+        var linkDetail = linkStatus === 'sent'
+          ? 'Link sent · waiting for first login'
+          : linkStatus === 'failed'
+            ? 'Link failed · retry or use Microsoft'
+            : linkStatus === 'pending'
+              ? 'Sending link · not yet confirmed'
+              : 'No link recorded · learner can request one';
+        return '<strong style="white-space:nowrap;">Email link</strong><br><small>' + escapeHtml(linkDetail) + '</small>';
+      }
+      if (selected !== 'Not recorded') {
+        return '<strong style="white-space:nowrap;">' + escapeHtml(selected) + '</strong><br><small>Selected for first sign-in · no login yet</small>';
       }
       return '<strong style="white-space:nowrap;">Unknown</strong><br><small>Older record; no reliable setup history</small>';
     }
@@ -10752,6 +10772,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
             if (row.action === 'add') {
               memberFields.welcomeEmailStatus = sendWelcome ? 'pending' : 'not_requested';
               memberFields.welcomeEmailFormat = etGetTemplate('welcomeEmail').emailFormat;
+              if (signInMethod === 'emailLink') memberFields.loginLinkStatus = sendLink ? 'pending' : 'not_requested';
             }
             if (cohort) memberFields.cohort = cohort;
             if (notes) memberFields.notes = notes;
@@ -10772,7 +10793,18 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
             }
           }
           if (!sendWelcome) result.welcome = null;
-          if (sendLink && (!retryOnly || result.loginLink === false)) { try { await fb.sendSignInInvite(row.email); await fb.authorizeMember(row.email, { invitedSignInMethod: 'emailLink', loginLinkSentAt: serverTimestamp() }); result.loginLink = true; } catch (error) { result.loginLink = false; result.error = error.message || 'Login link failed'; } }
+          if (sendLink && (!retryOnly || result.loginLink === false)) {
+            try {
+              try { await fb.authorizeMember(row.email, { invitedSignInMethod:'emailLink', loginLinkStatus:'pending' }); } catch (_) {}
+              await fb.sendSignInInvite(row.email);
+              result.loginLink = true;
+              try { await fb.authorizeMember(row.email, { invitedSignInMethod:'emailLink', loginLinkStatus:'sent', loginLinkSentAt:serverTimestamp() }); } catch (statusError) { result.error = 'Login link sent, but its status was not recorded'; }
+            } catch (error) {
+              try { await fb.authorizeMember(row.email, { invitedSignInMethod:'emailLink', loginLinkStatus:'failed', loginLinkFailedAt:serverTimestamp() }); } catch (_) {}
+              result.loginLink = false;
+              result.error = error.message || 'Login link failed';
+            }
+          }
           if (!sendLink) result.loginLink = null;
           if (requestGroup && (!retryOnly || result.group === false)) { try { await fb.requestGoogleGroupSyncJob(row.email, 'add', { name: row.name, requestedBy: addedBy, source: 'admin-bulk-member-import' }); result.group = true; } catch (error) { result.group = false; result.error = error.message || 'Group request failed'; } }
           if (!requestGroup) result.group = null;
@@ -10915,6 +10947,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
           expiryDate: expiryDate,
           status: 'active',
           invitedSignInMethod: signInMethod,
+          loginLinkStatus: signInMethod === 'emailLink' ? 'pending' : 'not_requested',
           welcomeEmailStatus: 'pending',
           welcomeEmailFormat: etGetTemplate('welcomeEmail').emailFormat
         };
@@ -10969,9 +11002,11 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
           if (sendLinkChecked && fb.sendSignInInvite) {
             try {
               await fb.sendSignInInvite(emailVal);
-              await fb.authorizeMember(emailVal, { invitedSignInMethod: 'emailLink', loginLinkSentAt: serverTimestamp() });
               linkSent = true;
-            } catch (linkErr) { /* non-fatal */ }
+              try { await fb.authorizeMember(emailVal, { invitedSignInMethod:'emailLink', loginLinkStatus:'sent', loginLinkSentAt:serverTimestamp() }); } catch (statusError) { console.warn('Login link was sent, but its status could not be recorded.', statusError); }
+            } catch (linkErr) {
+              try { await fb.authorizeMember(emailVal, { invitedSignInMethod:'emailLink', loginLinkStatus:'failed', loginLinkFailedAt:serverTimestamp() }); } catch (_) {}
+            }
           }
 
           var toastMsg = 'Member added';
@@ -11017,7 +11052,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       var pad = function (n) { return String(n).padStart(2, '0'); };
       var dateStr = String(now.getFullYear()) + pad(now.getMonth() + 1) + pad(now.getDate());
       var filename = dateStr + ' - utl-members download.csv';
-      var header = ['Name', 'Email', 'Role', 'Status', 'Cohort', 'First Login', 'Confirmed Sign-in Method', 'Sign-in Methods Used', 'Planned First Sign-in Method', 'Email Link Sent', 'Welcome Email Status', 'Welcome Email Sent', 'Welcome Email Format', 'Expiry', 'Google Group', 'Google Group Sync', 'Notes', 'Added By', 'Added At'];
+      var header = ['Name', 'Email', 'Role', 'Status', 'Cohort', 'First Login', 'Confirmed Sign-in Method', 'Sign-in Methods Used', 'Selected First Sign-in Method', 'Email Link Status', 'Email Link Sent', 'Welcome Email Status', 'Welcome Email Sent', 'Welcome Email Format', 'Expiry', 'Google Group', 'Google Group Sync', 'Notes', 'Added By', 'Added At'];
       function csvCell(val) {
         var s = String(val === null || val === undefined ? '' : val).replace(/"/g, '""');
         return (s.search(/[,"\r\n]/) !== -1) ? '"' + s + '"' : s;
@@ -11040,6 +11075,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
           csvCell(mbSignInProviderLabel(data.lastSignInProvider)),
           csvCell(Array.isArray(data.signInProviders) ? data.signInProviders.map(mbSignInProviderLabel).join(', ') : ''),
           csvCell(mbSignInProviderLabel(data.invitedSignInMethod)),
+          csvCell(data.loginLinkStatus || (data.loginLinkSentAt ? 'sent' : '')),
           csvCell(data.loginLinkSentAt ? mbFormatDate(data.loginLinkSentAt) : ''),
           csvCell(data.welcomeEmailStatus || (data.welcomeEmailSentAt ? 'sent' : 'estimated')),
           csvCell(data.welcomeEmailSentAt ? mbFormatDateTime(data.welcomeEmailSentAt) : (legacyWelcomeEstimate ? mbFormatDateTime(legacyWelcomeEstimate.date) : '')),

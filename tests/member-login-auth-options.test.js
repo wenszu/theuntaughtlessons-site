@@ -57,6 +57,13 @@ assert.match(emailActions, /emailFormat === 'branded' && htmlBody/, 'only brande
 assert.match(emailActions, /body: plainBody/, 'every welcome email should include an intentional plain-text body');
 assert.match(admin, /<th>Sign-in method<\/th>/, 'Member Access should show the last sign-in method');
 assert.match(admin, /Confirmed Sign-in Method/, 'member CSV export should distinguish the confirmed sign-in method');
-assert.match(admin, /Planned First Sign-in Method/, 'member CSV export should include the planned first sign-in method');
+assert.match(admin, /Selected First Sign-in Method/, 'member CSV export should include the selected first sign-in method');
+assert.doesNotMatch(admin, />Planned: /, 'Member Access should not use internal planning language as the primary method label');
+assert.match(admin, /Link sent · waiting for first login/, 'email-link selection should distinguish a sent link from a completed login');
+assert.match(admin, /Link failed · retry or use Microsoft/, 'failed email-link sends should show a useful fallback');
+assert.match(admin, /No link recorded · learner can request one/, 'legacy email-link selections should explain that learners can request a link');
+assert.match(admin, /Selected for first sign-in · no login yet/, 'federated setup should remain clearly unconfirmed before first login');
+assert.match(admin, /setup choice: /, 'a successful fallback login should preserve the original setup choice as secondary context');
+assert.match(admin, /loginLinkStatus:'failed'/, 'failed administrator link sends should be recorded for support');
 
 console.log('member login and corporate email-link onboarding contracts passed');
