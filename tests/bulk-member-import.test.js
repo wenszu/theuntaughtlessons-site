@@ -25,6 +25,8 @@ assert.match(admin, /role: 'member'/, 'bulk imports should only create ordinary 
 assert.match(admin, /window\.confirm\('Add ' \+ ready\.length/, 'writes and onboarding messages should require explicit confirmation');
 assert.match(admin, /requestGoogleGroupSyncJob\(row\.email, 'add'/, 'Google Group access should use the existing queued sync path');
 assert.match(admin, /id="mbBulkRetry"/, 'failed operations should be retryable without reimporting everyone');
+assert.match(admin, /mbRecordWelcomeEmailStatus\(row\.email, 'sent'/, 'successful bulk welcome sends should be persisted');
+assert.match(admin, /welcomeEmailStatus = sendWelcome \? 'pending' : 'not_requested'/, 'new bulk members should start with an explicit welcome-email state');
 assert.match(admin, /UTL bulk learner results\.csv/, 'admins should be able to download an audit-friendly result file');
 
 console.log('bulk member import contracts passed');

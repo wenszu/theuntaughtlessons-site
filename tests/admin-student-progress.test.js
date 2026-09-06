@@ -41,6 +41,11 @@ assert(appGuard.includes('mountExperiencePreviewBanner'), 'exercise pages show a
 assert(admin.includes('function spLaunchMemberSupportPreview(memberOrEmail)'), 'admins can launch a selected member support preview');
 assert(admin.includes('data-sp-support-preview'), 'Student Progress exposes Preview as member');
 assert(admin.includes('data-mb-support-preview'), 'Member Access exposes Preview as member');
+assert(admin.includes('<th>Welcome email</th>'), 'Member Access shows persistent welcome-email status');
+assert(admin.includes('data-mb-welcome-resend'), 'Member Access offers a welcome-email resend or retry action');
+assert(admin.includes("welcomeEmailStatus: status"), 'welcome-email send results are stored on the member record');
+assert(admin.includes("welcomeEmailSentAt = serverTimestamp()"), 'successful welcome sends retain a timestamp');
+assert(admin.includes("Older record; no send history"), 'legacy members receive an honest unknown email status');
 assert(firebase.includes('async function getMemberSupportSnapshot(email)'), 'support preview loads the selected member cloud snapshot');
 assert(firebase.includes('async function logMemberSupportPreview(snapshot = {})'), 'support preview openings are audited');
 assert(rules.includes('match /support_preview_audit/{eventId}'), 'support preview audits have an explicit Firestore rule');
