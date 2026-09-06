@@ -1985,6 +1985,21 @@
       els.recentAttempts.innerHTML = '';
     }
 
+    window.UTLReviewWritingSubmission = function () {
+      const response = getCurrentResponse();
+      const score = scorePractice(response, ACTIVITY.scoring);
+      els.submittedAnswer.textContent = response.text;
+      els.confirmation.classList.remove('hidden');
+      els.confirmation.innerHTML = '<strong>Previous submission.</strong> Review its feedback, your answer and the sample below.';
+      els.tryAgainBtn.classList.remove('hidden');
+      els.mobileResultTabs.classList.add('visible');
+      els.checklistPanel.classList.remove('hidden');
+      renderScore(score);
+      els.comparisonPanel.classList.add('hidden');
+      document.body.classList.add('result-mode');
+      setMobileTab('score');
+    };
+
     function submitAttempt() {
       if (!hasAnyContent()) {
         els.confirmation.classList.remove('hidden');
@@ -2045,12 +2060,12 @@
       });
     }
 
-    function clearCurrentInput() {
-      els.openResponse.value = '';
+    window.UTLBeginWritingAttempt = function () {
       [1, 2, 3].forEach((num) => {
-        getEl(`sectionTitle${num}`).value = '';
-        getEl(`sectionBody${num}`).value = '';
+        getEl(`sectionTitle${num}`).readOnly = false;
+        getEl(`sectionBody${num}`).readOnly = false;
       });
+      els.openResponse.readOnly = false;
       state.lastAttemptId = null;
       state.lastScore = null;
       state.sampleRevealed = false;
@@ -2065,13 +2080,23 @@
       setMobileTab('self');
       renderChecklist();
       resetTimer();
+    };
+
+    function clearCurrentInput() {
+      els.openResponse.value = '';
+      [1, 2, 3].forEach((num) => {
+        getEl(`sectionTitle${num}`).value = '';
+        getEl(`sectionBody${num}`).value = '';
+      });
+      window.UTLBeginWritingAttempt();
     }
 
     function renderAttempts() {
       const attempts = loadAttempts().slice().reverse();
       renderRecentAttempts();
+      els.clearAttemptsBtn.hidden = !attempts.length;
       if (!attempts.length) {
-        els.attemptsList.innerHTML = '<p class="small">No previous attempts yet.</p>';
+        els.attemptsList.innerHTML = '<p class="small"><strong>No submitted attempts yet.</strong><br>Your current response will appear as a draft while you work.</p>';
         return;
       }
 
@@ -2312,6 +2337,7 @@
   </script>
   <script type="module" src="../../assets/app-access-guard.js?v=20260903-responsive-preview"></script>
   <script src="../../assets/exercise-scoring-intro.js?v=6"></script>
+  <script src="../../assets/phase1-writing-history.js?v=20260906-action-hierarchy-1"></script>
   <script type="module" src="../../assets/feedback-widget.js?v=6"></script>
   <script src="../../assets/tactile-buttons.js?v=20260714-flat-1" defer></script>
 </body>

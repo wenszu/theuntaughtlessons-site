@@ -74,7 +74,7 @@
         return;
       }
       var script = document.createElement("script");
-      script.src = "../../assets/exercise-context-flow.js?v=20260903-feedback-preview";
+      script.src = "../../assets/exercise-context-flow.js?v=20260906-aiko-header-1";
       script.dataset.utlContextFlow = "true";
       script.onload = function () { resolve(window.UTLExerciseContextFlow); };
       script.onerror = reject;

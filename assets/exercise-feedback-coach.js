@@ -72,8 +72,22 @@
   }
 
   function promptText(options) {
-    const criteria = (options.criteria || []).map(function (item, index) { return `${index + 1}. ${item}`; }).join("\n");
-    const signals = (options.signals || []).map(function (item, index) { return `${index + 1}. ${item}`; }).join("\n");
+    function criterionLabel(item, index) {
+      const text = String(item || "");
+      if (/situation/i.test(text)) return "Situation";
+      if (/complication/i.test(text)) return "Complication";
+      if (/question/i.test(text)) return "Question";
+      if (/\banswer\b/i.test(text)) return "Answer";
+      if (/BSP|heading|scan/i.test(text)) return "Scannability";
+      if (/tone|professional/i.test(text)) return "Tone";
+      if (/concise|brief|length/i.test(text)) return "Conciseness";
+      if (/decision|next step|recommend|alternative/i.test(text)) return "Next step";
+      if (/evidence|reason|support|information|content|coverage/i.test(text)) return "Important content";
+      if (/structure|section|branch|MECE|mutually exclusive/i.test(text)) return "Organization";
+      return `Criterion ${index + 1}`;
+    }
+    const criteria = (options.criteria || []).map(function (item, index) { return `${index + 1}. **${criterionLabel(item, index)}:** ${item}`; }).join("\n");
+    const signals = (options.signals || []).map(function (item, index) { return `${index + 1}. **Signal ${index + 1}:** ${item}`; }).join("\n");
     return `You are a practical coach. Review my response to ${options.title || "this exercise"}.
 
 THE GOAL
@@ -86,13 +100,15 @@ MY RESPONSE
 ${options.response || "No written response was provided."}
 
 ${options.sample ? `ONE SAMPLE APPROACH\n${options.sample}\n\nUse the sample as one possible approach. Focus on the quality of the thinking and communication.\n\n` : ""}${signals ? `CURRENT RULE BASED SIGNALS\n${signals}\n\n` : ""}Return your feedback in five numbered sections:
-1. One specific strength, quoting a short phrase from my response
-2. The single most important improvement, with evidence from my response
-3. Important information or thinking I missed or made unclear
-4. A revised version of only the weakest part
-5. A two sentence explanation of why that revision is stronger
+1. **Specific strength:** Identify one strength and quote a short phrase from my response
+2. **Improve this first:** Explain the single most important improvement with evidence from my response
+3. **Important content:** Identify information or thinking I missed or made unclear
+4. **Suggested revision:** Revise only the weakest part
+5. **Why this is stronger:** Explain the benefit of the revision in two sentences
 
-Use only information found in my response or the sample. Keep the feedback concise and constructive.`;
+Use only information found in my response or the sample. Keep the feedback concise and constructive.
+
+When you use a numbered or bulleted list, begin every item with a short **Bolded Summary Phrase (BSP):** followed by the explanation.`;
   }
 
   function openPrompt(options) {

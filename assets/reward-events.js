@@ -356,8 +356,17 @@
       showZero: false,
       metadata: { appId, score, previousBest, mode }
     });
-    recordPracticeActivity(appId, options);
+    if (result.awarded && mpEarned > 0) recordPracticeActivity(appId, options);
     return result;
+  }
+
+  function exerciseCompletionAlreadyCredited(appId) {
+    const earned = readState().earnedEventIds || {};
+    return Boolean(
+      earned[`legacy-exercise:${appId}`] ||
+      earned[`completion-exercise:${appId}`] ||
+      earned[`reflection-exercise:${appId}`]
+    );
   }
 
   function awardCompletionExercise(options) {
@@ -365,7 +374,7 @@
     if (!appId) return { awarded: false, reason: "missing-app-id" };
     window.dispatchEvent(new CustomEvent("utl:activity-completed", { detail: { activityId: appId, activityTitle: options.title || "Exercise complete" } }));
     if (readSettings().enabled === false) return { awarded: false, reason: "rewards-disabled", state: readState() };
-    if (readState().earnedEventIds[`legacy-exercise:${appId}`]) {
+    if (exerciseCompletionAlreadyCredited(appId)) {
       return { awarded: false, reason: "already-awarded", state: readState() };
     }
     const result = awardEvent({
@@ -385,7 +394,7 @@
     if (!appId) return { awarded: false, reason: "missing-app-id" };
     window.dispatchEvent(new CustomEvent("utl:activity-completed", { detail: { activityId: appId, activityTitle: options.title || "Reflection saved" } }));
     if (readSettings().enabled === false) return { awarded: false, reason: "rewards-disabled", state: readState() };
-    if (readState().earnedEventIds[`legacy-exercise:${appId}`]) {
+    if (exerciseCompletionAlreadyCredited(appId)) {
       return { awarded: false, reason: "already-awarded", state: readState() };
     }
     const result = awardEvent({

@@ -1031,6 +1031,15 @@
       min-height: 72px;
     }
 
+    .reflection-guidance { margin: 5px 0 0; color: var(--ink); }
+    .reflection-note { margin: 6px 0 0; color: var(--steel); font-size: .82rem; }
+
+    body.reviewing-grocery-results .layout { position: static; height: auto; min-height: auto; }
+    body.reviewing-grocery-results .sorting-panel { height: auto; overflow: visible; }
+    body.reviewing-grocery-results .sorting-list-body { max-height: 480px; }
+    body.reviewing-grocery-results .sorting-buckets-body { min-height: 360px; }
+    body.reviewing-grocery-results .reflection-panel { max-height: none; overflow: visible; }
+
     .buttons {
       margin-top: 12px;
       display: flex;
@@ -1143,6 +1152,20 @@
     .attempt-comparison-grid dt { color: #667789; font-size: .72rem; font-weight: 700; }
     .attempt-comparison-grid dd { margin: 3px 0 0; color: var(--navy); font-size: 1rem; font-weight: 700; }
     .attempt-comparison-copy { margin: 12px 0 0; color: #424b53; font-size: .9rem; }
+    .history-view-button { min-height: 34px; padding: 6px 10px; border: 1px solid var(--navy); border-radius: 6px; background: #fff; color: var(--navy); font-weight: 700; }
+    .saved-attempt-heading { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+    .saved-attempt-heading h3 { margin: 3px 0 0; }
+    .saved-grocery-response { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 10px; margin: 14px 0; }
+    .saved-grocery-response article { padding: 13px; border: 1px solid var(--line); border-radius: 7px; background: #fff; }
+    .saved-grocery-response h4,.saved-grocery-response p { margin: 0; }
+    .saved-grocery-response p { margin-top: 6px; }
+    .grocery-saved-work { margin: 0 0 18px; padding: 16px 18px; border: 1px solid var(--line); border-radius: 9px; background: #fff; }
+    .grocery-saved-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+    .grocery-saved-head h2 { margin: 0 0 4px; }
+    .grocery-saved-head p { margin: 0; color: var(--steel); }
+    .grocery-saved-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+    .grocery-saved-list { display: grid; gap: 8px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); }
+    .grocery-saved-row { display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: center; gap: 12px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 7px; background: var(--paper); }
     .attempt-history { margin-top: 10px; border-top: 1px solid rgba(0, 51, 102, .12); padding-top: 10px; }
     .attempt-history summary { color: var(--navy); font-size: .85rem; font-weight: 700; cursor: pointer; }
     .attempt-history-list { margin: 10px 0 0!important; padding: 0!important; list-style: none; }
@@ -1154,6 +1177,11 @@
       .attempt-comparison-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .attempt-comparison-head { display: block; }
       .attempt-comparison-head span { display: block; margin-top: 4px; }
+      .saved-attempt-heading { align-items: stretch; flex-direction: column; }
+      .saved-grocery-response { grid-template-columns: 1fr; }
+      .grocery-saved-head { flex-direction: column; }
+      .grocery-saved-actions,.grocery-saved-actions button { width: 100%; }
+      .grocery-saved-row { grid-template-columns: 1fr; }
     }
 
     .mp-earned {
@@ -1563,14 +1591,15 @@
         </div>
 
         <section class="reflection-panel" aria-label="Reflection and answer controls">
-          <label for="whyText"><strong>Why did you choose these three buckets?</strong></label>
-          <textarea id="whyText" placeholder="Type your answer here."></textarea>
+          <label for="whyText"><strong>Optional reflection</strong></label>
+          <p class="reflection-guidance">What organizing rule did you use for these three buckets?</p>
+          <textarea id="whyText" placeholder="Describe your organizing rule, if useful."></textarea>
+          <p class="reflection-note">This helps you make your logic explicit. It is saved with your response and does not affect your score.</p>
 
           <div class="buttons">
-            <button id="generateBtn">Generate new list</button>
             <button id="checkBtn" class="primary" disabled>Submit</button>
             <button id="sampleBtn" disabled aria-describedby="answerRequirement">Review sample answer</button>
-            <button id="resetBtn" class="secondary-action hidden">Reset</button>
+            <button id="generateBtn" class="secondary-action hidden">Start a new attempt</button>
           </div>
           <p class="answer-requirement" id="answerRequirement" aria-live="polite">Sort every item into one of the three buckets to check your answer.</p>
 
@@ -1735,7 +1764,8 @@
 
       renderAll();
       clearFeedback();
-      document.getElementById('resetBtn')?.classList.add('hidden');
+      document.getElementById('generateBtn')?.classList.add('hidden');
+      document.getElementById('whyText').value = '';
       if (activityTimer) activityTimer.reset();
     }
 
@@ -1782,7 +1812,7 @@
         : state.changedAfterSubmit
           ? 'Resubmit for feedback'
           : 'Submit';
-      document.getElementById('sampleBtn').disabled = !allSorted;
+      document.getElementById('sampleBtn').disabled = !submissionIsCurrent;
       const requirement = document.getElementById('answerRequirement');
       if (requirement) {
         requirement.classList.toggle('ready', allSorted || submissionIsCurrent);
@@ -2111,6 +2141,7 @@
     }
 
     function showFeedback(evalResult) {
+      document.body.classList.add('reviewing-grocery-results');
       const panel = document.getElementById('feedback');
       panel.classList.remove('hidden');
       const elapsedSeconds = activityTimer.elapsedSeconds();
@@ -2121,7 +2152,8 @@
         bucket2_name: state.bucketNames.bucket2,
         bucket2_items: bucketItems('bucket2'),
         bucket3_name: state.bucketNames.bucket3,
-        bucket3_items: bucketItems('bucket3')
+        bucket3_items: bucketItems('bucket3'),
+        organizing_rule: document.getElementById('whyText').value.trim()
       }, evalResult.totalScore);
 
       const categoryClarity = evalResult.nameRatio >= 0.75
@@ -2160,9 +2192,11 @@
         ${evalResult.namesBlank ? '<p class="small"><em>You left one or more bucket names blank. Your item placement was still evaluated.</em></p>' : ''}
         ${completionSaveNotice()}
       `;
+      panel.querySelectorAll('[data-grocery-attempt]').forEach((button) => button.addEventListener('click', () => viewGroceryAttempt(loadGroceryAttempts().find((item) => item.attemptId === button.dataset.groceryAttempt))));
     }
 
     function clearFeedback() {
+      document.body.classList.remove('reviewing-grocery-results');
       document.getElementById('feedback').classList.add('hidden');
       document.getElementById('feedback').innerHTML = '';
     }
@@ -2423,15 +2457,29 @@
     function loadGroceryAttempts() {
       try {
         const attempts = JSON.parse(localStorage.getItem(GROCERY_ATTEMPTS_KEY) || '[]');
-        return Array.isArray(attempts) ? attempts.slice(-10) : [];
+        const history = Array.isArray(attempts) ? attempts : [];
+        const latest = JSON.parse(localStorage.getItem('utl_result_grocery-list') || 'null');
+        if (latest && latest.response) {
+          const attemptId = latest.attempt_id || `legacy-grocery-${latest.completed_at || 'latest'}`;
+          const migrated = { attemptId, attemptNumber: latest.attempt || 1, score: latest.score || 0, scoreMaximum: 100, contentVersion: latest.score_content_version || GROCERY_CONTENT_VERSION, completedAt: latest.completed_at, record: latest };
+          const index = history.findIndex((item) => item.attemptId === attemptId || (item.completedAt && item.completedAt === latest.completed_at));
+          if (index >= 0) history[index] = { ...history[index], ...migrated };
+          else history.push(migrated);
+          localStorage.setItem(GROCERY_ATTEMPTS_KEY, JSON.stringify(history.slice(-10)));
+        }
+        return history.slice(-10);
       } catch (error) { return []; }
     }
 
     async function hydrateGroceryAttempts() {
       if (new URLSearchParams(window.location.search).get('design-preview') === 'score-history') return;
       try {
-        const { getExerciseAttempts } = await import('../../assets/firebase.js');
-        const cloudAttempts = await getExerciseAttempts('grocery-list');
+        const { getExerciseAttempts, getExerciseWork } = await import('../../assets/firebase.js');
+        const [cloudAttempts, ...cloudWorkRecords] = await Promise.all([
+          getExerciseAttempts('grocery-list'),
+          getExerciseWork('grocery-list'),
+          getExerciseWork('p1-e1')
+        ]);
         const merged = new Map(loadGroceryAttempts().map((item) => [item.attemptId, item]));
         cloudAttempts.forEach((item) => {
           const submittedAt = item.submittedAt && item.submittedAt.toDate ? item.submittedAt.toDate().toISOString() : new Date().toISOString();
@@ -2444,8 +2492,15 @@
             completedAt: submittedAt
           });
         });
+        cloudWorkRecords.forEach((cloudWork) => (cloudWork.submissions || []).forEach((item) => {
+          const record = item.responsePayload || item.savedPayload || null;
+          if (!record || !record.response) return;
+          const attemptId = item.submissionId || item.id || `legacy-grocery-${record.completed_at || Date.now()}`;
+          merged.set(attemptId, { attemptId, attemptNumber: record.attempt || 1, score: record.score || 0, scoreMaximum: 100, contentVersion: record.score_content_version || GROCERY_CONTENT_VERSION, completedAt: item.completedAtClient || record.completed_at, record });
+        }));
         const attempts = Array.from(merged.values()).sort((a, b) => new Date(a.completedAt) - new Date(b.completedAt)).slice(-10);
         localStorage.setItem(GROCERY_ATTEMPTS_KEY, JSON.stringify(attempts));
+        renderGrocerySavedWork();
       } catch (error) {
         console.warn('Previous score history could not be synchronized.', error);
       }
@@ -2489,7 +2544,7 @@
             const older = recent[index + 1];
             const label = older && older.contentVersion === attempt.contentVersion ? attemptChangeLabel(attempt, older) : 'Baseline';
             const date = new Date(attempt.completedAt).toLocaleDateString([], { month: 'short', day: 'numeric' });
-            return `<li><span>Attempt ${attempt.attemptNumber} · ${date}</span><strong>${attempt.score}/100</strong><span class="attempt-history-change">${label}</span></li>`;
+            return `<li><span>Attempt ${attempt.attemptNumber} · ${date}</span><strong>${attempt.score}/100</strong><span class="attempt-history-change">${label}</span>${attempt.record ? `<button type="button" class="history-view-button" data-grocery-attempt="${attempt.attemptId}">View</button>` : ''}</li>`;
           }).join('')}
         </ol></details>
       </section>`;
@@ -2513,8 +2568,8 @@
         attempt_id: attemptId
       };
       localStorage.setItem('utl_result_' + appId, JSON.stringify(record));
-      const history = loadGroceryAttempts();
-      history.push({ attemptId, attemptNumber: attempt, score: record.score, scoreMaximum: 100, contentVersion: GROCERY_CONTENT_VERSION, completedAt: record.completed_at });
+      const history = loadGroceryAttempts().filter((item) => item.attemptId !== attemptId);
+      history.push({ attemptId, attemptNumber: attempt, score: record.score, scoreMaximum: 100, contentVersion: GROCERY_CONTENT_VERSION, completedAt: record.completed_at, record });
       localStorage.setItem(GROCERY_ATTEMPTS_KEY, JSON.stringify(history.slice(-10)));
       import('../../assets/firebase.js')
         .then(({ saveUserProgress, saveExerciseAttempt }) => Promise.allSettled([
@@ -2540,6 +2595,32 @@
 
     function bucketItems(bucketKey) {
       return state.placements[bucketKey].map((id) => getItemById(id)?.text || '').filter(Boolean);
+    }
+
+    function viewGroceryAttempt(attempt) {
+      const record = attempt && attempt.record;
+      if (!record || !record.response) return;
+      const response = record.response;
+      const panel = document.getElementById('feedback');
+      document.body.classList.add('reviewing-grocery-results');
+      const bucket = (number) => `<article><h4>${escapeHtml(response[`bucket${number}_name`] || `Bucket ${number}`)}</h4><p>${(response[`bucket${number}_items`] || []).map(escapeHtml).join(', ') || 'No items saved.'}</p></article>`;
+      panel.classList.remove('hidden');
+      panel.innerHTML = `<div class="saved-attempt-heading"><div><span class="small-label">Previous submission</span><h3>Attempt ${attempt.attemptNumber} · ${new Date(attempt.completedAt).toLocaleString()}</h3></div><button type="button" class="secondary" id="backToCurrentGrocery">Back to current exercise</button></div><p class="score">Automated practice score: ${attempt.score}/100</p><div class="saved-grocery-response">${bucket(1)}${bucket(2)}${bucket(3)}</div>${response.organizing_rule ? `<p><strong>Your organizing rule:</strong> ${escapeHtml(response.organizing_rule)}</p>` : ''}<p><strong>Feedback:</strong> Review whether every item is placed, each bucket has a distinct purpose and every label describes its contents clearly.</p>`;
+      document.getElementById('backToCurrentGrocery').addEventListener('click', () => { panel.classList.add('hidden'); panel.innerHTML = ''; document.body.classList.remove('reviewing-grocery-results'); });
+      panel.scrollIntoView({behavior:'smooth',block:'start'});
+    }
+
+    function renderGrocerySavedWork() {
+      document.getElementById('grocerySavedWork')?.remove();
+      const history = loadGroceryAttempts().filter((item) => item.record);
+      if (!history.length) return;
+      const latest = history[history.length - 1];
+      const section = document.createElement('section');
+      section.id = 'grocerySavedWork'; section.className = 'grocery-saved-work';
+      section.innerHTML = `<div class="grocery-saved-head"><div><h2>Welcome back</h2><p>Your latest Grocery List submission was saved ${new Date(latest.completedAt).toLocaleString()}.</p></div><div class="grocery-saved-actions"><button type="button" class="secondary" data-view-grocery="${latest.attemptId}">View latest submission</button><button type="button" class="primary" id="groceryStartNew">Start a new attempt</button></div></div><div class="grocery-saved-list"><strong>Previous submissions</strong>${history.slice().reverse().map((item,index)=>`<div class="grocery-saved-row"><div><strong>Submission ${history.length-index}</strong><span>${new Date(item.completedAt).toLocaleString()} · ${item.score}/100</span></div><button type="button" class="secondary" data-view-grocery="${item.attemptId}">View feedback</button></div>`).join('')}</div>`;
+      document.getElementById('hero').after(section);
+      section.querySelectorAll('[data-view-grocery]').forEach((button)=>button.addEventListener('click',()=>viewGroceryAttempt(history.find((item)=>item.attemptId===button.dataset.viewGrocery))));
+      document.getElementById('groceryStartNew').addEventListener('click',()=>{document.getElementById('generateBtn').click();document.getElementById('exercise').scrollIntoView({behavior:'smooth',block:'start'});});
     }
 
     function renderSampleAnswer() {
@@ -2596,7 +2677,7 @@
         state.submitted = true;
         state.changedAfterSubmit = false;
         renderAll();
-        document.getElementById('resetBtn').classList.remove('hidden');
+        document.getElementById('generateBtn').classList.remove('hidden');
       });
 
       document.getElementById('sampleBtn').addEventListener('click', () => {
@@ -2612,19 +2693,6 @@
         document.getElementById('sampleBtn').textContent = sample.classList.contains('hidden')
           ? 'Review sample answer'
           : 'Hide sample answer';
-      });
-
-      document.getElementById('resetBtn').addEventListener('click', () => {
-        state.placements = { list: state.generatedItems.map((i) => i.id), bucket1: [], bucket2: [], bucket3: [] };
-        state.bucketNames = { bucket1: '', bucket2: '', bucket3: '' };
-        state.submitted = false;
-        state.changedAfterSubmit = false;
-        selectedItemId = null;
-        document.getElementById('whyText').value = '';
-        clearFeedback();
-        document.getElementById('resetBtn').classList.add('hidden');
-        activityTimer.reset();
-        renderAll();
       });
 
       document.getElementById('doneToggleBtn').addEventListener('click', () => {
@@ -2694,6 +2762,7 @@
         updateMpDisplay();
         window.addEventListener('utl:reward-update', () => updateMpDisplay());
         syncDoneState();
+        renderGrocerySavedWork();
         hydrateGroceryAttempts();
         if (new URLSearchParams(window.location.search).get('design-preview') === 'score-history') {
           const panel = document.getElementById('feedback');

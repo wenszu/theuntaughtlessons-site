@@ -680,34 +680,39 @@
     .attempt-switcher {
       display: none;
       margin: -8px 60px 24px;
-      padding: 10px;
+      padding: 16px 18px;
       border: 1px solid var(--line);
       border-radius: 10px;
       background: var(--white);
     }
     .attempt-switcher.visible { display: block; }
+    .attempt-switcher-head { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 10px; }
     .attempt-switcher-label {
-      margin: 0 0 8px;
+      margin: 0;
       color: var(--steel);
       font: 700 11px/1.2 Lato, Arial, sans-serif;
     }
-    .attempt-tabs { display: flex; gap: 8px; flex-wrap: wrap; }
+    .attempt-switcher-summary { display: block; margin-top: 3px; color: var(--navy); font: 700 13px/1.35 Lato, Arial, sans-serif; }
+    .attempt-new-button { flex: 0 0 auto; min-height: 40px; padding: 8px 14px; border: 1px solid var(--navy); border-radius: 7px; background: var(--navy); color: var(--white); font-weight: 700; }
+    .attempt-tabs { display: grid; gap: 8px; }
     .attempt-tab {
-      display: inline-flex;
+      display: flex;
       align-items: center;
+      justify-content: space-between;
       gap: 7px;
+      width: 100%;
       min-height: 36px;
       padding: 7px 12px;
       border: 1px solid var(--line);
       border-radius: 7px;
-      background: var(--white);
+      background: var(--paper);
       color: var(--navy);
       cursor: pointer;
       font: 700 12px/1.2 Lato, Arial, sans-serif;
     }
     .attempt-tab[aria-selected="true"] {
       border-color: var(--gold);
-      background: #fff8ec;
+      background: var(--white);
       box-shadow: 0 0 0 1px var(--gold);
     }
     .attempt-status { color: var(--steel); font-size: 11px; }
@@ -784,12 +789,14 @@
       .mobile-guidance { display: block; }
     }
 
-    @media (max-width: 767px) {
+    @media (max-width: 900px) {
       main .utl-scoring-intro { margin-left: 20px; margin-right: 20px; }
       .page-title, .review { padding-left: 20px; padding-right: 20px; }
       .attempt-switcher { margin: -4px 20px 20px; }
       .attempt-tabs { display: none; }
       .attempt-select-wrap { display: block; }
+      .attempt-switcher-head { align-items: stretch; flex-direction: column; }
+      .attempt-new-button { width: 100%; }
       .title { font-size: 31px; }
       .context-card { margin-left: 20px; margin-right: 20px; padding: 24px; }
       .bottom-bar { position: static; flex-direction: column; align-items: stretch; margin: 24px 0 0; padding: 16px 0 0; }
@@ -1033,7 +1040,7 @@
       <p class="subtitle">Turn a problem into a clear, connected Situation, Complication, Question, and Answer.</p>
     </div>
     <nav class="attempt-switcher" id="attemptSwitcher" aria-label="Your SCQA attempts">
-      <p class="attempt-switcher-label">Your SCQAs</p>
+      <div class="attempt-switcher-head"><div><p class="attempt-switcher-label">Saved work</p><span class="attempt-switcher-summary" id="attemptSummary"></span></div><button class="attempt-new-button" id="attemptNewBtn" type="button">Start a new attempt</button></div>
       <div class="attempt-tabs" id="attemptTabs" role="tablist"></div>
       <div class="attempt-select-wrap">
         <label class="sr-only" for="attemptSelect">View a saved SCQA</label>
@@ -1087,7 +1094,7 @@
         <p><strong>Your SCQA is submitted.</strong> Review the feedback or revise your response.</p>
         <div class="action-row">
           <button class="btn btn-secondary" type="button" id="editScqa1">Edit SCQA</button>
-          <button class="btn btn-secondary" type="button" id="showPracticeScenarios">Practice another SCQA</button>
+          <button class="btn btn-secondary" type="button" id="showPracticeScenarios">Start a new attempt</button>
           <a class="btn btn-primary" href="../../member-login/index.html#learning-journey">Back to Learning Journey</a>
         </div>
       </section>
@@ -1268,21 +1275,28 @@
       const switcher = $("#attemptSwitcher");
       const tabs = $("#attemptTabs");
       const select = $("#attemptSelect");
+      const summary = $("#attemptSummary");
+      const newButton = $("#attemptNewBtn");
       if (!switcher || !tabs || !select) return;
       const attempts = orderedAttemptWorkspaces();
-      switcher.classList.toggle("visible", attempts.length > 1);
-      if (attempts.length < 2) return;
+      switcher.classList.toggle("visible", attempts.length > 0);
+      if (!attempts.length) return;
       const activeId = activeAttemptId();
+      const activeRecord = attempts.find((record) => record.id === activeId) || attempts[0];
+      const activeIndex = Math.max(0, attempts.findIndex((record) => record.id === activeRecord.id));
+      const activeComplete = attemptIsComplete(activeRecord);
+      if (summary) summary.textContent = `${activeComplete ? `Viewing submission ${activeIndex + 1} of ${attempts.length}` : "Draft in progress"} · ${activeRecord.title}`;
+      if (newButton) newButton.hidden = !attempts.some(attemptIsComplete);
       tabs.innerHTML = attempts.map((record, index) => {
         const complete = attemptIsComplete(record);
         return `<button class="attempt-tab" type="button" role="tab" data-attempt-id="${escapeHtml(record.id)}" aria-selected="${record.id === activeId}">
           <span>${index + 1} · ${escapeHtml(record.title)}</span>
-          <span class="attempt-status ${complete ? "complete" : ""}" aria-label="${complete ? "Complete" : "Draft"}">${complete ? "✓" : "•"}</span>
+          <span class="attempt-status ${complete ? "complete" : ""}">${complete ? "Submitted" : "Draft"}</span>
         </button>`;
       }).join("");
       select.innerHTML = attempts.map((record, index) => {
         const complete = attemptIsComplete(record);
-        return `<option value="${escapeHtml(record.id)}" ${record.id === activeId ? "selected" : ""}>Viewing: ${index + 1} · ${escapeHtml(record.title)} ${complete ? "✓" : "•"}</option>`;
+        return `<option value="${escapeHtml(record.id)}" ${record.id === activeId ? "selected" : ""}>${index + 1} · ${escapeHtml(record.title)} · ${complete ? "Submitted" : "Draft"}</option>`;
       }).join("");
     }
 
@@ -2026,6 +2040,12 @@
       if (button) setScqaResultTab(button.dataset.resultTab);
     });
     $("#showPracticeScenarios").addEventListener("click", () => {
+      renderPracticeScenarios();
+      $("#practiceScenarioPanel").hidden = false;
+      $("#practiceScenarioPanel").scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+    $("#attemptNewBtn").addEventListener("click", () => {
+      goToScreen(3);
       renderPracticeScenarios();
       $("#practiceScenarioPanel").hidden = false;
       $("#practiceScenarioPanel").scrollIntoView({ behavior: "smooth", block: "start" });

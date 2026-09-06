@@ -28,8 +28,6 @@ assert(topicIds.includes('delayed-project'), 'the bank includes a work or organi
 
 assert(workspace.includes('function speakingPracticeState()'), 'Learning Journey reads optional speaking state');
 assert(workspace.includes('utl_speak_like_obama_practice_workspaces'), 'Learning Journey reads the same per-topic workspace key the app writes');
-assert(workspace.includes('Practice another speech'), 'completed Learning Journey preview offers optional speaking practice');
-assert(workspace.includes('Resume practice'), 'Learning Journey resumes an unfinished speaking draft');
-assert(workspace.includes('Review original speech'), 'Learning Journey can reopen the required speech');
+assert(!workspace.includes('Review original speech') && !workspace.includes('Resume practice &rarr;'), 'Learning Journey uses the standard numbered review action for speaking practice');
 
 console.log('Speak like Obama optional practice contracts passed');

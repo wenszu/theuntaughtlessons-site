@@ -2406,12 +2406,6 @@ const UTL_CONTENT = {
         : state === "next"
           ? '<a class="ws-journey-start" href="' + escapeHtml(activity.href) + '">Start</a>'
           : "";
-    if (state === "done" && activity.appId === "scqa-builder") {
-      action = '<a href="' + escapeHtml(activity.href + "&attempt=olympics") + '">Review</a>';
-    }
-    if (state === "done" && activity.appId === "speak-like-obama") {
-      action = '<a href="' + escapeHtml(activity.href + "&attempt=olympics") + '">Review</a>';
-    }
     var unlockCopy = phaseIsUnlocked
       ? "Complete the activity immediately before this one to unlock it."
       : "Complete the previous phase to unlock this activity.";
@@ -2424,24 +2418,6 @@ const UTL_CONTENT = {
     var completedAppId = new URLSearchParams(window.location.search || "").get("completed");
     var justCompleted = activity.kind === "Exercise" && activity.appId === completedAppId;
     var availableAction = '<a class="ws-button" href="' + escapeHtml(activity.href) + '">' + (state === "done" ? "Review " : state === "progress" ? "Resume " : "Start ") + escapeHtml(sequenceLabel) + ' &rarr;</a>';
-    if (state === "done" && activity.appId === "scqa-builder") {
-      availableAction = '<div class="ws-journey-preview-actions"><a class="ws-button ws-button-outline" href="' + escapeHtml(activity.href + "&attempt=olympics") + '">Review my SCQA</a><a class="ws-button" href="' + escapeHtml(activity.href + "&practice=1") + '">Practice another SCQA &rarr;</a></div>';
-    }
-    if (state === "done" && activity.appId === "speak-like-obama") {
-      var optionalSpeechHref = speakingPractice.draft
-        ? activity.href + "&attempt=" + encodeURIComponent(speakingPractice.draft.id)
-        : activity.href + "&practice=1";
-      var optionalSpeechLabel = speakingPractice.draft ? "Resume practice &rarr;" : "Practice another speech &rarr;";
-      availableAction = '<div class="ws-journey-preview-actions"><a class="ws-button ws-button-outline" href="' + escapeHtml(activity.href + "&attempt=olympics") + '">Review original speech</a><a class="ws-button" href="' + escapeHtml(optionalSpeechHref) + '">' + optionalSpeechLabel + '</a></div>';
-    }
-    if (state === "done" && isExplainAikoRow && explainAikoBothRequiredDone()) {
-      var explainPracticeHref = appHref("../apps/explain-to-aiko/index.html");
-      var explainOptionalHref = explainPractice.draft
-        ? explainPracticeHref + "?practice=1&attempt=" + encodeURIComponent(explainPractice.draft.id)
-        : explainPracticeHref + "?practice=1";
-      var explainOptionalLabel = explainPractice.draft ? "Resume practice &rarr;" : "Practice another explanation &rarr;";
-      availableAction = '<div class="ws-journey-preview-actions"><a class="ws-button ws-button-outline" href="' + escapeHtml(activity.href) + '">Review</a><a class="ws-button" href="' + escapeHtml(explainOptionalHref) + '">' + explainOptionalLabel + '</a></div>';
-    }
     return '<li class="ws-journey-activity ws-journey-activity-' + state + (justCompleted ? ' ws-journey-activity-just-completed' : '') + '"><span class="ws-journey-status-icon" aria-hidden="true">' + statusIcon + '</span><button class="ws-journey-activity-preview-button" type="button" data-journey-preview="' + escapeHtml(activity.key) + '" aria-expanded="false"><span class="ws-journey-sequence">' + escapeHtml(sequenceLabel) + '</span><span class="ws-journey-type ws-journey-type-' + activity.kind.toLowerCase() + '"><span aria-hidden="true">' + typeIcon + '</span>' + escapeHtml(activity.kind + (activity.aiTool ? ' (' + activity.aiTool + ')' : '')) + '</span><strong>' + escapeHtml(activity.title) + '</strong><span class="ws-journey-duration">' + escapeHtml(activity.duration.replace(/^About /, "")) + '</span></button><span class="ws-journey-activity-state">' + (justCompleted ? "Just completed" : visibleStateText) + '</span><span class="ws-journey-activity-action">' + action + '</span><aside class="ws-journey-preview" data-journey-preview-panel="' + escapeHtml(activity.key) + '" role="dialog" aria-modal="true" aria-label="' + escapeHtml(activity.title) + ' preview" tabindex="-1" hidden><button class="ws-journey-preview-close" type="button" data-journey-preview-close aria-label="Close preview">&times;</button><span class="ws-journey-preview-overline">' + escapeHtml(sequenceLabel) + ' &middot; ' + escapeHtml(activity.kind) + '</span><h3>' + escapeHtml(activity.title) + '</h3><p>' + escapeHtml(activity.preview) + '</p><strong>Inside this activity</strong>' + activitySteps + '<dl><div><dt>Estimated time</dt><dd>' + escapeHtml(activity.duration) + '</dd></div><div><dt>Status</dt><dd>' + escapeHtml(visibleStateText) + '</dd></div>' + (state === "locked" ? '<div><dt>To unlock</dt><dd>' + escapeHtml(unlockCopy) + '</dd></div>' : "") + '</dl>' + (state === "locked" ? lockedAction : availableAction) + '</aside></li>';
   }
 

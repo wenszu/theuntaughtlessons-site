@@ -6,7 +6,7 @@ const data = JSON.parse(fs.readFileSync('data/practice/scqa-builder.json', 'utf8
 const workspace = fs.readFileSync('member-login/content-config.js', 'utf8');
 
 assert.equal(data[0].practiceScenarios.length, 5, 'SCQA provides exactly five optional practice topics');
-assert(scqa.includes('Practice another SCQA'), 'completed SCQA offers another practice round');
+assert(scqa.includes('Start a new attempt'), 'completed SCQA offers another attempt using the standard wording');
 assert(scqa.includes('#practiceScenarioPanel { border: 1px solid rgba(238,163,32,.72); background: #FFF8EC; }'), 'optional practice is visually distinct from required review content');
 assert(scqa.includes('practice-scenario-option'), 'practice topics use comparable selection cards');
 assert(scqa.includes('function updatePracticeScenarioSelection()'), 'changing a topic updates cards in place without closing the picker');
@@ -17,7 +17,10 @@ assert(scqa.includes('class="feedback-summary-details"'), 'complete structure ch
 assert(scqa.includes('urlParams.get("practice") === "1"'), 'a direct link can open the practice picker later');
 assert(scqa.includes('urlParams.get("attempt") === "olympics"'), 'a direct review link returns to the required SCQA');
 assert(scqa.includes('if (state.completedOnce && state.practiceScenarioId)'), 'practice saves do not repeat required exercise completion');
-assert(workspace.includes('Review my SCQA') && workspace.includes('Practice another SCQA'), 'completed Learning Journey preview offers review and practice choices');
+assert(!workspace.includes('Review latest submission') && !workspace.includes('Start a new attempt &rarr;</a></div>'), 'SCQA uses the standard single journey review action');
+assert(workspace.includes('(state === "done" ? "Review "'), 'completed journey activities use their numbered Review action');
+assert(scqa.includes('id="attemptSummary"') && scqa.includes('id="attemptNewBtn"'), 'SCQA exposes saved-work identity and the new-attempt action');
+assert(scqa.includes('Viewing submission ${activeIndex + 1} of ${attempts.length}') && scqa.includes('Draft in progress'), 'SCQA identifies the selected submission and labels drafts clearly');
 assert(workspace.includes('scqaPracticeCount()'), 'Learning Journey can report completed optional practice rounds');
 
 const titles = data[0].practiceScenarios.map((scenario) => scenario.title);

@@ -458,6 +458,20 @@
     }
 
     .write-to-aiko-results { margin-top: 18px; }
+    .write-to-aiko-return { margin: 0 0 18px; padding: 16px 18px; border: 1px solid var(--write-to-aiko-line); border-radius: 9px; background: var(--write-to-aiko-white); }
+    .write-to-aiko-return[hidden] { display: none; }
+    .write-to-aiko-return-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; }
+    .write-to-aiko-return h2 { margin: 0 0 4px; color: var(--write-to-aiko-navy); font: 700 20px/1.2 'Playfair Display', Georgia, serif; }
+    .write-to-aiko-return p { margin: 0; color: #536b82; font-size: 13px; }
+    .write-to-aiko-return-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+    .write-to-aiko-return button { min-height: 38px; padding: 8px 12px; border: 1px solid var(--write-to-aiko-navy); border-radius: 7px; background: #fff; color: var(--write-to-aiko-navy); font-weight: 700; cursor: pointer; }
+    .write-to-aiko-return button.primary { background: var(--write-to-aiko-navy); color: #fff; }
+    .write-to-aiko-history { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--write-to-aiko-line); }
+    .write-to-aiko-history[hidden] { display: none; }
+    .write-to-aiko-history-list { display: grid; gap: 8px; margin-top: 10px; }
+    .write-to-aiko-history-item { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 10px 12px; border: 1px solid var(--write-to-aiko-line); border-radius: 7px; background: var(--write-to-aiko-paper); }
+    .write-to-aiko-history-item strong, .write-to-aiko-history-item span { display: block; }
+    .write-to-aiko-history-item span { margin-top: 2px; color: #647587; font-size: 11px; }
     .write-to-aiko-result-tabs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); padding: 4px; border: 1px solid var(--write-to-aiko-line); border-radius: 8px; background: var(--write-to-aiko-paper); }
     .write-to-aiko-result-tab { min-height: 42px; border: 0; border-radius: 6px; background: transparent; color: var(--write-to-aiko-navy); font-weight: 700; cursor: pointer; }
     .write-to-aiko-result-tab.is-active { background: var(--write-to-aiko-navy); color: var(--write-to-aiko-white); }
@@ -479,7 +493,7 @@
     body.write-to-aiko-result .write-to-aiko-footer-count,
     body.write-to-aiko-result .write-to-aiko-sample-block,
     body.write-to-aiko-result .write-to-aiko-actions { display: none; }
-    @media (max-width: 620px) { .write-to-aiko-result-tabs { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 620px) { .write-to-aiko-result-tabs { grid-template-columns: 1fr 1fr; } .write-to-aiko-return-head { display: block; } .write-to-aiko-return-actions { margin-top: 12px; } }
 
     .write-to-aiko-actions {
       display: flex;
@@ -585,6 +599,15 @@
       .write-to-aiko-toggle {
         min-width: 0;
       }
+
+      .write-to-aiko-return-actions button,
+      .write-to-aiko-history-item button {
+        width: 100%;
+      }
+
+      .write-to-aiko-history-item {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
@@ -621,6 +644,21 @@
       <h1>Write to Aiko.</h1>
       <p>Turn your SCQA into an answer-first email. Lead with your bottom line, then build the supporting case.</p>
     </div>
+
+    <section class="write-to-aiko-return" id="writeToAikoReturn" hidden aria-live="polite">
+      <div class="write-to-aiko-return-head">
+        <div><h2 id="writeToAikoReturnTitle">Welcome back</h2><p id="writeToAikoReturnCopy"></p></div>
+        <div class="write-to-aiko-return-actions">
+          <button class="primary" type="button" id="writeToAikoResume">Continue draft</button>
+          <button type="button" id="writeToAikoViewLast">View last submission</button>
+          <button type="button" id="writeToAikoStartFresh">Start a new attempt</button>
+        </div>
+      </div>
+      <div class="write-to-aiko-history" id="writeToAikoHistory" hidden>
+        <strong>Previous submissions</strong>
+        <div class="write-to-aiko-history-list" id="writeToAikoHistoryList"></div>
+      </div>
+    </section>
 
     <div class="write-to-aiko-grid">
       <section class="write-to-aiko-panel write-to-aiko-scqa" aria-labelledby="writeToAikoScqaTitle">
@@ -795,7 +833,110 @@ Yutee Elle</div>
       const openText = document.getElementById('writeToAikoOpenText');
       const resultsEl = document.getElementById('writeToAikoResults');
       const structuredFields = Array.prototype.slice.call(document.querySelectorAll('[data-structured-field]'));
+      const returnEl = document.getElementById('writeToAikoReturn');
+      const returnTitleEl = document.getElementById('writeToAikoReturnTitle');
+      const returnCopyEl = document.getElementById('writeToAikoReturnCopy');
+      const historyEl = document.getElementById('writeToAikoHistory');
+      const historyListEl = document.getElementById('writeToAikoHistoryList');
+      const DRAFT_KEY = 'utl_draft_write-to-aiko';
+      const HISTORY_KEY = 'utl_submissions_write-to-aiko';
+      let draftSaveTimer = null;
+      let accountSaveTimer = null;
+      let savedDraft = null;
+      let submissionHistory = [];
       const analyticsStep = (stepId, progressPercent) => window.dispatchEvent(new CustomEvent('utl:activity-step', { detail: { stepId, progressPercent } }));
+
+      function safeParse(value, fallback) {
+        try { return value ? JSON.parse(value) : fallback; } catch (error) { return fallback; }
+      }
+
+      function draftPayload() {
+        return {
+          mode: state.mode,
+          openText: openText.value,
+          structuredValues: structuredFields.map((field) => field.value),
+          updatedAtClient: new Date().toISOString(),
+          durationSeconds: elapsedSeconds()
+        };
+      }
+
+      function hasDraftContent(draft) {
+        if (!draft) return false;
+        return Boolean(String(draft.openText || '').trim() || (draft.structuredValues || []).some((value) => String(value || '').trim()));
+      }
+
+      function applyDraft(draft) {
+        if (!draft) return;
+        openText.value = draft.openText || '';
+        structuredFields.forEach((field, index) => { field.value = (draft.structuredValues || [])[index] || ''; });
+        setMode(draft.mode === 'open' ? 'open' : 'structured');
+        state.elapsedBeforePause = Math.max(0, Number(draft.durationSeconds) || 0);
+        updateCounts();
+        updateTimer();
+        document.body.classList.remove('write-to-aiko-result');
+        resultsEl.hidden = true;
+        returnEl.hidden = true;
+      }
+
+      function saveDraftSoon() {
+        window.clearTimeout(draftSaveTimer);
+        draftSaveTimer = window.setTimeout(() => {
+          savedDraft = draftPayload();
+          localStorage.setItem(DRAFT_KEY, JSON.stringify(savedDraft));
+          window.clearTimeout(accountSaveTimer);
+          accountSaveTimer = window.setTimeout(() => {
+            import('../../assets/firebase.js')
+              .then(({ saveExerciseDraft }) => saveExerciseDraft('write-to-aiko', 'Write to Aiko', savedDraft))
+              .catch(() => {});
+          }, 2500);
+        }, 450);
+      }
+
+      function formatSavedDate(value) {
+        const date = new Date(value || '');
+        if (Number.isNaN(date.getTime())) return 'an earlier visit';
+        return date.toLocaleString([], { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' });
+      }
+
+      function responseFromSubmission(item) {
+        return item && item.responsePayload ? item.responsePayload.response : item && item.response;
+      }
+
+      function normalizeSubmission(item) {
+        const payload = item && item.responsePayload ? item.responsePayload : item || {};
+        return {
+          submissionId: item.submissionId || item.id || ('legacy-' + String(payload.completed_at || Date.now()).replace(/\W/g, '')),
+          attemptNumber: Number(item.attemptNumber || payload.attempt || 1),
+          completedAtClient: item.completedAtClient || payload.completed_at || new Date().toISOString(),
+          durationSeconds: Number(item.durationSeconds || payload.duration_seconds || 0),
+          responsePayload: payload
+        };
+      }
+
+      function mergeSubmissions(items) {
+        const merged = new Map(submissionHistory.map((item) => [item.submissionId, item]));
+        (items || []).map(normalizeSubmission).forEach((item) => merged.set(item.submissionId, item));
+        submissionHistory = Array.from(merged.values())
+          .filter((item) => responseFromSubmission(item))
+          .sort((a, b) => String(b.completedAtClient).localeCompare(String(a.completedAtClient)))
+          .slice(0, 10);
+        localStorage.setItem(HISTORY_KEY, JSON.stringify(submissionHistory));
+      }
+
+      function renderHistory() {
+        const hasDraft = hasDraftContent(savedDraft);
+        const latest = submissionHistory[0];
+        if (!hasDraft && !latest) { returnEl.hidden = true; return; }
+        returnEl.hidden = false;
+        returnTitleEl.textContent = hasDraft ? 'Continue your draft?' : 'Welcome back';
+        returnCopyEl.textContent = hasDraft
+          ? 'Your most recent changes were saved ' + formatSavedDate(savedDraft.updatedAtClient) + '.'
+          : 'You completed this exercise ' + formatSavedDate(latest.completedAtClient) + '.';
+        document.getElementById('writeToAikoResume').hidden = !hasDraft;
+        document.getElementById('writeToAikoViewLast').hidden = !latest;
+        historyEl.hidden = submissionHistory.length < 2;
+        historyListEl.innerHTML = submissionHistory.map((item, index) => `<div class="write-to-aiko-history-item"><div><strong>Attempt ${item.attemptNumber || submissionHistory.length - index}</strong><span>${formatSavedDate(item.completedAtClient)} · ${formatSeconds(item.durationSeconds || 0)}</span></div><button type="button" data-submission-id="${item.submissionId}">View</button></div>`).join('');
+      }
 
       function wordCount(text) {
         const words = text.trim().match(/\b[\w'-]+\b/g);
@@ -951,7 +1092,7 @@ Yutee Elle</div>
         resultsEl.hidden = false;
         renderResultFeedback(response);
         setResultTab(tab);
-        window.UTLFeedbackCoach?.mountPrompt({mount:'#writeToAikoFeedbackPrompt',title:'Write to Aiko',goal:'Write a concise email that gives Aiko the main point, the supporting logic, and a clear next step.',criteria:['State the main point before the supporting explanation','Use clear BSP headings to make the email easy to scan','Support the recommendation with the most important reasons','Close with a specific decision or next step','Keep the tone direct, useful, and professional'],response:()=>composedEmail(),sample:()=>document.getElementById('writeToAikoSample').textContent.trim()});
+        window.UTLFeedbackCoach?.mountPrompt({mount:'#writeToAikoFeedbackPrompt',title:'Write to Aiko',goal:'Write a concise email that gives Aiko the main point, the supporting logic, and a clear next step.',criteria:['State the main point before the supporting explanation','Use clear BSP headings to make the email easy to scan','Support the recommendation with the most important reasons','Close with a specific decision or next step','Keep the tone direct, useful, and professional'],response:()=>response,sample:()=>document.getElementById('writeToAikoSample').textContent.trim()});
       }
 
       function readProfileEmail() {
@@ -1009,6 +1150,7 @@ Yutee Elle</div>
           updateCounts();
           statusEl.textContent = '';
           submitBtn.disabled = false;
+          saveDraftSoon();
         });
       });
 
@@ -1038,6 +1180,14 @@ Yutee Elle</div>
           completed_at: new Date().toISOString(),
           duration_seconds: elapsedSeconds()
         };
+        const submissionId = window.crypto && crypto.randomUUID ? crypto.randomUUID() : 'write-aiko-' + Date.now();
+        const submission = normalizeSubmission({
+          submissionId,
+          attemptNumber: submissionHistory.length + 1,
+          completedAtClient: payload.completed_at,
+          durationSeconds: payload.duration_seconds,
+          responsePayload: payload
+        });
 
         try {
           // 1. Save to LocalStorage so "My Results" can see the text
@@ -1047,6 +1197,12 @@ Yutee Elle</div>
           // 2. Save to Firestore for the permanent member record
           const { saveUserProgress } = await import('../../assets/firebase.js');
           await saveUserProgress('write-to-aiko', 'Write to Aiko', payload);
+          mergeSubmissions([submission]);
+          localStorage.removeItem(DRAFT_KEY);
+          savedDraft = null;
+          import('../../assets/firebase.js')
+            .then(({ saveExerciseDraft }) => saveExerciseDraft('write-to-aiko', 'Write to Aiko', { mode: 'structured', openText: '', structuredValues: [], updatedAtClient: new Date().toISOString(), durationSeconds: 0 }))
+            .catch(() => {});
 
           pauseTimer();
           window.UTLRewardEvents?.awardReflectionExercise({
@@ -1082,6 +1238,9 @@ Yutee Elle</div>
         statusEl.textContent = '';
         document.body.classList.remove('write-to-aiko-result');
         resultsEl.hidden = true;
+        localStorage.removeItem(DRAFT_KEY);
+        savedDraft = null;
+        renderHistory();
       });
 
       document.getElementById('writeToAikoResultReset').addEventListener('click', () => resetBtn.click());
@@ -1090,10 +1249,52 @@ Yutee Elle</div>
         if (button) setResultTab(button.dataset.resultTab);
       });
 
+      document.getElementById('writeToAikoResume').addEventListener('click', () => applyDraft(savedDraft));
+      document.getElementById('writeToAikoViewLast').addEventListener('click', () => {
+        const latest = submissionHistory[0];
+        if (latest) { showResults(responseFromSubmission(latest)); returnEl.hidden = true; }
+      });
+      document.getElementById('writeToAikoStartFresh').addEventListener('click', () => {
+        structuredFields.forEach((field) => { field.value = ''; });
+        openText.value = '';
+        localStorage.removeItem(DRAFT_KEY);
+        savedDraft = null;
+        resetTimer();
+        updateCounts();
+        returnEl.hidden = true;
+        import('../../assets/firebase.js')
+          .then(({ saveExerciseDraft }) => saveExerciseDraft('write-to-aiko', 'Write to Aiko', { mode: 'structured', openText: '', structuredValues: [], updatedAtClient: new Date().toISOString(), durationSeconds: 0 }))
+          .catch(() => {});
+      });
+      historyListEl.addEventListener('click', (event) => {
+        const button = event.target.closest('[data-submission-id]');
+        if (!button) return;
+        const selected = submissionHistory.find((item) => item.submissionId === button.dataset.submissionId);
+        if (selected) { showResults(responseFromSubmission(selected)); returnEl.hidden = true; }
+      });
+
       setMode('structured');
       updateCounts();
       updateTimer();
+      savedDraft = safeParse(localStorage.getItem(DRAFT_KEY), null);
+      submissionHistory = safeParse(localStorage.getItem(HISTORY_KEY), []);
+      const legacyResult = safeParse(localStorage.getItem('utl_result_write-to-aiko'), null);
+      if (legacyResult && legacyResult.response) mergeSubmissions([legacyResult]);
+      renderHistory();
+      import('../../assets/firebase.js').then(({ getExerciseWork }) => getExerciseWork('write-to-aiko')).then((accountWork) => {
+        if (accountWork.draft && hasDraftContent(accountWork.draft.draftPayload)) {
+          const remoteDraft = accountWork.draft.draftPayload;
+          if (!savedDraft || String(remoteDraft.updatedAtClient || '') > String(savedDraft.updatedAtClient || '')) savedDraft = remoteDraft;
+        }
+        mergeSubmissions(accountWork.submissions || []);
+        renderHistory();
+      }).catch(() => {});
       const preview = new URLSearchParams(location.search);
+      if (preview.get('design-preview') === 'write-to-aiko-return') {
+        savedDraft = { mode: 'structured', openText: '', structuredValues: ['The Olympics needs a clearer reason for audiences to return.','','','',''], updatedAtClient: new Date().toISOString(), durationSeconds: 74 };
+        submissionHistory = [normalizeSubmission({ submissionId: 'preview-submission-2', attemptNumber: 2, completedAtClient: new Date(Date.now() - 86400000).toISOString(), durationSeconds: 214, responsePayload: { response: 'Hey Aiko,\n\nThe Olympics needs a clearer reason for audiences to return.\n\nBest,\n[Your name]' } }), normalizeSubmission({ submissionId: 'preview-submission-1', attemptNumber: 1, completedAtClient: new Date(Date.now() - 604800000).toISOString(), durationSeconds: 301, responsePayload: { response: 'Hey Aiko,\n\nThe Olympics can rebuild its shared cultural role.\n\nBest,\n[Your name]' } })];
+        renderHistory();
+      }
       if (preview.get('design-preview') === 'write-to-aiko-results') {
         structuredFields.forEach((field, index) => { field.value = ['The Olympics needs a clearer reason for audiences to return.','Shared ritual: Create appointment moments that people can experience together.','Athlete stories: Build story arcs that help audiences understand what is at stake.','One direction: Give every channel the same editorial focus.','If you agree, I will prepare three pilot options for review.'][index]; });
         updateCounts();

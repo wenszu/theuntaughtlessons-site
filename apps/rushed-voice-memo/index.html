@@ -1885,10 +1885,10 @@
       return `You are a practical writing coach. Review my response to the Rushed Voice Memo exercise.
 
 The goal is to turn a rushed update into a concise, actionable summary for an executive. Assess the response using these criteria:
-1. Exactly three clear, mutually exclusive sections
-2. Important information is covered without inventing facts
-3. Bullets begin with a short Bolded Summary Phrase (BSP)
-4. The message is concise and ready for a decision
+1. **Clear structure:** Use exactly three clear, mutually exclusive sections
+2. **Important content:** Cover the important information without inventing facts
+3. **Scannability:** Begin every bullet with a short Bolded Summary Phrase (BSP)
+4. **Decision readiness:** Keep the message concise and ready for a decision
 
 MY RESPONSE
 ${response}
@@ -1897,18 +1897,19 @@ ONE SAMPLE APPROACH
 ${plainSampleAnswer()}
 
 CURRENT RULE BASED SIGNALS
-${score.categories.map((category, index) => `${index + 1}. ${category.label}: ${category.points}/${category.max}. ${category.message}`).join('\n')}
+${score.categories.map((category, index) => `${index + 1}. **${category.label}:** ${category.points}/${category.max}. ${category.message}`).join('\n')}
 
 Use the sample as one possible approach. Focus on the quality of the thinking and communication.
 
 Return your feedback in five numbered sections:
-1. One specific strength, quoting a short phrase from my response
-2. The single most important improvement, with evidence from my response
-3. Important information I missed or made unclear
-4. A revised version of only my weakest section
-5. A two sentence explanation of why that revision is stronger
+1. **Specific strength:** Identify one strength and quote a short phrase from my response
+2. **Improve this first:** Explain the single most important improvement with evidence from my response
+3. **Important content:** Identify information I missed or made unclear
+4. **Suggested revision:** Revise only my weakest section
+5. **Why this is stronger:** Explain the benefit of the revision in two sentences
 
-Do not invent facts that are absent from my response or the sample. Keep the feedback concise and constructive.`;
+Do not invent facts that are absent from my response or the sample. Keep the feedback concise and constructive.
+When you use a numbered or bulleted list, begin every item with a short **Bolded Summary Phrase (BSP):** followed by the explanation.`;
     }
 
     function renderScore(score) {
@@ -1959,6 +1960,21 @@ Do not invent facts that are absent from my response or the sample. Keep the fee
       els.recentAttempts.classList.add('hidden');
       els.recentAttempts.innerHTML = '';
     }
+
+    window.UTLReviewWritingSubmission = function () {
+      const response = getCurrentResponse();
+      const score = scorePractice(response, ACTIVITY.scoring);
+      els.submittedAnswer.textContent = response.text;
+      els.confirmation.classList.remove('hidden');
+      els.confirmation.innerHTML = '<strong>Previous submission.</strong> Review its feedback, your answer and the sample below.';
+      els.tryAgainBtn.classList.remove('hidden');
+      els.mobileResultTabs.classList.add('visible');
+      els.checklistPanel.classList.remove('hidden');
+      renderScore(score);
+      els.comparisonPanel.classList.add('hidden');
+      document.body.classList.add('result-mode');
+      setMobileTab('score');
+    };
 
     function submitAttempt() {
       if (!hasAnyContent()) {
@@ -2019,12 +2035,12 @@ Do not invent facts that are absent from my response or the sample. Keep the fee
       els.scorePanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
-    function clearCurrentInput() {
-      els.openResponse.value = '';
+    window.UTLBeginWritingAttempt = function () {
       [1, 2, 3].forEach((num) => {
-        getEl(`sectionTitle${num}`).value = '';
-        getEl(`sectionBody${num}`).value = '';
+        getEl(`sectionTitle${num}`).readOnly = false;
+        getEl(`sectionBody${num}`).readOnly = false;
       });
+      els.openResponse.readOnly = false;
       state.lastAttemptId = null;
       state.lastScore = null;
       state.sampleRevealed = false;
@@ -2040,13 +2056,23 @@ Do not invent facts that are absent from my response or the sample. Keep the fee
       setMobileTab('self');
       renderChecklist();
       resetTimer();
+    };
+
+    function clearCurrentInput() {
+      els.openResponse.value = '';
+      [1, 2, 3].forEach((num) => {
+        getEl(`sectionTitle${num}`).value = '';
+        getEl(`sectionBody${num}`).value = '';
+      });
+      window.UTLBeginWritingAttempt();
     }
 
     function renderAttempts() {
       const attempts = loadAttempts().slice().reverse();
       renderRecentAttempts();
+      els.clearAttemptsBtn.hidden = !attempts.length;
       if (!attempts.length) {
-        els.attemptsList.innerHTML = '<p class="small">No previous attempts yet.</p>';
+        els.attemptsList.innerHTML = '<p class="small"><strong>No submitted attempts yet.</strong><br>Your current response will appear as a draft while you work.</p>';
         return;
       }
 
@@ -2341,6 +2367,7 @@ Do not invent facts that are absent from my response or the sample. Keep the fee
   </script>
   <script type="module" src="../../assets/app-access-guard.js?v=20260903-responsive-preview"></script>
   <script src="../../assets/exercise-scoring-intro.js?v=6"></script>
+  <script src="../../assets/phase1-writing-history.js?v=20260906-action-hierarchy-1"></script>
   <script type="module" src="../../assets/feedback-widget.js?v=6"></script>
   <script src="../../assets/tactile-buttons.js?v=20260714-flat-1" defer></script>
 </body>

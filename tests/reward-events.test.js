@@ -95,6 +95,20 @@ function createHarness(initialStorage) {
 
 {
   const { rewards } = createHarness();
+  rewards.writeSettings({ mp: { exerciseMode: "score-improvement" }, streak: { enabled: true, dailyExerciseGoal: 1, activityTypes: "any-completion", mpBase: 5 } });
+  rewards.awardScoredExercise({ appId: "repeat-score", score: 70, localDate: "2026-09-05" });
+  rewards.awardScoredExercise({ appId: "repeat-score", score: 70, localDate: "2026-09-06" });
+  assert.equal(rewards.readState().earnedEventIds["daily-streak:2026-09-06"], undefined, "an unchanged resubmission cannot earn a new daily streak");
+}
+
+{
+  const { rewards } = createHarness();
+  rewards.awardReflectionExercise({ appId: "same-completion" });
+  assert.equal(rewards.awardCompletionExercise({ appId: "same-completion" }).awarded, false, "switching completion award types cannot pay twice");
+}
+
+{
+  const { rewards } = createHarness();
   rewards.writeSettings({ levels: [{ name: "Starter", threshold: 0 }, { name: "Pro", threshold: 50 }] });
   rewards.awardEvent({ eventId: "level-test", mpEarned: 50 });
   assert.equal(rewards.readState().level.title, "Pro", "cached admin levels drive learner state");

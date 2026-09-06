@@ -4,10 +4,12 @@
   const mode = document.body.dataset.aikoMode === '60' ? '60' : '120';
   const TARGET_SECONDS = mode === '60' ? 60 : 120;
   const TARGET_WORDS = mode === '60' ? '110-130 words' : '220-260 words';
-  const PREP_STORAGE_KEY = 'utl_explain_to_aiko_120_prep';
+  const PREP_STORAGE_KEY = mode === '60' ? 'utl_explain_to_aiko_60_prep' : 'utl_explain_to_aiko_120_prep';
+  const PREP_FALLBACK_KEY = 'utl_explain_to_aiko_120_prep';
   const RESULT_KEY = mode === '60' ? 'utl_result_explain_to_aiko_60' : 'utl_result_explain_to_aiko';
   const DONE_KEY = mode === '60' ? 'utl_p2_ex6_done' : 'utl_p2_ex5_done';
   const APP_ID = mode === '60' ? 'explain-to-aiko-60' : 'explain-to-aiko-120';
+  const HISTORY_KEY = `utl_submissions_${APP_ID}`;
   const APP_TITLE = mode === '60' ? 'Explain to Aiko (60s)' : 'Explain to Aiko (120s)';
   const EXERCISE_ID = mode === '60' ? 'explain-to-aiko-60s' : 'explain-to-aiko-120s';
   const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzJE--FL2kB_XDNZRnszCtlyLRPvaLAHGuF5TAOdXJk40atbvf5Y6ELuSK2B7CSLaMN/exec';
@@ -111,6 +113,8 @@ Best, Yutee Elle`;
     startTime: 0, durationSeconds: 0, rafId: 0, usedEstimate: false,
     submitted: null, score: null
   };
+  let reviewingSaved = false;
+  let prepCloudTimer = null;
 
   function escapeHtml(value) {
     return String(value == null ? '' : value).replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[char]));
@@ -147,6 +151,72 @@ Best, Yutee Elle`;
     return `<div class="aiko-actions">${backId ? `<button class="aiko-button secondary" id="${backId}" type="button">Back</button>` : ''}<button class="aiko-button" id="${primaryId}" type="button">${primaryLabel}</button></div>`;
   }
 
+  function readSavedResult() {
+    try { return JSON.parse(localStorage.getItem(RESULT_KEY) || 'null'); } catch (_) { return null; }
+  }
+
+  function savedResults() {
+    let history = [];
+    try { const parsed = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]'); history = Array.isArray(parsed) ? parsed : []; } catch (_) {}
+    const latest = readSavedResult();
+    if (latest && latest.transcript && !history.some((item) => item.submitted_at === latest.submitted_at)) history.push(latest);
+    return history.filter((item) => item && item.transcript).sort((a, b) => String(b.submitted_at || '').localeCompare(String(a.submitted_at || ''))).slice(0, 10);
+  }
+
+  function saveResultHistory(payload) {
+    const history = savedResults().filter((item) => item.submitted_at !== payload.submitted_at);
+    history.unshift(payload);
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(history.slice(0, 10)));
+  }
+
+  async function hydrateSavedResults() {
+    try {
+      const { getExerciseWork } = await import('../../assets/firebase.js');
+      const legacyIds = mode === '60'
+        ? ['explain-to-aiko-60', 'explain-to-aiko-60-v2', 'explain-to-aiko-60s']
+        : ['explain-to-aiko-120', 'explain-to-aiko', 'explain-to-aiko-v2', 'explain-to-aiko-120s'];
+      const workRecords = await Promise.all(legacyIds.map((exerciseId) => getExerciseWork(exerciseId)));
+      const merged = new Map(savedResults().map((item) => [item.submitted_at || item.completed_at, item]));
+      workRecords.forEach((work) => (work.submissions || []).forEach((item) => {
+        const payload = item.responsePayload || item.savedPayload || null;
+        if (!payload || !payload.transcript) return;
+        const submittedAt = payload.submitted_at || payload.completed_at || item.completedAtClient || new Date().toISOString();
+        merged.set(submittedAt, { ...payload, submitted_at: submittedAt });
+      }));
+      const history = Array.from(merged.values()).sort((a,b)=>String(b.submitted_at||b.completed_at||'').localeCompare(String(a.submitted_at||a.completed_at||''))).slice(0,10);
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+      const cloudDraft = workRecords.map((work) => work.draft && work.draft.draftPayload).find((draft) => draft && draft.prep_notes);
+      if (cloudDraft) {
+        const localDraft = (() => { try { return JSON.parse(localStorage.getItem(PREP_STORAGE_KEY) || 'null'); } catch (_) { return null; } })();
+        if (!localDraft || String(cloudDraft.saved_at || '') > String(localDraft.saved_at || '')) {
+          localStorage.setItem(PREP_STORAGE_KEY, JSON.stringify(cloudDraft));
+          loadPrep();
+          if (!history.length && !reviewingSaved) renderPreparation();
+        }
+      }
+      if (!reviewingSaved && history[0]) renderSavedWorkHome(history[0]);
+    } catch (_) {}
+  }
+
+  function showSavedWork(saved) {
+    const criteria = (() => { try { return JSON.parse(saved.ai_criteria || '[]'); } catch (_) { return []; } })();
+    state.submitted = { transcript: saved.transcript || '', durationSeconds: Number(saved.duration_seconds) || 0, wpm: Number(saved.wpm) || 0, fillerCount: Number(saved.filler_count) || 0, priorTranscript: '' };
+    state.score = saved.ai_total == null ? { fallback: true } : { fallback: false, total: Number(saved.ai_total), level: saved.ai_level || '', summary: saved.gem_feedback || '', criteria, missed: [], exemplar_opening: '' };
+    state.usedEstimate = Boolean(saved.used_estimate);
+    state.notesMode = 'open';
+    state.openNotes = saved.prep_notes || '';
+    reviewingSaved = true;
+    renderResults();
+  }
+
+  function renderSavedWorkHome(saved) {
+    const history = savedResults();
+    shell(`<section class="aiko-saved-work"><div><p class="aiko-progress">Saved work</p><h2>Welcome back</h2><p>Your latest ${TARGET_SECONDS}-second explanation was submitted ${saved.submitted_at ? new Date(saved.submitted_at).toLocaleString() : 'previously'}.</p></div><div class="aiko-saved-actions"><button class="aiko-button secondary" id="viewSavedResult" type="button">View latest submission</button><button class="aiko-button" id="startNewRequiredAttempt" type="button">Start a new attempt</button></div><div class="aiko-saved-history"><h3>Previous submissions</h3>${history.map((item,index)=>`<div class="aiko-saved-row"><div><strong>Submission ${history.length-index}</strong><span>${item.submitted_at ? new Date(item.submitted_at).toLocaleString() : 'Earlier submission'} · ${formatDuration(item.duration_seconds)}</span></div><button class="aiko-button secondary" type="button" data-saved-index="${index}">View feedback</button></div>`).join('')}</div></section>`);
+    document.getElementById('viewSavedResult').addEventListener('click', () => showSavedWork(history[0] || saved));
+    document.getElementById('startNewRequiredAttempt').addEventListener('click', () => { reviewingSaved = false; state.finalTranscript = ''; state.interimTranscript = ''; state.submitted = null; state.score = null; state.durationSeconds = 0; renderPreparation(); });
+    document.querySelector('.aiko-saved-history').addEventListener('click',(event)=>{const button=event.target.closest('[data-saved-index]');if(button)showSavedWork(history[Number(button.dataset.savedIndex)]);});
+  }
+
   function sectionNotesText() {
     return state.sectionNotes.map((note) => [note.title, note.body].filter(Boolean).join(': ')).filter(Boolean).join('\n\n');
   }
@@ -154,16 +224,23 @@ Best, Yutee Elle`;
     const open = document.getElementById('openNotes'); if (open) state.openNotes = open.value;
     document.querySelectorAll('[data-note-title]').forEach((field) => { state.sectionNotes[Number(field.dataset.noteTitle)].title = field.value; });
     document.querySelectorAll('[data-note-body]').forEach((field) => { state.sectionNotes[Number(field.dataset.noteBody)].body = field.value; });
-    if (mode === '120') savePrep();
+    savePrep();
   }
   function savePrep() {
+    const draftPayload = { notesMode: state.notesMode, openNotes: state.openNotes, sectionNotes: state.sectionNotes, prep_notes: state.notesMode === 'open' ? state.openNotes : sectionNotesText(), saved_at: new Date().toISOString() };
     try {
-      localStorage.setItem(PREP_STORAGE_KEY, JSON.stringify({ notesMode: state.notesMode, openNotes: state.openNotes, sectionNotes: state.sectionNotes, prep_notes: state.notesMode === 'open' ? state.openNotes : sectionNotesText(), saved_at: new Date().toISOString() }));
+      localStorage.setItem(PREP_STORAGE_KEY, JSON.stringify(draftPayload));
     } catch (error) { console.warn('Could not save Explain to Aiko prep notes.', error); }
+    clearTimeout(prepCloudTimer);
+    prepCloudTimer = setTimeout(() => {
+      import('../../assets/firebase.js')
+        .then(({ saveExerciseDraft }) => saveExerciseDraft(APP_ID, APP_TITLE, draftPayload))
+        .catch((error) => console.warn('Could not sync Explain to Aiko prep notes.', error));
+    }, 600);
   }
   function loadPrep() {
     try {
-      const saved = JSON.parse(localStorage.getItem(PREP_STORAGE_KEY) || 'null'); if (!saved) return;
+      const saved = JSON.parse(localStorage.getItem(PREP_STORAGE_KEY) || (mode === '60' ? localStorage.getItem(PREP_FALLBACK_KEY) : '') || 'null'); if (!saved) return;
       state.notesMode = saved.notesMode === 'open' ? 'open' : 'sections';
       state.openNotes = saved.openNotes || saved.prep_notes || '';
       if (Array.isArray(saved.sectionNotes)) state.sectionNotes = state.sectionNotes.map((fallback, index) => Object.assign({}, fallback, saved.sectionNotes[index] || {}));
@@ -196,13 +273,14 @@ Best, Yutee Elle`;
   function phoneFallbackHtml() {
     return `<details class="aiko-phone"><summary>Prefer to record on your phone instead?</summary><div class="aiko-phone-body"><p>Record one complete take, then open <a href="${PLAYBACK_GEM_URL}" target="_blank" rel="noopener">The Playback</a> and upload the video or audio. Paste the transcript, Playback feedback, or the change you want to make below.</p><ol><li>Keep your notes near the camera lens.</li><li>Record your full explanation in a quiet room.</li><li>Upload it to The Playback, then paste what you learned here.</li></ol><label class="aiko-field-label" for="phoneTranscript">Transcript or Playback feedback</label><textarea class="aiko-textarea aiko-paste" id="phoneTranscript" placeholder="Paste your transcript or Playback feedback..."></textarea><small class="aiko-estimate">If you paste a transcript, timing is estimated at 130 words per minute. If you paste feedback, you can still save and complete without AI scoring.</small><div class="aiko-actions"><a class="aiko-link secondary" href="${PLAYBACK_GEM_URL}" target="_blank" rel="noopener">Open The Playback</a><button class="aiko-button" id="usePhoneText" type="button" disabled>Use this response</button></div></div></details>`;
   }
-  function preparationReferenceHtml() {
+  function preparationReferenceHtml(readOnly = false) {
+    const editControl = readOnly ? '' : '<button class="aiko-text-button" id="editPrepNotes" type="button">Edit notes</button>';
     if (state.notesMode === 'open') {
       const notes = state.openNotes.trim();
-      return `<aside class="aiko-prep-reference"><div class="aiko-prep-reference-head"><h3>Your preparation notes</h3><button class="aiko-text-button" id="editPrepNotes" type="button">Edit notes</button></div>${notes ? `<p class="aiko-prep-open">${escapeHtml(notes)}</p>` : '<p class="aiko-prep-empty">No notes entered. You can go back and add them before recording.</p>'}</aside>`;
+      return `<aside class="aiko-prep-reference"><div class="aiko-prep-reference-head"><h3>Your preparation notes</h3>${editControl}</div>${notes ? `<p class="aiko-prep-open">${escapeHtml(notes)}</p>` : '<p class="aiko-prep-empty">No preparation notes were saved with this submission.</p>'}</aside>`;
     }
     const notes = state.sectionNotes.filter((note) => String(note.title || note.body || '').trim());
-    return `<aside class="aiko-prep-reference"><div class="aiko-prep-reference-head"><h3>Your preparation notes</h3><button class="aiko-text-button" id="editPrepNotes" type="button">Edit notes</button></div>${notes.length ? `<div class="aiko-prep-reference-grid">${notes.map((note) => `<section><strong>${escapeHtml(note.title || 'Section')}</strong><p>${escapeHtml(note.body || 'No notes added.')}</p></section>`).join('')}</div>` : '<p class="aiko-prep-empty">No notes entered. You can go back and add them before recording.</p>'}</aside>`;
+    return `<aside class="aiko-prep-reference"><div class="aiko-prep-reference-head"><h3>Your preparation notes</h3>${editControl}</div>${notes.length ? `<div class="aiko-prep-reference-grid">${notes.map((note) => `<section><strong>${escapeHtml(note.title || 'Section')}</strong><p>${escapeHtml(note.body || 'No notes added.')}</p></section>`).join('')}</div>` : '<p class="aiko-prep-empty">No preparation notes were saved with this submission.</p>'}</aside>`;
   }
   function renderRecording() {
     analyticsStep('record-talk', 45);
@@ -302,10 +380,12 @@ Best, Yutee Elle`;
     const result = state.score || { fallback: true }; const fallback = result.fallback === true;
     const scoreHtml = fallback ? `<div class="aiko-notice"><strong>AI feedback is unavailable right now.</strong> Your recording and measured delivery details are safe. You can still save and complete this exercise, or try feedback again later.</div>` : `<div class="aiko-score"><div class="aiko-score-total">${Number(result.total) || 0}<span>/30</span></div><div><span class="aiko-level">${escapeHtml(result.level)}</span><p class="aiko-summary">${escapeHtml(result.summary)}</p></div></div><div class="aiko-levels">${LEVELS.map((level) => `<div class="aiko-level-cell ${level.name === result.level ? 'is-current' : ''}"><strong>${level.name}</strong>${level.range}</div>`).join('')}</div><h3 class="aiko-section-title">How you scored</h3><p class="aiko-muted">Each criterion uses a quote from your own transcript.</p><div class="aiko-criteria">${(result.criteria || []).map((criterion) => `<article class="aiko-criterion"><div class="aiko-criterion-head"><h4>${escapeHtml(criterion.name)}</h4><span class="aiko-criterion-score">${Number(criterion.score) || 1}/5</span></div><div class="aiko-evidence">“${escapeHtml(criterion.evidence)}”</div><p class="aiko-improve"><strong>Try next:</strong> ${escapeHtml(criterion.feedback)}</p></article>`).join('')}</div><h3 class="aiko-section-title">What Aiko would still ask</h3><ul class="aiko-missed">${(result.missed || []).length ? result.missed.map((item) => `<li>${escapeHtml(item)}</li>`).join('') : '<li>You covered the core questions Aiko would ask.</li>'}</ul><h3 class="aiko-section-title">A 5/5 opening for your talk</h3><p class="aiko-opening">${escapeHtml(result.exemplar_opening)}</p>`;
     const s = state.submitted;
-    shell(`<section class="aiko-panel"><div class="aiko-panel-head"><p class="aiko-progress">Step 3 · Feedback</p><h2>${fallback ? 'Your explanation is ready to submit.' : 'Here is how your explanation was received.'}</h2></div><div class="aiko-step">${scoreHtml}<h3 class="aiko-section-title">Your delivery, ${state.usedEstimate ? 'estimated' : 'measured'}</h3><div class="aiko-metrics"><div class="aiko-metric"><strong>${formatDuration(s.durationSeconds)}</strong><span>Duration vs ${formatDuration(TARGET_SECONDS)}</span></div><div class="aiko-metric"><strong>${s.wpm}</strong><span>Words per minute</span></div><div class="aiko-metric"><strong>${s.fillerCount}</strong><span>Filler words</span></div></div><p class="aiko-measured">${state.usedEstimate ? 'Duration and pace are estimates based on 130 words per minute because this transcript was pasted.' : 'These figures were measured in your browser during recording. They are not AI judgments.'}</p><div class="aiko-actions"><button class="aiko-button secondary" id="tryAgain" type="button">Record again</button>${fallback ? '<button class="aiko-button secondary" id="retryScore" type="button">Try AI feedback again</button>' : ''}<button class="aiko-button" id="saveResult" type="button">Submit</button></div><p class="aiko-status" id="saveStatus" role="status" aria-live="polite"></p></div></section>`);
-    document.getElementById('tryAgain').addEventListener('click', renderRecording);
+    const resultActions = reviewingSaved ? '<a class="aiko-link secondary" href="../../member-login/index.html#learning-journey">Back to Learning Journey</a><button class="aiko-button" id="tryAgain" type="button">Start a new attempt</button>' : `<button class="aiko-button secondary" id="tryAgain" type="button">Record again</button>${fallback ? '<button class="aiko-button secondary" id="retryScore" type="button">Try AI feedback again</button>' : ''}<button class="aiko-button" id="saveResult" type="button">Submit</button>`;
+    const savedPreparationHtml = reviewingSaved ? `${preparationReferenceHtml(true)}<aside class="aiko-prep-reference"><div class="aiko-prep-reference-head"><h3>Your submitted explanation</h3></div><p class="aiko-prep-open">${escapeHtml(s.transcript || '')}</p></aside>` : '';
+    shell(`<section class="aiko-panel"><div class="aiko-panel-head"><p class="aiko-progress">${reviewingSaved ? 'Previous submission' : 'Step 3 · Feedback'}</p><h2>${fallback ? (reviewingSaved ? 'Your saved explanation.' : 'Your explanation is ready to submit.') : 'Here is how your explanation was received.'}</h2></div><div class="aiko-step">${savedPreparationHtml}${scoreHtml}<h3 class="aiko-section-title">Your delivery, ${state.usedEstimate ? 'estimated' : 'measured'}</h3><div class="aiko-metrics"><div class="aiko-metric"><strong>${formatDuration(s.durationSeconds)}</strong><span>Duration vs ${formatDuration(TARGET_SECONDS)}</span></div><div class="aiko-metric"><strong>${s.wpm}</strong><span>Words per minute</span></div><div class="aiko-metric"><strong>${s.fillerCount}</strong><span>Filler words</span></div></div><p class="aiko-measured">${state.usedEstimate ? 'Duration and pace are estimates based on 130 words per minute because this transcript was pasted.' : 'These figures were measured in your browser during recording. They are not AI judgments.'}</p><div class="aiko-actions">${resultActions}</div><p class="aiko-status" id="saveStatus" role="status" aria-live="polite"></p></div></section>`);
+    document.getElementById('tryAgain').addEventListener('click', () => { reviewingSaved = false; renderPreparation(); });
     document.getElementById('retryScore')?.addEventListener('click', submitForScoring);
-    document.getElementById('saveResult').addEventListener('click', saveResult);
+    document.getElementById('saveResult')?.addEventListener('click', saveResult);
   }
 
   async function saveResult() {
@@ -319,10 +399,10 @@ Best, Yutee Elle`;
       page: window.location.href, submitted_at: new Date().toISOString(), transcript: state.submitted.transcript,
       wpm: state.submitted.wpm, filler_count: state.submitted.fillerCount,
       ai_total: score.fallback ? null : score.total, ai_level: score.fallback ? '' : score.level,
-      ai_criteria: JSON.stringify(score.criteria || []), scored_by: score.fallback ? 'local-fallback' : 'gemini'
+      ai_criteria: JSON.stringify(score.criteria || []), used_estimate: Boolean(state.usedEstimate), scored_by: score.fallback ? 'local-fallback' : 'gemini'
     };
     try { await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) }); } catch (error) { console.warn('Submission failed.', error); }
-    try { localStorage.setItem(RESULT_KEY, JSON.stringify(payload)); localStorage.setItem(DONE_KEY, 'true'); } catch (error) { console.warn('Local progress save failed.', error); }
+    try { localStorage.setItem(RESULT_KEY, JSON.stringify(payload)); saveResultHistory(payload); localStorage.setItem(DONE_KEY, 'true'); } catch (error) { console.warn('Local progress save failed.', error); }
     import('../../assets/firebase.js').then(({ saveUserProgress }) => saveUserProgress(APP_ID, APP_TITLE, payload)).catch((error) => console.warn('Firestore progress save failed.', error));
     const rewardDetail = { title: mode === '60' ? 'Explain to Aiko in 60 seconds complete' : 'Explain to Aiko complete', body: `Your ${TARGET_SECONDS}-second explanation was saved.` };
     if (window.awardAikoCompletion) window.awardAikoCompletion(rewardDetail);
@@ -533,7 +613,10 @@ Best, Yutee Elle`;
       renderPracticePicker(recent ? recent.topicId : PRACTICE_TOPICS[0].id);
     }
   } else {
-    if (mode === '60') loadPrep();
-    renderPreparation();
+    loadPrep();
+    const savedResult = readSavedResult();
+    if (savedResult && savedResult.transcript) renderSavedWorkHome(savedResult);
+    else renderPreparation();
+    hydrateSavedResults();
   }
 })();

@@ -69,7 +69,7 @@
     var gate = document.createElement("section");
     gate.className = "utl-context-gate";
     gate.setAttribute("aria-label", "Exercise setup");
-    var header = document.querySelector(".app-header,.ab-header,.eisenhower-header,.tsa-speak-header,.bad-news-header,.lsh-header,.slo-header,.write-to-aiko-header");
+    var header = document.querySelector(".app-header,.ab-header,.eisenhower-header,.tsa-speak-header,.bad-news-header,.lsh-header,.slo-header,.write-to-aiko-header,.aiko-header");
     function positionGate() {
       gate.style.top = Math.max(0, Math.ceil(header ? header.getBoundingClientRect().bottom : 0)) + "px";
     }

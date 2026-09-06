@@ -494,6 +494,9 @@
     }
 
     #aiStructuringPromptMount { margin: 20px 0; }
+    .voice-memo-transcript-input { min-height: 180px; margin-top: 8px; }
+    .voice-memo-helper { margin: 8px 0 0; color: var(--steel); font-size: 13px; }
+    .voice-memo-flow-step { display: inline-flex; margin-right: 7px; padding: 3px 7px; border-radius: 999px; background: #FFF1CF; color: var(--navy); font-size: 11px; font-weight: 700; }
 
     .tsa-speak-info {
       margin: 22px 0 0;
@@ -844,37 +847,38 @@
     <section class="tsa-speak-intro">
       <p class="tsa-speak-label">Phase 1 · Think clearly</p>
       <h1>Rushed voice memo: AI summary</h1>
-      <p>Transcribe the voice memo from Hugh, then use the AI prompt below to turn it into a clean structured summary.</p>
+      <p>Use one prepared prompt to turn Hugh's voice memo into a clean structured summary.</p>
     </section>
 
     <section class="tsa-speak-panel">
       <div class="tsa-speak-panel-head">
         <p class="tsa-speak-progress">The task</p>
         <h2>Use AI to restructure Hugh's voice memo</h2>
-        <p>Play Hugh's voice memo below, transcribe it, and use AI to structure it into a decision-ready update.</p>
+        <p>Listen to the memo, choose a transcript, then copy one complete prompt into the AI tool you prefer.</p>
       </div>
       <div class="tsa-speak-step">
         <section class="voice-memo-card" aria-labelledby="voiceMemoHeading">
           <h3 id="voiceMemoHeading">Hugh's voice memo</h3>
-          <p>Play the memo here. You can also open it in another tab if you want ChatGPT to listen while this page stays open.</p>
+          <p>Play the memo here to understand the source. You can also open it in another tab.</p>
           <iframe class="voice-memo-frame" src="https://drive.google.com/file/d/1vjcNHKWZ0uK4LPKQ8lEnd2ug3wqRR7fy/preview" title="Hugh's voice memo" allow="autoplay"></iframe>
           <a class="voice-memo-open" href="https://drive.google.com/file/d/1vjcNHKWZ0uK4LPKQ8lEnd2ug3wqRR7fy/view" target="_blank" rel="noopener">Open Hugh's voice memo in a new tab &rarr;</a>
         </section>
 
         <div class="voice-memo-path-picker">
-          <p class="voice-memo-path-label">How do you want to get the transcript?</p>
+          <p class="voice-memo-path-label"><span class="voice-memo-flow-step">Step 1</span>Choose the transcript to include in your prompt</p>
           <div class="voice-memo-path-tabs" role="tablist">
-            <button class="voice-memo-path-tab active" type="button" data-path="diy" role="tab" aria-selected="true">
-              <strong>🎧 Transcribe it yourself</strong>
-              <span>Practice the real workflow: listen, transcribe, then structure.</span>
+            <button class="voice-memo-path-tab active" type="button" data-path="lazy" role="tab" aria-selected="true">
+              <strong>Use the provided transcript</strong>
+              <span>Recommended. The transcript will be added to your complete AI prompt automatically.</span>
             </button>
-            <button class="voice-memo-path-tab" type="button" data-path="lazy" role="tab" aria-selected="false">
-              <strong>😴 Take the lazy way</strong>
-              <span>Skip transcribing. We already did it. Just copy and go.</span>
+            <button class="voice-memo-path-tab" type="button" data-path="diy" role="tab" aria-selected="false">
+              <strong>Create my own transcript</strong>
+              <span>Optional practice. Create a transcript elsewhere, then paste it here.</span>
             </button>
           </div>
 
-          <div class="voice-memo-path-panel" data-path-panel="diy" role="tabpanel">
+          <div class="voice-memo-path-panel" data-path-panel="diy" role="tabpanel" hidden>
+            <p><strong>How to create your transcript</strong></p>
             <ol class="tsa-speak-help-steps">
               <li>
                 <svg class="tsa-speak-step-icon" viewBox="0 0 64 48" fill="none" aria-hidden="true"><rect x="18" y="4" width="28" height="40" rx="5" fill="#FFFFFF" stroke="#003366" stroke-width="2"/><rect x="22" y="10" width="20" height="25" rx="2" fill="#F3EDE2" stroke="#003366" stroke-width="1.5"/><path d="M27 18h8l5-3v12l-5-3h-8z" fill="#EEA320" stroke="#003366" stroke-width="1.4"/><circle cx="32" cy="39" r="1.8" fill="#003366"/></svg>
@@ -894,7 +898,7 @@
               </li>
               <li>
                 <svg class="tsa-speak-step-icon" viewBox="0 0 64 48" fill="none" aria-hidden="true"><rect x="9" y="9" width="22" height="30" rx="3" fill="#FFFFFF" stroke="#003366" stroke-width="2"/><path d="M16 9c0-3 8-3 8 0h4v6H12V9z" fill="#F3EDE2" stroke="#003366" stroke-width="2" stroke-linejoin="round"/><rect x="39" y="14" width="18" height="24" rx="3" fill="#FFFFFF" stroke="#003366" stroke-width="2"/><path d="M17 23h8M17 29h8M32 24h12" stroke="#003366" stroke-width="2" stroke-linecap="round"/><path d="M40 19l5 5-5 5" stroke="#EEA320" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                <strong>Paste and use the AI prompt:</strong> Paste the transcript into ChatGPT. Then use the AI structuring prompt below to have it structure the memo into MECE buckets.
+                <strong>Paste the transcript here:</strong> Put the transcript in the box below. When you prepare the complete AI prompt, the transcript and structuring instructions will be combined automatically.
               </li>
             </ol>
             <p><strong>Alternative free tools if ChatGPT is unavailable:</strong></p>
@@ -903,10 +907,13 @@
               <li><strong>Otter.ai free tier:</strong> Upload your audio file directly. It transcribes automatically.</li>
               <li><strong>Manual fallback:</strong> If transcription fails, type what you heard. Minimum 50 words to continue.</li>
             </ul>
+            <label class="tsa-speak-field-label" for="customTranscript">Your transcript</label>
+            <textarea class="tsa-speak-textarea voice-memo-transcript-input" id="customTranscript" placeholder="Paste or type your transcript here."></textarea>
+            <p class="voice-memo-helper">Your transcript will be inserted into the prepared prompt automatically.</p>
           </div>
 
-          <div class="voice-memo-path-panel" data-path-panel="lazy" role="tabpanel" hidden>
-            <p>Here is Hugh's memo, already transcribed. Copy it and paste it into the AI structuring prompt below.</p>
+          <div class="voice-memo-path-panel" data-path-panel="lazy" role="tabpanel">
+            <p>Hugh's transcript is ready and will be included automatically when you prepare the prompt.</p>
             <div class="voice-memo-transcript-box" id="hughTranscript">Hey, I have a huge favor to ask for.
 
 This is just about the Nike Run Club initiative we discussed recently. Hoping you could get this to Aiko but in a cleaner format. Aside from the group run feature in key cities, we want to embrace beginners as well. So there will be a zero-pressure "Start Here" track with a simple walk/ run option, and a goal to get a 5K. We plan to gamify it as well to have badges, milestones, recaps, etc.
@@ -916,7 +923,6 @@ Big upside is it turns the brand into a community. Group runs create belonging a
 Some risks to this… well, beginners might get alienated fast even if we hedge against it. Running has somewhat of a learning curve, and if the vibe turns cliquish, it will just backfire. And measurement is tricky—sales conversion is hard to prove, so it can turn into pure customer sentiment unless we lock clear performance metrics upfront.
 
 Thanks a lot, really appreciate you for this.</div>
-            <button class="tsa-speak-button accent" type="button" id="copyTranscriptBtn">Copy transcript</button>
           </div>
         </div>
 
@@ -935,29 +941,6 @@ Thanks a lot, really appreciate you for this.</div>
                 panels.forEach(function (p) { p.hidden = p.dataset.pathPanel !== path; });
               });
             });
-            var copyBtn = document.getElementById('copyTranscriptBtn');
-            if (copyBtn) {
-              copyBtn.addEventListener('click', function () {
-                var text = document.getElementById('hughTranscript').textContent;
-                var done = function () {
-                  copyBtn.textContent = 'Copied!';
-                  setTimeout(function () { copyBtn.textContent = 'Copy transcript'; }, 1800);
-                };
-                if (navigator.clipboard && navigator.clipboard.writeText) {
-                  navigator.clipboard.writeText(text).then(done).catch(done);
-                } else {
-                  var textarea = document.createElement('textarea');
-                  textarea.value = text;
-                  textarea.style.position = 'fixed';
-                  textarea.style.opacity = '0';
-                  document.body.appendChild(textarea);
-                  textarea.select();
-                  try { document.execCommand('copy'); } catch (err) { /* no-op */ }
-                  document.body.removeChild(textarea);
-                  done();
-                }
-              });
-            }
           })();
         </script>
 
@@ -975,7 +958,7 @@ written summary using the following rules:
 Here is the transcript:
 [paste transcript here]</div>
 
-        <label class="tsa-speak-field-label" for="structuredOutput">Your AI-structured output</label>
+        <label class="tsa-speak-field-label" for="structuredOutput"><span class="voice-memo-flow-step">Step 3</span>Paste the structured response from your AI tool</label>
         <textarea class="tsa-speak-textarea" id="structuredOutput" placeholder="Paste your AI-structured output here…"></textarea>
         <p class="tsa-speak-count" id="outputCount">0 characters · 0 words</p>
 
@@ -1002,15 +985,16 @@ Here is the transcript:
   <script>
     window.UTLFeedbackCoach?.mountPreparedPrompt({
       mount: '#aiStructuringPromptMount',
-      heading: 'Prepare your AI structuring prompt',
-      description: 'Create a prompt using the transcript and exercise instructions. Nothing is sent automatically.',
-      buttonLabel: 'Prepare AI structuring prompt',
+      heading: 'Step 2 · Prepare one complete AI prompt',
+      description: 'The selected transcript and exercise instructions will be combined for you. Nothing is sent automatically.',
+      buttonLabel: 'Prepare complete AI prompt',
       kicker: 'AI structuring prompt',
       promptLabel: 'Your structuring prompt',
       prompt: () => {
         const template = document.getElementById('aiStructuringPromptSource').textContent.trim();
         const usingProvidedTranscript = !document.querySelector('[data-path-panel="lazy"]').hidden;
-        const transcript = usingProvidedTranscript ? document.getElementById('hughTranscript').textContent.trim() : '[paste transcript here]';
+        const customTranscript = document.getElementById('customTranscript').value.trim();
+        const transcript = usingProvidedTranscript ? document.getElementById('hughTranscript').textContent.trim() : (customTranscript || '[Add your transcript here before using this prompt]');
         return template.replace('[paste transcript here]', transcript);
       }
     });
@@ -1059,6 +1043,7 @@ Here is the transcript:
   <script src="../../assets/exercise-scoring-intro.js?v=6"></script>
   <script src="../../assets/app-reward-header.js?v=20260730-celebration-1"></script>
   <script src="../../assets/reward-events.js?v=20260730-celebration-1"></script>
+  <script src="../../assets/native-exercise-history.js?v=20260906-action-hierarchy-1"></script>
   <script type="module" src="../../assets/feedback-widget.js?v=6"></script>
   <script src="../../assets/tactile-buttons.js?v=20260714-flat-1" defer></script>
 </body>

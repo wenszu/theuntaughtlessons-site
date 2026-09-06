@@ -1528,8 +1528,18 @@
 
       function savePracticeRound() {
         const saved = attempts();
-        saved.push({ ...draft, stage: 'complete', completedAt: new Date().toISOString() });
+        const completedRecord = { ...draft, stage: 'complete', completedAt: new Date().toISOString() };
+        saved.push(completedRecord);
         localStorage.setItem(PRACTICE_ATTEMPTS_KEY, JSON.stringify(saved));
+        import('../../assets/firebase.js').then(({ saveExerciseSubmission }) => saveExerciseSubmission({
+          exerciseId: 'speak-like-obama',
+          exerciseTitle: 'Speak like Obama',
+          submissionId: completedRecord.id || `speak-like-obama-${Date.now()}`,
+          attemptNumber: saved.length,
+          completedAtClient: completedRecord.completedAt,
+          durationSeconds: Number(completedRecord.durationSeconds || 0),
+          responsePayload: completedRecord
+        })).catch((error) => console.warn('Practice history sync failed.', error));
         const workspaces = readWorkspaces();
         delete workspaces[draft.topicId];
         writeWorkspaces(workspaces);

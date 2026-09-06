@@ -13,11 +13,21 @@ assert.match(coach, /\.utl-coach-prompt-text\{[^}]*overflow:auto/, 'the prompt f
 assert.match(coach, /document\.documentElement\.style\.overflow = "hidden"/, 'opening an AI prompt keeps the page behind it still');
 assert.match(coach, /dialog\.addEventListener\("close", restorePageScroll\)/, 'closing the AI prompt restores page scrolling');
 assert.match(coach, /Scroll inside the prompt to read it in full\./, 'shared AI prompt dialogs explain where to scroll');
+assert.match(coach, /\*\*Specific strength:\*\*/);
+assert.match(coach, /\*\*Improve this first:\*\*/);
+assert.match(coach, /Bolded Summary Phrase \(BSP\)/);
+assert.match(coach, /function criterionLabel/);
 
 const rushedAi = fs.readFileSync('apps/rushed-voice-memo-ai/index.html', 'utf8');
 assert.match(rushedAi, /id="aiStructuringPromptMount"/);
 assert.match(rushedAi, /mountPreparedPrompt\(\{/);
-assert.match(rushedAi, /Prepare your AI structuring prompt/);
+assert.match(rushedAi, /Prepare one complete AI prompt/);
+assert.match(rushedAi, /Use the provided transcript/);
+assert.match(rushedAi, /id="customTranscript"/);
+assert.match(rushedAi, /How to create your transcript/);
+assert.match(rushedAi, /Paste the transcript here:/);
+assert.doesNotMatch(rushedAi, /data-path-panel="diy"\] \.tsa-speak-help-steps/);
+assert.match(rushedAi, /Paste the structured response from your AI tool/);
 assert.doesNotMatch(rushedAi, /<summary>AI structuring prompt<\/summary>/, 'Rushed Voice Memo AI no longer hides the prompt action in a disclosure');
 assert.match(rushedAi, /\.tsa-speak-field-label \{[\s\S]*?margin: 20px 0 8px;/, 'Rushed Voice Memo AI separates its output label from the field');
 
@@ -25,6 +35,8 @@ const rushedMemoPrompt = fs.readFileSync('apps/rushed-voice-memo/index.html', 'u
 assert.match(rushedMemoPrompt, /Scroll inside the prompt to read it in full\./, 'the custom Rushed Voice Memo prompt explains where to scroll');
 assert.match(rushedMemoPrompt, /\.ai-prompt-text\{[^}]*overflow:auto/, 'the custom Rushed Voice Memo prompt field scrolls independently');
 assert.match(rushedMemoPrompt, /document\.documentElement\.style\.overflow = 'hidden'/, 'the custom Rushed Voice Memo prompt keeps the page behind it still');
+assert.match(rushedMemoPrompt, /\*\*Clear structure:\*\*/);
+assert.match(rushedMemoPrompt, /\*\*Decision readiness:\*\*/);
 
 const fullFeedbackPages = [
   'apps/messy-notes/index.html',

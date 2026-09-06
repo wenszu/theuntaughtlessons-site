@@ -789,6 +789,25 @@ async function saveUserProgress(exerciseId, exerciseName, exercisePayload = {}) 
       savedPayload: exercisePayload
     }, { merge: true });
 
+    const completedAtClient = String(exercisePayload.completed_at || exercisePayload.completedAt || new Date().toISOString()).slice(0, 80);
+    const submissionId = `${exerciseId}-${completedAtClient}`.replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 100);
+    try {
+      await setDoc(doc(requireFirestore(), "users", user.uid, "exercise_submissions", submissionId), {
+        schemaVersion: 1,
+        userId: user.uid,
+        exerciseId: String(exerciseId).slice(0, 100),
+        exerciseTitle: String(exerciseName || "Exercise").trim().slice(0, 160),
+        submissionId,
+        attemptNumber: Math.max(1, Math.min(10000, Math.round(Number(exercisePayload.attempt) || 1))),
+        completedAtClient,
+        durationSeconds: Math.max(0, Math.min(43200, Math.round(Number(exercisePayload.duration_seconds || exercisePayload.durationSeconds) || 0))),
+        responsePayload: exercisePayload,
+        createdAt: serverTimestamp()
+      }, { merge: true });
+    } catch (historyError) {
+      console.warn("Exercise history save failed; completion was still saved.", historyError);
+    }
+
   const canonicalId = exerciseProgressIds[exerciseId] || exerciseId;
   const completedAt = new Date().toISOString();
   const exerciseProgress = {
@@ -870,6 +889,84 @@ async function getExerciseAttempts(exerciseId) {
     .filter((item) => item.exerciseId === targetId)
     .sort((a, b) => Number(b.submittedAt && b.submittedAt.toMillis ? b.submittedAt.toMillis() : 0) - Number(a.submittedAt && a.submittedAt.toMillis ? a.submittedAt.toMillis() : 0))
     .slice(0, 10);
+}
+
+async function saveExerciseDraft(exerciseId, exerciseTitle, draftPayload = {}) {
+  if (experiencePreviewActive()) return { preview: true, saved: false };
+  const user = await getSignedInUser();
+  if (!user || !user.uid) throw new Error("A signed-in Firebase user is required to save an exercise draft.");
+  const safeExerciseId = String(exerciseId || "").trim().slice(0, 100);
+  if (!safeExerciseId) throw new Error("An exercise ID is required.");
+  await setDoc(doc(requireFirestore(), "users", user.uid, "exercise_work", safeExerciseId), {
+    schemaVersion: 1,
+    userId: user.uid,
+    exerciseId: safeExerciseId,
+    exerciseTitle: String(exerciseTitle || "Exercise").trim().slice(0, 160),
+    draftPayload,
+    updatedAt: serverTimestamp()
+  }, { merge: true });
+  return { saved: true };
+}
+
+async function getExerciseWork(exerciseId) {
+  const user = await getSignedInUser();
+  if (!user || !user.uid) return { draft: null, submissions: [] };
+  const safeExerciseId = String(exerciseId || "").trim().slice(0, 100);
+  if (!safeExerciseId) return { draft: null, submissions: [] };
+  const readyDb = requireFirestore();
+  const [draftResult, submissionResult, latestResult] = await Promise.allSettled([
+    getDoc(doc(readyDb, "users", user.uid, "exercise_work", safeExerciseId)),
+    getDocs(collection(readyDb, "users", user.uid, "exercise_submissions")),
+    getDoc(doc(readyDb, "users", user.uid, "completed_exercises", safeExerciseId))
+  ]);
+  const draftSnapshot = draftResult.status === "fulfilled" ? draftResult.value : null;
+  const submissionSnapshot = submissionResult.status === "fulfilled" ? submissionResult.value : null;
+  const latestSnapshot = latestResult.status === "fulfilled" ? latestResult.value : null;
+  let submissions = (submissionSnapshot ? submissionSnapshot.docs : [])
+    .map((item) => ({ id: item.id, ...item.data() }))
+    .filter((item) => item.exerciseId === safeExerciseId)
+    .sort((a, b) => String(b.completedAtClient || "").localeCompare(String(a.completedAtClient || "")))
+    .slice(0, 10);
+  if (!submissions.length && latestSnapshot && latestSnapshot.exists()) {
+    const latest = latestSnapshot.data() || {};
+    const payload = latest.savedPayload || {};
+    if (Object.keys(payload).length) submissions = [{
+      id: `legacy-${safeExerciseId}`,
+      submissionId: `legacy-${safeExerciseId}`,
+      exerciseId: safeExerciseId,
+      exerciseTitle: latest.exerciseName || safeExerciseId,
+      attemptNumber: Number(payload.attempt) || 1,
+      completedAtClient: payload.completed_at || payload.completedAt || "",
+      durationSeconds: Number(payload.duration_seconds || payload.durationSeconds) || 0,
+      responsePayload: payload
+    }];
+  }
+  return {
+    draft: draftSnapshot && draftSnapshot.exists() ? draftSnapshot.data() : null,
+    submissions
+  };
+}
+
+async function saveExerciseSubmission(submissionPayload = {}) {
+  if (experiencePreviewActive()) return { preview: true, saved: false };
+  const user = await getSignedInUser();
+  if (!user || !user.uid) throw new Error("A signed-in Firebase user is required to save an exercise submission.");
+  const exerciseId = String(submissionPayload.exerciseId || "").trim().slice(0, 100);
+  const submissionId = String(submissionPayload.submissionId || "").trim().slice(0, 100);
+  if (!exerciseId || submissionId.length < 8) throw new Error("A valid exercise and submission ID are required.");
+  await setDoc(doc(requireFirestore(), "users", user.uid, "exercise_submissions", submissionId), {
+    schemaVersion: 1,
+    userId: user.uid,
+    exerciseId,
+    exerciseTitle: String(submissionPayload.exerciseTitle || "Exercise").trim().slice(0, 160),
+    submissionId,
+    attemptNumber: Math.max(1, Math.min(10000, Math.round(Number(submissionPayload.attemptNumber) || 1))),
+    completedAtClient: String(submissionPayload.completedAtClient || new Date().toISOString()).slice(0, 80),
+    durationSeconds: Math.max(0, Math.min(43200, Math.round(Number(submissionPayload.durationSeconds) || 0))),
+    responsePayload: submissionPayload.responsePayload || {},
+    createdAt: serverTimestamp()
+  });
+  return { saved: true, submissionId };
 }
 
 function analyticsText(value, max = 160) {
@@ -1519,6 +1616,7 @@ export {
   getMicrosoftRedirectResult,
   getEmailTemplates,
   getExerciseAttempts,
+  getExerciseWork,
   saveEmailTemplate,
   getMemberExerciseResponses,
   getMemberCredentialRegistry,
@@ -1558,6 +1656,8 @@ export {
   retryPendingProgressSyncs,
   saveEngagementAnalytics,
   saveExerciseAttempt,
+  saveExerciseDraft,
+  saveExerciseSubmission,
   saveAssessmentItemAttempt,
   getAssessmentVisibility,
   getAdminVisibilitySettings,
