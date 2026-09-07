@@ -481,7 +481,7 @@ const UTL_CONTENT = {
   });
 
   function rewardUiHref() {
-    var version = "?v=20260907-vimeo-main-videos";
+    var version = "?v=20260907-vimeo-lessons-2";
     if (inPhasePracticeRoot()) return "../../../assets/reward-ui.js" + version;
     return (inAdminRoot() ? "../assets/reward-ui.js" : "../assets/reward-ui.js") + version;
   }

@@ -10,7 +10,7 @@ assert.match(content, /picture-in-picture; clipboard-write; encrypted-media; web
 assert.ok(content.includes('referrerpolicy="strict-origin-when-cross-origin"'), 'the approved embedding domain is sent to Vimeo');
 assert.ok(content.includes('if (/vimeo\\.com\\//'), 'Google Drive access guidance is not shown for Vimeo videos');
 assert.match(content, /vimeo\\\.com.*drive\\\.google\\\.com.*localStorage\.removeItem/s, 'stale Drive overrides are retired after an official Vimeo migration');
-assert.ok(phaseOne.includes('content-config.js?v=20260907-vimeo-main-videos'), 'the Phase 1 page cache-busts the Vimeo player build');
+assert.ok(phaseOne.includes('content-config.js?v=20260907-vimeo-lessons-2'), 'the Phase 1 page cache-busts the Vimeo player build');
 
 [
   ['Orientation', '1224500458'],
