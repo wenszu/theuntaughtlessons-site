@@ -36,7 +36,7 @@ const UTL_CONTENT = {
     title: "Think clearly",
     description: "Build clean structure before you communicate. Watch the lessons, then practice turning a messy update into something a busy person can read.",
     lessons: [
-      { id: "p1-l1", title: "KonMari for the cluttered mind", duration: "9 min 35 sec", videoUrl: "https://drive.google.com/file/d/1JogKtDiCfhNjNckFLhOEJCCw7gh7eORq/view?usp=sharing", description: "Apply the declutter-and-keep-what-matters method to your own messy thinking before you write or speak." },
+      { id: "p1-l1", title: "KonMari for the cluttered mind", duration: "9 min 35 sec", videoUrl: "https://player.vimeo.com/video/1224500447?badge=0&autopause=0&player_id=0&app_id=58479", description: "Apply the declutter-and-keep-what-matters method to your own messy thinking before you write or speak." },
       { id: "p1-l2", title: "Rule of three", duration: "8 min 26 sec", videoUrl: "https://drive.google.com/open?id=1fFBBPC0JbHf1IPeHIz_9yKrp173coxJM&usp=drive_copy", description: "Group your points into threes so they are easier to remember, follow, and act on." },
       { id: "p1-l3", title: "Bolded Summary Phrase (BSP)", duration: "8 min 21 sec", videoUrl: "https://drive.google.com/open?id=1ZSKGHTUSZs2T3g3aTMgQ9fk9lHg_fN34&usp=drive_copy", description: "Write a one-line bolded takeaway for every section so a skimming reader still gets the point." }
     ],
@@ -1338,6 +1338,12 @@ const UTL_CONTENT = {
   function sanitizeMediaUrl(url) {
     var value = String(url || "").trim();
     if (!value) return "";
+    var vimeoPlayerMatch = value.match(/player\.vimeo\.com\/video\/(\d+)([^#]*)/);
+    if (vimeoPlayerMatch) return "https://player.vimeo.com/video/" + vimeoPlayerMatch[1] + (vimeoPlayerMatch[2] || "");
+    var vimeoMatch = value.match(/vimeo\.com\/(?:video\/)?(\d+)(?:\/([a-zA-Z0-9]+))?/);
+    if (vimeoMatch) {
+      return "https://player.vimeo.com/video/" + vimeoMatch[1] + (vimeoMatch[2] ? "?h=" + encodeURIComponent(vimeoMatch[2]) : "");
+    }
     var deckMatch = value.match(/docs\.google\.com\/presentation\/d\/([^/]+)/);
     if (deckMatch) {
       var slideMatch = value.match(/[?&]slide=([^&#]+)/) || value.match(/#slide=([^&#]+)/);
@@ -1357,6 +1363,9 @@ const UTL_CONTENT = {
   function directMediaUrl(url) {
     var value = String(url || "").trim();
     if (!value) return "";
+    if (/player\.vimeo\.com\/video\//.test(value)) return "";
+    var vimeoMatch = value.match(/vimeo\.com\/(?:video\/)?(\d+)(?:\/([a-zA-Z0-9]+))?/);
+    if (vimeoMatch) return "https://vimeo.com/" + vimeoMatch[1] + (vimeoMatch[2] ? "/" + vimeoMatch[2] : "");
     var deckMatch = value.match(/docs\.google\.com\/presentation\/d\/([^/]+)/);
     if (deckMatch) return "https://docs.google.com/presentation/d/" + deckMatch[1] + "/edit";
     var openMatch = value.match(/drive\.google\.com\/open\?id=([^&]+)/);
@@ -1377,10 +1386,11 @@ const UTL_CONTENT = {
     var mobileLaunch = directUrl
       ? '<div class="ws-mobile-video-launch"><div><strong>Watching on a phone?</strong><span>Mobile browsers may block the signed-in Drive player. ' + accountCopy + '</span></div><a href="' + escapeHtml(directUrl) + '" target="_blank" rel="noopener">Play in Google Drive &rarr;</a></div>'
       : "";
-    return mobileLaunch + '<div class="ws-media-frame"><iframe src="' + escapeHtml(src) + '" title="' + escapeHtml(title || "Video player") + '" loading="eager" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe></div>';
+    return mobileLaunch + '<div class="ws-media-frame"><iframe src="' + escapeHtml(src) + '" title="' + escapeHtml(title || "Video player") + '" loading="eager" allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>';
   }
 
   function videoAccessHelp(url) {
+    if (/vimeo\.com\//.test(String(url || ""))) return "";
     var email = currentUser().email || "";
     var emailText = email.indexOf("@") > -1 ? ' Your workspace email is <strong>' + escapeHtml(email) + '</strong>.' : "";
     var directUrl = directMediaUrl(url);
