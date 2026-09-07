@@ -481,7 +481,7 @@ const UTL_CONTENT = {
   });
 
   function rewardUiHref() {
-    var version = "?v=20260904-microsoft-restored";
+    var version = "?v=20260907-vimeo-pilot";
     if (inPhasePracticeRoot()) return "../../../assets/reward-ui.js" + version;
     return (inAdminRoot() ? "../assets/reward-ui.js" : "../assets/reward-ui.js") + version;
   }
