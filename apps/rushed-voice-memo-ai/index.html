@@ -399,6 +399,28 @@
       border: 1px solid #C7D8E8;
       border-radius: 10px;
       background: #F8FAFC;
+      max-width: 540px;
+    }
+
+    .voice-memo-card-label {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      margin: 0 0 12px;
+      color: var(--navy);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .voice-memo-card-label::before {
+      content: "\1F3A7";
+      display: grid;
+      place-items: center;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: #FFF1CF;
+      font-size: 15px;
     }
 
     .voice-memo-card h3 {
@@ -417,10 +439,10 @@
     .voice-memo-frame {
       display: block;
       width: 100%;
-      min-height: 112px;
+      height: 96px;
       border: 1px solid #C7D8E8;
       border-radius: 8px;
-      background: #FFFFFF;
+      background: #101820;
     }
 
     .voice-memo-open {
@@ -858,6 +880,7 @@
       </div>
       <div class="tsa-speak-step">
         <section class="voice-memo-card" aria-labelledby="voiceMemoHeading">
+          <div class="voice-memo-card-label">Audio source</div>
           <h3 id="voiceMemoHeading">Hugh's voice memo</h3>
           <p>Play the memo here to understand the source. You can also open it in another tab.</p>
           <iframe class="voice-memo-frame" src="https://player.vimeo.com/video/1224561751?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479" title="Hugh's voice memo" allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>

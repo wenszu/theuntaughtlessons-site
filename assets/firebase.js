@@ -1009,7 +1009,15 @@ function normalizedAnalyticsPayload(input = {}) {
     validationErrorCount: analyticsCount(input.validationErrorCount),
     submitCount: analyticsCount(input.submitCount),
     restartCount: analyticsCount(input.restartCount),
-    lastEventName: ["activity_opened", "working_started", "help_opened", "validation_failed", "submitted", "restarted", "completed"].includes(input.lastEventName) ? input.lastEventName : "activity_opened",
+    lastEventName: ["activity_opened", "working_started", "help_opened", "validation_failed", "submitted", "restarted", "completed", "video_progress", "video_completed"].includes(input.lastEventName) ? input.lastEventName : "activity_opened",
+    videoId: analyticsText(input.videoId, 40),
+    videoDurationSeconds: analyticsSeconds(input.videoDurationSeconds),
+    videoWatchSeconds: analyticsSeconds(input.videoWatchSeconds),
+    videoMaxPositionSeconds: analyticsSeconds(input.videoMaxPositionSeconds),
+    videoMaxPercent: Math.max(0, Math.min(100, Math.round(Number(input.videoMaxPercent) || 0))),
+    videoPlayCount: analyticsCount(input.videoPlayCount),
+    videoCompleted: input.videoCompleted === true,
+    videoMilestones: Array.isArray(input.videoMilestones) ? input.videoMilestones.map(Number).filter((value) => [25, 50, 75, 90, 100].includes(value)).slice(0, 5) : [],
     receivedAt: serverTimestamp()
   };
 }

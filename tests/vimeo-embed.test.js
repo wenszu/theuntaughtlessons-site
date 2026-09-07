@@ -12,7 +12,7 @@ assert.match(content, /picture-in-picture; clipboard-write; encrypted-media; web
 assert.ok(content.includes('referrerpolicy="strict-origin-when-cross-origin"'), 'the approved embedding domain is sent to Vimeo');
 assert.ok(content.includes('if (/vimeo\\.com\\//'), 'Google Drive access guidance is not shown for Vimeo videos');
 assert.match(content, /vimeo\\\.com.*drive\\\.google\\\.com.*localStorage\.removeItem/s, 'stale Drive overrides are retired after an official Vimeo migration');
-assert.ok(phaseOne.includes('content-config.js?v=20260907-vimeo-all-media-1'), 'the Phase 1 page cache-busts the Vimeo player build');
+assert.ok(phaseOne.includes('content-config.js?v=20260907-vimeo-engagement-1'), 'the Phase 1 page cache-busts the Vimeo player build');
 
 [
   ['Orientation', '1224500458'],
@@ -39,6 +39,10 @@ assert.ok(phaseOne.includes('content-config.js?v=20260907-vimeo-all-media-1'), '
 
 assert.ok(rushedMemo.includes('1224561751'), "Rushed voice memo uses Hugh's current Vimeo upload");
 assert.ok(rushedMemoAi.includes('1224561751'), "Rushed voice memo with AI uses Hugh's current Vimeo upload");
+assert.match(rushedMemo, /voice-memo-source-label/, 'the standard memo presents Vimeo as a compact audio source');
+assert.match(rushedMemo, /height: 96px/, 'the standard memo does not use a large video canvas');
+assert.match(rushedMemoAi, /voice-memo-card-label/, 'the AI memo uses the same audio-source treatment');
+assert.match(rushedMemoAi, /max-width: 540px/, 'the AI memo stays left-aligned at a compact width');
 assert.doesNotMatch(rushedMemo + rushedMemoAi, /1224530026/, "Hugh's superseded Vimeo upload is no longer referenced");
 assert.doesNotMatch(content, /contextUrl:\s*["']https:\/\/drive\.google\.com/, 'published course context no longer uses Google Drive');
 assert.doesNotMatch(rushedMemo + rushedMemoAi, /1vjcNHKWZ0uK4LPKQ8lEnd2ug3wqRR7fy/, "Hugh's former Drive file is no longer referenced");

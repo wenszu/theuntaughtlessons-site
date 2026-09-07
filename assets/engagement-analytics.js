@@ -64,6 +64,8 @@ function createTracker(options) {
     activityStartedAtMs: now, activityElapsedSeconds: 0, activityActiveSeconds: 0, activityIdleSeconds: 0, activityHiddenSeconds: 0, activityMeaningfulInteractions: 0,
     helpOpenedCount: 0, validationErrorCount: 0, submitCount: 0, restartCount: 0, lastEventName: "activity_opened",
     completed: false, resumed: localStorage.getItem("utl_analytics_incomplete_" + activity.id) === "true", exitReason: "", endedAtClient: "",
+    videoId: "", videoDurationSeconds: 0, videoWatchSeconds: 0, videoMaxPositionSeconds: 0,
+    videoMaxPercent: 0, videoPlayCount: 0, videoCompleted: false, videoMilestones: [],
     dirty: true, flushing: false, stopped: false
   };
   const lastFrictionAt = {};
@@ -138,6 +140,14 @@ function createTracker(options) {
       submitCount: state.submitCount,
       restartCount: state.restartCount,
       lastEventName: state.lastEventName
+      ,videoId: state.videoId,
+      videoDurationSeconds: Math.round(state.videoDurationSeconds),
+      videoWatchSeconds: Math.round(state.videoWatchSeconds),
+      videoMaxPositionSeconds: Math.round(state.videoMaxPositionSeconds),
+      videoMaxPercent: Math.round(state.videoMaxPercent),
+      videoPlayCount: state.videoPlayCount,
+      videoCompleted: state.videoCompleted,
+      videoMilestones: state.videoMilestones.slice()
     };
     return { session: base, activity: Object.assign({}, base, {
       activitySessionId: state.activitySessionId,
@@ -154,7 +164,7 @@ function createTracker(options) {
     if (state.flushing || (!state.dirty && !force) || localStorage.getItem(PREVIEW_KEY) === "true") return;
     state.flushing = true;
     try {
-      const fb = await import("./firebase.js");
+      const fb = await import("./firebase.js?v=20260907-vimeo-engagement-1");
       await fb.saveEngagementAnalytics(payload());
       state.dirty = false;
     } catch (error) {
@@ -206,6 +216,27 @@ function createTracker(options) {
   window.addEventListener("utl:activity-step", (event) => meaningful(event.detail?.stepId, event.detail?.progressPercent));
   window.addEventListener("utl:activity-friction", (event) => frictionEvent(event.detail?.eventName, event.detail?.stepId));
   window.addEventListener("utl:activity-completed", complete);
+  window.addEventListener("utl:vimeo-progress", (event) => {
+    const detail = event.detail || {};
+    if (detail.activityId && safeId(detail.activityId, "") !== state.activity.id) {
+      activity.id = safeId(detail.activityId, activity.id);
+      activity.type = "video";
+      activity.title = String(detail.activityTitle || activity.title).slice(0, 160);
+    }
+    state.videoId = safeId(detail.videoId, state.videoId || "video");
+    state.videoDurationSeconds = Math.max(state.videoDurationSeconds, Number(detail.durationSeconds) || 0);
+    state.videoWatchSeconds += Math.max(0, Math.min(10, Number(detail.watchDeltaSeconds) || 0));
+    state.videoMaxPositionSeconds = Math.max(state.videoMaxPositionSeconds, Number(detail.positionSeconds) || 0);
+    state.videoMaxPercent = Math.max(state.videoMaxPercent, Math.min(100, Number(detail.percent) || 0));
+    if (detail.eventName === "play") state.videoPlayCount += 1;
+    if (detail.milestone && !state.videoMilestones.includes(Number(detail.milestone))) state.videoMilestones.push(Number(detail.milestone));
+    const newlyCompleted = detail.completed === true && !state.videoCompleted;
+    if (detail.completed === true) state.videoCompleted = true;
+    state.lastEventName = detail.completed ? "video_completed" : "video_progress";
+    meaningful(detail.completed ? "video-completed" : "video-watching", state.videoMaxPercent);
+    if (newlyCompleted) complete();
+    else if (detail.eventName === "pause" || detail.milestone) flush(true);
+  });
   const tickTimer = setInterval(tick, TICK_MS);
   const flushTimer = setInterval(() => flush(false), FLUSH_EVERY_MS);
   persistSessionMarker();
@@ -229,6 +260,8 @@ function createTracker(options) {
       state.progressPercent = 0;
       state.lastStepId = "opened";
       state.completed = false;
+      state.videoId = ""; state.videoDurationSeconds = 0; state.videoWatchSeconds = 0; state.videoMaxPositionSeconds = 0;
+      state.videoMaxPercent = 0; state.videoPlayCount = 0; state.videoCompleted = false; state.videoMilestones = [];
       state.exitReason = "";
       state.endedAtClient = "";
       state.resumed = localStorage.getItem("utl_analytics_incomplete_" + activity.id) === "true";

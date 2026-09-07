@@ -8,6 +8,7 @@ const aiko = fs.readFileSync(path.resolve(__dirname, '../apps/write-to-aiko/inde
 const phase1History = fs.readFileSync(path.resolve(__dirname, '../assets/phase1-writing-history.js'), 'utf8');
 const nativeHistory = fs.readFileSync(path.resolve(__dirname, '../assets/native-exercise-history.js'), 'utf8');
 const explainAiko = fs.readFileSync(path.resolve(__dirname, '../apps/explain-to-aiko/aiko.js'), 'utf8');
+const explainAikoCss = fs.readFileSync(path.resolve(__dirname, '../apps/explain-to-aiko/aiko.css'), 'utf8');
 const journey = fs.readFileSync(path.resolve(__dirname, '../member-login/content-config.js'), 'utf8');
 const grocery = fs.readFileSync(path.resolve(__dirname, '../apps/grocery-list/index.html'), 'utf8');
 assert.match(grocery, /viewGroceryAttempt[\s\S]*renderAll\(\);\s*renderSampleAnswer\(\);/, 'Grocery List rebuilds the sample answer for the selected saved submission');
@@ -41,7 +42,8 @@ assert.match(phase1History, /\[data-resume\],\.phase1-work-actions \[data-new\],
 assert.doesNotMatch(phase1History, /View latest submission/);
 assert.match(phase1History, /select\.hidden=!saved\.length/);
 assert.match(phase1History, /Viewing submission \$\{viewingIndex\+1\} of \$\{saved\.length\}/);
-assert.match(phase1History, /max-width:900px/);
+assert.match(phase1History, /phase1-work-actions\{display:flex;align-items:center;flex-wrap:nowrap/);
+assert.match(phase1History, /max-width:760px/);
 assert.match(phase1History, /hasUsableResponse/);
 assert.match(phase1History, /messy-notes-ashley/);
 assert.match(phase1History, /saveExerciseDraft/);
@@ -61,7 +63,8 @@ assert.match(nativeHistory, /\[data-resume\],\.native-work-actions \[data-new\],
 assert.doesNotMatch(nativeHistory, /View latest submission/);
 assert.match(nativeHistory, /select\.hidden=!history\.length/);
 assert.match(nativeHistory, /if\(reviewingId\)select\.value=reviewingId/);
-assert.match(nativeHistory, /max-width:900px/);
+assert.match(nativeHistory, /native-work-actions\{display:flex;align-items:center;flex-wrap:nowrap/);
+assert.match(nativeHistory, /max-width:760px/);
 assert.match(nativeHistory, /getExerciseWork\(config\.id\)/);
 assert.match(nativeHistory, /utl:activity-completed/);
 for (const app of ['advisory-board', 'grocery-list-ai', 'rushed-voice-memo-ai']) {
@@ -76,6 +79,8 @@ assert.doesNotMatch(journey, /Review original speech|Practice another explanatio
 assert.match(explainAiko, /Previous submissions/);
 assert.match(explainAiko, /id="aikoSavedSelect"/);
 assert.match(explainAiko, /Choose a previous submission/);
+assert.match(explainAiko, /class="aiko-saved-controls"[\s\S]*id="aikoSavedSelect"[\s\S]*id="startNewRequiredAttempt"/);
+assert.match(explainAikoCss, /\.aiko-saved-controls\{display:flex;align-items:center;justify-content:flex-end/);
 assert.match(aiko, /id="writeToAikoHistoryList" aria-label="Choose a previous submission"/);
 assert.match(aiko, /write-to-aiko-return-tools/);
 assert.match(aiko, /Review sample answer →/);

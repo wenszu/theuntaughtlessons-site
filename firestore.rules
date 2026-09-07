@@ -43,7 +43,15 @@ service cloud.firestore {
         request.resource.data.validationErrorCount is int && request.resource.data.validationErrorCount >= 0 && request.resource.data.validationErrorCount <= 10000 &&
         request.resource.data.submitCount is int && request.resource.data.submitCount >= 0 && request.resource.data.submitCount <= 10000 &&
         request.resource.data.restartCount is int && request.resource.data.restartCount >= 0 && request.resource.data.restartCount <= 10000 &&
-        request.resource.data.lastEventName in ['activity_opened', 'working_started', 'help_opened', 'validation_failed', 'submitted', 'restarted', 'completed'] &&
+        request.resource.data.lastEventName in ['activity_opened', 'working_started', 'help_opened', 'validation_failed', 'submitted', 'restarted', 'completed', 'video_progress', 'video_completed'] &&
+        request.resource.data.videoId is string && request.resource.data.videoId.size() <= 40 &&
+        validAnalyticsSeconds(request.resource.data.videoDurationSeconds) &&
+        validAnalyticsSeconds(request.resource.data.videoWatchSeconds) &&
+        validAnalyticsSeconds(request.resource.data.videoMaxPositionSeconds) &&
+        request.resource.data.videoMaxPercent is int && request.resource.data.videoMaxPercent >= 0 && request.resource.data.videoMaxPercent <= 100 &&
+        request.resource.data.videoPlayCount is int && request.resource.data.videoPlayCount >= 0 && request.resource.data.videoPlayCount <= 10000 &&
+        request.resource.data.videoCompleted is bool &&
+        request.resource.data.videoMilestones is list && request.resource.data.videoMilestones.size() <= 5 &&
         request.resource.data.receivedAt == request.time;
     }
 
@@ -172,7 +180,9 @@ service cloud.firestore {
           'idleSeconds', 'hiddenSeconds', 'meaningfulInteractions', 'deviceClass', 'pagePath',
           'activityId', 'activityType', 'activityTitle', 'lastStepId', 'progressPercent',
           'completed', 'resumed', 'exitReason', 'endedAtClient', 'helpOpenedCount',
-          'validationErrorCount', 'submitCount', 'restartCount', 'lastEventName', 'receivedAt'
+          'validationErrorCount', 'submitCount', 'restartCount', 'lastEventName', 'receivedAt',
+          'videoId', 'videoDurationSeconds', 'videoWatchSeconds', 'videoMaxPositionSeconds',
+          'videoMaxPercent', 'videoPlayCount', 'videoCompleted', 'videoMilestones'
         ]) && request.resource.data.sessionId == sessionId && validAnalyticsCommon(userId);
       allow delete: if false;
     }
@@ -186,7 +196,9 @@ service cloud.firestore {
           'idleSeconds', 'hiddenSeconds', 'meaningfulInteractions', 'deviceClass', 'pagePath',
           'activityId', 'activityType', 'activityTitle', 'lastStepId', 'progressPercent',
           'completed', 'resumed', 'exitReason', 'endedAtClient', 'helpOpenedCount',
-          'validationErrorCount', 'submitCount', 'restartCount', 'lastEventName', 'receivedAt'
+          'validationErrorCount', 'submitCount', 'restartCount', 'lastEventName', 'receivedAt',
+          'videoId', 'videoDurationSeconds', 'videoWatchSeconds', 'videoMaxPositionSeconds',
+          'videoMaxPercent', 'videoPlayCount', 'videoCompleted', 'videoMilestones'
         ]) && request.resource.data.activitySessionId == activitySessionId && validAnalyticsCommon(userId);
       allow delete: if false;
     }

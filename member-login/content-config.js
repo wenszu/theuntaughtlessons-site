@@ -445,8 +445,8 @@ const UTL_CONTENT = {
   }
 
   function engagementAnalyticsHref() {
-    if (inPhasePracticeRoot()) return "../../../assets/engagement-analytics.js?v=20260831-phase2-part2";
-    return "../assets/engagement-analytics.js?v=20260831-phase2-part2";
+    if (inPhasePracticeRoot()) return "../../../assets/engagement-analytics.js?v=20260907-vimeo-engagement-1";
+    return "../assets/engagement-analytics.js?v=20260907-vimeo-engagement-1";
   }
 
   if (!inAdminRoot()) import(engagementAnalyticsHref()).catch(function (error) {
@@ -1358,7 +1358,7 @@ const UTL_CONTENT = {
     return value;
   }
 
-  function renderIframe(url, title) {
+  function renderIframe(url, title, analyticsId) {
     var src = sanitizeMediaUrl(url);
     if (!src) return "";
     var directUrl = directMediaUrl(url);
@@ -1369,7 +1369,10 @@ const UTL_CONTENT = {
     var mobileLaunch = directUrl
       ? '<div class="ws-mobile-video-launch"><div><strong>Watching on a phone?</strong><span>Mobile browsers may block the signed-in Drive player. ' + accountCopy + '</span></div><a href="' + escapeHtml(directUrl) + '" target="_blank" rel="noopener">Play in Google Drive &rarr;</a></div>'
       : "";
-    return mobileLaunch + '<div class="ws-media-frame"><iframe src="' + escapeHtml(src) + '" title="' + escapeHtml(title || "Video player") + '" loading="eager" allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>';
+    var analyticsAttrs = /player\.vimeo\.com\/video\//.test(src)
+      ? ' data-vimeo-analytics="true" data-video-activity-id="' + escapeHtml(analyticsId || String(title || "video").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")) + '" data-video-activity-title="' + escapeHtml(title || "Video") + '"'
+      : '';
+    return mobileLaunch + '<div class="ws-media-frame"><iframe src="' + escapeHtml(src) + '" title="' + escapeHtml(title || "Video player") + '"' + analyticsAttrs + ' loading="eager" allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>';
   }
 
   function videoAccessHelp(url) {
@@ -1402,8 +1405,8 @@ const UTL_CONTENT = {
     '</div></details>';
   }
 
-  function renderEmbeddedMedia(url, title) {
-    var frame = renderIframe(url, title);
+  function renderEmbeddedMedia(url, title, analyticsId) {
+    var frame = renderIframe(url, title, analyticsId);
     return frame ? frame + videoAccessHelp(url) : "";
   }
 
@@ -2674,7 +2677,7 @@ const UTL_CONTENT = {
     var orientation = UTL_CONTENT.orientation.contexts[1] || {};
     var orientationUrl = orientation.contextUrl || exerciseContextUrl(orientation);
     var welcomeOpen = localStorage.getItem("utl_welcome_video_open") === null ? true : readBool("utl_welcome_video_open");
-    var video = orientationUrl ? '<div class="ws-context-embed">' + renderEmbeddedMedia(orientationUrl, orientation.contextTitle) + '</div>' : '<div class="ws-player-card"><div class="ws-player"><div class="ws-player-placeholder"><span class="ws-play-icon">&#9654;</span><p>Orientation video coming soon</p></div></div></div>';
+    var video = orientationUrl ? '<div class="ws-context-embed">' + renderEmbeddedMedia(orientationUrl, orientation.contextTitle, "orientation") + '</div>' : '<div class="ws-player-card"><div class="ws-player"><div class="ws-player-placeholder"><span class="ws-play-icon">&#9654;</span><p>Orientation video coming soon</p></div></div></div>';
     return '<article class="ws-orientation-card ' + (open ? "ws-open" : "") + '" id="orientation"><div class="ws-orientation-head"><button class="ws-orientation-toggle" type="button" data-orientation-toggle><span class="ws-start-badge">Start here</span><span><span class="ws-orientation-title">Orientation</span><span class="ws-orientation-sub">' + (complete ? "Orientation complete &#10003;" : "Get oriented before jumping into Phase 1") + '</span></span><span class="ws-orientation-chevron ws-disclosure-icon">' + (open ? "&minus;" : "+") + '</span></button></div><div class="ws-orientation-body"><p class="ws-orientation-instruction">Read the story below, then watch the welcome video.</p><div class="ws-orientation-copy"><h3>' + escapeHtml(intro.contextTitle || "Welcome") + '</h3>' + textParagraphs(intro.contextBody) + '</div><div class="ws-how-row"><button class="ws-how-toggle" type="button" data-welcome-toggle><span class="ws-media-icon">&#9654;</span><span><strong>' + escapeHtml(orientation.contextTitle || "Welcome to The Untaught Lessons") + '</strong><br><small>' + escapeHtml(orientation.contextBody || "Watch before starting") + '</small></span><span class="ws-disclosure-icon" data-welcome-icon>' + (welcomeOpen ? "&minus;" : "+") + '</span></button><div class="ws-how-body ' + (welcomeOpen ? "ws-open" : "") + '" data-welcome-body>' + video + '</div></div><div class="ws-player-actions" data-orientation-action>' + orientationWatchActionHtml(complete) + '</div></div></article>';
   }
 
@@ -3363,7 +3366,7 @@ const UTL_CONTENT = {
     var watched = readBool(watchedKey(lesson.id));
     var url = lessonUrl(lesson);
     var player = url
-      ? renderIframe(url, lesson.title)
+      ? renderIframe(url, lesson.title, lesson.id)
       : '<div class="ws-player-placeholder"><div class="ws-play-icon">&#9654;</div><h2>' + escapeHtml(lesson.title) + '</h2><p>Video coming soon</p></div>';
     var help = url ? videoAccessHelp(url) : "";
     var journeyHref = memberHref("index.html") + "?phase=" + encodeURIComponent(phaseKey) + "#learning-journey";
@@ -4091,6 +4094,87 @@ const UTL_CONTENT = {
       setTimeout(function () { note.textContent = ""; }, 1500);
     }
   }
+
+  var vimeoPlayers = new WeakMap();
+  var vimeoSdkPromise = null;
+
+  function loadVimeoSdk() {
+    if (window.Vimeo && window.Vimeo.Player) return Promise.resolve(window.Vimeo);
+    if (vimeoSdkPromise) return vimeoSdkPromise;
+    vimeoSdkPromise = new Promise(function (resolve, reject) {
+      var existing = document.querySelector('script[src="https://player.vimeo.com/api/player.js"]');
+      var script = existing || document.createElement("script");
+      function ready() { window.Vimeo && window.Vimeo.Player ? resolve(window.Vimeo) : reject(new Error("Vimeo Player SDK did not initialize.")); }
+      script.addEventListener("load", ready, { once: true });
+      script.addEventListener("error", reject, { once: true });
+      if (!existing) { script.src = "https://player.vimeo.com/api/player.js"; script.async = true; document.head.appendChild(script); }
+      else if (window.Vimeo && window.Vimeo.Player) ready();
+    });
+    return vimeoSdkPromise;
+  }
+
+  function dispatchVimeoProgress(frame, detail) {
+    var match = String(frame.src || "").match(/player\.vimeo\.com\/video\/(\d+)/);
+    window.dispatchEvent(new CustomEvent("utl:vimeo-progress", { detail: Object.assign({
+      videoId: match ? match[1] : "",
+      activityId: frame.dataset.videoActivityId || "video",
+      activityTitle: frame.dataset.videoActivityTitle || frame.title || "Video"
+    }, detail || {}) }));
+  }
+
+  function syncVimeoCourseCompletion(event) {
+    var detail = event.detail || {};
+    if (detail.completed !== true) return;
+    if (detail.activityId === "orientation") {
+      if (readBool("utl_orientation_ready")) return;
+      writeBool("utl_orientation_ready", true);
+      awardOrientationVideo();
+      queueRemoteProgressSave();
+      return;
+    }
+    var lesson = allLessons().find(function (item) { return item.id === detail.activityId; });
+    if (!lesson || readBool(watchedKey(lesson.id))) return;
+    writeBool(watchedKey(lesson.id), true);
+    var reward = awardRewardEvent({ id: "video:" + lesson.id, type: "video-completed", title: lesson.title, mp: VIDEO_COMPLETE_MP });
+    if (reward.awarded) addStreakToReward(reward, recordWorkspaceDailyActivity("video:" + lesson.id));
+    phases.forEach(function (phaseKey) { videosDone(phaseKey); });
+    queueRemoteProgressSave();
+  }
+
+  function bindVimeoFrame(frame) {
+    if (!frame || vimeoPlayers.has(frame)) return;
+    vimeoPlayers.set(frame, true);
+    loadVimeoSdk().then(function (Vimeo) {
+      var player = new Vimeo.Player(frame);
+      var lastPosition = 0;
+      var lastEventAt = 0;
+      var milestones = {};
+      vimeoPlayers.set(frame, player);
+      player.on("play", function () { lastEventAt = Date.now(); dispatchVimeoProgress(frame, { eventName: "play" }); });
+      player.on("timeupdate", function (data) {
+        var now = Date.now();
+        var percent = Math.max(0, Math.min(100, Number(data.percent || 0) * 100));
+        var delta = lastEventAt ? Math.min(5, Math.max(0, (now - lastEventAt) / 1000)) : 0;
+        lastEventAt = now;
+        lastPosition = Number(data.seconds || lastPosition || 0);
+        var milestone = [25, 50, 75, 90].find(function (value) { return percent >= value && !milestones[value]; });
+        if (milestone) milestones[milestone] = true;
+        dispatchVimeoProgress(frame, { eventName: "progress", positionSeconds: lastPosition, durationSeconds: Number(data.duration || 0), percent: percent, watchDeltaSeconds: delta, milestone: milestone || 0, completed: percent >= 90 });
+      });
+      player.on("pause", function (data) { dispatchVimeoProgress(frame, { eventName: "pause", positionSeconds: Number(data.seconds || lastPosition || 0), durationSeconds: Number(data.duration || 0), percent: Number(data.percent || 0) * 100 }); });
+      player.on("ended", function (data) { dispatchVimeoProgress(frame, { eventName: "ended", positionSeconds: Number(data.seconds || lastPosition || 0), durationSeconds: Number(data.duration || 0), percent: 100, milestone: 100, completed: true }); });
+    }).catch(function (error) { console.warn("Vimeo playback analytics unavailable.", error); });
+  }
+
+  function bindVimeoAnalytics() {
+    qsa('iframe[data-vimeo-analytics="true"]').forEach(bindVimeoFrame);
+  }
+
+  var vimeoObserver = new MutationObserver(bindVimeoAnalytics);
+  vimeoObserver.observe(document.documentElement, { childList: true, subtree: true });
+  window.addEventListener("utl:vimeo-progress", syncVimeoCourseCompletion);
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", bindVimeoAnalytics, { once: true });
+  else bindVimeoAnalytics();
 
   window.UTL_CONTENT = UTL_CONTENT;
   window.addEventListener("pagehide", function () {
