@@ -1800,6 +1800,7 @@
       selectedItemId = null;
 
       renderAll();
+      renderSampleAnswer();
       clearFeedback();
       document.getElementById('generateBtn')?.classList.add('hidden');
       document.getElementById('whyText').value = '';
@@ -2649,7 +2650,8 @@
       };
       const savedBuckets = [1, 2, 3].map((number) => normalizeSavedItems(response[`bucket${number}_items`] || response[`bucket${number}`]?.items));
       const savedItems = savedBuckets.flat().map((name, index) => {
-        const bankItem = ITEM_BANK.find((item) => item.name === name) || {};
+        const normalizedName = String(name).trim().toLowerCase();
+        const bankItem = ITEM_BANK.find((item) => String(item.name || '').trim().toLowerCase() === normalizedName) || {};
         return { ...bankItem, name, id: `saved-${index}-${String(name).toLowerCase().replace(/[^a-z0-9]+/g, '-')}` };
       });
       state.generatedItems = savedItems;
@@ -2664,6 +2666,7 @@
       state.changedAfterSubmit = false;
       document.getElementById('whyText').value = response.organizing_rule || '';
       renderAll();
+      renderSampleAnswer();
       ['bucket1', 'bucket2', 'bucket3'].forEach((key) => { document.getElementById(`${key}Input`).readOnly = true; });
       document.getElementById('whyText').readOnly = true;
       document.body.classList.add('viewing-saved-grocery');
@@ -2755,6 +2758,7 @@
           feedback.innerHTML = `<strong>Finish sorting first:</strong><br>Place all ${state.generatedItems.length} items into buckets before opening the sample answer. ${movedCount} sorted so far.`;
           return;
         }
+        renderSampleAnswer();
         const sample = document.getElementById('sampleAnswer');
         sample.classList.toggle('hidden');
         document.getElementById('sampleBtn').textContent = sample.classList.contains('hidden')

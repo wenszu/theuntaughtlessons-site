@@ -10,6 +10,7 @@ const nativeHistory = fs.readFileSync(path.resolve(__dirname, '../assets/native-
 const explainAiko = fs.readFileSync(path.resolve(__dirname, '../apps/explain-to-aiko/aiko.js'), 'utf8');
 const journey = fs.readFileSync(path.resolve(__dirname, '../member-login/content-config.js'), 'utf8');
 const grocery = fs.readFileSync(path.resolve(__dirname, '../apps/grocery-list/index.html'), 'utf8');
+assert.match(grocery, /viewGroceryAttempt[\s\S]*renderAll\(\);\s*renderSampleAnswer\(\);/, 'Grocery List rebuilds the sample answer for the selected saved submission');
 
 assert.match(firebase, /async function saveExerciseDraft/);
 assert.match(firebase, /async function saveExerciseSubmission/);
