@@ -61,7 +61,7 @@ const UTL_CONTENT = {
         description: "Apply MECE thinking by sorting a messy grocery list into clean, non-overlapping categories.",
         appUrl: "../apps/grocery-list/index.html",
         contextType: "video",
-        contextUrl: "https://drive.google.com/file/d/1vtKHRag3W1PqbZSssdxxTVL7-FXFLJcl/view?usp=vids_web",
+        contextUrl: "https://vimeo.com/1224511246",
         contextTitle: "Before your first day",
         contextBody: "You have just arrived in Tokyo for your new role at MA as CEO's Chief of Staff. Before jumping into onboarding, you need to get your personal life in order. Aiko expects clarity from day one, so practice it before starting your role."
       },
@@ -76,7 +76,7 @@ const UTL_CONTENT = {
         description: "Use AI to improve your grocery-list structure and compare the result against your own MECE logic.",
         appUrl: "../apps/grocery-list-ai/index.html",
         contextType: "video",
-        contextUrl: "https://drive.google.com/file/d/119sJkFz6imeWn51g44qTfqjTQIEXs2OJ/view",
+        contextUrl: "https://vimeo.com/1224507503",
         contextTitle: "Try the same task with AI",
         contextBody: "Now that you have practiced sorting the list yourself, try the same task with AI and pay attention to what the prompt does or does not make clear."
       },
@@ -90,7 +90,7 @@ const UTL_CONTENT = {
         description: "Turn a disorganized message into a structured, decision-ready response using MECE, Rule of three, and BSP.",
         appUrl: "../apps/messy-notes/index.html",
         contextType: "video",
-        contextUrl: "https://drive.google.com/file/d/1QDiVqzY8xiQDpBoGq0UOpwzm1GxN2bDO/view",
+        contextUrl: "https://vimeo.com/1224507502",
         contextTitle: "A message just landed on your desk",
         contextBody: "One of Aiko's direct reports, Ashley, just sent a cluttered update meant for Aiko. Ashley needs it decision-ready before Aiko is back. Apply the lessons from Phase 1 to get this done."
       },
@@ -104,7 +104,7 @@ const UTL_CONTENT = {
         description: "Turn a rushed spoken update into a clear, actionable update using the principles of MECE, Rule of three, and BSP.",
         appUrl: "../apps/rushed-voice-memo/index.html",
         contextType: "video",
-        contextUrl: "https://drive.google.com/file/d/1ZomeBoyk0SS1iFNV2eXobRfJQWDwyhEz/view",
+        contextUrl: "https://vimeo.com/1224507504",
         contextTitle: "Hugh needs a favor",
         contextBody: "Hugh needs a favor and the information is messy. Your job is to slow the situation down and make the request easier to understand."
       },
@@ -119,7 +119,7 @@ const UTL_CONTENT = {
         description: "Use AI to pressure-test and improve the structure of a rushed memo response.",
         appUrl: "../apps/rushed-voice-memo-ai/index.html",
         contextType: "video",
-        contextUrl: "https://drive.google.com/file/d/1wU42aEuW-_XjVMrL479CUtAizs3BkAj5/view",
+        contextUrl: "https://vimeo.com/1224507505",
         contextTitle: "Try the same memo with AI",
         contextBody: "Use the AI version to compare your own restructuring choices against another structured draft."
       },
@@ -133,7 +133,7 @@ const UTL_CONTENT = {
         description: "Practice how to think clearly by cleaning up visual clutter into actionable and MECE insights.",
         appUrl: "../apps/chalkboard-notes/index.html",
         contextType: "video",
-        contextUrl: "https://drive.google.com/file/d/1BHO2za_2AtxJvyKVOh-B19gDUwvVMnYy/view",
+        contextUrl: "https://vimeo.com/1224507528",
         contextTitle: "Aiko needs the Olympic brainstorm session sorted",
         contextBody: "Aiko needs the Olympic brainstorm session turned into something the team can use. Clean up the fragments and make the structure visible."
       }
@@ -169,7 +169,7 @@ const UTL_CONTENT = {
         description: "Build an issue tree to break down the problem into solvable parts.",
         appUrl: "../apps/issue-tree-builder/index.html",
         contextType: "video",
-        contextUrl: "https://drive.google.com/file/d/1goMjwwkp_dGav6LyORBGMMFvBC27xTR8/view",
+        contextUrl: "https://vimeo.com/1224507799",
         contextTitle: "Aiko liked your work. Now she has a question.",
         contextBody: "Create an issue tree to break problems down into MECE parts for your answer to Aiko."
       },
@@ -183,7 +183,7 @@ const UTL_CONTENT = {
         description: "Using the issue tree, create an SCQA formulation.",
         appUrl: "../apps/scqa-builder/index.html",
         contextType: "video",
-        contextUrl: "https://drive.google.com/open?id=1qrngkvMOp3wkzrPnIuIe2CX9z7Tk1_NU&usp=drive_copy",
+        contextUrl: "https://vimeo.com/1224507800",
         contextTitle: "Create an executive-ready brief for Aiko.",
         contextBody: "You will need to make this more readable for Aiko. Use the SCQA framework to do so."
       },
@@ -198,7 +198,7 @@ const UTL_CONTENT = {
         description: "Use AI to simulate outside perspectives before committing to a recommendation.",
         appUrl: "../apps/advisory-board/index.html",
         contextType: "video",
-        contextUrl: "https://drive.google.com/file/d/1tNJgprewm7bCJ29EYzRBbW-AIf_kjAuk/view",
+        contextUrl: "https://vimeo.com/1224507797",
         contextTitle: "Get outside perspectives before you commit",
         contextBody: "Find expert opinions on your outputs."
       },
@@ -212,7 +212,7 @@ const UTL_CONTENT = {
         description: "Write a concise, answer-first email to Aiko using your SCQA logic.",
         appUrl: "../apps/write-to-aiko/index.html",
         contextType: "video",
-        contextUrl: "https://drive.google.com/file/d/1zbduNG5_xM2meZU0X8iI9vPJGgJvqdFd/view",
+        contextUrl: "https://vimeo.com/1224507825",
         contextTitle: "Aiko does not have time to read everything",
         contextBody: "Aiko needed the reply yesterday. She needs the email ASAP."
       },
@@ -226,7 +226,7 @@ const UTL_CONTENT = {
         description: "Prepare and record a 120-second spoken explanation of the same answer.",
         appUrl: "../apps/explain-to-aiko/index.html",
         contextType: "video",
-        contextUrl: "https://drive.google.com/file/d/1_qeA-dLRKfSgoxcXvXZ6WC0HfxfC6E3n/view?usp=vids_web",
+        contextUrl: "https://vimeo.com/1224507798",
         contextTitle: "Aiko asks for a quick explanation",
         contextBody: "Aiko said you can send her a quick voice message; she does not mind this time."
       },
@@ -240,7 +240,7 @@ const UTL_CONTENT = {
         description: "Compress the same message into 60 seconds or less.",
         appUrl: "../apps/explain-to-aiko-60/index.html",
         contextType: "video",
-        contextUrl: "https://drive.google.com/file/d/1SfgGyNExQfTOYpMx7AveLRvpRA4_I7qS/view?usp=vids_web",
+        contextUrl: "https://vimeo.com/1224507826",
         contextTitle: "Now compress it",
         contextBody: "Now, instead of 120 seconds, see if you can deliver the key points in 60 seconds or less."
       }
@@ -252,8 +252,8 @@ const UTL_CONTENT = {
     lessons: [
       { id: "p3-l1", title: "How to read people", duration: "7 min 19 sec", videoUrl: "https://vimeo.com/1224502887", description: "Pick up on the cues that tell you what someone actually thinks, even when they don't say it." },
       { id: "p3-l2", title: "Let's switch hats", duration: "7 min 19 sec", videoUrl: "https://vimeo.com/1224503019", description: "Argue the other side of a decision so you can spot the gaps in your own thinking." },
-      { id: "p3-l3", title: "Speak like Obama", duration: "21 min 47 sec", videoUrl: "https://drive.google.com/open?id=1sYAwaMxQE85_rvxRMabJvDm5a3yjZ6oz&usp=drive_copy", description: "Break down the pacing, pauses, and emphasis that make a speaker sound confident." },
-      { id: "p3-l4", title: "The art of saying no", duration: "18 min 25 sec", videoUrl: "https://drive.google.com/open?id=1XCOBAWDlcTht8w_utWZKwkw8wfBO_gC5&usp=drive_copy", description: "Decline a request firmly and professionally without damaging the relationship." },
+      { id: "p3-l3", title: "Speak like Obama", duration: "21 min 47 sec", videoUrl: "https://vimeo.com/1224503381", description: "Break down the pacing, pauses, and emphasis that make a speaker sound confident." },
+      { id: "p3-l4", title: "The art of saying no", duration: "18 min 25 sec", videoUrl: "https://vimeo.com/1224504944", description: "Decline a request firmly and professionally without damaging the relationship." },
       { id: "p3-l5", title: "I have bad news...", duration: "7 min 7 sec", videoUrl: "https://vimeo.com/1224504583", description: "Deliver difficult news directly and with composure, without softening it into confusion." }
     ],
     introContexts: [
@@ -277,7 +277,7 @@ const UTL_CONTENT = {
         description: "Everything feels important, but not everything is.",
         appUrl: "../apps/eisenhower-matrix/index.html",
         contextType: "video",
-        contextUrl: "https://drive.google.com/file/d/11RSuu5359pONf0sCef9TKnKMrzCPJE_R/view",
+        contextUrl: "https://vimeo.com/1224507844",
         contextTitle: "You just got the lead role.",
         contextBody: "Requests are coming from every direction and Aiko will not tell you what to prioritize. She expects you to decide."
       },
@@ -292,7 +292,7 @@ const UTL_CONTENT = {
         description: "Learn the art of being comfortable with difficult conversations.",
         appUrl: "../apps/i-have-bad-news/index.html",
         contextType: "video",
-        contextUrl: "https://drive.google.com/file/d/1vkri9tmOfrQA0TNun7zmKvpwzgje3NLG/view",
+        contextUrl: "https://vimeo.com/1224507846",
         contextTitle: "You have to be the one to say it",
         contextBody: "Something has gone wrong, and you need to say it plainly without making the conversation worse."
       },
@@ -307,7 +307,7 @@ const UTL_CONTENT = {
         description: "You will need to understand how others think.",
         appUrl: "../apps/lets-switch-hats/index.html",
         contextType: "video",
-        contextUrl: "https://drive.google.com/file/d/1MQNwwMRxfP_q6_5JEXe1MpTEN6OKbOfa/view",
+        contextUrl: "https://vimeo.com/1224507845",
         contextTitle: "Read the room before you speak",
         contextBody: "Before pushing your point, understand the other person's constraints, incentives, and version of success."
       },
@@ -322,7 +322,7 @@ const UTL_CONTENT = {
         description: "Your task involves two things: being clear and being impactful. In short, deliver it with Obama-level presence.",
         appUrl: "../apps/speak-like-obama/index.html",
         contextType: "video",
-        contextUrl: "https://drive.google.com/file/d/1Px3vppQ2z-Z-HrrpzykosGN7aWF6xnqs/view",
+        contextUrl: "https://vimeo.com/1224507847",
         contextTitle: "All eyes are on you",
         contextBody: "Act as your team's voice and lead with confidence."
       }
@@ -481,7 +481,7 @@ const UTL_CONTENT = {
   });
 
   function rewardUiHref() {
-    var version = "?v=20260907-vimeo-lessons-2";
+    var version = "?v=20260907-vimeo-all-media-1";
     if (inPhasePracticeRoot()) return "../../../assets/reward-ui.js" + version;
     return (inAdminRoot() ? "../assets/reward-ui.js" : "../assets/reward-ui.js") + version;
   }
@@ -1222,6 +1222,11 @@ const UTL_CONTENT = {
   function exerciseContextUrl(exercise) {
     var legacy = legacyEmbedConfig(exercise);
     var saved = localStorage.getItem("utl_ctx_url_" + exercise.id) || legacy.url || "";
+    if (/vimeo\.com\//.test(String(exercise.contextUrl || "")) && /drive\.google\.com\//.test(String(saved || ""))) {
+      localStorage.removeItem("utl_ctx_url_" + exercise.id);
+      if (exercise.legacyEmbedKey) localStorage.removeItem(exercise.legacyEmbedKey);
+      saved = "";
+    }
     var retiredContextVideo = /(?:168tYlq9fRUKl7NrlELHuwAPwAxC2_5yD|15AaNTTkiRsIVf90RfsmcSa3aEuFTqOAT|10GgHE70T14fcp4tvGF3gsltwsGgp-HXQ|1hNWuA1HBbZI57fUfDgdjlqLkJHYHjf1Q|1Tw0MhCjy5Tkdodjy8LvIEB-XEEuK4Di3|10b0x6cTO1rf3DYlTBbDm4tNQ4cirhWzh|17Nbk0w7C3MuEfwb_gsBn9oipmZ85exJ4|1LSc2dnbgk855FeG7R4WvWvf8P0kLJCpb|18UnP9dxWd31EeCfEfODiPBQ-Jfyxbd8Q|1m04hT3TUZkaKZN8-f0zlWWOBLA1DS6fF|1UVaAj5EG7Kg4c1uZhXaR0bqwasgtjQgS|1ndtAyGJpud5jDA5pLyYoGmqOJOeFabPO)/.test(saved);
     if (retiredContextVideo) {
       localStorage.removeItem("utl_ctx_url_" + exercise.id);

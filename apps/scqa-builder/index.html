@@ -686,7 +686,8 @@
       background: var(--white);
     }
     .attempt-switcher.visible { display: block; }
-    .attempt-switcher-head { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 10px; }
+    .attempt-switcher-head { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+    .attempt-switcher-actions { display: flex; align-items: center; justify-content: flex-end; gap: 10px; margin-left: auto; }
     .attempt-switcher-label {
       margin: 0;
       color: var(--steel);
@@ -694,7 +695,7 @@
     }
     .attempt-switcher-summary { display: block; margin-top: 3px; color: var(--navy); font: 700 13px/1.35 Lato, Arial, sans-serif; }
     .attempt-new-button { flex: 0 0 auto; min-height: 40px; padding: 8px 14px; border: 1px solid var(--navy); border-radius: 7px; background: var(--navy); color: var(--white); font-weight: 700; }
-    .attempt-tabs { display: grid; gap: 8px; }
+    .attempt-tabs { display: none; gap: 8px; }
     .attempt-tab {
       display: flex;
       align-items: center;
@@ -711,15 +712,16 @@
       font: 700 12px/1.2 Lato, Arial, sans-serif;
     }
     .attempt-tab[aria-selected="true"] {
-      border-color: var(--gold);
-      background: var(--white);
-      box-shadow: 0 0 0 1px var(--gold);
+      border-color: var(--navy);
+      background: var(--navy);
+      color: var(--white);
+      box-shadow: none;
     }
     .attempt-status { color: var(--steel); font-size: 11px; }
     .attempt-status.complete { color: var(--green); font-weight: 800; }
-    .attempt-select-wrap { display: none; }
+    .attempt-select-wrap { display: block; }
     #attemptSelect {
-      width: 100%;
+      width: min(460px, 42vw);
       min-height: 44px;
       padding: 9px 36px 9px 11px;
       border: 1px solid var(--line);
@@ -728,6 +730,7 @@
       color: var(--navy);
       font: 700 13px Lato, Arial, sans-serif;
     }
+    #showPracticeScenarios { border-color: var(--navy); background: var(--navy); color: var(--white); }
     .panel-close { position: absolute; top: 16px; right: 18px; border: 0; background: transparent; color: var(--charcoal); cursor: pointer; font-size: 18px; }
     .score-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
     .score-line { color: var(--navy); font-family: "Playfair Display", Georgia, serif; font-size: 22px; font-weight: 700; }
@@ -796,6 +799,8 @@
       .attempt-tabs { display: none; }
       .attempt-select-wrap { display: block; }
       .attempt-switcher-head { align-items: stretch; flex-direction: column; }
+      .attempt-switcher-actions { align-items: stretch; flex-direction: column; margin-left: 0; }
+      #attemptSelect { width: 100%; }
       .attempt-new-button { width: 100%; }
       .title { font-size: 31px; }
       .context-card { margin-left: 20px; margin-right: 20px; padding: 24px; }
@@ -1040,12 +1045,17 @@
       <p class="subtitle">Turn a problem into a clear, connected Situation, Complication, Question, and Answer.</p>
     </div>
     <nav class="attempt-switcher" id="attemptSwitcher" aria-label="Your SCQA attempts">
-      <div class="attempt-switcher-head"><div><p class="attempt-switcher-label">Saved work</p><span class="attempt-switcher-summary" id="attemptSummary"></span></div><button class="attempt-new-button" id="attemptNewBtn" type="button">Start a new attempt</button></div>
-      <div class="attempt-tabs" id="attemptTabs" role="tablist"></div>
-      <div class="attempt-select-wrap">
-        <label class="sr-only" for="attemptSelect">View a saved SCQA</label>
-        <select id="attemptSelect"></select>
+      <div class="attempt-switcher-head">
+        <div><p class="attempt-switcher-label">Saved work</p><span class="attempt-switcher-summary" id="attemptSummary"></span></div>
+        <div class="attempt-switcher-actions">
+          <div class="attempt-select-wrap">
+            <label class="sr-only" for="attemptSelect">View a saved SCQA</label>
+            <select id="attemptSelect"></select>
+          </div>
+          <button class="attempt-new-button" id="attemptNewBtn" type="button">Start a new attempt</button>
+        </div>
       </div>
+      <div class="attempt-tabs" id="attemptTabs" role="tablist"></div>
     </nav>
 
     <section class="screen active" id="screen1"></section>
@@ -2133,7 +2143,7 @@
   </script>
   <script type="module" src="../../assets/app-access-guard.js?v=20260903-feedback-preview"></script>
   <script src="../../assets/exercise-scoring-intro.js?v=6"></script>
-  <script src="../../assets/app-reward-header.js?v=20260903-feedback-preview"></script>
+  <script src="../../assets/app-reward-header.js?v=20260907-vimeo-all-media-1"></script>
   <script src="../../assets/reward-events.js?v=20260730-celebration-1"></script>
   <script type="module" src="../../assets/feedback-widget.js?v=6"></script>
   <script src="../../assets/tactile-buttons.js?v=20260714-flat-1" defer></script>

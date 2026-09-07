@@ -10,7 +10,7 @@ assert.match(content, /picture-in-picture; clipboard-write; encrypted-media; web
 assert.ok(content.includes('referrerpolicy="strict-origin-when-cross-origin"'), 'the approved embedding domain is sent to Vimeo');
 assert.ok(content.includes('if (/vimeo\\.com\\//'), 'Google Drive access guidance is not shown for Vimeo videos');
 assert.match(content, /vimeo\\\.com.*drive\\\.google\\\.com.*localStorage\.removeItem/s, 'stale Drive overrides are retired after an official Vimeo migration');
-assert.ok(phaseOne.includes('content-config.js?v=20260907-vimeo-lessons-2'), 'the Phase 1 page cache-busts the Vimeo player build');
+assert.ok(phaseOne.includes('content-config.js?v=20260907-vimeo-all-media-1'), 'the Phase 1 page cache-busts the Vimeo player build');
 
 [
   ['Orientation', '1224500458'],
@@ -22,9 +22,17 @@ assert.ok(phaseOne.includes('content-config.js?v=20260907-vimeo-lessons-2'), 'th
   ['The art of persuasion', '1224502855'],
   ['How to read people', '1224502887'],
   ["Let's switch hats", '1224503019'],
+  ['Speak like Obama', '1224503381'],
+  ['The art of saying no', '1224504944'],
   ['I have bad news...', '1224504583'],
 ].forEach(([title, id]) => {
   assert.ok(content.includes(id), `${title} uses its assigned Vimeo video`);
 });
+
+[
+  '1224511246', '1224507503', '1224507502', '1224507504', '1224507505', '1224507528',
+  '1224507799', '1224507800', '1224507797', '1224507825', '1224507798', '1224507826',
+  '1224507844', '1224507846', '1224507845', '1224507847'
+].forEach((id) => assert.ok(content.includes(id), `exercise setup uses Vimeo video ${id}`));
 
 console.log('Vimeo embed checks passed.');

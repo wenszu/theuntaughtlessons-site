@@ -70,6 +70,7 @@ for (const file of [
 }
 
 const issueTree = fs.readFileSync('apps/issue-tree-builder/index.html', 'utf8');
+assert.match(issueTree, /\.bottom-bar \{\s*position: static;/, 'Issue Tree keeps Submit in the normal document flow like the other exercises');
 for (const label of ['Self-check', 'Feedback', 'Your answer', 'Sample']) {
   assert.match(issueTree, new RegExp(`data-issue-result-tab="[^"]+"[^>]*>${label}`), `Issue Tree Builder includes the ${label} result tab`);
 }
@@ -121,6 +122,8 @@ for (const label of ['What is working', 'Improve this first', 'Check the connect
 assert.match(scqa, /View all structure checks/, 'SCQA keeps the complete rule feedback available on demand');
 assert.match(scqa, /<section class="scqa-results-shell">/, 'SCQA groups tabs, feedback, and actions in one outlined white results container');
 assert.match(scqa, /--paper: #FAF8F4/, 'SCQA uses the same beige result tab background as Manager’s Messy Notes');
+assert.match(scqa, /\.attempt-tabs \{ display: none;/, 'SCQA uses the same previous-submission selector pattern as the other writing exercises');
+assert.match(scqa, /#showPracticeScenarios \{ border-color: var\(--navy\); background: var\(--navy\); color: var\(--white\); \}/, 'SCQA uses navy for the forward Start a new attempt action');
 
 for (const file of ['apps/messy-notes/index.html', 'apps/chalkboard-notes/index.html', 'apps/rushed-voice-memo/index.html']) {
   const html = fs.readFileSync(file, 'utf8');

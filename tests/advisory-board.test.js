@@ -3,6 +3,9 @@ const assert = require('assert');
 
 const page = fs.readFileSync('apps/advisory-board/index.html', 'utf8');
 const functions = fs.readFileSync('functions-aiko/index.js', 'utf8');
+const contextFlow = fs.readFileSync('assets/exercise-context-flow.js', 'utf8');
+
+assert.match(contextFlow, /\.site-header/, 'the setup overlay preserves the Advisory Board sticky header');
 
 assert.match(page, /How does a virtual advisory board work\?/);
 assert.match(page, /Step 1 of 3/);

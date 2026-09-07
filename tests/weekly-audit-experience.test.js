@@ -62,7 +62,7 @@ assert(messyNotes.includes('utl_context_complete_p1-e3'), 'messy notes uses the 
 assert(messyNotes.includes("eventId: CONTEXT_REWARD_ID") && messyNotes.includes("type: 'context-completed'"), 'messy notes awards the standard context-completion event');
 assert(messyNotes.includes('Mark setup complete and continue · +5 MP'), 'messy notes makes context completion and the next step explicit');
 assert(messyNotes.includes('index.html?phase=phase1#learning-journey'), 'messy notes returns to the selected Learning Journey phase');
-assert(messyNotes.includes('Open it in Google Drive'), 'messy notes provides a fallback when the embedded context video cannot open');
+assert(messyNotes.includes('Open it in Vimeo'), 'messy notes provides a fallback when the embedded context video cannot open');
 const contextFlow = fs.readFileSync('assets/exercise-context-flow.js', 'utf8');
 assert(contextFlow.includes('"grocery-list"') && contextFlow.includes('"speak-like-obama"'), 'the shared setup-first flow covers exercises across all three phases');
 assert(contextFlow.includes('"utl_context_complete_" + config[0]'), 'shared exercise setup uses canonical context-completion keys');
@@ -77,7 +77,7 @@ assert(scqa.includes('.form-header p { width: 100%; max-width: none;'), 'SCQA in
 assert(!scqa.includes('How to make this one different'), 'SCQA avoids repeating the second-formulation guidance');
 const appHtml = fs.readdirSync('apps').filter((name) => fs.existsSync(`apps/${name}/index.html`)).map((name) => fs.readFileSync(`apps/${name}/index.html`, 'utf8')).join('\n');
 assert(!appHtml.includes('app-reward-header.js?v=20260729-phase3-4'), 'exercise pages do not retain the stale shared-header cache key');
-  assert(appHtml.includes('app-reward-header.js?v=20260730-celebration-1'), 'exercise pages load the current compact responsive reward header');
+assert(appHtml.includes('app-reward-header.js?v=20260907-vimeo-all-media-1'), 'exercise pages load the current compact responsive reward header');
 assert(!/member-login\/phase-[123]/.test(appHtml), 'exercise navigation no longer returns learners to deprecated phase pages');
 assert(!/Back to Phase [123] exercises/.test(appHtml), 'exercise headers consistently return learners to the Learning Journey');
 assert(appHtml.includes('member-login/index.html#learning-journey'), 'exercise navigation links directly to the Learning Journey');

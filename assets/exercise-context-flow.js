@@ -1,21 +1,21 @@
 (function () {
   var MP = 5;
   var CONTEXTS = {
-    "grocery-list": ["p1-e1", "phase1", "video", "Before your first day", "You have just arrived in Tokyo for your new role at MA. Aiko expects clarity from day one, so practice it before starting your role.", "https://drive.google.com/file/d/1vtKHRag3W1PqbZSssdxxTVL7-FXFLJcl/view?usp=vids_web"],
-    "grocery-list-ai": ["p1-e2", "phase1", "video", "Try the same task with AI", "Compare your own sorting choices with an AI-assisted approach and notice what the prompt makes clear.", "https://drive.google.com/file/d/119sJkFz6imeWn51g44qTfqjTQIEXs2OJ/view"],
-    "rushed-voice-memo": ["p1-e4", "phase1", "video", "Hugh needs a favor", "Hugh needs a favor and the information is messy. Slow the situation down and make the request easier to understand.", "https://drive.google.com/file/d/1ZomeBoyk0SS1iFNV2eXobRfJQWDwyhEz/view"],
-    "rushed-voice-memo-ai": ["p1-e5", "phase1", "video", "Try the same memo with AI", "Compare your restructuring choices with another structured draft before using AI.", "https://drive.google.com/file/d/1wU42aEuW-_XjVMrL479CUtAizs3BkAj5/view"],
-    "chalkboard-notes": ["p1-e6", "phase1", "video", "Aiko needs the Olympic brainstorm sorted", "Turn the brainstorm fragments into something the team can use. Clean up the clutter and make the structure visible.", "https://drive.google.com/file/d/1BHO2za_2AtxJvyKVOh-B19gDUwvVMnYy/view"],
-    "issue-tree-builder": ["p2-e1", "phase2", "video", "Aiko liked your work. Now she has a question.", "Create an issue tree that breaks the problem into clear, solvable parts.", "https://drive.google.com/file/d/1goMjwwkp_dGav6LyORBGMMFvBC27xTR8/view"],
-    "scqa-builder": ["p2-e2", "phase2", "video", "Create an executive-ready brief for Aiko", "Make the work easier for Aiko to read by using the SCQA framework.", "https://drive.google.com/open?id=1qrngkvMOp3wkzrPnIuIe2CX9z7Tk1_NU&usp=drive_copy"],
-    "advisory-board": ["p2-e3", "phase2", "video", "Get outside perspectives before you commit", "Use expert perspectives to test your thinking before committing to a recommendation.", "https://drive.google.com/file/d/1tNJgprewm7bCJ29EYzRBbW-AIf_kjAuk/view"],
-    "write-to-aiko": ["p2-e4", "phase2", "video", "Aiko does not have time to read everything", "Aiko needed the reply yesterday. Prepare an answer-first email she can use quickly.", "https://drive.google.com/file/d/1zbduNG5_xM2meZU0X8iI9vPJGgJvqdFd/view"],
-    "explain-to-aiko": ["p2-e5", "phase2", "video", "Aiko asks for a quick explanation", "Prepare a clear 120-second explanation of the same answer.", "https://drive.google.com/file/d/1_qeA-dLRKfSgoxcXvXZ6WC0HfxfC6E3n/view?usp=vids_web"],
-    "explain-to-aiko-60": ["p2-e6", "phase2", "video", "Now compress it", "Deliver the same key points in 60 seconds or less.", "https://drive.google.com/file/d/1SfgGyNExQfTOYpMx7AveLRvpRA4_I7qS/view?usp=vids_web"],
-    "eisenhower-matrix": ["p3-e1", "phase3", "video", "You just got the lead role", "Requests are coming from every direction. Decide what matters and be ready to explain your choices.", "https://drive.google.com/file/d/11RSuu5359pONf0sCef9TKnKMrzCPJE_R/view"],
-    "i-have-bad-news": ["p3-e2", "phase3", "video", "You have to be the one to say it", "Something has gone wrong. Say it plainly without making the conversation worse.", "https://drive.google.com/file/d/1vkri9tmOfrQA0TNun7zmKvpwzgje3NLG/view"],
-    "lets-switch-hats": ["p3-e3", "phase3", "video", "Read the room before you speak", "Understand the other person's constraints, incentives, and version of success before pushing your point.", "https://drive.google.com/file/d/1MQNwwMRxfP_q6_5JEXe1MpTEN6OKbOfa/view"],
-    "speak-like-obama": ["p3-e4", "phase3", "video", "All eyes are on you", "Act as your team's voice and lead with confidence.", "https://drive.google.com/file/d/1Px3vppQ2z-Z-HrrpzykosGN7aWF6xnqs/view"]
+    "grocery-list": ["p1-e1", "phase1", "video", "Before your first day", "You have just arrived in Tokyo for your new role at MA. Aiko expects clarity from day one, so practice it before starting your role.", "https://vimeo.com/1224511246"],
+    "grocery-list-ai": ["p1-e2", "phase1", "video", "Try the same task with AI", "Compare your own sorting choices with an AI-assisted approach and notice what the prompt makes clear.", "https://vimeo.com/1224507503"],
+    "rushed-voice-memo": ["p1-e4", "phase1", "video", "Hugh needs a favor", "Hugh needs a favor and the information is messy. Slow the situation down and make the request easier to understand.", "https://vimeo.com/1224507504"],
+    "rushed-voice-memo-ai": ["p1-e5", "phase1", "video", "Try the same memo with AI", "Compare your restructuring choices with another structured draft before using AI.", "https://vimeo.com/1224507505"],
+    "chalkboard-notes": ["p1-e6", "phase1", "video", "Aiko needs the Olympic brainstorm sorted", "Turn the brainstorm fragments into something the team can use. Clean up the clutter and make the structure visible.", "https://vimeo.com/1224507528"],
+    "issue-tree-builder": ["p2-e1", "phase2", "video", "Aiko liked your work. Now she has a question.", "Create an issue tree that breaks the problem into clear, solvable parts.", "https://vimeo.com/1224507799"],
+    "scqa-builder": ["p2-e2", "phase2", "video", "Create an executive-ready brief for Aiko", "Make the work easier for Aiko to read by using the SCQA framework.", "https://vimeo.com/1224507800"],
+    "advisory-board": ["p2-e3", "phase2", "video", "Get outside perspectives before you commit", "Use expert perspectives to test your thinking before committing to a recommendation.", "https://vimeo.com/1224507797"],
+    "write-to-aiko": ["p2-e4", "phase2", "video", "Aiko does not have time to read everything", "Aiko needed the reply yesterday. Prepare an answer-first email she can use quickly.", "https://vimeo.com/1224507825"],
+    "explain-to-aiko": ["p2-e5", "phase2", "video", "Aiko asks for a quick explanation", "Prepare a clear 120-second explanation of the same answer.", "https://vimeo.com/1224507798"],
+    "explain-to-aiko-60": ["p2-e6", "phase2", "video", "Now compress it", "Deliver the same key points in 60 seconds or less.", "https://vimeo.com/1224507826"],
+    "eisenhower-matrix": ["p3-e1", "phase3", "video", "You just got the lead role", "Requests are coming from every direction. Decide what matters and be ready to explain your choices.", "https://vimeo.com/1224507844"],
+    "i-have-bad-news": ["p3-e2", "phase3", "video", "You have to be the one to say it", "Something has gone wrong. Say it plainly without making the conversation worse.", "https://vimeo.com/1224507846"],
+    "lets-switch-hats": ["p3-e3", "phase3", "video", "Read the room before you speak", "Understand the other person's constraints, incentives, and version of success before pushing your point.", "https://vimeo.com/1224507845"],
+    "speak-like-obama": ["p3-e4", "phase3", "video", "All eyes are on you", "Act as your team's voice and lead with confidence.", "https://vimeo.com/1224507847"]
   };
 
   function appKey() {
@@ -25,6 +25,8 @@
 
   function embedUrl(url, type) {
     if (type === "slides") return url.replace(/\/edit(?:\?.*)?$/, "/embed");
+    var vimeo = url.match(/vimeo\.com\/(?:video\/)?(\d+)(?:\/([a-zA-Z0-9]+))?/);
+    if (vimeo) return "https://player.vimeo.com/video/" + vimeo[1] + (vimeo[2] ? "?h=" + encodeURIComponent(vimeo[2]) : "");
     var id = (url.match(/\/file\/d\/([^/]+)/) || url.match(/[?&]id=([^&]+)/) || [])[1];
     return id ? "https://drive.google.com/file/d/" + id + "/preview" : url;
   }
@@ -69,7 +71,7 @@
     var gate = document.createElement("section");
     gate.className = "utl-context-gate";
     gate.setAttribute("aria-label", "Exercise setup");
-    var header = document.querySelector(".app-header,.ab-header,.eisenhower-header,.tsa-speak-header,.bad-news-header,.lsh-header,.slo-header,.write-to-aiko-header,.aiko-header");
+    var header = document.querySelector(".app-header,.site-header,.ab-header,.eisenhower-header,.tsa-speak-header,.bad-news-header,.lsh-header,.slo-header,.write-to-aiko-header,.aiko-header");
     function positionGate() {
       gate.style.top = Math.max(0, Math.ceil(header ? header.getBoundingClientRect().bottom : 0)) + "px";
     }
