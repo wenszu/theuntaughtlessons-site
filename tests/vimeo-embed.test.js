@@ -8,5 +8,6 @@ assert.ok(content.includes('vimeo\\.com\\/(?:video\\/)?'), 'regular Vimeo share 
 assert.match(content, /picture-in-picture; clipboard-write; encrypted-media; web-share/, 'the embedded player receives Vimeo playback permissions');
 assert.ok(content.includes('referrerpolicy="strict-origin-when-cross-origin"'), 'the approved embedding domain is sent to Vimeo');
 assert.ok(content.includes('if (/vimeo\\.com\\//'), 'Google Drive access guidance is not shown for Vimeo videos');
+assert.match(content, /vimeo\\\.com.*drive\\\.google\\\.com.*localStorage\.removeItem/s, 'stale Drive overrides are retired after an official Vimeo migration');
 
 console.log('Vimeo embed checks passed.');

@@ -1189,7 +1189,12 @@ const UTL_CONTENT = {
 
   function lessonUrl(lesson) {
     var saved = localStorage.getItem("utl_url_" + lesson.id);
-    return supportedMediaUrl(saved) ? saved : (lesson.videoUrl || "");
+    var officialUrl = String(lesson.videoUrl || "");
+    if (/vimeo\.com\//.test(officialUrl) && /drive\.google\.com\//.test(String(saved || ""))) {
+      localStorage.removeItem("utl_url_" + lesson.id);
+      saved = "";
+    }
+    return supportedMediaUrl(saved) ? saved : officialUrl;
   }
 
   function supportedMediaUrl(value) {
