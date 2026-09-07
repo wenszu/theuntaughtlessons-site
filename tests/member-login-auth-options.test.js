@@ -34,23 +34,15 @@ assert.match(admin, /Older record; no reliable setup history/, 'legacy rows shou
 assert.match(admin, /Passwordless email link \(recommended for corporate members\)/, 'admin guidance should recommend email links for corporate learners');
 assert.doesNotMatch(admin, /sign in with the Google account connected to your membership/, 'welcome email should not assume Google is the only sign-in method');
 assert.match(admin, /email sign-in link or continue with Google, Microsoft or Facebook/, 'welcome email should explain every available sign-in path');
-assert.match(admin, /Confirm your program access/, 'welcome email should explain program-material access before sign-in');
-assert.match(admin, /utl-members@googlegroups\.com/, 'welcome email should name the Google Group learners may need to find');
-assert.match(admin, /If you receive a Google Groups invitation:/, 'welcome email should clearly identify when an invitation needs action');
-assert.match(admin, /If you do not receive an invitation:<\/strong> No action is needed\./, 'welcome email should prevent unnecessary action when access is already active');
-assert.match(admin, /invitation is separate from signing in to your workspace/, 'welcome email should distinguish group access from authentication');
-assert.ok(
-  admin.indexOf('Confirm your program access') < admin.indexOf('Sign in to your workspace'),
-  'program access instructions should appear before workspace sign-in'
-);
+assert.doesNotMatch(admin, /Google Groups invitation/, 'welcome email should not include obsolete group instructions');
 assert.match(admin, /name="etEmailFormat" value="simple"/, 'email editor should offer a simple text format');
 assert.match(admin, /name="etEmailFormat" value="branded"/, 'email editor should retain a branded format');
 assert.match(admin, /function datedWelcomeSubject\(subject, date\)/, 'welcome subject should include the current month and year');
 assert.match(admin, /'Sept'/, 'welcome subject should use the requested September abbreviation');
 assert.match(admin, /base = 'Welcome to The Untaught Lessons!'/, 'welcome subject should use the approved wording and punctuation');
 assert.match(admin, /function generateEmailPlainText\(data\)/, 'plain email should use a deliberate readable text template');
-assert.match(admin, /'\* If you receive a Google Groups invitation:/, 'plain email should use an asterisk for the invitation path');
-assert.match(admin, /'\* If you do not receive an invitation:/, 'plain email should visually separate the no-action path');
+assert.match(admin, /'1\. Sign in to your workspace'/, 'plain email should begin with workspace sign-in');
+assert.match(admin, /'3\. Begin Phase 1'/, 'plain email should retain a short three-step setup path');
 assert.match(admin, /emailFormat: delivery\.emailFormat/, 'welcome sends should include the selected delivery format');
 assert.match(admin, /SPF: PASS/, 'admin guidance should explain how to check sender authentication');
 assert.match(emailActions, /emailFormat === 'branded' && htmlBody/, 'only branded delivery should attach an HTML body');

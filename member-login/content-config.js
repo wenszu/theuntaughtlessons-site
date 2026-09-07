@@ -40,16 +40,7 @@ const UTL_CONTENT = {
       { id: "p1-l2", title: "Rule of three", duration: "8 min 26 sec", videoUrl: "https://vimeo.com/1224500460", description: "Group your points into threes so they are easier to remember, follow, and act on." },
       { id: "p1-l3", title: "Bolded Summary Phrase (BSP)", duration: "8 min 21 sec", videoUrl: "https://vimeo.com/1224500456", description: "Write a one-line bolded takeaway for every section so a skimming reader still gets the point." }
     ],
-    introContexts: [
-      {
-        id: "p1-welcome-ma",
-        legacyEmbedKey: "utl_embed_p1_welcome_ma",
-        contextType: "video",
-        contextUrl: "https://drive.google.com/file/d/1BdvDKLdjPz931sPVHSwTvcZT0u72Rcn1/view",
-        contextTitle: "Your first day at MA",
-        contextBody: "See what your first day will look like before you begin the exercises."
-      }
-    ],
+    introContexts: [],
     exercises: [
       {
         id: "p1-e1",
@@ -148,16 +139,7 @@ const UTL_CONTENT = {
       { id: "p2-l1", title: "The executive storyline", duration: "7 min 38 sec", videoUrl: "https://vimeo.com/1224502214", description: "Structure a message the way executives expect: the answer first, then the supporting logic." },
       { id: "p2-l3", title: "The art of persuasion", duration: "12 min 38 sec", videoUrl: "https://vimeo.com/1224502855", description: "Frame a recommendation so people are moved to agree, not just informed." }
     ],
-    introContexts: [
-      {
-        id: "p2-recap",
-        legacyEmbedKey: "utl_embed_p2_recap_storyline",
-        contextType: "video",
-        contextUrl: "https://drive.google.com/open?id=1A6lCodeBWSOQLNAEMOE4bpYYB5xJXWjb&usp=drive_copy",
-        contextTitle: "Recap and storyline",
-        contextBody: "Before moving into concise communication, reconnect the work to the MA storyline and the logic you built in Phase 1."
-      }
-    ],
+    introContexts: [],
     exercises: [
       {
         id: "p2-e1",
@@ -256,16 +238,7 @@ const UTL_CONTENT = {
       { id: "p3-l4", title: "The art of saying no", duration: "18 min 25 sec", videoUrl: "https://vimeo.com/1224504944", description: "Decline a request firmly and professionally without damaging the relationship." },
       { id: "p3-l5", title: "I have bad news...", duration: "7 min 7 sec", videoUrl: "https://vimeo.com/1224504583", description: "Deliver difficult news directly and with composure, without softening it into confusion." }
     ],
-    introContexts: [
-      {
-        id: "p3-recap",
-        legacyEmbedKey: "utl_embed_p3_recap_storyline",
-        contextType: "video",
-        contextUrl: "https://drive.google.com/file/d/1xJsxbjivMPHJvGKjWxtvPM0grgm2LiE-/view?usp=vids_web",
-        contextTitle: "Recap and storyline",
-        contextBody: "Before Phase 3, reconnect the storyline: you have built structure, practiced concise communication, and now need to act with judgment."
-      }
-    ],
+    introContexts: [],
     exercises: [
       {
         id: "p3-e1",
@@ -1411,7 +1384,7 @@ const UTL_CONTENT = {
       '<div class="ws-access-guide">' +
         '<section><h4>Quick checks</h4><ol>' +
           '<li><strong>Use the approved Google account:</strong> The Google account that can view the Drive file must match your member workspace email.' + emailText + '</li>' +
-          '<li><strong>Wait after access changes:</strong> New Google Group access can take a few minutes to apply.</li>' +
+          '<li><strong>Confirm your membership email:</strong> Make sure the email shown here matches the address used for your membership.</li>' +
           '<li><strong>Hard refresh:</strong> Reload this page after confirming the video opens in Google Drive.</li>' +
         '</ol></section>' +
         '<section><h4>Desktop browsers</h4><ol>' +

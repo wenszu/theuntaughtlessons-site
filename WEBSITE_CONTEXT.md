@@ -67,7 +67,7 @@ Firebase project: `the-untaught-lessons` · Shared client: `assets/firebase.js`
 The Admin Console imports the shared Firebase client with an explicit version query. Update that version whenever the module's named exports change so a cached older module cannot prevent the admin authentication gate from starting.
 
 Firestore collections:
-- `authorized_members/{email}` — who can sign in with Google. Email keys are normalized lowercase.
+- `authorized_members/{email}` — who can sign in with an approved email link or identity provider. Email keys are normalized lowercase.
 - `users/{uid}` — per-user profile and progress. Fields: `email`, `displayName`, `role`, `lastSeenAt`, `workspaceProgress`, `feedbackEnabled`.
 - `users/{uid}/completed_exercises/{exerciseId}` — per-exercise completion records.
 - `settings/emailTemplates` — welcome email template. Read/written by `getEmailTemplates`/`saveEmailTemplate` in `assets/firebase.js`.
@@ -79,7 +79,7 @@ Firestore collections:
 Key `authorized_members` fields: `email`, `name`, `role` (member/admin/owner), `status`, `googleGroupAdded`, `googleGroupAddedAt`, `googleGroupAddedBy`, `googleGroupRemovedAt`, `googleGroupRemovedBy`, `feedbackEnabled`, `addedAt`, `updatedAt`.
 
 Auth behavior:
-- Supports Google sign-in for emails in `authorized_members`.
+- Supports passwordless email links plus Google, Microsoft, and Facebook sign-in for emails in `authorized_members`.
 - Local test accounts: `admin/password123` and `testuser/member2026`.
 - Unauthorized Google accounts are signed out with an invite error (outside localhost/emulator).
 - Admin access: role `admin` or `owner`.
@@ -180,6 +180,8 @@ Decisions are made in Claude (claude.ai). JSON updates are handled in Codex. Doc
 - Member workspace video/context management is browser-local (localStorage). Admin content changes do not publish to other visitors unless defaults in `content-config.js` are updated in code.
 - Google Sheet admin changes are pending Google Drive connector reconnection: rename sheet `10iQByFqVCffHanZbbHLnYj7Csbet4fgOCd2FWDzEqkE`, add `Assessments` tab, add `source` column to contacts tab.
 - Legacy Google Group fields in `authorized_members` are preserved but are no longer shown or changed by the Admin Console.
+- New individual and bulk member onboarding no longer requests Google Group access. Welcome emails use a three-step path covering sign-in, orientation, and Phase 1.
+- Deprecated phase-introduction videos have been removed. Hugh's voice memo is hosted on Vimeo, so active course media no longer depends on Google Drive or Google Groups.
 - Embedded Google Drive videos/slides cannot expose their permission error state to site JavaScript because the iframe is cross-origin. The workspace instead shows a reusable "Video not opening?" access guide under protected embeds without exposing the internal Google Group address.
 - Firebase Auth sign-in-link email copy is controlled in Firebase Console Authentication Templates. Use `FIREBASE_EMAIL_TEMPLATE.md` for the approved template copy.
 - Passwordless invite `actionCodeSettings.url` uses the current site origin and `/member-login/`.

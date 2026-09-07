@@ -3,6 +3,8 @@ const fs = require('node:fs');
 
 const content = fs.readFileSync('member-login/content-config.js', 'utf8');
 const phaseOne = fs.readFileSync('member-login/phase-1.html', 'utf8');
+const rushedMemo = fs.readFileSync('apps/rushed-voice-memo/index.html', 'utf8');
+const rushedMemoAi = fs.readFileSync('apps/rushed-voice-memo-ai/index.html', 'utf8');
 
 assert.ok(content.includes('player\\.vimeo\\.com\\/video'), 'Vimeo player URLs are recognized');
 assert.ok(content.includes('vimeo\\.com\\/(?:video\\/)?'), 'regular Vimeo share URLs are recognized');
@@ -34,5 +36,11 @@ assert.ok(phaseOne.includes('content-config.js?v=20260907-vimeo-all-media-1'), '
   '1224507799', '1224507800', '1224507797', '1224507825', '1224507798', '1224507826',
   '1224507844', '1224507846', '1224507845', '1224507847'
 ].forEach((id) => assert.ok(content.includes(id), `exercise setup uses Vimeo video ${id}`));
+
+assert.ok(rushedMemo.includes('1224561751'), "Rushed voice memo uses Hugh's current Vimeo upload");
+assert.ok(rushedMemoAi.includes('1224561751'), "Rushed voice memo with AI uses Hugh's current Vimeo upload");
+assert.doesNotMatch(rushedMemo + rushedMemoAi, /1224530026/, "Hugh's superseded Vimeo upload is no longer referenced");
+assert.doesNotMatch(content, /contextUrl:\s*["']https:\/\/drive\.google\.com/, 'published course context no longer uses Google Drive');
+assert.doesNotMatch(rushedMemo + rushedMemoAi, /1vjcNHKWZ0uK4LPKQ8lEnd2ug3wqRR7fy/, "Hugh's former Drive file is no longer referenced");
 
 console.log('Vimeo embed checks passed.');

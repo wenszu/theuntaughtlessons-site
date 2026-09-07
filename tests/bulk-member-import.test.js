@@ -23,7 +23,8 @@ assert.match(admin, /Reactivate existing member/, 'inactive ordinary members sho
 assert.match(admin, /Existing ' \+ role \+ ' cannot be changed in bulk/, 'bulk imports should protect admins and owners');
 assert.match(admin, /role: 'member'/, 'bulk imports should only create ordinary learners');
 assert.match(admin, /window\.confirm\('Add ' \+ ready\.length/, 'writes and onboarding messages should require explicit confirmation');
-assert.match(admin, /requestGoogleGroupSyncJob\(row\.email, 'add'/, 'Google Group access should use the existing queued sync path');
+assert.doesNotMatch(admin, /id="mbBulkGoogleGroup"/, 'bulk onboarding should not request obsolete Google Group access');
+assert.doesNotMatch(admin, /requestGoogleGroupSyncJob\(row\.email, 'add'/, 'bulk onboarding should not create Google Group jobs');
 assert.match(admin, /id="mbBulkRetry"/, 'failed operations should be retryable without reimporting everyone');
 assert.match(admin, /mbRecordWelcomeEmailStatus\(row\.email, 'sent'/, 'successful bulk welcome sends should be persisted');
 assert.match(admin, /welcomeEmailStatus = sendWelcome \? 'pending' : 'not_requested'/, 'new bulk members should start with an explicit welcome-email state');

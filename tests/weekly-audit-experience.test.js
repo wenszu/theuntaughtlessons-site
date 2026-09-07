@@ -49,7 +49,7 @@ assert(workspace.includes('"?lesson=" + encodeURIComponent(lesson.id) + "#lesson
 assert(workspace.includes('ws-video-help-toggle'), 'video troubleshooting includes a visible expand and collapse control');
 assert(workspace.includes('.ws-video-access-help[open] .ws-video-help-toggle:before'), 'the troubleshooting control changes from plus to minus when expanded');
 assert(workspace.includes('Intern, Analyst, Associate, Principal, and Executive'), 'workspace explains the five levels');
-assert(workspace.includes('Your first day at MA'), 'Phase 1 avoids repeating the orientation welcome headline');
+assert(!workspace.includes('Your first day at MA'), 'the deprecated Phase 1 intro video should remain removed');
 assert(workspace.includes('ws-phase-practice-cta'), 'Phase 1 presents practice navigation as one clear button');
 assert(!workspace.includes('<a class="ws-ai-link-card"'), 'AI practice uses one clear action instead of a redundant link bar');
 assert(workspace.includes('(!seen && !orientationDone)'), 'completed onboarding does not reopen the introductory journey card');

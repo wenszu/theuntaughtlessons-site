@@ -1176,7 +1176,7 @@
           <div class="panel-body">
             <audio class="voice-memo-player hidden" id="voiceMemoPlayer" controls></audio>
             <div class="voice-memo-embed hidden" id="voiceMemoEmbed"></div>
-            <p class="small"><a id="voiceMemoFallbackLink" href="#" target="_blank" rel="noopener">Listen on Google Drive</a> if the player does not load.</p>
+            <p class="small"><a id="voiceMemoFallbackLink" href="#" target="_blank" rel="noopener">Open the voice memo in a new tab</a> if the player does not load.</p>
             <div class="voice-memo-placeholder" id="voiceMemoPlaceholder">Voice file placeholder. The audio will appear here once uploaded.</div>
 
             <div class="story-card">
@@ -1368,7 +1368,7 @@
         id: 'rushed-voice-memo',
         title: 'Rushed voice memo',
         subtitle: 'Turn a rushed verbal update into an Aiko-ready summary.',
-        audioUrl: 'https://drive.google.com/file/d/1vjcNHKWZ0uK4LPKQ8lEnd2ug3wqRR7fy/view',
+        audioUrl: 'https://vimeo.com/1224561751',
         storyContext: 'Hugh sent you a rushed voice memo. He spoke quickly and without structure and he knows that. He asked you to help him turn the verbal update into a clean, structured written summary that Aiko can act on.',
         instructions: [
           '<strong>Your task:</strong> Hugh sent you a rushed voice memo. He spoke quickly and without structure and he knows that. He asked you to help him turn the verbal update into a clean, structured written summary that Aiko can act on.',
@@ -1770,7 +1770,7 @@
       const voiceMemoPlaceholder = document.getElementById('voiceMemoPlaceholder');
       const voiceMemoFallbackLink = document.getElementById('voiceMemoFallbackLink');
       if (voiceMemoFallbackLink && ACTIVITY.audioUrl) voiceMemoFallbackLink.href = ACTIVITY.audioUrl;
-      if (ACTIVITY.audioUrl && drivePreviewUrl(ACTIVITY.audioUrl)) {
+      if (ACTIVITY.audioUrl && embeddedVoiceMemoUrl(ACTIVITY.audioUrl)) {
         renderVoiceMemoEmbed(ACTIVITY.audioUrl, voiceMemoEmbed, voiceMemoPlayer);
         if (voiceMemoPlaceholder) voiceMemoPlaceholder.classList.add('hidden');
       } else if (voiceMemoPlayer && ACTIVITY.audioUrl) {
@@ -1812,10 +1812,17 @@
       return '';
     }
 
+    function embeddedVoiceMemoUrl(url) {
+      const value = String(url || '').trim();
+      const vimeoMatch = value.match(/vimeo\.com\/(?:video\/)?(\d+)/);
+      if (vimeoMatch) return `https://player.vimeo.com/video/${vimeoMatch[1]}?badge=0&autopause=0&player_id=0&app_id=58479`;
+      return drivePreviewUrl(value);
+    }
+
     function renderVoiceMemoEmbed(url, embed, player) {
-      const embedUrl = drivePreviewUrl(url);
+      const embedUrl = embeddedVoiceMemoUrl(url);
       if (!embedUrl || !embed) return;
-      embed.innerHTML = `<iframe src="${escapeHtml(embedUrl)}" title="Voice memo player" allow="autoplay"></iframe>`;
+      embed.innerHTML = `<iframe src="${escapeHtml(embedUrl)}" title="Voice memo player" allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>`;
       embed.classList.remove('hidden');
       if (player) player.classList.add('hidden');
     }

@@ -3261,7 +3261,6 @@
             </div>
             <div class="mb-bulk-checks">
               <label><input type="checkbox" id="mbBulkWelcome" checked>Send the welcome email</label>
-              <label><input type="checkbox" id="mbBulkGoogleGroup" checked>Request Google Group access</label>
             </div>
             <div class="mb-bulk-tabs" role="tablist" aria-label="Choose how to add learners"><button class="mb-bulk-tab is-active" type="button" role="tab" aria-selected="true" data-mb-bulk-input="paste">Paste list</button><button class="mb-bulk-tab" type="button" role="tab" aria-selected="false" data-mb-bulk-input="file">Upload CSV</button></div>
             <div class="mb-bulk-input-panel" data-mb-bulk-input-panel="paste"><label for="mbBulkPaste" class="invite-email-label">Paste names and emails</label><textarea class="mb-bulk-textarea" id="mbBulkPaste" placeholder="Albert Einstein&#9;albert.einstein@example.com&#10;Marie Curie&#9;marie.curie@example.com"></textarea><p class="mb-bulk-help">Copy two columns from Google Sheets or Excel, or paste comma-separated rows. The first row may contain headings.</p></div>
@@ -3799,14 +3798,12 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       setPublicAssessmentSettings,
       getEngagementSettings,
       getRewardSettings,
-      getGoogleGroupSyncJobs,
       getGlobalFeedbackSetting,
       getPublicFindLevelSetting,
       getSignedInUser,
       manageVerifiedCredential,
       logMemberSupportPreview,
       searchVerifiedCredentials,
-      requestGoogleGroupSyncJob,
       runAdminAction,
       repairMemberProgramCompletionReward,
       replaceMemberWorkspaceProgress,
@@ -3850,14 +3847,12 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       setPublicAssessmentSettings,
       getEngagementSettings,
       getRewardSettings,
-      getGoogleGroupSyncJobs,
       getGlobalFeedbackSetting,
       getPublicFindLevelSetting,
       getSignedInUser,
       manageVerifiedCredential,
       logMemberSupportPreview,
       searchVerifiedCredentials,
-      requestGoogleGroupSyncJob,
       runAdminAction,
       repairMemberProgramCompletionReward,
       replaceMemberWorkspaceProgress,
@@ -3986,7 +3981,6 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
     const inviteStatus = document.getElementById('inviteStatus');
     let pendingLayoutHighlightKey = '';
     const EXPECTED_EMBEDS = [
-      ['embed-orientation', 'utl_embed_orientation_welcome', 'Your first day at MA'],
       ['embed-orientation', 'utl_embed_orientation_howto', 'How this program works'],
       ['embed-phase1', 'utl_embed_p1_first_day', 'Before your first day'],
       ['embed-phase1', 'utl_embed_p1_ai_grocery', 'Try the same task with AI'],
@@ -3994,14 +3988,12 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       ['embed-phase1', 'utl_embed_p1_hugh_favour', 'Hugh needs a favor'],
       ['embed-phase1', 'utl_embed_p1_ai_memo', 'Try the same memo with AI'],
       ['embed-phase1', 'utl_embed_p1_olympic_brainstorm', 'Aiko needs the Olympic brainstorm session sorted'],
-      ['embed-phase2', 'utl_embed_p2_recap_storyline', 'Recap and storyline'],
       ['embed-phase2', 'utl_embed_p2_aiko_question', 'Aiko liked your work. Now she has a question.'],
       ['embed-phase2', 'utl_embed_p2_frame_answer', 'Before you frame your answer'],
       ['embed-phase2', 'utl_embed_p2_outside_perspectives', 'Get outside perspectives before you commit'],
       ['embed-phase2', 'utl_embed_p2_aiko_email', 'Aiko does not have time to read everything'],
       ['embed-phase2', 'utl_embed_p2_hallway', 'Aiko asks for a quick explanation'],
       ['embed-phase2', 'utl_embed_p2_compress', 'Now compress it'],
-      ['embed-phase3', 'utl_embed_p3_recap_storyline', 'Recap and storyline'],
       ['embed-phase3', 'utl_embed_p3_lead_role', 'You just got the lead role.'],
       ['embed-phase3', 'utl_embed_p3_bad_news', 'You have to be the one to say it'],
       ['embed-phase3', 'utl_embed_p3_read_room', 'Read the room before you speak'],
@@ -4027,7 +4019,6 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
     ];
     const PHASE_LAYOUT_DEFAULTS = {
       orientation: [
-        { kind: 'context', key: 'utl_embed_orientation_welcome', label: 'Your first day at MA', visible: true, type: 'video', url: 'https://drive.google.com/file/d/1_o8FmQXijNxUmUJpOJ3XgZ9hOUxcCiI1/view' },
         { kind: 'context', key: 'utl_embed_orientation_howto', label: 'How this program works', visible: true, type: 'slides', url: '' }
       ],
       phase1: [
@@ -4045,7 +4036,6 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         { kind: 'app', key: 'utl_app_p1_6', title: 'Chalkboard notes', visible: true }
       ],
       phase2: [
-        { kind: 'context', key: 'utl_embed_p2_recap_storyline', label: 'Recap and storyline', visible: true, type: 'video', url: 'https://drive.google.com/open?id=1A6lCodeBWSOQLNAEMOE4bpYYB5xJXWjb&usp=drive_copy' },
         { kind: 'context', key: 'utl_embed_p2_aiko_question', label: 'Aiko liked your work. Now she has a question.', visible: true, type: 'video', url: 'https://vimeo.com/1224507799' },
         { kind: 'app', key: 'utl_app_p2_1', title: 'Issue tree builder', visible: true },
         { kind: 'context', key: 'utl_embed_p2_frame_answer', label: 'Before you frame your answer', visible: true, type: 'video', url: 'https://vimeo.com/1224507800' },
@@ -4060,7 +4050,6 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         { kind: 'app', key: 'utl_app_p2_6', title: 'Explain to Aiko (60s)', visible: true }
       ],
       phase3: [
-        { kind: 'context', key: 'utl_embed_p3_recap_storyline', label: 'Recap and storyline', visible: true, type: 'video', url: 'https://drive.google.com/file/d/1xJsxbjivMPHJvGKjWxtvPM0grgm2LiE-/view?usp=vids_web' },
         { kind: 'context', key: 'utl_embed_p3_lead_role', label: 'You just got the lead role.', visible: true, type: 'video', url: 'https://vimeo.com/1224507844' },
         { kind: 'app', key: 'utl_app_p3_1', title: 'The art of saying no', visible: true },
         { kind: 'context', key: 'utl_embed_p3_bad_news', label: 'You have to be the one to say it', visible: true, type: 'video', url: 'https://vimeo.com/1224507846' },
@@ -6372,7 +6361,6 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
     let _etTemplates = {};
     let _etPreviewRange = null;
     const DEFAULT_WORKSPACE_URL = 'https://theuntaughtlessons.com/member-login/';
-    const GOOGLE_GROUP_EMAIL = 'utl-members@googlegroups.com';
 
     function datedWelcomeSubject(subject, date) {
       const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'];
@@ -6634,23 +6622,14 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         '',
         'YOUR SETUP',
         '',
-        '1. Confirm your program access',
-        'We use utl-members@googlegroups.com to give you access to the program materials.',
-        '',
-        '* If you receive a Google Groups invitation: Open it and select Accept this invitation. Check your spam or junk folder if you cannot find it.',
-        '',
-        '* If you do not receive an invitation: No action is needed. Your access may already be active, so continue to the next step.',
-        '',
-        'The Google Groups invitation is separate from signing in to your workspace.',
-        '',
-        '2. Sign in to your workspace',
+        '1. Sign in to your workspace',
         'Go to the member login page and use the sign-in method provided with your membership. You can use an email sign-in link or continue with Google, Microsoft or Facebook. ' + loginInstruction,
         DEFAULT_WORKSPACE_URL,
         '',
-        '3. Complete your orientation',
+        '2. Complete your orientation',
         'Once you are signed in, start with the Home section at the top of your Home page. It takes about five minutes and sets you up for everything that follows.',
         '',
-        '4. Begin Phase 1',
+        '3. Begin Phase 1',
         'After orientation, begin Phase 1 and work through the first lesson and practice activity at your own pace.',
         '',
         'If anything does not work as expected, reply to this email and I will sort it out.',
@@ -6742,23 +6721,8 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
           <tr><td style="padding:0 48px 28px;">
             <table border="0" cellpadding="0" cellspacing="0" width="100%"><tr>
               <td width="40" valign="top" style="padding-top:2px;"><div style="width:28px; height:28px; background-color:${accent}; border-radius:50%; color:#FFFFFF; font-size:14px; font-weight:700; text-align:center; line-height:28px;">1</div></td>
-              <td><h2 style="margin:0 0 8px; font-size:17px; font-weight:700; color:${accent};">Confirm your program access</h2>
-                <p style="margin:0 0 12px; font-size:14px; color:#4A4A4A; line-height:1.6;">We use <strong>utl-members@googlegroups.com</strong> to give you access to the program materials.</p>
-                <table border="0" cellpadding="0" cellspacing="0" width="100%" style="border-collapse:separate;">
-                  <tr><td style="padding:12px 14px; border:1px solid #C9D9E8; border-radius:6px; background-color:#F5F9FC; font-size:14px; color:#4A4A4A; line-height:1.6;"><strong style="color:${accent};">If you receive a Google Groups invitation:</strong> Open it and select <strong>Accept this invitation</strong>. Check your spam or junk folder if you cannot find it.</td></tr>
-                  <tr><td height="8" style="height:8px; font-size:0; line-height:0;">&nbsp;</td></tr>
-                  <tr><td style="padding:12px 14px; border:1px solid #C9D9E8; border-radius:6px; background-color:#F5F9FC; font-size:14px; color:#4A4A4A; line-height:1.6;"><strong style="color:${accent};">If you do not receive an invitation:</strong> No action is needed. Your access may already be active, so continue to the next step.</td></tr>
-                </table>
-                <p style="margin:12px 0 0; padding:11px 13px; border:1px solid #B8D4EA; border-radius:6px; background-color:#EAF4FB; font-size:14px; font-weight:700; color:${accent}; line-height:1.6;">The Google Groups invitation is separate from signing in to your workspace.</p>
-              </td>
-            </tr></table>
-          </td></tr>
-
-          <tr><td style="padding:0 48px 28px;">
-            <table border="0" cellpadding="0" cellspacing="0" width="100%"><tr>
-              <td width="40" valign="top" style="padding-top:2px;"><div style="width:28px; height:28px; background-color:${accent}; border-radius:50%; color:#FFFFFF; font-size:14px; font-weight:700; text-align:center; line-height:28px;">2</div></td>
               <td><h2 style="margin:0 0 8px; font-size:17px; font-weight:700; color:${accent};">Sign in to your workspace</h2>
-                <p style="margin:0; font-size:14px; color:#4A4A4A; line-height:1.6;">Go to the member login page and use the sign-in method provided with your membership. You can use an email sign-in link or continue with Google, Microsoft or Facebook.${loginEmail ? ' Whichever option you use, enter <strong>' + escapeHtml(loginEmail) + '</strong>.' : ' Whichever option you use, enter the same email address that received this welcome message.'} If a video does not load right away, refresh the page after a few minutes.</p>
+                <p style="margin:0; font-size:14px; color:#4A4A4A; line-height:1.6;">Go to the member login page and use the sign-in method provided with your membership. You can use an email sign-in link or continue with Google, Microsoft or Facebook.${loginEmail ? ' Whichever option you use, enter <strong>' + escapeHtml(loginEmail) + '</strong>.' : ' Whichever option you use, enter the same email address that received this welcome message.'}</p>
                 <table border="0" cellpadding="0" cellspacing="0" style="margin-top:16px;"><tr><td align="center" bgcolor="${accent}" style="border-radius:6px;"><a href="${escapeHtml(workspaceUrl)}" target="_blank" style="display:inline-block; padding:12px 24px; font-size:14px; font-weight:700; color:#FFFFFF; text-decoration:none; letter-spacing: 0;">Sign in to your workspace &#8594;</a></td></tr></table>
                 <p style="margin:6px 0 0; font-family:'Courier New',Courier,monospace; font-size:11px; color:#999;">${escapeHtml(workspaceUrl.replace(/^https?:\/\//, ''))}</p>
               </td>
@@ -6767,7 +6731,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
 
           <tr><td style="padding:0 48px 28px;">
             <table border="0" cellpadding="0" cellspacing="0" width="100%"><tr>
-              <td width="40" valign="top" style="padding-top:2px;"><div style="width:28px; height:28px; background-color:${accent}; border-radius:50%; color:#FFFFFF; font-size:14px; font-weight:700; text-align:center; line-height:28px;">3</div></td>
+              <td width="40" valign="top" style="padding-top:2px;"><div style="width:28px; height:28px; background-color:${accent}; border-radius:50%; color:#FFFFFF; font-size:14px; font-weight:700; text-align:center; line-height:28px;">2</div></td>
               <td><h2 style="margin:0 0 8px; font-size:17px; font-weight:700; color:${accent};">Complete your orientation</h2>
                 <p style="margin:0; font-size:14px; color:#4A4A4A; line-height:1.6;">Once you are signed in, you will land on your Home page. Start with the Home section at the top. It takes about five minutes and sets you up for everything that follows.</p>
               </td>
@@ -6776,7 +6740,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
 
           <tr><td style="padding:0 48px 40px;">
             <table border="0" cellpadding="0" cellspacing="0" width="100%"><tr>
-              <td width="40" valign="top" style="padding-top:2px;"><div style="width:28px; height:28px; background-color:${accent}; border-radius:50%; color:#FFFFFF; font-size:14px; font-weight:700; text-align:center; line-height:28px;">4</div></td>
+              <td width="40" valign="top" style="padding-top:2px;"><div style="width:28px; height:28px; background-color:${accent}; border-radius:50%; color:#FFFFFF; font-size:14px; font-weight:700; text-align:center; line-height:28px;">3</div></td>
               <td><h2 style="margin:0 0 8px; font-size:17px; font-weight:700; color:${accent};">Begin Phase 1</h2>
                 <p style="margin:0; font-size:14px; color:#4A4A4A; line-height:1.6;">After orientation, begin Phase 1 and work through the first lesson and practice activity at your own pace.</p>
               </td>
@@ -10757,12 +10721,12 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       var list = document.getElementById('mbBulkResults');
       if (list) list.innerHTML = mbBulkResults.map(function (result) {
         function state(label, value) { return '<span class="' + (value === true ? 'is-ok' : value === false ? 'is-failed' : '') + '">' + label + ': ' + (value === true ? 'Done' : value === false ? 'Failed' : 'Not requested') + '</span>'; }
-        return '<div class="mb-bulk-result"><strong>' + escapeHtml(result.name) + '<br><small>' + escapeHtml(result.email) + '</small></strong>' + state('Access', result.access) + state('Welcome', result.welcome) + state('Login link', result.loginLink) + state('Group', result.group) + '</div>';
+        return '<div class="mb-bulk-result"><strong>' + escapeHtml(result.name) + '<br><small>' + escapeHtml(result.email) + '</small></strong>' + state('Access', result.access) + state('Welcome', result.welcome) + state('Login link', result.loginLink) + '</div>';
       }).join('');
       var bar = document.getElementById('mbBulkProgressBar');
       if (bar) bar.style.width = Math.round((processed / Math.max(1, total)) * 100) + '%';
       var succeeded = mbBulkResults.filter(function (result) { return result.access === true; }).length;
-      var failed = mbBulkResults.filter(function (result) { return result.access === false || result.welcome === false || result.loginLink === false || result.group === false; }).length;
+      var failed = mbBulkResults.filter(function (result) { return result.access === false || result.welcome === false || result.loginLink === false; }).length;
       var summary = document.getElementById('mbBulkResultSummary');
       if (summary) summary.innerHTML = '<span class="is-ready">' + succeeded + ' access records ready</span><span class="' + (failed ? 'is-error' : '') + '">' + failed + ' with an item to retry</span>';
       var retry = document.getElementById('mbBulkRetry');
@@ -10784,7 +10748,6 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       var sendWelcome = !!document.getElementById('mbBulkWelcome')?.checked;
       var signInMethod = mbSelectedSignInMethod('mbBulkSignInMethod');
       var sendLink = signInMethod === 'emailLink';
-      var requestGroup = !!document.getElementById('mbBulkGoogleGroup')?.checked;
       var profile = {};
       try { profile = JSON.parse(localStorage.getItem('utl_member_profile') || '{}'); } catch (_) {}
       var addedBy = profile.email || 'admin';
@@ -10793,7 +10756,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       for (var index = 0; index < rows.length; index += 1) {
         var row = rows[index];
         var previous = retryOnly ? mbBulkResults.find(function (item) { return item.email === row.email; }) : null;
-        var result = previous || { name: row.name, email: row.email, action: row.action, access: null, welcome: null, loginLink: null, group: null, error: '' };
+        var result = previous || { name: row.name, email: row.email, action: row.action, access: null, welcome: null, loginLink: null, error: '' };
         result.error = '';
         try {
           if (!retryOnly || result.access === false) {
@@ -10835,8 +10798,6 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
             }
           }
           if (!sendLink) result.loginLink = null;
-          if (requestGroup && (!retryOnly || result.group === false)) { try { await fb.requestGoogleGroupSyncJob(row.email, 'add', { name: row.name, requestedBy: addedBy, source: 'admin-bulk-member-import' }); result.group = true; } catch (error) { result.group = false; result.error = error.message || 'Group request failed'; } }
-          if (!requestGroup) result.group = null;
         } catch (error) {
           result.access = false;
           result.error = error.message || 'Access could not be added';
@@ -10895,8 +10856,8 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       document.getElementById('mbBulkBack')?.addEventListener('click', function () { mbBulkShowStep(1); });
       document.getElementById('mbBulkRecheck')?.addEventListener('click', function () { mbBulkReadEditedRows(); mbBulkRenderReview(); });
       document.getElementById('mbBulkConfirm')?.addEventListener('click', function () { mbBulkReadEditedRows(); mbBulkValidateRows(); var ready = mbBulkRows.filter(function (row) { return row.state === 'ready'; }); if (ready.length && window.confirm('Add ' + ready.length + ' learner' + (ready.length === 1 ? '' : 's') + ' and send the selected onboarding messages?')) mbBulkProcess(ready, false); });
-      document.getElementById('mbBulkRetry')?.addEventListener('click', function () { var failedEmails = new Set(mbBulkResults.filter(function (result) { return result.access === false || result.welcome === false || result.loginLink === false || result.group === false; }).map(function (result) { return result.email; })); mbBulkProcess(mbBulkRows.filter(function (row) { return failedEmails.has(row.email); }), true); });
-      document.getElementById('mbBulkDownloadResults')?.addEventListener('click', function () { var lines = [['Name','Email','Access','Welcome email','Login link','Google Group request','Error'].map(mbBulkCsvCell).join(',')].concat(mbBulkResults.map(function (result) { return [result.name,result.email,result.access === true ? 'Done' : 'Failed',result.welcome === null ? 'Not requested' : result.welcome ? 'Done' : 'Failed',result.loginLink === null ? 'Not requested' : result.loginLink ? 'Done' : 'Failed',result.group === null ? 'Not requested' : result.group ? 'Queued' : 'Failed',result.error || ''].map(mbBulkCsvCell).join(','); })); mbBulkDownload(new Date().toISOString().slice(0,10) + ' - UTL bulk learner results.csv', lines.join('\r\n')); });
+      document.getElementById('mbBulkRetry')?.addEventListener('click', function () { var failedEmails = new Set(mbBulkResults.filter(function (result) { return result.access === false || result.welcome === false || result.loginLink === false; }).map(function (result) { return result.email; })); mbBulkProcess(mbBulkRows.filter(function (row) { return failedEmails.has(row.email); }), true); });
+      document.getElementById('mbBulkDownloadResults')?.addEventListener('click', function () { var lines = [['Name','Email','Access','Welcome email','Login link','Error'].map(mbBulkCsvCell).join(',')].concat(mbBulkResults.map(function (result) { return [result.name,result.email,result.access === true ? 'Done' : 'Failed',result.welcome === null ? 'Not requested' : result.welcome ? 'Done' : 'Failed',result.loginLink === null ? 'Not requested' : result.loginLink ? 'Done' : 'Failed',result.error || ''].map(mbBulkCsvCell).join(','); })); mbBulkDownload(new Date().toISOString().slice(0,10) + ' - UTL bulk learner results.csv', lines.join('\r\n')); });
       document.getElementById('mbBulkViewCohort')?.addEventListener('click', function () { var cohort = String(document.getElementById('mbBulkCohort')?.value || '').trim(); close(); mbFilterState.cohort = cohort || 'all'; mbFilterState.page = 0; mbRenderControls(); mbApplyAndRender(); document.getElementById('mbTableWrap')?.scrollIntoView({ behavior:'smooth', block:'start' }); });
     }
 
