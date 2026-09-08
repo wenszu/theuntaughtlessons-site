@@ -909,6 +909,110 @@
 
     .ca-print-report { display: none; }
 
+    .ca-report-dialog { width:min(1180px,calc(100vw - 32px)); max-width:none; max-height:calc(100dvh - 32px); padding:0; border:0; border-radius:12px; box-shadow:0 24px 70px rgba(0,31,62,.28); }
+    .ca-report-dialog::backdrop { background:rgba(0,31,62,.58); }
+    .ca-report-dialog-head { position:sticky; top:0; z-index:3; display:flex; align-items:center; justify-content:space-between; gap:18px; padding:18px 22px; border-bottom:1px solid var(--line); background:#fff; }
+    .ca-report-dialog-head h3 { margin:0; color:var(--navy); font-family:'Playfair Display',serif; font-size:22px; }
+    .ca-report-dialog-head p { margin:3px 0 0; color:#667; font-size:12px; }
+    .ca-report-dialog-body { display:grid; grid-template-columns:330px minmax(0,1fr); min-height:680px; }
+    .ca-report-config { padding:20px; border-right:1px solid var(--line); background:#FAF8F3; overflow:auto; }
+    .ca-report-config h4 { margin:18px 0 8px; color:var(--navy); font-size:14px; }
+    .ca-report-config h4:first-child { margin-top:0; }
+    .ca-report-config-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .ca-report-field { display:grid; gap:5px; margin-bottom:10px; color:var(--navy); font-size:11px; font-weight:700; }
+    .ca-report-field input,.ca-report-field select,.ca-report-field textarea { width:100%; padding:9px 10px; border:1px solid var(--line); border-radius:7px; background:#fff; color:var(--charcoal); font:400 12px/1.45 Lato,Arial,sans-serif; }
+    .ca-report-field textarea { min-height:82px; resize:vertical; }
+    .ca-report-check { display:flex; align-items:flex-start; gap:8px; margin:8px 0; color:#4A4A4A; font-size:12px; }
+    .ca-report-check input { margin-top:3px; }
+    .ca-report-config-actions { position:sticky; bottom:0; display:flex; flex-wrap:wrap; gap:8px; margin:18px -20px -20px; padding:14px 20px; border-top:1px solid var(--line); background:#fff; }
+    .ca-report-preview-shell { padding:24px; overflow:auto; background:#DDD8CF; }
+    .ca-report-preview-note { margin:0 auto 12px; max-width:794px; color:#555; font-size:11px; }
+    .ca-report-sheet { width:794px; min-height:1123px; margin:0 auto 22px; padding:0 42px 34px; background:#fff; color:#4A4A4A; box-shadow:0 4px 18px rgba(0,0,0,.14); font:400 11px/1.42 Lato,Arial,sans-serif; }
+    .ca-report-sheet + .ca-report-sheet { margin-top:22px; }
+    .ca-report-titleband { display:grid; grid-template-columns:auto 1fr auto; align-items:center; gap:16px; margin:0 -42px; padding:28px 42px 22px; background:#003366; color:#fff; }
+    .ca-report-titleband img { width:116px; max-height:38px; object-fit:contain; }
+    .ca-report-titleband small { display:block; color:#EEA320; font-weight:700; }
+    .ca-report-titleband h1 { margin:3px 0 0; color:#fff; font:700 25px/1.1 'Playfair Display',serif; }
+    .ca-report-title-meta { padding-left:14px; border-left:1px solid rgba(255,255,255,.28); color:rgba(255,255,255,.82); font-size:9px; line-height:1.55; text-align:right; }
+    .ca-report-program { display:flex; align-items:center; justify-content:space-between; gap:15px; margin:0 -42px 20px; padding:9px 42px; border-bottom:1px solid #D8D0C4; background:#F3EDE2; color:#4A4A4A; font-size:9px; font-weight:700; }
+    .ca-report-program img { height:27px; }
+    .ca-report-kicker { margin:18px 0 3px; color:#B96F00; font-size:9px; font-weight:700; }
+    .ca-report-sheet h2 { margin:0 0 9px; padding-bottom:7px; border-bottom:2px solid #EEA320; color:#003366; font:700 17px/1.2 'Playfair Display',serif; }
+    .ca-report-sheet h3 { margin:0 0 7px; color:#003366; font-size:12px; }
+    .ca-report-summary { margin:0 0 14px; padding:13px 15px; border:1px solid #E6C681; border-radius:7px; background:#FFF8E8; font-size:12px; }
+    .ca-report-summary strong { color:#003366; }
+    .ca-report-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin:12px 0 18px; }
+    .ca-report-stat { padding:10px 11px; border:1px solid #D8D0C4; border-top:3px solid #EEA320; border-radius:7px; background:#fff; }
+    .ca-report-stat span { display:block; color:#6D6D6D; font-size:8.5px; font-weight:700; }
+    .ca-report-stat strong { display:block; margin-top:4px; color:#003366; font:700 19px/1 'Playfair Display',serif; }
+    .ca-report-stat small { display:block; margin-top:3px; color:#777; font-size:8px; }
+    .ca-report-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .ca-report-card { padding:13px; border:1px solid #D8D0C4; border-radius:7px; background:#fff; break-inside:avoid; }
+    .ca-report-action { margin-top:13px; padding:13px 15px; border:1px solid #E6C681; border-radius:7px; background:#FFF9EB; }
+    .ca-report-action p { margin:4px 0 0; white-space:pre-line; }
+    .ca-report-bars { display:grid; gap:9px; }
+    .ca-report-bar-row { display:grid; grid-template-columns:125px 1fr 75px; align-items:center; gap:9px; }
+    .ca-report-bar-row b { color:#003366; font-size:10px; }
+    .ca-report-bar-track { height:8px; overflow:hidden; border-radius:99px; background:#E9E4DA; }
+    .ca-report-bar-fill { height:100%; border-radius:99px; background:#EEA320; }
+    .ca-report-bar-row span { text-align:right; font-size:9px; }
+    .ca-report-table { width:100%; border-collapse:collapse; font-size:9px; }
+    .ca-report-table th,.ca-report-table td { padding:6px 7px; border-bottom:1px solid #DDD5C9; text-align:left; vertical-align:top; }
+    .ca-report-table th { background:#003366; color:#fff; font-size:8px; }
+    .ca-report-table tbody tr:nth-child(even) { background:#F7F3EC; }
+    .ca-report-status { display:inline-block; padding:2px 6px; border-radius:999px; background:#F0ECE5; color:#555; font-size:8px; font-weight:700; white-space:nowrap; }
+    .ca-report-status.is-complete,.ca-report-status.is-on-pace { background:#E6F4EC; color:#27633F; }
+    .ca-report-status.is-follow-up,.ca-report-status.is-access { background:#FFF1CF; color:#7B5200; }
+    .ca-report-methods { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+    .ca-report-method { padding:9px 10px; border:1px solid #D8D0C4; border-radius:6px; background:#FAF8F3; break-inside:avoid; }
+    .ca-report-method b { color:#003366; }
+    .ca-report-method p { margin:3px 0; }
+    .ca-report-footer { margin-top:18px; padding-top:8px; border-top:1px solid #EEA320; color:#777; font-size:8px; }
+    .ca-report-footer-row { display:flex; justify-content:space-between; gap:14px; margin-top:4px; color:#003366; font-weight:700; }
+    .cp-dialog { width:min(1020px,calc(100vw - 32px)); max-width:none; height:calc(100dvh - 32px); max-height:calc(100dvh - 32px); padding:0; overflow:hidden; border:0; border-radius:12px; box-shadow:0 24px 70px rgba(0,31,62,.28); }
+    .cp-dialog[open] { display:flex; flex-direction:column; }
+    .cp-dialog::backdrop { background:rgba(0,31,62,.58); }
+    .cp-dialog-body { display:grid; flex:1; grid-template-columns:330px minmax(0,1fr); min-height:0; overflow:hidden; }
+    .cp-dialog-body > .ca-report-config,.cp-preview-shell { min-height:0; overflow:auto; overscroll-behavior:contain; }
+    .cp-preview-shell { display:grid; place-items:start center; padding:24px; background:#DDD8CF; }
+    .cp-preview-wrap { width:min(540px,100%); }
+    .cp-preview-note { margin:0 0 12px; color:#555; font-size:11px; }
+    .cp-card { aspect-ratio:4/5; display:flex; flex-direction:column; overflow:hidden; border-radius:14px; background:#fff; color:#4A4A4A; box-shadow:0 5px 22px rgba(0,0,0,.16); font:400 15px/1.45 Lato,Arial,sans-serif; }
+    .cp-card-head { display:flex; align-items:center; justify-content:space-between; gap:18px; padding:30px 34px 24px; background:#003366; color:#fff; }
+    .cp-card-brand { font:700 18px/1.05 'Playfair Display',serif; }
+    .cp-card-brand span { display:block; color:#EEA320; }
+    .cp-card-meta { color:rgba(255,255,255,.8); font-size:11px; text-align:right; }
+    .cp-card-body { display:flex; flex:1; flex-direction:column; padding:32px 36px 26px; }
+    .cp-card-kicker { margin:0 0 8px; color:#B96F00; font-size:11px; font-weight:700; }
+    .cp-card h2 { margin:0; color:#003366; font:700 32px/1.12 'Playfair Display',serif; }
+    .cp-card-intro { margin:14px 0 20px; color:#4D7094; }
+    .cp-metrics { display:grid; grid-template-columns:repeat(3,1fr); gap:9px; margin:0 0 20px; }
+    .cp-metric { min-height:92px; padding:13px; border:1px solid #D8D0C4; border-top:3px solid #EEA320; border-radius:8px; }
+    .cp-metric strong { display:block; color:#003366; font:700 25px/1 'Playfair Display',serif; }
+    .cp-metric span { display:block; margin-top:8px; color:#5E6D7B; font-size:10px; font-weight:700; }
+    .cp-achievement { margin:0 0 16px; padding:14px 17px; border:1px solid #BCD8C7; border-radius:9px; background:#F2FAF5; color:#315A43; }
+    .cp-achievement b { display:block; margin-bottom:4px; color:#003366; }
+    .cp-focus { margin-top:auto; padding:17px 19px; border:1px solid #E6C681; border-radius:9px; background:#FFF8E8; }
+    .cp-focus b { display:block; margin-bottom:5px; color:#003366; }
+    .cp-next { margin:13px 0 0; padding:15px 18px; border-radius:8px; background:#003366; color:#fff; font-weight:700; }
+    .cp-card-foot { display:flex; justify-content:space-between; gap:12px; margin-top:18px; padding-top:12px; border-top:1px solid #D8D0C4; color:#718090; font-size:9px; }
+    .cp-card.has-achievement .cp-card-body { padding-top:25px; padding-bottom:20px; }
+    .cp-card.has-achievement h2 { font-size:29px; }
+    .cp-card.has-achievement .cp-card-intro { margin:10px 0 14px; }
+    .cp-card.has-achievement .cp-metrics { margin-bottom:13px; }
+    .cp-card.has-achievement .cp-metric { min-height:74px; padding:10px 12px; }
+    .cp-card.has-achievement .cp-metric strong { font-size:22px; }
+    .cp-card.has-achievement .cp-metric span { margin-top:6px; }
+    .cp-card.has-achievement .cp-achievement { margin-bottom:10px; padding:11px 15px; }
+    .cp-card.has-achievement .cp-focus { padding:12px 16px; }
+    .cp-card.has-achievement .cp-next { margin-top:9px; padding:11px 16px; }
+    .cp-card.has-achievement .cp-card-foot { margin-top:10px; padding-top:8px; }
+    .cp-privacy-status { margin:10px 0 0; padding:9px 11px; border:1px solid #BCD8C7; border-radius:7px; background:#F2FAF5; color:#27633F; font-size:11px; }
+    .cp-privacy-status.is-warning { border-color:#E6C681; background:#FFF8E8; color:#7B5200; }
+    .cp-output-actions { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+    @media(max-width:800px){.cp-dialog-body{display:block;overflow:auto}.cp-dialog-body>.ca-report-config{overflow:visible}.cp-preview-shell{overflow:visible;padding:16px}.cp-output-actions{grid-template-columns:1fr}}
+    @media(max-width:860px){.ca-report-dialog-body{grid-template-columns:1fr}.ca-report-config{border-right:0;border-bottom:1px solid var(--line)}.ca-report-preview-shell{padding:16px;overflow:auto}.ca-report-sheet{transform-origin:top left}}
+
     @media print {
       @page { margin: 14mm 12mm; }
 
@@ -925,6 +1029,13 @@
         color: #4A4A4A;
         font-size: 12px;
       }
+      #caPrintReport .ca-report-sheet { width:auto; min-height:0; margin:0; padding:0; box-shadow:none; break-after:page; page-break-after:always; }
+      #caPrintReport .ca-report-sheet:last-child { break-after:auto; page-break-after:auto; }
+      #caPrintReport .ca-report-titleband { margin:-14mm -12mm 0; padding:12mm 12mm 16px; }
+      #caPrintReport .ca-report-program { margin:0 -12mm 18px; padding:9px 12mm; }
+      #caPrintReport .ca-report-table thead { display:table-header-group; }
+      #caPrintReport .ca-report-table tr,.ca-report-card,.ca-report-method { break-inside:avoid; page-break-inside:avoid; }
+      #caPrintReport .cp-card { width:170mm; height:212.5mm; margin:8mm auto 0; border:1px solid #D8D0C4; border-radius:8px; box-shadow:none; font-size:14px; }
 
       #caPrintReport .ca-print-header {
         display: flex;
@@ -2980,7 +3091,7 @@
         </div>
         <div id="eiContent"><p class="mb-msg">Click Refresh insights to load tracked engagement.</p></div>
         <div class="ei-glossary" id="eiGlossary" hidden></div>
-        <p class="ei-note">Times are estimates. Background tabs are excluded; thinking or note-taking may appear idle. Video timing currently measures lesson-page engagement because Google Drive does not expose playback position.</p>
+        <p class="ei-note">Times are estimates. Background tabs are excluded, and thinking or note-taking may appear idle. Vimeo coverage begins after a learner presses play; reaching 90% counts as video completion.</p>
       </section>
 
       <section class="admin-section" id="section-cohort-analytics" data-admin-tab-panel="student-progress">
@@ -2997,10 +3108,68 @@
           <div class="student-progress-actions">
             <button class="small-button secondary-button" id="caDetailBack">← Back to all cohorts</button>
             <button class="small-button secondary-button" id="caExportCsv">Export cohort CSV</button>
-            <button class="small-button secondary-button" id="caExportPdf">Export cohort PDF</button>
+            <button class="small-button secondary-button" id="caExportPdf">Create weekly update</button>
+            <button class="small-button secondary-button" id="caParticipantUpdate">Share cohort encouragement</button>
           </div>
           <div id="caDetailContent"></div>
         </div>
+        <dialog class="ca-report-dialog" id="caReportDialog" aria-labelledby="caReportDialogTitle">
+          <div class="ca-report-dialog-head"><div><h3 id="caReportDialogTitle">Create weekly cohort update</h3><p>Choose the reporting context, review the narrative, then preview the client-ready report.</p></div><button class="small-button secondary-button" type="button" id="caReportClose">Close</button></div>
+          <div class="ca-report-dialog-body">
+            <aside class="ca-report-config">
+              <h4>Report details</h4>
+              <div class="ca-report-config-grid">
+                <label class="ca-report-field">Week<select id="caReportWeek"><option value="1">Week 1 of 3</option><option value="2">Week 2 of 3</option><option value="3">Week 3 of 3</option></select></label>
+                <label class="ca-report-field">Version<input id="caReportVersion" type="number" min="1" value="1"></label>
+                <label class="ca-report-field">Period begins<input id="caReportStart" type="date"></label>
+                <label class="ca-report-field">Period ends<input id="caReportEnd" type="date"></label>
+              </div>
+              <label class="ca-report-field">Expected milestone<select id="caReportMilestone"><option value="orientation">Orientation complete</option><option value="phase1">Phase 1 complete</option><option value="phase2">Phase 2 complete</option><option value="phase3">Full curriculum complete</option></select></label>
+              <label class="ca-report-field">Prepared for<input id="caReportPreparedFor" type="text" placeholder="Client or sponsor name"></label>
+              <h4>Buyer-facing update</h4>
+              <label class="ca-report-field">Executive summary<textarea id="caReportSummary" maxlength="420"></textarea></label>
+              <label class="ca-report-field">What is going well<textarea id="caReportHighlight" maxlength="320"></textarea></label>
+              <label class="ca-report-field">What may need attention<textarea id="caReportAttention" maxlength="320"></textarea></label>
+              <label class="ca-report-field">Suggested actions this week<textarea id="caReportActions" maxlength="420"></textarea></label>
+              <h4>Privacy and detail</h4>
+              <label class="ca-report-field">Learner names<select id="caReportNames"><option value="full">Full names</option><option value="first">First names only</option><option value="anonymous">Anonymous learner IDs</option></select></label>
+              <label class="ca-report-check"><input id="caReportIncludeMp" type="checkbox"> Include MP and level</label>
+              <label class="ca-report-check"><input id="caReportIncludeFocused" type="checkbox" checked> Include estimated focused time</label>
+              <label class="ca-report-check"><input id="caReportIncludeMethods" type="checkbox" checked> Include metric explanations</label>
+              <div class="ca-report-config-actions"><button class="small-button secondary-button" type="button" id="caReportRefreshPreview">Refresh preview</button><button class="small-button" type="button" id="caReportDownload">Save as PDF</button></div>
+            </aside>
+            <main class="ca-report-preview-shell"><p class="ca-report-preview-note">Preview uses A4 proportions. Select <strong>Save as PDF</strong>, then choose PDF in your browser’s print window.</p><div id="caReportPreview"></div></main>
+          </div>
+        </dialog>
+        <dialog class="cp-dialog" id="cpDialog" aria-labelledby="cpDialogTitle">
+          <div class="ca-report-dialog-head"><div><h3 id="cpDialogTitle">Share cohort encouragement</h3><p>Create a name-free update for WhatsApp, Teams, Slack, or email.</p></div><button class="small-button secondary-button" type="button" id="cpClose">Close</button></div>
+          <div class="cp-dialog-body">
+            <aside class="ca-report-config">
+              <h4>Update details</h4>
+              <label class="ca-report-field">Update style<select id="cpVariation"><option value="momentum">Momentum update · Recommended</option><option value="focus">Weekly focus · Minimal</option><option value="snapshot">Progress snapshot · More detail</option></select></label>
+              <p class="cp-privacy-status" id="cpVariationNote">Balanced encouragement with up to two safe collective signals.</p>
+              <div class="ca-report-config-grid">
+                <label class="ca-report-field">Week<select id="cpWeek"><option value="1">Week 1 of 3</option><option value="2">Week 2 of 3</option><option value="3">Week 3 of 3</option></select></label>
+                <label class="ca-report-field">Version<input id="cpVersion" type="number" min="1" value="1"></label>
+                <label class="ca-report-field">Period begins<input id="cpStart" type="date"></label>
+                <label class="ca-report-field">Period ends<input id="cpEnd" type="date"></label>
+              </div>
+              <label class="ca-report-field">Shared milestone<select id="cpMilestone"><option value="orientation">Complete Orientation</option><option value="phase1">Complete Phase 1</option><option value="phase2">Complete Phase 2</option><option value="phase3">Complete the program</option></select></label>
+              <label class="ca-report-field">Milestone date<input id="cpDeadline" type="text" placeholder="e.g. Friday"></label>
+              <h4>Message</h4>
+              <label class="ca-report-field">Headline<input id="cpHeadline" type="text" maxlength="90"></label>
+              <label class="ca-report-field">Short update<textarea id="cpIntro" maxlength="260"></textarea></label>
+              <label class="ca-report-field">Next step<textarea id="cpNext" maxlength="240"></textarea></label>
+              <h4>Collective signals</h4>
+              <label class="ca-report-check"><input id="cpIncludeActivities" type="checkbox" checked> Activities completed</label>
+              <label class="ca-report-check"><input id="cpIncludeVideos" type="checkbox" checked> Videos reaching 90%</label>
+              <label class="ca-report-check"><input id="cpIncludeResumes" type="checkbox" checked> Activities resumed</label>
+              <p class="cp-privacy-status" id="cpPrivacyStatus">Privacy check will run when the preview is created.</p>
+              <div class="ca-report-config-actions cp-output-actions"><button class="small-button secondary-button" type="button" id="cpRefresh">Refresh preview</button><button class="small-button secondary-button" type="button" id="cpCopy">Copy message</button><button class="small-button secondary-button" type="button" id="cpDownloadPng">Download image</button><button class="small-button" type="button" id="cpDownloadPdf">Save as PDF</button></div>
+            </aside>
+            <main class="cp-preview-shell"><div class="cp-preview-wrap"><p class="cp-preview-note">Chat preview · 1080 × 1350 image format</p><div id="cpPreview"></div></div></main>
+          </div>
+        </dialog>
       </section>
 
       <section class="admin-section" id="section-reward-levels" data-admin-tab-panel="rewards">
@@ -9125,39 +9294,334 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       return filter === 'all' ? 'All members' : filter === 'complete' ? 'Completed only' : filter === 'in-progress' ? 'In progress only' : 'Not started only';
     }
 
-    function caExportPdf() {
-      if (!caCurrentCohort) return;
-      const groups = caCohortGroups();
-      const members = groups[caCurrentCohort] || [];
-      if (!members.length) { showToast('No members to export.', 'error'); return; }
+    function caReportDateValue(date) {
+      const pad = (value) => String(value).padStart(2, '0');
+      return date.getFullYear() + '-' + pad(date.getMonth() + 1) + '-' + pad(date.getDate());
+    }
+
+    function caReportDateLabel(value) {
+      const date = new Date(String(value || '') + 'T12:00:00');
+      return Number.isNaN(date.getTime()) ? 'Date not set' : date.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+    }
+
+    function caReportWindow() {
+      const start = new Date((document.getElementById('caReportStart')?.value || '') + 'T00:00:00').getTime() || 0;
+      const end = new Date((document.getElementById('caReportEnd')?.value || '') + 'T23:59:59').getTime() || Date.now();
+      return { start, end };
+    }
+
+    function caReportScheduledItems(milestone) {
+      const result = [{ id:'orientation', title:'Orientation', type:'orientation', phase:'Getting started' }];
+      const phases = ['phase1','phase2','phase3'];
+      const through = milestone === 'orientation' ? 0 : Math.max(1, phases.indexOf(milestone) + 1);
+      phases.slice(0, through).forEach((phaseKey) => {
+        const phase = (window.UTL_CONTENT || {})[phaseKey] || {};
+        (phase.lessons || []).forEach((item) => result.push({ id:item.id, title:item.title || item.id, type:'lesson', phase:phase.label || phaseKey }));
+        (phase.exercises || []).forEach((item) => result.push({ id:item.id, title:item.title || item.id, type:'exercise', phase:phase.label || phaseKey }));
+      });
+      return result;
+    }
+
+    function caReportItemDone(member, item) {
+      const progress = member.workspaceProgress || {};
+      if (item.type === 'orientation') return progress.orientation?.ready === true;
+      if (item.type === 'lesson') return progress.lessons?.[item.id]?.watched === true;
+      return progress.exercises?.[item.id]?.completed === true;
+    }
+
+    function caReportMemberName(member, index, mode) {
+      const full = String(member.displayName || member.name || member.email || 'Learner ' + (index + 1)).trim();
+      if (mode === 'anonymous') return 'Learner ' + String(index + 1).padStart(2, '0');
+      if (mode === 'first') return full.split(/\s+/)[0];
+      return full;
+    }
+
+    function caReportMemberStage(member) {
+      const phase = spFurthestPhase(member);
+      if (phase === 'completed') return 'Program complete';
+      if (phase === 'phase3') return 'Phase 3';
+      if (phase === 'phase2') return 'Phase 2';
+      if (phase === 'phase1') return 'Phase 1';
+      return member.workspaceProgress?.orientation?.ready ? 'Orientation complete' : 'Getting started';
+    }
+
+    function caReportModel() {
+      const members = caCohortGroups()[caCurrentCohort] || [];
       const summary = caCohortSummary(caCurrentCohort, members);
-      const funnel = caFunnelStages(members);
-      const bottleneck = caExerciseBottleneck(members).slice(0, 8);
-      const generated = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-      const funnelMax = Math.max(1, funnel[0].count);
-      const funnelRows = funnel.map((stage) =>
-        '<tr><td>' + escapeHtml(stage.label) + '</td><td class="ca-print-bar-cell"><div class="ca-print-bar-track"><div class="ca-print-bar-fill" style="width:' + Math.round((stage.count / funnelMax) * 100) + '%"></div></div></td><td>' + stage.count + ' of ' + summary.count + '</td></tr>'
-      ).join('');
-      const bottleneckRows = bottleneck.length
-        ? bottleneck.map((row) => '<tr><td>' + escapeHtml(row.title) + '</td><td>' + escapeHtml(row.phaseLabel) + '</td><td>' + row.doneCount + ' of ' + summary.count + ' (' + row.percent + '%)</td></tr>').join('')
-        : '<tr><td colspan="3">No exercises configured.</td></tr>';
-      const rosterRows = caSortedRoster(caFilteredRoster(members)).map((m) => {
-        const rewards = spRewardData(m);
-        const status = caRosterStatus(m);
-        return '<tr><td>' + escapeHtml(m.displayName || m.name || 'Member') + '</td><td>' + escapeHtml(m.email || '') + '</td><td>' + caPercentComplete(m) + '%</td><td>' + Number(rewards.mpTotal || rewards.masteryPoints || 0) + '</td><td>' + escapeHtml(rewards.currentLevel || rewards.level || '—') + '</td><td>' + CA_STATUS_LABEL[status] + '</td></tr>';
-      }).join('');
-      document.getElementById('caPrintReport').innerHTML =
-        '<header class="ca-print-header"><img src="../assets/utl-logo-nav-white.png" alt="The Untaught Lessons"><div class="ca-print-header-text"><span>Cohort completion report</span><h1>' + escapeHtml(caCurrentCohort) + '</h1></div><div class="ca-print-header-meta">Generated<br>' + generated + '</div></header>' +
-        '<div class="ca-print-program"><span>Program</span><img src="../assets/program-logo-tsa.png" alt="Think, Speak, Act like an Executive"></div>' +
-        '<section class="ca-print-stats"><div><span>Members</span><strong>' + summary.count + '</strong></div><div><span>Completed</span><strong>' + summary.completed + ' of ' + summary.count + '</strong><small>' + summary.completionPercent + '%</small></div><div><span>Average MP</span><strong>' + summary.avgMp + '</strong></div><div><span>Since cohort start</span><strong>' + (summary.daysSinceStart === null ? '—' : summary.daysSinceStart) + '</strong><small>' + (summary.daysSinceStart === null ? 'unknown' : summary.startDateIsEstimate ? 'days (est.)' : 'days') + '</small></div></section>' +
-        '<section class="ca-print-block"><h2>Phase funnel</h2><table><thead><tr><th>Stage</th><th></th><th>Members</th></tr></thead><tbody>' + funnelRows + '</tbody></table></section>' +
-        '<section class="ca-print-block"><h2>Exercise bottlenecks</h2><table><thead><tr><th>Exercise</th><th>Phase</th><th>Completed</th></tr></thead><tbody>' + bottleneckRows + '</tbody></table></section>' +
-        '<section class="ca-print-block"><h2>Member roster &middot; ' + escapeHtml(caFilterLabel(caRosterFilter)) + '</h2><table><thead><tr><th>Name</th><th>Email</th><th>% Complete</th><th>MP</th><th>Level</th><th>Status</th></tr></thead><tbody>' + rosterRows + '</tbody></table></section>' +
-        ('<footer class="ca-print-footer"><p>' + (summary.startDateIsEstimate ? 'Cohort start is estimated from the earliest member added and should be treated as approximate.' : 'Cohort start reflects the date entered for this cohort.') + ' "Cohort" reflects the group label set in Member Management.</p><p>The Untaught Lessons &middot; Confidential, prepared for internal program review</p></footer>');
-      const previousTitle = document.title;
-      document.title = 'Cohort report, ' + caCurrentCohort;
+      const week = Number(document.getElementById('caReportWeek')?.value || 1);
+      const milestone = document.getElementById('caReportMilestone')?.value || 'phase1';
+      const milestoneLabel = document.getElementById('caReportMilestone')?.selectedOptions?.[0]?.textContent || 'Selected milestone';
+      const scheduled = caReportScheduledItems(milestone);
+      const windowRange = caReportWindow();
+      const memberUids = new Set(members.map((member) => member.uid).filter(Boolean));
+      const periodActivities = eiData.activities.filter((item) => memberUids.has(item.uid) && Number(item.lastMeaningfulAtMs || 0) >= windowRange.start && Number(item.lastMeaningfulAtMs || 0) <= windowRange.end);
+      const periodSessions = eiData.sessions.filter((item) => memberUids.has(item.uid) && Number(item.lastMeaningfulAtMs || 0) >= windowRange.start && Number(item.lastMeaningfulAtMs || 0) <= windowRange.end && Number(item.meaningfulInteractions || 0) > 0);
+      const activeUids = new Set([...periodActivities.filter((item)=>Number(item.meaningfulInteractions||0)>0).map((item)=>item.uid), ...periodSessions.map((item)=>item.uid)]);
+      const onPace = members.filter((member) => scheduled.every((item) => caReportItemDone(member,item)));
+      const video = eiVideoSummary(periodActivities);
+      const focusedSeconds = periodSessions.reduce((sum,item)=>sum+Number(item.activeSeconds||0),0);
+      const medianSession = eiMedian(periodSessions.map((item)=>item.activeSeconds));
+      const latestByUid = new Map();
+      eiData.activities.forEach((item)=>{if(!memberUids.has(item.uid)||Number(item.meaningfulInteractions||0)<1)return;const current=latestByUid.get(item.uid);if(!current||Number(item.lastMeaningfulAtMs||0)>Number(current.lastMeaningfulAtMs||0))latestByUid.set(item.uid,item);});
+      const learners = members.map((member,index) => {
+        const completedScheduled = scheduled.filter((item)=>caReportItemDone(member,item)).length;
+        const milestonePercent = scheduled.length ? Math.round(completedScheduled/scheduled.length*100) : 0;
+        const latest = latestByUid.get(member.uid);
+        const memberVideos = eiVideoItems(periodActivities.filter((item)=>item.uid===member.uid));
+        const maxVideo = memberVideos.length ? Math.max(...memberVideos.map((item)=>Number(item.videoMaxPercent||0))) : 0;
+        const completedVideos = memberVideos.filter((item)=>item.videoCompleted||Number(item.videoMaxPercent||0)>=90).length;
+        const accessed = Boolean(member.uid || member.firstLoginAt || member.lastLoginAt);
+        const complete = spProgramComplete(member);
+        const pace = scheduled.every((item)=>caReportItemDone(member,item));
+        let status = complete ? 'Program complete' : pace ? 'On pace' : !accessed ? 'Access support needed' : spProgressScore(member)===0 ? 'Not yet started' : !activeUids.has(member.uid) ? 'Follow-up suggested' : 'In progress';
+        return { member,index,name:caReportMemberName(member,index,document.getElementById('caReportNames')?.value||'full'),completedScheduled,milestonePercent,latest,maxVideo,completedVideos,status,stage:caReportMemberStage(member) };
+      });
+      const followUp = learners.filter((item)=>item.status==='Follow-up suggested'||item.status==='Access support needed'||item.status==='Not yet started').length;
+      const activityRows = scheduled.map((item)=>{const done=members.filter((member)=>caReportItemDone(member,item)).length;return Object.assign({},item,{done,percent:members.length?Math.round(done/members.length*100):0});}).sort((a,b)=>a.percent-b.percent).slice(0,6);
+      const videoGroups = {};
+      eiVideoItems(periodActivities).forEach((item)=>{const key=item.videoId||item.activityId;(videoGroups[key] ||= []).push(item);});
+      const videoRows = Object.values(videoGroups).map((rows)=>{const result=eiVideoSummary(rows);return{title:rows.find((row)=>row.activityTitle)?.activityTitle||'Video',viewers:result.viewers,median:Math.round(result.median),completion:result.completionRate,dropOff:result.dropOff};}).sort((a,b)=>a.completion-b.completion).slice(0,5);
+      return { members,summary,week,milestone,milestoneLabel,scheduled,windowRange,periodActivities,periodSessions,activeUids,onPace,video,focusedSeconds,medianSession,learners,followUp,activityRows,videoRows };
+    }
+
+    function caReportHeader(model, page, total) {
+      const prepared = document.getElementById('caReportPreparedFor')?.value.trim();
+      const version = Math.max(1,Number(document.getElementById('caReportVersion')?.value||1));
+      return '<header class="ca-report-titleband"><img src="../assets/utl-logo-nav-white.png" alt="The Untaught Lessons"><div><small>Weekly cohort update</small><h1>'+escapeHtml(caCurrentCohort)+'</h1></div><div class="ca-report-title-meta">Week '+model.week+' of 3<br>'+escapeHtml(caReportDateLabel(document.getElementById('caReportStart')?.value))+' to '+escapeHtml(caReportDateLabel(document.getElementById('caReportEnd')?.value))+(prepared?'<br>Prepared for '+escapeHtml(prepared):'')+'<br>Confidential</div></header><div class="ca-report-program"><span>Think, Speak, Act like an Executive</span><img src="../assets/program-logo-tsa.png" alt="Think, Speak, Act like an Executive"></div>';
+    }
+
+    function caReportFooter(model,page,total) {
+      const version=Math.max(1,Number(document.getElementById('caReportVersion')?.value||1));
+      const compact=(document.getElementById('caReportEnd')?.value||caReportDateValue(new Date())).replace(/-/g,'');
+      return '<footer class="ca-report-footer">Engagement measures are support signals. They are not grades or evidence of employee attention or performance.<div class="ca-report-footer-row"><span>'+escapeHtml(caCurrentCohort)+' · Week '+model.week+' of 3 · '+compact+' · v'+version+'</span><span>Page '+page+' of '+total+'</span></div></footer>';
+    }
+
+    function caReportMarkup() {
+      const model=caReportModel(), count=Math.max(1,model.members.length), includeMp=document.getElementById('caReportIncludeMp')?.checked, includeFocused=document.getElementById('caReportIncludeFocused')?.checked, includeMethods=document.getElementById('caReportIncludeMethods')?.checked;
+      const ratio=(value)=>value+' of '+count+' · '+Math.round(value/count*100)+'%';
+      const summary=escapeHtml(document.getElementById('caReportSummary')?.value||'');
+      const highlight=escapeHtml(document.getElementById('caReportHighlight')?.value||'');
+      const attention=escapeHtml(document.getElementById('caReportAttention')?.value||'');
+      const actions=escapeHtml(document.getElementById('caReportActions')?.value||'');
+      const phaseBars=caFunnelStages(model.members).slice(2,5).map((stage)=>'<div class="ca-report-bar-row"><b>'+escapeHtml(stage.label)+'</b><div class="ca-report-bar-track"><div class="ca-report-bar-fill" style="width:'+Math.round(stage.count/count*100)+'%"></div></div><span>'+stage.count+' of '+count+' · '+Math.round(stage.count/count*100)+'%</span></div>').join('');
+      const activityRows=model.activityRows.map((row)=>'<tr><td>'+escapeHtml(row.title)+'</td><td>'+escapeHtml(row.phase)+'</td><td>'+row.done+' of '+count+'</td><td>'+row.percent+'%</td></tr>').join('')||'<tr><td colspan="4">No scheduled activities found.</td></tr>';
+      const videoRows=model.videoRows.map((row)=>'<tr><td>'+escapeHtml(row.title)+'</td><td>'+row.viewers+'</td><td>'+row.median+'%</td><td>'+row.completion+'%</td><td>'+escapeHtml(row.dropOff)+'</td></tr>').join('')||'<tr><td colspan="5">No Vimeo playback was recorded during this reporting period.</td></tr>';
+      const learnerRows=model.learners.map((item)=>{const rewards=spRewardData(item.member),last=item.latest?formatProgressDate(item.latest.lastMeaningfulAtClient||item.latest.lastMeaningfulAtMs):'No activity recorded',video=item.completedVideos?item.completedVideos+' reached 90%':item.maxVideo?Math.round(item.maxVideo)+'% furthest':'No video playback';return'<tr><td>'+escapeHtml(item.name)+'</td><td><span class="ca-report-status is-'+item.status.toLowerCase().replace(/[^a-z]+/g,'-').replace(/-$/,'')+'">'+escapeHtml(item.status)+'</span></td><td>'+escapeHtml(item.stage)+'</td><td>'+item.completedScheduled+' of '+model.scheduled.length+' · '+item.milestonePercent+'%</td><td>'+caPercentComplete(item.member)+'%</td><td>'+escapeHtml(video)+'</td><td>'+escapeHtml(last)+'</td>'+(includeMp?'<td>'+Number(rewards.mpTotal||rewards.masteryPoints||0)+' MP<br>'+escapeHtml(rewards.currentLevel||rewards.level||'—')+'</td>':'')+'</tr>';}).join('');
+      const methods=includeMethods?'<div class="ca-report-methods"><div class="ca-report-method"><b>Participation this week</b><p><b>Measured as:</b> Learners with meaningful interaction during the reporting period.</p><p><b>What it tells you:</b> How broadly the cohort participated.</p><p><b>Combine with:</b> Progress to the selected milestone.</p></div><div class="ca-report-method"><b>On pace</b><p><b>Measured as:</b> Learners who completed every activity through '+escapeHtml(model.milestoneLabel)+'.</p><p><b>What it tells you:</b> Who has reached the agreed weekly target.</p><p><b>Combine with:</b> Last meaningful activity before sending a reminder.</p></div><div class="ca-report-method"><b>Median video coverage</b><p><b>Measured as:</b> The middle furthest Vimeo position among viewing sessions.</p><p><b>What it tells you:</b> How far a typical viewing session reached.</p><p><b>Combine with:</b> Exercise completion to understand application.</p></div><div class="ca-report-method"><b>Estimated focused time</b><p><b>Measured as:</b> Visible page time with interaction during the previous 60 seconds.</p><p><b>What it tells you:</b> The approximate depth of active visits.</p><p><b>Combine with:</b> Completed activities because longer time can also indicate friction.</p></div></div>':'';
+      return '<section class="ca-report-sheet">'+caReportHeader(model,1,3)+'<p class="ca-report-kicker">Executive update</p><h2>Week '+model.week+' cohort position</h2><p class="ca-report-summary">'+summary+'</p><div class="ca-report-stats"><div class="ca-report-stat"><span>Participated this period</span><strong>'+model.activeUids.size+' of '+count+'</strong><small>'+Math.round(model.activeUids.size/count*100)+'% of the cohort</small></div><div class="ca-report-stat"><span>On pace</span><strong>'+model.onPace.length+' of '+count+'</strong><small>Through '+escapeHtml(model.milestoneLabel)+'</small></div><div class="ca-report-stat"><span>Program complete</span><strong>'+model.summary.completed+' of '+count+'</strong><small>'+model.summary.completionPercent+'% of the cohort</small></div><div class="ca-report-stat"><span>Follow-up suggested</span><strong>'+model.followUp+'</strong><small>Review before contacting</small></div></div><div class="ca-report-grid"><div class="ca-report-card"><h3>Progress through the curriculum</h3><div class="ca-report-bars">'+phaseBars+'</div></div><div class="ca-report-card"><h3>Cohort engagement</h3><p>Vimeo viewers: <b>'+ratio(model.video.viewers)+'</b></p><p>Median video coverage: <b>'+Math.round(model.video.median)+'%</b></p><p>Viewing sessions reaching 90%: <b>'+model.video.completionRate+'%</b></p>'+(includeFocused?'<p>Median focused session: <b>'+eiFormatDuration(model.medianSession)+'</b></p>':'')+'</div></div><div class="ca-report-grid" style="margin-top:12px"><div class="ca-report-card"><h3>What is going well</h3><p>'+highlight+'</p></div><div class="ca-report-card"><h3>What may need attention</h3><p>'+attention+'</p></div></div><div class="ca-report-action"><h3>Suggested actions this week</h3><p>'+actions+'</p></div>'+caReportFooter(model,1,3)+'</section>'+
+      '<section class="ca-report-sheet">'+caReportHeader(model,2,3)+'<p class="ca-report-kicker">Progress and engagement</p><h2>Where learners are moving</h2><div class="ca-report-card"><h3>Activities through the selected milestone</h3><table class="ca-report-table"><thead><tr><th>Activity</th><th>Program area</th><th>Completed</th><th>Completion</th></tr></thead><tbody>'+activityRows+'</tbody></table></div><div class="ca-report-card" style="margin-top:14px"><h3>Vimeo engagement during this reporting period</h3><table class="ca-report-table"><thead><tr><th>Video</th><th>Viewers</th><th>Median coverage</th><th>Reached 90%</th><th>Common drop-off</th></tr></thead><tbody>'+videoRows+'</tbody></table></div><div class="ca-report-action"><h3>How to use this page</h3><p>Low completion can reflect access, timing, or exercise friction. Review viewer counts and the learner breakdown before deciding whether to send a reminder or revise an activity.</p></div>'+caReportFooter(model,2,3)+'</section>'+
+      '<section class="ca-report-sheet">'+caReportHeader(model,3,3)+'<p class="ca-report-kicker">Learner update</p><h2>Individual progress and support signals</h2><table class="ca-report-table"><thead><tr><th>Learner</th><th>Support status</th><th>Current stage</th><th>Weekly target</th><th>Total program</th><th>Video progress</th><th>Last meaningful activity</th>'+(includeMp?'<th>MP and level</th>':'')+'</tr></thead><tbody>'+learnerRows+'</tbody></table>'+(methods?'<p class="ca-report-kicker">How to read this update</p><h2>Metric explanations</h2>'+methods:'')+caReportFooter(model,3,3)+'</section>';
+    }
+
+    function caReportSuggestedCopy() {
+      const model=caReportModel(), count=Math.max(1,model.members.length), active=model.activeUids.size, onPace=model.onPace.length;
+      const summary=(onPace>=Math.ceil(count*.7)?'Strong progress: ':'Cohort update: ')+active+' of '+count+' learners participated during this reporting period, and '+onPace+' reached '+model.milestoneLabel+'.';
+      const highlight=model.video.viewers?'Video participation is visible: '+model.video.viewers+' learners played at least one Vimeo lesson, with median coverage of '+Math.round(model.video.median)+'%.':'Curriculum progress is now visible across the cohort dashboard.';
+      const attention=model.followUp?model.followUp+' learner'+(model.followUp===1?' may':'s may')+' benefit from a supportive follow-up after their individual activity records are reviewed.':'No learners currently meet the report’s follow-up criteria.';
+      const actions=model.followUp?'Review the learners marked for follow-up and confirm whether access or timing is the issue.\nEncourage the cohort to reach '+model.milestoneLabel+'.\nReview the lowest-completion scheduled activity before the next update.':'Reinforce the next weekly milestone.\nReview the lowest-completion scheduled activity.\nShare the next update after the reporting period closes.';
+      document.getElementById('caReportSummary').value=summary;
+      document.getElementById('caReportHighlight').value=highlight;
+      document.getElementById('caReportAttention').value=attention;
+      document.getElementById('caReportActions').value=actions;
+    }
+
+    function caRenderReportPreview() {
+      const preview=document.getElementById('caReportPreview');
+      if(preview)preview.innerHTML=caReportMarkup();
+    }
+
+    function caOpenWeeklyReport() {
+      if(!caCurrentCohort)return;
+      const members=caCohortGroups()[caCurrentCohort]||[];
+      if(!members.length){showToast('No members to include in this report.','error');return;}
+      const dialog=document.getElementById('caReportDialog'),today=new Date(),start=new Date(today);start.setDate(today.getDate()-6);
+      document.getElementById('caReportStart').value=caReportDateValue(start);
+      document.getElementById('caReportEnd').value=caReportDateValue(today);
+      const details=caCohortDetailsCache[caCurrentCohort]||{};
+      document.getElementById('caReportPreparedFor').value=details.contactName||'';
+      const days=caCohortSummary(caCurrentCohort,members).daysSinceStart;
+      const week=Math.min(3,Math.max(1,days===null?1:Math.floor(days/7)+1));
+      document.getElementById('caReportWeek').value=String(week);
+      document.getElementById('caReportMilestone').value='phase'+week;
+      caReportSuggestedCopy();caRenderReportPreview();dialog.showModal();
+    }
+
+    function caExportPdf() {
+      const report=document.getElementById('caPrintReport');
+      report.innerHTML=caReportMarkup();
+      const end=(document.getElementById('caReportEnd')?.value||caReportDateValue(new Date())).replace(/-/g,'');
+      const version=Math.max(1,Number(document.getElementById('caReportVersion')?.value||1));
+      const filename=end+' - '+caCurrentCohort.replace(/[^a-z0-9-]+/gi,'_')+' - Cohort update v'+version;
+      const previousTitle=document.title;
+      document.title=filename;
       window.print();
-      document.title = previousTitle;
+      window.setTimeout(()=>{document.title=previousTitle;},500);
+    }
+
+    function cpWindow() {
+      const start=new Date((document.getElementById('cpStart')?.value||'')+'T00:00:00').getTime()||0;
+      const end=new Date((document.getElementById('cpEnd')?.value||'')+'T23:59:59').getTime()||Date.now();
+      return {start,end};
+    }
+
+    function cpVariation() {
+      const value=document.getElementById('cpVariation')?.value||'momentum';
+      const options={
+        focus:{value:'focus',limit:0,label:'Weekly focus',note:'A simple milestone and next step reminder with no cohort numbers.'},
+        momentum:{value:'momentum',limit:2,label:'Momentum update',note:'Balanced encouragement with up to two safe collective signals.'},
+        snapshot:{value:'snapshot',limit:3,label:'Progress snapshot',note:'The most informative option, with up to three safe aggregate signals.'}
+      };
+      return options[value]||options.momentum;
+    }
+
+    function cpModel() {
+      const members=caCohortGroups()[caCurrentCohort]||[],uids=new Set(members.map((member)=>member.uid).filter(Boolean)),range=cpWindow();
+      const rows=eiData.activities.filter((item)=>uids.has(item.uid)&&Number(item.lastMeaningfulAtMs||0)>=range.start&&Number(item.lastMeaningfulAtMs||0)<=range.end&&Number(item.meaningfulInteractions||0)>0);
+      const activeUids=new Set(rows.map((item)=>item.uid));
+      const completedPairs=new Set(),videoPairs=new Set();let resumes=0;
+      const completedBy={},videosBy={},resumesBy={};
+      rows.forEach((item)=>{
+        if(item.activityType!=='video'&&item.completed){const key=item.uid+'|'+item.activityId;if(!completedPairs.has(key)){completedPairs.add(key);completedBy[item.uid]=(completedBy[item.uid]||0)+1;}}
+        if(item.activityType==='video'&&(item.videoCompleted||Number(item.videoMaxPercent||0)>=90)){const key=item.uid+'|'+(item.videoId||item.activityId);if(!videoPairs.has(key)){videoPairs.add(key);videosBy[item.uid]=(videosBy[item.uid]||0)+1;}}
+        const count=Number(item.resumeCount||0);if(count>0){resumes+=count;resumesBy[item.uid]=(resumesBy[item.uid]||0)+count;}
+      });
+      const metric=(label,value,byUid)=>{const maximum=Math.max(0,...Object.values(byUid));return{label,value,safe:value>=3&&maximum<=value/2};};
+      const metrics=[
+        document.getElementById('cpIncludeActivities')?.checked&&metric('Activities completed',completedPairs.size,completedBy),
+        document.getElementById('cpIncludeVideos')?.checked&&metric('Videos watched to 90%',videoPairs.size,videosBy),
+        document.getElementById('cpIncludeResumes')?.checked&&metric('Activities resumed',resumes,resumesBy)
+      ].filter(Boolean);
+      const participationRate=members.length?activeUids.size/members.length:0,variation=cpVariation();
+      const suppressNumbers=members.length<5||participationRate<.4;
+      const eligibleMetrics=metrics.filter((item)=>item.safe&&!suppressNumbers);
+      const completedTitlesByUid={},uidsByCompletedTitle={};
+      rows.forEach((item)=>{
+        const completed=item.activityType==='video'?(item.videoCompleted||Number(item.videoMaxPercent||0)>=90):item.completed;
+        const title=String(item.activityTitle||'').trim();
+        if(!completed||!title)return;
+        (completedTitlesByUid[item.uid] ||= new Set()).add(title);
+        (uidsByCompletedTitle[title] ||= new Set()).add(item.uid);
+      });
+      let achievement='';
+      if(variation.value==='snapshot'&&!suppressNumbers){
+        const shared=Object.entries(uidsByCompletedTitle).filter(([,ids])=>ids.size>=3).sort((a,b)=>b[1].size-a[1].size||a[0].localeCompare(b[0]))[0];
+        if(shared)achievement='Several participants completed '+shared[0]+' this week.';
+        else if(members.length>=8&&activeUids.size>=4){
+          const individual=Object.values(completedTitlesByUid).filter((titles)=>titles.size>=2).sort((a,b)=>b.size-a.size)[0];
+          if(individual){const titles=[...individual].slice(0,2);achievement='A participant completed '+titles[0]+' and '+titles[1]+' this week.';}
+        }
+      }
+      return {members,range,activeUids,variation,metrics:eligibleMetrics.slice(0,variation.limit),eligibleMetrics,achievement,suppressed:suppressNumbers||metrics.some((item)=>!item.safe)||eligibleMetrics.length<variation.limit,suppressNumbers};
+    }
+
+    function cpText() {
+      return {
+        week:Number(document.getElementById('cpWeek')?.value||1),
+        version:Math.max(1,Number(document.getElementById('cpVersion')?.value||1)),
+        milestone:document.getElementById('cpMilestone')?.selectedOptions?.[0]?.textContent||'Continue the current milestone',
+        deadline:String(document.getElementById('cpDeadline')?.value||'').trim(),
+        headline:String(document.getElementById('cpHeadline')?.value||'').trim(),
+        intro:String(document.getElementById('cpIntro')?.value||'').trim(),
+        next:String(document.getElementById('cpNext')?.value||'').trim(),
+        variation:cpVariation().value
+      };
+    }
+
+    function cpPrivacyCheck() {
+      const model=cpModel(),text=Object.values(cpText()).join(' ').toLowerCase();let found='';
+      model.members.some((member)=>{
+        const email=String(member.email||'').trim().toLowerCase(),name=String(member.displayName||member.name||'').trim().toLowerCase();
+        if(email&&text.includes(email)){found='an email address';return true;}
+        if(name.length>=4&&text.includes(name)){found='a learner name';return true;}
+        return false;
+      });
+      const variationNote=document.getElementById('cpVariationNote');
+      if(variationNote)variationNote.textContent=model.variation.note;
+      const status=document.getElementById('cpPrivacyStatus');
+      if(status){status.classList.toggle('is-warning',Boolean(found||model.suppressed));status.textContent=found?'Privacy check blocked this output because the message contains '+found+'. Remove it before sharing.':model.variation.value==='focus'?'Weekly focus selected. No cohort totals will be shown.':model.suppressed?'Privacy protection is active. The selected style has been simplified to show only safe collective signals.':'Privacy check passed. Only safe cohort totals will be shown.';}
+      return !found;
+    }
+
+    function cpCardMarkup() {
+      const model=cpModel(),copy=cpText(),period=caReportDateLabel(document.getElementById('cpStart')?.value)+' to '+caReportDateLabel(document.getElementById('cpEnd')?.value);
+      const metrics=model.metrics.length?'<div class="cp-metrics">'+model.metrics.map((item)=>'<div class="cp-metric"><strong>'+item.value+'</strong><span>'+escapeHtml(item.label)+'</span></div>').join('')+'</div>':'';
+      const achievement=model.achievement?'<div class="cp-achievement"><b>A milestone this week</b>'+escapeHtml(model.achievement)+'</div>':'';
+      const focus=copy.milestone+(copy.deadline?' by '+copy.deadline:'')+'.';
+      return '<article class="cp-card'+(model.achievement?' has-achievement':'')+'"><header class="cp-card-head"><div class="cp-card-brand">The Untaught<span>Lessons</span></div><div class="cp-card-meta">Week '+copy.week+' '+model.variation.label.toLowerCase()+'<br>'+escapeHtml(caCurrentCohort)+'</div></header><div class="cp-card-body"><p class="cp-card-kicker">Think, Speak, Act like an Executive</p><h2>'+escapeHtml(copy.headline)+'</h2><p class="cp-card-intro">'+escapeHtml(copy.intro)+'</p>'+metrics+achievement+'<div class="cp-focus"><b>This week’s focus</b>'+escapeHtml(focus)+'</div><div class="cp-next">'+escapeHtml(copy.next)+'</div><footer class="cp-card-foot"><span>'+escapeHtml(period)+'</span><span>Progress is private. No names or individual activity are shown.</span></footer></div></article>';
+    }
+
+    function cpRender() {
+      const preview=document.getElementById('cpPreview');if(preview)preview.innerHTML=cpCardMarkup();cpPrivacyCheck();
+    }
+
+    function cpSuggestedCopy() {
+      const model=cpModel(),milestone=document.getElementById('cpMilestone')?.selectedOptions?.[0]?.textContent||'Continue the current milestone',deadline=String(document.getElementById('cpDeadline')?.value||'Friday').trim();
+      if(model.variation.value==='snapshot'&&model.metrics.length){
+        document.getElementById('cpHeadline').value='Here is the cohort’s progress this week.';
+        document.getElementById('cpIntro').value='The group continued moving through the program. These shared totals reflect collective activity while keeping individual progress private.';
+      }else if(model.variation.value==='momentum'&&model.metrics.length){
+        document.getElementById('cpHeadline').value='The cohort is building momentum.';
+        document.getElementById('cpIntro').value='This week, the group continued moving through the program and putting the lessons into practice.';
+      }else{
+        document.getElementById('cpHeadline').value='Keep moving through this week’s milestone.';
+        document.getElementById('cpIntro').value='Continue from your next available activity and build from where you are.';
+      }
+      document.getElementById('cpNext').value='Open your Learning Journey and continue from your next available activity. Your work is saved when you return.';
+      document.getElementById('cpDeadline').value=deadline||'Friday';
+      if(!document.getElementById('cpDeadline').value)document.getElementById('cpDeadline').value='Friday';
+      if(!milestone)document.getElementById('cpMilestone').value='phase1';
+    }
+
+    function cpOpen() {
+      if(!caCurrentCohort)return;const members=caCohortGroups()[caCurrentCohort]||[];if(!members.length){showToast('No members are available for this update.','error');return;}
+      const today=new Date(),start=new Date(today);start.setDate(today.getDate()-6);
+      document.getElementById('cpStart').value=caReportDateValue(start);document.getElementById('cpEnd').value=caReportDateValue(today);
+      const days=caCohortSummary(caCurrentCohort,members).daysSinceStart,week=Math.min(3,Math.max(1,days===null?1:Math.floor(days/7)+1));
+      document.getElementById('cpWeek').value=String(week);document.getElementById('cpMilestone').value='phase'+week;document.getElementById('cpDeadline').value='Friday';cpSuggestedCopy();cpRender();document.getElementById('cpDialog').showModal();
+    }
+
+    function cpMessage() {
+      const model=cpModel(),copy=cpText(),lines=['Week '+copy.week+' '+model.variation.label.toLowerCase(),'Think, Speak, Act like an Executive','', '*'+copy.headline+'*',copy.intro,''];
+      if(model.metrics.length){lines.push('*Progress this week*');model.metrics.forEach((item)=>lines.push('* '+item.value+' '+item.label.toLowerCase()));lines.push('');}
+      if(model.achievement)lines.push('*A milestone this week*',model.achievement,'');
+      lines.push('*This week’s focus*',copy.milestone+(copy.deadline?' by '+copy.deadline:'')+'.','', '*Your next step*',copy.next,'','Your progress remains private. This update contains no names or individual activity.');
+      return lines.join('\n');
+    }
+
+    async function cpCopyMessage() {
+      if(!cpPrivacyCheck())return showToast('Remove the learner information before copying.','error');
+      try{await navigator.clipboard.writeText(cpMessage());showToast('Cohort message copied.');}catch(_){showToast('Could not copy the message.','error');}
+    }
+
+    function cpCanvasRound(ctx,x,y,w,h,r,fill,stroke) {
+      ctx.beginPath();ctx.roundRect(x,y,w,h,r);if(fill){ctx.fillStyle=fill;ctx.fill();}if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=2;ctx.stroke();}
+    }
+
+    function cpCanvasText(ctx,text,x,y,maxWidth,lineHeight,maxLines) {
+      const words=String(text||'').split(/\s+/);let line='',lines=[];
+      words.forEach((word)=>{const test=line?line+' '+word:word;if(ctx.measureText(test).width>maxWidth&&line){lines.push(line);line=word;}else line=test;});if(line)lines.push(line);
+      lines.slice(0,maxLines||99).forEach((value,index)=>ctx.fillText(value,x,y+index*lineHeight));return y+Math.min(lines.length,maxLines||99)*lineHeight;
+    }
+
+    function cpDownloadPng() {
+      if(!cpPrivacyCheck())return showToast('Remove the learner information before downloading.','error');
+      const model=cpModel(),copy=cpText(),canvas=document.createElement('canvas');canvas.width=1080;canvas.height=1350;const ctx=canvas.getContext('2d');ctx.fillStyle='#FFFFFF';ctx.fillRect(0,0,1080,1350);ctx.fillStyle='#003366';ctx.fillRect(0,0,1080,245);
+      ctx.fillStyle='#FFFFFF';ctx.font='700 38px Georgia,serif';ctx.fillText('The Untaught',68,82);ctx.fillStyle='#EEA320';ctx.fillText('Lessons',68,126);ctx.fillStyle='rgba(255,255,255,.82)';ctx.font='700 25px Arial,sans-serif';ctx.textAlign='right';ctx.fillText('Week '+copy.week+' '+model.variation.label.toLowerCase(),1012,83);ctx.font='22px Arial,sans-serif';ctx.fillText(caCurrentCohort,1012,122);ctx.textAlign='left';
+      let y=315;ctx.fillStyle='#B96F00';ctx.font='700 22px Arial,sans-serif';ctx.fillText('Think, Speak, Act like an Executive',68,y);y+=64;ctx.fillStyle='#003366';ctx.font='700 58px Georgia,serif';y=cpCanvasText(ctx,copy.headline,68,y,944,68,3)+20;ctx.fillStyle='#4D7094';ctx.font='30px Arial,sans-serif';y=cpCanvasText(ctx,copy.intro,68,y,944,43,4)+28;
+      if(model.metrics.length){const compact=model.achievement,gap=18,w=(944-gap*(model.metrics.length-1))/model.metrics.length,h=compact?130:155;model.metrics.forEach((item,index)=>{const x=68+index*(w+gap);cpCanvasRound(ctx,x,y,w,h,14,'#FFFFFF','#D8D0C4');ctx.fillStyle='#EEA320';ctx.fillRect(x,y,w,6);ctx.fillStyle='#003366';ctx.font=(compact?'700 42px':'700 48px')+' Georgia,serif';ctx.fillText(String(item.value),x+24,y+(compact?54:62));ctx.fillStyle='#5E6D7B';ctx.font='700 20px Arial,sans-serif';cpCanvasText(ctx,item.label,x+24,y+(compact?88:102),w-48,27,2);});y+=compact?150:190;}
+      if(model.achievement){cpCanvasRound(ctx,68,y,944,100,14,'#F2FAF5','#BCD8C7');ctx.fillStyle='#003366';ctx.font='700 22px Arial,sans-serif';ctx.fillText('A milestone this week',94,y+33);ctx.fillStyle='#315A43';ctx.font='23px Arial,sans-serif';cpCanvasText(ctx,model.achievement,94,y+66,890,31,2);y+=120;}
+      const compact=Boolean(model.achievement),focusHeight=compact?120:145;cpCanvasRound(ctx,68,y,944,focusHeight,14,'#FFF8E8','#E6C681');ctx.fillStyle='#003366';ctx.font='700 24px Arial,sans-serif';ctx.fillText('This week’s focus',94,y+(compact?36:42));ctx.fillStyle='#4A4A4A';ctx.font='28px Arial,sans-serif';cpCanvasText(ctx,copy.milestone+(copy.deadline?' by '+copy.deadline:'')+'.',94,y+(compact?73:83),890,38,2);y+=compact?140:170;cpCanvasRound(ctx,68,y,944,compact?105:125,14,'#003366');ctx.fillStyle='#FFFFFF';ctx.font='700 27px Arial,sans-serif';cpCanvasText(ctx,copy.next,94,y+(compact?36:43),890,37,3);
+      ctx.fillStyle='#718090';ctx.font='18px Arial,sans-serif';ctx.fillText(caReportDateLabel(document.getElementById('cpStart')?.value)+' to '+caReportDateLabel(document.getElementById('cpEnd')?.value),68,1290);ctx.textAlign='right';ctx.fillText('Progress is private. No names are shown.',1012,1290);
+      const link=document.createElement('a');link.download=cpFilename('png');link.href=canvas.toDataURL('image/png');link.click();
+    }
+
+    function cpFilename(extension) {
+      const copy=cpText(),date=(document.getElementById('cpEnd')?.value||caReportDateValue(new Date())).replace(/-/g,'');return date+' - '+caCurrentCohort.replace(/[^a-z0-9-]+/gi,'_')+' - Week '+copy.week+' cohort encouragement v'+copy.version+'.'+extension;
+    }
+
+    function cpDownloadPdf() {
+      if(!cpPrivacyCheck())return showToast('Remove the learner information before downloading.','error');
+      const report=document.getElementById('caPrintReport');report.innerHTML=cpCardMarkup();const previous=document.title;document.title=cpFilename('pdf').replace(/\.pdf$/,'');window.print();window.setTimeout(()=>{document.title=previous;},500);
     }
 
     function renderCohortAnalytics() {
@@ -9772,7 +10236,25 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
     });
     document.getElementById('caDetailBack')?.addEventListener('click', hideCohortDetail);
     document.getElementById('caExportCsv')?.addEventListener('click', caExportCsv);
-    document.getElementById('caExportPdf')?.addEventListener('click', caExportPdf);
+    document.getElementById('caExportPdf')?.addEventListener('click', caOpenWeeklyReport);
+    document.getElementById('caParticipantUpdate')?.addEventListener('click',cpOpen);
+    document.getElementById('caReportClose')?.addEventListener('click',()=>document.getElementById('caReportDialog')?.close());
+    document.getElementById('caReportRefreshPreview')?.addEventListener('click',caRenderReportPreview);
+    document.getElementById('caReportDownload')?.addEventListener('click',caExportPdf);
+    document.getElementById('caReportWeek')?.addEventListener('change',(event)=>{document.getElementById('caReportMilestone').value='phase'+event.target.value;caReportSuggestedCopy();caRenderReportPreview();});
+    ['caReportStart','caReportEnd','caReportMilestone','caReportPreparedFor','caReportVersion','caReportSummary','caReportHighlight','caReportAttention','caReportActions','caReportNames','caReportIncludeMp','caReportIncludeFocused','caReportIncludeMethods'].forEach((id)=>document.getElementById(id)?.addEventListener('change',caRenderReportPreview));
+    ['caReportSummary','caReportHighlight','caReportAttention','caReportActions','caReportPreparedFor'].forEach((id)=>document.getElementById(id)?.addEventListener('input',caRenderReportPreview));
+    document.getElementById('caReportDialog')?.addEventListener('click',(event)=>{if(event.target===event.currentTarget)event.currentTarget.close();});
+    document.getElementById('cpClose')?.addEventListener('click',()=>document.getElementById('cpDialog')?.close());
+    document.getElementById('cpRefresh')?.addEventListener('click',cpRender);
+    document.getElementById('cpCopy')?.addEventListener('click',cpCopyMessage);
+    document.getElementById('cpDownloadPng')?.addEventListener('click',cpDownloadPng);
+    document.getElementById('cpDownloadPdf')?.addEventListener('click',cpDownloadPdf);
+    document.getElementById('cpWeek')?.addEventListener('change',(event)=>{document.getElementById('cpMilestone').value='phase'+event.target.value;cpSuggestedCopy();cpRender();});
+    document.getElementById('cpVariation')?.addEventListener('change',()=>{cpSuggestedCopy();cpRender();});
+    ['cpStart','cpEnd','cpMilestone','cpDeadline','cpHeadline','cpIntro','cpNext','cpVersion','cpIncludeActivities','cpIncludeVideos','cpIncludeResumes'].forEach((id)=>document.getElementById(id)?.addEventListener('change',cpRender));
+    ['cpDeadline','cpHeadline','cpIntro','cpNext'].forEach((id)=>document.getElementById(id)?.addEventListener('input',cpRender));
+    document.getElementById('cpDialog')?.addEventListener('click',(event)=>{if(event.target===event.currentTarget)event.currentTarget.close();});
     document.querySelector('[data-target="section-cohort-analytics"]')?.addEventListener('click', () => {
       if (spAllMembers.length) renderCohortAnalytics();
     });
