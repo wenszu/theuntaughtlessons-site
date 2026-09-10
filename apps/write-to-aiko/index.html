@@ -382,11 +382,17 @@
     }
 
     .write-to-aiko-length-note {
-      margin: -4px 0 14px;
-      color: var(--write-to-aiko-steel);
-      font-size: .94rem;
+      margin: 0 0 18px;
+      padding: 12px 14px;
+      border: 1px solid rgba(238, 163, 32, .55);
+      border-radius: 8px;
+      background: #FFF8E8;
+      color: var(--write-to-aiko-navy);
+      font-size: .96rem;
       line-height: 1.45;
     }
+
+    .write-to-aiko-length-note strong { display: block; margin-bottom: 2px; }
 
     .write-to-aiko-textarea {
       width: 100%;
@@ -614,6 +620,8 @@
       }
     }
   </style>
+  <link rel="stylesheet" href="../../assets/rich-text-editor.css?v=1">
+  <script src="../../assets/rich-text-editor.js?v=1"></script>
 </head>
 <body>
   <header class="write-to-aiko-header">
@@ -699,7 +707,7 @@
             </div>
           </div>
           <p class="write-to-aiko-mode-guidance"><strong>Choose one format:</strong> Use <strong>"Structured"</strong> if you want the easier guided option with labeled sections for your bottom line and supporting points. Use <strong>"Open"</strong> if you want to write in your own free-form structure; this is the more difficult option. In both formats, lead with your bottom line and build from your SCQA.</p>
-          <p class="write-to-aiko-length-note">Suggested length: 80-120 words.</p>
+          <p class="write-to-aiko-length-note"><strong>Plan for 80 to 120 words.</strong>This usually gives you enough room for a clear bottom line, three supporting points and a useful closing.</p>
 
           <p class="write-to-aiko-salutation">Hey Aiko,</p>
 
@@ -745,7 +753,7 @@
           <p class="write-to-aiko-signoff">Best,<br>[Your name]</p>
 
           <div class="write-to-aiko-footer-count">
-            <p class="write-to-aiko-count-line"><span id="writeToAikoFooterCount">0</span> words · Suggested length: 80-120 words</p>
+            <p class="write-to-aiko-count-line"><span id="writeToAikoFooterCount">0</span> words</p>
           </div>
 
           <div class="write-to-aiko-sample-block">
@@ -859,7 +867,9 @@ Yutee Elle</div>
         return {
           mode: state.mode,
           openText: openText.value,
+          openHtml: window.UTLRichText.html(openText),
           structuredValues: structuredFields.map((field) => field.value),
+          structuredHtml: structuredFields.map((field) => window.UTLRichText.html(field)),
           updatedAtClient: new Date().toISOString(),
           durationSeconds: elapsedSeconds()
         };
@@ -872,8 +882,8 @@ Yutee Elle</div>
 
       function applyDraft(draft) {
         if (!draft) return;
-        openText.value = draft.openText || '';
-        structuredFields.forEach((field, index) => { field.value = (draft.structuredValues || [])[index] || ''; });
+        window.UTLRichText.set(openText, draft.openText || '', draft.openHtml || '');
+        structuredFields.forEach((field, index) => window.UTLRichText.set(field, (draft.structuredValues || [])[index] || '', (draft.structuredHtml || [])[index] || ''));
         setMode(draft.mode === 'open' ? 'open' : 'structured');
         state.elapsedBeforePause = Math.max(0, Number(draft.durationSeconds) || 0);
         updateCounts();
@@ -1180,6 +1190,7 @@ Yutee Elle</div>
         const payload = {
           email: readProfileEmail(),
           response,
+          response_html: state.mode === 'open' ? window.UTLRichText.html(openText) : structuredFields.map((field) => window.UTLRichText.html(field)),
           mode: state.mode,
           page: window.location.href,
           completed_at: new Date().toISOString(),
@@ -1273,6 +1284,7 @@ Yutee Elle</div>
       });
 
       setMode('structured');
+      window.UTLRichText.enhanceAll('[data-structured-field], #writeToAikoOpenText', { minHeight: '120px' });
       updateCounts();
       updateTimer();
       savedDraft = safeParse(localStorage.getItem(DRAFT_KEY), null);

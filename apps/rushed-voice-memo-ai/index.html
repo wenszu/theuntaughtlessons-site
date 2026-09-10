@@ -851,6 +851,8 @@
       }
     }
   </style>
+  <link rel="stylesheet" href="../../assets/rich-text-editor.css?v=1">
+  <script src="../../assets/rich-text-editor.js?v=1"></script>
 </head>
 <body>
   <header class="tsa-speak-header">
@@ -1027,6 +1029,7 @@ Here is the transcript:
     }
 
     const textarea = document.getElementById('structuredOutput');
+    window.UTLRichText.enhance(textarea, { minHeight: '220px' });
     const count = document.getElementById('outputCount');
     const btn = document.getElementById('markDoneBtn');
     const notice = document.getElementById('completionNotice');
@@ -1044,7 +1047,7 @@ Here is the transcript:
         phase: 1,
         exercise: 'Rushed voice memo with AI',
         completed_at: new Date().toISOString(),
-        response: { ai_structured_output: text }
+        response: { ai_structured_output: text, ai_structured_output_html: window.UTLRichText.html(textarea) }
       };
       localStorage.setItem('utl_result_rushed-voice-memo-ai', JSON.stringify(record));
       localStorage.setItem('utl_p1_ex5_done', 'true');

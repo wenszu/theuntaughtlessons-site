@@ -88,7 +88,24 @@
     .screen { display: none; }
     .screen.is-active { display: block; }
     .screen-grid { display: grid; grid-template-columns: minmax(0, 1fr) 300px; align-items: start; gap: 18px; }
-    .work-layout { display: grid; grid-template-columns: 370px minmax(0, 1fr); align-items: start; gap: 18px; }
+    .work-layout { display: grid; grid-template-columns: minmax(0, 1fr); align-items: start; gap: 20px; }
+    .work-layout > *,
+    .work-layout .panel,
+    .work-layout .work-field,
+    .work-layout .utl-rich-shell { min-width: 0; }
+    .work-layout .work-field > *,
+    .work-layout select,
+    .work-layout textarea { max-width: 100%; }
+    .work-layout .panel { overflow: hidden; }
+    .work-layout > .panel:first-child {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+    .work-layout > .panel:first-child > .substep { grid-column: 1 / -1; }
+    .work-layout > .panel:first-child > .native-history-mount { grid-column: 1 / -1; }
+    .work-layout > .panel:first-child > .work-field { margin-top: 0 !important; }
+    .work-layout > .panel:first-child > .work-field:last-of-type { grid-column: 1 / -1; }
     .main-column, .side-column { display: grid; gap: 16px; }
     .side-column { position: static; }
     h1, h2, h3 { margin: 0; color: var(--navy); }
@@ -232,6 +249,8 @@
     .response-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
     @media (max-width: 900px) {
       .screen-grid, .run-layout, .work-layout { grid-template-columns: 1fr; }
+      .work-layout > .panel:first-child { grid-template-columns: 1fr; }
+      .work-layout > .panel:first-child > .work-field:last-of-type { grid-column: auto; }
       .side-column, .run-board { position: static; }
       .role-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     }
@@ -247,6 +266,8 @@
       .step-dot { width: 26px; height: 26px; }
       main { width: calc(100% - 24px); padding-top: 22px; }
       .demo-grid, .role-grid { grid-template-columns: 1fr; }
+      .work-layout > .panel:first-child { grid-template-columns: 1fr; }
+      .work-layout > .panel:first-child > .work-field:last-of-type { grid-column: auto; }
       .role-card { min-height: 0; }
       .panel { padding: 18px; }
       .button-row.mobile-sticky { position: sticky; bottom: 0; z-index: 10; margin-inline: -12px; padding: 12px; border-top: 1px solid var(--rule); background: rgba(243,237,226,.96); backdrop-filter: blur(8px); }
@@ -254,6 +275,8 @@
     }
     @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
   </style>
+  <link rel="stylesheet" href="../../assets/rich-text-editor.css?v=1">
+  <script src="../../assets/rich-text-editor.js?v=1"></script>
 </head>
 <body>
   <header class="site-header">
@@ -282,7 +305,7 @@
         <div>
           <div class="eyebrow">Step 1 of 3 · Understand the approach</div>
           <h1>Use AI to hear several useful perspectives before you decide.</h1>
-          <p class="lead">A virtual advisory board is a set of AI-generated advisors, each assigned a specific role. For example, one advisor can think like a customer while another can test whether the idea will work. You can choose other roles based on the question you need to answer. A board chair compares their advice and recommends what to do next. You make the final decision.</p>
+          <p class="lead">A virtual advisory board uses AI to examine one decision through several assigned roles. Two or three advisors look at the question in different ways. The board chair considers every advisor's perspective, identifies where they agree and disagree, weighs the strongest points, and makes one recommendation on behalf of the board. You review the recommendation and make the final decision.</p>
         </div>
 
         <div>
@@ -296,18 +319,18 @@
             <div class="voice-row"><strong>Student representative</strong><span>Will students enjoy it and want to attend?</span></div>
             <div class="voice-row"><strong>Parent representative</strong><span>Is it safe and affordable for families?</span></div>
             <div class="voice-row"><strong>Event organizer</strong><span>Is there enough capacity and a weather backup?</span></div>
-            <div class="voice-row"><strong>Board chair</strong><span>Recommend the park only if a nearby indoor backup is reserved.</span></div>
+            <div class="voice-row"><strong>Board chair</strong><span>After considering all three views and weighing where they agree and disagree, the board recommends the park only if a nearby indoor backup is reserved.</span></div>
           </div></article>
         </div>
         <div class="panel">
           <h2 class="panel-title">How does a virtual advisory board work?</h2>
           <div class="faq-list">
-            <details class="faq-item"><summary>What is a virtual advisory board?</summary><p>A set of AI-generated advisors, each assigned a specific role. One might think like a CFO. Another might think like a customer. Another might think like someone responsible for making the project work. AI is useful here because you can tell it which role to take and what that role should examine. You can also ask AI to recommend a suitable mix of advisors that would bring different perspectives and useful insights to your question, then review or change its suggestions. You receive several distinct reactions to the same decision instead of one general answer.</p></details>
-            <details class="faq-item"><summary>Why do multiple roles matter?</summary><p>Most people ask AI one broad question and receive one broad answer. Giving AI a role changes what comes back. A CFO notices things a customer may miss. A customer notices things an operator may miss. Clear roles make the feedback specific enough to compare, challenge and use. You can weigh each response, push back on it and decide what applies.</p></details>
-            <details class="faq-item"><summary>Who is the orchestrator?</summary><p>The orchestrator is the board chair, not another advisor. The chair does not add another perspective to the list. The chair listens to the advisors, compares what they said and decides what matters most. This turns several opinions into one recommended direction.</p></details>
-            <details class="faq-item"><summary>Why does someone need to make the final call?</summary><p>More advice can create more confusion. The advisors widen the picture. The board chair orders the advice and recommends a decision. Without someone responsible for that step, you can end up with a long list of things to fix and no clear priority. You remain responsible for the final call.</p></details>
-            <details class="faq-item"><summary>How do I choose my orchestrator?</summary><p>You can choose someone who thinks like you when the decision is yours to own. You can also choose the person best suited to the problem, even if that person thinks differently from you. Ask whether you need a chair who represents your judgment or one whose experience best matches this specific problem. Those are not always the same choice.</p></details>
-            <details class="faq-item"><summary>How do I get the most out of this?</summary><p>Give the board something real to react to. In this exercise, you will provide a clear question, the context the board needs and your starting view. Each advisor responds from an assigned role. Review the comments rather than accepting all of them. Decide which feedback improves the decision and which feedback you can set aside.</p></details>
+            <details class="faq-item"><summary>What is a virtual advisory board?</summary><p>It is a group of AI roles that examines the same decision in different ways. One advisor might focus on the people affected, another on cost and another on whether the plan can work. After the advisors respond, the board chair considers all of their views, identifies where they agree and disagree, weighs the strongest points, and makes one recommendation on behalf of the board. These are AI-generated responses, so review the advice and check important facts.</p></details>
+            <details class="faq-item"><summary>Why do different roles matter?</summary><p>Each role pays attention to different questions. A customer may notice usability problems while an operations expert may notice delivery risks. Comparing these views can help you find issues that one general answer may miss.</p></details>
+            <details class="faq-item"><summary>What does the board chair do?</summary><p>The board chair is one of the members you selected. In some advisory-board methods, this role is called the orchestrator. The other members respond as advisors. The chair does not give a separate advisor response. Instead, the chair considers every advisor's perspective, identifies where they agree or disagree, weighs the strongest points, and makes one recommendation on behalf of the board. You still make the final decision.</p></details>
+            <details class="faq-item"><summary>Why does the board need a chair?</summary><p>The advisors may agree on some points and disagree on others. The chair makes the most important agreements and conflicts clear, weighs the main tradeoff, and makes one recommendation on behalf of the board. You decide whether to follow the recommendation.</p></details>
+            <details class="faq-item"><summary>How do I choose the board chair?</summary><p>Choose the member whose judgment best fits the decision and who can fairly weigh the other perspectives. For example, an operations expert may be a useful chair when the main question is whether a plan can be delivered. The chair should consider the whole board's advice, even when it differs from the chair's usual point of view.</p></details>
+            <details class="faq-item"><summary>How do I get useful advice?</summary><p>Give the board one clear question and the facts it needs. Choose members who will look at the decision in different ways. Review their suggestions carefully, then decide which ideas improve your thinking.</p></details>
             <details class="faq-item"><summary>Can I include a well-known person?</summary><p>Yes, but AI cannot reproduce what a real person would say. A well-known name is shorthand for a broadly associated style, such as Steve Jobs on simplicity. Use an established professional role when you need technical or factual judgment.</p></details>
             <details class="faq-item"><summary>What should I do with the board's advice?</summary><p>The board helps you see angles you may have missed. You still own the decision. Check any important claims, especially when money, health, law or safety is involved.</p></details>
           </div>
@@ -320,29 +343,30 @@
       <div>
         <div class="eyebrow">Step 2 of 3 · Build the board</div>
         <h1>Choose who should examine the problem.</h1>
-        <p class="lead">Start with the question and context. Then choose three or four board members whose perspectives will help you think through the solution. One member will serve as the board chair.</p>
+        <p class="lead">Start with one clear question and the facts the board needs. Then choose three or four board members in total. One member will serve as the board chair. The remaining two or three members will respond as advisors.</p>
       </div>
       <div class="work-layout" style="margin-top:20px">
         <aside class="side-column">
           <div class="panel">
-            <div class="substep"><span class="substep-number">2a</span><div class="substep-copy"><h3>Define the problem</h3><p>Give the board one question and the facts it should know.</p></div></div>
+            <div class="substep"><span class="substep-number">2a</span><div class="substep-copy"><h2>Define the decision</h2><p>Write one clear question. Add the facts the board needs and record what you currently think.</p></div></div>
+            <div class="native-history-mount" id="boardWorkHistory"></div>
             <div class="work-field" style="margin-top:18px"><label for="decisionText">Question for the board</label><textarea id="decisionText">Which one initiative should the Olympics pilot before the next Summer Games to increase engagement among viewers aged 18 to 30? Explain why it should come first, the main tradeoff it creates and what evidence could change your recommendation.</textarea></div>
             <div class="work-field"><label for="contextText">What the board should know</label><textarea id="contextText">The Olympics has historically been one of the most unifying global events, but recent Games have struggled to hold the attention of younger viewers. The pilot must work across several markets, fit within existing broadcast and sponsor agreements, and be practical to test before the next Summer Games. Success means more viewers aged 18 to 30 return on multiple days, not just watch one popular event.</textarea><p class="helper">Include who the decision affects, what is happening now, important evidence or assumptions, constraints, and what success would look like.</p></div>
-            <div class="work-field"><label for="initialView">What are you leaning toward now?</label><textarea id="initialView" style="min-height:100px" placeholder="Record your starting view so you can see whether the board changes it.">Pilot short daily viewing guides that explain which stories and events matter most.</textarea></div>
+            <div class="work-field"><label for="initialView">Your current view</label><textarea id="initialView" style="min-height:100px" placeholder="Record what you currently think so you can see whether the board changes your view.">Pilot short daily viewing guides that explain which stories and events matter most.</textarea></div>
           </div>
-          <div class="board-summary"><h2>Your board</h2><p>Each seat should examine something different.</p><div class="seat-list" id="seatList"></div><div class="coverage" id="coverageText" aria-live="polite"></div></div>
+          <div class="board-summary"><h2>Your board</h2><p>Each board member should focus on something different.</p><div class="seat-list" id="seatList"></div><div class="coverage" id="coverageText" aria-live="polite"></div></div>
         </aside>
         <div class="main-column">
           <div class="panel">
-            <div class="substep"><span class="substep-number">2b</span><div class="substep-copy"><h2>Choose useful perspectives</h2><p>The three recommended members cover simplicity, the audience, and delivery. Select any card to add or remove it. Keep the board focused with no more than four members.</p></div></div>
+            <div class="substep"><span class="substep-number">2b</span><div class="substep-copy"><h2>Choose the board members</h2><p>Select three or four members in total. Choose people who will notice different needs, risks or ideas. Select a card to add or remove a member.</p></div></div>
             <div class="role-grid" id="roleGrid" style="margin-top:18px"></div>
-            <p class="helper" style="margin-top:12px">Well-known names work best when you name the perspective you want. Role-based experts work well when the decision needs specific technical judgment.</p>
+            <p class="helper" style="margin-top:12px">Choose members who think differently from one another. Use a professional role when you need technical or factual judgment.</p>
           </div>
           <div class="panel">
-            <div class="substep"><span class="substep-number">2c</span><div class="substep-copy"><h2>Choose the board chair</h2><p>The chair compares the different views and recommends one direction. You will review it and make the final decision.</p></div></div>
+            <div class="substep"><span class="substep-number">2c</span><div class="substep-copy"><h2>Choose the board chair</h2><p>Choose one board member to serve as chair. The chair will not give a separate advisor response. After the other members respond, the chair will consider every perspective, explain the main agreements and conflicts, weigh the strongest points, and make one recommendation on behalf of the board. You make the final decision.</p></div></div>
             <div class="decision-maker" id="decisionMakerChoices"></div>
           </div>
-          <details class="help"><summary>AI can help assemble the board</summary><p>You do not need to know every board member before you begin. Give AI your question and ask which perspectives would help you examine it from different angles.</p><p><strong>Prompt to try:</strong> “Which three perspectives would help me examine this decision? Explain what each person should focus on, what assumptions they should challenge and why that perspective belongs on the board.”</p><p>You can use professional roles, such as a customer researcher, financial advisor or operations leader. You can also use well-known people as shorthand for a recognizable style of thinking. Review the suggestions and replace any advisor who would repeat a perspective already represented.</p></details>
+          <details class="help"><summary>AI can help assemble the board</summary><p>You do not need to know every board member before you begin. Give AI your question and ask which types of people or experts would help you think through it.</p><p><strong>Prompt to try:</strong> “Which three types of people or experts would help me think through this decision? Explain what each one should focus on, what they should question and why they belong on the board.”</p><p>You can use professional roles, such as a customer researcher, financial advisor or operations leader. You can also use well-known people as shorthand for a recognizable style of thinking. Review the suggestions and replace any member who would repeat a point of view already represented.</p></details>
           <div class="button-row mobile-sticky"><button class="button secondary" type="button" data-back>Back</button><button class="button primary" type="button" id="prepareBoardBtn">Bring the board together →</button></div>
           <div class="error" id="boardError" aria-live="polite"></div>
         </div>
@@ -353,7 +377,7 @@
       <div>
         <div class="eyebrow">Step 3 of 3 · Hear the board</div>
         <h1>Hear each perspective, then make the call.</h1>
-        <p class="lead">Run the board, review what it noticed, and make your decision.</p>
+        <p class="lead">Use the prepared prompt in the AI tool you choose. Bring the response back here, review each advisor's comments, and check how the board chair weighed their agreements and conflicts to make one recommendation for the board. Then record your final decision.</p>
       </div>
       <div class="work-layout" style="margin-top:20px">
         <aside class="side-column">
@@ -409,7 +433,7 @@
     ];
     const stages = [
       ['Understand the approach', 'Learn how distinct perspectives change the quality of a decision.'],
-      ['Build the board', 'Define the problem, choose the perspectives, and name a board chair.'],
+      ['Build the board', 'Define the decision, choose the board members, and name a board chair.'],
       ['Hear the board', 'Review the discussion and decide which advice you will use.']
     ];
     let currentScreen = 1;
@@ -485,7 +509,7 @@
       if (!selected.some(role => role.id === decisionMakerId)) decisionMakerId = selected[0]?.id || '';
       $('decisionMakerChoices').innerHTML = selected.map(role => `<label class="choice-card">
         <input type="radio" name="decision-maker" value="${role.id}" ${role.id === decisionMakerId ? 'checked' : ''}>
-        <span><strong>${escapeHtml(role.name)}</strong><small>${escapeHtml(role.lens)}. This seat will turn the different views into one recommendation.</small></span>
+        <span><strong>${escapeHtml(role.name)}</strong><small>${escapeHtml(role.lens)}. This member will consider all of the board's views, identify agreements and conflicts, weigh the strongest points, and make one recommendation on behalf of the board.</small></span>
       </label>`).join('');
       document.querySelectorAll('input[name="decision-maker"]').forEach(input => input.addEventListener('change', () => { decisionMakerId = input.value; renderBoardSummary(); }));
     }
@@ -505,7 +529,7 @@
 
     function buildPrompt() {
       const advisorInstructions = advisorRoleObjects().map(role => `${role.name} (${role.lens})\nWhat to examine: ${role.value}\nReturn:\n- Main concern\n- Evidence or assumption\n- Recommendation`).join('\n\n');
-      return `Facilitate a short virtual advisory board meeting. Keep every voice distinct and use clear language. Use only the supplied context and clearly label assumptions.\n\nQUESTION FOR THE BOARD\n${$('decisionText').value.trim()}\n\nWHAT THE BOARD SHOULD KNOW\n${$('contextText').value.trim()}\n\nLEARNER'S STARTING VIEW\n${$('initialView').value.trim() || 'Not provided'}\n\nBOARD MEMBERS\n${advisorInstructions}\n\nBOARD CHAIR\n${decisionMaker().name} (${decisionMaker().lens})\n\nEach advisor should raise one material issue, avoid repeating another advisor, say what information could change the recommendation, and give one recommendation that answers the question.\n\nAfter every board member responds, the board chair must provide:\n- Recommended direction and decision criterion\n- Central tradeoff\n- Advice accepted and why\n- Advice declined and why\n- Important uncertainty\n- One specific next step\n\nThe chair recommends. The learner makes the final decision. Keep the response under 500 words.`;
+      return `Facilitate a short virtual advisory board meeting. Keep every voice distinct and use clear language. Use only the supplied context and clearly label assumptions.\n\nQUESTION FOR THE BOARD\n${$('decisionText').value.trim()}\n\nWHAT THE BOARD SHOULD KNOW\n${$('contextText').value.trim()}\n\nLEARNER'S STARTING VIEW\n${$('initialView').value.trim() || 'Not provided'}\n\nADVISORS\n${advisorInstructions}\n\nBOARD CHAIR\n${decisionMaker().name} (${decisionMaker().lens})\n\nEach advisor should raise one material issue, avoid repeating another advisor, say what information could change the recommendation, and give one recommendation that answers the question.\n\nAfter all advisors respond, the board chair must consider every advisor's perspective, identify important agreements and conflicts, weigh the strongest points, and make one recommendation on behalf of the board. Include:\n- Main points of agreement\n- Main points of conflict\n- Recommended direction and decision criterion\n- Central tradeoff\n- Advice accepted and why\n- Advice declined and why\n- Important uncertainty\n- One specific next step\n\nThe board chair recommends one direction on behalf of the board. The learner makes the final decision. Keep the response under 500 words.`;
     }
 
     function sampleStructuredResponse() {
@@ -569,6 +593,7 @@
         adviceUsed: $('changedThinking').value.trim(),
         adviceSetAside: '',
         nextStep: $('nextStep').value.trim(),
+        richText: ['decisionText','contextText','initialView','finalDecision','changedThinking','nextStep'].reduce((result, id) => { result[id] = window.UTLRichText.html($(id)); return result; }, {}),
         completed_at: new Date().toISOString(),
         page: window.location.href
       };
@@ -619,6 +644,7 @@
       prompt: buildPrompt
     });
 
+    window.UTLRichText.enhanceAll('#decisionText, #contextText, #initialView, #finalDecision, #changedThinking, #nextStep', { minHeight: '110px' });
     renderRoles();
     renderDots();
   </script>

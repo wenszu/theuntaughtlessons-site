@@ -900,6 +900,8 @@
       .slo-notes { min-height: 300px; }
     }
   </style>
+  <link rel="stylesheet" href="../../assets/rich-text-editor.css?v=1">
+  <script src="../../assets/rich-text-editor.js?v=1"></script>
 </head>
 <body>
   <header class="slo-header">
@@ -1398,6 +1400,7 @@
           </div>`;
         renderSwitcher(draft.id);
         const notes = document.getElementById('practiceNotes');
+        window.UTLRichText.enhance(notes, { minHeight: '180px' });
         notes.addEventListener('input', () => {
           draft.notes = notes.value;
           saveDraft();

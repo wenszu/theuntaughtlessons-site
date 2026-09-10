@@ -107,8 +107,8 @@ Best, Yutee Elle`;
 
   const app = document.getElementById('app');
   const state = {
-    notesMode: 'sections', openNotes: '',
-    sectionNotes: [{ title: 'Bottom line', body: '' }, { title: 'Three reasons', body: '' }, { title: 'Close / ask', body: '' }],
+    notesMode: 'sections', openNotes: '', openNotesHtml: '',
+    sectionNotes: [{ title: 'Bottom line', body: '', richBody: '' }, { title: 'Three reasons', body: '', richBody: '' }, { title: 'Close / ask', body: '', richBody: '' }],
     recording: false, finalTranscript: '', interimTranscript: '', recognition: null,
     startTime: 0, durationSeconds: 0, rafId: 0, usedEstimate: false,
     submitted: null, score: null
@@ -205,6 +205,7 @@ Best, Yutee Elle`;
     state.usedEstimate = Boolean(saved.used_estimate);
     state.notesMode = 'open';
     state.openNotes = saved.prep_notes || '';
+    state.openNotesHtml = saved.prep_notes_html || '';
     reviewingSaved = true;
     renderResults();
   }
@@ -220,13 +221,13 @@ Best, Yutee Elle`;
     return state.sectionNotes.map((note) => [note.title, note.body].filter(Boolean).join(': ')).filter(Boolean).join('\n\n');
   }
   function captureNotes() {
-    const open = document.getElementById('openNotes'); if (open) state.openNotes = open.value;
+    const open = document.getElementById('openNotes'); if (open) { state.openNotes = open.value; state.openNotesHtml = window.UTLRichText.html(open); }
     document.querySelectorAll('[data-note-title]').forEach((field) => { state.sectionNotes[Number(field.dataset.noteTitle)].title = field.value; });
-    document.querySelectorAll('[data-note-body]').forEach((field) => { state.sectionNotes[Number(field.dataset.noteBody)].body = field.value; });
+    document.querySelectorAll('[data-note-body]').forEach((field) => { const note = state.sectionNotes[Number(field.dataset.noteBody)]; note.body = field.value; note.richBody = window.UTLRichText.html(field); });
     savePrep();
   }
   function savePrep() {
-    const draftPayload = { notesMode: state.notesMode, openNotes: state.openNotes, sectionNotes: state.sectionNotes, prep_notes: state.notesMode === 'open' ? state.openNotes : sectionNotesText(), saved_at: new Date().toISOString() };
+    const draftPayload = { notesMode: state.notesMode, openNotes: state.openNotes, openNotesHtml: state.openNotesHtml, sectionNotes: state.sectionNotes, prep_notes: state.notesMode === 'open' ? state.openNotes : sectionNotesText(), saved_at: new Date().toISOString() };
     try {
       localStorage.setItem(PREP_STORAGE_KEY, JSON.stringify(draftPayload));
     } catch (error) { console.warn('Could not save Explain to Aiko prep notes.', error); }
@@ -242,6 +243,7 @@ Best, Yutee Elle`;
       const saved = JSON.parse(localStorage.getItem(PREP_STORAGE_KEY) || (mode === '60' ? localStorage.getItem(PREP_FALLBACK_KEY) : '') || 'null'); if (!saved) return;
       state.notesMode = saved.notesMode === 'open' ? 'open' : 'sections';
       state.openNotes = saved.openNotes || saved.prep_notes || '';
+      state.openNotesHtml = saved.openNotesHtml || saved.prep_notes_html || '';
       if (Array.isArray(saved.sectionNotes)) state.sectionNotes = state.sectionNotes.map((fallback, index) => Object.assign({}, fallback, saved.sectionNotes[index] || {}));
     } catch (error) { console.warn('Could not load Explain to Aiko 120s prep notes.', error); }
   }
@@ -264,6 +266,10 @@ Best, Yutee Elle`;
       : 'You already wrote Aiko an email. Now imagine she stops by your desk and says, "Can you just tell me about that, real quick?" You would not read your email out loud from memory. You would explain your own idea in your own words, like you are talking to a real person. That is exactly what you are about to practice.';
     const compareHtml = `<div class="aiko-compare"><div class="aiko-compare-col aiko-compare-bad"><p class="aiko-compare-label">Reading it word-for-word (avoid this)</p><p class="aiko-compare-quote">"We believe the Olympics is losing cultural impact primarily due to reduced everyday visibility, fragmented attention, and weaker emotional connection with audiences..."</p></div><div class="aiko-compare-col aiko-compare-good"><p class="aiko-compare-label">Explaining it in your own words (aim for this)</p><p class="aiko-compare-quote">"Basically, the Olympics is not grabbing people's attention like it used to. There are three reasons why, and here is what I think we should do about it..."</p></div></div>`;
     shell(`<section class="aiko-panel"><div class="aiko-panel-head"><p class="aiko-progress">Step 1 · Prepare your talk</p><h2>${sixty ? 'Now say it in half the time.' : 'Explain your email out loud.'}</h2><p>${headIntro}</p></div><div class="aiko-step">${compareHtml}<div class="aiko-info"><h3>What your talk needs to do</h3><ul><li><strong>${sixty ? 'Keep' : 'Say'} your main point first:</strong> Do not save it for the end or build up to it. Say the one thing Aiko needs to know right away.</li><li><strong>${sixty ? 'Keep your strongest reason' : 'Give 2 to 3 short reasons'}:</strong> ${sixty ? 'Pick the one reason that matters most and cut the rest.' : 'Explain why your main point is true, one reason at a time.'}</li><li><strong>Close cleanly:</strong> End with the decision, meeting, or follow-up you want.</li></ul></div><div class="aiko-prep-grid">${sourceEmailHtml()}<section class="aiko-notes"><h3>Your notes</h3><div class="aiko-mode" aria-label="Preparation format"><button class="${state.notesMode === 'open' ? 'is-active' : ''}" data-mode="open">Open notes</button><button class="${state.notesMode === 'sections' ? 'is-active' : ''}" data-mode="sections">Three-section notes</button></div><p class="aiko-guidance"><strong>Choose one format:</strong> Use <strong>"Open" notes</strong> if you want to write in your own free-form structure; this is the more difficult option. Use <strong>"Three-section" notes</strong> if you want the easier guided option. In both formats, use BSP and the Rule of three.</p><div id="notesArea">${notesHtml()}</div></section></div>${actions('recordButton', 'I am ready to record')}</div></section>`);
+    window.UTLRichText.enhanceAll('#openNotes, .aiko-note-body', { minHeight: '150px' });
+    const openEditor = document.getElementById('openNotes');
+    if (openEditor) window.UTLRichText.set(openEditor, state.openNotes, state.openNotesHtml);
+    document.querySelectorAll('[data-note-body]').forEach((field) => { const note = state.sectionNotes[Number(field.dataset.noteBody)] || {}; window.UTLRichText.set(field, note.body, note.richBody); });
     document.querySelectorAll('[data-mode]').forEach((button) => button.addEventListener('click', () => changeMode(button.dataset.mode)));
     document.querySelectorAll('#notesArea input,#notesArea textarea').forEach((field) => field.addEventListener('input', captureNotes));
     document.getElementById('recordButton').addEventListener('click', () => { captureNotes(); renderRecording(); });
@@ -439,6 +445,7 @@ Best, Yutee Elle`;
     const item = practiceTopic(practiceDraft.topicId);
     practiceShell(`<div class="aiko-panel"><div class="aiko-panel-head"><p class="aiko-progress">Round 1 of 2 · Prepare</p><h2>Prepare your explanation.</h2><p>Write brief notes for <strong>${escapeHtml(item.title)}</strong>. You will use these same notes for both the 120-second round and the 60-second round.</p></div><div class="aiko-step"><div class="aiko-prep-grid"><section class="aiko-source"><h3>Situation</h3><p class="aiko-source-note">${escapeHtml(item.brief)}</p><p class="aiko-email"><strong>Audience:</strong> ${escapeHtml(item.audience)}\n<strong>Desired outcome:</strong> ${escapeHtml(item.outcome)}\n<strong>Focus:</strong> ${escapeHtml(item.focus)}</p></section><section class="aiko-notes"><h3>Your notes</h3><p class="aiko-guidance"><strong>Consider:</strong> What is your main point? Which reason or example makes it credible? How will you close?</p><textarea class="aiko-textarea" id="practiceNotes" placeholder="Type your answer here.">${escapeHtml(practiceDraft.notes)}</textarea></section></div><div class="aiko-actions"><button class="aiko-button secondary" id="practiceChooseTopic" type="button">Choose a different topic</button><button class="aiko-button" id="practiceReady" type="button">Ready to record round 1 (120 seconds) →</button></div></div></div>`);
     const notes = document.getElementById('practiceNotes');
+    window.UTLRichText.enhance(notes, { minHeight: '170px' });
     notes.addEventListener('input', () => { practiceDraft.notes = notes.value; savePracticeDraft(); });
     document.getElementById('practiceChooseTopic').addEventListener('click', () => renderPracticePicker(practiceDraft.topicId));
     document.getElementById('practiceReady').addEventListener('click', () => {

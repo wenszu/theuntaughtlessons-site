@@ -9,6 +9,7 @@
   <link rel="shortcut icon" type="image/png" href="../../assets/favicon-bluebg-whitedoor-thicker-32.png?v=6">
   <link rel="apple-touch-icon" sizes="180x180" href="../../assets/apple-touch-icon.png?v=3">
   <link rel="stylesheet" href="../shared/activity-timer.css">
+  <link rel="stylesheet" href="../../assets/rich-text-editor.css?v=1">
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lato:wght@300;400;700&family=Roboto+Mono:wght@400;500&display=swap');
 
@@ -1246,7 +1247,7 @@
               <button class="mode-btn active" id="openModeBtn" type="button" data-response-mode="open" onclick="window.switchMessyNotesMode && window.switchMessyNotesMode('open')">Open response</button>
               <button class="mode-btn" id="sectionModeBtn" type="button" data-response-mode="sections" onclick="window.switchMessyNotesMode && window.switchMessyNotesMode('sections')">Three-section response</button>
             </div>
-            <p class="mode-guidance"><strong>Choose one format:</strong> Use <strong>"Open response"</strong> if you want to write in your own free-form structure; this is the more difficult option. Use <strong>"Three-section response"</strong> if you want the easier guided option. In both formats, use BSP and the Rule of three.</p>
+            <p class="mode-guidance"><strong>Choose one format:</strong> Use <strong>"Open response"</strong> if you want to write in your own free-form structure; this is the more difficult option. Use <strong>"Three-section response"</strong> if you want the easier guided option. In both formats, use BSP and the Rule of three. <strong>Aim for 90 to 130 words.</strong></p>
 
             <div id="openMode">
               <textarea id="openResponse" class="response-area" aria-label="Open response" placeholder=""></textarea>
@@ -1357,6 +1358,7 @@
   </dialog>
   <script src="../../assets/app-reward-header.js?v=20260907-vimeo-all-media-1"></script>
   <script src="../../assets/reward-events.js?v=20260730-celebration-1"></script>
+  <script src="../../assets/rich-text-editor.js?v=1"></script>
 
   <script src="../shared/activity-timer.js?v=20260701-audit-1"></script>
   <script>
@@ -1529,12 +1531,16 @@
       return {
         mode: response.mode === 'sections' ? 'structured' : 'open',
         open_response: response.mode === 'open' ? response.text : '',
+        open_response_html: response.mode === 'open' ? (response.richHtml || '') : '',
         section1_heading: sections[0]?.title || '',
         section1_body: sections[0]?.body || '',
+        section1_body_html: sections[0]?.richBody || '',
         section2_heading: sections[1]?.title || '',
         section2_body: sections[1]?.body || '',
+        section2_body_html: sections[1]?.richBody || '',
         section3_heading: sections[2]?.title || '',
-        section3_body: sections[2]?.body || ''
+        section3_body: sections[2]?.body || '',
+        section3_body_html: sections[2]?.richBody || ''
       };
     }
 
@@ -1569,8 +1575,9 @@
     function getSectionResponse() {
       return [1, 2, 3].map((num) => {
         const title = getEl(`sectionTitle${num}`).value.trim();
-        const body = getEl(`sectionBody${num}`).value.trim();
-        return { title, body };
+        const source = getEl(`sectionBody${num}`);
+        const body = source.value.trim();
+        return { title, body, richBody: window.UTLRichText?.html(source) || '' };
       });
     }
 
@@ -1596,7 +1603,8 @@
 
       return {
         mode: 'open',
-        text: getOpenResponse()
+        text: getOpenResponse(),
+        richHtml: window.UTLRichText?.html(els.openResponse) || ''
       };
     }
 
@@ -1991,10 +1999,21 @@ When you use a numbered or bulleted list, begin every item with a short **Bolded
       els.recentAttempts.innerHTML = '';
     }
 
+    function renderSubmittedResponse(response) {
+      if (response.mode === 'open') {
+        els.submittedAnswer.innerHTML = window.UTLRichText.render(response.richHtml, response.text);
+        return;
+      }
+      els.submittedAnswer.innerHTML = (response.sections || []).map((section, index) => {
+        const title = escapeHtml(section.title || `Section ${index + 1}`);
+        return `<section><strong>${title}</strong>${window.UTLRichText.render(section.richBody, section.body)}</section>`;
+      }).join('');
+    }
+
     window.UTLReviewWritingSubmission = function () {
       const response = getCurrentResponse();
       const score = scorePractice(response, ACTIVITY.scoring);
-      els.submittedAnswer.textContent = response.text;
+      renderSubmittedResponse(response);
       els.confirmation.classList.remove('hidden');
       els.confirmation.innerHTML = '<strong>Previous submission.</strong> Review its feedback, your answer and the sample below.';
       els.tryAgainBtn.classList.remove('hidden');
@@ -2049,7 +2068,7 @@ When you use a numbered or bulleted list, begin every item with a short **Bolded
       state.lastScore = score;
       state.sampleRevealed = false;
 
-      els.submittedAnswer.textContent = response.text;
+      renderSubmittedResponse(response);
       els.confirmation.classList.remove('hidden');
       els.confirmation.innerHTML = `<strong>Submitted ✓.</strong> Time used: ${formatSeconds(elapsedSeconds)}. Now run the self-check.${completionSaveNotice()}`;
       els.tryAgainBtn.classList.remove('hidden');
@@ -2071,6 +2090,7 @@ When you use a numbered or bulleted list, begin every item with a short **Bolded
         getEl(`sectionBody${num}`).readOnly = false;
       });
       els.openResponse.readOnly = false;
+      window.UTLSetRichEditorsReadOnly?.(false);
       state.lastAttemptId = null;
       state.lastScore = null;
       state.sampleRevealed = false;
@@ -2090,10 +2110,13 @@ When you use a numbered or bulleted list, begin every item with a short **Bolded
 
     function clearCurrentInput() {
       els.openResponse.value = '';
+      els.openResponse.dataset.richHtml = '';
       [1, 2, 3].forEach((num) => {
         getEl(`sectionTitle${num}`).value = '';
         getEl(`sectionBody${num}`).value = '';
+        getEl(`sectionBody${num}`).dataset.richHtml = '';
       });
+      window.UTLSyncRichEditors?.();
       window.UTLBeginWritingAttempt();
     }
 
@@ -2348,6 +2371,8 @@ When you use a numbered or bulleted list, begin every item with a short **Bolded
       }
       renderConfig();
       buildSectionInputs();
+      window.UTLRichText.enhance(els.openResponse, { minHeight: '330px' });
+      [1, 2, 3].forEach((num) => window.UTLRichText.enhance(getEl(`sectionBody${num}`), { minHeight: '150px' }));
       renderChecklist();
       renderSampleAnswer();
       renderAttempts();
@@ -2379,7 +2404,7 @@ When you use a numbered or bulleted list, begin every item with a short **Bolded
         document.body.classList.add('design-preview-results', 'result-mode');
         const score = scorePractice(getCurrentResponse(), ACTIVITY.scoring);
         state.lastScore = score;
-        els.submittedAnswer.textContent = getCurrentResponse().text;
+        renderSubmittedResponse(getCurrentResponse());
         els.mobileResultTabs.classList.add('visible');
         els.checklistPanel.classList.remove('hidden');
         renderScore(score);

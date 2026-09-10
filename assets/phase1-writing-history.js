@@ -14,7 +14,7 @@
 
   function read(key, fallback) { try { return JSON.parse(localStorage.getItem(key) || 'null') || fallback; } catch (_) { return fallback; } }
   function fields() { return [open, ...[1,2,3].flatMap((n) => [document.getElementById(`sectionTitle${n}`), document.getElementById(`sectionBody${n}`)])].filter(Boolean); }
-  function snapshot() { return { mode: document.getElementById('sectionModeBtn')?.classList.contains('active') ? 'sections' : 'open', openResponse: open.value, sections:[1,2,3].map((n)=>({title:document.getElementById(`sectionTitle${n}`)?.value||'',body:document.getElementById(`sectionBody${n}`)?.value||''})), updatedAtClient:new Date().toISOString() }; }
+  function snapshot() { return { mode: document.getElementById('sectionModeBtn')?.classList.contains('active') ? 'sections' : 'open', openResponse: open.value, openRichHtml:open.dataset.richHtml||'', sections:[1,2,3].map((n)=>{const body=document.getElementById(`sectionBody${n}`);return{title:document.getElementById(`sectionTitle${n}`)?.value||'',body:body?.value||'',richBody:body?.dataset.richHtml||''}}), updatedAtClient:new Date().toISOString() }; }
   function hasDraft(draft) { return Boolean(draft && (String(draft.openResponse||'').trim() || (draft.sections||[]).some((s)=>String(s.title||s.body||'').trim()))); }
   function attempts() {
     const merged=new Map();
@@ -29,12 +29,14 @@
     if (response.mode === 'structured' || response.open_response != null) return {
       mode: response.mode === 'structured' ? 'sections' : 'open',
       text: response.open_response || '',
-      sections: [1,2,3].map((n)=>({title:response[`section${n}_heading`]||'',body:response[`section${n}_body`]||''}))
+      richHtml: response.open_response_html || '',
+      sections: [1,2,3].map((n)=>({title:response[`section${n}_heading`]||'',body:response[`section${n}_body`]||'',richBody:response[`section${n}_body_html`]||''}))
     };
     return response;
   }
   function setReviewOnly(reviewOnly) {
     fields().forEach((field)=>{field.readOnly=reviewOnly;});
+    window.UTLSetRichEditorsReadOnly?.(reviewOnly);
     const submit=document.getElementById('submitBtn');if(submit)submit.disabled=reviewOnly;
     editBtn.hidden=!reviewOnly;
   }
@@ -42,9 +44,10 @@
     response=normalizeResponse(response);
     const mode=response?.mode==='sections'?'sections':'open';
     if(mode==='sections'){
-      (response.sections||[]).slice(0,3).forEach((section,index)=>{const n=index+1;document.getElementById(`sectionTitle${n}`).value=section.title||'';document.getElementById(`sectionBody${n}`).value=section.body||'';});
+      (response.sections||[]).slice(0,3).forEach((section,index)=>{const n=index+1,body=document.getElementById(`sectionBody${n}`);document.getElementById(`sectionTitle${n}`).value=section.title||'';body.value=section.body||'';body.dataset.richHtml=section.richBody||'';});
       document.getElementById('sectionModeBtn')?.click();
-    } else { open.value=response?.text||response?.openResponse||''; document.getElementById('openModeBtn')?.click(); }
+    } else { open.value=response?.text||response?.openResponse||'';open.dataset.richHtml=response?.richHtml||response?.openRichHtml||'';document.getElementById('openModeBtn')?.click(); }
+    window.UTLSyncRichEditors?.();
     if(!reviewOnly)fields().forEach((field)=>field.dispatchEvent(new Event('input',{bubbles:true})));
     setReviewOnly(Boolean(reviewOnly));
     panel.dataset.state='viewing'; render();
@@ -52,7 +55,7 @@
     modeSwitch.scrollIntoView({behavior:'smooth',block:'center'});
   }
   function beginAttempt() { if(typeof window.UTLBeginWritingAttempt==='function')window.UTLBeginWritingAttempt(); }
-  function applyDraft(draft) { beginAttempt();applyResponse({mode:draft.mode,text:draft.openResponse,sections:draft.sections},false); panel.dataset.state='draft'; render(); }
+  function applyDraft(draft) { beginAttempt();applyResponse({mode:draft.mode,text:draft.openResponse,richHtml:draft.openRichHtml,sections:draft.sections},false); panel.dataset.state='draft'; render(); }
   function render() {
     const draft=read(draftKey,null), saved=attempts(), latest=saved[saved.length-1], state=panel.dataset.state;
     const viewingIndex=saved.findIndex((item)=>attemptKey(item)===viewingAttemptKey),viewing=viewingIndex>=0?saved[viewingIndex]:null;
@@ -71,7 +74,7 @@
   const titleEl=panel.querySelector('strong'),copyEl=panel.querySelector('span'),select=panel.querySelector('select'),resumeBtn=panel.querySelector('[data-resume]'),newBtn=panel.querySelector('[data-new]'),editBtn=panel.querySelector('[data-edit]');
   fields().forEach((field)=>field.addEventListener('input',()=>{clearTimeout(saveTimer);saveTimer=setTimeout(()=>{const value=snapshot();if(hasDraft(value)){localStorage.setItem(draftKey,JSON.stringify(value));import('../../assets/firebase.js').then(({saveExerciseDraft})=>saveExerciseDraft(appId,document.title,value)).catch(()=>{});}render();},450);}));
   resumeBtn.addEventListener('click',()=>applyDraft(read(draftKey,null)));
-  newBtn.addEventListener('click',()=>{beginAttempt();viewingAttemptKey='';localStorage.removeItem(draftKey);fields().forEach((field)=>{field.value='';field.dispatchEvent(new Event('input',{bubbles:true}));});document.getElementById('openModeBtn')?.click();setReviewOnly(false);panel.dataset.state='draft';render();import('../../assets/firebase.js').then(({saveExerciseDraft})=>saveExerciseDraft(appId,document.title,{mode:'open',openResponse:'',sections:[],updatedAtClient:new Date().toISOString()})).catch(()=>{});open.focus();});
+  newBtn.addEventListener('click',()=>{beginAttempt();viewingAttemptKey='';localStorage.removeItem(draftKey);fields().forEach((field)=>{field.value='';field.dataset.richHtml='';field.dispatchEvent(new Event('input',{bubbles:true}));});window.UTLSyncRichEditors?.();document.getElementById('openModeBtn')?.click();setReviewOnly(false);panel.dataset.state='draft';render();import('../../assets/firebase.js').then(({saveExerciseDraft})=>saveExerciseDraft(appId,document.title,{mode:'open',openResponse:'',openRichHtml:'',sections:[],updatedAtClient:new Date().toISOString()})).catch(()=>{});(open._richEditor||open).focus();});
   select.addEventListener('change',()=>{const item=attempts().find((attempt)=>attemptKey(attempt)===select.value);if(item){viewingAttemptKey=attemptKey(item);applyResponse(item.userResponse,true);}});
   editBtn.addEventListener('click',()=>{beginAttempt();setReviewOnly(false);panel.dataset.state='draft';const value=snapshot();localStorage.setItem(draftKey,JSON.stringify(value));render();modeSwitch.scrollIntoView({behavior:'smooth',block:'center'});fields().find((field)=>String(field.value||'').trim())?.focus();});
   window.addEventListener('utl:activity-completed',()=>{localStorage.removeItem(draftKey);panel.dataset.state='';render();import('../../assets/firebase.js').then(({saveExerciseDraft})=>saveExerciseDraft(appId,document.title,{mode:'open',openResponse:'',sections:[],updatedAtClient:new Date().toISOString()})).catch(()=>{});});

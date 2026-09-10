@@ -510,6 +510,70 @@
       line-height: 1.55;
     }
 
+    .rich-source { display: none; }
+    .rich-editor-shell {
+      overflow: hidden;
+      border: 1px solid rgba(0,51,102,.2);
+      border-radius: 8px;
+      background: #fff;
+    }
+    .rich-editor-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      padding: 6px 8px;
+      border-bottom: 1px solid var(--line);
+      background: #F5F7FA;
+    }
+    .rich-editor-toolbar button {
+      display: inline-grid;
+      place-items: center;
+      width: 32px;
+      height: 32px;
+      padding: 0;
+      border: 1px solid transparent;
+      border-radius: 5px;
+      background: transparent;
+      color: var(--navy);
+      font-weight: 700;
+      flex: 0 0 32px;
+    }
+    .rich-editor-toolbar button:hover { border-color: var(--line); background: #fff; }
+    .rich-editor-toolbar button:focus-visible { outline: 3px solid rgba(238,163,32,.35); outline-offset: 1px; }
+    .rich-editor-toolbar button[aria-pressed="true"] { border-color: #B9CDE2; background: #DDEBFA; }
+    .rich-editor-toolbar .rich-divider { width: 1px; height: 22px; margin: 0 4px; background: var(--line); }
+    .rich-editor-toolbar svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+    .rich-editor-tooltip {
+      position: fixed;
+      z-index: 1000;
+      max-width: 180px;
+      padding: 6px 9px;
+      border-radius: 5px;
+      background: #172B3F;
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(0,0,0,.2);
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 1.2;
+      pointer-events: none;
+      transform: translate(-50%, 0);
+    }
+    .rich-editor {
+      min-height: 330px;
+      padding: 13px 14px;
+      color: var(--charcoal);
+      line-height: 1.55;
+      outline: 0;
+      overflow-wrap: anywhere;
+    }
+    .rich-editor:empty::before { content: attr(data-placeholder); color: #888; pointer-events: none; }
+    .rich-editor:focus { box-shadow: inset 0 0 0 2px rgba(238,163,32,.35); }
+    .rich-editor ul,.rich-editor ol { margin: .45em 0; padding-left: 1.55em; }
+    .rich-editor li + li { margin-top: .25em; }
+    .rich-editor[contenteditable="false"] { background: #FAF8F3; color: #555; }
+    .section-box .rich-editor { min-height: 230px; }
+    .section-box .rich-editor-toolbar { overflow-x: auto; overscroll-behavior-x: contain; }
+
     .section-grid {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1346,7 +1410,8 @@
               <button class="mode-btn active" id="openModeBtn" type="button" data-response-mode="open" onclick="window.switchMessyNotesMode && window.switchMessyNotesMode('open')">Open response</button>
               <button class="mode-btn" id="sectionModeBtn" type="button" data-response-mode="sections" onclick="window.switchMessyNotesMode && window.switchMessyNotesMode('sections')">Three-section response</button>
             </div>
-            <p class="mode-guidance"><strong>Choose one format:</strong> Use <strong>"Open response"</strong> if you want to write in your own free-form structure; this is the more difficult option. Use <strong>"Three-section response"</strong> if you want the easier guided option. In both formats, use BSP and the Rule of three.</p>
+            <p class="mode-guidance"><strong>Choose one format:</strong> Use <strong>"Open response"</strong> if you want to write in your own free-form structure; this is the more difficult option. Use <strong>"Three-section response"</strong> if you want the easier guided option. In both formats, use BSP and the Rule of three. <strong>Aim for 90 to 130 words.</strong></p>
+            <p class="small" id="formattingHelp"><strong>Formatting:</strong> Select text to make it bold, italic, or underlined. Use the list buttons to organize supporting points. Your formatting is saved with your work.</p>
 
             <div id="openMode">
               <textarea id="openResponse" class="response-area" aria-label="Open response" placeholder=""></textarea>
@@ -1637,12 +1702,16 @@
       return {
         mode: response.mode === 'sections' ? 'structured' : 'open',
         open_response: response.mode === 'open' ? response.text : '',
+        open_response_html: response.mode === 'open' ? response.richHtml || '' : '',
         section1_heading: sections[0]?.title || '',
         section1_body: sections[0]?.body || '',
+        section1_body_html: sections[0]?.richBody || '',
         section2_heading: sections[1]?.title || '',
         section2_body: sections[1]?.body || '',
+        section2_body_html: sections[1]?.richBody || '',
         section3_heading: sections[2]?.title || '',
-        section3_body: sections[2]?.body || ''
+        section3_body: sections[2]?.body || '',
+        section3_body_html: sections[2]?.richBody || ''
       };
     }
 
@@ -1677,8 +1746,9 @@
     function getSectionResponse() {
       return [1, 2, 3].map((num) => {
         const title = getEl(`sectionTitle${num}`).value.trim();
-        const body = getEl(`sectionBody${num}`).value.trim();
-        return { title, body };
+        const source = getEl(`sectionBody${num}`);
+        const body = source.value.trim();
+        return { title, body, richBody: source.dataset.richHtml || '' };
       });
     }
 
@@ -1704,8 +1774,141 @@
 
       return {
         mode: 'open',
-        text: getOpenResponse()
+        text: getOpenResponse(),
+        richHtml: els.openResponse.dataset.richHtml || ''
       };
+    }
+
+    function sanitizeRichHtml(value) {
+      const template = document.createElement('template');
+      template.innerHTML = String(value || '');
+      const allowed = new Set(['B','STRONG','I','EM','U','UL','OL','LI','P','DIV','BR']);
+      function clean(node) {
+        if (node.nodeType === Node.TEXT_NODE) return document.createTextNode(node.textContent || '');
+        if (node.nodeType !== Node.ELEMENT_NODE) return document.createTextNode('');
+        if (!allowed.has(node.tagName)) {
+          const fragment = document.createDocumentFragment();
+          Array.from(node.childNodes).forEach((child) => fragment.appendChild(clean(child)));
+          return fragment;
+        }
+        const element = document.createElement(node.tagName.toLowerCase());
+        Array.from(node.childNodes).forEach((child) => element.appendChild(clean(child)));
+        return element;
+      }
+      const output = document.createElement('div');
+      Array.from(template.content.childNodes).forEach((child) => output.appendChild(clean(child)));
+      return output.innerHTML;
+    }
+
+    function richHtmlToText(editor) {
+      let output = '';
+      function visit(node, listType, itemIndex) {
+        if (node.nodeType === Node.TEXT_NODE) { output += node.textContent || ''; return; }
+        if (node.nodeType !== Node.ELEMENT_NODE) return;
+        if (node.tagName === 'BR') { output += '\n'; return; }
+        if (node.tagName === 'LI') output += listType === 'OL' ? `${itemIndex + 1}. ` : '• ';
+        const childListType = node.tagName === 'UL' || node.tagName === 'OL' ? node.tagName : listType;
+        Array.from(node.childNodes).forEach((child, index) => visit(child, childListType, index));
+        if (['DIV','P','LI'].includes(node.tagName) && !output.endsWith('\n')) output += '\n';
+      }
+      Array.from(editor.childNodes).forEach((node, index) => visit(node, '', index));
+      return output.replace(/\u00a0/g, ' ').replace(/[ \t]+\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim();
+    }
+
+    function plainTextToRichHtml(value) {
+      return escapeHtml(String(value || '')).replace(/\n/g, '<br>');
+    }
+
+    function toolbarButton(command, label, content) {
+      return `<button type="button" data-rich-command="${command}" aria-label="${label}" title="${label}">${content}</button>`;
+    }
+
+    function richToolbarMarkup() {
+      const undo='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 7 4 12l5 5"/><path d="M5 12h8a6 6 0 0 1 6 6"/></svg>';
+      const redo='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 7 5 5-5 5"/><path d="M19 12h-8a6 6 0 0 0-6 6"/></svg>';
+      const bullets='<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="4" cy="7" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="17" r="1"/><path d="M8 7h12M8 12h12M8 17h12"/></svg>';
+      const numbers='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h2v4M3 10h3M3 14h3l-3 4h3M9 7h11M9 12h11M9 17h11"/></svg>';
+      return toolbarButton('undo','Undo',undo)+toolbarButton('redo','Redo',redo)+'<span class="rich-divider" aria-hidden="true"></span>'+toolbarButton('bold','Bold','B')+toolbarButton('italic','Italic','<em>I</em>')+toolbarButton('underline','Underline','<u>U</u>')+'<span class="rich-divider" aria-hidden="true"></span>'+toolbarButton('insertUnorderedList','Bulleted list',bullets)+toolbarButton('insertOrderedList','Numbered list',numbers);
+    }
+
+    function enhanceRichText(source) {
+      source.classList.add('rich-source');
+      source.dataset.richSource = 'true';
+      const shell = document.createElement('div');
+      shell.className = 'rich-editor-shell';
+      shell.innerHTML = `<div class="rich-editor-toolbar" role="toolbar" aria-label="Text formatting">${richToolbarMarkup()}</div><div class="rich-editor" contenteditable="true" role="textbox" aria-multiline="true" aria-label="${escapeHtml(source.getAttribute('aria-label') || 'Response')}" data-placeholder="${escapeHtml(source.placeholder || 'Type your answer here.')}"></div>`;
+      source.insertAdjacentElement('afterend', shell);
+      const editor = shell.querySelector('.rich-editor');
+      source._richEditor = editor;
+      editor.innerHTML = sanitizeRichHtml(source.dataset.richHtml || plainTextToRichHtml(source.value));
+      function sync() {
+        source.dataset.richHtml = sanitizeRichHtml(editor.innerHTML);
+        source.value = richHtmlToText(editor);
+        source.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+      editor.addEventListener('input', sync);
+      editor.addEventListener('paste', (event) => {
+        event.preventDefault();
+        document.execCommand('insertText', false, event.clipboardData.getData('text/plain'));
+      });
+      shell.querySelectorAll('[data-rich-command]').forEach((button) => {
+        let tooltip;
+        function showTooltip() {
+          tooltip = document.createElement('div');
+          tooltip.className = 'rich-editor-tooltip';
+          tooltip.setAttribute('role', 'tooltip');
+          tooltip.textContent = button.getAttribute('aria-label');
+          document.body.appendChild(tooltip);
+          const buttonRect = button.getBoundingClientRect(), tipRect = tooltip.getBoundingClientRect();
+          tooltip.style.left = `${Math.max(tipRect.width / 2 + 8, Math.min(innerWidth - tipRect.width / 2 - 8, buttonRect.left + buttonRect.width / 2))}px`;
+          tooltip.style.top = `${buttonRect.bottom + 7}px`;
+        }
+        function hideTooltip() { tooltip?.remove(); tooltip = null; }
+        button.addEventListener('mouseenter', showTooltip);
+        button.addEventListener('mouseleave', hideTooltip);
+        button.addEventListener('focus', showTooltip);
+        button.addEventListener('blur', hideTooltip);
+        button.addEventListener('mousedown', (event) => event.preventDefault());
+        button.addEventListener('click', () => {
+          hideTooltip();
+          editor.focus();
+          document.execCommand(button.dataset.richCommand, false, null);
+          sync();
+          button.setAttribute('aria-pressed', String(['bold','italic','underline','insertUnorderedList','insertOrderedList'].includes(button.dataset.richCommand) && document.queryCommandState(button.dataset.richCommand)));
+        });
+      });
+      return editor;
+    }
+
+    function initializeRichEditors() {
+      [els.openResponse, ...[1,2,3].map((num) => getEl(`sectionBody${num}`))].forEach(enhanceRichText);
+      window.UTLSyncRichEditors = function () {
+        document.querySelectorAll('[data-rich-source]').forEach((source) => {
+          const editor = source._richEditor;
+          if (!editor) return;
+          editor.innerHTML = sanitizeRichHtml(source.dataset.richHtml || plainTextToRichHtml(source.value));
+        });
+      };
+      window.UTLSetRichEditorsReadOnly = function (readOnly) {
+        document.querySelectorAll('[data-rich-source]').forEach((source) => {
+          const editor = source._richEditor;
+          if (!editor) return;
+          editor.contentEditable = readOnly ? 'false' : 'true';
+          editor.closest('.rich-editor-shell').querySelectorAll('button').forEach((button) => button.disabled = readOnly);
+        });
+      };
+    }
+
+    function renderSubmittedResponse(response) {
+      if (response.mode === 'open' && response.richHtml) {
+        els.submittedAnswer.innerHTML = sanitizeRichHtml(response.richHtml);
+        return;
+      }
+      if (response.mode === 'sections') {
+        els.submittedAnswer.innerHTML = (response.sections || []).map((section) => `<h4>${escapeHtml(section.title || '')}</h4><div>${sanitizeRichHtml(section.richBody || plainTextToRichHtml(section.body || ''))}</div>`).join('');
+        return;
+      }
+      els.submittedAnswer.textContent = response.text;
     }
 
     function hasAnyContent() {
@@ -1988,7 +2191,7 @@
     window.UTLReviewWritingSubmission = function () {
       const response = getCurrentResponse();
       const score = scorePractice(response, ACTIVITY.scoring);
-      els.submittedAnswer.textContent = response.text;
+      renderSubmittedResponse(response);
       els.confirmation.classList.remove('hidden');
       els.confirmation.innerHTML = '<strong>Previous submission.</strong> Review its feedback, your answer and the sample below.';
       els.tryAgainBtn.classList.remove('hidden');
@@ -2043,7 +2246,7 @@
       state.lastScore = score;
       state.sampleRevealed = false;
 
-      els.submittedAnswer.textContent = response.text;
+      renderSubmittedResponse(response);
       els.confirmation.classList.remove('hidden');
       els.confirmation.innerHTML = `<strong>Submitted ✓.</strong> Time used: ${formatSeconds(elapsedSeconds)}. Now run the self-check.${completionSaveNotice()}`;
       els.tryAgainBtn.classList.remove('hidden');
@@ -2066,6 +2269,7 @@
         getEl(`sectionBody${num}`).readOnly = false;
       });
       els.openResponse.readOnly = false;
+      window.UTLSetRichEditorsReadOnly?.(false);
       state.lastAttemptId = null;
       state.lastScore = null;
       state.sampleRevealed = false;
@@ -2087,7 +2291,10 @@
       [1, 2, 3].forEach((num) => {
         getEl(`sectionTitle${num}`).value = '';
         getEl(`sectionBody${num}`).value = '';
+        getEl(`sectionBody${num}`).dataset.richHtml = '';
       });
+      els.openResponse.dataset.richHtml = '';
+      window.UTLSyncRichEditors?.();
       window.UTLBeginWritingAttempt();
     }
 
@@ -2292,6 +2499,7 @@
       }
       renderConfig();
       buildSectionInputs();
+      initializeRichEditors();
       renderChecklist();
       renderSampleAnswer();
       renderAttempts();
@@ -2319,6 +2527,8 @@
         setExerciseStep('exercise', false);
         setContextView('source');
         els.openResponse.value = 'Project update\n\nTimeline: The revised launch date is Friday.\nOwner: Maya will confirm the final vendor list.\nDecision needed: Approve the revised sequence by noon.';
+        els.openResponse.dataset.richHtml = '';
+        window.UTLSyncRichEditors?.();
       }
       if (designPreview === 'messy-notes-results') {
         document.body.classList.add('design-preview-results', 'result-mode');
