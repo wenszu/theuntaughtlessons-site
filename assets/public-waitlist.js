@@ -1,5 +1,19 @@
 const WAITLIST_ENDPOINT = 'https://script.google.com/macros/s/AKfycbzJE--FL2kB_XDNZRnszCtlyLRPvaLAHGuF5TAOdXJk40atbvf5Y6ELuSK2B7CSLaMN/exec';
 
+async function sendWaitlistPayload(payload) {
+  const body = JSON.stringify(payload);
+  if (navigator.sendBeacon) {
+    const queued = navigator.sendBeacon(WAITLIST_ENDPOINT, new Blob([body], { type: 'text/plain;charset=UTF-8' }));
+    if (queued) return;
+  }
+  await fetch(WAITLIST_ENDPOINT, {
+    method: 'POST',
+    mode: 'no-cors',
+    keepalive: true,
+    body
+  });
+}
+
 function waitlistMarkup() {
   return `
     <div class="lead-modal" id="waitlistModal" aria-hidden="true">
@@ -114,6 +128,7 @@ function initWaitlist() {
       help: 'Join the waitlist',
       role: form.elements.audience.value,
       organization: form.elements.organization.value.trim(),
+      tab: 'Contacts',
       page: window.location.href,
       source: 'waitlist-form'
     };
@@ -123,16 +138,7 @@ function initWaitlist() {
     error.classList.remove('is-visible');
 
     try {
-      const response = await fetch(WAITLIST_ENDPOINT, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
-        body: JSON.stringify(payload)
-      });
-      if (!response.ok) throw new Error(`Waitlist request failed: ${response.status}`);
-      const responseText = await response.text();
-      if (/\b(?:error|exception|typeerror)\b/i.test(responseText)) {
-        throw new Error('The waitlist service returned an error.');
-      }
+      await sendWaitlistPayload(payload);
       content.innerHTML = `
         <div class="lead-success" role="status">
           <svg width="48" height="48" viewBox="0 0 48 48" aria-hidden="true" focusable="false">

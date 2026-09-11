@@ -1,4 +1,5 @@
 const SCHEMA_VERSION = 1;
+import("./stability-monitor.js?v=20260911-stability-monitor-1").catch(() => {});
 const IDLE_AFTER_MS = 60000;
 const FLUSH_EVERY_MS = 60000;
 const TICK_MS = 5000;

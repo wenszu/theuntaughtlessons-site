@@ -2704,7 +2704,7 @@
 
       <span class="nav-group-label" data-admin-nav-group="student-progress">Progress</span>
       <button class="admin-nav-item" data-admin-tab-scope="student-progress" data-target="section-student-progress">Student Progress</button>
-      <button class="admin-nav-item" data-admin-tab-scope="student-progress" data-target="section-launch-health">Launch Health</button>
+      <button class="admin-nav-item" data-admin-tab-scope="student-progress" data-target="section-launch-health">Learner readiness</button>
       <button class="admin-nav-item" data-admin-tab-scope="student-progress" data-target="section-leaderboard">Leaderboard</button>
       <button class="admin-nav-item" data-admin-tab-scope="student-progress" data-target="section-engagement-insights">Engagement Insights</button>
       <button class="admin-nav-item" data-admin-tab-scope="student-progress" data-target="section-cohort-analytics">Cohort Analytics</button>
@@ -2733,12 +2733,26 @@
       <button class="admin-nav-item" data-admin-tab-scope="admin-tools" data-target="section-admin-preview">Unlock phases</button>
       <button class="admin-nav-item" data-admin-tab-scope="admin-tools" data-target="section-links">Quick links</button>
       <span class="nav-group-label" data-admin-nav-group="admin-tools">Health</span>
+      <button class="admin-nav-item" data-admin-tab-scope="admin-tools" data-target="section-site-reliability">Technical reliability</button>
       <button class="admin-nav-item" data-admin-tab-scope="admin-tools" data-target="section-sync">Site health check</button>
       <button class="admin-nav-item" data-admin-tab-scope="admin-tools" data-target="section-walkthrough-screenshots">Welcome walkthrough screenshots</button>
 
     </aside>
 
     <main class="admin-main">
+      <section class="admin-section" id="section-site-reliability" data-admin-tab-panel="admin-tools">
+        <span class="section-label">Preview &amp; Health</span>
+        <h2>Technical reliability</h2>
+        <div class="section-divider"></div>
+        <p class="description"><strong>Use this when monitoring the live learning experience:</strong> review errors reported by signed-in browsers, Vimeo playback problems, interrupted saves, and successful sync recoveries. This page shows technical incidents. Learner onboarding and participation are kept in Learner readiness under Student Progress.</p>
+        <div class="student-progress-actions">
+          <button class="small-button" type="button" id="srRefresh">Refresh reliability</button>
+          <span class="student-progress-status" id="srStatus" aria-live="polite"></span>
+        </div>
+        <div id="srContent"><p class="mb-msg">Click Refresh reliability to load recent technical reports.</p></div>
+        <p class="lh-note"><strong>Coverage:</strong> a browser must reconnect before it can report an offline incident. Repeated copies of the same issue are limited, and learner answers are never collected.</p>
+      </section>
+
       <section class="admin-section" id="section-sync" data-admin-tab-panel="admin-tools">
         <span class="section-label">Preview &amp; Health</span>
         <h2>Site health check</h2>
@@ -3048,15 +3062,15 @@
 
       <section class="admin-section" id="section-launch-health" data-admin-tab-panel="student-progress">
         <span class="section-label">Progress</span>
-        <h2>Launch Health</h2>
+        <h2>Learner readiness</h2>
         <div class="section-divider"></div>
-        <p class="description"><strong>Use this for daily launch checks:</strong> confirm who has signed in, who still needs orientation, when learners were last seen, and whether a browser has reported a recovered progress-sync problem.</p>
+        <p class="description"><strong>Use this for learner follow-up:</strong> confirm who has signed in, who still needs orientation, who was recently active, and whose progress is waiting to sync. Technical errors and Vimeo playback reports are kept in Technical reliability under Preview &amp; Health.</p>
         <div class="student-progress-actions">
-          <button class="small-button" type="button" id="lhRefresh">Refresh launch health</button>
+          <button class="small-button" type="button" id="lhRefresh">Refresh readiness</button>
           <span class="student-progress-status" id="lhStatus" aria-live="polite"></span>
         </div>
-        <div id="lhContent"><p class="mb-msg">Click Refresh launch health to load the current member status.</p></div>
-        <p class="lh-note"><strong>About connection failures:</strong> work that cannot reach Firebase stays in the learner’s browser with a Retry sync action. A completely offline browser cannot report itself to this page in real time. Once it reconnects, the recovery is recorded here.</p>
+        <div id="lhContent"><p class="mb-msg">Click Refresh readiness to load the current learner status.</p></div>
+        <p class="lh-note"><strong>Pending saves:</strong> work that cannot reach Firebase stays in the learner’s browser with a Retry sync action. Once the browser reconnects, a successful recovery appears under Technical reliability.</p>
       </section>
 
       <section class="admin-section" id="section-leaderboard" data-admin-tab-panel="student-progress">
@@ -3951,6 +3965,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       findUserUidByEmail,
       getAllMemberWorkspaceProgress,
       getAllEngagementAnalytics,
+      getAllStabilityEvents,
       getMemberCredentialRegistry,
       getMemberSupportSnapshot,
       getDoc,
@@ -4002,6 +4017,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       findUserUidByEmail,
       getAllMemberWorkspaceProgress,
       getAllEngagementAnalytics,
+      getAllStabilityEvents,
       getMemberCredentialRegistry,
       getMemberSupportSnapshot,
       getDoc,
@@ -8696,13 +8712,13 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       return member.workspaceProgress?.orientation?.ready === true;
     }
 
-    function renderLaunchHealth(members) {
+    function renderLearnerReadiness(members) {
       const content = document.getElementById('lhContent');
       if (!content) return;
       const active = members.filter((member) => String(member.status || 'active').toLowerCase() !== 'removed');
       const neverSignedIn = active.filter((member) => !member.uid && !member.firstLoginAt && !member.lastLoginAt);
       const orientationOpen = active.filter((member) => (member.uid || member.firstLoginAt || member.lastLoginAt) && !lhOrientationReady(member));
-      const recovered = active.filter((member) => member.syncHealth?.lastRecoveredAt);
+      const pendingSaves = active.filter((member) => Number(member.syncHealth?.pendingProgressSaves || 0) > 0);
       const seenRecently = active.filter((member) => {
         const iso = lhIso(member.lastSeenAt || member.lastLoginAt || member.updatedAt);
         return iso && Date.now() - new Date(iso).getTime() <= 24 * 60 * 60 * 1000;
@@ -8717,7 +8733,8 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         ['Active members', active.length, false],
         ['Seen in the last 24 hours', seenRecently.length, false],
         ['Never signed in', neverSignedIn.length, neverSignedIn.length > 0],
-        ['Orientation incomplete', orientationOpen.length, orientationOpen.length > 0]
+        ['Orientation incomplete', orientationOpen.length, orientationOpen.length > 0],
+        ['Progress saves pending', pendingSaves.length, pendingSaves.length > 0]
       ].map((item) => '<div class="lh-card' + (item[2] ? ' is-warning' : '') + '"><span>' + escapeHtml(item[0]) + '</span><strong>' + item[1] + '</strong></div>').join('');
       const rows = priority.map((member) => {
         const never = !member.uid && !member.firstLoginAt && !member.lastLoginAt;
@@ -8726,31 +8743,61 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         const action = pending ? 'Ask the learner to open the exercise and select Retry sync.' : never ? 'Confirm the welcome email and sign-in method.' : 'Send a gentle orientation reminder.';
         return '<tr><td>' + escapeHtml(member.displayName || member.name || member.email || 'Member') + '<br><small>' + escapeHtml(member.email || '') + '</small></td><td>' + escapeHtml(member.cohort || 'No cohort') + '</td><td><span class="ei-status-chip needs-support">' + escapeHtml(state) + '</span></td><td>' + lhDate(member.lastSeenAt || member.lastLoginAt || member.updatedAt) + '</td><td>' + escapeHtml(action) + '</td></tr>';
       }).join('') || '<tr><td colspan="5"><span class="sp-status-done">No launch issues need attention.</span></td></tr>';
+      content.innerHTML = '<div class="lh-summary">' + cards + '</div><div class="sp-detail-card"><h4>Learners to follow up with</h4><p class="description">This list combines access, orientation, and pending-save signals into one support queue.</p><div class="student-progress-table-wrap"><table class="student-progress-table"><thead><tr><th>Learner</th><th>Cohort</th><th>Signal</th><th>Last seen</th><th>Suggested action</th></tr></thead><tbody>' + rows + '</tbody></table></div></div>';
+    }
+
+    function renderSiteReliability(members, stabilityEvents) {
+      const content = document.getElementById('srContent');
+      if (!content) return;
+      stabilityEvents = Array.isArray(stabilityEvents) ? stabilityEvents : [];
+      const active = members.filter((member) => String(member.status || 'active').toLowerCase() !== 'removed');
+      const recovered = active.filter((member) => member.syncHealth?.lastRecoveredAt);
+      const recentTechnical = stabilityEvents.filter((event) => Date.now() - Number(event.occurredAtMs || 0) <= 24 * 60 * 60 * 1000 && event.severity !== 'info');
+      const affectedLearners = new Set(recentTechnical.map((event) => event.uid).filter(Boolean));
+      const videoIssues = recentTechnical.filter((event) => event.eventType === 'video_stall' || event.eventType === 'video_error');
+      const syncIssues = recentTechnical.filter((event) => event.eventType === 'sync_error' || event.eventType === 'network_offline');
+      const cards = [
+        ['Technical reports · 24h', recentTechnical.length, recentTechnical.length > 0],
+        ['Affected learners · 24h', affectedLearners.size, affectedLearners.size > 0],
+        ['Video issues · 24h', videoIssues.length, videoIssues.length > 0],
+        ['Connection or save issues · 24h', syncIssues.length, syncIssues.length > 0],
+        ['Recent sync recoveries', recovered.length, false]
+      ].map((item) => '<div class="lh-card' + (item[2] ? ' is-warning' : '') + '"><span>' + escapeHtml(item[0]) + '</span><strong>' + item[1] + '</strong></div>').join('');
+      const memberByUid = new Map(active.filter((member) => member.uid).map((member) => [member.uid, member]));
+      const technicalRows = stabilityEvents.filter((event) => event.eventType !== 'network_recovered').slice(0,20).map((event) => {
+        const member = memberByUid.get(event.uid) || {};
+        const labels = {javascript_error:'Page error',promise_rejection:'Background error',resource_error:'File failed to load',network_offline:'Connection lost',video_stall:'Video stalled',video_error:'Video error',sync_error:'Save error'};
+        return '<tr><td>' + escapeHtml(member.displayName || member.name || member.email || 'Member') + '<br><small>' + escapeHtml(member.email || '') + '</small></td><td><span class="ei-status-chip ' + (event.severity === 'error' ? 'needs-support' : '') + '">' + escapeHtml(labels[event.eventType] || event.eventType || 'Technical event') + '</span></td><td>' + escapeHtml(event.message || 'No detail') + '</td><td>' + escapeHtml(event.activityId || event.pagePath || '—') + '</td><td>' + lhDate(event.occurredAtClient || event.occurredAtMs) + '</td></tr>';
+      }).join('') || '<tr><td colspan="5"><span class="sp-status-done">No technical problems have been reported.</span></td></tr>';
       const recoveredRows = recovered.slice().sort((a,b) => String(lhIso(b.syncHealth.lastRecoveredAt)).localeCompare(String(lhIso(a.syncHealth.lastRecoveredAt)))).slice(0,10).map((member) => '<tr><td>' + escapeHtml(member.displayName || member.name || member.email || 'Member') + '</td><td>' + escapeHtml(member.email || '') + '</td><td>' + lhDate(member.syncHealth.lastRecoveredAt) + '</td><td><span class="ei-status-chip is-active">Recovered</span></td></tr>').join('') || '<tr><td colspan="4">No recovered sync problems have been recorded.</td></tr>';
-      content.innerHTML = '<div class="lh-summary">' + cards + '</div><div class="sp-detail-card"><h4>Needs attention</h4><div class="student-progress-table-wrap"><table class="student-progress-table"><thead><tr><th>Learner</th><th>Cohort</th><th>Signal</th><th>Last seen</th><th>Suggested action</th></tr></thead><tbody>' + rows + '</tbody></table></div></div><div class="sp-detail-card"><h4>Recent sync recoveries</h4><p class="description">A recovery appears after a learner’s locally protected work successfully reaches Firebase.</p><div class="student-progress-table-wrap"><table class="student-progress-table"><thead><tr><th>Learner</th><th>Email</th><th>Recovered</th><th>Status</th></tr></thead><tbody>' + recoveredRows + '</tbody></table></div></div>';
+      content.innerHTML = '<div class="lh-summary">' + cards + '</div><div class="sp-detail-card"><h4>Reported incidents</h4><p class="description">Use repeated reports from the same activity or several learners to identify a broader problem. A single report may reflect one device or connection.</p><details style="margin:12px 0"><summary>How these reports are measured</summary><div class="brief"><p><strong>Measured as:</strong> Browser and player failures during a signed-in visit. Each report records the activity, browser class and time.</p><p><strong>What it tells you:</strong> Which technical problem affected a learner and where it happened.</p><p><strong>Combine with:</strong> Look for the same issue across several learners or repeated reports from one activity before treating it as site-wide.</p></div></details><div class="student-progress-table-wrap"><table class="student-progress-table"><thead><tr><th>Learner</th><th>Issue</th><th>Detail</th><th>Activity</th><th>Reported</th></tr></thead><tbody>' + technicalRows + '</tbody></table></div></div><div class="sp-detail-card"><h4>Recent sync recoveries</h4><p class="description">A recovery appears after locally protected work successfully reaches Firebase.</p><div class="student-progress-table-wrap"><table class="student-progress-table"><thead><tr><th>Learner</th><th>Email</th><th>Recovered</th><th>Status</th></tr></thead><tbody>' + recoveredRows + '</tbody></table></div></div>';
     }
 
     async function loadLaunchHealth() {
-      const status = document.getElementById('lhStatus');
-      const button = document.getElementById('lhRefresh');
+      const statuses = [document.getElementById('lhStatus'), document.getElementById('srStatus')].filter(Boolean);
+      const buttons = [document.getElementById('lhRefresh'), document.getElementById('srRefresh')].filter(Boolean);
       const fb = window.utlFirebaseAuth;
       if (!fb?.getAllMemberWorkspaceProgress) {
-        if (status) status.textContent = 'Member service is loading…';
+        statuses.forEach((status) => { status.textContent = 'Member service is loading…'; });
         window.addEventListener('utlFirebaseAuthReady', function handler() { window.removeEventListener('utlFirebaseAuthReady', handler); loadLaunchHealth(); });
         return;
       }
-      if (button) { button.disabled = true; button.textContent = 'Refreshing…'; }
-      if (status) status.textContent = 'Loading member health…';
+      buttons.forEach((button) => { button.disabled = true; button.textContent = 'Refreshing…'; });
+      statuses.forEach((status) => { status.textContent = 'Loading operational health…'; });
       try {
         await mbRequireFirebaseAdmin();
         const members = await fb.getAllMemberWorkspaceProgress();
+        const stabilityEvents = fb.getAllStabilityEvents
+          ? await fb.getAllStabilityEvents(members.map((member) => member.uid).filter(Boolean)).catch(() => [])
+          : [];
         spAllMembers = members;
-        renderLaunchHealth(members);
-        if (status) status.textContent = members.length + ' member' + (members.length === 1 ? '' : 's') + ' · refreshed ' + new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+        renderLearnerReadiness(members);
+        renderSiteReliability(members, stabilityEvents);
+        statuses.forEach((status) => { status.textContent = members.length + ' member' + (members.length === 1 ? '' : 's') + ' · refreshed ' + new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}); });
       } catch (error) {
-        if (status) status.textContent = 'Could not load launch health: ' + ((error && error.message) || 'Unknown error');
+        statuses.forEach((status) => { status.textContent = 'Could not load operational health: ' + ((error && error.message) || 'Unknown error'); });
       } finally {
-        if (button) { button.disabled = false; button.textContent = 'Refresh launch health'; }
+        buttons.forEach((button) => { button.disabled = false; button.textContent = button.id === 'srRefresh' ? 'Refresh reliability' : 'Refresh readiness'; });
       }
     }
 
@@ -9933,6 +9980,10 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         loadPublicAssessmentSettings();
         loadTsaVisibility();
       }
+      if (activeTab === 'admin-tools') {
+        const healthTarget = (currentActive || visibleNavItems[0])?.dataset.target;
+        if (healthTarget === 'section-site-reliability') loadLaunchHealth();
+      }
       if (options.scroll !== false) {
         const target = (currentActive || visibleNavItems[0])?.dataset.target;
         if (target) openAndScrollToSection(target);
@@ -10223,7 +10274,9 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
     });
     document.getElementById('caRefresh')?.addEventListener('click', loadStudentProgress);
     document.getElementById('lhRefresh')?.addEventListener('click', loadLaunchHealth);
+    document.getElementById('srRefresh')?.addEventListener('click', loadLaunchHealth);
     document.querySelector('[data-target="section-launch-health"]')?.addEventListener('click', loadLaunchHealth);
+    document.querySelector('[data-target="section-site-reliability"]')?.addEventListener('click', loadLaunchHealth);
     document.querySelector('[data-target="section-student-progress"]')?.addEventListener('click', loadStudentProgress);
     document.querySelector('[data-target="section-engagement-insights"]')?.addEventListener('click', loadEngagementInsights);
     document.getElementById('eiRefresh')?.addEventListener('click', loadEngagementInsights);

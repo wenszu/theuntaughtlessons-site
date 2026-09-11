@@ -11,20 +11,22 @@ assert.match(firebase, /window\.addEventListener\("online"/, 'pending progress r
 assert.match(firebase, /lastRecoveredAt/, 'successful recovery is recorded for launch monitoring');
 assert.match(firebase, /pendingProgressSaves/, 'sync health records expose pending work without response content');
 
-assert.match(admin, /data-target="section-launch-health">Launch Health</, 'Launch Health is easy to find under Student Progress');
+assert.match(admin, /data-target="section-launch-health">Learner readiness</, 'Learner readiness is easy to find under Student Progress');
+assert.match(admin, /data-target="section-site-reliability">Technical reliability</, 'technical reliability is easy to find under Preview & Health');
 assert.ok(
   admin.indexOf('data-target="section-student-progress"') < admin.indexOf('data-target="section-launch-health"'),
-  'Student Progress appears before Launch Health in the navigation'
+  'Student Progress appears before Learner readiness in the navigation'
 );
 assert.ok(
   admin.indexOf('id="section-student-progress"') < admin.indexOf('id="section-launch-health"'),
-  'Student Progress appears before Launch Health in the page structure'
+  'Student Progress appears before Learner readiness in the page structure'
 );
-assert.match(admin, /id="lhRefresh"/, 'Launch Health can be refreshed on demand');
-assert.match(admin, /Never signed in/, 'Launch Health identifies members who have not signed in');
-assert.match(admin, /Orientation incomplete/, 'Launch Health identifies incomplete orientation');
-assert.match(admin, /Recent sync recoveries/, 'Launch Health shows known sync recoveries');
-assert.match(admin, /completely offline browser cannot report itself/, 'Launch Health explains its real-time limitation');
-assert.match(admin, /async function loadLaunchHealth\(\)/, 'Launch Health uses the authenticated member data source');
+assert.match(admin, /id="lhRefresh"/, 'Learner readiness can be refreshed on demand');
+assert.match(admin, /id="srRefresh"/, 'Technical reliability can be refreshed on demand');
+assert.match(admin, /Never signed in/, 'Learner readiness identifies members who have not signed in');
+assert.match(admin, /Orientation incomplete/, 'Learner readiness identifies incomplete orientation');
+assert.match(admin, /Recent sync recoveries/, 'Technical reliability shows known sync recoveries');
+assert.match(admin, /browser must reconnect before it can report an offline incident/i, 'Technical reliability explains its reporting limitation');
+assert.match(admin, /async function loadLaunchHealth\(\)/, 'Both views use the authenticated member data source');
 
 console.log('launch health and progress sync recovery contracts passed');

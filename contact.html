@@ -138,14 +138,32 @@
     const CONTACT_PROFILE_KEY = 'utl_contact_profile';
 
     function rememberContact(payload) {
-      sessionStorage.setItem(CONTACT_SESSION_KEY, 'true');
-      sessionStorage.setItem(CONTACT_PROFILE_KEY, JSON.stringify({
-        name: payload.name || '',
-        email: payload.email || '',
-        role: payload.role || '',
-        message: payload.message || '',
-        source: payload.source || ''
-      }));
+      try {
+        sessionStorage.setItem(CONTACT_SESSION_KEY, 'true');
+        sessionStorage.setItem(CONTACT_PROFILE_KEY, JSON.stringify({
+          name: payload.name || '',
+          email: payload.email || '',
+          role: payload.role || '',
+          message: payload.message || '',
+          source: payload.source || ''
+        }));
+      } catch (error) {
+        console.warn('Contact preference could not be saved in this browser.', error);
+      }
+    }
+
+    async function sendContactPayload(payload) {
+      const body = JSON.stringify(payload);
+      if (navigator.sendBeacon) {
+        const queued = navigator.sendBeacon(SCRIPT_URL, new Blob([body], { type: 'text/plain;charset=UTF-8' }));
+        if (queued) return;
+      }
+      await fetch(SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        keepalive: true,
+        body
+      });
     }
 
     navToggle.addEventListener('click', () => {
@@ -202,19 +220,13 @@
         email: form.email.value,
         role: 'Contact inquiry',
         message: form.message.value || '',
+        tab: 'Contacts',
         page: window.location.href,
         source: 'contact-form'
       };
 
       try {
-        const response = await fetch(SCRIPT_URL, {
-          method: 'POST',
-          body: JSON.stringify(payload),
-          headers: { 'Content-Type': 'text/plain;charset=UTF-8' }
-        });
-        if (!response.ok) throw new Error(`Contact request failed: ${response.status}`);
-        const responseText = await response.text();
-        if (/\b(?:error|exception|typeerror)\b/i.test(responseText)) throw new Error('The contact service returned an error.');
+        await sendContactPayload(payload);
         rememberContact(payload);
         showSuccessState();
       } catch (err) {
@@ -249,19 +261,13 @@
         role: 'Contact inquiry',
         help: form.help.value,
         message: form.message.value,
+        tab: 'Contacts',
         page: window.location.href,
         source: 'contact-form'
       };
 
       try {
-        const response = await fetch(SCRIPT_URL, {
-          method: 'POST',
-          body: JSON.stringify(payload),
-          headers: { 'Content-Type': 'text/plain;charset=UTF-8' }
-        });
-        if (!response.ok) throw new Error(`Contact request failed: ${response.status}`);
-        const responseText = await response.text();
-        if (/\b(?:error|exception|typeerror)\b/i.test(responseText)) throw new Error('The contact service returned an error.');
+        await sendContactPayload(payload);
         rememberContact(payload);
         showContactSuccess();
       } catch (err) {
@@ -295,7 +301,7 @@
       contactRevealObserver.observe(element);
     });
   </script>
-  <script src="assets/public-waitlist.js?v=1"></script>
+  <script src="assets/public-waitlist.js?v=3"></script>
   <script type="module" src="assets/public-site-settings.js?v=1"></script>
   <script type="module" src="assets/feedback-widget.js?v=6"></script>
 </body>

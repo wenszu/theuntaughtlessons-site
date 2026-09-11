@@ -27,6 +27,8 @@ import {
   getDoc,
   getDocs,
   getFirestore,
+  limit,
+  orderBy,
   query,
   runTransaction,
   serverTimestamp,
@@ -848,6 +850,12 @@ async function saveUserProgress(exerciseId, exerciseName, exercisePayload = {}) 
     return { saved: true };
   } catch (error) {
     queueProgressSync(exerciseId, exerciseName, exercisePayload, error);
+    window.dispatchEvent(new CustomEvent("utl:stability-event", { detail: {
+      eventType: "sync_error",
+      severity: "warning",
+      activityId: exerciseId,
+      message: "Exercise progress could not sync and was protected in this browser"
+    } }));
     showProgressSyncFailure(() => retryPendingProgressSyncs());
     throw error;
   }
@@ -1036,6 +1044,50 @@ async function saveEngagementAnalytics(payload = {}) {
     setDoc(doc(requireFirestore(), "users", user.uid, "analytics_activity_sessions", activitySessionId), Object.assign({ userId: user.uid, activitySessionId }, activity), { merge: true })
   ]);
   return { saved: true, sessionId };
+}
+
+function stabilityText(value, maximum = 240) {
+  return String(value || "").replace(/[\r\n\t]+/g, " ").replace(/\s{2,}/g, " ").trim().slice(0, maximum);
+}
+
+async function saveStabilityEvent(input = {}) {
+  if (experiencePreviewActive()) return { saved: false, reason: "preview" };
+  const user = await getSignedInUser();
+  if (!user?.uid) return { saved: false, reason: "signed-out" };
+  const eventId = stabilityText(input.eventId, 100);
+  if (!eventId) return { saved: false, reason: "invalid" };
+  await setDoc(doc(requireFirestore(), "users", user.uid, "stability_events", eventId), {
+    schemaVersion: 1,
+    userId: user.uid,
+    eventId,
+    eventType: stabilityText(input.eventType, 40),
+    severity: ["info", "warning", "error"].includes(input.severity) ? input.severity : "error",
+    fingerprint: stabilityText(input.fingerprint, 100),
+    message: stabilityText(input.message, 240),
+    source: stabilityText(input.source, 160),
+    pagePath: stabilityText(input.pagePath, 240),
+    activityId: stabilityText(input.activityId, 100),
+    browser: stabilityText(input.browser, 80),
+    deviceClass: ["mobile", "tablet", "desktop"].includes(input.deviceClass) ? input.deviceClass : "desktop",
+    online: input.online !== false,
+    occurredAtClient: stabilityText(input.occurredAtClient, 40),
+    occurredAtMs: Math.max(0, Math.round(Number(input.occurredAtMs) || Date.now())),
+    receivedAt: serverTimestamp()
+  });
+  return { saved: true, eventId };
+}
+
+async function getAllStabilityEvents(memberUids = []) {
+  const readyDb = requireFirestore();
+  const user = await getSignedInUser();
+  if (!user) throw new Error("An administrator session is required.");
+  const uids = [...new Set((memberUids || []).map((uid) => stabilityText(uid, 128)).filter(Boolean))];
+  if (!uids.length) return [];
+  const results = await Promise.all(uids.map(async (uid) => {
+    const snapshot = await getDocs(query(collection(readyDb, "users", uid, "stability_events"), orderBy("occurredAtMs", "desc"), limit(25)));
+    return snapshot.docs.map((entry) => Object.assign({ uid, id: entry.id }, entry.data() || {}));
+  }));
+  return results.flat().sort((a, b) => Number(b.occurredAtMs || 0) - Number(a.occurredAtMs || 0));
 }
 
 async function getAllEngagementAnalytics(memberUids = []) {
@@ -1634,6 +1686,7 @@ export {
   findUserUidByEmail,
   getAllMemberWorkspaceProgress,
   getAllEngagementAnalytics,
+  getAllStabilityEvents,
   getCohortDetails,
   setCohortDetails,
   renameCohort,
@@ -1663,6 +1716,7 @@ export {
   saveUserProgress,
   retryPendingProgressSyncs,
   saveEngagementAnalytics,
+  saveStabilityEvent,
   saveExerciseAttempt,
   saveExerciseDraft,
   saveExerciseSubmission,

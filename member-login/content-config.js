@@ -4158,6 +4158,16 @@ const UTL_CONTENT = {
     recovery.hidden = !visible;
   }
 
+  function reportVimeoStability(frame, eventType, message, severity) {
+    window.dispatchEvent(new CustomEvent("utl:stability-event", { detail: {
+      eventType: eventType,
+      message: message,
+      severity: severity || "warning",
+      source: frame && frame.src || "vimeo",
+      activityId: frame && frame.dataset.videoActivityId || "video"
+    } }));
+  }
+
   function syncVimeoCourseCompletion(event) {
     var detail = event.detail || {};
     if (detail.completed !== true) return;
@@ -4194,7 +4204,10 @@ const UTL_CONTENT = {
       function watchForStall() {
         clearBufferTimer();
         bufferTimer = window.setTimeout(function () {
-          if (playing) setVimeoRecovery(frame, true, "The stream appears to have paused. Retry from where you stopped, or open the video directly.");
+          if (playing) {
+            setVimeoRecovery(frame, true, "The stream appears to have paused. Retry from where you stopped, or open the video directly.");
+            reportVimeoStability(frame, "video_stall", "Vimeo playback stopped progressing for 12 seconds", "warning");
+          }
         }, 12000);
       }
       vimeoPlayers.set(frame, player);
@@ -4215,7 +4228,7 @@ const UTL_CONTENT = {
       player.on("bufferend", function () { setVimeoRecovery(frame, false); if (playing) watchForStall(); });
       player.on("pause", function (data) { playing = false; clearBufferTimer(); setVimeoRecovery(frame, false); dispatchVimeoProgress(frame, { eventName: "pause", positionSeconds: Number(data.seconds || lastPosition || 0), durationSeconds: Number(data.duration || 0), percent: Number(data.percent || 0) * 100 }); });
       player.on("ended", function (data) { playing = false; clearBufferTimer(); setVimeoRecovery(frame, false); dispatchVimeoProgress(frame, { eventName: "ended", positionSeconds: Number(data.seconds || lastPosition || 0), durationSeconds: Number(data.duration || 0), percent: 100, milestone: 100, completed: true }); });
-      player.on("error", function () { playing = false; clearBufferTimer(); setVimeoRecovery(frame, true, "Vimeo could not continue playback. Retry here, or open the video directly."); });
+      player.on("error", function () { playing = false; clearBufferTimer(); setVimeoRecovery(frame, true, "Vimeo could not continue playback. Retry here, or open the video directly."); reportVimeoStability(frame, "video_error", "Vimeo reported a playback error", "error"); });
       var retry = frame.parentElement && frame.parentElement.querySelector("[data-vimeo-retry]");
       if (retry) retry.addEventListener("click", function () {
         retry.disabled = true;
@@ -4227,6 +4240,7 @@ const UTL_CONTENT = {
       });
     }).catch(function (error) {
       setVimeoRecovery(frame, true, "The embedded player could not finish loading. Open the video directly or try another network.");
+      reportVimeoStability(frame, "video_error", "Vimeo player controls could not initialize", "error");
       console.warn("Vimeo playback analytics unavailable.", error);
     });
   }

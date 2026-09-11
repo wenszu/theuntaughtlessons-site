@@ -203,6 +203,33 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    match /users/{userId}/stability_events/{eventId} {
+      allow read: if isAdmin();
+      allow create: if signedIn() && request.auth.uid == userId &&
+        request.resource.data.keys().hasOnly([
+          'schemaVersion', 'userId', 'eventId', 'eventType', 'severity', 'fingerprint',
+          'message', 'source', 'pagePath', 'activityId', 'browser', 'deviceClass',
+          'online', 'occurredAtClient', 'occurredAtMs', 'receivedAt'
+        ]) &&
+        request.resource.data.schemaVersion == 1 &&
+        request.resource.data.userId == userId &&
+        request.resource.data.eventId == eventId && eventId.size() >= 8 && eventId.size() <= 100 &&
+        request.resource.data.eventType in ['javascript_error', 'promise_rejection', 'resource_error', 'network_offline', 'network_recovered', 'video_stall', 'video_error', 'sync_error'] &&
+        request.resource.data.severity in ['info', 'warning', 'error'] &&
+        request.resource.data.fingerprint is string && request.resource.data.fingerprint.size() <= 100 &&
+        request.resource.data.message is string && request.resource.data.message.size() <= 240 &&
+        request.resource.data.source is string && request.resource.data.source.size() <= 160 &&
+        request.resource.data.pagePath is string && request.resource.data.pagePath.size() <= 240 &&
+        request.resource.data.activityId is string && request.resource.data.activityId.size() <= 100 &&
+        request.resource.data.browser is string && request.resource.data.browser.size() <= 80 &&
+        request.resource.data.deviceClass in ['mobile', 'tablet', 'desktop'] &&
+        request.resource.data.online is bool &&
+        request.resource.data.occurredAtClient is string && request.resource.data.occurredAtClient.size() <= 40 &&
+        request.resource.data.occurredAtMs is int && request.resource.data.occurredAtMs >= 0 &&
+        request.resource.data.receivedAt == request.time;
+      allow update, delete: if false;
+    }
+
     match /assessment_item_attempts/{attemptId} {
       allow read: if isAdmin();
       allow create: if isValidAssessmentItemAttempt(attemptId);

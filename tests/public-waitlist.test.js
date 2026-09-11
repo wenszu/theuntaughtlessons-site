@@ -17,8 +17,17 @@ const component = fs.readFileSync('assets/public-waitlist.js', 'utf8');
 for (const field of ['I am interested for', 'Myself', 'My organization', 'Name', 'Email', 'Organization name', 'What are you hoping to work on?']) assert.ok(component.includes(field));
 assert.ok(component.includes("We'll reach out to find a time to talk."));
 assert.ok(component.includes('dataset.waitlistAudience'));
-assert.match(component, /Content-Type': 'text\/plain;charset=UTF-8'/);
+assert.match(component, /navigator\.sendBeacon/);
+assert.match(component, /new Blob\(\[body\], \{ type: 'text\/plain;charset=UTF-8' \}\)/);
+assert.match(component, /mode: 'no-cors'/);
+assert.match(component, /keepalive: true/);
+assert.match(component, /tab: 'Contacts'/);
 assert.doesNotMatch(component, /<select/);
+
+const contact = fs.readFileSync('contact.html', 'utf8');
+assert.match(contact, /tab: 'Contacts'/);
+assert.match(contact, /mode: 'no-cors'/);
+assert.match(contact, /navigator\.sendBeacon/);
 
 const tsaProgram = fs.readFileSync('programs/think-speak-act.html', 'utf8');
 assert.match(tsaProgram, /For organizations/);
