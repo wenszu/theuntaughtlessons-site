@@ -5,8 +5,6 @@
    Fonts: Lato (body), Roboto Mono (technical)
    ============================================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Roboto+Mono:wght@400;500&display=swap');
-
 /* ── Brand navigation bar ── */
 .brand-nav {
   background: #F3EDE2;
