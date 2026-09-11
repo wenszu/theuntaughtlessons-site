@@ -12,8 +12,8 @@ const oldFileId = '168tYlq9fRUKl7NrlELHuwAPwAxC2_5yD';
 assert(workspace.includes(newFileId), 'Learning Journey uses the new SCQA setup video');
 assert(contextFlow.includes(newFileId), 'direct SCQA setup flow uses the new video');
 assert(admin.includes(newFileId), 'Admin content defaults use the new video');
-assert(appHeader.includes('exercise-context-flow.js?v=20260907-vimeo-all-media-1'), 'shared setup loader bypasses the cached former context');
-assert(scqa.includes('app-reward-header.js?v=20260907-vimeo-all-media-1'), 'SCQA bypasses its cached former setup loader');
+assert(/exercise-context-flow\.js\?v=[\w-]+/.test(appHeader), 'shared setup loader cache-busts its context flow import');
+assert(/app-reward-header\.js\?v=[\w-]+/.test(scqa), 'SCQA loads the shared reward header with a cache-busting version string');
 assert(workspace.includes(oldFileId), 'member settings migrate the former built-in video');
 assert(admin.includes(`/${oldFileId}/.test(existing.url)`), 'admin settings migrate the former built-in video');
 

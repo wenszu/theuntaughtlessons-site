@@ -1,0 +1,35 @@
+name: Sync cache-busting versions
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  sync-cache-versions:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 20
+      - name: Rewrite ?v= cache-busting versions to one shared value
+        run: node scripts/sync-cache-versions.js
+      - name: Run repository tests against the rewritten files
+        run: |
+          for test_file in tests/*.test.js; do
+            node "$test_file"
+          done
+      - name: Commit and push if anything changed
+        run: |
+          if git diff --quiet; then
+            echo "No cache-busting references changed."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "chore: sync cache-busting versions [skip ci]"
+          git push

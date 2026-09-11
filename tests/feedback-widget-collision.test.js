@@ -20,7 +20,7 @@ const exercisePages = fs.readdirSync('apps')
   .filter((name) => fs.existsSync(`apps/${name}/index.html`))
   .map((name) => fs.readFileSync(`apps/${name}/index.html`, 'utf8'));
 exercisePages.filter((page) => page.includes('feedback-widget.js')).forEach((page) => {
-  assert(page.includes('feedback-widget.js?v=6'), 'exercise pages load the collision-safe feedback widget');
+  assert(/feedback-widget\.js\?v=[\w-]+/.test(page), 'exercise pages load a cache-busted copy of the collision-safe feedback widget');
 });
 
 console.log('feedback widget avoids sticky and fixed exercise actions');

@@ -445,8 +445,8 @@ const UTL_CONTENT = {
   }
 
   function engagementAnalyticsHref() {
-    if (inPhasePracticeRoot()) return "../../../assets/engagement-analytics.js?v=20260907-vimeo-engagement-1";
-    return "../assets/engagement-analytics.js?v=20260907-vimeo-engagement-1";
+    if (inPhasePracticeRoot()) return "../../../assets/engagement-analytics.js?v=20260911-1138";
+    return "../assets/engagement-analytics.js?v=20260911-1138";
   }
 
   if (!inAdminRoot()) import(engagementAnalyticsHref()).catch(function (error) {
@@ -2491,7 +2491,7 @@ const UTL_CONTENT = {
         : (next && phases.indexOf(next.phaseKey) >= 0 ? next.phaseKey : "phase1");
     if (phases.indexOf(requestedPhase) >= 0) localStorage.setItem("utl_journey_selected_phase", requestedPhase);
     var assessmentModel = assessmentJourneyModel(orientationDone);
-    return '<section class="ws-learning-home" id="learning-journey"><header class="ws-learning-heading"><div><span class="ws-kicker"><img class="ws-program-mark" src="' + assetHref("../assets/program-logo-tsa-icon.png?v=1") + '" alt="">Your program</span><h1>Learning Journey</h1><p>Welcome back, ' + escapeHtml(firstName) + '. Select any activity to preview it.</p></div>' + assessmentJourneyMilestonesHtml(assessmentModel) + '</header>' + assessmentJourneyNudgeHtml(assessmentModel, next, progress) + '<div class="ws-learning-path"><div class="ws-learning-path-head"><div><h2>Program path</h2><p class="ws-learning-path-sub">' + progress.done + ' of ' + progress.total + ' core activities complete &middot; ' + progress.percent + '%</p></div><button class="ws-walkthrough-replay" type="button" data-walkthrough-replay>Replay welcome tour</button></div>' + orientationCardHtml() + '<div class="ws-journey-tab-card"><div class="ws-journey-phase-tabs" role="tablist" aria-label="Learning journey phases">' + phases.map(function (phaseKey) { return journeyPhaseTabHtml(phaseKey, next, selectedPhase); }).join("") + '</div><div class="ws-journey-phase-panels">' + phases.map(function (phaseKey) { return journeyPhasePanelHtml(phaseKey, next, selectedPhase); }).join("") + '</div></div></div><div class="ws-journey-preview-scrim" data-journey-preview-scrim hidden></div></section>';
+    return '<section class="ws-learning-home" id="learning-journey"><header class="ws-learning-heading"><div><span class="ws-kicker"><img class="ws-program-mark" src="' + assetHref("../assets/program-logo-tsa-icon.png?v=20260911-1138") + '" alt="">Your program</span><h1>Learning Journey</h1><p>Welcome back, ' + escapeHtml(firstName) + '. Select any activity to preview it.</p></div>' + assessmentJourneyMilestonesHtml(assessmentModel) + '</header>' + assessmentJourneyNudgeHtml(assessmentModel, next, progress) + '<div class="ws-learning-path"><div class="ws-learning-path-head"><div><h2>Program path</h2><p class="ws-learning-path-sub">' + progress.done + ' of ' + progress.total + ' core activities complete &middot; ' + progress.percent + '%</p></div><button class="ws-walkthrough-replay" type="button" data-walkthrough-replay>Replay welcome tour</button></div>' + orientationCardHtml() + '<div class="ws-journey-tab-card"><div class="ws-journey-phase-tabs" role="tablist" aria-label="Learning journey phases">' + phases.map(function (phaseKey) { return journeyPhaseTabHtml(phaseKey, next, selectedPhase); }).join("") + '</div><div class="ws-journey-phase-panels">' + phases.map(function (phaseKey) { return journeyPhasePanelHtml(phaseKey, next, selectedPhase); }).join("") + '</div></div></div><div class="ws-journey-preview-scrim" data-journey-preview-scrim hidden></div></section>';
   }
 
   function missionDayKey() {

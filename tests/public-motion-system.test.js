@@ -30,7 +30,7 @@ assert.match(styles, /prefers-reduced-motion: reduce/, 'the motion system should
 assert.match(styles, /scroll-snap-type: x proximity/, 'testimonial cards should support controlled horizontal browsing');
 for (const [name, page] of Object.entries({ home, programs, programDetail, about, contact })) {
   assert.doesNotMatch(page, /class="footer-tagline"/, `${name} should use the concise public footer`);
-  assert.match(page, /styles\.css\?v=public-20260819-9/, `${name} should load the current public styles`);
+  assert.match(page, /styles\.css\?v=[\w-]+/, `${name} should load a cache-busted copy of the public styles`);
 }
 
 // --- programs.html is now a lightweight directory, not the deep-dive itself ---

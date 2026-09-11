@@ -55,7 +55,7 @@
         return;
       }
       var script = document.createElement("script");
-      script.src = "../../assets/reward-ui.js?v=20260803-written-reflection-1";
+      script.src = "../../assets/reward-ui.js?v=20260911-1138";
       script.async = true;
       script.dataset.utlRewardUi = "true";
       script.onload = function () { resolve(window.UTLRewardUI); };
@@ -74,7 +74,7 @@
         return;
       }
       var script = document.createElement("script");
-      script.src = "../../assets/exercise-context-flow.js?v=20260907-vimeo-all-media-1";
+      script.src = "../../assets/exercise-context-flow.js?v=20260911-1138";
       script.dataset.utlContextFlow = "true";
       script.onload = function () { resolve(window.UTLExerciseContextFlow); };
       script.onerror = reject;

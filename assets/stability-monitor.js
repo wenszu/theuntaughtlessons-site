@@ -102,7 +102,7 @@ async function flush() {
   if (flushing || navigator.onLine === false || !queue().length) return;
   flushing = true;
   try {
-    const firebase = await import("./firebase.js?v=20260911-stability-monitor-1");
+    const firebase = await import("./firebase.js?v=20260911-1138");
     const pending = queue();
     const remaining = [];
     for (const item of pending) {

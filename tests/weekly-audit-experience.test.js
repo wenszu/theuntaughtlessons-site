@@ -77,7 +77,7 @@ assert(scqa.includes('.form-header p { width: 100%; max-width: none;'), 'SCQA in
 assert(!scqa.includes('How to make this one different'), 'SCQA avoids repeating the second-formulation guidance');
 const appHtml = fs.readdirSync('apps').filter((name) => fs.existsSync(`apps/${name}/index.html`)).map((name) => fs.readFileSync(`apps/${name}/index.html`, 'utf8')).join('\n');
 assert(!appHtml.includes('app-reward-header.js?v=20260729-phase3-4'), 'exercise pages do not retain the stale shared-header cache key');
-assert(appHtml.includes('app-reward-header.js?v=20260907-vimeo-all-media-1'), 'exercise pages load the current compact responsive reward header');
+assert(/app-reward-header\.js\?v=[\w-]+/.test(appHtml), 'exercise pages load the shared reward header with a cache-busting version string');
 assert(!/member-login\/phase-[123]/.test(appHtml), 'exercise navigation no longer returns learners to deprecated phase pages');
 assert(!/Back to Phase [123] exercises/.test(appHtml), 'exercise headers consistently return learners to the Learning Journey');
 assert(appHtml.includes('member-login/index.html#learning-journey'), 'exercise navigation links directly to the Learning Journey');
