@@ -138,10 +138,46 @@ window.addEventListener("unhandledrejection", (event) => {
   enqueue({ eventType: "promise_rejection", message, source: location.pathname, severity: "error" });
 });
 
-window.addEventListener("offline", () => enqueue({ eventType: "network_offline", message: "Browser went offline", severity: "warning" }));
-window.addEventListener("online", () => { enqueue({ eventType: "network_recovered", message: "Browser connection returned", severity: "info" }); flush(); });
+function ensureOfflineBanner() {
+  let banner = document.getElementById("utlOfflineBanner");
+  if (banner) return banner;
+  const style = document.createElement("style");
+  style.textContent = ".utl-offline-banner{position:fixed;left:0;right:0;top:0;z-index:9999;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px;padding:9px 16px;background:#003366;color:#fff;font:600 13px/1.4 Lato,Arial,sans-serif;text-align:center}.utl-offline-banner[hidden]{display:none}.utl-offline-banner strong{color:#EEA320}";
+  document.head.appendChild(style);
+  banner = document.createElement("div");
+  banner.id = "utlOfflineBanner";
+  banner.className = "utl-offline-banner";
+  banner.setAttribute("role", "status");
+  banner.setAttribute("aria-live", "polite");
+  banner.hidden = true;
+  banner.innerHTML = "<strong>You’re offline.</strong><span>Your work keeps saving in this browser and will sync once you’re back online.</span>";
+  document.body.appendChild(banner);
+  return banner;
+}
+
+function showOfflineBanner() {
+  try {
+    if (!document.body) { document.addEventListener("DOMContentLoaded", showOfflineBanner, { once: true }); return; }
+    ensureOfflineBanner().hidden = false;
+  } catch (_) {
+    // Monitoring must never affect the learner experience.
+  }
+}
+
+function hideOfflineBanner() {
+  try {
+    const banner = document.getElementById("utlOfflineBanner");
+    if (banner) banner.hidden = true;
+  } catch (_) {
+    // Monitoring must never affect the learner experience.
+  }
+}
+
+window.addEventListener("offline", () => { enqueue({ eventType: "network_offline", message: "Browser went offline", severity: "warning" }); showOfflineBanner(); });
+window.addEventListener("online", () => { enqueue({ eventType: "network_recovered", message: "Browser connection returned", severity: "info" }); hideOfflineBanner(); flush(); });
 window.addEventListener("utl:stability-event", (event) => enqueue(event.detail || {}));
 window.addEventListener("pageshow", flush);
 setTimeout(flush, 1500);
+if (navigator.onLine === false) showOfflineBanner();
 
 window.UTLStabilityMonitor = { report: enqueue, flush };
