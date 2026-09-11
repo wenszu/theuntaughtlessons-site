@@ -12,7 +12,11 @@ assert.match(content, /picture-in-picture; clipboard-write; encrypted-media; web
 assert.ok(content.includes('referrerpolicy="strict-origin-when-cross-origin"'), 'the approved embedding domain is sent to Vimeo');
 assert.ok(content.includes('if (/vimeo\\.com\\//'), 'Google Drive access guidance is not shown for Vimeo videos');
 assert.match(content, /vimeo\\\.com.*drive\\\.google\\\.com.*localStorage\.removeItem/s, 'stale Drive overrides are retired after an official Vimeo migration');
-assert.ok(phaseOne.includes('content-config.js?v=20260907-vimeo-engagement-1'), 'the Phase 1 page cache-busts the Vimeo player build');
+assert.ok(phaseOne.includes('content-config.js?v=20260911-vimeo-recovery-1'), 'the Phase 1 page cache-busts the Vimeo player build');
+assert.match(content, /autopause", "0"/, 'Vimeo embeds disable cross-player autopause');
+assert.match(content, /max_quality", "720p"/, 'Vimeo embeds cap automatic playback quality at 720p');
+assert.match(content, /player\.on\("bufferstart"/, 'Vimeo buffering starts a stall check');
+assert.match(content, /data-vimeo-retry/, 'Vimeo embeds provide an in-page recovery action');
 
 [
   ['Orientation', '1224500458'],
