@@ -3069,8 +3069,20 @@
           <button class="small-button" type="button" id="lhRefresh">Refresh readiness</button>
           <span class="student-progress-status" id="lhStatus" aria-live="polite"></span>
         </div>
+        <div class="sp-controls" id="lhControls" hidden>
+          <input type="search" class="sp-search" id="lhSearch" placeholder="Search by name or email…" aria-label="Search learners">
+          <select class="sp-cohort-filter" id="lhCohortFilter" aria-label="Filter learners by cohort"><option value="all">All cohorts</option></select>
+          <div class="sp-filter-chips" role="group" aria-label="Filter by signal">
+            <button class="sp-chip active" type="button" data-lh-filter="all">All</button>
+            <button class="sp-chip" type="button" data-lh-filter="never">Never signed in</button>
+            <button class="sp-chip" type="button" data-lh-filter="orientation">Orientation incomplete</button>
+            <button class="sp-chip" type="button" data-lh-filter="pending">Pending saves</button>
+            <button class="sp-chip" type="button" data-lh-filter="issue">Technical issue</button>
+          </div>
+          <span class="sp-count" id="lhCount"></span>
+        </div>
         <div id="lhContent"><p class="mb-msg">Click Refresh readiness to load the current learner status.</p></div>
-        <p class="lh-note"><strong>Pending saves:</strong> work that cannot reach Firebase stays in the learner’s browser with a Retry sync action. Once the browser reconnects, a successful recovery appears under Technical reliability.</p>
+        <p class="lh-note"><strong>Pending saves:</strong> work that cannot reach Firebase stays in the learner’s browser with a Retry sync action. Once the browser reconnects, a successful recovery appears under Technical reliability. <strong>Technical issue:</strong> the learner had a video or connection error reported in the last 72 hours — see Technical reliability under Preview &amp; Health for the report detail.</p>
       </section>
 
       <section class="admin-section" id="section-leaderboard" data-admin-tab-panel="student-progress">
@@ -7989,10 +8001,28 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
 
     // Student progress state
     let spAllMembers = [];
+    let spAllMembersLoadedAt = 0;
+    const SP_MEMBERS_CACHE_MS = 45000;
     let spSort = { col: 'name', dir: 'asc' };
     let spFilter = 'all';
     let spCohortFilter = 'all';
+    let lhFilter = 'all';
+    let lhCohortFilter = 'all';
+    let lhStabilityEvents = [];
     let spActiveMember = null;
+
+    // Reuses the full member roster fetched within the last SP_MEMBERS_CACHE_MS
+    // instead of re-scanning the authorized_members/users collections on every
+    // tab switch between Student Progress, Learner readiness, and Engagement Insights.
+    // Pass forceRefresh:true from an explicit Refresh button to bypass the cache.
+    async function spFetchAllMembers(fb, forceRefresh) {
+      if (!forceRefresh && spAllMembers.length && (Date.now() - spAllMembersLoadedAt) < SP_MEMBERS_CACHE_MS) {
+        return spAllMembers;
+      }
+      const members = await fb.getAllMemberWorkspaceProgress();
+      spAllMembersLoadedAt = Date.now();
+      return members;
+    }
     const SP_PREVIEW_ACTIVE_KEY = 'utl_experience_preview_active';
     const SP_PREVIEW_BACKUP_KEY = 'utl_experience_preview_backup';
 
@@ -8712,38 +8742,101 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       return member.workspaceProgress?.orientation?.ready === true;
     }
 
-    function renderLearnerReadiness(members) {
+    function lhPopulateCohortFilter() {
+      const select = document.getElementById('lhCohortFilter');
+      if (!select) return;
+      const cohorts = Array.from(new Set(spAllMembers.map((member) => String(member.cohort || '').trim()).filter(Boolean)))
+        .sort((a, b) => a.localeCompare(b));
+      const hasNoCohort = spAllMembers.some((member) => !String(member.cohort || '').trim());
+      select.innerHTML = '<option value="all">All cohorts</option>' +
+        cohorts.map((cohort) => '<option value="' + escapeHtml(cohort) + '">' + escapeHtml(cohort) + '</option>').join('') +
+        (hasNoCohort ? '<option value="__none__">No cohort</option>' : '');
+      const available = ['all', ...cohorts, ...(hasNoCohort ? ['__none__'] : [])];
+      if (!available.includes(lhCohortFilter)) lhCohortFilter = 'all';
+      select.value = lhCohortFilter;
+    }
+
+    function lhApplyView() {
+      const q = ((document.getElementById('lhSearch') || {}).value || '').trim().toLowerCase();
+      let members = spAllMembers;
+      if (q) {
+        members = members.filter((m) => (m.displayName || m.name || '').toLowerCase().includes(q) || (m.email || '').toLowerCase().includes(q));
+      }
+      if (lhCohortFilter !== 'all') {
+        members = members.filter((m) => {
+          const cohort = String(m.cohort || '').trim();
+          return lhCohortFilter === '__none__' ? !cohort : cohort === lhCohortFilter;
+        });
+      }
+      renderLearnerReadiness(members, lhStabilityEvents, members.length !== spAllMembers.length);
+    }
+
+    function renderLearnerReadiness(members, stabilityEvents, isFiltered) {
       const content = document.getElementById('lhContent');
       if (!content) return;
+      stabilityEvents = Array.isArray(stabilityEvents) ? stabilityEvents : [];
       const active = members.filter((member) => String(member.status || 'active').toLowerCase() !== 'removed');
+      const recentIssueByUid = new Map();
+      stabilityEvents.forEach((event) => {
+        if (!event.uid || event.severity === 'info' || event.eventType === 'network_recovered') return;
+        if (Date.now() - Number(event.occurredAtMs || 0) > 72 * 60 * 60 * 1000) return;
+        const existing = recentIssueByUid.get(event.uid);
+        if (!existing || Number(event.occurredAtMs || 0) > Number(existing.occurredAtMs || 0)) recentIssueByUid.set(event.uid, event);
+      });
       const neverSignedIn = active.filter((member) => !member.uid && !member.firstLoginAt && !member.lastLoginAt);
       const orientationOpen = active.filter((member) => (member.uid || member.firstLoginAt || member.lastLoginAt) && !lhOrientationReady(member));
       const pendingSaves = active.filter((member) => Number(member.syncHealth?.pendingProgressSaves || 0) > 0);
+      const recentIssues = active.filter((member) => member.uid && recentIssueByUid.has(member.uid));
       const seenRecently = active.filter((member) => {
         const iso = lhIso(member.lastSeenAt || member.lastLoginAt || member.updatedAt);
         return iso && Date.now() - new Date(iso).getTime() <= 24 * 60 * 60 * 1000;
       });
-      const priority = active.filter((member) => {
+      const signalOf = (member) => {
         const never = !member.uid && !member.firstLoginAt && !member.lastLoginAt;
         const needsOrientation = !never && !lhOrientationReady(member);
         const pending = Number(member.syncHealth?.pendingProgressSaves || 0) > 0;
-        return never || needsOrientation || pending;
+        const hasIssue = member.uid && recentIssueByUid.has(member.uid);
+        return { never, needsOrientation, pending, hasIssue };
+      };
+      const priority = active.filter((member) => {
+        const s = signalOf(member);
+        return s.never || s.needsOrientation || s.pending || s.hasIssue;
+      }).filter((member) => {
+        if (lhFilter === 'all') return true;
+        const s = signalOf(member);
+        if (lhFilter === 'never') return s.never;
+        if (lhFilter === 'orientation') return s.needsOrientation;
+        if (lhFilter === 'pending') return s.pending;
+        if (lhFilter === 'issue') return s.hasIssue;
+        return true;
       });
+      const countEl = document.getElementById('lhCount');
+      if (countEl) {
+        countEl.textContent = isFiltered ? active.length + ' of ' + spAllMembers.length : active.length + ' member' + (active.length !== 1 ? 's' : '');
+      }
       const cards = [
         ['Active members', active.length, false],
         ['Seen in the last 24 hours', seenRecently.length, false],
         ['Never signed in', neverSignedIn.length, neverSignedIn.length > 0],
         ['Orientation incomplete', orientationOpen.length, orientationOpen.length > 0],
-        ['Progress saves pending', pendingSaves.length, pendingSaves.length > 0]
+        ['Progress saves pending', pendingSaves.length, pendingSaves.length > 0],
+        ['Recent technical issue', recentIssues.length, recentIssues.length > 0]
       ].map((item) => '<div class="lh-card' + (item[2] ? ' is-warning' : '') + '"><span>' + escapeHtml(item[0]) + '</span><strong>' + item[1] + '</strong></div>').join('');
       const rows = priority.map((member) => {
-        const never = !member.uid && !member.firstLoginAt && !member.lastLoginAt;
-        const pending = Number(member.syncHealth?.pendingProgressSaves || 0);
-        const state = pending ? 'Sync needs attention' : never ? 'Never signed in' : 'Orientation incomplete';
-        const action = pending ? 'Ask the learner to open the exercise and select Retry sync.' : never ? 'Confirm the welcome email and sign-in method.' : 'Send a gentle orientation reminder.';
+        const s = signalOf(member);
+        const issue = member.uid ? recentIssueByUid.get(member.uid) : null;
+        const issueLabels = {javascript_error:'a page error',promise_rejection:'a background error',resource_error:'a file failing to load',network_offline:'a lost connection',video_stall:'a stalled video',video_error:'a video error',sync_error:'a save error'};
+        const state = issue ? 'Recent technical issue' : s.pending ? 'Sync needs attention' : s.never ? 'Never signed in' : 'Orientation incomplete';
+        const action = issue
+          ? 'Reported ' + (issueLabels[issue.eventType] || 'a technical issue') + ' · check Technical reliability, then follow up with the learner.'
+          : s.pending ? 'Ask the learner to open the exercise and select Retry sync.'
+          : s.never ? 'Confirm the welcome email and sign-in method.'
+          : 'Send a gentle orientation reminder.';
         return '<tr><td>' + escapeHtml(member.displayName || member.name || member.email || 'Member') + '<br><small>' + escapeHtml(member.email || '') + '</small></td><td>' + escapeHtml(member.cohort || 'No cohort') + '</td><td><span class="ei-status-chip needs-support">' + escapeHtml(state) + '</span></td><td>' + lhDate(member.lastSeenAt || member.lastLoginAt || member.updatedAt) + '</td><td>' + escapeHtml(action) + '</td></tr>';
-      }).join('') || '<tr><td colspan="5"><span class="sp-status-done">No launch issues need attention.</span></td></tr>';
-      content.innerHTML = '<div class="lh-summary">' + cards + '</div><div class="sp-detail-card"><h4>Learners to follow up with</h4><p class="description">This list combines access, orientation, and pending-save signals into one support queue.</p><div class="student-progress-table-wrap"><table class="student-progress-table"><thead><tr><th>Learner</th><th>Cohort</th><th>Signal</th><th>Last seen</th><th>Suggested action</th></tr></thead><tbody>' + rows + '</tbody></table></div></div>';
+      }).join('') || (active.length === 0 && spAllMembers.length > 0
+        ? '<tr><td colspan="5">No learners match the current filters.</td></tr>'
+        : '<tr><td colspan="5"><span class="sp-status-done">No launch issues need attention.</span></td></tr>');
+      content.innerHTML = '<div class="lh-summary">' + cards + '</div><div class="sp-detail-card"><h4>Learners to follow up with</h4><p class="description">This list combines access, orientation, pending-save, and recent technical-issue signals into one support queue.</p><div class="student-progress-table-wrap"><table class="student-progress-table"><thead><tr><th>Learner</th><th>Cohort</th><th>Signal</th><th>Last seen</th><th>Suggested action</th></tr></thead><tbody>' + rows + '</tbody></table></div></div>';
     }
 
     function renderSiteReliability(members, stabilityEvents) {
@@ -8773,7 +8866,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       content.innerHTML = '<div class="lh-summary">' + cards + '</div><div class="sp-detail-card"><h4>Reported incidents</h4><p class="description">Use repeated reports from the same activity or several learners to identify a broader problem. A single report may reflect one device or connection.</p><details style="margin:12px 0"><summary>How these reports are measured</summary><div class="brief"><p><strong>Measured as:</strong> Browser and player failures during a signed-in visit. Each report records the activity, browser class and time.</p><p><strong>What it tells you:</strong> Which technical problem affected a learner and where it happened.</p><p><strong>Combine with:</strong> Look for the same issue across several learners or repeated reports from one activity before treating it as site-wide.</p></div></details><div class="student-progress-table-wrap"><table class="student-progress-table"><thead><tr><th>Learner</th><th>Issue</th><th>Detail</th><th>Activity</th><th>Reported</th></tr></thead><tbody>' + technicalRows + '</tbody></table></div></div><div class="sp-detail-card"><h4>Recent sync recoveries</h4><p class="description">A recovery appears after locally protected work successfully reaches Firebase.</p><div class="student-progress-table-wrap"><table class="student-progress-table"><thead><tr><th>Learner</th><th>Email</th><th>Recovered</th><th>Status</th></tr></thead><tbody>' + recoveredRows + '</tbody></table></div></div>';
     }
 
-    async function loadLaunchHealth() {
+    async function loadLaunchHealth(forceRefresh) {
       const statuses = [document.getElementById('lhStatus'), document.getElementById('srStatus')].filter(Boolean);
       const buttons = [document.getElementById('lhRefresh'), document.getElementById('srRefresh')].filter(Boolean);
       const fb = window.utlFirebaseAuth;
@@ -8786,12 +8879,16 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       statuses.forEach((status) => { status.textContent = 'Loading operational health…'; });
       try {
         await mbRequireFirebaseAdmin();
-        const members = await fb.getAllMemberWorkspaceProgress();
+        const members = await spFetchAllMembers(fb, forceRefresh);
         const stabilityEvents = fb.getAllStabilityEvents
           ? await fb.getAllStabilityEvents(members.map((member) => member.uid).filter(Boolean)).catch(() => [])
           : [];
         spAllMembers = members;
-        renderLearnerReadiness(members);
+        lhStabilityEvents = stabilityEvents;
+        lhPopulateCohortFilter();
+        const lhControls = document.getElementById('lhControls');
+        if (lhControls) lhControls.hidden = false;
+        lhApplyView();
         renderSiteReliability(members, stabilityEvents);
         statuses.forEach((status) => { status.textContent = members.length + ' member' + (members.length === 1 ? '' : 's') + ' · refreshed ' + new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}); });
       } catch (error) {
@@ -8950,7 +9047,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       if (glossary) glossary.innerHTML = Object.keys(EI_METRICS).map((key) => '<details><summary>' + escapeHtml(EI_METRICS[key][0]) + '</summary>' + eiExplanation(key) + '</details>').join('');
     }
 
-    async function loadEngagementInsights() {
+    async function loadEngagementInsights(forceRefresh) {
       const status = document.getElementById('eiStatus');
       const button = document.getElementById('eiRefresh');
       const fb = window.utlFirebaseAuth;
@@ -8966,10 +9063,10 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       if (status) status.textContent = 'Loading tracked sessions…';
       try {
         await mbRequireFirebaseAdmin();
-        const members = spAllMembers.length ? spAllMembers : await fb.getAllMemberWorkspaceProgress();
+        const members = await spFetchAllMembers(fb, forceRefresh);
         const analytics = await fb.getAllEngagementAnalytics(members.map((member) => member.uid).filter(Boolean));
         eiData = analytics;
-        if (!spAllMembers.length) spAllMembers = members;
+        spAllMembers = members;
         renderEngagementInsights();
         if (status) status.textContent = analytics.sessions.length + ' tracked session' + (analytics.sessions.length === 1 ? '' : 's') + ' · refreshed ' + new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
       } catch (error) {
@@ -9828,7 +9925,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       }));
     }
 
-    async function loadStudentProgress() {
+    async function loadStudentProgress(forceRefresh) {
       const wrap = document.getElementById('studentProgressTable');
       const refreshButtons = [document.getElementById('studentProgressRefresh'), document.getElementById('lbRefresh'), document.getElementById('caRefresh')].filter(Boolean);
       const statusEls = [document.getElementById('studentProgressStatus'), document.getElementById('lbStatus'), document.getElementById('caStatus')].filter(Boolean);
@@ -9855,7 +9952,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         currentUser = await mbRequireFirebaseAdmin();
         wrap.innerHTML = '<p class="mb-msg">Loading student progress...</p>';
         const [members, metadataResults] = await Promise.all([
-          fb.getAllMemberWorkspaceProgress(),
+          spFetchAllMembers(fb, forceRefresh),
           Promise.allSettled([
             fb.getMemberCredentialRegistry(),
             fb.getRewardSettings ? fb.getRewardSettings() : Promise.resolve(null),
@@ -10218,7 +10315,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       }
     });
     document.addEventListener('click', (event) => {
-      if (event.target.closest('#studentProgressRefresh')) loadStudentProgress();
+      if (event.target.closest('#studentProgressRefresh')) loadStudentProgress(true);
 
       // Filter chips
       const chip = event.target.closest('[data-sp-filter]');
@@ -10226,6 +10323,14 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         spFilter = chip.dataset.spFilter;
         document.querySelectorAll('[data-sp-filter]').forEach((c) => c.classList.toggle('active', c === chip));
         spApplyView();
+      }
+
+      // Learner readiness filter chips
+      const lhChip = event.target.closest('[data-lh-filter]');
+      if (lhChip) {
+        lhFilter = lhChip.dataset.lhFilter;
+        document.querySelectorAll('[data-lh-filter]').forEach((c) => c.classList.toggle('active', c === lhChip));
+        lhApplyView();
       }
 
       // Column sort
@@ -10262,7 +10367,12 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       spCohortFilter = event.target.value || 'all';
       spApplyView();
     });
-    document.getElementById('lbRefresh')?.addEventListener('click', loadStudentProgress);
+    document.getElementById('lhSearch')?.addEventListener('input', () => lhApplyView());
+    document.getElementById('lhCohortFilter')?.addEventListener('change', (event) => {
+      lhCohortFilter = event.target.value || 'all';
+      lhApplyView();
+    });
+    document.getElementById('lbRefresh')?.addEventListener('click', () => loadStudentProgress(true));
     document.getElementById('lbCohort')?.addEventListener('change', (event) => {
       lbSelectedCohort = event.target.value;
       renderLeaderboard();
@@ -10272,14 +10382,14 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
     document.querySelector('[data-target="section-leaderboard"]')?.addEventListener('click', () => {
       if (spAllMembers.length) renderLeaderboard();
     });
-    document.getElementById('caRefresh')?.addEventListener('click', loadStudentProgress);
-    document.getElementById('lhRefresh')?.addEventListener('click', loadLaunchHealth);
-    document.getElementById('srRefresh')?.addEventListener('click', loadLaunchHealth);
-    document.querySelector('[data-target="section-launch-health"]')?.addEventListener('click', loadLaunchHealth);
-    document.querySelector('[data-target="section-site-reliability"]')?.addEventListener('click', loadLaunchHealth);
-    document.querySelector('[data-target="section-student-progress"]')?.addEventListener('click', loadStudentProgress);
-    document.querySelector('[data-target="section-engagement-insights"]')?.addEventListener('click', loadEngagementInsights);
-    document.getElementById('eiRefresh')?.addEventListener('click', loadEngagementInsights);
+    document.getElementById('caRefresh')?.addEventListener('click', () => loadStudentProgress(true));
+    document.getElementById('lhRefresh')?.addEventListener('click', () => loadLaunchHealth(true));
+    document.getElementById('srRefresh')?.addEventListener('click', () => loadLaunchHealth(true));
+    document.querySelector('[data-target="section-launch-health"]')?.addEventListener('click', () => loadLaunchHealth());
+    document.querySelector('[data-target="section-site-reliability"]')?.addEventListener('click', () => loadLaunchHealth());
+    document.querySelector('[data-target="section-student-progress"]')?.addEventListener('click', () => loadStudentProgress());
+    document.querySelector('[data-target="section-engagement-insights"]')?.addEventListener('click', () => loadEngagementInsights());
+    document.getElementById('eiRefresh')?.addEventListener('click', () => loadEngagementInsights(true));
     document.getElementById('eiGlossaryToggle')?.addEventListener('click', function () {
       const glossary = document.getElementById('eiGlossary');
       if (!glossary) return;

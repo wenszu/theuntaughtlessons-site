@@ -27,6 +27,6 @@ assert.match(admin, /Never signed in/, 'Learner readiness identifies members who
 assert.match(admin, /Orientation incomplete/, 'Learner readiness identifies incomplete orientation');
 assert.match(admin, /Recent sync recoveries/, 'Technical reliability shows known sync recoveries');
 assert.match(admin, /browser must reconnect before it can report an offline incident/i, 'Technical reliability explains its reporting limitation');
-assert.match(admin, /async function loadLaunchHealth\(\)/, 'Both views use the authenticated member data source');
+assert.match(admin, /async function loadLaunchHealth\(forceRefresh\)/, 'Both views use the authenticated member data source');
 
 console.log('launch health and progress sync recovery contracts passed');
