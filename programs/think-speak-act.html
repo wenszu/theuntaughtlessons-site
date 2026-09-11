@@ -226,6 +226,11 @@
       margin-top: 40px;
     }
 
+    .program-hero .waitlist-cta,
+    .closing-program-cta .waitlist-cta {
+      margin-top: 40px;
+    }
+
     .audience-grid,
     .testimonial-grid {
       display: grid;
@@ -238,6 +243,221 @@
       grid-template-columns: repeat(2, minmax(0, 1fr));
       max-width: 900px;
     }
+
+    .cohort-support-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 32px;
+    }
+
+    .cohort-support-step {
+      padding: 24px 20px;
+      border: 1px solid #d7cdbd;
+      border-radius: 10px;
+      background: var(--program-white);
+    }
+
+    .cohort-support-step span {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px;
+      height: 30px;
+      margin-bottom: 16px;
+      border-radius: 50%;
+      background: var(--program-navy);
+      color: var(--program-white);
+      font-weight: 700;
+    }
+
+    .cohort-support-step h3 {
+      margin: 0 0 8px;
+      color: var(--program-navy);
+      font-size: 16pt;
+    }
+
+    .cohort-support-step p {
+      margin: 0;
+      color: var(--program-charcoal);
+      font-size: 13.5pt;
+      line-height: 1.6;
+    }
+
+    .cohort-result {
+      max-width: 900px;
+      margin: 28px 0 0;
+      padding: 22px 24px;
+      border-left: 4px solid var(--program-gold);
+      border-radius: 0 8px 8px 0;
+      background: #fff8e9;
+      color: var(--program-charcoal);
+      font-size: 15pt;
+      line-height: 1.65;
+    }
+
+    .cohort-result strong { color: var(--program-navy); }
+
+    .enrollment-paths {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 20px;
+      margin-top: 40px;
+    }
+
+    .enrollment-guidance {
+      margin: 18px 0 0;
+      color: #49698c;
+      font-size: 13.5pt;
+      line-height: 1.6;
+    }
+
+    .enrollment-path {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      padding: 30px;
+      border: 1px solid #d7cdbd;
+      border-radius: 10px;
+      background: var(--program-white);
+    }
+
+    .enrollment-path.is-featured {
+      border-color: #d7cdbd;
+      background: #fffdf8;
+      box-shadow: 0 12px 28px rgba(0, 51, 102, .07);
+    }
+
+    .enrollment-path-label {
+      display: inline-block;
+      margin-bottom: 14px;
+      color: #a96100;
+      font-size: 11pt;
+      font-weight: 700;
+    }
+
+    .enrollment-path-label .enrollment-focus {
+      display: inline-block;
+      margin-left: 8px;
+      padding: 5px 9px;
+      border-radius: 999px;
+      background: #fff0ce;
+      color: #8b5200;
+      font-size: 9.5pt;
+      line-height: 1;
+    }
+
+    .enrollment-path h3 {
+      margin: 0 0 10px;
+      color: var(--program-navy);
+      font-family: 'Playfair Display', serif;
+      font-size: 23pt;
+    }
+
+    .enrollment-path p {
+      margin: 0 0 24px;
+      color: var(--program-charcoal);
+      font-size: 14pt;
+      line-height: 1.65;
+    }
+
+    .enrollment-path-detail {
+      display: block;
+      margin-top: auto;
+      margin-bottom: 18px;
+      color: var(--program-navy);
+      font-size: 12pt;
+      font-weight: 700;
+    }
+
+    .cohort-experience-title {
+      margin: 64px 0 0;
+      color: var(--program-navy);
+      font-family: 'Playfair Display', serif;
+      font-size: 29pt;
+    }
+
+    .credential-explainer {
+      margin-top: 20px;
+    }
+
+    .credential-explainer p + p { margin-top: 14px; }
+
+    .credential-preview-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+      margin-top: 24px;
+    }
+
+    .credential-preview {
+      margin: 0;
+      overflow: hidden;
+      border: 1px solid #d7cdbd;
+      border-radius: 10px;
+      background: #fff;
+      box-shadow: 0 10px 24px rgba(0, 51, 102, .07);
+    }
+
+    .credential-preview figcaption {
+      padding: 14px 18px;
+      border-bottom: 1px solid #e3ddd2;
+      color: var(--program-navy);
+      font-size: 12pt;
+      font-weight: 700;
+    }
+
+    .certificate-screenshot {
+      margin: 16px;
+      padding: 24px 20px;
+      border: 2px solid var(--program-navy);
+      outline: 1px solid var(--program-gold);
+      outline-offset: -8px;
+      text-align: center;
+    }
+
+    .certificate-screenshot img {
+      width: 34px;
+      margin: 0 auto 8px;
+    }
+
+    .certificate-screenshot small,
+    .certificate-screenshot span { display: block; }
+
+    .certificate-screenshot small { color: #a96100; font-weight: 700; }
+    .certificate-screenshot strong { display: block; margin: 14px 0 8px; color: var(--program-navy); font: 700 20pt 'Playfair Display', serif; }
+    .certificate-screenshot span { color: #59636d; font-size: 10.5pt; line-height: 1.5; }
+
+    .verification-screenshot { padding: 20px; }
+
+    .verification-status {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 18px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #e3ddd2;
+    }
+
+    .verification-check {
+      display: grid;
+      place-items: center;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: #e3f3eb;
+      color: #237a52;
+      font-size: 18pt;
+      font-weight: 700;
+    }
+
+    .verification-status strong { color: #237a52; }
+    .verification-status small { display: block; margin-top: 3px; color: #667; }
+    .verification-screenshot dl { display: grid; grid-template-columns: auto 1fr; gap: 10px 16px; margin: 0; }
+    .verification-screenshot dt { color: #777; font-size: 9pt; font-weight: 700; }
+    .verification-screenshot dd { margin: 0; color: var(--program-navy); font-size: 10.5pt; }
+    .verification-screenshot .credential-id { font-family: 'Roboto Mono', monospace; }
+    .linkedin-preview { display: inline-block; margin-top: 18px; padding: 8px 12px; border-radius: 5px; background: #0a66c2; color: #fff; font-size: 10.5pt; font-weight: 700; }
 
     .faq-list {
       display: grid;
@@ -845,6 +1065,9 @@
 
       .audience-grid,
       .audience-grid.two-col,
+      .cohort-support-grid,
+      .enrollment-paths,
+      .credential-preview-grid,
       .testimonial-grid {
         grid-template-columns: 1fr;
       }
@@ -968,12 +1191,11 @@
 
     <div id="navMenu" class="nav-menu">
       <a href="/">Home</a>
-      <a href="/about.html">About</a>
       <a class="nav-link-active" href="/programs.html" aria-current="page">Programs</a>
+      <a href="/about.html">About</a>
       <a href="/contact.html">Contact</a>
-      <a href="/tsa-score.html" data-public-find-level>Find your level</a>
-      <a class="nav-button nav-button-secondary" href="/member-login">Member login</a>
-      <button class="nav-button nav-button-primary" type="button" onclick="openLeadModal()">Get in touch</button>
+      <a class="nav-member-link" href="/member-login">Member login</a>
+      <button class="waitlist-cta nav-waitlist-cta" type="button" data-waitlist-cta>Join the Think, Speak, Act waitlist</button>
     </div>
   </nav>
 
@@ -983,8 +1205,8 @@
         <h1 id="hero-title" class="program-hero-mark"><img src="../assets/program-logo-tsa-white.png?v=1" alt="Think, Speak, Act like an Executive"></h1>
         <p class="program-hero-subtitle">Practical lessons about life and work you wish someone had taught you sooner</p>
         <div class="program-hero-divider" aria-hidden="true"></div>
-        <p class="program-hero-copy">Also known as Think. Speak. Act.™, this program delivers the same frameworks taught to McKinsey consultants, media-trained executives and global business leaders. It changes how you think, communicate and show up in the room.</p>
-        <button class="program-cta-button" type="button" onclick="openLeadModal()">Get in touch</button>
+        <p class="program-hero-copy">Also known as Think. Speak. Act.™, this program uses frameworks taught to McKinsey consultants, media-trained executives and global business leaders. You practice organizing a problem, stating the point and responding under pressure.</p>
+        <button class="waitlist-cta" type="button" data-waitlist-cta>Join the Think, Speak, Act waitlist</button>
       </div>
     </section>
 
@@ -1001,12 +1223,12 @@
 
           <article class="audience-card program-reveal">
             <h3>Professionals</h3>
-            <p>You already have the experience and the ideas. The harder part is getting them across to the people who decide. <span class="tsa-mark">Think, speak and act like an executive</span> sharpens your thinking under pressure and gives you the confidence to be heard, and trusted with more.</p>
+            <p>You already have the experience and the ideas. The harder part is explaining them to the people who decide. In <span class="tsa-mark">Think, speak and act like an executive</span>, you practice organizing your thinking and making your case under pressure.</p>
           </article>
 
           <article class="audience-card program-reveal">
             <h3>Organizations</h3>
-            <p>Technical skill does not automatically prepare a team for pressure. People still need to think clearly, say the point and lead without hedging. <span class="tsa-mark">Think, speak and act like an executive</span> gives your team a shared language for structured thinking, sharper communication and steadier leadership.</p>
+            <p>Technical skill alone does not prepare a team for a tense meeting or a difficult decision. People still need to think clearly, state the point and lead without hedging. <span class="tsa-mark">Think, speak and act like an executive</span> gives the team a shared way to structure a problem and discuss what to do.</p>
           </article>
         </div>
       </div>
@@ -1015,7 +1237,7 @@
     <section id="ai-practice" class="program-section navy" aria-labelledby="ai-practice-title">
       <div class="program-container">
         <div class="program-section-label">AI-powered practice</div>
-        <h2 id="ai-practice-title" class="ai-practice-heading">AI is built into every phase, as a thinking partner, not a shortcut.</h2>
+        <h2 id="ai-practice-title" class="ai-practice-heading">Every phase includes practice with AI.</h2>
         <p class="ai-practice-intro">You work through each problem yourself first. Then you use AI to pressure-test your logic, sharpen your wording, and rehearse the moment before it counts.</p>
         <div class="ai-practice-grid">
           <article class="ai-practice-card">
@@ -1038,7 +1260,7 @@
       <div class="program-container">
         <div class="program-section-label">How it works</div>
         <h2 id="how-title" class="program-heading">Three phases built around skills you can use the next day.</h2>
-        <p class="program-body">The exercises use practical situations rather than abstract drills. You organize messy information, prepare a clear message and practice responding when the pressure rises.</p>
+        <p class="program-body">The exercises put you in practical situations: a cluttered update, a blank page or a difficult conversation. You organize the information, prepare the message and respond under pressure.</p>
 
         <div class="phase-journey">
           <nav class="phase-rail" aria-label="Program phases">
@@ -1078,7 +1300,7 @@
                   <p class="phase-time">About 1 hr 55 min total<span>35 min video + 1 hr 20 min exercises</span></p>
                 </div>
                 <div class="phase-summary-main">
-                  <p class="phase-description">Clarity in your head means nothing if you cannot land it with others. Phase 2 teaches you how to structure, sequence and deliver your thinking so it moves people.</p>
+                  <p class="phase-description">A clear thought still needs a clear delivery. In Phase 2, you structure the message, put the points in order and ask the audience to act.</p>
                   <span class="phase-toggle-copy">View curriculum</span>
                 </div>
               </summary>
@@ -1114,7 +1336,7 @@
           </div>
         </div>
 
-        <p class="program-total-time">Total program time: about 7 hours, including roughly 2.5 hours of video and 4.5 hours of exercises. Actual time varies by person, typically landing between 6 and 9 hours.</p>
+        <p class="program-total-time">Total program time: about 7 hours, including roughly 2.5 hours of video and 4.5 hours of exercises. Actual time varies by person and typically takes 6 to 9 hours.</p>
       </div>
     </section>
 
@@ -1139,28 +1361,64 @@
             <span>Feedback on your work</span>
           </article>
         </div>
-        <p class="expect-copy">Enrollment is by application. We curate each cohort to ensure the learning experience is maximized for everyone in it. Finish the program and you receive a certificate of completion, along with a short report on your growth across all three phases. The one requirement to start is a genuine motivation to grow.</p>
+        <p class="expect-copy">Individuals can join the self-led program, while organizations can bring a supported cohort through it together. Finish the program and you receive a downloadable certificate, a public verified credential and a short report on your growth across all three phases.</p>
         <div class="expect-button-wrap">
-          <button class="program-cta-button" type="button" onclick="openLeadModal()">Get in touch</button>
+          <button class="waitlist-cta" type="button" data-waitlist-cta>Join the Think, Speak, Act waitlist</button>
         </div>
       </div>
     </section>
 
     <section id="how-to-join" class="program-section cream" aria-labelledby="join-title">
       <div class="program-container">
-        <div class="program-section-label">For organizations</div>
-        <h2 id="join-title" class="program-heading">Two ways to bring this to your team.</h2>
-        <p class="program-body">Students and individual professionals join the self-paced program directly. Organizations have a choice in how their team experiences it.</p>
-        <div class="audience-grid two-col">
-          <article class="audience-card program-reveal">
-            <h3>Cohort-based learning</h3>
-            <p>A facilitated three-week experience for teams learning together. Participants share a dedicated group chat, stay engaged between lessons and join one live check-in per phase to connect the material to real work.</p>
+        <div class="program-section-label">Two ways to join</div>
+        <h2 id="join-title" class="program-heading">Join with your team or work through the program on your own.</h2>
+        <p class="program-body">Both options include the complete program: the same videos, exercises and feedback. We are initially focused on supported cohorts for organizations, while individual enrollment remains available for people who prefer to begin on their own.</p>
+        <p class="enrollment-guidance">Choose the path that fits you. The button under each option opens the waitlist with that path already selected.</p>
+
+        <div class="enrollment-paths" aria-label="Ways to join the program">
+          <article class="enrollment-path is-featured">
+            <span class="enrollment-path-label">For organizations <span class="enrollment-focus">Initial focus</span></span>
+            <h3>Cohort-based program</h3>
+            <p>Bring a team through the program together. We add a kickoff, weekly check-ins and an active group chat around the self-paced lessons.</p>
+            <span class="enrollment-path-detail">Best for shared momentum and stronger follow-through</span>
+            <button class="waitlist-cta" type="button" data-waitlist-cta data-waitlist-audience="My organization">Join the Think, Speak, Act waitlist</button>
           </article>
-          <article class="audience-card program-reveal">
+          <article class="enrollment-path">
+            <span class="enrollment-path-label">For individuals</span>
             <h3>Self-led program</h3>
-            <p>Best for scaling across the organization once a pilot has proven it out. Each person moves through the same videos, exercises and feedback at their own pace, with no facilitation required.</p>
+            <p>Complete the full program on your own schedule, including every video, exercise and feedback experience.</p>
+            <span class="enrollment-path-detail">Best for independent learners who want flexibility</span>
+            <button class="waitlist-cta" type="button" data-waitlist-cta data-waitlist-audience="Myself">Join the Think, Speak, Act waitlist</button>
           </article>
         </div>
+
+        <h3 class="cohort-experience-title">How the cohort experience supports the self-paced work</h3>
+
+        <div class="cohort-support-grid" aria-label="Three-week cohort support">
+          <article class="cohort-support-step">
+            <span>1</span>
+            <h3>Kickoff</h3>
+            <p>Meet the group, learn how the program works and begin Phase 1 together.</p>
+          </article>
+          <article class="cohort-support-step">
+            <span>2</span>
+            <h3>Weekly check-ins</h3>
+            <p>One live check-in per phase to answer questions, discuss the work and open the next phase.</p>
+          </article>
+          <article class="cohort-support-step">
+            <span>3</span>
+            <h3>Active group chat</h3>
+            <p>Participants can ask questions, share progress and receive regular prompts between sessions.</p>
+          </article>
+          <article class="cohort-support-step">
+            <span>4</span>
+            <h3>Wrap-up</h3>
+            <p>Close the program together, reflect on what changed and identify what to keep practicing.</p>
+          </article>
+        </div>
+
+        <p class="cohort-result"><strong>What we have observed so far:</strong> Our early cohort-based programs have had high participation across the materials and exercises. That early result is why we recommend the cohort format for teams that want stronger follow-through.</p>
+
       </div>
     </section>
 
@@ -1175,15 +1433,39 @@
           </div>
           <div class="faq-item">
             <h3>Does this program teach AI?</h3>
-            <p>Yes. AI is treated as a tool to sharpen thinking, not a shortcut around it. In select exercises you work through the problem on your own first, then use AI to compare approaches, pressure test your thinking, or go further. A few exercises are built specifically around learning to use AI well.</p>
+            <p>Yes. In select exercises, you solve the problem yourself first. Then you use AI to compare approaches, pressure-test your reasoning or rehearse a response. A few exercises focus specifically on using AI well.</p>
           </div>
           <div class="faq-item">
             <h3>Is there a certificate or credential at the end?</h3>
-            <p>Yes. Once you complete the program, you receive a certificate of completion along with a short report on your growth across Think clearly, Speak concisely, and Act confidently.</p>
+            <div class="credential-explainer">
+              <p>Yes. Completing the program gives you two records:</p>
+              <p><strong>Certificate of completion:</strong> A personalized certificate you can download as an image or PDF and keep for your records.</p>
+              <p><strong>Verified credential:</strong> A public, authenticated record with its own credential ID and verification link. You can add it to LinkedIn, include it on your CV or share the link with an employer. Anyone with the link can confirm that the credential is active on The Untaught Lessons website without seeing your email, score or account information.</p>
+              <div class="credential-preview-grid" aria-label="Certificate and verified credential previews">
+                <figure class="credential-preview">
+                  <figcaption>Downloadable certificate</figcaption>
+                  <div class="certificate-screenshot">
+                    <img src="../assets/apple-touch-icon.png" alt="">
+                    <small>The Untaught Lessons</small>
+                    <strong>Your name</strong>
+                    <span>Certificate of Completion</span>
+                    <span>Think, speak and act like an executive™</span>
+                  </div>
+                </figure>
+                <figure class="credential-preview">
+                  <figcaption>Public verification record</figcaption>
+                  <div class="verification-screenshot">
+                    <div class="verification-status"><span class="verification-check">✓</span><div><strong>Verified credential</strong><small>This record is current and authentic.</small></div></div>
+                    <dl><dt>Recipient</dt><dd>Your name</dd><dt>Issued by</dt><dd>The Untaught Lessons</dd><dt>Credential ID</dt><dd class="credential-id">UTL-TSA-••••••••••••</dd></dl>
+                    <span class="linkedin-preview">Add to LinkedIn</span>
+                  </div>
+                </figure>
+              </div>
+            </div>
           </div>
           <div class="faq-item">
             <h3>What if someone misses a live cohort session?</h3>
-            <p>Live sessions are recorded and shared with the cohort, so missing one does not mean missing the content. You are still encouraged to bring questions to the group chat so you stay connected to the discussion.</p>
+            <p>Live sessions are recorded and shared with the cohort. If you miss one, watch the recording and bring your questions to the group chat.</p>
           </div>
         </div>
       </div>
@@ -1199,9 +1481,9 @@
     </section>
 
     <section id="cta" class="closing-program-cta" aria-labelledby="cta-title">
-      <h2 id="cta-title">Ready to close the gap?</h2>
-      <p>Join thousands of professionals, students, and teams who have.</p>
-      <button class="program-cta-button" type="button" onclick="openLeadModal()">Get in touch</button>
+      <h2 id="cta-title">What do you want to handle better at work?</h2>
+      <p>Tell us where you get stuck. We will talk through whether the program fits.</p>
+      <button class="waitlist-cta" type="button" data-waitlist-cta>Join the Think, Speak, Act waitlist</button>
     </section>
   </main>
 
@@ -1223,39 +1505,7 @@
     </div>
   </footer>
 
-  <div class="lead-modal" id="leadModal" aria-hidden="true">
-    <div class="lead-modal-overlay" data-close-lead-modal></div>
-    <div class="lead-modal-card" role="dialog" aria-modal="true" aria-labelledby="leadModalTitle">
-      <button class="lead-modal-close" type="button" aria-label="Close modal" data-close-lead-modal>&times;</button>
-      <div class="lead-modal-content">
-        <h2 id="leadModalTitle">Say hello.</h2>
-        <p>Tell us a little about yourself and we will be in touch.</p>
-        <form class="lead-form" id="leadForm">
-          <label for="leadName">Name</label>
-          <input id="leadName" name="name" type="text" placeholder="Your full name" required>
-
-          <label for="leadEmail">Email</label>
-          <input id="leadEmail" name="email" type="email" placeholder="Your email address" required>
-
-          <label for="leadRole">Role</label>
-          <select id="leadRole" name="role" required>
-            <option value="" disabled selected>Select your role</option>
-            <option value="Student">Student</option>
-            <option value="Professional">Professional</option>
-            <option value="Manager">Manager</option>
-            <option value="Organization">Organization (buying for a team)</option>
-            <option value="Other">Other</option>
-          </select>
-
-          <label for="leadMessage">What brings you here?</label>
-          <textarea id="leadMessage" name="message" rows="3" placeholder="Tell us what you are looking for (optional)"></textarea>
-
-          <button class="lead-submit" type="submit">Send</button>
-          <p class="lead-error" id="leadError" role="alert">Something went wrong. Please try again or email us directly.</p>
-        </form>
-      </div>
-    </div>
-  </div>
+  <div id="leadModal" hidden><div class="lead-modal-content"></div></div>
 
   <script>
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzJE--FL2kB_XDNZRnszCtlyLRPvaLAHGuF5TAOdXJk40atbvf5Y6ELuSK2B7CSLaMN/exec';
@@ -1461,6 +1711,7 @@
 
     loadProgramTestimonials();
   </script>
+  <script src="../assets/public-waitlist.js?v=1"></script>
   <script type="module" src="../assets/public-site-settings.js?v=1"></script>
   <script type="module" src="../assets/feedback-widget.js?v=6"></script>
 </body>

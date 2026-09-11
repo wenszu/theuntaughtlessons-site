@@ -229,12 +229,11 @@
 
     <div id="navMenu" class="nav-menu">
       <a href="/">Home</a>
-      <a href="/about.html">About</a>
       <a class="nav-link-active" href="/programs.html" aria-current="page">Programs</a>
+      <a href="/about.html">About</a>
       <a href="/contact.html">Contact</a>
-      <a href="/tsa-score.html" data-public-find-level>Find your level</a>
-      <a class="nav-button nav-button-secondary" href="/member-login">Member login</a>
-      <button class="nav-button nav-button-primary" type="button" onclick="openLeadModal()">Get in touch</button>
+      <a class="nav-member-link" href="/member-login">Member login</a>
+      <button class="waitlist-cta nav-waitlist-cta" type="button" data-waitlist-cta>Join the waitlist</button>
     </div>
   </nav>
 
@@ -243,7 +242,7 @@
       <div class="catalog-hero-inner">
         <span class="catalog-hero-label">Programs</span>
         <h1 id="catalog-hero-title">Practical skills, taught the way school never did.</h1>
-        <p>Browse our programs and find the one built for where you are right now.</p>
+        <p>See what each program asks you to practice and choose the one that matches the work in front of you.</p>
       </div>
     </section>
 
@@ -261,6 +260,9 @@
             <h2>Understand, build and close<br>like a rainmaker</h2>
             <p>A new program is on the way, built for sales teams who want to understand their buyer, build a case that holds up and close with confidence. More coming soon.</p>
           </article>
+        </div>
+        <div class="catalog-waitlist">
+          <button class="waitlist-cta" type="button" data-waitlist-cta>Join the waitlist</button>
         </div>
       </div>
     </section>
@@ -284,39 +286,7 @@
     </div>
   </footer>
 
-  <div class="lead-modal" id="leadModal" aria-hidden="true">
-    <div class="lead-modal-overlay" data-close-lead-modal></div>
-    <div class="lead-modal-card" role="dialog" aria-modal="true" aria-labelledby="leadModalTitle">
-      <button class="lead-modal-close" type="button" aria-label="Close modal" data-close-lead-modal>&times;</button>
-      <div class="lead-modal-content">
-        <h2 id="leadModalTitle">Say hello.</h2>
-        <p>Tell us a little about yourself and we will be in touch.</p>
-        <form class="lead-form" id="leadForm">
-          <label for="leadName">Name</label>
-          <input id="leadName" name="name" type="text" placeholder="Your full name" required>
-
-          <label for="leadEmail">Email</label>
-          <input id="leadEmail" name="email" type="email" placeholder="Your email address" required>
-
-          <label for="leadRole">Role</label>
-          <select id="leadRole" name="role" required>
-            <option value="" disabled selected>Select your role</option>
-            <option value="Student">Student</option>
-            <option value="Professional">Professional</option>
-            <option value="Manager">Manager</option>
-            <option value="Organization">Organization (buying for a team)</option>
-            <option value="Other">Other</option>
-          </select>
-
-          <label for="leadMessage">What brings you here?</label>
-          <textarea id="leadMessage" name="message" rows="3" placeholder="Tell us what you are looking for (optional)"></textarea>
-
-          <button class="lead-submit" type="submit">Send</button>
-          <p class="lead-error" id="leadError" role="alert">Something went wrong. Please try again or email us directly.</p>
-        </form>
-      </div>
-    </div>
-  </div>
+  <div id="leadModal" hidden><div class="lead-modal-content"></div></div>
 
   <script>
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzJE--FL2kB_XDNZRnszCtlyLRPvaLAHGuF5TAOdXJk40atbvf5Y6ELuSK2B7CSLaMN/exec';
@@ -406,6 +376,7 @@
       if (event.key === 'Escape' && leadModal.classList.contains('is-open')) closeLeadModal();
     });
   </script>
+  <script src="assets/public-waitlist.js?v=1"></script>
   <script type="module" src="assets/public-site-settings.js?v=1"></script>
   <script type="module" src="assets/feedback-widget.js?v=6"></script>
 </body>

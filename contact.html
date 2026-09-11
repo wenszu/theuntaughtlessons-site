@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Reach out to The Untaught Lessons. Whether you are a student, a professional looking to level up, or an organization wanting to bring the program to your team, we would love to connect." />
+  <meta name="description" content="Contact The Untaught Lessons about media, speaking, partnerships, and general inquiries." />
   <title>Contact - The Untaught Lessons</title>
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-bluebg-whitedoor-thicker-32.png?v=6">
   <link rel="shortcut icon" type="image/png" href="/assets/favicon-bluebg-whitedoor-thicker-32.png?v=6">
@@ -27,12 +27,11 @@
 
     <div id="navMenu" class="nav-menu">
       <a href="/">Home</a>
-      <a href="/about.html">About</a>
       <a href="/programs.html">Programs</a>
+      <a href="/about.html">About</a>
       <a class="nav-link-active" href="/contact.html" aria-current="page">Contact</a>
-      <a href="/tsa-score.html" data-public-find-level>Find your level</a>
-      <a class="nav-button nav-button-secondary" href="/member-login">Member login</a>
-      <button class="nav-button nav-button-primary" type="button" onclick="openLeadModal()">Get in touch</button>
+      <a class="nav-member-link" href="/member-login">Member login</a>
+      <button class="waitlist-cta nav-waitlist-cta" type="button" data-waitlist-cta>Join the waitlist</button>
     </div>
   </nav>
 
@@ -40,10 +39,10 @@
     <section id="invitation" class="contact-section contact-invitation" aria-labelledby="invitation-title">
       <div class="contact-container">
         <div class="section-label">
-          <span class="section-label-text">Get in touch</span>
+          <span class="section-label-text">Contact us</span>
         </div>
         <h1 class="section-headline contact-reveal" id="invitation-title">We would love to hear from you.</h1>
-        <p class="contact-intro contact-reveal">Whether you are a student figuring out your next steps, a professional looking to level up, or an organization wanting to bring <span>Think, speak and act like an executive™</span> to your team, we would love to connect.</p>
+        <p class="contact-intro contact-reveal">For media, speaking, partnerships and general questions, send us a note here. Looking for training for yourself or a team? <button class="contact-waitlist-link" type="button" data-waitlist-cta>Join the waitlist</button> so we can learn what you need.</p>
       </div>
     </section>
 
@@ -58,22 +57,11 @@
           <label for="contactEmail">Email</label>
           <input id="contactEmail" name="email" type="email" placeholder="Your email address" required>
 
-          <label for="contactRole">Your role</label>
-          <select id="contactRole" name="role" required>
-            <option value="" disabled selected>Select your role</option>
-            <option value="Student">Student</option>
-            <option value="Professional">Professional</option>
-            <option value="Manager">Manager</option>
-            <option value="Organization">Organization (buying for a team)</option>
-            <option value="Other">Other</option>
-          </select>
-
           <label for="contactHelp">How can we help you?</label>
           <select id="contactHelp" name="help" required>
             <option value="" disabled selected>Select an option</option>
-            <option value="I am interested in joining the program">I am interested in joining the program</option>
-            <option value="I want to bring Think, speak and act like an executive to my school or university">I want to bring Think, speak and act like an executive to my school or university</option>
-            <option value="I want to bring Think, speak and act like an executive to my company or organization">I want to bring Think, speak and act like an executive to my company or organization</option>
+            <option value="Media inquiry">Media inquiry</option>
+            <option value="Partnership inquiry">Partnership inquiry</option>
             <option value="I would like Wen-Szu to speak at my event">I would like Wen-Szu to speak at my event</option>
             <option value="Something else">Something else</option>
           </select>
@@ -81,7 +69,7 @@
           <label for="contactMessage">What brings you here?</label>
           <textarea id="contactMessage" name="message" rows="5" placeholder="Tell us what you are looking for" required></textarea>
 
-          <button class="contact-submit" type="submit">Send</button>
+          <button class="contact-submit" type="submit">Send message</button>
           <p class="contact-error" role="alert">Something went wrong. Please try again or email us directly at wenszu.lin@gmail.com</p>
         </form>
 
@@ -111,9 +99,9 @@
 
     <section id="cta" class="closing-cta contact-closing-cta" aria-labelledby="cta-title">
       <div class="home-container">
-        <h2 id="cta-title">Ready to close the gap?</h2>
-        <p>Join thousands of professionals and students who have.</p>
-        <button class="cta-button" type="button" onclick="openLeadModal()">Get in touch</button>
+        <h2 id="cta-title">Interested in joining a program?</h2>
+        <p>Tell us what you want to work on. We will talk through whether the program fits.</p>
+        <button class="waitlist-cta" type="button" data-waitlist-cta>Join the waitlist</button>
       </div>
     </section>
   </main>
@@ -136,39 +124,7 @@
     </div>
   </footer>
 
-  <div class="lead-modal" id="leadModal" aria-hidden="true">
-    <div class="lead-modal-overlay" data-close-lead-modal></div>
-    <div class="lead-modal-card" role="dialog" aria-modal="true" aria-labelledby="leadModalTitle">
-      <button class="lead-modal-close" type="button" aria-label="Close modal" data-close-lead-modal>&times;</button>
-      <div class="lead-modal-content">
-        <h2 id="leadModalTitle">Say hello.</h2>
-        <p>Tell us a little about yourself and we will be in touch.</p>
-        <form class="lead-form" id="leadForm">
-          <label for="leadName">Name</label>
-          <input id="leadName" name="name" type="text" placeholder="Your full name" required>
-
-          <label for="leadEmail">Email</label>
-          <input id="leadEmail" name="email" type="email" placeholder="Your email address" required>
-
-          <label for="leadRole">Role</label>
-          <select id="leadRole" name="role" required>
-            <option value="" disabled selected>Select your role</option>
-            <option value="Student">Student</option>
-            <option value="Professional">Professional</option>
-            <option value="Manager">Manager</option>
-            <option value="Organization">Organization (buying for a team)</option>
-            <option value="Other">Other</option>
-          </select>
-
-          <label for="leadMessage">What brings you here?</label>
-          <textarea id="leadMessage" name="message" rows="3" placeholder="Tell us what you are looking for (optional)"></textarea>
-
-          <button class="lead-submit" type="submit">Send</button>
-          <p class="lead-error" role="alert">Something went wrong. Please try again or email us directly.</p>
-        </form>
-      </div>
-    </div>
-  </div>
+  <div id="leadModal" hidden><div class="lead-modal-content"></div></div>
 
   <script>
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzJE--FL2kB_XDNZRnszCtlyLRPvaLAHGuF5TAOdXJk40atbvf5Y6ELuSK2B7CSLaMN/exec';
@@ -244,18 +200,21 @@
       const payload = {
         name: form.name.value,
         email: form.email.value,
-        role: form.role.value,
+        role: 'Contact inquiry',
         message: form.message.value || '',
         page: window.location.href,
         source: 'contact-form'
       };
 
       try {
-        await fetch(SCRIPT_URL, {
+        const response = await fetch(SCRIPT_URL, {
           method: 'POST',
           body: JSON.stringify(payload),
-          headers: { 'Content-Type': 'application/json' }
+          headers: { 'Content-Type': 'text/plain;charset=UTF-8' }
         });
+        if (!response.ok) throw new Error(`Contact request failed: ${response.status}`);
+        const responseText = await response.text();
+        if (/\b(?:error|exception|typeerror)\b/i.test(responseText)) throw new Error('The contact service returned an error.');
         rememberContact(payload);
         showSuccessState();
       } catch (err) {
@@ -287,7 +246,7 @@
       const payload = {
         name: form.name.value,
         email: form.email.value,
-        role: form.role.value,
+        role: 'Contact inquiry',
         help: form.help.value,
         message: form.message.value,
         page: window.location.href,
@@ -295,11 +254,14 @@
       };
 
       try {
-        await fetch(SCRIPT_URL, {
+        const response = await fetch(SCRIPT_URL, {
           method: 'POST',
           body: JSON.stringify(payload),
-          headers: { 'Content-Type': 'application/json' }
+          headers: { 'Content-Type': 'text/plain;charset=UTF-8' }
         });
+        if (!response.ok) throw new Error(`Contact request failed: ${response.status}`);
+        const responseText = await response.text();
+        if (/\b(?:error|exception|typeerror)\b/i.test(responseText)) throw new Error('The contact service returned an error.');
         rememberContact(payload);
         showContactSuccess();
       } catch (err) {
@@ -333,6 +295,7 @@
       contactRevealObserver.observe(element);
     });
   </script>
+  <script src="assets/public-waitlist.js?v=1"></script>
   <script type="module" src="assets/public-site-settings.js?v=1"></script>
   <script type="module" src="assets/feedback-widget.js?v=6"></script>
 </body>

@@ -27,12 +27,11 @@
 
     <div id="navMenu" class="nav-menu">
       <a class="nav-link-active" href="#hero" aria-current="page">Home</a>
-      <a href="/about.html">About</a>
       <a href="/programs.html">Programs</a>
+      <a href="/about.html">About</a>
       <a href="/contact.html">Contact</a>
-      <a href="/tsa-score.html" data-public-find-level>Find your level</a>
-      <a class="nav-button nav-button-secondary" href="/member-login/">Member login</a>
-      <button class="nav-button nav-button-primary" type="button" onclick="openLeadModal()">Get in touch</button>
+      <a class="nav-member-link" href="/member-login/">Member login</a>
+      <button class="waitlist-cta nav-waitlist-cta" type="button" data-waitlist-cta>Join the waitlist</button>
     </div>
   </nav>
 
@@ -43,7 +42,7 @@
         <h1 id="hero-title">Practical lessons about life and work you wish someone had taught you sooner.</h1>
         <div class="hero-divider" aria-hidden="true"></div>
         <div class="hero-button-row">
-          <a class="hero-button hero-button-gold" href="/programs.html">Explore Programs</a>
+          <button class="waitlist-cta" type="button" data-waitlist-cta>Join the waitlist</button>
         </div>
         <p class="hero-member-link">Already a member? <a href="/member-login/">Log in &rarr;</a></p>
         <p class="credibility-strip">
@@ -71,7 +70,7 @@
         </div>
         <div class="question-list">
           <p class="reveal-question">Why do your ideas sound clear in your head... but messy out loud?</p>
-          <p class="reveal-question">If you had 30 seconds to explain your thinking, can you actually land your main point?</p>
+          <p class="reveal-question">If you had 30 seconds to explain your thinking, would people understand your main point?</p>
           <p class="reveal-question">Why do people with less insight get heard more than you?</p>
         </div>
         <p class="questions-close">
@@ -96,36 +95,28 @@
             <div class="pillar-icon" aria-hidden="true">✧</div>
             <h2>Think clearly</h2>
             <p class="pillar-summary">Structure your thoughts before you open your mouth.</p>
-            <p class="pillar-detail">Learn the structured thinking frameworks used by McKinsey consultants and top decision makers. Break down complex problems, sequence your logic and communicate a clear point of view under pressure.</p>
+            <p class="pillar-detail">Use the structured thinking frameworks taught to McKinsey consultants and senior decision makers. Break a complex problem into parts, put the logic in order and state your point of view under pressure.</p>
           </article>
 
           <article class="pillar-card motion-reveal">
             <div class="pillar-icon" aria-hidden="true">◇</div>
             <h2>Speak concisely</h2>
             <p class="pillar-summary">Say more with less and make it stick.</p>
-            <p class="pillar-detail">Learn persuasion, structured storytelling and the Pyramid Principle. Practice writing and speaking so the point is clear, the decision is easier and the message is remembered.</p>
+            <p class="pillar-detail">Use persuasion, structured storytelling and the Pyramid Principle. Practice writing and speaking until a reader can find the point and decide what to do next.</p>
           </article>
 
           <article class="pillar-card motion-reveal">
             <div class="pillar-icon" aria-hidden="true">⌁</div>
             <h2>Act confidently</h2>
             <p class="pillar-summary">Executive presence can be learned.</p>
-            <p class="pillar-detail">Develop the body language and composure strong leaders use. Read the room, manage your energy, keep your voice steady and hold your ground when the pressure rises.</p>
+            <p class="pillar-detail">Practice the body language and composure strong leaders use. Read the room, keep your voice steady and hold your ground when the pressure rises.</p>
           </article>
         </div>
         <div class="pillars-cta-row">
-          <a class="pillars-cta-primary" href="/programs/think-speak-act.html">Explore this program &rarr;</a>
+          <button class="waitlist-cta" type="button" data-waitlist-cta>Join the waitlist</button>
+          <a class="pillars-cta-primary" href="/programs/think-speak-act.html">Read about the program &rarr;</a>
           <a class="pillars-cta-secondary" href="/programs.html">View all programs</a>
         </div>
-      </div>
-    </section>
-
-    <section id="tsa-teaser" class="tsa-home-teaser" aria-labelledby="tsa-teaser-title" data-public-find-level>
-      <div class="home-container">
-        <h2 id="tsa-teaser-title">Where do you stand today?</h2>
-        <p>Take a free exercise to see how clearly you organize messy information and where you stand today.</p>
-        <a class="tsa-home-button" href="/tsa-score.html">Find your level</a>
-        <span class="tsa-home-meta">Free · No account needed · Instant results</span>
       </div>
     </section>
 
@@ -174,9 +165,9 @@
 
     <section id="cta" class="closing-cta" aria-labelledby="cta-title">
       <div class="home-container">
-        <h2 id="cta-title">Ready to learn what no one taught you?</h2>
-        <p>Join thousands of professionals, students, and teams who have.</p>
-        <button class="cta-button" type="button" onclick="openLeadModal()">Get in touch</button>
+        <h2 id="cta-title">Want to think more clearly under pressure?</h2>
+        <p>Tell us what you want to work on. We will talk through whether the program fits.</p>
+        <button class="waitlist-cta" type="button" data-waitlist-cta>Join the waitlist</button>
       </div>
     </section>
   </main>
@@ -199,39 +190,7 @@
     </div>
   </footer>
 
-  <div class="lead-modal" id="leadModal" aria-hidden="true">
-    <div class="lead-modal-overlay" data-close-lead-modal></div>
-    <div class="lead-modal-card" role="dialog" aria-modal="true" aria-labelledby="leadModalTitle">
-      <button class="lead-modal-close" type="button" aria-label="Close modal" data-close-lead-modal>&times;</button>
-      <div class="lead-modal-content">
-        <h2 id="leadModalTitle">Say hello.</h2>
-        <p>Tell us a little about yourself and we will be in touch.</p>
-        <form class="lead-form" id="leadForm">
-          <label for="leadName">Name</label>
-          <input id="leadName" name="name" type="text" placeholder="Your full name" required>
-
-          <label for="leadEmail">Email</label>
-          <input id="leadEmail" name="email" type="email" placeholder="Your email address" required>
-
-          <label for="leadRole">Role</label>
-          <select id="leadRole" name="role" required>
-            <option value="" disabled selected>Select your role</option>
-            <option value="Student">Student</option>
-            <option value="Professional">Professional</option>
-            <option value="Manager">Manager</option>
-            <option value="Organization">Organization (buying for a team)</option>
-            <option value="Other">Other</option>
-          </select>
-
-          <label for="leadMessage">What brings you here?</label>
-          <textarea id="leadMessage" name="message" rows="3" placeholder="Tell us what you are looking for (optional)"></textarea>
-
-          <button class="lead-submit" type="submit">Send</button>
-          <p class="lead-error" id="leadError" role="alert">Something went wrong. Please try again or email us directly.</p>
-        </form>
-      </div>
-    </div>
-  </div>
+  <div id="leadModal" hidden><div class="lead-modal-content"></div></div>
 
   <script>
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzJE--FL2kB_XDNZRnszCtlyLRPvaLAHGuF5TAOdXJk40atbvf5Y6ELuSK2B7CSLaMN/exec';
@@ -531,6 +490,7 @@
       statsObserver.observe(statsSection);
     }
   </script>
+  <script src="assets/public-waitlist.js?v=1"></script>
   <script type="module" src="assets/public-site-settings.js?v=1"></script>
   <script type="module" src="assets/feedback-widget.js?v=6"></script>
 </body>
