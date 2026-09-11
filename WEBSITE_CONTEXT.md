@@ -1,6 +1,6 @@
 # The Untaught Lessons Website Context
 
-Last updated: 2026-08-03
+Last updated: 2026-09-11
 
 Single source of truth for agents working on this repo. Read before making changes, update after structural changes. Detailed historical entries and full page/app maps are in `archive/WEBSITE_CONTEXT_ARCHIVE.md`.
 
@@ -245,6 +245,23 @@ Decisions are made in Claude (claude.ai). JSON updates are handled in Codex. Doc
 - Logo clicks in app headers link back to the homepage.
 
 ## Change Log
+
+### 2026-09-11 — Public form delivery fix and MECE operational health monitoring
+
+- Pushed commit `dcb0d51` (`Improve form delivery and operational health monitoring`) to `origin/main`. The working tree was clean immediately after the push. The documentation update in this entry was made afterward as a Claude handoff.
+- Fixed misleading failure states on the public Contact and Join the waitlist forms. The Apps Script endpoint had already written test submissions to the `Contacts` sheet, but the browser could still show an error because a static cross-origin page cannot reliably inspect the Apps Script redirect/response. Both forms now queue the JSON payload with `navigator.sendBeacon()` using a `text/plain` `Blob`, then fall back to a `no-cors`, `keepalive` fetch. Contact preference storage is isolated in its own `try/catch`, so disabled session storage cannot turn a queued submission into a visible error.
+- Both public forms explicitly send `tab: 'Contacts'`. This is required because the connected spreadsheet has a `Contacts` tab and no `Leads` tab, while the Apps Script's historical default is `Leads`. The spreadsheet is `[Website] UTL leads and assessments v1`, ID `10iQByFqVCffHanZbbHLnYj7Csbet4fgOCd2FWDzEqkE`. The `Contacts` columns are Timestamp, Name, Email, Role, What brings you here?, Page, and Source.
+- Static-site limitation: `sendBeacon()` confirms that the browser accepted the request for delivery; it cannot prove that Apps Script finished processing it. Do not restore response-body inspection on these cross-origin submissions. For end-to-end confirmation, submit once and check the `Contacts` sheet and notification inbox. Avoid repeated tests because each test creates a real row and may send a notification.
+- Bumped `assets/public-waitlist.js` references to `?v=3` on `index.html`, `about.html`, `programs.html`, `contact.html`, and `programs/think-speak-act.html` so visitors receive the corrected submission code.
+- Split the former mixed `Launch Health` screen into two mutually exclusive operational views:
+  - `Student Progress > Learner readiness` is the people/support view. It covers active members, activity in the last 24 hours, learners who never signed in, incomplete orientation, pending progress saves, and one consolidated follow-up queue.
+  - `Preview & Health > Technical reliability` is the incident view. It covers browser/page failures, failed resources, Vimeo stalls and player errors, connection/save incidents, affected learners, and successful sync recoveries. It explains reporting coverage and does not collect learner answers.
+  - `Preview & Health > Site health check` remains the separate configuration/structure audit for expected accordions, cards, app links, completion keys, and embed keys. Keep this separate from runtime incident monitoring.
+- Added `assets/stability-monitor.js`, loaded fail-safely through `assets/engagement-analytics.js`. Monitoring is bounded to 20 reports per session, deduplicates the same fingerprint for five minutes, strips email addresses and links from messages, omits stack traces and learner answers, and must never interrupt the learner experience.
+- Added Firebase persistence/admin reading for `users/{uid}/stability_events/{eventId}` in `assets/firebase.js`. `firestore.rules` permits a signed-in learner to create a tightly validated event under only their own UID, permits admins to read events, and disallows client update/delete. `member-login/content-config.js` dispatches Vimeo stall and error reports into the shared monitor.
+- Deployment caveat: the Git push publishes static code through the normal Cloudflare Pages flow, but it does not deploy Firestore rules. Before relying on production Technical reliability data, deploy the updated `firestore.rules` through the project's normal Firebase rules deployment process. The monitor is fail-safe if rules have not yet been deployed, so learner pages remain usable.
+- Files in commit `dcb0d51`: `about.html`, `admin/index.html`, `assets/engagement-analytics.js`, `assets/firebase.js`, `assets/public-waitlist.js`, `assets/stability-monitor.js`, `contact.html`, `firestore.rules`, `index.html`, `member-login/content-config.js`, `programs.html`, `programs/think-speak-act.html`, `tests/launch-health-and-sync-recovery.test.js`, `tests/public-waitlist.test.js`, and `tests/stability-monitoring.test.js`.
+- Verification completed before push: all 60 repository tests passed, contact inline JavaScript parsed, `assets/public-waitlist.js` passed `node --check`, `git diff --check` passed, Firestore rules compiled in the emulator earlier in the implementation, and the local server on port 8061 served the new Contact, Learner readiness, and Technical reliability code.
 
 ### 2026-08-11 — Retired v1 TSA assessment; the unified diagnostic is now the sole assessment
 
