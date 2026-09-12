@@ -3,7 +3,7 @@
   const REWARD_SETTINGS_KEY = "utl_reward_settings";
   const LEGACY_MP_KEY = "utl_demo_mp_total";
   const FIREBASE_URL = document.currentScript && document.currentScript.src
-    ? new URL("firebase.js?v=20260911-2340", document.currentScript.src).href
+    ? new URL("firebase.js?v=20260912-0117", document.currentScript.src).href
     : "";
   let syncTimer = null;
   const DEFAULT_LEVELS = [
@@ -191,7 +191,7 @@
       });
     } else if (!document.querySelector("script[data-utl-reward-ui-loader]")) {
       const script = document.createElement("script");
-      script.src = "../../assets/reward-ui.js?v=20260911-2340";
+      script.src = "../../assets/reward-ui.js?v=20260912-0117";
       script.defer = true;
       script.dataset.utlRewardUiLoader = "true";
       script.addEventListener("load", () => showRewardMoment(detail, previousState, nextState), { once: true });

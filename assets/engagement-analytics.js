@@ -1,5 +1,5 @@
 const SCHEMA_VERSION = 1;
-import("./stability-monitor.js?v=20260911-2340").catch(() => {});
+import("./stability-monitor.js?v=20260912-0117").catch(() => {});
 const IDLE_AFTER_MS = 60000;
 const FLUSH_EVERY_MS = 60000;
 const TICK_MS = 5000;
@@ -165,7 +165,7 @@ function createTracker(options) {
     if (state.flushing || (!state.dirty && !force) || localStorage.getItem(PREVIEW_KEY) === "true") return;
     state.flushing = true;
     try {
-      const fb = await import("./firebase.js?v=20260911-2340");
+      const fb = await import("./firebase.js?v=20260912-0117");
       await fb.saveEngagementAnalytics(payload());
       state.dirty = false;
     } catch (error) {
