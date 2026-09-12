@@ -2716,6 +2716,7 @@
       <span class="nav-group-label" data-admin-nav-group="rewards">Rewards</span>
       <button class="admin-nav-item" data-admin-tab-scope="rewards" data-target="section-reward-levels">Levels</button>
       <button class="admin-nav-item" data-admin-tab-scope="rewards" data-target="section-reward-overview">Rules &amp; MP</button>
+      <button class="admin-nav-item" data-admin-tab-scope="rewards" data-target="section-reward-rules">MP rules</button>
       <button class="admin-nav-item" data-admin-tab-scope="rewards" data-target="section-reward-simulator">Award preview</button>
 
       <span class="nav-group-label" data-admin-nav-group="member-management">Access</span>
@@ -2734,7 +2735,6 @@
 
       <span class="nav-group-label" data-admin-nav-group="admin-tools">Preview</span>
       <button class="admin-nav-item" data-admin-tab-scope="admin-tools" data-target="section-visibility">Member preview settings</button>
-      <button class="admin-nav-item" data-admin-tab-scope="admin-tools" data-target="section-admin-preview">Unlock phases</button>
       <button class="admin-nav-item" data-admin-tab-scope="admin-tools" data-target="section-links">Quick links</button>
       <span class="nav-group-label" data-admin-nav-group="admin-tools">Health</span>
       <button class="admin-nav-item" data-admin-tab-scope="admin-tools" data-target="section-site-reliability">Technical reliability</button>
@@ -2748,7 +2748,7 @@
         <span class="section-label">Preview &amp; Health</span>
         <h2>Technical reliability</h2>
         <div class="section-divider"></div>
-        <p class="description"><strong>Use this when monitoring the live learning experience:</strong> review errors reported by signed-in browsers, Vimeo playback problems, interrupted saves, and successful sync recoveries. This page shows technical incidents. Learner onboarding and participation are kept in Learner readiness under Student Progress.</p>
+        <p class="description"><strong>Use this to watch for live problems, in real time:</strong> review errors reported by signed-in browsers, Vimeo playback problems, interrupted saves, and successful sync recoveries — all pulled from what actually happened in a learner's browser in the last 24 hours. This page shows technical incidents, not configuration. Learner onboarding and participation are kept in Learner readiness under Student Progress; whether the site's own content and settings are correctly wired up is checked separately in Site health check.</p>
         <div class="student-progress-actions">
           <button class="small-button" type="button" id="srRefresh">Refresh reliability</button>
           <span class="student-progress-status" id="srStatus" aria-live="polite"></span>
@@ -2761,7 +2761,7 @@
         <span class="section-label">Preview &amp; Health</span>
         <h2>Site health check</h2>
         <div class="section-divider"></div>
-        <p class="description">Checks whether the member hub still matches the admin panel's expected accordions, exercise cards, app links, completion keys, and embed keys.</p>
+        <p class="description"><strong>Use this to confirm the site itself is set up correctly:</strong> checks whether the member hub still matches the admin panel's expected accordions, exercise cards, app links, completion keys, and embed keys. This is a check of content and configuration, not of live learner activity — it runs automatically on page load and does not require any learner to have signed in. For real errors reported by actual learner sessions, see Technical reliability.</p>
         <div class="sync-actions">
           <button class="small-button" type="button" id="runSyncCheck">Run check</button>
           <button class="small-button secondary-button" type="button" id="rerunSyncCheck" hidden>Rerun check</button>
@@ -2982,14 +2982,6 @@
           <span id="gd-feedback-status" style="font-size:12px;color:#555;display:block;margin-top:6px;min-height:16px;"></span>
           <p class="description" style="margin-top:6px;">Controls whether the floating "Got feedback?" button appears for new members by default.</p>
         </div>
-      </section>
-
-      <section class="admin-section" id="section-admin-preview" data-admin-tab-panel="admin-tools">
-        <span class="section-label">Preview &amp; Health</span>
-        <h2>Unlock phases</h2>
-        <div class="section-divider"></div>
-        <p class="description">Controls your own view of the member area. Turning this on lets you browse Phase 2 and Phase 3 without completing Phase 1 first. Members are not affected — they still follow the normal unlock sequence.</p>
-        <div class="visibility-checklist" id="adminPreviewChecklist"></div>
       </section>
 
       <section class="admin-section" id="section-student-progress" data-admin-tab-panel="student-progress">
@@ -3587,7 +3579,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         <span class="section-label">Preview &amp; Health</span>
         <h2>Quick links</h2>
         <div class="section-divider"></div>
-        <p class="description">Open these links in a new tab to verify your changes.</p>
+        <p class="description">A bookmark directory, not a check — open any of these member, assessment, or exercise pages in a new tab to verify your changes by hand.</p>
         <div id="quickLinks"></div>
       </section>
 
@@ -4291,6 +4283,19 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
           }
         ]
       },
+      {
+        title: 'Admin preview',
+        items: [
+          {
+            key: 'utl_admin_preview_bypass',
+            checkedValue: 'on',
+            uncheckedValue: 'off',
+            fallback: 'off',
+            label: 'Unlock all phases for admin preview',
+            description: 'Controls your own view of the member area only. When on, Phase 2 and Phase 3 open immediately while you browse. Members are not affected — they still follow the normal unlock sequence.'
+          }
+        ]
+      }
     ];
     const LEGACY_EMBED_KEYS = {
       utl_embed_orientation_welcome: 'utl_slides_orientation',
@@ -4850,17 +4855,6 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       });
     }
 
-    const ADMIN_PREVIEW_ITEMS = [
-      {
-        key: 'utl_admin_preview_bypass',
-        checkedValue: 'on',
-        uncheckedValue: 'off',
-        fallback: 'off',
-        label: 'Unlock all phases for admin preview',
-        description: 'When on, Phase 2 and Phase 3 open immediately while you browse the member area. Members are not affected — they still follow the normal unlock sequence.'
-      }
-    ];
-
     const PUBLIC_HOMEPAGE_ITEMS = [
       {
         key: 'utl_public_find_level',
@@ -4888,33 +4882,6 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       if (!control) return false;
       if (control.matches && control.matches('input[type="checkbox"]')) return Boolean(control.checked);
       return control.getAttribute('aria-pressed') === 'true';
-    }
-
-    function renderAdminPreviewChecklist() {
-      const target = document.getElementById('adminPreviewChecklist');
-      if (!target) return;
-      target.innerHTML = `<div class="eng-field-group">${ADMIN_PREVIEW_ITEMS.map((item) => {
-        if (localStorage.getItem(item.key) === null) localStorage.setItem(item.key, item.fallback);
-        const on = getValue(item.key, item.fallback) === item.checkedValue;
-        return `
-          <div class="eng-field-row">
-            <label class="eng-toggle-label">
-              <span class="eng-toggle-name">${item.label}</span>
-              <span class="eng-toggle-desc">${item.description}</span>
-            </label>
-            <input class="eng-toggle" type="checkbox" data-admin-preview-key="${item.key}" aria-label="${item.label}" ${on ? 'checked' : ''}>
-          </div>`;
-      }).join('')}</div>`;
-
-      target.querySelectorAll('[data-admin-preview-key]').forEach((input) => {
-        input.addEventListener('change', function(e) {
-          e.stopPropagation();
-          const newOn = input.checked;
-          const item = ADMIN_PREVIEW_ITEMS.find((entry) => entry.key === input.dataset.adminPreviewKey);
-          if (item) setChecklistValue(item, newOn);
-          renderVisibilityStatus();
-        });
-      });
     }
 
     function renderPublicHomepageChecklist() {
@@ -10252,7 +10219,6 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
 
     renderToggles();
     renderVisibilityChecklist();
-    renderAdminPreviewChecklist();
     renderPublicHomepageChecklist();
     renderEmbedBlocks();
     renderUrlInputs();
