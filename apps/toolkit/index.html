@@ -81,15 +81,18 @@ REUSE AUDIT
     .tk-back {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      color: rgba(255,255,255,.72);
-      font: 700 11px Lato, Arial, sans-serif;
+      gap: 5px;
+      margin-top: 6px;
+      color: var(--tk-white);
+      font: 700 13px Lato, Arial, sans-serif;
       letter-spacing: 0;
       text-transform: none;
-      text-decoration: none;
+      text-decoration: underline;
+      text-decoration-color: rgba(255,255,255,.6);
+      text-underline-offset: 3px;
       white-space: nowrap;
     }
-    .tk-back:hover { color: #fff; }
+    .tk-back:hover { color: var(--tk-gold); text-decoration-color: var(--tk-gold); }
     .tk-divider {
       width: 1px;
       height: 38px;
@@ -134,6 +137,31 @@ REUSE AUDIT
       margin: 0 auto;
       padding-bottom: 56px;
     }
+    .tk-library-tabs {
+      display: flex;
+      width: min(520px, 100%);
+      margin: 0 auto 24px;
+      border: 1px solid rgba(0,51,102,.18);
+      border-radius: 10px;
+      background: #ebe4d8;
+      padding: 5px;
+    }
+    .tk-library-tab {
+      flex: 1;
+      min-height: 46px;
+      border: 0;
+      border-radius: 7px;
+      background: transparent;
+      color: var(--tk-navy);
+      cursor: pointer;
+      font-weight: 700;
+      padding: 10px 16px;
+    }
+    .tk-library-tab.tk-active {
+      background: var(--tk-white);
+      box-shadow: 0 1px 5px rgba(0,31,61,.14);
+    }
+    .tk-library-panel[hidden] { display: none; }
     .tk-grid {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -266,6 +294,62 @@ REUSE AUDIT
       color: var(--tk-charcoal);
       font-size: .95rem;
     }
+    .tk-template-intro {
+      width: min(800px, 100%);
+      margin: 0 auto 26px;
+      text-align: center;
+    }
+    .tk-template-intro h2 {
+      margin: 0 0 10px;
+      color: var(--tk-navy);
+      font: 700 clamp(1.8rem, 4vw, 2.7rem)/1.1 'Playfair Display', serif;
+    }
+    .tk-template-intro p { margin: 0; line-height: 1.6; }
+    .tk-template-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+    }
+    .tk-template-card {
+      display: flex;
+      flex-direction: column;
+      min-height: 100%;
+      border: 1px solid rgba(0,51,102,.16);
+      border-top: 3px solid var(--tk-gold);
+      border-radius: 8px;
+      background: var(--tk-white);
+      padding: 22px;
+    }
+    .tk-template-format {
+      display: inline-flex;
+      align-self: flex-start;
+      border-radius: 999px;
+      background: #edf3f8;
+      color: var(--tk-steel);
+      font-size: .78rem;
+      font-weight: 700;
+      padding: 6px 10px;
+    }
+    .tk-template-card h3 {
+      margin: 16px 0 10px;
+      color: var(--tk-navy);
+      font: 700 1.55rem/1.15 'Playfair Display', serif;
+    }
+    .tk-template-card > p { margin: 0; line-height: 1.55; }
+    .tk-template-card details {
+      margin-top: 20px;
+      border-top: 1px solid rgba(0,51,102,.14);
+      padding-top: 14px;
+    }
+    .tk-template-card summary { color: var(--tk-navy); cursor: pointer; font-weight: 700; }
+    .tk-template-card ul { margin: 12px 0 0; padding-left: 20px; line-height: 1.55; }
+    .tk-template-status {
+      margin-top: auto;
+      padding-top: 20px;
+      color: var(--tk-steel);
+      font-size: .82rem;
+      font-weight: 700;
+    }
     @media (max-width: 768px) {
       .tk-header {
         grid-template-columns: auto 1fr auto;
@@ -277,6 +361,7 @@ REUSE AUDIT
       .tk-user-email { display: none; }
       .tk-profile-menu { position: fixed; top: 56px; right: 12px; left: auto; width: min(270px, calc(100vw - 24px)); max-width: none; }
       .tk-grid { grid-template-columns: 1fr; }
+      .tk-template-grid { grid-template-columns: 1fr; }
       .tk-main { width: min(100% - 24px, 1180px); }
       .tk-tabs { width: 100%; }
       .tk-tab { flex: 1; }
@@ -287,7 +372,7 @@ REUSE AUDIT
   <header class="tk-header">
     <a class="tk-logo" href="../../index.html" aria-label="The Untaught Lessons home"><img src="../../assets/utl-logo-nav-white.png" alt="The Untaught Lessons"></a>
     <div class="tk-divider" aria-hidden="true"></div>
-    <div><a class="tk-back" href="../../member-login/index.html">&#8617; Workspace</a><span class="tk-title" style="display:block;margin-top:2px">Toolkit</span></div>
+    <div><span class="tk-title">Toolkit</span><a class="tk-back" href="../../member-login/index.html">← Back to workspace</a></div>
     <div class="tk-user" id="tkUser" hidden>
       <span class="tk-user-email" id="tkUserEmail"></span>
       <button class="tk-avatar" id="tkAvatar" type="button" aria-label="Open profile menu" aria-expanded="false">U</button>
@@ -323,16 +408,81 @@ REUSE AUDIT
   </section>
 
   <main class="tk-main">
-    <nav class="tk-filters" aria-label="Filter toolkit resources">
-      <button class="tk-filter tk-active" type="button" data-filter="all">All tools</button>
-      <button class="tk-filter" type="button" data-filter="organize">Organize ideas</button>
-      <button class="tk-filter" type="button" data-filter="write">Write clearly</button>
-      <button class="tk-filter" type="button" data-filter="act">Prepare to act</button>
-      <button class="tk-filter" type="button" data-filter="review">Review a decision</button>
+    <nav class="tk-library-tabs" aria-label="Choose a Toolkit resource type">
+      <button class="tk-library-tab tk-active" type="button" data-library="prompts" aria-selected="true">AI prompts</button>
+      <button class="tk-library-tab" type="button" data-library="templates" aria-selected="false">Templates</button>
     </nav>
-    <p class="tk-safety"><strong>Before you paste:</strong> Remove confidential information that should not be shared with an outside AI tool. Check the result against your own facts and judgment.</p>
-    <div class="tk-grid" id="toolGrid"></div>
-    <p class="tk-footer-note">Save the prompts you use often and adjust them as your work changes.</p>
+
+    <section class="tk-library-panel" id="library-prompts">
+      <nav class="tk-filters" aria-label="Filter toolkit resources">
+        <button class="tk-filter tk-active" type="button" data-filter="all">All tools</button>
+        <button class="tk-filter" type="button" data-filter="organize">Organize ideas</button>
+        <button class="tk-filter" type="button" data-filter="write">Write clearly</button>
+        <button class="tk-filter" type="button" data-filter="act">Prepare to act</button>
+        <button class="tk-filter" type="button" data-filter="review">Review a decision</button>
+      </nav>
+      <p class="tk-safety"><strong>Before you paste:</strong> Remove confidential information that should not be shared with an outside AI tool. Check the result against your own facts and judgment.</p>
+      <div class="tk-grid" id="toolGrid"></div>
+      <p class="tk-footer-note">Save the prompts you use often and adjust them as your work changes.</p>
+    </section>
+
+    <section class="tk-library-panel" id="library-templates" hidden>
+      <div class="tk-template-intro">
+        <span class="tk-label">Planned resources</span>
+        <h2>Templates for common work</h2>
+        <p>These first templates will work in both Google and Microsoft files. The design will use a light UTL style that is easy to replace with your organization’s brand.</p>
+      </div>
+      <div class="tk-template-grid">
+        <article class="tk-template-card">
+          <span class="tk-template-format">Google Docs · Microsoft Word</span>
+          <h3>One page decision brief</h3>
+          <p>Turn a recommendation into a short document a busy reader can understand and approve.</p>
+          <details>
+            <summary>What the template will include</summary>
+            <ul>
+              <li>Decision needed</li>
+              <li>Recommendation</li>
+              <li>Three supporting points</li>
+              <li>Risks and responses</li>
+              <li>Owner and next step</li>
+            </ul>
+          </details>
+          <span class="tk-template-status">Template preview · File coming next</span>
+        </article>
+        <article class="tk-template-card">
+          <span class="tk-template-format">Google Sheets · Microsoft Excel</span>
+          <h3>Decision and action tracker</h3>
+          <p>Keep decisions, actions, owners and deadlines together after meetings or project reviews.</p>
+          <details>
+            <summary>What the template will include</summary>
+            <ul>
+              <li>Decision log</li>
+              <li>Action owner and due date</li>
+              <li>Status and priority</li>
+              <li>Open question or dependency</li>
+              <li>Simple summary view</li>
+            </ul>
+          </details>
+          <span class="tk-template-status">Template preview · File coming next</span>
+        </article>
+        <article class="tk-template-card">
+          <span class="tk-template-format">Google Slides · Microsoft PowerPoint</span>
+          <h3>Executive recommendation deck</h3>
+          <p>Build a short presentation that begins with the answer and leads to one clear decision or next step.</p>
+          <details>
+            <summary>What the template will include</summary>
+            <ul>
+              <li>Recommendation headline</li>
+              <li>Situation and complication</li>
+              <li>Evidence and options</li>
+              <li>Recommended path</li>
+              <li>Decision and next step</li>
+            </ul>
+          </details>
+          <span class="tk-template-status">Template preview · File coming next</span>
+        </article>
+      </div>
+    </section>
   </main>
 
   <script>
@@ -803,6 +953,16 @@ For the board chair, explain why this person can weigh the perspectives and reco
     document.querySelectorAll('.tk-tab').forEach(button => button.addEventListener('click', () => {
       document.querySelectorAll('.tk-tab').forEach(tab => tab.classList.toggle('tk-active', tab === button));
       document.querySelectorAll('.tk-mode').forEach(mode => mode.classList.toggle('tk-active', mode.id === `mode-${button.dataset.mode}`));
+    }));
+    document.querySelectorAll('[data-library]').forEach(button => button.addEventListener('click', () => {
+      document.querySelectorAll('[data-library]').forEach(tab => {
+        const active = tab === button;
+        tab.classList.toggle('tk-active', active);
+        tab.setAttribute('aria-selected', String(active));
+      });
+      document.querySelectorAll('.tk-library-panel').forEach(panel => {
+        panel.hidden = panel.id !== `library-${button.dataset.library}`;
+      });
     }));
     document.querySelectorAll('[data-filter]').forEach(button => button.addEventListener('click', () => {
       document.querySelectorAll('[data-filter]').forEach(item => item.classList.toggle('tk-active', item === button));
