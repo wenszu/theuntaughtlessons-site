@@ -437,7 +437,7 @@ const UTL_CONTENT = {
   }
 
   function firebaseHref() {
-    var version = "?v=20260914-member-account-1";
+    var version = "?v=20260914-member-account-2";
     if (inPhasePracticeRoot()) return "../../../assets/firebase.js" + version;
     return (inAdminRoot() ? "../assets/firebase.js" : "../assets/firebase.js") + version;
   }
@@ -1508,7 +1508,7 @@ const UTL_CONTENT = {
       ,".ws-journey-tab-card{border:1px solid var(--ws-line);border-radius:10px;background:#fff;overflow:hidden}.ws-journey-phase-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));background:#F2ECE3;border-bottom:1px solid var(--ws-line)}.ws-journey-phase-tab{position:relative;min-width:0;display:grid;grid-template-rows:1fr auto;gap:7px;padding:12px 16px 9px;border:0;border-right:1px solid var(--ws-line);background:#F2ECE3;color:inherit;text-align:left;cursor:pointer;transition:background .15s,box-shadow .15s}.ws-journey-phase-tab:last-child{border-right:0}.ws-journey-phase-tab:hover:not(.ws-active){background:#fff;box-shadow:0 4px 14px rgba(238,163,32,.18)}.ws-journey-phase-tab:hover:not(.ws-active):before{content:'';position:absolute;left:0;right:0;top:0;height:4px;background:rgba(238,163,32,.45)}.ws-journey-phase-tab>span:first-child{min-width:0}.ws-journey-phase-tab small,.ws-journey-phase-tab strong,.ws-journey-phase-tab em{display:block}.ws-journey-phase-tab small{color:var(--ws-gold);font-size:10px;font-weight:700}.ws-journey-phase-tab strong{margin:2px 0;color:var(--ws-navy);font-size:17px}.ws-journey-phase-tab em{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ws-steel);font-size:10px;font-style:normal}.ws-journey-phase-tab.ws-active{background:#fff}.ws-journey-phase-tab.ws-active:before{content:'';position:absolute;left:0;right:0;top:0;height:4px;background:var(--ws-gold)}.ws-journey-phase-tab.ws-tab-locked:not(.ws-active){background:#EEECE8}.ws-journey-phase-tab:focus-visible{outline:3px solid rgba(238,163,32,.55);outline-offset:-3px}.ws-journey-phase-panel{padding:12px 16px 16px}.ws-journey-panel-head{display:flex;align-items:end;justify-content:space-between;gap:20px;padding:0 2px 9px;border-bottom:1px solid var(--ws-line)}.ws-journey-panel-head span{color:var(--ws-gold);font-size:10px;font-weight:700}.ws-journey-panel-head h3{margin:1px 0 0;color:var(--ws-navy);font:700 22px/1.1 'Playfair Display',serif}.ws-journey-panel-head>strong{color:var(--ws-steel);font-size:11px}.ws-journey-phase-panel .ws-journey-activities{grid-template-columns:1fr;gap:2px;margin-top:5px}.ws-journey-phase-panel .ws-journey-activity{grid-template-columns:22px minmax(0,1fr) 58px 50px;min-height:43px;padding:3px 7px}.ws-journey-phase-panel .ws-journey-activity-preview-button{grid-template-columns:36px 128px minmax(0,1fr) 74px;gap:7px}.ws-journey-phase-panel .ws-journey-activity-preview-button strong{font-size:13px}.ws-journey-phase-panel .ws-journey-duration{font-size:10px;text-align:right}.ws-journey-phase-panel .ws-journey-activity-state{display:block;min-width:58px;text-align:right;font-size:10px}.ws-journey-phase-panel .ws-journey-activity-done .ws-journey-activity-state{color:var(--ws-green)}.ws-journey-phase-panel .ws-journey-activity-next .ws-journey-activity-state{color:#8A5A00}.ws-journey-phase-panel .ws-journey-activity-progress .ws-journey-activity-state{color:var(--ws-navy)}"
       ,"@media(max-width:700px){.ws-journey-phase-tab{padding:10px 8px 8px;text-align:center}.ws-journey-phase-tab strong{font-size:13px;white-space:nowrap}.ws-journey-phase-tab em{font-size:9px}.ws-journey-phase-panel{padding:10px 8px 12px}.ws-journey-panel-head{align-items:center;padding:0 4px 8px}.ws-journey-panel-head h3{font-size:19px}.ws-journey-phase-panel .ws-journey-activity{grid-template-columns:20px minmax(0,1fr);min-height:45px}.ws-journey-phase-panel .ws-journey-activity-preview-button{grid-template-columns:28px 22px minmax(0,1fr) auto;gap:5px}.ws-journey-phase-panel .ws-journey-type{font-size:0}.ws-journey-phase-panel .ws-journey-type span{font-size:9px}.ws-journey-phase-panel .ws-journey-activity-preview-button strong{font-size:11px}.ws-journey-phase-panel .ws-journey-activity-state{display:none}.ws-journey-phase-panel .ws-journey-activity-action{display:none}}"
       ,".ws-account-layout{display:grid;gap:22px}.ws-account-card{padding:24px}.ws-account-identity{display:grid;grid-template-columns:220px minmax(0,1fr);gap:24px;align-items:start}.ws-account-photo{display:grid;align-content:start;justify-items:center;gap:10px;padding:20px 16px;border:1px solid var(--ws-line);border-radius:8px;background:#FAF8F3}.ws-account-photo-circle{width:112px;height:112px;border-radius:999px;display:grid;place-items:center;overflow:hidden;background:#FFF3D7;border:3px solid var(--ws-gold);color:var(--ws-navy);font-size:42px}.ws-account-photo-circle img{width:100%;height:100%;object-fit:cover}.ws-account-photo small{color:var(--ws-steel);font-size:11px;text-align:center;line-height:1.35}.ws-account-form{display:grid;gap:16px}.ws-account-form .ws-card-actions{justify-content:flex-end}.ws-account-form .ws-card-actions .ws-button{width:auto;min-width:160px;flex:0 0 auto}.ws-account-field{display:grid;gap:7px}.ws-account-field label{color:var(--ws-navy);font-weight:700}.ws-account-readonly{min-height:46px;display:flex;align-items:center;padding:0 13px;border:1px solid var(--ws-line);border-radius:8px;background:#F6F3EE;color:var(--ws-steel)}.ws-account-access{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.ws-account-access-panel{min-height:100%;padding:18px;border:1px solid var(--ws-line);border-radius:8px;background:#FAF8F3}.ws-account-access-panel h3{margin:0 0 8px;color:var(--ws-navy);font:700 16px Lato,sans-serif}.ws-account-access-panel p{margin:0;color:var(--ws-steel);font-size:13px;line-height:1.5}.ws-account-access-value{display:block;margin:6px 0 7px;color:var(--ws-navy);font-size:16px;font-weight:700;overflow-wrap:anywhere}.ws-account-methods{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}.ws-account-method{display:inline-flex;align-items:center;gap:7px;min-height:32px;padding:5px 10px;border:1px solid #BCD1E5;border-radius:999px;background:#F4F8FC;color:var(--ws-navy);font-size:12px;font-weight:700}.ws-account-method:before{content:'\2713';color:var(--ws-green)}.ws-account-access-note{margin-top:14px!important;padding-top:13px;border-top:1px solid var(--ws-line)}.ws-account-avatars{display:grid;grid-template-columns:repeat(4,56px);gap:10px}.ws-account-avatar-option{position:relative}.ws-account-avatar-option input{position:absolute;opacity:0;pointer-events:none}.ws-account-avatar-option span{width:52px;height:52px;border:1px solid var(--ws-line);border-radius:999px;display:grid;place-items:center;background:#fff;color:var(--ws-navy);font-size:24px;cursor:pointer}.ws-account-avatar-option input:checked+span{border:3px solid var(--ws-gold);background:#FFF8E9}.ws-account-avatar-option input:focus-visible+span{outline:3px solid rgba(0,51,102,.28);outline-offset:2px}.ws-account-programs{display:grid;gap:12px}.ws-account-program{display:grid;grid-template-columns:minmax(230px,1.6fr) repeat(3,minmax(120px,1fr));gap:16px;padding:16px;border:1px solid var(--ws-line);border-radius:8px;background:#FAF8F3}.ws-account-program dt{color:var(--ws-steel);font-size:10px;font-weight:700}.ws-account-program dd{margin:4px 0 0;color:var(--ws-navy);font-weight:700}.ws-account-credential{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:18px;padding-top:14px;border-top:1px solid var(--ws-line)}.ws-account-credential-copy{display:grid;gap:3px}.ws-account-credential-copy strong{color:var(--ws-navy);font-size:13px}.ws-account-credential-copy span{color:var(--ws-steel);font-size:12px}.ws-account-credential-actions{display:flex;flex-wrap:wrap;gap:8px}.ws-account-credential-actions .ws-button{min-height:38px;padding:0 14px;font-size:12px}.ws-account-reserved{padding:18px 22px;border:1px solid #D9DEE3;background:#F1F3F4;box-shadow:none;color:#6F7780}.ws-account-reserved .ws-kicker{color:#7B838B;font-size:9px}.ws-account-reserved h2{margin:4px 0 5px;color:#66717B;font:700 20px/1.2 Lato,sans-serif}.ws-account-reserved p{max-width:720px;margin:0;color:#7B838B;font-size:13px}.ws-account-status{min-height:20px;margin:0;color:var(--ws-steel);font-size:13px}.ws-account-status.ws-success{color:var(--ws-green)}@media(max-width:760px){.ws-account-identity{grid-template-columns:1fr}.ws-account-photo{justify-items:center}.ws-account-access{grid-template-columns:1fr}.ws-account-program{grid-template-columns:1fr 1fr}.ws-account-program>div:first-child{grid-column:1/-1}.ws-account-avatars{grid-template-columns:repeat(4,52px)}.ws-account-credential{align-items:flex-start;flex-direction:column}}@media(max-width:460px){.ws-account-program{grid-template-columns:1fr}.ws-account-program>div:first-child{grid-column:auto}.ws-account-credential{grid-column:auto}.ws-account-credential-actions{width:100%}.ws-account-credential-actions .ws-button{width:100%}}"
-      ,".ws-account-method:before{content:none}.ws-account-method-check{color:var(--ws-green);font-weight:700}"
+      ,".ws-account-method:before{content:none}.ws-account-method-check{color:var(--ws-green);font-weight:700}.ws-account-field-help{margin:0;color:var(--ws-steel);font-size:12px;line-height:1.4}.ws-account-avatars{display:flex;flex-wrap:wrap;gap:10px}.ws-account-avatar-option{cursor:pointer}.ws-account-avatar-option span{overflow:hidden}.ws-account-avatar-option span img{width:100%;height:100%;display:block;object-fit:cover}.ws-account-avatar-provider span{width:auto;min-width:118px;grid-template-columns:42px auto;gap:8px;padding:4px 11px 4px 4px;border-radius:999px;font-size:12px;font-weight:700}.ws-account-avatar-provider span img{width:42px;height:42px;border-radius:999px;pointer-events:none}[data-account-photo-fallback][hidden]{display:none}"
       ,".ws-journey-activity-locked{opacity:1}.ws-journey-activity-locked>.ws-journey-status-icon,.ws-journey-activity-locked>.ws-journey-activity-preview-button,.ws-journey-activity-locked>.ws-journey-activity-state{color:#6F7780}.ws-journey-activity-locked .ws-journey-activity-preview-button strong{color:#5D6872}.ws-journey-activity-locked .ws-journey-type-video{color:#55738F}.ws-journey-activity-locked .ws-journey-type-exercise{color:#80652F}.ws-journey-preview{color:var(--ws-charcoal)}"
       ,".ws-journey-activity-just-completed{border-color:var(--ws-green)!important;background:#EFF8F1!important;animation:wsCompletedPulse 1.8s ease 2}.ws-journey-activity-just-completed .ws-journey-activity-state{display:block!important;color:var(--ws-green)!important}@keyframes wsCompletedPulse{50%{box-shadow:0 0 0 4px rgba(44,122,75,.14)}}"
       ,".ws-journey-preview-actions{display:grid;gap:10px}.ws-journey-preview-actions .ws-button{margin:0}.ws-journey-preview-actions .ws-button-outline{background:#fff;color:var(--ws-navy)}"
@@ -1588,7 +1588,9 @@ const UTL_CONTENT = {
   function navHtml(active, navContextHtml) {
     var user = currentUser();
     var avatarSymbols = { compass: "&#10022;", lightbulb: "&#128161;", book: "&#128214;", target: "&#9678;", conversation: "&#128172;", mountain: "&#9651;", star: "&#9733;", leaf: "&#10087;" };
-    var avatar = user.photoURL ? '<img src="' + escapeHtml(user.photoURL) + '" alt="">' : (avatarSymbols[user.avatarIconId] || escapeHtml(user.initials));
+    var avatar = user.avatarIconId
+      ? (avatarSymbols[user.avatarIconId] || escapeHtml(user.initials))
+      : (user.photoURL ? '<img src="' + escapeHtml(user.photoURL) + '" alt="" onerror="this.hidden=true;this.parentNode.textContent=\'' + escapeHtml(user.initials) + '\'">' : escapeHtml(user.initials));
     var roleLabel = isAdminUser(user) ? "Administrator" : "Member";
     var adminSection = isAdminUser(user) ? '<div class="ws-profile-section"><span class="ws-profile-section-label">Admin</span><a class="ws-admin-link" href="' + adminHref() + '"><span class="ws-profile-icon">&#9788;</span><span>Admin console</span></a></div>' : "";
     var links = [
@@ -2201,11 +2203,13 @@ const UTL_CONTENT = {
     var name = member.name || account.authDisplayName || account.email;
     var selectedAvatar = member.avatarIconId || "compass";
     var selectedOption = accountAvatarOptions.find(function (option) { return option.id === selectedAvatar; }) || accountAvatarOptions[0];
-    var photo = account.authPhotoURL
-      ? '<span class="ws-account-photo-circle"><img src="' + escapeHtml(account.authPhotoURL) + '" alt="' + escapeHtml(name) + '"></span><small>Photo provided by your sign-in account</small>'
-      : '<span class="ws-account-photo-circle" data-account-avatar-preview>' + selectedOption.symbol + '</span><small>Choose an icon for your workspace</small>';
-    var avatarChoices = account.authPhotoURL ? "" : '<div class="ws-account-field"><label>Choose an avatar</label><div class="ws-account-avatars" role="radiogroup" aria-label="Preset avatars">' + accountAvatarOptions.map(function (option) {
-      return '<label class="ws-account-avatar-option" title="' + escapeHtml(option.label) + '"><input type="radio" name="accountAvatar" value="' + option.id + '" aria-label="' + escapeHtml(option.label) + '"' + (option.id === selectedOption.id ? " checked" : "") + '><span aria-hidden="true">' + option.symbol + '</span></label>';
+    var usingProviderPhoto = Boolean(account.authPhotoURL && !member.avatarIconId);
+    var photo = usingProviderPhoto
+      ? '<span class="ws-account-photo-circle" data-account-avatar-preview><img data-account-photo-image src="' + escapeHtml(account.authPhotoURL) + '" alt="" onerror="this.hidden=true;this.nextElementSibling.hidden=false"><span data-account-photo-fallback hidden>' + selectedOption.symbol + '</span></span><small data-account-photo-caption>Photo from your sign-in account</small>'
+      : '<span class="ws-account-photo-circle" data-account-avatar-preview>' + selectedOption.symbol + '</span><small data-account-photo-caption>Preset workspace icon</small>';
+    var providerChoice = account.authPhotoURL ? '<label class="ws-account-avatar-option ws-account-avatar-provider" title="Use Google or sign-in photo"><input type="radio" name="accountAvatar" value="sign-in-photo" aria-label="Use Google or sign-in photo"' + (usingProviderPhoto ? " checked" : "") + '><span><img src="' + escapeHtml(account.authPhotoURL) + '" alt="" onerror="this.hidden=true">Google photo</span></label>' : "";
+    var avatarChoices = '<div class="ws-account-field"><label>Profile picture</label><p class="ws-account-field-help">Use your sign-in photo or choose a workspace icon.</p><div class="ws-account-avatars" role="radiogroup" aria-label="Profile picture choices">' + providerChoice + accountAvatarOptions.map(function (option) {
+      return '<label class="ws-account-avatar-option" title="' + escapeHtml(option.label) + '"><input type="radio" name="accountAvatar" value="' + option.id + '" aria-label="' + escapeHtml(option.label) + '"' + (!usingProviderPhoto && option.id === selectedOption.id ? " checked" : "") + '><span aria-hidden="true">' + option.symbol + '</span></label>';
     }).join("") + '</div></div>';
     var connectedMethods = accountSignInMethods(account);
     var connectedMethodsHtml = connectedMethods.length
@@ -2225,12 +2229,42 @@ const UTL_CONTENT = {
   }
 
   function bindAccountPage(firebaseAuth, account) {
+    var accountPhoto = qs("[data-account-photo-image]");
+    if (accountPhoto) accountPhoto.addEventListener("error", function () {
+      accountPhoto.hidden = true;
+      var fallback = qs("[data-account-photo-fallback]");
+      if (fallback) fallback.hidden = false;
+      var caption = qs("[data-account-photo-caption]");
+      if (caption) caption.textContent = "Your sign-in photo could not be loaded. Choose a workspace icon below.";
+    });
+    var savedAvatarId = String((account.member || {}).avatarIconId || (!account.authPhotoURL ? "compass" : ""));
+    var fallbackAvatar = accountAvatarOptions.find(function (item) { return item.id === savedAvatarId; }) || accountAvatarOptions[0];
+    function showAccountAvatar(value) {
+      var option = accountAvatarOptions.find(function (item) { return item.id === value; });
+      var preview = qs("[data-account-avatar-preview]");
+      var caption = qs("[data-account-photo-caption]");
+      if (!preview) return;
+      if (value === "sign-in-photo" && account.authPhotoURL) {
+        preview.innerHTML = '<img src="' + escapeHtml(account.authPhotoURL) + '" alt="" onerror="this.hidden=true;this.parentNode.textContent=\'' + fallbackAvatar.symbol + '\'">';
+        if (caption) caption.textContent = "Photo from your sign-in account";
+      } else if (option) {
+        preview.innerHTML = option.symbol;
+        if (caption) caption.textContent = "Preset workspace icon";
+      }
+    }
     qsa('input[name="accountAvatar"]').forEach(function (input) {
+      input.checked = input.value === "sign-in-photo"
+        ? Boolean(account.authPhotoURL && !savedAvatarId)
+        : input.value === savedAvatarId;
       input.addEventListener("change", function () {
-        var option = accountAvatarOptions.find(function (item) { return item.id === input.value; });
-        var preview = qs("[data-account-avatar-preview]");
-        if (option && preview) preview.innerHTML = option.symbol;
+        showAccountAvatar(input.value);
       });
+    });
+    var providerChoice = qs(".ws-account-avatar-provider");
+    if (providerChoice) providerChoice.addEventListener("click", function () {
+      var input = providerChoice.querySelector('input[name="accountAvatar"]');
+      if (input) input.checked = true;
+      showAccountAvatar("sign-in-photo");
     });
     var form = qs("#wsAccountForm");
     var credentialMount = qs("[data-account-credential]");
@@ -2262,7 +2296,7 @@ const UTL_CONTENT = {
         var saved = await firebaseAuth.updateMemberAccount({
           name: qs("#wsAccountName").value,
           goals: qs("#wsAccountGoals").value,
-          avatarIconId: account.authPhotoURL ? "" : (avatarInput ? avatarInput.value : "")
+          avatarIconId: avatarInput && avatarInput.value !== "sign-in-photo" ? avatarInput.value : ""
         });
         var profile = {};
         try { profile = JSON.parse(localStorage.getItem(PROFILE_KEY) || "{}"); } catch (error) {}
@@ -2270,6 +2304,7 @@ const UTL_CONTENT = {
         profile.firstName = saved.name.split(/\s+/)[0] || saved.name;
         profile.lastName = saved.name.split(/\s+/).slice(1).join(" ");
         profile.avatarIconId = saved.avatarIconId;
+        if (!saved.avatarIconId && account.authPhotoURL) profile.photoURL = account.authPhotoURL;
         localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
         status.classList.add("ws-success");
         status.textContent = "Your account has been updated.";
@@ -3476,7 +3511,7 @@ const UTL_CONTENT = {
         }
         var sub = qs(".ws-orientation-sub");
         if (sub) sub.innerHTML = nowWatched ? "Orientation complete &#10003;" : "Get oriented before jumping into Phase 1";
-        if (nowWatched) {
+        if (nowWatched && !wasWatched) {
           orientationCard.classList.add("ws-complete");
           if (journeyCard) {
             journeyCard.classList.add("ws-complete");
@@ -3760,8 +3795,8 @@ const UTL_CONTENT = {
 
   function lessonWatchActionHtml(lesson, watched) {
     return watched
-      ? '<div class="ws-player-action-text"><strong>Lesson marked complete.</strong><span>You can mark it not watched if this was a mistake. MP already earned is kept.</span></div><button class="ws-button ws-button-secondary" type="button" data-watch-id="' + lesson.id + '">Mark not watched</button>'
-      : '<div class="ws-player-action-text"><strong>Finished watching?</strong><span>Mark this lesson complete to save progress and earn ' + VIDEO_COMPLETE_MP + ' MP once.</span></div><button class="ws-button" type="button" data-watch-id="' + lesson.id + '">Mark lesson complete</button>';
+      ? '<div class="ws-player-action-text"><strong>Lesson marked complete.</strong><span>You can mark it not watched if this was a mistake. MP already earned is kept.</span></div><button class="ws-button ws-button-secondary" type="button" data-watch-id="' + lesson.id + '" data-watch-action="undo">Mark not watched</button>'
+      : '<div class="ws-player-action-text"><strong>Finished watching?</strong><span>Mark this lesson complete to save progress and earn ' + VIDEO_COMPLETE_MP + ' MP once.</span></div><button class="ws-button" type="button" data-watch-id="' + lesson.id + '" data-watch-action="complete">Mark lesson complete</button>';
   }
 
   function orientationContextSection() {
@@ -3830,7 +3865,10 @@ const UTL_CONTENT = {
         var lessonId = button.getAttribute("data-watch-id");
         var key = watchedKey(lessonId);
         var wasWatched = readBool(key);
-        var nowWatched = !wasWatched;
+        // Vimeo can mark the lesson complete before this visible action rerenders.
+        // Follow the action the learner clicked so a stale button never reverses
+        // an automatic completion and forces a second click.
+        var nowWatched = button.getAttribute("data-watch-action") !== "undo";
         var lesson = orderedLessons(phaseKey).find(function (item) { return item.id === lessonId; });
         var reward = null;
         writeBool(key, nowWatched);
@@ -3860,7 +3898,7 @@ const UTL_CONTENT = {
               showLevelModal: rewardLevelForMp(reward.startTotal) !== rewardLevelForMp(reward.total)
             });
           }, 80);
-        } else if (wasWatched) {
+        } else if (!nowWatched && wasWatched) {
           setTimeout(function () {
             showWorkspaceRewardMoment({
               label: "Progress updated",
@@ -3986,6 +4024,10 @@ const UTL_CONTENT = {
     }, detail || {}) }));
   }
 
+  // Learners receive completion credit once they have watched this share of a video.
+  // Keep this named because the threshold may change as real engagement data grows.
+  var VIMEO_COMPLETION_PERCENT = 80;
+
   function setVimeoRecovery(frame, visible, message) {
     var recovery = frame && frame.parentElement ? frame.parentElement.querySelector(".ws-vimeo-recovery") : null;
     if (!recovery) return;
@@ -4056,9 +4098,9 @@ const UTL_CONTENT = {
         var delta = lastEventAt ? Math.min(5, Math.max(0, (now - lastEventAt) / 1000)) : 0;
         lastEventAt = now;
         lastPosition = Number(data.seconds || lastPosition || 0);
-        var milestone = [25, 50, 75, 90].find(function (value) { return percent >= value && !milestones[value]; });
+        var milestone = [25, 50, 75, VIMEO_COMPLETION_PERCENT].find(function (value) { return percent >= value && !milestones[value]; });
         if (milestone) milestones[milestone] = true;
-        dispatchVimeoProgress(frame, { eventName: "progress", positionSeconds: lastPosition, durationSeconds: Number(data.duration || 0), percent: percent, watchDeltaSeconds: delta, milestone: milestone || 0, completed: percent >= 90 });
+        dispatchVimeoProgress(frame, { eventName: "progress", positionSeconds: lastPosition, durationSeconds: Number(data.duration || 0), percent: percent, watchDeltaSeconds: delta, milestone: milestone || 0, completed: percent >= VIMEO_COMPLETION_PERCENT });
       });
       player.on("bufferstart", function () { watchForStall(); });
       player.on("bufferend", function () { setVimeoRecovery(frame, false); if (playing) watchForStall(); });

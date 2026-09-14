@@ -14,6 +14,13 @@ assert.match(firebase, /signInProviderIds/, 'account reader exposes only provide
 assert.match(firebase, /"authorized_members", email/, 'account data uses the signed-in email member document');
 assert.doesNotMatch(account, /type=["']file["']|firebase-storage|upload/i, 'account page has no upload path');
 assert.match(workspace, /authPhotoURL/, 'Firebase Auth photo URL is used directly');
+assert.match(firebase, /user\.photoURL \|\| userData\.photoURL/, 'account falls back to the last stored provider photo');
+assert.match(firebase, /if \(user\.photoURL\) profileData\.photoURL = user\.photoURL/, 'passwordless sign-in does not erase a stored provider photo');
+assert.match(workspace, /Use your sign-in photo or choose a workspace icon/, 'provider photos can be overridden with a preset icon');
+assert.match(workspace, /value="sign-in-photo"/, 'the provider photo uses an explicit, selectable value');
+assert.match(workspace, /avatarInput\.value !== "sign-in-photo"/, 'saving the provider photo clears the preset override');
+assert.match(workspace, /providerChoice\.addEventListener\("click"/, 'clicking anywhere on the provider-photo control refreshes the preview');
+assert.match(workspace, /Your sign-in photo could not be loaded/, 'a broken provider image has a readable fallback');
 assert.match(workspace, /Your learning profile/, 'future Learning Profile space is reserved');
 assert.doesNotMatch(workspace.match(/function renderAccount\([\s\S]*?\n  function renderIndex/)?.[0] || '', /learningProfileSummar|learning_profile_summar/i, 'account rendering does not read the Learning Profile summary');
 assert.match(rules, /'name', 'goals', 'avatarIconId'/, 'member self-update allowlist includes only the account additions');

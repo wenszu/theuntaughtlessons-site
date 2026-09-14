@@ -50,6 +50,11 @@ assert(source.includes('ws-player-actions ws-context-completion'), 'context comp
 assert(source.includes('Context marked complete.'), 'completed context should match the lesson completed-state language');
 assert(source.includes('Mark not watched'), 'completed context should offer the same reversal pattern as lesson videos');
 assert(source.includes('class="ws-button" type="button" data-watch-id'), 'active lesson completion button should use the gold primary treatment');
+assert(source.includes('data-watch-action="complete"'), 'lesson completion button should declare its intended action');
+assert(source.includes('data-watch-action="undo"'), 'completed lesson button should declare its undo action');
+assert(source.includes('button.getAttribute("data-watch-action") !== "undo"'), 'lesson clicks should follow the visible action instead of toggling stale Vimeo state');
+assert(source.includes('if (nowWatched && !wasWatched)'), 'lesson completion should emit analytics and rewards only on a real incomplete-to-complete transition');
+assert(source.includes('else if (!nowWatched && wasWatched)'), 'the not-watched message should appear only after a real completed-to-incomplete transition');
 assert(source.includes("done ? 'ws-button-secondary' : ''"), 'context completion should switch between gold primary and green completed treatments');
 workspacePages.forEach((page) => {
   const pageSource = fs.readFileSync(page, 'utf8');

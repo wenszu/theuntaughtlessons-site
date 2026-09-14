@@ -13,7 +13,7 @@ REUSE AUDIT
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="AI prompt toolkit for The Untaught Lessons.">
+  <meta name="description" content="Practical prompts and job aids from The Untaught Lessons.">
   <title>Toolkit | The Untaught Lessons</title>
   <link rel="icon" type="image/png" sizes="32x32" href="../../assets/favicon-bluebg-whitedoor-thicker-32.png?v=20260914-0849">
   <link rel="shortcut icon" type="image/png" href="../../assets/favicon-bluebg-whitedoor-thicker-32.png?v=20260914-0849">
@@ -139,6 +139,10 @@ REUSE AUDIT
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 18px;
     }
+    .tk-filters { display:flex; flex-wrap:wrap; justify-content:center; gap:8px; margin:0 auto 22px; }
+    .tk-filter { min-height:42px; border:1px solid rgba(0,51,102,.25); border-radius:999px; background:#fff; color:var(--tk-navy); padding:9px 16px; font-weight:700; cursor:pointer; }
+    .tk-filter.tk-active { border-color:var(--tk-navy); background:var(--tk-navy); color:#fff; }
+    .tk-safety { width:min(900px,100%); margin:0 auto 26px; border:1px solid rgba(238,163,32,.55); border-radius:8px; background:#fff8e8; padding:13px 16px; line-height:1.5; }
     .tk-card {
       display: flex;
       flex-direction: column;
@@ -216,8 +220,20 @@ REUSE AUDIT
       padding: 10px 18px;
       align-self: flex-start;
     }
+    .tk-card summary { color:var(--tk-navy); cursor:pointer; font-weight:700; padding:4px 0; }
+    .tk-card summary::marker { color:var(--tk-gold); }
+    .tk-prompt-choice { display:flex; gap:5px; border-radius:8px; background:var(--tk-cream); padding:4px; }
+    .tk-choice { flex:1; min-height:42px; border:0; border-radius:6px; background:transparent; color:var(--tk-navy); font-weight:700; cursor:pointer; }
+    .tk-choice.tk-active { background:#fff; box-shadow:0 1px 4px rgba(0,31,61,.14); }
+    .tk-prompt-panel { display:none; gap:10px; }
+    .tk-prompt-panel.tk-active { display:grid; }
+    .tk-prompt-note { color:var(--tk-steel); font-size:.88rem; }
+    .tk-card[hidden] { display:none; }
     .tk-tabs {
       display: inline-flex;
+      align-self: flex-start;
+      width: auto;
+      max-width: 100%;
       gap: 4px;
       border: 1px solid rgba(0,51,102,.18);
       border-radius: 8px;
@@ -262,6 +278,8 @@ REUSE AUDIT
       .tk-profile-menu { position: fixed; top: 56px; right: 12px; left: auto; width: min(270px, calc(100vw - 24px)); max-width: none; }
       .tk-grid { grid-template-columns: 1fr; }
       .tk-main { width: min(100% - 24px, 1180px); }
+      .tk-tabs { width: 100%; }
+      .tk-tab { flex: 1; }
     }
   </style>
 </head>
@@ -299,51 +317,56 @@ REUSE AUDIT
   </header>
 
   <section class="tk-intro">
-    <h1>Your AI prompt toolkit</h1>
-    <p>These are the same tools we use inside the program, rebuilt so you can use them on any problem at any time. Each one takes less than a minute to run in whatever AI tool you already have. Paste the prompt, swap in your own context, and go.</p>
+    <span class="tk-label">Your resources</span>
+    <h1>Toolkit</h1>
+    <p>Use these prompts when you need to organize information, write for a busy reader, prepare for a conversation or review a decision.</p>
   </section>
 
   <main class="tk-main">
+    <nav class="tk-filters" aria-label="Filter toolkit resources">
+      <button class="tk-filter tk-active" type="button" data-filter="all">All tools</button>
+      <button class="tk-filter" type="button" data-filter="organize">Organize ideas</button>
+      <button class="tk-filter" type="button" data-filter="write">Write clearly</button>
+      <button class="tk-filter" type="button" data-filter="act">Prepare to act</button>
+      <button class="tk-filter" type="button" data-filter="review">Review a decision</button>
+    </nav>
+    <p class="tk-safety"><strong>Before you paste:</strong> Remove confidential information that should not be shared with an outside AI tool. Check the result against your own facts and judgment.</p>
     <div class="tk-grid" id="toolGrid"></div>
-    <p class="tk-footer-note">These tools are built from the same frameworks you used inside the program. The more you use them, the faster the thinking becomes yours.</p>
+    <p class="tk-footer-note">Save the prompts you use often and adjust them as your work changes.</p>
   </main>
 
   <script>
     const tools = [
       {
         phase: 'Phase 1 · Think clearly',
-        name: 'Check if your structure holds up',
-        description: 'Paste in any list, set of arguments, or grouping of ideas. This prompt checks whether your structure is truly MECE — no overlaps, nothing missing — and tells you exactly where it breaks down.',
+        name: 'Check a plan for overlaps and gaps',
+        description: 'Use this when you have grouped ideas and want to check whether items overlap or something important is missing.',
         example: `Arguments for why our product launch is at risk:
-- The market timing is wrong
-- Our competitor just launched something similar
-- Our internal team is not aligned on priorities
-- The pricing has not been finalized
-- Marketing and product aren't talking to each other`,
-        prompt: `You are an expert in structured thinking and MECE problem decomposition.
-
-I am going to give you a list of items — arguments, buckets, issues, or ideas. Your job is to evaluate whether this list is truly MECE: mutually exclusive (no overlaps between items) and collectively exhaustive (nothing important is missing).
+* **Market timing:** The timing may be wrong.
+* **Competition:** A competitor just launched something similar.
+* **Team alignment:** The internal team has different priorities.
+* **Pricing:** The price has not been finalized.
+* **Coordination:** Marketing and product are working separately.`,
+        prompt: `Review my list using MECE. Check whether categories overlap and whether an important category is missing.
 
 Here is my list:
 [PASTE YOUR LIST HERE]
 
 Please do the following:
-1. Identify any overlaps — items that belong in the same category or say the same thing in different ways
-2. Identify any gaps — important items or angles that are missing entirely
-3. Suggest a cleaner MECE structure, regrouped where needed
-4. Explain in plain language what you changed and why
+1. **Overlaps:** Identify items that belong in the same category or repeat the same idea.
+2. **Gaps:** Identify important items or angles that are missing.
+3. **Revised structure:** Suggest a cleaner MECE structure and regroup items where needed.
+4. **Reasoning:** Explain in plain language what you changed and why.
 
-Be direct. If the structure holds up well, say so and explain why. If it does not, tell me specifically where it breaks.`
+Give me a clear assessment. Explain where the structure works and where it needs revision.`
       },
       {
         phase: 'Phase 2 · Speak concisely',
-        name: 'Break down any problem',
-        description: 'Give AI your central question and your rough thinking. This prompt builds a clean issue tree — a hypothesis, three MECE arguments, and supporting details under each.',
+        name: 'Build a first issue tree',
+        description: 'Use this when you have a central question and rough ideas. You will get a first issue tree to review and improve.',
         example: `Central question: Why is employee retention dropping in our mid-level management team?
 My rough thinking: people are leaving for better pay, managers feel under-supported and there has been a lot of uncertainty since the reorganization`,
-        prompt: `You are an expert in structured problem decomposition using issue trees.
-
-I am going to give you a central question and some rough initial thinking. Build a clean, MECE issue tree that breaks this problem into its root causes.
+        prompt: `Build a first issue tree from my central question and rough thinking. Treat it as a draft that I should test against evidence.
 
 Central question: [PASTE YOUR QUESTION HERE]
 My initial thinking: [PASTE YOUR ROUGH IDEAS HERE]
@@ -353,37 +376,35 @@ Structure your output as follows:
 Hypothesis: [One sentence answering the central question upfront]
 
 Argument 1: [Broad cause or bucket]
-- Supporting detail 1: [Specific evidence or sub-cause]
-- Supporting detail 2
-- Supporting detail 3
+* **Supporting detail 1:** [Specific evidence or sub-cause]
+* **Supporting detail 2:** [Add detail]
+* **Supporting detail 3:** [Add detail]
 
 Argument 2: [Broad cause or bucket]
-- Supporting detail 1
-- Supporting detail 2
-- Supporting detail 3
+* **Supporting detail 1:** [Add detail]
+* **Supporting detail 2:** [Add detail]
+* **Supporting detail 3:** [Add detail]
 
 Argument 3: [Broad cause or bucket]
-- Supporting detail 1
-- Supporting detail 2
-- Supporting detail 3
+* **Supporting detail 1:** [Add detail]
+* **Supporting detail 2:** [Add detail]
+* **Supporting detail 3:** [Add detail]
 
 Rules:
-- Three arguments must be MECE — no overlap, no gaps
-- Each supporting detail must be specific enough to be actionable
-- Keep asking "why?" as you go — surface root causes, not symptoms
-- If my initial thinking contains overlaps or gaps, reorganize it rather than preserving it`
+* **MECE:** Remove overlaps and flag important gaps across the three arguments.
+* **Specificity:** Make each supporting detail specific enough to act on.
+* **Causes:** Ask why and look for causes behind the visible symptoms.
+* **Organization:** Reorganize my initial thinking when you find overlaps or gaps.`
       },
       {
         phase: 'Phase 2 · Speak concisely',
-        name: 'Sharpen your SCQA',
-        description: 'Paste in a draft SCQA. This prompt stress-tests each element and returns a sharper version with a note on what changed and why.',
+        name: 'Strengthen a problem and recommendation',
+        description: 'Use this to review each part of your SCQA and revise the connection between the problem, question and answer.',
         example: `Situation: Our company has been growing steadily for the past three years.
 Complication: But lately things have been harder.
 Question: What should we do?
 Answer: We need to focus on our core customers and fix operations.`,
-        prompt: `You are an expert in executive communication and the SCQA framework.
-
-I am going to give you a draft SCQA. Stress-test each element and return a sharper, more decision-ready version.
+        prompt: `Review my draft SCQA and help me make the problem, question and answer connect clearly.
 
 My draft SCQA:
 Situation: [PASTE HERE]
@@ -393,116 +414,110 @@ Answer: [PASTE HERE]
 
 Evaluate each element:
 
-Situation: Is it grounded in specific facts — or is it vague background?
-Complication: Is it specific enough to create genuine tension — or does it just say "something is wrong"?
-Question: Is this the single most important question that resolves the tension?
-Answer: Does it lead with the conclusion — or does it bury it?
+Situation: Identify the specific facts and flag vague background.
+Complication: Identify what changed and why it matters.
+Question: Check whether this question resolves the tension created by the Complication.
+Answer: Check whether the conclusion appears first and responds to the Question.
 
 Return:
-1. Your assessment of each element (2–3 sentences each)
-2. A revised version of the full SCQA
-3. A brief note on the most important change you made and why`
+1. **Assessment:** Review each element in two or three sentences.
+2. **Revised SCQA:** Give me a revised version of the full SCQA.
+3. **Main change:** Explain the most important change and why it helps.`
       },
       {
         phase: 'Phase 2 · Speak concisely',
         name: 'Write a decision-ready email',
-        description: "Paste in your SCQA or issue tree. This prompt converts it into an answer-first email using Minto's Pyramid — structured for a senior reader who will read it once and needs to act immediately.",
+        description: "Use this when you have an SCQA or issue tree and need a short email with the main point, three supporting points and a clear next step.",
         example: `Situation: Our onboarding process has been the same for three years.
 Complication: New hire time-to-productivity has increased by 40% since we moved to hybrid work, and three recent hires cited confusion during onboarding as a reason for leaving within 90 days.
 Question: How do we redesign onboarding to match how people actually work today?
-Answer: Rebuild onboarding around three shifts — digital-first delivery, manager accountability checkpoints, and a 90-day milestone framework instead of a two-day event.`,
-        prompt: `You are an expert in executive communication and Minto's Pyramid Principle.
-
-Convert the following SCQA or issue tree into a clear, answer-first email written for a senior stakeholder who will read it once and needs to act on it immediately.
+Answer: Rebuild onboarding around three shifts: digital delivery, manager checkpoints and milestones across the first 90 days.`,
+        prompt: `Turn the following SCQA or issue tree into a clear email for a busy senior stakeholder.
 
 My input:
 [PASTE YOUR SCQA OR ISSUE TREE HERE]
 
 Write the email using this structure:
 
-Opening line: Lead with the main conclusion or recommendation. Do not build up to it. The first sentence is the answer.
+Opening line: Put the main conclusion or recommendation in the first sentence.
 
 Supporting arguments: Three clear, distinct reasons or supporting points. Each labeled with a short bold header followed by one to two sentences.
 
-Closing: One sentence that signals what happens next — a meeting, a decision, a follow-up.
+Closing: One sentence that names the next meeting, decision or follow-up.
 
 Sign-off: Professional and brief.
 
 Rules:
-- Readable in under 90 seconds
-- No jargon, no hedging, no throat-clearing in the opening
-- Every sentence must add information. Cut any sentence that does not.
-- Write for someone who is senior, time-poor, and will only read this once`
+* **Length:** Keep it readable in under 90 seconds.
+* **Language:** Remove jargon, hedging and a slow opening.
+* **Relevance:** Make every sentence add information.
+* **Reader:** Write for a senior person with limited time.`
       },
       {
         phase: 'Phase 3 · Act confidently',
         name: 'Prioritize when everything feels urgent',
-        description: 'Paste in your full task list. This prompt sorts every item into the Eisenhower matrix — urgent vs. important — and tells you exactly what to do now, schedule, delegate, or drop.',
+        description: 'Use this when your task list feels crowded. You will get a suggested order for what to do, schedule, delegate and remove.',
         example: `My current task list:
-- Respond to client emails from yesterday
-- Finish the Q3 board deck (due Friday)
-- Interview candidate for open analyst role (scheduled tomorrow)
-- Review last month's budget variance report
-- Set up a recurring team stand-up
-- Fix the formatting on the investor one-pager
-- Research three competitors for the strategy offsite
-- Renew office software licences (expire next week)`,
-        prompt: `You are an expert in executive prioritization and the Eisenhower matrix.
-
-I am going to give you a task list. Sort every item into one of four quadrants based on urgency (needs action now) and importance (moves the needle on meaningful outcomes).
+* **Client:** Respond to client emails from yesterday.
+* **Board:** Finish the Q3 board deck due Friday.
+* **Hiring:** Interview the analyst candidate tomorrow.
+* **Budget:** Review last month's variance report.
+* **Team:** Set up a recurring team meeting.
+* **Investor material:** Fix the formatting on the investor one-pager.
+* **Strategy:** Research three competitors for the offsite.
+* **Operations:** Renew office software licences next week.`,
+        prompt: `Sort my task list using the Eisenhower matrix. Use urgency for work that needs action soon. Use importance for work that materially affects the outcome.
 
 My tasks:
 [PASTE YOUR TASK LIST HERE]
 
-Quadrant 1 — Do now (urgent + important): Action required today or this week. Delay has real consequences.
-Quadrant 2 — Schedule (not urgent + important): High-value work with no immediate deadline. Block time for it.
-Quadrant 3 — Delegate (urgent + not important): Time-sensitive but low-value. Someone else can handle it.
-Quadrant 4 — Drop (not urgent + not important): Does not move anything forward. Remove it.
+Quadrant 1, Do now: Urgent and important work. Delay has real consequences.
+Quadrant 2, Schedule: Important work with no immediate deadline. Block time for it.
+Quadrant 3, Delegate: Time-sensitive work that someone else can handle.
+Quadrant 4, Remove: Work that has little effect on the outcome.
 
 For each quadrant:
-1. List the tasks that belong there
-2. For Quadrant 1, suggest a specific order of completion
-3. For Quadrant 3, suggest who or what type of person should handle it
-4. For Quadrant 4, briefly explain why it does not belong on the list at all
+1. **Tasks:** List the tasks that belong in each quadrant.
+2. **Order:** Suggest a specific order for Quadrant 1.
+3. **Owner:** Suggest who could handle each item in Quadrant 3.
+4. **Removal:** Explain why each item in Quadrant 4 can leave the list.
 
-Close with one sentence: the single most important thing I should do first and why.`
+Close with one sentence that names what I should do first and why.`
       },
       {
         phase: 'Phase 3 · Act confidently',
         name: 'Prepare for a difficult conversation',
-        description: 'Paste in your situation — the message, the relationship, and what you need from the conversation. This prompt builds a clear script, prepares you for pushback, and tells you how to close with a decision.',
+        description: 'Use this to plan your opening, main point, likely questions and closing request before a difficult conversation.',
         example: `I need to tell a senior colleague that the timeline they committed to the client is not realistic. We are already three weeks in and the work is behind. They are defensive about it and the client is starting to ask questions. I need them to agree to a revised timeline before Friday's client call.`,
-        prompt: `You are an expert in executive communication and high-stakes conversation design.
-
-I am going to describe a difficult conversation I need to have. Help me prepare for it.
+        prompt: `Help me prepare for this difficult conversation.
 
 My situation:
-[DESCRIBE THE CONVERSATION — who, what, why it is difficult, what you need from it]
+[PASTE YOUR SITUATION HERE. INCLUDE THE PERSON, THE ISSUE, WHY IT IS DIFFICULT AND THE RESULT YOU NEED.]
 
 Please give me:
 
-1. Opening line — How to start the conversation directly without being aggressive. One or two sentences that establish the stakes immediately.
+1. **Opening:** Give me one or two direct sentences that explain why the conversation matters.
 
-2. Core message — The key point I need to land, stated clearly. No hedging. No build-up.
+2. **Core message:** State the key point clearly.
 
-3. Supporting evidence — Two or three specific facts or observations that back up my position. Objective, not emotional.
+3. **Supporting evidence:** Give me two or three specific facts or observations that support the point.
 
-4. Anticipated pushback — The two most likely objections or defensive responses, and how to respond to each without escalating.
+4. **Likely questions:** Give me the two most likely objections and a calm response to each.
 
-5. Closing ask. A specific, concrete request for what I need from this conversation, such as a decision, commitment or action. Do not end with a vague request to think about it.
+5. **Closing request:** Give me a specific request for a decision, commitment or action.
 
-6. Tone calibration — One sentence on how to hold the right energy: direct but not combative, confident but not dismissive.
+6. **Tone:** Give me one sentence on how to stay direct, calm and respectful.
 
-Keep it practical. I need to be ready to walk into this conversation, not just think about it.`
+Keep it practical so I can use it in the conversation.`
       },
       {
         phase: 'Phase 3 · Act confidently',
         name: 'Challenge your own thinking',
-        description: 'Paste in a decision, recommendation, or plan. This prompt assigns four different critical lenses to your idea — and makes each one push back on a different dimension of your reasoning.',
+        description: 'Use this before an important decision. You will review the evidence, risks, people affected and other options.',
         example: `My recommendation: We should delay the product launch by six weeks to allow more time for user testing. We currently have limited data on how the core feature performs under real conditions, and launching with known gaps could damage trust with early adopters.`,
-        prompt: `You are facilitating a structured thinking exercise using the four-hat method.
+        prompt: `Review my decision using four distinct perspectives.
 
-I am going to share a decision, recommendation, or plan. Evaluate it through four distinct critical lenses — each one focused on a different dimension of the thinking.
+I am going to share a decision, recommendation or plan. Review it from four perspectives.
 
 My input:
 [PASTE YOUR DECISION, RECOMMENDATION, OR PLAN HERE]
@@ -511,17 +526,118 @@ Apply each lens in turn:
 
 The Data lens: What evidence or information is being used to support this? What data is missing, assumed, or untested? What would you need to see to be more confident in this?
 
-The Risk lens: What could go wrong? What are the hidden costs, second-order effects, or unintended consequences? What is the worst realistic outcome if this goes ahead?
+The Risk lens: What could go wrong? What hidden costs or later effects should I consider? What is the worst realistic outcome if this goes ahead?
 
 The Human lens: Who is affected by this decision and how? Whose perspective is missing? What will this feel like for the people who have to live with it?
 
-The Alternative lens: What else could work? Is there a simpler path, a faster option, or a fundamentally different approach that has not been considered?
+The Alternative lens: What else could work? Identify a simpler path, a faster option or a different approach worth considering.
 
-Close with one synthesis question — the single most important thing I should think harder about before deciding.`
+Close with one question I should answer before deciding.`
+      },
+      {
+        phase: 'Use at work',
+        name: 'Turn meeting notes into decisions and actions',
+        description: 'Use this after a meeting when the notes are scattered. It pulls out what was decided, who owns each action, when it is due and what still needs an answer.',
+        example: `Meeting notes from the launch review on 14 September:
+* **Decision:** Move the pilot from 21 September to 28 September.
+* **Testing:** Priya will finish the client login test by 18 September.
+* **Training:** Marco will prepare the facilitator guide. No due date was agreed.
+* **Client update:** The team discussed telling the client about the new date, but no owner was assigned.
+* **Open question:** Do we need legal approval for the revised consent form?`,
+        prompt: `Review these meeting notes and turn them into a useful follow up.
+
+Meeting notes:
+[PASTE YOUR MEETING NOTES HERE]
+
+Give me:
+1. **Decisions made:** List each decision that was actually made. If the notes do not show a decision, say so.
+2. **Actions and owners:** List each action, its owner and due date. Write “Owner needed” or “Date needed” when either one is unclear.
+3. **Open questions:** List the questions the group still needs to answer.
+4. **People to update:** Name anyone who needs the result of the meeting and what they need to know.
+5. **Follow up message:** Draft a short message I can send to the group. Begin with the main result of the meeting.
+
+Keep names, dates and facts exactly as written. Flag missing information rather than filling it in.`
+      },
+      {
+        phase: 'Use at work',
+        name: 'Build a clear slide storyline',
+        description: 'Use this when you know what a presentation needs to achieve but the slides do not yet have a clear sequence.',
+        example: `Audience: Regional leadership team
+Decision or response I need: Approve a six week onboarding pilot in three markets
+Material:
+New hire time to productivity increased from 42 to 59 days after the move to hybrid work. Three of the last eight hires left within 90 days. Exit interviews mentioned unclear priorities and limited manager contact. The proposed pilot adds a first week plan, manager meetings on days 1, 7 and 30, and clear milestones for the first 90 days.`,
+        prompt: `Help me plan a presentation as a sequence of clear slide headlines.
+
+Audience: [WHO WILL SEE IT]
+Decision or response I need: [WHAT I NEED THEM TO DECIDE OR DO]
+Material:
+[PASTE NOTES, DATA OR DRAFT CONTENT]
+
+Create:
+1. **Opening:** Write the main conclusion as the first slide headline.
+2. **Storyline:** Propose five to seven slide headlines that form one connected argument. Write each headline as a complete sentence.
+3. **Evidence:** Under each headline, list the facts or analysis needed to support it.
+4. **Gaps:** Flag any slide that needs evidence I have not provided.
+5. **Closing:** End with the decision, commitment or next step I should request.
+
+Keep the facts unchanged. Use my material before adding suggestions. Label every suggestion that goes beyond my material.`
+      },
+      {
+        phase: 'Use at work',
+        name: 'Adapt a message for a specific audience',
+        description: 'Use this when a specific reader needs different context, emphasis or language while the facts and requested action stay the same.',
+        example: `Original message:
+We need to delay the launch by six weeks. Testing found that new users could not complete three of the five main tasks. The extra time will let us repair onboarding and run another test. Please approve the revised date by Friday.
+
+Audience: Sales leaders who have already committed to the current launch date
+What they care about: Client trust, revenue timing and having a clear message for account teams
+Response I need: Approval of the revised launch date`,
+        prompt: `Adapt this message for a specific audience while keeping the facts and requested action unchanged.
+
+Original message:
+[PASTE YOUR MESSAGE]
+
+Audience: [NAME THE PERSON OR GROUP]
+What they care about: [PASTE WHAT YOU KNOW]
+Response I need: [DECISION, ACTION OR UNDERSTANDING]
+
+Give me:
+1. **Audience priorities:** Based only on what I provided, explain what this audience may care about and what questions they may have.
+2. **Revised message:** Rewrite the message for this audience. Put the main point first.
+3. **What changed:** Explain the changes you made to the context, emphasis and language.
+4. **What stayed:** Confirm the facts and requested action you preserved.
+5. **Question for me:** Ask one question that would help you improve the message further.
+
+Use direct, natural language. Do not invent facts or claim to know how the audience feels.`
+      },
+      {
+        phase: 'Use at work',
+        name: 'Write the same message at three lengths',
+        description: 'Use this when the same message needs to work in a meeting, an email and a chat.',
+        example: `Message:
+The operations team found that 18 percent of orders placed after 4 PM missed the next day delivery promise last month. Most delays came from two warehouses that close their picking queue at 4:30 PM. We can reduce the delays by moving the cutoff to 3:30 PM for those locations while we test a later staffing shift. I need approval to run the change for two weeks starting Monday.
+
+Audience: Head of operations
+Requested action: Approve the two week test`,
+        prompt: `Rewrite this message at three lengths. Keep the same main point, facts and requested action in every version.
+
+Message:
+[PASTE YOUR MESSAGE HERE]
+
+Audience: [WHO WILL RECEIVE IT]
+Requested action: [WHAT YOU NEED THEM TO DO]
+
+Create:
+1. **One sentence:** Give me the main point and requested action in one sentence.
+2. **Thirty seconds:** Write a spoken version that takes about 30 seconds to say.
+3. **Brief message:** Write a version for email or chat that can be read in under one minute.
+4. **Details removed:** List any details you left out of the shorter versions so I can decide whether to restore them.
+
+Put the main point first. Keep every fact accurate. Remove repetition, filler and slow openings.`
       }
     ];
 
-    const advisoryA = `You are facilitating a structured advisory board session. Simulate a panel of expert advisors reviewing a piece of work, then deliver a final verdict from the Orchestrator.
+    const advisoryA = `Run a structured advisory board session. Each board member should review the work from the assigned perspective. The board chair, also called the orchestrator, should consider all perspectives and recommend one direction on behalf of the board.
 
 CONTEXT
 [PASTE YOUR PROBLEM STATEMENT HERE]
@@ -540,12 +656,12 @@ Advisor: [Name]
 Role lens: [Role lens]
 How they challenge: [Description]
 
-THE ORCHESTRATOR
-Orchestrator: [Name]
+THE BOARD CHAIR
+Board chair: [Name]
 Role lens: [Role lens]
 How they decide: [Description]
 
-The Orchestrator observes only. They deliver the final verdict after all advisors have spoken.
+The board chair considers all advice before making the recommendation.
 
 INSTRUCTIONS
 For each advisor:
@@ -554,29 +670,67 @@ What I like: [max 2 points]
 What I would challenge or cut: [max 2 points]
 What I recommend: [max 2 points]
 
-Then the Orchestrator:
-ORCHESTRATOR VERDICT — [Name]
-Synthesis: [2–3 sentences]
-Final decision: [1–2 sentences]
+Then the board chair:
+BOARD CHAIR RECOMMENDATION: [Name]
+Synthesis: [Two or three sentences]
+Recommendation: [One or two sentences]
 Recommended next step: [One specific action]
 
-Stay in character. Do not blend perspectives. The Orchestrator makes a call, not a summary.`;
+Keep each perspective distinct. The board chair should explain the recommendation and the most important tradeoff.`;
 
     const advisoryB = `I need help designing a virtual advisory board for the following problem:
 
 [PASTE YOUR PROBLEM STATEMENT AND END GOAL HERE]
 
-Recommend a panel of 6 — 5 advisors and 1 orchestrator — specifically suited to this problem.
+Recommend three advisors and one board chair, also called the orchestrator, who are suited to this problem.
 
 For each person:
-1. Name or persona
-2. Role lens (short phrase)
-3. Why they are right for this problem (2–3 sentences)
-4. What they are most likely to challenge (1–2 sentences)
+1. **Name:** Give the person's name or a clear persona.
+2. **Perspective:** Describe the role lens in a short phrase.
+3. **Value:** Explain in two or three sentences why this perspective helps with the problem.
+4. **Challenge:** Explain in one or two sentences what they are most likely to question.
 
-For the Orchestrator, explain why this person is right to make the final call on this type of problem.
+For the board chair, explain why this person can weigh the perspectives and recommend one direction on behalf of the board. I will make the final decision.
 
 Return in a clean list I can easily read and act on.`;
+
+    const advisoryAWorked = `Run a structured advisory board session. Each member should review the work from the assigned perspective. The board chair should consider every perspective and recommend one direction on behalf of the board.
+
+CONTEXT
+The leadership team must decide whether to delay a product launch by six weeks. User testing found serious onboarding problems, but the sales team has already committed to the current date.
+
+THE WORK BEING REVIEWED
+Recommendation: Delay the launch by six weeks and use the time to repair onboarding, complete another test and prepare customers for the revised date.
+
+THE ADVISORY BOARD
+* **Product leader:** Focus on customer value and product quality.
+* **Sales leader:** Focus on client commitments and revenue.
+* **Operations leader:** Focus on delivery capacity and dependencies.
+
+THE BOARD CHAIR
+* **General manager:** Weigh the three perspectives and recommend one direction on behalf of the board.
+
+INSTRUCTIONS
+1. **Each perspective:** Explain what the board member supports, what concerns them and what they recommend.
+2. **Board recommendation:** Compare the advice and recommend one direction on behalf of the board.
+3. **Tradeoff:** Name the most important cost or risk that comes with the recommendation.
+4. **Next step:** Give me one action to take this week.
+
+Keep each perspective distinct. I will make the final decision.`;
+
+    const advisoryBWorked = `Help me choose an advisory board for this problem:
+
+Our regional team must decide whether to centralize customer support or keep local teams in each market. We need to improve response times without losing local knowledge. I need a recommendation for the next leadership meeting.
+
+Recommend three advisors and one board chair who can examine this problem from useful perspectives.
+
+For each person:
+1. **Name:** Give the person's name or a clear persona.
+2. **Perspective:** Describe the role lens in a short phrase.
+3. **Value:** Explain why this perspective helps with the problem.
+4. **Challenge:** Explain what they are most likely to question.
+
+For the board chair, explain why this person can weigh the perspectives and recommend one direction on behalf of the board. I will make the final decision.`;
 
     function fallbackCopy(text) {
       const temp = document.createElement('textarea');
@@ -595,38 +749,64 @@ Return in a clean list I can easily read and act on.`;
       if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done).catch(() => { fallbackCopy(text); done(); });
       else { fallbackCopy(text); done(); }
     }
+    const categories = ['organize', 'organize', 'write', 'write', 'act', 'act', 'review', 'organize', 'write', 'write', 'write'];
+    function workedPrompt(tool, index) {
+      const replacements = [
+        [["[PASTE YOUR LIST HERE]", tool.example]],
+        [["[PASTE YOUR QUESTION HERE]", "Why is employee retention dropping in our mid-level management team?"], ["[PASTE YOUR ROUGH IDEAS HERE]", "People are leaving for better pay. Managers feel under-supported. The reorganization has created uncertainty."]],
+        [["Situation: [PASTE HERE]", "Situation: Our company has grown for three years."], ["Complication: [PASTE HERE]", "Complication: Delivery delays rose 30% this quarter and two major clients have raised concerns."], ["Question: [PASTE HERE]", "Question: How should we improve delivery reliability this quarter?"], ["Answer: [PASTE HERE]", "Answer: Assign one owner to each client delivery, add weekly risk reviews and escalate delays within 24 hours."]],
+        [["[PASTE YOUR SCQA OR ISSUE TREE HERE]", tool.example]],
+        [["[PASTE YOUR TASK LIST HERE]", tool.example]],
+        [["[PASTE YOUR SITUATION HERE. INCLUDE THE PERSON, THE ISSUE, WHY IT IS DIFFICULT AND THE RESULT YOU NEED.]", tool.example]],
+        [["[PASTE YOUR DECISION, RECOMMENDATION, OR PLAN HERE]", tool.example]],
+        [["[PASTE YOUR MEETING NOTES HERE]", tool.example]],
+        [["Audience: [WHO WILL SEE IT]\nDecision or response I need: [WHAT I NEED THEM TO DECIDE OR DO]\nMaterial:\n[PASTE NOTES, DATA OR DRAFT CONTENT]", tool.example]],
+        [["Original message:\n[PASTE YOUR MESSAGE]\n\nAudience: [NAME THE PERSON OR GROUP]\nWhat they care about: [PASTE WHAT YOU KNOW]\nResponse I need: [DECISION, ACTION OR UNDERSTANDING]", tool.example]],
+        [["Message:\n[PASTE YOUR MESSAGE HERE]\n\nAudience: [WHO WILL RECEIVE IT]\nRequested action: [WHAT YOU NEED THEM TO DO]", tool.example]]
+      ];
+      return (replacements[index] || []).reduce((text, pair) => text.split(pair[0]).join(pair[1]), tool.prompt);
+    }
     function renderTool(tool, index) {
-      return `<article class="tk-card">
+      const worked = workedPrompt(tool, index);
+      return `<article class="tk-card" data-category="${categories[index]}">
         <div class="tk-label">${tool.phase}</div>
         <h2>${tool.name}</h2>
         <p>${tool.description}</p>
-        <button class="tk-toggle" type="button" data-example="${index}">See example input</button>
-        <div class="tk-example" id="example-${index}">${tool.example}</div>
-        <textarea class="tk-prompt" id="prompt-${index}" readonly>${tool.prompt}</textarea>
-        <button class="tk-button" type="button" data-copy="prompt-${index}">Copy prompt</button>
+        <details><summary>Choose and copy a prompt</summary>
+          <div class="tk-prompt-choice" role="tablist" aria-label="Prompt version">
+            <button class="tk-choice tk-active" type="button" data-prompt-choice="template-${index}">Use with my own work</button>
+            <button class="tk-choice" type="button" data-prompt-choice="worked-${index}">Start with an example</button>
+          </div>
+          <div class="tk-prompt-panel tk-active" id="template-${index}"><p class="tk-prompt-note">This version shows where to add your details.</p><textarea class="tk-prompt" id="prompt-${index}" readonly>${tool.prompt}</textarea><button class="tk-button" type="button" data-copy="prompt-${index}">Copy blank template</button></div>
+          <div class="tk-prompt-panel" id="worked-${index}"><p class="tk-prompt-note">Copy this version and replace the example details with your own.</p><textarea class="tk-prompt" id="worked-prompt-${index}" readonly>${worked}</textarea><button class="tk-button" type="button" data-copy="worked-prompt-${index}">Copy working example</button></div>
+        </details>
       </article>`;
     }
     document.getElementById('toolGrid').innerHTML = tools.map(renderTool).join('') + `
-      <article class="tk-card">
+      <article class="tk-card" data-category="review">
         <div class="tk-label">Phase 2 · Speak concisely</div>
         <h2>Advisory board</h2>
-        <p>Two modes. Run a board you have already built, or ask AI to design the right panel for your problem from scratch. Both return structured advisor feedback and a final orchestrator verdict.</p>
+        <p>Use this for a deeper review. Choose a board for your problem, then ask each member for advice and have the board chair recommend what to do.</p>
         <div class="tk-tabs">
-          <button class="tk-tab tk-active" type="button" data-mode="a">Run your board</button>
-          <button class="tk-tab" type="button" data-mode="b">Design your board first</button>
+          <button class="tk-tab tk-active" type="button" data-mode="a">I have a board</button>
+          <button class="tk-tab" type="button" data-mode="b">Help me choose a board</button>
         </div>
-        <div class="tk-mode tk-active" id="mode-a"><div class="tk-label">Run your board</div><p>Built your board? This prompt runs the full session — each advisor's structured feedback, and a final orchestrator verdict with a recommended next step.</p><textarea class="tk-prompt" id="advisoryA" readonly>${advisoryA}</textarea><button class="tk-button" type="button" data-copy="advisoryA">Copy prompt</button></div>
-        <div class="tk-mode" id="mode-b"><div class="tk-label">Design your board first</div><p>Not sure who should be on your panel? Paste this prompt first. It will recommend a board of six suited to your specific problem — then come back and use Mode A.</p><textarea class="tk-prompt" id="advisoryB" readonly>${advisoryB}</textarea><button class="tk-button" type="button" data-copy="advisoryB">Copy prompt</button></div>
+        <div class="tk-mode tk-active" id="mode-a"><div class="tk-label">Ask the board</div><p>Each board member gives a distinct view. The board chair considers every perspective and recommends one direction on behalf of the board.</p><div class="tk-prompt-choice" role="tablist" aria-label="Prompt version"><button class="tk-choice tk-active" type="button" data-prompt-choice="advisory-a-template">Use with my own work</button><button class="tk-choice" type="button" data-prompt-choice="advisory-a-worked">Start with an example</button></div><div class="tk-prompt-panel tk-active" id="advisory-a-template"><p class="tk-prompt-note">This version shows where to add your details.</p><textarea class="tk-prompt" id="advisoryA" readonly>${advisoryA}</textarea><button class="tk-button" type="button" data-copy="advisoryA">Copy blank template</button></div><div class="tk-prompt-panel" id="advisory-a-worked"><p class="tk-prompt-note">Copy this version and replace the example details with your own.</p><textarea class="tk-prompt" id="advisoryAWorked" readonly>${advisoryAWorked}</textarea><button class="tk-button" type="button" data-copy="advisoryAWorked">Copy working example</button></div></div>
+        <div class="tk-mode" id="mode-b"><div class="tk-label">Choose a board</div><p>Describe the problem and the decision you need to make. The prompt suggests people or roles that can examine it from useful perspectives.</p><div class="tk-prompt-choice" role="tablist" aria-label="Prompt version"><button class="tk-choice tk-active" type="button" data-prompt-choice="advisory-b-template">Use with my own work</button><button class="tk-choice" type="button" data-prompt-choice="advisory-b-worked">Start with an example</button></div><div class="tk-prompt-panel tk-active" id="advisory-b-template"><p class="tk-prompt-note">This version shows where to add your details.</p><textarea class="tk-prompt" id="advisoryB" readonly>${advisoryB}</textarea><button class="tk-button" type="button" data-copy="advisoryB">Copy blank template</button></div><div class="tk-prompt-panel" id="advisory-b-worked"><p class="tk-prompt-note">Copy this version and replace the example details with your own.</p><textarea class="tk-prompt" id="advisoryBWorked" readonly>${advisoryBWorked}</textarea><button class="tk-button" type="button" data-copy="advisoryBWorked">Copy working example</button></div></div>
       </article>`;
-    document.querySelectorAll('[data-example]').forEach(button => button.addEventListener('click', () => {
-      const box = document.getElementById(`example-${button.dataset.example}`);
-      box.classList.toggle('tk-open');
-      button.textContent = box.classList.contains('tk-open') ? 'Hide example input' : 'See example input';
+    document.querySelectorAll('[data-prompt-choice]').forEach(button => button.addEventListener('click', () => {
+      const scope = button.closest('.tk-mode') || button.closest('details');
+      scope.querySelectorAll('.tk-choice').forEach(choice => choice.classList.toggle('tk-active', choice === button));
+      scope.querySelectorAll('.tk-prompt-panel').forEach(panel => panel.classList.toggle('tk-active', panel.id === button.dataset.promptChoice));
     }));
     document.querySelectorAll('[data-copy]').forEach(button => button.addEventListener('click', () => copyText(document.getElementById(button.dataset.copy).value, button)));
     document.querySelectorAll('.tk-tab').forEach(button => button.addEventListener('click', () => {
       document.querySelectorAll('.tk-tab').forEach(tab => tab.classList.toggle('tk-active', tab === button));
       document.querySelectorAll('.tk-mode').forEach(mode => mode.classList.toggle('tk-active', mode.id === `mode-${button.dataset.mode}`));
+    }));
+    document.querySelectorAll('[data-filter]').forEach(button => button.addEventListener('click', () => {
+      document.querySelectorAll('[data-filter]').forEach(item => item.classList.toggle('tk-active', item === button));
+      document.querySelectorAll('.tk-card[data-category]').forEach(card => { card.hidden = button.dataset.filter !== 'all' && card.dataset.category !== button.dataset.filter; });
     }));
   </script>
   <script type="module">

@@ -322,15 +322,16 @@ async function getMemberAccount() {
     throw new Error("This account does not have an active membership invite.");
   }
 
+  const userData = userSnap.exists() ? (userSnap.data() || {}) : {};
   return {
     email,
     authDisplayName: user.displayName || "",
-    authPhotoURL: user.photoURL || "",
+    authPhotoURL: user.photoURL || userData.photoURL || "",
     signInProviderIds: Array.from(new Set((user.providerData || [])
       .map((provider) => String(provider && provider.providerId || "").trim())
       .filter(Boolean))),
     member: memberSnap.data() || {},
-    workspaceProgress: userSnap.exists() ? ((userSnap.data() || {}).workspaceProgress || {}) : {}
+    workspaceProgress: userData.workspaceProgress || {}
   };
 }
 
@@ -526,11 +527,13 @@ async function saveUserProfile(user, member = {}, signInProvider = "") {
   const profileData = {
     email,
     displayName: user.displayName || "",
-    photoURL: user.photoURL || "",
     role: member.role || "member",
     lastSeenAt: serverTimestamp(),
     updatedAt: serverTimestamp()
   };
+  // Passwordless sessions may not include a provider photo. Preserve the last
+  // valid provider photo instead of replacing it with an empty value.
+  if (user.photoURL) profileData.photoURL = user.photoURL;
   if (normalizedProvider) {
     profileData.lastSignInProvider = normalizedProvider;
     profileData.signInProviders = signInProviders;
@@ -1305,7 +1308,7 @@ function normalizedAnalyticsPayload(input = {}) {
     videoMaxPercent: Math.max(0, Math.min(100, Math.round(Number(input.videoMaxPercent) || 0))),
     videoPlayCount: analyticsCount(input.videoPlayCount),
     videoCompleted: input.videoCompleted === true,
-    videoMilestones: Array.isArray(input.videoMilestones) ? input.videoMilestones.map(Number).filter((value) => [25, 50, 75, 90, 100].includes(value)).slice(0, 5) : [],
+    videoMilestones: Array.isArray(input.videoMilestones) ? input.videoMilestones.map(Number).filter((value) => [25, 50, 75, 80, 90, 100].includes(value)).slice(0, 6) : [],
     receivedAt: serverTimestamp()
   };
 }
