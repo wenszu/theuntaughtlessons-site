@@ -370,7 +370,7 @@
 <body>
 
   <nav class="cert-topbar" aria-label="Certificate navigation">
-    <a class="cert-back" href="../member-login/index.html">&larr; Back to portal</a>
+    <a class="cert-back" id="certBack" href="../member-login/index.html">Close certificate</a>
     <div class="cert-actions" id="certActions" hidden>
       <button class="cert-btn cert-btn-secondary" id="certPrintBtn" type="button">Save as PDF</button>
       <button class="cert-btn cert-btn-secondary" id="certDownloadBtn" type="button">Download image</button>
@@ -384,7 +384,7 @@
   <div class="cert-error" id="certError" hidden>
     <h2 id="certErrorTitle">Not yet</h2>
     <p id="certErrorMsg">You need to complete all three phases to receive your certificate.</p>
-    <a href="../member-login/index.html">Go back to the portal</a>
+    <a id="certErrorBack" href="../member-login/index.html">Close certificate</a>
   </div>
 
   <div class="cert-wrap" id="certWrap" hidden>
@@ -444,6 +444,22 @@
 
   <script type="module">
     import { getSignedInUser, getEngagementSettings, issueVerifiedCredential } from "../assets/firebase.js";
+
+    function configureReturnAction() {
+      const returnLinks = [document.getElementById('certBack'), document.getElementById('certErrorBack')];
+      returnLinks.forEach((link) => {
+        if (!link) return;
+        link.addEventListener('click', (event) => {
+          event.preventDefault();
+          window.close();
+          window.setTimeout(() => {
+            if (!window.closed) window.location.href = '../member-login/index.html';
+          }, 120);
+        });
+      });
+    }
+
+    configureReturnAction();
 
     function localProfile() {
       try { return JSON.parse(localStorage.getItem('utl_member_profile') || 'null'); } catch { return null; }

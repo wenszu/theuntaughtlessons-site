@@ -527,7 +527,7 @@
     var modal = document.createElement("div");
     modal.className = "utl-reward-modal-backdrop";
     var certLink = opts.certificateHref
-      ? '<a class="utl-reward-cert-cta" href="' + escapeHtml(opts.certificateHref) + '">View your certificate &rarr;</a>'
+      ? '<a class="utl-reward-cert-cta" href="' + escapeHtml(opts.certificateHref) + '" target="_blank" rel="noopener">View your certificate <span aria-hidden="true">↗</span></a>'
       : "";
     modal.innerHTML = [
       '<div class="utl-reward-modal utl-reward-modal-program" role="dialog" aria-modal="true" aria-label="You completed the full program">',

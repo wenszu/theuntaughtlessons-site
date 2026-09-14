@@ -5,9 +5,12 @@ const functions = fs.readFileSync('functions-admin/index.js', 'utf8');
 const firebase = fs.readFileSync('assets/firebase.js', 'utf8');
 const rules = fs.readFileSync('firestore.rules', 'utf8');
 const certificate = fs.readFileSync('certificate/index.html', 'utf8');
+assert.match(certificate, /Close certificate/, 'certificate offers the same close action in every member context');
+assert.doesNotMatch(certificate, /openedFromAccount|from=account/, 'certificate behavior does not vary by origin');
 const verification = fs.readFileSync('verify/index.html', 'utf8');
 const admin = fs.readFileSync('admin/index.html', 'utf8');
 const results = fs.readFileSync('my-results/index.html', 'utf8');
+assert.match(results, /certificate\/index\.html" target="_blank" rel="noopener"/, 'My Results opens the certificate separately');
 
 assert.match(functions, /exports\.issueVerifiedCredential = onCall/, 'credentials must be issued by a trusted server function');
 assert.match(functions, /exports\.autoIssueVerifiedCredential = onDocumentWritten/, 'credentials should be issued automatically when completion records change');

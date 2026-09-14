@@ -326,6 +326,9 @@ async function getMemberAccount() {
     email,
     authDisplayName: user.displayName || "",
     authPhotoURL: user.photoURL || "",
+    signInProviderIds: Array.from(new Set((user.providerData || [])
+      .map((provider) => String(provider && provider.providerId || "").trim())
+      .filter(Boolean))),
     member: memberSnap.data() || {},
     workspaceProgress: userSnap.exists() ? ((userSnap.data() || {}).workspaceProgress || {}) : {}
   };
