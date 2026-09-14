@@ -171,6 +171,49 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    match /users/{userId}/learning_profile_evidence/{evidenceId} {
+      allow read: if (signedIn() && request.auth.uid == userId) || isAdmin();
+      allow create: if signedIn() && request.auth.uid == userId &&
+        evidenceId.size() >= 8 && evidenceId.size() <= 100 &&
+        request.resource.data.keys().hasOnly([
+          'schemaVersion', 'userId', 'evidenceId', 'exerciseId', 'attemptId', 'programId',
+          'evidenceSource', 'recordedAtClient', 'learningDimensions',
+          'capabilities', 'performance', 'measurementDesign', 'createdAt'
+        ]) &&
+        request.resource.data.schemaVersion == 1 &&
+        request.resource.data.userId == userId &&
+        request.resource.data.evidenceId == evidenceId &&
+        request.resource.data.exerciseId is string && request.resource.data.exerciseId.size() >= 1 && request.resource.data.exerciseId.size() <= 100 &&
+        (request.resource.data.attemptId == null || (request.resource.data.attemptId is string && request.resource.data.attemptId.size() <= 100)) &&
+        (request.resource.data.programId == null || (request.resource.data.programId is string && request.resource.data.programId.size() >= 1 && request.resource.data.programId.size() <= 80)) &&
+        request.resource.data.evidenceSource in ['observed_exercise', 'self_report', 'external_ai'] &&
+        request.resource.data.recordedAtClient is string && request.resource.data.recordedAtClient.size() <= 80 &&
+        request.resource.data.learningDimensions is map &&
+        request.resource.data.learningDimensions.keys().hasOnly(['startingPoint', 'guidance', 'explanationPath', 'feedbackTiming', 'challenge']) &&
+        request.resource.data.capabilities is list && request.resource.data.capabilities.size() <= 20 &&
+        request.resource.data.performance is map &&
+        request.resource.data.performance.keys().hasOnly(['score', 'scoreMaximum', 'completed']) &&
+        request.resource.data.measurementDesign is map &&
+        request.resource.data.measurementDesign.keys().hasOnly(['skillKey', 'seriesKey', 'sequenceNumber', 'contextKey', 'scaffoldLevel', 'hintsUsed', 'refresherProvided', 'priorAttemptId', 'elapsedSincePriorSeconds']) &&
+        request.resource.data.createdAt == request.time;
+      allow update, delete: if false;
+    }
+
+    match /learning_profile_summaries/{userId} {
+      allow read: if (signedIn() && request.auth.uid == userId) || isAdmin();
+      allow create, update: if signedIn() && request.auth.uid == userId &&
+        request.resource.data.keys().hasOnly([
+          'schemaVersion', 'userId', 'personality', 'learning', 'programs', 'updatedAt'
+        ]) &&
+        request.resource.data.schemaVersion == 1 &&
+        request.resource.data.userId == userId &&
+        request.resource.data.personality is map &&
+        request.resource.data.learning is map &&
+        request.resource.data.programs is map &&
+        request.resource.data.updatedAt == request.time;
+      allow delete: if false;
+    }
+
     match /users/{userId}/analytics_sessions/{sessionId} {
       allow read: if (signedIn() && request.auth.uid == userId) || isAdmin();
       allow create, update: if signedIn() && request.auth.uid == userId &&
@@ -272,12 +315,21 @@ service cloud.firestore {
         isCanonicalMemberRecord(email) &&
         (!isBootstrapOwnerEmail(email) || isBootstrapOwner());
       allow delete: if isAdmin() && !isBootstrapOwnerEmail(email);
-      // Members can update only their own preferred name and login audit fields.
+      // Members can update only their own account preferences and login audit fields.
       allow update: if signedInWithEmail() &&
         request.auth.token.email.lower() == email &&
         request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-          'name', 'lastLoginAt', 'firstLoginAt', 'lastSignInProvider', 'signInProviders'
+          'name', 'goals', 'avatarIconId',
+          'lastLoginAt', 'firstLoginAt', 'lastSignInProvider', 'signInProviders'
         ]) &&
+        (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['name']) ||
+          (request.resource.data.name is string && request.resource.data.name.size() >= 1 && request.resource.data.name.size() <= 200)) &&
+        (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['goals']) ||
+          request.resource.data.goals == null ||
+          (request.resource.data.goals is string && request.resource.data.goals.size() <= 2000)) &&
+        (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['avatarIconId']) ||
+          request.resource.data.avatarIconId == null ||
+          request.resource.data.avatarIconId in ['compass', 'lightbulb', 'book', 'target', 'conversation', 'mountain', 'star', 'leaf']) &&
         (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['lastSignInProvider']) ||
           request.resource.data.lastSignInProvider in ['emailLink', 'google.com', 'microsoft.com', 'facebook.com', 'password']) &&
         (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['signInProviders']) ||

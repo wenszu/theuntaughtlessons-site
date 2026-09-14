@@ -904,3 +904,42 @@ Shared Design Patterns:
 - Add actual scoring logic using the C³ Rubric™.
 - Decide whether TSA results are purely local or submitted somewhere.
 - Continue aligning all app headers and timers.
+
+---
+
+## September 2026 implementation detail archived from active context
+
+### 2026-09-11 — Public form delivery and operational health
+
+- Commit `dcb0d51` fixed misleading errors on Contact and Join the waitlist. The Apps Script endpoint was already writing submissions, but the static cross-origin page could not reliably inspect its response. Both forms now use `navigator.sendBeacon()` with a `text/plain` JSON blob and fall back to a `no-cors`, `keepalive` fetch.
+- Both forms explicitly send `tab: 'Contacts'` to spreadsheet `[Website] UTL leads and assessments v1` (`10iQByFqVCffHanZbbHLnYj7Csbet4fgOCd2FWDzEqkE`). Columns: Timestamp, Name, Email, Role, What brings you here?, Page, Source. Beacon acceptance confirms queuing only; verify important submissions in the sheet and notification inbox.
+- Operational monitoring was separated into Learner readiness for people/support, Technical reliability for runtime incidents, and Site health check for static configuration and structure.
+- `assets/stability-monitor.js` is fail-safe, caps reports at 20 per session, deduplicates for five minutes, removes emails and links, and excludes answers and stack traces. Events write to `users/{uid}/stability_events/{eventId}` under tightly scoped rules.
+- Static deployment does not deploy Firestore rules. Deploy `firestore.rules` separately before treating Technical reliability as complete production coverage.
+- Verification at implementation: 60 tests passed, relevant JavaScript parsed, `git diff --check` passed, rules compiled in the emulator, and local routes served correctly.
+
+### 2026-09-11 — Vimeo CSP and admin progress loading
+
+- Added `player.vimeo.com` to the repository CSP. Live checks showed `_headers` was not served by the GitHub Pages plus Cloudflare DNS/CDN setup, so enforcement requires Cloudflare Pages or a Worker.
+- Added `spFetchAllMembers(fb, forceRefresh)`, a shared 45-second cache for member and progress scans. Refresh bypasses it; ordinary tab changes reuse it.
+- Learner readiness gained cohort, search, and signal filters, plus Technical reliability incidents from the previous 72 hours.
+
+### 2026-09-11 — Git metadata recovery
+
+- An external tool deleted local `.git` metadata and four tracked files. A fresh verified GitHub clone restored the files and metadata. One unpushed commit object was lost, but its working-tree content remained and was recommitted.
+- If repository status ever presents the entire home directory as untracked, stop. Do not run Git write commands until the repository root and metadata are recovered.
+
+### 2026-09-11 — Site-wide load-speed and stability pass
+
+- Replaced serial Google Fonts CSS imports with preconnect and stylesheet links. Added Firebase SDK and REST-origin preconnects on 23 dependent pages.
+- Added automated cache synchronization after finding several live versions of shared assets. Never hand-edit `?v=` values.
+- Removed roughly 340 lines of confirmed-dead admin code from `member-login/content-config.js`. A full split of the roughly 4,000-line closure was assessed and deferred as a broader shared-state refactor.
+- Resized six heavily reused images in place. Unreferenced large design assets and already-right-sized walkthrough/chalkboard images were left unchanged.
+- Added an offline/online learner banner. Kept one adaptive Vimeo `max_quality=720p` policy instead of a separate mobile cap.
+
+### 2026-09-12 — Admin console navigation cleanup
+
+- Audited seven tabs and 30 sections. Added the missing MP rules navigation item. Legacy local access and unconnected email nudges remain intentionally hidden.
+- Clarified that Technical reliability reads recent production incidents from Firebase, while Site health check audits static configuration and structure locally.
+- Merged Unlock phases into Member preview settings, clarified Quick links as a bookmark directory, and organized Rewards as Levels, Rules summary, MP rules, and Award preview.
+- Verification included the full tests, a headless admin load with no console errors, and validation of the reduced `window.UTLWorkspace` API.

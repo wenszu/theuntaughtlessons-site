@@ -295,6 +295,67 @@ async function getAuthorizedMember(email) {
   return memberSnap.exists() ? memberSnap.data() : null;
 }
 
+const MEMBER_ACCOUNT_AVATAR_ICON_IDS = Object.freeze([
+  "compass",
+  "lightbulb",
+  "book",
+  "target",
+  "conversation",
+  "mountain",
+  "star",
+  "leaf"
+]);
+
+async function getMemberAccount() {
+  const user = await getSignedInUser();
+  if (!user || !user.uid || !user.email) {
+    throw new Error("Please sign in to view your account.");
+  }
+
+  const email = String(user.email).trim().toLowerCase();
+  const readyDb = requireFirestore();
+  const [memberSnap, userSnap] = await Promise.all([
+    getDoc(doc(readyDb, "authorized_members", email)),
+    getDoc(doc(readyDb, "users", user.uid))
+  ]);
+  if (!memberSnap.exists()) {
+    throw new Error("This account does not have an active membership invite.");
+  }
+
+  return {
+    email,
+    authDisplayName: user.displayName || "",
+    authPhotoURL: user.photoURL || "",
+    member: memberSnap.data() || {},
+    workspaceProgress: userSnap.exists() ? ((userSnap.data() || {}).workspaceProgress || {}) : {}
+  };
+}
+
+async function updateMemberAccount(fields = {}) {
+  const user = await getSignedInUser();
+  if (!user || !user.email) {
+    throw new Error("Please sign in to update your account.");
+  }
+
+  const email = String(user.email).trim().toLowerCase();
+  const name = String(fields.name || "").trim();
+  const goals = String(fields.goals || "").trim();
+  const avatarIconId = String(fields.avatarIconId || "").trim();
+  if (!name) throw new Error("Please enter your name.");
+  if (name.length > 200) throw new Error("Please shorten your name to 200 characters or fewer.");
+  if (goals.length > 2000) throw new Error("Please shorten your goals to 2,000 characters or fewer.");
+  if (avatarIconId && !MEMBER_ACCOUNT_AVATAR_ICON_IDS.includes(avatarIconId)) {
+    throw new Error("Please choose one of the available avatars.");
+  }
+
+  await updateDoc(doc(requireFirestore(), "authorized_members", email), {
+    name,
+    goals: goals || null,
+    avatarIconId: avatarIconId || null
+  });
+  return { name, goals, avatarIconId };
+}
+
 async function requireAuthorizedMember(user) {
   const member = await getAuthorizedMember(user && user.email);
   if (!member) {
@@ -977,6 +1038,222 @@ async function saveExerciseSubmission(submissionPayload = {}) {
   return { saved: true, submissionId };
 }
 
+const LEARNING_PROFILE_TREND_TOLERANCE = 5;
+const LEARNING_PROFILE_SOURCE_RANK = { external_ai: 1, self_report: 2, observed_exercise: 3 };
+
+function learningProfileClone(value) {
+  return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : {};
+}
+
+function learningProfileEvidenceLevel(count, contextCount) {
+  if (count >= 3 && contextCount >= 2) return "consistent_pattern";
+  if (count >= 2) return "emerging_pattern";
+  if (count >= 1) return "starting_hypothesis";
+  return "none";
+}
+
+function learningProfileNormalizedScore(score, scoreMaximum) {
+  if (!Number.isFinite(score) || !Number.isFinite(scoreMaximum) || scoreMaximum <= 0) return null;
+  const bounded = Math.max(0, Math.min(100, score / scoreMaximum * 100));
+  return Math.round(bounded * 100) / 100;
+}
+
+function aggregateLearningProfileEvidence(current = {}, evidence = {}) {
+  const summary = learningProfileClone(current);
+  summary.schemaVersion = 1;
+  summary.userId = evidence.userId;
+  summary.personality ||= { dimensions: {} };
+  summary.learning ||= { dimensions: {} };
+  summary.programs ||= {};
+  const source = evidence.evidenceSource;
+  const contextKey = evidence.measurementDesign?.contextKey;
+
+  Object.entries(evidence.learningDimensions || {}).forEach(([dimension, value]) => {
+    if (!value) return;
+    const previous = summary.learning.dimensions[dimension] || {};
+    const previousRank = LEARNING_PROFILE_SOURCE_RANK[previous.evidenceSource] || 0;
+    const nextRank = LEARNING_PROFILE_SOURCE_RANK[source] || 0;
+    if (nextRank < previousRank) return;
+    const reset = nextRank > previousRank;
+    const valueCounts = reset ? {} : { ...(previous.valueCounts || {}) };
+    const contextsByValue = reset ? {} : learningProfileClone(previous.contextsByValue);
+    valueCounts[value] = (Number(valueCounts[value]) || 0) + 1;
+    const contexts = new Set(contextsByValue[value] || []);
+    if (contextKey) contexts.add(contextKey);
+    contextsByValue[value] = [...contexts].slice(-20);
+    const leadingValue = Object.keys(valueCounts).sort((a, b) => valueCounts[b] - valueCounts[a])[0];
+    const leadingContexts = contextsByValue[leadingValue] || [];
+    summary.learning.dimensions[dimension] = {
+      value: leadingValue,
+      evidenceLevel: learningProfileEvidenceLevel(valueCounts[leadingValue], leadingContexts.length),
+      evidenceSource: source,
+      observationCount: valueCounts[leadingValue],
+      contextCount: leadingContexts.length,
+      lastUpdatedAt: evidence.recordedAtClient,
+      valueCounts,
+      contextsByValue
+    };
+  });
+
+  if (!evidence.programId) return summary;
+  const program = learningProfileClone(summary.programs[evidence.programId] || { capabilities: {}, outcomes: {} });
+  program.capabilities ||= {};
+  program.outcomes ||= {};
+  const normalizedScore = learningProfileNormalizedScore(
+    evidence.performance?.score,
+    evidence.performance?.scoreMaximum
+  );
+
+  if (source === "observed_exercise") (evidence.capabilities || []).forEach((item) => {
+    if (!item.capability || !Number.isFinite(item.score) || !Number.isFinite(item.scoreMaximum) || item.scoreMaximum <= 0) return;
+    const key = [item.capability, item.subSkill].filter(Boolean).join("__");
+    const previous = program.capabilities[key] || {};
+    const contexts = new Set(previous.contextKeys || []);
+    if (contextKey) contexts.add(contextKey);
+    const observationCount = (Number(previous.observationCount) || 0) + 1;
+    program.capabilities[key] = {
+      capability: item.capability,
+      subSkill: item.subSkill,
+      score: learningProfileNormalizedScore(item.score, item.scoreMaximum),
+      evidenceLevel: learningProfileEvidenceLevel(observationCount, contexts.size),
+      evidenceSource: source,
+      observationCount,
+      contextCount: contexts.size,
+      contextKeys: [...contexts].slice(-20),
+      lastDemonstratedAt: evidence.recordedAtClient,
+      latestAttemptId: evidence.attemptId
+    };
+  });
+
+  const design = evidence.measurementDesign || {};
+  const comparableBase = normalizedScore != null && design.skillKey && design.seriesKey && design.priorAttemptId;
+  const qualifiers = {
+    improvement: comparableBase && design.sequenceNumber != null,
+    retention: comparableBase && design.sequenceNumber != null && design.elapsedSincePriorSeconds != null && design.refresherProvided === false,
+    application: comparableBase && Boolean(design.contextKey),
+    independence: comparableBase && Boolean(design.scaffoldLevel) && design.hintsUsed != null
+  };
+  if (source === "observed_exercise") Object.entries(qualifiers).forEach(([outcome, qualifies]) => {
+    if (!qualifies) return;
+    const previous = program.outcomes[outcome] || {};
+    const prior = previous.latestMeasurement;
+    const comparable = prior && prior.attemptId === design.priorAttemptId &&
+      prior.skillKey === design.skillKey && prior.seriesKey === design.seriesKey &&
+      (outcome !== "application" || prior.contextKey !== design.contextKey);
+    const delta = comparable ? normalizedScore - prior.score : null;
+    const trend = delta == null ? null : delta > LEARNING_PROFILE_TREND_TOLERANCE
+      ? "up"
+      : delta < -LEARNING_PROFILE_TREND_TOLERANCE ? "down" : "steady";
+    program.outcomes[outcome] = {
+      trend,
+      comparisonCount: (Number(previous.comparisonCount) || 0) + (comparable ? 1 : 0),
+      lastUpdatedAt: evidence.recordedAtClient,
+      latestMeasurement: {
+        score: normalizedScore,
+        attemptId: evidence.attemptId,
+        skillKey: design.skillKey,
+        seriesKey: design.seriesKey,
+        contextKey: design.contextKey,
+        scaffoldLevel: design.scaffoldLevel,
+        hintsUsed: design.hintsUsed,
+        refresherProvided: design.refresherProvided,
+        elapsedSincePriorSeconds: design.elapsedSincePriorSeconds
+      }
+    };
+  });
+  summary.programs[evidence.programId] = program;
+  return summary;
+}
+
+async function saveLearningProfileEvidence(input = {}) {
+  if (experiencePreviewActive()) return { preview: true, saved: false };
+  const user = await getSignedInUser();
+  if (!user?.uid) throw new Error("A signed-in Firebase user is required to save learning-profile evidence.");
+  const exerciseId = String(input.exerciseId || "").trim().slice(0, 100);
+  const evidenceId = String(input.evidenceId || input.attemptId || "").trim().slice(0, 100);
+  if (!exerciseId || evidenceId.length < 8) throw new Error("A valid exercise and evidence ID are required.");
+  const sources = ["observed_exercise", "self_report", "external_ai"];
+  const evidenceSource = sources.includes(input.evidenceSource) ? input.evidenceSource : "observed_exercise";
+  const programId = input.programId == null ? null : String(input.programId).trim().slice(0, 80) || null;
+  const dimensions = input.learningDimensions && typeof input.learningDimensions === "object" ? input.learningDimensions : {};
+  const design = input.measurementDesign && typeof input.measurementDesign === "object" ? input.measurementDesign : {};
+  const performance = input.performance && typeof input.performance === "object" ? input.performance : {};
+  const dimensionValue = (value, allowed) => allowed.includes(value) ? value : null;
+  const safeText = (value, max = 100) => value == null ? null : String(value).trim().slice(0, max) || null;
+  const capabilities = (Array.isArray(input.capabilities) ? input.capabilities : []).slice(0, 20).map((item) => ({
+    capability: safeText(item?.capability),
+    subSkill: safeText(item?.subSkill),
+    score: Number.isFinite(Number(item?.score)) ? Number(item.score) : null,
+    scoreMaximum: Number.isFinite(Number(item?.scoreMaximum)) ? Number(item.scoreMaximum) : null
+  })).filter((item) => item.capability || item.subSkill);
+  const learningDimensions = {
+    startingPoint: dimensionValue(dimensions.startingPoint, ["try_first", "worked_example_first"]),
+    guidance: dimensionValue(dimensions.guidance, ["light_touch", "step_by_step"]),
+    explanationPath: dimensionValue(dimensions.explanationPath, ["example_to_principle", "principle_to_example"]),
+    feedbackTiming: dimensionValue(dimensions.feedbackTiming, ["immediate", "after_reflection"]),
+    challenge: dimensionValue(dimensions.challenge, ["build_gradually", "stretch_quickly"])
+  };
+  const hasLearningEvidence = Object.values(learningDimensions).some(Boolean);
+  const hasTaggedDesign = Object.values(design).some((value) => value != null && value !== "");
+  const hasProgramEvidence = capabilities.length > 0 || (!hasLearningEvidence && hasTaggedDesign);
+  if (hasLearningEvidence && programId) throw new Error("Learning-dimension evidence must not include a program ID.");
+  if (hasProgramEvidence && !programId) throw new Error("Capability and outcome evidence requires a program ID.");
+  if (!hasLearningEvidence && !hasProgramEvidence) throw new Error("Learning Profile evidence requires at least one tagged signal.");
+  const evidence = {
+    schemaVersion: 1,
+    userId: user.uid,
+    evidenceId,
+    exerciseId,
+    attemptId: input.attemptId ? String(input.attemptId).slice(0, 100) : null,
+    programId,
+    evidenceSource,
+    recordedAtClient: String(input.recordedAtClient || new Date().toISOString()).slice(0, 80),
+    learningDimensions,
+    capabilities,
+    performance: {
+      score: Number.isFinite(Number(performance.score)) ? Number(performance.score) : null,
+      scoreMaximum: Number.isFinite(Number(performance.scoreMaximum)) ? Number(performance.scoreMaximum) : null,
+      completed: typeof performance.completed === "boolean" ? performance.completed : null
+    },
+    measurementDesign: {
+      skillKey: safeText(design.skillKey),
+      seriesKey: safeText(design.seriesKey),
+      sequenceNumber: Number.isFinite(Number(design.sequenceNumber)) ? Number(design.sequenceNumber) : null,
+      contextKey: safeText(design.contextKey),
+      scaffoldLevel: dimensionValue(design.scaffoldLevel, ["full", "partial", "minimal", "none"]),
+      hintsUsed: Number.isFinite(Number(design.hintsUsed)) ? Number(design.hintsUsed) : null,
+      refresherProvided: typeof design.refresherProvided === "boolean" ? design.refresherProvided : null,
+      priorAttemptId: safeText(design.priorAttemptId),
+      elapsedSincePriorSeconds: Number.isFinite(Number(design.elapsedSincePriorSeconds)) ? Number(design.elapsedSincePriorSeconds) : null
+    },
+  };
+  const readyDb = requireFirestore();
+  const evidenceRef = doc(readyDb, "users", user.uid, "learning_profile_evidence", evidenceId);
+  const summaryRef = doc(readyDb, "learning_profile_summaries", user.uid);
+  return runTransaction(readyDb, async (transaction) => {
+    const [existingEvidence, existingSummary] = await Promise.all([transaction.get(evidenceRef), transaction.get(summaryRef)]);
+    if (existingEvidence.exists()) return { saved: true, evidenceId, duplicate: true };
+    const summary = aggregateLearningProfileEvidence(existingSummary.exists() ? existingSummary.data() : {}, evidence);
+    transaction.set(evidenceRef, { ...evidence, createdAt: serverTimestamp() });
+    const summaryPatch = {
+      schemaVersion: summary.schemaVersion,
+      userId: summary.userId,
+      updatedAt: serverTimestamp()
+    };
+    if (!existingSummary.exists()) {
+      summaryPatch.personality = summary.personality;
+      summaryPatch.learning = summary.learning;
+      summaryPatch.programs = summary.programs;
+    } else if (hasLearningEvidence) {
+      summaryPatch.learning = summary.learning;
+    } else if (programId) {
+      summaryPatch.programs = { [programId]: summary.programs[programId] };
+    }
+    transaction.set(summaryRef, summaryPatch, { merge: true });
+    return { saved: true, evidenceId };
+  });
+}
+
 function analyticsText(value, max = 160) {
   return String(value || "").trim().slice(0, max);
 }
@@ -1656,6 +1933,7 @@ async function saveTsaScoringComparison(payload = {}) {
 }
 
 export {
+  aggregateLearningProfileEvidence,
   actionCodeSettings,
   app,
   auth,
@@ -1669,6 +1947,7 @@ export {
   firebaseConfig,
   firebaseInitError,
   getAuthorizedMember,
+  getMemberAccount,
   getDoc,
   getDocs,
   getFacebookRedirectResult,
@@ -1697,6 +1976,8 @@ export {
   getUserFeedbackEnabled,
   GoogleAuthProvider,
   isSignInWithEmailLink,
+  LEARNING_PROFILE_TREND_TOLERANCE,
+  MEMBER_ACCOUNT_AVATAR_ICON_IDS,
   issueVerifiedCredential,
   manageVerifiedCredential,
   searchVerifiedCredentials,
@@ -1710,6 +1991,7 @@ export {
   saveMemberWorkspaceProgress,
   saveMemberRewards,
   saveUserProfile,
+  updateMemberAccount,
   submitAccessRequest,
   sendSignInInvite,
   sendSignInLinkToEmail,
@@ -1720,6 +2002,7 @@ export {
   saveExerciseAttempt,
   saveExerciseDraft,
   saveExerciseSubmission,
+  saveLearningProfileEvidence,
   saveAssessmentItemAttempt,
   getAssessmentVisibility,
   getAdminVisibilitySettings,

@@ -437,7 +437,7 @@ const UTL_CONTENT = {
   }
 
   function firebaseHref() {
-    var version = "?v=20260902-cohort-standing-interaction-fix";
+    var version = "?v=20260914-member-account-1";
     if (inPhasePracticeRoot()) return "../../../assets/firebase.js" + version;
     return (inAdminRoot() ? "../assets/firebase.js" : "../assets/firebase.js") + version;
   }
@@ -1060,6 +1060,7 @@ const UTL_CONTENT = {
       label: label,
       initials: initials(label || email),
       photoURL: profile.photoURL || "",
+      avatarIconId: profile.avatarIconId || "",
       role: profile.role || (localStorage.getItem(ADMIN_KEY) === "true" ? "admin" : "member")
     };
   }
@@ -1506,6 +1507,7 @@ const UTL_CONTENT = {
       ,"@media(max-width:600px){.ws-learning-heading{display:grid;grid-template-columns:1fr auto;gap:8px;padding:14px 16px}.ws-learning-heading>div:first-child{min-width:0}.ws-learning-heading h1{font-size:26px;white-space:nowrap}.ws-learning-heading p{display:none}.ws-learning-overall{width:auto;display:block;padding:6px 9px}.ws-learning-overall strong{font-size:15px}.ws-learning-overall span{font-size:9px}.ws-learning-heading .ws-journey-milestone-copy{display:none}.ws-learning-heading .ws-journey-milestones{width:auto;gap:0}.ws-learning-heading .ws-journey-milestone{width:16px;height:16px}.ws-learning-heading .ws-journey-milestone:before{inset:4px}.ws-learning-heading .ws-journey-milestone.is-current:before{inset:3px;border-width:2px}.ws-learning-heading .ws-journey-milestone-dots:before{left:8px;right:8px}.ws-learning-continue{align-items:stretch;flex-direction:row;padding:9px 10px}.ws-learning-continue-copy{display:block}.ws-learning-continue-copy>span{font-size:9px}.ws-learning-continue h2{font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ws-learning-continue p{font-size:10px}.ws-learning-continue>.ws-button{width:auto;min-width:86px;min-height:38px;padding:0 9px;font-size:10px}.ws-learning-path-head{align-items:flex-start;flex-direction:column;gap:4px}.ws-learning-path-head h2{font-size:19px}.ws-learning-path-sub{font-size:11px}.ws-learning-path>.ws-orientation-card .ws-orientation-head{gap:9px;padding:7px 10px}.ws-learning-path>.ws-orientation-card .ws-start-badge{margin:0}.ws-learning-path>.ws-orientation-card .ws-orientation-title{font-size:14px}.ws-learning-path>.ws-orientation-card .ws-orientation-sub{font-size:11px}.ws-journey-module-head strong{font-size:17px}.ws-journey-activity{grid-template-columns:20px minmax(0,1fr) auto}.ws-journey-activity-preview-button{grid-template-columns:26px 22px minmax(0,1fr) auto}.ws-journey-type{font-size:0}.ws-journey-type span{font-size:9px}.ws-journey-duration{font-size:9px}.ws-journey-preview{top:auto;left:0;width:100%;height:min(72svh,620px);border-left:0;border-top:1px solid var(--ws-line);border-radius:16px 16px 0 0;padding:31px 20px 24px}.ws-journey-preview h3{font-size:27px}}"
       ,".ws-journey-tab-card{border:1px solid var(--ws-line);border-radius:10px;background:#fff;overflow:hidden}.ws-journey-phase-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));background:#F2ECE3;border-bottom:1px solid var(--ws-line)}.ws-journey-phase-tab{position:relative;min-width:0;display:grid;grid-template-rows:1fr auto;gap:7px;padding:12px 16px 9px;border:0;border-right:1px solid var(--ws-line);background:#F2ECE3;color:inherit;text-align:left;cursor:pointer;transition:background .15s,box-shadow .15s}.ws-journey-phase-tab:last-child{border-right:0}.ws-journey-phase-tab:hover:not(.ws-active){background:#fff;box-shadow:0 4px 14px rgba(238,163,32,.18)}.ws-journey-phase-tab:hover:not(.ws-active):before{content:'';position:absolute;left:0;right:0;top:0;height:4px;background:rgba(238,163,32,.45)}.ws-journey-phase-tab>span:first-child{min-width:0}.ws-journey-phase-tab small,.ws-journey-phase-tab strong,.ws-journey-phase-tab em{display:block}.ws-journey-phase-tab small{color:var(--ws-gold);font-size:10px;font-weight:700}.ws-journey-phase-tab strong{margin:2px 0;color:var(--ws-navy);font-size:17px}.ws-journey-phase-tab em{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ws-steel);font-size:10px;font-style:normal}.ws-journey-phase-tab.ws-active{background:#fff}.ws-journey-phase-tab.ws-active:before{content:'';position:absolute;left:0;right:0;top:0;height:4px;background:var(--ws-gold)}.ws-journey-phase-tab.ws-tab-locked:not(.ws-active){background:#EEECE8}.ws-journey-phase-tab:focus-visible{outline:3px solid rgba(238,163,32,.55);outline-offset:-3px}.ws-journey-phase-panel{padding:12px 16px 16px}.ws-journey-panel-head{display:flex;align-items:end;justify-content:space-between;gap:20px;padding:0 2px 9px;border-bottom:1px solid var(--ws-line)}.ws-journey-panel-head span{color:var(--ws-gold);font-size:10px;font-weight:700}.ws-journey-panel-head h3{margin:1px 0 0;color:var(--ws-navy);font:700 22px/1.1 'Playfair Display',serif}.ws-journey-panel-head>strong{color:var(--ws-steel);font-size:11px}.ws-journey-phase-panel .ws-journey-activities{grid-template-columns:1fr;gap:2px;margin-top:5px}.ws-journey-phase-panel .ws-journey-activity{grid-template-columns:22px minmax(0,1fr) 58px 50px;min-height:43px;padding:3px 7px}.ws-journey-phase-panel .ws-journey-activity-preview-button{grid-template-columns:36px 128px minmax(0,1fr) 74px;gap:7px}.ws-journey-phase-panel .ws-journey-activity-preview-button strong{font-size:13px}.ws-journey-phase-panel .ws-journey-duration{font-size:10px;text-align:right}.ws-journey-phase-panel .ws-journey-activity-state{display:block;min-width:58px;text-align:right;font-size:10px}.ws-journey-phase-panel .ws-journey-activity-done .ws-journey-activity-state{color:var(--ws-green)}.ws-journey-phase-panel .ws-journey-activity-next .ws-journey-activity-state{color:#8A5A00}.ws-journey-phase-panel .ws-journey-activity-progress .ws-journey-activity-state{color:var(--ws-navy)}"
       ,"@media(max-width:700px){.ws-journey-phase-tab{padding:10px 8px 8px;text-align:center}.ws-journey-phase-tab strong{font-size:13px;white-space:nowrap}.ws-journey-phase-tab em{font-size:9px}.ws-journey-phase-panel{padding:10px 8px 12px}.ws-journey-panel-head{align-items:center;padding:0 4px 8px}.ws-journey-panel-head h3{font-size:19px}.ws-journey-phase-panel .ws-journey-activity{grid-template-columns:20px minmax(0,1fr);min-height:45px}.ws-journey-phase-panel .ws-journey-activity-preview-button{grid-template-columns:28px 22px minmax(0,1fr) auto;gap:5px}.ws-journey-phase-panel .ws-journey-type{font-size:0}.ws-journey-phase-panel .ws-journey-type span{font-size:9px}.ws-journey-phase-panel .ws-journey-activity-preview-button strong{font-size:11px}.ws-journey-phase-panel .ws-journey-activity-state{display:none}.ws-journey-phase-panel .ws-journey-activity-action{display:none}}"
+      ,".ws-account-layout{display:grid;gap:22px}.ws-account-card{padding:24px}.ws-account-identity{display:grid;grid-template-columns:160px minmax(0,1fr);gap:28px;align-items:start}.ws-account-photo{display:grid;justify-items:center;gap:10px}.ws-account-photo-circle{width:112px;height:112px;border-radius:999px;display:grid;place-items:center;overflow:hidden;background:#FFF3D7;border:3px solid var(--ws-gold);color:var(--ws-navy);font-size:42px}.ws-account-photo-circle img{width:100%;height:100%;object-fit:cover}.ws-account-photo small{color:var(--ws-steel);font-size:11px;text-align:center;line-height:1.35}.ws-account-form{display:grid;gap:16px}.ws-account-field{display:grid;gap:7px}.ws-account-field label{color:var(--ws-navy);font-weight:700}.ws-account-readonly{min-height:46px;display:flex;align-items:center;padding:0 13px;border:1px solid var(--ws-line);border-radius:8px;background:#F6F3EE;color:var(--ws-steel)}.ws-account-avatars{display:grid;grid-template-columns:repeat(4,56px);gap:10px}.ws-account-avatar-option{position:relative}.ws-account-avatar-option input{position:absolute;opacity:0;pointer-events:none}.ws-account-avatar-option span{width:52px;height:52px;border:1px solid var(--ws-line);border-radius:999px;display:grid;place-items:center;background:#fff;color:var(--ws-navy);font-size:24px;cursor:pointer}.ws-account-avatar-option input:checked+span{border:3px solid var(--ws-gold);background:#FFF8E9}.ws-account-avatar-option input:focus-visible+span{outline:3px solid rgba(0,51,102,.28);outline-offset:2px}.ws-account-programs{display:grid;gap:12px}.ws-account-program{display:grid;grid-template-columns:minmax(230px,1.6fr) repeat(3,minmax(120px,1fr));gap:16px;padding:16px;border:1px solid var(--ws-line);border-radius:8px;background:#FAF8F3}.ws-account-program dt{color:var(--ws-steel);font-size:10px;font-weight:700}.ws-account-program dd{margin:4px 0 0;color:var(--ws-navy);font-weight:700}.ws-account-credential{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:18px;padding-top:14px;border-top:1px solid var(--ws-line)}.ws-account-credential-copy{display:grid;gap:3px}.ws-account-credential-copy strong{color:var(--ws-navy);font-size:13px}.ws-account-credential-copy span{color:var(--ws-steel);font-size:12px}.ws-account-credential-actions{display:flex;flex-wrap:wrap;gap:8px}.ws-account-credential-actions .ws-button{min-height:38px;padding:0 14px;font-size:12px}.ws-account-reserved{border-style:dashed;background:#F7FAFC}.ws-account-reserved p{max-width:720px}.ws-account-status{min-height:20px;margin:0;color:var(--ws-steel);font-size:13px}.ws-account-status.ws-success{color:var(--ws-green)}@media(max-width:760px){.ws-account-identity{grid-template-columns:1fr}.ws-account-photo{justify-items:start}.ws-account-program{grid-template-columns:1fr 1fr}.ws-account-program>div:first-child{grid-column:1/-1}.ws-account-avatars{grid-template-columns:repeat(4,52px)}.ws-account-credential{align-items:flex-start;flex-direction:column}}@media(max-width:460px){.ws-account-program{grid-template-columns:1fr}.ws-account-program>div:first-child{grid-column:auto}.ws-account-credential{grid-column:auto}.ws-account-credential-actions{width:100%}.ws-account-credential-actions .ws-button{width:100%}}"
       ,".ws-journey-activity-locked{opacity:1}.ws-journey-activity-locked>.ws-journey-status-icon,.ws-journey-activity-locked>.ws-journey-activity-preview-button,.ws-journey-activity-locked>.ws-journey-activity-state{color:#6F7780}.ws-journey-activity-locked .ws-journey-activity-preview-button strong{color:#5D6872}.ws-journey-activity-locked .ws-journey-type-video{color:#55738F}.ws-journey-activity-locked .ws-journey-type-exercise{color:#80652F}.ws-journey-preview{color:var(--ws-charcoal)}"
       ,".ws-journey-activity-just-completed{border-color:var(--ws-green)!important;background:#EFF8F1!important;animation:wsCompletedPulse 1.8s ease 2}.ws-journey-activity-just-completed .ws-journey-activity-state{display:block!important;color:var(--ws-green)!important}@keyframes wsCompletedPulse{50%{box-shadow:0 0 0 4px rgba(44,122,75,.14)}}"
       ,".ws-journey-preview-actions{display:grid;gap:10px}.ws-journey-preview-actions .ws-button{margin:0}.ws-journey-preview-actions .ws-button-outline{background:#fff;color:var(--ws-navy)}"
@@ -1584,7 +1586,8 @@ const UTL_CONTENT = {
 
   function navHtml(active, navContextHtml) {
     var user = currentUser();
-    var avatar = user.photoURL ? '<img src="' + escapeHtml(user.photoURL) + '" alt="">' : escapeHtml(user.initials);
+    var avatarSymbols = { compass: "&#10022;", lightbulb: "&#128161;", book: "&#128214;", target: "&#9678;", conversation: "&#128172;", mountain: "&#9651;", star: "&#9733;", leaf: "&#10087;" };
+    var avatar = user.photoURL ? '<img src="' + escapeHtml(user.photoURL) + '" alt="">' : (avatarSymbols[user.avatarIconId] || escapeHtml(user.initials));
     var roleLabel = isAdminUser(user) ? "Administrator" : "Member";
     var adminSection = isAdminUser(user) ? '<div class="ws-profile-section"><span class="ws-profile-section-label">Admin</span><a class="ws-admin-link" href="' + adminHref() + '"><span class="ws-profile-icon">&#9788;</span><span>Admin console</span></a></div>' : "";
     var links = [
@@ -1598,7 +1601,7 @@ const UTL_CONTENT = {
     return '<header class="ws-nav ' + (navContextHtml ? "ws-nav-focused" : "") + '"><div class="ws-nav-inner">' +
       '<div class="ws-brand"><a class="ws-logo-link" href="' + homeHref() + '" aria-label="The Untaught Lessons member home"><img class="ws-logo" src="' + assetHref("../assets/utl-logo-nav-white.png") + '" alt="The Untaught Lessons"></a></div>' +
       center +
-      '<div class="ws-user">' + (active === "admin" ? "" : missionNavHtml() + '<div id="wsRewardCluster" class="ws-reward-cluster-shell" data-utl-reward-mount aria-label="Learning rewards"></div>') + '<span class="ws-user-email">' + escapeHtml(user.email) + '</span><button class="ws-avatar" type="button" aria-label="Open profile menu" aria-expanded="false">' + avatar + '</button><div class="ws-profile-menu" hidden><div class="ws-profile-head"><span class="ws-profile-avatar">' + avatar + '</span><div><p class="ws-profile-name">' + escapeHtml(user.label) + '</p><p class="ws-profile-role">' + roleLabel + '</p></div></div><div class="ws-profile-section"><span class="ws-profile-section-label">Your space</span><a href="' + appHref("../my-results/index.html") + '"><span class="ws-profile-icon">&#9638;</span><span>My results</span></a><a href="' + appHref("../apps/toolkit/index.html") + '"><span class="ws-profile-icon">&#8962;</span><span>Toolkit</span></a></div><div class="ws-profile-section"><span class="ws-profile-section-label">Program</span><a href="' + publicSiteHref() + '"><span class="ws-profile-icon">&#8599;</span><span>Public website</span></a></div>' + adminSection + '<div class="ws-profile-section"><button class="ws-logout" type="button"><span class="ws-profile-icon">&#8618;</span><span>Log out</span></button></div></div></div>' +
+      '<div class="ws-user">' + (active === "admin" ? "" : missionNavHtml() + '<div id="wsRewardCluster" class="ws-reward-cluster-shell" data-utl-reward-mount aria-label="Learning rewards"></div>') + '<span class="ws-user-email">' + escapeHtml(user.email) + '</span><button class="ws-avatar" type="button" aria-label="Open profile menu" aria-expanded="false">' + avatar + '</button><div class="ws-profile-menu" hidden><div class="ws-profile-head"><span class="ws-profile-avatar">' + avatar + '</span><div><p class="ws-profile-name">' + escapeHtml(user.label) + '</p><p class="ws-profile-role">' + roleLabel + '</p></div></div><div class="ws-profile-section"><span class="ws-profile-section-label">Your space</span><a href="' + memberHref("account.html") + '"><span class="ws-profile-icon">&#9675;</span><span>Account</span></a><a href="' + appHref("../my-results/index.html") + '"><span class="ws-profile-icon">&#9638;</span><span>My results</span></a><a href="' + appHref("../apps/toolkit/index.html") + '"><span class="ws-profile-icon">&#8962;</span><span>Toolkit</span></a></div><div class="ws-profile-section"><span class="ws-profile-section-label">Program</span><a href="' + publicSiteHref() + '"><span class="ws-profile-icon">&#8599;</span><span>Public website</span></a></div>' + adminSection + '<div class="ws-profile-section"><button class="ws-logout" type="button"><span class="ws-profile-icon">&#8618;</span><span>Log out</span></button></div></div></div>' +
       '</div></header>';
   }
 
@@ -1771,6 +1774,7 @@ const UTL_CONTENT = {
       email: email || "member",
       displayName: user && user.displayName ? user.displayName : email,
       photoURL: user && user.photoURL ? user.photoURL : "",
+      avatarIconId: member && member.avatarIconId ? member.avatarIconId : "",
       role: member && member.role ? member.role : "member"
     }));
     await firebaseAuth.saveUserProfile(user, member || {}, signInProvider || "");
@@ -2115,6 +2119,163 @@ const UTL_CONTENT = {
       button.disabled = false;
       button.textContent = originalText;
     }
+  }
+
+  var accountAvatarOptions = [
+    { id: "compass", symbol: "&#10022;", label: "Compass" },
+    { id: "lightbulb", symbol: "&#128161;", label: "Lightbulb" },
+    { id: "book", symbol: "&#128214;", label: "Book" },
+    { id: "target", symbol: "&#9678;", label: "Target" },
+    { id: "conversation", symbol: "&#128172;", label: "Conversation" },
+    { id: "mountain", symbol: "&#9651;", label: "Mountain" },
+    { id: "star", symbol: "&#9733;", label: "Star" },
+    { id: "leaf", symbol: "&#10087;", label: "Leaf" }
+  ];
+
+  function accountDate(value) {
+    if (!value) return "Not recorded";
+    var date = value.toDate ? value.toDate() : new Date(value);
+    if (Number.isNaN(date.getTime())) return "Not recorded";
+    return date.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+  }
+
+  function derivedProgramStatus(progress) {
+    progress = progress && typeof progress === "object" ? progress : {};
+    var orientation = Boolean(progress.orientation && progress.orientation.ready);
+    var phaseData = progress.phases && typeof progress.phases === "object" ? progress.phases : {};
+    var complete = orientation && phases.every(function (phaseKey) {
+      return Boolean(phaseData[phaseKey] && phaseData[phaseKey].videosDone && phaseData[phaseKey].exercisesDone);
+    });
+    if (complete) return "completed";
+    var activityStarted = orientation || Object.keys(progress.lessons || {}).length > 0 || Object.keys(progress.exercises || {}).length > 0 || phases.some(function (phaseKey) {
+      var phase = phaseData[phaseKey] || {};
+      return Boolean(phase.videosDone || phase.exercisesDone);
+    });
+    return activityStarted ? "in_progress" : "not_started";
+  }
+
+  function accountStatusLabel(value) {
+    var labels = { not_started: "Not started", in_progress: "In progress", completed: "Completed" };
+    return labels[String(value || "").toLowerCase()] || "Not recorded";
+  }
+
+  function accountPrograms(account) {
+    var member = account.member || {};
+    var configured = member.programEnrollments;
+    if (configured && typeof configured === "object" && !Array.isArray(configured) && Object.keys(configured).length) {
+      return Object.keys(configured).map(function (programId) {
+        var item = configured[programId] || {};
+        return {
+          id: programId,
+          name: item.programName || programId,
+          cohort: item.cohort || member.cohort || "Individual enrollment",
+          joinedAt: item.joinedAt || member.addedAt || null,
+          completionStatus: item.completionStatus || null
+        };
+      });
+    }
+    return [{
+      id: "tsa-program",
+      name: "Think, Speak, Act Like an Executive",
+      cohort: member.cohort || "Individual enrollment",
+      joinedAt: member.addedAt || null,
+      completionStatus: derivedProgramStatus(account.workspaceProgress)
+    }];
+  }
+
+  function accountPageHtml(account) {
+    var member = account.member || {};
+    var name = member.name || account.authDisplayName || account.email;
+    var selectedAvatar = member.avatarIconId || "compass";
+    var selectedOption = accountAvatarOptions.find(function (option) { return option.id === selectedAvatar; }) || accountAvatarOptions[0];
+    var photo = account.authPhotoURL
+      ? '<span class="ws-account-photo-circle"><img src="' + escapeHtml(account.authPhotoURL) + '" alt="' + escapeHtml(name) + '"></span><small>Photo provided by your sign-in account</small>'
+      : '<span class="ws-account-photo-circle" data-account-avatar-preview>' + selectedOption.symbol + '</span><small>Choose an icon for your workspace</small>';
+    var avatarChoices = account.authPhotoURL ? "" : '<div class="ws-account-field"><label>Choose an avatar</label><div class="ws-account-avatars" role="radiogroup" aria-label="Preset avatars">' + accountAvatarOptions.map(function (option) {
+      return '<label class="ws-account-avatar-option" title="' + escapeHtml(option.label) + '"><input type="radio" name="accountAvatar" value="' + option.id + '" aria-label="' + escapeHtml(option.label) + '"' + (option.id === selectedOption.id ? " checked" : "") + '><span aria-hidden="true">' + option.symbol + '</span></label>';
+    }).join("") + '</div></div>';
+    var programs = accountPrograms(account).map(function (program) {
+      var credential = program.id === "tsa-program" && program.completionStatus === "completed"
+        ? '<div class="ws-account-credential" data-account-credential><div class="ws-account-credential-copy"><strong>Certificate and verified credential</strong><span data-account-credential-status>Loading your verification number...</span></div><div class="ws-account-credential-actions"><a class="ws-button ws-button-outline" href="../certificate/index.html">View certificate</a><a class="ws-button" data-account-verification-link hidden target="_blank" rel="noopener">Verify credential</a></div></div>'
+        : "";
+      return '<dl class="ws-account-program"><div><dt>Program</dt><dd>' + escapeHtml(program.name) + '</dd></div><div><dt>Cohort</dt><dd>' + escapeHtml(program.cohort) + '</dd></div><div><dt>Joined</dt><dd>' + escapeHtml(accountDate(program.joinedAt)) + '</dd></div><div><dt>Status</dt><dd>' + escapeHtml(accountStatusLabel(program.completionStatus)) + '</dd></div>' + credential + '</dl>';
+    }).join("");
+    return '<div class="ws-account-layout"><header><span class="ws-kicker">Your space</span><h1 class="ws-title">Account</h1><p class="ws-subtitle">Keep your name and goals current. Your program details are managed with your enrollment.</p></header>' +
+      '<section class="ws-card ws-account-card"><div class="ws-section-head"><div><span class="ws-kicker">Profile</span><h2>About you</h2></div></div><div class="ws-account-identity"><div class="ws-account-photo">' + photo + '</div><form class="ws-account-form" id="wsAccountForm"><div class="ws-account-field"><label for="wsAccountName">Name</label><input class="ws-input" id="wsAccountName" maxlength="200" autocomplete="name" required value="' + escapeHtml(name) + '"></div><div class="ws-account-field"><label>Email</label><div class="ws-account-readonly">' + escapeHtml(account.email) + '</div></div>' + avatarChoices + '<div class="ws-account-field"><label for="wsAccountGoals">What are you hoping to work on?</label><textarea class="ws-textarea" id="wsAccountGoals" maxlength="2000" rows="5" placeholder="Share the situations, skills or goals that matter to you.">' + escapeHtml(member.goals || "") + '</textarea></div><div class="ws-card-actions"><button class="ws-button" type="submit">Save account</button></div><p class="ws-account-status" id="wsAccountStatus" aria-live="polite"></p></form></div></section>' +
+      '<section class="ws-card ws-account-card"><div class="ws-section-head"><div><span class="ws-kicker">Enrollment</span><h2>Your programs</h2><p>These details are read only. Contact the program team if something needs to change.</p></div></div><div class="ws-account-programs">' + programs + '</div></section>' +
+      '<section class="ws-card ws-account-card ws-account-reserved" aria-labelledby="wsLearningProfileTitle"><span class="ws-kicker">Coming later</span><h2 id="wsLearningProfileTitle">Your learning profile</h2><p>This space is reserved for a future view of how you learn and the capabilities you demonstrate. No learning profile data is shown on this page yet.</p></section></div>';
+  }
+
+  function bindAccountPage(firebaseAuth, account) {
+    qsa('input[name="accountAvatar"]').forEach(function (input) {
+      input.addEventListener("change", function () {
+        var option = accountAvatarOptions.find(function (item) { return item.id === input.value; });
+        var preview = qs("[data-account-avatar-preview]");
+        if (option && preview) preview.innerHTML = option.symbol;
+      });
+    });
+    var form = qs("#wsAccountForm");
+    var credentialMount = qs("[data-account-credential]");
+    if (credentialMount) {
+      firebaseAuth.issueVerifiedCredential().then(function (result) {
+        var credential = result && result.credential;
+        if (!credential || !credential.credentialId) throw new Error("Credential unavailable");
+        var verificationUrl = credential.verificationUrl || ("https://theuntaughtlessons.com/verify/?id=" + encodeURIComponent(credential.credentialId));
+        var status = credentialMount.querySelector("[data-account-credential-status]");
+        var link = credentialMount.querySelector("[data-account-verification-link]");
+        if (status) status.textContent = "Verification number: " + credential.credentialId;
+        if (link) { link.href = verificationUrl; link.hidden = false; }
+      }).catch(function () {
+        var status = credentialMount.querySelector("[data-account-credential-status]");
+        if (status) status.textContent = "Open your certificate to view or create its verification record.";
+      });
+    }
+    if (!form) return;
+    form.addEventListener("submit", async function (event) {
+      event.preventDefault();
+      var button = form.querySelector('button[type="submit"]');
+      var status = qs("#wsAccountStatus");
+      var avatarInput = form.querySelector('input[name="accountAvatar"]:checked');
+      button.disabled = true;
+      button.textContent = "Saving...";
+      status.classList.remove("ws-success");
+      status.textContent = "";
+      try {
+        var saved = await firebaseAuth.updateMemberAccount({
+          name: qs("#wsAccountName").value,
+          goals: qs("#wsAccountGoals").value,
+          avatarIconId: account.authPhotoURL ? "" : (avatarInput ? avatarInput.value : "")
+        });
+        var profile = {};
+        try { profile = JSON.parse(localStorage.getItem(PROFILE_KEY) || "{}"); } catch (error) {}
+        profile.displayName = saved.name;
+        profile.firstName = saved.name.split(/\s+/)[0] || saved.name;
+        profile.lastName = saved.name.split(/\s+/).slice(1).join(" ");
+        profile.avatarIconId = saved.avatarIconId;
+        localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
+        status.classList.add("ws-success");
+        status.textContent = "Your account has been updated.";
+        button.textContent = "Saved";
+      } catch (error) {
+        status.textContent = error && error.message ? error.message : "We could not update your account. Please try again.";
+        button.textContent = "Save account";
+      } finally {
+        button.disabled = false;
+      }
+    });
+  }
+
+  function renderAccount() {
+    if (!requireMember()) return;
+    pageShell("account", '<section class="ws-card ws-account-card"><p class="ws-account-status">Loading your account...</p></section>');
+    import(firebaseHref()).then(async function (firebaseAuth) {
+      _preloadedFirebase = firebaseAuth;
+      var account = await firebaseAuth.getMemberAccount();
+      pageShell("account", accountPageHtml(account));
+      bindAccountPage(firebaseAuth, account);
+    }).catch(function (error) {
+      pageShell("account", '<section class="ws-card ws-account-card"><span class="ws-kicker">Account</span><h1>We could not load your account.</h1><p>' + escapeHtml(error && error.message ? error.message : "Please refresh and try again.") + '</p><a class="ws-button" href="' + homeHref() + '">Back to Learning Journey</a></section>');
+    });
   }
 
   function renderIndex() {
@@ -3920,6 +4081,7 @@ const UTL_CONTENT = {
     if (document.visibilityState === "hidden" && remoteProgressSaveTimer) flushRemoteProgressSave();
   });
   window.UTLWorkspace = {
+    renderAccount: renderAccount,
     renderIndex: renderIndex,
     renderOrientation: renderOrientation,
     renderPhasePage: renderPhasePage,
