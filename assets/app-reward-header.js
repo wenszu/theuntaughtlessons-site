@@ -55,7 +55,7 @@
         return;
       }
       var script = document.createElement("script");
-      script.src = "../../assets/reward-ui.js?v=20260914-1458";
+      script.src = "../../assets/reward-ui.js?v=20260915-0149";
       script.async = true;
       script.dataset.utlRewardUi = "true";
       script.onload = function () { resolve(window.UTLRewardUI); };
@@ -74,7 +74,7 @@
         return;
       }
       var script = document.createElement("script");
-      script.src = "../../assets/exercise-context-flow.js?v=20260914-1458";
+      script.src = "../../assets/exercise-context-flow.js?v=20260915-0149";
       script.dataset.utlContextFlow = "true";
       script.onload = function () { resolve(window.UTLExerciseContextFlow); };
       script.onerror = reject;
