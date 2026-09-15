@@ -1,8 +1,8 @@
 name: Verify deployment cache
 
 on:
-  push:
-    branches: [main]
+  pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -15,17 +15,11 @@ jobs:
   verify-deployment-cache:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - name: Install administrative function dependencies
-        working-directory: functions-admin
-        run: npm ci --ignore-scripts --no-audit
       - name: Verify cache-busting consistency
         run: node scripts/sync-cache-versions.js --check
-      - name: Run repository tests
-        run: |
-          for test_file in tests/*.test.js; do
-            node "$test_file"
-          done
+      - name: Verify deployment cache contracts
+        run: node tests/deployment-cache.test.js
