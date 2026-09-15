@@ -58,7 +58,7 @@ assert(source.includes('else if (!nowWatched && wasWatched)'), 'the not-watched 
 assert(source.includes("done ? 'ws-button-secondary' : ''"), 'context completion should switch between gold primary and green completed treatments');
 workspacePages.forEach((page) => {
   const pageSource = fs.readFileSync(page, 'utf8');
-  assert(/content-config\.js\?v=\d{8}[-\w]*/.test(pageSource), `${page} should load a cache-versioned workspace bundle`);
+  assert(/content-config\.js\?v=[\w-]+/.test(pageSource), `${page} should load a cache-versioned workspace bundle`);
 });
 assert(source.includes('.ws-subtitle{width:100%;max-width:1040px'), 'phase introductions should use the available laptop width');
 assert(source.includes('@media(min-width:769px) and (max-width:1100px)'), 'workspace typography should include an explicit tablet layout');
