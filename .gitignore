@@ -3,6 +3,7 @@ visual/*.png
 visual/*.png
 .firebase/
 firebase-debug.log
+firestore-debug.log
 public/
 functions/node_modules/
 functions-aiko/node_modules/

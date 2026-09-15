@@ -765,9 +765,31 @@ function progressSyncKey(exerciseId) {
   return String(exerciseId || "exercise").replace(/[^a-z0-9_-]+/gi, "-").slice(0, 100);
 }
 
+function progressSyncCompletionToken(exercisePayload = {}) {
+  return String(exercisePayload.completed_at || exercisePayload.completedAt || "")
+    .replace(/[^a-zA-Z0-9_-]/g, "")
+    .slice(0, 80);
+}
+
+function progressSyncEntryKey(exerciseId, exercisePayload = {}) {
+  const token = progressSyncCompletionToken(exercisePayload);
+  return token ? `${progressSyncKey(exerciseId)}--${token}`.slice(0, 180) : progressSyncKey(exerciseId);
+}
+
+function matchingProgressSyncKeys(queue, exerciseId, exercisePayload = {}) {
+  const targetId = String(exerciseId || "");
+  const targetToken = progressSyncCompletionToken(exercisePayload);
+  return Object.keys(queue || {}).filter((key) => {
+    const item = queue[key] || {};
+    if (String(item.exerciseId || "") !== targetId) return false;
+    const itemToken = progressSyncCompletionToken(item.exercisePayload || {});
+    return targetToken ? itemToken === targetToken : !itemToken;
+  });
+}
+
 function queueProgressSync(exerciseId, exerciseName, exercisePayload, error) {
   const queue = readProgressSyncQueue();
-  const key = progressSyncKey(exerciseId);
+  const key = progressSyncEntryKey(exerciseId, exercisePayload);
   const previous = queue[key] || {};
   queue[key] = {
     exerciseId,
@@ -782,9 +804,9 @@ function queueProgressSync(exerciseId, exerciseName, exercisePayload, error) {
   return queue[key];
 }
 
-function clearQueuedProgressSync(exerciseId) {
+function clearQueuedProgressSync(exerciseId, exercisePayload = {}) {
   const queue = readProgressSyncQueue();
-  delete queue[progressSyncKey(exerciseId)];
+  matchingProgressSyncKeys(queue, exerciseId, exercisePayload).forEach((key) => { delete queue[key]; });
   writeProgressSyncQueue(queue);
   return Object.keys(queue).length;
 }
@@ -909,13 +931,14 @@ async function saveUserProgress(exerciseId, exerciseName, exercisePayload = {}) 
   };
 
     const queued = readProgressSyncQueue();
-    const remainingAfterSave = Object.keys(queued).filter((key) => key !== progressSyncKey(exerciseId)).length;
+    const recoveredKeys = matchingProgressSyncKeys(queued, exerciseId, exercisePayload);
+    const remainingAfterSave = Object.keys(queued).filter((key) => !recoveredKeys.includes(key)).length;
     const userRef = doc(requireFirestore(), "users", user.uid);
     const syncHealth = {
       pendingProgressSaves: remainingAfterSave,
       lastSyncSuccessAt: serverTimestamp()
     };
-    if (queued[progressSyncKey(exerciseId)]) syncHealth.lastRecoveredAt = serverTimestamp();
+    if (recoveredKeys.length) syncHealth.lastRecoveredAt = serverTimestamp();
     await setDoc(userRef, {
       workspaceProgress: {
         exercises: exerciseProgress
@@ -924,8 +947,8 @@ async function saveUserProgress(exerciseId, exerciseName, exercisePayload = {}) 
       lastSeenAt: serverTimestamp(),
       updatedAt: serverTimestamp()
     }, { merge: true });
-    const remaining = clearQueuedProgressSync(exerciseId);
-    if (!remaining && queued[progressSyncKey(exerciseId)]) showProgressSyncSuccess();
+    const remaining = clearQueuedProgressSync(exerciseId, exercisePayload);
+    if (!remaining && recoveredKeys.length) showProgressSyncSuccess();
     window.dispatchEvent(new CustomEvent("utl:activity-completed", { detail: { activityId: exerciseId, activityTitle: exerciseName } }));
     return { saved: true };
   } catch (error) {
@@ -1004,7 +1027,7 @@ async function getExerciseWork(exerciseId) {
   const readyDb = requireFirestore();
   const [draftResult, submissionResult, latestResult] = await Promise.allSettled([
     getDoc(doc(readyDb, "users", user.uid, "exercise_work", safeExerciseId)),
-    getDocs(collection(readyDb, "users", user.uid, "exercise_submissions")),
+    getDocs(query(collection(readyDb, "users", user.uid, "exercise_submissions"), where("exerciseId", "==", safeExerciseId))),
     getDoc(doc(readyDb, "users", user.uid, "completed_exercises", safeExerciseId))
   ]);
   const draftSnapshot = draftResult.status === "fulfilled" ? draftResult.value : null;
@@ -1012,7 +1035,6 @@ async function getExerciseWork(exerciseId) {
   const latestSnapshot = latestResult.status === "fulfilled" ? latestResult.value : null;
   let submissions = (submissionSnapshot ? submissionSnapshot.docs : [])
     .map((item) => ({ id: item.id, ...item.data() }))
-    .filter((item) => item.exerciseId === safeExerciseId)
     .sort((a, b) => String(b.completedAtClient || "").localeCompare(String(a.completedAtClient || "")))
     .slice(0, 10);
   if (!submissions.length && latestSnapshot && latestSnapshot.exists()) {

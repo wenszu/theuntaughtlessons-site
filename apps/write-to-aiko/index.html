@@ -9,9 +9,9 @@
   <link rel="preconnect" href="https://firestore.googleapis.com">
   <link rel="preconnect" href="https://identitytoolkit.googleapis.com">
   <link rel="preconnect" href="https://securetoken.googleapis.com">
-  <link rel="icon" type="image/png" sizes="32x32" href="../../assets/favicon-bluebg-whitedoor-thicker-32.png?v=20260915-0603">
-  <link rel="shortcut icon" type="image/png" href="../../assets/favicon-bluebg-whitedoor-thicker-32.png?v=20260915-0603">
-  <link rel="apple-touch-icon" sizes="180x180" href="../../assets/apple-touch-icon.png?v=20260915-0603">
+  <link rel="icon" type="image/png" sizes="32x32" href="../../assets/favicon-bluebg-whitedoor-thicker-32.png?v=20260915-cache-v2">
+  <link rel="shortcut icon" type="image/png" href="../../assets/favicon-bluebg-whitedoor-thicker-32.png?v=20260915-cache-v2">
+  <link rel="apple-touch-icon" sizes="180x180" href="../../assets/apple-touch-icon.png?v=20260915-cache-v2">
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lato:wght@300;400;700&family=Roboto+Mono:wght@400;500;700&display=swap');
 
@@ -624,8 +624,8 @@
       }
     }
   </style>
-  <link rel="stylesheet" href="../../assets/rich-text-editor.css?v=20260915-0603">
-  <script src="../../assets/rich-text-editor.js?v=20260915-0603"></script>
+  <link rel="stylesheet" href="../../assets/rich-text-editor.css?v=20260915-cache-v2">
+  <script src="../../assets/rich-text-editor.js?v=20260915-cache-v2"></script>
 </head>
 <body>
   <header class="write-to-aiko-header">
@@ -827,7 +827,7 @@ Yutee Elle</div>
     </div>
   </main>
 
-  <script src="../../assets/exercise-feedback-coach.js?v=20260915-0603"></script>
+  <script src="../../assets/exercise-feedback-coach.js?v=20260915-cache-v2"></script>
   <script>
     (function () {
       const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzJE--FL2kB_XDNZRnszCtlyLRPvaLAHGuF5TAOdXJk40atbvf5Y6ELuSK2B7CSLaMN/exec';
@@ -1228,7 +1228,8 @@ Yutee Elle</div>
           window.UTLRewardEvents?.awardReflectionExercise({
             appId: 'write-to-aiko',
             title: 'Write to Aiko complete',
-            body: 'Your written recommendation was saved.'
+            body: 'Your written recommendation was saved.',
+            feedbackFirst: true
           });
           submitBtn.textContent = 'Submit';
           submitBtn.disabled = true;
@@ -1296,6 +1297,13 @@ Yutee Elle</div>
       const legacyResult = safeParse(localStorage.getItem('utl_result_write-to-aiko'), null);
       if (legacyResult && legacyResult.response) mergeSubmissions([legacyResult]);
       renderHistory();
+      const reviewParams = new URLSearchParams(location.search);
+      function reviewLatestSubmission() {
+        if (reviewParams.get('review') !== 'latest' || !submissionHistory.length) return;
+        showResults(responseFromSubmission(submissionHistory[0]));
+        returnEl.hidden = true;
+      }
+      reviewLatestSubmission();
       import('../../assets/firebase.js').then(({ getExerciseWork }) => getExerciseWork('write-to-aiko')).then((accountWork) => {
         if (accountWork.draft && hasDraftContent(accountWork.draft.draftPayload)) {
           const remoteDraft = accountWork.draft.draftPayload;
@@ -1303,6 +1311,7 @@ Yutee Elle</div>
         }
         mergeSubmissions(accountWork.submissions || []);
         renderHistory();
+        reviewLatestSubmission();
       }).catch(() => {});
       const preview = new URLSearchParams(location.search);
       if (preview.get('design-preview') === 'write-to-aiko-return') {
@@ -1318,11 +1327,11 @@ Yutee Elle</div>
       }
     })();
   </script>
-  <script type="module" src="../../assets/app-access-guard.js?v=20260915-0603"></script>
-  <script src="../../assets/exercise-scoring-intro.js?v=20260915-0603"></script>
-  <script src="../../assets/app-reward-header.js?v=20260915-0603"></script>
-  <script src="../../assets/reward-events.js?v=20260915-0603"></script>
-  <script type="module" src="../../assets/feedback-widget.js?v=20260915-0603"></script>
-  <script src="../../assets/tactile-buttons.js?v=20260915-0603" defer></script>
+  <script type="module" src="../../assets/app-access-guard.js?v=20260915-cache-v2"></script>
+  <script src="../../assets/exercise-scoring-intro.js?v=20260915-cache-v2"></script>
+  <script src="../../assets/app-reward-header.js?v=20260915-cache-v2"></script>
+  <script src="../../assets/reward-events.js?v=20260915-cache-v2"></script>
+  <script type="module" src="../../assets/feedback-widget.js?v=20260915-cache-v2"></script>
+  <script src="../../assets/tactile-buttons.js?v=20260915-cache-v2" defer></script>
 </body>
 </html>

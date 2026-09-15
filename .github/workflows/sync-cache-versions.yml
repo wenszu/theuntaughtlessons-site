@@ -1,14 +1,18 @@
-name: Sync cache-busting versions
+name: Verify deployment cache
 
 on:
   push:
     branches: [main]
 
 permissions:
-  contents: write
+  contents: read
+
+concurrency:
+  group: cache-version-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
-  sync-cache-versions:
+  verify-deployment-cache:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -18,21 +22,10 @@ jobs:
       - name: Install administrative function dependencies
         working-directory: functions-admin
         run: npm ci --ignore-scripts --no-audit
-      - name: Rewrite ?v= cache-busting versions to one shared value
-        run: node scripts/sync-cache-versions.js
-      - name: Run repository tests against the rewritten files
+      - name: Verify cache-busting consistency
+        run: node scripts/sync-cache-versions.js --check
+      - name: Run repository tests
         run: |
           for test_file in tests/*.test.js; do
             node "$test_file"
           done
-      - name: Commit and push if anything changed
-        run: |
-          if git diff --quiet; then
-            echo "No cache-busting references changed."
-            exit 0
-          fi
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add -A
-          git commit -m "chore: sync cache-busting versions [skip ci]"
-          git push

@@ -11,6 +11,7 @@ const explainAiko = fs.readFileSync(path.resolve(__dirname, '../apps/explain-to-
 const explainAikoCss = fs.readFileSync(path.resolve(__dirname, '../apps/explain-to-aiko/aiko.css'), 'utf8');
 const journey = fs.readFileSync(path.resolve(__dirname, '../member-login/content-config.js'), 'utf8');
 const grocery = fs.readFileSync(path.resolve(__dirname, '../apps/grocery-list/index.html'), 'utf8');
+const scqa = fs.readFileSync(path.resolve(__dirname, '../apps/scqa-builder/index.html'), 'utf8');
 assert.match(grocery, /viewGroceryAttempt[\s\S]*renderAll\(\);\s*renderSampleAnswer\(\);/, 'Grocery List rebuilds the sample answer for the selected saved submission');
 
 assert.match(firebase, /async function saveExerciseDraft/);
@@ -42,6 +43,7 @@ assert.match(phase1History, /\[data-resume\],\.phase1-work-actions \[data-new\],
 assert.doesNotMatch(phase1History, /View latest submission/);
 assert.match(phase1History, /select\.hidden=!saved\.length/);
 assert.match(phase1History, /Viewing submission \$\{viewingIndex\+1\} of \$\{saved\.length\}/);
+assert.match(phase1History, /get\('review'\)===\'latest\'/);
 assert.match(phase1History, /phase1-work-actions\{display:flex;align-items:center;flex-wrap:nowrap/);
 assert.match(phase1History, /max-width:760px/);
 assert.match(phase1History, /hasUsableResponse/);
@@ -66,6 +68,7 @@ assert.match(nativeHistory, /if\(reviewingId\)select\.value=reviewingId/);
 assert.match(nativeHistory, /native-work-actions\{display:flex;align-items:center;flex-wrap:nowrap/);
 assert.match(nativeHistory, /max-width:760px/);
 assert.match(nativeHistory, /getExerciseWork\(config\.id\)/);
+assert.match(nativeHistory, /get\('review'\)===\'latest\'/);
 assert.match(nativeHistory, /utl:activity-completed/);
 for (const app of ['advisory-board', 'grocery-list-ai', 'rushed-voice-memo-ai']) {
   const source = fs.readFileSync(path.resolve(__dirname, `../apps/${app}/index.html`), 'utf8');
@@ -79,12 +82,17 @@ assert.doesNotMatch(journey, /Review original speech|Practice another explanatio
 assert.match(explainAiko, /Previous submissions/);
 assert.match(explainAiko, /id="aikoSavedSelect"/);
 assert.match(explainAiko, /Choose a previous submission/);
+assert.match(explainAiko, /urlParams\.get\('review'\) === 'latest'/);
 assert.match(explainAiko, /class="aiko-saved-controls"[\s\S]*id="aikoSavedSelect"[\s\S]*id="startNewRequiredAttempt"/);
 assert.match(explainAikoCss, /\.aiko-saved-controls\{display:flex;align-items:center;justify-content:flex-end/);
 assert.match(aiko, /id="writeToAikoHistoryList" aria-label="Choose a previous submission"/);
 assert.match(aiko, /write-to-aiko-return-tools/);
 assert.match(aiko, /Review sample answer →/);
 assert.match(aiko, /historyListEl\.addEventListener\('change'/);
+assert.match(aiko, /function reviewLatestSubmission\(\)/);
+assert.match(aiko, /showResults\(responseFromSubmission\(submissionHistory\[0\]\)\)/);
+assert.match(scqa, /urlParams\.get\("review"\) === "latest"/);
+assert.match(scqa, /setScqaResultTab\("feedback"\)/);
 assert.match(explainAiko, /saveResultHistory/);
 assert.match(explainAiko, /saveExerciseDraft\(APP_ID, APP_TITLE, draftPayload\)/);
 assert.match(explainAiko, /Your submitted explanation/);
@@ -97,10 +105,12 @@ assert.match(grocery, /renderGrocerySavedWork/);
 assert.match(grocery, /Choose a previous submission/);
 assert.match(grocery, /id="grocerySubmissionSelect"/);
 assert.match(grocery, /viewGroceryAttempt\(displayedHistory\[index\]\)/);
+assert.match(grocery, /get\('review'\) === 'latest'/);
+assert.match(journey, /review=latest/);
 assert.match(grocery, /state\.placements\[`bucket\$\{index \+ 1\}`\]/);
 assert.match(grocery, /item\?\.name \|\| item\?\.text/);
 assert.match(grocery, /Item details unavailable/);
-assert.match(grocery, /saveExerciseSubmission/);
+assert.doesNotMatch(grocery, /saveExerciseSubmission/, 'saveUserProgress already records the submission history, so Grocery List must not write it twice');
 assert.match(grocery, /getExerciseWork\('p1-e1'\)/);
 assert.match(grocery, /Optional reflection/);
 assert.match(grocery, /id="sampleBtn"[^>]*>Review sample answer<\/button>\s*<button id="checkBtn" class="primary"[^>]*>Submit<\/button>/);

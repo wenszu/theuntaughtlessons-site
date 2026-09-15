@@ -9,9 +9,9 @@
   <link rel="preconnect" href="https://firestore.googleapis.com">
   <link rel="preconnect" href="https://identitytoolkit.googleapis.com">
   <link rel="preconnect" href="https://securetoken.googleapis.com">
-  <link rel="icon" type="image/png" sizes="32x32" href="../../assets/favicon-bluebg-whitedoor-thicker-32.png?v=20260915-0603">
-  <link rel="shortcut icon" type="image/png" href="../../assets/favicon-bluebg-whitedoor-thicker-32.png?v=20260915-0603">
-  <link rel="apple-touch-icon" sizes="180x180" href="../../assets/apple-touch-icon.png?v=20260915-0603">
+  <link rel="icon" type="image/png" sizes="32x32" href="../../assets/favicon-bluebg-whitedoor-thicker-32.png?v=20260915-cache-v2">
+  <link rel="shortcut icon" type="image/png" href="../../assets/favicon-bluebg-whitedoor-thicker-32.png?v=20260915-cache-v2">
+  <link rel="apple-touch-icon" sizes="180x180" href="../../assets/apple-touch-icon.png?v=20260915-cache-v2">
   <link rel="stylesheet" href="../shared/activity-timer.css">
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lato:wght@300;400;700&family=Roboto+Mono:wght@400;500&display=swap');
@@ -1650,10 +1650,10 @@
       </article>
     </section>
   </main>
-  <script src="../../assets/app-reward-header.js?v=20260915-0603"></script>
-  <script src="../../assets/reward-events.js?v=20260915-0603"></script>
+  <script src="../../assets/app-reward-header.js?v=20260915-cache-v2"></script>
+  <script src="../../assets/reward-events.js?v=20260915-cache-v2"></script>
 
-  <script src="../shared/activity-timer.js?v=20260915-0603"></script>
+  <script src="../shared/activity-timer.js?v=20260915-cache-v2"></script>
   <script>
     // -------------------------
     // Data layer
@@ -2614,10 +2614,9 @@
       history.push({ attemptId, attemptNumber: attempt, score: record.score, scoreMaximum: 100, contentVersion: GROCERY_CONTENT_VERSION, completedAt: record.completed_at, record });
       localStorage.setItem(GROCERY_ATTEMPTS_KEY, JSON.stringify(history.slice(-10)));
       import('../../assets/firebase.js')
-        .then(({ saveUserProgress, saveExerciseAttempt, saveExerciseSubmission }) => Promise.allSettled([
+        .then(({ saveUserProgress, saveExerciseAttempt }) => Promise.allSettled([
           saveUserProgress(appId, exerciseName, record),
-          saveExerciseAttempt({ attemptId, exerciseId: appId, exerciseTitle: exerciseName, contentVersion: GROCERY_CONTENT_VERSION, score: record.score, scoreMaximum: 100, attemptNumber: attempt, durationSeconds }),
-          saveExerciseSubmission({ exerciseId: appId, exerciseTitle: exerciseName, submissionId: attemptId, attemptNumber: attempt, completedAtClient: record.completed_at, durationSeconds, responsePayload: record })
+          saveExerciseAttempt({ attemptId, exerciseId: appId, exerciseTitle: exerciseName, contentVersion: GROCERY_CONTENT_VERSION, score: record.score, scoreMaximum: 100, attemptNumber: attempt, durationSeconds })
         ]))
         .catch((error) => console.warn('Firestore progress save failed.', error));
       return record;
@@ -2695,6 +2694,11 @@
       document.getElementById('hero').after(section);
       document.getElementById('grocerySubmissionSelect').addEventListener('change',(event)=>{if(event.target.value!==''){const index=Number(event.target.value);section.querySelector('h2').textContent=`Viewing submission ${history.length-index} of ${history.length}`;section.querySelector('.grocery-saved-head p').textContent='Your saved response and feedback are shown below.';viewGroceryAttempt(displayedHistory[index]);}});
       document.getElementById('groceryStartNew').addEventListener('click',()=>{document.body.classList.remove('viewing-saved-grocery');['bucket1','bucket2','bucket3'].forEach((key)=>{document.getElementById(`${key}Input`).readOnly=false;});document.getElementById('whyText').readOnly=false;document.getElementById('generateBtn').click();document.getElementById('exercise').scrollIntoView({behavior:'smooth',block:'start'});});
+      if (new URLSearchParams(location.search).get('review') === 'latest') {
+        const select = document.getElementById('grocerySubmissionSelect');
+        select.value = '0';
+        select.dispatchEvent(new Event('change'));
+      }
     }
 
     function renderSampleAnswer() {
@@ -2857,9 +2861,9 @@
 
     initializeApp();
   </script>
-  <script type="module" src="../../assets/app-access-guard.js?v=20260915-0603"></script>
-  <script src="../../assets/exercise-scoring-intro.js?v=20260915-0603"></script>
-  <script type="module" src="../../assets/feedback-widget.js?v=20260915-0603"></script>
-  <script src="../../assets/tactile-buttons.js?v=20260915-0603" defer></script>
+  <script type="module" src="../../assets/app-access-guard.js?v=20260915-cache-v2"></script>
+  <script src="../../assets/exercise-scoring-intro.js?v=20260915-cache-v2"></script>
+  <script type="module" src="../../assets/feedback-widget.js?v=20260915-cache-v2"></script>
+  <script src="../../assets/tactile-buttons.js?v=20260915-cache-v2" defer></script>
 </body>
 </html>

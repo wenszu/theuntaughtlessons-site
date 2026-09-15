@@ -189,6 +189,7 @@
       ".utl-exercise-award{width:min(640px,100%);border:1px solid rgba(0,51,102,.16);border-top:12px solid #EEA320;border-radius:10px;background:linear-gradient(115deg,#FFFDF8 0%,#FFFDF8 72%,#F3EDE2 72%,#F3EDE2 100%);padding:34px 42px 34px;text-align:left;box-shadow:0 30px 80px rgba(0,30,60,.38)}.utl-exercise-award.is-reflecting{border:2px solid rgba(238,163,32,.7);border-top-width:2px;background:#fff;padding:38px 42px;text-align:left;box-shadow:0 32px 90px rgba(0,30,60,.42)}.utl-exercise-award .utl-award-stage[hidden]{display:none}.utl-exercise-award [data-award-stage=celebrate] .utl-reward-modal-check{width:76px;height:76px;margin:0 0 22px;border:5px solid #fff;border-radius:999px;background:#003366;color:#EEA320;transform:none;box-shadow:0 0 0 3px #EEA320,0 10px 22px rgba(0,51,102,.2);font-size:38px}.utl-exercise-award [data-award-stage=celebrate] .utl-reward-modal-label{color:#A86400;font-size:13px}.utl-exercise-award [data-award-stage=celebrate] h2{max-width:470px;margin:7px 0 10px;color:#003366;font:800 44px/1.04 Lato,Arial,sans-serif}.utl-exercise-award [data-award-stage=celebrate] p{max-width:470px;margin:0;color:#4A4A4A;font:700 16px/1.5 Lato,Arial,sans-serif}.utl-exercise-award [data-award-stage=celebrate] p strong{color:#003366}.utl-exercise-award [data-award-stage=celebrate]>button{background:#003366;color:#fff;box-shadow:0 5px 0 #001F3F}.utl-exercise-award .utl-award-earned{display:inline-flex;align-items:center;gap:7px;margin-top:18px;padding:9px 15px;border:1px solid rgba(238,163,32,.55);border-radius:999px;background:#FFF1CF;color:#8A5A00;font:800 15px Lato,Arial,sans-serif}.utl-exercise-award .utl-award-progress{margin-top:9px;color:#4D7094;font:700 13px Lato,Arial,sans-serif}",
       ".utl-exercise-award .utl-reflection-head{display:grid;grid-template-columns:48px 1fr;gap:13px;align-items:center;text-align:left}.utl-reflection-icon{width:48px;height:48px;border-radius:999px;background:#FFF1CF;color:#A86400;display:grid;place-items:center;font-size:23px}.utl-exercise-award .utl-reflection-head h2{margin:0;font-size:34px}.utl-exercise-award .utl-reflection-prompt{margin:22px 0 0;text-align:left;color:#003366;font:700 17px/1.4 Lato,Arial,sans-serif}",
       ".utl-exercise-award p.utl-reflection-guidance{max-width:none;margin:6px 0 0;text-align:left;color:#4D7094;font:italic 400 12px/1.45 Lato,Arial,sans-serif}.utl-reflection-note{width:100%;min-height:110px;margin-top:14px;border:1px solid rgba(0,51,102,.2);border-radius:9px;padding:12px;resize:vertical;color:#4A4A4A;font:400 15px/1.5 Lato,Arial,sans-serif}.utl-reflection-note:focus{border-color:#EEA320;outline:2px solid rgba(238,163,32,.18)}.utl-reflection-actions{display:flex;justify-content:space-between;align-items:center;gap:12px}.utl-reflection-actions button{margin-top:18px}.utl-reflection-skip{background:transparent!important;color:#4D7094!important;box-shadow:none!important;padding:0 8px!important}.utl-reflection-save:disabled{opacity:.48;cursor:not-allowed}",
+      ".utl-feedback-reflection{display:flex;align-items:center;justify-content:space-between;gap:18px;margin:16px 0 0;padding:14px 16px;border:1px solid rgba(0,51,102,.18);border-radius:9px;background:#F4F7F9;color:#003366}.utl-feedback-reflection div{min-width:0}.utl-feedback-reflection strong,.utl-feedback-reflection span{display:block}.utl-feedback-reflection span{margin-top:3px;color:#4D7094;font-size:13px}.utl-feedback-reflection button{flex:0 0 auto;min-height:40px;border:1px solid #003366;border-radius:7px;background:#003366;color:#fff;padding:0 15px;font:700 14px Lato,Arial,sans-serif;cursor:pointer}",
       "@keyframes utlRewardPulse{0%{transform:translateY(0) scale(1)}45%{transform:translateY(-2px) scale(1.05)}100%{transform:translateY(0) scale(1)}}",
       "@keyframes utlRewardModalArrive{0%{opacity:0;transform:translateY(18px) scale(.92)}70%{transform:translateY(-3px) scale(1.015)}100%{opacity:1;transform:none}}",
       "@keyframes utlRewardSparkle{from{opacity:.35;transform:scale(.98)}to{opacity:.7;transform:scale(1.02)}}",
@@ -196,7 +197,7 @@
       "@keyframes utlRewardBurst{0%{opacity:0;transform:translate(-50%,-50%) scale(.2)}35%{opacity:1}100%{opacity:0;transform:translate(-50%,-50%) scale(1.35)}}",
       "@keyframes utlRewardTitleFlash{0%,100%{color:#003366;text-shadow:none;transform:scale(1)}50%{color:#A86400;text-shadow:0 0 18px rgba(238,163,32,.42),0 0 34px rgba(238,163,32,.22);transform:scale(1.055)}}",
       "@media(max-width:860px){.utl-reward-cluster{padding:4px;gap:4px}.utl-reward-level{display:none}.utl-reward-item{padding:5px 7px;font-size:12px}.utl-reward-popover{right:-74px;width:240px}}",
-      "@media(max-width:620px){.utl-reward-cluster{display:flex;min-height:34px;padding:3px;border-radius:9px;background:rgba(255,255,255,.1)}.utl-reward-cluster>.utl-reward-item:not(.is-emphasis){display:none}.utl-reward-item.is-emphasis{min-height:28px;padding:4px 8px;font-size:11px}.utl-reward-item .utl-reward-popover{position:fixed;top:calc(env(safe-area-inset-top,0px) + 86px);right:12px;width:calc(100vw - 24px)}.utl-reward-toast{top:calc(env(safe-area-inset-top,0px) + 94px);right:12px;width:calc(100vw - 24px);padding:14px 16px;border-radius:10px}.utl-reward-toast strong{font-size:17px}.utl-reward-modal-backdrop{align-items:end;padding:16px;padding-bottom:calc(16px + env(safe-area-inset-bottom,0px))}.utl-reward-modal{max-height:calc(100svh - 32px);overflow:auto;padding:24px 20px 20px;border-radius:16px}.utl-reward-modal-check{width:54px;height:54px;font-size:30px}.utl-reward-modal h2{font-size:34px}.utl-reward-modal p{font-size:15px}.utl-reward-modal button{width:100%;min-height:46px}.utl-exercise-award .utl-reflection-head h2{font-size:28px}.utl-reflection-actions{display:grid}.utl-reflection-actions button{margin-top:8px}}",
+      "@media(max-width:620px){.utl-reward-cluster{display:flex;min-height:34px;padding:3px;border-radius:9px;background:rgba(255,255,255,.1)}.utl-reward-cluster>.utl-reward-item:not(.is-emphasis){display:none}.utl-reward-item.is-emphasis{min-height:28px;padding:4px 8px;font-size:11px}.utl-reward-item .utl-reward-popover{position:fixed;top:calc(env(safe-area-inset-top,0px) + 86px);right:12px;width:calc(100vw - 24px)}.utl-reward-toast{top:calc(env(safe-area-inset-top,0px) + 94px);right:12px;width:calc(100vw - 24px);padding:14px 16px;border-radius:10px}.utl-reward-toast strong{font-size:17px}.utl-feedback-reflection{align-items:stretch;flex-direction:column}.utl-feedback-reflection button{width:100%}.utl-reward-modal-backdrop{align-items:end;padding:16px;padding-bottom:calc(16px + env(safe-area-inset-bottom,0px))}.utl-reward-modal{max-height:calc(100svh - 32px);overflow:auto;padding:24px 20px 20px;border-radius:16px}.utl-reward-modal-check{width:54px;height:54px;font-size:30px}.utl-reward-modal h2{font-size:34px}.utl-reward-modal p{font-size:15px}.utl-reward-modal button{width:100%;min-height:46px}.utl-exercise-award .utl-reflection-head h2{font-size:28px}.utl-reflection-actions{display:grid}.utl-reflection-actions button{margin-top:8px}}",
       "@media(prefers-reduced-motion:reduce){.utl-reward-mp-number,.utl-reward-popover,.utl-reward-toast{transition:none!important}.utl-reward-cluster.is-finished .utl-reward-item.is-emphasis,.utl-reward-modal,.utl-reward-celebration,.utl-reward-modal h2.is-celebrating,.utl-reward-streamer,.utl-reward-burst,.utl-reward-toast-icon{animation:none!important}.utl-reward-streamer,.utl-reward-burst{display:none}}"
     ].join("\n");
     document.head.appendChild(style);
@@ -610,6 +611,13 @@
     var reflectionNote = modal.querySelector('.utl-reflection-note');
     var saveButton = modal.querySelector('[data-reflection-save]');
     var continueHref = nextExerciseHref(appId, phaseProgress.phase);
+    if (opts.startWithReflection) {
+      modal.querySelector('.utl-exercise-award').classList.add('is-reflecting');
+      celebration.hidden = true;
+      reflectionStage.hidden = false;
+      reflectionStage.querySelector('.utl-reward-modal-label').textContent = 'After reviewing your feedback';
+      window.setTimeout(function () { if (reflectionNote) reflectionNote.focus(); }, 0);
+    }
     function finish() {
       modal.remove();
       if (typeof onComplete === "function") onComplete(continueHref);
@@ -635,6 +643,39 @@
     modal.querySelector('[data-reflection-skip]').addEventListener("click", finish);
   }
 
+  function addFeedbackReflectionAction(opts) {
+    window.setTimeout(function () {
+      var existing = document.querySelector('.utl-feedback-reflection');
+      if (existing) existing.remove();
+      var candidates = [
+        document.getElementById('scorePanel'),
+        document.getElementById('feedback'),
+        document.getElementById('feedbackMount'),
+        document.getElementById('reviewFeedbackPanel'),
+        document.getElementById('writeToAikoResults'),
+        document.querySelector('.score-panel:not(.hidden)'),
+        document.querySelector('.feedback:not(.hidden)'),
+        document.querySelector('[data-result-panel="feedback"]:not([hidden])')
+      ];
+      var feedback = candidates.find(function (node) {
+        return node && !node.classList.contains('hidden');
+      });
+      if (!feedback) return;
+      var action = document.createElement('aside');
+      action.className = 'utl-feedback-reflection';
+      action.setAttribute('aria-label', 'Optional reflection after feedback');
+      action.innerHTML = '<div><strong>Finished reading your feedback?</strong><span>Write one short takeaway while it is fresh.</span></div><button type="button">Write my takeaway</button>';
+      feedback.insertAdjacentElement('afterend', action);
+      action.querySelector('button').addEventListener('click', function () {
+        action.remove();
+        showExerciseAwardModal(Object.assign({}, opts, { startWithReflection: true }), function (continueHref) {
+          if (opts.showLevelModal) showLevelModal(opts, function () { window.location.assign(continueHref); });
+          else window.location.assign(continueHref);
+        });
+      });
+    }, 0);
+  }
+
   function handleRewardMoment(details, onComplete) {
     var opts = details || {};
     var container = opts.container || document.getElementById("wsRewardCluster") || document.querySelector("[data-utl-reward-mount]");
@@ -644,6 +685,15 @@
     var isExercise = opts.type === "completion-exercise" || opts.type === "reflection-exercise" || (opts.type === "scored-exercise" && numberOr(metadata.previousBest, 0) === 0);
     if (isExercise) {
       if (container) animateMp(container, startMp, newTotal);
+      if ((opts.type === "scored-exercise" || opts.type === "reflection-exercise") && metadata.feedbackFirst === true) {
+        showToast({
+          label: "Exercise submitted",
+          title: "Your feedback is ready",
+          body: "Review it below. You can write a short takeaway when you are ready."
+        });
+        addFeedbackReflectionAction(Object.assign({}, opts, { startMp: startMp, newTotal: newTotal }));
+        return;
+      }
       showExerciseAwardModal(Object.assign({}, opts, { startMp: startMp, newTotal: newTotal }), function (continueHref) {
         if (opts.showLevelModal) {
           showLevelModal(opts, function () { window.location.assign(continueHref); });

@@ -194,7 +194,10 @@ Best, Yutee Elle`;
           if (!history.length && !reviewingSaved) renderPreparation();
         }
       }
-      if (!reviewingSaved && history[0]) renderSavedWorkHome(history[0]);
+      if (!reviewingSaved && history[0]) {
+        if (urlParams.get('review') === 'latest') showSavedWork(history[0]);
+        else renderSavedWorkHome(history[0]);
+      }
     } catch (_) {}
   }
 
@@ -621,7 +624,10 @@ Best, Yutee Elle`;
   } else {
     loadPrep();
     const savedResult = readSavedResult();
-    if (savedResult && savedResult.transcript) renderSavedWorkHome(savedResult);
+    if (savedResult && savedResult.transcript) {
+      if (urlParams.get('review') === 'latest') showSavedWork(savedResult);
+      else renderSavedWorkHome(savedResult);
+    }
     else renderPreparation();
     hydrateSavedResults();
   }

@@ -31,6 +31,11 @@ assert(!rewardUi.includes('data-award-stage="takeaway"'), 'the selected reflecti
 assert(rewardUi.includes('showLevelModal(opts, function () { window.location.assign(continueHref); })'), 'a promotion appears after reflection and before navigation');
 assert(rewardUi.includes('settings.exerciseReflections && settings.exerciseReflections[appId]'), 'learner award uses Admin reflection overrides');
 assert(rewardUi.includes('opts.type === "scored-exercise" && numberOr(metadata.previousBest, 0) === 0'), 'only the first scored completion interrupts with the award screen');
+assert(rewardEvents.includes('feedbackFirst: !options || options.feedbackFirst !== false'), 'scored exercises request feedback-first reflection timing by default');
+assert(rewardEvents.includes('feedbackFirst: Boolean(options && options.feedbackFirst)'), 'reflection exercises can explicitly request feedback-first reflection timing');
+assert(rewardUi.includes('opts.type === "scored-exercise" || opts.type === "reflection-exercise"'), 'feedback-first timing supports scored and reflection exercises');
+assert(rewardUi.includes('Finished reading your feedback?'), 'scored exercises offer reflection after the learner can read feedback');
+assert(rewardUi.includes('startWithReflection: true'), 'the optional takeaway action opens directly to reflection');
 assert(rewardEvents.includes('utl:exercise-reflection'), 'saved reflections attach to reward state');
 assert(rewardEvents.includes('completionReflection'), 'reflection content is retained in the exercise ledger event');
 assert(rewardEvents.includes('const response = String(detail.response'), 'written response is the canonical saved reflection');

@@ -1,9 +1,10 @@
 (function () {
   const REWARD_STATE_KEY = "utl_rewards_state";
   const REWARD_SETTINGS_KEY = "utl_reward_settings";
+  const REWARD_SYNC_QUEUE_KEY = "utl_pending_reward_sync";
   const LEGACY_MP_KEY = "utl_demo_mp_total";
   const FIREBASE_URL = document.currentScript && document.currentScript.src
-    ? new URL("firebase.js?v=20260915-0603", document.currentScript.src).href
+    ? new URL("firebase.js?v=20260915-cache-v2", document.currentScript.src).href
     : "";
   let syncTimer = null;
   const DEFAULT_LEVELS = [
@@ -142,12 +143,30 @@
 
   function queueRemoteSync(state) {
     if (!FIREBASE_URL) return;
+    const serialized = JSON.stringify(normalizeState(state));
+    try { localStorage.setItem(REWARD_SYNC_QUEUE_KEY, serialized); } catch (error) {}
     if (syncTimer) clearTimeout(syncTimer);
     syncTimer = setTimeout(() => {
       import(FIREBASE_URL)
-        .then((firebase) => firebase.saveMemberRewards ? firebase.saveMemberRewards(state) : null)
+        .then((firebase) => {
+          if (!firebase.saveMemberRewards) throw new Error("Reward sync is unavailable.");
+          return firebase.saveMemberRewards(state);
+        })
+        .then(() => {
+          try {
+            if (localStorage.getItem(REWARD_SYNC_QUEUE_KEY) === serialized) {
+              localStorage.removeItem(REWARD_SYNC_QUEUE_KEY);
+            }
+          } catch (error) {}
+        })
         .catch((error) => console.warn("Reward sync deferred until the next signed-in page.", error));
     }, 80);
+  }
+
+  function retryPendingRewardSync() {
+    let pending = null;
+    try { pending = JSON.parse(localStorage.getItem(REWARD_SYNC_QUEUE_KEY) || "null"); } catch (error) {}
+    if (pending) queueRemoteSync(pending);
   }
 
   function findRewardMount() {
@@ -191,7 +210,7 @@
       });
     } else if (!document.querySelector("script[data-utl-reward-ui-loader]")) {
       const script = document.createElement("script");
-      script.src = "../../assets/reward-ui.js?v=20260915-0603";
+      script.src = "../../assets/reward-ui.js?v=20260915-cache-v2";
       script.defer = true;
       script.dataset.utlRewardUiLoader = "true";
       script.addEventListener("load", () => showRewardMoment(detail, previousState, nextState), { once: true });
@@ -354,7 +373,13 @@
         : `Score saved at ${score}.`,
       mpEarned,
       showZero: false,
-      metadata: { appId, score, previousBest, mode }
+      metadata: {
+        appId,
+        score,
+        previousBest,
+        mode,
+        feedbackFirst: !options || options.feedbackFirst !== false
+      }
     });
     if (result.awarded && mpEarned > 0) recordPracticeActivity(appId, options);
     return result;
@@ -383,7 +408,10 @@
       title: options.title || "Exercise complete",
       body: options.body || "Progress saved.",
       mpEarned: options.mpEarned == null ? readSettings().mp.exerciseCompleteFallback : options.mpEarned,
-      metadata: { appId }
+      metadata: {
+        appId,
+        feedbackFirst: Boolean(options && options.feedbackFirst)
+      }
     });
     if (result.awarded) recordPracticeActivity(appId, options);
     return result;
@@ -403,7 +431,10 @@
       title: options.title || "Reflection saved",
       body: options.body || "Your thinking was saved.",
       mpEarned: options.mpEarned == null ? readSettings().mp.reflectionExercise : options.mpEarned,
-      metadata: { appId }
+      metadata: {
+        appId,
+        feedbackFirst: Boolean(options && options.feedbackFirst)
+      }
     });
     if (result.awarded) recordPracticeActivity(appId, options);
     return result;
@@ -447,6 +478,7 @@
   };
 
   if (window.addEventListener) {
+    window.addEventListener("online", retryPendingRewardSync);
     window.addEventListener("utl:exercise-reflection", (event) => {
       const detail = event && event.detail || {};
       const response = String(detail.response || detail.note || detail.choice || "").trim();
@@ -481,4 +513,6 @@
       if (event.key === REWARD_SETTINGS_KEY) refreshRewardCluster(readState());
     });
   }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", retryPendingRewardSync, { once: true });
+  else retryPendingRewardSync();
 })();

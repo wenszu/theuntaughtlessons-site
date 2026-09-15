@@ -84,5 +84,9 @@
     if(hasDraft(remoteDraft)&&(!currentDraft||String(remoteDraft.updatedAtClient||'')>String(currentDraft.updatedAtClient||'')))localStorage.setItem(draftKey,JSON.stringify(remoteDraft));
     remoteAttempts=(work.submissions||[]).map((item)=>{const payload=item.responsePayload||{};const raw=payload.response&&typeof payload.response==='object'?payload.response:null;if(!raw)return null;const response=normalizeResponse(raw);return{attemptId:item.submissionId||item.id,timestamp:item.completedAtClient||payload.completed_at,inputMode:response.mode||'open',userResponse:response,elapsedSeconds:item.durationSeconds||payload.duration_seconds||0,score:payload.score};}).filter(Boolean);
     render();
+    if(new URLSearchParams(location.search).get('review')==='latest'){
+      const saved=attempts(),latest=saved[saved.length-1];
+      if(latest){viewingAttemptKey=attemptKey(latest);applyResponse(latest.userResponse,true);}
+    }
   }).catch(()=>{});
 })();
