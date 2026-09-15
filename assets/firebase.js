@@ -165,6 +165,12 @@ async function issueVerifiedCredential() {
   return result && result.data ? result.data : null;
 }
 
+async function repairMemberVerifiedCredential(userId) {
+  const callable = httpsCallable(functions, "repairMemberVerifiedCredential");
+  const result = await callable({ userId });
+  return result && result.data ? result.data : null;
+}
+
 async function manageVerifiedCredential(action, credentialId, details = {}) {
   const callable = httpsCallable(functions, "manageVerifiedCredential");
   const result = await callable({ action, credentialId, ...(details && typeof details === "object" ? details : {}) });
@@ -659,9 +665,16 @@ async function saveMemberRewards(incoming = {}) {
       .slice(-500);
     const ledgerTotal = ledger.reduce((sum, entry) => sum + Math.max(0, Number(entry.mpEarned || 0)), 0);
     const mpTotal = Math.max(ledgerTotal, Number(current.mpTotal || current.masteryPoints || 0), Number(incoming.mpTotal || incoming.masteryPoints || 0));
+    const incomingLevel = incoming.currentLevel || incoming.level || current.currentLevel || current.level;
+    const nestedLevel = incomingLevel && typeof incomingLevel === "object" && incomingLevel.current && typeof incomingLevel.current === "object" ? incomingLevel.current : null;
+    const level = typeof incomingLevel === "string"
+      ? incomingLevel
+      : String(incomingLevel && (incomingLevel.name || incomingLevel.title) || (nestedLevel && (nestedLevel.name || nestedLevel.title)) || "");
     const rewards = Object.assign({}, current, incoming, {
       mpTotal,
       masteryPoints: mpTotal,
+      level,
+      currentLevel: level,
       earnedEvents: eventIds,
       earnedEventIds: eventIds,
       ledger
@@ -1985,6 +1998,7 @@ export {
   LEARNING_PROFILE_TREND_TOLERANCE,
   MEMBER_ACCOUNT_AVATAR_ICON_IDS,
   issueVerifiedCredential,
+  repairMemberVerifiedCredential,
   manageVerifiedCredential,
   searchVerifiedCredentials,
   onAuthStateChanged,

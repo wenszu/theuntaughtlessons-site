@@ -157,6 +157,19 @@ exports.issueVerifiedCredential = onCall({ timeoutSeconds: 30, memory: "256MiB" 
   return issueCredentialForUser(caller.uid, caller.email, request.auth.token.name, { throwOnIneligible: true });
 });
 
+exports.repairMemberVerifiedCredential = onCall({ timeoutSeconds: 30, memory: "256MiB" }, async (request) => {
+  const caller = await requireVerifiedCaller(request);
+  if (!(await isAuthorizedAdmin(caller.email))) throw new HttpsError("permission-denied", "Administrator access is required.");
+  const uid = String(request.data && request.data.userId || "").trim();
+  if (!uid) throw new HttpsError("invalid-argument", "A learner user ID is required.");
+  const userSnap = await admin.firestore().collection("users").doc(uid).get();
+  if (!userSnap.exists) throw new HttpsError("not-found", "The learner account could not be found.");
+  const userData = userSnap.data() || {};
+  const email = String(userData.email || "").trim().toLowerCase();
+  if (!email) throw new HttpsError("failed-precondition", "The learner account does not have an email address.");
+  return issueCredentialForUser(uid, email, userData.displayName || "", { throwOnIneligible: true });
+});
+
 function cohortProgress(data) {
   const workspace = data && data.workspaceProgress || {};
   const orientationDone = workspace.orientation && workspace.orientation.ready === true ? 1 : 0;
@@ -174,8 +187,15 @@ function cohortReward(data) {
   const rewards = data && data.rewards || workspace.rewards || {};
   return {
     mp: Math.max(0, Math.round(Number(rewards.mpTotal || rewards.masteryPoints || 0))),
-    level: String(rewards.currentLevel || rewards.level || "Intern").slice(0, 40)
+    level: rewardLevelName(rewards.currentLevel || rewards.level) || "Intern"
   };
+}
+
+function rewardLevelName(value) {
+  if (typeof value === "string") return value.slice(0, 40);
+  if (!value || typeof value !== "object") return "";
+  const nested = value.current && typeof value.current === "object" ? value.current : null;
+  return String(value.name || value.title || (nested && (nested.name || nested.title)) || "").slice(0, 40);
 }
 
 function rankCohort(entries, metric) {

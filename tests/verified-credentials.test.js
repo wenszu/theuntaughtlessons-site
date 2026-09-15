@@ -13,6 +13,8 @@ const results = fs.readFileSync('my-results/index.html', 'utf8');
 assert.match(results, /certificate\/index\.html" target="_blank" rel="noopener"/, 'My Results opens the certificate separately');
 
 assert.match(functions, /exports\.issueVerifiedCredential = onCall/, 'credentials must be issued by a trusted server function');
+assert.match(functions, /exports\.repairMemberVerifiedCredential = onCall/, 'admins should be able to repair a missing credential for an eligible learner');
+assert.match(functions, /isAuthorizedAdmin\(caller\.email\)/, 'credential repair must remain admin-only');
 assert.match(functions, /exports\.autoIssueVerifiedCredential = onDocumentWritten/, 'credentials should be issued automatically when completion records change');
 assert.match(functions, /CREDENTIAL_PROGRAM_ID = "think-speak-act-executive"/, 'credential records should identify their program independently from the learner');
 assert.match(functions, /credentialCode: CREDENTIAL_CODE/, 'credential records should carry a program-specific credential code for future programs');
@@ -39,6 +41,8 @@ assert.match(functions, /exports\.searchVerifiedCredentials = onCall/, 'admins s
 assert.match(functions, /collection\("credential_issuance"\)\.where\("email"/, 'admin search should connect learner email to its private issuance record');
 assert.match(admin, /learner name, email, or credential ID/i, 'the admin registry should explain all supported search methods');
 assert.match(admin, /searchVerifiedCredentials\(query\)/, 'the admin registry should search without requiring a known ID');
+assert.match(admin, /spRewardLevelName/, 'student progress should normalize legacy and object-form reward levels');
+assert.match(admin, /repairMemberVerifiedCredential\(member\.uid\)/, 'student progress should repair eligible completed learners missing credentials');
 assert.match(results, /id="resultsVerifyLink"/, 'My Results should display the graduate credential ID as a direct verification link');
 assert.match(results, /id="resultsShareCredential"/, 'My Results should offer one clear cross-platform sharing action');
 assert.match(results, /Your certificate/, 'My Results should explain the downloadable certificate');

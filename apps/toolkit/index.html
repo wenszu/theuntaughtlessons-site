@@ -139,7 +139,7 @@ REUSE AUDIT
     }
     .tk-library-tabs {
       display: flex;
-      width: min(520px, 100%);
+      width: min(760px, 100%);
       margin: 0 auto 24px;
       border: 1px solid rgba(0,51,102,.18);
       border-radius: 10px;
@@ -176,7 +176,6 @@ REUSE AUDIT
       flex-direction: column;
       gap: 12px;
       border: 1px solid rgba(0,51,102,.14);
-      border-top: 3px solid var(--tk-gold);
       border-radius: 8px;
       background: var(--tk-white);
       box-shadow: none;
@@ -305,21 +304,11 @@ REUSE AUDIT
       font: 700 clamp(1.8rem, 4vw, 2.7rem)/1.1 'Playfair Display', serif;
     }
     .tk-template-intro p { margin: 0; line-height: 1.6; }
-    .tk-template-grid {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 18px;
-    }
-    .tk-template-card {
-      display: flex;
-      flex-direction: column;
-      min-height: 100%;
-      border: 1px solid rgba(0,51,102,.16);
-      border-top: 3px solid var(--tk-gold);
-      border-radius: 8px;
-      background: var(--tk-white);
-      padding: 22px;
-    }
+    .tk-coming-soon { width:min(760px,100%); margin:0 auto; border:1px solid rgba(0,51,102,.16); border-radius:10px; background:var(--tk-white); padding:clamp(24px,5vw,48px); text-align:center; }
+    .tk-coming-soon-icon { display:grid; place-items:center; width:58px; height:58px; margin:0 auto 18px; border-radius:50%; background:#edf3f8; color:var(--tk-navy); font-size:1.55rem; font-weight:700; }
+    .tk-coming-soon h2 { margin:0 0 12px; color:var(--tk-navy); font:700 clamp(1.8rem,4vw,2.7rem)/1.1 'Playfair Display',serif; }
+    .tk-coming-soon p { max-width:580px; margin:0 auto; line-height:1.65; }
+    .tk-coming-soon-formats { display:flex; flex-wrap:wrap; justify-content:center; gap:8px; margin-top:22px; }
     .tk-template-format {
       display: inline-flex;
       align-self: flex-start;
@@ -361,7 +350,6 @@ REUSE AUDIT
       .tk-user-email { display: none; }
       .tk-profile-menu { position: fixed; top: 56px; right: 12px; left: auto; width: min(270px, calc(100vw - 24px)); max-width: none; }
       .tk-grid { grid-template-columns: 1fr; }
-      .tk-template-grid { grid-template-columns: 1fr; }
       .tk-main { width: min(100% - 24px, 1180px); }
       .tk-tabs { width: 100%; }
       .tk-tab { flex: 1; }
@@ -404,13 +392,15 @@ REUSE AUDIT
   <section class="tk-intro">
     <span class="tk-label">Your resources</span>
     <h1>Toolkit</h1>
-    <p>Use these prompts when you need to organize information, write for a busy reader, prepare for a conversation or review a decision.</p>
+    <p>Choose a prompt for the work in front of you. Document, spreadsheet and presentation templates are coming next.</p>
   </section>
 
   <main class="tk-main">
     <nav class="tk-library-tabs" aria-label="Choose a Toolkit resource type">
       <button class="tk-library-tab tk-active" type="button" data-library="prompts" aria-selected="true">AI prompts</button>
-      <button class="tk-library-tab" type="button" data-library="templates" aria-selected="false">Templates</button>
+      <button class="tk-library-tab" type="button" data-library="documents" aria-selected="false">Documents</button>
+      <button class="tk-library-tab" type="button" data-library="spreadsheets" aria-selected="false">Spreadsheets</button>
+      <button class="tk-library-tab" type="button" data-library="presentations" aria-selected="false">Presentations</button>
     </nav>
 
     <section class="tk-library-panel" id="library-prompts">
@@ -426,63 +416,11 @@ REUSE AUDIT
       <p class="tk-footer-note">Save the prompts you use often and adjust them as your work changes.</p>
     </section>
 
-    <section class="tk-library-panel" id="library-templates" hidden>
-      <div class="tk-template-intro">
-        <span class="tk-label">Planned resources</span>
-        <h2>Templates for common work</h2>
-        <p>These first templates will work in both Google and Microsoft files. The design will use a light UTL style that is easy to replace with your organization’s brand.</p>
-      </div>
-      <div class="tk-template-grid">
-        <article class="tk-template-card">
-          <span class="tk-template-format">Google Docs · Microsoft Word</span>
-          <h3>One page decision brief</h3>
-          <p>Turn a recommendation into a short document a busy reader can understand and approve.</p>
-          <details>
-            <summary>What the template will include</summary>
-            <ul>
-              <li>Decision needed</li>
-              <li>Recommendation</li>
-              <li>Three supporting points</li>
-              <li>Risks and responses</li>
-              <li>Owner and next step</li>
-            </ul>
-          </details>
-          <span class="tk-template-status">Template preview · File coming next</span>
-        </article>
-        <article class="tk-template-card">
-          <span class="tk-template-format">Google Sheets · Microsoft Excel</span>
-          <h3>Decision and action tracker</h3>
-          <p>Keep decisions, actions, owners and deadlines together after meetings or project reviews.</p>
-          <details>
-            <summary>What the template will include</summary>
-            <ul>
-              <li>Decision log</li>
-              <li>Action owner and due date</li>
-              <li>Status and priority</li>
-              <li>Open question or dependency</li>
-              <li>Simple summary view</li>
-            </ul>
-          </details>
-          <span class="tk-template-status">Template preview · File coming next</span>
-        </article>
-        <article class="tk-template-card">
-          <span class="tk-template-format">Google Slides · Microsoft PowerPoint</span>
-          <h3>Executive recommendation deck</h3>
-          <p>Build a short presentation that begins with the answer and leads to one clear decision or next step.</p>
-          <details>
-            <summary>What the template will include</summary>
-            <ul>
-              <li>Recommendation headline</li>
-              <li>Situation and complication</li>
-              <li>Evidence and options</li>
-              <li>Recommended path</li>
-              <li>Decision and next step</li>
-            </ul>
-          </details>
-          <span class="tk-template-status">Template preview · File coming next</span>
-        </article>
-      </div>
-    </section>
+    <section class="tk-library-panel" id="library-documents" hidden><div class="tk-coming-soon"><div class="tk-coming-soon-icon" aria-hidden="true">D</div><span class="tk-label">Coming soon</span><h2>Document templates</h2><p>Clear documents for recommendations, decisions and follow up. Each template will be available in Google Docs and Microsoft Word.</p><div class="tk-coming-soon-formats"><span class="tk-template-format">Google Docs</span><span class="tk-template-format">Microsoft Word</span></div></div></section>
+
+    <section class="tk-library-panel" id="library-spreadsheets" hidden><div class="tk-coming-soon"><div class="tk-coming-soon-icon" aria-hidden="true">S</div><span class="tk-label">Coming soon</span><h2>Spreadsheet templates</h2><p>Simple trackers for decisions, actions and work that needs an owner. Each template will be available in Google Sheets and Microsoft Excel.</p><div class="tk-coming-soon-formats"><span class="tk-template-format">Google Sheets</span><span class="tk-template-format">Microsoft Excel</span></div></div></section>
+
+    <section class="tk-library-panel" id="library-presentations" hidden><div class="tk-coming-soon"><div class="tk-coming-soon-icon" aria-hidden="true">P</div><span class="tk-label">Coming soon</span><h2>Presentation templates</h2><p>Slides that help you build a clear storyline and ask for a decision. Each template will be available in Google Slides and Microsoft PowerPoint.</p><div class="tk-coming-soon-formats"><span class="tk-template-format">Google Slides</span><span class="tk-template-format">Microsoft PowerPoint</span></div></div></section>
   </main>
 
   <script>

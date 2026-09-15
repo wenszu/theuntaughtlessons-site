@@ -8370,8 +8370,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
     }
 
     function rewardsCell(member) {
-      const progressRewards = ((member.workspaceProgress || {}).rewards) || {};
-      const rewards = member.rewards || progressRewards || {};
+      const rewards = spRewardData(member);
       const mpTotal = Number(rewards.mpTotal || rewards.masteryPoints || 0);
       const level = rewards.currentLevel || rewards.level || '';
       const streakDays = Number(rewards.streakDays || 0);
@@ -8403,7 +8402,16 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
     }
 
     function spRewardData(member) {
-      return member.rewards || ((member.workspaceProgress || {}).rewards) || {};
+      const source = member.rewards || ((member.workspaceProgress || {}).rewards) || {};
+      const level = spRewardLevelName(source.currentLevel || source.level);
+      return Object.assign({}, source, { level, currentLevel: level });
+    }
+
+    function spRewardLevelName(value) {
+      if (typeof value === 'string') return value;
+      if (!value || typeof value !== 'object') return '';
+      const nested = value.current && typeof value.current === 'object' ? value.current : null;
+      return String(value.name || value.title || (nested && (nested.name || nested.title)) || '');
     }
 
     function spProgramBonusCredited(member) {
@@ -9960,6 +9968,24 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
           member.rewards = repair.rewards;
           member.workspaceProgress = Object.assign({}, member.workspaceProgress || {}, { rewards: repair.rewards });
         });
+        const credentialRepairCandidates = members.filter((member) => {
+          return member.uid && spProgramComplete(member) && !member.credential && fb.repairMemberVerifiedCredential;
+        });
+        const credentialRepairResults = await Promise.allSettled(credentialRepairCandidates.map(async (member) => {
+          const repaired = await fb.repairMemberVerifiedCredential(member.uid);
+          return { member, repaired };
+        }));
+        let repairedCredentials = 0;
+        credentialRepairResults.forEach((entry) => {
+          if (entry.status !== 'fulfilled') {
+            console.warn('A completed learner credential could not be repaired.', entry.reason);
+            return;
+          }
+          const { member, repaired } = entry.value;
+          if (!repaired || !repaired.credential || !repaired.credential.credentialId) return;
+          member.credential = repaired.credential;
+          repairedCredentials += 1;
+        });
         spAllMembers = members;
         try { eiData = await fb.getAllEngagementAnalytics(members.map((member)=>member.uid).filter(Boolean)); }
         catch (analyticsError) { console.warn('Engagement analytics could not be loaded in Cohort Analytics.', analyticsError); }
@@ -9982,7 +10008,8 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         if (statusEls.length) {
           const partial = members.usersReadError ? ' · Progress details blocked by Firestore rules' : '';
           const repairNote = repairedBonuses ? ' · Repaired ' + repairedBonuses + ' missing program completion bonus' + (repairedBonuses === 1 ? '' : 'es') : '';
-          const text = 'Signed in as ' + escapeHtml(currentUser.email) + ' · Last refreshed ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + repairNote + partial;
+          const credentialNote = repairedCredentials ? ' · Issued ' + repairedCredentials + ' missing credential' + (repairedCredentials === 1 ? '' : 's') : '';
+          const text = 'Signed in as ' + escapeHtml(currentUser.email) + ' · Last refreshed ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + repairNote + credentialNote + partial;
           statusEls.forEach((el) => { el.textContent = text; });
         }
         if (members.usersReadError) {
