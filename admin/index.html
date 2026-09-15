@@ -941,12 +941,12 @@
     .ca-report-program { display:flex; align-items:center; justify-content:space-between; gap:15px; margin:0 -42px 20px; padding:9px 42px; border-bottom:1px solid #D8D0C4; background:#F3EDE2; color:#4A4A4A; font-size:9px; font-weight:700; }
     .ca-report-program img { height:27px; }
     .ca-report-kicker { margin:18px 0 3px; color:#B96F00; font-size:9px; font-weight:700; }
-    .ca-report-sheet h2 { margin:0 0 9px; padding-bottom:7px; border-bottom:2px solid #EEA320; color:#003366; font:700 17px/1.2 'Playfair Display',serif; }
+    .ca-report-sheet h2 { margin:0 0 14px; color:#003366; font:700 17px/1.2 'Playfair Display',serif; }
     .ca-report-sheet h3 { margin:0 0 7px; color:#003366; font-size:12px; }
     .ca-report-summary { margin:0 0 14px; padding:13px 15px; border:1px solid #E6C681; border-radius:7px; background:#FFF8E8; font-size:12px; }
     .ca-report-summary strong { color:#003366; }
     .ca-report-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin:12px 0 18px; }
-    .ca-report-stat { padding:10px 11px; border:1px solid #D8D0C4; border-top:3px solid #EEA320; border-radius:7px; background:#fff; }
+    .ca-report-stat { padding:12px 11px; border:1px solid #D8D0C4; border-radius:7px; background:#FAF8F3; }
     .ca-report-stat span { display:block; color:#6D6D6D; font-size:8.5px; font-weight:700; }
     .ca-report-stat strong { display:block; margin-top:4px; color:#003366; font:700 19px/1 'Playfair Display',serif; }
     .ca-report-stat small { display:block; margin-top:3px; color:#777; font-size:8px; }
@@ -954,19 +954,24 @@
     .ca-report-card { padding:13px; border:1px solid #D8D0C4; border-radius:7px; background:#fff; break-inside:avoid; }
     .ca-report-action { margin-top:13px; padding:13px 15px; border:1px solid #E6C681; border-radius:7px; background:#FFF9EB; }
     .ca-report-action p { margin:4px 0 0; white-space:pre-line; }
+    .ca-report-bsp-list { display:grid; gap:5px; margin:6px 0 0; padding-left:17px; }
+    .ca-report-bsp-list strong { color:#003366; }
     .ca-report-bars { display:grid; gap:9px; }
     .ca-report-bar-row { display:grid; grid-template-columns:125px 1fr 75px; align-items:center; gap:9px; }
     .ca-report-bar-row b { color:#003366; font-size:10px; }
-    .ca-report-bar-track { height:8px; overflow:hidden; border-radius:99px; background:#E9E4DA; }
+    .ca-report-bar-track { position:relative; height:8px; border-radius:99px; background:#E9E4DA; }
     .ca-report-bar-fill { height:100%; border-radius:99px; background:#EEA320; }
+    .ca-report-bar-pace { position:absolute; top:-4px; bottom:-4px; width:2px; border-radius:2px; background:#003366; }
+    .ca-report-bar-legend { margin:8px 0 0; color:#6D6D6D; font-size:8px; }
+    .ca-report-bar-legend i { display:inline-block; width:2px; height:10px; margin-right:5px; background:#003366; vertical-align:-2px; }
     .ca-report-bar-row span { text-align:right; font-size:9px; }
     .ca-report-table { width:100%; border-collapse:collapse; font-size:9px; }
     .ca-report-table th,.ca-report-table td { padding:6px 7px; border-bottom:1px solid #DDD5C9; text-align:left; vertical-align:top; }
     .ca-report-table th { background:#003366; color:#fff; font-size:8px; }
     .ca-report-table tbody tr:nth-child(even) { background:#F7F3EC; }
     .ca-report-status { display:inline-block; padding:2px 6px; border-radius:999px; background:#F0ECE5; color:#555; font-size:8px; font-weight:700; white-space:nowrap; }
-    .ca-report-status.is-complete,.ca-report-status.is-on-pace { background:#E6F4EC; color:#27633F; }
-    .ca-report-status.is-follow-up,.ca-report-status.is-access { background:#FFF1CF; color:#7B5200; }
+    .ca-report-status.is-program-complete,.ca-report-status.is-on-schedule { background:#E6F4EC; color:#27633F; }
+    .ca-report-status.is-check-in-suggested,.ca-report-status.is-access-help-needed { background:#FFF1CF; color:#7B5200; }
     .ca-report-methods { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
     .ca-report-method { padding:9px 10px; border:1px solid #D8D0C4; border-radius:6px; background:#FAF8F3; break-inside:avoid; }
     .ca-report-method b { color:#003366; }
@@ -1033,12 +1038,13 @@
         color: #4A4A4A;
         font-size: 12px;
       }
-      #caPrintReport .ca-report-sheet { width:auto; min-height:0; margin:0; padding:0; box-shadow:none; break-after:page; page-break-after:always; }
+      #caPrintReport .ca-report-sheet { box-sizing:border-box; width:auto; min-height:0; margin:0; padding:0 0 5mm; box-shadow:none; break-after:page; page-break-after:always; }
       #caPrintReport .ca-report-sheet:last-child { break-after:auto; page-break-after:auto; }
-      #caPrintReport .ca-report-titleband { margin:-14mm -12mm 0; padding:12mm 12mm 16px; }
-      #caPrintReport .ca-report-program { margin:0 -12mm 18px; padding:9px 12mm; }
+      #caPrintReport .ca-report-titleband { margin:0 -2mm; padding:8mm 2mm 16px; }
+      #caPrintReport .ca-report-program { margin:0 -2mm 18px; padding:9px 2mm; }
       #caPrintReport .ca-report-table thead { display:table-header-group; }
       #caPrintReport .ca-report-table tr,.ca-report-card,.ca-report-method { break-inside:avoid; page-break-inside:avoid; }
+      #caPrintReport .ca-report-footer { break-inside:avoid; page-break-inside:avoid; }
       #caPrintReport .cp-card { width:170mm; height:212.5mm; margin:8mm auto 0; border:1px solid #D8D0C4; border-radius:8px; box-shadow:none; font-size:14px; }
 
       #caPrintReport .ca-print-header {
@@ -3153,6 +3159,7 @@
               <label class="ca-report-field">What is going well<textarea id="caReportHighlight" maxlength="320"></textarea></label>
               <label class="ca-report-field">What may need attention<textarea id="caReportAttention" maxlength="320"></textarea></label>
               <label class="ca-report-field">Suggested actions this week<textarea id="caReportActions" maxlength="420"></textarea></label>
+              <label class="ca-report-field">Action owner<select id="caReportActionOwner"><option value="UTL">UTL</option><option value="Client HR">Client HR</option><option value="Shared">UTL and Client HR</option></select></label>
               <h4>Privacy and detail</h4>
               <label class="ca-report-field">Learner names<select id="caReportNames"><option value="full">Full names</option><option value="first">First names only</option><option value="anonymous">Anonymous learner IDs</option></select></label>
               <label class="ca-report-check"><input id="caReportIncludeMp" type="checkbox"> Include MP and level</label>
@@ -8878,6 +8885,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
     }
 
     // Engagement Insights
+    const VIDEO_COMPLETION_PERCENT = 80;
     let eiData = { sessions: [], activities: [] };
     const EI_METRICS = {
       activeLearners: ['Active learners (7d)', 'Unique learners with meaningful interaction during the last 7 days; page views alone are excluded.', 'Shows the recent participating population.', 'Completion rate reveals whether activity is translating into progress.'],
@@ -8943,8 +8951,8 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
 
     function eiVideoSummary(items) {
       const videos = eiVideoItems(items);
-      const completed = videos.filter((item) => item.videoCompleted || Number(item.videoMaxPercent || 0) >= 90);
-      const incomplete = videos.filter((item) => !(item.videoCompleted || Number(item.videoMaxPercent || 0) >= 90));
+      const completed = videos.filter((item) => item.videoCompleted || Number(item.videoMaxPercent || 0) >= VIDEO_COMPLETION_PERCENT);
+      const incomplete = videos.filter((item) => !(item.videoCompleted || Number(item.videoMaxPercent || 0) >= VIDEO_COMPLETION_PERCENT));
       const bands = { 'Before 25%': 0, '25% to 49%': 0, '50% to 74%': 0, '75% to 89%': 0 };
       incomplete.forEach((item) => { const p=Number(item.videoMaxPercent||0); bands[p<25?'Before 25%':p<50?'25% to 49%':p<75?'50% to 74%':'75% to 89%'] += 1; });
       const common = Object.entries(bands).sort((a,b)=>b[1]-a[1])[0];
@@ -9437,10 +9445,11 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       const result = [{ id:'orientation', title:'Orientation', type:'orientation', phase:'Getting started' }];
       const phases = ['phase1','phase2','phase3'];
       const through = milestone === 'orientation' ? 0 : Math.max(1, phases.indexOf(milestone) + 1);
-      phases.slice(0, through).forEach((phaseKey) => {
+      phases.slice(0, through).forEach((phaseKey,phaseIndex) => {
         const phase = (window.UTL_CONTENT || {})[phaseKey] || {};
-        (phase.lessons || []).forEach((item) => result.push({ id:item.id, title:item.title || item.id, type:'lesson', phase:phase.label || phaseKey }));
-        (phase.exercises || []).forEach((item) => result.push({ id:item.id, title:item.title || item.id, type:'exercise', phase:phase.label || phaseKey }));
+        const phaseLabel=/^phase\s*\d+$/i.test(String(phase.label||''))?'Phase '+(phaseIndex+1):(phase.label||'Phase '+(phaseIndex+1));
+        (phase.lessons || []).forEach((item) => result.push({ id:item.id, title:item.title || item.id, type:'lesson', phase:phaseLabel }));
+        (phase.exercises || []).forEach((item) => result.push({ id:item.id, title:item.title || item.id, type:'exercise', phase:phaseLabel }));
       });
       return result;
     }
@@ -9453,10 +9462,21 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
     }
 
     function caReportMemberName(member, index, mode) {
-      const full = String(member.displayName || member.name || member.email || 'Learner ' + (index + 1)).trim();
+      const email = String(member.email || '').trim();
+      const emailName = email.split('@')[0].replace(/[._-]+/g,' ').replace(/\b\w/g,(letter)=>letter.toUpperCase());
+      const storedNames=[member.displayName,member.name,member.fullName,[member.firstName,member.lastName].filter(Boolean).join(' ')].map((value)=>String(value||'').trim()).filter((value)=>value&&!value.includes('@'));
+      const full = String(storedNames[0] || emailName || 'Learner ' + (index + 1)).trim();
       if (mode === 'anonymous') return 'Learner ' + String(index + 1).padStart(2, '0');
       if (mode === 'first') return full.split(/\s+/)[0];
       return full;
+    }
+
+    function caReportPhaseKey(item) {
+      const value = String(item && (item.phaseId || item.phase || item.activityId || item.sessionId) || '').toLowerCase();
+      if (/phase[-_ ]?1|\bp1[-_]/.test(value)) return 'phase1';
+      if (/phase[-_ ]?2|\bp2[-_]/.test(value)) return 'phase2';
+      if (/phase[-_ ]?3|\bp3[-_]/.test(value)) return 'phase3';
+      return 'other';
     }
 
     function caReportMemberStage(member) {
@@ -9482,8 +9502,11 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       const activeUids = new Set([...periodActivities.filter((item)=>Number(item.meaningfulInteractions||0)>0).map((item)=>item.uid), ...periodSessions.map((item)=>item.uid)]);
       const onPace = members.filter((member) => scheduled.every((item) => caReportItemDone(member,item)));
       const video = eiVideoSummary(periodActivities);
+      const videoAssigned = scheduled.some((item)=>item.type==='lesson');
       const focusedSeconds = periodSessions.reduce((sum,item)=>sum+Number(item.activeSeconds||0),0);
       const medianSession = eiMedian(periodSessions.map((item)=>item.activeSeconds));
+      const averageFocusedSeconds = members.length ? focusedSeconds / members.length : 0;
+      const phaseFocusedSeconds = periodSessions.reduce((totals,item)=>{const key=caReportPhaseKey(item);totals[key]=(totals[key]||0)+Number(item.activeSeconds||0);return totals;},{phase1:0,phase2:0,phase3:0,other:0});
       const latestByUid = new Map();
       eiData.activities.forEach((item)=>{if(!memberUids.has(item.uid)||Number(item.meaningfulInteractions||0)<1)return;const current=latestByUid.get(item.uid);if(!current||Number(item.lastMeaningfulAtMs||0)>Number(current.lastMeaningfulAtMs||0))latestByUid.set(item.uid,item);});
       const learners = members.map((member,index) => {
@@ -9492,19 +9515,21 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         const latest = latestByUid.get(member.uid);
         const memberVideos = eiVideoItems(periodActivities.filter((item)=>item.uid===member.uid));
         const maxVideo = memberVideos.length ? Math.max(...memberVideos.map((item)=>Number(item.videoMaxPercent||0))) : 0;
-        const completedVideos = memberVideos.filter((item)=>item.videoCompleted||Number(item.videoMaxPercent||0)>=90).length;
-        const accessed = Boolean(member.uid || member.firstLoginAt || member.lastLoginAt);
+        const completedVideos = memberVideos.filter((item)=>item.videoCompleted||Number(item.videoMaxPercent||0)>=VIDEO_COMPLETION_PERCENT).length;
+        const accessed = Boolean(member.firstLoginAt || member.lastLoginAt || spProgressScore(member)>0);
         const complete = spProgramComplete(member);
         const pace = scheduled.every((item)=>caReportItemDone(member,item));
-        let status = complete ? 'Program complete' : pace ? 'On pace' : !accessed ? 'Access support needed' : spProgressScore(member)===0 ? 'Not yet started' : !activeUids.has(member.uid) ? 'Follow-up suggested' : 'In progress';
-        return { member,index,name:caReportMemberName(member,index,document.getElementById('caReportNames')?.value||'full'),completedScheduled,milestonePercent,latest,maxVideo,completedVideos,status,stage:caReportMemberStage(member) };
-      });
-      const followUp = learners.filter((item)=>item.status==='Follow-up suggested'||item.status==='Access support needed'||item.status==='Not yet started').length;
+        let status = complete ? 'Program complete' : !accessed ? 'Access help needed' : pace ? 'On schedule' : 'Check-in suggested';
+        const statusPriority = {'Access help needed':0,'Check-in suggested':1,'On schedule':2,'Program complete':3}[status];
+        return { member,index,name:caReportMemberName(member,index,document.getElementById('caReportNames')?.value||'full'),completedScheduled,milestonePercent,latest,maxVideo,completedVideos,status,statusPriority,stage:caReportMemberStage(member) };
+      }).sort((a,b)=>a.statusPriority-b.statusPriority||a.name.localeCompare(b.name));
+      const followUp = learners.filter((item)=>item.status==='Check-in suggested'||item.status==='Access help needed').length;
       const activityRows = scheduled.map((item)=>{const done=members.filter((member)=>caReportItemDone(member,item)).length;return Object.assign({},item,{done,percent:members.length?Math.round(done/members.length*100):0});}).sort((a,b)=>a.percent-b.percent).slice(0,6);
       const videoGroups = {};
       eiVideoItems(periodActivities).forEach((item)=>{const key=item.videoId||item.activityId;(videoGroups[key] ||= []).push(item);});
       const videoRows = Object.values(videoGroups).map((rows)=>{const result=eiVideoSummary(rows);return{title:rows.find((row)=>row.activityTitle)?.activityTitle||'Video',viewers:result.viewers,median:Math.round(result.median),completion:result.completionRate,dropOff:result.dropOff};}).sort((a,b)=>a.completion-b.completion).slice(0,5);
-      return { members,summary,week,milestone,milestoneLabel,scheduled,windowRange,periodActivities,periodSessions,activeUids,onPace,video,focusedSeconds,medianSession,learners,followUp,activityRows,videoRows };
+      const projectedFinishDate = new Date(windowRange.end); projectedFinishDate.setDate(projectedFinishDate.getDate()+Math.max(0,3-week)*7);
+      return { members,summary,week,milestone,milestoneLabel,scheduled,windowRange,periodActivities,periodSessions,activeUids,onPace,video,videoAssigned,focusedSeconds,averageFocusedSeconds,phaseFocusedSeconds,medianSession,learners,followUp,activityRows,videoRows,projectedFinishDate };
     }
 
     function caReportHeader(model, page, total) {
@@ -9519,29 +9544,46 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       return '<footer class="ca-report-footer">Engagement measures are support signals. They are not grades or evidence of employee attention or performance.<div class="ca-report-footer-row"><span>'+escapeHtml(caCurrentCohort)+' · Week '+model.week+' of 3 · '+compact+' · v'+version+'</span><span>Page '+page+' of '+total+'</span></div></footer>';
     }
 
+    function caReportBspList(value, labels) {
+      const lines=String(value||'').split(/\n+/).map((line)=>line.replace(/^\s*[-*•]\s*/, '').trim()).filter(Boolean);
+      if(!lines.length)return '<p>No update entered.</p>';
+      return '<ul class="ca-report-bsp-list">'+lines.map((line,index)=>{
+        const match=line.match(/^([^:]{2,45}):\s*(.+)$/);
+        const rawLabel=match?match[1]:(labels[index]||labels[labels.length-1]||'Update');
+        const label=rawLabel.charAt(0).toUpperCase()+rawLabel.slice(1);
+        return '<li><strong>'+escapeHtml(label)+':</strong> '+escapeHtml(match?match[2]:line)+'</li>';
+      }).join('')+'</ul>';
+    }
+
     function caReportMarkup() {
       const model=caReportModel(), count=Math.max(1,model.members.length), includeMp=document.getElementById('caReportIncludeMp')?.checked, includeFocused=document.getElementById('caReportIncludeFocused')?.checked, includeMethods=document.getElementById('caReportIncludeMethods')?.checked;
       const ratio=(value)=>value+' of '+count+' · '+Math.round(value/count*100)+'%';
       const summary=escapeHtml(document.getElementById('caReportSummary')?.value||'');
-      const highlight=escapeHtml(document.getElementById('caReportHighlight')?.value||'');
-      const attention=escapeHtml(document.getElementById('caReportAttention')?.value||'');
-      const actions=escapeHtml(document.getElementById('caReportActions')?.value||'');
-      const phaseBars=caFunnelStages(model.members).slice(2,5).map((stage)=>'<div class="ca-report-bar-row"><b>'+escapeHtml(stage.label)+'</b><div class="ca-report-bar-track"><div class="ca-report-bar-fill" style="width:'+Math.round(stage.count/count*100)+'%"></div></div><span>'+stage.count+' of '+count+' · '+Math.round(stage.count/count*100)+'%</span></div>').join('');
+      const highlight=caReportBspList(document.getElementById('caReportHighlight')?.value,['Participation','Progress','Video engagement']);
+      const attention=caReportBspList(document.getElementById('caReportAttention')?.value,['Support','Access','Activity']);
+      const actionOwner=document.getElementById('caReportActionOwner')?.value||'UTL';
+      const actions=caReportBspList(document.getElementById('caReportActions')?.value,[actionOwner]);
+      const phaseBars=caFunnelStages(model.members).slice(2,5).map((stage,index)=>{const actual=Math.round(stage.count/count*100),due=index<model.week;return'<div class="ca-report-bar-row"><b>'+escapeHtml(stage.label)+'</b><div class="ca-report-bar-track"><div class="ca-report-bar-fill" style="width:'+actual+'%"></div>'+(due?'<i class="ca-report-bar-pace" style="left:calc(100% - 2px)" aria-label="Expected pace"></i>':'')+'</div><span>'+stage.count+' of '+count+' · '+actual+'%'+(due?'':' · Not due yet')+'</span></div>';}).join('')+'<p class="ca-report-bar-legend"><i></i>Expected phase completion by Week '+model.week+'</p>';
       const activityRows=model.activityRows.map((row)=>'<tr><td>'+escapeHtml(row.title)+'</td><td>'+escapeHtml(row.phase)+'</td><td>'+row.done+' of '+count+'</td><td>'+row.percent+'%</td></tr>').join('')||'<tr><td colspan="4">No scheduled activities found.</td></tr>';
-      const videoRows=model.videoRows.map((row)=>'<tr><td>'+escapeHtml(row.title)+'</td><td>'+row.viewers+'</td><td>'+row.median+'%</td><td>'+row.completion+'%</td><td>'+escapeHtml(row.dropOff)+'</td></tr>').join('')||'<tr><td colspan="5">No Vimeo playback was recorded during this reporting period.</td></tr>';
+      const videoRows=!model.videoAssigned?'<tr><td colspan="5">No videos were assigned for this reporting milestone.</td></tr>':model.videoRows.map((row)=>'<tr><td>'+escapeHtml(row.title)+'</td><td>'+row.viewers+' of '+count+'</td><td>'+row.median+'%</td><td>'+row.completion+'%</td><td>'+escapeHtml(row.dropOff)+'</td></tr>').join('')||'<tr><td colspan="5">Videos were assigned, but no Vimeo playback was recorded during this reporting period.</td></tr>';
       const learnerRows=model.learners.map((item)=>{const rewards=spRewardData(item.member),last=item.latest?formatProgressDate(item.latest.lastMeaningfulAtClient||item.latest.lastMeaningfulAtMs):'No activity recorded',video=item.completedVideos?item.completedVideos+' reached 80%':item.maxVideo?Math.round(item.maxVideo)+'% furthest':'No video playback';return'<tr><td>'+escapeHtml(item.name)+'</td><td><span class="ca-report-status is-'+item.status.toLowerCase().replace(/[^a-z]+/g,'-').replace(/-$/,'')+'">'+escapeHtml(item.status)+'</span></td><td>'+escapeHtml(item.stage)+'</td><td>'+item.completedScheduled+' of '+model.scheduled.length+' · '+item.milestonePercent+'%</td><td>'+caPercentComplete(item.member)+'%</td><td>'+escapeHtml(video)+'</td><td>'+escapeHtml(last)+'</td>'+(includeMp?'<td>'+Number(rewards.mpTotal||rewards.masteryPoints||0)+' MP<br>'+escapeHtml(rewards.currentLevel||rewards.level||'—')+'</td>':'')+'</tr>';}).join('');
-      const methods=includeMethods?'<div class="ca-report-methods"><div class="ca-report-method"><b>Participation this week</b><p><b>Measured as:</b> Learners with meaningful interaction during the reporting period.</p><p><b>What it tells you:</b> How broadly the cohort participated.</p><p><b>Combine with:</b> Progress to the selected milestone.</p></div><div class="ca-report-method"><b>On pace</b><p><b>Measured as:</b> Learners who completed every activity through '+escapeHtml(model.milestoneLabel)+'.</p><p><b>What it tells you:</b> Who has reached the agreed weekly target.</p><p><b>Combine with:</b> Last meaningful activity before sending a reminder.</p></div><div class="ca-report-method"><b>Median video coverage</b><p><b>Measured as:</b> The middle furthest Vimeo position among viewing sessions.</p><p><b>What it tells you:</b> How far a typical viewing session reached.</p><p><b>Combine with:</b> Exercise completion to understand application.</p></div><div class="ca-report-method"><b>Estimated focused time</b><p><b>Measured as:</b> Visible page time with interaction during the previous 60 seconds.</p><p><b>What it tells you:</b> The approximate depth of active visits.</p><p><b>Combine with:</b> Completed activities because longer time can also indicate friction.</p></div></div>':'';
-      return '<section class="ca-report-sheet">'+caReportHeader(model,1,3)+'<p class="ca-report-kicker">Executive update</p><h2>Week '+model.week+' cohort position</h2><p class="ca-report-summary">'+summary+'</p><div class="ca-report-stats"><div class="ca-report-stat"><span>Participated this period</span><strong>'+model.activeUids.size+' of '+count+'</strong><small>'+Math.round(model.activeUids.size/count*100)+'% of the cohort</small></div><div class="ca-report-stat"><span>On pace</span><strong>'+model.onPace.length+' of '+count+'</strong><small>Through '+escapeHtml(model.milestoneLabel)+'</small></div><div class="ca-report-stat"><span>Program complete</span><strong>'+model.summary.completed+' of '+count+'</strong><small>'+model.summary.completionPercent+'% of the cohort</small></div><div class="ca-report-stat"><span>Follow-up suggested</span><strong>'+model.followUp+'</strong><small>Review before contacting</small></div></div><div class="ca-report-grid"><div class="ca-report-card"><h3>Progress through the curriculum</h3><div class="ca-report-bars">'+phaseBars+'</div></div><div class="ca-report-card"><h3>Cohort engagement</h3><p>Vimeo viewers: <b>'+ratio(model.video.viewers)+'</b></p><p>Median video coverage: <b>'+Math.round(model.video.median)+'%</b></p><p>Viewing sessions reaching 80%: <b>'+model.video.completionRate+'%</b></p>'+(includeFocused?'<p>Median focused session: <b>'+eiFormatDuration(model.medianSession)+'</b></p>':'')+'</div></div><div class="ca-report-grid" style="margin-top:12px"><div class="ca-report-card"><h3>What is going well</h3><p>'+highlight+'</p></div><div class="ca-report-card"><h3>What may need attention</h3><p>'+attention+'</p></div></div><div class="ca-report-action"><h3>Suggested actions this week</h3><p>'+actions+'</p></div>'+caReportFooter(model,1,3)+'</section>'+
-      '<section class="ca-report-sheet">'+caReportHeader(model,2,3)+'<p class="ca-report-kicker">Progress and engagement</p><h2>Where learners are moving</h2><div class="ca-report-card"><h3>Activities through the selected milestone</h3><table class="ca-report-table"><thead><tr><th>Activity</th><th>Program area</th><th>Completed</th><th>Completion</th></tr></thead><tbody>'+activityRows+'</tbody></table></div><div class="ca-report-card" style="margin-top:14px"><h3>Vimeo engagement during this reporting period</h3><table class="ca-report-table"><thead><tr><th>Video</th><th>Viewers</th><th>Median coverage</th><th>Reached 80%</th><th>Common drop-off</th></tr></thead><tbody>'+videoRows+'</tbody></table></div><div class="ca-report-action"><h3>How to use this page</h3><p>Low completion can reflect access, timing, or exercise friction. Review viewer counts and the learner breakdown before deciding whether to send a reminder or revise an activity.</p></div>'+caReportFooter(model,2,3)+'</section>'+
-      '<section class="ca-report-sheet">'+caReportHeader(model,3,3)+'<p class="ca-report-kicker">Learner update</p><h2>Individual progress and support signals</h2><table class="ca-report-table"><thead><tr><th>Learner</th><th>Support status</th><th>Current stage</th><th>Weekly target</th><th>Total program</th><th>Video progress</th><th>Last meaningful activity</th>'+(includeMp?'<th>MP and level</th>':'')+'</tr></thead><tbody>'+learnerRows+'</tbody></table>'+(methods?'<p class="ca-report-kicker">How to read this update</p><h2>Metric explanations</h2>'+methods:'')+caReportFooter(model,3,3)+'</section>';
+      const methods=includeMethods?'<div class="ca-report-methods"><div class="ca-report-method"><b>Participation this week</b><p><b>Measured as:</b> Learners with meaningful interaction during the reporting period.</p><p><b>What it tells you:</b> How broadly the cohort participated.</p><p><b>Combine with:</b> Progress to the selected milestone.</p></div><div class="ca-report-method"><b>On schedule</b><p><b>Measured as:</b> Learners who completed every activity through '+escapeHtml(model.milestoneLabel)+'.</p><p><b>What it tells you:</b> Who reached the agreed weekly target.</p><p><b>Combine with:</b> Last meaningful activity before sending a reminder.</p></div><div class="ca-report-method"><b>Video start rate</b><p><b>Measured as:</b> Learners who pressed play on an assigned Vimeo lesson.</p><p><b>What it tells you:</b> Whether learners reached the video.</p><p><b>Combine with:</b> The 80% completion rate to separate access from content drop-off.</p></div><div class="ca-report-method"><b>Estimated focused time</b><p><b>Measured as:</b> Visible page time with interaction during the previous 60 seconds.</p><p><b>What it tells you:</b> Approximate time invested in active visits.</p><p><b>Combine with:</b> Completed activities because longer time can also indicate friction.</p></div></div>':'';
+      const videoSummary=model.videoAssigned?'<p>Started an assigned video: <b>'+ratio(model.video.viewers)+'</b></p><p>Median video coverage: <b>'+Math.round(model.video.median)+'%</b></p><p>Viewing sessions reaching '+VIDEO_COMPLETION_PERCENT+'%: <b>'+model.video.completionRate+'%</b></p>':'<p><b>Not assigned:</b> No videos are included in this reporting milestone.</p>';
+      const attributedPhaseTime=model.phaseFocusedSeconds.phase1+model.phaseFocusedSeconds.phase2+model.phaseFocusedSeconds.phase3;
+      const timeBreakdown=includeFocused?'<p>Total focused time: <b>'+eiFormatDuration(model.focusedSeconds)+'</b><br><small>'+eiFormatDuration(model.averageFocusedSeconds)+' average per enrolled learner</small></p>'+(attributedPhaseTime?'<p>By phase: <b>Phase 1 '+eiFormatDuration(model.phaseFocusedSeconds.phase1)+' · Phase 2 '+eiFormatDuration(model.phaseFocusedSeconds.phase2)+' · Phase 3 '+eiFormatDuration(model.phaseFocusedSeconds.phase3)+'</b></p>':''):'';
+      const projection='At the current weekly pace, <strong>'+model.onPace.length+' of '+count+'</strong> learners are on track to finish by '+escapeHtml(model.projectedFinishDate.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}))+'.';
+      return '<section class="ca-report-sheet">'+caReportHeader(model,1,3)+'<p class="ca-report-kicker">Executive update</p><h2>Week '+model.week+' cohort position</h2><p class="ca-report-summary">'+summary+'<br>'+projection+'</p><div class="ca-report-stats"><div class="ca-report-stat"><span>Participated this period</span><strong>'+model.activeUids.size+' of '+count+'</strong><small>'+Math.round(model.activeUids.size/count*100)+'% of the cohort</small></div><div class="ca-report-stat"><span>On schedule</span><strong>'+model.onPace.length+' of '+count+'</strong><small>Through '+escapeHtml(model.milestoneLabel)+'</small></div><div class="ca-report-stat"><span>Program complete</span><strong>'+model.summary.completed+' of '+count+'</strong><small>'+model.summary.completionPercent+'% of the cohort</small></div><div class="ca-report-stat"><span>Check-in suggested</span><strong>'+model.followUp+'</strong><small>Review before contacting</small></div></div><div class="ca-report-grid"><div class="ca-report-card"><h3>Progress through the curriculum</h3><div class="ca-report-bars">'+phaseBars+'</div></div><div class="ca-report-card"><h3>Cohort engagement</h3>'+videoSummary+timeBreakdown+'</div></div><div class="ca-report-grid" style="margin-top:12px"><div class="ca-report-card"><h3>What is going well</h3>'+highlight+'</div><div class="ca-report-card"><h3>What may need attention</h3>'+attention+'</div></div><div class="ca-report-action"><h3>Suggested actions this week</h3><p><b>Owner:</b> '+escapeHtml(actionOwner)+'</p>'+actions+'</div>'+caReportFooter(model,1,3)+'</section>'+
+      '<section class="ca-report-sheet">'+caReportHeader(model,2,3)+'<p class="ca-report-kicker">Progress and engagement</p><h2>Where learners are moving</h2><div class="ca-report-card"><h3>Activities through the selected milestone</h3><table class="ca-report-table"><thead><tr><th>Activity</th><th>Program area</th><th>Completed</th><th>Completion</th></tr></thead><tbody>'+activityRows+'</tbody></table></div><div class="ca-report-card" style="margin-top:14px"><h3>Vimeo engagement during this reporting period</h3><table class="ca-report-table"><thead><tr><th>Video</th><th>Learners who started</th><th>Median coverage</th><th>Reached 80%</th><th>Common drop-off</th></tr></thead><tbody>'+videoRows+'</tbody></table></div><div class="ca-report-action"><h3>How to use this page</h3><p>Low completion can reflect access, timing, or exercise friction. Review viewer counts and the learner breakdown before deciding whether to send a reminder or revise an activity.</p></div>'+caReportFooter(model,2,3)+'</section>'+
+      '<section class="ca-report-sheet">'+caReportHeader(model,3,3)+'<p class="ca-report-kicker">Learner update</p><h2>Individual progress and support signals</h2><p><b>Weekly target</b> covers assigned activities through '+escapeHtml(model.milestoneLabel)+'. <b>Total program</b> covers the full curriculum.</p><table class="ca-report-table"><thead><tr><th>Learner</th><th>Support status</th><th>Current stage</th><th>Weekly target progress</th><th>Total program progress</th><th>Video progress</th><th>Last meaningful activity</th>'+(includeMp?'<th>MP and level</th>':'')+'</tr></thead><tbody>'+learnerRows+'</tbody></table>'+(methods?'<p class="ca-report-kicker">How to read this update</p><h2>Metric explanations</h2>'+methods:'')+caReportFooter(model,3,3)+'</section>';
     }
 
     function caReportSuggestedCopy() {
       const model=caReportModel(), count=Math.max(1,model.members.length), active=model.activeUids.size, onPace=model.onPace.length;
       const summary=(onPace>=Math.ceil(count*.7)?'Strong progress: ':'Cohort update: ')+active+' of '+count+' learners participated during this reporting period, and '+onPace+' reached '+model.milestoneLabel+'.';
-      const highlight=model.video.viewers?'Video participation is visible: '+model.video.viewers+' learners played at least one Vimeo lesson, with median coverage of '+Math.round(model.video.median)+'%.':'Curriculum progress is now visible across the cohort dashboard.';
-      const attention=model.followUp?model.followUp+' learner'+(model.followUp===1?' may':'s may')+' benefit from a supportive follow-up after their individual activity records are reviewed.':'No learners currently meet the report’s follow-up criteria.';
-      const actions=model.followUp?'Review the learners marked for follow-up and confirm whether access or timing is the issue.\nEncourage the cohort to reach '+model.milestoneLabel+'.\nReview the lowest-completion scheduled activity before the next update.':'Reinforce the next weekly milestone.\nReview the lowest-completion scheduled activity.\nShare the next update after the reporting period closes.';
+      const leader=model.learners.slice().sort((a,b)=>b.completedScheduled-a.completedScheduled)[0];
+      const highlight=leader?'Learner progress: '+leader.name+' completed '+leader.completedScheduled+' of '+model.scheduled.length+' activities through the weekly target.'+(model.videoAssigned?'\nVideo starts: '+model.video.viewers+' of '+count+' learners pressed play on an assigned video.':''):'Participation: No learner activity was recorded in this reporting period.';
+      const attention=model.followUp?'Support review: '+model.followUp+' learner'+(model.followUp===1?' has':'s have')+' a check-in or access flag that needs review.':'Support review: No learners currently meet the report’s check-in criteria.';
+      const actions=model.followUp?'Review support: Confirm whether access or timing is blocking the flagged learners.\nReinforce the target: Remind the cohort to complete '+model.milestoneLabel+'.\nCheck the activity: Review the lowest-completion assigned activity before the next update.':'Reinforce the target: Share the next weekly milestone.\nCheck the activity: Review the lowest-completion assigned activity.\nSend the update: Share the next report after the reporting period closes.';
       document.getElementById('caReportSummary').value=summary;
       document.getElementById('caReportHighlight').value=highlight;
       document.getElementById('caReportAttention').value=attention;
@@ -9605,7 +9647,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       const completedBy={},videosBy={},resumesBy={};
       rows.forEach((item)=>{
         if(item.activityType!=='video'&&item.completed){const key=item.uid+'|'+item.activityId;if(!completedPairs.has(key)){completedPairs.add(key);completedBy[item.uid]=(completedBy[item.uid]||0)+1;}}
-        if(item.activityType==='video'&&(item.videoCompleted||Number(item.videoMaxPercent||0)>=90)){const key=item.uid+'|'+(item.videoId||item.activityId);if(!videoPairs.has(key)){videoPairs.add(key);videosBy[item.uid]=(videosBy[item.uid]||0)+1;}}
+        if(item.activityType==='video'&&(item.videoCompleted||Number(item.videoMaxPercent||0)>=VIDEO_COMPLETION_PERCENT)){const key=item.uid+'|'+(item.videoId||item.activityId);if(!videoPairs.has(key)){videoPairs.add(key);videosBy[item.uid]=(videosBy[item.uid]||0)+1;}}
         const count=Number(item.resumeCount||0);if(count>0){resumes+=count;resumesBy[item.uid]=(resumesBy[item.uid]||0)+count;}
       });
       const metric=(label,value,byUid)=>{const maximum=Math.max(0,...Object.values(byUid));return{label,value,safe:value>=3&&maximum<=value/2};};
@@ -9619,7 +9661,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       const eligibleMetrics=metrics.filter((item)=>item.safe&&!suppressNumbers);
       const completedTitlesByUid={},uidsByCompletedTitle={};
       rows.forEach((item)=>{
-        const completed=item.activityType==='video'?(item.videoCompleted||Number(item.videoMaxPercent||0)>=90):item.completed;
+        const completed=item.activityType==='video'?(item.videoCompleted||Number(item.videoMaxPercent||0)>=VIDEO_COMPLETION_PERCENT):item.completed;
         const title=String(item.activityTitle||'').trim();
         if(!completed||!title)return;
         (completedTitlesByUid[item.uid] ||= new Set()).add(title);

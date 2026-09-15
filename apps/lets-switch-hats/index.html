@@ -365,6 +365,16 @@
       line-height: 1.5;
     }
 
+    .lsh-voice-help {
+      display: inline-flex;
+      margin-top: 12px;
+      color: var(--lsh-navy);
+      font-family: 'Lato', Arial, sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      text-underline-offset: 3px;
+    }
+
     .lsh-voice-guide {
       grid-column: 1 / -1;
       display: grid;
@@ -432,7 +442,7 @@
     .lsh-actions {
       display: flex;
       flex-direction: column;
-      align-items: flex-end;
+      align-items: stretch;
       flex-wrap: wrap;
       gap: 10px;
       justify-content: flex-end;
@@ -532,7 +542,7 @@
       }
 
       .lsh-actions {
-        align-items: flex-start;
+        align-items: stretch;
         justify-content: flex-start;
       }
 
@@ -646,31 +656,14 @@
         <p class="lsh-label">Practice with AI</p>
         <h2>Practice the conversation out loud.</h2>
         <p>Open the Let&rsquo;s switch hats CustomGPT, tell it who you are speaking with and what is at stake, then work through the conversation from the other person&rsquo;s point of view.</p>
+        <a class="lsh-voice-help" data-custom-gpt-voice-help href="https://chatgpt.com/g/g-6a411c3c9468819194486200d74b40e4-utl-lets-switch-hats">New to voice mode? View the three steps.</a>
       </div>
       <div class="lsh-actions">
-        <a class="lsh-button lsh-button-accent" href="https://chatgpt.com/g/g-6a411c3c9468819194486200d74b40e4-utl-lets-switch-hats" target="_blank" rel="noopener">Open CustomGPT (Let's switch hats)</a>
-      </div>
-      <div class="lsh-voice-guide">
-        <span class="lsh-voice-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-            <path d="M5 10v4M8.5 7v10M12 5v14M15.5 8v8M19 10v4"/>
-          </svg>
-        </span>
-        <div>
-          <strong>Use ChatGPT voice mode</strong>
-          <p>Click the black voice button with the white waveform near the message box. If asked, allow ChatGPT to use your microphone.</p>
-        </div>
-      </div>
-      <ol class="lsh-voice-steps">
-        <li>Say who the other person is, what they care about, and what conversation you need to have.</li>
-        <li>Respond out loud. Ask the GPT to challenge you if you are still seeing the situation only from your side.</li>
-        <li>Finish by stating what you now understand and one thing you will say differently.</li>
-      </ol>
-      <div style="grid-column:1/-1;display:flex;align-items:center;justify-content:flex-end;gap:10px;flex-wrap:wrap;">
+        <a class="lsh-button lsh-button-accent" data-custom-gpt-voice-guide data-voice-guide-label="Open CustomGPT and start voice practice" href="https://chatgpt.com/g/g-6a411c3c9468819194486200d74b40e4-utl-lets-switch-hats" target="_blank" rel="noopener">Open CustomGPT and start voice practice</a>
         <button class="lsh-button lsh-button-primary" id="completeExerciseBtn" type="button">Mark exercise complete · +30 MP</button>
         <a class="lsh-exit-link" id="journeyLink" href="../../member-login/index.html#learning-journey">Back to Learning Journey</a>
       </div>
-      <p style="grid-column:1/-1;">ChatGPT opens in a new tab. Return here and mark the exercise complete after you finish the conversation.</p>
+      <p>ChatGPT opens in a new tab. Return here and mark the exercise complete after you finish the conversation.</p>
     </section>
   </main>
 
@@ -749,6 +742,7 @@
     });
   </script>
   <script type="module" src="../../assets/feedback-widget.js?v=20260915-0149"></script>
+  <script src="../../assets/custom-gpt-voice-guide.js?v=20260915-0149"></script>
   <script src="../../assets/tactile-buttons.js?v=20260915-0149" defer></script>
 </body>
 </html>

@@ -367,6 +367,16 @@
       line-height: 1.5;
     }
 
+    .bad-news-voice-help {
+      display: inline-flex;
+      margin-top: 12px;
+      color: var(--bad-news-navy);
+      font-family: 'Lato', Arial, sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      text-underline-offset: 3px;
+    }
+
     .bad-news-actions {
       display: flex;
       flex-direction: column;
@@ -594,9 +604,10 @@
         <p class="bad-news-label">Practice with AI</p>
         <h2>Open the Difficult Conversations CustomGPT.</h2>
         <p>Paste your situation, ask it to role-play the other person, and revise until your message is direct, humane, and ready to say out loud.</p>
+        <a class="bad-news-voice-help" data-custom-gpt-voice-help href="https://chatgpt.com/g/g-6a3e9a1b55c08191a19cd53f882b746d-utl-difficult-conversations">New to voice mode? View the three steps.</a>
       </div>
       <div class="bad-news-actions">
-        <a class="bad-news-button bad-news-button-accent" href="https://chatgpt.com/g/g-6a3e9a1b55c08191a19cd53f882b746d-utl-difficult-conversations" target="_blank" rel="noopener">Open CustomGPT (Difficult conversations)</a>
+        <a class="bad-news-button bad-news-button-accent" data-custom-gpt-voice-guide data-voice-guide-label="Open CustomGPT and start voice practice" href="https://chatgpt.com/g/g-6a3e9a1b55c08191a19cd53f882b746d-utl-difficult-conversations" target="_blank" rel="noopener">Open CustomGPT and start voice practice</a>
         <button class="bad-news-button bad-news-button-primary" id="completeExerciseBtn" type="button">Mark exercise complete · +30 MP</button>
         <a class="bad-news-exit-link" id="journeyLink" href="../../member-login/index.html#learning-journey">Back to Learning Journey</a>
       </div>
@@ -679,6 +690,7 @@
     });
   </script>
   <script type="module" src="../../assets/feedback-widget.js?v=20260915-0149"></script>
+  <script src="../../assets/custom-gpt-voice-guide.js?v=20260915-0149"></script>
   <script src="../../assets/tactile-buttons.js?v=20260915-0149" defer></script>
 </body>
 </html>

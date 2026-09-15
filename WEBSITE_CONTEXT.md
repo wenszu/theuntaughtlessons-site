@@ -275,3 +275,8 @@ Decisions are made in Claude (claude.ai). JSON updates are handled in Codex. Doc
 
 - Admin navigation now exposes MP rules, distinguishes runtime reliability from static site health, and merges phase unlocking into Member preview settings. Legacy local access and unconnected email nudges intentionally remain hidden from navigation.
 - Rewards is organized as Levels, Rules summary, MP rules, and Award preview. Detailed record: [archive](archive/WEBSITE_CONTEXT_ARCHIVE.md#2026-09-12--admin-console-navigation-cleanup).
+
+### 2026-09-15 — CustomGPT voice-practice guide
+
+- `i-have-bad-news` and `lets-switch-hats` share an opt-out voice-practice dialog that shows how to open the CustomGPT, find the highlighted blue ChatGPT voice control, allow microphone access, and practice aloud. Text remains an available fallback, and a small help link reopens the guide.
+- The external CustomGPT destination, completion keys, and MP award logic were not changed.
