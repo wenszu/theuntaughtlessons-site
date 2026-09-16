@@ -861,6 +861,383 @@
       color: var(--program-white);
     }
 
+    .experience-intro {
+      max-width: 760px;
+    }
+
+    .experience-showcase {
+      display: grid;
+      grid-template-columns: minmax(0, 1.55fr) minmax(300px, .75fr);
+      gap: 28px;
+      align-items: stretch;
+      margin-top: 52px;
+    }
+
+    .experience-preview {
+      min-width: 0;
+      overflow: hidden;
+      border: 1px solid #d8d0c3;
+      border-radius: 12px;
+      background: #f9f7f2;
+      box-shadow: 0 18px 42px rgba(0, 33, 66, .09);
+    }
+
+    .experience-preview-bar {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      min-height: 44px;
+      padding: 10px 16px;
+      border-bottom: 1px solid #ded7ca;
+      background: var(--program-white);
+      color: var(--program-steel);
+      font-family: Lato, Arial, sans-serif;
+      font-size: 10pt;
+      font-weight: 700;
+    }
+
+    .experience-panel {
+      margin: 0;
+      background: #eef1f2;
+    }
+
+    .experience-panel[hidden] {
+      display: none;
+    }
+
+    .experience-panel img {
+      display: block;
+      width: 100%;
+      aspect-ratio: 16 / 10;
+      object-fit: contain;
+      background: #eef1f2;
+    }
+
+    .experience-image-private {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .experience-image-private::after {
+      content: "";
+      position: absolute;
+      left: 11.5%;
+      bottom: 0;
+      width: 22.5%;
+      height: 31.5%;
+      border-radius: 6px 6px 0 0;
+      background: rgba(247, 244, 238, .52);
+      -webkit-backdrop-filter: blur(9px);
+      backdrop-filter: blur(9px);
+      pointer-events: none;
+    }
+
+    .experience-support {
+      margin-top: 72px;
+      padding-top: 46px;
+      border-top: 1px solid #d8d0c3;
+    }
+
+    .experience-support-heading {
+      margin: 8px 0 12px;
+      color: var(--program-navy);
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(27px, 3vw, 40px);
+      line-height: 1.15;
+    }
+
+    .experience-support-intro {
+      max-width: 760px;
+      margin: 0;
+      color: var(--program-steel);
+      font-family: Lato, Arial, sans-serif;
+      font-size: 15pt;
+      line-height: 1.6;
+    }
+
+    .experience-support-viewer {
+      overflow: hidden;
+      margin-top: 32px;
+      border: 1px solid #d8d0c3;
+      border-radius: 12px;
+      background: var(--program-white);
+      box-shadow: 0 12px 28px rgba(0, 33, 66, .06);
+    }
+
+    .experience-support-viewer .experience-lesson-shot {
+      display: grid;
+      grid-template-columns: minmax(0, 1.45fr) minmax(280px, .55fr);
+      align-items: center;
+      min-height: 520px;
+      background: #f4f0e7;
+    }
+
+    .experience-support-viewer .experience-lesson-shot img {
+      aspect-ratio: auto;
+      max-height: 500px;
+      padding: 24px;
+      object-fit: contain;
+    }
+
+    .experience-support-viewer .experience-lesson-shot figcaption {
+      position: static;
+      align-self: stretch;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 38px;
+      border-left: 1px solid #e2dbcf;
+      border-radius: 0;
+      background: var(--program-white);
+      color: #454545;
+      font-size: 12pt;
+      font-weight: 400;
+      line-height: 1.55;
+    }
+
+    .experience-support-viewer .experience-lesson-shot figcaption strong {
+      display: block;
+      margin-bottom: 10px;
+      color: var(--program-navy);
+      font-size: 17pt;
+      line-height: 1.25;
+    }
+
+    .experience-lesson-shot img {
+      cursor: zoom-in;
+    }
+
+    .experience-lesson-shot img:focus-visible {
+      outline: 3px solid var(--program-gold);
+      outline-offset: -4px;
+    }
+
+    .experience-zoom-dialog {
+      width: min(94vw, 1500px);
+      max-width: none;
+      max-height: 92vh;
+      padding: 0;
+      border: 0;
+      border-radius: 14px;
+      background: var(--program-white);
+      box-shadow: 0 24px 80px rgba(0, 20, 45, .3);
+    }
+
+    .experience-zoom-dialog::backdrop {
+      background: rgba(0, 25, 52, .78);
+    }
+
+    .experience-zoom-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 16px 20px;
+      border-bottom: 1px solid #ded7ca;
+      color: var(--program-navy);
+      font-family: Lato, Arial, sans-serif;
+      font-weight: 700;
+    }
+
+    .experience-zoom-close {
+      width: 40px;
+      height: 40px;
+      border: 1px solid #b7c4d0;
+      border-radius: 50%;
+      background: var(--program-white);
+      color: var(--program-navy);
+      font-size: 18pt;
+      cursor: pointer;
+    }
+
+    .experience-zoom-stage {
+      overflow: auto;
+      max-height: calc(92vh - 74px);
+      padding: 20px;
+      background: #eef1f2;
+      text-align: center;
+    }
+
+    .experience-zoom-stage img {
+      display: block;
+      width: auto;
+      max-width: 100%;
+      height: auto;
+      max-height: calc(92vh - 114px);
+      margin: auto;
+      object-fit: contain;
+    }
+
+    .experience-lesson-carousel {
+      position: relative;
+      background: #eef1f2;
+    }
+
+    .experience-lesson-track {
+      display: flex;
+      overflow-x: auto;
+      scroll-behavior: smooth;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+      overscroll-behavior-x: contain;
+    }
+
+    .experience-lesson-track::-webkit-scrollbar {
+      display: none;
+    }
+
+    .experience-lesson-shot {
+      position: relative;
+      flex: 0 0 100%;
+      margin: 0;
+      overflow: hidden;
+      background: #eef1f2;
+      scroll-snap-align: start;
+      scroll-snap-stop: always;
+    }
+
+    .experience-lesson-shot img {
+      aspect-ratio: 16 / 10;
+      object-fit: contain;
+    }
+
+    .experience-lesson-shot figcaption {
+      position: absolute;
+      right: 12px;
+      bottom: 12px;
+      padding: 7px 10px;
+      border-radius: 6px;
+      background: rgba(0, 52, 101, .9);
+      color: var(--program-white);
+      font-family: Lato, Arial, sans-serif;
+      font-size: 9pt;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    .experience-lesson-controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      min-height: 54px;
+      padding: 8px 14px;
+      border-top: 1px solid #d8d0c3;
+      background: var(--program-white);
+    }
+
+    .experience-lesson-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 38px;
+      height: 38px;
+      border: 1px solid #b7c4d0;
+      border-radius: 50%;
+      background: var(--program-white);
+      color: var(--program-navy);
+      font-size: 17pt;
+      line-height: 1;
+      cursor: pointer;
+    }
+
+    .experience-lesson-button:hover:not(:disabled) {
+      border-color: var(--program-navy);
+      background: #f4f7fa;
+    }
+
+    .experience-lesson-button:focus-visible {
+      outline: 3px solid var(--program-gold);
+      outline-offset: 2px;
+    }
+
+    .experience-lesson-button:disabled {
+      opacity: .35;
+      cursor: default;
+    }
+
+    .experience-lesson-position {
+      min-width: 74px;
+      color: var(--program-steel);
+      font-family: Lato, Arial, sans-serif;
+      font-size: 10pt;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .experience-steps {
+      display: grid;
+      gap: 10px;
+    }
+
+    .experience-step {
+      display: grid;
+      grid-template-columns: 42px 1fr;
+      gap: 14px;
+      align-items: start;
+      width: 100%;
+      padding: 18px;
+      border: 1px solid #d8d0c3;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, .65);
+      color: var(--program-navy);
+      font-family: Lato, Arial, sans-serif;
+      text-align: left;
+      cursor: pointer;
+      transition: background-color .18s ease, border-color .18s ease, color .18s ease;
+    }
+
+    .experience-step:hover {
+      border-color: #9daebe;
+      background: var(--program-white);
+    }
+
+    .experience-step:focus-visible {
+      outline: 3px solid var(--program-gold);
+      outline-offset: 3px;
+    }
+
+    .experience-step[aria-selected="true"] {
+      border-color: var(--program-navy);
+      background: var(--program-navy);
+      color: var(--program-white);
+    }
+
+    .experience-step-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #f7e8c8;
+      color: var(--program-navy);
+      font-size: 11pt;
+      font-weight: 700;
+    }
+
+    .experience-step strong,
+    .experience-step-description {
+      display: block;
+    }
+
+    .experience-step strong {
+      font-size: 13pt;
+      line-height: 1.35;
+    }
+
+    .experience-step-description {
+      margin-top: 5px;
+      color: var(--program-charcoal);
+      font-size: 11pt;
+      font-weight: 300;
+      line-height: 1.5;
+    }
+
+    .experience-step[aria-selected="true"] .experience-step-description {
+      color: #dbe6ef;
+    }
+
     .ai-practice-heading {
       max-width: 760px;
       margin: 0 auto;
@@ -1037,6 +1414,11 @@
     }
 
     @media (max-width: 768px) {
+      .programs-document,
+      .programs-page {
+        overflow-x: hidden;
+      }
+
       .program-section {
         padding: 84px 0;
       }
@@ -1093,6 +1475,23 @@
 
       .ai-practice-grid {
         grid-template-columns: 1fr;
+      }
+
+      .experience-showcase {
+        grid-template-columns: 1fr;
+      }
+
+      .experience-steps {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .experience-support-viewer .experience-lesson-shot {
+        grid-template-columns: 1fr;
+      }
+
+      .experience-support-viewer .experience-lesson-shot figcaption {
+        border-top: 1px solid #e2dbcf;
+        border-left: 0;
       }
     }
 
@@ -1174,6 +1573,36 @@
       .closing-program-cta h2 {
         font-size: 28pt;
       }
+
+      .experience-showcase {
+        margin-top: 38px;
+      }
+
+      .experience-steps {
+        grid-template-columns: 1fr;
+      }
+
+      .experience-step {
+        padding: 16px;
+      }
+
+      .experience-support {
+        margin-top: 54px;
+        padding-top: 36px;
+      }
+
+      .experience-support-viewer .experience-lesson-shot {
+        min-height: 0;
+      }
+
+      .experience-support-viewer .experience-lesson-shot img {
+        max-height: 360px;
+        padding: 14px;
+      }
+
+      .experience-support-viewer .experience-lesson-shot figcaption {
+        padding: 24px;
+      }
     }
   </style>
 </head>
@@ -1209,6 +1638,164 @@
         <button class="waitlist-cta" type="button" data-waitlist-cta>Join the Think, Speak, Act waitlist</button>
       </div>
     </section>
+
+    <section id="learning-experience" class="program-section deep-cream" aria-labelledby="learning-experience-title">
+      <div class="program-container">
+        <div class="program-section-label">Inside the program</div>
+        <h2 id="learning-experience-title" class="program-heading">See what you will actually do.</h2>
+        <p class="program-body experience-intro">Follow your Learning Journey, watch a short lesson, apply the idea and review feedback on your work. Your progress is saved so you can return and keep practicing.</p>
+
+        <div class="experience-showcase">
+          <div class="experience-preview">
+            <div class="experience-preview-bar" aria-hidden="true">
+              <span>Actual program screen</span>
+            </div>
+
+            <figure id="experience-panel-1" class="experience-panel" role="tabpanel" aria-labelledby="experience-tab-1">
+              <div class="experience-lesson-carousel" data-experience-carousel>
+                <div class="experience-lesson-track" data-carousel-track tabindex="0" aria-label="Learning Journey previews. Scroll horizontally to see both images.">
+                  <figure class="experience-lesson-shot">
+                    <img src="../assets/program-experience/learning-journey.png" alt="Learning Journey showing the three phases, completed work and the learner's next activity" loading="lazy">
+                    <figcaption>Your full path</figcaption>
+                  </figure>
+                  <figure class="experience-lesson-shot">
+                    <img src="../assets/program-experience/learning-journey-activity.png" alt="Learning Journey with the Chalkboard notes activity details open" loading="lazy">
+                    <figcaption>Activity details</figcaption>
+                  </figure>
+                </div>
+                <div class="experience-lesson-controls" aria-label="Learning Journey preview controls">
+                  <button class="experience-lesson-button" type="button" data-carousel-previous aria-label="Show previous Learning Journey image">&#8249;</button>
+                  <span class="experience-lesson-position" data-carousel-position aria-live="polite">1 of 2</span>
+                  <button class="experience-lesson-button" type="button" data-carousel-next aria-label="Show next Learning Journey image">&#8250;</button>
+                </div>
+              </div>
+            </figure>
+            <figure id="experience-panel-2" class="experience-panel" role="tabpanel" aria-labelledby="experience-tab-2" hidden>
+              <div class="experience-lesson-carousel" data-experience-carousel>
+                <div class="experience-lesson-track" data-carousel-track tabindex="0" aria-label="Short lesson previews. Scroll horizontally to see both images.">
+                  <figure class="experience-lesson-shot">
+                    <img src="../assets/program-experience/lesson-slide.png" alt="A lesson slide that explains a practical idea visually" loading="lazy">
+                    <figcaption>Visual examples</figcaption>
+                  </figure>
+                  <figure class="experience-lesson-shot">
+                    <img src="../assets/program-experience/lesson-presenter.png" alt="Wen-Szu presenting the Rule of three lesson" loading="lazy">
+                    <figcaption>Direct instruction</figcaption>
+                  </figure>
+                </div>
+                <div class="experience-lesson-controls" aria-label="Lesson preview controls">
+                  <button class="experience-lesson-button" type="button" data-carousel-previous aria-label="Show previous lesson image">&#8249;</button>
+                  <span class="experience-lesson-position" data-carousel-position aria-live="polite">1 of 2</span>
+                  <button class="experience-lesson-button" type="button" data-carousel-next aria-label="Show next lesson image">&#8250;</button>
+                </div>
+              </div>
+            </figure>
+            <figure id="experience-panel-3" class="experience-panel" role="tabpanel" aria-labelledby="experience-tab-3" hidden>
+              <div class="experience-lesson-carousel" data-experience-carousel>
+                <div class="experience-lesson-track" data-carousel-track tabindex="0" aria-label="Exercise previews. Scroll horizontally to see both images.">
+                  <figure class="experience-lesson-shot">
+                    <img src="../assets/program-experience/exercise-setup.png" alt="I have bad news exercise setup with a short video and task introduction" loading="lazy">
+                    <figcaption>Review the setup</figcaption>
+                  </figure>
+                  <figure class="experience-lesson-shot">
+                    <div class="experience-image-private">
+                      <img src="../assets/program-experience/practice-exercise.png" alt="Manager's messy notes exercise with private source text blurred and a structured response area" loading="lazy">
+                    </div>
+                    <figcaption>Complete the exercise</figcaption>
+                  </figure>
+                </div>
+                <div class="experience-lesson-controls" aria-label="Exercise preview controls">
+                  <button class="experience-lesson-button" type="button" data-carousel-previous aria-label="Show previous exercise image">&#8249;</button>
+                  <span class="experience-lesson-position" data-carousel-position aria-live="polite">1 of 2</span>
+                  <button class="experience-lesson-button" type="button" data-carousel-next aria-label="Show next exercise image">&#8250;</button>
+                </div>
+              </div>
+            </figure>
+            <figure id="experience-panel-4" class="experience-panel" role="tabpanel" aria-labelledby="experience-tab-4" hidden>
+              <div class="experience-lesson-carousel" data-experience-carousel>
+                <div class="experience-lesson-track" data-carousel-track tabindex="0" aria-label="Feedback previews. Scroll horizontally to see feedback, the learner's answer and a sample answer.">
+                  <figure class="experience-lesson-shot">
+                    <img src="../assets/program-experience/feedback-review.png" alt="Submitted exercise showing a score and specific feedback on structure, content and conciseness" loading="lazy">
+                    <figcaption>Feedback</figcaption>
+                  </figure>
+                  <figure class="experience-lesson-shot">
+                    <img src="../assets/program-experience/feedback-answer.png" alt="Submitted exercise showing the learner's saved answer" loading="lazy">
+                    <figcaption>Your answer</figcaption>
+                  </figure>
+                  <figure class="experience-lesson-shot">
+                    <img src="../assets/program-experience/feedback-sample.png" alt="Submitted exercise showing a sample answer organized into three sections" loading="lazy">
+                    <figcaption>Sample answer</figcaption>
+                  </figure>
+                </div>
+                <div class="experience-lesson-controls" aria-label="Feedback preview controls">
+                  <button class="experience-lesson-button" type="button" data-carousel-previous aria-label="Show previous feedback image">&#8249;</button>
+                  <span class="experience-lesson-position" data-carousel-position aria-live="polite">1 of 3</span>
+                  <button class="experience-lesson-button" type="button" data-carousel-next aria-label="Show next feedback image">&#8250;</button>
+                </div>
+              </div>
+            </figure>
+          </div>
+
+          <div class="experience-steps" role="tablist" aria-label="Program experience">
+            <button id="experience-tab-1" class="experience-step" type="button" role="tab" aria-selected="true" aria-controls="experience-panel-1" tabindex="0">
+              <span class="experience-step-number">1</span>
+              <span class="experience-step-copy"><strong>Follow your Learning Journey</strong><span class="experience-step-description">See the full program, what you have completed and what comes next.</span></span>
+            </button>
+            <button id="experience-tab-2" class="experience-step" type="button" role="tab" aria-selected="false" aria-controls="experience-panel-2" tabindex="-1">
+              <span class="experience-step-number">2</span>
+              <span class="experience-step-copy"><strong>Watch a short lesson</strong><span class="experience-step-description">Learn one practical idea through visual examples and direct instruction.</span></span>
+            </button>
+            <button id="experience-tab-3" class="experience-step" type="button" role="tab" aria-selected="false" aria-controls="experience-panel-3" tabindex="-1">
+              <span class="experience-step-number">3</span>
+              <span class="experience-step-copy"><strong>Try it yourself</strong><span class="experience-step-description">Use the idea in a realistic work situation.</span></span>
+            </button>
+            <button id="experience-tab-4" class="experience-step" type="button" role="tab" aria-selected="false" aria-controls="experience-panel-4" tabindex="-1">
+              <span class="experience-step-number">4</span>
+              <span class="experience-step-copy"><strong>Review your feedback</strong><span class="experience-step-description">See what worked, what to improve and a sample answer.</span></span>
+            </button>
+          </div>
+        </div>
+
+        <section class="experience-support" aria-labelledby="experience-support-title">
+          <div class="program-section-label">Engagement as you go</div>
+          <h3 id="experience-support-title" class="experience-support-heading">Small wins keep learners moving.</h3>
+          <p class="experience-support-intro">Daily missions make the next step clear. Streaks, levels and Mastery Points show the work adding up. Learners in a cohort can also check their anonymous standing while every name stays private.</p>
+
+          <div class="experience-support-viewer experience-lesson-carousel" data-experience-carousel>
+            <div class="experience-lesson-track" data-carousel-track tabindex="0" aria-label="Learner support features. Scroll horizontally to see all three images.">
+              <figure class="experience-lesson-shot">
+                <img src="../assets/walkthrough/daily-goal-20260816.png" alt="Daily mission picker with quick start, focused session and deep dive options" loading="lazy">
+                <figcaption><strong>Set a daily mission</strong>Choose one activity to complete today. Your goal stays visible while you work.</figcaption>
+              </figure>
+
+              <figure class="experience-lesson-shot">
+                <img src="../assets/program-experience/level-progression.png" alt="Five program levels from Intern through Executive with the Mastery Points needed for each level" loading="lazy">
+                <figcaption><strong>See your progress build</strong>See all five levels and how completed practice moves you toward the next one through Mastery Points (MP).</figcaption>
+              </figure>
+
+              <figure class="experience-lesson-shot">
+                <img src="../assets/walkthrough/cohort-standing-20260902.png" alt="Anonymous cohort standing view comparing program completion" loading="lazy">
+                <figcaption><strong>Check your cohort standing</strong>If you join through a cohort, compare completion and Mastery Points (MP) while every other learner remains anonymous.</figcaption>
+              </figure>
+            </div>
+            <div class="experience-lesson-controls" aria-label="Learner support preview controls">
+              <button class="experience-lesson-button" type="button" data-carousel-previous aria-label="Show previous support feature">&#8249;</button>
+              <span class="experience-lesson-position" data-carousel-position aria-live="polite">1 of 3</span>
+              <button class="experience-lesson-button" type="button" data-carousel-next aria-label="Show next support feature">&#8250;</button>
+            </div>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <dialog class="experience-zoom-dialog" data-experience-zoom aria-labelledby="experience-zoom-title">
+      <div class="experience-zoom-header">
+        <span id="experience-zoom-title" data-experience-zoom-title>Program screen</span>
+        <button class="experience-zoom-close" type="button" data-experience-zoom-close aria-label="Close enlarged image">&times;</button>
+      </div>
+      <div class="experience-zoom-stage">
+        <img src="" alt="" data-experience-zoom-image>
+      </div>
+    </dialog>
 
     <section id="audience" class="program-section cream" aria-labelledby="audience-title">
       <div class="program-container">
@@ -1654,6 +2241,99 @@
     document.querySelectorAll('.audience-card.program-reveal').forEach((card, index) => {
       card.style.transitionDelay = `${Math.min(index * 80, 240)}ms`;
       revealObserver.observe(card);
+    });
+
+    const experienceTabs = [...document.querySelectorAll('.experience-step[role="tab"]')];
+    const selectExperience = (selectedTab) => {
+      experienceTabs.forEach((tab) => {
+        const isSelected = tab === selectedTab;
+        tab.setAttribute('aria-selected', String(isSelected));
+        tab.tabIndex = isSelected ? 0 : -1;
+        const panel = document.getElementById(tab.getAttribute('aria-controls'));
+        if (panel) panel.hidden = !isSelected;
+      });
+    };
+    experienceTabs.forEach((tab, index) => {
+      tab.addEventListener('click', () => selectExperience(tab));
+      tab.addEventListener('keydown', (event) => {
+        if (!['ArrowDown', 'ArrowRight', 'ArrowUp', 'ArrowLeft', 'Home', 'End'].includes(event.key)) return;
+        event.preventDefault();
+        let nextIndex = index;
+        if (event.key === 'ArrowDown' || event.key === 'ArrowRight') nextIndex = (index + 1) % experienceTabs.length;
+        if (event.key === 'ArrowUp' || event.key === 'ArrowLeft') nextIndex = (index - 1 + experienceTabs.length) % experienceTabs.length;
+        if (event.key === 'Home') nextIndex = 0;
+        if (event.key === 'End') nextIndex = experienceTabs.length - 1;
+        selectExperience(experienceTabs[nextIndex]);
+        experienceTabs[nextIndex].focus();
+      });
+    });
+
+    const zoomDialog = document.querySelector('[data-experience-zoom]');
+    const zoomImage = zoomDialog?.querySelector('[data-experience-zoom-image]');
+    const zoomTitle = zoomDialog?.querySelector('[data-experience-zoom-title]');
+    const closeZoom = () => zoomDialog?.close();
+    zoomDialog?.querySelector('[data-experience-zoom-close]')?.addEventListener('click', closeZoom);
+    zoomDialog?.addEventListener('click', (event) => {
+      if (event.target === zoomDialog) closeZoom();
+    });
+
+    document.querySelectorAll('[data-experience-carousel]').forEach((carousel) => {
+      const track = carousel.querySelector('[data-carousel-track]');
+      const slides = [...carousel.querySelectorAll('.experience-lesson-shot')];
+      const previous = carousel.querySelector('[data-carousel-previous]');
+      const next = carousel.querySelector('[data-carousel-next]');
+      const position = carousel.querySelector('[data-carousel-position]');
+      let index = 0;
+
+      const openSlideZoom = (slide) => {
+        const image = slide?.querySelector('img');
+        const caption = slide?.querySelector('figcaption')?.textContent.trim() || 'Program screen';
+        if (!zoomDialog || !zoomImage || !image) return;
+        zoomImage.src = image.currentSrc || image.src;
+        zoomImage.alt = image.alt;
+        if (zoomTitle) zoomTitle.textContent = caption;
+        zoomDialog.showModal();
+      };
+
+      const updateControls = () => {
+        previous.disabled = index === 0;
+        next.disabled = index === slides.length - 1;
+        position.textContent = `${index + 1} of ${slides.length}`;
+      };
+
+      const showSlide = (nextIndex) => {
+        index = Math.max(0, Math.min(nextIndex, slides.length - 1));
+        track.scrollTo({ left: index * track.clientWidth, behavior: 'smooth' });
+        updateControls();
+      };
+
+      previous.addEventListener('click', () => showSlide(index - 1));
+      next.addEventListener('click', () => showSlide(index + 1));
+      track.addEventListener('keydown', (event) => {
+        if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+        event.preventDefault();
+        showSlide(index + (event.key === 'ArrowRight' ? 1 : -1));
+      });
+      track.addEventListener('scroll', () => {
+        if (!track.clientWidth) return;
+        index = Math.max(0, Math.min(Math.round(track.scrollLeft / track.clientWidth), slides.length - 1));
+        updateControls();
+      }, { passive: true });
+      slides.forEach((slide) => {
+        const image = slide.querySelector('img');
+        const caption = slide.querySelector('figcaption')?.textContent.trim() || 'program screen';
+        if (!image) return;
+        image.tabIndex = 0;
+        image.setAttribute('role', 'button');
+        image.setAttribute('aria-label', `Open ${caption} as a larger image`);
+        image.addEventListener('click', () => openSlideZoom(slide));
+        image.addEventListener('keydown', (event) => {
+          if (event.key !== 'Enter' && event.key !== ' ') return;
+          event.preventDefault();
+          openSlideZoom(slide);
+        });
+      });
+      updateControls();
     });
 
     const phaseBlocks = [...document.querySelectorAll('.phase-block.program-reveal')];

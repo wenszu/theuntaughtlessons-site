@@ -391,15 +391,31 @@ body {
 .home-page .program-highlight-spotlight {
   position: relative;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 24px;
   max-width: 680px;
   margin: 8px auto 0;
   padding: 68px 48px;
   border-radius: 20px;
   background: radial-gradient(ellipse 120% 140% at 50% 40%, #0b4d8a 0%, #003366 62%, #001d3d 100%);
   box-shadow: 0 32px 64px rgba(0, 20, 45, .32);
+  color: var(--home-white);
+  text-decoration: none;
   overflow: hidden;
+  cursor: pointer;
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+
+.home-page .program-highlight-spotlight:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 38px 72px rgba(0, 20, 45, .38);
+}
+
+.home-page .program-highlight-spotlight:focus-visible {
+  outline: 3px solid var(--home-gold);
+  outline-offset: 5px;
 }
 
 .home-page .program-highlight-glow {
@@ -421,12 +437,27 @@ body {
   width: auto;
 }
 
+.home-page .program-highlight-action {
+  position: relative;
+  z-index: 1;
+  padding-bottom: 4px;
+  border-bottom: 1px solid rgba(255, 255, 255, .7);
+  color: var(--home-white);
+  font-weight: 700;
+}
+
+.home-page .program-highlight-spotlight:hover .program-highlight-action {
+  border-bottom-color: var(--home-gold);
+  color: var(--home-gold);
+}
+
 @media (max-width: 700px) {
   .home-page .program-highlight-section {
     padding: 32px 0 4px;
   }
 
   .home-page .program-highlight-spotlight {
+    gap: 18px;
     padding: 44px 28px;
     border-radius: 16px;
   }
@@ -828,7 +859,7 @@ body {
   min-width: 0;
   padding: 0 0 14px;
   overflow-x: auto;
-  scroll-snap-type: x proximity;
+  scroll-snap-type: none;
   scrollbar-width: none;
 }
 
@@ -838,21 +869,23 @@ body {
 
 .home-page .testimonial-track {
   display: flex;
+  align-items: flex-start;
   gap: 24px;
   width: max-content;
 }
 
 .home-page .testimonial-card {
+  display: flex;
+  flex-direction: column;
   flex: 0 0 420px;
   width: 420px;
-  min-height: 360px;
+  min-height: 0;
   margin: 0;
-  padding: 32px;
+  padding: 32px 32px 28px;
   border: 1px solid rgba(0, 51, 102, .12);
   border-radius: 12px;
   background: var(--home-white);
   box-shadow: none;
-  scroll-snap-align: start;
   transition: border-color .18s ease, translate .18s ease;
 }
 
@@ -872,7 +905,11 @@ body {
   line-height: 1.7;
 }
 
-.home-page .testimonial-card footer { margin-top: 24px; }
+.home-page .testimonial-card footer {
+  margin-top: 24px;
+  padding-top: 22px;
+  border-top: 1px solid rgba(0, 51, 102, .12);
+}
 
 .home-page .testimonial-card strong,
 .home-page .testimonial-card span {

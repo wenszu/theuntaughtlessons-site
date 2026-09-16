@@ -23,5 +23,6 @@ assert.match(history, /openRichHtml:open\.dataset\.richHtml/);
 assert.match(history, /richBody:body\?\.dataset\.richHtml/);
 assert.match(history, /window\.UTLSyncRichEditors\?\.\(\)/);
 assert.match(history, /window\.UTLSetRichEditorsReadOnly\?\.\(reviewOnly\)/);
+assert.match(app, /\.context-view-tab\.active \{ border-color:var\(--navy\); background:var\(--navy\); color:#fff; box-shadow:none; \}/, 'the active source tab uses a filled state without a decorative orange outline');
 
 console.log('Manager’s messy notes rich text pilot contracts passed');

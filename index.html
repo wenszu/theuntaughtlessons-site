@@ -56,10 +56,11 @@
         <div class="section-label">
           <span class="section-label-text">Featured program</span>
         </div>
-        <div class="program-highlight-spotlight">
+        <a class="program-highlight-spotlight" href="/programs/think-speak-act.html" aria-label="View the Think, Speak, Act like an Executive program">
           <span class="program-highlight-glow" aria-hidden="true"></span>
           <img class="program-highlight-logo" src="assets/program-logo-tsa-white.png?v=20260915-cache-v2" alt="Think, Speak, Act like an Executive">
-        </div>
+          <span class="program-highlight-action">View the program <span aria-hidden="true">&rarr;</span></span>
+        </a>
       </div>
     </section>
 
@@ -267,7 +268,10 @@
         clearTimeout(resumeTimer);
         resumeTimer = setTimeout(() => { paused = false; }, 2600);
       };
-      browser.addEventListener('pointerenter', pause);
+      browser.addEventListener('pointerenter', () => {
+        pause();
+        resumeSoon();
+      });
       browser.addEventListener('pointerleave', resumeSoon);
       browser.addEventListener('pointerdown', pause);
       browser.addEventListener('pointerup', resumeSoon);
@@ -296,7 +300,7 @@
 
       if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-      const pxPerFrame = 1;
+      const pxPerFrame = .35;
       function step() {
         if (!paused && halfWidth > 0) {
           position += pxPerFrame;
