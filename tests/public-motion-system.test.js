@@ -85,6 +85,7 @@ assert.match(programDetail, /walkthrough\/daily-goal-20260816\.png/, 'the suppor
 assert.match(programDetail, /program-experience\/level-progression\.png/, 'the support section should show the full five-level progression');
 assert.match(programDetail, /walkthrough\/cohort-standing-20260902\.png/, 'the support section should show the real anonymous cohort standing view');
 assert.match(programDetail, /Mastery Points \(MP\)/, 'the first mention in support copy should spell out Mastery Points and its abbreviation');
+assert.match(programDetail, /\.testimonial-grid \{\s*align-items: start;/, 'program testimonial cards should keep their natural content height instead of stretching to the longest quote');
 assert.match(programDetail, /data-experience-zoom/, 'product screenshots should open in an accessible full-view dialog');
 assert.doesNotMatch(programDetail, /Open full view/, 'screenshots should open directly without a separate full-view control');
 assert.match(programDetail, /image\.addEventListener\('click', \(\) => openSlideZoom\(slide\)\)/, 'each screenshot should open the larger view when selected');
