@@ -560,6 +560,12 @@
       border-bottom: 0;
     }
 
+    .student-progress-table td small {
+      display: block;
+      margin-top: 3px;
+      color: #777;
+    }
+
     .progress-cell {
       min-width: 120px;
     }
@@ -1180,6 +1186,7 @@
     #section-organization-access .oa-panel .mb-form-grid { row-gap:16px; }
     #section-organization-access .oa-panel .mb-form-field { align-content:start; grid-auto-rows:max-content; gap:8px; }
     #section-organization-access #oaEmailCheckStatus { margin-top:4px; }
+    #section-organization-access .oa-panel .mb-form-actions { gap:16px; }
     #section-emergency-access .student-progress-actions { margin-top:16px; }
     @media (max-width:1100px) { #caDetailContent .ca-cohort-details-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
     @media (max-width:640px) { #caDetailContent .ca-cohort-details-grid { grid-template-columns:1fr; } }
@@ -3627,6 +3634,37 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         </div>
         <div class="oa-layout">
           <div class="oa-panel">
+            <div class="mb-guide">
+              <button class="mb-guide-toggle" type="button" id="oaGuideToggle">
+                <span>How organization access works — 3 steps</span>
+                <span class="mb-guide-icon" id="oaGuideIcon">+</span>
+              </button>
+              <div class="mb-guide-body" id="oaGuideBody">
+                <div class="mb-guide-methods">
+                  <div class="mb-guide-method">
+                    <p class="mb-guide-method-label">Step 1 — Create the organization (above, once)</p>
+                    <ol>
+                      <li>Add the client's name in <strong>Add an organization</strong>. This only needs to happen once per client.</li>
+                      <li>Assign its cohorts in Student Progress → Cohort Analytics before granting anyone access below.</li>
+                    </ol>
+                  </div>
+                  <div class="mb-guide-method">
+                    <p class="mb-guide-method-label">Step 2 — Confirm the person has signed in (optional)</p>
+                    <ol>
+                      <li>Enter their email below and click <strong>Check</strong>.</li>
+                      <li>If they haven't signed in to UTL yet, ask them to do that once, then check again. This step is a convenience — it doesn't save anything by itself.</li>
+                    </ol>
+                  </div>
+                  <div class="mb-guide-method">
+                    <p class="mb-guide-method-label">Step 3 — Set their role and scope, then save</p>
+                    <ol>
+                      <li>Choose the organization, role, and cohorts (if the role requires them). The description under Role and the Access summary below update as you choose.</li>
+                      <li>Nothing is saved until you click <strong>Grant access</strong>.</li>
+                    </ol>
+                  </div>
+                </div>
+              </div>
+            </div>
             <h3 id="oaFormHeading">Add a representative</h3>
             <p class="description">Choose the organization, role, and cohort scope. Review the access summary before saving.</p>
             <div class="mb-form-grid">
@@ -10666,12 +10704,12 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         wrap.innerHTML = '<p class="oa-empty">No organizations yet. Add one above.</p>';
         return;
       }
-      wrap.innerHTML = '<div class="sp-table-wrap"><table class="sp-table"><thead><tr><th>Organization</th><th>Status</th><th>Cohorts</th><th>Actions</th></tr></thead><tbody>' + organizations.map((organization) => {
+      wrap.innerHTML = '<div class="student-progress-table-wrap"><table class="student-progress-table"><thead><tr><th>Organization</th><th>Status</th><th>Cohorts</th><th>Actions</th></tr></thead><tbody>' + organizations.map((organization) => {
         const isArchived = organization.status === 'archived';
         return '<tr><td><strong>' + escapeHtml(organization.name) + '</strong><small>' + escapeHtml(organization.id) + '</small></td>' +
           '<td><span class="oa-status-chip ' + (isArchived ? 'is-suspended' : '') + '">' + escapeHtml(isArchived ? 'Archived' : 'Active') + '</span></td>' +
           '<td>' + (organization.cohortIds?.length ? escapeHtml(organization.cohortIds.join(', ')) : '<span class="description">None assigned yet</span>') + '</td>' +
-          '<td><div class="sp-row-actions"><button type="button" class="small-button secondary-button" data-oa-org-edit="' + escapeHtml(organization.id) + '">Edit</button><button type="button" class="small-button secondary-button" data-oa-org-toggle="' + escapeHtml(organization.id) + '">' + (isArchived ? 'Reactivate' : 'Archive') + '</button></div></td></tr>';
+          '<td><div class="mb-actions"><button type="button" class="small-button secondary-button" data-oa-org-edit="' + escapeHtml(organization.id) + '">Edit</button><button type="button" class="small-button secondary-button" data-oa-org-toggle="' + escapeHtml(organization.id) + '">' + (isArchived ? 'Reactivate' : 'Archive') + '</button></div></td></tr>';
       }).join('') + '</tbody></table></div>';
     }
 
@@ -10717,7 +10755,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         return;
       }
       const organizationById = Object.fromEntries((oaData.organizations || []).map((item) => [item.id, item]));
-      wrap.innerHTML = '<div class="sp-table-wrap"><table class="sp-table"><thead><tr><th>Representative</th><th>Organization</th><th>Role and scope</th><th>Status</th><th>Last changed</th><th>Actions</th></tr></thead><tbody>' + memberships.map((member) => {
+      wrap.innerHTML = '<div class="student-progress-table-wrap"><table class="student-progress-table"><thead><tr><th>Representative</th><th>Organization</th><th>Role and scope</th><th>Status</th><th>Last changed</th><th>Actions</th></tr></thead><tbody>' + memberships.map((member) => {
         const organization = organizationById[member.organizationId];
         const roleLabel = oaData.roleLabels?.[member.role] || member.role;
         const cohorts = member.preview?.cohortIds || member.assignedCohortIds || [];
@@ -10726,7 +10764,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
           '<td><strong>' + escapeHtml(roleLabel) + '</strong><small>' + escapeHtml(cohorts.join(', ') || 'No cohort scope') + '</small></td>' +
           '<td><span class="oa-status-chip ' + (member.status === 'suspended' ? 'is-suspended' : '') + '">' + escapeHtml(member.status === 'suspended' ? 'Suspended' : 'Active') + '</span></td>' +
           '<td>' + escapeHtml(oaDate(member.updatedAt)) + '<small>' + escapeHtml(member.updatedByEmail || '') + '</small></td>' +
-          '<td><div class="sp-row-actions"><button type="button" class="small-button secondary-button" data-oa-edit="' + escapeHtml(member.uid) + '">Edit</button><button type="button" class="small-button secondary-button" data-oa-toggle="' + escapeHtml(member.uid) + '">' + (member.status === 'suspended' ? 'Reactivate' : 'Suspend') + '</button></div></td></tr>';
+          '<td><div class="mb-actions"><button type="button" class="small-button secondary-button" data-oa-edit="' + escapeHtml(member.uid) + '">Edit</button><button type="button" class="small-button secondary-button" data-oa-toggle="' + escapeHtml(member.uid) + '">' + (member.status === 'suspended' ? 'Reactivate' : 'Suspend') + '</button></div></td></tr>';
       }).join('') + '</tbody></table></div>';
     }
 
@@ -10738,7 +10776,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         wrap.innerHTML = '<p class="oa-empty">No access changes have been recorded.</p>';
         return;
       }
-      wrap.innerHTML = '<div class="sp-table-wrap"><table class="sp-table"><thead><tr><th>When</th><th>Representative</th><th>Organization</th><th>Change</th><th>Role and scope</th><th>Changed by</th></tr></thead><tbody>' + audit.map((item) => '<tr><td>' + escapeHtml(oaDate(item.occurredAt)) + '</td><td>' + escapeHtml(item.targetEmail || '—') + '</td><td>' + escapeHtml(item.organizationName || item.organizationId) + '</td><td>' + escapeHtml(oaAuditActionLabel(item.action)) + '</td><td>' + oaAuditScopeText(item) + '</td><td>' + escapeHtml(item.actorEmail || 'Unknown') + '</td></tr>').join('') + '</tbody></table></div>';
+      wrap.innerHTML = '<div class="student-progress-table-wrap"><table class="student-progress-table"><thead><tr><th>When</th><th>Representative</th><th>Organization</th><th>Change</th><th>Role and scope</th><th>Changed by</th></tr></thead><tbody>' + audit.map((item) => '<tr><td>' + escapeHtml(oaDate(item.occurredAt)) + '</td><td>' + escapeHtml(item.targetEmail || '—') + '</td><td>' + escapeHtml(item.organizationName || item.organizationId) + '</td><td>' + escapeHtml(oaAuditActionLabel(item.action)) + '</td><td>' + oaAuditScopeText(item) + '</td><td>' + escapeHtml(item.actorEmail || 'Unknown') + '</td></tr>').join('') + '</tbody></table></div>';
     }
 
     function oaClearEmailCheckStatus() {
@@ -12446,15 +12484,18 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
     }
 
     (function () {
-      var guideToggle = document.getElementById('mbGuideToggle');
-      var guideBody = document.getElementById('mbGuideBody');
-      var guideIcon = document.getElementById('mbGuideIcon');
-      if (guideToggle && guideBody) {
+      function wireGuideToggle(toggleId, bodyId, iconId) {
+        var guideToggle = document.getElementById(toggleId);
+        var guideBody = document.getElementById(bodyId);
+        var guideIcon = document.getElementById(iconId);
+        if (!guideToggle || !guideBody) return;
         guideToggle.addEventListener('click', function () {
           var open = guideBody.classList.toggle('is-open');
           if (guideIcon) guideIcon.textContent = open ? '−' : '+';
         });
       }
+      wireGuideToggle('mbGuideToggle', 'mbGuideBody', 'mbGuideIcon');
+      wireGuideToggle('oaGuideToggle', 'oaGuideBody', 'oaGuideIcon');
     })();
 
     // ===== end Members management =====
