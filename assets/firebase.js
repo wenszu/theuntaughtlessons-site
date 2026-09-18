@@ -292,6 +292,54 @@ async function getSignedInUser() {
   });
 }
 
+async function getOrganizationConsole(organizationId = "") {
+  const user = await getSignedInUser();
+  if (!user) throw new Error("Please sign in to open the organization console.");
+  const callable = httpsCallable(functions, "getOrganizationConsole");
+  const result = await callable({ organizationId: String(organizationId || "").trim().toLowerCase() });
+  return result && result.data ? result.data : null;
+}
+
+async function getMyOrganizationAccess() {
+  const user = await getSignedInUser();
+  if (!user) return { ok: true, hasAccess: false, organizations: [] };
+  const callable = httpsCallable(functions, "getMyOrganizationAccess");
+  const result = await callable({});
+  return result && result.data ? result.data : { ok: true, hasAccess: false, organizations: [] };
+}
+
+async function getOrganizationAccessAdmin() {
+  const user = await getSignedInUser();
+  if (!user) throw new Error("Please sign in with a UTL administrator account.");
+  const callable = httpsCallable(functions, "getOrganizationAccessAdmin");
+  const result = await callable({});
+  return result && result.data ? result.data : null;
+}
+
+async function checkOrganizationRepEmail(email) {
+  const user = await getSignedInUser();
+  if (!user) throw new Error("Please sign in with a UTL administrator account.");
+  const callable = httpsCallable(functions, "checkOrganizationRepEmail");
+  const result = await callable({ email });
+  return result && result.data ? result.data : null;
+}
+
+async function saveOrganizationAccessMember(payload = {}) {
+  const user = await getSignedInUser();
+  if (!user) throw new Error("Please sign in with a UTL administrator account.");
+  const callable = httpsCallable(functions, "saveOrganizationAccessMember");
+  const result = await callable(payload && typeof payload === "object" ? payload : {});
+  return result && result.data ? result.data : null;
+}
+
+async function saveOrganizationDefinition(payload = {}) {
+  const user = await getSignedInUser();
+  if (!user) throw new Error("Please sign in with a UTL administrator account.");
+  const callable = httpsCallable(functions, "saveOrganizationDefinition");
+  const result = await callable(payload && typeof payload === "object" ? payload : {});
+  return result && result.data ? result.data : null;
+}
+
 async function getAuthorizedMember(email) {
   const normalizedEmail = String(email || "").trim().toLowerCase();
   if (!normalizedEmail) return null;
@@ -1989,6 +2037,9 @@ export {
   firebaseInitError,
   getAuthorizedMember,
   getMemberAccount,
+  getMyOrganizationAccess,
+  getOrganizationAccessAdmin,
+  getOrganizationConsole,
   getDoc,
   getDocs,
   getFacebookRedirectResult,
@@ -2031,6 +2082,9 @@ export {
   replaceMemberWorkspaceProgress,
   resetMemberWorkspaceProgress,
   saveMemberWorkspaceProgress,
+  checkOrganizationRepEmail,
+  saveOrganizationAccessMember,
+  saveOrganizationDefinition,
   saveMemberRewards,
   saveUserProfile,
   updateMemberAccount,

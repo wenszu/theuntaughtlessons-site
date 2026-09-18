@@ -36,6 +36,20 @@ const COHORT_LESSONS = [
 const COHORT_MINIMUM_SIZE = 5;
 const COHORT_STANDING_CACHE_MS = 30000;
 const cohortStandingCache = new Map();
+const ORGANIZATION_ROLE_LABELS = Object.freeze({
+  organization_owner: "Organization Owner",
+  program_manager: "Program Manager",
+  cohort_facilitator: "Cohort Facilitator",
+  report_viewer: "Report Viewer"
+});
+const ORGANIZATION_ALL_COHORT_ROLES = new Set(["organization_owner", "program_manager"]);
+const ORGANIZATION_ACCESS_STATUSES = new Set(["active", "suspended"]);
+const ORGANIZATION_STATUSES = new Set(["active", "archived"]);
+const ORGANIZATION_DEFINITION_ACTIONS = new Set(["create", "rename", "archive", "reactivate"]);
+
+function slugifyOrganizationName(name) {
+  return String(name || "").trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 80);
+}
 
 function newCredentialId() {
   const bytes = crypto.randomBytes(12);
@@ -212,9 +226,469 @@ function rankCohort(entries, metric) {
   return entries;
 }
 
+function normalizeOrganizationId(value) {
+  return String(value || "").trim().toLowerCase().replace(/[^a-z0-9-]/g, "").slice(0, 80);
+}
+
+function mergeOrganizationDefinitions(storedOrganizations, cohortDetails) {
+  const merged = {};
+  Object.entries(storedOrganizations || {}).forEach(([documentId, value]) => {
+    const item = value || {};
+    const id = normalizeOrganizationId(item.id || documentId);
+    if (!id) return;
+    merged[id] = {
+      id,
+      name: String(item.name || id).trim().slice(0, 160),
+      status: ORGANIZATION_STATUSES.has(String(item.status || "").trim().toLowerCase()) ? String(item.status).trim().toLowerCase() : "active",
+      cohortIds: []
+    };
+  });
+  Object.entries(cohortDetails || {}).forEach(([cohortId, value]) => {
+    const organizationId = normalizeOrganizationId((value || {}).organizationId);
+    if (!organizationId || !merged[organizationId]) return;
+    if (!merged[organizationId].cohortIds.includes(cohortId)) merged[organizationId].cohortIds.push(cohortId);
+  });
+  return merged;
+}
+
+function allowedCohortsForMembership(organization, membership) {
+  const allCohorts = Array.isArray(organization && organization.cohortIds) ? organization.cohortIds : [];
+  const role = String(membership && membership.role || "").trim().toLowerCase();
+  if (ORGANIZATION_ALL_COHORT_ROLES.has(role)) return [...allCohorts];
+  const assigned = Array.isArray(membership && membership.assignedCohortIds) ? membership.assignedCohortIds : [];
+  return allCohorts.filter((cohortId) => assigned.includes(cohortId));
+}
+
+function normalizeOrganizationAccessInput(input, definitions) {
+  const value = input && typeof input === "object" ? input : {};
+  const organizationId = normalizeOrganizationId(value.organizationId);
+  const organization = definitions && definitions[organizationId];
+  if (!organization) throw new HttpsError("invalid-argument", "Choose a valid organization.");
+  const email = String(value.email || "").trim().toLowerCase();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new HttpsError("invalid-argument", "Enter a valid representative email address.");
+  const role = String(value.role || "").trim().toLowerCase();
+  if (!ORGANIZATION_ROLE_LABELS[role]) throw new HttpsError("invalid-argument", "Choose a valid organization role.");
+  const status = String(value.status || "active").trim().toLowerCase();
+  if (!ORGANIZATION_ACCESS_STATUSES.has(status)) throw new HttpsError("invalid-argument", "Choose a valid access status.");
+  const requestedCohorts = Array.from(new Set((Array.isArray(value.assignedCohortIds) ? value.assignedCohortIds : [])
+    .map((cohortId) => String(cohortId || "").trim()).filter(Boolean)));
+  const invalidCohort = requestedCohorts.find((cohortId) => !organization.cohortIds.includes(cohortId));
+  if (invalidCohort) throw new HttpsError("invalid-argument", "A selected cohort does not belong to this organization.");
+  const assignedCohortIds = ORGANIZATION_ALL_COHORT_ROLES.has(role) ? [...organization.cohortIds] : requestedCohorts;
+  if (!assignedCohortIds.length) throw new HttpsError("invalid-argument", "Choose at least one cohort for this role.");
+  return { organization, organizationId, email, role, status, assignedCohortIds };
+}
+
+function organizationAccessPreview(organization, membership) {
+  const cohortIds = allowedCohortsForMembership(organization, membership);
+  return {
+    organizationId: organization.id,
+    organizationName: organization.name,
+    role: membership.role,
+    roleLabel: ORGANIZATION_ROLE_LABELS[membership.role] || membership.role,
+    status: membership.status,
+    cohortIds,
+    permissions: [
+      "View organization and cohort progress summaries",
+      "View learner names, enrollment status, completion and Mastery Points (MP)",
+      "Download the reports available in the organization console"
+    ],
+    excluded: ["Exercise answers", "Private learner goals", "Account settings", "UTL administration"]
+  };
+}
+
+function organizationMemberSummary(member, user) {
+  const memberData = member || {};
+  const userData = user || {};
+  const progress = cohortProgress(userData);
+  const reward = cohortReward(userData);
+  return {
+    name: String(memberData.name || userData.displayName || memberData.email || "Learner").trim().slice(0, 200),
+    email: String(memberData.email || userData.email || "").trim().toLowerCase(),
+    cohortId: String(memberData.cohort || "").trim(),
+    status: String(memberData.status || "active").trim().toLowerCase(),
+    progress: { completed: progress.done, total: progress.total, percent: progress.percent },
+    rewards: reward
+  };
+}
+
+function organizationConsoleAggregate(members) {
+  const values = Array.isArray(members) ? members : [];
+  const started = values.filter((member) => member.progress && member.progress.completed > 0).length;
+  const completed = values.filter((member) => member.progress && member.progress.percent === 100).length;
+  const totalPercent = values.reduce((sum, member) => sum + Number(member.progress && member.progress.percent || 0), 0);
+  return {
+    enrolledLearners: values.length,
+    learnersStarted: started,
+    programCompleters: completed,
+    averageCompletionPercent: values.length ? Math.round(totalPercent / values.length) : 0
+  };
+}
+
 if (process.env.NODE_ENV === "test") {
   exports.__cohortStandingTest = { cohortProgress, cohortReward, rankCohort };
+  exports.__organizationConsoleTest = {
+    normalizeOrganizationId,
+    slugifyOrganizationName,
+    mergeOrganizationDefinitions,
+    allowedCohortsForMembership,
+    organizationMemberSummary,
+    organizationConsoleAggregate,
+    normalizeOrganizationAccessInput,
+    organizationAccessPreview
+  };
 }
+
+async function organizationDefinitions() {
+  const db = admin.firestore();
+  const [organizationsSnap, cohortSettingsSnap] = await Promise.all([
+    db.collection("organizations").get(),
+    db.collection("settings").doc("cohorts").get()
+  ]);
+  const stored = {};
+  organizationsSnap.forEach((document) => { stored[document.id] = document.data() || {}; });
+  const cohortDetails = cohortSettingsSnap.exists && cohortSettingsSnap.data() && cohortSettingsSnap.data().cohorts || {};
+  return { definitions: mergeOrganizationDefinitions(stored, cohortDetails), cohortDetails };
+}
+
+async function organizationMembershipsForCaller(caller, definitions, isAdminCaller) {
+  if (isAdminCaller) {
+    return Object.values(definitions).map((organization) => ({
+      organizationId: organization.id,
+      role: "utl_admin",
+      status: "active",
+      assignedCohortIds: [...organization.cohortIds]
+    }));
+  }
+  const snapshot = await admin.firestore().collectionGroup("members").where("uid", "==", caller.uid).get();
+  const memberships = [];
+  snapshot.forEach((document) => {
+    const data = document.data() || {};
+    const parentOrganizationId = document.ref.parent.parent ? document.ref.parent.parent.id : "";
+    const organizationId = normalizeOrganizationId(data.organizationId || parentOrganizationId);
+    const organization = definitions[organizationId];
+    const role = String(data.role || "").trim().toLowerCase();
+    const status = String(data.status || "active").trim().toLowerCase();
+    if (!organization || organization.status !== "active" || !ORGANIZATION_ROLE_LABELS[role] || status !== "active") return;
+    memberships.push({ organizationId, role, status, assignedCohortIds: Array.isArray(data.assignedCohortIds) ? data.assignedCohortIds : [] });
+  });
+  return memberships;
+}
+
+async function loadOrganizationLearners(cohortIds) {
+  if (!cohortIds.length) return [];
+  const db = admin.firestore();
+  const cohortChunks = [];
+  for (let index = 0; index < cohortIds.length; index += 30) cohortChunks.push(cohortIds.slice(index, index + 30));
+  const memberSnapshots = await Promise.all(cohortChunks.map((ids) => db.collection("authorized_members").where("cohort", "in", ids).get()));
+  const members = [];
+  memberSnapshots.forEach((snapshot) => snapshot.forEach((document) => {
+    const data = document.data() || {};
+    const role = String(data.role || "member").trim().toLowerCase();
+    if (String(data.status || "active").trim().toLowerCase() === "inactive" || role === "admin" || role === "owner") return;
+    members.push({ id: document.id, ...data });
+  }));
+  const emails = Array.from(new Set(members.map((member) => String(member.email || member.id || "").trim().toLowerCase()).filter(Boolean)));
+  const emailChunks = [];
+  for (let index = 0; index < emails.length; index += 30) emailChunks.push(emails.slice(index, index + 30));
+  const userSnapshots = await Promise.all(emailChunks.map((values) => db.collection("users").where("email", "in", values).get()));
+  const usersByEmail = new Map();
+  userSnapshots.forEach((snapshot) => snapshot.forEach((document) => {
+    const data = document.data() || {};
+    const email = String(data.email || "").trim().toLowerCase();
+    if (email) usersByEmail.set(email, data);
+  }));
+  return members.map((member) => {
+    const email = String(member.email || member.id || "").trim().toLowerCase();
+    return organizationMemberSummary({ ...member, email }, usersByEmail.get(email) || {});
+  }).sort((a, b) => a.name.localeCompare(b.name));
+}
+
+exports.getOrganizationConsole = onCall({ timeoutSeconds: 30, memory: "256MiB" }, async (request) => {
+  const caller = await requireVerifiedCaller(request);
+  const isAdminCaller = await isAuthorizedAdmin(caller.email);
+  const { definitions, cohortDetails } = await organizationDefinitions();
+  const memberships = await organizationMembershipsForCaller(caller, definitions, isAdminCaller);
+  const allowed = memberships.map((membership) => {
+    const organization = definitions[membership.organizationId];
+    const cohortIds = isAdminCaller ? [...organization.cohortIds] : allowedCohortsForMembership(organization, membership);
+    return {
+      id: organization.id,
+      name: organization.name,
+      role: membership.role,
+      roleLabel: isAdminCaller ? "UTL administrator preview" : ORGANIZATION_ROLE_LABELS[membership.role],
+      cohortIds
+    };
+  }).filter((item) => item.cohortIds.length > 0);
+  const requestedId = normalizeOrganizationId(request.data && request.data.organizationId);
+  const selected = requestedId ? allowed.find((item) => item.id === requestedId) : (allowed.length === 1 ? allowed[0] : null);
+  if (requestedId && !selected) throw new HttpsError("permission-denied", "You do not have access to this organization.");
+  const base = { ok: true, organizations: allowed, selectedOrganization: null, cohorts: [], members: [], aggregate: organizationConsoleAggregate([]) };
+  if (!selected) return base;
+  const members = await loadOrganizationLearners(selected.cohortIds);
+  const cohorts = selected.cohortIds.map((cohortId) => {
+    const detail = cohortDetails[cohortId] || {};
+    const cohortMembers = members.filter((member) => member.cohortId === cohortId);
+    return {
+      id: cohortId,
+      status: String(detail.status || "active").trim().toLowerCase(),
+      startDate: String(detail.startDate || ""),
+      endDate: String(detail.endDate || ""),
+      aggregate: organizationConsoleAggregate(cohortMembers)
+    };
+  });
+  return { ...base, selectedOrganization: selected, cohorts, members, aggregate: organizationConsoleAggregate(members) };
+});
+
+exports.getMyOrganizationAccess = onCall({ timeoutSeconds: 15, memory: "256MiB" }, async (request) => {
+  const caller = await requireVerifiedCaller(request);
+  const { definitions } = await organizationDefinitions();
+  const memberships = await organizationMembershipsForCaller(caller, definitions, false);
+  const organizations = memberships.map((membership) => {
+    const organization = definitions[membership.organizationId];
+    const cohortIds = allowedCohortsForMembership(organization, membership);
+    return {
+      id: organization.id,
+      name: organization.name,
+      role: membership.role,
+      roleLabel: ORGANIZATION_ROLE_LABELS[membership.role],
+      cohortCount: cohortIds.length
+    };
+  }).filter((organization) => organization.cohortCount > 0);
+  return { ok: true, hasAccess: organizations.length > 0, organizations };
+});
+
+exports.getOrganizationAccessAdmin = onCall({ timeoutSeconds: 30, memory: "256MiB" }, async (request) => {
+  const caller = await requireVerifiedCaller(request);
+  if (!(await isAuthorizedAdmin(caller.email))) throw new HttpsError("permission-denied", "UTL administrator access is required.");
+  const db = admin.firestore();
+  const { definitions } = await organizationDefinitions();
+  const organizations = Object.values(definitions).sort((a, b) => a.name.localeCompare(b.name));
+  const membershipGroups = await Promise.all(organizations.map(async (organization) => {
+    const snapshot = await db.collection("organizations").doc(organization.id).collection("members").get();
+    return snapshot.docs.map((document) => {
+      const data = document.data() || {};
+      const membership = {
+        uid: document.id,
+        email: String(data.email || "").trim().toLowerCase(),
+        displayName: String(data.displayName || data.email || "Representative").trim().slice(0, 200),
+        organizationId: organization.id,
+        role: String(data.role || "report_viewer").trim().toLowerCase(),
+        status: String(data.status || "active").trim().toLowerCase(),
+        assignedCohortIds: Array.isArray(data.assignedCohortIds) ? data.assignedCohortIds : [],
+        updatedAt: data.updatedAt && typeof data.updatedAt.toDate === "function" ? data.updatedAt.toDate().toISOString() : "",
+        updatedByEmail: String(data.updatedByEmail || "").trim().toLowerCase()
+      };
+      return { ...membership, preview: organizationAccessPreview(organization, membership) };
+    });
+  }));
+  const auditGroups = await Promise.all(organizations.map(async (organization) => {
+    const snapshot = await db.collection("organizations").doc(organization.id).collection("access_audit")
+      .orderBy("occurredAt", "desc").limit(25).get();
+    return snapshot.docs.map((document) => {
+      const data = document.data() || {};
+      return {
+        id: document.id,
+        organizationId: organization.id,
+        organizationName: organization.name,
+        action: String(data.action || "updated"),
+        targetEmail: String(data.targetEmail || ""),
+        roleLabel: ORGANIZATION_ROLE_LABELS[String(data.nextRole || data.previousRole || "")] || "",
+        cohortIds: Array.isArray(data.nextCohortIds) ? data.nextCohortIds : [],
+        previousName: String(data.previousName || ""),
+        nextName: String(data.nextName || ""),
+        actorEmail: String(data.actorEmail || ""),
+        occurredAt: data.occurredAt && typeof data.occurredAt.toDate === "function" ? data.occurredAt.toDate().toISOString() : ""
+      };
+    });
+  }));
+  return {
+    ok: true,
+    organizations: organizations.map((organization) => ({ id: organization.id, name: organization.name, status: organization.status, cohortIds: organization.cohortIds })),
+    memberships: membershipGroups.flat().sort((a, b) => a.displayName.localeCompare(b.displayName)),
+    audit: auditGroups.flat().sort((a, b) => String(b.occurredAt).localeCompare(String(a.occurredAt))).slice(0, 50),
+    roleLabels: ORGANIZATION_ROLE_LABELS
+  };
+});
+
+exports.saveOrganizationDefinition = onCall({ timeoutSeconds: 30, memory: "256MiB" }, async (request) => {
+  const caller = await requireVerifiedCaller(request);
+  if (!(await isAuthorizedAdmin(caller.email))) throw new HttpsError("permission-denied", "UTL administrator access is required.");
+  const db = admin.firestore();
+  const input = request.data && typeof request.data === "object" ? request.data : {};
+  const action = String(input.action || "").trim().toLowerCase();
+  if (!ORGANIZATION_DEFINITION_ACTIONS.has(action)) throw new HttpsError("invalid-argument", "Choose a valid organization action.");
+  const now = admin.firestore.FieldValue.serverTimestamp();
+
+  if (action === "create") {
+    const name = String(input.name || "").trim().slice(0, 160);
+    if (!name) throw new HttpsError("invalid-argument", "Enter an organization name.");
+    const organizationId = normalizeOrganizationId(input.organizationId) || slugifyOrganizationName(name);
+    if (!organizationId) throw new HttpsError("invalid-argument", "Enter an organization name that includes at least one letter or number.");
+    const organizationRef = db.collection("organizations").doc(organizationId);
+    await db.runTransaction(async (transaction) => {
+      const existing = await transaction.get(organizationRef);
+      if (existing.exists) throw new HttpsError("already-exists", "An organization with this ID already exists. Rename or reactivate it instead.");
+      transaction.set(organizationRef, {
+        id: organizationId,
+        name,
+        status: "active",
+        createdAt: now,
+        createdByUid: caller.uid,
+        createdByEmail: caller.email,
+        updatedAt: now,
+        updatedByUid: caller.uid,
+        updatedByEmail: caller.email
+      });
+      transaction.set(organizationRef.collection("access_audit").doc(), {
+        organizationId,
+        action: "organization_created",
+        previousName: "",
+        nextName: name,
+        previousStatus: "",
+        nextStatus: "active",
+        actorUid: caller.uid,
+        actorEmail: caller.email,
+        occurredAt: now
+      });
+    });
+    return { ok: true, action: "organization_created", organization: { id: organizationId, name, status: "active", cohortIds: [] } };
+  }
+
+  const organizationId = normalizeOrganizationId(input.organizationId);
+  if (!organizationId) throw new HttpsError("invalid-argument", "Choose a valid organization.");
+  const organizationRef = db.collection("organizations").doc(organizationId);
+  const snap = await organizationRef.get();
+  if (!snap.exists) throw new HttpsError("not-found", "This organization could not be found.");
+  const prior = snap.data() || {};
+
+  if (action === "rename") {
+    const name = String(input.name || "").trim().slice(0, 160);
+    if (!name) throw new HttpsError("invalid-argument", "Enter an organization name.");
+    const batch = db.batch();
+    batch.set(organizationRef, { name, updatedAt: now, updatedByUid: caller.uid, updatedByEmail: caller.email }, { merge: true });
+    batch.set(organizationRef.collection("access_audit").doc(), {
+      organizationId,
+      action: "organization_renamed",
+      previousName: String(prior.name || ""),
+      nextName: name,
+      previousStatus: "",
+      nextStatus: "",
+      actorUid: caller.uid,
+      actorEmail: caller.email,
+      occurredAt: now
+    });
+    await batch.commit();
+    return { ok: true, action: "organization_renamed", organization: { id: organizationId, name, status: String(prior.status || "active") } };
+  }
+
+  const nextStatus = action === "archive" ? "archived" : "active";
+  const previousStatus = String(prior.status || "active").trim().toLowerCase();
+  if (previousStatus === nextStatus) throw new HttpsError("failed-precondition", "This organization is already " + nextStatus + ".");
+  const batch = db.batch();
+  batch.set(organizationRef, { status: nextStatus, updatedAt: now, updatedByUid: caller.uid, updatedByEmail: caller.email }, { merge: true });
+  batch.set(organizationRef.collection("access_audit").doc(), {
+    organizationId,
+    action: action === "archive" ? "organization_archived" : "organization_reactivated",
+    previousName: "",
+    nextName: "",
+    previousStatus,
+    nextStatus,
+    actorUid: caller.uid,
+    actorEmail: caller.email,
+    occurredAt: now
+  });
+  await batch.commit();
+  return { ok: true, action: action === "archive" ? "organization_archived" : "organization_reactivated", organization: { id: organizationId, name: String(prior.name || ""), status: nextStatus } };
+});
+
+exports.checkOrganizationRepEmail = onCall({ timeoutSeconds: 15, memory: "256MiB" }, async (request) => {
+  const caller = await requireVerifiedCaller(request);
+  if (!(await isAuthorizedAdmin(caller.email))) throw new HttpsError("permission-denied", "UTL administrator access is required.");
+  const email = String(request.data && request.data.email || "").trim().toLowerCase();
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new HttpsError("invalid-argument", "Enter a valid email address.");
+  try {
+    const userRecord = await admin.auth().getUserByEmail(email);
+    return { ok: true, exists: true, displayName: String(userRecord.displayName || "").trim() };
+  } catch (error) {
+    if (error && error.code === "auth/user-not-found") return { ok: true, exists: false, displayName: "" };
+    throw error;
+  }
+});
+
+exports.saveOrganizationAccessMember = onCall({ timeoutSeconds: 30, memory: "256MiB" }, async (request) => {
+  const caller = await requireVerifiedCaller(request);
+  if (!(await isAuthorizedAdmin(caller.email))) throw new HttpsError("permission-denied", "UTL administrator access is required.");
+  const db = admin.firestore();
+  const { definitions } = await organizationDefinitions();
+  const normalized = normalizeOrganizationAccessInput(request.data, definitions);
+  let userRecord;
+  try {
+    userRecord = await admin.auth().getUserByEmail(normalized.email);
+  } catch (error) {
+    if (error && error.code === "auth/user-not-found") throw new HttpsError("failed-precondition", "This person must sign in to UTL once before organization access can be granted.");
+    throw error;
+  }
+  const organizationRef = db.collection("organizations").doc(normalized.organizationId);
+  const memberRef = organizationRef.collection("members").doc(userRecord.uid);
+  const priorSnap = await memberRef.get();
+  const prior = priorSnap.exists ? priorSnap.data() || {} : {};
+  const priorStatus = String(prior.status || "").trim().toLowerCase();
+  const action = !priorSnap.exists ? "granted" : priorStatus === "suspended" && normalized.status === "active" ? "reactivated" : normalized.status === "suspended" && priorStatus !== "suspended" ? "suspended" : "updated";
+  const now = admin.firestore.FieldValue.serverTimestamp();
+  const membership = {
+    uid: userRecord.uid,
+    email: normalized.email,
+    displayName: String(userRecord.displayName || normalized.email).trim().slice(0, 200),
+    organizationId: normalized.organizationId,
+    role: normalized.role,
+    status: normalized.status,
+    assignedCohortIds: normalized.assignedCohortIds,
+    updatedAt: now,
+    updatedByUid: caller.uid,
+    updatedByEmail: caller.email
+  };
+  if (!priorSnap.exists) {
+    membership.createdAt = now;
+    membership.createdByUid = caller.uid;
+    membership.createdByEmail = caller.email;
+  }
+  const auditRef = organizationRef.collection("access_audit").doc();
+  const batch = db.batch();
+  batch.set(memberRef, membership, { merge: true });
+  batch.set(auditRef, {
+    organizationId: normalized.organizationId,
+    membershipUid: userRecord.uid,
+    targetEmail: normalized.email,
+    targetName: membership.displayName,
+    action,
+    previousRole: String(prior.role || ""),
+    previousStatus: priorStatus,
+    previousCohortIds: Array.isArray(prior.assignedCohortIds) ? prior.assignedCohortIds : [],
+    nextRole: normalized.role,
+    nextStatus: normalized.status,
+    nextCohortIds: normalized.assignedCohortIds,
+    actorUid: caller.uid,
+    actorEmail: caller.email,
+    occurredAt: now
+  });
+  await batch.commit();
+  return {
+    ok: true,
+    action,
+    membership: {
+      uid: userRecord.uid,
+      email: normalized.email,
+      displayName: membership.displayName,
+      organizationId: normalized.organizationId,
+      role: normalized.role,
+      roleLabel: ORGANIZATION_ROLE_LABELS[normalized.role],
+      status: normalized.status,
+      assignedCohortIds: normalized.assignedCohortIds,
+      preview: organizationAccessPreview(normalized.organization, normalized)
+    }
+  };
+});
 
 exports.getCohortStanding = onCall({ timeoutSeconds: 30, memory: "256MiB" }, async (request) => {
   const caller = await requireVerifiedCaller(request);

@@ -34,7 +34,8 @@
 
     button,
     input,
-    select {
+    select,
+    textarea {
       font: inherit;
     }
 
@@ -111,8 +112,22 @@
       font-size: 13px;
     }
 
+    textarea {
+      box-sizing: border-box;
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--white);
+      color: var(--charcoal);
+      font-family: 'Lato', sans-serif;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
     input:focus,
-    select:focus {
+    select:focus,
+    textarea:focus {
       border-color: var(--navy);
       outline: none;
     }
@@ -865,6 +880,25 @@
       font-size: 9px;
       font-weight: 700;
     }
+    .ca-status-chip {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: #F0ECE5;
+      color: #5F5F5F;
+      font-family: Lato, Arial, sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .ca-status-chip.is-active { background:#E6F4EC; color:#27633F; }
+    .ca-status-chip.is-upcoming,.ca-status-chip.is-draft { background:#FFF1CF; color:#7B5200; }
+    .ca-status-chip.is-completed { background:#E8EEF5; color:#315779; }
+    .ca-status-chip.is-archived,.ca-status-chip.is-cancelled { background:#ECECEC; color:#666; }
+    .ca-overview-head { display:flex; align-items:center; justify-content:space-between; gap:14px; margin:0 0 10px; }
+    .ca-overview-head p { margin:0; color:#666; font-size:12px; }
+    .ca-archive-toggle { display:flex; align-items:center; gap:7px; color:var(--navy); font-size:12px; font-weight:700; white-space:nowrap; }
+    @media(max-width:700px){.ca-overview-head{display:block}.ca-archive-toggle{margin-top:9px}.ca-cohort-organization{display:none}}
     .ei-summary { display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:10px; margin:14px 0; }
     .ei-metric { padding:15px; border:1px solid var(--line); border-radius:8px; background:#fff; }
     .ei-metric-label { color:#777; font-size:11px; font-weight:700; }
@@ -1137,8 +1171,18 @@
     #caDetailContent { display:grid; gap:16px; }
     #caDetailContent > * { margin-top:0!important; margin-bottom:0!important; }
     #caDetailContent .mb-form-grid { row-gap:16px; }
-    #caDetailContent .mb-form-field { gap:8px; }
+    #caDetailContent .mb-form-field { align-content:start; grid-auto-rows:max-content; gap:8px; }
+    #caDetailContent .ca-cohort-details-grid { grid-template-columns:repeat(4,minmax(0,1fr)); column-gap:12px; row-gap:18px; align-items:start; }
+    #caDetailContent .ca-cohort-details-grid input,
+    #caDetailContent .ca-cohort-details-grid select { min-height:42px; }
+    #caDetailContent #caDetailNotes { min-height:88px; padding:12px 14px; resize:vertical; }
     #caDetailContent .student-progress-actions { margin-top:16px; }
+    #section-organization-access .oa-panel .mb-form-grid { row-gap:16px; }
+    #section-organization-access .oa-panel .mb-form-field { align-content:start; grid-auto-rows:max-content; gap:8px; }
+    #section-organization-access #oaEmailCheckStatus { margin-top:4px; }
+    #section-emergency-access .student-progress-actions { margin-top:16px; }
+    @media (max-width:1100px) { #caDetailContent .ca-cohort-details-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+    @media (max-width:640px) { #caDetailContent .ca-cohort-details-grid { grid-template-columns:1fr; } }
     .sp-detail-card h4 { margin:0 0 12px; color:var(--navy); font-size:15px; }
     .sp-activity-list { display:grid; gap:7px; margin:0; padding:0; list-style:none; }
     .sp-activity-row { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; padding-bottom:7px; border-bottom:1px solid var(--line); font-size:12px; }
@@ -2139,6 +2183,22 @@
     .mb-add-form-title { margin:0 0 12px; color:var(--navy); font-family:'Playfair Display',serif; font-size:18px; }
     .mb-form-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:10px; }
     .mb-form-field { display:grid; gap:6px; }
+    .oa-layout { display:grid; grid-template-columns:minmax(300px,.85fr) minmax(420px,1.15fr); gap:18px; align-items:start; }
+    .oa-panel { padding:18px; border:1px solid var(--line); border-radius:10px; background:var(--white); }
+    .oa-panel h3 { margin:0 0 6px; color:var(--navy); font:700 20px/1.25 'Playfair Display',serif; }
+    .oa-panel .description { margin-top:0; }
+    .oa-cohort-options { display:grid; gap:7px; padding:10px 12px; border:1px solid var(--line); border-radius:8px; background:#FAF8F3; }
+    .oa-cohort-options label { display:flex; gap:8px; align-items:flex-start; font-size:12px; line-height:1.4; }
+    .oa-cohort-options input { margin-top:2px; accent-color:var(--navy); }
+    .oa-preview { margin-top:14px; padding:14px; border-radius:8px; background:#F2F6FA; border:1px solid #C9D9E8; }
+    .oa-preview h4 { margin:0 0 8px; color:var(--navy); font-size:14px; }
+    .oa-preview-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+    .oa-preview ul { margin:5px 0 0; padding-left:18px; font-size:12px; line-height:1.5; }
+    .oa-status-chip { display:inline-flex; padding:3px 8px; border-radius:999px; font-size:10px; font-weight:700; background:#E8F5ED; color:#26734D; }
+    .oa-status-chip.is-suspended { background:#F4F0E9; color:#745B25; }
+    .oa-empty { padding:18px; color:#687482; text-align:center; }
+    @media (max-width:900px) { .oa-layout { grid-template-columns:1fr; } }
+    @media (max-width:560px) { .oa-preview-grid { grid-template-columns:1fr; } }
     .mb-form-actions { display:flex; gap:8px; margin-top:12px; align-items:center; }
     .mb-add-email-status { margin-top:10px; font-family:'Lato',sans-serif; font-size:13px; padding:8px 10px; border-radius:4px; }
     .mb-add-email-status.is-sent { background:#f0faf5; color:#0F6E56; border:1px solid #b7e4cf; }
@@ -2727,6 +2787,7 @@
 
       <span class="nav-group-label" data-admin-nav-group="member-management">Access</span>
       <button class="admin-nav-item" data-admin-tab-scope="member-management" data-target="section-members">Members</button>
+      <button class="admin-nav-item" data-admin-tab-scope="member-management" data-target="section-organization-access">Organization access</button>
       <button class="admin-nav-item" data-admin-tab-scope="member-management" data-target="section-emergency-access">Emergency access</button>
 
       <span class="nav-group-label" data-admin-nav-group="engagement">Communications</span>
@@ -3548,6 +3609,49 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         </div>
       </section>
 
+      <section class="admin-section" id="section-organization-access" data-admin-tab-panel="member-management">
+        <span class="section-label">Access</span>
+        <h2>Organization access</h2>
+        <div class="section-divider"></div>
+        <p class="description">Give an organization representative read-only access to the cohorts they support. This does not change their learner account, program enrollment, or UTL role.</p>
+        <div class="operational-notice"><strong>Access begins only after you save an explicit grant.</strong> The representative must sign in to UTL once before you can add them. Use Suspend to stop access while keeping the record and audit history.</div>
+        <div class="oa-panel" id="oaOrgPanel" style="margin-bottom:18px">
+          <h3 id="oaOrgFormHeading">Add an organization</h3>
+          <p class="description">Create the organization here, then assign its cohorts from Cohort Analytics before granting representative access below.</p>
+          <div class="mb-form-grid">
+            <div class="mb-form-field"><label for="oaOrgName">Organization name</label><input type="text" id="oaOrgName" placeholder="e.g. AyalaLand" autocomplete="off" maxlength="160"></div>
+            <div class="mb-form-field"><label for="oaOrgSlug">Organization ID</label><input type="text" id="oaOrgSlug" placeholder="auto-generated" maxlength="80"><span class="student-progress-status">Cannot be changed after creation.</span></div>
+          </div>
+          <div class="mb-form-actions"><button class="small-button" type="button" id="oaOrgSave">Add organization</button><button class="small-button secondary-button" type="button" id="oaOrgCancel" hidden>Cancel edit</button><span class="student-progress-status" id="oaOrgStatus" aria-live="polite"></span></div>
+          <div id="oaOrgTable" style="margin-top:16px"><p class="oa-empty">Open this section to load organizations.</p></div>
+        </div>
+        <div class="oa-layout">
+          <div class="oa-panel">
+            <h3 id="oaFormHeading">Add a representative</h3>
+            <p class="description">Choose the organization, role, and cohort scope. Review the access summary before saving.</p>
+            <div class="mb-form-grid">
+              <div class="mb-form-field"><label for="oaOrganization">Organization</label><select id="oaOrganization"><option value="">Loading organizations…</option></select></div>
+              <div class="mb-form-field"><label for="oaEmail">Representative email</label><div style="display:flex;gap:8px;align-items:center"><input type="email" id="oaEmail" placeholder="name@company.com" autocomplete="off" style="flex:1;min-width:0"><button type="button" class="small-button secondary-button" id="oaEmailCheck">Check</button></div><span class="mb-msg" id="oaEmailCheckStatus" aria-live="polite"></span></div>
+              <div class="mb-form-field"><label for="oaRole">Role</label><select id="oaRole"><option value="program_manager">Program manager</option><option value="organization_owner">Organization owner</option><option value="cohort_facilitator">Cohort facilitator</option><option value="report_viewer">Report viewer</option></select><span class="student-progress-status" id="oaRoleHint"></span></div>
+              <div class="mb-form-field"><label for="oaAccessStatus">Access status</label><select id="oaAccessStatus"><option value="active">Active</option><option value="suspended">Suspended</option></select></div>
+            </div>
+            <div class="mb-form-field" style="margin-top:12px"><label>Cohorts</label><div class="oa-cohort-options" id="oaCohorts"><span class="description">Choose an organization first.</span></div></div>
+            <div class="oa-preview" id="oaPreview" aria-live="polite"></div>
+            <div class="mb-form-actions"><button class="small-button" type="button" id="oaSave">Grant access</button><button class="small-button secondary-button" type="button" id="oaCancel" hidden>Cancel edit</button><span class="student-progress-status" id="oaStatus" aria-live="polite"></span></div>
+          </div>
+          <div class="oa-panel">
+            <h3>Current representatives</h3>
+            <p class="description">These people can open the organization console for the scope shown below.</p>
+            <div id="oaTable"><p class="oa-empty">Open this section to load access records.</p></div>
+          </div>
+        </div>
+        <div class="oa-panel" style="margin-top:18px">
+          <h3>Recent access changes</h3>
+          <p class="description">A read-only record of who granted, changed, suspended, or reactivated access.</p>
+          <div id="oaAudit"><p class="oa-empty">No access changes loaded.</p></div>
+        </div>
+      </section>
+
       <section class="admin-section" id="section-emergency-access" data-admin-tab-panel="member-management">
         <span class="section-label">Access</span>
         <h2>Emergency access</h2>
@@ -3983,8 +4087,10 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       getAllStabilityEvents,
       getMemberCredentialRegistry,
       getMemberSupportSnapshot,
+      getOrganizationAccessAdmin,
       getDoc,
       getDocs,
+      getCohortDetails,
       getAssessmentVisibility,
       getAdminVisibilitySettings,
       getTsaScoringSettings,
@@ -4005,9 +4111,14 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       searchVerifiedCredentials,
       runAdminAction,
       repairMemberProgramCompletionReward,
+      renameCohort,
       replaceMemberWorkspaceProgress,
       resetMemberWorkspaceProgress,
+      checkOrganizationRepEmail,
+      saveOrganizationAccessMember,
+      saveOrganizationDefinition,
       sendSignInInvite,
+      setCohortDetails,
       setEngagementSettings,
       setGlobalFeedbackSetting,
       setPublicFindLevelSetting,
@@ -4035,8 +4146,10 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       getAllStabilityEvents,
       getMemberCredentialRegistry,
       getMemberSupportSnapshot,
+      getOrganizationAccessAdmin,
       getDoc,
       getDocs,
+      getCohortDetails,
       getAssessmentVisibility,
       getAdminVisibilitySettings,
       getTsaScoringSettings,
@@ -4055,9 +4168,14 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       searchVerifiedCredentials,
       runAdminAction,
       repairMemberProgramCompletionReward,
+      renameCohort,
       replaceMemberWorkspaceProgress,
       resetMemberWorkspaceProgress,
+      checkOrganizationRepEmail,
+      saveOrganizationAccessMember,
+      saveOrganizationDefinition,
       sendSignInInvite,
+      setCohortDetails,
       setEngagementSettings,
       setGlobalFeedbackSetting,
       setPublicFindLevelSetting,
@@ -8346,11 +8464,13 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       const select = document.getElementById('spCohortFilter');
       if (!select) return;
       const cohorts = Array.from(new Set(spAllMembers.map((member) => String(member.cohort || '').trim()).filter(Boolean)))
-        .sort((a, b) => a.localeCompare(b));
+        .sort(caCompareCohortNames);
       const hasNoCohort = spAllMembers.some((member) => !String(member.cohort || '').trim());
-      select.innerHTML = '<option value="all">All cohorts</option>' +
-        cohorts.map((cohort) => '<option value="' + escapeHtml(cohort) + '">' + escapeHtml(cohort) + '</option>').join('') +
-        (hasNoCohort ? '<option value="__none__">No cohort</option>' : '');
+      select.innerHTML = caCohortOptionsHtml(cohorts, spCohortFilter, {
+        allValue: 'all',
+        allLabel: 'All cohorts',
+        includeNoCohort: hasNoCohort
+      });
       const available = ['all', ...cohorts, ...(hasNoCohort ? ['__none__'] : [])];
       if (!available.includes(spCohortFilter)) spCohortFilter = 'all';
       select.value = spCohortFilter;
@@ -8622,10 +8742,10 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
     function lbPopulateCohorts() {
       const select = document.getElementById('lbCohort');
       if (!select) return;
-      const cohorts = Array.from(new Set(spAllMembers.map((m) => String(m.cohort || '').trim()).filter(Boolean))).sort((a, b) => a.localeCompare(b));
+      const cohorts = Array.from(new Set(spAllMembers.map((m) => String(m.cohort || '').trim()).filter(Boolean))).sort(caCompareCohortNames);
       if (cohorts.length && !cohorts.includes(lbSelectedCohort)) lbSelectedCohort = cohorts[0];
       if (!cohorts.length) lbSelectedCohort = '';
-      select.innerHTML = '<option value="">All cohorts</option>' + cohorts.map((c) => '<option value="' + escapeHtml(c) + '"' + (c === lbSelectedCohort ? ' selected' : '') + '>' + escapeHtml(c) + '</option>').join('');
+      select.innerHTML = caCohortOptionsHtml(cohorts, lbSelectedCohort, { allValue: '', allLabel: 'All cohorts' });
       select.value = lbSelectedCohort;
     }
 
@@ -8732,11 +8852,13 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       const select = document.getElementById('lhCohortFilter');
       if (!select) return;
       const cohorts = Array.from(new Set(spAllMembers.map((member) => String(member.cohort || '').trim()).filter(Boolean)))
-        .sort((a, b) => a.localeCompare(b));
+        .sort(caCompareCohortNames);
       const hasNoCohort = spAllMembers.some((member) => !String(member.cohort || '').trim());
-      select.innerHTML = '<option value="all">All cohorts</option>' +
-        cohorts.map((cohort) => '<option value="' + escapeHtml(cohort) + '">' + escapeHtml(cohort) + '</option>').join('') +
-        (hasNoCohort ? '<option value="__none__">No cohort</option>' : '');
+      select.innerHTML = caCohortOptionsHtml(cohorts, lhCohortFilter, {
+        allValue: 'all',
+        allLabel: 'All cohorts',
+        includeNoCohort: hasNoCohort
+      });
       const available = ['all', ...cohorts, ...(hasNoCohort ? ['__none__'] : [])];
       if (!available.includes(lhCohortFilter)) lhCohortFilter = 'all';
       select.value = lhCohortFilter;
@@ -8866,6 +8988,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       try {
         await mbRequireFirebaseAdmin();
         const members = await spFetchAllMembers(fb, forceRefresh);
+        await caEnsureCohortDetails(fb, forceRefresh);
         const stabilityEvents = fb.getAllStabilityEvents
           ? await fb.getAllStabilityEvents(members.map((member) => member.uid).filter(Boolean)).catch(() => [])
           : [];
@@ -9064,11 +9187,84 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
     // Cohort Analytics
     let caCurrentCohort = '';
     let caCohortDetailsCache = {};
+    let caCohortDetailsLoaded = false;
+    let caShowArchived = false;
     let caRosterFilter = 'all';
     let caRosterSort = { col: 'name', dir: 'asc' };
     const CA_LEVEL_RANK = { Intern: 0, Analyst: 1, Associate: 2, Principal: 3, Executive: 4 };
     const CA_STATUS_RANK = { 'not-started': 0, 'in-progress': 1, complete: 2 };
     const CA_STATUS_LABEL = { complete: 'Complete', 'in-progress': 'In progress', 'not-started': 'Not started' };
+    const CA_COHORT_STATUS_LABEL = { draft: 'Draft', upcoming: 'Upcoming', active: 'Active', completed: 'Completed', archived: 'Archived', cancelled: 'Cancelled' };
+    const CA_COHORT_STATUS_RANK = { active: 0, upcoming: 1, draft: 2, completed: 3, cancelled: 4, archived: 5 };
+
+    async function caEnsureOrganizations(forceRefresh) {
+      try { await oaEnsureData(forceRefresh); } catch (error) { console.warn('Organization directory could not be loaded.', error); }
+      return (oaData && oaData.organizations) || [];
+    }
+
+    function caOrganizationOptionsHtml(selectedId) {
+      const organizations = (oaData && oaData.organizations) || [];
+      const selected = String(selectedId || '');
+      let html = '<option value="">No organization</option>';
+      html += organizations.map((organization) => '<option value="' + escapeHtml(organization.id) + '"' + (selected === organization.id ? ' selected' : '') + '>' + escapeHtml(organization.name) + (organization.status === 'archived' ? ' (archived)' : '') + '</option>').join('');
+      return html;
+    }
+
+    function caResolvedCohortDetails(cohortName) {
+      const saved = caCohortDetailsCache[cohortName] || {};
+      const organization = ((oaData && oaData.organizations) || []).find((item) => item.id === saved.organizationId) || null;
+      return { ...saved, organizationId: organization ? organization.id : '', organizationName: organization ? organization.name : '' };
+    }
+
+    function caCohortLifecycleStatus(cohortName) {
+      const value = String((caCohortDetailsCache[cohortName] || {}).status || '').toLowerCase();
+      return Object.prototype.hasOwnProperty.call(CA_COHORT_STATUS_LABEL, value) ? value : 'active';
+    }
+
+    function caIsPastCohort(cohortName) {
+      return ['completed', 'archived', 'cancelled'].includes(caCohortLifecycleStatus(cohortName));
+    }
+
+    function caCompareCohortNames(a, b) {
+      const statusDifference = CA_COHORT_STATUS_RANK[caCohortLifecycleStatus(a)] - CA_COHORT_STATUS_RANK[caCohortLifecycleStatus(b)];
+      return statusDifference || String(a).localeCompare(String(b));
+    }
+
+    function caCohortOptionsHtml(cohorts, selectedValue, options) {
+      const settings = Object.assign({ allValue: 'all', allLabel: 'All cohorts', includeNoCohort: false }, options || {});
+      const selected = String(selectedValue || '');
+      const option = (value, label) => '<option value="' + escapeHtml(value) + '"' + (selected === value ? ' selected' : '') + '>' + escapeHtml(label) + '</option>';
+      const current = cohorts.filter((cohort) => !caIsPastCohort(cohort)).sort(caCompareCohortNames);
+      const past = cohorts.filter(caIsPastCohort).sort(caCompareCohortNames);
+      let html = settings.allLabel ? option(settings.allValue, settings.allLabel) : '';
+      if (current.length) html += '<optgroup label="Current cohorts">' + current.map((cohort) => option(cohort, cohort)).join('') + '</optgroup>';
+      if (past.length) html += '<optgroup label="Past cohorts">' + past.map((cohort) => option(cohort, cohort)).join('') + '</optgroup>';
+      if (settings.includeNoCohort) html += option('__none__', 'No cohort');
+      return html;
+    }
+
+    async function caEnsureCohortDetails(fb, forceRefresh) {
+      if (caCohortDetailsLoaded && !forceRefresh) return caCohortDetailsCache;
+      if (!fb || !fb.getCohortDetails) return caCohortDetailsCache;
+      try {
+        caCohortDetailsCache = (await fb.getCohortDetails()) || {};
+        caCohortDetailsLoaded = true;
+      } catch (error) {
+        console.warn('Cohort lifecycle details could not be loaded.', error);
+      }
+      return caCohortDetailsCache;
+    }
+
+    function caRefreshCohortSelectors() {
+      spPopulateCohortFilter();
+      lbPopulateCohorts();
+      lhPopulateCohortFilter();
+      if (mbMembersCache.length) mbRenderControls();
+    }
+
+    function caCohortStatusChip(status) {
+      return '<span class="ca-status-chip is-' + status + '">' + CA_COHORT_STATUS_LABEL[status] + '</span>';
+    }
 
     function caRosterStatus(member) {
       if (spProgramComplete(member)) return 'complete';
@@ -9156,7 +9352,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         const ms = spToMs(m.addedAt);
         if (ms && (!earliestAddedAt || ms < earliestAddedAt)) earliestAddedAt = ms;
       });
-      const details = caCohortDetailsCache[name] || {};
+      const details = caResolvedCohortDetails(name);
       const explicitStart = details.startDate ? spToMs(details.startDate) : null;
       const startMs = explicitStart || earliestAddedAt;
       return {
@@ -9223,22 +9419,34 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         return;
       }
       const groups = caCohortGroups();
-      const names = Object.keys(groups).sort((a, b) => a.localeCompare(b));
-      if (!names.length) {
-        wrap.innerHTML = '<p class="mb-msg">No members found.</p>';
-        return;
-      }
+      const allNames = Object.keys(groups);
+      const archivedCount = allNames.filter((name) => caCohortLifecycleStatus(name) === 'archived').length;
+      const names = allNames
+        .filter((name) => caShowArchived || caCohortLifecycleStatus(name) !== 'archived')
+        .sort((a, b) => {
+          const statusDifference = CA_COHORT_STATUS_RANK[caCohortLifecycleStatus(a)] - CA_COHORT_STATUS_RANK[caCohortLifecycleStatus(b)];
+          return statusDifference || a.localeCompare(b);
+        });
       const summaries = names.map((name) => caCohortSummary(name, groups[name]));
       const rows = summaries.map((s) =>
         '<tr class="ca-cohort-row" data-ca-cohort="' + escapeHtml(s.name) + '">' +
           '<td>' + escapeHtml(s.name) + (s.small ? '<span class="ca-flag-small">Small sample</span>' : '') + '</td>' +
+          '<td class="ca-cohort-organization">' + escapeHtml(s.details.organizationName || '—') + '</td>' +
+          '<td>' + caCohortStatusChip(caCohortLifecycleStatus(s.name)) + '</td>' +
           '<td>' + s.count + '</td>' +
           '<td>' + s.completed + ' of ' + s.count + ' (' + s.completionPercent + '%)</td>' +
           '<td>' + s.avgMp + ' MP</td>' +
           '<td>' + (s.daysSinceStart === null ? '—' : s.daysSinceStart + ' days') + '</td>' +
         '</tr>'
       ).join('');
-      wrap.innerHTML = '<div class="student-progress-table-wrap"><table class="student-progress-table"><thead><tr><th>Cohort</th><th>Members</th><th>Completion</th><th>Avg MP</th><th>Since cohort start (est.)</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
+      wrap.innerHTML = '<div class="ca-overview-head"><p>Active work appears first. Archived cohorts stay available without crowding the working list.</p>' +
+        (archivedCount ? '<label class="ca-archive-toggle"><input type="checkbox" id="caShowArchived"' + (caShowArchived ? ' checked' : '') + '> Show archived (' + archivedCount + ')</label>' : '') + '</div>' +
+        (rows ? '<div class="student-progress-table-wrap"><table class="student-progress-table"><thead><tr><th>Cohort</th><th class="ca-cohort-organization">Organization</th><th>Status</th><th>Members</th><th>Completion</th><th>Avg MP</th><th>Since cohort start (est.)</th></tr></thead><tbody>' + rows + '</tbody></table></div>' : '<p class="mb-msg">No current cohorts. Select Show archived to review past records.</p>');
+      const showArchived = document.getElementById('caShowArchived');
+      if (showArchived) showArchived.addEventListener('change', () => {
+        caShowArchived = showArchived.checked;
+        renderCohortOverview();
+      });
       wrap.querySelectorAll('[data-ca-cohort]').forEach((row) => {
         row.addEventListener('click', () => renderCohortDetail(row.dataset.caCohort));
       });
@@ -9278,15 +9486,18 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
           ).join('') + '</ul>'
         : '<p class="sp-status-done">Nobody in this cohort is currently flagged as behind.</p>';
 
-      const details = summary.details || {};
+      const details = summary.details || caResolvedCohortDetails(cohortName);
       const cohortUids = new Set(members.map((member)=>member.uid).filter(Boolean));
       const cohortVideo = eiVideoSummary(eiData.activities.filter((item)=>cohortUids.has(item.uid)));
       const cohortVideoHtml = '<div class="sp-detail-card" style="margin-top:12px"><h4>Video engagement</h4><p class="description">Playback is counted only after a learner presses play in Vimeo. Reaching 80% counts as a completed viewing session.</p><div class="sp-detail-summary"><div class="sp-detail-stat"><span>Video viewers</span><strong>'+cohortVideo.viewers+' of '+summary.count+'</strong></div><div class="sp-detail-stat"><span>Median coverage</span><strong>'+Math.round(cohortVideo.median)+'%</strong></div><div class="sp-detail-stat"><span>Reached 80%</span><strong>'+cohortVideo.completionRate+'%</strong></div><div class="sp-detail-stat"><span>Common drop-off</span><strong>'+escapeHtml(cohortVideo.dropOff)+'</strong></div></div><details style="margin-top:14px"><summary>How these metrics are measured</summary>'+eiExplanation('videoViewers')+eiExplanation('videoCoverage')+eiExplanation('videoCompletion')+eiExplanation('videoDropOff')+'</details></div>';
       content.innerHTML =
-        '<div class="sp-detail-header"><div><h3>' + escapeHtml(cohortName) + (summary.small ? '<span class="ca-flag-small">Small sample</span>' : '') + '</h3><p>' + summary.count + ' member' + (summary.count === 1 ? '' : 's') + ' · ' + (summary.startDateIsEstimate ? 'Cohort start estimated from earliest member added' : 'Cohort start set manually') + '</p></div></div>' +
+        '<div class="sp-detail-header"><div><h3>' + escapeHtml(cohortName) + (summary.small ? '<span class="ca-flag-small">Small sample</span>' : '') + '</h3><p>' + summary.count + ' member' + (summary.count === 1 ? '' : 's') + ' · ' + (summary.startDateIsEstimate ? 'Cohort start estimated from earliest member added' : 'Cohort start set manually') + '</p></div>' + caCohortStatusChip(caCohortLifecycleStatus(cohortName)) + '</div>' +
         '<div class="sp-detail-summary"><div class="sp-detail-stat"><span>Completion</span><strong>' + summary.completed + ' of ' + summary.count + '</strong></div><div class="sp-detail-stat"><span>Completion rate</span><strong>' + summary.completionPercent + '%</strong></div><div class="sp-detail-stat"><span>Average MP</span><strong>' + summary.avgMp + '</strong></div><div class="sp-detail-stat"><span>Since cohort start</span><strong>' + (summary.daysSinceStart === null ? '—' : summary.daysSinceStart + ' days') + '</strong></div></div>' +
-        '<div class="sp-detail-card" style="margin:12px 0"><h4>Cohort details</h4><p class="description" style="margin-top:-6px">Internal organization only. Contact and notes never appear in the exported CSV or PDF.</p>' +
-          '<div class="mb-form-grid"><div class="mb-form-field"><label for="caDetailContact">Contact name</label><input type="text" id="caDetailContact" placeholder="e.g. Priya Shah" value="' + escapeHtml(details.contactName || '') + '"></div>' +
+        '<div class="sp-detail-card" style="margin:12px 0"><h4>Cohort details</h4><p class="description" style="margin-top:-6px">Internal organization only. These fields prepare the cohort for a future organization console. They do not grant client access.</p>' +
+          '<div class="mb-form-grid ca-cohort-details-grid"><div class="mb-form-field"><label for="caDetailOrganizationId">Organization</label><select id="caDetailOrganizationId">' + caOrganizationOptionsHtml(details.organizationId) + '</select><span class="student-progress-status">Manage organizations in Member Management → Organization access.</span></div>' +
+          '<div class="mb-form-field"><label for="caDetailStatus">Cohort status</label><select id="caDetailStatus">' + Object.keys(CA_COHORT_STATUS_LABEL).map((status) => '<option value="' + status + '"' + (caCohortLifecycleStatus(cohortName) === status ? ' selected' : '') + '>' + CA_COHORT_STATUS_LABEL[status] + '</option>').join('') + '</select></div>' +
+          '<div class="mb-form-field"><label for="caDetailEndDate">Cohort end date</label><input type="date" id="caDetailEndDate" value="' + escapeHtml(details.endDate || '') + '"></div>' +
+          '<div class="mb-form-field"><label for="caDetailContact">Contact name</label><input type="text" id="caDetailContact" placeholder="e.g. Priya Shah" value="' + escapeHtml(details.contactName || '') + '"></div>' +
           '<div class="mb-form-field"><label for="caDetailContactEmail">Contact email</label><input type="email" id="caDetailContactEmail" placeholder="name@company.com" value="' + escapeHtml(details.contactEmail || '') + '"></div>' +
           '<div class="mb-form-field"><label for="caDetailStartDate">Cohort start date</label><input type="date" id="caDetailStartDate" value="' + escapeHtml(details.startDate || '') + '"></div></div>' +
           '<div class="mb-form-field" style="margin-top:12px"><label for="caDetailNotes">Notes</label><textarea id="caDetailNotes" rows="3" placeholder="Anything worth remembering about this cohort: which firm, contract terms, how the rollout is going.">' + escapeHtml(details.notes || '') + '</textarea></div>' +
@@ -9305,14 +9516,20 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         if (status) status.textContent = 'Saving...';
         try {
           const payload = {
+            organizationId: document.getElementById('caDetailOrganizationId').value.trim(),
+            status: document.getElementById('caDetailStatus').value,
             contactName: document.getElementById('caDetailContact').value.trim(),
             contactEmail: document.getElementById('caDetailContactEmail').value.trim(),
             startDate: document.getElementById('caDetailStartDate').value,
+            endDate: document.getElementById('caDetailEndDate').value,
             notes: document.getElementById('caDetailNotes').value.trim()
           };
           await fb.setCohortDetails(cohortName, payload);
           caCohortDetailsCache[cohortName] = payload;
+          caCohortDetailsLoaded = true;
           if (status) status.textContent = 'Saved.';
+          caRefreshCohortSelectors();
+          renderCohortAnalytics();
           renderCohortDetail(cohortName);
         } catch (error) {
           if (status) status.textContent = 'Save failed: ' + ((error && error.message) || 'Unknown error');
@@ -9334,6 +9551,9 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         try {
           await fb.renameCohort(cohortName, newName, members.map((m) => m.email || m.id).filter(Boolean));
           members.forEach((m) => { m.cohort = newName; });
+          caCohortDetailsCache[newName] = caCohortDetailsCache[cohortName] || {};
+          delete caCohortDetailsCache[cohortName];
+          caRefreshCohortSelectors();
           renderCohortAnalytics();
           renderCohortDetail(newName);
           showToast('Cohort renamed to "' + newName + '".');
@@ -10039,9 +10259,11 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
           member.workspaceProgress.lessons = member.workspaceProgress.lessons || {};
           member.workspaceProgress.lessons[item.activityId] = Object.assign({}, member.workspaceProgress.lessons[item.activityId] || {}, { watched:true, source:'vimeo-80-percent' });
         });
+        caCohortDetailsCache = cohortDetailsResult.status === 'fulfilled' ? (cohortDetailsResult.value || {}) : {};
+        caCohortDetailsLoaded = cohortDetailsResult.status === 'fulfilled';
+        await caEnsureOrganizations(forceRefresh);
         spPopulateCohortFilter();
         lbMaxScoreCache = null;
-        caCohortDetailsCache = cohortDetailsResult.status === 'fulfilled' ? (cohortDetailsResult.value || {}) : {};
         const controls = document.getElementById('spControls');
         if (controls) controls.hidden = false;
         spApplyView();
@@ -10110,7 +10332,11 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         else loadStudentProgress();
       }
       if (activeTab === 'rewards') loadRewardSettings();
-      if (activeTab === 'member-management' && !mbMembersCache.length) mbLoadMembers();
+      if (activeTab === 'member-management') {
+        const memberTarget = (currentActive || visibleNavItems[0])?.dataset.target;
+        if (memberTarget === 'section-organization-access') oaLoad(false);
+        else if (!mbMembersCache.length) mbLoadMembers();
+      }
       if (activeTab === 'engagement') loadEngagementSettings();
       if (activeTab === 'content-manager') {
         loadAdminVisibilitySettings();
@@ -10286,6 +10512,361 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       button.setAttribute('aria-expanded', 'false');
     });
 
+    let oaData = null;
+    let oaDataLoadedAt = 0;
+    const OA_DATA_CACHE_MS = 45000;
+    let oaEditingUid = '';
+    let oaOrgEditingId = '';
+    let oaLoading = false;
+
+    async function oaEnsureData(forceRefresh) {
+      if (!forceRefresh && oaData && (Date.now() - oaDataLoadedAt) < OA_DATA_CACHE_MS) return oaData;
+      await mbRequireFirebaseAdmin();
+      const fb = window.utlFirebaseAuth || {};
+      if (!fb.getOrganizationAccessAdmin) throw new Error('Organization access service is not available.');
+      oaData = await fb.getOrganizationAccessAdmin();
+      oaDataLoadedAt = Date.now();
+      return oaData;
+    }
+
+    function oaAuditActionLabel(action) {
+      return ({
+        granted: 'Granted', reactivated: 'Reactivated', suspended: 'Suspended', updated: 'Updated',
+        organization_created: 'Organization created', organization_renamed: 'Organization renamed',
+        organization_archived: 'Organization archived', organization_reactivated: 'Organization reactivated'
+      })[action] || action || 'Updated';
+    }
+
+    function oaAuditScopeText(item) {
+      if (item.action === 'organization_renamed') return escapeHtml(item.previousName || '—') + ' → ' + escapeHtml(item.nextName || '—');
+      if (String(item.action || '').startsWith('organization_')) return '';
+      return escapeHtml(item.roleLabel || '') + ((item.cohortIds || []).length ? '<small>' + escapeHtml(item.cohortIds.join(', ')) + '</small>' : '');
+    }
+
+    function oaRoleUsesEveryCohort(role) {
+      return role === 'organization_owner' || role === 'program_manager';
+    }
+
+    const OA_ROLE_HINTS = {
+      organization_owner: 'Accountable client lead. Sees every current and future cohort in this organization, plus its reports.',
+      program_manager: 'Runs the day-to-day program. Sees every current and future cohort in this organization, plus its reports.',
+      cohort_facilitator: 'Supports specific cohorts only — choose them below. No access to cohorts you don’t assign.',
+      report_viewer: 'Read-only reports and aggregate analytics for the cohorts you assign below. No roster-level detail.'
+    };
+
+    function oaRenderRoleHint() {
+      const hint = document.getElementById('oaRoleHint');
+      const role = String(document.getElementById('oaRole')?.value || '');
+      if (hint) hint.textContent = OA_ROLE_HINTS[role] || '';
+    }
+
+    function oaOrganization() {
+      const id = String(document.getElementById('oaOrganization')?.value || '');
+      return (oaData?.organizations || []).find((item) => item.id === id) || null;
+    }
+
+    function oaSelectedCohorts() {
+      return Array.from(document.querySelectorAll('#oaCohorts input[type="checkbox"]:checked')).map((input) => input.value);
+    }
+
+    function oaDate(value) {
+      if (!value) return 'Not recorded';
+      const date = new Date(value);
+      return Number.isNaN(date.getTime()) ? 'Not recorded' : date.toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' });
+    }
+
+    function oaRenderPreview() {
+      const wrap = document.getElementById('oaPreview');
+      if (!wrap) return;
+      const organization = oaOrganization();
+      if (!organization) {
+        wrap.innerHTML = '<strong>Access summary</strong><p>Choose an organization to preview the scope.</p>';
+        return;
+      }
+      const role = String(document.getElementById('oaRole')?.value || 'report_viewer');
+      const status = String(document.getElementById('oaAccessStatus')?.value || 'active');
+      const roleLabel = oaData?.roleLabels?.[role] || role;
+      const cohortIds = oaRoleUsesEveryCohort(role) ? organization.cohortIds : oaSelectedCohorts();
+      const cohortText = cohortIds.length ? cohortIds.join(', ') : 'No cohorts selected';
+      wrap.innerHTML = '<strong>Access summary</strong>' +
+        '<p><span class="oa-status-chip ' + (status === 'suspended' ? 'is-suspended' : '') + '">' + escapeHtml(status === 'suspended' ? 'Suspended' : 'Active') + '</span> ' +
+        escapeHtml(roleLabel) + ' for <strong>' + escapeHtml(organization.name) + '</strong>.</p>' +
+        '<p><strong>Cohorts:</strong> ' + escapeHtml(cohortText) + '</p>' +
+        '<div class="oa-preview-grid"><div><strong>Can see</strong><ul><li>Progress summaries</li><li>Learner names, enrollment, completion and Mastery Points (MP)</li><li>Available organization reports</li></ul></div>' +
+        '<div><strong>Cannot see</strong><ul><li>Exercise answers</li><li>Private learner goals</li><li>Account settings</li><li>UTL administration</li></ul></div></div>';
+    }
+
+    function oaRenderCohorts(selectedIds) {
+      oaRenderRoleHint();
+      const wrap = document.getElementById('oaCohorts');
+      if (!wrap) return;
+      const organization = oaOrganization();
+      if (!organization) {
+        wrap.innerHTML = '<span class="description">Choose an organization first.</span>';
+        oaRenderPreview();
+        return;
+      }
+      const role = String(document.getElementById('oaRole')?.value || 'program_manager');
+      const everyCohort = oaRoleUsesEveryCohort(role);
+      const chosen = new Set(Array.isArray(selectedIds) ? selectedIds : oaSelectedCohorts());
+      wrap.innerHTML = organization.cohortIds.map((cohortId) => {
+        const checked = everyCohort || chosen.has(cohortId);
+        return '<label><input type="checkbox" value="' + escapeHtml(cohortId) + '" ' + (checked ? 'checked ' : '') + (everyCohort ? 'disabled ' : '') + '><span>' + escapeHtml(cohortId) + '</span></label>';
+      }).join('') || '<span class="description">No cohorts are mapped to this organization.</span>';
+      if (everyCohort && organization.cohortIds.length) {
+        wrap.insertAdjacentHTML('beforeend', '<p class="description" style="grid-column:1/-1;margin:4px 0 0;">This role automatically covers every current and future cohort in the organization.</p>');
+      }
+      wrap.querySelectorAll('input').forEach((input) => input.addEventListener('change', oaRenderPreview));
+      oaRenderPreview();
+    }
+
+    function oaRenderOrganizations() {
+      const select = document.getElementById('oaOrganization');
+      if (!select) return;
+      const previous = select.value;
+      const organizations = (oaData?.organizations || []).filter((organization) => organization.status !== 'archived');
+      select.innerHTML = organizations.length
+        ? organizations.map((organization) => '<option value="' + escapeHtml(organization.id) + '">' + escapeHtml(organization.name) + '</option>').join('')
+        : '<option value="">No organizations yet — add one above</option>';
+      if (previous && organizations.some((item) => item.id === previous)) select.value = previous;
+      oaRenderCohorts();
+    }
+
+    function oaOrgResetForm() {
+      oaOrgEditingId = '';
+      const name = document.getElementById('oaOrgName');
+      const slug = document.getElementById('oaOrgSlug');
+      if (name) name.value = '';
+      if (slug) { slug.value = ''; slug.readOnly = false; }
+      document.getElementById('oaOrgFormHeading').textContent = 'Add an organization';
+      document.getElementById('oaOrgSave').textContent = 'Add organization';
+      document.getElementById('oaOrgCancel').hidden = true;
+      document.getElementById('oaOrgStatus').textContent = '';
+    }
+
+    function oaOrgEdit(id) {
+      const organization = (oaData?.organizations || []).find((item) => item.id === id);
+      if (!organization) return;
+      oaOrgEditingId = id;
+      document.getElementById('oaOrgName').value = organization.name;
+      const slug = document.getElementById('oaOrgSlug');
+      slug.value = organization.id;
+      slug.readOnly = true;
+      document.getElementById('oaOrgFormHeading').textContent = 'Rename organization';
+      document.getElementById('oaOrgSave').textContent = 'Save name';
+      document.getElementById('oaOrgCancel').hidden = false;
+      document.getElementById('oaOrgPanel')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function oaRenderOrgTable() {
+      const wrap = document.getElementById('oaOrgTable');
+      if (!wrap) return;
+      const organizations = oaData?.organizations || [];
+      if (!organizations.length) {
+        wrap.innerHTML = '<p class="oa-empty">No organizations yet. Add one above.</p>';
+        return;
+      }
+      wrap.innerHTML = '<div class="sp-table-wrap"><table class="sp-table"><thead><tr><th>Organization</th><th>Status</th><th>Cohorts</th><th>Actions</th></tr></thead><tbody>' + organizations.map((organization) => {
+        const isArchived = organization.status === 'archived';
+        return '<tr><td><strong>' + escapeHtml(organization.name) + '</strong><small>' + escapeHtml(organization.id) + '</small></td>' +
+          '<td><span class="oa-status-chip ' + (isArchived ? 'is-suspended' : '') + '">' + escapeHtml(isArchived ? 'Archived' : 'Active') + '</span></td>' +
+          '<td>' + (organization.cohortIds?.length ? escapeHtml(organization.cohortIds.join(', ')) : '<span class="description">None assigned yet</span>') + '</td>' +
+          '<td><div class="sp-row-actions"><button type="button" class="small-button secondary-button" data-oa-org-edit="' + escapeHtml(organization.id) + '">Edit</button><button type="button" class="small-button secondary-button" data-oa-org-toggle="' + escapeHtml(organization.id) + '">' + (isArchived ? 'Reactivate' : 'Archive') + '</button></div></td></tr>';
+      }).join('') + '</tbody></table></div>';
+    }
+
+    async function oaSaveOrganization(payloadOverride) {
+      const payload = payloadOverride || {
+        action: oaOrgEditingId ? 'rename' : 'create',
+        organizationId: oaOrgEditingId,
+        name: String(document.getElementById('oaOrgName')?.value || '').trim(),
+        organizationIdInput: String(document.getElementById('oaOrgSlug')?.value || '').trim()
+      };
+      if (!payloadOverride && !payload.name) { showToast('Enter an organization name.', 'error'); return; }
+      if (!payloadOverride && !oaOrgEditingId) payload.organizationId = payload.organizationIdInput;
+      const button = document.getElementById('oaOrgSave');
+      const status = document.getElementById('oaOrgStatus');
+      if (button) { button.disabled = true; button.textContent = 'Saving…'; }
+      if (status) status.textContent = '';
+      try {
+        await mbRequireFirebaseAdmin();
+        const fb = window.utlFirebaseAuth || {};
+        if (!fb.saveOrganizationDefinition) throw new Error('Organization access service is not available.');
+        const result = await fb.saveOrganizationDefinition(payload.action === 'create'
+          ? { action: 'create', name: payload.name, organizationId: payload.organizationIdInput }
+          : { action: payload.action, organizationId: payload.organizationId, name: payload.name });
+        oaData = null;
+        await oaLoad(true);
+        oaOrgResetForm();
+        showToast('Organization ' + (result?.action || 'updated').replace('organization_', '') + '.');
+      } catch (error) {
+        const message = (error && error.message) || 'Unknown error';
+        if (status) status.textContent = message;
+        showToast('Could not save organization: ' + message, 'error');
+      } finally {
+        if (button) { button.disabled = false; button.textContent = oaOrgEditingId ? 'Save name' : 'Add organization'; }
+      }
+    }
+
+    function oaRenderTable() {
+      const wrap = document.getElementById('oaTable');
+      if (!wrap) return;
+      const memberships = oaData?.memberships || [];
+      if (!memberships.length) {
+        wrap.innerHTML = '<p class="oa-empty">No organization representatives have access yet.</p>';
+        return;
+      }
+      const organizationById = Object.fromEntries((oaData.organizations || []).map((item) => [item.id, item]));
+      wrap.innerHTML = '<div class="sp-table-wrap"><table class="sp-table"><thead><tr><th>Representative</th><th>Organization</th><th>Role and scope</th><th>Status</th><th>Last changed</th><th>Actions</th></tr></thead><tbody>' + memberships.map((member) => {
+        const organization = organizationById[member.organizationId];
+        const roleLabel = oaData.roleLabels?.[member.role] || member.role;
+        const cohorts = member.preview?.cohortIds || member.assignedCohortIds || [];
+        return '<tr><td><strong>' + escapeHtml(member.displayName || member.email) + '</strong><small>' + escapeHtml(member.email) + '</small></td>' +
+          '<td>' + escapeHtml(organization?.name || member.organizationId) + '</td>' +
+          '<td><strong>' + escapeHtml(roleLabel) + '</strong><small>' + escapeHtml(cohorts.join(', ') || 'No cohort scope') + '</small></td>' +
+          '<td><span class="oa-status-chip ' + (member.status === 'suspended' ? 'is-suspended' : '') + '">' + escapeHtml(member.status === 'suspended' ? 'Suspended' : 'Active') + '</span></td>' +
+          '<td>' + escapeHtml(oaDate(member.updatedAt)) + '<small>' + escapeHtml(member.updatedByEmail || '') + '</small></td>' +
+          '<td><div class="sp-row-actions"><button type="button" class="small-button secondary-button" data-oa-edit="' + escapeHtml(member.uid) + '">Edit</button><button type="button" class="small-button secondary-button" data-oa-toggle="' + escapeHtml(member.uid) + '">' + (member.status === 'suspended' ? 'Reactivate' : 'Suspend') + '</button></div></td></tr>';
+      }).join('') + '</tbody></table></div>';
+    }
+
+    function oaRenderAudit() {
+      const wrap = document.getElementById('oaAudit');
+      if (!wrap) return;
+      const audit = oaData?.audit || [];
+      if (!audit.length) {
+        wrap.innerHTML = '<p class="oa-empty">No access changes have been recorded.</p>';
+        return;
+      }
+      wrap.innerHTML = '<div class="sp-table-wrap"><table class="sp-table"><thead><tr><th>When</th><th>Representative</th><th>Organization</th><th>Change</th><th>Role and scope</th><th>Changed by</th></tr></thead><tbody>' + audit.map((item) => '<tr><td>' + escapeHtml(oaDate(item.occurredAt)) + '</td><td>' + escapeHtml(item.targetEmail || '—') + '</td><td>' + escapeHtml(item.organizationName || item.organizationId) + '</td><td>' + escapeHtml(oaAuditActionLabel(item.action)) + '</td><td>' + oaAuditScopeText(item) + '</td><td>' + escapeHtml(item.actorEmail || 'Unknown') + '</td></tr>').join('') + '</tbody></table></div>';
+    }
+
+    function oaClearEmailCheckStatus() {
+      const status = document.getElementById('oaEmailCheckStatus');
+      if (status) { status.textContent = ''; status.classList.remove('mb-err'); }
+    }
+
+    async function oaCheckRepEmail() {
+      const input = document.getElementById('oaEmail');
+      const status = document.getElementById('oaEmailCheckStatus');
+      const button = document.getElementById('oaEmailCheck');
+      const email = String(input?.value || '').trim().toLowerCase();
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        if (status) { status.textContent = 'Enter a valid email first.'; status.classList.add('mb-err'); }
+        return;
+      }
+      if (button) { button.disabled = true; button.textContent = 'Checking…'; }
+      if (status) { status.textContent = ''; status.classList.remove('mb-err'); }
+      try {
+        await mbRequireFirebaseAdmin();
+        const fb = window.utlFirebaseAuth || {};
+        if (!fb.checkOrganizationRepEmail) throw new Error('Email check is not available.');
+        const result = await fb.checkOrganizationRepEmail(email);
+        if (status) {
+          if (result?.exists) {
+            status.textContent = '✓ Has signed in to UTL' + (result.displayName ? ' as ' + result.displayName : '') + '.';
+            status.classList.remove('mb-err');
+          } else {
+            status.textContent = 'Hasn’t signed in to UTL yet. Ask them to sign in once, then check again.';
+            status.classList.add('mb-err');
+          }
+        }
+      } catch (error) {
+        if (status) { status.textContent = (error && error.message) || 'Could not check this email.'; status.classList.add('mb-err'); }
+      } finally {
+        if (button) { button.disabled = false; button.textContent = 'Check'; }
+      }
+    }
+
+    function oaResetForm() {
+      oaEditingUid = '';
+      const email = document.getElementById('oaEmail');
+      if (email) { email.value = ''; email.readOnly = false; }
+      document.getElementById('oaRole').value = 'program_manager';
+      document.getElementById('oaAccessStatus').value = 'active';
+      document.getElementById('oaFormHeading').textContent = 'Add a representative';
+      document.getElementById('oaSave').textContent = 'Grant access';
+      document.getElementById('oaCancel').hidden = true;
+      document.getElementById('oaStatus').textContent = '';
+      oaClearEmailCheckStatus();
+      oaRenderCohorts();
+    }
+
+    function oaEdit(uid) {
+      const member = (oaData?.memberships || []).find((item) => item.uid === uid);
+      if (!member) return;
+      oaEditingUid = uid;
+      document.getElementById('oaOrganization').value = member.organizationId;
+      const email = document.getElementById('oaEmail');
+      email.value = member.email;
+      email.readOnly = true;
+      document.getElementById('oaRole').value = member.role;
+      document.getElementById('oaAccessStatus').value = member.status;
+      document.getElementById('oaFormHeading').textContent = 'Edit representative access';
+      document.getElementById('oaSave').textContent = 'Save access';
+      document.getElementById('oaCancel').hidden = false;
+      oaClearEmailCheckStatus();
+      oaRenderCohorts(member.assignedCohortIds || []);
+      document.getElementById('section-organization-access')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    async function oaLoad(force) {
+      if (oaLoading || (oaData && !force)) return;
+      const wrap = document.getElementById('oaTable');
+      const orgWrap = document.getElementById('oaOrgTable');
+      const status = document.getElementById('oaStatus');
+      oaLoading = true;
+      if (wrap) wrap.innerHTML = '<p class="oa-empty">Loading organization access…</p>';
+      if (orgWrap) orgWrap.innerHTML = '<p class="oa-empty">Loading organizations…</p>';
+      if (status) status.textContent = '';
+      try {
+        await oaEnsureData(force);
+        oaRenderOrganizations();
+        oaRenderOrgTable();
+        oaRenderTable();
+        oaRenderAudit();
+      } catch (error) {
+        const message = (error && error.message) || 'Unknown error';
+        if (wrap) wrap.innerHTML = '<p class="oa-empty mb-err">Could not load organization access: ' + escapeHtml(message) + '</p>';
+        if (orgWrap) orgWrap.innerHTML = '<p class="oa-empty mb-err">Could not load organizations: ' + escapeHtml(message) + '</p>';
+        const select = document.getElementById('oaOrganization');
+        if (select) select.innerHTML = '<option value="">Could not load organizations</option>';
+        oaRenderCohorts();
+      } finally {
+        oaLoading = false;
+      }
+    }
+
+    async function oaSaveAccess(payloadOverride) {
+      const organization = oaOrganization();
+      const email = String(document.getElementById('oaEmail')?.value || '').trim().toLowerCase();
+      const role = String(document.getElementById('oaRole')?.value || '');
+      const statusValue = String(document.getElementById('oaAccessStatus')?.value || 'active');
+      const payload = payloadOverride || { organizationId: organization?.id || '', email, role, status: statusValue, assignedCohortIds: oaSelectedCohorts() };
+      if (!payload.organizationId || !payload.email) { showToast('Choose an organization and enter the representative email.', 'error'); return; }
+      if (!oaRoleUsesEveryCohort(payload.role) && !(payload.assignedCohortIds || []).length) { showToast('Choose at least one cohort for this role.', 'error'); return; }
+      const button = document.getElementById('oaSave');
+      const status = document.getElementById('oaStatus');
+      if (button) { button.disabled = true; button.textContent = 'Saving…'; }
+      if (status) status.textContent = '';
+      try {
+        await mbRequireFirebaseAdmin();
+        const fb = window.utlFirebaseAuth || {};
+        if (!fb.saveOrganizationAccessMember) throw new Error('Organization access service is not available.');
+        const result = await fb.saveOrganizationAccessMember(payload);
+        oaData = null;
+        await oaLoad(true);
+        oaResetForm();
+        showToast('Organization access ' + (result?.action || 'updated') + '.');
+      } catch (error) {
+        const message = (error && error.message) || 'Unknown error';
+        if (status) status.textContent = message;
+        showToast('Could not save organization access: ' + message, 'error');
+      } finally {
+        if (button) { button.disabled = false; button.textContent = oaEditingUid ? 'Save access' : 'Grant access'; }
+      }
+    }
+
     renderToggles();
     renderVisibilityChecklist();
     renderPublicHomepageChecklist();
@@ -10325,6 +10906,59 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
     document.getElementById('hideSyncCheck')?.addEventListener('click', hideSyncCheckResults);
     document.querySelector('[data-target="section-members"]')?.addEventListener('click', function () {
       if (!mbMembersCache.length) mbLoadMembers();
+    });
+    document.querySelector('[data-target="section-organization-access"]')?.addEventListener('click', function () {
+      oaLoad(false);
+    });
+    document.getElementById('oaOrganization')?.addEventListener('change', function () {
+      oaRenderCohorts();
+    });
+    document.getElementById('oaRole')?.addEventListener('change', function () {
+      oaRenderCohorts();
+    });
+    oaRenderRoleHint();
+    document.getElementById('oaEmailCheck')?.addEventListener('click', oaCheckRepEmail);
+    document.getElementById('oaEmail')?.addEventListener('input', oaClearEmailCheckStatus);
+    document.getElementById('oaAccessStatus')?.addEventListener('change', oaRenderPreview);
+    document.getElementById('oaSave')?.addEventListener('click', function () {
+      oaSaveAccess();
+    });
+    document.getElementById('oaCancel')?.addEventListener('click', oaResetForm);
+    document.getElementById('oaTable')?.addEventListener('click', function (event) {
+      const edit = event.target.closest('[data-oa-edit]');
+      if (edit) { oaEdit(edit.dataset.oaEdit); return; }
+      const toggle = event.target.closest('[data-oa-toggle]');
+      if (!toggle) return;
+      const member = (oaData?.memberships || []).find((item) => item.uid === toggle.dataset.oaToggle);
+      if (!member) return;
+      const nextStatus = member.status === 'suspended' ? 'active' : 'suspended';
+      oaSaveAccess({
+        organizationId: member.organizationId,
+        email: member.email,
+        role: member.role,
+        status: nextStatus,
+        assignedCohortIds: member.assignedCohortIds || []
+      });
+    });
+    document.getElementById('oaOrgName')?.addEventListener('input', function () {
+      const slug = document.getElementById('oaOrgSlug');
+      if (!slug || slug.readOnly) return;
+      slug.value = this.value.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+    });
+    document.getElementById('oaOrgSave')?.addEventListener('click', function () {
+      oaSaveOrganization();
+    });
+    document.getElementById('oaOrgCancel')?.addEventListener('click', oaOrgResetForm);
+    document.getElementById('oaOrgTable')?.addEventListener('click', function (event) {
+      const edit = event.target.closest('[data-oa-org-edit]');
+      if (edit) { oaOrgEdit(edit.dataset.oaOrgEdit); return; }
+      const toggle = event.target.closest('[data-oa-org-toggle]');
+      if (!toggle) return;
+      const organization = (oaData?.organizations || []).find((item) => item.id === toggle.dataset.oaOrgToggle);
+      if (!organization) return;
+      const archiving = organization.status !== 'archived';
+      if (archiving && !window.confirm('Archive ' + organization.name + '? Its representatives will lose console access until it is reactivated.')) return;
+      oaSaveOrganization({ action: archiving ? 'archive' : 'reactivate', organizationId: organization.id });
     });
     document.getElementById('mbRefreshBtn')?.addEventListener('click', mbLoadMembers);
     document.getElementById('mbDownloadCsvBtn')?.addEventListener('click', mbDownloadCsv);
@@ -10969,7 +11603,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         var c = d.data().cohort;
         if (c && !cohorts.includes(c)) cohorts.push(c);
       });
-      cohorts.sort();
+      cohorts.sort(caCompareCohortNames);
       var counts = { all: 0, active: 0, inactive: 0, expired: 0, expiring: 0 };
       mbMembersCache.forEach(function (d) {
         var data = d.data();
@@ -10989,10 +11623,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
           '<input class="mb-search" type="search" id="mbSearchInput" placeholder="Search name, email, or credential ID…" value="' + escapeHtml(mbFilterState.search) + '" autocomplete="off">' +
           (cohorts.length > 1
             ? '<select class="mb-cohort-select" id="mbCohortFilter">' +
-                '<option value="all">All cohorts</option>' +
-                cohorts.map(function (c) {
-                  return '<option value="' + escapeHtml(c) + '"' + (mbFilterState.cohort === c ? ' selected' : '') + '>' + escapeHtml(c) + '</option>';
-                }).join('') +
+                caCohortOptionsHtml(cohorts, mbFilterState.cohort, { allValue: 'all', allLabel: 'All cohorts' }) +
               '</select>'
             : '') +
         '</div>' +
@@ -11282,6 +11913,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
 
       try {
         await mbRequireFirebaseAdmin();
+        await caEnsureCohortDetails(fb, false);
         var snap = await fb.getDocs(fb.collection(fb.db, 'authorized_members'));
         var docs = [];
         snap.forEach(function (d) { docs.push(d); });

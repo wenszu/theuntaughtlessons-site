@@ -336,6 +336,22 @@ service cloud.firestore {
           (request.resource.data.signInProviders is list && request.resource.data.signInProviders.size() <= 5));
     }
 
+    // Organization access is separate from UTL platform administration.
+    // Learner progress remains server-only for the organization console.
+    match /organizations/{organizationId} {
+      allow read: if isAdmin() || (
+        signedIn() &&
+        exists(/databases/$(database)/documents/organizations/$(organizationId)/members/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/organizations/$(organizationId)/members/$(request.auth.uid)).data.status == 'active'
+      );
+      allow write: if isAdmin();
+
+      match /members/{userId} {
+        allow read: if isAdmin() || (signedIn() && request.auth.uid == userId);
+        allow write: if isAdmin();
+      }
+    }
+
     // Public credentials intentionally contain only verification-safe fields.
     // Issuance records and all writes are handled by trusted server functions.
     match /public_credentials/{credentialId} {

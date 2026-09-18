@@ -280,3 +280,32 @@ Decisions are made in Claude (claude.ai). JSON updates are handled in Codex. Doc
 
 - `i-have-bad-news` and `lets-switch-hats` share an opt-out voice-practice dialog that shows how to open the CustomGPT, find the highlighted blue ChatGPT voice control, allow microphone access, and practice aloud. Text remains an available fallback, and a small help link reopens the guide.
 - The external CustomGPT destination, completion keys, and MP award logic were not changed.
+
+### 2026-09-17 — Organization console Phase 1 foundation
+
+- Cohort Analytics now stores optional organization name/ID, lifecycle status, and end date inside the existing admin-only `settings/cohorts` record. Existing cohorts remain compatible and default to Active.
+- Active cohorts appear first. Archived cohorts are hidden from the working overview unless `Show archived` is selected; archiving does not delete learner data.
+- Organization roles are documented separately from UTL platform roles. No organization access, Firestore rule, or current role behavior changed in this pass. See `docs/ORGANIZATION_CONSOLE_FOUNDATION.md`.
+
+### 2026-09-17 (cont.) — Read only organization console
+
+- Added a separate, read only organization console at `/member-login/organization.html`. It uses a verified callable and returns only organization-scoped aggregate progress and a sanitized learner roster.
+- Current cohort mappings are `TSA-03-ALI-01` → AyalaLand (`ali`) and `TSA-01-ADMU-01` / `TSA-02-ADMU-02` → Ateneo de Manila University (`admu`). Existing cohort records are not migrated; Admin displays these values as inferred defaults until explicitly saved.
+- `beta-user`, `No cohort`, blank cohorts, and other unassigned learners remain individual enrollments and are excluded from organization consoles.
+- Client access requires an explicit active `organizations/{organizationId}/members/{uid}` membership. Organization roles do not grant UTL Admin Console access, and client users cannot read raw learner collections.
+
+### Organization access administration
+
+The UTL admin console has an Organization access section under Members & Access. Only an existing UTL owner or admin can grant, edit, suspend, or reactivate organization representative access. A representative must have signed in once before a grant can be saved. Grants are scoped to an organization and cohorts, keep UTL platform roles separate from organization roles, and write an access audit record. The preview explicitly excludes exercise answers, private learner goals, account settings, and UTL administration.
+
+Approved representatives now see a conditional Organization Console entry in the workspace profile menu. The lightweight access check returns only their organization name, organization role, and permitted cohort count; learner data is loaded only after they open the console. Ordinary learners and individual enrollments do not see the entry.
+
+### 2026-09-17 (cont. 2) — Organization access entry and Claude handoff
+
+- Added `getMyOrganizationAccess`, a verified callable that returns only the organization name, organization role, and permitted cohort count required for workspace navigation.
+- The workspace profile menu now exposes Organization Console only to active, explicitly granted organization memberships with at least one permitted cohort. It fails closed for ordinary learners and does not preload learner analytics.
+- Organization access administration, audit records, the read only console, Firestore isolation rules, and current ALI/ADMU mappings are implemented locally. Nothing from this organization-console pass has been pushed or deployed yet.
+- Verification passed: JavaScript syntax checks, `git diff --check`, all 70 automated tests, and the Firebase Auth/Firestore Emulator behavior test covering same-organization access and cross-organization, signed-out, and client-write denials. A final local HTTP smoke run after the last menu edit remains to be repeated because the environment could not restart the local server.
+- Safe rollout order: deploy reviewed Firestore rules, deploy the four organization callable exports, then push/deploy the static site. Validate with a UTL admin, an approved organization representative, and an ordinary learner.
+- Next recommended build: organization-scoped roster drafts with UTL approval. The first slice must stop at draft/submission/review and must not create accounts, send invitations, or write member access automatically.
+- Full implementation and continuation notes: `docs/ORGANIZATION_CONSOLE_FOUNDATION.md`.

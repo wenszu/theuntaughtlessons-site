@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Organization console | The Untaught Lessons</title>
+  <link rel="icon" href="../assets/program-logo-tsa-icon.png">
+  <style>
+    :root { --navy:#003b70; --navy-dark:#003463; --orange:#f5a313; --beige:#f5efe3; --white:#fff; --ink:#333; --steel:#456d98; --line:#d9cdbd; --green:#2d7e54; --soft:#fbfaf7; }
+    * { box-sizing:border-box; }
+    body { margin:0; color:var(--ink); background:var(--beige); font-family:Arial, Helvetica, sans-serif; }
+    a { color:inherit; }
+    .topbar { min-height:84px; padding:14px clamp(18px,4vw,64px); background:var(--navy); color:white; display:flex; align-items:center; justify-content:space-between; gap:24px; }
+    .brand { display:flex; align-items:center; gap:24px; min-width:0; }
+    .brand img { width:150px; height:auto; }
+    .brand-copy { padding-left:24px; border-left:1px solid rgba(255,255,255,.35); }
+    .brand-copy small { color:var(--orange); font-weight:700; }
+    .brand-copy strong { display:block; margin-top:3px; font-family:Georgia,serif; font-size:26px; }
+    .back { text-decoration:none; font-weight:700; white-space:nowrap; }
+    main { width:min(1240px,calc(100% - 32px)); margin:0 auto; padding:48px 0 80px; }
+    .eyebrow { color:#c67b00; font-weight:700; font-size:13px; }
+    h1,h2 { color:var(--navy); font-family:Georgia,serif; margin:8px 0 12px; }
+    h1 { font-size:clamp(42px,6vw,70px); line-height:1; }
+    h2 { font-size:28px; }
+    .intro { color:var(--steel); font-size:18px; line-height:1.55; max-width:760px; }
+    .toolbar { margin:28px 0 22px; display:flex; align-items:end; justify-content:space-between; gap:16px; flex-wrap:wrap; }
+    label { display:grid; gap:7px; color:var(--navy); font-weight:700; }
+    select { min-width:min(360px,calc(100vw - 32px)); padding:12px 42px 12px 14px; border:1px solid #afc4d8; border-radius:8px; background:white; color:var(--navy); font:inherit; font-weight:700; }
+    .role { color:var(--steel); font-size:14px; }
+    .status { min-height:70px; padding:22px; border:1px solid var(--line); border-radius:12px; background:white; color:var(--steel); }
+    .status.error { color:#a33; border-color:#ddb8b8; }
+    .metrics { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:14px; margin:22px 0; }
+    .metric,.card { background:white; border:1px solid var(--line); border-radius:12px; }
+    .metric { padding:20px; }
+    .metric span { display:block; color:#666; font-size:13px; font-weight:700; }
+    .metric strong { display:block; color:var(--navy); font:700 30px Georgia,serif; margin-top:10px; }
+    .grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px; }
+    .card { padding:22px; }
+    .cohort-head { display:flex; justify-content:space-between; gap:12px; align-items:start; }
+    .pill { padding:5px 9px; border-radius:999px; background:#e7f3ec; color:var(--green); font-size:12px; font-weight:700; text-transform:capitalize; }
+    .cohort-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:18px; }
+    .cohort-stats div { padding:12px; border-radius:8px; background:var(--soft); }
+    .cohort-stats span { display:block; font-size:12px; color:#666; }
+    .cohort-stats strong { display:block; color:var(--navy); margin-top:5px; }
+    .table-card { margin-top:22px; overflow:hidden; padding:0; }
+    .table-heading { padding:20px 22px 8px; }
+    .table-wrap { overflow:auto; }
+    table { width:100%; border-collapse:collapse; min-width:780px; }
+    th { background:var(--navy); color:white; text-align:left; padding:12px 16px; font-size:13px; }
+    td { padding:14px 16px; border-bottom:1px solid var(--line); vertical-align:top; }
+    tr:last-child td { border-bottom:0; }
+    .person strong { display:block; color:var(--navy); }
+    .person span { display:block; margin-top:4px; font-size:12px; color:#666; }
+    .progress { width:150px; }
+    .progress-track { height:7px; border-radius:999px; background:#e7e3dc; overflow:hidden; margin-top:7px; }
+    .progress-track i { display:block; height:100%; background:var(--green); }
+    .empty { color:#666; padding:10px 0 18px; }
+    [hidden] { display:none !important; }
+    @media (max-width:800px) {
+      .topbar { align-items:flex-start; }
+      .brand img { width:105px; }
+      .brand-copy { padding-left:14px; }
+      .brand-copy strong { font-size:20px; }
+      main { padding-top:34px; }
+      .metrics { grid-template-columns:repeat(2,1fr); }
+      .grid { grid-template-columns:1fr; }
+    }
+    @media (max-width:520px) {
+      .topbar { display:block; }
+      .back { display:inline-block; margin-top:14px; }
+      .metrics { grid-template-columns:1fr; }
+      .toolbar { display:block; }
+      .role { margin-top:10px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><img src="../assets/utl-logo-nav-white.png" alt="The Untaught Lessons"><div class="brand-copy"><small>Organization access</small><strong>Organization console</strong></div></div>
+    <a class="back" href="./home.html">← Learning Journey</a>
+  </header>
+  <main>
+    <span class="eyebrow">Cohort overview</span>
+    <h1>Your learners</h1>
+    <p class="intro">Review participation and completion for the cohorts you support. Exercise answers, private goals and account settings are not shown here.</p>
+    <div class="toolbar" id="orgToolbar" hidden>
+      <label for="organizationSelect">Organization<select id="organizationSelect"></select></label>
+      <div class="role" id="organizationRole"></div>
+    </div>
+    <div class="status" id="consoleStatus" role="status">Checking your organization access…</div>
+    <section id="consoleContent" hidden>
+      <div class="metrics" id="organizationMetrics"></div>
+      <div class="grid" id="cohortCards"></div>
+      <article class="card table-card">
+        <div class="table-heading"><span class="eyebrow">Learner progress</span><h2>People in these cohorts</h2></div>
+        <div class="table-wrap"><table><thead><tr><th>Learner</th><th>Cohort</th><th>Progress</th><th>Mastery Points (MP)</th><th>Status</th></tr></thead><tbody id="learnerRows"></tbody></table></div>
+      </article>
+    </section>
+  </main>
+  <script type="module">
+    import { getOrganizationConsole, getSignedInUser } from "../assets/firebase.js";
+    const status = document.getElementById("consoleStatus");
+    const content = document.getElementById("consoleContent");
+    const toolbar = document.getElementById("orgToolbar");
+    const select = document.getElementById("organizationSelect");
+    const role = document.getElementById("organizationRole");
+    const metrics = document.getElementById("organizationMetrics");
+    const cohorts = document.getElementById("cohortCards");
+    const learners = document.getElementById("learnerRows");
+    const escapeHtml = (value) => String(value == null ? "" : value).replace(/[&<>'"]/g, (character) => ({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[character]));
+    function metric(label,value){ return `<div class="metric"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong></div>`; }
+    function render(data) {
+      const organizations = data.organizations || [];
+      toolbar.hidden = organizations.length === 0;
+      select.innerHTML = organizations.map((item) => `<option value="${escapeHtml(item.id)}"${data.selectedOrganization && data.selectedOrganization.id === item.id ? " selected" : ""}>${escapeHtml(item.name)}</option>`).join("");
+      if (!data.selectedOrganization) {
+        status.hidden = false; content.hidden = true;
+        status.textContent = organizations.length ? "Choose an organization to review its cohorts." : "Your account does not have organization-console access yet.";
+        return;
+      }
+      const aggregate = data.aggregate || {};
+      role.textContent = data.selectedOrganization.roleLabel || "";
+      metrics.innerHTML = metric("Enrolled learners",aggregate.enrolledLearners || 0) + metric("Learners who started",aggregate.learnersStarted || 0) + metric("Program completers",aggregate.programCompleters || 0) + metric("Average completion",`${aggregate.averageCompletionPercent || 0}%`);
+      cohorts.innerHTML = (data.cohorts || []).map((item) => `<article class="card"><div class="cohort-head"><div><span class="eyebrow">Cohort</span><h2>${escapeHtml(item.id)}</h2></div><span class="pill">${escapeHtml(item.status)}</span></div><div class="cohort-stats"><div><span>Learners</span><strong>${item.aggregate.enrolledLearners}</strong></div><div><span>Started</span><strong>${item.aggregate.learnersStarted}</strong></div><div><span>Average</span><strong>${item.aggregate.averageCompletionPercent}%</strong></div></div></article>`).join("") || `<p class="empty">No cohorts are assigned to this organization account.</p>`;
+      learners.innerHTML = (data.members || []).map((item) => `<tr><td class="person"><strong>${escapeHtml(item.name)}</strong><span>${escapeHtml(item.email)}</span></td><td>${escapeHtml(item.cohortId)}</td><td class="progress"><strong>${item.progress.percent}%</strong><div class="progress-track"><i style="width:${Math.max(0,Math.min(100,item.progress.percent))}%"></i></div><small>${item.progress.completed} of ${item.progress.total}</small></td><td>${item.rewards.mp} MP<br><small>${escapeHtml(item.rewards.level)}</small></td><td>${item.progress.percent === 100 ? "Completed" : item.progress.completed > 0 ? "In progress" : "Not started"}</td></tr>`).join("") || `<tr><td colspan="5" class="empty">No learner records were found for these cohorts.</td></tr>`;
+      status.hidden = true; content.hidden = false;
+    }
+    async function load(organizationId = "") {
+      status.hidden = false; status.classList.remove("error"); status.textContent = "Loading organization progress…"; content.hidden = true;
+      try { render(await getOrganizationConsole(organizationId)); }
+      catch (error) { status.classList.add("error"); status.textContent = error && error.message ? error.message : "We could not load the organization console."; }
+    }
+    select.addEventListener("change", () => load(select.value));
+    const user = await getSignedInUser();
+    if (!user) { window.location.href = "./index.html?returnTo=" + encodeURIComponent("organization.html"); }
+    else {
+      const initial = await getOrganizationConsole("");
+      if (!initial.selectedOrganization && initial.organizations && initial.organizations.length) await load(initial.organizations[0].id);
+      else render(initial);
+    }
+  </script>
+</body>
+</html>
