@@ -934,9 +934,11 @@ For the board chair, explain why this person can weigh the perspectives and reco
           const img = document.createElement('img');
           img.src = user.photoURL;
           img.alt = displayName;
+          img.onerror = function () { this.remove(); tkAvatar.textContent = initials; };
           tkAvatar.textContent = '';
           tkAvatar.appendChild(img);
           const menuImg = img.cloneNode();
+          menuImg.onerror = function () { this.remove(); tkMenuAvatar.textContent = initials; };
           tkMenuAvatar.textContent = '';
           tkMenuAvatar.appendChild(menuImg);
         } else {

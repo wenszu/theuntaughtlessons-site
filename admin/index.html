@@ -4879,7 +4879,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       const button = document.getElementById('adminProfileButton');
       const avatar = document.getElementById('adminProfileAvatar');
       const avatarHtml = profile.photoURL
-        ? '<img src="' + escapeHtml(profile.photoURL) + '" alt="">'
+        ? '<img src="' + escapeHtml(profile.photoURL) + '" alt="" onerror="this.parentNode.textContent=\'' + escapeHtml(profile.initials) + '\';">'
         : escapeHtml(profile.initials);
       if (emailEl) emailEl.textContent = profile.email;
       if (nameEl) nameEl.textContent = profile.displayName;

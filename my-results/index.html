@@ -588,11 +588,6 @@
     }
 
     .certificate-callout {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 16px;
       background: #FDF3DC;
       border: 1px solid rgba(238, 163, 32, .55);
       border-radius: 10px;
@@ -600,8 +595,9 @@
       margin-bottom: 1.5rem;
     }
 
-    .certificate-callout-copy {
+    .certificate-callout-header {
       min-width: 0;
+      margin-bottom: 14px;
     }
 
     .certificate-callout-label {
@@ -613,28 +609,28 @@
       margin-bottom: 4px;
     }
 
-    .certificate-callout-copy h2 {
+    .certificate-callout-header h2 {
       margin: 0 0 4px;
       font-family: 'Playfair Display', serif;
       font-size: 20px;
       color: var(--navy);
     }
 
-    .certificate-callout-copy p {
+    .certificate-callout-header p {
       margin: 0;
       font-size: 13px;
       color: var(--charcoal);
     }
-    .credential-explainer { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px; }
-    .credential-explainer div { padding:9px 11px;border:1px solid rgba(0,51,102,.13);border-radius:7px;background:rgba(255,255,255,.58); }
-    .credential-explainer strong { display:block;margin-bottom:2px;color:var(--navy);font-size:11px; }
-    .credential-explainer span { display:block;color:#59636d;font-size:11px;line-height:1.4; }
+    .credential-cards { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px; }
+    .credential-card { display:flex;flex-direction:column;padding:14px 16px;border:1px solid rgba(0,51,102,.14);border-radius:8px;background:rgba(255,255,255,.72); }
+    .credential-card h3 { margin:0 0 4px;font-family:'Playfair Display', serif;font-size:15px;color:var(--navy); }
+    .credential-card > p { margin:0;font-size:12px;line-height:1.5;color:#59636d; }
     .credential-summary { margin-top:10px; padding-top:10px; border-top:1px solid rgba(0,51,102,.14); }
     .credential-summary[hidden] { display:none; }
     .credential-summary-id { display:inline-flex;align-items:center;gap:5px;margin-bottom:3px;color:var(--navy);font:700 12px Lato,Arial,sans-serif; }
     .credential-summary-id:hover { color:#285f91; }
-    .credential-summary-help { display:block;max-width:650px;color:#59636d;font-size:11px;line-height:1.4; }
-    .certificate-callout-actions { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:8px; }
+    .credential-summary-help { display:block;color:#59636d;font-size:11px;line-height:1.4; }
+    .credential-card-actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:auto; padding-top:12px; }
     .certificate-callout-link.is-secondary { background:#fff; color:var(--navy); border:1px solid rgba(0,51,102,.25); cursor:pointer; }
     .certificate-callout-link.is-primary { background:var(--gold);color:var(--navy);border:1px solid var(--gold);cursor:pointer; }
 
@@ -655,9 +651,9 @@
     }
 
     @media (max-width: 700px) {
-      .credential-explainer { grid-template-columns:1fr; }
-      .certificate-callout-actions { width:100%;justify-content:stretch; }
-      .certificate-callout-link { flex:1 1 100%;justify-content:center; }
+      .credential-cards { grid-template-columns:1fr; }
+      .credential-card-actions { width:100%; }
+      .credential-card-actions .certificate-callout-link { flex:1 1 100%;justify-content:center; }
     }
 
     .progress-label {
@@ -1317,14 +1313,24 @@
     </div>
 
     <div class="certificate-callout" id="certificateCallout" hidden>
-      <div class="certificate-callout-copy">
+      <div class="certificate-callout-header">
         <span class="certificate-callout-label">Program complete</span>
         <h2>Your credential is ready.</h2>
         <p>Congratulations! You finished all three phases and earned both a certificate and a verified credential.</p>
-        <div class="credential-explainer"><div><strong>Your certificate</strong><span>A visual record you can download as a PDF or image and keep for your files.</span></div><div><strong>Your verified credential</strong><span>A public, authenticated link that employers can check. Use it on LinkedIn, a CV, an application, or a social post.</span></div></div>
-        <div class="credential-summary" id="credentialSummary" hidden><a class="credential-summary-id" id="resultsVerifyLink" target="_blank" rel="noopener"></a><span class="credential-summary-help">Anyone with this link can confirm who earned the credential, when it was issued, and that it is active.</span></div>
       </div>
-      <div class="certificate-callout-actions"><button class="certificate-callout-link is-primary" id="resultsLinkedIn" type="button" hidden>Add to LinkedIn</button><button class="certificate-callout-link is-secondary" id="resultsShareCredential" type="button" hidden>Share credential</button><a class="certificate-callout-link is-secondary" href="../certificate/index.html" target="_blank" rel="noopener">View or download certificate <span aria-hidden="true">↗</span></a></div>
+      <div class="credential-cards">
+        <div class="credential-card">
+          <h3>Your verified credential</h3>
+          <p>A public, authenticated link that employers can check. Use it on LinkedIn, a CV, an application, or a social post.</p>
+          <div class="credential-summary" id="credentialSummary" hidden><a class="credential-summary-id" id="resultsVerifyLink" target="_blank" rel="noopener"></a><span class="credential-summary-help">Anyone with this link can confirm who earned the credential, when it was issued, and that it is active.</span></div>
+          <div class="credential-card-actions"><button class="certificate-callout-link is-primary" id="resultsLinkedIn" type="button" hidden>Add to LinkedIn</button><button class="certificate-callout-link is-secondary" id="resultsShareCredential" type="button" hidden>Share credential</button></div>
+        </div>
+        <div class="credential-card">
+          <h3>Your certificate</h3>
+          <p>A visual record you can download as a PDF or image and keep for your files.</p>
+          <div class="credential-card-actions"><a class="certificate-callout-link is-secondary" href="../certificate/index.html" target="_blank" rel="noopener">View or download certificate <span aria-hidden="true">↗</span></a></div>
+        </div>
+      </div>
     </div>
 
     <div class="device-notice" id="deviceNotice">
@@ -1569,14 +1575,17 @@
       if (profileMenuAvatar) profileMenuAvatar.textContent = '';
 
       if (profile.photoURL) {
+        const initials = getInitials(displayName);
         const image = document.createElement('img');
         image.src = profile.photoURL;
         image.alt = '';
+        image.onerror = function () { this.remove(); memberAvatar.textContent = initials; };
         memberAvatar.appendChild(image);
         if (profileMenuAvatar) {
           const menuImage = document.createElement('img');
           menuImage.src = profile.photoURL;
           menuImage.alt = '';
+          menuImage.onerror = function () { this.remove(); profileMenuAvatar.textContent = initials; };
           profileMenuAvatar.appendChild(menuImage);
         }
       } else {
