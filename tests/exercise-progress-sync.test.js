@@ -46,4 +46,11 @@ assert(admin.includes('data-sp-repair-exercises'));
 assert(admin.includes('repairMemberExerciseProgress,'));
 assert(admin.includes("fb.repairMemberExerciseProgress(member.uid)"));
 
+// A 2-second toast is easy to miss once it's racing an admin's own follow-up member-list
+// refetch and re-render. The repair result must also persist as an inline banner baked into
+// the freshly rendered detail view, not just a toast, so the admin has lasting confirmation
+// exactly where they were already looking.
+assert(admin.includes('spExerciseRepairNotice'), 'a repair confirmation must survive the detail panel re-render, not just flash as a toast');
+assert(admin.includes('data-sp-repair-notice'), 'the repair confirmation should render as a visible banner in the detail panel');
+
 console.log('exercise progress sync repair contracts passed');

@@ -8139,6 +8139,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
     let spAllMembers = [];
     let spAllMembersLoadedAt = 0;
     const SP_MEMBERS_CACHE_MS = 45000;
+    let spExerciseRepairNotice = null;
     let spSort = { col: 'name', dir: 'asc' };
     let spFilter = 'all';
     let spCohortFilter = 'all';
@@ -10106,9 +10107,15 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       const credentialHtml = credential && credential.credentialId
         ? '<div class="sp-detail-card"><h4>Verified credential</h4><p><strong style="font-family:monospace;">' + escapeHtml(credential.credentialId) + '</strong></p><p>Status: <strong>' + escapeHtml(credential.status || 'unknown') + '</strong> · Issued ' + escapeHtml(formatProgressDate(credential.issuedAt)) + '</p><p><a class="small-button secondary-button" target="_blank" rel="noopener" href="../verify/?id=' + encodeURIComponent(credential.credentialId) + '">Open verification page</a></p></div>'
         : '<div class="sp-detail-card"><h4>Verified credential</h4><p class="sp-status-missing">Not issued yet. After this learner completes the program, opening My Results or the certificate creates their credential ID.</p></div>';
+      let repairNoticeHtml = '';
+      if (spExerciseRepairNotice && spExerciseRepairNotice.uid === member.uid) {
+        repairNoticeHtml = '<div class="sp-reward-alert is-ok" data-sp-repair-notice>' + escapeHtml(spExerciseRepairNotice.message) + '</div>';
+        spExerciseRepairNotice = null;
+      }
       content.innerHTML =
         '<div class="sp-detail-header"><div><h3>' + escapeHtml(member.displayName || member.name || member.email || 'Member') + '</h3><p>' + escapeHtml(member.email || '') + ' · Last active ' + escapeHtml(formatProgressDate(member.lastSeenAt || member.updatedAt)) + '</p></div><span class="mb-status-badge ' + ((member.status || 'active') === 'inactive' ? 'mb-status-inactive' : 'mb-status-active') + '">' + escapeHtml(member.status || 'active') + '</span></div>' +
         '<div class="sp-detail-actions"><button class="small-button" type="button" data-sp-support-preview>Preview as member</button><button class="small-button secondary-button" type="button" data-sp-edit-progress>Edit progress</button><button class="small-button secondary-button" type="button" data-sp-repair-exercises title="Re-syncs exercise completion from this learner\'s completed_exercises record. Use this if a learner sees an exercise as done but it shows Not complete here.">Repair exercise sync</button><button class="small-button sp-danger-button" type="button" data-sp-reset-progress>Reset progress</button></div>' +
+        repairNoticeHtml +
         '<div class="sp-detail-summary"><div class="sp-detail-stat"><span>Current level</span><strong>' + escapeHtml(level) + '</strong></div><div class="sp-detail-stat"><span>Mastery Points</span><strong>' + escapeHtml(String(total)) + ' MP</strong></div><div class="sp-detail-stat"><span>Exercises complete</span><strong>' + (p1e.done + p2e.done + p3e.done) + ' / ' + (p1e.total + p2e.total + p3e.total) + '</strong></div><div class="sp-detail-stat"><span>Program bonus</span><strong>' + credited + ' / ' + target + ' MP</strong></div></div>' +
         '<div class="sp-reward-alert ' + (!missingBonus ? 'is-ok' : '') + '">' + (missingBonus
           ? '<strong>Missing completion milestone:</strong> this student finished all phases but needs ' + missingAmount + ' MP to receive the full bonus and reach Executive. <button class="small-button" type="button" data-sp-repair-bonus style="margin-left:8px">Award missing MP</button>'
@@ -10128,7 +10135,11 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         repairExercises.textContent = 'Repairing…';
         try {
           const result = await fb.repairMemberExerciseProgress(member.uid);
+          const message = result && result.repaired
+            ? 'Re-synced ' + result.repaired + ' completed exercise' + (result.repaired === 1 ? '' : 's') + ' from this learner\'s record. The list below now reflects it.'
+            : 'Checked this learner\'s record — nothing needed repair. What is shown below already matches it.';
           showToast(result && result.repaired ? 'Re-synced ' + result.repaired + ' completed exercise' + (result.repaired === 1 ? '' : 's') + '.' : 'No completed exercises needed repair.');
+          spExerciseRepairNotice = { uid: member.uid, message };
           spAllMembersLoadedAt = 0;
           const refreshed = await spFetchAllMembers(fb, true);
           const updated = refreshed.find((item) => item.uid === member.uid);
