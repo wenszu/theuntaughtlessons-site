@@ -327,6 +327,7 @@ function organizationConsoleAggregate(members) {
 
 if (process.env.NODE_ENV === "test") {
   exports.__cohortStandingTest = { cohortProgress, cohortReward, rankCohort };
+  exports.__exerciseProgressSyncTest = { exerciseWorkspaceProgressPatch, EXERCISE_ALIASES };
   exports.__organizationConsoleTest = {
     normalizeOrganizationId,
     slugifyOrganizationName,
@@ -766,18 +767,57 @@ exports.getCohortStanding = onCall({ timeoutSeconds: 30, memory: "256MiB" }, asy
   return response;
 });
 
+function exerciseWorkspaceProgressPatch(exerciseId, exerciseData) {
+  const canonicalId = EXERCISE_ALIASES[exerciseId] || exerciseId;
+  const completedAt = exerciseData.updatedAt || admin.firestore.FieldValue.serverTimestamp();
+  const title = String(exerciseData.exerciseName || "").trim().slice(0, 160) || exerciseId;
+  const patch = { [exerciseId]: { visited: true, completed: true, completedAt, title } };
+  patch[canonicalId] = { visited: true, completed: true, completedAt, title, appKey: exerciseId };
+  return patch;
+}
+
+// The admin console's Student Progress panel reads workspaceProgress.exercises directly
+// (unlike credential issuance and the member's own cross-device recovery, which both also
+// check the completed_exercises subcollection). If the client's own write to
+// workspaceProgress.exercises ever fails or lags behind its write to completed_exercises,
+// admin silently shows stale "Not complete" status even though the learner is done. This
+// trigger keeps workspaceProgress.exercises in sync server-side, from the same authoritative
+// document every other consumer already trusts.
 exports.autoIssueVerifiedCredential = onDocumentWritten({
   document: "users/{userId}/completed_exercises/{exerciseId}", timeoutSeconds: 30, memory: "256MiB"
 }, async (event) => {
   const after = event.data && event.data.after;
   if (!after || !after.exists || String((after.data() || {}).status || "").toLowerCase() !== "done") return;
   const uid = event.params.userId;
-  const userSnap = await admin.firestore().collection("users").doc(uid).get();
+  const userRef = admin.firestore().collection("users").doc(uid);
+  await userRef.set({
+    workspaceProgress: { exercises: exerciseWorkspaceProgressPatch(event.params.exerciseId, after.data() || {}) }
+  }, { merge: true });
+  const userSnap = await userRef.get();
   const userData = userSnap.exists ? userSnap.data() || {} : {};
   const email = String(userData.email || "").trim().toLowerCase();
   if (!email) return;
   const result = await issueCredentialForUser(uid, email, userData.displayName || "");
   if (result && result.issued) console.log("Credential ready", { uid, programVersion: CREDENTIAL_PROGRAM_VERSION, credentialId: result.credential.credentialId });
+});
+
+exports.repairMemberExerciseProgress = onCall({ timeoutSeconds: 30, memory: "256MiB" }, async (request) => {
+  const caller = await requireVerifiedCaller(request);
+  if (!(await isAuthorizedAdmin(caller.email))) throw new HttpsError("permission-denied", "Administrator access is required.");
+  const uid = String(request.data && request.data.userId || "").trim();
+  if (!uid) throw new HttpsError("invalid-argument", "A learner user ID is required.");
+  const userRef = admin.firestore().collection("users").doc(uid);
+  const snapshot = await userRef.collection("completed_exercises").get();
+  let exercisesPatch = {};
+  let repaired = 0;
+  snapshot.forEach((document) => {
+    const data = document.data() || {};
+    if (String(data.status || "").toLowerCase() !== "done") return;
+    exercisesPatch = Object.assign(exercisesPatch, exerciseWorkspaceProgressPatch(document.id, data));
+    repaired += 1;
+  });
+  if (repaired) await userRef.set({ workspaceProgress: { exercises: exercisesPatch } }, { merge: true });
+  return { ok: true, repaired };
 });
 
 exports.manageVerifiedCredential = onCall({ timeoutSeconds: 30, memory: "256MiB" }, async (request) => {

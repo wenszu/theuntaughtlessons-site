@@ -1620,7 +1620,8 @@ const UTL_CONTENT = {
     } else {
       var nextTask = plan.tasks.filter(function (task) { return !missionTaskIsDone(task); })[0] || null;
       var rows = plan.tasks.map(function (task) { return '<li class="' + (missionTaskIsDone(task) ? "ws-done" : "") + '"><span aria-hidden="true">' + (missionTaskIsDone(task) ? "&#10003;" : "&#8226;") + '</span>' + escapeHtml(task.title) + '</li>'; }).join("");
-      popover = '<span class="ws-mission-popover" role="tooltip"><small>Daily mission</small><strong>' + progress.done + ' of ' + progress.total + ' complete</strong><ul>' + rows + '</ul><span class="ws-mission-popover-actions">' + (progress.done === 0 ? '<a href="' + memberHref("index.html") + '?open=planner&change=mission#todays-mission">Change</a>' : '') + (nextTask ? '<a href="' + escapeHtml(nextTask.href) + '">Continue</a>' : '<b>Mission complete</b>') + '</span></span>';
+      var nextTaskHref = nextTask ? (nextTask.manual ? memberHref("index.html") + "?open=planner#todays-mission" : nextTask.href) : "";
+      popover = '<span class="ws-mission-popover" role="tooltip"><small>Daily mission</small><strong>' + progress.done + ' of ' + progress.total + ' complete</strong><ul>' + rows + '</ul><span class="ws-mission-popover-actions">' + (progress.done === 0 ? '<a href="' + memberHref("index.html") + '?open=planner&change=mission#todays-mission">Change</a>' : '') + (nextTask ? '<a href="' + escapeHtml(nextTaskHref) + '">' + (nextTask.manual ? "Start challenge" : "Continue") + '</a>' : '<b>Mission complete</b>') + '</span></span>';
     }
     return '<span class="ws-mission-nav" tabindex="0" aria-label="' + aria + '"><span>Daily mission:</span><b>' + value + '</b>' + popover + '</span>';
   }

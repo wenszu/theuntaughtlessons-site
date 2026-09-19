@@ -316,6 +316,15 @@ async function getOrganizationAccessAdmin() {
   return result && result.data ? result.data : null;
 }
 
+async function repairMemberExerciseProgress(userId) {
+  const user = await getSignedInUser();
+  if (!user) throw new Error("Please sign in with a UTL administrator account.");
+  if (!userId) throw new Error("A learner user ID is required.");
+  const callable = httpsCallable(functions, "repairMemberExerciseProgress");
+  const result = await callable({ userId });
+  return result && result.data ? result.data : null;
+}
+
 async function checkOrganizationRepEmail(email) {
   const user = await getSignedInUser();
   if (!user) throw new Error("Please sign in with a UTL administrator account.");
@@ -2083,6 +2092,7 @@ export {
   resetMemberWorkspaceProgress,
   saveMemberWorkspaceProgress,
   checkOrganizationRepEmail,
+  repairMemberExerciseProgress,
   saveOrganizationAccessMember,
   saveOrganizationDefinition,
   saveMemberRewards,

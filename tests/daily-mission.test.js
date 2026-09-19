@@ -78,4 +78,12 @@ assert(rewardUiSource.includes('levelPopoverHtml'), 'level hover should use the 
 assert(rewardUiSource.includes('Current level'), 'MP breakdown should separate level details');
 assert(!rewardUiSource.includes('Today’s streak progress'), 'MP breakdown should leave daily progress to the mission control');
 
+// The manual "Apply today's idea at work" challenge task has no real destination href (it
+// defaults to the workspace's own home page), so the nav popover's "Continue" link must not
+// treat it like a normal task — that regressed to a self-referential refresh with no visible
+// change. It must route back into the mission overlay instead, where "Start challenge" already
+// runs the correct prepare/reflect flow.
+assert(source.includes('nextTask.manual ? memberHref("index.html") + "?open=planner#todays-mission" : nextTask.href'), 'the daily mission popover must route a manual challenge task back to the mission overlay, not its bare href');
+assert(source.includes('(nextTask.manual ? "Start challenge" : "Continue")'), 'the popover should label a manual challenge task as a challenge to start, not a task to continue');
+
 console.log('daily mission metadata and UI contract passed');

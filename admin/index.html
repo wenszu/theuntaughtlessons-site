@@ -4153,6 +4153,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       replaceMemberWorkspaceProgress,
       resetMemberWorkspaceProgress,
       checkOrganizationRepEmail,
+      repairMemberExerciseProgress,
       saveOrganizationAccessMember,
       saveOrganizationDefinition,
       sendSignInInvite,
@@ -4210,6 +4211,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       replaceMemberWorkspaceProgress,
       resetMemberWorkspaceProgress,
       checkOrganizationRepEmail,
+      repairMemberExerciseProgress,
       saveOrganizationAccessMember,
       saveOrganizationDefinition,
       sendSignInInvite,
@@ -10106,7 +10108,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         : '<div class="sp-detail-card"><h4>Verified credential</h4><p class="sp-status-missing">Not issued yet. After this learner completes the program, opening My Results or the certificate creates their credential ID.</p></div>';
       content.innerHTML =
         '<div class="sp-detail-header"><div><h3>' + escapeHtml(member.displayName || member.name || member.email || 'Member') + '</h3><p>' + escapeHtml(member.email || '') + ' · Last active ' + escapeHtml(formatProgressDate(member.lastSeenAt || member.updatedAt)) + '</p></div><span class="mb-status-badge ' + ((member.status || 'active') === 'inactive' ? 'mb-status-inactive' : 'mb-status-active') + '">' + escapeHtml(member.status || 'active') + '</span></div>' +
-        '<div class="sp-detail-actions"><button class="small-button" type="button" data-sp-support-preview>Preview as member</button><button class="small-button secondary-button" type="button" data-sp-edit-progress>Edit progress</button><button class="small-button sp-danger-button" type="button" data-sp-reset-progress>Reset progress</button></div>' +
+        '<div class="sp-detail-actions"><button class="small-button" type="button" data-sp-support-preview>Preview as member</button><button class="small-button secondary-button" type="button" data-sp-edit-progress>Edit progress</button><button class="small-button secondary-button" type="button" data-sp-repair-exercises title="Re-syncs exercise completion from this learner\'s completed_exercises record. Use this if a learner sees an exercise as done but it shows Not complete here.">Repair exercise sync</button><button class="small-button sp-danger-button" type="button" data-sp-reset-progress>Reset progress</button></div>' +
         '<div class="sp-detail-summary"><div class="sp-detail-stat"><span>Current level</span><strong>' + escapeHtml(level) + '</strong></div><div class="sp-detail-stat"><span>Mastery Points</span><strong>' + escapeHtml(String(total)) + ' MP</strong></div><div class="sp-detail-stat"><span>Exercises complete</span><strong>' + (p1e.done + p2e.done + p3e.done) + ' / ' + (p1e.total + p2e.total + p3e.total) + '</strong></div><div class="sp-detail-stat"><span>Program bonus</span><strong>' + credited + ' / ' + target + ' MP</strong></div></div>' +
         '<div class="sp-reward-alert ' + (!missingBonus ? 'is-ok' : '') + '">' + (missingBonus
           ? '<strong>Missing completion milestone:</strong> this student finished all phases but needs ' + missingAmount + ' MP to receive the full bonus and reach Executive. <button class="small-button" type="button" data-sp-repair-bonus style="margin-left:8px">Award missing MP</button>'
@@ -10118,6 +10120,21 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       content.querySelector('[data-sp-support-preview]')?.addEventListener('click', () => spLaunchMemberSupportPreview(member));
       content.querySelector('[data-sp-edit-progress]')?.addEventListener('click', () => spOpenEditDialog(member));
       content.querySelector('[data-sp-reset-progress]')?.addEventListener('click', () => spOpenResetDialog(member));
+      const repairExercises = content.querySelector('[data-sp-repair-exercises]');
+      if (repairExercises) repairExercises.addEventListener('click', async function () {
+        const fb = window.utlFirebaseAuth;
+        if (!member.uid || !fb || !fb.repairMemberExerciseProgress) return showToast('Exercise sync repair is unavailable.', true);
+        repairExercises.disabled = true;
+        repairExercises.textContent = 'Repairing…';
+        try {
+          const result = await fb.repairMemberExerciseProgress(member.uid);
+          showToast(result && result.repaired ? 'Re-synced ' + result.repaired + ' completed exercise' + (result.repaired === 1 ? '' : 's') + '.' : 'No completed exercises needed repair.');
+          spAllMembersLoadedAt = 0;
+          const refreshed = await spFetchAllMembers(fb, true);
+          const updated = refreshed.find((item) => item.uid === member.uid);
+          showStudentProgressDetail(updated || member);
+        } catch (error) { showToast('Repair failed: ' + ((error && error.message) || 'Unknown error'), true); repairExercises.disabled = false; repairExercises.textContent = 'Repair exercise sync'; }
+      });
       const repair = content.querySelector('[data-sp-repair-bonus]');
       if (repair) repair.addEventListener('click', async function () {
         const fb = window.utlFirebaseAuth;
