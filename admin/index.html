@@ -3628,6 +3628,8 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
           <div class="mb-form-grid">
             <div class="mb-form-field"><label for="oaOrgName">Organization name</label><input type="text" id="oaOrgName" placeholder="e.g. AyalaLand" autocomplete="off" maxlength="160"></div>
             <div class="mb-form-field"><label for="oaOrgSlug">Organization ID</label><input type="text" id="oaOrgSlug" placeholder="auto-generated" maxlength="80"><span class="student-progress-status">Cannot be changed after creation.</span></div>
+            <div class="mb-form-field"><label for="oaOrgContactName">Contact name</label><input type="text" id="oaOrgContactName" placeholder="e.g. Priya Shah" autocomplete="off" maxlength="160"></div>
+            <div class="mb-form-field"><label for="oaOrgContactEmail">Contact email</label><input type="email" id="oaOrgContactEmail" placeholder="name@company.com" autocomplete="off" maxlength="200"><span class="student-progress-status">Optional. Shown across this organization's cohorts and reports.</span></div>
           </div>
           <div class="mb-form-actions"><button class="small-button" type="button" id="oaOrgSave">Add organization</button><button class="small-button secondary-button" type="button" id="oaOrgCancel" hidden>Cancel edit</button><span class="student-progress-status" id="oaOrgStatus" aria-live="polite"></span></div>
           <div id="oaOrgTable" style="margin-top:16px"><p class="oa-empty">Open this section to load organizations.</p></div>
@@ -3688,6 +3690,18 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
           <p class="description">A read-only record of who granted, changed, suspended, or reactivated access.</p>
           <div id="oaAudit"><p class="oa-empty">No access changes loaded.</p></div>
         </div>
+        <dialog class="sp-dialog" id="oaOverviewDialog" aria-labelledby="oaOverviewTitle">
+          <div class="sp-dialog-shell">
+            <div class="sp-dialog-head">
+              <div><h3 id="oaOverviewTitle">Organization overview</h3><p id="oaOverviewSubtitle"></p></div>
+              <button class="sp-dialog-close" type="button" data-sp-dialog-close="oaOverviewDialog" aria-label="Close">&times;</button>
+            </div>
+            <div class="sp-dialog-body" id="oaOverviewBody"></div>
+            <div class="sp-dialog-actions">
+              <button class="small-button secondary-button" type="button" data-sp-dialog-close="oaOverviewDialog">Close</button>
+            </div>
+          </div>
+        </dialog>
       </section>
 
       <section class="admin-section" id="section-emergency-access" data-admin-tab-panel="member-management">
@@ -10702,8 +10716,12 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       oaOrgEditingId = '';
       const name = document.getElementById('oaOrgName');
       const slug = document.getElementById('oaOrgSlug');
+      const contactName = document.getElementById('oaOrgContactName');
+      const contactEmail = document.getElementById('oaOrgContactEmail');
       if (name) name.value = '';
       if (slug) { slug.value = ''; slug.readOnly = false; }
+      if (contactName) contactName.value = '';
+      if (contactEmail) contactEmail.value = '';
       document.getElementById('oaOrgFormHeading').textContent = 'Add an organization';
       document.getElementById('oaOrgSave').textContent = 'Add organization';
       document.getElementById('oaOrgCancel').hidden = true;
@@ -10718,8 +10736,10 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       const slug = document.getElementById('oaOrgSlug');
       slug.value = organization.id;
       slug.readOnly = true;
-      document.getElementById('oaOrgFormHeading').textContent = 'Rename organization';
-      document.getElementById('oaOrgSave').textContent = 'Save name';
+      document.getElementById('oaOrgContactName').value = organization.contactName || '';
+      document.getElementById('oaOrgContactEmail').value = organization.contactEmail || '';
+      document.getElementById('oaOrgFormHeading').textContent = 'Edit organization';
+      document.getElementById('oaOrgSave').textContent = 'Save changes';
       document.getElementById('oaOrgCancel').hidden = false;
       document.getElementById('oaOrgPanel')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
@@ -10732,13 +10752,59 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         wrap.innerHTML = '<p class="oa-empty">No organizations yet. Add one above.</p>';
         return;
       }
-      wrap.innerHTML = '<div class="student-progress-table-wrap"><table class="student-progress-table"><thead><tr><th>Organization</th><th>Status</th><th>Cohorts</th><th>Actions</th></tr></thead><tbody>' + organizations.map((organization) => {
+      wrap.innerHTML = '<div class="student-progress-table-wrap"><table class="student-progress-table"><thead><tr><th>Organization</th><th>Contact</th><th>Status</th><th>Cohorts</th><th>Actions</th></tr></thead><tbody>' + organizations.map((organization) => {
         const isArchived = organization.status === 'archived';
         return '<tr><td><strong>' + escapeHtml(organization.name) + '</strong><small>' + escapeHtml(organization.id) + '</small></td>' +
+          '<td>' + (organization.contactName || organization.contactEmail ? escapeHtml(organization.contactName || '—') + (organization.contactEmail ? '<small>' + escapeHtml(organization.contactEmail) + '</small>' : '') : '<span class="description">Not set</span>') + '</td>' +
           '<td><span class="oa-status-chip ' + (isArchived ? 'is-suspended' : '') + '">' + escapeHtml(isArchived ? 'Archived' : 'Active') + '</span></td>' +
           '<td>' + (organization.cohortIds?.length ? escapeHtml(organization.cohortIds.join(', ')) : '<span class="description">None assigned yet</span>') + '</td>' +
-          '<td><div class="mb-actions"><button type="button" class="small-button secondary-button" data-oa-org-edit="' + escapeHtml(organization.id) + '">Edit</button><button type="button" class="small-button secondary-button" data-oa-org-toggle="' + escapeHtml(organization.id) + '">' + (isArchived ? 'Reactivate' : 'Archive') + '</button></div></td></tr>';
+          '<td><div class="mb-actions"><button type="button" class="small-button secondary-button" data-oa-org-overview="' + escapeHtml(organization.id) + '">Overview</button><button type="button" class="small-button secondary-button" data-oa-org-edit="' + escapeHtml(organization.id) + '">Edit</button><button type="button" class="small-button secondary-button" data-oa-org-toggle="' + escapeHtml(organization.id) + '">' + (isArchived ? 'Reactivate' : 'Archive') + '</button></div></td></tr>';
       }).join('') + '</tbody></table></div>';
+    }
+
+    async function oaOpenOverview(orgId) {
+      const organization = (oaData?.organizations || []).find((item) => item.id === orgId);
+      const dialog = document.getElementById('oaOverviewDialog');
+      const body = document.getElementById('oaOverviewBody');
+      if (!organization || !dialog || !body) return;
+      document.getElementById('oaOverviewSubtitle').textContent = organization.id + ' · ' + (organization.status === 'archived' ? 'Archived' : 'Active');
+      body.innerHTML = '<p class="oa-empty">Loading…</p>';
+      dialog.showModal();
+      try {
+        await mbRequireFirebaseAdmin();
+        if (!spAllMembers.length) spAllMembers = await spFetchAllMembers(window.utlFirebaseAuth || {}, false);
+      } catch (error) {
+        // Cohort learner stats are a nice-to-have here; still show org and rep info even if this fails.
+      }
+      const groups = caCohortGroups();
+      const cohortSummaries = (organization.cohortIds || []).map((cohortId) => caCohortSummary(cohortId, groups[cohortId] || []));
+      const totalLearners = cohortSummaries.reduce((sum, s) => sum + s.count, 0);
+      const totalCompleted = cohortSummaries.reduce((sum, s) => sum + s.completed, 0);
+      const overallPercent = totalLearners ? Math.round((totalCompleted / totalLearners) * 100) : 0;
+      const reps = (oaData?.memberships || []).filter((member) => member.organizationId === organization.id);
+
+      const contactHtml = organization.contactName || organization.contactEmail
+        ? '<p>' + escapeHtml(organization.contactName || 'No name on file') + (organization.contactEmail ? ' &middot; <a href="mailto:' + escapeHtml(organization.contactEmail) + '">' + escapeHtml(organization.contactEmail) + '</a>' : '') + '</p>'
+        : '<p class="oa-empty">No contact on file.</p>';
+
+      const cohortRowsHtml = cohortSummaries.length
+        ? '<div class="student-progress-table-wrap"><table class="student-progress-table"><thead><tr><th>Cohort</th><th>Status</th><th>Learners</th><th>Completed</th><th>Avg MP</th></tr></thead><tbody>' +
+          cohortSummaries.map((s) => '<tr><td>' + escapeHtml(s.name) + '</td><td>' + caCohortStatusChip(caCohortLifecycleStatus(s.name)) + '</td><td>' + s.count + '</td><td>' + s.completed + ' (' + s.completionPercent + '%)</td><td>' + s.avgMp + ' MP</td></tr>').join('') +
+          '</tbody></table></div>'
+        : '<p class="oa-empty">No cohorts assigned yet. Assign one from Student Progress &rarr; Cohort Analytics.</p>';
+
+      const repRowsHtml = reps.length
+        ? '<div class="student-progress-table-wrap"><table class="student-progress-table"><thead><tr><th>Representative</th><th>Role</th><th>Status</th></tr></thead><tbody>' +
+          reps.map((member) => '<tr><td><strong>' + escapeHtml(member.displayName || member.email) + '</strong><small>' + escapeHtml(member.email) + '</small></td><td>' + escapeHtml((oaData?.roleLabels || {})[member.role] || member.role) + '</td><td><span class="oa-status-chip ' + (member.status === 'suspended' ? 'is-suspended' : '') + '">' + escapeHtml(member.status === 'suspended' ? 'Suspended' : 'Active') + '</span></td></tr>').join('') +
+          '</tbody></table></div>'
+        : '<p class="oa-empty">No representatives have access yet.</p>';
+
+      body.innerHTML =
+        '<div class="sp-detail-card"><h4>Contact</h4>' + contactHtml + '<button type="button" class="small-button secondary-button" data-oa-overview-edit>Edit organization</button></div>' +
+        '<div class="sp-detail-summary" style="margin:16px 0"><div class="sp-detail-stat"><span>Cohorts</span><strong>' + cohortSummaries.length + '</strong></div><div class="sp-detail-stat"><span>Learners</span><strong>' + totalLearners + '</strong></div><div class="sp-detail-stat"><span>Program complete</span><strong>' + totalCompleted + ' (' + overallPercent + '%)</strong></div><div class="sp-detail-stat"><span>Representatives</span><strong>' + reps.length + '</strong></div></div>' +
+        '<div class="sp-detail-card"><h4>Cohorts</h4>' + cohortRowsHtml + '</div>' +
+        '<div class="sp-detail-card" style="margin-top:16px"><h4>Representatives</h4>' + repRowsHtml + '</div>';
+      body.querySelector('[data-oa-overview-edit]')?.addEventListener('click', () => { dialog.close(); oaOrgEdit(organization.id); });
     }
 
     async function oaSaveOrganization(payloadOverride) {
@@ -10746,7 +10812,9 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         action: oaOrgEditingId ? 'rename' : 'create',
         organizationId: oaOrgEditingId,
         name: String(document.getElementById('oaOrgName')?.value || '').trim(),
-        organizationIdInput: String(document.getElementById('oaOrgSlug')?.value || '').trim()
+        organizationIdInput: String(document.getElementById('oaOrgSlug')?.value || '').trim(),
+        contactName: String(document.getElementById('oaOrgContactName')?.value || '').trim(),
+        contactEmail: String(document.getElementById('oaOrgContactEmail')?.value || '').trim()
       };
       if (!payloadOverride && !payload.name) { showToast('Enter an organization name.', 'error'); return; }
       if (!payloadOverride && !oaOrgEditingId) payload.organizationId = payload.organizationIdInput;
@@ -10759,8 +10827,8 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         const fb = window.utlFirebaseAuth || {};
         if (!fb.saveOrganizationDefinition) throw new Error('Organization access service is not available.');
         const result = await fb.saveOrganizationDefinition(payload.action === 'create'
-          ? { action: 'create', name: payload.name, organizationId: payload.organizationIdInput }
-          : { action: payload.action, organizationId: payload.organizationId, name: payload.name });
+          ? { action: 'create', name: payload.name, organizationId: payload.organizationIdInput, contactName: payload.contactName, contactEmail: payload.contactEmail }
+          : { action: payload.action, organizationId: payload.organizationId, name: payload.name, contactName: payload.contactName, contactEmail: payload.contactEmail });
         oaData = null;
         await oaLoad(true);
         oaOrgResetForm();
@@ -10770,7 +10838,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         if (status) status.textContent = message;
         showToast('Could not save organization: ' + message, 'error');
       } finally {
-        if (button) { button.disabled = false; button.textContent = oaOrgEditingId ? 'Save name' : 'Add organization'; }
+        if (button) { button.disabled = false; button.textContent = oaOrgEditingId ? 'Save changes' : 'Add organization'; }
       }
     }
 
@@ -11016,6 +11084,8 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
     });
     document.getElementById('oaOrgCancel')?.addEventListener('click', oaOrgResetForm);
     document.getElementById('oaOrgTable')?.addEventListener('click', function (event) {
+      const overview = event.target.closest('[data-oa-org-overview]');
+      if (overview) { oaOpenOverview(overview.dataset.oaOrgOverview); return; }
       const edit = event.target.closest('[data-oa-org-edit]');
       if (edit) { oaOrgEdit(edit.dataset.oaOrgEdit); return; }
       const toggle = event.target.closest('[data-oa-org-toggle]');

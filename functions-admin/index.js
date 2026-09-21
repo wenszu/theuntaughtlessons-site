@@ -240,6 +240,8 @@ function mergeOrganizationDefinitions(storedOrganizations, cohortDetails) {
       id,
       name: String(item.name || id).trim().slice(0, 160),
       status: ORGANIZATION_STATUSES.has(String(item.status || "").trim().toLowerCase()) ? String(item.status).trim().toLowerCase() : "active",
+      contactName: String(item.contactName || "").trim().slice(0, 160),
+      contactEmail: String(item.contactEmail || "").trim().toLowerCase().slice(0, 200),
       cohortIds: []
     };
   });
@@ -336,7 +338,8 @@ if (process.env.NODE_ENV === "test") {
     organizationMemberSummary,
     organizationConsoleAggregate,
     normalizeOrganizationAccessInput,
-    organizationAccessPreview
+    organizationAccessPreview,
+    normalizeOrganizationContact
   };
 }
 
@@ -512,6 +515,15 @@ exports.getOrganizationAccessAdmin = onCall({ timeoutSeconds: 30, memory: "256Mi
   };
 });
 
+function normalizeOrganizationContact(input) {
+  const contactName = String((input && input.contactName) || "").trim().slice(0, 160);
+  const rawEmail = String((input && input.contactEmail) || "").trim().toLowerCase();
+  if (rawEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(rawEmail)) {
+    throw new HttpsError("invalid-argument", "Enter a valid contact email, or leave it blank.");
+  }
+  return { contactName, contactEmail: rawEmail.slice(0, 200) };
+}
+
 exports.saveOrganizationDefinition = onCall({ timeoutSeconds: 30, memory: "256MiB" }, async (request) => {
   const caller = await requireVerifiedCaller(request);
   if (!(await isAuthorizedAdmin(caller.email))) throw new HttpsError("permission-denied", "UTL administrator access is required.");
@@ -526,6 +538,7 @@ exports.saveOrganizationDefinition = onCall({ timeoutSeconds: 30, memory: "256Mi
     if (!name) throw new HttpsError("invalid-argument", "Enter an organization name.");
     const organizationId = normalizeOrganizationId(input.organizationId) || slugifyOrganizationName(name);
     if (!organizationId) throw new HttpsError("invalid-argument", "Enter an organization name that includes at least one letter or number.");
+    const { contactName, contactEmail } = normalizeOrganizationContact(input);
     const organizationRef = db.collection("organizations").doc(organizationId);
     await db.runTransaction(async (transaction) => {
       const existing = await transaction.get(organizationRef);
@@ -534,6 +547,8 @@ exports.saveOrganizationDefinition = onCall({ timeoutSeconds: 30, memory: "256Mi
         id: organizationId,
         name,
         status: "active",
+        contactName,
+        contactEmail,
         createdAt: now,
         createdByUid: caller.uid,
         createdByEmail: caller.email,
@@ -553,7 +568,7 @@ exports.saveOrganizationDefinition = onCall({ timeoutSeconds: 30, memory: "256Mi
         occurredAt: now
       });
     });
-    return { ok: true, action: "organization_created", organization: { id: organizationId, name, status: "active", cohortIds: [] } };
+    return { ok: true, action: "organization_created", organization: { id: organizationId, name, status: "active", contactName, contactEmail, cohortIds: [] } };
   }
 
   const organizationId = normalizeOrganizationId(input.organizationId);
@@ -566,8 +581,9 @@ exports.saveOrganizationDefinition = onCall({ timeoutSeconds: 30, memory: "256Mi
   if (action === "rename") {
     const name = String(input.name || "").trim().slice(0, 160);
     if (!name) throw new HttpsError("invalid-argument", "Enter an organization name.");
+    const { contactName, contactEmail } = normalizeOrganizationContact(input);
     const batch = db.batch();
-    batch.set(organizationRef, { name, updatedAt: now, updatedByUid: caller.uid, updatedByEmail: caller.email }, { merge: true });
+    batch.set(organizationRef, { name, contactName, contactEmail, updatedAt: now, updatedByUid: caller.uid, updatedByEmail: caller.email }, { merge: true });
     batch.set(organizationRef.collection("access_audit").doc(), {
       organizationId,
       action: "organization_renamed",
@@ -580,7 +596,7 @@ exports.saveOrganizationDefinition = onCall({ timeoutSeconds: 30, memory: "256Mi
       occurredAt: now
     });
     await batch.commit();
-    return { ok: true, action: "organization_renamed", organization: { id: organizationId, name, status: String(prior.status || "active") } };
+    return { ok: true, action: "organization_renamed", organization: { id: organizationId, name, status: String(prior.status || "active"), contactName, contactEmail } };
   }
 
   const nextStatus = action === "archive" ? "archived" : "active";

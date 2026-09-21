@@ -1993,12 +1993,13 @@ const UTL_CONTENT = {
 
       var card = document.querySelector(".ws-login-card");
       if (!card) return;
-      card.innerHTML = '<span class="ws-kicker">Magic link sign-in</span><h1 class="ws-title">One more step.</h1><p class="ws-subtitle">Enter the email address this link was sent to.</p><form class="ws-form" id="wsEmailLinkForm"><label for="wsEmailConfirm">Your email address</label><input class="ws-input" id="wsEmailConfirm" type="email" autocomplete="email" placeholder="you@example.com" required><button class="ws-button" type="submit">Sign in</button><p class="ws-message" id="wsEmailLinkMessage" aria-live="polite"></p></form>';
+      card.innerHTML = '<span class="ws-kicker">Magic link sign-in</span><h1 class="ws-title">One more step.</h1><p class="ws-subtitle">Enter the email address this link was sent to.</p><form class="ws-form" id="wsEmailLinkForm"><label for="wsEmailConfirm">Your email address</label><input class="ws-input" id="wsEmailConfirm" type="email" autocomplete="email" placeholder="you@example.com" required><button class="ws-button" type="submit">Sign in</button><p class="ws-message" id="wsEmailLinkMessage" aria-live="polite"></p><button class="ws-button ws-button-secondary" type="button" id="wsEmailLinkResend" style="margin-top:8px;display:none">Send me a new link</button></form>';
 
       qs("#wsEmailLinkForm").addEventListener("submit", async function (event) {
         event.preventDefault();
         var emailInput = qs("#wsEmailConfirm");
         var linkMessage = qs("#wsEmailLinkMessage");
+        var resendBtn = qs("#wsEmailLinkResend");
         var submitBtn = event.currentTarget.querySelector("button[type=submit]");
         var email = emailInput.value.trim();
         if (!email) {
@@ -2009,6 +2010,7 @@ const UTL_CONTENT = {
         submitBtn.textContent = "Signing in...";
         linkMessage.textContent = "";
         linkMessage.classList.remove("ws-success");
+        resendBtn.style.display = "none";
         try {
           var credential = await firebaseAuth.signInWithEmailLink(firebaseAuth.auth, email, window.location.href);
           await finishGoogleUser(firebaseAuth, credential.user, linkMessage, "emailLink");
@@ -2016,14 +2018,40 @@ const UTL_CONTENT = {
           submitBtn.disabled = false;
           submitBtn.textContent = "Sign in";
           var errMsg = "Sign-in failed. ";
-          if (err.code === "auth/invalid-action-code") {
-            errMsg = "This link has expired or already been used. Please ask for a new one.";
+          var expired = err.code === "auth/invalid-action-code" || err.code === "auth/expired-action-code";
+          if (expired) {
+            // Corporate mail security scanners often "click" links to scan them before a
+            // person ever opens the email, which burns the one-time code first. This is the
+            // single most common cause of this error for corporate accounts, not a bug in the
+            // link itself, so the fix is just sending a fresh one rather than asking to retry.
+            errMsg = "This link has expired or was already used — this can happen if your email provider's security scanner opened it first. Request a new one below.";
           } else if (err.code === "auth/invalid-email") {
             errMsg = "That email does not match the one this link was sent to. Please check and try again.";
           } else {
             errMsg += err.message || "Please try again.";
           }
           linkMessage.textContent = errMsg;
+          if (expired) { resendBtn.style.display = ""; resendBtn.dataset.email = email; }
+        }
+      });
+
+      qs("#wsEmailLinkResend").addEventListener("click", async function (event) {
+        var resendBtn = event.currentTarget;
+        var linkMessage = qs("#wsEmailLinkMessage");
+        var email = resendBtn.dataset.email || qs("#wsEmailConfirm").value.trim();
+        if (!email) return;
+        resendBtn.disabled = true;
+        resendBtn.textContent = "Sending...";
+        try {
+          await firebaseAuth.sendSignInInvite(email);
+          linkMessage.classList.add("ws-success");
+          linkMessage.textContent = "New link sent to " + email + ". Check your email and open it on this device.";
+          resendBtn.style.display = "none";
+        } catch (err) {
+          resendBtn.disabled = false;
+          resendBtn.textContent = "Send me a new link";
+          linkMessage.classList.remove("ws-success");
+          linkMessage.textContent = "Could not send a new link. Please try again.";
         }
       });
     } catch (err) {

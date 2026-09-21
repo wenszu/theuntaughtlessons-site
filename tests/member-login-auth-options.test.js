@@ -58,4 +58,14 @@ assert.match(admin, /Selected for first sign-in · no login yet/, 'federated set
 assert.match(admin, /setup choice: /, 'a successful fallback login should preserve the original setup choice as secondary context');
 assert.match(admin, /loginLinkStatus:'failed'/, 'failed administrator link sends should be recorded for support');
 
+// Firebase can reject a used or stale sign-in link as either auth/invalid-action-code or
+// auth/expired-action-code depending on why it failed. Only the first was ever handled, so a
+// learner hitting the expired variant (very common on corporate email — security scanners
+// often "click" the link to scan it before the person ever opens it, burning the one-time
+// code first) saw a raw "Firebase: Error (auth/expired-action-code)" message with no way
+// forward except leaving the page.
+assert.match(memberLogin, /err\.code === "auth\/invalid-action-code" \|\| err\.code === "auth\/expired-action-code"/, 'both known "this link no longer works" error codes must be treated the same way');
+assert.match(memberLogin, /id="wsEmailLinkResend"/, 'an expired or reused link should offer a way to request a new one without leaving the page');
+assert.match(memberLogin, /firebaseAuth\.sendSignInInvite\(email\)/, 'the resend action should reuse the email the learner already confirmed, not send them back to the login form');
+
 console.log('member login and corporate email-link onboarding contracts passed');
