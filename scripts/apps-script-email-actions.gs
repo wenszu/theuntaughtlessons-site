@@ -216,6 +216,37 @@ function notifyGroupSyncFailure_(email, groupEmail, mode, error) {
   });
 }
 
+/**
+ * Blank-field spam guard for the waitlist/contact-form logging branch.
+ *
+ * The waitlist and contact forms on the public site both validate name,
+ * email and message as required fields, so a real visitor cannot submit
+ * one empty — the browser blocks it before your endpoint ever sees it.
+ * This web app URL is still plainly visible in the page source of every
+ * page with a "Join the waitlist" button, though, so it is a public POST
+ * endpoint that anyone (or any bot) can hit directly with arbitrary JSON,
+ * bypassing the real form and its validation entirely. That is almost
+ * always the source of an email with real-looking metadata (a genuine
+ * page URL) but blank name/role/message — an automated script that never
+ * loaded the actual form.
+ *
+ * Add this near the top of the sheet/contact-form logging branch, before
+ * it appends a row or sends a notification email:
+ *
+ *   if (shouldRejectContactSubmission_(data)) return ContentService.createTextOutput('ignored');
+ *
+ * This only guards the generic waitlist/contact branch — it must not gate
+ * TestEmailTemplate, WelcomeEmail, RemovedMember or the Google Group
+ * actions above, since those are legitimate server-to-server calls from
+ * the Admin Console, not visitor form submissions.
+ */
+function shouldRejectContactSubmission_(data) {
+  var name = String((data && data.name) || '').trim();
+  var email = String((data && data.email) || '').trim();
+  var validEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  return !name || !validEmail;
+}
+
 function stripHtml_(html) {
   return String(html || '')
     .replace(/<style[\s\S]*?<\/style>/gi, '')

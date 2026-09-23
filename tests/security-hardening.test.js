@@ -38,6 +38,20 @@ assert.strictEqual((functions.match(/rejectOversizedRequest\(request, response\)
 assert.match(sheetActions, /function safeSheetCell_\(value\)/);
 assert.match(sheetActions, /groupEmail !== String\(UTL_GOOGLE_GROUP_EMAIL\)/);
 assert.match(sheetActions, /function isValidAdminRelay_\(data\)/);
+
+// The waitlist/contact endpoint is a public Apps Script URL visible in every page's source,
+// so it is a routine target for bots that POST directly to it, bypassing the real HTML forms
+// (which already require name/email/message). Without a server-side check, that produces
+// exactly the symptom reported: an email with a real page URL but blank name/role/message.
+assert.match(sheetActions, /function shouldRejectContactSubmission_\(data\)/, 'the contact-form logging branch must be able to reject submissions that skipped the real form');
+(function () {
+  const src = sheetActions.slice(sheetActions.indexOf('function shouldRejectContactSubmission_'));
+  const body = src.slice(0, src.indexOf('\nfunction stripHtml_'));
+  const shouldRejectContactSubmission_ = new Function('data', body + '\nreturn shouldRejectContactSubmission_(data);');
+  assert.equal(shouldRejectContactSubmission_({ name: '', email: '' }), true, 'a fully blank submission must be rejected');
+  assert.equal(shouldRejectContactSubmission_({ name: 'Karla', email: 'not-an-email' }), true, 'a malformed email must be rejected even if a name is present');
+  assert.equal(shouldRejectContactSubmission_({ name: 'Karla', email: 'karla@ayalamalls.com' }), false, 'a real, complete submission must not be rejected');
+})();
 assert.match(adminFunctions, /exports\.runAdminAction = onCall/);
 assert.match(adminFunctions, /ALLOWED_ADMIN_ACTIONS = new Set\(\["WelcomeEmail", "TestEmailTemplate", "RemovedMember"\]\)/);
 assert.match(adminFunctions, /await isAuthorizedAdmin\(email\)/);
