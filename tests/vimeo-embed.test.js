@@ -18,6 +18,18 @@ assert.match(content, /max_quality", "720p"/, 'Vimeo embeds cap automatic playba
 assert.match(content, /player\.on\("bufferstart"/, 'Vimeo buffering starts a stall check');
 assert.match(content, /data-vimeo-retry/, 'Vimeo embeds provide an in-page recovery action');
 
+// Some environments (locked-down corporate browser policies, certain in-app webviews) reject
+// a fullscreen request made from inside the cross-origin Vimeo iframe, so the player's own
+// fullscreen button appears to expand and then immediately reverts, even though playback
+// continues normally. A same-origin expand button, with a CSS-only fallback for when the
+// Fullscreen API itself is unavailable or refused, gives learners a way to actually see the
+// video full-size regardless of that restriction.
+assert.match(content, /class="ws-media-expand" aria-label="View in full screen"/, 'every media frame offers a same-origin expand control');
+assert.match(content, /function toggleMediaExpand\(frameWrap\)/, 'the expand control drives a dedicated toggle handler');
+assert.match(content, /frameWrap\.requestFullscreen \|\| frameWrap\.webkitRequestFullscreen/, 'expanding requests fullscreen on the page\'s own media frame, not the cross-origin iframe');
+assert.match(content, /setMediaFallbackExpanded\(frameWrap, true\)/, 'a refused or unsupported Fullscreen API falls back to a CSS overlay');
+assert.match(content, /\.ws-media-frame\.ws-media-expanded\{position:fixed;inset:0;z-index:9999/, 'the CSS fallback covers the viewport when native fullscreen is unavailable');
+
 [
   ['Orientation', '1224500458'],
   ['Rule of three', '1224500460'],
