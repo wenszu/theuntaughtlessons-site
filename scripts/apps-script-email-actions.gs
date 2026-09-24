@@ -13,9 +13,16 @@
  *   if (action === 'RemovedMember') return handleRemovedMemberLog(data);
  *   if (action === 'AddGoogleGroupMember') return handleGoogleGroupMember(data, 'add');
  *   if (action === 'RemoveGoogleGroupMember') return handleGoogleGroupMember(data, 'remove');
+ *   if (action === 'WeeklyOrgReport') return handleTemplateEmail(data, false);
  *
  * Then replace the old handleWelcomeEmail(data) with handleTemplateEmail(data, false)
  * or keep handleWelcomeEmail as a wrapper around handleTemplateEmail.
+ *
+ * WeeklyOrgReport (Cloud Functions: exports.sendWeeklyOrganizationReports, a scheduled
+ * function that runs Tuesdays at 8am Asia/Manila) sends an organization's weekly stats to
+ * its contact email, for organizations an admin has opted in from the Organization access
+ * panel. It needs no handler of its own; it reuses handleTemplateEmail exactly like
+ * WelcomeEmail, since it sends the same recipient/subject/plainBody/emailFormat shape.
  *
  * Google Group automation requires Apps Script Advanced Google services:
  *   Services (+) -> Admin Directory API -> Add

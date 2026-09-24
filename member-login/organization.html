@@ -56,6 +56,22 @@
     .progress-track { height:7px; border-radius:999px; background:#e7e3dc; overflow:hidden; margin-top:7px; }
     .progress-track i { display:block; height:100%; background:var(--green); }
     .empty { color:#666; padding:10px 0 18px; }
+    .roster-steps { margin:14px 0 0; padding:0 0 0 20px; color:var(--steel); font-size:14px; line-height:1.6; }
+    .roster-steps li { margin-bottom:4px; }
+    .roster-body { padding:0 22px 22px; }
+    .roster-body > label { margin-bottom:14px; }
+    .roster-row { display:grid; grid-template-columns:1fr 1fr auto; gap:10px; align-items:center; margin-bottom:10px; }
+    .roster-row input { padding:11px 12px; border:1px solid #afc4d8; border-radius:8px; font:inherit; color:var(--ink); width:100%; }
+    .roster-remove { border:1px solid var(--line); background:white; border-radius:8px; width:38px; height:38px; cursor:pointer; color:#a33; font-size:16px; line-height:1; }
+    .roster-actions { margin-top:6px; display:flex; gap:10px; flex-wrap:wrap; }
+    .roster-actions button { padding:11px 16px; border-radius:8px; border:1px solid var(--navy); font-weight:700; cursor:pointer; font:inherit; }
+    #rosterSubmit { background:var(--navy); color:white; }
+    #rosterAddRow { background:white; color:var(--navy); }
+    .roster-status { margin-top:12px; }
+    .roster-history { margin-top:20px; }
+    .roster-history-item { display:flex; justify-content:space-between; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid var(--line); font-size:14px; }
+    .roster-history-item:last-child { border-bottom:0; }
+    @media (max-width:640px) { .roster-row { grid-template-columns:1fr; } }
     [hidden] { display:none !important; }
     @media (max-width:800px) {
       .topbar { align-items:flex-start; }
@@ -96,10 +112,32 @@
         <div class="table-heading"><span class="eyebrow">Learner progress</span><h2>People in these cohorts</h2></div>
         <div class="table-wrap"><table><thead><tr><th>Learner</th><th>Cohort</th><th>Progress</th><th>Mastery Points (MP)</th><th>Status</th></tr></thead><tbody id="learnerRows"></tbody></table></div>
       </article>
+      <article class="card table-card" id="rosterCard" hidden>
+        <div class="table-heading">
+          <span class="eyebrow">Suggest learners</span><h2>Propose a roster</h2>
+          <p class="intro" style="font-size:15px;margin:6px 0 0">Suggest people for a cohort. UTL reviews every proposal before anyone is added or contacted.</p>
+          <ol class="roster-steps">
+            <li>Choose the cohort you're proposing people for.</li>
+            <li>Enter each person's full name and email. Use "+ Add another person" for more than one.</li>
+            <li>Submit for review. Your proposal appears below as "Pending review" until UTL responds.</li>
+          </ol>
+        </div>
+        <div class="roster-body">
+          <label for="rosterCohort">Cohort<select id="rosterCohort"></select></label>
+          <div id="rosterRows"></div>
+          <div class="roster-actions">
+            <button type="button" id="rosterAddRow">+ Add another person</button>
+            <button type="button" id="rosterSubmit">Submit for review</button>
+          </div>
+          <p class="status roster-status" id="rosterStatus" role="status" hidden></p>
+          <div class="roster-history" id="rosterHistory"></div>
+        </div>
+      </article>
     </section>
   </main>
   <script type="module">
-    import { getOrganizationConsole, getSignedInUser } from "../assets/firebase.js";
+    import { getOrganizationConsole, getSignedInUser, submitOrganizationRosterDraft } from "../assets/firebase.js";
+    const ROSTER_PROPOSAL_ROLES = ["organization_owner", "program_manager", "cohort_facilitator"];
     const status = document.getElementById("consoleStatus");
     const content = document.getElementById("consoleContent");
     const toolbar = document.getElementById("orgToolbar");
@@ -108,8 +146,73 @@
     const metrics = document.getElementById("organizationMetrics");
     const cohorts = document.getElementById("cohortCards");
     const learners = document.getElementById("learnerRows");
+    const rosterCard = document.getElementById("rosterCard");
+    const rosterCohort = document.getElementById("rosterCohort");
+    const rosterRows = document.getElementById("rosterRows");
+    const rosterAddRow = document.getElementById("rosterAddRow");
+    const rosterSubmit = document.getElementById("rosterSubmit");
+    const rosterStatus = document.getElementById("rosterStatus");
+    const rosterHistory = document.getElementById("rosterHistory");
     const escapeHtml = (value) => String(value == null ? "" : value).replace(/[&<>'"]/g, (character) => ({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[character]));
     function metric(label,value){ return `<div class="metric"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong></div>`; }
+    function rosterRowMarkup() {
+      return `<div class="roster-row" data-roster-row><input type="text" placeholder="Full name" data-roster-name><input type="email" placeholder="name@company.com" data-roster-email><button type="button" class="roster-remove" data-roster-remove aria-label="Remove this person">&times;</button></div>`;
+    }
+    function addRosterRow() {
+      rosterRows.insertAdjacentHTML("beforeend", rosterRowMarkup());
+    }
+    function renderRosterCohortOptions(cohortIds) {
+      const ids = cohortIds || [];
+      rosterCohort.innerHTML = ids.map((id) => `<option value="${escapeHtml(id)}">${escapeHtml(id)}</option>`).join("");
+    }
+    function rosterStatusLabel(item) {
+      if (item.status === "approved") return "Approved";
+      if (item.status === "rejected") return "Not approved" + (item.reviewNote ? `: ${item.reviewNote}` : "");
+      return "Pending review";
+    }
+    function renderRosterHistory(drafts) {
+      const items = drafts || [];
+      rosterHistory.innerHTML = items.length
+        ? items.map((item) => `<div class="roster-history-item"><span>${escapeHtml(item.cohortId)} &middot; ${item.rows.length} ${item.rows.length === 1 ? "person" : "people"}</span><span class="pill">${escapeHtml(rosterStatusLabel(item))}</span></div>`).join("")
+        : `<p class="empty">No roster proposals submitted yet.</p>`;
+    }
+    function collectRosterRows() {
+      return Array.from(rosterRows.querySelectorAll("[data-roster-row]")).map((row) => ({
+        name: row.querySelector("[data-roster-name]").value.trim(),
+        email: row.querySelector("[data-roster-email]").value.trim().toLowerCase()
+      })).filter((item) => item.name || item.email);
+    }
+    async function submitRoster() {
+      const cohortId = rosterCohort.value;
+      const rows = collectRosterRows();
+      rosterStatus.hidden = false; rosterStatus.classList.remove("error");
+      if (!cohortId) { rosterStatus.classList.add("error"); rosterStatus.textContent = "Choose a cohort."; return; }
+      if (!rows.length) { rosterStatus.classList.add("error"); rosterStatus.textContent = "Add at least one person with a name and email."; return; }
+      rosterSubmit.disabled = true;
+      rosterStatus.textContent = "Submitting…";
+      try {
+        await submitOrganizationRosterDraft({ organizationId: select.value, cohortId, rows });
+        rosterStatus.textContent = "Submitted. UTL will review this proposal.";
+        rosterRows.innerHTML = "";
+        addRosterRow();
+        await load(select.value);
+      } catch (error) {
+        rosterStatus.classList.add("error");
+        rosterStatus.textContent = error && error.message ? error.message : "We could not submit this proposal.";
+      } finally {
+        rosterSubmit.disabled = false;
+      }
+    }
+    rosterAddRow.addEventListener("click", addRosterRow);
+    rosterSubmit.addEventListener("click", submitRoster);
+    rosterRows.addEventListener("click", (event) => {
+      const removeButton = event.target.closest("[data-roster-remove]");
+      if (!removeButton) return;
+      const rowsCount = rosterRows.querySelectorAll("[data-roster-row]").length;
+      if (rowsCount <= 1) { removeButton.closest("[data-roster-row]").querySelectorAll("input").forEach((input) => input.value = ""); return; }
+      removeButton.closest("[data-roster-row]").remove();
+    });
+    addRosterRow();
     function render(data) {
       const organizations = data.organizations || [];
       toolbar.hidden = organizations.length === 0;
@@ -124,6 +227,12 @@
       metrics.innerHTML = metric("Enrolled learners",aggregate.enrolledLearners || 0) + metric("Learners who started",aggregate.learnersStarted || 0) + metric("Program completers",aggregate.programCompleters || 0) + metric("Average completion",`${aggregate.averageCompletionPercent || 0}%`);
       cohorts.innerHTML = (data.cohorts || []).map((item) => `<article class="card"><div class="cohort-head"><div><span class="eyebrow">Cohort</span><h2>${escapeHtml(item.id)}</h2></div><span class="pill">${escapeHtml(item.status)}</span></div><div class="cohort-stats"><div><span>Learners</span><strong>${item.aggregate.enrolledLearners}</strong></div><div><span>Started</span><strong>${item.aggregate.learnersStarted}</strong></div><div><span>Average</span><strong>${item.aggregate.averageCompletionPercent}%</strong></div></div></article>`).join("") || `<p class="empty">No cohorts are assigned to this organization account.</p>`;
       learners.innerHTML = (data.members || []).map((item) => `<tr><td class="person"><strong>${escapeHtml(item.name)}</strong><span>${escapeHtml(item.email)}</span></td><td>${escapeHtml(item.cohortId)}</td><td class="progress"><strong>${item.progress.percent}%</strong><div class="progress-track"><i style="width:${Math.max(0,Math.min(100,item.progress.percent))}%"></i></div><small>${item.progress.completed} of ${item.progress.total}</small></td><td>${item.rewards.mp} MP<br><small>${escapeHtml(item.rewards.level)}</small></td><td>${item.progress.percent === 100 ? "Completed" : item.progress.completed > 0 ? "In progress" : "Not started"}</td></tr>`).join("") || `<tr><td colspan="5" class="empty">No learner records were found for these cohorts.</td></tr>`;
+      const canProposeRoster = ROSTER_PROPOSAL_ROLES.includes(data.selectedOrganization.role);
+      rosterCard.hidden = !canProposeRoster;
+      if (canProposeRoster) {
+        renderRosterCohortOptions(data.selectedOrganization.cohortIds || []);
+        renderRosterHistory(data.myRosterDrafts || []);
+      }
       status.hidden = true; content.hidden = false;
     }
     async function load(organizationId = "") {

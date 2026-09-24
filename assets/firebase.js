@@ -349,6 +349,22 @@ async function saveOrganizationDefinition(payload = {}) {
   return result && result.data ? result.data : null;
 }
 
+async function submitOrganizationRosterDraft(payload = {}) {
+  const user = await getSignedInUser();
+  if (!user) throw new Error("Please sign in to submit a roster proposal.");
+  const callable = httpsCallable(functions, "submitOrganizationRosterDraft");
+  const result = await callable(payload && typeof payload === "object" ? payload : {});
+  return result && result.data ? result.data : null;
+}
+
+async function reviewOrganizationRosterDraft(payload = {}) {
+  const user = await getSignedInUser();
+  if (!user) throw new Error("Please sign in with a UTL administrator account.");
+  const callable = httpsCallable(functions, "reviewOrganizationRosterDraft");
+  const result = await callable(payload && typeof payload === "object" ? payload : {});
+  return result && result.data ? result.data : null;
+}
+
 async function getAuthorizedMember(email) {
   const normalizedEmail = String(email || "").trim().toLowerCase();
   if (!normalizedEmail) return null;
@@ -2095,6 +2111,8 @@ export {
   repairMemberExerciseProgress,
   saveOrganizationAccessMember,
   saveOrganizationDefinition,
+  submitOrganizationRosterDraft,
+  reviewOrganizationRosterDraft,
   saveMemberRewards,
   saveUserProfile,
   updateMemberAccount,

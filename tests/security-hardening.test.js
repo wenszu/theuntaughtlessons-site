@@ -53,7 +53,7 @@ assert.match(sheetActions, /function shouldRejectContactSubmission_\(data\)/, 't
   assert.equal(shouldRejectContactSubmission_({ name: 'Karla', email: 'karla@ayalamalls.com' }), false, 'a real, complete submission must not be rejected');
 })();
 assert.match(adminFunctions, /exports\.runAdminAction = onCall/);
-assert.match(adminFunctions, /ALLOWED_ADMIN_ACTIONS = new Set\(\["WelcomeEmail", "TestEmailTemplate", "RemovedMember"\]\)/);
+assert.match(adminFunctions, /ALLOWED_ADMIN_ACTIONS = new Set\(\["WelcomeEmail", "TestEmailTemplate", "RemovedMember", "WeeklyOrgReport"\]\)/);
 assert.match(adminFunctions, /await isAuthorizedAdmin\(email\)/);
 assert.doesNotMatch(admin, /const EMAIL_SCRIPT_URL =/);
 assert.doesNotMatch(admin, /mode: 'no-cors'/);

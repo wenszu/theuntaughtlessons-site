@@ -2,6 +2,7 @@ const admin = require("firebase-admin");
 const crypto = require("crypto");
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const { onDocumentWritten } = require("firebase-functions/v2/firestore");
+const { onSchedule } = require("firebase-functions/v2/scheduler");
 const { defineSecret, defineString } = require("firebase-functions/params");
 
 admin.initializeApp();
@@ -11,7 +12,7 @@ const APPS_SCRIPT_ADMIN_URL = defineString("APPS_SCRIPT_ADMIN_URL", {
   default: "https://script.google.com/macros/s/AKfycbzJE--FL2kB_XDNZRnszCtlyLRPvaLAHGuF5TAOdXJk40atbvf5Y6ELuSK2B7CSLaMN/exec"
 });
 const BOOTSTRAP_OWNER_EMAILS = new Set(["wenszu@gmail.com"]);
-const ALLOWED_ADMIN_ACTIONS = new Set(["WelcomeEmail", "TestEmailTemplate", "RemovedMember"]);
+const ALLOWED_ADMIN_ACTIONS = new Set(["WelcomeEmail", "TestEmailTemplate", "RemovedMember", "WeeklyOrgReport"]);
 const MAX_ADMIN_ACTION_BYTES = 64 * 1024;
 const CREDENTIAL_PROGRAM_ID = "think-speak-act-executive";
 const CREDENTIAL_CODE = "TSA";
@@ -46,6 +47,10 @@ const ORGANIZATION_ALL_COHORT_ROLES = new Set(["organization_owner", "program_ma
 const ORGANIZATION_ACCESS_STATUSES = new Set(["active", "suspended"]);
 const ORGANIZATION_STATUSES = new Set(["active", "archived"]);
 const ORGANIZATION_DEFINITION_ACTIONS = new Set(["create", "rename", "archive", "reactivate"]);
+const ORGANIZATION_ROSTER_PROPOSAL_ROLES = new Set(["organization_owner", "program_manager", "cohort_facilitator"]);
+const ORGANIZATION_ROSTER_DRAFT_STATUSES = new Set(["submitted", "approved", "rejected"]);
+const ORGANIZATION_ROSTER_REVIEW_ACTIONS = new Set(["approve", "reject"]);
+const MAX_ROSTER_DRAFT_ROWS = 25;
 
 function slugifyOrganizationName(name) {
   return String(name || "").trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 80);
@@ -242,6 +247,7 @@ function mergeOrganizationDefinitions(storedOrganizations, cohortDetails) {
       status: ORGANIZATION_STATUSES.has(String(item.status || "").trim().toLowerCase()) ? String(item.status).trim().toLowerCase() : "active",
       contactName: String(item.contactName || "").trim().slice(0, 160),
       contactEmail: String(item.contactEmail || "").trim().toLowerCase().slice(0, 200),
+      weeklyReportOptIn: item.weeklyReportOptIn === true,
       cohortIds: []
     };
   });
@@ -259,6 +265,22 @@ function allowedCohortsForMembership(organization, membership) {
   if (ORGANIZATION_ALL_COHORT_ROLES.has(role)) return [...allCohorts];
   const assigned = Array.isArray(membership && membership.assignedCohortIds) ? membership.assignedCohortIds : [];
   return allCohorts.filter((cohortId) => assigned.includes(cohortId));
+}
+
+function normalizeOrganizationRosterRows(rows) {
+  const values = Array.isArray(rows) ? rows : [];
+  const seen = new Set();
+  const normalized = [];
+  values.forEach((row) => {
+    const name = String((row && row.name) || "").trim().slice(0, 200);
+    const email = String((row && row.email) || "").trim().toLowerCase().slice(0, 200);
+    if (!name || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || seen.has(email)) return;
+    seen.add(email);
+    normalized.push({ name, email });
+  });
+  if (!normalized.length) throw new HttpsError("invalid-argument", "Add at least one person with a name and a valid email.");
+  if (normalized.length > MAX_ROSTER_DRAFT_ROWS) throw new HttpsError("invalid-argument", "A roster proposal can include at most " + MAX_ROSTER_DRAFT_ROWS + " people.");
+  return normalized;
 }
 
 function normalizeOrganizationAccessInput(input, definitions) {
@@ -339,7 +361,10 @@ if (process.env.NODE_ENV === "test") {
     organizationConsoleAggregate,
     normalizeOrganizationAccessInput,
     organizationAccessPreview,
-    normalizeOrganizationContact
+    normalizeOrganizationContact,
+    normalizeOrganizationRosterRows,
+    normalizeOrganizationReportSettings,
+    isoWeekId
   };
 }
 
@@ -351,7 +376,9 @@ async function organizationDefinitions() {
   ]);
   const stored = {};
   organizationsSnap.forEach((document) => { stored[document.id] = document.data() || {}; });
-  const cohortDetails = cohortSettingsSnap.exists && cohortSettingsSnap.data() && cohortSettingsSnap.data().cohorts || {};
+  // settings/cohorts stores each cohort's details as a flat top-level field keyed by cohort
+  // name (see setCohortDetails in assets/firebase.js) -- there is no nested "cohorts" field.
+  const cohortDetails = cohortSettingsSnap.exists ? (cohortSettingsSnap.data() || {}) : {};
   return { definitions: mergeOrganizationDefinitions(stored, cohortDetails), cohortDetails };
 }
 
@@ -427,7 +454,7 @@ exports.getOrganizationConsole = onCall({ timeoutSeconds: 30, memory: "256MiB" }
   const requestedId = normalizeOrganizationId(request.data && request.data.organizationId);
   const selected = requestedId ? allowed.find((item) => item.id === requestedId) : (allowed.length === 1 ? allowed[0] : null);
   if (requestedId && !selected) throw new HttpsError("permission-denied", "You do not have access to this organization.");
-  const base = { ok: true, organizations: allowed, selectedOrganization: null, cohorts: [], members: [], aggregate: organizationConsoleAggregate([]) };
+  const base = { ok: true, organizations: allowed, selectedOrganization: null, cohorts: [], members: [], aggregate: organizationConsoleAggregate([]), myRosterDrafts: [] };
   if (!selected) return base;
   const members = await loadOrganizationLearners(selected.cohortIds);
   const cohorts = selected.cohortIds.map((cohortId) => {
@@ -441,7 +468,28 @@ exports.getOrganizationConsole = onCall({ timeoutSeconds: 30, memory: "256MiB" }
       aggregate: organizationConsoleAggregate(cohortMembers)
     };
   });
-  return { ...base, selectedOrganization: selected, cohorts, members, aggregate: organizationConsoleAggregate(members) };
+  let myRosterDrafts = [];
+  if (ORGANIZATION_ROSTER_PROPOSAL_ROLES.has(selected.role)) {
+    // A plain .get() avoids requiring a composite Firestore index (see getOrganizationAccessAdmin).
+    const draftSnap = await admin.firestore().collection("organizations").doc(selected.id).collection("roster_drafts").get();
+    myRosterDrafts = draftSnap.docs.map((document) => {
+      const data = document.data() || {};
+      return {
+        id: document.id,
+        submittedByUid: String(data.submittedByUid || ""),
+        cohortId: String(data.cohortId || ""),
+        rows: Array.isArray(data.rows) ? data.rows : [],
+        status: String(data.status || "submitted"),
+        submittedAt: data.submittedAt && typeof data.submittedAt.toDate === "function" ? data.submittedAt.toDate().toISOString() : "",
+        reviewedAt: data.reviewedAt && typeof data.reviewedAt.toDate === "function" ? data.reviewedAt.toDate().toISOString() : "",
+        reviewNote: String(data.reviewNote || "")
+      };
+    }).filter((draft) => draft.submittedByUid === caller.uid)
+      .sort((a, b) => String(b.submittedAt).localeCompare(String(a.submittedAt)))
+      .slice(0, 25)
+      .map(({ submittedByUid, ...rest }) => rest);
+  }
+  return { ...base, selectedOrganization: selected, cohorts, members, aggregate: organizationConsoleAggregate(members), myRosterDrafts };
 });
 
 exports.getMyOrganizationAccess = onCall({ timeoutSeconds: 15, memory: "256MiB" }, async (request) => {
@@ -486,6 +534,25 @@ exports.getOrganizationAccessAdmin = onCall({ timeoutSeconds: 30, memory: "256Mi
       return { ...membership, preview: organizationAccessPreview(organization, membership) };
     });
   }));
+  const rosterDraftGroups = await Promise.all(organizations.map(async (organization) => {
+    // A plain .get() (no where/orderBy) avoids requiring a composite Firestore index; roster
+    // drafts per organization are expected to stay small, so filtering and sorting in memory
+    // is cheap and keeps this deployable without an index-creation step.
+    const snapshot = await db.collection("organizations").doc(organization.id).collection("roster_drafts").get();
+    return snapshot.docs.map((document) => {
+      const data = document.data() || {};
+      return {
+        id: document.id,
+        organizationId: organization.id,
+        organizationName: organization.name,
+        cohortId: String(data.cohortId || ""),
+        rows: Array.isArray(data.rows) ? data.rows : [],
+        status: String(data.status || "submitted"),
+        submittedByEmail: String(data.submittedByEmail || ""),
+        submittedAt: data.submittedAt && typeof data.submittedAt.toDate === "function" ? data.submittedAt.toDate().toISOString() : ""
+      };
+    }).filter((draft) => draft.status === "submitted");
+  }));
   const auditGroups = await Promise.all(organizations.map(async (organization) => {
     const snapshot = await db.collection("organizations").doc(organization.id).collection("access_audit")
       .orderBy("occurredAt", "desc").limit(25).get();
@@ -508,10 +575,102 @@ exports.getOrganizationAccessAdmin = onCall({ timeoutSeconds: 30, memory: "256Mi
   }));
   return {
     ok: true,
-    organizations: organizations.map((organization) => ({ id: organization.id, name: organization.name, status: organization.status, cohortIds: organization.cohortIds })),
+    organizations: organizations.map((organization) => ({ id: organization.id, name: organization.name, status: organization.status, contactName: organization.contactName, contactEmail: organization.contactEmail, weeklyReportOptIn: organization.weeklyReportOptIn, cohortIds: organization.cohortIds })),
     memberships: membershipGroups.flat().sort((a, b) => a.displayName.localeCompare(b.displayName)),
     audit: auditGroups.flat().sort((a, b) => String(b.occurredAt).localeCompare(String(a.occurredAt))).slice(0, 50),
+    rosterDrafts: rosterDraftGroups.flat().sort((a, b) => String(b.submittedAt).localeCompare(String(a.submittedAt))),
     roleLabels: ORGANIZATION_ROLE_LABELS
+  };
+});
+
+exports.submitOrganizationRosterDraft = onCall({ timeoutSeconds: 30, memory: "256MiB" }, async (request) => {
+  const caller = await requireVerifiedCaller(request);
+  const db = admin.firestore();
+  const { definitions } = await organizationDefinitions();
+  const memberships = await organizationMembershipsForCaller(caller, definitions, false);
+  const organizationId = normalizeOrganizationId(request.data && request.data.organizationId);
+  const organization = definitions[organizationId];
+  const membership = memberships.find((item) => item.organizationId === organizationId);
+  if (!organization || !membership) throw new HttpsError("permission-denied", "You do not have access to this organization.");
+  if (!ORGANIZATION_ROSTER_PROPOSAL_ROLES.has(membership.role)) throw new HttpsError("permission-denied", "Your role cannot propose learners for this organization.");
+  const cohortId = String((request.data && request.data.cohortId) || "").trim();
+  const allowedCohorts = allowedCohortsForMembership(organization, membership);
+  if (!cohortId || !allowedCohorts.includes(cohortId)) throw new HttpsError("invalid-argument", "Choose a cohort you have access to.");
+  const rows = normalizeOrganizationRosterRows(request.data && request.data.rows);
+  const now = admin.firestore.FieldValue.serverTimestamp();
+  const organizationRef = db.collection("organizations").doc(organizationId);
+  const draftRef = organizationRef.collection("roster_drafts").doc();
+  const batch = db.batch();
+  batch.set(draftRef, {
+    organizationId,
+    cohortId,
+    rows,
+    status: "submitted",
+    submittedByUid: caller.uid,
+    submittedByEmail: caller.email,
+    submittedAt: now,
+    reviewedByUid: "",
+    reviewedByEmail: "",
+    reviewedAt: null,
+    reviewNote: "",
+    updatedAt: now
+  });
+  batch.set(organizationRef.collection("access_audit").doc(), {
+    organizationId,
+    action: "roster_draft_submitted",
+    targetEmail: caller.email,
+    nextCohortIds: [cohortId],
+    rowCount: rows.length,
+    actorUid: caller.uid,
+    actorEmail: caller.email,
+    occurredAt: now
+  });
+  await batch.commit();
+  return { ok: true, draftId: draftRef.id };
+});
+
+exports.reviewOrganizationRosterDraft = onCall({ timeoutSeconds: 30, memory: "256MiB" }, async (request) => {
+  const caller = await requireVerifiedCaller(request);
+  if (!(await isAuthorizedAdmin(caller.email))) throw new HttpsError("permission-denied", "UTL administrator access is required.");
+  const db = admin.firestore();
+  const organizationId = normalizeOrganizationId(request.data && request.data.organizationId);
+  const draftId = String((request.data && request.data.draftId) || "").trim();
+  const action = String((request.data && request.data.action) || "").trim().toLowerCase();
+  if (!organizationId || !draftId) throw new HttpsError("invalid-argument", "Choose a valid roster proposal.");
+  if (!ORGANIZATION_ROSTER_REVIEW_ACTIONS.has(action)) throw new HttpsError("invalid-argument", "Choose a valid review action.");
+  const reviewNote = String((request.data && request.data.reviewNote) || "").trim().slice(0, 500);
+  const organizationRef = db.collection("organizations").doc(organizationId);
+  const draftRef = organizationRef.collection("roster_drafts").doc(draftId);
+  const snap = await draftRef.get();
+  if (!snap.exists) throw new HttpsError("not-found", "This roster proposal could not be found.");
+  const draft = snap.data() || {};
+  if (draft.status !== "submitted") throw new HttpsError("failed-precondition", "This roster proposal has already been reviewed.");
+  const nextStatus = action === "approve" ? "approved" : "rejected";
+  const now = admin.firestore.FieldValue.serverTimestamp();
+  const batch = db.batch();
+  batch.set(draftRef, {
+    status: nextStatus,
+    reviewedByUid: caller.uid,
+    reviewedByEmail: caller.email,
+    reviewedAt: now,
+    reviewNote,
+    updatedAt: now
+  }, { merge: true });
+  batch.set(organizationRef.collection("access_audit").doc(), {
+    organizationId,
+    action: action === "approve" ? "roster_draft_approved" : "roster_draft_rejected",
+    targetEmail: String(draft.submittedByEmail || ""),
+    nextCohortIds: draft.cohortId ? [draft.cohortId] : [],
+    rowCount: Array.isArray(draft.rows) ? draft.rows.length : 0,
+    actorUid: caller.uid,
+    actorEmail: caller.email,
+    occurredAt: now
+  });
+  await batch.commit();
+  return {
+    ok: true,
+    action: nextStatus,
+    draft: { organizationId, draftId, cohortId: String(draft.cohortId || ""), rows: Array.isArray(draft.rows) ? draft.rows : [] }
   };
 });
 
@@ -522,6 +681,10 @@ function normalizeOrganizationContact(input) {
     throw new HttpsError("invalid-argument", "Enter a valid contact email, or leave it blank.");
   }
   return { contactName, contactEmail: rawEmail.slice(0, 200) };
+}
+
+function normalizeOrganizationReportSettings(input) {
+  return { weeklyReportOptIn: (input && input.weeklyReportOptIn) === true };
 }
 
 exports.saveOrganizationDefinition = onCall({ timeoutSeconds: 30, memory: "256MiB" }, async (request) => {
@@ -539,6 +702,7 @@ exports.saveOrganizationDefinition = onCall({ timeoutSeconds: 30, memory: "256Mi
     const organizationId = normalizeOrganizationId(input.organizationId) || slugifyOrganizationName(name);
     if (!organizationId) throw new HttpsError("invalid-argument", "Enter an organization name that includes at least one letter or number.");
     const { contactName, contactEmail } = normalizeOrganizationContact(input);
+    const { weeklyReportOptIn } = normalizeOrganizationReportSettings(input);
     const organizationRef = db.collection("organizations").doc(organizationId);
     await db.runTransaction(async (transaction) => {
       const existing = await transaction.get(organizationRef);
@@ -549,6 +713,7 @@ exports.saveOrganizationDefinition = onCall({ timeoutSeconds: 30, memory: "256Mi
         status: "active",
         contactName,
         contactEmail,
+        weeklyReportOptIn,
         createdAt: now,
         createdByUid: caller.uid,
         createdByEmail: caller.email,
@@ -568,7 +733,7 @@ exports.saveOrganizationDefinition = onCall({ timeoutSeconds: 30, memory: "256Mi
         occurredAt: now
       });
     });
-    return { ok: true, action: "organization_created", organization: { id: organizationId, name, status: "active", contactName, contactEmail, cohortIds: [] } };
+    return { ok: true, action: "organization_created", organization: { id: organizationId, name, status: "active", contactName, contactEmail, weeklyReportOptIn, cohortIds: [] } };
   }
 
   const organizationId = normalizeOrganizationId(input.organizationId);
@@ -582,8 +747,9 @@ exports.saveOrganizationDefinition = onCall({ timeoutSeconds: 30, memory: "256Mi
     const name = String(input.name || "").trim().slice(0, 160);
     if (!name) throw new HttpsError("invalid-argument", "Enter an organization name.");
     const { contactName, contactEmail } = normalizeOrganizationContact(input);
+    const { weeklyReportOptIn } = normalizeOrganizationReportSettings(input);
     const batch = db.batch();
-    batch.set(organizationRef, { name, contactName, contactEmail, updatedAt: now, updatedByUid: caller.uid, updatedByEmail: caller.email }, { merge: true });
+    batch.set(organizationRef, { name, contactName, contactEmail, weeklyReportOptIn, updatedAt: now, updatedByUid: caller.uid, updatedByEmail: caller.email }, { merge: true });
     batch.set(organizationRef.collection("access_audit").doc(), {
       organizationId,
       action: "organization_renamed",
@@ -596,7 +762,7 @@ exports.saveOrganizationDefinition = onCall({ timeoutSeconds: 30, memory: "256Mi
       occurredAt: now
     });
     await batch.commit();
-    return { ok: true, action: "organization_renamed", organization: { id: organizationId, name, status: String(prior.status || "active"), contactName, contactEmail } };
+    return { ok: true, action: "organization_renamed", organization: { id: organizationId, name, status: String(prior.status || "active"), contactName, contactEmail, weeklyReportOptIn } };
   }
 
   const nextStatus = action === "archive" ? "archived" : "active";
@@ -940,6 +1106,34 @@ exports.getMemberCredentialRegistry = onCall({ timeoutSeconds: 30, memory: "256M
   return { ok: true, credentials };
 });
 
+// Shared by runAdminAction (a caller-authenticated onCall) and the scheduled weekly-report
+// function (which has no request.auth — it IS the trusted caller) so the fetch/response-
+// validation logic against the Apps Script relay is not duplicated between the two.
+async function postToAdminRelay(action, payload, requestedBy) {
+  const relayUrl = String(APPS_SCRIPT_ADMIN_URL.value() || "").trim();
+  const relaySecret = String(APPS_SCRIPT_ADMIN_RELAY_SECRET.value() || "").trim();
+  if (!relayUrl || !relaySecret) {
+    throw new HttpsError("failed-precondition", "The administrative relay is not configured.");
+  }
+  const response = await fetch(relayUrl + "?action=" + encodeURIComponent(action), {
+    method: "POST",
+    headers: { "Content-Type": "text/plain;charset=UTF-8" },
+    body: JSON.stringify({
+      ...payload,
+      action,
+      adminRelaySecret: relaySecret,
+      requestedBy,
+      source: String(payload.source || "firebase-admin-action")
+    })
+  });
+  const responseText = String(await response.text() || "").trim();
+  if (!response.ok || !/^ok(?:\b|:)/i.test(responseText)) {
+    console.error("Admin relay failed", { action, status: response.status, responseText: responseText.slice(0, 300) });
+    throw new HttpsError("internal", "The administrative action could not be completed.");
+  }
+  return { ok: true, action };
+}
+
 exports.runAdminAction = onCall({
   secrets: [APPS_SCRIPT_ADMIN_RELAY_SECRET],
   timeoutSeconds: 30,
@@ -965,29 +1159,86 @@ exports.runAdminAction = onCall({
     throw new HttpsError("invalid-argument", "The administrative request is too large.");
   }
 
-  const relayUrl = String(APPS_SCRIPT_ADMIN_URL.value() || "").trim();
-  const relaySecret = String(APPS_SCRIPT_ADMIN_RELAY_SECRET.value() || "").trim();
-  if (!relayUrl || !relaySecret) {
-    throw new HttpsError("failed-precondition", "The administrative relay is not configured.");
-  }
+  return postToAdminRelay(action, payload, email);
+});
 
-  const response = await fetch(relayUrl + "?action=" + encodeURIComponent(action), {
-    method: "POST",
-    headers: { "Content-Type": "text/plain;charset=UTF-8" },
-    body: JSON.stringify({
-      ...payload,
-      action,
-      adminRelaySecret: relaySecret,
-      requestedBy: email,
-      source: String(payload.source || "firebase-admin-action")
-    })
-  });
-  const responseText = String(await response.text() || "").trim();
-  if (!response.ok || !/^ok(?:\b|:)/i.test(responseText)) {
-    console.error("Admin relay failed", { action, status: response.status, responseText: responseText.slice(0, 300) });
-    throw new HttpsError("internal", "The administrative action could not be completed.");
+// ISO week id (e.g. "2026-W38"), used as the weekly_report_log document id so a retried or
+// duplicate scheduler invocation for the same week does not send a second email.
+function isoWeekId(date) {
+  const utcDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+  const dayNumber = utcDate.getUTCDay() || 7;
+  utcDate.setUTCDate(utcDate.getUTCDate() + 4 - dayNumber);
+  const yearStart = new Date(Date.UTC(utcDate.getUTCFullYear(), 0, 1));
+  const weekNumber = Math.ceil(((utcDate - yearStart) / 86400000 + 1) / 7);
+  return utcDate.getUTCFullYear() + "-W" + String(weekNumber).padStart(2, "0");
+}
+
+function weeklyOrgReportBody(organization, aggregate, cohortAggregates) {
+  const lines = [
+    "Weekly update for " + organization.name,
+    "",
+    "Enrolled learners: " + aggregate.enrolledLearners,
+    "Learners who have started: " + aggregate.learnersStarted,
+    "Program completers: " + aggregate.programCompleters,
+    "Average completion: " + aggregate.averageCompletionPercent + "%"
+  ];
+  if (cohortAggregates.length > 1) {
+    lines.push("", "By cohort:");
+    cohortAggregates.forEach((item) => lines.push("- " + item.cohortId + ": " + item.aggregate.enrolledLearners + " enrolled, " + item.aggregate.programCompleters + " completed (" + item.aggregate.averageCompletionPercent + "% average)"));
   }
-  return { ok: true, action };
+  return lines.join("\n");
+}
+
+exports.sendWeeklyOrganizationReports = onSchedule({
+  schedule: "0 8 * * TUE",
+  timeZone: "Asia/Manila",
+  secrets: [APPS_SCRIPT_ADMIN_RELAY_SECRET],
+  timeoutSeconds: 300,
+  memory: "512MiB"
+}, async () => {
+  const db = admin.firestore();
+  const { definitions } = await organizationDefinitions();
+  const weekId = isoWeekId(new Date());
+  const optedIn = Object.values(definitions).filter((organization) => organization.status === "active" && organization.weeklyReportOptIn === true);
+  for (const organization of optedIn) {
+    if (!organization.contactEmail) {
+      console.warn("Weekly org report skipped: no contact email on file", { organizationId: organization.id });
+      continue;
+    }
+    const logRef = db.collection("organizations").doc(organization.id).collection("weekly_report_log").doc(weekId);
+    if ((await logRef.get()).exists) continue;
+    try {
+      const members = await loadOrganizationLearners(organization.cohortIds);
+      const aggregate = organizationConsoleAggregate(members);
+      const cohortAggregates = organization.cohortIds.map((cohortId) => ({ cohortId, aggregate: organizationConsoleAggregate(members.filter((member) => member.cohortId === cohortId)) }));
+      // Stats only, deliberately: the narrative highlight/attention/action fields in the manual
+      // weekly report are human-authored per week and are not generated automatically here.
+      await postToAdminRelay("WeeklyOrgReport", {
+        recipient: organization.contactEmail,
+        subject: "Weekly update for " + organization.name,
+        plainBody: weeklyOrgReportBody(organization, aggregate, cohortAggregates),
+        emailFormat: "simple",
+        source: "scheduled-weekly-report"
+      }, "scheduled-weekly-report");
+      await logRef.set({
+        organizationId: organization.id,
+        sentAt: admin.firestore.FieldValue.serverTimestamp(),
+        cohortIds: organization.cohortIds,
+        recipientEmail: organization.contactEmail,
+        status: "sent"
+      });
+    } catch (error) {
+      console.error("Weekly org report failed", { organizationId: organization.id, error: error && error.message });
+      await logRef.set({
+        organizationId: organization.id,
+        sentAt: admin.firestore.FieldValue.serverTimestamp(),
+        cohortIds: organization.cohortIds,
+        recipientEmail: organization.contactEmail,
+        status: "failed",
+        error: String((error && error.message) || error)
+      });
+    }
+  }
 });
 
 async function isAuthorizedAdmin(email) {

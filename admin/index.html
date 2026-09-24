@@ -112,6 +112,10 @@
       font-size: 13px;
     }
 
+    select {
+      padding-right: 32px;
+    }
+
     textarea {
       box-sizing: border-box;
       width: 100%;
@@ -707,7 +711,7 @@
     }
 
     .lb-field select {
-      padding: 7px 10px;
+      padding: 7px 30px 7px 10px;
       border: 1px solid var(--line);
       border-radius: 6px;
       background: var(--white);
@@ -2781,6 +2785,7 @@
 
       <span class="nav-group-label" data-admin-nav-group="student-progress">Progress</span>
       <button class="admin-nav-item" data-admin-tab-scope="student-progress" data-target="section-student-progress">Student Progress</button>
+      <button class="admin-nav-item" data-admin-tab-scope="student-progress" data-target="section-platform-overview">Platform overview</button>
       <button class="admin-nav-item" data-admin-tab-scope="student-progress" data-target="section-launch-health">Learner readiness</button>
       <button class="admin-nav-item" data-admin-tab-scope="student-progress" data-target="section-leaderboard">Leaderboard</button>
       <button class="admin-nav-item" data-admin-tab-scope="student-progress" data-target="section-engagement-insights">Engagement Insights</button>
@@ -3128,6 +3133,19 @@
             </div>
           </div>
         </dialog>
+      </section>
+
+      <section class="admin-section" id="section-platform-overview" data-admin-tab-panel="student-progress">
+        <span class="section-label">Progress</span>
+        <h2>Platform overview</h2>
+        <div class="section-divider"></div>
+        <p class="description">Aggregate learner and completion stats across every organization, plus individual learners not assigned to one.</p>
+        <div class="student-progress-actions">
+          <button class="small-button" type="button" id="poRefresh">Refresh overview</button>
+          <span class="student-progress-status" id="poStatus" aria-live="polite"></span>
+        </div>
+        <div id="poSummary"></div>
+        <div id="poTable"><p class="mb-msg">Click Refresh overview to load platform-wide stats.</p></div>
       </section>
 
       <section class="admin-section" id="section-launch-health" data-admin-tab-panel="student-progress">
@@ -3631,6 +3649,10 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
             <div class="mb-form-field"><label for="oaOrgContactName">Contact name</label><input type="text" id="oaOrgContactName" placeholder="e.g. Priya Shah" autocomplete="off" maxlength="160"></div>
             <div class="mb-form-field"><label for="oaOrgContactEmail">Contact email</label><input type="email" id="oaOrgContactEmail" placeholder="name@company.com" autocomplete="off" maxlength="200"><span class="student-progress-status">Optional. Shown across this organization's cohorts and reports.</span></div>
           </div>
+          <div class="mb-form-field" style="margin-top:12px">
+            <label style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="oaOrgWeeklyReportOptIn" style="width:auto"><span>Weekly stats email</span></label>
+            <span class="student-progress-status">Automatically emails the contact above every Tuesday with enrolled learners, starts, and completions for this organization. Requires a contact email above; off by default.</span>
+          </div>
           <div class="mb-form-actions"><button class="small-button" type="button" id="oaOrgSave">Add organization</button><button class="small-button secondary-button" type="button" id="oaOrgCancel" hidden>Cancel edit</button><span class="student-progress-status" id="oaOrgStatus" aria-live="polite"></span></div>
           <div id="oaOrgTable" style="margin-top:16px"><p class="oa-empty">Open this section to load organizations.</p></div>
         </div>
@@ -3686,22 +3708,46 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
           </div>
         </div>
         <div class="oa-panel" style="margin-top:18px">
+          <h3>Roster proposals</h3>
+          <p class="description">Organization representatives can propose learners for a cohort from their console. Approving opens Bulk add learners pre-filled with their list — nothing is created until you review and confirm that step.</p>
+          <div class="mb-guide">
+            <button class="mb-guide-toggle" type="button" id="oaRosterGuideToggle">
+              <span>How roster proposals work — 3 steps</span>
+              <span class="mb-guide-icon" id="oaRosterGuideIcon">+</span>
+            </button>
+            <div class="mb-guide-body" id="oaRosterGuideBody">
+              <div class="mb-guide-methods">
+                <div class="mb-guide-method">
+                  <p class="mb-guide-method-label">Step 1 — A representative submits a proposal</p>
+                  <ol>
+                    <li><strong>Where:</strong> From their organization console (the same page they view progress on), a representative with Owner, Program manager, or Cohort facilitator access can list people for a cohort they already support.</li>
+                    <li><strong>What they see:</strong> Nothing is created yet. It shows here as "Pending review" until you act on it.</li>
+                  </ol>
+                </div>
+                <div class="mb-guide-method">
+                  <p class="mb-guide-method-label">Step 2 — Review it below</p>
+                  <ol>
+                    <li><strong>Reject:</strong> Declines the proposal and lets you leave an optional note the representative will see.</li>
+                    <li><strong>Approve &amp; open in bulk add:</strong> Marks the proposal approved and opens Bulk add learners with their cohort and list already filled in.</li>
+                  </ol>
+                </div>
+                <div class="mb-guide-method">
+                  <p class="mb-guide-method-label">Step 3 — Finish the bulk add like any other batch</p>
+                  <ol>
+                    <li><strong>Check the review table:</strong> Correct names or emails, and confirm who is ready before adding anyone. This is the same review step used for every bulk add.</li>
+                    <li><strong>Add ready learners:</strong> Nothing is created, and no email is sent, until you click this button.</li>
+                  </ol>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div id="oaRosterDrafts"><p class="oa-empty">No pending roster proposals.</p></div>
+        </div>
+        <div class="oa-panel" style="margin-top:18px">
           <h3>Recent access changes</h3>
           <p class="description">A read-only record of who granted, changed, suspended, or reactivated access.</p>
           <div id="oaAudit"><p class="oa-empty">No access changes loaded.</p></div>
         </div>
-        <dialog class="sp-dialog" id="oaOverviewDialog" aria-labelledby="oaOverviewTitle">
-          <div class="sp-dialog-shell">
-            <div class="sp-dialog-head">
-              <div><h3 id="oaOverviewTitle">Organization overview</h3><p id="oaOverviewSubtitle"></p></div>
-              <button class="sp-dialog-close" type="button" data-sp-dialog-close="oaOverviewDialog" aria-label="Close">&times;</button>
-            </div>
-            <div class="sp-dialog-body" id="oaOverviewBody"></div>
-            <div class="sp-dialog-actions">
-              <button class="small-button secondary-button" type="button" data-sp-dialog-close="oaOverviewDialog">Close</button>
-            </div>
-          </div>
-        </dialog>
       </section>
 
       <section class="admin-section" id="section-emergency-access" data-admin-tab-panel="member-management">
@@ -4170,6 +4216,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       repairMemberExerciseProgress,
       saveOrganizationAccessMember,
       saveOrganizationDefinition,
+      reviewOrganizationRosterDraft,
       sendSignInInvite,
       setCohortDetails,
       setEngagementSettings,
@@ -4228,6 +4275,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       repairMemberExerciseProgress,
       saveOrganizationAccessMember,
       saveOrganizationDefinition,
+      reviewOrganizationRosterDraft,
       sendSignInInvite,
       setCohortDetails,
       setEngagementSettings,
@@ -6854,37 +6902,52 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       }
     }
 
+    // Firebase Auth's SDK cannot handle two concurrent signInWithGooglePopup() calls -- the
+    // second corrupts the first's internal state (INTERNAL ASSERTION FAILED: Pending promise
+    // was never set), after which every other admin action on the page silently fails too.
+    // Several sections now auto-load on tab switch (Platform overview, Cohort Analytics, ...),
+    // so a real click shortly after landing on a tab can race an in-flight call from that
+    // auto-load. Sharing one in-flight promise across all callers makes that race impossible.
+    let mbRequireFirebaseAdminPromise = null;
     async function mbRequireFirebaseAdmin() {
-      const fb = window.utlFirebaseAuth;
-      if (!fb || !fb.getSignedInUser || !fb.signInWithGooglePopup || !fb.getDoc || !fb.doc || !fb.db) {
-        throw new Error('Firebase is still loading. Try again in a moment.');
-      }
+      if (mbRequireFirebaseAdminPromise) return mbRequireFirebaseAdminPromise;
+      mbRequireFirebaseAdminPromise = (async () => {
+        const fb = window.utlFirebaseAuth;
+        if (!fb || !fb.getSignedInUser || !fb.signInWithGooglePopup || !fb.getDoc || !fb.doc || !fb.db) {
+          throw new Error('Firebase is still loading. Try again in a moment.');
+        }
 
-      let user = await fb.getSignedInUser();
-      if (!user) {
-        await fb.signInWithGooglePopup();
-        user = await fb.getSignedInUser();
-      }
+        let user = await fb.getSignedInUser();
+        if (!user) {
+          await fb.signInWithGooglePopup();
+          user = await fb.getSignedInUser();
+        }
 
-      let adminStatus = await mbGetFirebaseAdminRole(user);
-      if (!adminStatus.email) {
-        throw new Error('Sign in with your Google admin account before managing members.');
-      }
+        let adminStatus = await mbGetFirebaseAdminRole(user);
+        if (!adminStatus.email) {
+          throw new Error('Sign in with your Google admin account before managing members.');
+        }
 
-      if (!adminStatus.isAdmin && fb.signOut && fb.auth) {
-        user = await mbSwitchFirebaseAdminAccount(adminStatus.email);
-        adminStatus = await mbGetFirebaseAdminRole(user);
-      }
+        if (!adminStatus.isAdmin && fb.signOut && fb.auth) {
+          user = await mbSwitchFirebaseAdminAccount(adminStatus.email);
+          adminStatus = await mbGetFirebaseAdminRole(user);
+        }
 
-      if (!adminStatus.isAdmin) {
-        throw new Error('Your Google account (' + adminStatus.email + ') is not marked admin or owner in authorized_members.');
-      }
+        if (!adminStatus.isAdmin) {
+          throw new Error('Your Google account (' + adminStatus.email + ') is not marked admin or owner in authorized_members.');
+        }
 
-      if (adminStatus.isBootstrapOwner) {
-        await mbEnsureBootstrapOwnerRecord(adminStatus.email);
-      }
+        if (adminStatus.isBootstrapOwner) {
+          await mbEnsureBootstrapOwnerRecord(adminStatus.email);
+        }
 
-      return user;
+        return user;
+      })();
+      try {
+        return await mbRequireFirebaseAdminPromise;
+      } finally {
+        mbRequireFirebaseAdminPromise = null;
+      }
     }
 
     function mbFriendlyPermissionMessage(error) {
@@ -9087,6 +9150,15 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       ,videoCompletion: ['Video completion rate', 'Vimeo viewing sessions reaching at least 80% divided by sessions where playback started.', 'Shows how often learners watch enough of a video to receive completion credit.', 'The common drop-off band and lesson title point to videos worth reviewing.']
       ,videoDropOff: ['Most common video drop-off', 'The quarter of the video containing the furthest point reached for sessions below 80%.', 'Shows where incomplete viewers most often stopped.', 'Use the lesson-level viewer count and median coverage before changing content.']
       ,dropOffStep: ['Most common exit step', 'The last named journey step reached in incomplete, meaningful activity visits. Completed visits are excluded.', 'Shows the part of an exercise where learners most often stop.', 'Completion rate, active time, help use, and validation errors help distinguish interruption from design friction.']
+      ,adoptionLearners: ['Total learners', 'Every learner ever granted authorized access to the program, platform-wide.', 'Shows total reach, not just who is active right now.', 'Compare with organizations and started-the-program below to see how reach is converting.']
+      ,adoptionOrganizations: ['Organizations', 'Active client organizations in Organization access.', 'Shows how many companies have adopted the program.', 'Open Organization access for contact details and per-company representative activity.']
+      ,adoptionStarted: ['Started the program', 'Learners with at least one completed exercise anywhere in the curriculum.', 'Shows how many people actually engaged with the material, not just signed up.', 'Compare with total learners for an activation rate, and with graduates for the finish rate.']
+      ,adoptionGraduates: ['Graduates (certificates issued)', 'Learners with a currently active TSA program certificate.', 'Shows how many people completed the full program end to end.', 'Compare with started-the-program for the finish rate below.']
+      ,adoptionFinishRate: ['Finish rate', 'Graduates divided by learners who started the program.', 'Shows how well the program retains people once they begin, independent of how many never start.', 'A low rate alongside high engagement volume may point to one phase worth reviewing in Cohort Analytics.']
+      ,adoptionLessonsWatched: ['Lessons watched (total)', 'Every lesson video marked watched, summed across every learner and phase.', 'Shows total content consumption across the whole program.', 'Divide by total learners for the average below.']
+      ,adoptionExercisesCompleted: ['Exercises completed (total)', 'Every exercise marked complete, summed across every learner and phase.', 'Shows total hands-on practice completed across the whole program.', 'Divide by total learners for the average below.']
+      ,adoptionAvgLessons: ['Avg lessons watched / learner', 'Total lessons watched divided by total learners.', 'Shows typical content consumption per person, including those who never started.', 'A low average alongside a high finish rate can mean a small, highly engaged group; compare with started-the-program.']
+      ,adoptionAvgExercises: ['Avg exercises completed / learner', 'Total exercises completed divided by total learners.', 'Shows typical hands-on practice per person, including those who never started.', 'Compare with avg lessons watched to see whether learners who watch also practice.']
     };
 
     function eiExplanation(key) {
@@ -9096,6 +9168,73 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
 
     function eiMetricCard(key, value) {
       return '<div class="ei-metric"><span class="ei-metric-label">' + escapeHtml(EI_METRICS[key][0]) + '</span><strong>' + escapeHtml(value) + '</strong><details><summary>How to interpret this metric</summary>' + eiExplanation(key) + '</details></div>';
+    }
+
+    // Program adoption: platform-wide reach, volume, and outcome totals, for tracking and
+    // eventually sharing how the TSA program is being adopted. Reuses the same per-member
+    // progress helpers Student Progress and Cohort Analytics already rely on (spFurthestPhase,
+    // spCompletedCount) and the certificate registry, rather than a new, parallel computation.
+    let eiCredentials = [];
+
+    function eiComputeAdoptionMetrics(members, credentials, organizationCount) {
+      const totalLearners = members.length;
+      const started = members.filter((member) => spFurthestPhase(member) !== 'none').length;
+      const graduates = credentials.filter((item) => item.status === 'active').length;
+      let lessonsWatched = 0;
+      let exercisesCompleted = 0;
+      members.forEach((member) => {
+        ['phase1', 'phase2', 'phase3'].forEach((phaseKey) => {
+          lessonsWatched += spCompletedCount(member, phaseKey, 'lessons').done;
+          exercisesCompleted += spCompletedCount(member, phaseKey, 'exercises').done;
+        });
+      });
+      return {
+        organizationCount,
+        totalLearners,
+        started,
+        graduates,
+        lessonsWatched,
+        exercisesCompleted,
+        avgLessonsPerLearner: totalLearners ? Math.round((lessonsWatched / totalLearners) * 10) / 10 : 0,
+        avgExercisesPerLearner: totalLearners ? Math.round((exercisesCompleted / totalLearners) * 10) / 10 : 0,
+        finishRatePercent: started ? Math.round((graduates / started) * 100) : 0
+      };
+    }
+
+    // Grouped like a funnel a caring admin would actually read top to bottom: how many people
+    // and companies the program has reached, how much of the material they are actually
+    // consuming, then how that turns into finished outcomes -- rather than one flat, undifferentiated
+    // grid of numbers.
+    function eiAdoptionHtml(metrics) {
+      return '<div class="sp-detail-card"><h4>Reach</h4><p class="description" style="margin-top:-6px">Who the program has reached so far.</p><div class="ei-summary">' +
+          eiMetricCard('adoptionLearners', String(metrics.totalLearners)) + eiMetricCard('adoptionOrganizations', String(metrics.organizationCount)) +
+        '</div></div>' +
+        '<div class="sp-detail-card" style="margin-top:16px"><h4>Engagement volume</h4><p class="description" style="margin-top:-6px">How much of the material learners are actually consuming.</p><div class="ei-summary">' +
+          eiMetricCard('adoptionLessonsWatched', String(metrics.lessonsWatched)) + eiMetricCard('adoptionExercisesCompleted', String(metrics.exercisesCompleted)) +
+          eiMetricCard('adoptionAvgLessons', String(metrics.avgLessonsPerLearner)) + eiMetricCard('adoptionAvgExercises', String(metrics.avgExercisesPerLearner)) +
+        '</div></div>' +
+        '<div class="sp-detail-card" style="margin-top:16px"><h4>Outcomes</h4><p class="description" style="margin-top:-6px">How engagement is converting into finished outcomes.</p><div class="ei-summary">' +
+          eiMetricCard('adoptionStarted', String(metrics.started)) + eiMetricCard('adoptionGraduates', String(metrics.graduates)) + eiMetricCard('adoptionFinishRate', metrics.finishRatePercent + '%') +
+        '</div></div>' +
+        '<div class="student-progress-actions" style="margin-top:16px"><button class="small-button secondary-button" type="button" id="eiAdoptionCopy">Copy summary</button><span class="student-progress-status" id="eiAdoptionCopyStatus" aria-live="polite"></span></div>';
+    }
+
+    function eiAdoptionSummaryText(metrics) {
+      return 'The Untaught Lessons — TSA program adoption\n' +
+        metrics.totalLearners + ' learners across ' + metrics.organizationCount + ' organization' + (metrics.organizationCount === 1 ? '' : 's') + '\n' +
+        metrics.started + ' started the program, ' + metrics.graduates + ' have graduated (' + metrics.finishRatePercent + '% finish rate)\n' +
+        metrics.lessonsWatched + ' lessons watched, ' + metrics.exercisesCompleted + ' exercises completed';
+    }
+
+    async function eiCopyAdoptionSummary(metrics) {
+      const status = document.getElementById('eiAdoptionCopyStatus');
+      const text = eiAdoptionSummaryText(metrics);
+      try {
+        await navigator.clipboard.writeText(text);
+        if (status) status.textContent = 'Copied.';
+      } catch (error) {
+        window.prompt('Copy this adoption summary:', text);
+      }
     }
 
     function eiFormatDuration(seconds) {
@@ -9198,13 +9337,17 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       eiData.activities.filter((activity)=>activity.meaningfulInteractions>0).forEach((activity)=>{const key=activity.activityId||'unknown';(activityGroups[key] ||= []).push(activity);});
       const activityRows = Object.entries(activityGroups).map(([id,items])=>{const starts=items.length,completed=items.filter((item)=>item.completed).length,help=items.reduce((sum,item)=>sum+Number(item.helpOpenedCount||0),0),errors=items.reduce((sum,item)=>sum+Number(item.validationErrorCount||0),0),submits=items.reduce((sum,item)=>sum+Number(item.submitCount||0),0),restarts=items.reduce((sum,item)=>sum+Number(item.restartCount||0),0),resumes=items.filter((item)=>item.resumed).length,title=items.find((item)=>item.activityTitle)?.activityTitle||id;return '<tr><td>'+escapeHtml(title)+'<br><small>'+escapeHtml(id)+'</small></td><td>'+starts+'</td><td>'+completed+' ('+Math.round(completed/starts*100)+'%)</td><td>'+escapeHtml(eiCommonExitStep(items))+'</td><td>'+eiFormatDuration(eiMedian(items.map((item)=>item.activeSeconds)))+'</td><td>'+help+'</td><td>'+errors+'</td><td>'+submits+'</td><td>'+restarts+'</td><td>'+resumes+'</td></tr>';}).join('') || '<tr><td colspan="10">No meaningful activity attempts have been tracked yet.</td></tr>';
       const noData = !eiData.sessions.length ? '<div class="sp-detail-card"><h4>No engagement recorded yet</h4><p>All students are listed in the Students view, but timing begins only on their next instrumented visit. Open a student workspace and interact with an activity to create test data.</p></div>' : '';
-      wrap.innerHTML = '<div class="ei-view-tabs" role="tablist"><button class="ei-view-tab is-active" type="button" data-ei-view="overview">Overview</button><button class="ei-view-tab" type="button" data-ei-view="videos">Videos</button><button class="ei-view-tab" type="button" data-ei-view="students">Students (' + studentMetrics.length + ')</button><button class="ei-view-tab" type="button" data-ei-view="cohorts">Cohorts (' + Object.keys(groups).length + ')</button><button class="ei-view-tab" type="button" data-ei-view="activities">Activities (' + Object.keys(activityGroups).length + ')</button></div>' +
-        '<div class="ei-view-panel" data-ei-panel="overview">' + noData + '<div class="ei-summary">' + cards + '</div><div class="sp-detail-card"><h4>Video engagement</h4><p class="description">Vimeo playback evidence appears after learners press play. Opening a lesson page alone is not counted as viewing.</p><div class="ei-summary">'+videoCards+'</div></div><div class="sp-detail-card"><h4>Needs attention</h4><p class="description">Incomplete activity with no meaningful engagement for at least 3 days. Review the evidence before contacting anyone.</p>' + queue + '</div></div>' +
+      const organizationCount = (oaData?.organizations || []).filter((organization) => organization.status !== 'archived').length;
+      const adoptionMetrics = eiComputeAdoptionMetrics(spAllMembers, eiCredentials, organizationCount);
+      wrap.innerHTML = '<div class="ei-view-tabs" role="tablist"><button class="ei-view-tab is-active" type="button" data-ei-view="adoption">Adoption</button><button class="ei-view-tab" type="button" data-ei-view="overview">Overview</button><button class="ei-view-tab" type="button" data-ei-view="videos">Videos</button><button class="ei-view-tab" type="button" data-ei-view="students">Students (' + studentMetrics.length + ')</button><button class="ei-view-tab" type="button" data-ei-view="cohorts">Cohorts (' + Object.keys(groups).length + ')</button><button class="ei-view-tab" type="button" data-ei-view="activities">Activities (' + Object.keys(activityGroups).length + ')</button></div>' +
+        '<div class="ei-view-panel" data-ei-panel="adoption"><div class="ei-section-intro"><div><h3>Program adoption</h3><p>Platform-wide reach, engagement volume, and outcomes, for tracking and eventually sharing how the TSA program is being adopted.</p></div></div>' + eiAdoptionHtml(adoptionMetrics) + '</div>' +
+        '<div class="ei-view-panel" data-ei-panel="overview" hidden>' + noData + '<div class="ei-summary">' + cards + '</div><div class="sp-detail-card"><h4>Video engagement</h4><p class="description">Vimeo playback evidence appears after learners press play. Opening a lesson page alone is not counted as viewing.</p><div class="ei-summary">'+videoCards+'</div></div><div class="sp-detail-card"><h4>Needs attention</h4><p class="description">Incomplete activity with no meaningful engagement for at least 3 days. Review the evidence before contacting anyone.</p>' + queue + '</div></div>' +
         '<div class="ei-view-panel" data-ei-panel="videos" hidden><div class="ei-section-intro"><div><h3>Video engagement</h3><p>Use lesson-level starts, coverage, completion and drop-off to identify videos that may need a clearer opening, tighter pacing or a better transition.</p></div></div><div class="student-progress-table-wrap"><table class="student-progress-table"><thead><tr><th>Video</th><th>Unique viewers</th><th>Viewing sessions</th><th>Median coverage</th><th>Reached 80%</th><th>Common drop-off</th><th>Active watch time</th></tr></thead><tbody>'+eiVideoTable(eiData.activities)+'</tbody></table></div><details style="margin-top:16px"><summary>How video metrics work</summary>'+eiExplanation('videoViewers')+eiExplanation('videoCoverage')+eiExplanation('videoCompletion')+eiExplanation('videoDropOff')+'</details></div>' +
         '<div class="ei-view-panel" data-ei-panel="students" hidden><div class="ei-section-intro"><div><h3>Student engagement</h3><p>Every student appears here, including those with no tracked activity. Select a student for their recent engagement detail.</p></div></div><div id="eiStudentList"><div class="student-progress-table-wrap"><table class="student-progress-table"><thead><tr><th>Student</th><th>Cohort</th><th>Signal</th><th>Last meaningful</th><th>Focused · 7d</th><th>Latest activity</th><th>Resumes</th></tr></thead><tbody>' + eiStudentRows(studentMetrics) + '</tbody></table></div></div><div id="eiStudentDetail" hidden></div></div>' +
         '<div class="ei-view-panel" data-ei-panel="cohorts" hidden><div class="ei-section-intro"><div><h3>Cohort engagement</h3><p>Compare behavioral engagement here. Completion funnels and curriculum outcomes remain in Cohort Analytics.</p></div></div><div id="eiCohortList"><div class="student-progress-table-wrap"><table class="student-progress-table"><thead><tr><th>Cohort</th><th>Students</th><th>Tracked</th><th>Active · 7d</th><th>Median session</th><th>Needs check-in</th><th>Resumes</th></tr></thead><tbody>' + cohortRows + '</tbody></table></div></div><div id="eiCohortDetail" hidden></div></div>' +
         '<div class="ei-view-panel" data-ei-panel="activities" hidden><div class="ei-section-intro"><div><h3>Activity friction</h3><p>Shared Phase 2 signals across exercises and assessments. Counts are interaction milestones, not raw clickstream data.</p></div></div><div class="student-progress-table-wrap"><table class="student-progress-table"><thead><tr><th>Activity</th><th>Starts</th><th>Completed</th><th>Common exit step</th><th>Median active</th><th>Help opened</th><th>Validation errors</th><th>Submissions</th><th>Restarts</th><th>Resumes</th></tr></thead><tbody>' + activityRows + '</tbody></table></div><details style="margin-top:16px"><summary>How activity-friction metrics work</summary>' + eiExplanation('activityStarts') + eiExplanation('completionRate') + eiExplanation('dropOffStep') + eiExplanation('helpRate') + eiExplanation('validationRate') + eiExplanation('restartRate') + '</details></div>';
       wrap.querySelectorAll('[data-ei-view]').forEach((button)=>button.addEventListener('click',()=>{wrap.querySelectorAll('[data-ei-view]').forEach((item)=>item.classList.toggle('is-active',item===button));wrap.querySelectorAll('[data-ei-panel]').forEach((panel)=>panel.hidden=panel.dataset.eiPanel!==button.dataset.eiView);}));
+      document.getElementById('eiAdoptionCopy')?.addEventListener('click', () => eiCopyAdoptionSummary(adoptionMetrics));
       function openStudent(uid) { const member=spAllMembers.find((item)=>item.uid===uid); const list=document.getElementById('eiStudentList'); const detail=document.getElementById('eiStudentDetail'); if(!member||!detail)return; wrap.querySelector('[data-ei-view="students"]')?.click(); if(list)list.hidden=true; detail.hidden=false; detail.innerHTML='<div class="student-progress-actions"><button class="small-button secondary-button" type="button" data-ei-back>← Back to all students</button></div><div class="sp-detail-header"><div><h3>'+escapeHtml(member.displayName||member.name||member.email||'Student')+'</h3><p>'+escapeHtml(member.email||'')+' · '+escapeHtml(member.cohort||'No cohort')+'</p></div></div>'+eiMemberCardHtml(member); detail.querySelector('[data-ei-back]')?.addEventListener('click',()=>{detail.hidden=true;if(list)list.hidden=false;}); }
       wrap.querySelectorAll('[data-ei-student]').forEach((button)=>button.addEventListener('click',()=>openStudent(button.dataset.eiStudent)));
       wrap.querySelectorAll('[data-ei-cohort]').forEach((button)=>button.addEventListener('click',()=>{const items=groups[button.dataset.eiCohort]||[];const list=document.getElementById('eiCohortList');const detail=document.getElementById('eiCohortDetail');if(!detail)return;if(list)list.hidden=true;detail.hidden=false;detail.innerHTML='<div class="student-progress-actions"><button class="small-button secondary-button" type="button" data-ei-cohort-back>← Back to all cohorts</button></div><div class="sp-detail-header"><div><h3>'+escapeHtml(button.dataset.eiCohort)+'</h3><p>'+items.length+' students · engagement detail</p></div></div><div class="student-progress-table-wrap"><table class="student-progress-table"><thead><tr><th>Student</th><th>Cohort</th><th>Signal</th><th>Last meaningful</th><th>Focused · 7d</th><th>Latest activity</th><th>Resumes</th></tr></thead><tbody>'+eiStudentRows(items)+'</tbody></table></div>';detail.querySelector('[data-ei-cohort-back]')?.addEventListener('click',()=>{detail.hidden=true;if(list)list.hidden=false;});detail.querySelectorAll('[data-ei-student]').forEach((student)=>student.addEventListener('click',()=>openStudent(student.dataset.eiStudent)));}));
@@ -9232,6 +9375,14 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         const analytics = await fb.getAllEngagementAnalytics(members.map((member) => member.uid).filter(Boolean));
         eiData = analytics;
         spAllMembers = members;
+        await caEnsureOrganizations(forceRefresh === true);
+        try {
+          const registry = fb.getMemberCredentialRegistry ? await fb.getMemberCredentialRegistry() : null;
+          eiCredentials = registry?.credentials || [];
+        } catch (credentialError) {
+          eiCredentials = [];
+          console.warn('Credential registry could not be loaded for Program adoption.', credentialError);
+        }
         renderEngagementInsights();
         if (status) status.textContent = analytics.sessions.length + ' tracked session' + (analytics.sessions.length === 1 ? '' : 's') + ' · refreshed ' + new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
       } catch (error) {
@@ -10407,7 +10558,8 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
 
       if (activeTab === 'student-progress') {
         const progressTarget = (currentActive || visibleNavItems[0])?.dataset.target;
-        if (progressTarget === 'section-launch-health') loadLaunchHealth();
+        if (progressTarget === 'section-platform-overview') poLoadPlatformOverview(false);
+        else if (progressTarget === 'section-launch-health') loadLaunchHealth();
         else if (progressTarget === 'section-engagement-insights') loadEngagementInsights();
         else loadStudentProgress();
       }
@@ -10613,7 +10765,9 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       return ({
         granted: 'Granted', reactivated: 'Reactivated', suspended: 'Suspended', updated: 'Updated',
         organization_created: 'Organization created', organization_renamed: 'Organization renamed',
-        organization_archived: 'Organization archived', organization_reactivated: 'Organization reactivated'
+        organization_archived: 'Organization archived', organization_reactivated: 'Organization reactivated',
+        roster_draft_submitted: 'Roster proposal submitted', roster_draft_approved: 'Roster proposal approved',
+        roster_draft_rejected: 'Roster proposal rejected'
       })[action] || action || 'Updated';
     }
 
@@ -10722,6 +10876,8 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       if (slug) { slug.value = ''; slug.readOnly = false; }
       if (contactName) contactName.value = '';
       if (contactEmail) contactEmail.value = '';
+      const weeklyReportOptIn = document.getElementById('oaOrgWeeklyReportOptIn');
+      if (weeklyReportOptIn) weeklyReportOptIn.checked = false;
       document.getElementById('oaOrgFormHeading').textContent = 'Add an organization';
       document.getElementById('oaOrgSave').textContent = 'Add organization';
       document.getElementById('oaOrgCancel').hidden = true;
@@ -10731,6 +10887,11 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
     function oaOrgEdit(id) {
       const organization = (oaData?.organizations || []).find((item) => item.id === id);
       if (!organization) return;
+      // Organization overview (and its Edit organization button) can be opened from Platform
+      // overview, under the Student Progress tab -- but the edit form itself lives under Member
+      // Access. Without switching tabs first, the form fills in correctly but stays invisible,
+      // since a hidden tab section is never rendered, and it looks like the click did nothing.
+      switchAdminTab('member-management');
       oaOrgEditingId = id;
       document.getElementById('oaOrgName').value = organization.name;
       const slug = document.getElementById('oaOrgSlug');
@@ -10738,6 +10899,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       slug.readOnly = true;
       document.getElementById('oaOrgContactName').value = organization.contactName || '';
       document.getElementById('oaOrgContactEmail').value = organization.contactEmail || '';
+      document.getElementById('oaOrgWeeklyReportOptIn').checked = organization.weeklyReportOptIn === true;
       document.getElementById('oaOrgFormHeading').textContent = 'Edit organization';
       document.getElementById('oaOrgSave').textContent = 'Save changes';
       document.getElementById('oaOrgCancel').hidden = false;
@@ -10769,6 +10931,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       if (!organization || !dialog || !body) return;
       document.getElementById('oaOverviewSubtitle').textContent = organization.id + ' · ' + (organization.status === 'archived' ? 'Archived' : 'Active');
       body.innerHTML = '<p class="oa-empty">Loading…</p>';
+      if (dialog.open) dialog.close();
       dialog.showModal();
       try {
         await mbRequireFirebaseAdmin();
@@ -10776,35 +10939,105 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       } catch (error) {
         // Cohort learner stats are a nice-to-have here; still show org and rep info even if this fails.
       }
+      try {
+        const groups = caCohortGroups();
+        const cohortSummaries = (organization.cohortIds || []).map((cohortId) => caCohortSummary(cohortId, groups[cohortId] || []));
+        const totalLearners = cohortSummaries.reduce((sum, s) => sum + s.count, 0);
+        const totalCompleted = cohortSummaries.reduce((sum, s) => sum + s.completed, 0);
+        const overallPercent = totalLearners ? Math.round((totalCompleted / totalLearners) * 100) : 0;
+        const reps = (oaData?.memberships || []).filter((member) => member.organizationId === organization.id);
+
+        const contactHtml = (organization.contactName || organization.contactEmail
+          ? '<p>' + escapeHtml(organization.contactName || 'No name on file') + (organization.contactEmail ? ' &middot; <a href="mailto:' + escapeHtml(organization.contactEmail) + '">' + escapeHtml(organization.contactEmail) + '</a>' : '') + '</p>'
+          : '<p class="oa-empty">No contact on file.</p>')
+          + '<p>Weekly report emails: <strong>' + (organization.weeklyReportOptIn ? 'On' : 'Off') + '</strong></p>';
+
+        const cohortRowsHtml = cohortSummaries.length
+          ? '<div class="student-progress-table-wrap"><table class="student-progress-table"><thead><tr><th>Cohort</th><th>Status</th><th>Learners</th><th>Completed</th><th>Avg MP</th></tr></thead><tbody>' +
+            cohortSummaries.map((s) => '<tr><td>' + escapeHtml(s.name) + '</td><td>' + caCohortStatusChip(caCohortLifecycleStatus(s.name)) + '</td><td>' + s.count + '</td><td>' + s.completed + ' (' + s.completionPercent + '%)</td><td>' + s.avgMp + ' MP</td></tr>').join('') +
+            '</tbody></table></div>'
+          : '<p class="oa-empty">No cohorts assigned yet. Assign one from Student Progress &rarr; Cohort Analytics.</p>';
+
+        const repRowsHtml = reps.length
+          ? '<div class="student-progress-table-wrap"><table class="student-progress-table"><thead><tr><th>Representative</th><th>Role</th><th>Status</th></tr></thead><tbody>' +
+            reps.map((member) => '<tr><td><strong>' + escapeHtml(member.displayName || member.email) + '</strong><small>' + escapeHtml(member.email) + '</small></td><td>' + escapeHtml((oaData?.roleLabels || {})[member.role] || member.role) + '</td><td><span class="oa-status-chip ' + (member.status === 'suspended' ? 'is-suspended' : '') + '">' + escapeHtml(member.status === 'suspended' ? 'Suspended' : 'Active') + '</span></td></tr>').join('') +
+            '</tbody></table></div>'
+          : '<p class="oa-empty">No representatives have access yet.</p>';
+
+        body.innerHTML =
+          '<div class="sp-detail-card"><h4>Contact</h4>' + contactHtml + '<button type="button" class="small-button secondary-button" data-oa-overview-edit>Edit organization</button></div>' +
+          '<div class="sp-detail-summary" style="margin:16px 0"><div class="sp-detail-stat"><span>Cohorts</span><strong>' + cohortSummaries.length + '</strong></div><div class="sp-detail-stat"><span>Learners</span><strong>' + totalLearners + '</strong></div><div class="sp-detail-stat"><span>Program complete</span><strong>' + totalCompleted + ' (' + overallPercent + '%)</strong></div><div class="sp-detail-stat"><span>Representatives</span><strong>' + reps.length + '</strong></div></div>' +
+          '<div class="sp-detail-card"><h4>Cohorts</h4>' + cohortRowsHtml + '</div>' +
+          '<div class="sp-detail-card" style="margin-top:16px"><h4>Representatives</h4>' + repRowsHtml + '</div>';
+        body.querySelector('[data-oa-overview-edit]')?.addEventListener('click', () => { dialog.close(); oaOrgEdit(organization.id); });
+      } catch (error) {
+        body.innerHTML = '<p class="oa-empty mb-err">Could not build this overview: ' + escapeHtml((error && error.message) || 'Unknown error') + '</p>';
+      }
+    }
+
+    async function poLoadPlatformOverview(forceRefresh) {
+      const status = document.getElementById('poStatus');
+      const tableWrap = document.getElementById('poTable');
+      if (status) status.textContent = 'Loading…';
+      try {
+        await mbRequireFirebaseAdmin();
+        await oaEnsureData(forceRefresh === true);
+        if (!spAllMembers.length || forceRefresh === true) spAllMembers = await spFetchAllMembers(window.utlFirebaseAuth || {}, forceRefresh === true);
+        poRenderPlatformOverview();
+        if (status) status.textContent = 'Updated ' + new Date().toLocaleTimeString();
+      } catch (error) {
+        if (status) status.textContent = '';
+        if (tableWrap) tableWrap.innerHTML = '<p class="oa-empty">Could not load platform overview: ' + escapeHtml((error && error.message) || 'Unknown error') + '</p>';
+      }
+    }
+
+    function poRenderPlatformOverview() {
+      const summaryWrap = document.getElementById('poSummary');
+      const tableWrap = document.getElementById('poTable');
+      if (!summaryWrap || !tableWrap) return;
+      const organizations = oaData?.organizations || [];
       const groups = caCohortGroups();
-      const cohortSummaries = (organization.cohortIds || []).map((cohortId) => caCohortSummary(cohortId, groups[cohortId] || []));
-      const totalLearners = cohortSummaries.reduce((sum, s) => sum + s.count, 0);
-      const totalCompleted = cohortSummaries.reduce((sum, s) => sum + s.completed, 0);
+      const assignedCohortNames = new Set(organizations.flatMap((organization) => organization.cohortIds || []));
+      const rows = organizations.map((organization) => {
+        const summaries = (organization.cohortIds || []).map((cohortId) => caCohortSummary(cohortId, groups[cohortId] || []));
+        const learners = summaries.reduce((sum, s) => sum + s.count, 0);
+        const completed = summaries.reduce((sum, s) => sum + s.completed, 0);
+        const reps = (oaData?.memberships || []).filter((member) => member.organizationId === organization.id).length;
+        return {
+          id: organization.id,
+          name: organization.name,
+          status: organization.status,
+          cohortCount: summaries.length,
+          learners,
+          completed,
+          completionPercent: learners ? Math.round((completed / learners) * 100) : 0,
+          reps
+        };
+      });
+      const unassignedCohortNames = Object.keys(groups).filter((name) => !assignedCohortNames.has(name));
+      const unassignedSummaries = unassignedCohortNames.map((name) => caCohortSummary(name, groups[name] || []));
+      const unassignedLearners = unassignedSummaries.reduce((sum, s) => sum + s.count, 0);
+      const unassignedCompleted = unassignedSummaries.reduce((sum, s) => sum + s.completed, 0);
+      const unassignedPercent = unassignedLearners ? Math.round((unassignedCompleted / unassignedLearners) * 100) : 0;
+
+      const activeRows = rows.filter((row) => row.status !== 'archived');
+      const totalOrganizations = activeRows.length;
+      const totalLearners = activeRows.reduce((sum, row) => sum + row.learners, 0) + unassignedLearners;
+      const totalCompleted = activeRows.reduce((sum, row) => sum + row.completed, 0) + unassignedCompleted;
+      const totalCohorts = activeRows.reduce((sum, row) => sum + row.cohortCount, 0) + unassignedSummaries.length;
       const overallPercent = totalLearners ? Math.round((totalCompleted / totalLearners) * 100) : 0;
-      const reps = (oaData?.memberships || []).filter((member) => member.organizationId === organization.id);
 
-      const contactHtml = organization.contactName || organization.contactEmail
-        ? '<p>' + escapeHtml(organization.contactName || 'No name on file') + (organization.contactEmail ? ' &middot; <a href="mailto:' + escapeHtml(organization.contactEmail) + '">' + escapeHtml(organization.contactEmail) + '</a>' : '') + '</p>'
-        : '<p class="oa-empty">No contact on file.</p>';
+      summaryWrap.innerHTML = '<div class="sp-detail-summary"><div class="sp-detail-stat"><span>Active organizations</span><strong>' + totalOrganizations + '</strong></div><div class="sp-detail-stat"><span>Cohorts</span><strong>' + totalCohorts + '</strong></div><div class="sp-detail-stat"><span>Learners</span><strong>' + totalLearners + '</strong></div><div class="sp-detail-stat"><span>Program complete</span><strong>' + totalCompleted + ' (' + overallPercent + '%)</strong></div></div>';
 
-      const cohortRowsHtml = cohortSummaries.length
-        ? '<div class="student-progress-table-wrap"><table class="student-progress-table"><thead><tr><th>Cohort</th><th>Status</th><th>Learners</th><th>Completed</th><th>Avg MP</th></tr></thead><tbody>' +
-          cohortSummaries.map((s) => '<tr><td>' + escapeHtml(s.name) + '</td><td>' + caCohortStatusChip(caCohortLifecycleStatus(s.name)) + '</td><td>' + s.count + '</td><td>' + s.completed + ' (' + s.completionPercent + '%)</td><td>' + s.avgMp + ' MP</td></tr>').join('') +
-          '</tbody></table></div>'
-        : '<p class="oa-empty">No cohorts assigned yet. Assign one from Student Progress &rarr; Cohort Analytics.</p>';
+      const orgRowsHtml = rows.map((row) => '<tr><td><strong>' + escapeHtml(row.name) + '</strong><small>' + escapeHtml(row.id) + '</small></td><td><span class="oa-status-chip ' + (row.status === 'archived' ? 'is-suspended' : '') + '">' + escapeHtml(row.status === 'archived' ? 'Archived' : 'Active') + '</span></td><td>' + row.cohortCount + '</td><td>' + row.learners + '</td><td>' + row.completed + ' (' + row.completionPercent + '%)</td><td>' + row.reps + '</td><td><button type="button" class="small-button secondary-button" data-po-org-overview="' + escapeHtml(row.id) + '">View</button></td></tr>').join('');
+      const unassignedRowHtml = unassignedSummaries.length
+        ? '<tr><td><strong>Individual / unassigned</strong><small>Not tied to an organization</small></td><td></td><td>' + unassignedSummaries.length + '</td><td>' + unassignedLearners + '</td><td>' + unassignedCompleted + ' (' + unassignedPercent + '%)</td><td>—</td><td></td></tr>'
+        : '';
 
-      const repRowsHtml = reps.length
-        ? '<div class="student-progress-table-wrap"><table class="student-progress-table"><thead><tr><th>Representative</th><th>Role</th><th>Status</th></tr></thead><tbody>' +
-          reps.map((member) => '<tr><td><strong>' + escapeHtml(member.displayName || member.email) + '</strong><small>' + escapeHtml(member.email) + '</small></td><td>' + escapeHtml((oaData?.roleLabels || {})[member.role] || member.role) + '</td><td><span class="oa-status-chip ' + (member.status === 'suspended' ? 'is-suspended' : '') + '">' + escapeHtml(member.status === 'suspended' ? 'Suspended' : 'Active') + '</span></td></tr>').join('') +
-          '</tbody></table></div>'
-        : '<p class="oa-empty">No representatives have access yet.</p>';
-
-      body.innerHTML =
-        '<div class="sp-detail-card"><h4>Contact</h4>' + contactHtml + '<button type="button" class="small-button secondary-button" data-oa-overview-edit>Edit organization</button></div>' +
-        '<div class="sp-detail-summary" style="margin:16px 0"><div class="sp-detail-stat"><span>Cohorts</span><strong>' + cohortSummaries.length + '</strong></div><div class="sp-detail-stat"><span>Learners</span><strong>' + totalLearners + '</strong></div><div class="sp-detail-stat"><span>Program complete</span><strong>' + totalCompleted + ' (' + overallPercent + '%)</strong></div><div class="sp-detail-stat"><span>Representatives</span><strong>' + reps.length + '</strong></div></div>' +
-        '<div class="sp-detail-card"><h4>Cohorts</h4>' + cohortRowsHtml + '</div>' +
-        '<div class="sp-detail-card" style="margin-top:16px"><h4>Representatives</h4>' + repRowsHtml + '</div>';
-      body.querySelector('[data-oa-overview-edit]')?.addEventListener('click', () => { dialog.close(); oaOrgEdit(organization.id); });
+      tableWrap.innerHTML = (rows.length || unassignedSummaries.length)
+        ? '<div class="student-progress-table-wrap"><table class="student-progress-table"><thead><tr><th>Organization</th><th>Status</th><th>Cohorts</th><th>Learners</th><th>Completed</th><th>Reps</th><th>Actions</th></tr></thead><tbody>' + orgRowsHtml + unassignedRowHtml + '</tbody></table></div>'
+        : '<p class="oa-empty">No organizations or cohorts yet.</p>';
+      tableWrap.querySelectorAll('[data-po-org-overview]').forEach((button) => button.addEventListener('click', () => oaOpenOverview(button.dataset.poOrgOverview)));
     }
 
     async function oaSaveOrganization(payloadOverride) {
@@ -10814,7 +11047,8 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         name: String(document.getElementById('oaOrgName')?.value || '').trim(),
         organizationIdInput: String(document.getElementById('oaOrgSlug')?.value || '').trim(),
         contactName: String(document.getElementById('oaOrgContactName')?.value || '').trim(),
-        contactEmail: String(document.getElementById('oaOrgContactEmail')?.value || '').trim()
+        contactEmail: String(document.getElementById('oaOrgContactEmail')?.value || '').trim(),
+        weeklyReportOptIn: document.getElementById('oaOrgWeeklyReportOptIn')?.checked === true
       };
       if (!payloadOverride && !payload.name) { showToast('Enter an organization name.', 'error'); return; }
       if (!payloadOverride && !oaOrgEditingId) payload.organizationId = payload.organizationIdInput;
@@ -10827,8 +11061,8 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         const fb = window.utlFirebaseAuth || {};
         if (!fb.saveOrganizationDefinition) throw new Error('Organization access service is not available.');
         const result = await fb.saveOrganizationDefinition(payload.action === 'create'
-          ? { action: 'create', name: payload.name, organizationId: payload.organizationIdInput, contactName: payload.contactName, contactEmail: payload.contactEmail }
-          : { action: payload.action, organizationId: payload.organizationId, name: payload.name, contactName: payload.contactName, contactEmail: payload.contactEmail });
+          ? { action: 'create', name: payload.name, organizationId: payload.organizationIdInput, contactName: payload.contactName, contactEmail: payload.contactEmail, weeklyReportOptIn: payload.weeklyReportOptIn }
+          : { action: payload.action, organizationId: payload.organizationId, name: payload.name, contactName: payload.contactName, contactEmail: payload.contactEmail, weeklyReportOptIn: payload.weeklyReportOptIn });
         oaData = null;
         await oaLoad(true);
         oaOrgResetForm();
@@ -10873,6 +11107,51 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         return;
       }
       wrap.innerHTML = '<div class="student-progress-table-wrap"><table class="student-progress-table"><thead><tr><th>When</th><th>Representative</th><th>Organization</th><th>Change</th><th>Role and scope</th><th>Changed by</th></tr></thead><tbody>' + audit.map((item) => '<tr><td>' + escapeHtml(oaDate(item.occurredAt)) + '</td><td>' + escapeHtml(item.targetEmail || '—') + '</td><td>' + escapeHtml(item.organizationName || item.organizationId) + '</td><td>' + escapeHtml(oaAuditActionLabel(item.action)) + '</td><td>' + oaAuditScopeText(item) + '</td><td>' + escapeHtml(item.actorEmail || 'Unknown') + '</td></tr>').join('') + '</tbody></table></div>';
+    }
+
+    function oaRenderRosterDrafts() {
+      const wrap = document.getElementById('oaRosterDrafts');
+      if (!wrap) return;
+      const drafts = oaData?.rosterDrafts || [];
+      if (!drafts.length) {
+        wrap.innerHTML = '<p class="oa-empty">No pending roster proposals.</p>';
+        return;
+      }
+      wrap.innerHTML = '<div class="student-progress-table-wrap"><table class="student-progress-table"><thead><tr><th>Organization</th><th>Cohort</th><th>People</th><th>Submitted by</th><th>Submitted</th><th>Actions</th></tr></thead><tbody>' + drafts.map((draft) => '<tr><td>' + escapeHtml(draft.organizationName || draft.organizationId) + '</td><td>' + escapeHtml(draft.cohortId) + '</td><td>' + draft.rows.length + '</td><td>' + escapeHtml(draft.submittedByEmail) + '</td><td>' + escapeHtml(oaDate(draft.submittedAt)) + '</td><td><div class="mb-actions"><button type="button" class="small-button secondary-button" data-oa-roster-approve="' + escapeHtml(draft.id) + '" data-oa-roster-org="' + escapeHtml(draft.organizationId) + '">Approve &amp; open in bulk add</button><button type="button" class="small-button secondary-button" data-oa-roster-reject="' + escapeHtml(draft.id) + '" data-oa-roster-org="' + escapeHtml(draft.organizationId) + '">Reject</button></div></td></tr>').join('') + '</tbody></table></div>';
+      wrap.querySelectorAll('[data-oa-roster-approve]').forEach((button) => button.addEventListener('click', () => oaApproveRosterDraft(button.dataset.oaRosterOrg, button.dataset.oaRosterApprove)));
+      wrap.querySelectorAll('[data-oa-roster-reject]').forEach((button) => button.addEventListener('click', () => oaRejectRosterDraft(button.dataset.oaRosterOrg, button.dataset.oaRosterReject)));
+    }
+
+    async function oaApproveRosterDraft(organizationId, draftId) {
+      const draft = (oaData?.rosterDrafts || []).find((item) => item.id === draftId && item.organizationId === organizationId);
+      if (!draft) return;
+      try {
+        await mbRequireFirebaseAdmin();
+        const fb = window.utlFirebaseAuth || {};
+        if (!fb.reviewOrganizationRosterDraft) throw new Error('Roster review service is not available.');
+        await fb.reviewOrganizationRosterDraft({ organizationId, draftId, action: 'approve' });
+        oaData = null;
+        await oaLoad(true);
+        showToast('Roster proposal approved. Review the pre-filled list before adding these learners.');
+        await mbBulkLoadRowsFromDraft(draft.cohortId, draft.rows);
+      } catch (error) {
+        showToast('Could not approve roster proposal: ' + ((error && error.message) || 'Unknown error'), 'error');
+      }
+    }
+
+    async function oaRejectRosterDraft(organizationId, draftId) {
+      const reviewNote = window.prompt('Optional note for the representative (why this was rejected):', '') || '';
+      try {
+        await mbRequireFirebaseAdmin();
+        const fb = window.utlFirebaseAuth || {};
+        if (!fb.reviewOrganizationRosterDraft) throw new Error('Roster review service is not available.');
+        await fb.reviewOrganizationRosterDraft({ organizationId, draftId, action: 'reject', reviewNote });
+        oaData = null;
+        await oaLoad(true);
+        showToast('Roster proposal rejected.');
+      } catch (error) {
+        showToast('Could not reject roster proposal: ' + ((error && error.message) || 'Unknown error'), 'error');
+      }
     }
 
     function oaClearEmailCheckStatus() {
@@ -10959,6 +11238,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         oaRenderOrgTable();
         oaRenderTable();
         oaRenderAudit();
+        oaRenderRosterDrafts();
       } catch (error) {
         const message = (error && error.message) || 'Unknown error';
         if (wrap) wrap.innerHTML = '<p class="oa-empty mb-err">Could not load organization access: ' + escapeHtml(message) + '</p>';
@@ -11230,12 +11510,19 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
     document.querySelector('[data-target="section-cohort-analytics"]')?.addEventListener('click', () => {
       if (spAllMembers.length) renderCohortAnalytics();
     });
+    document.querySelector('[data-target="section-platform-overview"]')?.addEventListener('click', () => poLoadPlatformOverview(false));
+    document.getElementById('poRefresh')?.addEventListener('click', () => poLoadPlatformOverview(true));
     document.getElementById('spPreviewLaunch')?.addEventListener('click', spLaunchExperiencePreview);
     document.getElementById('spPreviewEnd')?.addEventListener('click', spEndExperiencePreview);
     document.getElementById('spDetailBack')?.addEventListener('click', hideStudentProgressDetail);
-    document.querySelectorAll('[data-sp-dialog-close]').forEach((button) => button.addEventListener('click', () => {
-      document.getElementById(button.dataset.spDialogClose)?.close();
-    }));
+    // Delegated on document (not queried once at load) so this keeps working for a
+    // [data-sp-dialog-close] button regardless of where its dialog sits in the DOM --
+    // querySelectorAll-at-load-time misses any such dialog defined later in the page,
+    // including ones inserted or moved after this script already ran.
+    document.addEventListener('click', (event) => {
+      const button = event.target.closest('[data-sp-dialog-close]');
+      if (button) document.getElementById(button.dataset.spDialogClose)?.close();
+    });
     document.getElementById('spEditSave')?.addEventListener('click', spSaveEditedProgress);
     document.getElementById('spResetConfirm')?.addEventListener('change', (event) => {
       document.getElementById('spResetSubmit').disabled = !event.target.checked;
@@ -12179,6 +12466,24 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       if (confirm) { confirm.disabled = counts.ready === 0; confirm.textContent = 'Add ' + counts.ready + ' ready learner' + (counts.ready === 1 ? '' : 's'); }
     }
 
+    async function mbBulkLoadRowsFromDraft(cohort, rows) {
+      document.getElementById('mbAddMemberForm').hidden = true;
+      document.getElementById('mbInviteForm').hidden = true;
+      document.getElementById('mbAddMemberBtn').textContent = '+ Add member';
+      document.getElementById('mbInviteBtn').textContent = 'Send login link';
+      var bulkForm = document.getElementById('mbBulkAddForm');
+      var bulkButton = document.getElementById('mbBulkAddBtn');
+      if (bulkForm) bulkForm.hidden = false;
+      if (bulkButton) bulkButton.textContent = '✕ Cancel bulk add';
+      var cohortInput = document.getElementById('mbBulkCohort');
+      if (cohortInput) cohortInput.value = cohort || '';
+      if (!mbMembersCache.length) await mbLoadMembers();
+      mbBulkRows = (rows || []).map(function (row, index) { return { sourceIndex: index + 1, name: String(row.name || '').trim(), email: mbNormalizeEmail(row.email), action: '', message: '', state: '' }; });
+      mbBulkRenderReview();
+      mbBulkShowStep(2);
+      bulkForm?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
     function mbBulkShowStep(step) {
       document.querySelectorAll('[data-mb-bulk-step]').forEach(function (item) { item.classList.toggle('is-active', item.dataset.mbBulkStep === String(step)); });
       document.querySelectorAll('[data-mb-bulk-panel]').forEach(function (panel) { panel.hidden = panel.dataset.mbBulkPanel !== String(step); });
@@ -12594,6 +12899,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       }
       wireGuideToggle('mbGuideToggle', 'mbGuideBody', 'mbGuideIcon');
       wireGuideToggle('oaGuideToggle', 'oaGuideBody', 'oaGuideIcon');
+      wireGuideToggle('oaRosterGuideToggle', 'oaRosterGuideBody', 'oaRosterGuideIcon');
     })();
 
     // ===== end Members management =====
@@ -12675,5 +12981,17 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
   <script src="../assets/tactile-buttons.js?v=20260915-cache-v2" defer></script>
   <script type="module" src="../assets/feedback-widget.js?v=20260915-cache-v2"></script>
   <div id="caPrintReport" class="ca-print-report"></div>
+  <dialog class="sp-dialog" id="oaOverviewDialog" aria-labelledby="oaOverviewTitle">
+    <div class="sp-dialog-shell">
+      <div class="sp-dialog-head">
+        <div><h3 id="oaOverviewTitle">Organization overview</h3><p id="oaOverviewSubtitle"></p></div>
+        <button class="sp-dialog-close" type="button" data-sp-dialog-close="oaOverviewDialog" aria-label="Close">&times;</button>
+      </div>
+      <div class="sp-dialog-body" id="oaOverviewBody"></div>
+      <div class="sp-dialog-actions">
+        <button class="small-button secondary-button" type="button" data-sp-dialog-close="oaOverviewDialog">Close</button>
+      </div>
+    </div>
+  </dialog>
 </body>
 </html>
