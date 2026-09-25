@@ -4,7 +4,7 @@
   const REWARD_SYNC_QUEUE_KEY = "utl_pending_reward_sync";
   const LEGACY_MP_KEY = "utl_demo_mp_total";
   const FIREBASE_URL = document.currentScript && document.currentScript.src
-    ? new URL("firebase.js?v=20260915-cache-v2", document.currentScript.src).href
+    ? new URL("firebase.js?v=20260925-mobile-v1", document.currentScript.src).href
     : "";
   let syncTimer = null;
   const DEFAULT_LEVELS = [
@@ -210,7 +210,7 @@
       });
     } else if (!document.querySelector("script[data-utl-reward-ui-loader]")) {
       const script = document.createElement("script");
-      script.src = "../../assets/reward-ui.js?v=20260915-cache-v2";
+      script.src = "../../assets/reward-ui.js?v=20260925-mobile-v1";
       script.defer = true;
       script.dataset.utlRewardUiLoader = "true";
       script.addEventListener("load", () => showRewardMoment(detail, previousState, nextState), { once: true });

@@ -169,7 +169,18 @@ const STYLES = `
   @media (max-width: 600px) {
     #utl-feedback-btn {
       right: 16px;
-      padding: 10px 14px;
+      width: 46px;
+      height: 46px;
+      justify-content: center;
+      padding: 0;
+    }
+    #utl-feedback-btn .utl-fb-label {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: nowrap;
     }
     #utl-feedback-overlay {
       align-items: flex-end;
