@@ -108,7 +108,14 @@ const STYLES = `
     color: #222;
     margin-bottom: 14px;
   }
-  #utl-feedback-type { appearance: auto; }
+  #utl-feedback-type {
+    appearance: none;
+    padding-right: 44px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='m4 6 4 4 4-4' stroke='%23003366' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+    background-size: 16px 16px;
+  }
   #utl-feedback-desc { resize: vertical; min-height: 80px; }
   #utl-feedback-submit {
     background: #003366;
