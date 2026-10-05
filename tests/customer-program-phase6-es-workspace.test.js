@@ -126,7 +126,7 @@ async function main() {
   assert.equal(foundAttempt.resultScore, 50);
   assert.ok(!JSON.stringify(foundAttempt).includes(rawAnswerMarker), 'the attempts list must never expose raw responses');
 
-  // --- getEsConfiguration: definitions/versions summaries, no question content ---
+  // --- getEsConfiguration: definitions/versions summaries, including full question content for staff ---
   await db.collection('assessmentDefinitions').doc(`phase6-def-${token}`).set({
     schemaVersion: 1, programId: 'executive-signature', title: 'Phase 6 Test Assessment', status: 'live',
     currentVersionId: `phase6-ver-${token}`, estimatedMinutes: 5, updatedAt: admin.firestore.FieldValue.serverTimestamp()
@@ -144,7 +144,7 @@ async function main() {
   const ver = config.versions.find((v) => v.versionId === `phase6-ver-${token}`);
   assert.ok(ver, 'the seeded version must appear in the configuration summary');
   assert.equal(ver.questionCount, 2);
-  assert.ok(!('questions' in ver), 'configuration summaries must not carry the full question payload');
+  assert.deepEqual(ver.questions, [{ id: 'q1' }, { id: 'q2' }], 'ES operations staff must be able to see the actual question content, not just a count');
 
   // --- getEsDataGovernance: restricted for support, open for privacy admin ---
   await db.collection('consentEvents').doc(`phase6-consent-${token}`).set({

@@ -410,8 +410,12 @@ function createCustomerProgramService({ db, FieldValue }) {
     const pageSize = Math.min(DIRECTORY_PAGE_SIZE_MAX, Math.max(1,
       Number.isInteger(options.pageSize) ? options.pageSize : DIRECTORY_PAGE_SIZE_DEFAULT));
     const rawSearch = cleanString(options.search, "search", 200);
+    const programFilter = PROGRAM_IDS.has(options.programFilter) ? options.programFilter : null;
 
     if (rawSearch && EMAIL_PATTERN.test(rawSearch.toLowerCase())) {
+      // A pinpoint lookup for one known person. The program filter is for
+      // browsing a list, not for narrowing a search that already identifies
+      // exactly one customer, so it is deliberately ignored here.
       const emailHash = sha256(rawSearch.toLowerCase());
       const claimSnap = await db.collection("customerEmailClaims").doc(emailHash).get();
       if (!claimSnap.exists || claimSnap.data().status !== "active") {
@@ -424,12 +428,15 @@ function createCustomerProgramService({ db, FieldValue }) {
     }
 
     const mode = rawSearch ? "byName" : "recent";
-    let query = mode === "byName"
-      ? (() => {
-        const normalized = normalizeSearchName(rawSearch);
-        return db.collection("customers").orderBy("searchNameNormalized").startAt(normalized).endAt(`${normalized}`);
-      })()
-      : db.collection("customers").orderBy("createdAt", "desc");
+    let query;
+    if (mode === "byName") {
+      const normalized = normalizeSearchName(rawSearch);
+      query = db.collection("customers").orderBy("searchNameNormalized").startAt(normalized).endAt(normalized + "");
+    } else if (programFilter) {
+      query = db.collection("customers").where("programIds", "array-contains", programFilter).orderBy("lastActivityAt", "desc");
+    } else {
+      query = db.collection("customers").orderBy("createdAt", "desc");
+    }
 
     const cursorCustomerId = cleanString(options.cursorCustomerId, "cursor", 160);
     if (cursorCustomerId) {
@@ -439,7 +446,10 @@ function createCustomerProgramService({ db, FieldValue }) {
 
     const snapshot = await query.limit(pageSize).get();
     const openIds = await openDuplicateCustomerIdSet(snapshot.docs.map((document) => document.id));
-    const rows = snapshot.docs.map((document) => directoryRow(document, openIds));
+    let rows = snapshot.docs.map((document) => directoryRow(document, openIds));
+    if (mode === "byName" && programFilter) {
+      rows = rows.filter((row) => Array.isArray(row.programIds) && row.programIds.includes(programFilter));
+    }
     const last = snapshot.docs[snapshot.docs.length - 1];
     const nextCursor = snapshot.size === pageSize && last ? last.id : null;
     return { ok: true, mode, rows, nextCursor };
@@ -555,11 +565,14 @@ function createCustomerProgramService({ db, FieldValue }) {
     return { ok: true, rows, nextCursor };
   }
 
-  function attemptRow(doc) {
+  function attemptRow(doc, customerById) {
     const data = doc.data() || {};
+    const customer = (customerById && customerById.get(data.customerId)) || null;
     return {
       attemptId: doc.id,
       customerId: data.customerId || "",
+      displayName: customer ? (customer.displayName || customer.primaryEmail || "(no name on file)") : "",
+      primaryEmail: customer ? (customer.primaryEmail || "") : "",
       assessmentId: data.assessmentId || "",
       status: data.status || "",
       resultLabel: data.profileLabel || null,
@@ -569,6 +582,21 @@ function createCustomerProgramService({ db, FieldValue }) {
       startedAt: isoFromTimestamp(data.startedAt),
       completedAt: isoFromTimestamp(data.completedAt)
     };
+  }
+
+  // One extra read per unique customer on the page (via getAll, a single batch
+  // call rather than N queries) so Attempts can show who an attempt belongs to
+  // without ever touching their actual answers.
+  async function customerLookupMap(customerIds) {
+    const uniqueIds = Array.from(new Set(customerIds)).filter(Boolean);
+    const byId = new Map();
+    if (!uniqueIds.length) return byId;
+    const refs = uniqueIds.map((id) => db.collection("customers").doc(id));
+    const docs = await db.getAll(...refs);
+    docs.forEach((document) => {
+      if (document.exists) byId.set(document.id, document.data() || {});
+    });
+    return byId;
   }
 
   async function listEsAttempts(input) {
@@ -582,15 +610,19 @@ function createCustomerProgramService({ db, FieldValue }) {
       if (cursorSnap.exists) query = query.startAfter(cursorSnap);
     }
     const snapshot = await query.limit(pageSize).get();
-    const rows = snapshot.docs.map(attemptRow);
+    const customerById = await customerLookupMap(snapshot.docs.map((document) => (document.data() || {}).customerId));
+    const rows = snapshot.docs.map((document) => attemptRow(document, customerById));
     const last = snapshot.docs[snapshot.docs.length - 1];
     const nextCursor = snapshot.size === pageSize && last ? last.id : null;
     return { ok: true, rows, nextCursor };
   }
 
   async function getEsConfiguration() {
-    // Summaries only: question/scoring/content payloads stay out of this read so
-    // Configuration never becomes a second path for bulk-dumping assessment content.
+    // Full question text, scoring inputs and randomization behavior are
+    // included here deliberately (not just a summary): this is staff-only,
+    // already requires an ES operations role via requireCustomerProgramRole,
+    // and the content is not a secret from the people who wrote it. It must
+    // still never become something a participant can reach.
     const [definitionsSnap, versionsSnap] = await Promise.all([
       db.collection("assessmentDefinitions").limit(DIRECTORY_PAGE_SIZE_MAX).get(),
       db.collection("assessmentVersions").limit(DIRECTORY_PAGE_SIZE_MAX).get()
@@ -612,6 +644,9 @@ function createCustomerProgramService({ db, FieldValue }) {
           versionId: document.id, assessmentId: data.assessmentId || "", programId: data.programId || "",
           version: data.version || "", scoringVersion: data.scoringVersion || "", contentVersion: data.contentVersion || "",
           status: data.status || "", questionCount: Array.isArray(data.questions) ? data.questions.length : 0,
+          questions: Array.isArray(data.questions) ? data.questions : [],
+          scoring: data.scoring || null,
+          content: data.content || null,
           publishedAt: isoFromTimestamp(data.publishedAt), createdAt: isoFromTimestamp(data.createdAt)
         };
       })

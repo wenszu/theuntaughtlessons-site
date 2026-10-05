@@ -1,13 +1,15 @@
 const admin = require("firebase-admin");
 const { FieldValue: ReadinessFieldValue } = require("firebase-admin/firestore");
 const crypto = require("crypto");
-const { onCall, HttpsError } = require("firebase-functions/v2/https");
+const { onCall, onRequest, HttpsError } = require("firebase-functions/v2/https");
 const { onDocumentWritten } = require("firebase-functions/v2/firestore");
 const { onSchedule } = require("firebase-functions/v2/scheduler");
 const { defineSecret, defineString } = require("firebase-functions/params");
 const { CustomerProgramError, createCustomerProgramService } = require("./customer-program-service");
 const { createAssessmentPersistenceService } = require("./assessment-persistence-service");
 const { getVersion: getExecutiveSignatureVersion, normalizeAnswers: normalizeExecutiveSignatureAnswers } = require("./executive-signature-versions");
+const { createPaymentsService } = require("./payments-service");
+const Stripe = require("stripe");
 
 admin.initializeApp();
 const customerProgramService = createCustomerProgramService({
@@ -18,8 +20,15 @@ const assessmentPersistenceService = createAssessmentPersistenceService({
   db: admin.firestore(),
   FieldValue: admin.firestore.FieldValue
 });
+const paymentsService = createPaymentsService({
+  db: admin.firestore(),
+  FieldValue: admin.firestore.FieldValue,
+  customerProgramService
+});
 
 const APPS_SCRIPT_ADMIN_RELAY_SECRET = defineSecret("APPS_SCRIPT_ADMIN_RELAY_SECRET");
+const STRIPE_SECRET_KEY = defineSecret("STRIPE_SECRET_KEY");
+const STRIPE_WEBHOOK_SECRET = defineSecret("STRIPE_WEBHOOK_SECRET");
 const APPS_SCRIPT_ADMIN_URL = defineString("APPS_SCRIPT_ADMIN_URL", {
   default: "https://script.google.com/macros/s/AKfycbzJE--FL2kB_XDNZRnszCtlyLRPvaLAHGuF5TAOdXJk40atbvf5Y6ELuSK2B7CSLaMN/exec"
 });
@@ -219,7 +228,8 @@ async function getCustomerDirectoryHandler(request) {
     return await customerProgramService.listCustomerDirectory({
       search: input.search,
       pageSize: input.pageSize,
-      cursorCustomerId: input.cursorCustomerId
+      cursorCustomerId: input.cursorCustomerId,
+      programFilter: input.programFilter
     });
   } catch (error) {
     console.error("Customer directory listing failed", { uid: caller.uid, message: error && error.message });
@@ -1767,6 +1777,68 @@ async function checkReadinessAccountEmailHandler(request) {
 
 exports.checkReadinessAccountEmail = onCall({ timeoutSeconds: 15, memory: "256MiB" }, checkReadinessAccountEmailHandler);
 
+const CHECKOUT_REDIRECT_ORIGINS = ["https://theuntaughtlessons.com", "http://localhost", "http://127.0.0.1"];
+
+function isAllowedCheckoutRedirect(url) {
+  try {
+    const parsed = new URL(String(url || ""));
+    return CHECKOUT_REDIRECT_ORIGINS.some((origin) => parsed.origin === origin || parsed.origin.startsWith(origin + ":"));
+  } catch (error) {
+    return false;
+  }
+}
+
+async function createCheckoutSessionHandler(request) {
+  const input = request.data && typeof request.data === "object" ? request.data : {};
+  const program = String(input.program || "").trim();
+  if (!isAllowedCheckoutRedirect(input.successUrl) || !isAllowedCheckoutRedirect(input.cancelUrl)) {
+    throw new HttpsError("invalid-argument", "Checkout redirect URLs must point back to this site.");
+  }
+  const secretKey = String(STRIPE_SECRET_KEY.value() || "").trim();
+  const stripeClient = secretKey ? new Stripe(secretKey) : null;
+  try {
+    return await paymentsService.createCheckoutSession({
+      program,
+      successUrl: input.successUrl,
+      cancelUrl: input.cancelUrl,
+      stripeClient
+    });
+  } catch (error) {
+    console.error("Checkout session creation failed", { program, message: error && error.message });
+    const notReady = /not (open|configured)/i.test(error && error.message || "");
+    throw new HttpsError(notReady ? "failed-precondition" : "invalid-argument", error.message || "Could not start checkout.");
+  }
+}
+exports.createCheckoutSession = onCall({ secrets: [STRIPE_SECRET_KEY], timeoutSeconds: 30, memory: "256MiB" }, createCheckoutSessionHandler);
+
+async function stripeWebhookHandler(req, res) {
+  const secretKey = String(STRIPE_SECRET_KEY.value() || "").trim();
+  const webhookSecret = String(STRIPE_WEBHOOK_SECRET.value() || "").trim();
+  if (!secretKey || !webhookSecret) {
+    res.status(500).send("Stripe is not configured.");
+    return;
+  }
+  const stripeClient = new Stripe(secretKey);
+  let event;
+  try {
+    event = stripeClient.webhooks.constructEvent(req.rawBody, req.headers["stripe-signature"], webhookSecret);
+  } catch (error) {
+    console.error("Stripe webhook signature verification failed", { message: error && error.message });
+    res.status(400).send("Invalid signature.");
+    return;
+  }
+  try {
+    if (event.type === "checkout.session.completed") {
+      await paymentsService.grantAccessForCompletedSession(event.data.object);
+    }
+    res.status(200).send("ok");
+  } catch (error) {
+    console.error("Stripe webhook processing failed", { type: event.type, message: error && error.message });
+    res.status(500).send("Processing failed.");
+  }
+}
+exports.stripeWebhook = onRequest({ secrets: [STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET], timeoutSeconds: 30, memory: "256MiB" }, stripeWebhookHandler);
+
 if (process.env.NODE_ENV === "test") {
   exports.__readinessAccountTest = {
     recordReadinessCompletion: recordReadinessCompletionHandler,
@@ -1788,5 +1860,11 @@ if (process.env.NODE_ENV === "test") {
     getEsConfiguration: getEsConfigurationHandler,
     getEsDataGovernance: getEsDataGovernanceHandler,
     revealAssessmentResponse: revealAssessmentResponseHandler
+  };
+  exports.__paymentsTest = {
+    paymentsService,
+    createCheckoutSession: createCheckoutSessionHandler,
+    stripeWebhook: stripeWebhookHandler,
+    isAllowedCheckoutRedirect
   };
 }

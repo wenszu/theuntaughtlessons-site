@@ -2395,6 +2395,42 @@
     loadProgramTestimonials();
   </script>
   <script src="../assets/public-waitlist.js?v=20260925-mobile-v1"></script>
+  <script type="module">
+    // Off by default. While settings/payments.enabled is false (the default),
+    // this does nothing and the self-led card keeps its normal waitlist button.
+    import { getPaymentSettings, createCheckoutSession } from '../assets/firebase.js';
+    getPaymentSettings().then((settings) => {
+      const price = settings.enabled && settings.prices && settings.prices.tsa;
+      // A price of exactly 0 means this program is deliberately kept free even
+      // while the master toggle is on for other programs, so it keeps the
+      // normal waitlist button rather than a broken $0 checkout.
+      if (!price || !(price.amountCents > 0)) return;
+      const original = document.querySelector('[data-waitlist-cta][data-waitlist-audience="Myself"]');
+      if (!original) return;
+      const priceLabel = '$' + (price.amountCents / 100).toFixed(2);
+      // Cloning (rather than mutating in place) drops public-waitlist.js's own
+      // click listener on this button, whichever order the two scripts ran in.
+      const button = original.cloneNode(true);
+      button.removeAttribute('data-waitlist-cta');
+      button.removeAttribute('data-waitlist-audience');
+      button.textContent = 'Buy the self-guided program, ' + priceLabel;
+      button.addEventListener('click', async () => {
+        const originalLabel = button.textContent;
+        button.disabled = true;
+        button.textContent = 'Redirecting…';
+        try {
+          const successUrl = new URL('../member-login/index.html?purchase=success', location.href).toString();
+          const result = await createCheckoutSession({ program: 'tsa', successUrl, cancelUrl: location.href });
+          if (result && result.url) { window.location.href = result.url; return; }
+          throw new Error('No checkout URL returned.');
+        } catch (error) {
+          button.disabled = false;
+          button.textContent = originalLabel;
+        }
+      });
+      original.replaceWith(button);
+    }).catch(() => {});
+  </script>
   <script type="module" src="../assets/public-site-settings.js?v=20260925-mobile-v1"></script>
   <script type="module" src="../assets/feedback-widget.js?v=20260925-mobile-v1"></script>
 </body>

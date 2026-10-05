@@ -500,6 +500,40 @@
       display: none !important;
     }
 
+    .program-picker {
+      display: flex;
+      gap: 6px;
+      margin: 0 0 1.25rem;
+      padding: 0 10px;
+    }
+
+    .program-pill {
+      flex: 1;
+      min-height: 32px;
+      padding: 6px 8px;
+      border: 1px solid rgba(255, 255, 255, .18);
+      border-radius: 6px;
+      background: transparent;
+      color: rgba(255, 255, 255, .75);
+      cursor: pointer;
+      font-family: Lato, Arial, sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      text-align: center;
+      transition: background .15s, color .15s, border-color .15s;
+    }
+
+    .program-pill:hover {
+      border-color: rgba(255, 255, 255, .4);
+      color: var(--white);
+    }
+
+    .program-pill.active {
+      background: var(--gold);
+      border-color: var(--gold);
+      color: var(--navy);
+    }
+
     .admin-section {
       margin-bottom: 34px;
       padding: 24px;
@@ -1191,6 +1225,7 @@
     #section-organization-access #oaEmailCheckStatus { margin-top:4px; }
     #section-organization-access .oa-panel .mb-form-actions { gap:16px; }
     #section-emergency-access .student-progress-actions { margin-top:16px; }
+    #section-payments .student-progress-actions { margin-top:16px; }
     @media (max-width:1100px) { #caDetailContent .ca-cohort-details-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
     @media (max-width:640px) { #caDetailContent .ca-cohort-details-grid { grid-template-columns:1fr; } }
     .sp-detail-card h4 { margin:0 0 12px; color:var(--navy); font-size:15px; }
@@ -2208,7 +2243,7 @@
     .oa-status-chip.is-suspended { background:#F4F0E9; color:#745B25; }
     .oa-empty { padding:18px; color:#687482; text-align:center; }
     .cs-table { width:100%; border-collapse:collapse; font-size:13px; }
-    .cs-table th { border-bottom:2px solid var(--line); font-size:11px; font-weight:700; color:#687482; }
+    .cs-table th { border-bottom:2px solid var(--line); font-size:11px; font-weight:700; color:#687482; text-align:left; padding:8px; }
     .cs-table td { border-bottom:1px solid var(--line); padding:8px; vertical-align:top; }
     .cs-table tbody tr:hover { background:#FAF8F3; }
     .cs-row-open { background:none; border:1px solid var(--line); border-radius:6px; padding:4px 10px; font-size:12px; cursor:pointer; color:var(--navy); font-weight:700; }
@@ -2718,6 +2753,7 @@
     @media(max-width:900px){.assessment-form-grid{grid-template-columns:1fr}}@media(max-width:760px){.qb-toolbar,.qb-options,.qb-review-grid{grid-template-columns:1fr}.qb-card-head{display:block}.qb-card-meta{margin-top:8px}}
   </style>
   <link rel="stylesheet" href="../assets/select-controls.css?v=20260925-mobile-v1">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
   <section class="admin-gate" id="adminGate">
@@ -2777,6 +2813,7 @@
     </div>
 
     <nav class="admin-tabs" aria-label="Admin console tabs">
+      <button class="admin-tab" type="button" data-admin-tab="guide">README</button>
       <button class="admin-tab active" type="button" data-admin-tab="customers">Customers</button>
       <button class="admin-tab" type="button" data-admin-tab="programs">Programs</button>
       <button class="admin-tab" type="button" data-admin-tab="organizations">Organizations</button>
@@ -2789,50 +2826,58 @@
       <div class="sidebar-title">Admin</div>
       <div class="sidebar-divider"></div>
 
+      <span class="nav-group-label" data-admin-nav-group="guide">README</span>
+      <button class="admin-nav-item" data-admin-tab-scope="guide" data-target="section-admin-guide">How this console is organized</button>
+
       <span class="nav-group-label" data-admin-nav-group="customers">Customers</span>
       <button class="admin-nav-item active" data-admin-tab-scope="customers" data-target="section-customers-directory">Directory</button>
 
-      <span class="nav-group-label" data-admin-nav-group="programs">TSA · Program access</span>
-      <button class="admin-nav-item" data-admin-tab-scope="programs" data-target="section-access-controls">Visibility &amp; access</button>
+      <div class="program-picker" data-admin-tab-scope="programs">
+        <button type="button" class="program-pill active" data-program="tsa">Think, Speak, Act</button>
+        <button type="button" class="program-pill" data-program="executive-signature">Executive Signature</button>
+      </div>
 
-      <span class="nav-group-label" data-admin-nav-group="programs">TSA · Program content</span>
-      <button class="admin-nav-item" data-admin-tab-scope="programs" data-target="section-orientation">Orientation</button>
-      <button class="admin-nav-item" data-admin-tab-scope="programs" data-target="section-phase1">Phase 1</button>
-      <button class="admin-nav-item" data-admin-tab-scope="programs" data-target="section-phase2">Phase 2</button>
-      <button class="admin-nav-item" data-admin-tab-scope="programs" data-target="section-phase3">Phase 3</button>
+      <span class="nav-group-label" data-admin-nav-group="programs" data-admin-program="tsa">Program access</span>
+      <button class="admin-nav-item" data-admin-tab-scope="programs" data-admin-program="tsa" data-target="section-access-controls">Visibility &amp; access</button>
 
-      <span class="nav-group-label" data-admin-nav-group="programs">TSA · Progress</span>
-      <button class="admin-nav-item" data-admin-tab-scope="programs" data-target="section-student-progress">Student Progress</button>
-      <button class="admin-nav-item" data-admin-tab-scope="programs" data-target="section-platform-overview">Platform overview</button>
-      <button class="admin-nav-item" data-admin-tab-scope="programs" data-target="section-launch-health">Learner readiness</button>
-      <button class="admin-nav-item" data-admin-tab-scope="programs" data-target="section-leaderboard">Leaderboard</button>
-      <button class="admin-nav-item" data-admin-tab-scope="programs" data-target="section-engagement-insights">Engagement Insights</button>
-      <button class="admin-nav-item" data-admin-tab-scope="programs" data-target="section-cohort-analytics">Cohort Analytics</button>
+      <span class="nav-group-label" data-admin-nav-group="programs" data-admin-program="tsa">Program content</span>
+      <button class="admin-nav-item" data-admin-tab-scope="programs" data-admin-program="tsa" data-target="section-orientation">Orientation</button>
+      <button class="admin-nav-item" data-admin-tab-scope="programs" data-admin-program="tsa" data-target="section-phase1">Phase 1</button>
+      <button class="admin-nav-item" data-admin-tab-scope="programs" data-admin-program="tsa" data-target="section-phase2">Phase 2</button>
+      <button class="admin-nav-item" data-admin-tab-scope="programs" data-admin-program="tsa" data-target="section-phase3">Phase 3</button>
 
-      <span class="nav-group-label" data-admin-nav-group="programs">TSA · Rewards</span>
-      <button class="admin-nav-item" data-admin-tab-scope="programs" data-target="section-reward-levels">Levels</button>
-      <button class="admin-nav-item" data-admin-tab-scope="programs" data-target="section-reward-overview">Rules summary</button>
-      <button class="admin-nav-item" data-admin-tab-scope="programs" data-target="section-reward-rules">MP rules</button>
-      <button class="admin-nav-item" data-admin-tab-scope="programs" data-target="section-reward-simulator">Award preview</button>
+      <span class="nav-group-label" data-admin-nav-group="programs" data-admin-program="tsa">Progress</span>
+      <button class="admin-nav-item" data-admin-tab-scope="programs" data-admin-program="tsa" data-target="section-student-progress">Student Progress</button>
+      <button class="admin-nav-item" data-admin-tab-scope="programs" data-admin-program="tsa" data-target="section-platform-overview">Platform overview</button>
+      <button class="admin-nav-item" data-admin-tab-scope="programs" data-admin-program="tsa" data-target="section-launch-health">Learner readiness</button>
+      <button class="admin-nav-item" data-admin-tab-scope="programs" data-admin-program="tsa" data-target="section-leaderboard">Leaderboard</button>
+      <button class="admin-nav-item" data-admin-tab-scope="programs" data-admin-program="tsa" data-target="section-engagement-insights">Engagement Insights</button>
+      <button class="admin-nav-item" data-admin-tab-scope="programs" data-admin-program="tsa" data-target="section-cohort-analytics">Cohort Analytics</button>
 
-      <span class="nav-group-label" data-admin-nav-group="programs">TSA · Enrollments</span>
-      <button class="admin-nav-item" data-admin-tab-scope="programs" data-target="section-members">Members</button>
+      <span class="nav-group-label" data-admin-nav-group="programs" data-admin-program="tsa">Rewards</span>
+      <button class="admin-nav-item" data-admin-tab-scope="programs" data-admin-program="tsa" data-target="section-reward-levels">Levels</button>
+      <button class="admin-nav-item" data-admin-tab-scope="programs" data-admin-program="tsa" data-target="section-reward-overview">Rules summary</button>
+      <button class="admin-nav-item" data-admin-tab-scope="programs" data-admin-program="tsa" data-target="section-reward-rules">MP rules</button>
+      <button class="admin-nav-item" data-admin-tab-scope="programs" data-admin-program="tsa" data-target="section-reward-simulator">Award preview</button>
 
-      <span class="nav-group-label" data-admin-nav-group="programs">TSA · Credentials</span>
-      <button class="admin-nav-item" data-admin-tab-scope="programs" data-target="section-certificate">Certificate</button>
+      <span class="nav-group-label" data-admin-nav-group="programs" data-admin-program="tsa">Enrollments</span>
+      <button class="admin-nav-item" data-admin-tab-scope="programs" data-admin-program="tsa" data-target="section-members">Members</button>
 
-      <span class="nav-group-label" data-admin-nav-group="programs">TSA · Assessments</span>
-      <button class="admin-nav-item" data-admin-tab-scope="programs" data-target="section-cl-question-bank">Assessment content review</button>
+      <span class="nav-group-label" data-admin-nav-group="programs" data-admin-program="tsa">Credentials</span>
+      <button class="admin-nav-item" data-admin-tab-scope="programs" data-admin-program="tsa" data-target="section-certificate">Certificate</button>
 
-      <span class="nav-group-label" data-admin-nav-group="programs">TSA · UX maintenance</span>
-      <button class="admin-nav-item" data-admin-tab-scope="programs" data-target="section-walkthrough-screenshots">Welcome walkthrough screenshots</button>
+      <span class="nav-group-label" data-admin-nav-group="programs" data-admin-program="tsa">Assessments</span>
+      <button class="admin-nav-item" data-admin-tab-scope="programs" data-admin-program="tsa" data-target="section-cl-question-bank">Assessment content review</button>
 
-      <span class="nav-group-label" data-admin-nav-group="programs">Executive Signature</span>
-      <button class="admin-nav-item" data-admin-tab-scope="programs" data-target="section-es-overview">Overview</button>
-      <button class="admin-nav-item" data-admin-tab-scope="programs" data-target="section-es-participants">Participants</button>
-      <button class="admin-nav-item" data-admin-tab-scope="programs" data-target="section-es-attempts">Attempts</button>
-      <button class="admin-nav-item" data-admin-tab-scope="programs" data-target="section-es-configuration">Configuration</button>
-      <button class="admin-nav-item" data-admin-tab-scope="programs" data-target="section-es-governance">Data governance</button>
+      <span class="nav-group-label" data-admin-nav-group="programs" data-admin-program="tsa">UX maintenance</span>
+      <button class="admin-nav-item" data-admin-tab-scope="programs" data-admin-program="tsa" data-target="section-walkthrough-screenshots">Welcome walkthrough screenshots</button>
+
+      <span class="nav-group-label" data-admin-nav-group="programs" data-admin-program="executive-signature">Workspace</span>
+      <button class="admin-nav-item" data-admin-tab-scope="programs" data-admin-program="executive-signature" data-target="section-es-overview">Overview</button>
+      <button class="admin-nav-item" data-admin-tab-scope="programs" data-admin-program="executive-signature" data-target="section-es-participants">Participants</button>
+      <button class="admin-nav-item" data-admin-tab-scope="programs" data-admin-program="executive-signature" data-target="section-es-attempts">Attempts</button>
+      <button class="admin-nav-item" data-admin-tab-scope="programs" data-admin-program="executive-signature" data-target="section-es-configuration">Configuration</button>
+      <button class="admin-nav-item" data-admin-tab-scope="programs" data-admin-program="executive-signature" data-target="section-es-governance">Data governance</button>
 
       <span class="nav-group-label" data-admin-nav-group="organizations">Organizations</span>
       <button class="admin-nav-item" data-admin-tab-scope="organizations" data-target="section-organization-access">Representatives</button>
@@ -2842,7 +2887,7 @@
       <button class="admin-nav-item" data-admin-tab-scope="engagement" data-target="section-email-templates">Email templates</button>
       <button class="admin-nav-item" data-admin-tab-scope="engagement" data-target="section-global-defaults">Global defaults</button>
 
-      <span class="nav-group-label" data-admin-nav-group="content-library">Content</span>
+      <span class="nav-group-label" data-admin-nav-group="content-library">TSA · Exercise data</span>
       <button class="admin-nav-item" data-admin-tab-scope="content-library" data-target="section-cl-files">Data files</button>
 
       <span class="nav-group-label" data-admin-nav-group="admin-tools">Preview</span>
@@ -2853,6 +2898,9 @@
       <button class="admin-nav-item" data-admin-tab-scope="admin-tools" data-target="section-sync">Site health check</button>
       <span class="nav-group-label" data-admin-nav-group="admin-tools">Access &amp; staff roles</span>
       <button class="admin-nav-item" data-admin-tab-scope="admin-tools" data-target="section-emergency-access">Emergency access</button>
+
+      <span class="nav-group-label" data-admin-nav-group="admin-tools">Monetization</span>
+      <button class="admin-nav-item" data-admin-tab-scope="admin-tools" data-target="section-payments">Payments</button>
 
     </aside>
 
@@ -2884,7 +2932,7 @@
         <div class="sync-list" id="syncCheckResults"></div>
       </section>
 
-      <section class="admin-section" id="section-walkthrough-screenshots" data-admin-tab-panel="programs">
+      <section class="admin-section" id="section-walkthrough-screenshots" data-admin-tab-panel="programs" data-admin-program="tsa">
         <span class="section-label">TSA · UX maintenance</span>
         <h2>Welcome walkthrough screenshots</h2>
         <div class="section-divider"></div>
@@ -2913,7 +2961,7 @@
         </div>
       </section>
 
-      <section class="admin-section" id="section-access-controls" data-admin-tab-panel="programs">
+      <section class="admin-section" id="section-access-controls" data-admin-tab-panel="programs" data-admin-program="tsa">
         <span class="section-label">TSA · Program access</span>
         <h2>Visibility &amp; access</h2>
         <div class="section-divider"></div>
@@ -3042,7 +3090,7 @@
         </dialog>
       </section>
 
-      <section class="admin-section" id="section-orientation" data-admin-tab-panel="programs">
+      <section class="admin-section" id="section-orientation" data-admin-tab-panel="programs" data-admin-program="tsa">
         <span class="section-label">TSA · Program content</span>
         <h2>Orientation</h2>
         <div class="section-divider"></div>
@@ -3051,7 +3099,7 @@
         <div id="embed-orientation"></div>
       </section>
 
-      <section class="admin-section" id="section-phase1" data-admin-tab-panel="programs">
+      <section class="admin-section" id="section-phase1" data-admin-tab-panel="programs" data-admin-program="tsa">
         <span class="section-label">TSA · Program content</span>
         <h2>Phase 1</h2>
         <div class="section-divider"></div>
@@ -3060,7 +3108,7 @@
         <div id="embed-phase1"></div>
       </section>
 
-      <section class="admin-section" id="section-phase2" data-admin-tab-panel="programs">
+      <section class="admin-section" id="section-phase2" data-admin-tab-panel="programs" data-admin-program="tsa">
         <span class="section-label">TSA · Program content</span>
         <h2>Phase 2</h2>
         <div class="section-divider"></div>
@@ -3069,7 +3117,7 @@
         <div id="embed-phase2"></div>
       </section>
 
-      <section class="admin-section" id="section-phase3" data-admin-tab-panel="programs">
+      <section class="admin-section" id="section-phase3" data-admin-tab-panel="programs" data-admin-program="tsa">
         <span class="section-label">TSA · Program content</span>
         <h2>Phase 3</h2>
         <div class="section-divider"></div>
@@ -3097,7 +3145,7 @@
         </div>
       </section>
 
-      <section class="admin-section" id="section-student-progress" data-admin-tab-panel="programs">
+      <section class="admin-section" id="section-student-progress" data-admin-tab-panel="programs" data-admin-program="tsa">
         <span class="section-label">TSA · Progress</span>
         <h2>Student Progress</h2>
         <div class="section-divider"></div>
@@ -3169,7 +3217,7 @@
         </dialog>
       </section>
 
-      <section class="admin-section" id="section-platform-overview" data-admin-tab-panel="programs">
+      <section class="admin-section" id="section-platform-overview" data-admin-tab-panel="programs" data-admin-program="tsa">
         <span class="section-label">TSA · Progress</span>
         <h2>Platform overview</h2>
         <div class="section-divider"></div>
@@ -3182,7 +3230,7 @@
         <div id="poTable"><p class="mb-msg">Click Refresh overview to load platform-wide stats.</p></div>
       </section>
 
-      <section class="admin-section" id="section-launch-health" data-admin-tab-panel="programs">
+      <section class="admin-section" id="section-launch-health" data-admin-tab-panel="programs" data-admin-program="tsa">
         <span class="section-label">TSA · Progress</span>
         <h2>Learner readiness</h2>
         <div class="section-divider"></div>
@@ -3207,7 +3255,7 @@
         <p class="lh-note"><strong>Pending saves:</strong> work that cannot reach Firebase stays in the learner’s browser with a Retry sync action. Once the browser reconnects, a successful recovery appears under Technical reliability. <strong>Technical issue:</strong> the learner had a video or connection error reported in the last 72 hours — see Technical reliability under Preview &amp; Health for the report detail.</p>
       </section>
 
-      <section class="admin-section" id="section-leaderboard" data-admin-tab-panel="programs">
+      <section class="admin-section" id="section-leaderboard" data-admin-tab-panel="programs" data-admin-program="tsa">
         <span class="section-label">TSA · Progress</span>
         <h2>Leaderboard</h2>
         <div class="section-divider"></div>
@@ -3227,7 +3275,7 @@
         <div id="lbBoard"><p class="mb-msg">Click Refresh leaderboard to load rankings.</p></div>
       </section>
 
-      <section class="admin-section" id="section-engagement-insights" data-admin-tab-panel="programs">
+      <section class="admin-section" id="section-engagement-insights" data-admin-tab-panel="programs" data-admin-program="tsa">
         <span class="section-label">TSA · Progress</span>
         <h2>Engagement Insights</h2>
         <div class="section-divider"></div>
@@ -3242,7 +3290,7 @@
         <p class="ei-note">Times are estimates. Background tabs are excluded, and thinking or note-taking may appear idle. Vimeo coverage begins after a learner presses play; reaching 80% counts as video completion.</p>
       </section>
 
-      <section class="admin-section" id="section-cohort-analytics" data-admin-tab-panel="programs">
+      <section class="admin-section" id="section-cohort-analytics" data-admin-tab-panel="programs" data-admin-program="tsa">
         <span class="section-label">TSA · Progress</span>
         <h2>Cohort Analytics</h2>
         <div class="section-divider"></div>
@@ -3321,7 +3369,7 @@
         </dialog>
       </section>
 
-      <section class="admin-section" id="section-reward-levels" data-admin-tab-panel="programs">
+      <section class="admin-section" id="section-reward-levels" data-admin-tab-panel="programs" data-admin-program="tsa">
         <span class="section-label">TSA · Rewards</span>
         <h2>Level system</h2>
         <div class="section-divider"></div>
@@ -3342,7 +3390,7 @@
         </div>
       </section>
 
-      <section class="admin-section" id="section-reward-overview" data-admin-tab-panel="programs">
+      <section class="admin-section" id="section-reward-overview" data-admin-tab-panel="programs" data-admin-program="tsa">
         <span class="section-label">TSA · Rewards</span>
         <h2>Rules members experience</h2>
         <div class="section-divider"></div>
@@ -3364,7 +3412,7 @@
         <div class="reward-storage-note"><strong>Completion path:</strong> Videos, orientation, context items, and exercises (at a realistic, not perfect, scoring level) add up to roughly 1,325&ndash;1,525 MP before assessments or the program bonus. The 600 MP full-program bonus brings a member who finishes the curriculum to well over 1,800 MP, so completing the program reliably reaches Executive without needing perfect scores or the streak feature. Historical awards are never recalculated when future rule values change.</div>
       </section>
 
-      <section class="admin-section" id="section-reward-rules" data-admin-tab-panel="programs">
+      <section class="admin-section" id="section-reward-rules" data-admin-tab-panel="programs" data-admin-program="tsa">
         <span class="section-label">TSA · Rewards</span>
         <h2>MP rules</h2>
         <div class="section-divider"></div>
@@ -3465,7 +3513,7 @@
         </div>
       </section>
 
-      <section class="admin-section" id="section-reward-simulator" data-admin-tab-panel="programs">
+      <section class="admin-section" id="section-reward-simulator" data-admin-tab-panel="programs" data-admin-program="tsa">
         <span class="section-label">TSA · Rewards</span>
         <h2>Exercise award and reflection</h2>
         <div class="section-divider"></div>
@@ -3479,6 +3527,8 @@
             <label for="rewardReflectionPrompt">Reflection question</label>
             <textarea id="rewardReflectionPrompt" rows="3" maxlength="240"></textarea>
             <small>Members write one or two sentences. They can skip without blocking their progress.</small>
+            <label for="rewardSimStartMp">Starting MP shown in the preview</label>
+            <input id="rewardSimStartMp" type="number" min="0" step="1" value="280">
             <div class="sync-actions"><button class="small-button" type="button" id="rewardReflectionSave">Save reflection</button><button class="small-button secondary-button" type="button" id="rewardReflectionPreview">Preview award screen</button><button class="small-button secondary-button" type="button" id="rewardReflectionReset">Restore recommended wording</button><span class="reward-status" id="rewardReflectionStatus" aria-live="polite"></span></div>
           </div>
         </div>
@@ -3502,7 +3552,7 @@
         </div>
       </section>
 
-      <section class="admin-section" id="section-members" data-admin-tab-panel="programs">
+      <section class="admin-section" id="section-members" data-admin-tab-panel="programs" data-admin-program="tsa">
         <span class="section-label">TSA · Enrollments</span>
         <h2>Members</h2>
         <div class="section-divider"></div>
@@ -3806,6 +3856,60 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         </div>
       </section>
 
+      <section class="admin-section" id="section-payments" data-admin-tab-panel="admin-tools">
+        <span class="section-label">Monetization</span>
+        <h2>Payments</h2>
+        <div class="section-divider"></div>
+        <p class="description">Controls the self-guided purchase flow for TSA and the Executive Signature full report. While off, the public pages show no pricing or buy button and nothing changes for current visitors. Turning this on requires a Stripe secret key to already be configured; without one, checkout will refuse to start even with this on, so it is safe to turn on early for layout testing.</p>
+        <p class="description">A price of $0.00 keeps that one program free, even while this is turned on for the other program. Its page keeps the normal free flow instead of showing a buy button.</p>
+        <div id="paymentsStatus" class="eng-status" aria-live="polite"></div>
+        <div id="paymentsForm">
+          <div class="eng-field-group">
+            <div class="eng-field-row">
+              <label class="eng-toggle-label">
+                <span class="eng-toggle-name">Show the buy button on the public site</span>
+                <span class="eng-toggle-desc">Off by default. Turn on only once pricing below is correct and Stripe is configured.</span>
+              </label>
+              <input class="eng-toggle" type="checkbox" id="paymentsEnabled" aria-label="Show the buy button on the public site">
+            </div>
+          </div>
+          <div class="mb-form-grid" style="max-width:420px;margin-top:14px;">
+            <div class="mb-form-field">
+              <label for="paymentsPriceTsa">TSA self-guided price (USD)</label>
+              <input type="number" id="paymentsPriceTsa" min="0" step="0.01" placeholder="199.00">
+            </div>
+            <div class="mb-form-field">
+              <label for="paymentsPriceEs">Executive Signature full report price (USD)</label>
+              <input type="number" id="paymentsPriceEs" min="0" step="0.01" placeholder="49.00">
+            </div>
+          </div>
+        </div>
+        <div class="student-progress-actions">
+          <button class="small-button" type="button" id="paymentsSave">Save</button>
+          <span class="student-progress-status" id="paymentsSaveStatus" aria-live="polite"></span>
+        </div>
+      </section>
+
+      <section class="admin-section" id="section-admin-guide" data-admin-tab-panel="guide">
+        <span class="section-label">README</span>
+        <h2>How this console is organized</h2>
+        <div class="section-divider"></div>
+        <p class="description">A short table of contents for the six tabs above, and the test used to decide where a new feature goes. This is the one place this explanation lives. For the fuller version, with a worked example and where each piece is implemented in code, see <code>docs/ADMIN_CONSOLE_IA_GUIDELINE.md</code> in the repository.</p>
+
+        <p class="description"><strong>Customers:</strong> the cross-program person record. One directory, one detail view, regardless of which programs that person touches.</p>
+        <p class="description"><strong>Programs:</strong> operating a specific program for the people going through it. Has its own TSA / Executive Signature picker at the top of the sidebar; every section under it belongs to exactly one program, chosen by that picker.</p>
+        <p class="description"><strong>Organizations:</strong> organization representatives and their access, not tied to one program.</p>
+        <p class="description"><strong>Communications:</strong> outbound messaging settings and certificates.</p>
+        <p class="description"><strong>Content:</strong> raw, directly editable data files. A program only gets an entry here if it actually has files to edit here today, that is TSA's practice exercises. Executive Signature has none, since its content is version locked, not an editable file; review it instead under Programs &rarr; Executive Signature &rarr; Configuration.</p>
+        <p class="description"><strong>Operations:</strong> platform-wide infrastructure that is not about any one program's learners, technical health, staff access and roles, emergency access, preview tooling, and monetization settings.</p>
+
+        <h3 style="margin:24px 0 10px;font-size:1.05rem">Where should a new feature go?</h3>
+        <p class="description">Ask in this order, and stop at the first yes:</p>
+        <p class="description">1. <strong>Program fit:</strong> Does it describe or affect one specific program's learners? If yes, Programs, inside that program's picker group.</p>
+        <p class="description">2. <strong>Editable file:</strong> Is it a raw file someone opens, edits, validates and downloads from this console? If yes, Content, and only if that program actually has such a file.</p>
+        <p class="description">3. <strong>Platform scope:</strong> Is it about running the platform itself, not any one program's learners? If yes, Operations.</p>
+      </section>
+
       <section class="admin-section" id="section-passwords" data-admin-tab-panel="admin-tools">
         <span class="section-label">Local testing</span>
         <h2>Legacy local access</h2>
@@ -3826,17 +3930,26 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         <p class="description">One row per person across every program. This is read-only: it does not grant access, change TSA data, or expose raw assessment answers.</p>
         <div id="csFlagNotice" hidden></div>
         <div id="csLoaded" hidden>
-          <div class="mb-form-grid">
-            <div class="mb-form-field">
+          <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-end;margin-bottom:4px">
+            <div style="flex:1;min-width:260px">
               <label for="csSearch">Search by name or exact email</label>
-              <div style="display:flex;gap:8px;align-items:center">
-                <input type="search" id="csSearch" placeholder="e.g. Priya Shah or priya@company.com" autocomplete="off" style="flex:1;min-width:0">
+              <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:6px">
+                <input type="search" id="csSearch" placeholder="e.g. Priya Shah or priya@company.com" autocomplete="off" style="flex:1;min-width:200px">
                 <button type="button" class="small-button secondary-button" id="csSearchGo">Search</button>
                 <button type="button" class="small-button secondary-button" id="csSearchClear">Clear</button>
                 <button type="button" class="small-button secondary-button" id="csRefresh">Refresh</button>
               </div>
             </div>
+            <div style="flex:0 0 auto;min-width:200px">
+              <label for="csProgramFilter">Program</label>
+              <select id="csProgramFilter" style="margin-top:6px;width:100%">
+                <option value="">All programs</option>
+                <option value="tsa">Think, Speak, Act</option>
+                <option value="executive-signature">Executive Signature</option>
+              </select>
+            </div>
           </div>
+          <p class="description" style="margin:0 0 14px;font-size:12px">The program filter does not apply to an exact-email search, since that already finds one specific person.</p>
           <p class="student-progress-status" id="csStatus" aria-live="polite">Open this section to load customers.</p>
           <div style="overflow-x:auto">
             <table class="cs-table" id="csTable" style="display:none">
@@ -3868,19 +3981,34 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         </div>
       </section>
 
-      <section class="admin-section" id="section-es-overview" data-admin-tab-panel="programs">
+      <section class="admin-section" id="section-es-overview" data-admin-tab-panel="programs" data-admin-program="executive-signature">
         <span class="section-label">Executive Signature</span>
         <h2>Overview</h2>
         <div class="section-divider"></div>
         <p class="description">Executive Signature (ES) connects participants, attempts, configuration, and data governance in one place. This workspace is read-only except for one explicit, audited action: revealing raw responses for a single attempt.</p>
+        <div class="settings-audience-heading"><div><h3>Public visitors</h3><p>Controls whether Executive Signature is reachable on the public site at all.</p></div><span class="control-scope is-live">Live</span></div>
+        <div id="esPublicVisibilityStatus" class="eng-status" aria-live="polite"></div>
+        <div class="eng-field-group">
+          <div class="eng-field-row">
+            <label class="eng-toggle-label">
+              <span class="eng-toggle-name">Show Executive Signature publicly</span>
+              <span class="eng-toggle-desc">Off hides the quick check and full report links from the public site and shows a not-available notice to anyone who reaches the assessment pages directly. This does not affect this admin console.</span>
+            </label>
+            <input class="eng-toggle" type="checkbox" id="esPublicVisibilityToggle" aria-label="Show Executive Signature publicly">
+          </div>
+        </div>
+        <div class="student-progress-actions">
+          <button class="small-button" type="button" id="esPublicVisibilitySave">Save</button>
+          <span class="student-progress-status" id="esPublicVisibilitySaveStatus" aria-live="polite"></span>
+        </div>
         <div id="esFlagNotice" hidden></div>
         <div id="esOverviewLoaded" hidden>
           <p class="description">Raw assessment answers are never shown automatically. Open Attempts, then use that attempt's explicit reveal action if your role allows it.</p>
           <ul style="margin:0;padding-left:18px;font-size:13px;line-height:1.7">
-            <li><strong>Participants</strong> — people with an Executive Signature entitlement (Quick Check or Full Assessment).</li>
-            <li><strong>Attempts</strong> — one row per start-to-terminal-state assessment instance, with result labels and scores but never answers.</li>
-            <li><strong>Configuration</strong> — a summary of assessment definitions and their locked content/scoring versions.</li>
-            <li><strong>Data governance</strong> — consent events and the retention policy that applies to ES data. Bulk export of raw responses is intentionally not available.</li>
+            <li><strong>Participants:</strong> people with an Executive Signature entitlement (Quick Check or Full Assessment).</li>
+            <li><strong>Attempts:</strong> one row per start-to-terminal-state assessment instance, with result labels and scores but never answers.</li>
+            <li><strong>Configuration:</strong> the full question list and scoring logic for each locked assessment version.</li>
+            <li><strong>Data governance:</strong> consent events and the retention policy that applies to ES data. Bulk export of raw responses is intentionally not available.</li>
           </ul>
         </div>
         <div class="student-progress-actions">
@@ -3889,7 +4017,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         </div>
       </section>
 
-      <section class="admin-section" id="section-es-participants" data-admin-tab-panel="programs">
+      <section class="admin-section" id="section-es-participants" data-admin-tab-panel="programs" data-admin-program="executive-signature">
         <span class="section-label">Executive Signature</span>
         <h2>Participants</h2>
         <div class="section-divider"></div>
@@ -3909,7 +4037,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         </div>
       </section>
 
-      <section class="admin-section" id="section-es-attempts" data-admin-tab-panel="programs">
+      <section class="admin-section" id="section-es-attempts" data-admin-tab-panel="programs" data-admin-program="executive-signature">
         <span class="section-label">Executive Signature</span>
         <h2>Attempts</h2>
         <div class="section-divider"></div>
@@ -3920,7 +4048,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
           <div style="overflow-x:auto">
             <table class="cs-table" id="esaTable" style="display:none">
               <thead>
-                <tr><th>Assessment</th><th>Status</th><th>Result</th><th>Completed</th><th>Raw responses</th></tr>
+                <tr><th>Name</th><th>Email</th><th>Assessment</th><th>Status</th><th>Result</th><th>Completed</th><th>Raw responses</th></tr>
               </thead>
               <tbody id="esaTableBody"></tbody>
             </table>
@@ -3943,11 +4071,11 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         </div>
       </section>
 
-      <section class="admin-section" id="section-es-configuration" data-admin-tab-panel="programs">
+      <section class="admin-section" id="section-es-configuration" data-admin-tab-panel="programs" data-admin-program="executive-signature">
         <span class="section-label">Executive Signature</span>
         <h2>Configuration</h2>
         <div class="section-divider"></div>
-        <p class="description">Read-only summary of assessment definitions and their locked content/scoring versions. Editing assessment content is not part of this phase.</p>
+        <p class="description">Read-only view of assessment definitions and their locked content and scoring versions, including the full question list and scoring logic for each version. Editing assessment content from here is not available; a new version is published through a code change, not this console.</p>
         <div id="esConfigFlagNotice" hidden></div>
         <div id="esConfigLoaded" hidden>
           <p class="student-progress-status" id="esConfigStatus" aria-live="polite">Loading configuration…</p>
@@ -3959,7 +4087,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         </div>
       </section>
 
-      <section class="admin-section" id="section-es-governance" data-admin-tab-panel="programs">
+      <section class="admin-section" id="section-es-governance" data-admin-tab-panel="programs" data-admin-program="executive-signature">
         <span class="section-label">Executive Signature</span>
         <h2>Data governance</h2>
         <div class="section-divider"></div>
@@ -4205,7 +4333,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         </div>
       </section>
 
-      <section class="admin-section" id="section-certificate" data-admin-tab-panel="programs">
+      <section class="admin-section" id="section-certificate" data-admin-tab-panel="programs" data-admin-program="tsa">
         <span class="section-label">TSA · Credentials</span>
         <h2>Certificate</h2>
         <div class="section-divider"></div>
@@ -4257,13 +4385,14 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       <!-- ===== Content Library ===== -->
 
       <section class="admin-section" id="section-cl-files" data-admin-tab-panel="content-library">
-        <span class="section-label">Content</span>
+        <span class="section-label">TSA · Exercise data</span>
         <h2>Data files</h2>
         <div class="section-divider"></div>
 
         <!-- File list view -->
         <div id="clFileList">
-          <p class="description">Each file below drives one or more exercises. Load a file directly from this site to review, validate, edit, or download a revised copy. Direct publishing remains disabled until the secure server-side workflow is connected.</p>
+          <p class="description">Each file below drives one or more TSA exercises. Load a file directly from this site to review, validate, edit, or download a revised copy. Direct publishing remains disabled until the secure server-side workflow is connected.</p>
+          <p class="description">Executive Signature has no entry here on purpose. See the README tab for why, and for how this list is organized as more programs are added.</p>
           <div id="clFileListInner" class="cl-file-grid" style="margin-top:16px"></div>
         </div>
 
@@ -4283,7 +4412,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         </div>
       </section>
 
-      <section class="admin-section" id="section-cl-question-bank" data-admin-tab-panel="programs">
+      <section class="admin-section" id="section-cl-question-bank" data-admin-tab-panel="programs" data-admin-program="tsa">
         <span class="section-label">TSA · Assessments</span>
         <h2>Assessment content review</h2>
         <div class="section-divider"></div>
@@ -5008,7 +5137,10 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       gate.style.display = 'none';
       app.classList.add('is-visible');
       renderAdminProfile();
-      const requestedTab = new URLSearchParams(window.location.search).get('tab') || 'customers';
+      const requestedParams = new URLSearchParams(window.location.search);
+      const requestedTab = requestedParams.get('tab') || 'customers';
+      const requestedProgram = requestedParams.get('program');
+      if (requestedProgram === 'executive-signature' || requestedProgram === 'tsa') currentAdminProgram = requestedProgram;
       switchAdminTab(requestedTab, { replace: true, scroll: false });
     }
 
@@ -7764,6 +7896,60 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
 
     // ===== End public assessment card visibility =====
 
+    // ===== Monetization (payments toggle + prices) =====
+
+    async function loadPaymentsSettings() {
+      var fb = window.utlFirebaseAuth;
+      var statusEl = document.getElementById('paymentsStatus');
+      if (!statusEl) return;
+      if (!fb || !fb.getPaymentSettings) {
+        statusEl.textContent = 'Loading...';
+        window.addEventListener('utlFirebaseAuthReady', function handler() {
+          window.removeEventListener('utlFirebaseAuthReady', handler);
+          loadPaymentsSettings();
+        });
+        return;
+      }
+      statusEl.textContent = 'Loading...';
+      try {
+        var settings = await fb.getPaymentSettings();
+        document.getElementById('paymentsEnabled').checked = settings.enabled === true;
+        document.getElementById('paymentsPriceTsa').value = (settings.prices.tsa.amountCents / 100).toFixed(2);
+        document.getElementById('paymentsPriceEs').value = (settings.prices['executive-signature'].amountCents / 100).toFixed(2);
+        statusEl.textContent = '';
+      } catch (error) {
+        statusEl.textContent = 'Could not load payment settings: ' + ((error && error.message) || 'Unknown error');
+      }
+    }
+
+    document.getElementById('paymentsSave')?.addEventListener('click', async function () {
+      var fb = window.utlFirebaseAuth;
+      var statusEl = document.getElementById('paymentsSaveStatus');
+      var btn = document.getElementById('paymentsSave');
+      if (!fb || !fb.setPaymentSettings) return;
+      btn.disabled = true;
+      statusEl.textContent = 'Saving...';
+      try {
+        var tsaDollars = parseFloat(document.getElementById('paymentsPriceTsa').value);
+        var esDollars = parseFloat(document.getElementById('paymentsPriceEs').value);
+        if (!(tsaDollars >= 0) || !(esDollars >= 0)) throw new Error('Enter valid, non-negative prices.');
+        await fb.setPaymentSettings({
+          enabled: document.getElementById('paymentsEnabled').checked === true,
+          prices: {
+            tsa: { amountCents: Math.round(tsaDollars * 100), currency: 'usd', label: 'Think, Speak, Act (self-guided)' },
+            'executive-signature': { amountCents: Math.round(esDollars * 100), currency: 'usd', label: 'Executive Signature full report' }
+          }
+        });
+        statusEl.textContent = 'Saved.';
+      } catch (error) {
+        statusEl.textContent = 'Could not save: ' + ((error && error.message) || 'Unknown error');
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    // ===== End monetization =====
+
     // ===== Admin/ owner preview visibility =====
 
     const ADMIN_VISIBILITY_LOCAL_KEYS = {
@@ -8404,7 +8590,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
     // ===== End Content Library =====
 
     function validAdminTab(tab) {
-      return ['customers', 'programs', 'organizations', 'admin-tools', 'engagement', 'content-library'].includes(tab) ? tab : 'customers';
+      return ['customers', 'programs', 'organizations', 'admin-tools', 'engagement', 'content-library', 'guide'].includes(tab) ? tab : 'customers';
     }
 
     function phaseLessonIds(phaseKey) {
@@ -10734,19 +10920,84 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       }
     }
 
+    let currentAdminProgram = localStorage.getItem('utl_admin_current_program') === 'executive-signature'
+      ? 'executive-signature' : 'tsa';
+
+    function programMismatch(el) {
+      return Boolean(el.dataset.adminProgram) && el.dataset.adminProgram !== currentAdminProgram;
+    }
+
+    // Programs has its own program-scoped picker (TSA / Executive Signature)
+    // layered on top of the admin-tab system, since both programs' sections
+    // share the same "programs" tab panel and would otherwise all be visible
+    // at once, in whatever order they happen to sit in the document.
+    function switchProgram(program) {
+      currentAdminProgram = program === 'executive-signature' ? 'executive-signature' : 'tsa';
+      try { localStorage.setItem('utl_admin_current_program', currentAdminProgram); } catch (e) {}
+      switchAdminTab('programs', { replace: true });
+    }
+
+    document.querySelectorAll('.program-pill').forEach((pill) => {
+      pill.addEventListener('click', () => switchProgram(pill.dataset.program));
+    });
+
+    // Shared by switchAdminTab (fires for whichever section is active right
+    // when a tab or program switches) and the sidebar nav click handler below
+    // (fires for whatever the visitor actually clicked). Without the second
+    // call site, clicking from one loaded section straight to a sibling one
+    // in the same tab/program (Participants to Attempts, say) only scrolled
+    // and expanded it, since every section under one tab panel is already
+    // visible at once and no tab/program switch ever happens to re-trigger
+    // this — so the sibling's own data silently never loaded.
+    function dispatchSectionLoad(tab, target) {
+      if (!target) return;
+      if (tab === 'programs') {
+        const programContentTargets = ['section-access-controls', 'section-orientation', 'section-phase1', 'section-phase2', 'section-phase3'];
+        const studentProgressTargets = ['section-student-progress', 'section-platform-overview', 'section-launch-health', 'section-leaderboard', 'section-engagement-insights', 'section-cohort-analytics'];
+        const rewardTargets = ['section-reward-levels', 'section-reward-overview', 'section-reward-rules', 'section-reward-simulator'];
+        const esTargets = ['section-es-overview', 'section-es-participants', 'section-es-attempts', 'section-es-configuration', 'section-es-governance'];
+        if (programContentTargets.includes(target)) {
+          loadAdminVisibilitySettings();
+          loadPublicAssessmentSettings();
+          loadTsaVisibility();
+        } else if (studentProgressTargets.includes(target)) {
+          if (target === 'section-platform-overview') poLoadPlatformOverview(false);
+          else if (target === 'section-launch-health') loadLaunchHealth();
+          else if (target === 'section-engagement-insights') loadEngagementInsights();
+          else loadStudentProgress();
+        } else if (rewardTargets.includes(target)) {
+          loadRewardSettings();
+        } else if (target === 'section-members') {
+          if (!mbMembersCache.length) mbLoadMembers();
+        } else if (esTargets.includes(target)) {
+          esLoadForTarget(target);
+        }
+      }
+      if (tab === 'organizations' && target === 'section-organization-access') oaLoad(false);
+      if (tab === 'customers' && target === 'section-customers-directory') csLoadDirectory();
+      if (tab === 'engagement') loadEngagementSettings();
+      if (tab === 'admin-tools') {
+        if (target === 'section-site-reliability') loadLaunchHealth();
+        else if (target === 'section-payments') loadPaymentsSettings();
+      }
+    }
+
     function switchAdminTab(tab, options = {}) {
       const activeTab = validAdminTab(tab);
       document.querySelectorAll('[data-admin-tab]').forEach((button) => {
         button.classList.toggle('active', button.dataset.adminTab === activeTab);
       });
       document.querySelectorAll('[data-admin-tab-panel]').forEach((section) => {
-        section.hidden = section.dataset.adminTabPanel !== activeTab;
+        section.hidden = section.dataset.adminTabPanel !== activeTab || programMismatch(section);
       });
       document.querySelectorAll('[data-admin-tab-scope]').forEach((item) => {
-        item.hidden = item.dataset.adminTabScope !== activeTab;
+        item.hidden = item.dataset.adminTabScope !== activeTab || programMismatch(item);
       });
       document.querySelectorAll('[data-admin-nav-group]').forEach((label) => {
-        label.hidden = label.dataset.adminNavGroup !== activeTab;
+        label.hidden = label.dataset.adminNavGroup !== activeTab || programMismatch(label);
+      });
+      document.querySelectorAll('.program-pill').forEach((pill) => {
+        pill.classList.toggle('active', pill.dataset.program === currentAdminProgram);
       });
 
       const visibleNavItems = Array.from(document.querySelectorAll('.admin-nav-item')).filter((item) => !item.hidden);
@@ -10758,6 +11009,8 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
 
       const url = new URL(window.location.href);
       url.searchParams.set('tab', activeTab);
+      if (activeTab === 'programs') url.searchParams.set('program', currentAdminProgram);
+      else url.searchParams.delete('program');
       if (options.replace) window.history.replaceState({}, '', url);
       else window.history.pushState({}, '', url);
 
@@ -10767,36 +11020,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       // Data/Preview & Health) into one, per the Phase 9 restructuring. Dispatch
       // stays target-scoped (not "load everything whenever Programs opens") so
       // visiting one sub-area never triggers unrelated network calls.
-      if (activeTab === 'programs') {
-        const programsTarget = (currentActive || visibleNavItems[0])?.dataset.target;
-        const programContentTargets = ['section-access-controls', 'section-orientation', 'section-phase1', 'section-phase2', 'section-phase3'];
-        const studentProgressTargets = ['section-student-progress', 'section-platform-overview', 'section-launch-health', 'section-leaderboard', 'section-engagement-insights', 'section-cohort-analytics'];
-        const rewardTargets = ['section-reward-levels', 'section-reward-overview', 'section-reward-rules', 'section-reward-simulator'];
-        const esTargets = ['section-es-overview', 'section-es-participants', 'section-es-attempts', 'section-es-configuration', 'section-es-governance'];
-        if (programContentTargets.includes(programsTarget)) {
-          loadAdminVisibilitySettings();
-          loadPublicAssessmentSettings();
-          loadTsaVisibility();
-        } else if (studentProgressTargets.includes(programsTarget)) {
-          if (programsTarget === 'section-platform-overview') poLoadPlatformOverview(false);
-          else if (programsTarget === 'section-launch-health') loadLaunchHealth();
-          else if (programsTarget === 'section-engagement-insights') loadEngagementInsights();
-          else loadStudentProgress();
-        } else if (rewardTargets.includes(programsTarget)) {
-          loadRewardSettings();
-        } else if (programsTarget === 'section-members') {
-          if (!mbMembersCache.length) mbLoadMembers();
-        } else if (esTargets.includes(programsTarget)) {
-          esLoadForTarget(programsTarget);
-        }
-      }
-      if (activeTab === 'organizations') oaLoad(false);
-      if (activeTab === 'customers') csLoadDirectory();
-      if (activeTab === 'engagement') loadEngagementSettings();
-      if (activeTab === 'admin-tools') {
-        const healthTarget = (currentActive || visibleNavItems[0])?.dataset.target;
-        if (healthTarget === 'section-site-reliability') loadLaunchHealth();
-      }
+      dispatchSectionLoad(activeTab, (currentActive || visibleNavItems[0])?.dataset.target);
       if (options.scroll !== false) {
         const target = (currentActive || visibleNavItems[0])?.dataset.target;
         if (target) openAndScrollToSection(target);
@@ -10886,6 +11110,14 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       document.querySelectorAll('.admin-nav-item').forEach((item) => {
         item.addEventListener('click', () => {
           openAndScrollToSection(item.dataset.target);
+          // A tab/program switch only dispatches a load for whichever section
+          // happens to be first/active at that moment; clicking straight to a
+          // sibling section afterward (e.g. Participants to Attempts, without
+          // leaving Programs or the Executive Signature picker) never
+          // re-triggers that, so this section's own data load would otherwise
+          // never run. dispatchSectionLoad is a no-op for targets that were
+          // already loaded (each loader guards its own "loaded once" state).
+          dispatchSectionLoad(item.dataset.adminTabScope, item.dataset.target);
         });
       });
     }
@@ -11448,6 +11680,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
     let csData = [];
     let csNextCursor = null;
     let csSearchTerm = '';
+    let csProgramFilter = '';
     let csFlagChecked = false;
     let csFlagEnabled = false;
     let csLoading = false;
@@ -11514,6 +11747,20 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       const status = document.getElementById('csStatus');
       const loadMore = document.getElementById('csLoadMore');
       if (!flagNotice || !loaded || !status) return;
+      // Customers is now the default tab, so this can run before window.utlFirebaseAuth
+      // finishes initializing (a race every other section already guards against,
+      // see mbLoadMembers). Without this, a visitor landing here first ever got a
+      // permanent "Firebase is still loading" error with no automatic retry.
+      if (!window.utlFirebaseAuth) {
+        loaded.hidden = false;
+        flagNotice.hidden = true;
+        status.textContent = 'Waiting for Firebase…';
+        window.addEventListener('utlFirebaseAuthReady', function handler() {
+          window.removeEventListener('utlFirebaseAuthReady', handler);
+          csFetchPage(options);
+        });
+        return;
+      }
       csLoading = true;
       try {
         const fb = await csEnsureFirebase();
@@ -11536,7 +11783,8 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         const result = await fb.getCustomerDirectory({
           search: csSearchTerm,
           pageSize: 25,
-          cursorCustomerId: reset ? '' : (csNextCursor || '')
+          cursorCustomerId: reset ? '' : (csNextCursor || ''),
+          programFilter: csProgramFilter
         });
         csData = reset ? (result.rows || []).slice() : csData.concat(result.rows || []);
         csNextCursor = result.nextCursor || null;
@@ -11578,6 +11826,10 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
     });
     document.getElementById('csRefresh')?.addEventListener('click', () => {
       csFetchPage({ reset: true, forceFlagRecheck: true });
+    });
+    document.getElementById('csProgramFilter')?.addEventListener('change', (event) => {
+      csProgramFilter = event.target.value || '';
+      csFetchPage({ reset: true });
     });
     document.getElementById('csLoadMore')?.addEventListener('click', () => {
       csFetchPage({ reset: false });
@@ -11725,6 +11977,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
     let esaLoading = false;
     let esaLoadedOnce = false;
     let esConfigLoadedOnce = false;
+    let esConfigVersionsCache = [];
     let esGovLoadedOnce = false;
     let esRevealAttemptId = null;
 
@@ -11774,7 +12027,48 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       else esOverviewLoadOnce();
     }
 
+    async function loadEsPublicVisibility() {
+      var fb = window.utlFirebaseAuth;
+      var statusEl = document.getElementById('esPublicVisibilityStatus');
+      var toggle = document.getElementById('esPublicVisibilityToggle');
+      if (!statusEl || !toggle) return;
+      if (!fb || !fb.getPublicAssessmentSettings) {
+        statusEl.textContent = 'Loading...';
+        window.addEventListener('utlFirebaseAuthReady', function handler() {
+          window.removeEventListener('utlFirebaseAuthReady', handler);
+          loadEsPublicVisibility();
+        });
+        return;
+      }
+      try {
+        var settings = await fb.getPublicAssessmentSettings();
+        toggle.checked = settings.executiveSignatureVisible === true;
+        statusEl.textContent = '';
+      } catch (error) {
+        statusEl.textContent = 'Could not load: ' + ((error && error.message) || 'Unknown error');
+      }
+    }
+
+    document.getElementById('esPublicVisibilitySave')?.addEventListener('click', async function () {
+      var fb = window.utlFirebaseAuth;
+      var statusEl = document.getElementById('esPublicVisibilitySaveStatus');
+      var toggle = document.getElementById('esPublicVisibilityToggle');
+      var btn = document.getElementById('esPublicVisibilitySave');
+      if (!fb || !fb.setPublicAssessmentSettings || !toggle) return;
+      btn.disabled = true;
+      statusEl.textContent = 'Saving...';
+      try {
+        await fb.setPublicAssessmentSettings({ executiveSignatureVisible: toggle.checked === true });
+        statusEl.textContent = 'Saved.';
+      } catch (error) {
+        statusEl.textContent = 'Could not save: ' + ((error && error.message) || 'Unknown error');
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
     async function esOverviewLoadOnce() {
+      loadEsPublicVisibility();
       await esGuardSection('esFlagNotice', 'esOverviewLoaded', false);
     }
 
@@ -11863,6 +12157,8 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       table.style.display = '';
       body.innerHTML = esaData.map((row) => (
         '<tr>' +
+          '<td>' + escapeHtml(row.displayName || '—') + '</td>' +
+          '<td>' + escapeHtml(row.primaryEmail || '—') + '</td>' +
           '<td>' + escapeHtml(esAssessmentLabel(row.assessmentId)) + '</td>' +
           '<td>' + escapeHtml(row.status || '—') + '</td>' +
           '<td>' + esaResultCell(row) + '</td>' +
@@ -11971,6 +12267,58 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       }
     });
 
+    function exportEsConfigVersion(versionId, format) {
+      const version = esConfigVersionsCache.find((v) => v.versionId === versionId);
+      if (!version || !Array.isArray(version.questions)) return;
+      const rows = [['Order', 'Item ID', 'Area', 'Direction']].concat(
+        version.questions.map((q) => [q.orderInForm || '', q.id || '', q.area || '', q.direction || ''])
+      );
+      const scoringRows = version.scoring ? [
+        ['Readiness areas', (version.scoring.readinessAreas || []).join('; ')],
+        ['Voice area', version.scoring.voiceArea || ''],
+        ['Achievement area', version.scoring.achievementArea || ''],
+        ['Connection area', version.scoring.connectionArea || '']
+      ] : [];
+      const safeName = versionId.replace(/[^a-z0-9-_]/gi, '-');
+
+      if (format === 'csv') {
+        const csvEscape = (value) => {
+          const text = String(value == null ? '' : value);
+          return /[",\n]/.test(text) ? '"' + text.replace(/"/g, '""') + '"' : text;
+        };
+        const parts = ['Version,' + csvEscape(versionId), ''];
+        parts.push(rows.map((row) => row.map(csvEscape).join(',')).join('\n'));
+        if (scoringRows.length) {
+          parts.push('');
+          parts.push('Scoring');
+          parts.push(scoringRows.map((row) => row.map(csvEscape).join(',')).join('\n'));
+        }
+        const blob = new Blob([parts.join('\n')], { type: 'text/csv;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = safeName + '-questions.csv';
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+        return;
+      }
+
+      if (format === 'xlsx') {
+        if (!window.XLSX) {
+          showToast('The spreadsheet library did not load. Check your connection and try again.', 'error');
+          return;
+        }
+        const workbook = window.XLSX.utils.book_new();
+        window.XLSX.utils.book_append_sheet(workbook, window.XLSX.utils.aoa_to_sheet(rows), 'Questions');
+        if (scoringRows.length) {
+          window.XLSX.utils.book_append_sheet(workbook, window.XLSX.utils.aoa_to_sheet([['Setting', 'Value']].concat(scoringRows)), 'Scoring');
+        }
+        window.XLSX.writeFile(workbook, safeName + '-questions.xlsx');
+      }
+    }
+
     async function esConfigLoadOnce() {
       if (esConfigLoadedOnce) return;
       const ready = await esGuardSection('esConfigFlagNotice', 'esConfigLoaded', false);
@@ -11998,7 +12346,39 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
               versions.map((v) => '<tr><td>' + escapeHtml(v.versionId) + '</td><td>' + escapeHtml(v.assessmentId || '—') +
                 '</td><td>' + escapeHtml(v.status || '—') + '</td><td>' + escapeHtml(v.scoringVersion || '—') + '</td><td>' + escapeHtml(v.contentVersion || '—') +
                 '</td><td>' + escapeHtml(String(v.questionCount || 0)) + '</td><td>' + escapeHtml(formatProgressDate(v.publishedAt)) + '</td></tr>').join('') +
-              '</tbody></table>' : '<p class="oa-empty">No assessment versions on file yet.</p>');
+              '</tbody></table>' : '<p class="oa-empty">No assessment versions on file yet.</p>') +
+            versions.filter((v) => v.questions && v.questions.length).map((v) => {
+              const areaCounts = {};
+              v.questions.forEach((q) => { areaCounts[q.area] = (areaCounts[q.area] || 0) + 1; });
+              const areaSummary = Object.keys(areaCounts).map((a) => escapeHtml(a) + ' (' + areaCounts[a] + ')').join(', ');
+              const scoringRows = v.scoring ? [
+                ['Readiness areas (average into the score shown to the participant)', (v.scoring.readinessAreas || []).join(', ')],
+                ['Voice area (Reserved / Balanced / Vocal)', v.scoring.voiceArea || '—'],
+                ['Achievement area (drive comparison)', v.scoring.achievementArea || '—'],
+                ['Connection area (drive comparison)', v.scoring.connectionArea || '—']
+              ] : [];
+              return '<details style="margin-top:12px;border:1px solid var(--line);border-radius:8px;padding:10px 14px;">' +
+                '<summary style="cursor:pointer;font-weight:700;color:var(--navy)">' + escapeHtml(v.versionId) + ', question content and scoring (' + v.questions.length + ' items, ' + areaSummary + ')</summary>' +
+                (scoringRows.length ? '<table class="cs-table" style="margin-top:10px"><tbody>' +
+                  scoringRows.map((r) => '<tr><td>' + escapeHtml(r[0]) + '</td><td>' + escapeHtml(r[1]) + '</td></tr>').join('') +
+                  '</tbody></table>' : '') +
+                '<table class="cs-table" style="margin-top:10px"><thead><tr><th>#</th><th>Item ID</th><th>Area</th><th>Direction</th></tr></thead><tbody>' +
+                v.questions.map((q) => '<tr><td>' + escapeHtml(String(q.orderInForm || '')) + '</td><td class="mono">' + escapeHtml(q.id || '') +
+                  '</td><td>' + escapeHtml(q.area || '') + '</td><td>' + escapeHtml(q.direction || '') + '</td></tr>').join('') +
+                '</tbody></table>' +
+                '<div class="sync-actions" style="margin-top:10px">' +
+                  '<button type="button" class="small-button secondary-button" data-es-config-csv="' + escapeHtml(v.versionId) + '">Download CSV</button>' +
+                  '<button type="button" class="small-button secondary-button" data-es-config-xlsx="' + escapeHtml(v.versionId) + '">Download XLSX</button>' +
+                '</div></details>';
+            }).join('') +
+            '<p class="description" style="margin-top:16px"><strong>How questions are presented:</strong> the order shown above is the fixed definition order, used only to build each attempt&rsquo;s shuffle. Every participant sees these same items in a freshly randomized order each time they start an attempt (a Fisher&ndash;Yates shuffle in <code>apps/readiness-assessment/forms.js</code>), not the order listed here. &ldquo;Direction&rdquo; of <code>+</code> or <code>&minus;</code> means the raw 1&ndash;5 answer is used as-is or reversed (6 minus the answer) before it is averaged into that item&rsquo;s area.</p>';
+          esConfigVersionsCache = versions;
+          bodyEl.querySelectorAll('[data-es-config-csv]').forEach((button) => {
+            button.addEventListener('click', () => exportEsConfigVersion(button.dataset.esConfigCsv, 'csv'));
+          });
+          bodyEl.querySelectorAll('[data-es-config-xlsx]').forEach((button) => {
+            button.addEventListener('click', () => exportEsConfigVersion(button.dataset.esConfigXlsx, 'xlsx'));
+          });
         }
       } catch (error) {
         const raw = (error && error.message) || 'Unknown error';

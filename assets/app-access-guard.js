@@ -78,7 +78,7 @@ function endExperiencePreview() {
   });
   localStorage.removeItem("utl_experience_preview_active");
   localStorage.removeItem("utl_experience_preview_backup");
-  window.location.href = new URL("../../admin/index.html?tab=student-progress", window.location.href).toString();
+  window.location.href = new URL("../../admin/index.html?tab=programs", window.location.href).toString();
 }
 
 function mountExperiencePreviewBanner() {
