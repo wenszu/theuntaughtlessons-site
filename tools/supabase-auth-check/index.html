@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Supabase auth check</title>
+  <style>
+    :root { color-scheme: light dark; --ink: #1d1d1f; --paper: #ffffff; --pass: #1b7f3b; --fail: #b3261e; --muted: #5f6368; }
+    @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --ink: #e8eaed; --paper: #1d1d1f; --muted: #9aa0a6; } }
+    :root[data-theme="dark"] { --ink: #e8eaed; --paper: #1d1d1f; --muted: #9aa0a6; }
+    body { margin: 0; padding: 16px; font-family: system-ui, sans-serif; background: var(--paper); color: var(--ink); max-width: 640px; }
+    h1 { font-size: 1.3rem; }
+    p.note { color: var(--muted); font-size: 0.9rem; }
+    form, .row { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+    input { padding: 8px; font-size: 1rem; min-width: 0; flex: 1 1 200px; }
+    button { padding: 8px 12px; font-size: 1rem; cursor: pointer; }
+    li { margin: 10px 0; }
+    .pass { color: var(--pass); font-weight: 600; }
+    .fail { color: var(--fail); font-weight: 600; }
+    .detail { color: var(--muted); font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+  <h1>Supabase auth check</h1>
+  <p class="note">Local test page. Reads only. It never displays a token, email address or key, and it does not store the sign-in between page loads.</p>
+
+  <section id="signin">
+    <div class="row">
+      <button id="googleBtn" type="button">Sign in with Google</button>
+    </div>
+    <form id="emailForm">
+      <input id="email" type="email" autocomplete="username" placeholder="Email" required>
+      <input id="password" type="password" autocomplete="current-password" placeholder="Password" required>
+      <button type="submit">Sign in with email</button>
+    </form>
+    <p id="signinStatus" class="detail" aria-live="polite"></p>
+  </section>
+
+  <section id="results" hidden>
+    <h2>Checks</h2>
+    <ol id="checks"></ol>
+  </section>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+    import {
+      getAuth,
+      setPersistence,
+      inMemoryPersistence,
+      GoogleAuthProvider,
+      signInWithPopup,
+      signInWithEmailAndPassword
+    } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+
+    // Same public web config as assets/firebase.js.
+    const firebaseConfig = {
+      apiKey: "AIzaSyAqM97wUydwu2QVUZGMbH4NWcUTEr62JQc",
+      authDomain: "the-untaught-lessons.firebaseapp.com",
+      projectId: "the-untaught-lessons",
+      storageBucket: "the-untaught-lessons.firebasestorage.app",
+      messagingSenderId: "429241278717",
+      appId: "1:429241278717:web:f69fc7add8f47ba579de94",
+      measurementId: "G-F7C8J1LHR7"
+    };
+
+    const SUPABASE_URL = "https://czljyikfavtjgqcibdda.supabase.co";
+    const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_uxSIlhwWdbAa6EnHyn_Flw__P3u6tlW";
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    // Keep the sign-in in memory only. Nothing is written to browser storage.
+    await setPersistence(auth, inMemoryPersistence);
+
+    const signinStatus = document.getElementById("signinStatus");
+    const results = document.getElementById("results");
+    const checksList = document.getElementById("checks");
+
+    function decodeClaims(jwt) {
+      const part = jwt.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
+      const padded = part + "=".repeat((4 - (part.length % 4)) % 4);
+      return JSON.parse(atob(padded));
+    }
+
+    function addCheck(title, passed, detail) {
+      const item = document.createElement("li");
+      const verdict = document.createElement("span");
+      verdict.className = passed ? "pass" : "fail";
+      verdict.textContent = passed ? "PASS" : "FAIL";
+      const heading = document.createElement("strong");
+      heading.textContent = " " + title;
+      const info = document.createElement("div");
+      info.className = "detail";
+      info.textContent = detail;
+      item.append(verdict, heading, info);
+      checksList.append(item);
+    }
+
+    async function readPrograms(headers) {
+      const response = await fetch(`${SUPABASE_URL}/rest/v1/programs?select=id`, { headers });
+      let rows = null;
+      if (response.ok) {
+        const body = await response.json();
+        rows = Array.isArray(body) ? body.map((row) => row.id) : null;
+      }
+      return { status: response.status, ids: rows };
+    }
+
+    async function runChecks(user) {
+      checksList.replaceChildren();
+      results.hidden = false;
+
+      // Force a fresh token so the custom claim is current. The token stays in this variable only.
+      let idToken;
+      try {
+        idToken = await user.getIdToken(true);
+      } catch (error) {
+        addCheck("Token refresh", false, `getIdToken(true) failed (${error.code || error.name}).`);
+        return;
+      }
+
+      // a. Claim in the token.
+      try {
+        const claims = decodeClaims(idToken);
+        const hasRole = claims.role === "authenticated";
+        addCheck("Token has role = authenticated", hasRole, `role claim is authenticated: ${hasRole}`);
+      } catch (error) {
+        addCheck("Token has role = authenticated", false, `Could not decode the token (${error.name}).`);
+      }
+
+      // b. Programs with the token.
+      try {
+        const withToken = await readPrograms({
+          apikey: SUPABASE_PUBLISHABLE_KEY,
+          Authorization: `Bearer ${idToken}`
+        });
+        const ids = withToken.ids || [];
+        const expected = ["tsa", "executive-signature"];
+        const passed = withToken.status === 200 && expected.every((id) => ids.includes(id));
+        addCheck(
+          "Programs with signed-in token",
+          passed,
+          `HTTP ${withToken.status}. Program ids returned: ${ids.length ? ids.join(", ") : "none"}. Expected 200 with tsa and executive-signature.`
+        );
+      } catch (error) {
+        addCheck("Programs with signed-in token", false, `Request failed (${error.name}).`);
+      }
+
+      // c. Programs with the key only. Anonymous readers should see nothing.
+      try {
+        const keyOnly = await readPrograms({ apikey: SUPABASE_PUBLISHABLE_KEY });
+        const ids = keyOnly.ids || [];
+        const passed = keyOnly.status === 401 || keyOnly.status === 403 || (keyOnly.status === 200 && ids.length === 0);
+        addCheck(
+          "Programs with key only (no token)",
+          passed,
+          `HTTP ${keyOnly.status}. Rows returned: ${keyOnly.ids ? ids.length : "none"}. Pass means 401, 403, or 200 with zero rows.`
+        );
+      } catch (error) {
+        addCheck("Programs with key only (no token)", false, `Request failed (${error.name}).`);
+      }
+
+      // d. Org brand RPC for a slug that does not exist.
+      try {
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/get_public_org_brand`, {
+          method: "POST",
+          headers: { apikey: SUPABASE_PUBLISHABLE_KEY, "content-type": "application/json" },
+          body: JSON.stringify({ p_slug: "nobody" })
+        });
+        let rowCount = null;
+        if (response.ok) {
+          const rows = await response.json();
+          rowCount = Array.isArray(rows) ? rows.length : null;
+        }
+        const passed = response.status === 200 && rowCount === 0;
+        addCheck(
+          "Org brand RPC for unknown slug",
+          passed,
+          `HTTP ${response.status}. Rows returned: ${rowCount === null ? "none" : rowCount}. Expected 200 with 0 rows.`
+        );
+      } catch (error) {
+        addCheck("Org brand RPC for unknown slug", false, `Request failed (${error.name}).`);
+      }
+    }
+
+    document.getElementById("googleBtn").addEventListener("click", async () => {
+      signinStatus.textContent = "Opening Google sign-in...";
+      try {
+        const credential = await signInWithPopup(auth, new GoogleAuthProvider());
+        signinStatus.textContent = "Signed in. Running checks.";
+        await runChecks(credential.user);
+      } catch (error) {
+        signinStatus.textContent = `Sign-in failed (${error.code || error.name}).`;
+      }
+    });
+
+    document.getElementById("emailForm").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const emailInput = document.getElementById("email");
+      const passwordInput = document.getElementById("password");
+      signinStatus.textContent = "Signing in...";
+      try {
+        const credential = await signInWithEmailAndPassword(auth, emailInput.value.trim().toLowerCase(), passwordInput.value);
+        passwordInput.value = "";
+        signinStatus.textContent = "Signed in. Running checks.";
+        await runChecks(credential.user);
+      } catch (error) {
+        passwordInput.value = "";
+        signinStatus.textContent = `Sign-in failed (${error.code || error.name}).`;
+      }
+    });
+  </script>
+</body>
+</html>

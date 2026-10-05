@@ -124,3 +124,20 @@ Rollback: `node scripts/supabase-auth-claim-backfill.js --project the-untaught-l
 - Confirm the Supabase third-party auth setup that will read the `role` claim, so the claim name and value match what Supabase expects.
 - The `onUserCreated` trigger runs asynchronously. The client's forced refresh may run before the claim is written, so a brand-new user may need one more token refresh. A later refresh or the next hourly token renewal picks it up.
 - Decide whether the 7 users not in the members list should keep `authenticated`. The current decision is yes, for every Firebase user.
+
+## 11. End-to-end check (local page, 2026-10-05)
+
+Method: `tools/supabase-auth-check/index.html`, served on localhost (port 8081). It signed in the owner account, forced a token refresh, and ran four read-only checks. Nothing was written to Firebase or Supabase. The page never shows a token, email or key. The page is excluded from hosting in `firebase.json`.
+
+The Admin SDK version of this check was dropped. It failed at token creation (`auth/invalid-credential`, because the local login is a personal account), and no credential or role was changed to work around it.
+
+| # | Check | Result |
+|---|---|---|
+| 1 | Token has `role` = `authenticated` | PASS (true) |
+| 2 | Programs with signed-in token | PASS. HTTP 200. Ids: `tsa`, `executive-signature` |
+| 3 | Programs with publishable key only | PASS. HTTP 401 (no rows exposed) |
+| 4 | Org brand RPC for unknown slug | PASS. HTTP 200, 0 rows |
+
+What this shows: Supabase accepts the Firebase token carrying the claim, and anonymous callers get no program rows or org brand rows for an unknown slug.
+
+Not done: no change to Firebase or Supabase, no deployment, no push.

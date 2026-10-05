@@ -59,6 +59,8 @@
       "csv/**",
       "scripts",
       "scripts/**",
+      "tools",
+      "tools/**",
       "reference",
       "reference/**",
       "apps/readiness-assessment",
