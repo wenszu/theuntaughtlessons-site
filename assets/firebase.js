@@ -776,6 +776,16 @@ async function saveUserProfile(user, member = {}, signInProvider = "") {
 
   await setDoc(userRef, profileData, { merge: true });
 
+  // New accounts get the Supabase role claim from the onUserCreated trigger. Refresh
+  // the ID token so this session picks it up. A failed refresh must not block sign-in.
+  if (isNewUser) {
+    try {
+      await user.getIdToken(true);
+    } catch (error) {
+      console.warn("Token refresh after sign-up failed", error && error.code);
+    }
+  }
+
   if (email && memberSnap && memberSnap.exists()) {
     const memberData = memberSnap.data() || {};
     const memberProviders = Array.isArray(memberData.signInProviders) ? memberData.signInProviders : [];

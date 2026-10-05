@@ -14,3 +14,4 @@ functions/.runtimeconfig.json
 *.pem
 *.key
 secrets/
+node_modules/

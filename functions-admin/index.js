@@ -4,6 +4,8 @@ const crypto = require("crypto");
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const { onDocumentWritten } = require("firebase-functions/v2/firestore");
 const { onSchedule } = require("firebase-functions/v2/scheduler");
+const authV1 = require("firebase-functions/v1/auth");
+const { planSetRole } = require("./auth-claims");
 const { defineSecret, defineString } = require("firebase-functions/params");
 const { CustomerProgramError, createCustomerProgramService } = require("./customer-program-service");
 const { createAssessmentPersistenceService } = require("./assessment-persistence-service");
@@ -1766,6 +1768,15 @@ async function checkReadinessAccountEmailHandler(request) {
 }
 
 exports.checkReadinessAccountEmail = onCall({ timeoutSeconds: 15, memory: "256MiB" }, checkReadinessAccountEmailHandler);
+
+// Adds role = "authenticated" to every new Firebase user, merging into existing
+// claims. Supabase reads this claim. Auth triggers are v1-only in this SDK.
+exports.setRoleClaimOnUserCreated = authV1.user().onCreate(async (user) => {
+  const record = await admin.auth().getUser(user.uid);
+  const plan = planSetRole(record.customClaims);
+  if (plan.action !== "set") return;
+  await admin.auth().setCustomUserClaims(user.uid, plan.claims);
+});
 
 if (process.env.NODE_ENV === "test") {
   exports.__readinessAccountTest = {

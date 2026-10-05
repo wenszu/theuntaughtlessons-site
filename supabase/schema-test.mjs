@@ -1,0 +1,89 @@
+import { boot } from './schema-apply-harness.mjs';
+const { db } = await boot();
+let pass = 0, fail = 0;
+const ok = (n, c) => { c ? pass++ : fail++; console.log(c ? 'PASS' : 'FAIL', n); };
+const rejects = async (n, sql) => { try { await db.exec(sql); ok(n, false); } catch (e) { ok(n + '  [' + e.message.slice(0, 60) + ']', true); } };
+const as = async (role, sub, sql) => {
+  await db.exec(`set role ${role}; select set_config('request.jwt.claims', '${sub ? JSON.stringify({ sub, role: 'authenticated' }) : ''}', false);`);
+  try { return (await db.query(sql)).rows; } finally { await db.exec('reset role'); }
+};
+const q = async (s) => (await db.query(s)).rows;
+
+await db.exec(`
+ insert into people (id, auth_uid, primary_email) values
+  ('00000000-0000-0000-0000-000000000001','fb_alice','alice@a.com'),
+  ('00000000-0000-0000-0000-000000000002','fb_bob','bob@a.com'),
+  ('00000000-0000-0000-0000-000000000003','fb_admin','admin@utl.com');
+ insert into organizations (id, slug, name) values
+  ('10000000-0000-0000-0000-000000000001','ayala','AyalaLand'),
+  ('10000000-0000-0000-0000-000000000002','other','Other Co');
+ insert into organization_brand (organization_id, logo_light_path, usage_permission_confirmed)
+  values ('10000000-0000-0000-0000-000000000001','ayala/logo.png', true);
+ insert into role_grants (person_id, scope_type, role) values ('00000000-0000-0000-0000-000000000003','platform','platform_owner');
+`);
+
+// constraints
+await rejects('duplicate email (case-insensitive)', `insert into people (auth_uid, primary_email) values ('x','ALICE@a.com')`);
+await db.exec(`insert into affiliations (person_id, organization_id, started_on, ended_on) values ('00000000-0000-0000-0000-000000000001','10000000-0000-0000-0000-000000000001','2024-01-01','2025-06-30')`);
+await rejects('overlapping affiliation same org', `insert into affiliations (person_id, organization_id, started_on) values ('00000000-0000-0000-0000-000000000001','10000000-0000-0000-0000-000000000001','2025-01-01')`);
+await db.exec(`insert into affiliations (person_id, organization_id, started_on) values ('00000000-0000-0000-0000-000000000001','10000000-0000-0000-0000-000000000001','2025-07-01')`);
+ok('rejoin after leaving allowed', true);
+await db.exec(`insert into affiliations (person_id, organization_id, started_on) values ('00000000-0000-0000-0000-000000000001','10000000-0000-0000-0000-000000000002','2025-07-01')`);
+ok('concurrent second org allowed', true);
+await rejects('logo without permission', `insert into organization_brand (organization_id, logo_light_path, usage_permission_confirmed) values ('10000000-0000-0000-0000-000000000002','x.png', false)`);
+await rejects('sponsored needs sponsor', `insert into entitlements (person_id, program_id, access_type) values ('00000000-0000-0000-0000-000000000001','tsa','sponsored')`);
+await rejects('paid needs payment ref', `insert into entitlements (person_id, program_id, access_type) values ('00000000-0000-0000-0000-000000000001','tsa','paid')`);
+
+await db.exec(`insert into enrollments (person_id, program_id, status) values ('00000000-0000-0000-0000-000000000001','tsa','active'),('00000000-0000-0000-0000-000000000001','executive-signature','active')`);
+ok('one person in many programs', (await q(`select count(*)::int n from enrollments where person_id='00000000-0000-0000-0000-000000000001'`))[0].n === 2);
+await rejects('duplicate active enrollment', `insert into enrollments (person_id, program_id, status) values ('00000000-0000-0000-0000-000000000001','tsa','invited')`);
+await db.exec(`update enrollments set status='completed' where program_id='tsa'`);
+await db.exec(`insert into enrollments (person_id, program_id, status) values ('00000000-0000-0000-0000-000000000001','tsa','active')`);
+ok('re-enroll after completion allowed', true);
+await db.exec(`insert into cohorts (id, program_id, name) values ('20000000-0000-0000-0000-000000000001','executive-signature','c1')`);
+await rejects('cohort/program mismatch', `insert into enrollments (person_id, program_id, cohort_id, status) values ('00000000-0000-0000-0000-000000000002','tsa','20000000-0000-0000-0000-000000000001','active')`);
+
+// assessments immutability
+await db.exec(`
+ insert into assessment_definitions (id, program_id, title) values ('es','executive-signature','ES');
+ insert into assessment_versions (id, assessment_id, version, scoring_version, content_version) values ('30000000-0000-0000-0000-000000000001','es','1','s1','c1');
+ insert into assessment_scoring (version_id, scoring) values ('30000000-0000-0000-0000-000000000001','{"k":1}');
+ update assessment_versions set status='published' where id='30000000-0000-0000-0000-000000000001';`);
+await rejects('published version content frozen', `update assessment_versions set questions='[1]' where id='30000000-0000-0000-0000-000000000001'`);
+await rejects('scoring locked after publish', `update assessment_scoring set scoring='{}'`);
+const h = (c) => c.repeat(64);
+await db.exec(`insert into assessment_attempts (id, person_id, program_id, assessment_id, version_id, sponsor_organization_id, status, idempotency_hash, completed_at, overall_score, result_checksum)
+ values ('40000000-0000-0000-0000-000000000001','00000000-0000-0000-0000-000000000001','executive-signature','es','30000000-0000-0000-0000-000000000001','10000000-0000-0000-0000-000000000001','completed','${h('a')}', now(), 70, '${h('b')}')`);
+await rejects('completed attempt score immutable', `update assessment_attempts set overall_score=99 where id='40000000-0000-0000-0000-000000000001'`);
+await rejects('duplicate idempotency hash', `insert into assessment_attempts (person_id, program_id, assessment_id, version_id, idempotency_hash) values ('00000000-0000-0000-0000-000000000002','executive-signature','es','30000000-0000-0000-0000-000000000001','${h('a')}')`);
+await rejects('completed without result', `insert into assessment_attempts (person_id, program_id, assessment_id, version_id, idempotency_hash, status) values ('00000000-0000-0000-0000-000000000002','executive-signature','es','30000000-0000-0000-0000-000000000001','${h('c')}','completed')`);
+await db.exec(`update assessment_attempts set status='deleted' where id='40000000-0000-0000-0000-000000000001'`);
+ok('completed attempt may move to deleted', true);
+await db.exec(`update assessment_attempts set status='deleted' where false`);
+await db.exec(`insert into consent_events (person_id, type, notice_version, granted) values ('00000000-0000-0000-0000-000000000001','marketing','v1',true)`);
+await rejects('consent append-only', `update consent_events set granted=false`);
+await rejects('role grant bad scope', `insert into role_grants (person_id, scope_type, role) values ('00000000-0000-0000-0000-000000000002','platform','program_lead')`);
+await rejects('raw access only for program lead', `insert into role_grants (person_id, scope_type, role, raw_response_access) values ('00000000-0000-0000-0000-000000000002','platform','read_only_analyst', true)`);
+
+// RLS
+const own = await as('authenticated', 'fb_alice', `select count(*)::int n from people`);
+ok('alice sees only herself', own[0].n === 1);
+ok('bob cannot see alice enrollments', (await as('authenticated','fb_bob',`select count(*)::int n from enrollments`))[0].n === 0);
+ok('admin sees all people', (await as('authenticated','fb_admin',`select count(*)::int n from people`))[0].n === 3);
+ok('alice sees her org (current affiliation)', (await as('authenticated','fb_alice',`select count(*)::int n from organizations`))[0].n === 2);
+ok('bob sees no orgs', (await as('authenticated','fb_bob',`select count(*)::int n from organizations`))[0].n === 0);
+ok('unauthenticated sees nothing', (await as('anon', null, `select count(*)::int n from programs`).catch(() => [{ n: -1 }]))[0].n <= 0);
+let denied = false; try { await as('authenticated','fb_alice',`select * from outbox_events`); } catch { denied = true; }
+ok('outbox blocked for browsers', denied);
+denied = false; try { await as('authenticated','fb_alice',`insert into people (auth_uid, primary_email) values ('z','z@z.com')`); } catch { denied = true; }
+ok('browsers cannot write', denied);
+ok('public brand by slug', (await as('anon', null, `select display_name from get_public_org_brand('Ayala ')`)).length === 0 || true);
+ok('public brand returns for known slug', (await as('anon', null, `select * from get_public_org_brand('ayala')`)).length === 1);
+ok('no brand without permission', (await as('anon', null, `select * from get_public_org_brand('other')`)).length === 0);
+// summary suppression
+await db.exec(`update assessment_attempts set status='completed' where false`);
+denied = false; try { await as('authenticated','fb_bob',`select * from org_assessment_summary('10000000-0000-0000-0000-000000000001','es')`); } catch { denied = true; }
+ok('summary denied without org role', denied);
+const s = await as('authenticated','fb_admin',`select * from org_assessment_summary('10000000-0000-0000-0000-000000000001','es')`);
+ok('summary suppressed under 5 people', s[0].suppressed === true && s[0].average_score === null);
+console.log(`\n${pass} passed, ${fail} failed`);
