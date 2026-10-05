@@ -452,64 +452,6 @@
       padding: calc(2.5rem + 102px) 2rem 2.5rem;
       background: var(--cream);
     }
-    .readiness-admin-note {
-      max-width: 860px;
-      margin-bottom: 18px;
-    }
-    .ra-workspace-nav {
-      display: flex;
-      gap: 8px;
-      margin: 22px 0;
-      padding-bottom: 10px;
-      overflow-x: auto;
-      border-bottom: 1px solid var(--line);
-    }
-    .ra-workspace-nav button {
-      flex: 0 0 auto;
-      border: 0;
-      border-radius: 8px;
-      background: transparent;
-      color: var(--navy);
-      font: inherit;
-      font-weight: 700;
-      padding: 10px 14px;
-      cursor: pointer;
-    }
-    .ra-workspace-nav button[aria-selected="true"] {
-      background: var(--navy);
-      color: var(--white);
-    }
-    .ra-summary-grid {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 14px;
-      margin: 18px 0 24px;
-    }
-    .ra-summary-card,
-    .ra-panel,
-    .ra-version-card {
-      border: 1px solid var(--line);
-      border-radius: 12px;
-      background: var(--white);
-    }
-    .ra-summary-card { padding: 18px; }
-    .ra-summary-card span { color: var(--muted); font-size: 13px; }
-    .ra-summary-card strong { display: block; color: var(--navy); font-size: 25px; margin-top: 5px; }
-    .ra-panel { padding: 22px; margin-top: 16px; }
-    .ra-panel h3 { margin: 0 0 8px; color: var(--navy); }
-    .ra-version-list { display: grid; gap: 12px; margin-top: 18px; }
-    .ra-version-card { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 18px; padding: 18px; align-items: center; }
-    .ra-version-meta { display: flex; flex-wrap: wrap; gap: 8px 18px; color: var(--muted); font-size: 13px; margin-top: 7px; }
-    .ra-status-chip { display: inline-flex; border-radius: 999px; padding: 4px 9px; background: #e7f3eb; color: #286843; font-size: 12px; font-weight: 700; }
-    .ra-status-chip.is-draft { background: #f2ede4; color: #725f42; }
-    .ra-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
-    .ra-data-rule { padding: 16px 18px; border-radius: 8px; background: #f4f7fa; color: var(--ink); }
-    @media (max-width: 820px) {
-      .ra-summary-grid { grid-template-columns: 1fr; }
-      .ra-version-card { grid-template-columns: 1fr; }
-      .ra-actions { justify-content: flex-start; }
-    }
-
     .admin-tabs {
       position: fixed;
       inset: 54px 0 auto 0;
@@ -2837,7 +2779,6 @@
     <nav class="admin-tabs" aria-label="Admin console tabs">
       <button class="admin-tab active" type="button" data-admin-tab="content-manager">Program</button>
       <button class="admin-tab" type="button" data-admin-tab="student-progress">Student Progress</button>
-      <button class="admin-tab" type="button" data-admin-tab="readiness-assessment">Readiness Assessment</button>
       <button class="admin-tab" type="button" data-admin-tab="member-management">Member Access</button>
       <button class="admin-tab" type="button" data-admin-tab="customers">Customers</button>
       <button class="admin-tab" type="button" data-admin-tab="executive-signature">Executive Signature</button>
@@ -2867,9 +2808,6 @@
       <button class="admin-nav-item" data-admin-tab-scope="student-progress" data-target="section-leaderboard">Leaderboard</button>
       <button class="admin-nav-item" data-admin-tab-scope="student-progress" data-target="section-engagement-insights">Engagement Insights</button>
       <button class="admin-nav-item" data-admin-tab-scope="student-progress" data-target="section-cohort-analytics">Cohort Analytics</button>
-
-      <span class="nav-group-label" data-admin-nav-group="readiness-assessment">Assessment</span>
-      <button class="admin-nav-item" data-admin-tab-scope="readiness-assessment" data-target="section-readiness-assessment">Readiness assessment</button>
 
       <span class="nav-group-label" data-admin-nav-group="customers">Customers</span>
       <button class="admin-nav-item" data-admin-tab-scope="customers" data-target="section-customers-directory">Directory</button>
@@ -2913,61 +2851,6 @@
     </aside>
 
     <main class="admin-main">
-      <section class="admin-section" id="section-readiness-assessment" data-admin-tab-panel="readiness-assessment">
-        <span class="section-label">Readiness Assessment</span>
-        <h2>Readiness assessment</h2>
-        <div class="section-divider"></div>
-        <p class="description readiness-admin-note"><strong>Keep assessment work in its own workspace:</strong> Review forms, published versions and attempts here. This tab stays separate from Student Progress, so assessment traffic does not slow the TSA cohort tools.</p>
-
-        <nav class="ra-workspace-nav" aria-label="Readiness assessment workspace">
-          <button type="button" aria-selected="true" data-ra-panel="overview">Overview</button>
-          <button type="button" aria-selected="false" data-ra-panel="forms">Forms and versions</button>
-          <button type="button" aria-selected="false" data-ra-panel="attempts">Attempts</button>
-          <button type="button" aria-selected="false" data-ra-panel="results">Results</button>
-          <button type="button" aria-selected="false" data-ra-panel="reference">Scoring reference</button>
-          <button type="button" aria-selected="false" data-ra-panel="privacy">Privacy</button>
-        </nav>
-
-        <div data-ra-content="overview">
-          <div class="ra-summary-grid">
-            <div class="ra-summary-card"><span>Published forms</span><strong>1</strong></div>
-            <div class="ra-summary-card"><span>Draft forms</span><strong>1</strong></div>
-            <div class="ra-summary-card"><span>Connected attempts</span><strong>Not connected</strong></div>
-          </div>
-          <div class="ra-panel">
-            <h3>What is ready now</h3>
-            <p>The 20-question assessment works as a local browser preview. It calculates a sample result without reading from or writing to Firebase.</p>
-            <div class="student-progress-actions">
-              <a class="small-button" href="../apps/readiness-assessment/" target="_blank" rel="noopener">Preview the learner experience</a>
-              <a class="small-button secondary-button" href="../apps/readiness-assessment/research/" target="_blank" rel="noopener">Review the research page</a>
-            </div>
-          </div>
-          <p class="ra-data-rule"><strong>Data boundary:</strong> Assessment people, answers and attempts will live in assessment-specific collections. TSA enrollment and progress continue to use the existing member collections.</p>
-        </div>
-
-        <div data-ra-content="forms" hidden>
-          <div class="ra-panel">
-            <h3>Forms and published versions</h3>
-            <p>Each published version is locked. An attempt keeps the exact form version the person answered, even after a newer version is published.</p>
-            <div class="ra-version-list">
-              <article class="ra-version-card">
-                <div><span class="ra-status-chip">Published</span><h3>Executive Signature Quick Check</h3><div class="ra-version-meta"><span>Version 1.0.0</span><span>20 questions</span><span>Public and TSA access</span><span>0 connected attempts</span></div></div>
-                <div class="ra-actions"><a class="small-button secondary-button" href="../apps/readiness-assessment/?internal=1" target="_blank" rel="noopener">Inspect questions</a></div>
-              </article>
-              <article class="ra-version-card">
-                <div><span class="ra-status-chip is-draft">Scope decision needed</span><h3>Longer readiness assessment</h3><p>Current planning notes describe 40 additional questions, creating 60 questions in total. Confirm whether the intended product has 40 total questions or 60 total questions before this form receives a version number.</p><div class="ra-version-meta"><span>No published version</span><span>No attempts</span></div></div>
-                <div class="ra-actions"><button class="small-button secondary-button" type="button" disabled>Create draft after scope is confirmed</button></div>
-              </article>
-            </div>
-          </div>
-        </div>
-
-        <div data-ra-content="attempts" hidden><div class="ra-panel"><h3>Attempts</h3><p>No connected attempts yet. When storage is approved, this view will filter by form, version, source, status and date. Each row will show the version used without loading TSA learner progress.</p></div></div>
-        <div data-ra-content="results" hidden><div class="ra-panel"><h3>Results</h3><p>Aggregate assessment results will load only when this tab opens. Individual answers will remain separate from identity records, and TSA dashboards will receive only a compact assignment status when needed.</p></div></div>
-        <div data-ra-content="reference" hidden><div class="ra-panel"><h3>Scoring reference</h3><p>Keep the scoring formula, question keys, readiness bands and participant language here. Each published form points to the scoring and content versions used for its results.</p><a class="small-button secondary-button" href="../apps/readiness-assessment/how-it-works/" target="_blank" rel="noopener">Open the scoring reference</a></div></div>
-        <div data-ra-content="privacy" hidden><div class="ra-panel"><h3>Privacy and access</h3><p>Assessment participants, identities, consent records, answers and attempts will be stored separately from TSA members. Access will be limited by assessment role and organization assignment. The local preview does not save personal data.</p></div></div>
-      </section>
-
       <section class="admin-section" id="section-site-reliability" data-admin-tab-panel="admin-tools">
         <span class="section-label">Preview &amp; Health</span>
         <h2>Technical reliability</h2>
@@ -3993,6 +3876,10 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
             <li><strong>Data governance</strong> — consent events and the retention policy that applies to ES data. Bulk export of raw responses is intentionally not available.</li>
           </ul>
         </div>
+        <div class="student-progress-actions">
+          <a class="small-button secondary-button" href="../apps/readiness-assessment/" target="_blank" rel="noopener">Preview the participant experience</a>
+          <a class="small-button secondary-button" href="../apps/readiness-assessment/research/" target="_blank" rel="noopener">Review the research page</a>
+        </div>
       </section>
 
       <section class="admin-section" id="section-es-participants" data-admin-tab-panel="executive-signature">
@@ -4058,6 +3945,10 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         <div id="esConfigLoaded" hidden>
           <p class="student-progress-status" id="esConfigStatus" aria-live="polite">Loading configuration…</p>
           <div id="esConfigBody"></div>
+          <div class="student-progress-actions" style="margin-top:14px">
+            <a class="small-button secondary-button" href="../apps/readiness-assessment/how-it-works/" target="_blank" rel="noopener">Open the scoring reference</a>
+            <a class="small-button secondary-button" href="../apps/readiness-assessment/?internal=1" target="_blank" rel="noopener">Inspect questions</a>
+          </div>
         </div>
       </section>
 
@@ -8506,22 +8397,8 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
     // ===== End Content Library =====
 
     function validAdminTab(tab) {
-      return ['content-manager', 'student-progress', 'readiness-assessment', 'rewards', 'member-management', 'customers', 'executive-signature', 'admin-tools', 'engagement', 'content-library'].includes(tab) ? tab : 'content-manager';
+      return ['content-manager', 'student-progress', 'rewards', 'member-management', 'customers', 'executive-signature', 'admin-tools', 'engagement', 'content-library'].includes(tab) ? tab : 'content-manager';
     }
-
-    function setReadinessAssessmentPanel(panelName) {
-      const workspace = document.getElementById('section-readiness-assessment');
-      if (!workspace) return;
-      workspace.querySelectorAll('[data-ra-panel]').forEach((button) => {
-        button.setAttribute('aria-selected', String(button.dataset.raPanel === panelName));
-      });
-      workspace.querySelectorAll('[data-ra-content]').forEach((panel) => {
-        panel.hidden = panel.dataset.raContent !== panelName;
-      });
-    }
-    document.querySelectorAll('[data-ra-panel]').forEach((button) => {
-      button.addEventListener('click', () => setReadinessAssessmentPanel(button.dataset.raPanel));
-    });
 
     function phaseLessonIds(phaseKey) {
       const content = window.UTL_CONTENT || {};
@@ -10884,7 +10761,6 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         else if (progressTarget === 'section-engagement-insights') loadEngagementInsights();
         else loadStudentProgress();
       }
-      if (activeTab === 'readiness-assessment') setReadinessAssessmentPanel('overview');
       if (activeTab === 'rewards') loadRewardSettings();
       if (activeTab === 'member-management') {
         const memberTarget = (currentActive || visibleNavItems[0])?.dataset.target;
@@ -13218,7 +13094,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
             'Continue?'
           )) return;
           var fb = window.utlFirebaseAuth;
-          if (!fb || !fb.deleteDoc || !fb.doc || !fb.db) { showToast('Firebase not ready', 'error'); return; }
+          if (!fb || !fb.removeMember) { showToast('Firebase not ready', 'error'); return; }
           btn.disabled = true;
           try {
             await mbRequireFirebaseAdmin();
@@ -13228,11 +13104,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
               await mbLogRemovedMember(email, cachedData);
             } catch (logErr) { /* non-fatal: removal should not be blocked by sheet logging */ }
 
-            await fb.deleteDoc(fb.doc(fb.db, 'authorized_members', email));
-            try {
-              var uid = await fb.findUserUidByEmail(email);
-              if (uid) await fb.deleteDoc(fb.doc(fb.db, 'users', uid));
-            } catch (e2) { /* non-fatal */ }
+            await fb.removeMember(email);
             showToast('Member removed');
             await mbLoadMembers();
             var notice = document.getElementById('mbRemovalNotice');

@@ -1,8 +1,13 @@
 # Phase 9 — Action-Level Admin Route and Capability Matrix
 
-Last updated: 2026-10-04
+Last updated: 2026-10-05
 Scope: Expansion of P0-11 (`docs/CUSTOMER_PROGRAM_PLATFORM_PHASE_0.md`) to action/dialog/export/deep-link level, as P0-11 requires before Phase 9 restructuring begins
-Status: Documentation only. No file other than this one was created or modified. No code, test, rule, or tracker change is included in this phase.
+Status: Matrix reviewed by the owner (published as an artifact for review). Both flagged decisions (findings 1 and 2) resolved 2026-10-05. The broader admin/index.html restructuring into the final IA has not started.
+
+## Decisions resolved (2026-10-05)
+
+- **Finding 1 (two ES homes):** The owner chose to remove the stale "Readiness Assessment" tab and fold its still-useful content into the connected "Executive Signature" tab rather than keep both. Implemented: the old tab, its section, its workspace-nav JS, and its now-orphaned CSS (`.ra-workspace-nav`, `.ra-summary-grid`, `.ra-panel`, `.ra-version-*`, `.ra-status-chip`, `.ra-actions`, `.ra-data-rule`, `.readiness-admin-note`) were all removed from `admin/index.html`. The two links with no ES equivalent (participant-experience preview, research page) were added to ES Overview; the scoring-reference link and a question-inspection link were added to ES Configuration. The stale "40 vs. 60 questions" draft-form card and the already-superseded static "Forms and versions"/"Attempts"/"Results"/"Privacy" placeholder content were not ported, since ES's real Configuration and Data governance panels already cover that ground with live data. Verified: the main admin script block still parses cleanly after removal, and the full static/emulator suites pass unchanged.
+- **Finding 2 (unaudited remove-member delete):** The owner's call, on a least-risk assessment, was to give it a proper audited callable rather than formally accept the gap. Implemented: `functions-admin/index.js` `removeMember` (admin/owner-only, via the existing `isAuthorizedAdmin` helper) performs the exact same two deletes (`authorized_members/{email}`, then `users/{uid}` if resolvable) the client used to do directly, and additionally writes an `auditEvents` record (`action: "tsa_member_removed"`, actor, target, removed uid). `admin/index.html`'s Remove button now calls this callable instead of `deleteDoc()` directly; the confirm wording, the best-effort email notification, and the success/error UI are all unchanged. Covered by `tests/member-removal.test.js` (unauthenticated, non-admin, inactive-admin, invalid email, successful removal with and without a matching `users` doc, and idempotent behavior removing an email that was never a member). Not yet deployed — built and emulator-verified only, consistent with how every other production-facing change in this project has been built before its own deploy decision.
 
 ## Outcome
 
@@ -340,4 +345,4 @@ Fully documented in `docs/CUSTOMER_PROGRAM_PLATFORM_PHASE_5.md`. Summarized for 
 
 # Closing note
 
-This document enumerates and maps; it does not execute. The actual relocation of `admin/index.html` content into the `Overview / Customers / Programs → TSA / Executive Signature / Organizations / Communications / Content / Operations` structure is a separate, later, sequential implementation task that should begin only after a human reviews this expanded matrix — particularly the decisions flagged in "New findings" items 1 and 2, which affect what gets built, not just where it moves. No code, configuration, rule, or test file was changed to produce this document.
+This document enumerates and maps; it did not originally execute anything. Findings 1 and 2, the two that affected what gets built rather than just where it moves, were reviewed by the owner and resolved on 2026-10-05 (see "Decisions resolved" above) — the ES-tab consolidation and the audited remove-member callable are both implemented and tested. The broader relocation of the remaining `admin/index.html` content into the final `Overview / Customers / Programs → TSA / Executive Signature / Organizations / Communications / Content / Operations` structure is still a separate, later, sequential task, informed by the other 9 findings in this document.

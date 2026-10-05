@@ -599,6 +599,7 @@ function organizationConsoleAggregate(members) {
 }
 
 if (process.env.NODE_ENV === "test") {
+  exports.__memberRemovalTest = { removeMember: removeMemberHandler, isAuthorizedAdmin };
   exports.__cohortStandingTest = { cohortProgress, cohortReward, rankCohort };
   exports.__exerciseProgressSyncTest = { exerciseWorkspaceProgressPatch, EXERCISE_ALIASES };
   exports.__organizationConsoleTest = {
@@ -1499,6 +1500,59 @@ async function isAuthorizedAdmin(email) {
   const status = String(data.status || "active").trim().toLowerCase();
   return (role === "admin" || role === "owner") && status !== "inactive";
 }
+
+// Server-side, audited replacement for the admin console's "Remove member"
+// button, which previously called deleteDoc() directly from the browser on
+// both authorized_members and users with no server-side audit record (see
+// docs/CUSTOMER_PROGRAM_PLATFORM_PHASE_9.md, finding 2). Performs the exact
+// same two deletes, in the same order, with the same best-effort (non-fatal)
+// uid lookup -- only the write path moves server-side and gains an audit
+// event; the confirm wording and UI behavior in admin/index.html are
+// unchanged.
+async function removeMemberHandler(request) {
+  const callerEmail = String(request.auth && request.auth.token && request.auth.token.email || "").trim().toLowerCase();
+  const emailVerified = request.auth && request.auth.token && request.auth.token.email_verified === true;
+  if (!request.auth || !callerEmail || !emailVerified) {
+    throw new HttpsError("unauthenticated", "Sign in with an administrator account.");
+  }
+  if (!(await isAuthorizedAdmin(callerEmail))) {
+    throw new HttpsError("permission-denied", "This account is not authorized as an administrator.");
+  }
+
+  const input = request.data && typeof request.data === "object" ? request.data : {};
+  const targetEmail = String(input.email || "").trim().toLowerCase();
+  if (!targetEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(targetEmail)) {
+    throw new HttpsError("invalid-argument", "Enter a valid email address.");
+  }
+
+  const db = admin.firestore();
+  try {
+    const usersSnap = await db.collection("users").where("email", "==", targetEmail).get();
+    const uid = usersSnap.empty ? null : usersSnap.docs[0].id;
+
+    await db.collection("authorized_members").doc(targetEmail).delete();
+    if (uid) await db.collection("users").doc(uid).delete();
+
+    await db.collection("auditEvents").add({
+      schemaVersion: 1,
+      action: "tsa_member_removed",
+      actorType: "staff",
+      actorId: callerEmail,
+      actorRole: "admin",
+      subjectCustomerId: null,
+      targetId: targetEmail,
+      outcome: "success",
+      removedUserUid: uid || null,
+      createdAt: admin.firestore.FieldValue.serverTimestamp()
+    });
+
+    return { ok: true, email: targetEmail, uid: uid || null };
+  } catch (error) {
+    console.error("Member removal failed", { callerEmail, targetEmail, message: error && error.message });
+    throw new HttpsError("internal", "Could not remove this member.");
+  }
+}
+exports.removeMember = onCall({ timeoutSeconds: 30, memory: "256MiB" }, removeMemberHandler);
 
 const MIN_EMERGENCY_PASSWORD_LENGTH = 12;
 

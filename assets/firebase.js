@@ -1883,6 +1883,14 @@ async function findUserUidByEmail(email) {
   return usersSnap.docs[0].id;
 }
 
+async function removeMember(email) {
+  const user = await getSignedInUser();
+  if (!user) throw new Error("Please sign in with a UTL administrator account.");
+  const callable = httpsCallable(functions, "removeMember");
+  const result = await callable({ email });
+  return result && result.data ? result.data : null;
+}
+
 async function getMemberSupportSnapshot(email) {
   const normalizedEmail = String(email || "").trim().toLowerCase();
   if (!normalizedEmail) throw new Error("A member email is required.");
@@ -2197,6 +2205,7 @@ export {
   app,
   auth,
   authorizeMember,
+  removeMember,
   collection,
   createUserWithEmailAndPassword,
   db,
