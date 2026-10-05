@@ -1,0 +1,3 @@
+[[IgnoredVulns]]
+id = "CVE-2026-33894"
+reason = "No non-breaking fix exists: node-forge has no patched release for this advisory, and the only path npm offers is a firebase-admin major-version bump (12.x -> 14.x), which is a breaking change for this codebase's own use of the Admin SDK and has not been reviewed or tested. Tracked as a follow-up requiring its own upgrade/regression pass, not suppressed as a non-issue."
