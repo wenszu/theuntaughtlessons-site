@@ -32,9 +32,19 @@ const pages = [
   'tools/[Grade 8] Linear_systems_grapher.html'
 ];
 
+// The cache-busting version is rewritten site-wide on every deploy
+// (scripts/sync-cache-versions.js), so this must check that every page shares
+// whatever the current version is, not a hardcoded historical value -- the
+// same reasoning tests/deployment-cache.test.js already applies to the site
+// generally. The version is read from the first page and checked for
+// consistency across the rest, rather than assumed in advance.
+let sharedVersion = null;
 pages.forEach((file) => {
   const html = fs.readFileSync(path.join(root, file), 'utf8');
-  assert.match(html, /select-controls\.css\?v=20260925-mobile-v1/, `${file} must load the shared dropdown styling`);
+  const match = html.match(/select-controls\.css\?v=([^"'&)\s]+)/);
+  assert.ok(match, `${file} must load the shared dropdown styling`);
+  if (sharedVersion === null) sharedVersion = match[1];
+  assert.equal(match[1], sharedVersion, `${file} must load select-controls.css at the same cache-busting version as the rest of the site`);
 });
 
 console.log('shared dropdown spacing contract passed');
