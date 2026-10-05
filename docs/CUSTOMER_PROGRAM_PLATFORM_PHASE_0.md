@@ -198,6 +198,8 @@ Flag for manual review. Do not assume one shared mailbox equals one person.
 | TSA progress | Existing user progress/subcollections | Existing TSA records | Existing TSA paths only |
 | TSA rewards | Existing user/reward records | Existing TSA records | Existing TSA paths only |
 | TSA credential | `credential_issuance` and `public_credentials` | Existing credential records | Existing trusted functions only |
+| TSA question-bank quality review | `assessment_item_reviews` (status, decision note, capped 100-entry decision log with email attribution) | Existing admin review records | Direct client write from Content Data → Assessment content review; not routed through a callable, and has no corresponding `auditEvents` entry (added to this matrix per Phase 9 finding 4, 2026-10-05) |
+| Google Group membership sync status | `google_group_sync_jobs`, read/written via `requestGoogleGroupSyncJob`/`getGoogleGroupSyncJobs` | Existing sync job records | Existing admin paths only; tracked adjacent to, but separate from, `authorized_members` (added to this matrix per Phase 9 finding 5, 2026-10-05) |
 | Organization definition/access | `organizations` and subcollections | Existing organization records | Existing trusted admin functions |
 | ES access/funding/validity | Legacy `users.products.readinessAssessment` summary | `entitlements` | Trusted server/admin workflow only |
 | ES form/scoring configuration | Static versioned app files during prototype | Versioned assessment definitions/configuration | Authorized content/scoring admin through trusted process |
