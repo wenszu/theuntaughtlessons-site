@@ -279,6 +279,16 @@ Decisions are made in Claude (claude.ai). JSON updates are handled in Codex. Doc
 
 Entries older than ~3 days live in `archive/WEBSITE_CONTEXT_ARCHIVE.md` (most recent archived block: 2026-09-23 through 2026-09-28).
 
+### 2026-10-05 — First push to `main` in nine days: the customer-program-platform work is now live
+
+- Committed and pushed everything that had accumulated in the working tree since the last commit (2026-09-26): the full Phases 0–9 customer-program-platform build, the Executive Signature private-preview app and its report-design assets, and assorted documentation-accuracy fixes. 119 files, two commits (`b01feb8`, `8d36e01`).
+- Before pushing: reviewed every file for secrets (found none beyond the standard public Firebase client `apiKey`, already live) and confirmed `reference/`, `visual/`, and `apps/readiness-assessment/` all stay excluded from the deployed artifact.
+- Found and fixed two real, previously undetected typography-rule violations in `admin/index.html` (uppercase/letter-spaced Customers-table headers from Phase 5, and the original decorative `.ra-data-rule` border) that were blocking the CI test gate.
+- Found that CI had actually been broken for nine days: the prior commit (`5113be2`, 2026-09-26) introduced `tests/select-controls.test.js` with a cache-busting version string hardcoded as a literal, which the deploy workflow's own SHA-based rewrite step invalidates on every single push. Nobody had pushed since, so nobody had noticed the live site was already one commit behind what `git log` suggested. Fixed the test to check version consistency instead (matching how `tests/deployment-cache.test.js` already handles this), and verified the fix for real by running the actual CI rewrite sequence locally before reverting the simulation.
+- First push's deploy still failed on the newly-found issue; the second push succeeded completely. Verified independently, not just via the green checkmark: fetched the live site directly and confirmed `assets/firebase.js` now serves the new `getMyWorkspaces` function, and that `apps/readiness-assessment/index.html` correctly returns 404 (its exclusion works in production, not just in config).
+- A separate, unrelated "Security checks" workflow (runs on a daily schedule, doesn't gate deployment) has been failing since 2026-10-01 due to newly-disclosed CVEs in transitive Firebase SDK dependencies across all three Functions codebases — pre-existing, unrelated to this push, flagged as a follow-up candidate.
+- Full detail in `docs/CUSTOMER_PROGRAM_PLATFORM_TRACKER.md`'s decision log.
+
 ### 2026-10-04 — Full Phases 7–11 plan written; decision-free work kicked off and verified across four parallel streams
 
 - Wrote `docs/CUSTOMER_PROGRAM_PLATFORM_PHASES_7_TO_11_PLAN.md`: every remaining phase of the customer-program platform broken into decision-free engineering work versus owner decisions, in dependency order, with a coordination log so parallel work streams don't collide.
