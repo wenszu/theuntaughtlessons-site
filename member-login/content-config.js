@@ -1604,7 +1604,7 @@ const UTL_CONTENT = {
     return '<header class="ws-nav ' + (navContextHtml ? "ws-nav-focused" : "") + '"><div class="ws-nav-inner">' +
       '<div class="ws-brand"><a class="ws-logo-link" href="' + homeHref() + '" aria-label="The Untaught Lessons member home"><img class="ws-logo" src="' + assetHref("../assets/utl-logo-nav-white.png") + '" alt="The Untaught Lessons"></a></div>' +
       center +
-      '<div class="ws-user">' + (active === "admin" ? "" : missionNavHtml() + '<div id="wsRewardCluster" class="ws-reward-cluster-shell" data-utl-reward-mount aria-label="Learning rewards"></div>') + '<span class="ws-user-email">' + escapeHtml(user.email) + '</span><button class="ws-avatar" type="button" aria-label="Open profile menu" aria-expanded="false">' + avatar + '</button><div class="ws-profile-menu" hidden><div class="ws-profile-head"><span class="ws-profile-avatar">' + avatar + '</span><div><p class="ws-profile-name">' + escapeHtml(user.label) + '</p><p class="ws-profile-role">' + roleLabel + '</p></div></div><div class="ws-profile-section"><span class="ws-profile-section-label">Your space</span><a href="' + memberHref("account.html") + '"><span class="ws-profile-icon">&#9675;</span><span>Account</span></a><a href="' + appHref("../my-results/index.html") + '"><span class="ws-profile-icon">&#9638;</span><span>My results</span></a><a href="' + appHref("../apps/toolkit/index.html") + '"><span class="ws-profile-icon">&#8962;</span><span>Toolkit</span></a></div><div class="ws-profile-section" data-organization-access hidden><span class="ws-profile-section-label">Organization</span><a href="' + memberHref("organization.html") + '"><span class="ws-profile-icon">&#9638;</span><span class="ws-profile-link-copy"><span>Organization console</span><small data-organization-access-label></small></span></a></div><div class="ws-profile-section"><span class="ws-profile-section-label">Program</span><a href="' + publicSiteHref() + '"><span class="ws-profile-icon">&#8599;</span><span>Public website</span></a></div>' + adminSection + '<div class="ws-profile-section"><button class="ws-logout" type="button"><span class="ws-profile-icon">&#8618;</span><span>Log out</span></button></div></div></div>' +
+      '<div class="ws-user">' + (active === "admin" ? "" : missionNavHtml() + '<div id="wsRewardCluster" class="ws-reward-cluster-shell" data-utl-reward-mount aria-label="Learning rewards"></div>') + '<span class="ws-user-email">' + escapeHtml(user.email) + '</span><button class="ws-avatar" type="button" aria-label="Open profile menu" aria-expanded="false">' + avatar + '</button><div class="ws-profile-menu" hidden><div class="ws-profile-head"><span class="ws-profile-avatar">' + avatar + '</span><div><p class="ws-profile-name">' + escapeHtml(user.label) + '</p><p class="ws-profile-role">' + roleLabel + '</p></div></div><div class="ws-profile-section"><span class="ws-profile-section-label">Your space</span><a href="' + memberHref("account.html") + '"><span class="ws-profile-icon">&#9675;</span><span>Account</span></a><a href="' + appHref("../my-results/index.html") + '"><span class="ws-profile-icon">&#9638;</span><span>My results</span></a><a href="' + appHref("../apps/toolkit/index.html") + '"><span class="ws-profile-icon">&#8962;</span><span>Toolkit</span></a></div><div class="ws-profile-section" data-es-workspace-access hidden><span class="ws-profile-section-label">Workspaces</span><a href="' + appHref("../apps/readiness-assessment/index.html") + '"><span class="ws-profile-icon">&#9670;</span><span>Executive Signature</span></a></div><div class="ws-profile-section" data-organization-access hidden><span class="ws-profile-section-label">Organization</span><a href="' + memberHref("organization.html") + '"><span class="ws-profile-icon">&#9638;</span><span class="ws-profile-link-copy"><span>Organization console</span><small data-organization-access-label></small></span></a></div><div class="ws-profile-section"><span class="ws-profile-section-label">Program</span><a href="' + publicSiteHref() + '"><span class="ws-profile-icon">&#8599;</span><span>Public website</span></a></div>' + adminSection + '<div class="ws-profile-section"><button class="ws-logout" type="button"><span class="ws-profile-icon">&#8618;</span><span>Log out</span></button></div></div></div>' +
       '</div></header>';
   }
 
@@ -1653,6 +1653,42 @@ const UTL_CONTENT = {
       });
     });
     hydrateOrganizationAccess();
+    hydrateEsWorkspaceAccess();
+  }
+
+  function hydrateEsWorkspaceAccess() {
+    var sections = qsa("[data-es-workspace-access]");
+    if (!sections.length) return;
+    var cacheKey = "utl_es_workspace_access_v1";
+    var cached = null;
+    try {
+      cached = JSON.parse(sessionStorage.getItem(cacheKey) || "null");
+      if (cached && Date.now() - Number(cached.savedAt || 0) > 300000) cached = null;
+    } catch (error) {
+      cached = null;
+    }
+
+    function reveal(data) {
+      var workspaces = data && Array.isArray(data.workspaces) ? data.workspaces : [];
+      var hasEs = workspaces.some(function (workspace) { return workspace && workspace.programId === "executive-signature"; });
+      if (!hasEs) return;
+      sections.forEach(function (section) { section.hidden = false; });
+    }
+
+    if (cached && cached.data) {
+      reveal(cached.data);
+      return;
+    }
+    import(firebaseHref()).then(function (firebaseAuth) {
+      return firebaseAuth.getMyWorkspaces();
+    }).then(function (data) {
+      try {
+        sessionStorage.setItem(cacheKey, JSON.stringify({ savedAt: Date.now(), data: data }));
+      } catch (error) {}
+      reveal(data);
+    }).catch(function () {
+      // ES workspace access is optional. Leave the entry hidden when unavailable.
+    });
   }
 
   function hydrateOrganizationAccess() {
@@ -2293,7 +2329,15 @@ const UTL_CONTENT = {
     }];
   }
 
-  function accountPageHtml(account) {
+  function accountEsProgramHtml(esWorkspaces) {
+    var hasEs = Array.isArray(esWorkspaces) && esWorkspaces.some(function (workspace) {
+      return workspace && workspace.programId === "executive-signature";
+    });
+    if (!hasEs) return "";
+    return '<dl class="ws-account-program"><div><dt>Program</dt><dd>Executive Signature</dd></div><div><dt>Access</dt><dd>Active</dd></div></dl><div class="ws-card-actions"><a class="ws-button ws-button-outline" href="' + appHref("../apps/readiness-assessment/index.html") + '">Open Executive Signature <span aria-hidden="true">&#8594;</span></a></div>';
+  }
+
+  function accountPageHtml(account, esWorkspaces) {
     var member = account.member || {};
     var name = member.name || account.authDisplayName || account.email;
     var selectedAvatar = member.avatarIconId || "compass";
@@ -2319,7 +2363,7 @@ const UTL_CONTENT = {
     }).join("");
     return '<div class="ws-account-layout"><header><span class="ws-kicker">Your space</span><h1 class="ws-title">Account</h1><p class="ws-subtitle">Keep your name and goals current. Your program details are managed with your enrollment.</p></header>' +
       '<section class="ws-card ws-account-card"><div class="ws-section-head"><div><span class="ws-kicker">Profile</span><h2>About you</h2></div></div><div class="ws-account-identity"><div class="ws-account-photo">' + photo + '</div><form class="ws-account-form" id="wsAccountForm"><div class="ws-account-field"><label for="wsAccountName">Name</label><input class="ws-input" id="wsAccountName" maxlength="200" autocomplete="name" required value="' + escapeHtml(name) + '"></div>' + avatarChoices + '<div class="ws-account-field"><label for="wsAccountGoals">What are you hoping to work on?</label><textarea class="ws-textarea" id="wsAccountGoals" maxlength="2000" rows="5" placeholder="Share the situations, skills or goals that matter to you.">' + escapeHtml(member.goals || "") + '</textarea></div><div class="ws-card-actions"><button class="ws-button" type="submit">Save account</button></div><p class="ws-account-status" id="wsAccountStatus" aria-live="polite"></p></form></div></section>' + accessHtml +
-      '<section class="ws-card ws-account-card"><div class="ws-section-head"><div><span class="ws-kicker">Enrollment</span><h2>Your programs</h2><p>These details are read only. Contact the program team if something needs to change.</p></div></div><div class="ws-account-programs">' + programs + '</div></section>' +
+      '<section class="ws-card ws-account-card"><div class="ws-section-head"><div><span class="ws-kicker">Enrollment</span><h2>Your programs</h2><p>These details are read only. Contact the program team if something needs to change.</p></div></div><div class="ws-account-programs">' + programs + accountEsProgramHtml(esWorkspaces) + '</div></section>' +
       '<section class="ws-card ws-account-card ws-account-reserved" aria-labelledby="wsLearningProfileTitle"><span class="ws-kicker">Coming later</span><h2 id="wsLearningProfileTitle">Your learning profile</h2><p>This space is reserved for a future view of how you learn and the capabilities you demonstrate. No learning profile data is shown on this page yet.</p></section></div>';
   }
 
@@ -2419,7 +2463,8 @@ const UTL_CONTENT = {
     import(firebaseHref()).then(async function (firebaseAuth) {
       _preloadedFirebase = firebaseAuth;
       var account = await firebaseAuth.getMemberAccount();
-      pageShell("account", accountPageHtml(account));
+      var workspaces = await firebaseAuth.getMyWorkspaces().catch(function () { return { workspaces: [] }; });
+      pageShell("account", accountPageHtml(account, workspaces.workspaces));
       bindAccountPage(firebaseAuth, account);
     }).catch(function (error) {
       pageShell("account", '<section class="ws-card ws-account-card"><span class="ws-kicker">Account</span><h1>We could not load your account.</h1><p>' + escapeHtml(error && error.message ? error.message : "Please refresh and try again.") + '</p><a class="ws-button" href="' + homeHref() + '">Back to Learning Journey</a></section>');

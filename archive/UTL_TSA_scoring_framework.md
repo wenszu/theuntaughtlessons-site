@@ -1,4 +1,6 @@
-# UTL_TSA_scoring_framework.md
+# Archived: UTL TSA scoring framework
+
+Archived on 2026-10-04 because it documents the retired v1 multi-app assessment; current behavior lives in `apps/tsa-diagnostic/index.html` and its tests.
 <!-- Part of UTL assessment documentation. See also: WEBSITE_CONTEXT.md for site overview, UTL_assessment_exercises.md for exercise details. -->
 <!-- Last updated: June 2026 -->
 

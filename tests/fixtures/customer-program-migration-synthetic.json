@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "environment": "synthetic",
+  "snapshotId": "phase4-synthetic-v1",
+  "authUsers": [
+    { "uid": "auth-alex", "email": "alex@example.test", "emailVerified": true },
+    { "uid": "auth-unverified", "email": "unverified@example.test", "emailVerified": false },
+    { "uid": "auth-mismatch", "email": "mismatch@example.test", "emailVerified": true }
+  ],
+  "authorized_members": [
+    { "id": "alex@example.test", "data": { "email": "Alex@Example.test", "name": "Alex Rivera", "role": "member", "status": "active", "cohort": "cohort-a" } },
+    { "id": "admin@example.test", "data": { "email": "admin@example.test", "name": "TSA Admin", "role": "admin", "status": "active" } },
+    { "id": "unverified@example.test", "data": { "email": "unverified@example.test", "name": "Unverified Member", "role": "member" } },
+    { "id": "mismatch@example.test", "data": { "email": "mismatch@example.test", "name": "Mismatch Member", "role": "member" } },
+    { "id": "bad-email", "data": { "email": "not-an-email", "role": "member" } },
+    { "id": "duplicate-one", "data": { "email": "duplicate@example.test", "role": "member" } },
+    { "id": "duplicate-two", "data": { "email": "DUPLICATE@example.test", "role": "member" } }
+  ],
+  "users": [
+    { "id": "auth-alex", "data": { "email": "alex@example.test", "name": "Alex Rivera", "products": { "tsa": true } } },
+    { "id": "auth-mismatch", "data": { "email": "someone-else@example.test", "name": "Wrong Link" } }
+  ],
+  "settings_cohorts": [{ "id": "cohorts", "data": { "cohort-a": { "name": "Cohort A" } } }],
+  "organizations": []
+}

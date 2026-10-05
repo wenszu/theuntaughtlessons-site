@@ -1,4 +1,6 @@
-# UTL_assessment_exercises.md
+# Archived: UTL assessment exercises
+
+Archived on 2026-10-04 because it is the exercise register for the retired v1 assessment architecture; it is retained for historical design context.
 <!-- Part of UTL assessment documentation. See also: WEBSITE_CONTEXT.md for site overview, UTL_TSA_scoring_framework.md for scoring rules and C³ Rubric. -->
 <!-- Last updated: June 2026 -->
 

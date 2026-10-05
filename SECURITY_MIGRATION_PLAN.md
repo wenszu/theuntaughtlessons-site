@@ -4,6 +4,17 @@ This document separates changes that can ship without altering the learner journ
 from changes that require coordinated Firebase, Cloudflare, Google Workspace, or
 Google Apps Script deployment. Do not treat browser-side checks as authorization.
 
+## Current stage status
+
+| Stage | Status verified 2026-10-04 | Evidence |
+| --- | --- | --- |
+| 1. Production admin authentication | Implemented in the production Pages source; bootstrap/backup-owner operational check remains | `admin/index.html`, current `main` history |
+| 2. Authenticated administrative services | Partially deployed | `runAdminAction` and several admin callables are live; current source has additional undeployed callables and Google Group automation is retired/undeployed |
+| 3. Authenticated AI services | Outstanding | Two Aiko HTTP functions are deployed, but Firebase-token/App Check/quota migration is not implemented as specified |
+| 4. Server-authoritative progress and rewards | Partial | Credential/progress repair triggers/callables exist; core reward/progress authority is still shared with browser/Firestore flows |
+| 5. Genuinely private course delivery | Outstanding | Production content is a public GitHub Pages artifact; application guards do not make files private |
+| 6. Public forms and enforced browser policy | Outstanding/partial hardening only | Spam input guard exists; no Turnstile, and `_headers` is not enforced by GitHub Pages |
+
 ## Implemented non-disruptive hardening
 
 - Saved learner responses are escaped before My Results renders them.
@@ -12,11 +23,11 @@ Google Apps Script deployment. Do not treat browser-side checks as authorization
 - The Apps Script helper neutralizes spreadsheet formula prefixes in removal logs
   and limits Google Group operations to the configured UTL group.
 - AI endpoints reject request bodies larger than 64 KB.
-- A Cloudflare Pages `_headers` file adds non-blocking CSP reporting and baseline
-  browser hardening. Confirm that the production project actually deploys this file.
+- A repository `_headers` file documents a proposed report-only CSP and baseline
+  headers, but GitHub Pages does not apply it as response-header configuration.
 - Pull requests and pushes to `main` run tests, secret-pattern checks, syntax checks,
   and high-severity dependency audits.
-- Both Firebase Functions codebases now have lockfiles for reproducible installs.
+- All three Firebase Functions codebases have lockfiles for reproducible installs.
 
 ## Stage 1: production admin authentication (implemented in code)
 
@@ -24,9 +35,10 @@ Google Apps Script deployment. Do not treat browser-side checks as authorization
 
 The Admin Console now ignores the browser password and local authorization flag on
 production. It requires Firebase Google sign-in and verifies `admin` or `owner`
-authorization before showing the console. The password flow remains available only
-on `localhost` and `127.0.0.1` for local preview. Deployment and the backup-admin
-verification below remain outstanding.
+authorization before showing the console. The local username/password preview flow
+remains available only on `localhost` and `127.0.0.1`; emergency production password
+access is a separate hidden, server-gated path. The static admin gate is live, while
+the backup-admin verification below remains an owner/operations check.
 
 ### Member impact
 
@@ -53,9 +65,10 @@ Welcome email, test email, and removed-member logging now use the authenticated
 `runAdminAction` Firebase callable, which verifies the Firebase identity and an
 `admin` or `owner` role server-side before relaying an allowlisted action to Apps
 Script. The relay uses a server-held shared secret and a 64 KB request cap. Google
-Group changes use the existing admin-only Firestore job and Function; the public
-Apps Script fallback has been removed. Secret setup, Apps Script publication, and
-Function deployment remain outstanding.
+Group changes are no longer part of member onboarding. `runAdminAction` is deployed,
+but the optional Firestore Google Group worker is not deployed and member access
+does not depend on it. Several newer admin exports in the current source are also
+not deployed; use `firebase functions:list` during a release review.
 
 ### Member impact
 

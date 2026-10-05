@@ -72,6 +72,51 @@ service cloud.firestore {
       return email.lower() in ['wenszu@gmail.com'];
     }
 
+    // Cross-program customer platform. These helpers are additive: TSA access
+    // continues to be governed by authorized_members and the existing rules
+    // below. Identity links and staff grants are trusted-server records.
+    function hasCustomerLink(customerId) {
+      return signedIn() &&
+        exists(/databases/$(database)/documents/customerAuthLinks/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/customerAuthLinks/$(request.auth.uid)).data.status == 'active' &&
+        get(/databases/$(database)/documents/customerAuthLinks/$(request.auth.uid)).data.customerId == customerId;
+    }
+
+    function hasPlatformStaffRole(roles) {
+      return signedIn() &&
+        exists(/databases/$(database)/documents/platform_staff/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/platform_staff/$(request.auth.uid)).data.status == 'active' &&
+        get(/databases/$(database)/documents/platform_staff/$(request.auth.uid)).data.role in roles;
+    }
+
+    function isPlatformOwner() {
+      return isBootstrapOwner() || hasPlatformStaffRole(['platform_owner']);
+    }
+
+    function canReadCustomerIdentity() {
+      return isPlatformOwner() || hasPlatformStaffRole(['customer_support', 'privacy_data_admin']);
+    }
+
+    function canReadEsOperations() {
+      return isPlatformOwner() || hasPlatformStaffRole(['customer_support', 'es_program_lead', 'privacy_data_admin']);
+    }
+
+    function canReadRawEsResponses() {
+      return isPlatformOwner() ||
+        hasPlatformStaffRole(['privacy_data_admin']) ||
+        (
+          hasPlatformStaffRole(['es_program_lead']) &&
+          get(/databases/$(database)/documents/platform_staff/$(request.auth.uid)).data.rawResponseAccess == true
+        );
+    }
+
+    function canReadCrossProgramAggregates() {
+      return isPlatformOwner() || hasPlatformStaffRole([
+        'customer_support', 'tsa_program_lead', 'es_program_lead',
+        'privacy_data_admin', 'read_only_analyst'
+      ]);
+    }
+
     function isCanonicalMemberRecord(email) {
       return email == email.lower() &&
         request.resource.data.email is string &&
@@ -148,6 +193,120 @@ service cloud.firestore {
     match /users/{userId} {
       allow read: if isSelfUserDocument(userId) || isAdmin();
       allow write: if isSelfUserDocument(userId) || isAdmin();
+    }
+
+    // Phase 1 cross-program boundary. Client writes are denied intentionally;
+    // Phase 2 trusted services will validate and write these records through
+    // the Admin SDK, which bypasses client rules.
+    match /customers/{customerId} {
+      allow read: if hasCustomerLink(customerId) || canReadCustomerIdentity();
+      allow write: if false;
+    }
+
+    match /customerEmailClaims/{emailHash} {
+      allow read: if isPlatformOwner() || hasPlatformStaffRole(['privacy_data_admin']);
+      allow write: if false;
+    }
+
+    match /customerAuthLinks/{authUid} {
+      allow read: if (signedIn() && request.auth.uid == authUid) || canReadCustomerIdentity();
+      allow write: if false;
+    }
+
+    match /platform_staff/{staffUid} {
+      allow read: if (signedIn() && request.auth.uid == staffUid) || isPlatformOwner();
+      allow write: if false;
+    }
+
+    // Phase 5. Release toggles for additive, read-only admin console surfaces.
+    // Any active platform staff member may read whether a feature is on so the
+    // admin UI can hide itself cleanly; only a trusted operator with direct
+    // Firestore access can turn one on, never a client write.
+    match /platformFeatureFlags/{flagId} {
+      allow read: if hasPlatformStaffRole([
+        'platform_owner', 'customer_support', 'tsa_program_lead',
+        'es_program_lead', 'privacy_data_admin', 'read_only_analyst'
+      ]) || isPlatformOwner();
+      allow write: if false;
+    }
+
+    match /programs/{programId} {
+      allow read: if signedIn() || canReadCrossProgramAggregates();
+      allow write: if false;
+    }
+
+    match /assessmentDefinitions/{assessmentId} {
+      allow get: if resource.data.status == 'live' || canReadEsOperations();
+      allow list: if canReadEsOperations();
+      allow write: if false;
+    }
+
+    match /assessmentVersions/{versionId} {
+      allow get: if resource.data.status == 'published' || canReadEsOperations();
+      allow list: if canReadEsOperations();
+      allow write: if false;
+    }
+
+    match /enrollments/{enrollmentId} {
+      allow read: if hasCustomerLink(resource.data.customerId) || canReadCustomerIdentity() ||
+        hasPlatformStaffRole(['tsa_program_lead', 'es_program_lead']);
+      allow write: if false;
+    }
+
+    match /entitlements/{entitlementId} {
+      allow read: if hasCustomerLink(resource.data.customerId) || canReadEsOperations();
+      allow write: if false;
+    }
+
+    match /assessmentAttempts/{attemptId} {
+      allow read: if hasCustomerLink(resource.data.customerId) || canReadEsOperations();
+      allow write: if false;
+
+      match /responseParts/{partId} {
+        allow read: if canReadRawEsResponses();
+        allow write: if false;
+      }
+    }
+
+    match /consentEvents/{consentEventId} {
+      allow read: if hasCustomerLink(resource.data.customerId) ||
+        isPlatformOwner() || hasPlatformStaffRole(['privacy_data_admin']);
+      allow write: if false;
+    }
+
+    match /duplicateCandidates/{candidateId} {
+      allow read: if isPlatformOwner() || hasPlatformStaffRole(['privacy_data_admin']);
+      allow write: if false;
+    }
+
+    match /auditEvents/{eventId} {
+      allow read: if isPlatformOwner() || hasPlatformStaffRole(['privacy_data_admin']);
+      allow write: if false;
+    }
+
+    match /outboxEvents/{eventId} {
+      allow read, write: if false;
+    }
+
+    // Trusted-service idempotency receipts. Keys and results are operational
+    // metadata and must never be discoverable or writable from a client.
+    match /serviceRequests/{requestId} {
+      allow read, write: if false;
+    }
+
+    match /migrationRuns/{runId} {
+      allow read: if isPlatformOwner() || hasPlatformStaffRole(['privacy_data_admin']);
+      allow write: if false;
+
+      match /records/{recordId} {
+        allow read: if isPlatformOwner() || hasPlatformStaffRole(['privacy_data_admin']);
+        allow write: if false;
+      }
+    }
+
+    match /programAggregates/{aggregateId} {
+      allow read: if canReadCrossProgramAggregates();
+      allow write: if false;
     }
 
     match /users/{userId}/completed_exercises/{exerciseId} {
@@ -349,6 +508,16 @@ service cloud.firestore {
       match /members/{userId} {
         allow read: if isAdmin() || (signedIn() && request.auth.uid == userId);
         allow write: if isAdmin();
+      }
+
+      // Contains only server-produced, small-group-suppressed ES aggregates.
+      match /assessment_aggregates/{aggregateId} {
+        allow read: if isAdmin() || (
+          signedIn() &&
+          exists(/databases/$(database)/documents/organizations/$(organizationId)/members/$(request.auth.uid)) &&
+          get(/databases/$(database)/documents/organizations/$(organizationId)/members/$(request.auth.uid)).data.status == 'active'
+        );
+        allow write: if false;
       }
     }
 

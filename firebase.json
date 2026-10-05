@@ -18,7 +18,8 @@
     "singleProjectMode": true
   },
   "firestore": {
-    "rules": "firestore.rules"
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
   },
   "functions": [
     {
@@ -58,6 +59,10 @@
       "csv/**",
       "scripts",
       "scripts/**",
+      "reference",
+      "reference/**",
+      "apps/readiness-assessment",
+      "apps/readiness-assessment/**",
       "public",
       "public/**"
     ],

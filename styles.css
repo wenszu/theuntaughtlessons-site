@@ -31,6 +31,7 @@ body {
   --home-cream: #F3EDE2;
   --home-deep-cream: #EBE4D5;
   --home-charcoal: #4A4A4A;
+  --home-steel: #4D7094;
   --home-white: #FFFFFF;
   background: var(--home-cream);
   color: var(--home-charcoal);
@@ -383,6 +384,123 @@ body {
   opacity: 0.85;
 }
 
+.home-page .readiness-entry-section {
+  padding: 40px 0 16px;
+  background: var(--home-cream);
+}
+
+.home-page .readiness-entry-panel {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 28px;
+  align-items: center;
+  padding: 30px 36px;
+  border: 1.5px solid rgba(0, 51, 102, .4);
+  border-radius: 14px;
+  background: var(--home-deep-cream);
+  color: var(--home-charcoal);
+  text-align: left;
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+
+.home-page .readiness-entry-panel:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(0, 51, 102, .1);
+}
+
+.home-page .readiness-entry-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: none;
+}
+
+.home-page .readiness-entry-mark {
+  width: 40px;
+  height: 40px;
+  flex: none;
+}
+
+.home-page .readiness-entry-brand-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+  white-space: nowrap;
+}
+
+.home-page .readiness-entry-brand-text b {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--home-navy);
+}
+
+.home-page .readiness-entry-brand-text span {
+  font-weight: 700;
+  font-size: 10.5px;
+  color: #C2841A;
+}
+
+.home-page .readiness-entry-eyebrow {
+  margin: 0 0 6px;
+  color: var(--home-steel);
+  font-family: Lato, Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.home-page .readiness-entry-copy h2 {
+  margin: 0 0 10px;
+  color: var(--home-navy);
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: clamp(24px, 3vw, 32px);
+  line-height: 1.16;
+}
+
+.home-page .readiness-entry-copy p:last-child {
+  max-width: 640px;
+  margin: 0;
+  color: var(--home-charcoal);
+  font-size: 16px;
+  line-height: 1.55;
+}
+
+.home-page .readiness-entry-actions {
+  display: flex;
+  min-width: 200px;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+  text-align: center;
+}
+
+.home-page .readiness-entry-cta {
+  display: inline-flex;
+  min-height: 48px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border: 1.5px solid transparent;
+  border-radius: 8px;
+  background: var(--home-gold);
+  color: var(--home-navy);
+  font-weight: 700;
+  text-decoration: none;
+  transition: opacity .15s ease;
+}
+
+.home-page .readiness-entry-cta:hover {
+  opacity: .86;
+}
+
+.home-page .readiness-entry-link {
+  color: var(--home-steel);
+  font-size: 13px;
+  font-weight: 700;
+  text-underline-offset: 4px;
+}
+
 .home-page .program-highlight-section {
   padding: 40px 0 8px;
   background: var(--home-cream);
@@ -452,6 +570,25 @@ body {
 }
 
 @media (max-width: 700px) {
+  .home-page .readiness-entry-section {
+    padding: 26px 0 8px;
+  }
+
+  .home-page .readiness-entry-panel {
+    grid-template-columns: 1fr;
+    gap: 18px;
+    padding: 24px 22px;
+  }
+
+  .home-page .readiness-entry-mark {
+    width: 32px;
+    height: 32px;
+  }
+
+  .home-page .readiness-entry-actions {
+    min-width: 0;
+  }
+
   .home-page .program-highlight-section {
     padding: 32px 0 4px;
   }

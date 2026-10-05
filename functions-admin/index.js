@@ -1,11 +1,23 @@
 const admin = require("firebase-admin");
+const { FieldValue: ReadinessFieldValue } = require("firebase-admin/firestore");
 const crypto = require("crypto");
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const { onDocumentWritten } = require("firebase-functions/v2/firestore");
 const { onSchedule } = require("firebase-functions/v2/scheduler");
 const { defineSecret, defineString } = require("firebase-functions/params");
+const { CustomerProgramError, createCustomerProgramService } = require("./customer-program-service");
+const { createAssessmentPersistenceService } = require("./assessment-persistence-service");
+const { getVersion: getExecutiveSignatureVersion, normalizeAnswers: normalizeExecutiveSignatureAnswers } = require("./executive-signature-versions");
 
 admin.initializeApp();
+const customerProgramService = createCustomerProgramService({
+  db: admin.firestore(),
+  FieldValue: admin.firestore.FieldValue
+});
+const assessmentPersistenceService = createAssessmentPersistenceService({
+  db: admin.firestore(),
+  FieldValue: admin.firestore.FieldValue
+});
 
 const APPS_SCRIPT_ADMIN_RELAY_SECRET = defineSecret("APPS_SCRIPT_ADMIN_RELAY_SECRET");
 const APPS_SCRIPT_ADMIN_URL = defineString("APPS_SCRIPT_ADMIN_URL", {
@@ -79,6 +91,243 @@ async function requireVerifiedCaller(request) {
   }
   return { uid: request.auth.uid, email };
 }
+
+function customerProgramHttpsError(error) {
+  if (error instanceof CustomerProgramError) {
+    const supportedCodes = new Set([
+      "invalid-argument", "not-found", "already-exists", "permission-denied",
+      "failed-precondition", "resource-exhausted", "aborted", "data-loss"
+    ]);
+    return new HttpsError(supportedCodes.has(error.code) ? error.code : "internal", error.message);
+  }
+  return new HttpsError("internal", "The customer platform operation could not be completed.");
+}
+
+async function requireCustomerProgramRole(request, allowedRoles) {
+  const caller = await requireVerifiedCaller(request);
+  if (BOOTSTRAP_OWNER_EMAILS.has(caller.email)) return { ...caller, role: "platform_owner" };
+  const snap = await admin.firestore().collection("platform_staff").doc(caller.uid).get();
+  const data = snap.exists ? snap.data() || {} : {};
+  if (data.status !== "active" || !allowedRoles.includes(data.role)) {
+    throw new HttpsError("permission-denied", "This account is not authorized for that customer platform action.");
+  }
+  return { ...caller, role: data.role };
+}
+
+async function resolveMyCustomerIdentityHandler(request) {
+  const caller = await requireVerifiedCaller(request);
+  try {
+    return await customerProgramService.resolveCustomerIdentity({
+      email: caller.email,
+      authUid: caller.uid,
+      profile: { displayName: request.auth.token.name || "" },
+      idempotencyKey: `self-link:${caller.uid}:${caller.email}`,
+      actor: { actorType: "participant", actorId: caller.uid, actorRole: "participant" }
+    });
+  } catch (error) {
+    console.error("Customer identity resolution failed", { uid: caller.uid, message: error && error.message });
+    throw customerProgramHttpsError(error);
+  }
+}
+exports.resolveMyCustomerIdentity = onCall({ timeoutSeconds: 30, memory: "256MiB" }, resolveMyCustomerIdentityHandler);
+
+async function getMyWorkspacesHandler(request) {
+  const caller = await requireVerifiedCaller(request);
+  try {
+    // TSA access authority remains authorized_members during this project (see
+    // the schema's Authority-during-transition table), so it is checked here at
+    // the callable layer, never inside customer-program-service.js, which must
+    // stay free of any TSA dependency (enforced by a Phase 2 contract test).
+    const [memberSnap, esAccess] = await Promise.all([
+      admin.firestore().collection("authorized_members").doc(caller.email).get(),
+      customerProgramService.getMyEsWorkspaceAccess({ authUid: caller.uid })
+    ]);
+    const workspaces = [];
+    if (memberSnap.exists) workspaces.push({ programId: "tsa", label: "Think, Speak, Act" });
+    if (esAccess.esAuthorized) workspaces.push({ programId: "executive-signature", label: "Executive Signature" });
+    return { ok: true, customerId: esAccess.customerId, workspaces, hasMultiple: workspaces.length > 1 };
+  } catch (error) {
+    console.error("getMyWorkspaces failed", { uid: caller.uid, message: error && error.message });
+    throw customerProgramHttpsError(error);
+  }
+}
+exports.getMyWorkspaces = onCall({ timeoutSeconds: 30, memory: "256MiB" }, getMyWorkspacesHandler);
+
+async function getMyEsStatusHandler(request) {
+  const caller = await requireVerifiedCaller(request);
+  try {
+    const status = await customerProgramService.getMyEsStatus({ authUid: caller.uid });
+    return { ok: true, ...status };
+  } catch (error) {
+    console.error("getMyEsStatus failed", { uid: caller.uid, message: error && error.message });
+    throw customerProgramHttpsError(error);
+  }
+}
+exports.getMyEsStatus = onCall({ timeoutSeconds: 30, memory: "256MiB" }, getMyEsStatusHandler);
+
+async function changeMyCustomerEmailHandler(request) {
+  const caller = await requireVerifiedCaller(request);
+  const input = request.data && typeof request.data === "object" ? request.data : {};
+  try {
+    return await customerProgramService.changeCustomerEmail({
+      customerId: input.customerId,
+      authUid: caller.uid,
+      currentEmail: input.currentEmail,
+      newEmail: caller.email,
+      idempotencyKey: input.idempotencyKey,
+      actor: { actorType: "participant", actorId: caller.uid, actorRole: "participant" }
+    });
+  } catch (error) {
+    console.error("Customer email change failed", { uid: caller.uid, message: error && error.message });
+    throw customerProgramHttpsError(error);
+  }
+}
+exports.changeMyCustomerEmail = onCall({ timeoutSeconds: 30, memory: "256MiB" }, changeMyCustomerEmailHandler);
+
+async function grantCustomerEntitlementHandler(request) {
+  const caller = await requireCustomerProgramRole(request, ["platform_owner", "customer_support", "es_program_lead"]);
+  const input = request.data && typeof request.data === "object" ? request.data : {};
+  try {
+    return await customerProgramService.grantEntitlement({ ...input,
+      actor: { actorType: "staff", actorId: caller.uid, actorRole: caller.role }
+    });
+  } catch (error) {
+    console.error("Customer entitlement grant failed", { uid: caller.uid, message: error && error.message });
+    throw customerProgramHttpsError(error);
+  }
+}
+exports.grantCustomerEntitlement = onCall({ timeoutSeconds: 30, memory: "256MiB" }, grantCustomerEntitlementHandler);
+
+async function changeCustomerEntitlementStatusHandler(request) {
+  const caller = await requireCustomerProgramRole(request, ["platform_owner", "customer_support", "es_program_lead"]);
+  const input = request.data && typeof request.data === "object" ? request.data : {};
+  try {
+    return await customerProgramService.changeEntitlementStatus({ ...input,
+      actor: { actorType: "staff", actorId: caller.uid, actorRole: caller.role }
+    });
+  } catch (error) {
+    console.error("Customer entitlement status change failed", { uid: caller.uid, message: error && error.message });
+    throw customerProgramHttpsError(error);
+  }
+}
+exports.changeCustomerEntitlementStatus = onCall({ timeoutSeconds: 30, memory: "256MiB" }, changeCustomerEntitlementStatusHandler);
+
+async function getCustomerDirectoryHandler(request) {
+  const caller = await requireCustomerProgramRole(request, ["platform_owner", "customer_support", "privacy_data_admin"]);
+  const input = request.data && typeof request.data === "object" ? request.data : {};
+  try {
+    return await customerProgramService.listCustomerDirectory({
+      search: input.search,
+      pageSize: input.pageSize,
+      cursorCustomerId: input.cursorCustomerId
+    });
+  } catch (error) {
+    console.error("Customer directory listing failed", { uid: caller.uid, message: error && error.message });
+    throw customerProgramHttpsError(error);
+  }
+}
+exports.getCustomerDirectory = onCall({ timeoutSeconds: 30, memory: "256MiB" }, getCustomerDirectoryHandler);
+
+async function getCustomerDetailForStaffHandler(request) {
+  const caller = await requireCustomerProgramRole(request, ["platform_owner", "customer_support", "privacy_data_admin"]);
+  const input = request.data && typeof request.data === "object" ? request.data : {};
+  try {
+    return await customerProgramService.getCustomerDetailForStaff({
+      customerId: input.customerId,
+      canSeePrivileged: caller.role === "platform_owner" || caller.role === "privacy_data_admin"
+    });
+  } catch (error) {
+    console.error("Customer detail lookup failed", { uid: caller.uid, message: error && error.message });
+    throw customerProgramHttpsError(error);
+  }
+}
+exports.getCustomerDetailForStaff = onCall({ timeoutSeconds: 30, memory: "256MiB" }, getCustomerDetailForStaffHandler);
+
+const ES_OPERATIONS_ROLES = ["platform_owner", "customer_support", "es_program_lead", "privacy_data_admin"];
+
+// Mirrors canReadRawEsResponses() in firestore.rules. The rawResponseAccess
+// flag is read from the caller's own platform_staff record on the server;
+// it is never accepted from the client request payload.
+async function requireRawResponseAccess(request) {
+  const caller = await requireVerifiedCaller(request);
+  if (BOOTSTRAP_OWNER_EMAILS.has(caller.email)) return { ...caller, role: "platform_owner" };
+  const snap = await admin.firestore().collection("platform_staff").doc(caller.uid).get();
+  const data = snap.exists ? snap.data() || {} : {};
+  if (data.status !== "active") {
+    throw new HttpsError("permission-denied", "This account is not authorized to reveal raw assessment responses.");
+  }
+  if (data.role === "platform_owner" || data.role === "privacy_data_admin") return { ...caller, role: data.role };
+  if (data.role === "es_program_lead" && data.rawResponseAccess === true) return { ...caller, role: data.role };
+  throw new HttpsError("permission-denied",
+    "Raw assessment response access requires the platform owner role, the privacy data admin role, or an ES program lead with explicit raw-response access.");
+}
+
+async function listEsParticipantsHandler(request) {
+  const caller = await requireCustomerProgramRole(request, ES_OPERATIONS_ROLES);
+  const input = request.data && typeof request.data === "object" ? request.data : {};
+  try {
+    return await customerProgramService.listEsParticipants({ pageSize: input.pageSize, cursorCustomerId: input.cursorCustomerId });
+  } catch (error) {
+    console.error("ES participant listing failed", { uid: caller.uid, message: error && error.message });
+    throw customerProgramHttpsError(error);
+  }
+}
+exports.listEsParticipants = onCall({ timeoutSeconds: 30, memory: "256MiB" }, listEsParticipantsHandler);
+
+async function listEsAttemptsHandler(request) {
+  const caller = await requireCustomerProgramRole(request, ES_OPERATIONS_ROLES);
+  const input = request.data && typeof request.data === "object" ? request.data : {};
+  try {
+    return await customerProgramService.listEsAttempts({ pageSize: input.pageSize, cursorAttemptId: input.cursorAttemptId });
+  } catch (error) {
+    console.error("ES attempt listing failed", { uid: caller.uid, message: error && error.message });
+    throw customerProgramHttpsError(error);
+  }
+}
+exports.listEsAttempts = onCall({ timeoutSeconds: 30, memory: "256MiB" }, listEsAttemptsHandler);
+
+async function getEsConfigurationHandler(request) {
+  const caller = await requireCustomerProgramRole(request, ES_OPERATIONS_ROLES);
+  try {
+    return await customerProgramService.getEsConfiguration();
+  } catch (error) {
+    console.error("ES configuration lookup failed", { uid: caller.uid, message: error && error.message });
+    throw customerProgramHttpsError(error);
+  }
+}
+exports.getEsConfiguration = onCall({ timeoutSeconds: 30, memory: "256MiB" }, getEsConfigurationHandler);
+
+async function getEsDataGovernanceHandler(request) {
+  const caller = await requireCustomerProgramRole(request, ES_OPERATIONS_ROLES);
+  const input = request.data && typeof request.data === "object" ? request.data : {};
+  try {
+    return await customerProgramService.getEsDataGovernance({
+      pageSize: input.pageSize,
+      cursorEventId: input.cursorEventId,
+      canSeePrivileged: caller.role === "platform_owner" || caller.role === "privacy_data_admin"
+    });
+  } catch (error) {
+    console.error("ES data governance lookup failed", { uid: caller.uid, message: error && error.message });
+    throw customerProgramHttpsError(error);
+  }
+}
+exports.getEsDataGovernance = onCall({ timeoutSeconds: 30, memory: "256MiB" }, getEsDataGovernanceHandler);
+
+async function revealAssessmentResponseHandler(request) {
+  const caller = await requireRawResponseAccess(request);
+  const input = request.data && typeof request.data === "object" ? request.data : {};
+  try {
+    return await customerProgramService.revealAssessmentResponse({
+      attemptId: input.attemptId,
+      reason: input.reason,
+      actor: { actorType: "staff", actorId: caller.uid, actorRole: caller.role }
+    });
+  } catch (error) {
+    console.error("Raw assessment response reveal failed", { uid: caller.uid, message: error && error.message });
+    throw customerProgramHttpsError(error);
+  }
+}
+exports.revealAssessmentResponse = onCall({ timeoutSeconds: 30, memory: "256MiB" }, revealAssessmentResponseHandler);
 
 async function credentialSettings() {
   const snap = await admin.firestore().collection("settings").doc("engagement").get();
@@ -1303,3 +1552,187 @@ exports.setEmergencyCredential = onCall({
     throw new HttpsError("internal", "Could not set the emergency password.");
   }
 });
+
+const READINESS_STRING_FIELD_MAX_LENGTH = 200;
+
+function readinessStringField(value, label, { required = true } = {}) {
+  const trimmed = String(value || "").trim();
+  if (!trimmed) {
+    if (required) throw new HttpsError("invalid-argument", `Missing ${label}.`);
+    return "";
+  }
+  if (trimmed.length > READINESS_STRING_FIELD_MAX_LENGTH) {
+    throw new HttpsError("invalid-argument", `${label} is too long.`);
+  }
+  return trimmed;
+}
+
+// Public, unauthenticated by design: called the moment a participant finishes
+// either the free quick check or the paid full report, before they have any
+// account at all. Space and write volume are not a constraint here, so both
+// tiers create or reuse a Firebase Auth account by email (no password — access
+// is by magic link only) and merge a readinessAssessment entry into the same
+// users/{uid} schema TSA members already use, so RA and TSA share one customer
+// record. The two tiers are stored separately — products.readinessAssessment.free
+// and .full — because completing one does not overwrite or imply the other:
+// someone can hold a quick-check result, a full-report result, or both,
+// independently, and a later retake of either tier only replaces that tier's
+// own entry. accessType is always "comped" on the full tier here: real payment
+// processing isn't live yet, so nothing paid has actually happened regardless
+// of what a caller might claim.
+async function recordReadinessCompletionHandler(request) {
+  const input = request.data && typeof request.data === "object" ? request.data : {};
+  const email = readinessStringField(input.email, "email").toLowerCase();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    throw new HttpsError("invalid-argument", "Enter a valid email address.");
+  }
+  const tier = String(input.tier || "").trim().toLowerCase();
+  if (tier !== "free" && tier !== "full") {
+    throw new HttpsError("invalid-argument", "Tier must be the quick check or the full report.");
+  }
+  const name = readinessStringField(input.name, "name", { required: false });
+  const band = readinessStringField(input.band, "band");
+  const profile = readinessStringField(input.profile, "profile");
+  const formVersion = readinessStringField(input.formVersion, "form version");
+  const submissionId = readinessStringField(input.submissionId, "submission ID");
+  try {
+    const lockedVersion = getExecutiveSignatureVersion(formVersion);
+    if (lockedVersion.assessmentId !== (tier === "free" ? "quick-check" : "full-assessment")) {
+      throw new Error("Tier and form version do not match.");
+    }
+    normalizeExecutiveSignatureAnswers(lockedVersion, input.answers);
+    if (!input.consent || input.consent.assessmentProcessing !== true || !String(input.consent.noticeVersion || "").trim()) {
+      throw new Error("Assessment-processing consent and notice version are required.");
+    }
+  } catch (error) {
+    throw new HttpsError("invalid-argument", error.message);
+  }
+
+  try {
+    let userRecord;
+    let isNewAccount = false;
+    try {
+      userRecord = await admin.auth().getUserByEmail(email);
+    } catch (lookupError) {
+      if (lookupError && lookupError.code === "auth/user-not-found") {
+        userRecord = await admin.auth().createUser({ email, displayName: name || undefined });
+        isNewAccount = true;
+      } else {
+        throw lookupError;
+      }
+    }
+
+    const tierEntry = { completedAt: ReadinessFieldValue.serverTimestamp(), band, profile, formVersion };
+    if (tier === "full") {
+      tierEntry.accessType = "comped";
+      tierEntry.amountPaid = null;
+      tierEntry.paymentReference = null;
+    }
+
+    const userRef = admin.firestore().collection("users").doc(userRecord.uid);
+    const identity = await customerProgramService.resolveCustomerIdentity({
+      email,
+      authUid: userRecord.uid,
+      profile: { displayName: name },
+      idempotencyKey: `legacy-readiness-identity:${userRecord.uid}:${email}`,
+      actor: { actorType: "service", actorId: "recordReadinessCompletion", actorRole: "trusted_service" }
+    });
+    if (!identity.ok) throw new CustomerProgramError("failed-precondition", "This account needs identity review before its result can be linked.");
+    const entitlement = await customerProgramService.grantEntitlement({
+      customerId: identity.customerId,
+      programId: "executive-signature",
+      assessmentId: tier === "free" ? "quick-check" : "full-assessment",
+      accessType: tier === "free" ? "free" : "comped",
+      status: "active",
+      retakesAllowed: 0,
+      reason: tier === "free" ? "Legacy Quick Check completion" : "Full Assessment testing access",
+      idempotencyKey: `legacy-readiness-entitlement:${userRecord.uid}:${tier}`,
+      actor: { actorType: "service", actorId: "recordReadinessCompletion", actorRole: "trusted_service" }
+    });
+    const persisted = await assessmentPersistenceService.persistCompletedAssessment({
+      customerId: identity.customerId,
+      entitlementId: entitlement.entitlementId,
+      assessmentId: tier === "free" ? "quick-check" : "full-assessment",
+      formVersion,
+      answers: input.answers,
+      itemOrder: input.itemOrder,
+      startedAt: input.startedAt,
+      durationSeconds: input.durationSeconds,
+      consent: input.consent,
+      source: input.source,
+      idempotencyKey: `readiness-submission:${userRecord.uid}:${tier}:${submissionId}`,
+      actor: { actorType: "participant", actorId: userRecord.uid, actorRole: "participant" }
+    });
+    const update = {
+      email,
+      products: { readinessAssessment: { [tier]: tierEntry } }
+    };
+    if (isNewAccount) {
+      update.name = name;
+      update.createdAt = ReadinessFieldValue.serverTimestamp();
+    }
+    tierEntry.band = persisted.band;
+    tierEntry.profile = persisted.profileLabel;
+    tierEntry.formVersion = persisted.formVersion;
+    tierEntry.attemptId = persisted.attemptId;
+    tierEntry.resultChecksum = persisted.resultChecksum;
+    await userRef.set(update, { merge: true });
+
+    return { ok: true, attemptId: persisted.attemptId };
+  } catch (error) {
+    console.error("Readiness completion recording failed", { email, tier, message: error && error.message });
+    if (error instanceof CustomerProgramError) throw customerProgramHttpsError(error);
+    throw new HttpsError("internal", "Could not save your result.");
+  }
+}
+
+exports.recordReadinessCompletion = onCall({ timeoutSeconds: 30, memory: "256MiB" }, recordReadinessCompletionHandler);
+
+// Public, unauthenticated by design: the "resend my access" page on the readiness
+// assessment needs to know whether to send a magic link, without ever confirming
+// or denying to an anonymous caller whether a given email has an account.
+async function checkReadinessAccountEmailHandler(request) {
+  const input = request.data && typeof request.data === "object" ? request.data : {};
+  const email = readinessStringField(input.email, "email").toLowerCase();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    throw new HttpsError("invalid-argument", "Enter a valid email address.");
+  }
+  try {
+    const userRecord = await admin.auth().getUserByEmail(email);
+    const userSnap = await admin.firestore().collection("users").doc(userRecord.uid).get();
+    const data = userSnap.exists ? userSnap.data() || {} : {};
+    const ra = (data.products && data.products.readinessAssessment) || {};
+    const hasResult = Boolean(ra.free || ra.full);
+    return { ok: true, hasResult };
+  } catch (error) {
+    if (error && error.code === "auth/user-not-found") return { ok: true, hasResult: false };
+    console.error("Readiness account email check failed", { email, message: error && error.message });
+    throw new HttpsError("internal", "Could not check that email.");
+  }
+}
+
+exports.checkReadinessAccountEmail = onCall({ timeoutSeconds: 15, memory: "256MiB" }, checkReadinessAccountEmailHandler);
+
+if (process.env.NODE_ENV === "test") {
+  exports.__readinessAccountTest = {
+    recordReadinessCompletion: recordReadinessCompletionHandler,
+    checkReadinessAccountEmail: checkReadinessAccountEmailHandler
+  };
+  exports.__customerProgramTest = customerProgramService;
+  exports.__assessmentPersistenceTest = assessmentPersistenceService;
+  exports.__customerProgramCallableTest = {
+    resolveMyCustomerIdentity: resolveMyCustomerIdentityHandler,
+    getMyWorkspaces: getMyWorkspacesHandler,
+    getMyEsStatus: getMyEsStatusHandler,
+    changeMyCustomerEmail: changeMyCustomerEmailHandler,
+    grantCustomerEntitlement: grantCustomerEntitlementHandler,
+    changeCustomerEntitlementStatus: changeCustomerEntitlementStatusHandler,
+    getCustomerDirectory: getCustomerDirectoryHandler,
+    getCustomerDetailForStaff: getCustomerDetailForStaffHandler,
+    listEsParticipants: listEsParticipantsHandler,
+    listEsAttempts: listEsAttemptsHandler,
+    getEsConfiguration: getEsConfigurationHandler,
+    getEsDataGovernance: getEsDataGovernanceHandler,
+    revealAssessmentResponse: revealAssessmentResponseHandler
+  };
+}

@@ -452,6 +452,63 @@
       padding: calc(2.5rem + 102px) 2rem 2.5rem;
       background: var(--cream);
     }
+    .readiness-admin-note {
+      max-width: 860px;
+      margin-bottom: 18px;
+    }
+    .ra-workspace-nav {
+      display: flex;
+      gap: 8px;
+      margin: 22px 0;
+      padding-bottom: 10px;
+      overflow-x: auto;
+      border-bottom: 1px solid var(--line);
+    }
+    .ra-workspace-nav button {
+      flex: 0 0 auto;
+      border: 0;
+      border-radius: 8px;
+      background: transparent;
+      color: var(--navy);
+      font: inherit;
+      font-weight: 700;
+      padding: 10px 14px;
+      cursor: pointer;
+    }
+    .ra-workspace-nav button[aria-selected="true"] {
+      background: var(--navy);
+      color: var(--white);
+    }
+    .ra-summary-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin: 18px 0 24px;
+    }
+    .ra-summary-card,
+    .ra-panel,
+    .ra-version-card {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--white);
+    }
+    .ra-summary-card { padding: 18px; }
+    .ra-summary-card span { color: var(--muted); font-size: 13px; }
+    .ra-summary-card strong { display: block; color: var(--navy); font-size: 25px; margin-top: 5px; }
+    .ra-panel { padding: 22px; margin-top: 16px; }
+    .ra-panel h3 { margin: 0 0 8px; color: var(--navy); }
+    .ra-version-list { display: grid; gap: 12px; margin-top: 18px; }
+    .ra-version-card { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 18px; padding: 18px; align-items: center; }
+    .ra-version-meta { display: flex; flex-wrap: wrap; gap: 8px 18px; color: var(--muted); font-size: 13px; margin-top: 7px; }
+    .ra-status-chip { display: inline-flex; border-radius: 999px; padding: 4px 9px; background: #e7f3eb; color: #286843; font-size: 12px; font-weight: 700; }
+    .ra-status-chip.is-draft { background: #f2ede4; color: #725f42; }
+    .ra-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
+    .ra-data-rule { padding: 16px 18px; border-radius: 8px; background: #f4f7fa; color: var(--ink); }
+    @media (max-width: 820px) {
+      .ra-summary-grid { grid-template-columns: 1fr; }
+      .ra-version-card { grid-template-columns: 1fr; }
+      .ra-actions { justify-content: flex-start; }
+    }
 
     .admin-tabs {
       position: fixed;
@@ -2208,6 +2265,22 @@
     .oa-status-chip { display:inline-flex; padding:3px 8px; border-radius:999px; font-size:10px; font-weight:700; background:#E8F5ED; color:#26734D; }
     .oa-status-chip.is-suspended { background:#F4F0E9; color:#745B25; }
     .oa-empty { padding:18px; color:#687482; text-align:center; }
+    .cs-table { width:100%; border-collapse:collapse; font-size:13px; }
+    .cs-table th { border-bottom:2px solid var(--line); font-size:11px; font-weight:700; color:#687482; }
+    .cs-table td { border-bottom:1px solid var(--line); padding:8px; vertical-align:top; }
+    .cs-table tbody tr:hover { background:#FAF8F3; }
+    .cs-row-open { background:none; border:1px solid var(--line); border-radius:6px; padding:4px 10px; font-size:12px; cursor:pointer; color:var(--navy); font-weight:700; }
+    .cs-row-open:hover { background:#F2F6FA; }
+    .cs-badge { display:inline-flex; padding:2px 8px; border-radius:999px; font-size:10px; font-weight:700; margin:0 4px 4px 0; }
+    .cs-badge.is-active { background:#E8F5ED; color:#26734D; }
+    .cs-badge.is-restricted, .cs-badge.is-deletionpending { background:#FBEAEA; color:#9B2C2C; }
+    .cs-badge.is-archived { background:#F4F0E9; color:#745B25; }
+    .cs-badge.is-migrated { background:#EEF2FB; color:#2A4C9B; }
+    .cs-badge.is-duplicate { background:#FDF1E0; color:#8A5A10; }
+    .cs-detail-tabs { display:flex; gap:6px; flex-wrap:wrap; margin:14px 0; }
+    .cs-detail-tab { background:none; border:1px solid var(--line); border-radius:999px; padding:5px 14px; font-size:12px; font-weight:700; cursor:pointer; color:#687482; }
+    .cs-detail-tab[aria-selected="true"] { background:var(--navy); color:var(--white); border-color:var(--navy); }
+    .cs-restricted-note { padding:14px; border-radius:8px; background:#F4F0E9; color:#745B25; font-size:13px; }
     @media (max-width:900px) { .oa-layout { grid-template-columns:1fr; } }
     @media (max-width:560px) { .oa-preview-grid { grid-template-columns:1fr; } }
     .mb-form-actions { display:flex; gap:8px; margin-top:12px; align-items:center; }
@@ -2764,7 +2837,10 @@
     <nav class="admin-tabs" aria-label="Admin console tabs">
       <button class="admin-tab active" type="button" data-admin-tab="content-manager">Program</button>
       <button class="admin-tab" type="button" data-admin-tab="student-progress">Student Progress</button>
+      <button class="admin-tab" type="button" data-admin-tab="readiness-assessment">Readiness Assessment</button>
       <button class="admin-tab" type="button" data-admin-tab="member-management">Member Access</button>
+      <button class="admin-tab" type="button" data-admin-tab="customers">Customers</button>
+      <button class="admin-tab" type="button" data-admin-tab="executive-signature">Executive Signature</button>
       <button class="admin-tab" type="button" data-admin-tab="rewards">Rewards</button>
       <button class="admin-tab" type="button" data-admin-tab="engagement">Communications</button>
       <button class="admin-tab" type="button" data-admin-tab="content-library">Content Data</button>
@@ -2791,6 +2867,19 @@
       <button class="admin-nav-item" data-admin-tab-scope="student-progress" data-target="section-leaderboard">Leaderboard</button>
       <button class="admin-nav-item" data-admin-tab-scope="student-progress" data-target="section-engagement-insights">Engagement Insights</button>
       <button class="admin-nav-item" data-admin-tab-scope="student-progress" data-target="section-cohort-analytics">Cohort Analytics</button>
+
+      <span class="nav-group-label" data-admin-nav-group="readiness-assessment">Assessment</span>
+      <button class="admin-nav-item" data-admin-tab-scope="readiness-assessment" data-target="section-readiness-assessment">Readiness assessment</button>
+
+      <span class="nav-group-label" data-admin-nav-group="customers">Customers</span>
+      <button class="admin-nav-item" data-admin-tab-scope="customers" data-target="section-customers-directory">Directory</button>
+
+      <span class="nav-group-label" data-admin-nav-group="executive-signature">Executive Signature</span>
+      <button class="admin-nav-item" data-admin-tab-scope="executive-signature" data-target="section-es-overview">Overview</button>
+      <button class="admin-nav-item" data-admin-tab-scope="executive-signature" data-target="section-es-participants">Participants</button>
+      <button class="admin-nav-item" data-admin-tab-scope="executive-signature" data-target="section-es-attempts">Attempts</button>
+      <button class="admin-nav-item" data-admin-tab-scope="executive-signature" data-target="section-es-configuration">Configuration</button>
+      <button class="admin-nav-item" data-admin-tab-scope="executive-signature" data-target="section-es-governance">Data governance</button>
 
       <span class="nav-group-label" data-admin-nav-group="rewards">Rewards</span>
       <button class="admin-nav-item" data-admin-tab-scope="rewards" data-target="section-reward-levels">Levels</button>
@@ -2824,6 +2913,61 @@
     </aside>
 
     <main class="admin-main">
+      <section class="admin-section" id="section-readiness-assessment" data-admin-tab-panel="readiness-assessment">
+        <span class="section-label">Readiness Assessment</span>
+        <h2>Readiness assessment</h2>
+        <div class="section-divider"></div>
+        <p class="description readiness-admin-note"><strong>Keep assessment work in its own workspace:</strong> Review forms, published versions and attempts here. This tab stays separate from Student Progress, so assessment traffic does not slow the TSA cohort tools.</p>
+
+        <nav class="ra-workspace-nav" aria-label="Readiness assessment workspace">
+          <button type="button" aria-selected="true" data-ra-panel="overview">Overview</button>
+          <button type="button" aria-selected="false" data-ra-panel="forms">Forms and versions</button>
+          <button type="button" aria-selected="false" data-ra-panel="attempts">Attempts</button>
+          <button type="button" aria-selected="false" data-ra-panel="results">Results</button>
+          <button type="button" aria-selected="false" data-ra-panel="reference">Scoring reference</button>
+          <button type="button" aria-selected="false" data-ra-panel="privacy">Privacy</button>
+        </nav>
+
+        <div data-ra-content="overview">
+          <div class="ra-summary-grid">
+            <div class="ra-summary-card"><span>Published forms</span><strong>1</strong></div>
+            <div class="ra-summary-card"><span>Draft forms</span><strong>1</strong></div>
+            <div class="ra-summary-card"><span>Connected attempts</span><strong>Not connected</strong></div>
+          </div>
+          <div class="ra-panel">
+            <h3>What is ready now</h3>
+            <p>The 20-question assessment works as a local browser preview. It calculates a sample result without reading from or writing to Firebase.</p>
+            <div class="student-progress-actions">
+              <a class="small-button" href="../apps/readiness-assessment/" target="_blank" rel="noopener">Preview the learner experience</a>
+              <a class="small-button secondary-button" href="../apps/readiness-assessment/research/" target="_blank" rel="noopener">Review the research page</a>
+            </div>
+          </div>
+          <p class="ra-data-rule"><strong>Data boundary:</strong> Assessment people, answers and attempts will live in assessment-specific collections. TSA enrollment and progress continue to use the existing member collections.</p>
+        </div>
+
+        <div data-ra-content="forms" hidden>
+          <div class="ra-panel">
+            <h3>Forms and published versions</h3>
+            <p>Each published version is locked. An attempt keeps the exact form version the person answered, even after a newer version is published.</p>
+            <div class="ra-version-list">
+              <article class="ra-version-card">
+                <div><span class="ra-status-chip">Published</span><h3>Executive Signature Quick Check</h3><div class="ra-version-meta"><span>Version 1.0.0</span><span>20 questions</span><span>Public and TSA access</span><span>0 connected attempts</span></div></div>
+                <div class="ra-actions"><a class="small-button secondary-button" href="../apps/readiness-assessment/?internal=1" target="_blank" rel="noopener">Inspect questions</a></div>
+              </article>
+              <article class="ra-version-card">
+                <div><span class="ra-status-chip is-draft">Scope decision needed</span><h3>Longer readiness assessment</h3><p>Current planning notes describe 40 additional questions, creating 60 questions in total. Confirm whether the intended product has 40 total questions or 60 total questions before this form receives a version number.</p><div class="ra-version-meta"><span>No published version</span><span>No attempts</span></div></div>
+                <div class="ra-actions"><button class="small-button secondary-button" type="button" disabled>Create draft after scope is confirmed</button></div>
+              </article>
+            </div>
+          </div>
+        </div>
+
+        <div data-ra-content="attempts" hidden><div class="ra-panel"><h3>Attempts</h3><p>No connected attempts yet. When storage is approved, this view will filter by form, version, source, status and date. Each row will show the version used without loading TSA learner progress.</p></div></div>
+        <div data-ra-content="results" hidden><div class="ra-panel"><h3>Results</h3><p>Aggregate assessment results will load only when this tab opens. Individual answers will remain separate from identity records, and TSA dashboards will receive only a compact assignment status when needed.</p></div></div>
+        <div data-ra-content="reference" hidden><div class="ra-panel"><h3>Scoring reference</h3><p>Keep the scoring formula, question keys, readiness bands and participant language here. Each published form points to the scoring and content versions used for its results.</p><a class="small-button secondary-button" href="../apps/readiness-assessment/how-it-works/" target="_blank" rel="noopener">Open the scoring reference</a></div></div>
+        <div data-ra-content="privacy" hidden><div class="ra-panel"><h3>Privacy and access</h3><p>Assessment participants, identities, consent records, answers and attempts will be stored separately from TSA members. Access will be limited by assessment role and organization assignment. The local preview does not save personal data.</p></div></div>
+      </section>
+
       <section class="admin-section" id="section-site-reliability" data-admin-tab-panel="admin-tools">
         <span class="section-label">Preview &amp; Health</span>
         <h2>Technical reliability</h2>
@@ -3785,6 +3929,150 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         </details>
       </section>
 
+      <section class="admin-section" id="section-customers-directory" data-admin-tab-panel="customers">
+        <span class="section-label">Customers</span>
+        <h2>Customer directory</h2>
+        <div class="section-divider"></div>
+        <p class="description">One row per person across every program. This is read-only: it does not grant access, change TSA data, or expose raw assessment answers.</p>
+        <div id="csFlagNotice" hidden></div>
+        <div id="csLoaded" hidden>
+          <div class="mb-form-grid">
+            <div class="mb-form-field">
+              <label for="csSearch">Search by name or exact email</label>
+              <div style="display:flex;gap:8px;align-items:center">
+                <input type="search" id="csSearch" placeholder="e.g. Priya Shah or priya@company.com" autocomplete="off" style="flex:1;min-width:0">
+                <button type="button" class="small-button secondary-button" id="csSearchGo">Search</button>
+                <button type="button" class="small-button secondary-button" id="csSearchClear">Clear</button>
+                <button type="button" class="small-button secondary-button" id="csRefresh">Refresh</button>
+              </div>
+            </div>
+          </div>
+          <p class="student-progress-status" id="csStatus" aria-live="polite">Open this section to load customers.</p>
+          <div style="overflow-x:auto">
+            <table class="cs-table" id="csTable" style="display:none">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Status</th>
+                  <th>Programs</th>
+                  <th>Flags</th>
+                  <th>Last activity</th>
+                  <th>Detail</th>
+                </tr>
+              </thead>
+              <tbody id="csTableBody"></tbody>
+            </table>
+          </div>
+          <div class="mb-form-actions"><button type="button" class="small-button secondary-button" id="csLoadMore" hidden>Load more</button></div>
+        </div>
+        <div class="oa-panel" id="csDetailPanel" hidden style="margin-top:18px">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+            <div>
+              <h3 id="csDetailName">Customer</h3>
+              <p class="description" id="csDetailEmail"></p>
+            </div>
+            <button type="button" class="small-button secondary-button" id="csDetailClose">Close</button>
+          </div>
+          <div id="csDetailBody"></div>
+        </div>
+      </section>
+
+      <section class="admin-section" id="section-es-overview" data-admin-tab-panel="executive-signature">
+        <span class="section-label">Executive Signature</span>
+        <h2>Overview</h2>
+        <div class="section-divider"></div>
+        <p class="description">Executive Signature (ES) connects participants, attempts, configuration, and data governance in one place. This workspace is read-only except for one explicit, audited action: revealing raw responses for a single attempt.</p>
+        <div id="esFlagNotice" hidden></div>
+        <div id="esOverviewLoaded" hidden>
+          <p class="description">Raw assessment answers are never shown automatically. Open Attempts, then use that attempt's explicit reveal action if your role allows it.</p>
+          <ul style="margin:0;padding-left:18px;font-size:13px;line-height:1.7">
+            <li><strong>Participants</strong> — people with an Executive Signature entitlement (Quick Check or Full Assessment).</li>
+            <li><strong>Attempts</strong> — one row per start-to-terminal-state assessment instance, with result labels and scores but never answers.</li>
+            <li><strong>Configuration</strong> — a summary of assessment definitions and their locked content/scoring versions.</li>
+            <li><strong>Data governance</strong> — consent events and the retention policy that applies to ES data. Bulk export of raw responses is intentionally not available.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="admin-section" id="section-es-participants" data-admin-tab-panel="executive-signature">
+        <span class="section-label">Executive Signature</span>
+        <h2>Participants</h2>
+        <div class="section-divider"></div>
+        <p class="description">One row per person with an Executive Signature entitlement. This is read-only; it never shows assessment answers.</p>
+        <div id="espFlagNotice" hidden></div>
+        <div id="espLoaded" hidden>
+          <p class="student-progress-status" id="espStatus" aria-live="polite">Loading participants…</p>
+          <div style="overflow-x:auto">
+            <table class="cs-table" id="espTable" style="display:none">
+              <thead>
+                <tr><th>Name</th><th>Email</th><th>Status</th><th>Programs</th><th>Flags</th><th>Last activity</th></tr>
+              </thead>
+              <tbody id="espTableBody"></tbody>
+            </table>
+          </div>
+          <div class="mb-form-actions"><button type="button" class="small-button secondary-button" id="espLoadMore" hidden>Load more</button></div>
+        </div>
+      </section>
+
+      <section class="admin-section" id="section-es-attempts" data-admin-tab-panel="executive-signature">
+        <span class="section-label">Executive Signature</span>
+        <h2>Attempts</h2>
+        <div class="section-divider"></div>
+        <p class="description">One row per assessment attempt. Result labels and scores are shown here; question-level answers require the explicit, audited reveal action below.</p>
+        <div id="esaFlagNotice" hidden></div>
+        <div id="esaLoaded" hidden>
+          <p class="student-progress-status" id="esaStatus" aria-live="polite">Loading attempts…</p>
+          <div style="overflow-x:auto">
+            <table class="cs-table" id="esaTable" style="display:none">
+              <thead>
+                <tr><th>Assessment</th><th>Status</th><th>Result</th><th>Completed</th><th>Raw responses</th></tr>
+              </thead>
+              <tbody id="esaTableBody"></tbody>
+            </table>
+          </div>
+          <div class="mb-form-actions"><button type="button" class="small-button secondary-button" id="esaLoadMore" hidden>Load more</button></div>
+          <div class="oa-panel" id="esRevealPanel" hidden style="margin-top:18px">
+            <h3>Reveal raw responses</h3>
+            <p class="description" id="esRevealContext"></p>
+            <div style="padding:10px 12px;border-radius:8px;background:#FBEAEA;color:#9B2C2C;font-size:12px;margin-bottom:10px">This loads the participant's actual answers and is recorded in the audit log with your reason. It is never triggered automatically.</div>
+            <div class="mb-form-field">
+              <label for="esRevealReason">Reason for this reveal (required, audited)</label>
+              <textarea id="esRevealReason" rows="2" maxlength="500" placeholder="e.g. Support ticket #1234 — participant disputes their Full Assessment score"></textarea>
+            </div>
+            <div class="mb-form-actions">
+              <button type="button" class="small-button" id="esRevealConfirm">Reveal raw responses</button>
+              <button type="button" class="small-button secondary-button" id="esRevealCancel">Cancel</button>
+            </div>
+            <div id="esRevealResult"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="admin-section" id="section-es-configuration" data-admin-tab-panel="executive-signature">
+        <span class="section-label">Executive Signature</span>
+        <h2>Configuration</h2>
+        <div class="section-divider"></div>
+        <p class="description">Read-only summary of assessment definitions and their locked content/scoring versions. Editing assessment content is not part of this phase.</p>
+        <div id="esConfigFlagNotice" hidden></div>
+        <div id="esConfigLoaded" hidden>
+          <p class="student-progress-status" id="esConfigStatus" aria-live="polite">Loading configuration…</p>
+          <div id="esConfigBody"></div>
+        </div>
+      </section>
+
+      <section class="admin-section" id="section-es-governance" data-admin-tab-panel="executive-signature">
+        <span class="section-label">Executive Signature</span>
+        <h2>Data governance</h2>
+        <div class="section-divider"></div>
+        <p class="description">Consent events and the retention policy that applies to Executive Signature data. Bulk export of raw responses is intentionally not available in this phase; see Attempts for the single-attempt, audited reveal action.</p>
+        <div id="esGovFlagNotice" hidden></div>
+        <div id="esGovLoaded" hidden>
+          <p class="student-progress-status" id="esGovStatus" aria-live="polite">Loading data governance…</p>
+          <div id="esGovBody"></div>
+        </div>
+      </section>
+
       <section class="admin-section" id="section-links" data-admin-tab-panel="admin-tools">
         <span class="section-label">Preview &amp; Health</span>
         <h2>Quick links</h2>
@@ -4187,6 +4475,15 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       getMemberCredentialRegistry,
       getMemberSupportSnapshot,
       getOrganizationAccessAdmin,
+      getCustomersConsoleFeatureFlag,
+      getCustomerDirectory,
+      getCustomerDetailForStaff,
+      getEsWorkspaceFeatureFlag,
+      listEsParticipants,
+      listEsAttempts,
+      getEsConfiguration,
+      getEsDataGovernance,
+      revealAssessmentResponse,
       getDoc,
       getDocs,
       getCohortDetails,
@@ -4248,6 +4545,15 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       getMemberCredentialRegistry,
       getMemberSupportSnapshot,
       getOrganizationAccessAdmin,
+      getCustomersConsoleFeatureFlag,
+      getCustomerDirectory,
+      getCustomerDetailForStaff,
+      getEsWorkspaceFeatureFlag,
+      listEsParticipants,
+      listEsAttempts,
+      getEsConfiguration,
+      getEsDataGovernance,
+      revealAssessmentResponse,
       getDoc,
       getDocs,
       getCohortDetails,
@@ -8200,8 +8506,22 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
     // ===== End Content Library =====
 
     function validAdminTab(tab) {
-      return ['content-manager', 'student-progress', 'rewards', 'member-management', 'admin-tools', 'engagement', 'content-library'].includes(tab) ? tab : 'content-manager';
+      return ['content-manager', 'student-progress', 'readiness-assessment', 'rewards', 'member-management', 'customers', 'executive-signature', 'admin-tools', 'engagement', 'content-library'].includes(tab) ? tab : 'content-manager';
     }
+
+    function setReadinessAssessmentPanel(panelName) {
+      const workspace = document.getElementById('section-readiness-assessment');
+      if (!workspace) return;
+      workspace.querySelectorAll('[data-ra-panel]').forEach((button) => {
+        button.setAttribute('aria-selected', String(button.dataset.raPanel === panelName));
+      });
+      workspace.querySelectorAll('[data-ra-content]').forEach((panel) => {
+        panel.hidden = panel.dataset.raContent !== panelName;
+      });
+    }
+    document.querySelectorAll('[data-ra-panel]').forEach((button) => {
+      button.addEventListener('click', () => setReadinessAssessmentPanel(button.dataset.raPanel));
+    });
 
     function phaseLessonIds(phaseKey) {
       const content = window.UTL_CONTENT || {};
@@ -10564,11 +10884,17 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         else if (progressTarget === 'section-engagement-insights') loadEngagementInsights();
         else loadStudentProgress();
       }
+      if (activeTab === 'readiness-assessment') setReadinessAssessmentPanel('overview');
       if (activeTab === 'rewards') loadRewardSettings();
       if (activeTab === 'member-management') {
         const memberTarget = (currentActive || visibleNavItems[0])?.dataset.target;
         if (memberTarget === 'section-organization-access') oaLoad(false);
         else if (!mbMembersCache.length) mbLoadMembers();
+      }
+      if (activeTab === 'customers') csLoadDirectory();
+      if (activeTab === 'executive-signature') {
+        const esTarget = (currentActive || visibleNavItems[0])?.dataset.target;
+        esLoadForTarget(esTarget);
       }
       if (activeTab === 'engagement') loadEngagementSettings();
       if (activeTab === 'content-manager') {
@@ -11222,6 +11548,614 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       oaClearEmailCheckStatus();
       oaRenderCohorts(member.assignedCohortIds || []);
       document.getElementById('section-organization-access')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // Phase 5 — read-only cross-program Customers directory. This never writes
+    // anything and never reads assessmentAttempts/{id}/responseParts; the
+    // backing callables (functions-admin/customer-program-service.js) enforce
+    // the same boundary server-side so this UI cannot drift out of sync with it.
+    let csData = [];
+    let csNextCursor = null;
+    let csSearchTerm = '';
+    let csFlagChecked = false;
+    let csFlagEnabled = false;
+    let csLoading = false;
+    let csLoadedOnce = false;
+    let csDetailCache = null;
+
+    const CS_STATUS_LABELS = { active: 'Active', restricted: 'Restricted', archived: 'Archived', deletionPending: 'Deletion pending' };
+
+    function csStatusBadge(row) {
+      const status = String(row.accountStatus || 'active');
+      const cls = status.toLowerCase().replace(/[^a-z]/g, '');
+      return '<span class="cs-badge is-' + cls + '">' + escapeHtml(CS_STATUS_LABELS[status] || status) + '</span>';
+    }
+
+    function csFlagBadges(row) {
+      const badges = [];
+      if (row.isMigrated) badges.push('<span class="cs-badge is-migrated">Migrated</span>');
+      if (row.hasOpenDuplicate) badges.push('<span class="cs-badge is-duplicate">Needs identity review</span>');
+      return badges.join(' ') || '—';
+    }
+
+    function csRenderRows() {
+      const body = document.getElementById('csTableBody');
+      const table = document.getElementById('csTable');
+      const status = document.getElementById('csStatus');
+      if (!body || !table || !status) return;
+      if (!csData.length) {
+        table.style.display = 'none';
+        status.textContent = csSearchTerm ? 'No customers match "' + csSearchTerm + '".' : 'No customers yet.';
+        return;
+      }
+      table.style.display = '';
+      body.innerHTML = csData.map((row) => (
+        '<tr>' +
+          '<td>' + escapeHtml(row.displayName || '(no name on file)') + '</td>' +
+          '<td>' + escapeHtml(row.primaryEmail || '—') + '</td>' +
+          '<td>' + csStatusBadge(row) + '</td>' +
+          '<td>' + escapeHtml((row.programIds || []).join(', ') || '—') + '</td>' +
+          '<td>' + csFlagBadges(row) + '</td>' +
+          '<td>' + escapeHtml(formatProgressDate(row.lastActivityAt)) + '</td>' +
+          '<td><button type="button" class="cs-row-open" data-cs-open="' + escapeHtml(row.customerId) + '">Open ' + escapeHtml(row.displayName || 'customer') + '</button></td>' +
+        '</tr>'
+      )).join('');
+      status.textContent = csData.length + (csData.length === 1 ? ' customer loaded.' : ' customers loaded.');
+      body.querySelectorAll('[data-cs-open]').forEach((button) => {
+        button.addEventListener('click', () => csOpenDetail(button.dataset.csOpen));
+      });
+    }
+
+    async function csEnsureFirebase() {
+      await mbRequireFirebaseAdmin();
+      const fb = window.utlFirebaseAuth || {};
+      if (!fb.getCustomerDirectory || !fb.getCustomersConsoleFeatureFlag || !fb.getCustomerDetailForStaff) {
+        throw new Error('The Customers console service is not available yet.');
+      }
+      return fb;
+    }
+
+    async function csFetchPage(options = {}) {
+      if (csLoading) return;
+      const reset = options.reset !== false;
+      const flagNotice = document.getElementById('csFlagNotice');
+      const loaded = document.getElementById('csLoaded');
+      const status = document.getElementById('csStatus');
+      const loadMore = document.getElementById('csLoadMore');
+      if (!flagNotice || !loaded || !status) return;
+      csLoading = true;
+      try {
+        const fb = await csEnsureFirebase();
+        if (!csFlagChecked || options.forceFlagRecheck) {
+          const flag = await fb.getCustomersConsoleFeatureFlag();
+          csFlagEnabled = Boolean(flag && flag.enabled);
+          csFlagChecked = true;
+        }
+        if (!csFlagEnabled) {
+          flagNotice.hidden = false;
+          flagNotice.innerHTML = '<div class="operational-notice"><strong>Not turned on yet.</strong> The Customers directory is implemented and tested in the Firebase emulator (Phase 5), but <code>platformFeatureFlags/customersConsole</code> has not been enabled for this workspace. That is expected while Phase 4\'s production backfill gate remains open — there is no production customer data for this console to show yet.</div>';
+          loaded.hidden = true;
+          return;
+        }
+        flagNotice.hidden = true;
+        loaded.hidden = false;
+        if (reset) { csData = []; csNextCursor = null; }
+        status.textContent = 'Loading customers…';
+        document.getElementById('csTable').style.display = 'none';
+        const result = await fb.getCustomerDirectory({
+          search: csSearchTerm,
+          pageSize: 25,
+          cursorCustomerId: reset ? '' : (csNextCursor || '')
+        });
+        csData = reset ? (result.rows || []).slice() : csData.concat(result.rows || []);
+        csNextCursor = result.nextCursor || null;
+        if (loadMore) loadMore.hidden = !csNextCursor;
+        csLoadedOnce = true;
+        csRenderRows();
+      } catch (error) {
+        loaded.hidden = false;
+        flagNotice.hidden = true;
+        document.getElementById('csTable').style.display = 'none';
+        const raw = (error && error.message) || 'Unknown error';
+        status.textContent = /permission-denied/i.test(String(error && error.code))
+          ? 'Your signed-in account does not hold a customer platform role (customer support, privacy data admin, or platform owner). Ask an administrator to add a platform_staff record with one of those roles.'
+          : 'Could not load customers: ' + raw;
+      } finally {
+        csLoading = false;
+      }
+    }
+
+    function csLoadDirectory() {
+      if (csLoadedOnce) return;
+      csFetchPage({ reset: true });
+    }
+
+    document.getElementById('csSearchGo')?.addEventListener('click', () => {
+      csSearchTerm = (document.getElementById('csSearch').value || '').trim();
+      csFetchPage({ reset: true });
+    });
+    document.getElementById('csSearch')?.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        document.getElementById('csSearchGo').click();
+      }
+    });
+    document.getElementById('csSearchClear')?.addEventListener('click', () => {
+      document.getElementById('csSearch').value = '';
+      csSearchTerm = '';
+      csFetchPage({ reset: true });
+    });
+    document.getElementById('csRefresh')?.addEventListener('click', () => {
+      csFetchPage({ reset: true, forceFlagRecheck: true });
+    });
+    document.getElementById('csLoadMore')?.addEventListener('click', () => {
+      csFetchPage({ reset: false });
+    });
+    document.getElementById('csDetailClose')?.addEventListener('click', () => {
+      const panel = document.getElementById('csDetailPanel');
+      if (panel) panel.hidden = true;
+      csDetailCache = null;
+    });
+
+    function csProgramLabel(programId) {
+      return ({ tsa: 'Think, Speak, Act', 'executive-signature': 'Executive Signature' })[programId] || programId;
+    }
+
+    function csRestrictedNote(reason) {
+      return '<p class="cs-restricted-note">' + escapeHtml(reason || 'This information requires a more privileged customer platform role.') + '</p>';
+    }
+
+    function csRenderDetailTab(panelName) {
+      const detail = csDetailCache;
+      if (!detail) return '';
+      if (panelName === 'overview') {
+        const o = detail.overview;
+        return '<div class="mb-form-grid">' +
+          '<div class="mb-form-field"><label>Account status</label>' + csStatusBadge(o) + '</div>' +
+          '<div class="mb-form-field"><label>Programs</label><span>' + escapeHtml((o.programIds || []).map(csProgramLabel).join(', ') || 'None yet') + '</span></div>' +
+          '<div class="mb-form-field"><label>Relationships</label><span>' + escapeHtml((o.relationships || []).join(', ') || '—') + '</span></div>' +
+          '<div class="mb-form-field"><label>Flags</label>' + csFlagBadges(o) + '</div>' +
+          '<div class="mb-form-field"><label>Created</label><span>' + escapeHtml(formatProgressDate(o.createdAt)) + '</span></div>' +
+          '<div class="mb-form-field"><label>Last activity</label><span>' + escapeHtml(formatProgressDate(o.lastActivityAt)) + '</span></div>' +
+        '</div>';
+      }
+      if (panelName === 'programs') {
+        if (!detail.programs.length) return '<p class="oa-empty">No program enrollments on file yet.</p>';
+        return '<table class="cs-table"><thead><tr><th>Program</th><th>Cohort</th><th>Status</th><th>Joined</th><th>Completed</th></tr></thead><tbody>' +
+          detail.programs.map((e) => '<tr><td>' + escapeHtml(csProgramLabel(e.programId)) + '</td><td>' + escapeHtml(e.cohortId || '—') +
+            '</td><td>' + escapeHtml(e.status || '—') + '</td><td>' + escapeHtml(formatProgressDate(e.joinedAt)) + '</td><td>' + escapeHtml(formatProgressDate(e.completedAt)) + '</td></tr>').join('') +
+          '</tbody></table>';
+      }
+      if (panelName === 'assessments') {
+        const ent = detail.assessments.entitlements;
+        const att = detail.assessments.attempts;
+        if (!ent.length && !att.length) return '<p class="oa-empty">No Executive Signature entitlements or attempts on file yet.</p>';
+        let html = '';
+        if (ent.length) {
+          html += '<h4 style="color:var(--navy);margin:0 0 8px">Entitlements</h4><table class="cs-table"><thead><tr><th>Assessment</th><th>Access</th><th>Status</th><th>Retakes used</th></tr></thead><tbody>' +
+            ent.map((e) => '<tr><td>' + escapeHtml(e.assessmentId || e.programId) + '</td><td>' + escapeHtml(e.accessType || '—') +
+              '</td><td>' + escapeHtml(e.status || '—') + '</td><td>' + escapeHtml(String(e.retakesUsed || 0) + ' / ' + String(e.retakesAllowed || 0)) + '</td></tr>').join('') +
+            '</tbody></table>';
+        }
+        if (att.length) {
+          html += '<h4 style="color:var(--navy);margin:16px 0 8px">Attempts</h4><table class="cs-table"><thead><tr><th>Assessment</th><th>Status</th><th>Result</th><th>Completed</th></tr></thead><tbody>' +
+            att.map((a) => '<tr><td>' + escapeHtml(a.assessmentId || '—') + '</td><td>' + escapeHtml(a.status || '—') +
+              '</td><td>' + escapeHtml(a.resultLabel ? (a.resultLabel + (a.resultScore != null ? ' (' + a.resultScore + ')' : '')) : '—') + '</td><td>' + escapeHtml(formatProgressDate(a.completedAt)) + '</td></tr>').join('') +
+            '</tbody></table><p class="description" style="margin-top:8px">Raw assessment responses are never shown here; they require a separate, audited privileged workflow.</p>';
+        }
+        return html;
+      }
+      if (panelName === 'activity') {
+        const events = [].concat(
+          detail.programs.map((e) => ({ at: e.completedAt || e.joinedAt, label: 'Enrolled in ' + csProgramLabel(e.programId) + ' (' + (e.status || 'active') + ')' })),
+          detail.assessments.attempts.map((a) => ({ at: a.completedAt, label: (a.assessmentId || 'Assessment') + ' attempt ' + (a.status || '') }))
+        ).filter((e) => e.at).sort((a, b) => String(b.at).localeCompare(String(a.at)));
+        if (!events.length) return '<p class="oa-empty">No dated activity on file yet.</p>';
+        return '<ul style="margin:0;padding-left:18px;font-size:13px;line-height:1.7">' +
+          events.map((e) => '<li>' + escapeHtml(formatProgressDate(e.at)) + ' — ' + escapeHtml(e.label) + '</li>').join('') + '</ul>';
+      }
+      if (panelName === 'consent') {
+        if (detail.consent.restricted) return csRestrictedNote(detail.consent.reason);
+        if (!detail.consent.events.length) return '<p class="oa-empty">No consent events on file yet.</p>';
+        return '<table class="cs-table"><thead><tr><th>Type</th><th>Granted</th><th>Version</th><th>When</th></tr></thead><tbody>' +
+          detail.consent.events.map((c) => '<tr><td>' + escapeHtml(c.consentType || '—') + '</td><td>' + (c.granted ? 'Yes' : 'No') +
+            '</td><td>' + escapeHtml(c.version || '—') + '</td><td>' + escapeHtml(formatProgressDate(c.occurredAt)) + '</td></tr>').join('') +
+          '</tbody></table>';
+      }
+      if (panelName === 'audit') {
+        if (detail.audit.restricted) return csRestrictedNote(detail.audit.reason);
+        if (!detail.audit.events.length) return '<p class="oa-empty">No audit events on file yet.</p>';
+        return '<table class="cs-table"><thead><tr><th>Action</th><th>Actor role</th><th>Outcome</th><th>When</th></tr></thead><tbody>' +
+          detail.audit.events.map((a) => '<tr><td>' + escapeHtml(a.action || '—') + '</td><td>' + escapeHtml(a.actorRole || '—') +
+            '</td><td>' + escapeHtml(a.outcome || '—') + '</td><td>' + escapeHtml(formatProgressDate(a.createdAt)) + '</td></tr>').join('') +
+          '</tbody></table>';
+      }
+      return '';
+    }
+
+    function csSetDetailTab(panelName) {
+      const body = document.getElementById('csDetailTabBody');
+      if (!body) return;
+      document.querySelectorAll('#csDetailPanel .cs-detail-tab').forEach((button) => {
+        button.setAttribute('aria-selected', String(button.dataset.csTab === panelName));
+      });
+      body.innerHTML = csRenderDetailTab(panelName);
+    }
+
+    async function csOpenDetail(customerId) {
+      const panel = document.getElementById('csDetailPanel');
+      const nameEl = document.getElementById('csDetailName');
+      const emailEl = document.getElementById('csDetailEmail');
+      const body = document.getElementById('csDetailBody');
+      if (!panel || !body) return;
+      panel.hidden = false;
+      nameEl.textContent = 'Loading…';
+      emailEl.textContent = '';
+      body.innerHTML = '<p class="oa-empty">Loading customer detail…</p>';
+      try {
+        const fb = await csEnsureFirebase();
+        const detail = await fb.getCustomerDetailForStaff(customerId);
+        csDetailCache = detail;
+        nameEl.textContent = detail.overview.displayName || '(no name on file)';
+        emailEl.textContent = detail.overview.primaryEmail || '';
+        const tabs = [
+          ['overview', 'Overview'], ['programs', 'Programs'], ['assessments', 'Assessments'],
+          ['activity', 'Activity'], ['consent', 'Consent & privacy'], ['audit', 'Audit']
+        ];
+        body.innerHTML = '<div class="cs-detail-tabs" role="tablist" aria-label="Customer detail">' +
+          tabs.map(([key, label]) => '<button type="button" class="cs-detail-tab" role="tab" data-cs-tab="' + key + '" aria-selected="false">' + escapeHtml(label) + '</button>').join('') +
+          '</div><div id="csDetailTabBody"></div>';
+        document.querySelectorAll('#csDetailPanel .cs-detail-tab').forEach((button) => {
+          button.addEventListener('click', () => csSetDetailTab(button.dataset.csTab));
+        });
+        csSetDetailTab('overview');
+        document.querySelector('#csDetailPanel [data-cs-tab="overview"]').setAttribute('aria-selected', 'true');
+        panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      } catch (error) {
+        nameEl.textContent = 'Could not load this customer';
+        const raw = (error && error.message) || 'Unknown error';
+        body.innerHTML = '<p class="oa-empty mb-err">' + escapeHtml(/permission-denied/i.test(String(error && error.code))
+          ? 'Your account does not have a customer platform role that can read this detail.'
+          : raw) + '</p>';
+      }
+    }
+
+    // Executive Signature (ES) workspace — Phase 6. Read-only except for the
+    // explicit, audited raw-response reveal below. Every loader here is gated
+    // behind platformFeatureFlags/esWorkspace, checked once and cached.
+    let esFlagChecked = false;
+    let esFlagEnabled = false;
+    let espData = [];
+    let espNextCursor = null;
+    let espLoading = false;
+    let espLoadedOnce = false;
+    let esaData = [];
+    let esaNextCursor = null;
+    let esaLoading = false;
+    let esaLoadedOnce = false;
+    let esConfigLoadedOnce = false;
+    let esGovLoadedOnce = false;
+    let esRevealAttemptId = null;
+
+    async function esEnsureFirebase() {
+      await mbRequireFirebaseAdmin();
+      const fb = window.utlFirebaseAuth || {};
+      if (!fb.getEsWorkspaceFeatureFlag || !fb.listEsParticipants || !fb.listEsAttempts ||
+        !fb.getEsConfiguration || !fb.getEsDataGovernance || !fb.revealAssessmentResponse) {
+        throw new Error('The Executive Signature workspace service is not available yet.');
+      }
+      return fb;
+    }
+
+    async function esGuardSection(flagNoticeId, loadedId, forceFlagRecheck) {
+      const flagNotice = document.getElementById(flagNoticeId);
+      const loaded = document.getElementById(loadedId);
+      if (!flagNotice || !loaded) return false;
+      try {
+        const fb = await esEnsureFirebase();
+        if (!esFlagChecked || forceFlagRecheck) {
+          const flag = await fb.getEsWorkspaceFeatureFlag();
+          esFlagEnabled = Boolean(flag && flag.enabled);
+          esFlagChecked = true;
+        }
+      } catch (error) {
+        flagNotice.hidden = false;
+        flagNotice.innerHTML = '<div class="operational-notice mb-err">Could not check the Executive Signature workspace flag: ' + escapeHtml((error && error.message) || 'Unknown error') + '</div>';
+        loaded.hidden = true;
+        return false;
+      }
+      if (!esFlagEnabled) {
+        flagNotice.hidden = false;
+        flagNotice.innerHTML = '<div class="operational-notice"><strong>Not turned on yet.</strong> The Executive Signature workspace is implemented and tested in the Firebase emulator (Phase 6), but <code>platformFeatureFlags/esWorkspace</code> has not been enabled for this workspace. That is expected while this phase stays local-only.</div>';
+        loaded.hidden = true;
+        return false;
+      }
+      flagNotice.hidden = true;
+      loaded.hidden = false;
+      return true;
+    }
+
+    function esLoadForTarget(target) {
+      if (target === 'section-es-participants') espLoadOnce();
+      else if (target === 'section-es-attempts') esaLoadOnce();
+      else if (target === 'section-es-configuration') esConfigLoadOnce();
+      else if (target === 'section-es-governance') esGovLoadOnce();
+      else esOverviewLoadOnce();
+    }
+
+    async function esOverviewLoadOnce() {
+      await esGuardSection('esFlagNotice', 'esOverviewLoaded', false);
+    }
+
+    function espRenderRows() {
+      const body = document.getElementById('espTableBody');
+      const table = document.getElementById('espTable');
+      const status = document.getElementById('espStatus');
+      if (!body || !table || !status) return;
+      if (!espData.length) {
+        table.style.display = 'none';
+        status.textContent = 'No Executive Signature participants yet.';
+        return;
+      }
+      table.style.display = '';
+      body.innerHTML = espData.map((row) => (
+        '<tr>' +
+          '<td>' + escapeHtml(row.displayName || '(no name on file)') + '</td>' +
+          '<td>' + escapeHtml(row.primaryEmail || '—') + '</td>' +
+          '<td>' + csStatusBadge(row) + '</td>' +
+          '<td>' + escapeHtml((row.programIds || []).join(', ') || '—') + '</td>' +
+          '<td>' + csFlagBadges(row) + '</td>' +
+          '<td>' + escapeHtml(formatProgressDate(row.lastActivityAt)) + '</td>' +
+        '</tr>'
+      )).join('');
+      status.textContent = espData.length + (espData.length === 1 ? ' participant loaded.' : ' participants loaded.');
+    }
+
+    async function espFetchPage(options = {}) {
+      if (espLoading) return;
+      const reset = options.reset !== false;
+      const ready = await esGuardSection('espFlagNotice', 'espLoaded', options.forceFlagRecheck);
+      if (!ready) return;
+      const status = document.getElementById('espStatus');
+      const loadMore = document.getElementById('espLoadMore');
+      const table = document.getElementById('espTable');
+      espLoading = true;
+      try {
+        const fb = await esEnsureFirebase();
+        if (reset) { espData = []; espNextCursor = null; }
+        if (status) status.textContent = 'Loading participants…';
+        if (table) table.style.display = 'none';
+        const result = await fb.listEsParticipants({ pageSize: 25, cursorCustomerId: reset ? '' : (espNextCursor || '') });
+        espData = reset ? (result.rows || []).slice() : espData.concat(result.rows || []);
+        espNextCursor = result.nextCursor || null;
+        if (loadMore) loadMore.hidden = !espNextCursor;
+        espLoadedOnce = true;
+        espRenderRows();
+      } catch (error) {
+        if (table) table.style.display = 'none';
+        const raw = (error && error.message) || 'Unknown error';
+        if (status) status.textContent = /permission-denied/i.test(String(error && error.code))
+          ? 'Your signed-in account does not hold an ES operations role (customer support, ES program lead, privacy data admin, or platform owner).'
+          : 'Could not load participants: ' + raw;
+      } finally {
+        espLoading = false;
+      }
+    }
+
+    function espLoadOnce() {
+      if (espLoadedOnce) return;
+      espFetchPage({ reset: true });
+    }
+
+    document.getElementById('espLoadMore')?.addEventListener('click', () => espFetchPage({ reset: false }));
+
+    function esAssessmentLabel(assessmentId) {
+      return ({ 'quick-check': 'Quick Check', 'full-assessment': 'Full Assessment' })[assessmentId] || assessmentId || '—';
+    }
+
+    function esaResultCell(row) {
+      if (row.status !== 'completed') return escapeHtml(row.status || '—');
+      const score = row.resultScore != null ? ' (' + row.resultScore + ')' : '';
+      return escapeHtml((row.resultLabel || row.band || 'Completed') + score);
+    }
+
+    function esaRenderRows() {
+      const body = document.getElementById('esaTableBody');
+      const table = document.getElementById('esaTable');
+      const status = document.getElementById('esaStatus');
+      if (!body || !table || !status) return;
+      if (!esaData.length) {
+        table.style.display = 'none';
+        status.textContent = 'No Executive Signature attempts yet.';
+        return;
+      }
+      table.style.display = '';
+      body.innerHTML = esaData.map((row) => (
+        '<tr>' +
+          '<td>' + escapeHtml(esAssessmentLabel(row.assessmentId)) + '</td>' +
+          '<td>' + escapeHtml(row.status || '—') + '</td>' +
+          '<td>' + esaResultCell(row) + '</td>' +
+          '<td>' + escapeHtml(formatProgressDate(row.completedAt)) + '</td>' +
+          '<td><button type="button" class="small-button secondary-button" data-esa-reveal="' + escapeHtml(row.attemptId) + '">Reveal…</button></td>' +
+        '</tr>'
+      )).join('');
+      status.textContent = esaData.length + (esaData.length === 1 ? ' attempt loaded.' : ' attempts loaded.');
+      body.querySelectorAll('[data-esa-reveal]').forEach((button) => {
+        button.addEventListener('click', () => esOpenRevealPanel(button.dataset.esaReveal));
+      });
+    }
+
+    async function esaFetchPage(options = {}) {
+      if (esaLoading) return;
+      const reset = options.reset !== false;
+      const ready = await esGuardSection('esaFlagNotice', 'esaLoaded', options.forceFlagRecheck);
+      if (!ready) return;
+      const status = document.getElementById('esaStatus');
+      const loadMore = document.getElementById('esaLoadMore');
+      const table = document.getElementById('esaTable');
+      esaLoading = true;
+      try {
+        const fb = await esEnsureFirebase();
+        if (reset) { esaData = []; esaNextCursor = null; }
+        if (status) status.textContent = 'Loading attempts…';
+        if (table) table.style.display = 'none';
+        const result = await fb.listEsAttempts({ pageSize: 25, cursorAttemptId: reset ? '' : (esaNextCursor || '') });
+        esaData = reset ? (result.rows || []).slice() : esaData.concat(result.rows || []);
+        esaNextCursor = result.nextCursor || null;
+        if (loadMore) loadMore.hidden = !esaNextCursor;
+        esaLoadedOnce = true;
+        esaRenderRows();
+      } catch (error) {
+        if (table) table.style.display = 'none';
+        const raw = (error && error.message) || 'Unknown error';
+        if (status) status.textContent = /permission-denied/i.test(String(error && error.code))
+          ? 'Your signed-in account does not hold an ES operations role (customer support, ES program lead, privacy data admin, or platform owner).'
+          : 'Could not load attempts: ' + raw;
+      } finally {
+        esaLoading = false;
+      }
+    }
+
+    function esaLoadOnce() {
+      if (esaLoadedOnce) return;
+      esaFetchPage({ reset: true });
+    }
+
+    document.getElementById('esaLoadMore')?.addEventListener('click', () => esaFetchPage({ reset: false }));
+
+    function esOpenRevealPanel(attemptId) {
+      const panel = document.getElementById('esRevealPanel');
+      const context = document.getElementById('esRevealContext');
+      const reasonField = document.getElementById('esRevealReason');
+      const resultBox = document.getElementById('esRevealResult');
+      if (!panel) return;
+      esRevealAttemptId = attemptId;
+      const row = esaData.find((item) => item.attemptId === attemptId);
+      if (context) {
+        context.textContent = row
+          ? 'Attempt ' + attemptId + ' — ' + esAssessmentLabel(row.assessmentId) + ', ' + (row.status || 'unknown status') + '.'
+          : 'Attempt ' + attemptId + '.';
+      }
+      if (reasonField) reasonField.value = '';
+      if (resultBox) resultBox.innerHTML = '';
+      panel.hidden = false;
+      panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    document.getElementById('esRevealCancel')?.addEventListener('click', () => {
+      const panel = document.getElementById('esRevealPanel');
+      if (panel) panel.hidden = true;
+      esRevealAttemptId = null;
+    });
+
+    document.getElementById('esRevealConfirm')?.addEventListener('click', async () => {
+      const reasonField = document.getElementById('esRevealReason');
+      const resultBox = document.getElementById('esRevealResult');
+      const button = document.getElementById('esRevealConfirm');
+      const reason = String((reasonField && reasonField.value) || '').trim();
+      if (!esRevealAttemptId) return;
+      if (!reason) { showToast('A reason is required to reveal raw responses.', 'error'); return; }
+      if (button) { button.disabled = true; button.textContent = 'Revealing…'; }
+      try {
+        const fb = await esEnsureFirebase();
+        const result = await fb.revealAssessmentResponse(esRevealAttemptId, reason);
+        if (resultBox) {
+          const parts = result && result.parts || [];
+          resultBox.innerHTML = parts.length ? parts.map((part) => (
+            '<h4 style="color:var(--navy);margin:12px 0 8px">Part ' + (part.partNumber || '—') + ' of ' + (part.partCount || '—') + '</h4>' +
+            '<table class="cs-table"><thead><tr><th>Question</th><th>Answer</th></tr></thead><tbody>' +
+            (part.answers || []).map((answer) => '<tr><td>' + escapeHtml(String(answer.questionId || '')) +
+              '</td><td>' + escapeHtml(String(answer.value)) + '</td></tr>').join('') +
+            '</tbody></table>'
+          )).join('') : '<p class="oa-empty">No response parts are on file for this attempt.</p>';
+        }
+        showToast('Raw responses revealed and logged to the audit trail.');
+      } catch (error) {
+        const raw = (error && error.message) || 'Unknown error';
+        if (resultBox) resultBox.innerHTML = '<p class="oa-empty mb-err">' + escapeHtml(/permission-denied/i.test(String(error && error.code))
+          ? 'Your account does not hold raw-response access (platform owner, privacy data admin, or an ES program lead with explicit raw-response access).'
+          : raw) + '</p>';
+      } finally {
+        if (button) { button.disabled = false; button.textContent = 'Reveal raw responses'; }
+      }
+    });
+
+    async function esConfigLoadOnce() {
+      if (esConfigLoadedOnce) return;
+      const ready = await esGuardSection('esConfigFlagNotice', 'esConfigLoaded', false);
+      if (!ready) return;
+      const status = document.getElementById('esConfigStatus');
+      const bodyEl = document.getElementById('esConfigBody');
+      try {
+        const fb = await esEnsureFirebase();
+        if (status) status.textContent = 'Loading configuration…';
+        const result = await fb.getEsConfiguration();
+        esConfigLoadedOnce = true;
+        if (status) status.textContent = '';
+        const definitions = (result && result.definitions) || [];
+        const versions = (result && result.versions) || [];
+        if (bodyEl) {
+          bodyEl.innerHTML =
+            '<h4 style="color:var(--navy);margin:0 0 8px">Assessment definitions</h4>' +
+            (definitions.length ? '<table class="cs-table"><thead><tr><th>Assessment</th><th>Title</th><th>Status</th><th>Current version</th><th>Est. minutes</th></tr></thead><tbody>' +
+              definitions.map((d) => '<tr><td>' + escapeHtml(d.assessmentId) + '</td><td>' + escapeHtml(d.title || '—') +
+                '</td><td>' + escapeHtml(d.status || '—') + '</td><td>' + escapeHtml(d.currentVersionId || '—') +
+                '</td><td>' + escapeHtml(d.estimatedMinutes != null ? String(d.estimatedMinutes) : '—') + '</td></tr>').join('') +
+              '</tbody></table>' : '<p class="oa-empty">No assessment definitions on file yet.</p>') +
+            '<h4 style="color:var(--navy);margin:16px 0 8px">Assessment versions</h4>' +
+            (versions.length ? '<table class="cs-table"><thead><tr><th>Version</th><th>Assessment</th><th>Status</th><th>Scoring version</th><th>Content version</th><th>Questions</th><th>Published</th></tr></thead><tbody>' +
+              versions.map((v) => '<tr><td>' + escapeHtml(v.versionId) + '</td><td>' + escapeHtml(v.assessmentId || '—') +
+                '</td><td>' + escapeHtml(v.status || '—') + '</td><td>' + escapeHtml(v.scoringVersion || '—') + '</td><td>' + escapeHtml(v.contentVersion || '—') +
+                '</td><td>' + escapeHtml(String(v.questionCount || 0)) + '</td><td>' + escapeHtml(formatProgressDate(v.publishedAt)) + '</td></tr>').join('') +
+              '</tbody></table>' : '<p class="oa-empty">No assessment versions on file yet.</p>');
+        }
+      } catch (error) {
+        const raw = (error && error.message) || 'Unknown error';
+        if (status) status.textContent = /permission-denied/i.test(String(error && error.code))
+          ? 'Your signed-in account does not hold an ES operations role.'
+          : 'Could not load configuration: ' + raw;
+      }
+    }
+
+    async function esGovLoadOnce() {
+      if (esGovLoadedOnce) return;
+      const ready = await esGuardSection('esGovFlagNotice', 'esGovLoaded', false);
+      if (!ready) return;
+      const status = document.getElementById('esGovStatus');
+      const bodyEl = document.getElementById('esGovBody');
+      try {
+        const fb = await esEnsureFirebase();
+        if (status) status.textContent = 'Loading data governance…';
+        const result = await fb.getEsDataGovernance({ pageSize: 25 });
+        esGovLoadedOnce = true;
+        if (status) status.textContent = '';
+        const consent = (result && result.consent) || { restricted: true, events: [] };
+        const retention = (result && result.retention) || [];
+        if (bodyEl) {
+          let html = '<h4 style="color:var(--navy);margin:0 0 8px">Consent events</h4>';
+          if (consent.restricted) {
+            html += csRestrictedNote(consent.reason);
+          } else if (!consent.events.length) {
+            html += '<p class="oa-empty">No consent events on file yet.</p>';
+          } else {
+            html += '<table class="cs-table"><thead><tr><th>Customer</th><th>Type</th><th>Granted</th><th>Notice version</th><th>When</th></tr></thead><tbody>' +
+              consent.events.map((c) => '<tr><td>' + escapeHtml(c.customerId || '—') + '</td><td>' + escapeHtml(c.consentType || '—') +
+                '</td><td>' + (c.granted ? 'Yes' : 'No') + '</td><td>' + escapeHtml(c.noticeVersion || '—') + '</td><td>' + escapeHtml(formatProgressDate(c.recordedAt)) + '</td></tr>').join('') +
+              '</tbody></table>';
+          }
+          html += '<h4 style="color:var(--navy);margin:16px 0 8px">Retention policy</h4>' +
+            '<table class="cs-table"><thead><tr><th>Data class</th><th>Retention</th><th>Deletion behavior</th></tr></thead><tbody>' +
+            retention.map((r) => '<tr><td>' + escapeHtml(r.dataClass) + '</td><td>' + escapeHtml(r.retention) + '</td><td>' + escapeHtml(r.deletionBehavior) + '</td></tr>').join('') +
+            '</tbody></table>' +
+            '<p class="description" style="margin-top:8px">Bulk export of raw ES responses is intentionally not available. A single attempt can be revealed from Attempts, with a required reason and an audit record.</p>';
+          bodyEl.innerHTML = html;
+        }
+      } catch (error) {
+        const raw = (error && error.message) || 'Unknown error';
+        if (status) status.textContent = /permission-denied/i.test(String(error && error.code))
+          ? 'Your signed-in account does not hold an ES operations role.'
+          : 'Could not load data governance: ' + raw;
+      }
     }
 
     async function oaLoad(force) {

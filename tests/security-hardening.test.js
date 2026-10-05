@@ -50,7 +50,11 @@ assert.match(sheetActions, /function shouldRejectContactSubmission_\(data\)/, 't
   const shouldRejectContactSubmission_ = new Function('data', body + '\nreturn shouldRejectContactSubmission_(data);');
   assert.equal(shouldRejectContactSubmission_({ name: '', email: '' }), true, 'a fully blank submission must be rejected');
   assert.equal(shouldRejectContactSubmission_({ name: 'Karla', email: 'not-an-email' }), true, 'a malformed email must be rejected even if a name is present');
+  assert.equal(shouldRejectContactSubmission_({ name: 'Jordan Rivera', email: 'jordan.rivera@example.com', page: 'http://localhost:8080/apps/readiness-assessment/' }), true, 'a local readiness preview using a reserved test address must be rejected');
+  assert.equal(shouldRejectContactSubmission_({ name: 'Jordan Rivera', email: 'jordan.rivera@example.com', page: 'https://theuntaughtlessons.com/apps/readiness-assessment/' }), true, 'reserved example addresses must be rejected even when a page URL claims to be production');
+  assert.equal(shouldRejectContactSubmission_({ name: 'Karla', email: 'karla@ayalamalls.com', page: 'http://127.0.0.1:8061/contact.html' }), true, 'local preview submissions must never generate live notifications');
   assert.equal(shouldRejectContactSubmission_({ name: 'Karla', email: 'karla@ayalamalls.com' }), false, 'a real, complete submission must not be rejected');
+  assert.equal(shouldRejectContactSubmission_({ name: 'Karla', email: 'karla@ayalamalls.com', page: 'https://theuntaughtlessons.com/contact.html' }), false, 'a real production submission must not be rejected');
 })();
 assert.match(adminFunctions, /exports\.runAdminAction = onCall/);
 assert.match(adminFunctions, /ALLOWED_ADMIN_ACTIONS = new Set\(\["WelcomeEmail", "TestEmailTemplate", "RemovedMember", "WeeklyOrgReport"\]\)/);

@@ -10,9 +10,15 @@ const technicalMonospaceFiles = new Set([
   'tools/[Grade 9 and 10] Logarithm_explorer.html',
   'tools/tools-shared.css'
 ]);
+// apps/readiness-assessment is a private preview explicitly excluded from the
+// deployed site (.github/workflows/deploy-pages.yml `--exclude 'apps/readiness-assessment/'`),
+// with its own separately-governed visual design still being iterated on. It is
+// excluded from this scan entirely rather than allowlisted rule-by-rule.
+const excludedDirs = new Set(['apps/readiness-assessment']);
 
 function collect(directory) {
   if (!fs.existsSync(directory)) return [];
+  if (excludedDirs.has(directory)) return [];
   return fs.readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
     const file = path.join(directory, entry.name);
     return entry.isDirectory() ? collect(file) : extensions.has(path.extname(file)) ? [file] : [];

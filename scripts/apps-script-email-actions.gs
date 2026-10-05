@@ -249,9 +249,13 @@ function notifyGroupSyncFailure_(email, groupEmail, mode, error) {
  */
 function shouldRejectContactSubmission_(data) {
   var name = String((data && data.name) || '').trim();
-  var email = String((data && data.email) || '').trim();
+  var email = String((data && data.email) || '').trim().toLowerCase();
+  var page = String((data && data.page) || '').trim().toLowerCase();
   var validEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  return !name || !validEmail;
+  var emailDomain = email.indexOf('@') === -1 ? '' : email.split('@').pop();
+  var reservedTestAddress = ['example.com', 'example.org', 'example.net'].indexOf(emailDomain) !== -1;
+  var localPreview = /^https?:\/\/(localhost|127\.0\.0\.1|\[?::1\]?)(:\d+)?(?:\/|$)/.test(page);
+  return !name || !validEmail || reservedTestAddress || localPreview;
 }
 
 function stripHtml_(html) {

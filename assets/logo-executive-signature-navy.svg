@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="420" height="104" viewBox="0 0 420 104" role="img" aria-label="Executive Signature">
+  <g transform="translate(3 8) scale(1.8)">
+    <path d="M23.4 4.6Q33 9.5 41.6 18.7Q40 30.5 34.3 41.8Q23.8 45.3 13.2 41.3Q7.6 30.8 5.5 18.2Q13.8 10.2 23.4 4.6Z" fill="none" stroke="#003366" stroke-width="1.8"/>
+    <path d="M24.6 3.3Q34.3 10.6 42.4 17.5Q38.9 29.8 35.5 42.6Q24.2 44.2 14.1 40.4Q8.6 31.4 6.4 19.1Q14.9 11.4 24.6 3.3Z" fill="none" stroke="#003366" stroke-width="1.5" opacity=".55"/>
+    <circle cx="24" cy="4" r="2.6" fill="#EEA320"/>
+  </g>
+  <text x="108" y="47" fill="#003366" font-family="Georgia,serif" font-size="36" font-weight="700">Executive</text>
+  <text x="108" y="84" fill="#003366" font-family="Georgia,serif" font-size="36" font-weight="700">Signature</text>
+</svg>

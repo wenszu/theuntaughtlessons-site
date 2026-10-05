@@ -63,6 +63,11 @@ const actionCodeSettings = {
   handleCodeInApp: true
 };
 
+const readinessActionCodeSettings = {
+  url: `${window.location.origin}/apps/readiness-assessment/my-results/`,
+  handleCodeInApp: true
+};
+
 const exerciseProgressIds = {
   "grocery-list": "p1-e1",
   "grocery-list-ai": "p1-e2",
@@ -308,11 +313,131 @@ async function getMyOrganizationAccess() {
   return result && result.data ? result.data : { ok: true, hasAccess: false, organizations: [] };
 }
 
+async function getMyWorkspaces() {
+  const user = await getSignedInUser();
+  if (!user) return { ok: true, customerId: null, workspaces: [], hasMultiple: false };
+  const callable = httpsCallable(functions, "getMyWorkspaces");
+  const result = await callable({});
+  return result && result.data ? result.data : { ok: true, customerId: null, workspaces: [], hasMultiple: false };
+}
+
+function emptyEsStatus() {
+  const emptyAssessment = () => ({ hasEntitlement: false, status: null, attemptsCompleted: 0, retakesAllowed: 0, retakesUsed: 0, latestAttempt: null, recentAttempts: [] });
+  return { ok: true, customerId: null, assessments: { "quick-check": emptyAssessment(), "full-assessment": emptyAssessment() } };
+}
+
+async function getMyEsStatus() {
+  const user = await getSignedInUser();
+  if (!user) return emptyEsStatus();
+  const callable = httpsCallable(functions, "getMyEsStatus");
+  const result = await callable({});
+  return result && result.data ? result.data : emptyEsStatus();
+}
+
 async function getOrganizationAccessAdmin() {
   const user = await getSignedInUser();
   if (!user) throw new Error("Please sign in with a UTL administrator account.");
   const callable = httpsCallable(functions, "getOrganizationAccessAdmin");
   const result = await callable({});
+  return result && result.data ? result.data : null;
+}
+
+async function getCustomersConsoleFeatureFlag() {
+  const user = await getSignedInUser();
+  if (!user) return { enabled: false };
+  try {
+    const snap = await getDoc(doc(requireFirestore(), "platformFeatureFlags", "customersConsole"));
+    return { enabled: snap.exists() && snap.data().enabled === true };
+  } catch (error) {
+    console.warn("Could not read the Customers console feature flag:", error && error.message);
+    return { enabled: false };
+  }
+}
+
+async function getCustomerDirectory(options = {}) {
+  const user = await getSignedInUser();
+  if (!user) throw new Error("Please sign in with a UTL administrator account.");
+  const callable = httpsCallable(functions, "getCustomerDirectory");
+  const result = await callable({
+    search: options.search || "",
+    pageSize: Number.isInteger(options.pageSize) ? options.pageSize : undefined,
+    cursorCustomerId: options.cursorCustomerId || ""
+  });
+  return result && result.data ? result.data : null;
+}
+
+async function getCustomerDetailForStaff(customerId) {
+  const user = await getSignedInUser();
+  if (!user) throw new Error("Please sign in with a UTL administrator account.");
+  if (!customerId) throw new Error("A customer ID is required.");
+  const callable = httpsCallable(functions, "getCustomerDetailForStaff");
+  const result = await callable({ customerId });
+  return result && result.data ? result.data : null;
+}
+
+async function getEsWorkspaceFeatureFlag() {
+  const user = await getSignedInUser();
+  if (!user) return { enabled: false };
+  try {
+    const snap = await getDoc(doc(requireFirestore(), "platformFeatureFlags", "esWorkspace"));
+    return { enabled: snap.exists() && snap.data().enabled === true };
+  } catch (error) {
+    console.warn("Could not read the ES workspace feature flag:", error && error.message);
+    return { enabled: false };
+  }
+}
+
+async function listEsParticipants(options = {}) {
+  const user = await getSignedInUser();
+  if (!user) throw new Error("Please sign in with a UTL administrator account.");
+  const callable = httpsCallable(functions, "listEsParticipants");
+  const result = await callable({
+    pageSize: Number.isInteger(options.pageSize) ? options.pageSize : undefined,
+    cursorCustomerId: options.cursorCustomerId || ""
+  });
+  return result && result.data ? result.data : null;
+}
+
+async function listEsAttempts(options = {}) {
+  const user = await getSignedInUser();
+  if (!user) throw new Error("Please sign in with a UTL administrator account.");
+  const callable = httpsCallable(functions, "listEsAttempts");
+  const result = await callable({
+    pageSize: Number.isInteger(options.pageSize) ? options.pageSize : undefined,
+    cursorAttemptId: options.cursorAttemptId || ""
+  });
+  return result && result.data ? result.data : null;
+}
+
+async function getEsConfiguration() {
+  const user = await getSignedInUser();
+  if (!user) throw new Error("Please sign in with a UTL administrator account.");
+  const callable = httpsCallable(functions, "getEsConfiguration");
+  const result = await callable({});
+  return result && result.data ? result.data : null;
+}
+
+async function getEsDataGovernance(options = {}) {
+  const user = await getSignedInUser();
+  if (!user) throw new Error("Please sign in with a UTL administrator account.");
+  const callable = httpsCallable(functions, "getEsDataGovernance");
+  const result = await callable({
+    pageSize: Number.isInteger(options.pageSize) ? options.pageSize : undefined,
+    cursorEventId: options.cursorEventId || ""
+  });
+  return result && result.data ? result.data : null;
+}
+
+// The raw-response reveal is a deliberate, audited action, never a silent or
+// bulk read. The admin UI must only call this from an explicit confirm button
+// with a reason the staff member typed, never on attempt-detail open.
+async function revealAssessmentResponse(attemptId, reason) {
+  const user = await getSignedInUser();
+  if (!user) throw new Error("Please sign in with a UTL administrator account.");
+  if (!attemptId) throw new Error("An attempt ID is required.");
+  if (!reason || !String(reason).trim()) throw new Error("A reason is required to reveal raw responses.");
+  const callable = httpsCallable(functions, "revealAssessmentResponse");
+  const result = await callable({ attemptId, reason: String(reason).trim() });
   return result && result.data ? result.data : null;
 }
 
@@ -458,6 +583,26 @@ async function requireAuthorizedMember(user) {
 async function sendSignInInvite(email) {
   await sendSignInLinkToEmail(requireFirebaseAuth(), email, actionCodeSettings);
   window.localStorage.setItem("emailForSignIn", email);
+}
+
+// Unauthenticated by design: a readiness-assessment customer who never joined
+// TSA has no session to reuse, so "see my results" re-grants access the same
+// way a TSA invite link works, just pointed at the readiness results page.
+async function sendReadinessAccessLink(email) {
+  await sendSignInLinkToEmail(requireFirebaseAuth(), email, readinessActionCodeSettings);
+  window.localStorage.setItem("emailForSignIn", email);
+}
+
+async function recordReadinessCompletion(payload = {}) {
+  const callable = httpsCallable(functions, "recordReadinessCompletion");
+  const result = await callable(payload && typeof payload === "object" ? payload : {});
+  return result && result.data ? result.data : null;
+}
+
+async function checkReadinessAccountEmail(email) {
+  const callable = httpsCallable(functions, "checkReadinessAccountEmail");
+  const result = await callable({ email });
+  return result && result.data ? result.data : { ok: false, hasResult: false };
 }
 
 async function submitAccessRequest(fullName, email, notes = "") {
@@ -2062,9 +2207,20 @@ export {
   firebaseInitError,
   getAuthorizedMember,
   getMemberAccount,
+  getMyWorkspaces,
+  getMyEsStatus,
   getMyOrganizationAccess,
   getOrganizationAccessAdmin,
   getOrganizationConsole,
+  getCustomersConsoleFeatureFlag,
+  getCustomerDirectory,
+  getCustomerDetailForStaff,
+  getEsWorkspaceFeatureFlag,
+  listEsParticipants,
+  listEsAttempts,
+  getEsConfiguration,
+  getEsDataGovernance,
+  revealAssessmentResponse,
   getDoc,
   getDocs,
   getFacebookRedirectResult,
@@ -2119,6 +2275,9 @@ export {
   submitAccessRequest,
   sendSignInInvite,
   sendSignInLinkToEmail,
+  sendReadinessAccessLink,
+  recordReadinessCompletion,
+  checkReadinessAccountEmail,
   saveUserProgress,
   retryPendingProgressSyncs,
   saveEngagementAnalytics,

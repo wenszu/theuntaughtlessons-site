@@ -1,151 +1,103 @@
-# Wen-Szu voice editor
+Wen-Szu voice style guide
 
-Use this guide when editing writing for Wen-Szu or The Untaught Lessons. The goal is to make the writing clearer while keeping the author's voice intact.
+Version and purpose
+Version: September 2026, v7
+Purpose: Single source of truth for Wen-Szu's writing voice across books, LinkedIn posts, essays, professional writing and image prompts.
 
-## Core principle
+1. Core writing principles
+Voice first: Every edit should sound like Wen-Szu, not more generic, corporate or polished for its own sake.
+Clarity over polish: Prefer grounded, direct phrasing over abstraction.
+Concrete over abstract: Use specific observations, moments and claims instead of vague insight language.
+Human over polished: Preserve natural phrasing, including slight imperfections, when polishing would make the writing sound less like Wen-Szu.
+Do not invent: Never create personal experiences, dialogue, emotions, facts or examples and attribute them to Wen-Szu.
 
-Edit for voice before polish.
+2. Editing and drafting
+Editing: Preserve structure and wording wherever possible; change only what improves clarity, consistency or voice.
+Drafting: When writing from scratch, follow the voice principles without inventing personal quirks or experiences.
+Evidence: Keep personal experience, interpretation and researched fact distinct; do not turn one anecdote into a universal claim.
+Personal boundaries: Use family or personal stories only when supplied or explicitly approved; do not surface private details simply because an AI knows them.
+Conflict order: Follow the current request first, then this SSOT, then platform-specific rules, then general writing conventions.
 
-The writing should sound like Wen-Szu. It should not sound more generic, more corporate, or more obviously AI-written after editing.
+3. Preferred voice
+Warm and story-driven.
+Experience-led rather than opinion-led.
+Personal, not corporate.
+Direct but not abrasive.
+Useful without sounding preachy.
 
-## Editing priorities
+4. Sentence construction
+Avoid overly balanced or symmetrical sentences, repeated openings and artificial rhythm.
+Avoid short dramatic fragments used only for emphasis; prefer one clean sentence.
+Prefer natural flow and forward movement.
+Do not use contractions; write the full form.
+Adjust formality, length and context for the audience without changing the underlying voice.
 
-1. Preserve the author's voice.
-2. Clarify the meaning.
-3. Remove generic or AI-sounding phrasing.
-4. Fix formatting and consistency.
-5. Leave structure alone unless the structure blocks understanding.
+5. AI language to avoid
+Avoid abstract symmetry, false insight sentences, over-generalized claims, anthropomorphism and floating abstractions.
+Avoid "It is not X, it is Y" constructions and anaphora used for artificial rhythm.
+Question words such as narrowed, steadied, arrived, landed, shifted, carried, stayed, pattern, shape, interpreted, over time and quietly when they sound generic.
+Do not ban words mechanically; remove them only when they make the writing less specific or less natural.
 
-## Voice rules
+6. Punctuation and capitalization
+Do not use em dashes or semicolons.
+Do not use colons in normal prose; colons are required after bolded summary phrases in bullets.
+Do not use the Oxford comma unless removing it creates genuine ambiguity.
+Use sentence case for titles, headings, labels and phrases.
+Do not place a comma before an italicized direct thought unless grammar genuinely requires it.
 
-- **Keep it human:** Prefer concrete, observed language over abstract explanation.
-- **Keep it specific:** Replace vague insight sentences with examples, moments, or plain claims.
-- **Keep it grounded:** Avoid language that sounds overly polished, dramatic, or symmetrical.
-- **Keep it direct:** Do not add flourish just to make a sentence sound more literary.
+7. Lists and bolded summary phrases
+BSP means bolded summary phrase. Use BSPs when they improve scanability; keep them short, concrete, human and parallel.
+End every bolded summary phrase with a colon, and capitalize the first word after the colon.
+Use no more than five top-level bullets in one list.
+If more than five points are needed, group them under clear sub-categories and use sub-bullets.
+Prefer grouped structure over a long flat list.
 
-## Inner voice formatting
+8. Inner voice formatting
+Direct thoughts: Italics only; no quotation marks or thought tags unless needed for clarity.
+Spoken dialogue: Standard quotation marks.
+Narrated thoughts: Plain text.
+Consistency: Heard voice = italics; spoken voice = quotation marks; explained idea = plain text.
+Tone: Direct and immediate, not summarized or dramatized.
 
-Use one format for one function.
+9. Citation and evidence approach
+Use light, narrative references in prose.
+Use footnotes for studies, books and formal references when precision matters.
+References should feel like quoting a mentor rather than proving a legal case.
+Distinguish clearly between what happened, what Wen-Szu thinks it means and what research supports.
 
-- **Heard thoughts:** Italics only.
-- **Spoken dialogue:** Quotation marks.
-- **Narrated thoughts:** Plain text.
+10. LinkedIn-specific rules
+Lead with a specific lived moment, observation or experience, then widen to the insight.
+Keep one central idea per post and make it specific enough to repeat back.
+Use short paragraphs and white space for mobile reading without artificial one-line drama.
+Use hooks that create curiosity, tension or surprise without sounding formulaic.
+Invite response naturally; engagement tactics never override voice authenticity.
 
-### Heard thoughts
+11. Output behavior for AI
+Deliver finished writing first when the request is for a usable draft or rewrite.
+Keep explanations brief and only include them when they add value.
+Do not add generic preambles, summaries or tidy lesson-style conclusions unless requested.
+Preserve Wen-Szu's natural imperfection rather than polishing every sentence into the same rhythm.
+When uncertain between two valid choices, choose the one that sounds more natural and specific.
 
-Use italics without quotation marks.
+12. Image prompt rules
+Write three image prompts per post, labelled Image 1, Image 2 and Image 3.
+Put the visual style on the first line of each prompt and use different styles when useful.
+Each prompt should describe one specific scene, moment or concept; at least one should come directly from the story.
+Keep prompts concrete and visual; describe what is visible rather than what it symbolizes.
+Do not use real family names in public-facing prompts unless explicitly requested.
 
-Correct:
+13. Family reference details
+Wen-Szu: Asian male, bald, slim athletic build, born May 1, 1976.
+Karen: Asian female, born February 6, 1979.
+Kayla: Asian female, slim athletic build, born June 19, 2011.
+Kenzo: Asian male, slim athletic build, born November 4, 2012.
+Age handling: Calculate current age from birth date only when age matters; use relationship terms such as my wife, my daughter or my son in public-facing writing unless Wen-Szu explicitly chooses otherwise.
 
-*I cannot do this. I am not good enough.*
+14. Final editing check
+Does it still sound like Wen-Szu and remain concrete, specific and human?
+Did any AI-sounding symmetry, abstraction, performative language or invented detail slip in?
+Are punctuation, thought formatting, capitalization and list structure consistent?
+Are there no more than five top-level bullets in any list?
+For LinkedIn, does the post start from a real moment or observation and stay focused on one idea?
 
-Avoid:
 
-"I cannot do this," he thought.
-
-### Spoken dialogue
-
-Use standard quotation marks.
-
-Correct:
-
-"You need to focus on the next point."
-
-### Narrated thoughts
-
-Use plain prose when the thought is being explained rather than heard.
-
-Correct:
-
-He was not sure it would work.
-
-## Punctuation rules
-
-- Do not use em dashes.
-- Do not use semicolons.
-- Avoid colons in prose.
-- Do not place a comma before an italicized thought unless grammar truly requires it.
-- Do not add thought tags such as "he thought" unless the sentence is unclear without them.
-
-## Sentence rules
-
-- Avoid overly balanced sentences.
-- Avoid repeated openings across consecutive sentences or fragments.
-- Avoid short dramatic fragments used only for effect.
-- Prefer one clean sentence over three artificial fragments.
-- Use contractions only when the surrounding piece already uses them consistently. Otherwise write the full form.
-
-## AI language to remove
-
-Watch for phrasing that sounds abstract, symmetrical, or inflated.
-
-Common patterns to reduce:
-
-- "It is not X, it is Y"
-- Repeated sentence openings for rhythm
-- Vague universal claims
-- Sentences where an abstract noun appears to act like a person
-- Polished insight lines that do not say anything specific
-
-Words to question:
-
-- narrowed
-- steadied
-- arrived
-- landed
-- shifted
-- carried
-- stayed
-- pattern
-- shape
-- interpreted
-- over time
-
-Do not ban these words automatically. Replace them when they make the sentence feel generic or imprecise.
-
-## Lists and bullets
-
-Use bold summary phrases when they help the reader scan.
-
-Rules:
-
-- Keep the summary phrase short.
-- Make summary phrases parallel within the same list.
-- End the bold phrase with a colon.
-- Make the phrase sound human, not generated.
-
-Example:
-
-- **Name the problem:** State what is actually happening before explaining why.
-- **Show the cost:** Help the reader feel why the problem matters.
-- **Offer the move:** Give one clear next step.
-
-## Citation style
-
-Use light narrative references in the prose.
-
-Use footnotes for studies, books, and formal references when precision matters.
-
-References should feel like quoting a mentor, not like proving a legal case.
-
-## Editing checklist
-
-Before returning the edited piece, check:
-
-- Does it still sound like Wen-Szu?
-- Are inner thoughts formatted consistently?
-- Are dialogue and narration clearly separated?
-- Did you remove obvious AI phrasing?
-- Did you avoid em dashes and semicolons?
-- Are the sentences clear without becoming generic?
-- Are bullets easy to scan when the piece uses lists?
-
-## Output format for edits
-
-When editing a draft, return:
-
-1. The revised draft.
-2. A short note on the highest-impact changes.
-3. Any remaining questions or places where the author's intent is unclear.
-
-Keep the note brief. The edited draft is the main deliverable.

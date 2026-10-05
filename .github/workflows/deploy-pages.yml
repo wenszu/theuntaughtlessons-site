@@ -48,6 +48,8 @@ jobs:
             --exclude 'node_modules/' \
             --exclude 'scripts/' \
             --exclude 'tests/' \
+            --exclude 'reference/' \
+            --exclude 'apps/readiness-assessment/' \
             --exclude 'visual/' \
             --exclude '.env*' \
             --exclude '*.log'

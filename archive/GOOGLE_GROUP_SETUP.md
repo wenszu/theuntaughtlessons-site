@@ -1,4 +1,6 @@
-# Google Group Setup — The Untaught Lessons
+# Archived: Google Group setup — The Untaught Lessons
+
+Archived on 2026-10-04 because current onboarding and course media no longer depend on Google Group membership; retained for historical operations context.
 
 This guide explains how to set up the Google Group used to share the UTL Drive folder
 with all members, and how the `googleGroupAdded` field in the admin Members panel connects
@@ -80,7 +82,7 @@ the script sends a failure email to the admin address and the member must be man
 
 The Firestore/Cloud Functions migration is being added in parallel so the Admin Console can
 eventually show confirmed/failed Google Group sync status. Track that rollout in
-`GOOGLE_GROUP_SYNC_MIGRATION.md`. Until the checklist there is complete, keep the Apps Script
+`archive/GOOGLE_GROUP_SYNC_MIGRATION.md`. This is historical; current onboarding does not use either path. The original instruction was to keep the Apps Script
 fallback active.
 
 The Admin Console **Group** column is also the manual verification queue. The table header

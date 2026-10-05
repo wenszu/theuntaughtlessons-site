@@ -3,20 +3,21 @@ Last updated: 2026-06-02
 
 > **PARTIALLY ARCHIVED (2026-08-11):** Every "Member Diagnostic / Checkpoint" section below (Sort & Bucket, Spot the Problem, Speak Concisely, Act Confidently) documents the retired v1 assessment — fully removed, it was never finished and saw no real production use. The live assessment is now `apps/tsa-diagnostic/index.html` (a single unified Think/Speak/Act flow, member-facing names unchanged), which uses different content and scoring entirely. Kept here as historical reference only. The **"Public Find your level"** sections (using `data/sort-bucket.json` at the repo root) are unrelated and still current/live — not affected by this archival.
 
-This file documents the current assessment content, answer keys, and scoring methodology used by The Untaught Lessons website. It is intended as a shareable reference for collaborators reviewing the assessment design.
+This file combines current public Find your level/grocery material with an explicitly historical record of the removed v1 member assessment. It is not the source of truth for the live unified Diagnostic/Checkpoint; use `apps/tsa-diagnostic/index.html` and its tests for that implementation.
 
-Source files used:
+Current source files:
 - `data/sort-bucket.json` - public Find your level sort-and-bucket assessment
-- `data/tsa/sort-bucket.json` - member diagnostic/checkpoint sort-and-bucket assessment
-- `data/tsa/spot-the-problem.json` - member spot-the-problem assessment
-- `data/tsa/speak-concisely.json` - member speak-concisely assessment prompts
-- `data/tsa/act-confidently.json` - placeholder assessment
 - `data/practice/grocery-list.json` - Phase 1 grocery list practice exercise
-- `apps/tsa-sort-bucket/index.html`, `apps/tsa-spot-the-problem/index.html`, and `apps/tsa-speak/index.html` - scoring logic
+- `apps/find-your-level/index.html` - public assessment behavior
+- `apps/grocery-list/index.html` - grocery practice behavior
+- `apps/tsa-diagnostic/index.html` - live unified member Diagnostic/Checkpoint behavior and scoring
+
+Paths named later under “Member Diagnostic / Checkpoint” were removed in commit `ffc72dd`; they are historical labels/content, not live dependencies.
 
 ## Assessment Inventory
 - Public Find your level: Sort & Bucket using `data/sort-bucket.json`.
-- Member Diagnostic / Checkpoint: Sort & Bucket, Spot the problem, Speak concisely, and the Act confidently placeholder.
+- Historical v1 Member Diagnostic / Checkpoint: Sort & Bucket, Spot the problem, Speak concisely, and the Act confidently placeholder (removed).
+- Live Member Diagnostic / Checkpoint: unified Think/Speak/Act flow in `apps/tsa-diagnostic/index.html`.
 - Phase 1 practice: Grocery list sorting exercise. This is a practice exercise, not a scored assessment.
 
 ## Scoring Methodology

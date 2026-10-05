@@ -1,4 +1,6 @@
-# Google Group Sync Migration
+# Archived: Google Group sync migration
+
+Archived on 2026-10-04 because Google Group automation is no longer part of member onboarding, the worker is undeployed, and current access does not depend on it.
 
 Status: Phase 1 scaffold implemented locally. Deployment/configuration not complete.
 

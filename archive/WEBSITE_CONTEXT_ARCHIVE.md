@@ -8,7 +8,129 @@ Extended on 2026-07-30: moved entries from 2026-05-27 through 2026-07-22 here. `
 
 Extended on 2026-09-13: moved entries from 2026-07-29 through 2026-08-11 here (had been sitting well past the 3-day window).
 
+Extended on 2026-09-25: moved entries from 2026-09-11 through 2026-09-17 here (had been sitting well past the 3-day window; the working session between 2026-09-17 and 2026-09-25 ran long without an archive pass).
+
+Extended on 2026-10-01: moved entries from 2026-09-23 through 2026-09-28 here (had been sitting well past the 3-day window).
+
+Extended on 2026-10-04: moved the 2026-10-01 readiness-assessment summary here to keep the active change log to the last three days. Full implementation detail remains in `BUILD_STATUS.md` and `README-assessment.md`.
+
+## Change log (2026-10-01)
+
+### 2026-10-01 — Readiness assessment full-report PDF/web redesign and account work
+
+- Both Quick Check and Full Assessment completion paths were wired to the then-new readiness account callables; those callables remain undeployed as of the 2026-10-04 audit.
+- The PDF/report work added branded running headers, cover/closing pages, a grouped contents page, radar and score visuals, and participant/report metadata.
+- A confirmed Chromium print bug means named `@page` rules must not redeclare `margin` or `size`; full-bleed pages use negative element margins instead. A separate screenshot-generation issue required a transparent CDP background override.
+- Three unresolved interpretation issues were recorded: the 10-facet/6-scored-facet wording, growth-area selection scope, and strength comparisons across scored versus style facets.
+
 ---
+
+## Change Log (2026-09-23 through 2026-09-28)
+
+### 2026-09-28 — Readiness assessment forms locked, attempt order shuffled, and admin version review added
+
+- The readiness assessment now has one locked source of truth in `apps/readiness-assessment/forms.js`: `readiness-free@1.0.0` contains the fixed 20-item Mini-IPIP check and `readiness-full@1.0.0` contains the fixed 40-item full report. The form definitions store stable item IDs, text, area/facet, scoring direction, and order-in-form. Scoring must continue to use item ID and answer value rather than the displayed sequence.
+- Starting an assessment creates and stores an attempt-specific `itemOrder` array. A new attempt receives a new shuffled order; resuming a saved attempt reuses its original order. Free and full attempts are independent, so upgrading to the full report starts a separate 40-item order rather than extending the free attempt.
+- Attempts and results now both record the exact `formVersion` used. The readiness admin person view shows that version beside each attempt's date and score so an older result can be tied back to the form that produced it.
+- The embedded Readiness Assessment Questions screen now separates Free check and Full report versions. Its version table shows version, status, item count, publication date, and attempt count. Selecting an older version opens it read-only. The selected version can be downloaded as spreadsheet-compatible CSV.
+- CSV upload uses the existing item columns (`ID`, text, area or facet, scoring direction, and order-in-form), validates the required item count and unique IDs, creates a draft, shows a diff against the live version, suggests a version bump, and requires an explicit publish action. Publishing retires the previous live version in the prototype state.
+- The assessment page no longer hardcodes `20 of 20 answered`; counts derive from the active locked form. `README-assessment.md` documents the form/version rules and the current operating boundary.
+- Added `tests/readiness-assessment-forms.test.js`. Verification passed on 2026-09-28: `node tests/readiness-assessment-forms.test.js`, `node tests/readiness-assessment-preview.test.js`, `node tests/live-assessment-journey.test.js`, `node --check apps/readiness-assessment/forms.js`, and `git diff --check`.
+- **Important current limitation (as of 2026-09-28):** this remained the Phase 0 browser prototype at that point. Uploaded drafts, newly published versions, and their derived attempt counts were held in browser/session state and reset after reload. Superseded 2026-09-30/10-01 — see `BUILD_STATUS.md` and `WEBSITE_CONTEXT.md`'s current Change Log for the account-creation and full-report-redesign work built since.
+- These readiness files were part of a dirty working tree that also contained unrelated pre-existing work as of 2026-09-28. Review the readiness-specific diff before committing.
+
+### 2026-09-23 — Vimeo fullscreen fallback, and a spam guard on the public contact endpoint
+
+- The Vimeo player's own fullscreen button can fail silently in some environments (locked-down corporate browser policies, some in-app webviews): it appears to expand, then immediately reverts, while playback keeps playing inline. Every video embed (`member-login/content-config.js`) now also has a same-origin "expand" button that requests fullscreen on the page's own container first, falling back to a CSS viewport-covering overlay when the Fullscreen API is unavailable or refused. Not a Vimeo player change — it sits alongside Vimeo's own controls.
+- The public waitlist/contact Apps Script endpoint is visible in every page's source, so it is a routine bot target hit directly with arbitrary JSON, bypassing real form validation — the cause of contact emails with a real page URL but blank name/role/message. `scripts/apps-script-email-actions.gs` (a reference file the user pastes into the live Apps Script by hand — Claude cannot edit that script directly) documents a `shouldRejectContactSubmission_()` guard for the generic contact-form logging branch only; it must not gate `WelcomeEmail`, `TestEmailTemplate`, `RemovedMember`, or the Google Group actions, which are legitimate server-to-server calls. Confirmed applied to the live script by the user.
+- Commits: `85b7dbf`, `b6dba06`.
+
+### 2026-09-23 through 2026-09-25 — Organization console phase 3: draft rosters, platform overview, program adoption, scheduled reports
+
+Built the three items the Sep 17 handoff queued up next (`docs/ORGANIZATION_CONSOLE_FOUNDATION.md`'s "Later phases" 3–5), then fixed several real bugs surfaced while building and testing them — including one that had silently broken organization↔cohort attribution since the feature's original Sep 17 build. Full detail, data shapes, and design rationale: `docs/ORGANIZATION_CONSOLE_FOUNDATION.md`'s "September 25, 2026 handoff" section. Summary:
+
+- **Draft roster submission**: an organization representative (Owner/Program manager/Cohort facilitator, not Report viewer) can propose a short list of learners for a cohort they already support, from their existing console (`member-login/organization.html`). Nothing is created on submission. A UTL admin reviews pending proposals in **Member Access → Organization access → Roster proposals**; approving hands off into the *existing* bulk-add wizard, pre-filled, for the same final per-row review every other bulk add already gets — deliberately not a new account-creation path.
+- **Platform overview**: a new nav item under Student Progress (now listed *after* Student Progress, not before — see the "learned the hard way" bugs below) showing learner/completion stats per organization plus an explicit "Individual / unassigned" row for cohorts not tied to any organization.
+- **Program adoption**: lives as the first tab inside **Student Progress → Engagement Insights**, not on Platform overview — moved there deliberately after review, since it answers a different kind of question ("how is the whole program doing") than Platform overview's per-organization operational breakdown. Grouped as a funnel (Reach → Engagement volume → Outcomes: total learners, organizations, lessons watched, exercises completed, averages per learner, started/graduated/finish rate), using the same glossary-card pattern (`EI_METRICS` + `eiMetricCard`) every other Engagement Insights metric already uses, plus a "Copy summary" button for pasting headline numbers elsewhere. Admin-only for now — no public-site exposure.
+- **Scheduled weekly reports**: `exports.sendWeeklyOrganizationReports`, a new `onSchedule` Cloud Function (the first scheduled function in this codebase), Tuesdays 8am Asia/Manila. Sends one combined, stats-only email per opted-in organization (no auto-generated narrative — the report's highlight/attention/action fields stay human-authored) to its contact email, with a `weekly_report_log` doc per org per ISO week as a send-idempotency guard. Opt-in is a new per-organization checkbox, off by default, in the org form. Needs one more manual step: paste the new `WeeklyOrgReport` dispatch line into the live Apps Script (documented in `scripts/apps-script-email-actions.gs`, same paste-by-hand pattern as the contact-form guard above) before any email can actually send.
+- **Real bug: organization↔cohort attribution never worked server-side.** `organizationDefinitions()` (`functions-admin/index.js`) read `settings/cohorts` expecting a nested `cohorts` field that has never existed — every actual writer (`setCohortDetails`/`getCohortDetails` in `assets/firebase.js`, cohort renaming) always stored cohort details as flat top-level fields directly on that document. The bug meant `mergeOrganizationDefinitions()` could never see any cohort's `organizationId`, so **every organization has always shown 0 cohorts/0 learners** in both the one-page Organization overview (shipped Sep 17–18) and the new Platform overview, regardless of what an admin assigned in Cohort Analytics. Fixed the read to match every writer's actual shape; added a regression test coupling the two.
+- **Real bug: a dialog opened from a different top-level tab than the one it lived in.** The Organization overview `<dialog>` lived inside the Organization access section (Member Access tab); Platform overview's "View" button (Student Progress tab) could open it while that section was `hidden` — a `<dialog>` cannot render inside a hidden ancestor, so it silently "opened" invisibly and stayed stuck open, making every *next* dialog-open throw (`showModal()` on an already-open dialog). Fixed by moving the dialog to a direct child of `<body>`, so it's never nested inside a tab section that can be hidden.
+- **Real bug, caused by the fix above: the dialog's Close buttons stopped working.** Their click listener was wired once via `querySelectorAll` at a point in the page's script *before* the (now relocated) dialog existed in the DOM — so it never found the buttons at all. Replaced with a single delegated listener on `document` for every `[data-sp-dialog-close]`, which works regardless of where its target dialog sits in the page.
+- **Real bug: "Edit organization" (inside the overview dialog) silently did nothing** when opened from a tab other than Member Access, for the same hidden-ancestor reason — the edit form filled in correctly but stayed invisible. `oaOrgEdit()` now switches to the Member Access tab itself before populating and scrolling to the form.
+- **Real bug: a same-origin `mbRequireFirebaseAdmin()` popup race could corrupt the whole page's admin session.** Firebase Auth's SDK cannot handle two concurrent `signInWithGooglePopup()` calls; the second corrupts the first's internal state (`INTERNAL ASSERTION FAILED: Pending promise was never set`), after which *every other* admin action on the page silently fails too. Several sections now auto-load on tab switch (Platform overview, Cohort Analytics), which made a real click racing an in-flight auto-load call newly likely. All callers now share one in-flight promise instead of racing.
+- Also fixed: a weekly-report-opt-in checkbox stretched full-width and its label shoved off-screen, from inheriting a global `input, select { width: 100% }` rule meant for text inputs.
+- **Deployment state as of 2026-09-25**: the static site (`admin/index.html`, `assets/firebase.js`, `member-login/organization.html`) was pushed to `main` and live via GitHub Pages (commits `5ecb9bc`, `e1972ba`). `functions-admin/index.js` had not been deployed at that point — check current deploy state before assuming this is still accurate.
+
+### 2026-09-24 — About page photo
+
+- Repointed `about.html`'s photo (`og:image`, JSON-LD, and the `<img>`) at a re-exported source file and resized it to match the previous file's footprint (1200×1200) so the swap didn't slow page load. The site never references a raw filename with spaces/parens directly (risks breaking some social-share link-preview crawlers reading `og:image`) — it always uses a sanitized copy, matching every other asset reference in this repo.
+
+### 2026-09-25 — Open investigation: a specific learner's Phase 2 exercise count not showing
+
+- Joaquin Jose Ilagan reported completing 2 Phase 2 exercises; Student Progress shows 0 for him. Likely the known `completed_exercises` ↔ `workspaceProgress.exercises` sync gap (see Known Notes) — Student Progress's per-learner detail already has a **"Repair exercise sync"** button for exactly this symptom. User confirmed she also sees 0, but it is **not yet confirmed** whether the repair button was tried against his record or what it reported. **Status unknown as of archiving (2026-10-01)** — if this is still live, check Student Progress directly rather than trusting this note's age.
+
+## Change Log (2026-09-11 through 2026-09-17)
+
+### 2026-09-11 — Public form delivery fix and MECE operational health monitoring
+
+- Public forms now queue cross-origin Apps Script submissions with `sendBeacon()` and a `no-cors` fallback. A queued request is not proof of processing; confirm important submissions in the `Contacts` sheet and notification inbox.
+- Operational health is split by use case: `Student Progress > Learner readiness` for people/support, `Preview & Health > Technical reliability` for runtime incidents, and `Preview & Health > Site health check` for configuration integrity.
+- Stability events are privacy-bounded and fail-safe. Deploy `firestore.rules` separately before relying on production incident data.
+- Implementation commit: `dcb0d51`. Detailed record: [archive above](#change-log-2026-07-29-through-2026-08-11).
+
+### 2026-09-11 (cont.) — Vimeo CSP fix, Firebase admin-loading cache, and Learner readiness filtering
+
+- Vimeo is allowed in the repository CSP, but `_headers` is not served by the current GitHub Pages/CDN setup. Enforcing those headers requires a Cloudflare Worker or a move to Cloudflare Pages.
+- Admin member/progress loading uses a shared 45-second cache with explicit refresh bypass. Learner readiness includes cohort/search/signal filters and recent technical incidents.
+
+### 2026-09-11 (cont. 2) — Local `.git` metadata deleted by an external tool; recovered from GitHub
+
+- Repository metadata and four tracked files were recovered from a verified fresh GitHub clone after an external tool deleted them. One unpushed commit record was lost, but its working-tree content was retained and recommitted.
+- If `git status` ever shows the entire home directory as untracked, stop without running a Git write command.
+
+### 2026-09-11 (cont. 3) — Site-wide load-speed pass: fonts, cache-busting automation, dead-code removal, images, offline indicator
+
+- Improved font loading, resized six live images, added Firebase-origin preconnects, removed confirmed dead admin code, and added the learner offline banner. Vimeo retains one adaptive 720p ceiling across devices.
+- Cache-busting is automated; never hand-edit `?v=` values. A risky full split of `member-login/content-config.js` was evaluated and deferred.
+
+### 2026-09-12 — Admin console navigation review and cleanup
+
+- Admin navigation now exposes MP rules, distinguishes runtime reliability from static site health, and merges phase unlocking into Member preview settings. Legacy local access and unconnected email nudges intentionally remain hidden from navigation.
+- Rewards is organized as Levels, Rules summary, MP rules, and Award preview.
+
+### 2026-09-15 — CustomGPT voice-practice guide
+
+- `i-have-bad-news` and `lets-switch-hats` share an opt-out voice-practice dialog that shows how to open the CustomGPT, find the highlighted blue ChatGPT voice control, allow microphone access, and practice aloud. Text remains an available fallback, and a small help link reopens the guide.
+- The external CustomGPT destination, completion keys, and MP award logic were not changed.
+
+### 2026-09-17 — Organization console Phase 1 foundation
+
+- Cohort Analytics now stores optional organization name/ID, lifecycle status, and end date inside the existing admin-only `settings/cohorts` record. Existing cohorts remain compatible and default to Active.
+- Active cohorts appear first. Archived cohorts are hidden from the working overview unless `Show archived` is selected; archiving does not delete learner data.
+- Organization roles are documented separately from UTL platform roles. No organization access, Firestore rule, or current role behavior changed in this pass. See `docs/ORGANIZATION_CONSOLE_FOUNDATION.md`.
+
+### 2026-09-17 (cont.) — Read only organization console
+
+- Added a separate, read only organization console at `/member-login/organization.html`. It uses a verified callable and returns only organization-scoped aggregate progress and a sanitized learner roster.
+- Current cohort mappings are `TSA-03-ALI-01` → AyalaLand (`ali`) and `TSA-01-ADMU-01` / `TSA-02-ADMU-02` → Ateneo de Manila University (`admu`). Existing cohort records are not migrated; Admin displays these values as inferred defaults until explicitly saved.
+- `beta-user`, `No cohort`, blank cohorts, and other unassigned learners remain individual enrollments and are excluded from organization consoles.
+- Client access requires an explicit active `organizations/{organizationId}/members/{uid}` membership. Organization roles do not grant UTL Admin Console access, and client users cannot read raw learner collections.
+
+### Organization access administration (as of 2026-09-17)
+
+The UTL admin console has an Organization access section under Members & Access. Only an existing UTL owner or admin can grant, edit, suspend, or reactivate organization representative access. A representative must have signed in once before a grant can be saved. Grants are scoped to an organization and cohorts, keep UTL platform roles separate from organization roles, and write an access audit record. The preview explicitly excludes exercise answers, private learner goals, account settings, and UTL administration.
+
+Approved representatives now see a conditional Organization Console entry in the workspace profile menu. The lightweight access check returns only their organization name, organization role, and permitted cohort count; learner data is loaded only after they open the console. Ordinary learners and individual enrollments do not see the entry.
+
+### 2026-09-17 (cont. 2) — Organization access entry and Claude handoff
+
+- Added `getMyOrganizationAccess`, a verified callable that returns only the organization name, organization role, and permitted cohort count required for workspace navigation.
+- The workspace profile menu now exposes Organization Console only to active, explicitly granted organization memberships with at least one permitted cohort. It fails closed for ordinary learners and does not preload learner analytics.
+- Organization access administration, audit records, the read only console, Firestore isolation rules, and current ALI/ADMU mappings are implemented locally. Nothing from this organization-console pass has been pushed or deployed yet (superseded — see `docs/ORGANIZATION_CONSOLE_FOUNDATION.md` and `WEBSITE_CONTEXT.md`'s current Change Log for what shipped since).
+- Verification passed: JavaScript syntax checks, `git diff --check`, all 70 automated tests, and the Firebase Auth/Firestore Emulator behavior test covering same-organization access and cross-organization, signed-out, and client-write denials.
+- Safe rollout order: deploy reviewed Firestore rules, deploy the four organization callable exports, then push/deploy the static site. Validate with a UTL admin, an approved organization representative, and an ordinary learner.
+- Next recommended build (at the time): organization-scoped roster drafts with UTL approval, stopping at draft/submission/review with no account creation, invitations, or automatic member-access writes.
+- Full implementation and continuation notes: `docs/ORGANIZATION_CONSOLE_FOUNDATION.md`.
 
 ## Change Log (2026-07-29 through 2026-08-11)
 

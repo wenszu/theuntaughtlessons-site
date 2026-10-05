@@ -1,0 +1,622 @@
+<title>UTL readiness check</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lato:wght@400;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --bg:#FBF8F2; --surface:#FFFFFF; --sunk:#F3EDE2; --line:#E4DCCD;
+  --ink:#0F2236; --ink2:#4E5E70; --ink3:#7C8896;
+  --navy:#003366; --gold:#EEA320; --goldsoft:#FBEBC9;
+  --primary:#003366; --on-primary:#FBF8F2;
+  --good:#2E7D55; --goodsoft:#E3F2E9; --warn:#A8620A; --warnsoft:#FCEFD8; --bad:#B03A2E; --badsoft:#F8E3E0;
+  --shadow:0 1px 2px rgba(0,51,102,.06),0 4px 16px rgba(0,51,102,.06);
+  --serif:'Playfair Display',Georgia,'Times New Roman',serif;
+  --sans:'Lato','Helvetica Neue',Arial,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#0A1726; --surface:#11233A; --sunk:#0D1D31; --line:#223A57;
+    --ink:#F3EDE2; --ink2:#B8C3D0; --ink3:#8595A8;
+    --navy:#9CC0E6; --gold:#F2B33D; --goldsoft:#3A2E14;
+    --primary:#F2B33D; --on-primary:#0A1726;
+    --good:#6CC596; --goodsoft:#16352A; --warn:#F2B33D; --warnsoft:#3A2E14; --bad:#F08B7F; --badsoft:#3D1F1C;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 4px 16px rgba(0,0,0,.25);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0A1726; --surface:#11233A; --sunk:#0D1D31; --line:#223A57;
+  --ink:#F3EDE2; --ink2:#B8C3D0; --ink3:#8595A8;
+  --navy:#9CC0E6; --gold:#F2B33D; --goldsoft:#3A2E14;
+  --primary:#F2B33D; --on-primary:#0A1726;
+  --good:#6CC596; --goodsoft:#16352A; --warn:#F2B33D; --warnsoft:#3A2E14; --bad:#F08B7F; --badsoft:#3D1F1C;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 4px 16px rgba(0,0,0,.25);
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.55;margin:0}
+h1,h2,h3{font-family:var(--serif);font-weight:600;text-wrap:balance;margin:0;color:var(--ink)}
+p{margin:0}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.mono{font-family:var(--mono);font-size:12.5px}
+.num{font-variant-numeric:tabular-nums}
+.eyebrow{font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
+.muted{color:var(--ink2)}
+.small{font-size:13px}
+
+/* top bar */
+.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--surface);border-bottom:1px solid var(--line)}
+.topbar-in{max-width:1180px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.brand{display:flex;align-items:baseline;gap:10px;margin-right:auto}
+.brand b{font-family:var(--serif);font-size:19px;color:var(--navy)}
+.brand span{font-size:12px;color:var(--ink3)}
+.tabs{display:flex;gap:4px;background:var(--sunk);padding:4px;border-radius:10px;overflow-x:auto;max-width:100%}
+.tab{border:0;background:transparent;padding:7px 14px;border-radius:7px;font-weight:700;font-size:14px;color:var(--ink2);white-space:nowrap}
+.tab[aria-selected="true"]{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;padding:3px 10px;border-radius:99px;background:var(--goldsoft);color:var(--warn);white-space:nowrap}
+.chip.good{background:var(--goodsoft);color:var(--good)}
+.chip.bad{background:var(--badsoft);color:var(--bad)}
+.chip.plain{background:var(--sunk);color:var(--ink2)}
+.chip.navy{background:var(--sunk);color:var(--navy)}
+
+.wrap{max-width:1180px;margin:0 auto;padding-inline:16px}
+.btn{border:1px solid var(--line);background:var(--surface);padding:9px 16px;border-radius:9px;font-weight:700;font-size:14px;display:inline-flex;align-items:center;gap:8px}
+.btn:hover{border-color:var(--ink3)}
+.btn.primary{background:var(--primary);color:var(--on-primary);border-color:var(--primary)}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.gold{background:var(--gold);color:#0F2236;border-color:var(--gold)}
+.btn.link{border:0;background:none;padding:4px 0;color:var(--navy);text-decoration:underline;text-underline-offset:3px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+
+/* participant */
+.test{padding-block:40px 64px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow)}
+.stage{max-width:720px;margin:0 auto}
+.landing{padding:48px 40px;display:flex;flex-direction:column;gap:20px}
+.landing h1{font-size:clamp(34px,6vw,54px);line-height:1.08;color:var(--navy)}
+.landing .lede{font-size:18px;color:var(--ink2);max-width:56ch}
+.facts{display:flex;flex-wrap:wrap;gap:8px 20px;font-size:14px;color:var(--ink2)}
+.facts span::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--gold);margin-right:8px;vertical-align:middle}
+.fineprint{font-size:13px;color:var(--ink3);border-top:1px solid var(--line);padding-top:16px;max-width:62ch}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.consent{padding:36px 40px;display:flex;flex-direction:column;gap:18px}
+.consent label{display:flex;gap:12px;align-items:flex-start}
+.consent input[type=checkbox]{width:20px;height:20px;margin-top:2px;accent-color:var(--navy);flex:none}
+.field{display:flex;flex-direction:column;gap:6px}
+.field input,.field select,.field textarea{border:1px solid var(--line);background:var(--bg);border-radius:9px;padding:10px 12px;width:100%}
+.qcard{padding:36px 40px 28px;display:flex;flex-direction:column;gap:26px}
+.progress{display:flex;flex-direction:column;gap:8px}
+.bar{height:6px;background:var(--sunk);border-radius:6px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--gold);border-radius:6px;transition:width .25s}
+.qtext{font-family:var(--serif);font-size:clamp(26px,4.5vw,36px);line-height:1.2;min-height:2.4em;color:var(--ink)}
+.scale{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.opt{border:1.5px solid var(--line);background:var(--bg);border-radius:12px;padding:14px 8px;display:flex;flex-direction:column;align-items:center;gap:6px;font-size:13px;color:var(--ink2);text-align:center;transition:border-color .15s,background .15s}
+.opt b{font-family:var(--serif);font-size:22px;color:var(--ink)}
+.opt:hover{border-color:var(--gold)}
+.opt[aria-pressed="true"]{border-color:var(--navy);background:var(--sunk);color:var(--ink)}
+.qfoot{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+
+.result{display:flex;flex-direction:column;gap:20px}
+.rhead{padding:36px 40px;display:grid;grid-template-columns:auto 1fr;gap:28px;align-items:center}
+.dial{width:148px;height:148px;position:relative}
+.dial svg{width:100%;height:100%;transform:rotate(-90deg)}
+.dial .val{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.dial .val b{font-family:var(--serif);font-size:46px;line-height:1;color:var(--navy)}
+.dial .val span{font-size:12px;color:var(--ink3)}
+.rhead h2{font-size:30px;color:var(--navy)}
+.profile{padding:28px 40px;display:flex;flex-direction:column;gap:12px;border-left:6px solid var(--gold)}
+.profile h3{font-size:28px}
+.pwords{font-weight:700;color:var(--ink2)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.two>div{background:var(--sunk);border-radius:12px;padding:16px}
+.two h4{margin:0 0 6px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink3)}
+.domains{padding:28px 40px;display:flex;flex-direction:column;gap:18px}
+.dom{display:grid;grid-template-columns:130px 1fr 42px;gap:14px;align-items:center}
+.dom .bar{height:10px}
+.dom .bar i{background:var(--navy)}
+.dom-text{grid-column:2/4;font-size:14px;color:var(--ink2);margin-top:-8px}
+.feedback{padding:28px 40px;display:flex;flex-direction:column;gap:14px}
+.stars{display:flex;gap:8px;flex-wrap:wrap}
+.stars button{border:1.5px solid var(--line);background:var(--bg);border-radius:9px;padding:8px 14px;font-weight:700}
+.stars button[aria-pressed="true"]{border-color:var(--navy);background:var(--navy);color:var(--bg)}
+.next{padding:28px 40px;background:var(--navy);color:#FBF8F2;border-color:var(--navy)}
+:root[data-theme="dark"] .next{background:var(--sunk);color:var(--ink)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .next{background:var(--sunk);color:var(--ink)}}
+.next h3{color:inherit;font-size:24px;margin-bottom:8px}
+.next p{opacity:.85;margin-bottom:16px;max-width:60ch}
+details.db{border:1px dashed var(--ink3);border-radius:12px;padding:14px 18px;background:var(--surface)}
+details.db summary{cursor:pointer;font-weight:700;color:var(--navy)}
+pre{background:var(--sunk);border-radius:10px;padding:14px;overflow-x:auto;font-family:var(--mono);font-size:12px;line-height:1.5;margin:10px 0 0;color:var(--ink)}
+
+/* admin */
+.admin{display:grid;grid-template-columns:210px 1fr;gap:24px;padding-block:28px 64px}
+.side{display:flex;flex-direction:column;gap:2px;position:sticky;top:76px;align-self:start}
+.side button{border:0;background:none;text-align:left;padding:9px 12px;border-radius:8px;font-weight:700;color:var(--ink2);display:flex;justify-content:space-between;align-items:center;gap:8px}
+.side button[aria-current="true"]{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+.side .who{font-size:12px;color:var(--ink3);padding:14px 12px 0;border-top:1px solid var(--line);margin-top:10px}
+.pane{display:flex;flex-direction:column;gap:20px;min-width:0}
+.phead{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap}
+.phead h2{font-size:30px}
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.tile{padding:18px;display:flex;flex-direction:column;gap:4px}
+.tile b{font-family:var(--serif);font-size:32px;line-height:1.1;color:var(--navy)}
+.tile span{font-size:13px;color:var(--ink2)}
+.panel{padding:22px}
+.panel h3{font-size:20px;margin-bottom:14px}
+.tablewrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{text-align:left;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);font-weight:700;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:10px;border-bottom:1px solid var(--line);vertical-align:middle}
+tr.click{cursor:pointer}
+tr.click:hover td{background:var(--sunk)}
+td input.edit{width:100%;min-width:220px;border:1px solid transparent;background:transparent;border-radius:7px;padding:6px 8px}
+td input.edit:hover{border-color:var(--line)}
+td input.edit:focus{border-color:var(--navy);background:var(--bg)}
+tr.changed td{background:var(--goldsoft)}
+tr.added td{background:var(--goodsoft)}
+tr.removed td{opacity:.5;text-decoration:line-through}
+.keybtn{border:1px solid var(--line);background:var(--bg);border-radius:6px;width:34px;height:30px;font-weight:700}
+.iconbtn{border:0;background:none;color:var(--ink3);font-size:13px;font-weight:700;padding:4px 6px;border-radius:6px}
+.iconbtn:hover{color:var(--bad);background:var(--badsoft)}
+.versionbar{display:flex;gap:14px;flex-wrap:wrap;align-items:center;padding:16px 20px}
+.versionbar .sep{width:1px;height:28px;background:var(--line)}
+.changes{display:flex;flex-direction:column;gap:8px;margin:0;padding:0;list-style:none}
+.changes li{display:flex;gap:10px;align-items:baseline;font-size:14px}
+.inline-confirm{display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:var(--sunk);border-radius:10px;padding:12px 14px}
+.settings{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+.settings .field input{background:var(--bg)}
+.filters{display:flex;gap:12px;flex-wrap:wrap}
+.filters select{border:1px solid var(--line);background:var(--surface);border-radius:9px;padding:8px 12px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.hbar{display:grid;grid-template-columns:140px 1fr 40px;gap:10px;align-items:center;font-size:14px;margin-bottom:8px}
+.hbar .bar{height:14px}
+.hbar .bar i{background:var(--navy)}
+.funnel .hbar .bar i{background:var(--gold)}
+svg text{fill:var(--ink3);font-family:var(--sans);font-size:11px}
+.timeline{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.timeline li{display:grid;grid-template-columns:130px 1fr;gap:12px;font-size:14px}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:10px;font-weight:700;box-shadow:var(--shadow);z-index:50}
+.note{font-size:13px;color:var(--ink2);background:var(--sunk);border-radius:10px;padding:12px 14px}
+
+/* build plan */
+.plan{padding-block:32px 64px;display:flex;flex-direction:column;gap:28px}
+.phases{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+.phase{padding:18px;display:flex;flex-direction:column;gap:8px}
+.phase h3{font-size:18px}
+.phase ul{margin:0;padding-left:18px;font-size:13.5px;color:var(--ink2)}
+.phase.now{border-color:var(--gold);box-shadow:0 0 0 2px var(--gold)}
+.model{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.lane{display:flex;flex-direction:column;gap:10px}
+.lane>h3{font-size:17px}
+.lane>p{font-size:13px;color:var(--ink2);min-height:3.2em}
+.entity{padding:12px 14px;border-radius:12px;background:var(--surface);border:1px solid var(--line)}
+.entity b{font-family:var(--mono);font-size:13px;color:var(--navy)}
+.entity p{font-size:12.5px;color:var(--ink2);margin-top:4px}
+.entity.lock{border-left:4px solid var(--navy)}
+.entity.flat{border-left:4px solid var(--gold)}
+.legend{display:flex;gap:18px;flex-wrap:wrap;font-size:13px;color:var(--ink2)}
+.legend i{display:inline-block;width:14px;height:14px;border-radius:3px;margin-right:6px;vertical-align:-2px}
+
+@media (max-width:900px){
+  .admin{grid-template-columns:1fr}
+  .side{position:static;flex-direction:row;overflow-x:auto;gap:4px}
+  .side .who{display:none}
+  .side button{white-space:nowrap}
+  .tiles{grid-template-columns:repeat(2,1fr)}
+  .grid2{grid-template-columns:1fr}
+  .phases{grid-template-columns:1fr 1fr}
+  .model{grid-template-columns:1fr 1fr}
+}
+@media (max-width:560px){
+  .landing,.consent,.qcard,.profile,.domains,.feedback,.next,.rhead{padding:24px 20px}
+  .rhead{grid-template-columns:1fr;justify-items:start}
+  .scale{grid-template-columns:1fr;gap:6px}
+  .opt{flex-direction:row;justify-content:flex-start;gap:14px;padding:12px 14px;text-align:left}
+  .two{grid-template-columns:1fr}
+  .dom{grid-template-columns:100px 1fr 36px}
+  .dom-text{grid-column:1/4}
+  .phases,.model{grid-template-columns:1fr}
+  .hbar{grid-template-columns:110px 1fr 34px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<header class="topbar">
+  <div class="topbar-in">
+    <div class="brand"><b>The Untaught Lessons</b><span>Readiness check · prototype</span></div>
+    <div class="tabs" role="tablist">
+      <button class="tab" role="tab" id="tab-test" aria-selected="true" data-view="test">Take the test</button>
+      <button class="tab" role="tab" id="tab-admin" aria-selected="false" data-view="admin">Admin</button>
+      <button class="tab" role="tab" id="tab-plan" aria-selected="false" data-view="plan">Build plan</button>
+    </div>
+    <span class="chip">Sample data only</span>
+  </div>
+</header>
+
+<main>
+<!-- PARTICIPANT -->
+<section id="view-test" class="wrap test">
+  <div class="stage">
+    <div id="t-landing" class="card landing">
+      <p class="eyebrow">Free readiness check</p>
+      <h1>Are you ready to be an executive?</h1>
+      <p class="lede">Twenty quick statements about how you work. You get your readiness score, your profile and what to work on next, right away.</p>
+      <div class="facts"><span>20 questions</span><span>About 4 minutes</span><span>Results on screen instantly</span></div>
+      <div class="row">
+        <button class="btn primary" id="startBtn">Start the check</button>
+        <button class="btn link" id="sampleBtn">Skip ahead with sample answers</button>
+      </div>
+      <p class="fineprint">Built on the IPIP Big Five items used in published personality research. This is a tool to help you grow. It is not a hiring or screening test.</p>
+    </div>
+
+    <form id="t-consent" class="card consent" hidden>
+      <p class="eyebrow">Before you start</p>
+      <h2>How we use your answers</h2>
+      <p class="muted">We store your answers and results so we can show them to you and improve the questions over time. We never sell your data. You can ask us to delete it at any time.</p>
+      <div class="field"><label for="nameIn">First name, for your result page (optional)</label><input id="nameIn" autocomplete="given-name" placeholder="e.g. Andrea"></div>
+      <label for="consentIn"><input type="checkbox" id="consentIn"> <span>I agree to the <u>privacy notice</u> (version 1.0) and understand this is a tool for my own growth.</span></label>
+      <div class="row"><button class="btn primary" id="consentBtn" type="submit" disabled>Begin</button><button class="btn link" type="button" id="consentBack">Back</button></div>
+    </form>
+
+    <div id="t-q" class="card qcard" hidden>
+      <div class="progress">
+        <div class="row" style="justify-content:space-between"><span class="small muted num" id="qCount">Question 1 of 20</span><span class="small muted">How well does this describe you?</span></div>
+        <div class="bar"><i id="qBar" style="width:0%"></i></div>
+      </div>
+      <p class="qtext" id="qText" aria-live="polite"></p>
+      <div class="scale" id="scale"></div>
+      <div class="qfoot">
+        <button class="btn" id="prevBtn">Back</button>
+        <span class="small muted">Tip: press 1 to 5 on your keyboard</span>
+      </div>
+    </div>
+
+    <div id="t-result" class="result" hidden></div>
+  </div>
+</section>
+
+<!-- ADMIN -->
+<section id="view-admin" class="wrap admin" hidden>
+  <nav class="side" aria-label="Admin sections">
+    <button data-pane="overview" aria-current="true">Overview</button>
+    <button data-pane="questions">Questions <span class="chip" id="draftChip" hidden>Draft</span></button>
+    <button data-pane="cohorts">Teams and invites</button>
+    <button data-pane="people">People</button>
+    <button data-pane="insights">Insights</button>
+    <button data-pane="activity">Change log</button>
+    <p class="who">Signed in as Wen-Szu · Admin</p>
+  </nav>
+  <div id="panes"></div>
+</section>
+
+<!-- BUILD PLAN -->
+<section id="view-plan" class="wrap plan" hidden></section>
+</main>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+const DATA = {"items": [{"t": "Am the life of the party.", "d": "Extraversion", "k": "+", "a": 3}, {"t": "Sympathize with others' feelings.", "d": "Agreeableness", "k": "+", "a": 4}, {"t": "Get chores done right away.", "d": "Conscientiousness", "k": "+", "a": 4}, {"t": "Have frequent mood swings.", "d": "Neuroticism", "k": "+", "a": 2}, {"t": "Have a vivid imagination.", "d": "Intellect", "k": "+", "a": 4}, {"t": "Don't talk a lot.", "d": "Extraversion", "k": "-", "a": 3}, {"t": "Am not interested in other people's problems.", "d": "Agreeableness", "k": "-", "a": 2}, {"t": "Often forget to put things back in their proper place.", "d": "Conscientiousness", "k": "-", "a": 2}, {"t": "Am relaxed most of the time.", "d": "Neuroticism", "k": "-", "a": 4}, {"t": "Am not interested in abstract ideas.", "d": "Intellect", "k": "-", "a": 2}, {"t": "Talk to a lot of different people at parties.", "d": "Extraversion", "k": "+", "a": 3}, {"t": "Feel others' emotions.", "d": "Agreeableness", "k": "+", "a": 3}, {"t": "Like order.", "d": "Conscientiousness", "k": "+", "a": 5}, {"t": "Get upset easily.", "d": "Neuroticism", "k": "+", "a": 2}, {"t": "Have difficulty understanding abstract ideas.", "d": "Intellect", "k": "-", "a": 1}, {"t": "Keep in the background.", "d": "Extraversion", "k": "-", "a": 3}, {"t": "Am not really interested in others.", "d": "Agreeableness", "k": "-", "a": 1}, {"t": "Make a mess of things.", "d": "Conscientiousness", "k": "-", "a": 2}, {"t": "Seldom feel blue.", "d": "Neuroticism", "k": "-", "a": 4}, {"t": "Do not have a good imagination.", "d": "Intellect", "k": "-", "a": 2}], "domains": [["Extraversion", "Social energy", false], ["Agreeableness", "Warmth", false], ["Conscientiousness", "Follow-through", false], ["Neuroticism", "Steadiness", true], ["Intellect", "Curiosity", false]], "dtext": {"Social energy|Low": "You recharge on your own and tend to speak once you have something worth saying. In a busy meeting you may be the one who listens longest.", "Social energy|Mid": "You can work a room when you need to and still enjoy time alone. Which way you lean depends on the day and the people.", "Social energy|High": "You get energy from people. You are often the first to start a conversation and people notice when you are not there.", "Warmth|Low": "You say what you think even when it is not what people want to hear. Others may read you as tough before they read you as fair.", "Warmth|Mid": "You care about how people feel and you can still hold a hard line when it matters.", "Warmth|High": "You notice how people are feeling and you often act on it. Colleagues likely come to you when something is not going well.", "Follow-through|Low": "You work best with room to move and may start more than you finish. Clear deadlines and simple systems tend to help you most.", "Follow-through|Mid": "You get the important things done and let smaller details slide when time is short.", "Follow-through|High": "You finish what you start and people can plan around you. Loose ends bother you more than they bother most people.", "Steadiness|Low": "Pressure reaches you quickly and a bad moment can stay with you for a while. Knowing this helps you plan recovery time into hard weeks.", "Steadiness|Mid": "Most days you stay level. The really hard weeks still get to you, like they do for most people.", "Steadiness|High": "You stay calm when things get loud. The people around you often borrow some of that calm without realizing it.", "Curiosity|Low": "You prefer ideas you can use tomorrow over theory. You judge an idea by whether it works in practice.", "Curiosity|Mid": "You enjoy a good idea when it connects to something real and lose interest when it drifts too far from practice.", "Curiosity|High": "You enjoy complex problems and new ideas for their own sake. You may be the one still asking why after everyone else has moved on."}, "bands": [["Emerging", 0, "Several of the habits that carry people into bigger roles are still forming for you. The facet report shows which ones to start with."], ["Developing", 40, "You have a working base and a few clear gaps. Closing one or two of them would move your score the most."], ["Strong", 60, "Most of the habits that matter are already in place. The next gains come from sharpening one or two specific areas."], ["Exceptional", 80, "Your answers show the habits of someone ready for a bigger role today. The question now is where to point them."]], "profiles": [["Reserved", "Achievement-driven", "Quiet achiever", "Focused, self-driven, reliable", "You put in the work before anyone asks. People know you by what you finish, not by how much you talk about it.", "Work that needs finishing without anyone checking in. Your track record speaks before you do."], ["Reserved", "Connection-driven", "Steady supporter", "Calm, dependable, loyal", "People lean on you when things get hard. You do not need the spotlight to make a team work better.", "Tense moments and teams under strain. People calm down when you are in the room."], ["Balanced", "Achievement-driven", "Go-getter", "Driven, practical, adaptable", "You push hard for results and still read the room well enough to know when to ease off.", "Goals that need both push and judgment. You know when to press and when to wait."], ["Balanced", "Connection-driven", "Team player", "Cooperative, fair, easy to work with", "You keep a group working together. You often notice what two people missed about each other.", "Work across teams where people talk past each other."], ["Vocal", "Achievement-driven", "Natural leader", "Decisive, confident, ambitious", "You go first and set the pace. Other people often take their cue from you.", "New projects and moments that need someone to go first."], ["Vocal", "Connection-driven", "People person", "Outgoing, warm, encouraging", "You bring energy into a room and get people talking to each other, not only to you.", "Rallying people around a change or a new direction."]], "facets": {"Achievement-Striving": ["Readiness", 0.78, [["Go straight for the goal.", "+", 5], ["Work hard.", "+", 4], ["Do just enough work to get by.", "-", 1], ["Put little time and effort into my work.", "-", 2]]], "Self-Discipline": ["Readiness", 0.85, [["Start tasks right away.", "+", 4], ["Carry out my plans.", "+", 4], ["Waste my time.", "-", 3], ["Need a push to get started.", "-", 3]]], "Orderliness": ["Readiness", 0.82, [["Like to tidy up.", "+", 4], ["Do things according to a plan.", "+", 4], ["Leave my belongings around.", "-", 2], ["Am not bothered by disorder.", "-", 2]]], "Intellect": ["Readiness", 0.86, [["Like to solve complex problems.", "+", 5], ["Can handle a lot of information.", "+", 4], ["Avoid philosophical discussions.", "-", 2], ["Am not interested in theoretical discussions.", "-", 2]]], "Anxiety": ["Readiness, read inversely", 0.83, [["Worry about things.", "+", 3], ["Get stressed out easily.", "+", 3], ["Am not easily bothered by things.", "-", 3], ["Am not easily disturbed by events.", "-", 3]]], "Self-Consciousness": ["Readiness, read inversely", 0.8, [["Am easily intimidated.", "+", 2], ["Find it difficult to approach others.", "+", 3], ["Am comfortable in unfamiliar situations.", "-", 4], ["Am able to stand up for myself.", "-", 4]]], "Assertiveness": ["Style, the Voice axis", 0.84, [["Take charge.", "+", 4], ["Try to lead others.", "+", 4], ["Wait for others to lead the way.", "-", 2], ["Hold back my opinions.", "-", 2]]], "Activity Level": ["Style", 0.71, [["Am always busy.", "+", 5], ["Can manage many things at the same time.", "+", 4], ["Like to take it easy.", "-", 2], ["Like a leisurely lifestyle.", "-", 2]]], "Cooperation": ["Style", 0.73, [["Am easy to satisfy.", "+", 3], ["Hate to seem pushy.", "+", 3], ["Love a good fight.", "-", 3], ["Get back at others.", "-", 2]]], "Altruism": ["Style, the Drive axis", 0.77, [["Love to help others.", "+", 4], ["Anticipate the needs of others.", "+", 3], ["Am indifferent to the feelings of others.", "-", 2], ["Take no time for others.", "-", 2]]]}};
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function toast(msg){const t=$('#toast');t.textContent=msg;t.hidden=false;clearTimeout(toast.h);toast.h=setTimeout(()=>t.hidden=true,2600)}
+
+/* ---------- content and scoring (same rules as the mockup spreadsheet) ---------- */
+const CODE={Extraversion:'e',Agreeableness:'a',Conscientiousness:'c',Neuroticism:'n',Intellect:'i'};
+const LABEL={Extraversion:'Social energy',Agreeableness:'Warmth',Conscientiousness:'Follow-through',Neuroticism:'Steadiness',Intellect:'Curiosity'};
+const cnt={};
+const ITEMS=DATA.items.map(it=>{cnt[it.d]=(cnt[it.d]||0)+1;return {id:`mini_${CODE[it.d]}${cnt[it.d]}`,text:it.t,domain:it.d,key:it.k,sample:it.a}});
+let SETTINGS={levelLow:40,levelHigh:60,voiceLow:40,voiceHigh:60,closeGap:10};
+const SCALE=['Very inaccurate','Moderately inaccurate','Neither','Moderately accurate','Very accurate'];
+const show = t => 'I ' + t.charAt(0).toLowerCase() + t.slice(1);
+
+function score(answers, items=ITEMS, S=SETTINGS){
+  const sums={},n={};
+  items.forEach(it=>{const a=answers[it.id]; if(a==null)return; const v=it.key==='+'?a:6-a; sums[it.domain]=(sums[it.domain]||0)+v; n[it.domain]=(n[it.domain]||0)+1});
+  const raw={}; Object.keys(sums).forEach(d=>raw[d]=(sums[d]/n[d]-1)/4*100);
+  const shown={Extraversion:raw.Extraversion,Agreeableness:raw.Agreeableness,Conscientiousness:raw.Conscientiousness,Neuroticism:100-raw.Neuroticism,Intellect:raw.Intellect};
+  const readiness=Math.round((shown.Conscientiousness+shown.Neuroticism+shown.Intellect)/3);
+  const band=[...DATA.bands].reverse().find(b=>readiness>=b[1]);
+  const v=shown.Extraversion; const voice=v<S.voiceLow?'Reserved':v>S.voiceHigh?'Vocal':'Balanced';
+  const ach=shown.Conscientiousness, con=shown.Agreeableness;
+  const drive=ach>=con?'Achievement-driven':'Connection-driven';
+  const close=Math.abs(ach-con)<S.closeGap;
+  const profile=DATA.profiles.find(p=>p[0]===voice&&p[1]===drive);
+  const level=x=>x<S.levelLow?'Low':x>S.levelHigh?'High':'Mid';
+  return {readiness,band:band[0],bandText:band[2],voice,drive,close,profile,shown,level};
+}
+
+/* ---------- participant flow ---------- */
+let answers={}, qi=0, pname='';
+const screens=['t-landing','t-consent','t-q','t-result'];
+function go(id){screens.forEach(s=>$('#'+s).hidden=s!==id);window.scrollTo({top:0})}
+$('#startBtn').onclick=()=>go('t-consent');
+$('#consentBack').onclick=()=>go('t-landing');
+$('#consentIn').onchange=e=>$('#consentBtn').disabled=!e.target.checked;
+$('#t-consent').addEventListener('submit',e=>{e.preventDefault();pname=$('#nameIn').value.trim();answers={};qi=0;renderQ();go('t-q')});
+$('#sampleBtn').onclick=()=>{pname='Andrea';answers={};ITEMS.forEach(it=>answers[it.id]=it.sample);renderResult();go('t-result')};
+$('#scale').innerHTML=SCALE.map((l,i)=>`<button class="opt" data-v="${i+1}" aria-pressed="false"><b>${i+1}</b>${l}</button>`).join('');
+$('#scale').addEventListener('click',e=>{const b=e.target.closest('.opt');if(b)answer(+b.dataset.v)});
+$('#prevBtn').onclick=()=>{if(qi>0){qi--;renderQ()}else go('t-consent')};
+document.addEventListener('keydown',e=>{if($('#t-q').hidden||$('#view-test').hidden)return;const k=+e.key;if(k>=1&&k<=5)answer(k)});
+function renderQ(){
+  const it=ITEMS[qi];
+  $('#qCount').textContent=`Question ${qi+1} of ${ITEMS.length}`;
+  $('#qBar').style.width=(qi/ITEMS.length*100)+'%';
+  $('#qText').textContent=show(it.text);
+  document.querySelectorAll('.opt').forEach(b=>b.setAttribute('aria-pressed',answers[it.id]==b.dataset.v?'true':'false'));
+}
+function answer(v){
+  answers[ITEMS[qi].id]=v;
+  document.querySelectorAll('.opt').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v==v?'true':'false'));
+  setTimeout(()=>{if(qi<ITEMS.length-1){qi++;renderQ()}else{renderResult();go('t-result')}},180);
+}
+function dial(val){const r=62,c=2*Math.PI*r;return `<div class="dial"><svg viewBox="0 0 148 148"><circle cx="74" cy="74" r="${r}" fill="none" stroke="var(--sunk)" stroke-width="12"/><circle cx="74" cy="74" r="${r}" fill="none" stroke="var(--gold)" stroke-width="12" stroke-linecap="round" stroke-dasharray="${c*val/100} ${c}"/></svg><div class="val"><b class="num">${val}</b><span>out of 100</span></div></div>`}
+function rid(){return Math.random().toString(36).slice(2,10)}
+function renderResult(){
+  const s=score(answers), p=s.profile, now=new Date().toISOString();
+  const aid='att_'+rid(), resid='res_'+rid();
+  const order=['Conscientiousness','Neuroticism','Intellect','Extraversion','Agreeableness'];
+  const doms=order.map(d=>{const val=Math.round(s.shown[d]);const txt=DATA.dtext[LABEL[d]+'|'+s.level(val)]||'';return `<div class="dom"><b>${LABEL[d]}</b><div class="bar"><i style="width:${val}%"></i></div><span class="num">${val}</span><p class="dom-text">${esc(txt)}</p></div>`}).join('');
+  const record={
+    attempt:{id:aid,participantId:'anon_'+rid(),cohortId:null,tier:'free',track:'employee',formVersion:'readiness-free@1.0.0',contentHash:'sha256:9f2c…e41a',status:'scored',answers:Object.fromEntries(Object.entries(answers).slice(0,4)),'…':`${Object.keys(answers).length} answers in total`,submittedAt:now},
+    result:{id:resid,attemptId:aid,isCurrent:true,scoringEngine:'1.0.0+git.4be21c7',readiness:s.readiness,band:s.band,profile:p[2],voice:s.voice,drive:s.drive,driveCloseCall:s.close},
+    delivery:{resultId:resid,channel:'screen',status:'shown',shownAt:now}
+  };
+  $('#t-result').innerHTML=`
+  <div class="card rhead">${dial(s.readiness)}<div style="display:flex;flex-direction:column;gap:8px"><p class="eyebrow">${pname?esc(pname)+', here is your result':'Your result'}</p><h2>${s.band} readiness</h2><p class="muted">${esc(s.bandText)}</p></div></div>
+  <div class="card profile"><p class="eyebrow">Your profile</p><h3>${esc(p[2])}</h3><p class="pwords">${esc(p[3])}</p><p>${esc(p[4])}</p>
+    <div class="two"><div><h4>Where you add the most</h4><p>${esc(p[5])}</p></div><div><h4>Voice and drive</h4><p>${s.voice} voice, ${s.drive.toLowerCase()}.${s.close?' Your drive result was close, so the full report matters more than usual for you.':''}</p></div></div></div>
+  <div class="card domains"><p class="eyebrow">Your five areas</p>${doms}</div>
+  <div class="card feedback" id="fb"><h3 style="font-size:22px">How accurate does this feel?</h3>
+    <div class="stars" id="stars">${[1,2,3,4,5].map(n=>`<button aria-pressed="false" data-n="${n}">${n}</button>`).join('')}<span class="small muted" style="align-self:center">1 = not me at all · 5 = spot on</span></div>
+    <div class="field"><label for="fbText">Which part felt off? (optional)</label><textarea id="fbText" rows="2"></textarea></div>
+    <div><button class="btn primary" id="fbSend">Send feedback</button></div></div>
+  <div class="card next"><h3>Want the full picture?</h3><p>The full report adds 40 questions and breaks your result into 10 facets. It names your top two strengths and your top two growth edges.</p><div class="row"><button class="btn gold">Get the full report</button><button class="btn" style="background:transparent;color:inherit;border-color:currentColor">Join the cohort waitlist</button></div></div>
+  <details class="db"><summary>For the team: what the database saved for this result</summary><pre>${esc(JSON.stringify(record,null,2))}</pre></details>
+  <div class="row"><button class="btn" id="again">Take it again</button></div>`;
+  $('#stars').onclick=e=>{const b=e.target.closest('button');if(!b)return;document.querySelectorAll('#stars button').forEach(x=>x.setAttribute('aria-pressed',x===b?'true':'false'))};
+  $('#fbSend').onclick=()=>{$('#fb').innerHTML='<h3 style="font-size:22px">Thank you</h3><p class="muted">Your feedback is saved with this result. It helps us improve the questions.</p>'};
+  $('#again').onclick=()=>go('t-landing');
+}
+
+/* ---------- sample admin data ---------- */
+function rng(seed){return()=>{seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const R=rng(7);
+const COHORTS=[
+  {id:'coh_tsa_alumni',name:'TSA alumni pilot',org:'The Untaught Lessons',version:'1.0.0',status:'Open',invited:40,ends:'31 Oct 2026'},
+  {id:'coh_harbor_ld',name:'Harbor Logistics team',org:'Harbor Logistics (sample)',version:'1.0.0',status:'Open',invited:18,ends:'15 Nov 2026'},
+  {id:'coh_friends',name:'Friends and family test',org:'The Untaught Lessons',version:'1.0.0',status:'Closed',invited:12,ends:'20 Sep 2026'},
+];
+const NAMES=['Andrea R.','Miguel S.','Bea L.','Paolo T.','Katrina D.','Joaquin M.','Pia C.','Rafael G.','Carmela V.','Nico B.','Isabel F.','Enzo P.','Trisha A.','Marco Y.','Liza N.','Gabriel O.','Denise K.','Jericho H.','Mika E.','Sofia J.','Luis Q.','Hannah W.','Carlo Z.','Ria U.','Tomas I.','Jasmine X.','Adrian L.','Clarisse M.','Dom P.','Ella S.','Franco T.','Gia R.'];
+const PEOPLE=NAMES.map((name,i)=>{
+  const coh=i<20?COHORTS[0]:i<28?COHORTS[1]:COHORTS[2];
+  const bias={Extraversion:R()*2-1,Agreeableness:R()*1.4-.4,Conscientiousness:R()*1.6-.3,Neuroticism:R()*1.6-.9,Intellect:R()*1.4-.3};
+  const mk=(shift=0)=>{const a={};ITEMS.forEach(it=>{let v=3+(it.key==='+'?1:-1)*(bias[it.domain]+shift*(it.domain==='Conscientiousness'||it.domain==='Neuroticism'?(it.domain==='Neuroticism'?-1:1):0))+(R()*1.6-.8);a[it.id]=Math.max(1,Math.min(5,Math.round(v)))});return a};
+  const finished=R()>0.12;
+  const attempts=[];
+  const day=1+Math.floor(R()*20);
+  if(finished){const a=mk();attempts.push({id:'att_'+(1000+i),date:`${day} Sep 2026`,version:'1.0.0',answers:a,res:score(a),shown:true,feedback:R()>0.35?Math.min(5,Math.max(2,Math.round(3.6+R()*1.8))):null,pdf:R()>0.5?'Emailed':'Not requested'})}
+  if(finished&&i%5===0){const a=mk(.35);attempts.push({id:'att_'+(2000+i),date:`${Math.min(26,day+6)} Sep 2026`,version:'1.0.0',answers:a,res:score(a),shown:R()>0.2,feedback:null,pdf:'Queued'})}
+  return {id:'p_'+(4100+i*7),name,cohort:coh,started:true,finished,attempts};
+});
+let LOG=[
+  {when:'26 Sep 2026 09:12',who:'Wen-Szu',what:'Published Free readiness check v1.0.0',detail:'First version. 20 Mini-IPIP items, cut points 40 / 60.'},
+  {when:'24 Sep 2026 16:40',who:'Wen-Szu',what:'Created team "Harbor Logistics team"',detail:'18 invites, ends 15 Nov 2026'},
+  {when:'20 Sep 2026 11:05',who:'Wen-Szu',what:'Closed team "Friends and family test"',detail:''},
+];
+
+/* ---------- admin state ---------- */
+let published={version:'1.0.0',items:ITEMS.map(x=>({...x})),settings:{...SETTINGS}};
+let draft=null; // created on first edit
+function ensureDraft(){if(!draft){draft={items:published.items.map(x=>({...x,status:'same',orig:x.text,origKey:x.key})),settings:{...published.settings}}}return draft}
+function diff(){
+  if(!draft)return {list:[],bump:null};
+  const list=[];let major=false,minor=false;
+  draft.items.forEach(it=>{
+    if(it.status==='added'){list.push(['Added',`${it.id} "${show(it.text)}" (${LABEL[it.domain]})`]);major=true}
+    else if(it.status==='removed'){list.push(['Removed',`${it.id} "${show(it.orig)}"`]);major=true}
+    else{if(it.text!==it.orig){list.push(['Reworded',`${it.id} → gets new ID ${it.id}_r2. "${show(it.text)}"`]);major=true}
+      if(it.key!==it.origKey){list.push(['Scoring flipped',`${it.id} now ${it.key==='+'?'forward':'reverse'} keyed`]);major=true}}
+  });
+  Object.keys(draft.settings).forEach(k=>{if(draft.settings[k]!==published.settings[k]){list.push(['Setting',`${SET_LABEL[k]}: ${published.settings[k]} → ${draft.settings[k]}`]);minor=true}});
+  const [M,m,p]=published.version.split('.').map(Number);
+  const bump=major?`${M+1}.0.0`:minor?`${M}.${m+1}.0`:null;
+  return {list,bump,type:major?'Major':minor?'Minor':null};
+}
+const SET_LABEL={levelLow:'Low below',levelHigh:'High above',voiceLow:'Reserved below',voiceHigh:'Vocal above',closeGap:'Drive close call gap'};
+
+let pane='overview', personOpen=null, insightCohort='all', confirmPublish=false;
+function setPane(p){pane=p;personOpen=null;confirmPublish=false;document.querySelectorAll('.side button').forEach(b=>b.setAttribute('aria-current',b.dataset.pane===p?'true':'false'));renderAdmin()}
+document.querySelector('.side').addEventListener('click',e=>{const b=e.target.closest('button[data-pane]');if(b)setPane(b.dataset.pane)});
+
+function hbars(rows,max,cls=''){return `<div class="${cls}">`+rows.map(([l,v,suffix=''])=>`<div class="hbar"><span>${esc(l)}</span><div class="bar"><i style="width:${max?v/max*100:0}%"></i></div><span class="num">${v}${suffix}</span></div>`).join('')+'</div>'}
+function allAttempts(filter='all'){return PEOPLE.filter(p=>filter==='all'||p.cohort.id===filter).flatMap(p=>p.attempts.map(a=>({...a,person:p})))}
+
+function renderAdmin(){
+  $('#draftChip').hidden=!(draft&&diff().list.length);
+  const el=$('#panes');
+  if(pane==='overview'){
+    const started=PEOPLE.length, fin=PEOPLE.filter(p=>p.finished).length, att=allAttempts(), shown=att.filter(a=>a.shown).length;
+    const fbs=att.filter(a=>a.feedback).map(a=>a.feedback), avg=(fbs.reduce((x,y)=>x+y,0)/fbs.length).toFixed(1);
+    el.innerHTML=`<div class="pane">
+      <div class="phead"><div><p class="eyebrow">Overview</p><h2>Readiness check at a glance</h2></div><span class="chip plain">Website access: invite only</span></div>
+      <div class="tiles">
+        <div class="card tile"><b class="num">${started}</b><span>People started</span></div>
+        <div class="card tile"><b class="num">${fin}</b><span>Finished (${Math.round(fin/started*100)}%)</span></div>
+        <div class="card tile"><b class="num">${shown}</b><span>Results shown</span></div>
+        <div class="card tile"><b class="num">${avg}</b><span>"Feels accurate" average, out of 5</span></div>
+      </div>
+      <div class="grid2">
+        <div class="card panel"><h3>Where people drop off</h3>${hbars([['Opened the page',46],['Agreed to privacy',41],['Started',started],['Answered 10+',30],['Finished',fin],['Saw result',shown]],46,'funnel')}</div>
+        <div class="card panel"><h3>Recent changes</h3><ul class="timeline">${LOG.slice(0,4).map(l=>`<li><span class="small muted">${l.when}</span><span>${esc(l.what)}</span></li>`).join('')}</ul></div>
+      </div>
+      <div class="card panel"><h3>Go public when you are ready</h3><p class="muted" style="margin-bottom:12px">Right now only people with a team invite link can take the check. Turning this on lets anyone on the website start it. No new code is needed.</p><label class="row" for="pubToggle"><input type="checkbox" id="pubToggle" style="width:20px;height:20px;accent-color:var(--navy)"> <b>Open the free check to everyone on the website</b></label></div>
+    </div>`;
+    $('#pubToggle').onchange=e=>toast(e.target.checked?'Free check is now open to everyone':'Free check is back to invite only');
+  }
+  if(pane==='questions') renderQuestions(el);
+  if(pane==='cohorts'){
+    el.innerHTML=`<div class="pane"><div class="phead"><div><p class="eyebrow">Teams and invites</p><h2>Private groups</h2></div><button class="btn primary" id="newCoh">New team</button></div>
+      <div id="newCohForm"></div>
+      <div class="card panel tablewrap"><table><thead><tr><th>Team</th><th>Version</th><th>Status</th><th class="num">Invited</th><th class="num">Started</th><th class="num">Finished</th><th>Ends</th><th></th></tr></thead><tbody>
+      ${COHORTS.map(c=>{const ps=PEOPLE.filter(p=>p.cohort.id===c.id);return `<tr><td><b>${esc(c.name)}</b><br><span class="small muted">${esc(c.org)}</span></td><td class="mono">v${c.version}</td><td><span class="chip ${c.status==='Open'?'good':'plain'}">${c.status}</span></td><td class="num">${c.invited}</td><td class="num">${ps.length}</td><td class="num">${ps.filter(p=>p.finished).length}</td><td class="small">${c.ends}</td><td><button class="btn" data-copy="${c.id}">Copy invite link</button></td></tr>`}).join('')}
+      </tbody></table></div>
+      <p class="note">Team leads see group totals by default. They only see a person's own result if that person says yes.</p></div>`;
+    el.querySelectorAll('[data-copy]').forEach(b=>b.onclick=()=>{const url=`https://theuntaughtlessons.com/check?invite=${b.dataset.copy}-${rid()}`;navigator.clipboard?.writeText(url).then(()=>toast('Invite link copied'),()=>toast(url))});
+    $('#newCoh').onclick=()=>{$('#newCohForm').innerHTML=`<form class="card panel" id="cohF" style="display:flex;flex-direction:column;gap:12px"><h3>New team</h3><div class="settings"><div class="field"><label for="cName">Team name</label><input id="cName" required placeholder="e.g. Sales leads Q4"></div><div class="field"><label for="cOrg">Company</label><input id="cOrg" placeholder="e.g. Acme Inc."></div><div class="field"><label for="cInv">Number of invites</label><input id="cInv" type="number" value="20" min="1"></div><div class="field"><label for="cVer">Question version</label><select id="cVer"><option>v${published.version} (latest)</option></select></div></div><div><button class="btn primary">Create team</button></div></form>`;
+      $('#cohF').onsubmit=e=>{e.preventDefault();const c={id:'coh_'+rid(),name:$('#cName').value,org:$('#cOrg').value||'—',version:published.version,status:'Open',invited:+$('#cInv').value,ends:'30 Nov 2026'};COHORTS.push(c);LOG.unshift({when:'Just now',who:'Wen-Szu',what:`Created team "${c.name}"`,detail:`${c.invited} invites`});toast('Team created. Copy the invite link to share it.');renderAdmin()}};
+  }
+  if(pane==='people') personOpen?renderPerson(el):renderPeople(el);
+  if(pane==='insights') renderInsights(el);
+  if(pane==='activity'){
+    el.innerHTML=`<div class="pane"><div class="phead"><div><p class="eyebrow">Change log</p><h2>Every change, who made it and when</h2></div></div>
+    <div class="card panel tablewrap"><table><thead><tr><th>When</th><th>Who</th><th>What changed</th><th>Details</th></tr></thead><tbody>${LOG.map(l=>`<tr><td class="small num" style="white-space:nowrap">${l.when}</td><td>${esc(l.who)}</td><td><b>${esc(l.what)}</b></td><td class="small muted">${esc(l.detail)}</td></tr>`).join('')}</tbody></table></div>
+    <p class="note">Published versions are locked. Every result keeps the version it was scored with, so older results never change when you edit questions.</p></div>`;
+  }
+}
+
+function renderQuestions(el){
+  const d=draft, rows=(d?d.items:published.items), df=diff();
+  const S=d?d.settings:published.settings;
+  const nResp=allAttempts().length;
+  el.innerHTML=`<div class="pane">
+    <div class="phead"><div><p class="eyebrow">Questions</p><h2>Free readiness check</h2></div>
+      <div class="row"><button class="btn" id="impBtn">Import from spreadsheet</button><button class="btn" id="expBtn">Download as spreadsheet</button></div></div>
+    <div class="card versionbar">
+      <span class="chip good">Live: v${published.version}</span><span class="small muted num">${nResp} responses on this version</span>
+      <span class="sep"></span>
+      ${df.list.length?`<span class="chip">Draft: ${df.list.length} change${df.list.length>1?'s':''}</span><span class="small muted">Will publish as <b class="mono">v${df.bump}</b> (${df.type.toLowerCase()} change)</span>`:`<span class="small muted">No unpublished changes. Edit any question below to start a draft.</span>`}
+    </div>
+    <div id="impNote"></div>
+    ${df.list.length?`<div class="card panel"><h3>Review changes before publishing</h3><ul class="changes">${df.list.map(([t,x])=>`<li><span class="chip ${t==='Added'?'good':t==='Removed'?'bad':''}">${t}</span><span>${esc(x)}</span></li>`).join('')}</ul>
+      <p class="note" style="margin-top:14px">${df.type==='Major'?'This changes what people are asked, so it is a major version. Scores on v'+df.bump+' are kept separate from v'+published.version+' in Insights.':'Only settings changed, so it is a minor version. Stored answers can be rescored with the new settings.'}</p>
+      <div style="margin-top:14px">${confirmPublish?`<div class="inline-confirm"><span>Publish <b class="mono">v${df.bump}</b>? New takers get it right away. Teams pinned to v${published.version} stay on it.</span><button class="btn primary" id="pubYes">Yes, publish</button><button class="btn" id="pubNo">Cancel</button></div>`:`<div class="row"><button class="btn primary" id="pubBtn">Publish v${df.bump}</button><button class="btn" id="previewBtn">Preview as a participant</button><button class="btn link" id="discard">Discard draft</button></div>`}</div></div>`:''}
+    <div class="card panel"><h3>Scoring settings</h3><div class="settings">${Object.keys(SET_LABEL).map(k=>`<div class="field"><label for="s_${k}">${SET_LABEL[k]}</label><input id="s_${k}" type="number" value="${S[k]}" data-set="${k}"></div>`).join('')}</div></div>
+    <div class="card panel tablewrap"><div class="row" style="justify-content:space-between;margin-bottom:10px"><h3 style="margin:0">Questions (${rows.filter(r=>r.status!=='removed').length})</h3><button class="btn" id="addQ">Add a question</button></div>
+      <table><thead><tr><th>ID</th><th>Statement (shown as "I …")</th><th>Area</th><th title="+ counts as is, − is reversed">Scoring</th><th></th></tr></thead><tbody>
+      ${rows.map((it,i)=>{const cls=it.status==='added'?'added':it.status==='removed'?'removed':(d&&(it.text!==it.orig||it.key!==it.origKey))?'changed':'';
+        return `<tr class="${cls}"><td class="mono">${it.id}</td><td><input class="edit" id="q_${it.id}" data-i="${i}" value="${esc(it.text)}" ${it.status==='removed'?'disabled':''}></td>
+        <td>${it.status==='added'?`<select data-dom="${i}">${Object.keys(LABEL).map(k=>`<option value="${k}" ${k===it.domain?'selected':''}>${LABEL[k]}</option>`).join('')}</select>`:LABEL[it.domain]}</td>
+        <td><button class="keybtn" data-key="${i}" title="Switch forward or reverse scoring" ${it.status==='removed'?'disabled':''}>${it.key==='+'?'+':'−'}</button></td>
+        <td>${it.status==='removed'?`<button class="iconbtn" data-undo="${i}">Undo</button>`:`<button class="iconbtn" data-rm="${i}">Remove</button>`}</td></tr>`}).join('')}
+      </tbody></table></div>
+  </div>`;
+  el.querySelectorAll('input.edit').forEach(inp=>inp.onchange=()=>{ensureDraft().items[+inp.dataset.i].text=inp.value.trim();renderAdmin()});
+  el.querySelectorAll('[data-key]').forEach(b=>b.onclick=()=>{const it=ensureDraft().items[+b.dataset.key];it.key=it.key==='+'?'-':'+';renderAdmin()});
+  el.querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{const d=ensureDraft(),it=d.items[+b.dataset.rm];if(it.status==='added')d.items.splice(+b.dataset.rm,1);else it.status='removed';renderAdmin()});
+  el.querySelectorAll('[data-undo]').forEach(b=>b.onclick=()=>{ensureDraft().items[+b.dataset.undo].status='same';renderAdmin()});
+  el.querySelectorAll('[data-dom]').forEach(s=>s.onchange=()=>{const it=ensureDraft().items[+s.dataset.dom];it.domain=s.value;const n=ensureDraft().items.filter(x=>x.domain===s.value).length;it.id=`mini_${CODE[s.value]}${n}`;renderAdmin()});
+  el.querySelectorAll('[data-set]').forEach(inp=>inp.onchange=()=>{ensureDraft().settings[inp.dataset.set]=+inp.value;renderAdmin()});
+  $('#addQ').onclick=()=>{const d=ensureDraft();const n=d.items.filter(x=>x.domain==='Conscientiousness').length+1;d.items.push({id:`mini_c${n}`,text:'Finish what I start.',domain:'Conscientiousness',key:'+',status:'added',orig:'',origKey:'+'});renderAdmin();setTimeout(()=>{const last=[...document.querySelectorAll('input.edit')].pop();last&&last.focus();last&&last.select()},30)};
+  $('#impBtn').onclick=()=>{$('#impNote').innerHTML=`<p class="note">In the real tool you download the template, edit questions in Excel or Google Sheets, and upload it here. You then see the same review screen before anything goes live.</p>`};
+  $('#expBtn').onclick=()=>toast('Spreadsheet download works in the real tool');
+  const pb=$('#pubBtn'); if(pb) pb.onclick=()=>{confirmPublish=true;renderAdmin()};
+  const pn=$('#pubNo'); if(pn) pn.onclick=()=>{confirmPublish=false;renderAdmin()};
+  const dc=$('#discard'); if(dc) dc.onclick=()=>{draft=null;renderAdmin();toast('Draft discarded')};
+  const pv=$('#previewBtn'); if(pv) pv.onclick=()=>toast('Preview opens the test with the draft questions');
+  const py=$('#pubYes'); if(py) py.onclick=()=>{const df=diff();const kept=draft.items.filter(x=>x.status!=='removed').map(x=>{const n={...x};if(x.status==='same'&&x.text!==x.orig)n.id=x.id+'_r2';delete n.status;delete n.orig;delete n.origKey;return n});
+    LOG.unshift({when:'Just now',who:'Wen-Szu',what:`Published Free readiness check v${df.bump}`,detail:df.list.map(x=>x[0]+': '+x[1]).join(' · ')});
+    published={version:df.bump,items:kept,settings:{...draft.settings}};draft=null;confirmPublish=false;renderAdmin();toast(`Published v${published.version}`)};
+}
+
+function renderPeople(el){
+  el.innerHTML=`<div class="pane"><div class="phead"><div><p class="eyebrow">People</p><h2>Everyone who has started</h2></div><div class="filters"><select id="pplF" aria-label="Filter by team"><option value="all">All teams</option>${COHORTS.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('')}</select><button class="btn" id="pplExp">Export CSV</button></div></div>
+  <div class="card panel tablewrap"><table><thead><tr><th>Person</th><th>Team</th><th class="num">Attempts</th><th class="num">Latest score</th><th>Profile</th><th>Result shown</th><th>Report</th></tr></thead><tbody id="pplBody"></tbody></table></div>
+  <p class="note">Click a person to see every attempt, the version they took and what we sent them. Names are kept apart from answers, so research exports carry only the person ID.</p></div>`;
+  const draw=f=>{$('#pplBody').innerHTML=PEOPLE.filter(p=>f==='all'||p.cohort.id===f).map(p=>{const l=p.attempts[p.attempts.length-1];return `<tr class="click" data-p="${p.id}"><td><b>${esc(p.name)}</b><br><span class="mono muted">${p.id}</span></td><td class="small">${esc(p.cohort.name)}</td><td class="num">${p.attempts.length}</td><td class="num">${l?l.res.readiness:'—'}</td><td>${l?esc(l.res.profile[2]):'<span class="chip plain">Not finished</span>'}</td><td>${l?(l.shown?'<span class="chip good">Shown</span>':'<span class="chip">Not yet</span>'):'—'}</td><td class="small">${l?l.pdf:'—'}</td></tr>`}).join('')};
+  draw('all');
+  $('#pplF').onchange=e=>draw(e.target.value);
+  $('#pplExp').onclick=()=>toast('CSV export works in the real tool');
+  $('#pplBody').onclick=e=>{const r=e.target.closest('tr[data-p]');if(r){personOpen=r.dataset.p;renderAdmin()}};
+}
+function renderPerson(el){
+  const p=PEOPLE.find(x=>x.id===personOpen);
+  const pts=p.attempts.map(a=>a.res.readiness);
+  let chart='';
+  if(pts.length>1){const W=320,H=110,x=i=>30+i*(W-60)/(pts.length-1),y=v=>H-20-(v/100)*(H-36);chart=`<svg viewBox="0 0 ${W} ${H}" style="width:100%;max-width:360px"><line x1="30" x2="${W-30}" y1="${y(50)}" y2="${y(50)}" stroke="var(--line)" stroke-dasharray="3 3"/><text x="4" y="${y(50)+4}">50</text><polyline fill="none" stroke="var(--gold)" stroke-width="3" points="${pts.map((v,i)=>x(i)+','+y(v)).join(' ')}"/>${pts.map((v,i)=>`<circle cx="${x(i)}" cy="${y(v)}" r="5" fill="var(--navy)"/><text x="${x(i)-8}" y="${y(v)-10}" style="fill:var(--ink);font-weight:700">${v}</text><text x="${x(i)-26}" y="${H-4}">${p.attempts[i].date.replace(' 2026','')}</text>`).join('')}</svg>`}
+  el.innerHTML=`<div class="pane"><div><button class="btn link" id="backP">← All people</button></div>
+    <div class="phead"><div><p class="eyebrow">${esc(p.cohort.name)}</p><h2>${esc(p.name)}</h2><span class="mono muted">${p.id}</span></div><div class="row"><button class="btn" id="resend">Resend result email</button><button class="btn" id="delP">Delete this person's data</button></div></div>
+    <div id="delConfirm"></div>
+    ${chart?`<div class="card panel"><h3>Readiness score over time</h3>${chart}</div>`:''}
+    ${p.attempts.length?p.attempts.map(a=>`<div class="card panel"><div class="row" style="justify-content:space-between"><h3 style="margin:0">Attempt ${a.id}</h3><span class="chip navy mono">v${a.version}</span></div>
+      <div class="tiles" style="margin:14px 0"><div class="tile" style="padding:0"><b class="num">${a.res.readiness}</b><span>${a.res.band}</span></div><div class="tile" style="padding:0"><b style="font-size:22px">${esc(a.res.profile[2])}</b><span>${a.res.voice}, ${a.res.drive.toLowerCase()}</span></div><div class="tile" style="padding:0"><b class="num">${a.feedback??'—'}</b><span>"Feels accurate" rating</span></div><div class="tile" style="padding:0"><b style="font-size:22px">${a.date}</b><span>Submitted</span></div></div>
+      <ul class="timeline"><li><span class="small muted">Started</span><span>${a.date}, 10:02</span></li><li><span class="small muted">Submitted</span><span>${a.date}, 10:06 · 20 of 20 answered</span></li><li><span class="small muted">Result on screen</span><span>${a.shown?'<span class="chip good">Shown</span> '+a.date+', 10:06':'<span class="chip">Not opened yet</span>'}</span></li><li><span class="small muted">PDF report</span><span>${a.pdf==='Emailed'?'<span class="chip good">Emailed</span> '+a.date+', 10:07':a.pdf==='Queued'?'<span class="chip">Queued</span>':'<span class="chip plain">Not requested</span>'}</span></li></ul></div>`).join(''):'<div class="card panel"><p class="muted">Started but did not finish. Answers so far are saved, and they can pick up where they left off.</p></div>'}
+  </div>`;
+  $('#backP').onclick=()=>{personOpen=null;renderAdmin()};
+  $('#resend').onclick=()=>toast('Result email queued');
+  $('#delP').onclick=()=>{$('#delConfirm').innerHTML=`<div class="inline-confirm"><span>Delete all answers, results and emails for ${esc(p.name)}? This cannot be undone.</span><button class="btn" id="delYes" style="border-color:var(--bad);color:var(--bad)">Delete</button><button class="btn" id="delNo">Cancel</button></div>`;$('#delNo').onclick=()=>$('#delConfirm').innerHTML='';$('#delYes').onclick=()=>{toast('In the prototype nothing is deleted');$('#delConfirm').innerHTML=''}};
+}
+
+function renderInsights(el){
+  const att=allAttempts(insightCohort);
+  const bins=Array(10).fill(0);att.forEach(a=>bins[Math.min(9,Math.floor(a.res.readiness/10))]++);
+  const mx=Math.max(1,...bins);const W=520,H=190,bw=(W-40)/10;
+  const hist=`<svg viewBox="0 0 ${W} ${H}" style="width:100%">${[0,1,2,3,4,5,6,7,8,9].map(i=>{const h=bins[i]/mx*(H-50);return `<rect x="${30+i*bw+3}" y="${H-24-h}" width="${bw-6}" height="${h}" rx="3" fill="${i>=6?'var(--gold)':'var(--navy)'}"/>${bins[i]?`<text x="${30+i*bw+bw/2-4}" y="${H-28-h}" style="fill:var(--ink)">${bins[i]}</text>`:''}<text x="${30+i*bw+2}" y="${H-8}">${i*10}</text>`}).join('')}<text x="${W-24}" y="${H-8}">100</text></svg>`;
+  const prof={};att.forEach(a=>prof[a.res.profile[2]]=(prof[a.res.profile[2]]||0)+1);
+  const profRows=DATA.profiles.map(p=>[p[2],prof[p[2]]||0]);
+  const stats=ITEMS.map(it=>{const vals=att.map(a=>a.answers[it.id]).filter(v=>v!=null);const m=vals.reduce((x,y)=>x+y,0)/vals.length;const sd=Math.sqrt(vals.reduce((x,y)=>x+(y-m)**2,0)/vals.length);
+    const sc=att.map(a=>a.res.shown[it.domain]);const iv=att.map(a=>{const v=a.answers[it.id];return it.key==='+'?v:6-v});const ms=sc.reduce((x,y)=>x+y,0)/sc.length,mi=iv.reduce((x,y)=>x+y,0)/iv.length;
+    let num=0,da=0,db=0;sc.forEach((s,i)=>{num+=(s-ms)*(iv[i]-mi);da+=(s-ms)**2;db+=(iv[i]-mi)**2});let r=num/Math.sqrt(da*db);if(it.domain==='Neuroticism')r=-r;return {it,m,sd,r}});
+  const fbs=att.filter(a=>a.feedback).map(a=>a.feedback);
+  el.innerHTML=`<div class="pane"><div class="phead"><div><p class="eyebrow">Insights</p><h2>What the answers are telling us</h2></div>
+    <div class="filters"><select id="insF" aria-label="Filter by team"><option value="all">All teams</option>${COHORTS.map(c=>`<option value="${c.id}" ${c.id===insightCohort?'selected':''}>${esc(c.name)}</option>`).join('')}</select><select aria-label="Version"><option>v${published.version}</option></select><button class="btn" id="insExp">Export for analysis</button></div></div>
+    <div class="tiles"><div class="card tile"><b class="num">${att.length}</b><span>Finished attempts</span></div><div class="card tile"><b class="num">${att.length?Math.round(att.reduce((x,a)=>x+a.res.readiness,0)/att.length):'—'}</b><span>Average readiness</span></div><div class="card tile"><b class="num">${fbs.length?(fbs.reduce((x,y)=>x+y,0)/fbs.length).toFixed(1):'—'}</b><span>"Feels accurate" average</span></div><div class="card tile"><b class="num">${att.filter(a=>a.res.close).length}</b><span>Drive close calls</span></div></div>
+    <div class="grid2"><div class="card panel"><h3>Readiness scores</h3>${hist}<p class="small muted">Gold bars are Strong or Exceptional (60 and up).</p></div><div class="card panel"><h3>Profile mix</h3>${hbars(profRows,Math.max(1,...profRows.map(r=>r[1])))}</div></div>
+    <div class="card panel tablewrap"><h3>How each question is performing</h3><table><thead><tr><th>ID</th><th>Statement</th><th>Area</th><th class="num">Average</th><th class="num">Spread</th><th class="num">Fits its area</th><th></th></tr></thead><tbody>
+    ${stats.map(s=>`<tr><td class="mono">${s.it.id}</td><td>${esc(show(s.it.text))}</td><td class="small">${LABEL[s.it.domain]}</td><td class="num">${s.m.toFixed(2)}</td><td class="num">${s.sd.toFixed(2)}</td><td class="num">${isFinite(s.r)?s.r.toFixed(2):'—'}</td><td>${!isFinite(s.r)?'':s.r<.3?'<span class="chip bad">Review</span>':s.sd<.6?'<span class="chip">Low spread</span>':'<span class="chip good">OK</span>'}</td></tr>`).join('')}
+    </tbody></table><p class="small muted" style="margin-top:10px">"Fits its area" is how closely each answer moves with the rest of its area (item to total correlation). Below 0.30 means the question may be measuring something else, so it is worth a look. Sample data, so the numbers are only illustrative.</p></div>
+    <p class="note">For deeper analysis, the same data flows every few minutes into BigQuery, where it opens in Looker Studio or Google Sheets. Answers come as one row per person per question, ready for a pivot table.</p></div>`;
+  $('#insF').onchange=e=>{insightCohort=e.target.value;renderAdmin()};
+  $('#insExp').onclick=()=>toast('Export works in the real tool');
+}
+
+/* ---------- build plan ---------- */
+function renderPlan(){
+  const phases=[
+    ['Phase 0','Clickable preview',['This prototype, rebuilt in your repo','Deployed to a private preview link','Sample data, no database yet'],true],
+    ['Phase 1','Content and scoring',['Item bank and form versions','Scoring engine with tests that match the spreadsheet','Import from spreadsheet']],
+    ['Phase 2','Database and security',['Collections, access rules, emulator tests','Start, save, submit and score functions','Team invites']],
+    ['Phase 3','Live test flow',['Preview screens wired to real data','Result shown and saved','Feedback box','Resume where you left off']],
+    ['Phase 4','Admin and analysis',['Question editor with review and publish','People and delivery tracking','Insights, BigQuery export, delete requests']],
+  ];
+  const lanes=[
+    ['What we ask','The question bank and each published version of the test.',[
+      ['items','Every question ever written. Permanent ID, text, area, scoring direction, tags, language.','flat'],
+      ['forms','A test people can take, like the free check or the full report.',''],
+      ['formVersions','A locked snapshot of the questions, settings and write-ups. Never edited after publishing.','lock'],
+      ['writeups','Result text blocks, versioned on their own so a typo fix does not touch scores.','']]],
+    ['Who takes it','People, teams and how they got in.',[
+      ['participants','Name and email only. Kept apart from answers.',''],
+      ['cohorts','Private teams with their own invite links and pinned version.',''],
+      ['invites','One link or code per team or person, with use counts and expiry.',''],
+      ['consents','Which privacy notice version each person agreed to, and when.','']]],
+    ['What they answered','Attempts, answers, results and what we sent.',[
+      ['attempts','One sitting of the test. Status, version, source, timestamps.',''],
+      ['responses','One row per answer. The format analysts want.','flat'],
+      ['results','Scores, band and profile. Locked. Rescoring adds a new result.','lock'],
+      ['deliveries','Shown on screen, PDF made, email sent, opened.',''],
+      ['feedback','"How accurate does this feel?" per result.','']]],
+    ['Looking back','Tracking, audit and analysis.',[
+      ['events','Page opened, started, finished, clicked. For the drop-off chart.','flat'],
+      ['auditLog','Every admin change: who, what, when, before and after.','lock'],
+      ['BigQuery','Live copy of everything for SQL, Looker Studio and Sheets.','flat']]],
+  ];
+  $('#view-plan').innerHTML=`
+    <div style="display:flex;flex-direction:column;gap:8px;max-width:760px"><p class="eyebrow">Build plan</p><h2 style="font-size:34px">From this preview to a live check</h2><p class="muted">Each phase ends with something you can click. The preview comes first so you can react to the look and flow before any database work starts.</p></div>
+    <div class="phases">${phases.map(([n,t,l,now])=>`<div class="card phase ${now?'now':''}"><span class="chip ${now?'':'plain'}">${now?'You are here':n}</span><h3>${t}</h3><ul>${l.map(x=>`<li>${x}</li>`).join('')}</ul></div>`).join('')}</div>
+    <div style="display:flex;flex-direction:column;gap:8px"><h2 style="font-size:26px">Where the data lives</h2><p class="muted" style="max-width:70ch">Four groups of records. New question types, new tests or new languages are new rows, not new tables.</p>
+    <div class="legend"><span><i style="background:var(--navy)"></i>Locked once written</span><span><i style="background:var(--gold)"></i>Built for analysis</span></div></div>
+    <div class="model">${lanes.map(([t,d,es])=>`<div class="lane"><h3>${t}</h3><p>${d}</p>${es.map(([n,x,c])=>`<div class="entity ${c}"><b>${n}</b><p>${x}</p></div>`).join('')}</div>`).join('')}</div>`;
+}
+
+/* ---------- views ---------- */
+document.querySelector('.tabs').addEventListener('click',e=>{const b=e.target.closest('.tab');if(!b)return;const v=b.dataset.view;
+  document.querySelectorAll('.tab').forEach(t=>t.setAttribute('aria-selected',t===b?'true':'false'));
+  ['test','admin','plan'].forEach(x=>$('#view-'+x).hidden=x!==v);
+  if(v==='admin')renderAdmin(); if(v==='plan')renderPlan(); window.scrollTo({top:0})});
+const h=location.hash.slice(1); if(['admin','plan'].includes(h)) document.querySelector(`.tab[data-view="${h}"]`).click();
+</script>

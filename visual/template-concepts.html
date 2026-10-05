@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Toolkit template concepts | The Untaught Lessons</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lato:wght@300;400;700&display=swap');
+    :root { --navy:#003366; --gold:#EEA320; --cream:#F3EDE2; --charcoal:#4A4A4A; --steel:#4D7094; --paper:#FAF9F6; --line:#E8DFD1; --green:#2D7D52; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:#e9e2d7; color:var(--charcoal); font-family:Lato,Arial,sans-serif; }
+    button { font:inherit; }
+    .concept-header { background:var(--navy); color:#fff; padding:28px max(24px,calc((100% - 1320px)/2)); }
+    .concept-header span { color:var(--gold); font-weight:700; }
+    .concept-header h1 { margin:8px 0 6px; font:700 clamp(2rem,5vw,3.8rem)/1 Playfair Display,serif; }
+    .concept-header p { max-width:760px; margin:0; color:#d6e0ea; line-height:1.55; }
+    .concept-main { width:min(1320px,calc(100% - 32px)); margin:28px auto 60px; }
+    .concept-tabs { display:flex; gap:6px; width:min(900px,100%); margin:0 auto 28px; padding:5px; border:1px solid #d5cbbb; border-radius:10px; background:var(--cream); }
+    .concept-tab { flex:1; min-height:48px; border:0; border-radius:7px; background:transparent; color:var(--navy); font-weight:700; cursor:pointer; padding:10px; }
+    .concept-tab.active { background:#fff; box-shadow:0 2px 7px rgba(0,35,70,.15); }
+    .concept-panel[hidden] { display:none; }
+    .concept-copy { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,2.25fr); gap:24px; align-items:start; }
+    .concept-notes { position:sticky; top:20px; border:1px solid #d8d0c4; border-radius:8px; background:#fff; padding:24px; }
+    .concept-notes .format { color:var(--gold); font-weight:700; }
+    .concept-notes h2 { margin:10px 0; color:var(--navy); font:700 2rem/1.1 Playfair Display,serif; }
+    .concept-notes p,.concept-notes li { line-height:1.55; }
+    .concept-notes ul { padding-left:20px; }
+    .resource-actions { display:grid; gap:9px; margin-top:22px; }
+    .resource-action { min-height:46px; border-radius:7px; cursor:pointer; font-weight:700; padding:10px 14px; text-align:center; }
+    .resource-action.google { border:0; background:var(--navy); color:#fff; }
+    .resource-action.microsoft { border:2px solid var(--navy); background:#fff; color:var(--navy); }
+    .resource-action small { display:block; margin-top:3px; font-size:10px; font-weight:400; opacity:.78; }
+    .design-note { margin-top:10px; color:var(--steel); font-size:11px; }
+    .preview-shell { overflow:auto; border-radius:10px; background:#d9d1c5; padding:28px; box-shadow:0 8px 28px rgba(0,31,61,.12); }
+    .preview-toolbar { display:flex; align-items:center; justify-content:space-between; gap:12px; min-width:760px; margin:0 auto 12px; }
+    .preview-switch { display:flex; gap:4px; border-radius:8px; background:#c9c0b4; padding:4px; }
+    .preview-button { min-height:38px; border:0; border-radius:6px; background:transparent; color:var(--navy); cursor:pointer; font-weight:700; padding:8px 13px; }
+    .preview-button.active { background:#fff; box-shadow:0 1px 4px rgba(0,31,61,.14); }
+    .preview-caption { color:#5f5a53; font-size:12px; font-weight:700; }
+    .doc-page { width:760px; min-height:980px; margin:auto; background:#fff; padding:56px 62px; box-shadow:0 2px 12px rgba(0,0,0,.12); }
+    .brand-row { display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--line); padding-bottom:14px; }
+    .mini-brand { color:var(--navy); font:700 14px/1.05 Playfair Display,serif; }
+    .mini-brand b { color:var(--gold); display:block; }
+    .doc-label { color:var(--gold); font-size:12px; font-weight:700; margin-top:42px; }
+    .doc-page h3 { margin:8px 0 10px; color:var(--navy); font:700 40px/1.07 Playfair Display,serif; }
+    .doc-sub { margin:0 0 28px; color:var(--steel); font-size:17px; }
+    .doc-meta { display:grid; grid-template-columns:repeat(3,1fr); gap:1px; border:1px solid var(--line); background:var(--line); }
+    .doc-meta div { background:var(--paper); padding:12px; }
+    .doc-meta span,.sheet-kpi span { display:block; color:var(--steel); font-size:10px; font-weight:700; text-transform:uppercase; }
+    .doc-meta strong { display:block; color:var(--navy); margin-top:5px; }
+    .doc-section { margin-top:30px; }
+    .doc-section h4 { margin:0 0 10px; color:var(--navy); font-size:17px; }
+    .doc-section p { margin:0; line-height:1.55; }
+    .recommendation { border-left:5px solid var(--gold); background:#fff8e8; padding:18px 20px; }
+    .reason-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+    .reason-grid div { border:1px solid var(--line); border-radius:6px; padding:14px; }
+    .reason-grid strong { color:var(--navy); }
+    .doc-footer { margin-top:46px; border-top:1px solid var(--line); padding-top:12px; color:#888; font-size:10px; }
+    .sheet-window { width:980px; margin:auto; background:#fff; box-shadow:0 2px 12px rgba(0,0,0,.12); }
+    .sheet-title { display:flex; justify-content:space-between; align-items:center; background:var(--navy); color:#fff; padding:20px 24px; }
+    .sheet-title h3 { margin:0; font:700 25px Playfair Display,serif; }
+    .sheet-title span { color:var(--gold); font-size:12px; font-weight:700; }
+    .sheet-body { padding:22px; }
+    .sheet-kpis { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:20px; }
+    .sheet-kpi { border:1px solid var(--line); border-radius:6px; padding:12px; }
+    .sheet-kpi strong { display:block; margin-top:5px; color:var(--navy); font-size:24px; }
+    table { width:100%; border-collapse:collapse; font-size:12px; }
+    th { background:var(--navy); color:#fff; text-align:left; padding:10px; }
+    td { border:1px solid var(--line); padding:11px 10px; vertical-align:top; }
+    tr:nth-child(even) td { background:var(--paper); }
+    .status { display:inline-block; border-radius:999px; padding:4px 8px; font-weight:700; }
+    .status.progress { background:#fff0cf; color:#8b5b00; }
+    .status.done { background:#e3f3e9; color:var(--green); }
+    .status.open { background:#edf3f8; color:var(--steel); }
+    .sheet-tabs { display:flex; gap:3px; border-top:1px solid var(--line); background:#f1ede6; padding:8px 16px 0; }
+    .sheet-tabs button { border:0; border-radius:5px 5px 0 0; background:#ddd5c9; color:var(--charcoal); cursor:pointer; padding:8px 18px; font-size:11px; font-weight:700; }
+    .sheet-tabs button.selected { background:#fff; color:var(--navy); }
+    .sheet-preview-panel[hidden] { display:none; }
+    .slide { position:relative; width:960px; aspect-ratio:16/9; margin:auto; overflow:hidden; background:var(--cream); box-shadow:0 2px 12px rgba(0,0,0,.12); padding:48px 58px; }
+    .slide-logo { position:absolute; right:46px; top:36px; color:var(--navy); font:700 13px/1 Playfair Display,serif; }
+    .slide-logo b { color:var(--gold); display:block; }
+    .slide-kicker { color:var(--gold); font-size:14px; font-weight:700; }
+    .slide h3 { width:80%; margin:10px 0 12px; color:var(--navy); font:700 42px/1.06 Playfair Display,serif; }
+    .slide-sub { width:75%; color:var(--steel); font-size:19px; }
+    .slide-rule { width:75px; height:5px; margin:24px 0; background:var(--gold); }
+    .slide-columns { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+    .slide-columns div { min-height:178px; border:1px solid var(--line); border-radius:6px; background:#fff; padding:18px; }
+    .slide-columns strong { display:block; color:var(--navy); margin-bottom:8px; }
+    .slide-columns p { margin:0; line-height:1.45; font-size:14px; }
+    .slide-decision { position:absolute; left:58px; right:58px; bottom:32px; display:flex; justify-content:space-between; align-items:center; border-left:5px solid var(--gold); background:#fff8e8; padding:14px 18px; }
+    .slide-decision strong { color:var(--navy); }
+    .prompt-preview-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px; }
+    .prompt-preview-card { border:1px solid rgba(0,51,102,.16); border-radius:8px; background:#fff; padding:22px; }
+    .prompt-preview-card span { color:var(--gold); font-size:11px; font-weight:700; }
+    .prompt-preview-card h3 { margin:9px 0; color:var(--navy); font:700 1.5rem/1.15 Playfair Display,serif; }
+    .prompt-preview-card p { margin:0 0 18px; line-height:1.5; }
+    .prompt-preview-card button { border:2px solid var(--gold); border-radius:7px; background:#fff; color:var(--navy); font-weight:700; padding:10px 14px; }
+    .slide-viewport { width:100%; overflow:auto; }
+    .slide-stage { width:960px; transform-origin:top left; }
+    .zoom-controls { display:flex; align-items:center; gap:8px; color:var(--navy); font-size:12px; font-weight:700; }
+    .zoom-controls button { width:36px; height:36px; border:1px solid #b9c6d2; border-radius:6px; background:#fff; color:var(--navy); cursor:pointer; font-size:18px; }
+    .zoom-level { min-width:44px; text-align:center; }
+    @media(max-width:850px){ .concept-copy{grid-template-columns:1fr}.concept-notes{position:static}.preview-shell{padding:14px}.concept-tabs{flex-direction:column}.doc-page{transform-origin:top left}.concept-header{padding:24px}.concept-main{width:min(100% - 20px,1320px)} }
+  </style>
+</head>
+<body>
+  <header class="concept-header">
+    <span>Toolkit design preview</span>
+    <h1>Choose the tool you need.</h1>
+    <p>Copy a prompt, open a Google template or download a Microsoft file. Each resource is ready to adapt to your own work.</p>
+  </header>
+  <main class="concept-main">
+    <nav class="concept-tabs" aria-label="Choose a template concept">
+      <button class="concept-tab active" type="button" data-show="prompts">AI prompts</button>
+      <button class="concept-tab" type="button" data-show="doc">Documents</button>
+      <button class="concept-tab" type="button" data-show="sheet">Spreadsheets</button>
+      <button class="concept-tab" type="button" data-show="slide">Presentations</button>
+    </nav>
+
+    <section class="concept-panel" id="prompts">
+      <div class="concept-notes" style="position:static;margin-bottom:18px"><span class="format">AI prompts</span><h2 style="margin-bottom:8px">Prompts for work you do often</h2><p style="margin:0">Choose a task, then copy the version that fits your work.</p></div>
+      <div class="prompt-preview-grid">
+        <article class="prompt-preview-card"><span>Organize ideas</span><h3>Check a plan for overlaps and gaps</h3><p>Review a set of categories using MECE.</p><button type="button">Choose and copy a prompt</button></article>
+        <article class="prompt-preview-card"><span>Organize ideas</span><h3>Build a first issue tree</h3><p>Turn a central question and rough thinking into a first draft.</p><button type="button">Choose and copy a prompt</button></article>
+        <article class="prompt-preview-card"><span>Write clearly</span><h3>Strengthen a problem and recommendation</h3><p>Review an SCQA and improve how its four parts connect.</p><button type="button">Choose and copy a prompt</button></article>
+        <article class="prompt-preview-card"><span>Write clearly</span><h3>Write a decision-ready email</h3><p>Turn an SCQA or issue tree into a clear email for a busy reader.</p><button type="button">Choose and copy a prompt</button></article>
+        <article class="prompt-preview-card"><span>Prepare to act</span><h3>Prioritize when everything feels urgent</h3><p>Sort a task list by urgency and importance.</p><button type="button">Choose and copy a prompt</button></article>
+        <article class="prompt-preview-card"><span>Prepare to act</span><h3>Prepare for a difficult conversation</h3><p>Plan your opening, main point, likely questions and closing request.</p><button type="button">Choose and copy a prompt</button></article>
+        <article class="prompt-preview-card"><span>Review a decision</span><h3>Challenge your own thinking</h3><p>Review the evidence, risks, people affected and other options.</p><button type="button">Choose and copy a prompt</button></article>
+        <article class="prompt-preview-card"><span>Organize ideas</span><h3>Turn meeting notes into decisions and actions</h3><p>Pull out decisions, owners, due dates and open questions.</p><button type="button">Choose and copy a prompt</button></article>
+        <article class="prompt-preview-card"><span>Write clearly</span><h3>Build a clear slide storyline</h3><p>Turn notes and evidence into a sequence of slide headlines.</p><button type="button">Choose and copy a prompt</button></article>
+        <article class="prompt-preview-card"><span>Write clearly</span><h3>Adapt a message for a specific audience</h3><p>Adjust the context and emphasis while keeping the facts and requested action.</p><button type="button">Choose and copy a prompt</button></article>
+        <article class="prompt-preview-card"><span>Write clearly</span><h3>Write the same message at three lengths</h3><p>Create short, medium and full versions with the same main point.</p><button type="button">Choose and copy a prompt</button></article>
+        <article class="prompt-preview-card"><span>Review a decision</span><h3>Advisory board</h3><p>Ask several perspectives to review a decision and recommend what to do.</p><button type="button">Choose and copy a prompt</button></article>
+      </div>
+    </section>
+
+    <section class="concept-panel" id="doc" hidden>
+      <div class="concept-copy">
+        <aside class="concept-notes"><span class="format">Document template</span><h2>One page decision brief</h2><p>A reusable brief for decisions that need context, a recommendation and a clear next step.</p><ul><li>Best general purpose document</li><li>Easy to read before a meeting</li><li>Light branding in the header and accent rule</li><li>Works in print and PDF</li></ul><div class="resource-actions"><button class="resource-action google" type="button">Make a copy in Google Docs<small>Opens a new copy in your Drive</small></button><button class="resource-action microsoft" type="button">Download Microsoft Word<small>Downloads a .docx file</small></button></div><p class="design-note">Design preview only. Links will be added with the finished files.</p></aside>
+        <div class="preview-shell"><div class="preview-toolbar"><strong style="color:var(--navy)">Completed example</strong><span class="preview-caption">Click the preview to open it at full size</span></div><article class="doc-page">
+          <div class="brand-row"><div class="mini-brand">The Untaught<b>Lessons</b></div><span>DECISION BRIEF</span></div>
+          <div class="doc-label">Recommendation</div><h3>Approve a six week onboarding pilot</h3><p class="doc-sub">A short brief for the regional leadership meeting</p>
+          <div class="doc-meta"><div><span>Decision owner</span><strong>Regional COO</strong></div><div><span>Decision date</span><strong>18 September</strong></div><div><span>Prepared by</span><strong>People team</strong></div></div>
+          <section class="doc-section recommendation"><h4>Decision needed</h4><p>Approve a six week pilot in three markets beginning 5 October.</p></section>
+          <section class="doc-section"><h4>Why this matters</h4><div class="reason-grid"><div><strong>Slower ramp up</strong><p>Time to productivity increased from 42 to 59 days.</p></div><div><strong>Early exits</strong><p>Three of the last eight hires left within 90 days.</p></div><div><strong>Clear fix</strong><p>The pilot adds manager contact and visible milestones.</p></div></div></section>
+          <section class="doc-section"><h4>Risks and response</h4><p>The pilot adds manager time during the first month. We will keep each check in to 20 minutes and track whether the added contact reduces later support.</p></section>
+          <section class="doc-section"><h4>Next step</h4><p>Name one owner in each market and confirm the first participant group by 25 September.</p></section>
+          <footer class="doc-footer">The Untaught Lessons template · Replace this line with your organization name</footer>
+        </article></div>
+      </div>
+    </section>
+
+    <section class="concept-panel" id="sheet" hidden>
+      <div class="concept-copy">
+        <aside class="concept-notes"><span class="format">Spreadsheet template</span><h2>Decision and action tracker</h2><p>A shared tracker that keeps meeting decisions and follow through in one place.</p><ul><li>Useful after meetings and project reviews</li><li>Fast filters for owner, status and due date</li><li>Small summary area for weekly review</li><li>Neutral rows that accept a company color</li></ul><div class="resource-actions"><button class="resource-action google" type="button">Make a copy in Google Sheets<small>Opens a new copy in your Drive</small></button><button class="resource-action microsoft" type="button">Download Microsoft Excel<small>Downloads an .xlsx file</small></button></div><p class="design-note">Design preview only. Links will be added with the finished files.</p></aside>
+        <div class="preview-shell"><div class="preview-toolbar" style="min-width:980px"><strong style="color:var(--navy)">Click a tab to preview it</strong><span class="preview-caption">The finished template will include a completed example and clean copy</span></div><div class="sheet-window">
+          <div class="sheet-title"><h3>Decision and action tracker</h3><span>PROJECT NORTHSTAR</span></div>
+          <div class="sheet-body sheet-preview-panel" id="sheet-actions">
+            <div class="sheet-kpis"><div class="sheet-kpi"><span>Open actions</span><strong>8</strong></div><div class="sheet-kpi"><span>Due this week</span><strong>3</strong></div><div class="sheet-kpi"><span>Owners needed</span><strong>1</strong></div><div class="sheet-kpi"><span>Decisions made</span><strong>6</strong></div></div>
+            <table><thead><tr><th>Type</th><th>Decision or action</th><th>Owner</th><th>Due</th><th>Status</th><th>Question or dependency</th></tr></thead><tbody>
+              <tr><td>Decision</td><td>Move the pilot to 28 September</td><td>Steering team</td><td>14 Sep</td><td><span class="status done">Done</span></td><td>Client update required</td></tr>
+              <tr><td>Action</td><td>Complete client login test</td><td>Priya</td><td>18 Sep</td><td><span class="status progress">In progress</span></td><td>Waiting on test accounts</td></tr>
+              <tr><td>Action</td><td>Prepare facilitator guide</td><td>Marco</td><td>20 Sep</td><td><span class="status open">Open</span></td><td></td></tr>
+              <tr><td>Action</td><td>Confirm consent form approval</td><td>Owner needed</td><td>18 Sep</td><td><span class="status open">Open</span></td><td>Legal review</td></tr>
+            </tbody></table>
+          </div>
+          <div class="sheet-body sheet-preview-panel" id="sheet-decisions" hidden>
+            <table><thead><tr><th>Date</th><th>Decision</th><th>Reason</th><th>Decision owner</th><th>Review date</th></tr></thead><tbody>
+              <tr><td>12 Sep</td><td>Run the pilot in three markets</td><td>Tests the approach before a larger launch</td><td>Regional COO</td><td>30 Oct</td></tr>
+              <tr><td>14 Sep</td><td>Move the launch to 28 September</td><td>Allows time for client login testing</td><td>Steering team</td><td>28 Sep</td></tr>
+              <tr><td>16 Sep</td><td>Use one facilitator guide</td><td>Keeps delivery consistent across markets</td><td>Program lead</td><td>15 Oct</td></tr>
+            </tbody></table>
+          </div>
+          <div class="sheet-body sheet-preview-panel" id="sheet-lists" hidden>
+            <table><thead><tr><th>Status</th><th>Type</th><th>Priority</th><th>Team</th></tr></thead><tbody>
+              <tr><td>Open</td><td>Decision</td><td>High</td><td>Program</td></tr>
+              <tr><td>In progress</td><td>Action</td><td>Medium</td><td>Technology</td></tr>
+              <tr><td>Done</td><td>Question</td><td>Low</td><td>Client</td></tr>
+            </tbody></table>
+          </div>
+          <div class="sheet-tabs"><button class="selected" type="button" data-sheet-tab="sheet-actions">Action tracker</button><button type="button" data-sheet-tab="sheet-decisions">Decision log</button><button type="button" data-sheet-tab="sheet-lists">Lists</button></div>
+        </div></div>
+      </div>
+    </section>
+
+    <section class="concept-panel" id="slide" hidden>
+      <div class="concept-copy">
+        <aside class="concept-notes"><span class="format">Presentation template</span><h2>Executive recommendation deck</h2><p>A short deck that begins with the recommendation and supports one decision.</p><ul><li>Built from your existing PowerPoint system</li><li>Uses the layouts already in the brand file</li><li>Keeps the logo small and removable</li><li>Includes a clean version and a worked example</li></ul><div class="resource-actions"><button class="resource-action google" type="button">Make a copy in Google Slides<small>Opens a new copy in your Drive</small></button><button class="resource-action microsoft" type="button">Download Microsoft PowerPoint<small>Downloads a .pptx file</small></button></div><p class="design-note">Design preview only. Links will be added with the finished files.</p></aside>
+        <div class="preview-shell" id="slide-preview"><div class="preview-toolbar"><strong style="color:var(--navy)">Completed example</strong><div class="zoom-controls" aria-label="Presentation preview zoom"><button type="button" data-zoom="out" aria-label="Zoom out">−</button><span class="zoom-level" id="zoom-level">Fit</span><button type="button" data-zoom="in" aria-label="Zoom in">+</button></div></div><div class="slide-viewport"><div class="slide-stage" id="slide-stage"><article class="slide">
+          <div class="slide-logo">The Untaught<b>Lessons</b></div><div class="slide-kicker">Recommendation</div><h3>Run a six week onboarding pilot in three markets</h3><p class="slide-sub">The pilot addresses slower ramp up and gives managers a practical structure for the first 90 days.</p><div class="slide-rule"></div>
+          <div class="slide-columns"><div><strong>What changed</strong><p>Time to productivity rose from 42 to 59 days after the move to hybrid work.</p></div><div><strong>What we learned</strong><p>Recent exit interviews mentioned unclear priorities and limited manager contact.</p></div><div><strong>What we will test</strong><p>A first week plan, three manager meetings and clear milestones through day 90.</p></div></div>
+          <div class="slide-decision"><strong>Decision needed</strong><span>Approve the pilot by 18 September</span></div>
+        </article></div></div></div>
+      </div>
+    </section>
+  </main>
+  <script>
+    document.querySelectorAll('[data-show]').forEach(button => button.addEventListener('click', () => {
+      document.querySelectorAll('[data-show]').forEach(tab => tab.classList.toggle('active', tab === button));
+      document.querySelectorAll('.concept-panel').forEach(panel => { panel.hidden = panel.id !== button.dataset.show; });
+      if (button.dataset.show === 'slide') fitSlide();
+    }));
+    document.querySelectorAll('[data-sheet-tab]').forEach(button => button.addEventListener('click', () => {
+      document.querySelectorAll('[data-sheet-tab]').forEach(tab => tab.classList.toggle('selected', tab === button));
+      document.querySelectorAll('.sheet-preview-panel').forEach(panel => { panel.hidden = panel.id !== button.dataset.sheetTab; });
+    }));
+    let slideZoom = 1;
+    const stage = document.getElementById('slide-stage');
+    const viewport = document.querySelector('.slide-viewport');
+    const zoomLevel = document.getElementById('zoom-level');
+    function applySlideZoom(label) {
+      stage.style.transform = `scale(${slideZoom})`;
+      stage.style.marginBottom = `${(540 * slideZoom) - 540}px`;
+      zoomLevel.textContent = label || `${Math.round(slideZoom * 100)}%`;
+    }
+    function fitSlide() {
+      slideZoom = Math.min(1, Math.max(.35, (viewport.clientWidth - 2) / 960));
+      applySlideZoom('Fit');
+    }
+    document.querySelectorAll('[data-zoom]').forEach(button => button.addEventListener('click', () => {
+      slideZoom = Math.min(1.5, Math.max(.35, slideZoom + (button.dataset.zoom === 'in' ? .15 : -.15)));
+      applySlideZoom();
+    }));
+    window.addEventListener('resize', () => { if (!document.getElementById('slide').hidden) fitSlide(); });
+  </script>
+</body>
+</html>

@@ -1039,10 +1039,16 @@
 
     async function submitAssessmentResult(score) {
       if (state.adminPreview) return;
-      // The current Apps Script endpoint must route this payload to the Assessments tab.
-      // If the deployed script only writes contact leads today, update it to branch on assessment_type.
+      // Routes to the Contacts tab (the script's default branch). The Contacts branch
+      // requires a name and a valid email or it silently drops the submission, so both
+      // are set here even though the assessment intake only asked for email before.
       const payload = {
+        name: sessionStorage.getItem('find_your_level_name') || state.participant.name || 'Find your level participant',
         email: sessionStorage.getItem('find_your_level_email') || state.participant.email,
+        role: 'Find your level',
+        message: `Completed Find Your Level. Band: ${score.band}. Score: ${score.percentage}%.`,
+        page: location.href,
+        source: 'find-your-level',
         assessment_type: 'find-your-level',
         version: '',
         score: score.percentage,

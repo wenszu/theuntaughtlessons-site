@@ -1,0 +1,148 @@
+const assert = require('assert');
+const fs = require('fs');
+const path = require('path');
+const vm = require('vm');
+
+const root = path.resolve(__dirname, '..');
+const html = fs.readFileSync(path.join(root, 'apps/readiness-assessment/index.html'), 'utf8');
+const content = fs.readFileSync(path.join(root, 'apps/readiness-assessment/content.js'), 'utf8');
+const howItWorks = fs.readFileSync(path.join(root, 'apps/readiness-assessment/how-it-works/index.html'), 'utf8');
+const sources = fs.readFileSync(path.join(root, 'apps/readiness-assessment/sources.js'), 'utf8');
+const research = fs.readFileSync(path.join(root, 'apps/readiness-assessment/research/index.html'), 'utf8');
+const siteNav = fs.readFileSync(path.join(root, 'apps/readiness-assessment/assets/site-nav.js'), 'utf8');
+
+assert.match(html, /Are you ready to be an executive yet\?/, 'Participant title uses the executive readiness question');
+assert.match(html, /What the assessment looks at/, 'Participant page uses assessment terminology');
+assert.match(html, /There are no right answers\./, 'Participant page reassures learners before the questions');
+assert.match(html, /1 = Not me at all · 5 = Spot on/, 'Participant feedback scale needs clear endpoints');
+assert.match(html, /Download image/, 'Public result image download is missing');
+assert.match(html, /shareLinkedIn/, 'LinkedIn sharing is missing');
+assert.match(html, /shareFacebook/, 'Facebook sharing is missing');
+assert.match(howItWorks, /There are no right answers/, 'Scoring explanation repeats the reassurance');
+assert.doesNotMatch(html, /How do you approach bigger roles\?|What the check looks at|Free readiness check/, 'Old assessment language is removed');
+assert.doesNotMatch(content, /bigger roles?/, 'Result content does not use the old bigger role language');
+const workflow = fs.readFileSync(path.join(root, '.github/workflows/deploy-pages.yml'), 'utf8');
+const firebase = JSON.parse(fs.readFileSync(path.join(root, 'firebase.json'), 'utf8'));
+
+assert.match(html, /Phase 0 preview/i, 'Preview must identify itself as Phase 0');
+assert.match(html, /Sample data only/, 'Preview must identify sample data');
+assert.match(html, /Keep your result on file/i, 'Consent must explain that the result is kept on file');
+assert.match(html, /separate from being contacted about UTL programs/i, 'Consent must separate keeping the result from marketing consent');
+assert.match(html, /request a copy, correction or deletion/i, 'Privacy copy must cover global data rights');
+assert.match(html, /id="t-details"/, 'Participant details must be a separate screen');
+assert.match(html, /id="firstNameIn"[\s\S]*required/, 'First name must be required');
+assert.match(html, /id="lastNameIn"[\s\S]*required/, 'Last name must be required');
+assert.match(html, /id="emailIn"[\s\S]*required/, 'Email must be required');
+assert.match(siteNav, /window\.__raAccountIdentity\s*=\s*\{/, 'Signed-in identity must be available to the assessment flow');
+assert.match(html, /function signedInParticipant\(\)/, 'Assessment must recognize a signed-in participant');
+assert.match(html, /if\(!signedIn\)\{setInviteMode\(false\);go\('t-details'\);return\}/, 'Only signed-out or incomplete accounts should see the details screen');
+assert.match(html, /participant=signedIn;[\s\S]*go\('t-background'\)/, 'Signed-in participants must skip the duplicate name and email screen');
+assert.match(html, /id="t-background"/, 'Participant background must be a separate screen');
+assert.match(html, /id="ageRangeIn"[\s\S]*required/, 'Age range must be required');
+assert.match(html, /id="careerStageIn"[\s\S]*required/, 'Career stage must be required');
+assert.match(html, /id="goalIn"[\s\S]*required/, 'Primary goal must be required');
+assert.match(html, /Prefer not to say/, 'Sensitive demographic choices need a decline option');
+assert.match(html, /id="regionIn"/, 'Country or region context is missing');
+assert.match(html, /id="updatesIn"/, 'Optional program updates choice is missing');
+assert.match(html, /does not affect whether I can take the assessment/i, 'Marketing permission must be separate from assessment consent');
+assert.match(html, /Preview the invited team flow/, 'Invited participant variation is missing');
+assert.match(html, /linked to the sample invitation and cannot be changed here/i, 'Invited email behavior is not explained');
+assert.match(html, /Assessment admin/, 'Admin preview must have an explicit label');
+assert.match(html, /id="view-test"/, 'Participant flow is missing');
+assert.match(html, /id="view-admin"/, 'Admin preview is missing');
+assert.match(html, /id="view-plan"/, 'Build plan is missing');
+assert.match(html, /id="t-intro"/, 'Five-area introduction screen is missing');
+assert.match(html, /Included in your UTL readiness reflection/, 'Readiness areas are not identified before the questions');
+assert.match(html, /These two describe your style\. Neither end is better\./, 'Style areas are not distinguished before the questions');
+assert.match(html, /scoreDisplay:'band_first'/, 'Band-first result display must be the default');
+assert.match(html, /value="number_first"/, 'Number-first display option is missing');
+assert.match(html, /value="band_only"/, 'Band-only display option is missing');
+assert.match(html, /const READINESS_IDLE_LIMIT_MS=120000/, 'Named two-minute inactivity threshold is missing');
+assert.match(html, /if\(elapsed<=READINESS_IDLE_LIMIT_MS\)qaTiming\.activeMs\+=elapsed/, 'Inactive time must be excluded from active time');
+assert.match(html, /Your detailed score stays private/, 'Share control must explain that the detailed score is private');
+assert.match(html, /Your result, step by step/, 'Results must provide a guided reading sequence');
+assert.match(html, /\.result \.card>\.result-step:first-child\{margin-top:14px\}/, 'Result tags need visible space above the orange section label');
+assert.match(html, /1 = Not me at all · 5 = Spot on/, 'Feedback scale must label both endpoints');
+assert.match(html, /id="copyCaption"/, 'Results must provide a caption users can copy for social sharing');
+assert.match(html, /utm_campaign=readiness_assessment/, 'Shared links must identify assessment referrals');
+assert.match(html, /class="spectrum"/, 'Style areas must use a spectrum rather than a readiness fill bar');
+assert.match(html, /data-pane="sources"/, 'Admin sources section is missing');
+assert.match(html, /function renderSources/, 'Admin source editor is missing');
+assert.match(html, /Where these questions come from/, 'Result source explanation is missing');
+assert.match(html, /research\//, 'Research page link is missing');
+assert.match(content, /contentVersion:\s*'1\.1\.0'/, 'Versioned assessment content is missing');
+assert.match(content, /name:\s*'Follow-through'/, 'Follow-through content is missing');
+assert.match(content, /name:\s*'Steadiness'/, 'Steadiness content is missing');
+assert.match(content, /name:\s*'Curiosity'/, 'Curiosity content is missing');
+
+const contentSandbox = { window: {} };
+vm.runInNewContext(content, contentSandbox);
+const sharedContent = contentSandbox.window.READINESS_CONTENT;
+const andreaReadiness = Math.round((43.75 + 43.75 + 50) / 3);
+const andreaBand = sharedContent.bands.find(band => andreaReadiness >= band.min && andreaReadiness <= band.max);
+assert.strictEqual(andreaReadiness, 46, 'Andrea sample must produce a readiness score of 46');
+assert.strictEqual(andreaBand.label, 'Developing', 'Andrea sample score must fall in the Developing band');
+assert.match(howItWorks, /\.\.\/content\.js/, 'How-it-works page must use the shared content source');
+assert.match(howItWorks, /id="rubric"/, 'Scoring rubric is missing from the reference page');
+assert.match(howItWorks, /class="area-grid"/, 'Area explanations must use one consistent, readable grid rather than a mismatched layout');
+assert.match(howItWorks, /id="bands"/, 'Readiness bands are missing from the reference page');
+assert.match(howItWorks, /id="areas"/, 'Five-area reference is missing from the reference page');
+
+const sourceSandbox = { window: {} };
+vm.runInNewContext(sources, sourceSandbox);
+assert.strictEqual(sourceSandbox.window.READINESS_SOURCES.version, '1.0.1', 'Source registry needs a version');
+assert.strictEqual(sourceSandbox.window.READINESS_SOURCES.sources.length, 5, 'Source registry must contain five references');
+assert(sourceSandbox.window.READINESS_SOURCES.paidItemsMatch(JSON.parse(html.match(/const DATA = (\{.*?\});\nconst /s)[1]).facets), 'Paid facet wording must match its registered source');
+for (const name of ['Donnellan', 'Johnson', 'Kajonius', 'Judge', 'Goldberg']) assert.match(sources, new RegExp(name), `${name} source is missing`);
+assert.match(research, /International Personality Item Pool/, 'IPIP needs a plain-language explanation');
+assert.match(research, /Five broad areas/, 'Big Five needs a plain-language explanation');
+assert.match(research, /peer-reviewed set of 20 questions/, 'Mini-IPIP needs a plain-language explanation');
+assert.match(research, /What comes from research and what UTL added/, 'Research and UTL interpretation must be separated');
+assert.match(research, /How UTL calculates the score/, 'The pilot score calculation must be explained');
+assert.match(research, /Limits to keep in mind/, 'Research limits section is missing');
+assert.match(research, /UTL interpretation/, 'UTL interpretation section is missing');
+assert(!research.includes('UTL is still testing'), 'Research page should not discuss internal testing status');
+for (const claim of ['scientifically proven', 'validated', 'clinically tested', 'guaranteed accurate']) {
+  assert(!research.toLowerCase().includes(claim), `Research page contains an inflated claim: ${claim}`);
+}
+
+const itemBlock = html.match(/"items":\s*\[(.*?)\],\s*"domains"/s);
+assert(itemBlock, 'Could not locate readiness questions');
+assert.strictEqual((itemBlock[1].match(/"t":/g) || []).length, 20, 'Short assessment must contain 20 questions');
+
+const moduleScriptMatch = html.match(/<script type="module">([\s\S]*?)<\/script>/);
+assert(moduleScriptMatch, 'Readiness account bridge module script is missing');
+const readinessModuleScript = moduleScriptMatch[1];
+const readinessPlainScript = html.slice(0, moduleScriptMatch.index);
+
+for (const forbidden of ['initializeApp(', 'getFirestore(', 'firebase.firestore(', 'firebase.auth(']) {
+  assert(!readinessPlainScript.includes(forbidden), `The free/full participant flow itself must not connect to Firebase directly: ${forbidden}`);
+}
+assert(!howItWorks.includes('initializeApp('), 'How-it-works page must remain disconnected from Firebase');
+
+assert.match(readinessModuleScript, /import\s*\{\s*recordReadinessCompletion,\s*checkReadinessAccountEmail,\s*sendReadinessAccessLink\s*\}\s*from\s*'\.\.\/\.\.\/assets\/firebase\.js'/, 'Readiness account bridge must import the three account functions from the shared Firebase module');
+assert.match(readinessPlainScript, /if\s*\(window\.raRecordCompletion\)/, 'Both the quick check and the full report must trigger account creation');
+assert.match(readinessPlainScript, /function isSyntheticReadinessNotification\(email\)/, 'Readiness preview must identify local and reserved-address test attempts');
+assert.match(readinessPlainScript, /if\(!isSyntheticReadinessNotification\(email\)\)/, 'Synthetic readiness attempts must not trigger live notification email');
+
+assert.match(html, /print-logo-utl-navy-header\.svg/, 'Every normal printed page needs the UTL logo');
+assert.match(html, /print-logo-signature-navy-header\.svg/, 'Every normal printed page needs the Executive Signature logo');
+assert.match(html, /print-logo-utl-white-cover\.svg/, 'Cover and closing pages need the larger UTL logo');
+assert.match(html, /print-logo-signature-white-cover\.svg/, 'Cover and closing pages need the larger Executive Signature logo');
+assert.match(html, /\.report-summary,\.report-part\{page:pg-report\}/, 'Normal report sections must share one print page template');
+assert.match(html, /\.report-summary,\.report-part\{display:block\}/, 'Print report sections must use block flow so part banners do not strand on their own page');
+assert.doesNotMatch(html, /\.report-part\{break-before:page/, 'Major report sections must not force standalone opener pages');
+assert.match(html, /target-counter\(attr\(href\),page\)/, 'The contents page must resolve final page numbers from section anchors');
+assert.match(html, /six contribute to your readiness score, and four describe your working style/, 'The report must distinguish the six scored readiness facets from the four style facets');
+assert.match(html, /range across 6 readiness facets/, 'The executive summary must describe the numeric score using only the six readiness facets');
+for (const seam of ['Whatto', 'Whatit', 'outloud', 'notleave', 'reportis']) {
+  assert(!html.includes(seam), `Print copy contains a concatenated text seam: ${seam}`);
+}
+
+assert.match(workflow, /--exclude 'reference\/'/, 'Reference sources must not ship through GitHub Pages');
+assert.match(workflow, /--exclude 'apps\/readiness-assessment\/'/, 'Private preview must not ship through GitHub Pages');
+const ignored = firebase.hosting.ignore;
+assert(ignored.includes('reference/**'), 'Reference sources must not ship through Firebase Hosting');
+assert(ignored.includes('apps/readiness-assessment/**'), 'Private preview must not ship through Firebase Hosting');
+
+console.log('readiness-assessment-preview tests passed');

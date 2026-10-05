@@ -31,6 +31,10 @@ assert.match(workspace, /Verification number:/, 'completed TSA enrollment shows 
 assert.match(workspace, /Account and sign-in/, 'account page separates protected sign-in details from editable profile fields');
 assert.match(workspace, /Email sign-in link/, 'account page explains the email-link backup');
 assert.match(workspace, /It cannot be changed here/, 'login email is explicitly read only');
+assert.match(workspace, /firebaseAuth\.getMyWorkspaces\(\)\.catch/, 'account page reads cross-program workspace access and tolerates its failure');
+assert.match(workspace, /accountEsProgramHtml\(esWorkspaces\)/, 'the programs section renders the Executive Signature entry when the account has that workspace');
+assert.match(workspace, /programId === "executive-signature"/, 'the Executive Signature program row is gated on an actual ES workspace, not shown unconditionally');
+assert.match(workspace, /appHref\("\.\.\/apps\/readiness-assessment\/index\.html"\)/, 'the Executive Signature program row links to the participant entry point');
 assert.doesNotMatch(workspace.match(/function accountPageHtml\([\s\S]*?\n  function bindAccountPage/)?.[0] || '', /change login email|unlink|link account/i, 'account page does not add provider or email management controls');
 assert.match(workspace, /\.\.\/certificate\/index\.html/, 'completed TSA enrollment links to the existing certificate');
 assert.match(workspace, /certificate\/index\.html[^\n]+target="_blank"/, 'account opens the certificate in a separate tab');
