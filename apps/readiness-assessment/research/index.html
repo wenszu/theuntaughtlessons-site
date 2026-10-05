@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lato:wght@400;700&display=swap">
-  <link rel="stylesheet" href="../assets/site-nav.css">
+  <link rel="stylesheet" href="../assets/site-nav.css?v=20260925-mobile-v1">
   <style>
     :root{--navy:#003366;--gold:#EEA320;--harvest:#C2841A;--cream:#F3EDE2;--paper:#fff;--ink:#003366;--body:#4A4A4A;--line:#ddd2c1;--soft:#EBE4D5;--steel:#4D7094}
     *{box-sizing:border-box}body{margin:0;background:var(--cream);color:var(--body);font:16px/1.6 Lato,Arial,sans-serif}a{color:var(--navy)}
@@ -122,7 +122,7 @@
     document.getElementById('sourceList').innerHTML=window.READINESS_SOURCES.sources.map(source=>`<li><strong>${source.short}:</strong> ${source.citation}<br><span class="small">Used for: ${source.use}. <a href="${source.url}" target="_blank" rel="noopener">Open the published source</a>.</span></li>`).join('');
   </script>
   <script type="module">
-    import { initReadinessNav } from '../assets/site-nav.js';
+    import { initReadinessNav } from '../assets/site-nav.js?v=20260925-mobile-v1';
     initReadinessNav({
       mount: '#raNav',
       title: 'Research',

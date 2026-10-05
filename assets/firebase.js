@@ -361,7 +361,8 @@ async function getCustomerDirectory(options = {}) {
   const result = await callable({
     search: options.search || "",
     pageSize: Number.isInteger(options.pageSize) ? options.pageSize : undefined,
-    cursorCustomerId: options.cursorCustomerId || ""
+    cursorCustomerId: options.cursorCustomerId || "",
+    programFilter: options.programFilter || ""
   });
   return result && result.data ? result.data : null;
 }
@@ -2151,6 +2152,35 @@ async function setPublicAssessmentSettings(partial) {
   await setDoc(doc(requireFirestore(), "settings", "public_assessments"), partial, { merge: true });
 }
 
+function getDefaultPaymentSettings() {
+  return {
+    enabled: false,
+    prices: {
+      tsa: { amountCents: 19900, currency: "usd", label: "Think, Speak, Act (self-guided)" },
+      "executive-signature": { amountCents: 4900, currency: "usd", label: "Executive Signature full report" }
+    }
+  };
+}
+async function getPaymentSettings() {
+  try {
+    const snap = await getDoc(doc(requireFirestore(), "settings", "payments"));
+    const defaults = getDefaultPaymentSettings();
+    if (!snap.exists()) return defaults;
+    const data = snap.data() || {};
+    return { enabled: data.enabled === true, prices: Object.assign({}, defaults.prices, data.prices || {}) };
+  } catch {
+    return getDefaultPaymentSettings();
+  }
+}
+async function setPaymentSettings(partial) {
+  await setDoc(doc(requireFirestore(), "settings", "payments"), partial, { merge: true });
+}
+async function createCheckoutSession({ program, successUrl, cancelUrl }) {
+  const callable = httpsCallable(functions, "createCheckoutSession");
+  const result = await callable({ program, successUrl, cancelUrl });
+  return result && result.data ? result.data : null;
+}
+
 function getDefaultAdminVisibilitySettings() {
   return { publicFindLevelPreview: true, findLevelLeadGateBypass: true };
 }
@@ -2315,6 +2345,9 @@ export {
   saveTsaScoringComparison,
   getPublicAssessmentSettings,
   setPublicAssessmentSettings,
+  getPaymentSettings,
+  setPaymentSettings,
+  createCheckoutSession,
   getEngagementSettings,
   getGoogleGroupSyncJobs,
   getRewardSettings,

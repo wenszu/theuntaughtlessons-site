@@ -547,7 +547,7 @@ service cloud.firestore {
     }
 
     match /settings/{docId} {
-      allow read: if docId in ['publicSite', 'public_assessments'] ||
+      allow read: if docId in ['publicSite', 'public_assessments', 'payments'] ||
         (signedIn() && docId in ['feedback', 'engagement', 'rewards', 'tsa_scoring']) ||
         isAdmin();
       allow write: if isAdmin();

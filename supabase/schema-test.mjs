@@ -86,4 +86,49 @@ denied = false; try { await as('authenticated','fb_bob',`select * from org_asses
 ok('summary denied without org role', denied);
 const s = await as('authenticated','fb_admin',`select * from org_assessment_summary('10000000-0000-0000-0000-000000000001','es')`);
 ok('summary suppressed under 5 people', s[0].suppressed === true && s[0].average_score === null);
+
+// 1100 TSA learning
+await db.exec(`
+ insert into activities (id, program_id, title, module_key) values ('p1-e1','tsa','Grocery list','phase-1'),('p2-e1','tsa','Issue tree','phase-2');
+ insert into activity_keys (key, activity_id) values ('grocery-list','p1-e1'),('issue-tree','p2-e1'),('issue-tree-builder','p2-e1');
+ insert into activity_submissions (id, person_id, activity_id, program_id, submission_key, completed_at, response)
+  values ('50000000-0000-0000-0000-000000000001','00000000-0000-0000-0000-000000000001','p1-e1','tsa','grocery-list-2026','2026-01-01T00:00:00Z','{"answer":1}');
+ insert into activity_progress (person_id, activity_id, program_id, status, completed_at, completion_count, latest_submission_id)
+  values ('00000000-0000-0000-0000-000000000001','p1-e1','tsa','completed','2026-01-01T00:00:00Z',1,'50000000-0000-0000-0000-000000000001');
+ insert into activity_drafts (person_id, activity_id, draft) values ('00000000-0000-0000-0000-000000000001','p2-e1','{"text":"draft"}');
+ insert into reward_ledger (person_id, program_id, entry_key, points) values
+  ('00000000-0000-0000-0000-000000000001','tsa','exercise-completed:p1-e1',50),
+  ('00000000-0000-0000-0000-000000000001','tsa','program-completed:tsa-program',600);
+ insert into app_settings (key, visibility, value) values ('test_private','staff','{"x":1}') on conflict (key) do nothing;
+`);
+ok('two keys map to one activity', (await q(`select count(*)::int n from activity_keys where activity_id='p2-e1'`))[0].n === 2);
+await rejects('submission frozen after insert', `update activity_submissions set response='{}' where id='50000000-0000-0000-0000-000000000001'`);
+await rejects('duplicate submission key', `insert into activity_submissions (person_id, activity_id, program_id, submission_key, completed_at) values ('00000000-0000-0000-0000-000000000001','p1-e1','tsa','grocery-list-2026',now())`);
+await rejects('completed progress needs a time', `insert into activity_progress (person_id, activity_id, program_id, status) values ('00000000-0000-0000-0000-000000000002','p1-e1','tsa','completed')`);
+await rejects('score above maximum', `insert into activity_attempts (person_id, activity_id, program_id, attempt_key, score, score_maximum, submitted_at) values ('00000000-0000-0000-0000-000000000001','p1-e1','tsa','attempt-0001',120,100,now())`);
+await db.exec(`insert into activity_attempts (person_id, activity_id, program_id, attempt_key, score, score_maximum, submitted_at) values ('00000000-0000-0000-0000-000000000001','p1-e1','tsa','attempt-0001',7,10,now())`);
+ok('score percent computed', (await q(`select score_percent from activity_attempts where attempt_key='attempt-0001'`))[0].score_percent === 70);
+await rejects('reward ledger append-only', `delete from reward_ledger where entry_key='exercise-completed:p1-e1'`);
+await rejects('reward entry earned once', `insert into reward_ledger (person_id, program_id, entry_key, points) values ('00000000-0000-0000-0000-000000000001','tsa','exercise-completed:p1-e1',50)`);
+ok('reward total is the ledger sum', (await q(`select points_total from reward_totals where person_id='00000000-0000-0000-0000-000000000001'`))[0].points_total === 650);
+await rejects('evidence source restricted', `insert into learning_profile_evidence (person_id, evidence_key, evidence_source, recorded_at) values ('00000000-0000-0000-0000-000000000001','evidence-01','guess',now())`);
+await rejects('evidence dimension keys restricted', `insert into learning_profile_evidence (person_id, evidence_key, evidence_source, recorded_at, learning_dimensions) values ('00000000-0000-0000-0000-000000000001','evidence-01','self_report',now(),'{"mood":"x"}')`);
+await db.exec(`insert into learning_profile_evidence (person_id, evidence_key, evidence_source, recorded_at, learning_dimensions) values ('00000000-0000-0000-0000-000000000001','evidence-01','self_report',now(),'{"guidance":"light_touch"}')`);
+await rejects('evidence append-only', `update learning_profile_evidence set capabilities='[]'`);
+await rejects('one pending access request per email', `insert into access_requests (email, full_name) values ('new@a.com','A'), ('new@a.com','B')`);
+ok('tsa assessments seeded', (await q(`select count(*)::int n from assessment_definitions where program_id='tsa'`))[0].n === 2);
+// RLS for learning data
+ok('alice sees her own progress', (await as('authenticated','fb_alice',`select count(*)::int n from activity_progress`))[0].n === 1);
+ok('bob sees no progress of others', (await as('authenticated','fb_bob',`select count(*)::int n from activity_progress`))[0].n === 0);
+ok('alice sees her draft', (await as('authenticated','fb_alice',`select count(*)::int n from activity_drafts`))[0].n === 1);
+ok('admin cannot see drafts', (await as('authenticated','fb_admin',`select count(*)::int n from activity_drafts`))[0].n === 0);
+ok('admin sees submissions', (await as('authenticated','fb_admin',`select count(*)::int n from activity_submissions`))[0].n === 1);
+ok('alice sees her reward total', (await as('authenticated','fb_alice',`select points_total from reward_totals`))[0].points_total === 650);
+ok('bob sees no reward rows', (await as('authenticated','fb_bob',`select count(*)::int n from reward_totals`))[0].n === 0);
+ok('anon reads public settings only', (await as('anon', null, `select count(*)::int n from app_settings`))[0].n === 3);
+ok('member reads public and member settings', (await as('authenticated','fb_bob',`select count(*)::int n from app_settings`))[0].n === 7);
+ok('admin reads all settings', (await as('authenticated','fb_admin',`select count(*)::int n from app_settings`))[0].n === 11);
+ok('learner cannot see stability events', (await as('authenticated','fb_alice',`select count(*)::int n from stability_events`))[0].n === 0);
+denied = false; try { await as('authenticated','fb_alice',`insert into activity_drafts (person_id, activity_id) values ('00000000-0000-0000-0000-000000000001','p1-e1')`); } catch { denied = true; }
+ok('browsers cannot write learning data', denied);
 console.log(`\n${pass} passed, ${fail} failed`);

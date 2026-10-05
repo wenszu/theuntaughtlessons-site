@@ -17,8 +17,8 @@ assert.ok(adminHtml.includes('data-admin-tab="programs"'), 'admin console must h
 ['section-es-overview', 'section-es-participants', 'section-es-attempts', 'section-es-configuration', 'section-es-governance']
   .forEach((id) => {
     assert.ok(adminHtml.includes(`id="${id}"`), `admin console must define ${id}`);
-    assert.ok(adminHtml.includes(`data-admin-tab-scope="programs" data-target="${id}"`), `admin console must have a Programs nav item targeting ${id}`);
-    assert.ok(adminHtml.includes(`<section class="admin-section" id="${id}" data-admin-tab-panel="programs">`), `${id} must be scoped to the programs tab panel`);
+    assert.ok(adminHtml.includes(`data-admin-tab-scope="programs" data-admin-program="executive-signature" data-target="${id}"`), `admin console must have a Programs nav item targeting ${id}`);
+    assert.ok(adminHtml.includes(`<section class="admin-section" id="${id}" data-admin-tab-panel="programs" data-admin-program="executive-signature">`), `${id} must be scoped to the programs tab panel`);
   });
 assert.ok(adminHtml.includes("'programs'") && /validAdminTab/.test(adminHtml), 'programs must be a recognized admin tab');
 

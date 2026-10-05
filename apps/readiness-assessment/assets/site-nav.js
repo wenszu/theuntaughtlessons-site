@@ -2,7 +2,7 @@
 // exercise header (member-login/content-config.js: navHtml()'s .ws-nav /
 // .ws-focused-nav-context / .ws-avatar / .ws-profile-menu) rather than a
 // simplified approximation of it. See site-nav.css for the ported CSS.
-import { auth, db, doc, getDoc, onAuthStateChanged, signOut } from '../../../assets/firebase.js';
+import { auth, db, doc, getDoc, getMyWorkspaces, onAuthStateChanged, signOut } from '../../../assets/firebase.js';
 
 function escapeHtml(value) {
   return String(value).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -13,6 +13,20 @@ function initials(name, email) {
   if (!source) return '?';
   const parts = source.includes('@') ? [source.split('@')[0]] : source.split(/\s+/);
   return parts.slice(0, 2).map((part) => part[0]).join('').toUpperCase();
+}
+
+// Mirrors how member-login/content-config.js renders its own avatar: the
+// sign-in provider's photo when there is one, initials otherwise. This page
+// has no custom avatar-icon picker of its own (that lives in TSA's Account
+// page, stored on authorized_members, which this ES-only script must not
+// depend on), so the provider photo is the one thing worth matching here.
+function avatarMarkup(name, email, photoURL) {
+  const fallback = escapeHtml(initials(name, email));
+  if (!photoURL) return fallback;
+  // Sized inline, not just via site-nav.css, so a stale cached stylesheet (this
+  // file has no cache-busting query string) can never make the photo render
+  // at its native, unconstrained size again.
+  return `<img src="${escapeHtml(photoURL)}" alt="" style="width:100%;height:100%;object-fit:cover;display:block" onerror="this.hidden=true;this.parentNode.textContent='${fallback}'">`;
 }
 
 // While testing against local emulators, ?emulators=true has to survive every
@@ -37,10 +51,15 @@ function propagateEmulatorFlag() {
 // X" line). secondaryLinks: [{ label, href }] shown on the right, before the
 // signed-in avatar (or where it would go, signed out).
 // resultsHref: relative path from this page to apps/readiness-assessment/my-results/.
+// homeHref: relative path from this page to apps/readiness-assessment/home/.
+// When set, a signed-in visitor's first backLink (normally "Back to the
+// site") points here instead, since a returning participant has somewhere
+// more useful to land than the public homepage. Signed-out visitors keep the
+// original href. Omit this on the home page itself.
 // titleId/linksId: only index.html's internal admin/plan preview needs these
 // exact element ids, to keep swapping their content/visibility the way it
 // already did before this nav was rebuilt.
-export function initReadinessNav({ mount, title, backLinks = [], secondaryLinks = [], resultsHref, titleId, linksId }) {
+export function initReadinessNav({ mount, title, backLinks = [], secondaryLinks = [], resultsHref, homeHref, titleId, linksId }) {
   const host = document.querySelector(mount);
   if (!host) return;
 
@@ -73,7 +92,10 @@ export function initReadinessNav({ mount, title, backLinks = [], secondaryLinks 
 
   const userMount = host.querySelector('#raUserMount');
 
+  const firstBackLink = host.querySelector('.ra-nav-links a');
+
   onAuthStateChanged(auth, async (user) => {
+    if (firstBackLink) firstBackLink.href = (user && homeHref) ? homeHref : backLinks[0]?.href || '/';
     if (!user) {
       userMount.innerHTML = '';
       userMount.hidden = true;
@@ -106,16 +128,38 @@ export function initReadinessNav({ mount, title, backLinks = [], secondaryLinks 
       name: name || user.displayName || ''
     };
     window.dispatchEvent(new CustomEvent('ra:account-readiness'));
-    const isTsaMember = Boolean(products && products.tsa);
+    // TSA access authority is authorized_members, not a field on the users doc,
+    // so this asks the same getMyWorkspaces callable the member portal's own
+    // nav uses to decide whether to show its Executive Signature workspace link.
+    let isTsaMember = false;
+    try {
+      const workspaces = await getMyWorkspaces();
+      isTsaMember = (workspaces.workspaces || []).some((workspace) => workspace && workspace.programId === 'tsa');
+    } catch (error) {
+      isTsaMember = false;
+    }
     const email = user.email || '';
+    const avatar = avatarMarkup(name, email, user.photoURL || '');
     userMount.hidden = false;
     userMount.innerHTML = `
       <span class="ra-nav-email">${escapeHtml(email)}</span>
-      <button class="ra-avatar" type="button" aria-haspopup="true" aria-expanded="false" aria-label="Account menu">${escapeHtml(initials(name, email))}</button>
+      <button class="ra-avatar" type="button" aria-haspopup="true" aria-expanded="false" aria-label="Account menu">${avatar}</button>
       <div class="ra-profile-menu" hidden>
-        <a href="${resultsHref}">My results</a>
-        ${isTsaMember ? '<a href="/member-login/">Back to your portal</a>' : ''}
-        <button type="button" data-ra-sign-out>Log out</button>
+        <div class="ra-profile-head">
+          <span class="ra-profile-avatar">${avatar}</span>
+          <div><p class="ra-profile-name">${escapeHtml(name || email)}</p><p class="ra-profile-role">Participant</p></div>
+        </div>
+        <div class="ra-profile-section">
+          <span class="ra-profile-section-label">Your Executive Signature workspace</span>
+          <a href="${resultsHref}">My results</a>
+        </div>
+        ${isTsaMember ? `<div class="ra-profile-section">
+          <span class="ra-profile-section-label">Workspaces</span>
+          <a href="/member-login/">Think, Speak, Act</a>
+        </div>` : ''}
+        <div class="ra-profile-section">
+          <button type="button" data-ra-sign-out>Log out</button>
+        </div>
       </div>`;
     propagateEmulatorFlag();
 

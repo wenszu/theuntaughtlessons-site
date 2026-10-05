@@ -13,7 +13,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lato:wght@400;700&family=Roboto+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="assets/site-nav.css">
+<link rel="stylesheet" href="assets/site-nav.css?v=20260925-mobile-v1">
 <style>
 :root{
   --bg:#F3EDE2; --surface:#FFFFFF; --sunk:#EBE4D5; --line:#E4DCCD;
@@ -966,15 +966,25 @@ function saveActiveAttempt(){
   activeAttempt.answers={...answers};
   try{sessionStorage.setItem(ACTIVE_ATTEMPT_KEY,JSON.stringify(activeAttempt))}catch(error){console.warn('Could not save readiness attempt',error)}
 }
-function startOrResumeAttempt(forceNew=false){
+function startOrResumeAttempt(forceNew=false,allowComplete=false){
   let saved=null;
   if(!forceNew){try{saved=JSON.parse(sessionStorage.getItem(ACTIVE_ATTEMPT_KEY)||'null')}catch(error){saved=null}}
-  if(saved&&saved.formVersion===FREE_FORM_VERSION&&window.READINESS_FORMS.validateAttempt(saved))activeAttempt=saved;
+  // A saved attempt that is already fully answered is a finished take, not
+  // progress to resume into a new one. Every call site that means "begin or
+  // continue taking the quiz" leaves allowComplete false, so it never reuses
+  // a finished attempt's answers, lands on its last already-answered question
+  // only, and lets one click send the visitor straight to a result built
+  // almost entirely from stale answers it never actually asked again. Only
+  // "show me the result I already have" call sites (seeResultBtn) pass
+  // allowComplete=true, since those really do want that finished attempt.
+  const savedIsComplete=saved&&saved.itemOrder&&saved.answers&&saved.itemOrder.every((id)=>saved.answers[id]!=null);
+  if(saved&&(allowComplete||!savedIsComplete)&&saved.formVersion===FREE_FORM_VERSION&&window.READINESS_FORMS.validateAttempt(saved))activeAttempt=saved;
   else activeAttempt=window.READINESS_FORMS.createAttempt({formVersion:FREE_FORM_VERSION});
   const baseById=new Map(ITEMS.map(it=>[it.id,it]));
   attemptItems=activeAttempt.itemOrder.map(id=>baseById.get(id));
   answers={...(activeAttempt.answers||{})};
-  qi=Math.min(Object.keys(answers).length,attemptItems.length-1);
+  const firstUnanswered=attemptItems.findIndex(it=>answers[it.id]==null);
+  qi=firstUnanswered===-1?attemptItems.length-1:firstUnanswered;
   saveActiveAttempt();
 }
 const screens=['t-landing','t-details','t-background','t-consent','t-intro','t-q','t-result','t-full-intro','t-full-q','t-full-result'];
@@ -1005,6 +1015,17 @@ function beginParticipantFlow(){
   if(!signedIn){setInviteMode(false);go('t-details');return}
   participant=signedIn;
   pname=participant.firstName;
+  // window.__raAccountIdentity (what signedInParticipant() reads) is set for
+  // any signed-in visitor, including someone who has never taken this
+  // assessment before but is signed in from elsewhere on the site (for
+  // example, a TSA member who followed the workspace switcher here for the
+  // first time). window.__raAccountReadiness is only set once they have an
+  // actual completed attempt on file, which is the real signal for "this is
+  // a retake." Work/demographic answers are never persisted server-side (see
+  // logCompletedResult, which only sends them to the notification email), so
+  // there is nothing to prefill from on a retake. Skipping the step entirely
+  // is correct, not just more convenient, since asking again adds nothing.
+  if(window.__raAccountReadiness){go('t-consent');return}
   $('#ageRangeIn').value='';
   $('#careerStageIn').value='';
   $('#goalIn').value='';
@@ -1068,7 +1089,7 @@ window.addEventListener('ra:account-readiness',async()=>{
     renderAccountResultNotice(null);
   }
 });
-$('#seeResultBtn').onclick=()=>{startOrResumeAttempt(false);renderResult();go('t-result')};
+$('#seeResultBtn').onclick=()=>{startOrResumeAttempt(false,true);renderResult();go('t-result')};
 $('#retakeBtn').onclick=()=>{try{sessionStorage.removeItem(ACTIVE_ATTEMPT_KEY)}catch(error){}activeAttempt=null;answers={};beginParticipantFlow()};
 $('#detailsBack').onclick=()=>go('t-landing');
 $('#t-details').addEventListener('submit',e=>{
@@ -1106,7 +1127,12 @@ function answer(v){
   answers[attemptItems[qi].id]=v;
   saveActiveAttempt();
   document.querySelectorAll('.opt').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v==v?'true':'false'));
-  setTimeout(()=>{if(qi<attemptItems.length-1){qi++;renderQ()}else{renderResult();go('t-result')}},180);
+  setTimeout(()=>{
+    const next=attemptItems.findIndex((item,index)=>index>qi&&answers[item.id]==null);
+    if(next!==-1){qi=next;renderQ()}
+    else if(qi<attemptItems.length-1){qi++;renderQ()}
+    else{renderResult();go('t-result')}
+  },180);
 }
 function personBadge(name){
   const initials=name.split(' ').filter(Boolean).map(w=>w[0]).slice(0,2).join('').toUpperCase();
@@ -1270,7 +1296,20 @@ function renderResult(){
     <div class="stars" id="stars">${[1,2,3,4,5].map(n=>`<button aria-pressed="false" data-n="${n}">${n}</button>`).join('')}<span class="small muted" style="align-self:center">1 = Not me at all · 5 = Spot on</span></div>
     <div class="field"><label for="fbText">Which part felt off? (optional)</label><textarea id="fbText" rows="2"></textarea></div>
     <div><button class="btn primary" id="fbSend">Send feedback</button></div></div>
-  <div class="card next">${fullReportLocation()!=='none'?`<h3>You already have a full facet-level report</h3><p>You completed the separate 40-statement assessment. Open it again any time, no need to retake it.</p><div class="row"><button class="btn gold" id="getFullReportBtn">See your full report</button><a class="btn" style="background:transparent;color:inherit;border-color:currentColor" href="../../programs.html" target="_blank" rel="noopener">Join the TSA waitlist</a></div>`:`<h3>Want the full facet-level report?</h3><p>The full report is a separate 40-statement assessment selected from an established 120-question personality measure that examines more specific traits. Researchers know the full measure as the IPIP-NEO-120. It looks at 10 more specific traits, confirms your profile and names your top two strengths and top two growth edges.</p><div class="price-tag"><span class="price-was">$9.95</span><span class="price-now">Free</span><span class="price-note">while we are testing this</span></div><p class="small muted">Once purchases open, it will be a one-time digital sale with no refunds.</p><div class="row"><button class="btn gold" id="getFullReportBtn">Get the full report, free for now</button><a class="btn" style="background:transparent;color:inherit;border-color:currentColor" href="../../programs.html" target="_blank" rel="noopener">Join the TSA waitlist</a></div>`}</div>
+  <div class="card next">${fullReportLocation()!=='none'?`<h3>You already have a full facet-level report</h3><p>You completed the separate 40-statement assessment. Open it again any time, no need to retake it.</p><div class="row"><button class="btn gold" id="getFullReportBtn">See your full report</button><a class="btn" style="background:transparent;color:inherit;border-color:currentColor" href="../../programs.html" target="_blank" rel="noopener">Join the TSA waitlist</a></div>`:(()=>{
+    const esPriceSetting=window.__raPaymentSettings&&window.__raPaymentSettings.enabled&&window.__raPaymentSettings.prices&&window.__raPaymentSettings.prices['executive-signature'];
+    // A price of exactly 0 means the admin deliberately kept this program free
+    // while the master toggle is on for other programs, so it is treated the
+    // same as payments being off for Executive Signature specifically: no
+    // Stripe checkout, normal free flow.
+    const paymentsOn=Boolean(esPriceSetting&&esPriceSetting.amountCents>0);
+    const esPrice=paymentsOn?esPriceSetting:null;
+    const esPriceLabel=esPrice?'$'+(esPrice.amountCents/100).toFixed(2):'$9.95';
+    const priceTag=paymentsOn?`<span class="price-now">${esPriceLabel}</span><span class="price-note">one-time, no subscription</span>`:`<span class="price-was">$9.95</span><span class="price-now">Free</span><span class="price-note">while we are testing this</span>`;
+    const priceNote=paymentsOn?'This is a one-time digital purchase with no refunds.':'Once purchases open, it will be a one-time digital sale with no refunds.';
+    const ctaLabel=paymentsOn?`Buy the full report, ${esPriceLabel}`:'Get the full report, free for now';
+    return `<h3>Want the full facet-level report?</h3><p>The full report is a separate 40-statement assessment selected from an established 120-question personality measure that examines more specific traits. Researchers know the full measure as the IPIP-NEO-120. It looks at 10 more specific traits, confirms your profile and names your top two strengths and top two growth edges.</p><div class="price-tag">${priceTag}</div><p class="small muted">${priceNote}</p><div class="row"><button class="btn gold" id="getFullReportBtn">${esc(ctaLabel)}</button><a class="btn" style="background:transparent;color:inherit;border-color:currentColor" href="../../programs.html" target="_blank" rel="noopener">Join the TSA waitlist</a></div>`;
+  })()}</div>
   ${new URLSearchParams(location.search).get('debug')==='1'?`<details class="db"><summary>Developer preview: saved record</summary><pre>${esc(JSON.stringify(record,null,2))}</pre></details>`:''}
   <div class="row"><button class="btn" id="again">Take it again</button></div>`;
   $('#stars').onclick=e=>{const b=e.target.closest('button');if(!b)return;document.querySelectorAll('#stars button').forEach(x=>x.setAttribute('aria-pressed',x===b?'true':'false'))};
@@ -1287,10 +1326,27 @@ function renderResult(){
   $('#copyResultLink').onclick=()=>copyShare(trackedUrl('copy_link'),'Assessment link copied');
   $('#shareImage').onclick=()=>downloadResultCard(signature,p,shapeScores,shareBaseUrl);
   $('#again').onclick=()=>go('t-landing');
-  $('#getFullReportBtn').onclick=()=>{
+  $('#getFullReportBtn').onclick=async ()=>{
     const loc=fullReportLocation();
-    if(loc==='local'){if(!fullActiveAttempt)startOrResumeFullAttempt(false);renderFullResult();go('t-full-result');return}
+    if(loc==='local'){if(!fullActiveAttempt)startOrResumeFullAttempt(false,true);renderFullResult();go('t-full-result');return}
     if(loc==='account'){goToMyResults();return}
+    const esPriceSetting=window.__raPaymentSettings&&window.__raPaymentSettings.enabled&&window.__raPaymentSettings.prices&&window.__raPaymentSettings.prices['executive-signature'];
+    const paymentsOn=Boolean(esPriceSetting&&esPriceSetting.amountCents>0);
+    if(paymentsOn){
+      const btn=$('#getFullReportBtn');
+      const originalLabel=btn.textContent;
+      btn.disabled=true;btn.textContent='Redirecting…';
+      try{
+        const successUrl=new URL('home/',location.href).toString()+'?purchase=success';
+        const result=await window.raCreateCheckoutSession({program:'executive-signature',successUrl,cancelUrl:location.href});
+        if(result&&result.url){window.location.href=result.url;return}
+        throw new Error('No checkout URL returned.');
+      }catch(error){
+        btn.disabled=false;btn.textContent=originalLabel;
+        toast('Could not start checkout. Please try again.');
+      }
+      return;
+    }
     go('t-full-intro');
   };
   wireEmailResultBtn(participant.email,pname,'Your Executive Signature Quick Check result',[`Your Executive Signature is ${p[2]}.`,`Your Executive Readiness Score is in the ${s.band} range.`,nextLine,'See the full result and share it any time using the link below.']);
@@ -1313,15 +1369,18 @@ function saveFullActiveAttempt(){
   fullActiveAttempt.answers={...fullAnswers};
   try{sessionStorage.setItem(FULL_ACTIVE_ATTEMPT_KEY,JSON.stringify(fullActiveAttempt))}catch(error){console.warn('Could not save full report attempt',error)}
 }
-function startOrResumeFullAttempt(forceNew=false){
+function startOrResumeFullAttempt(forceNew=false,allowComplete=false){
   let saved=null;
   if(!forceNew){try{saved=JSON.parse(sessionStorage.getItem(FULL_ACTIVE_ATTEMPT_KEY)||'null')}catch(error){saved=null}}
-  if(saved&&saved.formVersion===FULL_FORM_VERSION&&window.READINESS_FORMS.validateAttempt(saved))fullActiveAttempt=saved;
+  // See the matching check and allowComplete explanation in startOrResumeAttempt.
+  const savedIsComplete=saved&&saved.itemOrder&&saved.answers&&saved.itemOrder.every((id)=>saved.answers[id]!=null);
+  if(saved&&(allowComplete||!savedIsComplete)&&saved.formVersion===FULL_FORM_VERSION&&window.READINESS_FORMS.validateAttempt(saved))fullActiveAttempt=saved;
   else fullActiveAttempt=window.READINESS_FORMS.createAttempt({formVersion:FULL_FORM_VERSION});
   const baseById=new Map(FULL_ITEMS.map(it=>[it.id,it]));
   fullAttemptItems=fullActiveAttempt.itemOrder.map(id=>baseById.get(id));
   fullAnswers={...(fullActiveAttempt.answers||{})};
-  fqi=Math.min(Object.keys(fullAnswers).length,fullAttemptItems.length-1);
+  const firstUnansweredFull=fullAttemptItems.findIndex(it=>fullAnswers[it.id]==null);
+  fqi=firstUnansweredFull===-1?fullAttemptItems.length-1:firstUnansweredFull;
   saveFullActiveAttempt();
 }
 function isFullAttemptComplete(){
@@ -1354,7 +1413,7 @@ function goToMyResults(){
 }
 $('#fullIntroBack').onclick=()=>{
   const loc=fullReportLocation();
-  if(loc==='local'){if(!fullActiveAttempt)startOrResumeFullAttempt(false);renderFullResult();go('t-full-result');return}
+  if(loc==='local'){if(!fullActiveAttempt)startOrResumeFullAttempt(false,true);renderFullResult();go('t-full-result');return}
   if(loc==='account'){goToMyResults();return}
   go('t-result');
 };
@@ -1378,7 +1437,12 @@ function answerFull(v){
   fullAnswers[fullAttemptItems[fqi].id]=v;
   saveFullActiveAttempt();
   document.querySelectorAll('#fscale .opt').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v==v?'true':'false'));
-  setTimeout(()=>{if(fqi<fullAttemptItems.length-1){fqi++;renderFullQ()}else{renderFullResult();go('t-full-result')}},180);
+  setTimeout(()=>{
+    const next=fullAttemptItems.findIndex((item,index)=>index>fqi&&fullAnswers[item.id]==null);
+    if(next!==-1){fqi=next;renderFullQ()}
+    else if(fqi<fullAttemptItems.length-1){fqi++;renderFullQ()}
+    else{renderFullResult();go('t-full-result')}
+  },180);
 }
 function scoreFull(answersIn, items=FULL_ITEMS, S=SETTINGS){
   const sums={},n={};
@@ -1507,6 +1571,8 @@ function renderFullResult(){
         </div>
         <p class="small muted">${esc(scoreGrounding)}</p>
       </div>
+    </div>
+    <div class="card score-first">
       <div class="summary-grid">
         <div class="summary-score">
           ${dial(s.readiness)}
@@ -1527,7 +1593,8 @@ function renderFullResult(){
       ${partOpener(2,'Your profile in depth',`How ${esc(p[2])} shows up day to day, under pressure, and in how you decide.`)}
       <div class="card profile" id="full-profile"><h3>${esc(p[2])}</h3><p class="pwords">${esc(p[3])}</p><p class="small muted">Two people can share this profile and still lead differently. ${esc(scoreGrounding)}</p>
         <h4>Personal style</h4>${paras(depth.personalStyle||p[4])}
-        <h4>Interacting with others</h4>${paras(depth.interactingWithOthers)}
+        <h4>Interacting with others</h4>${paras(depth.interactingWithOthers)}</div>
+      <div class="card profile">
         <div class="signature-context-grid">
           <div><b>Execution:</b> ${esc(practical[hi1[0]].value)}</div>
           <div><b>Under pressure:</b> Your Steadiness result shows how readily you keep judgment available when pressure rises.</div>
@@ -1986,7 +2053,13 @@ if(internalMode){
   window.raGetMyEsStatus = getMyEsStatus;
 </script>
 <script type="module">
-  import { initReadinessNav } from './assets/site-nav.js';
+  import { getPaymentSettings, createCheckoutSession } from '../../assets/firebase.js';
+  window.raCreateCheckoutSession = createCheckoutSession;
+  window.__raPaymentSettings = { enabled: false, prices: {} };
+  getPaymentSettings().then((settings) => { window.__raPaymentSettings = settings; }).catch(() => {});
+</script>
+<script type="module">
+  import { initReadinessNav } from './assets/site-nav.js?v=20260925-mobile-v1';
   initReadinessNav({
     mount: '#raNav',
     title: 'Take the assessment',
@@ -1994,7 +2067,8 @@ if(internalMode){
     linksId: 'publicAssessmentNav',
     backLinks: [{ label: '← Back to the site', href: '/' }],
     secondaryLinks: [{ label: 'How it works', href: 'how-it-works/' }, { label: 'Research', href: 'research/' }],
-    resultsHref: 'my-results/'
+    resultsHref: 'my-results/',
+    homeHref: 'home/'
   });
   if (window.__raInternalMode) {
     document.getElementById('publicAssessmentNav').hidden = true;

@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Your Executive Signature | The Untaught Lessons</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lato:wght@400;700&display=swap">
+  <link rel="stylesheet" href="../assets/site-nav.css?v=20260925-mobile-v1">
+  <style>
+    :root{--navy:#003366;--gold:#EEA320;--harvest:#C2841A;--ink:#4A4A4A;--muted:#4D7094;--paper:#F3EDE2;--card:#fff;--line:#ddd2c1}
+    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.55 Lato,Arial,sans-serif}
+    h1,h2,h3{color:var(--navy);font-family:'Playfair Display',Georgia,serif;line-height:1.08}
+    h1{font-size:clamp(2rem,5vw,3.1rem);margin:.1em 0}h2{font-size:clamp(1.3rem,2.4vw,1.7rem);margin:0 0 12px}
+    .wrap{width:min(760px,calc(100% - 32px));margin:auto}
+    .hero{background:var(--card);padding:44px 0 36px;border-bottom:1px solid var(--line)}
+    .hero-row{display:flex;align-items:flex-start;gap:18px}
+    .hero-mark{width:40px;height:40px;flex:0 0 auto;margin-top:10px}
+    .hero p{max-width:60ch;margin:0 0 0}
+    .section{padding:36px 0}
+    .card{background:var(--card);border-radius:14px;padding:28px;margin-bottom:18px}
+    .card:last-child{margin-bottom:0}
+    p{margin:0 0 14px}
+    .eyebrow{font-family:"Roboto Mono",monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:0 0 8px}
+    .btn{display:inline-block;background:var(--navy);color:#fff;border:0;border-radius:8px;padding:12px 22px;font-weight:700;font-size:14.5px;cursor:pointer;text-decoration:none}
+    .btn.gold{background:var(--gold);color:var(--navy)}
+    .btn.outline{background:transparent;color:var(--navy);border:1px solid var(--line)}
+    .row{display:flex;gap:12px;flex-wrap:wrap;margin-top:6px}
+    .small{font-size:13px}.muted{color:var(--muted)}
+    .meta-line{color:var(--muted);font-size:14px;margin:0 0 18px}
+    .divider{height:1px;background:var(--line);margin:20px 0}
+    .history-row{display:flex;align-items:baseline;justify-content:space-between;gap:14px;padding:10px 0;border-top:1px solid var(--line)}
+    .history-row:first-child{border-top:0;padding-top:0}
+    .history-row b{color:var(--navy)}
+  </style>
+</head>
+<body>
+  <header id="raNav" class="ra-nav" aria-label="Assessment navigation"></header>
+
+  <header class="hero"><div class="wrap hero-row">
+    <img class="hero-mark" src="../../../assets/mark-readiness.svg" alt="">
+    <div>
+      <p class="eyebrow" style="color:var(--gold)">Executive Signature&trade;</p>
+      <h1 id="homeGreeting">Welcome back</h1>
+      <p id="homeSub" class="muted">This is your Executive Signature space. Come back here any time to see your result or take the next step.</p>
+    </div>
+  </div></header>
+
+  <main>
+    <section class="section"><div class="wrap">
+
+      <div class="card" id="signedOutState" hidden>
+        <h2>You are not signed in</h2>
+        <p class="muted">Sign in to see your result here. If you already completed the assessment, request an access link from the results page.</p>
+        <div class="row">
+          <a class="btn gold" href="../">Take the assessment</a>
+          <a class="btn outline" href="../my-results/">Find my result</a>
+        </div>
+      </div>
+
+      <div class="card" id="noResultState" hidden>
+        <h2>No result yet</h2>
+        <p class="muted">You have not completed the quick check or the full report. The quick check takes about three minutes and gives you a first read on your executive readiness.</p>
+        <div class="row"><a class="btn gold" href="../">Take the quick check</a></div>
+      </div>
+
+      <div id="resultState" hidden>
+        <div class="card">
+          <p class="eyebrow" id="resultEyebrow"></p>
+          <h2 id="resultBand"></h2>
+          <p class="meta-line" id="resultMeta"></p>
+          <h3 id="resultProfile" style="margin:0 0 4px;font-size:1.2rem"></h3>
+          <p class="small muted" id="resultNote"></p>
+        </div>
+        <div class="card">
+          <h3 style="margin:0 0 12px;font-size:1.1rem">What is next</h3>
+          <div class="row" id="resultActions"></div>
+        </div>
+        <div class="card" id="historyCard" hidden>
+          <h3 id="historyTitle" style="margin:0 0 4px;font-size:1.1rem"></h3>
+          <p class="small muted" style="margin:0 0 14px">Every time you took the quick check, most recent first.</p>
+          <div id="historyList"></div>
+        </div>
+      </div>
+
+    </div></section>
+
+    <section class="section" style="padding-top:0"><div class="wrap">
+      <div class="divider"></div>
+      <p class="small muted">Looking for the rest of the site? <a href="/">Back to theuntaughtlessons.com</a></p>
+    </div></section>
+  </main>
+
+  <script type="module">
+    import { auth, getMyEsStatus, onAuthStateChanged } from '../../../assets/firebase.js';
+
+    const $ = (s) => document.querySelector(s);
+    const esc = (s) => String(s || '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    const show = (id) => { ['signedOutState', 'noResultState', 'resultState'].forEach((s) => { $('#' + s).hidden = s !== id; }); };
+
+    function formatDate(iso) {
+      if (!iso) return null;
+      const date = new Date(iso);
+      if (Number.isNaN(date.getTime())) return null;
+      return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    }
+
+    function actionButton(label, href, kind) {
+      const a = document.createElement('a');
+      a.className = 'btn' + (kind ? ' ' + kind : '');
+      a.href = href;
+      a.textContent = label;
+      return a;
+    }
+
+    async function render() {
+      let status;
+      try {
+        status = await getMyEsStatus();
+      } catch (error) {
+        show('noResultState');
+        return;
+      }
+      const quick = status.assessments['quick-check'];
+      const full = status.assessments['full-assessment'];
+      const fullDone = full && full.latestAttempt;
+      const quickDone = quick && quick.latestAttempt;
+
+      if (!fullDone && !quickDone) { show('noResultState'); return; }
+
+      const attempt = fullDone ? full.latestAttempt : quick.latestAttempt;
+      const isFull = Boolean(fullDone);
+      $('#resultEyebrow').textContent = isFull ? 'Full report · 40 questions' : 'Quick check · 20 questions';
+      $('#resultBand').textContent = attempt.band + ' range';
+      const dateLabel = formatDate(attempt.completedAt);
+      $('#resultMeta').textContent = dateLabel ? 'Completed ' + dateLabel : 'Result on file';
+      $('#resultProfile').textContent = attempt.profileLabel || '';
+      $('#resultNote').textContent = isFull
+        ? 'This is your confirmed profile from the full facet-level report.'
+        : 'This is your quick-check result. The full report confirms it across 10 facets and names your top strengths and growth edges.';
+
+      const actions = $('#resultActions');
+      actions.innerHTML = '';
+      if (isFull) {
+        actions.appendChild(actionButton('See your full result', '../my-results/', 'gold'));
+      } else {
+        actions.appendChild(actionButton('Get the full report', '../', 'gold'));
+        actions.appendChild(actionButton('See this result again', '../my-results/', 'outline'));
+      }
+      actions.appendChild(actionButton('Retake the quick check', '../', 'outline'));
+
+      const quickHistory = (quick && quick.recentAttempts) || [];
+      const historyCard = $('#historyCard');
+      if (quickHistory.length > 1) {
+        $('#historyTitle').textContent = 'Quick check history (' + quickHistory.length + ')';
+        const list = $('#historyList');
+        list.innerHTML = '';
+        quickHistory.forEach((entry) => {
+          const row = document.createElement('div');
+          row.className = 'history-row';
+          const entryDate = formatDate(entry.completedAt) || 'Date unknown';
+          row.innerHTML = '<span>' + esc(entryDate) + '</span><b>' + esc(entry.band) + ' &middot; ' + esc(entry.profileLabel) + '</b>';
+          list.appendChild(row);
+        });
+        historyCard.hidden = false;
+      } else {
+        historyCard.hidden = true;
+      }
+
+      show('resultState');
+    }
+
+    onAuthStateChanged(auth, (user) => {
+      if (!user) { show('signedOutState'); return; }
+      $('#homeGreeting').textContent = 'Welcome back';
+      render();
+    });
+  </script>
+  <script type="module">
+    import { initReadinessNav } from '../assets/site-nav.js?v=20260925-mobile-v1';
+    initReadinessNav({
+      mount: '#raNav',
+      title: 'Your Executive Signature workspace',
+      backLinks: [{ label: '← Back to the site', href: '/' }],
+      secondaryLinks: [{ label: 'How it works', href: '../how-it-works/' }, { label: 'Research', href: '../research/' }],
+      resultsHref: '../my-results/'
+    });
+  </script>
+</body>
+</html>

@@ -94,26 +94,71 @@
   cursor: pointer;
   display: grid;
   place-items: center;
+  overflow: hidden;
+  padding: 0;
 }
+.ra-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
 .ra-profile-menu {
   position: absolute;
   top: calc(100% + 10px);
   right: 0;
   z-index: 100;
-  min-width: 200px;
+  min-width: 220px;
+  max-width: 260px;
   background: #fff;
   border: 1px solid var(--line, #ddd2c1);
   border-radius: 10px;
   box-shadow: 0 10px 28px rgba(0, 51, 102, .14);
-  padding: 6px;
+  padding: 0;
+  overflow: hidden;
+}
+
+.ra-profile-head {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  background: var(--navy, #003366);
+  color: #fff;
+  padding: 14px 16px 13px;
+  border-bottom: 3px solid var(--gold, #EEA320);
+}
+.ra-profile-avatar {
+  width: 46px;
+  height: 46px;
+  border-radius: 999px;
+  background: var(--gold, #EEA320);
+  color: var(--navy, #003366);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  font: 700 14px 'Lato', sans-serif;
+  flex: 0 0 auto;
+}
+.ra-profile-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.ra-profile-name { margin: 0; color: #fff; font-size: 15px; font-weight: 700; line-height: 1.15; }
+.ra-profile-role { margin: 4px 0 0; color: var(--gold, #EEA320); font: 700 9.5px 'Lato', sans-serif; letter-spacing: 0; }
+
+.ra-profile-section {
+  padding: 11px 16px 10px;
+  border-bottom: 1px solid var(--line, #ddd2c1);
+}
+.ra-profile-section:last-child { border-bottom: 0; }
+.ra-profile-section-label {
+  display: block;
+  margin: 0 0 7px;
+  color: var(--gold, #EEA320);
+  font: 700 9.5px 'Lato', sans-serif;
+  letter-spacing: 0;
 }
 
 .ra-profile-menu a,
 .ra-profile-menu button {
   display: block;
   width: 100%;
-  padding: 8px 10px;
+  min-height: 32px;
+  padding: 4px 0;
   border: 0;
   border-radius: 6px;
   background: transparent;
@@ -126,7 +171,7 @@
   cursor: pointer;
 }
 .ra-profile-menu a:hover,
-.ra-profile-menu button:hover { background: var(--sunk, #EBE4D5); }
+.ra-profile-menu button:hover { text-decoration: underline; }
 
 @media (max-width: 768px) {
   .ra-nav-inner { height: auto; grid-template-columns: auto 1fr auto; grid-template-rows: auto auto; gap: 0 10px; width: 100%; padding: 8px 12px 0; }
