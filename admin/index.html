@@ -2777,68 +2777,73 @@
     </div>
 
     <nav class="admin-tabs" aria-label="Admin console tabs">
-      <button class="admin-tab active" type="button" data-admin-tab="content-manager">Program</button>
-      <button class="admin-tab" type="button" data-admin-tab="student-progress">Student Progress</button>
-      <button class="admin-tab" type="button" data-admin-tab="member-management">Member Access</button>
-      <button class="admin-tab" type="button" data-admin-tab="customers">Customers</button>
-      <button class="admin-tab" type="button" data-admin-tab="executive-signature">Executive Signature</button>
-      <button class="admin-tab" type="button" data-admin-tab="rewards">Rewards</button>
+      <button class="admin-tab active" type="button" data-admin-tab="customers">Customers</button>
+      <button class="admin-tab" type="button" data-admin-tab="programs">Programs</button>
+      <button class="admin-tab" type="button" data-admin-tab="organizations">Organizations</button>
       <button class="admin-tab" type="button" data-admin-tab="engagement">Communications</button>
-      <button class="admin-tab" type="button" data-admin-tab="content-library">Content Data</button>
-      <button class="admin-tab" type="button" data-admin-tab="admin-tools">Preview &amp; Health</button>
+      <button class="admin-tab" type="button" data-admin-tab="content-library">Content</button>
+      <button class="admin-tab" type="button" data-admin-tab="admin-tools">Operations</button>
     </nav>
 
     <aside class="admin-sidebar">
       <div class="sidebar-title">Admin</div>
       <div class="sidebar-divider"></div>
 
-      <span class="nav-group-label" data-admin-nav-group="content-manager">Program access</span>
-      <button class="admin-nav-item active" data-admin-tab-scope="content-manager" data-target="section-access-controls">Visibility &amp; access</button>
-
-      <span class="nav-group-label" data-admin-nav-group="content-manager">Program content</span>
-      <button class="admin-nav-item" data-admin-tab-scope="content-manager" data-target="section-orientation">Orientation</button>
-      <button class="admin-nav-item" data-admin-tab-scope="content-manager" data-target="section-phase1">Phase 1</button>
-      <button class="admin-nav-item" data-admin-tab-scope="content-manager" data-target="section-phase2">Phase 2</button>
-      <button class="admin-nav-item" data-admin-tab-scope="content-manager" data-target="section-phase3">Phase 3</button>
-
-      <span class="nav-group-label" data-admin-nav-group="student-progress">Progress</span>
-      <button class="admin-nav-item" data-admin-tab-scope="student-progress" data-target="section-student-progress">Student Progress</button>
-      <button class="admin-nav-item" data-admin-tab-scope="student-progress" data-target="section-platform-overview">Platform overview</button>
-      <button class="admin-nav-item" data-admin-tab-scope="student-progress" data-target="section-launch-health">Learner readiness</button>
-      <button class="admin-nav-item" data-admin-tab-scope="student-progress" data-target="section-leaderboard">Leaderboard</button>
-      <button class="admin-nav-item" data-admin-tab-scope="student-progress" data-target="section-engagement-insights">Engagement Insights</button>
-      <button class="admin-nav-item" data-admin-tab-scope="student-progress" data-target="section-cohort-analytics">Cohort Analytics</button>
-
       <span class="nav-group-label" data-admin-nav-group="customers">Customers</span>
-      <button class="admin-nav-item" data-admin-tab-scope="customers" data-target="section-customers-directory">Directory</button>
+      <button class="admin-nav-item active" data-admin-tab-scope="customers" data-target="section-customers-directory">Directory</button>
 
-      <span class="nav-group-label" data-admin-nav-group="executive-signature">Executive Signature</span>
-      <button class="admin-nav-item" data-admin-tab-scope="executive-signature" data-target="section-es-overview">Overview</button>
-      <button class="admin-nav-item" data-admin-tab-scope="executive-signature" data-target="section-es-participants">Participants</button>
-      <button class="admin-nav-item" data-admin-tab-scope="executive-signature" data-target="section-es-attempts">Attempts</button>
-      <button class="admin-nav-item" data-admin-tab-scope="executive-signature" data-target="section-es-configuration">Configuration</button>
-      <button class="admin-nav-item" data-admin-tab-scope="executive-signature" data-target="section-es-governance">Data governance</button>
+      <span class="nav-group-label" data-admin-nav-group="programs">TSA · Program access</span>
+      <button class="admin-nav-item" data-admin-tab-scope="programs" data-target="section-access-controls">Visibility &amp; access</button>
 
-      <span class="nav-group-label" data-admin-nav-group="rewards">Rewards</span>
-      <button class="admin-nav-item" data-admin-tab-scope="rewards" data-target="section-reward-levels">Levels</button>
-      <button class="admin-nav-item" data-admin-tab-scope="rewards" data-target="section-reward-overview">Rules summary</button>
-      <button class="admin-nav-item" data-admin-tab-scope="rewards" data-target="section-reward-rules">MP rules</button>
-      <button class="admin-nav-item" data-admin-tab-scope="rewards" data-target="section-reward-simulator">Award preview</button>
+      <span class="nav-group-label" data-admin-nav-group="programs">TSA · Program content</span>
+      <button class="admin-nav-item" data-admin-tab-scope="programs" data-target="section-orientation">Orientation</button>
+      <button class="admin-nav-item" data-admin-tab-scope="programs" data-target="section-phase1">Phase 1</button>
+      <button class="admin-nav-item" data-admin-tab-scope="programs" data-target="section-phase2">Phase 2</button>
+      <button class="admin-nav-item" data-admin-tab-scope="programs" data-target="section-phase3">Phase 3</button>
 
-      <span class="nav-group-label" data-admin-nav-group="member-management">Access</span>
-      <button class="admin-nav-item" data-admin-tab-scope="member-management" data-target="section-members">Members</button>
-      <button class="admin-nav-item" data-admin-tab-scope="member-management" data-target="section-organization-access">Organization access</button>
-      <button class="admin-nav-item" data-admin-tab-scope="member-management" data-target="section-emergency-access">Emergency access</button>
+      <span class="nav-group-label" data-admin-nav-group="programs">TSA · Progress</span>
+      <button class="admin-nav-item" data-admin-tab-scope="programs" data-target="section-student-progress">Student Progress</button>
+      <button class="admin-nav-item" data-admin-tab-scope="programs" data-target="section-platform-overview">Platform overview</button>
+      <button class="admin-nav-item" data-admin-tab-scope="programs" data-target="section-launch-health">Learner readiness</button>
+      <button class="admin-nav-item" data-admin-tab-scope="programs" data-target="section-leaderboard">Leaderboard</button>
+      <button class="admin-nav-item" data-admin-tab-scope="programs" data-target="section-engagement-insights">Engagement Insights</button>
+      <button class="admin-nav-item" data-admin-tab-scope="programs" data-target="section-cohort-analytics">Cohort Analytics</button>
+
+      <span class="nav-group-label" data-admin-nav-group="programs">TSA · Rewards</span>
+      <button class="admin-nav-item" data-admin-tab-scope="programs" data-target="section-reward-levels">Levels</button>
+      <button class="admin-nav-item" data-admin-tab-scope="programs" data-target="section-reward-overview">Rules summary</button>
+      <button class="admin-nav-item" data-admin-tab-scope="programs" data-target="section-reward-rules">MP rules</button>
+      <button class="admin-nav-item" data-admin-tab-scope="programs" data-target="section-reward-simulator">Award preview</button>
+
+      <span class="nav-group-label" data-admin-nav-group="programs">TSA · Enrollments</span>
+      <button class="admin-nav-item" data-admin-tab-scope="programs" data-target="section-members">Members</button>
+
+      <span class="nav-group-label" data-admin-nav-group="programs">TSA · Credentials</span>
+      <button class="admin-nav-item" data-admin-tab-scope="programs" data-target="section-certificate">Certificate</button>
+
+      <span class="nav-group-label" data-admin-nav-group="programs">TSA · Assessments</span>
+      <button class="admin-nav-item" data-admin-tab-scope="programs" data-target="section-cl-question-bank">Assessment content review</button>
+
+      <span class="nav-group-label" data-admin-nav-group="programs">TSA · UX maintenance</span>
+      <button class="admin-nav-item" data-admin-tab-scope="programs" data-target="section-walkthrough-screenshots">Welcome walkthrough screenshots</button>
+
+      <span class="nav-group-label" data-admin-nav-group="programs">Executive Signature</span>
+      <button class="admin-nav-item" data-admin-tab-scope="programs" data-target="section-es-overview">Overview</button>
+      <button class="admin-nav-item" data-admin-tab-scope="programs" data-target="section-es-participants">Participants</button>
+      <button class="admin-nav-item" data-admin-tab-scope="programs" data-target="section-es-attempts">Attempts</button>
+      <button class="admin-nav-item" data-admin-tab-scope="programs" data-target="section-es-configuration">Configuration</button>
+      <button class="admin-nav-item" data-admin-tab-scope="programs" data-target="section-es-governance">Data governance</button>
+
+      <span class="nav-group-label" data-admin-nav-group="organizations">Organizations</span>
+      <button class="admin-nav-item" data-admin-tab-scope="organizations" data-target="section-organization-access">Representatives</button>
 
       <span class="nav-group-label" data-admin-nav-group="engagement">Communications</span>
       <button class="admin-nav-item" data-admin-tab-scope="engagement" data-target="section-inapp-nudges">In-app nudges</button>
       <button class="admin-nav-item" data-admin-tab-scope="engagement" data-target="section-email-templates">Email templates</button>
-      <button class="admin-nav-item" data-admin-tab-scope="engagement" data-target="section-certificate">Certificate</button>
       <button class="admin-nav-item" data-admin-tab-scope="engagement" data-target="section-global-defaults">Global defaults</button>
 
-      <span class="nav-group-label" data-admin-nav-group="content-library">Content data</span>
+      <span class="nav-group-label" data-admin-nav-group="content-library">Content</span>
       <button class="admin-nav-item" data-admin-tab-scope="content-library" data-target="section-cl-files">Data files</button>
-      <button class="admin-nav-item" data-admin-tab-scope="content-library" data-target="section-cl-question-bank">Assessment content review</button>
 
       <span class="nav-group-label" data-admin-nav-group="admin-tools">Preview</span>
       <button class="admin-nav-item" data-admin-tab-scope="admin-tools" data-target="section-visibility">Member preview settings</button>
@@ -2846,13 +2851,14 @@
       <span class="nav-group-label" data-admin-nav-group="admin-tools">Health</span>
       <button class="admin-nav-item" data-admin-tab-scope="admin-tools" data-target="section-site-reliability">Technical reliability</button>
       <button class="admin-nav-item" data-admin-tab-scope="admin-tools" data-target="section-sync">Site health check</button>
-      <button class="admin-nav-item" data-admin-tab-scope="admin-tools" data-target="section-walkthrough-screenshots">Welcome walkthrough screenshots</button>
+      <span class="nav-group-label" data-admin-nav-group="admin-tools">Access &amp; staff roles</span>
+      <button class="admin-nav-item" data-admin-tab-scope="admin-tools" data-target="section-emergency-access">Emergency access</button>
 
     </aside>
 
     <main class="admin-main">
       <section class="admin-section" id="section-site-reliability" data-admin-tab-panel="admin-tools">
-        <span class="section-label">Preview &amp; Health</span>
+        <span class="section-label">Operations · Health</span>
         <h2>Technical reliability</h2>
         <div class="section-divider"></div>
         <p class="description"><strong>Use this to watch for live problems, in real time:</strong> review errors reported by signed-in browsers, Vimeo playback problems, interrupted saves, and successful sync recoveries — all pulled from what actually happened in a learner's browser in the last 24 hours. This page shows technical incidents, not configuration. Learner onboarding and participation are kept in Learner readiness under Student Progress; whether the site's own content and settings are correctly wired up is checked separately in Site health check.</p>
@@ -2865,7 +2871,7 @@
       </section>
 
       <section class="admin-section" id="section-sync" data-admin-tab-panel="admin-tools">
-        <span class="section-label">Preview &amp; Health</span>
+        <span class="section-label">Operations · Health</span>
         <h2>Site health check</h2>
         <div class="section-divider"></div>
         <p class="description"><strong>Use this to confirm the site itself is set up correctly:</strong> checks whether the member hub still matches the admin panel's expected accordions, exercise cards, app links, completion keys, and embed keys. This is a check of content and configuration, not of live learner activity — it runs automatically on page load and does not require any learner to have signed in. For real errors reported by actual learner sessions, see Technical reliability.</p>
@@ -2878,8 +2884,8 @@
         <div class="sync-list" id="syncCheckResults"></div>
       </section>
 
-      <section class="admin-section" id="section-walkthrough-screenshots" data-admin-tab-panel="admin-tools">
-        <span class="section-label">Preview &amp; Health</span>
+      <section class="admin-section" id="section-walkthrough-screenshots" data-admin-tab-panel="programs">
+        <span class="section-label">TSA · UX maintenance</span>
         <h2>Welcome walkthrough screenshots</h2>
         <div class="section-divider"></div>
         <p class="description">The welcome walkthrough embeds real screenshots of the Learning Journey page. These go stale if that page's design changes. Review them periodically. After any redesign of the Program path section, the diagnostic nudge card, the Today's Mission popup, or the header reward cluster, re-run <code>node scripts/capture-walkthrough-screenshots.js</code> (see <code>scripts/README.md</code>) and this list will pick up the new files and dates automatically.</p>
@@ -2888,7 +2894,7 @@
       </section>
 
       <section class="admin-section" id="section-visibility" data-admin-tab-panel="admin-tools">
-        <span class="section-label">Preview &amp; Health</span>
+        <span class="section-label">Operations · Preview</span>
         <h2>Member preview settings</h2>
         <div class="section-divider"></div>
         <span class="control-scope is-preview">This browser only</span>
@@ -2907,8 +2913,8 @@
         </div>
       </section>
 
-      <section class="admin-section" id="section-access-controls" data-admin-tab-panel="content-manager">
-        <span class="section-label">Program</span>
+      <section class="admin-section" id="section-access-controls" data-admin-tab-panel="programs">
+        <span class="section-label">TSA · Program access</span>
         <h2>Visibility &amp; access</h2>
         <div class="section-divider"></div>
         <p class="description">Only live settings appear here. Diagnostic and Checkpoint use the same assessment system at two points in the member journey.</p>
@@ -3036,8 +3042,8 @@
         </dialog>
       </section>
 
-      <section class="admin-section" id="section-orientation" data-admin-tab-panel="content-manager">
-        <span class="section-label">Members</span>
+      <section class="admin-section" id="section-orientation" data-admin-tab-panel="programs">
+        <span class="section-label">TSA · Program content</span>
         <h2>Orientation</h2>
         <div class="section-divider"></div>
         <span class="control-scope is-live">Published configuration</span>
@@ -3045,8 +3051,8 @@
         <div id="embed-orientation"></div>
       </section>
 
-      <section class="admin-section" id="section-phase1" data-admin-tab-panel="content-manager">
-        <span class="section-label">Members</span>
+      <section class="admin-section" id="section-phase1" data-admin-tab-panel="programs">
+        <span class="section-label">TSA · Program content</span>
         <h2>Phase 1</h2>
         <div class="section-divider"></div>
         <span class="control-scope is-live">Published configuration</span>
@@ -3054,8 +3060,8 @@
         <div id="embed-phase1"></div>
       </section>
 
-      <section class="admin-section" id="section-phase2" data-admin-tab-panel="content-manager">
-        <span class="section-label">Members</span>
+      <section class="admin-section" id="section-phase2" data-admin-tab-panel="programs">
+        <span class="section-label">TSA · Program content</span>
         <h2>Phase 2</h2>
         <div class="section-divider"></div>
         <span class="control-scope is-live">Published configuration</span>
@@ -3063,8 +3069,8 @@
         <div id="embed-phase2"></div>
       </section>
 
-      <section class="admin-section" id="section-phase3" data-admin-tab-panel="content-manager">
-        <span class="section-label">Members</span>
+      <section class="admin-section" id="section-phase3" data-admin-tab-panel="programs">
+        <span class="section-label">TSA · Program content</span>
         <h2>Phase 3</h2>
         <div class="section-divider"></div>
         <span class="control-scope is-live">Published configuration</span>
@@ -3091,8 +3097,8 @@
         </div>
       </section>
 
-      <section class="admin-section" id="section-student-progress" data-admin-tab-panel="student-progress">
-        <span class="section-label">Progress</span>
+      <section class="admin-section" id="section-student-progress" data-admin-tab-panel="programs">
+        <span class="section-label">TSA · Progress</span>
         <h2>Student Progress</h2>
         <div class="section-divider"></div>
         <p class="description">High-level member progress from Firestore. Dots show watched lessons and completed exercises where remote progress has been saved.</p>
@@ -3163,8 +3169,8 @@
         </dialog>
       </section>
 
-      <section class="admin-section" id="section-platform-overview" data-admin-tab-panel="student-progress">
-        <span class="section-label">Progress</span>
+      <section class="admin-section" id="section-platform-overview" data-admin-tab-panel="programs">
+        <span class="section-label">TSA · Progress</span>
         <h2>Platform overview</h2>
         <div class="section-divider"></div>
         <p class="description">Aggregate learner and completion stats across every organization, plus individual learners not assigned to one.</p>
@@ -3176,8 +3182,8 @@
         <div id="poTable"><p class="mb-msg">Click Refresh overview to load platform-wide stats.</p></div>
       </section>
 
-      <section class="admin-section" id="section-launch-health" data-admin-tab-panel="student-progress">
-        <span class="section-label">Progress</span>
+      <section class="admin-section" id="section-launch-health" data-admin-tab-panel="programs">
+        <span class="section-label">TSA · Progress</span>
         <h2>Learner readiness</h2>
         <div class="section-divider"></div>
         <p class="description"><strong>Use this for learner follow-up:</strong> confirm who has signed in, who still needs orientation, who was recently active, and whose progress is waiting to sync. Technical errors and Vimeo playback reports are kept in Technical reliability under Preview &amp; Health.</p>
@@ -3201,8 +3207,8 @@
         <p class="lh-note"><strong>Pending saves:</strong> work that cannot reach Firebase stays in the learner’s browser with a Retry sync action. Once the browser reconnects, a successful recovery appears under Technical reliability. <strong>Technical issue:</strong> the learner had a video or connection error reported in the last 72 hours — see Technical reliability under Preview &amp; Health for the report detail.</p>
       </section>
 
-      <section class="admin-section" id="section-leaderboard" data-admin-tab-panel="student-progress">
-        <span class="section-label">Progress</span>
+      <section class="admin-section" id="section-leaderboard" data-admin-tab-panel="programs">
+        <span class="section-label">TSA · Progress</span>
         <h2>Leaderboard</h2>
         <div class="section-divider"></div>
         <p class="description"><strong>Internal administrator view:</strong> rank members within a cohort by completion, Mastery Points, or streak. Learners see only their own exact position and a small anonymous neighborhood; names, emails, and detailed activity histories are never included in their view.</p>
@@ -3221,8 +3227,8 @@
         <div id="lbBoard"><p class="mb-msg">Click Refresh leaderboard to load rankings.</p></div>
       </section>
 
-      <section class="admin-section" id="section-engagement-insights" data-admin-tab-panel="student-progress">
-        <span class="section-label">Progress</span>
+      <section class="admin-section" id="section-engagement-insights" data-admin-tab-panel="programs">
+        <span class="section-label">TSA · Progress</span>
         <h2>Engagement Insights</h2>
         <div class="section-divider"></div>
         <p class="description"><strong>Use this for learner behavior and support:</strong> focused-time estimates, resumptions, incomplete activities, and transparent signals that someone may benefit from help. For completion rates, phase funnels, and cohort outcomes, use Cohort Analytics below. These signals are not grades or proof of attention.</p>
@@ -3236,8 +3242,8 @@
         <p class="ei-note">Times are estimates. Background tabs are excluded, and thinking or note-taking may appear idle. Vimeo coverage begins after a learner presses play; reaching 80% counts as video completion.</p>
       </section>
 
-      <section class="admin-section" id="section-cohort-analytics" data-admin-tab-panel="student-progress">
-        <span class="section-label">Progress</span>
+      <section class="admin-section" id="section-cohort-analytics" data-admin-tab-panel="programs">
+        <span class="section-label">TSA · Progress</span>
         <h2>Cohort Analytics</h2>
         <div class="section-divider"></div>
         <p class="description"><strong>Use this for completion and cohort outcomes:</strong> phase funnels, exercise completion bottlenecks, pace, and overall progress by cohort. For focused time, inactivity, resumptions, and individual support signals, use Engagement Insights above. Counts always show alongside percentages — cohorts under 5 members are flagged as a small sample.</p>
@@ -3315,8 +3321,8 @@
         </dialog>
       </section>
 
-      <section class="admin-section" id="section-reward-levels" data-admin-tab-panel="rewards">
-        <span class="section-label">Rewards</span>
+      <section class="admin-section" id="section-reward-levels" data-admin-tab-panel="programs">
+        <span class="section-label">TSA · Rewards</span>
         <h2>Level system</h2>
         <div class="section-divider"></div>
         <p class="description">Manage the member titles and MP thresholds that power the sticky-nav level chip. The first promotion should feel reachable; later promotions should require stronger completion and scores.</p>
@@ -3336,8 +3342,8 @@
         </div>
       </section>
 
-      <section class="admin-section" id="section-reward-overview" data-admin-tab-panel="rewards">
-        <span class="section-label">Rewards</span>
+      <section class="admin-section" id="section-reward-overview" data-admin-tab-panel="programs">
+        <span class="section-label">TSA · Rewards</span>
         <h2>Rules members experience</h2>
         <div class="section-divider"></div>
         <p class="description">Read-only: this live summary uses the currently loaded Reward settings, so Admin always shows the same earning rules members experience. To change any of these rules, use MP rules.</p>
@@ -3358,8 +3364,8 @@
         <div class="reward-storage-note"><strong>Completion path:</strong> Videos, orientation, context items, and exercises (at a realistic, not perfect, scoring level) add up to roughly 1,325&ndash;1,525 MP before assessments or the program bonus. The 600 MP full-program bonus brings a member who finishes the curriculum to well over 1,800 MP, so completing the program reliably reaches Executive without needing perfect scores or the streak feature. Historical awards are never recalculated when future rule values change.</div>
       </section>
 
-      <section class="admin-section" id="section-reward-rules" data-admin-tab-panel="rewards">
-        <span class="section-label">Rewards</span>
+      <section class="admin-section" id="section-reward-rules" data-admin-tab-panel="programs">
+        <span class="section-label">TSA · Rewards</span>
         <h2>MP rules</h2>
         <div class="section-divider"></div>
         <p class="description">Edit the default MP rules here. Tokens are intentionally disabled until hint content exists. See Rules summary for a read-only view of what members currently experience.</p>
@@ -3459,8 +3465,8 @@
         </div>
       </section>
 
-      <section class="admin-section" id="section-reward-simulator" data-admin-tab-panel="rewards">
-        <span class="section-label">Rewards</span>
+      <section class="admin-section" id="section-reward-simulator" data-admin-tab-panel="programs">
+        <span class="section-label">TSA · Rewards</span>
         <h2>Exercise award and reflection</h2>
         <div class="section-divider"></div>
         <p class="description">Choose an exercise, review or edit its short written-reflection question, and open the same celebration card members see after completing it.</p>
@@ -3496,10 +3502,11 @@
         </div>
       </section>
 
-      <section class="admin-section" id="section-members" data-admin-tab-panel="member-management">
-        <span class="section-label">Access</span>
+      <section class="admin-section" id="section-members" data-admin-tab-panel="programs">
+        <span class="section-label">TSA · Enrollments</span>
         <h2>Members</h2>
         <div class="section-divider"></div>
+        <p class="description">Every member here also has a Customer profile under the Customers tab. The two stay administratively separate for now — TSA access is managed here specifically, until the customer model is formally verified fully equivalent to this list.</p>
 
         <div class="mb-guide">
           <button class="mb-guide-toggle" type="button" id="mbGuideToggle">
@@ -3662,8 +3669,8 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         </div>
       </section>
 
-      <section class="admin-section" id="section-organization-access" data-admin-tab-panel="member-management">
-        <span class="section-label">Access</span>
+      <section class="admin-section" id="section-organization-access" data-admin-tab-panel="organizations">
+        <span class="section-label">Organizations</span>
         <h2>Organization access</h2>
         <div class="section-divider"></div>
         <p class="description">Give an organization representative read-only access to the cohorts they support. This does not change their learner account, program enrollment, or UTL role.</p>
@@ -3778,8 +3785,8 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         </div>
       </section>
 
-      <section class="admin-section" id="section-emergency-access" data-admin-tab-panel="member-management">
-        <span class="section-label">Access</span>
+      <section class="admin-section" id="section-emergency-access" data-admin-tab-panel="admin-tools">
+        <span class="section-label">Access &amp; staff roles</span>
         <h2>Emergency access</h2>
         <div class="section-divider"></div>
         <p class="description">Set or reset a real password for a break-glass account, for the rare case Google, Facebook, and the emailed sign-in link are all unavailable. This is not offered to regular members. There is no password option on the normal sign-in page. The email must already exist as an active admin or owner under Members. To sign in with it, go to <code>/member-login/?emergency=1</code>.</p>
@@ -3799,8 +3806,8 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         </div>
       </section>
 
-      <section class="admin-section" id="section-passwords" data-admin-tab-panel="member-management">
-        <span class="section-label">Legacy access</span>
+      <section class="admin-section" id="section-passwords" data-admin-tab-panel="admin-tools">
+        <span class="section-label">Local testing</span>
         <h2>Legacy local access</h2>
         <div class="section-divider"></div>
         <span class="control-scope is-preview">This browser only · legacy</span>
@@ -3861,7 +3868,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         </div>
       </section>
 
-      <section class="admin-section" id="section-es-overview" data-admin-tab-panel="executive-signature">
+      <section class="admin-section" id="section-es-overview" data-admin-tab-panel="programs">
         <span class="section-label">Executive Signature</span>
         <h2>Overview</h2>
         <div class="section-divider"></div>
@@ -3882,7 +3889,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         </div>
       </section>
 
-      <section class="admin-section" id="section-es-participants" data-admin-tab-panel="executive-signature">
+      <section class="admin-section" id="section-es-participants" data-admin-tab-panel="programs">
         <span class="section-label">Executive Signature</span>
         <h2>Participants</h2>
         <div class="section-divider"></div>
@@ -3902,7 +3909,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         </div>
       </section>
 
-      <section class="admin-section" id="section-es-attempts" data-admin-tab-panel="executive-signature">
+      <section class="admin-section" id="section-es-attempts" data-admin-tab-panel="programs">
         <span class="section-label">Executive Signature</span>
         <h2>Attempts</h2>
         <div class="section-divider"></div>
@@ -3936,7 +3943,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         </div>
       </section>
 
-      <section class="admin-section" id="section-es-configuration" data-admin-tab-panel="executive-signature">
+      <section class="admin-section" id="section-es-configuration" data-admin-tab-panel="programs">
         <span class="section-label">Executive Signature</span>
         <h2>Configuration</h2>
         <div class="section-divider"></div>
@@ -3952,7 +3959,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         </div>
       </section>
 
-      <section class="admin-section" id="section-es-governance" data-admin-tab-panel="executive-signature">
+      <section class="admin-section" id="section-es-governance" data-admin-tab-panel="programs">
         <span class="section-label">Executive Signature</span>
         <h2>Data governance</h2>
         <div class="section-divider"></div>
@@ -3965,7 +3972,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       </section>
 
       <section class="admin-section" id="section-links" data-admin-tab-panel="admin-tools">
-        <span class="section-label">Preview &amp; Health</span>
+        <span class="section-label">Operations · Preview</span>
         <h2>Quick links</h2>
         <div class="section-divider"></div>
         <p class="description">A bookmark directory, not a check — open any of these member, assessment, or exercise pages in a new tab to verify your changes by hand.</p>
@@ -4198,8 +4205,8 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         </div>
       </section>
 
-      <section class="admin-section" id="section-certificate" data-admin-tab-panel="engagement">
-        <span class="section-label">Certificate</span>
+      <section class="admin-section" id="section-certificate" data-admin-tab-panel="programs">
+        <span class="section-label">TSA · Credentials</span>
         <h2>Certificate</h2>
         <div class="section-divider"></div>
         <span class="control-scope is-live">Live for all members</span>
@@ -4250,7 +4257,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       <!-- ===== Content Library ===== -->
 
       <section class="admin-section" id="section-cl-files" data-admin-tab-panel="content-library">
-        <span class="section-label">Content Data</span>
+        <span class="section-label">Content</span>
         <h2>Data files</h2>
         <div class="section-divider"></div>
 
@@ -4276,8 +4283,8 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         </div>
       </section>
 
-      <section class="admin-section" id="section-cl-question-bank" data-admin-tab-panel="content-library">
-        <span class="section-label">Content Data</span>
+      <section class="admin-section" id="section-cl-question-bank" data-admin-tab-panel="programs">
+        <span class="section-label">TSA · Assessments</span>
         <h2>Assessment content review</h2>
         <div class="section-divider"></div>
         <p class="description">Review every learner-facing task in the unified diagnostic and checkpoint. All four parts and all three scenario forms load directly from the canonical assessment source.</p>
@@ -5001,7 +5008,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       gate.style.display = 'none';
       app.classList.add('is-visible');
       renderAdminProfile();
-      const requestedTab = new URLSearchParams(window.location.search).get('tab') || 'content-manager';
+      const requestedTab = new URLSearchParams(window.location.search).get('tab') || 'customers';
       switchAdminTab(requestedTab, { replace: true, scroll: false });
     }
 
@@ -8397,7 +8404,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
     // ===== End Content Library =====
 
     function validAdminTab(tab) {
-      return ['content-manager', 'student-progress', 'rewards', 'member-management', 'customers', 'executive-signature', 'admin-tools', 'engagement', 'content-library'].includes(tab) ? tab : 'content-manager';
+      return ['customers', 'programs', 'organizations', 'admin-tools', 'engagement', 'content-library'].includes(tab) ? tab : 'customers';
     }
 
     function phaseLessonIds(phaseKey) {
@@ -10754,30 +10761,38 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       if (options.replace) window.history.replaceState({}, '', url);
       else window.history.pushState({}, '', url);
 
-      if (activeTab === 'student-progress') {
-        const progressTarget = (currentActive || visibleNavItems[0])?.dataset.target;
-        if (progressTarget === 'section-platform-overview') poLoadPlatformOverview(false);
-        else if (progressTarget === 'section-launch-health') loadLaunchHealth();
-        else if (progressTarget === 'section-engagement-insights') loadEngagementInsights();
-        else loadStudentProgress();
+      // "programs" merges what were five separate tabs (Program, Student Progress,
+      // Rewards, Executive Signature, and the Members/Certificate/Assessment-review/
+      // Walkthrough items formerly under Member Access/Communications/Content
+      // Data/Preview & Health) into one, per the Phase 9 restructuring. Dispatch
+      // stays target-scoped (not "load everything whenever Programs opens") so
+      // visiting one sub-area never triggers unrelated network calls.
+      if (activeTab === 'programs') {
+        const programsTarget = (currentActive || visibleNavItems[0])?.dataset.target;
+        const programContentTargets = ['section-access-controls', 'section-orientation', 'section-phase1', 'section-phase2', 'section-phase3'];
+        const studentProgressTargets = ['section-student-progress', 'section-platform-overview', 'section-launch-health', 'section-leaderboard', 'section-engagement-insights', 'section-cohort-analytics'];
+        const rewardTargets = ['section-reward-levels', 'section-reward-overview', 'section-reward-rules', 'section-reward-simulator'];
+        const esTargets = ['section-es-overview', 'section-es-participants', 'section-es-attempts', 'section-es-configuration', 'section-es-governance'];
+        if (programContentTargets.includes(programsTarget)) {
+          loadAdminVisibilitySettings();
+          loadPublicAssessmentSettings();
+          loadTsaVisibility();
+        } else if (studentProgressTargets.includes(programsTarget)) {
+          if (programsTarget === 'section-platform-overview') poLoadPlatformOverview(false);
+          else if (programsTarget === 'section-launch-health') loadLaunchHealth();
+          else if (programsTarget === 'section-engagement-insights') loadEngagementInsights();
+          else loadStudentProgress();
+        } else if (rewardTargets.includes(programsTarget)) {
+          loadRewardSettings();
+        } else if (programsTarget === 'section-members') {
+          if (!mbMembersCache.length) mbLoadMembers();
+        } else if (esTargets.includes(programsTarget)) {
+          esLoadForTarget(programsTarget);
+        }
       }
-      if (activeTab === 'rewards') loadRewardSettings();
-      if (activeTab === 'member-management') {
-        const memberTarget = (currentActive || visibleNavItems[0])?.dataset.target;
-        if (memberTarget === 'section-organization-access') oaLoad(false);
-        else if (!mbMembersCache.length) mbLoadMembers();
-      }
+      if (activeTab === 'organizations') oaLoad(false);
       if (activeTab === 'customers') csLoadDirectory();
-      if (activeTab === 'executive-signature') {
-        const esTarget = (currentActive || visibleNavItems[0])?.dataset.target;
-        esLoadForTarget(esTarget);
-      }
       if (activeTab === 'engagement') loadEngagementSettings();
-      if (activeTab === 'content-manager') {
-        loadAdminVisibilitySettings();
-        loadPublicAssessmentSettings();
-        loadTsaVisibility();
-      }
       if (activeTab === 'admin-tools') {
         const healthTarget = (currentActive || visibleNavItems[0])?.dataset.target;
         if (healthTarget === 'section-site-reliability') loadLaunchHealth();
@@ -10797,7 +10812,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
 
       const collapseDefaultKey = 'utl_admin_content_collapsed_default_v3';
       if (localStorage.getItem(collapseDefaultKey) !== 'done') {
-        document.querySelectorAll('[data-admin-tab-panel="content-manager"], [data-admin-tab-panel="content-library"], [data-admin-tab-panel="engagement"], [data-admin-tab-panel="rewards"]').forEach((section) => {
+        document.querySelectorAll('[data-admin-tab-panel="programs"], [data-admin-tab-panel="content-library"], [data-admin-tab-panel="engagement"]').forEach((section) => {
           if (section.id) savedStates[section.id] = false;
         });
         localStorage.setItem('utl_admin_section_states', JSON.stringify(savedStates));
@@ -11091,10 +11106,10 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       const organization = (oaData?.organizations || []).find((item) => item.id === id);
       if (!organization) return;
       // Organization overview (and its Edit organization button) can be opened from Platform
-      // overview, under the Student Progress tab -- but the edit form itself lives under Member
-      // Access. Without switching tabs first, the form fills in correctly but stays invisible,
-      // since a hidden tab section is never rendered, and it looks like the click did nothing.
-      switchAdminTab('member-management');
+      // overview, under the Programs tab -- but the edit form itself lives under Organizations.
+      // Without switching tabs first, the form fills in correctly but stays invisible, since a
+      // hidden tab section is never rendered, and it looks like the click did nothing.
+      switchAdminTab('organizations');
       oaOrgEditingId = id;
       document.getElementById('oaOrgName').value = organization.name;
       const slug = document.getElementById('oaOrgSlug');

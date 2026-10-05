@@ -202,14 +202,15 @@ assert.doesNotMatch(functions, /caReportHighlight|caReportAttention|caReportActi
 // intentionally, to escape every tab section) would silently get no working close button at all.
 assert.doesNotMatch(admin, /<section[^>]*data-admin-tab-panel[\s\S]*?id="oaOverviewDialog"[\s\S]*?<\/section>/, 'the organization overview dialog must not be nested inside a tab-scoped section');
 assert(admin.includes('document.addEventListener(\'click\', (event) => {\n      const button = event.target.closest(\'[data-sp-dialog-close]\');'), 'dialog close buttons must be wired by delegation so a dialog defined anywhere in the page still gets a working close button');
-// oaOrgEdit can now be reached from Platform overview's dialog, under Student Progress -- but
-// the edit form itself lives under Member Access. Without switching tabs first, the form fills
-// in correctly but stays invisible (a hidden tab section is never rendered), so the click
-// appears to do nothing.
+// oaOrgEdit can now be reached from Platform overview's dialog, under the
+// Programs tab (Phase 9, 2026-10-05, folded Student Progress into Programs)
+// -- but the edit form itself lives under its own Organizations tab. Without
+// switching tabs first, the form fills in correctly but stays invisible (a
+// hidden tab section is never rendered), so the click appears to do nothing.
 (function () {
   const fnSrc = admin.slice(admin.indexOf('function oaOrgEdit(id)'));
   const fnBody = fnSrc.slice(0, fnSrc.indexOf('\n    function oaSaveOrganization'));
-  assert.match(fnBody, /switchAdminTab\('member-management'\)/, 'editing an organization must switch to the Member Access tab so the form is actually visible, regardless of which tab the edit was triggered from');
+  assert.match(fnBody, /switchAdminTab\('organizations'\)/, 'editing an organization must switch to the Organizations tab so the form is actually visible, regardless of which tab the edit was triggered from');
 })();
 assert(admin.includes('id="oaOrgWeeklyReportOptIn"'));
 assert(admin.includes("weeklyReportOptIn: document.getElementById('oaOrgWeeklyReportOptIn')?.checked === true"));

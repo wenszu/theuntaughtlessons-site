@@ -8,15 +8,19 @@ const functionsIndex = fs.readFileSync(path.join(root, 'functions-admin/index.js
 const customerProgramService = fs.readFileSync(path.join(root, 'functions-admin/customer-program-service.js'), 'utf8');
 const rules = fs.readFileSync(path.join(root, 'firestore.rules'), 'utf8');
 
-// --- The ES workspace tab and its five nav items exist and are wired into the
-// same tab/section/nav conventions Phase 5's Customers tab established. ---
-assert.ok(adminHtml.includes('data-admin-tab="executive-signature"'), 'admin console must have an Executive Signature tab button');
+// --- The ES workspace's five sections and nav items exist and are wired into
+// the same tab/section/nav conventions Phase 5's Customers tab established.
+// Phase 9 (2026-10-05) folded the formerly-standalone "Executive Signature"
+// top-level tab into the consolidated "Programs" tab; ES no longer has its
+// own top-level tab button, so this checks the sections live there instead. ---
+assert.ok(adminHtml.includes('data-admin-tab="programs"'), 'admin console must have a Programs tab button (Executive Signature now lives inside it)');
 ['section-es-overview', 'section-es-participants', 'section-es-attempts', 'section-es-configuration', 'section-es-governance']
   .forEach((id) => {
     assert.ok(adminHtml.includes(`id="${id}"`), `admin console must define ${id}`);
-    assert.ok(adminHtml.includes(`data-target="${id}"`), `admin console must have a nav item targeting ${id}`);
+    assert.ok(adminHtml.includes(`data-admin-tab-scope="programs" data-target="${id}"`), `admin console must have a Programs nav item targeting ${id}`);
+    assert.ok(adminHtml.includes(`<section class="admin-section" id="${id}" data-admin-tab-panel="programs">`), `${id} must be scoped to the programs tab panel`);
   });
-assert.ok(adminHtml.includes("'executive-signature'") && /validAdminTab/.test(adminHtml), 'executive-signature must be a recognized admin tab');
+assert.ok(adminHtml.includes("'programs'") && /validAdminTab/.test(adminHtml), 'programs must be a recognized admin tab');
 
 // --- The whole workspace is inert unless its feature flag is checked first,
 // the same off-by-default pattern Phase 5 used for platformFeatureFlags/customersConsole. ---

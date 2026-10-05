@@ -3,12 +3,23 @@ const fs = require('node:fs');
 
 const admin = fs.readFileSync('admin/index.html', 'utf8');
 
-['Program', 'Student Progress', 'Member Access', 'Rewards', 'Communications', 'Content Data', 'Preview &amp; Health'].forEach((label) => {
+// Phase 9 (2026-10-05) consolidated Program/Student Progress/Member Access/
+// Rewards/Executive Signature into one "Programs" tab, promoted Organization
+// access to its own "Organizations" tab, and renamed Content Data/Preview &
+// Health to Content/Operations -- see docs/CUSTOMER_PROGRAM_PLATFORM_PHASE_9.md.
+['Customers', 'Programs', 'Organizations', 'Communications', 'Content', 'Operations'].forEach((label) => {
   assert(admin.includes('>' + label + '</button>'), `primary navigation includes ${label}`);
 });
 assert(!admin.includes('>Site &amp; Content</button>'), 'old Site & Content tab label is removed');
 assert(!admin.includes('>Admin Tools</button>'), 'old Admin Tools tab label is removed');
 assert(!admin.includes('>Engagement</button>'), 'old Engagement tab label is removed');
+// These labels still legitimately appear as sidebar nav-item/group text now
+// (e.g. "Student Progress" is a Programs sub-item); only the top-level
+// *tab button* form needs to be gone, so match that exact element shape.
+['Program', 'Student Progress', 'Member Access', 'Rewards', 'Executive Signature', 'Content Data', 'Preview &amp; Health'].forEach((label) => {
+  const pattern = new RegExp('<button class="admin-tab( active)?" type="button" data-admin-tab="[a-z-]+">' + label + '</button>');
+  assert(!pattern.test(admin), `retired top-level tab button for ${label} is gone`);
+});
 
 ['section-links', 'section-sync'].forEach((target) => {
   assert(admin.includes(`data-admin-tab-scope="admin-tools" data-target="${target}"`), `Preview & Health links to ${target}`);
