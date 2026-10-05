@@ -61,8 +61,6 @@
       "scripts/**",
       "reference",
       "reference/**",
-      "apps/readiness-assessment",
-      "apps/readiness-assessment/**",
       "public",
       "public/**"
     ],

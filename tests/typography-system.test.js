@@ -10,10 +10,11 @@ const technicalMonospaceFiles = new Set([
   'tools/[Grade 9 and 10] Logarithm_explorer.html',
   'tools/tools-shared.css'
 ]);
-// apps/readiness-assessment is a private preview explicitly excluded from the
-// deployed site (.github/workflows/deploy-pages.yml `--exclude 'apps/readiness-assessment/'`),
-// with its own separately-governed visual design still being iterated on. It is
-// excluded from this scan entirely rather than allowlisted rule-by-rule.
+// apps/readiness-assessment now ships on the public site, but its visual design
+// was built independently of this guide and has known deviations (uppercase
+// labels, positive letter-spacing, decorative monospace, colored left rails)
+// that have never been reconciled against it. Excluded from this scan until
+// that reconciliation happens, rather than allowlisted rule-by-rule.
 const excludedDirs = new Set(['apps/readiness-assessment']);
 
 function collect(directory) {

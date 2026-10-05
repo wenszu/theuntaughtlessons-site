@@ -140,9 +140,7 @@ for (const seam of ['Whatto', 'Whatit', 'outloud', 'notleave', 'reportis']) {
 }
 
 assert.match(workflow, /--exclude 'reference\/'/, 'Reference sources must not ship through GitHub Pages');
-assert.match(workflow, /--exclude 'apps\/readiness-assessment\/'/, 'Private preview must not ship through GitHub Pages');
 const ignored = firebase.hosting.ignore;
 assert(ignored.includes('reference/**'), 'Reference sources must not ship through Firebase Hosting');
-assert(ignored.includes('apps/readiness-assessment/**'), 'Private preview must not ship through Firebase Hosting');
 
 console.log('readiness-assessment-preview tests passed');
