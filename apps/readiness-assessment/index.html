@@ -92,7 +92,7 @@ button{cursor:pointer}
 .test{padding-block:40px 64px}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:28px 40px}
 .result .card{position:relative}
-.result .card::after{position:absolute;top:14px;right:18px;font-size:10px;font-weight:700;letter-spacing:.02em;color:var(--ink3)}
+.result .card::after{position:absolute;top:14px;right:18px;font-size:10px;font-weight:700;color:var(--ink3)}
 #t-result .card::after{content:"Quick check"}
 #t-full-result .card::after{content:"Full report"}
 .result .card>.result-step:first-child{margin-top:14px}
@@ -187,14 +187,11 @@ button{cursor:pointer}
 .two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
 .detail-list{margin:10px 0 0;padding-left:20px}
 .bucket-groups{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:14px}
-.bucket{border-left:3px solid var(--line);padding:4px 0 4px 14px}
+.bucket{padding:4px 0}
 .bucket-label{font-weight:700;font-size:13px;color:var(--ink);margin:0 0 2px}
 .bucket .detail-list{margin-top:6px;padding-left:16px}
-.bucket-navy{border-left-color:var(--navy)}
 .bucket-navy .bucket-label{color:var(--navy)}
-.bucket-gold{border-left-color:var(--gold)}
 .bucket-gold .bucket-label{color:var(--harvest)}
-.bucket-steel{border-left-color:#4D7094}
 .bucket-steel .bucket-label{color:#4D7094}
 @media(max-width:640px){.bucket-groups{grid-template-columns:1fr}}
 .detail-list li{margin-bottom:8px;color:var(--ink2)}
@@ -439,7 +436,7 @@ svg text{fill:var(--ink3);font-family:var(--sans);font-size:11px}
   .dom{grid-template-columns:1fr;gap:12px}.dom-text{grid-column:1}.meaning{grid-column:1}
   .domain-title{grid-template-columns:1fr auto}
 }
-.prepared-for{font-family:var(--mono);margin-top:6px}
+.prepared-for{margin-top:6px}
 .print-only{display:none}
 @media print{
   @page{size:letter;margin:30mm 18mm 26mm 18mm}
@@ -456,7 +453,7 @@ svg text{fill:var(--ink3);font-family:var(--sans);font-size:11px}
      own intrinsic size). */
   @page{
     @top-left{content:url("../../assets/print-logo-utl-navy-header.svg");border-bottom:1.5pt solid #EEA320;padding-bottom:6pt}
-    @top-center{content:"";font:600 8pt/1 'Lato',sans-serif;color:#7C8896;letter-spacing:.01em;border-bottom:1.5pt solid #EEA320;padding-bottom:6pt}
+    @top-center{content:"";font:600 8pt/1 'Lato',sans-serif;color:#7C8896;border-bottom:1.5pt solid #EEA320;padding-bottom:6pt}
     @top-right{content:url("../../assets/print-logo-signature-navy-header.svg");border-bottom:1.5pt solid #EEA320;padding-bottom:6pt}
   }
   /* Footer, every page except cover/closing: one slim navy band (three
@@ -558,7 +555,7 @@ svg text{fill:var(--ink3);font-family:var(--sans);font-size:11px}
   .cover-score span{font-size:13pt;color:var(--gold)}
   .cover-meta{border-top:1px solid rgba(255,255,255,.3);padding-top:22px;display:flex;flex-direction:column;gap:9px;font-size:11.5pt;color:rgba(255,255,255,.92)}
   .cover-meta b{color:var(--gold);margin-right:6px}
-  .cover-foot{margin-top:50px;font-size:9pt;color:rgba(255,255,255,.6);letter-spacing:.03em}
+  .cover-foot{margin-top:50px;font-size:9pt;color:rgba(255,255,255,.6)}
 
   .report-summary .score-first{background:var(--navy);color:#fff;border-color:var(--navy)}
   .report-summary .score-first .result-step{background:var(--gold);color:var(--navy)}

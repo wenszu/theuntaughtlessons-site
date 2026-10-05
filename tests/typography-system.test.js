@@ -6,20 +6,17 @@ const roots = ['admin', 'apps', 'assets', 'certificate', 'member-login', 'my-res
 const extensions = new Set(['.css', '.html', '.js']);
 const technicalMonospaceFiles = new Set([
   'admin/index.html',
+  'apps/readiness-assessment/index.html',
   'tools/[Grade 8] Linear_systems_grapher.html',
   'tools/[Grade 9 and 10] Logarithm_explorer.html',
   'tools/tools-shared.css'
 ]);
-// apps/readiness-assessment now ships on the public site, but its visual design
-// was built independently of this guide and has known deviations (uppercase
-// labels, positive letter-spacing, decorative monospace, colored left rails)
-// that have never been reconciled against it. Excluded from this scan until
-// that reconciliation happens, rather than allowlisted rule-by-rule.
-const excludedDirs = new Set(['apps/readiness-assessment']);
+// apps/readiness-assessment/index.html reserves monospace for the same kind of
+// staff-only technical content as admin/index.html: version numbers, question
+// IDs, and item statistics in its build-plan/admin preview panes.
 
 function collect(directory) {
   if (!fs.existsSync(directory)) return [];
-  if (excludedDirs.has(directory)) return [];
   return fs.readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
     const file = path.join(directory, entry.name);
     return entry.isDirectory() ? collect(file) : extensions.has(path.extname(file)) ? [file] : [];
