@@ -907,8 +907,11 @@ async function saveMemberRewards(incoming = {}) {
   });
 }
 
-async function repairMemberProgramCompletionReward(userId, options = {}) {
-  if (!userId) throw new Error("A user ID is required to repair the program completion reward.");
+// Pure (no Firestore access) so callers can cheaply check, from data they already
+// have in hand, whether a learner's reward ledger needs this adjustment at all —
+// letting a page that lists many learners skip the transaction below entirely for
+// everyone who is already correct, instead of opening one per learner on every view.
+function computeProgramCompletionAdjustment(current, options = {}) {
   const configuredTarget = Number(options.programCompletion);
   const target = Math.max(0, Number.isFinite(configuredTarget) ? configuredTarget : 600);
   const levels = (Array.isArray(options.levels) && options.levels.length ? options.levels : [
@@ -920,6 +923,49 @@ async function repairMemberProgramCompletionReward(userId, options = {}) {
   ]).slice().sort((a, b) => Number(a.threshold || 0) - Number(b.threshold || 0));
   const executiveLevel = levels.find((item) => String(item.name || item.title || "").toLowerCase() === "executive") || levels[levels.length - 1] || { threshold: 0 };
   const executiveThreshold = Math.max(0, Number(executiveLevel.threshold || 0));
+  const ledger = Array.isArray(current.ledger) ? current.ledger.slice() : [];
+  const credited = ledger.reduce((sum, entry) => {
+    const id = String(entry && entry.id || "");
+    if (id !== "program-completed:tsa-program" && !id.startsWith("program-completion-adjustment:tsa-program:")) return sum;
+    return sum + Math.max(0, Number(entry.mpEarned || 0));
+  }, 0);
+  const currentTotal = Math.max(0, Number(current.mpTotal || current.masteryPoints || 0));
+  const missing = Math.max(0, target - credited, executiveThreshold - currentTotal);
+  if (!missing) return null;
+  const adjustmentId = "program-completion-adjustment:tsa-program:" + target + ":executive-" + executiveThreshold;
+  if (ledger.some((entry) => entry && entry.id === adjustmentId)) return null;
+  const mpTotal = currentTotal + missing;
+  let level = levels[0] && levels[0].name || "Intern";
+  levels.forEach((item) => { if (mpTotal >= Number(item.threshold || 0)) level = item.name; });
+  ledger.push({
+    id: adjustmentId,
+    type: "program-completion-adjustment",
+    title: "Full program Executive milestone adjustment",
+    mpEarned: missing,
+    totalAfter: mpTotal,
+    earnedAt: new Date().toISOString()
+  });
+  const earnedEvents = Object.assign({}, current.earnedEvents || {}, current.earnedEventIds || {}, { [adjustmentId]: true });
+  const rewards = Object.assign({}, current, {
+    mpTotal,
+    masteryPoints: mpTotal,
+    level,
+    currentLevel: level,
+    earnedEvents,
+    earnedEventIds: earnedEvents,
+    ledger: ledger.slice(-500)
+  });
+  return { mpEarned: missing, mpTotal, rewards };
+}
+
+function programCompletionAdjustmentNeeded(member, options = {}) {
+  if (!member) return false;
+  const current = member.rewards || (member.workspaceProgress && member.workspaceProgress.rewards) || {};
+  return Boolean(computeProgramCompletionAdjustment(current, options));
+}
+
+async function repairMemberProgramCompletionReward(userId, options = {}) {
+  if (!userId) throw new Error("A user ID is required to repair the program completion reward.");
   const userRef = doc(requireFirestore(), "users", userId);
   let result = { repaired: false, mpEarned: 0, mpTotal: 0, rewards: null };
   await runTransaction(requireFirestore(), async (transaction) => {
@@ -927,43 +973,13 @@ async function repairMemberProgramCompletionReward(userId, options = {}) {
     if (!snap.exists()) return;
     const data = snap.data() || {};
     const current = data.rewards || (data.workspaceProgress && data.workspaceProgress.rewards) || {};
-    const ledger = Array.isArray(current.ledger) ? current.ledger.slice() : [];
-    const credited = ledger.reduce((sum, entry) => {
-      const id = String(entry && entry.id || "");
-      if (id !== "program-completed:tsa-program" && !id.startsWith("program-completion-adjustment:tsa-program:")) return sum;
-      return sum + Math.max(0, Number(entry.mpEarned || 0));
-    }, 0);
-    const currentTotal = Math.max(0, Number(current.mpTotal || current.masteryPoints || 0));
-    const missing = Math.max(0, target - credited, executiveThreshold - currentTotal);
-    if (!missing) {
-      result = { repaired: false, mpEarned: 0, mpTotal: currentTotal, rewards: current };
+    const adjustment = computeProgramCompletionAdjustment(current, options);
+    if (!adjustment) {
+      result = { repaired: false, mpEarned: 0, mpTotal: Math.max(0, Number(current.mpTotal || current.masteryPoints || 0)), rewards: current };
       return;
     }
-    const adjustmentId = "program-completion-adjustment:tsa-program:" + target + ":executive-" + executiveThreshold;
-    if (ledger.some((entry) => entry && entry.id === adjustmentId)) return;
-    const mpTotal = currentTotal + missing;
-    let level = levels[0] && levels[0].name || "Intern";
-    levels.forEach((item) => { if (mpTotal >= Number(item.threshold || 0)) level = item.name; });
-    ledger.push({
-      id: adjustmentId,
-      type: "program-completion-adjustment",
-      title: "Full program Executive milestone adjustment",
-      mpEarned: missing,
-      totalAfter: mpTotal,
-      earnedAt: new Date().toISOString()
-    });
-    const earnedEvents = Object.assign({}, current.earnedEvents || {}, current.earnedEventIds || {}, { [adjustmentId]: true });
-    const rewards = Object.assign({}, current, {
-      mpTotal,
-      masteryPoints: mpTotal,
-      level,
-      currentLevel: level,
-      earnedEvents,
-      earnedEventIds: earnedEvents,
-      ledger: ledger.slice(-500)
-    });
-    transaction.set(userRef, { rewards, workspaceProgress: { rewards }, updatedAt: serverTimestamp() }, { merge: true });
-    result = { repaired: true, mpEarned: missing, mpTotal, rewards };
+    transaction.set(userRef, { rewards: adjustment.rewards, workspaceProgress: { rewards: adjustment.rewards }, updatedAt: serverTimestamp() }, { merge: true });
+    result = { repaired: true, mpEarned: adjustment.mpEarned, mpTotal: adjustment.mpTotal, rewards: adjustment.rewards };
   });
   return result;
 }
@@ -2299,6 +2315,7 @@ export {
   requestGoogleGroupSyncJob,
   runAdminAction,
   repairMemberProgramCompletionReward,
+  programCompletionAdjustmentNeeded,
   replaceMemberWorkspaceProgress,
   resetMemberWorkspaceProgress,
   saveMemberWorkspaceProgress,
