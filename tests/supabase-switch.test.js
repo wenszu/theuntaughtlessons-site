@@ -343,6 +343,42 @@ async function check(name, fn) {
     assert.equal(noMember.storage.utl_data_pending, undefined);
   });
 
+  await check('the gate: an answer from the offline cache never switches an active tester off or turns a request down', async () => {
+    const cacheOnly = (h) => {
+      // The member record in the cache does not show the flag; the answer is marked as coming from the cache.
+      h.store.set(`authorized_members/${EMAIL}`, { email: EMAIL, role: 'member' });
+      h.cachedPaths = new Set([`authorized_members/${EMAIL}`]);
+    };
+    const active = await observe(harness, scenariosFor(current).saveUserProfile, { storage: { utl_data_source: 'supabase' }, before: cacheOnly });
+    assert.equal(active.storage.utl_data_source, 'supabase', 'an active tester stays active on a cache-only answer');
+    const pending = await observe(harness, scenariosFor(current).saveUserProfile, { storage: { utl_data_pending: 'supabase' }, before: cacheOnly });
+    assert.equal(pending.storage.utl_data_pending, 'supabase', 'a request waits for a real answer');
+    assert.equal(pending.storage.utl_data_source, undefined);
+    harness.cachedPaths = null;
+    // The same record answered by the server (no flag) does switch the member off.
+    const server = await observe(harness, scenariosFor(current).saveUserProfile, { storage: { utl_data_source: 'supabase' } });
+    assert.equal(server.storage.utl_data_source, 'firebase');
+  });
+
+  await check('the gate: every change of the switch prints one console line with the reason and no personal data', async () => {
+    const lines = [];
+    const original = console.info;
+    console.info = (...args) => { lines.push(args.join(' ')); };
+    try {
+      await observe(harness, scenariosFor(current).saveUserProfile, { storage: { utl_data_pending: 'supabase' }, seedOptions: { tester: true } });
+      await observe(harness, scenariosFor(current).saveUserProfile, { storage: { utl_data_source: 'supabase' } });
+      await observe(harness, scenariosFor(current).saveUserProfile, { storage: { utl_data_pending: 'supabase' }, before: (h) => h.store.delete(`authorized_members/${EMAIL}`) });
+    } finally {
+      console.info = original;
+    }
+    const gateLines = lines.filter((line) => line.startsWith('Data source:'));
+    assert.equal(gateLines.length, 3);
+    assert.ok(gateLines[0].includes('-> supabase') && gateLines[0].includes('supabaseTester is true'));
+    assert.ok(gateLines[1].includes('-> firebase') && gateLines[1].includes('supabaseTester is not true'));
+    assert.ok(gateLines[2].includes('-> firebase') && gateLines[2].includes('no member record'));
+    assert.ok(gateLines.every((line) => !line.includes(EMAIL) && !line.includes(UID)), 'no email or uid in the line');
+  });
+
   await check('the gate: pending with supabaseTester true activates at the next saveUserProfile', async () => {
     const result = await observe(harness, scenariosFor(current).saveUserProfile, {
       storage: { utl_data_pending: 'supabase' },

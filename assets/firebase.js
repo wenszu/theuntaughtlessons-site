@@ -114,8 +114,20 @@ function applyDataSourceGate(memberSnap) {
     const requested = storage.getItem(DATA_SOURCE_PENDING_KEY) === "supabase" || storage.getItem(DATA_SOURCE_KEY) === "supabase";
     if (!requested) return;
     const tester = Boolean(memberSnap && memberSnap.exists() && (memberSnap.data() || {}).supabaseTester === true);
-    storage.setItem(DATA_SOURCE_KEY, tester ? "supabase" : "firebase");
+    // A snapshot answered from the offline cache cannot show that the flag was removed, so it never switches a
+    // member off or turns a request down; the next sign-in decides with a real answer.
+    const fromCache = Boolean(memberSnap && memberSnap.metadata && memberSnap.metadata.fromCache === true);
+    if (!tester && fromCache) return;
+    const next = tester ? "supabase" : "firebase";
+    const before = storage.getItem(DATA_SOURCE_KEY) || "(none)";
+    const wasPending = storage.getItem(DATA_SOURCE_PENDING_KEY) === "supabase";
+    storage.setItem(DATA_SOURCE_KEY, next);
     storage.removeItem(DATA_SOURCE_PENDING_KEY);
+    // One line in the console, no personal data, so a tester can see what the gate decided and why.
+    const reason = tester
+      ? "supabaseTester is true"
+      : (memberSnap && memberSnap.exists() ? "supabaseTester is not true on the member record" : "no member record was found");
+    if (wasPending || before !== next) console.info(`Data source: ${before} -> ${next} (${reason})`);
   } catch {
     // Unreadable storage: the switch simply stays as it was (off unless already set).
   }

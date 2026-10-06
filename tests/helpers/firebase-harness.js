@@ -104,10 +104,13 @@ export class Timestamp {
 }
 function snapshot(docPath) {
   const data = h().store.get(docPath);
+  const fromCache = Boolean(h().cachedPaths && h().cachedPaths.has(docPath));
   return {
     id: docPath.split('/').pop(),
     exists: () => data !== undefined,
-    data: () => (data === undefined ? undefined : h().clone(data))
+    data: () => (data === undefined ? undefined : h().clone(data)),
+    // Like the real SDK: metadata.fromCache is true when the answer came from the offline cache, not the server.
+    metadata: { fromCache, hasPendingWrites: false }
   };
 }
 export async function getDoc(ref) {
