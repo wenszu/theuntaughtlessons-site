@@ -124,6 +124,12 @@ function invalidArgument(message) {
   return new SupabaseDataError(message, { code: "data/invalid-argument" });
 }
 
+// A read for an id the catalog does not know (a retired activity, a typo). The caller treats it like
+// any other Supabase failure and reads Firestore instead, as the writes do on the database's 22023.
+function unknownActivity(key) {
+  return new SupabaseDataError(`Unknown activity "${String(key).slice(0, 100)}".`, { code: "data/unknown-activity" });
+}
+
 // ---------------------------------------------------------------------------
 // Small pure helpers
 
@@ -531,9 +537,17 @@ function mapRewards(incoming = {}) {
   return { entries, state };
 }
 
+// Exercises the catalog flags selfReported (activities.config.selfReported) save no answer anywhere. The database
+// lets mark_activity_progress complete those exercises, and only those, and never an assessment.
+function isSelfReported(activity) {
+  return Boolean(activity) && activity.kind === "exercise" && isPlainObject(activity.config) && activity.config.selfReported === true;
+}
+
 // Which mark_activity_progress calls a workspace snapshot needs, given what the database already holds.
-// Only forward moves are sent (the function ignores backward moves anyway), exercises are only ever
-// marked visited, and ids that are not active in the catalog are reported in skipped, not sent.
+// Only forward moves are sent (the function ignores backward moves anyway), exercises are only marked visited
+// (a real exercise is completed by submitting it), except the exercises the catalog flags selfReported, which save
+// no answer and so are marked completed from the learner's own flag; ids that are not active in the catalog are
+// reported in skipped, not sent.
 function planProgressMarks(progress = {}, catalog, existingRows = []) {
   const snapshot = isPlainObject(progress) ? progress : {};
   const existing = new Map();
@@ -549,7 +563,7 @@ function planProgressMarks(progress = {}, catalog, existingRows = []) {
       return;
     }
     const activity = catalog.get(activityId);
-    if (status === "completed" && activity && ["exercise", "assessment"].includes(activity.kind)) status = "visited";
+    if (status === "completed" && activity && ["exercise", "assessment"].includes(activity.kind) && !isSelfReported(activity)) status = "visited";
     const current = wanted.get(activityId) || existing.get(activityId) || "not_started";
     if (PROGRESS_RANK[status] > PROGRESS_RANK[current]) wanted.set(activityId, status);
   }
@@ -564,7 +578,12 @@ function planProgressMarks(progress = {}, catalog, existingRows = []) {
     if (value && value.completed === true) add(id, catalog.resolveContext(id), "completed");
   });
   Object.entries(isPlainObject(snapshot.exercises) ? snapshot.exercises : {}).forEach(([id, value]) => {
-    if (value && (value.visited === true || value.completed === true)) add(id, catalog.resolve(id), "visited");
+    if (!value) return;
+    const activityId = catalog.resolve(id);
+    const activity = activityId ? catalog.get(activityId) : null;
+    // A self reported exercise the page says is completed is marked completed; any other exercise only visited.
+    if (value.completed === true && activity && isSelfReported(activity)) add(id, activityId, "completed");
+    else if (value.visited === true || value.completed === true) add(id, activityId, "visited");
   });
 
   const marks = [];
@@ -680,7 +699,8 @@ function rebuildWorkspaceProgress({ progressRows = [], ledgerRows = [], totalRow
     rewards: rebuildRewards(ledgerRows, totalRows, stateRows)
   };
   (progressRows || []).forEach((row) => {
-    if (!row || !row.activity_id) return;
+    // A not_started row carries no flag the page can use, so it adds nothing to the view.
+    if (!row || !row.activity_id || row.status === "not_started") return;
     const activity = catalog.get(row.activity_id) || { id: row.activity_id, kind: "exercise", title: row.activity_id };
     const completed = row.status === "completed";
     const visited = Boolean(row.status) && row.status !== "not_started";
@@ -1021,7 +1041,7 @@ function createSupabaseData(context = {}) {
     if (!(await currentToken())) return empty;
     const catalog = await loadCatalog();
     const activityId = catalog.resolve(safeExerciseId);
-    if (!activityId) return empty;
+    if (!activityId) throw unknownActivity(safeExerciseId);
     const title = (catalog.get(activityId) || {}).title || safeExerciseId;
     // Either read failing fails the whole call, so the caller (assets/firebase.js) can fall back to its
     // Firestore read instead of showing an empty draft or history.
@@ -1041,7 +1061,7 @@ function createSupabaseData(context = {}) {
     if (!(await currentToken())) return [];
     const catalog = await loadCatalog();
     const activityId = catalog.resolve(targetId);
-    if (!activityId) return [];
+    if (!activityId) throw unknownActivity(targetId);
     const title = (catalog.get(activityId) || {}).title || targetId;
     const rows = await select("activity_attempts", `select=attempt_key,attempt_number,score,score_maximum,score_percent,duration_seconds,content_version,submitted_at&activity_id=${eq(activityId)}&order=submitted_at.desc&limit=10`);
     return rows.map((row) => mapAttemptRow(row, targetId, title));

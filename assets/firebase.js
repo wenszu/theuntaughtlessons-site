@@ -232,6 +232,8 @@ async function runSupabase(run) {
 // One stability event per failed Supabase operation: the label, the error code, nothing else.
 function reportSupabaseFailure(label, activityId, error) {
   const code = String((error && error.code) || "unknown");
+  // A read for an activity the catalog does not know (a retired one) is a normal fall back to Firestore, not a fault.
+  if (code === "data/unknown-activity" && / read$/.test(String(label))) return;
   window.dispatchEvent(new CustomEvent("utl:stability-event", { detail: {
     eventType: "sync_error",
     severity: "warning",
@@ -249,10 +251,132 @@ async function supabaseFirst(label, activityId, run, options = {}) {
   return null;
 }
 
-// Best-effort Supabase copy after a Firestore write that already succeeded.
-async function supabaseBridge(label, activityId, run) {
-  const result = await runSupabase(run);
-  if (!result.ok) reportSupabaseFailure(label, activityId, result.error);
+// Best-effort Supabase copy after every Firestore write of a call has succeeded. It runs in the
+// background: the caller's promise never waits for it, and nothing it does can reach the caller.
+function startSupabaseBridge(label, activityId, run) {
+  runSupabase(run)
+    .then((result) => { if (!result.ok) reportSupabaseFailure(label, activityId, result.error); })
+    .catch((error) => { console.warn(`Supabase ${label} report failed`, error && error.code); });
+}
+
+// -- read merges (Firestore is the base; Supabase may only add) ---------------------------------
+
+function timeMillis(value) {
+  if (value == null || value === "") return 0;
+  if (typeof value === "number") return Number.isFinite(value) ? value : 0;
+  if (typeof value.toMillis === "function") return Number(value.toMillis()) || 0;
+  if (typeof value.toDate === "function") return Number(value.toDate().getTime()) || 0;
+  const parsed = Date.parse(String(value));
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function mergeRewardsViews(base, remote) {
+  if (!remote) return base || null;
+  if (!base) return remote;
+  const ledgerById = {};
+  [].concat(remote.ledger || [], base.ledger || []).forEach((entry) => {
+    if (entry && entry.id) ledgerById[entry.id] = entry;
+  });
+  const ledger = Object.values(ledgerById)
+    .sort((a, b) => String(a.earnedAt || "").localeCompare(String(b.earnedAt || "")))
+    .slice(-500);
+  const ledgerTotal = ledger.reduce((sum, entry) => sum + Math.max(0, Number(entry.mpEarned || 0)), 0);
+  const mpTotal = Math.max(ledgerTotal, Number(base.mpTotal || base.masteryPoints || 0), Number(remote.mpTotal || remote.masteryPoints || 0));
+  const earnedEvents = Object.assign({}, remote.earnedEvents || {}, remote.earnedEventIds || {}, base.earnedEvents || {}, base.earnedEventIds || {});
+  const baseStreak = base.streak && typeof base.streak === "object" ? base.streak : {};
+  const remoteStreak = remote.streak && typeof remote.streak === "object" ? remote.streak : {};
+  const streakDays = Math.max(Number(base.streakDays || baseStreak.currentDays || 0), Number(remote.streakDays || remoteStreak.currentDays || 0));
+  const lastQualifiedDate = [String(baseStreak.lastQualifiedDate || ""), String(remoteStreak.lastQualifiedDate || "")].sort().pop();
+  const streak = Object.assign({}, remoteStreak, baseStreak, {
+    currentDays: streakDays,
+    lastQualifiedDate,
+    dailyActivities: Object.assign({}, remoteStreak.dailyActivities || {}, baseStreak.dailyActivities || {}),
+    awardedDates: Object.assign({}, remoteStreak.awardedDates || {}, baseStreak.awardedDates || {})
+  });
+  return Object.assign({}, remote, base, {
+    mpTotal,
+    masteryPoints: mpTotal,
+    tokens: Math.max(Number(base.tokens || 0), Number(remote.tokens || 0)),
+    streakDays,
+    streak,
+    earnedEvents,
+    earnedEventIds: earnedEvents,
+    ledger
+  });
+}
+
+// The Firestore progress view stays the base (the page writes its snapshot back to Firestore, so a
+// view missing a flag would be written back as false). Supabase only turns flags on and adds entries
+// the base lacks. Admin flags (adminProgressRevision, adminProgressReset, updatedAtClient) are the
+// base's and never come from Supabase.
+function mergeWorkspaceProgressViews(base, remote) {
+  if (!remote) return base || null;
+  if (!base) return remote;
+  const merged = base;
+  merged.orientation = merged.orientation && typeof merged.orientation === "object" ? merged.orientation : {};
+  if (remote.orientation && remote.orientation.ready === true) merged.orientation.ready = true;
+  [["lessons", "watched"], ["contexts", "completed"]].forEach(([group, flag]) => {
+    merged[group] = merged[group] && typeof merged[group] === "object" ? merged[group] : {};
+    Object.entries(remote[group] || {}).forEach(([id, value]) => {
+      if (!value || typeof value !== "object") return;
+      if (value[flag] === true) merged[group][id] = Object.assign({}, merged[group][id] || {}, { [flag]: true });
+      else if (!merged[group][id]) merged[group][id] = Object.assign({}, value);
+    });
+  });
+  merged.exercises = merged.exercises && typeof merged.exercises === "object" ? merged.exercises : {};
+  Object.entries(remote.exercises || {}).forEach(([id, value]) => {
+    if (!value || typeof value !== "object") return;
+    const current = merged.exercises[id];
+    if (!current) {
+      merged.exercises[id] = Object.assign({}, value);
+      return;
+    }
+    const next = Object.assign({}, current);
+    if (value.visited === true) next.visited = true;
+    if (value.completed === true) {
+      next.completed = true;
+      next.visited = true;
+      if (!next.completedAt && value.completedAt) next.completedAt = value.completedAt;
+    }
+    if (!next.title && value.title) next.title = value.title;
+    if (!next.appKey && value.appKey) next.appKey = value.appKey;
+    merged.exercises[id] = next;
+  });
+  merged.rewards = mergeRewardsViews(merged.rewards || null, remote.rewards || null);
+  return merged;
+}
+
+function draftMillis(draft) {
+  if (!draft) return 0;
+  const payload = draft.draftPayload && typeof draft.draftPayload === "object" ? draft.draftPayload : {};
+  return Math.max(timeMillis(draft.updatedAtClient), timeMillis(payload.updatedAtClient), timeMillis(draft.updatedAt));
+}
+
+// Both sources, newest draft wins (the Firestore draft on a tie), submissions as a union by id, newest
+// first, ten at most, as today.
+function mergeExerciseWorkViews(local, remote) {
+  if (!remote) return local;
+  const draft = !local.draft ? remote.draft : (!remote.draft ? local.draft : (draftMillis(remote.draft) > draftMillis(local.draft) ? remote.draft : local.draft));
+  const byId = new Map();
+  [].concat(remote.submissions || [], local.submissions || []).forEach((item) => {
+    if (item) byId.set(String(item.submissionId || item.id || ""), item);
+  });
+  const submissions = Array.from(byId.values())
+    .sort((a, b) => String(b.completedAtClient || "").localeCompare(String(a.completedAtClient || "")))
+    .slice(0, 10);
+  return { draft, submissions };
+}
+
+function attemptMillis(item) {
+  return Math.max(timeMillis(item && item.submittedAt), timeMillis(item && item.submittedAtClient));
+}
+
+function mergeAttemptViews(local, remote) {
+  const byId = new Map();
+  [].concat(remote || [], local || []).forEach((item) => {
+    if (item) byId.set(String(item.attemptId || item.id || ""), item);
+  });
+  return Array.from(byId.values()).sort((a, b) => attemptMillis(b) - attemptMillis(a)).slice(0, 10);
 }
 
 const app = initializeApp(firebaseConfig);
@@ -974,26 +1098,12 @@ async function getMemberWorkspaceProgress() {
   if (!user || !user.uid) return null;
 
   const readyDb = requireFirestore();
-  if (supabaseModeActive()) {
-    // Supabase holds the progress; a failed read falls through to the Firestore read below. The
-    // admin "reset member progress" button still works through Firestore, so its revision flags ride
-    // along from the users document; without them the page simply keeps its local copy.
-    const remote = await supabaseFirst("progress read", "", (data) => data.getMemberWorkspaceProgress());
-    if (remote) {
-      const progress = remote.value;
-      if (!progress) return null;
-      try {
-        const adminSnap = await getDoc(doc(readyDb, "users", user.uid));
-        const stored = adminSnap.exists() ? ((adminSnap.data() || {}).workspaceProgress || {}) : {};
-        if (stored.adminProgressRevision !== undefined) progress.adminProgressRevision = stored.adminProgressRevision;
-        if (stored.adminProgressReset !== undefined) progress.adminProgressReset = stored.adminProgressReset;
-        if (stored.updatedAtClient !== undefined) progress.updatedAtClient = stored.updatedAtClient;
-      } catch (error) {
-        console.warn("Admin progress flags could not be read:", error && error.code);
-      }
-      return progress;
-    }
-  }
+  // Supabase mode: Supabase is read alongside Firestore and merged in (Firestore is the base, Supabase
+  // only adds). A failed Supabase read leaves the Firestore view; a failed Firestore read with a
+  // Supabase answer returns that answer alone.
+  const remotePromise = supabaseModeActive() ? runSupabase((data) => data.getMemberWorkspaceProgress()) : null;
+
+  async function readFromFirestore() {
   const userSnap = await getDoc(doc(readyDb, "users", user.uid));
   if (!userSnap.exists()) return null;
   const data = userSnap.data() || {};
@@ -1032,6 +1142,24 @@ async function getMemberWorkspaceProgress() {
   }
 
   return progress;
+  }
+
+  if (!remotePromise) return readFromFirestore();
+  let base;
+  try {
+    base = await readFromFirestore();
+  } catch (error) {
+    const remote = await remotePromise;
+    if (remote.ok && remote.value) return remote.value;
+    if (!remote.ok) reportSupabaseFailure("progress read", "", remote.error);
+    throw error;
+  }
+  const remote = await remotePromise;
+  if (!remote.ok) {
+    reportSupabaseFailure("progress read", "", remote.error);
+    return base;
+  }
+  return mergeWorkspaceProgressViews(base, remote.value);
 }
 
 async function getEmailTemplates() {
@@ -1060,10 +1188,10 @@ async function saveMemberWorkspaceProgress(progress = {}) {
     lastSeenAt: serverTimestamp(),
     updatedAt: serverTimestamp()
   }, { merge: true });
-  // Supabase mode: a best-effort copy of the marks after the Firestore write. Rewards follow through
-  // saveMemberRewards, which does the same.
-  if (supabaseModeActive()) await supabaseBridge("workspace progress", "", (data) => data.saveMemberWorkspaceProgress(progressWithoutRewards));
   if (rewards) await saveMemberRewards(rewards);
+  // Supabase mode: a background copy of the marks, started only after every Firestore write above
+  // (including the rewards transaction) is done. Rewards have their own copy in saveMemberRewards.
+  if (supabaseModeActive()) startSupabaseBridge("workspace progress", "", (data) => data.saveMemberWorkspaceProgress(progressWithoutRewards));
 }
 
 async function saveMemberRewards(incoming = {}) {
@@ -1107,8 +1235,8 @@ async function saveMemberRewards(incoming = {}) {
       updatedAt: serverTimestamp()
     }, { merge: true });
   });
-  // Supabase mode: a best-effort copy of the ledger and streak state after the Firestore transaction.
-  if (supabaseModeActive()) await supabaseBridge("rewards", "", (data) => data.saveMemberRewards(incoming));
+  // Supabase mode: a background copy of the ledger and streak state after the Firestore transaction.
+  if (supabaseModeActive()) startSupabaseBridge("rewards", "", (data) => data.saveMemberRewards(incoming));
 }
 
 async function repairMemberProgramCompletionReward(userId, options = {}) {
@@ -1381,9 +1509,10 @@ async function saveUserProgress(exerciseId, exerciseName, exercisePayload = {}) 
     const remaining = clearQueuedProgressSync(exerciseId, exercisePayload);
     if (!remaining && recoveredKeys.length) showProgressSyncSuccess();
     window.dispatchEvent(new CustomEvent("utl:activity-completed", { detail: { activityId: exerciseId, activityTitle: exerciseName } }));
-    // Supabase mode: a best-effort copy of the completion (record_activity_submission, same
-    // deterministic key) after Firestore has it. A Supabase failure is reported, never thrown or queued.
-    if (useSupabase) await supabaseBridge("completion", exerciseId, (data) => data.saveUserProgress(exerciseId, exerciseName, exercisePayload));
+    // Supabase mode: a background copy of the completion (record_activity_submission, same
+    // deterministic key) once Firestore has it. The caller does not wait for it; a Supabase failure
+    // is reported, never thrown or queued.
+    if (useSupabase) startSupabaseBridge("completion", exerciseId, (data) => data.saveUserProgress(exerciseId, exerciseName, exercisePayload));
     return { saved: true };
   } catch (error) {
     queueProgressSync(exerciseId, exerciseName, exercisePayload, error);
@@ -1432,16 +1561,31 @@ async function saveExerciseAttempt(attemptPayload = {}) {
 async function getExerciseAttempts(exerciseId) {
   const user = await getSignedInUser();
   if (!user || !user.uid) return [];
-  if (supabaseModeActive()) {
-    const remote = await supabaseFirst("attempts read", exerciseId, (data) => data.getExerciseAttempts(exerciseId));
-    if (remote) return remote.value;
-  }
+  // Supabase mode: both sources, a union by attemptId. One failing source leaves the other; an id the
+  // catalog cannot resolve counts as a Supabase failure and leaves the Firestore attempts.
+  const remotePromise = supabaseModeActive() ? runSupabase((data) => data.getExerciseAttempts(exerciseId)) : null;
   const targetId = String(exerciseId || "").trim();
-  const snapshot = await getDocs(collection(requireFirestore(), "users", user.uid, "exercise_attempts"));
-  return snapshot.docs.map((item) => ({ id: item.id, ...item.data() }))
-    .filter((item) => item.exerciseId === targetId)
-    .sort((a, b) => Number(b.submittedAt && b.submittedAt.toMillis ? b.submittedAt.toMillis() : 0) - Number(a.submittedAt && a.submittedAt.toMillis ? a.submittedAt.toMillis() : 0))
-    .slice(0, 10);
+  let local;
+  try {
+    const snapshot = await getDocs(collection(requireFirestore(), "users", user.uid, "exercise_attempts"));
+    local = snapshot.docs.map((item) => ({ id: item.id, ...item.data() }))
+      .filter((item) => item.exerciseId === targetId)
+      .sort((a, b) => Number(b.submittedAt && b.submittedAt.toMillis ? b.submittedAt.toMillis() : 0) - Number(a.submittedAt && a.submittedAt.toMillis ? a.submittedAt.toMillis() : 0))
+      .slice(0, 10);
+  } catch (error) {
+    if (!remotePromise) throw error;
+    const remote = await remotePromise;
+    if (remote.ok) return remote.value;
+    reportSupabaseFailure("attempts read", exerciseId, remote.error);
+    throw error;
+  }
+  if (!remotePromise) return local;
+  const remote = await remotePromise;
+  if (!remote.ok) {
+    reportSupabaseFailure("attempts read", exerciseId, remote.error);
+    return local;
+  }
+  return mergeAttemptViews(local, remote.value);
 }
 
 async function saveExerciseDraft(exerciseId, exerciseTitle, draftPayload = {}) {
@@ -1468,12 +1612,11 @@ async function saveExerciseDraft(exerciseId, exerciseTitle, draftPayload = {}) {
 async function getExerciseWork(exerciseId) {
   const user = await getSignedInUser();
   if (!user || !user.uid) return { draft: null, submissions: [] };
-  if (supabaseModeActive()) {
-    const remote = await supabaseFirst("exercise work read", exerciseId, (data) => data.getExerciseWork(exerciseId));
-    if (remote) return remote.value;
-  }
   const safeExerciseId = String(exerciseId || "").trim().slice(0, 100);
   if (!safeExerciseId) return { draft: null, submissions: [] };
+  // Supabase mode: both sources; the newer draft wins and the submissions are a union by id. One
+  // failing source leaves the other (the Firestore reads below never throw, as today).
+  const remotePromise = supabaseModeActive() ? runSupabase((data) => data.getExerciseWork(exerciseId)) : null;
   const readyDb = requireFirestore();
   const [draftResult, submissionResult, latestResult] = await Promise.allSettled([
     getDoc(doc(readyDb, "users", user.uid, "exercise_work", safeExerciseId)),
@@ -1501,10 +1644,17 @@ async function getExerciseWork(exerciseId) {
       responsePayload: payload
     }];
   }
-  return {
+  const local = {
     draft: draftSnapshot && draftSnapshot.exists() ? draftSnapshot.data() : null,
     submissions
   };
+  if (!remotePromise) return local;
+  const remote = await remotePromise;
+  if (!remote.ok) {
+    reportSupabaseFailure("exercise work read", exerciseId, remote.error);
+    return local;
+  }
+  return mergeExerciseWorkViews(local, remote.value);
 }
 
 async function saveExerciseSubmission(submissionPayload = {}) {

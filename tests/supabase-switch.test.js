@@ -9,11 +9,14 @@
 //    events as the baseline copy from before the switch (tests/fixtures/firebase-baseline.js).
 // 2. The ?utl_data= parameter: supabase only records a pending request, the tester gate in
 //    saveUserProfile decides, firebase applies at once, and the parameter is stripped from the address.
-// 3. Supabase mode, bridge writes: Firestore first, then a best-effort Supabase copy; any Supabase
+// 3. Supabase mode, bridge writes: every Firestore write first (the rewards transaction before the
+//    workspace bridge), then a background Supabase copy the caller never waits for; any Supabase
 //    failure (42501, 404, 22023, 500, timeout) leaves the Firestore write done, throws nothing, queues
 //    nothing, shows no banner and emits one stability event with the code.
-// 4. Supabase mode, Supabase-only writes and reads: Supabase first, fall back to the Firestore code on
-//    any failure (no event loop from saveStabilityEvent).
+// 4. Supabase mode, Supabase-only writes: Supabase first, fall back to the Firestore code on any
+//    failure (no event loop from saveStabilityEvent). Reads: both sources merged, Firestore the base
+//    (flags only turned on, entries only added, newer draft wins, unions by id); one failing source
+//    leaves the other; an id the catalog does not know counts as a Supabase failure.
 // 5. The queue: a queued completion retried into a permanent Supabase error still completes its
 //    Firestore sync, clears the queue and the banner; the stamped completed_at keeps the key stable.
 // 6. Expired tokens are retried once; the sign-in record never blocks sign-in, even when Supabase hangs.
@@ -431,7 +434,9 @@ async function check(name, fn) {
     }).then(async () => {
       harness.fetchCalls.length = 0;
       harness.log.length = 0;
-      return settle(current.saveUserProgress('grocery-list', 'Grocery list', UNSTAMPED_PAYLOAD));
+      const outcome = await settle(current.saveUserProgress('grocery-list', 'Grocery list', UNSTAMPED_PAYLOAD));
+      await harness.flush();
+      return outcome;
     });
     assert.equal(result.error, null);
     const stamped = Object.assign({}, UNSTAMPED_PAYLOAD, { completed_at: FIXED_ISO });
@@ -445,6 +450,7 @@ async function check(name, fn) {
     harness.fetchCalls.length = 0;
     harness.log.length = 0;
     await current.saveUserProgress('grocery-list', 'Grocery list', { submitted_at: '2026-10-06T09:00:00.000Z', attempt: 1 });
+    await harness.flush();
     assert.equal(harness.rpcCalls('record_activity_submission')[0].body.p_submission_key, 'grocery-list-2026-10-06T090000000Z');
     assert.deepEqual(completionWrite().data.savedPayload, { submitted_at: '2026-10-06T09:00:00.000Z', attempt: 1 }, 'not re-stamped');
   });
@@ -479,29 +485,76 @@ async function check(name, fn) {
     });
   }
 
-  await check('supabase mode: a Supabase call that never answers is abandoned; Firestore is already written', async () => {
+  await check('supabase mode: the completion bridge is not awaited; a Supabase call that never answers is abandoned in the background', async () => {
     harness.reset();
     harness.storage.setItem('utl_data_source', 'supabase');
     harness.signIn();
     seedFirestore(harness);
     harness.onFetch('POST', '/rest/v1/rpc/', { __hang: true });
-    let settled = null;
-    const pending = current.saveUserProgress('grocery-list', 'Grocery list', PROGRESS_PAYLOAD).then((value) => { settled = { value }; }, (error) => { settled = { error }; });
+    const value = await current.saveUserProgress('grocery-list', 'Grocery list', PROGRESS_PAYLOAD);
+    assert.deepEqual(value, { saved: true }, 'the caller got its answer while Supabase was still hanging');
+    assert.equal(harness.read(`users/${UID}/completed_exercises/grocery-list`).savedPayload.completed_at, PROGRESS_PAYLOAD.completed_at, 'Firestore was written');
+    assert.deepEqual(harness.events.map((event) => event.type), ['utl:activity-completed'], 'the page was told the activity completed, nothing else yet');
     await harness.flush(10);
-    assert.equal(settled, null, 'still waiting on Supabase');
-    assert.equal(harness.read(`users/${UID}/completed_exercises/grocery-list`).savedPayload.completed_at, PROGRESS_PAYLOAD.completed_at, 'Firestore was written before the wait');
-    assert.ok(harness.events.some((event) => event.type === 'utl:activity-completed'), 'the page was told the activity completed');
+    assert.equal(harness.rpcCalls('record_activity_submission').length, 1, 'the background copy started');
     const delays = harness.pendingTimers();
     assert.ok(delays.includes(10000), 'the data layer armed its 10 second abort');
     assert.ok(delays.includes(15000), 'firebase.js armed its 15 second wait');
+    assert.equal(syncEvents(harness.events).length, 0, 'no failure reported while still waiting');
     harness.fireTimers();
-    await pending;
-    assert.ok(settled && !settled.error, 'resolved without throwing');
-    assert.deepEqual(settled.value, { saved: true });
+    await harness.flush(10);
     const events = syncEvents(harness.events);
     assert.equal(events.length, 1);
     assert.match(events[0].detail.message, /Supabase completion failed \((network\/failed|network\/timeout)\)/);
     assert.deepEqual(queueOf(harness.storage.snapshot()), {});
+    assert.equal(harness.pendingTimers().length, 0);
+  });
+
+  await check('supabase mode: the caller resolves before a failing bridge reports; the report arrives in the background', async () => {
+    harness.reset();
+    harness.storage.setItem('utl_data_source', 'supabase');
+    harness.signIn();
+    seedFirestore(harness);
+    harness.onFetch('POST', '/rest/v1/rpc/', FAILURES['500']);
+    await current.saveUserProgress('grocery-list', 'Grocery list', PROGRESS_PAYLOAD);
+    assert.deepEqual(harness.events.map((event) => event.type), ['utl:activity-completed'], 'resolved before the bridge finished');
+    await harness.flush();
+    assert.deepEqual(harness.events.map((event) => event.type), ['utl:activity-completed', 'utl:stability-event'], 'the failure is reported afterwards');
+    assert.ok(harness.events[1].detail.message.includes('(http/500)'));
+
+    harness.events.length = 0;
+    harness.fetchCalls.length = 0;
+    await current.saveMemberRewards(REWARDS_PAYLOAD);
+    assert.equal(harness.events.length, 0, 'rewards resolved before the bridge finished');
+    await harness.flush();
+    assert.equal(syncEvents(harness.events).length, 1);
+    assert.equal(harness.rpcCalls('add_reward_entries').length, 1);
+  });
+
+  await check('supabase mode: saveMemberWorkspaceProgress writes Firestore and the rewards transaction before any Supabase call, even when Supabase hangs', async () => {
+    harness.reset();
+    harness.storage.setItem('utl_data_source', 'supabase');
+    harness.signIn();
+    seedFirestore(harness);
+    harness.onFetch('POST', '/rest/v1/rpc/', { __hang: true }).onFetch('GET', '/rest/v1/', { __hang: true });
+    const value = await current.saveMemberWorkspaceProgress(WORKSPACE_PAYLOAD);
+    assert.equal(value, undefined, 'resolved as in default mode while Supabase hangs');
+    const writes = harness.firestoreWrites().map((entry) => entry.op);
+    assert.deepEqual(writes, ['setDoc', 'transaction.set'], 'the workspace document and the rewards transaction are both written');
+    assert.equal(harness.read(`users/${UID}`).rewards.mpTotal, 70);
+    await harness.flush(10);
+    const firstFetch = harness.sequence.findIndex((step) => step.startsWith('fetch:'));
+    const transaction = harness.sequence.indexOf('firestore:runTransaction:');
+    assert.ok(firstFetch !== -1, 'Supabase was started');
+    assert.ok(transaction !== -1 && transaction < firstFetch, 'the rewards transaction happened before the first Supabase call');
+    assert.ok(harness.sequence.indexOf(`firestore:setDoc:users/${UID}`) < firstFetch, 'the workspace write happened before the first Supabase call');
+    assert.ok(harness.sequence.slice(firstFetch).every((step) => step.startsWith('fetch:')), 'no Firestore work after Supabase started');
+    harness.fireTimers();
+    await harness.flush(10);
+    harness.fireTimers();
+    await harness.flush(10);
+    const events = syncEvents(harness.events);
+    assert.deepEqual(events.map((event) => event.detail.message.replace(/\(.*\)/, '(code)')).sort(), ['Supabase rewards failed (code); the Firestore copy is kept', 'Supabase workspace progress failed (code); the Firestore copy is kept']);
     assert.equal(harness.pendingTimers().length, 0);
   });
 
@@ -533,7 +586,9 @@ async function check(name, fn) {
     const expected = Object.assign({}, WORKSPACE_PAYLOAD);
     delete expected.rewards;
     assert.deepEqual(setDocs[0].data.workspaceProgress, expected, 'the Firestore document is the snapshot without rewards, as today');
-    assert.ok(workspace.sequence.indexOf(`firestore:setDoc:users/${UID}`) < workspace.sequence.findIndex((step) => step.startsWith('fetch:')), 'Firestore first');
+    const firstFetch = workspace.sequence.findIndex((step) => step.startsWith('fetch:'));
+    assert.ok(workspace.sequence.indexOf(`firestore:setDoc:users/${UID}`) < firstFetch, 'Firestore first');
+    assert.ok(workspace.sequence.indexOf('firestore:runTransaction:') < firstFetch, 'the rewards transaction before any Supabase call');
   });
 
   // -- 4. supabase mode, Supabase-only writes and reads ----------------------------------
@@ -623,49 +678,232 @@ async function check(name, fn) {
     window.listeners['utl:stability-event'] = [];
   });
 
-  await check('supabase mode: reads come from Supabase, with the admin flags from one getDoc', async () => {
+  await check('supabase mode: progress is read from both sources; Firestore is the base and Supabase only adds', async () => {
     const seedReads = (h) => withCatalog(h)
       .onFetch('GET', '/rest/v1/activity_progress?', [
         { activity_id: 'orientation', status: 'completed', completed_at: '2026-10-01T00:00:00+00:00' },
         { activity_id: 'p1-l1', status: 'completed', completed_at: '2026-10-02T00:00:00+00:00' },
-        { activity_id: 'p1-e1', status: 'completed', completed_at: '2026-10-06T09:58:00+00:00' }
+        { activity_id: 'p1-e1', status: 'completed', completed_at: '2026-10-06T09:58:00+00:00' },
+        { activity_id: 'p2-e4', status: 'completed', completed_at: '2026-10-06T09:59:00+00:00' },
+        { activity_id: 'p1-e1-context', status: 'completed', completed_at: '2026-10-03T00:00:00+00:00' }
+      ])
+      .onFetch('GET', '/rest/v1/reward_ledger?', [
+        { entry_key: 'lesson:p1-l1', points: 10, reason: '', activity_id: 'p1-l1', earned_at: '2026-10-05T10:00:00+00:00', source: { id: 'lesson:p1-l1', type: 'lesson', mpEarned: 10 } },
+        { entry_key: 'exercise:p1-e1', points: 60, reason: '', activity_id: 'p1-e1', earned_at: '2026-10-06T09:58:30+00:00', source: { id: 'exercise:p1-e1', type: 'exercise', mpEarned: 60 } }
       ])
       .onFetch('GET', '/rest/v1/reward_totals?', [{ program_id: 'tsa', points_total: 70, entry_count: 2 }])
-      .onFetch('GET', '/rest/v1/reward_state?', [{ streak_days: 2, last_qualified_on: '2026-10-06', tokens: 1, streak: {} }]);
+      .onFetch('GET', '/rest/v1/reward_state?', [{ streak_days: 3, last_qualified_on: '2026-10-06', tokens: 2, streak: { dailyActivities: { '2026-10-06': { 'p1-e1': true } }, awardedDates: {} } }]);
+    const defaultRun = await observe(harness, scenariosFor(current).getMemberWorkspaceProgress);
     let result = await supa('getMemberWorkspaceProgress', { before: seedReads });
     assert.equal(result.outcome.error, null);
     const progress = result.outcome.value;
-    assert.deepEqual(result.firestore, [{ sdk: 'firestore', op: 'getDoc', path: `users/${UID}` }], 'exactly one Firestore read');
-    assert.equal(progress.adminProgressRevision, 'admin-7');
+    assert.deepStrictEqual(result.firestore, defaultRun.firestore, 'the full Firestore read path ran (users document and completed_exercises)');
+    assert.equal(progress.adminProgressRevision, 'admin-7', 'admin flags come from Firestore');
     assert.equal(progress.adminProgressReset, true);
     assert.equal(progress.updatedAtClient, '2026-10-05T10:00:00.000Z');
-    assert.deepEqual(progress.orientation, { ready: true, open: null }, 'orientation.open stays browser-only');
-    assert.equal(progress.exercises['grocery-list'].completed, true);
-    assert.equal(progress.rewards.mpTotal, 70);
+    assert.deepEqual(progress.orientation, { ready: true, open: true }, 'the Firestore orientation (open included) is kept');
+    assert.deepEqual(progress.lessons, { 'p1-l1': { watched: true } });
+    assert.equal(progress.exercises['grocery-list'].completed, true, 'from Firestore completed_exercises');
+    assert.equal(progress.exercises['p1-e1'].completed, true);
+    assert.equal(progress.exercises['p1-e1'].title, 'Grocery list');
+    assert.deepEqual(progress.exercises['p2-e4'], { visited: true, completed: true, completedAt: '2026-10-06T09:59:00.000Z', title: 'Write to Aiko', appKey: 'write-to-aiko' }, 'a Supabase-only completion is added');
+    assert.equal(progress.exercises['write-to-aiko'].completed, true, 'with its alias');
+    assert.deepEqual(progress.contexts, { 'p1-e1': { completed: true } }, 'a Supabase-only context is added');
+    const rewards = progress.rewards;
+    assert.equal(rewards.mpTotal, 70, 'the larger total');
+    assert.equal(rewards.masteryPoints, 70);
+    assert.deepEqual(rewards.ledger.map((entry) => entry.id), ['lesson:p1-l1', 'exercise:p1-e1'], 'union of the ledger by id');
+    assert.equal(rewards.ledger[0].type, 'lesson', 'the Firestore entry wins a duplicate id');
+    assert.equal(rewards.tokens, 2, 'the larger tokens');
+    assert.equal(rewards.streakDays, 3);
+    assert.equal(rewards.streak.currentDays, 3);
+    assert.equal(rewards.streak.lastQualifiedDate, '2026-10-06');
+    assert.equal(rewards.level, 'Intern', 'the Firestore level is kept');
+    assert.deepEqual(rewards.earnedEvents, { 'lesson:p1-l1': true, 'exercise:p1-e1': true });
 
     result = await supa('getMemberWorkspaceProgress', { before: (h) => { seedReads(h); h.failWhen('getDoc', /^users\/uid-1$/, Object.assign(new Error('denied'), { code: 'permission-denied' })); } });
-    assert.equal(result.outcome.error, null);
-    assert.equal(result.outcome.value.exercises['p1-e1'].completed, true, 'a failing admin read does not hide the progress');
-    assert.equal(result.outcome.value.adminProgressRevision, undefined);
-
-    result = await supa('getMemberWorkspaceProgress', { before: (h) => withCatalog(h) });
-    assert.equal(result.outcome.value, null, 'no Supabase rows reads as no document');
+    assert.equal(result.outcome.error, null, 'a failing Firestore read with a Supabase answer returns the Supabase view');
+    assert.equal(result.outcome.value.exercises['p1-e1'].completed, true);
+    assert.equal(result.outcome.value.adminProgressRevision, undefined, 'no admin flags without Firestore');
+    assert.deepEqual(result.outcome.value.orientation, { ready: true, open: null });
+    assert.equal(syncEvents(result.events).length, 0);
 
     result = await supa('getExerciseWork', {
       before: (h) => withCatalog(h)
         .onFetch('GET', '/rest/v1/activity_drafts?', [{ draft: { mode: 'open' }, updated_at: '2026-10-06T09:50:00+00:00' }])
         .onFetch('GET', '/rest/v1/activity_submissions?', [{ id: 'row-1', submission_key: 'grocery-list-2026-10-06T095800000Z', attempt_number: 2, completed_at: '2026-10-06T09:58:00+00:00', duration_seconds: 300, content_version: '', response: PROGRESS_PAYLOAD }])
     });
-    assert.equal(result.firestore.length, 0, 'no Firestore read');
-    assert.deepEqual(result.outcome.value.draft.draftPayload, { mode: 'open' });
-    assert.equal(result.outcome.value.submissions[0].submissionId, 'grocery-list-2026-10-06T095800000Z');
+    assert.ok(result.firestore.some((entry) => entry.path.includes('exercise_work')), 'Firestore is read too');
+    assert.deepEqual(result.outcome.value.draft.draftPayload, { mode: 'open' }, 'the Supabase draft wins (the Firestore copy carries no time)');
+    assert.deepEqual(result.outcome.value.submissions.map((item) => item.submissionId), ['grocery-list-2026-10-06T095800000Z', 'grocery-list-2026-10-01T000000000Z'], 'union of both histories, newest first');
 
     result = await supa('getExerciseAttempts', {
       before: (h) => withCatalog(h).onFetch('GET', '/rest/v1/activity_attempts?', [{ attempt_key: 'attempt-00000001', attempt_number: 2, score: 80, score_maximum: 100, score_percent: 80, duration_seconds: 300, content_version: 'v3', submitted_at: '2026-10-06T09:58:00+00:00' }])
     });
-    assert.equal(result.firestore.length, 0);
-    assert.equal(result.outcome.value[0].attemptId, 'attempt-00000001');
+    assert.ok(result.firestore.some((entry) => entry.path.includes('exercise_attempts')), 'Firestore is read too');
+    assert.deepEqual(result.outcome.value.map((item) => item.attemptId), ['attempt-00000001', 'attempt-00000000'], 'union of both, newest first');
     assert.equal(result.outcome.value[0].submittedAt.toMillis(), Date.parse('2026-10-06T09:58:00Z'));
+  });
+
+  await check('supabase mode: a fresh browser with an empty Supabase sees exactly the Firestore view (no false flags to write back)', async () => {
+    const defaultRun = await observe(harness, scenariosFor(current).getMemberWorkspaceProgress);
+    const result = await supa('getMemberWorkspaceProgress', { before: (h) => withCatalog(h) });
+    assert.equal(result.outcome.error, null);
+    assert.deepStrictEqual(result.outcome.value, defaultRun.outcome.value, 'identical to the default-mode view');
+    assert.equal(result.outcome.value.lessons['p1-l1'].watched, true);
+    assert.equal(result.outcome.value.orientation.ready, true);
+    assert.equal(syncEvents(result.events).length, 0, 'an empty Supabase is not a failure');
+    // The page writes this view back: the Firestore document is unchanged by that write.
+    const beforeWrite = harness.read(`users/${UID}`).workspaceProgress;
+    await current.saveMemberWorkspaceProgress(Object.assign({}, result.outcome.value, { rewards: undefined }));
+    await harness.flush();
+    const afterWrite = harness.read(`users/${UID}`).workspaceProgress;
+    ['orientation', 'lessons', 'contexts', 'adminProgressRevision', 'adminProgressReset'].forEach((key) => assert.deepStrictEqual(afterWrite[key], beforeWrite[key], `${key} unchanged by the write-back`));
+    assert.equal(afterWrite.exercises['p1-e1'].completed, true, 'the completion seen in completed_exercises is now in the document, nothing was set to false');
+
+    // Both sources empty still reads as no document.
+    const empty = await supa('getMemberWorkspaceProgress', { before: (h) => { withCatalog(h); h.store.delete(`users/${UID}`); } });
+    assert.equal(empty.outcome.value, null);
+  });
+
+  await check('supabase mode: stale Supabase rows never turn a Firestore flag off', async () => {
+    const result = await supa('getMemberWorkspaceProgress', {
+      before: (h) => withCatalog(h).onFetch('GET', '/rest/v1/activity_progress?', [
+        { activity_id: 'orientation', status: 'not_started' },
+        { activity_id: 'p1-l1', status: 'visited' },
+        { activity_id: 'p1-e1', status: 'visited' },
+        { activity_id: 'p3-e4', status: 'visited' }
+      ])
+    });
+    const progress = result.outcome.value;
+    assert.equal(progress.orientation.ready, true, 'orientation stays ready');
+    assert.deepEqual(progress.lessons['p1-l1'], { watched: true }, 'the watched lesson stays watched');
+    assert.equal(progress.exercises['p1-e1'].completed, true, 'the completed exercise stays completed');
+    assert.equal(progress.exercises['grocery-list'].completed, true);
+    assert.deepEqual(progress.exercises['p3-e4'], { visited: true, completed: false, completedAt: null, title: 'Speak like Obama', appKey: 'speak-like-obama' }, 'an exercise the base lacks is added as Supabase has it');
+    assert.equal(progress.rewards.mpTotal, 10, 'the Firestore rewards stay when Supabase has none');
+    assert.equal(progress.adminProgressRevision, 'admin-7');
+  });
+
+  await check('supabase mode: rewards merge keeps the larger values when Firestore is ahead', async () => {
+    const result = await supa('getMemberWorkspaceProgress', {
+      before: (h) => {
+        withCatalog(h)
+          .onFetch('GET', '/rest/v1/reward_ledger?', [{ entry_key: 'lesson:p1-l1', points: 10, reason: '', activity_id: 'p1-l1', earned_at: '2026-10-05T10:00:00+00:00', source: {} }])
+          .onFetch('GET', '/rest/v1/reward_totals?', [{ program_id: 'tsa', points_total: 10, entry_count: 1 }])
+          .onFetch('GET', '/rest/v1/reward_state?', [{ streak_days: 1, last_qualified_on: '2026-10-05', tokens: 0, streak: {} }]);
+        const user = h.read(`users/${UID}`);
+        user.rewards = Object.assign({}, REWARDS_PAYLOAD, { level: 'Analyst', currentLevel: 'Analyst' });
+        h.seed(`users/${UID}`, user);
+      }
+    });
+    const rewards = result.outcome.value.rewards;
+    assert.equal(rewards.mpTotal, 70);
+    assert.deepEqual(rewards.ledger.map((entry) => entry.id), ['lesson:p1-l1', 'exercise:p1-e1']);
+    assert.equal(rewards.tokens, 1);
+    assert.equal(rewards.streak.currentDays, 2);
+    assert.equal(rewards.streak.lastQualifiedDate, '2026-10-06');
+    assert.deepEqual(rewards.streak.dailyActivities, { '2026-10-06': { 'p1-e1': true } });
+    assert.equal(rewards.level, 'Analyst');
+  });
+
+  await check('supabase mode: exercise work and attempts fall back to Firestore for an id the catalog does not know', async () => {
+    const seedRetired = (h) => {
+      withCatalog(h);
+      h.seed(`users/${UID}/exercise_work/retired-thing`, { exerciseId: 'retired-thing', draftPayload: { mode: 'legacy' } });
+      h.seed(`users/${UID}/exercise_submissions/retired-thing-2026`, { exerciseId: 'retired-thing', submissionId: 'retired-thing-2026', completedAtClient: '2026-09-01T00:00:00.000Z', responsePayload: { r: 1 } });
+      h.seed(`users/${UID}/exercise_attempts/attempt-retired-1`, { attemptId: 'attempt-retired-1', exerciseId: 'retired-thing', score: 5, scoreMaximum: 10, submittedAt: { seconds: 1, nanoseconds: 0 } });
+    };
+    const defaultWork = await observe(harness, () => current.getExerciseWork('retired-thing'), { before: seedRetired });
+    const work = await observe(harness, () => current.getExerciseWork('retired-thing'), { storage: SUPABASE_ON, before: seedRetired });
+    assert.deepStrictEqual(work.outcome.value, defaultWork.outcome.value, 'the Firestore draft and history');
+    assert.equal(work.outcome.value.draft.draftPayload.mode, 'legacy');
+    assert.equal(syncEvents(work.events).length, 0, 'an unknown (retired) id is a normal fall back, not a stability event');
+    assert.equal(harness.getCalls('activity_drafts').length, 0, 'no row read for an unknown id');
+
+    const defaultAttempts = await observe(harness, () => current.getExerciseAttempts('retired-thing'), { before: seedRetired });
+    const attempts = await observe(harness, () => current.getExerciseAttempts('retired-thing'), { storage: SUPABASE_ON, before: seedRetired });
+    assert.deepStrictEqual(attempts.outcome.value, defaultAttempts.outcome.value);
+    assert.equal(attempts.outcome.value[0].attemptId, 'attempt-retired-1');
+    assert.equal(syncEvents(attempts.events).length, 0);
+  });
+
+  await check('supabase mode: the newer draft wins from either side; submissions and attempts are a union capped at ten', async () => {
+    const supabaseDraft = (time) => [{ draft: { mode: 'remote', updatedAtClient: time }, updated_at: time }];
+    const localDraft = (h, time) => h.seed(`users/${UID}/exercise_work/grocery-list`, { exerciseId: 'grocery-list', draftPayload: { mode: 'local', updatedAtClient: time } });
+    let result = await supa('getExerciseWork', { before: (h) => { withCatalog(h).onFetch('GET', '/rest/v1/activity_drafts?', supabaseDraft('2026-10-06T09:00:00+00:00')); localDraft(h, '2026-10-06T09:30:00.000Z'); } });
+    assert.equal(result.outcome.value.draft.draftPayload.mode, 'local', 'the newer Firestore draft wins');
+    result = await supa('getExerciseWork', { before: (h) => { withCatalog(h).onFetch('GET', '/rest/v1/activity_drafts?', supabaseDraft('2026-10-06T09:45:00+00:00')); localDraft(h, '2026-10-06T09:30:00.000Z'); } });
+    assert.equal(result.outcome.value.draft.draftPayload.mode, 'remote', 'the newer Supabase draft wins');
+    result = await supa('getExerciseWork', { before: (h) => { withCatalog(h).onFetch('GET', '/rest/v1/activity_drafts?', supabaseDraft('2026-10-06T09:30:00+00:00')); localDraft(h, '2026-10-06T09:30:00.000Z'); } });
+    assert.equal(result.outcome.value.draft.draftPayload.mode, 'local', 'a tie keeps the Firestore draft');
+    result = await supa('getExerciseWork', { before: (h) => { withCatalog(h).onFetch('GET', '/rest/v1/activity_drafts?', supabaseDraft('2026-10-06T09:30:00+00:00')); h.store.delete(`users/${UID}/exercise_work/grocery-list`); } });
+    assert.equal(result.outcome.value.draft.draftPayload.mode, 'remote', 'the only draft is used');
+
+    const rows = [];
+    for (let index = 0; index < 11; index += 1) {
+      rows.push({ id: `row-${index}`, submission_key: `grocery-list-2026-10-0${index < 9 ? index + 1 : 9}T0${index}0000000Z`, attempt_number: index + 1, completed_at: `2026-10-0${index < 9 ? index + 1 : 9}T0${index}:00:00+00:00`, duration_seconds: 10, content_version: '', response: {} });
+    }
+    rows.push({ id: 'dup', submission_key: 'grocery-list-2026-10-01T000000000Z', attempt_number: 9, completed_at: '2026-10-01T00:00:00+00:00', duration_seconds: 10, content_version: '', response: { fromSupabase: true } });
+    result = await supa('getExerciseWork', { before: (h) => withCatalog(h).onFetch('GET', '/rest/v1/activity_submissions?', rows) });
+    const submissions = result.outcome.value.submissions;
+    assert.equal(submissions.length, 10, 'capped at ten');
+    const ids = submissions.map((item) => item.submissionId);
+    assert.equal(new Set(ids).size, 10, 'no duplicate ids');
+    assert.deepEqual(ids.slice(), ids.slice().sort((a, b) => String(b).localeCompare(a)), 'newest first');
+    const duplicate = submissions.find((item) => item.submissionId === 'grocery-list-2026-10-01T000000000Z');
+    assert.ok(!duplicate || duplicate.responsePayload.a === 1, 'the Firestore copy wins a duplicate id');
+
+    result = await supa('getExerciseAttempts', {
+      before: (h) => withCatalog(h).onFetch('GET', '/rest/v1/activity_attempts?', [
+        { attempt_key: 'attempt-00000000', attempt_number: 1, score: 40, score_maximum: 100, score_percent: 40, duration_seconds: 10, content_version: '', submitted_at: '2026-10-01T00:00:00+00:00' },
+        { attempt_key: 'attempt-00000002', attempt_number: 2, score: 90, score_maximum: 100, score_percent: 90, duration_seconds: 10, content_version: '', submitted_at: '2026-10-06T09:00:00+00:00' }
+      ])
+    });
+    assert.deepEqual(result.outcome.value.map((item) => item.attemptId), ['attempt-00000002', 'attempt-00000000'], 'union by attemptId, newest first');
+    assert.equal(result.outcome.value[1].score, 40);
+    assert.equal(result.outcome.value[1].id, 'attempt-00000000');
+    assert.ok(!('schemaVersion' in result.outcome.value[1]) || result.outcome.value[1].schemaVersion === undefined, 'the Firestore copy wins the duplicate id');
+  });
+
+  await check('supabase mode: a single failing source leaves the other for drafts, history and attempts; both failing throws as today', async () => {
+    // Firestore attempts read fails, Supabase answers.
+    let result = await supa('getExerciseAttempts', {
+      before: (h) => {
+        withCatalog(h).onFetch('GET', '/rest/v1/activity_attempts?', [{ attempt_key: 'attempt-00000002', attempt_number: 2, score: 90, score_maximum: 100, score_percent: 90, duration_seconds: 10, content_version: '', submitted_at: '2026-10-06T09:00:00+00:00' }]);
+        h.failWhen('getDocs', /exercise_attempts/, Object.assign(new Error('denied'), { code: 'permission-denied' }));
+      }
+    });
+    assert.equal(result.outcome.error, null);
+    assert.deepEqual(result.outcome.value.map((item) => item.attemptId), ['attempt-00000002']);
+    // Both fail: the Firestore error is thrown, the Supabase failure reported.
+    result = await supa('getExerciseAttempts', {
+      before: (h) => {
+        withCatalog(h).onFetch('GET', '/rest/v1/activity_attempts?', FAILURES['500']);
+        h.failWhen('getDocs', /exercise_attempts/, Object.assign(new Error('denied'), { code: 'permission-denied' }));
+      }
+    });
+    assert.equal(result.outcome.error.code, 'permission-denied');
+    assert.equal(syncEvents(result.events).length, 1);
+    // Firestore work reads fail (they never throw, as today), Supabase answers.
+    result = await supa('getExerciseWork', {
+      before: (h) => {
+        withCatalog(h)
+          .onFetch('GET', '/rest/v1/activity_drafts?', [{ draft: { mode: 'remote' }, updated_at: '2026-10-06T09:50:00+00:00' }])
+          .onFetch('GET', '/rest/v1/activity_submissions?', [{ id: 'row-1', submission_key: 'grocery-list-2026-10-06T095800000Z', attempt_number: 2, completed_at: '2026-10-06T09:58:00+00:00', duration_seconds: 300, content_version: '', response: {} }]);
+        h.failWhen('getDoc', /exercise_work/, new Error('denied'));
+        h.failWhen('getDocs', /exercise_submissions/, new Error('denied'));
+        h.failWhen('getDoc', /completed_exercises/, new Error('denied'));
+      }
+    });
+    assert.equal(result.outcome.error, null);
+    assert.equal(result.outcome.value.draft.draftPayload.mode, 'remote');
+    assert.deepEqual(result.outcome.value.submissions.map((item) => item.submissionId), ['grocery-list-2026-10-06T095800000Z']);
+    // Supabase draft read fails: the Firestore draft and history, one event.
+    const defaultWork = await observe(harness, scenariosFor(current).getExerciseWork);
+    result = await supa('getExerciseWork', { before: (h) => withCatalog(h).onFetch('GET', '/rest/v1/activity_drafts?', FAILURES['500']) });
+    assert.deepStrictEqual(result.outcome.value, defaultWork.outcome.value);
+    assert.equal(syncEvents(result.events).length, 1);
   });
 
   for (const [label, answer] of Object.entries(FAILURES)) {
@@ -774,6 +1012,7 @@ async function check(name, fn) {
     try {
       harness.onFetch('POST', '/rest/v1/rpc/record_activity_submission', FAILURES['500']);
       let result = await current.retryPendingProgressSyncs();
+      await harness.flush();
       assert.deepEqual(result, { synced: 1, remaining: 0 });
       assert.equal(harness.rpcCalls('record_activity_submission')[0].body.p_submission_key, expectedKey, 'first retry uses the stamped key');
       assert.equal(harness.read(`users/${UID}/completed_exercises/grocery-list`).savedPayload.completed_at, FIXED_ISO);
@@ -782,6 +1021,7 @@ async function check(name, fn) {
       harness.now = FIXED_NOW + 120000;
       harness.fetchCalls.length = 0;
       await current.saveUserProgress('grocery-list', 'Grocery list', queue[key].exercisePayload);
+      await harness.flush();
       assert.equal(harness.rpcCalls('record_activity_submission')[0].body.p_submission_key, expectedKey, 'same key again');
     } finally {
       harness.now = FIXED_NOW;

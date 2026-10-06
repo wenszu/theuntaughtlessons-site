@@ -7,23 +7,14 @@ const { pathToFileURL } = require('url');
 // assets/supabase-data.js is a browser ES module. Node treats .js in this repo as CommonJS, so the test
 // copies it to a temporary .mjs file and imports that.
 const SOURCE = path.resolve(__dirname, '..', 'assets', 'supabase-data.js');
-const SCRATCH_DIRS = [
-  '/private/tmp/claude-501/-Users-wenszu-dev-utl-supabase-core/37f1d22f-2889-49da-bfd6-c00d411a2f20/scratchpad',
-  path.join(os.tmpdir(), 'utl-supabase-data-test')
-];
 
+// The copy lives in a fresh folder under the system temp directory, removed when the process exits.
 function moduleCopy() {
-  for (const dir of SCRATCH_DIRS) {
-    try {
-      fs.mkdirSync(dir, { recursive: true });
-      const target = path.join(dir, 'supabase-data.mjs');
-      fs.copyFileSync(SOURCE, target);
-      return target;
-    } catch (error) {
-      // try the next directory
-    }
-  }
-  throw new Error('No writable scratch directory for the module copy.');
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'utl-supabase-data-test-'));
+  process.on('exit', () => { try { fs.rmSync(dir, { recursive: true, force: true }); } catch (error) { /* best effort */ } });
+  const target = path.join(dir, 'supabase-data.mjs');
+  fs.copyFileSync(SOURCE, target);
+  return target;
 }
 
 const URL_BASE = 'https://example-project.supabase.co';
@@ -71,7 +62,7 @@ const CATALOG_ACTIVITIES = [
   { id: 'p1-e1-context', kind: 'context', title: 'Grocery list context', status: 'active', config: {} },
   { id: 'p1-e3', kind: 'exercise', title: 'Messy notes', status: 'active', config: { appKey: 'messy-notes' } },
   { id: 'p1-e3-context', kind: 'context', title: 'Messy notes context', status: 'active', config: {} },
-  { id: 'p3-e4', kind: 'exercise', title: 'Speak like Obama', status: 'active', config: { appKey: 'speak-like-obama' } },
+  { id: 'p3-e4', kind: 'exercise', title: 'Speak like Obama', status: 'active', config: { appKey: 'speak-like-obama', selfReported: true } },
   { id: 'tsa-diagnostic', kind: 'assessment', title: 'TSA diagnostic', status: 'active', config: {} }
 ];
 const CATALOG_KEYS = [
@@ -625,11 +616,26 @@ function check(name, fn) {
     assert.equal(catalog.resolveContext('grocery-list'), 'p1-e1-context');
     assert.equal(catalog.resolveContext('orientation-start'), 'orientation-start');
     assert.equal(catalog.resolve('p2-l2'), null);
+    const withEmpty = rebuildWorkspaceProgress({ progressRows: [{ activity_id: 'p1-e3', status: 'not_started' }, { activity_id: 'p1-e1', status: 'visited' }] }, catalog);
+    assert.equal(withEmpty.exercises['p1-e3'], undefined, 'a not_started row adds nothing to the view');
     const rebuilt = rebuildWorkspaceProgress({ progressRows: [{ activity_id: 'p1-e1', status: 'visited' }] }, catalog);
     assert.equal(rebuilt.rewards, null);
     assert.equal(rebuilt.exercises['p1-e1'].visited, true);
     const plan = planProgressMarks({ exercises: { 'grocery-list': { completed: true } } }, catalog, []);
     assert.deepEqual(plan.marks, [{ activityId: 'p1-e1', status: 'visited' }]);
+    // Self reported exercises (no save call in their app) are marked completed from the learner's own flag, and
+    // only those: an ordinary exercise stays visited, and a flagged assessment is never completed by marking.
+    const selfReported = planProgressMarks({ exercises: { 'speak-like-obama': { visited: true, completed: true } } }, catalog, []);
+    assert.deepEqual(selfReported.marks, [{ activityId: 'p3-e4', status: 'completed' }]);
+    const visitedOnly = planProgressMarks({ exercises: { 'speak-like-obama': { visited: true, completed: false } } }, catalog, []);
+    assert.deepEqual(visitedOnly.marks, [{ activityId: 'p3-e4', status: 'visited' }]);
+    const alreadyDone = planProgressMarks({ exercises: { 'speak-like-obama': { completed: true } } }, catalog, [{ activity_id: 'p3-e4', status: 'completed' }]);
+    assert.deepEqual(alreadyDone.marks, [], 'nothing is sent again once the database has it');
+    const mixed = planProgressMarks({ exercises: { 'grocery-list': { completed: true }, 'speak-like-obama': { completed: true } } }, catalog, []);
+    assert.deepEqual(mixed.marks.slice().sort((a, b) => a.activityId.localeCompare(b.activityId)), [{ activityId: 'p1-e1', status: 'visited' }, { activityId: 'p3-e4', status: 'completed' }]);
+    const flaggedAssessment = buildCatalogIndex(CATALOG_ACTIVITIES.map((a) => (a.id === 'tsa-diagnostic' ? { ...a, config: { selfReported: true } } : a)), CATALOG_KEYS);
+    const assessmentPlan = planProgressMarks({ exercises: { 'tsa-diagnostic': { completed: true } } }, flaggedAssessment, []);
+    assert.deepEqual(assessmentPlan.marks, [{ activityId: 'tsa-diagnostic', status: 'visited' }]);
   });
 
   await check('getExerciseWork maps drafts and submissions, resolves both key styles', async () => {
@@ -656,7 +662,7 @@ function check(name, fn) {
     assert.equal(work.submissions[1].submissionId, 'legacy-grocery-list');
     const same = await data.getExerciseWork('p1-e1');
     assert.equal(same.submissions.length, 2, 'the canonical id reads the same rows');
-    assert.deepEqual(await data.getExerciseWork('not-an-activity'), { draft: null, submissions: [] });
+    await rejects(data.getExerciseWork('not-an-activity'), (error) => assert.equal(error.code, 'data/unknown-activity', 'an unknown id is a failure the caller falls back on'));
     assert.deepEqual(await data.getExerciseWork(''), { draft: null, submissions: [] });
   });
 
@@ -681,7 +687,8 @@ function check(name, fn) {
     assert.equal(attempts[0].submittedAt.toDate().toISOString(), '2026-02-02T00:00:00.000Z');
     assert.equal(attempts[0].submittedAt.toMillis(), Date.parse('2026-02-02T00:00:00Z'));
     assert.equal(attempts[1].scorePercent, 25);
-    assert.deepEqual(await data.getExerciseAttempts('unknown-thing'), []);
+    await rejects(data.getExerciseAttempts('unknown-thing'), (error) => assert.equal(error.code, 'data/unknown-activity'));
+    assert.deepEqual(await data.getExerciseAttempts(''), []);
   });
 
   await check('preview mode saves nothing', async () => {
