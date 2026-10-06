@@ -127,6 +127,20 @@
         addCheck("Token has role = authenticated", false, `Could not decode the token (${error.name}).`);
       }
 
+      // a2. Who issued the token, and what the uid looks like. The identity fix (migration 1800) matches a
+      // Firebase token only when the issuer is this project's, and a Firebase uid must not look like a uuid.
+      // Only PASS or FAIL is shown, never the values.
+      try {
+        const claims = decodeClaims(idToken);
+        const expectedIssuer = `https://securetoken.google.com/${firebaseConfig.projectId}`;
+        const issuerOk = claims.iss === expectedIssuer;
+        addCheck("Token issuer is this Firebase project", issuerOk, `issuer matches https://securetoken.google.com/<project>: ${issuerOk}`);
+        const uuidShape = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(String(claims.sub || ""));
+        addCheck("Firebase uid is not uuid shaped", !uuidShape && Boolean(claims.sub), `uid looks like a uuid: ${uuidShape}`);
+      } catch (error) {
+        addCheck("Token issuer is this Firebase project", false, `Could not decode the token (${error.name}).`);
+      }
+
       // b. Programs with the token.
       try {
         const withToken = await readPrograms({
