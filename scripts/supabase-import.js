@@ -179,6 +179,20 @@ function recordId(table, row) {
   return `${table}:${mapping.sha256(row)}`;
 }
 
+// Rows an apply should not write again because the database already has them. Pure, so it is tested locally.
+function filterForRerun(table, rows, existingVersions) {
+  const keep = (row) => {
+    if (table === "assessment_versions") return !existingVersions.has(row.id);
+    if (table === "assessment_scoring") return !existingVersions.has(row.version_id);
+    if (table === "assessment_versions_publish") {
+      const version = existingVersions.get(row.id);
+      return !version || version.status === "draft";
+    }
+    return true;
+  };
+  return { write: rows.filter(keep), skipped: rows.filter((row) => !keep(row)) };
+}
+
 async function apply(plan, catalogChecksum, args) {
   const client = supabase();
   const runId = crypto.randomUUID();
@@ -196,23 +210,42 @@ async function apply(plan, catalogChecksum, args) {
   }));
 
   const results = [];
+  let stoppedAt = null;
+  // Published assessment versions are frozen: the database refuses scoring writes for them, even an insert
+  // that would be skipped as a duplicate. So a rerun leaves versions that already exist alone.
+  const existingVersions = new Map((await client.select("assessment_versions", "select=id,status,migration_run_id&limit=10000")).map((v) => [v.id, v]));
   for (const table of mapping.WRITE_ORDER) {
     const rows = plan.tables[table];
     if (!rows || !rows.length) continue;
     const mode = mapping.WRITE_MODE[table];
     const realTable = table.replace(/_(publish|current)$/, "");
-    let toWrite = rows;
+    const before = results.length;
+    const rerun = filterForRerun(table, rows, existingVersions);
+    let toWrite = rerun.write;
+    rerun.skipped.forEach((row) => results.push({ table: realTable, row, status: "skipped_existing" }));
+    // Versions created by an earlier run that had no run id yet take this run's id, so a rollback finds them.
+    if (table === "assessment_versions") {
+      for (const row of rerun.skipped) {
+        if (!existingVersions.get(row.id).migration_run_id) await client.update("assessment_versions", "id", { id: row.id, migration_run_id: runId });
+      }
+    }
     if (mode.dedupeBy) {
       const existing = await client.select(realTable, "select=detail&detail->>source=eq.firestore&limit=10000");
       const seen = new Set(existing.map((e) => e.detail && e.detail.legacy_firestore_id).filter(Boolean));
-      toWrite = rows.filter((row) => !seen.has(row.detail.legacy_firestore_id));
-      rows.filter((row) => seen.has(row.detail.legacy_firestore_id)).forEach((row) => results.push({ table, row, status: "skipped_existing" }));
+      const fresh = toWrite.filter((row) => !seen.has(row.detail.legacy_firestore_id));
+      toWrite.filter((row) => seen.has(row.detail.legacy_firestore_id)).forEach((row) => results.push({ table: realTable, row, status: "skipped_existing" }));
+      toWrite = fresh;
     }
     await writeTable(client, realTable, toWrite, mode, results);
-    const applied = results.filter((r) => r.table === table && r.status === "applied").length;
-    const failed = results.filter((r) => r.table === table && r.status === "exception").length;
-    console.log(`  ${table}: ${applied} written${failed ? `, ${failed} failed` : ""}`);
+    const step = results.slice(before);
+    const applied = step.filter((r) => r.status === "applied").length;
+    const skipped = step.filter((r) => r.status === "skipped_existing").length;
+    const failed = step.filter((r) => r.status === "exception").length;
+    console.log(`  ${table}: ${applied} written${skipped ? `, ${skipped} already there` : ""}${failed ? `, ${failed} failed` : ""}`);
+    // Later tables point at earlier ones, so a failure here would only cascade. Stop and report.
+    if (failed) { stoppedAt = table; break; }
   }
+  if (stoppedAt) console.log(`\nStopped at ${stoppedAt}: later tables were not attempted. Undo with: node scripts/supabase-import.js --rollback ${runId}`);
 
   // Provenance rows. Update steps are not documents, so they are left out.
   const records = results
@@ -237,7 +270,7 @@ async function apply(plan, catalogChecksum, args) {
   await client.update("migration_runs", "id", {
     id: runId, status: failures.length ? "failed" : "completed", finished_at: new Date().toISOString(),
     counts: Object.assign({}, plan.counts, { written: summary }),
-    reconciliation: { planExceptions: plan.exceptions.length, writeExceptions: failures.length, warnings: plan.warnings.length }
+    reconciliation: { planExceptions: plan.exceptions.length, writeExceptions: failures.length, warnings: plan.warnings.length, stoppedAt }
   });
   console.log(JSON.stringify({ runId, written: summary }, null, 2));
   if (failures.length) {
@@ -305,4 +338,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { parseArgs, recordId, writeTable, TOP_LEVEL, USER_SUBCOLLECTIONS };
+module.exports = { parseArgs, recordId, writeTable, filterForRerun, TOP_LEVEL, USER_SUBCOLLECTIONS };

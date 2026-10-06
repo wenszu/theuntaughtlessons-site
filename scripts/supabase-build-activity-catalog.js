@@ -113,6 +113,19 @@ function build() {
   addKey("tsa_spot_score", "tsa-spot-score");
   addKey("tsa_speak_score", "tsa-speak-score");
 
+  // Content that members have progress against but that is no longer in site code (found by the
+  // 2026-10-06 dry run). Kept as retired activities so their history is imported, not dropped.
+  [
+    { id: "p1-welcome-ma", kind: "context", title: "Retired: phase 1 welcome", module_key: "phase-1" },
+    { id: "p2-recap", kind: "context", title: "Retired: phase 2 recap", module_key: "phase-2" },
+    { id: "p3-recap", kind: "context", title: "Retired: phase 3 recap", module_key: "phase-3" },
+    { id: "p2-l2", kind: "lesson", title: "Retired: phase 2 lesson 2", module_key: "phase-2" },
+    { id: "p2-l4", kind: "lesson", title: "Retired: phase 2 lesson 4", module_key: "phase-2" }
+  ].forEach((legacy) => add(Object.assign({ status: "retired", config: { retired: true } }, legacy)));
+  // Progress also records the assessment results under these local-storage style keys.
+  addKey("utl_result_tsa_diagnostic", "tsa-diagnostic");
+  addKey("utl_result_tsa_checkpoint", "tsa-checkpoint");
+
   // App keys from site code. Every target must exist in the catalog.
   Object.entries(appKeyMap).forEach(([key, activityId]) => {
     if (!seen.has(activityId)) throw new Error(`exerciseProgressIds points ${key} at unknown activity ${activityId}`);

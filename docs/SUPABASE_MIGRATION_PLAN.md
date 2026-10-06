@@ -8,11 +8,11 @@ Goal: every record and, at the end, sign-in itself moves from Firebase to the Su
 
 | Area | State on 2026-10-06 |
 |---|---|
-| Supabase project `utl-core` | Exists. Free plan. Migrations 0100 to 1400 applied. No data |
-| Schema (1100 to 1400) | Applied to `utl-core` on 2026-10-06. 14 migrations. 75 of 75 local checks |
+| Supabase project `utl-core` | Exists. Free plan. Migrations 0100 to 1500 applied. Firestore data imported 2026-10-06 (run `c431b8db`, 8,671 rows, verified) |
+| Schema (1100 to 1500) | Applied to `utl-core` on 2026-10-06. 15 migrations. 75 of 75 local checks |
 | Firebase Auth | 61 users. All carry `role` = `authenticated`. Supabase accepts their tokens (end-to-end check passed) |
 | `setRoleClaimOnUserCreated` | Deployed 2026-10-06 (v1, us-east1). New sign-ups get the claim |
-| `supabase-core` branch | Merged with `main` and committed (`78a0c37`). Step A and B work not yet committed |
+| `supabase-core` branch | Merged with `main`. Last commit `5ee6f8a`; the import fixes, migration 1500 and the new tests are not committed |
 | Firestore | Live and the only data store. About 5,300 documents across 47 paths (inventory below) |
 | Site | GitHub Pages serves `main`. Firebase Functions in three codebases. Stripe scaffolding on `main` |
 

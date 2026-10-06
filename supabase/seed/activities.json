@@ -709,6 +709,66 @@
       "title": "Find Your Level",
       "module_key": "assessment",
       "config": {}
+    },
+    {
+      "program_id": "tsa",
+      "status": "retired",
+      "sort_order": 540,
+      "config": {
+        "retired": true
+      },
+      "id": "p1-welcome-ma",
+      "kind": "context",
+      "title": "Retired: phase 1 welcome",
+      "module_key": "phase-1"
+    },
+    {
+      "program_id": "tsa",
+      "status": "retired",
+      "sort_order": 550,
+      "config": {
+        "retired": true
+      },
+      "id": "p2-recap",
+      "kind": "context",
+      "title": "Retired: phase 2 recap",
+      "module_key": "phase-2"
+    },
+    {
+      "program_id": "tsa",
+      "status": "retired",
+      "sort_order": 560,
+      "config": {
+        "retired": true
+      },
+      "id": "p3-recap",
+      "kind": "context",
+      "title": "Retired: phase 3 recap",
+      "module_key": "phase-3"
+    },
+    {
+      "program_id": "tsa",
+      "status": "retired",
+      "sort_order": 570,
+      "config": {
+        "retired": true
+      },
+      "id": "p2-l2",
+      "kind": "lesson",
+      "title": "Retired: phase 2 lesson 2",
+      "module_key": "phase-2"
+    },
+    {
+      "program_id": "tsa",
+      "status": "retired",
+      "sort_order": 580,
+      "config": {
+        "retired": true
+      },
+      "id": "p2-l4",
+      "kind": "lesson",
+      "title": "Retired: phase 2 lesson 4",
+      "module_key": "phase-2"
     }
   ],
   "keys": [
@@ -795,6 +855,14 @@
     {
       "key": "tsa_speak_score",
       "activity_id": "tsa-speak-score"
+    },
+    {
+      "key": "utl_result_tsa_diagnostic",
+      "activity_id": "tsa-diagnostic"
+    },
+    {
+      "key": "utl_result_tsa_checkpoint",
+      "activity_id": "tsa-checkpoint"
     },
     {
       "key": "issue-tree",

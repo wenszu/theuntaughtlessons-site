@@ -11,6 +11,7 @@ const crypto = require("crypto");
 
 const NAMESPACE = "6f1b2c3d-4e5f-4a6b-8c7d-9e0f1a2b3c4d";
 const PROGRAM_TSA = "tsa";
+const KNOWN_PROGRAMS = ["tsa", "executive-signature", "doc"];
 
 // uuid v5 (sha1) with a fixed namespace.
 function uuidFor(key) {
@@ -139,6 +140,18 @@ function buildPlan(snapshot, catalog, options = {}) {
   const exception = (source, reason) => exceptions.push({ source, reason });
   const activities = activityResolver(catalog);
   const stamp = (row) => (runId ? Object.assign(row, { migration_run_id: runId }) : row);
+  // Some records carry the long program name. Known aliases map to the program id; anything else
+  // falls back and is reported once per distinct value.
+  const unknownPrograms = new Map();
+  const programFor = (value, fallback) => {
+    const v = String(value || "").trim();
+    if (!v) return fallback;
+    if (KNOWN_PROGRAMS.includes(v)) return v;
+    if (/^(think-speak-act|tsa)/.test(v)) return PROGRAM_TSA;
+    if (/^executive-signature/.test(v)) return "executive-signature";
+    unknownPrograms.set(v, (unknownPrograms.get(v) || 0) + 1);
+    return fallback;
+  };
 
   // Organizations.
   const orgByDocId = new Map();
@@ -235,12 +248,12 @@ function buildPlan(snapshot, catalog, options = {}) {
   });
 
   people.forEach((person) => rows("people").push(person));
-  people.forEach((person) => rows("person_emails").push({
+  people.forEach((person) => rows("person_emails").push(stamp({
     id: uuidFor(`email:${person.primary_email}`),
     person_id: person.id,
     email: person.primary_email,
     status: "active"
-  }));
+  })));
 
   // Profiles from users and members.
   const profiles = new Map();
@@ -280,14 +293,14 @@ function buildPlan(snapshot, catalog, options = {}) {
   members.forEach(({ data }, email) => {
     const role = String(data.role || "").toLowerCase();
     if (role !== "admin" && role !== "owner") return;
-    rows("role_grants").push({
+    rows("role_grants").push(stamp({
       id: uuidFor(`grant:${email}:platform_owner`),
       person_id: people.get(email).id,
       scope_type: "platform",
       role: "platform_owner",
       status: "active",
       created_at: iso(data.addedAt) || importDate
-    });
+    }));
   });
 
   // Cohorts from settings/cohorts. Each key is one cohort.
@@ -362,7 +375,7 @@ function buildPlan(snapshot, catalog, options = {}) {
     pushEnrollment(stamp({
       id: uuidFor(`enrollment:${id}`),
       person_id: person.id,
-      program_id: data.programId || PROGRAM_TSA,
+      program_id: programFor(data.programId, PROGRAM_TSA),
       cohort_id: cohortId,
       sponsor_organization_id: (data.organizationId && orgByDocId.get(data.organizationId)) || (cohortId ? cohortOrg.get(cohortId) : null) || null,
       status: oneOf(data.status, ENROLLMENT_STATUS, "active"),
@@ -431,18 +444,18 @@ function buildPlan(snapshot, catalog, options = {}) {
   // Assessment definitions and versions (Executive Signature from Firestore, TSA from attempts).
   const versionIdByDoc = new Map();
   col("assessmentDefinitions").forEach(({ id, data }) => {
-    rows("assessment_definitions").push({
+    rows("assessment_definitions").push(stamp({
       id,
-      program_id: data.programId || "executive-signature",
+      program_id: programFor(data.programId, "executive-signature"),
       title: text(data.title || id, 200),
       status: oneOf(data.status, ["draft", "live", "retired"], "draft"),
       estimated_minutes: Number(data.estimatedMinutes) > 0 ? Math.round(Number(data.estimatedMinutes)) : null
-    });
+    }));
   });
   col("assessmentVersions").forEach(({ id, data }) => {
     const versionId = uuidFor(`version:${id}`);
     versionIdByDoc.set(id, versionId);
-    rows("assessment_versions").push({
+    rows("assessment_versions").push(stamp({
       id: versionId,
       assessment_id: data.assessmentId,
       version: text(data.version || id, 80),
@@ -452,7 +465,7 @@ function buildPlan(snapshot, catalog, options = {}) {
       questions: plain(Array.isArray(data.questions) ? data.questions : []),
       content: plain(data.content && typeof data.content === "object" ? data.content : {}),
       created_at: iso(data.createdAt) || importDate
-    });
+    }));
     if (data.scoring && typeof data.scoring === "object") {
       rows("assessment_scoring").push({ version_id: versionId, scoring: plain(data.scoring) });
     }
@@ -471,7 +484,7 @@ function buildPlan(snapshot, catalog, options = {}) {
     if (tsaVersions.has(key)) return;
     const versionId = uuidFor(`tsa-version:${key}`);
     tsaVersions.set(key, versionId);
-    rows("assessment_versions").push({
+    rows("assessment_versions").push(stamp({
       id: versionId,
       assessment_id: assessment,
       version: text(`${data.bankRelease || "bank"}|${data.rubricVersion || "rubric"}`, 80),
@@ -481,7 +494,7 @@ function buildPlan(snapshot, catalog, options = {}) {
       questions: [],
       content: {},
       created_at: importDate
-    });
+    }));
     rows("assessment_versions_publish").push({ id: versionId, status: "published", published_at: importDate });
   });
 
@@ -515,7 +528,7 @@ function buildPlan(snapshot, catalog, options = {}) {
     rows("entitlements").push(stamp({
       id: entId,
       person_id: person.id,
-      program_id: data.programId || "executive-signature",
+      program_id: programFor(data.programId, "executive-signature"),
       assessment_id: data.assessmentId || null,
       access_type: accessType,
       status: oneOf(data.status, ENTITLEMENT_STATUS, "active"),
@@ -568,7 +581,7 @@ function buildPlan(snapshot, catalog, options = {}) {
     rows("assessment_attempts").push(stamp({
       id: attemptId,
       person_id: person.id,
-      program_id: data.programId || "executive-signature",
+      program_id: programFor(data.programId, "executive-signature"),
       assessment_id: data.assessmentId,
       version_id: versionId,
       entitlement_id: data.entitlementId ? entitlementIdByDoc.get(data.entitlementId) || null : null,
@@ -801,12 +814,12 @@ function buildPlan(snapshot, catalog, options = {}) {
     if (!person) return exception(`users/${uid}/exercise_work/${id}`, "uid does not match a person");
     const activityId = activities.resolve(data.exerciseId || id);
     if (!activityId) return exception(`users/${uid}/exercise_work/${id}`, `exercise ${data.exerciseId || id} not in catalog`);
-    rows("activity_drafts").push({
+    rows("activity_drafts").push(stamp({
       person_id: person.id,
       activity_id: activityId,
       draft: data.draftPayload && typeof data.draftPayload === "object" ? plain(data.draftPayload) : {},
       updated_at: iso(data.updatedAt) || importDate
-    });
+    }));
   });
 
   progress.forEach((row) => rows("activity_progress").push(row));
@@ -938,7 +951,7 @@ function buildPlan(snapshot, catalog, options = {}) {
     let person = null;
     if (issuance) person = personByUid.get(issuance.data.userId) || people.get(normalizeEmail(issuance.data.email)) || null;
     if (!person) warn(`public_credentials/${id}: no person matched, imported without person`);
-    const programId = data.programId || (issuance && issuance.data.programId) || PROGRAM_TSA;
+    const programId = programFor(data.programId || (issuance && issuance.data.programId), PROGRAM_TSA);
     const required = issuance && Array.isArray(issuance.data.requiredExercises) ? issuance.data.requiredExercises : [];
     rows("credentials").push(stamp({
       id: uuidFor(`credential:${code}`),
@@ -1015,6 +1028,8 @@ function buildPlan(snapshot, catalog, options = {}) {
       created_at: iso(data.createdAt) || importDate
     }));
   });
+
+  unknownPrograms.forEach((count, value) => warn(`program id "${value}" is not a known program; used the default (${count} records)`));
 
   // Counts for the report.
   const counts = {};
