@@ -6,19 +6,23 @@
 //
 // Usage:
 //   node scripts/firestore-rewards-check.js --project the-untaught-lessons --email member@example.com
+//   node scripts/firestore-rewards-check.js --project ... --email ... --expected-file scripts/data/owner-rewards-expected.json
+//     (also lists ledger entries that are not in that {id: points} file, differ in points, or are missing)
 //
 // Credentials: Application Default Credentials. Set FIREBASE_ADMIN_MODULE_DIR if this checkout
 // has no functions-admin/node_modules.
 
+const fs = require("fs");
 const path = require("path");
 
 const DEFAULT_ADMIN_MODULE_DIR = path.join(__dirname, "..", "functions-admin", "node_modules", "firebase-admin");
 
 function parseArgs(argv) {
-  const args = { project: "", email: "" };
+  const args = { project: "", email: "", expectedFile: "" };
   for (let i = 0; i < argv.length; i += 1) {
     if (argv[i] === "--project") args.project = String(argv[i + 1] || "");
     if (argv[i] === "--email") args.email = String(argv[i + 1] || "").trim().toLowerCase();
+    if (argv[i] === "--expected-file") args.expectedFile = path.resolve(String(argv[i + 1] || ""));
   }
   return args;
 }
@@ -39,6 +43,22 @@ function summarize(label, rewards) {
   ].join("\n");
 }
 
+// Entry ids, types, points and dates only; no titles, notes or other text from the entries.
+function compareLedger(label, rewards, expected) {
+  const ledger = rewards && Array.isArray(rewards.ledger) ? rewards.ledger : [];
+  const seen = new Set();
+  const lines = [];
+  ledger.forEach((entry) => {
+    const id = entry && entry.id;
+    seen.add(id);
+    const points = Math.max(0, Number(entry && entry.mpEarned) || 0);
+    if (!(id in expected)) lines.push(`  extra:    ${id}  (${points} pts, ${String(entry.type || "")}, ${String(entry.earnedAt || "").slice(0, 10)})`);
+    else if (expected[id] !== points) lines.push(`  points differ: ${id}  expected ${expected[id]}, found ${points}`);
+  });
+  Object.keys(expected).filter((id) => !seen.has(id)).forEach((id) => lines.push(`  missing:  ${id}  (expected ${expected[id]} pts)`));
+  return `${label} compared with the expected record:\n${lines.length ? lines.join("\n") : "  identical"}`;
+}
+
 async function main() {
   const args = parseArgs(process.argv.slice(2));
   if (!args.project || !args.email) {
@@ -55,6 +75,10 @@ async function main() {
     console.log(`\nDocument ${index + 1}`);
     console.log(summarize("users.rewards", data.rewards));
     console.log(summarize("users.workspaceProgress.rewards", data.workspaceProgress && data.workspaceProgress.rewards));
+    if (args.expectedFile) {
+      const expected = JSON.parse(fs.readFileSync(args.expectedFile, "utf8"));
+      console.log("\n" + compareLedger("users.rewards", data.rewards, expected));
+    }
   });
 }
 
