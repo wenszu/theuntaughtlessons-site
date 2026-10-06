@@ -4012,8 +4012,8 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
           </ul>
         </div>
         <div class="student-progress-actions">
-          <a class="small-button secondary-button" href="../apps/readiness-assessment/" target="_blank" rel="noopener">Preview the participant experience</a>
-          <a class="small-button secondary-button" href="../apps/readiness-assessment/research/" target="_blank" rel="noopener">Review the research page</a>
+          <a class="small-button secondary-button" href="../apps/executive-signature/" target="_blank" rel="noopener">Preview the participant experience</a>
+          <a class="small-button secondary-button" href="../apps/executive-signature/research/" target="_blank" rel="noopener">Review the research page</a>
         </div>
       </section>
 
@@ -4081,8 +4081,8 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
           <p class="student-progress-status" id="esConfigStatus" aria-live="polite">Loading configuration…</p>
           <div id="esConfigBody"></div>
           <div class="student-progress-actions" style="margin-top:14px">
-            <a class="small-button secondary-button" href="../apps/readiness-assessment/how-it-works/" target="_blank" rel="noopener">Open the scoring reference</a>
-            <a class="small-button secondary-button" href="../apps/readiness-assessment/?internal=1" target="_blank" rel="noopener">Inspect questions</a>
+            <a class="small-button secondary-button" href="../apps/executive-signature/how-it-works/" target="_blank" rel="noopener">Open the scoring reference</a>
+            <a class="small-button secondary-button" href="../apps/executive-signature/?internal=1" target="_blank" rel="noopener">Inspect questions</a>
           </div>
         </div>
       </section>
@@ -12371,7 +12371,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
                   '<button type="button" class="small-button secondary-button" data-es-config-xlsx="' + escapeHtml(v.versionId) + '">Download XLSX</button>' +
                 '</div></details>';
             }).join('') +
-            '<p class="description" style="margin-top:16px"><strong>How questions are presented:</strong> the order shown above is the fixed definition order, used only to build each attempt&rsquo;s shuffle. Every participant sees these same items in a freshly randomized order each time they start an attempt (a Fisher&ndash;Yates shuffle in <code>apps/readiness-assessment/forms.js</code>), not the order listed here. &ldquo;Direction&rdquo; of <code>+</code> or <code>&minus;</code> means the raw 1&ndash;5 answer is used as-is or reversed (6 minus the answer) before it is averaged into that item&rsquo;s area.</p>';
+            '<p class="description" style="margin-top:16px"><strong>How questions are presented:</strong> the order shown above is the fixed definition order, used only to build each attempt&rsquo;s shuffle. Every participant sees these same items in a freshly randomized order each time they start an attempt (a Fisher&ndash;Yates shuffle in <code>apps/executive-signature/forms.js</code>), not the order listed here. &ldquo;Direction&rdquo; of <code>+</code> or <code>&minus;</code> means the raw 1&ndash;5 answer is used as-is or reversed (6 minus the answer) before it is averaged into that item&rsquo;s area.</p>';
           esConfigVersionsCache = versions;
           bodyEl.querySelectorAll('[data-es-config-csv]').forEach((button) => {
             button.addEventListener('click', () => exportEsConfigVersion(button.dataset.esConfigCsv, 'csv'));

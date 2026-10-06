@@ -167,8 +167,8 @@
         const btn = $('#emailResultBtn');
         btn.disabled = true; btn.textContent = 'Sending…';
         const greeting = name ? `Hi ${esc(name)},` : 'Hi,';
-        const renderedHtml = `<p>${greeting}</p><p>Your Executive Readiness Score is in the ${esc(full.band)} range, with a ${esc(full.profile)} profile.</p><p><a href="https://theuntaughtlessons.com/apps/readiness-assessment/">theuntaughtlessons.com/apps/readiness-assessment/</a></p>`;
-        const ok = await sendResultEmailPayload({ action: 'EmailReadinessResult', recipient: email, name, subject: 'Your Executive Signature Full Assessment', renderedHtml, page: location.href, source: 'readiness-assessment-my-results' });
+        const renderedHtml = `<p>${greeting}</p><p>Your Executive Readiness Score is in the ${esc(full.band)} range, with a ${esc(full.profile)} profile.</p><p><a href="https://theuntaughtlessons.com/apps/executive-signature/">theuntaughtlessons.com/apps/executive-signature/</a></p>`;
+        const ok = await sendResultEmailPayload({ action: 'EmailReadinessResult', recipient: email, name, subject: 'Your Executive Signature Full Assessment', renderedHtml, page: location.href, source: 'executive-signature-my-results' });
         btn.disabled = false; btn.textContent = 'Email me this result';
         $('#resultActionMsg').textContent = ok ? 'On its way to ' + email : 'Could not send right now.';
       };

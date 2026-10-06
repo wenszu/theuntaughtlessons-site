@@ -6,7 +6,7 @@ const assert = require('assert');
 // (firebase emulators:start --only auth,firestore) and skips itself otherwise,
 // so the plain `node tests/*.test.js` sweep never depends on them being up.
 if (!process.env.FIRESTORE_EMULATOR_HOST || !process.env.FIREBASE_AUTH_EMULATOR_HOST) {
-  console.log('readiness-assessment-account tests skipped (Firestore/Auth emulator not active)');
+  console.log('executive-signature-account tests skipped (Firestore/Auth emulator not active)');
   process.exit(0);
 }
 
@@ -17,7 +17,7 @@ const { recordReadinessCompletion, checkReadinessAccountEmail } = require('../fu
 // Resolved through functions-admin's own node_modules: this repo has no root
 // package.json, and firebase-admin is only installed inside that codebase.
 const admin = require('../functions-admin/node_modules/firebase-admin');
-const readinessForms = require('../apps/readiness-assessment/forms.js');
+const readinessForms = require('../apps/executive-signature/forms.js');
 
 function neutralSubmission(formVersion, submissionId) {
   const form = readinessForms.getForm(formVersion);
@@ -120,7 +120,7 @@ async function main() {
   await admin.auth().deleteUser(userRecord.uid);
   await admin.firestore().collection('users').doc(userRecord.uid).delete();
 
-  console.log('readiness-assessment-account tests passed');
+  console.log('executive-signature-account tests passed');
 }
 
 main().catch((error) => {

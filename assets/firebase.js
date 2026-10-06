@@ -64,7 +64,7 @@ const actionCodeSettings = {
 };
 
 const readinessActionCodeSettings = {
-  url: `${window.location.origin}/apps/readiness-assessment/my-results/`,
+  url: `${window.location.origin}/apps/executive-signature/my-results/`,
   handleCodeInApp: true
 };
 
@@ -586,7 +586,7 @@ async function sendSignInInvite(email) {
   window.localStorage.setItem("emailForSignIn", email);
 }
 
-// Unauthenticated by design: a readiness-assessment customer who never joined
+// Unauthenticated by design: a executive-signature customer who never joined
 // TSA has no session to reuse, so "see my results" re-grants access the same
 // way a TSA invite link works, just pointed at the readiness results page.
 async function sendReadinessAccessLink(email) {

@@ -4,12 +4,12 @@ const path = require('path');
 const vm = require('vm');
 
 const root = path.resolve(__dirname, '..');
-const html = fs.readFileSync(path.join(root, 'apps/readiness-assessment/index.html'), 'utf8');
-const content = fs.readFileSync(path.join(root, 'apps/readiness-assessment/content.js'), 'utf8');
-const howItWorks = fs.readFileSync(path.join(root, 'apps/readiness-assessment/how-it-works/index.html'), 'utf8');
-const sources = fs.readFileSync(path.join(root, 'apps/readiness-assessment/sources.js'), 'utf8');
-const research = fs.readFileSync(path.join(root, 'apps/readiness-assessment/research/index.html'), 'utf8');
-const siteNav = fs.readFileSync(path.join(root, 'apps/readiness-assessment/assets/site-nav.js'), 'utf8');
+const html = fs.readFileSync(path.join(root, 'apps/executive-signature/index.html'), 'utf8');
+const content = fs.readFileSync(path.join(root, 'apps/executive-signature/content.js'), 'utf8');
+const howItWorks = fs.readFileSync(path.join(root, 'apps/executive-signature/how-it-works/index.html'), 'utf8');
+const sources = fs.readFileSync(path.join(root, 'apps/executive-signature/sources.js'), 'utf8');
+const research = fs.readFileSync(path.join(root, 'apps/executive-signature/research/index.html'), 'utf8');
+const siteNav = fs.readFileSync(path.join(root, 'apps/executive-signature/assets/site-nav.js'), 'utf8');
 
 assert.match(html, /Are you ready to be an executive yet\?/, 'Participant title uses the executive readiness question');
 assert.match(html, /What the assessment looks at/, 'Participant page uses assessment terminology');
@@ -143,4 +143,4 @@ assert.match(workflow, /--exclude 'reference\/'/, 'Reference sources must not sh
 const ignored = firebase.hosting.ignore;
 assert(ignored.includes('reference/**'), 'Reference sources must not ship through Firebase Hosting');
 
-console.log('readiness-assessment-preview tests passed');
+console.log('executive-signature-preview tests passed');

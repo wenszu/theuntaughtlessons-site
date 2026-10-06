@@ -184,7 +184,7 @@ The repository still contains the optional `functions/processGoogleGroupSyncJob`
 | `apps/lets-switch-hats/` | Phase 3 | Perspective-taking launch page |
 | `apps/speak-like-obama/` | Phase 3 | Speech delivery launch page |
 | `apps/tsa-diagnostic/` | Assessment | The sole TSA assessment — Think/Speak/Act in one saved flow. `?assessment=checkpoint` serves the post-program Checkpoint from the same file |
-| `apps/readiness-assessment/` | Private ES preview | Executive Signature Quick Check and Full Assessment plus admin, build-plan, how-it-works, research, and returning-results pages. The whole directory is excluded from the production Pages artifact; its current callable persistence code is not deployed. Read `README-assessment.md` and `BUILD_STATUS.md` before editing. |
+| `apps/executive-signature/` | Live ES program (renamed from `apps/readiness-assessment/` 2026-10-06) | Executive Signature Quick Check and Full Assessment plus admin, build-plan, how-it-works, research, and returning-results pages. Public on the production site as of 2026-10-06; its callable persistence code has been deployed since earlier this week. Read `README-assessment.md` and `BUILD_STATUS.md` before editing. |
 
 Data files: `data/sort-bucket.json` (public concept-scored Find your level exercises), `data/tsa-score-bands.js` (public score bands/scoring helpers), `data/practice/*.json` (member practice), and `data/testimonials.json`. The unified member assessment embeds its current question/scoring data in `apps/tsa-diagnostic/index.html`; removed `data/tsa/` files survive only in history/archive references.
 

@@ -50,8 +50,8 @@ function propagateEmulatorFlag() {
 // backLinks: [{ label, href }] shown under the kicker/title (the "<- Back to
 // X" line). secondaryLinks: [{ label, href }] shown on the right, before the
 // signed-in avatar (or where it would go, signed out).
-// resultsHref: relative path from this page to apps/readiness-assessment/my-results/.
-// homeHref: relative path from this page to apps/readiness-assessment/home/.
+// resultsHref: relative path from this page to apps/executive-signature/my-results/.
+// homeHref: relative path from this page to apps/executive-signature/home/.
 // When set, a signed-in visitor's first backLink (normally "Back to the
 // site") points here instead, since a returning participant has somewhere
 // more useful to land than the public homepage. Signed-out visitors keep the

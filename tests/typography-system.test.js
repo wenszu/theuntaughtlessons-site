@@ -6,12 +6,12 @@ const roots = ['admin', 'apps', 'assets', 'certificate', 'member-login', 'my-res
 const extensions = new Set(['.css', '.html', '.js']);
 const technicalMonospaceFiles = new Set([
   'admin/index.html',
-  'apps/readiness-assessment/index.html',
+  'apps/executive-signature/index.html',
   'tools/[Grade 8] Linear_systems_grapher.html',
   'tools/[Grade 9 and 10] Logarithm_explorer.html',
   'tools/tools-shared.css'
 ]);
-// apps/readiness-assessment/index.html reserves monospace for the same kind of
+// apps/executive-signature/index.html reserves monospace for the same kind of
 // staff-only technical content as admin/index.html: version numbers, question
 // IDs, and item statistics in its build-plan/admin preview panes.
 

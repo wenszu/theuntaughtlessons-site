@@ -8,7 +8,7 @@
 <meta property="og:title" content="Are you ready to be an executive yet?">
 <meta property="og:description" content="Find your Executive Signature and see five traits connected with executive work.">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://theuntaughtlessons.com/apps/readiness-assessment/">
+<meta property="og:url" content="https://theuntaughtlessons.com/apps/executive-signature/">
 <title>UTL readiness assessment · Phase 0 preview</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -783,7 +783,7 @@ function logCompletedResult(attemptId,tier,email,name,band,profile,formVersion,s
   // Preview and sample attempts still exercise the local completion flow, but
   // they must never generate a real notification email.
   if(!isSyntheticReadinessNotification(email)){
-    sendResultEmailPayload({tab:'readiness',name:name||'',email,tier,band,profile,formVersion:formVersion||'',page:location.href,source:'readiness-assessment'});
+    sendResultEmailPayload({tab:'readiness',name:name||'',email,tier,band,profile,formVersion:formVersion||'',page:location.href,source:'executive-signature'});
   }
   if(window.raRecordCompletion){
     window.raRecordCompletion({
@@ -801,7 +801,7 @@ function logCompletedResult(attemptId,tier,email,name,band,profile,formVersion,s
 }
 function resultEmailHtml(name,lines){
   const greeting=name?`Hi ${esc(name)},`:'Hi,';
-  return `<p>${greeting}</p><p>${lines.map(esc).join('</p><p>')}</p><p><a href="https://theuntaughtlessons.com/apps/readiness-assessment/">theuntaughtlessons.com/apps/readiness-assessment/</a></p>`;
+  return `<p>${greeting}</p><p>${lines.map(esc).join('</p><p>')}</p><p><a href="https://theuntaughtlessons.com/apps/executive-signature/">theuntaughtlessons.com/apps/executive-signature/</a></p>`;
 }
 function emailResultBlock(email){
   if(!email)return '';
@@ -812,7 +812,7 @@ function wireEmailResultBtn(email,name,subject,lines){
   if(!btn)return;
   btn.onclick=async()=>{
     btn.disabled=true;btn.textContent='Sending…';
-    const ok=await sendResultEmailPayload({action:'EmailReadinessResult',recipient:email,name:name||'',subject,renderedHtml:resultEmailHtml(name,lines),page:location.href,source:'readiness-assessment'});
+    const ok=await sendResultEmailPayload({action:'EmailReadinessResult',recipient:email,name:name||'',subject,renderedHtml:resultEmailHtml(name,lines),page:location.href,source:'executive-signature'});
     btn.disabled=false;btn.textContent='Email me this result';
     toast(ok?'On its way to '+email:'Could not send right now');
   };
@@ -1311,7 +1311,7 @@ function renderResult(){
   <div class="row"><button class="btn" id="again">Take it again</button></div>`;
   $('#stars').onclick=e=>{const b=e.target.closest('button');if(!b)return;document.querySelectorAll('#stars button').forEach(x=>x.setAttribute('aria-pressed',x===b?'true':'false'))};
   $('#fbSend').onclick=()=>{$('#fb').innerHTML='<h3 style="font-size:22px">Thank you</h3><p class="muted">Your feedback is saved with this result. It helps us improve UTL\'s interpretation and guidance.</p>'};
-  const shareBaseUrl='https://theuntaughtlessons.com/apps/readiness-assessment/';
+  const shareBaseUrl='https://theuntaughtlessons.com/apps/executive-signature/';
   const trackedUrl=source=>`${shareBaseUrl}?utm_source=${source}&utm_medium=social&utm_campaign=readiness_assessment`;
   const shareCaption=`My Executive Signature is ${p[2]}. ${signature.firstPersonSentence} My Executive Edge is ${signature.edge}. My Executive Unlock is ${signature.unlock}. What’s your Executive Signature?`;
   const shareText=`${shareCaption} Take the assessment: ${trackedUrl('native_share')}`;
@@ -1627,7 +1627,7 @@ function renderFullResult(){
           <h4>The source</h4><p class="small muted">The full report selects 40 statements from the IPIP-NEO-120, an established, openly available personality measure built on the same five-area research tradition as the 20-question quick check (the short assessment page explains that tradition in full). Some statements run in the opposite direction, so their scores are reversed before a facet score is calculated.</p>
           <h4>How the score is built</h4><p class="small muted">Each of the 10 facets shown in this report runs on its own 0 to 100 scale, built from your own answers. Achievement‑Striving, Self‑Discipline, Orderliness, Intellect, Anxiety and Self‑Consciousness average into the one readiness score on your executive summary. Assertiveness, Activity Level, Cooperation and Altruism describe your working style and sit outside that score on purpose, since neither end of a style facet is the better one. The shape on your summary page draws from the same five broad areas as the quick check, built here from these 10 facets rather than estimated from 20 broader questions.</p>
           <h4>Limits to keep in mind</h4><ul class="detail-list"><li><b>Self-report:</b> This result comes from how you described yourself when you took the assessment. Mood, context and the impression you wanted to give can all affect an answer.</li><li><b>Scope:</b> This describes broad tendencies in how you work, not a diagnosis, and not a measure of intelligence, job performance or promotion potential.</li><li><b>No percentile:</b> UTL deliberately does not compare your result to a wider population. Comparing your own answers to each other says more about you than ranking you against other people would.</li></ul>
-          <p class="small muted" style="margin-top:4px">Read the full methodology, including the published source and what UTL added on top of it, at theuntaughtlessons.com/apps/readiness-assessment/how-it-works/.</p></div>
+          <p class="small muted" style="margin-top:4px">Read the full methodology, including the published source and what UTL added on top of it, at theuntaughtlessons.com/apps/executive-signature/how-it-works/.</p></div>
       </div>
     </div>
     <div class="card no-print"><p class="result-step">Keep a copy</p><h3>Get this in your inbox</h3><p class="muted">A private copy of your confirmed profile, top strengths and growth edges, sent to the email you gave us. Not shared with anyone else.</p>${emailResultBlock(participant.email)}</div>

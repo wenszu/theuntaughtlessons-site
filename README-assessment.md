@@ -15,7 +15,7 @@ As of 2026-10-04, the repository also contains the emulator-approved cross-progr
 
 ```js
 // in resolveSubmissionTab_, alongside the existing checks:
-if (tab === 'readiness' || tab === 'readiness-assessment') {
+if (tab === 'readiness' || tab === 'executive-signature') {
   return READINESS_TAB;
 }
 
@@ -33,7 +33,7 @@ if (tabName === READINESS_TAB) {
     data.profile || '',
     data.formVersion || '',
     data.page || '',
-    data.source || 'readiness-assessment'
+    data.source || 'executive-signature'
   ]);
   return textResponse_('ok');
 }
@@ -59,7 +59,7 @@ python3 -m http.server 8061
 Open:
 
 ```text
-http://127.0.0.1:8061/apps/readiness-assessment/index.html
+http://127.0.0.1:8061/apps/executive-signature/index.html
 ```
 
 Use the header to move between:
@@ -83,23 +83,23 @@ The preview now models the intended live information architecture as separate sc
 
 Before the questions, the preview introduces all five areas in plain language. Follow-through, Steadiness and Curiosity feed the readiness score. Social energy and Warmth describe working style and are shown as spectra because neither end is better.
 
-The result includes a closed **What this means** reference for each area. The definitions, bands and practical suggestions all come from the versioned `apps/readiness-assessment/content.js` file. The same source powers the separate scoring reference at:
+The result includes a closed **What this means** reference for each area. The definitions, bands and practical suggestions all come from the versioned `apps/executive-signature/content.js` file. The same source powers the separate scoring reference at:
 
 ```text
-http://127.0.0.1:8061/apps/readiness-assessment/how-it-works/
+http://127.0.0.1:8061/apps/executive-signature/how-it-works/
 ```
 
 The questions and research sources are explained at:
 
 ```text
-http://127.0.0.1:8061/apps/readiness-assessment/research/
+http://127.0.0.1:8061/apps/executive-signature/research/
 ```
 
 The research page explains the Big Five, IPIP and Mini-IPIP in plain language. It separates the published questions from the names, explanations and readiness display created by UTL, and gives the complete references and limits.
 
 ### Locked forms and version review
 
-The preview now uses two fixed, versioned form definitions in `apps/readiness-assessment/forms.js`:
+The preview now uses two fixed, versioned form definitions in `apps/executive-signature/forms.js`:
 
 - `readiness-free@1.0.0`, with 20 locked items
 - `readiness-full@1.0.0`, with 40 locked items
@@ -112,7 +112,7 @@ These administration controls remain browser-only in Phase 0. Uploaded drafts, n
 
 Assessment admins can preview editing and publishing the Areas and Bands content separately from question or scoring changes. The score-display setting supports band first, number first and band only. These controls remain browser-only in Phase 0.
 
-The **Sources** admin section uses the versioned registry in `apps/readiness-assessment/sources.js`. Editing a reference creates a patch version. The preview also checks that the planned paid facet questions match the registered source wording exactly before that source can be attached to the planned report. This control remains browser-only in Phase 0.
+The **Sources** admin section uses the versioned registry in `apps/executive-signature/sources.js`. Editing a reference creates a patch version. The preview also checks that the planned paid facet questions match the registered source wording exactly before that source can be attached to the planned report. This control remains browser-only in Phase 0.
 
 ### Timing and sharing in the preview
 
@@ -147,9 +147,9 @@ Completing either tier creates or reuses a Firebase Auth account keyed by normal
 
 The compatibility `products.readinessAssessment.free` and `.full` summaries remain separate. The authoritative history is now `assessmentAttempts` plus bounded `responseParts`, so a retake creates a new immutable attempt rather than replacing history. Quick Check access is reusable. Full Assessment allows one completion by default; another requires a new or explicitly retake-enabled entitlement. Payment is not live, so Full Assessment testing access remains `comped`.
 
-A returning customer can see their report again at `apps/readiness-assessment/my-results/`, which sends a magic-link sign-in to the email on file (reusing the same `sendSignInLinkToEmail` mechanism already live for TSA members) rather than asking for a password. That page now renders one of four states depending on what the account holds: no result yet, quick-check only (with a CTA into the full report), full report (the main view), or full report with a quiet note that a quick-check result also exists. The two Cloud Functions behind this, `recordReadinessCompletion` and `checkReadinessAccountEmail`, live in `functions-admin/index.js` and are the first genuinely public, unauthenticated callables in that file — worth knowing if you're scanning it for auth assumptions.
+A returning customer can see their report again at `apps/executive-signature/my-results/`, which sends a magic-link sign-in to the email on file (reusing the same `sendSignInLinkToEmail` mechanism already live for TSA members) rather than asking for a password. That page now renders one of four states depending on what the account holds: no result yet, quick-check only (with a CTA into the full report), full report (the main view), or full report with a quiet note that a quick-check result also exists. The two Cloud Functions behind this, `recordReadinessCompletion` and `checkReadinessAccountEmail`, live in `functions-admin/index.js` and are the first genuinely public, unauthenticated callables in that file — worth knowing if you're scanning it for auth assumptions.
 
-Like the rest of this app, `apps/readiness-assessment/` (including the new results page) stays excluded from both GitHub Pages and Firebase Hosting for now, see Deployment isolation below. The account-creation code is real and will run in production Firebase the moment someone reaches it, but nobody can reach it publicly until that exclusion is deliberately lifted.
+Like the rest of this app, `apps/executive-signature/` (including the new results page) stays excluded from both GitHub Pages and Firebase Hosting for now, see Deployment isolation below. The account-creation code is real and will run in production Firebase the moment someone reaches it, but nobody can reach it publicly until that exclusion is deliberately lifted.
 
 ## Emulator-approved live architecture
 
@@ -160,9 +160,9 @@ The implementation through Phase 3 is documented in the cross-program plan, sche
 Run the focused test:
 
 ```bash
-node tests/readiness-assessment-preview.test.js
-node tests/readiness-assessment-forms.test.js
-node tests/readiness-assessment-account.test.js
+node tests/executive-signature-preview.test.js
+node tests/executive-signature-forms.test.js
+node tests/executive-signature-account.test.js
 node tests/customer-program-phase3-contract.test.js
 node tests/customer-program-assessment-persistence.test.js
 ```

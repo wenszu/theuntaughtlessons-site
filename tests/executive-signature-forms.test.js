@@ -3,8 +3,8 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const root = path.resolve(__dirname, '..');
-const forms = require(path.join(root, 'apps/readiness-assessment/forms.js'));
-const html = fs.readFileSync(path.join(root, 'apps/readiness-assessment/index.html'), 'utf8');
+const forms = require(path.join(root, 'apps/executive-signature/forms.js'));
+const html = fs.readFileSync(path.join(root, 'apps/executive-signature/index.html'), 'utf8');
 
 function seededRandom(seed) {
   let state = seed >>> 0;
