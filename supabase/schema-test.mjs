@@ -126,9 +126,31 @@ ok('admin sees submissions', (await as('authenticated','fb_admin',`select count(
 ok('alice sees her reward total', (await as('authenticated','fb_alice',`select points_total from reward_totals`))[0].points_total === 650);
 ok('bob sees no reward rows', (await as('authenticated','fb_bob',`select count(*)::int n from reward_totals`))[0].n === 0);
 ok('anon reads public settings only', (await as('anon', null, `select count(*)::int n from app_settings`))[0].n === 3);
-ok('member reads public and member settings', (await as('authenticated','fb_bob',`select count(*)::int n from app_settings`))[0].n === 7);
-ok('admin reads all settings', (await as('authenticated','fb_admin',`select count(*)::int n from app_settings`))[0].n === 11);
+ok('member reads public and member settings', (await as('authenticated','fb_bob',`select count(*)::int n from app_settings`))[0].n === 8);
+ok('admin reads all settings', (await as('authenticated','fb_admin',`select count(*)::int n from app_settings`))[0].n === 13);
 ok('learner cannot see stability events', (await as('authenticated','fb_alice',`select count(*)::int n from stability_events`))[0].n === 0);
 denied = false; try { await as('authenticated','fb_alice',`insert into activity_drafts (person_id, activity_id) values ('00000000-0000-0000-0000-000000000001','p1-e1')`); } catch { denied = true; }
 ok('browsers cannot write learning data', denied);
+
+// 1200 inventory additions
+await db.exec(`
+ insert into activities (id, program_id, kind, title, module_key) values ('p1-l1','tsa','lesson','Lesson one','phase-1'),('orientation','tsa','orientation','Orientation','');
+ insert into reward_state (person_id, program_id, streak_days, tokens, last_qualified_on) values ('00000000-0000-0000-0000-000000000001','tsa',3,2,'2026-01-03');
+ insert into credentials (credential_code, person_id, program_id, title, recipient_name, program_version)
+  values ('UTL-TSA-0001','00000000-0000-0000-0000-000000000001','tsa','TSA certificate','Alice A','2026.1');
+ insert into credentials (credential_code, person_id, program_id, title, recipient_name, status, revoked_at)
+  values ('UTL-TSA-0002','00000000-0000-0000-0000-000000000002','tsa','TSA certificate','Bob B','revoked',now());
+ update enrollments set notes='Imported from authorized_members', source='{"addedBy":"owner"}' where person_id='00000000-0000-0000-0000-000000000001' and program_id='tsa' and status='active';
+ update people set supabase_uid='99999999-0000-0000-0000-000000000001' where id='00000000-0000-0000-0000-000000000001';
+`);
+await rejects('activity kind restricted', `insert into activities (id, program_id, kind, title) values ('bad','tsa','module','x')`);
+await rejects('revoked credential needs a time', `insert into credentials (credential_code, program_id, title, recipient_name, status) values ('UTL-TSA-0003','tsa','x','y','revoked')`);
+await rejects('duplicate credential code', `insert into credentials (credential_code, program_id, title, recipient_name) values ('UTL-TSA-0001','tsa','x','y')`);
+ok('public verify returns issued credential', (await as('anon', null, `select recipient_name from get_public_credential(' UTL-TSA-0001 ')`)).length === 1);
+ok('public verify hides revoked credential', (await as('anon', null, `select * from get_public_credential('UTL-TSA-0002')`)).length === 0);
+ok('alice sees her streak', (await as('authenticated','fb_alice',`select streak_days from reward_state`))[0].streak_days === 3);
+ok('bob sees no streak rows', (await as('authenticated','fb_bob',`select count(*)::int n from reward_state`))[0].n === 0);
+ok('alice sees her credential only', (await as('authenticated','fb_alice',`select count(*)::int n from credentials`))[0].n === 1);
+ok('supabase uid resolves the same person', (await as('authenticated','99999999-0000-0000-0000-000000000001',`select count(*)::int n from activity_progress`))[0].n === 1);
+ok('firebase uid still resolves', (await as('authenticated','fb_alice',`select count(*)::int n from activity_progress`))[0].n === 1);
 console.log(`\n${pass} passed, ${fail} failed`);
