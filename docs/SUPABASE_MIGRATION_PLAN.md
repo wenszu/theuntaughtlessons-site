@@ -8,11 +8,11 @@ Goal: every record and, at the end, sign-in itself moves from Firebase to the Su
 
 | Area | State on 2026-10-06 |
 |---|---|
-| Supabase project `utl-core` | Exists. Free plan. Migrations 0100 to 1000 applied. No data |
-| Learning schema (1100, 1200) | Written and tested locally (69 of 69 checks). Not applied |
+| Supabase project `utl-core` | Exists. Free plan. Migrations 0100 to 1400 applied. No data |
+| Schema (1100 to 1400) | Applied to `utl-core` on 2026-10-06. 14 migrations. 75 of 75 local checks |
 | Firebase Auth | 61 users. All carry `role` = `authenticated`. Supabase accepts their tokens (end-to-end check passed) |
-| `setRoleClaimOnUserCreated` | Written, not deployed |
-| `supabase-core` branch | Merged with `main` (`2070e33`) and committed (`c580e3f`). 1200 migration not yet committed |
+| `setRoleClaimOnUserCreated` | Deployed 2026-10-06 (v1, us-east1). New sign-ups get the claim |
+| `supabase-core` branch | Merged with `main` and committed (`78a0c37`). Step A and B work not yet committed |
 | Firestore | Live and the only data store. About 5,300 documents across 47 paths (inventory below) |
 | Site | GitHub Pages serves `main`. Firebase Functions in three codebases. Stripe scaffolding on `main` |
 
@@ -70,14 +70,14 @@ Build effort: about 8 to 10 working sessions in all. A and B fit in one day. D c
 
 ### A. Schema and backup (today)
 
-1. Deploy `setRoleClaimOnUserCreated` alone: `firebase deploy --only functions:admin-actions:setRoleClaimOnUserCreated`. Check it appears in `firebase functions:list`.
-2. Apply 1100 and 1200 to `utl-core`. Run the advisors. Fix anything flagged in a 1300 migration. Check: `list_migrations` shows 12 and the local test page still passes 4 of 4.
-3. Export Firestore: `gcloud firestore export gs://<bucket>/firestore-2026-10-06`. Record the path in the handoff note. This is the backup Wen-Szu asked for, and it exists before any data is copied.
-4. Upgrade `utl-core` to Pro so backups run from the first import.
+1. Done. `setRoleClaimOnUserCreated` deployed alone and listed.
+2. Done. 1100, 1200 and 1300 (advisor fixes) applied; 13 migrations.
+3. Done. Firestore exported to `gs://the-untaught-lessons-firestore-backups/2026-10-06` (bucket in `asia-east1`, same as the database). This is the backup, taken before any data was copied.
+4. Upgrade `utl-core` to Pro so backups run from the first import. Pending.
 
 ### B. Copy
 
-1. `scripts/supabase-import.js`: Firebase Admin read, Supabase service role write, dry run by default, `--apply` with typed confirmation, `--rollback <run id>`. Every run writes `migration_runs` and `migration_records` with checksums, and reruns skip rows whose `legacy_firestore_id` exists.
+1. Done. `scripts/supabase-import.js`: Firebase Admin read, Supabase service role write (REST, key from `SUPABASE_SERVICE_ROLE_KEY`), dry run by default, `--apply` with typed APPLY, `--rollback <run id>` with typed ROLLBACK. Every apply writes `migration_runs` and one `migration_records` row per document with checksums. Ids are deterministic (uuid v5 of the Firestore key), so reruns upsert; append-only tables skip existing rows. The mapping is `scripts/supabase-import-mapping.js`, tested in `tests/supabase-import-mapping.test.js`. The catalog comes from `scripts/supabase-build-activity-catalog.js` into `supabase/seed/activities.json`.
 2. Mapping, in dependency order: members and users into `people`, `person_emails`, `person_profiles`, `enrollments` (tsa, status and `valid_until` from `status` and `expiryDate`; AyalaLand gets one year from import date), `role_grants` (`admin` and `owner` become `platform_owner`); `settings/cohorts` into `cohorts`; `customers`, `customerAuthLinks`, `customerEmailClaims` merged into the same `people` rows by email; the customer platform collections into their core tables; `workspaceProgress`, `completed_exercises`, `exercise_submissions`, `exercise_attempts`, `exercise_work` into the activity tables (the catalog is seeded first from `exerciseProgressIds` and `member-login/content-config.js`); `rewards` into `reward_ledger` and `reward_state`; analytics and stability events; `assessment_item_attempts` into `assessment_attempts`; `settings/*` into `app_settings`; credentials; audits into `audit_events`.
 3. Dry run, Wen-Szu reads the counts, apply. Check: counts per table match the plan; every submission has a progress row; reward ledger sums are compared with stored `mpTotal` and differences listed.
 4. Shadow comparison for three members (owner, one AyalaLand member, one of the 7 unmatched): field by field, no values printed.

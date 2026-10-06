@@ -1,0 +1,808 @@
+{
+  "generatedFrom": [
+    "member-login/content-config.js",
+    "assets/firebase.js"
+  ],
+  "activities": [
+    {
+      "program_id": "tsa",
+      "status": "active",
+      "sort_order": 10,
+      "id": "orientation",
+      "kind": "orientation",
+      "title": "Orientation",
+      "module_key": "orientation",
+      "config": {
+        "videoUrl": "https://vimeo.com/1224500458"
+      }
+    },
+    {
+      "program_id": "tsa",
+      "status": "active",
+      "sort_order": 20,
+      "id": "orientation-start",
+      "kind": "context",
+      "title": "Welcome to MA!",
+      "module_key": "orientation",
+      "config": {
+        "contextType": "text"
+      }
+    },
+    {
+      "program_id": "tsa",
+      "status": "active",
+      "sort_order": 30,
+      "id": "orientation-welcome",
+      "kind": "context",
+      "title": "Welcome to The Untaught Lessons",
+      "module_key": "orientation",
+      "config": {
+        "contextType": "video"
+      }
+    },
+    {
+      "program_id": "tsa",
+      "status": "active",
+      "sort_order": 40,
+      "id": "p1-l1",
+      "kind": "lesson",
+      "title": "KonMari for the cluttered mind",
+      "module_key": "phase-1",
+      "config": {
+        "duration": "9 min 35 sec",
+        "videoUrl": "https://player.vimeo.com/video/1224500447?badge=0&autopause=0&player_id=0&app_id=58479"
+      }
+    },
+    {
+      "program_id": "tsa",
+      "status": "active",
+      "sort_order": 50,
+      "id": "p1-l2",
+      "kind": "lesson",
+      "title": "Rule of three",
+      "module_key": "phase-1",
+      "config": {
+        "duration": "8 min 26 sec",
+        "videoUrl": "https://vimeo.com/1224500460"
+      }
+    },
+    {
+      "program_id": "tsa",
+      "status": "active",
+      "sort_order": 60,
+      "id": "p1-l3",
+      "kind": "lesson",
+      "title": "Bolded Summary Phrase (BSP)",
+      "module_key": "phase-1",
+      "config": {
+        "duration": "8 min 21 sec",
+        "videoUrl": "https://vimeo.com/1224500456"
+      }
+    },
+    {
+      "program_id": "tsa",
+      "status": "active",
+      "sort_order": 70,
+      "id": "p1-e1",
+      "kind": "exercise",
+      "title": "Grocery list",
+      "module_key": "phase-1",
+      "config": {
+        "estimatedMinutes": 10,
+        "type": "Sort & bucket",
+        "appUrl": "../apps/grocery-list/index.html",
+        "appKey": "grocery-list"
+      }
+    },
+    {
+      "program_id": "tsa",
+      "status": "active",
+      "sort_order": 80,
+      "id": "p1-e1-context",
+      "kind": "context",
+      "title": "Before your first day",
+      "module_key": "phase-1",
+      "config": {
+        "contextType": "video",
+        "forExercise": "p1-e1"
+      }
+    },
+    {
+      "program_id": "tsa",
+      "status": "active",
+      "sort_order": 90,
+      "id": "p1-e2",
+      "kind": "exercise",
+      "title": "Grocery list with AI",
+      "module_key": "phase-1",
+      "config": {
+        "estimatedMinutes": 10,
+        "type": "AI prompting",
+        "appUrl": "../apps/grocery-list-ai/index.html",
+        "appKey": "grocery-list-ai"
+      }
+    },
+    {
+      "program_id": "tsa",
+      "status": "active",
+      "sort_order": 100,
+      "id": "p1-e2-context",
+      "kind": "context",
+      "title": "Try the same task with AI",
+      "module_key": "phase-1",
+      "config": {
+        "contextType": "video",
+        "forExercise": "p1-e2"
+      }
+    },
+    {
+      "program_id": "tsa",
+      "status": "active",
+      "sort_order": 110,
+      "id": "p1-e3",
+      "kind": "exercise",
+      "title": "Manager's messy notes",
+      "module_key": "phase-1",
+      "config": {
+        "estimatedMinutes": 15,
+        "type": "Restructure",
+        "appUrl": "../apps/messy-notes/index.html",
+        "appKey": "messy-notes"
+      }
+    },
+    {
+      "program_id": "tsa",
+      "status": "active",
+      "sort_order": 120,
+      "id": "p1-e3-context",
+      "kind": "context",
+      "title": "A message just landed on your desk",
+      "module_key": "phase-1",
+      "config": {
+        "contextType": "video",
+        "forExercise": "p1-e3"
+      }
+    },
+    {
+      "program_id": "tsa",
+      "status": "active",
+      "sort_order": 130,
+      "id": "p1-e4",
+      "kind": "exercise",
+      "title": "Rushed voice memo",
+      "module_key": "phase-1",
+      "config": {
+        "estimatedMinutes": 15,
+        "type": "Voice structure",
+        "appUrl": "../apps/rushed-voice-memo/index.html",
+        "appKey": "rushed-voice-memo"
+      }
+    },
+    {
+      "program_id": "tsa",
+      "status": "active",
+      "sort_order": 140,
+      "id": "p1-e4-context",
+      "kind": "context",
+      "title": "Hugh needs a favor",
+      "module_key": "phase-1",
+      "config": {
+        "contextType": "video",
+        "forExercise": "p1-e4"
+      }
+    },
+    {
+      "program_id": "tsa",
+      "status": "active",
+      "sort_order": 150,
+      "id": "p1-e5",
+      "kind": "exercise",
+      "title": "Rushed voice memo with AI",
+      "module_key": "phase-1",
+      "config": {
+        "estimatedMinutes": 10,
+        "type": "AI practice",
+        "appUrl": "../apps/rushed-voice-memo-ai/index.html",
+        "appKey": "rushed-voice-memo-ai"
+      }
+    },
+    {
+      "program_id": "tsa",
+      "status": "active",
+      "sort_order": 160,
+      "id": "p1-e5-context",
+      "kind": "context",
+      "title": "Try the same memo with AI",
+      "module_key": "phase-1",
+      "config": {
+        "contextType": "video",
+        "forExercise": "p1-e5"
+      }
+    },
+    {
+      "program_id": "tsa",
+      "status": "active",
+      "sort_order": 170,
+      "id": "p1-e6",
+      "kind": "exercise",
+      "title": "Chalkboard notes",
+      "module_key": "phase-1",
+      "config": {
+        "estimatedMinutes": 20,
+        "type": "Synthesis",
+        "appUrl": "../apps/chalkboard-notes/index.html",
+        "appKey": "chalkboard-notes"
+      }
+    },
+    {
+      "program_id": "tsa",
+      "status": "active",
+      "sort_order": 180,
+      "id": "p1-e6-context",
+      "kind": "context",
+      "title": "Aiko needs the Olympic brainstorm session sorted",
+      "module_key": "phase-1",
+      "config": {
+        "contextType": "video",
+        "forExercise": "p1-e6"
+      }
+    },
+    {
+      "program_id": "tsa",
+      "status": "active",
+      "sort_order": 190,
+      "id": "p1-l4",
+      "kind": "lesson",
+      "title": "Wait, what's the problem again?",
+      "module_key": "phase-2",
+      "config": {
+        "duration": "10 min 21 sec",
+        "videoUrl": "https://vimeo.com/1224500700"
+      }
+    },
+    {
+      "program_id": "tsa",
+      "status": "active",
+      "sort_order": 200,
+      "id": "p1-l5",
+      "kind": "lesson",
+      "title": "Divide and conquer",
+      "module_key": "phase-2",
+      "config": {
+        "duration": "6 min 1 sec",
+        "videoUrl": "https://vimeo.com/1224501784"
+      }
+    },
+    {
+      "program_id": "tsa",
+      "status": "active",
+      "sort_order": 210,
+      "id": "p2-l1",
+      "kind": "lesson",
+      "title": "The executive storyline",
+      "module_key": "phase-2",
+      "config": {
+        "duration": "7 min 38 sec",
+        "videoUrl": "https://vimeo.com/1224502214"
+      }
+    },
+    {
+      "program_id": "tsa",
+      "status": "active",
+      "sort_order": 220,
+      "id": "p2-l3",
+      "kind": "lesson",
+      "title": "The art of persuasion",
+      "module_key": "phase-2",
+      "config": {
+        "duration": "12 min 38 sec",
+        "videoUrl": "https://vimeo.com/1224502855"
+      }
+    },
+    {
+      "program_id": "tsa",
+      "status": "active",
+      "sort_order": 230,
+      "id": "p2-e1",
+      "kind": "exercise",
+      "title": "Issue tree builder",
+      "module_key": "phase-2",
+      "config": {
+        "estimatedMinutes": 15,
+        "type": "Problem breakdown",
+        "appUrl": "../apps/issue-tree-builder/index.html",
+        "appKey": "issue-tree-builder"
+      }
+    },
+    {
+      "program_id": "tsa",
+      "status": "active",
+      "sort_order": 240,
+      "id": "p2-e1-context",
+      "kind": "context",
+      "title": "Aiko liked your work. Now she has a question.",
+      "module_key": "phase-2",
+      "config": {
+        "contextType": "video",
+        "forExercise": "p2-e1"
+      }
+    },
+    {
+      "program_id": "tsa",
+      "status": "active",
+      "sort_order": 250,
+      "id": "p2-e2",
+      "kind": "exercise",
+      "title": "Framing the storyline (SCQA)",
+      "module_key": "phase-2",
+      "config": {
+        "estimatedMinutes": 15,
+        "type": "Storyline",
+        "appUrl": "../apps/scqa-builder/index.html",
+        "appKey": "scqa-builder"
+      }
+    },
+    {
+      "program_id": "tsa",
+      "status": "active",
+      "sort_order": 260,
+      "id": "p2-e2-context",
+      "kind": "context",
+      "title": "Create an executive-ready brief for Aiko.",
+      "module_key": "phase-2",
+      "config": {
+        "contextType": "video",
+        "forExercise": "p2-e2"
+      }
+    },
+    {
+      "program_id": "tsa",
+      "status": "active",
+      "sort_order": 270,
+      "id": "p2-e3",
+      "kind": "exercise",
+      "title": "Advisory board with AI",
+      "module_key": "phase-2",
+      "config": {
+        "estimatedMinutes": 15,
+        "type": "AI advisory board",
+        "appUrl": "../apps/advisory-board/index.html",
+        "appKey": "advisory-board"
+      }
+    },
+    {
+      "program_id": "tsa",
+      "status": "active",
+      "sort_order": 280,
+      "id": "p2-e3-context",
+      "kind": "context",
+      "title": "Get outside perspectives before you commit",
+      "module_key": "phase-2",
+      "config": {
+        "contextType": "video",
+        "forExercise": "p2-e3"
+      }
+    },
+    {
+      "program_id": "tsa",
+      "status": "active",
+      "sort_order": 290,
+      "id": "p2-e4",
+      "kind": "exercise",
+      "title": "Write to Aiko",
+      "module_key": "phase-2",
+      "config": {
+        "estimatedMinutes": 10,
+        "type": "Answer-first email",
+        "appUrl": "../apps/write-to-aiko/index.html",
+        "appKey": "write-to-aiko"
+      }
+    },
+    {
+      "program_id": "tsa",
+      "status": "active",
+      "sort_order": 300,
+      "id": "p2-e4-context",
+      "kind": "context",
+      "title": "Aiko does not have time to read everything",
+      "module_key": "phase-2",
+      "config": {
+        "contextType": "video",
+        "forExercise": "p2-e4"
+      }
+    },
+    {
+      "program_id": "tsa",
+      "status": "active",
+      "sort_order": 310,
+      "id": "p2-e5",
+      "kind": "exercise",
+      "title": "Explain to Aiko (120s)",
+      "module_key": "phase-2",
+      "config": {
+        "estimatedMinutes": 15,
+        "type": "Spoken explanation",
+        "appUrl": "../apps/explain-to-aiko/index.html",
+        "appKey": "explain-to-aiko"
+      }
+    },
+    {
+      "program_id": "tsa",
+      "status": "active",
+      "sort_order": 320,
+      "id": "p2-e5-context",
+      "kind": "context",
+      "title": "Aiko asks for a quick explanation",
+      "module_key": "phase-2",
+      "config": {
+        "contextType": "video",
+        "forExercise": "p2-e5"
+      }
+    },
+    {
+      "program_id": "tsa",
+      "status": "active",
+      "sort_order": 330,
+      "id": "p2-e6",
+      "kind": "exercise",
+      "title": "Explain to Aiko (60s)",
+      "module_key": "phase-2",
+      "config": {
+        "estimatedMinutes": 10,
+        "type": "Elevator pitch",
+        "appUrl": "../apps/explain-to-aiko-60/index.html",
+        "appKey": "explain-to-aiko-60"
+      }
+    },
+    {
+      "program_id": "tsa",
+      "status": "active",
+      "sort_order": 340,
+      "id": "p2-e6-context",
+      "kind": "context",
+      "title": "Now compress it",
+      "module_key": "phase-2",
+      "config": {
+        "contextType": "video",
+        "forExercise": "p2-e6"
+      }
+    },
+    {
+      "program_id": "tsa",
+      "status": "active",
+      "sort_order": 350,
+      "id": "p3-l1",
+      "kind": "lesson",
+      "title": "How to read people",
+      "module_key": "phase-3",
+      "config": {
+        "duration": "7 min 19 sec",
+        "videoUrl": "https://vimeo.com/1224502887"
+      }
+    },
+    {
+      "program_id": "tsa",
+      "status": "active",
+      "sort_order": 360,
+      "id": "p3-l2",
+      "kind": "lesson",
+      "title": "Let's switch hats",
+      "module_key": "phase-3",
+      "config": {
+        "duration": "7 min 19 sec",
+        "videoUrl": "https://vimeo.com/1224503019"
+      }
+    },
+    {
+      "program_id": "tsa",
+      "status": "active",
+      "sort_order": 370,
+      "id": "p3-l3",
+      "kind": "lesson",
+      "title": "Speak like Obama",
+      "module_key": "phase-3",
+      "config": {
+        "duration": "21 min 47 sec",
+        "videoUrl": "https://vimeo.com/1224503381"
+      }
+    },
+    {
+      "program_id": "tsa",
+      "status": "active",
+      "sort_order": 380,
+      "id": "p3-l4",
+      "kind": "lesson",
+      "title": "The art of saying no",
+      "module_key": "phase-3",
+      "config": {
+        "duration": "18 min 25 sec",
+        "videoUrl": "https://vimeo.com/1224504944"
+      }
+    },
+    {
+      "program_id": "tsa",
+      "status": "active",
+      "sort_order": 390,
+      "id": "p3-l5",
+      "kind": "lesson",
+      "title": "I have bad news...",
+      "module_key": "phase-3",
+      "config": {
+        "duration": "7 min 7 sec",
+        "videoUrl": "https://vimeo.com/1224504583"
+      }
+    },
+    {
+      "program_id": "tsa",
+      "status": "active",
+      "sort_order": 400,
+      "id": "p3-e1",
+      "kind": "exercise",
+      "title": "The art of saying no",
+      "module_key": "phase-3",
+      "config": {
+        "estimatedMinutes": 10,
+        "type": "Prioritize",
+        "appUrl": "../apps/eisenhower-matrix/index.html",
+        "appKey": "eisenhower-matrix"
+      }
+    },
+    {
+      "program_id": "tsa",
+      "status": "active",
+      "sort_order": 410,
+      "id": "p3-e1-context",
+      "kind": "context",
+      "title": "You just got the lead role.",
+      "module_key": "phase-3",
+      "config": {
+        "contextType": "video",
+        "forExercise": "p3-e1"
+      }
+    },
+    {
+      "program_id": "tsa",
+      "status": "active",
+      "sort_order": 420,
+      "id": "p3-e2",
+      "kind": "exercise",
+      "title": "I have bad news...",
+      "module_key": "phase-3",
+      "config": {
+        "estimatedMinutes": 25,
+        "type": "Difficult conversation",
+        "appUrl": "../apps/i-have-bad-news/index.html",
+        "appKey": "i-have-bad-news"
+      }
+    },
+    {
+      "program_id": "tsa",
+      "status": "active",
+      "sort_order": 430,
+      "id": "p3-e2-context",
+      "kind": "context",
+      "title": "You have to be the one to say it",
+      "module_key": "phase-3",
+      "config": {
+        "contextType": "video",
+        "forExercise": "p3-e2"
+      }
+    },
+    {
+      "program_id": "tsa",
+      "status": "active",
+      "sort_order": 440,
+      "id": "p3-e3",
+      "kind": "exercise",
+      "title": "Let's switch hats",
+      "module_key": "phase-3",
+      "config": {
+        "estimatedMinutes": 20,
+        "type": "Perspective taking",
+        "appUrl": "../apps/lets-switch-hats/index.html",
+        "appKey": "lets-switch-hats"
+      }
+    },
+    {
+      "program_id": "tsa",
+      "status": "active",
+      "sort_order": 450,
+      "id": "p3-e3-context",
+      "kind": "context",
+      "title": "Read the room before you speak",
+      "module_key": "phase-3",
+      "config": {
+        "contextType": "video",
+        "forExercise": "p3-e3"
+      }
+    },
+    {
+      "program_id": "tsa",
+      "status": "active",
+      "sort_order": 460,
+      "id": "p3-e4",
+      "kind": "exercise",
+      "title": "Speak like Obama",
+      "module_key": "phase-3",
+      "config": {
+        "estimatedMinutes": 25,
+        "type": "Executive presence",
+        "appUrl": "../apps/speak-like-obama/index.html",
+        "appKey": "speak-like-obama"
+      }
+    },
+    {
+      "program_id": "tsa",
+      "status": "active",
+      "sort_order": 470,
+      "id": "p3-e4-context",
+      "kind": "context",
+      "title": "All eyes are on you",
+      "module_key": "phase-3",
+      "config": {
+        "contextType": "video",
+        "forExercise": "p3-e4"
+      }
+    },
+    {
+      "program_id": "tsa",
+      "status": "active",
+      "sort_order": 480,
+      "id": "tsa-diagnostic",
+      "kind": "assessment",
+      "title": "TSA diagnostic",
+      "module_key": "assessment",
+      "config": {}
+    },
+    {
+      "program_id": "tsa",
+      "status": "active",
+      "sort_order": 490,
+      "id": "tsa-checkpoint",
+      "kind": "assessment",
+      "title": "TSA checkpoint",
+      "module_key": "assessment",
+      "config": {}
+    },
+    {
+      "program_id": "tsa",
+      "status": "active",
+      "sort_order": 500,
+      "id": "tsa-sort-score",
+      "kind": "assessment",
+      "title": "TSA section: Sort",
+      "module_key": "assessment",
+      "config": {
+        "section": "sort"
+      }
+    },
+    {
+      "program_id": "tsa",
+      "status": "active",
+      "sort_order": 510,
+      "id": "tsa-spot-score",
+      "kind": "assessment",
+      "title": "TSA section: Spot",
+      "module_key": "assessment",
+      "config": {
+        "section": "spot"
+      }
+    },
+    {
+      "program_id": "tsa",
+      "status": "active",
+      "sort_order": 520,
+      "id": "tsa-speak-score",
+      "kind": "assessment",
+      "title": "TSA section: Speak",
+      "module_key": "assessment",
+      "config": {
+        "section": "speak"
+      }
+    },
+    {
+      "program_id": "tsa",
+      "status": "active",
+      "sort_order": 530,
+      "id": "find-your-level",
+      "kind": "assessment",
+      "title": "Find Your Level",
+      "module_key": "assessment",
+      "config": {}
+    }
+  ],
+  "keys": [
+    {
+      "key": "grocery-list",
+      "activity_id": "p1-e1"
+    },
+    {
+      "key": "grocery-list-ai",
+      "activity_id": "p1-e2"
+    },
+    {
+      "key": "messy-notes",
+      "activity_id": "p1-e3"
+    },
+    {
+      "key": "rushed-voice-memo",
+      "activity_id": "p1-e4"
+    },
+    {
+      "key": "rushed-voice-memo-ai",
+      "activity_id": "p1-e5"
+    },
+    {
+      "key": "chalkboard-notes",
+      "activity_id": "p1-e6"
+    },
+    {
+      "key": "issue-tree-builder",
+      "activity_id": "p2-e1"
+    },
+    {
+      "key": "scqa-builder",
+      "activity_id": "p2-e2"
+    },
+    {
+      "key": "advisory-board",
+      "activity_id": "p2-e3"
+    },
+    {
+      "key": "write-to-aiko",
+      "activity_id": "p2-e4"
+    },
+    {
+      "key": "explain-to-aiko",
+      "activity_id": "p2-e5"
+    },
+    {
+      "key": "explain-to-aiko-60",
+      "activity_id": "p2-e6"
+    },
+    {
+      "key": "eisenhower-matrix",
+      "activity_id": "p3-e1"
+    },
+    {
+      "key": "i-have-bad-news",
+      "activity_id": "p3-e2"
+    },
+    {
+      "key": "lets-switch-hats",
+      "activity_id": "p3-e3"
+    },
+    {
+      "key": "speak-like-obama",
+      "activity_id": "p3-e4"
+    },
+    {
+      "key": "tsa-diagnostic-v2",
+      "activity_id": "tsa-diagnostic"
+    },
+    {
+      "key": "tsa-checkpoint-v2",
+      "activity_id": "tsa-checkpoint"
+    },
+    {
+      "key": "tsa_sort_score",
+      "activity_id": "tsa-sort-score"
+    },
+    {
+      "key": "tsa_spot_score",
+      "activity_id": "tsa-spot-score"
+    },
+    {
+      "key": "tsa_speak_score",
+      "activity_id": "tsa-speak-score"
+    },
+    {
+      "key": "issue-tree",
+      "activity_id": "p2-e1"
+    },
+    {
+      "key": "explain-to-aiko-120",
+      "activity_id": "p2-e5"
+    }
+  ]
+}

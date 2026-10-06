@@ -153,4 +153,26 @@ ok('bob sees no streak rows', (await as('authenticated','fb_bob',`select count(*
 ok('alice sees her credential only', (await as('authenticated','fb_alice',`select count(*)::int n from credentials`))[0].n === 1);
 ok('supabase uid resolves the same person', (await as('authenticated','99999999-0000-0000-0000-000000000001',`select count(*)::int n from activity_progress`))[0].n === 1);
 ok('firebase uid still resolves', (await as('authenticated','fb_alice',`select count(*)::int n from activity_progress`))[0].n === 1);
+
+// 1400 import support: a run's rows can be rolled back, including append-only tables.
+await db.exec(`
+ insert into migration_runs (id, version, mode, status) values ('70000000-0000-0000-0000-000000000001','test','apply','completed');
+ insert into people (id, auth_uid, primary_email, migration_run_id) values ('00000000-0000-0000-0000-000000000009','fb_imported','imported@a.com','70000000-0000-0000-0000-000000000001');
+ insert into enrollments (person_id, program_id, status, migration_run_id) values ('00000000-0000-0000-0000-000000000009','tsa','active','70000000-0000-0000-0000-000000000001');
+ insert into activity_submissions (id, person_id, activity_id, program_id, submission_key, completed_at, migration_run_id)
+  values ('50000000-0000-0000-0000-000000000009','00000000-0000-0000-0000-000000000009','p1-e1','tsa','k-1',now(),'70000000-0000-0000-0000-000000000001');
+ insert into activity_progress (person_id, activity_id, program_id, status, completed_at, latest_submission_id, migration_run_id)
+  values ('00000000-0000-0000-0000-000000000009','p1-e1','tsa','completed',now(),'50000000-0000-0000-0000-000000000009','70000000-0000-0000-0000-000000000001');
+ insert into reward_ledger (person_id, program_id, entry_key, points, migration_run_id) values ('00000000-0000-0000-0000-000000000009','tsa','e1',10,'70000000-0000-0000-0000-000000000001');
+ insert into stability_events (person_id, event_key, event_type, severity, occurred_at, migration_run_id) values ('00000000-0000-0000-0000-000000000009','evt-00000001','sync_error','warning',now(),'70000000-0000-0000-0000-000000000001');
+ insert into audit_events (action, person_id, migration_run_id) values ('imported','00000000-0000-0000-0000-000000000009','70000000-0000-0000-0000-000000000001');
+`);
+const rb = await q(`select rollback_migration_run('70000000-0000-0000-0000-000000000001') as c`);
+ok('rollback removed the imported person', (await q(`select count(*)::int n from people where id='00000000-0000-0000-0000-000000000009'`))[0].n === 0);
+ok('rollback removed append-only rows', rb[0].c.reward_ledger === 1 && rb[0].c.stability_events === 1 && rb[0].c.audit_events === 1);
+ok('rollback left other people alone', (await q(`select count(*)::int n from people`))[0].n === 3);
+ok('run marked rolled back', (await q(`select status from migration_runs where id='70000000-0000-0000-0000-000000000001'`))[0].status === 'rolled_back');
+await rejects('append-only trigger back on after rollback', `delete from reward_ledger where entry_key='exercise-completed:p1-e1'`);
+denied = false; try { await as('authenticated','fb_admin',`select rollback_migration_run('70000000-0000-0000-0000-000000000001')`); } catch { denied = true; }
+ok('rollback not callable by browsers', denied);
 console.log(`\n${pass} passed, ${fail} failed`);
