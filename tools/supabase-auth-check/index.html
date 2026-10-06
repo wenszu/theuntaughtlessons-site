@@ -141,6 +141,23 @@
         addCheck("Token issuer is this Firebase project", false, `Could not decode the token (${error.name}).`);
       }
 
+      // a3. The real test of the identity lookup: with this token the database must find my own person record
+      // and my enrollment. Counts only, nothing from the rows is shown.
+      try {
+        const claims = decodeClaims(idToken);
+        const authHeaders = { apikey: SUPABASE_PUBLISHABLE_KEY, Authorization: `Bearer ${idToken}` };
+        const personResponse = await fetch(`${SUPABASE_URL}/rest/v1/people?select=id&auth_uid=eq.${encodeURIComponent(String(claims.sub || ""))}`, { headers: authHeaders });
+        const personRows = personResponse.ok ? await personResponse.json() : null;
+        const personCount = Array.isArray(personRows) ? personRows.length : null;
+        addCheck("Token resolves to my person record", personResponse.status === 200 && personCount === 1, `HTTP ${personResponse.status}. Person records found: ${personCount === null ? "none" : personCount}. Expected 200 with 1.`);
+        const enrollmentResponse = await fetch(`${SUPABASE_URL}/rest/v1/enrollments?select=id&limit=5`, { headers: authHeaders });
+        const enrollmentRows = enrollmentResponse.ok ? await enrollmentResponse.json() : null;
+        const enrollmentCount = Array.isArray(enrollmentRows) ? enrollmentRows.length : null;
+        addCheck("Token can read enrollments", enrollmentResponse.status === 200 && enrollmentCount >= 1, `HTTP ${enrollmentResponse.status}. Enrollments visible: ${enrollmentCount === null ? "none" : enrollmentCount}. Expected 200 with at least 1.`);
+      } catch (error) {
+        addCheck("Token resolves to my person record", false, `Request failed (${error.name}).`);
+      }
+
       // b. Programs with the token.
       try {
         const withToken = await readPrograms({

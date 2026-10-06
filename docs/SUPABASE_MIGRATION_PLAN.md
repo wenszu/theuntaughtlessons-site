@@ -8,8 +8,8 @@ Goal: every record and, at the end, sign-in itself moves from Firebase to the Su
 
 | Area | State on 2026-10-06 |
 |---|---|
-| Supabase project `utl-core` | Exists. Free plan. Migrations 0100 to 1710 applied. Firestore data imported 2026-10-06 (run `c431b8db`, 8,671 rows, verified) |
-| Schema (1100 to 1710) | Applied to `utl-core` on 2026-10-06. 18 migrations, including the 11 browser write functions (step C part 1, reviewed twice). 75 of 75 schema checks |
+| Supabase project `utl-core` | Exists. Free plan. Migrations 0100 to 1800 applied. Firestore data imported 2026-10-06 (run `c431b8db`, 8,671 rows, verified) |
+| Schema (1100 to 1800) | Applied to `utl-core` on 2026-10-06. 19 migrations, including the 11 browser write functions (reviewed twice) and the identity by token issuer fix. 75 of 75 schema checks |
 | Firebase Auth | 61 users. All carry `role` = `authenticated`. Supabase accepts their tokens (end-to-end check passed) |
 | `setRoleClaimOnUserCreated` | Deployed 2026-10-06 (v1, us-east1). New sign-ups get the claim |
 | `supabase-core` branch | Merged with `main`. Last commit `5ee6f8a`; the import fixes, migration 1500 and the new tests are not committed |
@@ -52,19 +52,21 @@ Run by Wen-Szu with `scripts/supabase-firestore-inventory.js`. 47 collection pat
 
 What the inventory changed in the design (migration 1200): lessons, contexts and orientation became activity kinds; `reward_state` holds streaks and tokens; `enrollments.notes` and `enrollments.source` hold the member notes and invitation metadata; `public_credentials` and `credential_issuance` merged into `credentials` with a public verify function; `people.supabase_uid` added so the sign-in move needs no schema change.
 
-## 2. The plan in one view
+## 2. Remaining phases (updated 2026-10-06)
 
-| Step | What happens | Members notice | Undo |
-|---|---|---|---|
-| A. Today: schema and backup | Deploy claim trigger, apply 1100 and 1200, export Firestore to Cloud Storage, upgrade to Pro | Nothing | Drop the new tables |
-| B. Today or next session: copy | Import tool, dry run, apply. Supabase holds everything | Nothing | Rollback by run id |
-| C. Build the switch | Postgres write functions, rewrite the data layer in `assets/firebase.js`, point the 6 admin calls and the ES results page at Supabase. Sign-in stays on Firebase | Nothing (not deployed) | Nothing to undo |
-| D. Test and flip the site | Test with you plus 2 or 3 members on a preview. Then: deny Firestore client writes, re-import once, merge to `main`. One hour of writes frozen, sign-in never interrupted | A reload. Drafts saved during the hour are kept (re-import) | Re-enable Firestore writes, revert `main` |
-| E. Move the server callables | The 34 `functions-admin` callables write Supabase with the service role. Stripe grants an entitlement in Supabase | Nothing | Redeploy previous functions |
-| F. Move sign-in | Create Supabase Auth users, Google via the same OAuth client, password users set a new password once, both token types accepted for one week | Google users sign in again once, password users set a password once | Keep Firebase sign-in on until everyone is through |
-| G. Close | Firestore read-only archive, Firebase project paused 90 days then deleted | Nothing | Archive stays |
+Done: A (schema, trigger, backup, Pro), B (data copied and verified), step C part 1 (11 browser write functions, reviewed twice), the identity fix, and a drafted data layer (`assets/supabase-data.js`). What is left, in order:
 
-Build effort: about 8 to 10 working sessions in all. A and B fit in one day. D can happen the same day C is finished. Between D and E the customer platform (Executive Signature, 2 attempts, 1 entitlement) still writes Firestore for a few days; that is accepted because its volume is near zero and its reads are server side.
+| Phase | What happens | Who | Members notice | Undo |
+|---|---|---|---|---|
+| 1. Finish the data layer | Decide the open questions (table in the handoff note). Small database tweaks: a practice flag for submissions, a progress reset mechanism for the admin button, name, photo and feedback fields, milestones 6, a one time rewards adjustment so nobody loses points. Wire `assets/supabase-data.js` into `assets/firebase.js` behind a switch that is OFF by default, with the bridge writes (completion record, workspace progress, rewards also written to Firestore). Tests only, no deploy | Claude, with the owner's decisions | Nothing | Nothing deployed |
+| 2. Dark launch | Merge to `main` with the switch off for everyone. Owner turns it on for their own account only and runs a full pass (sign in, finish an exercise, save a draft, rewards, certificate, admin console). Run the compare tool on the owner, then on 2 or 3 chosen members, who turn it on. Watch the tracking events | Owner and Claude | Nothing for most; testers see the same site | Switch it off for that person |
+| 3. Everyone on | Final delta import, switch on for all, Firestore client writes denied except the three bridge paths. The import secret key is deleted after this | Claude, owner approves | A reload | Switch off for all, rules back |
+| 4. Server functions | Move the 34 admin callables, in this order: read only ones that already have a table, certificate issuing and the credential admin tools, organization console and weekly reports, then Stripe, the anonymous assessment saver and sign-in identity last. Delete the bridge when done | Claude | Nothing | Redeploy the old functions |
+| 5. Admin console | The six direct Firestore calls and the admin callables read and write Supabase | Claude | Admin only | Per screen |
+| 6. Move sign-in | Create Supabase Auth users, Google through the same OAuth client, password users set a password once, both token types accepted for a week | Claude, owner tests with AyalaLand | Google users sign in once more, password users set a password | Firebase sign-in stays on until everyone is through |
+| 7. Close | Firestore rules deny everything, Firebase Auth export saved, the Firebase project paused for 90 days then deleted, secret keys deleted | Claude, owner approves | Nothing | The archive stays |
+
+Rough size: phases 1 to 3 are 3 to 5 working sessions and put every member on Supabase; phases 4 to 7 are another 6 to 9 sessions, mostly the server functions and the sign-in move.
 
 ## 3. Steps in detail
 
