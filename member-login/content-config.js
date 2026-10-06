@@ -886,7 +886,8 @@ const UTL_CONTENT = {
       var preservedPrefixes = [
         "utl_member_", "utl_admin_", "utl_local_pw_", "utl_aiko_",
         "utl_feedback_", "utl_global_feedback",
-        "utl_use_firebase_", "utl_reward_settings"
+        "utl_use_firebase_", "utl_reward_settings",
+        "utl_data_source"
       ];
       Object.keys(localStorage).forEach(function (key) {
         if (key.indexOf("utl_") !== 0 || key === ADMIN_PROGRESS_REVISION_KEY) return;
@@ -1843,7 +1844,8 @@ const UTL_CONTENT = {
       var preservedPrefixes = [
         "utl_use_firebase_",
         "utl_reward_settings",
-        "utl_public_site_"
+        "utl_public_site_",
+        "utl_data_source"
       ];
       Object.keys(localStorage).forEach(function (key) {
         if (key.indexOf("utl_") !== 0 || key === ACCOUNT_SCOPE_KEY) return;

@@ -118,6 +118,36 @@ if (await exists('update_my_profile')) {
   await refused('anon cannot update a profile', 'anon', null, `select update_my_profile('{"goals":"x"}'::jsonb)`);
 }
 
+if (await exists('record_activity_practice')) {
+  // Practice rounds must never complete anything, count anything, or touch another person.
+  await db.exec(`insert into activities (id, program_id, kind, title) values ('p1-l1', 'tsa', 'lesson', 'Lesson') on conflict (id) do nothing`);
+  const before = await fingerprint();
+  await as('authenticated', 'fb_bob', `select record_activity_practice('p1-e2', 'sub-alice-1', 1, now(), 5, '{"round":1}'::jsonb)`);
+  const prog = (await q(`select status, completion_count, completed_at, latest_submission_id from activity_progress where person_id = '${BOB}' and activity_id = 'p1-e2'`))[0];
+  ok('a practice round leaves the exercise in progress, not completed', prog.status === 'in_progress' && prog.completion_count === 0 && prog.completed_at === null && prog.latest_submission_id === null);
+  await as('authenticated', 'fb_bob', `select record_activity_practice('p1-e2', 'practice-2', 2, now(), 5, '{"round":2}'::jsonb)`);
+  ok('many practice rounds still never complete it', (await q(`select status, completion_count from activity_progress where person_id = '${BOB}' and activity_id = 'p1-e2'`))[0].completion_count === 0);
+  ok('Alice is unchanged by Bob\'s practice with her key', (await fingerprint()) === before);
+  await refused('practice is refused for a lesson', 'authenticated', 'fb_bob', `select record_activity_practice('p1-l1', 'practice-l1', 1, now(), 5, '{}'::jsonb)`, '22023');
+  await refused('anon cannot record practice', 'anon', null, `select record_activity_practice('p1-e2', 'anon-practice', 1, now(), 5, '{}'::jsonb)`);
+  await refused('practice with SQL in the key is refused', 'authenticated', 'fb_bob', `select record_activity_practice('p1-e2', $$k'; delete from people; --$$, 1, now(), 1, '{}'::jsonb)`, '22023');
+  // A real completion afterwards completes once; the practice key stays a separate row.
+  const real = await as('authenticated', 'fb_bob', `select record_activity_submission('p1-e2', 'real-final-1', 1, now(), 60, '{"final":true}'::jsonb) as r`);
+  ok('a real submission after practice completes once', real[0].r.status === 'completed' && real[0].r.completion_count === 1);
+}
+
+if (await exists('update_my_profile')) {
+  const before = await fingerprint();
+  for (const [name, url] of [['javascript:', 'javascript:alert(1)'], ['data:', 'data:text/html,<script>alert(1)</script>'], ['http:', 'http://x.example/p.png'], ['protocol relative', '//x.example/p.png'], ['https with a space', 'https://x.example/a b.png']]) {
+    await refused(`a ${name} photo link is refused`, 'authenticated', 'fb_bob', `select update_my_profile(jsonb_build_object('photoUrl', ${lit(url)}))`, '22023');
+  }
+  await as('authenticated', 'fb_bob', `select update_my_profile('{"photoUrl":"https://lh3.googleusercontent.com/a/photo=s96-c","feedbackEnabled":false}'::jsonb)`);
+  ok('an https photo and the feedback setting are stored for Bob', (await q(`select photo_url, feedback_enabled from person_profiles where person_id = '${BOB}'`))[0].feedback_enabled === false);
+  await refused('the progress reset marker cannot be set through the profile function', 'authenticated', 'fb_bob', `select update_my_profile('{"progressRevision":"x"}'::jsonb)`, '22023');
+  await refused('the progress reset marker cannot be written directly', 'authenticated', 'fb_bob', `update person_profiles set progress_revision = 'x' where person_id = '${BOB}'`, '42501');
+  ok('Alice is unchanged by Bob\'s profile changes', (await fingerprint()) === before);
+}
+
 if (await exists('add_reward_entries')) {
   const before = await fingerprint();
   await as('authenticated', 'fb_bob', `select add_reward_entries('tsa', '[{"id":"bob-1","mpEarned":10,"earnedAt":"2026-01-01T00:00:00Z"}]'::jsonb, '{"streakDays":1,"tokens":0}'::jsonb)`);

@@ -13,7 +13,8 @@ import { boot } from './schema-apply-harness.mjs';
 
 const WRITE_FUNCTIONS = [
   'save_activity_draft', 'clear_activity_draft', 'record_activity_submission', 'record_activity_attempt', 'mark_activity_progress',
-  'record_engagement_session', 'record_stability_event', 'record_learning_evidence', 'add_reward_entries', 'update_my_profile', 'record_login'
+  'record_engagement_session', 'record_stability_event', 'record_learning_evidence', 'add_reward_entries', 'update_my_profile', 'record_login',
+  'record_activity_practice'
 ];
 // Existing functions that browsers may call on purpose.
 const PUBLIC_ALLOWLIST = ['get_public_org_brand', 'get_public_credential'];                 // anon and authenticated

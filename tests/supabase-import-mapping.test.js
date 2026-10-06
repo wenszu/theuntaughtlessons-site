@@ -120,8 +120,13 @@ assert.deepStrictEqual(t.activity_drafts[0].draft, {});
 assert.equal(t.activity_drafts[0].activity_id, 'p2-e2');
 
 // Rewards: duplicate ledger id dropped, mismatch warned, state row built.
-assert.equal(t.reward_ledger.filter((r) => r.person_id === alice).length, 2);
-assert.ok(plan.warnings.some((w) => w.includes('stored mpTotal 70 differs from ledger sum 60')));
+// Two real entries plus one adjustment entry that lifts the ledger sum (60) to the stored total (70).
+assert.equal(t.reward_ledger.filter((r) => r.person_id === alice).length, 3);
+const adjustment = t.reward_ledger.find((r) => r.person_id === alice && r.entry_key === 'legacy-adjustment');
+assert.ok(adjustment && adjustment.points === 10 && adjustment.activity_id === null);
+assert.equal(t.reward_ledger.filter((r) => r.person_id === alice).reduce((sum, r) => sum + r.points, 0), 70);
+assert.equal(adjustment.id, uuidFor(`reward:uid-alice:legacy-adjustment`)); // fixed key: a rerun never adds a second one
+assert.ok(plan.warnings.some((w) => w.includes('stored mpTotal 70 differs from ledger sum 60') && w.includes('legacy-adjustment entry of 10')));
 const state = t.reward_state.find((r) => r.person_id === alice);
 assert.equal(state.streak_days, 2);
 assert.equal(state.tokens, 1);

@@ -209,7 +209,8 @@ function check(name, fn) {
     const session = normalizeEngagementSession({ sessionId: 'session-12345', userId: 'u', receivedAt: 1, videoMilestones: [25, 50, 75, 80, 90, 100, 33] }, 'session');
     assertNoReservedKeys(session, 'session');
     assert.ok(!('activitySessionId' in session), 'page sessions never carry activitySessionId');
-    assert.deepEqual(session.videoMilestones, [25, 50, 75, 80, 90], 'milestones capped at the database limit of 5');
+    assert.deepEqual(session.videoMilestones, [25, 50, 75, 80, 90, 100], 'all six site milestones pass; unknown values are dropped');
+    assert.equal(normalizeEngagementSession({ sessionId: 'session-12345', videoMilestones: [100, 90, 80, 75, 50, 25, 25] }, 'session').videoMilestones.length, 6, 'milestones capped at the database limit of 6');
     const activity = normalizeEngagementSession({ sessionId: 'session-12345', activitySessionId: 'activity-123', activityId: 'p1-e1' }, 'activity');
     assert.equal(activity.activitySessionId, 'activity-123');
     const event = normalizeStabilityEvent({ eventId: 'event-12345', eventType: 'sync_error', message: 'a\n\nb   c', userId: 'u', receivedAt: 1 });
@@ -256,6 +257,52 @@ function check(name, fn) {
     });
   });
 
+  await check('an expired token is retried once with a refreshed token, nothing else is retried', async () => {
+    const expired = { __status: 401, body: { code: 'PGRST301', message: 'JWT expired' } };
+    let answers = [expired, { saved: true }];
+    const tokenRequests = [];
+    const fetchImpl = fakeFetch().on('POST', '/rest/v1/rpc/save_activity_draft', () => answers.shift());
+    const data = createSupabaseData({
+      supabaseUrl: URL_BASE,
+      publishableKey: KEY,
+      fetchImpl,
+      getIdToken: async (forceRefresh) => { tokenRequests.push(forceRefresh); return forceRefresh ? 'fresh-token' : 'stale-token'; }
+    });
+    await data.saveExerciseDraft('p1-e1', 'Title', { a: 1 });
+    const calls = fetchImpl.rpcCalls('save_activity_draft');
+    assert.equal(calls.length, 2, 'one retry');
+    assert.deepEqual(tokenRequests, [false, true], 'the retry asks for a forced refresh');
+    assert.equal(calls[0].headers.Authorization, 'Bearer stale-token');
+    assert.equal(calls[1].headers.Authorization, 'Bearer fresh-token');
+    assert.deepEqual(calls[1].body, calls[0].body, 'the same request body is re-sent');
+
+    // A second expiry answer is not retried again.
+    fetchImpl.reset(); tokenRequests.length = 0;
+    answers = [expired, { __status: 401, body: { code: 'PGRST301', message: 'JWT expired' } }];
+    await rejects(data.saveExerciseDraft('p1-e1', 'Title', { a: 1 }), (error) => assert.equal(error.code, 'PGRST301'));
+    assert.equal(fetchImpl.rpcCalls('save_activity_draft').length, 2, 'at most two attempts');
+
+    // The message form without the PostgREST code also counts as expiry.
+    fetchImpl.reset(); tokenRequests.length = 0;
+    answers = [{ __status: 401, body: { message: 'JWT expired' } }, { saved: true }];
+    await data.saveExerciseDraft('p1-e1', 'Title', { a: 1 });
+    assert.equal(fetchImpl.rpcCalls('save_activity_draft').length, 2);
+
+    // Other 401s, 403s, 400s and network failures are not retried.
+    for (const answer of [
+      { __status: 401, body: { code: 'PGRST302', message: 'Anonymous access is disabled' } },
+      { __status: 403, body: { code: '42501', message: 'not signed in' } },
+      { __status: 400, body: { code: '22023', message: 'bad input' } },
+      { __throw: new TypeError('Failed to fetch') }
+    ]) {
+      fetchImpl.reset(); tokenRequests.length = 0;
+      answers = [answer, { saved: true }];
+      await rejects(data.saveExerciseDraft('p1-e1', 'Title', { a: 1 }), () => {});
+      assert.equal(fetchImpl.rpcCalls('save_activity_draft').length, 1, `no retry for ${JSON.stringify(answer.body || 'network')}`);
+      assert.deepEqual(tokenRequests, [false]);
+    }
+  });
+
   // -- writes ---------------------------------------------------------------
 
   await check('saveUserProgress calls record_activity_submission with the deterministic key', async () => {
@@ -275,13 +322,20 @@ function check(name, fn) {
     assert.equal(fetchImpl.calls.length, 1, 'one call replaces three Firestore writes');
   });
 
-  await check('saveExerciseSubmission sends the page submission id', async () => {
+  await check('saveExerciseSubmission records a practice round, never a completion', async () => {
     const fetchImpl = fakeFetch();
     const data = makeData(fetchImpl);
     const result = await data.saveExerciseSubmission({ exerciseId: 'speak-like-obama', exerciseTitle: 'Speak', submissionId: 'practice-abc123', attemptNumber: 2, completedAtClient: '2026-01-01T00:00:00.000Z', durationSeconds: 30, responsePayload: { topic: 't' }, userId: 'u' });
-    const [call] = fetchImpl.rpcCalls('record_activity_submission');
+    const [call] = fetchImpl.rpcCalls('record_activity_practice');
+    assert.ok(call, 'the practice function is called');
+    assert.equal(fetchImpl.rpcCalls('record_activity_submission').length, 0, 'the completing function is not called');
     assertOnlyKeys(call.body, ['p_activity', 'p_submission_key', 'p_attempt_number', 'p_completed_at', 'p_duration_seconds', 'p_response', 'p_content_version'], 'args');
+    assert.equal(call.body.p_activity, 'speak-like-obama');
     assert.equal(call.body.p_submission_key, 'practice-abc123');
+    assert.equal(call.body.p_attempt_number, 2);
+    assert.equal(call.body.p_completed_at, '2026-01-01T00:00:00.000Z');
+    assert.equal(call.body.p_duration_seconds, 30);
+    assert.equal(call.body.p_content_version, '');
     assert.deepEqual(call.body.p_response, { topic: 't' });
     assert.deepEqual(result, { saved: true, submissionId: 'practice-abc123' });
     await rejects(data.saveExerciseSubmission({ exerciseId: 'x', submissionId: 'short' }), (error) => assert.equal(error.code, 'data/invalid-argument'));
@@ -462,6 +516,28 @@ function check(name, fn) {
     assertOnlyKeys(profile.body, ['displayName', 'goals', 'avatarIconId'], 'profile fields');
     assert.deepEqual(profile.body, { displayName: 'Zed', goals: 'Lead', avatarIconId: 'compass' });
     await rejects(data.updateMemberAccount({ name: 'Zed', avatarIconId: 'dragon' }), (error) => assert.match(error.message, /available avatars/));
+  });
+
+  await check('updateMyProfile sends photoUrl and feedbackEnabled only when valid', async () => {
+    const fetchImpl = fakeFetch();
+    const data = makeData(fetchImpl);
+    const photo = 'https://lh3.example.test/photo.jpg';
+    assert.deepEqual(await data.updateMyProfile({ photoUrl: photo, userId: 'u', displayName: undefined }), { saved: true, fields: ['photoUrl'] });
+    assert.deepEqual(await data.updateMyProfile({ feedbackEnabled: false }), { saved: true, fields: ['feedbackEnabled'] });
+    assert.deepEqual(await data.updateMyProfile({ photoUrl: '' }), { saved: true, fields: ['photoUrl'] }, 'an empty photo clears it');
+    const calls = fetchImpl.rpcCalls('update_my_profile');
+    assert.equal(calls.length, 3);
+    calls.forEach((call) => assertOnlyKeys(call.body, ['displayName', 'goals', 'avatarIconId', 'photoUrl', 'feedbackEnabled'], 'profile fields'));
+    assert.deepEqual(calls[0].body, { photoUrl: photo });
+    assert.ok(!('displayName' in calls[0].body), 'the display name is never sent at sign-in');
+    assert.deepEqual(calls[1].body, { feedbackEnabled: false });
+    assert.deepEqual(calls[2].body, { photoUrl: null });
+    fetchImpl.reset();
+    await rejects(data.updateMyProfile({ photoUrl: 'http://insecure.example.test/x.png' }), (error) => assert.equal(error.code, 'data/invalid-argument'));
+    await rejects(data.updateMyProfile({ photoUrl: 'https://x.test/' + 'a'.repeat(2000) }), (error) => assert.equal(error.code, 'data/invalid-argument'));
+    await rejects(data.updateMyProfile({ feedbackEnabled: 'yes' }), (error) => assert.equal(error.code, 'data/invalid-argument'));
+    await rejects(data.updateMyProfile({ unknown: 1 }), (error) => assert.equal(error.code, 'data/invalid-argument'));
+    assert.equal(fetchImpl.calls.length, 0, 'invalid fields never reach the network');
   });
 
   // -- reads ----------------------------------------------------------------

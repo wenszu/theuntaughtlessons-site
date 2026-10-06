@@ -137,7 +137,8 @@ await rejectsAs('activityId over 100 chars rejected', 'authenticated', 'fb_alice
 await rejectsAs('activityTitle over 160 chars rejected', 'authenticated', 'fb_alice', `select record_engagement_session('session', ${j({ ...session, activityTitle: 'x'.repeat(161) })})`, 'activityTitle');
 await rejectsAs('videoId over 40 chars rejected', 'authenticated', 'fb_alice', `select record_engagement_session('session', ${j({ ...session, videoId: 'x'.repeat(41) })})`, 'videoId');
 await rejectsAs('videoMaxPercent over 100 rejected', 'authenticated', 'fb_alice', `select record_engagement_session('session', ${j({ ...session, videoMaxPercent: 101 })})`, 'videoMaxPercent');
-await rejectsAs('six milestones rejected', 'authenticated', 'fb_alice', `select record_engagement_session('session', ${j({ ...session, videoMilestones: [25, 50, 75, 80, 90, 100] })})`, 'videoMilestones');
+// The limit was raised from 5 to 6 in migration 1900 (the site can build 6 values); seven is still refused.
+await rejectsAs('seven milestones rejected', 'authenticated', 'fb_alice', `select record_engagement_session('session', ${j({ ...session, videoMilestones: [25, 50, 75, 80, 90, 100, 100] })})`, 'videoMilestones');
 await rejectsAs('odd milestone value rejected', 'authenticated', 'fb_alice', `select record_engagement_session('session', ${j({ ...session, videoMilestones: [33] })})`, 'videoMilestones');
 await rejectsAs('milestones must be a list', 'authenticated', 'fb_alice', `select record_engagement_session('session', ${j({ ...session, videoMilestones: 'all' })})`, 'videoMilestones');
 await rejectsAs('bad timestamp rejected', 'authenticated', 'fb_alice', `select record_engagement_session('session', ${j({ ...session, startedAtClient: 'yesterday-ish' })})`, 'startedAtClient');

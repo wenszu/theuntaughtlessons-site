@@ -44,8 +44,8 @@ const ENGAGEMENT_EVENT_NAMES = [
   "completed", "video_progress", "video_completed"
 ];
 const VIDEO_MILESTONES = [25, 50, 75, 80, 90, 100];
-// record_engagement_session accepts at most 5 milestones (firestore.rules had the same limit).
-const VIDEO_MILESTONE_LIMIT = 5;
+// record_engagement_session accepts at most 6 milestones (one per value the site can build).
+const VIDEO_MILESTONE_LIMIT = 6;
 
 // Keys accepted by add_reward_entries for one ledger entry and for the state object.
 const REWARD_ENTRY_KEYS = [
@@ -75,7 +75,10 @@ const EVIDENCE_KEYS = [
   "recordedAtClient", "learningDimensions", "capabilities", "performance", "measurementDesign"
 ];
 const SUMMARY_KEYS = ["schemaVersion", "personality", "learning", "programs"];
-const PROFILE_KEYS = ["displayName", "goals", "avatarIconId"];
+// Keys accepted by update_my_profile. photoUrl is https only (up to 2000 characters, empty or null
+// clears it); feedbackEnabled is a boolean or null.
+const PROFILE_KEYS = ["displayName", "goals", "avatarIconId", "photoUrl", "feedbackEnabled"];
+const PHOTO_URL_MAX = 2000;
 
 // ---------------------------------------------------------------------------
 // Errors
@@ -107,6 +110,13 @@ function isPermanentError(error) {
 
 function invalidArgument(message) {
   return new SupabaseDataError(message, { code: "data/invalid-argument" });
+}
+
+// True only for the one case a fresh token fixes: PostgREST refused the request (401) because the
+// Firebase ID token had expired (code PGRST301 or a "JWT expired" message).
+function isExpiredTokenError(error) {
+  if (!error || Number(error.status) !== 401) return false;
+  return String(error.code || "") === "PGRST301" || /JWT expired/i.test(String(error.message || ""));
 }
 
 // ---------------------------------------------------------------------------
@@ -706,23 +716,26 @@ function createSupabaseData(context = {}) {
   if (typeof getIdToken !== "function") throw new Error("createSupabaseData needs getIdToken().");
   if (typeof fetchImpl !== "function") throw new Error("createSupabaseData needs fetchImpl in this environment.");
 
-  async function currentToken() {
+  // getIdToken(forceRefresh): true asks Firebase for a fresh token (used once, after an expiry answer).
+  async function currentToken(forceRefresh = false) {
     try {
-      const token = await getIdToken();
+      const token = await getIdToken(forceRefresh === true);
       return token ? String(token) : "";
     } catch (error) {
       return "";
     }
   }
 
-  async function requireToken() {
-    const token = await currentToken();
+  async function requireToken(forceRefresh = false) {
+    const token = await currentToken(forceRefresh);
     if (!token) throw new SupabaseDataError("Your sign-in session is no longer active.", { code: "auth/no-user" });
     return token;
   }
 
-  async function request(method, path, body) {
-    const token = await requireToken();
+  // An expired token is retried exactly once with a refreshed token (attempt 1); every other failure
+  // is thrown to the caller as it is.
+  async function request(method, path, body, attempt = 0) {
+    const token = await requireToken(attempt > 0);
     const headers = {
       apikey: publishableKey,
       Authorization: `Bearer ${token}`,
@@ -741,14 +754,16 @@ function createSupabaseData(context = {}) {
       try { data = JSON.parse(raw); } catch (error) { data = null; }
     }
     if (!response.ok) {
-      const body = isPlainObject(data) ? data : {};
+      const answer = isPlainObject(data) ? data : {};
       // The server message names the field and rule; it never echoes the payload.
-      throw new SupabaseDataError(body.message || `The data service answered ${response.status}.`, {
-        code: body.code || `http/${response.status}`,
+      const error = new SupabaseDataError(answer.message || `The data service answered ${response.status}.`, {
+        code: answer.code || `http/${response.status}`,
         status: response.status,
-        details: body.details || null,
-        hint: body.hint || null
+        details: answer.details || null,
+        hint: answer.hint || null
       });
+      if (attempt === 0 && isExpiredTokenError(error)) return request(method, path, body, 1);
+      throw error;
     }
     return data;
   }
@@ -818,12 +833,13 @@ function createSupabaseData(context = {}) {
     return { saved: true };
   }
 
-  // Note: record_activity_submission also marks the activity completed. Pages that store practice
-  // rounds through this function (speak-like-obama) will now complete the exercise in Supabase.
+  // Practice rounds (speak-like-obama is the only caller). record_activity_practice stores the
+  // submission and marks the activity in_progress; it never completes it. Completion still comes
+  // only from saveUserProgress (record_activity_submission).
   async function saveExerciseSubmission(submissionPayload = {}) {
     if (previewActive()) return { preview: true, saved: false };
     const args = buildExplicitSubmissionArgs(submissionPayload);
-    await rpc("record_activity_submission", args);
+    await rpc("record_activity_practice", args);
     return { saved: true, submissionId: args.p_submission_key };
   }
 
@@ -922,11 +938,11 @@ function createSupabaseData(context = {}) {
     return { saved: true, marked: plan.marks.length, skipped: plan.skipped, rewards };
   }
 
-  // Login audit only. The users/{uid} document fields (email, displayName, photoURL, role, lastSeenAt,
-  // feedbackEnabled) and the authorized_members member and role logic are out of scope here.
-  // TODO (page switch): decide where displayName, photoURL and feedbackEnabled live; update_my_profile
-  // accepts displayName but overwriting people.display_name on every sign-in is not what the member
-  // record does today. The token refresh for new accounts stays in assets/firebase.js.
+  // Login audit only. The users/{uid} document (email, displayName, role, lastSeenAt) and the
+  // authorized_members member and role logic stay in assets/firebase.js, which in supabase mode also
+  // sends the provider photo and, for a new account, the feedback setting through updateMyProfile.
+  // The display name is never written at sign-in. The token refresh for new accounts stays in
+  // assets/firebase.js as well.
   async function saveUserProfile(user, member = {}, signInProvider = "") {
     if (!user || !user.uid) return undefined;
     const provider = SIGN_IN_PROVIDERS.includes(signInProvider) ? signInProvider : "";
@@ -934,6 +950,26 @@ function createSupabaseData(context = {}) {
     // record_login needs a provider; with none known the login time is not recorded.
     if (provider) login = await rpc("record_login", { p_provider: provider }) || null;
     return { saved: Boolean(login), provider, firstLogin: login ? login.firstLogin === true : false };
+  }
+
+  // One update_my_profile call with only the keys the function accepts. photoUrl must be https (an
+  // empty string or null clears it); feedbackEnabled must be a boolean or null. Anything else is a
+  // local error, so the database never sees an invalid value.
+  async function updateMyProfile(fields = {}) {
+    const picked = pickKeys(fields, PROFILE_KEYS);
+    if (Object.prototype.hasOwnProperty.call(picked, "photoUrl")) {
+      const photoUrl = picked.photoUrl == null ? "" : String(picked.photoUrl).trim();
+      if (photoUrl && (!photoUrl.startsWith("https://") || photoUrl.length > PHOTO_URL_MAX)) {
+        throw invalidArgument("photoUrl must be an https address of up to 2000 characters.");
+      }
+      picked.photoUrl = photoUrl || null;
+    }
+    if (Object.prototype.hasOwnProperty.call(picked, "feedbackEnabled") && picked.feedbackEnabled !== null && typeof picked.feedbackEnabled !== "boolean") {
+      throw invalidArgument("feedbackEnabled must be true, false or null.");
+    }
+    if (!Object.keys(picked).length) throw invalidArgument("updateMyProfile needs at least one profile field.");
+    await rpc("update_my_profile", picked);
+    return { saved: true, fields: Object.keys(picked) };
   }
 
   // The three fields a member may change (goals, avatar, name). Same checks as assets/firebase.js.
@@ -1011,6 +1047,7 @@ function createSupabaseData(context = {}) {
     saveMemberRewards,
     saveMemberWorkspaceProgress,
     saveUserProfile,
+    updateMyProfile,
     updateMemberAccount,
     getMemberWorkspaceProgress,
     getExerciseWork,
@@ -1025,6 +1062,7 @@ export {
   createSupabaseData,
   SupabaseDataError,
   isPermanentError,
+  isExpiredTokenError,
   pickKeys,
   stripReservedKeys,
   chunk,

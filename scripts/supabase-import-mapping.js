@@ -852,7 +852,27 @@ function buildPlan(snapshot, catalog, options = {}) {
       }));
     });
     const stored = Number(rewards.mpTotal || rewards.masteryPoints || 0);
-    if (stored !== sum) warn(`users/${uid}: stored mpTotal ${stored} differs from ledger sum ${sum}`);
+    if (stored !== sum) {
+      // Site code keeps the larger of the stored total and the ledger sum. Supabase totals are the ledger sum, so
+      // when the stored total is higher the difference becomes one ledger entry and nobody loses points. A ledger
+      // sum above the stored total needs nothing. The entry key is fixed, so a rerun never adds a second one.
+      const gap = Math.min(stored - sum, 100000);
+      const adjusted = gap > 0;
+      if (adjusted) {
+        rows("reward_ledger").push(stamp({
+          id: uuidFor(`reward:${uid}:legacy-adjustment`),
+          person_id: person.id,
+          program_id: PROGRAM_TSA,
+          entry_key: "legacy-adjustment",
+          points: gap,
+          reason: "Adjustment so the total matches the Firestore total at import",
+          activity_id: null,
+          earned_at: importDate,
+          source: { type: "legacy-adjustment", storedTotal: stored, ledgerSum: sum }
+        }));
+      }
+      warn(`users/${uid}: stored mpTotal ${stored} differs from ledger sum ${sum}${adjusted ? `; added a legacy-adjustment entry of ${gap}` : "; ledger sum is higher, nothing added"}`);
+    }
     const streak = rewards.streak && typeof rewards.streak === "object" ? rewards.streak : {};
     rows("reward_state").push(stamp({
       person_id: person.id,
