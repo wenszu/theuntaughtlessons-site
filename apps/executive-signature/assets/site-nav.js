@@ -101,6 +101,7 @@ export function initReadinessNav({ mount, title, backLinks = [], secondaryLinks 
       userMount.hidden = true;
       window.__raAccountIdentity = null;
       window.__raAccountReadiness = null;
+      window.__raIsTsaMember = null;
       window.dispatchEvent(new CustomEvent('ra:account-readiness'));
       return;
     }
@@ -127,10 +128,12 @@ export function initReadinessNav({ mount, title, backLinks = [], secondaryLinks 
       email: user.email || '',
       name: name || user.displayName || ''
     };
-    window.dispatchEvent(new CustomEvent('ra:account-readiness'));
     // TSA access authority is authorized_members, not a field on the users doc,
     // so this asks the same getMyWorkspaces callable the member portal's own
     // nav uses to decide whether to show its Executive Signature workspace link.
+    // Resolved before the readiness event fires, so a listener reading
+    // window.__raIsTsaMember synchronously on that event always sees the
+    // current value rather than a stale one from the previous signed-in user.
     let isTsaMember = false;
     try {
       const workspaces = await getMyWorkspaces();
@@ -138,6 +141,8 @@ export function initReadinessNav({ mount, title, backLinks = [], secondaryLinks 
     } catch (error) {
       isTsaMember = false;
     }
+    window.__raIsTsaMember = isTsaMember;
+    window.dispatchEvent(new CustomEvent('ra:account-readiness'));
     const email = user.email || '';
     const avatar = avatarMarkup(name, email, user.photoURL || '');
     userMount.hidden = false;

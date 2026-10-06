@@ -194,6 +194,11 @@ button{cursor:pointer}
 .bucket-gold .bucket-label{color:var(--harvest)}
 .bucket-steel .bucket-label{color:#4D7094}
 @media(max-width:640px){.bucket-groups{grid-template-columns:1fr}}
+.tsa-choice-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:18px 0}
+.tsa-choice-card{background:var(--sunk);border:1px solid var(--line);border-radius:12px;padding:20px;display:flex;flex-direction:column;gap:10px}
+.tsa-choice-card h3{margin:0;font-size:19px}
+.tsa-choice-card .btn{margin-top:auto;width:100%}
+@media(max-width:640px){.tsa-choice-grid{grid-template-columns:1fr}}
 .detail-list li{margin-bottom:8px;color:var(--ink2)}
 .snapshot-list{list-style:none;margin:14px 0 0;padding:14px 16px;background:rgba(255,255,255,.1);border-radius:10px;display:flex;flex-direction:column;gap:6px}
 .snapshot-list li{color:rgba(255,255,255,.92);font-size:14px}
@@ -617,6 +622,25 @@ svg text{fill:var(--ink3);font-family:var(--sans);font-size:11px}
       <div class="row" id="landingPrimaryActions">
         <button class="btn primary" id="startBtn">Find your Executive Signature</button>
       </div>
+      <div id="landingTsaChoiceActions" hidden>
+        <p class="lede" style="margin-bottom:10px">As a TSA member, you have access to both the quick check and the full assessment. You can take them in any order.</p>
+        <div class="tsa-choice-grid">
+          <div class="tsa-choice-card">
+            <p class="eyebrow">Quick check</p>
+            <h3>The 5-minute read</h3>
+            <p class="muted">20 statements about how you work. See your profile and one area to grow, instantly on screen.</p>
+            <div class="facts"><span>20 questions</span><span>About 4 minutes</span></div>
+            <button class="btn primary" id="tsaStartQuickBtn" type="button">Start the quick check</button>
+          </div>
+          <div class="tsa-choice-card">
+            <p class="eyebrow">Full assessment</p>
+            <h3>The full facet-level report</h3>
+            <p class="muted">40 statements, 10 specific traits. Confirms your profile and names your top two strengths and top two growth edges.</p>
+            <div class="price-tag" id="tsaFullPriceTag"></div>
+            <button class="btn gold" id="tsaStartFullBtn" type="button">Start the full assessment</button>
+          </div>
+        </div>
+      </div>
       <div class="row" id="landingReturnActions" hidden>
         <button class="btn primary" id="seeResultBtn">See your result</button>
         <button class="btn link" id="retakeBtn">Take it again</button>
@@ -702,7 +726,7 @@ svg text{fill:var(--ink3);font-family:var(--sans);font-size:11px}
       <p class="muted">The full report is a separate 40-statement assessment, selected from an established 120-item public-domain measure. It looks at 10 more specific traits and confirms your profile, your top two strengths and your top two growth edges.</p>
       <div class="price-tag"><span class="price-was">$9.95</span><span class="price-now">Free</span><span class="price-note">while we are testing this</span></div>
       <p class="muted">We are not charging for the full report yet. Once purchases open, it will be a one-time digital sale with no refunds. <a href="research/">Read about the research →</a></p>
-      <div class="row"><button class="btn primary" id="fullIntroStart">Start the 40 statements</button><button class="btn link" id="fullIntroBack">Back to your quick check result</button></div>
+      <div class="row"><button class="btn primary" id="fullIntroStart">Start the 40 statements</button><button class="btn link" id="fullIntroBack">Back</button></div>
     </div>
 
     <div id="t-full-q" class="card qcard" hidden>
@@ -1007,7 +1031,9 @@ function signedInParticipant(){
   const nameParts=identity.name.trim().split(/\s+/);
   return {firstName:nameParts.shift()||'',lastName:nameParts.join(' '),email:identity.email,invited:false};
 }
-function beginParticipantFlow(){
+let participantTier='free';
+function beginParticipantFlow(tier='free'){
+  participantTier=tier;
   const signedIn=signedInParticipant();
   if(!signedIn){setInviteMode(false);go('t-details');return}
   participant=signedIn;
@@ -1031,13 +1057,29 @@ function beginParticipantFlow(){
   $('#regionIn').value='';
   go('t-background');
 }
-$('#startBtn').onclick=beginParticipantFlow;
+$('#startBtn').onclick=()=>beginParticipantFlow('free');
+$('#tsaStartQuickBtn').onclick=()=>beginParticipantFlow('free');
+$('#tsaStartFullBtn').onclick=()=>beginParticipantFlow('full');
 $('#invitePreviewBtn').onclick=()=>{setInviteMode(true);$('#firstNameIn').value='Andrea';$('#lastNameIn').value='Reyes';$('#orgIn').value='Harbor Logistics';go('t-details')};
 function hasSavedCompleteAttempt(){
   let saved=null;
   try{saved=JSON.parse(sessionStorage.getItem(ACTIVE_ATTEMPT_KEY)||'null')}catch(error){saved=null}
   if(!saved||saved.formVersion!==FREE_FORM_VERSION||!window.READINESS_FORMS.validateAttempt(saved))return false;
   return saved.itemOrder.every(id=>saved.answers&&saved.answers[id]!=null);
+}
+function esFullPriceInfo(){
+  const esPriceSetting=window.__raPaymentSettings&&window.__raPaymentSettings.enabled&&window.__raPaymentSettings.prices&&window.__raPaymentSettings.prices['executive-signature'];
+  // A price of exactly 0 means the admin deliberately kept this program free
+  // while the master toggle is on for other programs, so it is treated the
+  // same as payments being off for Executive Signature specifically: no
+  // Stripe checkout, normal free flow.
+  const paymentsOn=Boolean(esPriceSetting&&esPriceSetting.amountCents>0);
+  const esPrice=paymentsOn?esPriceSetting:null;
+  const esPriceLabel=esPrice?'$'+(esPrice.amountCents/100).toFixed(2):'$9.95';
+  const priceTag=paymentsOn?`<span class="price-now">${esPriceLabel}</span><span class="price-note">one-time, no subscription</span>`:`<span class="price-was">$9.95</span><span class="price-now">Free</span><span class="price-note">while we are testing this</span>`;
+  const priceNote=paymentsOn?'This is a one-time digital purchase with no refunds.':'Once purchases open, it will be a one-time digital sale with no refunds.';
+  const ctaLabel=paymentsOn?`Buy the full report, ${esPriceLabel}`:'Get the full report, free for now';
+  return {paymentsOn,esPriceLabel,priceTag,priceNote,ctaLabel};
 }
 function refreshLandingState(){
   const already=hasSavedCompleteAttempt();
@@ -1076,14 +1118,33 @@ function renderAccountResultNotice(status){
     note.hidden=true;
   }
 }
+// Only for a signed-in TSA member who has never touched Executive Signature at
+// all (neither tier, on any device): offers both tiers side by side instead of
+// funneling them through the Quick-Check-first flow built for a cold visitor.
+// Anyone with an existing result keeps seeing the normal single-button landing
+// plus the "you already completed..." note above, same as before.
+function refreshTsaChoiceState(status){
+  const choice=$('#landingTsaChoiceActions');
+  if(!choice)return;
+  const assessments=status&&status.assessments;
+  const everTaken=Boolean(assessments&&(assessments['quick-check']||assessments['full-assessment']));
+  const show=window.__raIsTsaMember===true&&!everTaken&&!hasSavedCompleteAttempt();
+  choice.hidden=!show;
+  if(show){
+    $('#landingPrimaryActions').hidden=true;
+    $('#tsaFullPriceTag').innerHTML=esFullPriceInfo().priceTag;
+  }
+}
 window.addEventListener('ra:account-readiness',async()=>{
-  if(!window.__raAccountIdentity||typeof window.raGetMyEsStatus!=='function'){renderAccountResultNotice(null);return}
+  if(!window.__raAccountIdentity||typeof window.raGetMyEsStatus!=='function'){renderAccountResultNotice(null);refreshTsaChoiceState(null);return}
   try{
     const status=await window.raGetMyEsStatus();
     renderAccountResultNotice(status);
+    refreshTsaChoiceState(status);
   }catch(error){
     console.error('Could not load your Executive Signature status',error);
     renderAccountResultNotice(null);
+    refreshTsaChoiceState(null);
   }
 });
 $('#seeResultBtn').onclick=()=>{startOrResumeAttempt(false,true);renderResult();go('t-result')};
@@ -1103,7 +1164,11 @@ $('#t-background').addEventListener('submit',e=>{
 });
 $('#consentBack').onclick=()=>go('t-background');
 $('#consentIn').onchange=e=>$('#consentBtn').disabled=!e.target.checked;
-$('#t-consent').addEventListener('submit',e=>{e.preventDefault();participant.assessmentConsent=true;participant.marketingConsent=$('#updatesIn').checked;startOrResumeAttempt(false);go('t-intro')});
+$('#t-consent').addEventListener('submit',e=>{
+  e.preventDefault();participant.assessmentConsent=true;participant.marketingConsent=$('#updatesIn').checked;
+  if(participantTier==='full'){startOrResumeFullAttempt(false);go('t-full-intro');return}
+  startOrResumeAttempt(false);go('t-intro');
+});
 $('#introBack').onclick=()=>go('t-consent');
 $('#introStart').onclick=()=>{if(!activeAttempt)startOrResumeAttempt(false);qaTiming.startedAt=activeAttempt.startedAt;renderQ();go('t-q')};
 $('#sampleBtn').onclick=()=>{participant={firstName:'Andrea',lastName:'Reyes',email:'andrea@example.com',ageRange:'35–44',careerStage:'People manager',primaryGoal:'Prepare for an executive role',organization:'',jobTitle:'',region:'Philippines',invited:false,assessmentConsent:true,marketingConsent:false};pname='Andrea';startOrResumeAttempt(true);answers={};const targets={Conscientiousness:[3,3,3,2],Neuroticism:[3,3,3,4],Intellect:[3,3,3,3]},seen={};ITEMS.forEach(it=>{if(targets[it.domain]){const n=seen[it.domain]||0,e=targets[it.domain][n];seen[it.domain]=n+1;answers[it.id]=it.key==='+'?e:6-e}else answers[it.id]=it.sample});saveActiveAttempt();renderResult();go('t-result')};
@@ -1294,18 +1359,8 @@ function renderResult(){
     <div class="field"><label for="fbText">Which part felt off? (optional)</label><textarea id="fbText" rows="2"></textarea></div>
     <div><button class="btn primary" id="fbSend">Send feedback</button></div></div>
   <div class="card next">${fullReportLocation()!=='none'?`<h3>You already have a full facet-level report</h3><p>You completed the separate 40-statement assessment. Open it again any time, no need to retake it.</p><div class="row"><button class="btn gold" id="getFullReportBtn">See your full report</button><a class="btn" style="background:transparent;color:inherit;border-color:currentColor" href="../../programs.html" target="_blank" rel="noopener">Join the TSA waitlist</a></div>`:(()=>{
-    const esPriceSetting=window.__raPaymentSettings&&window.__raPaymentSettings.enabled&&window.__raPaymentSettings.prices&&window.__raPaymentSettings.prices['executive-signature'];
-    // A price of exactly 0 means the admin deliberately kept this program free
-    // while the master toggle is on for other programs, so it is treated the
-    // same as payments being off for Executive Signature specifically: no
-    // Stripe checkout, normal free flow.
-    const paymentsOn=Boolean(esPriceSetting&&esPriceSetting.amountCents>0);
-    const esPrice=paymentsOn?esPriceSetting:null;
-    const esPriceLabel=esPrice?'$'+(esPrice.amountCents/100).toFixed(2):'$9.95';
-    const priceTag=paymentsOn?`<span class="price-now">${esPriceLabel}</span><span class="price-note">one-time, no subscription</span>`:`<span class="price-was">$9.95</span><span class="price-now">Free</span><span class="price-note">while we are testing this</span>`;
-    const priceNote=paymentsOn?'This is a one-time digital purchase with no refunds.':'Once purchases open, it will be a one-time digital sale with no refunds.';
-    const ctaLabel=paymentsOn?`Buy the full report, ${esPriceLabel}`:'Get the full report, free for now';
-    return `<h3>Want the full facet-level report?</h3><p>The full report is a separate 40-statement assessment selected from an established 120-question personality measure that examines more specific traits. Researchers know the full measure as the IPIP-NEO-120. It looks at 10 more specific traits, confirms your profile and names your top two strengths and top two growth edges.</p><div class="price-tag">${priceTag}</div><p class="small muted">${priceNote}</p><div class="row"><button class="btn gold" id="getFullReportBtn">${esc(ctaLabel)}</button><a class="btn" style="background:transparent;color:inherit;border-color:currentColor" href="../../programs.html" target="_blank" rel="noopener">Join the TSA waitlist</a></div>`;
+    const price=esFullPriceInfo();
+    return `<h3>Want the full facet-level report?</h3><p>The full report is a separate 40-statement assessment selected from an established 120-question personality measure that examines more specific traits. Researchers know the full measure as the IPIP-NEO-120. It looks at 10 more specific traits, confirms your profile and names your top two strengths and top two growth edges.</p><div class="price-tag">${price.priceTag}</div><p class="small muted">${price.priceNote}</p><div class="row"><button class="btn gold" id="getFullReportBtn">${esc(price.ctaLabel)}</button><a class="btn" style="background:transparent;color:inherit;border-color:currentColor" href="../../programs.html" target="_blank" rel="noopener">Join the TSA waitlist</a></div>`;
   })()}</div>
   ${new URLSearchParams(location.search).get('debug')==='1'?`<details class="db"><summary>Developer preview: saved record</summary><pre>${esc(JSON.stringify(record,null,2))}</pre></details>`:''}
   <div class="row"><button class="btn" id="again">Take it again</button></div>`;
@@ -1327,8 +1382,7 @@ function renderResult(){
     const loc=fullReportLocation();
     if(loc==='local'){if(!fullActiveAttempt)startOrResumeFullAttempt(false,true);renderFullResult();go('t-full-result');return}
     if(loc==='account'){goToMyResults();return}
-    const esPriceSetting=window.__raPaymentSettings&&window.__raPaymentSettings.enabled&&window.__raPaymentSettings.prices&&window.__raPaymentSettings.prices['executive-signature'];
-    const paymentsOn=Boolean(esPriceSetting&&esPriceSetting.amountCents>0);
+    const paymentsOn=esFullPriceInfo().paymentsOn;
     if(paymentsOn){
       const btn=$('#getFullReportBtn');
       const originalLabel=btn.textContent;
@@ -1412,7 +1466,11 @@ $('#fullIntroBack').onclick=()=>{
   const loc=fullReportLocation();
   if(loc==='local'){if(!fullActiveAttempt)startOrResumeFullAttempt(false,true);renderFullResult();go('t-full-result');return}
   if(loc==='account'){goToMyResults();return}
-  go('t-result');
+  // A member who started the full assessment directly from the TSA chooser,
+  // without taking the quick check first, has no quick-check result to go
+  // back to, so send them to the landing page instead of a broken t-result.
+  if(hasSavedCompleteAttempt()){go('t-result');return}
+  go('t-landing');
 };
 $('#fullIntroStart').onclick=()=>{
   if(!fullActiveAttempt)startOrResumeFullAttempt(false);
