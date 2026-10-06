@@ -15,6 +15,8 @@ const vm = require("vm");
 const root = path.resolve(__dirname, "..");
 const OUT = path.join(root, "supabase", "seed", "activities.json");
 const PROGRAM_ID = "tsa";
+// Exercises with no save call in their app code (checked 2026-10-06): their completion lives in the browser only.
+const SELF_REPORTED = new Set(["p3-e2", "p3-e3", "p3-e4"]);
 
 // Takes the object literal assigned to `const <name> = {` and evaluates it on its own.
 function extractObjectLiteral(source, name) {
@@ -87,7 +89,10 @@ function build() {
           estimatedMinutes: Number(exercise.estimatedMinutes || 0),
           type: exercise.type || "",
           appUrl: exercise.appUrl || "",
-          appKey: appKey ? appKey[1] : ""
+          appKey: appKey ? appKey[1] : "",
+          // These exercises save no answer to the database, so the learner's own "mark complete" is the only
+          // completion signal. mark_activity_progress may complete exercises carrying this flag and no others.
+          ...(SELF_REPORTED.has(exercise.id) ? { selfReported: true } : {})
         }
       });
       if (appKey) addKey(appKey[1], exercise.id);

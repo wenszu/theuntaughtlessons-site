@@ -572,7 +572,8 @@
         "estimatedMinutes": 25,
         "type": "Difficult conversation",
         "appUrl": "../apps/i-have-bad-news/index.html",
-        "appKey": "i-have-bad-news"
+        "appKey": "i-have-bad-news",
+        "selfReported": true
       }
     },
     {
@@ -600,7 +601,8 @@
         "estimatedMinutes": 20,
         "type": "Perspective taking",
         "appUrl": "../apps/lets-switch-hats/index.html",
-        "appKey": "lets-switch-hats"
+        "appKey": "lets-switch-hats",
+        "selfReported": true
       }
     },
     {
@@ -628,7 +630,8 @@
         "estimatedMinutes": 25,
         "type": "Executive presence",
         "appUrl": "../apps/speak-like-obama/index.html",
-        "appKey": "speak-like-obama"
+        "appKey": "speak-like-obama",
+        "selfReported": true
       }
     },
     {
