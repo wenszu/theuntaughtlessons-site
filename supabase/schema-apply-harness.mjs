@@ -13,7 +13,13 @@ export async function boot() {
     grant execute on function auth.jwt() to anon, authenticated;
   `);
   const dir = new URL('./migrations/', import.meta.url).pathname;
-  for (const f of fs.readdirSync(dir).sort()) {
+  // Optional isolation for work in progress: UTL_BASE_ONLY=<14 digit version> loads only migrations up to that
+  // version, plus any whose name starts with an entry of UTL_EXTRA_MIGRATIONS (comma separated).
+  const base = process.env.UTL_BASE_ONLY;
+  const extra = (process.env.UTL_EXTRA_MIGRATIONS || '').split(',').filter(Boolean);
+  let files = fs.readdirSync(dir).sort();
+  if (base) files = files.filter((f) => f.slice(0, 14) <= base || extra.some((e) => f.startsWith(e)));
+  for (const f of files) {
     try { await db.exec(fs.readFileSync(dir + f, 'utf8')); console.log('ok  ', f); }
     catch (e) { console.log('FAIL', f, '\n  ', e.message); return { db, failed: f }; }
   }
