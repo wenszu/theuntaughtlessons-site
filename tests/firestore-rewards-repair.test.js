@@ -50,4 +50,16 @@ assert.equal(again.missingIds.length, 64);
 assert.equal(planRepair({ mpTotal: 5 }, ids), null);
 assert.equal(planRepair(null, ids), null);
 
+// --set-level: only the level the total earns is accepted, and only the two level fields change.
+const wrongLevel = Object.assign({}, plan.next, { mpTotal: 2612, masteryPoints: 2612, level: "Intern", currentLevel: "Intern", ledger: plan.next.ledger.concat([{ id: "daily-streak:2026-10-07", mpEarned: 5 }]) });
+const fix = planRepair(wrongLevel, ids, { setLevel: "Executive" });
+assert.equal(fix.total, 2612);
+assert.equal(fix.next.level, "Executive");
+assert.equal(fix.next.currentLevel, "Executive");
+assert.equal(fix.next.tokens, 3);
+assert.equal(fix.removedCount, 0);
+assert.throws(() => planRepair(wrongLevel, ids, { setLevel: "Intern" }), /does not match 2612 points/);
+assert.throws(() => planRepair(wrongLevel, ids, { setLevel: "Principal" }), /does not match/);
+assert.equal(planRepair(wrongLevel, ids).next.level, "Intern", "without the option the level is left alone");
+
 console.log("firestore-rewards-repair: checks passed");
