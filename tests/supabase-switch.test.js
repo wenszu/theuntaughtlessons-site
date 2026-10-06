@@ -361,6 +361,37 @@ async function check(name, fn) {
     assert.equal(server.storage.utl_data_source, 'firebase');
   });
 
+  let pageLoadCount = 0;
+  const loadFresh = async (options) => {
+    harness.reset();
+    Object.entries(options.storage || {}).forEach(([key, value]) => harness.storage.setItem(key, value));
+    harness.signIn({});
+    seedFirestore(harness, options.seedOptions || {});
+    pageLoadCount += 1;
+    await harness.loadFirebaseModule(FIREBASE_SOURCE, `firebase-pageload-${pageLoadCount}`);
+    await harness.flush();
+    return { storage: harness.storage.snapshot(), serverReads: harness.firestoreLog().filter((call) => call.op === 'getDocFromServer') };
+  };
+
+  await check('the gate also settles at page load, from the server, without a sign-in step', async () => {
+    const granted = await loadFresh({ storage: { utl_data_pending: 'supabase' }, seedOptions: { tester: true } });
+    assert.equal(granted.storage.utl_data_source, 'supabase');
+    assert.equal(granted.storage.utl_data_pending, undefined);
+    assert.equal(granted.serverReads.length, 1);
+    assert.ok(/-> supabase \(supabaseTester is true\)/.test(granted.storage.utl_data_gate_last));
+    const revoked = await loadFresh({ storage: { utl_data_source: 'supabase' } });
+    assert.equal(revoked.storage.utl_data_source, 'firebase');
+    assert.equal(revoked.serverReads.length, 1);
+  });
+
+  await check('page load: a browser with no request and no active switch makes no extra read', async () => {
+    const plain = await loadFresh({ storage: {} });
+    assert.equal(plain.serverReads.length, 0);
+    assert.equal(plain.storage.utl_data_source, undefined);
+    const off = await loadFresh({ storage: { utl_data_source: 'firebase' } });
+    assert.equal(off.serverReads.length, 0);
+  });
+
   await check('the gate: every change of the switch prints one console line with the reason and no personal data', async () => {
     const lines = [];
     const original = console.info;

@@ -118,6 +118,13 @@ export async function getDoc(ref) {
   h().maybeFail('getDoc', ref.path);
   return snapshot(ref.path);
 }
+export async function getDocFromServer(ref) {
+  h().record({ sdk: 'firestore', op: 'getDocFromServer', path: ref.path });
+  h().maybeFail('getDocFromServer', ref.path);
+  const snap = snapshot(ref.path);
+  snap.metadata = { fromCache: false, hasPendingWrites: false };
+  return snap;
+}
 export async function getDocs(target) {
   const constraints = target.constraints || [];
   h().record({ sdk: 'firestore', op: 'getDocs', path: target.path, constraints: h().clone(constraints) });

@@ -25,6 +25,7 @@ import {
   deleteDoc,
   doc,
   getDoc,
+  getDocFromServer,
   getDocs,
   getFirestore,
   limit,
@@ -435,6 +436,24 @@ if (useLocalFirebaseEmulators) {
   connectFunctionsEmulator(functions, "127.0.0.1", 5001);
   console.log("⚡ Connected to local Firebase Emulators");
 }
+
+// The gate also settles at every page load, not only at sign-in: a browser that holds a pending request
+// or an active switch asks the server (never the cache) for the member record once the signed-in user is
+// known. Browsers with no request and no active switch do nothing here, so the default page load is
+// unchanged. A failed or offline read changes nothing.
+async function settleDataSourceAtPageLoad() {
+  try {
+    const storage = window.localStorage;
+    if (storage.getItem(DATA_SOURCE_PENDING_KEY) !== "supabase" && storage.getItem(DATA_SOURCE_KEY) !== "supabase") return;
+    const user = await getSignedInUser();
+    const email = user && user.email ? String(user.email).trim().toLowerCase() : "";
+    if (!email) return;
+    applyDataSourceGate(await getDocFromServer(doc(db, "authorized_members", email)));
+  } catch {
+    // Offline, signed out or denied: the switch stays as it was.
+  }
+}
+settleDataSourceAtPageLoad();
 
 async function runAdminAction(action, payload = {}) {
   const callable = httpsCallable(functions, "runAdminAction");
