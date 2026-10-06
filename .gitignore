@@ -15,3 +15,6 @@ functions/.runtimeconfig.json
 *.key
 secrets/
 node_modules/
+
+# Local backups written by scripts/firestore-rewards-repair.js (contain member data)
+rewards-backup-*.json
