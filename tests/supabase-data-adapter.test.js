@@ -158,8 +158,14 @@ function check(name, fn) {
     assert.equal(isPermanentError(new SupabaseDataError('x', { code: '22023', status: 400 })), true);
     assert.equal(isPermanentError(new SupabaseDataError('x', { code: '42501', status: 403 })), true);
     assert.equal(isPermanentError(new SupabaseDataError('x', { code: '54000', status: 500 })), true, 'SQLSTATE wins over status');
-    assert.equal(isPermanentError(new SupabaseDataError('x', { code: 'PGRST301', status: 401 })), true);
-    assert.equal(isPermanentError(new SupabaseDataError('x', { code: 'http/404', status: 404 })), true);
+    assert.equal(isPermanentError(new SupabaseDataError('x', { code: 'PGRST301', status: 401 })), true, 'an expired token after its one retry');
+    assert.equal(isPermanentError(new SupabaseDataError('JWT expired', { code: 'http/401', status: 401 })), true);
+    assert.equal(isPermanentError(new SupabaseDataError('x', { code: 'PGRST302', status: 401 })), false, 'other 401s are transient');
+    assert.equal(isPermanentError(new SupabaseDataError('x', { code: 'PGRST202', status: 404 })), false, 'a function not applied yet or a stale schema cache');
+    assert.equal(isPermanentError(new SupabaseDataError('x', { code: 'http/404', status: 404 })), false);
+    assert.equal(isPermanentError(new SupabaseDataError('x', { code: 'http/400', status: 400 })), true);
+    assert.equal(isPermanentError(new SupabaseDataError('x', { code: 'http/403', status: 403 })), true);
+    assert.equal(isPermanentError(new SupabaseDataError('x', { code: 'network/timeout' })), false);
     assert.equal(isPermanentError(new SupabaseDataError('x', { code: 'http/408', status: 408 })), false);
     assert.equal(isPermanentError(new SupabaseDataError('x', { code: 'http/429', status: 429 })), false);
     assert.equal(isPermanentError(new SupabaseDataError('x', { code: 'http/503', status: 503 })), false);
@@ -180,6 +186,32 @@ function check(name, fn) {
     assert.equal(args.p_duration_seconds, 90);
     assert.equal(args.p_completed_at, '2026-03-04T05:06:07.000Z');
     assert.equal(buildSubmissionArgs('x', { completed_at: 'garbage' }).p_completed_at, null, 'unparsable time becomes null, not a failed call');
+    assert.equal(buildSubmissionId('grocery-list', { submitted_at: '2026-03-04T05:06:07.000Z' }).submissionId, submissionId, 'submitted_at is accepted as the completion time');
+    assert.equal(buildSubmissionId('grocery-list', { completedAt: '2026-03-04T05:06:07.000Z', submitted_at: 'later' }).submissionId, submissionId, 'completed_at and completedAt win over submitted_at');
+  });
+
+  await check('a request with no answer is aborted after the timeout and reported as network/failed', async () => {
+    const calls = [];
+    const hangingFetch = (url, init) => {
+      calls.push(init);
+      return new Promise((resolve, reject) => {
+        init.signal.addEventListener('abort', () => reject(Object.assign(new Error('aborted'), { name: 'AbortError' })));
+      });
+    };
+    const data = createSupabaseData({ supabaseUrl: URL_BASE, publishableKey: KEY, getIdToken: async () => TOKEN, fetchImpl: hangingFetch, requestTimeoutMs: 20 });
+    const started = Date.now();
+    await rejects(data.saveExerciseDraft('p1-e1', 'Title', { a: 1 }), (error) => {
+      assert.equal(error.code, 'network/failed');
+      assert.equal(isPermanentError(error), false, 'a timeout is retryable');
+      assert.equal(error.cause.name, 'AbortError');
+    });
+    assert.ok(Date.now() - started < 2000, 'the call gave up quickly');
+    assert.equal(calls.length, 1, 'a timeout is not retried by the adapter');
+    assert.ok(calls[0].signal && calls[0].signal.aborted, 'the request was aborted through its signal');
+    // A normal answer clears the timer, so the request carries a signal but is not aborted.
+    const quick = fakeFetch();
+    await makeData(quick).saveExerciseDraft('p1-e1', 'Title', { a: 1 });
+    assert.equal(mod.REQUEST_TIMEOUT_MS, 10000, 'the default is ten seconds');
   });
 
   await check('reward mapping flattens streak and keeps display fields only', () => {

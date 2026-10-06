@@ -26,6 +26,7 @@
 
 const PROGRAM_TSA = "tsa";
 const REWARD_ENTRIES_PER_CALL = 500;
+const REQUEST_TIMEOUT_MS = 10000;
 const RESERVED_KEYS = ["userId", "receivedAt", "createdAt", "updatedAt"];
 const PERMANENT_SQLSTATES = ["22023", "42501", "54000"];
 const PERMANENT_CLIENT_CODES = ["data/invalid-argument"];
@@ -96,27 +97,31 @@ class SupabaseDataError extends Error {
   }
 }
 
+// True only for the one case a fresh token fixes: PostgREST refused the request (401) because the
+// Firebase ID token had expired (code PGRST301 or a "JWT expired" message).
+function isExpiredTokenError(error) {
+  if (!error || Number(error.status) !== 401) return false;
+  return String(error.code || "") === "PGRST301" || /JWT expired/i.test(String(error.message || ""));
+}
+
 // True when a retry cannot help: the database refused the input (22023), the caller is not signed in
 // (42501), a limit was reached (54000), a locally invalid argument, or any other 4xx except a timeout
-// (408) and rate limiting (429). Network failures and 5xx are retryable.
+// (408), rate limiting (429), a function that is not there yet (404, PostgREST PGRST202 before a
+// migration is applied or while the schema cache is stale) and a 401 that is not an expired token (a
+// transient auth hiccup). Network failures, timeouts and 5xx are retryable.
 function isPermanentError(error) {
   if (!error) return false;
   const code = String(error.code || "");
   if (PERMANENT_SQLSTATES.includes(code) || PERMANENT_CLIENT_CODES.includes(code)) return true;
   const status = Number(error.status) || 0;
+  if (status === 404) return false;
+  if (status === 401) return isExpiredTokenError(error);
   if (status >= 400 && status < 500) return status !== 408 && status !== 429;
   return false;
 }
 
 function invalidArgument(message) {
   return new SupabaseDataError(message, { code: "data/invalid-argument" });
-}
-
-// True only for the one case a fresh token fixes: PostgREST refused the request (401) because the
-// Firebase ID token had expired (code PGRST301 or a "JWT expired" message).
-function isExpiredTokenError(error) {
-  if (!error || Number(error.status) !== 401) return false;
-  return String(error.code || "") === "PGRST301" || /JWT expired/i.test(String(error.message || ""));
 }
 
 // ---------------------------------------------------------------------------
@@ -275,7 +280,7 @@ function buildCatalogIndex(activities = [], keys = []) {
 // reuses its key and record_activity_submission treats it as a harmless repeat.
 function buildSubmissionId(exerciseId, exercisePayload = {}) {
   const payload = isPlainObject(exercisePayload) ? exercisePayload : {};
-  const completedAtClient = String(payload.completed_at || payload.completedAt || new Date().toISOString()).slice(0, 80);
+  const completedAtClient = String(payload.completed_at || payload.completedAt || payload.submitted_at || new Date().toISOString()).slice(0, 80);
   const submissionId = `${exerciseId}-${completedAtClient}`.replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 100);
   return { submissionId, completedAtClient };
 }
@@ -706,6 +711,8 @@ function createSupabaseData(context = {}) {
   const publishableKey = String(context.publishableKey || "");
   const getIdToken = context.getIdToken;
   const fetchImpl = context.fetchImpl || (typeof fetch === "function" ? fetch.bind(globalThis) : null);
+  // A request that gets no answer is abandoned after this long and reported as a network failure.
+  const requestTimeoutMs = Number(context.requestTimeoutMs) > 0 ? Number(context.requestTimeoutMs) : REQUEST_TIMEOUT_MS;
   // Preview mode (utl_experience_preview_active) saves nothing, as in assets/firebase.js.
   const previewActive = typeof context.previewActive === "function" ? context.previewActive : () => false;
   // Optional: the summary aggregator from assets/firebase.js (aggregateLearningProfileEvidence).
@@ -742,11 +749,16 @@ function createSupabaseData(context = {}) {
       Accept: "application/json"
     };
     if (body !== undefined) headers["Content-Type"] = "application/json";
+    // The timeout aborts the request; the browser then rejects fetch, which surfaces as network/failed.
+    const controller = typeof AbortController === "function" ? new AbortController() : null;
+    const timer = controller ? setTimeout(() => controller.abort(), requestTimeoutMs) : null;
     let response;
     try {
-      response = await fetchImpl(`${supabaseUrl}${path}`, { method, headers, body });
+      response = await fetchImpl(`${supabaseUrl}${path}`, { method, headers, body, signal: controller ? controller.signal : undefined });
     } catch (error) {
       throw new SupabaseDataError("The connection to the data service failed.", { code: "network/failed", cause: error });
+    } finally {
+      if (timer !== null) clearTimeout(timer);
     }
     const raw = typeof response.text === "function" ? await response.text() : "";
     let data = null;
@@ -1011,13 +1023,12 @@ function createSupabaseData(context = {}) {
     const activityId = catalog.resolve(safeExerciseId);
     if (!activityId) return empty;
     const title = (catalog.get(activityId) || {}).title || safeExerciseId;
-    // One failing read must not hide the other, as with Promise.allSettled in assets/firebase.js.
-    const [draftResult, submissionResult] = await Promise.allSettled([
+    // Either read failing fails the whole call, so the caller (assets/firebase.js) can fall back to its
+    // Firestore read instead of showing an empty draft or history.
+    const [draftRows, submissionRows] = await Promise.all([
       select("activity_drafts", `select=draft,updated_at&activity_id=${eq(activityId)}`),
       select("activity_submissions", `select=id,submission_key,attempt_number,completed_at,duration_seconds,content_version,response&activity_id=${eq(activityId)}&order=completed_at.desc&limit=10`)
     ]);
-    const draftRows = draftResult.status === "fulfilled" ? draftResult.value : [];
-    const submissionRows = submissionResult.status === "fulfilled" ? submissionResult.value : [];
     return {
       draft: mapDraftRow(draftRows[0], safeExerciseId, title),
       submissions: submissionRows.map((row) => mapSubmissionRow(row, safeExerciseId, title))
@@ -1088,5 +1099,6 @@ export {
   rebuildWorkspaceProgress,
   PROGRAM_TSA,
   REWARD_ENTRIES_PER_CALL,
+  REQUEST_TIMEOUT_MS,
   RESERVED_KEYS
 };

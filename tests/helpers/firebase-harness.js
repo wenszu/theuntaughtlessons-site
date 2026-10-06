@@ -19,27 +19,21 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const { pathToFileURL } = require('url');
-
-const SCRATCH_DIRS = [
-  '/private/tmp/claude-501/-Users-wenszu-dev-utl-supabase-core/37f1d22f-2889-49da-bfd6-c00d411a2f20/scratchpad',
-  path.join(os.tmpdir(), 'utl-firebase-harness')
-];
+const { setTimeout: realSleep } = require('timers/promises');
 
 const REPO_ROOT = path.resolve(__dirname, '..', '..');
 const SUPABASE_DATA_SOURCE = path.join(REPO_ROOT, 'assets', 'supabase-data.js');
 
 const FIXED_NOW = Date.parse('2026-10-06T10:00:00.000Z');
 
+// Module copies go to the system temp directory (one folder per process, removed at exit).
+let scratch = null;
 function scratchDir() {
-  for (const dir of SCRATCH_DIRS) {
-    try {
-      fs.mkdirSync(path.join(dir, 'firebase-harness'), { recursive: true });
-      return path.join(dir, 'firebase-harness');
-    } catch (error) {
-      // try the next one
-    }
+  if (!scratch) {
+    scratch = fs.mkdtempSync(path.join(os.tmpdir(), 'utl-firebase-harness-'));
+    process.on('exit', () => { try { fs.rmSync(scratch, { recursive: true, force: true }); } catch (error) { /* best effort */ } });
   }
-  throw new Error('No writable scratch directory for the harness.');
+  return scratch;
 }
 
 // ---------------------------------------------------------------------------
@@ -297,15 +291,20 @@ function createHarness() {
     events: [],
     warnings: [],
     timers: [],
+    timerCounter: 0,
     historyCalls: [],
     tokenRequests: [],
+    sequence: [],
     idCounter: 0,
     storage: fakeStorage(),
     document: fakeDocument(),
     location: {},
     clone,
 
-    record(entry) { this.log.push(entry); },
+    record(entry) {
+      this.log.push(entry);
+      if (entry.sdk === 'firestore') this.sequence.push(`firestore:${entry.op}:${entry.path || ''}`);
+    },
     newId() { this.idCounter += 1; return `generated-${this.idCounter}`; },
 
     // -- Firestore store ---------------------------------------------------
@@ -366,8 +365,15 @@ function createHarness() {
         body: init.body ? JSON.parse(init.body) : undefined
       };
       this.fetchCalls.push(call);
+      this.sequence.push(`fetch:${method}:${call.path.split('?')[0]}`);
       const handler = this.fetchHandlers.find((item) => item.method === method && item.match(call.path));
       const answer = handler ? handler.respond(call) : (method === 'GET' ? [] : {});
+      // { __hang: true } never answers; the request ends only when the caller's AbortController fires.
+      if (answer && answer.__hang) {
+        return new Promise((resolve, reject) => {
+          if (init.signal) init.signal.addEventListener('abort', () => reject(Object.assign(new Error('The operation was aborted.'), { name: 'AbortError' })));
+        });
+      }
       if (answer && answer.__throw) throw answer.__throw;
       if (answer && answer.__status) {
         return { ok: false, status: answer.__status, text: async () => JSON.stringify(answer.body || {}) };
@@ -391,6 +397,34 @@ function createHarness() {
     firestoreWrites() { return this.firestoreLog().filter((entry) => /setDoc|updateDoc|deleteDoc|transaction\.set|transaction\.update/.test(entry.op)); },
     notice() { return this.document.getElementById('utlProgressSyncNotice'); },
 
+    // -- Timers ----------------------------------------------------------------
+    // Every setTimeout (global and window) lands here and fires only when a test says so, so a
+    // 10 or 15 second production timeout costs nothing and nothing keeps the process alive.
+    addTimer(handler, delay) {
+      this.timerCounter += 1;
+      this.timers.push({ id: this.timerCounter, handler, delay: Number(delay) || 0 });
+      return this.timerCounter;
+    },
+    removeTimer(id) {
+      const index = this.timers.findIndex((timer) => timer.id === id);
+      if (index !== -1) this.timers.splice(index, 1);
+    },
+    pendingTimers() { return this.timers.map((timer) => timer.delay); },
+    // Fires every pending timer in registration order (each at most once).
+    fireTimers() {
+      const due = this.timers.splice(0, this.timers.length);
+      due.forEach((timer) => { if (typeof timer.handler === 'function') timer.handler(); });
+      return due.length;
+    },
+    // Lets pending promise work settle without touching the fake timers.
+    async flush(rounds = 5) {
+      for (let index = 0; index < rounds; index += 1) await new Promise((resolve) => setImmediate(resolve));
+      // Background work such as the first dynamic import of the data layer needs real file input and output, which a
+      // few event loop turns do not always cover. A short real wait (the node timer, not the faked one) makes the
+      // checks that look at background calls deterministic.
+      await realSleep(15);
+    },
+
     // Fresh state for a case. The stored data source and location are kept unless asked otherwise.
     reset(options = {}) {
       this.log.length = 0;
@@ -403,6 +437,7 @@ function createHarness() {
       this.timers.length = 0;
       this.historyCalls.length = 0;
       this.tokenRequests.length = 0;
+      this.sequence.length = 0;
       this.idCounter = 0;
       this.auth.currentUser = null;
       if (options.keepStorage !== true) this.storage.clear();
@@ -468,10 +503,13 @@ function installGlobals(harness) {
       (this.listeners[event.type] || []).forEach((handler) => handler(event));
       return true;
     },
-    setTimeout(handler, delay) { harness.timers.push({ delay }); return harness.timers.length; },
-    clearTimeout() {}
+    setTimeout(handler, delay) { return harness.addTimer(handler, delay); },
+    clearTimeout(id) { harness.removeTimer(id); }
   };
   globalThis.window = window;
+  // The data layer uses the bare setTimeout for its request timeout; route it through the same registry.
+  globalThis.setTimeout = (handler, delay) => harness.addTimer(handler, delay);
+  globalThis.clearTimeout = (id) => harness.removeTimer(id);
   Object.defineProperty(globalThis, 'localStorage', { get: () => harness.storage, configurable: true });
   globalThis.document = harness.document;
   Object.defineProperty(globalThis, 'location', { get: () => harness.location, configurable: true });
