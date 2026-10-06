@@ -292,15 +292,25 @@ function timeMillis(value) {
 function mergeRewardsViews(base, remote) {
   if (!remote) return base || null;
   if (!base) return remote;
+  // Firestore is the system of record, and the page writes the merged rewards back to it (line "saveMemberRewards"
+  // takes the larger of the ledger sum and the totals). So while Firestore has rewards, they are used as they
+  // are: Supabase must never add ledger entries or raise the total, because its ledger can hold history that
+  // Firestore's own total never counted (a copy of a device's full history), and that would inflate MP and be
+  // written back. Supabase fills in only when Firestore has no rewards at all.
+  const baseTotal = Math.max(0, Number(base.mpTotal || base.masteryPoints || 0));
+  const baseLedger = Array.isArray(base.ledger) ? base.ledger : [];
+  const baseHasRewards = baseTotal > 0 || baseLedger.length > 0;
   const ledgerById = {};
-  [].concat(remote.ledger || [], base.ledger || []).forEach((entry) => {
+  (baseHasRewards ? baseLedger : [].concat(remote.ledger || [], baseLedger)).forEach((entry) => {
     if (entry && entry.id) ledgerById[entry.id] = entry;
   });
   const ledger = Object.values(ledgerById)
     .sort((a, b) => String(a.earnedAt || "").localeCompare(String(b.earnedAt || "")))
     .slice(-500);
   const ledgerTotal = ledger.reduce((sum, entry) => sum + Math.max(0, Number(entry.mpEarned || 0)), 0);
-  const mpTotal = Math.max(ledgerTotal, Number(base.mpTotal || base.masteryPoints || 0), Number(remote.mpTotal || remote.masteryPoints || 0));
+  const mpTotal = baseHasRewards
+    ? Math.max(baseTotal, ledgerTotal)
+    : Math.max(ledgerTotal, Number(remote.mpTotal || remote.masteryPoints || 0));
   const earnedEvents = Object.assign({}, remote.earnedEvents || {}, remote.earnedEventIds || {}, base.earnedEvents || {}, base.earnedEventIds || {});
   const baseStreak = base.streak && typeof base.streak === "object" ? base.streak : {};
   const remoteStreak = remote.streak && typeof remote.streak === "object" ? remote.streak : {};
