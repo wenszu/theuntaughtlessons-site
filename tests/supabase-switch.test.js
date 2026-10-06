@@ -354,6 +354,7 @@ async function check(name, fn) {
     const pending = await observe(harness, scenariosFor(current).saveUserProfile, { storage: { utl_data_pending: 'supabase' }, before: cacheOnly });
     assert.equal(pending.storage.utl_data_pending, 'supabase', 'a request waits for a real answer');
     assert.equal(pending.storage.utl_data_source, undefined);
+    assert.ok(/skipped: answer came from the offline cache/.test(pending.storage.utl_data_gate_last || ''), 'the skip is recorded for reading after a redirect');
     harness.cachedPaths = null;
     // The same record answered by the server (no flag) does switch the member off.
     const server = await observe(harness, scenariosFor(current).saveUserProfile, { storage: { utl_data_source: 'supabase' } });

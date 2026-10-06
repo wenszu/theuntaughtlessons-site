@@ -69,6 +69,8 @@ const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_uxSIlhwWdbAa6EnHyn_Flw__P3u6tlW
 // contacts Supabase and every function runs the Firestore code it always ran.
 const DATA_SOURCE_KEY = "utl_data_source";
 const DATA_SOURCE_PENDING_KEY = "utl_data_pending";
+// Last decision of the gate, kept so it can be read after the sign-in page redirects and clears the console.
+const DATA_SOURCE_GATE_LOG_KEY = "utl_data_gate_last";
 const DATA_SOURCE_PARAMETER = "utl_data";
 
 function getDataSource() {
@@ -117,7 +119,10 @@ function applyDataSourceGate(memberSnap) {
     // A snapshot answered from the offline cache cannot show that the flag was removed, so it never switches a
     // member off or turns a request down; the next sign-in decides with a real answer.
     const fromCache = Boolean(memberSnap && memberSnap.metadata && memberSnap.metadata.fromCache === true);
-    if (!tester && fromCache) return;
+    if (!tester && fromCache) {
+      storage.setItem(DATA_SOURCE_GATE_LOG_KEY, `${new Date().toISOString()} skipped: answer came from the offline cache and does not show the flag`);
+      return;
+    }
     const next = tester ? "supabase" : "firebase";
     const before = storage.getItem(DATA_SOURCE_KEY) || "(none)";
     const wasPending = storage.getItem(DATA_SOURCE_PENDING_KEY) === "supabase";
@@ -127,6 +132,7 @@ function applyDataSourceGate(memberSnap) {
     const reason = tester
       ? "supabaseTester is true"
       : (memberSnap && memberSnap.exists() ? "supabaseTester is not true on the member record" : "no member record was found");
+    storage.setItem(DATA_SOURCE_GATE_LOG_KEY, `${new Date().toISOString()} ${before} -> ${next} (${reason})`);
     if (wasPending || before !== next) console.info(`Data source: ${before} -> ${next} (${reason})`);
   } catch {
     // Unreadable storage: the switch simply stays as it was (off unless already set).
