@@ -289,49 +289,13 @@ function timeMillis(value) {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
-function mergeRewardsViews(base, remote) {
-  if (!remote) return base || null;
-  if (!base) return remote;
-  // Firestore is the system of record, and the page writes the merged rewards back to it (line "saveMemberRewards"
-  // takes the larger of the ledger sum and the totals). So while Firestore has rewards, they are used as they
-  // are: Supabase must never add ledger entries or raise the total, because its ledger can hold history that
-  // Firestore's own total never counted (a copy of a device's full history), and that would inflate MP and be
-  // written back. Supabase fills in only when Firestore has no rewards at all.
-  const baseTotal = Math.max(0, Number(base.mpTotal || base.masteryPoints || 0));
-  const baseLedger = Array.isArray(base.ledger) ? base.ledger : [];
-  const baseHasRewards = baseTotal > 0 || baseLedger.length > 0;
-  const ledgerById = {};
-  (baseHasRewards ? baseLedger : [].concat(remote.ledger || [], baseLedger)).forEach((entry) => {
-    if (entry && entry.id) ledgerById[entry.id] = entry;
-  });
-  const ledger = Object.values(ledgerById)
-    .sort((a, b) => String(a.earnedAt || "").localeCompare(String(b.earnedAt || "")))
-    .slice(-500);
-  const ledgerTotal = ledger.reduce((sum, entry) => sum + Math.max(0, Number(entry.mpEarned || 0)), 0);
-  const mpTotal = baseHasRewards
-    ? Math.max(baseTotal, ledgerTotal)
-    : Math.max(ledgerTotal, Number(remote.mpTotal || remote.masteryPoints || 0));
-  const earnedEvents = Object.assign({}, remote.earnedEvents || {}, remote.earnedEventIds || {}, base.earnedEvents || {}, base.earnedEventIds || {});
-  const baseStreak = base.streak && typeof base.streak === "object" ? base.streak : {};
-  const remoteStreak = remote.streak && typeof remote.streak === "object" ? remote.streak : {};
-  const streakDays = Math.max(Number(base.streakDays || baseStreak.currentDays || 0), Number(remote.streakDays || remoteStreak.currentDays || 0));
-  const lastQualifiedDate = [String(baseStreak.lastQualifiedDate || ""), String(remoteStreak.lastQualifiedDate || "")].sort().pop();
-  const streak = Object.assign({}, remoteStreak, baseStreak, {
-    currentDays: streakDays,
-    lastQualifiedDate,
-    dailyActivities: Object.assign({}, remoteStreak.dailyActivities || {}, baseStreak.dailyActivities || {}),
-    awardedDates: Object.assign({}, remoteStreak.awardedDates || {}, baseStreak.awardedDates || {})
-  });
-  return Object.assign({}, remote, base, {
-    mpTotal,
-    masteryPoints: mpTotal,
-    tokens: Math.max(Number(base.tokens || 0), Number(remote.tokens || 0)),
-    streakDays,
-    streak,
-    earnedEvents,
-    earnedEventIds: earnedEvents,
-    ledger
-  });
+// Rewards are never read from Supabase while Firestore is the system of record. The page unions whatever
+// rewards it is given into the device's ledger and saves that back to Firestore (the save keeps the larger
+// of the ledger sum and the totals), so a Supabase ledger that holds history Firestore's own total never
+// counted would inflate MP and be stored. Supabase's reward copy is write-only until Firestore is retired.
+function withoutSupabaseRewards(view) {
+  if (!view || typeof view !== "object") return view;
+  return Object.assign({}, view, { rewards: null });
 }
 
 // The Firestore progress view stays the base (the page writes its snapshot back to Firestore, so a
@@ -340,7 +304,7 @@ function mergeRewardsViews(base, remote) {
 // base's and never come from Supabase.
 function mergeWorkspaceProgressViews(base, remote) {
   if (!remote) return base || null;
-  if (!base) return remote;
+  if (!base) return withoutSupabaseRewards(remote);
   const merged = base;
   merged.orientation = merged.orientation && typeof merged.orientation === "object" ? merged.orientation : {};
   if (remote.orientation && remote.orientation.ready === true) merged.orientation.ready = true;
@@ -371,7 +335,7 @@ function mergeWorkspaceProgressViews(base, remote) {
     if (!next.appKey && value.appKey) next.appKey = value.appKey;
     merged.exercises[id] = next;
   });
-  merged.rewards = mergeRewardsViews(merged.rewards || null, remote.rewards || null);
+  // merged.rewards stays the Firestore rewards exactly as read.
   return merged;
 }
 
@@ -1197,7 +1161,7 @@ async function getMemberWorkspaceProgress() {
     base = await readFromFirestore();
   } catch (error) {
     const remote = await remotePromise;
-    if (remote.ok && remote.value) return remote.value;
+    if (remote.ok && remote.value) return withoutSupabaseRewards(remote.value);
     if (!remote.ok) reportSupabaseFailure("progress read", "", remote.error);
     throw error;
   }

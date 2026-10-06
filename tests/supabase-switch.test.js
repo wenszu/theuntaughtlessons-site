@@ -778,21 +778,13 @@ async function check(name, fn) {
     assert.equal(progress.exercises['write-to-aiko'].completed, true, 'with its alias');
     assert.deepEqual(progress.contexts, { 'p1-e1': { completed: true } }, 'a Supabase-only context is added');
     const rewards = progress.rewards;
-    assert.equal(rewards.mpTotal, 10, 'the Firestore total, never raised by Supabase');
-    assert.equal(rewards.masteryPoints, 10);
-    assert.deepEqual(rewards.ledger.map((entry) => entry.id), ['lesson:p1-l1'], 'Firestore has rewards, so Supabase adds no ledger entries');
-    assert.equal(rewards.ledger[0].type, 'lesson', 'the Firestore entry is kept');
-    assert.equal(rewards.tokens, 2, 'the larger tokens');
-    assert.equal(rewards.streakDays, 3);
-    assert.equal(rewards.streak.currentDays, 3);
-    assert.equal(rewards.streak.lastQualifiedDate, '2026-10-06');
-    assert.equal(rewards.level, 'Intern', 'the Firestore level is kept');
-    assert.deepEqual(rewards.earnedEvents, { 'lesson:p1-l1': true, 'exercise:p1-e1': true });
+    assert.deepEqual(rewards, { mpTotal: 10, masteryPoints: 10, level: 'Intern', earnedEvents: { 'lesson:p1-l1': true }, ledger: [{ id: 'lesson:p1-l1', type: 'lesson', mpEarned: 10, earnedAt: '2026-10-05T10:00:00.000Z' }] }, 'rewards are the Firestore rewards exactly as read: Supabase adds nothing and raises nothing');
 
     result = await supa('getMemberWorkspaceProgress', { before: (h) => { seedReads(h); h.failWhen('getDoc', /^users\/uid-1$/, Object.assign(new Error('denied'), { code: 'permission-denied' })); } });
     assert.equal(result.outcome.error, null, 'a failing Firestore read with a Supabase answer returns the Supabase view');
     assert.equal(result.outcome.value.exercises['p1-e1'].completed, true);
     assert.equal(result.outcome.value.adminProgressRevision, undefined, 'no admin flags without Firestore');
+    assert.equal(result.outcome.value.rewards, null, 'a Supabase only view never carries rewards');
     assert.deepEqual(result.outcome.value.orientation, { ready: true, open: null });
     assert.equal(syncEvents(result.events).length, 0);
 
@@ -853,57 +845,41 @@ async function check(name, fn) {
     assert.equal(progress.adminProgressRevision, 'admin-7');
   });
 
-  await check('supabase mode: a Supabase ledger and total far above Firestore never raise the MP (history copied from a device)', async () => {
-    const result = await supa('getMemberWorkspaceProgress', {
+  await check('supabase mode: rewards are never read from Supabase (history copied from a device cannot inflate MP)', async () => {
+    const bigSupabaseRewards = (h) => {
+      const history = Array.from({ length: 60 }, (_, index) => ({ entry_key: `scored-exercise:old:${index}`, points: 60, reason: 'scored-exercise', activity_id: null, earned_at: `2026-08-${String((index % 28) + 1).padStart(2, '0')}T10:00:00+00:00`, source: {} }));
+      withCatalog(h)
+        .onFetch('GET', '/rest/v1/reward_ledger?', history)
+        .onFetch('GET', '/rest/v1/reward_totals?', [{ program_id: 'tsa', points_total: 3600, entry_count: 60 }])
+        .onFetch('GET', '/rest/v1/reward_state?', [{ streak_days: 1, last_qualified_on: '2026-10-05', tokens: 0, streak: {} }]);
+    };
+    // Firestore has rewards: they are returned untouched.
+    const withRewards = await supa('getMemberWorkspaceProgress', {
       before: (h) => {
-        const history = Array.from({ length: 60 }, (_, index) => ({ entry_key: `scored-exercise:old:${index}`, points: 60, reason: 'scored-exercise', activity_id: null, earned_at: `2026-08-${String((index % 28) + 1).padStart(2, '0')}T10:00:00+00:00`, source: {} }));
-        withCatalog(h)
-          .onFetch('GET', '/rest/v1/reward_ledger?', history)
-          .onFetch('GET', '/rest/v1/reward_totals?', [{ program_id: 'tsa', points_total: 3600, entry_count: 60 }])
-          .onFetch('GET', '/rest/v1/reward_state?', [{ streak_days: 1, last_qualified_on: '2026-10-05', tokens: 0, streak: {} }]);
+        bigSupabaseRewards(h);
         const user = h.read(`users/${UID}`);
         user.rewards = Object.assign({}, REWARDS_PAYLOAD);
         h.seed(`users/${UID}`, user);
       }
     });
-    const rewards = result.outcome.value.rewards;
-    assert.equal(rewards.mpTotal, 70, 'Firestore total kept');
-    assert.deepEqual(rewards.ledger.map((entry) => entry.id), ['lesson:p1-l1', 'exercise:p1-e1'], 'no Supabase ledger entries added');
-    const empty = await supa('getMemberWorkspaceProgress', {
+    assert.deepEqual(withRewards.outcome.value.rewards, REWARDS_PAYLOAD, 'exactly the Firestore rewards');
+    // Firestore has no rewards: the view carries none, rather than the Supabase ledger.
+    const without = await supa('getMemberWorkspaceProgress', {
       before: (h) => {
-        withCatalog(h)
-          .onFetch('GET', '/rest/v1/reward_ledger?', [{ entry_key: 'lesson:p1-l1', points: 10, reason: '', activity_id: 'p1-l1', earned_at: '2026-10-05T10:00:00+00:00', source: {} }])
-          .onFetch('GET', '/rest/v1/reward_totals?', [{ program_id: 'tsa', points_total: 10, entry_count: 1 }])
-          .onFetch('GET', '/rest/v1/reward_state?', [{ streak_days: 1, last_qualified_on: '2026-10-05', tokens: 0, streak: {} }]);
+        bigSupabaseRewards(h);
         const user = h.read(`users/${UID}`);
         delete user.rewards;
         h.seed(`users/${UID}`, user);
       }
     });
-    assert.equal(empty.outcome.error, null);
-    assert.equal(empty.outcome.value.rewards.mpTotal, 10, 'Supabase fills in when Firestore has no rewards');
-  });
-
-  await check('supabase mode: rewards merge keeps the larger values when Firestore is ahead', async () => {
-    const result = await supa('getMemberWorkspaceProgress', {
-      before: (h) => {
-        withCatalog(h)
-          .onFetch('GET', '/rest/v1/reward_ledger?', [{ entry_key: 'lesson:p1-l1', points: 10, reason: '', activity_id: 'p1-l1', earned_at: '2026-10-05T10:00:00+00:00', source: {} }])
-          .onFetch('GET', '/rest/v1/reward_totals?', [{ program_id: 'tsa', points_total: 10, entry_count: 1 }])
-          .onFetch('GET', '/rest/v1/reward_state?', [{ streak_days: 1, last_qualified_on: '2026-10-05', tokens: 0, streak: {} }]);
-        const user = h.read(`users/${UID}`);
-        user.rewards = Object.assign({}, REWARDS_PAYLOAD, { level: 'Analyst', currentLevel: 'Analyst' });
-        h.seed(`users/${UID}`, user);
-      }
+    assert.equal(without.outcome.error, null);
+    assert.ok(!without.outcome.value.rewards, 'no Supabase rewards when Firestore has none');
+    // Firestore read fails: the Supabase view has progress but no rewards.
+    const failed = await supa('getMemberWorkspaceProgress', {
+      before: (h) => { bigSupabaseRewards(h); h.failWhen('getDoc', /^users\/uid-1$/, Object.assign(new Error('offline'), { code: 'unavailable' })); }
     });
-    const rewards = result.outcome.value.rewards;
-    assert.equal(rewards.mpTotal, 70);
-    assert.deepEqual(rewards.ledger.map((entry) => entry.id), ['lesson:p1-l1', 'exercise:p1-e1']);
-    assert.equal(rewards.tokens, 1);
-    assert.equal(rewards.streak.currentDays, 2);
-    assert.equal(rewards.streak.lastQualifiedDate, '2026-10-06');
-    assert.deepEqual(rewards.streak.dailyActivities, { '2026-10-06': { 'p1-e1': true } });
-    assert.equal(rewards.level, 'Analyst');
+    assert.equal(failed.outcome.error, null);
+    assert.equal(failed.outcome.value.rewards, null);
   });
 
   await check('supabase mode: exercise work and attempts fall back to Firestore for an id the catalog does not know', async () => {
