@@ -131,3 +131,28 @@ Firestore rules deny everything. Firebase Auth export saved beside the Firestore
 1. Commit the 1200 migration, tests and this plan on `supabase-core`.
 2. Go for step A (deploy the trigger, apply 1100 and 1200, Firestore export, Pro upgrade).
 3. Which 2 or 3 members test in step D.
+
+## 6. Final cutover plan: phase 3, everyone on (written 2026-10-07)
+
+What it is: every member's browser saves learning data to Supabase as well as Firebase and reads their history from Supabase. Firebase stays alongside as the safety net and the system of record for three things (completion records, workspace progress, rewards) until the server functions move. Sign-in does not change. What changed from section 2 after the live test: rollout by member flag in waves (no personal link needed), and the Firestore write lockdown moves to the end (phase 7), so the Firestore fallback is the undo until then.
+
+Stage 0, before the day (Claude, no live effect):
+1. Force a token refresh on a 401 for reads as well as writes, so a brand new member's first token (issued before their role claim) recovers on its own.
+2. Importer review: score improvement points (best-57 is 57 in Firestore and 7 in Supabase), two imported legacy entries not in the owner's Firestore ledger; then a per member comparison of Firestore and Supabase (counts and totals only) for all members.
+3. Change the gate so a flagged member (`supabaseTester` true, to be renamed `supabaseWave` later) turns on at the next page load with no link; check the flag once per browser session with a server read. `?utl_data=firebase` stays as a personal undo.
+4. A remote off switch (a settings document read at page load) so everyone can be switched off without a deploy.
+5. Run `scripts/supabase-auth-claim-backfill.js` as a dry run for all users; apply only if any member lacks the role claim.
+6. Tests, the separate reviewer, and a ready revert commit.
+
+Stage 1, final copy (owner runs, Claude reads the counts):
+1. Fresh Firestore export to the backup bucket.
+2. Delete tester rows (owner and test member, `migration_run_id is null`) so Supabase matches Firestore for them, then run the final delta import: dry run, read counts, apply.
+3. Reconcile report. Go only if every difference is explained.
+
+Stage 2, waves (owner flags members, Claude watches):
+- Wave 1: about 5 members for 2 days. Flag them with a script (dry run first). Watch rows arriving, 401s, stability events, support mail.
+- Wave 2: everyone, by the same script. Undo for one member is removing the flag; for all, the remote off switch.
+
+Stage 3, after (days 2 to 7): delete the import secret key; daily drift check of Firestore against Supabase for active members; then phases 4 to 7 as in section 2.
+
+Go or no go before wave 1: all tests and database suites pass; reconcile report clean; test member passes again after stage 0; the claim backfill dry run shows zero missing; Firebase export exists. Members notice: a reload. Owner does: export command, import dry run and apply, the push (the push is blocked for Claude), and flagging waves with a script. About 2 to 3 sessions plus the watching days.
