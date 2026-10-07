@@ -317,7 +317,8 @@ function rowsForPlatformStaff(doc, context = {}) {
     organization_id: null,
     program_id: programId,
     role: programId ? "program_lead" : role,
-    status: oneOf(text(data.status, 20).toLowerCase(), GRANT_STATUSES, "suspended"),
+    // The server only grants staff access when status is exactly "active" (functions-admin/index.js), so "Active" stays suspended here too.
+    status: text(data.status, 20) === "active" ? "active" : oneOf(text(data.status, 20).toLowerCase(), GRANT_STATUSES.filter((value) => value !== "active"), "suspended"),
     raw_response_access: Boolean(programId) && data.rawResponseAccess === true,
     ended_at: null
   };
@@ -336,18 +337,26 @@ async function runSteps(mirror, build) {
   if (typeof mirror.enabled === "function" && !mirror.enabled()) return { ok: false, skipped: true };
   try {
     let written = 0;
+    let failure = null;
     for (const step of build()) {
+      // After a failed step only the audit entry is still written: it has no references, and a missing audit
+      // row is worse than a missing grant, which the next catch up import restores.
+      if (failure && step.table !== "audit_events") continue;
+      let result;
       if (step.update) {
-        const result = await mirror.update(step.table, step.match, step.patch, { label: step.label });
-        if (!result || !result.ok) return result && result.skipped ? result : { ok: false, written, error: (result && result.error) || "failed" };
+        result = await mirror.update(step.table, step.match, step.patch, { label: step.label });
+      } else {
+        if (!step.rows || !step.rows.length) continue;
+        result = await mirror.upsert(step.table, step.rows, { conflict: step.conflict, ignoreDuplicates: step.ignoreDuplicates === true, label: step.label });
+      }
+      if (result && result.skipped) return result;
+      if (!result || !result.ok) {
+        if (!failure) failure = { ok: false, written, error: (result && result.error) || "failed" };
         continue;
       }
-      if (!step.rows || !step.rows.length) continue;
-      const result = await mirror.upsert(step.table, step.rows, { conflict: step.conflict, ignoreDuplicates: step.ignoreDuplicates === true, label: step.label });
-      if (!result || !result.ok) return result && result.skipped ? result : { ok: false, written, error: (result && result.error) || "failed" };
       written += Number(result.written) || 0;
     }
-    return { ok: true, written };
+    return failure ? Object.assign(failure, { written }) : { ok: true, written };
   } catch (error) {
     return { ok: false, error: "step-failed" };
   }

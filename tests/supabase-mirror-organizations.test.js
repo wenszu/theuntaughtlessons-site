@@ -274,6 +274,19 @@ const pathOf = (call) => call.url.replace("https://czljyikfavtjgqcibdda.supabase
   assert.strictEqual(result.ok, true);
   assert.deepStrictEqual(ctx.f.calls.map((call) => pathOf(call)), ["/rest/v1/people?on_conflict=id", "/rest/v1/person_emails?on_conflict=id", "/rest/v1/role_grants?on_conflict=id"]);
 
+  // A refused people or grant write (409) does not stop the audit entry; the failure is still reported.
+  ctx = build([{ status: 409 }, { status: 409 }, { status: 409 }, { status: 201 }]);
+  result = await org.mirrorOrganizationMember(ctx.mirror, { organizationId: "o", uid: "u", membership, prior, audit: { id: "9", doc: { action: "granted", targetEmail: REP } } });
+  assert.strictEqual(result.ok, false, "the first failure is reported");
+  assert.strictEqual(auditCalls(ctx.f).length, 1, "the audit entry is still written after a failed grant step");
+  assert.ok(ctx.f.calls.length >= 2);
+
+  // Platform staff: only exactly "active" is active, as the server requires.
+  ctx = build();
+  await org.mirrorPlatformStaff(ctx.mirror, { uid: "fb_staff", email: ADMIN, staff: { role: "privacy_data_admin", status: "Active" }, now: NOW });
+  const grantCall = ctx.f.calls.find((call) => pathOf(call).startsWith("/rest/v1/role_grants"));
+  assert.notStrictEqual(grantCall.body[0].status, "active", "\"Active\" is not active, as on the server");
+
   // Every audit_events request in everything above was an ignore-duplicates insert.
   // (Checked per call above; here the whole set is asserted once more through a combined run.)
   ctx = build();
