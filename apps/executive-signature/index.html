@@ -20,6 +20,7 @@
   --ink:#0F2236; --ink2:#4E5E70; --ink3:#7C8896;
   --navy:#003366; --gold:#EEA320; --goldsoft:#FBEBC9; --harvest:#C2841A;
   --primary:#003366; --on-primary:#FBF8F2;
+  --steelsoft:#EAF0F5;
   --good:#2E7D55; --goodsoft:#E3F2E9; --warn:#A8620A; --warnsoft:#FCEFD8; --bad:#B03A2E; --badsoft:#F8E3E0;
   --shadow:none;
   --serif:'Playfair Display',Georgia,'Times New Roman',serif;
@@ -33,6 +34,7 @@
     --ink:#F3EDE2; --ink2:#B8C3D0; --ink3:#8595A8;
     --navy:#9CC0E6; --gold:#F2B33D; --goldsoft:#3A2E14; --harvest:#D99B3D;
     --primary:#F2B33D; --on-primary:#0A1726;
+    --steelsoft:#162535;
     --good:#6CC596; --goodsoft:#16352A; --warn:#F2B33D; --warnsoft:#3A2E14; --bad:#F08B7F; --badsoft:#3D1F1C;
     --shadow:none;
   }
@@ -43,6 +45,7 @@
   --ink:#F3EDE2; --ink2:#B8C3D0; --ink3:#8595A8;
   --navy:#9CC0E6; --gold:#F2B33D; --goldsoft:#3A2E14;
   --primary:#F2B33D; --on-primary:#0A1726;
+  --steelsoft:#162535;
   --good:#6CC596; --goodsoft:#16352A; --warn:#F2B33D; --warnsoft:#3A2E14; --bad:#F08B7F; --badsoft:#3D1F1C;
   --shadow:none;
 }
@@ -195,9 +198,17 @@ button{cursor:pointer}
 .bucket-steel .bucket-label{color:#4D7094}
 @media(max-width:640px){.bucket-groups{grid-template-columns:1fr}}
 .tsa-choice-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:18px 0}
-.tsa-choice-card{background:var(--sunk);border:1px solid var(--line);border-radius:12px;padding:20px;display:flex;flex-direction:column;gap:10px}
+.tsa-choice-card{border:1px solid var(--line);border-radius:12px;padding:20px;display:flex;flex-direction:column;gap:8px}
+.tsa-choice-card.quick{background:var(--steelsoft);border-color:rgba(77,94,112,.25)}
+.tsa-choice-card.full{background:var(--goldsoft);border-color:rgba(238,163,32,.35)}
+.tsa-choice-card .status-chip{display:inline-flex;align-self:flex-start;font:700 11px Lato,sans-serif;padding:4px 10px;border-radius:999px;margin-bottom:2px}
+.tsa-choice-card .status-chip.done{background:var(--goodsoft);color:var(--good)}
+.tsa-choice-card .status-chip.todo{background:rgba(0,0,0,.08);color:var(--ink2)}
+.tsa-choice-card .tier-label{font-size:12.5px;font-weight:700;color:var(--ink2);margin:0}
 .tsa-choice-card h3{margin:0;font-size:19px}
-.tsa-choice-card .btn{margin-top:auto;width:100%}
+.tsa-choice-card>.btn{margin-top:auto;width:100%}
+.tsa-choice-card>.row{margin-top:auto;gap:8px}
+.tsa-choice-card>.row .btn{flex:1}
 @media(max-width:640px){.tsa-choice-grid{grid-template-columns:1fr}}
 .detail-list li{margin-bottom:8px;color:var(--ink2)}
 .snapshot-list{list-style:none;margin:14px 0 0;padding:14px 16px;background:rgba(255,255,255,.1);border-radius:10px;display:flex;flex-direction:column;gap:6px}
@@ -623,22 +634,10 @@ svg text{fill:var(--ink3);font-family:var(--sans);font-size:11px}
         <button class="btn primary" id="startBtn">Find your Executive Signature</button>
       </div>
       <div id="landingTsaChoiceActions" hidden>
-        <p class="lede" style="margin-bottom:10px">As a TSA member, you have access to both the quick check and the full assessment. You can take them in any order.</p>
+        <p class="lede" id="esStatusIntro" style="margin-bottom:10px"></p>
         <div class="tsa-choice-grid">
-          <div class="tsa-choice-card">
-            <p class="eyebrow">Quick check</p>
-            <h3>The 5-minute read</h3>
-            <p class="muted">20 statements about how you work. See your profile and one area to grow, instantly on screen.</p>
-            <div class="facts"><span>20 questions</span><span>About 4 minutes</span></div>
-            <button class="btn primary" id="tsaStartQuickBtn" type="button">Start the quick check</button>
-          </div>
-          <div class="tsa-choice-card">
-            <p class="eyebrow">Full assessment</p>
-            <h3>The full facet-level report</h3>
-            <p class="muted">40 statements, 10 specific traits. Confirms your profile and names your top two strengths and top two growth edges.</p>
-            <div class="price-tag" id="tsaFullPriceTag"></div>
-            <button class="btn gold" id="tsaStartFullBtn" type="button">Start the full assessment</button>
-          </div>
+          <div class="tsa-choice-card quick" id="esQuickCard"></div>
+          <div class="tsa-choice-card full" id="esFullCard"></div>
         </div>
       </div>
       <div class="row" id="landingReturnActions" hidden>
@@ -1058,8 +1057,6 @@ function beginParticipantFlow(tier='free'){
   go('t-background');
 }
 $('#startBtn').onclick=()=>beginParticipantFlow('free');
-$('#tsaStartQuickBtn').onclick=()=>beginParticipantFlow('free');
-$('#tsaStartFullBtn').onclick=()=>beginParticipantFlow('full');
 $('#invitePreviewBtn').onclick=()=>{setInviteMode(true);$('#firstNameIn').value='Andrea';$('#lastNameIn').value='Reyes';$('#orgIn').value='Harbor Logistics';go('t-details')};
 function hasSavedCompleteAttempt(){
   let saved=null;
@@ -1118,33 +1115,73 @@ function renderAccountResultNotice(status){
     note.hidden=true;
   }
 }
-// Only for a signed-in TSA member who has never touched Executive Signature at
-// all (neither tier, on any device): offers both tiers side by side instead of
-// funneling them through the Quick-Check-first flow built for a cold visitor.
-// Anyone with an existing result keeps seeing the normal single-button landing
-// plus the "you already completed..." note above, same as before.
-function refreshTsaChoiceState(status){
-  const choice=$('#landingTsaChoiceActions');
-  if(!choice)return;
-  const assessments=status&&status.assessments;
-  const everTaken=Boolean(assessments&&(assessments['quick-check']||assessments['full-assessment']));
-  const show=window.__raIsTsaMember===true&&!everTaken&&!hasSavedCompleteAttempt();
-  choice.hidden=!show;
-  if(show){
-    $('#landingPrimaryActions').hidden=true;
-    $('#tsaFullPriceTag').innerHTML=esFullPriceInfo().priceTag;
+// Shows a two-card status view, one card per tier, instead of the normal
+// single-button landing built for a cold visitor. Two groups qualify: a TSA
+// member (both tiers are free for them, even before taking either one) and
+// anyone who has already completed at least one tier (so returning here never
+// shows a "take it for the first time" button when a result already exists on
+// file). Each card independently shows its own tier's status, not taken yet
+// or already completed, so both products and their progress are visible at
+// once instead of needing a different screen per combination.
+function esQuickCardHtml(entry){
+  const taken=entry&&entry.latestAttempt;
+  if(taken){
+    const date=formatEsResultDate(taken.completedAt);
+    return '<span class="status-chip done">Completed</span><p class="tier-label">Quick check &middot; 20 questions</p><h3>'+esc(taken.band)+' range</h3><p class="muted">'+esc(taken.profileLabel)+(date?', completed '+esc(date):'')+'</p><div class="row"><a class="btn primary" href="my-results/">View result</a><button class="btn" id="esQuickRetakeBtn" type="button">Take it again</button></div>';
   }
+  return '<span class="status-chip todo">Not started</span><p class="tier-label">Quick check &middot; 20 questions &middot; About 4 minutes</p><h3>The 5-minute read</h3><p class="muted">20 statements about how you work. See your profile and one area to grow, instantly on screen.</p><button class="btn primary" id="esQuickStartBtn" type="button">Start the quick check</button>';
+}
+function esFullCardHtml(entry){
+  const taken=entry&&entry.latestAttempt;
+  if(taken){
+    const date=formatEsResultDate(taken.completedAt);
+    return '<span class="status-chip done">Completed</span><p class="tier-label">Full assessment &middot; 40 questions</p><h3>'+esc(taken.profileLabel)+'</h3><p class="muted">'+esc(taken.band)+' range'+(date?', completed '+esc(date):'')+'</p><button class="btn primary" id="esFullViewBtn" type="button">View your full report</button>';
+  }
+  const price=esFullPriceInfo();
+  return '<span class="status-chip todo">Not started</span><p class="tier-label">Full assessment &middot; 40 questions</p><h3>The full facet-level report</h3><p class="muted">40 statements, 10 specific traits. Confirms your profile and names your top two strengths and top two growth edges.</p><div class="price-tag">'+price.priceTag+'</div><button class="btn primary" id="esFullStartBtn" type="button">Start the full assessment</button>';
+}
+function wireEsStatusCardButtons(){
+  const quickStart=$('#esQuickStartBtn');
+  if(quickStart)quickStart.onclick=()=>beginParticipantFlow('free');
+  const quickRetake=$('#esQuickRetakeBtn');
+  if(quickRetake)quickRetake.onclick=()=>{try{sessionStorage.removeItem(ACTIVE_ATTEMPT_KEY)}catch(error){}activeAttempt=null;answers={};beginParticipantFlow('free')};
+  const fullStart=$('#esFullStartBtn');
+  if(fullStart)fullStart.onclick=()=>beginParticipantFlow('full');
+  const fullView=$('#esFullViewBtn');
+  if(fullView)fullView.onclick=()=>{
+    const loc=fullReportLocation();
+    if(loc==='local'){if(!fullActiveAttempt)startOrResumeFullAttempt(false,true);renderFullResult();go('t-full-result');return}
+    goToMyResults();
+  };
+}
+function refreshEsStatusView(status){
+  const choice=$('#landingTsaChoiceActions');
+  if(!choice)return false;
+  const assessments=status&&status.assessments;
+  const quickEntry=assessments&&assessments['quick-check'];
+  const fullEntry=assessments&&assessments['full-assessment'];
+  const everTaken=Boolean((quickEntry&&quickEntry.latestAttempt)||(fullEntry&&fullEntry.latestAttempt));
+  const show=(window.__raIsTsaMember===true||everTaken)&&!hasSavedCompleteAttempt();
+  choice.hidden=!show;
+  if(!show)return false;
+  $('#esStatusIntro').textContent=everTaken?'Here is where things stand for each.':'As a TSA member, you have access to both the quick check and the full assessment. You can take them in any order.';
+  $('#esQuickCard').innerHTML=esQuickCardHtml(quickEntry);
+  $('#esFullCard').innerHTML=esFullCardHtml(fullEntry);
+  wireEsStatusCardButtons();
+  $('#landingPrimaryActions').hidden=true;
+  return true;
 }
 window.addEventListener('ra:account-readiness',async()=>{
-  if(!window.__raAccountIdentity||typeof window.raGetMyEsStatus!=='function'){renderAccountResultNotice(null);refreshTsaChoiceState(null);return}
+  if(!window.__raAccountIdentity||typeof window.raGetMyEsStatus!=='function'){renderAccountResultNotice(null);refreshEsStatusView(null);return}
   try{
     const status=await window.raGetMyEsStatus();
-    renderAccountResultNotice(status);
-    refreshTsaChoiceState(status);
+    const shown=refreshEsStatusView(status);
+    if(shown)$('#accountResultNote').hidden=true;
+    else renderAccountResultNotice(status);
   }catch(error){
     console.error('Could not load your Executive Signature status',error);
     renderAccountResultNotice(null);
-    refreshTsaChoiceState(null);
+    refreshEsStatusView(null);
   }
 });
 $('#seeResultBtn').onclick=()=>{startOrResumeAttempt(false,true);renderResult();go('t-result')};

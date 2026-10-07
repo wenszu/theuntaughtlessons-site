@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lato:wght@400;700&display=swap">
   <link rel="stylesheet" href="../assets/site-nav.css?v=20260925-mobile-v1">
   <style>
-    :root{--navy:#003366;--gold:#EEA320;--harvest:#C2841A;--ink:#4A4A4A;--muted:#4D7094;--paper:#F3EDE2;--card:#fff;--line:#ddd2c1}
+    :root{--navy:#003366;--gold:#EEA320;--harvest:#C2841A;--ink:#4A4A4A;--muted:#4D7094;--paper:#F3EDE2;--card:#fff;--line:#ddd2c1;--steelsoft:#EAF0F5;--goldsoft:#FBEBC9;--good:#2E7D55;--goodsoft:#E3F2E9}
     *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.55 Lato,Arial,sans-serif}
     h1,h2,h3{color:var(--navy);font-family:'Playfair Display',Georgia,serif;line-height:1.08}
     h1{font-size:clamp(2rem,5vw,3.1rem);margin:.1em 0}h2{font-size:clamp(1.4rem,2.6vw,1.9rem);margin:0 0 14px}
@@ -40,11 +40,51 @@
     .msg.error{color:#9a3b1f}
     .eyebrow{font-size:13px;font-weight:700;color:var(--muted);margin:0 0 8px}
     .row{display:flex;gap:12px;flex-wrap:wrap;margin-top:18px}
-    @media print{.app-nav,.ra-nav,.no-print{display:none!important}body{background:#fff}}
+    .tsa-choice-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px}
+    .tsa-choice-card{border:1px solid var(--line);border-radius:14px;padding:24px;display:flex;flex-direction:column;gap:8px}
+    .tsa-choice-card.quick{background:var(--steelsoft);border-color:rgba(77,94,112,.25)}
+    .tsa-choice-card.full{background:var(--goldsoft);border-color:rgba(238,163,32,.35)}
+    .tsa-choice-card .status-chip{display:inline-flex;align-self:flex-start;font:700 11px Lato,sans-serif;padding:4px 10px;border-radius:999px;margin-bottom:2px}
+    .tsa-choice-card .status-chip.done{background:var(--goodsoft);color:var(--good)}
+    .tsa-choice-card .status-chip.todo{background:rgba(0,0,0,.08);color:var(--muted)}
+    .tsa-choice-card .tier-label{font-size:12.5px;font-weight:700;color:var(--muted);margin:0}
+    .tsa-choice-card h3{margin:0;font-size:19px}
+    .tsa-choice-card>.btn{margin-top:auto;align-self:flex-start}
+    .tsa-choice-card>.row{margin-top:auto;gap:8px}
+    .facts{display:flex;flex-wrap:wrap;gap:8px 16px;font-size:13px;color:var(--muted)}
+    .price-tag{display:flex;align-items:baseline;gap:10px;margin:2px 0;flex-wrap:wrap}
+    .price-was{font-size:14px;opacity:.6;text-decoration:line-through}
+    .price-now{font-family:'Playfair Display',Georgia,serif;font-weight:700;font-size:24px;color:var(--harvest)}
+    .price-note{font-size:12px;color:var(--muted)}
+    @media(max-width:640px){.tsa-choice-grid{grid-template-columns:1fr}}
+    .history-row{display:flex;align-items:baseline;justify-content:space-between;gap:14px;padding:10px 0;border-top:1px solid var(--line)}
+    .history-row:first-child{border-top:0;padding-top:0}
+    .history-row b{color:var(--navy)}
+    .print-only{display:none}
+    @media print{
+      .app-nav,.ra-nav,.no-print,.hero{display:none!important}
+      .print-only{display:flex}
+      @page{margin:16mm 16mm 18mm}
+      body{background:#fff;font-size:11pt}
+      .wrap{width:100%;max-width:none}
+      .section{padding:0}
+      .print-header{align-items:center;justify-content:space-between;gap:20px;border-bottom:2px solid var(--gold);padding-bottom:10px;margin-bottom:20px}
+      .print-header img{height:24px}
+      .tsa-choice-grid{display:block;margin-bottom:0}
+      .tsa-choice-card{background:#fff!important;border:1px solid #999;break-inside:avoid;margin-bottom:14px}
+      .status-chip{background:none!important;border:1px solid currentColor}
+      .tsa-choice-card>.btn,.tsa-choice-card>.row{display:none}
+      #historyCard{break-inside:avoid;border:1px solid #999;border-radius:0}
+      .history-row{break-inside:avoid}
+    }
   </style>
 </head>
 <body>
   <header id="raNav" class="ra-nav" aria-label="Assessment navigation"></header>
+  <div class="print-only print-header">
+    <img src="../../../assets/print-logo-utl-navy-header.svg" alt="The Untaught Lessons">
+    <img src="../../../assets/print-logo-signature-navy-header.svg" alt="Executive Signature">
+  </div>
   <header class="hero"><div class="wrap"><p class="eyebrow" style="color:var(--gold)">Executive Signature&trade;</p><h1>See your report again</h1><p>If you completed the Quick Check or the Full Assessment, this is where you can come back to it, anytime, on any device.</p></div></header>
   <main>
     <section class="section"><div class="wrap">
@@ -71,18 +111,18 @@
         <p class="msg" id="confirmMsg" aria-live="polite"></p>
       </div>
 
-      <div id="resultState" hidden>
-        <div class="card">
-          <p class="eyebrow">Full report &middot; 40 questions</p>
-          <h2 id="resultBand"></h2>
-          <p class="muted" id="resultMeta"></p>
+      <div id="resultsView" hidden>
+        <div class="tsa-choice-grid" id="resultsTop">
+          <div class="tsa-choice-card quick" id="myQuickCard"></div>
+          <div class="tsa-choice-card full" id="myFullCard"></div>
         </div>
-        <div class="card">
-          <h3 id="resultProfile" style="margin:0 0 8px;color:var(--navy);font-family:'Playfair Display',Georgia,serif;font-size:1.3rem"></h3>
-          <p class="small muted">This is the confirmed profile from your full facet-level report. For the complete write-up, strengths and growth edges, take the full report again from the assessment.</p>
-          <p class="small muted" id="alsoQuickCheckNote" hidden></p>
+        <div class="card" id="historyCard" hidden>
+          <h3 id="historyTitle" style="margin:0 0 4px;font-size:1.1rem"></h3>
+          <p class="small muted" style="margin:0 0 14px">Every time you took the quick check, most recent first.</p>
+          <div id="historyList"></div>
+          <p class="small no-print" style="margin:14px 0 0"><a href="#resultsTop">&uarr; Back to your results</a></p>
         </div>
-        <div class="card no-print">
+        <div class="card no-print" id="keepCopyCard" hidden>
           <h3 style="margin:0 0 8px">Keep a copy</h3>
           <p class="muted small">A copy of your band and profile, sent to the email on this account.</p>
           <div class="row">
@@ -93,30 +133,16 @@
         </div>
       </div>
 
-      <div class="card" id="quickOnlyState" hidden>
-        <p class="eyebrow">Quick check &middot; 20 questions</p>
-        <h2 id="quickBand"></h2>
-        <p class="muted" id="quickMeta"></p>
-        <h3 id="quickProfile" style="margin:0 0 8px;color:var(--navy);font-family:'Playfair Display',Georgia,serif;font-size:1.3rem"></h3>
-        <p class="small muted">This is your quick-check result. The full report confirms it across 10 facets and names your top strengths and growth edges.</p>
-        <div class="row no-print"><a class="btn gold" href="../">Get the full report</a></div>
-      </div>
-
-      <div class="card" id="noResultState" hidden>
-        <h2>No report on file yet</h2>
-        <p class="muted">This account hasn't completed the quick check or the full report yet. <a href="../">Take the assessment</a> to see your result here afterward.</p>
-      </div>
-
     </div></section>
   </main>
   <footer class="section no-print" style="padding-top:0"><div class="wrap small muted">Not shared with anyone else without your consent. <a href="../how-it-works/">Read how the score works.</a></div></footer>
 
   <script type="module">
-    import { auth, db, doc, getDoc, isSignInWithEmailLink, onAuthStateChanged, signInWithEmailLink, checkReadinessAccountEmail, sendReadinessAccessLink } from '../../../assets/firebase.js';
+    import { auth, db, doc, getDoc, getMyEsStatus, isSignInWithEmailLink, onAuthStateChanged, signInWithEmailLink, checkReadinessAccountEmail, sendReadinessAccessLink } from '../../../assets/firebase.js';
 
     const $ = (s) => document.querySelector(s);
     const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-    const show = (id) => { ['requestState','confirmState','resultState','quickOnlyState','noResultState'].forEach((s) => { $('#'+s).hidden = s !== id; }); };
+    const show = (id) => { ['requestState','confirmState','resultsView'].forEach((s) => { $('#'+s).hidden = s !== id; }); };
 
     const RESULT_EMAIL_ENDPOINT = 'https://script.google.com/macros/s/AKfycbzJE--FL2kB_XDNZRnszCtlyLRPvaLAHGuF5TAOdXJk40atbvf5Y6ELuSK2B7CSLaMN/exec';
     async function sendResultEmailPayload(payload) {
@@ -125,56 +151,87 @@
       catch (error) { return false; }
     }
 
-    function completedAtDate(entry) {
-      return entry.completedAt && typeof entry.completedAt.toDate === 'function'
-        ? entry.completedAt.toDate().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
-        : null;
-    }
-    function formatCompletedAt(entry, label) {
-      const date = completedAtDate(entry);
-      return date ? label + ', completed ' + date : label;
-    }
-
-    function renderQuickOnly(free) {
-      $('#quickBand').textContent = free.band + ' range';
-      $('#quickMeta').textContent = formatCompletedAt(free, 'Quick check');
-      $('#quickProfile').textContent = free.profile;
-      show('quickOnlyState');
+    function esQuickCardHtml(entry) {
+      const taken = entry && entry.latestAttempt;
+      if (taken) {
+        const date = formatCompletedAtIso(taken.completedAt);
+        return '<span class="status-chip done">Completed</span><p class="tier-label">Quick check &middot; 20 questions</p><h3>' + esc(taken.band) + ' range</h3><p class="muted">' + esc(taken.profileLabel) + (date ? ', completed ' + esc(date) : '') + '</p><a class="btn" href="../">Take it again</a>';
+      }
+      return '<span class="status-chip todo">Not started</span><p class="tier-label">Quick check &middot; 20 questions &middot; About 4 minutes</p><h3>The 5-minute read</h3><p class="muted">20 statements about how you work. See your profile and one area to grow, instantly on screen.</p><a class="btn" href="../">Start the quick check</a>';
     }
 
-    async function renderResult(userData) {
-      const ra = userData && userData.products && userData.products.readinessAssessment;
-      const full = ra && ra.full;
-      const free = ra && ra.free;
-      if (!full && !free) { show('noResultState'); return; }
-      if (!full) { renderQuickOnly(free); return; }
+    function esFullCardHtml(entry) {
+      const taken = entry && entry.latestAttempt;
+      if (taken) {
+        const date = formatCompletedAtIso(taken.completedAt);
+        return '<span class="status-chip done">Completed</span><p class="tier-label">Full assessment &middot; 40 questions</p><h3>' + esc(taken.profileLabel) + '</h3><p class="muted">' + esc(taken.band) + ' range' + (date ? ', completed ' + esc(date) : '') + '</p>';
+      }
+      return '<span class="status-chip todo">Not started</span><p class="tier-label">Full assessment &middot; 40 questions</p><h3>The full facet-level report</h3><p class="muted">40 statements, 10 specific traits. Confirms your profile and names your top two strengths and top two growth edges.</p><div class="price-tag"><span class="price-was">$9.95</span><span class="price-now">Free</span><span class="price-note">while we are testing this</span></div><a class="btn" href="../">Start the full assessment</a>';
+    }
 
-      $('#resultBand').textContent = full.band + ' range';
-      $('#resultMeta').textContent = formatCompletedAt(full, 'Full facet-level report');
-      $('#resultProfile').textContent = full.profile;
-      const noteEl = $('#alsoQuickCheckNote');
-      const freeDate = free ? completedAtDate(free) : null;
-      if (free) {
-        noteEl.textContent = freeDate ? 'You also completed the quick check on ' + freeDate + '.' : 'You also completed the quick check.';
-        noteEl.hidden = false;
+    function formatCompletedAtIso(iso) {
+      if (!iso) return null;
+      try { return new Date(iso).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }); }
+      catch (error) { return null; }
+    }
+
+    async function renderResultsView(status, userData) {
+      const assessments = status && status.assessments;
+      const quickEntry = assessments && assessments['quick-check'];
+      const fullEntry = assessments && assessments['full-assessment'];
+      $('#myQuickCard').innerHTML = esQuickCardHtml(quickEntry);
+      $('#myFullCard').innerHTML = esFullCardHtml(fullEntry);
+
+      const quickHistory = (quickEntry && quickEntry.recentAttempts) || [];
+      const historyCard = $('#historyCard');
+      if (quickHistory.length > 1) {
+        $('#historyTitle').textContent = 'Quick check history (' + quickHistory.length + ')';
+        const list = $('#historyList');
+        list.innerHTML = '';
+        quickHistory.forEach((entry) => {
+          const row = document.createElement('div');
+          row.className = 'history-row';
+          const entryDate = formatCompletedAtIso(entry.completedAt) || 'Date unknown';
+          row.innerHTML = '<span>' + esc(entryDate) + '</span><b>' + esc(entry.band) + ' &middot; ' + esc(entry.profileLabel) + '</b>';
+          list.appendChild(row);
+        });
+        historyCard.hidden = false;
       } else {
-        noteEl.hidden = true;
+        historyCard.hidden = true;
       }
 
-      const email = userData.email;
-      const name = userData.name || '';
-      $('#emailResultBtn').onclick = async () => {
-        const btn = $('#emailResultBtn');
-        btn.disabled = true; btn.textContent = 'Sending…';
-        const greeting = name ? `Hi ${esc(name)},` : 'Hi,';
-        const renderedHtml = `<p>${greeting}</p><p>Your Executive Readiness Score is in the ${esc(full.band)} range, with a ${esc(full.profile)} profile.</p><p><a href="https://theuntaughtlessons.com/apps/executive-signature/">theuntaughtlessons.com/apps/executive-signature/</a></p>`;
-        const ok = await sendResultEmailPayload({ action: 'EmailReadinessResult', recipient: email, name, subject: 'Your Executive Signature Full Assessment', renderedHtml, page: location.href, source: 'executive-signature-my-results' });
-        btn.disabled = false; btn.textContent = 'Email me this result';
-        $('#resultActionMsg').textContent = ok ? 'On its way to ' + email : 'Could not send right now.';
-      };
-      $('#printResultBtn').onclick = () => window.print();
+      const full = fullEntry && fullEntry.latestAttempt;
+      const quick = quickEntry && quickEntry.latestAttempt;
+      const latest = full || quick;
+      const latestLabel = full ? 'full assessment' : 'quick check';
+      const keepCopy = $('#keepCopyCard');
+      if (latest && userData && userData.email) {
+        const email = userData.email;
+        const name = userData.name || '';
+        $('#emailResultBtn').onclick = async () => {
+          const btn = $('#emailResultBtn');
+          btn.disabled = true; btn.textContent = 'Sending…';
+          const greeting = name ? `Hi ${esc(name)},` : 'Hi,';
+          const renderedHtml = `<p>${greeting}</p><p>Your Executive Readiness Score is in the ${esc(latest.band)} range, with a ${esc(latest.profileLabel)} profile, from your ${esc(latestLabel)}.</p><p><a href="https://theuntaughtlessons.com/apps/executive-signature/">theuntaughtlessons.com/apps/executive-signature/</a></p>`;
+          const ok = await sendResultEmailPayload({ action: 'EmailReadinessResult', recipient: email, name, subject: 'Your Executive Signature result', renderedHtml, page: location.href, source: 'executive-signature-my-results' });
+          btn.disabled = false; btn.textContent = 'Email me this result';
+          $('#resultActionMsg').textContent = ok ? 'On its way to ' + email : 'Could not send right now.';
+        };
+        $('#printResultBtn').onclick = () => window.print();
+        keepCopy.hidden = false;
+      } else {
+        keepCopy.hidden = true;
+      }
 
-      show('resultState');
+      show('resultsView');
+    }
+
+    async function loadAndRenderResults(uid) {
+      const [status, snap] = await Promise.all([
+        getMyEsStatus().catch(() => null),
+        getDoc(doc(db, 'users', uid)).catch(() => null)
+      ]);
+      await renderResultsView(status, snap && snap.exists() ? snap.data() : null);
     }
 
     async function completeSignIn(email) {
@@ -185,8 +242,7 @@
         const credential = await signInWithEmailLink(auth, email, window.location.href);
         window.localStorage.removeItem('emailForSignIn');
         history.replaceState({}, '', location.pathname);
-        const snap = await getDoc(doc(db, 'users', credential.user.uid));
-        await renderResult(snap.exists() ? snap.data() : null);
+        await loadAndRenderResults(credential.user.uid);
       } catch (error) {
         btn.disabled = false; btn.textContent = 'Continue';
         const expired = error && (error.code === 'auth/invalid-action-code' || error.code === 'auth/expired-action-code');
@@ -234,8 +290,7 @@
       onAuthStateChanged(auth, async (user) => {
         if (!user) { show('requestState'); return; }
         try {
-          const snap = await getDoc(doc(db, 'users', user.uid));
-          await renderResult(snap.exists() ? snap.data() : null);
+          await loadAndRenderResults(user.uid);
         } catch (error) {
           show('requestState');
         }
