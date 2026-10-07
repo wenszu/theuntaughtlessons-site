@@ -9,7 +9,9 @@
 //   node scripts/supabase-import.js --project the-untaught-lessons --save-snapshot ~/utl-backups
 //       reads Firestore (read only) and also saves the whole read as one JSON file plus a manifest in that folder,
 //       which must be OUTSIDE this repository (the repository is public and the file holds member data)
-//   node scripts/supabase-import.js --from-snapshot ~/utl-backups/firestore-snapshot-X.json [--apply]
+//   node scripts/supabase-import.js --from-snapshot ~/utl-backups/firestore-snapshot-X.json [--apply] [--exclude-email a@b.c]
+//       --exclude-email (repeatable by commas) leaves one member out of the plan: every document that has that
+//       email or that member's uid as its id, its parent, or anywhere in its fields (counts only are printed)
 //       builds the plan from a saved snapshot instead of reading Firestore, so Supabase can be rebuilt from the
 //       last look at Firebase at any time
 //
@@ -69,6 +71,43 @@ async function confirmTyped(expected) {
 }
 
 // Reads every collection the plan needs. Read-only.
+// Leaves members out of a plan (used for the hand made test member, whose Supabase rows exist already and cannot be
+// deleted because the history tables are append only). Drops every document whose id, parent or fields contain the
+// member's email or uid. Returns counts only.
+function excludeMembers(snapshot, emails) {
+  const wanted = emails.map((e) => String(e).trim().toLowerCase()).filter(Boolean);
+  const removed = {};
+  const mentions = (value, needles) => { const text = JSON.stringify(value || {}).toLowerCase(); return needles.some((n) => text.includes(n)); };
+  const uids = new Set();
+  (snapshot.collections.users || []).forEach((doc) => {
+    if (wanted.includes(String((doc.data || {}).email || "").trim().toLowerCase())) uids.add(doc.id);
+  });
+  Object.values(snapshot.collections).forEach((docs) => docs.forEach((doc) => {
+    if (wanted.includes(String(doc.id).toLowerCase())) {
+      const data = doc.data || {};
+      if (data.uid) uids.add(String(data.uid));
+    }
+  }));
+  const needles = wanted.concat(Array.from(uids).map((u) => u.toLowerCase()));
+  const dropped = new Set();
+  Object.entries(snapshot.collections).forEach(([name, docs]) => {
+    snapshot.collections[name] = docs.filter((doc) => {
+      const drop = needles.includes(String(doc.id).toLowerCase()) || mentions(doc.data, needles);
+      if (drop) { removed[name] = (removed[name] || 0) + 1; dropped.add(`${name}/${doc.id}`); }
+      return !drop;
+    });
+  });
+  const droppedAttempts = new Set(Array.from(dropped).filter((k) => k.startsWith("assessmentAttempts/")).map((k) => k.split("/")[1]));
+  Object.entries(snapshot.subcollections).forEach(([name, rows]) => {
+    snapshot.subcollections[name] = rows.filter((row) => {
+      const drop = uids.has(String(row.parentId)) || droppedAttempts.has(String(row.parentId)) || mentions(row.data, needles);
+      if (drop) removed[name] = (removed[name] || 0) + 1;
+      return !drop;
+    });
+  });
+  return { removed, uidsFound: uids.size };
+}
+
 // A snapshot is the whole Firestore read as one JSON file. Firestore timestamps serialize as
 // {_seconds, _nanoseconds}, which the mapping reads directly. The file holds member data, so it is
 // refused inside this repository (public) and written readable by the owner only.
@@ -350,6 +389,11 @@ async function main() {
       console.table(saved.manifest.counts);
     }
   }
+  if (args["exclude-email"] && args["exclude-email"] !== true) {
+    const result = excludeMembers(snapshot, String(args["exclude-email"]).split(","));
+    console.log(`Excluded ${String(args["exclude-email"]).split(",").length} member(s) from the plan (uids found: ${result.uidsFound}). Documents left out:`);
+    console.table(result.removed);
+  }
   const plan = mapping.buildPlan(snapshot, catalog, { importDate: new Date().toISOString(), runId: "00000000-0000-0000-0000-000000000000" });
 
   console.log("\nSource documents:");
@@ -387,4 +431,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { parseArgs, recordId, writeTable, filterForRerun, saveSnapshot, loadSnapshot, insideRepo, TOP_LEVEL, USER_SUBCOLLECTIONS };
+module.exports = { parseArgs, recordId, writeTable, filterForRerun, saveSnapshot, loadSnapshot, insideRepo, excludeMembers, TOP_LEVEL, USER_SUBCOLLECTIONS };

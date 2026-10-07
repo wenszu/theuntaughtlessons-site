@@ -4,7 +4,7 @@ const assert = require("assert");
 const fs = require("fs");
 const os = require("os");
 const path = require("path");
-const { saveSnapshot, loadSnapshot, insideRepo } = require("../scripts/supabase-import");
+const { saveSnapshot, loadSnapshot, insideRepo, excludeMembers } = require("../scripts/supabase-import");
 const { buildPlan, uuidFor } = require("../scripts/supabase-import-mapping");
 const { snapshot: fixture } = require("./fixtures/import-snapshot");
 const catalog = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "supabase", "seed", "activities.json"), "utf8"));
@@ -45,6 +45,24 @@ const planAfter = buildPlan(loaded.snapshot, catalog, options);
 assert.deepStrictEqual(planAfter.counts, planBefore.counts, "the same plan counts from the saved file");
 assert.deepStrictEqual(planAfter.sourceCounts, planBefore.sourceCounts);
 assert.deepStrictEqual(JSON.parse(JSON.stringify(planAfter.tables || planAfter)), JSON.parse(JSON.stringify(planBefore.tables || planBefore)), "identical rows from the saved file");
+
+
+// Leaving one member out of the plan: nothing of theirs remains, everyone else is unchanged.
+const cloned = JSON.parse(JSON.stringify(original));
+const email = "alice@example.com";
+const leftOut = excludeMembers(cloned, [email.toUpperCase()]);
+assert.ok(leftOut.removed.authorized_members >= 1, "the member document is left out");
+assert.ok(leftOut.uidsFound >= 1, "the member's uid was found through the users document");
+assert.ok(!JSON.stringify(cloned).toLowerCase().includes(email), "no remaining document mentions the member");
+const planWithout = buildPlan(cloned, catalog, options);
+assert.equal(planWithout.counts.people, planBefore.counts.people - 1, "one person fewer in the plan");
+// The member's own records that point at their customer id are skipped, and only those.
+const knownBefore = new Set(planBefore.exceptions.map((e) => `${e.source}|${e.reason}`));
+const newExceptions = planWithout.exceptions.filter((e) => !knownBefore.has(`${e.source}|${e.reason}`));
+assert.ok(newExceptions.length > 0 && newExceptions.every((e) => /unknown customerId|attempt not imported/.test(e.reason)), "only records of the left out member are skipped");
+assert.ok(newExceptions.every((e) => /enr-alice|consent-1|ent-1|att-1/.test(e.source)), "and only the left out member's records");
+const untouched = excludeMembers(JSON.parse(JSON.stringify(original)), ["nobody@example.test"]);
+assert.deepStrictEqual(untouched.removed, {}, "an unknown email removes nothing");
 
 // Refusals.
 assert.ok(insideRepo(path.join(__dirname, "..", "backups")), "a folder inside the repository is detected");
