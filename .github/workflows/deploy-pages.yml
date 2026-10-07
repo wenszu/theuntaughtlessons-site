@@ -50,6 +50,9 @@ jobs:
             --exclude 'tests/' \
             --exclude 'reference/' \
             --exclude 'visual/' \
+            --exclude 'supabase/' \
+            --exclude 'tools/' \
+            --exclude 'docs/SUPABASE_*' \
             --exclude '.env*' \
             --exclude '*.log'
           touch "$RUNNER_TEMP/site/.nojekyll"
