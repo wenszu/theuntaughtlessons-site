@@ -72,10 +72,22 @@ const rewardRows = [
   { id: "r-3", person_id: "p2", program_id: "tsa", entry_key: "video:p1-l1" }
 ];
 const existingRewards = new Map([["p1|tsa|daily-streak:2026-10-07", "tester-row"], ["p1|tsa|video:p1-l1", "r-1"]]);
-const reward = filterForRerun("reward_ledger", rewardRows, new Map(), existingRewards);
+const reward = filterForRerun("reward_ledger", rewardRows, new Map(), { reward_ledger: existingRewards });
 assert.deepStrictEqual(reward.skipped.map((r) => r.id), ["r-2"], "only the entry held under another id is skipped");
 assert.deepStrictEqual(reward.write.map((r) => r.id), ["r-1", "r-3"], "the same id and a new entry are written");
-assert.deepStrictEqual(filterForRerun("activity_progress", rewardRows, new Map(), existingRewards).skipped, [], "other tables are unaffected");
+assert.deepStrictEqual(filterForRerun("activity_progress", rewardRows, new Map(), { reward_ledger: existingRewards }).skipped, [], "other tables are unaffected");
+
+
+// Visit tracking and stability events follow the same rule through their own natural keys.
+const sessions = [
+  { id: "s-1", person_id: "p1", kind: "session", session_key: "abc" },
+  { id: "s-2", person_id: "p1", kind: "activity", session_key: "abc" }
+];
+const sessionFilter = filterForRerun("engagement_sessions", sessions, new Map(), { engagement_sessions: new Map([["p1|session|abc", "tester-session"]]) });
+assert.deepStrictEqual(sessionFilter.skipped.map((r) => r.id), ["s-1"], "a session held under another id is skipped, the other kind is written");
+const events = [{ id: "e-1", person_id: "p1", event_key: "k1" }, { id: "e-2", person_id: null, event_key: "k2" }];
+const eventFilter = filterForRerun("stability_events", events, new Map(), { stability_events: new Map([["p1|k1", "other"]]) });
+assert.deepStrictEqual(eventFilter.write.map((r) => r.id), ["e-2"], "only the new stability event is written");
 
 // Refusals.
 assert.ok(insideRepo(path.join(__dirname, "..", "backups")), "a folder inside the repository is detected");

@@ -254,12 +254,18 @@ function recordId(table, row) {
 }
 
 // Rows an apply should not write again because the database already has them. Pure, so it is tested locally.
-function filterForRerun(table, rows, existingVersions, existingRewards = new Map()) {
+// Tables whose rows are also unique by a natural key besides the id. A row the database already holds under the same
+// natural key but another id (for example one a tester run copied from a browser) is left as it is.
+const NATURAL_KEYS = {
+  reward_ledger: { columns: "person_id,program_id,entry_key", of: (r) => `${r.person_id}|${r.program_id}|${r.entry_key}` },
+  engagement_sessions: { columns: "person_id,kind,session_key", of: (r) => `${r.person_id}|${r.kind}|${r.session_key}` },
+  stability_events: { columns: "person_id,event_key", of: (r) => `${r.person_id}|${r.event_key}` }
+};
+
+function filterForRerun(table, rows, existingVersions, existingNatural = {}) {
   const keep = (row) => {
-    // A reward entry that the database already holds under the same (person, program, entry key) but another id,
-    // for example one a tester run copied from a browser, is left as it is: the table allows one row per entry key.
-    if (table === "reward_ledger") {
-      const other = existingRewards.get(`${row.person_id}|${row.program_id}|${row.entry_key}`);
+    if (NATURAL_KEYS[table] && existingNatural[table]) {
+      const other = existingNatural[table].get(NATURAL_KEYS[table].of(row));
       return !other || other === row.id;
     }
     if (table === "assessment_versions") return !existingVersions.has(row.id);
@@ -294,12 +300,15 @@ async function apply(plan, catalogChecksum, args) {
   // Published assessment versions are frozen: the database refuses scoring writes for them, even an insert
   // that would be skipped as a duplicate. So a rerun leaves versions that already exist alone.
   const existingVersions = new Map((await client.select("assessment_versions", "select=id,status,migration_run_id&limit=10000")).map((v) => [v.id, v]));
-  // The server returns at most one page per request, so read the existing reward entries page by page.
-  const existingRewards = new Map();
-  for (let offset = 0; ; offset += 1000) {
-    const page = await client.select("reward_ledger", `select=id,person_id,program_id,entry_key&order=id&limit=1000&offset=${offset}`);
-    page.forEach((r) => existingRewards.set(`${r.person_id}|${r.program_id}|${r.entry_key}`, r.id));
-    if (page.length < 1000) break;
+  // The server returns at most one page per request, so read the existing keys page by page.
+  const existingNatural = {};
+  for (const [name, spec] of Object.entries(NATURAL_KEYS)) {
+    existingNatural[name] = new Map();
+    for (let offset = 0; ; offset += 1000) {
+      const page = await client.select(name, `select=id,${spec.columns}&order=id&limit=1000&offset=${offset}`);
+      page.forEach((r) => existingNatural[name].set(spec.of(r), r.id));
+      if (page.length < 1000) break;
+    }
   }
   for (const table of mapping.WRITE_ORDER) {
     const rows = plan.tables[table];
@@ -307,7 +316,7 @@ async function apply(plan, catalogChecksum, args) {
     const mode = mapping.WRITE_MODE[table];
     const realTable = table.replace(/_(publish|current)$/, "");
     const before = results.length;
-    const rerun = filterForRerun(table, rows, existingVersions, existingRewards);
+    const rerun = filterForRerun(table, rows, existingVersions, existingNatural);
     let toWrite = rerun.write;
     rerun.skipped.forEach((row) => results.push({ table: realTable, row, status: "skipped_existing" }));
     // Versions created by an earlier run that had no run id yet take this run's id, so a rollback finds them.
