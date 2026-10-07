@@ -4,7 +4,7 @@ const assert = require("assert");
 const fs = require("fs");
 const os = require("os");
 const path = require("path");
-const { saveSnapshot, loadSnapshot, insideRepo, excludeMembers } = require("../scripts/supabase-import");
+const { saveSnapshot, loadSnapshot, insideRepo, excludeMembers, filterForRerun } = require("../scripts/supabase-import");
 const { buildPlan, uuidFor } = require("../scripts/supabase-import-mapping");
 const { snapshot: fixture } = require("./fixtures/import-snapshot");
 const catalog = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "supabase", "seed", "activities.json"), "utf8"));
@@ -63,6 +63,19 @@ assert.ok(newExceptions.length > 0 && newExceptions.every((e) => /unknown custom
 assert.ok(newExceptions.every((e) => /enr-alice|consent-1|ent-1|att-1/.test(e.source)), "and only the left out member's records");
 const untouched = excludeMembers(JSON.parse(JSON.stringify(original)), ["nobody@example.test"]);
 assert.deepStrictEqual(untouched.removed, {}, "an unknown email removes nothing");
+
+
+// Reward entries: one that the database already holds under another id (a tester copy) is skipped, the same id is not.
+const rewardRows = [
+  { id: "r-1", person_id: "p1", program_id: "tsa", entry_key: "video:p1-l1" },
+  { id: "r-2", person_id: "p1", program_id: "tsa", entry_key: "daily-streak:2026-10-07" },
+  { id: "r-3", person_id: "p2", program_id: "tsa", entry_key: "video:p1-l1" }
+];
+const existingRewards = new Map([["p1|tsa|daily-streak:2026-10-07", "tester-row"], ["p1|tsa|video:p1-l1", "r-1"]]);
+const reward = filterForRerun("reward_ledger", rewardRows, new Map(), existingRewards);
+assert.deepStrictEqual(reward.skipped.map((r) => r.id), ["r-2"], "only the entry held under another id is skipped");
+assert.deepStrictEqual(reward.write.map((r) => r.id), ["r-1", "r-3"], "the same id and a new entry are written");
+assert.deepStrictEqual(filterForRerun("activity_progress", rewardRows, new Map(), existingRewards).skipped, [], "other tables are unaffected");
 
 // Refusals.
 assert.ok(insideRepo(path.join(__dirname, "..", "backups")), "a folder inside the repository is detected");
