@@ -985,7 +985,8 @@ function buildPlan(snapshot, catalog, options = {}) {
       signatory_name: text(data.signatoryName, 200),
       signatory_title: text(data.signatoryTitle, 200),
       program_version: text(data.programVersion || (issuance && issuance.data.programVersion), 80),
-      status: oneOf(data.status, ["issued", "revoked", "superseded"], data.status === "active" ? "issued" : "issued"),
+      // A reissued (replaced) certificate is superseded, so it never verifies as the current one; active and anything unknown read as issued.
+      status: data.status === "replaced" ? "superseded" : oneOf(data.status, ["issued", "revoked", "superseded"], "issued"),
       revoked_at: data.status === "revoked" ? (iso(data.revokedAt) || importDate) : null,
       required_activity_ids: required.map((k) => activities.resolve(k)).filter(Boolean),
       completion_verified_at: issuance ? iso(issuance.data.completionVerifiedAt) : null,

@@ -9,7 +9,7 @@ function fakeFetch(answers = []) {
     calls.push({ url, method: init.method, headers: init.headers, body: init.body ? JSON.parse(init.body) : undefined });
     const next = answers.length ? answers.shift() : { status: 201 };
     if (next.throw) throw next.throw;
-    return { status: next.status, ok: next.status >= 200 && next.status < 300 };
+    return { status: next.status, ok: next.status >= 200 && next.status < 300, json: async () => next.rows || [] };
   };
   impl.calls = calls;
   return impl;
@@ -77,6 +77,14 @@ function fakeFetch(answers = []) {
   assert.equal(f.calls[0].method, "PATCH");
   assert.equal(f.calls[0].url, "https://czljyikfavtjgqcibdda.supabase.co/rest/v1/credentials?credential_code=eq.UTL-1&status=eq.issued");
   assert.deepStrictEqual(f.calls[0].body, { status: "revoked" });
+  // expectRow: a PATCH that matches no row is reported, one that matches is ok.
+  f = fakeFetch([{ status: 200, rows: [] }, { status: 200, rows: [{ id: "x" }] }, { status: 200, rows: [] }]);
+  mirror = createMirror({ env: onEnv, fetchImpl: f, logger });
+  assert.deepStrictEqual(await mirror.update("credentials", { id: "x" }, { status: "revoked" }, { expectRow: true }), { ok: false, error: "no-row" });
+  assert.equal(f.calls[0].headers.Prefer, "return=representation");
+  assert.deepStrictEqual(await mirror.update("credentials", { id: "x" }, { status: "revoked" }, { expectRow: true }), { ok: true });
+  assert.deepStrictEqual(await mirror.update("credentials", { id: "x" }, { status: "revoked" }), { ok: true }, "without expectRow an empty answer is not an error");
+  assert.equal(f.calls[2].headers.Prefer, "return=minimal");
   assert.deepStrictEqual(await mirror.update("credentials", {}, { status: "x" }), { ok: false, error: "invalid" }, "an update with no match is refused");
   assert.deepStrictEqual(await mirror.update("credentials", { id: 1 }, null), { ok: false, error: "invalid" });
 

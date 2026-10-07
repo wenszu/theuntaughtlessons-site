@@ -126,10 +126,10 @@ function programFor(value, fallback) {
   return fallback;
 }
 
-// Exactly the import's status rule: active and anything it does not know (including replaced) read as issued,
-// revoked stays revoked. See the final report: the import maps replaced to issued, not superseded.
+// Exactly the import's status rule: a replaced (reissued) certificate is superseded so it never verifies as the
+// current one; active and anything it does not know read as issued; revoked stays revoked.
 function statusFor(value) {
-  return oneOf(value, CREDENTIAL_STATUSES, "issued");
+  return value === "replaced" ? "superseded" : oneOf(value, CREDENTIAL_STATUSES, "issued");
 }
 
 // The verification code is the document id; credentialId and credentialCode are the import's fallbacks.
@@ -187,7 +187,7 @@ function rowsForCredential(doc, context) {
       signatory_name: text(data.signatoryName, 200),
       signatory_title: text(data.signatoryTitle, 200),
       program_version: text(data.programVersion || (issuance && issuance.data.programVersion), 80),
-      status: oneOf(data.status, CREDENTIAL_STATUSES, "issued"),
+      status: statusFor(data.status),
       revoked_at: data.status === "revoked" ? (iso(data.revokedAt) || now) : null,
       required_activity_ids: required.map((k) => resolve(k)).filter(Boolean),
       completion_verified_at: issuance ? iso(issuance.data.completionVerifiedAt) : null,
@@ -207,7 +207,7 @@ function patchForCredentialStatus(publicData, context) {
   const iso = makeIso(now);
   const data = publicData || {};
   return {
-    status: oneOf(data.status, CREDENTIAL_STATUSES, "issued"),
+    status: statusFor(data.status),
     revoked_at: data.status === "revoked" ? (iso(data.revokedAt) || now) : null
   };
 }
@@ -255,9 +255,11 @@ async function upsertCredentialRow(mirror, row) {
   if (row.enrollment_id) ladder.push(Object.assign({}, row, { enrollment_id: null }));
   if (row.person_id) ladder.push(Object.assign({}, row, { enrollment_id: null, person_id: null }));
   let result = { ok: false, error: "no-rows" };
-  for (const candidate of ladder) {
-    result = await mirror.upsert("credentials", [candidate], { conflict: "id", label: LABEL });
-    if (result.ok || result.skipped || result.error !== "http/409") return result;
+  for (let step = 0; step < ladder.length; step += 1) {
+    result = await mirror.upsert("credentials", [ladder[step]], { conflict: "id", label: LABEL });
+    // degraded: written without its enrollment or person link, which the next catch up import fills in
+    if (result.ok) return step > 0 ? Object.assign({}, result, { degraded: true }) : result;
+    if (result.skipped || result.error !== "http/409") return result;
   }
   return result;
 }
@@ -280,7 +282,7 @@ async function mirrorCredentialStatus(mirror, input, context) {
     const code = codeFor(value.credentialId, {});
     if (!code) return { ok: false, error: "no-code" };
     const patch = patchForCredentialStatus(value.publicData, context);
-    return mirror.update("credentials", { id: credentialRowId(code) }, patch, { label: LABEL });
+    return mirror.update("credentials", { id: credentialRowId(code) }, patch, { label: LABEL, expectRow: true });
   });
 }
 
@@ -292,7 +294,7 @@ async function mirrorCredentialName(mirror, input) {
     if (!code) return { ok: false, error: "no-code" };
     const patch = patchForRecipientName(value.recipientName);
     if (!patch) return { ok: false, error: "no-name" };
-    return mirror.update("credentials", { id: credentialRowId(code) }, patch, { label: LABEL });
+    return mirror.update("credentials", { id: credentialRowId(code) }, patch, { label: LABEL, expectRow: true });
   });
 }
 
@@ -305,7 +307,7 @@ async function mirrorCredentialReissue(mirror, input, context) {
     let skipped = false;
     let error;
     for (const step of built.credential_updates) {
-      const result = await mirror.update("credentials", step.match, step.patch, { label: LABEL });
+      const result = await mirror.update("credentials", step.match, step.patch, { label: LABEL, expectRow: true });
       if (result.skipped) skipped = true;
       if (!result.ok && !result.skipped) { ok = false; error = result.error; }
     }

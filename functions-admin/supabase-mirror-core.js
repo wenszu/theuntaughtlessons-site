@@ -39,7 +39,7 @@ function createMirror(options = {}) {
     }
   }
 
-  async function send(method, path, body, extraHeaders) {
+  async function send(method, path, body, extraHeaders, wantRows) {
     const controller = typeof AbortController === "function" ? new AbortController() : null;
     const timer = controller ? setTimeout(() => controller.abort(), timeoutMs) : null;
     try {
@@ -49,7 +49,11 @@ function createMirror(options = {}) {
         body: body === undefined ? undefined : JSON.stringify(body),
         signal: controller ? controller.signal : undefined
       });
-      return { status: Number(response.status) || 0, ok: Boolean(response.ok) };
+      let rows = null;
+      if (wantRows && response.ok && typeof response.json === "function") {
+        try { rows = await response.json(); } catch (error) { rows = null; }
+      }
+      return { status: Number(response.status) || 0, ok: Boolean(response.ok), rows };
     } finally {
       if (timer !== null) clearTimeout(timer);
     }
@@ -81,17 +85,24 @@ function createMirror(options = {}) {
     }
   }
 
-  // update(table, { column: value }, patch, { label }) updates the rows that equal every match column.
+  // update(table, { column: value }, patch, { label, expectRow }) updates the rows that equal every match column.
   async function update(table, match, patch, opts = {}) {
     const label = String(opts.label || table);
     if (!on) return { ok: false, skipped: true };
     const filters = Object.entries(match || {}).map(([column, value]) => `${encodeURIComponent(column)}=eq.${encodeURIComponent(String(value))}`);
     if (!filters.length || !patch || typeof patch !== "object") return { ok: false, error: "invalid" };
     try {
-      const result = await send("PATCH", `/rest/v1/${encodeURIComponent(table)}?${filters.join("&")}`, patch, { Prefer: "return=minimal" });
+      // expectRow: true asks for the changed rows back so "no row matched" is reported instead of looking like success
+      // (the row was never mirrored; the next catch up import creates it).
+      const expectRow = opts.expectRow === true;
+      const result = await send("PATCH", `/rest/v1/${encodeURIComponent(table)}?${filters.join("&")}`, patch, { Prefer: expectRow ? "return=representation" : "return=minimal" }, expectRow);
       if (!result.ok) {
         note("warn", label, { table, status: result.status });
         return { ok: false, error: `http/${result.status}` };
+      }
+      if (expectRow && Array.isArray(result.rows) && result.rows.length === 0) {
+        note("warn", label, { table, status: "no-row" });
+        return { ok: false, error: "no-row" };
       }
       return { ok: true };
     } catch (error) {

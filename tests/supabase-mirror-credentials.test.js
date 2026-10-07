@@ -230,7 +230,7 @@ const sentinel = () => new ServerTimestampTransform();
     const m = recorder();
     const r1 = await cred.mirrorCredentialStatus(m, { credentialId: 'UTL-TSA-REVOKED0000', publicData: { status: 'revoked', revokedAt: ts('2026-09-20T12:00:00Z') } }, { now: NOW });
     assert.equal(r1.ok, true);
-    assert.deepStrictEqual(m.calls[0], { op: 'update', table: 'credentials', match: { id: importUuidFor('credential:UTL-TSA-REVOKED0000') }, patch: { status: 'revoked', revoked_at: '2026-09-20T12:00:00.000Z' }, opts: { label: 'credentials' } });
+    assert.deepStrictEqual(m.calls[0], { op: 'update', table: 'credentials', match: { id: importUuidFor('credential:UTL-TSA-REVOKED0000') }, patch: { status: 'revoked', revoked_at: '2026-09-20T12:00:00.000Z' }, opts: { label: 'credentials', expectRow: true } });
     await cred.mirrorCredentialStatus(m, { credentialId: 'UTL-TSA-REVOKED0000', publicData: { status: 'active', reactivatedAt: ts('2026-09-21T00:00:00Z') } }, { now: NOW });
     assert.deepStrictEqual(m.calls[1].patch, { status: 'issued', revoked_at: null });
     assert.deepStrictEqual(await cred.mirrorCredentialStatus(m, { credentialId: 'no', publicData: {} }, {}), { ok: false, error: 'no-code' });
@@ -250,7 +250,7 @@ const sentinel = () => new ServerTimestampTransform();
     const result = await cred.mirrorCredentialReissue(m, { oldId: 'UTL-TSA-OLDONE00000', replacement: { id: 'UTL-TSA-NEWONE00000', data: { credentialId: 'UTL-TSA-NEWONE00000', recipientName: 'Orphan', credentialTitle: 'T', issuedAt: ts('2026-09-03T00:00:00Z'), status: 'active', reissuedAt: sentinel(), programId: 'think-speak-act-executive' } }, issuance: { id: 'uid-orphan_tsa-2026-v1', data: { userId: 'uid-orphan', email: 'orphan@example.com', credentialId: 'UTL-TSA-OLDONE00000', requiredExercises: ['p1-e1'], createdAt: ts('2026-09-03T00:00:00Z') } } }, { now: NOW });
     assert.equal(result.ok, true);
     assert.deepStrictEqual(m.calls.map((c) => c.op), ['update', 'upsert']);
-    assert.deepStrictEqual(m.calls[0].patch, { status: 'issued', revoked_at: null, legacy_issuance_id: null });
+    assert.deepStrictEqual(m.calls[0].patch, { status: 'superseded', revoked_at: null, legacy_issuance_id: null });
     assert.equal(m.calls[1].rows[0].credential_code, 'UTL-TSA-NEWONE00000');
     assert.equal(m.calls[1].rows[0].legacy_issuance_id, 'credential_issuance/uid-orphan_tsa-2026-v1');
   }
@@ -326,6 +326,22 @@ const sentinel = () => new ServerTimestampTransform();
     assert.equal((await cred.mirrorIssuedCredential(throwing, aliceDocs, { now: NOW })).ok, false);
     assert.equal((await cred.mirrorCredentialStatus(throwing, { credentialId: 'UTL-TSA-REVOKED0000', publicData: {} }, {})).ok, false);
     assert.equal(m.calls.length, 0);
+  }
+
+  // A refused link (409) is retried without the enrollment, then without the person, and the result says so.
+  {
+    const answers = [409, 409, 201];
+    const seen = [];
+    const fetchImpl = async (url, init) => { seen.push(JSON.parse(init.body)[0]); const status = answers.shift(); return { status, ok: status < 300, json: async () => [] }; };
+    const live = createMirror({ env: { SUPABASE_MIRROR: 'on', SUPABASE_SERVICE_ROLE_KEY: 'k' }, fetchImpl, logger: { warn() {}, log() {} } });
+    const result = await cred.mirrorIssuedCredential(live, aliceDocs, { now: NOW });
+    assert.equal(result.ok, true);
+    assert.equal(result.degraded, true, 'a row written without its links is marked degraded');
+    assert.ok(seen[0].enrollment_id && seen[0].person_id);
+    assert.equal(seen[1].enrollment_id, null);
+    assert.equal(seen[2].person_id, null);
+    const clean = createMirror({ env: { SUPABASE_MIRROR: 'on', SUPABASE_SERVICE_ROLE_KEY: 'k' }, fetchImpl: async () => ({ status: 201, ok: true, json: async () => [] }), logger: { warn() {}, log() {} } });
+    assert.equal((await cred.mirrorIssuedCredential(clean, aliceDocs, { now: NOW })).degraded, undefined, 'a clean write is not degraded');
   }
 
   console.log('supabase-mirror-credentials tests passed');
