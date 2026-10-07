@@ -88,6 +88,18 @@ function fakeFetch(answers = []) {
   assert.deepStrictEqual(await mirror.update("credentials", {}, { status: "x" }), { ok: false, error: "invalid" }, "an update with no match is refused");
   assert.deepStrictEqual(await mirror.update("credentials", { id: 1 }, null), { ok: false, error: "invalid" });
 
+  // select: reads rows, reports errors, off does nothing, never throws.
+  f = fakeFetch([{ status: 200, rows: [{ id: "a", status: "active" }] }, { status: 500 }, { throw: Object.assign(new Error("boom"), { name: "TypeError" }) }]);
+  mirror = createMirror({ env: onEnv, fetchImpl: f, logger });
+  assert.deepStrictEqual(await mirror.select("enrollments", "select=id,status&person_id=eq.p1&limit=5"), { ok: true, rows: [{ id: "a", status: "active" }] });
+  assert.equal(f.calls[0].method, "GET");
+  assert.equal(f.calls[0].url, "https://czljyikfavtjgqcibdda.supabase.co/rest/v1/enrollments?select=id,status&person_id=eq.p1&limit=5");
+  assert.equal(f.calls[0].body, undefined);
+  assert.deepStrictEqual(await mirror.select("enrollments", "select=id"), { ok: false, error: "http/500" });
+  assert.deepStrictEqual(await mirror.select("enrollments", "select=id"), { ok: false, error: "network" });
+  assert.deepStrictEqual(await createMirror({ env: {}, fetchImpl: fakeFetch(), logger }).select("enrollments", "select=id"), { ok: false, skipped: true });
+  assert.deepStrictEqual(await createMirror({ env: onEnv, fetchImpl: fakeFetch([{ status: 200, rows: [{ id: "z" }] }]), logger }).run("s", async (m) => m.select("people", "select=id")), { ok: true, rows: [{ id: "z" }] }, "run passes select to a step");
+
   // run turns a thrown error into a result; startMirror never throws or waits.
   mirror = createMirror({ env: onEnv, fetchImpl: fakeFetch(), logger });
   assert.deepStrictEqual(await mirror.run("step", async () => { throw new Error("nope"); }), { ok: false, error: "step-failed" });

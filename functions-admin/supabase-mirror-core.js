@@ -111,11 +111,30 @@ function createMirror(options = {}) {
     }
   }
 
+  // select(table, "select=id,status&person_id=eq.<uuid>&limit=10") reads rows (service role) so a mirror write can
+  // look at what a row already holds and change only what it should. The caller encodes the values in the query.
+  // Returns { ok: true, rows } or { ok: false, error } and never throws.
+  async function select(table, query, opts = {}) {
+    const label = String(opts.label || table);
+    if (!on) return { ok: false, skipped: true };
+    try {
+      const result = await send("GET", `/rest/v1/${encodeURIComponent(table)}?${String(query || "")}`, undefined, { Accept: "application/json" }, true);
+      if (!result.ok) {
+        note("warn", label, { table, status: result.status });
+        return { ok: false, error: `http/${result.status}` };
+      }
+      return { ok: true, rows: Array.isArray(result.rows) ? result.rows : [] };
+    } catch (error) {
+      note("warn", label, { table, error: error && error.name === "AbortError" ? "timeout" : "network" });
+      return { ok: false, error: error && error.name === "AbortError" ? "timeout" : "network" };
+    }
+  }
+
   // run(label, async (mirror) => ...) runs a mirror step and turns any thrown error into { ok: false }.
   async function run(label, step) {
     if (!on) return { ok: false, skipped: true };
     try {
-      const value = await step({ upsert, update });
+      const value = await step({ upsert, update, select });
       return value && typeof value === "object" && "ok" in value ? value : { ok: true, value };
     } catch (error) {
       note("warn", String(label), { error: "step-failed" });
@@ -123,7 +142,7 @@ function createMirror(options = {}) {
     }
   }
 
-  return { enabled, upsert, update, run };
+  return { enabled, upsert, update, select, run };
 }
 
 // Fire and forget: starts the mirror step and returns at once. Nothing it does can reach the caller.
