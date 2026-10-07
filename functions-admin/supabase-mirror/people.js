@@ -96,6 +96,16 @@ function text(value, max) {
   return String(value == null ? "" : value).trim().slice(0, max);
 }
 
+// A date the document states: undefined when the key is absent or its value cannot be read (not stated, the column
+// is left alone), null when it is explicitly empty (cleared), else the ISO string.
+function statedDate(data, key) {
+  if (!has(data, key)) return undefined;
+  const value = data[key];
+  if (value == null || value === "") return null;
+  const parsed = iso(value);
+  return parsed === null ? undefined : parsed;
+}
+
 function has(object, key) {
   return Boolean(object) && Object.prototype.hasOwnProperty.call(object, key);
 }
@@ -246,7 +256,9 @@ function buildPerson(sources, ctx) {
     if (stated("firstName")) row.first_name = text(data.firstName, 120);
     if (stated("lastName")) row.last_name = text(data.lastName, 120);
     if (stated("displayName")) row.display_name = text(data.displayName, 200);
-    if (stated("accountStatus")) row.account_status = ACCOUNT_STATUS_FROM_CUSTOMER[data.accountStatus] || "active";
+    // An unknown status value is "not stated" for a live write; the import maps it to active.
+    if (complete) row.account_status = ACCOUNT_STATUS_FROM_CUSTOMER[data.accountStatus] || "active";
+    else if (has(data, "accountStatus") && ACCOUNT_STATUS_FROM_CUSTOMER[data.accountStatus]) row.account_status = ACCOUNT_STATUS_FROM_CUSTOMER[data.accountStatus];
     const activity = iso(data.lastActivityAt);
     if (complete || activity) row.last_activity_at = activity;
     row.legacy_firestore_id = `customers/${customer.id}`;
@@ -290,18 +302,21 @@ function buildProfile(personId, sources, ctx) {
     if (data.photoURL) row.photo_url = text(data.photoURL, 2000);
     if (typeof data.feedbackEnabled === "boolean") row.feedback_enabled = data.feedbackEnabled;
     if (Array.isArray(data.signInProviders)) row.sign_in_providers = data.signInProviders.map(String).slice(0, 5);
-    if (data.lastSignInProvider) row.last_sign_in_provider = oneOf(data.lastSignInProvider, PROVIDERS, "");
+    if (data.lastSignInProvider && (complete || PROVIDERS.includes(data.lastSignInProvider))) row.last_sign_in_provider = oneOf(data.lastSignInProvider, PROVIDERS, "");
   }
   if (member) {
     const data = member.data;
     // Patch-like: only the keys the member document states (a key set to null states "cleared").
     const stated = (key) => complete || has(data, key);
     if (complete ? data.goals : has(data, "goals")) row.goals = text(data.goals, 2000);
-    if (complete ? data.avatarIconId : has(data, "avatarIconId")) row.avatar_icon_id = oneOf(data.avatarIconId, AVATARS, null);
+    // An unknown avatar or provider is "not stated" for a live write (it must not overwrite a stored value).
+    if (complete ? data.avatarIconId : has(data, "avatarIconId") && (!data.avatarIconId || AVATARS.includes(data.avatarIconId))) row.avatar_icon_id = oneOf(data.avatarIconId, AVATARS, null);
     if (typeof data.feedbackEnabled === "boolean" && row.feedback_enabled == null) row.feedback_enabled = data.feedbackEnabled;
-    if (stated("firstLoginAt")) row.first_login_at = iso(data.firstLoginAt);
-    if (stated("lastLoginAt")) row.last_login_at = iso(data.lastLoginAt);
-    if (!row.last_sign_in_provider && data.lastSignInProvider) row.last_sign_in_provider = oneOf(data.lastSignInProvider, PROVIDERS, "");
+    const firstLogin = complete ? iso(data.firstLoginAt) : statedDate(data, "firstLoginAt");
+    const lastLogin = complete ? iso(data.lastLoginAt) : statedDate(data, "lastLoginAt");
+    if (complete || firstLogin !== undefined) row.first_login_at = firstLogin;
+    if (complete || lastLogin !== undefined) row.last_login_at = lastLogin;
+    if (!row.last_sign_in_provider && data.lastSignInProvider && (complete || PROVIDERS.includes(data.lastSignInProvider))) row.last_sign_in_provider = oneOf(data.lastSignInProvider, PROVIDERS, "");
     if (!(row.sign_in_providers && row.sign_in_providers.length) && Array.isArray(data.signInProviders)) row.sign_in_providers = data.signInProviders.map(String).slice(0, 5);
     if (stated("googleGroupAdded")) row.google_group_added = data.googleGroupAdded === true;
   }
@@ -711,7 +726,7 @@ function personForCustomer(customerId, ctx) {
 // failure is returned with the list of failed steps.
 
 const enc = encodeURIComponent;
-const PERSON_COLUMNS = "id,primary_email,auth_uid,display_name,account_status,last_activity_at,legacy_firestore_id";
+const PERSON_COLUMNS = "id,primary_email,auth_uid,first_name,last_name,display_name,account_status,last_activity_at,legacy_firestore_id";
 
 async function read(api, table, query, label) {
   if (!api || typeof api.select !== "function") return { ok: false, error: "no-select" };
@@ -741,7 +756,9 @@ async function findPerson(api, spec) {
     if (!r.ok || r.person) return r;
     const held = await read(api, "person_emails", `select=person_id,status&email=eq.${enc(email)}&limit=5`, "person_emails lookup");
     if (!held.ok) return held;
-    const hit = held.rows.find((row) => row.status === "active") || held.rows[0];
+    // An active holder only. A historical row is accepted for the exact previous address the caller passed, never
+    // for an address that once belonged to someone else.
+    const hit = held.rows.find((row) => row.status === "active") || (email === spec.previousEmail ? held.rows[0] : null);
     if (hit) {
       r = await peopleWhere(api, `id=eq.${enc(hit.person_id)}`);
       if (!r.ok || r.person) return r;
@@ -778,8 +795,8 @@ async function insertIfMissing(api, table, rows, conflict) {
   return send(api, table, rows, { conflict, ignoreDuplicates: true, label: `${table} insert` });
 }
 
-async function sendUpdate(api, step, table, match, patch) {
-  const result = await api.update(table, match, patch, { label: step });
+async function sendUpdate(api, step, table, match, patch, expectRow) {
+  const result = await api.update(table, match, patch, expectRow ? { label: step, expectRow: true } : { label: step });
   return result && result.ok === true ? { ok: true } : fail(step, result);
 }
 
@@ -806,13 +823,14 @@ function nowIso(ctx) {
 const isEmpty = (value) => value == null || value === "";
 const later = (a, b) => Date.parse(a) > Date.parse(b);
 
-// What to do with people.account_status. Customer documents are authoritative for their own statuses. A member
-// document may archive (never over deletion_pending) and may bring an archived account back to active; it never
-// touches restricted or deletion_pending and never downgrades anything else.
-function decideAccountStatus(current, desired) {
+// What to do with people.account_status. Nothing is ever written for an absent status. An archive never replaces
+// deletion_pending. A customer document that explicitly states active wins over restricted, deletion_pending and
+// archived (Firestore says so); a member document only brings an archived account back to active, it never
+// touches restricted or deletion_pending. Any other stated customer status is written.
+function decideAccountStatus(current, desired, source) {
   if (!desired || desired === current) return null;
   if (desired === "archived") return current === "deletion_pending" ? null : desired;
-  if (desired === "active") return current === "archived" ? "active" : null;
+  if (desired === "active") return source === "customer" || current === "archived" ? "active" : null;
   return desired;
 }
 
@@ -822,6 +840,8 @@ function decideAccountStatus(current, desired) {
 // existing different one is never written and is reported as { ok:false, conflict:true, error:"auth-uid-conflict" }.
 async function patchPerson(api, existing, row, opts) {
   if (!existing) {
+    // A person is never created without an address (primary_email is not null and must not be empty).
+    if (!row.primary_email) return { ok: false, step: "people", error: "no-email", personId: row.id };
     const insert = Object.assign({}, row);
     if (opts.desiredStatus && opts.desiredStatus !== "active") insert.account_status = opts.desiredStatus;
     const inserted = await insertIfMissing(api, "people", [insert], "id");
@@ -837,6 +857,10 @@ async function patchPerson(api, existing, row, opts) {
       if (!value) return;
       if (isEmpty(existing.auth_uid)) update.auth_uid = value;
       else if (existing.auth_uid !== value) conflict = true;
+    } else if (column === "first_name" || column === "last_name") {
+      // Never an empty name over a name that is there.
+      if (value && value !== existing[column]) update[column] = value;
+      else if (!value && isEmpty(existing[column]) && existing[column] !== value) update[column] = value;
     } else if (column === "display_name") {
       if (value && (!opts.fillOnly || isEmpty(existing.display_name)) && value !== existing.display_name) update.display_name = value;
     } else if (column === "last_activity_at") {
@@ -853,7 +877,7 @@ async function patchPerson(api, existing, row, opts) {
       update[column] = value;
     }
   });
-  const status = decideAccountStatus(existing.account_status, opts.desiredStatus || row.account_status);
+  const status = decideAccountStatus(existing.account_status, opts.desiredStatus || row.account_status, opts.desiredStatus ? "member" : "customer");
   if (status) update.account_status = status;
   if (Object.keys(update).length) {
     const done = await sendUpdate(api, "people update", "people", { id: existing.id }, update);
@@ -885,10 +909,11 @@ async function retireEmail(api, personId, email, now) {
 }
 
 async function emailSteps(api, personId, previousEmail, email, ctx) {
-  const results = [];
-  if (previousEmail && previousEmail !== email) results.push(await retireEmail(api, personId, previousEmail, nowIso(ctx)));
-  results.push(await ensureActiveEmail(api, personId, email, ctx));
-  return results.find((r) => !r.ok) || { ok: true };
+  // The new address first: if it cannot be made active (held by someone else) the old one stays active.
+  const ensured = await ensureActiveEmail(api, personId, email, ctx);
+  if (!ensured.ok) return ensured;
+  if (previousEmail && previousEmail !== email) return retireEmail(api, personId, previousEmail, nowIso(ctx));
+  return { ok: true };
 }
 
 // Profile: insert the row when missing, then update only the columns the document stated.
@@ -958,7 +983,8 @@ function memberEnrollmentPatch(member, existing, ctx, out) {
   const patch = {};
   const status = String(data.status || "").toLowerCase();
   if (status && MEMBER_STATUS[status]) patch.status = MEMBER_STATUS[status];
-  if (has(data, "expiryDate")) patch.valid_until = iso(data.expiryDate);
+  const expiry = statedDate(data, "expiryDate"); // an unreadable date is not stated: valid_until stays
+  if (expiry !== undefined) patch.valid_until = expiry;
   let sponsor = existing.sponsor_organization_id || null;
   if (has(data, "cohort")) {
     const cohort = data.cohort ? cohortFor(data.cohort, "authorized_members.cohort", ctx, out) : null;
@@ -1022,7 +1048,7 @@ function mirrorMemberWrite(mirror, memberDoc, ctx) {
     const email = member && normalizeEmail(member.data.email || member.id);
     if (!email) return { ok: false, error: "unmapped" };
     const previous = normalizeEmail(context.previousEmail);
-    const found = await findPerson(api, { personId: context.personId, emails: [previous, email] });
+    const found = await findPerson(api, { personId: context.personId, emails: [previous, email], previousEmail: previous });
     if (!found.ok) return fail("lookup", found);
     const personId = found.person ? found.person.id : (context.personId || personIdFor(email, context));
     const tables = rowsForMember(memberDoc, Object.assign({}, context, { personId }));
@@ -1089,7 +1115,7 @@ function mirrorUserWrite(mirror, userDoc, ctx) {
     const email = user && normalizeEmail(user.data.email);
     if (!email || !user.id) return { ok: false, error: "unmapped" };
     const previous = normalizeEmail(context.previousEmail);
-    const byEmail = await findPerson(api, { personId: context.personId, emails: [previous, email] });
+    const byEmail = await findPerson(api, { personId: context.personId, emails: [previous, email], previousEmail: previous });
     if (!byEmail.ok) return fail("lookup", byEmail);
     const uidCheck = await conflictForUid(api, user.id, byEmail.person);
     if (!uidCheck.ok) return uidCheck;
@@ -1133,7 +1159,7 @@ async function customerFlow(api, docs, ctx) {
   if (!email) return { ok: false, error: "unmapped" };
   const previous = normalizeEmail(ctx.previousEmail);
   const authLink = docParts(docs.authLink);
-  const found = await findPerson(api, { personId: ctx.personId, legacyId: `customers/${customer.id}`, emails: [previous, email] });
+  const found = await findPerson(api, { personId: ctx.personId, legacyId: `customers/${customer.id}`, emails: [previous, email], previousEmail: previous });
   if (!found.ok) return fail("lookup", found);
   const uidCheck = await conflictForUid(api, authLink && authLink.id, found.person);
   if (!uidCheck.ok) return uidCheck;
@@ -1143,7 +1169,8 @@ async function customerFlow(api, docs, ctx) {
   const tables = rowsForCustomer(docs.customer, context);
   const person = await patchPerson(api, existing, tables.people[0], { fillOnly: false, syncEmail: true, customerLegacy: true });
   if (!person.ok) return person;
-  const claims = [docs.emailClaim, docs.oldClaim, docs.newClaim].filter(Boolean).map(docParts);
+  // Only claims of this customer count; a claim that names another customer is skipped.
+  const claims = [docs.emailClaim, docs.oldClaim, docs.newClaim].filter(Boolean).map(docParts).filter((claim) => claim && String(claim.data.customerId || "") === String(customer.id));
   return runSteps([
     ["person_emails", async () => {
       const first = await emailSteps(api, personId, previous || (existing && existing.primary_email !== email ? existing.primary_email : ""), email, context);
@@ -1224,9 +1251,30 @@ async function applyCohortStubs(api, cohorts) {
   return cohorts && cohorts.length ? insertIfMissing(api, "cohorts", cohorts, "id") : { ok: true };
 }
 
-// enrollments/{id}. Hook: an enrollment created or its status or validUntil changed. When the person already has
-// an open enrollment under another id (the one authorized_members made), that row is updated instead of a second
-// open row being added.
+// The columns an enrollments document states. A key that is absent, or whose value cannot be read, is not stated.
+function enrollmentPatchFromDocument(data, ctx, out) {
+  const patch = {};
+  if (has(data, "status") && ENROLLMENT_STATUS.includes(data.status)) patch.status = data.status;
+  for (const [key, column] of [["joinedAt", "joined_at"], ["completedAt", "completed_at"], ["validUntil", "valid_until"]]) {
+    const value = statedDate(data, key);
+    if (value !== undefined) patch[column] = value;
+  }
+  if (has(data, "cohortId")) {
+    const cohort = data.cohortId ? cohortFor(data.cohortId, "enrollments.cohortId", ctx, out) : null;
+    patch.cohort_id = cohort ? cohort.id : null;
+    if (cohort && cohort.org) patch.sponsor_organization_id = cohort.org;
+  }
+  if (data.organizationId) {
+    const org = orgIdFor(data.organizationId, ctx);
+    if (org) patch.sponsor_organization_id = org;
+  }
+  return patch;
+}
+
+// enrollments/{id}. Hook: an enrollment created or its status or validUntil changed. Patch-like: the row with this
+// document's id, else the person's open row of that program (the one authorized_members made), is updated with only
+// the columns the document states. A full row (with defaults) is inserted, ignore-duplicates, only when the person
+// has neither. A closed row is never reopened unless the document states the status.
 function mirrorEnrollmentWrite(mirror, enrollmentDoc, ctx) {
   const context = ctx || {};
   return runMirror(mirror, "enrollment write", async (api) => {
@@ -1237,39 +1285,56 @@ function mirrorEnrollmentWrite(mirror, enrollmentDoc, ctx) {
     const built = rowsForEnrollment(enrollmentDoc, resolved.ctx);
     if (!built.enrollments) return { ok: false, error: "unmapped" };
     const row = built.enrollments[0];
-    const stubs = await applyCohortStubs(api, built.cohorts);
-    if (!stubs.ok) return stubs;
-    if (row.status === "active" || row.status === "invited") {
-      const open = await read(api, "enrollments", `select=id&person_id=eq.${enc(row.person_id)}&program_id=eq.${enc(row.program_id)}&status=in.(invited,active)&limit=5`, "enrollments lookup");
-      if (!open.ok) return fail("enrollments", open);
-      const other = open.rows.find((r) => r.id !== row.id);
-      if (other) {
-        const patch = Object.assign({}, row);
-        ["id", "person_id", "program_id", "created_at", "legacy_firestore_id", "notes", "source", "migration_run_id"].forEach((key) => delete patch[key]);
-        return Object.keys(patch).length ? sendUpdate(api, "enrollments update", "enrollments", { id: other.id }, patch) : { ok: true };
-      }
+    const found = await read(api, "enrollments", `select=id,status&person_id=eq.${enc(row.person_id)}&program_id=eq.${enc(row.program_id)}&order=created_at.desc&limit=20`, "enrollments lookup");
+    if (!found.ok) return fail("enrollments", found);
+    const open = (r) => r.status === "active" || r.status === "invited";
+    const existing = found.rows.find((r) => r.id === row.id) || found.rows.find(open);
+    if (!existing) {
+      const stubs = await applyCohortStubs(api, built.cohorts);
+      if (!stubs.ok) return stubs;
+      return insertIfMissing(api, "enrollments", [row], "id");
     }
-    return send(api, "enrollments", [row], { conflict: "id", label: "enrollment" });
+    const out = newOut();
+    const patch = enrollmentPatchFromDocument(enr.data, resolved.ctx, out);
+    const stubs = await applyCohortStubs(api, out.cohorts);
+    if (!stubs.ok) return stubs;
+    return Object.keys(patch).length ? sendUpdate(api, "enrollments update", "enrollments", { id: existing.id }, patch) : { ok: true };
   });
 }
 
-// Only the entitlement columns the document states (keys present), after an insert-if-missing of the full row.
-function entitlementPatch(data, ctx) {
-  const patch = {};
-  if (has(data, "status")) patch.status = oneOf(data.status, ENTITLEMENT_STATUS, "active");
-  if (has(data, "accessType")) patch.access_type = oneOf(data.accessType, ["free", "paid", "comped", "sponsored"], "comped");
-  if (has(data, "sponsorOrganizationId")) patch.sponsor_organization_id = data.sponsorOrganizationId ? orgIdFor(data.sponsorOrganizationId, ctx) : null;
-  if (has(data, "reportAvailable")) patch.report_available = data.reportAvailable === true;
-  if (has(data, "attemptsCompleted")) patch.attempts_completed = clampInt(data.attemptsCompleted, 0, 100000);
-  if (has(data, "retakesAllowed")) patch.retakes_allowed = clampInt(data.retakesAllowed, 0, 100000);
-  if (has(data, "retakesUsed")) patch.retakes_used = clampInt(data.retakesUsed, 0, 100000);
-  if (patch.retakes_used != null && patch.retakes_allowed != null) patch.retakes_used = Math.min(patch.retakes_used, patch.retakes_allowed);
-  if (has(data, "validFrom")) patch.valid_from = iso(data.validFrom);
-  if (has(data, "validUntil")) patch.valid_until = iso(data.validUntil);
-  if (has(data, "paymentReference") && data.paymentReference) patch.payment_reference = data.paymentReference;
-  return patch;
+// The entitlement columns a document states (an unknown or unreadable value is not stated), split in two:
+// status alone (never constrained) and everything else (which the database constrains together).
+function entitlementPatches(data, ctx) {
+  const status = has(data, "status") && ENTITLEMENT_STATUS.includes(data.status) ? { status: data.status } : {};
+  const rest = {};
+  if (has(data, "accessType") && ["free", "paid", "comped", "sponsored"].includes(data.accessType)) rest.access_type = data.accessType;
+  if (has(data, "sponsorOrganizationId")) rest.sponsor_organization_id = data.sponsorOrganizationId ? orgIdFor(data.sponsorOrganizationId, ctx) : null;
+  if (has(data, "reportAvailable")) rest.report_available = data.reportAvailable === true;
+  if (has(data, "attemptsCompleted")) rest.attempts_completed = clampInt(data.attemptsCompleted, 0, 100000);
+  if (has(data, "retakesAllowed")) rest.retakes_allowed = clampInt(data.retakesAllowed, 0, 100000);
+  if (has(data, "retakesUsed")) rest.retakes_used = clampInt(data.retakesUsed, 0, 100000);
+  for (const [key, column] of [["validFrom", "valid_from"], ["validUntil", "valid_until"]]) {
+    const value = statedDate(data, key);
+    if (value !== undefined) rest[column] = value;
+  }
+  if (has(data, "paymentReference") && data.paymentReference) rest.payment_reference = data.paymentReference;
+  return { status, rest };
 }
 
+// The database constraints of public.entitlements checked on the row as it would be after the update.
+function entitlementViolation(merged) {
+  if (merged.access_type === "sponsored" && !merged.sponsor_organization_id) return "sponsored-needs-sponsor";
+  if (merged.access_type === "paid" && !merged.payment_reference) return "paid-needs-reference";
+  if (Number(merged.retakes_used) > Number(merged.retakes_allowed)) return "retakes-over-allowance";
+  if (merged.valid_from && merged.valid_until && Date.parse(merged.valid_until) < Date.parse(merged.valid_from)) return "validity-out-of-order";
+  return null;
+}
+
+const ENTITLEMENT_COLUMNS = "id,access_type,sponsor_organization_id,payment_reference,retakes_allowed,retakes_used,valid_from,valid_until";
+
+// A new entitlement is inserted whole. For an existing one the status change goes first and alone, so it can never
+// fail on another column's constraint; the other stated columns are merged with the stored row, the constraints are
+// checked here, and the update is sent only when it is valid ({ ok:false, error:"constraint:<which>" } otherwise).
 function mirrorEntitlementWrite(mirror, entitlementDoc, ctx) {
   const context = ctx || {};
   return runMirror(mirror, "entitlement write", async (api) => {
@@ -1282,23 +1347,34 @@ function mirrorEntitlementWrite(mirror, entitlementDoc, ctx) {
     const row = built.entitlements[0];
     const inserted = await insertIfMissing(api, "entitlements", [row], "id");
     if (!inserted.ok) return inserted;
-    const patch = entitlementPatch(ent.data, resolved.ctx);
-    return Object.keys(patch).length ? sendUpdate(api, "entitlements update", "entitlements", { id: row.id }, patch) : { ok: true };
+    const { status, rest } = entitlementPatches(ent.data, resolved.ctx);
+    if (Object.keys(status).length) {
+      const done = await sendUpdate(api, "entitlements status", "entitlements", { id: row.id }, status);
+      if (!done.ok) return done;
+    }
+    if (!Object.keys(rest).length) return { ok: true };
+    const stored = await read(api, "entitlements", `select=${ENTITLEMENT_COLUMNS}&id=eq.${enc(row.id)}&limit=1`, "entitlements lookup");
+    if (!stored.ok) return fail("entitlements", stored);
+    const merged = Object.assign({}, stored.rows[0] || row, rest);
+    if (rest.retakes_used != null && merged.retakes_allowed != null) rest.retakes_used = merged.retakes_used = Math.min(rest.retakes_used, merged.retakes_allowed);
+    const violation = entitlementViolation(merged);
+    if (violation) return { ok: false, step: "entitlements", error: `constraint:${violation}` };
+    return sendUpdate(api, "entitlements update", "entitlements", { id: row.id }, rest);
   });
 }
 
-// changeEntitlementStatus: status only. { entitlementId, status }.
+// changeEntitlementStatus: status only. { entitlementId, status }. A missing row is { ok:false, error:"no-row" }.
 function mirrorEntitlementStatusChange(mirror, change) {
   return runMirror(mirror, "entitlement status", async (api) => {
     const id = String(change && change.entitlementId || "");
     const status = oneOf(change && change.status, ENTITLEMENT_STATUS, "");
     if (!id || !status) return { ok: false, error: "unmapped" };
-    return sendUpdate(api, "entitlements status", "entitlements", { id: uuidFor(`entitlement:${id}`) }, { status });
+    return sendUpdate(api, "entitlements status", "entitlements", { id: uuidFor(`entitlement:${id}`) }, { status }, true);
   });
 }
 
 // persistCompletedAssessment counters on the entitlement: only the keys supplied are written.
-// { entitlementId, attemptsCompleted?, retakesUsed?, reportAvailable? }
+// { entitlementId, attemptsCompleted?, retakesUsed?, reportAvailable? }. A missing row is { ok:false, error:"no-row" }.
 function mirrorEntitlementCounters(mirror, change) {
   return runMirror(mirror, "entitlement counters", async (api) => {
     const id = String(change && change.entitlementId || "");
@@ -1308,7 +1384,7 @@ function mirrorEntitlementCounters(mirror, change) {
     if (change.retakesUsed !== undefined) patch.retakes_used = clampInt(change.retakesUsed, 0, 100000);
     if (change.reportAvailable !== undefined) patch.report_available = change.reportAvailable === true;
     if (!Object.keys(patch).length) return { ok: false, error: "unmapped" };
-    return sendUpdate(api, "entitlements counters", "entitlements", { id: uuidFor(`entitlement:${id}`) }, patch);
+    return sendUpdate(api, "entitlements counters", "entitlements", { id: uuidFor(`entitlement:${id}`) }, patch, true);
   });
 }
 

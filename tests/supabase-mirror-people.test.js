@@ -40,19 +40,23 @@ function fakeFetch(answers = [], store = {}, readFail = {}) {
     const table = decodeURIComponent(u.pathname.replace("/rest/v1/", ""));
     const query = Object.fromEntries(u.searchParams.entries());
     calls.push({ method: init.method, table, query, prefer: init.headers.Prefer, body: init.body ? JSON.parse(init.body) : undefined });
+    const matching = () => (store[table] || []).filter((row) => Object.entries(query).every(([key, value]) => {
+      if (["select", "order", "limit"].includes(key)) return true;
+      if (value.startsWith("eq.")) return String(row[key]) === value.slice(3);
+      if (value.startsWith("in.(")) return value.slice(4, -1).split(",").includes(String(row[key]));
+      return true;
+    }));
     if (init.method === "GET") {
       if (readFail[table]) return { status: readFail[table], ok: false };
-      const rows = (store[table] || []).filter((row) => Object.entries(query).every(([key, value]) => {
-        if (["select", "order", "limit"].includes(key)) return true;
-        if (value.startsWith("eq.")) return String(row[key]) === value.slice(3);
-        if (value.startsWith("in.(")) return value.slice(4, -1).split(",").includes(String(row[key]));
-        return true;
-      }));
+      const rows = matching();
       return { status: 200, ok: true, json: async () => rows };
     }
     const next = answers.length ? answers.shift() : { status: 201 };
     if (next.throw) throw next.throw;
-    return { status: next.status, ok: next.status >= 200 && next.status < 300 };
+    const response = { status: next.status, ok: next.status >= 200 && next.status < 300 };
+    // A PATCH that asks for the changed rows back gets the rows the store holds for its filter.
+    if (init.method === "PATCH" && String(init.headers.Prefer).includes("representation")) response.json = async () => matching();
+    return response;
   };
   impl.calls = calls;
   return impl;
@@ -475,10 +479,10 @@ const byTable = (f, table, method) => f.calls.filter((c) => c.table === table &&
     const P = uuidFor("person:first@example.com");
     const store = (status) => ({
       people: [person(P, { primary_email: "new@example.com", account_status: status })],
-      person_emails: [{ id: "e1", person_id: P, email: "old@example.com", status: "historical" }, { id: "e2", person_id: P, email: "new@example.com", status: "active" }]
+      person_emails: [{ id: "e1", person_id: P, email: "old@example.com", status: "historical" }, { id: "e2", person_id: P, email: "new@example.com", status: "active" }, { id: "e3", person_id: P, email: "alt@example.com", status: "active" }]
     });
     let { mirror, f } = liveMirror([], store("active"));
-    let result = await people.mirrorMemberRemoval(mirror, { email: " Old@Example.com " }, {});
+    let result = await people.mirrorMemberRemoval(mirror, { email: " Alt@Example.com " }, {});
     assert.strictEqual(result.ok, true);
     assert.ok(writes(f).every((c) => c.method === "PATCH"));
     assert.deepStrictEqual(patchesTo(f, "people").map((c) => [c.query, c.body]), [[{ id: `eq.${P}` }, { account_status: "archived" }]]);
@@ -619,10 +623,12 @@ const byTable = (f, table, method) => f.calls.filter((c) => c.table === table &&
   });
 
   await check("customer archived and the status spellings", () => {
-    for (const [firestore, supabase] of [["restricted", "restricted"], ["deletionPending", "deletion_pending"], ["deletion_pending", "deletion_pending"], ["nonsense", "active"]]) {
+    for (const [firestore, supabase] of [["restricted", "restricted"], ["deletionPending", "deletion_pending"], ["deletion_pending", "deletion_pending"], ["nonsense", undefined]]) {
       const built = people.rowsForCustomer({ id: "c", data: { primaryEmail: "z@example.com", accountStatus: firestore } }, {});
       assert.strictEqual(built.people[0].account_status, supabase, firestore);
     }
+    // The import (complete mode) still maps an unknown value to active; a live write treats it as not stated.
+    assert.strictEqual(people.rowsForCustomer({ id: "c", data: { primaryEmail: "z@example.com", accountStatus: "nonsense" } }, { complete: true }).people[0].account_status, "active");
   });
 
   await check("auth link alone sets auth_uid through the customer (found by the customer path)", async () => {
@@ -715,11 +721,11 @@ const byTable = (f, table, method) => f.calls.filter((c) => c.table === table &&
       retakes_allowed: 2, retakes_used: 2, valid_from: "2026-10-07T00:00:00.000Z", valid_until: null, payment_reference: null,
       legacy_firestore_id: "entitlements/ent-9", created_at: "2026-10-07T00:00:00.000Z"
     });
-    assert.strictEqual(patchesTo(f, "entitlements")[0].body.retakes_used, 2);
+    assert.strictEqual(patchesTo(f, "entitlements").find((c) => "retakes_used" in c.body).body.retakes_used, 2);
     // A partial document updates only what it states.
     const partial = liveMirror();
     await people.mirrorEntitlementWrite(partial.mirror, { id: "ent-9", data: { customerId: "cust-9", programId: "executive-signature", accessType: "comped", status: "revoked" } }, { related: { customer } });
-    assert.deepStrictEqual(patchesTo(partial.f, "entitlements")[0].body, { access_type: "comped", status: "revoked" });
+    assert.deepStrictEqual(patchesTo(partial.f, "entitlements").map((c) => c.body), [{ status: "revoked" }, { access_type: "comped" }], "the status change is its own update");
     const paid = people.rowsForEntitlement({ id: "p1", data: { customerId: "cust-9", programId: "executive-signature", accessType: "paid" } }, { related: { customer } });
     assert.strictEqual(paid.entitlements[0].payment_reference, "legacy:p1");
     const unknownOrg = people.rowsForEntitlement({ id: "p2", data: { customerId: "cust-9", programId: "tsa", accessType: "sponsored", sponsorOrganizationId: "nope" } }, { related: { customer }, organizations: orgNames });
@@ -727,8 +733,9 @@ const byTable = (f, table, method) => f.calls.filter((c) => c.table === table &&
   });
 
   await check("entitlement status change is a single update keyed by the entitlement id", async () => {
-    const { mirror, f } = liveMirror();
+    const { mirror, f } = liveMirror([], { entitlements: [{ id: uuidFor("entitlement:ent-9") }] });
     assert.strictEqual((await people.mirrorEntitlementStatusChange(mirror, { entitlementId: "ent-9", status: "revoked" })).ok, true);
+    assert.strictEqual(f.calls[0].prefer, "return=representation", "asks for the row back so a missing row is noticed");
     assert.deepStrictEqual(f.calls.map((c) => [c.method, c.table, c.query, c.body]), [["PATCH", "entitlements", { id: `eq.${uuidFor("entitlement:ent-9")}` }, { status: "revoked" }]]);
     assert.deepStrictEqual(await people.mirrorEntitlementStatusChange(liveMirror().mirror, { entitlementId: "e", status: "bogus" }), { ok: false, error: "unmapped" });
   });
@@ -794,6 +801,197 @@ const byTable = (f, table, method) => f.calls.filter((c) => c.table === table &&
     const built = people.rowsForMember(snapshotLike, {});
     assert.strictEqual(built.people[0].primary_email, "snap@example.com");
     assert.strictEqual(built.people[0].display_name, "Snap");
+  });
+
+  // ------------------------------------------------------------------------------------------------------
+  // Second review round.
+
+  await check("R2-1 enrollment write is patch-like: stated columns only, no blanking, no reopening, no merge over an existing id", async () => {
+    const other = uuidFor("enrollment:tsa:cust.nine@example.com");
+    const own = uuidFor("enrollment:enr-9");
+    const base = (rows) => ({ people: [person(custPerson, { legacy_firestore_id: "customers/cust-9" })], enrollments: rows });
+    const run = async (rows, data) => {
+      const { mirror, f } = liveMirror([], base(rows));
+      const result = await people.mirrorEnrollmentWrite(mirror, { id: "enr-9", data: Object.assign({ customerId: "cust-9" }, data) }, {});
+      return { result, f };
+    };
+    // A partial document against the open row of another id updates only the status.
+    let r = await run([{ id: other, person_id: custPerson, program_id: "tsa", status: "active" }], { status: "active" });
+    assert.strictEqual(r.result.ok, true);
+    assert.deepStrictEqual(patchesTo(r.f, "enrollments").map((c) => [c.query, c.body]), [[{ id: `eq.${other}` }, { status: "active" }]]);
+    assert.strictEqual(byTable(r.f, "enrollments", "POST").length, 0);
+    // The same id exists and is closed: a document without a status does not reopen it, and nothing is merged over it.
+    r = await run([{ id: own, person_id: custPerson, program_id: "tsa", status: "completed" }], { validUntil: ts("2027-01-01T00:00:00Z") });
+    assert.deepStrictEqual(patchesTo(r.f, "enrollments").map((c) => c.body), [{ valid_until: "2027-01-01T00:00:00.000Z" }]);
+    assert.strictEqual(byTable(r.f, "enrollments", "POST").length, 0);
+    // A document that states nothing changes nothing.
+    r = await run([{ id: other, person_id: custPerson, program_id: "tsa", status: "active" }], {});
+    assert.strictEqual(writes(r.f).length, 0);
+    // A cleared date is stated (null); an unreadable one is not stated.
+    r = await run([{ id: own, person_id: custPerson, program_id: "tsa", status: "active" }], { validUntil: null, completedAt: "garbage" });
+    assert.deepStrictEqual(patchesTo(r.f, "enrollments").map((c) => c.body), [{ valid_until: null }]);
+    // Only a closed row under another id: the document is a new enrollment, the closed row is left alone.
+    r = await run([{ id: other, person_id: custPerson, program_id: "tsa", status: "expired" }], { status: "active" });
+    assert.strictEqual(patchesTo(r.f, "enrollments").length, 0);
+    const created = byTable(r.f, "enrollments", "POST")[0];
+    assert.strictEqual(created.prefer, IGNORE);
+    assert.strictEqual(created.body[0].id, own);
+    // No row at all: inserted whole, ignore-duplicates.
+    r = await run([], { status: "active", cohortId: "Batch Z" });
+    assert.strictEqual(byTable(r.f, "enrollments", "POST")[0].prefer, IGNORE);
+    assert.strictEqual(byTable(r.f, "cohorts", "POST")[0].prefer, IGNORE);
+  });
+
+  await check("R2-2 customer names: an empty or null name never replaces a real one", async () => {
+    const existing = person(custPerson, { primary_email: "cust.nine@example.com", legacy_firestore_id: "customers/cust-9", first_name: "Real", last_name: "Name" });
+    const { mirror, f } = liveMirror([], { people: [existing] });
+    const result = await people.mirrorCustomerWrite(mirror, { id: "cust-9", data: { primaryEmail: "cust.nine@example.com", firstName: "", lastName: null } }, {});
+    assert.strictEqual(result.ok, true);
+    assert.strictEqual(patchesTo(f, "people").length, 0);
+    const changed = liveMirror([], { people: [existing] });
+    await people.mirrorCustomerWrite(changed.mirror, { id: "cust-9", data: { primaryEmail: "cust.nine@example.com", firstName: "Renamed" } }, {});
+    assert.deepStrictEqual(patchesTo(changed.f, "people").map((c) => c.body), [{ first_name: "Renamed" }]);
+  });
+
+  await check("R2-3 customer account status: an explicit active wins over restricted and deletion_pending; absent and unknown never write; archive never replaces deletion_pending", async () => {
+    const statusWrites = async (current, data) => {
+      const { mirror, f } = liveMirror([], { people: [person(custPerson, { primary_email: "cust.nine@example.com", legacy_firestore_id: "customers/cust-9", account_status: current })] });
+      const result = await people.mirrorCustomerWrite(mirror, { id: "cust-9", data: Object.assign({ primaryEmail: "cust.nine@example.com" }, data) }, {});
+      assert.strictEqual(result.ok, true);
+      return patchesTo(f, "people").map((c) => c.body.account_status).filter(Boolean);
+    };
+    assert.deepStrictEqual(await statusWrites("restricted", { accountStatus: "active" }), ["active"]);
+    assert.deepStrictEqual(await statusWrites("deletion_pending", { accountStatus: "active" }), ["active"]);
+    assert.deepStrictEqual(await statusWrites("archived", { accountStatus: "active" }), ["active"]);
+    assert.deepStrictEqual(await statusWrites("restricted", {}), [], "absent status: nothing");
+    assert.deepStrictEqual(await statusWrites("restricted", { accountStatus: "nonsense" }), [], "unknown status: not stated");
+    assert.deepStrictEqual(await statusWrites("deletion_pending", { accountStatus: "archived" }), []);
+    assert.deepStrictEqual(await statusWrites("active", { accountStatus: "deletionPending" }), ["deletion_pending"]);
+    assert.strictEqual(people.decideAccountStatus("restricted", "active", "member"), null, "a member document still cannot do this");
+  });
+
+  await check("R2-4 a new member is never attributed to the person an address once belonged to", async () => {
+    const A = uuidFor("person:a@example.com");
+    const store = () => ({
+      people: [person(A, { primary_email: "a@example.com" })],
+      person_emails: [{ id: "eh", person_id: A, email: "shared@example.com", status: "historical" }],
+      enrollments: [{ id: "ea", person_id: A, program_id: "tsa", status: "active" }]
+    });
+    let { mirror, f } = liveMirror([], store());
+    const result = await people.mirrorMemberWrite(mirror, memberDoc({ status: "inactive", cohort: undefined, role: "admin" }, "shared@example.com"), {});
+    assert.strictEqual(result.ok, true);
+    assert.strictEqual(byTable(f, "people", "POST")[0].body[0].id, uuidFor("person:shared@example.com"), "a new person");
+    assert.strictEqual(patchesTo(f, "people").length, 0, "A is not patched");
+    assert.strictEqual(patchesTo(f, "enrollments").length, 0, "A's enrollment is not patched");
+    assert.strictEqual(byTable(f, "role_grants", "POST").filter((c) => c.body[0].person_id === A).length, 0);
+    // Removal of that address does not archive A either.
+    ({ mirror, f } = liveMirror([], store()));
+    assert.deepStrictEqual(await people.mirrorMemberRemoval(mirror, { email: "shared@example.com" }, {}), { ok: false, error: "no-row" });
+    assert.strictEqual(writes(f).length, 0);
+    // The exact previous address passed by the caller is accepted as a historical match.
+    ({ mirror, f } = liveMirror([], store()));
+    await people.mirrorMemberWrite(mirror, memberDoc({ cohort: undefined }, "next@example.com"), { previousEmail: "shared@example.com" });
+    assert.ok(patchesTo(f, "people").some((c) => c.query.id === `eq.${A}`));
+  });
+
+  await check("R2-5 entitlement update: status goes alone, the rest is merged with the stored row and checked against the constraints", async () => {
+    const id = uuidFor("entitlement:ent-9");
+    const stored = { id, access_type: "comped", sponsor_organization_id: null, payment_reference: null, retakes_allowed: 1, retakes_used: 0, valid_from: "2026-10-01T00:00:00+00:00", valid_until: null };
+    const run = async (data, row) => {
+      const { mirror, f } = liveMirror([], { entitlements: [row || stored] });
+      const result = await people.mirrorEntitlementWrite(mirror, { id: "ent-9", data: Object.assign({ customerId: "cust-9", programId: "executive-signature" }, data) }, { related: { customer } });
+      return { result, f };
+    };
+    // paid without a reference: the status still goes through, the constrained part is refused before it is sent.
+    let r = await run({ status: "revoked", accessType: "paid" });
+    assert.deepStrictEqual(patchesTo(r.f, "entitlements").map((c) => c.body), [{ status: "revoked" }]);
+    assert.strictEqual(r.result.ok, false);
+    assert.strictEqual(r.result.error, "constraint:paid-needs-reference");
+    // paid with a reference is fine.
+    r = await run({ accessType: "paid", paymentReference: "stripe:cs_1" });
+    assert.strictEqual(r.result.ok, true);
+    assert.deepStrictEqual(patchesTo(r.f, "entitlements").map((c) => c.body), [{ access_type: "paid", payment_reference: "stripe:cs_1" }]);
+    // sponsored without a sponsor, an expiry before the stored start, retakes over the allowance.
+    assert.strictEqual((await run({ accessType: "sponsored" })).result.error, "constraint:sponsored-needs-sponsor");
+    assert.strictEqual((await run({ validUntil: ts("2026-09-01T00:00:00Z") })).result.error, "constraint:validity-out-of-order");
+    r = await run({ retakesUsed: 9 });
+    assert.deepStrictEqual(patchesTo(r.f, "entitlements").map((c) => c.body), [{ retakes_used: 1 }], "clamped to the stored allowance");
+    assert.strictEqual((await run({ retakesAllowed: 0 }, Object.assign({}, stored, { retakes_used: 2 }))).result.error, "constraint:retakes-over-allowance");
+    // An unknown status or access type is not stated.
+    r = await run({ status: "weird", accessType: "weird" });
+    assert.strictEqual(patchesTo(r.f, "entitlements").length, 0);
+  });
+
+  await check("R2-5 entitlement status change and counters report a missing row", async () => {
+    let { mirror, f } = liveMirror([], { entitlements: [] });
+    let missing = await people.mirrorEntitlementStatusChange(mirror, { entitlementId: "nope", status: "revoked" });
+    assert.deepStrictEqual([missing.ok, missing.error], [false, "no-row"]);
+    ({ mirror, f } = liveMirror([], { entitlements: [] }));
+    missing = await people.mirrorEntitlementCounters(mirror, { entitlementId: "nope", attemptsCompleted: 1 });
+    assert.deepStrictEqual([missing.ok, missing.error], [false, "no-row"]);
+    assert.strictEqual(f.calls[0].prefer, "return=representation");
+    ({ mirror, f } = liveMirror([], { entitlements: [{ id: uuidFor("entitlement:here") }] }));
+    assert.strictEqual((await people.mirrorEntitlementCounters(mirror, { entitlementId: "here", attemptsCompleted: 1 })).ok, true);
+  });
+
+  await check("R2-7 a person is never inserted without an address", async () => {
+    const { mirror, f } = liveMirror();
+    const result = await people.mirrorCustomerAuthLinkWrite(mirror, { id: "uid-x", data: { customerId: "cust-x" } }, { personId: "00000000-0000-4000-8000-0000000000aa" });
+    assert.strictEqual(result.ok, false);
+    assert.strictEqual(result.error, "no-email");
+    assert.strictEqual(byTable(f, "people", "POST").length, 0);
+  });
+
+  await check("R2-8 the new address is made active before the old one is retired", async () => {
+    const P = uuidFor("person:first@example.com");
+    const Q = "22222222-2222-4222-8222-222222222222";
+    const { mirror, f } = liveMirror([], {
+      people: [person(P, { primary_email: "old@example.com" })],
+      person_emails: [{ id: "e-old", person_id: P, email: "old@example.com", status: "active" }, { id: "e-taken", person_id: Q, email: "taken@example.com", status: "active" }]
+    });
+    const result = await people.mirrorMemberWrite(mirror, memberDoc({ cohort: undefined }, "taken@example.com"), { previousEmail: "old@example.com" });
+    assert.strictEqual(result.ok, false);
+    assert.ok(result.failed.includes("person_emails"));
+    assert.strictEqual(patchesTo(f, "person_emails").length, 0, "the old address is not retired when the new one failed");
+    // And in the normal order the retire comes after the new address exists.
+    const good = liveMirror([], { people: [person(P, { primary_email: "old@example.com" })], person_emails: [{ id: "e-old", person_id: P, email: "old@example.com", status: "active" }] });
+    await people.mirrorMemberWrite(good.mirror, memberDoc({ cohort: undefined }, "fresh@example.com"), { previousEmail: "old@example.com" });
+    const writeTables = writes(good.f).filter((c) => c.table === "person_emails").map((c) => c.method);
+    assert.deepStrictEqual(writeTables, ["POST", "PATCH"]);
+  });
+
+  await check("R2-9 claims of another customer are skipped", async () => {
+    const { mirror, f } = liveMirror();
+    const result = await people.mirrorIdentityResolution(mirror, {
+      customer,
+      emailClaim: { id: "hx", data: { customerId: "cust-OTHER", emailNormalized: "foreign@example.com", status: "active" } }
+    }, {});
+    assert.strictEqual(result.ok, true);
+    assert.ok(!f.calls.some((c) => JSON.stringify(c.body || "").includes("foreign@example.com") || JSON.stringify(c.query).includes("foreign@example.com")));
+    const own = liveMirror();
+    await people.mirrorIdentityResolution(own.mirror, { customer, emailClaim: { id: "h1", data: { customerId: "cust-9", emailNormalized: "second.address@example.com", status: "active" } } }, {});
+    assert.ok(byTable(own.f, "person_emails", "POST").some((c) => c.body[0].email === "second.address@example.com"));
+  });
+
+  await check("R2-10 unknown or unreadable values mean not stated", async () => {
+    const P = uuidFor("person:first@example.com");
+    const open = { id: "en1", person_id: P, program_id: "tsa", status: "active", cohort_id: null, sponsor_organization_id: null, joined_at: "2025-01-01T00:00:00+00:00", valid_until: "2027-01-01T00:00:00+00:00", source: {} };
+    const base = () => ({ people: [person(P, { primary_email: "first@example.com" })], enrollments: [open] });
+    // Member document: unknown avatar, unreadable dates, unknown provider.
+    let { mirror, f } = liveMirror([], base());
+    await people.mirrorMemberWrite(mirror, { id: "first@example.com", data: { email: "first@example.com", avatarIconId: "unicorn", expiryDate: "not a date", firstLoginAt: "garbage", lastSignInProvider: "twitter.com" } }, {});
+    assert.strictEqual(patchesTo(f, "enrollments").length, 0, "valid_until is not nulled by an unreadable expiry");
+    assert.strictEqual(patchesTo(f, "person_profiles").length, 0, "no profile column is written");
+    // A cleared avatar (null) is stated and written; a known one too.
+    ({ mirror, f } = liveMirror([], base()));
+    await people.mirrorMemberWrite(mirror, { id: "first@example.com", data: { email: "first@example.com", avatarIconId: null, lastSignInProvider: "google.com" } }, {});
+    assert.deepStrictEqual(patchesTo(f, "person_profiles")[0].body, { avatar_icon_id: null, last_sign_in_provider: "google.com" });
+    // User document with an unknown provider.
+    ({ mirror, f } = liveMirror([], base()));
+    await people.mirrorUserWrite(mirror, { id: "uid-1", data: { email: "first@example.com", lastSignInProvider: "twitter.com", photoURL: "https://img/x.png" } }, {});
+    assert.deepStrictEqual(patchesTo(f, "person_profiles")[0].body, { photo_url: "https://img/x.png" });
+    // The import (complete) behaviour is unchanged.
+    assert.strictEqual(people.rowsForUser({ id: "u", data: { email: "z@example.com", lastSignInProvider: "twitter.com" } }, { complete: true }).person_profiles[0].last_sign_in_provider, "");
   });
 
   console.log(`supabase-mirror-people: ${passed} checks passed`);
