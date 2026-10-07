@@ -73,15 +73,30 @@ function createFakeDb(seed = {}) {
 
 // ---- an in-memory stand in for the PostgREST endpoint the core talks to ---------------------------------------------
 
+const PARITY_PERSON = uuidFor("person:parity@example.com");
+const ALICE_PERSON = uuidFor("person:alice@example.com");
+const BUYER_PERSON = uuidFor("person:buyer@example.com");
+
+// By default the people and entitlement rows the people module would already have mirrored exist.
+// options.seed: { table: [rows] } replaces that default; options.failSelect: reads answer 500.
 function memoryRest(options = {}) {
   const tables = {};
   const calls = [];
+  const seed = options.seed || { people: [{ id: PARITY_PERSON }, { id: ALICE_PERSON }, { id: BUYER_PERSON }], entitlements: [{ id: uuidFor("entitlement:ent-full") }, { id: uuidFor("entitlement:ent-quick") }] };
+  Object.entries(seed).forEach(([table, rows]) => { tables[table] = new Map(rows.map((row, i) => [`seed${i}`, Object.assign({}, row)])); });
   const impl = async (url, init) => {
     const u = new URL(url);
     const table = decodeURIComponent(u.pathname.split("/").pop());
     const body = init.body ? JSON.parse(init.body) : undefined;
     calls.push({ method: init.method, table, search: u.search, prefer: init.headers.Prefer, body });
     if (options.reject) throw options.reject;
+    if (init.method === "GET") {
+      if (options.failSelect) return { status: 500, ok: false };
+      const idParam = u.searchParams.get("id") || "";
+      const wanted = idParam.startsWith("in.(") ? idParam.slice(4, -1).split(",") : [idParam.replace(/^eq\./, "")];
+      const found = [...(tables[table] || new Map()).values()].filter((row) => wanted.includes(String(row.id))).map((row) => Object.assign({}, row));
+      return { status: 200, ok: true, json: async () => found };
+    }
     if (options.hang) return new Promise((resolve, reject) => init.signal.addEventListener("abort", () => reject(Object.assign(new Error("aborted"), { name: "AbortError" }))));
     if (options.failTables && options.failTables.has(table)) return { status: 409, ok: false };
     if (options.status) return { status: options.status, ok: false };
@@ -230,13 +245,13 @@ const byKey = (rows, key) => Object.fromEntries(rows.map((row) => [typeof key ==
   const partRows = [].concat(...D.parts.map((p) => mirrorMod.rowsForResponsePart(p, context).assessment_response_parts));
   eq(partRows, t.assessment_response_parts.filter((r) => r.attempt_id === uuidFor("attempt:att-es-1")), "parity: assessment_response_parts");
   // audit events
-  // The mirror row is the import's row plus one extra column, mirror_key (the unique key from migration 2150).
-  const withoutMirrorKey = (row) => { const copy = Object.assign({}, row); delete copy.mirror_key; return copy; };
+  // The mirror row is the import's row plus one extra column, legacy_firestore_id (the unique column from migration 2130).
+  const withoutMirrorKey = (row) => { const copy = Object.assign({}, row); delete copy.legacy_firestore_id; return copy; };
   const importAudit = byKey(t.audit_events, (r) => r.detail.legacy_firestore_id);
   for (const audit of D.audits) {
     const mine = mirrorMod.rowsForAuditEvent(audit, context).audit_events;
     eq(mine.map(withoutMirrorKey), [importAudit[`auditEvents/${audit.id}`]], `parity: audit_events ${audit.id}`);
-    eq(mine[0].mirror_key, `auditEvents/${audit.id}`, `mirror key: audit_events ${audit.id}`);
+    eq(mine[0].legacy_firestore_id, `auditEvents/${audit.id}`, `legacy id column: audit_events ${audit.id}`);
   }
   // settings
   eq(mirrorMod.rowsForPaymentsSettings(D.settings, context).app_settings, t.app_settings.filter((r) => r.key === "payments"), "parity: app_settings payments");
@@ -256,7 +271,7 @@ const byKey = (rows, key) => Object.fromEntries(rows.map((row) => [typeof key ==
   const planned = mirrorMod.planWrites(firstFull.writes, context);
   const tb = planned.tables;
   eq(Object.keys(tb).sort(), ["assessment_attempts", "assessment_definitions", "assessment_definitions_current", "assessment_response_parts", "assessment_scoring", "assessment_versions", "assessment_versions_publish", "audit_events", "consent_events", "outbox_events", "service_requests"], "every write family produces rows");
-  eq(planned.skipped.map((s) => s.source).sort(), ["customers/cust-parity", "entitlements/ent-full"], "entitlement and customer updates are left to the people module");
+  eq(planned.skipped.map((s) => s.source).sort(), ["customers", "entitlements"], "entitlement and customer updates are left to the people module");
   eq([tb.consent_events.length, tb.assessment_attempts.length, tb.assessment_response_parts.length, tb.outbox_events.length, tb.audit_events.length, tb.service_requests.length], [2, 1, 2, 2, 1, 1], "row counts per family (full assessment, marketing consent)");
   eq(tb.outbox_events.map((r) => r.event_type).sort(), ["assessment.analytics_projection", "assessment.report_generation"], "both outbox events");
 
@@ -271,7 +286,7 @@ const byKey = (rows, key) => Object.fromEntries(rows.map((row) => [typeof key ==
   for (const table of ["assessment_definitions", "assessment_definitions_current", "assessment_versions", "assessment_scoring", "assessment_versions_publish", "consent_events", "assessment_attempts", "assessment_response_parts", "audit_events"]) {
     const theirs = realPlan.tables[table];
     const key = table === "audit_events" ? (r) => r.detail.legacy_firestore_id : table === "assessment_response_parts" ? (r) => `${r.attempt_id}:${r.part_number}` : table === "assessment_scoring" ? "version_id" : "id";
-    eq(byKey(tb[table].map(withoutMirrorKey), key), byKey(theirs, key), `real writes parity: ${table}`);
+    eq(byKey(table === "audit_events" ? tb[table].map(withoutMirrorKey) : tb[table], key), byKey(theirs, key), `real writes parity: ${table}`);
   }
   eq(tb.assessment_attempts[0].completed_at, NOW, "a server timestamp becomes context.now");
   ok(tb.assessment_attempts[0].status === "completed" && tb.assessment_attempts[0].result_checksum.length === 64, "the attempt row is completed with a checksum");
@@ -302,12 +317,12 @@ const byKey = (rows, key) => Object.fromEntries(rows.map((row) => [typeof key ==
   const first = await mirrorMod.mirrorAssessmentPersistence(mirror, firstFull.writes, context);
   ok(first.ok === true, "mirror call ok");
   const order = rest.calls.map((c) => `${c.method} ${c.table}`);
-  eq(order, ["POST assessment_definitions", "POST assessment_versions", "POST assessment_scoring", "PATCH assessment_versions", "PATCH assessment_definitions", "POST consent_events", "POST assessment_attempts", "POST assessment_response_parts", "POST outbox_events", "POST service_requests", "POST audit_events"], "parents are written before children");
+  eq(order, ["GET assessment_versions", "GET people", "GET entitlements", "POST assessment_definitions", "POST assessment_versions", "POST assessment_scoring", "PATCH assessment_versions", "PATCH assessment_definitions", "POST consent_events", "POST assessment_attempts", "POST assessment_response_parts", "POST outbox_events", "POST service_requests", "POST audit_events"], "links are checked first, then parents are written before children");
   const preferFor = (table, method = "POST") => rest.calls.find((c) => c.table === table && c.method === method).prefer;
   for (const table of ["assessment_definitions", "assessment_versions", "assessment_scoring", "consent_events", "assessment_attempts", "assessment_response_parts", "service_requests", "audit_events"]) {
     eq(preferFor(table), "resolution=ignore-duplicates,return=minimal", `${table} is insert only (ignore duplicates)`);
   }
-  eq(rest.calls.find((c) => c.table === "audit_events").search, "?on_conflict=mirror_key", "audit rows resolve on the mirror key");
+  eq(rest.calls.find((c) => c.table === "audit_events").search, "?on_conflict=legacy_firestore_id", "audit rows resolve on the legacy id column");
   eq(rest.calls.find((c) => c.table === "assessment_response_parts").search, "?on_conflict=attempt_id%2Cpart_number", "parts resolve on attempt and part number");
   eq(rest.calls.find((c) => c.method === "PATCH" && c.table === "assessment_versions").search, `?id=eq.${verId}&status=eq.draft`, "the publish update only touches drafts");
   eq(rest.rows("assessment_versions")[0].status, "published", "the version ends published");
@@ -371,14 +386,14 @@ const byKey = (rows, key) => Object.fromEntries(rows.map((row) => [typeof key ==
   await mirrorMod.mirrorCheckoutSessionCompleted(mirror, completedDocs, completedCtx);
   eq([rest.rows("stripe_processed_sessions").length, rest.rows("audit_events").length], [1, 2], "a Stripe retry replay adds nothing");
   const memberSkip = mirrorMod.planWrites(completedWrites, context);
-  ok(memberSkip.skipped.some((s) => s.source === "authorized_members/buyer@example.com"), "the authorized_members grant is left to the people module");
+  ok(memberSkip.skipped.some((s) => s.source === "authorized_members"), "the authorized_members grant (collection name only, no email) is left to the people module");
   // Executive Signature purchase: the marker maps the same way, the entitlement belongs to the people module.
   const esMarker = mirrorMod.rowsForStripeProcessedSession({ id: "cs_test_synthetic_10", data: { program: "executive-signature", email: "es@example.com", processedAt: FieldValue.serverTimestamp() } }, context);
   eq(esMarker.stripe_processed_sessions[0].program_id, "executive-signature", "es purchase marker");
   eq(esMarker.stripe_processed_sessions[0].person_id, null, "no person id unless the context gives one");
   eq(mirrorMod.rowsForStripeProcessedSession({ id: "cs_x", data: { program: "other", email: "a@example.com" } }, context), {}, "an unknown program is skipped");
   eq(mirrorMod.rowsForStripeProcessedSession({ id: "cs_x", data: { program: "tsa", email: "not an email" } }, context), {}, "an unusable email is skipped");
-  eq(mirrorMod.rowsForAuditEvent({ data: { action: "checkout_session_created", sessionId: "cs_fallback" } }, context).audit_events[0].detail.legacy_firestore_id, "auditEvents/mirror-checkout_session_created-cs_fallback", "deterministic fallback id for checkout audit rows");
+  eq(mirrorMod.rowsForAuditEvent({ data: { action: "checkout_session_created", sessionId: "cs_no_id" } }, context), {}, "no id, no audit row (nothing is invented)");
   eq(mirrorMod.rowsForAuditEvent({ data: { action: "other" } }, context), {}, "no id, no row");
 
   // Settings, with a secret-looking key and a card field that must never be copied.
@@ -393,6 +408,86 @@ const byKey = (rows, key) => Object.fromEntries(rows.map((row) => [typeof key ==
   const allRows = JSON.stringify([tb, processedRows, settingsRows]);
   ok(!/4242|card_|sk_live|sk_test|whsec/.test(allRows), "no card number or Stripe key anywhere in the mirrored rows");
   eq(mirrorMod.rowsForServiceRequest({ id: "not-a-hash", data: {} }, context), {}, "service request ids must be sha256 hex");
+
+  // ===== 4b. Review fixes ===========================================================================================
+  const attemptWriteFull = firstFull.writes.find((w) => w.path.startsWith("assessmentAttempts/") && w.path.split("/").length === 2);
+  const personOnly = (extra) => Object.assign({ people: [{ id: PARITY_PERSON }] }, extra || {});
+  const callsOf = (r, method, table) => r.calls.filter((c) => c.method === method && c.table === table);
+  const attemptRowsSent = (r) => [].concat(...callsOf(r, "POST", "assessment_attempts").map((c) => c.body));
+  const versionWrites = firstFull.writes.filter((w) => w.path.startsWith("assessmentVersions/"));
+
+  // Fix 3: the definition is created from the transaction's own write, with its current version link.
+  rest = memoryRest();
+  const defOnly = await mirrorMod.mirrorAssessmentPersistence(mirrorOn(rest), firstFull.writes.filter((w) => w.path.startsWith("assessmentDefinitions/") || w.path.startsWith("assessmentVersions/")), context);
+  ok(defOnly.ok === true, "fix 3: definition and version mirror from the transaction writes");
+  eq(rest.rows("assessment_definitions").map((r) => [r.id, r.current_version_id, r.title, r.estimated_minutes]), [["full-assessment", verId, "Executive Signature Full Assessment", 10]], "fix 3: the definition is created with its current version link");
+  eq(rest.rows("assessment_versions").map((r) => r.status), ["published"], "fix 3: the version ends published after scoring");
+
+  // Fix 4: a version that already exists and is published is never given scoring again.
+  rest = memoryRest({ seed: { people: [{ id: PARITY_PERSON }], entitlements: [{ id: uuidFor("entitlement:ent-full") }], assessment_versions: [{ id: verId, status: "published" }] } });
+  const published = await mirrorMod.mirrorAssessmentPersistence(mirrorOn(rest), firstFull.writes, context);
+  ok(published.ok === true, "fix 4: a published version in the batch does not fail the batch");
+  ok(!callsOf(rest, "POST", "assessment_versions").length && !callsOf(rest, "POST", "assessment_scoring").length && !callsOf(rest, "PATCH", "assessment_versions").length, "fix 4: no version, scoring or publish call for a published version");
+  ok(published.results.some((r) => r.table === "assessment_versions" && r.skipped && r.reason === "version-present"), "fix 4: the skip is reported");
+  ok(callsOf(rest, "POST", "assessment_attempts").length === 1 && callsOf(rest, "POST", "assessment_response_parts").length === 1, "fix 4: the attempt and its parts are still written");
+  rest = memoryRest({ seed: { people: [{ id: PARITY_PERSON }], assessment_versions: [{ id: verId, status: "retired" }] } });
+  await mirrorMod.mirrorAssessmentPersistence(mirrorOn(rest), versionWrites, context);
+  ok(!callsOf(rest, "POST", "assessment_scoring").length, "fix 4: a retired version is skipped too");
+  rest = memoryRest({ seed: { people: [{ id: PARITY_PERSON }], assessment_versions: [{ id: verId, status: "draft" }] } });
+  await mirrorMod.mirrorAssessmentPersistence(mirrorOn(rest), versionWrites, context);
+  ok(callsOf(rest, "POST", "assessment_scoring").length === 1 && callsOf(rest, "PATCH", "assessment_versions").length === 1, "fix 4: a leftover draft gets its scoring and is promoted");
+  rest = memoryRest({ failSelect: true });
+  const checkFailed = await mirrorMod.mirrorAssessmentPersistence(mirrorOn(rest), firstFull.writes, context);
+  ok(checkFailed.ok === false && checkFailed.results.some((r) => r.table === "assessment_versions" && r.error === "version-check-failed"), "fix 4: a failed version check is reported");
+  ok(!callsOf(rest, "POST", "assessment_versions").length && !callsOf(rest, "POST", "assessment_scoring").length && !callsOf(rest, "PATCH", "assessment_versions").length && !callsOf(rest, "PATCH", "assessment_definitions").length, "fix 4: nothing about the version or the definition link is written when the check fails");
+  ok(attemptRowsSent(rest).length === 1 && attemptRowsSent(rest)[0].entitlement_id === uuidFor("entitlement:ent-full"), "fix 4: a failed link check keeps the row as it is");
+
+  // Fix 5: missing links degrade instead of failing the batch.
+  rest = memoryRest({ seed: personOnly() });
+  const noEntitlement = await mirrorMod.mirrorAssessmentPersistence(mirrorOn(rest), firstFull.writes, context);
+  ok(noEntitlement.ok === true && noEntitlement.degraded === true && JSON.stringify(noEntitlement.degradedFields) === JSON.stringify(["entitlement_id"]), "fix 5: a missing entitlement degrades, the call stays ok");
+  eq(attemptRowsSent(rest)[0].entitlement_id, null, "fix 5: the entitlement link falls back to null like the import");
+  ok(rest.rows("assessment_response_parts").length === 2 && rest.rows("audit_events").length === 1, "fix 5: the attempt, its parts and the audit row are all written");
+  rest = memoryRest();
+  const allLinked = await mirrorMod.mirrorAssessmentPersistence(mirrorOn(rest), firstFull.writes, context);
+  ok(allLinked.ok === true && allLinked.degraded === false && allLinked.degradedFields.length === 0, "fix 5: nothing is degraded when the links exist");
+  eq(attemptRowsSent(rest)[0].entitlement_id, uuidFor("entitlement:ent-full"), "fix 5: an existing entitlement stays linked");
+  rest = memoryRest({ seed: { people: [] } });
+  const noPerson = await mirrorMod.mirrorAssessmentPersistence(mirrorOn(rest), firstFull.writes, context);
+  ok(noPerson.ok === false && noPerson.degraded === true, "fix 5: a missing person is reported as degraded and not ok");
+  ok(!callsOf(rest, "POST", "assessment_attempts").length && !callsOf(rest, "POST", "assessment_response_parts").length && !callsOf(rest, "POST", "consent_events").length, "fix 5: a missing person skips that person's consent, attempt and parts");
+  ok(callsOf(rest, "POST", "service_requests").length === 1 && callsOf(rest, "POST", "audit_events").length === 1 && callsOf(rest, "POST", "outbox_events").length === 1, "fix 5: rows without a person link are still written");
+  const sponsored = firstFull.writes.map((w) => (w === attemptWriteFull ? { path: w.path, data: Object.assign({}, w.data, { organizationId: "org-x" }) } : w));
+  rest = memoryRest();
+  await mirrorMod.mirrorAssessmentPersistence(mirrorOn(rest), sponsored, context);
+  eq(attemptRowsSent(rest)[0].sponsor_organization_id, null, "fix 5: a missing sponsor organization falls back to null");
+  rest = memoryRest({ seed: { people: [{ id: PARITY_PERSON }], entitlements: [{ id: uuidFor("entitlement:ent-full") }], organizations: [{ id: uuidFor("organization:org-x") }] } });
+  await mirrorMod.mirrorAssessmentPersistence(mirrorOn(rest), sponsored, context);
+  eq(attemptRowsSent(rest)[0].sponsor_organization_id, uuidFor("organization:org-x"), "fix 5: an existing sponsor organization stays linked");
+  const markerDoc = { id: "cs_test_synthetic_20", data: { program: "tsa", email: "buyer@example.com", processedAt: new Date(NOW) } };
+  rest = memoryRest({ seed: {} });
+  const strayPerson = await mirrorMod.mirrorStripeProcessedSession(mirrorOn(rest), markerDoc, { now: NOW, personId: BUYER_PERSON });
+  ok(strayPerson.ok === true && strayPerson.degraded === true && JSON.stringify(strayPerson.degradedFields) === JSON.stringify(["person_id"]), "fix 5: a missing person degrades a processed session");
+  eq(rest.rows("stripe_processed_sessions")[0].person_id, null, "fix 5: the processed session is written without the person link");
+  rest = memoryRest();
+  const linkedPerson = await mirrorMod.mirrorStripeProcessedSession(mirrorOn(rest), markerDoc, { now: NOW, personId: BUYER_PERSON });
+  ok(linkedPerson.degraded === false && rest.rows("stripe_processed_sessions")[0].person_id === BUYER_PERSON, "fix 5: an existing person stays linked on a processed session");
+
+  // Fix 6: no invented audit ids, no ids in skipped[].
+  rest = memoryRest();
+  const noId = await mirrorMod.mirrorCheckoutSessionCreated(mirrorOn(rest), { data: { action: "checkout_session_created", program: "tsa", sessionId: "cs_secret_session" } }, context);
+  ok(noId.ok === false && noId.error === "no-audit-id", "fix 6: a checkout audit without an id reports no-audit-id");
+  ok(!rest.calls.some((c) => c.method === "POST"), "fix 6: nothing is written for it");
+  rest = memoryRest();
+  const doneNoId = await mirrorMod.mirrorCheckoutSessionCompleted(mirrorOn(rest), { audit: { data: completedAudit.data }, processed: completedDocs.processed }, completedCtx);
+  ok(doneNoId.ok === false && doneNoId.error === "no-audit-id" && doneNoId.results.some((r) => r.table === "audit_events" && r.error === "no-audit-id"), "fix 6: the audit part of a completed checkout reports no-audit-id");
+  ok(rest.rows("stripe_processed_sessions").length === 1 && rest.rows("audit_events").length === 0, "fix 6: the processed marker is still written, the audit row is not invented");
+  const skippedLists = [
+    mirrorMod.planWrites([{ path: "stripeProcessedSessions/cs_secret_session", data: { program: "other", email: "a@example.com" } }, { path: "authorized_members/someone@example.com", data: {} }, { path: "stripeProcessedSessions/cs_secret_two", data: { program: "tsa", email: "bad" } }], context).skipped,
+    noId.skipped, doneNoId.skipped, strayPerson.skipped
+  ];
+  ok(!/cs_secret|someone@example|@/.test(JSON.stringify(skippedLists)), "fix 6: skipped[] holds no session id and no email");
+  ok(!/cs_secret/.test(JSON.stringify([noId, doneNoId])), "fix 6: results hold no session id");
 
   // ===== 5. Off means nothing happens; failures never throw ======================================================
   const offFetch = memoryRest();

@@ -28,10 +28,10 @@ const downSql = readFileSync(new URL('./rollbacks/20261007002150_payments_mirror
 class ServerTimestampTransform { constructor() { this.methodName = 'FieldValue.serverTimestamp'; } }
 class ArrayUnionTransform { constructor(values) { this.methodName = 'FieldValue.arrayUnion'; this.values = values; } }
 const FieldValue = { serverTimestamp: () => new ServerTimestampTransform(), arrayUnion: (...v) => new ArrayUnionTransform(v) };
-function fakeFirestore(seed) {
+function fakeFirestore(seed, start = 0) {
   const store = new Map(Object.entries(seed));
   const writes = [];
-  let counter = 0;
+  let counter = start;
   const docRef = (p) => ({ path: p, id: p.split('/').pop(), collection: (n) => collRef(`${p}/${n}`) });
   const collRef = (cp) => ({ doc: (id) => docRef(`${cp}/${id || `AUTOID${String(++counter).padStart(14, '0')}`}`) });
   return {
@@ -76,22 +76,12 @@ async function run() {
   await db.exec('reset role');
   ok('no function was added by the migration', !/create (or replace )?function/i.test(upSql));
   ok('the migration drops nothing', !/\bdrop\b/i.test(upSql.replace(/--.*$/gm, '')));
-  const mirrorKey = (await q(`select is_nullable, is_generated from information_schema.columns where table_name = 'audit_events' and column_name = 'mirror_key'`))[0];
-  ok('audit_events.mirror_key is a plain nullable column', mirrorKey && mirrorKey.is_nullable === 'YES' && mirrorKey.is_generated === 'NEVER');
-  ok('audit_events.mirror_key has a unique index', (await q(`select count(*)::int n from pg_indexes where indexname = 'audit_events_mirror_key_key' and indexdef like 'CREATE UNIQUE%'`))[0].n === 1);
+  ok('the migration adds no audit key of its own (it relies on 2130)', !/audit_events/.test(upSql.replace(/--.*$/gm, '')) && /2130/.test(upSql));
+  ok('migration 2130 is applied before 2150', (await q(`select count(*)::int n from information_schema.columns where table_name = 'audit_events' and column_name = 'legacy_firestore_id'`))[0].n === 1);
+  ok('audit_events.legacy_firestore_id (2130) is unique and has no mirror_key beside it', (await q(`select count(*)::int n from pg_indexes where tablename = 'audit_events' and indexdef like 'CREATE UNIQUE%legacy_firestore_id%'`))[0].n === 1 && (await q(`select count(*)::int n from information_schema.columns where table_name = 'audit_events' and column_name = 'mirror_key'`))[0].n === 0);
+  ok('the migration inserts no data', !/\binsert\s+into\b/i.test(upSql.replace(/--.*$/gm, '')));
   ok('outbox_events.legacy_firestore_id exists', (await q(`select count(*)::int n from information_schema.columns where table_name = 'outbox_events' and column_name = 'legacy_firestore_id'`))[0].n === 1);
-  const seeded = await q(`select id, program_id, title, status, estimated_minutes from assessment_definitions where id in ('quick-check','full-assessment') order by id`);
-  ok('the two Executive Signature definitions are seeded', seeded.length === 2);
-  const fakeSeedDb = fakeFirestore({ 'customers/c': {}, 'entitlements/e': { customerId: 'c', programId: 'executive-signature', assessmentId: 'quick-check', status: 'active', attemptsCompleted: 0, retakesAllowed: 0 } });
-  await createAssessmentPersistenceService({ db: fakeSeedDb, FieldValue }).persistCompletedAssessment({
-    customerId: 'c', entitlementId: 'e', assessmentId: 'quick-check', formVersion: 'readiness-free@1.0.0',
-    answers: Object.fromEntries(getVersion('readiness-free@1.0.0').questions.map((x) => [x.id, 3])), startedAt: new Date(Date.now() - 60000).toISOString(),
-    consent: { assessmentProcessing: true, noticeVersion: 'n@1' }, idempotencyKey: 'seed-check', actor: { actorType: 'participant', actorId: 'uid-seed', actorRole: 'participant' }
-  });
-  const serviceDefinition = fakeSeedDb.writes.find((w) => w.path === 'assessmentDefinitions/quick-check').data;
-  const mappedDefinition = mirrorMod.rowsForAssessmentDefinition({ id: 'quick-check', data: serviceDefinition }, { now: NOW }).assessment_definitions[0];
-  const seededQuick = seeded.find((r) => r.id === 'quick-check');
-  ok('the seeded quick-check row equals what the service would create', JSON.stringify(seededQuick) === JSON.stringify(mappedDefinition));
+  ok('no assessment definition exists before the mirror creates one', (await q(`select count(*)::int n from assessment_definitions where id in ('quick-check','full-assessment')`))[0].n === 0);
 
   // ---- 2. constraints on the new tables -------------------------------------------------------------------------
   const person = uuidFor('person:parity@example.com');
@@ -136,6 +126,12 @@ async function run() {
         const sets = Object.keys(body);
         await db.query(`update public.${table} set ${sets.map((c, i) => `${c} = $${i + 1}${types[c] === 'jsonb' ? '::jsonb' : ''}`).join(', ')} where ${filters.map(([c], i) => `${c}::text = $${sets.length + i + 1}`).join(' and ')}`,
           [...sets.map((c) => toParam(types[c], body[c])), ...filters.map(([, v]) => v.replace(/^eq\./, ''))]);
+      } else if (init.method === 'GET') {
+        const cols = (u.searchParams.get('select') || '*').replace(/[^a-z_,*]/g, '');
+        const idParam = u.searchParams.get('id') || '';
+        const wanted = idParam.startsWith('in.(') ? idParam.slice(4, -1).split(',') : [idParam.replace(/^eq\./, '')];
+        const found = (await db.query(`select ${cols} from public.${table} where id::text = any($1)`, [wanted])).rows;
+        return { status: 200, ok: true, json: async () => found };
       }
       return { status: 201, ok: true };
     } catch (e) {
@@ -145,10 +141,9 @@ async function run() {
   };
   const mirror = createMirror({ env: { SUPABASE_MIRROR: 'on', SUPABASE_SERVICE_ROLE_KEY: 'test-key-not-real' }, fetchImpl: restOverPglite, logger: { warn() {}, log() {} } });
 
-  // what the people module would have mirrored first: the entitlement rows (assessment ids come from the seed)
+  // The people module cannot mirror an entitlement for 'full-assessment' before the definition exists (its foreign key),
+  // so the first completion arrives with no entitlement row: the mirror falls back to null and says so.
   const entFull = uuidFor('entitlement:ent-full');
-  await db.exec(`insert into entitlements (id, person_id, program_id, assessment_id, access_type, status, retakes_allowed, legacy_firestore_id)
-    values ('${entFull}', '${person}', 'executive-signature', 'full-assessment', 'comped', 'active', 0, 'entitlements/ent-full')`);
 
   const fsDb = fakeFirestore({
     'customers/cust-parity': {},
@@ -165,33 +160,36 @@ async function run() {
   const ctx = { now: NOW, personIds: { 'cust-parity': person } };
   const first = await mirrorMod.mirrorAssessmentPersistence(mirror, fsDb.writes, ctx);
   ok(`the whole completion mirrors into the real schema  ${lastError ? JSON.stringify(lastError) : ''}`, first.ok === true);
+  ok('the missing entitlement degraded instead of failing the batch', first.degraded === true && JSON.stringify(first.degradedFields) === JSON.stringify(['entitlement_id']));
   const count = async (table) => (await q(`select count(*)::int n from ${table}`))[0].n;
   const attempt = (await q(`select * from assessment_attempts`))[0];
   ok('one completed attempt with the score and checksums', attempt.status === 'completed' && Number(attempt.overall_score) === result.overallScore && attempt.result_checksum === result.resultChecksum && attempt.response_checksum === result.responseChecksum);
   ok('the attempt is the import\'s uuid of the Firestore id', attempt.id === uuidFor(`attempt:${result.attemptId}`) && attempt.legacy_firestore_id === `assessmentAttempts/${result.attemptId}`);
-  ok('the attempt points at the person, entitlement and version', attempt.person_id === person && attempt.entitlement_id === entFull && attempt.version_id === uuidFor('version:es-full-assessment-1.0.0'));
+  ok('the attempt points at the person and version, and has no entitlement link yet', attempt.person_id === person && attempt.entitlement_id === null && attempt.version_id === uuidFor('version:es-full-assessment-1.0.0'));
   ok('two response parts, two consent events', (await count('assessment_response_parts')) === 2 && (await count('consent_events')) === 2);
   ok('consent ids on the attempt are the consent rows', (await q(`select count(*)::int n from consent_events where id = any (select unnest(consent_event_ids) from assessment_attempts)`))[0].n === 2);
   ok('two outbox events and one service request', (await count('outbox_events')) === 2 && (await count('service_requests')) === 1);
   ok('the idempotency hash is the service request id', (await q(`select count(*)::int n from service_requests s join assessment_attempts a on a.idempotency_hash = s.id`))[0].n === 1);
   const audit = (await q(`select * from audit_events`))[0];
-  ok('one audit event with its mirror key and legacy id', audit.action === 'assessment_completed' && /^auditEvents\//.test(audit.mirror_key) && audit.mirror_key === audit.detail.legacy_firestore_id && audit.person_id === person);
+  ok('one audit event with its legacy id column (2130)', audit.action === 'assessment_completed' && /^auditEvents\//.test(audit.legacy_firestore_id) && audit.legacy_firestore_id === audit.detail.legacy_firestore_id && audit.person_id === person);
   const version = (await q(`select * from assessment_versions where id = $1`, [uuidFor('version:es-full-assessment-1.0.0')]))[0];
   ok('the version is published, with scoring', version.status === 'published' && version.published_at !== null && (await count('assessment_scoring')) === 1);
   ok('the definition points at the version', (await q(`select current_version_id from assessment_definitions where id = 'full-assessment'`))[0].current_version_id === version.id);
-  ok('the seeded definition kept its row (insert only)', (await q(`select count(*)::int n from assessment_definitions where id = 'full-assessment'`))[0].n === 1);
+  const definitionRow = (await q(`select id, program_id, title, status, estimated_minutes from assessment_definitions where id = 'full-assessment'`))[0];
+  const mappedDefinition = mirrorMod.rowsForAssessmentDefinition({ id: 'full-assessment', data: fsDb.writes.find((w) => w.path === 'assessmentDefinitions/full-assessment').data }, ctx).assessment_definitions[0];
+  ok('the definition was created by the mirror, equal to what the service wrote', JSON.stringify(definitionRow) === JSON.stringify(mappedDefinition));
 
   // idempotency
   const before = { attempts: await count('assessment_attempts'), audit: await count('audit_events'), consent: await count('consent_events'), parts: await count('assessment_response_parts'), outbox: await count('outbox_events'), req: await count('service_requests') };
   const replay = await mirrorMod.mirrorAssessmentPersistence(mirror, fsDb.writes, ctx);
   const after = { attempts: await count('assessment_attempts'), audit: await count('audit_events'), consent: await count('consent_events'), parts: await count('assessment_response_parts'), outbox: await count('outbox_events'), req: await count('service_requests') };
-  ok('replaying the same writes changes no row count (the version replay is refused harmlessly)', JSON.stringify(before) === JSON.stringify(after));
-  ok('the replay never throws and reports the refusal', typeof replay.ok === 'boolean');
+  ok('replaying the same writes changes no row count', JSON.stringify(before) === JSON.stringify(after));
+  ok('the replay skips the now published version instead of failing', replay.ok === true && replay.results.some((r) => r.table === 'assessment_versions' && r.reason === 'version-present'));
 
   // published version lock, and the frozen attempt
   const scoringBefore = (await q(`select scoring from assessment_scoring`))[0].scoring;
   const misuse = await mirrorMod.mirrorAssessmentPersistence(mirror, fsDb.writes.filter((w) => w.path.startsWith('assessmentVersions/')), ctx);
-  ok('a published version cannot get scoring rows from the mirror (database refuses, mirror reports ok:false)', misuse.ok === false && lastError && lastError.code === '42501');
+  ok('a published version document passed again is skipped without a scoring write (no database refusal needed)', misuse.ok === true && misuse.results.every((r) => r.table !== 'assessment_scoring') && lastError === null);
   ok('the version and its scoring are unchanged after the refused write', JSON.stringify((await q(`select scoring from assessment_scoring`))[0].scoring) === JSON.stringify(scoringBefore) && (await q(`select status from assessment_versions where id = $1`, [version.id]))[0].status === 'published');
   await rejects('direct scoring insert for a published version is refused', db, `insert into assessment_scoring (version_id, scoring) values ('${version.id}', '{}') on conflict do nothing`, '42501');
   await rejects('a completed attempt cannot be rewritten', db, `update assessment_attempts set overall_score = 1 where id = '${attempt.id}'`, '42501');
@@ -203,15 +201,38 @@ async function run() {
   await rejects('audit_events rejects delete', db, `delete from audit_events`, '42501');
   await rejects('consent_events rejects update', db, `update consent_events set granted = false`, '42501');
   await rejects('consent_events rejects delete', db, `delete from consent_events`, '42501');
-  const auditId = audit.mirror_key.split('/')[1];
+  const auditId = audit.legacy_firestore_id.split('/')[1];
   const auditDuplicate = await mirrorMod.mirrorAuditEvent(mirror, { id: auditId, data: fsDb.writes.find((w) => w.path === `auditEvents/${auditId}`).data }, ctx);
   ok('an audit event written twice is one row', auditDuplicate.ok === true && (await count('audit_events')) === 1);
-  await rejects('the mirror key is unique', db, `insert into audit_events (action, mirror_key) values ('x', '${audit.mirror_key}')`, '23505');
-  // The importer's own rows leave mirror_key null, so a rerun of the importer (which can insert the same legacy id
+  await rejects('the legacy id column is unique', db, `insert into audit_events (action, legacy_firestore_id) values ('x', '${audit.legacy_firestore_id}')`, '23505');
+  // The importer's own rows leave legacy_firestore_id null, so a rerun of the importer (which can insert the same legacy id
   // twice when it does not dedupe) behaves exactly as before the migration.
   await db.exec(`insert into audit_events (action, detail) values ('import_style', '{"source":"firestore","legacy_firestore_id":"auditEvents/imported-1"}'), ('import_style_again', '{"source":"firestore","legacy_firestore_id":"auditEvents/imported-1"}')`);
   await db.exec(`insert into audit_events (action) values ('no_key_one'), ('no_key_two')`);
-  ok('import style audit rows (null mirror key) can still be inserted repeatedly', (await q(`select count(*)::int n from audit_events where detail ->> 'legacy_firestore_id' = 'auditEvents/imported-1'`))[0].n === 2);
+  ok('import style audit rows (null legacy id column) can still be inserted repeatedly', (await q(`select count(*)::int n from audit_events where detail ->> 'legacy_firestore_id' = 'auditEvents/imported-1'`))[0].n === 2);
+
+  // Second completion: now the definition exists, the people module can mirror the entitlement, and the link is kept.
+  await db.exec(`insert into entitlements (id, person_id, program_id, assessment_id, access_type, status, retakes_allowed, legacy_firestore_id)
+    values ('${entFull}', '${person}', 'executive-signature', 'full-assessment', 'comped', 'active', 1, 'entitlements/ent-full')`);
+  const fsDb2 = fakeFirestore({
+    'customers/cust-parity': {}, 'assessmentVersions/es-full-assessment-1.0.0': { status: 'published' }, 'assessmentDefinitions/full-assessment': { status: 'live' },
+    'entitlements/ent-full': { customerId: 'cust-parity', programId: 'executive-signature', assessmentId: 'full-assessment', status: 'active', attemptsCompleted: 1, retakesAllowed: 1 }
+  }, 500);
+  const result2 = await createAssessmentPersistenceService({ db: fsDb2, FieldValue }).persistCompletedAssessment({
+    customerId: 'cust-parity', entitlementId: 'ent-full', assessmentId: 'full-assessment', formVersion: full.formVersion,
+    answers: Object.fromEntries(full.questions.map((x, i) => [x.id, ((i + 2) % 5) + 1])), startedAt: new Date(Date.now() - 300000).toISOString(),
+    consent: { assessmentProcessing: true, noticeVersion: 'notice@1' }, idempotencyKey: 'pglite-full-2', actor: { actorType: 'participant', actorId: 'uid-parity', actorRole: 'participant' }
+  });
+  ok('the retake writes no version or definition document', !fsDb2.writes.some((w) => w.path.startsWith('assessmentVersions/') || w.path.startsWith('assessmentDefinitions/')));
+  const second = await mirrorMod.mirrorAssessmentPersistence(mirror, fsDb2.writes, ctx);
+  ok('the second completion mirrors with the entitlement linked and nothing degraded', second.ok === true && second.degraded === false);
+  ok('the second attempt is linked to the entitlement', (await q(`select entitlement_id from assessment_attempts where id = $1`, [uuidFor(`attempt:${result2.attemptId}`)]))[0].entitlement_id === entFull);
+  ok('the version has exactly one scoring row and is still published', (await count('assessment_scoring')) === 1 && (await q(`select status from assessment_versions where id = $1`, [version.id]))[0].status === 'published');
+  const ghost = uuidFor('person:ghost@example.com');
+  const ghostRun = await mirrorMod.mirrorAssessmentPersistence(mirror, fsDb2.writes, { now: NOW, personIds: { 'cust-parity': ghost } });
+  ok('a missing person row skips the attempt and reports degraded, without a database error', ghostRun.ok === false && ghostRun.degraded === true && (await count('assessment_attempts')) === 2);
+  const noId = await mirrorMod.mirrorCheckoutSessionCreated(mirror, { data: { action: 'checkout_session_created', program: 'tsa', sessionId: 'cs_test_noid' } }, ctx);
+  ok('an audit document without an id reports no-audit-id and writes nothing', noId.ok === false && noId.error === 'no-audit-id' && (await q(`select count(*)::int n from audit_events where detail ->> 'sessionId' = 'cs_test_noid'`))[0].n === 0);
 
   // ---- 4. payments through the real module ----------------------------------------------------------------------
   const checkoutAudit = { id: 'AUTOID00000000000101', data: { action: 'checkout_session_created', program: 'tsa', sessionId: 'cs_test_synthetic_1', createdAt: new ServerTimestampTransform() } };
@@ -239,20 +260,13 @@ async function run() {
   const auditBeforeDown = await count('audit_events');
   await db.exec(downSql);
   ok('down: both tables are gone', (await q(`select count(*)::int n from information_schema.tables where table_schema = 'public' and table_name in ('stripe_processed_sessions','service_requests')`))[0].n === 0);
-  ok('down: the audit mirror key and the outbox legacy id are gone', (await q(`select count(*)::int n from information_schema.columns where (column_name = 'mirror_key' and table_name = 'audit_events') or (column_name = 'legacy_firestore_id' and table_name = 'outbox_events')`))[0].n === 0);
+  ok('down: the outbox legacy id is gone', (await q(`select count(*)::int n from information_schema.columns where column_name = 'legacy_firestore_id' and table_name = 'outbox_events'`))[0].n === 0);
   ok('down: audit rows are kept', (await count('audit_events')) === auditBeforeDown);
-  ok('down: a definition with attempts, entitlements or versions behind it is kept', (await q(`select count(*)::int n from assessment_definitions where id = 'full-assessment'`))[0].n === 1);
-  ok('down: an unreferenced seeded definition is removed', (await q(`select count(*)::int n from assessment_definitions where id = 'quick-check'`))[0].n === 0 || (await q(`select count(*)::int n from assessment_versions where assessment_id = 'quick-check'`))[0].n > 0);
+  ok('down: assessment definitions are untouched', (await q(`select count(*)::int n from assessment_definitions where id = 'full-assessment'`))[0].n === 1);
+  ok('down: audit_events.legacy_firestore_id (migration 2130) is left alone', (await q(`select count(*)::int n from information_schema.columns where table_name = 'audit_events' and column_name = 'legacy_firestore_id'`))[0].n === 1);
+  ok('down: the down script deletes nothing from existing tables', !/\bdelete\b/i.test(downSql.replace(/--.*$/gm, '')));
   await db.exec(upSql);
   ok('up again after down works (re-runnable)', (await q(`select count(*)::int n from information_schema.tables where table_schema = 'public' and table_name in ('stripe_processed_sessions','service_requests')`))[0].n === 2);
-
-  // ---- 6. undo on a clean database removes the seed -------------------------------------------------------------
-  const clean = await boot();
-  await clean.db.exec(downSql);
-  const left = (await clean.db.query(`select count(*)::int n from assessment_definitions where id in ('quick-check','full-assessment')`)).rows[0].n;
-  ok('down on a clean database removes the two seeded definitions', left === 0);
-  await clean.db.exec(upSql);
-  ok('up after a clean down restores the seed', (await clean.db.query(`select count(*)::int n from assessment_definitions where id in ('quick-check','full-assessment')`)).rows[0].n === 2);
 
   console.log(`\n${pass} passed, ${fail} failed`);
   process.exit(fail ? 1 : 0);

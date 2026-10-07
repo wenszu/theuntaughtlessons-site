@@ -18,21 +18,37 @@
 //   auditEvents/{auto id}                         -> audit_events                         (append only)
 //   stripeProcessedSessions/{checkout session id} -> stripe_processed_sessions            (new, migration 2150)
 //   settings/payments                             -> app_settings key "payments"
+// The definition is created the same way Firestore creates it: the caller passes the assessmentDefinitions write
+// from the transaction, and the mirror inserts it, then its version, then points current_version_id at the version.
 // Not handled here (another module owns people, members, customers, enrollments and entitlements): customers,
 // customerAuthLinks, customerEmailClaims, entitlements (including the counters persistCompletedAssessment
 // updates), authorized_members (TSA purchase grant), users/{uid}.products.readinessAssessment.
 //
 // Rules the mapping keeps:
 //   * Rows are identical to what scripts/supabase-import-mapping.js builds for the same Firestore document
-//     (same uuid v5 ids, same columns; the one extra column is audit_events.mirror_key, see migration 2150). The helpers below are copies of the import's pure helpers because
+//     (same uuid v5 ids, same columns; the one extra column is audit_events.legacy_firestore_id, from migration
+//     2130, which the importer leaves null). The helpers below are copies of the import's pure helpers because
 //     scripts/ is not deployed with the functions. tests/supabase-mirror-payments-assessments.test.js proves parity.
 //   * Append only tables (consent_events, audit_events) are only ever inserted with ignore-duplicates.
 //     assessment_attempts, assessment_response_parts, assessment_definitions, assessment_versions and
 //     service_requests are also insert-once, ignore-duplicates.
 //   * A published assessment version is frozen, and the database refuses scoring writes for it even when the
-//     insert would be skipped as a duplicate. Version and scoring rows are therefore only written when the
-//     caller reports that Firestore just created the version document, and the publish update only touches
-//     rows that are still drafts.
+//     insert would be skipped as a duplicate. The caller passes an assessmentVersions document only when
+//     Firestore just created it, and the code checks anyway (mirror.select): a version row that already exists
+//     and is not a draft is skipped together with its scoring and publish steps; a missing row is inserted as a
+//     draft, gets its scoring, and is then promoted draft to published (the update only matches drafts); a row
+//     left as a draft by an earlier failed call is completed the same way.
+//   * Links that may be missing are checked with mirror.select before the attempt is written: an entitlement
+//     or sponsor organization row that does not exist yet becomes null (as the import does for unknown
+//     links) and the result says degraded: true; a missing person row skips the person's consent and attempt rows
+//     (and so the response parts) instead of failing the whole batch. The same applies to the person link on
+//     stripe_processed_sessions. People and entitlements are written by the people module, before this one.
+//   * Audit documents need the real Firestore document id (the reference add() returns, or the one a transaction
+//     created). A document without an id is not mirrored and the result reports error "no-audit-id": an id made up
+//     here would be duplicated by a catch-up import of the same document.
+//   * Results and skipped[] hold only table names, counts and reasons, but callers must not log them or the
+//     documents (checkout session ids and emails live in the documents).
+//   * Depends on migration 2130 (audit_events.legacy_firestore_id, applied before 2150) and on 2150.
 //   * No card data exists in any of these documents and none is mapped. Payment documents map only the fields
 //     the Firestore document holds, and keys that look like secrets are dropped from the public settings row.
 
@@ -45,6 +61,7 @@ const KNOWN_PROGRAMS = ["tsa", "executive-signature", "doc"];
 const PAYMENT_PROGRAMS = ["tsa", "executive-signature"];
 const ATTEMPT_STATUS = ["received", "in_progress", "scoring", "completed", "abandoned", "failed", "deleted"];
 const CONSENT_TYPES = ["assessment_processing", "marketing", "organization_disclosure", "research"];
+const NO_AUDIT_ID = "no-audit-id";
 const OUTBOX_STATUS = ["pending", "processing", "completed", "retry", "dead_letter"];
 
 // ---- copies of the import mapping's pure helpers (scripts/supabase-import-mapping.js) -------------------------
@@ -383,16 +400,11 @@ function planServiceRequest(doc, context) {
 // Same row the import builds for auditEvents. person_id and actor_person_id come from the people module through
 // context (context.personId for the subject customer, context.actorPersonId when actorType is "customer").
 function planAuditEvent(doc, context) {
-  let { id } = docParts(doc);
-  const { data: raw } = docParts(doc);
+  const { id, data: raw } = docParts(doc);
   const now = nowIsoFor(context);
   let data = resolveSentinels(raw, now);
-  if (!id && data.sessionId && /^checkout_session_/.test(String(data.action || ""))) {
-    // Deterministic fallback so a retry cannot duplicate the row. Callers should pass the real document id,
-    // otherwise a later catch-up import of the same Firestore document would add a second row.
-    id = `mirror-${data.action}-${data.sessionId}`;
-  }
-  if (!id) return plan({}, [{ source: "auditEvents", reason: "missing document id" }]);
+  // No invented id: a row under an id Firestore never had would be duplicated by a catch-up import.
+  if (!id) return plan({}, [{ source: "auditEvents", reason: NO_AUDIT_ID }]);
   if (/^checkout_session_/.test(String(data.action || ""))) data = scrubPaymentFields(data);
   const subjectPerson = data.subjectCustomerId ? personFor(data.subjectCustomerId, context) : null;
   const actorPerson = data.actorType === "customer" && data.actorId
@@ -408,8 +420,9 @@ function planAuditEvent(doc, context) {
       organization_id: data.organizationId ? uuidFor(`organization:${data.organizationId}`) : null,
       detail: plain(Object.assign({}, data, { source: "firestore", legacy_firestore_id: `auditEvents/${id}` })),
       created_at: iso(data.createdAt) || now,
-      // Not in the import's row: the unique key (migration 2150) that lets the same mirrored document be sent twice.
-      mirror_key: `auditEvents/${id}`
+      // Not in the import's row: the unique column from migration 2130 that lets the same mirrored document be sent
+      // twice. The importer leaves it null.
+      legacy_firestore_id: `auditEvents/${id}`
     }]
   });
 }
@@ -418,12 +431,13 @@ function planAuditEvent(doc, context) {
 function planStripeProcessedSession(doc, context) {
   const { id, data: raw } = docParts(doc);
   const source = `stripeProcessedSessions/${id}`;
+  // The checkout session id is not put in skipped[] (callers must still not log skipped[] or results).
   if (!id) return plan({}, [{ source: "stripeProcessedSessions", reason: "missing document id" }]);
   const now = nowIsoFor(context);
   const data = resolveSentinels(raw, now);
   const email = normalizeEmail(data.email);
-  if (!email) return plan({}, [{ source, reason: "no usable email" }]);
-  if (!PAYMENT_PROGRAMS.includes(data.program)) return plan({}, [{ source, reason: "unknown program" }]);
+  if (!email) return plan({}, [{ source: "stripeProcessedSessions", reason: "no usable email" }]);
+  if (!PAYMENT_PROGRAMS.includes(data.program)) return plan({}, [{ source: "stripeProcessedSessions", reason: "unknown program" }]);
   return plan({
     stripe_processed_sessions: [{
       session_id: id,
@@ -480,7 +494,8 @@ function planForWrite(write, context) {
   if (parts.length === 4 && parts[0] === "assessmentAttempts" && parts[2] === "responseParts") {
     return planResponsePart({ parentId: parts[1], id: parts[3], data }, context);
   }
-  return plan({}, [{ source: path || "unknown", reason: "not mapped by this module" }]);
+  // Only the collection name: a path can hold an email (authorized_members) or a session id.
+  return plan({}, [{ source: parts[0] || "unknown", reason: "not mapped by this module" }]);
 }
 
 function mergePlans(plans) {
@@ -513,7 +528,7 @@ const WRITE_MODE = Object.freeze({
   assessment_response_parts: { conflict: "attempt_id,part_number", ignoreDuplicates: true },
   outbox_events: { conflict: "id", ignoreDuplicates: false },
   service_requests: { conflict: "id", ignoreDuplicates: true },
-  audit_events: { conflict: "mirror_key", ignoreDuplicates: true }, // append only
+  audit_events: { conflict: "legacy_firestore_id", ignoreDuplicates: true }, // append only (column from migration 2130)
   stripe_processed_sessions: { conflict: "session_id", ignoreDuplicates: true },
   app_settings: { conflict: "key", ignoreDuplicates: false }
 });
@@ -538,11 +553,99 @@ function isEnabled(mirror) {
   return typeof mirror.enabled === "function" ? mirror.enabled() : true;
 }
 
-async function writePlanned(mirror, planned, label) {
+// Reads the ids a batch points at (mirror.select) so one missing link does not lose the whole batch.
+async function selectRows(mirror, table, columns, ids, label) {
+  const unique = Array.from(new Set(ids.filter(Boolean)));
+  if (!unique.length) return { ok: true, rows: [] };
+  if (!mirror || typeof mirror.select !== "function") return { ok: false, error: "no-select" };
+  const answer = await mirror.select(table, `select=${columns}&id=in.(${unique.map(encodeURIComponent).join(",")})`, { label });
+  return answer && answer.ok ? { ok: true, rows: answer.rows || [] } : { ok: false, error: (answer && answer.error) || "select-failed" };
+}
+
+// Checks what the batch depends on and adjusts a copy of the rows:
+//   * a version that already exists and is not a draft is left alone with its scoring and publish steps;
+//     a draft or missing version proceeds; when the check itself fails the version family is not written;
+//   * an entitlement or sponsor organization row that is missing becomes null (like the import's unknown links);
+//   * a person row that is missing skips that person's consent and attempt rows (not nullable columns).
+async function prepare(mirror, planned, label) {
+  const tables = {};
+  Object.entries(planned.tables).forEach(([table, rows]) => { tables[table] = rows.slice(); });
   const results = [];
   const failed = new Set();
+  const degradedFields = new Set();
+  const dropTable = (table) => { if (tables[table] && !tables[table].length) delete tables[table]; };
+
+  if (tables.assessment_versions) {
+    const versionIds = tables.assessment_versions.map((row) => row.id);
+    const found = await selectRows(mirror, "assessment_versions", "id,status", versionIds, label);
+    const drop = new Set();
+    if (!found.ok) {
+      versionIds.forEach((id) => drop.add(id));
+      results.push({ table: "assessment_versions", ok: false, skipped: true, error: "version-check-failed" });
+      failed.add("assessment_versions");
+    } else {
+      found.rows.forEach((row) => { if (row.status !== "draft") drop.add(row.id); });
+      if (drop.size) results.push({ table: "assessment_versions", ok: true, skipped: true, reason: "version-present" });
+    }
+    tables.assessment_versions = tables.assessment_versions.filter((row) => !drop.has(row.id));
+    if (tables.assessment_scoring) tables.assessment_scoring = tables.assessment_scoring.filter((row) => !drop.has(row.version_id));
+    if (tables.assessment_versions_publish) tables.assessment_versions_publish = tables.assessment_versions_publish.filter((row) => !drop.has(row.id));
+    ["assessment_versions", "assessment_scoring", "assessment_versions_publish"].forEach(dropTable);
+  }
+
+  const personIds = [];
+  ["consent_events", "assessment_attempts", "stripe_processed_sessions"].forEach((table) => {
+    (tables[table] || []).forEach((row) => { if (row.person_id) personIds.push(row.person_id); });
+  });
+  if (personIds.length) {
+    const people = await selectRows(mirror, "people", "id", personIds, label);
+    if (people.ok) {
+      const present = new Set(people.rows.map((row) => row.id));
+      ["consent_events", "assessment_attempts"].forEach((table) => {
+        if (!tables[table]) return;
+        const kept = tables[table].filter((row) => present.has(row.person_id));
+        if (kept.length !== tables[table].length) {
+          results.push({ table, ok: false, skipped: true, error: "person-missing" });
+          degradedFields.add("person-missing");
+          failed.add(table);
+        }
+        tables[table] = kept;
+        dropTable(table);
+      });
+      if (tables.stripe_processed_sessions) {
+        tables.stripe_processed_sessions = tables.stripe_processed_sessions.map((row) => {
+          if (!row.person_id || present.has(row.person_id)) return row;
+          degradedFields.add("person_id");
+          return Object.assign({}, row, { person_id: null });
+        });
+      }
+    }
+  }
+
+  if (tables.assessment_attempts) {
+    const attempts = tables.assessment_attempts;
+    const nullOut = async (column, table) => {
+      const wanted = attempts.map((row) => row[column]);
+      const found = await selectRows(mirror, table, "id", wanted, label);
+      if (!found.ok) return;
+      const present = new Set(found.rows.map((row) => row.id));
+      attempts.forEach((row, index) => {
+        if (row[column] && !present.has(row[column])) {
+          attempts[index] = Object.assign({}, row, { [column]: null });
+          degradedFields.add(column);
+        }
+      });
+    };
+    await nullOut("entitlement_id", "entitlements");
+    await nullOut("sponsor_organization_id", "organizations");
+  }
+  return { tables, results, failed, degraded: degradedFields.size > 0, degradedFields: Array.from(degradedFields).sort() };
+}
+
+async function writePlanned(mirror, tables, label, failed) {
+  const results = [];
   for (const table of WRITE_ORDER) {
-    const rows = planned.tables[table];
+    const rows = tables[table];
     if (!rows || !rows.length) continue;
     const parents = DEPENDS_ON[table] || [];
     if (parents.some((parent) => failed.has(parent))) {
@@ -578,16 +681,23 @@ async function runPlan(mirror, planner, label) {
   if (!isEnabled(mirror)) return { ok: false, skipped: true };
   try {
     const planned = planner();
-    const results = await writePlanned(mirror, planned, label);
-    return { ok: results.every((r) => r.ok), results, skipped: planned.skipped };
+    const prepared = await prepare(mirror, planned, label);
+    const results = prepared.results.concat(await writePlanned(mirror, prepared.tables, label, prepared.failed));
+    const noAuditId = planned.skipped.some((item) => item.reason === NO_AUDIT_ID);
+    if (noAuditId) results.push({ table: "audit_events", ok: false, skipped: true, error: NO_AUDIT_ID });
+    const out = { ok: results.every((r) => r.ok), results, skipped: planned.skipped, degraded: prepared.degraded, degradedFields: prepared.degradedFields };
+    if (noAuditId) out.error = NO_AUDIT_ID;
+    return out;
   } catch (error) {
     return { ok: false, error: "mirror-failed" };
   }
 }
 
 // ---- async mirror functions ----------------------------------------------------------------------------------------
-// Each takes the mirror from createMirror (or the { upsert, update } handed to a startMirror step), never throws,
-// and resolves to { ok, results, skipped } or { ok: false, skipped: true } while the mirror is off.
+// Each takes the mirror from createMirror (or the { upsert, update, select } handed to a startMirror step), never
+// throws, and resolves to { ok, results, skipped, degraded, degradedFields } or { ok: false, skipped: true } while the
+// mirror is off. Do not log the result or the documents: skipped[] and results[] hold table names and reasons only,
+// but the documents carry checkout session ids and emails.
 
 // persistCompletedAssessment: pass every document the transaction created, as { path, data } entries.
 function mirrorAssessmentPersistence(mirror, writes, context) {
