@@ -137,6 +137,19 @@ function build() {
     addKey(key, activityId);
   });
 
+  // Older ids the Explain to Aiko pages still ask for (apps/explain-to-aiko/aiko.js lists them for the saved-result
+  // lookup and posts the -120s / -60s ids as the exercise name). They are not in exerciseProgressIds, so they are
+  // added here to keep a regeneration from dropping them. Migration 20261008002160 inserts the same four keys.
+  [
+    ["explain-to-aiko-v2", "p2-e5"],
+    ["explain-to-aiko-120s", "p2-e5"],
+    ["explain-to-aiko-60-v2", "p2-e6"],
+    ["explain-to-aiko-60s", "p2-e6"]
+  ].forEach(([key, activityId]) => {
+    if (!seen.has(activityId)) throw new Error(`extra key ${key} points at unknown activity ${activityId}`);
+    addKey(key, activityId);
+  });
+
   return { generatedFrom: ["member-login/content-config.js", "assets/firebase.js"], activities, keys };
 }
 

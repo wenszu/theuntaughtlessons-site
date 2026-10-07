@@ -874,6 +874,22 @@
     {
       "key": "explain-to-aiko-120",
       "activity_id": "p2-e5"
+    },
+    {
+      "key": "explain-to-aiko-v2",
+      "activity_id": "p2-e5"
+    },
+    {
+      "key": "explain-to-aiko-120s",
+      "activity_id": "p2-e5"
+    },
+    {
+      "key": "explain-to-aiko-60-v2",
+      "activity_id": "p2-e6"
+    },
+    {
+      "key": "explain-to-aiko-60s",
+      "activity_id": "p2-e6"
     }
   ]
 }

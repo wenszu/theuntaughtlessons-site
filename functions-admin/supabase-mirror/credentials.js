@@ -43,7 +43,9 @@ const CATALOG_KEYS = [
   ["lets-switch-hats", "p3-e3"], ["speak-like-obama", "p3-e4"], ["tsa-diagnostic-v2", "tsa-diagnostic"],
   ["tsa-checkpoint-v2", "tsa-checkpoint"], ["tsa_sort_score", "tsa-sort-score"], ["tsa_spot_score", "tsa-spot-score"],
   ["tsa_speak_score", "tsa-speak-score"], ["utl_result_tsa_diagnostic", "tsa-diagnostic"],
-  ["utl_result_tsa_checkpoint", "tsa-checkpoint"], ["issue-tree", "p2-e1"], ["explain-to-aiko-120", "p2-e5"]
+  ["utl_result_tsa_checkpoint", "tsa-checkpoint"], ["issue-tree", "p2-e1"], ["explain-to-aiko-120", "p2-e5"],
+  ["explain-to-aiko-v2", "p2-e5"], ["explain-to-aiko-120s", "p2-e5"], ["explain-to-aiko-60-v2", "p2-e6"],
+  ["explain-to-aiko-60s", "p2-e6"]
 ];
 
 // ---- Copies of the import mapping helpers (scripts/supabase-import-mapping.js) ----------------------------------
