@@ -6,6 +6,12 @@
 //   node scripts/supabase-import.js --project the-untaught-lessons [--out report.json]        dry run (default)
 //   node scripts/supabase-import.js --project the-untaught-lessons --apply [--out report.json] writes after typed APPLY
 //   node scripts/supabase-import.js --rollback <run id>                                        undoes one apply run
+//   node scripts/supabase-import.js --project the-untaught-lessons --save-snapshot ~/utl-backups
+//       reads Firestore (read only) and also saves the whole read as one JSON file plus a manifest in that folder,
+//       which must be OUTSIDE this repository (the repository is public and the file holds member data)
+//   node scripts/supabase-import.js --from-snapshot ~/utl-backups/firestore-snapshot-X.json [--apply]
+//       builds the plan from a saved snapshot instead of reading Firestore, so Supabase can be rebuilt from the
+//       last look at Firebase at any time
 //
 // Dry run reads Firestore, builds every row, and prints counts, warnings and exceptions. Nothing is written.
 // Apply writes a migration_runs row, then every table in dependency order, then one migration_records row per
@@ -63,6 +69,35 @@ async function confirmTyped(expected) {
 }
 
 // Reads every collection the plan needs. Read-only.
+// A snapshot is the whole Firestore read as one JSON file. Firestore timestamps serialize as
+// {_seconds, _nanoseconds}, which the mapping reads directly. The file holds member data, so it is
+// refused inside this repository (public) and written readable by the owner only.
+function insideRepo(target) {
+  const repoRoot = path.resolve(__dirname, "..") + path.sep;
+  return (path.resolve(target) + path.sep).startsWith(repoRoot);
+}
+
+function saveSnapshot(snapshot, dir, projectId) {
+  if (insideRepo(dir)) throw new Error("The snapshot folder must be outside this repository (it is public and the snapshot holds member data).");
+  fs.mkdirSync(dir, { recursive: true, mode: 0o700 });
+  const stamp = new Date().toISOString().replace(/[:.]/g, "-");
+  const file = path.join(dir, `firestore-snapshot-${stamp}.json`);
+  const body = JSON.stringify({ project: projectId, takenAt: new Date().toISOString(), snapshot });
+  fs.writeFileSync(file, body, { mode: 0o600 });
+  const counts = {};
+  Object.entries(snapshot.collections).forEach(([name, docs]) => { counts[name] = docs.length; });
+  Object.entries(snapshot.subcollections).forEach(([name, docs]) => { counts[name] = docs.length; });
+  const manifest = { file: path.basename(file), project: projectId, takenAt: new Date().toISOString(), bytes: Buffer.byteLength(body), sha256: crypto.createHash("sha256").update(body).digest("hex"), counts };
+  fs.writeFileSync(file.replace(/\.json$/, ".manifest.json"), JSON.stringify(manifest, null, 2), { mode: 0o600 });
+  return { file, manifest };
+}
+
+function loadSnapshot(file) {
+  const saved = JSON.parse(fs.readFileSync(file, "utf8"));
+  if (!saved || !saved.snapshot || !saved.snapshot.collections || !saved.snapshot.subcollections) throw new Error("That file is not a snapshot written by --save-snapshot.");
+  return saved;
+}
+
 async function readSnapshot(projectId) {
   const adminModuleDir = process.env.FIREBASE_ADMIN_MODULE_DIR || DEFAULT_ADMIN_MODULE_DIR;
   const admin = require(adminModuleDir);
@@ -292,15 +327,29 @@ async function main() {
     return;
   }
 
-  if (!args.project || args.project === true) {
-    console.error("A --project Firebase project ID is required.");
+  const fromSnapshotFile = args["from-snapshot"] && args["from-snapshot"] !== true ? path.resolve(args["from-snapshot"]) : "";
+  if (!fromSnapshotFile && (!args.project || args.project === true)) {
+    console.error("A --project Firebase project ID (or --from-snapshot <file>) is required.");
     process.exit(1);
   }
 
   const catalog = JSON.parse(fs.readFileSync(CATALOG_PATH, "utf8"));
   const catalogChecksum = mapping.sha256(catalog);
-  console.log("Reading Firestore...");
-  const snapshot = await readSnapshot(args.project);
+  let snapshot;
+  if (fromSnapshotFile) {
+    const saved = loadSnapshot(fromSnapshotFile);
+    snapshot = saved.snapshot;
+    console.log(`Using the saved snapshot taken ${saved.takenAt} (project ${saved.project}). Firestore is not read.`);
+  } else {
+    console.log("Reading Firestore...");
+    snapshot = await readSnapshot(args.project);
+    if (args["save-snapshot"] && args["save-snapshot"] !== true) {
+      const saved = saveSnapshot(snapshot, path.resolve(args["save-snapshot"]), args.project);
+      console.log(`Snapshot saved: ${saved.file}`);
+      console.log(`Manifest: ${saved.file.replace(/\.json$/, ".manifest.json")} (sha256 ${saved.manifest.sha256.slice(0, 16)}...)`);
+      console.table(saved.manifest.counts);
+    }
+  }
   const plan = mapping.buildPlan(snapshot, catalog, { importDate: new Date().toISOString(), runId: "00000000-0000-0000-0000-000000000000" });
 
   console.log("\nSource documents:");
@@ -338,4 +387,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { parseArgs, recordId, writeTable, filterForRerun, TOP_LEVEL, USER_SUBCOLLECTIONS };
+module.exports = { parseArgs, recordId, writeTable, filterForRerun, saveSnapshot, loadSnapshot, insideRepo, TOP_LEVEL, USER_SUBCOLLECTIONS };
