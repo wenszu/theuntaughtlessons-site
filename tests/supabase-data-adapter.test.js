@@ -311,9 +311,20 @@ function check(name, fn) {
     await data.saveExerciseDraft('p1-e1', 'Title', { a: 1 });
     assert.equal(fetchImpl.rpcCalls('save_activity_draft').length, 2);
 
-    // Other 401s, 403s, 400s and network failures are not retried.
+    // Any 401 gets one retry with a freshly issued token (a new member's first token predates their role claim);
+    // when the second answer is a 401 as well, the error surfaces after exactly two attempts.
+    fetchImpl.reset(); tokenRequests.length = 0;
+    answers = [{ __status: 401, body: { code: 'PGRST302', message: 'Anonymous access is disabled' } }, { saved: true }];
+    await data.saveExerciseDraft('p1-e1', 'Title', { a: 1 });
+    assert.equal(fetchImpl.rpcCalls('save_activity_draft').length, 2, 'a 401 with another message is retried once');
+    assert.deepEqual(tokenRequests, [false, true], 'the retry forces a fresh token');
+    fetchImpl.reset(); tokenRequests.length = 0;
+    answers = [{ __status: 401, body: { message: 'bad token' } }, { __status: 401, body: { message: 'bad token' } }, { saved: true }];
+    await rejects(data.saveExerciseDraft('p1-e1', 'Title', { a: 1 }), () => {});
+    assert.equal(fetchImpl.rpcCalls('save_activity_draft').length, 2, 'never more than one retry');
+
+    // 403s, 400s and network failures are not retried.
     for (const answer of [
-      { __status: 401, body: { code: 'PGRST302', message: 'Anonymous access is disabled' } },
       { __status: 403, body: { code: '42501', message: 'not signed in' } },
       { __status: 400, body: { code: '22023', message: 'bad input' } },
       { __throw: new TypeError('Failed to fetch') }

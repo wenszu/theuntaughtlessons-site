@@ -7,7 +7,7 @@
 // 1. Default (switch off): no network request, and every one of the 13 learner functions makes the
 //    same Firestore calls, writes the same documents, returns the same value and dispatches the same
 //    events as the baseline copy from before the switch (tests/fixtures/firebase-baseline.js).
-// 2. The ?utl_data= parameter: supabase only records a pending request, the tester gate in
+// 2. The ?utl_data= parameter: supabase only records a pending request, the all members gate in
 //    saveUserProfile decides, firebase applies at once, and the parameter is stripped from the address.
 // 3. Supabase mode, bridge writes: every Firestore write first (the rewards transaction before the
 //    workspace bridge), then a background Supabase copy the caller never waits for; any Supabase
@@ -120,8 +120,8 @@ function seedFirestore(harness, options = {}) {
   harness.seed(`users/${UID}/exercise_submissions/grocery-list-2026-10-01T000000000Z`, { exerciseId: 'grocery-list', submissionId: 'grocery-list-2026-10-01T000000000Z', completedAtClient: '2026-10-01T00:00:00.000Z', responsePayload: { a: 1 } });
   harness.seed(`users/${UID}/exercise_work/grocery-list`, { exerciseId: 'grocery-list', draftPayload: { mode: 'open' } });
   const member = { email: EMAIL, role: 'member', name: 'Member One', firstLoginAt: { seconds: 1, nanoseconds: 0 }, signInProviders: ['google.com'] };
-  if (options.tester === true) member.supabaseTester = true;
-  if (options.tester === 'string') member.supabaseTester = 'true';
+  if (options.optOut === true) member.supabaseOptOut = true;
+  if (options.optOut === 'string') member.supabaseOptOut = 'true';
   harness.seed(`authorized_members/${EMAIL}`, member);
   harness.seed('settings/feedback', { defaultFeedbackEnabled: false });
 }
@@ -191,6 +191,8 @@ const READS = ['getMemberWorkspaceProgress', 'getExerciseWork', 'getExerciseAtte
 // Everything observable after a call: Firestore calls, the documents, localStorage, events, the answer.
 async function observe(harness, run, options = {}) {
   harness.reset({ keepStorage: options.keepStorage === true });
+  // A browser that has already been decided (utl_data_gate_v 2) unless the test is about a fresh browser.
+  if (options.fresh !== true) harness.storage.setItem('utl_data_gate_v', '2');
   if (options.storage) Object.entries(options.storage).forEach(([key, value]) => harness.storage.setItem(key, value));
   harness.signIn(options.user || {});
   if (options.seed !== false) seedFirestore(harness, options.seedOptions || {});
@@ -306,10 +308,10 @@ async function check(name, fn) {
     const loader = FIREBASE_SOURCE.slice(FIREBASE_SOURCE.indexOf('function loadSupabaseModule'), FIREBASE_SOURCE.indexOf('async function supabaseData'));
     assert.ok(loader.includes('import("./supabase-data.js")'), 'the import lives in loadSupabaseModule');
     assert.ok(!/service_role|sb_secret/.test(FIREBASE_SOURCE), 'no secret key in the file');
-    assert.ok(/supabaseTester === true/.test(FIREBASE_SOURCE), 'the gate checks the exact flag');
+    assert.ok(/supabaseOptOut === true/.test(FIREBASE_SOURCE), 'the gate checks the exact opt out flag');
   });
 
-  // -- 2. the address parameter and the tester gate -----------------------------
+  // -- 2. the address parameter and the all members gate -----------------------------
 
   const SITE = 'https://www.theuntaughtlessons.com';
 
@@ -327,45 +329,71 @@ async function check(name, fn) {
     assert.equal(harness.fetchCalls.length, 0, 'still no Supabase request while only pending');
   });
 
-  await check('the gate: pending without supabaseTester never activates and removes itself', async () => {
-    const result = await observe(harness, scenariosFor(current).saveUserProfile, { storage: { utl_data_pending: 'supabase' } });
-    assert.equal(result.outcome.error, null);
-    assert.equal(result.storage.utl_data_source, 'firebase');
-    assert.equal(result.storage.utl_data_pending, undefined, 'the request is cleared');
-    assert.equal(result.fetchCount, 0, 'no Supabase sign-in record for a non-tester');
-    // The flag has to be the boolean true; a string does not count.
-    const stringFlag = await observe(harness, scenariosFor(current).saveUserProfile, { storage: { utl_data_pending: 'supabase' }, seedOptions: { tester: 'string' } });
-    assert.equal(stringFlag.storage.utl_data_source, 'firebase');
-    assert.equal(stringFlag.fetchCount, 0);
-    // No member document at all (an email with no authorized_members record) also deactivates.
-    const noMember = await observe(harness, scenariosFor(current).saveUserProfile, { storage: { utl_data_pending: 'supabase' }, before: (h) => h.store.delete(`authorized_members/${EMAIL}`) });
+  const profile = () => scenariosFor(current).saveUserProfile;
+
+  await check('the gate: a signed in member is switched on at sign in unless opted out, and the answer is remembered', async () => {
+    // A fresh browser, member record present, no opt out: on, decided, request cleared, sign in record sent.
+    const fresh = await observe(harness, profile(), { fresh: true });
+    assert.equal(fresh.outcome.error, null);
+    assert.equal(fresh.storage.utl_data_source, 'supabase');
+    assert.equal(fresh.storage.utl_data_gate_v, '2');
+    assert.equal(harness.rpcCalls('record_login').length, 1, 'the sign in record ran for the newly switched on member');
+    // A pending request from the address behaves the same.
+    const pending = await observe(harness, profile(), { fresh: true, storage: { utl_data_pending: 'supabase' } });
+    assert.equal(pending.storage.utl_data_source, 'supabase');
+    assert.equal(pending.storage.utl_data_pending, undefined, 'the request is cleared');
+    // Opted out: firebase, decided, no Supabase request at all.
+    const optedOut = await observe(harness, profile(), { fresh: true, seedOptions: { optOut: true } });
+    assert.equal(optedOut.storage.utl_data_source, 'firebase');
+    assert.equal(optedOut.storage.utl_data_gate_v, '2');
+    assert.equal(optedOut.fetchCount, 0, 'no Supabase request for an opted out member');
+    // The opt out has to be the boolean true; a string does not count.
+    const stringOptOut = await observe(harness, profile(), { fresh: true, seedOptions: { optOut: 'string' } });
+    assert.equal(stringOptOut.storage.utl_data_source, 'supabase');
+    // No member document at all: firebase.
+    const noMember = await observe(harness, profile(), { fresh: true, before: (h) => h.store.delete(`authorized_members/${EMAIL}`) });
     assert.equal(noMember.storage.utl_data_source, 'firebase');
-    assert.equal(noMember.storage.utl_data_pending, undefined);
+    assert.equal(noMember.fetchCount, 0);
   });
 
-  await check('the gate: an answer from the offline cache never switches an active tester off or turns a request down', async () => {
-    const cacheOnly = (h) => {
-      // The member record in the cache does not show the flag; the answer is marked as coming from the cache.
-      h.store.set(`authorized_members/${EMAIL}`, { email: EMAIL, role: 'member' });
+  await check('the gate: a browser that chose ?utl_data=firebase (decided) is left alone, and an active member can be opted out', async () => {
+    const chose = await observe(harness, profile(), { storage: { utl_data_source: 'firebase', utl_data_gate_v: '2' } });
+    assert.equal(chose.storage.utl_data_source, 'firebase', 'a decided firebase browser stays on firebase');
+    assert.equal(chose.fetchCount, 0);
+    // An older decision (no version) is checked again.
+    const old = await observe(harness, profile(), { fresh: true, storage: { utl_data_source: 'firebase' } });
+    assert.equal(old.storage.utl_data_source, 'supabase', 'a browser from before this version is decided again');
+    // An active member who is opted out goes back to firebase at the next sign in.
+    const out = await observe(harness, profile(), { storage: SUPABASE_ON, seedOptions: { optOut: true } });
+    assert.equal(out.storage.utl_data_source, 'firebase');
+    const stays = await observe(harness, profile(), { storage: SUPABASE_ON });
+    assert.equal(stays.storage.utl_data_source, 'supabase');
+  });
+
+  await check('the gate: an answer from the offline cache can switch a member on but never off', async () => {
+    const cached = (opts) => (h) => {
+      const member = { email: EMAIL, role: 'member' };
+      if (opts && opts.optOut) member.supabaseOptOut = true;
+      if (opts && opts.none) h.store.delete(`authorized_members/${EMAIL}`); else h.store.set(`authorized_members/${EMAIL}`, member);
       h.cachedPaths = new Set([`authorized_members/${EMAIL}`]);
     };
-    const active = await observe(harness, scenariosFor(current).saveUserProfile, { storage: { utl_data_source: 'supabase' }, before: cacheOnly });
-    assert.equal(active.storage.utl_data_source, 'supabase', 'an active tester stays active on a cache-only answer');
-    const pending = await observe(harness, scenariosFor(current).saveUserProfile, { storage: { utl_data_pending: 'supabase' }, before: cacheOnly });
-    assert.equal(pending.storage.utl_data_pending, 'supabase', 'a request waits for a real answer');
-    assert.equal(pending.storage.utl_data_source, undefined);
-    assert.ok(/skipped: answer came from the offline cache/.test(pending.storage.utl_data_gate_last || ''), 'the skip is recorded for reading after a redirect');
+    const on = await observe(harness, profile(), { fresh: true, before: cached() });
+    assert.equal(on.storage.utl_data_source, 'supabase', 'a cached record with no opt out switches on');
+    const active = await observe(harness, profile(), { storage: SUPABASE_ON, before: cached({ optOut: true }) });
+    assert.equal(active.storage.utl_data_source, 'supabase', 'an active member stays active on a cache only answer');
+    const none = await observe(harness, profile(), { fresh: true, before: cached({ none: true }) });
+    assert.equal(none.storage.utl_data_source, undefined, 'a cache only "no record" decides nothing');
+    assert.ok(/skipped: answer came from the offline cache/.test(none.storage.utl_data_gate_last || ''), 'the skip is recorded for reading after a redirect');
     harness.cachedPaths = null;
-    // The same record answered by the server (no flag) does switch the member off.
-    const server = await observe(harness, scenariosFor(current).saveUserProfile, { storage: { utl_data_source: 'supabase' } });
-    assert.equal(server.storage.utl_data_source, 'firebase');
+    const server = await observe(harness, profile(), { storage: SUPABASE_ON, seedOptions: { optOut: true } });
+    assert.equal(server.storage.utl_data_source, 'firebase', 'the same record from the server switches off');
   });
 
   let pageLoadCount = 0;
   const loadFresh = async (options) => {
     harness.reset();
     Object.entries(options.storage || {}).forEach(([key, value]) => harness.storage.setItem(key, value));
-    harness.signIn({});
+    if (options.signedIn !== false) harness.signIn({});
     seedFirestore(harness, options.seedOptions || {});
     pageLoadCount += 1;
     await harness.loadFirebaseModule(FIREBASE_SOURCE, `firebase-pageload-${pageLoadCount}`);
@@ -373,23 +401,28 @@ async function check(name, fn) {
     return { storage: harness.storage.snapshot(), serverReads: harness.firestoreLog().filter((call) => call.op === 'getDocFromServer') };
   };
 
-  await check('the gate also settles at page load, from the server, without a sign-in step', async () => {
-    const granted = await loadFresh({ storage: { utl_data_pending: 'supabase' }, seedOptions: { tester: true } });
-    assert.equal(granted.storage.utl_data_source, 'supabase');
-    assert.equal(granted.storage.utl_data_pending, undefined);
-    assert.equal(granted.serverReads.length, 1);
-    assert.ok(/-> supabase \(supabaseTester is true\)/.test(granted.storage.utl_data_gate_last));
-    const revoked = await loadFresh({ storage: { utl_data_source: 'supabase' } });
-    assert.equal(revoked.storage.utl_data_source, 'firebase');
-    assert.equal(revoked.serverReads.length, 1);
+  await check('page load: an undecided signed in browser is decided from the server without a sign in step', async () => {
+    const on = await loadFresh({ storage: {} });
+    assert.equal(on.storage.utl_data_source, 'supabase');
+    assert.equal(on.storage.utl_data_gate_v, '2');
+    assert.equal(on.serverReads.length, 1);
+    assert.ok(/-> supabase \(member record found, not opted out\)/.test(on.storage.utl_data_gate_last));
+    const optedOut = await loadFresh({ storage: {}, seedOptions: { optOut: true } });
+    assert.equal(optedOut.storage.utl_data_source, 'firebase');
+    assert.equal(optedOut.serverReads.length, 1);
+    const requested = await loadFresh({ storage: { utl_data_pending: 'supabase', utl_data_gate_v: '2' } });
+    assert.equal(requested.storage.utl_data_source, 'supabase');
+    assert.equal(requested.storage.utl_data_pending, undefined);
   });
 
-  await check('page load: a browser with no request and no active switch makes no extra read', async () => {
-    const plain = await loadFresh({ storage: {} });
-    assert.equal(plain.serverReads.length, 0);
-    assert.equal(plain.storage.utl_data_source, undefined);
-    const off = await loadFresh({ storage: { utl_data_source: 'firebase' } });
-    assert.equal(off.serverReads.length, 0);
+  await check('page load: anonymous visitors and browsers that chose firebase make no extra read and change nothing', async () => {
+    const anonymous = await loadFresh({ storage: {}, signedIn: false });
+    assert.equal(anonymous.serverReads.length, 0);
+    assert.equal(anonymous.storage.utl_data_source, undefined);
+    assert.equal(anonymous.storage.utl_data_gate_v, undefined, 'still undecided until a member signs in');
+    const chose = await loadFresh({ storage: { utl_data_source: 'firebase', utl_data_gate_v: '2' } });
+    assert.equal(chose.serverReads.length, 0);
+    assert.equal(chose.storage.utl_data_source, 'firebase');
   });
 
   await check('the gate: every change of the switch prints one console line with the reason and no personal data', async () => {
@@ -397,45 +430,18 @@ async function check(name, fn) {
     const original = console.info;
     console.info = (...args) => { lines.push(args.join(' ')); };
     try {
-      await observe(harness, scenariosFor(current).saveUserProfile, { storage: { utl_data_pending: 'supabase' }, seedOptions: { tester: true } });
-      await observe(harness, scenariosFor(current).saveUserProfile, { storage: { utl_data_source: 'supabase' } });
-      await observe(harness, scenariosFor(current).saveUserProfile, { storage: { utl_data_pending: 'supabase' }, before: (h) => h.store.delete(`authorized_members/${EMAIL}`) });
+      await observe(harness, profile(), { fresh: true });
+      await observe(harness, profile(), { fresh: true, seedOptions: { optOut: true } });
+      await observe(harness, profile(), { fresh: true, before: (h) => h.store.delete(`authorized_members/${EMAIL}`) });
     } finally {
       console.info = original;
     }
     const gateLines = lines.filter((line) => line.startsWith('Data source:'));
     assert.equal(gateLines.length, 3);
-    assert.ok(gateLines[0].includes('-> supabase') && gateLines[0].includes('supabaseTester is true'));
-    assert.ok(gateLines[1].includes('-> firebase') && gateLines[1].includes('supabaseTester is not true'));
+    assert.ok(gateLines[0].includes('-> supabase') && gateLines[0].includes('not opted out'));
+    assert.ok(gateLines[1].includes('-> firebase') && gateLines[1].includes('supabaseOptOut is true'));
     assert.ok(gateLines[2].includes('-> firebase') && gateLines[2].includes('no member record'));
     assert.ok(gateLines.every((line) => !line.includes(EMAIL) && !line.includes(UID)), 'no email or uid in the line');
-  });
-
-  await check('the gate: pending with supabaseTester true activates at the next saveUserProfile', async () => {
-    const result = await observe(harness, scenariosFor(current).saveUserProfile, {
-      storage: { utl_data_pending: 'supabase' },
-      seedOptions: { tester: true },
-      before: (h) => h.onFetch('POST', '/rest/v1/rpc/record_login', { saved: true, provider: 'google.com', firstLogin: false })
-    });
-    assert.equal(result.outcome.error, null);
-    assert.equal(result.storage.utl_data_source, 'supabase');
-    assert.equal(result.storage.utl_data_pending, undefined);
-    assert.equal(current.getDataSource(), 'supabase');
-    assert.equal(harness.rpcCalls('record_login').length, 1, 'the sign-in record ran in the background for the newly active tester');
-    // Without a request nothing happens, even for a tester.
-    const quiet = await observe(harness, scenariosFor(current).saveUserProfile, { seedOptions: { tester: true } });
-    assert.equal(quiet.storage.utl_data_source, undefined, 'a tester is not switched without asking');
-    assert.equal(quiet.fetchCount, 0);
-  });
-
-  await check('the gate: removing the flag puts an active tester back on firebase at the next sign-in', async () => {
-    const result = await observe(harness, scenariosFor(current).saveUserProfile, { storage: SUPABASE_ON });
-    assert.equal(result.storage.utl_data_source, 'firebase');
-    assert.equal(result.fetchCount, 0, 'no Supabase calls once deactivated');
-    assert.deepStrictEqual(result.firestore, (await observe(harness, scenariosFor(baseline).saveUserProfile)).firestore, 'Firestore work unchanged');
-    // A tester who is still flagged stays on.
-    const still = await observe(harness, scenariosFor(current).saveUserProfile, { storage: SUPABASE_ON, seedOptions: { tester: true } });
-    assert.equal(still.storage.utl_data_source, 'supabase');
   });
 
   await check('?utl_data=firebase applies at once and clears a pending request; unknown values only get stripped', async () => {
@@ -1127,7 +1133,6 @@ async function check(name, fn) {
   await check('supabase mode: saveUserProfile keeps every Firestore write and records login, photo and (new users) feedback in the background', async () => {
     const defaultRun = await observe(harness, scenariosFor(current).saveUserProfile);
     const result = await supa('saveUserProfile', {
-      seedOptions: { tester: true },
       before: (h) => h.onFetch('POST', '/rest/v1/rpc/record_login', { saved: true, provider: 'google.com', firstLogin: false, providers: ['google.com'] })
     });
     assert.equal(result.outcome.error, null);
@@ -1141,7 +1146,6 @@ async function check(name, fn) {
     profiles.forEach((call) => assert.ok(!('displayName' in call.body), 'the display name is never written at sign-in'));
 
     const fresh = await supa('saveUserProfile', {
-      seedOptions: { tester: true },
       before: (h) => {
         h.store.delete(`users/${UID}`);
         h.onFetch('POST', '/rest/v1/rpc/record_login', { saved: true, provider: 'google.com', firstLogin: true });
@@ -1154,14 +1158,13 @@ async function check(name, fn) {
     assert.equal(fresh.store[`users/${UID}`].feedbackEnabled, false);
     assert.equal(harness.tokenRequests[0], true, 'the new-account token refresh happens before any Supabase call');
 
-    const bare = await supa('saveUserProfile', { seedOptions: { tester: true }, user: { photoURL: 'http://insecure.example.test/p.jpg' } });
+    const bare = await supa('saveUserProfile', { user: { photoURL: 'http://insecure.example.test/p.jpg' } });
     assert.equal(bare.outcome.error, null);
     assert.equal(harness.rpcCalls('update_my_profile').length, 0, 'an http photo is not sent');
   });
 
   await check('supabase mode: sign-in is not blocked by failing or hanging Supabase calls; failures are logged by code only', async () => {
     const result = await supa('saveUserProfile', {
-      seedOptions: { tester: true },
       before: (h) => {
         h.store.delete(`users/${UID}`);
         h.onFetch('POST', '/rest/v1/rpc/record_login', FAILURES['42501']);
@@ -1185,7 +1188,7 @@ async function check(name, fn) {
     harness.reset();
     harness.storage.setItem('utl_data_source', 'supabase');
     harness.signIn();
-    seedFirestore(harness, { tester: true });
+    seedFirestore(harness);
     harness.onFetch('POST', '/rest/v1/rpc/', { __hang: true });
     let done = false;
     const pending = current.saveUserProfile(harness.auth.currentUser, { role: 'member' }, 'google.com').then(() => { done = true; });
@@ -1205,7 +1208,7 @@ async function check(name, fn) {
     harness.reset();
     harness.storage.setItem('utl_data_source', 'supabase');
     harness.signIn();
-    seedFirestore(harness, { tester: true });
+    seedFirestore(harness);
     const broken = await harness.loadFirebaseModule(FIREBASE_SOURCE.replace('import("./supabase-data.js")', 'import("./missing-data-layer.js")'), 'firebase-broken-loader');
     await broken.saveUserProfile(harness.auth.currentUser, { role: 'member' }, 'google.com');
     await harness.flush(10);

@@ -794,7 +794,8 @@ function createSupabaseData(context = {}) {
         details: answer.details || null,
         hint: answer.hint || null
       });
-      if (attempt === 0 && isExpiredTokenError(error)) return request(method, path, body, 1);
+      // Any 401 gets one retry with a freshly issued token: a new member's first token predates their role claim.
+      if (attempt === 0 && Number(response.status) === 401) return request(method, path, body, 1);
       throw error;
     }
     return data;

@@ -63,15 +63,22 @@ const SUPABASE_URL = "https://czljyikfavtjgqcibdda.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_uxSIlhwWdbAa6EnHyn_Flw__P3u6tlW";
 
 // Data source switch, per browser. localStorage utl_data_source is "supabase" or "firebase" (the
-// default); only "supabase" turns the switch on. ?utl_data=supabase in the address does not switch
-// anything by itself: it records a pending request (utl_data_pending) that the tester gate in
-// saveUserProfile decides at the next sign-in. ?utl_data=firebase applies at once. Either parameter is
-// removed from the address bar so shared links stay clean. With the switch off nothing in this file
-// contacts Supabase and every function runs the Firestore code it always ran.
+// default until a signed in member's browser has been checked); only "supabase" turns the switch on.
+// Every signed in member is on Supabase unless their authorized_members/{email} document carries
+// supabaseOptOut: true: the first signed in page load of a browser (utl_data_gate_v not yet "2") reads
+// that document from the server once, decides, and remembers the answer. A member can undo it for one
+// browser with ?utl_data=firebase, which sticks; ?utl_data=supabase asks for a new check. Either
+// parameter is removed from the address bar so shared links stay clean. With the switch off nothing in
+// this file contacts Supabase and every function runs the Firestore code it always ran.
 const DATA_SOURCE_KEY = "utl_data_source";
 const DATA_SOURCE_PENDING_KEY = "utl_data_pending";
 // Last decision of the gate, kept so it can be read after the sign-in page redirects and clears the console.
 const DATA_SOURCE_GATE_LOG_KEY = "utl_data_gate_last";
+// "2" once this browser has been decided for the all members switch; an older decision is checked again.
+const DATA_SOURCE_GATE_VERSION_KEY = "utl_data_gate_v";
+const DATA_SOURCE_GATE_VERSION = "2";
+// sessionStorage: the member record was checked in this browser session (an opt out takes effect at the next session).
+const DATA_SOURCE_SESSION_KEY = "utl_data_checked";
 const DATA_SOURCE_PARAMETER = "utl_data";
 
 function getDataSource() {
@@ -94,6 +101,7 @@ function applyDataSourceParameter() {
     url.searchParams.delete(DATA_SOURCE_PARAMETER);
     if (requested === "firebase") {
       window.localStorage.setItem(DATA_SOURCE_KEY, "firebase");
+      window.localStorage.setItem(DATA_SOURCE_GATE_VERSION_KEY, DATA_SOURCE_GATE_VERSION);
       window.localStorage.removeItem(DATA_SOURCE_PENDING_KEY);
     } else if (requested === "supabase") {
       window.localStorage.setItem(DATA_SOURCE_PENDING_KEY, "supabase");
@@ -106,35 +114,55 @@ function applyDataSourceParameter() {
 
 applyDataSourceParameter();
 
-// The tester gate. Only a member whose authorized_members/{email} document carries
-// supabaseTester: true can ever be switched to Supabase; the owner sets that field by hand in the
-// Firebase console. Runs in saveUserProfile, where that document is already read: a pending request
-// or an active switch stays on only for a tester; anyone else is set back to firebase and the request
-// is cleared. Removing the field puts the member back on firebase at their next sign-in.
+// The all members gate. Runs in saveUserProfile (sign in) and at page load, with the member's
+// authorized_members/{email} document: a signed in member is switched to Supabase unless the document
+// has supabaseOptOut: true or does not exist. It runs when a request is pending, when the switch is
+// active, or when this browser has not been decided for this version yet. A browser that chose
+// ?utl_data=firebase is decided and is left alone. An answer from the offline cache can switch a member
+// on but never off: the next real answer decides.
+function dataSourceCheckWanted(storage) {
+  return storage.getItem(DATA_SOURCE_PENDING_KEY) === "supabase"
+    || storage.getItem(DATA_SOURCE_GATE_VERSION_KEY) !== DATA_SOURCE_GATE_VERSION
+    || storage.getItem(DATA_SOURCE_KEY) === "supabase";
+}
+
+function sessionFlag(write) {
+  try {
+    const session = window.sessionStorage;
+    if (!session) return false;
+    if (write) { session.setItem(DATA_SOURCE_SESSION_KEY, "1"); return true; }
+    return session.getItem(DATA_SOURCE_SESSION_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
 function applyDataSourceGate(memberSnap) {
   try {
     const storage = window.localStorage;
-    const requested = storage.getItem(DATA_SOURCE_PENDING_KEY) === "supabase" || storage.getItem(DATA_SOURCE_KEY) === "supabase";
-    if (!requested) return;
-    const tester = Boolean(memberSnap && memberSnap.exists() && (memberSnap.data() || {}).supabaseTester === true);
-    // A snapshot answered from the offline cache cannot show that the flag was removed, so it never switches a
-    // member off or turns a request down; the next sign-in decides with a real answer.
+    if (!dataSourceCheckWanted(storage)) return;
+    const memberFound = Boolean(memberSnap && memberSnap.exists());
+    const optedOut = memberFound && (memberSnap.data() || {}).supabaseOptOut === true;
+    const enabled = memberFound && !optedOut;
     const fromCache = Boolean(memberSnap && memberSnap.metadata && memberSnap.metadata.fromCache === true);
-    if (!tester && fromCache) {
-      storage.setItem(DATA_SOURCE_GATE_LOG_KEY, `${new Date().toISOString()} skipped: answer came from the offline cache and does not show the flag`);
+    if (!enabled && fromCache) {
+      storage.setItem(DATA_SOURCE_GATE_LOG_KEY, `${new Date().toISOString()} skipped: answer came from the offline cache and cannot switch a member off`);
       return;
     }
-    const next = tester ? "supabase" : "firebase";
+    const next = enabled ? "supabase" : "firebase";
     const before = storage.getItem(DATA_SOURCE_KEY) || "(none)";
     const wasPending = storage.getItem(DATA_SOURCE_PENDING_KEY) === "supabase";
+    const wasUndecided = storage.getItem(DATA_SOURCE_GATE_VERSION_KEY) !== DATA_SOURCE_GATE_VERSION;
     storage.setItem(DATA_SOURCE_KEY, next);
+    storage.setItem(DATA_SOURCE_GATE_VERSION_KEY, DATA_SOURCE_GATE_VERSION);
     storage.removeItem(DATA_SOURCE_PENDING_KEY);
-    // One line in the console, no personal data, so a tester can see what the gate decided and why.
-    const reason = tester
-      ? "supabaseTester is true"
-      : (memberSnap && memberSnap.exists() ? "supabaseTester is not true on the member record" : "no member record was found");
+    if (!fromCache) sessionFlag(true);
+    // One line in the console, no personal data, so a member can see what the gate decided and why.
+    const reason = enabled
+      ? "member record found, not opted out"
+      : (optedOut ? "supabaseOptOut is true on the member record" : "no member record was found");
     storage.setItem(DATA_SOURCE_GATE_LOG_KEY, `${new Date().toISOString()} ${before} -> ${next} (${reason})`);
-    if (wasPending || before !== next) console.info(`Data source: ${before} -> ${next} (${reason})`);
+    if (wasPending || wasUndecided || before !== next) console.info(`Data source: ${before} -> ${next} (${reason})`);
   } catch {
     // Unreadable storage: the switch simply stays as it was (off unless already set).
   }
@@ -411,14 +439,17 @@ if (useLocalFirebaseEmulators) {
   console.log("⚡ Connected to local Firebase Emulators");
 }
 
-// The gate also settles at every page load, not only at sign-in: a browser that holds a pending request
-// or an active switch asks the server (never the cache) for the member record once the signed-in user is
-// known. Browsers with no request and no active switch do nothing here, so the default page load is
-// unchanged. A failed or offline read changes nothing.
+// The gate also settles at page load, not only at sign-in, with a server read (never the cache) once the
+// signed in user is known. It reads when a request is pending or this browser is not decided yet, and
+// once per browser session for an active member so an opt out takes effect. Anonymous visitors, browsers
+// that chose ?utl_data=firebase and sessions already checked do nothing. A failed or offline read changes nothing.
 async function settleDataSourceAtPageLoad() {
   try {
     const storage = window.localStorage;
-    if (storage.getItem(DATA_SOURCE_PENDING_KEY) !== "supabase" && storage.getItem(DATA_SOURCE_KEY) !== "supabase") return;
+    if (!dataSourceCheckWanted(storage)) return;
+    const pending = storage.getItem(DATA_SOURCE_PENDING_KEY) === "supabase";
+    const undecided = storage.getItem(DATA_SOURCE_GATE_VERSION_KEY) !== DATA_SOURCE_GATE_VERSION;
+    if (!pending && !undecided && sessionFlag(false)) return;
     const user = await getSignedInUser();
     const email = user && user.email ? String(user.email).trim().toLowerCase() : "";
     if (!email) return;
