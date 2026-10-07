@@ -39,8 +39,6 @@
 //   cohorts            the settings/cohorts document data. Without it a member cohort gets a stub cohort row
 //                      written with ignore-duplicates (the real cohort row belongs to the settings mirror).
 //   keepAyalaAccess    false switches the one-time AyalaLand rule off (default on when organizations is given).
-//   mapAccountStatus   (members) true adds people.account_status from the member status. mirrorMemberWrite
-//                      sets it; rowsForMember leaves it out unless asked, because the import does.
 
 const crypto = require("crypto");
 
@@ -96,6 +94,10 @@ function clampInt(value, min, max, fallback = 0) {
 
 function text(value, max) {
   return String(value == null ? "" : value).trim().slice(0, max);
+}
+
+function has(object, key) {
+  return Boolean(object) && Object.prototype.hasOwnProperty.call(object, key);
 }
 
 function oneOf(value, allowed, fallback) {
@@ -238,11 +240,15 @@ function buildPerson(sources, ctx) {
 
   if (customer) {
     const data = customer.data;
-    row.first_name = text(data.firstName, 120);
-    row.last_name = text(data.lastName, 120);
-    row.display_name = text(data.displayName, 200);
-    row.account_status = ACCOUNT_STATUS_FROM_CUSTOMER[data.accountStatus] || "active";
-    row.last_activity_at = iso(data.lastActivityAt);
+    // Live writes are patch-like: a column the document does not state is not written (a partial customer
+    // document must not blank names or reset the status). The full-document case equals the import.
+    const stated = (key) => complete || has(data, key);
+    if (stated("firstName")) row.first_name = text(data.firstName, 120);
+    if (stated("lastName")) row.last_name = text(data.lastName, 120);
+    if (stated("displayName")) row.display_name = text(data.displayName, 200);
+    if (stated("accountStatus")) row.account_status = ACCOUNT_STATUS_FROM_CUSTOMER[data.accountStatus] || "active";
+    const activity = iso(data.lastActivityAt);
+    if (complete || activity) row.last_activity_at = activity;
     row.legacy_firestore_id = `customers/${customer.id}`;
     const created = iso(data.createdAt);
     if (created) row.created_at = created;
@@ -288,14 +294,16 @@ function buildProfile(personId, sources, ctx) {
   }
   if (member) {
     const data = member.data;
-    if (data.goals) row.goals = text(data.goals, 2000);
-    if (data.avatarIconId) row.avatar_icon_id = oneOf(data.avatarIconId, AVATARS, null);
+    // Patch-like: only the keys the member document states (a key set to null states "cleared").
+    const stated = (key) => complete || has(data, key);
+    if (complete ? data.goals : has(data, "goals")) row.goals = text(data.goals, 2000);
+    if (complete ? data.avatarIconId : has(data, "avatarIconId")) row.avatar_icon_id = oneOf(data.avatarIconId, AVATARS, null);
     if (typeof data.feedbackEnabled === "boolean" && row.feedback_enabled == null) row.feedback_enabled = data.feedbackEnabled;
-    row.first_login_at = iso(data.firstLoginAt);
-    row.last_login_at = iso(data.lastLoginAt);
+    if (stated("firstLoginAt")) row.first_login_at = iso(data.firstLoginAt);
+    if (stated("lastLoginAt")) row.last_login_at = iso(data.lastLoginAt);
     if (!row.last_sign_in_provider && data.lastSignInProvider) row.last_sign_in_provider = oneOf(data.lastSignInProvider, PROVIDERS, "");
     if (!(row.sign_in_providers && row.sign_in_providers.length) && Array.isArray(data.signInProviders)) row.sign_in_providers = data.signInProviders.map(String).slice(0, 5);
-    row.google_group_added = data.googleGroupAdded === true;
+    if (stated("googleGroupAdded")) row.google_group_added = data.googleGroupAdded === true;
   }
   return Object.keys(row).length > 1 ? stampOf(ctx)(row) : null;
 }
@@ -414,11 +422,16 @@ function buildMemberEnrollment(personId, email, member, enrollmentDoc, ctx, out)
   return stamp(row);
 }
 
-// Account status that a member status implies, for the live mirror. Null means leave it alone.
+// The account status a member document asks for, or null when it states nothing (a document without a status
+// never changes the account). Deactivating statuses ask for archived; any other stated status asks for active,
+// unless the related customer document states its own status, which then wins. Whether the database row is
+// changed is decided against its current value by the mirror (see decideAccountStatus): an archive never
+// replaces deletion_pending, and active is only written to bring an archived account back.
 function accountStatusForMember(memberData, customer) {
   const status = String(memberData && memberData.status || "").toLowerCase();
+  if (!status) return null;
   if (DEACTIVATING_MEMBER_STATUSES.includes(status)) return "archived";
-  const fromCustomer = customer && ACCOUNT_STATUS_FROM_CUSTOMER[customer.data.accountStatus];
+  const fromCustomer = customer && customer.data && ACCOUNT_STATUS_FROM_CUSTOMER[customer.data.accountStatus];
   return fromCustomer || "active";
 }
 
@@ -492,15 +505,12 @@ function rowsForCustomerAuthLink(linkDoc, ctx) {
   const context = ctx || {};
   const link = docParts(linkDoc);
   if (!link) return {};
-  const customer = customerFor(link.data.customerId, context);
-  const sources = { authLink: link, customer: customer ? { id: customer.id, data: customer.data } : null };
-  const email = customer ? "" : normalizeEmail(context.email);
-  if (!customer && !email) return {};
-  const person = buildPerson(sources, context);
-  if (!person) return {};
+  const person = personForCustomer(link.data.customerId, context);
+  const email = (person && person.email) || normalizeEmail(context.email);
+  if (!person && !email) return {};
+  const id = person ? person.id : personIdFor(email, context);
   // Only the identity link is decided here, so only auth_uid goes with the required keys.
-  const row = stampOf(context)({ id: person.id, primary_email: person.primary_email, auth_uid: link.id });
-  return { people: [row] };
+  return { people: [stampOf(context)({ id, primary_email: email, auth_uid: link.id })] };
 }
 
 // customerEmailClaims/{emailHash}: who holds an address. An active claim is the person's active address, a
@@ -669,6 +679,9 @@ function customerFor(customerId, ctx) {
 
 // The person behind a customerId: { id, email } or null when nothing in context identifies it.
 function personForCustomer(customerId, ctx) {
+  // The mirror looks the person up in the database first (an email change leaves the id derived from the old address).
+  const known = ctx && ctx.personIdByCustomer && ctx.personIdByCustomer[String(customerId || "")];
+  if (known) return { id: String(known), email: "" };
   const customer = customerFor(customerId, ctx);
   const subject = related(ctx, "customer");
   const isSubject = Boolean(customer && subject && subject.id === customer.id);
@@ -684,8 +697,66 @@ function personForCustomer(customerId, ctx) {
 }
 
 // ---------------------------------------------------------------------------------------------------------
-// Mirroring: run the steps in order, stop at the first failure (later steps would only fail on foreign keys).
-// Every function resolves to { ok, ... } and never throws or rejects. Off or disabled: { ok:false, skipped:true }.
+// Mirroring. Every function resolves to { ok, ... } and never throws or rejects. Off or disabled:
+// { ok:false, skipped:true }.
+//
+// A live write is PATCH-LIKE. The Firestore document it receives may be partial, so the mirror never blanks,
+// downgrades or defaults a column the document does not state:
+//   1. a row that does not exist yet is inserted with ignore-duplicates (new rows get the defaults);
+//   2. when a decision depends on what the row holds, the row is read first (mirror.select);
+//   3. an existing row is updated with only the columns the document states or that can be derived.
+// This is a deliberate difference from the import (which sees whole documents and rewrites every column). The
+// pure rowsFor... builders keep full parity with the import for whole documents.
+// Independent steps (emails, profile, platform grant, enrollment) all run even when one of them fails; the first
+// failure is returned with the list of failed steps.
+
+const enc = encodeURIComponent;
+const PERSON_COLUMNS = "id,primary_email,auth_uid,display_name,account_status,last_activity_at,legacy_firestore_id";
+
+async function read(api, table, query, label) {
+  if (!api || typeof api.select !== "function") return { ok: false, error: "no-select" };
+  const result = await api.select(table, query, { label: label || `${table} read` });
+  return result && result.ok === true ? { ok: true, rows: Array.isArray(result.rows) ? result.rows : [] } : { ok: false, error: (result && result.error) || "select" };
+}
+
+async function peopleWhere(api, filter) {
+  const result = await read(api, "people", `select=${PERSON_COLUMNS}&${filter}&limit=2`, "people lookup");
+  return result.ok ? { ok: true, person: result.rows[0] || null } : result;
+}
+
+// Finds the existing person row: by id, by the Firestore customer path (stable across an email change), by
+// each email (people.primary_email, then person_emails of any status) and by Firebase uid, in that order.
+async function findPerson(api, spec) {
+  if (spec.personId) {
+    const r = await peopleWhere(api, `id=eq.${enc(spec.personId)}`);
+    if (!r.ok || r.person) return r;
+  }
+  if (spec.legacyId) {
+    const r = await peopleWhere(api, `legacy_firestore_id=eq.${enc(spec.legacyId)}`);
+    if (!r.ok || r.person) return r;
+  }
+  for (const email of spec.emails || []) {
+    if (!email) continue;
+    let r = await peopleWhere(api, `primary_email=eq.${enc(email)}`);
+    if (!r.ok || r.person) return r;
+    const held = await read(api, "person_emails", `select=person_id,status&email=eq.${enc(email)}&limit=5`, "person_emails lookup");
+    if (!held.ok) return held;
+    const hit = held.rows.find((row) => row.status === "active") || held.rows[0];
+    if (hit) {
+      r = await peopleWhere(api, `id=eq.${enc(hit.person_id)}`);
+      if (!r.ok || r.person) return r;
+    }
+  }
+  if (spec.uid) {
+    const r = await peopleWhere(api, `auth_uid=eq.${enc(spec.uid)}`);
+    if (!r.ok || r.person) return r;
+  }
+  return { ok: true, person: null };
+}
+
+function fail(step, result) {
+  return Object.assign({ step }, result || {}, { ok: false });
+}
 
 // Rows of one table go out grouped by column set, because PostgREST fills a column that is missing from one
 // object of a batch with null. One group is one request; most calls have a single row.
@@ -698,38 +769,29 @@ async function send(api, table, rows, options) {
   });
   for (const group of groups.values()) {
     const result = await api.upsert(table, group, options);
-    if (!result || result.ok !== true) return Object.assign({ ok: false, step: table }, result || {});
+    if (!result || result.ok !== true) return fail(table, result);
   }
   return { ok: true };
+}
+
+async function insertIfMissing(api, table, rows, conflict) {
+  return send(api, table, rows, { conflict, ignoreDuplicates: true, label: `${table} insert` });
 }
 
 async function sendUpdate(api, step, table, match, patch) {
   const result = await api.update(table, match, patch, { label: step });
-  return result && result.ok === true ? { ok: true } : Object.assign({ ok: false, step }, result || {});
+  return result && result.ok === true ? { ok: true } : fail(step, result);
 }
 
-const CONFLICT = {
-  people: "id", person_emails: "id", person_profiles: "person_id", role_grants: "id", cohorts: "id",
-  enrollments: "id", entitlements: "id", consent_events: "id", duplicate_candidates: "id", identity_conflicts: "id"
-};
-// Insert-only tables: a row that exists is left as it is (consent is append only in the database; cohort stubs
-// must never overwrite a real cohort row).
-const INSERT_ONLY = new Set(["consent_events", "cohorts"]);
-const ORDER = ["cohorts", "people", "person_emails", "person_profiles", "role_grants", "enrollments", "entitlements", "consent_events", "duplicate_candidates", "identity_conflicts"];
-
-async function writeTables(api, label, tables) {
-  for (const table of ORDER) {
-    const rows = tables[table];
-    if (!rows || !rows.length) continue;
-    let toSend = rows;
-    // A rejoined or re-added address must come back as active, so retired_at is cleared explicitly.
-    if (table === "person_emails") toSend = rows.map((row) => (row.status === "active" ? Object.assign({ retired_at: null }, row) : row));
-    // A grant that was ended earlier is live again when the role is granted again.
-    if (table === "role_grants") toSend = rows.map((row) => Object.assign({ ended_at: null }, row));
-    const result = await send(api, table, toSend, { conflict: CONFLICT[table], ignoreDuplicates: INSERT_ONLY.has(table), label: `${label} ${table}` });
-    if (!result.ok) return result;
+async function runSteps(steps) {
+  const failed = [];
+  for (const [name, run] of steps) {
+    let result;
+    try { result = await run(); } catch (error) { result = { ok: false, error: "step-failed" }; }
+    if (!result || result.ok !== true) failed.push(Object.assign({ step: name }, result || { error: "no-result" }));
   }
-  return { ok: true };
+  if (!failed.length) return { ok: true };
+  return { ok: false, step: failed[0].step, error: failed[0].error, failed: failed.map((f) => f.step) };
 }
 
 function runMirror(mirror, label, build) {
@@ -737,177 +799,491 @@ function runMirror(mirror, label, build) {
   return mirror.run(label, async (api) => build(api)).then((result) => result || { ok: false, error: "no-result" }, () => ({ ok: false, error: "step-failed" }));
 }
 
-// Retire the old address and add the new one. person_emails is an append only history: the old row is
-// updated to historical with retired_at, never deleted.
-async function changeEmailSteps(api, personId, previousEmail, newEmail, now) {
-  const oldEmail = normalizeEmail(previousEmail);
-  const email = normalizeEmail(newEmail);
-  if (!oldEmail || !email || oldEmail === email) return { ok: true };
-  const retired = await sendUpdate(api, "person_emails retire", "person_emails", { person_id: personId, email: oldEmail, status: "active" }, { status: "historical", retired_at: now });
-  if (!retired.ok) return retired;
-  return { ok: true };
-}
-
 function nowIso(ctx) {
   return (ctx && ctx.now) || new Date().toISOString();
 }
 
+const isEmpty = (value) => value == null || value === "";
+const later = (a, b) => Date.parse(a) > Date.parse(b);
+
+// What to do with people.account_status. Customer documents are authoritative for their own statuses. A member
+// document may archive (never over deletion_pending) and may bring an archived account back to active; it never
+// touches restricted or deletion_pending and never downgrades anything else.
+function decideAccountStatus(current, desired) {
+  if (!desired || desired === current) return null;
+  if (desired === "archived") return current === "deletion_pending" ? null : desired;
+  if (desired === "active") return current === "archived" ? "active" : null;
+  return desired;
+}
+
+// Insert the person when missing, else update only what the row should take. row is the patch row from the pure
+// builder. opts: { fillOnly (display_name only fills an empty name), desiredStatus, syncEmail (primary_email may
+// move), customerLegacy }. Returns { ok, personId, created } or a failure; an auth_uid that would replace an
+// existing different one is never written and is reported as { ok:false, conflict:true, error:"auth-uid-conflict" }.
+async function patchPerson(api, existing, row, opts) {
+  if (!existing) {
+    const insert = Object.assign({}, row);
+    if (opts.desiredStatus && opts.desiredStatus !== "active") insert.account_status = opts.desiredStatus;
+    const inserted = await insertIfMissing(api, "people", [insert], "id");
+    return inserted.ok ? { ok: true, personId: row.id, created: true } : Object.assign(fail("people", inserted), { personId: row.id });
+  }
+  const update = {};
+  let conflict = false;
+  Object.entries(row).forEach(([column, value]) => {
+    if (["id", "created_at", "migration_run_id"].includes(column)) return;
+    if (column === "primary_email") {
+      if (opts.syncEmail && value && value !== existing.primary_email) update.primary_email = value;
+    } else if (column === "auth_uid") {
+      if (!value) return;
+      if (isEmpty(existing.auth_uid)) update.auth_uid = value;
+      else if (existing.auth_uid !== value) conflict = true;
+    } else if (column === "display_name") {
+      if (value && (!opts.fillOnly || isEmpty(existing.display_name)) && value !== existing.display_name) update.display_name = value;
+    } else if (column === "last_activity_at") {
+      // Never moves backwards, never nulled.
+      if (value && (isEmpty(existing.last_activity_at) || later(value, existing.last_activity_at))) update.last_activity_at = value;
+    } else if (column === "legacy_firestore_id") {
+      // A customer path replaces an empty id or the member placeholder, never another customer path.
+      if (isEmpty(existing.legacy_firestore_id) || String(existing.legacy_firestore_id).startsWith("member:")) {
+        if (opts.customerLegacy && value !== existing.legacy_firestore_id) update.legacy_firestore_id = value;
+      }
+    } else if (column === "account_status") {
+      // handled below together with desiredStatus
+    } else if (value !== existing[column]) {
+      update[column] = value;
+    }
+  });
+  const status = decideAccountStatus(existing.account_status, opts.desiredStatus || row.account_status);
+  if (status) update.account_status = status;
+  if (Object.keys(update).length) {
+    const done = await sendUpdate(api, "people update", "people", { id: existing.id }, update);
+    if (!done.ok) return Object.assign(done, { personId: existing.id });
+  }
+  if (conflict) return { ok: false, step: "people", error: "auth-uid-conflict", conflict: true, personId: existing.id };
+  return { ok: true, personId: existing.id, created: false };
+}
+
+// The person's address rows: retire the previous one, make the current one the active one. Nothing is deleted.
+async function ensureActiveEmail(api, personId, email, ctx) {
+  if (!email) return { ok: true };
+  const held = await read(api, "person_emails", `select=id,person_id,status&email=eq.${enc(email)}&limit=10`, "person_emails lookup");
+  if (!held.ok) return fail("person_emails", held);
+  const mine = held.rows.find((row) => row.person_id === personId);
+  if (held.rows.some((row) => row.person_id !== personId && row.status === "active")) return fail("person_emails", { error: "email-held" });
+  if (mine) {
+    if (mine.status === "active") return { ok: true };
+    return sendUpdate(api, "person_emails reactivate", "person_emails", { id: mine.id }, { status: "active", retired_at: null });
+  }
+  // A historical row of another person may already use the derived id for this address.
+  const idKey = held.rows.length ? `email:${email}:${personId}` : `email:${email}`;
+  return insertIfMissing(api, "person_emails", [stampOf(ctx)({ id: uuidFor(idKey), person_id: personId, email, status: "active" })], "id");
+}
+
+async function retireEmail(api, personId, email, now) {
+  if (!email) return { ok: true };
+  return sendUpdate(api, "person_emails retire", "person_emails", { person_id: personId, email, status: "active" }, { status: "historical", retired_at: now });
+}
+
+async function emailSteps(api, personId, previousEmail, email, ctx) {
+  const results = [];
+  if (previousEmail && previousEmail !== email) results.push(await retireEmail(api, personId, previousEmail, nowIso(ctx)));
+  results.push(await ensureActiveEmail(api, personId, email, ctx));
+  return results.find((r) => !r.ok) || { ok: true };
+}
+
+// Profile: insert the row when missing, then update only the columns the document stated.
+async function patchProfile(api, personId, row) {
+  if (!row) return { ok: true };
+  const patch = Object.assign({}, row);
+  delete patch.person_id;
+  delete patch.migration_run_id;
+  const inserted = await insertIfMissing(api, "person_profiles", [{ person_id: personId }], "person_id");
+  if (!inserted.ok) return inserted;
+  if (!Object.keys(patch).length) return { ok: true };
+  return sendUpdate(api, "person_profiles update", "person_profiles", { person_id: personId }, patch);
+}
+
+// Platform grants. The mirror owns only grants whose id is derived from one of the person's own addresses
+// (the id the import and this module give a platform_owner grant). It never touches any other grant.
+async function ownedGrantIds(api, personId, extraEmails) {
+  const emails = new Set((extraEmails || []).filter(Boolean));
+  const held = await read(api, "person_emails", `select=email&person_id=eq.${enc(personId)}&limit=50`, "person_emails lookup");
+  if (!held.ok) return held;
+  held.rows.forEach((row) => row.email && emails.add(row.email));
+  return { ok: true, ids: new Set(Array.from(emails).map((e) => uuidFor(`grant:${e}:platform_owner`))) };
+}
+
+async function grantRows(api, personId) {
+  return read(api, "role_grants", `select=id,status,ended_at&person_id=eq.${enc(personId)}&scope_type=eq.platform&role=eq.platform_owner&limit=50`, "role_grants lookup");
+}
+
+async function endOwnedGrants(api, personId, emails, now) {
+  const grants = await grantRows(api, personId);
+  if (!grants.ok) return fail("role_grants", grants);
+  const active = grants.rows.filter((g) => g.status === "active");
+  if (!active.length) return { ok: true };
+  const owned = await ownedGrantIds(api, personId, emails);
+  if (!owned.ok) return fail("role_grants", owned);
+  for (const grant of active) {
+    if (!owned.ids.has(grant.id)) continue;
+    const done = await sendUpdate(api, "role_grants end", "role_grants", { id: grant.id }, { status: "suspended", ended_at: now });
+    if (!done.ok) return done;
+  }
+  return { ok: true };
+}
+
+async function syncGrant(api, personId, member, emails, ctx) {
+  const data = member.data;
+  if (!has(data, "role")) return { ok: true }; // the document does not state a role
+  const role = String(data.role || "").toLowerCase();
+  const admin = role === "admin" || role === "owner";
+  const before = ctx.previousRole == null ? null : String(ctx.previousRole).toLowerCase();
+  if (!admin && before !== null && before !== "admin" && before !== "owner") return { ok: true };
+  if (!admin) return endOwnedGrants(api, personId, emails, nowIso(ctx));
+  const grants = await grantRows(api, personId);
+  if (!grants.ok) return fail("role_grants", grants);
+  if (grants.rows.some((g) => g.status === "active" && g.ended_at == null)) return { ok: true };
+  const owned = await ownedGrantIds(api, personId, emails);
+  if (!owned.ok) return fail("role_grants", owned);
+  const mine = grants.rows.find((g) => owned.ids.has(g.id));
+  if (mine) return sendUpdate(api, "role_grants reactivate", "role_grants", { id: mine.id }, { status: "active", ended_at: null });
+  const grant = buildGrant(personId, emails.find(Boolean), member, ctx);
+  return grant ? insertIfMissing(api, "role_grants", [grant], "id") : { ok: true };
+}
+
+// The member's TSA enrollment. An existing row (the open one, else the latest) is updated with only the columns
+// the member document states; a new row is inserted only when the person has none.
+function memberEnrollmentPatch(member, existing, ctx, out) {
+  const data = member.data;
+  const patch = {};
+  const status = String(data.status || "").toLowerCase();
+  if (status && MEMBER_STATUS[status]) patch.status = MEMBER_STATUS[status];
+  if (has(data, "expiryDate")) patch.valid_until = iso(data.expiryDate);
+  let sponsor = existing.sponsor_organization_id || null;
+  if (has(data, "cohort")) {
+    const cohort = data.cohort ? cohortFor(data.cohort, "authorized_members.cohort", ctx, out) : null;
+    if (cohort) {
+      patch.cohort_id = cohort.id;
+      if (!sponsor && cohort.org) { patch.sponsor_organization_id = cohort.org; sponsor = cohort.org; }
+    } else {
+      patch.cohort_id = null;
+    }
+  }
+  if (has(data, "notes")) patch.notes = text(data.notes, 4000);
+  const sourceKeys = ["addedBy", "invitedSignInMethod", "welcomeEmailStatus", "welcomeEmailFormat", "loginLinkStatus", "localUsername"];
+  const stated = memberSourceJson(data);
+  const googleGroup = stated.googleGroup && Object.keys(stated.googleGroup).length ? stated.googleGroup : null;
+  if (sourceKeys.some((key) => has(data, key)) || googleGroup) {
+    const merged = Object.assign({}, existing.source && typeof existing.source === "object" ? existing.source : {});
+    sourceKeys.forEach((key) => { if (has(data, key)) merged[key] = stated[key]; });
+    if (googleGroup) merged.googleGroup = Object.assign({}, merged.googleGroup, googleGroup);
+    patch.source = merged;
+  }
+  const joined = iso(data.firstLoginAt) || iso(data.addedAt);
+  if (isEmpty(existing.joined_at) && joined) patch.joined_at = joined;
+  // Decision 2026-10-05 (AyalaLand keeps access one more year), applied when this write states a status, expiry or cohort.
+  if ((patch.status || "valid_until" in patch || patch.cohort_id) && sponsor && isAyala(sponsor, ctx)) {
+    const base = fallbackDate(ctx) || new Date().toISOString();
+    const oneYearOut = new Date(new Date(base).getTime() + 365 * 86400000).toISOString();
+    if ((patch.status || existing.status) !== "completed") patch.status = "active";
+    const until = "valid_until" in patch ? patch.valid_until : existing.valid_until && new Date(existing.valid_until).toISOString();
+    if (!until || until < oneYearOut) patch.valid_until = oneYearOut;
+  }
+  return patch;
+}
+
+async function memberEnrollmentStep(api, personId, member, tables, ctx) {
+  const found = await read(api, "enrollments", `select=id,status,cohort_id,sponsor_organization_id,joined_at,valid_until,source&person_id=eq.${enc(personId)}&program_id=eq.${PROGRAM_TSA}&order=created_at.desc&limit=10`, "enrollments lookup");
+  if (!found.ok) return fail("enrollments", found);
+  const existing = found.rows.find((r) => r.status === "active" || r.status === "invited") || found.rows[0];
+  if (!existing) {
+    if (tables.cohorts && tables.cohorts.length) {
+      const stubs = await insertIfMissing(api, "cohorts", tables.cohorts, "id");
+      if (!stubs.ok) return stubs;
+    }
+    return insertIfMissing(api, "enrollments", tables.enrollments, "id");
+  }
+  const out = newOut();
+  const patch = memberEnrollmentPatch(member, existing, ctx, out);
+  if (out.cohorts.length) {
+    const stubs = await insertIfMissing(api, "cohorts", out.cohorts, "id");
+    if (!stubs.ok) return stubs;
+  }
+  return Object.keys(patch).length ? sendUpdate(api, "enrollments update", "enrollments", { id: existing.id }, patch) : { ok: true };
+}
+
 // Member added, edited, role or status changed. Pass the stored document (read it back after the write so
-// timestamps are real). A changed address: context.previousEmail (and personId if the person changed address
-// before). Account status follows the member status (inactive, expired, removed, revoked, suspended archive
-// the person; anything else makes it active again, or the customer's own status when related.customer is given).
+// timestamps are real). A changed address: context.previousEmail. The person is found in the database (email,
+// earlier address, id), so the person id never has to be derived after an address change.
 function mirrorMemberWrite(mirror, memberDoc, ctx) {
-  const context = Object.assign({ mapAccountStatus: true }, ctx || {});
+  const context = ctx || {};
   return runMirror(mirror, "member write", async (api) => {
-    const tables = rowsForMember(memberDoc, context);
-    if (!tables.people) return { ok: false, error: "unmapped" };
     const member = docParts(memberDoc);
-    if (context.mapAccountStatus) tables.people[0].account_status = accountStatusForMember(member.data, related(context, "customer"));
-    const person = tables.people[0];
-    const written = await writeTables(api, "member", tables);
-    if (!written.ok) return written;
-    if (context.previousEmail) {
-      const changed = await changeEmailSteps(api, person.id, context.previousEmail, person.primary_email, nowIso(context));
-      if (!changed.ok) return changed;
-    }
-    // A role taken away ends the platform grant; the row stays (history). Skipped only when the caller says the
-    // member was not an admin or owner before (context.previousRole), to save a request on every ordinary write.
-    const role = String(member.data.role || "").toLowerCase();
-    const before = context.previousRole == null ? null : String(context.previousRole).toLowerCase();
-    if (role !== "admin" && role !== "owner" && (before === null || before === "admin" || before === "owner")) {
-      const ended = await sendUpdate(api, "role_grants end", "role_grants", { person_id: person.id, role: "platform_owner", status: "active" }, { status: "suspended", ended_at: nowIso(context) });
-      if (!ended.ok) return ended;
-    }
-    return { ok: true, tables: Object.keys(tables) };
+    const email = member && normalizeEmail(member.data.email || member.id);
+    if (!email) return { ok: false, error: "unmapped" };
+    const previous = normalizeEmail(context.previousEmail);
+    const found = await findPerson(api, { personId: context.personId, emails: [previous, email] });
+    if (!found.ok) return fail("lookup", found);
+    const personId = found.person ? found.person.id : (context.personId || personIdFor(email, context));
+    const tables = rowsForMember(memberDoc, Object.assign({}, context, { personId }));
+    const customer = related(context, "customer");
+    const person = await patchPerson(api, found.person, tables.people[0], {
+      fillOnly: !(customer && customer.data.displayName),
+      desiredStatus: accountStatusForMember(member.data, customer),
+      syncEmail: Boolean(previous)
+    });
+    if (!person.ok && !person.conflict) return person;
+    const emails = [email, previous];
+    const result = await runSteps([
+      ["person_emails", () => emailSteps(api, personId, previous, email, context)],
+      ["person_profiles", () => patchProfile(api, personId, tables.person_profiles && tables.person_profiles[0])],
+      ["role_grants", () => syncGrant(api, personId, member, emails, context)],
+      ["enrollments", () => memberEnrollmentStep(api, personId, member, tables, context)]
+    ]);
+    return person.ok ? result : Object.assign({}, person, { failed: [person.step].concat(result.failed || []) });
   });
 }
 
-// Member document deleted (removeMember). Nothing is deleted in Supabase: the person is archived, an open TSA
-// enrollment becomes revoked and the platform grant ends. The enrollment and grant lookups use the same
-// deterministic person id as the import (context.personId or the email).
+// Member document deleted (removeMember). Nothing is deleted in Supabase. The person is found through the
+// database (address, earlier address, uid), then archived (never over deletion_pending), an open TSA enrollment
+// becomes revoked and the mirror's own platform grants end. No matching person is { ok:false, error:"no-row" }.
 function mirrorMemberRemoval(mirror, removal, ctx) {
   const context = ctx || {};
   return runMirror(mirror, "member removal", async (api) => {
     const email = normalizeEmail(removal && removal.email);
-    if (!email && !context.personId) return { ok: false, error: "unmapped" };
-    const personId = context.personId ? String(context.personId) : uuidFor(`person:${email}`);
+    const uid = removal && removal.uid ? String(removal.uid) : "";
+    if (!email && !context.personId && !uid) return { ok: false, error: "unmapped" };
+    const found = await findPerson(api, { personId: context.personId, emails: [email], uid });
+    if (!found.ok) return fail("lookup", found);
+    if (!found.person) return { ok: false, error: "no-row" };
+    const person = found.person;
     const now = nowIso(context);
-    const archived = await sendUpdate(api, "people archive", "people", { id: personId }, { account_status: "archived" });
-    if (!archived.ok) return archived;
-    for (const status of ["active", "invited"]) {
-      const revoked = await sendUpdate(api, "enrollments revoke", "enrollments", { person_id: personId, program_id: PROGRAM_TSA, status }, { status: "revoked" });
-      if (!revoked.ok) return revoked;
-    }
-    const ended = await sendUpdate(api, "role_grants end", "role_grants", { person_id: personId, role: "platform_owner", status: "active" }, { status: "suspended", ended_at: now });
-    if (!ended.ok) return ended;
-    return { ok: true };
+    return runSteps([
+      ["people", async () => (decideAccountStatus(person.account_status, "archived") ? sendUpdate(api, "people archive", "people", { id: person.id }, { account_status: "archived" }) : { ok: true })],
+      ["enrollments", async () => {
+        for (const status of ["active", "invited"]) {
+          const revoked = await sendUpdate(api, "enrollments revoke", "enrollments", { person_id: person.id, program_id: PROGRAM_TSA, status }, { status: "revoked" });
+          if (!revoked.ok) return revoked;
+        }
+        return { ok: true };
+      }],
+      ["role_grants", () => endOwnedGrants(api, person.id, [email], now)]
+    ]);
   });
 }
 
-// users/{uid} written (email, displayName, photoURL, providers, readiness product).
+async function conflictForUid(api, uid, found) {
+  if (!uid) return { ok: true };
+  const byUid = await peopleWhere(api, `auth_uid=eq.${enc(uid)}`);
+  if (!byUid.ok) return fail("lookup", byUid);
+  if (byUid.person && found && found.id !== byUid.person.id) return { ok: false, step: "people", error: "auth-uid-conflict", conflict: true };
+  return { ok: true, holder: byUid.person };
+}
+
+// users/{uid} written (email, displayName, photoURL, providers, readiness product). A uid that another person
+// holds, or a person who already holds a different uid, is a conflict: auth_uid is never overwritten.
 function mirrorUserWrite(mirror, userDoc, ctx) {
   const context = ctx || {};
   return runMirror(mirror, "user write", async (api) => {
-    const tables = rowsForUser(userDoc, context);
-    if (!tables.people) return { ok: false, error: "unmapped" };
-    const person = tables.people[0];
-    const written = await writeTables(api, "user", tables);
-    if (!written.ok) return written;
-    if (context.previousEmail) {
-      const changed = await changeEmailSteps(api, person.id, context.previousEmail, person.primary_email, nowIso(context));
-      if (!changed.ok) return changed;
-    }
-    return { ok: true, tables: Object.keys(tables) };
+    const user = docParts(userDoc);
+    const email = user && normalizeEmail(user.data.email);
+    if (!email || !user.id) return { ok: false, error: "unmapped" };
+    const previous = normalizeEmail(context.previousEmail);
+    const byEmail = await findPerson(api, { personId: context.personId, emails: [previous, email] });
+    if (!byEmail.ok) return fail("lookup", byEmail);
+    const uidCheck = await conflictForUid(api, user.id, byEmail.person);
+    if (!uidCheck.ok) return uidCheck;
+    const existing = byEmail.person || uidCheck.holder || null;
+    const personId = existing ? existing.id : (context.personId || personIdFor(email, context));
+    const tables = rowsForUser(userDoc, Object.assign({}, context, { personId }));
+    const person = await patchPerson(api, existing, tables.people[0], { fillOnly: true, syncEmail: Boolean(previous) || (!byEmail.person && Boolean(uidCheck.holder)) });
+    if (!person.ok) return person;
+    return runSteps([
+      ["person_emails", () => emailSteps(api, personId, previous || (existing && existing.primary_email !== email ? existing.primary_email : ""), email, context)],
+      ["person_profiles", () => patchProfile(api, personId, tables.person_profiles && tables.person_profiles[0])],
+      ["entitlements", async () => {
+        const row = tables.entitlements && tables.entitlements[0];
+        if (!row) return { ok: true };
+        const inserted = await insertIfMissing(api, "entitlements", [row], "id");
+        const product = user.data.products && user.data.products.readinessAssessment;
+        if (!inserted.ok || !has(product, "reportAvailable")) return inserted;
+        return sendUpdate(api, "entitlements update", "entitlements", { id: row.id }, { report_available: product.reportAvailable === true });
+      }]
+    ]);
   });
 }
 
-// customers/{id} written (created, activity touched, name or status changed).
+// The person id behind each customer id, from the database (people.legacy_firestore_id = customers/<id>), so an
+// email change never separates a customer from its person. Falls back to the derived id inside the pure builders.
+async function withCustomerPeople(api, customerIds, ctx) {
+  const map = Object.assign({}, ctx && ctx.personIdByCustomer);
+  for (const id of Array.from(new Set((customerIds || []).filter(Boolean).map(String)))) {
+    if (map[id]) continue;
+    const r = await peopleWhere(api, `legacy_firestore_id=eq.${enc(`customers/${id}`)}`);
+    if (!r.ok) return fail("lookup", r);
+    if (r.person) map[id] = r.person.id;
+  }
+  return { ok: true, ctx: Object.assign({}, ctx, { personIdByCustomer: map }) };
+}
+
+// The shared customer flow: identity resolution, any customer write and an email change.
+async function customerFlow(api, docs, ctx) {
+  const customer = docParts(docs.customer);
+  const email = customer && normalizeEmail(customer.data.primaryEmail);
+  if (!email) return { ok: false, error: "unmapped" };
+  const previous = normalizeEmail(ctx.previousEmail);
+  const authLink = docParts(docs.authLink);
+  const found = await findPerson(api, { personId: ctx.personId, legacyId: `customers/${customer.id}`, emails: [previous, email] });
+  if (!found.ok) return fail("lookup", found);
+  const uidCheck = await conflictForUid(api, authLink && authLink.id, found.person);
+  if (!uidCheck.ok) return uidCheck;
+  const existing = found.person || (uidCheck.holder || null);
+  const personId = existing ? existing.id : (ctx.personId || personIdFor(email, ctx));
+  const context = Object.assign({}, ctx, { personId, previousEmail: previous || undefined, related: Object.assign({}, ctx.related, { customer: docs.customer, authLink: docs.authLink || undefined }) });
+  const tables = rowsForCustomer(docs.customer, context);
+  const person = await patchPerson(api, existing, tables.people[0], { fillOnly: false, syncEmail: true, customerLegacy: true });
+  if (!person.ok) return person;
+  const claims = [docs.emailClaim, docs.oldClaim, docs.newClaim].filter(Boolean).map(docParts);
+  return runSteps([
+    ["person_emails", async () => {
+      const first = await emailSteps(api, personId, previous || (existing && existing.primary_email !== email ? existing.primary_email : ""), email, context);
+      if (!first.ok) return first;
+      for (const claim of claims) {
+        const claimEmail = normalizeEmail(claim.data.emailNormalized);
+        if (!claimEmail || claimEmail === email) continue;
+        const done = claim.data.status === "historical" ? await retireEmail(api, personId, claimEmail, nowIso(context)) : await ensureActiveEmail(api, personId, claimEmail, context);
+        if (!done.ok) return done;
+      }
+      return { ok: true };
+    }]
+  ]);
+}
+
+// customers/{id} written (created, activity touched, name or status changed). Only stated fields are written,
+// last_activity_at only moves forward.
 function mirrorCustomerWrite(mirror, customerDoc, ctx) {
   const context = ctx || {};
-  return runMirror(mirror, "customer write", async (api) => {
-    const tables = rowsForCustomer(customerDoc, context);
-    if (!tables.people) return { ok: false, error: "unmapped" };
-    const written = await writeTables(api, "customer", tables);
-    if (!written.ok) return written;
-    return { ok: true, tables: Object.keys(tables) };
-  });
+  return runMirror(mirror, "customer write", (api) => customerFlow(api, { customer: customerDoc }, context));
 }
 
 // The whole of resolveCustomerIdentity in one call: customer, auth link, email claim.
 //   documents: { customer: {id,data}, authLink: {id,data}|null, emailClaim: {id,data}|null }
 function mirrorIdentityResolution(mirror, documents, ctx) {
   const docs = documents || {};
-  const context = Object.assign({}, ctx || {}, { related: Object.assign({}, ctx && ctx.related, { customer: docs.customer, authLink: docs.authLink || undefined }) });
-  return runMirror(mirror, "identity resolution", async (api) => {
-    const tables = rowsForCustomer(docs.customer, context);
-    if (!tables.people) return { ok: false, error: "unmapped" };
-    if (docs.emailClaim) {
-      const claim = rowsForEmailClaim(docs.emailClaim, context);
-      if (claim.person_emails) tables.person_emails = claim.person_emails;
-    }
-    const written = await writeTables(api, "identity", tables);
-    if (!written.ok) return written;
-    return { ok: true, tables: Object.keys(tables) };
-  });
+  return runMirror(mirror, "identity resolution", (api) => customerFlow(api, docs, ctx || {}));
 }
 
-// customerAuthLinks/{uid} written on its own (for example a relink).
+// changeCustomerEmail done. documents: { customer: {id, data after the change}, previousEmail, oldClaim?, newClaim? }
+// The person is found by the customer path, so it keeps its id however often the address changed.
+function mirrorCustomerEmailChange(mirror, documents, ctx) {
+  const docs = documents || {};
+  const context = Object.assign({}, ctx || {}, { previousEmail: docs.previousEmail });
+  return runMirror(mirror, "customer email change", (api) => customerFlow(api, docs, context));
+}
+
+// customerAuthLinks/{uid} written on its own. auth_uid is only set on a person who holds none.
 function mirrorCustomerAuthLinkWrite(mirror, linkDoc, ctx) {
   const context = ctx || {};
   return runMirror(mirror, "auth link", async (api) => {
-    const tables = rowsForCustomerAuthLink(linkDoc, context);
-    if (!tables.people) return { ok: false, error: "unmapped" };
-    const written = await writeTables(api, "auth link", tables);
-    return written.ok ? { ok: true } : written;
+    const link = docParts(linkDoc);
+    if (!link || !link.id) return { ok: false, error: "unmapped" };
+    const customerId = String(link.data.customerId || "");
+    const resolved = await withCustomerPeople(api, [customerId], context);
+    if (!resolved.ok) return resolved;
+    const built = rowsForCustomerAuthLink(linkDoc, resolved.ctx);
+    if (!built.people) return { ok: false, error: "unmapped" };
+    const found = await findPerson(api, { personId: built.people[0].id });
+    if (!found.ok) return fail("lookup", found);
+    const uidCheck = await conflictForUid(api, link.id, found.person);
+    if (!uidCheck.ok) return uidCheck;
+    return patchPerson(api, found.person || uidCheck.holder || null, built.people[0], { fillOnly: true });
   });
 }
 
-// customerEmailClaims/{hash} written on its own.
+// customerEmailClaims/{hash} written on its own: active adds or reactivates the address, historical retires it.
 function mirrorEmailClaimWrite(mirror, claimDoc, ctx) {
   const context = ctx || {};
   return runMirror(mirror, "email claim", async (api) => {
-    const tables = rowsForEmailClaim(claimDoc, context);
-    if (!tables.person_emails) return { ok: false, error: "unmapped" };
-    const written = await writeTables(api, "email claim", tables);
-    return written.ok ? { ok: true } : written;
+    const claim = docParts(claimDoc);
+    const email = claim && normalizeEmail(claim.data.emailNormalized);
+    if (!email) return { ok: false, error: "unmapped" };
+    const resolved = await withCustomerPeople(api, [claim.data.customerId], context);
+    if (!resolved.ok) return resolved;
+    const person = personForCustomer(claim.data.customerId, resolved.ctx);
+    if (!person) return { ok: false, error: "unmapped" };
+    if (claim.data.status !== "historical") return ensureActiveEmail(api, person.id, email, context);
+    const held = await read(api, "person_emails", `select=id,person_id&email=eq.${enc(email)}&person_id=eq.${enc(person.id)}&limit=1`, "person_emails lookup");
+    if (!held.ok) return fail("person_emails", held);
+    if (held.rows.length) return retireEmail(api, person.id, email, iso(claim.data.updatedAt) || nowIso(context));
+    const built = rowsForEmailClaim(claimDoc, resolved.ctx);
+    return built.person_emails ? insertIfMissing(api, "person_emails", built.person_emails, "id") : { ok: false, error: "unmapped" };
   });
 }
 
-// changeCustomerEmail done. documents: { customer: {id, data after the change}, previousEmail }
-// The person keeps its id; people.primary_email moves, the old person_emails row becomes historical and the new
-// one is added. Pass context.personId when the customer changed address before.
-function mirrorCustomerEmailChange(mirror, documents, ctx) {
-  const docs = documents || {};
-  const context = Object.assign({}, ctx || {}, { previousEmail: docs.previousEmail, related: Object.assign({}, ctx && ctx.related, { customer: docs.customer }) });
-  return runMirror(mirror, "customer email change", async (api) => {
-    const tables = rowsForCustomer(docs.customer, context);
-    if (!tables.people) return { ok: false, error: "unmapped" };
-    const person = tables.people[0];
-    const written = await writeTables(api, "email change", tables);
-    if (!written.ok) return written;
-    const changed = await changeEmailSteps(api, person.id, docs.previousEmail, person.primary_email, nowIso(context));
-    if (!changed.ok) return changed;
-    return { ok: true, tables: Object.keys(tables) };
-  });
+async function applyCohortStubs(api, cohorts) {
+  return cohorts && cohorts.length ? insertIfMissing(api, "cohorts", cohorts, "id") : { ok: true };
 }
 
+// enrollments/{id}. Hook: an enrollment created or its status or validUntil changed. When the person already has
+// an open enrollment under another id (the one authorized_members made), that row is updated instead of a second
+// open row being added.
 function mirrorEnrollmentWrite(mirror, enrollmentDoc, ctx) {
   const context = ctx || {};
   return runMirror(mirror, "enrollment write", async (api) => {
-    const tables = rowsForEnrollment(enrollmentDoc, context);
-    if (!tables.enrollments) return { ok: false, error: "unmapped" };
-    const written = await writeTables(api, "enrollment", tables);
-    return written.ok ? { ok: true } : written;
+    const enr = docParts(enrollmentDoc);
+    if (!enr) return { ok: false, error: "unmapped" };
+    const resolved = await withCustomerPeople(api, [enr.data.customerId], context);
+    if (!resolved.ok) return resolved;
+    const built = rowsForEnrollment(enrollmentDoc, resolved.ctx);
+    if (!built.enrollments) return { ok: false, error: "unmapped" };
+    const row = built.enrollments[0];
+    const stubs = await applyCohortStubs(api, built.cohorts);
+    if (!stubs.ok) return stubs;
+    if (row.status === "active" || row.status === "invited") {
+      const open = await read(api, "enrollments", `select=id&person_id=eq.${enc(row.person_id)}&program_id=eq.${enc(row.program_id)}&status=in.(invited,active)&limit=5`, "enrollments lookup");
+      if (!open.ok) return fail("enrollments", open);
+      const other = open.rows.find((r) => r.id !== row.id);
+      if (other) {
+        const patch = Object.assign({}, row);
+        ["id", "person_id", "program_id", "created_at", "legacy_firestore_id", "notes", "source", "migration_run_id"].forEach((key) => delete patch[key]);
+        return Object.keys(patch).length ? sendUpdate(api, "enrollments update", "enrollments", { id: other.id }, patch) : { ok: true };
+      }
+    }
+    return send(api, "enrollments", [row], { conflict: "id", label: "enrollment" });
   });
+}
+
+// Only the entitlement columns the document states (keys present), after an insert-if-missing of the full row.
+function entitlementPatch(data, ctx) {
+  const patch = {};
+  if (has(data, "status")) patch.status = oneOf(data.status, ENTITLEMENT_STATUS, "active");
+  if (has(data, "accessType")) patch.access_type = oneOf(data.accessType, ["free", "paid", "comped", "sponsored"], "comped");
+  if (has(data, "sponsorOrganizationId")) patch.sponsor_organization_id = data.sponsorOrganizationId ? orgIdFor(data.sponsorOrganizationId, ctx) : null;
+  if (has(data, "reportAvailable")) patch.report_available = data.reportAvailable === true;
+  if (has(data, "attemptsCompleted")) patch.attempts_completed = clampInt(data.attemptsCompleted, 0, 100000);
+  if (has(data, "retakesAllowed")) patch.retakes_allowed = clampInt(data.retakesAllowed, 0, 100000);
+  if (has(data, "retakesUsed")) patch.retakes_used = clampInt(data.retakesUsed, 0, 100000);
+  if (patch.retakes_used != null && patch.retakes_allowed != null) patch.retakes_used = Math.min(patch.retakes_used, patch.retakes_allowed);
+  if (has(data, "validFrom")) patch.valid_from = iso(data.validFrom);
+  if (has(data, "validUntil")) patch.valid_until = iso(data.validUntil);
+  if (has(data, "paymentReference") && data.paymentReference) patch.payment_reference = data.paymentReference;
+  return patch;
 }
 
 function mirrorEntitlementWrite(mirror, entitlementDoc, ctx) {
   const context = ctx || {};
   return runMirror(mirror, "entitlement write", async (api) => {
-    const tables = rowsForEntitlement(entitlementDoc, context);
-    if (!tables.entitlements) return { ok: false, error: "unmapped" };
-    const written = await writeTables(api, "entitlement", tables);
-    return written.ok ? { ok: true } : written;
+    const ent = docParts(entitlementDoc);
+    if (!ent) return { ok: false, error: "unmapped" };
+    const resolved = await withCustomerPeople(api, [ent.data.customerId], context);
+    if (!resolved.ok) return resolved;
+    const built = rowsForEntitlement(entitlementDoc, resolved.ctx);
+    if (!built.entitlements) return { ok: false, error: "unmapped" };
+    const row = built.entitlements[0];
+    const inserted = await insertIfMissing(api, "entitlements", [row], "id");
+    if (!inserted.ok) return inserted;
+    const patch = entitlementPatch(ent.data, resolved.ctx);
+    return Object.keys(patch).length ? sendUpdate(api, "entitlements update", "entitlements", { id: row.id }, patch) : { ok: true };
   });
 }
 
@@ -921,25 +1297,31 @@ function mirrorEntitlementStatusChange(mirror, change) {
   });
 }
 
-// persistCompletedAssessment counters on the entitlement: { entitlementId, attemptsCompleted, retakesUsed, reportAvailable }.
+// persistCompletedAssessment counters on the entitlement: only the keys supplied are written.
+// { entitlementId, attemptsCompleted?, retakesUsed?, reportAvailable? }
 function mirrorEntitlementCounters(mirror, change) {
   return runMirror(mirror, "entitlement counters", async (api) => {
     const id = String(change && change.entitlementId || "");
     if (!id) return { ok: false, error: "unmapped" };
-    const attempts = clampInt(change.attemptsCompleted, 0, 100000);
-    const patch = { attempts_completed: attempts, report_available: change.reportAvailable === true };
-    if (change.retakesUsed != null) patch.retakes_used = clampInt(change.retakesUsed, 0, 100000);
+    const patch = {};
+    if (change.attemptsCompleted !== undefined) patch.attempts_completed = clampInt(change.attemptsCompleted, 0, 100000);
+    if (change.retakesUsed !== undefined) patch.retakes_used = clampInt(change.retakesUsed, 0, 100000);
+    if (change.reportAvailable !== undefined) patch.report_available = change.reportAvailable === true;
+    if (!Object.keys(patch).length) return { ok: false, error: "unmapped" };
     return sendUpdate(api, "entitlements counters", "entitlements", { id: uuidFor(`entitlement:${id}`) }, patch);
   });
 }
 
-// consentEvents written. documents: array of { id, data }. context.customers or related.customer resolves the person.
+// consentEvents written. documents: array of { id, data }. Insert only (the table is append only).
 function mirrorConsentEvents(mirror, documents, ctx) {
   const context = ctx || {};
   return runMirror(mirror, "consent events", async (api) => {
+    const list = Array.isArray(documents) ? documents.map(docParts).filter(Boolean) : [];
+    const resolved = await withCustomerPeople(api, list.map((d) => d.data.customerId), context);
+    if (!resolved.ok) return resolved;
     const rows = [];
-    (Array.isArray(documents) ? documents : []).forEach((doc) => {
-      const built = rowsForConsentEvent(doc, context);
+    list.forEach((doc) => {
+      const built = rowsForConsentEvent(doc, resolved.ctx);
       if (built.consent_events) rows.push(...built.consent_events);
     });
     if (!rows.length) return { ok: false, error: "unmapped" };
@@ -951,7 +1333,12 @@ function mirrorConsentEvents(mirror, documents, ctx) {
 function mirrorDuplicateCandidate(mirror, candidateDoc, ctx) {
   const context = ctx || {};
   return runMirror(mirror, "duplicate candidate", async (api) => {
-    const tables = rowsForDuplicateCandidate(candidateDoc, context);
+    const candidate = docParts(candidateDoc);
+    if (!candidate) return { ok: false, error: "unmapped" };
+    const ids = Array.isArray(candidate.data.candidateCustomerIds) ? candidate.data.candidateCustomerIds : [];
+    const resolved = await withCustomerPeople(api, ids, context);
+    if (!resolved.ok) return resolved;
+    const tables = rowsForDuplicateCandidate(candidateDoc, resolved.ctx);
     const table = tables.duplicate_candidates ? "duplicate_candidates" : "identity_conflicts";
     if (!tables[table]) return { ok: false, error: "unmapped" };
     const written = await send(api, table, tables[table], { conflict: "id", label: "duplicate candidate" });
@@ -963,7 +1350,7 @@ module.exports = {
   // pure
   rowsForPerson, rowsForMember, rowsForUser, rowsForCustomer, rowsForCustomerAuthLink, rowsForEmailClaim,
   rowsForEnrollment, rowsForEntitlement, rowsForConsentEvent, rowsForDuplicateCandidate,
-  accountStatusForMember,
+  accountStatusForMember, decideAccountStatus,
   // mirroring
   mirrorMemberWrite, mirrorMemberRemoval, mirrorUserWrite, mirrorCustomerWrite, mirrorIdentityResolution,
   mirrorCustomerAuthLinkWrite, mirrorEmailClaimWrite, mirrorCustomerEmailChange, mirrorEnrollmentWrite,
