@@ -106,6 +106,15 @@ function statedDate(data, key) {
   return parsed === null ? undefined : parsed;
 }
 
+// An integer the document states: undefined when the key is absent, null, empty or not a number (not stated, the
+// stored value stays), else the clamped integer.
+function statedInt(data, key, max) {
+  if (!has(data, key)) return undefined;
+  const value = data[key];
+  if (value == null || value === "" || !Number.isFinite(Number(value))) return undefined;
+  return clampInt(value, 0, max);
+}
+
 function has(object, key) {
   return Boolean(object) && Object.prototype.hasOwnProperty.call(object, key);
 }
@@ -318,7 +327,7 @@ function buildProfile(personId, sources, ctx) {
     if (complete || lastLogin !== undefined) row.last_login_at = lastLogin;
     if (!row.last_sign_in_provider && data.lastSignInProvider && (complete || PROVIDERS.includes(data.lastSignInProvider))) row.last_sign_in_provider = oneOf(data.lastSignInProvider, PROVIDERS, "");
     if (!(row.sign_in_providers && row.sign_in_providers.length) && Array.isArray(data.signInProviders)) row.sign_in_providers = data.signInProviders.map(String).slice(0, 5);
-    if (stated("googleGroupAdded")) row.google_group_added = data.googleGroupAdded === true;
+    if (complete || typeof data.googleGroupAdded === "boolean") row.google_group_added = data.googleGroupAdded === true;
   }
   return Object.keys(row).length > 1 ? stampOf(ctx)(row) : null;
 }
@@ -1285,10 +1294,15 @@ function mirrorEnrollmentWrite(mirror, enrollmentDoc, ctx) {
     const built = rowsForEnrollment(enrollmentDoc, resolved.ctx);
     if (!built.enrollments) return { ok: false, error: "unmapped" };
     const row = built.enrollments[0];
-    const found = await read(api, "enrollments", `select=id,status&person_id=eq.${enc(row.person_id)}&program_id=eq.${enc(row.program_id)}&order=created_at.desc&limit=20`, "enrollments lookup");
+    const found = await read(api, "enrollments", `select=id,status,legacy_firestore_id&person_id=eq.${enc(row.person_id)}&program_id=eq.${enc(row.program_id)}&order=created_at.desc&limit=20`, "enrollments lookup");
     if (!found.ok) return fail("enrollments", found);
     const open = (r) => r.status === "active" || r.status === "invited";
-    const existing = found.rows.find((r) => r.id === row.id) || found.rows.find(open);
+    // The row of this document, else the open row that authorized_members made (it has no enrollments/ path). The open
+    // row of ANOTHER enrollments document is never overwritten: this document gets its own row, unless the one open
+    // enrollment per person and program rule forbids it.
+    const foreign = (r) => String(r.legacy_firestore_id || "").startsWith("enrollments/");
+    const existing = found.rows.find((r) => r.id === row.id) || found.rows.find((r) => open(r) && !foreign(r));
+    if (!existing && open(row) && found.rows.some((r) => open(r) && foreign(r))) return { ok: false, step: "enrollments", error: "open-enrollment-exists" };
     if (!existing) {
       const stubs = await applyCohortStubs(api, built.cohorts);
       if (!stubs.ok) return stubs;
@@ -1308,11 +1322,16 @@ function entitlementPatches(data, ctx) {
   const status = has(data, "status") && ENTITLEMENT_STATUS.includes(data.status) ? { status: data.status } : {};
   const rest = {};
   if (has(data, "accessType") && ["free", "paid", "comped", "sponsored"].includes(data.accessType)) rest.access_type = data.accessType;
-  if (has(data, "sponsorOrganizationId")) rest.sponsor_organization_id = data.sponsorOrganizationId ? orgIdFor(data.sponsorOrganizationId, ctx) : null;
+  if (has(data, "sponsorOrganizationId")) {
+    // Empty states "no sponsor". An id that is not a known organization is not stated: the stored sponsor stays.
+    const sponsor = data.sponsorOrganizationId ? orgIdFor(data.sponsorOrganizationId, ctx) : null;
+    if (sponsor || !data.sponsorOrganizationId) rest.sponsor_organization_id = sponsor;
+  }
   if (has(data, "reportAvailable")) rest.report_available = data.reportAvailable === true;
-  if (has(data, "attemptsCompleted")) rest.attempts_completed = clampInt(data.attemptsCompleted, 0, 100000);
-  if (has(data, "retakesAllowed")) rest.retakes_allowed = clampInt(data.retakesAllowed, 0, 100000);
-  if (has(data, "retakesUsed")) rest.retakes_used = clampInt(data.retakesUsed, 0, 100000);
+  for (const [key, column] of [["attemptsCompleted", "attempts_completed"], ["retakesAllowed", "retakes_allowed"], ["retakesUsed", "retakes_used"]]) {
+    const value = statedInt(data, key, 100000);
+    if (value !== undefined) rest[column] = value;
+  }
   for (const [key, column] of [["validFrom", "valid_from"], ["validUntil", "valid_until"]]) {
     const value = statedDate(data, key);
     if (value !== undefined) rest[column] = value;
@@ -1380,8 +1399,10 @@ function mirrorEntitlementCounters(mirror, change) {
     const id = String(change && change.entitlementId || "");
     if (!id) return { ok: false, error: "unmapped" };
     const patch = {};
-    if (change.attemptsCompleted !== undefined) patch.attempts_completed = clampInt(change.attemptsCompleted, 0, 100000);
-    if (change.retakesUsed !== undefined) patch.retakes_used = clampInt(change.retakesUsed, 0, 100000);
+    const attempts = statedInt(change, "attemptsCompleted", 100000);
+    const retakes = statedInt(change, "retakesUsed", 100000);
+    if (attempts !== undefined) patch.attempts_completed = attempts;
+    if (retakes !== undefined) patch.retakes_used = retakes;
     if (change.reportAvailable !== undefined) patch.report_available = change.reportAvailable === true;
     if (!Object.keys(patch).length) return { ok: false, error: "unmapped" };
     return sendUpdate(api, "entitlements counters", "entitlements", { id: uuidFor(`entitlement:${id}`) }, patch, true);
@@ -1406,18 +1427,44 @@ function mirrorConsentEvents(mirror, documents, ctx) {
   });
 }
 
+// duplicateCandidates/{id}. Inserted whole (defaults for a new row only) when neither table holds it; an existing row
+// gets only the columns the document states and is never reopened, blanked or re-dated by a partial document.
 function mirrorDuplicateCandidate(mirror, candidateDoc, ctx) {
   const context = ctx || {};
   return runMirror(mirror, "duplicate candidate", async (api) => {
     const candidate = docParts(candidateDoc);
     if (!candidate) return { ok: false, error: "unmapped" };
-    const ids = Array.isArray(candidate.data.candidateCustomerIds) ? candidate.data.candidateCustomerIds : [];
+    const data = candidate.data;
+    const ids = Array.isArray(data.candidateCustomerIds) ? data.candidateCustomerIds : [];
     const resolved = await withCustomerPeople(api, ids, context);
     if (!resolved.ok) return resolved;
+    const pairId = uuidFor(`duplicate:${candidate.id}`);
+    const conflictId = uuidFor(`identity-conflict:${candidate.id}`);
+    const inPair = await read(api, "duplicate_candidates", `select=id&id=eq.${enc(pairId)}&limit=1`, "duplicate_candidates lookup");
+    if (!inPair.ok) return fail("duplicate_candidates", inPair);
+    const inConflicts = inPair.rows.length ? { ok: true, rows: [] } : await read(api, "identity_conflicts", `select=id&id=eq.${enc(conflictId)}&limit=1`, "identity_conflicts lookup");
+    if (!inConflicts.ok) return fail("identity_conflicts", inConflicts);
+    const patch = {};
+    if (has(data, "status") && ["open", "merged", "dismissed"].includes(data.status)) patch.status = data.status;
+    if (Array.isArray(data.reasonCodes)) patch.reason_codes = data.reasonCodes.map((code) => text(code, 80)).filter(Boolean);
+    const due = statedDate(data, "reviewDueAt");
+    if (due !== undefined) patch.review_due_at = due;
+    if (inPair.rows.length) return Object.keys(patch).length ? sendUpdate(api, "duplicate_candidates update", "duplicate_candidates", { id: pairId }, patch) : { ok: true };
+    if (inConflicts.rows.length) {
+      if (has(data, "status") && data.status === "resolved") patch.status = "resolved";
+      if (data.authUidHash) patch.auth_uid_hash = text(data.authUidHash, 64);
+      if (data.emailHash) patch.email_hash = text(data.emailHash, 64);
+      if (Array.isArray(data.candidateCustomerIds)) {
+        const people = [];
+        ids.forEach((customerId) => { const person = personForCustomer(customerId, resolved.ctx); if (person && !people.includes(person.id)) people.push(person.id); });
+        patch.candidate_person_ids = people;
+      }
+      return Object.keys(patch).length ? sendUpdate(api, "identity_conflicts update", "identity_conflicts", { id: conflictId }, patch) : { ok: true };
+    }
     const tables = rowsForDuplicateCandidate(candidateDoc, resolved.ctx);
     const table = tables.duplicate_candidates ? "duplicate_candidates" : "identity_conflicts";
     if (!tables[table]) return { ok: false, error: "unmapped" };
-    const written = await send(api, table, tables[table], { conflict: "id", label: "duplicate candidate" });
+    const written = await insertIfMissing(api, table, tables[table], "id");
     return written.ok ? { ok: true, table } : written;
   });
 }

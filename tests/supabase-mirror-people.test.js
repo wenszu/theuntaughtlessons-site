@@ -994,6 +994,117 @@ const byTable = (f, table, method) => f.calls.filter((c) => c.table === table &&
     assert.strictEqual(people.rowsForUser({ id: "u", data: { email: "z@example.com", lastSignInProvider: "twitter.com" } }, { complete: true }).person_profiles[0].last_sign_in_provider, "");
   });
 
+  // ------------------------------------------------------------------------------------------------------
+  // Third review round.
+
+  await check("R3-1 duplicate candidates are patch-like: insert-if-missing, then only stated columns, never reopened or re-dated", async () => {
+    const pairId = uuidFor("duplicate:dup-1");
+    const conflictId = uuidFor("identity-conflict:dup-2");
+    const run = async (store, id, data) => {
+      const { mirror, f } = liveMirror([], store);
+      const result = await people.mirrorDuplicateCandidate(mirror, { id, data }, { now: "2026-10-09T00:00:00.000Z", customers: { "cust-9": customer.data } });
+      return { result, f };
+    };
+    // A merged pair and a partial document: only the stated reason codes are written.
+    let r = await run({ duplicate_candidates: [{ id: pairId }] }, "dup-1", { reasonCodes: ["email_change_claimed"] });
+    assert.strictEqual(r.result.ok, true);
+    assert.deepStrictEqual(patchesTo(r.f, "duplicate_candidates").map((c) => [c.query, c.body]), [[{ id: `eq.${pairId}` }, { reason_codes: ["email_change_claimed"] }]]);
+    assert.strictEqual(byTable(r.f, "duplicate_candidates", "POST").length, 0, "no merge over the stored row");
+    // Status only when stated, and created_at is never written on an existing row.
+    r = await run({ duplicate_candidates: [{ id: pairId }] }, "dup-1", { status: "open", createdAt: ts("2026-10-07T00:00:00Z") });
+    assert.deepStrictEqual(patchesTo(r.f, "duplicate_candidates").map((c) => c.body), [{ status: "open" }]);
+    r = await run({ duplicate_candidates: [{ id: pairId }] }, "dup-1", {});
+    assert.strictEqual(writes(r.f).length, 0);
+    // A one customer conflict is found in identity_conflicts and patched the same way.
+    r = await run({ identity_conflicts: [{ id: conflictId }] }, "dup-2", { status: "dismissed", reviewDueAt: null });
+    assert.deepStrictEqual(patchesTo(r.f, "identity_conflicts").map((c) => [c.query, c.body]), [[{ id: `eq.${conflictId}` }, { status: "dismissed", review_due_at: null }]]);
+    assert.strictEqual(byTable(r.f, "identity_conflicts", "POST").length, 0);
+    // A new candidate is inserted whole with ignore-duplicates.
+    r = await run({}, "dup-2", { status: "open", reasonCodes: ["auth_link_unavailable"], candidateCustomerIds: ["cust-9"] });
+    const created = byTable(r.f, "identity_conflicts", "POST")[0];
+    assert.strictEqual(created.prefer, IGNORE);
+    assert.strictEqual(created.body[0].created_at, "2026-10-09T00:00:00.000Z");
+  });
+
+  await check("R3-2 an unknown sponsor organization is not stated: the stored sponsor is kept", async () => {
+    const id = uuidFor("entitlement:ent-9");
+    const stored = { id, access_type: "sponsored", sponsor_organization_id: uuidFor("organization:ayalaland"), payment_reference: null, retakes_allowed: 1, retakes_used: 0, valid_from: null, valid_until: null };
+    const run = async (data) => {
+      const { mirror, f } = liveMirror([], { entitlements: [stored] });
+      const result = await people.mirrorEntitlementWrite(mirror, { id: "ent-9", data: Object.assign({ customerId: "cust-9", programId: "executive-signature" }, data) }, { related: { customer }, organizations: orgNames });
+      return { result, f };
+    };
+    let r = await run({ sponsorOrganizationId: "nope", reportAvailable: true });
+    assert.strictEqual(r.result.ok, true);
+    assert.deepStrictEqual(patchesTo(r.f, "entitlements").map((c) => c.body), [{ report_available: true }], "no sponsor column, the other stated column still goes");
+    r = await run({ sponsorOrganizationId: "other-co" });
+    assert.deepStrictEqual(patchesTo(r.f, "entitlements").map((c) => c.body), [{ sponsor_organization_id: uuidFor("organization:other-co") }]);
+    // An explicitly empty sponsor is stated (and the database constraint check still applies on the merged row).
+    r = await run({ sponsorOrganizationId: null });
+    assert.strictEqual(r.result.error, "constraint:sponsored-needs-sponsor");
+  });
+
+  await check("R3-3 null or unparseable counters are not stated", async () => {
+    const id = uuidFor("entitlement:ent-9");
+    const stored = { id, access_type: "comped", sponsor_organization_id: null, payment_reference: null, retakes_allowed: 2, retakes_used: 1, valid_from: null, valid_until: null };
+    const { mirror, f } = liveMirror([], { entitlements: [stored] });
+    const result = await people.mirrorEntitlementWrite(mirror, { id: "ent-9", data: { customerId: "cust-9", programId: "executive-signature", attemptsCompleted: null, retakesAllowed: "abc", retakesUsed: "", reportAvailable: true } }, { related: { customer } });
+    assert.strictEqual(result.ok, true);
+    assert.deepStrictEqual(patchesTo(f, "entitlements").map((c) => c.body), [{ report_available: true }]);
+    const zero = liveMirror([], { entitlements: [stored] });
+    await people.mirrorEntitlementWrite(zero.mirror, { id: "ent-9", data: { customerId: "cust-9", programId: "executive-signature", attemptsCompleted: 0 } }, { related: { customer } });
+    assert.deepStrictEqual(patchesTo(zero.f, "entitlements").map((c) => c.body), [{ attempts_completed: 0 }], "a real zero is stated");
+    // The counters hook.
+    const counters = async (change) => {
+      const live = liveMirror([], { entitlements: [{ id: uuidFor("entitlement:ent-9") }] });
+      const done = await people.mirrorEntitlementCounters(live.mirror, Object.assign({ entitlementId: "ent-9" }, change));
+      return { done, bodies: patchesTo(live.f, "entitlements").map((c) => c.body) };
+    };
+    assert.deepStrictEqual((await counters({ attemptsCompleted: null, retakesUsed: "x", reportAvailable: true })).bodies, [{ report_available: true }]);
+    assert.deepStrictEqual((await counters({ attemptsCompleted: null })).done, { ok: false, error: "unmapped" });
+  });
+
+  await check("R3-7 google_group_added is only written for a real boolean", async () => {
+    const P = uuidFor("person:first@example.com");
+    const profileWrite = async (extra) => {
+      const { mirror, f } = liveMirror([], { people: [person(P, { primary_email: "first@example.com" })] });
+      await people.mirrorMemberWrite(mirror, { id: "first@example.com", data: Object.assign({ email: "first@example.com" }, extra) }, {});
+      return patchesTo(f, "person_profiles").map((c) => c.body);
+    };
+    assert.deepStrictEqual(await profileWrite({ googleGroupAdded: "yes" }), []);
+    assert.deepStrictEqual(await profileWrite({ googleGroupAdded: null }), []);
+    assert.deepStrictEqual(await profileWrite({ googleGroupAdded: true }), [{ google_group_added: true }]);
+    assert.deepStrictEqual(await profileWrite({ googleGroupAdded: false }), [{ google_group_added: false }]);
+    assert.strictEqual(people.rowsForMember({ id: "m@example.com", data: { email: "m@example.com", googleGroupAdded: "yes" } }, { complete: true }).person_profiles[0].google_group_added, false, "the import still says === true");
+  });
+
+  await check("R3-5 a second enrollments document never overwrites another document's row", async () => {
+    const first = uuidFor("enrollment:enr-first");
+    const second = { id: "enr-second", data: { customerId: "cust-9", programId: "tsa", status: "active", cohortId: "Other Cohort" } };
+    const store = (extra) => ({ people: [person(custPerson, { legacy_firestore_id: "customers/cust-9" })], enrollments: [Object.assign({ id: first, person_id: custPerson, program_id: "tsa", status: "active", legacy_firestore_id: "enrollments/enr-first" }, extra)] });
+    // Open row of another document: refused, nothing written.
+    let { mirror, f } = liveMirror([], store());
+    let result = await people.mirrorEnrollmentWrite(mirror, second, {});
+    assert.deepStrictEqual([result.ok, result.error], [false, "open-enrollment-exists"]);
+    assert.strictEqual(writes(f).length, 0);
+    // A closed second document gets its own row; the first row is untouched.
+    ({ mirror, f } = liveMirror([], store()));
+    result = await people.mirrorEnrollmentWrite(mirror, { id: "enr-second", data: Object.assign({}, second.data, { status: "completed" }) }, {});
+    assert.strictEqual(result.ok, true);
+    assert.strictEqual(patchesTo(f, "enrollments").length, 0);
+    assert.strictEqual(byTable(f, "enrollments", "POST")[0].body[0].id, uuidFor("enrollment:enr-second"));
+    // The row authorized_members made (no enrollments/ path) is still adopted.
+    ({ mirror, f } = liveMirror([], store({ legacy_firestore_id: "authorized_members/c@example.com" })));
+    result = await people.mirrorEnrollmentWrite(mirror, second, {});
+    assert.strictEqual(result.ok, true);
+    assert.strictEqual(patchesTo(f, "enrollments")[0].query.id, `eq.${first}`);
+    // The first document itself keeps updating its own row.
+    ({ mirror, f } = liveMirror([], store()));
+    result = await people.mirrorEnrollmentWrite(mirror, { id: "enr-first", data: { customerId: "cust-9", programId: "tsa", status: "completed" } }, {});
+    assert.strictEqual(result.ok, true);
+    assert.deepStrictEqual(patchesTo(f, "enrollments").map((c) => c.body), [{ status: "completed" }]);
+  });
+
   console.log(`supabase-mirror-people: ${passed} checks passed`);
 })().catch((error) => {
   console.error(error);
