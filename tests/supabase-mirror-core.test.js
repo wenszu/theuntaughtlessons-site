@@ -100,6 +100,14 @@ function fakeFetch(answers = []) {
   assert.deepStrictEqual(await createMirror({ env: {}, fetchImpl: fakeFetch(), logger }).select("enrollments", "select=id"), { ok: false, skipped: true });
   assert.deepStrictEqual(await createMirror({ env: onEnv, fetchImpl: fakeFetch([{ status: 200, rows: [{ id: "z" }] }]), logger }).run("s", async (m) => m.select("people", "select=id")), { ok: true, rows: [{ id: "z" }] }, "run passes select to a step");
 
+  // select: a body that cannot be read is an error, not an empty result.
+  f = async () => ({ status: 200, ok: true, json: async () => { throw new Error("cut off"); } });
+  mirror = createMirror({ env: onEnv, fetchImpl: f, logger });
+  assert.deepStrictEqual(await mirror.select("people", "select=id"), { ok: false, error: "bad-body" });
+  f = async () => ({ status: 200, ok: true, json: async () => ({ not: "an array" }) });
+  mirror = createMirror({ env: onEnv, fetchImpl: f, logger });
+  assert.deepStrictEqual(await mirror.select("people", "select=id"), { ok: false, error: "bad-body" });
+
   // run turns a thrown error into a result; startMirror never throws or waits.
   mirror = createMirror({ env: onEnv, fetchImpl: fakeFetch(), logger });
   assert.deepStrictEqual(await mirror.run("step", async () => { throw new Error("nope"); }), { ok: false, error: "step-failed" });

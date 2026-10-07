@@ -123,7 +123,9 @@ function createMirror(options = {}) {
         note("warn", label, { table, status: result.status });
         return { ok: false, error: `http/${result.status}` };
       }
-      return { ok: true, rows: Array.isArray(result.rows) ? result.rows : [] };
+      // An unreadable body (for example a timeout in the middle of it) is an error, never "no row".
+      if (!Array.isArray(result.rows)) return { ok: false, error: "bad-body" };
+      return { ok: true, rows: result.rows };
     } catch (error) {
       note("warn", label, { table, error: error && error.name === "AbortError" ? "timeout" : "network" });
       return { ok: false, error: error && error.name === "AbortError" ? "timeout" : "network" };
