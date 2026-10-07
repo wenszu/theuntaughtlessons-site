@@ -1,6 +1,9 @@
 "use strict";
 
-const { CustomerProgramError, sha256 } = require("./customer-program-service");
+const { CustomerProgramError, sha256, newWriteLog, recordTransaction, documentAtPath, documentAfter } = require("./customer-program-service");
+const mirrorRuntime = require("./supabase-mirror/runtime");
+const peopleMirror = require("./supabase-mirror/people");
+const paymentsMirror = require("./supabase-mirror/payments-assessments");
 const { getVersion, normalizeAnswers, scoreVersion } = require("./executive-signature-versions");
 
 const SCHEMA_VERSION = 1;
@@ -73,6 +76,15 @@ function validateConsent(input) {
   return { noticeVersion, assessmentProcessing: true, marketing: consent.marketing === true };
 }
 
+// The people row behind a customer: looked up by its Firestore customer path (stable across an email change),
+// else derived from the customer's primary email the way the people mirror derives it. Mirror hook only.
+async function mirrorPersonId(mirror, customerId, customer) {
+  const found = await mirror.select("people", `select=id&legacy_firestore_id=eq.${encodeURIComponent(`customers/${customerId}`)}&limit=1`, { label: "assessment persistence" });
+  if (found && found.ok && Array.isArray(found.rows) && found.rows[0] && found.rows[0].id) return found.rows[0].id;
+  const email = peopleMirror.normalizeEmail(customer && customer.data && customer.data.primaryEmail);
+  return email ? peopleMirror.uuidFor(`person:${email}`) : null;
+}
+
 function createAssessmentPersistenceService({ db, FieldValue }) {
   if (!db || !FieldValue) throw new Error("Assessment persistence service requires Firestore and FieldValue.");
 
@@ -128,7 +140,10 @@ function createAssessmentPersistenceService({ db, FieldValue }) {
       parts.push({ ref: attemptRef.collection("responseParts").doc(), answers: partAnswers });
     }
 
-    return db.runTransaction(async (transaction) => {
+    let recorded = null;
+    const result = await db.runTransaction(async (rawTransaction) => {
+      recorded = newWriteLog();
+      const transaction = recordTransaction(rawTransaction, recorded);
       const requestSnap = await transaction.get(requestRef);
       if (requestSnap.exists) return { ...(requestSnap.data().result || {}), idempotentReplay: true };
       const entitlementSnap = await transaction.get(entitlementRef);
@@ -231,6 +246,23 @@ function createAssessmentPersistenceService({ db, FieldValue }) {
         status: "completed", result: response, createdAt: FieldValue.serverTimestamp(), completedAt: FieldValue.serverTimestamp() });
       return { ...response, idempotentReplay: false };
     });
+    if (recorded && result && result.idempotentReplay === false) {
+      // Supabase mirror (off unless SUPABASE_MIRROR=on)
+      await mirrorRuntime.settle("assessment persistence", async (mirror) => {
+        const customer = documentAtPath(recorded, customerRef.path);
+        const personId = await mirrorPersonId(mirror, customerId, customer);
+        const writes = recorded.writes.map(({ path, data }) => ({ path, data }));
+        const consentEvents = consentRefs.map((ref) => documentAfter(recorded, ref)).filter(Boolean);
+        const entitlement = documentAfter(recorded, entitlementRef);
+        const counters = entitlement && entitlement.data || {};
+        await peopleMirror.mirrorConsentEvents(mirror, consentEvents, { related: customer ? { customer } : {} });
+        await peopleMirror.mirrorEntitlementCounters(mirror, { entitlementId, attemptsCompleted: counters.attemptsCompleted,
+          retakesUsed: counters.retakesUsed, reportAvailable: counters.reportAvailable });
+        if (counters.status === "consumed") await peopleMirror.mirrorEntitlementStatusChange(mirror, { entitlementId, status: "consumed" });
+        await paymentsMirror.mirrorAssessmentPersistence(mirror, writes, { personIds: personId ? { [customerId]: personId } : {} });
+      });
+    }
+    return result;
   }
 
   return { persistCompletedAssessment };

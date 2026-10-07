@@ -22,12 +22,28 @@
 //     Google Group / welcome email follow-up stays a manual step for now,
 //     flagged on the audit event so it is easy to find and finish later.
 
+const mirrorRuntime = require("./supabase-mirror/runtime");
+const peopleMirror = require("./supabase-mirror/people");
+const paymentsMirror = require("./supabase-mirror/payments-assessments");
+
 const PROGRAM_IDS = new Set(["tsa", "executive-signature"]);
 
 const DEFAULT_PRICES = Object.freeze({
   tsa: Object.freeze({ amountCents: 19900, currency: "usd", label: "Think, Speak, Act (self-guided)" }),
   "executive-signature": Object.freeze({ amountCents: 4900, currency: "usd", label: "Executive Signature full report" })
 });
+
+// The people row behind a purchaser: by Firestore customer path when there is a customer, else by email, else the id
+// the people mirror would derive. Mirror hook only; never returned or logged.
+async function mirrorPersonId(mirror, customerId, email) {
+  const lookup = async (filter) => {
+    const found = await mirror.select("people", `select=id&${filter}&limit=1`, { label: "checkout session completed" });
+    return found && found.ok && Array.isArray(found.rows) && found.rows[0] && found.rows[0].id ? found.rows[0].id : null;
+  };
+  const byCustomer = customerId ? await lookup(`legacy_firestore_id=eq.${encodeURIComponent(`customers/${customerId}`)}`) : null;
+  const found = byCustomer || await lookup(`primary_email=eq.${encodeURIComponent(email)}`);
+  return found || peopleMirror.uuidFor(`person:${email}`);
+}
 
 function createPaymentsService({ db, FieldValue, customerProgramService }) {
   async function getSettings() {
@@ -64,12 +80,16 @@ function createPaymentsService({ db, FieldValue, customerProgramService }) {
       cancel_url: cancelUrl
     });
 
-    await db.collection("auditEvents").add({
+    const createdAudit = {
       action: "checkout_session_created",
       program,
       sessionId: session.id,
       createdAt: FieldValue.serverTimestamp()
-    });
+    };
+    const createdAuditRef = await db.collection("auditEvents").add(createdAudit);
+    // Supabase mirror (off unless SUPABASE_MIRROR=on)
+    await mirrorRuntime.settle("checkout session created", (mirror) =>
+      paymentsMirror.mirrorCheckoutSessionCreated(mirror, { id: createdAuditRef && createdAuditRef.id, data: createdAudit }, {}));
 
     return { url: session.url, sessionId: session.id };
   }
@@ -87,6 +107,9 @@ function createPaymentsService({ db, FieldValue, customerProgramService }) {
     if (!PROGRAM_IDS.has(program)) throw new Error("Completed checkout session is missing a recognized program.");
     if (!email) throw new Error("Completed checkout session has no customer email.");
 
+    let identityCustomerId = null;
+    let memberData = null;
+    let memberBefore = null;
     if (program === "executive-signature") {
       const identity = await customerProgramService.resolveCustomerIdentity({
         email,
@@ -96,6 +119,7 @@ function createPaymentsService({ db, FieldValue, customerProgramService }) {
         actor: { actorType: "service", actorId: "stripeWebhook", actorRole: "trusted_service" }
       });
       if (!identity.ok) throw new Error("This email needs identity review before access can be granted.");
+      identityCustomerId = identity.customerId;
       await customerProgramService.grantEntitlement({
         customerId: identity.customerId,
         programId: "executive-signature",
@@ -111,25 +135,42 @@ function createPaymentsService({ db, FieldValue, customerProgramService }) {
     } else {
       const memberRef = db.collection("authorized_members").doc(email);
       const existing = await memberRef.get();
-      await memberRef.set({
+      memberBefore = existing;
+      memberData = {
         email,
         role: existing.exists ? (existing.data() || {}).role || "member" : "member",
         source: "stripe_self_guided_purchase",
         stripeSessionId: sessionId,
         updatedAt: FieldValue.serverTimestamp(),
         ...(existing.exists ? {} : { addedAt: FieldValue.serverTimestamp(), googleGroupAdded: false })
-      }, { merge: true });
+      };
+      await memberRef.set(memberData, { merge: true });
     }
 
-    await db.collection("auditEvents").add({
+    const completedAudit = {
       action: "checkout_session_completed",
       program,
       email,
       sessionId,
       note: program === "tsa" ? "Google Group sync and welcome email are not automated yet; follow up manually." : null,
       createdAt: FieldValue.serverTimestamp()
+    };
+    const completedAuditRef = await db.collection("auditEvents").add(completedAudit);
+    const processedData = { program, email, processedAt: FieldValue.serverTimestamp() };
+    await processedRef.set(processedData);
+
+    // Supabase mirror (off unless SUPABASE_MIRROR=on)
+    await mirrorRuntime.settle("checkout session completed", async (mirror) => {
+      if (memberData) {
+        const before = memberBefore && memberBefore.exists ? (memberBefore.data() || {}) : {};
+        await peopleMirror.mirrorMemberWrite(mirror, { id: email, data: Object.assign({}, before, memberData) }, {});
+      }
+      const personId = await mirrorPersonId(mirror, identityCustomerId, email);
+      await paymentsMirror.mirrorCheckoutSessionCompleted(mirror, {
+        audit: { id: completedAuditRef && completedAuditRef.id, data: completedAudit },
+        processed: { id: sessionId, data: processedData }
+      }, personId ? { personId } : {});
     });
-    await processedRef.set({ program, email, processedAt: FieldValue.serverTimestamp() });
 
     return { ok: true, alreadyProcessed: false, program, email };
   }

@@ -12,6 +12,10 @@ const { createAssessmentPersistenceService } = require("./assessment-persistence
 const { getVersion: getExecutiveSignatureVersion, normalizeAnswers: normalizeExecutiveSignatureAnswers } = require("./executive-signature-versions");
 const { createPaymentsService } = require("./payments-service");
 const Stripe = require("stripe");
+const mirrorRuntime = require("./supabase-mirror/runtime");
+const credentialsMirror = require("./supabase-mirror/credentials");
+const organizationsMirror = require("./supabase-mirror/organizations");
+const peopleMirror = require("./supabase-mirror/people");
 
 admin.initializeApp();
 const customerProgramService = createCustomerProgramService({
@@ -400,7 +404,9 @@ async function issueCredentialForUser(uid, email, fallbackName, options = {}) {
   const issuanceRef = db.collection("credential_issuance").doc(uid + "_" + CREDENTIAL_PROGRAM_VERSION);
   const recipientName = String(memberSnap.data().name || fallbackName || normalizedEmail.split("@")[0]).trim().slice(0, 160);
   const issuedAt = evidence.latest || admin.firestore.Timestamp.now();
+  let createdIssuance = null;
   const credential = await db.runTransaction(async (transaction) => {
+    createdIssuance = null;
     const existing = await transaction.get(issuanceRef);
     if (existing.exists) {
       const data = existing.data() || {};
@@ -421,14 +427,21 @@ async function issueCredentialForUser(uid, email, fallbackName, options = {}) {
       verificationUrl: "https://theuntaughtlessons.com/verify/?id=" + encodeURIComponent(credentialId)
     };
     transaction.set(publicRef, publicCredential);
-    transaction.set(issuanceRef, {
+    const issuanceDoc = {
       userId: uid, email: normalizedEmail, credentialId, programId: CREDENTIAL_PROGRAM_ID,
       credentialCode: CREDENTIAL_CODE, programVersion: CREDENTIAL_PROGRAM_VERSION,
       completionVerifiedAt: admin.firestore.FieldValue.serverTimestamp(), issuedAt, status: "active",
       requiredExercises: REQUIRED_EXERCISES, createdAt: admin.firestore.FieldValue.serverTimestamp()
-    });
+    };
+    transaction.set(issuanceRef, issuanceDoc);
+    createdIssuance = issuanceDoc;
     return publicCredential;
   });
+  // Supabase mirror (off unless SUPABASE_MIRROR=on)
+  if (createdIssuance) await mirrorRuntime.settle("credential issue", (mirror) => credentialsMirror.mirrorIssuedCredential(mirror, {
+    credential: { id: credential.credentialId, data: credential },
+    issuance: { id: uid + "_" + CREDENTIAL_PROGRAM_VERSION, data: createdIssuance }
+  }, {}));
   return { ok: true, issued: true, credential: { ...credential, issuedAt: timestampToIso(credential.issuedAt) } };
 }
 
@@ -862,8 +875,7 @@ exports.submitOrganizationRosterDraft = onCall({ timeoutSeconds: 30, memory: "25
   const now = admin.firestore.FieldValue.serverTimestamp();
   const organizationRef = db.collection("organizations").doc(organizationId);
   const draftRef = organizationRef.collection("roster_drafts").doc();
-  const batch = db.batch();
-  batch.set(draftRef, {
+  const draftDoc = {
     organizationId,
     cohortId,
     rows,
@@ -876,8 +888,9 @@ exports.submitOrganizationRosterDraft = onCall({ timeoutSeconds: 30, memory: "25
     reviewedAt: null,
     reviewNote: "",
     updatedAt: now
-  });
-  batch.set(organizationRef.collection("access_audit").doc(), {
+  };
+  const auditRef = organizationRef.collection("access_audit").doc();
+  const auditEntry = {
     organizationId,
     action: "roster_draft_submitted",
     targetEmail: caller.email,
@@ -886,8 +899,15 @@ exports.submitOrganizationRosterDraft = onCall({ timeoutSeconds: 30, memory: "25
     actorUid: caller.uid,
     actorEmail: caller.email,
     occurredAt: now
-  });
+  };
+  const batch = db.batch();
+  batch.set(draftRef, draftDoc);
+  batch.set(auditRef, auditEntry);
   await batch.commit();
+  // Supabase mirror (off unless SUPABASE_MIRROR=on)
+  await mirrorRuntime.settle("roster draft submit", (mirror) => organizationsMirror.mirrorRosterDraft(mirror, {
+    organizationId, draftId: draftRef.id, draft: draftDoc, organization, audit: { id: auditRef.id, doc: auditEntry }, now: new Date().toISOString()
+  }));
   return { ok: true, draftId: draftRef.id };
 });
 
@@ -909,16 +929,16 @@ exports.reviewOrganizationRosterDraft = onCall({ timeoutSeconds: 30, memory: "25
   if (draft.status !== "submitted") throw new HttpsError("failed-precondition", "This roster proposal has already been reviewed.");
   const nextStatus = action === "approve" ? "approved" : "rejected";
   const now = admin.firestore.FieldValue.serverTimestamp();
-  const batch = db.batch();
-  batch.set(draftRef, {
+  const reviewFields = {
     status: nextStatus,
     reviewedByUid: caller.uid,
     reviewedByEmail: caller.email,
     reviewedAt: now,
     reviewNote,
     updatedAt: now
-  }, { merge: true });
-  batch.set(organizationRef.collection("access_audit").doc(), {
+  };
+  const auditRef = organizationRef.collection("access_audit").doc();
+  const auditEntry = {
     organizationId,
     action: action === "approve" ? "roster_draft_approved" : "roster_draft_rejected",
     targetEmail: String(draft.submittedByEmail || ""),
@@ -927,8 +947,15 @@ exports.reviewOrganizationRosterDraft = onCall({ timeoutSeconds: 30, memory: "25
     actorUid: caller.uid,
     actorEmail: caller.email,
     occurredAt: now
-  });
+  };
+  const batch = db.batch();
+  batch.set(draftRef, reviewFields, { merge: true });
+  batch.set(auditRef, auditEntry);
   await batch.commit();
+  // Supabase mirror (off unless SUPABASE_MIRROR=on)
+  await mirrorRuntime.settle("roster draft review", (mirror) => organizationsMirror.mirrorRosterDraft(mirror, {
+    organizationId, draftId, draft: { ...draft, ...reviewFields }, audit: { id: auditRef.id, doc: auditEntry }, now: new Date().toISOString()
+  }));
   return {
     ok: true,
     action: nextStatus,
@@ -966,35 +993,42 @@ exports.saveOrganizationDefinition = onCall({ timeoutSeconds: 30, memory: "256Mi
     const { contactName, contactEmail } = normalizeOrganizationContact(input);
     const { weeklyReportOptIn } = normalizeOrganizationReportSettings(input);
     const organizationRef = db.collection("organizations").doc(organizationId);
+    const organizationDoc = {
+      id: organizationId,
+      name,
+      status: "active",
+      contactName,
+      contactEmail,
+      weeklyReportOptIn,
+      createdAt: now,
+      createdByUid: caller.uid,
+      createdByEmail: caller.email,
+      updatedAt: now,
+      updatedByUid: caller.uid,
+      updatedByEmail: caller.email
+    };
+    const auditRef = organizationRef.collection("access_audit").doc();
+    const auditEntry = {
+      organizationId,
+      action: "organization_created",
+      previousName: "",
+      nextName: name,
+      previousStatus: "",
+      nextStatus: "active",
+      actorUid: caller.uid,
+      actorEmail: caller.email,
+      occurredAt: now
+    };
     await db.runTransaction(async (transaction) => {
       const existing = await transaction.get(organizationRef);
       if (existing.exists) throw new HttpsError("already-exists", "An organization with this ID already exists. Rename or reactivate it instead.");
-      transaction.set(organizationRef, {
-        id: organizationId,
-        name,
-        status: "active",
-        contactName,
-        contactEmail,
-        weeklyReportOptIn,
-        createdAt: now,
-        createdByUid: caller.uid,
-        createdByEmail: caller.email,
-        updatedAt: now,
-        updatedByUid: caller.uid,
-        updatedByEmail: caller.email
-      });
-      transaction.set(organizationRef.collection("access_audit").doc(), {
-        organizationId,
-        action: "organization_created",
-        previousName: "",
-        nextName: name,
-        previousStatus: "",
-        nextStatus: "active",
-        actorUid: caller.uid,
-        actorEmail: caller.email,
-        occurredAt: now
-      });
+      transaction.set(organizationRef, organizationDoc);
+      transaction.set(auditRef, auditEntry);
     });
+    // Supabase mirror (off unless SUPABASE_MIRROR=on)
+    await mirrorRuntime.settle("organization create", (mirror) => organizationsMirror.mirrorOrganizationChange(mirror, {
+      organizationId, organization: organizationDoc, audit: { id: auditRef.id, doc: auditEntry }, now: new Date().toISOString()
+    }));
     return { ok: true, action: "organization_created", organization: { id: organizationId, name, status: "active", contactName, contactEmail, weeklyReportOptIn, cohortIds: [] } };
   }
 
@@ -1010,9 +1044,9 @@ exports.saveOrganizationDefinition = onCall({ timeoutSeconds: 30, memory: "256Mi
     if (!name) throw new HttpsError("invalid-argument", "Enter an organization name.");
     const { contactName, contactEmail } = normalizeOrganizationContact(input);
     const { weeklyReportOptIn } = normalizeOrganizationReportSettings(input);
-    const batch = db.batch();
-    batch.set(organizationRef, { name, contactName, contactEmail, weeklyReportOptIn, updatedAt: now, updatedByUid: caller.uid, updatedByEmail: caller.email }, { merge: true });
-    batch.set(organizationRef.collection("access_audit").doc(), {
+    const changes = { name, contactName, contactEmail, weeklyReportOptIn, updatedAt: now, updatedByUid: caller.uid, updatedByEmail: caller.email };
+    const auditRef = organizationRef.collection("access_audit").doc();
+    const auditEntry = {
       organizationId,
       action: "organization_renamed",
       previousName: String(prior.name || ""),
@@ -1022,17 +1056,24 @@ exports.saveOrganizationDefinition = onCall({ timeoutSeconds: 30, memory: "256Mi
       actorUid: caller.uid,
       actorEmail: caller.email,
       occurredAt: now
-    });
+    };
+    const batch = db.batch();
+    batch.set(organizationRef, changes, { merge: true });
+    batch.set(auditRef, auditEntry);
     await batch.commit();
+    // Supabase mirror (off unless SUPABASE_MIRROR=on)
+    await mirrorRuntime.settle("organization rename", (mirror) => organizationsMirror.mirrorOrganizationChange(mirror, {
+      organizationId, organization: { ...prior, id: organizationId, ...changes }, audit: { id: auditRef.id, doc: auditEntry }, now: new Date().toISOString()
+    }));
     return { ok: true, action: "organization_renamed", organization: { id: organizationId, name, status: String(prior.status || "active"), contactName, contactEmail, weeklyReportOptIn } };
   }
 
   const nextStatus = action === "archive" ? "archived" : "active";
   const previousStatus = String(prior.status || "active").trim().toLowerCase();
   if (previousStatus === nextStatus) throw new HttpsError("failed-precondition", "This organization is already " + nextStatus + ".");
-  const batch = db.batch();
-  batch.set(organizationRef, { status: nextStatus, updatedAt: now, updatedByUid: caller.uid, updatedByEmail: caller.email }, { merge: true });
-  batch.set(organizationRef.collection("access_audit").doc(), {
+  const changes = { status: nextStatus, updatedAt: now, updatedByUid: caller.uid, updatedByEmail: caller.email };
+  const auditRef = organizationRef.collection("access_audit").doc();
+  const auditEntry = {
     organizationId,
     action: action === "archive" ? "organization_archived" : "organization_reactivated",
     previousName: "",
@@ -1042,8 +1083,15 @@ exports.saveOrganizationDefinition = onCall({ timeoutSeconds: 30, memory: "256Mi
     actorUid: caller.uid,
     actorEmail: caller.email,
     occurredAt: now
-  });
+  };
+  const batch = db.batch();
+  batch.set(organizationRef, changes, { merge: true });
+  batch.set(auditRef, auditEntry);
   await batch.commit();
+  // Supabase mirror (off unless SUPABASE_MIRROR=on)
+  await mirrorRuntime.settle("organization status", (mirror) => organizationsMirror.mirrorOrganizationChange(mirror, {
+    organizationId, organization: { ...prior, id: organizationId, ...changes }, audit: { id: auditRef.id, doc: auditEntry }, now: new Date().toISOString()
+  }));
   return { ok: true, action: action === "archive" ? "organization_archived" : "organization_reactivated", organization: { id: organizationId, name: String(prior.name || ""), status: nextStatus } };
 });
 
@@ -1099,9 +1147,7 @@ exports.saveOrganizationAccessMember = onCall({ timeoutSeconds: 30, memory: "256
     membership.createdByEmail = caller.email;
   }
   const auditRef = organizationRef.collection("access_audit").doc();
-  const batch = db.batch();
-  batch.set(memberRef, membership, { merge: true });
-  batch.set(auditRef, {
+  const auditEntry = {
     organizationId: normalized.organizationId,
     membershipUid: userRecord.uid,
     targetEmail: normalized.email,
@@ -1116,8 +1162,16 @@ exports.saveOrganizationAccessMember = onCall({ timeoutSeconds: 30, memory: "256
     actorUid: caller.uid,
     actorEmail: caller.email,
     occurredAt: now
-  });
+  };
+  const batch = db.batch();
+  batch.set(memberRef, membership, { merge: true });
+  batch.set(auditRef, auditEntry);
   await batch.commit();
+  // Supabase mirror (off unless SUPABASE_MIRROR=on)
+  await mirrorRuntime.settle("organization member", (mirror) => organizationsMirror.mirrorOrganizationMember(mirror, {
+    organizationId: normalized.organizationId, uid: userRecord.uid, membership, prior: priorSnap.exists ? prior : null,
+    organization: definitions[normalized.organizationId], audit: { id: auditRef.id, doc: auditEntry }, now: new Date().toISOString()
+  }));
   return {
     ok: true,
     action,
@@ -1282,6 +1336,8 @@ exports.manageVerifiedCredential = onCall({ timeoutSeconds: 30, memory: "256MiB"
     const recipientName = String(input.recipientName || "").trim().slice(0, 160);
     if (!recipientName) throw new HttpsError("invalid-argument", "Enter the recipient's name.");
     await ref.update({ recipientName, correctedAt: admin.firestore.FieldValue.serverTimestamp() });
+    // Supabase mirror (off unless SUPABASE_MIRROR=on)
+    await mirrorRuntime.settle("credential name", (mirror) => credentialsMirror.mirrorCredentialName(mirror, { credentialId, recipientName }));
   } else if (action === "reissue") {
     const oldData = snap.data() || {};
     let replacementId;
@@ -1301,19 +1357,28 @@ exports.manageVerifiedCredential = onCall({ timeoutSeconds: 30, memory: "256MiB"
     delete replacement.revokedAt;
     delete replacement.revokedBy;
     const issuanceQuery = await admin.firestore().collection("credential_issuance").where("credentialId", "==", credentialId).limit(1).get();
+    const reissuedIssuance = issuanceQuery.empty ? null : { credentialId: replacementId, status: "active", reissuedAt: admin.firestore.FieldValue.serverTimestamp() };
     const batch = admin.firestore().batch();
     batch.set(replacementRef, replacement);
     batch.update(ref, { status: "replaced", replacementCredentialId: replacementId, replacedAt: admin.firestore.FieldValue.serverTimestamp() });
-    if (!issuanceQuery.empty) batch.update(issuanceQuery.docs[0].ref, { credentialId: replacementId, status: "active", reissuedAt: admin.firestore.FieldValue.serverTimestamp() });
+    if (!issuanceQuery.empty) batch.update(issuanceQuery.docs[0].ref, reissuedIssuance);
     await batch.commit();
     const replacementSnap = await replacementRef.get();
     const replacementData = replacementSnap.data() || {};
+    // Supabase mirror (off unless SUPABASE_MIRROR=on)
+    await mirrorRuntime.settle("credential reissue", (mirror) => credentialsMirror.mirrorCredentialReissue(mirror, {
+      oldId: credentialId,
+      replacement: { id: replacementId, data: replacementData },
+      issuance: reissuedIssuance ? { id: issuanceQuery.docs[0].id, data: { ...issuanceQuery.docs[0].data(), ...reissuedIssuance } } : null
+    }, {}));
     return { ok: true, found: true, credential: { ...replacementData, issuedAt: timestampToIso(replacementData.issuedAt) }, replacedCredentialId: credentialId };
   } else if (action !== "lookup") {
     throw new HttpsError("invalid-argument", "Unsupported credential action.");
   }
   const current = await ref.get();
   const data = current.data() || {};
+  // Supabase mirror (off unless SUPABASE_MIRROR=on)
+  if (action === "revoke" || action === "reactivate") await mirrorRuntime.settle("credential status", (mirror) => credentialsMirror.mirrorCredentialStatus(mirror, { credentialId, publicData: data }, {}));
   return { ok: true, found: true, credential: { ...data, issuedAt: timestampToIso(data.issuedAt) } };
 });
 
@@ -1482,23 +1547,33 @@ exports.sendWeeklyOrganizationReports = onSchedule({
         emailFormat: "simple",
         source: "scheduled-weekly-report"
       }, "scheduled-weekly-report");
-      await logRef.set({
+      const sentEntry = {
         organizationId: organization.id,
         sentAt: admin.firestore.FieldValue.serverTimestamp(),
         cohortIds: organization.cohortIds,
         recipientEmail: organization.contactEmail,
         status: "sent"
-      });
+      };
+      await logRef.set(sentEntry);
+      // Supabase mirror (off unless SUPABASE_MIRROR=on)
+      await mirrorRuntime.settle("weekly report log", (mirror) => organizationsMirror.mirrorWeeklyReportLog(mirror, {
+        organizationId: organization.id, weekId, entry: sentEntry, organization, now: new Date().toISOString()
+      }), { waitMs: 3000 });
     } catch (error) {
       console.error("Weekly org report failed", { organizationId: organization.id, error: error && error.message });
-      await logRef.set({
+      const failedEntry = {
         organizationId: organization.id,
         sentAt: admin.firestore.FieldValue.serverTimestamp(),
         cohortIds: organization.cohortIds,
         recipientEmail: organization.contactEmail,
         status: "failed",
         error: String((error && error.message) || error)
-      });
+      };
+      await logRef.set(failedEntry);
+      // Supabase mirror (off unless SUPABASE_MIRROR=on)
+      await mirrorRuntime.settle("weekly report log", (mirror) => organizationsMirror.mirrorWeeklyReportLog(mirror, {
+        organizationId: organization.id, weekId, entry: failedEntry, organization, now: new Date().toISOString()
+      }), { waitMs: 3000 });
     }
   }
 });
@@ -1544,6 +1619,8 @@ async function removeMemberHandler(request) {
 
     await db.collection("authorized_members").doc(targetEmail).delete();
     if (uid) await db.collection("users").doc(uid).delete();
+    // Supabase mirror (off unless SUPABASE_MIRROR=on)
+    await mirrorRuntime.settle("member removal", (mirror) => peopleMirror.mirrorMemberRemoval(mirror, { email: targetEmail, uid }, { now: new Date().toISOString() }));
 
     await db.collection("auditEvents").add({
       schemaVersion: 1,
@@ -1743,6 +1820,8 @@ async function recordReadinessCompletionHandler(request) {
     tierEntry.attemptId = persisted.attemptId;
     tierEntry.resultChecksum = persisted.resultChecksum;
     await userRef.set(update, { merge: true });
+    // Supabase mirror (off unless SUPABASE_MIRROR=on)
+    await mirrorRuntime.settle("readiness user", (mirror) => peopleMirror.mirrorUserWrite(mirror, { id: userRecord.uid, data: update }, { now: new Date().toISOString() }));
 
     return { ok: true, attemptId: persisted.attemptId };
   } catch (error) {

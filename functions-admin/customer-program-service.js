@@ -1,6 +1,9 @@
 "use strict";
 
 const crypto = require("crypto");
+const mirrorRuntime = require("./supabase-mirror/runtime");
+const peopleMirror = require("./supabase-mirror/people");
+const paymentsMirror = require("./supabase-mirror/payments-assessments");
 
 const SCHEMA_VERSION = 1;
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -104,6 +107,58 @@ function publicIdentityResult(result) {
   };
 }
 
+// Plain collecting for the Supabase mirror: wraps a Firestore transaction so the snapshots it read and the
+// documents it wrote can be handed to the mirror after the commit. Every call is passed straight through with
+// the same arguments and the same return value; nothing here changes what the transaction does.
+function newWriteLog() {
+  return { writes: [], snaps: new Map() };
+}
+
+function recordTransaction(transaction, log) {
+  return {
+    async get(ref, ...rest) {
+      const snap = await transaction.get(ref, ...rest);
+      log.snaps.set(ref && ref.path, snap);
+      return snap;
+    },
+    create(ref, data, ...rest) {
+      log.writes.push({ path: ref && ref.path, data, op: "create", merge: false });
+      return transaction.create(ref, data, ...rest);
+    },
+    set(ref, data, options, ...rest) {
+      log.writes.push({ path: ref && ref.path, data, op: "set", merge: Boolean(options && options.merge) });
+      return transaction.set(ref, data, options, ...rest);
+    },
+    update(ref, data, ...rest) {
+      log.writes.push({ path: ref && ref.path, data, op: "update", merge: true });
+      return transaction.update(ref, data, ...rest);
+    }
+  };
+}
+
+// The document as the transaction left it: what it read, then every write to the same path in order.
+// Returns { id, data } or null when the transaction neither read nor wrote it. Used by mirror hooks only.
+function documentAtPath(log, path) {
+  if (!log || !path) return null;
+  const snap = log.snaps.get(path);
+  let data = snap && snap.exists ? Object.assign({}, snap.data() || {}) : null;
+  log.writes.forEach((write) => {
+    if (write.path !== path) return;
+    data = write.merge && data ? Object.assign(data, write.data) : Object.assign({}, write.data);
+  });
+  return data ? { id: String(path).split("/").pop(), data } : null;
+}
+
+function documentAfter(log, ref) {
+  return documentAtPath(log, ref && ref.path);
+}
+
+// The first document written under a collection (for documents whose reference only exists inside the transaction).
+function firstWrittenDocument(log, collection) {
+  const write = log && log.writes.find((item) => String(item.path || "").startsWith(`${collection}/`));
+  return write ? documentAtPath(log, write.path) : null;
+}
+
 function createCustomerProgramService({ db, FieldValue }) {
   if (!db || !FieldValue) throw new Error("Customer program service requires Firestore and FieldValue.");
 
@@ -119,7 +174,10 @@ function createCustomerProgramService({ db, FieldValue }) {
     const proposedCustomerRef = db.collection("customers").doc();
     const eventRef = auditRef(db);
 
-    const result = await db.runTransaction(async (transaction) => {
+    let recorded = null;
+    const result = await db.runTransaction(async (rawTransaction) => {
+      recorded = newWriteLog();
+      const transaction = recordTransaction(rawTransaction, recorded);
       const requestSnap = await transaction.get(requestRef);
       if (requestSnap.exists) {
         const stored = requestSnap.data().result || {};
@@ -209,6 +267,21 @@ function createCustomerProgramService({ db, FieldValue }) {
         authUidHash: authUid ? sha256(authUid) : null, createdAt: FieldValue.serverTimestamp() });
       return response;
     });
+    if (recorded && result.idempotentReplay !== true) {
+      // Supabase mirror (off unless SUPABASE_MIRROR=on)
+      await mirrorRuntime.settle("customer identity resolution", async (mirror) => {
+        if (result.status === "manual_review") {
+          await peopleMirror.mirrorDuplicateCandidate(mirror, firstWrittenDocument(recorded, "duplicateCandidates"), {});
+        } else {
+          await peopleMirror.mirrorIdentityResolution(mirror, {
+            customer: firstWrittenDocument(recorded, "customers"),
+            authLink: authRef ? documentAfter(recorded, authRef) : null,
+            emailClaim: documentAfter(recorded, claimRef)
+          }, {});
+        }
+        await paymentsMirror.mirrorServiceRequest(mirror, documentAfter(recorded, requestRef), {});
+      });
+    }
     return publicIdentityResult(result);
   }
 
@@ -238,7 +311,10 @@ function createCustomerProgramService({ db, FieldValue }) {
     const customerRef = db.collection("customers").doc(customerId);
     const eventRef = auditRef(db);
 
-    return db.runTransaction(async (transaction) => {
+    let recorded = null;
+    const result = await db.runTransaction(async (rawTransaction) => {
+      recorded = newWriteLog();
+      const transaction = recordTransaction(rawTransaction, recorded);
       const requestSnap = await transaction.get(requestRef);
       if (requestSnap.exists) return { ...(requestSnap.data().result || {}), idempotentReplay: true };
       const customerSnap = await transaction.get(customerRef);
@@ -271,6 +347,15 @@ function createCustomerProgramService({ db, FieldValue }) {
         result: response, createdAt: FieldValue.serverTimestamp(), completedAt: FieldValue.serverTimestamp() });
       return response;
     });
+    if (recorded && result.idempotentReplay !== true) {
+      // Supabase mirror (off unless SUPABASE_MIRROR=on)
+      await mirrorRuntime.settle("entitlement grant", async (mirror) => {
+        const customer = documentAfter(recorded, customerRef);
+        await peopleMirror.mirrorEntitlementWrite(mirror, documentAfter(recorded, entitlementRef), customer ? { related: { customer } } : {});
+        await paymentsMirror.mirrorServiceRequest(mirror, documentAfter(recorded, requestRef), {});
+      });
+    }
+    return result;
   }
 
   async function changeEntitlementStatus(input) {
@@ -287,7 +372,10 @@ function createCustomerProgramService({ db, FieldValue }) {
     const allowed = { pending: new Set(["active", "revoked"]), active: new Set(["expired", "revoked", "refunded"]),
       expired: new Set(["active"]), revoked: new Set(["active"]), refunded: new Set(), consumed: new Set() };
 
-    return db.runTransaction(async (transaction) => {
+    let recorded = null;
+    const result = await db.runTransaction(async (rawTransaction) => {
+      recorded = newWriteLog();
+      const transaction = recordTransaction(rawTransaction, recorded);
       const requestSnap = await transaction.get(requestRef);
       if (requestSnap.exists) return { ...(requestSnap.data().result || {}), idempotentReplay: true };
       const entitlementSnap = await transaction.get(entitlementRef);
@@ -305,6 +393,14 @@ function createCustomerProgramService({ db, FieldValue }) {
         result: response, createdAt: FieldValue.serverTimestamp(), completedAt: FieldValue.serverTimestamp() });
       return response;
     });
+    if (recorded && result.idempotentReplay !== true) {
+      // Supabase mirror (off unless SUPABASE_MIRROR=on)
+      await mirrorRuntime.settle("entitlement status change", async (mirror) => {
+        await peopleMirror.mirrorEntitlementStatusChange(mirror, { entitlementId, status });
+        await paymentsMirror.mirrorServiceRequest(mirror, documentAfter(recorded, requestRef), {});
+      });
+    }
+    return result;
   }
 
   async function changeCustomerEmail(input) {
@@ -323,7 +419,10 @@ function createCustomerProgramService({ db, FieldValue }) {
     const customerRef = db.collection("customers").doc(customerId);
     const eventRef = auditRef(db);
 
-    const result = await db.runTransaction(async (transaction) => {
+    let recorded = null;
+    const result = await db.runTransaction(async (rawTransaction) => {
+      recorded = newWriteLog();
+      const transaction = recordTransaction(rawTransaction, recorded);
       const requestSnap = await transaction.get(requestRef);
       if (requestSnap.exists) return { ...(requestSnap.data().result || {}), idempotentReplay: true };
       const authSnap = await transaction.get(authRef);
@@ -367,6 +466,22 @@ function createCustomerProgramService({ db, FieldValue }) {
         result: response, createdAt: FieldValue.serverTimestamp(), completedAt: FieldValue.serverTimestamp() });
       return response;
     });
+    if (recorded && result.idempotentReplay !== true) {
+      // Supabase mirror (off unless SUPABASE_MIRROR=on)
+      await mirrorRuntime.settle("customer email change", async (mirror) => {
+        if (result.status === "manual_review") {
+          await peopleMirror.mirrorDuplicateCandidate(mirror, firstWrittenDocument(recorded, "duplicateCandidates"), {});
+        } else {
+          await peopleMirror.mirrorCustomerEmailChange(mirror, {
+            customer: documentAfter(recorded, customerRef),
+            previousEmail: currentEmail,
+            oldClaim: documentAfter(recorded, currentClaimRef),
+            newClaim: documentAfter(recorded, newClaimRef)
+          }, {});
+        }
+        await paymentsMirror.mirrorServiceRequest(mirror, documentAfter(recorded, requestRef), {});
+      });
+    }
     return result;
   }
 
@@ -842,5 +957,9 @@ module.exports = {
   createCustomerProgramService,
   normalizeEmail,
   normalizeSearchName,
-  sha256
+  sha256,
+  newWriteLog,
+  recordTransaction,
+  documentAtPath,
+  documentAfter
 };
