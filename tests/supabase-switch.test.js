@@ -192,7 +192,7 @@ const READS = ['getMemberWorkspaceProgress', 'getExerciseWork', 'getExerciseAtte
 async function observe(harness, run, options = {}) {
   harness.reset({ keepStorage: options.keepStorage === true });
   // A browser that has already been decided (utl_data_gate_v 2) unless the test is about a fresh browser.
-  if (options.fresh !== true) harness.storage.setItem('utl_data_gate_v', '2');
+  if (options.fresh !== true) { harness.storage.setItem('utl_data_gate_v', '2'); harness.storage.setItem('utl_data_gate_for', EMAIL); }
   if (options.storage) Object.entries(options.storage).forEach(([key, value]) => harness.storage.setItem(key, value));
   harness.signIn(options.user || {});
   if (options.seed !== false) seedFirestore(harness, options.seedOptions || {});
@@ -357,7 +357,7 @@ async function check(name, fn) {
   });
 
   await check('the gate: a browser that chose ?utl_data=firebase (decided) is left alone, and an active member can be opted out', async () => {
-    const chose = await observe(harness, profile(), { storage: { utl_data_source: 'firebase', utl_data_gate_v: '2' } });
+    const chose = await observe(harness, profile(), { storage: { utl_data_source: 'firebase', utl_data_gate_v: '2', utl_data_gate_for: '*' } });
     assert.equal(chose.storage.utl_data_source, 'firebase', 'a decided firebase browser stays on firebase');
     assert.equal(chose.fetchCount, 0);
     // An older decision (no version) is checked again.
@@ -401,6 +401,26 @@ async function check(name, fn) {
     return { storage: harness.storage.snapshot(), serverReads: harness.firestoreLog().filter((call) => call.op === 'getDocFromServer') };
   };
 
+  await check('the gate: a different member signing in on the same browser is decided again; a personal choice and the same member are not', async () => {
+    // Decided for someone else (an opted out or non member account): the next member is checked and switched on.
+    const next = await observe(harness, profile(), { storage: { utl_data_source: 'firebase', utl_data_gate_v: '2', utl_data_gate_for: 'someone.else@example.test' } });
+    assert.equal(next.storage.utl_data_source, 'supabase');
+    assert.equal(next.storage.utl_data_gate_for, EMAIL);
+    // Decided for the same member as firebase (opted out): left alone, no extra request.
+    const same = await observe(harness, profile(), { storage: { utl_data_source: 'firebase', utl_data_gate_v: '2', utl_data_gate_for: EMAIL } });
+    assert.equal(same.storage.utl_data_source, 'firebase');
+    assert.equal(same.fetchCount, 0);
+    // The address parameter records a personal choice for any account.
+    harness.reset({ href: 'https://www.theuntaughtlessons.com/member-login/?utl_data=firebase' });
+    await harness.loadFirebaseModule(FIREBASE_SOURCE, 'firebase-param-for-all');
+    assert.equal(harness.storage.getItem('utl_data_gate_for'), '*');
+    harness.reset({ href: 'https://www.theuntaughtlessons.com/member-login/' });
+    // Page load: a browser decided for another account is re-read from the server once.
+    const reread = await loadFresh({ storage: { utl_data_source: 'firebase', utl_data_gate_v: '2', utl_data_gate_for: 'someone.else@example.test' } });
+    assert.equal(reread.serverReads.length, 1);
+    assert.equal(reread.storage.utl_data_source, 'supabase');
+  });
+
   await check('page load: an undecided signed in browser is decided from the server without a sign in step', async () => {
     const on = await loadFresh({ storage: {} });
     assert.equal(on.storage.utl_data_source, 'supabase');
@@ -420,7 +440,7 @@ async function check(name, fn) {
     assert.equal(anonymous.serverReads.length, 0);
     assert.equal(anonymous.storage.utl_data_source, undefined);
     assert.equal(anonymous.storage.utl_data_gate_v, undefined, 'still undecided until a member signs in');
-    const chose = await loadFresh({ storage: { utl_data_source: 'firebase', utl_data_gate_v: '2' } });
+    const chose = await loadFresh({ storage: { utl_data_source: 'firebase', utl_data_gate_v: '2', utl_data_gate_for: '*' } });
     assert.equal(chose.serverReads.length, 0);
     assert.equal(chose.storage.utl_data_source, 'firebase');
   });
@@ -667,52 +687,57 @@ async function check(name, fn) {
 
   // -- 4. supabase mode, Supabase-only writes and reads ----------------------------------
 
-  await check('supabase mode: Supabase-only writes go to Supabase with no Firestore write when Supabase answers', async () => {
-    let result = await supa('saveExerciseAttempt');
+  await check('supabase mode: the six data families are written to Firestore first, exactly as in default mode, and copied to Supabase in the background', async () => {
+    // Each call returns the Firestore result and leaves the same Firestore data as default mode.
+    const sameAsDefault = async (name, options = {}) => {
+      const defaultRun = await observe(harness, scenariosFor(current)[name], options.defaultOptions || {});
+      const result = await supa(name, options);
+      assert.equal(result.outcome.error, null, `${name} does not throw`);
+      assert.deepStrictEqual(result.outcome.value, defaultRun.outcome.value, `${name} returns the Firestore result`);
+      assert.deepStrictEqual(result.firestore, defaultRun.firestore, `${name}: the same Firestore calls as default mode`);
+      assert.deepStrictEqual(result.store, defaultRun.store, `${name}: the same Firestore data as default mode`);
+      assert.ok(defaultRun.firestore.length > 0, `${name} writes Firestore`);
+      return result;
+    };
+    let result = await sameAsDefault('saveExerciseAttempt');
     assert.deepEqual(result.outcome.value, { saved: true, attemptId: 'attempt-00000001' });
     const [attempt] = harness.rpcCalls('record_activity_attempt');
     assertSupabaseHeaders(attempt);
     assertOnlyKeys(attempt.body, RPC_ARGS.attempt, 'attempt args');
     assert.deepEqual(attempt.body, { p_activity: 'grocery-list', p_attempt_key: 'attempt-00000001', p_attempt_number: 2, p_score: 80, p_score_maximum: 100, p_duration_seconds: 300, p_content_version: 'v3' });
-    assert.equal(harness.firestoreWrites().length, 0);
 
-    result = await supa('saveExerciseDraft');
+    result = await sameAsDefault('saveExerciseDraft');
     assert.deepEqual(result.outcome.value, { saved: true });
     assert.deepEqual(harness.rpcCalls('save_activity_draft')[0].body, { p_activity: 'write-to-aiko', p_draft: DRAFT_PAYLOAD });
-    assert.equal(harness.firestoreWrites().length, 0);
 
-    result = await supa('saveExerciseSubmission');
+    result = await sameAsDefault('saveExerciseSubmission');
     assert.deepEqual(result.outcome.value, { saved: true, submissionId: 'practice-00000001' });
     const [practice] = harness.rpcCalls('record_activity_practice');
     assert.ok(practice, 'record_activity_practice called');
     assert.equal(harness.rpcCalls('record_activity_submission').length, 0, 'a practice round never completes the exercise');
     assertOnlyKeys(practice.body, RPC_ARGS.submission, 'practice args');
     assert.deepEqual(practice.body, { p_activity: 'speak-like-obama', p_submission_key: 'practice-00000001', p_attempt_number: 3, p_completed_at: '2026-10-06T09:59:00.000Z', p_duration_seconds: 120, p_response: SUBMISSION_PAYLOAD.responsePayload, p_content_version: '' });
-    assert.equal(harness.firestoreWrites().length, 0);
 
-    result = await supa('saveLearningProfileEvidence', { before: (h) => h.onFetch('POST', '/rest/v1/rpc/record_learning_evidence', { saved: true, evidenceId: 'evidence-00000001', duplicate: false }) });
-    assert.deepEqual(result.outcome.value, { saved: true, evidenceId: 'evidence-00000001' });
+    result = await sameAsDefault('saveLearningProfileEvidence', { before: (h) => h.onFetch('POST', '/rest/v1/rpc/record_learning_evidence', { saved: true, evidenceId: 'evidence-00000001', duplicate: false }) });
+    assert.equal(result.outcome.value.saved, true);
     const [evidence] = harness.rpcCalls('record_learning_evidence');
     assertOnlyKeys(evidence.body, ['p_evidence', 'p_summary'], 'evidence args');
     assertOnlyKeys(evidence.body.p_summary, ['schemaVersion', 'personality', 'learning', 'programs'], 'summary');
     assert.equal(evidence.body.p_summary.learning.dimensions.guidance.value, 'step_by_step', 'the summary comes from aggregateLearningProfileEvidence in firebase.js');
-    assert.ok(!result.firestore.some((entry) => entry.op === 'runTransaction'));
 
-    result = await supa('saveEngagementAnalytics');
+    result = await sameAsDefault('saveEngagementAnalytics');
     assert.deepEqual(result.outcome.value, { saved: true, sessionId: 'session-00000001' });
     const activity = harness.rpcCalls('record_engagement_session').find((call) => call.body.p_kind === 'activity');
     assert.deepEqual(activity.body.p_session.videoMilestones, [25, 50, 75, 80, 90, 100], 'all six milestones are sent');
-    assert.equal(harness.firestoreWrites().length, 0);
 
-    result = await supa('saveStabilityEvent');
+    result = await sameAsDefault('saveStabilityEvent');
     assert.deepEqual(result.outcome.value, { saved: true, eventId: 'event-00000001' });
     assert.equal(harness.rpcCalls('record_stability_event')[0].body.p_event.eventType, 'javascript_error');
-    assert.equal(harness.firestoreWrites().length, 0);
     assert.equal(result.events.length, 0, 'no event on success');
   });
 
   for (const [label, answer] of Object.entries(FAILURES)) {
-    await check(`supabase mode: Supabase-only writes fall back to Firestore on a ${label} answer, with one event (none from saveStabilityEvent)`, async () => {
+    await check(`supabase mode: a ${label} answer from Supabase changes nothing in Firestore, with one event (none from saveStabilityEvent)`, async () => {
       for (const name of SUPABASE_ONLY_WRITES) {
         const defaultRun = await observe(harness, scenariosFor(current)[name]);
         const result = await supa(name, { before: (h) => h.onFetch('POST', '/rest/v1/rpc/', answer).onFetch('GET', '/rest/v1/', answer) });
@@ -720,7 +745,7 @@ async function check(name, fn) {
         assert.deepStrictEqual(result.outcome.value, defaultRun.outcome.value, `${name} returns the Firestore result`);
         assert.deepStrictEqual(result.firestore, defaultRun.firestore, `${name}: the full Firestore code path ran`);
         assert.deepStrictEqual(result.store, defaultRun.store, `${name}: the data is stored in Firestore`);
-        assert.ok(result.fetchCount >= 1, `${name}: Supabase was tried first`);
+        assert.ok(result.fetchCount >= 1, `${name}: the Supabase copy was tried`);
         const events = syncEvents(result.events);
         if (name === 'saveStabilityEvent') {
           assert.equal(events.length, 0, 'saveStabilityEvent never emits a stability event (no loop)');
@@ -1121,11 +1146,11 @@ async function check(name, fn) {
     assert.deepEqual(harness.tokenRequests, [false, true], 'the second attempt forces a refresh');
     assert.equal(calls[0].headers.Authorization, 'Bearer firebase-token');
     assert.equal(calls[1].headers.Authorization, 'Bearer fresh-firebase-token');
-    assert.equal(harness.firestoreWrites().length, 0, 'no fallback was needed');
+    assert.equal(harness.firestoreWrites().filter((entry) => entry.path.includes('exercise_work')).length, 1, 'the draft is stored in Firestore first, as in default mode');
 
     answers = [{ __status: 401, body: { code: 'PGRST301', message: 'JWT expired' } }, { __status: 401, body: { code: 'PGRST301', message: 'JWT expired' } }];
     const twice = await supa('saveExerciseDraft', { before: (h) => h.onFetch('POST', '/rest/v1/rpc/save_activity_draft', () => answers.shift()) });
-    assert.equal(twice.outcome.error, null, 'a second expiry falls back to Firestore instead of throwing');
+    assert.equal(twice.outcome.error, null, 'a second expiry never throws; the Firestore copy is already stored');
     assert.equal(harness.rpcCalls('save_activity_draft').length, 2, 'at most two attempts');
     assert.equal(harness.firestoreWrites().filter((entry) => entry.path.includes('exercise_work')).length, 1, 'the draft landed in Firestore');
   });

@@ -77,6 +77,9 @@ const DATA_SOURCE_GATE_LOG_KEY = "utl_data_gate_last";
 // "2" once this browser has been decided for the all members switch; an older decision is checked again.
 const DATA_SOURCE_GATE_VERSION_KEY = "utl_data_gate_v";
 const DATA_SOURCE_GATE_VERSION = "2";
+// Whose decision it is: the member's email, or "*" when the person chose ?utl_data=firebase for this browser.
+// A different member signing in on the same browser is decided again.
+const DATA_SOURCE_GATE_FOR_KEY = "utl_data_gate_for";
 // sessionStorage: the member record was checked in this browser session (an opt out takes effect at the next session).
 const DATA_SOURCE_SESSION_KEY = "utl_data_checked";
 const DATA_SOURCE_PARAMETER = "utl_data";
@@ -102,6 +105,7 @@ function applyDataSourceParameter() {
     if (requested === "firebase") {
       window.localStorage.setItem(DATA_SOURCE_KEY, "firebase");
       window.localStorage.setItem(DATA_SOURCE_GATE_VERSION_KEY, DATA_SOURCE_GATE_VERSION);
+      window.localStorage.setItem(DATA_SOURCE_GATE_FOR_KEY, "*");
       window.localStorage.removeItem(DATA_SOURCE_PENDING_KEY);
     } else if (requested === "supabase") {
       window.localStorage.setItem(DATA_SOURCE_PENDING_KEY, "supabase");
@@ -120,10 +124,13 @@ applyDataSourceParameter();
 // active, or when this browser has not been decided for this version yet. A browser that chose
 // ?utl_data=firebase is decided and is left alone. An answer from the offline cache can switch a member
 // on but never off: the next real answer decides.
-function dataSourceCheckWanted(storage) {
-  return storage.getItem(DATA_SOURCE_PENDING_KEY) === "supabase"
-    || storage.getItem(DATA_SOURCE_GATE_VERSION_KEY) !== DATA_SOURCE_GATE_VERSION
-    || storage.getItem(DATA_SOURCE_KEY) === "supabase";
+function dataSourceCheckReason(storage, email) {
+  if (storage.getItem(DATA_SOURCE_PENDING_KEY) === "supabase") return "pending";
+  if (storage.getItem(DATA_SOURCE_GATE_VERSION_KEY) !== DATA_SOURCE_GATE_VERSION) return "undecided";
+  const decidedFor = storage.getItem(DATA_SOURCE_GATE_FOR_KEY);
+  if (email && decidedFor !== "*" && decidedFor !== email) return "other-account";
+  if (storage.getItem(DATA_SOURCE_KEY) === "supabase") return "active";
+  return "";
 }
 
 function sessionFlag(write) {
@@ -140,7 +147,9 @@ function sessionFlag(write) {
 function applyDataSourceGate(memberSnap) {
   try {
     const storage = window.localStorage;
-    if (!dataSourceCheckWanted(storage)) return;
+    const memberEmail = String((memberSnap && memberSnap.id) || "").trim().toLowerCase();
+    const reason0 = dataSourceCheckReason(storage, memberEmail);
+    if (!reason0) return;
     const memberFound = Boolean(memberSnap && memberSnap.exists());
     const optedOut = memberFound && (memberSnap.data() || {}).supabaseOptOut === true;
     const enabled = memberFound && !optedOut;
@@ -152,9 +161,10 @@ function applyDataSourceGate(memberSnap) {
     const next = enabled ? "supabase" : "firebase";
     const before = storage.getItem(DATA_SOURCE_KEY) || "(none)";
     const wasPending = storage.getItem(DATA_SOURCE_PENDING_KEY) === "supabase";
-    const wasUndecided = storage.getItem(DATA_SOURCE_GATE_VERSION_KEY) !== DATA_SOURCE_GATE_VERSION;
+    const wasUndecided = reason0 === "undecided" || reason0 === "other-account";
     storage.setItem(DATA_SOURCE_KEY, next);
     storage.setItem(DATA_SOURCE_GATE_VERSION_KEY, DATA_SOURCE_GATE_VERSION);
+    if (memberEmail) storage.setItem(DATA_SOURCE_GATE_FOR_KEY, memberEmail);
     storage.removeItem(DATA_SOURCE_PENDING_KEY);
     if (!fromCache) sessionFlag(true);
     // One line in the console, no personal data, so a member can see what the gate decided and why.
@@ -289,20 +299,11 @@ function reportSupabaseFailure(label, activityId, error) {
   } }));
 }
 
-// Supabase first for data that lives only there; on any failure the caller falls back to its
-// Firestore code so the data is stored somewhere. Returns null when the caller must fall back.
-async function supabaseFirst(label, activityId, run, options = {}) {
-  const result = await runSupabase(run);
-  if (result.ok) return result;
-  if (options.silent !== true) reportSupabaseFailure(label, activityId, result.error);
-  return null;
-}
-
 // Best-effort Supabase copy after every Firestore write of a call has succeeded. It runs in the
 // background: the caller's promise never waits for it, and nothing it does can reach the caller.
-function startSupabaseBridge(label, activityId, run) {
+function startSupabaseBridge(label, activityId, run, options = {}) {
   runSupabase(run)
-    .then((result) => { if (!result.ok) reportSupabaseFailure(label, activityId, result.error); })
+    .then((result) => { if (!result.ok && options.silent !== true) reportSupabaseFailure(label, activityId, result.error); })
     .catch((error) => { console.warn(`Supabase ${label} report failed`, error && error.code); });
 }
 
@@ -446,13 +447,12 @@ if (useLocalFirebaseEmulators) {
 async function settleDataSourceAtPageLoad() {
   try {
     const storage = window.localStorage;
-    if (!dataSourceCheckWanted(storage)) return;
-    const pending = storage.getItem(DATA_SOURCE_PENDING_KEY) === "supabase";
-    const undecided = storage.getItem(DATA_SOURCE_GATE_VERSION_KEY) !== DATA_SOURCE_GATE_VERSION;
-    if (!pending && !undecided && sessionFlag(false)) return;
     const user = await getSignedInUser();
     const email = user && user.email ? String(user.email).trim().toLowerCase() : "";
     if (!email) return;
+    const reason = dataSourceCheckReason(storage, email);
+    if (!reason) return;
+    if (reason === "active" && sessionFlag(false)) return;
     applyDataSourceGate(await getDocFromServer(doc(db, "authorized_members", email)));
   } catch {
     // Offline, signed out or denied: the switch stays as it was.
@@ -1585,14 +1585,10 @@ async function saveUserProgress(exerciseId, exerciseName, exercisePayload = {}) 
   }
 }
 
-async function saveExerciseAttempt(attemptPayload = {}) {
+async function saveExerciseAttemptFirestore(attemptPayload = {}) {
   if (experiencePreviewActive()) return { preview: true, saved: false };
   const user = await getSignedInUser();
   if (!user || !user.uid) throw new Error("A signed-in Firebase user is required to save an exercise attempt.");
-  if (supabaseModeActive()) {
-    const remote = await supabaseFirst("exercise attempt", attemptPayload.exerciseId, (data) => data.saveExerciseAttempt(attemptPayload));
-    if (remote) return remote.value;
-  }
   const attemptId = String(attemptPayload.attemptId || "").trim().slice(0, 100);
   const exerciseId = String(attemptPayload.exerciseId || "").trim().slice(0, 100);
   if (attemptId.length < 8 || !exerciseId) throw new Error("A valid attempt and exercise ID are required.");
@@ -1614,6 +1610,15 @@ async function saveExerciseAttempt(attemptPayload = {}) {
     createdAt: serverTimestamp()
   });
   return { saved: true, attemptId };
+}
+
+// Firestore first, exactly as before; with the switch on, a best-effort Supabase copy follows once the Firestore write has succeeded.
+async function saveExerciseAttempt(attemptPayload = {}) {
+  const result = await saveExerciseAttemptFirestore(attemptPayload);
+  if (supabaseModeActive() && result && result.saved !== false && !result.preview) {
+    startSupabaseBridge("exercise attempt", attemptPayload.exerciseId, (data) => data.saveExerciseAttempt(attemptPayload));
+  }
+  return result;
 }
 
 async function getExerciseAttempts(exerciseId) {
@@ -1646,14 +1651,10 @@ async function getExerciseAttempts(exerciseId) {
   return mergeAttemptViews(local, remote.value);
 }
 
-async function saveExerciseDraft(exerciseId, exerciseTitle, draftPayload = {}) {
+async function saveExerciseDraftFirestore(exerciseId, exerciseTitle, draftPayload = {}) {
   if (experiencePreviewActive()) return { preview: true, saved: false };
   const user = await getSignedInUser();
   if (!user || !user.uid) throw new Error("A signed-in Firebase user is required to save an exercise draft.");
-  if (supabaseModeActive()) {
-    const remote = await supabaseFirst("draft", exerciseId, (data) => data.saveExerciseDraft(exerciseId, exerciseTitle, draftPayload));
-    if (remote) return remote.value;
-  }
   const safeExerciseId = String(exerciseId || "").trim().slice(0, 100);
   if (!safeExerciseId) throw new Error("An exercise ID is required.");
   await setDoc(doc(requireFirestore(), "users", user.uid, "exercise_work", safeExerciseId), {
@@ -1665,6 +1666,15 @@ async function saveExerciseDraft(exerciseId, exerciseTitle, draftPayload = {}) {
     updatedAt: serverTimestamp()
   }, { merge: true });
   return { saved: true };
+}
+
+// Firestore first, exactly as before; with the switch on, a best-effort Supabase copy follows once the Firestore write has succeeded.
+async function saveExerciseDraft(exerciseId, exerciseTitle, draftPayload = {}) {
+  const result = await saveExerciseDraftFirestore(exerciseId, exerciseTitle, draftPayload);
+  if (supabaseModeActive() && result && result.saved !== false && !result.preview) {
+    startSupabaseBridge("draft", exerciseId, (data) => data.saveExerciseDraft(exerciseId, exerciseTitle, draftPayload));
+  }
+  return result;
 }
 
 async function getExerciseWork(exerciseId) {
@@ -1715,15 +1725,10 @@ async function getExerciseWork(exerciseId) {
   return mergeExerciseWorkViews(local, remote.value);
 }
 
-async function saveExerciseSubmission(submissionPayload = {}) {
+async function saveExerciseSubmissionFirestore(submissionPayload = {}) {
   if (experiencePreviewActive()) return { preview: true, saved: false };
   const user = await getSignedInUser();
   if (!user || !user.uid) throw new Error("A signed-in Firebase user is required to save an exercise submission.");
-  // Supabase mode: a practice round (record_activity_practice), which never completes the exercise.
-  if (supabaseModeActive()) {
-    const remote = await supabaseFirst("practice round", submissionPayload.exerciseId, (data) => data.saveExerciseSubmission(submissionPayload));
-    if (remote) return remote.value;
-  }
   const exerciseId = String(submissionPayload.exerciseId || "").trim().slice(0, 100);
   const submissionId = String(submissionPayload.submissionId || "").trim().slice(0, 100);
   if (!exerciseId || submissionId.length < 8) throw new Error("A valid exercise and submission ID are required.");
@@ -1740,6 +1745,15 @@ async function saveExerciseSubmission(submissionPayload = {}) {
     createdAt: serverTimestamp()
   });
   return { saved: true, submissionId };
+}
+
+// Firestore first, exactly as before; with the switch on, a best-effort Supabase copy follows once the Firestore write has succeeded.
+async function saveExerciseSubmission(submissionPayload = {}) {
+  const result = await saveExerciseSubmissionFirestore(submissionPayload);
+  if (supabaseModeActive() && result && result.saved !== false && !result.preview) {
+    startSupabaseBridge("practice round", submissionPayload.exerciseId, (data) => data.saveExerciseSubmission(submissionPayload));
+  }
+  return result;
 }
 
 const LEARNING_PROFILE_TREND_TOLERANCE = 5;
@@ -1869,14 +1883,10 @@ function aggregateLearningProfileEvidence(current = {}, evidence = {}) {
   return summary;
 }
 
-async function saveLearningProfileEvidence(input = {}) {
+async function saveLearningProfileEvidenceFirestore(input = {}) {
   if (experiencePreviewActive()) return { preview: true, saved: false };
   const user = await getSignedInUser();
   if (!user?.uid) throw new Error("A signed-in Firebase user is required to save learning-profile evidence.");
-  if (supabaseModeActive()) {
-    const remote = await supabaseFirst("learning evidence", input.exerciseId, (data) => data.saveLearningProfileEvidence(input));
-    if (remote) return remote.value;
-  }
   const exerciseId = String(input.exerciseId || "").trim().slice(0, 100);
   const evidenceId = String(input.evidenceId || input.attemptId || "").trim().slice(0, 100);
   if (!exerciseId || evidenceId.length < 8) throw new Error("A valid exercise and evidence ID are required.");
@@ -1962,6 +1972,15 @@ async function saveLearningProfileEvidence(input = {}) {
   });
 }
 
+// Firestore first, exactly as before; with the switch on, a best-effort Supabase copy follows once the Firestore write has succeeded.
+async function saveLearningProfileEvidence(input = {}) {
+  const result = await saveLearningProfileEvidenceFirestore(input);
+  if (supabaseModeActive() && result && result.saved !== false && !result.preview) {
+    startSupabaseBridge("learning evidence", input.exerciseId, (data) => data.saveLearningProfileEvidence(input));
+  }
+  return result;
+}
+
 function analyticsText(value, max = 160) {
   return String(value || "").trim().slice(0, max);
 }
@@ -2015,14 +2034,10 @@ function normalizedAnalyticsPayload(input = {}) {
   };
 }
 
-async function saveEngagementAnalytics(payload = {}) {
+async function saveEngagementAnalyticsFirestore(payload = {}) {
   if (experiencePreviewActive()) return { saved: false, reason: "preview" };
   const user = await getSignedInUser();
   if (!user?.uid) return { saved: false, reason: "signed-out" };
-  if (supabaseModeActive()) {
-    const remote = await supabaseFirst("engagement analytics", payload.activity && payload.activity.activityId, (data) => data.saveEngagementAnalytics(payload));
-    if (remote) return remote.value;
-  }
   const session = normalizedAnalyticsPayload(payload.session || {});
   const activity = normalizedAnalyticsPayload(payload.activity || {});
   const sessionId = analyticsText(session.sessionId, 100);
@@ -2035,19 +2050,23 @@ async function saveEngagementAnalytics(payload = {}) {
   return { saved: true, sessionId };
 }
 
+// Firestore first, exactly as before; with the switch on, a best-effort Supabase copy follows once the Firestore write has succeeded.
+async function saveEngagementAnalytics(payload = {}) {
+  const result = await saveEngagementAnalyticsFirestore(payload);
+  if (supabaseModeActive() && result && result.saved !== false && !result.preview) {
+    startSupabaseBridge("engagement analytics", payload.activity && payload.activity.activityId, (data) => data.saveEngagementAnalytics(payload));
+  }
+  return result;
+}
+
 function stabilityText(value, maximum = 240) {
   return String(value || "").replace(/[\r\n\t]+/g, " ").replace(/\s{2,}/g, " ").trim().slice(0, maximum);
 }
 
-async function saveStabilityEvent(input = {}) {
+async function saveStabilityEventFirestore(input = {}) {
   if (experiencePreviewActive()) return { saved: false, reason: "preview" };
   const user = await getSignedInUser();
   if (!user?.uid) return { saved: false, reason: "signed-out" };
-  // Silent on failure: a stability event about a failed stability event would loop.
-  if (supabaseModeActive()) {
-    const remote = await supabaseFirst("stability event", input.activityId, (data) => data.saveStabilityEvent(input), { silent: true });
-    if (remote) return remote.value;
-  }
   const eventId = stabilityText(input.eventId, 100);
   if (!eventId) return { saved: false, reason: "invalid" };
   await setDoc(doc(requireFirestore(), "users", user.uid, "stability_events", eventId), {
@@ -2069,6 +2088,15 @@ async function saveStabilityEvent(input = {}) {
     receivedAt: serverTimestamp()
   });
   return { saved: true, eventId };
+}
+
+// Firestore first, exactly as before; with the switch on, a best-effort Supabase copy follows once the Firestore write has succeeded.
+async function saveStabilityEvent(input = {}) {
+  const result = await saveStabilityEventFirestore(input);
+  if (supabaseModeActive() && result && result.saved !== false && !result.preview) {
+    startSupabaseBridge("stability event", input.activityId, (data) => data.saveStabilityEvent(input), { silent: true });
+  }
+  return result;
 }
 
 async function getAllStabilityEvents(memberUids = []) {
