@@ -54,8 +54,12 @@ function propagateEmulatorFlag() {
 // homeHref: relative path from this page to apps/executive-signature/home/.
 // When set, a signed-in visitor's first backLink (normally "Back to the
 // site") points here instead, since a returning participant has somewhere
-// more useful to land than the public homepage. Signed-out visitors keep the
-// original href. Omit this on the home page itself.
+// more useful to land than the public homepage. Omit this on the home page
+// itself. There, and on any page without homeHref, a signed-in TSA member's
+// "Back to the site" (href "/") instead points to "/member-login/", their
+// actual starting point, rather than the public marketing site they likely
+// never visited to get here. Signed-out visitors always keep the original
+// href, since none of this applies to them.
 // titleId/linksId: only index.html's internal admin/plan preview needs these
 // exact element ids, to keep swapping their content/visibility the way it
 // already did before this nav was rebuilt.
@@ -95,8 +99,8 @@ export function initReadinessNav({ mount, title, backLinks = [], secondaryLinks 
   const firstBackLink = host.querySelector('.ra-nav-links a');
 
   onAuthStateChanged(auth, async (user) => {
-    if (firstBackLink) firstBackLink.href = (user && homeHref) ? homeHref : backLinks[0]?.href || '/';
     if (!user) {
+      if (firstBackLink) firstBackLink.href = backLinks[0]?.href || '/';
       userMount.innerHTML = '';
       userMount.hidden = true;
       window.__raAccountIdentity = null;
@@ -105,17 +109,21 @@ export function initReadinessNav({ mount, title, backLinks = [], secondaryLinks 
       window.dispatchEvent(new CustomEvent('ra:account-readiness'));
       return;
     }
+    // The user doc read (client SDK, direct to Firestore) and the workspaces
+    // check (a Cloud Function call, typically the slower of the two) don't
+    // depend on each other, so they run together instead of one after the
+    // other — this is on the critical path of every single Executive
+    // Signature page load, since nothing above renders until both resolve.
+    const [userSnapResult, workspacesResult] = await Promise.all([
+      getDoc(doc(db, 'users', user.uid)).catch(() => null),
+      getMyWorkspaces().catch(() => null)
+    ]);
     let products = null;
     let name = '';
-    try {
-      const snap = await getDoc(doc(db, 'users', user.uid));
-      if (snap.exists()) {
-        const data = snap.data() || {};
-        products = data.products || null;
-        name = data.name || '';
-      }
-    } catch (error) {
-      products = null;
+    if (userSnapResult && userSnapResult.exists()) {
+      const data = userSnapResult.data() || {};
+      products = data.products || null;
+      name = data.name || '';
     }
     // Shaped as { free?: {...}, full?: {...} } — the quick check and the full
     // report are stored separately, since completing one does not imply the
@@ -134,14 +142,21 @@ export function initReadinessNav({ mount, title, backLinks = [], secondaryLinks 
     // Resolved before the readiness event fires, so a listener reading
     // window.__raIsTsaMember synchronously on that event always sees the
     // current value rather than a stale one from the previous signed-in user.
-    let isTsaMember = false;
-    try {
-      const workspaces = await getMyWorkspaces();
-      isTsaMember = (workspaces.workspaces || []).some((workspace) => workspace && workspace.programId === 'tsa');
-    } catch (error) {
-      isTsaMember = false;
-    }
+    const isTsaMember = Boolean(workspacesResult && (workspacesResult.workspaces || []).some((workspace) => workspace && workspace.programId === 'tsa'));
     window.__raIsTsaMember = isTsaMember;
+    // A TSA member's "Back to the site" exit (backLinks[0].href === '/') should
+    // return them to their member portal, not the public marketing homepage
+    // they most likely never visited to get here. homeHref (the ES workspace
+    // page itself) still takes priority where it is configured, since that is
+    // a more specific, more useful landing than either fallback.
+    if (firstBackLink) {
+      if (homeHref) {
+        firstBackLink.href = homeHref;
+      } else {
+        const fallback = backLinks[0]?.href || '/';
+        firstBackLink.href = fallback === '/' && isTsaMember ? '/member-login/' : fallback;
+      }
+    }
     window.dispatchEvent(new CustomEvent('ra:account-readiness'));
     const email = user.email || '';
     const avatar = avatarMarkup(name, email, user.photoURL || '');

@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lato:wght@400;700&display=swap">
   <link rel="stylesheet" href="../assets/site-nav.css?v=20260925-mobile-v1">
   <style>
-    :root{--navy:#003366;--gold:#EEA320;--harvest:#C2841A;--ink:#4A4A4A;--muted:#4D7094;--paper:#F3EDE2;--card:#fff;--line:#ddd2c1}
+    :root{--navy:#003366;--gold:#EEA320;--harvest:#C2841A;--ink:#4A4A4A;--muted:#4D7094;--paper:#F3EDE2;--card:#fff;--line:#ddd2c1;--steelsoft:#EAF0F5;--goldsoft:#FBEBC9;--good:#2E7D55;--goodsoft:#E3F2E9}
     *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.55 Lato,Arial,sans-serif}
     h1,h2,h3{color:var(--navy);font-family:'Playfair Display',Georgia,serif;line-height:1.08}
     h1{font-size:clamp(2rem,5vw,3.1rem);margin:.1em 0}h2{font-size:clamp(1.3rem,2.4vw,1.7rem);margin:0 0 12px}
@@ -33,10 +33,49 @@
     .history-row{display:flex;align-items:baseline;justify-content:space-between;gap:14px;padding:10px 0;border-top:1px solid var(--line)}
     .history-row:first-child{border-top:0;padding-top:0}
     .history-row b{color:var(--navy)}
+    .print-only{display:none}
+    @media print{
+      .ra-nav,.hero{display:none!important}
+      .print-only{display:flex}
+      @page{margin:16mm 16mm 18mm}
+      body{background:#fff;font-size:11pt}
+      .wrap{width:100%;max-width:none}
+      .section{padding:0}
+      .print-header{align-items:center;justify-content:space-between;gap:20px;border-bottom:2px solid var(--gold);padding-bottom:10px;margin-bottom:20px}
+      .print-header img{height:24px}
+      .tsa-choice-grid{display:block;margin-bottom:0}
+      .tsa-choice-card{background:#fff!important;border:1px solid #999;break-inside:avoid;margin-bottom:14px}
+      .status-chip{background:none!important;border:1px solid currentColor}
+      .tsa-choice-card>.btn,.tsa-choice-card>.row{display:none}
+      #historyCard{break-inside:avoid;border:1px solid #999;border-radius:0}
+      .history-row{break-inside:avoid}
+    }
+    .tsa-choice-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px}
+    .tsa-choice-card{border:1px solid var(--line);border-radius:14px;padding:24px;display:flex;flex-direction:column;gap:8px}
+    .tsa-choice-card.quick{background:var(--steelsoft);border-color:rgba(77,94,112,.25)}
+    .tsa-choice-card.full{background:var(--goldsoft);border-color:rgba(238,163,32,.35)}
+    .tsa-choice-card .status-chip{display:inline-flex;align-self:flex-start;font:700 11px Lato,sans-serif;padding:4px 10px;border-radius:999px;margin-bottom:2px}
+    .tsa-choice-card .status-chip.done{background:var(--goodsoft);color:var(--good)}
+    .tsa-choice-card .status-chip.todo{background:rgba(0,0,0,.08);color:var(--muted)}
+    .tsa-choice-card .tier-label{font-size:12.5px;font-weight:700;color:var(--muted);margin:0}
+    .tsa-choice-card h3{margin:0;font-size:19px}
+    .tsa-choice-card>.btn{margin-top:auto;width:100%}
+    .tsa-choice-card>.row{margin-top:auto;gap:8px}
+    .tsa-choice-card>.row .btn{flex:1}
+    .facts{display:flex;flex-wrap:wrap;gap:8px 16px;font-size:13px;color:var(--muted)}
+    .price-tag{display:flex;align-items:baseline;gap:10px;margin:2px 0;flex-wrap:wrap}
+    .price-was{font-size:14px;opacity:.6;text-decoration:line-through}
+    .price-now{font-family:'Playfair Display',Georgia,serif;font-weight:700;font-size:24px;color:var(--harvest)}
+    .price-note{font-size:12px;color:var(--muted)}
+    @media(max-width:640px){.tsa-choice-grid{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
   <header id="raNav" class="ra-nav" aria-label="Assessment navigation"></header>
+  <div class="print-only print-header">
+    <img src="../../../assets/print-logo-utl-navy-header.svg" alt="The Untaught Lessons">
+    <img src="../../../assets/print-logo-signature-navy-header.svg" alt="Executive Signature">
+  </div>
 
   <header class="hero"><div class="wrap hero-row">
     <img class="hero-mark" src="../../../assets/mark-readiness.svg" alt="">
@@ -59,28 +98,16 @@
         </div>
       </div>
 
-      <div class="card" id="noResultState" hidden>
-        <h2>No result yet</h2>
-        <p class="muted">You have not completed the quick check or the full report. The quick check takes about three minutes and gives you a first read on your executive readiness.</p>
-        <div class="row"><a class="btn gold" href="../">Take the quick check</a></div>
-      </div>
-
       <div id="resultState" hidden>
-        <div class="card">
-          <p class="eyebrow" id="resultEyebrow"></p>
-          <h2 id="resultBand"></h2>
-          <p class="meta-line" id="resultMeta"></p>
-          <h3 id="resultProfile" style="margin:0 0 4px;font-size:1.2rem"></h3>
-          <p class="small muted" id="resultNote"></p>
-        </div>
-        <div class="card">
-          <h3 style="margin:0 0 12px;font-size:1.1rem">What is next</h3>
-          <div class="row" id="resultActions"></div>
+        <div class="tsa-choice-grid" id="resultsTop">
+          <div class="tsa-choice-card quick" id="homeQuickCard"></div>
+          <div class="tsa-choice-card full" id="homeFullCard"></div>
         </div>
         <div class="card" id="historyCard" hidden>
           <h3 id="historyTitle" style="margin:0 0 4px;font-size:1.1rem"></h3>
           <p class="small muted" style="margin:0 0 14px">Every time you took the quick check, most recent first.</p>
           <div id="historyList"></div>
+          <p class="small" style="margin:14px 0 0"><a href="#resultsTop">&uarr; Back to your results</a></p>
         </div>
       </div>
 
@@ -97,7 +124,7 @@
 
     const $ = (s) => document.querySelector(s);
     const esc = (s) => String(s || '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-    const show = (id) => { ['signedOutState', 'noResultState', 'resultState'].forEach((s) => { $('#' + s).hidden = s !== id; }); };
+    const show = (id) => { ['signedOutState', 'resultState'].forEach((s) => { $('#' + s).hidden = s !== id; }); };
 
     function formatDate(iso) {
       if (!iso) return null;
@@ -106,49 +133,32 @@
       return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
     }
 
-    function actionButton(label, href, kind) {
-      const a = document.createElement('a');
-      a.className = 'btn' + (kind ? ' ' + kind : '');
-      a.href = href;
-      a.textContent = label;
-      return a;
+    function quickCardHtml(entry) {
+      const taken = entry && entry.latestAttempt;
+      if (taken) {
+        const date = formatDate(taken.completedAt);
+        return '<span class="status-chip done">Completed</span><p class="tier-label">Quick check &middot; 20 questions</p><h3>' + esc(taken.band) + ' range</h3><p class="muted">' + esc(taken.profileLabel) + (date ? ', completed ' + esc(date) : '') + '</p><div class="row"><a class="btn" href="../my-results/">View result</a><a class="btn" href="../">Take it again</a></div>';
+      }
+      return '<span class="status-chip todo">Not started</span><p class="tier-label">Quick check &middot; 20 questions &middot; About 4 minutes</p><h3>The 5-minute read</h3><p class="muted">20 statements about how you work. See your profile and one area to grow, instantly on screen.</p><a class="btn" href="../">Start the quick check</a>';
+    }
+
+    function fullCardHtml(entry) {
+      const taken = entry && entry.latestAttempt;
+      if (taken) {
+        const date = formatDate(taken.completedAt);
+        return '<span class="status-chip done">Completed</span><p class="tier-label">Full assessment &middot; 40 questions</p><h3>' + esc(taken.profileLabel) + '</h3><p class="muted">' + esc(taken.band) + ' range' + (date ? ', completed ' + esc(date) : '') + '</p><a class="btn" href="../my-results/">View your full report</a>';
+      }
+      return '<span class="status-chip todo">Not started</span><p class="tier-label">Full assessment &middot; 40 questions</p><h3>The full facet-level report</h3><p class="muted">40 statements, 10 specific traits. Confirms your profile and names your top two strengths and top two growth edges.</p><div class="price-tag"><span class="price-was">$9.95</span><span class="price-now">Free</span><span class="price-note">while we are testing this</span></div><a class="btn" href="../">Start the full assessment</a>';
     }
 
     async function render() {
-      let status;
-      try {
-        status = await getMyEsStatus();
-      } catch (error) {
-        show('noResultState');
-        return;
-      }
-      const quick = status.assessments['quick-check'];
-      const full = status.assessments['full-assessment'];
-      const fullDone = full && full.latestAttempt;
-      const quickDone = quick && quick.latestAttempt;
+      let status = null;
+      try { status = await getMyEsStatus(); } catch (error) { status = null; }
+      const quick = status && status.assessments['quick-check'];
+      const full = status && status.assessments['full-assessment'];
 
-      if (!fullDone && !quickDone) { show('noResultState'); return; }
-
-      const attempt = fullDone ? full.latestAttempt : quick.latestAttempt;
-      const isFull = Boolean(fullDone);
-      $('#resultEyebrow').textContent = isFull ? 'Full report · 40 questions' : 'Quick check · 20 questions';
-      $('#resultBand').textContent = attempt.band + ' range';
-      const dateLabel = formatDate(attempt.completedAt);
-      $('#resultMeta').textContent = dateLabel ? 'Completed ' + dateLabel : 'Result on file';
-      $('#resultProfile').textContent = attempt.profileLabel || '';
-      $('#resultNote').textContent = isFull
-        ? 'This is your confirmed profile from the full facet-level report.'
-        : 'This is your quick-check result. The full report confirms it across 10 facets and names your top strengths and growth edges.';
-
-      const actions = $('#resultActions');
-      actions.innerHTML = '';
-      if (isFull) {
-        actions.appendChild(actionButton('See your full result', '../my-results/', 'gold'));
-      } else {
-        actions.appendChild(actionButton('Get the full report', '../', 'gold'));
-        actions.appendChild(actionButton('See this result again', '../my-results/', 'outline'));
-      }
-      actions.appendChild(actionButton('Retake the quick check', '../', 'outline'));
+      $('#homeQuickCard').innerHTML = quickCardHtml(quick);
+      $('#homeFullCard').innerHTML = fullCardHtml(full);
 
       const quickHistory = (quick && quick.recentAttempts) || [];
       const historyCard = $('#historyCard');
