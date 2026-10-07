@@ -8,7 +8,7 @@
 <meta property="og:title" content="Are you ready to be an executive yet?">
 <meta property="og:description" content="Find your Executive Signature and see five traits connected with executive work.">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://theuntaughtlessons.com/apps/readiness-assessment/">
+<meta property="og:url" content="https://theuntaughtlessons.com/apps/executive-signature/">
 <title>UTL readiness assessment · Phase 0 preview</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -92,7 +92,7 @@ button{cursor:pointer}
 .test{padding-block:40px 64px}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:28px 40px}
 .result .card{position:relative}
-.result .card::after{position:absolute;top:14px;right:18px;font-size:10px;font-weight:700;letter-spacing:.02em;color:var(--ink3)}
+.result .card::after{position:absolute;top:14px;right:18px;font-size:10px;font-weight:700;color:var(--ink3)}
 #t-result .card::after{content:"Quick check"}
 #t-full-result .card::after{content:"Full report"}
 .result .card>.result-step:first-child{margin-top:14px}
@@ -187,16 +187,18 @@ button{cursor:pointer}
 .two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
 .detail-list{margin:10px 0 0;padding-left:20px}
 .bucket-groups{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:14px}
-.bucket{border-left:3px solid var(--line);padding:4px 0 4px 14px}
+.bucket{padding:4px 0}
 .bucket-label{font-weight:700;font-size:13px;color:var(--ink);margin:0 0 2px}
 .bucket .detail-list{margin-top:6px;padding-left:16px}
-.bucket-navy{border-left-color:var(--navy)}
 .bucket-navy .bucket-label{color:var(--navy)}
-.bucket-gold{border-left-color:var(--gold)}
 .bucket-gold .bucket-label{color:var(--harvest)}
-.bucket-steel{border-left-color:#4D7094}
 .bucket-steel .bucket-label{color:#4D7094}
 @media(max-width:640px){.bucket-groups{grid-template-columns:1fr}}
+.tsa-choice-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:18px 0}
+.tsa-choice-card{background:var(--sunk);border:1px solid var(--line);border-radius:12px;padding:20px;display:flex;flex-direction:column;gap:10px}
+.tsa-choice-card h3{margin:0;font-size:19px}
+.tsa-choice-card .btn{margin-top:auto;width:100%}
+@media(max-width:640px){.tsa-choice-grid{grid-template-columns:1fr}}
 .detail-list li{margin-bottom:8px;color:var(--ink2)}
 .snapshot-list{list-style:none;margin:14px 0 0;padding:14px 16px;background:rgba(255,255,255,.1);border-radius:10px;display:flex;flex-direction:column;gap:6px}
 .snapshot-list li{color:rgba(255,255,255,.92);font-size:14px}
@@ -439,7 +441,7 @@ svg text{fill:var(--ink3);font-family:var(--sans);font-size:11px}
   .dom{grid-template-columns:1fr;gap:12px}.dom-text{grid-column:1}.meaning{grid-column:1}
   .domain-title{grid-template-columns:1fr auto}
 }
-.prepared-for{font-family:var(--mono);margin-top:6px}
+.prepared-for{margin-top:6px}
 .print-only{display:none}
 @media print{
   @page{size:letter;margin:30mm 18mm 26mm 18mm}
@@ -456,7 +458,7 @@ svg text{fill:var(--ink3);font-family:var(--sans);font-size:11px}
      own intrinsic size). */
   @page{
     @top-left{content:url("../../assets/print-logo-utl-navy-header.svg");border-bottom:1.5pt solid #EEA320;padding-bottom:6pt}
-    @top-center{content:"";font:600 8pt/1 'Lato',sans-serif;color:#7C8896;letter-spacing:.01em;border-bottom:1.5pt solid #EEA320;padding-bottom:6pt}
+    @top-center{content:"";font:600 8pt/1 'Lato',sans-serif;color:#7C8896;border-bottom:1.5pt solid #EEA320;padding-bottom:6pt}
     @top-right{content:url("../../assets/print-logo-signature-navy-header.svg");border-bottom:1.5pt solid #EEA320;padding-bottom:6pt}
   }
   /* Footer, every page except cover/closing: one slim navy band (three
@@ -558,7 +560,7 @@ svg text{fill:var(--ink3);font-family:var(--sans);font-size:11px}
   .cover-score span{font-size:13pt;color:var(--gold)}
   .cover-meta{border-top:1px solid rgba(255,255,255,.3);padding-top:22px;display:flex;flex-direction:column;gap:9px;font-size:11.5pt;color:rgba(255,255,255,.92)}
   .cover-meta b{color:var(--gold);margin-right:6px}
-  .cover-foot{margin-top:50px;font-size:9pt;color:rgba(255,255,255,.6);letter-spacing:.03em}
+  .cover-foot{margin-top:50px;font-size:9pt;color:rgba(255,255,255,.6)}
 
   .report-summary .score-first{background:var(--navy);color:#fff;border-color:var(--navy)}
   .report-summary .score-first .result-step{background:var(--gold);color:var(--navy)}
@@ -619,6 +621,25 @@ svg text{fill:var(--ink3);font-family:var(--sans);font-size:11px}
       <p class="invite-note" id="accountResultNote" hidden></p>
       <div class="row" id="landingPrimaryActions">
         <button class="btn primary" id="startBtn">Find your Executive Signature</button>
+      </div>
+      <div id="landingTsaChoiceActions" hidden>
+        <p class="lede" style="margin-bottom:10px">As a TSA member, you have access to both the quick check and the full assessment. You can take them in any order.</p>
+        <div class="tsa-choice-grid">
+          <div class="tsa-choice-card">
+            <p class="eyebrow">Quick check</p>
+            <h3>The 5-minute read</h3>
+            <p class="muted">20 statements about how you work. See your profile and one area to grow, instantly on screen.</p>
+            <div class="facts"><span>20 questions</span><span>About 4 minutes</span></div>
+            <button class="btn primary" id="tsaStartQuickBtn" type="button">Start the quick check</button>
+          </div>
+          <div class="tsa-choice-card">
+            <p class="eyebrow">Full assessment</p>
+            <h3>The full facet-level report</h3>
+            <p class="muted">40 statements, 10 specific traits. Confirms your profile and names your top two strengths and top two growth edges.</p>
+            <div class="price-tag" id="tsaFullPriceTag"></div>
+            <button class="btn gold" id="tsaStartFullBtn" type="button">Start the full assessment</button>
+          </div>
+        </div>
       </div>
       <div class="row" id="landingReturnActions" hidden>
         <button class="btn primary" id="seeResultBtn">See your result</button>
@@ -705,7 +726,7 @@ svg text{fill:var(--ink3);font-family:var(--sans);font-size:11px}
       <p class="muted">The full report is a separate 40-statement assessment, selected from an established 120-item public-domain measure. It looks at 10 more specific traits and confirms your profile, your top two strengths and your top two growth edges.</p>
       <div class="price-tag"><span class="price-was">$9.95</span><span class="price-now">Free</span><span class="price-note">while we are testing this</span></div>
       <p class="muted">We are not charging for the full report yet. Once purchases open, it will be a one-time digital sale with no refunds. <a href="research/">Read about the research →</a></p>
-      <div class="row"><button class="btn primary" id="fullIntroStart">Start the 40 statements</button><button class="btn link" id="fullIntroBack">Back to your quick check result</button></div>
+      <div class="row"><button class="btn primary" id="fullIntroStart">Start the 40 statements</button><button class="btn link" id="fullIntroBack">Back</button></div>
     </div>
 
     <div id="t-full-q" class="card qcard" hidden>
@@ -786,7 +807,7 @@ function logCompletedResult(attemptId,tier,email,name,band,profile,formVersion,s
   // Preview and sample attempts still exercise the local completion flow, but
   // they must never generate a real notification email.
   if(!isSyntheticReadinessNotification(email)){
-    sendResultEmailPayload({tab:'readiness',name:name||'',email,tier,band,profile,formVersion:formVersion||'',page:location.href,source:'readiness-assessment'});
+    sendResultEmailPayload({tab:'readiness',name:name||'',email,tier,band,profile,formVersion:formVersion||'',page:location.href,source:'executive-signature'});
   }
   if(window.raRecordCompletion){
     window.raRecordCompletion({
@@ -804,7 +825,7 @@ function logCompletedResult(attemptId,tier,email,name,band,profile,formVersion,s
 }
 function resultEmailHtml(name,lines){
   const greeting=name?`Hi ${esc(name)},`:'Hi,';
-  return `<p>${greeting}</p><p>${lines.map(esc).join('</p><p>')}</p><p><a href="https://theuntaughtlessons.com/apps/readiness-assessment/">theuntaughtlessons.com/apps/readiness-assessment/</a></p>`;
+  return `<p>${greeting}</p><p>${lines.map(esc).join('</p><p>')}</p><p><a href="https://theuntaughtlessons.com/apps/executive-signature/">theuntaughtlessons.com/apps/executive-signature/</a></p>`;
 }
 function emailResultBlock(email){
   if(!email)return '';
@@ -815,7 +836,7 @@ function wireEmailResultBtn(email,name,subject,lines){
   if(!btn)return;
   btn.onclick=async()=>{
     btn.disabled=true;btn.textContent='Sending…';
-    const ok=await sendResultEmailPayload({action:'EmailReadinessResult',recipient:email,name:name||'',subject,renderedHtml:resultEmailHtml(name,lines),page:location.href,source:'readiness-assessment'});
+    const ok=await sendResultEmailPayload({action:'EmailReadinessResult',recipient:email,name:name||'',subject,renderedHtml:resultEmailHtml(name,lines),page:location.href,source:'executive-signature'});
     btn.disabled=false;btn.textContent='Email me this result';
     toast(ok?'On its way to '+email:'Could not send right now');
   };
@@ -1010,7 +1031,9 @@ function signedInParticipant(){
   const nameParts=identity.name.trim().split(/\s+/);
   return {firstName:nameParts.shift()||'',lastName:nameParts.join(' '),email:identity.email,invited:false};
 }
-function beginParticipantFlow(){
+let participantTier='free';
+function beginParticipantFlow(tier='free'){
+  participantTier=tier;
   const signedIn=signedInParticipant();
   if(!signedIn){setInviteMode(false);go('t-details');return}
   participant=signedIn;
@@ -1034,13 +1057,29 @@ function beginParticipantFlow(){
   $('#regionIn').value='';
   go('t-background');
 }
-$('#startBtn').onclick=beginParticipantFlow;
+$('#startBtn').onclick=()=>beginParticipantFlow('free');
+$('#tsaStartQuickBtn').onclick=()=>beginParticipantFlow('free');
+$('#tsaStartFullBtn').onclick=()=>beginParticipantFlow('full');
 $('#invitePreviewBtn').onclick=()=>{setInviteMode(true);$('#firstNameIn').value='Andrea';$('#lastNameIn').value='Reyes';$('#orgIn').value='Harbor Logistics';go('t-details')};
 function hasSavedCompleteAttempt(){
   let saved=null;
   try{saved=JSON.parse(sessionStorage.getItem(ACTIVE_ATTEMPT_KEY)||'null')}catch(error){saved=null}
   if(!saved||saved.formVersion!==FREE_FORM_VERSION||!window.READINESS_FORMS.validateAttempt(saved))return false;
   return saved.itemOrder.every(id=>saved.answers&&saved.answers[id]!=null);
+}
+function esFullPriceInfo(){
+  const esPriceSetting=window.__raPaymentSettings&&window.__raPaymentSettings.enabled&&window.__raPaymentSettings.prices&&window.__raPaymentSettings.prices['executive-signature'];
+  // A price of exactly 0 means the admin deliberately kept this program free
+  // while the master toggle is on for other programs, so it is treated the
+  // same as payments being off for Executive Signature specifically: no
+  // Stripe checkout, normal free flow.
+  const paymentsOn=Boolean(esPriceSetting&&esPriceSetting.amountCents>0);
+  const esPrice=paymentsOn?esPriceSetting:null;
+  const esPriceLabel=esPrice?'$'+(esPrice.amountCents/100).toFixed(2):'$9.95';
+  const priceTag=paymentsOn?`<span class="price-now">${esPriceLabel}</span><span class="price-note">one-time, no subscription</span>`:`<span class="price-was">$9.95</span><span class="price-now">Free</span><span class="price-note">while we are testing this</span>`;
+  const priceNote=paymentsOn?'This is a one-time digital purchase with no refunds.':'Once purchases open, it will be a one-time digital sale with no refunds.';
+  const ctaLabel=paymentsOn?`Buy the full report, ${esPriceLabel}`:'Get the full report, free for now';
+  return {paymentsOn,esPriceLabel,priceTag,priceNote,ctaLabel};
 }
 function refreshLandingState(){
   const already=hasSavedCompleteAttempt();
@@ -1079,14 +1118,33 @@ function renderAccountResultNotice(status){
     note.hidden=true;
   }
 }
+// Only for a signed-in TSA member who has never touched Executive Signature at
+// all (neither tier, on any device): offers both tiers side by side instead of
+// funneling them through the Quick-Check-first flow built for a cold visitor.
+// Anyone with an existing result keeps seeing the normal single-button landing
+// plus the "you already completed..." note above, same as before.
+function refreshTsaChoiceState(status){
+  const choice=$('#landingTsaChoiceActions');
+  if(!choice)return;
+  const assessments=status&&status.assessments;
+  const everTaken=Boolean(assessments&&(assessments['quick-check']||assessments['full-assessment']));
+  const show=window.__raIsTsaMember===true&&!everTaken&&!hasSavedCompleteAttempt();
+  choice.hidden=!show;
+  if(show){
+    $('#landingPrimaryActions').hidden=true;
+    $('#tsaFullPriceTag').innerHTML=esFullPriceInfo().priceTag;
+  }
+}
 window.addEventListener('ra:account-readiness',async()=>{
-  if(!window.__raAccountIdentity||typeof window.raGetMyEsStatus!=='function'){renderAccountResultNotice(null);return}
+  if(!window.__raAccountIdentity||typeof window.raGetMyEsStatus!=='function'){renderAccountResultNotice(null);refreshTsaChoiceState(null);return}
   try{
     const status=await window.raGetMyEsStatus();
     renderAccountResultNotice(status);
+    refreshTsaChoiceState(status);
   }catch(error){
     console.error('Could not load your Executive Signature status',error);
     renderAccountResultNotice(null);
+    refreshTsaChoiceState(null);
   }
 });
 $('#seeResultBtn').onclick=()=>{startOrResumeAttempt(false,true);renderResult();go('t-result')};
@@ -1106,7 +1164,11 @@ $('#t-background').addEventListener('submit',e=>{
 });
 $('#consentBack').onclick=()=>go('t-background');
 $('#consentIn').onchange=e=>$('#consentBtn').disabled=!e.target.checked;
-$('#t-consent').addEventListener('submit',e=>{e.preventDefault();participant.assessmentConsent=true;participant.marketingConsent=$('#updatesIn').checked;startOrResumeAttempt(false);go('t-intro')});
+$('#t-consent').addEventListener('submit',e=>{
+  e.preventDefault();participant.assessmentConsent=true;participant.marketingConsent=$('#updatesIn').checked;
+  if(participantTier==='full'){startOrResumeFullAttempt(false);go('t-full-intro');return}
+  startOrResumeAttempt(false);go('t-intro');
+});
 $('#introBack').onclick=()=>go('t-consent');
 $('#introStart').onclick=()=>{if(!activeAttempt)startOrResumeAttempt(false);qaTiming.startedAt=activeAttempt.startedAt;renderQ();go('t-q')};
 $('#sampleBtn').onclick=()=>{participant={firstName:'Andrea',lastName:'Reyes',email:'andrea@example.com',ageRange:'35–44',careerStage:'People manager',primaryGoal:'Prepare for an executive role',organization:'',jobTitle:'',region:'Philippines',invited:false,assessmentConsent:true,marketingConsent:false};pname='Andrea';startOrResumeAttempt(true);answers={};const targets={Conscientiousness:[3,3,3,2],Neuroticism:[3,3,3,4],Intellect:[3,3,3,3]},seen={};ITEMS.forEach(it=>{if(targets[it.domain]){const n=seen[it.domain]||0,e=targets[it.domain][n];seen[it.domain]=n+1;answers[it.id]=it.key==='+'?e:6-e}else answers[it.id]=it.sample});saveActiveAttempt();renderResult();go('t-result')};
@@ -1297,24 +1359,14 @@ function renderResult(){
     <div class="field"><label for="fbText">Which part felt off? (optional)</label><textarea id="fbText" rows="2"></textarea></div>
     <div><button class="btn primary" id="fbSend">Send feedback</button></div></div>
   <div class="card next">${fullReportLocation()!=='none'?`<h3>You already have a full facet-level report</h3><p>You completed the separate 40-statement assessment. Open it again any time, no need to retake it.</p><div class="row"><button class="btn gold" id="getFullReportBtn">See your full report</button><a class="btn" style="background:transparent;color:inherit;border-color:currentColor" href="../../programs.html" target="_blank" rel="noopener">Join the TSA waitlist</a></div>`:(()=>{
-    const esPriceSetting=window.__raPaymentSettings&&window.__raPaymentSettings.enabled&&window.__raPaymentSettings.prices&&window.__raPaymentSettings.prices['executive-signature'];
-    // A price of exactly 0 means the admin deliberately kept this program free
-    // while the master toggle is on for other programs, so it is treated the
-    // same as payments being off for Executive Signature specifically: no
-    // Stripe checkout, normal free flow.
-    const paymentsOn=Boolean(esPriceSetting&&esPriceSetting.amountCents>0);
-    const esPrice=paymentsOn?esPriceSetting:null;
-    const esPriceLabel=esPrice?'$'+(esPrice.amountCents/100).toFixed(2):'$9.95';
-    const priceTag=paymentsOn?`<span class="price-now">${esPriceLabel}</span><span class="price-note">one-time, no subscription</span>`:`<span class="price-was">$9.95</span><span class="price-now">Free</span><span class="price-note">while we are testing this</span>`;
-    const priceNote=paymentsOn?'This is a one-time digital purchase with no refunds.':'Once purchases open, it will be a one-time digital sale with no refunds.';
-    const ctaLabel=paymentsOn?`Buy the full report, ${esPriceLabel}`:'Get the full report, free for now';
-    return `<h3>Want the full facet-level report?</h3><p>The full report is a separate 40-statement assessment selected from an established 120-question personality measure that examines more specific traits. Researchers know the full measure as the IPIP-NEO-120. It looks at 10 more specific traits, confirms your profile and names your top two strengths and top two growth edges.</p><div class="price-tag">${priceTag}</div><p class="small muted">${priceNote}</p><div class="row"><button class="btn gold" id="getFullReportBtn">${esc(ctaLabel)}</button><a class="btn" style="background:transparent;color:inherit;border-color:currentColor" href="../../programs.html" target="_blank" rel="noopener">Join the TSA waitlist</a></div>`;
+    const price=esFullPriceInfo();
+    return `<h3>Want the full facet-level report?</h3><p>The full report is a separate 40-statement assessment selected from an established 120-question personality measure that examines more specific traits. Researchers know the full measure as the IPIP-NEO-120. It looks at 10 more specific traits, confirms your profile and names your top two strengths and top two growth edges.</p><div class="price-tag">${price.priceTag}</div><p class="small muted">${price.priceNote}</p><div class="row"><button class="btn gold" id="getFullReportBtn">${esc(price.ctaLabel)}</button><a class="btn" style="background:transparent;color:inherit;border-color:currentColor" href="../../programs.html" target="_blank" rel="noopener">Join the TSA waitlist</a></div>`;
   })()}</div>
   ${new URLSearchParams(location.search).get('debug')==='1'?`<details class="db"><summary>Developer preview: saved record</summary><pre>${esc(JSON.stringify(record,null,2))}</pre></details>`:''}
   <div class="row"><button class="btn" id="again">Take it again</button></div>`;
   $('#stars').onclick=e=>{const b=e.target.closest('button');if(!b)return;document.querySelectorAll('#stars button').forEach(x=>x.setAttribute('aria-pressed',x===b?'true':'false'))};
   $('#fbSend').onclick=()=>{$('#fb').innerHTML='<h3 style="font-size:22px">Thank you</h3><p class="muted">Your feedback is saved with this result. It helps us improve UTL\'s interpretation and guidance.</p>'};
-  const shareBaseUrl='https://theuntaughtlessons.com/apps/readiness-assessment/';
+  const shareBaseUrl='https://theuntaughtlessons.com/apps/executive-signature/';
   const trackedUrl=source=>`${shareBaseUrl}?utm_source=${source}&utm_medium=social&utm_campaign=readiness_assessment`;
   const shareCaption=`My Executive Signature is ${p[2]}. ${signature.firstPersonSentence} My Executive Edge is ${signature.edge}. My Executive Unlock is ${signature.unlock}. What’s your Executive Signature?`;
   const shareText=`${shareCaption} Take the assessment: ${trackedUrl('native_share')}`;
@@ -1330,8 +1382,7 @@ function renderResult(){
     const loc=fullReportLocation();
     if(loc==='local'){if(!fullActiveAttempt)startOrResumeFullAttempt(false,true);renderFullResult();go('t-full-result');return}
     if(loc==='account'){goToMyResults();return}
-    const esPriceSetting=window.__raPaymentSettings&&window.__raPaymentSettings.enabled&&window.__raPaymentSettings.prices&&window.__raPaymentSettings.prices['executive-signature'];
-    const paymentsOn=Boolean(esPriceSetting&&esPriceSetting.amountCents>0);
+    const paymentsOn=esFullPriceInfo().paymentsOn;
     if(paymentsOn){
       const btn=$('#getFullReportBtn');
       const originalLabel=btn.textContent;
@@ -1415,7 +1466,11 @@ $('#fullIntroBack').onclick=()=>{
   const loc=fullReportLocation();
   if(loc==='local'){if(!fullActiveAttempt)startOrResumeFullAttempt(false,true);renderFullResult();go('t-full-result');return}
   if(loc==='account'){goToMyResults();return}
-  go('t-result');
+  // A member who started the full assessment directly from the TSA chooser,
+  // without taking the quick check first, has no quick-check result to go
+  // back to, so send them to the landing page instead of a broken t-result.
+  if(hasSavedCompleteAttempt()){go('t-result');return}
+  go('t-landing');
 };
 $('#fullIntroStart').onclick=()=>{
   if(!fullActiveAttempt)startOrResumeFullAttempt(false);
@@ -1630,7 +1685,7 @@ function renderFullResult(){
           <h4>The source</h4><p class="small muted">The full report selects 40 statements from the IPIP-NEO-120, an established, openly available personality measure built on the same five-area research tradition as the 20-question quick check (the short assessment page explains that tradition in full). Some statements run in the opposite direction, so their scores are reversed before a facet score is calculated.</p>
           <h4>How the score is built</h4><p class="small muted">Each of the 10 facets shown in this report runs on its own 0 to 100 scale, built from your own answers. Achievement‑Striving, Self‑Discipline, Orderliness, Intellect, Anxiety and Self‑Consciousness average into the one readiness score on your executive summary. Assertiveness, Activity Level, Cooperation and Altruism describe your working style and sit outside that score on purpose, since neither end of a style facet is the better one. The shape on your summary page draws from the same five broad areas as the quick check, built here from these 10 facets rather than estimated from 20 broader questions.</p>
           <h4>Limits to keep in mind</h4><ul class="detail-list"><li><b>Self-report:</b> This result comes from how you described yourself when you took the assessment. Mood, context and the impression you wanted to give can all affect an answer.</li><li><b>Scope:</b> This describes broad tendencies in how you work, not a diagnosis, and not a measure of intelligence, job performance or promotion potential.</li><li><b>No percentile:</b> UTL deliberately does not compare your result to a wider population. Comparing your own answers to each other says more about you than ranking you against other people would.</li></ul>
-          <p class="small muted" style="margin-top:4px">Read the full methodology, including the published source and what UTL added on top of it, at theuntaughtlessons.com/apps/readiness-assessment/how-it-works/.</p></div>
+          <p class="small muted" style="margin-top:4px">Read the full methodology, including the published source and what UTL added on top of it, at theuntaughtlessons.com/apps/executive-signature/how-it-works/.</p></div>
       </div>
     </div>
     <div class="card no-print"><p class="result-step">Keep a copy</p><h3>Get this in your inbox</h3><p class="muted">A private copy of your confirmed profile, top strengths and growth edges, sent to the email you gave us. Not shared with anyone else.</p>${emailResultBlock(participant.email)}</div>

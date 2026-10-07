@@ -1,6 +1,6 @@
 const test=require('node:test');
 const assert=require('node:assert/strict');
-const {createSignature}=require('../apps/readiness-assessment/signature.js');
+const {createSignature}=require('../apps/executive-signature/signature.js');
 
 const areas=[
   {label:'Follow-through',kind:'readiness',value:78},

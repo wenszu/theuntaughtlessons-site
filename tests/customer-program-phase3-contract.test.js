@@ -1,13 +1,13 @@
 const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
-const forms = require('../apps/readiness-assessment/forms.js');
+const forms = require('../apps/executive-signature/forms.js');
 const versions = require('../functions-admin/executive-signature-versions.js');
 
 const root = path.resolve(__dirname, '..');
 const persistence = fs.readFileSync(path.join(root, 'functions-admin/assessment-persistence-service.js'), 'utf8');
 const functionsIndex = fs.readFileSync(path.join(root, 'functions-admin/index.js'), 'utf8');
-const assessmentPage = fs.readFileSync(path.join(root, 'apps/readiness-assessment/index.html'), 'utf8');
+const assessmentPage = fs.readFileSync(path.join(root, 'apps/executive-signature/index.html'), 'utf8');
 const rules = fs.readFileSync(path.join(root, 'firestore.rules'), 'utf8');
 
 Object.values(versions.VERSION_REGISTRY).forEach((serverVersion) => {

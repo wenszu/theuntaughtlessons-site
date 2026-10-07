@@ -11,7 +11,7 @@
   <style>
     :root{--navy:#003366;--gold:#EEA320;--harvest:#C2841A;--ink:#4A4A4A;--muted:#4D7094;--paper:#F3EDE2;--card:#fff;--line:#ddd2c1;--grid:#c9c2b2}
     *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.55 Lato,Arial,sans-serif}h1,h2,h3{color:var(--navy);font-family:'Playfair Display',Georgia,serif;line-height:1.08}h1{font-size:clamp(2.2rem,5.4vw,3.6rem);margin:.1em 0}h2{font-size:clamp(1.6rem,2.8vw,2.2rem);margin:0 0 18px}h3{font-size:1.3rem;margin:0 0 8px}.wrap{width:min(1120px,calc(100% - 32px));margin:auto}.hero{background:var(--card);color:var(--ink);padding:48px 0;border-bottom:1px solid var(--line)}.hero p{max-width:760px}.hero p:first-of-type{color:var(--gold);font-weight:700;font-size:13px}.hero-mark{display:flex;align-items:center;gap:12px;margin:0 0 14px}.hero-mark img{width:32px;height:32px}.hero-mark span{font-weight:700;font-size:14px;color:var(--gold)}.back{color:#fff;font-weight:700;text-decoration:none}.section{padding:46px 0}.section.alt{background:#EBE4D5}.card{background:var(--card);border:0;border-radius:14px;padding:24px}.reassurance{max-width:860px;background:#fff;padding:28px;border-radius:14px}.reassurance p:last-child{margin-bottom:0}.rubric{display:grid;grid-template-columns:220px 1fr}.rubric div{padding:16px;border-bottom:1px solid var(--line)}.rubric div:nth-last-child(-n+2){border-bottom:0}.rubric b{color:var(--navy)}.bands{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.range{font-weight:700;color:var(--muted)}.areas{display:grid;gap:14px}.area-card{display:grid;gap:16px}.area-card h3{font-size:clamp(1.5rem,2.6vw,1.9rem);margin:0;display:flex;align-items:center;gap:10px;flex-wrap:wrap}.area-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px 28px}.area-grid p{margin:6px 0 0}.label{font-size:.78rem;color:var(--muted);font-weight:700}.footer{padding:32px 0 54px;border-top:1px solid var(--line);color:var(--muted);font-size:13px}
-    .kind-tag{font-family:'Roboto Mono',monospace;font-size:10px;font-weight:700;padding:2px 8px;border-radius:5px}
+    .kind-tag{font-size:10px;font-weight:700;padding:2px 8px;border-radius:5px}
     .kind-tag.scored{background:#eef2f6;color:var(--navy)}
     .kind-tag.style{background:rgba(77,112,148,.12);color:var(--muted)}
     .app-nav{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;gap:20px;padding:14px 32px;background:#fff;border-bottom:1px solid var(--line)}
@@ -33,7 +33,7 @@
     .shape-key .solid{width:16px;height:0;border-top:1.5px solid var(--ink);flex:none}
     .shape-extremes{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:20px}
     .shape-extreme{background:var(--card);border-radius:14px;padding:16px 12px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center}
-    .shape-extreme .exlabel{font-family:'Roboto Mono',monospace;font-size:10.5px;color:var(--muted)}
+    .shape-extreme .exlabel{font-size:10.5px;font-weight:700;color:var(--muted)}
     @media(max-width:820px){.bands{grid-template-columns:1fr 1fr}.area-grid{grid-template-columns:1fr;gap:16px}.rubric{grid-template-columns:1fr}.rubric div:nth-last-child(2){border-bottom:1px solid var(--line)}.shape-extremes{grid-template-columns:1fr 1fr}}
     @media(max-width:520px){.bands{grid-template-columns:1fr}.section{padding:32px 0}.card{padding:18px}}
   </style>
@@ -80,7 +80,7 @@
         const anchor=cosA>0.3?'start':cosA<-0.3?'end':'middle';
         const scored=s.kind!=='style';
         const fill=scored?'#003366':'#4D7094',weight=scored?'700':'400';
-        const tag=scored?'':`<text x="${x.toFixed(1)}" y="${(y+9).toFixed(1)}" text-anchor="${anchor}" dominant-baseline="middle" font-family="'Roboto Mono',monospace" font-size="9" fill="#4D7094" opacity=".8">style only</text>`;
+        const tag=scored?'':`<text x="${x.toFixed(1)}" y="${(y+9).toFixed(1)}" text-anchor="${anchor}" dominant-baseline="middle" font-family="Lato,sans-serif" font-size="9" fill="#4D7094" opacity=".8">style only</text>`;
         return `<text x="${x.toFixed(1)}" y="${(y-6).toFixed(1)}" text-anchor="${anchor}" dominant-baseline="middle" font-family="Lato,sans-serif" font-size="10.5" font-weight="${weight}" fill="${fill}">${esc(s.label)}</text>${tag}`;
       }).join('');
     }

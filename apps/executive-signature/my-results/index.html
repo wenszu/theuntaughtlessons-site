@@ -38,7 +38,7 @@
     .small{font-size:13px}.muted{color:var(--muted)}
     .msg{margin-top:14px;font-size:14px}
     .msg.error{color:#9a3b1f}
-    .eyebrow{font-family:"Roboto Mono",monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:0 0 8px}
+    .eyebrow{font-size:13px;font-weight:700;color:var(--muted);margin:0 0 8px}
     .row{display:flex;gap:12px;flex-wrap:wrap;margin-top:18px}
     @media print{.app-nav,.ra-nav,.no-print{display:none!important}body{background:#fff}}
   </style>
@@ -167,8 +167,8 @@
         const btn = $('#emailResultBtn');
         btn.disabled = true; btn.textContent = 'Sending…';
         const greeting = name ? `Hi ${esc(name)},` : 'Hi,';
-        const renderedHtml = `<p>${greeting}</p><p>Your Executive Readiness Score is in the ${esc(full.band)} range, with a ${esc(full.profile)} profile.</p><p><a href="https://theuntaughtlessons.com/apps/readiness-assessment/">theuntaughtlessons.com/apps/readiness-assessment/</a></p>`;
-        const ok = await sendResultEmailPayload({ action: 'EmailReadinessResult', recipient: email, name, subject: 'Your Executive Signature Full Assessment', renderedHtml, page: location.href, source: 'readiness-assessment-my-results' });
+        const renderedHtml = `<p>${greeting}</p><p>Your Executive Readiness Score is in the ${esc(full.band)} range, with a ${esc(full.profile)} profile.</p><p><a href="https://theuntaughtlessons.com/apps/executive-signature/">theuntaughtlessons.com/apps/executive-signature/</a></p>`;
+        const ok = await sendResultEmailPayload({ action: 'EmailReadinessResult', recipient: email, name, subject: 'Your Executive Signature Full Assessment', renderedHtml, page: location.href, source: 'executive-signature-my-results' });
         btn.disabled = false; btn.textContent = 'Email me this result';
         $('#resultActionMsg').textContent = ok ? 'On its way to ' + email : 'Could not send right now.';
       };

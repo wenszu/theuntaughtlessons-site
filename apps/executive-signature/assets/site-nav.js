@@ -50,8 +50,8 @@ function propagateEmulatorFlag() {
 // backLinks: [{ label, href }] shown under the kicker/title (the "<- Back to
 // X" line). secondaryLinks: [{ label, href }] shown on the right, before the
 // signed-in avatar (or where it would go, signed out).
-// resultsHref: relative path from this page to apps/readiness-assessment/my-results/.
-// homeHref: relative path from this page to apps/readiness-assessment/home/.
+// resultsHref: relative path from this page to apps/executive-signature/my-results/.
+// homeHref: relative path from this page to apps/executive-signature/home/.
 // When set, a signed-in visitor's first backLink (normally "Back to the
 // site") points here instead, since a returning participant has somewhere
 // more useful to land than the public homepage. Signed-out visitors keep the
@@ -101,6 +101,7 @@ export function initReadinessNav({ mount, title, backLinks = [], secondaryLinks 
       userMount.hidden = true;
       window.__raAccountIdentity = null;
       window.__raAccountReadiness = null;
+      window.__raIsTsaMember = null;
       window.dispatchEvent(new CustomEvent('ra:account-readiness'));
       return;
     }
@@ -127,10 +128,12 @@ export function initReadinessNav({ mount, title, backLinks = [], secondaryLinks 
       email: user.email || '',
       name: name || user.displayName || ''
     };
-    window.dispatchEvent(new CustomEvent('ra:account-readiness'));
     // TSA access authority is authorized_members, not a field on the users doc,
     // so this asks the same getMyWorkspaces callable the member portal's own
     // nav uses to decide whether to show its Executive Signature workspace link.
+    // Resolved before the readiness event fires, so a listener reading
+    // window.__raIsTsaMember synchronously on that event always sees the
+    // current value rather than a stale one from the previous signed-in user.
     let isTsaMember = false;
     try {
       const workspaces = await getMyWorkspaces();
@@ -138,6 +141,8 @@ export function initReadinessNav({ mount, title, backLinks = [], secondaryLinks 
     } catch (error) {
       isTsaMember = false;
     }
+    window.__raIsTsaMember = isTsaMember;
+    window.dispatchEvent(new CustomEvent('ra:account-readiness'));
     const email = user.email || '';
     const avatar = avatarMarkup(name, email, user.photoURL || '');
     userMount.hidden = false;

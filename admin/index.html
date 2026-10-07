@@ -2837,6 +2837,14 @@
         <button type="button" class="program-pill" data-program="executive-signature">Executive Signature</button>
       </div>
 
+      <span class="nav-group-label" data-admin-nav-group="programs" data-admin-program="tsa">Progress</span>
+      <button class="admin-nav-item" data-admin-tab-scope="programs" data-admin-program="tsa" data-target="section-student-progress">Student Progress</button>
+      <button class="admin-nav-item" data-admin-tab-scope="programs" data-admin-program="tsa" data-target="section-platform-overview">Platform overview</button>
+      <button class="admin-nav-item" data-admin-tab-scope="programs" data-admin-program="tsa" data-target="section-launch-health">Learner readiness</button>
+      <button class="admin-nav-item" data-admin-tab-scope="programs" data-admin-program="tsa" data-target="section-leaderboard">Leaderboard</button>
+      <button class="admin-nav-item" data-admin-tab-scope="programs" data-admin-program="tsa" data-target="section-engagement-insights">Engagement Insights</button>
+      <button class="admin-nav-item" data-admin-tab-scope="programs" data-admin-program="tsa" data-target="section-cohort-analytics">Cohort Analytics</button>
+
       <span class="nav-group-label" data-admin-nav-group="programs" data-admin-program="tsa">Program access</span>
       <button class="admin-nav-item" data-admin-tab-scope="programs" data-admin-program="tsa" data-target="section-access-controls">Visibility &amp; access</button>
 
@@ -2845,14 +2853,6 @@
       <button class="admin-nav-item" data-admin-tab-scope="programs" data-admin-program="tsa" data-target="section-phase1">Phase 1</button>
       <button class="admin-nav-item" data-admin-tab-scope="programs" data-admin-program="tsa" data-target="section-phase2">Phase 2</button>
       <button class="admin-nav-item" data-admin-tab-scope="programs" data-admin-program="tsa" data-target="section-phase3">Phase 3</button>
-
-      <span class="nav-group-label" data-admin-nav-group="programs" data-admin-program="tsa">Progress</span>
-      <button class="admin-nav-item" data-admin-tab-scope="programs" data-admin-program="tsa" data-target="section-student-progress">Student Progress</button>
-      <button class="admin-nav-item" data-admin-tab-scope="programs" data-admin-program="tsa" data-target="section-platform-overview">Platform overview</button>
-      <button class="admin-nav-item" data-admin-tab-scope="programs" data-admin-program="tsa" data-target="section-launch-health">Learner readiness</button>
-      <button class="admin-nav-item" data-admin-tab-scope="programs" data-admin-program="tsa" data-target="section-leaderboard">Leaderboard</button>
-      <button class="admin-nav-item" data-admin-tab-scope="programs" data-admin-program="tsa" data-target="section-engagement-insights">Engagement Insights</button>
-      <button class="admin-nav-item" data-admin-tab-scope="programs" data-admin-program="tsa" data-target="section-cohort-analytics">Cohort Analytics</button>
 
       <span class="nav-group-label" data-admin-nav-group="programs" data-admin-program="tsa">Rewards</span>
       <button class="admin-nav-item" data-admin-tab-scope="programs" data-admin-program="tsa" data-target="section-reward-levels">Levels</button>
@@ -4012,8 +4012,8 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
           </ul>
         </div>
         <div class="student-progress-actions">
-          <a class="small-button secondary-button" href="../apps/readiness-assessment/" target="_blank" rel="noopener">Preview the participant experience</a>
-          <a class="small-button secondary-button" href="../apps/readiness-assessment/research/" target="_blank" rel="noopener">Review the research page</a>
+          <a class="small-button secondary-button" href="../apps/executive-signature/" target="_blank" rel="noopener">Preview the participant experience</a>
+          <a class="small-button secondary-button" href="../apps/executive-signature/research/" target="_blank" rel="noopener">Review the research page</a>
         </div>
       </section>
 
@@ -4081,8 +4081,8 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
           <p class="student-progress-status" id="esConfigStatus" aria-live="polite">Loading configuration…</p>
           <div id="esConfigBody"></div>
           <div class="student-progress-actions" style="margin-top:14px">
-            <a class="small-button secondary-button" href="../apps/readiness-assessment/how-it-works/" target="_blank" rel="noopener">Open the scoring reference</a>
-            <a class="small-button secondary-button" href="../apps/readiness-assessment/?internal=1" target="_blank" rel="noopener">Inspect questions</a>
+            <a class="small-button secondary-button" href="../apps/executive-signature/how-it-works/" target="_blank" rel="noopener">Open the scoring reference</a>
+            <a class="small-button secondary-button" href="../apps/executive-signature/?internal=1" target="_blank" rel="noopener">Inspect questions</a>
           </div>
         </div>
       </section>
@@ -4534,6 +4534,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       searchVerifiedCredentials,
       runAdminAction,
       repairMemberProgramCompletionReward,
+      programCompletionAdjustmentNeeded,
       renameCohort,
       replaceMemberWorkspaceProgress,
       resetMemberWorkspaceProgress,
@@ -4602,6 +4603,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       searchVerifiedCredentials,
       runAdminAction,
       repairMemberProgramCompletionReward,
+      programCompletionAdjustmentNeeded,
       renameCohort,
       replaceMemberWorkspaceProgress,
       resetMemberWorkspaceProgress,
@@ -8607,6 +8609,11 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
     let spAllMembers = [];
     let spAllMembersLoadedAt = 0;
     const SP_MEMBERS_CACHE_MS = 45000;
+    // A learner who looks complete here but fails the server's stricter credential
+    // check (e.g. an inactive membership record) would otherwise be retried on
+    // every single page view. Remembering the failure for this browser session
+    // avoids re-spending a Cloud Function call on the same learner every time.
+    const spCredentialRepairFailedUids = new Set();
     let spExerciseRepairNotice = null;
     let spSort = { col: 'name', dir: 'asc' };
     let spFilter = 'all';
@@ -10834,15 +10841,14 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         }
         const rewardSettings = rewardSettingsResult.status === 'fulfilled' ? rewardSettingsResult.value : null;
         if (rewardSettingsResult.status === 'rejected') console.warn('Reward settings could not be loaded in Student Progress.', rewardSettingsResult.reason);
+        const rewardRepairOptions = { programCompletion: rewardSettings && rewardSettings.mp && rewardSettings.mp.programCompletion, levels: rewardSettings && rewardSettings.levels };
         const repairCandidates = members.filter((member) => {
           if (!member.uid || !spProgramComplete(member) || !fb.repairMemberProgramCompletionReward) return false;
-          return true;
+          if (!fb.programCompletionAdjustmentNeeded) return true;
+          return fb.programCompletionAdjustmentNeeded(member, rewardRepairOptions);
         });
         const repairResults = await Promise.all(repairCandidates.map(async (member) => {
-          const repair = await fb.repairMemberProgramCompletionReward(member.uid, {
-            programCompletion: rewardSettings && rewardSettings.mp && rewardSettings.mp.programCompletion,
-            levels: rewardSettings && rewardSettings.levels
-          });
+          const repair = await fb.repairMemberProgramCompletionReward(member.uid, rewardRepairOptions);
           return { member, repair };
         }));
         let repairedBonuses = 0;
@@ -10853,15 +10859,17 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
           member.workspaceProgress = Object.assign({}, member.workspaceProgress || {}, { rewards: repair.rewards });
         });
         const credentialRepairCandidates = members.filter((member) => {
-          return member.uid && spProgramComplete(member) && !member.credential && fb.repairMemberVerifiedCredential;
+          return member.uid && spProgramComplete(member) && !member.credential && fb.repairMemberVerifiedCredential
+            && !spCredentialRepairFailedUids.has(member.uid);
         });
         const credentialRepairResults = await Promise.allSettled(credentialRepairCandidates.map(async (member) => {
           const repaired = await fb.repairMemberVerifiedCredential(member.uid);
           return { member, repaired };
         }));
         let repairedCredentials = 0;
-        credentialRepairResults.forEach((entry) => {
+        credentialRepairResults.forEach((entry, index) => {
           if (entry.status !== 'fulfilled') {
+            spCredentialRepairFailedUids.add(credentialRepairCandidates[index].uid);
             console.warn('A completed learner credential could not be repaired.', entry.reason);
             return;
           }
@@ -12371,7 +12379,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
                   '<button type="button" class="small-button secondary-button" data-es-config-xlsx="' + escapeHtml(v.versionId) + '">Download XLSX</button>' +
                 '</div></details>';
             }).join('') +
-            '<p class="description" style="margin-top:16px"><strong>How questions are presented:</strong> the order shown above is the fixed definition order, used only to build each attempt&rsquo;s shuffle. Every participant sees these same items in a freshly randomized order each time they start an attempt (a Fisher&ndash;Yates shuffle in <code>apps/readiness-assessment/forms.js</code>), not the order listed here. &ldquo;Direction&rdquo; of <code>+</code> or <code>&minus;</code> means the raw 1&ndash;5 answer is used as-is or reversed (6 minus the answer) before it is averaged into that item&rsquo;s area.</p>';
+            '<p class="description" style="margin-top:16px"><strong>How questions are presented:</strong> the order shown above is the fixed definition order, used only to build each attempt&rsquo;s shuffle. Every participant sees these same items in a freshly randomized order each time they start an attempt (a Fisher&ndash;Yates shuffle in <code>apps/executive-signature/forms.js</code>), not the order listed here. &ldquo;Direction&rdquo; of <code>+</code> or <code>&minus;</code> means the raw 1&ndash;5 answer is used as-is or reversed (6 minus the answer) before it is averaged into that item&rsquo;s area.</p>';
           esConfigVersionsCache = versions;
           bodyEl.querySelectorAll('[data-es-config-csv]').forEach((button) => {
             button.addEventListener('click', () => exportEsConfigVersion(button.dataset.esConfigCsv, 'csv'));

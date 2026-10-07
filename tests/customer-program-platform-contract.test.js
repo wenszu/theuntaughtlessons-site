@@ -7,7 +7,7 @@ const rules = fs.readFileSync(path.join(root, 'firestore.rules'), 'utf8');
 const firebaseConfig = JSON.parse(fs.readFileSync(path.join(root, 'firebase.json'), 'utf8'));
 const indexes = JSON.parse(fs.readFileSync(path.join(root, 'firestore.indexes.json'), 'utf8'));
 const schema = fs.readFileSync(path.join(root, 'docs/CUSTOMER_PROGRAM_PLATFORM_SCHEMA_V1.md'), 'utf8');
-const forms = require(path.join(root, 'apps/readiness-assessment/forms.js'));
+const forms = require(path.join(root, 'apps/executive-signature/forms.js'));
 
 assert.equal(firebaseConfig.firestore.rules, 'firestore.rules');
 assert.equal(firebaseConfig.firestore.indexes, 'firestore.indexes.json');
