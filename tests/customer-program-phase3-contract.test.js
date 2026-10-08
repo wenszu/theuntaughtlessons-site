@@ -41,7 +41,7 @@ assert.ok(persistence.includes('assessment.analytics_projection'), 'completion m
 assert.ok(persistence.includes('assessment.report_generation'), 'full completion must queue report generation');
 assert.ok(persistence.includes('resource-exhausted'), 'full-assessment attempt limits must be enforced');
 assert.ok(functionsIndex.includes('assessmentPersistenceService.persistCompletedAssessment'), 'readiness completion must use Phase 3 persistence');
-assert.ok(assessmentPage.includes('answers:submission.answers||{}'), 'browser must send raw answers to trusted persistence');
+assert.ok(assessmentPage.includes('answers:answersForItems(submission.answers,submission.itemOrder)'), 'browser must send raw answers, limited to the attempt\'s own items, to trusted persistence');
 assert.ok(assessmentPage.includes("noticeVersion:'readiness-privacy-preview@1.0'"), 'browser must send versioned consent');
 
 const responseRules = rules.match(/match \/responseParts\/\{partId\} \{([\s\S]*?)\n      \}/);
