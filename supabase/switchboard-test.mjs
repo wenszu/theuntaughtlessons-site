@@ -5,6 +5,10 @@ import fs from 'fs';
 import { isDeepStrictEqual } from 'util';
 import { boot } from './schema-apply-harness.mjs';
 
+// This file tests migration 2300 as it was: six flags. Later migrations that change the switchboard (2360 adds es_submit and mail)
+// are tested in supabase/switchboard-more-flags-test.mjs, so only the migrations up to 2300 are loaded here.
+process.env.UTL_BASE_ONLY = process.env.UTL_BASE_ONLY || '20261008002300';
+
 const { db, failed } = await boot();
 if (failed) { console.log('\nmigrations did not apply, stopping'); process.exit(1); }
 let pass = 0, fail = 0;

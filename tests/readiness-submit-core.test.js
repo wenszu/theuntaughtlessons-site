@@ -598,6 +598,74 @@ async function main() {
     eq(invalid.world.calls.length, 0, 'an invalid request calls nothing at all');
   }
 
+  // ---- 4c. the hand written checks give the same answers as the regular expressions they replaced ----------------------------
+  {
+    const OLD = {
+      local: /^http:\/\/(localhost|127\.0\.0\.1)(:\d{1,5})?$/,
+      email: /^[A-Za-z0-9!#$%&*+\/=?^_{|}~.-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+$/,
+      json: (value) => /^application\/json\b/i.test(String(value).trim()),
+      control: (text) => text.replace(/[\x00-\x1f\x7f]/g, ' '),
+      clean: (text) => text.replace(/[\x00-\x1f\x7f]/g, ' ').replace(/\s+/g, ' ').trim(),
+      split: (text) => text.split(/\s+/),
+      slashes: (text) => text.replace(/\/+$/, '')
+    };
+    const spaces = [9, 10, 11, 12, 13, 32, 160, 5760, 8192, 8193, 8194, 8195, 8196, 8197, 8198, 8199, 8200, 8201, 8202, 8232, 8233, 8239, 8287, 12288, 65279].map((c) => String.fromCharCode(c));
+    // Every character the old class treated as whitespace is treated as whitespace now, and nothing else is (checked over all 65536 codes).
+    const oldSpace = /\s/;
+    for (let code = 0; code < 65536; code += 1) {
+      const character = String.fromCharCode(code);
+      if (oldSpace.test(character) !== core.isSpaceCode(code)) { ok(false, 'whitespace class differs at code ' + code); }
+      if (/[\x00-\x1f\x7f]/.test(character) !== core.isControlCode(code)) { ok(false, 'control class differs at code ' + code); }
+    }
+    ok(true, 'whitespace and control character classes agree with the old patterns over all 65536 codes');
+    eq(spaces.every((c) => core.isSpaceCode(c.charCodeAt(0))), true, 'the listed unicode spaces are all whitespace');
+    const pool = ['a', 'b', 'Z', '0', '5', '9', '.', '-', '_', '+', '/', ':', '@', ' ', '\t', '\n', '\r', '\v', '\f', String.fromCharCode(0), String.fromCharCode(127), String.fromCharCode(160), String.fromCharCode(8195),
+      String.fromCharCode(8232), String.fromCharCode(12288), String.fromCharCode(65279), String.fromCharCode(233), '"', "'", '`', '\\', '<', ',', ';', '(', 'http://', 'localhost', '127.0.0.1', 'application/json', 'json', ':3000', '::', '%', '[', ']', 'e', 'g', 'n'];
+    const rnd = mulberry32(777);
+    const word = () => Array.from({ length: 1 + Math.floor(rnd() * 7) }, () => pool[Math.floor(rnd() * pool.length)]).join('');
+    for (let round = 0; round < 6000; round += 1) {
+      const text = word();
+      eq(core.isLocalOrigin(text), OLD.local.test(text), 'local origin agrees');
+      eq(core.isValidEmail(text), OLD.email.test(text), 'email agrees for ' + JSON.stringify(text));
+      eq(core.replaceControlChars(text), OLD.control(text), 'control replacement agrees');
+      eq(core.cleanName(text), OLD.clean(text), 'name cleaning agrees for ' + JSON.stringify(text));
+      eq(core.splitOnWhitespace(text), OLD.split(text), 'whitespace split agrees for ' + JSON.stringify(text));
+      eq(core.stripTrailingSlashes(text), OLD.slashes(text), 'trailing slash removal agrees');
+      eq(core.isJsonContentType(text), OLD.json(text), 'json content type agrees for ' + JSON.stringify(text));
+    }
+    for (const text of ['http://localhost', 'http://localhost:1', 'http://localhost:12345', 'http://localhost:123456', 'http://localhost:', 'http://127.0.0.1:8080', 'http://127.0.0.1.', 'http://localhost/', 'https://localhost',
+      'http://LOCALHOST', 'http://localhost:0x50', 'http://localhost :80', 'http://localhost:80\n', 'a@b.co', 'a@b', 'a@b.', 'a@.b', 'a@b..c', '@b.co', 'a@@b.co', 'a b@b.co', 'a\tb@b.co', 'a\nb@b.co', 'a@b.co\n', 'a' + String.fromCharCode(0) + '@b.co',
+      'a' + String.fromCharCode(127) + '@b.co', 'a' + String.fromCharCode(160) + '@b.co', 'a@b.co' + String.fromCharCode(8195), 'a@b-c.co', 'a@-b.co', 'a@b_c.co']) {
+      eq(core.isLocalOrigin(text), OLD.local.test(text), 'local origin: ' + JSON.stringify(text));
+      eq(core.isValidEmail(text), OLD.email.test(text), 'email: ' + JSON.stringify(text));
+    }
+    for (const type of ['application/json', 'APPLICATION/JSON', 'application/json; charset=utf-8', 'application/json;charset=x', 'application/jsonx', 'application/json2', 'application/json_', 'application/json-patch', 'application/json ', ' application/json', 'application/json\t', 'application/jsonp', 'application/x-json', 'text/plain', '']) {
+      eq(core.isJsonContentType(type), OLD.json(type), 'content type: ' + JSON.stringify(type));
+    }
+    // The cases the owner asked for, said out loud.
+    eq(core.cleanName('Ada\tLovelace'), 'Ada Lovelace', 'a tab in a name becomes a space');
+    eq(core.cleanName('Ada\nLovelace'), 'Ada Lovelace', 'a newline in a name becomes a space');
+    eq(core.cleanName('Ada' + String.fromCharCode(0) + 'Lovelace'), 'Ada Lovelace', 'NUL in a name becomes a space');
+    eq(core.cleanName('Ada' + String.fromCharCode(127) + 'Lovelace'), 'Ada Lovelace', 'DEL in a name becomes a space');
+    eq(core.cleanName('Ada' + String.fromCharCode(160, 8195, 12288, 65279) + 'Lovelace'), 'Ada Lovelace', 'no break, em and ideographic spaces and the byte order mark collapse to one space');
+    eq(core.cleanName(String.fromCharCode(8232) + 'Ada ' + String.fromCharCode(8233)), 'Ada', 'line and paragraph separators are trimmed');
+    eq(core.splitName('Ada Lovelace  King'), { firstName: 'Ada', lastName: 'Lovelace King', displayName: 'Ada Lovelace  King' }, 'splitName keeps its result');
+    eq(core.stripTrailingSlashes('https://x.supabase.co///'), 'https://x.supabase.co', 'trailing slashes are removed');
+    const withSpaces = core.validateSubmission(validBody('free', { source: { channel: ' we' + String.fromCharCode(0) + 'b\t' } }), NOW);
+    eq(withSpaces.value.source.channel, 'we b', 'a channel with control characters is cleaned');
+    // An address of 17 or 100 characters with every unicode space is not an address.
+    eq(core.ipBucket(String.fromCharCode(160) + '203.0.113.7' + String.fromCharCode(8195)), '203.0.113.7', 'surrounding unicode spaces around an address are trimmed');
+  }
+
+  // No function folder that the deploy tool packs may contain a backslash character.
+  for (const folder of ['readiness-submit', 'result-emails', 'weekly-org-reports']) {
+    const dir = path.join(root, 'supabase/functions', folder);
+    ok(fs.existsSync(dir), folder + ' exists');
+    const files = fs.readdirSync(dir).filter((name) => fs.statSync(path.join(dir, name)).isFile());
+    ok(files.length > 0, folder + ' has files');
+    for (const name of files) ok(!fs.readFileSync(path.join(dir, name), 'utf8').includes(String.fromCharCode(92)), folder + '/' + name + ' contains no backslash');
+  }
+
   // ---- 5. the browser client and the files --------------------------------------------------------------------------------
   {
     const store = (value) => ({ getItem: (key) => (key === 'utl_es' ? value : null) });
@@ -637,7 +705,7 @@ async function main() {
   ok(!fs.readFileSync(path.join(root, 'supabase/rollbacks/20261008002330_readiness_submit_down.sql'), 'utf8').includes('\\'), 'the rollback has no backslash');
   ok(/--no-verify-jwt/.test(fs.readFileSync(path.join(funcDir, 'index.ts'), 'utf8')), 'index.ts says it must be deployed with the gateway token check off');
   const page = fs.readFileSync(path.join(root, 'apps/executive-signature/index.html'), 'utf8');
-  ok(!page.includes('readiness-submit-client'), 'the page is not switched yet (the client is a draft until the owner decides)');
+  ok(page.includes("import { recordReadinessCompletion as recordReadinessCompletionChoice } from '../../assets/readiness-submit-client.js';") && page.includes('window.raRecordCompletion = recordReadinessCompletionChoice;'), 'the page loads the client (browser wiring); with no switch the client calls the Firebase function');
   ok(!/readiness-submit/.test(fs.readFileSync(path.join(root, 'assets/firebase.js'), 'utf8')), 'firebase.js does not mention the new function');
 
   console.log(checks + ' checks passed');

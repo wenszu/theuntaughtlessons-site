@@ -39,10 +39,26 @@ function queuePendingInbox(type, payload) {
   writePendingInbox(items);
 }
 
-// Best effort Firebase ID token for a signed in member, capped at two seconds. Never throws.
+// True while the browser signs people in with Supabase Auth (localStorage utl_auth, the same switch assets/firebase.js reads).
+function supabaseSignInOn() {
+  try {
+    return localStorage.getItem("utl_auth") === "supabase";
+  } catch {
+    return false;
+  }
+}
+
+// Best effort sign in token for a signed in member, capped at two seconds. Never throws. With Supabase sign in on, the session lives in
+// Supabase Auth and there is no Firebase user, so the token comes from the signed in user the rest of the site uses (getSignedInUser);
+// otherwise it is the Firebase ID token, exactly as before.
 async function getFeedbackToken() {
   let timer = null;
   try {
+    if (supabaseSignInOn()) {
+      const lookup = Promise.resolve(getSignedInUser()).then((user) => (user && typeof user.getIdToken === "function" ? user.getIdToken() : ""));
+      const cap = new Promise((resolve) => { timer = setTimeout(() => resolve(""), TOKEN_WAIT_MS); });
+      return (await Promise.race([lookup, cap])) || "";
+    }
     if (!auth || !auth.currentUser) return "";
     const lookup = Promise.resolve(auth.currentUser.getIdToken());
     const cap = new Promise((resolve) => { timer = setTimeout(() => resolve(""), TOKEN_WAIT_MS); });

@@ -39,14 +39,13 @@ export const MAX_BODY_BYTES = 32 * 1024;
 export const DATABASE_TIMEOUT_MS = 12000;
 export const AUTH_TIMEOUT_MS = 5000;
 export const ALLOWED_ORIGINS = ["https://theuntaughtlessons.com", "https://www.theuntaughtlessons.com"];
-// http only for a local test page: localhost or 127.0.0.1 with any port.
-const LOCAL_ORIGIN = /^http:\/\/(localhost|127\.0\.0\.1)(:\d{1,5})?$/;
 export const GENERIC_ERROR = "Could not save your result.";
 export const SIGN_IN_REQUIRED = "Sign in required.";
 export const STRING_FIELD_MAX_LENGTH = 200;
 // Printable ASCII only: no control characters, no space, no quotes (single, double or backtick), no backslash, no angle
-// brackets, comma or semicolon. The same pattern is checked again in the database function.
-const EMAIL_PATTERN = /^[A-Za-z0-9!#$%&*+\/=?^_{|}~.-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+$/;
+// brackets, comma or semicolon. The same rule is checked again in the database function.
+const EMAIL_LOCAL_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!#$%&*+/=?^_{|}~.-";
+const EMAIL_DOMAIN_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-";
 const SAFE_SOURCE_PATTERN = /^[A-Za-z0-9_-]{1,60}$/;
 const QUICK_CHECK_MIN_SECONDS = 20;
 const STALE_START_MS = 24 * 60 * 60 * 1000;
@@ -58,10 +57,111 @@ const PERSON_NAMESPACE = "6f1b2c3d-4e5f-4a6b-8c7d-9e0f1a2b3c4d";
 
 // ---------------------------------------------------------------------------
 // Small helpers
+//
+// This file contains no backslash character at all (the deploy tool corrupts it), so nothing here is a regular expression
+// with an escape. The helpers below do the same work with plain character checks.
+
+const DIGITS = "0123456789";
+
+// True when the text is only the characters of "allowed" (and not empty).
+function onlyChars(text, allowed) {
+  if (!text) return false;
+  for (const character of text) if (!allowed.includes(character)) return false;
+  return true;
+}
+
+// True when the text is 1 to maxLength ASCII digits.
+function digitsBetween(text, maxLength) {
+  return text.length >= 1 && text.length <= maxLength && onlyChars(text, DIGITS);
+}
+
+// The characters the JavaScript whitespace class matches (tab, line feed, vertical tab, form feed, carriage return, space,
+// no break space, ogham space, the en and em spaces up to hair space, line and paragraph separators, narrow no break space,
+// medium mathematical space, ideographic space, and the byte order mark). Listed by number so no escape is needed.
+export function isSpaceCode(code) {
+  return (code >= 9 && code <= 13) || code === 32 || code === 160 || code === 5760 || (code >= 8192 && code <= 8202)
+    || code === 8232 || code === 8233 || code === 8239 || code === 8287 || code === 12288 || code === 65279;
+}
+
+// Control characters: the codes 0 to 31 and 127.
+export function isControlCode(code) {
+  return code < 32 || code === 127;
+}
+
+// Every control character becomes a space.
+export function replaceControlChars(text) {
+  let out = "";
+  for (let index = 0; index < text.length; index += 1) out += isControlCode(text.charCodeAt(index)) ? " " : text[index];
+  return out;
+}
+
+// Every run of whitespace becomes one space.
+export function collapseWhitespace(text) {
+  let out = "";
+  let inRun = false;
+  for (let index = 0; index < text.length; index += 1) {
+    if (isSpaceCode(text.charCodeAt(index))) {
+      if (!inRun) out += " ";
+      inRun = true;
+    } else {
+      out += text[index];
+      inRun = false;
+    }
+  }
+  return out;
+}
+
+// Splits on runs of whitespace, the way splitting on a whitespace pattern does (a leading or trailing run gives an empty piece).
+export function splitOnWhitespace(text) {
+  return collapseWhitespace(text).split(" ");
+}
+
+// Removes every slash at the end.
+export function stripTrailingSlashes(text) {
+  let end = text.length;
+  while (end > 0 && text[end - 1] === "/") end -= 1;
+  return text.slice(0, end);
+}
+
+// http only for a local test page: localhost or 127.0.0.1 with any port (1 to 5 digits).
+export function isLocalOrigin(value) {
+  const text = String(value || "");
+  if (!text.startsWith("http://")) return false;
+  const rest = text.slice(7);
+  const colon = rest.indexOf(":");
+  const host = colon < 0 ? rest : rest.slice(0, colon);
+  if (host !== "localhost" && host !== "127.0.0.1") return false;
+  return colon < 0 || digitsBetween(rest.slice(colon + 1), 5);
+}
+
+// A plain ASCII address: one at sign, a local part of the allowed characters, and a domain of two or more dot separated
+// parts made of letters, digits and dashes.
+export function isValidEmail(text) {
+  const at = text.indexOf("@");
+  if (at < 1 || text.indexOf("@", at + 1) >= 0) return false;
+  if (!onlyChars(text.slice(0, at), EMAIL_LOCAL_CHARS)) return false;
+  const labels = text.slice(at + 1).split(".");
+  return labels.length >= 2 && labels.every((label) => onlyChars(label, EMAIL_DOMAIN_CHARS));
+}
+
+// A dotted IPv4 shape: four parts of 1 to 3 digits. Returns the four numbers, or null.
+function dottedQuad(text) {
+  const parts = text.split(".");
+  return parts.length === 4 && parts.every((part) => digitsBetween(part, 3)) ? parts.map(Number) : null;
+}
+
+// True for a content type that is application/json (any case), with or without parameters. The text after "json" must not
+// continue the word (letters, digits or an underscore).
+export function isJsonContentType(value) {
+  const text = String(value || "").trim().toLowerCase();
+  if (!text.startsWith("application/json")) return false;
+  const next = text.slice(16, 17);
+  return next === "" || !(next === "_" || DIGITS.includes(next) || (next >= "a" && next <= "z"));
+}
 
 export function originAllowed(origin) {
   const value = String(origin || "");
-  return ALLOWED_ORIGINS.includes(value) || LOCAL_ORIGIN.test(value);
+  return ALLOWED_ORIGINS.includes(value) || isLocalOrigin(value);
 }
 
 function readHeader(headers, name) {
@@ -206,18 +306,17 @@ export function ipBucket(raw) {
   if (value.startsWith("[") && value.endsWith("]")) value = value.slice(1, -1);
   const zone = value.indexOf("%");
   if (zone >= 0) value = value.slice(0, zone);
-  const four = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/.exec(value);
-  if (four) return four.slice(1).every((part) => Number(part) <= 255) ? four.slice(1).map(Number).join(".") : "";
+  const four = dottedQuad(value);
+  if (four) return four.every((part) => part <= 255) ? four.join(".") : "";
   if (!value.includes(":")) return "";
   // An IPv4 address mapped into IPv6 is that IPv4 address.
-  const mapped = /^::ffff:(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$/.exec(value);
-  if (mapped) return ipBucket(mapped[1]);
+  if (value.startsWith("::ffff:") && dottedQuad(value.slice(7))) return ipBucket(value.slice(7));
   // A trailing dotted IPv4 part becomes two hex groups.
-  const tail = /^(.*:)(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/.exec(value);
-  if (tail) {
-    const octets = tail.slice(2).map(Number);
+  const lastColon = value.lastIndexOf(":");
+  const octets = dottedQuad(value.slice(lastColon + 1));
+  if (octets) {
     if (octets.some((n) => n > 255)) return "";
-    value = tail[1] + ((octets[0] << 8) | octets[1]).toString(16) + ":" + ((octets[2] << 8) | octets[3]).toString(16);
+    value = value.slice(0, lastColon + 1) + ((octets[0] << 8) | octets[1]).toString(16) + ":" + ((octets[2] << 8) | octets[3]).toString(16);
   }
   const halves = value.split("::");
   if (halves.length > 2) return "";
@@ -231,7 +330,7 @@ export function ipBucket(raw) {
   } else {
     groups = left;
   }
-  if (groups.length !== 8 || groups.some((group) => !/^[0-9a-f]{1,4}$/.test(group))) return "";
+  if (groups.length !== 8 || groups.some((group) => group.length > 4 || !onlyChars(group, "0123456789abcdef"))) return "";
   return groups.slice(0, 4).map((group) => group.padStart(4, "0")).join(":") + "::/64";
 }
 
@@ -253,13 +352,13 @@ function textField(value, label, required) {
   return { value: trimmed };
 }
 
-function cleanName(value) {
-  return value.replace(/[\x00-\x1f\x7f]/g, " ").replace(/\s+/g, " ").trim();
+export function cleanName(value) {
+  return collapseWhitespace(replaceControlChars(value)).trim();
 }
 
-function splitName(displayName) {
+export function splitName(displayName) {
   if (!displayName) return { firstName: "", lastName: "", displayName: "" };
-  const parts = displayName.split(/\s+/);
+  const parts = splitOnWhitespace(displayName);
   const firstName = parts.shift() || "";
   return { firstName: firstName.slice(0, 100), lastName: parts.join(" ").slice(0, 100), displayName };
 }
@@ -277,7 +376,7 @@ export function validateSubmission(body, nowMs) {
   const emailField = textField(input.email, "email", true);
   if (emailField.error) return { ok: false, error: emailField.error };
   const email = emailField.value.toLowerCase();
-  if (!EMAIL_PATTERN.test(email)) return { ok: false, error: "Enter a valid email address." };
+  if (!isValidEmail(email)) return { ok: false, error: "Enter a valid email address." };
   const tier = String(typeof input.tier === "string" ? input.tier : "").trim().toLowerCase();
   if (tier !== "free" && tier !== "full") return { ok: false, error: "Tier must be the quick check or the full report." };
   const nameField = textField(input.name, "name", false);
@@ -326,7 +425,7 @@ export function validateSubmission(body, nowMs) {
   const sourceInput = cleaned && typeof cleaned === "object" && !Array.isArray(cleaned) ? cleaned : {};
   let channel = "web";
   if (typeof sourceInput.channel === "string" && sourceInput.channel.trim()) {
-    channel = sourceInput.channel.replace(/[\x00-\x1f\x7f]/g, " ").trim();
+    channel = replaceControlChars(sourceInput.channel).trim();
     if (channel.length > 80) return { ok: false, error: "A source field is too long." };
   }
   const source = {
@@ -518,7 +617,7 @@ export async function handleReadinessSubmit(request, deps) {
   if (method === "OPTIONS") return finish(204, null, "preflight");
   if (method !== "POST") return finish(405, { ok: false, error: "POST only." }, "method", { Allow: "POST, OPTIONS" });
   if (!routeKnown(request.pathname)) return finish(404, { ok: false, error: "Unknown route." }, "route");
-  if (!/^application\/json\b/i.test(readHeader(request.headers, "content-type").trim())) {
+  if (!isJsonContentType(readHeader(request.headers, "content-type"))) {
     return finish(415, { ok: false, error: "JSON only." }, "content-type");
   }
 
@@ -551,7 +650,7 @@ export async function handleReadinessSubmit(request, deps) {
   } catch (error) {
     return failure(500, "build");
   }
-  const supabaseUrl = String(env.SUPABASE_URL || SUPABASE_URL).replace(/\/+$/, "");
+  const supabaseUrl = stripTrailingSlashes(String(env.SUPABASE_URL || SUPABASE_URL));
   const settings = {
     fetchImpl: deps.fetchImpl,
     supabaseUrl,

@@ -619,6 +619,136 @@ async function listAuthorizedMembers() {
   return adminConsoleReadRoute("listAuthorizedMembers", [], () => getDocs(collection(requireFirestore(), "authorized_members")));
 }
 
+// -- question bank (admin section "Assessment content review"; docs/SUPABASE_QUESTION_BANK.md) -------------------------------
+// Three new functions, not yet called by the page (the page change is listed in the doc). They use the same switches as the other staff
+// screens: the reads follow utl_server_reads / ?utl_server=shadow, the review write follows utl_server_writes / ?utl_server=shadow.
+//   getAssessmentItemHealth()          COUNTS ONLY per question, version and scope (assets/supabase-question-bank.js). Firebase mode works
+//                                      the same numbers out of the Firestore attempt documents, with the same rules as the database.
+//   listAssessmentItemReviews()        a snapshot of the review documents (what the page read with getDocs).
+//   saveAssessmentItemReview(id, doc)  the setDoc of the page; with the writes flag on, Supabase is written INSTEAD of Firestore.
+let questionBankPromise = null;
+
+function loadQuestionBank() {
+  if (!questionBankPromise) {
+    questionBankPromise = import("./supabase-question-bank.js").then((module) => ({
+      module,
+      api: module.createQuestionBank({ supabaseUrl: SUPABASE_URL, publishableKey: SUPABASE_PUBLISHABLE_KEY, getIdToken: siteIdToken })
+    })).catch((error) => {
+      questionBankPromise = null;
+      throw error;
+    });
+  }
+  return questionBankPromise;
+}
+
+// Resolves { ok: true, value, compare } or { ok: false, error }; never rejects and never waits longer than SUPABASE_WAIT_MS.
+async function runSupabaseQuestionBank(run) {
+  let timer = null;
+  try {
+    const layer = await loadQuestionBank();
+    const value = await Promise.race([
+      run(layer.api),
+      new Promise((resolve, reject) => {
+        timer = window.setTimeout(() => {
+          reject(Object.assign(new Error("The data service did not answer in time."), { code: "network/timeout" }));
+        }, SUPABASE_WAIT_MS);
+      })
+    ]);
+    return { ok: true, value, compare: layer.module.compareQuestionBankRead };
+  } catch (error) {
+    return { ok: false, error };
+  } finally {
+    if (timer !== null) window.clearTimeout(timer);
+  }
+}
+
+// An empty Supabase answer may only mean it has not caught up yet, so Firestore is asked then (the same rule as the other reads).
+const QUESTION_BANK_USABLE = {
+  getAssessmentItemHealth: (value) => Boolean(value) && Array.isArray(value.items) && Number(value.attempts && value.attempts.all) > 0,
+  listAssessmentItemReviews: (value) => Boolean(value) && Number(value.size) > 0
+};
+
+async function questionBankReadRoute(name, supabaseRun, firebaseCall) {
+  const mode = adminReadMode();
+  if (mode === "firebase") return firebaseCall();
+  if (mode === "supabase") {
+    const remote = await runSupabaseQuestionBank(supabaseRun);
+    if (remote.ok && QUESTION_BANK_USABLE[name](remote.value)) return remote.value;
+    console.warn(`Question bank read ${name}: Supabase gave no usable answer (${String((remote.error && remote.error.code) || (remote.ok ? "empty" : "unknown"))}); the Firebase answer is used.`);
+    return firebaseCall();
+  }
+  // Shadow: the Supabase call starts first so both run together; the Firebase answer is what the page gets, or its error.
+  const pending = runSupabaseQuestionBank(supabaseRun);
+  let firebaseValue;
+  try {
+    firebaseValue = await firebaseCall();
+  } catch (error) {
+    pending.catch(() => {});
+    throw error;
+  }
+  pending.then((remote) => {
+    if (!remote.ok) {
+      console.warn(`Question bank read shadow ${name}: Supabase did not answer (${String((remote.error && remote.error.code) || "unknown")}).`);
+      return;
+    }
+    const result = remote.compare(name, firebaseValue, remote.value);
+    console.warn(result.same
+      ? `Question bank read shadow ${name}: match`
+      : `Question bank read shadow ${name}: ${result.differences.length} difference(s) - ${result.differences.join("; ")}`);
+  }).catch(() => {});
+  return firebaseValue;
+}
+
+async function getAssessmentItemHealthFromFirebase() {
+  const readyDb = requireFirestore();
+  const user = await getSignedInUser();
+  if (!user) throw new Error("An administrator session is required.");
+  const [attemptSnapshot, reviewSnapshot] = await Promise.all([
+    getDocs(collection(readyDb, "assessment_item_attempts")),
+    getDocs(collection(readyDb, "assessment_item_reviews"))
+  ]);
+  const reviews = {};
+  reviewSnapshot.forEach((entry) => { reviews[entry.id] = entry.data() || {}; });
+  const module = await import("./supabase-question-bank.js");
+  return module.summarizeItemAttempts(attemptSnapshot.docs.map((entry) => Object.assign({ id: entry.id }, entry.data() || {})), reviews);
+}
+
+async function getAssessmentItemHealth() {
+  return questionBankReadRoute("getAssessmentItemHealth", (api) => api.getItemHealth(), getAssessmentItemHealthFromFirebase);
+}
+
+async function listAssessmentItemReviews() {
+  return questionBankReadRoute("listAssessmentItemReviews", (api) => api.listItemReviews(), () => getDocs(collection(requireFirestore(), "assessment_item_reviews")));
+}
+
+// The setDoc of the page's qbSaveReview, field for field.
+async function saveAssessmentItemReviewFromFirebase(questionId, review = {}) {
+  await setDoc(doc(requireFirestore(), "assessment_item_reviews", questionId), {
+    questionId,
+    reviewStatus: review.reviewStatus,
+    currentNote: review.currentNote,
+    questionVersion: review.questionVersion,
+    bankRelease: review.bankRelease,
+    decisionLog: review.decisionLog,
+    updatedAt: serverTimestamp()
+  }, { merge: true });
+}
+
+async function saveAssessmentItemReview(questionId, review = {}) {
+  const mode = staffWriteMode();
+  if (mode === "firebase") return saveAssessmentItemReviewFromFirebase(questionId, review);
+  // Wait for the sign in to be restored, so the token is there when the Supabase request is made.
+  try { await getSignedInUser(); } catch { /* the Firebase run reports its own sign in problem */ }
+  // The database builds the decision log entry itself, so only the status, note, version and bank release are sent.
+  if (mode === "supabase") return (await loadQuestionBank()).api.saveItemReview(questionId, review, {});
+  await saveAssessmentItemReviewFromFirebase(questionId, review);
+  runSupabaseQuestionBank((api) => api.saveItemReview(questionId, review, { dryRun: true })).then((remote) => {
+    console.warn(remote.ok
+      ? "Question bank write shadow saveAssessmentItemReview: the database function accepted the change (dry run, nothing written)."
+      : `Question bank write shadow saveAssessmentItemReview: the database function did not accept it (${String((remote.error && (remote.error.sqlstate || remote.error.code)) || "unknown")}).`);
+  }).catch(() => {});
+}
+
 // -- read merges (Firestore is the base; Supabase may only add) ---------------------------------
 
 function timeMillis(value) {
@@ -824,13 +954,53 @@ async function settleDataSourceAtPageLoad() {
 }
 settleDataSourceAtPageLoad();
 
-async function runAdminAction(action, payload = {}) {
+async function runAdminActionFromFirebase(action, payload = {}) {
   const callable = httpsCallable(functions, "runAdminAction");
   const result = await callable({
     action: String(action || "").trim(),
     payload: payload && typeof payload === "object" ? payload : {}
   });
   return result && result.data ? result.data : { ok: true };
+}
+
+// -- callables with a Supabase twin and no read or write module of their own (docs/SUPABASE_BROWSER_WIRING.md) -------------------
+// The emails the admin console sends, the member's certificate, and the "send me my results link" step. Each public function keeps the
+// Firebase code unchanged (the <name>FromFirebase function) and runs it unless the browser switch below says "supabase":
+//   runAdminAction             utl_mail = "supabase"  -> Edge Function admin-mail (the switchboard flag mail). No shadow: an email cannot be sent twice.
+//   issueVerifiedCredential    utl_server_writes = "supabase" -> database function issue_my_credential. The shadow value and ?utl_server=shadow
+//                              stay on Firebase: this function has no dry run and a second call would issue a second certificate.
+//   requestReadinessAccess     utl_es = "supabase" AND utl_auth = "supabase" -> Edge Function readiness-access (see the function).
+// A failure in Supabase mode is thrown to the caller: there is no fallback to Firebase, because a second path could send or issue twice.
+let supabaseCallablesPromise = null;
+
+function browserFlagIs(key, value) {
+  try {
+    return window.localStorage.getItem(key) === value;
+  } catch {
+    return false;
+  }
+}
+
+function loadSupabaseCallables() {
+  if (!supabaseCallablesPromise) {
+    supabaseCallablesPromise = import("./supabase-callables.js").then((module) => module.createCallables({
+      supabaseUrl: SUPABASE_URL,
+      publishableKey: SUPABASE_PUBLISHABLE_KEY,
+      getIdToken: siteIdToken
+    })).catch((error) => {
+      supabaseCallablesPromise = null;
+      throw error;
+    });
+  }
+  return supabaseCallablesPromise;
+}
+
+async function runAdminAction(action, payload = {}) {
+  if (!browserFlagIs("utl_mail", "supabase")) return runAdminActionFromFirebase(action, payload);
+  // Wait for the sign in to be restored, so the token is there when the request is made.
+  try { await getSignedInUser(); } catch { /* the request reports its own sign in problem */ }
+  const answer = await (await loadSupabaseCallables()).adminMail(action, payload);
+  return answer && typeof answer === "object" ? answer : { ok: true };
 }
 
 async function setEmergencyCredential(email, password) {
@@ -842,16 +1012,26 @@ async function setEmergencyCredential(email, password) {
   return result && result.data ? result.data : { ok: true };
 }
 
-async function issueVerifiedCredential() {
+async function issueVerifiedCredentialFromFirebase() {
   const callable = httpsCallable(functions, "issueVerifiedCredential");
   const result = await callable({});
   return result && result.data ? result.data : null;
 }
 
-async function repairMemberVerifiedCredential(userId) {
+async function issueVerifiedCredential() {
+  if (!browserFlagIs(STAFF_WRITE_FLAG_KEY, "supabase")) return issueVerifiedCredentialFromFirebase();
+  try { await getSignedInUser(); } catch { /* the request reports its own sign in problem */ }
+  return (await loadSupabaseCallables()).issueMyCredential();
+}
+
+async function repairMemberVerifiedCredentialFromFirebase(userId) {
   const callable = httpsCallable(functions, "repairMemberVerifiedCredential");
   const result = await callable({ userId });
   return result && result.data ? result.data : null;
+}
+
+async function repairMemberVerifiedCredential(userId) {
+  return staffWriteRoute("repairMemberVerifiedCredential", [userId], () => repairMemberVerifiedCredentialFromFirebase(userId));
 }
 
 // -- staff writes: shadow and Supabase-first (waves 6 and 7, docs/SUPABASE_PLAN_SERVERS_AND_ADMIN.md) ---------------------
@@ -890,7 +1070,8 @@ function loadStaffWrites() {
       writes: module.createAdminWrites({
         supabaseUrl: SUPABASE_URL,
         publishableKey: SUPABASE_PUBLISHABLE_KEY,
-        getIdToken: (forceRefresh) => auth.currentUser && auth.currentUser.getIdToken(forceRefresh === true)
+        // The same token as the read modules: the Supabase Auth token when utl_auth is "supabase", otherwise the Firebase one.
+        getIdToken: siteIdToken
       }),
       compare: module.compareStaffWrite,
       describe: module.describeStaffWrite
@@ -1214,12 +1395,17 @@ async function getSignedInUser() {
   });
 }
 
-async function getOrganizationConsole(organizationId = "") {
+async function getOrganizationConsoleFromFirebase(organizationId = "") {
   const user = await getSignedInUser();
   if (!user) throw new Error("Please sign in to open the organization console.");
   const callable = httpsCallable(functions, "getOrganizationConsole");
   const result = await callable({ organizationId: String(organizationId || "").trim().toLowerCase() });
   return result && result.data ? result.data : null;
+}
+
+// The sponsor page and the administrator preview. Follows the staff read flags (utl_server_reads, ?utl_server=shadow): see adminReadRoute.
+async function getOrganizationConsole(organizationId = "") {
+  return adminReadRoute("getOrganizationConsole", [organizationId], () => getOrganizationConsoleFromFirebase(organizationId));
 }
 
 async function getMyOrganizationAccess() {
@@ -1418,12 +1604,16 @@ async function repairMemberExerciseProgress(userId) {
   return result && result.data ? result.data : null;
 }
 
-async function checkOrganizationRepEmail(email) {
+async function checkOrganizationRepEmailFromFirebase(email) {
   const user = await getSignedInUser();
   if (!user) throw new Error("Please sign in with a UTL administrator account.");
   const callable = httpsCallable(functions, "checkOrganizationRepEmail");
   const result = await callable({ email });
   return result && result.data ? result.data : null;
+}
+
+async function checkOrganizationRepEmail(email) {
+  return adminReadRoute("checkOrganizationRepEmail", [email], () => checkOrganizationRepEmailFromFirebase(email));
 }
 
 async function saveOrganizationAccessMemberFromFirebase(payload = {}) {
@@ -1689,6 +1879,21 @@ async function checkReadinessAccountEmail(email) {
   const callable = httpsCallable(functions, "checkReadinessAccountEmail");
   const result = await callable({ email });
   return result && result.data ? result.data : { ok: false, hasResult: false };
+}
+
+// The "send me a link to my results" form of the My Results page, in one call. Firebase: the check and then the link, exactly the two
+// steps the page took before (it throws what they throw, and the page ignores it). With utl_es and utl_auth both "supabase": the Edge
+// Function readiness-access does both on the server and always answers { ok: true }, so the caller learns nothing about the address.
+// The link it sends is a Supabase Auth link, which the page only understands while utl_auth is "supabase", hence both switches.
+async function requestReadinessAccess(email) {
+  if (browserFlagIs("utl_es", "supabase") && supabaseAuthActive()) {
+    await (await loadSupabaseCallables()).readinessAccess(email);
+    try { window.localStorage.setItem("emailForSignIn", email); } catch { /* the page then asks for the address */ }
+    return { ok: true };
+  }
+  const result = await checkReadinessAccountEmail(email);
+  if (result && result.hasResult) await sendReadinessAccessLink(email);
+  return result;
 }
 
 // "Email me this result": the server finds the stored attempt, renders the email itself
@@ -3743,6 +3948,9 @@ export {
   getAllStabilityEvents,
   getCohortDetails,
   listAuthorizedMembers,
+  getAssessmentItemHealth,
+  listAssessmentItemReviews,
+  saveAssessmentItemReview,
   setCohortDetails,
   renameCohort,
   getGlobalFeedbackSetting,
@@ -3781,6 +3989,7 @@ export {
   sendReadinessAccessLink,
   recordReadinessCompletion,
   checkReadinessAccountEmail,
+  requestReadinessAccess,
   sendMyResultsEmail,
   sendReadinessResultEmail,
   saveUserProgress,

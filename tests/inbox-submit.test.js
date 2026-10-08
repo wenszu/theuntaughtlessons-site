@@ -337,7 +337,7 @@ function loadPage({ responder = ANSWERS.ok, href = 'https://www.theuntaughtlesso
   }
 
   // ---------- feedback widget ----------
-  function loadWidget({ responder = ANSWERS.ok, auth, href = 'https://www.theuntaughtlessons.com/apps/scqa-builder/index.html?q=1', storage } = {}) {
+  function loadWidget({ responder = ANSWERS.ok, auth, href = 'https://www.theuntaughtlessons.com/apps/scqa-builder/index.html?q=1', storage, getSignedInUser = async () => null } = {}) {
     const source = widgetSource
       .replace(/^import \{[^}]*\} from "\.\/firebase\.js";\n/m, 'const { getSignedInUser, getUserFeedbackEnabled, auth, onAuthStateChanged } = globalThis.__fb;\n')
       .replace(/\ninit\(\);\s*$/, '\n');
@@ -348,7 +348,7 @@ function loadPage({ responder = ANSWERS.ok, href = 'https://www.theuntaughtlesso
       localStorage: storage || makeStorage(),
       fetch,
       location: { href },
-      __fb: { getSignedInUser: async () => null, getUserFeedbackEnabled: async () => true, auth, onAuthStateChanged() {} },
+      __fb: { getSignedInUser, getUserFeedbackEnabled: async () => true, auth, onAuthStateChanged() {} },
       document: {
         createElement: () => {
           const el = fakeElement();
@@ -454,6 +454,49 @@ function loadPage({ responder = ANSWERS.ok, href = 'https://www.theuntaughtlesso
     assert.equal(w.fetch.calls.length, 1, 'submit is not blocked past the cap');
     assert.deepEqual(w.fetch.calls[0].opts.headers, { apikey: KEY, 'Content-Type': 'application/json' });
     assert.equal(els['#utl-feedback-success'].style.display, 'block');
+  }
+
+  // Feedback with Supabase sign in on (utl_auth = supabase): no Firebase user exists, the token comes from the signed in user of the site.
+  {
+    const supabaseOn = () => makeStorage({ utl_auth: 'supabase' });
+    const siteUser = (getIdToken) => async () => ({ uid: 'sb-uid', email: 'ada@example.com', getIdToken });
+    // A Supabase only session: auth.currentUser is null, and the Supabase token is what is sent.
+    let w = loadWidget({ auth: { currentUser: null }, storage: supabaseOn(), getSignedInUser: siteUser(async () => 'sb-tok-1') });
+    await w.ctx.handleSubmit(fakeOverlay().overlay, 'Ada', 'ada@example.com');
+    assert.deepEqual(w.fetch.calls[0].opts.headers, { apikey: KEY, 'Content-Type': 'application/json', Authorization: 'Bearer sb-tok-1' }, 'Supabase only session: the Supabase token is sent');
+    // Even with a leftover Firebase user the Supabase token wins while the switch is on.
+    w = loadWidget({ auth: signedIn(async () => 'firebase-tok'), storage: supabaseOn(), getSignedInUser: siteUser(async () => 'sb-tok-2') });
+    await w.ctx.handleSubmit(fakeOverlay().overlay, 'Ada', 'ada@example.com');
+    assert.equal(w.fetch.calls[0].opts.headers.Authorization, 'Bearer sb-tok-2');
+    // Signed out, a failing lookup and a slow lookup send no token, and never block the submit.
+    for (const [label, lookup] of [['signed out', async () => null], ['lookup rejects', async () => { throw new Error('nope'); }], ['user without a token function', async () => ({ uid: 'x' })], ['token lookup rejects', siteUser(async () => { throw new Error('nope'); })]]) {
+      w = loadWidget({ auth: { currentUser: null }, storage: supabaseOn(), getSignedInUser: lookup });
+      await w.ctx.handleSubmit(fakeOverlay().overlay, 'Ada', 'ada@example.com');
+      assert.equal(w.fetch.calls.length, 1, `${label}: still submitted`);
+      assert.deepEqual(w.fetch.calls[0].opts.headers, { apikey: KEY, 'Content-Type': 'application/json' }, `${label}: apikey only`);
+    }
+    const hang = new Promise(() => {});
+    w = loadWidget({ auth: { currentUser: null }, storage: supabaseOn(), getSignedInUser: siteUser(() => hang) });
+    const pending = w.ctx.handleSubmit(fakeOverlay().overlay, 'Ada', 'ada@example.com');
+    await tickN();
+    assert.equal(w.fetch.calls.length, 0, 'waiting for the token');
+    assert.equal(w.clock.timers.filter((t) => t.ms === 2000 && !t.cleared).length, 1, 'capped at 2 seconds');
+    w.clock.fire(2000);
+    await pending;
+    assert.deepEqual(w.fetch.calls[0].opts.headers, { apikey: KEY, 'Content-Type': 'application/json' });
+    // Any other value of the switch is the Firebase path, and the site user is never asked.
+    for (const value of ['firebase', 'Supabase', '']) {
+      let asked = 0;
+      w = loadWidget({ auth: signedIn(async () => 'firebase-tok'), storage: makeStorage({ utl_auth: value }), getSignedInUser: async () => { asked += 1; return null; } });
+      await w.ctx.handleSubmit(fakeOverlay().overlay, 'Ada', 'ada@example.com');
+      assert.equal(w.fetch.calls[0].opts.headers.Authorization, 'Bearer firebase-tok', `utl_auth=${JSON.stringify(value)}: Firebase token`);
+      assert.equal(asked, 0);
+    }
+    // The retry queue keeps its tokens out of storage in this mode too.
+    w = loadWidget({ responder: ANSWERS.http500, auth: { currentUser: null }, storage: supabaseOn(), getSignedInUser: siteUser(async () => 'sb-secret') });
+    await w.ctx.handleSubmit(fakeOverlay().overlay, 'Ada', 'ada@example.com');
+    assert(!JSON.stringify(w.queue()).includes('sb-secret'), 'token is never stored');
+    assert.equal(w.consoleCalls.length, 0);
   }
 
   // Feedback: failure, http error and rate limited still show success and queue the item (without a token).

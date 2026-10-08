@@ -2151,7 +2151,7 @@
       setSendStatus('Sending your results...', '');
 
       try {
-        const fb = await import('../assets/firebase.js');
+        const fb = await import('../assets/result-email-client.js');
         const outcome = await fb.sendMyResultsEmail({ recipients, resultsText, filename: resultsFilename() });
         if (outcome && outcome.ok) {
           setSendStatus('Sent. Your thank-you summary email has been queued.', 'success');

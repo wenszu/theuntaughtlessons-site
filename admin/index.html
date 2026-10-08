@@ -4531,6 +4531,10 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       replaceMemberWorkspaceProgress,
       resetMemberWorkspaceProgress,
       checkOrganizationRepEmail,
+      listAuthorizedMembers,
+      getAssessmentItemHealth,
+      listAssessmentItemReviews,
+      saveAssessmentItemReview,
       repairMemberExerciseProgress,
       saveOrganizationAccessMember,
       saveOrganizationDefinition,
@@ -4600,6 +4604,10 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       replaceMemberWorkspaceProgress,
       resetMemberWorkspaceProgress,
       checkOrganizationRepEmail,
+      listAuthorizedMembers,
+      getAssessmentItemHealth,
+      listAssessmentItemReviews,
+      saveAssessmentItemReview,
       repairMemberExerciseProgress,
       saveOrganizationAccessMember,
       saveOrganizationDefinition,
@@ -8110,6 +8118,10 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
     let qbBank = [];
     let qbForms = {};
     let qbAttempts = [];
+    // The item health answer of fb.getAssessmentItemHealth and the pure figures function, both set only while a server flag
+    // (utl_server_reads, ?utl_server=shadow) is on. With no flag they stay empty and the page works from the Firestore documents as before.
+    let qbHealth = null;
+    let qbQuestionStats = null;
     let qbReviews = {};
     let qbDifficulty = { accessible: [], stretch: [] };
     let qbBankRelease = '';
@@ -8245,6 +8257,35 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       return sumX && sumY ? numerator / Math.sqrt(sumX * sumY) : null;
     }
 
+    // 'firebase' (no flag), 'shadow' or 'supabase': the same words the other staff screens use (assets/firebase.js adminReadMode and
+    // staffWriteMode). key is utl_server_reads for the health reads and utl_server_writes for the review write.
+    function qbServerMode(key) {
+      try {
+        const value = localStorage.getItem(key);
+        if (value === 'supabase' || value === 'shadow') return value;
+        return new URLSearchParams(location.search).get('utl_server') === 'shadow' ? 'shadow' : 'firebase';
+      } catch (_) {
+        return 'firebase';
+      }
+    }
+
+    function qbAttemptCount() {
+      return qbHealth ? (Number(qbHealth.attempts && qbHealth.attempts.all) || 0) : qbAttempts.length;
+    }
+
+    // The name written into a decision log entry: the Firebase account, else the signed in account of a Supabase only session.
+    async function qbReviewer() {
+      const own = auth.currentUser?.email;
+      if (own) return own;
+      try {
+        const fb = window.utlFirebaseAuth || {};
+        const user = fb.getSignedInUser ? await fb.getSignedInUser() : null;
+        return (user && user.email) || 'Admin';
+      } catch (_) {
+        return 'Admin';
+      }
+    }
+
     function qbCurrentRows() {
       const assessment = document.getElementById('qbAssessment')?.value || 'all';
       const rows = [];
@@ -8256,9 +8297,14 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
     }
 
     function qbStats() {
-      const rows = qbCurrentRows();
+      const scope = document.getElementById('qbAssessment')?.value || 'all';
+      const rows = qbHealth ? [] : qbCurrentRows();
       const stats = {};
       qbBank.forEach((question) => {
+        if (qbHealth && qbQuestionStats) {
+          stats[question.id] = Object.assign({ question, rows: [] }, qbQuestionStats(qbHealth, scope, question.id, qbVersionFor(question.id)));
+          return;
+        }
         const current = rows.filter((row) => row.questionId === question.id && Number(row.questionVersion) === qbVersionFor(question.id));
         const diagnostic = current.filter((row) => row.assessment === 'diagnostic');
         const checkpoint = current.filter((row) => row.assessment === 'checkpoint');
@@ -8331,12 +8377,22 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       const status = statusEl?.value || 'Active';
       const note = String(noteEl?.value || '').trim().slice(0, 1000);
       const current = qbReviews[questionId] || {};
-      const entry = { at: new Date().toISOString(), status, note, by: auth.currentUser?.email || 'Admin', questionVersion: qbVersionFor(questionId) };
+      const entry = { at: new Date().toISOString(), status, note, by: await qbReviewer(), questionVersion: qbVersionFor(questionId) };
       const decisionLog = [...(Array.isArray(current.decisionLog) ? current.decisionLog : []), entry].slice(-100);
       if (message) { message.textContent = 'Saving review…'; message.className = 'cl-status'; }
       try {
-        await setDoc(doc(db, 'assessment_item_reviews', questionId), { questionId, reviewStatus: status, currentNote: note, questionVersion: qbVersionFor(questionId), bankRelease: qbBankRelease, decisionLog, updatedAt: serverTimestamp() }, { merge: true });
-        qbReviews[questionId] = Object.assign({}, current, { reviewStatus: status, currentNote: note, decisionLog });
+        const writeMode = qbServerMode('utl_server_writes');
+        const fbReview = window.utlFirebaseAuth || {};
+        let saved = null;
+        if (writeMode !== 'firebase' && fbReview.saveAssessmentItemReview) {
+          // The same setDoc as below (Firestore), followed by a dry run in shadow mode; or Supabase only, which returns the stored review.
+          saved = await fbReview.saveAssessmentItemReview(questionId, { reviewStatus: status, currentNote: note, questionVersion: qbVersionFor(questionId), bankRelease: qbBankRelease, decisionLog });
+        } else {
+          await setDoc(doc(db, 'assessment_item_reviews', questionId), { questionId, reviewStatus: status, currentNote: note, questionVersion: qbVersionFor(questionId), bankRelease: qbBankRelease, decisionLog, updatedAt: serverTimestamp() }, { merge: true });
+        }
+        qbReviews[questionId] = writeMode === 'supabase' && saved && Array.isArray(saved.decisionLog)
+          ? saved
+          : Object.assign({}, current, { reviewStatus: status, currentNote: note, decisionLog });
         if (message) { message.textContent = 'Review saved.'; message.className = 'cl-status is-success'; }
         qbRenderHealth();
       } catch (error) {
@@ -8352,7 +8408,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       const values = Object.values(stats);
       const counts = values.reduce((all, stat) => { all[stat.health] = (all[stat.health] || 0) + 1; return all; }, {});
       const responseCount = values.reduce((sum, stat) => sum + stat.n, 0);
-      summary.innerHTML = `<span>${qbAttempts.length} completed attempts loaded</span><span>${responseCount} current-version item responses</span><span>${counts.Review || 0} automated review flags</span><span>${values.reduce((sum, stat) => sum + stat.reports.length, 0)} learner quality reports</span>`;
+      summary.innerHTML = `<span>${qbAttemptCount()} completed attempts loaded</span><span>${responseCount} current-version item responses</span><span>${counts.Review || 0} automated review flags</span><span>${values.reduce((sum, stat) => sum + stat.reports.length, 0)} learner quality reports</span>`;
       body.innerHTML = values.map((stat) => { const change = stat.diagnosticRate !== null && stat.checkpointRate !== null ? stat.checkpointRate - stat.diagnosticRate : null; const reviewStatus = qbReviews[stat.question.id]?.reviewStatus || 'Active'; return `<tr><td><button class="qb-health-link" type="button" data-qb-jump="${stat.question.id}">${stat.question.id.toUpperCase()}</button></td><td>v${qbVersionFor(stat.question.id)}</td><td>${qbDifficultyFor(stat.question.id)}</td><td>${stat.n}</td><td>${qbPercent(stat.correctRate)}</td><td>${qbPercent(stat.diagnosticRate)}</td><td>${qbPercent(stat.checkpointRate)}</td><td>${change === null ? '—' : (change >= 0 ? '+' : '') + Math.round(change * 100) + ' pts'}</td><td>${stat.medianMs === null ? '—' : Math.round(stat.medianMs / 1000) + 's'}</td><td>${qbPercent(stat.changedRate)}</td><td>${stat.reports.length}${stat.reportRate === null ? '' : ' (' + qbPercent(stat.reportRate) + ')'}</td><td>${stat.discrimination === null ? '—' : stat.discrimination.toFixed(2)}</td><td><span title="${escapeHtml(stat.reasons.join('; '))}" class="qb-health-state ${qbHealthClass(stat.health)}">${stat.health}</span></td><td>${escapeHtml(reviewStatus)}</td></tr>`; }).join('');
       document.querySelectorAll('[data-qb-jump]').forEach(button => button.addEventListener('click', () => document.getElementById('qb-card-' + button.dataset.qbJump)?.scrollIntoView({ behavior:'smooth', block:'start' })));
     }
@@ -8467,16 +8523,27 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       try {
         const fb = window.utlFirebaseAuth || {};
         if (!fb.getDocs || !fb.collection || !fb.db) throw new Error('Assessment data service is unavailable');
-        const [attemptSnapshot, reviewSnapshot] = await Promise.all([
-          fb.getDocs(fb.collection(fb.db, 'assessment_item_attempts')),
-          fb.getDocs(fb.collection(fb.db, 'assessment_item_reviews'))
-        ]);
-        qbAttempts = [];
-        attemptSnapshot.forEach(snapshot => qbAttempts.push(Object.assign({ id:snapshot.id }, snapshot.data() || {})));
-        qbReviews = {};
-        reviewSnapshot.forEach(snapshot => { qbReviews[snapshot.id] = snapshot.data() || {}; });
+        if (qbServerMode('utl_server_reads') !== 'firebase' && fb.getAssessmentItemHealth && fb.listAssessmentItemReviews) {
+          // A server flag is on: counts only (no learner answers reach the page), from Supabase or, in shadow mode, worked out from Firestore.
+          const [health, reviewSnapshot] = await Promise.all([fb.getAssessmentItemHealth(), fb.listAssessmentItemReviews()]);
+          qbQuestionStats = (await import('../assets/supabase-question-bank.js')).questionStats;
+          qbHealth = health;
+          qbAttempts = [];
+          qbReviews = {};
+          reviewSnapshot.forEach(snapshot => { qbReviews[snapshot.id] = snapshot.data() || {}; });
+        } else {
+          const [attemptSnapshot, reviewSnapshot] = await Promise.all([
+            fb.getDocs(fb.collection(fb.db, 'assessment_item_attempts')),
+            fb.getDocs(fb.collection(fb.db, 'assessment_item_reviews'))
+          ]);
+          qbHealth = null;
+          qbAttempts = [];
+          attemptSnapshot.forEach(snapshot => qbAttempts.push(Object.assign({ id:snapshot.id }, snapshot.data() || {})));
+          qbReviews = {};
+          reviewSnapshot.forEach(snapshot => { qbReviews[snapshot.id] = snapshot.data() || {}; });
+        }
         qbHealthLoaded = true;
-        if (status) { status.textContent = qbAttempts.length ? `Loaded ${qbAttempts.length} completed assessment attempts.` : 'No item-level attempts have been recorded yet. Data will appear after the next completed assessment.'; status.className = 'cl-status is-success'; }
+        if (status) { status.textContent = qbAttemptCount() ? `Loaded ${qbAttemptCount()} completed assessment attempts.` : 'No item-level attempts have been recorded yet. Data will appear after the next completed assessment.'; status.className = 'cl-status is-success'; }
       } catch (error) {
         if (status) { status.textContent = 'Could not load item health data: ' + ((error && error.message) || 'Unknown error'); status.className = 'cl-status is-error'; }
       }
@@ -13486,7 +13553,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       try {
         await mbRequireFirebaseAdmin();
         await caEnsureCohortDetails(fb, false);
-        var snap = await fb.getDocs(fb.collection(fb.db, 'authorized_members'));
+        var snap = await fb.listAuthorizedMembers();
         var docs = [];
         snap.forEach(function (d) { docs.push(d); });
         docs = mbApplyLocalGroupOverrides(docs);

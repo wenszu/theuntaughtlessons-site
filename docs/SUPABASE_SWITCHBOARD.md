@@ -4,11 +4,11 @@ Status (2026-10-08): written and tested locally. Not applied to the database, no
 
 ## What it is, in plain words
 
-The move from Firebase to Supabase is controlled by six switches. Today each switch lives in one browser only (the browser's local storage), so turning something on for everyone would mean visiting every browser. The switchboard is one small public setting in the database that holds the six switches for everyone. When a page loads, the site reads that setting and copies each switch into the browser, but only where the person has not set that switch by hand.
+The move from Firebase to Supabase is controlled by eight switches (the last two, `es_submit` and `mail`, come with migration 2360; see below). Today each switch lives in one browser only (the browser's local storage), so turning something on for everyone would mean visiting every browser. The switchboard is one small public setting in the database that holds the switches for everyone. When a page loads, the site reads that setting and copies each switch into the browser, but only where the person has not set that switch by hand.
 
 With every switch on `firebase` (the starting state) the site behaves exactly as it does today and writes nothing into any browser.
 
-## The six switches
+## The eight switches
 
 | Name in the setting | What it moves | Allowed words |
 |---|---|---|
@@ -17,11 +17,23 @@ With every switch on `firebase` (the starting state) the site behaves exactly as
 | `server_writes` | Admin console changes | `firebase`, `supabase`, `shadow` |
 | `auth` | Sign in (Supabase Auth instead of Firebase Auth) | `firebase`, `supabase` |
 | `payments` | Checkout (Stripe through Supabase) | `firebase`, `supabase` |
-| `ai` | AI scoring | `firebase`, `supabase` |
+| `ai` | AI scoring (Explain to Aiko and the TSA diagnostic pages) | `firebase`, `supabase` |
+| `es_submit` | The public Executive Signature submission and its "send me my results link" step (migration 2360) | `firebase`, `supabase` |
+| `mail` | The result emails and the emails the admin console sends (migration 2360) | `firebase`, `supabase` |
+
+The browser switch behind each name: `es_submit` is `utl_es` and `mail` is `utl_mail`; the other six are in `assets/switchboard.js`. Two more things now follow the existing flags (see `docs/SUPABASE_BROWSER_WIRING.md`): the member's certificate button follows `server_writes` (only the value `supabase` moves it, `shadow` leaves it on Firebase because that function has no dry run), and the sponsor page and the organization address check follow `server_reads`.
 
 `firebase` means "no change from today". `supabase` means "use Supabase". `shadow` (reads and writes only) means "Firebase still answers, and Supabase is asked quietly in the background so the two answers can be compared in the browser console".
 
 The database refuses any other name and any other word, so a typing mistake cannot be saved and no secret can be stored here.
+
+**Migration 2360 (`supabase/migrations/20261008002360_switchboard_more_flags.sql`, written, not applied)** adds `es_submit` and `mail`: it replaces the shape check with a version that allows the two names (words `firebase` and `supabase`, no `shadow`) and adds both to the row as `firebase`, only where they are not there yet, so running it again never resets a flag you flipped. Undo: `supabase/rollbacks/20261008002360_switchboard_more_flags_down.sql` (takes the two flags out of the row, puts the check back). Until 2360 is applied the site file already understands the two names, and a row without them counts as `firebase`, so nothing changes. Flip them like the others:
+
+```sql
+update public.app_settings
+set value = jsonb_set(value, '{es_submit}', '"supabase"')
+where key = 'switchboard';
+```
 
 ## Before you can use it
 
@@ -61,11 +73,11 @@ set value = jsonb_set(value, '{ai}', '"firebase"')
 where key = 'switchboard';
 ```
 
-To put ALL six back at once:
+To put ALL back at once (after migration 2360; before it, leave out `es_submit` and `mail`):
 
 ```sql
 update public.app_settings
-set value = '{"data_source":"firebase","server_reads":"firebase","server_writes":"firebase","auth":"firebase","payments":"firebase","ai":"firebase"}'::jsonb
+set value = '{"data_source":"firebase","server_reads":"firebase","server_writes":"firebase","auth":"firebase","payments":"firebase","ai":"firebase","es_submit":"firebase","mail":"firebase"}'::jsonb
 where key = 'switchboard';
 ```
 

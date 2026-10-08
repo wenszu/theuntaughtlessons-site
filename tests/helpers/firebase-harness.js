@@ -27,6 +27,8 @@ const SUPABASE_ADMIN_READS_SOURCE = path.join(REPO_ROOT, 'assets', 'supabase-adm
 const SUPABASE_MEMBER_READS_SOURCE = path.join(REPO_ROOT, 'assets', 'supabase-member-reads.js');
 const SUPABASE_ADMIN_WRITES_SOURCE = path.join(REPO_ROOT, 'assets', 'supabase-admin-writes.js');
 const SUPABASE_ADMIN_CONSOLE_READS_SOURCE = path.join(REPO_ROOT, 'assets', 'supabase-admin-console-reads.js');
+const SUPABASE_QUESTION_BANK_SOURCE = path.join(REPO_ROOT, 'assets', 'supabase-question-bank.js');
+const SUPABASE_CALLABLES_SOURCE = path.join(REPO_ROOT, 'assets', 'supabase-callables.js');
 
 const FIXED_NOW = Date.parse('2026-10-06T10:00:00.000Z');
 
@@ -214,7 +216,11 @@ const IMPORT_REWRITES = [
   // The staff writes twin (waves 6 and 7) is copied the same way.
   [/import\("\.\/supabase-admin-writes\.js"\)/g, 'import("./supabase-admin-writes.mjs")'],
   // The admin console direct reads twin (wave 13) is copied the same way.
-  [/import\("\.\/supabase-admin-console-reads\.js"\)/g, 'import("./supabase-admin-console-reads.mjs")']
+  [/import\("\.\/supabase-admin-console-reads\.js"\)/g, 'import("./supabase-admin-console-reads.mjs")'],
+  // The question bank twin is copied the same way.
+  [/import\("\.\/supabase-question-bank\.js"\)/g, 'import("./supabase-question-bank.mjs")'],
+  // The callables twin (admin mail, member certificate, readiness access link) is copied the same way.
+  [/import\("\.\/supabase-callables\.js"\)/g, 'import("./supabase-callables.mjs")']
 ];
 
 // ---------------------------------------------------------------------------
@@ -486,6 +492,8 @@ function createHarness() {
       fs.copyFileSync(SUPABASE_MEMBER_READS_SOURCE, path.join(dir, 'supabase-member-reads.mjs'));
       fs.copyFileSync(SUPABASE_ADMIN_WRITES_SOURCE, path.join(dir, 'supabase-admin-writes.mjs'));
       fs.copyFileSync(SUPABASE_ADMIN_CONSOLE_READS_SOURCE, path.join(dir, 'supabase-admin-console-reads.mjs'));
+      fs.copyFileSync(SUPABASE_QUESTION_BANK_SOURCE, path.join(dir, 'supabase-question-bank.mjs'));
+      fs.copyFileSync(SUPABASE_CALLABLES_SOURCE, path.join(dir, 'supabase-callables.mjs'));
       let text = sourceText;
       IMPORT_REWRITES.forEach(([pattern, replacement]) => { text = text.replace(pattern, replacement); });
       if (/https:\/\/www\.gstatic\.com/.test(text)) throw new Error('An SDK import was not rewritten.');

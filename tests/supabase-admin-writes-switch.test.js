@@ -35,6 +35,7 @@ const RPC = {
   reviewOrganizationRosterDraft: 'admin_review_roster_draft',
   manageVerifiedCredential: 'admin_manage_credential',
   removeMember: 'admin_remove_member',
+  repairMemberVerifiedCredential: 'admin_issue_credential',
   authorizeMember: 'admin_authorize_member'
 };
 const NAMES = Object.keys(RPC);
@@ -50,6 +51,7 @@ const CALLS = {
   reviewOrganizationRosterDraft: [{ organizationId: 'acme', draftId: 'd1', action: 'approve', reviewNote: MARK }],
   manageVerifiedCredential: ['update-name', 'UTL-TSA-AAAAAAAAAAAA', { recipientName: MARK }],
   removeMember: ['gone@example.test'],
+  repairMemberVerifiedCredential: ['uid-learner-1'],
   authorizeMember: ['new@example.test', { name: MARK, role: 'member', cohort: 'A', expiryDate: EXPIRY, status: 'active', welcomeEmailUpdatedAt: { __serverTimestamp: true } }]
 };
 // The document the database function receives for each call (what the adapter picks from the arguments).
@@ -63,6 +65,7 @@ const EXPECTED_INPUT = {
   reviewOrganizationRosterDraft: { organizationId: 'acme', draftId: 'd1', action: 'approve', reviewNote: MARK },
   manageVerifiedCredential: { action: 'update-name', credentialId: 'UTL-TSA-AAAAAAAAAAAA', recipientName: MARK },
   removeMember: { email: 'gone@example.test' },
+  repairMemberVerifiedCredential: { userId: 'uid-learner-1' },
   authorizeMember: { email: 'new@example.test', name: MARK, role: 'member', cohort: 'A', expiryDate: '2027-10-08T00:00:00.000Z', status: 'active' }
 };
 // What the Firebase callable answers, and what the database function answers. They differ on purpose: one more row, one extra field,

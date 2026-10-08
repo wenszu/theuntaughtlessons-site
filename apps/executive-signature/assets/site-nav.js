@@ -2,7 +2,8 @@
 // exercise header (member-login/content-config.js: navHtml()'s .ws-nav /
 // .ws-focused-nav-context / .ws-avatar / .ws-profile-menu) rather than a
 // simplified approximation of it. See site-nav.css for the ported CSS.
-import { auth, db, doc, getDoc, getMyWorkspaces, onAuthStateChanged, signOut } from '../../../assets/firebase.js';
+import { auth, db, doc, getDoc, getMyEsStatus, getMyWorkspaces, onAuthStateChanged, signOut } from '../../../assets/firebase.js';
+import { readAccountRecord } from './account-record.js';
 
 function escapeHtml(value) {
   return String(value).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -115,7 +116,8 @@ export function initReadinessNav({ mount, title, backLinks = [], secondaryLinks 
     // other — this is on the critical path of every single Executive
     // Signature page load, since nothing above renders until both resolve.
     const [userSnapResult, workspacesResult] = await Promise.all([
-      getDoc(doc(db, 'users', user.uid)).catch(() => null),
+      // With a Supabase only session there is no users/{uid} document (it is keyed by the Firebase uid): see account-record.js.
+      readAccountRecord({ user, readUserDoc: (uid) => getDoc(doc(db, 'users', uid)), getMyEsStatus }),
       getMyWorkspaces().catch(() => null)
     ]);
     let products = null;

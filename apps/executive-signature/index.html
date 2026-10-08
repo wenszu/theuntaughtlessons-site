@@ -2151,7 +2151,8 @@ if(internalMode){
 </script>
 <script type="module">
   import { recordReadinessCompletion, checkReadinessAccountEmail, sendReadinessAccessLink } from '../../assets/firebase.js';
-  window.raRecordCompletion = recordReadinessCompletion;
+  import { recordReadinessCompletion as recordReadinessCompletionChoice } from '../../assets/readiness-submit-client.js';
+  window.raRecordCompletion = recordReadinessCompletionChoice;
   window.raCheckAccountEmail = checkReadinessAccountEmail;
   window.raSendAccessLink = sendReadinessAccessLink;
 </script>
@@ -2160,7 +2161,7 @@ if(internalMode){
   window.raGetMyEsStatus = getMyEsStatus;
 </script>
 <script type="module">
-  import { sendReadinessResultEmail } from '../../assets/firebase.js';
+  import { sendReadinessResultEmail } from '../../assets/result-email-client.js';
   window.raSendResultEmail = sendReadinessResultEmail;
 </script>
 <script type="module">

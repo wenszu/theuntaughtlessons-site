@@ -61,11 +61,11 @@ async function check(name, fn) {
     assert.throws(() => mod.createAdminWrites({ supabaseUrl: URL_BASE, publishableKey: KEY, getIdToken: () => '' , fetchImpl: 'not a function' }), /fetchImpl/);
   });
 
-  await check('the ten wrappers exist with the Firebase names and the right database function', () => {
+  await check('the eleven wrappers exist with the Firebase names and the right database function', () => {
     assert.deepStrictEqual(mod.WRAPPER_NAMES, ['grantCustomerEntitlement', 'changeCustomerEntitlementStatus', 'revealAssessmentResponse', 'saveOrganizationDefinition',
-      'saveOrganizationAccessMember', 'submitOrganizationRosterDraft', 'reviewOrganizationRosterDraft', 'manageVerifiedCredential', 'removeMember', 'authorizeMember']);
+      'saveOrganizationAccessMember', 'submitOrganizationRosterDraft', 'reviewOrganizationRosterDraft', 'manageVerifiedCredential', 'removeMember', 'repairMemberVerifiedCredential', 'authorizeMember']);
     assert.deepStrictEqual(mod.WRAPPER_NAMES.map((n) => mod.FUNCTIONS[n].rpc), ['admin_grant_entitlement', 'admin_set_entitlement_status', 'admin_reveal_response',
-      'admin_save_organization', 'admin_save_org_access_member', 'submit_roster_draft', 'admin_review_roster_draft', 'admin_manage_credential', 'admin_remove_member', 'admin_authorize_member']);
+      'admin_save_organization', 'admin_save_org_access_member', 'submit_roster_draft', 'admin_review_roster_draft', 'admin_manage_credential', 'admin_remove_member', 'admin_issue_credential', 'admin_authorize_member']);
     const { writes } = make({});
     mod.WRAPPER_NAMES.forEach((name) => assert.strictEqual(typeof writes[name], 'function', name));
   });

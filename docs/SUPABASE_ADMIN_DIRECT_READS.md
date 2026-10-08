@@ -142,6 +142,9 @@ Reads that Firestore itself needs (the cohort rename reads the stored details, t
    Needs its own design: a counts only function `admin_item_health(assessment)` (per question: attempts, correct, average
    score), and a staff write function for the reviews. The tables exist; the learner write path for TSA item attempts exists
    (2190). Not built here.
+   BUILT LATER (2026-10-08, migration `20261008002350_question_bank.sql`, notes in `docs/SUPABASE_QUESTION_BANK.md`): `admin_item_health()`
+   (counts only), `admin_item_reviews()` and `admin_save_item_review()`, with the browser side in `assets/supabase-question-bank.js`. The
+   page change is still to do.
 2. **Sync telemetry (`syncHealth`).** Learner readiness shows pending progress saves and recovered sync problems from a field
    the browser writes to the Firestore user document. The importer drops it; Supabase has no column. In Supabase mode it reads
    as null (nothing pending). Suggested: leave it out, since the double write that causes pending saves goes away with the move.

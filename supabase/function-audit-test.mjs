@@ -41,13 +41,23 @@ const ADMIN_CONSOLE_READ_FUNCTIONS = ['admin_console_members', 'admin_member_pro
   'admin_member_support_snapshot', 'admin_find_user_uid', 'admin_cohorts_summary', 'admin_leaderboard', 'admin_platform_overview', 'admin_engagement_summary',
   'admin_support_preview_audit', 'admin_credential_counts'];
 const ADMIN_READ_FUNCTIONS = ['admin_list_customers', 'admin_get_customer', 'admin_list_es_participants', 'admin_list_es_attempts', 'admin_get_es_configuration',
-  'admin_get_es_governance', 'admin_search_credentials', 'admin_credential_registry', 'admin_organization_access', ...ADMIN_CONSOLE_READ_FUNCTIONS];
+  'admin_get_es_governance', 'admin_search_credentials', 'admin_credential_registry', 'admin_organization_access', 'admin_check_org_rep_email', ...ADMIN_CONSOLE_READ_FUNCTIONS];
 // Staff writes (migration 2260): the Firebase callables of the admin console as database functions. Each takes one jsonb document and a
 // dry run flag, is authenticated only, and refuses the wrong caller with 42501 as its first statement. submit_roster_draft is for sponsor
 // staff (an organization role), so its first statement only requires a signed in person; the organization role is checked straight after.
 const ADMIN_WRITE_FUNCTIONS = ['admin_grant_entitlement', 'admin_set_entitlement_status', 'admin_reveal_response', 'admin_save_organization', 'admin_save_org_access_member',
-  'submit_roster_draft', 'admin_review_roster_draft', 'admin_manage_credential', 'admin_remove_member', 'admin_authorize_member'];
+  'submit_roster_draft', 'admin_review_roster_draft', 'admin_manage_credential', 'admin_remove_member', 'admin_authorize_member', 'admin_issue_credential'];
 // A parameter must not let the caller name a person, role, email or organization. (A plain p_status is a progress state.)
+// Organization console (migration 2342): read only, authenticated only, the caller comes from the token; the one parameter names the
+// organization to open, and the function refuses (42501) an organization the caller holds no role in (a platform owner sees all).
+const ORG_CONSOLE_FUNCTIONS = ['get_organization_console'];
+// Service role only (migrations 2341 and 2343): the database halves of the readiness-access and auth-admin Edge Functions. No browser role may
+// execute them; each public function is a one line call of a private function with the same name.
+const SERVICE_ONLY_GAP_FUNCTIONS = ['readiness_access_check', 'auth_admin_target', 'auth_admin_record'];
+// Question bank (migration 2350): counts only reads and the review write of the admin section "Assessment content review". Platform owner
+// only, authenticated only, the check is the first statement (42501). The health read must never select a person, an email or a date of an attempt.
+const QUESTION_BANK_READ_FUNCTIONS = ['admin_item_health', 'admin_item_reviews'];
+const QUESTION_BANK_WRITE_FUNCTIONS = ['admin_save_item_review'];
 const FORBIDDEN_PARAMS = /(^|_)(person|user|uid|auth|email|role|account_status|organization|org)(_|$)/i;
 
 const { db, failed } = await boot();
@@ -264,7 +274,8 @@ const ADMIN_WRITE_TABLES = {
   admin_review_roster_draft: ['organization_roster_drafts'],
   admin_manage_credential: ['credentials'],
   admin_remove_member: ['people', 'enrollments', 'role_grants'],
-  admin_authorize_member: ['people', 'person_emails', 'person_profiles', 'role_grants', 'cohorts', 'enrollments']
+  admin_authorize_member: ['people', 'person_emails', 'person_profiles', 'role_grants', 'cohorts', 'enrollments'],
+  admin_issue_credential: []   // migration 2340: the insert happens inside private.issue_credential_core, never here
 };
 for (const name of ADMIN_WRITE_FUNCTIONS) {
   const f = fns.find((x) => x.proname === name);
@@ -313,12 +324,105 @@ for (const privateName of ['apply_readiness_completion', 'readiness_take', 'read
   ok('readiness_limits: row level security on, no policy, no grant for anon or authenticated', t.rows[0].rls === true && t.rows[0].policies === 0 && t.rows[0].grants === 0);
 }
 
+// Organization console (migration 2342).
+for (const name of ORG_CONSOLE_FUNCTIONS) {
+  const f = fns.find((x) => x.proname === name);
+  ok(`${name}: exists`, Boolean(f));
+  if (!f) continue;
+  ok(`${name}: security definer, search_path fixed to empty, no dynamic sql, no backslash`, f.prosecdef && /search_path=("")?(,|$)/.test(f.config || '') && !/^\s*execute\b/im.test(f.prosrc) && !/\bexecute\b\s+(format|'|\$|quote)/i.test(f.prosrc) && !f.prosrc.includes('\\'));
+  ok(`${name}: anon cannot execute, authenticated can`, !f.anon_exec && f.auth_exec);
+  ok(`${name}: resolves the caller from the token and refuses a signed out caller (42501)`, /private\.current_person_id\(\)/.test(f.prosrc) && /42501/.test(f.prosrc));
+  ok(`${name}: the only parameter is the organization to open`, f.args === 'p_organization_id text DEFAULT NULL::text' || f.args === 'p_organization_id text', f.args);
+  ok(`${name}: refuses an organization the caller has no role in`, /You do not have access to this organization/.test(f.prosrc));
+  ok(`${name}: never writes, never reads raw answers, drafts or attempts`, !/\b(insert\s+into|update\s+public|delete\s+from|create\s+temp)/i.test(f.prosrc) && !/activity_submissions|activity_drafts|assessment_response_parts|assessment_attempts/i.test(f.prosrc));
+}
+for (const h of (await db.query(`select p.proname, has_function_privilege('anon', p.oid, 'execute') as anon_exec, has_function_privilege('authenticated', p.oid, 'execute') as auth_exec
+  from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'private' and p.proname like 'oc\\_%'`)).rows) ok(`private.${h.proname}: closed to browsers`, !h.anon_exec && !h.auth_exec);
+
+// Service role only (migrations 2341 and 2343).
+for (const name of SERVICE_ONLY_GAP_FUNCTIONS) {
+  const f = fns.find((x) => x.proname === name);
+  ok(`${name}: exists`, Boolean(f));
+  if (!f) continue;
+  ok(`${name}: security definer, search_path fixed to empty, no dynamic sql, no backslash`, f.prosecdef && /search_path=("")?(,|$)/.test(f.config || '') && !/^\s*execute\b/im.test(f.prosrc) && !/\bexecute\b\s+(format|'|\$|quote)/i.test(f.prosrc) && !f.prosrc.includes('\\'));
+  ok(`${name}: neither anon nor authenticated can execute it`, !f.anon_exec && !f.auth_exec);
+  ok(`${name}: the only parameter is one jsonb document`, f.args === 'p_input jsonb', f.args);
+  const service = await db.query(`select has_function_privilege('service_role', $1::oid, 'execute') as ok`, [f.oid]);
+  ok(`${name}: the service role can execute it`, service.rows[0].ok === true);
+  ok(`${name}: it is a one line call of the private function`, new RegExp(`^\\s*select private\\.${name}\\(p_input\\)\\s*$`).test(f.prosrc));
+}
+// Service role only (migration 2344): the sending cap of the admin-mail Edge Function. Takes one person id, so it has its own check.
+for (const name of ['admin_mail_take', 'admin_mail_release']) {
+  const f = fns.find((x) => x.proname === name);
+  ok(`${name}: exists`, Boolean(f));
+  if (!f) continue;
+  ok(`${name}: security definer, search_path fixed to empty, no dynamic sql, no backslash`, f.prosecdef && /search_path=("")?(,|$)/.test(f.config || '') && !/^\s*execute\b/im.test(f.prosrc) && !f.prosrc.includes('\\'));
+  ok(`${name}: neither anon nor authenticated can execute it`, !f.anon_exec && !f.auth_exec);
+  ok(`${name}: the only parameter is the person counted`, f.args === 'p_person uuid', f.args);
+  const service = await db.query(`select has_function_privilege('service_role', $1::oid, 'execute') as ok`, [f.oid]);
+  ok(`${name}: the service role can execute it`, service.rows[0].ok === true);
+  ok(`${name}: it is a one line call of the private function`, new RegExp(`^\\s*select private\\.${name}\\(p_person, now\\(\\)\\)\\s*$`).test(f.prosrc));
+}
+for (const privateName of ['admin_mail_take', 'admin_mail_release']) {
+  const p = await db.query(`select has_function_privilege('anon', p.oid, 'execute') as anon_exec, has_function_privilege('authenticated', p.oid, 'execute') as auth_exec
+    from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'private' and p.proname = $1`, [privateName]);
+  ok(`private.${privateName}: closed to browsers`, p.rows.length === 1 && !p.rows[0].anon_exec && !p.rows[0].auth_exec);
+}
+for (const privateName of ['readiness_access_check', 'access_check_take', 'auth_admin_target', 'auth_admin_record']) {
+  const p = await db.query(`select has_function_privilege('anon', p.oid, 'execute') as anon_exec, has_function_privilege('authenticated', p.oid, 'execute') as auth_exec
+    from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'private' and p.proname = $1`, [privateName]);
+  ok(`private.${privateName}: closed to browsers`, p.rows.length === 1 && !p.rows[0].anon_exec && !p.rows[0].auth_exec);
+}
+{
+  const t = await db.query(`select (select relrowsecurity from pg_class where oid = 'public.access_check_limits'::regclass) as rls,
+    (select count(*)::int from pg_policies where tablename = 'access_check_limits') as policies,
+    (select count(*)::int from information_schema.role_table_grants where table_schema = 'public' and table_name = 'access_check_limits' and grantee in ('anon', 'authenticated', 'PUBLIC')) as grants`);
+  ok('access_check_limits: row level security on, no policy, no grant for anon or authenticated', t.rows[0].rls === true && t.rows[0].policies === 0 && t.rows[0].grants === 0);
+}
+
+// Question bank (migration 2350).
+for (const name of [...QUESTION_BANK_READ_FUNCTIONS, ...QUESTION_BANK_WRITE_FUNCTIONS]) {
+  const f = fns.find((x) => x.proname === name);
+  ok(`${name}: exists`, Boolean(f));
+  if (!f) continue;
+  ok(`${name}: security definer, search_path fixed to empty, no dynamic sql, no backslash`, f.prosecdef && /search_path=("")?(,|$)/.test(f.config || '') && !/^\s*execute\b/im.test(f.prosrc) && !/\bexecute\b\s+(format|'|\$|quote)/i.test(f.prosrc) && !f.prosrc.includes('\\'));
+  ok(`${name}: anon cannot execute, authenticated can`, !f.anon_exec && f.auth_exec);
+  const afterBegin = f.prosrc.slice(f.prosrc.search(/\bbegin\b/i) + 5).trimStart();
+  ok(`${name}: first statement refuses anyone but a platform_owner with 42501`, /^if not private\.has_platform_role\(array\['platform_owner'\]\) then\s+raise exception[^;]*errcode = '42501';/i.test(afterBegin), afterBegin.slice(0, 120));
+  ok(`${name}: no parameter names a person, role, status or email`, !(f.argnames || []).some((a) => FORBIDDEN_PARAMS.test(a)), (f.argnames || []).join(','));
+}
+for (const name of QUESTION_BANK_READ_FUNCTIONS) {
+  const f = fns.find((x) => x.proname === name);
+  if (!f) continue;
+  ok(`${name}: takes no argument, never writes`, f.args === '' && !/\b(insert\s+into|update\s+public|delete\s+from|create\s+temp)/i.test(f.prosrc));
+  ok(`${name}: never selects a person, a person id, an email, a name or an auth id`, !/person_id|primary_email|display_name|auth_uid|supabase_uid|public\.people/i.test(f.prosrc));
+}
+{
+  const f = fns.find((x) => x.proname === 'admin_item_health');
+  if (f) ok('admin_item_health: reads only the item list of the item attempt path and the review statuses (no scoring inputs, no payload, no other part)',
+    /assessment_response_parts/.test(f.prosrc) && !/scoring_inputs|\.payload\b/i.test(f.prosrc) && /part_number = 1/.test(f.prosrc) && /assessment_item_attempts\//.test(f.prosrc));
+}
+{
+  const f = fns.find((x) => x.proname === 'admin_save_item_review');
+  if (f) {
+    ok('admin_save_item_review: arguments are one jsonb document and the dry run flag', f.args === 'p_input jsonb, p_dry_run boolean', f.args);
+    ok('admin_save_item_review: audit rows only through private.aw_audit', !/insert\s+into\s+public\.audit_events/i.test(f.prosrc) && /private\.aw_audit/.test(f.prosrc));
+    const touched = [...f.prosrc.matchAll(/(?:insert\s+into|update|delete\s+from)\s+public\.([a-z_]+)/gi)].map((m) => m[1].toLowerCase());
+    ok('admin_save_item_review: writes only assessment_item_reviews (and the audit row)', touched.every((t) => t === 'assessment_item_reviews'), touched.join());
+    ok('admin_save_item_review: never touches people, role_grants, enrollments, entitlements or organizations', !/(insert\s+into|update|delete\s+from)\s+public\.(people|role_grants|enrollments|entitlements|organizations|affiliations)\b/i.test(f.prosrc));
+  }
+}
+const qbHelpers = await db.query(`select p.proname, has_function_privilege('anon', p.oid, 'execute') as anon_exec, has_function_privilege('authenticated', p.oid, 'execute') as auth_exec
+  from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'private' and p.proname like 'qb\\_%'`);
+ok('the question bank helpers exist', qbHelpers.rows.length === 2, String(qbHelpers.rows.length));
+for (const h of qbHelpers.rows) ok(`private.${h.proname}: closed to browsers`, !h.anon_exec && !h.auth_exec);
+
 // Nothing else is exposed by accident.
 const exposed = fns.filter((f) => f.prosecdef && (f.anon_exec || f.auth_exec));
 for (const f of exposed) {
   const allowed = WRITE_FUNCTIONS.includes(f.proname) || PUBLIC_ALLOWLIST.includes(f.proname) || SIGNED_IN_ALLOWLIST.includes(f.proname)
     || SUBMIT_FUNCTIONS.includes(f.proname) || STAFF_FUNCTIONS.includes(f.proname) || ADMIN_READ_FUNCTIONS.includes(f.proname) || MEMBER_READ_FUNCTIONS.includes(f.proname)
-    || ACCESS_FUNCTIONS.includes(f.proname) || SETTINGS_STAFF_FUNCTIONS.includes(f.proname) || ADMIN_MIRROR_FUNCTIONS.includes(f.proname) || ADMIN_WRITE_FUNCTIONS.includes(f.proname);
+    || QUESTION_BANK_READ_FUNCTIONS.includes(f.proname) || QUESTION_BANK_WRITE_FUNCTIONS.includes(f.proname) || ORG_CONSOLE_FUNCTIONS.includes(f.proname) || ACCESS_FUNCTIONS.includes(f.proname) || SETTINGS_STAFF_FUNCTIONS.includes(f.proname) || ADMIN_MIRROR_FUNCTIONS.includes(f.proname) || ADMIN_WRITE_FUNCTIONS.includes(f.proname);
   ok(`${f.proname}: browser-callable security definer function is on the allowlist`, allowed);
   if (f.anon_exec) ok(`${f.proname}: anon access is intended`, PUBLIC_ALLOWLIST.includes(f.proname) || SUBMIT_FUNCTIONS.includes(f.proname));
   if (STAFF_FUNCTIONS.includes(f.proname)) ok(`${f.proname}: staff function is not callable by anon`, !f.anon_exec);

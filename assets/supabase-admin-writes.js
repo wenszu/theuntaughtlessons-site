@@ -1,9 +1,9 @@
 // Supabase twin of the staff writes of the admin console (waves 6 and 7 of docs/SUPABASE_PLAN_SERVERS_AND_ADMIN.md).
 //
-// Ten functions with the SAME names, arguments and return shapes as the Firebase wrappers in assets/firebase.js:
+// Eleven functions with the SAME names, arguments and return shapes as the Firebase wrappers in assets/firebase.js:
 //   grantCustomerEntitlement, changeCustomerEntitlementStatus, revealAssessmentResponse, saveOrganizationDefinition,
 //   saveOrganizationAccessMember, submitOrganizationRosterDraft, reviewOrganizationRosterDraft, manageVerifiedCredential,
-//   removeMember, authorizeMember.
+//   removeMember, repairMemberVerifiedCredential (migration 2340), authorizeMember.
 // Each one calls one database function from supabase/migrations/20261008002260_admin_writes.sql over PostgREST:
 //   POST {SUPABASE_URL}/rest/v1/rpc/<function>   body { p_input: <the payload of the Firebase callable>, p_dry_run: <boolean> }
 // with the publishable key (apikey) and the signed in person's Firebase ID token. The database decides who may call (the same role
@@ -134,6 +134,8 @@ const FUNCTIONS = {
     }
   },
   removeMember: { rpc: "admin_remove_member", arity: 1, input: (args) => ({ email: args[0] }) },
+  // Migration 2340: the staff certificate repair. The argument is the learner's Firebase uid (the function also takes a Supabase uid or a person id).
+  repairMemberVerifiedCredential: { rpc: "admin_issue_credential", arity: 1, input: (args) => ({ userId: args[0] === undefined || args[0] === null ? "" : String(args[0]) }) },
   authorizeMember: {
     rpc: "admin_authorize_member",
     arity: 2,

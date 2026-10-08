@@ -1,6 +1,6 @@
 // The switchboard: one public setting that moves every browser at once (docs/SUPABASE_SWITCHBOARD.md).
 //
-// The cut over to Supabase is controlled by six switches that live in one browser each (localStorage). To move everyone
+// The cut over to Supabase is controlled by eight switches that live in one browser each (localStorage). To move everyone
 // on the window day, the database holds a public row, app_settings key "switchboard", which says what each switch should
 // be. On page load this file reads that row with the publishable key alone and copies each flag into the matching browser
 // switch. It is loaded by assets/firebase.js (one dynamic import at the top), so every page that uses the site's
@@ -13,6 +13,8 @@
 //   auth              utl_auth                        firebase, supabase
 //   payments          utl_payments                    firebase, supabase
 //   ai                utl_ai                          firebase, supabase
+//   es_submit         utl_es                          firebase, supabase   (migration 2360)
+//   mail              utl_mail                        firebase, supabase   (migration 2360)
 //
 // Rules, in plain words:
 //   1. The value "firebase" (or a flag that is missing from the row) means "do nothing": every browser switch already
@@ -26,7 +28,7 @@
 //   4. The row is cached in sessionStorage for five minutes (utl_switchboard_cache), so a normal visit costs at most one
 //      small request per five minutes. A cached answer is applied at once, before any request.
 //   5. Any failure (no network, a slow answer, an unexpected answer, unreadable storage) changes nothing.
-//   6. Only the six names and the words above are understood. Anything else in the row is ignored.
+//   6. Only the eight names and the words above are understood. Anything else in the row is ignored.
 //
 // Nothing private is read or written here. The URL and the publishable key are the same public values as in assets/firebase.js.
 
@@ -44,7 +46,10 @@ export const SWITCHBOARD_FLAGS = Object.freeze({
   server_writes: Object.freeze({ key: "utl_server_writes", values: Object.freeze(["firebase", "supabase", "shadow"]) }),
   auth: Object.freeze({ key: "utl_auth", values: Object.freeze(["firebase", "supabase"]) }),
   payments: Object.freeze({ key: "utl_payments", values: Object.freeze(["firebase", "supabase"]) }),
-  ai: Object.freeze({ key: "utl_ai", values: Object.freeze(["firebase", "supabase"]) })
+  ai: Object.freeze({ key: "utl_ai", values: Object.freeze(["firebase", "supabase"]) }),
+  // Added with migration 2360. A row without them (migration not applied yet) counts as firebase: nothing is written.
+  es_submit: Object.freeze({ key: "utl_es", values: Object.freeze(["firebase", "supabase"]) }),
+  mail: Object.freeze({ key: "utl_mail", values: Object.freeze(["firebase", "supabase"]) })
 });
 
 function isPlainObject(value) {
@@ -52,7 +57,7 @@ function isPlainObject(value) {
 }
 
 // The row's value as one word per flag. A flag that is missing counts as "firebase". A flag with a word that is not allowed
-// for it is null, which means "leave that switch alone". Names that are not one of the six are dropped.
+// for it is null, which means "leave that switch alone". Names that are not one of the eight are dropped.
 export function sanitizeSwitchboard(value) {
   const source = isPlainObject(value) ? value : {};
   const result = {};

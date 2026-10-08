@@ -164,7 +164,9 @@
   <script src="../content.js"></script>
   <script src="../facet-report.js"></script>
   <script type="module">
-    import { auth, db, doc, getDoc, getDataSource, getMyEsStatus, isSignInWithEmailLink, onAuthStateChanged, signInWithEmailLink, checkReadinessAccountEmail, sendReadinessAccessLink, sendReadinessResultEmail } from '../../../assets/firebase.js';
+    import { auth, db, doc, getDoc, getDataSource, getMyEsStatus, isSignInWithEmailLink, onAuthStateChanged, signInWithEmailLink, requestReadinessAccess } from '../../../assets/firebase.js';
+    import { accountDataFor, supabaseSessionActive } from '../assets/account-record.js';
+    import { sendReadinessResultEmail } from '../../../assets/result-email-client.js';
 
     const $ = (s) => document.querySelector(s);
     const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -266,12 +268,13 @@
       show('resultsView');
     }
 
-    async function loadAndRenderResults(uid) {
+    async function loadAndRenderResults(user) {
       const [status, snap] = await Promise.all([
         getMyEsStatus().catch(() => null),
-        getDoc(doc(db, 'users', uid)).catch(() => null)
+        // A Supabase only session has no users/{uid} document (keyed by the Firebase uid): the address comes from the signed in user.
+        supabaseSessionActive() ? null : getDoc(doc(db, 'users', user.uid)).catch(() => null)
       ]);
-      await renderResultsView(status, snap && snap.exists() ? snap.data() : null);
+      await renderResultsView(status, accountDataFor(snap, user));
     }
 
     async function completeSignIn(email) {
@@ -282,7 +285,7 @@
         const credential = await signInWithEmailLink(auth, email, window.location.href);
         window.localStorage.removeItem('emailForSignIn');
         history.replaceState({}, '', location.pathname);
-        await loadAndRenderResults(credential.user.uid);
+        await loadAndRenderResults(credential.user);
       } catch (error) {
         btn.disabled = false; btn.textContent = 'Continue';
         const expired = error && (error.code === 'auth/invalid-action-code' || error.code === 'auth/expired-action-code');
@@ -304,10 +307,7 @@
       btn.disabled = true; btn.textContent = 'Sending…';
       msg.classList.remove('error');
       try {
-        const result = await checkReadinessAccountEmail(email);
-        if (result && result.hasResult) {
-          await sendReadinessAccessLink(email);
-        }
+        await requestReadinessAccess(email);
       } catch (error) {
         // Deliberately silent: the confirmation message below never reveals
         // whether an account exists for this email, so a failed check fails
@@ -330,7 +330,7 @@
       onAuthStateChanged(auth, async (user) => {
         if (!user) { show('requestState'); return; }
         try {
-          await loadAndRenderResults(user.uid);
+          await loadAndRenderResults(user);
         } catch (error) {
           show('requestState');
         }

@@ -24,6 +24,8 @@ const REPO_ROOT = path.resolve(__dirname, '..');
 const SWITCHBOARD_SOURCE = fs.readFileSync(path.join(REPO_ROOT, 'assets', 'switchboard.js'), 'utf8');
 const FIREBASE_SOURCE = fs.readFileSync(path.join(REPO_ROOT, 'assets', 'firebase.js'), 'utf8');
 const MIGRATION = fs.readFileSync(path.join(REPO_ROOT, 'supabase', 'migrations', '20261008002300_switchboard.sql'), 'utf8');
+// Migration 2360 adds the flags es_submit and mail; its check function lists all eight names.
+const MIGRATION_MORE = fs.readFileSync(path.join(REPO_ROOT, 'supabase', 'migrations', '20261008002360_switchboard_more_flags.sql'), 'utf8');
 
 const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'utl-switchboard-test-'));
 process.on('exit', () => { try { fs.rmSync(dir, { recursive: true, force: true }); } catch (error) { /* best effort */ } });
@@ -61,9 +63,10 @@ function fakeFetch(state = {}) {
   return fn;
 }
 
-const ALL_FIREBASE = { data_source: 'firebase', server_reads: 'firebase', server_writes: 'firebase', auth: 'firebase', payments: 'firebase', ai: 'firebase' };
+const ALL_FIREBASE = { data_source: 'firebase', server_reads: 'firebase', server_writes: 'firebase', auth: 'firebase', payments: 'firebase', ai: 'firebase', es_submit: 'firebase', mail: 'firebase' };
+const SIX = ['data_source', 'server_reads', 'server_writes', 'auth', 'payments', 'ai'];
 const row = (value) => [{ value }];
-const KEYS = { data_source: 'utl_data_source', server_reads: 'utl_server_reads', server_writes: 'utl_server_writes', auth: 'utl_auth', payments: 'utl_payments', ai: 'utl_ai' };
+const KEYS = { data_source: 'utl_data_source', server_reads: 'utl_server_reads', server_writes: 'utl_server_writes', auth: 'utl_auth', payments: 'utl_payments', ai: 'utl_ai', es_submit: 'utl_es', mail: 'utl_mail' };
 const MARK = 'utl_switchboard_applied';
 const CACHE = 'utl_switchboard_cache';
 const T0 = 1800000000000;
@@ -88,19 +91,31 @@ async function check(name, fn) {
     assert.equal(mod.SWITCHBOARD_APPLIED_KEY, MARK);
     assert.equal(mod.SWITCHBOARD_CACHE_KEY, CACHE);
   });
-  await check('the six flags map to the six browser switches, with the words the site understands', () => {
+  await check('the eight flags map to the eight browser switches, with the words the site understands', () => {
     assert.deepEqual(Object.fromEntries(Object.entries(mod.SWITCHBOARD_FLAGS).map(([flag, v]) => [flag, v.key])), KEYS);
     assert.deepEqual(mod.SWITCHBOARD_FLAGS.server_reads.values, ['firebase', 'supabase', 'shadow']);
     assert.deepEqual(mod.SWITCHBOARD_FLAGS.server_writes.values, ['firebase', 'supabase', 'shadow']);
-    ['data_source', 'auth', 'payments', 'ai'].forEach((flag) => assert.deepEqual(mod.SWITCHBOARD_FLAGS[flag].values, ['firebase', 'supabase']));
+    ['data_source', 'auth', 'payments', 'ai', 'es_submit', 'mail'].forEach((flag) => assert.deepEqual(mod.SWITCHBOARD_FLAGS[flag].values, ['firebase', 'supabase']));
     assert.ok(Object.isFrozen(mod.SWITCHBOARD_FLAGS));
   });
-  await check('the database migration allows the same flags and words as this file', () => {
-    const names = (MIGRATION.match(/array\['data_source'[^\]]*\]/) || [''])[0].match(/'[a-z_]+'/g).map((s) => s.slice(1, -1)).sort();
-    assert.deepEqual(names, Object.keys(KEYS).sort());
-    assert.ok(MIGRATION.includes("array['firebase', 'supabase', 'shadow']"));
-    assert.ok(MIGRATION.includes("array['firebase', 'supabase']"));
-    assert.ok(MIGRATION.includes("v_name in ('server_reads', 'server_writes')"));
+  await check('the database migrations allow the same flags and words as this file', () => {
+    const six = (MIGRATION.match(/array\['data_source'[^\]]*\]/) || [''])[0].match(/'[a-z_]+'/g).map((s) => s.slice(1, -1)).sort();
+    assert.deepEqual(six, SIX.slice().sort(), '2300 allows the first six');
+    const names = (MIGRATION_MORE.match(/array\['data_source'[^\]]*\]/) || [''])[0].match(/'[a-z_]+'/g).map((s) => s.slice(1, -1)).sort();
+    assert.deepEqual(names, Object.keys(KEYS).sort(), '2360 allows all eight');
+    for (const text of [MIGRATION, MIGRATION_MORE]) {
+      assert.ok(text.includes("array['firebase', 'supabase', 'shadow']"));
+      assert.ok(text.includes("array['firebase', 'supabase']"));
+      assert.ok(text.includes("v_name in ('server_reads', 'server_writes')"));
+    }
+  });
+  await check('migration 2360 adds the two flags without resetting a value, takes no new grant and is numbered in its own range', () => {
+    assert.ok(/set value = jsonb_build_object\('es_submit', 'firebase', 'mail', 'firebase'\) \|\| value/.test(MIGRATION_MORE), 'the new keys are on the left, so a value already there is kept');
+    assert.ok(/not \(value \? 'es_submit' and value \? 'mail'\)/.test(MIGRATION_MORE));
+    assert.ok(/set local lock_timeout = '3s'/.test(MIGRATION_MORE));
+    assert.ok(!/\bgrant\b/i.test(MIGRATION_MORE.replace(/--.*$/gm, '')), 'no grant');
+    assert.ok(!MIGRATION_MORE.includes('\\'), 'no backslash');
+    assert.ok(/^2026100800236\d_/.test('20261008002360_switchboard_more_flags.sql'));
   });
   await check('the file holds no secret, no service key and no write call', () => {
     assert.ok(!/service_role|secret|sb_secret|eyJ[A-Za-z0-9_-]{20,}/.test(SWITCHBOARD_SOURCE));
@@ -116,8 +131,8 @@ async function check(name, fn) {
     assert.deepEqual(sanitizeSwitchboard(null), ALL_FIREBASE);
     assert.deepEqual(sanitizeSwitchboard([]), ALL_FIREBASE);
     assert.deepEqual(sanitizeSwitchboard('x'), ALL_FIREBASE);
-    const s = sanitizeSwitchboard({ auth: 'supabase', ai: 'shadow', payments: 'Supabase', data_source: 1, server_reads: 'shadow', mystery: 'supabase', __proto__: { x: 1 } });
-    assert.deepEqual(s, { data_source: null, server_reads: 'shadow', server_writes: 'firebase', auth: 'supabase', payments: null, ai: null });
+    const s = sanitizeSwitchboard({ auth: 'supabase', ai: 'shadow', payments: 'Supabase', data_source: 1, server_reads: 'shadow', mystery: 'supabase', es_submit: 'shadow', mail: 'supabase', __proto__: { x: 1 } });
+    assert.deepEqual(s, { data_source: null, server_reads: 'shadow', server_writes: 'firebase', auth: 'supabase', payments: null, ai: null, es_submit: null, mail: 'supabase' });
     assert.ok(!('mystery' in s));
   });
 
@@ -132,14 +147,14 @@ async function check(name, fn) {
     assert.equal(local.map.size, 0);
   });
   await check('an empty row, an unknown flag and a bad word also write nothing', async () => {
-    for (const value of [{}, { mystery: 'supabase' }, { auth: 'on' }, { auth: 'shadow' }, { ai: true }, { data_source: 'shadow' }]) {
+    for (const value of [{}, { mystery: 'supabase' }, { auth: 'on' }, { auth: 'shadow' }, { ai: true }, { data_source: 'shadow' }, { es_submit: 'shadow' }, { mail: 'on' }]) {
       const local = store();
       await run({ rows: row(value) }, local, store());
       assert.deepEqual(local.writes, [], JSON.stringify(value));
     }
   });
   await check('with all flags on firebase a person with their own switches keeps every one of them untouched', async () => {
-    const own = { utl_auth: 'supabase', utl_payments: 'supabase', utl_ai: 'supabase', utl_data_source: 'supabase', utl_server_reads: 'shadow', utl_server_writes: 'supabase' };
+    const own = { utl_auth: 'supabase', utl_payments: 'supabase', utl_ai: 'supabase', utl_data_source: 'supabase', utl_server_reads: 'shadow', utl_server_writes: 'supabase', utl_es: 'supabase', utl_mail: 'supabase' };
     const local = store(own);
     await run({ rows: row(ALL_FIREBASE) }, local, store());
     assert.deepEqual(Object.fromEntries(local.map), own);
@@ -165,9 +180,9 @@ async function check(name, fn) {
     assert.equal(local.getItem('utl_auth'), null);
     assert.equal(local.getItem('utl_ai'), null);
   });
-  await check('all six on supabase fills all six and marks all six', async () => {
+  await check('all eight on supabase fills all eight and marks all eight', async () => {
     const local = store();
-    await run({ rows: row({ data_source: 'supabase', server_reads: 'supabase', server_writes: 'supabase', auth: 'supabase', payments: 'supabase', ai: 'supabase' }) }, local, store());
+    await run({ rows: row({ data_source: 'supabase', server_reads: 'supabase', server_writes: 'supabase', auth: 'supabase', payments: 'supabase', ai: 'supabase', es_submit: 'supabase', mail: 'supabase' }) }, local, store());
     Object.values(KEYS).forEach((key) => assert.equal(local.getItem(key), 'supabase'));
     assert.deepEqual(JSON.parse(local.getItem(MARK)), Object.fromEntries(Object.values(KEYS).map((key) => [key, 'supabase'])));
   });
@@ -429,12 +444,29 @@ async function check(name, fn) {
     const member = grab('memberReadsMode');
     assert.ok(/getItem\("utl_server_reads"\) === "shadow"\) return "shadow"/.test(member));
   });
+  await check('the flags reach the client modules: the switchboard value is what esBackend, mailBackend and aiBackend read', async () => {
+    const readSource = (name) => fs.readFileSync(path.join(REPO_ROOT, 'assets', name), 'utf8');
+    const es = await load(readSource('readiness-submit-client.js'));
+    const mail = await load(readSource('result-email-client.js'));
+    const ai = await load(readSource('ai-score-client.js'));
+    const local = store();
+    assert.equal(es.esBackend(local), 'firebase');
+    assert.equal(mail.mailBackend(local), 'firebase');
+    assert.equal(ai.aiBackend(local), 'firebase');
+    await run({ rows: row({ ...ALL_FIREBASE, es_submit: 'supabase', mail: 'supabase', ai: 'supabase' }) }, local, store());
+    assert.equal(es.esBackend(local), 'supabase');
+    assert.equal(mail.mailBackend(local), 'supabase');
+    assert.equal(ai.aiBackend(local), 'supabase');
+    await run({ rows: row(ALL_FIREBASE) }, local, store(), { cacheMs: 0 });
+    assert.equal(es.esBackend(local), 'firebase', 'taken back with the flag');
+    assert.equal(mail.mailBackend(local), 'firebase');
+  });
   await check('every browser switch the switchboard writes is a key the site reads', () => {
     const assetsDir = path.join(REPO_ROOT, 'assets');
     const all = fs.readdirSync(assetsDir).filter((f) => f.endsWith('.js') && f !== 'switchboard.js').map((f) => fs.readFileSync(path.join(assetsDir, f), 'utf8')).join('\n');
     Object.values(KEYS).forEach((key) => assert.ok(all.includes(key), `${key} is read somewhere in assets`));
   });
-  await check('firebase.js: the readers of the six switches still treat only the documented words as on', () => {
+  await check('firebase.js: the readers of the switches still treat only the documented words as on', () => {
     assert.ok(/getItem\(DATA_SOURCE_KEY\) === "supabase" \? "supabase" : "firebase"/.test(FIREBASE_SOURCE));
     assert.ok(/getItem\("utl_auth"\) === "supabase"/.test(FIREBASE_SOURCE));
     assert.ok(/getItem\("utl_payments"\) === "supabase"/.test(FIREBASE_SOURCE));

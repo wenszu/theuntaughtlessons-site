@@ -1,9 +1,10 @@
 // Supabase data layer for the read only staff screens of the admin console (wave 3 of docs/SUPABASE_PLAN_SERVERS_AND_ADMIN.md).
 //
-// Nine functions with the SAME names, arguments and return shapes as the Firebase callables wrapped in assets/firebase.js:
+// Eleven functions with the SAME names, arguments and return shapes as the Firebase callables wrapped in assets/firebase.js:
 //   getCustomerDirectory, getCustomerDetailForStaff, listEsParticipants, listEsAttempts, getEsConfiguration, getEsDataGovernance,
-//   searchVerifiedCredentials, getMemberCredentialRegistry, getOrganizationAccessAdmin.
-// Each one calls one staff database function from supabase/migrations/20261008002240_admin_read_screens.sql over PostgREST:
+//   searchVerifiedCredentials, getMemberCredentialRegistry, getOrganizationAccessAdmin, and (migrations 2340 and 2342)
+//   checkOrganizationRepEmail and getOrganizationConsole (the sponsor page: the database function finds the caller itself).
+// Each one calls one database function from supabase/migrations/20261008002240_admin_read_screens.sql (and 2340, 2342) over PostgREST:
 //   POST {SUPABASE_URL}/rest/v1/rpc/<function>   with the publishable key (apikey) and the signed in staff member's Firebase ID token.
 // The database decides who may call (platform staff roles) and refuses everyone else with 42501; nothing here makes that decision.
 //
@@ -61,6 +62,12 @@ function buildAdminReadArgs(name, args) {
       return { p_limit: pageSizeOf(options), p_cursor: cleanText(options.cursorEventId, 160) || null };
     case "searchVerifiedCredentials":
       return { p_query: cleanText(first, 200) };
+    // Migration 2340: the address check of the Organization access screen (platform owner only).
+    case "checkOrganizationRepEmail":
+      return { p_email: cleanText(first, 254) };
+    // Migration 2342: the sponsor page and the administrator preview. The organization is the page's key in lower case, or nothing.
+    case "getOrganizationConsole":
+      return { p_organization_id: cleanText(first, 80).toLowerCase() || null };
     case "getEsConfiguration":
     case "getMemberCredentialRegistry":
     case "getOrganizationAccessAdmin":
@@ -79,7 +86,9 @@ const RPC_NAMES = {
   getEsDataGovernance: "admin_get_es_governance",
   searchVerifiedCredentials: "admin_search_credentials",
   getMemberCredentialRegistry: "admin_credential_registry",
-  getOrganizationAccessAdmin: "admin_organization_access"
+  getOrganizationAccessAdmin: "admin_organization_access",
+  checkOrganizationRepEmail: "admin_check_org_rep_email",
+  getOrganizationConsole: "get_organization_console"
 };
 const ADMIN_READ_NAMES = Object.keys(RPC_NAMES);
 

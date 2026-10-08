@@ -13,6 +13,13 @@
   const APP_TITLE = mode === '60' ? 'Explain to Aiko (60s)' : 'Explain to Aiko (120s)';
   const EXERCISE_ID = mode === '60' ? 'explain-to-aiko-60s' : 'explain-to-aiko-120s';
   const SCORE_URL = 'https://us-central1-the-untaught-lessons.cloudfunctions.net/scoreExplainToAiko';
+  // With the browser switch utl_ai = "supabase" (set for everyone by the switchboard flag ai) the score is asked of the Supabase Edge Function
+  // through assets/ai-score-client.js; with any other value, or none, the request to the Firebase scorer below is sent exactly as before.
+  function aiBackendIsSupabase() { try { return localStorage.getItem('utl_ai') === 'supabase'; } catch (_) { return false; } }
+  async function scoreViaSupabase(payload, signal, idToken) {
+    const { scoreExplainToAiko } = await import('../../assets/ai-score-client.js');
+    return scoreExplainToAiko(payload, { signal, idToken });
+  }
   const SCORE_CONTENT_VERSION = '2026-10-08-v1';
   const LEGACY_120_IDS = ['explain-to-aiko-120', 'explain-to-aiko', 'explain-to-aiko-v2', 'explain-to-aiko-120s'];
   const PRIOR_TRANSCRIPT_CAP_MS = 4000;
@@ -390,10 +397,14 @@ Best, Yutee Elle`;
     const scoringTimeout = window.setTimeout(() => controller.abort(), 50000);
     const send = (extended) => fetch(SCORE_URL, { method: 'POST', headers: Object.assign({ 'Content-Type': 'application/json' }, extended && idToken ? { Authorization: `Bearer ${idToken}` } : {}), signal: controller.signal, body: JSON.stringify(Object.assign({ mode }, state.submitted, extended && !preview ? { attemptId: state.scoreAttemptId, attemptNumber } : {})) });
     try {
+      if (aiBackendIsSupabase()) {
+        state.score = await scoreViaSupabase(Object.assign({ mode }, state.submitted, !preview ? { attemptId: state.scoreAttemptId, attemptNumber } : {}), controller.signal, idToken);
+      } else {
       // An older scorer deployment rejects the Authorization header at preflight: retry once in the old request shape.
       const response = await send(true).catch((error) => { if (idToken && !controller.signal.aborted) return send(false); throw error; });
       const result = await response.json().catch(() => ({ fallback: true }));
       state.score = response.ok ? result : { fallback: true };
+      }
     } catch (_) { state.score = { fallback: true }; }
     finally { window.clearTimeout(scoringTimeout); }
     renderResults();
@@ -604,9 +615,13 @@ Best, Yutee Elle`;
     const timeout = window.setTimeout(() => controller.abort(), 50000);
     let score;
     try {
+      if (aiBackendIsSupabase()) {
+        score = await scoreViaSupabase({ mode: scoreMode, transcript, durationSeconds: duration, wpm, fillerCount: fillers, priorTranscript }, controller.signal, '');
+      } else {
       const response = await fetch(SCORE_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: controller.signal, body: JSON.stringify({ mode: scoreMode, transcript, durationSeconds: duration, wpm, fillerCount: fillers, priorTranscript }) });
       const result = await response.json().catch(() => ({ fallback: true }));
       score = response.ok ? result : { fallback: true };
+      }
     } catch (_) { score = { fallback: true }; }
     finally { window.clearTimeout(timeout); }
     if (scoreMode === '120') {

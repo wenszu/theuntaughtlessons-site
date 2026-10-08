@@ -30,7 +30,9 @@ const RPC = {
   getEsDataGovernance: 'admin_get_es_governance',
   searchVerifiedCredentials: 'admin_search_credentials',
   getMemberCredentialRegistry: 'admin_credential_registry',
-  getOrganizationAccessAdmin: 'admin_organization_access'
+  getOrganizationAccessAdmin: 'admin_organization_access',
+  checkOrganizationRepEmail: 'admin_check_org_rep_email',
+  getOrganizationConsole: 'get_organization_console'
 };
 const NAMES = Object.keys(RPC);
 const CALLS = {
@@ -42,7 +44,9 @@ const CALLS = {
   getEsDataGovernance: [{ pageSize: 5, cursorEventId: 'cur-4' }],
   searchVerifiedCredentials: ['mia member'],
   getMemberCredentialRegistry: [],
-  getOrganizationAccessAdmin: []
+  getOrganizationAccessAdmin: [],
+  checkOrganizationRepEmail: ['rep@example.test'],
+  getOrganizationConsole: ['Acme']
 };
 // What the Firebase callable answers, and what the Supabase function answers. They differ on purpose: one more row, one extra
 // field, one missing field. The values carry a marker that must never show up in a comparison warning.
@@ -130,7 +134,7 @@ async function run(harness, mod, name, options = {}) {
     assert.strictEqual(out.value.from, 'firebase');
     assert.deepStrictEqual(out.warnings, []);
   });
-  await check('default: the export list of the nine is untouched and the file loads the twin only through a dynamic import', () => {
+  await check('default: the export list of the eleven is untouched and the file loads the twin only through a dynamic import', () => {
     NAMES.forEach((name) => assert.strictEqual(typeof current[name], 'function', `${name} is exported`));
     const imports = FIREBASE_SOURCE.match(/import\(["']\.\/supabase-admin-reads\.js["']\)/g) || [];
     assert.strictEqual(imports.length, 1);
@@ -173,7 +177,9 @@ async function run(harness, mod, name, options = {}) {
       getEsDataGovernance: { p_limit: 5, p_cursor: 'cur-4' },
       searchVerifiedCredentials: { p_query: 'mia member' },
       getMemberCredentialRegistry: {},
-      getOrganizationAccessAdmin: {}
+      getOrganizationAccessAdmin: {},
+      checkOrganizationRepEmail: { p_email: 'rep@example.test' },
+      getOrganizationConsole: { p_organization_id: 'acme' }
     };
     for (const name of NAMES) {
       const out = await run(harness, current, name, { href: SITE + '?utl_server=shadow', before: (h) => installRpc(h) });
@@ -297,7 +303,7 @@ async function run(harness, mod, name, options = {}) {
     assert.throws(() => adapter.createSupabaseAdminReads({}), /supabaseUrl/);
     assert.throws(() => adapter.createSupabaseAdminReads({ supabaseUrl: 'u', publishableKey: 'k' }), /getIdToken/);
   });
-  await check('adapter: the same nine names as the Firebase wrappers, one database function each', () => {
+  await check('adapter: the same eleven names as the Firebase wrappers, one database function each', () => {
     assert.deepStrictEqual(adapter.ADMIN_READ_NAMES.slice().sort(), NAMES.slice().sort());
     assert.deepStrictEqual(adapter.RPC_NAMES, RPC);
     const reads = adapter.createSupabaseAdminReads(context(async () => ({ ok: true, status: 200, text: async () => '{}' })));
