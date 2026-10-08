@@ -12,8 +12,11 @@
   const HISTORY_KEY = `utl_submissions_${APP_ID}`;
   const APP_TITLE = mode === '60' ? 'Explain to Aiko (60s)' : 'Explain to Aiko (120s)';
   const EXERCISE_ID = mode === '60' ? 'explain-to-aiko-60s' : 'explain-to-aiko-120s';
-  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzJE--FL2kB_XDNZRnszCtlyLRPvaLAHGuF5TAOdXJk40atbvf5Y6ELuSK2B7CSLaMN/exec';
   const SCORE_URL = 'https://us-central1-the-untaught-lessons.cloudfunctions.net/scoreExplainToAiko';
+  const SCORE_CONTENT_VERSION = '2026-10-08-v1';
+  const LEGACY_120_IDS = ['explain-to-aiko-120', 'explain-to-aiko', 'explain-to-aiko-v2', 'explain-to-aiko-120s'];
+  const PRIOR_TRANSCRIPT_CAP_MS = 4000;
+  const ID_TOKEN_CAP_MS = 2000;
   const PLAYBACK_GEM_URL = 'https://gemini.google.com/gem/1mwtmHhhwE2IzQ2w_EUYwxkSto4yym1CX?usp=sharing';
   const CONTACT_PROFILE_KEY = 'utl_contact_profile';
   const FILLER_RE = /\b(um+|uh+|erm+|like|you know|sort of|kind of)\b/gi;
@@ -120,6 +123,10 @@ Best, Yutee Elle`;
     return String(value == null ? '' : value).replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[char]));
   }
   function wordCount(text) { return String(text || '').trim() ? String(text).trim().split(/\s+/).length : 0; }
+  function deterministicId(...parts) { return parts.join('-').replace(/[^A-Za-z0-9-]+/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '').slice(0, 100); }
+  function shortHash(text) { let hash = 5381; const value = String(text || ''); for (let i = 0; i < value.length; i += 1) hash = ((hash * 33) ^ value.charCodeAt(i)) >>> 0; return hash.toString(36); }
+  function previewActive() { try { return localStorage.getItem('utl_experience_preview_active') === 'true'; } catch (_) { return false; } }
+  function isPracticeWork(item) { return Boolean(item && (item.practice === true || (item.responsePayload && item.responsePayload.practice === true))); }
   function fillerCount(text) { const matches = String(text || '').match(FILLER_RE); return matches ? matches.length : 0; }
   function formatDuration(seconds) {
     const rounded = Math.max(0, Math.round(Number(seconds) || 0));
@@ -160,7 +167,7 @@ Best, Yutee Elle`;
     try { const parsed = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]'); history = Array.isArray(parsed) ? parsed : []; } catch (_) {}
     const latest = readSavedResult();
     if (latest && latest.transcript && !history.some((item) => item.submitted_at === latest.submitted_at)) history.push(latest);
-    return history.filter((item) => item && item.transcript).sort((a, b) => String(b.submitted_at || '').localeCompare(String(a.submitted_at || ''))).slice(0, 10);
+    return history.filter((item) => item && item.transcript && !isPracticeWork(item)).sort((a, b) => String(b.submitted_at || '').localeCompare(String(a.submitted_at || ''))).slice(0, 10);
   }
 
   function saveResultHistory(payload) {
@@ -174,15 +181,21 @@ Best, Yutee Elle`;
       const { getExerciseWork } = await import('../../assets/firebase.js');
       const legacyIds = mode === '60'
         ? ['explain-to-aiko-60', 'explain-to-aiko-60-v2', 'explain-to-aiko-60s']
-        : ['explain-to-aiko-120', 'explain-to-aiko', 'explain-to-aiko-v2', 'explain-to-aiko-120s'];
+        : LEGACY_120_IDS;
       const workRecords = await Promise.all(legacyIds.map((exerciseId) => getExerciseWork(exerciseId)));
       const merged = new Map(savedResults().map((item) => [item.submitted_at || item.completed_at, item]));
+      const practiceFound = [];
       workRecords.forEach((work) => (work.submissions || []).forEach((item) => {
         const payload = item.responsePayload || item.savedPayload || null;
+        if (isPracticeWork(item) || isPracticeWork(payload)) { if (payload) practiceFound.push(payload); return; }
         if (!payload || !payload.transcript) return;
         const submittedAt = payload.submitted_at || payload.completed_at || item.completedAtClient || new Date().toISOString();
         merged.set(submittedAt, { ...payload, submitted_at: submittedAt });
       }));
+      const knownPractice = new Set(practiceAttempts().map((item) => item.id));
+      const addedPractice = practiceFound.filter((item) => item && item.id && item.topicId && !knownPractice.has(item.id) && knownPractice.add(item.id)).map(({ practice, ...attempt }) => ({ ...attempt, stage: 'complete' }));
+      if (addedPractice.length) { try { localStorage.setItem(PRACTICE_ATTEMPTS_KEY, JSON.stringify(practiceAttempts().concat(addedPractice))); } catch (_) {} }
+      if (urlParams.get('practice') === '1') { if (addedPractice.length && !practiceDraft) { const recent = mostRecentPracticeWorkspace(); if (urlParams.get('attempt')) loadPracticeAttempt(urlParams.get('attempt')); else renderPracticePicker(recent ? recent.topicId : PRACTICE_TOPICS[0].id); } return; }
       const history = Array.from(merged.values()).sort((a,b)=>String(b.submitted_at||b.completed_at||'').localeCompare(String(a.submitted_at||a.completed_at||''))).slice(0,10);
       localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
       const cloudDraft = workRecords.map((work) => work.draft && work.draft.draftPayload).find((draft) => draft && draft.prep_notes);
@@ -216,7 +229,7 @@ Best, Yutee Elle`;
   function renderSavedWorkHome(saved) {
     const history = savedResults();
     shell(`<section class="aiko-saved-work"><div><p class="aiko-progress">Saved work</p><h2>Welcome back</h2><p>Your latest ${TARGET_SECONDS}-second explanation was submitted ${saved.submitted_at ? new Date(saved.submitted_at).toLocaleString() : 'previously'}.</p></div><div class="aiko-saved-controls"><div class="aiko-saved-history"><label for="aikoSavedSelect">Previous submissions</label><select class="aiko-saved-select" id="aikoSavedSelect"><option value="">Choose a previous submission</option>${history.map((item,index)=>`<option value="${index}">Submission ${history.length-index} · ${item.submitted_at ? new Date(item.submitted_at).toLocaleString() : 'Earlier submission'} · ${formatDuration(item.duration_seconds)}</option>`).join('')}</select></div><div class="aiko-saved-actions"><button class="aiko-button" id="startNewRequiredAttempt" type="button">Start a new attempt</button></div></div></section>`);
-    document.getElementById('startNewRequiredAttempt').addEventListener('click', () => { reviewingSaved = false; state.finalTranscript = ''; state.interimTranscript = ''; state.submitted = null; state.score = null; state.durationSeconds = 0; renderPreparation(); });
+    document.getElementById('startNewRequiredAttempt').addEventListener('click', () => { reviewingSaved = false; state.finalTranscript = ''; state.interimTranscript = ''; state.submitted = null; state.score = null; state.durationSeconds = 0; state.takeNonce = ''; renderPreparation(); });
     document.getElementById('aikoSavedSelect').addEventListener('change',(event)=>{if(event.target.value!=='')showSavedWork(history[Number(event.target.value)]);});
   }
 
@@ -292,6 +305,7 @@ Best, Yutee Elle`;
   }
   function renderRecording() {
     analyticsStep('record-talk', 45);
+    state.takeNonce = '';
     shell(`<section class="aiko-panel"><div class="aiko-panel-head"><p class="aiko-progress">Step 2 · Record · ${TARGET_SECONDS} seconds</p><h2>Deliver your explanation.</h2><p>Use your preparation notes below. Tap the microphone and speak as if Aiko is listening. Your words appear live, and recording stops at ${TARGET_SECONDS} seconds.</p></div><div class="aiko-step">${preparationReferenceHtml()}<div id="recordPath"><div class="aiko-recorder"><div class="aiko-ring"><svg width="220" height="220" viewBox="0 0 210 210" aria-hidden="true"><circle class="aiko-ring-track" cx="105" cy="105" r="98"></circle><circle class="aiko-ring-fill" id="ringFill" cx="105" cy="105" r="98"></circle></svg><button class="aiko-mic" id="micButton" type="button" aria-label="Start recording"><svg id="micIcon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2z"/></svg><span class="aiko-timer" id="timerLabel">${formatDuration(TARGET_SECONDS)}</span><span id="micState">Start recording</span></button></div><p class="aiko-rec-hint" id="recordHint">Your browser will ask for microphone access after you tap.</p></div><div class="aiko-transcript" id="liveTranscript"><span class="placeholder">Your words will appear here as you speak…</span></div><div class="aiko-live-metrics"><span>Words <b id="liveWords">0</b></span><span>Pace <b id="liveWpm">–</b> wpm</span><span>Fillers <b id="liveFillers">0</b></span></div></div><div id="pastePath" hidden><div class="aiko-notice">Live transcription is not supported in this browser. Record with any voice-memo app and paste the transcript below. Duration will be clearly labeled as an estimate.</div><label class="aiko-field-label" for="pasteTranscript">Paste your transcript</label><textarea class="aiko-textarea aiko-paste" id="pasteTranscript" placeholder="Paste your explanation transcript..."></textarea></div><div class="aiko-notice error" id="recordError" hidden></div><div class="aiko-actions"><button class="aiko-button secondary" id="prepBack" type="button">Back to prep</button><button class="aiko-button secondary" id="retryButton" type="button" hidden>Record again</button><button class="aiko-button" id="scoreButton" type="button" disabled>Get feedback</button></div>${phoneFallbackHtml()}</div></section>`);
     initializeRecorder();
   }
@@ -315,7 +329,7 @@ Best, Yutee Elle`;
     hideRecordError();
     try { const stream = await navigator.mediaDevices.getUserMedia({ audio: true }); stream.getTracks().forEach((track) => track.stop()); }
     catch (_) { showRecordError('Microphone access was blocked. Allow access and try again, or use the paste or phone option below.'); return; }
-    state.finalTranscript = ''; state.interimTranscript = ''; state.durationSeconds = 0; state.usedEstimate = false; state.recording = true; state.startTime = Date.now();
+    state.finalTranscript = ''; state.interimTranscript = ''; state.durationSeconds = 0; state.takeNonce = ''; state.usedEstimate = false; state.recording = true; state.startTime = Date.now();
     const recognition = new SPEECH_RECOGNITION(); state.recognition = recognition; recognition.continuous = true; recognition.interimResults = true; recognition.lang = 'en-US';
     recognition.onresult = (event) => { let interim = ''; for (let i = event.resultIndex; i < event.results.length; i += 1) { const text = event.results[i][0].transcript; if (event.results[i].isFinal) state.finalTranscript += text + ' '; else interim += text; } state.interimTranscript = interim; renderLiveTranscript(); };
     recognition.onerror = (event) => { if (event.error === 'not-allowed' || event.error === 'service-not-allowed') { stopRecording('error'); showRecordError('Microphone access was blocked. Use the paste or phone option below.'); } };
@@ -340,7 +354,7 @@ Best, Yutee Elle`;
     if (wordCount(text) < 5 && reason !== 'error') showRecordError('We did not capture enough speech. Record again, speak closer to the microphone, or use the paste option.');
   }
   function resetRecording() {
-    state.finalTranscript = ''; state.interimTranscript = ''; state.durationSeconds = 0; hideRecordError();
+    state.finalTranscript = ''; state.interimTranscript = ''; state.durationSeconds = 0; state.takeNonce = ''; hideRecordError();
     document.getElementById('liveTranscript').innerHTML = '<span class="placeholder">Your words will appear here as you speak…</span>'; document.getElementById('timerLabel').textContent = formatDuration(TARGET_SECONDS); document.getElementById('micState').textContent = 'Start recording'; document.getElementById('recordHint').textContent = 'Your browser will ask for microphone access after you tap.'; document.getElementById('ringFill').style.strokeDashoffset = 0; document.getElementById('ringFill').classList.remove('is-warning'); document.getElementById('liveWords').textContent = '0'; document.getElementById('liveWpm').textContent = '–'; document.getElementById('liveFillers').textContent = '0'; document.getElementById('scoreButton').disabled = true; document.getElementById('retryButton').hidden = true;
   }
   function fullTranscript() { return (state.finalTranscript + ' ' + state.interimTranscript).replace(/\s+/g, ' ').trim(); }
@@ -359,17 +373,25 @@ Best, Yutee Elle`;
   }
 
   async function submitForScoring() {
+
     let transcript = fullTranscript();
     if (!SPEECH_RECOGNITION || document.getElementById('recordPath')?.hidden) { transcript = document.getElementById('pasteTranscript').value.trim(); state.usedEstimate = true; state.durationSeconds = Math.min(TARGET_SECONDS, Math.max(1, Math.round(wordCount(transcript) / 130 * 60))); }
     if (wordCount(transcript) < 5) return;
     analyticsStep(state.usedEstimate ? 'submit-transcript' : 'submit-recording', 70);
     const duration = Math.max(1, Math.round(state.durationSeconds)); const wpm = Math.round(wordCount(transcript) / duration * 60); const fillers = fillerCount(transcript);
-    state.submitted = { transcript, durationSeconds: duration, wpm, fillerCount: fillers, priorTranscript: mode === '60' ? readPriorTranscript() : '' };
+    state.submitted = { transcript, durationSeconds: duration, wpm, fillerCount: fillers, priorTranscript: '' };
     renderLoading();
+    const preview = previewActive(); let attemptNumber = 1; try { attemptNumber = savedResults().length + 1; } catch (_) {}
+    if (!state.takeNonce) state.takeNonce = Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+    state.scoreAttemptId = preview ? '' : deterministicId(APP_ID, 'score', state.takeNonce, shortHash(transcript + '|' + duration), String(transcript.length));
+    const [prior, idToken] = await Promise.all([mode === '60' ? loadPriorTranscript() : '', readIdToken()]);
+    state.submitted.priorTranscript = prior;
     const controller = new AbortController();
     const scoringTimeout = window.setTimeout(() => controller.abort(), 50000);
+    const send = (extended) => fetch(SCORE_URL, { method: 'POST', headers: Object.assign({ 'Content-Type': 'application/json' }, extended && idToken ? { Authorization: `Bearer ${idToken}` } : {}), signal: controller.signal, body: JSON.stringify(Object.assign({ mode }, state.submitted, extended && !preview ? { attemptId: state.scoreAttemptId, attemptNumber } : {})) });
     try {
-      const response = await fetch(SCORE_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: controller.signal, body: JSON.stringify(Object.assign({ mode }, state.submitted)) });
+      // An older scorer deployment rejects the Authorization header at preflight: retry once in the old request shape.
+      const response = await send(true).catch((error) => { if (idToken && !controller.signal.aborted) return send(false); throw error; });
       const result = await response.json().catch(() => ({ fallback: true }));
       state.score = response.ok ? result : { fallback: true };
     } catch (_) { state.score = { fallback: true }; }
@@ -378,6 +400,33 @@ Best, Yutee Elle`;
   }
   function readPriorTranscript() {
     try { return String(JSON.parse(localStorage.getItem('utl_result_explain_to_aiko') || '{}').transcript || '').slice(0, 12000); } catch (_) { return ''; }
+  }
+  async function loadPriorTranscript() {
+    const local = readPriorTranscript(); if (local) return local;
+    let timer = null;
+    try {
+      const cloud = (async () => {
+        const { getExerciseWork } = await import('../../assets/firebase.js');
+        const settled = await Promise.allSettled(LEGACY_120_IDS.map(async (exerciseId) => getExerciseWork(exerciseId)));
+        const found = [];
+        settled.forEach((entry) => { if (entry.status === 'fulfilled') ((entry.value && entry.value.submissions) || []).forEach((item) => { const payload = item && (item.responsePayload || item.savedPayload); if (payload && payload.transcript && !isPracticeWork(item) && !isPracticeWork(payload)) found.push({ at: String(payload.submitted_at || payload.completed_at || item.completedAtClient || ''), text: String(payload.transcript) }); }); });
+        found.sort((a, b) => b.at.localeCompare(a.at));
+        return found.length ? found[0].text.slice(0, 12000) : '';
+      })();
+      cloud.catch(() => {});
+      return await Promise.race([cloud, new Promise((resolve) => { timer = setTimeout(() => resolve(''), PRIOR_TRANSCRIPT_CAP_MS); })]);
+    } catch (_) { return ''; }
+    finally { clearTimeout(timer); }
+  }
+  async function readIdToken() {
+    if (previewActive()) return '';
+    let timer = null;
+    try {
+      const lookup = (async () => { const { getSignedInUser } = await import('../../assets/firebase.js'); const user = await getSignedInUser(); return user && typeof user.getIdToken === 'function' ? String(await user.getIdToken() || '') : ''; })();
+      lookup.catch(() => {});
+      return await Promise.race([lookup, new Promise((resolve) => { timer = setTimeout(() => resolve(''), ID_TOKEN_CAP_MS); })]);
+    } catch (_) { return ''; }
+    finally { clearTimeout(timer); }
   }
   function renderLoading() {
     shell(`<section class="aiko-panel"><div class="aiko-loading"><div class="aiko-spinner"></div><h2>Reviewing your explanation…</h2><p>Checking the message, structure, close, and measured delivery.</p></div></section>`);
@@ -391,27 +440,32 @@ Best, Yutee Elle`;
     const resultActions = reviewingSaved ? '<a class="aiko-link secondary" href="../../member-login/index.html#learning-journey">Back to Learning Journey</a><button class="aiko-button" id="tryAgain" type="button">Start a new attempt</button>' : `<button class="aiko-button secondary" id="tryAgain" type="button">Record again</button>${fallback ? '<button class="aiko-button secondary" id="retryScore" type="button">Try AI feedback again</button>' : ''}<button class="aiko-button" id="saveResult" type="button">Submit</button>`;
     const savedPreparationHtml = reviewingSaved ? `${preparationReferenceHtml(true)}<aside class="aiko-prep-reference"><div class="aiko-prep-reference-head"><h3>Your submitted explanation</h3></div><p class="aiko-prep-open">${escapeHtml(s.transcript || '')}</p></aside>` : '';
     shell(`<section class="aiko-panel"><div class="aiko-panel-head"><p class="aiko-progress">${reviewingSaved ? 'Previous submission' : 'Step 3 · Feedback'}</p><h2>${fallback ? (reviewingSaved ? 'Your saved explanation.' : 'Your explanation is ready to submit.') : 'Here is how your explanation was received.'}</h2></div><div class="aiko-step">${savedPreparationHtml}${scoreHtml}<h3 class="aiko-section-title">Your delivery, ${state.usedEstimate ? 'estimated' : 'measured'}</h3><div class="aiko-metrics"><div class="aiko-metric"><strong>${formatDuration(s.durationSeconds)}</strong><span>Duration vs ${formatDuration(TARGET_SECONDS)}</span></div><div class="aiko-metric"><strong>${s.wpm}</strong><span>Words per minute</span></div><div class="aiko-metric"><strong>${s.fillerCount}</strong><span>Filler words</span></div></div><p class="aiko-measured">${state.usedEstimate ? 'Duration and pace are estimates based on 130 words per minute because this transcript was pasted.' : 'These figures were measured in your browser during recording. They are not AI judgments.'}</p><div class="aiko-actions">${resultActions}</div><p class="aiko-status" id="saveStatus" role="status" aria-live="polite"></p></div></section>`);
-    document.getElementById('tryAgain').addEventListener('click', () => { reviewingSaved = false; renderPreparation(); });
-    document.getElementById('retryScore')?.addEventListener('click', submitForScoring);
+    document.getElementById('tryAgain').addEventListener('click', () => { reviewingSaved = false; state.takeNonce = ''; renderPreparation(); });
+    document.getElementById('retryScore')?.addEventListener('click', () => submitForScoring());
     document.getElementById('saveResult')?.addEventListener('click', saveResult);
   }
 
   async function saveResult() {
     analyticsStep('save-explanation', 95);
     const button = document.getElementById('saveResult'); const status = document.getElementById('saveStatus'); button.disabled = true; button.textContent = 'Saving…';
-    const score = state.score || { fallback: true }; const aiSummary = score.fallback ? 'AI feedback unavailable; exercise saved with measured delivery metrics.' : `${score.summary || ''} Total: ${score.total}/30 (${score.level}).`;
+    const score = state.score || { fallback: true }; const submittedAt = new Date().toISOString();
+    const scorerRecorded = score.fallback !== true && score.attemptRecorded === true && typeof score.attemptId === 'string' && score.attemptId.length > 0;
+    const scoreAttemptId = score.fallback === true || previewActive() ? '' : scorerRecorded ? score.attemptId : state.scoreAttemptId || deterministicId(APP_ID, 'score', submittedAt);
+    let attemptNumber = 1; try { attemptNumber = savedResults().length + 1; } catch (_) {}
+    state.takeNonce = '';
+    const aiSummary = score.fallback ? 'AI feedback unavailable; exercise saved with measured delivery metrics.' : `${score.summary || ''} Total: ${score.total}/30 (${score.level}).`;
     const payload = {
       email: readProfileEmail(), exercise: EXERCISE_ID, gem_feedback: aiSummary,
       duration_seconds: state.submitted.durationSeconds, target_seconds: TARGET_SECONDS, recommended_words: TARGET_WORDS,
       prep_notes: state.notesMode === 'open' ? state.openNotes : sectionNotesText(), gem_url: PLAYBACK_GEM_URL,
-      page: window.location.href, submitted_at: new Date().toISOString(), transcript: state.submitted.transcript,
+      page: window.location.href, submitted_at: submittedAt, transcript: state.submitted.transcript,
       wpm: state.submitted.wpm, filler_count: state.submitted.fillerCount,
       ai_total: score.fallback ? null : score.total, ai_level: score.fallback ? '' : score.level,
-      ai_criteria: JSON.stringify(score.criteria || []), used_estimate: Boolean(state.usedEstimate), scored_by: score.fallback ? 'local-fallback' : 'gemini'
+      ai_criteria: JSON.stringify(score.criteria || []), used_estimate: Boolean(state.usedEstimate), scored_by: score.fallback ? 'local-fallback' : 'gemini', score_attempt_id: scoreAttemptId
     };
-    try { await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) }); } catch (error) { console.warn('Submission failed.', error); }
     try { localStorage.setItem(RESULT_KEY, JSON.stringify(payload)); saveResultHistory(payload); localStorage.setItem(DONE_KEY, 'true'); } catch (error) { console.warn('Local progress save failed.', error); }
     import('../../assets/firebase.js').then(({ saveUserProgress }) => saveUserProgress(APP_ID, APP_TITLE, payload)).catch((error) => console.warn('Firestore progress save failed.', error));
+    if (scoreAttemptId && !scorerRecorded) import('../../assets/firebase.js').then(({ saveExerciseAttempt }) => saveExerciseAttempt({ attemptId: scoreAttemptId, exerciseId: APP_ID, exerciseTitle: APP_TITLE, contentVersion: SCORE_CONTENT_VERSION, score: score.total, scoreMaximum: 30, attemptNumber, durationSeconds: payload.duration_seconds })).catch((error) => console.warn('Score attempt save failed.', error));
     const rewardDetail = { title: mode === '60' ? 'Explain to Aiko in 60 seconds complete' : 'Explain to Aiko complete', body: `Your ${TARGET_SECONDS}-second explanation was saved.` };
     if (window.awardAikoCompletion) window.awardAikoCompletion(rewardDetail);
     else window.UTLRewardEvents?.awardCompletionExercise(Object.assign({ appId: APP_ID }, rewardDetail));
@@ -602,6 +656,8 @@ Best, Yutee Elle`;
     delete workspaces[practiceDraft.topicId];
     writePracticeWorkspaces(workspaces);
     const completed = { ...practiceDraft };
+    const finished = attempts[attempts.length - 1];
+    import('../../assets/firebase.js').then(({ saveExerciseSubmission }) => saveExerciseSubmission({ exerciseId: APP_ID, exerciseTitle: APP_TITLE, submissionId: deterministicId(APP_ID, 'practice', finished.id), attemptNumber: attempts.length, completedAtClient: finished.completedAt, durationSeconds: (Number(finished.duration120) || 0) + (Number(finished.duration60) || 0), responsePayload: { ...finished, practice: true } })).catch((error) => console.warn('Practice round cloud save failed.', error));
     practiceDraft = null;
     history.replaceState(null, '', `?practice=1&attempt=${encodeURIComponent(completed.id)}`);
     renderPracticeSaved(completed);
@@ -621,6 +677,7 @@ Best, Yutee Elle`;
       const recent = mostRecentPracticeWorkspace();
       renderPracticePicker(recent ? recent.topicId : PRACTICE_TOPICS[0].id);
     }
+    hydrateSavedResults();
   } else {
     loadPrep();
     const savedResult = readSavedResult();

@@ -89,6 +89,23 @@ const events = [{ id: "e-1", person_id: "p1", event_key: "k1" }, { id: "e-2", pe
 const eventFilter = filterForRerun("stability_events", events, new Map(), { stability_events: new Map([["p1|k1", "other"]]) });
 assert.deepStrictEqual(eventFilter.write.map((r) => r.id), ["e-2"], "only the new stability event is written");
 
+
+// A practice round in exercise_submissions is stored as kind practice and never completes the exercise.
+{
+  const withPractice = JSON.parse(JSON.stringify(original));
+  const sample = withPractice.subcollections["users/*/exercise_submissions"][0];
+  const practiceDoc = { parentId: sample.parentId, id: "practice-round-0001", data: Object.assign({}, sample.data, { submissionId: "practice-round-0001", exerciseId: "explain-to-aiko-120", responsePayload: { practice: true, round: 1, transcript: "a practice round" } }) };
+  withPractice.subcollections["users/*/exercise_submissions"].push(practiceDoc);
+  const planWith = buildPlan(withPractice, catalog, options);
+  const practiceRow = planWith.tables.activity_submissions.find((row) => row.submission_key === "practice-round-0001");
+  assert.ok(practiceRow, "the practice round is imported");
+  assert.equal(practiceRow.kind, "practice", "as kind practice");
+  assert.ok(planWith.tables.activity_submissions.filter((row) => row.submission_key !== "practice-round-0001").every((row) => row.kind === undefined || row.kind === "submission"), "real submissions stay submissions");
+  const progressWithout = planBefore.tables.activity_progress.find((r) => r.person_id === practiceRow.person_id && r.activity_id === practiceRow.activity_id);
+  const progressWith = planWith.tables.activity_progress.find((r) => r.person_id === practiceRow.person_id && r.activity_id === practiceRow.activity_id);
+  assert.deepStrictEqual(progressWith, progressWithout, "a practice round changes nothing in the progress row (no completion, no completion count)");
+}
+
 // Refusals.
 assert.ok(insideRepo(path.join(__dirname, "..", "backups")), "a folder inside the repository is detected");
 assert.ok(!insideRepo(os.tmpdir()));

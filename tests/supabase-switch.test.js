@@ -126,6 +126,10 @@ function seedFirestore(harness, options = {}) {
   harness.seed('settings/feedback', { defaultFeedbackEnabled: false });
 }
 
+// getExerciseWork reads real submissions and practice rounds with two requests; these tell them apart.
+const SUBMISSIONS_READ = (requestPath) => requestPath.startsWith('/rest/v1/activity_submissions?') && requestPath.includes('kind=eq.submission');
+const PRACTICE_READ = (requestPath) => requestPath.startsWith('/rest/v1/activity_submissions?') && requestPath.includes('kind=eq.practice');
+
 function withCatalog(harness) {
   return harness
     .onFetch('GET', '/rest/v1/activities?', CATALOG_ACTIVITIES)
@@ -822,7 +826,7 @@ async function check(name, fn) {
     result = await supa('getExerciseWork', {
       before: (h) => withCatalog(h)
         .onFetch('GET', '/rest/v1/activity_drafts?', [{ draft: { mode: 'open' }, updated_at: '2026-10-06T09:50:00+00:00' }])
-        .onFetch('GET', '/rest/v1/activity_submissions?', [{ id: 'row-1', submission_key: 'grocery-list-2026-10-06T095800000Z', attempt_number: 2, completed_at: '2026-10-06T09:58:00+00:00', duration_seconds: 300, content_version: '', response: PROGRESS_PAYLOAD }])
+        .onFetch('GET', SUBMISSIONS_READ, [{ id: 'row-1', submission_key: 'grocery-list-2026-10-06T095800000Z', attempt_number: 2, completed_at: '2026-10-06T09:58:00+00:00', duration_seconds: 300, content_version: '', response: PROGRESS_PAYLOAD }])
     });
     assert.ok(result.firestore.some((entry) => entry.path.includes('exercise_work')), 'Firestore is read too');
     assert.deepEqual(result.outcome.value.draft.draftPayload, { mode: 'open' }, 'the Supabase draft wins (the Firestore copy carries no time)');
@@ -951,7 +955,7 @@ async function check(name, fn) {
       rows.push({ id: `row-${index}`, submission_key: `grocery-list-2026-10-0${index < 9 ? index + 1 : 9}T0${index}0000000Z`, attempt_number: index + 1, completed_at: `2026-10-0${index < 9 ? index + 1 : 9}T0${index}:00:00+00:00`, duration_seconds: 10, content_version: '', response: {} });
     }
     rows.push({ id: 'dup', submission_key: 'grocery-list-2026-10-01T000000000Z', attempt_number: 9, completed_at: '2026-10-01T00:00:00+00:00', duration_seconds: 10, content_version: '', response: { fromSupabase: true } });
-    result = await supa('getExerciseWork', { before: (h) => withCatalog(h).onFetch('GET', '/rest/v1/activity_submissions?', rows) });
+    result = await supa('getExerciseWork', { before: (h) => withCatalog(h).onFetch('GET', SUBMISSIONS_READ, rows) });
     const submissions = result.outcome.value.submissions;
     assert.equal(submissions.length, 10, 'capped at ten');
     const ids = submissions.map((item) => item.submissionId);
@@ -970,6 +974,61 @@ async function check(name, fn) {
     assert.equal(result.outcome.value[1].score, 40);
     assert.equal(result.outcome.value[1].id, 'attempt-00000000');
     assert.ok(!('schemaVersion' in result.outcome.value[1]) || result.outcome.value[1].schemaVersion === undefined, 'the Firestore copy wins the duplicate id');
+  });
+
+  await check('practice rounds keep their own ten slots: real saved results are never hidden, in both sources', async () => {
+    const at = (day, hour) => `2026-11-${String(day).padStart(2, '0')}T${String(hour).padStart(2, '0')}:00:00`;
+    const practiceRow = (index) => ({ id: `p-${index}`, submission_key: `grocery-list-practice-${index}`, attempt_number: index + 1, completed_at: `${at(20, index)}+00:00`, duration_seconds: 5, content_version: '', kind: 'practice', response: { practice: true } });
+    const realRow = (index) => ({ id: `r-${index}`, submission_key: `grocery-list-real-${index}`, attempt_number: index + 1, completed_at: `${at(1 + index, 1)}+00:00`, duration_seconds: 5, content_version: '', kind: 'submission', response: {} });
+    const practiceRows = Array.from({ length: 12 }, (_, index) => practiceRow(index)).reverse();
+    const realRows = [2, 1, 0].map(realRow);
+    const isPracticeItem = (item) => item.responsePayload && item.responsePayload.practice === true;
+
+    // Supabase: 12 practice rounds newer than 3 real ones. The real ones come back with ten practice rounds, newest first.
+    let result = await supa('getExerciseWork', { before: (h) => withCatalog(h).onFetch('GET', SUBMISSIONS_READ, realRows).onFetch('GET', PRACTICE_READ, practiceRows.slice(0, 10)) });
+    assert.equal(result.outcome.error, null);
+    let submissions = result.outcome.value.submissions;
+    const real = submissions.filter((item) => !isPracticeItem(item));
+    assert.equal(real.filter((item) => item.submissionId.startsWith('grocery-list-real-')).length, 3, 'all three real rows are returned');
+    assert.equal(submissions.filter(isPracticeItem).length, 10, 'ten practice rounds');
+    const times = submissions.map((item) => item.completedAtClient);
+    assert.deepEqual(times.slice(), times.slice().sort().reverse(), 'newest first');
+    // Both reads are made, filtered by kind and limited to ten each.
+    const reads = harness.fetchCalls.filter((call) => call.path.startsWith('/rest/v1/activity_submissions?'));
+    assert.equal(reads.length, 2);
+    assert.ok(reads.every((call) => /limit=10/.test(call.path) && /select=[^&]*\bkind\b/.test(call.path) && /order=completed_at\.desc/.test(call.path)));
+    assert.deepEqual(reads.map((call) => (call.path.match(/kind=eq\.(\w+)/) || [])[1]).sort(), ['practice', 'submission']);
+    assert.equal(syncEvents(result.events).length, 0);
+
+    // A practice row whose stored response lacks the flag is still marked as practice for the callers.
+    result = await supa('getExerciseWork', { before: (h) => withCatalog(h).onFetch('GET', PRACTICE_READ, [{ ...practiceRow(1), response: {} }]) });
+    assert.ok(result.outcome.value.submissions.some((item) => item.submissionId === 'grocery-list-practice-1' && item.responsePayload.practice === true));
+
+    // The merged list keeps ten real and ten practice from the union of both sources, deduped by id.
+    const manyReal = Array.from({ length: 12 }, (_, index) => realRow(index)).reverse();
+    result = await supa('getExerciseWork', { before: (h) => withCatalog(h).onFetch('GET', SUBMISSIONS_READ, manyReal.slice(0, 10)).onFetch('GET', PRACTICE_READ, practiceRows.slice(0, 10)) });
+    submissions = result.outcome.value.submissions;
+    assert.equal(submissions.filter(isPracticeItem).length, 10);
+    assert.equal(submissions.filter((item) => !isPracticeItem(item)).length, 10, 'real submissions are still capped at ten');
+    assert.equal(new Set(submissions.map((item) => item.submissionId)).size, submissions.length, 'no duplicate ids');
+
+    // Firestore only (switch off): 12 practice documents and 3 real ones.
+    const seedWork = (h) => {
+      practiceRows.forEach((row) => h.seed(`users/${UID}/exercise_submissions/${row.submission_key}`, { exerciseId: 'grocery-list', submissionId: row.submission_key, completedAtClient: `${row.completed_at.slice(0, 19)}.000Z`, responsePayload: { practice: true } }));
+      realRows.forEach((row) => h.seed(`users/${UID}/exercise_submissions/${row.submission_key}`, { exerciseId: 'grocery-list', submissionId: row.submission_key, completedAtClient: `${row.completed_at.slice(0, 19)}.000Z`, responsePayload: {} }));
+    };
+    const firestoreOnly = await observe(harness, scenariosFor(current).getExerciseWork, { before: seedWork });
+    submissions = firestoreOnly.outcome.value.submissions;
+    assert.equal(submissions.filter((item) => item.submissionId.startsWith('grocery-list-real-')).length, 3, 'Firestore: the real documents are not pushed out');
+    assert.equal(submissions.filter(isPracticeItem).length, 10, 'Firestore: ten practice rounds');
+    const firestoreTimes = submissions.map((item) => item.completedAtClient);
+    assert.deepEqual(firestoreTimes.slice(), firestoreTimes.slice().sort().reverse());
+
+    // The second read failing fails the whole Supabase call; the caller keeps the Firestore result and reports once.
+    result = await supa('getExerciseWork', { before: (h) => { seedWork(h); withCatalog(h).onFetch('GET', SUBMISSIONS_READ, realRows).onFetch('GET', PRACTICE_READ, FAILURES['500']); } });
+    assert.equal(result.outcome.error, null);
+    assert.deepStrictEqual(result.outcome.value, firestoreOnly.outcome.value, 'the Firestore read result');
+    assert.equal(syncEvents(result.events).length, 1);
   });
 
   await check('supabase mode: a single failing source leaves the other for drafts, history and attempts; both failing throws as today', async () => {
@@ -996,7 +1055,7 @@ async function check(name, fn) {
       before: (h) => {
         withCatalog(h)
           .onFetch('GET', '/rest/v1/activity_drafts?', [{ draft: { mode: 'remote' }, updated_at: '2026-10-06T09:50:00+00:00' }])
-          .onFetch('GET', '/rest/v1/activity_submissions?', [{ id: 'row-1', submission_key: 'grocery-list-2026-10-06T095800000Z', attempt_number: 2, completed_at: '2026-10-06T09:58:00+00:00', duration_seconds: 300, content_version: '', response: {} }]);
+          .onFetch('GET', SUBMISSIONS_READ, [{ id: 'row-1', submission_key: 'grocery-list-2026-10-06T095800000Z', attempt_number: 2, completed_at: '2026-10-06T09:58:00+00:00', duration_seconds: 300, content_version: '', response: {} }]);
         h.failWhen('getDoc', /exercise_work/, new Error('denied'));
         h.failWhen('getDocs', /exercise_submissions/, new Error('denied'));
         h.failWhen('getDoc', /completed_exercises/, new Error('denied'));

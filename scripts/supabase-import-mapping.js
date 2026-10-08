@@ -726,6 +726,7 @@ function buildPlan(snapshot, catalog, options = {}) {
   // Submissions: exercise_submissions (history) plus completed_exercises (latest) when not already covered.
   const submissionTimes = new Map(); // person:activity -> set of completed_at
   const submissionRows = [];
+  const practiceRows = [];
   const pushSubmission = (row) => {
     const key = `${row.person_id}:${row.activity_id}`;
     if (!submissionTimes.has(key)) submissionTimes.set(key, new Set());
@@ -741,12 +742,16 @@ function buildPlan(snapshot, catalog, options = {}) {
     if (!person) return exception(`users/${uid}/exercise_submissions/${id}`, "uid does not match a person");
     const activityId = activities.resolve(data.exerciseId || id);
     if (!activityId) return exception(`users/${uid}/exercise_submissions/${id}`, `exercise ${data.exerciseId} not in catalog`);
-    pushSubmission(stamp({
+    // A practice round (saved through saveExerciseSubmission with responsePayload.practice === true) is stored as kind
+    // practice and never completes the exercise, exactly like record_activity_practice does for a live write.
+    const isPractice = Boolean(data.responsePayload && typeof data.responsePayload === "object" && data.responsePayload.practice === true);
+    (isPractice ? practiceRows.push.bind(practiceRows) : pushSubmission)(stamp({
       id: uuidFor(`submission:${uid}:${id}`),
       person_id: person.id,
       activity_id: activityId,
       program_id: PROGRAM_TSA,
       enrollment_id: (tsaEnrollmentFor(person) || {}).id || null,
+      kind: isPractice ? "practice" : "submission",
       submission_key: text(data.submissionId || id, 160),
       attempt_number: clampInt(data.attemptNumber, 1, 10000, 1),
       completed_at: iso(data.completedAtClient) || iso(data.createdAt) || importDate,
@@ -774,6 +779,7 @@ function buildPlan(snapshot, catalog, options = {}) {
       activity_id: activityId,
       program_id: PROGRAM_TSA,
       enrollment_id: (tsaEnrollmentFor(person) || {}).id || null,
+      kind: "submission",
       submission_key: text(`legacy-${id}`, 160),
       attempt_number: clampInt(payload.attempt, 1, 10000, 1),
       completed_at: completedAt,
@@ -784,7 +790,7 @@ function buildPlan(snapshot, catalog, options = {}) {
       created_at: iso(data.updatedAt) || importDate
     }));
   });
-  submissionRows.forEach((row) => rows("activity_submissions").push(row));
+  submissionRows.concat(practiceRows).forEach((row) => rows("activity_submissions").push(row));
 
   sub("users/*/exercise_attempts").forEach(({ parentId: uid, id, data }) => {
     const person = personByUid.get(uid);

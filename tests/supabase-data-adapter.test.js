@@ -54,6 +54,9 @@ function fakeFetch() {
   return impl;
 }
 
+// The kind-filtered submissions read made by getExerciseWork.
+const kindRead = (kind) => (requestPath) => requestPath.startsWith('/rest/v1/activity_submissions?') && requestPath.includes(`kind=eq.${kind}`);
+
 const CATALOG_ACTIVITIES = [
   { id: 'orientation', kind: 'orientation', title: 'Orientation', status: 'active', config: {} },
   { id: 'orientation-start', kind: 'context', title: 'Welcome to MA!', status: 'active', config: {} },
@@ -659,7 +662,7 @@ function check(name, fn) {
     };
     const fetchImpl = withCatalog(fakeFetch())
       .on('GET', '/rest/v1/activity_drafts?', rows.drafts)
-      .on('GET', '/rest/v1/activity_submissions?', rows.submissions);
+      .on('GET', kindRead('submission'), rows.submissions);
     const data = makeData(fetchImpl);
     const work = await data.getExerciseWork('grocery-list');
     const draftCall = fetchImpl.calls.find((c) => c.path.startsWith('/rest/v1/activity_drafts?'));
@@ -671,10 +674,59 @@ function check(name, fn) {
     assert.equal(work.submissions.length, 2);
     assert.deepEqual(work.submissions[0], { id: 'grocery-list-2026', submissionId: 'grocery-list-2026', schemaVersion: 1, exerciseId: 'grocery-list', exerciseTitle: 'Grocery list', attemptNumber: 2, completedAtClient: '2026-02-02T00:00:00.000Z', durationSeconds: 40, contentVersion: '', responsePayload: { response: { a: 1 }, completed_at: '2026-02-02T00:00:00.000Z' } });
     assert.equal(work.submissions[1].submissionId, 'legacy-grocery-list');
+    const submissionReads = fetchImpl.calls.filter((c) => c.path.startsWith('/rest/v1/activity_submissions?'));
+    assert.equal(submissionReads.length, 2, 'real submissions and practice rounds are two reads');
+    submissionReads.forEach(assertHeaders);
+    const expectedPath = (kind) => `/rest/v1/activity_submissions?select=id,submission_key,attempt_number,completed_at,duration_seconds,content_version,kind,response&activity_id=eq.p1-e1&kind=eq.${kind}&order=completed_at.desc&limit=10`;
+    assert.deepEqual(submissionReads.map((c) => c.path).sort(), [expectedPath('practice'), expectedPath('submission')].sort());
     const same = await data.getExerciseWork('p1-e1');
     assert.equal(same.submissions.length, 2, 'the canonical id reads the same rows');
     await rejects(data.getExerciseWork('not-an-activity'), (error) => assert.equal(error.code, 'data/unknown-activity', 'an unknown id is a failure the caller falls back on'));
     assert.deepEqual(await data.getExerciseWork(''), { draft: null, submissions: [] });
+  });
+
+  await check('getExerciseWork returns ten real submissions plus ten practice rounds, newest first', async () => {
+    const real = (index) => ({ id: `r-${index}`, submission_key: `real-${index}`, attempt_number: index + 1, completed_at: `2026-03-${String(index + 1).padStart(2, '0')}T00:00:00+00:00`, duration_seconds: 1, content_version: '', kind: 'submission', response: { n: index } });
+    const practice = (index) => ({ id: `p-${index}`, submission_key: `practice-${index}`, attempt_number: index + 1, completed_at: `2026-04-${String(index + 1).padStart(2, '0')}T00:00:00+00:00`, duration_seconds: 1, content_version: '', kind: 'practice', response: { practice: true, n: index } });
+    // The database applies the kind filter and the limit; the fake answers per kind, newest first, ten at most.
+    const answer = (rows) => rows.slice().sort((a, b) => b.completed_at.localeCompare(a.completed_at)).slice(0, 10);
+
+    // 12 practice rounds and 3 real submissions: all 3 real ones come back, with 10 practice rounds.
+    let fetchImpl = withCatalog(fakeFetch())
+      .on('GET', kindRead('submission'), answer([0, 1, 2].map(real)))
+      .on('GET', kindRead('practice'), answer(Array.from({ length: 12 }, (_, index) => practice(index))));
+    let work = await makeData(fetchImpl).getExerciseWork('grocery-list');
+    assert.equal(work.submissions.filter((item) => item.responsePayload.practice !== true).length, 3);
+    assert.equal(work.submissions.filter((item) => item.responsePayload.practice === true).length, 10);
+    assert.equal(work.submissions.length, 13);
+    const times = work.submissions.map((item) => item.completedAtClient);
+    assert.deepEqual(times.slice(), times.slice().sort().reverse(), 'newest first');
+    assert.equal(work.submissions[0].submissionId, 'practice-11');
+    assert.equal(work.submissions[work.submissions.length - 1].submissionId, 'real-0');
+    assert.ok(!work.submissions.some((item) => item.submissionId === 'practice-0' || item.submissionId === 'practice-1'), 'the two oldest practice rounds fall out');
+
+    // A practice row stored without the flag in its response still reads as practice.
+    fetchImpl = withCatalog(fakeFetch()).on('GET', kindRead('practice'), [{ ...practice(3), response: {} }]);
+    work = await makeData(fetchImpl).getExerciseWork('grocery-list');
+    assert.equal(work.submissions.length, 1);
+    assert.equal(work.submissions[0].responsePayload.practice, true);
+
+    // No practice rows: exactly the old result (the same rows, the same order, nothing added).
+    const realRows = [2, 1, 0].map(real);
+    fetchImpl = withCatalog(fakeFetch()).on('GET', kindRead('submission'), realRows);
+    work = await makeData(fetchImpl).getExerciseWork('grocery-list');
+    assert.deepEqual(work.submissions.map((item) => item.submissionId), ['real-2', 'real-1', 'real-0']);
+    assert.deepEqual(work.submissions[0], { id: 'real-2', submissionId: 'real-2', schemaVersion: 1, exerciseId: 'grocery-list', exerciseTitle: 'Grocery list', attemptNumber: 3, completedAtClient: '2026-03-03T00:00:00.000Z', durationSeconds: 1, contentVersion: '', responsePayload: { n: 2 } });
+    assert.deepEqual(work.draft, null);
+
+    // Either submissions read failing fails the whole call.
+    for (const failing of ['submission', 'practice']) {
+      const other = failing === 'submission' ? 'practice' : 'submission';
+      fetchImpl = withCatalog(fakeFetch())
+        .on('GET', kindRead(failing), { __status: 500, body: { message: 'boom' } })
+        .on('GET', kindRead(other), other === 'practice' ? [practice(1)] : realRows);
+      await rejects(makeData(fetchImpl).getExerciseWork('grocery-list'), (error) => assert.ok(error instanceof Error, `a failing ${failing} read fails the call`));
+    }
   });
 
   await check('getExerciseAttempts maps rows with a Firestore-like submittedAt', async () => {

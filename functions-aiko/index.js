@@ -1,5 +1,6 @@
 const { onRequest } = require("firebase-functions/v2/https");
 const { defineSecret } = require("firebase-functions/params");
+const { storeAttempt, tokenFromHeader, isOn: storeAttemptIsOn } = require("./store-attempt");
 
 const GEMINI_API_KEY = defineSecret("GEMINI_API_KEY");
 const ALLOWED_ORIGINS = new Set([
@@ -429,7 +430,7 @@ exports.scoreExplainToAiko = onRequest({
   if (origin) response.set("Access-Control-Allow-Origin", origin);
   response.set("Vary", "Origin");
   response.set("Access-Control-Allow-Methods", "POST, OPTIONS");
-  response.set("Access-Control-Allow-Headers", "Content-Type");
+  response.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
   response.set("Content-Type", "application/json");
   if (request.method === "OPTIONS") { response.status(204).send(""); return; }
   if (request.method !== "POST") { response.status(405).json({ error: "POST only." }); return; }
@@ -457,7 +458,23 @@ exports.scoreExplainToAiko = onRequest({
     const apiKey = String(GEMINI_API_KEY.value() || "").trim();
     if (!apiKey) throw new Error("GEMINI_API_KEY is not configured.");
     const raw = await callGemini(apiKey, buildPrompt(input));
-    response.status(200).json(normalizeResult(raw));
+    const result = normalizeResult(raw);
+    // Optional, off unless AIKO_STORE_ATTEMPT is "on": store the server's own score with the caller's token.
+    // It never throws, waits at most 4 seconds and adds nothing to the answer unless the attempt was stored.
+    let stored = { recorded: false };
+    if (storeAttemptIsOn()) {
+      try {
+        stored = await storeAttempt({
+          token: tokenFromHeader(request.get("authorization")),
+          attemptId: body?.attemptId,
+          attemptNumber: body?.attemptNumber,
+          mode: input.mode,
+          total: result.total,
+          durationSeconds: input.durationSeconds
+        });
+      } catch (_) { stored = { recorded: false }; }
+    }
+    response.status(200).json(stored && stored.recorded ? { ...result, attemptRecorded: true, attemptId: stored.attemptId } : result);
   } catch (error) {
     console.error("Explain to Aiko scoring unavailable:", error.message);
     response.status(200).json({ fallback: true });

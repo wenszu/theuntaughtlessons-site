@@ -375,7 +375,7 @@ function draftMillis(draft) {
 }
 
 // Both sources, newest draft wins (the Firestore draft on a tie), submissions as a union by id, newest
-// first, ten at most, as today.
+// first, ten real and ten practice at most.
 function mergeExerciseWorkViews(local, remote) {
   if (!remote) return local;
   const draft = !local.draft ? remote.draft : (!remote.draft ? local.draft : (draftMillis(remote.draft) > draftMillis(local.draft) ? remote.draft : local.draft));
@@ -383,10 +383,21 @@ function mergeExerciseWorkViews(local, remote) {
   [].concat(remote.submissions || [], local.submissions || []).forEach((item) => {
     if (item) byId.set(String(item.submissionId || item.id || ""), item);
   });
-  const submissions = Array.from(byId.values())
-    .sort((a, b) => String(b.completedAtClient || "").localeCompare(String(a.completedAtClient || "")))
-    .slice(0, 10);
+  const submissions = capExerciseSubmissions(Array.from(byId.values()));
   return { draft, submissions };
+}
+
+// Newest first, with the newest ten real submissions and the newest ten practice rounds kept, so a run of
+// practice rounds never hides the real saved results. With no practice rounds this is the newest ten.
+function capExerciseSubmissions(items) {
+  const sorted = items
+    .slice()
+    .sort((a, b) => String(b.completedAtClient || "").localeCompare(String(a.completedAtClient || "")));
+  const isPractice = (item) => Boolean(item && item.responsePayload && item.responsePayload.practice === true);
+  if (!sorted.some(isPractice)) return sorted.slice(0, 10);
+  let real = 0;
+  let practice = 0;
+  return sorted.filter((item) => (isPractice(item) ? (practice += 1) <= 10 : (real += 1) <= 10));
 }
 
 function attemptMillis(item) {
@@ -1694,10 +1705,10 @@ async function getExerciseWork(exerciseId) {
   const draftSnapshot = draftResult.status === "fulfilled" ? draftResult.value : null;
   const submissionSnapshot = submissionResult.status === "fulfilled" ? submissionResult.value : null;
   const latestSnapshot = latestResult.status === "fulfilled" ? latestResult.value : null;
-  let submissions = (submissionSnapshot ? submissionSnapshot.docs : [])
-    .map((item) => ({ id: item.id, ...item.data() }))
-    .sort((a, b) => String(b.completedAtClient || "").localeCompare(String(a.completedAtClient || "")))
-    .slice(0, 10);
+  // The query has no limit, so every document is here: the newest ten real submissions plus the newest ten
+  // practice rounds (responsePayload.practice === true), newest first.
+  let submissions = capExerciseSubmissions((submissionSnapshot ? submissionSnapshot.docs : [])
+    .map((item) => ({ id: item.id, ...item.data() })));
   if (!submissions.length && latestSnapshot && latestSnapshot.exists()) {
     const latest = latestSnapshot.data() || {};
     const payload = latest.savedPayload || {};

@@ -1046,13 +1046,30 @@ function createSupabaseData(context = {}) {
     const title = (catalog.get(activityId) || {}).title || safeExerciseId;
     // Either read failing fails the whole call, so the caller (assets/firebase.js) can fall back to its
     // Firestore read instead of showing an empty draft or history.
-    const [draftRows, submissionRows] = await Promise.all([
+    // Real submissions and practice rounds are read separately, ten of each, so a run of practice rounds
+    // can never push a member's real saved results out of the window.
+    const submissionSelect = (kind) => select("activity_submissions", `select=id,submission_key,attempt_number,completed_at,duration_seconds,content_version,kind,response&activity_id=${eq(activityId)}&kind=eq.${kind}&order=completed_at.desc&limit=10`);
+    const [draftRows, submissionRows, practiceRows] = await Promise.all([
       select("activity_drafts", `select=draft,updated_at&activity_id=${eq(activityId)}`),
-      select("activity_submissions", `select=id,submission_key,attempt_number,completed_at,duration_seconds,content_version,response&activity_id=${eq(activityId)}&order=completed_at.desc&limit=10`)
+      submissionSelect("submission"),
+      submissionSelect("practice")
     ]);
+    const mapPractice = (row) => {
+      const mapped = mapSubmissionRow(row, safeExerciseId, title);
+      // Callers tell practice rounds apart by responsePayload.practice.
+      if (mapped.responsePayload.practice !== true) mapped.responsePayload = { ...mapped.responsePayload, practice: true };
+      return mapped;
+    };
+    const submissions = submissionRows.map((row) => mapSubmissionRow(row, safeExerciseId, title));
+    if (practiceRows.length) {
+      // Newest first by completion time (a stable sort keeps the real rows first on a tie).
+      const timeOf = (item) => Date.parse(item.completedAtClient) || 0;
+      submissions.push(...practiceRows.map(mapPractice));
+      submissions.sort((a, b) => timeOf(b) - timeOf(a));
+    }
     return {
       draft: mapDraftRow(draftRows[0], safeExerciseId, title),
-      submissions: submissionRows.map((row) => mapSubmissionRow(row, safeExerciseId, title))
+      submissions
     };
   }
 
