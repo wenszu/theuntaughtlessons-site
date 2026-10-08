@@ -95,8 +95,14 @@ await sleep(200);
 check('bad news: dialog copy button copies the prompt', (await evalJs('window.__copied || ""')) === prompt);
 check('bad news: copy button shows Copied', /Copied/.test(await text('#utl-feedback-coach-dialog [data-utl-coach-copy]')));
 await click('#utl-feedback-coach-dialog [data-utl-coach-cancel]');
+await evalJs('document.getElementById("openChatGpt").addEventListener("click", function (e) { e.preventDefault(); })');
 await click('#openChatGpt');
 await sleep(200);
+{
+  const href = await evalJs('document.getElementById("openChatGpt").href');
+  check('bad news: Open ChatGPT link carries the prompt (?q=)', href.startsWith('https://chatgpt.com/?q=') && decodeURIComponent(href.slice('https://chatgpt.com/?q='.length)) === prompt, 'length ' + href.length);
+  check('bad news: link stays under 7500 encoded characters', href.length < 7600, String(href.length));
+}
 check('bad news: Open ChatGPT also copies the prompt', (await evalJs('(window.__copied||"").includes("HOW IT ENDS")')));
 check('bad news: ChatGPT button label and tag', /Open ChatGPT/.test(await text('#openChatGpt')) && /Recommended/.test(await text('#openChatGpt')));
 check('bad news: Gemini button says voice on phone only', /Voice on phone only/.test(await text('#openGemini')));
@@ -135,6 +141,15 @@ for (const needle of ['Michael Felipe', 'Aiko', 'Ambiguity', 'Accountability', '
 for (const secret of ['Correct answer: B', 'scoring guide', 'ideal response', 'decision-rights map', 'RACI', 'steering committee', 'right of return']) check(`Michael prompt does not give away "${secret}"`, !mp.toLowerCase().includes(secret.toLowerCase()));
 check('Michael prompt has no dashes used as punctuation', !/[–—]| - /.test(mp));
 await click('#utl-feedback-coach-dialog [data-utl-coach-cancel]');
+await evalJs('document.getElementById("openChatGpt").addEventListener("click", function (e) { e.preventDefault(); })');
+await click('#openChatGpt');
+await sleep(200);
+{
+  const href = await evalJs('document.getElementById("openChatGpt").href');
+  check('switch hats: Michael link carries the full prompt (?q=)', href.startsWith('https://chatgpt.com/?q=') && decodeURIComponent(href.slice('https://chatgpt.com/?q='.length)) === mp, 'length ' + href.length);
+  console.log('INFO Michael prompt link length: ' + href.length + ' characters');
+  check('switch hats: Michael link stays under 7500 encoded characters', href.length < 7600, String(href.length));
+}
 await evalJs('document.querySelector("input[name=pick][value=friend]").click()');
 check('switch hats: other situations show the name and level choices', (await evalJs('!document.getElementById("nameField").hidden && !document.getElementById("levelField").hidden')));
 await evalJs('document.querySelector("input[name=who][value=Priya]").click(); document.querySelector("input[name=level][value=Hard]").click();');

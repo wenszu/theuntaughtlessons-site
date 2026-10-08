@@ -251,7 +251,7 @@
         </div>
         <div class="bad-news-part">
           <p class="bad-news-part-title"><span class="bad-news-part-letter">c</span>Open ChatGPT or Gemini</p>
-          <p class="bad-news-hint">These buttons also copy your prompt. Paste it into a new chat and send it. For voice on a computer, use ChatGPT. Gemini voice chat is in the Gemini phone app.</p>
+          <p class="bad-news-hint">Open ChatGPT puts your prompt into a new chat for you, and ChatGPT may send it right away. Your prompt is also copied, so if the box is empty, paste it and send it. Gemini cannot be filled in this way, so paste the copied prompt there. For voice on a computer, use ChatGPT. Gemini voice chat is in the Gemini phone app.</p>
           <div class="bad-news-launch">
             <a class="bad-news-button bad-news-button-accent bad-news-button-wide" id="openChatGpt" href="https://chatgpt.com/" target="_blank" rel="noopener">Open ChatGPT <span class="bad-news-tag-light">Recommended</span></a>
             <a class="bad-news-button bad-news-button-accent bad-news-button-narrow" id="openGemini" href="https://gemini.google.com/app" target="_blank" rel="noopener">Open Gemini <span class="bad-news-tag-light">Voice on phone only</span></a>
@@ -480,11 +480,18 @@
       // Opening an AI tool also copies the prompt, so one click is enough before pasting.
       function copyAndAnnounce() {
         var text = practicePrompt();
-        var done = function () { $('openStatus').textContent = 'Prompt copied. Paste it into the new chat.'; setTimeout(function () { $('openStatus').textContent = ''; }, 5000); };
+        var done = function () { $('openStatus').textContent = 'Prompt copied. If the new chat is empty, paste it.'; setTimeout(function () { $('openStatus').textContent = ''; }, 5000); };
         var failed = function () { $('openStatus').textContent = 'Use "Prepare practice prompt" above to copy it.'; };
         try { navigator.clipboard.writeText(text).then(done, failed); } catch (error) { failed(); }
       }
-      $('openChatGpt').addEventListener('click', copyAndAnnounce);
+      // ChatGPT accepts the prompt in the address (?q=). Very long prompts fall back to a blank chat plus the copied prompt.
+      var CHATGPT_URL = 'https://chatgpt.com/';
+      var MAX_PREFILL = 7500;
+      $('openChatGpt').addEventListener('click', function () {
+        var encoded = encodeURIComponent(practicePrompt());
+        this.href = encoded.length <= MAX_PREFILL ? CHATGPT_URL + '?q=' + encoded : CHATGPT_URL;
+        copyAndAnnounce();
+      });
       $('openGemini').addEventListener('click', copyAndAnnounce);
 
       if (window.UTLFeedbackCoach) {
