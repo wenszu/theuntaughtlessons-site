@@ -248,7 +248,7 @@ async function check(name, fn) {
     const baselineExports = Object.keys(baseline).sort();
     const currentExports = Object.keys(current).sort();
     baselineExports.forEach((name) => assert.ok(currentExports.includes(name), `export ${name} kept`));
-    assert.deepEqual(currentExports.filter((name) => !baselineExports.includes(name)), ['getDataSource', 'getMyExerciseResults', 'sendReadinessResultEmail'], 'getDataSource, getMyExerciseResults (My Results exercise results, Supabase mode only, null with the switch off) and sendReadinessResultEmail (a Firebase callable wrapper, no Supabase path) are the only new exports');
+    assert.deepEqual(currentExports.filter((name) => !baselineExports.includes(name)), ['getDataSource', 'getMyExerciseResults', 'sendMyResultsEmail', 'sendReadinessResultEmail'], 'getDataSource, getMyExerciseResults (My Results exercise results, Supabase mode only, null with the switch off), sendMyResultsEmail and sendReadinessResultEmail (Firebase callable wrappers, no Supabase path) are the only new exports');
   });
 
   for (const name of LEARNER_FUNCTIONS) {

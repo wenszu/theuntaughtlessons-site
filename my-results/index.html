@@ -1376,7 +1376,7 @@
       <div class="results-email-form">
         <label class="results-email-label" for="resultsEmailRecipients">Email results to</label>
         <input class="results-email-input" id="resultsEmailRecipients" type="text" autocomplete="email" placeholder="you@example.com, instructor@example.com">
-        <p class="results-email-hint">Separate multiple emails with commas or spaces. The email includes your completion summary and workbook record.</p>
+        <p class="results-email-hint">Separate multiple emails with commas or spaces. You can send to up to 5 addresses. The email includes your completion summary and workbook record.</p>
         <div class="results-actions-buttons">
           <button class="btn-download" onclick="downloadResults()">Download my results</button>
           <button class="btn-send" id="btn-send-instructor" onclick="emailMyResults()">Email my results</button>
@@ -2116,11 +2116,11 @@
       input.value = currentUserEmail();
     }
 
-    const RESULTS_EMAIL_URL = 'https://script.google.com/macros/s/AKfycbzJE--FL2kB_XDNZRnszCtlyLRPvaLAHGuF5TAOdXJk40atbvf5Y6ELuSK2B7CSLaMN/exec';
+    const MAX_EMAIL_RESULTS_LENGTH = 60000;
 
-    function emailMyResults() {
+    async function emailMyResults() {
       const input = document.getElementById('resultsEmailRecipients');
-      const recipients = parseRecipientEmails(input ? input.value : '');
+      const recipients = Array.from(new Set(parseRecipientEmails(input ? input.value : '').map((email) => email.toLowerCase())));
       if (!recipients.length) {
         setSendStatus('Add at least one recipient email.', 'error');
         if (input) input.focus();
@@ -2132,6 +2132,16 @@
         if (input) input.focus();
         return;
       }
+      if (recipients.length > 5) {
+        setSendStatus('You can email your results to up to 5 addresses at a time.', 'error');
+        if (input) input.focus();
+        return;
+      }
+      const resultsText = buildResultsText();
+      if (resultsText.length > MAX_EMAIL_RESULTS_LENGTH) {
+        setSendStatus('Your results are too long to email. Please download them instead.', 'error');
+        return;
+      }
 
       const button = document.getElementById('btn-send-instructor');
       if (button) {
@@ -2140,34 +2150,32 @@
       }
       setSendStatus('Sending your results...', '');
 
-      fetch(RESULTS_EMAIL_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        body: JSON.stringify({
-          action: 'ResultsEmail',
-          submitted_at: new Date().toISOString(),
-          user_email: currentUserEmail(),
-          recipients,
-          filename: resultsFilename(),
-          results_text: buildResultsText(),
-          email_intro: 'Thank you for completing your Untaught Lessons work. Here is a progress summary and the workbook record for reference.'
-        })
-      }).then(() => {
-        setSendStatus('Sent. Your thank-you summary email has been queued.', 'success');
-      }).catch(() => {
+      try {
+        const fb = await import('../assets/firebase.js');
+        const outcome = await fb.sendMyResultsEmail({ recipients, resultsText, filename: resultsFilename() });
+        if (outcome && outcome.ok) {
+          setSendStatus('Sent. Your thank-you summary email has been queued.', 'success');
+        } else if (outcome && outcome.error === 'rate-limited') {
+          setSendStatus(outcome.message || 'You have sent several emails recently. Please try again later.', 'error');
+        } else if (outcome && outcome.error === 'unauthenticated') {
+          setSendStatus('Please sign in again, then try to email your results.', 'error');
+        } else {
+          setSendStatus('Could not send. Please download your results and email them instead.', 'error');
+        }
+      } catch (error) {
         setSendStatus('Could not send. Please download your results and email them instead.', 'error');
-      }).finally(() => {
+      } finally {
         if (button) {
           button.disabled = false;
           button.textContent = 'Email my results';
         }
-      });
+      }
     }
 
     function applySendInstructorStatus() {
       const button = document.getElementById('btn-send-instructor');
       if (!button) return;
-      const isLive = true; // always live — URL is hardcoded
+      const isLive = true; // always live
       if (!isLive) {
         button.hidden = true;
         document.querySelectorAll('.results-email-label, .results-email-input, .results-email-hint').forEach(function(el) {

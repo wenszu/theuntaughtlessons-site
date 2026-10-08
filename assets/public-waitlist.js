@@ -14,6 +14,120 @@ async function sendWaitlistPayload(payload) {
   });
 }
 
+// The same submission also goes to Supabase through the public submit_lead function, in the same way as
+// apps/find-your-level/index.html and assets/feedback-widget.js. The URL and the publishable key are public
+// configuration (same values as assets/firebase.js). The Apps Script post above is still the one that
+// decides what the visitor sees; this copy never throws, never shows an error and never blocks the form.
+const SUPABASE_URL = 'https://czljyikfavtjgqcibdda.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_uxSIlhwWdbAa6EnHyn_Flw__P3u6tlW';
+const PENDING_INBOX_KEY = 'utl_pending_inbox';
+const PENDING_INBOX_MAX = 20;
+const PENDING_INBOX_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+const INBOX_TIMEOUT_MS = 8000;
+
+// Retry queue shared with apps/find-your-level/index.html and assets/feedback-widget.js (same key and item shape).
+function readPendingInbox() {
+  try {
+    const items = JSON.parse(localStorage.getItem(PENDING_INBOX_KEY) || '[]');
+    if (!Array.isArray(items)) return [];
+    const now = Date.now();
+    return items.filter((item) => item && (item.type === 'lead' || item.type === 'feedback') &&
+      item.payload && typeof item.payload === 'object' &&
+      Number.isFinite(item.created) && now - item.created < PENDING_INBOX_TTL_MS);
+  } catch (error) {
+    return [];
+  }
+}
+
+function writePendingInbox(items) {
+  try {
+    const kept = items.slice(-PENDING_INBOX_MAX);
+    if (kept.length) localStorage.setItem(PENDING_INBOX_KEY, JSON.stringify(kept));
+    else localStorage.removeItem(PENDING_INBOX_KEY);
+  } catch (error) {
+    // Storage can be blocked; the visitor flow must not depend on it.
+  }
+}
+
+function queuePendingInbox(type, payload) {
+  const created = Date.now();
+  const items = readPendingInbox();
+  items.push({ id: created + '-' + Math.random().toString(36).slice(2, 8), type, payload, created });
+  writePendingInbox(items);
+}
+
+// Returns 'ok', 'invalid' (the server will never accept it) or 'failed' (network, error or rate limited).
+async function postLead(payload) {
+  let timer = null;
+  try {
+    const controller = typeof AbortController === 'function' ? new AbortController() : null;
+    timer = setTimeout(() => { if (controller) controller.abort(); }, INBOX_TIMEOUT_MS);
+    const response = await fetch(SUPABASE_URL + '/rest/v1/rpc/submit_lead', {
+      method: 'POST',
+      headers: { apikey: SUPABASE_PUBLISHABLE_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ p_lead: payload }),
+      keepalive: true,
+      signal: controller ? controller.signal : undefined
+    });
+    if (!response || !response.ok) return 'failed';
+    const answer = await response.json();
+    if (answer && answer.ok === true) return 'ok';
+    if (answer && answer.error === 'invalid') return 'invalid';
+    return 'failed';
+  } catch (error) {
+    return 'failed';
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+// Sends a lead; on failure it is kept in the local retry queue. Never throws.
+async function submitLead(payload) {
+  try {
+    const outcome = await postLead(payload);
+    if (outcome === 'failed') queuePendingInbox('lead', payload);
+    return outcome;
+  } catch (error) {
+    return 'failed';
+  }
+}
+
+// One attempt per queued lead per page load. Only leads are retried here; queued feedback needs the
+// member sign in token that only the feedback widget has, so it is left in the queue.
+async function flushPendingLeads() {
+  try {
+    if (window.__utlLeadsFlushed) return;
+    window.__utlLeadsFlushed = true;
+    const items = readPendingInbox().filter((item) => item.type === 'lead');
+    if (!items.length) return;
+    const done = new Set();
+    for (const item of items) {
+      const outcome = await postLead(item.payload);
+      if (outcome !== 'failed') done.add(item.id || (item.created + ':' + item.type));
+    }
+    writePendingInbox(readPendingInbox().filter((item) => !done.has(item.id || (item.created + ':' + item.type))));
+  } catch (error) {
+    // Best effort only.
+  }
+}
+
+// Builds the submit_lead payload from the waitlist form values.
+function buildLeadPayload(values, formStartedAt) {
+  const organization = String(values.organization || '').trim();
+  const message = String(values.message || '').trim();
+  return {
+    kind: 'gate',
+    name: values.name,
+    email: values.email,
+    role: values.role,
+    message: organization ? (message ? message + '\n' : '') + 'Organization: ' + organization : message,
+    page: String(values.page || '').split('#')[0].split('?')[0],
+    source: 'waitlist-form',
+    website: String(values.website || ''),
+    form_started_at: formStartedAt
+  };
+}
+
 function waitlistMarkup() {
   return `
     <div class="lead-modal" id="waitlistModal" aria-hidden="true">
@@ -51,6 +165,10 @@ function waitlistMarkup() {
             <label for="waitlistGoal">What are you hoping to work on?</label>
             <textarea id="waitlistGoal" name="message" rows="4" placeholder="Tell us what you would like to handle better" required></textarea>
 
+            <div class="waitlist-hp" aria-hidden="true" style="position:absolute;left:-10000px;top:auto;width:1px;height:1px;overflow:hidden;">
+              <input id="waitlistWebsite" name="website" type="text" tabindex="-1" autocomplete="off" value="">
+            </div>
+
             <button class="lead-submit waitlist-submit" type="submit">Join the waitlist</button>
             <p class="waitlist-followup">We'll reach out to find a time to talk.</p>
             <p class="lead-error" role="alert">We could not add you right now. Please try again or contact us.</p>
@@ -66,6 +184,7 @@ function initWaitlist() {
   const content = modal.querySelector('[data-waitlist-content]');
   const initialContent = content.innerHTML;
   let returnFocus = null;
+  let formShownAt = Date.now();
 
   function close() {
     modal.classList.remove('is-open');
@@ -78,6 +197,7 @@ function initWaitlist() {
     event?.preventDefault();
     returnFocus = event?.currentTarget || document.activeElement;
     content.innerHTML = initialContent;
+    formShownAt = Date.now();
     const requestedAudience = event?.currentTarget?.dataset.waitlistAudience;
     if (requestedAudience) {
       const audienceChoice = Array.from(content.querySelectorAll('input[name="audience"]'))
@@ -139,6 +259,21 @@ function initWaitlist() {
 
     try {
       await sendWaitlistPayload(payload);
+      // Second copy to Supabase. Started only after the Apps Script post was queued, not awaited, so it
+      // can never delay or break the success state; submitLead never throws and queues its own retry.
+      try {
+        submitLead(buildLeadPayload({
+          name: payload.name,
+          email: payload.email,
+          role: payload.role,
+          message: payload.message,
+          organization: payload.organization,
+          page: payload.page,
+          website: form.elements.website ? form.elements.website.value : ''
+        }, formShownAt)).catch(() => {});
+      } catch (leadError) {
+        // Never surfaces to the visitor.
+      }
       content.innerHTML = `
         <div class="lead-success" role="status">
           <svg width="48" height="48" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
@@ -162,3 +297,4 @@ if (document.readyState === 'loading') {
 } else {
   initWaitlist();
 }
+flushPendingLeads();

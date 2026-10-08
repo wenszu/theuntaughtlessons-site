@@ -1903,6 +1903,24 @@ if (process.env.NODE_ENV === "test") {
   exports.__readinessEmailTest = { sendReadinessResultEmail: sendReadinessResultEmailHandler };
 }
 
+// "Email my results" on the My Results page. The browser used to post this straight to the
+// Apps Script web app, which made the owner's Google account an open mail relay. It now goes
+// through this signed in callable and the authenticated relay. See results-email.js.
+const resultsEmail = require("./results-email");
+const sendMyResultsEmailHandler = resultsEmail.createSendMyResultsEmailHandler({
+  get db() { return admin.firestore(); },
+  HttpsError,
+  relay: (payload) => postToAdminRelay(resultsEmail.RELAY_ACTION, payload, resultsEmail.RELAY_REQUESTED_BY)
+});
+exports.sendMyResultsEmail = onCall({
+  secrets: [APPS_SCRIPT_ADMIN_RELAY_SECRET],
+  timeoutSeconds: 30,
+  memory: "256MiB"
+}, sendMyResultsEmailHandler);
+if (process.env.NODE_ENV === "test") {
+  exports.__resultsEmailTest = { sendMyResultsEmail: sendMyResultsEmailHandler };
+}
+
 const CHECKOUT_REDIRECT_ORIGINS = ["https://theuntaughtlessons.com", "http://localhost", "http://127.0.0.1"];
 
 function isAllowedCheckoutRedirect(url) {

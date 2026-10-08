@@ -1128,6 +1128,24 @@ async function sendReadinessResultEmail(attemptId) {
   }
 }
 
+// "Email my results" on My Results: the server sends through the authenticated relay. The sender
+// is always the signed in, verified address. Never throws; the page reads { ok, error, message }
+// where message is the server's plain sentence for a refusal.
+async function sendMyResultsEmail({ recipients, resultsText, filename } = {}) {
+  try {
+    const callable = httpsCallable(functions, "sendMyResultsEmail");
+    const result = await callable({ recipients, resultsText, filename });
+    return result && result.data && typeof result.data === "object" ? result.data : { ok: false, error: "unavailable" };
+  } catch (error) {
+    const code = String((error && error.code) || "").replace(/^functions\//, "");
+    const message = typeof (error && error.message) === "string" ? error.message : "";
+    if (code === "resource-exhausted") return { ok: false, error: "rate-limited", message };
+    if (code === "unauthenticated") return { ok: false, error: "unauthenticated", message };
+    if (code === "invalid-argument") return { ok: false, error: "invalid", message };
+    return { ok: false, error: "unavailable" };
+  }
+}
+
 async function submitAccessRequest(fullName, email, notes = "") {
   const normalizedEmail = String(email || "").trim().toLowerCase();
   const cleanFullName = String(fullName || "").trim();
@@ -3161,6 +3179,7 @@ export {
   sendReadinessAccessLink,
   recordReadinessCompletion,
   checkReadinessAccountEmail,
+  sendMyResultsEmail,
   sendReadinessResultEmail,
   saveUserProgress,
   retryPendingProgressSyncs,
