@@ -50,12 +50,13 @@
     dialog.addEventListener("click", function (event) { if (event.target === dialog) close(); });
     dialog.addEventListener("close", restorePageScroll);
     dialog.querySelector("[data-utl-coach-copy]").addEventListener("click", async function (event) {
+      const copyButton = event.currentTarget;
       const textarea = dialog.querySelector(".utl-coach-prompt-text");
       try { await navigator.clipboard.writeText(currentPrompt); }
       catch (error) { textarea.focus(); textarea.select(); document.execCommand("copy"); }
       dialog.querySelector(".utl-coach-copy-status").textContent = "Copied. Paste it into the AI tool you prefer.";
-      event.currentTarget.textContent = "Copied ✓";
-      setTimeout(function () { event.currentTarget.textContent = "Copy prompt"; }, 1800);
+      copyButton.textContent = "Copied ✓";
+      setTimeout(function () { copyButton.textContent = "Copy prompt"; }, 1800);
     });
     return dialog;
   }

@@ -1599,7 +1599,7 @@ const UTL_CONTENT = {
       { key: "results", label: "My Results", href: appHref("../my-results/index.html") }
     ];
     if (active === "admin") links.push({ key: "admin", label: "Admin", href: adminHref() });
-    var esNavLink = active === "admin" ? "" : '<span class="ws-sep">|</span><span class="ws-es-nav-wrap" data-es-nudge><a class="ws-link ws-link-es" href="' + appHref("../apps/executive-signature/") + '">Try Executive Signature</a><span class="ws-es-popover" role="tooltip"><small>Executive Signature</small><strong>A free 5-minute check on how you lead under pressure</strong><p>See your profile and one area to grow, instantly on screen.</p></span></span>';
+    var esNavLink = active === "admin" ? "" : '<span class="ws-sep">|</span><span class="ws-es-nav-wrap" data-es-nudge><a class="ws-link ws-link-es" href="' + appHref("../apps/executive-signature/") + '">Try Executive Signature</a><span class="ws-es-popover" role="tooltip"><small>Executive Signature</small><strong>A free 5-minute personality assessment on how you lead under pressure</strong><p>Answer a short set of questions about your working style, then see your profile and one area to grow, instantly on screen.</p></span></span>';
     var center = navContextHtml || '<nav class="ws-links" aria-label="Member workspace">' + links.map(function (link, index) {
       return (index ? '<span class="ws-sep">|</span>' : "") + '<a class="ws-link ' + (active === link.key ? "ws-active" : "") + '" href="' + link.href + '">' + link.label + '</a>';
     }).join("") + esNavLink + '</nav>';
@@ -2346,7 +2346,7 @@ const UTL_CONTENT = {
       return workspace && workspace.programId === "executive-signature";
     });
     if (!hasEs) {
-      return '<div class="ws-orientation-prompt"><span><strong>Executive Signature</strong> is a free 5-minute check on how you lead under pressure. You can take it anytime.</span><a href="' + appHref("../apps/executive-signature/") + '">Take the free check <span aria-hidden="true">&rarr;</span></a></div>';
+      return '<div class="ws-orientation-prompt"><span><strong>Executive Signature</strong> is a free 5-minute personality assessment on how you lead under pressure. You can take it anytime.</span><a href="' + appHref("../apps/executive-signature/") + '">Take the free check <span aria-hidden="true">&rarr;</span></a></div>';
     }
     return '<dl class="ws-account-program"><div><dt>Program</dt><dd>Executive Signature</dd></div><div><dt>Access</dt><dd>Active</dd></div><div class="ws-account-credential"><div class="ws-account-credential-copy"><strong>Your workspace</strong><span>Continue where you left off, anytime.</span></div><div class="ws-account-credential-actions"><a class="ws-button ws-button-outline" href="' + appHref("../apps/executive-signature/") + '">Open Executive Signature <span aria-hidden="true">&#8594;</span></a></div></div></dl>';
   }
