@@ -1107,6 +1107,28 @@ Yutee Elle</div>
         document.getElementById('writeToAikoResultSample').textContent = document.getElementById('writeToAikoSample').textContent.trim();
       }
 
+      // Counts and flags behind the feedback cards. No score exists here, so none is invented; no text goes in.
+      function granularInputs(response) {
+        try {
+          const body = emailBodyOnly(response);
+          const count = wordCount(body);
+          const paragraphs = body.split(/\n\s*\n/).map((part) => part.trim()).filter(Boolean);
+          return {
+            mode: state.mode,
+            body_words: count,
+            paragraph_count: paragraphs.length,
+            bsp_heading_count: paragraphs.filter((part) => /^[^:\n]{2,45}:\s+/.test(part)).length,
+            has_next_step: /\b(recommend|next step|if you agree|please|approve|decide|review|follow up)\b/i.test(body),
+            within_word_range: count >= 80 && count <= 120,
+            structured_section_words: state.mode === 'open' ? [] : structuredFields.map((field) => wordCount(field.value)),
+            sample_open_at_submit: document.getElementById('writeToAikoSample').classList.contains('is-open')
+          };
+        } catch (error) {
+          console.warn('Granular inputs failed.', error);
+          return {};
+        }
+      }
+
       function showResults(response, tab = 'feedback') {
         document.body.classList.add('write-to-aiko-result');
         resultsEl.hidden = false;
@@ -1199,7 +1221,8 @@ Yutee Elle</div>
           mode: state.mode,
           page: window.location.href,
           completed_at: new Date().toISOString(),
-          duration_seconds: elapsedSeconds()
+          duration_seconds: elapsedSeconds(),
+          granular_inputs: granularInputs(response)
         };
         const submissionId = window.crypto && crypto.randomUUID ? crypto.randomUUID() : 'write-aiko-' + Date.now();
         const submission = normalizeSubmission({

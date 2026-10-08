@@ -122,8 +122,8 @@ assert(!howItWorks.includes('initializeApp('), 'How-it-works page must remain di
 
 assert.match(readinessModuleScript, /import\s*\{\s*recordReadinessCompletion,\s*checkReadinessAccountEmail,\s*sendReadinessAccessLink\s*\}\s*from\s*'\.\.\/\.\.\/assets\/firebase\.js'/, 'Readiness account bridge must import the three account functions from the shared Firebase module');
 assert.match(readinessPlainScript, /if\s*\(window\.raRecordCompletion\)/, 'Both the quick check and the full report must trigger account creation');
-assert.match(readinessPlainScript, /function isSyntheticReadinessNotification\(email\)/, 'Readiness preview must identify local and reserved-address test attempts');
-assert.match(readinessPlainScript, /if\(!isSyntheticReadinessNotification\(email\)\)/, 'Synthetic readiness attempts must not trigger live notification email');
+assert(!readinessPlainScript.includes('isSyntheticReadinessNotification'), 'The browser no longer posts a completion notification, so there is nothing to gate for local and reserved-address attempts');
+assert(!readinessPlainScript.includes('script.google.com'), 'The readiness page must not post to the Apps Script endpoint; the result email goes through sendReadinessResultEmail');
 
 assert.match(html, /print-logo-utl-navy-header\.svg/, 'Every normal printed page needs the UTL logo');
 assert.match(html, /print-logo-signature-navy-header\.svg/, 'Every normal printed page needs the Executive Signature logo');

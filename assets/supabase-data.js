@@ -323,6 +323,79 @@ function buildExplicitSubmissionArgs(submissionPayload = {}) {
   };
 }
 
+// The granular detail of an attempt goes to the database as a JSON object. Only plain JSON survives: functions,
+// symbols, undefined, non finite numbers and non plain objects are dropped, dates become ISO text, a loop or a very
+// deep value is cut. The database refuses 16000 bytes or more of the detail's jsonb text (octet_length(detail::text)),
+// and that text puts a space after every comma and colon, so it is longer than compact JSON. The size is therefore
+// measured in that form (pgJsonTextBytes below), and over 15000 of it means send {} rather than fail.
+const ATTEMPT_DETAIL_MAX_BYTES = 15000;
+const ATTEMPT_DETAIL_MAX_DEPTH = 12;
+
+// PostgreSQL jsonb refuses a NUL character and a lone UTF-16 surrogate, and one refusal would lose the whole attempt.
+function cleanDetailText(text) {
+  return String(text).replace(/\u0000/g, "").replace(/[\ud800-\udbff](?![\udc00-\udfff])|(?<![\ud800-\udbff])[\udc00-\udfff]/g, "");
+}
+
+function jsonSafeValue(value, depth, seen) {
+  if (typeof value === "string") return cleanDetailText(value);
+  if (value === null || typeof value === "boolean") return value;
+  if (typeof value === "number") return Number.isFinite(value) ? value : undefined;
+  if (value instanceof Date) return Number.isNaN(value.getTime()) ? undefined : value.toISOString();
+  if (typeof value !== "object" || depth > ATTEMPT_DETAIL_MAX_DEPTH || seen.has(value)) return undefined;
+  seen.add(value);
+  try {
+    if (Array.isArray(value)) {
+      return value.map((item) => {
+        const safe = jsonSafeValue(item, depth + 1, seen);
+        return safe === undefined ? null : safe;
+      });
+    }
+    const proto = Object.getPrototypeOf(value);
+    if (proto !== Object.prototype && proto !== null) return undefined;
+    const out = {};
+    Object.keys(value).forEach((key) => {
+      const safe = jsonSafeValue(value[key], depth + 1, seen);
+      if (safe !== undefined) out[cleanDetailText(key)] = safe;
+    });
+    return out;
+  } finally {
+    seen.delete(value);
+  }
+}
+
+function utf8Length(text) {
+  return typeof TextEncoder === "function" ? new TextEncoder().encode(text).length : text.length;
+}
+
+// Size in bytes of a plain JSON value as PostgreSQL prints it from jsonb: ", " between items, ": " after keys. A number
+// written with an exponent is counted as its expanded digits, which is what numeric prints.
+function pgJsonTextBytes(value) {
+  if (value === null) return 4;
+  if (typeof value === "boolean") return value ? 4 : 5;
+  if (typeof value === "number") {
+    const written = String(value);
+    if (!/e/i.test(written)) return written.length;
+    const parts = written.toLowerCase().split("e");
+    return parts[0].replace(/[-.]/g, "").length + Math.abs(Number(parts[1])) + 3;
+  }
+  if (typeof value === "string") return utf8Length(JSON.stringify(value));
+  if (Array.isArray(value)) {
+    return 2 + value.reduce((sum, item) => sum + pgJsonTextBytes(item), 0) + 2 * Math.max(0, value.length - 1);
+  }
+  const keys = Object.keys(value);
+  return 2 + keys.reduce((sum, key) => sum + utf8Length(JSON.stringify(key)) + 2 + pgJsonTextBytes(value[key]), 0) + 2 * Math.max(0, keys.length - 1);
+}
+
+function attemptDetail(value) {
+  if (!isPlainObject(value)) return {};
+  try {
+    const safe = jsonSafeValue(value, 0, new Set()) || {};
+    return pgJsonTextBytes(safe) > ATTEMPT_DETAIL_MAX_BYTES ? {} : safe;
+  } catch (error) {
+    return {};
+  }
+}
+
 function buildAttemptArgs(attemptPayload = {}) {
   const payload = isPlainObject(attemptPayload) ? attemptPayload : {};
   const attemptId = text(payload.attemptId, 100);
@@ -337,7 +410,8 @@ function buildAttemptArgs(attemptPayload = {}) {
     p_score: score,
     p_score_maximum: scoreMaximum,
     p_duration_seconds: clampInt(payload.durationSeconds, 0, 43200, 0),
-    p_content_version: text(payload.contentVersion, 80)
+    p_content_version: text(payload.contentVersion, 80),
+    p_detail: attemptDetail(payload.detail)
   };
 }
 
@@ -628,7 +702,8 @@ function mapAttemptRow(row, exerciseId, exerciseTitle) {
     attemptNumber: Number(row.attempt_number) || 1,
     durationSeconds: Number(row.duration_seconds) || 0,
     submittedAt: timestampLike(row.submitted_at),
-    submittedAtClient: toIsoOrNull(row.submitted_at) || ""
+    submittedAtClient: toIsoOrNull(row.submitted_at) || "",
+    detail: isPlainObject(row.detail) ? row.detail : {}
   };
 }
 
@@ -1081,7 +1156,7 @@ function createSupabaseData(context = {}) {
     const activityId = catalog.resolve(targetId);
     if (!activityId) throw unknownActivity(targetId);
     const title = (catalog.get(activityId) || {}).title || targetId;
-    const rows = await select("activity_attempts", `select=attempt_key,attempt_number,score,score_maximum,score_percent,duration_seconds,content_version,submitted_at&activity_id=${eq(activityId)}&order=submitted_at.desc&limit=10`);
+    const rows = await select("activity_attempts", `select=attempt_key,attempt_number,score,score_maximum,score_percent,duration_seconds,content_version,detail,submitted_at&activity_id=${eq(activityId)}&order=submitted_at.desc&limit=10`);
     return rows.map((row) => mapAttemptRow(row, targetId, title));
   }
 

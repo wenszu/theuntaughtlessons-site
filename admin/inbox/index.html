@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Inbox — The Untaught Lessons</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="../../assets/favicon-bluebg-whitedoor-thicker-32.png?v=20260925-mobile-v1">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lato:wght@300;400;700&family=Roboto+Mono:wght@400;500;700&display=swap');
+
+    :root {
+      --navy: #003366;
+      --gold: #EEA320;
+      --cream: #F3EDE2;
+      --charcoal: #4A4A4A;
+      --line: #d4ccbf;
+      --green: #2d6a4f;
+      --red: #8A1F1F;
+      --white: #ffffff;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--cream);
+      color: var(--charcoal);
+      font-family: 'Lato', sans-serif;
+    }
+
+    button, input, select, textarea { font: inherit; }
+    [hidden] { display: none !important; }
+
+    h1, h2, h3 {
+      margin: 0;
+      color: var(--navy);
+      font-family: 'Playfair Display', serif;
+      line-height: 1.15;
+    }
+    h3 { margin: 22px 0 8px; font-size: 18px; }
+
+    .ib-bar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-height: 54px;
+      padding: 8px 1.75rem;
+      background: var(--navy);
+      color: var(--white);
+    }
+    .ib-bar a { color: rgba(255, 255, 255, .85); font-size: 13px; text-decoration: none; }
+    .ib-bar a:hover { color: var(--white); }
+    .ib-bar strong { font-family: 'Playfair Display', serif; font-size: 20px; }
+
+    .ib-page { max-width: 1280px; margin: 0 auto; padding: 24px 1.25rem 48px; }
+    .ib-label { color: var(--gold); font-size: 11px; font-weight: 700; }
+    .ib-page > h1 { margin: 4px 0 6px; font-size: 28px; }
+    .ib-intro { margin: 0 0 18px; font-size: 14px; }
+
+    .ib-tabs { display: flex; gap: 8px; margin-bottom: 16px; overflow-x: auto; }
+    .ib-tab {
+      min-height: 36px;
+      padding: 0 16px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--white);
+      color: var(--charcoal);
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .ib-tab.is-active { border-color: var(--navy); background: var(--navy); color: var(--white); }
+
+    .ib-panel {
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--white);
+    }
+
+    label { color: var(--navy); font-size: 13px; font-weight: 700; }
+    input[type="text"], input[type="search"], input[type="number"], select {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--white);
+      color: var(--charcoal);
+      font-size: 13px;
+    }
+    input:focus, select:focus { border-color: var(--navy); outline: none; }
+    input[type="number"] { width: 110px; }
+
+    .ib-row { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px; margin: 8px 0; }
+    .ib-between { justify-content: space-between; align-items: center; }
+    .ib-filters { margin-top: 0; }
+    .ib-field { display: grid; gap: 4px; min-width: 130px; }
+    .ib-field.ib-grow { flex: 1 1 220px; }
+    .ib-check { display: inline-flex; align-items: center; gap: 6px; min-height: 34px; font-weight: 400; }
+
+    .ib-btn {
+      padding: 7px 13px;
+      border: 1px solid var(--navy);
+      border-radius: 6px;
+      background: var(--white);
+      color: var(--navy);
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .ib-btn.ib-primary { border-color: var(--gold); background: var(--gold); color: var(--white); }
+    .ib-btn.ib-danger { border-color: var(--red); background: var(--red); color: var(--white); }
+    .ib-btn:disabled { cursor: not-allowed; opacity: .55; }
+
+    .ib-message { min-height: 1.2em; margin: 8px 0; font-size: 13px; font-weight: 700; }
+    .ib-message.ib-error { color: var(--red); }
+    .ib-message.ib-ok { color: var(--green); }
+    .ib-count { color: var(--charcoal); font-size: 13px; }
+    .ib-hint, .ib-note { margin: 4px 0 10px; font-size: 13px; }
+    .ib-note { padding: 10px 12px; border: 1px solid var(--line); background: var(--cream); }
+    .ib-empty { padding: 14px 0; font-size: 13px; }
+
+    .ib-table-wrap { overflow-x: auto; margin: 8px 0; }
+    .ib-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .ib-table th, .ib-table td { padding: 7px 8px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+    .ib-table th { color: var(--navy); font-size: 12px; white-space: nowrap; }
+    .ib-table td { overflow-wrap: anywhere; }
+    .ib-row-item { cursor: pointer; }
+    .ib-row-item:hover, .ib-row-item.is-open { background: var(--cream); }
+
+    .ib-badge {
+      display: inline-block;
+      margin: 0 4px 2px 0;
+      padding: 1px 7px;
+      border-radius: 10px;
+      background: var(--cream);
+      color: var(--charcoal);
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .ib-st-new { background: var(--gold); color: var(--white); }
+    .ib-st-contacted, .ib-st-reviewed { background: var(--green); color: var(--white); }
+    .ib-st-spam { background: var(--red); color: var(--white); }
+
+    .ib-table tr.ib-warn-row td { background: #fbf1f1; color: var(--red); font-weight: 700; }
+    .ib-warn-check { color: var(--red); font-weight: 700; }
+    .ib-who { max-height: 200px; margin: 6px 0; padding-left: 20px; overflow-y: auto; font-size: 13px; overflow-wrap: anywhere; }
+
+    .ib-bulk { margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--line); }
+    .ib-bulk input[type="text"] { width: 220px; }
+    .ib-confirm { margin: 8px 0; padding: 12px; border: 1px solid var(--red); border-radius: 6px; background: #fbf1f1; }
+    .ib-confirm input[type="text"] { width: 180px; }
+
+    .ib-detail { margin-top: 16px; padding: 14px; border: 1px solid var(--navy); border-radius: 8px; background: var(--white); }
+    .ib-detail h3 { margin: 0; }
+    .ib-dl { display: grid; grid-template-columns: 150px 1fr; gap: 6px 14px; margin: 10px 0; font-size: 13px; }
+    .ib-dl dt { color: var(--navy); font-weight: 700; }
+    .ib-dl dd { margin: 0; overflow-wrap: anywhere; }
+    .ib-dl dd.ib-long { white-space: pre-wrap; padding: 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--cream); }
+
+    .ib-purge { margin-top: 18px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; }
+    .ib-purge summary { cursor: pointer; color: var(--navy); font-weight: 700; font-size: 14px; }
+
+    .ib-denied { max-width: 560px; margin: 40px auto; padding: 24px; border: 1px solid var(--line); border-radius: 10px; background: var(--white); }
+    .ib-denied h2 { margin-bottom: 10px; font-size: 24px; }
+    .ib-denied a { color: var(--navy); font-weight: 700; }
+
+    @media (max-width: 640px) {
+      .ib-bar { padding: 8px 1rem; }
+      .ib-page { padding: 16px 1rem 40px; }
+      .ib-panel { padding: 12px; }
+      .ib-dl { grid-template-columns: 1fr; }
+      .ib-bulk input[type="text"] { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <header class="ib-bar">
+    <strong>Admin</strong>
+    <a href="../">Back to the admin console</a>
+  </header>
+  <div class="ib-page">
+    <span class="ib-label">Operations · Inbox</span>
+    <h1>Inbox</h1>
+    <p class="ib-intro">Leads and feedback sent by visitors and members, and clean up of test data. Owner only.</p>
+    <div id="inboxApp" aria-live="polite"><p class="ib-intro">Loading...</p></div>
+    <noscript><p class="ib-intro">This page needs JavaScript.</p></noscript>
+  </div>
+
+  <script src="inbox.js?v=20260925-mobile-v1"></script>
+  <script type="module">
+    // Signs in with the Firebase session the admin console already holds. The token is requested for each
+    // call and never stored.
+    const app = document.getElementById('inboxApp');
+    function showNotice(title, body) {
+      app.textContent = '';
+      const box = document.createElement('div');
+      box.className = 'ib-denied';
+      box.setAttribute('role', 'alert');
+      const h = document.createElement('h2');
+      h.textContent = title;
+      const p = document.createElement('p');
+      p.textContent = body;
+      const a = document.createElement('a');
+      a.setAttribute('href', '../');
+      a.textContent = 'Back to the admin console';
+      const p2 = document.createElement('p');
+      p2.appendChild(a);
+      box.append(h, p, p2);
+      app.appendChild(box);
+    }
+    try {
+      const { getSignedInUser } = await import('../../assets/firebase.js?v=20260925-mobile-v1');
+      const user = await getSignedInUser();
+      if (!user) {
+        showNotice('Please sign in', 'Open the admin console, sign in with the owner account, then open the Inbox again.');
+      } else {
+        await window.UTLInbox.start(app, {
+          getToken: async (forceRefresh) => {
+            const current = await getSignedInUser();
+            return current ? current.getIdToken(forceRefresh === true) : '';
+          }
+        });
+      }
+    } catch (error) {
+      showNotice('The Inbox could not start', 'Reload the page. If it keeps happening, check your connection.');
+    }
+  </script>
+</body>
+</html>

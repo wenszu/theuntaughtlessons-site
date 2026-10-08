@@ -138,18 +138,11 @@
   <footer class="section no-print" style="padding-top:0"><div class="wrap small muted">Not shared with anyone else without your consent. <a href="../how-it-works/">Read how the score works.</a></div></footer>
 
   <script type="module">
-    import { auth, db, doc, getDoc, getMyEsStatus, isSignInWithEmailLink, onAuthStateChanged, signInWithEmailLink, checkReadinessAccountEmail, sendReadinessAccessLink } from '../../../assets/firebase.js';
+    import { auth, db, doc, getDoc, getMyEsStatus, isSignInWithEmailLink, onAuthStateChanged, signInWithEmailLink, checkReadinessAccountEmail, sendReadinessAccessLink, sendReadinessResultEmail } from '../../../assets/firebase.js';
 
     const $ = (s) => document.querySelector(s);
     const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
     const show = (id) => { ['requestState','confirmState','resultsView'].forEach((s) => { $('#'+s).hidden = s !== id; }); };
-
-    const RESULT_EMAIL_ENDPOINT = 'https://script.google.com/macros/s/AKfycbzJE--FL2kB_XDNZRnszCtlyLRPvaLAHGuF5TAOdXJk40atbvf5Y6ELuSK2B7CSLaMN/exec';
-    async function sendResultEmailPayload(payload) {
-      const body = JSON.stringify(payload);
-      try { await fetch(RESULT_EMAIL_ENDPOINT, { method: 'POST', mode: 'no-cors', keepalive: true, body }); return true; }
-      catch (error) { return false; }
-    }
 
     function esQuickCardHtml(entry) {
       const taken = entry && entry.latestAttempt;
@@ -203,19 +196,26 @@
       const full = fullEntry && fullEntry.latestAttempt;
       const quick = quickEntry && quickEntry.latestAttempt;
       const latest = full || quick;
-      const latestLabel = full ? 'full assessment' : 'quick check';
       const keepCopy = $('#keepCopyCard');
       if (latest && userData && userData.email) {
         const email = userData.email;
-        const name = userData.name || '';
         $('#emailResultBtn').onclick = async () => {
           const btn = $('#emailResultBtn');
           btn.disabled = true; btn.textContent = 'Sending…';
-          const greeting = name ? `Hi ${esc(name)},` : 'Hi,';
-          const renderedHtml = `<p>${greeting}</p><p>Your Executive Readiness Score is in the ${esc(latest.band)} range, with a ${esc(latest.profileLabel)} profile, from your ${esc(latestLabel)}.</p><p><a href="https://theuntaughtlessons.com/apps/executive-signature/">theuntaughtlessons.com/apps/executive-signature/</a></p>`;
-          const ok = await sendResultEmailPayload({ action: 'EmailReadinessResult', recipient: email, name, subject: 'Your Executive Signature result', renderedHtml, page: location.href, source: 'executive-signature-my-results' });
+          let answer = null;
+          try { answer = latest.attemptId ? await sendReadinessResultEmail(latest.attemptId) : null; }
+          catch (error) { answer = null; }
           btn.disabled = false; btn.textContent = 'Email me this result';
-          $('#resultActionMsg').textContent = ok ? 'On its way to ' + email : 'Could not send right now.';
+          let message = 'We could not send the email right now. Please try again later.';
+          if (answer && answer.ok === true) message = 'On its way to ' + email;
+          else if (answer && answer.error === 'rate-limited') {
+            if (answer.reason === 'address-daily-limit') message = 'This address has reached today\'s limit for result emails. Please try again tomorrow.';
+            else if (answer.reason === 'global-daily-limit') message = 'We cannot send result emails right now. Please try again later.';
+            else message = 'You already requested this a moment ago. Please check your inbox and spam folder.';
+          } else if (answer && answer.error === 'not-found') {
+            message = 'We could not match this request to your result. Please open your results from the My Results page and try again.';
+          }
+          $('#resultActionMsg').textContent = message;
         };
         $('#printResultBtn').onclick = () => window.print();
         keepCopy.hidden = false;

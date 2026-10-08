@@ -931,6 +931,19 @@ async function checkReadinessAccountEmail(email) {
   return result && result.data ? result.data : { ok: false, hasResult: false };
 }
 
+// "Email me this result": the server finds the stored attempt, renders the email itself
+// and sends it only to the address on file. Never throws for an expected failure; the
+// page reads { ok, error } and shows a gentle message.
+async function sendReadinessResultEmail(attemptId) {
+  try {
+    const callable = httpsCallable(functions, "sendReadinessResultEmail");
+    const result = await callable({ attemptId });
+    return result && result.data && typeof result.data === "object" ? result.data : { ok: false, error: "unavailable" };
+  } catch (error) {
+    return { ok: false, error: "unavailable" };
+  }
+}
+
 async function submitAccessRequest(fullName, email, notes = "") {
   const normalizedEmail = String(email || "").trim().toLowerCase();
   const cleanFullName = String(fullName || "").trim();
@@ -2814,6 +2827,7 @@ export {
   sendReadinessAccessLink,
   recordReadinessCompletion,
   checkReadinessAccountEmail,
+  sendReadinessResultEmail,
   saveUserProgress,
   retryPendingProgressSyncs,
   saveEngagementAnalytics,

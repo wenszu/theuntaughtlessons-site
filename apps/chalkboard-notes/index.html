@@ -1428,7 +1428,63 @@
       return activityTimer.elapsedSeconds();
     }
 
-    function saveResult(appId, phase, exerciseName, durationSeconds, responseObj) {
+    // Scored-take recording: one scored take has one attempt id (app id plus a nonce made when the take starts),
+    // so a double click or retry of the same take reuses it. Best effort only; it never blocks the existing flow.
+    const ATTEMPT_APP_ID = 'chalkboard-notes';
+    const ATTEMPT_CONTENT_VERSION = '2026-10-08-v1';
+    let takeNonce = newTakeNonce();
+
+    function newTakeNonce() {
+      return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+    }
+
+    function buildAttemptId(appId, nonce) {
+      return `${appId}-${nonce}`.replace(/[^A-Za-z0-9-]/g, '-').slice(0, 100);
+    }
+
+    function buildAttemptDetail(score, response, withinTarget, elapsedSeconds) {
+      return {
+        schema: 1,
+        exercise: ATTEMPT_APP_ID,
+        scoreBreakdown: score.categories.map((category) => ({ label: category.label, points: category.points, max: category.max, details: category.details })),
+        checklist: [],
+        flags: { withinTarget: Boolean(withinTarget) },
+        inputs: {
+          activityId: ACTIVITY.id,
+          wordCount: score.wordCount,
+          elapsedSeconds: Math.round(elapsedSeconds),
+          targetSeconds: ACTIVITY.durationSeconds || null,
+          checklistItemCount: (ACTIVITY.checklist || []).length
+        },
+        mode: response.mode,
+        contentVersion: ATTEMPT_CONTENT_VERSION
+      };
+    }
+
+    function recordExerciseAttempt(appId, title, scored, attemptNumber, durationSeconds) {
+      try {
+        if (localStorage.getItem('utl_experience_preview_active') === 'true') return;
+        const scoreMaximum = Math.max(1, Math.min(1000, Math.round(Number(scored.scoreMaximum) || 100)));
+        const payload = {
+          attemptId: buildAttemptId(appId, takeNonce),
+          exerciseId: appId,
+          exerciseTitle: title,
+          contentVersion: ATTEMPT_CONTENT_VERSION,
+          score: Math.max(0, Math.min(scoreMaximum, Math.round(Number(scored.score) || 0))),
+          scoreMaximum,
+          attemptNumber: Math.max(1, Math.round(Number(attemptNumber) || 1)),
+          durationSeconds: Math.max(0, Math.round(Number(durationSeconds) || 0)),
+          detail: scored.detail
+        };
+        import('../../assets/firebase.js')
+          .then(({ saveExerciseAttempt }) => saveExerciseAttempt(payload))
+          .catch((error) => console.warn('Exercise attempt could not be recorded.', error));
+      } catch (error) {
+        console.warn('Exercise attempt could not be recorded.', error);
+      }
+    }
+
+    function saveResult(appId, phase, exerciseName, durationSeconds, responseObj, scored) {
       const existing = localStorage.getItem('utl_result_' + appId);
       const attempt = existing ? (JSON.parse(existing).attempt || 0) + 1 : 1;
       const record = {
@@ -1440,10 +1496,17 @@
         attempt,
         response: responseObj
       };
+      if (scored) {
+        record.score = scored.score;
+        record.score_maximum = scored.scoreMaximum;
+        record.score_detail = scored.detail;
+        record.attempt_id = buildAttemptId(appId, takeNonce);
+      }
       localStorage.setItem('utl_result_' + appId, JSON.stringify(record));
       import('../../assets/firebase.js')
         .then(({ saveUserProgress }) => saveUserProgress(appId, exerciseName, record))
         .catch((error) => console.warn('Firestore progress save failed.', error));
+      if (scored) recordExerciseAttempt(appId, exerciseName, scored, attempt, durationSeconds);
     }
 
     function completionSaveNotice() {
@@ -1893,7 +1956,11 @@
       // Future backend extension point:
       // sendAttemptToApi(attempt), sendAttemptToGoogleSheets(attempt), or sendFeedbackEmail(attempt).
       addAttempt(attempt);
-      saveResult('chalkboard-notes', 1, 'Chalkboard notes', elapsedSeconds, resultPayloadFromResponse(response));
+      saveResult('chalkboard-notes', 1, 'Chalkboard notes', elapsedSeconds, resultPayloadFromResponse(response), {
+        score: score.total,
+        scoreMaximum: score.max,
+        detail: buildAttemptDetail(score, response, withinTarget, elapsedSeconds)
+      });
       window.UTLRewardEvents?.awardScoredExercise({
         appId: 'chalkboard-notes',
         title: 'Chalkboard notes scored',
@@ -1925,6 +1992,7 @@
       });
       els.openResponse.readOnly = false;
       window.UTLSetRichEditorsReadOnly?.(false);
+      takeNonce = newTakeNonce();
       state.lastAttemptId = null;
       state.lastScore = null;
       state.sampleRevealed = false;

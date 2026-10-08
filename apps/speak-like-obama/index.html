@@ -1085,7 +1085,7 @@
         renderTimer();
       });
 
-      window.SLOTimer = { start: startTimer, stop: stopTimer, reset: () => {
+      window.SLOTimer = { start: startTimer, stop: stopTimer, elapsed: () => elapsed, reset: () => {
         stopTimer();
         elapsed = 0;
         renderTimer();
@@ -1545,7 +1545,7 @@
           attemptNumber: saved.length,
           completedAtClient: completedRecord.completedAt,
           durationSeconds: Number(completedRecord.durationSeconds || 0),
-          responsePayload: completedRecord
+          responsePayload: { ...completedRecord, practice: true }
         })).catch((error) => console.warn('Practice history sync failed.', error));
         const workspaces = readWorkspaces();
         delete workspaces[draft.topicId];
@@ -1615,6 +1615,26 @@
         title: 'Delivery practice complete',
         body: 'Your reflection and exercise progress were saved.'
       });
+      // Explicit cloud completion record. Fire and forget; never blocks or changes the flow above.
+      try {
+        if (localStorage.getItem('utl_experience_preview_active') !== 'true') {
+          let rounds = [];
+          try { rounds = JSON.parse(localStorage.getItem('utl_speak_like_obama_practice_attempts') || '[]'); } catch (_) { rounds = []; }
+          const completion = {
+            completed_at: new Date().toISOString(),
+            self_reported: true,
+            exercise: 'speak-like-obama',
+            duration_seconds: Math.round(Number(window.SLOTimer && window.SLOTimer.elapsed ? window.SLOTimer.elapsed() : 0) || 0),
+            practice_rounds_saved: Array.isArray(rounds) ? rounds.length : 0,
+            practice_topic_ids: (Array.isArray(rounds) ? rounds : []).slice(-20).map((item) => String(item && item.topicId || ''))
+          };
+          import('../../assets/firebase.js')
+            .then(({ saveUserProgress }) => saveUserProgress('speak-like-obama', 'Speak like Obama', completion))
+            .catch((error) => console.warn('Completion record sync failed.', error));
+        }
+      } catch (error) {
+        console.warn('Completion record sync failed.', error);
+      }
       this.hidden = true;
       document.getElementById('completeExerciseStatus').hidden = false;
       document.getElementById('journeyLink').hidden = true;

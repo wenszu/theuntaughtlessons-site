@@ -124,6 +124,15 @@
       background: var(--cream);
     }
 
+    .hp-field {
+      position: absolute;
+      left: -10000px;
+      top: auto;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+    }
+
     .gate.is-hidden {
       display: none;
     }
@@ -645,6 +654,10 @@
         <label for="leadReason">What brings you here?</label>
         <textarea id="leadReason" name="message" rows="3" placeholder="Tell us what you are looking for"></textarea>
 
+        <div class="hp-field" aria-hidden="true">
+          <input id="websiteHoneypot" name="website" type="text" tabindex="-1" autocomplete="off" value="">
+        </div>
+
         <button id="startButton" type="submit">Start the exercise</button>
       </form>
     </div>
@@ -655,7 +668,105 @@
   <script type="module">
     import { getBand, scoreExercise } from '../../data/tsa-score-bands.js';
 
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzJE--FL2kB_XDNZRnszCtlyLRPvaLAHGuF5TAOdXJk40atbvf5Y6ELuSK2B7CSLaMN/exec';
+    // Leads go to Supabase through the public submit_lead function. The URL and the publishable key
+    // are public configuration (same values as assets/firebase.js).
+    const SUPABASE_URL = 'https://czljyikfavtjgqcibdda.supabase.co';
+    const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_uxSIlhwWdbAa6EnHyn_Flw__P3u6tlW';
+    const PENDING_INBOX_KEY = 'utl_pending_inbox';
+    const PENDING_INBOX_MAX = 20;
+    const PENDING_INBOX_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+    const INBOX_TIMEOUT_MS = 8000;
+    const formShownAt = Date.now();
+
+    function isLocalHost() {
+      const host = String(location.hostname || '');
+      return host === 'localhost' || host === '127.0.0.1';
+    }
+
+    // Retry queue shared with assets/feedback-widget.js (same key and item shape).
+    function readPendingInbox() {
+      try {
+        const items = JSON.parse(localStorage.getItem(PENDING_INBOX_KEY) || '[]');
+        if (!Array.isArray(items)) return [];
+        const now = Date.now();
+        return items.filter(item => item && (item.type === 'lead' || item.type === 'feedback') &&
+          item.payload && typeof item.payload === 'object' &&
+          Number.isFinite(item.created) && now - item.created < PENDING_INBOX_TTL_MS);
+      } catch (error) {
+        return [];
+      }
+    }
+
+    function writePendingInbox(items) {
+      try {
+        const kept = items.slice(-PENDING_INBOX_MAX);
+        if (kept.length) localStorage.setItem(PENDING_INBOX_KEY, JSON.stringify(kept));
+        else localStorage.removeItem(PENDING_INBOX_KEY);
+      } catch (error) {
+        // Storage can be blocked; the visitor flow must not depend on it.
+      }
+    }
+
+    function queuePendingInbox(type, payload) {
+      const created = Date.now();
+      const items = readPendingInbox();
+      items.push({ id: created + '-' + Math.random().toString(36).slice(2, 8), type, payload, created });
+      writePendingInbox(items);
+    }
+
+    // Returns 'ok', 'invalid' (the server will never accept it) or 'failed' (network, error or rate limited).
+    async function postInbox(type, payload) {
+      const controller = typeof AbortController === 'function' ? new AbortController() : null;
+      const timer = setTimeout(() => { if (controller) controller.abort(); }, INBOX_TIMEOUT_MS);
+      try {
+        const isLead = type === 'lead';
+        const response = await fetch(SUPABASE_URL + '/rest/v1/rpc/' + (isLead ? 'submit_lead' : 'submit_feedback'), {
+          method: 'POST',
+          headers: { apikey: SUPABASE_PUBLISHABLE_KEY, 'Content-Type': 'application/json' },
+          body: JSON.stringify(isLead ? { p_lead: payload } : { p_feedback: payload }),
+          keepalive: true,
+          signal: controller ? controller.signal : undefined
+        });
+        if (!response || !response.ok) return 'failed';
+        const answer = await response.json();
+        if (answer && answer.ok === true) return 'ok';
+        if (answer && answer.error === 'invalid') return 'invalid';
+        return 'failed';
+      } catch (error) {
+        return 'failed';
+      } finally {
+        clearTimeout(timer);
+      }
+    }
+
+    // Sends a lead; on failure it is kept in the local retry queue. Never throws.
+    async function submitLead(payload) {
+      const outcome = await postInbox('lead', payload);
+      if (outcome === 'failed') queuePendingInbox('lead', payload);
+      return outcome;
+    }
+
+    // One attempt per queued item per page load, shared with the feedback widget through a window flag.
+    async function flushPendingInbox() {
+      if (window.__utlInboxFlushed) return;
+      window.__utlInboxFlushed = true;
+      const items = readPendingInbox();
+      if (!items.length) return;
+      const done = new Set();
+      for (const item of items) {
+        const outcome = await postInbox(item.type, item.payload);
+        if (outcome !== 'failed') done.add(item.id || (item.created + ':' + item.type));
+      }
+      writePendingInbox(readPendingInbox().filter(item => !done.has(item.id || (item.created + ':' + item.type))));
+    }
+
+    function leadBase(overrides) {
+      return Object.assign({
+        website: '',
+        form_started_at: formShownAt
+      }, overrides);
+    }
+
     const DATA_URL = '../../data/sort-bucket.json';
     const gate = document.getElementById('gate');
     const gateForm = document.getElementById('gateForm');
@@ -1039,14 +1150,14 @@
 
     async function submitAssessmentResult(score) {
       if (state.adminPreview) return;
-      // Routes to the Contacts tab (the script's default branch). The Contacts branch
-      // requires a name and a valid email or it silently drops the submission, so both
-      // are set here even though the assessment intake only asked for email before.
+      // Both name and a valid email are set here even though the assessment intake only asked for
+      // email before, because the server drops a result without them.
+      const bandLabel = score.band && typeof score.band === 'object' ? (score.band.label || '') : String(score.band || '');
       const payload = {
         name: sessionStorage.getItem('find_your_level_name') || state.participant.name || 'Find your level participant',
         email: sessionStorage.getItem('find_your_level_email') || state.participant.email,
         role: 'Find your level',
-        message: `Completed Find Your Level. Band: ${score.band}. Score: ${score.percentage}%.`,
+        message: `Completed Find Your Level. Band: ${bandLabel}. Score: ${score.percentage}%.`,
         page: location.href,
         source: 'find-your-level',
         assessment_type: 'find-your-level',
@@ -1055,15 +1166,20 @@
         variation_id: exercise.exercise_id || '',
         submitted_at: new Date().toISOString()
       };
-      try {
-        await fetch(SCRIPT_URL, {
-          method: 'POST',
-          mode: 'no-cors',
-          body: JSON.stringify(payload)
-        });
-      } catch (error) {
-        console.warn('Assessment result submission failed.', error);
-      }
+      await submitLead(leadBase({
+        kind: 'result',
+        name: payload.name,
+        email: payload.email,
+        role: payload.role,
+        message: payload.message,
+        score: payload.score,
+        band: bandLabel,
+        variation_id: payload.variation_id,
+        assessment_type: payload.assessment_type,
+        page: payload.page,
+        source: payload.source,
+        extra: { version: payload.version, submitted_at: payload.submitted_at }
+      }));
       import('../../assets/firebase.js')
         .then(({ saveUserProgress }) => saveUserProgress('find-your-level', 'Find your level', payload))
         .catch((error) => console.warn('Firestore progress save failed.', error));
@@ -1143,15 +1259,16 @@
         email: state.participant.email,
         role: String(formData.get('role') || '').trim(),
         message: String(formData.get('message') || '').trim(),
-        page: 'find-your-level',
+        page: isLocalHost() ? location.href : 'find-your-level',
         source: 'find-your-level'
       };
       try {
-        await fetch(SCRIPT_URL, {
-          method: 'POST',
-          mode: 'no-cors',
-          body: JSON.stringify(payload)
-        });
+        // The visitor always gets the exercise: a failed, rejected or rate limited send is queued
+        // for a later retry inside submitLead and never blocks the start.
+        await submitLead(leadBase(Object.assign({ kind: 'gate' }, payload, {
+          website: String(formData.get('website') || ''),
+          form_started_at: formShownAt
+        })));
         rememberContact(payload);
         await startExerciseForParticipant(state.participant);
       } catch (error) {
@@ -1187,6 +1304,7 @@
       }
     }
 
+    flushPendingInbox();
     initialize();
   </script>
   <script type="module" src="../../assets/feedback-widget.js?v=20260925-mobile-v1"></script>

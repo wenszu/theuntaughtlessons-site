@@ -584,6 +584,25 @@
       $('reviewPanel').scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
+    // Granular inputs only (the seat selection, counts and sources). The free text stays in the existing keys.
+    function boardGranularInputs() {
+      const words = value => (String(value || '').trim().match(/\b[\w'-]+\b/g) || []).length;
+      const pasted = $('boardOutput').value.trim();
+      return {
+        selected_advisor_ids: selectedRoleObjects().map(role => role.id),
+        board_chair_id: decisionMakerId,
+        board_size: selectedRoles.size,
+        coverage_categories: [...new Set(advisorRoleObjects().map(role => role.category))],
+        response_source: structuredResponse ? (structuredResponse.fallback ? 'sample' : 'structured') : pasted ? 'pasted' : 'none',
+        pasted_response_words: structuredResponse ? 0 : words(pasted),
+        field_words: { problem: words($('decisionText').value), context: words($('contextText').value), initial_view: words($('initialView').value), final_decision: words($('finalDecision').value), changed_thinking: words($('changedThinking').value), next_step: words($('nextStep').value) }
+      };
+    }
+
+    function safeGranularInputs() {
+      try { return boardGranularInputs(); } catch (error) { console.warn('Granular inputs failed.', error); return {}; }
+    }
+
     function saveProgress() {
       const payload = {
         version: 'advisory-board',
@@ -600,7 +619,8 @@
         nextStep: $('nextStep').value.trim(),
         richText: ['decisionText','contextText','initialView','finalDecision','changedThinking','nextStep'].reduce((result, id) => { result[id] = window.UTLRichText.html($(id)); return result; }, {}),
         completed_at: new Date().toISOString(),
-        page: window.location.href
+        page: window.location.href,
+        granular_inputs: safeGranularInputs()
       };
       localStorage.setItem('utl_p2_ex3_done', 'true');
       localStorage.setItem('utl_result_advisory-board', JSON.stringify(payload));

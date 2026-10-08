@@ -384,12 +384,51 @@ function check(name, fn) {
     const result = await data.saveExerciseAttempt({ attemptId: 'attempt-12345', exerciseId: 'grocery-list', exerciseTitle: 'Grocery', contentVersion: 'v3', score: 150, scoreMaximum: 100, attemptNumber: 2, durationSeconds: 55, userId: 'u', createdAt: 'x' });
     const [call] = fetchImpl.rpcCalls('record_activity_attempt');
     assertHeaders(call);
-    assertOnlyKeys(call.body, ['p_activity', 'p_attempt_key', 'p_attempt_number', 'p_score', 'p_score_maximum', 'p_duration_seconds', 'p_content_version'], 'args');
+    assertOnlyKeys(call.body, ['p_activity', 'p_attempt_key', 'p_attempt_number', 'p_score', 'p_score_maximum', 'p_duration_seconds', 'p_content_version', 'p_detail'], 'args');
+    assert.deepEqual(call.body.p_detail, {}, 'no detail sent means an empty object');
     assert.equal(call.body.p_score, 100, 'score is capped at the maximum, as today');
     assert.equal(call.body.p_score_maximum, 100);
     assert.equal(call.body.p_content_version, 'v3');
     assert.deepEqual(result, { saved: true, attemptId: 'attempt-12345' });
     await rejects(data.saveExerciseAttempt({ attemptId: 'short', exerciseId: 'x' }), (error) => assert.equal(error.code, 'data/invalid-argument'));
+  });
+
+  await check('saveExerciseAttempt removes NUL and lone surrogates the database would refuse', async () => {
+    const fetchImpl = fakeFetch();
+    const data = makeData(fetchImpl);
+    const detail = { ['ke' + String.fromCharCode(0) + 'y']: 'a' + String.fromCharCode(0) + 'b', lone: 'x' + String.fromCharCode(0xd800) + 'y' + String.fromCharCode(0xdc00) + 'z', pair: 'ok \ud83d\ude00 ok', list: ['p' + String.fromCharCode(0)] };
+    await data.saveExerciseAttempt({ attemptId: 'attempt-12346', exerciseId: 'grocery-list', score: 3, scoreMaximum: 5, detail });
+    const [call] = fetchImpl.rpcCalls('record_activity_attempt');
+    assert.deepEqual(call.body.p_detail, { key: 'ab', lone: 'xyz', pair: 'ok \ud83d\ude00 ok', list: ['p'] });
+    assert.doesNotThrow(() => JSON.parse(JSON.stringify(call.body.p_detail)));
+  });
+
+  await check('saveExerciseAttempt carries the granular detail as p_detail', async () => {
+    const fetchImpl = fakeFetch();
+    const data = makeData(fetchImpl);
+    const detail = { criteria: [{ name: 'clarity', mark: 4, note: null }], transcript: 'hello', nested: { a: [1, 2, { b: true }] }, when: new Date('2026-02-03T04:05:06.000Z'), gone: () => 1, nothing: undefined, bad: NaN, symbol: Symbol('s') };
+    await data.saveExerciseAttempt({ attemptId: 'attempt-12345', exerciseId: 'grocery-list', score: 3, scoreMaximum: 5, detail });
+    const [call] = fetchImpl.rpcCalls('record_activity_attempt');
+    assert.deepEqual(call.body.p_detail, { criteria: [{ name: 'clarity', mark: 4, note: null }], transcript: 'hello', nested: { a: [1, 2, { b: true }] }, when: '2026-02-03T04:05:06.000Z' });
+  });
+
+  await check('saveExerciseAttempt sends {} for a non object, circular or oversize detail instead of failing', async () => {
+    const circular = { a: 1 };
+    circular.self = circular;
+    const bigButFine = { text: 'x'.repeat(14000) };
+    const tooBig = { text: 'x'.repeat(15001) };
+    const multiByte = { text: '\u00e9'.repeat(8000) };
+    const cases = [
+      ['array', [1, 2], null], ['string', 'detail', null], ['number', 7, null], ['null', null, null], ['function', () => 1, null],
+      ['oversize', tooBig, null], ['oversize in bytes not characters', multiByte, null], ['circular reference cut', circular, { a: 1 }], ['under the limit is kept', bigButFine, bigButFine]
+    ];
+    for (const [name, detail, expected] of cases) {
+      const fetchImpl = fakeFetch();
+      await makeData(fetchImpl).saveExerciseAttempt({ attemptId: 'attempt-12345', exerciseId: 'grocery-list', score: 1, scoreMaximum: 2, detail });
+      const [call] = fetchImpl.rpcCalls('record_activity_attempt');
+      assert.deepEqual(call.body.p_detail, expected === null ? {} : expected, name);
+      assert.ok(Buffer.byteLength(JSON.stringify(call.body.p_detail)) <= 15000, `${name}: within the byte limit`);
+    }
   });
 
   await check('saveExerciseDraft sends {} for a null draft', async () => {
@@ -732,7 +771,7 @@ function check(name, fn) {
   await check('getExerciseAttempts maps rows with a Firestore-like submittedAt', async () => {
     const fetchImpl = withCatalog(fakeFetch())
       .on('GET', '/rest/v1/activity_attempts?', [
-        { attempt_key: 'attempt-2', attempt_number: 2, score: 80, score_maximum: 100, score_percent: 80, duration_seconds: 50, content_version: 'v3', submitted_at: '2026-02-02T00:00:00+00:00' },
+        { attempt_key: 'attempt-2', attempt_number: 2, score: 80, score_maximum: 100, score_percent: 80, duration_seconds: 50, content_version: 'v3', detail: { criteria: [{ name: 'clarity', mark: 4 }] }, submitted_at: '2026-02-02T00:00:00+00:00' },
         { attempt_key: 'attempt-1', attempt_number: 1, score: 1, score_maximum: 4, score_percent: 25, duration_seconds: null, content_version: '', submitted_at: '2026-02-01T00:00:00+00:00' }
       ]);
     const data = makeData(fetchImpl);
@@ -742,6 +781,7 @@ function check(name, fn) {
     assert.match(call.path, /activity_id=eq\.p1-e1/);
     assert.match(call.path, /order=submitted_at\.desc/);
     assert.match(call.path, /limit=10/);
+    assert.match(call.path, /select=[^&]*content_version,detail,submitted_at/, 'detail is in the column list');
     assert.equal(attempts.length, 2);
     assert.equal(attempts[0].attemptId, 'attempt-2');
     assert.equal(attempts[0].id, 'attempt-2');
@@ -750,6 +790,8 @@ function check(name, fn) {
     assert.equal(attempts[0].submittedAt.toDate().toISOString(), '2026-02-02T00:00:00.000Z');
     assert.equal(attempts[0].submittedAt.toMillis(), Date.parse('2026-02-02T00:00:00Z'));
     assert.equal(attempts[1].scorePercent, 25);
+    assert.deepEqual(attempts[0].detail, { criteria: [{ name: 'clarity', mark: 4 }] }, 'detail is exposed');
+    assert.deepEqual(attempts[1].detail, {}, 'a row without detail reads as an empty object');
     await rejects(data.getExerciseAttempts('unknown-thing'), (error) => assert.equal(error.code, 'data/unknown-activity'));
     assert.deepEqual(await data.getExerciseAttempts(''), []);
   });

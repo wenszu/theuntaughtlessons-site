@@ -684,6 +684,27 @@
         title: 'Difficult conversation complete',
         body: 'Your reflection and exercise progress were saved.'
       });
+      // The first completion time is kept, so a later click on "Already completed" maps to the same cloud record instead of adding a new one.
+      function firstCompletionStamp() {
+        const key = 'utl_completion_stamp_i-have-bad-news';
+        let stamp = '';
+        try { stamp = localStorage.getItem(key) || ''; } catch (error) { stamp = ''; }
+        if (!stamp) {
+          stamp = new Date().toISOString();
+          try { localStorage.setItem(key, stamp); } catch (error) { /* the stamp is only a convenience */ }
+        }
+        return stamp;
+      }
+      // Explicit cloud completion record for this self reported exercise. Fire and forget; never blocks or changes the flow.
+      try {
+        if (localStorage.getItem('utl_experience_preview_active') !== 'true') {
+          import('../../assets/firebase.js')
+            .then(({ saveUserProgress }) => saveUserProgress('i-have-bad-news', 'I have bad news', { completed_at: firstCompletionStamp(), self_reported: true, exercise: 'i-have-bad-news' }))
+            .catch((error) => console.warn('Completion record sync failed.', error));
+        }
+      } catch (error) {
+        console.warn('Completion record sync failed.', error);
+      }
       this.textContent = result?.awarded ? 'Exercise complete' : 'Already completed';
       this.disabled = true;
       document.getElementById('journeyLink').className = 'bad-news-button bad-news-button-primary';

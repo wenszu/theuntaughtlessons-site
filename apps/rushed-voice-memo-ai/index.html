@@ -1052,7 +1052,13 @@ Here is the transcript:
         phase: 1,
         exercise: 'Rushed voice memo with AI',
         completed_at: new Date().toISOString(),
-        response: { ai_structured_output: text, ai_structured_output_html: window.UTLRichText.html(textarea) }
+        response: {
+          ai_structured_output: text,
+          ai_structured_output_html: window.UTLRichText.html(textarea),
+          transcript_source: document.querySelector('[data-path-panel="lazy"]').hidden ? 'custom' : 'provided',
+          output_character_count: text.length,
+          output_word_count: wordCount(text)
+        }
       };
       localStorage.setItem('utl_result_rushed-voice-memo-ai', JSON.stringify(record));
       localStorage.setItem('utl_p1_ex5_done', 'true');

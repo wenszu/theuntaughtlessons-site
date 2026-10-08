@@ -1858,6 +1858,24 @@ async function checkReadinessAccountEmailHandler(request) {
 
 exports.checkReadinessAccountEmail = onCall({ timeoutSeconds: 15, memory: "256MiB" }, checkReadinessAccountEmailHandler);
 
+// "Email me this result" on the Executive Signature pages. The page sends only an attempt
+// id. The recipient is always the address stored on the attempt's customer, the email is
+// rendered here (never taken from the browser), and it goes out through the same
+// authenticated Apps Script relay as the member welcome email. See readiness-email.js.
+const readinessEmail = require("./readiness-email");
+const sendReadinessResultEmailHandler = readinessEmail.createSendReadinessResultEmailHandler({
+  get db() { return admin.firestore(); },
+  relay: (payload) => postToAdminRelay(readinessEmail.RELAY_ACTION, payload, "readiness-result-email")
+});
+exports.sendReadinessResultEmail = onCall({
+  secrets: [APPS_SCRIPT_ADMIN_RELAY_SECRET],
+  timeoutSeconds: 30,
+  memory: "256MiB"
+}, sendReadinessResultEmailHandler);
+if (process.env.NODE_ENV === "test") {
+  exports.__readinessEmailTest = { sendReadinessResultEmail: sendReadinessResultEmailHandler };
+}
+
 const CHECKOUT_REDIRECT_ORIGINS = ["https://theuntaughtlessons.com", "http://localhost", "http://127.0.0.1"];
 
 function isAllowedCheckoutRedirect(url) {

@@ -1723,7 +1723,66 @@
       if (tab === "sample") renderSamples();
     }
 
-    function saveResult(appId, phase, exerciseName, durationSeconds, responseObj) {
+    /* attempt-record:begin */
+    const GRANULAR_PRACTICE_KEY = "utl_scqa_practice_attempts";
+    const GRANULAR_CHECK_IDS = ["complete_structure", "clear_question", "answer_first", "visible_change", "distinct_roles", "connected_decision", "direct_resolution"];
+
+    function previewIsActive() {
+      try { return localStorage.getItem("utl_experience_preview_active") === "true"; } catch (_) { return false; }
+    }
+
+    // Counts and pass/fail flags only. No score is invented: this exercise shows feedback, not a number.
+    function granularInputs() {
+      try {
+        const data = state.scqa1;
+        const structure = {};
+        checkOne(data).forEach((result, index) => { structure[GRANULAR_CHECK_IDS[index] || "check_" + index] = result.pass; });
+        let stored = [];
+        try { stored = JSON.parse(localStorage.getItem(GRANULAR_PRACTICE_KEY) || "[]"); } catch (_) { stored = []; }
+        const practice = (Array.isArray(stored) ? stored : []).slice(-20).map((item) => ({
+          scenario_id: String(item && item.scenarioId || ""),
+          completed_at: String(item && item.completedAt || ""),
+          part_words: ["situation", "complication", "question", "answer"].map((key) => wordCount(String(item && item.response && item.response[key] || "")))
+        }));
+        return {
+          scqa_parts_filled: ["s", "c", "q", "a"].filter((part) => filled(data[part])).length,
+          scqa_part_words: { s: wordCount(data.s), c: wordCount(data.c), q: wordCount(data.q), a: wordCount(data.a) },
+          structure_checks: structure,
+          structure_checks_passed: Object.keys(structure).filter((key) => structure[key]).length,
+          structure_checks_total: Object.keys(structure).length,
+          scenario_id: activeAttemptId(),
+          practice_attempts_count: practice.length,
+          practice_attempts: practice
+        };
+      } catch (error) {
+        console.warn("Granular inputs failed.", error);
+        return {};
+      }
+    }
+
+    // A practice attempt after the first completion goes to the practice history, marked practice, never as a completion.
+    function sendPracticeRound(attempt, number) {
+      try {
+        if (previewIsActive()) return;
+        const submission = {
+          exerciseId: "scqa-builder",
+          exerciseTitle: "SCQA builder",
+          submissionId: ("scqa-builder-practice-" + attempt.scenarioId + "-" + attempt.completedAt).replace(/[^A-Za-z0-9-]/g, "-").slice(0, 100),
+          attemptNumber: number,
+          completedAtClient: attempt.completedAt,
+          durationSeconds: 0,
+          responsePayload: { practice: true, scenario_id: attempt.scenarioId, response: attempt.response }
+        };
+        import('../../assets/firebase.js')
+          .then(({ saveExerciseSubmission }) => saveExerciseSubmission(submission))
+          .catch((error) => console.warn("Practice history sync failed.", error));
+      } catch (error) {
+        console.warn("Practice history sync failed.", error);
+      }
+    }
+    /* attempt-record:end */
+
+    function saveResult(appId, phase, exerciseName, durationSeconds, responseObj, extras) {
       const existing = localStorage.getItem('utl_result_' + appId);
       const attempt = existing ? (JSON.parse(existing).attempt || 0) + 1 : 1;
       const record = {
@@ -1738,7 +1797,7 @@
       localStorage.setItem('utl_result_' + appId, JSON.stringify(record));
       if (appId === 'scqa-builder') localStorage.setItem('utl_p2_ex2_done', 'true');
       import('../../assets/firebase.js')
-        .then(({ saveUserProgress }) => saveUserProgress(appId, exerciseName, record))
+        .then(({ saveUserProgress }) => saveUserProgress(appId, exerciseName, extras ? { ...record, ...extras } : record))
         .catch((error) => console.warn('Firestore progress save failed.', error));
     }
 
@@ -1925,13 +1984,15 @@
     function savePracticeAttempt() {
       let attempts = [];
       try { attempts = JSON.parse(localStorage.getItem(PRACTICE_ATTEMPTS_KEY) || "[]"); } catch (_) { attempts = []; }
-      attempts.push({
+      const practiceAttempt = {
         scenarioId: state.practiceScenarioId,
         context: state.context,
         response: scqaResponse(),
         completedAt: new Date().toISOString()
-      });
+      };
+      attempts.push(practiceAttempt);
       localStorage.setItem(PRACTICE_ATTEMPTS_KEY, JSON.stringify(attempts.slice(-20)));
+      sendPracticeRound(practiceAttempt, attempts.length);
       state.practiceAttemptSaved = true;
       save();
       $("#saveNoticeMount").innerHTML = '<div class="completion-save-notice"><div class="save-notice-text"><strong>Practice attempt saved.</strong> You can try another situation or return to the Learning Journey.</div></div>';
@@ -1949,7 +2010,7 @@
         saveResult("scqa-builder", 2, "SCQA builder", elapsedSeconds(), {
           context: state.context,
           scqa1: scqaResponse()
-        });
+        }, { granular_inputs: granularInputs() });
         window.UTLRewardEvents?.awardReflectionExercise({
           appId: 'scqa-builder',
           title: "SCQA builder complete",

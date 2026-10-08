@@ -2047,7 +2047,8 @@
         { text: "", details: ["", "", ""] }
       ],
       currentScreen: 1,
-      submitted: false
+      submitted: false,
+      takeNonce: ""
     });
 
     let templateState = null;
@@ -2105,6 +2106,7 @@
         next.hypothesis = parsed.hypothesis || "";
         next.currentScreen = Number(parsed.currentScreen) || 1;
         next.submitted = parsed.submitted === true;
+        next.takeNonce = typeof parsed.takeNonce === "string" ? parsed.takeNonce : "";
         next.arguments = next.arguments.map((arg, i) => {
           const savedDetails = parsed.arguments?.[i]?.details || [];
           const details = [0, 1, 2].map((j) => savedDetails[j] || "");
@@ -2360,6 +2362,100 @@
       $("#remainingFields").style.visibility = requiredMissing ? "visible" : "hidden";
     }
 
+    /* attempt-record:begin */
+    const ATTEMPT_APP_ID = "issue-tree";
+    const ATTEMPT_TITLE = "Issue tree builder";
+    const ATTEMPT_CONTENT_VERSION = "2026-10-08-v1";
+    const ATTEMPT_CHECK_IDS = ["arguments_present", "arguments_distinct", "detail_coverage", "label_focus", "detail_specificity", "question_framed", "hypothesis", "anchored_to_question"];
+
+    function newTakeNonce() {
+      return Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 8);
+    }
+
+    function attemptIdFor(appId, nonce) {
+      return (appId + "-" + nonce).replace(/[^A-Za-z0-9-]/g, "-").slice(0, 100);
+    }
+
+    function attemptNumberFor(appId, nonce) {
+      try {
+        const key = "utl_attempt_seq_" + appId;
+        const seq = JSON.parse(localStorage.getItem(key) || "{}") || {};
+        seq.byNonce = seq.byNonce || {};
+        if (!seq.byNonce[nonce]) {
+          seq.count = (Number(seq.count) || 0) + 1;
+          seq.byNonce[nonce] = seq.count;
+          const keep = {};
+          Object.keys(seq.byNonce).slice(-30).forEach((k) => { keep[k] = seq.byNonce[k]; });
+          seq.byNonce = keep;
+        }
+        localStorage.setItem(key, JSON.stringify(seq));
+        return seq.byNonce[nonce];
+      } catch (_) {
+        return 1;
+      }
+    }
+
+    function recordAttempt(nonce, score, scoreMaximum, durationSeconds, detail) {
+      try {
+        if (localStorage.getItem("utl_experience_preview_active") === "true") return;
+        const attempt = { attemptId: attemptIdFor(ATTEMPT_APP_ID, nonce), exerciseId: ATTEMPT_APP_ID, exerciseTitle: ATTEMPT_TITLE, contentVersion: ATTEMPT_CONTENT_VERSION, score, scoreMaximum, attemptNumber: attemptNumberFor(ATTEMPT_APP_ID, nonce), durationSeconds, detail };
+        import('../../assets/firebase.js')
+          .then(({ saveExerciseAttempt }) => saveExerciseAttempt(attempt))
+          .catch((error) => console.warn("Exercise attempt save failed.", error));
+      } catch (error) {
+        console.warn("Exercise attempt save failed.", error);
+      }
+    }
+
+    // Counts, settings and check results only. The learner's own words never go into the detail.
+    function attemptDetail(results, snapshot) {
+      const byId = (pick) => { const out = {}; results.forEach((result, index) => { out[ATTEMPT_CHECK_IDS[index] || "check_" + index] = pick(result); }); return out; };
+      const statuses = byId((result) => result.status);
+      const status = (id) => statuses[id];
+      return {
+        schema: 1,
+        exercise: ATTEMPT_APP_ID,
+        scoreBreakdown: byId((result) => ({ points: result.points, max: result.maxPoints })),
+        checklist: statuses,
+        flags: {
+          all_arguments_present: status("arguments_present") === "pass",
+          arguments_overlap: status("arguments_distinct") === "fail" && status("arguments_present") === "pass",
+          question_framed: status("question_framed") === "pass",
+          hypothesis_status: status("hypothesis"),
+          labels_need_focus: status("label_focus") === "fail"
+        },
+        inputs: {
+          arguments: snapshot.arguments,
+          supporting_details: snapshot.details,
+          problem_words: snapshot.problemWords,
+          hypothesis_words: snapshot.hypothesisWords,
+          argument_words: snapshot.argumentWords,
+          detail_words: snapshot.detailWords
+        },
+        mode: "scored",
+        contentVersion: ATTEMPT_CONTENT_VERSION
+      };
+    }
+
+    function recordSubmitAttempt(score, durationSeconds) {
+      try {
+        if (!state.takeNonce) { state.takeNonce = newTakeNonce(); save(); }
+        const details = state.arguments.flatMap((arg) => arg.details);
+        const snapshot = {
+          arguments: state.arguments.filter((arg) => hasContent(arg.text)).length,
+          details: details.filter(hasContent).length,
+          problemWords: wordCount(state.problemStatement || ""),
+          hypothesisWords: wordCount(state.hypothesis || ""),
+          argumentWords: state.arguments.map((arg) => wordCount(arg.text || "")),
+          detailWords: details.reduce((sum, detail) => sum + wordCount(detail || ""), 0)
+        };
+        recordAttempt(state.takeNonce, score, 100, durationSeconds, attemptDetail(runChecks(), snapshot));
+      } catch (error) {
+        console.warn("Exercise attempt save failed.", error);
+      }
+    }
+    /* attempt-record:end */
+
     function saveResult(appId, phase, exerciseName, durationSeconds, responseObj) {
       const existing = localStorage.getItem('utl_result_' + appId);
       const attempt = existing ? (JSON.parse(existing).attempt || 0) + 1 : 1;
@@ -2501,6 +2597,7 @@
         score,
         ...issueTreePayload()
       });
+      recordSubmitAttempt(score, elapsedSeconds());
       window.UTLRewardEvents?.awardScoredExercise({
         appId: 'issue-tree',
         title: 'Issue tree builder scored',
@@ -2550,6 +2647,7 @@
       $$(".detail-input").forEach((input) => {
         state.arguments[Number(input.dataset.arg)].details[Number(input.dataset.detail)] = input.value;
       });
+      if (state.submitted) state.takeNonce = "";
       state.submitted = false;
       save();
       setSaveButtonSaved(false);

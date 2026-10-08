@@ -727,6 +727,7 @@ ${SUPPLY_LIST_FOR_PROMPT}`
 
     let activityTimer = null;
     let timerMetricHidden = false;
+    const copiedPromptLabels = [];
     const COMPLETION_KEYS = ['utl_done_grocery-list-ai', 'utl_p1_ex2_done'];
     const APP_ID = 'grocery-list-ai';
     const EXERCISE_NAME = 'Grocery list with AI';
@@ -830,7 +831,9 @@ ${SUPPLY_LIST_FOR_PROMPT}`
         const button = event.target.closest('[data-copy-prompt]');
         if (!button) return;
         activityTimer.startFromInteraction();
-        copyText(PROMPTS[Number(button.dataset.copyPrompt)].text, button);
+        const copiedPrompt = PROMPTS[Number(button.dataset.copyPrompt)];
+        if (!copiedPromptLabels.includes(copiedPrompt.label)) copiedPromptLabels.push(copiedPrompt.label);
+        copyText(copiedPrompt.text, button);
       });
 
       document.getElementById('reflectionText').addEventListener('input', (event) => {
@@ -881,7 +884,10 @@ ${SUPPLY_LIST_FOR_PROMPT}`
         duration_seconds: Math.round(elapsedSeconds),
         marked_done: true,
         response: {
-          reflection
+          reflection,
+          prompts_copied: copiedPromptLabels.slice(),
+          prompt_count: PROMPTS.length,
+          within_target: activityTimer ? activityTimer.isWithinTarget() : null
         }
       };
 

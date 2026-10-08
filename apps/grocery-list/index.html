@@ -1677,6 +1677,8 @@
 
     let activityTimer = null;
     let timerMetricHidden = false;
+    // One scored take has one attempt id (app id plus this nonce), so a double click reuses it; a new list or a revision makes a new take.
+    let groceryTakeNonce = newGroceryTakeNonce();
     let selectedItemId = null;
     let activeDragZone = null;
     const dragDepthByZone = new WeakMap();
@@ -1802,6 +1804,7 @@
       state.bucketNames = { bucket1: '', bucket2: '', bucket3: '' };
       state.submitted = false;
       state.changedAfterSubmit = false;
+      groceryTakeNonce = newGroceryTakeNonce();
       selectedItemId = null;
 
       renderAll();
@@ -2197,7 +2200,7 @@
         bucket3_name: state.bucketNames.bucket3,
         bucket3_items: bucketItems('bucket3'),
         organizing_rule: document.getElementById('whyText').value.trim()
-      }, evalResult.totalScore);
+      }, evalResult.totalScore, evalResult);
 
       const categoryClarity = evalResult.nameRatio >= 0.75
         ? 'Your bucket names are mostly clear and easy to interpret.'
@@ -2593,10 +2596,51 @@
       </section>`;
     }
 
-    function saveResult(appId, phase, exerciseName, durationSeconds, responseObj, score) {
+    function newGroceryTakeNonce() {
+      return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+    }
+
+    function buildGroceryAttemptId(appId, nonce) {
+      return `${appId}-${nonce}`.replace(/[^A-Za-z0-9-]/g, '-').slice(0, 100);
+    }
+
+    // The learner's own words (bucket names, organizing rule) are never part of the detail: counts, ratios and flags only.
+    function buildGroceryAttemptDetail(appId, evalResult, durationSeconds) {
+      const ev = evalResult || {};
+      const part = (key, ratio, weight) => ({ key, ratio: Math.round((Number(ratio) || 0) * 1000) / 1000, weight, points: Math.round((Number(ratio) || 0) * weight * 10) / 10 });
+      const bucketKeys = ['bucket1', 'bucket2', 'bucket3'];
+      return {
+        schema: 1,
+        exercise: appId,
+        scoreBreakdown: [
+          part('completion', ev.completionRatio, 20),
+          part('itemFit', ev.itemFitRatio, 40),
+          part('mece', ev.meceRatio, 25),
+          part('bucketNames', ev.nameRatio, 15)
+        ],
+        checklist: [],
+        flags: { allItemsPlaced: ev.completionRatio === 1, distinctBuckets: ev.meceRatio === 1, bucketNameBlank: Boolean(ev.namesBlank) },
+        inputs: {
+          itemCount: state.generatedItems.length,
+          placedCount: Number(ev.placedCount) || 0,
+          correctFits: Number(ev.correctFits) || 0,
+          misplacedSampled: Array.isArray(ev.misplaced) ? ev.misplaced.length : 0,
+          bucketItemCounts: bucketKeys.map((key) => state.placements[key].length),
+          mappedCategories: bucketKeys.map((key) => (ev.mapping && ev.mapping[key]) || null),
+          bucketNamesFilled: bucketKeys.filter((key) => String(state.bucketNames[key] || '').trim()).length,
+          organizingRuleGiven: Boolean(document.getElementById('whyText') && document.getElementById('whyText').value.trim()),
+          elapsedSeconds: Math.round(Number(durationSeconds) || 0)
+        },
+        mode: 'bucket-sort',
+        contentVersion: GROCERY_CONTENT_VERSION
+      };
+    }
+
+    function saveResult(appId, phase, exerciseName, durationSeconds, responseObj, score, evalResult) {
       const existing = localStorage.getItem('utl_result_' + appId);
-      const attempt = existing ? (JSON.parse(existing).attempt || 0) + 1 : 1;
-      const attemptId = window.crypto && crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+      const attemptId = buildGroceryAttemptId(appId, groceryTakeNonce);
+      const repeated = loadGroceryAttempts().find((item) => item.attemptId === attemptId);
+      const attempt = repeated ? repeated.attemptNumber : existing ? (JSON.parse(existing).attempt || 0) + 1 : 1;
       const record = {
         app_id: appId,
         phase,
@@ -2608,7 +2652,8 @@
         score: Math.max(0, Math.min(100, Math.round(Number(score) || 0))),
         score_maximum: 100,
         score_content_version: GROCERY_CONTENT_VERSION,
-        attempt_id: attemptId
+        attempt_id: attemptId,
+        score_detail: buildGroceryAttemptDetail(appId, evalResult, durationSeconds)
       };
       localStorage.setItem('utl_result_' + appId, JSON.stringify(record));
       const history = loadGroceryAttempts().filter((item) => item.attemptId !== attemptId);
@@ -2617,7 +2662,7 @@
       import('../../assets/firebase.js')
         .then(({ saveUserProgress, saveExerciseAttempt }) => Promise.allSettled([
           saveUserProgress(appId, exerciseName, record),
-          saveExerciseAttempt({ attemptId, exerciseId: appId, exerciseTitle: exerciseName, contentVersion: GROCERY_CONTENT_VERSION, score: record.score, scoreMaximum: 100, attemptNumber: attempt, durationSeconds })
+          localStorage.getItem('utl_experience_preview_active') === 'true' ? null : saveExerciseAttempt({ attemptId, exerciseId: appId, exerciseTitle: exerciseName, contentVersion: GROCERY_CONTENT_VERSION, score: record.score, scoreMaximum: 100, attemptNumber: attempt, durationSeconds, detail: record.score_detail })
         ]))
         .catch((error) => console.warn('Firestore progress save failed.', error));
       return record;
@@ -2751,6 +2796,7 @@
 
       document.getElementById('checkBtn').addEventListener('click', () => {
         activityTimer.pause();
+        if (state.submitted && state.changedAfterSubmit) groceryTakeNonce = newGroceryTakeNonce();
         const result = evaluate();
         showFeedback(result);
         state.submitted = true;

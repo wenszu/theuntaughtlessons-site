@@ -38,7 +38,7 @@ const FIXED_ISO = new Date(FIXED_NOW).toISOString();
 const SUPABASE_ON = { utl_data_source: 'supabase' };
 const RPC_ARGS = {
   submission: ['p_activity', 'p_submission_key', 'p_attempt_number', 'p_completed_at', 'p_duration_seconds', 'p_response', 'p_content_version'],
-  attempt: ['p_activity', 'p_attempt_key', 'p_attempt_number', 'p_score', 'p_score_maximum', 'p_duration_seconds', 'p_content_version']
+  attempt: ['p_activity', 'p_attempt_key', 'p_attempt_number', 'p_score', 'p_score_maximum', 'p_duration_seconds', 'p_content_version', 'p_detail']
 };
 const CATALOG_ACTIVITIES = [
   { id: 'orientation', kind: 'orientation', title: 'Orientation', status: 'active', config: {} },
@@ -245,7 +245,7 @@ async function check(name, fn) {
     const baselineExports = Object.keys(baseline).sort();
     const currentExports = Object.keys(current).sort();
     baselineExports.forEach((name) => assert.ok(currentExports.includes(name), `export ${name} kept`));
-    assert.deepEqual(currentExports.filter((name) => !baselineExports.includes(name)), ['getDataSource'], 'getDataSource is the only new export');
+    assert.deepEqual(currentExports.filter((name) => !baselineExports.includes(name)), ['getDataSource', 'sendReadinessResultEmail'], 'getDataSource and sendReadinessResultEmail (a Firebase callable wrapper, no Supabase path) are the only new exports');
   });
 
   for (const name of LEARNER_FUNCTIONS) {
@@ -708,7 +708,7 @@ async function check(name, fn) {
     const [attempt] = harness.rpcCalls('record_activity_attempt');
     assertSupabaseHeaders(attempt);
     assertOnlyKeys(attempt.body, RPC_ARGS.attempt, 'attempt args');
-    assert.deepEqual(attempt.body, { p_activity: 'grocery-list', p_attempt_key: 'attempt-00000001', p_attempt_number: 2, p_score: 80, p_score_maximum: 100, p_duration_seconds: 300, p_content_version: 'v3' });
+    assert.deepEqual(attempt.body, { p_activity: 'grocery-list', p_attempt_key: 'attempt-00000001', p_attempt_number: 2, p_score: 80, p_score_maximum: 100, p_duration_seconds: 300, p_content_version: 'v3', p_detail: {} });
 
     result = await sameAsDefault('saveExerciseDraft');
     assert.deepEqual(result.outcome.value, { saved: true });

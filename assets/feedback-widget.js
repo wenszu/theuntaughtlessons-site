@@ -1,6 +1,100 @@
 import { getSignedInUser, getUserFeedbackEnabled, auth, onAuthStateChanged } from "./firebase.js";
 
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzJE--FL2kB_XDNZRnszCtlyLRPvaLAHGuF5TAOdXJk40atbvf5Y6ELuSK2B7CSLaMN/exec";
+// Feedback goes to Supabase through the public submit_feedback function. The URL and the publishable
+// key are public configuration (same values as assets/firebase.js).
+const SUPABASE_URL = "https://czljyikfavtjgqcibdda.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_uxSIlhwWdbAa6EnHyn_Flw__P3u6tlW";
+const PENDING_INBOX_KEY = "utl_pending_inbox";
+const PENDING_INBOX_MAX = 20;
+const PENDING_INBOX_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+const INBOX_TIMEOUT_MS = 8000;
+const TOKEN_WAIT_MS = 2000;
+
+// Retry queue shared with apps/find-your-level/index.html (same key and item shape).
+function readPendingInbox() {
+  try {
+    const items = JSON.parse(localStorage.getItem(PENDING_INBOX_KEY) || "[]");
+    if (!Array.isArray(items)) return [];
+    const now = Date.now();
+    return items.filter((item) => item && (item.type === "lead" || item.type === "feedback") &&
+      item.payload && typeof item.payload === "object" &&
+      Number.isFinite(item.created) && now - item.created < PENDING_INBOX_TTL_MS);
+  } catch {
+    return [];
+  }
+}
+
+function writePendingInbox(items) {
+  try {
+    const kept = items.slice(-PENDING_INBOX_MAX);
+    if (kept.length) localStorage.setItem(PENDING_INBOX_KEY, JSON.stringify(kept));
+    else localStorage.removeItem(PENDING_INBOX_KEY);
+  } catch {}
+}
+
+function queuePendingInbox(type, payload) {
+  const created = Date.now();
+  const items = readPendingInbox();
+  items.push({ id: created + "-" + Math.random().toString(36).slice(2, 8), type, payload, created });
+  writePendingInbox(items);
+}
+
+// Best effort Firebase ID token for a signed in member, capped at two seconds. Never throws.
+async function getFeedbackToken() {
+  let timer = null;
+  try {
+    if (!auth || !auth.currentUser) return "";
+    const lookup = Promise.resolve(auth.currentUser.getIdToken());
+    const cap = new Promise((resolve) => { timer = setTimeout(() => resolve(""), TOKEN_WAIT_MS); });
+    return (await Promise.race([lookup, cap])) || "";
+  } catch {
+    return "";
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+// Returns "ok", "invalid" (the server will never accept it) or "failed" (network, error or rate limited).
+async function postInbox(type, payload, token) {
+  const controller = typeof AbortController === "function" ? new AbortController() : null;
+  const timer = setTimeout(() => { if (controller) controller.abort(); }, INBOX_TIMEOUT_MS);
+  try {
+    const isLead = type === "lead";
+    const headers = { apikey: SUPABASE_PUBLISHABLE_KEY, "Content-Type": "application/json" };
+    if (token) headers.Authorization = "Bearer " + token;
+    const response = await fetch(SUPABASE_URL + "/rest/v1/rpc/" + (isLead ? "submit_lead" : "submit_feedback"), {
+      method: "POST",
+      headers,
+      body: JSON.stringify(isLead ? { p_lead: payload } : { p_feedback: payload }),
+      keepalive: true,
+      signal: controller ? controller.signal : undefined
+    });
+    if (!response || !response.ok) return "failed";
+    const answer = await response.json();
+    if (answer && answer.ok === true) return "ok";
+    if (answer && answer.error === "invalid") return "invalid";
+    return "failed";
+  } catch {
+    return "failed";
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+// One attempt per queued item per page load, shared with the find your level page through a window flag.
+async function flushPendingInbox() {
+  if (window.__utlInboxFlushed) return;
+  window.__utlInboxFlushed = true;
+  const items = readPendingInbox();
+  if (!items.length) return;
+  const token = items.some((item) => item.type === "feedback") ? await getFeedbackToken() : "";
+  const done = new Set();
+  for (const item of items) {
+    const outcome = await postInbox(item.type, item.payload, item.type === "feedback" ? token : "");
+    if (outcome !== "failed") done.add(item.id || (item.created + ":" + item.type));
+  }
+  writePendingInbox(readPendingInbox().filter((item) => !done.has(item.id || (item.created + ":" + item.type))));
+}
 
 const FEEDBACK_TYPES = [
   { value: "It is broken", label: "It is broken. A button, link, timer or AI feature is not working" },
@@ -117,6 +211,14 @@ const STYLES = `
     background-size: 16px 16px;
   }
   #utl-feedback-desc { resize: vertical; min-height: 80px; }
+  #utl-feedback-card .utl-fb-hp {
+    position: absolute;
+    left: -10000px;
+    top: auto;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
   #utl-feedback-submit {
     background: #003366;
     color: #fff;
@@ -309,6 +411,9 @@ function buildModal(userName, userEmail) {
         </select>
         <label for="utl-feedback-desc">Tell us more</label>
         <textarea id="utl-feedback-desc" rows="4" placeholder="What is on your mind?"></textarea>
+        <div class="utl-fb-hp" aria-hidden="true">
+          <input id="utl-feedback-website" name="website" type="text" tabindex="-1" autocomplete="off" value="">
+        </div>
         <button id="utl-feedback-submit">Submit</button>
         <div id="utl-feedback-error">Something went wrong. Please try again.</div>
       </div>
@@ -321,6 +426,8 @@ function buildModal(userName, userEmail) {
       </div>
     </div>
   `;
+
+  overlay.dataset.startedAt = String(Date.now());
 
   overlay.addEventListener("click", (e) => {
     if (e.target === overlay) closeModal(overlay);
@@ -368,23 +475,31 @@ async function handleSubmit(overlay, userName, userEmail) {
 
   submitBtn.disabled = true;
 
+  const startedAt = Number(overlay.dataset && overlay.dataset.startedAt);
+  const websiteEl = overlay.querySelector("#utl-feedback-website");
   const payload = {
-    tab: "Feedback",
-    timestamp: new Date().toISOString(),
     name: userName || "",
     email: userEmail || "",
-    pageUrl: window.location.href,
-    feedbackType,
-    description
+    page_url: String(window.location.href || "").split("#")[0].split("?")[0],
+    feedback_type: feedbackType,
+    description,
+    website: websiteEl ? String(websiteEl.value || "") : "",
+    form_started_at: Number.isFinite(startedAt) && startedAt > 0 ? startedAt : Date.now()
   };
 
   try {
-    await fetch(APPS_SCRIPT_URL, {
-      method: "POST",
-      mode: "no-cors",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
+    const token = await getFeedbackToken();
+    const outcome = await postInbox("feedback", payload, token);
+
+    if (outcome === "invalid") {
+      // The server refused the text (for example it is empty): show the existing validation message.
+      submitBtn.disabled = false;
+      errorEl.textContent = "Please describe your feedback.";
+      errorEl.style.display = "block";
+      return;
+    }
+    // Accepted, or kept in the local retry queue so it is sent the next time a page loads.
+    if (outcome === "failed") queuePendingInbox("feedback", payload);
 
     formView.style.display = "none";
     successView.style.display = "block";
@@ -398,6 +513,7 @@ async function handleSubmit(overlay, userName, userEmail) {
 
 async function init() {
   injectStyles();
+  flushPendingInbox();
   try {
     const cachedProfile = (() => {
       try { return JSON.parse(localStorage.getItem("utl_member_profile") || "null"); } catch { return null; }

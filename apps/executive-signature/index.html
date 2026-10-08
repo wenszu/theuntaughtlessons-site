@@ -783,61 +783,57 @@ const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':
 // it survives esc() (which only touches &<>") regardless of call order.
 const nbh = s => s.replace(/-/g, '‑');
 function toast(msg){const t=$('#toast');t.textContent=msg;t.hidden=false;clearTimeout(toast.h);toast.h=setTimeout(()=>t.hidden=true,2600)}
-const RESULT_EMAIL_ENDPOINT='https://script.google.com/macros/s/AKfycbzJE--FL2kB_XDNZRnszCtlyLRPvaLAHGuF5TAOdXJk40atbvf5Y6ELuSK2B7CSLaMN/exec';
-function isSyntheticReadinessNotification(email){
-  const host=String(location.hostname||'').toLowerCase();
-  const domain=String(email||'').trim().toLowerCase().split('@').pop();
-  const localPreview=host==='localhost'||host==='127.0.0.1'||host==='::1';
-  const reservedTestAddress=['example.com','example.org','example.net'].includes(domain);
-  return localPreview||reservedTestAddress;
-}
-async function sendResultEmailPayload(payload){
-  const body=JSON.stringify(payload);
-  if(navigator.sendBeacon){
-    const queued=navigator.sendBeacon(RESULT_EMAIL_ENDPOINT,new Blob([body],{type:'text/plain;charset=UTF-8'}));
-    if(queued)return true;
-  }
-  try{await fetch(RESULT_EMAIL_ENDPOINT,{method:'POST',mode:'no-cors',keepalive:true,body});return true}catch(error){return false}
-}
+// Server attempt ids, keyed by the id this page gave the attempt. recordReadinessCompletion
+// returns the stored attempt id, which "Email me this result" sends to the server.
+const recordedAttempts=new Map();
 const loggedAttempts=new Set();
 function logCompletedResult(attemptId,tier,email,name,band,profile,formVersion,submission={}){
   if(!email||!attemptId||loggedAttempts.has(attemptId))return;
   loggedAttempts.add(attemptId);
-  // Preview and sample attempts still exercise the local completion flow, but
-  // they must never generate a real notification email.
-  if(!isSyntheticReadinessNotification(email)){
-    sendResultEmailPayload({tab:'readiness',name:name||'',email,tier,band,profile,formVersion:formVersion||'',page:location.href,source:'executive-signature'});
-  }
   if(window.raRecordCompletion){
-    window.raRecordCompletion({
+    const recording=window.raRecordCompletion({
       name:name||'',email,tier,band,profile,formVersion:formVersion||'',submissionId:attemptId,
       answers:submission.answers||{},itemOrder:submission.itemOrder||[],startedAt:submission.startedAt||new Date().toISOString(),
       durationSeconds:Number.isInteger(submission.durationSeconds)?submission.durationSeconds:null,
       consent:{assessmentProcessing:participant.assessmentConsent===true,marketing:participant.marketingConsent===true,noticeVersion:'readiness-privacy-preview@1.0'},
       source:{channel:'web',campaignId:null,referrerCode:null}
-    }).catch(error=>{
+    });
+    recordedAttempts.set(attemptId,recording.then(result=>result&&result.attemptId?String(result.attemptId):'',()=>''));
+    recording.catch(error=>{
       loggedAttempts.delete(attemptId);
+      recordedAttempts.delete(attemptId);
       console.error('Could not persist the completed assessment',error);
       toast('Your result is ready, but it could not be saved. Check your connection and try again.');
     });
   }
 }
-function resultEmailHtml(name,lines){
-  const greeting=name?`Hi ${esc(name)},`:'Hi,';
-  return `<p>${greeting}</p><p>${lines.map(esc).join('</p><p>')}</p><p><a href="https://theuntaughtlessons.com/apps/executive-signature/">theuntaughtlessons.com/apps/executive-signature/</a></p>`;
-}
 function emailResultBlock(email){
   if(!email)return '';
   return `<div class="email-result"><button class="btn" id="emailResultBtn">Email me this result</button><span class="small muted email-result-to">to ${esc(email)}</span></div>`;
 }
-function wireEmailResultBtn(email,name,subject,lines){
+function emailResultMessage(answer,email){
+  if(answer&&answer.ok===true)return 'On its way to '+email;
+  if(answer&&answer.error==='rate-limited'){
+    if(answer.reason==='address-daily-limit')return 'This address has reached today\'s limit for result emails. Please try again tomorrow.';
+    if(answer.reason==='global-daily-limit')return 'We cannot send result emails right now. Please try again later.';
+    return 'You already requested this a moment ago. Please check your inbox and spam folder.';
+  }
+  if(answer&&answer.error==='not-found')return 'We could not match this request to your result. Please open your results from the My Results page and try again.';
+  return 'We could not send the email right now. Please try again later.';
+}
+function wireEmailResultBtn(email,clientAttemptId){
   const btn=$('#emailResultBtn');
   if(!btn)return;
   btn.onclick=async()=>{
     btn.disabled=true;btn.textContent='Sending…';
-    const ok=await sendResultEmailPayload({action:'EmailReadinessResult',recipient:email,name:name||'',subject,renderedHtml:resultEmailHtml(name,lines),page:location.href,source:'executive-signature'});
+    let answer=null;
+    try{
+      const pending=recordedAttempts.get(clientAttemptId);
+      const serverAttemptId=pending?await pending:'';
+      if(serverAttemptId&&typeof window.raSendResultEmail==='function')answer=await window.raSendResultEmail(serverAttemptId);
+    }catch(error){answer=null}
     btn.disabled=false;btn.textContent='Email me this result';
-    toast(ok?'On its way to '+email:'Could not send right now');
+    toast(emailResultMessage(answer,email));
   };
 }
 
@@ -1437,7 +1433,7 @@ function renderResult(){
     }
     go('t-full-intro');
   };
-  wireEmailResultBtn(participant.email,pname,'Your Executive Signature Quick Check result',[`Your Executive Signature is ${p[2]}.`,`Your Executive Readiness Score is in the ${s.band} range.`,nextLine,'See the full result and share it any time using the link below.']);
+  wireEmailResultBtn(participant.email,activeAttempt?activeAttempt.id:aid);
   logCompletedResult(activeAttempt?activeAttempt.id:aid,'free',participant.email,pname,s.band,p[2],activeAttempt?activeAttempt.formVersion:FREE_FORM_VERSION,{
     answers,itemOrder:activeAttempt?activeAttempt.itemOrder:ITEMS.map(item=>item.id),startedAt:activeAttempt&&activeAttempt.startedAt,
     durationSeconds:Math.round(qaTiming.activeMs/1000)
@@ -1738,7 +1734,7 @@ function renderFullResult(){
 
   $('#t-full-result').innerHTML=coverSection+tocSection+summarySection+extendedSection;
   $('#fullAgain').onclick=()=>{startOrResumeFullAttempt(true);go('t-full-intro')};
-  wireEmailResultBtn(participant.email,fullName,'Your Executive Signature Full Assessment',[`Your Executive Readiness Score is in the ${s.band} range across six readiness facets, with a ${p[2]} profile.`,'Your top strengths and growth edges are in the full report on screen.','See the full report any time using the link below.']);
+  wireEmailResultBtn(participant.email,fullActiveAttempt?fullActiveAttempt.id:'');
   logCompletedResult(fullActiveAttempt?fullActiveAttempt.id:'','full',participant.email,fullName,s.band,p[2],fullActiveAttempt?fullActiveAttempt.formVersion:FULL_FORM_VERSION,{
     answers:fullAnswers,itemOrder:fullActiveAttempt?fullActiveAttempt.itemOrder:FULL_ITEMS.map(item=>item.id),startedAt:fullActiveAttempt&&fullActiveAttempt.startedAt,
     durationSeconds:Math.round(qaTiming.activeMs/1000)
@@ -2143,6 +2139,10 @@ if(internalMode){
 <script type="module">
   import { getMyEsStatus } from '../../assets/firebase.js';
   window.raGetMyEsStatus = getMyEsStatus;
+</script>
+<script type="module">
+  import { sendReadinessResultEmail } from '../../assets/firebase.js';
+  window.raSendResultEmail = sendReadinessResultEmail;
 </script>
 <script type="module">
   import { getPaymentSettings, createCheckoutSession } from '../../assets/firebase.js';
