@@ -455,6 +455,180 @@
       line-height: 1.5;
     }
 
+    .slo-action-step-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 20px;
+      margin-right: 9px;
+      flex: 0 0 auto;
+      border-radius: 999px;
+      background: rgba(0, 51, 102, .12);
+      color: var(--slo-navy);
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .ai-prompt-dialog {
+      width: min(720px, calc(100vw - 28px));
+      max-height: 88dvh;
+      overflow: hidden;
+      overscroll-behavior: contain;
+      border: 0;
+      border-radius: 12px;
+      padding: 0;
+      box-shadow: 0 22px 70px rgba(0, 51, 102, .3);
+      color: var(--slo-charcoal);
+    }
+
+    .ai-prompt-dialog::backdrop {
+      background: rgba(0, 51, 102, .58);
+    }
+
+    .ai-prompt-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 20px 22px 16px;
+      border-bottom: 1px solid var(--slo-line);
+    }
+
+    .ai-prompt-head h2 {
+      margin: 0;
+      color: var(--slo-navy);
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 25px;
+    }
+
+    .ai-prompt-close {
+      display: grid;
+      width: 32px;
+      height: 32px;
+      flex: 0 0 32px;
+      place-items: center;
+      padding: 0;
+      border: 1px solid var(--slo-line);
+      border-radius: 50%;
+      background: var(--slo-white);
+      color: var(--slo-charcoal);
+    }
+
+    .ai-prompt-close:hover {
+      border-color: var(--slo-navy);
+      color: var(--slo-navy);
+      background: var(--slo-soft);
+    }
+
+    .ai-prompt-close svg {
+      width: 15px;
+      height: 15px;
+      pointer-events: none;
+    }
+
+    .ai-prompt-body {
+      max-height: calc(88dvh - 78px);
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      padding: 18px 22px 22px;
+    }
+
+    .ai-prompt-privacy {
+      margin: 0 0 13px;
+      padding: 11px 13px;
+      border-radius: 7px;
+      background: var(--slo-soft);
+      color: var(--slo-navy);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .ai-prompt-body label {
+      display: block;
+      color: var(--slo-navy);
+      font-weight: 700;
+    }
+
+    .ai-prompt-upload-note {
+      margin: 5px 0 0;
+      color: var(--slo-charcoal);
+      font-size: 12px;
+    }
+
+    .ai-prompt-scroll-cue {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin: 5px 0 0;
+      color: var(--slo-charcoal);
+      font-size: 12px;
+    }
+
+    .ai-prompt-scroll-cue::before {
+      content: "↓";
+      color: var(--slo-gold);
+      font-weight: 700;
+    }
+
+    .ai-prompt-text {
+      width: 100%;
+      height: min(390px, 48dvh);
+      min-height: 220px;
+      max-height: 52dvh;
+      overflow: auto;
+      overscroll-behavior: contain;
+      margin-top: 7px;
+      resize: vertical;
+      border: 1px solid var(--slo-line);
+      border-radius: 8px;
+      padding: 12px;
+      font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+
+    .ai-prompt-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .ai-prompt-status {
+      margin-right: auto;
+      color: #2C7A4B;
+      font-size: 13px;
+    }
+
+    .ai-prompt-actions button {
+      min-height: 42px;
+      border: 1px solid var(--slo-navy);
+      border-radius: 7px;
+      padding: 0 15px;
+      background: var(--slo-white);
+      color: var(--slo-navy);
+      font-weight: 700;
+    }
+
+    .ai-prompt-actions .primary {
+      background: var(--slo-navy);
+      color: var(--slo-white);
+    }
+
+    @media (max-width: 700px) {
+      .ai-prompt-actions {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .ai-prompt-status {
+        margin: 0;
+      }
+
+      .ai-prompt-actions button {
+        width: 100%;
+      }
+    }
+
     .slo-actions {
       display: flex;
       flex-direction: column;
@@ -942,7 +1116,7 @@
       <aside class="slo-brief-card" aria-label="Exercise brief">
         <p class="slo-label">Exercise brief</p>
         <strong>25 minutes</strong>
-        <span>Use The Playback to upload a recording, review feedback using the rubric, identify one or two improvements, and iterate on your script and delivery.</span>
+        <span>Copy the prompt, upload a recording to Gemini, review Gemini's feedback, identify one or two improvements, and iterate on your script and delivery.</span>
         <span>When you finish, note the one delivery habit you will change first.</span>
       </aside>
     </section>
@@ -993,31 +1167,37 @@
           </li>
           <li>
             <svg class="slo-step-icon" viewBox="0 0 64 48" fill="none" aria-hidden="true"><rect x="13" y="9" width="38" height="26" rx="3" fill="#FFFFFF" stroke="#003366" stroke-width="2"/><path d="M8 39h48l-4-4H12z" fill="#F3EDE2" stroke="#003366" stroke-width="2" stroke-linejoin="round"/><circle cx="24" cy="22" r="5" fill="#EEA320" stroke="#003366" stroke-width="1.5"/><path d="M32 18h10M32 24h7" stroke="#003366" stroke-width="2" stroke-linecap="round"/><path d="M23 22l2 2 4-5" stroke="#003366" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            <strong>Open The Playback:</strong>
-            <span>Use the button below, then upload the video or audio file. If needed, move it from phone to laptop with AirDrop or Google Drive.</span>
+            <strong>Prepare your prompt, then open Gemini:</strong>
+            <span>Use "Prepare AI feedback prompt" below, copy it, and paste it into a new chat in your own Gemini, before you upload anything.</span>
+          </li>
+          <li>
+            <svg class="slo-step-icon" viewBox="0 0 64 48" fill="none" aria-hidden="true"><rect x="10" y="8" width="44" height="32" rx="4" fill="#FFFFFF" stroke="#003366" stroke-width="2"/><path d="M32 32V14M32 14l-8 8M32 14l8 8" stroke="#EEA320" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M18 32h28" stroke="#003366" stroke-width="2" stroke-linecap="round"/></svg>
+            <strong>Upload your recording:</strong>
+            <span>In that same Gemini chat, attach the video or audio file. If needed, move it from phone to laptop with AirDrop or Google Drive. Gemini accepts video up to 2GB and up to 5 minutes total, so this short recording fits with room to spare.</span>
           </li>
           <li>
             <svg class="slo-step-icon" viewBox="0 0 64 48" fill="none" aria-hidden="true"><rect x="9" y="9" width="22" height="30" rx="3" fill="#FFFFFF" stroke="#003366" stroke-width="2"/><path d="M16 9c0-3 8-3 8 0h4v6H12V9z" fill="#F3EDE2" stroke="#003366" stroke-width="2" stroke-linejoin="round"/><rect x="39" y="14" width="18" height="24" rx="3" fill="#FFFFFF" stroke="#003366" stroke-width="2"/><path d="M17 23h8M17 29h8M32 24h12" stroke="#003366" stroke-width="2" stroke-linecap="round"/><path d="M40 19l5 5-5 5" stroke="#EEA320" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
             <strong>Use the feedback for one better take:</strong>
-            <span>Ask The Playback what to fix first, then rerecord with that one change in mind.</span>
+            <span>Read what Gemini sends back, pick the one thing to fix first, then rerecord with that one change in mind.</span>
           </li>
         </ol>
       </article>
     </section>
 
-    <section class="slo-action-card" aria-label="Open The Playback">
+    <section class="slo-action-card" aria-label="Get feedback from Gemini">
       <div>
         <p class="slo-label">Practice with AI</p>
-        <h2>Open The Playback.</h2>
-        <p>Upload your recording and ask for feedback on presence, pacing, emphasis, pauses, and whether the message feels inevitable.</p>
+        <h2>Get feedback from Gemini.</h2>
+        <p>Prepare your feedback prompt, open your own Gemini, paste it into a new chat, then upload your recording for feedback on presence, pacing, emphasis and pauses.</p>
       </div>
       <div class="slo-actions">
-        <a class="slo-button slo-button-accent" href="https://gemini.google.com/gem/1mwtmHhhwE2IzQ2w_EUYwxkSto4yym1CX?usp=sharing" target="_blank" rel="noopener">Open GEM (The Playback)</a>
+        <button class="slo-button slo-button-accent" type="button" id="prepareCorePrompt"><span class="slo-action-step-num">1</span>Prepare AI feedback prompt</button>
+        <a class="slo-button slo-button-accent" href="https://gemini.google.com/app" target="_blank" rel="noopener"><span class="slo-action-step-num">2</span>Open Gemini</a>
         <button class="slo-button slo-button-primary" id="completeExerciseBtn" type="button">Mark exercise complete · +30 MP</button>
         <span class="slo-complete-status" id="completeExerciseStatus" hidden>✓ Exercise complete</span>
         <a class="slo-exit-link" id="journeyLink" href="../../member-login/index.html#learning-journey">Back to Learning Journey</a>
       </div>
-      <p>This opens Gemini in a new tab. You may need to sign in, then return here when you finish.</p>
+      <p>This opens Gemini in a new tab. You will need a Google account signed in to Gemini. Once you have read your feedback, come back to this tab and mark the exercise complete.</p>
     </section>
     <section class="slo-completion-choice" id="coreCompletionChoice" hidden>
       <p class="slo-label">Exercise complete</p>
@@ -1032,6 +1212,25 @@
 
     <section class="slo-practice-shell" id="practiceApp" hidden aria-live="polite"></section>
   </main>
+
+  <dialog class="ai-prompt-dialog" id="aiPromptDialog" aria-labelledby="aiPromptTitle">
+    <div class="ai-prompt-head">
+      <div><span class="slo-label">Gemini</span><h2 id="aiPromptTitle">Your feedback prompt</h2></div>
+      <button class="ai-prompt-close" id="aiPromptClose" type="button" aria-label="Close AI feedback prompt"><svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"><path d="M3 3l10 10M13 3L3 13"/></svg></button>
+    </div>
+    <div class="ai-prompt-body">
+      <p class="ai-prompt-privacy"><strong>Nothing is sent automatically.</strong> This prompt is prepared in your browser. Review it, copy it, and paste it into Gemini yourself. If you have completed the Executive Signature assessment, a short, non-identifying behavior label (never your name, email or score) is included to help the coach calibrate its feedback.</p>
+      <label for="aiPromptText">Paste this into a new Gemini chat before you upload your recording</label>
+      <p class="ai-prompt-upload-note">Gemini accepts video up to 2GB and up to 5 minutes total, so your short recording fits easily.</p>
+      <p class="ai-prompt-scroll-cue">Scroll inside the prompt to read it in full.</p>
+      <textarea class="ai-prompt-text" id="aiPromptText" readonly></textarea>
+      <div class="ai-prompt-actions">
+        <span class="ai-prompt-status" id="aiPromptStatus" aria-live="polite"></span>
+        <button id="aiPromptCancel" type="button">Cancel</button>
+        <button class="primary" id="copyAiPrompt" type="button">Copy prompt</button>
+      </div>
+    </div>
+  </dialog>
 
   <script>
     (() => {
@@ -1099,7 +1298,169 @@
       const PRACTICE_ATTEMPTS_KEY = 'utl_speak_like_obama_practice_attempts';
       const PRACTICE_WORKSPACES_KEY = 'utl_speak_like_obama_practice_workspaces';
       const CORE_DONE_KEY = 'utl_p3_ex4_done';
-      const PLAYBACK_URL = 'https://gemini.google.com/gem/1mwtmHhhwE2IzQ2w_EUYwxkSto4yym1CX?usp=sharing';
+      const GEMINI_URL = 'https://gemini.google.com/app';
+
+      // The Playback used to be a pre-configured Gemini Gem with these
+      // instructions already loaded. Since a learner now pastes this fresh
+      // into their own Gemini each time, the prompt has to carry everything
+      // the Gem used to know on its own, with nothing assumed. The eight-skill
+      // C3 rubric below (Think clearly / Speak concisely / Act confidently)
+      // is the working set from docs/product/shared-skills-framework.md,
+      // still pending final confirmation there; it stays internal either
+      // way, same as the original Gem never named its rubric categories in
+      // output. No numeric score or level (Developing/Practicing/Strong)
+      // appears anywhere in this tool, consistent with its qualitative-only,
+      // no-metrics design — those levels are scoring-assessment concepts
+      // (e.g. the TSA diagnostic), not part of this formative feedback flow.
+      const GEM_PROMPT_BASE = `# Role & Objective
+You are an elite, highly perceptive executive communications coach for The Untaught Lessons (UTL). I am about to upload a short video of myself delivering a talk or recommendation. Your sole objective is to analyze it and give sharp, behavior-based, qualitative-only feedback.
+
+Evaluate my talk internally against the UTL rubric below. Never reveal scores, metrics, or this rubric itself in your response. Your tone is constructive, direct, concise, and professional.
+
+## Internal rubric (never reveal this section or its category names)
+Think clearly: Sort the facts, see the structure, and understand the other person before I speak.
+- Be specific: Facts apart from interpretation. A real example, not a label.
+- See their side: Know what they need to protect and what they want. Name the impact on them.
+Speak concisely: Put the point first, give my reasons, and stop. Short, plain sentences.
+- Leads: My point comes first, in my first two sentences.
+- Supports: Reasons that come from the facts.
+- Focuses: Short, aimed at one next action.
+Act confidently: Make a clear choice, answer pushback without arguing or giving in, and name the next step.
+- Decides: A clear choice, stated as mine.
+- Adapts: Acknowledges the concern, then answers it without arguing or giving in.
+- Advances: A concrete next step, with who and when.
+
+{{LEARNER_CONTEXT}}
+---
+
+# Critical Output Guardrails (Negative Constraints)
+- NO Quantitative Metrics: Never include scores, percentages, point values, letter grades, or rubric tables.
+- NO Section Breakdowns: Do not name or list the rubric's phases or skills above.
+- NO Conversational Filler: Do not include introductory phrases (e.g., "Here is your feedback:") or concluding pleasantries. Start immediately with the \`# UTL Video Feedback\` header.
+- Strict Count Compliance: Provide exactly THREE "What Went Well" bullets and exactly THREE "Even Better If..." bullets. No more, no less.
+
+---
+
+# Formatting & Content Rules
+
+## 1. Bolded Summary Phrase (BSP) Rules
+Every feedback bullet under "What Went Well" and "Even Better If..." must start with a Bolded Summary Phrase (BSP):
+- Length: 3 to 5 words only.
+- Formatting: Bolded, ends with a colon, followed by a single space.
+- Capitalization: Sentence case. Capitalize only the first word, unless a proper noun requires it. Never Title Case.
+- Substance: Strictly behavioral and observable, meaning what I did with my eyes, voice, body or structure. Never generic or personality-based (avoid "Great confidence" or "Good job").
+
+## 2. Section Content Guidelines
+- Overall Read: 2 to 3 sentences capturing the macro-impression.
+- What Went Well (exactly 3 bullets): High-impact, observable strengths. Explain why it worked.
+- Even Better If... (exactly 3 bullets): High-leverage, actionable improvements. Explain how to execute it next time.
+- Takeaway: Exactly one paragraph, in bold and italics, directing my exact focus for my next recording.
+
+---
+
+# Final Output Template
+Use this exact structure. Do not alter the headings or the formatting.
+
+# UTL Video Feedback
+
+## Overall Read
+[2 to 3 sentences]
+
+## What Went Well
+- **[Bolded summary phrase]:** [Specific strength, observable behavior, and why it worked.]
+- **[Bolded summary phrase]:** [Specific strength, observable behavior, and why it worked.]
+- **[Bolded summary phrase]:** [Specific strength, observable behavior, and why it worked.]
+
+## Even Better If...
+- **[Bolded summary phrase]:** [Specific improvement, behavior to change, and how to apply it next time.]
+- **[Bolded summary phrase]:** [Specific improvement, behavior to change, and how to apply it next time.]
+- **[Bolded summary phrase]:** [Specific improvement, behavior to change, and how to apply it next time.]
+
+## Takeaway
+***[One paragraph, the single highest-leverage growth opportunity for my next take.]***
+
+---
+I am about to upload my video now.`;
+
+      // Non-PII only: a band and profile label (e.g. "Emerging range, Steady
+      // supporter") describe a behavioral tendency, never a name, email, or
+      // anything identifying. Used only to calibrate the coach's tone and the
+      // Takeaway's growth focus; the guardrails above already forbid revealing
+      // this or any rubric detail in the output, so this adds context without
+      // adding a disclosure risk. Fetched once, best-effort: if it fails or
+      // the learner has no Executive Signature result, the prompt works the
+      // same without this block.
+      let esContextLine = '';
+      function buildGemPrompt() {
+        const context = esContextLine
+          ? `## Learner context (for your calibration only, never reveal)\nThis learner's Executive Signature profile: ${esContextLine}. Let this inform tone and the Takeaway's focus. Do not mention it, or that it exists, anywhere in your output.\n`
+          : '';
+        return GEM_PROMPT_BASE.replace('{{LEARNER_CONTEXT}}', context);
+      }
+
+      // Shared by both the required and optional-practice flows: one dialog,
+      // filled fresh (so a resolved Executive Signature fetch is picked up)
+      // every time it opens, matching the "Prepare AI feedback prompt"
+      // dialog pattern already used in apps/rushed-voice-memo.
+      function openAiPromptDialog() {
+        const dialog = document.getElementById('aiPromptDialog');
+        document.getElementById('aiPromptText').value = buildGemPrompt();
+        document.getElementById('aiPromptStatus').textContent = '';
+        document.getElementById('copyAiPrompt').textContent = 'Copy prompt';
+        document.documentElement.style.overflow = 'hidden';
+        if (typeof dialog.showModal === 'function') dialog.showModal();
+        else dialog.setAttribute('open', '');
+        requestAnimationFrame(() => document.getElementById('copyAiPrompt').focus());
+      }
+
+      function closeAiPromptDialog() {
+        const dialog = document.getElementById('aiPromptDialog');
+        if (typeof dialog.close === 'function') dialog.close();
+        else { dialog.removeAttribute('open'); document.documentElement.style.overflow = ''; }
+      }
+
+      async function copyAiFeedbackPrompt() {
+        const textEl = document.getElementById('aiPromptText');
+        const status = document.getElementById('aiPromptStatus');
+        const button = document.getElementById('copyAiPrompt');
+        let ok = true;
+        try {
+          if (navigator.clipboard && window.isSecureContext) await navigator.clipboard.writeText(textEl.value);
+          else throw new Error('Clipboard API unavailable');
+        } catch (error) {
+          textEl.focus();
+          textEl.select();
+          try { ok = document.execCommand('copy'); } catch (_) { ok = false; }
+        }
+        status.textContent = ok ? 'Copied. Paste it into Gemini.' : 'Could not copy. Select the text above and copy it manually.';
+        if (ok) {
+          button.textContent = 'Copied ✓';
+          window.setTimeout(() => { button.textContent = 'Copy prompt'; }, 2000);
+        }
+      }
+
+      document.getElementById('prepareCorePrompt')?.addEventListener('click', openAiPromptDialog);
+      document.getElementById('aiPromptClose').addEventListener('click', closeAiPromptDialog);
+      document.getElementById('aiPromptCancel').addEventListener('click', closeAiPromptDialog);
+      document.getElementById('copyAiPrompt').addEventListener('click', copyAiFeedbackPrompt);
+      document.getElementById('aiPromptDialog').addEventListener('click', (event) => {
+        if (event.target === document.getElementById('aiPromptDialog')) closeAiPromptDialog();
+      });
+      document.getElementById('aiPromptDialog').addEventListener('close', () => { document.documentElement.style.overflow = ''; });
+
+      // Best-effort, non-blocking: the prompt already works without this, so
+      // a slow or failed fetch should never hold up the page. The dialog
+      // reads esContextLine fresh each time it opens, so this only needs to
+      // resolve before someone clicks "Prepare AI feedback prompt," not
+      // before the page itself finishes loading.
+      import('../../assets/firebase.js').then(({ getMyEsStatus }) => getMyEsStatus()).then((status) => {
+        const assessments = status && status.assessments;
+        const full = assessments && assessments['full-assessment'] && assessments['full-assessment'].latestAttempt;
+        const quick = assessments && assessments['quick-check'] && assessments['quick-check'].latestAttempt;
+        const latest = full || quick;
+        if (!latest || !latest.band || !latest.profileLabel) return;
+        esContextLine = `${latest.band} range, ${latest.profileLabel}`;
+      }).catch(() => {});
       const TOPICS = [
         {
           id: 'phone-free-hour',
@@ -1461,19 +1822,21 @@
             ${contextPanelMarkup(item)}
           </div>
           <section class="slo-panel">
-            <h2>Record and use The Playback</h2>
+            <h2>Record and use Gemini</h2>
             <ol class="slo-compact-list">
               <li>Record one complete take on your phone or computer.</li>
-              <li>Upload it to The Playback and review the feedback.</li>
-              <li>Choose the one delivery habit you want to improve first.</li>
+              <li>Prepare your feedback prompt, open your own Gemini, paste it into a new chat, then upload your recording.</li>
+              <li>Read the feedback and choose the one delivery habit you want to improve first.</li>
             </ol>
-            <p class="slo-helper"><strong>The Playback will examine:</strong> your main point, supporting structure, pacing, pauses, filler words, emphasis and ending.</p>
+            <p class="slo-helper"><strong>Gemini will examine:</strong> your main point, supporting structure, pacing, pauses, filler words, emphasis and ending.</p>
             <div class="slo-practice-actions">
-              <a class="slo-button slo-button-accent" href="${PLAYBACK_URL}" target="_blank" rel="noopener">Open GEM (The Playback)</a>
+              <button class="slo-button slo-button-accent" type="button" id="preparePracticePrompt"><span class="slo-action-step-num">1</span>Prepare AI feedback prompt</button>
+              <a class="slo-button slo-button-accent" href="${GEMINI_URL}" target="_blank" rel="noopener"><span class="slo-action-step-num">2</span>Open Gemini</a>
               <button class="slo-button slo-button-primary" id="reviewedFeedback" type="button">I reviewed my feedback →</button>
             </div>
           </section>`;
         renderSwitcher(draft.id);
+        document.getElementById('preparePracticePrompt').addEventListener('click', openAiPromptDialog);
         document.getElementById('editPracticeNotes').addEventListener('click', () => {
           draft.stage = 'prepare';
           saveDraft();
@@ -1502,7 +1865,7 @@
             <section class="slo-notes-panel">
               <label for="practiceImprovement"><strong>What will you improve in your next speech?</strong></label>
               <textarea class="slo-reflection-input" id="practiceImprovement" placeholder="Name one specific change you will make.">${escapeHtml(draft.improvement)}</textarea>
-              <label for="practiceFeedback" style="display:block;margin:16px 0 6px"><strong>Useful feedback from The Playback</strong> <span style="font-weight:400">(optional)</span></label>
+              <label for="practiceFeedback" style="display:block;margin:16px 0 6px"><strong>Useful feedback from Gemini</strong> <span style="font-weight:400">(optional)</span></label>
               <textarea class="slo-reflection-input" id="practiceFeedback" placeholder="Paste or summarize one useful feedback point.">${escapeHtml(draft.feedback)}</textarea>
               <div class="slo-practice-actions" style="margin-top:16px">
                 <button class="slo-button slo-button-primary" id="savePractice" type="button" disabled>Submit</button>
