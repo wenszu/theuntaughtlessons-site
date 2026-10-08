@@ -271,7 +271,7 @@ const baseInput = {
   const currentSource = fs.readFileSync(path.join(ROOT, "functions", "index.js"), "utf8");
   let committedSource = null;
   try {
-    committedSource = execFileSync("git", ["show", "HEAD:functions/index.js"], { cwd: ROOT, encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] });
+    committedSource = execFileSync("git", ["show", "1679614:functions/index.js"], { cwd: ROOT, encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] });
   } catch (error) {
     committedSource = null;
   }
