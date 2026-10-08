@@ -4,7 +4,7 @@ const assert = require("assert");
 const fs = require("fs");
 const os = require("os");
 const path = require("path");
-const { saveSnapshot, loadSnapshot, insideRepo, excludeMembers, filterForRerun } = require("../scripts/supabase-import");
+const { saveSnapshot, loadSnapshot, insideRepo, excludeMembers, filterForRerun, reconcileMirrored } = require("../scripts/supabase-import");
 const { buildPlan, uuidFor } = require("../scripts/supabase-import-mapping");
 const { snapshot: fixture } = require("./fixtures/import-snapshot");
 const catalog = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "supabase", "seed", "activities.json"), "utf8"));
@@ -89,6 +89,45 @@ const events = [{ id: "e-1", person_id: "p1", event_key: "k1" }, { id: "e-2", pe
 const eventFilter = filterForRerun("stability_events", events, new Map(), { stability_events: new Map([["p1|k1", "other"]]) });
 assert.deepStrictEqual(eventFilter.write.map((r) => r.id), ["e-2"], "only the new stability event is written");
 
+
+// TSA attempts the browser mirror stored first (another id, the same natural keys): the planned rows are pointed at the stored
+// ids and the planned parents are dropped, so nothing hits a unique key. A rerun after an import changes nothing.
+{
+  const fresh = () => JSON.parse(JSON.stringify(planBefore.tables));
+  const tsaAttemptRow = planBefore.tables.assessment_attempts.find((row) => row.assessment_id === "tsa-diagnostic");
+  const tsaVersionRow = planBefore.tables.assessment_versions.find((row) => row.id === tsaAttemptRow.version_id);
+  const nothing = fresh();
+  const noop = reconcileMirrored(nothing, { versions: new Map(), attempts: new Map() });
+  assert.deepStrictEqual(noop, { versions: 0, attempts: 0 });
+  assert.deepStrictEqual(nothing, planBefore.tables, "no stored rows: the plan is unchanged");
+  const same = fresh();
+  reconcileMirrored(same, { versions: new Map([[`${tsaVersionRow.assessment_id}|${tsaVersionRow.version}`, tsaVersionRow.id]]), attempts: new Map([[tsaAttemptRow.legacy_firestore_id, tsaAttemptRow.id]]) });
+  assert.deepStrictEqual(same, planBefore.tables, "rows stored by an earlier import (same ids) are left to the normal skip");
+  const mirrored = fresh();
+  const result = reconcileMirrored(mirrored, { versions: new Map([[`${tsaVersionRow.assessment_id}|${tsaVersionRow.version}`, "mirror-version"]]), attempts: new Map([[tsaAttemptRow.legacy_firestore_id, "mirror-attempt"]]) });
+  assert.deepStrictEqual(result, { versions: 1, attempts: 1 });
+  assert.ok(!mirrored.assessment_versions.some((row) => row.id === tsaVersionRow.id), "the planned version is dropped");
+  assert.ok(!mirrored.assessment_versions_publish.some((row) => row.id === tsaVersionRow.id), "and its publish step");
+  assert.ok(!mirrored.assessment_attempts.some((row) => row.id === tsaAttemptRow.id), "the planned attempt is dropped");
+  assert.equal(mirrored.assessment_attempts.length, planBefore.tables.assessment_attempts.length - 1, "other attempts stay");
+  assert.ok(mirrored.assessment_response_parts.some((row) => row.attempt_id === "mirror-attempt"), "its response part points at the stored attempt");
+  assert.ok(mirrored.assessment_scoring_comparisons.every((row) => row.attempt_id === "mirror-attempt"), "and so does its scoring comparison");
+  assert.ok(!mirrored.assessment_response_parts.some((row) => row.attempt_id === tsaAttemptRow.id));
+  assert.equal(mirrored.assessment_versions.length, planBefore.tables.assessment_versions.length - 1, "other versions stay");
+  assert.ok(!JSON.stringify(mirrored).includes(tsaAttemptRow.id), "no row still names the dropped attempt");
+  // Only the TSA assessments are reconciled: an Executive Signature version or attempt that matches a stored key is never dropped.
+  const esAttemptRow = planBefore.tables.assessment_attempts.find((row) => row.assessment_id === "es");
+  const esVersionRow = planBefore.tables.assessment_versions.find((row) => row.assessment_id === "es");
+  assert.ok(esAttemptRow && esVersionRow, "the fixture has an Executive Signature version and attempt");
+  const es = fresh();
+  const esResult = reconcileMirrored(es, { versions: new Map([[`${esVersionRow.assessment_id}|${esVersionRow.version}`, "other-version"]]), attempts: new Map([[esAttemptRow.legacy_firestore_id, "other-attempt"]]) });
+  assert.deepStrictEqual(esResult, { versions: 0, attempts: 0 });
+  assert.deepStrictEqual(es, planBefore.tables, "Executive Signature rows are never dropped or repointed");
+  const both = fresh();
+  reconcileMirrored(both, { versions: new Map([[`${esVersionRow.assessment_id}|${esVersionRow.version}`, "other-version"], [`${tsaVersionRow.assessment_id}|${tsaVersionRow.version}`, "mirror-version"]]), attempts: new Map([[esAttemptRow.legacy_firestore_id, "other-attempt"]]) });
+  assert.ok(both.assessment_versions.some((row) => row.id === esVersionRow.id) && both.assessment_attempts.some((row) => row.id === esAttemptRow.id), "the Executive Signature rows stay while the TSA version is remapped");
+  assert.ok(!both.assessment_versions.some((row) => row.id === tsaVersionRow.id));
+}
 
 // A practice round in exercise_submissions is stored as kind practice and never completes the exercise.
 {

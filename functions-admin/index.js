@@ -624,6 +624,7 @@ function organizationConsoleAggregate(members) {
 }
 
 if (process.env.NODE_ENV === "test") {
+  exports.__organizationAccessTest = { getMyOrganizationAccess: getMyOrganizationAccessHandler, organizationMembershipsForCaller };
   exports.__memberRemovalTest = { removeMember: removeMemberHandler, isAuthorizedAdmin };
   exports.__cohortStandingTest = { cohortProgress, cohortReward, rankCohort };
   exports.__exerciseProgressSyncTest = { exerciseWorkspaceProgressPatch, EXERCISE_ALIASES };
@@ -666,11 +667,19 @@ async function organizationMembershipsForCaller(caller, definitions, isAdminCall
       assignedCohortIds: [...organization.cohortIds]
     }));
   }
-  const snapshot = await admin.firestore().collectionGroup("members").where("uid", "==", caller.uid).get();
+  // One direct read per organization at organizations/{id}/members/{uid} (the member document id is
+  // the person's uid, see saveOrganizationAccessMember). The earlier collection group query on the
+  // uid field needs a collection group index that was never created, so Firestore refused it for
+  // every caller and the callable returned HTTP 500 instead of "no organization access".
+  const db = admin.firestore();
+  const organizationDocIds = Object.keys(definitions || {});
+  const documents = (await Promise.all(organizationDocIds.map((organizationDocId) =>
+    db.collection("organizations").doc(organizationDocId).collection("members").doc(caller.uid).get()
+  ))).filter((document) => document && document.exists);
   const memberships = [];
-  snapshot.forEach((document) => {
+  documents.forEach((document) => {
     const data = document.data() || {};
-    const parentOrganizationId = document.ref.parent.parent ? document.ref.parent.parent.id : "";
+    const parentOrganizationId = document.ref && document.ref.parent && document.ref.parent.parent ? document.ref.parent.parent.id : "";
     const organizationId = normalizeOrganizationId(data.organizationId || parentOrganizationId);
     const organization = definitions[organizationId];
     const role = String(data.role || "").trim().toLowerCase();
@@ -767,7 +776,7 @@ exports.getOrganizationConsole = onCall({ timeoutSeconds: 30, memory: "256MiB" }
   return { ...base, selectedOrganization: selected, cohorts, members, aggregate: organizationConsoleAggregate(members), myRosterDrafts };
 });
 
-exports.getMyOrganizationAccess = onCall({ timeoutSeconds: 15, memory: "256MiB" }, async (request) => {
+async function getMyOrganizationAccessHandler(request) {
   const caller = await requireVerifiedCaller(request);
   const { definitions } = await organizationDefinitions();
   const memberships = await organizationMembershipsForCaller(caller, definitions, false);
@@ -783,7 +792,8 @@ exports.getMyOrganizationAccess = onCall({ timeoutSeconds: 15, memory: "256MiB" 
     };
   }).filter((organization) => organization.cohortCount > 0);
   return { ok: true, hasAccess: organizations.length > 0, organizations };
-});
+}
+exports.getMyOrganizationAccess = onCall({ timeoutSeconds: 15, memory: "256MiB" }, getMyOrganizationAccessHandler);
 
 exports.getOrganizationAccessAdmin = onCall({ timeoutSeconds: 30, memory: "256MiB" }, async (request) => {
   const caller = await requireVerifiedCaller(request);
@@ -1696,6 +1706,7 @@ exports.setEmergencyCredential = onCall({
   }
 });
 
+const readinessCompletionGuard = require("./readiness-completion-guard");
 const READINESS_STRING_FIELD_MAX_LENGTH = 200;
 
 function readinessStringField(value, label, { required = true } = {}) {
@@ -1751,6 +1762,20 @@ async function recordReadinessCompletionHandler(request) {
     throw new HttpsError("invalid-argument", error.message);
   }
 
+  // Abuse protection for an anonymous endpoint. Counts per address (hourly and daily) and across
+  // everyone (daily). A refusal looks like any other save failure so it never says which limit was
+  // reached, and a failure of the limit store lets the request through.
+  const nowMs = Date.now();
+  const reservation = await readinessCompletionGuard.reserveCompletion({ db: admin.firestore(), email, nowMs });
+  if (!reservation.allowed) {
+    console.warn("Readiness completion refused by a limit", { tier, reason: reservation.reason });
+    throw new HttpsError("internal", "Could not save your result.");
+  }
+  const source = readinessCompletionGuard.sanitizeCompletionSource(input.source);
+  const suspect = readinessCompletionGuard.isSuspectCompletion({
+    tier, durationSeconds: input.durationSeconds, startedAt: input.startedAt, answers: input.answers, nowMs
+  });
+
   try {
     let userRecord;
     let isNewAccount = false;
@@ -1802,7 +1827,8 @@ async function recordReadinessCompletionHandler(request) {
       startedAt: input.startedAt,
       durationSeconds: input.durationSeconds,
       consent: input.consent,
-      source: input.source,
+      source,
+      suspect,
       idempotencyKey: `readiness-submission:${userRecord.uid}:${tier}:${submissionId}`,
       actor: { actorType: "participant", actorId: userRecord.uid, actorRole: "participant" }
     });
@@ -1831,7 +1857,7 @@ async function recordReadinessCompletionHandler(request) {
   }
 }
 
-exports.recordReadinessCompletion = onCall({ timeoutSeconds: 30, memory: "256MiB" }, recordReadinessCompletionHandler);
+exports.recordReadinessCompletion = onCall({ timeoutSeconds: 30, memory: "256MiB", maxInstances: 10 }, recordReadinessCompletionHandler);
 
 // Public, unauthenticated by design: the "resend my access" page on the readiness
 // assessment needs to know whether to send a magic link, without ever confirming
@@ -1946,6 +1972,10 @@ exports.setRoleClaimOnUserCreated = authV1.user().onCreate(async (user) => {
   if (plan.action !== "set") return;
   await admin.auth().setCustomUserClaims(user.uid, plan.claims);
 });
+
+// Copies every write to authorized_members (the admin console writes members straight from the browser) to Supabase.
+// Off unless SUPABASE_MIRROR=on; see supabase-mirror/member-trigger.js.
+exports.mirrorAuthorizedMemberWrite = require("./supabase-mirror/member-trigger").mirrorAuthorizedMemberWrite;
 
 if (process.env.NODE_ENV === "test") {
   exports.__readinessAccountTest = {

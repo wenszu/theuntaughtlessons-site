@@ -21,11 +21,13 @@ const URL_BASE = 'https://example-project.supabase.co';
 const KEY = 'sb_publishable_test_key';
 const TOKEN = 'firebase-id-token-test';
 const RESERVED = ['userId', 'receivedAt', 'createdAt', 'updatedAt'];
+const PERSON_ID = '11111111-2222-4333-8444-555555555555';
 
 // Recording fake fetch. Handlers are matched in order on method and path; the first match answers.
 function fakeFetch() {
   const calls = [];
-  const handlers = [];
+  // Every learner read first asks who the caller is (get_my_person_id, migration 2230); the default answer is PERSON_ID.
+  const handlers = [{ method: 'POST', match: (p) => p === '/rest/v1/rpc/get_my_person_id', respond: () => PERSON_ID }];
   const impl = async (url, init = {}) => {
     const method = init.method || 'GET';
     const call = {
@@ -716,7 +718,7 @@ function check(name, fn) {
     const submissionReads = fetchImpl.calls.filter((c) => c.path.startsWith('/rest/v1/activity_submissions?'));
     assert.equal(submissionReads.length, 2, 'real submissions and practice rounds are two reads');
     submissionReads.forEach(assertHeaders);
-    const expectedPath = (kind) => `/rest/v1/activity_submissions?select=id,submission_key,attempt_number,completed_at,duration_seconds,content_version,kind,response&activity_id=eq.p1-e1&kind=eq.${kind}&order=completed_at.desc&limit=10`;
+    const expectedPath = (kind) => `/rest/v1/activity_submissions?select=id,submission_key,attempt_number,completed_at,duration_seconds,content_version,kind,response&activity_id=eq.p1-e1&kind=eq.${kind}&order=completed_at.desc&limit=10&person_id=eq.${PERSON_ID}`;
     assert.deepEqual(submissionReads.map((c) => c.path).sort(), [expectedPath('practice'), expectedPath('submission')].sort());
     const same = await data.getExerciseWork('p1-e1');
     assert.equal(same.submissions.length, 2, 'the canonical id reads the same rows');
@@ -816,6 +818,114 @@ function check(name, fn) {
     assert.equal(fetchImpl.calls.filter((c) => c.path.startsWith('/rest/v1/activities?')).length, 1);
     assert.equal(fetchImpl.calls.filter((c) => c.path.startsWith('/rest/v1/activity_keys?')).length, 1);
     assert.ok(fetchImpl.calls.every((c) => !JSON.stringify(c.body || {}).includes(TOKEN)), 'the token never appears in a body');
+  });
+
+  // Row level security also lets staff roles read every member's rows, so every read of a learner owned table must name
+  // the caller's own person id (get_my_person_id) and a read without one must send nothing.
+  const LEARNER_TABLES = ['activity_progress', 'activity_attempts', 'activity_submissions', 'activity_drafts', 'learning_profile_summaries', 'learning_profile_evidence', 'reward_ledger', 'reward_totals', 'reward_state', 'engagement_sessions'];
+  const SHARED_TABLES = ['activities', 'activity_keys', 'app_settings'];
+  const tableOf = (c) => (c.path.match(/^\/rest\/v1\/([a-z_]+)\?/) || [])[1];
+
+  async function runEveryRead(data) {
+    await data.getMemberWorkspaceProgress();
+    await data.getExerciseWork('grocery-list');
+    await data.getExerciseAttempts('grocery-list');
+    await data.getMemberExerciseResults();
+    await data.saveMemberWorkspaceProgress({ lessons: { 'p1-l1': { watched: true } } });
+    await data.saveLearningProfileEvidence({ exerciseId: 'grocery-list', evidenceId: 'evidence-00000001', attemptId: 'attempt-00000001', evidenceSource: 'observed_exercise', learningDimensions: { guidance: 'step_by_step' }, measurementDesign: { contextKey: 'grocery' } }).catch(() => null);
+  }
+
+  await check('every read of a learner table carries person_id=eq.<own id>; shared catalog reads carry none', async () => {
+    const fetchImpl = withCatalog(fakeFetch());
+    const data = makeData(fetchImpl, { aggregateLearningProfileEvidence: (existing) => existing });
+    await runEveryRead(data);
+    const gets = fetchImpl.calls.filter((c) => c.method === 'GET');
+    const learner = gets.filter((c) => LEARNER_TABLES.includes(tableOf(c)));
+    assert.ok(learner.length >= 13, `many learner reads were made (${learner.length})`);
+    learner.forEach((c) => assert.ok(c.path.endsWith(`&person_id=eq.${PERSON_ID}`) && (c.path.match(/person_id=/g) || []).length === 1, `${tableOf(c)} read is scoped: ${c.path}`));
+    const tables = new Set(learner.map(tableOf));
+    ['activity_progress', 'activity_attempts', 'activity_submissions', 'activity_drafts', 'reward_ledger', 'reward_totals', 'reward_state', 'learning_profile_summaries'].forEach((t) => assert.ok(tables.has(t), `${t} was read`));
+    const shared = gets.filter((c) => SHARED_TABLES.includes(tableOf(c)));
+    assert.ok(shared.length >= 2);
+    shared.forEach((c) => assert.ok(!c.path.includes('person_id'), `${tableOf(c)} is a shared table and is not scoped`));
+    assert.ok(gets.every((c) => LEARNER_TABLES.includes(tableOf(c)) || SHARED_TABLES.includes(tableOf(c))), 'no read of a table this test does not know');
+    assert.equal(fetchImpl.rpcCalls('get_my_person_id').length, 1, 'the person id is asked once and cached');
+    assert.deepEqual(fetchImpl.rpcCalls('get_my_person_id')[0].body, {}, 'no argument: the server decides who the caller is');
+  });
+
+  // A fake service whose get_my_person_id answers with the given raw JSON text; everything else answers like a table with
+  // a tempting row in it, so a leak would show.
+  function bareFetch(personAnswerText) {
+    const calls = [];
+    const impl = async (url, init = {}) => {
+      const method = init.method || 'GET';
+      const path = String(url).replace(URL_BASE, '');
+      calls.push({ method, path });
+      const answer = (text) => ({ ok: true, status: 200, text: async () => text });
+      if (path === '/rest/v1/rpc/get_my_person_id') return answer(personAnswerText);
+      if (path.startsWith('/rest/v1/activities?')) return answer(JSON.stringify(CATALOG_ACTIVITIES));
+      if (path.startsWith('/rest/v1/activity_keys?')) return answer(JSON.stringify(CATALOG_KEYS));
+      return answer('[{"activity_id":"p1-e1","status":"completed","draft":{"leak":true}}]');
+    };
+    impl.calls = calls;
+    return impl;
+  }
+
+  await check('with no person id (null, empty, not a uuid, wrong shape) no learner table is read and every answer is empty', async () => {
+    for (const answer of ['null', '""', '"not-a-uuid"', '["x"]', '{}', '7']) {
+      const bare = bareFetch(answer);
+      const data = makeData(bare);
+      assert.equal(await data.getMemberWorkspaceProgress(), null, answer);
+      assert.deepEqual(await data.getExerciseWork('grocery-list'), { draft: null, submissions: [] }, answer);
+      assert.deepEqual(await data.getExerciseAttempts('grocery-list'), [], answer);
+      assert.deepEqual(await data.getMemberExerciseResults(), { exercises: {}, aliases: {} }, answer);
+      assert.deepEqual(bare.calls.filter((c) => c.method === 'GET' && LEARNER_TABLES.includes(tableOf(c))), [], `no learner table read for ${answer}`);
+      assert.ok(bare.calls.filter((c) => c.path.endsWith('get_my_person_id')).length >= 4, 'an unknown person is asked again on the next read, not cached');
+    }
+  });
+
+  await check('a failing get_my_person_id fails the read (the caller falls back) and sends no learner read', async () => {
+    const calls = [];
+    const failing = async (url, init = {}) => {
+      const path = String(url).replace(URL_BASE, '');
+      calls.push(path);
+      if (path.endsWith('get_my_person_id')) return { ok: false, status: 500, text: async () => '{"message":"boom"}' };
+      if (path.startsWith('/rest/v1/activities?')) return { ok: true, status: 200, text: async () => JSON.stringify(CATALOG_ACTIVITIES) };
+      if (path.startsWith('/rest/v1/activity_keys?')) return { ok: true, status: 200, text: async () => JSON.stringify(CATALOG_KEYS) };
+      return { ok: true, status: 200, text: async () => '[]' };
+    };
+    const data = makeData(failing);
+    await assert.rejects(() => data.getExerciseAttempts('grocery-list'), (error) => error.status === 500);
+    assert.ok(!calls.some((p) => p.startsWith('/rest/v1/activity_attempts')), 'no attempts read was sent');
+  });
+
+  await check('the person id follows the signed in person: a new token subject asks again, a signed out token clears it', async () => {
+    const jwt = (sub) => `x.${Buffer.from(JSON.stringify({ sub })).toString('base64url')}.y`;
+    let token = jwt('uid-a');
+    let current = PERSON_ID;
+    const other = 'aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee';
+    const fetchImpl = withCatalog(fakeFetch());
+    const calls = fetchImpl.calls;
+    const asked = () => calls.filter((c) => c.path.endsWith('get_my_person_id')).length;
+    const data = makeData(async (url, init) => {
+      if (String(url).endsWith('get_my_person_id')) { calls.push({ path: '/rest/v1/rpc/get_my_person_id', method: 'POST' }); return { ok: true, status: 200, text: async () => JSON.stringify(current) }; }
+      return fetchImpl(url, init);
+    }, { getIdToken: async () => token });
+    await data.getExerciseAttempts('grocery-list');
+    token = jwt('uid-a') + '';
+    await data.getExerciseAttempts('grocery-list');
+    assert.equal(asked(), 1, 'same person, token refresh: one question');
+    token = jwt('uid-b');
+    current = other;
+    await data.getExerciseAttempts('grocery-list');
+    assert.equal(asked(), 2, 'a different person is asked again');
+    const lastRead = calls.filter((c) => c.path.startsWith('/rest/v1/activity_attempts?')).pop();
+    assert.ok(lastRead.path.endsWith(`person_id=eq.${other}`), 'the new person id is used');
+    token = '';
+    assert.deepEqual(await data.getExerciseAttempts('grocery-list'), []);
+    token = jwt('uid-b');
+    await data.getExerciseAttempts('grocery-list');
+    assert.equal(asked(), 3, 'after a sign out the id is asked for again');
   });
 
   console.log(`supabase-data-adapter: ${passed} checks passed`);

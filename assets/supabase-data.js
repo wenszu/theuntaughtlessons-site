@@ -415,6 +415,82 @@ function buildAttemptArgs(attemptPayload = {}) {
   };
 }
 
+// -- TSA diagnostic and checkpoint (migration 2190) ----------------------------------------------
+
+const TSA_ITEMS_MAX = 45;
+// The database refuses items of 100000 bytes of text or more and each comparison part of 20000 (enabled and official
+// source of 2000); the client keeps a margin and measures the same way as the database.
+const TSA_ITEMS_MAX_BYTES = 98000;
+const TSA_COMPARISON_PART_MAX_BYTES = 19000;
+const TSA_COMPARISON_FLAG_MAX_BYTES = 1900;
+
+// An identifier like value (bank release, rubric version, form id): the database accepts letters, digits and . _ : + / -
+// and spaces only, and one refusal would lose the whole call, so anything else is dropped here.
+function tsaIdent(value, max) {
+  return text(String(value == null ? "" : value).replace(/[^A-Za-z0-9._:+/ -]/g, ""), max);
+}
+
+function tsaAttemptKey(payload) {
+  // Not cut to length: a key shortened here would name a different attempt than the Firestore document.
+  const attemptId = String(payload.attemptId == null ? "" : payload.attemptId).trim();
+  if (attemptId.length < 8 || attemptId.length > 160 || !/^[A-Za-z0-9_.:-]+$/.test(attemptId)) throw invalidArgument("A valid assessment attempt ID is required.");
+  return attemptId;
+}
+
+function tsaAssessment(value) {
+  return value === "checkpoint" ? "checkpoint" : "diagnostic";
+}
+
+// A plain object kept under a size limit measured the way the database prints jsonb; an object over the limit (or one
+// that is not an object) becomes {} so the rest of the call is not lost.
+function tsaObject(value, maxBytes) {
+  if (!isPlainObject(value)) return {};
+  try {
+    const safe = jsonSafeValue(value, 0, new Set()) || {};
+    return pgJsonTextBytes(safe) > maxBytes ? {} : safe;
+  } catch (error) {
+    return {};
+  }
+}
+
+function buildTsaItemAttemptArgs(attemptPayload = {}) {
+  const payload = isPlainObject(attemptPayload) ? attemptPayload : {};
+  const attemptId = tsaAttemptKey(payload);
+  const score = Number(payload.totalScore);
+  const rawItems = (Array.isArray(payload.items) ? payload.items : []).filter(isPlainObject).slice(0, TSA_ITEMS_MAX);
+  let items = rawItems.map((item) => jsonSafeValue(item, 0, new Set()) || {});
+  if (pgJsonTextBytes(items) > TSA_ITEMS_MAX_BYTES) {
+    // The free text comment is the only part of an item that can be long; drop it before giving up.
+    items = items.map((item) => { const { feedbackComment, ...rest } = item; return rest; });
+    if (pgJsonTextBytes(items) > TSA_ITEMS_MAX_BYTES) throw invalidArgument("The assessment items are too large to save.");
+  }
+  return {
+    p_attempt_key: attemptId,
+    p_assessment: tsaAssessment(payload.assessment),
+    p_bank_release: tsaIdent(payload.bankRelease, 80),
+    p_rubric_version: tsaIdent(payload.rubricVersion, 120),
+    p_form_id: tsaIdent(payload.formId, 20),
+    p_total_score: Number.isFinite(score) ? Math.round(Math.max(0, Math.min(100, score)) * 100) / 100 : 0,
+    p_items: items,
+    p_completed_at: toIsoOrNull(payload.completedAt)
+  };
+}
+
+function buildTsaScoringComparisonArgs(payload = {}) {
+  const source = isPlainObject(payload) ? payload : {};
+  return {
+    p_attempt_key: tsaAttemptKey(source),
+    p_assessment: tsaAssessment(source.assessment),
+    p_rubric_version: tsaIdent(source.rubricVersion, 120),
+    p_enabled: tsaObject(source.enabled, TSA_COMPARISON_FLAG_MAX_BYTES),
+    p_official_source: tsaObject(source.officialSource, TSA_COMPARISON_FLAG_MAX_BYTES),
+    p_deterministic: tsaObject(source.deterministic, TSA_COMPARISON_PART_MAX_BYTES),
+    p_gen_ai: tsaObject(source.genAi, TSA_COMPARISON_PART_MAX_BYTES),
+    p_difference: tsaObject(source.difference, TSA_COMPARISON_PART_MAX_BYTES),
+    p_model_version: text(cleanDetailText(source.modelVersion == null ? "" : source.modelVersion).replace(/[\u0000-\u001f\u007f]/g, ""), 160)
+  };
+}
+
 function analyticsSeconds(value) {
   return clampInt(value, 0, 43200, 0);
 }
@@ -719,6 +795,63 @@ function mapDraftRow(row, exerciseId, exerciseTitle) {
   };
 }
 
+// My Results (exercise results): every exercise the member has anything for, from rows already read.
+//   progressRows: activity_progress; lightAttempts: activity_attempts without detail (all, for the best score and the
+//   count); detailAttempts: the newest attempts with detail; submissionRows: the latest real submission per completed
+//   exercise ({ activity_id, ...submission columns }). Result: { exercises: { <activity id>: entry }, aliases: { <key>: <activity id> } }.
+//   entry: activityId, appKey, title, status, completedAt, completionCount, latestSubmission (the shape of
+//   getExerciseWork submissions), attempts (the newest ten, detail when the detail read held it), attemptCount, best.
+function buildExerciseResults({ catalog, progressRows = [], lightAttempts = [], detailAttempts = [], submissionRows = [] } = {}) {
+  const result = { exercises: {}, aliases: {} };
+  if (!catalog) return result;
+  const exerciseIds = new Set();
+  catalog.byId.forEach((activity, id) => {
+    if (activity && activity.kind === "exercise" && catalog.isActive(id)) exerciseIds.add(id);
+  });
+  const detailByKey = new Map();
+  (detailAttempts || []).forEach((row) => { if (row && row.attempt_key) detailByKey.set(`${row.activity_id}|${row.attempt_key}`, row); });
+  const progressById = new Map();
+  (progressRows || []).forEach((row) => { if (row && exerciseIds.has(row.activity_id)) progressById.set(row.activity_id, row); });
+  const attemptsById = new Map();
+  (lightAttempts || []).forEach((row) => {
+    if (!row || !exerciseIds.has(row.activity_id) || !row.attempt_key) return;
+    if (!attemptsById.has(row.activity_id)) attemptsById.set(row.activity_id, []);
+    attemptsById.get(row.activity_id).push(row);
+  });
+  const submissionById = new Map();
+  (submissionRows || []).forEach((row) => { if (row && exerciseIds.has(row.activity_id) && !submissionById.has(row.activity_id)) submissionById.set(row.activity_id, row); });
+
+  exerciseIds.forEach((activityId) => {
+    const progress = progressById.get(activityId) || null;
+    const attempts = attemptsById.get(activityId) || [];
+    const submission = submissionById.get(activityId) || null;
+    if (!progress && !attempts.length && !submission) return;
+    const activity = catalog.get(activityId) || {};
+    const appKey = catalog.appKeyFor(activityId) || activityId;
+    const title = activity.title || appKey;
+    const mapped = attempts.map((row) => mapAttemptRow(detailByKey.get(`${activityId}|${row.attempt_key}`) || row, appKey, title));
+    let best = null;
+    mapped.forEach((item) => { if (!best || item.scorePercent > best.scorePercent) best = item; });
+    result.exercises[activityId] = {
+      activityId,
+      appKey,
+      title,
+      status: progress ? progress.status || null : null,
+      completedAt: progress ? toIsoOrNull(progress.completed_at) : null,
+      completionCount: progress ? Number(progress.completion_count) || 0 : 0,
+      latestSubmission: submission ? mapSubmissionRow(submission, appKey, title) : null,
+      attempts: mapped.slice(0, 10),
+      attemptCount: mapped.length,
+      best
+    };
+    [activityId, appKey].concat(catalog.aliasesFor(activityId)).forEach((key) => {
+      const normalized = String(key || "").trim().toLowerCase();
+      if (normalized) result.aliases[normalized] = activityId;
+    });
+  });
+  return result;
+}
+
 function rebuildRewards(ledgerRows = [], totalRows = [], stateRows = []) {
   const ledger = (ledgerRows || []).map((row) => {
     const source = isPlainObject(row.source) ? row.source : {};
@@ -799,6 +932,195 @@ function rebuildWorkspaceProgress({ progressRows = [], ledgerRows = [], totalRow
 }
 
 // ---------------------------------------------------------------------------
+// Site settings (Firestore settings/{docId} <-> app_settings.key) and the member access record (pure helpers)
+
+// The ten settings documents the admin console writes, by Firestore document id. Only these map to app_settings rows;
+// settings/cohorts is the cohorts table and has no settings row.
+const SETTING_DOC_KEYS = {
+  feedback: "feedback",
+  publicSite: "public_site",
+  engagement: "engagement",
+  rewards: "rewards",
+  assessments: "assessments",
+  public_assessments: "public_assessments",
+  payments: "payments",
+  admin_visibility: "admin_visibility",
+  tsa_scoring: "tsa_scoring",
+  emailTemplates: "email_templates"
+};
+// Rows anyone can read with the publishable key alone (visibility public); logged out pages read these three.
+const PUBLIC_SETTING_KEYS = ["public_site", "public_assessments", "payments"];
+// The same list the payments mirror and the database use: a public row never carries a field like these.
+const SECRET_FIELD_NAME = /(secret|token|card|cvc|cvv|password|api_?key|webhook|signature_key)/i;
+const SETTING_DEPTH_LIMIT = 12;
+
+function settingKeyFor(docId) {
+  const id = String(docId == null ? "" : docId);
+  return Object.prototype.hasOwnProperty.call(SETTING_DOC_KEYS, id) ? SETTING_DOC_KEYS[id] : "";
+}
+
+// Firestore Timestamps become ISO text, anything that is not plain JSON is dropped (jsonSafeValue), and a public
+// setting loses any field that looks secret at any depth. Always returns a plain object.
+function settingJson(value, key = "") {
+  const convert = (item, depth) => {
+    if (item && typeof item === "object" && typeof item.toDate === "function") {
+      try { return item.toDate().toISOString(); } catch (error) { return undefined; }
+    }
+    if (depth > SETTING_DEPTH_LIMIT) return undefined;
+    if (Array.isArray(item)) return item.map((entry) => convert(entry, depth + 1));
+    if (isPlainObject(item)) {
+      const out = {};
+      Object.keys(item).forEach((name) => {
+        if (PUBLIC_SETTING_KEYS.includes(key) && SECRET_FIELD_NAME.test(name)) return;
+        const next = convert(item[name], depth + 1);
+        if (next !== undefined) out[name] = next;
+      });
+      return out;
+    }
+    return item;
+  };
+  if (!isPlainObject(value)) return {};
+  const safe = jsonSafeValue(convert(value, 0), 0, new Set());
+  return isPlainObject(safe) ? safe : {};
+}
+
+// Order independent comparison of two plain JSON values (used by the shadow compare of settings).
+function sameJson(a, b) {
+  if (a === b) return true;
+  if (Array.isArray(a) || Array.isArray(b)) {
+    return Array.isArray(a) && Array.isArray(b) && a.length === b.length && a.every((item, index) => sameJson(item, b[index]));
+  }
+  if (isPlainObject(a) && isPlainObject(b)) {
+    const keys = Object.keys(a);
+    return keys.length === Object.keys(b).length && keys.every((name) => Object.prototype.hasOwnProperty.call(b, name) && sameJson(a[name], b[name]));
+  }
+  return false;
+}
+
+function millisOf(value) {
+  if (value == null || value === "") return null;
+  const time = toIsoOrNull(value);
+  return time ? new Date(time).getTime() : null;
+}
+
+// The answer of get_my_access in a fixed shape, or null when it is not an object with a boolean 'allowed'.
+function normalizeAccess(raw) {
+  if (!isPlainObject(raw) || typeof raw.allowed !== "boolean") return null;
+  const roles = Array.isArray(raw.platformRoles) ? raw.platformRoles.filter((role) => typeof role === "string") : [];
+  return {
+    found: raw.found === true,
+    allowed: raw.allowed === true,
+    reason: typeof raw.reason === "string" ? raw.reason : "",
+    email: typeof raw.email === "string" ? raw.email.trim().toLowerCase() : "",
+    name: typeof raw.name === "string" ? raw.name : "",
+    isAdmin: raw.isAdmin === true,
+    platformRoles: roles,
+    status: raw.status === "inactive" ? "inactive" : "active",
+    expiryDate: toIsoOrNull(raw.expiryDate),
+    cohort: typeof raw.cohort === "string" ? raw.cohort : ""
+  };
+}
+
+// What the sign in code decides from a Firestore authorized_members record: it exists, its status is not
+// "inactive" and its expiry date (if any) is not in the past. admin and owner roles are administrators.
+function summarizeFirestoreMember(member, nowMs = Date.now()) {
+  if (!isPlainObject(member)) return { exists: false, allowed: false, isAdmin: false, expiryMs: null };
+  const expiryMs = millisOf(member.expiryDate);
+  const expired = expiryMs !== null && expiryMs < nowMs;
+  const inactive = String(member.status || "").toLowerCase() === "inactive";
+  const role = String(member.role || "").toLowerCase();
+  return { exists: true, allowed: !inactive && !expired, isAdmin: role === "admin" || role === "owner", expiryMs };
+}
+
+// The names of the facts on which Firestore and Supabase disagree (no values, nothing personal). An expiry date counts
+// when only one side has one or the two are more than a day apart.
+function compareAccess(summary, access) {
+  const differences = [];
+  if (!summary || !access) return ["unreadable"];
+  if (summary.allowed !== access.allowed) differences.push("allowed");
+  if (summary.isAdmin !== access.isAdmin) differences.push("admin");
+  if (summary.allowed && access.allowed) {
+    const supabaseMs = millisOf(access.expiryDate);
+    if ((summary.expiryMs === null) !== (supabaseMs === null)) differences.push("expiry");
+    else if (summary.expiryMs !== null && Math.abs(summary.expiryMs - supabaseMs) > 86400000) differences.push("expiry");
+  }
+  return differences;
+}
+
+// The record handed to the sign in code when Firestore could not be read and Supabase says the person may enter.
+// It can only grant: null unless Supabase found the person and said allowed. The role is always "member" here, so a
+// Supabase answer can never make anyone an administrator of the site pages.
+function buildFallbackMember(access, email) {
+  if (!access || access.found !== true || access.allowed !== true) return null;
+  const address = String(email || "").trim().toLowerCase();
+  if (!address) return null;
+  // The record must be the one that was asked about: a different address on the Supabase side means no grant.
+  if (access.email !== address) return null;
+  const member = { email: address, name: access.name || "", role: "member", status: "active", source: "supabase-fallback" };
+  if (access.expiryDate) member.expiryDate = access.expiryDate;
+  if (access.cohort) member.cohort = access.cohort;
+  return member;
+}
+
+// ---------------------------------------------------------------------------
+// Admin browser writes (migration 2220): ids and arguments for the cohort, feedback and support preview copies.
+
+// The importer's name based ids: uuid v5 of the key in this namespace (scripts/supabase-import-mapping.js uuidFor).
+// Cohort rows are "cohort:tsa:<name>" and organization rows "organization:<Firestore document id>", so a copy made
+// here lands on the same row a later import or the server mirror finds.
+const ID_NAMESPACE = "6f1b2c3d-4e5f-4a6b-8c7d-9e0f1a2b3c4d";
+
+async function uuidV5(key) {
+  const subtle = typeof globalThis !== "undefined" && globalThis.crypto && globalThis.crypto.subtle;
+  if (!subtle || typeof subtle.digest !== "function") {
+    throw new SupabaseDataError("This browser cannot make the record id.", { code: "data/no-crypto" });
+  }
+  const namespace = ID_NAMESPACE.replace(/-/g, "").match(/.{2}/g).map((pair) => parseInt(pair, 16));
+  const name = Array.from(new TextEncoder().encode(String(key)));
+  const digest = new Uint8Array(await subtle.digest("SHA-1", new Uint8Array(namespace.concat(name))));
+  const bytes = digest.slice(0, 16);
+  bytes[6] = (bytes[6] & 0x0f) | 0x50;
+  bytes[8] = (bytes[8] & 0x3f) | 0x80;
+  const hex = Array.from(bytes).map((byte) => byte.toString(16).padStart(2, "0")).join("");
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20, 32)}`;
+}
+
+function cohortIdFor(name) {
+  return uuidV5(`cohort:${PROGRAM_TSA}:${text(name, 120)}`);
+}
+
+function organizationIdFor(documentId) {
+  return uuidV5(`organization:${documentId}`);
+}
+
+// A calendar day (YYYY-MM-DD) from the admin form's date input, a Firestore Timestamp or an ISO string; null if none.
+function dayOrNull(value) {
+  if (typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value.trim())) return value.trim();
+  const iso = toIsoOrNull(value);
+  return iso ? iso.slice(0, 10) : null;
+}
+
+// Arguments of admin_mirror_cohort for one settings/cohorts entry (the details object the admin console saved).
+async function buildCohortArgs(cohortName, details) {
+  const name = text(cohortName, 120);
+  if (!name) throw invalidArgument("A cohort name is required.");
+  const source = isPlainObject(details) ? details : {};
+  const organizationDocId = text(source.organizationId, 200);
+  return {
+    p_id: await cohortIdFor(name),
+    p_name: name,
+    p_status: text(source.status, 20) || "active",
+    p_starts_on: dayOrNull(source.startDate),
+    p_ends_on: dayOrNull(source.endDate),
+    p_contact_name: text(source.contactName, 200),
+    p_contact_email: text(source.contactEmail, 320) || null,
+    p_notes: text(source.notes, 4000),
+    p_organization_id: organizationDocId ? await organizationIdFor(organizationDocId) : null,
+    p_organization_name: text(source.organizationName, 160) || null
+  };
+}
+
+// ---------------------------------------------------------------------------
 // The data layer
 
 function createSupabaseData(context = {}) {
@@ -818,10 +1140,14 @@ function createSupabaseData(context = {}) {
   if (typeof getIdToken !== "function") throw new Error("createSupabaseData needs getIdToken().");
   if (typeof fetchImpl !== "function") throw new Error("createSupabaseData needs fetchImpl in this environment.");
 
+  // The cached own person id (see ownPersonId below); cleared whenever there is no token.
+  let personCache = null;
+
   // getIdToken(forceRefresh): true asks Firebase for a fresh token (used once, after an expiry answer).
   async function currentToken(forceRefresh = false) {
     try {
       const token = await getIdToken(forceRefresh === true);
+      if (!token) personCache = null;
       return token ? String(token) : "";
     } catch (error) {
       return "";
@@ -836,13 +1162,12 @@ function createSupabaseData(context = {}) {
 
   // An expired token is retried exactly once with a refreshed token (attempt 1); every other failure
   // is thrown to the caller as it is.
-  async function request(method, path, body, attempt = 0) {
-    const token = await requireToken(attempt > 0);
-    const headers = {
-      apikey: publishableKey,
-      Authorization: `Bearer ${token}`,
-      Accept: "application/json"
-    };
+  // anonymous is for the public settings only (logged out pages): the publishable key alone, no token.
+  async function request(method, path, body, attempt = 0, anonymous = false) {
+    const token = anonymous ? "" : await requireToken(attempt > 0);
+    const headers = { apikey: publishableKey };
+    if (token) headers.Authorization = `Bearer ${token}`;
+    headers.Accept = "application/json";
     if (body !== undefined) headers["Content-Type"] = "application/json";
     // The timeout aborts the request; the browser then rejects fetch, which surfaces as network/failed.
     const controller = typeof AbortController === "function" ? new AbortController() : null;
@@ -870,7 +1195,7 @@ function createSupabaseData(context = {}) {
         hint: answer.hint || null
       });
       // Any 401 gets one retry with a freshly issued token: a new member's first token predates their role claim.
-      if (attempt === 0 && Number(response.status) === 401) return request(method, path, body, 1);
+      if (attempt === 0 && !anonymous && Number(response.status) === 401) return request(method, path, body, 1);
       throw error;
     }
     return data;
@@ -882,6 +1207,51 @@ function createSupabaseData(context = {}) {
 
   function select(table, query) {
     return request("GET", `/rest/v1/${table}?${query}`).then((rows) => (Array.isArray(rows) ? rows : []));
+  }
+
+  // The signed in person's own id (public.get_my_person_id, migration 2230), asked once per signed in person. Reads of
+  // learner owned tables carry person_id=eq.<id>: row level security also lets staff roles read every member's rows, so
+  // "own rows" alone would hand a staff account who uses the learner site everyone's data. The cache is keyed by the
+  // token's subject (the Firebase uid), so a different person signing in is asked again; a missing token clears it; an
+  // unknown person (null) is not cached, so the next read asks again.
+  function tokenSubject(token) {
+    try {
+      const part = String(token).split(".")[1] || "";
+      const json = typeof atob === "function" ? atob(part.replace(/-/g, "+").replace(/_/g, "/")) : Buffer.from(part, "base64").toString("utf8");
+      const sub = JSON.parse(json).sub;
+      return typeof sub === "string" && sub ? sub : "";
+    } catch (error) {
+      return "";
+    }
+  }
+
+  async function ownPersonId() {
+    const token = await currentToken();
+    if (!token) {
+      personCache = null;
+      return "";
+    }
+    const key = tokenSubject(token) || token;
+    if (personCache && personCache.key === key) return personCache.promise;
+    const entry = { key, promise: null };
+    entry.promise = rpc("get_my_person_id", {}).then((id) => {
+      const value = typeof id === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id) ? id.toLowerCase() : "";
+      if (!value && personCache === entry) personCache = null;
+      return value;
+    }, (error) => {
+      if (personCache === entry) personCache = null;
+      throw error;
+    });
+    personCache = entry;
+    return entry.promise;
+  }
+
+  // A read of a learner owned table, narrowed to the caller's own person_id. With no person id (signed out, or no
+  // person record for this token) nothing is sent and the answer is empty, never unscoped rows.
+  async function selectOwn(table, query) {
+    const personId = await ownPersonId();
+    if (!personId) return [];
+    return select(table, `${query}&person_id=eq.${personId}`);
   }
 
   // The catalog is small (about 60 rows) and stable; one load per page, retried if it failed.
@@ -929,6 +1299,22 @@ function createSupabaseData(context = {}) {
     return { saved: true, attemptId: args.p_attempt_key };
   }
 
+  // The finished TSA diagnostic or checkpoint (Firestore assessment_item_attempts). First write of a key wins.
+  async function saveAssessmentItemAttempt(attemptPayload = {}) {
+    if (previewActive()) return { preview: true, saved: false };
+    const args = buildTsaItemAttemptArgs(attemptPayload);
+    const result = await rpc("record_tsa_item_attempt", args) || {};
+    return { saved: true, attemptId: args.p_attempt_key, inserted: result.inserted === true };
+  }
+
+  // The private rules based versus generative score for one stored attempt (Firestore tsa_scoring_comparisons).
+  async function saveTsaScoringComparison(payload = {}) {
+    if (previewActive()) return { preview: true, saved: false };
+    const args = buildTsaScoringComparisonArgs(payload);
+    const result = await rpc("record_tsa_scoring_comparison", args) || {};
+    return { saved: true, attemptId: args.p_attempt_key, inserted: result.inserted === true };
+  }
+
   async function saveExerciseDraft(exerciseId, exerciseTitle, draftPayload = {}) {
     if (previewActive()) return { preview: true, saved: false };
     const safeExerciseId = text(exerciseId, 100);
@@ -960,7 +1346,7 @@ function createSupabaseData(context = {}) {
     }
     // The browser still computes the summary (as the Firestore transaction did); the database applies
     // the same patch rules and ignores the summary when the evidence key is a repeat.
-    const rows = await select("learning_profile_summaries", "select=schema_version,personality,learning,programs");
+    const rows = await selectOwn("learning_profile_summaries", "select=schema_version,personality,learning,programs");
     const existing = rows[0]
       ? { schemaVersion: rows[0].schema_version, personality: rows[0].personality, learning: rows[0].learning, programs: rows[0].programs }
       : {};
@@ -1034,7 +1420,7 @@ function createSupabaseData(context = {}) {
     const snapshot = isPlainObject(progress) ? progress : {};
     const [catalog, existingRows] = await Promise.all([
       loadCatalog(),
-      select("activity_progress", "select=activity_id,status")
+      selectOwn("activity_progress", "select=activity_id,status")
     ]);
     const plan = planProgressMarks(snapshot, catalog, existingRows);
     // Sequential on purpose: a snapshot after an import or a reset can carry dozens of marks.
@@ -1100,10 +1486,10 @@ function createSupabaseData(context = {}) {
     if (!(await currentToken())) return null;
     const [catalog, progressRows, ledgerRows, totalRows, stateRows] = await Promise.all([
       loadCatalog(),
-      select("activity_progress", "select=activity_id,status,first_visited_at,completed_at,completion_count"),
-      select("reward_ledger", `select=entry_key,points,reason,activity_id,earned_at,source&program_id=${eq(PROGRAM_TSA)}&order=earned_at.asc`),
-      select("reward_totals", `select=program_id,points_total,entry_count,last_earned_at&program_id=${eq(PROGRAM_TSA)}`),
-      select("reward_state", `select=streak_days,last_qualified_on,tokens,streak&program_id=${eq(PROGRAM_TSA)}`)
+      selectOwn("activity_progress", "select=activity_id,status,first_visited_at,completed_at,completion_count"),
+      selectOwn("reward_ledger", `select=entry_key,points,reason,activity_id,earned_at,source&program_id=${eq(PROGRAM_TSA)}&order=earned_at.asc`),
+      selectOwn("reward_totals", `select=program_id,points_total,entry_count,last_earned_at&program_id=${eq(PROGRAM_TSA)}`),
+      selectOwn("reward_state", `select=streak_days,last_qualified_on,tokens,streak&program_id=${eq(PROGRAM_TSA)}`)
     ]);
     // No rows at all is the same as no users document in Firestore.
     if (!progressRows.length && !ledgerRows.length && !stateRows.length && !totalRows.length) return null;
@@ -1123,9 +1509,9 @@ function createSupabaseData(context = {}) {
     // Firestore read instead of showing an empty draft or history.
     // Real submissions and practice rounds are read separately, ten of each, so a run of practice rounds
     // can never push a member's real saved results out of the window.
-    const submissionSelect = (kind) => select("activity_submissions", `select=id,submission_key,attempt_number,completed_at,duration_seconds,content_version,kind,response&activity_id=${eq(activityId)}&kind=eq.${kind}&order=completed_at.desc&limit=10`);
+    const submissionSelect = (kind) => selectOwn("activity_submissions", `select=id,submission_key,attempt_number,completed_at,duration_seconds,content_version,kind,response&activity_id=${eq(activityId)}&kind=eq.${kind}&order=completed_at.desc&limit=10`);
     const [draftRows, submissionRows, practiceRows] = await Promise.all([
-      select("activity_drafts", `select=draft,updated_at&activity_id=${eq(activityId)}`),
+      selectOwn("activity_drafts", `select=draft,updated_at&activity_id=${eq(activityId)}`),
       submissionSelect("submission"),
       submissionSelect("practice")
     ]);
@@ -1156,13 +1542,172 @@ function createSupabaseData(context = {}) {
     const activityId = catalog.resolve(targetId);
     if (!activityId) throw unknownActivity(targetId);
     const title = (catalog.get(activityId) || {}).title || targetId;
-    const rows = await select("activity_attempts", `select=attempt_key,attempt_number,score,score_maximum,score_percent,duration_seconds,content_version,detail,submitted_at&activity_id=${eq(activityId)}&order=submitted_at.desc&limit=10`);
+    const rows = await selectOwn("activity_attempts", `select=attempt_key,attempt_number,score,score_maximum,score_percent,duration_seconds,content_version,detail,submitted_at&activity_id=${eq(activityId)}&order=submitted_at.desc&limit=10`);
     return rows.map((row) => mapAttemptRow(row, targetId, title));
+  }
+
+  // The member's own exercise results for the My Results page, in a fixed number of reads instead of four per
+  // exercise: progress, every attempt (light, for the best score and the count), the newest sixty attempts with their
+  // detail, and the latest real submission of each completed exercise. Any read failing fails the whole call, so the
+  // page keeps its local results. Row level security returns only the caller's rows.
+  async function getMemberExerciseResults() {
+    const empty = { exercises: {}, aliases: {} };
+    if (!(await currentToken())) return empty;
+    const catalog = await loadCatalog();
+    const attemptColumns = "activity_id,attempt_key,attempt_number,score,score_maximum,score_percent,duration_seconds,content_version,submitted_at";
+    const [progressRows, lightAttempts, detailAttempts] = await Promise.all([
+      selectOwn("activity_progress", "select=activity_id,status,first_visited_at,completed_at,completion_count"),
+      selectOwn("activity_attempts", `select=${attemptColumns}&order=submitted_at.desc&limit=400`),
+      selectOwn("activity_attempts", `select=${attemptColumns},detail&order=submitted_at.desc&limit=60`)
+    ]);
+    const completedIds = (progressRows || [])
+      .filter((row) => row && row.status === "completed" && catalog.get(row.activity_id) && catalog.get(row.activity_id).kind === "exercise" && catalog.isActive(row.activity_id))
+      .map((row) => row.activity_id);
+    const submissionRows = (await Promise.all(completedIds.map((activityId) =>
+      selectOwn("activity_submissions", `select=activity_id,id,submission_key,attempt_number,completed_at,duration_seconds,content_version,kind,response&activity_id=${eq(activityId)}&kind=eq.submission&order=completed_at.desc&limit=1`)
+    ))).reduce((all, rows) => all.concat(rows), []);
+    return buildExerciseResults({ catalog, progressRows, lightAttempts, detailAttempts, submissionRows });
+  }
+
+  // -- Executive Signature (migration 2210) ----------------------------------------
+
+  // Same shape as the getMyEsStatus callable ({ ok, customerId, assessments: { 'quick-check', 'full-assessment' } }),
+  // read from the member's own stored attempts. Null when there is no signed in user or the answer is not an object.
+  async function getMyEsStatus() {
+    if (!(await currentToken())) return null;
+    const result = await rpc("get_my_es_status", {});
+    return isPlainObject(result) && isPlainObject(result.assessments) ? result : null;
+  }
+
+  // One stored completed attempt with its ten facet scores: the member's own, or any when the caller is staff.
+  // Null when the id is empty, unknown, not completed or not the caller's to read.
+  async function getEsAttemptReport(attemptId) {
+    const id = text(attemptId, 200);
+    if (!id) return null;
+    if (!(await currentToken())) return null;
+    const result = await rpc("get_es_attempt_report", { p_attempt: id });
+    return isPlainObject(result) ? result : null;
+  }
+
+  // -- site settings ----------------------------------------------------------
+
+  // One settings document by its Firestore id (rewards, publicSite, emailTemplates, ...). Resolves
+  // { found: true, key, value, updatedAt } or { found: false, key }. found is false when the row is not visible to
+  // this caller (row level security hides member and staff keys from a logged out page), which is not the same as
+  // "the document does not exist". With no token only the three public keys can be read, with the publishable key alone.
+  async function getAppSetting(docId) {
+    const key = settingKeyFor(docId);
+    if (!key) throw invalidArgument("Unknown setting.");
+    const query = `select=key,value,updated_at&key=${eq(key)}`;
+    const readAnonymously = () => request("GET", `/rest/v1/app_settings?${query}`, undefined, 0, true).then((rows) => (Array.isArray(rows) ? rows : []));
+    let rows;
+    if (await currentToken()) {
+      try {
+        rows = await select("app_settings", query);
+      } catch (error) {
+        if (!PUBLIC_SETTING_KEYS.includes(key)) throw error;
+        rows = await readAnonymously();
+      }
+    } else {
+      rows = PUBLIC_SETTING_KEYS.includes(key) ? await readAnonymously() : [];
+    }
+    const row = rows[0];
+    if (!row || !isPlainObject(row.value)) return { found: false, key };
+    return { found: true, key, value: row.value, updatedAt: row.updated_at || null };
+  }
+
+  // Replaces the Supabase copy of one settings document with the whole stored Firestore document (staff only; the
+  // database refuses everyone but a platform owner). The caller reads the document back from Firestore after its own write.
+  async function saveAppSetting(docId, value) {
+    if (previewActive()) return { preview: true, saved: false };
+    const key = settingKeyFor(docId);
+    if (!key) throw invalidArgument("Unknown setting.");
+    await rpc("admin_set_app_setting", { p_key: key, p_value: settingJson(value, key) });
+    return { saved: true, key };
+  }
+
+  // -- admin browser writes (migration 2220, platform owners only) ----------------
+
+  // The Supabase copy of one settings/cohorts entry, after the Firestore write succeeded.
+  async function mirrorAdminCohort(cohortName, details) {
+    if (previewActive()) return { preview: true, saved: false };
+    await rpc("admin_mirror_cohort", await buildCohortArgs(cohortName, details));
+    return { saved: true };
+  }
+
+  // A cohort renamed: the enrollments move to the new name's row. details is the entry now stored under the new name.
+  async function mirrorAdminCohortRename(oldName, newName, details) {
+    if (previewActive()) return { preview: true, saved: false };
+    const from = text(oldName, 120);
+    const to = text(newName, 120);
+    if (!from || !to) throw invalidArgument("Both cohort names are required.");
+    await rpc("admin_mirror_cohort_rename", { p_old_name: from, p_new_name: to, p_new_id: await cohortIdFor(to) });
+    // The new row copies the old one; the stored details of the new name then replace its contact, dates and notes.
+    if (isPlainObject(details) && Object.keys(details).length) await rpc("admin_mirror_cohort", await buildCohortArgs(to, details));
+    return { saved: true };
+  }
+
+  // users/{uid}.feedbackEnabled for one member (the admin's per member feedback switch).
+  async function mirrorAdminFeedbackEnabled(uid, enabled) {
+    if (previewActive()) return { preview: true, saved: false };
+    const safeUid = text(uid, 200);
+    if (!safeUid) throw invalidArgument("A member uid is required.");
+    await rpc("admin_mirror_feedback_enabled", { p_uid: safeUid, p_enabled: Boolean(enabled) });
+    return { saved: true };
+  }
+
+  // The "admin opened a member's view" audit entry that Firestore holds as support_preview_audit/{eventId}.
+  async function mirrorAdminSupportPreview(eventId, memberUid, memberEmail) {
+    if (previewActive()) return { preview: true, saved: false };
+    const safeId = text(eventId, 100);
+    if (!safeId) throw invalidArgument("An event id is required.");
+    await rpc("admin_mirror_support_preview", {
+      p_event_id: safeId,
+      p_member_uid: text(memberUid, 200) || null,
+      p_member_email: text(memberEmail, 320).toLowerCase() || null
+    });
+    return { saved: true };
+  }
+
+  // Shadow compare of one Firestore settings document (null when it does not exist) with the Supabase row. The two are
+  // compared as the caller's own view of them (the getter's normalising function), so fields the page never reads do
+  // not count. compared is false when the row is not visible to this caller. Never decides anything.
+  async function checkSetting(docId, firestoreData, view) {
+    const key = settingKeyFor(docId);
+    const remote = await getAppSetting(docId);
+    if (!remote.found) return { compared: false, agree: true };
+    const apply = typeof view === "function" ? view : (value) => value;
+    const fromFirestore = apply(firestoreData === null ? null : settingJson(firestoreData, key));
+    const fromSupabase = apply(remote.value);
+    return { compared: true, agree: sameJson(fromFirestore, fromSupabase) };
+  }
+
+  // -- access -----------------------------------------------------------------
+
+  // The signed in person's own access record (get_my_access). Throws when the answer is not understood.
+  async function getMyAccess() {
+    const access = normalizeAccess(await rpc("get_my_access", {}));
+    if (!access) throw new SupabaseDataError("The access answer was not understood.", { code: "data/bad-answer" });
+    return access;
+  }
+
+  // Shadow compare of a Firestore authorized_members record (or null) with Supabase. Never decides anything.
+  async function checkAccess(member, nowMs = Date.now()) {
+    const access = await getMyAccess();
+    const differences = compareAccess(summarizeFirestoreMember(member, nowMs), access);
+    return { compared: true, agree: differences.length === 0, differences };
+  }
+
+  // A member record to use when Firestore could not be read: null unless Supabase says this person may enter.
+  async function getAccessFallback(email) {
+    return buildFallbackMember(await getMyAccess(), email);
   }
 
   return {
     saveUserProgress,
     saveExerciseAttempt,
+    saveAssessmentItemAttempt,
+    saveTsaScoringComparison,
     saveExerciseDraft,
     saveExerciseSubmission,
     saveLearningProfileEvidence,
@@ -1176,6 +1721,19 @@ function createSupabaseData(context = {}) {
     getMemberWorkspaceProgress,
     getExerciseWork,
     getExerciseAttempts,
+    getMemberExerciseResults,
+    getMyEsStatus,
+    getEsAttemptReport,
+    getAppSetting,
+    saveAppSetting,
+    checkSetting,
+    mirrorAdminCohort,
+    mirrorAdminCohortRename,
+    mirrorAdminFeedbackEnabled,
+    mirrorAdminSupportPreview,
+    getMyAccess,
+    checkAccess,
+    getAccessFallback,
     // For the page switch and tests.
     loadCatalog,
     resetCatalog() { catalogPromise = null; }
@@ -1199,6 +1757,21 @@ export {
   buildSubmissionArgs,
   buildExplicitSubmissionArgs,
   buildAttemptArgs,
+  buildTsaItemAttemptArgs,
+  buildTsaScoringComparisonArgs,
+  settingKeyFor,
+  settingJson,
+  sameJson,
+  uuidV5,
+  cohortIdFor,
+  organizationIdFor,
+  buildCohortArgs,
+  normalizeAccess,
+  summarizeFirestoreMember,
+  compareAccess,
+  buildFallbackMember,
+  SETTING_DOC_KEYS,
+  PUBLIC_SETTING_KEYS,
   normalizeEngagementSession,
   normalizeStabilityEvent,
   normalizeLearningEvidence,
@@ -1208,6 +1781,7 @@ export {
   mapSubmissionRow,
   mapAttemptRow,
   mapDraftRow,
+  buildExerciseResults,
   rebuildRewards,
   rebuildWorkspaceProgress,
   PROGRAM_TSA,

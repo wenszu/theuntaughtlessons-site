@@ -2,6 +2,8 @@ const admin = require("firebase-admin");
 const { onDocumentCreated } = require("firebase-functions/v2/firestore");
 const { defineSecret, defineString } = require("firebase-functions/params");
 const { google } = require("googleapis");
+const mirrorRuntime = require("./supabase-mirror/runtime");
+const groupSyncMirror = require("./supabase-mirror/group-sync");
 
 admin.initializeApp();
 
@@ -48,9 +50,9 @@ exports.processGoogleGroupSyncJob = onDocumentCreated({
     if (action === "add") await addGroupMember(directory, groupEmail, email);
     else await removeGroupMember(directory, groupEmail, email);
 
-    await markJobConfirmed(jobRef, action, groupEmail, email);
+    await markJobConfirmed(jobRef, action, groupEmail, email, job);
   } catch (error) {
-    await markJobFailed(jobRef, action, groupEmail, email, error);
+    await markJobFailed(jobRef, action, groupEmail, email, error, job);
   }
 });
 
@@ -93,7 +95,15 @@ async function removeGroupMember(directory, groupEmail, email) {
   }
 }
 
-async function markJobConfirmed(jobRef, action, groupEmail, email) {
+// The job and member documents are written by markJobConfirmedInFirestore (unchanged); once that has succeeded the final
+// state is copied to Supabase. The copy is off unless SUPABASE_MIRROR=on, never throws and is capped, so it can neither
+// change the outcome of the sync nor turn a confirmed job into a failed one.
+async function markJobConfirmed(jobRef, action, groupEmail, email, job) {
+  await markJobConfirmedInFirestore(jobRef, action, groupEmail, email);
+  await mirrorGroupSyncFinalState("group sync confirmed", "confirmed", jobRef, action, groupEmail, email, job);
+}
+
+async function markJobConfirmedInFirestore(jobRef, action, groupEmail, email) {
   const db = admin.firestore();
   const now = admin.firestore.FieldValue.serverTimestamp();
   await jobRef.set({
@@ -118,7 +128,12 @@ async function markJobConfirmed(jobRef, action, groupEmail, email) {
   }, { merge: true });
 }
 
-async function markJobFailed(jobRef, action, groupEmail, email, error) {
+async function markJobFailed(jobRef, action, groupEmail, email, error, job) {
+  await markJobFailedInFirestore(jobRef, action, groupEmail, email, error);
+  await mirrorGroupSyncFinalState("group sync failed", "failed", jobRef, action, groupEmail, email, job);
+}
+
+async function markJobFailedInFirestore(jobRef, action, groupEmail, email, error) {
   const db = admin.firestore();
   const message = String(error && error.message || error || "Unknown Google Group sync error");
   const now = admin.firestore.FieldValue.serverTimestamp();
@@ -144,6 +159,25 @@ async function markJobFailed(jobRef, action, groupEmail, email, error) {
       googleGroupSyncFailedAt: now
     }, { merge: true });
   }
+}
+
+async function mirrorGroupSyncFinalState(label, status, jobRef, action, groupEmail, email, job) {
+  // Supabase mirror (off unless SUPABASE_MIRROR=on)
+  await mirrorRuntime.settle(label, async (mirror) => {
+    // The member document is read back only when the mirror is on, so the stored timestamps are the real ones.
+    const memberSnap = email ? await admin.firestore().collection("authorized_members").doc(email).get() : null;
+    return groupSyncMirror.mirrorGroupSyncResult(mirror, {
+      jobId: jobRef.id,
+      status,
+      action,
+      groupEmail,
+      email,
+      requestedBy: job && job.requestedBy,
+      requestedAt: job && job.requestedAt,
+      member: memberSnap && memberSnap.exists ? memberSnap.data() : null,
+      now: new Date().toISOString()
+    });
+  }, { waitMs: 10000 });
 }
 
 function isNotFound(error) {

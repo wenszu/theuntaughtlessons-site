@@ -959,6 +959,24 @@
       font-family: 'Lato', sans-serif;
     }
 
+    .ex-result-score {
+      margin: 8px 0 4px;
+    }
+
+    .ex-result-score .ex-result-meta {
+      font-size: 12px;
+      color: var(--charcoal);
+    }
+
+    .ex-result-breakdown {
+      margin: 6px 0 0;
+      padding-left: 18px;
+      font-size: 12px;
+      line-height: 1.6;
+      color: var(--charcoal);
+      font-family: 'Lato', sans-serif;
+    }
+
     .ex-marked-msg {
       font-size: 12px;
       color: var(--charcoal);
@@ -1371,6 +1389,7 @@
     </footer>
   </main>
 
+  <script src="../assets/exercise-results-view.js"></script>
   <script>
     const APPS = [
       { id: 'grocery-list', phase: 1, number: 1, doneKey: 'utl_p1_ex1_done', name: 'Grocery list', path: '../apps/grocery-list/index.html' },
@@ -1504,8 +1523,33 @@
       return Boolean(app.doneKey && localStorage.getItem(app.doneKey) === 'true');
     }
 
+    // Exercise results from the member's account (Supabase mode only). The module script at the end of the page
+    // fills window.utlAccountResults after sign in; until then, and whenever the data switch is off or the read
+    // fails, it stays null and every function below behaves exactly as it did with this browser's data alone.
+    window.utlAccountResults = null;
+
+    function viewForApp(appId) {
+      const api = window.UTL_EXERCISE_RESULTS;
+      if (!api || !window.utlAccountResults) return null;
+      return api.viewFor(appId, resultFor(appId), readKey('utl_score_attempts_' + appId), window.utlAccountResults);
+    }
+
+    // The record to show: this browser's own, with the account filling a gap or supplying a newer one.
+    function recordFor(appId) {
+      const view = viewForApp(appId);
+      return view ? view.record : resultFor(appId);
+    }
+
+    function scoreBlockFor(appId) {
+      const view = viewForApp(appId);
+      const api = window.UTL_EXERCISE_RESULTS;
+      return view && api ? api.scoreHtml(view.summary, escapeHtml) : '';
+    }
+
     function isComplete(app) {
-      return isWorkspaceDone(app) || Boolean(resultFor(app.id));
+      if (isWorkspaceDone(app) || Boolean(resultFor(app.id))) return true;
+      const view = viewForApp(app.id);
+      return Boolean(view && (view.record || view.accountComplete));
     }
 
     function renderStorageOriginHint() {
@@ -1734,6 +1778,7 @@
             <span class="ex-badge-done">Done</span>
           </div>
           <div class="ex-marked-msg">This exercise has been checked off. No written response has been saved in this browser yet.</div>
+          ${scoreBlockFor(app.id)}
         </div>`;
       }
       return `<div class="ex-result-card">
@@ -1746,6 +1791,7 @@
           <span class="ex-badge-done">Done</span>
         </div>
         <div class="ex-result-preview" id="preview-${app.id}">${escapeHtml(formatPreview(app.id, record))}</div>
+        ${scoreBlockFor(app.id)}
         <div class="ex-result-actions">
           <button class="btn-copy-workbook" onclick="copyToWorkbook('${app.id}')">Copy to workbook</button>
           <button class="btn-view-full" onclick="toggleFullResponse('${app.id}')">View full response</button>
@@ -1908,7 +1954,7 @@
         const pNum = p.key.replace('phase', '');
         const pApps = APPS.filter(a => a.phase == pNum);
         const exContent = pApps.map(app => {
-          const record = resultFor(app.id);
+          const record = recordFor(app.id);
           return isComplete(app) ? completedCard(app, record) : pendingCard(app);
         }).join('');
         const content = renderVideoGrid(p.key) + `<div class="exercise-progress-section"><div class="exercise-section-header"><h4>Applying: Exercises</h4></div><div class="exercise-list">${exContent}</div></div>`;
@@ -1941,7 +1987,7 @@
     }
 
     function copyToWorkbook(appId) {
-      const record = resultFor(appId);
+      const record = recordFor(appId);
       if (!record) return;
       const text = formatFullResponse(appId, record);
       const button = event.target;
@@ -1975,7 +2021,7 @@
       const phaseEntries = [1, 2, 3].map((phase) => ({
         section: `Phase ${phase} · ${phaseTitles[phase]}`,
         items: APPS.filter((app) => app.phase === phase).map((app) => {
-          const record = resultFor(app.id);
+          const record = recordFor(app.id);
           const completed = isComplete(app);
           return {
             name: app.name,
@@ -2139,7 +2185,7 @@
     applySendInstructorStatus();
   </script>
   <script type="module">
-    import { getSignedInUser, getAssessmentVisibility, getMemberExerciseResponses, issueVerifiedCredential } from '../assets/firebase.js';
+    import { getSignedInUser, getAssessmentVisibility, getMemberExerciseResponses, getMyExerciseResults, issueVerifiedCredential } from '../assets/firebase.js';
     (async () => {
       const callout = document.getElementById('certificateCallout');
       if (!callout || callout.hidden) return;
@@ -2205,6 +2251,21 @@
           }
         });
         if (repaired && typeof renderAllSections === 'function') renderAllSections();
+      } catch {}
+    })();
+    (async () => {
+      // With the Supabase data switch on, add the member's scored attempts, best results and latest saved answers from
+      // their account to what this browser holds. getMyExerciseResults resolves null with the switch off or when the
+      // read fails, and then nothing below runs: the page stays exactly as the local data drew it. Local data is never
+      // changed or removed; the account only fills gaps (see assets/exercise-results-view.js).
+      try {
+        const user = await getSignedInUser();
+        if (!user || !user.uid) return;
+        const results = await getMyExerciseResults();
+        if (!results || !results.exercises) return;
+        window.utlAccountResults = results;
+        if (typeof renderProgress === 'function') renderProgress();
+        if (typeof renderAllSections === 'function') renderAllSections();
       } catch {}
     })();
     (async () => {

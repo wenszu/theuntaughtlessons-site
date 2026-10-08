@@ -114,6 +114,7 @@ function createAssessmentPersistenceService({ db, FieldValue }) {
     }
     const startedAt = new Date(startedAtMillis);
     const source = sanitizeSource(input && input.source);
+    const suspect = input && input.suspect === true;
     const actor = input && input.actor || {};
     const actorId = requiredString(actor.actorId || "assessment-submission", "actor ID", 160);
     const actorType = requiredString(actor.actorType || "participant", "actor type", 40);
@@ -204,7 +205,9 @@ function createAssessmentPersistenceService({ db, FieldValue }) {
         completedAt: FieldValue.serverTimestamp(), durationSeconds, overallScore: score.overallScore,
         areaScores: score.areaScores, profileLabel: score.profileLabel, band: score.band,
         responseChecksum, resultChecksum, consentEventIds, responsePartCount: parts.length, source,
-        createdBy: actorId, writeVersion: 1, migrationRunId: null
+        createdBy: actorId, writeVersion: 1, migrationRunId: null,
+        // A review flag only (set by the public readiness callable); absent on ordinary attempts.
+        ...(suspect ? { suspect: true } : {})
       });
 
       const completedAfter = completedBefore + 1;

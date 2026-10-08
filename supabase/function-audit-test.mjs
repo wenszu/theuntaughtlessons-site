@@ -14,16 +14,22 @@ import { boot } from './schema-apply-harness.mjs';
 const WRITE_FUNCTIONS = [
   'save_activity_draft', 'clear_activity_draft', 'record_activity_submission', 'record_activity_attempt', 'mark_activity_progress',
   'record_engagement_session', 'record_stability_event', 'record_learning_evidence', 'add_reward_entries', 'update_my_profile', 'record_login',
-  'record_activity_practice'
+  'record_activity_practice', 'record_tsa_item_attempt', 'record_tsa_scoring_comparison'
 ];
 // Existing functions that browsers may call on purpose.
 const PUBLIC_ALLOWLIST = ['get_public_org_brand', 'get_public_credential'];                 // anon and authenticated
-const SIGNED_IN_ALLOWLIST = ['org_assessment_summary'];                                      // authenticated only
+const SIGNED_IN_ALLOWLIST = ['org_assessment_summary', 'get_my_es_status', 'get_es_attempt_report', 'get_my_person_id'];  // authenticated only (the two ES read functions are migration 2210, get_my_person_id is 2230)
 // Inbox (migration 2170). The two submit functions are the only new functions anon may execute. The staff functions are
 // authenticated only and refuse everyone but a platform_owner as their first statement.
 const SUBMIT_FUNCTIONS = ['submit_lead', 'submit_feedback'];                                 // anon and authenticated
 const STAFF_FUNCTIONS = ['admin_inbox_list', 'admin_inbox_set_status', 'admin_inbox_delete', 'admin_inbox_purge', 'admin_people_search',
   'admin_set_person_test_flag', 'admin_cleanup_preview', 'admin_cleanup_purge_people', 'admin_cleanup_junk_events'];
+// Settings and access (migration 2200), both authenticated only: the caller's own access record (no parameter at all) and the
+// platform owner only settings writer.
+const ACCESS_FUNCTIONS = ['get_my_access'];
+const SETTINGS_STAFF_FUNCTIONS = ['admin_set_app_setting'];
+// Admin browser writes (migration 2220): platform owner only copies of the cohort, feedback switch and support preview records.
+const ADMIN_MIRROR_FUNCTIONS = ['admin_mirror_cohort', 'admin_mirror_cohort_rename', 'admin_mirror_feedback_enabled', 'admin_mirror_support_preview'];
 // A parameter must not let the caller name a person, role, email or organization. (A plain p_status is a progress state.)
 const FORBIDDEN_PARAMS = /(^|_)(person|user|uid|auth|email|role|account_status|organization|org)(_|$)/i;
 
@@ -127,11 +133,80 @@ const helpers = await db.query(`select p.proname, has_function_privilege('anon',
   where n.nspname = 'private' and (p.proname like 'pw\\_%' or p.proname in ('require_person_id', 'resolve_activity', 'open_enrollment_id', 'check_jsonb_object', 'check_key', 'reject_update'))`);
 for (const h of helpers.rows) ok(`private.${h.proname}: closed to browsers`, !h.anon_exec && !h.auth_exec || h.proname === 'reject_update');
 
+// The two Executive Signature read functions (migration 2210): read only, caller from the token, no person parameter.
+// get_my_person_id (migration 2230): no argument, returns only the caller's own id.
+{
+  const f = fns.find((x) => x.proname === 'get_my_person_id');
+  ok('get_my_person_id: exists, security definer, empty search_path, no argument', !!f && f.prosecdef && /search_path=("")?(,|$)/.test(f.config || '') && f.args === '');
+  if (f) {
+    ok('get_my_person_id: anon cannot execute, authenticated can', !f.anon_exec && f.auth_exec);
+    ok('get_my_person_id: returns the caller from the token and nothing else', /private\.current_person_id\(\)/.test(f.prosrc) && !/\bfrom\s+public\./i.test(f.prosrc));
+  }
+}
+for (const f of fns.filter((x) => ['get_my_es_status', 'get_es_attempt_report'].includes(x.proname))) {
+  const name = f.proname;
+  ok(`${name}: security definer, search_path fixed to empty, no dynamic sql`, f.prosecdef && /search_path=("")?(,|$)/.test(f.config || '') && !/^\s*execute\b/im.test(f.prosrc));
+  ok(`${name}: resolves the caller from the token and refuses a signed out caller`, /private\.require_person_id\(\)/.test(f.prosrc));
+  ok(`${name}: takes no parameter that names a person, role, email or organization`, !(f.argnames || []).some((a) => FORBIDDEN_PARAMS.test(a)), (f.argnames || []).join(','));
+  ok(`${name}: anon cannot execute, authenticated can`, !f.anon_exec && f.auth_exec);
+  ok(`${name}: never writes`, !/\b(insert\s+into|update\s+public|delete\s+from)\b/i.test(f.prosrc));
+  ok(`${name}: never reads the raw answer table`, !/assessment_response_parts/.test(f.prosrc));
+}
+
+// Settings and access (migration 2200).
+for (const name of [...ACCESS_FUNCTIONS, ...SETTINGS_STAFF_FUNCTIONS]) {
+  const f = fns.find((x) => x.proname === name);
+  ok(`${name}: exists`, Boolean(f));
+  if (!f) continue;
+  ok(`${name}: security definer`, f.prosecdef);
+  ok(`${name}: search_path fixed to empty`, /search_path=("")?(,|$)/.test(f.config || ''), f.config);
+  ok(`${name}: no dynamic sql`, !/^\s*execute\b/im.test(f.prosrc) && !/\bexecute\b\s+(format|'|\$|quote)/i.test(f.prosrc));
+  ok(`${name}: anon cannot execute, authenticated can`, !f.anon_exec && f.auth_exec);
+  ok(`${name}: no parameter names a person, role, status or email`, !(f.argnames || []).some((a) => FORBIDDEN_PARAMS.test(a)), (f.argnames || []).join(','));
+}
+const access = fns.find((f) => f.proname === 'get_my_access');
+if (access) {
+  ok('get_my_access: takes no parameter, so a caller can only ever read their own record', access.args === '');
+  ok('get_my_access: resolves the person from the token (jwt sub) and writes nothing', /auth\.jwt\(\)/.test(access.prosrc) && !/\b(insert\s+into|update\s+public|delete\s+from)\b/i.test(access.prosrc));
+  ok('get_my_access: never raises for a missing person (the browser treats it as no information)', !/raise exception/i.test(access.prosrc));
+}
+for (const name of SETTINGS_STAFF_FUNCTIONS) {
+  const f = fns.find((x) => x.proname === name);
+  if (!f) continue;
+  const afterBegin = f.prosrc.slice(f.prosrc.search(/\bbegin\b/i) + 5).trimStart();
+  ok(`${name}: first statement refuses anyone but a platform_owner with 42501`, /^if not private\.has_platform_role\(array\['platform_owner'\]\) then\s+raise exception[^;]*errcode = '42501';/i.test(afterBegin), afterBegin.slice(0, 120));
+  ok(`${name}: only touches app_settings and audit_events`, !/(insert\s+into|update|delete\s+from)\s+public\.(?!app_settings\b|audit_events\b)/i.test(f.prosrc));
+}
+
+// Admin browser writes (migration 2220): staff only, first statement is the platform_owner check, authenticated only,
+// and each may touch only the tables it is meant to.
+const ADMIN_MIRROR_TABLES = {
+  admin_mirror_cohort: ['cohorts', 'audit_events'],
+  admin_mirror_cohort_rename: ['cohorts', 'enrollments', 'audit_events'],
+  admin_mirror_feedback_enabled: ['person_profiles', 'audit_events'],
+  admin_mirror_support_preview: ['audit_events']
+};
+for (const name of ADMIN_MIRROR_FUNCTIONS) {
+  const f = fns.find((x) => x.proname === name);
+  ok(`${name}: exists`, Boolean(f));
+  if (!f) continue;
+  ok(`${name}: security definer`, f.prosecdef);
+  ok(`${name}: search_path fixed to empty`, /search_path=("")?(,|$)/.test(f.config || ''), f.config);
+  ok(`${name}: no dynamic sql`, !/^\s*execute\b/im.test(f.prosrc) && !/\bexecute\b\s+(format|'|\$|quote)/i.test(f.prosrc));
+  ok(`${name}: anon cannot execute, authenticated can`, !f.anon_exec && f.auth_exec);
+  const afterBegin = f.prosrc.slice(f.prosrc.search(/\bbegin\b/i) + 5).trimStart();
+  ok(`${name}: first statement refuses anyone but a platform_owner with 42501`, /^if not private\.has_platform_role\(array\['platform_owner'\]\) then\s+raise exception[^;]*errcode = '42501';/i.test(afterBegin), afterBegin.slice(0, 120));
+  const touched = [...f.prosrc.matchAll(/(?:insert\s+into|update|delete\s+from)\s+public\.([a-z_]+)/gi)].map((m) => m[1].toLowerCase());
+  ok(`${name}: writes only ${ADMIN_MIRROR_TABLES[name].join(', ')}`, touched.every((t) => ADMIN_MIRROR_TABLES[name].includes(t)), touched.join());
+  ok(`${name}: never touches people, role_grants, entitlements or organizations`, !/(insert\s+into|update|delete\s+from)\s+public\.(people|role_grants|entitlements|organizations|affiliations)\b/i.test(f.prosrc));
+}
+
 // Nothing else is exposed by accident.
 const exposed = fns.filter((f) => f.prosecdef && (f.anon_exec || f.auth_exec));
 for (const f of exposed) {
   const allowed = WRITE_FUNCTIONS.includes(f.proname) || PUBLIC_ALLOWLIST.includes(f.proname) || SIGNED_IN_ALLOWLIST.includes(f.proname)
-    || SUBMIT_FUNCTIONS.includes(f.proname) || STAFF_FUNCTIONS.includes(f.proname);
+    || SUBMIT_FUNCTIONS.includes(f.proname) || STAFF_FUNCTIONS.includes(f.proname)
+    || ACCESS_FUNCTIONS.includes(f.proname) || SETTINGS_STAFF_FUNCTIONS.includes(f.proname) || ADMIN_MIRROR_FUNCTIONS.includes(f.proname);
   ok(`${f.proname}: browser-callable security definer function is on the allowlist`, allowed);
   if (f.anon_exec) ok(`${f.proname}: anon access is intended`, PUBLIC_ALLOWLIST.includes(f.proname) || SUBMIT_FUNCTIONS.includes(f.proname));
   if (STAFF_FUNCTIONS.includes(f.proname)) ok(`${f.proname}: staff function is not callable by anon`, !f.anon_exec);

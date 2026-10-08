@@ -307,6 +307,21 @@ function startSupabaseBridge(label, activityId, run, options = {}) {
     .catch((error) => { console.warn(`Supabase ${label} report failed`, error && error.code); });
 }
 
+// Admin console writes that the browser makes straight to Firestore (cohort details, the per member feedback switch,
+// the support preview audit): once the Firestore write has succeeded, a background copy to Supabase through a platform
+// owner only database function. Skipped unless the data switch is on. The admin's own flow never waits for it and never
+// sees its failure (a refused call just means this admin is not a platform owner there); the only trace is a console warning.
+function startAdminSupabaseCopy(label, run) {
+  try {
+    if (!supabaseModeActive()) return;
+    runSupabase(run)
+      .then((result) => { if (!result.ok) console.warn(`Supabase ${label} copy failed`, result.error && result.error.code); })
+      .catch(() => {});
+  } catch (error) {
+    // Never matters to the admin flow.
+  }
+}
+
 // -- read merges (Firestore is the base; Supabase may only add) ---------------------------------
 
 function timeMillis(value) {
@@ -410,6 +425,47 @@ function mergeAttemptViews(local, remote) {
     if (item) byId.set(String(item.attemptId || item.id || ""), item);
   });
   return Array.from(byId.values()).sort((a, b) => attemptMillis(b) - attemptMillis(a)).slice(0, 10);
+}
+
+// Executive Signature status (getMyEsStatus). The Firestore callable answer is the base; the Supabase answer only
+// adds: an entitlement the base does not have, attempts the base does not list, and fields an attempt lacks (such as
+// the stored facet scores). Attempts are a union by attemptId, newest first, five at most. Nothing the base holds is
+// replaced by a Supabase value.
+function mergeEsStatusViews(base, remote) {
+  if (!remote || !remote.assessments || typeof remote.assessments !== "object") return base;
+  if (!base || !base.assessments || typeof base.assessments !== "object") return remote;
+  const merged = Object.assign({}, base, { assessments: Object.assign({}, base.assessments) });
+  if (!merged.customerId && remote.customerId) merged.customerId = remote.customerId;
+  ["quick-check", "full-assessment"].forEach((assessmentId) => {
+    const own = base.assessments[assessmentId];
+    const extra = remote.assessments[assessmentId];
+    if (!extra) return;
+    if (!own) {
+      merged.assessments[assessmentId] = extra;
+      return;
+    }
+    const entry = Object.assign({}, own);
+    if (!own.hasEntitlement && extra.hasEntitlement) {
+      ["hasEntitlement", "status", "attemptsCompleted", "retakesAllowed", "retakesUsed"].forEach((key) => { entry[key] = extra[key]; });
+    }
+    const byId = new Map();
+    (own.recentAttempts || []).forEach((item) => { if (item && item.attemptId) byId.set(String(item.attemptId), Object.assign({}, item)); });
+    (extra.recentAttempts || []).forEach((item) => {
+      if (!item || !item.attemptId) return;
+      const key = String(item.attemptId);
+      const have = byId.get(key);
+      if (!have) {
+        byId.set(key, Object.assign({}, item));
+        return;
+      }
+      Object.keys(item).forEach((field) => { if (have[field] == null && item[field] != null) have[field] = item[field]; });
+    });
+    const recent = Array.from(byId.values()).sort((x, y) => timeMillis(y.completedAt) - timeMillis(x.completedAt)).slice(0, 5);
+    entry.recentAttempts = recent;
+    entry.latestAttempt = recent[0] || null;
+    merged.assessments[assessmentId] = entry;
+  });
+  return merged;
 }
 
 const app = initializeApp(firebaseConfig);
@@ -654,9 +710,43 @@ function emptyEsStatus() {
 async function getMyEsStatus() {
   const user = await getSignedInUser();
   if (!user) return emptyEsStatus();
-  const callable = httpsCallable(functions, "getMyEsStatus");
-  const result = await callable({});
-  return result && result.data ? result.data : emptyEsStatus();
+  // Supabase mode: the callable stays the base and Supabase (get_my_es_status) adds what it lacks. If the callable
+  // fails, the Supabase answer stands in for it; if both fail, the callable's error is thrown as before.
+  const remotePromise = supabaseModeActive() ? runSupabase((data) => data.getMyEsStatus()) : null;
+  let base;
+  try {
+    const callable = httpsCallable(functions, "getMyEsStatus");
+    const result = await callable({});
+    base = result && result.data ? result.data : emptyEsStatus();
+  } catch (error) {
+    if (!remotePromise) throw error;
+    const remote = await remotePromise;
+    if (remote.ok && remote.value) return remote.value;
+    if (!remote.ok) reportSupabaseFailure("executive signature status read", "", remote.error);
+    throw error;
+  }
+  if (!remotePromise) return base;
+  const remote = await remotePromise;
+  if (!remote.ok) {
+    reportSupabaseFailure("executive signature status read", "", remote.error);
+    return base;
+  }
+  return mergeEsStatusViews(base, remote.value);
+}
+
+// My Results (exercise results). Supabase mode only: the member's own scored attempts, best results and latest
+// submissions, for the page to merge with its local data (assets/exercise-results-view.js). Resolves null with the
+// switch off, with no signed in user, or when Supabase fails (the page then keeps its local results as they are).
+async function getMyExerciseResults() {
+  if (!supabaseModeActive()) return null;
+  const user = await getSignedInUser();
+  if (!user || !user.uid) return null;
+  const remote = await runSupabase((data) => data.getMemberExerciseResults());
+  if (!remote.ok) {
+    reportSupabaseFailure("exercise results read", "", remote.error);
+    return null;
+  }
+  return remote.value;
 }
 
 async function getOrganizationAccessAdmin() {
@@ -816,13 +906,107 @@ async function reviewOrganizationRosterDraft(payload = {}) {
   return result && result.data ? result.data : null;
 }
 
+async function getAuthorizedMemberFirestore(normalizedEmail) {
+  const memberRef = doc(requireFirestore(), "authorized_members", normalizedEmail);
+  const memberSnap = await getDoc(memberRef);
+  return memberSnap.exists() ? memberSnap.data() : null;
+}
+
+// -- access: Firestore decides, Supabase only watches and can only add ------------------------------
+//
+// Firestore authorized_members stays the base. With the data switch on, Supabase (get_my_access, derived from the
+// imported people, enrollments, role grants and entitlements) is used in two ways and no more:
+//   1. Shadow compare: after Firestore answered, the caller's own access record is compared in the background and one
+//      console.warn names the facts that differ (allowed, admin, expiry). No address, no name, no value is logged. At most
+//      once per page load and once per browser session.
+//   2. Grant only fallback (OFF, see ACCESS_FALLBACK_ENABLED): when the Firestore read itself fails (unavailable, timed
+//      out, not initialised) for the signed in person's own address, and Supabase says that person may enter, a minimal
+//      member record is returned (role "member", never an administrator). A Firestore answer is never overridden: a
+//      missing record, an inactive status or a past expiry date still deny, and so does a rules refusal
+//      (permission-denied, unauthenticated). Supabase saying "no", or failing, only means the original Firestore error
+//      is thrown as before.
+// With the switch off nothing here runs and the Firestore code is exactly what it was.
+//
+// ACCESS_FALLBACK_ENABLED is false on purpose. Supabase can be stale: while the member trigger is not deployed, the
+// people mirror is off, or a delete in Firestore is not mirrored, Supabase could still call a removed or expired member
+// "allowed", and a Firestore failure would then let that person in. Cut over rule: set it to true only when ALL of
+// these hold: (a) the member trigger is deployed with SUPABASE_MIRROR on, (b) a catch up import has run since, (c) the
+// shadow compare below has shown no "allowed" or "admin" disagreement for at least two weeks of real sign ins. Until
+// then getAuthorizedMember behaves exactly as it did before this code existed when Firestore fails: the Firestore error
+// is thrown. The tests force the constant on by rewriting the source text, so the code stays exercised.
+const ACCESS_FALLBACK_ENABLED = false;
+const ACCESS_SHADOW_SESSION_KEY = "utl_access_shadow";
+let accessShadowStarted = false;
+
+function isDeliberateFirestoreDenial(error) {
+  const code = String((error && error.code) || "").replace(/^firestore\//, "");
+  return code === "permission-denied" || code === "unauthenticated";
+}
+
+// True when the lookup asks about the person who is signed in right now (the only record Supabase will ever answer).
+async function lookupIsForSignedInUser(normalizedEmail) {
+  try {
+    const user = await getSignedInUser();
+    return Boolean(user && user.email && String(user.email).trim().toLowerCase() === normalizedEmail);
+  } catch {
+    return false;
+  }
+}
+
+function startAccessShadowCompare(normalizedEmail, member) {
+  if (accessShadowStarted) return;
+  try {
+    if (window.sessionStorage && window.sessionStorage.getItem(ACCESS_SHADOW_SESSION_KEY) === "1") return;
+  } catch {
+    // Unreadable session storage: compare anyway, once per page load.
+  }
+  accessShadowStarted = true;
+  (async () => {
+    if (!(await lookupIsForSignedInUser(normalizedEmail))) {
+      accessShadowStarted = false;
+      return;
+    }
+    const result = await runSupabase((data) => data.checkAccess(member));
+    if (!result.ok || !result.value || result.value.compared !== true) return;
+    try { window.sessionStorage.setItem(ACCESS_SHADOW_SESSION_KEY, "1"); } catch { /* best effort */ }
+    if (!result.value.agree) {
+      console.warn(`Access shadow compare: Firestore and Supabase disagree on ${result.value.differences.join(", ")}. Firestore was used.`);
+    }
+  })().catch(() => {});
+}
+
+// Never throws. A record only when Supabase confirms the signed in person's own access.
+async function accessFallbackMember(normalizedEmail) {
+  try {
+    if (!(await lookupIsForSignedInUser(normalizedEmail))) return null;
+    const result = await runSupabase((data) => data.getAccessFallback(normalizedEmail));
+    if (result.ok && result.value) {
+      console.warn("Access fallback: the member record could not be read from Firestore; access was confirmed from Supabase.");
+      return result.value;
+    }
+  } catch {
+    // The Firestore error is thrown by the caller.
+  }
+  return null;
+}
+
 async function getAuthorizedMember(email) {
   const normalizedEmail = String(email || "").trim().toLowerCase();
   if (!normalizedEmail) return null;
 
-  const memberRef = doc(requireFirestore(), "authorized_members", normalizedEmail);
-  const memberSnap = await getDoc(memberRef);
-  return memberSnap.exists() ? memberSnap.data() : null;
+  if (!supabaseModeActive()) return getAuthorizedMemberFirestore(normalizedEmail);
+  let member;
+  try {
+    member = await getAuthorizedMemberFirestore(normalizedEmail);
+  } catch (error) {
+    if (ACCESS_FALLBACK_ENABLED && !isDeliberateFirestoreDenial(error)) {
+      const fallback = await accessFallbackMember(normalizedEmail);
+      if (fallback) return fallback;
+    }
+    throw error;
+  }
+  startAccessShadowCompare(normalizedEmail, member);
+  return member;
 }
 
 const MEMBER_ACCOUNT_AVATAR_ICON_IDS = Object.freeze([
@@ -1109,7 +1293,8 @@ async function saveUserProfile(user, member = {}, signInProvider = "") {
     if (memberData && memberData.feedbackEnabled !== undefined) {
       feedbackEnabled = Boolean(memberData.feedbackEnabled);
     } else {
-      feedbackEnabled = await getGlobalFeedbackSetting();
+      // Firestore only: a new account makes no Supabase call before its token has been refreshed (below).
+      feedbackEnabled = feedbackSettingFromDoc(await readSettingsDocFirestore("feedback"));
     }
     profileData.feedbackEnabled = feedbackEnabled;
   }
@@ -1229,14 +1414,17 @@ async function getMemberWorkspaceProgress() {
 }
 
 async function getEmailTemplates() {
-  const snap = await getDoc(doc(requireFirestore(), "settings", "emailTemplates"));
-  return snap.exists() ? snap.data() : {};
+  return emailTemplatesFromDoc(await readSettingsDoc("emailTemplates", emailTemplatesFromDoc));
+}
+function emailTemplatesFromDoc(stored) {
+  return stored === null ? {} : stored;
 }
 
 async function saveEmailTemplate(id, data) {
   await setDoc(doc(requireFirestore(), "settings", "emailTemplates"), {
     [id]: data
   }, { merge: true });
+  bridgeSettingsWrite("emailTemplates");
 }
 
 async function saveMemberWorkspaceProgress(progress = {}) {
@@ -2157,7 +2345,7 @@ async function getAllEngagementAnalytics(memberUids = []) {
   }, { sessions: [], activities: [] });
 }
 
-async function saveAssessmentItemAttempt(attemptPayload = {}) {
+async function saveAssessmentItemAttemptFirestore(attemptPayload = {}) {
   if (experiencePreviewActive()) return { preview: true, saved: false };
   const user = await getSignedInUser();
   if (!user || !user.uid) {
@@ -2178,6 +2366,29 @@ async function saveAssessmentItemAttempt(attemptPayload = {}) {
     updatedAt: serverTimestamp()
   }, { merge: true });
   return { saved: true };
+}
+
+// The Supabase copy of an item attempt is in flight under its attempt ID until it settles, so the scoring comparison for the
+// same attempt (which the database accepts only after the attempt is stored) can wait for it.
+const tsaItemBridges = new Map();
+
+// Firestore first, exactly as before; with the switch on, a best-effort Supabase copy follows once the Firestore write has succeeded.
+async function saveAssessmentItemAttempt(attemptPayload = {}) {
+  const result = await saveAssessmentItemAttemptFirestore(attemptPayload);
+  if (supabaseModeActive() && result && result.saved !== false && !result.preview) {
+    try {
+      const attemptId = String(attemptPayload.attemptId || "").trim();
+      const activityId = attemptPayload.assessment === "checkpoint" ? "tsa-checkpoint" : "tsa-diagnostic";
+      const settled = runSupabase((data) => data.saveAssessmentItemAttempt(attemptPayload))
+        .then((outcome) => { if (!outcome.ok) reportSupabaseFailure("assessment item attempt", activityId, outcome.error); })
+        .catch((error) => { console.warn("Supabase assessment item attempt report failed", error && error.code); })
+        .then(() => { if (tsaItemBridges.get(attemptId) === settled) tsaItemBridges.delete(attemptId); });
+      tsaItemBridges.set(attemptId, settled);
+    } catch (error) {
+      console.warn("Supabase assessment item attempt could not start", error && error.code);
+    }
+  }
+  return result;
 }
 
 async function getMemberExerciseResponses(uid) {
@@ -2282,6 +2493,11 @@ async function setCohortDetails(cohortName, details) {
   if (!key) throw new Error("A cohort name is required.");
   const readyDb = requireFirestore();
   await setDoc(doc(readyDb, "settings", "cohorts"), { [key]: details }, { merge: true });
+  // Supabase mode: a background copy of the stored entry (the merge may hold more than this save sent).
+  startAdminSupabaseCopy("cohort details", async (data) => {
+    const stored = await getCohortDetails();
+    return data.mirrorAdminCohort(key, stored[key] || details);
+  });
 }
 
 async function renameCohort(oldName, newName, memberEmails) {
@@ -2299,6 +2515,12 @@ async function renameCohort(oldName, newName, memberEmails) {
     delete next[from];
     await setDoc(doc(readyDb, "settings", "cohorts"), next);
   }
+  // Supabase mode: the members' own cohort change is copied by the server (the authorized_members trigger); this moves
+  // the cohort row and its enrollments to the new name and copies the stored details.
+  startAdminSupabaseCopy("cohort rename", async (data) => {
+    const stored = await getCohortDetails();
+    return data.mirrorAdminCohortRename(from, to, stored[to]);
+  });
   return { renamed: emails.length };
 }
 
@@ -2380,6 +2602,7 @@ async function setUserFeedbackEnabled(uid, enabled) {
   await updateDoc(doc(requireFirestore(), "users", uid), {
     feedbackEnabled: Boolean(enabled)
   });
+  startAdminSupabaseCopy("feedback switch", (data) => data.mirrorAdminFeedbackEnabled(uid, enabled));
 }
 
 async function findUserUidByEmail(email) {
@@ -2464,33 +2687,109 @@ async function logMemberSupportPreview(snapshot = {}) {
     memberName: String(snapshot.displayName || "").slice(0, 200),
     createdAt: serverTimestamp()
   });
+  startAdminSupabaseCopy("support preview audit", (data) => data.mirrorAdminSupportPreview(eventId, snapshot.uid, snapshot.email));
   return { logged: true, eventId };
 }
 
+// -- site settings ----------------------------------------------------------------------------------
+//
+// Firestore settings/{docId} stays the base for every settings read and write. Each getter is split into the read
+// (readSettingsDoc) and a pure view of the stored document (...FromDoc, null when the document does not exist), so
+// the same view can be applied to the Supabase copy (app_settings). With the data switch on:
+//   reads  - Firestore first; a background shadow compare of the two views (once per setting per page load) warns in
+//            the console with the setting name only when they differ; if the Firestore read fails and Supabase can
+//            show the row to this person (row level security decides), that row is used instead of the failure.
+//   writes - after Firestore accepted the write, the whole stored document is copied to Supabase in the background
+//            (admin_set_app_setting, platform owners only); a failure leaves the Firestore write and emits one
+//            stability event.
+// With the switch off nothing here contacts Supabase and the Firestore calls are exactly what they were.
+const settingsShadowDone = new Set();
+
+// The stored document, or null when it does not exist.
+async function readSettingsDocFirestore(docId) {
+  const snap = await getDoc(doc(requireFirestore(), "settings", docId));
+  return snap.exists() ? (snap.data() || {}) : null;
+}
+
+async function readSettingsDoc(docId, view) {
+  if (!supabaseModeActive()) return readSettingsDocFirestore(docId);
+  let stored;
+  try {
+    stored = await readSettingsDocFirestore(docId);
+  } catch (error) {
+    const remote = await runSupabase((data) => data.getAppSetting(docId));
+    if (remote.ok && remote.value && remote.value.found) return remote.value.value;
+    throw error;
+  }
+  if (!settingsShadowDone.has(docId)) {
+    settingsShadowDone.add(docId);
+    runSupabase((data) => data.checkSetting(docId, stored, view))
+      .then((result) => {
+        if (result.ok && result.value && result.value.compared === true && !result.value.agree) {
+          console.warn(`Settings shadow compare: "${docId}" differs between Firestore and Supabase. Firestore was used.`);
+        }
+      })
+      .catch(() => {});
+  }
+  return stored;
+}
+
+// After a Firestore settings write: copy the whole stored document to Supabase. Never waits, never throws.
+// The copies of one setting run one after the other (each waits for the previous one for the same key), and each reads
+// the document back when its turn comes, so two quick saves can never land in Supabase out of order. A refusal
+// because the admin is not a Supabase platform owner (42501) is reported once per page load per setting.
+const settingsCopyChain = new Map();
+const settingsDeniedReported = new Set();
+function bridgeSettingsWrite(docId) {
+  if (!supabaseModeActive()) return;
+  const previous = settingsCopyChain.get(docId) || Promise.resolve();
+  const next = previous
+    .then(() => runSupabase(async (data) => {
+      const stored = await readSettingsDocFirestore(docId);
+      return stored === null ? null : data.saveAppSetting(docId, stored);
+    }))
+    .then((result) => {
+      if (result.ok) return;
+      if (String((result.error && result.error.code) || "") === "42501") {
+        if (settingsDeniedReported.has(docId)) return;
+        settingsDeniedReported.add(docId);
+      }
+      reportSupabaseFailure("settings write", "", result.error);
+    })
+    .catch((error) => { console.warn("Supabase settings write report failed", error && error.code); });
+  settingsCopyChain.set(docId, next);
+}
+
+function feedbackSettingFromDoc(stored) {
+  if (stored === null) return true;
+  return stored.defaultFeedbackEnabled !== false;
+}
+
 async function getGlobalFeedbackSetting() {
-  const snap = await getDoc(doc(requireFirestore(), "settings", "feedback"));
-  if (!snap.exists()) return true;
-  const data = snap.data() || {};
-  return data.defaultFeedbackEnabled !== false;
+  return feedbackSettingFromDoc(await readSettingsDoc("feedback", feedbackSettingFromDoc));
 }
 
 async function setGlobalFeedbackSetting(enabled) {
   await setDoc(doc(requireFirestore(), "settings", "feedback"), {
     defaultFeedbackEnabled: Boolean(enabled)
   }, { merge: true });
+  bridgeSettingsWrite("feedback");
+}
+
+function publicFindLevelSettingFromDoc(stored) {
+  if (stored === null) return false;
+  return stored.findLevelVisible === true;
 }
 
 async function getPublicFindLevelSetting() {
-  const snap = await getDoc(doc(requireFirestore(), "settings", "publicSite"));
-  if (!snap.exists()) return false;
-  const data = snap.data() || {};
-  return data.findLevelVisible === true;
+  return publicFindLevelSettingFromDoc(await readSettingsDoc("publicSite", publicFindLevelSettingFromDoc));
 }
 
 async function setPublicFindLevelSetting(visible) {
   await setDoc(doc(requireFirestore(), "settings", "publicSite"), {
     findLevelVisible: Boolean(visible)
   }, { merge: true });
+  bridgeSettingsWrite("publicSite");
 }
 
 function getDefaultEngagementSettings() {
@@ -2520,17 +2819,19 @@ function getDefaultEngagementSettings() {
   };
 }
 
+function engagementSettingsFromDoc(stored) {
+  if (stored === null) return getDefaultEngagementSettings();
+  const def = getDefaultEngagementSettings();
+  return {
+    inApp: Object.assign({}, def.inApp, stored.inApp || {}),
+    email: Object.assign({}, def.email, stored.email || {}),
+    certificate: Object.assign({}, def.certificate, stored.certificate || {})
+  };
+}
+
 async function getEngagementSettings() {
   try {
-    const snap = await getDoc(doc(requireFirestore(), "settings", "engagement"));
-    if (!snap.exists()) return getDefaultEngagementSettings();
-    const stored = snap.data() || {};
-    const def = getDefaultEngagementSettings();
-    return {
-      inApp: Object.assign({}, def.inApp, stored.inApp || {}),
-      email: Object.assign({}, def.email, stored.email || {}),
-      certificate: Object.assign({}, def.certificate, stored.certificate || {})
-    };
+    return engagementSettingsFromDoc(await readSettingsDoc("engagement", engagementSettingsFromDoc));
   } catch {
     return getDefaultEngagementSettings();
   }
@@ -2538,6 +2839,7 @@ async function getEngagementSettings() {
 
 async function setEngagementSettings(partial) {
   await setDoc(doc(requireFirestore(), "settings", "engagement"), partial, { merge: true });
+  bridgeSettingsWrite("engagement");
 }
 
 function getDefaultRewardSettings() {
@@ -2586,27 +2888,29 @@ function getDefaultRewardSettings() {
   };
 }
 
+function rewardSettingsFromDoc(stored) {
+  if (stored === null) return getDefaultRewardSettings();
+  const def = getDefaultRewardSettings();
+  const storedStreak = stored.streak || {};
+  const migratedStreak = storedStreak.activityTypes
+    ? storedStreak
+    : Object.assign({}, storedStreak, { dailyExerciseGoal: 1, activityTypes: "any-completion" });
+  return {
+    enabled: stored.enabled !== false,
+    display: Object.assign({}, def.display, stored.display || {}),
+    levels: Array.isArray(stored.levels) && stored.levels.length ? stored.levels : def.levels,
+    mp: Object.assign({}, def.mp, stored.mp || {}, {
+      phaseCompletion: Object.assign({}, def.mp.phaseCompletion, (stored.mp && stored.mp.phaseCompletion) || {})
+    }),
+    exerciseReflections: Object.assign({}, def.exerciseReflections, stored.exerciseReflections || {}),
+    streak: Object.assign({}, def.streak, migratedStreak),
+    tokens: Object.assign({}, def.tokens, stored.tokens || {})
+  };
+}
+
 async function getRewardSettings() {
   try {
-    const snap = await getDoc(doc(requireFirestore(), "settings", "rewards"));
-    if (!snap.exists()) return getDefaultRewardSettings();
-    const stored = snap.data() || {};
-    const def = getDefaultRewardSettings();
-    const storedStreak = stored.streak || {};
-    const migratedStreak = storedStreak.activityTypes
-      ? storedStreak
-      : Object.assign({}, storedStreak, { dailyExerciseGoal: 1, activityTypes: "any-completion" });
-    return {
-      enabled: stored.enabled !== false,
-      display: Object.assign({}, def.display, stored.display || {}),
-      levels: Array.isArray(stored.levels) && stored.levels.length ? stored.levels : def.levels,
-      mp: Object.assign({}, def.mp, stored.mp || {}, {
-        phaseCompletion: Object.assign({}, def.mp.phaseCompletion, (stored.mp && stored.mp.phaseCompletion) || {})
-      }),
-      exerciseReflections: Object.assign({}, def.exerciseReflections, stored.exerciseReflections || {}),
-      streak: Object.assign({}, def.streak, migratedStreak),
-      tokens: Object.assign({}, def.tokens, stored.tokens || {})
-    };
+    return rewardSettingsFromDoc(await readSettingsDoc("rewards", rewardSettingsFromDoc));
   } catch {
     return getDefaultRewardSettings();
   }
@@ -2614,20 +2918,25 @@ async function getRewardSettings() {
 
 async function setRewardSettings(partial) {
   await setDoc(doc(requireFirestore(), "settings", "rewards"), partial, { merge: true });
+  bridgeSettingsWrite("rewards");
 }
 
 function getDefaultAssessmentVisibility() {
   return { userEnabled: false, adminEnabled: true };
 }
 
+function assessmentVisibilityFromDoc(stored) {
+  if (stored === null) return getDefaultAssessmentVisibility();
+  return Object.assign({}, getDefaultAssessmentVisibility(), stored);
+}
+
 async function getAssessmentVisibility() {
-  const snap = await getDoc(doc(requireFirestore(), "settings", "assessments"));
-  if (!snap.exists()) return getDefaultAssessmentVisibility();
-  return Object.assign({}, getDefaultAssessmentVisibility(), snap.data() || {});
+  return assessmentVisibilityFromDoc(await readSettingsDoc("assessments", assessmentVisibilityFromDoc));
 }
 
 async function setAssessmentVisibility(partial) {
   await setDoc(doc(requireFirestore(), "settings", "assessments"), partial, { merge: true });
+  bridgeSettingsWrite("assessments");
 }
 
 function getDefaultPublicAssessmentSettings() {
@@ -2638,17 +2947,20 @@ function getDefaultPublicAssessmentSettings() {
     findLevelExerciseId: "sort_bucket_001"
   };
 }
+function publicAssessmentSettingsFromDoc(stored) {
+  if (stored === null) return getDefaultPublicAssessmentSettings();
+  return Object.assign({}, getDefaultPublicAssessmentSettings(), stored);
+}
 async function getPublicAssessmentSettings() {
   try {
-    const snap = await getDoc(doc(requireFirestore(), "settings", "public_assessments"));
-    if (!snap.exists()) return getDefaultPublicAssessmentSettings();
-    return Object.assign({}, getDefaultPublicAssessmentSettings(), snap.data() || {});
+    return publicAssessmentSettingsFromDoc(await readSettingsDoc("public_assessments", publicAssessmentSettingsFromDoc));
   } catch {
     return getDefaultPublicAssessmentSettings();
   }
 }
 async function setPublicAssessmentSettings(partial) {
   await setDoc(doc(requireFirestore(), "settings", "public_assessments"), partial, { merge: true });
+  bridgeSettingsWrite("public_assessments");
 }
 
 function getDefaultPaymentSettings() {
@@ -2660,19 +2972,21 @@ function getDefaultPaymentSettings() {
     }
   };
 }
+function paymentSettingsFromDoc(stored) {
+  const defaults = getDefaultPaymentSettings();
+  if (stored === null) return defaults;
+  return { enabled: stored.enabled === true, prices: Object.assign({}, defaults.prices, stored.prices || {}) };
+}
 async function getPaymentSettings() {
   try {
-    const snap = await getDoc(doc(requireFirestore(), "settings", "payments"));
-    const defaults = getDefaultPaymentSettings();
-    if (!snap.exists()) return defaults;
-    const data = snap.data() || {};
-    return { enabled: data.enabled === true, prices: Object.assign({}, defaults.prices, data.prices || {}) };
+    return paymentSettingsFromDoc(await readSettingsDoc("payments", paymentSettingsFromDoc));
   } catch {
     return getDefaultPaymentSettings();
   }
 }
 async function setPaymentSettings(partial) {
   await setDoc(doc(requireFirestore(), "settings", "payments"), partial, { merge: true });
+  bridgeSettingsWrite("payments");
 }
 async function createCheckoutSession({ program, successUrl, cancelUrl }) {
   const callable = httpsCallable(functions, "createCheckoutSession");
@@ -2683,38 +2997,43 @@ async function createCheckoutSession({ program, successUrl, cancelUrl }) {
 function getDefaultAdminVisibilitySettings() {
   return { publicFindLevelPreview: true, findLevelLeadGateBypass: true };
 }
+function adminVisibilitySettingsFromDoc(stored) {
+  if (stored === null) return getDefaultAdminVisibilitySettings();
+  return Object.assign({}, getDefaultAdminVisibilitySettings(), stored);
+}
 async function getAdminVisibilitySettings() {
   try {
-    const snap = await getDoc(doc(requireFirestore(), "settings", "admin_visibility"));
-    if (!snap.exists()) return getDefaultAdminVisibilitySettings();
-    return Object.assign({}, getDefaultAdminVisibilitySettings(), snap.data() || {});
+    return adminVisibilitySettingsFromDoc(await readSettingsDoc("admin_visibility", adminVisibilitySettingsFromDoc));
   } catch {
     return getDefaultAdminVisibilitySettings();
   }
 }
 async function setAdminVisibilitySettings(partial) {
   await setDoc(doc(requireFirestore(), "settings", "admin_visibility"), partial, { merge: true });
+  bridgeSettingsWrite("admin_visibility");
 }
 function getDefaultTsaScoringSettings() {
   return { speakGenAiEnabled: false, actGenAiEnabled: false };
 }
+function tsaScoringSettingsFromDoc(stored) {
+  if (stored === null) return getDefaultTsaScoringSettings();
+  return {
+    speakGenAiEnabled: stored.speakGenAiEnabled === true,
+    actGenAiEnabled: stored.actGenAiEnabled === true
+  };
+}
 async function getTsaScoringSettings() {
   try {
-    const snap = await getDoc(doc(requireFirestore(), "settings", "tsa_scoring"));
-    if (!snap.exists()) return getDefaultTsaScoringSettings();
-    const data = snap.data() || {};
-    return {
-      speakGenAiEnabled: data.speakGenAiEnabled === true,
-      actGenAiEnabled: data.actGenAiEnabled === true
-    };
+    return tsaScoringSettingsFromDoc(await readSettingsDoc("tsa_scoring", tsaScoringSettingsFromDoc));
   } catch {
     return getDefaultTsaScoringSettings();
   }
 }
 async function setTsaScoringSettings(partial) {
   await setDoc(doc(requireFirestore(), "settings", "tsa_scoring"), partial, { merge: true });
+  bridgeSettingsWrite("tsa_scoring");
 }
-async function saveTsaScoringComparison(payload = {}) {
+async function saveTsaScoringComparisonFirestore(payload = {}) {
   if (experiencePreviewActive()) return { preview: true, saved: false };
   const user = await getSignedInUser();
   if (!user?.uid) throw new Error("A signed-in Firebase user is required to save scoring calibration data.");
@@ -2736,6 +3055,20 @@ async function saveTsaScoringComparison(payload = {}) {
     updatedAt: serverTimestamp()
   }, { merge: true });
   return { saved: true };
+}
+
+// Firestore first, exactly as before; with the switch on, a best-effort Supabase copy follows once the Firestore write has succeeded.
+// The copy waits for the Supabase copy of the same attempt, which the database requires to exist first.
+async function saveTsaScoringComparison(payload = {}) {
+  const result = await saveTsaScoringComparisonFirestore(payload);
+  if (supabaseModeActive() && result && result.saved !== false && !result.preview) {
+    const attemptId = String(payload.attemptId || "").trim();
+    const waitFor = tsaItemBridges.get(attemptId) || Promise.resolve();
+    waitFor.then(() => {
+      startSupabaseBridge("tsa scoring comparison", payload.assessment === "checkpoint" ? "tsa-checkpoint" : "tsa-diagnostic", (data) => data.saveTsaScoringComparison(payload));
+    }).catch(() => {});
+  }
+  return result;
 }
 
 export {
@@ -2777,6 +3110,7 @@ export {
   getEmailTemplates,
   getExerciseAttempts,
   getExerciseWork,
+  getMyExerciseResults,
   saveEmailTemplate,
   getMemberExerciseResponses,
   getMemberCredentialRegistry,

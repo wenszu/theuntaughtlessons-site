@@ -620,7 +620,10 @@ function buildPlan(snapshot, catalog, options = {}) {
     });
   });
 
-  // TSA diagnostic and checkpoint attempts.
+  // TSA diagnostic and checkpoint attempts. The browser mirror (record_tsa_item_attempt, migration 2190) writes the same
+  // rows under the same natural keys (idempotency_hash and legacy_firestore_id), so a rerun after the mirror has run
+  // finds them (scripts/supabase-import.js reconciles by those keys).
+  const tsaAttemptByDoc = new Map();
   col("assessment_item_attempts").forEach(({ id, data }) => {
     const person = personByUid.get(data.userId);
     if (!person) return exception(`assessment_item_attempts/${id}`, "userId does not match a person");
@@ -628,6 +631,7 @@ function buildPlan(snapshot, catalog, options = {}) {
     const versionId = tsaVersions.get(`${assessment}:${data.bankRelease || ""}:${data.rubricVersion || ""}`);
     const items = plain(Array.isArray(data.items) ? data.items : []);
     const attemptId = uuidFor(`tsa-attempt:${id}`);
+    tsaAttemptByDoc.set(id, { attemptId, userId: data.userId });
     const completedAt = iso(data.completedAt) || iso(data.updatedAt) || importDate;
     rows("assessment_attempts").push(stamp({
       id: attemptId,
@@ -665,6 +669,31 @@ function buildPlan(snapshot, catalog, options = {}) {
       response_checksum: sha256(items),
       created_at: completedAt
     });
+  });
+
+  // Private scoring comparisons (rules based score next to the generative score) for those attempts. One per attempt.
+  // The browser mirror (record_tsa_scoring_comparison) keeps the same summary columns and the same by task detail.
+  col("tsa_scoring_comparisons").forEach(({ id, data }) => {
+    const attempt = tsaAttemptByDoc.get(id);
+    if (!attempt) return exception(`tsa_scoring_comparisons/${id}`, "no imported item attempt with this id");
+    if (data.userId !== attempt.userId) return exception(`tsa_scoring_comparisons/${id}`, "userId does not match the item attempt");
+    const objectOf = (value) => (value && typeof value === "object" && !Array.isArray(value) ? plain(value) : {});
+    const enabled = objectOf(data.enabled);
+    const official = objectOf(data.officialSource);
+    rows("assessment_scoring_comparisons").push(stamp({
+      attempt_id: attempt.attemptId,
+      enabled: Object.values(enabled).some((value) => value === true),
+      official_source: Object.values(official).some((value) => value === "genai" || value === "gen_ai") ? "gen_ai" : "deterministic",
+      deterministic: objectOf(data.deterministic),
+      gen_ai: objectOf(data.genAi),
+      difference: objectOf(data.difference),
+      rubric_version: text(data.rubricVersion, 120),
+      model_version: text(data.modelVersion, 160),
+      enabled_by_task: enabled,
+      official_source_by_task: official,
+      legacy_firestore_id: `tsa_scoring_comparisons/${id}`,
+      created_at: iso(data.completedAt) || iso(data.updatedAt) || importDate
+    }));
   });
 
   // Activity catalog.
@@ -1072,7 +1101,7 @@ function buildPlan(snapshot, catalog, options = {}) {
 const WRITE_ORDER = [
   "organizations", "people", "person_emails", "person_profiles", "role_grants", "cohorts", "enrollments",
   "assessment_definitions", "assessment_versions", "assessment_scoring", "assessment_versions_publish", "assessment_definitions_current",
-  "consent_events", "entitlements", "assessment_attempts", "assessment_response_parts",
+  "consent_events", "entitlements", "assessment_attempts", "assessment_response_parts", "assessment_scoring_comparisons",
   "activities", "activity_keys", "activity_submissions", "activity_attempts", "activity_drafts", "activity_progress",
   "reward_ledger", "reward_state", "engagement_sessions", "stability_events", "credentials", "app_settings", "audit_events"
 ];
@@ -1095,6 +1124,7 @@ const WRITE_MODE = {
   entitlements: { conflict: "id" },
   assessment_attempts: { conflict: "id", skipExisting: true },
   assessment_response_parts: { conflict: "attempt_id,part_number", skipExisting: true },
+  assessment_scoring_comparisons: { conflict: "attempt_id", skipExisting: true },
   activities: { conflict: "id" },
   activity_keys: { conflict: "key" },
   activity_submissions: { conflict: "id", skipExisting: true },

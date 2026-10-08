@@ -183,6 +183,13 @@ export function connectFunctionsEmulator() {}
 export function httpsCallable(functions, name) {
   return async (payload) => {
     h().record({ sdk: 'functions', op: 'callable', name });
+    // A test can set harness.callableAnswers = { <callable name>: value, a function of the payload, or { __throw: error } }.
+    const answers = h().callableAnswers;
+    if (answers && Object.prototype.hasOwnProperty.call(answers, name)) {
+      const answer = typeof answers[name] === 'function' ? answers[name](payload) : answers[name];
+      if (answer && answer.__throw) throw answer.__throw;
+      return { data: answer };
+    }
     return { data: { ok: true } };
   };
 }

@@ -41,7 +41,7 @@ const BATCH = 200;
 const TOP_LEVEL = [
   "organizations", "authorized_members", "users", "customers", "customerAuthLinks", "enrollments", "settings",
   "platformFeatureFlags", "assessmentDefinitions", "assessmentVersions", "consentEvents", "entitlements",
-  "assessmentAttempts", "assessment_item_attempts", "public_credentials", "credential_issuance", "auditEvents",
+  "assessmentAttempts", "assessment_item_attempts", "tsa_scoring_comparisons", "public_credentials", "credential_issuance", "auditEvents",
   "google_group_sync_jobs", "support_preview_audit"
 ];
 const USER_SUBCOLLECTIONS = [
@@ -279,6 +279,62 @@ function filterForRerun(table, rows, existingVersions, existingNatural = {}) {
   return { write: rows.filter(keep), skipped: rows.filter((row) => !keep(row)) };
 }
 
+// TSA item attempts (and their assessment versions) can already be in the database because the browser mirror
+// (record_tsa_item_attempt, migration 2190) wrote them under another id: it cannot compute the import's uuid v5, so it
+// shares the natural keys instead (an attempt's legacy_firestore_id, a version's assessment_id plus version text).
+// Writing the planned row would then fail on the unique key. This points the planned child rows at the stored ids and
+// drops the planned parent rows, so every rerun is safe whichever side wrote first. Pure, tested locally; it changes
+// plan.tables in place and returns what it remapped.
+function reconcileMirrored(tables, existing = {}) {
+  // Only the TSA assessments are ever written by the browser mirror; Executive Signature rows are never touched here.
+  const isTsa = (assessmentId) => assessmentId === "tsa-diagnostic" || assessmentId === "tsa-checkpoint";
+  const versionIds = existing.versions || new Map();
+  const attemptIds = existing.attempts || new Map();
+  const result = { versions: 0, attempts: 0 };
+  const versionRemap = new Map();
+  tables.assessment_versions = (tables.assessment_versions || []).filter((row) => {
+    const stored = isTsa(row.assessment_id) ? versionIds.get(`${row.assessment_id}|${row.version}`) : null;
+    if (!stored || stored === row.id) return true;
+    versionRemap.set(row.id, stored);
+    result.versions += 1;
+    return false;
+  });
+  if (versionRemap.size) {
+    tables.assessment_versions_publish = (tables.assessment_versions_publish || []).filter((row) => !versionRemap.has(row.id));
+    (tables.assessment_attempts || []).forEach((row) => { if (versionRemap.has(row.version_id)) row.version_id = versionRemap.get(row.version_id); });
+  }
+  const attemptRemap = new Map();
+  tables.assessment_attempts = (tables.assessment_attempts || []).filter((row) => {
+    const stored = isTsa(row.assessment_id) && row.legacy_firestore_id ? attemptIds.get(row.legacy_firestore_id) : null;
+    if (!stored || stored === row.id) return true;
+    attemptRemap.set(row.id, stored);
+    result.attempts += 1;
+    return false;
+  });
+  if (attemptRemap.size) {
+    ["assessment_response_parts", "assessment_scoring_comparisons"].forEach((table) => {
+      (tables[table] || []).forEach((row) => { if (attemptRemap.has(row.attempt_id)) row.attempt_id = attemptRemap.get(row.attempt_id); });
+    });
+  }
+  return result;
+}
+
+async function readMirroredKeys(client) {
+  const versions = new Map();
+  const attempts = new Map();
+  for (let offset = 0; ; offset += 1000) {
+    const page = await client.select("assessment_versions", `select=id,assessment_id,version&order=id&limit=1000&offset=${offset}`);
+    page.forEach((r) => versions.set(`${r.assessment_id}|${r.version}`, r.id));
+    if (page.length < 1000) break;
+  }
+  for (let offset = 0; ; offset += 1000) {
+    const page = await client.select("assessment_attempts", `select=id,legacy_firestore_id&legacy_firestore_id=not.is.null&order=id&limit=1000&offset=${offset}`);
+    page.forEach((r) => attempts.set(r.legacy_firestore_id, r.id));
+    if (page.length < 1000) break;
+  }
+  return { versions, attempts };
+}
+
 async function apply(plan, catalogChecksum, args) {
   const client = supabase();
   const runId = crypto.randomUUID();
@@ -310,6 +366,8 @@ async function apply(plan, catalogChecksum, args) {
       if (page.length < 1000) break;
     }
   }
+  const mirrored = reconcileMirrored(plan.tables, await readMirroredKeys(client));
+  if (mirrored.versions || mirrored.attempts) console.log(`  Rows the browser mirror already stored are reused: ${mirrored.attempts} TSA attempts, ${mirrored.versions} versions.`);
   for (const table of mapping.WRITE_ORDER) {
     const rows = plan.tables[table];
     if (!rows || !rows.length) continue;
@@ -453,4 +511,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { parseArgs, recordId, writeTable, filterForRerun, saveSnapshot, loadSnapshot, insideRepo, excludeMembers, TOP_LEVEL, USER_SUBCOLLECTIONS };
+module.exports = { parseArgs, recordId, writeTable, filterForRerun, reconcileMirrored, saveSnapshot, loadSnapshot, insideRepo, excludeMembers, TOP_LEVEL, USER_SUBCOLLECTIONS };

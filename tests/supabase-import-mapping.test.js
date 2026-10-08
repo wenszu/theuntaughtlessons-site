@@ -76,6 +76,29 @@ assert.equal(tsaAttempt.status, 'completed');
 assert.equal(tsaAttempt.overall_score, 64);
 assert.equal(tsaAttempt.enrollment_id, aliceEnr.id);
 assert.equal(t.assessment_response_parts.length, 2);
+// TSA scoring comparison: one row for the imported attempt, the by task detail kept, the summary columns derived; a
+// comparison with no imported attempt is an exception, not a row.
+assert.equal(t.assessment_scoring_comparisons.length, 1);
+const comparison = t.assessment_scoring_comparisons[0];
+assert.equal(comparison.attempt_id, tsaAttempt.id);
+assert.equal(comparison.legacy_firestore_id, 'tsa_scoring_comparisons/tsa-att-1');
+assert.equal(comparison.enabled, true);
+assert.equal(comparison.official_source, 'gen_ai');
+assert.deepStrictEqual(comparison.enabled_by_task, { speak: true, act: false });
+assert.deepStrictEqual(comparison.official_source_by_task, { speak: 'genai', act: 'deterministic' });
+assert.deepStrictEqual(comparison.gen_ai, { speak: { total: 8 }, act: null });
+assert.equal(comparison.rubric_version, 'rubric-3');
+assert.equal(comparison.model_version, 'model-x');
+assert.equal(comparison.created_at, '2025-03-02T10:00:05.000Z');
+assert.ok(plan.exceptions.some((e) => e.source === 'tsa_scoring_comparisons/no-such-attempt'), 'a comparison without an imported attempt is an exception');
+assert.deepStrictEqual(WRITE_MODE.assessment_scoring_comparisons, { conflict: 'attempt_id', skipExisting: true });
+assert.ok(WRITE_ORDER.indexOf('assessment_scoring_comparisons') > WRITE_ORDER.indexOf('assessment_attempts'), 'written after the attempts it points at');
+// The natural keys the browser mirror shares with the import (migration 2190).
+assert.equal(tsaAttempt.legacy_firestore_id, 'assessment_item_attempts/tsa-att-1');
+assert.equal(tsaAttempt.idempotency_hash, require('crypto').createHash('sha256').update('tsa-attempt:tsa-att-1').digest('hex'));
+const tsaVersion = t.assessment_versions.find((v) => v.id === tsaAttempt.version_id);
+assert.equal(tsaVersion.assessment_id, 'tsa-diagnostic');
+assert.equal(tsaVersion.version, 'bank-2025-08|rubric-3');
 // Owner's products.readinessAssessment becomes an entitlement.
 assert.equal(t.entitlements.length, 2);
 

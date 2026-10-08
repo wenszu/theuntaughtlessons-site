@@ -33,6 +33,7 @@ const FIREBASE_SOURCE = fs.readFileSync(path.join(REPO_ROOT, 'assets', 'firebase
 const BASELINE_SOURCE = fs.readFileSync(path.join(__dirname, 'fixtures', 'firebase-baseline.js'), 'utf8');
 
 const UID = 'uid-1';
+const PERSON_ID = '11111111-2222-4333-8444-555555555555';
 const EMAIL = 'member@example.test';
 const FIXED_ISO = new Date(FIXED_NOW).toISOString();
 const SUPABASE_ON = { utl_data_source: 'supabase' };
@@ -97,6 +98,8 @@ const WORKSPACE_PAYLOAD = {
 };
 
 function seedFirestore(harness, options = {}) {
+  // Learner reads first ask who the caller is (get_my_person_id, migration 2230) and then name that person.
+  harness.onFetch('POST', '/rest/v1/rpc/get_my_person_id', PERSON_ID);
   harness.seed(`users/${UID}`, {
     email: EMAIL,
     displayName: 'Member One',
@@ -245,7 +248,7 @@ async function check(name, fn) {
     const baselineExports = Object.keys(baseline).sort();
     const currentExports = Object.keys(current).sort();
     baselineExports.forEach((name) => assert.ok(currentExports.includes(name), `export ${name} kept`));
-    assert.deepEqual(currentExports.filter((name) => !baselineExports.includes(name)), ['getDataSource', 'sendReadinessResultEmail'], 'getDataSource and sendReadinessResultEmail (a Firebase callable wrapper, no Supabase path) are the only new exports');
+    assert.deepEqual(currentExports.filter((name) => !baselineExports.includes(name)), ['getDataSource', 'getMyExerciseResults', 'sendReadinessResultEmail'], 'getDataSource, getMyExerciseResults (My Results exercise results, Supabase mode only, null with the switch off) and sendReadinessResultEmail (a Firebase callable wrapper, no Supabase path) are the only new exports');
   });
 
   for (const name of LEARNER_FUNCTIONS) {

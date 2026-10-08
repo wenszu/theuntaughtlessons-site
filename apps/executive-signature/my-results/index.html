@@ -61,7 +61,30 @@
     .history-row:first-child{border-top:0;padding-top:0}
     .history-row b{color:var(--navy)}
     .print-only{display:none}
+    .facet-report h3{font-size:1.1rem;margin:22px 0 10px}
+    .facet-report-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    .facet-report-item{border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+    .facet-report-item p{font-size:13.5px;margin:8px 0 0}
+    .facet-report-item-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;color:var(--navy)}
+    .facet-report-style{margin:0;padding-left:18px;font-size:13.5px}
+    .facet-report-style li{margin-bottom:6px}
+    .num{font-variant-numeric:tabular-nums}
+    .facet-bar-track{background:var(--steelsoft);border-radius:5px;height:7px;overflow:visible;position:relative}
+    .facet-bar-track.mini{margin:10px 0 8px}
+    .facet-bar-fill{display:block;height:100%;background:var(--gold);border-radius:5px;overflow:hidden}
+    .facet-bar-dot{position:absolute;top:50%;width:11px;height:11px;border:2px solid var(--card);border-radius:50%;background:var(--navy);transform:translate(-50%,-50%)}
+    .area-detail-block{margin-bottom:22px}
+    .area-detail-block:last-child{margin-bottom:0}
+    .area-detail-head{display:flex;align-items:baseline;gap:10px;margin-bottom:6px}
+    .area-detail-head b{font-size:16px;color:var(--navy)}
+    .area-detail-level{font-size:12px;color:var(--muted)}
+    .area-detail-head .num{font-family:'Playfair Display',Georgia,serif;font-size:19px;color:var(--navy);margin-left:auto}
+    .area-facets{margin:12px 0 0 8px;padding-left:14px;border-left:2px solid var(--line);display:flex;flex-direction:column;gap:10px}
+    .area-facet-head{display:flex;justify-content:space-between;font-size:13px;margin-bottom:2px}
+    .area-facet-head .num{color:var(--navy)}
+    @media(max-width:640px){.facet-report-grid{grid-template-columns:1fr}}
     @media print{
+      #facetReportCard{break-inside:avoid;border:1px solid #999;border-radius:0}
       .app-nav,.ra-nav,.no-print,.hero{display:none!important}
       .print-only{display:flex}
       @page{margin:16mm 16mm 18mm}
@@ -116,6 +139,7 @@
           <div class="tsa-choice-card quick" id="myQuickCard"></div>
           <div class="tsa-choice-card full" id="myFullCard"></div>
         </div>
+        <div class="card" id="facetReportCard" hidden></div>
         <div class="card" id="historyCard" hidden>
           <h3 id="historyTitle" style="margin:0 0 4px;font-size:1.1rem"></h3>
           <p class="small muted" style="margin:0 0 14px">Every time you took the quick check, most recent first.</p>
@@ -137,8 +161,10 @@
   </main>
   <footer class="section no-print" style="padding-top:0"><div class="wrap small muted">Not shared with anyone else without your consent. <a href="../how-it-works/">Read how the score works.</a></div></footer>
 
+  <script src="../content.js"></script>
+  <script src="../facet-report.js"></script>
   <script type="module">
-    import { auth, db, doc, getDoc, getMyEsStatus, isSignInWithEmailLink, onAuthStateChanged, signInWithEmailLink, checkReadinessAccountEmail, sendReadinessAccessLink, sendReadinessResultEmail } from '../../../assets/firebase.js';
+    import { auth, db, doc, getDoc, getDataSource, getMyEsStatus, isSignInWithEmailLink, onAuthStateChanged, signInWithEmailLink, checkReadinessAccountEmail, sendReadinessAccessLink, sendReadinessResultEmail } from '../../../assets/firebase.js';
 
     const $ = (s) => document.querySelector(s);
     const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -168,12 +194,26 @@
       catch (error) { return null; }
     }
 
+    // The full facet report, drawn again from the ten facet scores stored with the latest full assessment. Hidden when
+    // there is no full assessment or the stored scores do not hold all ten facets (an older record).
+    function renderFacetReport(attempt) {
+      const card = $('#facetReportCard');
+      const api = window.READINESS_FACET_REPORT;
+      const content = window.READINESS_CONTENT || null;
+      // Only with the Supabase data switch on; with it off the page is exactly the page it was.
+      const reading = getDataSource() === 'supabase' && api && attempt ? api.readingFromAreaScores(attempt.areaScores, { bands: content && content.bands }) : null;
+      if (!reading) { card.hidden = true; card.innerHTML = ''; return; }
+      card.innerHTML = api.renderHtml(reading, { escape: esc, content, profileLabel: attempt.profileLabel, band: attempt.band, overallScore: attempt.overallScore });
+      card.hidden = false;
+    }
+
     async function renderResultsView(status, userData) {
       const assessments = status && status.assessments;
       const quickEntry = assessments && assessments['quick-check'];
       const fullEntry = assessments && assessments['full-assessment'];
       $('#myQuickCard').innerHTML = esQuickCardHtml(quickEntry);
       $('#myFullCard').innerHTML = esFullCardHtml(fullEntry);
+      renderFacetReport(fullEntry && fullEntry.latestAttempt);
 
       const quickHistory = (quickEntry && quickEntry.recentAttempts) || [];
       const historyCard = $('#historyCard');
