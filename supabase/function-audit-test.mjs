@@ -18,7 +18,7 @@ const WRITE_FUNCTIONS = [
 ];
 // Existing functions that browsers may call on purpose.
 const PUBLIC_ALLOWLIST = ['get_public_org_brand', 'get_public_credential'];                 // anon and authenticated
-const SIGNED_IN_ALLOWLIST = ['org_assessment_summary', 'get_my_es_status', 'get_es_attempt_report', 'get_my_person_id'];  // authenticated only (the two ES read functions are migration 2210, get_my_person_id is 2230)
+const SIGNED_IN_ALLOWLIST = ['org_assessment_summary', 'get_my_es_status', 'get_es_attempt_report', 'get_my_person_id', 'ai_score_take_mine', 'link_my_identity', 'get_my_checkout_identity'];  // authenticated only (the two ES read functions are migration 2210, get_my_person_id is 2230, ai_score_take_mine is 2280, link_my_identity is 2270, get_my_checkout_identity is 2290)
 // Inbox (migration 2170). The two submit functions are the only new functions anon may execute. The staff functions are
 // authenticated only and refuse everyone but a platform_owner as their first statement.
 const SUBMIT_FUNCTIONS = ['submit_lead', 'submit_feedback'];                                 // anon and authenticated
@@ -30,6 +30,18 @@ const ACCESS_FUNCTIONS = ['get_my_access'];
 const SETTINGS_STAFF_FUNCTIONS = ['admin_set_app_setting'];
 // Admin browser writes (migration 2220): platform owner only copies of the cohort, feedback switch and support preview records.
 const ADMIN_MIRROR_FUNCTIONS = ['admin_mirror_cohort', 'admin_mirror_cohort_rename', 'admin_mirror_feedback_enabled', 'admin_mirror_support_preview'];
+// Member reads (migration 2250): the caller's own workspaces, organization access, cohort standing and saved answers. Read only,
+// authenticated only, the caller comes from the token; the only parameter is the standing metric.
+const MEMBER_READ_FUNCTIONS = ['get_my_workspaces', 'get_my_organization_access', 'get_my_cohort_standing', 'get_my_exercise_responses'];
+// Admin read screens (migration 2240): read only staff functions. Each is authenticated only and refuses a caller without the staff
+// role (platform_owner, or the Firebase staff roles for the customer and Executive Signature screens) with 42501 as its first statement.
+const ADMIN_READ_FUNCTIONS = ['admin_list_customers', 'admin_get_customer', 'admin_list_es_participants', 'admin_list_es_attempts', 'admin_get_es_configuration',
+  'admin_get_es_governance', 'admin_search_credentials', 'admin_credential_registry', 'admin_organization_access'];
+// Staff writes (migration 2260): the Firebase callables of the admin console as database functions. Each takes one jsonb document and a
+// dry run flag, is authenticated only, and refuses the wrong caller with 42501 as its first statement. submit_roster_draft is for sponsor
+// staff (an organization role), so its first statement only requires a signed in person; the organization role is checked straight after.
+const ADMIN_WRITE_FUNCTIONS = ['admin_grant_entitlement', 'admin_set_entitlement_status', 'admin_reveal_response', 'admin_save_organization', 'admin_save_org_access_member',
+  'submit_roster_draft', 'admin_review_roster_draft', 'admin_manage_credential', 'admin_remove_member', 'admin_authorize_member'];
 // A parameter must not let the caller name a person, role, email or organization. (A plain p_status is a progress state.)
 const FORBIDDEN_PARAMS = /(^|_)(person|user|uid|auth|email|role|account_status|organization|org)(_|$)/i;
 
@@ -201,12 +213,70 @@ for (const name of ADMIN_MIRROR_FUNCTIONS) {
   ok(`${name}: never touches people, role_grants, entitlements or organizations`, !/(insert\s+into|update|delete\s+from)\s+public\.(people|role_grants|entitlements|organizations|affiliations)\b/i.test(f.prosrc));
 }
 
+// Member reads (migration 2250): read only, stable, authenticated only, caller from the token, no person parameter.
+for (const name of MEMBER_READ_FUNCTIONS) {
+  const f = fns.find((x) => x.proname === name);
+  ok(`${name}: exists`, Boolean(f));
+  if (!f) continue;
+  ok(`${name}: security definer, search_path fixed to empty, no dynamic sql`, f.prosecdef && /search_path=("")?(,|$)/.test(f.config || '') && !/^\s*execute\b/im.test(f.prosrc) && !/\bexecute\b\s+(format|'|\$|quote)/i.test(f.prosrc));
+  ok(`${name}: anon cannot execute, authenticated can`, !f.anon_exec && f.auth_exec);
+  ok(`${name}: resolves the caller from the token (current_person_id or require_person_id)`, /private\.(current|require)_person_id\(\)/.test(f.prosrc));
+  ok(`${name}: no parameter names a person, role, status or email`, !(f.argnames || []).some((a) => FORBIDDEN_PARAMS.test(a)), (f.argnames || []).join(','));
+  ok(`${name}: never writes, no backslash`, !/\b(insert\s+into|update\s+public|delete\s+from|create\s+temp)/i.test(f.prosrc) && !f.prosrc.includes('\\'));
+}
+
+// Admin read screens (migration 2240).
+for (const name of ADMIN_READ_FUNCTIONS) {
+  const f = fns.find((x) => x.proname === name);
+  ok(`${name}: exists`, Boolean(f));
+  if (!f) continue;
+  ok(`${name}: security definer, search_path fixed to empty, no dynamic sql`, f.prosecdef && /search_path=("")?(,|$)/.test(f.config || '') && !/^\s*execute\b/im.test(f.prosrc) && !/\bexecute\b\s+(format|'|\$|quote)/i.test(f.prosrc));
+  ok(`${name}: anon cannot execute, authenticated can`, !f.anon_exec && f.auth_exec);
+  const afterBegin = f.prosrc.slice(f.prosrc.search(/\bbegin\b/i) + 5).trimStart();
+  ok(`${name}: first statement refuses a caller without the staff role with 42501`, /^if not \(?private\.has_platform_role\(array\[[^\]]+\]\)/i.test(afterBegin) && /^[^;]*?errcode = '42501';/is.test(afterBegin), afterBegin.slice(0, 120));
+  ok(`${name}: never writes, no backslash, never reads raw answers`, !/\b(insert\s+into|update\s+public|delete\s+from|create\s+temp)/i.test(f.prosrc) && !f.prosrc.includes('\\') && !/\.answers\b|scoring_inputs/i.test(f.prosrc));
+}
+
+// Staff writes (migration 2260).
+const ADMIN_WRITE_TABLES = {
+  admin_grant_entitlement: ['entitlements', 'service_requests'],
+  admin_set_entitlement_status: ['entitlements', 'service_requests'],
+  admin_reveal_response: [],
+  admin_save_organization: ['organizations'],
+  admin_save_org_access_member: ['role_grants'],
+  submit_roster_draft: ['organization_roster_drafts'],
+  admin_review_roster_draft: ['organization_roster_drafts'],
+  admin_manage_credential: ['credentials'],
+  admin_remove_member: ['people', 'enrollments', 'role_grants'],
+  admin_authorize_member: ['people', 'person_emails', 'person_profiles', 'role_grants', 'cohorts', 'enrollments']
+};
+for (const name of ADMIN_WRITE_FUNCTIONS) {
+  const f = fns.find((x) => x.proname === name);
+  ok(`${name}: exists`, Boolean(f));
+  if (!f) continue;
+  ok(`${name}: security definer, search_path fixed to empty, no dynamic sql, no backslash`, f.prosecdef && /search_path=("")?(,|$)/.test(f.config || '') && !/^\s*execute\b/im.test(f.prosrc) && !/\bexecute\b\s+(format|'|\$|quote)/i.test(f.prosrc) && !f.prosrc.includes('\\'));
+  ok(`${name}: anon cannot execute, authenticated can`, !f.anon_exec && f.auth_exec);
+  ok(`${name}: arguments are one jsonb document and the dry run flag, nothing that names a person, role or email`, f.args === 'p_input jsonb, p_dry_run boolean' && !(f.argnames || []).some((a) => FORBIDDEN_PARAMS.test(a)), f.args);
+  const afterBegin = f.prosrc.slice(f.prosrc.search(/\bbegin\b/i) + 5).trimStart();
+  const first = name === 'submit_roster_draft'
+    ? /^if v_actor is null then\s+raise exception[^;]*errcode = '42501';/i.test(afterBegin)
+    : /^if not \(?private\.has_platform_role\(array\[[^\]]+\]\)/i.test(afterBegin) && /^[^;]*?errcode = '42501';/is.test(afterBegin);
+  ok(`${name}: first statement refuses the wrong caller with 42501`, first, afterBegin.slice(0, 120));
+  ok(`${name}: audit rows only through private.aw_audit (no free text in a direct insert)`, !/insert\s+into\s+public\.audit_events/i.test(f.prosrc));
+  const touched = [...f.prosrc.matchAll(/(?:insert\s+into|update|delete\s+from)\s+public\.([a-z_]+)/gi)].map((m) => m[1].toLowerCase());
+  ok(`${name}: writes only ${ADMIN_WRITE_TABLES[name].join(', ') || 'nothing but the audit row'}`, touched.every((t) => ADMIN_WRITE_TABLES[name].includes(t)), touched.join());
+}
+const awHelpers = await db.query(`select p.proname, has_function_privilege('anon', p.oid, 'execute') as anon_exec, has_function_privilege('authenticated', p.oid, 'execute') as auth_exec
+  from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'private' and p.proname like 'aw\\_%'`);
+ok('the staff write helpers exist', awHelpers.rows.length >= 15, String(awHelpers.rows.length));
+for (const h of awHelpers.rows) ok(`private.${h.proname}: closed to browsers`, !h.anon_exec && !h.auth_exec);
+
 // Nothing else is exposed by accident.
 const exposed = fns.filter((f) => f.prosecdef && (f.anon_exec || f.auth_exec));
 for (const f of exposed) {
   const allowed = WRITE_FUNCTIONS.includes(f.proname) || PUBLIC_ALLOWLIST.includes(f.proname) || SIGNED_IN_ALLOWLIST.includes(f.proname)
-    || SUBMIT_FUNCTIONS.includes(f.proname) || STAFF_FUNCTIONS.includes(f.proname)
-    || ACCESS_FUNCTIONS.includes(f.proname) || SETTINGS_STAFF_FUNCTIONS.includes(f.proname) || ADMIN_MIRROR_FUNCTIONS.includes(f.proname);
+    || SUBMIT_FUNCTIONS.includes(f.proname) || STAFF_FUNCTIONS.includes(f.proname) || ADMIN_READ_FUNCTIONS.includes(f.proname) || MEMBER_READ_FUNCTIONS.includes(f.proname)
+    || ACCESS_FUNCTIONS.includes(f.proname) || SETTINGS_STAFF_FUNCTIONS.includes(f.proname) || ADMIN_MIRROR_FUNCTIONS.includes(f.proname) || ADMIN_WRITE_FUNCTIONS.includes(f.proname);
   ok(`${f.proname}: browser-callable security definer function is on the allowlist`, allowed);
   if (f.anon_exec) ok(`${f.proname}: anon access is intended`, PUBLIC_ALLOWLIST.includes(f.proname) || SUBMIT_FUNCTIONS.includes(f.proname));
   if (STAFF_FUNCTIONS.includes(f.proname)) ok(`${f.proname}: staff function is not callable by anon`, !f.anon_exec);

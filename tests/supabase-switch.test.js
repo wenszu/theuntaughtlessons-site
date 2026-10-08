@@ -255,7 +255,7 @@ async function check(name, fn) {
     });
     assert.deepEqual(baselineExports.filter((name) => !currentExports.includes(name)), RETIRED_EXPORTS, 'the retired Google Group exports are the only baseline exports that went away');
     baselineExports.filter((name) => !RETIRED_EXPORTS.includes(name)).forEach((name) => assert.ok(currentExports.includes(name), `export ${name} kept`));
-    assert.deepEqual(currentExports.filter((name) => !baselineExports.includes(name)), ['getDataSource', 'getMyExerciseResults', 'sendMyResultsEmail', 'sendReadinessResultEmail'], 'getDataSource, getMyExerciseResults (My Results exercise results, Supabase mode only, null with the switch off), sendMyResultsEmail and sendReadinessResultEmail (Firebase callable wrappers, no Supabase path) are the only new exports');
+    assert.deepEqual(currentExports.filter((name) => !baselineExports.includes(name)), ['changeCustomerEntitlementStatus', 'getDataSource', 'getMyExerciseResults', 'grantCustomerEntitlement', 'sendMyResultsEmail', 'sendReadinessResultEmail'], 'getDataSource, getMyExerciseResults (My Results exercise results, Supabase mode only, null with the switch off), sendMyResultsEmail and sendReadinessResultEmail (Firebase callable wrappers, no Supabase path) and grantCustomerEntitlement and changeCustomerEntitlementStatus (Firebase callable wrappers for the two entitlement callables that had no browser wrapper; Supabase twin only behind the staff write flags, wave 6 and 7) are the only new exports');
   });
 
   for (const name of LEARNER_FUNCTIONS) {

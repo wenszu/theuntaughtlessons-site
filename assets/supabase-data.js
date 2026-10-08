@@ -1143,10 +1143,18 @@ function createSupabaseData(context = {}) {
   // The cached own person id (see ownPersonId below); cleared whenever there is no token.
   let personCache = null;
 
+  // Sign in source (docs/SUPABASE_PLAN_SIGNIN.md): with localStorage utl_auth = "supabase" the token is the Supabase Auth
+  // access token (assets/supabase-auth.js); with anything else it is getIdToken() as before. Read at request time.
+  const supabaseAuthOn = typeof context.supabaseAuthOn === "function" ? context.supabaseAuthOn : () => {
+    try { return globalThis.localStorage.getItem("utl_auth") === "supabase"; } catch (error) { return false; }
+  };
+  const getSupabaseAuthToken = typeof context.getSupabaseAuthToken === "function" ? context.getSupabaseAuthToken
+    : (forceRefresh) => import("./supabase-auth.js").then((module) => module.getIdToken(forceRefresh));
+
   // getIdToken(forceRefresh): true asks Firebase for a fresh token (used once, after an expiry answer).
   async function currentToken(forceRefresh = false) {
     try {
-      const token = await getIdToken(forceRefresh === true);
+      const token = await (supabaseAuthOn() ? getSupabaseAuthToken(forceRefresh === true) : getIdToken(forceRefresh === true));
       if (!token) personCache = null;
       return token ? String(token) : "";
     } catch (error) {

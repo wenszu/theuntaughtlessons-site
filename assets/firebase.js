@@ -96,6 +96,71 @@ function supabaseModeActive() {
   return getDataSource() === "supabase";
 }
 
+// Sign in source switch (the move to Supabase Auth, docs/SUPABASE_PLAN_SIGNIN.md). localStorage utl_auth is
+// "supabase" or anything else; only "supabase" turns it on, and the default is Firebase. With it off every function
+// below runs the Firebase code it always ran and assets/supabase-auth.js is never fetched. With it on, the sign in
+// functions delegate to that file. Meant for the dual login period, after the server functions accept Supabase tokens.
+function supabaseAuthActive() {
+  try {
+    return window.localStorage.getItem("utl_auth") === "supabase";
+  } catch {
+    return false;
+  }
+}
+
+let supabaseAuthModulePromise = null;
+function supabaseAuth() {
+  if (!supabaseAuthModulePromise) {
+    supabaseAuthModulePromise = import("./supabase-auth.js").catch((error) => {
+      supabaseAuthModulePromise = null;
+      throw error;
+    });
+  }
+  return supabaseAuthModulePromise;
+}
+
+// Sign in with a provider by full page redirect. Used where the Firebase code opens a popup: the page navigates away,
+// so the promise never settles (the login page keeps its "Connecting" state), and the person comes back to this page.
+async function supabaseRedirectSignIn(name) {
+  await (await supabaseAuth())[name]();
+  return new Promise(() => {});
+}
+
+// The raw Firebase SDK functions that pages call as signOut(auth), onAuthStateChanged(auth, callback),
+// isSignInWithEmailLink(auth, href) and signInWithEmailLink(auth, email, href) are exported through these. With the
+// switch off they call the SDK function with the same arguments and return what it returns.
+function signOutForSite(...args) {
+  return supabaseAuthActive() ? supabaseAuth().then((module) => module.signOut()) : signOut(...args);
+}
+
+function onAuthStateChangedForSite(...args) {
+  if (!supabaseAuthActive()) return onAuthStateChanged(...args);
+  const callback = args[1];
+  let stop = null;
+  let cancelled = false;
+  supabaseAuth()
+    .then((module) => { if (!cancelled) stop = module.onAuthChange((user) => callback(user)); })
+    .catch(() => { if (!cancelled) callback(null); });
+  return () => {
+    cancelled = true;
+    if (stop) stop();
+  };
+}
+
+function isSignInWithEmailLinkForSite(...args) {
+  if (!supabaseAuthActive()) return isSignInWithEmailLink(...args);
+  try {
+    const params = new URL(String(args[1] || "")).searchParams;
+    return Boolean(params.get("token_hash")) && ["email", "magiclink"].includes(params.get("type"));
+  } catch {
+    return false;
+  }
+}
+
+function signInWithEmailLinkForSite(...args) {
+  return supabaseAuthActive() ? supabaseAuth().then((module) => module.signInWithEmailLink(args[1], args[2])) : signInWithEmailLink(...args);
+}
+
 function applyDataSourceParameter() {
   try {
     const url = new URL(window.location.href);
@@ -320,6 +385,134 @@ function startAdminSupabaseCopy(label, run) {
   } catch (error) {
     // Never matters to the admin flow.
   }
+}
+
+// -- admin read screens: shadow and Supabase-first reads (wave 3, docs/SUPABASE_PLAN_SERVERS_AND_ADMIN.md) -------------------
+// Nine read only staff callables have a Supabase twin (assets/supabase-admin-reads.js, migration 2240). Each public function
+// below is a thin wrapper around the unchanged Firebase code (the <name>FromFirebase function):
+//   no flag                          the Firebase function runs and nothing else happens (no import, no request).
+//   page address has ?utl_server=shadow   the Firebase answer is returned as always; the Supabase twin is called in the background and
+//                                    a console warning says how the two answers differ (counts and field names, never values).
+//   localStorage utl_server_reads = "supabase"   the Supabase answer is used first; any failure (including a refusal because this
+//                                    account holds no staff role there) runs the Firebase function instead.
+// The flags are read when a function is called, so a page can be switched without a reload.
+const ADMIN_READ_FLAG_KEY = "utl_server_reads";
+const ADMIN_READ_SHADOW_PARAMETER = "utl_server";
+let supabaseAdminReadsPromise = null;
+
+function adminReadMode() {
+  try {
+    if (window.localStorage.getItem(ADMIN_READ_FLAG_KEY) === "supabase") return "supabase";
+    if (new URLSearchParams(window.location.search).get(ADMIN_READ_SHADOW_PARAMETER) === "shadow") return "shadow";
+  } catch (error) {
+    // Blocked storage or an odd address: Firebase only.
+  }
+  return "firebase";
+}
+
+function loadSupabaseAdminReads() {
+  if (!supabaseAdminReadsPromise) {
+    supabaseAdminReadsPromise = import("./supabase-admin-reads.js").then((module) => ({
+      reads: module.createSupabaseAdminReads({
+        supabaseUrl: SUPABASE_URL,
+        publishableKey: SUPABASE_PUBLISHABLE_KEY,
+        getIdToken: siteIdToken
+      }),
+      compare: module.compareAdminRead
+    })).catch((error) => {
+      supabaseAdminReadsPromise = null;
+      throw error;
+    });
+  }
+  return supabaseAdminReadsPromise;
+}
+
+// Resolves { ok: true, value, compare } or { ok: false, error }; never rejects and never waits longer than SUPABASE_WAIT_MS.
+async function runSupabaseAdminRead(name, args) {
+  let timer = null;
+  try {
+    const layer = await loadSupabaseAdminReads();
+    const value = await Promise.race([
+      layer.reads[name](...args),
+      new Promise((resolve, reject) => {
+        timer = window.setTimeout(() => {
+          reject(Object.assign(new Error("The data service did not answer in time."), { code: "network/timeout" }));
+        }, SUPABASE_WAIT_MS);
+      })
+    ]);
+    return { ok: true, value, compare: layer.compare };
+  } catch (error) {
+    return { ok: false, error };
+  } finally {
+    if (timer !== null) window.clearTimeout(timer);
+  }
+}
+
+async function adminReadRoute(name, args, firebaseCall) {
+  const mode = adminReadMode();
+  if (mode === "firebase") return firebaseCall();
+  if (mode === "supabase") {
+    const remote = await runSupabaseAdminRead(name, args);
+    if (remote.ok && remote.value) return remote.value;
+    console.warn(`Admin read ${name}: Supabase did not answer (${String((remote.error && remote.error.code) || "unknown")}); the Firebase answer is used.`);
+    return firebaseCall();
+  }
+  // Shadow: the Supabase call starts first so both run together; the Firebase answer is what the page gets, or its error.
+  const pending = runSupabaseAdminRead(name, args);
+  let firebaseValue;
+  try {
+    firebaseValue = await firebaseCall();
+  } catch (error) {
+    pending.catch(() => {});
+    throw error;
+  }
+  pending.then((remote) => {
+    if (!remote.ok) {
+      console.warn(`Admin read shadow ${name}: Supabase did not answer (${String((remote.error && remote.error.code) || "unknown")}).`);
+      return;
+    }
+    const result = remote.compare(name, firebaseValue, remote.value);
+    console.warn(result.same
+      ? `Admin read shadow ${name}: match`
+      : `Admin read shadow ${name}: ${result.differences.length} difference(s) - ${result.differences.join("; ")}`);
+  }).catch(() => {});
+  return firebaseValue;
+}
+
+async function searchVerifiedCredentials(queryText) {
+  return adminReadRoute("searchVerifiedCredentials", [queryText], () => searchVerifiedCredentialsFromFirebase(queryText));
+}
+
+async function getMemberCredentialRegistry() {
+  return adminReadRoute("getMemberCredentialRegistry", [], () => getMemberCredentialRegistryFromFirebase());
+}
+
+async function getOrganizationAccessAdmin() {
+  return adminReadRoute("getOrganizationAccessAdmin", [], () => getOrganizationAccessAdminFromFirebase());
+}
+
+async function getCustomerDirectory(options = {}) {
+  return adminReadRoute("getCustomerDirectory", [options], () => getCustomerDirectoryFromFirebase(options));
+}
+
+async function getCustomerDetailForStaff(customerId) {
+  return adminReadRoute("getCustomerDetailForStaff", [customerId], () => getCustomerDetailForStaffFromFirebase(customerId));
+}
+
+async function listEsParticipants(options = {}) {
+  return adminReadRoute("listEsParticipants", [options], () => listEsParticipantsFromFirebase(options));
+}
+
+async function listEsAttempts(options = {}) {
+  return adminReadRoute("listEsAttempts", [options], () => listEsAttemptsFromFirebase(options));
+}
+
+async function getEsConfiguration() {
+  return adminReadRoute("getEsConfiguration", [], () => getEsConfigurationFromFirebase());
+}
+
+async function getEsDataGovernance(options = {}) {
+  return adminReadRoute("getEsDataGovernance", [options], () => getEsDataGovernanceFromFirebase(options));
 }
 
 // -- read merges (Firestore is the base; Supabase may only add) ---------------------------------
@@ -557,25 +750,251 @@ async function repairMemberVerifiedCredential(userId) {
   return result && result.data ? result.data : null;
 }
 
-async function manageVerifiedCredential(action, credentialId, details = {}) {
+// -- staff writes: shadow and Supabase-first (waves 6 and 7, docs/SUPABASE_PLAN_SERVERS_AND_ADMIN.md) ---------------------
+// Ten admin writes have a Supabase twin (assets/supabase-admin-writes.js, migration 2260): grantCustomerEntitlement,
+// changeCustomerEntitlementStatus, revealAssessmentResponse, saveOrganizationDefinition, saveOrganizationAccessMember,
+// submitOrganizationRosterDraft, reviewOrganizationRosterDraft, manageVerifiedCredential, removeMember and authorizeMember.
+// Each public function below is a thin wrapper around the unchanged Firebase code (the <name>FromFirebase function):
+//   no flag                          the Firebase function runs and nothing else happens (no import, no request).
+//   page address has ?utl_server=shadow   the Firebase write runs as always. Once it has SUCCEEDED, the database function is called
+//                                    with p_dry_run=true (it writes nothing) and one console warning says how the two answers differ
+//                                    (field names and counts, never values). A dry run that comes after the Firebase write can
+//                                    report "already exists" or "already archived" when the server mirror has copied the change.
+//   localStorage utl_server_writes = "supabase"   the database function is the BASE and the Firebase function is NOT called: the
+//                                    change is written to Supabase only. Off by default. Turn it on only when the admin console reads
+//                                    from Supabase too (wave 13), because a Firestore based screen will not show these changes.
+//                                    A failure is thrown to the admin (no fallback: a second write path could write twice).
+// The flags are read when a function is called, so a page can be switched without a reload.
+const STAFF_WRITE_FLAG_KEY = "utl_server_writes";
+const STAFF_WRITE_SHADOW_PARAMETER = "utl_server";
+let staffWritesModulePromise = null;
+
+function staffWriteMode() {
+  try {
+    if (window.localStorage.getItem(STAFF_WRITE_FLAG_KEY) === "supabase") return "supabase";
+    if (new URLSearchParams(window.location.search).get(STAFF_WRITE_SHADOW_PARAMETER) === "shadow") return "shadow";
+  } catch (error) {
+    // Blocked storage or an odd address: Firebase only.
+  }
+  return "firebase";
+}
+
+function loadStaffWrites() {
+  if (!staffWritesModulePromise) {
+    staffWritesModulePromise = import("./supabase-admin-writes.js").then((module) => ({
+      writes: module.createAdminWrites({
+        supabaseUrl: SUPABASE_URL,
+        publishableKey: SUPABASE_PUBLISHABLE_KEY,
+        getIdToken: (forceRefresh) => auth.currentUser && auth.currentUser.getIdToken(forceRefresh === true)
+      }),
+      compare: module.compareStaffWrite,
+      describe: module.describeStaffWrite
+    })).catch((error) => {
+      staffWritesModulePromise = null;
+      throw error;
+    });
+  }
+  return staffWritesModulePromise;
+}
+
+// The dry run of the shadow mode: never rejects, never waits longer than SUPABASE_WAIT_MS, never throws into the admin flow.
+function startStaffShadow(name, args, firebaseAnswer) {
+  let timer = null;
+  loadStaffWrites()
+    .then((layer) => Promise.race([
+      layer.writes.run(name, args, { dryRun: true }),
+      new Promise((resolve, reject) => {
+        timer = window.setTimeout(() => {
+          reject(Object.assign(new Error("The data service did not answer in time."), { code: "unavailable" }));
+        }, SUPABASE_WAIT_MS);
+      })
+    ]).then((answer) => console.warn(layer.describe(name, layer.compare(name, firebaseAnswer, answer)))))
+    .catch((error) => console.warn(`Staff write shadow ${name}: the database function did not answer (${String((error && (error.sqlstate || error.code)) || "unknown")}).`))
+    .finally(() => { if (timer !== null) window.clearTimeout(timer); });
+}
+
+async function staffWriteRoute(name, args, firebaseCall) {
+  const mode = staffWriteMode();
+  if (mode === "firebase") return firebaseCall();
+  // Wait for the sign in to be restored, so the token is there when the Supabase request is made.
+  try { await getSignedInUser(); } catch { /* the Firebase run reports its own sign in problem */ }
+  if (mode === "supabase") return (await loadStaffWrites()).writes.run(name, args, {});
+  const answer = await firebaseCall();
+  startStaffShadow(name, args, answer);
+  return answer;
+}
+
+async function grantCustomerEntitlementFromFirebase(payload = {}) {
+  const user = await getSignedInUser();
+  if (!user) throw new Error("Please sign in with a UTL administrator account.");
+  const callable = httpsCallable(functions, "grantCustomerEntitlement");
+  const result = await callable(payload && typeof payload === "object" ? payload : {});
+  return result && result.data ? result.data : null;
+}
+
+async function grantCustomerEntitlement(payload = {}) {
+  return staffWriteRoute("grantCustomerEntitlement", [payload], () => grantCustomerEntitlementFromFirebase(payload));
+}
+
+async function changeCustomerEntitlementStatusFromFirebase(payload = {}) {
+  const user = await getSignedInUser();
+  if (!user) throw new Error("Please sign in with a UTL administrator account.");
+  const callable = httpsCallable(functions, "changeCustomerEntitlementStatus");
+  const result = await callable(payload && typeof payload === "object" ? payload : {});
+  return result && result.data ? result.data : null;
+}
+
+async function changeCustomerEntitlementStatus(payload = {}) {
+  return staffWriteRoute("changeCustomerEntitlementStatus", [payload], () => changeCustomerEntitlementStatusFromFirebase(payload));
+}
+
+async function manageVerifiedCredentialFromFirebase(action, credentialId, details = {}) {
   const callable = httpsCallable(functions, "manageVerifiedCredential");
   const result = await callable({ action, credentialId, ...(details && typeof details === "object" ? details : {}) });
   return result && result.data ? result.data : null;
 }
 
-async function searchVerifiedCredentials(queryText) {
+async function manageVerifiedCredential(action, credentialId, details = {}) {
+  return staffWriteRoute("manageVerifiedCredential", [action, credentialId, details], () => manageVerifiedCredentialFromFirebase(action, credentialId, details));
+}
+
+async function searchVerifiedCredentialsFromFirebase(queryText) {
   const callable = httpsCallable(functions, "searchVerifiedCredentials");
   const result = await callable({ query: String(queryText || "").trim() });
   return result && result.data ? result.data : { ok: true, credentials: [] };
 }
 
-async function getMemberCredentialRegistry() {
+async function getMemberCredentialRegistryFromFirebase() {
   const callable = httpsCallable(functions, "getMemberCredentialRegistry");
   const result = await callable({});
   return result && result.data ? result.data : { ok: true, credentials: [] };
 }
 
+// -- Member reads on Supabase (wave 4, docs/SUPABASE_PLAN_SERVERS_AND_ADMIN.md) ----------------------------------
+// getMyWorkspaces, getMyOrganizationAccess, getCohortStanding, getMemberExerciseResponses and getMyEsStatus each have a
+// Supabase version (assets/supabase-member-reads.js: read only database functions that find the caller from the token).
+// With neither switch below, every one of them runs the Firebase code it always ran and that file is never fetched.
+//   ?utl_server=shadow                  Firebase answers as before. The Supabase version is asked in the background and one
+//                                       console.warn line names the fields or counts that differ (never a value).
+//   localStorage utl_server_reads=supabase   Supabase answers first; Firebase is the fallback when Supabase fails or has
+//                                       no usable answer. This switch wins over the shadow parameter.
+function memberReadsMode() {
+  try {
+    if (window.localStorage.getItem("utl_server_reads") === "supabase") return "supabase";
+  } catch {
+    // unreadable storage means no switch
+  }
+  try {
+    if (new URLSearchParams(window.location.search).get("utl_server") === "shadow") return "shadow";
+  } catch {
+    // an unreadable address means no switch
+  }
+  return "off";
+}
+
+let memberReadsModulePromise = null;
+let memberReadsInstance = null;
+
+function loadMemberReadsModule() {
+  if (!memberReadsModulePromise) {
+    memberReadsModulePromise = import("./supabase-member-reads.js").catch((error) => {
+      memberReadsModulePromise = null;
+      throw error;
+    });
+  }
+  return memberReadsModulePromise;
+}
+
+// Resolves { ok: true, value } or { ok: false, error }; never rejects and never waits longer than SUPABASE_WAIT_MS.
+async function runMemberReads(run) {
+  let timer = null;
+  try {
+    const module = await loadMemberReadsModule();
+    if (!memberReadsInstance) {
+      memberReadsInstance = module.createMemberReads({
+        supabaseUrl: SUPABASE_URL,
+        publishableKey: SUPABASE_PUBLISHABLE_KEY,
+        getIdToken: siteIdToken
+      });
+    }
+    const value = await Promise.race([
+      run(memberReadsInstance),
+      new Promise((resolve, reject) => {
+        timer = window.setTimeout(() => {
+          reject(Object.assign(new Error("The data service did not answer in time."), { code: "network/timeout" }));
+        }, SUPABASE_WAIT_MS);
+      })
+    ]);
+    return { ok: true, value };
+  } catch (error) {
+    return { ok: false, error };
+  } finally {
+    if (timer !== null) window.clearTimeout(timer);
+  }
+}
+
+// In Supabase first mode only an answer that holds something may replace Firebase's: an empty or negative answer (no
+// workspace, no organization access, no cohort or not yet ranked, no entitlement) may just mean Supabase has not caught up
+// yet, so Firebase is asked. The same rule applies to getMemberExerciseResponses (see its wrapper).
+const MEMBER_READ_USABLE = {
+  getMyWorkspaces: (value) => Boolean(value) && Array.isArray(value.workspaces) && value.workspaces.length > 0,
+  getMyOrganizationAccess: (value) => Boolean(value) && value.hasAccess === true && Array.isArray(value.organizations) && value.organizations.length > 0,
+  getCohortStanding: (value) => Boolean(value) && value.state === "ready",
+  getMyEsStatus: (value) => Boolean(value) && Boolean(value.assessments) && Object.values(value.assessments).some((item) => Boolean(item) && item.hasEntitlement === true)
+};
+
+// The token for a Supabase request, taken the way the data layer takes it (assets/supabase-data.js currentToken): the
+// Supabase Auth access token when localStorage utl_auth is "supabase", otherwise the Firebase ID token.
+async function siteIdToken(forceRefresh) {
+  if (supabaseAuthActive()) return (await supabaseAuth()).getIdToken(forceRefresh === true);
+  return auth.currentUser && auth.currentUser.getIdToken(forceRefresh === true);
+}
+
+// One member read. firebaseRun is the original function body; supabaseRun gets the Supabase reads.
+// options.firebaseOnly keeps a call on Firebase (the support preview), options.usable(value) says whether a Supabase
+// answer may be used in place of Firebase's.
+async function memberRead(name, firebaseRun, supabaseRun, options = {}) {
+  const mode = options.firebaseOnly ? "off" : memberReadsMode();
+  if (mode === "off") return firebaseRun();
+  const usable = typeof options.usable === "function" ? options.usable : (MEMBER_READ_USABLE[name] || ((value) => value !== null && value !== undefined));
+  // Wait for the sign in to be restored, so the token is there when the Supabase request is made.
+  try { await getSignedInUser(); } catch { /* the Firebase run reports its own sign in problem */ }
+  if (mode === "supabase") {
+    const remote = await runMemberReads(supabaseRun);
+    if (remote.ok && usable(remote.value)) return remote.value;
+    console.warn(`Member reads: ${name} could not be answered by Supabase (${remote.ok ? "no usable answer" : String((remote.error && remote.error.code) || "unknown")}); Firebase was used.`);
+    return firebaseRun();
+  }
+  const remotePromise = runMemberReads(supabaseRun);
+  const base = await firebaseRun();
+  remotePromise.then(async (remote) => {
+    if (!remote.ok) {
+      console.warn(`Member reads shadow compare: ${name} failed on Supabase (${String((remote.error && remote.error.code) || "unknown")}). Firebase was used.`);
+      return;
+    }
+    if (remote.value === null || remote.value === undefined) {
+      console.warn(`Member reads shadow compare: ${name} had no Supabase answer. Firebase was used.`);
+      return;
+    }
+    const result = (await loadMemberReadsModule()).compareMemberRead(name, base, remote.value);
+    console.warn(result.agree
+      ? `Member reads shadow compare: ${name} agrees with Supabase.`
+      : `Member reads shadow compare: ${name} differs from Supabase in ${result.differences.join(", ")}. Firebase was used.`);
+  }).catch(() => {});
+  return base;
+}
+
+// The support preview (previewEmail, administrators only) stays on Firebase: the database function answers for the caller only.
 async function getCohortStanding(metric = "completion", previewEmail = "") {
+  return memberRead(
+    "getCohortStanding",
+    () => getCohortStandingFromFirebase(metric, previewEmail),
+    (reads) => reads.getCohortStanding(metric),
+    { firebaseOnly: Boolean(String(previewEmail || "").trim()) }
+  );
+}
+
+async function getCohortStandingFromFirebase(metric = "completion", previewEmail = "") {
   const callable = httpsCallable(functions, "getCohortStanding");
   const result = await callable({
     metric: metric === "mp" ? "mp" : "completion",
@@ -585,10 +1004,12 @@ async function getCohortStanding(metric = "completion", previewEmail = "") {
 }
 
 function signInWithEmailPassword(email, password) {
+  if (supabaseAuthActive()) return supabaseAuth().then((module) => module.signInWithPassword(email, password));
   return signInWithEmailAndPassword(requireFirebaseAuth(), String(email || "").trim().toLowerCase(), String(password || ""));
 }
 
 function signInWithGooglePopup() {
+  if (supabaseAuthActive()) return supabaseRedirectSignIn("signInWithGoogle");
   // Do not await authPersistenceReady here — it resolves on page load, well before
   // the user can tap. Skipping the await keeps window.open() as close to synchronous
   // as possible, which is required for iOS Safari's user-gesture popup policy.
@@ -596,41 +1017,49 @@ function signInWithGooglePopup() {
 }
 
 async function signInWithGoogleRedirect() {
+  if (supabaseAuthActive()) return supabaseRedirectSignIn("signInWithGoogle");
   await authPersistenceReady;
   return signInWithRedirect(requireFirebaseAuth(), provider);
 }
 
 async function getGoogleRedirectResult() {
+  if (supabaseAuthActive()) return (await supabaseAuth()).getRedirectResult("google");
   await authPersistenceReady;
   return getRedirectResult(requireFirebaseAuth());
 }
 
 function signInWithMicrosoftPopup() {
+  if (supabaseAuthActive()) return supabaseRedirectSignIn("signInWithMicrosoft");
   // See signInWithGooglePopup — skipping the await keeps window.open() close
   // to synchronous, required for iOS Safari's user-gesture popup policy.
   return signInWithPopup(requireFirebaseAuth(), microsoftProvider);
 }
 
 async function signInWithMicrosoftRedirect() {
+  if (supabaseAuthActive()) return supabaseRedirectSignIn("signInWithMicrosoft");
   await authPersistenceReady;
   return signInWithRedirect(requireFirebaseAuth(), microsoftProvider);
 }
 
 async function getMicrosoftRedirectResult() {
+  if (supabaseAuthActive()) return (await supabaseAuth()).getRedirectResult("azure");
   await authPersistenceReady;
   return getRedirectResult(requireFirebaseAuth());
 }
 
 function signInWithFacebookPopup() {
+  if (supabaseAuthActive()) return supabaseRedirectSignIn("signInWithFacebook");
   return signInWithPopup(requireFirebaseAuth(), facebookProvider);
 }
 
 async function signInWithFacebookRedirect() {
+  if (supabaseAuthActive()) return supabaseRedirectSignIn("signInWithFacebook");
   await authPersistenceReady;
   return signInWithRedirect(requireFirebaseAuth(), facebookProvider);
 }
 
 async function getFacebookRedirectResult() {
+  if (supabaseAuthActive()) return (await supabaseAuth()).getRedirectResult("facebook");
   await authPersistenceReady;
   return getRedirectResult(requireFirebaseAuth());
 }
@@ -666,6 +1095,7 @@ async function describeAccountExistsError(error) {
 }
 
 async function getSignedInUser() {
+  if (supabaseAuthActive()) return (await supabaseAuth()).getSignedInUser();
   const readyAuth = requireFirebaseAuth();
   await authPersistenceReady;
   if (readyAuth.currentUser) return readyAuth.currentUser;
@@ -687,6 +1117,10 @@ async function getOrganizationConsole(organizationId = "") {
 }
 
 async function getMyOrganizationAccess() {
+  return memberRead("getMyOrganizationAccess", getMyOrganizationAccessFromFirebase, (reads) => reads.getMyOrganizationAccess());
+}
+
+async function getMyOrganizationAccessFromFirebase() {
   const user = await getSignedInUser();
   if (!user) return { ok: true, hasAccess: false, organizations: [] };
   const callable = httpsCallable(functions, "getMyOrganizationAccess");
@@ -695,6 +1129,10 @@ async function getMyOrganizationAccess() {
 }
 
 async function getMyWorkspaces() {
+  return memberRead("getMyWorkspaces", getMyWorkspacesFromFirebase, (reads) => reads.getMyWorkspaces());
+}
+
+async function getMyWorkspacesFromFirebase() {
   const user = await getSignedInUser();
   if (!user) return { ok: true, customerId: null, workspaces: [], hasMultiple: false };
   const callable = httpsCallable(functions, "getMyWorkspaces");
@@ -708,6 +1146,10 @@ function emptyEsStatus() {
 }
 
 async function getMyEsStatus() {
+  return memberRead("getMyEsStatus", getMyEsStatusFromFirebase, (reads) => reads.getMyEsStatus());
+}
+
+async function getMyEsStatusFromFirebase() {
   const user = await getSignedInUser();
   if (!user) return emptyEsStatus();
   // Supabase mode: the callable stays the base and Supabase (get_my_es_status) adds what it lacks. If the callable
@@ -749,7 +1191,7 @@ async function getMyExerciseResults() {
   return remote.value;
 }
 
-async function getOrganizationAccessAdmin() {
+async function getOrganizationAccessAdminFromFirebase() {
   const user = await getSignedInUser();
   if (!user) throw new Error("Please sign in with a UTL administrator account.");
   const callable = httpsCallable(functions, "getOrganizationAccessAdmin");
@@ -769,7 +1211,7 @@ async function getCustomersConsoleFeatureFlag() {
   }
 }
 
-async function getCustomerDirectory(options = {}) {
+async function getCustomerDirectoryFromFirebase(options = {}) {
   const user = await getSignedInUser();
   if (!user) throw new Error("Please sign in with a UTL administrator account.");
   const callable = httpsCallable(functions, "getCustomerDirectory");
@@ -782,7 +1224,7 @@ async function getCustomerDirectory(options = {}) {
   return result && result.data ? result.data : null;
 }
 
-async function getCustomerDetailForStaff(customerId) {
+async function getCustomerDetailForStaffFromFirebase(customerId) {
   const user = await getSignedInUser();
   if (!user) throw new Error("Please sign in with a UTL administrator account.");
   if (!customerId) throw new Error("A customer ID is required.");
@@ -803,7 +1245,7 @@ async function getEsWorkspaceFeatureFlag() {
   }
 }
 
-async function listEsParticipants(options = {}) {
+async function listEsParticipantsFromFirebase(options = {}) {
   const user = await getSignedInUser();
   if (!user) throw new Error("Please sign in with a UTL administrator account.");
   const callable = httpsCallable(functions, "listEsParticipants");
@@ -814,7 +1256,7 @@ async function listEsParticipants(options = {}) {
   return result && result.data ? result.data : null;
 }
 
-async function listEsAttempts(options = {}) {
+async function listEsAttemptsFromFirebase(options = {}) {
   const user = await getSignedInUser();
   if (!user) throw new Error("Please sign in with a UTL administrator account.");
   const callable = httpsCallable(functions, "listEsAttempts");
@@ -825,7 +1267,7 @@ async function listEsAttempts(options = {}) {
   return result && result.data ? result.data : null;
 }
 
-async function getEsConfiguration() {
+async function getEsConfigurationFromFirebase() {
   const user = await getSignedInUser();
   if (!user) throw new Error("Please sign in with a UTL administrator account.");
   const callable = httpsCallable(functions, "getEsConfiguration");
@@ -833,7 +1275,7 @@ async function getEsConfiguration() {
   return result && result.data ? result.data : null;
 }
 
-async function getEsDataGovernance(options = {}) {
+async function getEsDataGovernanceFromFirebase(options = {}) {
   const user = await getSignedInUser();
   if (!user) throw new Error("Please sign in with a UTL administrator account.");
   const callable = httpsCallable(functions, "getEsDataGovernance");
@@ -847,7 +1289,7 @@ async function getEsDataGovernance(options = {}) {
 // The raw-response reveal is a deliberate, audited action, never a silent or
 // bulk read. The admin UI must only call this from an explicit confirm button
 // with a reason the staff member typed, never on attempt-detail open.
-async function revealAssessmentResponse(attemptId, reason) {
+async function revealAssessmentResponseFromFirebase(attemptId, reason) {
   const user = await getSignedInUser();
   if (!user) throw new Error("Please sign in with a UTL administrator account.");
   if (!attemptId) throw new Error("An attempt ID is required.");
@@ -855,6 +1297,10 @@ async function revealAssessmentResponse(attemptId, reason) {
   const callable = httpsCallable(functions, "revealAssessmentResponse");
   const result = await callable({ attemptId, reason: String(reason).trim() });
   return result && result.data ? result.data : null;
+}
+
+async function revealAssessmentResponse(attemptId, reason) {
+  return staffWriteRoute("revealAssessmentResponse", [attemptId, reason], () => revealAssessmentResponseFromFirebase(attemptId, reason));
 }
 
 async function repairMemberExerciseProgress(userId) {
@@ -874,7 +1320,7 @@ async function checkOrganizationRepEmail(email) {
   return result && result.data ? result.data : null;
 }
 
-async function saveOrganizationAccessMember(payload = {}) {
+async function saveOrganizationAccessMemberFromFirebase(payload = {}) {
   const user = await getSignedInUser();
   if (!user) throw new Error("Please sign in with a UTL administrator account.");
   const callable = httpsCallable(functions, "saveOrganizationAccessMember");
@@ -882,7 +1328,11 @@ async function saveOrganizationAccessMember(payload = {}) {
   return result && result.data ? result.data : null;
 }
 
-async function saveOrganizationDefinition(payload = {}) {
+async function saveOrganizationAccessMember(payload = {}) {
+  return staffWriteRoute("saveOrganizationAccessMember", [payload], () => saveOrganizationAccessMemberFromFirebase(payload));
+}
+
+async function saveOrganizationDefinitionFromFirebase(payload = {}) {
   const user = await getSignedInUser();
   if (!user) throw new Error("Please sign in with a UTL administrator account.");
   const callable = httpsCallable(functions, "saveOrganizationDefinition");
@@ -890,7 +1340,11 @@ async function saveOrganizationDefinition(payload = {}) {
   return result && result.data ? result.data : null;
 }
 
-async function submitOrganizationRosterDraft(payload = {}) {
+async function saveOrganizationDefinition(payload = {}) {
+  return staffWriteRoute("saveOrganizationDefinition", [payload], () => saveOrganizationDefinitionFromFirebase(payload));
+}
+
+async function submitOrganizationRosterDraftFromFirebase(payload = {}) {
   const user = await getSignedInUser();
   if (!user) throw new Error("Please sign in to submit a roster proposal.");
   const callable = httpsCallable(functions, "submitOrganizationRosterDraft");
@@ -898,12 +1352,20 @@ async function submitOrganizationRosterDraft(payload = {}) {
   return result && result.data ? result.data : null;
 }
 
-async function reviewOrganizationRosterDraft(payload = {}) {
+async function submitOrganizationRosterDraft(payload = {}) {
+  return staffWriteRoute("submitOrganizationRosterDraft", [payload], () => submitOrganizationRosterDraftFromFirebase(payload));
+}
+
+async function reviewOrganizationRosterDraftFromFirebase(payload = {}) {
   const user = await getSignedInUser();
   if (!user) throw new Error("Please sign in with a UTL administrator account.");
   const callable = httpsCallable(functions, "reviewOrganizationRosterDraft");
   const result = await callable(payload && typeof payload === "object" ? payload : {});
   return result && result.data ? result.data : null;
+}
+
+async function reviewOrganizationRosterDraft(payload = {}) {
+  return staffWriteRoute("reviewOrganizationRosterDraft", [payload], () => reviewOrganizationRosterDraftFromFirebase(payload));
 }
 
 async function getAuthorizedMemberFirestore(normalizedEmail) {
@@ -1084,13 +1546,17 @@ async function requireAuthorizedMember(user) {
         source: "local-emulator"
       };
     }
-    await signOut(requireFirebaseAuth());
+    await signOutForSite(requireFirebaseAuth());
     throw new Error("This account does not have an active membership invite.");
   }
   return member;
 }
 
 async function sendSignInInvite(email) {
+  if (supabaseAuthActive()) {
+    await (await supabaseAuth()).sendEmailLink(email, { redirectTo: actionCodeSettings.url });
+    return;
+  }
   await sendSignInLinkToEmail(requireFirebaseAuth(), email, actionCodeSettings);
   window.localStorage.setItem("emailForSignIn", email);
 }
@@ -1099,6 +1565,10 @@ async function sendSignInInvite(email) {
 // TSA has no session to reuse, so "see my results" re-grants access the same
 // way a TSA invite link works, just pointed at the readiness results page.
 async function sendReadinessAccessLink(email) {
+  if (supabaseAuthActive()) {
+    await (await supabaseAuth()).sendEmailLink(email, { redirectTo: readinessActionCodeSettings.url });
+    return;
+  }
   await sendSignInLinkToEmail(requireFirebaseAuth(), email, readinessActionCodeSettings);
   window.localStorage.setItem("emailForSignIn", email);
 }
@@ -1182,7 +1652,7 @@ async function submitAccessRequest(fullName, email, notes = "") {
   }
 }
 
-async function authorizeMember(email, fields = {}) {
+async function authorizeMemberFromFirebase(email, fields = {}) {
   const normalizedEmail = String(email || "").trim().toLowerCase();
   if (!normalizedEmail) {
     throw new Error("An email address is required to authorize a member.");
@@ -1225,6 +1695,10 @@ async function authorizeMember(email, fields = {}) {
   }
 
   await setDoc(memberRef, payload, { merge: true });
+}
+
+async function authorizeMember(email, fields = {}) {
+  return staffWriteRoute("authorizeMember", [email, fields], () => authorizeMemberFromFirebase(email, fields));
 }
 
 async function saveUserProfile(user, member = {}, signInProvider = "") {
@@ -2369,6 +2843,18 @@ async function saveAssessmentItemAttempt(attemptPayload = {}) {
 
 async function getMemberExerciseResponses(uid) {
   if (!uid) throw new Error("A user UID is required.");
+  // Another person's answers (an administrator's read) stay on Firebase: the database function answers for the caller only.
+  // An empty Supabase answer is not trusted over Firebase (it may just mean nothing was copied yet).
+  const signedIn = memberReadsMode() === "off" ? null : await getSignedInUser().catch(() => null);
+  return memberRead(
+    "getMemberExerciseResponses",
+    () => getMemberExerciseResponsesFromFirebase(uid),
+    (reads) => reads.getMemberExerciseResponses(),
+    { firebaseOnly: !signedIn || signedIn.uid !== uid, usable: (value) => Boolean(value) && Object.keys(value).length > 0 }
+  );
+}
+
+async function getMemberExerciseResponsesFromFirebase(uid) {
   const readyDb = requireFirestore();
   const subCollectionRef = collection(readyDb, "users", uid, "completed_exercises");
   const snapshot = await getDocs(subCollectionRef);
@@ -2592,12 +3078,16 @@ async function findUserUidByEmail(email) {
   return usersSnap.docs[0].id;
 }
 
-async function removeMember(email) {
+async function removeMemberFromFirebase(email) {
   const user = await getSignedInUser();
   if (!user) throw new Error("Please sign in with a UTL administrator account.");
   const callable = httpsCallable(functions, "removeMember");
   const result = await callable({ email });
   return result && result.data ? result.data : null;
+}
+
+async function removeMember(email) {
+  return staffWriteRoute("removeMember", [email], () => removeMemberFromFirebase(email));
 }
 
 async function getMemberSupportSnapshot(email) {
@@ -2965,6 +3455,28 @@ async function setPaymentSettings(partial) {
   bridgeSettingsWrite("payments");
 }
 async function createCheckoutSession({ program, successUrl, cancelUrl }) {
+  // Checkout path, per browser, for the Stripe test mode rehearsal: localStorage utl_payments is "supabase" or "firebase"
+  // (anything else, a missing value or unreadable storage means "firebase", the Firebase callable below). Nothing sets it
+  // from a link; it is set by hand in the console. The Supabase function needs a signed in member and answers 401 otherwise.
+  let paymentsPath = "firebase";
+  try { paymentsPath = window.localStorage.getItem("utl_payments") === "supabase" ? "supabase" : "firebase"; } catch { /* storage unreadable */ }
+  if (paymentsPath === "supabase") {
+    // The same token the other Supabase calls use: the Supabase Auth token when utl_auth is "supabase", else the Firebase one.
+    const token = supabaseAuthActive()
+      ? await (await supabaseAuth()).getIdToken()
+      : (auth.currentUser ? await auth.currentUser.getIdToken() : "");
+    if (!token) throw new Error("Sign in to continue.");
+    const response = await fetch(`${SUPABASE_URL}/functions/v1/stripe-checkout`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", apikey: SUPABASE_PUBLISHABLE_KEY, Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ program, successUrl, cancelUrl })
+    });
+    const answer = await response.json().catch(() => null);
+    if (!response.ok || !answer || !answer.url) {
+      throw new Error((answer && answer.error && answer.error.message) || "Could not start checkout.");
+    }
+    return { url: answer.url, sessionId: answer.sessionId || null };
+  }
   const callable = httpsCallable(functions, "createCheckoutSession");
   const result = await callable({ program, successUrl, cancelUrl });
   return result && result.data ? result.data : null;
@@ -3054,6 +3566,8 @@ export {
   auth,
   authorizeMember,
   removeMember,
+  grantCustomerEntitlement,
+  changeCustomerEntitlementStatus,
   collection,
   createUserWithEmailAndPassword,
   db,
@@ -3106,14 +3620,14 @@ export {
   getSignedInUser,
   getUserFeedbackEnabled,
   GoogleAuthProvider,
-  isSignInWithEmailLink,
+  isSignInWithEmailLinkForSite as isSignInWithEmailLink,
   LEARNING_PROFILE_TREND_TOLERANCE,
   MEMBER_ACCOUNT_AVATAR_ICON_IDS,
   issueVerifiedCredential,
   repairMemberVerifiedCredential,
   manageVerifiedCredential,
   searchVerifiedCredentials,
-  onAuthStateChanged,
+  onAuthStateChangedForSite as onAuthStateChanged,
   requireAuthorizedMember,
   runAdminAction,
   repairMemberProgramCompletionReward,
@@ -3168,7 +3682,7 @@ export {
   setEmergencyCredential,
   setUserFeedbackEnabled,
   signInWithEmailAndPassword,
-  signInWithEmailLink,
+  signInWithEmailLinkForSite as signInWithEmailLink,
   signInWithEmailPassword,
   signInWithFacebookPopup,
   signInWithFacebookRedirect,
@@ -3177,7 +3691,7 @@ export {
   signInWithMicrosoftPopup,
   signInWithMicrosoftRedirect,
   signInWithPopup,
-  signOut,
+  signOutForSite as signOut,
   query,
   Timestamp,
   updateDoc,

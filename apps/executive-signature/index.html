@@ -1441,7 +1441,7 @@ function renderResult(){
         throw new Error('No checkout URL returned.');
       }catch(error){
         btn.disabled=false;btn.textContent=originalLabel;
-        toast('Could not start checkout. Please try again.');
+        toast(error&&error.message==='Sign in to continue.'?'Sign in to continue, then try again.':'Could not start checkout. Please try again.');
       }
       return;
     }

@@ -23,6 +23,9 @@ const { setTimeout: realSleep } = require('timers/promises');
 
 const REPO_ROOT = path.resolve(__dirname, '..', '..');
 const SUPABASE_DATA_SOURCE = path.join(REPO_ROOT, 'assets', 'supabase-data.js');
+const SUPABASE_ADMIN_READS_SOURCE = path.join(REPO_ROOT, 'assets', 'supabase-admin-reads.js');
+const SUPABASE_MEMBER_READS_SOURCE = path.join(REPO_ROOT, 'assets', 'supabase-member-reads.js');
+const SUPABASE_ADMIN_WRITES_SOURCE = path.join(REPO_ROOT, 'assets', 'supabase-admin-writes.js');
 
 const FIXED_NOW = Date.parse('2026-10-06T10:00:00.000Z');
 
@@ -202,7 +205,13 @@ const IMPORT_REWRITES = [
   [/"https:\/\/www\.gstatic\.com\/firebasejs\/[^"]+\/firebase-firestore\.js"/g, '"./firebase-firestore.mjs"'],
   [/"https:\/\/www\.gstatic\.com\/firebasejs\/[^"]+\/firebase-functions\.js"/g, '"./firebase-functions.mjs"'],
   // Node treats .js in this repo as CommonJS, so the data layer is copied next to the module as .mjs.
-  [/import\("\.\/supabase-data\.js"\)/g, 'import("./supabase-data.mjs")']
+  [/import\("\.\/supabase-data\.js"\)/g, 'import("./supabase-data.mjs")'],
+  // The admin read screens twin (wave 3) is copied the same way.
+  [/import\("\.\/supabase-admin-reads\.js"\)/g, 'import("./supabase-admin-reads.mjs")'],
+  // The member reads twin (wave 4) is copied the same way.
+  [/import\("\.\/supabase-member-reads\.js"\)/g, 'import("./supabase-member-reads.mjs")'],
+  // The staff writes twin (waves 6 and 7) is copied the same way.
+  [/import\("\.\/supabase-admin-writes\.js"\)/g, 'import("./supabase-admin-writes.mjs")']
 ];
 
 // ---------------------------------------------------------------------------
@@ -470,6 +479,9 @@ function createHarness() {
       const dir = scratchDir();
       Object.entries(STUBS).forEach(([name, text]) => fs.writeFileSync(path.join(dir, name), text));
       fs.copyFileSync(SUPABASE_DATA_SOURCE, path.join(dir, 'supabase-data.mjs'));
+      fs.copyFileSync(SUPABASE_ADMIN_READS_SOURCE, path.join(dir, 'supabase-admin-reads.mjs'));
+      fs.copyFileSync(SUPABASE_MEMBER_READS_SOURCE, path.join(dir, 'supabase-member-reads.mjs'));
+      fs.copyFileSync(SUPABASE_ADMIN_WRITES_SOURCE, path.join(dir, 'supabase-admin-writes.mjs'));
       let text = sourceText;
       IMPORT_REWRITES.forEach(([pattern, replacement]) => { text = text.replace(pattern, replacement); });
       if (/https:\/\/www\.gstatic\.com/.test(text)) throw new Error('An SDK import was not rewritten.');

@@ -1,9 +1,10 @@
 import { PGlite } from '@electric-sql/pglite';
 import { citext } from '@electric-sql/pglite/contrib/citext';
 import { btree_gist } from '@electric-sql/pglite/contrib/btree_gist';
+import { uuid_ossp } from '@electric-sql/pglite/contrib/uuid_ossp';
 import fs from 'fs';
 export async function boot() {
-  const db = new PGlite({ extensions: { citext, btree_gist } });
+  const db = new PGlite({ extensions: { citext, btree_gist, uuid_ossp } });
   await db.exec(`
     create role anon nologin; create role authenticated nologin; create role service_role nologin bypassrls;
     create schema auth; create schema extensions;

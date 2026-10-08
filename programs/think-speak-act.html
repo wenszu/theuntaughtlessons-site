@@ -2414,8 +2414,9 @@
       button.removeAttribute('data-waitlist-cta');
       button.removeAttribute('data-waitlist-audience');
       button.textContent = 'Buy the self-guided program, ' + priceLabel;
+      const buyLabel = button.textContent;
       button.addEventListener('click', async () => {
-        const originalLabel = button.textContent;
+        const originalLabel = buyLabel;
         button.disabled = true;
         button.textContent = 'Redirecting…';
         try {
@@ -2425,7 +2426,8 @@
           throw new Error('No checkout URL returned.');
         } catch (error) {
           button.disabled = false;
-          button.textContent = originalLabel;
+          // The Supabase checkout needs a signed in member: say so instead of doing nothing.
+          button.textContent = error && error.message === 'Sign in to continue.' ? 'Sign in to continue, then try again' : originalLabel;
         }
       });
       original.replaceWith(button);

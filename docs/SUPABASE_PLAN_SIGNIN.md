@@ -80,10 +80,10 @@ Written as questions with my recommendation.
 
 1. **Which sign in methods stay?** Recommendation: Google and email always. Microsoft only if at least one active member uses it. Facebook only if at least one active member uses it (my guess is none). Decide after task A1 gives the counts.
 2. **Which email sender?** The sign in emails need a sender on `theuntaughtlessons.com` or the emails land in spam. Options: Resend, Brevo, Amazon SES, Postmark. I recommend one with an easy dashboard and a free tier that covers 55 people. You choose, then you add the DNS records I give you. Sending through the Google Apps Script mail relay is possible for the welcome email but is not suitable for sign in codes (daily Gmail limits, and it is tied to one personal account).
-3. **Email link or code, or both?** Recommendation: both in one email. A button that opens a page on your site, and a six digit code underneath. The code works on any device and avoids the scanner problem completely.
+3. **Email link or code, or both?** Update after the security review: link only for now (see section 7.4). Original recommendation: both in one email. A button that opens a page on your site, and a six digit code underneath. The code works on any device and avoids the scanner problem completely.
 4. **Remove or keep the "type your email again" step?** Recommendation: remove it. The new link flow does not need it.
 5. **Silent upgrade for people who are already signed in?** Recommendation: no. Their Firebase session keeps working during the two week window. When the window ends they sign in once more. Only build the silent upgrade if the active count turns out to be large.
-6. **Closed sign up?** Recommendation: switch off "Allow new users to sign up" in Supabase, so only accounts that the server creates can sign in. This matches today's rule that only people in `authorized_members` get in. It costs one thing: the login page can tell an outsider "this email is not a member" (see risk R6).
+6. **Closed sign up?** Decided (security review 2026-10-08): "Allow new users to sign up" is OFF from the very first minute and stays off, never "off once provisioning is done". While it is on, anyone who has the public key can create an unconfirmed account with a member's email address and a password they know, and that account survives the member's later email sign in. Accounts are created only with the dashboard "Add user" (Auto Confirm) or the Auth Admin API, which both still work with sign up off. This matches today's rule that only people in `authorized_members` get in. It costs one thing: the login page can tell an outsider "this email is not a member" (see risk R6).
 7. **Test admin.** For testing the admin console I want a second admin member (a test member with the admin role) so tests never touch your own record. OK?
 
 ---
@@ -241,7 +241,7 @@ The Google consent screen will name the Supabase address. Firebase shows `the-un
 
 ### 7.4 Email templates and sender
 - Templates to write (owner's voice, no dashes): Magic link (the sign in email, with a button and a code), Confirm sign up (rarely used because accounts are created by the server), Reset password (break glass accounts only), Change email address, and optionally the security notices (password changed, sign in method linked).
-- The sign in email: subject "Your sign in code for The Untaught Lessons". Body: a button "Open my workspace" pointing to `{{ .SiteURL }}/member-login/?token_hash={{ .TokenHash }}&type=email`, then "Or enter this code: `{{ .Token }}`". The page shows a "Continue" button and only then calls `verifyOtp`, so scanners cannot use the token up. Supabase's own guidance recommends this approach for company mail systems.
+- The sign in email: subject "Your sign in link for The Untaught Lessons". Body: a button "Open my workspace" pointing to `{{ .RedirectTo }}?token_hash={{ .TokenHash }}&type=email`. The page shows a "Continue" button and only then calls `verifyOtp`, so scanners cannot use the token up. Supabase's own guidance recommends this approach for company mail systems. The six digit code is NOT put in the email text (decision of the security review, 2026-10-08): the login page has no code box, and a code in the email adds a second way to be tricked. Add it only together with a code box and a fresh review.
 - Sender: a custom SMTP service. The Supabase built in sender is limited to a very small number of emails per hour and is meant for project team addresses only, so it is not usable. The sender address, for example `login@theuntaughtlessons.com`, must be verified with the provider by adding DNS records (SPF, DKIM and a DMARC record) in Cloudflare. Turn off link click tracking at the sender, because it rewrites the link and breaks it.
 - Today's Firebase sender name and subject (`FIREBASE_EMAIL_TEMPLATE.md`) are the model for the new text.
 
@@ -339,7 +339,7 @@ Menu names change over time in both consoles. If a name differs, search the page
 - A2. In the Firebase console (Authentication, Users), note the date of the last sign in of anyone from AyalaLand.
 
 ### 11.2 Supabase dashboard (project `utl-core`)
-1. Authentication, Sign In / Providers (also called Providers): confirm Email is on. Turn on "Confirm email". Turn off "Allow new users to sign up" when the provisioning is done and tested.
+1. Authentication, Sign In / Providers (also called Providers): confirm Email is on. Turn on "Confirm email". Turn off "Allow new users to sign up" BEFORE anything else and leave it off (see decision 6); create accounts only with "Add user" or the Auth Admin API.
 2. Authentication, Sign In / Providers, Google: enter the client ID and secret from section 11.3. Copy the callback address shown there into the Google console. Leave "Skip nonce check" off.
 3. Same page, Azure (Microsoft): only if kept. Needs an Azure app registration (section 11.4). Set the tenant URL for work, school and personal accounts according to Supabase's current Azure guide.
 4. Same page, Facebook: only if kept.
@@ -450,3 +450,89 @@ Each line starts with the short version.
 - [ ] **Remove the Firebase fallback** from `private.jwt_identity` in a new migration with a down file.
 - [ ] **Save a final Firebase Auth export,** then the Firebase project is paused as planned.
 - [ ] **Remove** `http://localhost:8082/**` from the Supabase redirect list, delete the unused secret keys, and update `WEBSITE_CONTEXT.md`.
+
+---
+
+## 15. Build status (2026-10-08, builder session)
+
+Nothing below is switched on, applied, deployed or committed. The live site still signs in with Firebase exactly as before.
+
+### 15.1 What exists
+
+| Piece | File | State |
+|---|---|---|
+| Browser module for Supabase Auth: Google, Microsoft (provider `azure`), Facebook, email link and six digit code, emergency password, sign out, current person, change listener, token, and `linkPerson()` | `assets/supabase-auth.js` | Built and tested with a fake library. Loads the Supabase library (supabase-js 2.116.0, released 2026-09-07) from this site, not from a content delivery network: `assets/vendor/supabase-js-2.116.0/` (nine files, no import from any other host, SHA-256 of each recorded in the module and checked by the test), only when used. Files end in `.mjs`; check on the first preview that the host serves them as JavaScript |
+| The switch | `assets/firebase.js` (small block after `supabaseModeActive`, one line at the top of each sign in function) | Off. Turned on per browser by `localStorage.utl_auth = "supabase"`. Any other value, or no value, means Firebase and the module is never fetched. No new export; `signOut`, `onAuthStateChanged`, `isSignInWithEmailLink` and `signInWithEmailLink` are exported through wrappers that call the Firebase function unchanged when the switch is off |
+| Token choice for the data layer | `assets/supabase-data.js` (`currentToken`, one place) | With the switch on, requests carry the Supabase Auth access token; otherwise the Firebase token as before |
+| Database function `public.link_my_identity()` | `supabase/migrations/20261008002270_signin_link.sql`, undo `supabase/rollbacks/20261008002270_signin_link_down.sql` | Written and tested locally (`supabase/signin-link-test.mjs`, 50 checks). Also checks the exact issuer, refuses single sign on users and needs an identity that vouches for the email. NOT applied to the live database |
+| Server token check | `functions-admin/supabase-token.js` | Built and tested (`tests/supabase-token.test.js`). Not required by any callable |
+| Tests | `tests/supabase-auth.test.js`, `tests/supabase-auth-switch.test.js` (compares every sign in function with the pre switch copy while the switch is off), `tests/supabase-token.test.js`, `supabase/signin-link-test.mjs` | Pass |
+
+How the pieces behave with the switch on, on the existing login page and without any page change:
+- The Google, Microsoft and Facebook buttons send the whole page to the provider and back (no popup). The login page then finds the returned person the same way it does after a Firebase redirect.
+- The email link: the sign in email links to the page with `token_hash` and `type` in the address. The page's existing "enter your email again" step still appears and then signs in with the token (the typed address is not used). The link is used up only when the person presses the button, so mail scanners do not burn it.
+- A link only signs in the address it was sent to (the typed or remembered address is compared with the account the link opened; a different one is signed out at once).
+- On the login page an address that is not a member gets the same answer as a member ("email sent"), so the page cannot be used to find out who is a member. An administrator who is signed in and sends an invitation is told when the address has no account.
+- After any sign in the browser calls `link_my_identity()` once per browser session (never longer than 8 seconds, never blocks sign in). It ties the Supabase account to the person with the same verified email, only when the person has no Supabase id yet.
+- `link_my_identity()` trusts the account record in Supabase (email confirmed, not banned, not anonymous), not anything the browser can edit. It never creates a person. A person who already has a different Supabase id is refused.
+
+### 15.2 What is NOT built, and what blocks turning it on
+
+1. The provisioning script (section 5.1) is not built. Sign up is off from the start, so a person without a Supabase account cannot sign in at all, and accounts must exist first (the test member can be added by hand, see step 8 below).
+2. Most of the site still reads Firestore and the callable functions under a Firebase session. A person who signed in only with Supabase has no Firebase session, so those parts fail until the phases in section 8 (server functions and admin console on Supabase) are done. The switch is for a test browser until then.
+3. Pages that read the Firebase session directly, not through `getSignedInUser`: `assets/feedback-widget.js` (token for feedback), `admin/index.html` (`auth.currentUser?.email`, one line), the inbox pages (token), `assets/firebase.js` itself (`users/{uid}` records are keyed by the Firebase uid; a Supabase sign in would key them by the Supabase id). They need a small follow up edit each.
+4. The login page has no box for the six digit code (the module can verify it). Until it has one, leave the code line out of the email template.
+5. There is no site wide switch yet. The switch is per browser. A public setting that sets it for everyone on the window day is a later, small piece.
+6. The server helper is not used by any callable. Firebase callables reject a header that is not a Firebase token before the code runs, so a Supabase only browser must send the token inside the request data (`supabaseAccessToken`) or the function must move to Edge Functions. Each of the 33 callables that read `request.auth` needs its own change (listed in the builder report).
+
+### 15.3 Owner steps (about 90 minutes in all, plus waiting for DNS)
+
+Menu names change over time. If a name differs, search the page for the words in quotes. Never paste a secret into a chat.
+
+**A. Resend (the sender of the sign in emails)**
+1. Open resend.com and create an account with your own address.
+2. In Resend open "Domains", choose "Add Domain", and enter `theuntaughtlessons.com`.
+3. Resend shows a list of DNS records. Open Cloudflare, choose the domain, open "DNS", and add each record exactly as shown. Set every one of them to "DNS only" (grey cloud, not orange).
+4. Return to Resend and press "Verify". Wait until the domain shows "Verified". This can take a few minutes up to a few hours.
+5. In the domain settings turn OFF "Click tracking" (it rewrites the link in the email and breaks it).
+6. Open "API Keys", choose "Create API Key", name it "Supabase sign in", permission "Sending access", domain `theuntaughtlessons.com`. Copy the key once. Keep it in your password manager. You will paste it in step 6 below.
+
+**B. Google Cloud console (project `the-untaught-lessons`)**
+1. Open APIs and Services, then "Credentials" (or "Google Auth Platform", then "Clients").
+2. Choose "Create credentials", then "OAuth client ID", type "Web application", name "UTL Supabase sign in".
+3. Under "Authorized redirect URIs" add exactly: `https://czljyikfavtjgqcibdda.supabase.co/auth/v1/callback`
+4. Under "Authorized JavaScript origins" add `https://theuntaughtlessons.com`.
+5. Choose "Create". Copy the Client ID and the Client secret. Keep both for step 4 below.
+6. Open the OAuth consent screen ("Audience" and "Branding"). Check that the status is "In production" (not "Testing"), that the only scopes are `openid`, `email` and `profile`, and that `theuntaughtlessons.com` is a listed authorized domain.
+
+**C. Supabase dashboard (project `utl-core`)**
+1. Open "Authentication", then "URL Configuration". Set "Site URL" to `https://theuntaughtlessons.com`. Under "Redirect URLs" add `https://theuntaughtlessons.com/**`. Add `https://www.theuntaughtlessons.com/**` only if the site also answers on the www address. While you test on your own computer also add `http://localhost:8082/**`, and remove it again afterwards.
+2. Open "Authentication", then "Sign In / Providers". Open "Email". Make sure "Enable Email provider" and "Confirm email" are on. Set "Email OTP Expiration" to 1800 (seconds). Turn "Allow new users to sign up" OFF now, before any other step, and leave it off for good. Plain reason: while it is on, anyone with the public key can create an unconfirmed account with a member's email address and a password they know, and that account stays usable after the member signs in by email. Accounts are made only with "Add user" (step 8 below) or the Auth Admin API, and both work with sign up off.
+3. On the same page open "Google". Turn "Enable Sign in with Google" on. Leave "Skip nonce check" off.
+4. Paste the Client ID and the Client secret from step B5. Check that the "Callback URL (for OAuth)" shown on this page is the address you entered in B3. Save.
+5. Leave "Azure" (Microsoft) and "Facebook" OFF (recommended, and the build treats them as off). Decision for you, later: turn them on only if the provider counts (task A1 in section 11.1) show someone uses them. Microsoft sign in links to an existing account only when Microsoft reports the email as verified, which it often does not (risk R3). Facebook is probably unused.
+6. Open "Authentication", then "Emails", then "SMTP Settings". Turn on "Enable custom SMTP". Enter: Sender email `login@theuntaughtlessons.com`, Sender name `The Untaught Lessons`, Host `smtp.resend.com`, Port `465`, Username `resend`, Password: the Resend API key from step A6. Save.
+7. Open "Authentication", then "Emails", then "Templates", then "Magic Link". Set the subject to: `Your sign in link for The Untaught Lessons`. Replace the body with the text below, and save. (The code line is left out because the login page has no box for the code yet.)
+
+   ```
+   <h2>Sign in to The Untaught Lessons</h2>
+   <p>Select the button below to open your workspace. The button works one time and stays valid for 30 minutes.</p>
+   <p><a href="{{ .RedirectTo }}?token_hash={{ .TokenHash }}&type=email">Open my workspace</a></p>
+   <p>If you did not ask for this email, you can ignore it. Nobody can sign in without the button.</p>
+   ```
+   Leave the other templates as they are for now.
+8. Create the test member by hand: open "Authentication", then "Users", then "Add user", then "Create new user". Enter the test member's address (never your own address), choose a long random password you do not need to keep, and tick "Auto Confirm User". Save. This member must already exist as a person in the database with the same address.
+9. Check once more that "Allow new users to sign up" is OFF (step 2). It is never turned on, not even for provisioning.
+10. Open "Authentication", then "Rate Limits". Note the number of emails per hour. With custom email on it is 30 per hour by default; raise it to 100 before a large cohort signs in.
+11. Open "Project Settings", then "JWT Keys". Write down whether the project uses a signing key of type "ECC (P-256)" or "RSA" (public keys, nothing to store on the server), or only the "Legacy JWT secret". Tell Claude which. If it is the legacy secret, the server functions will need that secret stored as a Firebase secret; you set it yourself with `firebase functions:secrets:set`, never in a chat.
+12. Leave "Third-Party Auth" with Firebase in place until the end of the dual window.
+
+**D. Database**
+1. Tell Claude when you are ready for the link function. Claude then shows you the migration `20261008002270_signin_link.sql` and applies it only after you approve. Until it is applied, sign in works but the person is not linked, and data reads return nothing for a Supabase only session.
+
+**E. Try it (test member only, in a private browser window)**
+1. Open the site's login page. Ask Claude to set the switch for you in that window, or open the browser tools console and enter `localStorage.setItem("utl_auth", "supabase")`. Reload the page.
+2. Choose the email option, enter the test member's address, and open the email on the same device. Press the button in the email, then "Sign in" on the page.
+3. Repeat with the Google button and the test member's Google account.
+4. To switch back, enter `localStorage.removeItem("utl_auth")` in the same console and reload. Nothing else needs undoing.
+5. Do not use your own member record for these tests (it has been inflated by tests before).
