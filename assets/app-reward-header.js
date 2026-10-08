@@ -201,6 +201,8 @@
     var links = backdrop.querySelector(".utl-mobile-header-sheet-links");
     var moreButton = summary.querySelector(".utl-mobile-header-more");
     var timeLabel = summary.querySelector(".utl-mobile-header-time");
+    // Exercises without a timer (external AI hand-off pages) must not show a frozen 00:00 chip.
+    if (!header.querySelector(".app-timer,.utility-cluster,.ab-timer,.write-to-aiko-utilities,.bad-news-timer,.lsh-timer,.slo-timer,[id*='timer' i]")) timeLabel.style.display = 'none';
     var closeButton = backdrop.querySelector(".utl-mobile-header-close");
     var mobileQuery = window.matchMedia("(max-width: 760px)");
     var moved = [];
