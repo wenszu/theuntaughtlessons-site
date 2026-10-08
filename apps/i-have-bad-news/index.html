@@ -107,7 +107,11 @@
     .bad-news-read-tag.is-read { background: #E3F1E8; color: var(--bad-news-ok); }
     .bad-news-part .bad-news-launch { margin-top: 4px; }
     .bad-news-part .utl-coach-prompt { margin-top: 0; }
-    .bad-news-personal { display: grid; gap: 12px; padding: 16px; border: 1px solid var(--bad-news-line); border-radius: 8px; background: var(--bad-news-soft); }
+    .bn-pers-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .bn-plus { flex: 0 0 auto; display: grid; place-items: center; width: 28px; height: 28px; padding: 0; border: 1px solid var(--bad-news-rule); border-radius: 6px; background: var(--bad-news-white); color: var(--bad-news-navy); font-size: 20px; line-height: 1; cursor: pointer; }
+    .bn-pers-panel { display: grid; gap: 12px; }
+    .bn-pers-panel[hidden] { display: none; }
+    .bad-news-personal { display: grid; gap: 4px; padding: 16px; border: 1px solid var(--bad-news-line); border-radius: 8px; background: var(--bad-news-soft); }
     .bad-news-personal .bad-news-field-label { margin: 0; }
     .bad-news-check { display: flex; align-items: center; gap: 10px; min-height: 44px; color: var(--bad-news-navy); font-size: 14px; font-weight: 700; cursor: pointer; }
     .bad-news-check input { width: 18px; height: 18px; accent-color: var(--bad-news-navy); }
@@ -203,12 +207,16 @@
               </div>
             </fieldset>
             <div class="bad-news-personal">
-              <p class="bad-news-field-label">Make the practice fit you</p>
-              <p class="bad-news-hint">Details about you can be added to the prompt so the other person and the coach respond to you, not to a generic learner. Today that is your first name. Later it can include non-sensitive details about how you work, such as findings from your Executive Signature. You see everything before you copy it, and nothing is sent automatically.</p>
-              <label for="learnerName" class="bad-news-hint"><strong>What should they call you?</strong> Optional.</label>
-              <input class="bad-news-text" id="learnerName" type="text" maxlength="30" placeholder="Your first name" autocomplete="given-name">
-              <label class="bad-news-check"><input type="checkbox" id="usePersonal" checked> Use my details to personalize the practice</label>
+              <div class="bn-pers-head">
+                <label class="bad-news-check"><input type="checkbox" id="usePersonal" checked> Personalize this practice for me</label>
+                <button class="bn-plus" id="persToggle" type="button" aria-expanded="false" aria-controls="persPanel" aria-label="Show personalization details">+</button>
+              </div>
               <p class="bad-news-hint" id="personalIncluded" aria-live="polite"></p>
+              <div class="bn-pers-panel" id="persPanel" hidden>
+                <p class="bad-news-hint">Details about you can be added to the prompt so the other person and the coach respond to you, not to a generic learner. Today that is your first name. Later it can include non-sensitive details about how you work, such as findings from your Executive Signature. You see everything before you copy it, and nothing is sent automatically.</p>
+                <label for="learnerName" class="bad-news-hint"><strong>What should they call you?</strong> Optional.</label>
+                <input class="bad-news-text" id="learnerName" type="text" maxlength="30" placeholder="Your first name" autocomplete="given-name">
+              </div>
             </div>
             <fieldset>
               <legend>How hard should it be?</legend>
@@ -377,9 +385,10 @@
       }
       function renderPersonalIncluded() {
         var items = [];
-        if (learnerName()) items.push('your first name');
-        if (profileHints().length) items.push(profileHints().length + (profileHints().length === 1 ? ' working style note' : ' working style notes'));
-        $('personalIncluded').textContent = items.length ? 'Included in your prompt: ' + items.join(' and ') + '.' : 'Nothing personal is included in your prompt.';
+        if (learnerName()) items.push('Your first name');
+        var hints = profileHints().length;
+        if (hints) items.push(hints + ' working style ' + (hints === 1 ? 'note' : 'notes'));
+        $('personalIncluded').textContent = !personalOn() ? 'Personalization is off. Nothing personal is included.' : (items.length ? personName() + ' will use your details. ' + items.join(' and ') + (items.length > 1 ? ' are included.' : ' is included.') : 'Add your first name so ' + personName() + ' can use it.');
       }
       function personName() { var typed = $('ownName').value.trim(); return state.ownName ? (typed || 'Jordan') : state.name; }
       function currentLevel() { return LEVELS.filter(function (level) { return level.id === state.level; })[0]; }
@@ -457,6 +466,11 @@
       $('ownName').addEventListener('input', function () { buildSituations(); renderSummary(); });
       $('learnerName').addEventListener('input', renderSummary);
       $('usePersonal').addEventListener('change', renderSummary);
+      $('persToggle').addEventListener('click', function () {
+        var opening = $('persPanel').hidden; $('persPanel').hidden = !opening;
+        this.setAttribute('aria-expanded', String(opening)); this.textContent = opening ? '\u2212' : '+';
+        this.setAttribute('aria-label', opening ? 'Hide personalization details' : 'Show personalization details');
+      });
       try {
         var profile = JSON.parse(localStorage.getItem('utl_member_profile') || 'null');
         var first = profile && profile.displayName ? String(profile.displayName).trim().split(/\s+/)[0] : '';

@@ -20,567 +20,173 @@
       --lsh-gold: #EEA320;
       --lsh-cream: #F3EDE2;
       --lsh-charcoal: #4A4A4A;
+      --lsh-steel: #4D7094;
       --lsh-white: #FFFFFF;
       --lsh-line: #C7D8E8;
+      --lsh-rule: #D8CFC1;
       --lsh-soft: #F7F5EF;
-      --lsh-shadow: none;
+      --lsh-ok: #2C7A4B;
     }
 
     * { box-sizing: border-box; }
-
-    body {
-      margin: 0;
-      background: var(--lsh-cream);
-      color: var(--lsh-charcoal);
-      font-family: 'Lato', Arial, sans-serif;
-    }
-
+    body { margin: 0; background: var(--lsh-cream); color: var(--lsh-charcoal); font-family: 'Lato', Arial, sans-serif; }
     a { color: inherit; }
+    button, input, textarea { font: inherit; }
+    button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible, summary:focus-visible { outline: 2px solid var(--lsh-gold); outline-offset: 3px; }
 
-    button {
-      font: inherit;
-    }
+    .lsh-header { position: sticky; top: 0; z-index: 20; display: grid; grid-template-columns: auto auto minmax(220px, 1fr) auto; align-items: center; column-gap: 20px; min-height: 76px; padding: 12px 32px; background: var(--lsh-navy); color: var(--lsh-white); }
+    .lsh-logo { display: block; width: 224px; height: 46px; }
+    .lsh-logo img { display: block; width: 100%; height: 100%; object-fit: contain; }
+    .lsh-divider { width: 1px; height: 38px; background: rgba(255, 255, 255, .42); }
+    .lsh-kicker { display: block; color: var(--lsh-gold); font-size: 10px; letter-spacing: 0; }
+    .lsh-title { display: block; margin-top: 3px; color: var(--lsh-white); font-family: 'Playfair Display', Georgia, serif; font-size: 27px; font-weight: 700; line-height: 1; }
+    .module-back-link { display: inline-flex; align-items: center; gap: 6px; margin-top: 8px; color: rgba(255, 255, 255, .82); font-family: 'Lato', sans-serif; font-size: 15px; font-weight: 700; line-height: 1.25; text-decoration: none; }
+    .module-back-link:hover { color: var(--gold, var(--ab-gold, var(--eisenhower-gold, #EEA320))); text-decoration: underline; text-underline-offset: 3px; }
 
-    button:focus-visible,
-    a:focus-visible {
-      outline: 2px solid var(--lsh-gold);
-      outline-offset: 3px;
-    }
+    .lsh-main { width: min(960px, calc(100% - 56px)); margin: 0 auto; padding: 28px 0 84px; display: grid; gap: 24px; }
+    .lsh-label { margin: 0 0 8px; color: #7A4E00; font-size: 11px; font-weight: 700; }
+    .lsh-intro h1 { margin: 0 0 12px; color: var(--lsh-navy); font-family: 'Playfair Display', Georgia, serif; font-size: clamp(32px, 5vw, 52px); line-height: 1.05; text-wrap: balance; }
+    .lsh-intro p { max-width: 65ch; margin: 0; font-size: 17px; line-height: 1.55; }
 
-    .lsh-header {
-      position: sticky;
-      top: 0;
-      z-index: 20;
-      display: grid;
-      grid-template-columns: auto auto minmax(220px, 1fr) auto;
-      align-items: center;
-      column-gap: 20px;
-      min-height: 76px;
-      padding: 12px 32px;
-      background: var(--lsh-navy);
-      color: var(--lsh-white);
-    }
+    .lsh-step { display: grid; gap: 24px; padding: 24px; border: 1px solid var(--lsh-line); border-radius: 8px; background: var(--lsh-white); }
+    .lsh-step-head { display: flex; align-items: flex-start; gap: 16px; }
+    .lsh-step-number { flex: none; display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: var(--lsh-gold); color: var(--lsh-white); font-size: 13px; font-weight: 700; }
+    .lsh-step h2 { margin: 0; color: var(--lsh-navy); font-family: 'Playfair Display', Georgia, serif; font-size: 24px; line-height: 1.2; text-wrap: balance; }
+    .lsh-step-head p { margin: 4px 0 0; font-size: 15px; line-height: 1.5; }
+    .lsh-step-body { display: grid; gap: 24px; }
 
-    .lsh-logo {
-      display: block;
-      width: 224px;
-      height: 46px;
-    }
+    details.lsh-fold { border-top: 1px solid var(--lsh-rule); }
+    details.lsh-fold summary { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 0; color: var(--lsh-navy); cursor: pointer; font-weight: 700; list-style: none; }
+    details.lsh-fold summary::-webkit-details-marker { display: none; }
+    details.lsh-fold summary::after { content: '+'; display: grid; place-items: center; flex: 0 0 auto; width: 28px; height: 28px; border: 1px solid var(--lsh-rule); border-radius: 6px; color: var(--lsh-navy); font-size: 20px; line-height: 1; }
+    details.lsh-fold[open] summary::after { content: '\2212'; }
+    .lsh-fold-summary { display: block; color: var(--lsh-steel); font-size: 14px; font-weight: 400; }
+    .lsh-fold-body { display: grid; gap: 24px; padding: 8px 0; }
 
-    .lsh-logo img {
-      display: block;
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-    }
+    fieldset { min-width: 0; margin: 0; padding: 0; border: 0; }
+    legend, .lsh-field-label { display: block; padding: 0; margin-bottom: 12px; color: var(--lsh-navy); font-weight: 700; }
+    .lsh-options { display: flex; flex-wrap: wrap; gap: 16px; }
+    .lsh-option { position: relative; }
+    .lsh-option input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+    .lsh-option .box { display: block; min-height: 44px; padding: 10px 18px; border: 1.5px solid var(--lsh-line); border-radius: 8px; background: var(--lsh-soft); cursor: pointer; }
+    .lsh-option input:checked + .box { padding: 9.5px 17.5px; border: 2px solid var(--lsh-gold); background: #FFF7E8; color: var(--lsh-navy); }
+    .lsh-option input:focus-visible + .box { outline: 2px solid var(--lsh-gold); outline-offset: 3px; }
+    .lsh-option small { display: block; font-size: 13px; opacity: .85; }
+    .lsh-option em, .lsh-tag-light { display: inline-block; margin-left: 8px; padding: 0 8px; border-radius: 999px; background: rgba(238, 163, 32, .16); color: #8a6a2c; font-size: 11px; font-style: normal; font-weight: 400; vertical-align: middle; }
+    .lsh-options.stack .lsh-option { flex: 1 1 220px; }
+    .lsh-options.stack .lsh-option .box { height: 100%; }
+    .lsh-text { width: 100%; max-width: 360px; min-height: 44px; padding: 13px 14px; border: 1px solid var(--lsh-line); border-radius: 7px; background: #FCFBF8; color: var(--lsh-charcoal); }
+    .lsh-own { margin-top: 12px; }
+    .lsh-hint { margin: 0; font-size: 14px; line-height: 1.5; }
+    [hidden] { display: none !important; }
 
-    .lsh-divider {
-      width: 1px;
-      height: 38px;
-      background: rgba(255, 255, 255, .42);
-    }
+    .lsh-button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 11px 22px; border: 1.5px solid var(--lsh-navy); border-radius: 7px; background: var(--lsh-white); color: var(--lsh-navy); font-size: 14px; font-weight: 700; text-decoration: none; cursor: pointer; }
+    .lsh-button:hover { background: var(--lsh-soft); }
+    .lsh-button-primary { border-color: var(--lsh-gold); background: var(--lsh-gold); color: var(--lsh-navy); }
+    .lsh-button-primary:hover { background: #d9941c; }
+    .lsh-button-accent { border: 2px solid var(--lsh-gold); }
+    .lsh-button:disabled { opacity: .45; cursor: not-allowed; }
+    .lsh-row { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; }
+    .lsh-launch { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 16px; }
+    .lsh-launch .lsh-button { flex: 1 1 200px; }
+    .lsh-launch .lsh-button-wide { flex: 2 1 0; }
+    .lsh-launch .lsh-button-narrow { flex: 1 1 0; }
+    @media (max-width: 520px) { .lsh-launch .lsh-button-wide, .lsh-launch .lsh-button-narrow { flex: 1 1 100%; } }
+    .lsh-status { margin: 0; color: var(--lsh-ok); font-size: 13px; font-weight: 700; }
+    .lsh-bonus { display: inline-block; vertical-align: middle; padding: 2px 10px; border-radius: 999px; background: var(--lsh-gold); color: #2b1c00; font-family: 'Lato', Arial, sans-serif; font-size: 13px; font-weight: 700; }
+    .lsh-paste { width: 100%; min-height: 140px; padding: 14px; border: 1px solid var(--lsh-line); border-radius: 7px; background: #FCFBF8; color: var(--lsh-charcoal); resize: vertical; }
+    .lsh-complete { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; padding-top: 24px; border-top: 1px solid var(--lsh-rule); }
+    .lsh-exit-link { color: var(--lsh-navy); font-size: 14px; font-weight: 700; }
 
-    .lsh-kicker,
-    .lsh-label,
-    .lsh-button,
-    .lsh-timer-label,
-    .lsh-timer-value,
-    .lsh-step-number {
-      font-family: Lato, Arial, sans-serif;
-    }
 
-    .lsh-kicker {
-      display: block;
-      color: var(--lsh-gold);
-      font-size: 10px;
-      letter-spacing: 0;
-      text-transform: none;
-    }
-
-    .lsh-title {
-      display: block;
-      margin-top: 3px;
-      color: var(--lsh-white);
-      font-family: 'Playfair Display', Georgia, serif;
-      font-size: 27px;
-      font-weight: 700;
-      line-height: 1;
-    }
-
-    .module-back-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      margin-top: 8px;
-      color: rgba(255, 255, 255, .82);
-      font-family: 'Lato', sans-serif;
-      font-size: 15px;
-      font-weight: 700;
-      line-height: 1.25;
-      text-decoration: none;
-    }
-
-    .module-back-link:hover {
-      color: var(--gold, var(--ab-gold, var(--eisenhower-gold, #EEA320)));
-      text-decoration: underline;
-      text-underline-offset: 3px;
-    }
-
-    .lsh-timer {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 7px 10px;
-      border: 1px solid rgba(255, 255, 255, .32);
-      border-radius: 6px;
-      background: rgba(255, 255, 255, .08);
-      white-space: nowrap;
-    }
-
-    .lsh-timer-label {
-      color: var(--lsh-gold);
-      font-size: 9px;
-      letter-spacing: 0;
-      text-transform: none;
-    }
-
-    .lsh-timer-value {
-      color: var(--lsh-white);
-      font-size: 18px;
-      font-weight: 700;
-      line-height: 1;
-    }
-
-    .lsh-icon-button {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 30px;
-      height: 30px;
-      border: 1px solid rgba(255, 255, 255, .34);
-      border-radius: 6px;
-      background: transparent;
-      color: var(--lsh-white);
-      cursor: pointer;
-      font-weight: 700;
-      line-height: 1;
-      padding: 0;
-    }
-
-    .lsh-icon-button svg {
-      width: 17px;
-      height: 17px;
-      stroke-width: 2.2;
-      vertical-align: middle;
-    }
-
-    .lsh-main {
-      width: min(960px, calc(100% - 56px));
-      margin: 0 auto;
-      padding: 28px 0 84px;
-    }
-
-    .lsh-intro {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(260px, 340px);
-      gap: 24px;
-      align-items: stretch;
-      padding-bottom: 18px;
-      border-bottom: 1px solid #D8CFC1;
-    }
-
-    .lsh-intro h1 {
-      margin: 0 0 8px;
-      color: var(--lsh-navy);
-      font-family: 'Playfair Display', Georgia, serif;
-      font-size: clamp(36px, 5vw, 58px);
-      line-height: 1.03;
-    }
-
-    .lsh-intro p {
-      max-width: 760px;
-      margin: 0;
-      color: var(--lsh-charcoal);
-      font-size: 17px;
-      line-height: 1.55;
-    }
-
-    .lsh-brief-card,
-    .lsh-panel,
-    .lsh-action-card {
-      border: 1px solid var(--lsh-line);
-      border-radius: 8px;
-      background: var(--lsh-white);
-      box-shadow: var(--lsh-shadow);
-    }
-
-    .lsh-brief-card {
-      padding: 18px;
-    }
-
-    .lsh-label {
-      margin: 0 0 8px;
-      color: var(--lsh-gold);
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0;
-      text-transform: none;
-    }
-
-    .lsh-brief-card strong {
-      display: block;
-      color: var(--lsh-gold);
-      font-family: 'Playfair Display', Georgia, serif;
-      font-size: 26px;
-      line-height: 1.1;
-    }
-
-    .lsh-brief-card span {
-      display: block;
-      margin-top: 8px;
-      font-size: 15px;
-      line-height: 1.45;
-    }
-
-    .lsh-grid {
-      display: grid;
-      grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr);
-      gap: 18px;
-      margin-top: 36px;
-    }
-
-    .lsh-panel {
-      padding: 20px;
-    }
-
-    .lsh-panel h2 {
-      margin: 0 0 12px;
-      color: var(--lsh-navy);
-      font-family: 'Playfair Display', Georgia, serif;
-      font-size: 28px;
-      line-height: 1.15;
-    }
-
-    .lsh-panel p {
-      margin: 0 0 14px;
-      font-size: 16px;
-      line-height: 1.55;
-    }
-
-    .lsh-panel p:last-child {
-      margin-bottom: 0;
-    }
-
-    .lsh-scenario {
-      display: grid;
-      gap: 12px;
-      padding: 16px;
-      border: 1px dashed var(--lsh-line);
-      border-radius: 8px;
-      background: var(--lsh-soft);
-    }
-
-    .lsh-scenario p {
-      margin: 0;
-    }
-
-    .lsh-steps {
-      display: grid;
-      gap: 12px;
-      margin: 0;
-      padding: 0;
-      list-style: none;
-    }
-
-    .lsh-step {
-      position: relative;
-      display: grid;
-      grid-template-columns: 42px minmax(0, 1fr);
-      gap: 12px;
-      padding: 14px;
-      border: 1px solid var(--lsh-line);
-      border-radius: 8px;
-      background: var(--lsh-soft);
-    }
-
-    .lsh-step:not(:last-child)::after {
-      content: "";
-      position: absolute;
-      left: 30px;
-      top: 49px;
-      bottom: -15px;
-      width: 1px;
-      border-left: 1px dashed rgba(74, 74, 74, .2);
-    }
-
-    .lsh-step-number {
-      position: relative;
-      z-index: 1;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 30px;
-      height: 30px;
-      border-radius: 999px;
-      background: var(--lsh-gold);
-      color: var(--lsh-white);
-      font-size: 13px;
-      font-weight: 700;
-    }
-
-    .lsh-step strong {
-      display: block;
-      margin-bottom: 4px;
-      color: var(--lsh-navy);
-      font-size: 16px;
-    }
-
-    .lsh-step > span:not(.lsh-step-number) {
-      display: block;
-      font-size: 15px;
-      line-height: 1.45;
-    }
-
-    .lsh-action-card {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) auto;
-      gap: 20px;
-      align-items: center;
-      margin-top: 36px;
-      padding: 20px;
-      border-color: var(--lsh-gold);
-    }
-
-    .lsh-action-card h2 {
-      margin: 0 0 6px;
-      color: var(--lsh-navy);
-      font-family: 'Playfair Display', Georgia, serif;
-      font-size: 30px;
-      line-height: 1.1;
-    }
-
-    .lsh-action-card p {
-      margin: 0;
-      font-size: 16px;
-      line-height: 1.5;
-    }
-
-    .lsh-voice-help {
-      display: inline-flex;
-      margin-top: 12px;
-      color: var(--lsh-navy);
-      font-family: 'Lato', Arial, sans-serif;
-      font-size: 14px;
-      font-weight: 700;
-      text-underline-offset: 3px;
-    }
-
-    .lsh-voice-guide {
-      grid-column: 1 / -1;
-      display: grid;
-      grid-template-columns: auto minmax(0, 1fr);
-      gap: 14px;
-      align-items: center;
-      padding: 15px 16px;
-      border: 1px solid var(--lsh-line);
-      border-radius: 8px;
-      background: var(--lsh-soft);
-    }
-
-    .lsh-voice-icon {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 48px;
-      height: 48px;
-      border-radius: 999px;
-      background: #050505;
-      color: #fff;
-      flex-shrink: 0;
-    }
-
-    .lsh-voice-icon svg { width: 25px; height: 25px; }
-    .lsh-voice-guide strong { display:block; margin-bottom:3px; color:var(--lsh-navy); font-size:16px; }
-    .lsh-voice-guide p { color:var(--lsh-charcoal); font-size:14px; }
-
-    .lsh-voice-steps {
-      grid-column: 1 / -1;
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 10px;
-      margin: 0;
-      padding: 0;
-      list-style: none;
-      counter-reset: voice-step;
-    }
-
-    .lsh-voice-steps li {
-      counter-increment: voice-step;
-      padding: 12px;
-      border: 1px solid var(--lsh-line);
-      border-radius: 8px;
-      background: var(--lsh-white);
-      font-size: 14px;
-      line-height: 1.45;
-    }
-
-    .lsh-voice-steps li::before {
-      content: counter(voice-step);
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 22px;
-      height: 22px;
-      margin-right: 6px;
-      border-radius: 999px;
-      background: var(--lsh-navy);
-      color: #fff;
-      font-size: 11px;
-      font-weight: 700;
-    }
-
-    .lsh-actions {
-      display: flex;
-      flex-direction: column;
-      align-items: stretch;
-      flex-wrap: wrap;
-      gap: 10px;
-      justify-content: flex-end;
-    }
-
-    .lsh-button {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 11px 22px;
-      border-radius: 7px;
-      border: 0;
-      background: var(--lsh-white);
-      color: var(--lsh-navy);
-      font-family: 'Lato', Arial, sans-serif;
-      font-size: 14px;
-      font-weight: 700;
-      letter-spacing: 0;
-      text-decoration: none;
-      cursor: pointer;
-    }
-
-    .lsh-button-primary {
-      border-color: var(--lsh-gold);
-      background: var(--lsh-gold);
-      color: var(--lsh-navy);
-    }
-
-    .lsh-button-accent {
-      border: 2px solid var(--lsh-gold);
-      background: var(--lsh-white);
-      color: var(--lsh-navy);
-    }
-
-    .lsh-button-accent:hover {
-      background: rgba(238, 163, 32, .12);
-    }
-
-    .lsh-prep-cue {
-      margin: 12px 0 0;
-      padding-left: 0;
-      color: var(--lsh-navy);
-      font-family: 'Lato', Arial, sans-serif;
-      font-size: 16px;
-      font-weight: 600;
-      line-height: 1.45;
-    }
-
-    .lsh-exit-link {
-      color: var(--lsh-navy);
-      font-family: 'Lato', Arial, sans-serif;
-      font-size: 12px;
-      font-weight: 600;
-      text-decoration: none;
-    }
-
-    .lsh-exit-link:hover {
-      color: #2e7d4f;
-      text-decoration: underline;
+    .lsh-part { display: grid; gap: 12px; padding-top: 24px; border-top: 1px solid var(--lsh-rule); }
+    .lsh-part:first-child { padding-top: 0; border-top: 0; }
+    .lsh-part-title { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin: 0; color: var(--lsh-navy); font-size: 17px; font-weight: 700; }
+    .lsh-part-letter { display: grid; place-items: center; width: 24px; height: 24px; border: 1.5px solid var(--lsh-gold); border-radius: 50%; color: var(--lsh-navy); font-size: 12px; font-weight: 700; }
+    .lsh-read-tag { padding: 2px 10px; border-radius: 999px; background: var(--lsh-gold); color: #2b1c00; font-size: 12px; font-weight: 700; }
+    .lsh-read-tag.is-read { background: #E3F1E8; color: var(--lsh-ok); }
+    .lsh-part .lsh-launch { margin-top: 4px; }
+    .lsh-part .utl-coach-prompt { margin-top: 0; }
+    .lsh-pers-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .lsh-plus { flex: 0 0 auto; display: grid; place-items: center; width: 28px; height: 28px; padding: 0; border: 1px solid var(--lsh-rule); border-radius: 6px; background: var(--lsh-white); color: var(--lsh-navy); font-size: 20px; line-height: 1; cursor: pointer; }
+    .lsh-pers-panel { display: grid; gap: 12px; }
+    .lsh-pers-panel[hidden] { display: none; }
+    .lsh-personal { display: grid; gap: 4px; padding: 16px; border: 1px solid var(--lsh-line); border-radius: 8px; background: var(--lsh-soft); }
+    .lsh-personal .lsh-field-label { margin: 0; }
+    .lsh-check { display: flex; align-items: center; gap: 10px; min-height: 44px; color: var(--lsh-navy); font-size: 14px; font-weight: 700; cursor: pointer; }
+    .lsh-check input { width: 18px; height: 18px; accent-color: var(--lsh-navy); }
+    .lsh-voice-link { justify-self: start; min-height: 44px; padding: 0 4px; border: 0; background: none; color: var(--lsh-navy); font-size: 14px; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+    .lsh-voice-dialog { box-sizing: border-box; width: min(780px, calc(100vw - 28px)); max-height: min(90dvh, 820px); overflow: hidden; border: 0; border-radius: 16px; padding: 0; background: #fff; color: #333; box-shadow: 0 26px 80px rgba(0, 31, 61, .38); }
+    .lsh-voice-dialog::backdrop { background: rgba(0, 31, 61, .62); }
+    .lsh-voice-dialog * { box-sizing: border-box; }
+    .lsh-voice-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; padding: 24px 26px 18px; border-bottom: 1px solid #d8e1e8; }
+    .lsh-voice-kicker { display: block; margin: 0 0 5px; color: #a86400; font: 700 12px/1.2 Lato, Arial, sans-serif; }
+    .lsh-voice-head h2 { margin: 0; color: #003366; font: 700 30px/1.15 'Playfair Display', Georgia, serif; }
+    .lsh-voice-close { display: grid; flex: 0 0 36px; width: 36px; height: 36px; place-items: center; border: 1px solid #c7d8e8; border-radius: 50%; background: #fff; color: #003366; font: 700 22px/1 Arial, sans-serif; cursor: pointer; }
+    .lsh-voice-close:hover, .lsh-voice-close:focus-visible { border-color: #003366; background: #f3f7fa; }
+    .lsh-voice-body { max-height: calc(90dvh - 92px); overflow-y: auto; overscroll-behavior: contain; padding: 22px 26px 26px; }
+    .lsh-voice-intro { margin: 0 0 16px; color: #4d7094; font: 16px/1.5 Lato, Arial, sans-serif; }
+    .lsh-voice-steps { display: grid; gap: 12px; margin: 0; padding: 0; list-style: none; }
+    .lsh-voice-step { display: grid; grid-template-columns: 30px minmax(0, 1fr) 200px; gap: 16px; align-items: center; min-width: 0; border: 1px solid #c7d8e8; border-radius: 12px; background: #fff; padding: 14px 16px; }
+    .lsh-voice-step-number { display: grid; width: 30px; height: 30px; place-items: center; border-radius: 50%; background: #EEA320; color: #fff; font: 800 13px/1 Lato, Arial, sans-serif; }
+    .lsh-voice-step h3 { margin: 0 0 4px; color: #003366; font: 800 16px/1.25 Lato, Arial, sans-serif; }
+    .lsh-voice-step p { margin: 0 0 4px; color: #4a4a4a; font: 14px/1.48 Lato, Arial, sans-serif; }
+    .lsh-voice-step p:last-child { margin-bottom: 0; }
+    .lsh-voice-graphic { display: flex; align-items: center; justify-content: center; height: 84px; padding: 8px; border-radius: 9px; background: #f5f7f9; color: #003366; }
+    .lsh-voice-window { width: 100%; max-width: 184px; border: 1px solid #d7dde3; border-radius: 10px; background: #fff; padding: 8px; box-shadow: 0 4px 12px rgba(0, 31, 61, .08); }
+    .lsh-voice-compose { display: flex; align-items: center; justify-content: flex-end; gap: 7px; height: 30px; border: 1px solid #d8dee5; border-radius: 15px; padding: 4px 5px; }
+    .lsh-voice-compose.is-focus { justify-content: flex-start; border: 2px solid #1768c4; padding: 4px 9px; box-shadow: 0 0 0 3px rgba(23, 104, 196, .14); }
+    .lsh-voice-caret { width: 2px; height: 16px; background: #1768c4; }
+    .lsh-voice-highlight { display: grid; place-items: center; padding: 5px; border: 2px solid #eea320; border-radius: 10px; background: #fff7e8; box-shadow: 0 0 0 3px rgba(238, 163, 32, .12); }
+    .lsh-voice-button { display: grid; width: 24px; height: 24px; place-items: center; border-radius: 50%; background: #287ff0; color: #fff; box-shadow: 0 0 0 3px rgba(40, 127, 240, .14); }
+    .lsh-voice-button span { display: flex; align-items: center; gap: 1px; height: 11px; }
+    .lsh-voice-button i { display: block; width: 2px; border-radius: 2px; background: #fff; }
+    .lsh-voice-button i:nth-child(1), .lsh-voice-button i:nth-child(5) { height: 5px; }
+    .lsh-voice-button i:nth-child(2), .lsh-voice-button i:nth-child(4) { height: 9px; }
+    .lsh-voice-button i:nth-child(3) { height: 12px; }
+    .lsh-voice-callout { margin: 6px 0 0; text-align: right; color: #1768c4; font: 800 11px/1.2 Lato, Arial, sans-serif; }
+    .lsh-voice-callout.left { text-align: left; }
+    .lsh-voice-icon { display: grid; min-height: 40px; place-items: center; padding: 0 20px; border-radius: 20px; background: #eaf3fb; color: #003366; font: 700 15px/1 Lato, Arial, sans-serif; }
+    .lsh-voice-note { margin: 16px 0 0; padding: 11px 13px; border-radius: 8px; background: #f3ede2; color: #4a4a4a; font: 13px/1.45 Lato, Arial, sans-serif; }
+    .lsh-voice-actions { display: flex; align-items: center; margin-top: 20px; }
+    .lsh-voice-done { display: inline-flex; min-height: 48px; align-items: center; justify-content: center; border: 0; border-radius: 8px; background: #eea320; color: #003366; padding: 0 22px; font: 800 15px/1.2 Lato, Arial, sans-serif; cursor: pointer; }
+    @media (max-width: 680px) {
+      .lsh-voice-dialog { width: calc(100vw - 20px); max-height: 94dvh; }
+      .lsh-voice-head { padding: 19px 18px 15px; }
+      .lsh-voice-head h2 { font-size: 25px; }
+      .lsh-voice-body { max-height: calc(94dvh - 78px); padding: 17px 18px 20px; }
+      .lsh-voice-step { grid-template-columns: 30px minmax(0, 1fr); }
+      .lsh-voice-graphic { grid-column: 1 / -1; }
+      .lsh-voice-done { width: 100%; }
     }
 
     @media (max-width: 860px) {
-      .lsh-header {
-        grid-template-columns: 1fr auto;
-        row-gap: 10px;
-        padding: 12px 18px;
-      }
-
-      .lsh-logo {
-        width: 176px;
-        height: 38px;
-      }
-
-      .lsh-divider {
-        display: none;
-      }
-
-      .lsh-heading {
-        grid-column: 1 / -1;
-        grid-row: 2;
-      }
-
-      .lsh-timer {
-        grid-column: 2;
-        grid-row: 1;
-      }
-
-      .lsh-main {
-        width: min(100% - 32px, 640px);
-        padding-top: 20px;
-      }
-
-      .lsh-intro,
-      .lsh-grid,
-      .lsh-action-card {
-        grid-template-columns: 1fr;
-      }
-
-      .lsh-actions {
-        align-items: stretch;
-        justify-content: flex-start;
-      }
-
-      .lsh-voice-steps { grid-template-columns: 1fr; }
+      .lsh-header { grid-template-columns: 1fr; row-gap: 8px; padding: 12px 16px; }
+      .lsh-divider { display: none; }
+      .lsh-logo { width: 180px; height: 38px; }
+      .lsh-main { width: calc(100% - 32px); }
     }
-
     @media (max-width: 520px) {
-      .lsh-header {
-        grid-template-columns: 1fr;
-      }
-
-      .lsh-timer {
-        grid-column: 1;
-        grid-row: 3;
-        width: 100%;
-        justify-content: space-between;
-      }
-
-      .lsh-title {
-        font-size: 24px;
-      }
-
-      .lsh-step {
-        grid-template-columns: 1fr;
-      }
-
-      .lsh-step:not(:last-child)::after {
-        display: none;
-      }
-
-      .lsh-button {
-        width: 100%;
-      }
-
-      .lsh-exit-link {
-        align-self: center;
-      }
+      .lsh-step { padding: 16px; }
+      .lsh-row > .lsh-button, .lsh-complete > .lsh-button { width: 100%; }
     }
+    /* New for this exercise */
+    .shs-case { display: grid; gap: 8px; }
+    .shs-case-tag { justify-self: start; padding: 2px 10px; border-radius: 999px; background: rgba(0,51,102,.08); color: var(--lsh-navy); font-size: 12px; font-weight: 700; }
+    .shs-sub { margin: 32px 0 20px; color: var(--lsh-navy); font-weight: 700; }
+    .shs-framework { border: 1px solid var(--lsh-line); border-radius: 8px; background: var(--lsh-white); padding: 0 24px; }
+    .shs-framework details.lsh-fold { border-top: 0; }
+    .shs-framework ol { margin: 0; padding: 0 0 16px; display: grid; gap: 12px; list-style: none; }
+    .shs-framework li { display: grid; grid-template-columns: 30px minmax(0, 1fr); gap: 12px; align-items: start; font-size: 15px; line-height: 1.5; }
+    .shs-framework li b.n { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: var(--lsh-gold); color: #fff; font-size: 13px; }
+    .shs-framework li strong { color: var(--lsh-navy); }
+    .shs-skill { display: block; margin-top: 6px; color: var(--lsh-steel); font-size: 13px; }
+    .lsh-option input:checked + .box .shs-skill { color: var(--lsh-steel); }
+    .shs-tag { padding: 2px 10px; border-radius: 999px; background: #E3F1E8; color: var(--lsh-ok); font-size: 12px; font-weight: 700; }
+    .shs-rounds { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin: 0; padding: 0; list-style: none; }
+    .shs-rounds li { padding: 12px; border: 1px solid var(--lsh-line); border-radius: 8px; background: var(--lsh-soft); font-size: 14px; line-height: 1.4; }
+    .shs-rounds li b { display: block; color: var(--lsh-navy); margin-bottom: 2px; }
+    @media (max-width: 860px) { .shs-rounds { grid-template-columns: repeat(2, minmax(0, 1fr)); } .shs-framework { padding: 0 16px; } }
   </style>
 </head>
 <body>
@@ -590,77 +196,318 @@
     </a>
     <div class="lsh-divider" aria-hidden="true"></div>
     <div class="lsh-heading">
-      <span class="lsh-kicker">PHASE 3 &middot; ACT CONFIDENTLY</span>
+      <span class="lsh-kicker">Phase 3 · Act confidently</span>
       <span class="lsh-title">Let's switch hats</span>
       <a class="module-back-link" href="../../member-login/index.html#learning-journey">← Back to Learning Journey</a>
     </div>
   </header>
 
   <main class="lsh-main">
-    <section class="lsh-intro" aria-labelledby="lshIntroTitle">
-      <div>
-        <p class="lsh-label">Perspective taking</p>
-        <h1 id="lshIntroTitle">Understand their perspective before you respond.</h1>
-        <p>Consider how the other person sees the situation before you respond. You do not have to agree or compromise. First, find where their view differs from yours.</p>
-      </div>
-      <aside class="lsh-brief-card" aria-label="Exercise brief">
-        <p class="lsh-label">Exercise brief</p>
-        <strong>20 minutes</strong>
-        <span>Use the Let's switch hats CustomGPT to consider another person's perspective, practice reading their constraints and motivations, and reshape how you would approach the conversation.</span>
-        <span>When you finish, note one thing you would say differently after seeing it from their side.</span>
-      </aside>
-    </section>
+  <section class="lsh-intro" aria-labelledby="shsIntroTitle">
+    <p class="lsh-label">Perspective taking</p>
+    <h1 id="shsIntroTitle">Understand their perspective before you respond.</h1>
+    <p>You do not have to agree or compromise. First, find where their view differs from yours. In the Olympic project case, you are Aiko's Chief of Staff and you need Michael Felipe on the team. An AI plays Michael, asks what he is really signaling, and coaches how you respond. Plan for about <strong>20 minutes</strong>.</p>
+  </section>
 
-    <section class="lsh-grid" aria-label="Practice instructions">
-      <article class="lsh-panel">
-        <h2>The scenario</h2>
-        <div class="lsh-scenario">
-          <p>You are now leading the Olympic project. You will work with people who have different roles, pressures and definitions of success.</p>
-          <p>What feels obvious to you may feel risky or unclear to someone else. Before you push your idea, you need to understand their world first.</p>
-          <p>Choose one person involved in the Olympic project and one real conversation you need to handle. The Custom GPT will take the other person&rsquo;s perspective, question your assumptions, and help you test a better way to approach the conversation.</p>
+  <section class="shs-framework" aria-label="Your switching framework">
+    <details class="lsh-fold">
+      <summary><span>Your switching framework<span class="lsh-fold-summary">How to switch hats: four questions to ask in every round</span></span></summary>
+      <p class="lsh-hint" style="padding-bottom:12px">To switch hats, take off your own view and put on theirs before you respond. Ask yourself:</p>
+      <ol>
+        <li><b class="n">1</b><span><strong>Name their role and pressures:</strong> What do they need to protect? What are they accountable for? What would failure look like for them?</span></li>
+        <li><b class="n">2</b><span><strong>Identify what they actually want:</strong> Look past the first request. What outcome matters most to them here?</span></li>
+        <li><b class="n">3</b><span><strong>Spot where your view and theirs diverge:</strong> Where are you assuming they see it the way you do?</span></li>
+        <li><b class="n">4</b><span><strong>Adjust your approach:</strong> Given what you now know about their world, what would you say differently?</span></li>
+      </ol>
+    </details>
+  </section>
+
+  <section class="lsh-step" aria-labelledby="s1t">
+    <div class="lsh-step-head"><span class="lsh-step-number">1</span><div><h2 id="s1t">Set up your practice</h2><p>We pre-selected the recommended choices. Keep them or change any of them.</p></div></div>
+    <div class="lsh-step-body">
+      <details class="lsh-fold" open>
+        <summary><span>Your setup<span class="lsh-fold-summary" id="setupSummary"></span></span></summary>
+        <div class="lsh-fold-body">
+          <fieldset>
+            <legend>Which practice?</legend>
+            <div class="lsh-options stack" id="caseOptions"></div>
+            <p class="shs-sub">Or practice with a different situation. No case needed.</p>
+            <div class="lsh-options stack" id="scenarioOptions"></div>
+          </fieldset>
+          <fieldset id="nameField" hidden>
+            <legend>Who are you talking to?</legend>
+            <div class="lsh-options" id="nameOptions"></div>
+            <div class="lsh-own" id="ownNameWrap" hidden>
+              <label for="ownName" class="lsh-hint">Type the name you want to use</label>
+              <input class="lsh-text" id="ownName" type="text" maxlength="30" placeholder="For example, Jordan" autocomplete="off">
+            </div>
+          </fieldset>
+          <div class="lsh-personal">
+            <div class="lsh-pers-head">
+              <label class="lsh-check"><input type="checkbox" id="usePersonal" checked> Personalize this practice for me</label>
+              <button class="lsh-plus" id="persToggle" type="button" aria-expanded="false" aria-controls="persPanel" aria-label="Show personalization details">+</button>
+            </div>
+            <p class="lsh-hint" id="personalIncluded" aria-live="polite"></p>
+            <div class="lsh-pers-panel" id="persPanel" hidden>
+              <p class="lsh-hint">Details about you can be added to the prompt so the other person and the coach respond to you, not to a generic learner. Today that is your first name. Later it can include non-sensitive details about how you work, such as findings from your Executive Signature. You see everything before you copy it, and nothing is sent automatically.</p>
+              <label for="learnerName" class="lsh-hint"><strong>What should they call you?</strong> Optional.</label>
+              <input class="lsh-text" id="learnerName" type="text" maxlength="30" placeholder="Your first name" autocomplete="given-name">
+            </div>
+          </div>
+          <fieldset id="levelField" hidden>
+            <legend>How clear should their signals be?</legend>
+            <div class="lsh-options stack" id="levelOptions"></div>
+          </fieldset>
         </div>
-        <p class="lsh-prep-cue">Choose your person and situation above before opening the GPT.</p>
-      </article>
+      </details>
+    </div>
+  </section>
 
-      <article class="lsh-panel">
-        <h2>Your switching framework</h2>
-        <ol class="lsh-steps">
-          <li class="lsh-step">
-            <span class="lsh-step-number">1</span>
-            <span><strong>Name their role and pressures:</strong> What do they need to protect? What are they accountable for? What would failure look like for them?</span>
-          </li>
-          <li class="lsh-step">
-            <span class="lsh-step-number">2</span>
-            <span><strong>Identify what they actually want:</strong> Look past the first request. What outcome matters most to them in this situation?</span>
-          </li>
-          <li class="lsh-step">
-            <span class="lsh-step-number">3</span>
-            <span><strong>Spot where your view and theirs diverge:</strong> Where are you assuming they see it the same way you do? That difference may be causing the disagreement.</span>
-          </li>
-          <li class="lsh-step">
-            <span class="lsh-step-number">4</span>
-            <span><strong>Adjust your approach:</strong> Given what you now know about their world, what would you say differently?</span>
-          </li>
-        </ol>
-      </article>
-    </section>
-
-    <section class="lsh-action-card" aria-label="Open CustomGPT (Let's switch hats)">
-      <div>
-        <p class="lsh-label">Practice with AI</p>
-        <h2>Practice the conversation out loud.</h2>
-        <p>Open the Let&rsquo;s switch hats CustomGPT, tell it who you are speaking with and what is at stake, then work through the conversation from the other person&rsquo;s point of view.</p>
-        <a class="lsh-voice-help" data-custom-gpt-voice-help href="https://chatgpt.com/g/g-6a411c3c9468819194486200d74b40e4-utl-lets-switch-hats">New to voice mode? View the three steps.</a>
+  <section class="lsh-step" aria-labelledby="s2t">
+    <div class="lsh-step-head"><span class="lsh-step-number">2</span><div><h2 id="s2t">Get ready and open your AI</h2><p>Do these three parts in order. Each one takes under a minute.</p></div></div>
+    <div class="lsh-step-body">
+      <div class="lsh-part">
+        <p class="lsh-part-title"><span class="lsh-part-letter">a</span>Prepare your practice prompt</p>
+        <div id="practicePromptMount"></div>
       </div>
-      <div class="lsh-actions">
-        <a class="lsh-button lsh-button-accent" data-custom-gpt-voice-guide data-voice-guide-label="Open CustomGPT and start voice practice" href="https://chatgpt.com/g/g-6a411c3c9468819194486200d74b40e4-utl-lets-switch-hats" target="_blank" rel="noopener">Open CustomGPT and start voice practice</a>
+      <div class="lsh-part">
+        <p class="lsh-part-title"><span class="lsh-part-letter">b</span>Learn how the four rounds work <span class="lsh-read-tag" id="readTag">Read first</span></p>
+        <div class="utl-coach-prompt">
+          <div><strong>How the practice works</strong><span>Four short steps, including how to answer by voice. Open this before you start.</span></div>
+          <button type="button" id="openRoundsHelp" aria-haspopup="dialog" style="flex:0 0 auto;min-height:42px;border:0;border-radius:7px;background:#003366;color:#fff;padding:0 15px;font:700 14px Lato,Arial,sans-serif;cursor:pointer">Read the instructions</button>
+        </div>
+      </div>
+      <div class="lsh-part">
+        <p class="lsh-part-title"><span class="lsh-part-letter">c</span>Open ChatGPT or Gemini</p>
+        <p class="lsh-hint">These buttons also copy your prompt. Paste it into a new chat and send it. You can type every answer. For voice on a computer, use ChatGPT. Gemini voice chat is in the Gemini phone app.</p>
+        <div class="lsh-launch">
+          <a class="lsh-button lsh-button-accent lsh-button-wide" id="openChatGpt" href="https://chatgpt.com/" target="_blank" rel="noopener">Open ChatGPT <span class="lsh-tag-light">Recommended</span></a>
+          <a class="lsh-button lsh-button-accent lsh-button-narrow" id="openGemini" href="https://gemini.google.com/app" target="_blank" rel="noopener">Open Gemini <span class="lsh-tag-light">Voice on phone only</span></a>
+        </div>
+        <p class="lsh-status" id="openStatus" aria-live="polite"></p>
+        <p class="lsh-hint"><strong>It ends by itself.</strong> After round 4 you give your three step approach and get final feedback. Say "Coach break" to pause the practice at any time.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="lsh-step" aria-labelledby="s3t">
+    <div class="lsh-step-head"><span class="lsh-step-number">3</span><div><h2 id="s3t">Bring back your feedback <span class="lsh-bonus">+10 MP</span></h2><p>Copy this request and paste it into the same chat. Then press the copy button on the box the AI returns.</p></div></div>
+    <div class="lsh-step-body">
+      <div id="transcriptPromptMount"></div>
+      <div>
+        <label class="lsh-field-label" for="transcriptPaste">Paste the conversation and feedback here</label>
+        <textarea class="lsh-paste" id="transcriptPaste" placeholder="Paste here."></textarea>
+        <p class="lsh-hint">This text stays in your browser. It is only used to confirm that you finished the practice.</p>
+      </div>
+      <div class="lsh-row"><button class="lsh-button lsh-button-accent" id="saveTranscriptBtn" type="button" disabled>Add to my record · +10 MP</button><span class="lsh-status" id="saveStatus" aria-live="polite"></span></div>
+      <div class="lsh-complete">
         <button class="lsh-button lsh-button-primary" id="completeExerciseBtn" type="button">Mark exercise complete · +30 MP</button>
         <a class="lsh-exit-link" id="journeyLink" href="../../member-login/index.html#learning-journey">Back to Learning Journey</a>
       </div>
-      <p>ChatGPT opens in a new tab. Return here and mark the exercise complete after you finish the conversation.</p>
-    </section>
-  </main>
+    </div>
+  </section>
+</main>
 
+  <dialog class="lsh-voice-dialog" id="voiceDialog" aria-labelledby="voiceDialogTitle">
+  <div class="lsh-voice-head"><div><span class="lsh-voice-kicker">How it works</span><h2 id="voiceDialogTitle">Four rounds, then your approach.</h2></div><button class="lsh-voice-close" type="button" aria-label="Close instructions" data-voice-close>&times;</button></div>
+  <div class="lsh-voice-body">
+    <p class="lsh-voice-intro">Each round gives you a scene, a question about what the other person is really signaling, and a chance to respond in your own words.</p>
+    <ol class="lsh-voice-steps">
+      <li class="lsh-voice-step"><span class="lsh-voice-step-number">1</span><div><h3>Paste and send</h3><p>Paste the prompt into a new chat and send it as text. The AI takes a moment to read it, then writes a short briefing. Reply Yes when you are ready to begin.</p></div><div class="lsh-voice-graphic"><span class="lsh-voice-icon" aria-hidden="true">Paste</span></div></li>
+      <li class="lsh-voice-step"><span class="lsh-voice-step-number">2</span><div><h3>Reply with one letter</h3><p>After each scene the AI asks what the other person is really signaling, with choices A to D. Reply with only the letter. The AI then explains what they are protecting. Between rounds, reply Yes to continue.</p></div><div class="lsh-voice-graphic"><span class="lsh-voice-icon" aria-hidden="true">A  B  C  D</span></div></li>
+      <li class="lsh-voice-step"><span class="lsh-voice-step-number">3</span><div><h3>Answer in your own words</h3><p>Next comes one open question. Type your answer, or speak it. You can revise it once after the feedback. For voice, click inside the message box first. In ChatGPT the blue voice button then appears. In the Gemini phone app, use the Live button. On a computer, the Gemini microphone only types what you say.</p></div><div class="lsh-voice-graphic"><span class="lsh-voice-icon" aria-hidden="true">Your turn</span></div></li>
+      <li class="lsh-voice-step"><span class="lsh-voice-step-number">4</span><div><h3>Finish with your approach</h3><p>After round 4, you design a three step approach: what you address first, what you clarify, and what you offer. You then get a final score, two strengths, two gaps, and a takeaway.</p></div><div class="lsh-voice-graphic"><span class="lsh-voice-icon" aria-hidden="true">Round 4</span></div></li>
+    </ol>
+    <p class="lsh-voice-note"><strong>Need a pause?</strong> Say "Coach break" to step out of the practice and talk to the coach. The practice picks up where you stopped.</p>
+    <div class="lsh-voice-actions"><button class="lsh-voice-done" type="button" data-voice-close>Got it</button></div>
+  </div>
+</dialog>
+
+  <script src="../../assets/exercise-feedback-coach.js?v=20260925-mobile-v1"></script>
+  <script>
+(function () {
+  var NAMES = ['Alex', 'Elon', 'Priya', 'Marcus'];
+  var LEVELS = [
+    { id: 'Easy', note: 'Their concern is fairly easy to spot', rule: 'Their signals are fairly clear. The concern behind them is easy to find if I listen.' },
+    { id: 'Medium', note: 'Mixed signals', rule: 'Their signals are mixed. They say something polite while a different concern sits underneath.' },
+    { id: 'Hard', note: 'Very indirect', rule: 'Their signals are very indirect. They almost never state the real concern, and I must infer it from small details.' }
+  ];
+  var CASE = { id: 'michael', title: 'The Olympic project case: Michael Felipe', blurb: 'You are Aiko\'s Chief of Staff. Aiko wants Michael on the team for the Olympic project, and Michael is cautious. Read what he is protecting and make it easier for him to say yes.', skill: 'Reading what a strong operator is protecting before you respond' };
+  var SCENARIOS = [
+    { id: 'friend', title: 'A friend who will not commit', who: 'Personal', skill: 'Reading avoidance and indirect hesitation',
+      setup: 'I am planning something with {n}, a friend. {n} keeps sounding interested but never fully commits.',
+      traits: 'friendly, non-confrontational, socially aware, casual and slightly vague when uncomfortable',
+      protects: 'social comfort, flexibility, and the freedom to change plans without guilt',
+      rounds: ['vague interest', 'cost discomfort', 'fear of locking in', 'social guilt'] },
+    { id: 'groupmate', title: 'A groupmate who is not contributing', who: 'Group work', skill: 'Reading passive agreement and silent disengagement',
+      setup: 'I am working on a shared project with {n}. {n} agrees in every conversation, but their actual contribution is minimal.',
+      traits: 'agreeable, avoids conflict, worried about getting it wrong',
+      protects: 'their image and social harmony',
+      rounds: ['surface agreement', 'unclear understanding', 'fear of getting it wrong', 'ownership test'] },
+    { id: 'manager', title: 'A manager who gives a vague answer', who: 'Work', skill: 'Reading soft rejection and polite deflection',
+      setup: 'I bring an idea to {n}, my manager. {n} answers vaguely and moves the conversation on without a yes or no.',
+      traits: 'calm, busy, polite, protective of priorities',
+      protects: 'their time and their priority focus',
+      rounds: ['polite deflection', 'priority mismatch', 'insufficient confidence', 'decision threshold'] }
+  ];
+  var SURPRISE = 'Surprise me';
+  var state = { name: 'Alex', ownName: false, level: 'Medium', pick: 'michael', mp: 0 };
+  var $ = function (id) { return document.getElementById(id); };
+  var TRANSCRIPT_KEY = 'utl_lets_switch_hats_transcript_done';
+  var READ_KEY = 'utl_lets_switch_hats_rounds_read';
+  function safeGet(key) { try { return localStorage.getItem(key); } catch (error) { return null; } }
+  function safeSet(key, value) { try { localStorage.setItem(key, value); } catch (error) {} }
+  function lower(t) { return t.charAt(0).toLowerCase() + t.slice(1); }
+  function option(group, value, label, note, checked, recommended, extra) {
+    var wrap = document.createElement('label'); wrap.className = 'lsh-option';
+    var input = document.createElement('input'); input.type = 'radio'; input.name = group; input.value = value; input.checked = !!checked;
+    var box = document.createElement('span'); box.className = 'box'; box.textContent = label;
+    if (recommended) { var tag = document.createElement('em'); tag.textContent = 'Recommended'; box.appendChild(tag); }
+    if (note) { var small = document.createElement('small'); small.textContent = note; box.appendChild(small); }
+    if (extra) { var sk = document.createElement('span'); sk.className = 'shs-skill'; sk.textContent = extra; box.appendChild(sk); }
+    wrap.appendChild(input); wrap.appendChild(box); return wrap;
+  }
+  function isCase() { return state.pick === 'michael'; }
+  function chosenName() { var t = $('ownName').value.trim(); return state.ownName ? (t || 'Jordan') : state.name; }
+  function personName() { return isCase() ? 'Michael' : chosenName(); }
+  function fill(t) { return t.replace(/\{n\}/g, chosenName()); }
+  function personalOn() { return $('usePersonal').checked; }
+  function learnerName() { return personalOn() ? $('learnerName').value.trim() : ''; }
+  function profileHints() {
+    if (!personalOn()) return [];
+    try { var h = window.UTLLearnerProfile && window.UTLLearnerProfile.practiceHints && window.UTLLearnerProfile.practiceHints(); return Array.isArray(h) ? h.slice(0, 6) : []; } catch (e) { return []; }
+  }
+  function current() { return SCENARIOS.filter(function (s) { return s.id === state.pick; })[0]; }
+  function level() { return LEVELS.filter(function (l) { return l.id === state.level; })[0]; }
+  function youText(s) { return fill(s.setup.replace(/^I am /, 'You are ').replace(/^I bring/, 'You bring').replace(/\bmy manager\b/, 'your manager')); }
+  function build() {
+    $('caseOptions').innerHTML = ''; $('nameOptions').innerHTML = ''; $('levelOptions').innerHTML = ''; $('scenarioOptions').innerHTML = '';
+    $('caseOptions').appendChild(option('pick', 'michael', CASE.title, CASE.blurb, isCase(), true, CASE.skill));
+    SCENARIOS.forEach(function (s) { $('scenarioOptions').appendChild(option('pick', s.id, s.title, youText(s), state.pick === s.id, false, s.who + ' · ' + s.skill)); });
+    $('scenarioOptions').appendChild(option('pick', SURPRISE, SURPRISE, 'Invent a situation I have not seen', state.pick === SURPRISE, false));
+    NAMES.forEach(function (n) { $('nameOptions').appendChild(option('who', n, n, '', !state.ownName && state.name === n, n === 'Alex')); });
+    $('nameOptions').appendChild(option('who', '__own', 'Type my own', '', state.ownName, false));
+    LEVELS.forEach(function (l) { $('levelOptions').appendChild(option('level', l.id, l.id, l.note, state.level === l.id, l.id === 'Medium')); });
+    $('nameField').hidden = isCase(); $('levelField').hidden = isCase();
+  }
+  function renderSummary() {
+    var what = isCase() ? 'the Olympic project case with Michael' : (state.pick === SURPRISE ? 'a surprise situation with ' + personName() : lower(current().title) + ' with ' + personName());
+    $('setupSummary').textContent = what + (isCase() ? '' : ', ' + lower(level().id));
+    var items = [];
+    if (learnerName()) items.push('Your first name');
+    if (profileHints().length) items.push((items.length ? profileHints().length : profileHints().length) + ' working style ' + (profileHints().length === 1 ? 'note' : 'notes'));
+    var verb = items.length > 1 ? ' are included.' : ' is included.';
+    $('personalIncluded').textContent = !personalOn() ? 'Personalization is off. Nothing personal is included.' : (items.length ? personName() + ' will use your details. ' + items.join(' and ') + verb : 'Add your first name so ' + personName() + ' can use it.');
+  }
+  function sharedSections(n) {
+    var L = [];
+    if (learnerName()) L.push('', 'MY NAME', 'My name is ' + learnerName() + '. Have ' + n + ' call me ' + learnerName() + ' naturally, and use my name once in the final feedback.');
+    if (profileHints().length) L.push('', 'ABOUT ME', 'These are non-sensitive notes about how I work. Use them quietly to make the scenes and the coaching fit me. Never mention that you were given them.', profileHints().map(function (h, i) { return 'Note ' + (i + 1) + ': ' + h; }).join('\n'));
+    return L;
+  }
+  var VOICE_NOTE = '"[Want to answer out loud? Click inside the message box first. In ChatGPT, the blue voice button then appears at the right of the box. In the Gemini phone app, select the Live button. On a computer, the Gemini microphone only types what you say.]"';
+  function michaelPrompt() {
+    var L = [
+      'Help me practice perspective taking with a four round simulation. You play Michael Felipe, and after the simulation you also act as Coach, my warm and direct coach.', '',
+      'THE CASE',
+      'I am Aiko\'s Chief of Staff. Aiko has asked me to help build the team for a high stakes Olympic project that is visible, urgent and politically complex. Michael Felipe is the candidate Aiko wants most. He is a strong operator, trusted and consistent. He is known for avoiding work where success depends on unclear authority, shifting scope or political exposure. My goal is not to sell harder. It is to understand what Michael is protecting, reduce the risk he sees, and make it easier for him to say yes.', '',
+      'THE FOUR ROUNDS, IN ORDER',
+      '1. Ambiguity: unclear workstreams, friction and unclear authority.',
+      '2. Accountability: being held responsible for delays caused by people he does not control.',
+      '3. Stability: leaving a trusted, high performing team for a project with unclear rules.',
+      '4. Downside: what happens to his reputation and career if the project fails or is deprioritized.'];
+    L = L.concat(sharedSections('Michael'));
+    L.push('', 'HOW TO PLAY MICHAEL',
+      'Michael is calm, thoughtful, risk aware, professional and specific. He is not dramatic, hostile or easily convinced. He resists because he is protecting his reputation, his team stability, his accountability boundaries and his momentum, not because he is lazy. He becomes gradually more open when I offer practical mechanisms that reduce his risk. Never let him say yes before the final step.');
+    L.push('', 'HOW EACH ROUND WORKS',
+      '1. Use bolded speaker labels on one line each: Narrator, You, Michael. Keep blocks short. Narrator sets the scene, You is a short natural line from me, and Michael states one specific concern in three or four lines.',
+      '2. Ask "What is Michael really signaling?" with choices A to D. Stop and tell me to reply with A, B, C or D only. Accept simple variants such as "b", "B)" or "I choose B". If I give more than one letter or none, ask again and stop.',
+      '3. Only after I answer, give the correct letter, a short principle label, and one or two lines on what Michael is protecting. Never make me feel stupid.',
+      '4. Ask one open question that begins "Your turn to switch hats", with a short hint. Stop and wait.',
+      '5. After I answer, give: Score out of 5; Risk diagnosis out of 5 (did I identify what he was protecting); Response quality out of 5 (did I offer a practical mechanism that reduces the risk); one thing that worked; one thing that needs work; a stronger version of what I could have said; and one improvement. Score only against the current round.',
+      '6. Ask whether I want to revise once or continue. If I revise, ask me to try again in two to four sentences, then give a brief note on what improved and what is still missing.',
+      '7. Before each new round, ask "Ready for the next exchange with Michael?" and wait for me to reply Yes.',
+      'If I give a non-attempt such as "idk" or "skip", score it honestly, then give a short scaffold: name the risk, offer one practical mechanism, explain how it protects him. Do not write the whole answer for me.');
+    L.push('', 'AFTER ROUND 4', 'Ask me to design a three step approach to get Michael on board: first address what he is protecting, then clarify how the work will be governed, and finally offer a safety net if the project changes. Then give a final score out of 5, what I understood well, what still needs work, a stronger three step version, and this takeaway: people manage risk differently, and strong influence comes from understanding what matters to them, reducing uncertainty, making the path clearer, and offering protection without removing accountability. Then ask whether I want to try a different situation.');
+    L.push('', 'COMMANDS', 'If I say "Coach break", pause the simulation and answer me as Coach, then resume where we stopped. Keep every reply short and realistic, never dramatic. Do not answer your own questions.');
+    L.push('', 'START', 'Do not begin round 1 yet. First write me a short briefing that I can read on screen: the case in three or four sentences, what the four rounds are, how a round works, and my command. Then add this note in brackets, word for word: ' + VOICE_NOTE + ' Ask me to reply Yes when I am ready, and wait.');
+    return L.join('\n');
+  }
+  function otherPrompt() {
+    var n = personName(), lv = level(), sc = current(), L = [];
+    L.push('Help me practice perspective taking. You run a four round simulation as ' + n + ', the other person, and then act as Coach, my warm and direct coach.', '', 'THE SCENARIO');
+    if (state.pick === SURPRISE) {
+      L.push('Invent a realistic, everyday, low risk situation where ' + n + ' sends mixed signals and has a reasonable concern they do not state. Include it in your briefing. Keep the same four round structure.');
+    } else {
+      L.push(fill(sc.setup) + ' ' + n + ' is ' + sc.traits + '. ' + n + ' is protecting ' + sc.protects + '.', 'The four rounds, in order, are about: ' + sc.rounds.join(', ') + '. Each round adds a little more friction than the one before.');
+    }
+    L = L.concat(sharedSections(n));
+    L.push('', 'HOW CLEAR THEIR SIGNALS ARE', 'Difficulty: ' + lower(lv.id) + '. ' + lv.rule, n + ' is reasonable, calm and human. Never a villain, never dramatic, and never obviously wrong.');
+    L.push('', 'HOW EACH ROUND WORKS',
+      '1. A short narrator line that sets the scene.',
+      '2. ' + n + ' speaks in three or four short lines, with one specific concern showing through.',
+      '3. Ask "What is ' + n + ' really signaling?" with choices A to D. Stop and tell me to reply with A, B, C or D only. Do not reveal the answer yet.',
+      '4. After I answer, give the correct letter and one or two lines on what ' + n + ' is protecting.',
+      '5. Ask one open question that begins "Your turn to switch hats", with a one line hint. Stop and wait.',
+      '6. After I answer, give feedback, a score out of 5 for whether I addressed their actual concern and made things clearer, and one improvement. Then ask me to reply Yes to continue.');
+    L.push('', 'AFTER ROUND 4', 'Ask me to design a three step approach: what I would address first, what I would clarify, and what I would offer. Then give an overall score out of 5, two strengths, two gaps, and this takeaway: people respond based on what they are protecting. Then ask whether I want to try another situation.');
+    L.push('', 'COMMANDS', 'If I say "Coach break", pause the simulation and answer me as Coach, then resume where we stopped.');
+    L.push('', 'START', 'Do not begin round 1 yet. First write me a short briefing that I can read on screen: the situation in two or three sentences, the difficulty, how a round works, and my command. Then add this note in brackets, word for word: ' + VOICE_NOTE + ' Ask me to reply Yes when I am ready, and wait.');
+    return L.join('\n');
+  }
+  function practicePrompt() { return isCase() ? michaelPrompt() : otherPrompt(); }
+  function transcriptPrompt() {
+    return ['Put the full conversation and your final feedback into one code block, so I can copy everything with one click.', 'Label each line "Me:", "' + personName() + ':" or "Coach:". Use only one code block, with no other text.'].join('\n');
+  }
+  document.addEventListener('change', function (e) {
+    var t = e.target; if (!t || t.tagName !== 'INPUT') return;
+    if (t.name === 'who') { state.ownName = t.value === '__own'; if (!state.ownName) state.name = t.value; $('ownNameWrap').hidden = !state.ownName; build(); }
+    if (t.name === 'level') state.level = t.value;
+    if (t.name === 'pick') { state.pick = t.value; build(); }
+    renderSummary();
+  });
+  $('ownName').addEventListener('input', function () { build(); renderSummary(); });
+  $('learnerName').addEventListener('input', renderSummary);
+  $('usePersonal').addEventListener('change', renderSummary);
+  $('persToggle').addEventListener('click', function () {
+    var opening = $('persPanel').hidden; $('persPanel').hidden = !opening;
+    this.setAttribute('aria-expanded', String(opening)); this.textContent = opening ? '−' : '+';
+    this.setAttribute('aria-label', opening ? 'Hide personalization details' : 'Show personalization details');
+  });
+  function copyAnnounce() {
+    var ok = function () { $('openStatus').textContent = 'Prompt copied. Paste it into the new chat.'; setTimeout(function () { $('openStatus').textContent = ''; }, 5000); };
+    try { navigator.clipboard.writeText(practicePrompt()).then(ok, function () { $('openStatus').textContent = 'Use "Prepare practice prompt" above to copy it.'; }); } catch (e) {}
+  }
+  $('openChatGpt').addEventListener('click', copyAnnounce); $('openGemini').addEventListener('click', copyAnnounce);
+  if (window.UTLFeedbackCoach) {
+    window.UTLFeedbackCoach.mountPreparedPrompt({ mount: '#practicePromptMount', heading: 'Review and copy your prompt', description: 'Your case or situation and your name are included. Nothing is sent automatically.', buttonLabel: 'Prepare practice prompt', kicker: 'Use another AI', dialogTitle: 'Bring the practice prompt with you', promptLabel: 'Your practice prompt', prompt: practicePrompt });
+  window.UTLFeedbackCoach.mountPreparedPrompt({ mount: '#transcriptPromptMount', heading: 'Get the full transcript in one box', description: 'The AI returns your conversation and feedback in a single copyable box.', buttonLabel: 'Prepare transcript request', kicker: 'Use another AI', dialogTitle: 'Bring the transcript request with you', promptLabel: 'Your transcript request', prompt: transcriptPrompt });
+  }
+  var vd = $('voiceDialog');
+  function markRead() { var tag = $('readTag'); tag.textContent = 'Read'; tag.classList.add('is-read'); }
+  if (safeGet(READ_KEY) === 'true') markRead();
+  $('openRoundsHelp').addEventListener('click', function () { safeSet(READ_KEY, 'true'); markRead(); if (typeof vd.showModal === 'function') vd.showModal(); else vd.setAttribute('open', ''); });
+  Array.prototype.forEach.call(vd.querySelectorAll('[data-voice-close]'), function (b) { b.addEventListener('click', function () { if (typeof vd.close === 'function') vd.close(); else vd.removeAttribute('open'); }); });
+  vd.addEventListener('click', function (e) { if (e.target === vd && vd.close) vd.close(); });
+  var saveButton = $('saveTranscriptBtn');
+  function markTranscriptSaved() { saveButton.disabled = true; saveButton.textContent = 'Added to my record'; }
+  if (safeGet(TRANSCRIPT_KEY) === 'true') markTranscriptSaved();
+  $('transcriptPaste').addEventListener('input', function () { if (safeGet(TRANSCRIPT_KEY) === 'true') return; saveButton.disabled = $('transcriptPaste').value.trim().length < 40; });
+  saveButton.addEventListener('click', function () {
+    if (safeGet(TRANSCRIPT_KEY) === 'true') return;
+    safeSet(TRANSCRIPT_KEY, 'true');
+    var result = window.UTLRewardEvents && window.UTLRewardEvents.awardEvent && window.UTLRewardEvents.awardEvent({ eventId: 'transcript-shared:lets-switch-hats', type: 'transcript-shared', title: 'Feedback added', body: 'You brought your conversation and feedback back.', mpEarned: 10, metadata: { appId: 'lets-switch-hats' } });
+    $('saveStatus').textContent = result && result.awarded ? 'Added. You earned 10 MP.' : 'Added.';
+    markTranscriptSaved();
+  });
+  try {
+    var profile = JSON.parse(localStorage.getItem('utl_member_profile') || 'null');
+    var first = profile && profile.displayName ? String(profile.displayName).trim().split(/\s+/)[0] : '';
+    if (first) $('learnerName').value = first;
+  } catch (error) {}
+  build(); renderSummary();
+})();
+</script>
   <script type="module" src="../../assets/app-access-guard.js?v=20260925-mobile-v1"></script>
   <script src="../../assets/exercise-scoring-intro.js?v=20260925-mobile-v1"></script>
   <script src="../../assets/app-reward-header.js?v=20260925-mobile-v1"></script>
@@ -701,7 +548,6 @@
     });
   </script>
   <script type="module" src="../../assets/feedback-widget.js?v=20260925-mobile-v1"></script>
-  <script src="../../assets/custom-gpt-voice-guide.js?v=20260925-mobile-v1"></script>
   <script src="../../assets/tactile-buttons.js?v=20260925-mobile-v1" defer></script>
 </body>
 </html>

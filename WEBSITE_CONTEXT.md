@@ -181,7 +181,7 @@ The Google Group sync (`functions/processGoogleGroupSyncJob`, codebase `group-sy
 | `apps/toolkit/` | Cross-program | AI prompt toolkit reference (CSS: `tk-`) |
 | `apps/eisenhower-matrix/` | Phase 3 | Guided five-round prioritization and written-no exercise (member-facing v1) |
 | `apps/i-have-bad-news/` | Phase 3 | Difficult conversations practice. Learners copy a generated prompt into their own ChatGPT or Gemini (no CustomGPT). Old CustomGPT version archived at `archive/i-have-bad-news-customgpt-2026-10-05.html`. |
-| `apps/lets-switch-hats/` | Phase 3 | Perspective-taking launch page |
+| `apps/lets-switch-hats/` | Phase 3 | Perspective taking practice built around the Olympic project case with Michael Felipe, plus three general situations. Learners copy a generated prompt into their own ChatGPT or Gemini (no CustomGPT). Old CustomGPT version archived at `archive/lets-switch-hats-customgpt-2026-10-08.html`. |
 | `apps/speak-like-obama/` | Phase 3 | Speech delivery launch page |
 | `apps/tsa-diagnostic/` | Assessment | The sole TSA assessment — Think/Speak/Act in one saved flow. `?assessment=checkpoint` serves the post-program Checkpoint from the same file |
 | `apps/executive-signature/` | Live ES program (renamed from `apps/readiness-assessment/` 2026-10-06) | Executive Signature Quick Check and Full Assessment plus admin, build-plan, how-it-works, research, and returning-results pages. Public on the production site as of 2026-10-06; its callable persistence code has been deployed since earlier this week. Read `README-assessment.md` and `BUILD_STATUS.md` before editing. |
@@ -278,6 +278,15 @@ Decisions are made in Claude (claude.ai). JSON updates are handled in Codex. Doc
 ## Change Log
 
 Entries older than ~3 days live in `archive/WEBSITE_CONTEXT_ARCHIVE.md` (most recent archived block: 2026-10-03 through 2026-10-04).
+
+### 2026-10-08 (night) — `lets-switch-hats` rebuilt around the Michael case; collapsible personalization on both pages
+
+- **Design source:** the original exercise is `Phase 3 - Let's switch hats (Michael) - Gem` (Drive `01-switch-hats-michael-gem-v6.md`, source Google Doc `1G4NOkNldAA7EShDhNrRlPdzukSaXyX43qxl1BLT0V74`): you are Aiko's Chief of Staff recruiting Michael Felipe for the Olympic project, four rounds (Ambiguity, Accountability, Stability, Downside), a ready gate between rounds, an optional revise step, a final three step approach. The generalised `switch-hats-aiko` GPT (I v4, three scenarios) that the old page linked to had dropped the case. Mock-up source of truth: `reference/mockups/lets-switch-hats-mockup.html` (https://claude.ai/artifact/L8SdToEG4zbguJoPGUyWei).
+- **`apps/lets-switch-hats/index.html`** now uses the same three step layout and shared components as `i-have-bad-news` (class prefix `lsh-`). Step 1: the Michael case is the recommended practice; the friend, groupmate and manager situations plus `Surprise me` are the alternatives (name picker and Easy, Medium, Hard only show for those); collapsible personalization. Step 2: shared prompt dialog, `Read first` dialog on the four round format and optional voice, `Open ChatGPT` (two thirds, `Recommended`) and `Open Gemini` (one third, `Voice on phone only`). Step 3: transcript request, `+10 MP` bonus (`transcript-shared:lets-switch-hats`, once, `utl_lets_switch_hats_transcript_done`), the unchanged `Mark exercise complete · +30 MP` contract and the explicit cloud completion record. The switching framework uses bolded summary phrases ending in a colon and explains how to switch hats. The Michael prompt keeps the case, his personality and one line of concern per round and leaves out the per round correct answers, scoring guides, ideal response qualities and the example answer. The previous CustomGPT page is archived unchanged at `archive/lets-switch-hats-customgpt-2026-10-08.html` (relative asset paths do not resolve from `archive/`).
+- **Personalization (both pages):** `Personalize this practice for me` is a checked box with a plus/minus control; the explanation and the first name field open on demand, and one line shows what is included (`Michael will use your details. Your first name is included.`).
+- **Learning Journey:** `p3-e3` now shows `ChatGPT, Gemini`.
+- **Tests:** `tests/custom-gpt-voice-guidance.test.js` now expects Michael Felipe on the page (the old test forbade it), no `chatgpt.com/g/` link, and a link to ChatGPT and Gemini. The test suite has no new failures; nine tests that need `node_modules` fail in a clean worktree both with and without this change.
+- **Not yet verified:** a signed in run through the real pages, mobile width, and the prompts in ChatGPT and Gemini. The setup video gate (`exercise-context-flow.js`) and the `How this exercise is checked` card still appear above the new content, as on the other exercises.
 
 ### 2026-10-08 — `i-have-bad-news` rebuilt around the learner's own ChatGPT or Gemini; timers removed from hand-off exercises
 
