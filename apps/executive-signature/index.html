@@ -787,13 +787,22 @@ function toast(msg){const t=$('#toast');t.textContent=msg;t.hidden=false;clearTi
 // returns the stored attempt id, which "Email me this result" sends to the server.
 const recordedAttempts=new Map();
 const loggedAttempts=new Set();
+// The server accepts exactly the answers of the items in the form, nothing more. A tab that was resumed from an
+// older partial attempt can carry stray answer keys, so only the answers of the attempt's own items are sent.
+function answersForItems(answers,itemOrder){
+  const source=answers&&typeof answers==='object'?answers:{};
+  if(!Array.isArray(itemOrder)||!itemOrder.length)return {...source};
+  const picked={};
+  itemOrder.forEach(id=>{if(source[id]!=null)picked[id]=source[id]});
+  return picked;
+}
 function logCompletedResult(attemptId,tier,email,name,band,profile,formVersion,submission={}){
   if(!email||!attemptId||loggedAttempts.has(attemptId))return;
   loggedAttempts.add(attemptId);
   if(window.raRecordCompletion){
     const recording=window.raRecordCompletion({
       name:name||'',email,tier,band,profile,formVersion:formVersion||'',submissionId:attemptId,
-      answers:submission.answers||{},itemOrder:submission.itemOrder||[],startedAt:submission.startedAt||new Date().toISOString(),
+      answers:answersForItems(submission.answers,submission.itemOrder),itemOrder:submission.itemOrder||[],startedAt:submission.startedAt||new Date().toISOString(),
       durationSeconds:Number.isInteger(submission.durationSeconds)?submission.durationSeconds:null,
       consent:{assessmentProcessing:participant.assessmentConsent===true,marketing:participant.marketingConsent===true,noticeVersion:'readiness-privacy-preview@1.0'},
       source:{channel:'web',campaignId:null,referrerCode:null}
@@ -802,7 +811,7 @@ function logCompletedResult(attemptId,tier,email,name,band,profile,formVersion,s
     recording.catch(error=>{
       loggedAttempts.delete(attemptId);
       recordedAttempts.delete(attemptId);
-      console.error('Could not persist the completed assessment',error);
+      console.error('Could not persist the completed assessment',error,{tier,itemsInAttempt:(submission.itemOrder||[]).length,answersHeld:Object.keys(submission.answers||{}).length});
       toast('Your result is ready, but it could not be saved. Check your connection and try again.');
     });
   }

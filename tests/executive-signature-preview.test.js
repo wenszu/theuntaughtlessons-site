@@ -125,6 +125,17 @@ assert.match(readinessPlainScript, /if\s*\(window\.raRecordCompletion\)/, 'Both 
 assert(!readinessPlainScript.includes('isSyntheticReadinessNotification'), 'The browser no longer posts a completion notification, so there is nothing to gate for local and reserved-address attempts');
 assert(!readinessPlainScript.includes('script.google.com'), 'The readiness page must not post to the Apps Script endpoint; the result email goes through sendReadinessResultEmail');
 
+// Only the answers of the attempt's own items are sent to the server, so stray keys from a resumed tab cannot make it refuse the save.
+{
+  const helperSource = html.match(/function answersForItems\(answers,itemOrder\)\{[\s\S]*?\n\}/);
+  assert(helperSource, 'answersForItems exists in the readiness page');
+  const answersForItems = new Function(helperSource[0] + '; return answersForItems;')();
+  assert.deepStrictEqual(answersForItems({ a: 1, b: 2, stray: 5 }, ['a', 'b']), { a: 1, b: 2 }, 'stray answer keys are dropped');
+  assert.deepStrictEqual(answersForItems({ a: 1, b: null }, ['a', 'b']), { a: 1 }, 'unanswered items are not sent');
+  assert.deepStrictEqual(answersForItems({ a: 1 }, []), { a: 1 }, 'without an item order the answers pass through');
+  assert.match(html, /answers:answersForItems\(submission\.answers,submission\.itemOrder\)/, 'the completion call uses the helper');
+}
+
 assert.match(html, /print-logo-utl-navy-header\.svg/, 'Every normal printed page needs the UTL logo');
 assert.match(html, /print-logo-signature-navy-header\.svg/, 'Every normal printed page needs the Executive Signature logo');
 assert.match(html, /print-logo-utl-white-cover\.svg/, 'Cover and closing pages need the larger UTL logo');
