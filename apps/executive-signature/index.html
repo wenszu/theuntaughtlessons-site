@@ -1227,12 +1227,17 @@ function renderQ(){
   document.querySelectorAll('.opt').forEach(b=>b.setAttribute('aria-pressed',answers[it.id]==b.dataset.v?'true':'false'));
 }
 function answer(v){
-  qaTiming.answerTimings[attemptItems[qi].id]=Math.round(Math.min(performance.now()-qaTiming.questionStartedAt,READINESS_IDLE_LIMIT_MS));
-  answers[attemptItems[qi].id]=v;
+  const answeredIndex=qi;
+  qaTiming.answerTimings[attemptItems[answeredIndex].id]=Math.round(Math.min(performance.now()-qaTiming.questionStartedAt,READINESS_IDLE_LIMIT_MS));
+  answers[attemptItems[answeredIndex].id]=v;
   saveActiveAttempt();
   document.querySelectorAll('.opt').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v==v?'true':'false'));
   setTimeout(()=>{
-    const next=attemptItems.findIndex((item,index)=>index>qi&&answers[item.id]==null);
+    // A second tap on the same statement must not move on twice, or the next statement is skipped.
+    if(qi!==answeredIndex)return;
+    let next=attemptItems.findIndex((item,index)=>index>qi&&answers[item.id]==null);
+    // Anything skipped earlier is asked before the result is shown.
+    if(next===-1)next=attemptItems.findIndex(item=>answers[item.id]==null);
     if(next!==-1){qi=next;renderQ()}
     else if(qi<attemptItems.length-1){qi++;renderQ()}
     else{renderResult();go('t-result')}
@@ -1531,11 +1536,16 @@ function renderFullQ(){
   document.querySelectorAll('#fscale .opt').forEach(b=>b.setAttribute('aria-pressed',fullAnswers[it.id]==b.dataset.v?'true':'false'));
 }
 function answerFull(v){
-  fullAnswers[fullAttemptItems[fqi].id]=v;
+  const answeredIndex=fqi;
+  fullAnswers[fullAttemptItems[answeredIndex].id]=v;
   saveFullActiveAttempt();
   document.querySelectorAll('#fscale .opt').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v==v?'true':'false'));
   setTimeout(()=>{
-    const next=fullAttemptItems.findIndex((item,index)=>index>fqi&&fullAnswers[item.id]==null);
+    // A second tap on the same statement must not move on twice, or the next statement is skipped.
+    if(fqi!==answeredIndex)return;
+    let next=fullAttemptItems.findIndex((item,index)=>index>fqi&&fullAnswers[item.id]==null);
+    // Anything skipped earlier is asked before the result is shown.
+    if(next===-1)next=fullAttemptItems.findIndex(item=>fullAnswers[item.id]==null);
     if(next!==-1){fqi=next;renderFullQ()}
     else if(fqi<fullAttemptItems.length-1){fqi++;renderFullQ()}
     else{renderFullResult();go('t-full-result')}

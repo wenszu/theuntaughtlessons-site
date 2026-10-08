@@ -125,6 +125,16 @@ assert.match(readinessPlainScript, /if\s*\(window\.raRecordCompletion\)/, 'Both 
 assert(!readinessPlainScript.includes('isSyntheticReadinessNotification'), 'The browser no longer posts a completion notification, so there is nothing to gate for local and reserved-address attempts');
 assert(!readinessPlainScript.includes('script.google.com'), 'The readiness page must not post to the Apps Script endpoint; the result email goes through sendReadinessResultEmail');
 
+// A second quick tap on the same statement used to advance twice and skip the next statement, so a finished
+// assessment could hold fewer answers than the form has and the server refused to save it.
+for (const [name, items] of [['answerFull', 'fullAttemptItems'], ['answer', 'attemptItems']]) {
+  const body = html.match(new RegExp('function ' + name + '\\(v\\)\\{[\\s\\S]*?\\n\\}'));
+  assert(body, name + ' exists in the readiness page');
+  assert.match(body[0], /const answeredIndex=/, name + ' remembers which statement was answered');
+  assert.match(body[0], /if\((fqi|qi)!==answeredIndex\)return/, name + ' ignores a second tap on the same statement');
+  assert.match(body[0], new RegExp('next=' + items + '\\.findIndex\\(item=>'), name + ' goes back to any statement that was skipped before showing the result');
+}
+
 // Only the answers of the attempt's own items are sent to the server, so stray keys from a resumed tab cannot make it refuse the save.
 {
   const helperSource = html.match(/function answersForItems\(answers,itemOrder\)\{[\s\S]*?\n\}/);
