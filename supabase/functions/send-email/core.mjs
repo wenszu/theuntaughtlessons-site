@@ -30,7 +30,15 @@ export const SECRET_HEADER = "x-utl-mail-secret";
 // Same pattern as functions-admin/readiness-email.js and results-email.js.
 export const EMAIL_PATTERN = /^[^\s@<>"',;]+@[^\s@<>"',;]+\.[^\s@<>"',;]+$/;
 const KIND_PATTERN = /^[A-Za-z0-9_-]{1,40}$/;
-const CONTROL_CHARACTERS = /[\u0000-\u001f\u007f-\u009f\u2028\u2029]/;
+// True when the text holds a control character or a line or paragraph separator. Written with code points
+// (no escape sequences) so the file survives any copy or deploy tool unchanged.
+function hasControlCharacter(text) {
+  for (const character of String(text)) {
+    const code = character.codePointAt(0);
+    if (code <= 0x1f || (code >= 0x7f && code <= 0x9f) || code === 0x2028 || code === 0x2029) return true;
+  }
+  return false;
+}
 
 // Compares two strings in time that depends only on the longer length, not on where the
 // first difference is.
@@ -50,7 +58,7 @@ function validAddress(value) {
   return typeof value === "string"
     && value.length > 0
     && value.length <= MAX_ADDRESS_LENGTH
-    && !CONTROL_CHARACTERS.test(value)
+    && !hasControlCharacter(value)
     && EMAIL_PATTERN.test(value);
 }
 
@@ -76,7 +84,7 @@ export function validateBody(body) {
   const subject = body.subject;
   if (typeof subject !== "string") return { ok: false };
   const trimmedSubject = subject.trim();
-  if (!trimmedSubject || trimmedSubject.length > MAX_SUBJECT_LENGTH || CONTROL_CHARACTERS.test(subject)) return { ok: false };
+  if (!trimmedSubject || trimmedSubject.length > MAX_SUBJECT_LENGTH || hasControlCharacter(subject)) return { ok: false };
 
   if (typeof body.html !== "string" || !body.html.trim() || body.html.length > MAX_HTML_LENGTH) return { ok: false };
 
