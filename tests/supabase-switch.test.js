@@ -243,11 +243,18 @@ async function check(name, fn) {
 
   // -- 1. default mode equals the baseline --------------------------------------
 
-  await check('default mode: getDataSource is firebase and the export list only grew', () => {
+  await check('default mode: getDataSource is firebase and the export list only grew (apart from the retired Google Group exports)', () => {
     assert.equal(current.getDataSource(), 'firebase');
     const baselineExports = Object.keys(baseline).sort();
     const currentExports = Object.keys(current).sort();
-    baselineExports.forEach((name) => assert.ok(currentExports.includes(name), `export ${name} kept`));
+    // The Google Group sync was retired on purpose (2026-10-08): its two browser exports are the only baseline exports allowed to be gone.
+    const RETIRED_EXPORTS = ['getGoogleGroupSyncJobs', 'requestGoogleGroupSyncJob'];
+    RETIRED_EXPORTS.forEach((name) => {
+      assert.ok(baselineExports.includes(name), `${name} really is in the pre-switch baseline`);
+      assert.ok(!currentExports.includes(name), `${name} is retired and no longer exported`);
+    });
+    assert.deepEqual(baselineExports.filter((name) => !currentExports.includes(name)), RETIRED_EXPORTS, 'the retired Google Group exports are the only baseline exports that went away');
+    baselineExports.filter((name) => !RETIRED_EXPORTS.includes(name)).forEach((name) => assert.ok(currentExports.includes(name), `export ${name} kept`));
     assert.deepEqual(currentExports.filter((name) => !baselineExports.includes(name)), ['getDataSource', 'getMyExerciseResults', 'sendMyResultsEmail', 'sendReadinessResultEmail'], 'getDataSource, getMyExerciseResults (My Results exercise results, Supabase mode only, null with the switch off), sendMyResultsEmail and sendReadinessResultEmail (Firebase callable wrappers, no Supabase path) are the only new exports');
   });
 

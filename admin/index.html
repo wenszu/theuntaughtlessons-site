@@ -2340,18 +2340,7 @@
     .mb-bool-no { color:#bbb; }
     .mb-bool-pending { display:block; margin-top:2px; color:var(--gold); font:700 10px Lato, Arial, sans-serif; letter-spacing: 0; text-transform: none; }
     .mb-group-cell { display:grid; gap:6px; min-width:132px; }
-    .mb-group-badge { display:inline-flex; width:max-content; max-width:100%; align-items:center; border-radius:999px; padding:3px 8px; font:700 10px Lato, Arial, sans-serif; letter-spacing: 0; text-transform: none; }
-    .mb-group-ok { background:#e8f5ed; color:var(--green); }
-    .mb-group-warn { background:#fff8e1; color:#9a6400; }
-    .mb-group-danger { background:#fdecea; color:#8A1F1F; }
-    .mb-group-muted { background:#f0f0f0; color:#777; }
     .mb-group-hint { color:#777; font-size:11px; line-height:1.3; }
-    .mb-group-link { display:inline-block; margin-top:5px; padding:4px 7px; border-radius:999px; background:var(--navy); color:#fff; font-size:10px; font-weight:700; text-decoration:none; white-space:nowrap; }
-    .mb-group-link:hover { background:var(--gold); color:var(--navy); }
-    .mb-group-toggle { width:max-content; min-width:94px; padding:5px 9px; border:1px solid rgba(0,51,102,.22); border-radius:999px; background:#fff; color:var(--navy); font:700 10px Lato, Arial, sans-serif; cursor:pointer; text-transform: none; }
-    .mb-group-toggle.is-added { border-color:rgba(45,106,79,.32); color:var(--green); background:#f0faf5; }
-    .mb-group-toggle.is-not-added { border-color:rgba(238,163,32,.4); color:#9a6400; background:#fff8e1; }
-    .mb-group-toggle:hover { border-color:var(--navy); background:#f7f2e8; }
     .mb-group-queue { margin:0 0 12px; padding:12px 14px;  background:#fff8e1; border-radius:6px; color:var(--charcoal); font-size:13px; line-height:1.5; }
     .mb-actions { display:flex; gap:5px; flex-wrap:wrap; }
     .mb-btn { padding:4px 9px; border:1px solid var(--line); border-radius:4px; background:var(--white); color:var(--navy); font-size:11px; font-family:Lato, Arial, sans-serif; font-weight:700; cursor:pointer; white-space:nowrap; transition:border-color .12s,background .12s; }
@@ -12932,28 +12921,12 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         '<button class="mb-btn" type="button" data-mb-welcome-resend="' + escapeHtml(email) + '">' + escapeHtml(buttonLabel) + '</button></div>';
     }
 
-    function mbFormatGroupAuditDate(ts) {
-      var formatted = mbFormatDate(ts);
-      return formatted === '—' ? '' : formatted;
-    }
-
     function mbIsExpired(ts) {
       if (!ts) return false;
       try {
         var d = ts.toDate ? ts.toDate() : new Date(ts);
         return d < new Date();
       } catch (e) { return false; }
-    }
-
-    function mbGroupNeedsManualAdd(data) {
-      var sync = String(data.googleGroupSyncStatus || '').toLowerCase();
-      return !data.googleGroupAdded && (sync === 'pending' || sync === 'processing' || sync === 'add-requested' || sync === 'add-request-failed' || sync === 'failed');
-    }
-
-    function mbGroupNeedsManualRemove(data) {
-      var sync = String(data.googleGroupSyncStatus || '').toLowerCase();
-      var action = String(data.googleGroupSyncAction || '').toLowerCase();
-      return data.googleGroupAdded && ((data.status || 'active') === 'inactive' || action === 'remove' || sync === 'remove-requested' || sync === 'remove-request-failed');
     }
 
     function mbNormalizeEmail(value) {
@@ -13023,43 +12996,6 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       return (mbMembersCache || []).find(function (docSnap) {
         return mbCanonicalEmailFromDoc(docSnap) === normalized;
       }) || null;
-    }
-
-    function mbGroupAuditText(data, added) {
-      var date = '';
-      var admin = '';
-      if (added) {
-        date = mbFormatGroupAuditDate(data.googleGroupAddedAt || data.googleGroupSyncConfirmedAt || data.googleGroupSyncManuallyUpdatedAt);
-        admin = data.googleGroupAddedBy || data.googleGroupSyncManuallyUpdatedBy || data.googleGroupSyncRequestedBy || '';
-        if (date || admin) {
-          return 'Added' + (date ? ' ' + date : '') + (admin ? ' by ' + admin : '');
-        }
-        return 'Added; date/admin not recorded';
-      }
-
-      date = mbFormatGroupAuditDate(data.googleGroupRemovedAt || data.googleGroupSyncManuallyUpdatedAt);
-      admin = data.googleGroupRemovedBy || data.googleGroupSyncManuallyUpdatedBy || '';
-      if (date || admin) {
-        return 'Removed' + (date ? ' ' + date : '') + (admin ? ' by ' + admin : '');
-      }
-      return 'Not added yet';
-    }
-
-    function mbGroupStatusHtml(email, data) {
-      var sync = String(data.googleGroupSyncStatus || '').toLowerCase();
-      var syncLabel = /manual-confirmed|manual-removed/i.test(sync) ? '' : sync;
-      var added = !!data.googleGroupAdded;
-      var toggleLabel = added ? 'Added' : 'Not added';
-      var toggleMode = added ? 'removed' : 'added';
-      var toggleClass = added ? 'is-added' : 'is-not-added';
-      var hint = mbGroupAuditText(data, added);
-      if (mbGroupNeedsManualRemove(data)) hint = 'Manual removal needed.';
-      if (mbGroupNeedsManualAdd(data)) hint = 'Manual add needed.';
-      return '<div class="mb-group-cell">' +
-        '<button class="mb-group-toggle ' + toggleClass + '" type="button" data-mb-group-mark="' + toggleMode + '" data-email="' + escapeHtml(email) + '">' + toggleLabel + '</button>' +
-        '<span class="mb-group-hint">' + escapeHtml(hint) + '</span>' +
-        (syncLabel ? '<span class="mb-group-hint">' + escapeHtml(syncLabel) + '</span>' : '') +
-      '</div>';
     }
 
     function mbDuplicateWarningHtml(duplicates) {

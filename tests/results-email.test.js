@@ -293,7 +293,7 @@ async function main() {
   // ---------- static checks on the wiring ----------
 
   const indexJs = fs.readFileSync(path.join(root, 'functions-admin/index.js'), 'utf8');
-  assert.match(indexJs, /exports\.sendMyResultsEmail = onCall\(\{\s*secrets: \[APPS_SCRIPT_ADMIN_RELAY_SECRET\],\s*timeoutSeconds: 30/, 'uses the relay secret and a 30 second timeout');
+  assert.match(indexJs, /exports\.sendMyResultsEmail = onCall\(\{\s*secrets: RELAY_SECRETS,\s*timeoutSeconds: 30/, 'uses the relay secrets and a 30 second timeout');
   assert.match(indexJs, /postToAdminRelay\(resultsEmail\.RELAY_ACTION, payload, resultsEmail\.RELAY_REQUESTED_BY\)/, 'sent through the authenticated relay helper');
   assert.strictEqual(mod.RELAY_ACTION, 'ResultsEmail');
   assert.strictEqual(mod.RELAY_REQUESTED_BY, 'my-results-email');

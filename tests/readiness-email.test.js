@@ -293,7 +293,7 @@ async function main() {
   // ---------- static checks on the wiring ----------
 
   const indexJs = fs.readFileSync(path.join(root, 'functions-admin/index.js'), 'utf8');
-  assert.match(indexJs, /exports\.sendReadinessResultEmail = onCall\(\{\s*secrets: \[APPS_SCRIPT_ADMIN_RELAY_SECRET\]/, 'the callable uses the existing relay secret');
+  assert.match(indexJs, /exports\.sendReadinessResultEmail = onCall\(\{\s*secrets: RELAY_SECRETS/, 'the callable uses the relay secrets (the existing relay secret, plus the mail sender secret only when MAIL_TRANSPORT=resend)');
   assert.match(indexJs, /postToAdminRelay\(readinessEmail\.RELAY_ACTION/, 'the callable reuses the existing relay helper');
   assert.strictEqual(email.RELAY_ACTION, 'WelcomeEmail', 'sent through the action the Apps Script already routes to handleTemplateEmail');
   assert.strictEqual((indexJs.match(/APPS_SCRIPT_ADMIN_RELAY_SECRET = defineSecret/g) || []).length, 1, 'no second relay secret');

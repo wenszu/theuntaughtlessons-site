@@ -8,7 +8,7 @@ Written 2026-10-08 for Wen-Szu. This is a read only research result: nothing was
 
 - 39 functions in `functions-admin` (codebase `admin-actions`): 36 callables or web endpoints and 3 triggers. One trigger is scheduled (weekly organization reports), one fires on a Firestore write (certificates), one fires when a Firebase user is created (the role claim).
 - 4 functions in `functions-aiko` (codebase `aiko`): the AI scorers. They use the Google Gemini key, not an Anthropic key. There is no Anthropic key anywhere in the code.
-- 1 function in `functions` (codebase `group-sync`): the Google Group sync. Nothing creates jobs for it any more (`WEBSITE_CONTEXT.md` says the admin console stopped because Workspace group automation is unavailable). It is dead code.
+- 1 function in `functions` (codebase `group-sync`): the Google Group sync (RETIRED 2026-10-08, folder deleted). Nothing creates jobs for it any more (`WEBSITE_CONTEXT.md` says the admin console stopped because Workspace group automation is unavailable). It is dead code.
 - The admin console (`admin/index.html`, 14,210 lines, plus the new `admin/inbox/` page): 39 sections in 7 tabs. It reads and writes Firestore directly through `assets/firebase.js` and through the callables above.
 
 **What I recommend.** Use the database for almost everything and use Edge Functions only where the database cannot do the job.
@@ -137,7 +137,7 @@ Services used by these functions: `customer-program-service.js` (965 lines, the 
 
 Secret: `GEMINI_API_KEY` in Firebase's secret store. The two live pages call the Firebase URLs directly: `apps/explain-to-aiko/aiko.js` line 15 and `apps/tsa-diagnostic/index.html` line 158. All four endpoints are open to the internet from the allowed origins, which also means a person who copies the URL can spend your Gemini quota. The move is a chance to require the sign-in token for member exercises and add a small daily limit per person (section 5, wave 5).
 
-### 3.3 Codebase `group-sync` (`functions/index.js`)
+### 3.3 Codebase `group-sync` (`functions/index.js`) - RETIRED 2026-10-08 (code, mirror files and tests deleted; owner commands to delete the deployed function are in `~/utl-backups/retire-group-sync.txt`)
 
 | Function | How it runs | Reads | Writes | Replacement | Kind | W | Risk |
 |---|---|---|---|---|---|---|---|
@@ -175,10 +175,10 @@ Each wave lists: what moves, effort in sessions, risk, the shadow compare step, 
 
 ### Wave 1. Delete what is dead. 0.5 session plus a log check. Risk: low.
 
-- `processGoogleGroupSyncJob`: confirm no new `google_group_sync_jobs` documents since the admin console stopped creating them (the newest one in the archive), then delete the function.
+- `processGoogleGroupSyncJob`: RETIRED 2026-10-08 (the owner decided; code deleted, delete commands in `~/utl-backups/retire-group-sync.txt`, no log check needed). Original step: confirm no new `google_group_sync_jobs` documents since the admin console stopped creating them (the newest one in the archive), then delete the function.
 - `scoreScqa` and `runAdvisoryBoard`: nothing in the repo calls them. Check 60 days of invocation counts in the Firebase console (Functions, then each function, then metrics). Zero calls: delete. Some calls: list the caller and port them in wave 5.
 - **Shadow compare:** not applicable; deletion is checked by zero traffic.
-- **Rollback:** the code stays in git. Redeploy the one function with `firebase deploy --only functions:group-sync` (or `aiko:scoreScqa`) if something turns out to use it. Deleting a function does not delete its secret.
+- **Rollback:** the code stays in git. Redeploy the one function (for the Google Group sync the `functions/` folder is now deleted: restore it from git history first, then `firebase deploy --only functions:group-sync`; for `aiko:scoreScqa` use `firebase deploy --only functions:aiko:scoreScqa`) if something turns out to use it. Deleting a function does not delete its secret.
 - Benefit: the Gemini endpoints with no caller are open to the internet and consume your key if found.
 
 ### Wave 2. Turn on the server mirror that is already built. 1 session plus owner tasks. Risk: low to medium.
@@ -423,7 +423,7 @@ Secrets, deploys of Firebase functions, dashboard clicks, third party dashboards
 | Apps Script email relay (`WelcomeEmail`, weekly reports, result email, removed member sheet log) | Google Apps Script, run as you | It is the only thing that sends the mail today from your Google account. The Edge Functions just call its web address | Yes, by adding a mail sending service. Worth doing after Firebase is closed, not during |
 | Public contact, waitlist, TSA score and program forms on several site pages | Apps Script (Sheet row plus owner notification) | Not part of Firebase at all | Yes: `submit_lead` and the Inbox already exist and could take them. Separate project |
 | Gemini AI key | Google (AI Studio or Google Cloud) | The scorers call Gemini | Yes, by switching to another model (D3). Not required |
-| Google Group sync | nowhere | Retired. Reviving it would need Google Workspace group management through the Directory API with a service account; the site's group address is a `googlegroups.com` address, which is the reason the feature was switched off | Not needed |
+| Google Group sync | nowhere | Retired (code deleted 2026-10-08). Reviving it would need Google Workspace group management through the Directory API with a service account; the site's group address is a `googlegroups.com` address, which is the reason the feature was switched off | Not needed |
 | Firebase Auth | Firebase | It signs 61 people in. Nothing else can close until phase 6 moves them | Yes: the sign-in move |
 | GitHub Pages, Cloudflare | unchanged | They serve the site; nothing in this plan touches them | n/a |
 | Vimeo and Drive embeds | unchanged | Not part of Firebase | n/a |
@@ -468,7 +468,7 @@ Written in your voice. I have marked the points where menu names may differ slig
 
 ### Task 6. Check that the three Firebase functions are really unused (wave 1, 10 minutes)
 
-- [ ] In the Firebase console, Functions: open `scoreScqa`, `runAdvisoryBoard` and `processGoogleGroupSyncJob`, look at the invocation metric for the last 60 days, and tell Claude the numbers.
+- [ ] In the Firebase console, Functions: open `scoreScqa` and `runAdvisoryBoard` (`processGoogleGroupSyncJob` is already retired, no check needed), look at the invocation metric for the last 60 days, and tell Claude the numbers.
 - [ ] If all are zero, I say "delete them" and Claude gives me the exact delete commands to run.
 
 ### Task 7. A real email sender for sign-in links (before wave 12, 40 minutes)
@@ -582,7 +582,7 @@ While I was writing, other sessions added uncommitted files to this worktree (th
 | `20261008002200_settings_and_access.sql` | `admin_set_app_setting(key, value)` for the ten admin settings (owner only, audited, the browser sends the whole stored document after the Firestore write), and `get_my_access()` | This is the settings half of wave 6, built the way decision D2 recommends (Firestore first, Supabase copy second). Wave 6 then only needs the member administration half and the learner page reads of settings. Note it deliberately says `get_my_access()` must never deny anyone while Firestore is the base |
 | `20261008002210_es_report.sql` | `get_my_es_status()` and `get_es_attempt_report(attempt)` | `get_my_es_status` is the SQL replacement for the `getMyEsStatus` callable (row 3, wave 4). Check its answer against the callable in the shadow step. `get_es_attempt_report` supports the Executive Signature results page without a callable |
 | `20261008002220_admin_browser_writes.sql` | `admin_mirror_cohort`, `admin_mirror_cohort_rename`, `admin_mirror_feedback_enabled`, `admin_mirror_support_preview` (owner only) | The cohort, feedback flag and support preview parts of wave 6. Its header also mentions member documents being copied "by a Firestore trigger in functions-admin". No such trigger exists in `functions-admin/index.js` today, so that part is planned, not built. A Firestore trigger would keep a Google dependency until the close and would need the mirror secret; compare it with simply adding the member write to the browser adapter (decision D2) |
-| `functions/supabase-mirror/` and `functions/supabase-mirror-core.js` | A Supabase mirror for the Google Group sync | **I recommend against finishing this.** The sync is retired (nothing creates jobs; the 48 old jobs are already archived), and wave 1 deletes the function. If someone still wants the mirror, it is dead weight to maintain |
+| `functions/supabase-mirror/` and `functions/supabase-mirror-core.js` | A Supabase mirror for the Google Group sync | **Retired 2026-10-08: these files are deleted, along with the sync itself.** Original note: I recommend against finishing this. The sync is retired (nothing creates jobs; the 48 old jobs are already archived), and wave 1 deletes the function. If someone still wants the mirror, it is dead weight to maintain |
 | `docs/SUPABASE_PLAN_SIGNIN.md` | The sign-in move plan, by another planner | Agrees with my order (sign-in last, after the server functions and admin console), also says the built in Supabase email sender cannot be used (my task 7) and recommends a two week dual period where the main plan says one week. One item to settle between the two documents: it recommends a new Google OAuth client for Supabase, and my close checklist (decision D6) still requires keeping the Google Cloud project that holds whichever client is used |
 
 Nothing here is wrong; it means waves 4 and 6 are partly built, and a short "what is applied and what is only written" check should be the first thing done in wave 0.

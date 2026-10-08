@@ -12,6 +12,7 @@ const { createAssessmentPersistenceService } = require("./assessment-persistence
 const { getVersion: getExecutiveSignatureVersion, normalizeAnswers: normalizeExecutiveSignatureAnswers } = require("./executive-signature-versions");
 const { createPaymentsService } = require("./payments-service");
 const Stripe = require("stripe");
+const mailSender = require("./mail-sender");
 const mirrorRuntime = require("./supabase-mirror/runtime");
 const credentialsMirror = require("./supabase-mirror/credentials");
 const organizationsMirror = require("./supabase-mirror/organizations");
@@ -33,6 +34,11 @@ const paymentsService = createPaymentsService({
 });
 
 const APPS_SCRIPT_ADMIN_RELAY_SECRET = defineSecret("APPS_SCRIPT_ADMIN_RELAY_SECRET");
+// The new mail sender needs its own secret, but only once MAIL_TRANSPORT=resend is set in functions-admin/.env.
+// With the default (Apps Script) no new secret is required, so a deploy can never fail because of it.
+const RELAY_SECRETS = mailSender.mailTransport() === "resend" && mailSender.MAIL_RELAY_SECRET
+  ? [APPS_SCRIPT_ADMIN_RELAY_SECRET, mailSender.MAIL_RELAY_SECRET]
+  : [APPS_SCRIPT_ADMIN_RELAY_SECRET];
 const STRIPE_SECRET_KEY = defineSecret("STRIPE_SECRET_KEY");
 const STRIPE_WEBHOOK_SECRET = defineSecret("STRIPE_WEBHOOK_SECRET");
 const APPS_SCRIPT_ADMIN_URL = defineString("APPS_SCRIPT_ADMIN_URL", {
@@ -1447,6 +1453,10 @@ exports.getMemberCredentialRegistry = onCall({ timeoutSeconds: 30, memory: "256M
 // function (which has no request.auth — it IS the trusted caller) so the fetch/response-
 // validation logic against the Apps Script relay is not duplicated between the two.
 async function postToAdminRelay(action, payload, requestedBy) {
+  if (mailSender.useResendFor(action)) {
+    await mailSender.sendRelayAsMail(action, payload);
+    return { ok: true, action };
+  }
   const relayUrl = String(APPS_SCRIPT_ADMIN_URL.value() || "").trim();
   const relaySecret = String(APPS_SCRIPT_ADMIN_RELAY_SECRET.value() || "").trim();
   if (!relayUrl || !relaySecret) {
@@ -1472,7 +1482,7 @@ async function postToAdminRelay(action, payload, requestedBy) {
 }
 
 exports.runAdminAction = onCall({
-  secrets: [APPS_SCRIPT_ADMIN_RELAY_SECRET],
+  secrets: RELAY_SECRETS,
   timeoutSeconds: 30,
   memory: "256MiB"
 }, async (request) => {
@@ -1529,7 +1539,7 @@ function weeklyOrgReportBody(organization, aggregate, cohortAggregates) {
 exports.sendWeeklyOrganizationReports = onSchedule({
   schedule: "0 8 * * TUE",
   timeZone: "Asia/Manila",
-  secrets: [APPS_SCRIPT_ADMIN_RELAY_SECRET],
+  secrets: RELAY_SECRETS,
   timeoutSeconds: 300,
   memory: "512MiB"
 }, async () => {
@@ -1895,7 +1905,7 @@ const sendReadinessResultEmailHandler = readinessEmail.createSendReadinessResult
   relay: (payload) => postToAdminRelay(readinessEmail.RELAY_ACTION, payload, "readiness-result-email")
 });
 exports.sendReadinessResultEmail = onCall({
-  secrets: [APPS_SCRIPT_ADMIN_RELAY_SECRET],
+  secrets: RELAY_SECRETS,
   timeoutSeconds: 30,
   memory: "256MiB"
 }, sendReadinessResultEmailHandler);
@@ -1913,7 +1923,7 @@ const sendMyResultsEmailHandler = resultsEmail.createSendMyResultsEmailHandler({
   relay: (payload) => postToAdminRelay(resultsEmail.RELAY_ACTION, payload, resultsEmail.RELAY_REQUESTED_BY)
 });
 exports.sendMyResultsEmail = onCall({
-  secrets: [APPS_SCRIPT_ADMIN_RELAY_SECRET],
+  secrets: RELAY_SECRETS,
   timeoutSeconds: 30,
   memory: "256MiB"
 }, sendMyResultsEmailHandler);

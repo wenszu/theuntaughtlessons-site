@@ -537,8 +537,10 @@ service cloud.firestore {
       allow read, update, delete: if isAdmin();
     }
 
+    // Retired: the Google Group sync was removed. The old jobs stay readable for history; nothing may write any more.
     match /google_group_sync_jobs/{jobId} {
-      allow read, create, update, delete: if isAdmin();
+      allow read: if isAdmin();
+      allow create, update, delete: if false;
     }
 
     match /support_preview_audit/{eventId} {

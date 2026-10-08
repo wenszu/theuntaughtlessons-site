@@ -65,7 +65,7 @@ Local server: `python3 -m http.server 8061 --bind 127.0.0.1`
 - **Edge:** `theuntaughtlessons.com` is the `CNAME` and is proxied by Cloudflare. GitHub Pages does not apply the repository's `_headers` file, so it is not an enforced production-header policy.
 - **Authentication:** Firebase Authentication supports email links, Google, Microsoft, and Facebook. A hidden emergency-password path exists only for eligible administrator accounts; localhost/emulator test accounts are separate from production access.
 - **Database:** Cloud Firestore stores TSA membership/progress, organizations, rewards/credentials, and the additive customer/program/ES model. See `firestore.rules`, `firestore.indexes.json`, and the [schema contract](docs/CUSTOMER_PROGRAM_PLATFORM_SCHEMA_V1.md).
-- **Functions:** `firebase.json` declares `group-sync`, `aiko`, and `admin-actions`, all on Node 20. Deployment is per exported function/codebase; source presence does not mean deployment. See the deployment inventory under Current implementation notes.
+- **Functions:** `firebase.json` declares `aiko` and `admin-actions`, all on Node 20 (the `group-sync` codebase was retired and its `functions/` folder deleted on 2026-10-08). Deployment is per exported function/codebase; source presence does not mean deployment. See the deployment inventory under Current implementation notes.
 - **Email and sheet logging:** Public forms and administrative email actions use the Google Apps Script relay; `scripts/apps-script-email-actions.gs` is a repository reference, not an automatically deployed script.
 - **AI scoring:** The `aiko` Functions codebase provides Gemini-backed HTTP scoring for selected practice experiences. Apps keep non-blocking/fallback behavior where documented.
 - **Media:** Current lesson/exercise media is primarily Vimeo; some Google Drive/Docs embeds remain and are cross-origin.
@@ -132,7 +132,7 @@ Emulators (Auth: 9099, Firestore: 8085, Hosting: 5000): enable with `localStorag
 
 Firestore rules pattern for settings: public pages can read `publicSite` and `public_assessments`; other settings require sign-in.
 
-The repository still contains the optional `functions/processGoogleGroupSyncJob` implementation, but it is not deployed. It requires paid Google Workspace administration and domain-wide delegation. Member access does not depend on it.
+The Google Group sync (`functions/processGoogleGroupSyncJob`, codebase `group-sync`) was retired completely on 2026-10-08: the code, its Supabase mirror hooks and its tests are deleted (recoverable from git history). Old `google_group_sync_jobs` documents and the `authorized_members.googleGroup*` fields stay as history. Member access never depended on it.
 
 ## Quick reference — pages
 

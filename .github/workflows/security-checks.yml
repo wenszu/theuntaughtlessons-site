@@ -20,7 +20,6 @@ jobs:
           node-version: 20
           cache: npm
           cache-dependency-path: |
-            functions/package-lock.json
             functions-aiko/package-lock.json
             functions-admin/package-lock.json
       - name: Check committed files for GitHub tokens
@@ -35,7 +34,6 @@ jobs:
           done
       - name: Validate Cloud Functions syntax
         run: |
-          node --check functions/index.js
           node --check functions-aiko/index.js
           node --check functions-admin/index.js
 
@@ -43,7 +41,6 @@ jobs:
     uses: "google/osv-scanner-action/.github/workflows/osv-scanner-reusable.yml@v2.5.0"
     with:
       scan-args: |-
-        --lockfile=functions/package-lock.json
         --lockfile=functions-aiko/package-lock.json
         --lockfile=functions-admin/package-lock.json
     permissions:
