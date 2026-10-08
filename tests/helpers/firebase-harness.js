@@ -26,6 +26,7 @@ const SUPABASE_DATA_SOURCE = path.join(REPO_ROOT, 'assets', 'supabase-data.js');
 const SUPABASE_ADMIN_READS_SOURCE = path.join(REPO_ROOT, 'assets', 'supabase-admin-reads.js');
 const SUPABASE_MEMBER_READS_SOURCE = path.join(REPO_ROOT, 'assets', 'supabase-member-reads.js');
 const SUPABASE_ADMIN_WRITES_SOURCE = path.join(REPO_ROOT, 'assets', 'supabase-admin-writes.js');
+const SUPABASE_ADMIN_CONSOLE_READS_SOURCE = path.join(REPO_ROOT, 'assets', 'supabase-admin-console-reads.js');
 
 const FIXED_NOW = Date.parse('2026-10-06T10:00:00.000Z');
 
@@ -211,7 +212,9 @@ const IMPORT_REWRITES = [
   // The member reads twin (wave 4) is copied the same way.
   [/import\("\.\/supabase-member-reads\.js"\)/g, 'import("./supabase-member-reads.mjs")'],
   // The staff writes twin (waves 6 and 7) is copied the same way.
-  [/import\("\.\/supabase-admin-writes\.js"\)/g, 'import("./supabase-admin-writes.mjs")']
+  [/import\("\.\/supabase-admin-writes\.js"\)/g, 'import("./supabase-admin-writes.mjs")'],
+  // The admin console direct reads twin (wave 13) is copied the same way.
+  [/import\("\.\/supabase-admin-console-reads\.js"\)/g, 'import("./supabase-admin-console-reads.mjs")']
 ];
 
 // ---------------------------------------------------------------------------
@@ -482,6 +485,7 @@ function createHarness() {
       fs.copyFileSync(SUPABASE_ADMIN_READS_SOURCE, path.join(dir, 'supabase-admin-reads.mjs'));
       fs.copyFileSync(SUPABASE_MEMBER_READS_SOURCE, path.join(dir, 'supabase-member-reads.mjs'));
       fs.copyFileSync(SUPABASE_ADMIN_WRITES_SOURCE, path.join(dir, 'supabase-admin-writes.mjs'));
+      fs.copyFileSync(SUPABASE_ADMIN_CONSOLE_READS_SOURCE, path.join(dir, 'supabase-admin-console-reads.mjs'));
       let text = sourceText;
       IMPORT_REWRITES.forEach(([pattern, replacement]) => { text = text.replace(pattern, replacement); });
       if (/https:\/\/www\.gstatic\.com/.test(text)) throw new Error('An SDK import was not rewritten.');

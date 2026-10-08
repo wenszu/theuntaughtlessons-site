@@ -62,6 +62,11 @@ const firebaseConfig = {
 const SUPABASE_URL = "https://czljyikfavtjgqcibdda.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_uxSIlhwWdbAa6EnHyn_Flw__P3u6tlW";
 
+// The switchboard (docs/SUPABASE_SWITCHBOARD.md): a public setting that sets the per browser switches below for everyone, but
+// only where the person has not set a switch by hand. With every flag on firebase it writes nothing. Never required: a missing
+// file or a failed request changes nothing.
+import("./switchboard.js").catch(() => {});
+
 // Data source switch, per browser. localStorage utl_data_source is "supabase" or "firebase" (the
 // default until a signed in member's browser has been checked); only "supabase" turns the switch on.
 // Every signed in member is on Supabase unless their authorized_members/{email} document carries
@@ -403,6 +408,7 @@ let supabaseAdminReadsPromise = null;
 function adminReadMode() {
   try {
     if (window.localStorage.getItem(ADMIN_READ_FLAG_KEY) === "supabase") return "supabase";
+    if (window.localStorage.getItem(ADMIN_READ_FLAG_KEY) === "shadow") return "shadow"; // set for everyone by the switchboard
     if (new URLSearchParams(window.location.search).get(ADMIN_READ_SHADOW_PARAMETER) === "shadow") return "shadow";
   } catch (error) {
     // Blocked storage or an odd address: Firebase only.
@@ -513,6 +519,104 @@ async function getEsConfiguration() {
 
 async function getEsDataGovernance(options = {}) {
   return adminReadRoute("getEsDataGovernance", [options], () => getEsDataGovernanceFromFirebase(options));
+}
+
+// -- admin console direct reads: shadow and Supabase-first (wave 13, docs/SUPABASE_ADMIN_DIRECT_READS.md) ----------------
+// Seven functions below read Firestore straight from the admin page (members list, member progress, engagement analytics, stability
+// events, cohort details, support preview snapshot, uid lookup). Each public function is a thin wrapper around the unchanged
+// Firebase code (the <name>FromFirebase function). The flags are the ones of the read screens above:
+//   no flag                          Firebase only, nothing else happens (no import, no request).
+//   page address has ?utl_server=shadow   the Firebase answer is returned; the Supabase twin (assets/supabase-admin-console-reads.js)
+//                                    is asked in the background and a console warning says how they differ (counts, field names).
+//   localStorage utl_server_reads = "supabase"   Supabase first; a failure or an empty answer runs the Firebase function instead.
+// Three of them are answered by Firebase even with the Supabase flag (they are compared in the background, like shadow): the
+// support snapshot (it carries the learner's saved answers, which the database never returns), the cohort details (the cohorts
+// table cannot hold the draft and cancelled statuses) and the member progress (the edit, reset and repair tools of Student
+// Progress write whatever this answer holds back into Firestore, and the rebuilt progress is not complete enough for that).
+const ADMIN_CONSOLE_FIREBASE_ANSWERS = new Set(["getAllMemberWorkspaceProgress", "getMemberSupportSnapshot", "getCohortDetails"]);
+const ADMIN_CONSOLE_USABLE = {
+  listAuthorizedMembers: (value) => Boolean(value) && Number(value.size) > 0,
+  getAllMemberWorkspaceProgress: (value) => Array.isArray(value) && value.length > 0,
+  getAllEngagementAnalytics: (value) => Boolean(value) && (value.sessions.length + value.activities.length) > 0,
+  getAllStabilityEvents: (value) => Array.isArray(value),
+  getCohortDetails: (value) => Boolean(value) && Object.keys(value).length > 0,
+  getMemberSupportSnapshot: (value) => Boolean(value),
+  findUserUidByEmail: (value) => typeof value === "string" && value !== ""
+};
+let supabaseAdminConsolePromise = null;
+
+function loadSupabaseAdminConsoleReads() {
+  if (!supabaseAdminConsolePromise) {
+    supabaseAdminConsolePromise = import("./supabase-admin-console-reads.js").then((module) => ({
+      reads: module.createSupabaseAdminConsoleReads({
+        supabaseUrl: SUPABASE_URL,
+        publishableKey: SUPABASE_PUBLISHABLE_KEY,
+        getIdToken: siteIdToken
+      }),
+      compare: module.compareAdminConsoleRead
+    })).catch((error) => {
+      supabaseAdminConsolePromise = null;
+      throw error;
+    });
+  }
+  return supabaseAdminConsolePromise;
+}
+
+// Resolves { ok: true, value, compare } or { ok: false, error }; never rejects and never waits longer than SUPABASE_WAIT_MS.
+async function runSupabaseAdminConsoleRead(name, args) {
+  let timer = null;
+  try {
+    const layer = await loadSupabaseAdminConsoleReads();
+    const value = await Promise.race([
+      layer.reads[name](...args),
+      new Promise((resolve, reject) => {
+        timer = window.setTimeout(() => {
+          reject(Object.assign(new Error("The data service did not answer in time."), { code: "network/timeout" }));
+        }, SUPABASE_WAIT_MS);
+      })
+    ]);
+    return { ok: true, value, compare: layer.compare };
+  } catch (error) {
+    return { ok: false, error };
+  } finally {
+    if (timer !== null) window.clearTimeout(timer);
+  }
+}
+
+async function adminConsoleReadRoute(name, args, firebaseCall) {
+  const mode = adminReadMode();
+  if (mode === "firebase") return firebaseCall();
+  if (mode === "supabase" && !ADMIN_CONSOLE_FIREBASE_ANSWERS.has(name)) {
+    const remote = await runSupabaseAdminConsoleRead(name, args);
+    if (remote.ok && ADMIN_CONSOLE_USABLE[name](remote.value)) return remote.value;
+    console.warn(`Admin console read ${name}: Supabase gave no usable answer (${String((remote.error && remote.error.code) || (remote.ok ? "empty" : "unknown"))}); the Firebase answer is used.`);
+    return firebaseCall();
+  }
+  // Shadow (and the Firebase answered functions with the Supabase flag): the Supabase call starts first so both run together.
+  const pending = runSupabaseAdminConsoleRead(name, args);
+  let firebaseValue;
+  try {
+    firebaseValue = await firebaseCall();
+  } catch (error) {
+    pending.catch(() => {});
+    throw error;
+  }
+  pending.then((remote) => {
+    if (!remote.ok) {
+      console.warn(`Admin console read shadow ${name}: Supabase did not answer (${String((remote.error && remote.error.code) || "unknown")}).`);
+      return;
+    }
+    const result = remote.compare(name, firebaseValue, remote.value);
+    console.warn(result.same
+      ? `Admin console read shadow ${name}: match`
+      : `Admin console read shadow ${name}: ${result.differences.length} difference(s) - ${result.differences.join("; ")}`);
+  }).catch(() => {});
+  return firebaseValue;
+}
+
+// The Members list: every authorized_members document (what the page read with getDocs(collection(db, "authorized_members"))).
+async function listAuthorizedMembers() {
+  return adminConsoleReadRoute("listAuthorizedMembers", [], () => getDocs(collection(requireFirestore(), "authorized_members")));
 }
 
 // -- read merges (Firestore is the base; Supabase may only add) ---------------------------------
@@ -772,6 +876,7 @@ let staffWritesModulePromise = null;
 function staffWriteMode() {
   try {
     if (window.localStorage.getItem(STAFF_WRITE_FLAG_KEY) === "supabase") return "supabase";
+    if (window.localStorage.getItem(STAFF_WRITE_FLAG_KEY) === "shadow") return "shadow"; // set for everyone by the switchboard
     if (new URLSearchParams(window.location.search).get(STAFF_WRITE_SHADOW_PARAMETER) === "shadow") return "shadow";
   } catch (error) {
     // Blocked storage or an odd address: Firebase only.
@@ -881,6 +986,7 @@ async function getMemberCredentialRegistryFromFirebase() {
 function memberReadsMode() {
   try {
     if (window.localStorage.getItem("utl_server_reads") === "supabase") return "supabase";
+    if (window.localStorage.getItem("utl_server_reads") === "shadow") return "shadow"; // set for everyone by the switchboard
   } catch {
     // unreadable storage means no switch
   }
@@ -2762,6 +2868,10 @@ async function saveStabilityEvent(input = {}) {
 }
 
 async function getAllStabilityEvents(memberUids = []) {
+  return adminConsoleReadRoute("getAllStabilityEvents", [memberUids], () => getAllStabilityEventsFromFirebase(memberUids));
+}
+
+async function getAllStabilityEventsFromFirebase(memberUids = []) {
   const readyDb = requireFirestore();
   const user = await getSignedInUser();
   if (!user) throw new Error("An administrator session is required.");
@@ -2775,6 +2885,10 @@ async function getAllStabilityEvents(memberUids = []) {
 }
 
 async function getAllEngagementAnalytics(memberUids = []) {
+  return adminConsoleReadRoute("getAllEngagementAnalytics", [memberUids], () => getAllEngagementAnalyticsFromFirebase(memberUids));
+}
+
+async function getAllEngagementAnalyticsFromFirebase(memberUids = []) {
   const readyDb = requireFirestore();
   const user = await getSignedInUser();
   if (!user) throw new Error("An administrator session is required.");
@@ -2866,6 +2980,10 @@ async function getMemberExerciseResponsesFromFirebase(uid) {
 }
 
 async function getAllMemberWorkspaceProgress() {
+  return adminConsoleReadRoute("getAllMemberWorkspaceProgress", [], () => getAllMemberWorkspaceProgressFromFirebase());
+}
+
+async function getAllMemberWorkspaceProgressFromFirebase() {
   const readyDb = requireFirestore();
   const user = await getSignedInUser();
   if (!user) {
@@ -2945,6 +3063,10 @@ async function getAllMemberWorkspaceProgress() {
 }
 
 async function getCohortDetails() {
+  return adminConsoleReadRoute("getCohortDetails", [], () => getCohortDetailsFromFirebase());
+}
+
+async function getCohortDetailsFromFirebase() {
   const readyDb = requireFirestore();
   const snap = await getDoc(doc(readyDb, "settings", "cohorts"));
   return snap.exists() ? snap.data() || {} : {};
@@ -2957,7 +3079,7 @@ async function setCohortDetails(cohortName, details) {
   await setDoc(doc(readyDb, "settings", "cohorts"), { [key]: details }, { merge: true });
   // Supabase mode: a background copy of the stored entry (the merge may hold more than this save sent).
   startAdminSupabaseCopy("cohort details", async (data) => {
-    const stored = await getCohortDetails();
+    const stored = await getCohortDetailsFromFirebase();
     return data.mirrorAdminCohort(key, stored[key] || details);
   });
 }
@@ -2970,7 +3092,7 @@ async function renameCohort(oldName, newName, memberEmails) {
   const readyDb = requireFirestore();
   const emails = Array.isArray(memberEmails) ? memberEmails : [];
   await Promise.all(emails.map((email) => updateDoc(doc(readyDb, "authorized_members", email), { cohort: to })));
-  const details = await getCohortDetails();
+  const details = await getCohortDetailsFromFirebase();
   if (details[from]) {
     const next = Object.assign({}, details);
     next[to] = Object.assign({}, next[from], next[to] || {});
@@ -2980,7 +3102,7 @@ async function renameCohort(oldName, newName, memberEmails) {
   // Supabase mode: the members' own cohort change is copied by the server (the authorized_members trigger); this moves
   // the cohort row and its enrollments to the new name and copies the stored details.
   startAdminSupabaseCopy("cohort rename", async (data) => {
-    const stored = await getCohortDetails();
+    const stored = await getCohortDetailsFromFirebase();
     return data.mirrorAdminCohortRename(from, to, stored[to]);
   });
   return { renamed: emails.length };
@@ -3068,6 +3190,10 @@ async function setUserFeedbackEnabled(uid, enabled) {
 }
 
 async function findUserUidByEmail(email) {
+  return adminConsoleReadRoute("findUserUidByEmail", [email], () => findUserUidByEmailFromFirebase(email));
+}
+
+async function findUserUidByEmailFromFirebase(email) {
   const normalizedEmail = String(email || "").trim().toLowerCase();
   if (!normalizedEmail) return null;
 
@@ -3091,13 +3217,17 @@ async function removeMember(email) {
 }
 
 async function getMemberSupportSnapshot(email) {
+  return adminConsoleReadRoute("getMemberSupportSnapshot", [email], () => getMemberSupportSnapshotFromFirebase(email));
+}
+
+async function getMemberSupportSnapshotFromFirebase(email) {
   const normalizedEmail = String(email || "").trim().toLowerCase();
   if (!normalizedEmail) throw new Error("A member email is required.");
   const readyDb = requireFirestore();
   const memberSnap = await getDoc(doc(readyDb, "authorized_members", normalizedEmail));
   if (!memberSnap.exists()) throw new Error("The member access record could not be found.");
   const member = memberSnap.data() || {};
-  const uid = await findUserUidByEmail(normalizedEmail);
+  const uid = await findUserUidByEmailFromFirebase(normalizedEmail);
   if (!uid) {
     return {
       uid: "",
@@ -3612,6 +3742,7 @@ export {
   getAllEngagementAnalytics,
   getAllStabilityEvents,
   getCohortDetails,
+  listAuthorizedMembers,
   setCohortDetails,
   renameCohort,
   getGlobalFeedbackSetting,

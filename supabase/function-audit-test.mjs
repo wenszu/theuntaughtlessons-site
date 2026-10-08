@@ -18,7 +18,7 @@ const WRITE_FUNCTIONS = [
 ];
 // Existing functions that browsers may call on purpose.
 const PUBLIC_ALLOWLIST = ['get_public_org_brand', 'get_public_credential'];                 // anon and authenticated
-const SIGNED_IN_ALLOWLIST = ['org_assessment_summary', 'get_my_es_status', 'get_es_attempt_report', 'get_my_person_id', 'ai_score_take_mine', 'link_my_identity', 'get_my_checkout_identity'];  // authenticated only (the two ES read functions are migration 2210, get_my_person_id is 2230, ai_score_take_mine is 2280, link_my_identity is 2270, get_my_checkout_identity is 2290)
+const SIGNED_IN_ALLOWLIST = ['org_assessment_summary', 'get_my_es_status', 'get_es_attempt_report', 'get_my_person_id', 'ai_score_take_mine', 'link_my_identity', 'get_my_checkout_identity', 'issue_my_credential'];  // authenticated only (the two ES read functions are migration 2210, get_my_person_id is 2230, ai_score_take_mine is 2280, link_my_identity is 2270, get_my_checkout_identity is 2290, issue_my_credential is 2320)
 // Inbox (migration 2170). The two submit functions are the only new functions anon may execute. The staff functions are
 // authenticated only and refuse everyone but a platform_owner as their first statement.
 const SUBMIT_FUNCTIONS = ['submit_lead', 'submit_feedback'];                                 // anon and authenticated
@@ -35,8 +35,13 @@ const ADMIN_MIRROR_FUNCTIONS = ['admin_mirror_cohort', 'admin_mirror_cohort_rena
 const MEMBER_READ_FUNCTIONS = ['get_my_workspaces', 'get_my_organization_access', 'get_my_cohort_standing', 'get_my_exercise_responses'];
 // Admin read screens (migration 2240): read only staff functions. Each is authenticated only and refuses a caller without the staff
 // role (platform_owner, or the Firebase staff roles for the customer and Executive Signature screens) with 42501 as its first statement.
+// Admin console direct reads (migration 2310): read only staff functions for the screens that read Firestore from the browser. Same checks as
+// the screens above, plus: they never touch the tables that hold learner answers (activity_submissions, activity_drafts, assessment_response_parts).
+const ADMIN_CONSOLE_READ_FUNCTIONS = ['admin_console_members', 'admin_member_progress_all', 'admin_engagement_analytics', 'admin_stability_recent', 'admin_cohort_details',
+  'admin_member_support_snapshot', 'admin_find_user_uid', 'admin_cohorts_summary', 'admin_leaderboard', 'admin_platform_overview', 'admin_engagement_summary',
+  'admin_support_preview_audit', 'admin_credential_counts'];
 const ADMIN_READ_FUNCTIONS = ['admin_list_customers', 'admin_get_customer', 'admin_list_es_participants', 'admin_list_es_attempts', 'admin_get_es_configuration',
-  'admin_get_es_governance', 'admin_search_credentials', 'admin_credential_registry', 'admin_organization_access'];
+  'admin_get_es_governance', 'admin_search_credentials', 'admin_credential_registry', 'admin_organization_access', ...ADMIN_CONSOLE_READ_FUNCTIONS];
 // Staff writes (migration 2260): the Firebase callables of the admin console as database functions. Each takes one jsonb document and a
 // dry run flag, is authenticated only, and refuses the wrong caller with 42501 as its first statement. submit_roster_draft is for sponsor
 // staff (an organization role), so its first statement only requires a signed in person; the organization role is checked straight after.
@@ -237,6 +242,17 @@ for (const name of ADMIN_READ_FUNCTIONS) {
   ok(`${name}: never writes, no backslash, never reads raw answers`, !/\b(insert\s+into|update\s+public|delete\s+from|create\s+temp)/i.test(f.prosrc) && !f.prosrc.includes('\\') && !/\.answers\b|scoring_inputs/i.test(f.prosrc));
 }
 
+// Admin console direct reads (migration 2310): the extra privacy checks, and the helpers are closed to browsers.
+for (const name of ADMIN_CONSOLE_READ_FUNCTIONS) {
+  const f = fns.find((x) => x.proname === name);
+  if (!f) continue;
+  ok(`${name}: never touches the tables that hold learner answers or drafts`, !/activity_submissions|activity_drafts|assessment_response_parts|assessment_attempts/i.test(f.prosrc));
+}
+const acHelpers = await db.query(`select p.proname, has_function_privilege('anon', p.oid, 'execute') as anon_exec, has_function_privilege('authenticated', p.oid, 'execute') as auth_exec
+  from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'private' and p.proname like 'ac\\_%'`);
+ok('the admin console read helpers exist', acHelpers.rows.length >= 7, String(acHelpers.rows.length));
+for (const h of acHelpers.rows) ok(`private.${h.proname}: closed to browsers`, !h.anon_exec && !h.auth_exec);
+
 // Staff writes (migration 2260).
 const ADMIN_WRITE_TABLES = {
   admin_grant_entitlement: ['entitlements', 'service_requests'],
@@ -270,6 +286,32 @@ const awHelpers = await db.query(`select p.proname, has_function_privilege('anon
   from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'private' and p.proname like 'aw\\_%'`);
 ok('the staff write helpers exist', awHelpers.rows.length >= 15, String(awHelpers.rows.length));
 for (const h of awHelpers.rows) ok(`private.${h.proname}: closed to browsers`, !h.anon_exec && !h.auth_exec);
+
+// Service role only (migration 2330): the database half of the public Executive Signature submission (Edge Function readiness-submit).
+// The Edge Function is anonymous to the world but calls the database with the service key, so no browser role may execute these.
+const SERVICE_ONLY_FUNCTIONS = ['apply_readiness_completion'];
+for (const name of SERVICE_ONLY_FUNCTIONS) {
+  const f = fns.find((x) => x.proname === name);
+  ok(`${name}: exists`, Boolean(f));
+  if (!f) continue;
+  ok(`${name}: security definer, search_path fixed to empty, no dynamic sql, no backslash`, f.prosecdef && /search_path=("")?(,|$)/.test(f.config || '') && !/^\s*execute\b/im.test(f.prosrc) && !/\bexecute\b\s+(format|'|\$|quote)/i.test(f.prosrc) && !f.prosrc.includes('\\'));
+  ok(`${name}: neither anon nor authenticated can execute it`, !f.anon_exec && !f.auth_exec);
+  ok(`${name}: the only parameter is one jsonb document`, f.args === 'p_input jsonb', f.args);
+  const service = await db.query(`select has_function_privilege('service_role', $1::oid, 'execute') as ok`, [f.oid]);
+  ok(`${name}: the service role can execute it`, service.rows[0].ok === true);
+  ok(`${name}: it is a one line call of the private function`, /^\s*select private\.apply_readiness_completion\(p_input\)\s*$/.test(f.prosrc));
+}
+for (const privateName of ['apply_readiness_completion', 'readiness_take', 'readiness_need']) {
+  const p = await db.query(`select has_function_privilege('anon', p.oid, 'execute') as anon_exec, has_function_privilege('authenticated', p.oid, 'execute') as auth_exec
+    from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'private' and p.proname = $1`, [privateName]);
+  ok(`private.${privateName}: closed to browsers`, p.rows.length === 1 && !p.rows[0].anon_exec && !p.rows[0].auth_exec);
+}
+{
+  const t = await db.query(`select (select relrowsecurity from pg_class where oid = 'public.readiness_limits'::regclass) as rls,
+    (select count(*)::int from pg_policies where tablename = 'readiness_limits') as policies,
+    (select count(*)::int from information_schema.role_table_grants where table_schema = 'public' and table_name = 'readiness_limits' and grantee in ('anon', 'authenticated', 'PUBLIC')) as grants`);
+  ok('readiness_limits: row level security on, no policy, no grant for anon or authenticated', t.rows[0].rls === true && t.rows[0].policies === 0 && t.rows[0].grants === 0);
+}
 
 // Nothing else is exposed by accident.
 const exposed = fns.filter((f) => f.prosecdef && (f.anon_exec || f.auth_exec));

@@ -125,9 +125,9 @@ ok('admin cannot see drafts', (await as('authenticated','fb_admin',`select count
 ok('admin sees submissions', (await as('authenticated','fb_admin',`select count(*)::int n from activity_submissions`))[0].n === 1);
 ok('alice sees her reward total', (await as('authenticated','fb_alice',`select points_total from reward_totals`))[0].points_total === 650);
 ok('bob sees no reward rows', (await as('authenticated','fb_bob',`select count(*)::int n from reward_totals`))[0].n === 0);
-ok('anon reads public settings only', (await as('anon', null, `select count(*)::int n from app_settings`))[0].n === 3);
-ok('member reads public and member settings', (await as('authenticated','fb_bob',`select count(*)::int n from app_settings`))[0].n === 8);
-ok('admin reads all settings', (await as('authenticated','fb_admin',`select count(*)::int n from app_settings`))[0].n === 13);
+ok('anon reads public settings only', (await as('anon', null, `select count(*)::int n from app_settings`))[0].n === 4);  // + the switchboard row (migration 2300)
+ok('member reads public and member settings', (await as('authenticated','fb_bob',`select count(*)::int n from app_settings`))[0].n === 9);
+ok('admin reads all settings', (await as('authenticated','fb_admin',`select count(*)::int n from app_settings`))[0].n === 14);
 ok('learner cannot see stability events', (await as('authenticated','fb_alice',`select count(*)::int n from stability_events`))[0].n === 0);
 denied = false; try { await as('authenticated','fb_alice',`insert into activity_drafts (person_id, activity_id) values ('00000000-0000-0000-0000-000000000001','p1-e1')`); } catch { denied = true; }
 ok('browsers cannot write learning data', denied);

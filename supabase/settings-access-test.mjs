@@ -128,11 +128,11 @@ ok('reading is repeatable and writes nothing', isDeepStrictEqual(r, again) && (a
 const keys = (await q(`select key, visibility from app_settings order by key`));
 const vis = Object.fromEntries(keys.map((k) => [k.key, k.visibility]));
 ok('the ten keys the admin writes all exist', ['feedback', 'public_site', 'engagement', 'rewards', 'assessments', 'public_assessments', 'payments', 'admin_visibility', 'tsa_scoring', 'email_templates'].every((k) => k in vis));
-ok('public keys are exactly public_site, public_assessments and payments', isDeepStrictEqual(keys.filter((k) => k.visibility === 'public').map((k) => k.key), ['payments', 'public_assessments', 'public_site']));
+ok('public keys are exactly public_site, public_assessments, payments and the switchboard (migration 2300)', isDeepStrictEqual(keys.filter((k) => k.visibility === 'public').map((k) => k.key), ['payments', 'public_assessments', 'public_site', 'switchboard']));
 await db.exec(`update app_settings set value = '{"findLevelVisible": true}' where key = 'public_site'; update app_settings set value = '{"enabled": true}' where key = 'rewards'; update app_settings set value = '{"x": 1}' where key = 'email_templates'`);
 const readKeys = async (role, sub) => (await as(role, sub, `select key from app_settings order by key`)).map((x) => x.key);
 const anonKeys = await readKeys('anon', null);
-ok('logged out pages read the three public keys with no token', isDeepStrictEqual(anonKeys, ['payments', 'public_assessments', 'public_site']));
+ok('logged out pages read the four public keys with no token', isDeepStrictEqual(anonKeys, ['payments', 'public_assessments', 'public_site', 'switchboard']));
 const memberKeys = await readKeys('authenticated', 'fb_alice');
 ok('a member reads public and member keys, never staff keys', memberKeys.includes('rewards') && memberKeys.includes('payments') && !memberKeys.includes('email_templates') && !memberKeys.includes('admin_visibility'));
 const ownerKeys = await readKeys('authenticated', 'fb_erin');
