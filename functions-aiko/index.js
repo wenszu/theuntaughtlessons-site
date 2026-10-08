@@ -282,6 +282,10 @@ exports.scoreScqa = onRequest({
   response.set("Access-Control-Allow-Headers", "Content-Type");
   response.set("Content-Type", "application/json");
   if (request.method === "OPTIONS") { response.status(204).send(""); return; }
+  // This endpoint has no caller on the site any more. It stays deployed but answers 410 without calling the AI service,
+  // so nobody can use the key through it. Remove the export in a later deploy.
+  response.status(410).json({ error: "This endpoint has been retired." });
+  return;
   if (request.method !== "POST") { response.status(405).json({ error: "POST only." }); return; }
   if (rejectOversizedRequest(request, response)) return;
 
@@ -379,6 +383,10 @@ exports.runAdvisoryBoard = onRequest({
   response.set("Access-Control-Allow-Headers", "Content-Type");
   response.set("Content-Type", "application/json");
   if (request.method === "OPTIONS") { response.status(204).send(""); return; }
+  // This endpoint has no caller on the site any more. It stays deployed but answers 410 without calling the AI service,
+  // so nobody can use the key through it. Remove the export in a later deploy.
+  response.status(410).json({ error: "This endpoint has been retired." });
+  return;
   if (request.method !== "POST") { response.status(405).json({ error: "POST only." }); return; }
   if (rejectOversizedRequest(request, response)) return;
 

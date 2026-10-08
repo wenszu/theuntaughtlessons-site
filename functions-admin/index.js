@@ -1766,13 +1766,14 @@ async function recordReadinessCompletionHandler(request) {
   // everyone (daily). A refusal looks like any other save failure so it never says which limit was
   // reached, and a failure of the limit store lets the request through.
   const nowMs = Date.now();
-  const reservation = await readinessCompletionGuard.reserveCompletion({ db: admin.firestore(), email, nowMs });
+  const reservation = await readinessCompletionGuard.reserveCompletion({ db: admin.firestore(), email, ip: readinessCompletionGuard.clientIpFromRequest(request), nowMs });
   if (!reservation.allowed) {
     console.warn("Readiness completion refused by a limit", { tier, reason: reservation.reason });
     throw new HttpsError("internal", "Could not save your result.");
   }
   const source = readinessCompletionGuard.sanitizeCompletionSource(input.source);
-  const suspect = readinessCompletionGuard.isSuspectCompletion({
+  // Past the global daily limit nobody is refused; the attempt is saved and marked suspect instead.
+  const suspect = reservation.overGlobalLimit === true || readinessCompletionGuard.isSuspectCompletion({
     tier, durationSeconds: input.durationSeconds, startedAt: input.startedAt, answers: input.answers, nowMs
   });
 
@@ -1851,7 +1852,7 @@ async function recordReadinessCompletionHandler(request) {
 
     return { ok: true, attemptId: persisted.attemptId };
   } catch (error) {
-    console.error("Readiness completion recording failed", { email, tier, message: error && error.message });
+    console.error("Readiness completion recording failed", { tier, code: error && error.code ? String(error.code) : "unknown" });
     if (error instanceof CustomerProgramError) throw customerProgramHttpsError(error);
     throw new HttpsError("internal", "Could not save your result.");
   }
