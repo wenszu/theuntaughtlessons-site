@@ -280,6 +280,11 @@ Decisions are made in Claude (claude.ai). JSON updates are handled in Codex. Doc
 
 Entries older than ~3 days live in `archive/WEBSITE_CONTEXT_ARCHIVE.md` (most recent archived block: 2026-10-03 through 2026-10-04).
 
+### 2026-10-08 (late night) — One click ChatGPT prefill
+
+- `Open ChatGPT` on `i-have-bad-news` and `lets-switch-hats` now opens `https://chatgpt.com/?q=<encoded prompt>` so the prompt arrives in a new chat without pasting. The prompt is still copied to the clipboard as a fallback, and prompts longer than 7500 encoded characters (none today; the Michael prompt link is about 6300) fall back to a blank chat plus the copied prompt. Page text says ChatGPT may send the prompt right away. Gemini has no supported way to prefill a prompt from a link (an extension is needed), so `Open Gemini` still copies and asks the learner to paste.
+- **Verified by the owner on 2026-10-08:** the short test link (`?q=Say only the word PINEAPPLE.`) and a full practice prompt both worked in ChatGPT. ChatGPT blocks automated browsers, so this cannot be checked by the virtual run. `scripts/virtual-learner-run.mjs` now has 78 checks, including that the link carries the exact prompt.
+
 ### 2026-10-08 (late night) — Virtual learner run and a shared prompt dialog fix
 
 - `scripts/virtual-learner-run.mjs` drives the three updated exercises (`i-have-bad-news`, `lets-switch-hats`, `speak-like-obama`) in a fresh throwaway Chrome profile through the Chrome DevTools protocol, with a made up learner on `127.0.0.1:8061` (no real sign in, no real record). It checks the page loads, the setup choices, both generated prompts and what they must and must not contain, the copy and open buttons, the voice instructions, the transcript bonus, completion keys, console errors, and horizontal scroll at 1280px and 390px. Result on 2026-10-08: 74 of 74 checks pass.
