@@ -104,6 +104,17 @@ await sleep(200);
   check('bad news: link stays under 7500 encoded characters', href.length < 7600, String(href.length));
 }
 check('bad news: Open ChatGPT also copies the prompt', (await evalJs('(window.__copied||"").includes("HOW IT ENDS")')));
+// Gemini with a blocked clipboard must open the review box instead of failing silently
+await evalJs('window.__clipboardWrite = navigator.clipboard.writeText; navigator.clipboard.writeText = function () { return Promise.reject(new Error("blocked")); }; document.execCommand = function () { return false; };');
+await click('#openGemini');
+await sleep(500);
+check('bad news: Gemini with a blocked copy opens the review box', (await evalJs('(function(){var d=document.getElementById("utl-feedback-coach-dialog");return !!(d&&d.open);})()')));
+check('bad news: Gemini blocked copy says so', /could not copy/.test(await text('#openStatus')), await text('#openStatus'));
+await click('#utl-feedback-coach-dialog [data-utl-coach-cancel]');
+await evalJs('navigator.clipboard.writeText = window.__clipboardWrite;');
+await click('#openGemini');
+await sleep(300);
+check('bad news: Gemini with a working copy says paste it', /Paste it into the new Gemini chat/.test(await text('#openStatus')), await text('#openStatus'));
 check('bad news: ChatGPT button label and tag', /Open ChatGPT/.test(await text('#openChatGpt')) && /Recommended/.test(await text('#openChatGpt')));
 check('bad news: Gemini button says voice on phone only', /Voice on phone only/.test(await text('#openGemini')));
 await click('#openVoiceHelp');
@@ -159,6 +170,13 @@ mp = await evalJs('(document.querySelector("#utl-feedback-coach-dialog textarea"
 check('switch hats: friend prompt uses the chosen name and level', mp.includes('Priya') && /Difficulty: hard/.test(mp), mp.slice(0, 160));
 check('switch hats: friend prompt does not mention Michael', !/Michael/.test(mp));
 await click('#utl-feedback-coach-dialog [data-utl-coach-cancel]');
+await evalJs('window.__clipboardWrite = navigator.clipboard.writeText; navigator.clipboard.writeText = function () { return Promise.reject(new Error("blocked")); }; document.execCommand = function () { return false; };');
+await click('#openGemini');
+await sleep(500);
+check('switch hats: Gemini with a blocked copy opens the review box', (await evalJs('(function(){var d=document.getElementById("utl-feedback-coach-dialog");return !!(d&&d.open);})()')));
+check('switch hats: Gemini blocked copy says so', /could not copy/.test(await text('#openStatus')), await text('#openStatus'));
+await click('#utl-feedback-coach-dialog [data-utl-coach-cancel]');
+await evalJs('navigator.clipboard.writeText = window.__clipboardWrite;');
 await click('#openRoundsHelp');
 await sleep(200);
 check('switch hats: round instructions dialog opens with four steps', (await evalJs('document.getElementById("voiceDialog").open && document.querySelectorAll("#voiceDialog .lsh-voice-step").length')) === 4);

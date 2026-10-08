@@ -280,6 +280,12 @@ Decisions are made in Claude (claude.ai). JSON updates are handled in Codex. Doc
 
 Entries older than ~3 days live in `archive/WEBSITE_CONTEXT_ARCHIVE.md` (most recent archived block: 2026-10-03 through 2026-10-04).
 
+### 2026-10-08 (late night) — Copy and open flow reviewed on `i-have-bad-news`, then applied to `lets-switch-hats`
+
+- Part a is now `Review your prompt` with a light `Optional` tag (card: `Your prompt is ready`, button `Review prompt`). Part c text is shorter: ChatGPT fills in the prompt and may send it right away, Gemini cannot be filled in so the copied prompt is pasted. Status lines: ChatGPT `is opening with your prompt filled in. It is also copied, in case you need to paste it.`; Gemini `Prompt copied. Paste it into the new Gemini chat.`
+- Copying now tries the clipboard, then a hidden text box. If both are blocked, `Open Gemini` opens the review box (select and copy by hand) and says so; ChatGPT still works because the prompt is in the link.
+- Approved by the owner after a local review, and applied the same way to `lets-switch-hats`. `scripts/virtual-learner-run.mjs` has 83 checks, including a blocked clipboard on both pages.
+
 ### 2026-10-08 (late night) — One click ChatGPT prefill
 
 - `Open ChatGPT` on `i-have-bad-news` and `lets-switch-hats` now opens `https://chatgpt.com/?q=<encoded prompt>` so the prompt arrives in a new chat without pasting. The prompt is still copied to the clipboard as a fallback, and prompts longer than 7500 encoded characters (none today; the Michael prompt link is about 6300) fall back to a blank chat plus the copied prompt. Page text says ChatGPT may send the prompt right away. Gemini has no supported way to prefill a prompt from a link (an extension is needed), so `Open Gemini` still copies and asks the learner to paste.
