@@ -1,6 +1,6 @@
 # The Untaught Lessons Website Context
 
-Last updated: 2026-10-04
+Last updated: 2026-10-08
 
 Single source of truth for agents working on this repo. Read before making changes, update after structural changes. Detailed historical entries and full page/app maps are in `archive/WEBSITE_CONTEXT_ARCHIVE.md`.
 
@@ -180,7 +180,7 @@ The repository still contains the optional `functions/processGoogleGroupSyncJob`
 | `apps/explain-to-aiko-60/` | Phase 2 | Primary 60s recording/scoring exercise with 120s prep and prior-transcript compression comparison |
 | `apps/toolkit/` | Cross-program | AI prompt toolkit reference (CSS: `tk-`) |
 | `apps/eisenhower-matrix/` | Phase 3 | Guided five-round prioritization and written-no exercise (member-facing v1) |
-| `apps/i-have-bad-news/` | Phase 3 | Difficult conversations launch page |
+| `apps/i-have-bad-news/` | Phase 3 | Difficult conversations practice. Learners copy a generated prompt into their own ChatGPT or Gemini (no CustomGPT). Old CustomGPT version archived at `archive/i-have-bad-news-customgpt-2026-10-05.html`. |
 | `apps/lets-switch-hats/` | Phase 3 | Perspective-taking launch page |
 | `apps/speak-like-obama/` | Phase 3 | Speech delivery launch page |
 | `apps/tsa-diagnostic/` | Assessment | The sole TSA assessment — Think/Speak/Act in one saved flow. `?assessment=checkpoint` serves the post-program Checkpoint from the same file |
@@ -252,7 +252,7 @@ Decisions are made in Claude (claude.ai). JSON updates are handled in Codex. Doc
 - First-time completion of each of the 16 reward-enabled exercises opens a two-stage reward moment: a celebratory MP award card followed by a tailored key-learning reflection. Completion-only and reflection exercises show it once; scored exercises show it on the first score only, while later score improvements keep the lightweight toast. Saved reflection choices and optional notes attach to the exercise reward ledger metadata as `completionReflection` and sync with reward state. After reflection (and a level-up modal when earned), the learner returns to the matching Learning Journey phase rather than opening another exercise directly. The completed activity is briefly highlighted there, while the newly unlocked row remains marked `Up next`; phase/program milestones are then handled once on the journey.
 - Admin can manage this experience under `Rewards > Award preview`: select any of the 16 exercises, edit its reflection question and three responses, preview the real two-stage learner modal using unsaved draft wording, restore the recommended copy, or save overrides to `settings/rewards.exerciseReflections` in Firebase. The older calculation form and duplicate MP summary are removed, while a compact bottom preview retains immediate buttons for MP count-up, reward toast, streak toast, level-up, and exercise award examples.
 - Hovering or focusing the sticky-nav level renders a five-step Intern → Analyst → Associate → Principal → Executive progression. Completed/current/upcoming states are visually distinct, the current level is highlighted, and the next-promotion requirement appears below the track.
-- Pure external/CustomGPT exercises (`i-have-bad-news`, `lets-switch-hats`, and `speak-like-obama`) use a simple `Mark exercise complete · +30 MP` action. Each writes both its legacy and canonical completion keys and awards the one-time `reflection-exercise` reward through `assets/reward-events.js`; `tests/external-link-rewards.test.js` guards this contract.
+- Pure external/AI hand-off exercises (`i-have-bad-news`, `lets-switch-hats`, and `speak-like-obama`) use a simple `Mark exercise complete · +30 MP` action. Each writes both its legacy and canonical completion keys and awards the one-time `reflection-exercise` reward through `assets/reward-events.js`; `tests/external-link-rewards.test.js` guards this contract.
 
 ### Learning experience ownership (Phase 6 handoff)
 
@@ -277,7 +277,24 @@ Decisions are made in Claude (claude.ai). JSON updates are handled in Codex. Doc
 
 ## Change Log
 
-Entries older than ~3 days live in `archive/WEBSITE_CONTEXT_ARCHIVE.md` (most recent archived block: 2026-09-23 through 2026-09-28).
+Entries older than ~3 days live in `archive/WEBSITE_CONTEXT_ARCHIVE.md` (most recent archived block: 2026-10-03 through 2026-10-04).
+
+### 2026-10-08 — `i-have-bad-news` rebuilt around the learner's own ChatGPT or Gemini; timers removed from hand-off exercises
+
+Mock-up source of truth: `reference/mockups/i-have-bad-news-mockup.html` (published copy https://claude.ai/artifact/AKTaEF9a7tkbpuKR8CchwF). The live page is `apps/i-have-bad-news/index.html`. The previous CustomGPT version is archived unchanged at `archive/i-have-bad-news-customgpt-2026-10-05.html` (copied from git `HEAD`, so its relative asset paths do not resolve from `archive/`) and also remains in git history.
+
+- **Page:** three open steps, no locked cards, real `bad-news-header`. Step 1: setup in a plus/minus `<details>` (open by default) with `Recommended` pre-selected (Alex, Medium, Work, first situation), optional `What should they call you?` (prefilled from `utl_member_profile.displayName`), names Alex, Elon, Priya, Marcus or typed, Easy/Medium/Hard, four settings plus `Surprise me`. Step 2: (a) shared `UTLFeedbackCoach.mountPreparedPrompt` strip and dialog, (b) `Read first` voice instructions dialog (four steps, page local `bn-voice-*`, `utl_bad_news_voice_read`), (c) `Open ChatGPT` (two thirds width, `Recommended`) and `Open Gemini` (one third, `Voice on phone only`), both also copy the prompt. Step 3: transcript request strip, paste box, `+10 MP` bonus, and the unchanged `Mark exercise complete · +30 MP` contract plus the explicit cloud completion record now used by the other external exercises.
+- **Situations:** every card names both roles in the second person with the other person's name filled in; each is a pair in `CATEGORIES` (card text, first person prompt text). `I need to tell them they have bad breath` (shown as `You have to tell {name} that they have bad breath.`) is the required first Personal situation.
+- **Prompt:** reduced version of the Sam GPT instructions (Drive `02-difficult-conversations-sam-gpt.md`): role play plus Coach, difficulty one-liners, short turns, `HOW IT ENDS` (`Coach, hint`; automatic ask after about eight turns, again after four more; `Coach, debrief now` any time), a briefing before the role play starts that ends with a bracketed voice note, the learner's name used by the other person and once in the debrief, and the debrief format (3 went well, 3 even better, each quoting the learner). Hard mode realism, interruption rules, scenario bank and security rules were left out on purpose.
+- **Personalization hook (built now, for later):** step 1 has a `Make the practice fit you` block that tells the learner that details about them can be added to the prompt (today only the first name; later non-sensitive working style details such as Executive Signature findings), that they review everything before copying, and that nothing is sent automatically. A checkbox (`Use my details to personalize the practice`, on by default) turns it off, and a line shows what is included. In code, `profileHints()` reads `window.UTLLearnerProfile.practiceHints()` (an array of up to six short plain sentences) and adds an `ABOUT ME` section to the prompt (`Note 1:`, `Note 2:`, and so on, with an instruction to use them quietly and never mention them). Nothing provides hints yet. When Executive Signature data is ready, supply that function and keep the notes non-identifying (no scores, email or full name), as `speak-like-obama` does with its behavior label.
+- **Voice facts:** ChatGPT hides its voice button until the cursor is in the message box. Gemini Live is in the phone app; the computer microphone is dictation only.
+- **Bonus event:** `awardEvent` with eventId `transcript-shared:i-have-bad-news`, type `transcript-shared`, 10 MP, once (`utl_bad_news_transcript_done`). Pasted text is not stored. Not yet confirmed: the remote ledger and the admin Rewards views accept this type, and whether 10 MP belongs in reward settings.
+- **Learning Journey:** `p3-e2` shows `ChatGPT, Gemini`; `lets-switch-hats` still shows `CustomGPT`.
+- **Timers removed** from `i-have-bad-news` and `lets-switch-hats` (hand-off exercises where the timer ran while the learner was in another tab). `assets/app-reward-header.js` hides the frozen mobile `00:00` chip when a page has no timer. `speak-like-obama` and the in-app writing exercises keep theirs.
+- **Executive Signature nav fix:** `Try Executive Signature` never hid because `.ws-es-nav-wrap{display:inline-flex}` overrode the `hidden` attribute. Added `.ws-es-nav-wrap[hidden]{display:none}` and the divider is hidden too. Rule: any element with a `display` rule needs its own `[hidden]` rule.
+- **Tests:** `tests/custom-gpt-voice-guidance.test.js` updated (no voice guide expected on this page; asserts no `chatgpt.com/g/` link). Local server: `python3 -m http.server 8061 --bind 127.0.0.1` from the repo root.
+- **Scenario panel (simulated, not user research):** keep deadline, lend money, price, feature, volunteer, rule change; rewrite raise, role change, budget cut, family event, delivery, contract, event cancelled, application; replace `cancel a trip` and `end a friendship`; suggested additions (former peer now reports to me, leadership rejected our plan, tell my senior their plan has a flaw, my mistake affects their work, my team promised something we cannot deliver). Open owner decisions: relationship choice for bad breath (default friend), exclude heavy items from `Surprise me`, cap Hard on personal items, a fifth `Managing people` setting, Southeast Asian names, whether to keep `Elon`, warning against real colleague names. None applied yet.
+- **Not yet verified in a browser:** mobile width, and a signed-in run through the real page (no test sign-in was used, per the no tester runs on the owner account rule).
 
 ### 2026-10-05 — First push to `main` in nine days: the customer-program-platform work is now live
 
@@ -289,146 +306,3 @@ Entries older than ~3 days live in `archive/WEBSITE_CONTEXT_ARCHIVE.md` (most re
 - A separate, unrelated "Security checks" workflow (runs on a daily schedule, doesn't gate deployment) has been failing since 2026-10-01 due to newly-disclosed CVEs in transitive Firebase SDK dependencies across all three Functions codebases — pre-existing, unrelated to this push, flagged as a follow-up candidate.
 - Full detail in `docs/CUSTOMER_PROGRAM_PLATFORM_TRACKER.md`'s decision log.
 
-### 2026-10-04 — Full Phases 7–11 plan written; decision-free work kicked off and verified across four parallel streams
-
-- Wrote `docs/CUSTOMER_PROGRAM_PLATFORM_PHASES_7_TO_11_PLAN.md`: every remaining phase of the customer-program platform broken into decision-free engineering work versus owner decisions, in dependency order, with a coordination log so parallel work streams don't collide.
-- Ran four background agents in parallel, each scoped to its own non-overlapping new files, then independently re-verified every one of them afterward (re-ran their tests myself, spot-checked specific factual claims against the real code, confirmed via file-modification timestamps that none touched another stream's files):
-  - **Phase 8** (TSA shadow verification): a read-only tool comparing the legacy `authorized_members`/`users`/`settings/cohorts` sources against the Phase 4 `customers`/`enrollments` projection, in both directions. Found a real gap worth tracking: Phase 4's migration hardcoded `organizationId: null` on every enrollment, so org/cohort consistency can't be fully verified from that field yet.
-  - **Phase 9** (admin route matrix): expanded the Phase 0 admin-navigation table to ~140 individual actions/dialogs/exports. Surfaced two previously-unnoticed issues, both confirmed directly against the code: a "Remove member" button performs an unaudited direct `deleteDoc` on `authorized_members`/`users` from the browser (the only identity-destructive action that bypasses the audited-callable pattern used everywhere else since Phase 2), and there are two separate, disconnected "Executive Signature" admin tabs today (the old static "Readiness Assessment" tab and the real connected one built in Phases 5–6).
-  - **Phase 7 continuation**: wired `apps/readiness-assessment` to real entitlements — a new self-service `getMyEsStatus` read (entitlement status plus safe attempt summaries, never raw responses) now lets a signed-in returning participant see a notice pointing to their real result instead of being silently restarted at question one. Entry remains free/open, unchanged.
-  - **Phase 11** (legacy-field retirement): a dependency scanner that greps the repository for references to compatibility fields like `productSummary` and the legacy readiness projection, so a future removal decision can be backed by evidence instead of guesswork. Run against both real candidates today: neither is close to clean, as expected, since nothing has migrated off them yet.
-- My own work in parallel: extended the existing member Account page with an Executive Signature program row (verified by executing the rendering function directly with real inputs, not just reading it); wrote `docs/CUSTOMER_PROGRAM_PLATFORM_PHASE_10.md`, a risk assessment for the next production step (a Firestore rules deployment), explaining why it needs its own decision — the index deployment earlier this week revealed that no Firestore resource had ever been deployed through this project's own tooling before, so there's no confirmed record of what rules are actually live today — and giving the exact read-only command to check that before deciding; built and verified observability-scan tooling (duplicate-candidate age, orphaned entitlements/attempts, outbox dead letters) for the signals Phase 0 specified that are cheap to compute without new infrastructure.
-- Caught and fixed one real documentation inconsistency along the way: the Phase 7 doc's "not yet built" list still named the Account-page and ES-entry work as outstanding after both were actually completed in this same round, left stale by the parallel work happening across multiple streams without an immediate sync pass.
-- Every new and existing test passes together in one combined emulator run (15 suites); the full static repository sweep remains at exactly the one known pre-existing `typography-system.test.js` failure. Nothing from this work was pushed to `main` or deployed to production beyond what was already authorized earlier the same day (Cloud Functions). See `docs/CUSTOMER_PROGRAM_PLATFORM_TRACKER.md`'s decision log for the full record.
-
-### 2026-10-04 — First Cloud Functions deployment; Phase 7 begun locally
-
-- Deployed the full `functions-admin` (`admin-actions`) Cloud Functions codebase to production for the first time (`firebase deploy --only functions:admin-actions`). Every pre-existing function updated successfully; every new customer-program-platform callable (`getCustomerDirectory`, `getCustomerDetailForStaff`, `listEsParticipants`, `listEsAttempts`, `getEsConfiguration`, `getEsDataGovernance`, `revealAssessmentResponse`, the Phase 2 identity/entitlement callables, plus the new `getMyWorkspaces` below) created successfully, with zero exports removed. Verified live with a probe call returning `401 unauthenticated` rather than a 404/500.
-- Deliberately did not deploy Firestore rules in the same step. The admin console's feature-flag read already fails closed harmlessly without them, and a rules deployment is Phase 10-scoped in the implementation plan; the index-deployment discovery that no Firestore resource had ever been deployed via this pipeline before means the live rules' real baseline is unverified. Turning the Phase 5/6 flags on for an actual accessibility review still needs this as its own later decision.
-- Began Phase 7 (member workspaces and switcher) at the local/emulator level, ahead of Phase 6's own formal pass, mirroring the precedent set when Phase 5 began under the same condition (only production-dependent evidence remained open on the prior phase). Built and emulator-verified a self-service `getMyWorkspaces` read (TSA eligibility from `authorized_members`, ES eligibility from an active `entitlements` row, no side effects) and a pure, dependency-free `resolveLandingWorkspace` module implementing the Phase 0 landing order (deep link → last visited → only workspace → chooser → account-help) exactly.
-- An existing Phase 2 static contract test caught a real design mistake in the first draft: TSA logic had leaked into `customer-program-service.js`, which must stay structurally free of any TSA dependency. Fixed by moving that check to the callable layer; full regression (all customer-program-platform emulator suites plus the new Phase 7 suite) then passed clean. See `docs/CUSTOMER_PROGRAM_PLATFORM_PHASE_7.md`.
-- Nothing from Phase 7 is wired into the live member-facing pages yet, and nothing from either milestone has been pushed to `main`.
-
-### 2026-10-04 — Cross-program Phase 6 built locally; release evidence remains open
-
-- Added a new "Executive Signature" admin tab (Overview, Participants, Attempts, Configuration, Data governance), additive and read-only except for one explicit, audited action: revealing raw responses for a single attempt.
-- `functions-admin/customer-program-service.js` adds `listEsParticipants`, `listEsAttempts`, `getEsConfiguration`, `getEsDataGovernance`, and `revealAssessmentResponse`; callable-gated in `functions-admin/index.js` to the existing `canReadEsOperations()` role set (`platform_owner`/`customer_support`/`es_program_lead`/`privacy_data_admin`).
-- `revealAssessmentResponse` uses a strictly narrower server-side check mirroring `canReadRawEsResponses()`: only `platform_owner`, `privacy_data_admin`, or an `es_program_lead` whose own `platform_staff` document has `rawResponseAccess == true` can call it; the flag is read from Firestore server-side, never trusted from the client. Every reveal writes an `auditEvents` record (actor, attempt, reason) that never contains the raw answer content, verified by test.
-- The reveal is a deliberate two-step UI gesture (open a confirm panel → type a required reason → confirm) on the Attempts tab only; it never runs automatically when an attempt's detail is viewed. No bulk export of raw responses exists in this phase.
-- `firestore.rules` needed no changes: `assessmentDefinitions`, `assessmentVersions`, `entitlements`, `assessmentAttempts`, `responseParts`, and `platformFeatureFlags` already carried the exact boundaries this phase relies on, confirmed by rereading the file.
-- The tab is inert unless `platformFeatureFlags/esWorkspace.enabled == true`, off by default. New `tests/customer-program-phase6-es-workspace.test.js` (emulator) plus `tests/customer-program-phase6-ui-contract.test.js` (static) join the full existing TSA/customer-program emulator suite (now ten emulator files) passing together; static sweep lands at 72 pass, 12 emulator-only skips, 1 pre-existing typography baseline failure.
-- Phase 4 later passed. Direct service verification correctly found zero production ES records; Phase 6 callables/UI remain undeployed and flagged off pending scale, accessibility, ownership, and gate evidence. See `docs/CUSTOMER_PROGRAM_PLATFORM_PHASE_6.md`.
-
-### 2026-10-04 — First production deployment (Firestore indexes only); Phase 5/6 reconciliation against real data passes
-
-- Verified Phase 5/6's read logic directly against production through the service module, not through the undeployed customer-program callables. Existing unrelated Firebase Functions remain live.
-- Found that `listEsParticipants` failed on a missing composite index, and discovered the root cause: **zero Firestore indexes had ever been deployed to production**, true since this project began (not specific to Phase 5/6). Every prior phase's gate decision had explicitly withheld production deployment.
-- Deployed `firestore.indexes.json` to production (`firebase deploy --only firestore:indexes`) — index-only, no Firestore rules, Cloud Functions, or data touched. This is the first production deployment of any kind in this entire project. After the index finished building, re-verified `listEsParticipants` returns 0 rows, correctly matching that Phase 4 only backfilled TSA data (no Executive Signature entitlements exist yet).
-- Phase 5's and Phase 6's "reconciliation against real backfilled data" gate items both now pass. What remains before either phase can fully pass: a performance/cost trace (not meaningful yet at 55 real customers and 0 ES participants) and an accessibility/usability review of the live UI with its feature flag on — the latter requires a first Cloud Functions deployment, which has not been authorized.
-
-### 2026-10-04 — Cross-program Phase 4 passed, including the first production write in this plan
-
-- Captured and signed a restricted production baseline by cloning the live Firestore `(default)` database into an isolated `cpp-phase4-baseline` database (`firebase firestore:databases:clone`), then reading only the clone (never production directly) with a new read-only `scripts/customer-program-production-baseline.js`: 55 `authorized_members`, 54 `users`, 2 `organizations`, 0 rows in any customer-program-platform collection.
-- Generated and reviewed a production dry-run plan (`scripts/customer-program-production-dry-run.js`, combining the baseline with one read-only Firebase Auth `listUsers` call): 55 records, 0 named exceptions, 1 soft warning.
-- Approved an operating window (batch size 25, halt on mismatch, rollback owner Wen-Szu) and executed the production apply with a new, separately reviewed `scripts/customer-program-production-apply.js` — emulator-verified for correct batching/checkpointing/idempotent replay before its first production use. Result: 55/55 applied, 0 exceptions, 0 skipped. This is additive only; `authorized_members`, `users`, and `organizations` were not modified.
-- Reconciliation initially reported `FAILED` despite `matched=55, mismatched=0` — a bug in the reconciliation tooling (comparing the wrong snapshot variant for its `sourceUnchanged` check), not a data problem. Fixed, regression-tested, and re-run: PASSED (`sourceUnchanged=true`, `matched=55`, `mismatched=0`).
-- Phase 4 has fully passed, local and production. Phase 5/6 direct production-data reconciliation also passed; their meaningful-scale performance, accessibility/usability, deployment, ownership, and written gate evidence remain before either feature flag can be enabled. See the tracker for current status.
-
-### 2026-10-04 — Cross-program Phase 5 built locally; release evidence remains open
-
-- Added bounded, cursor-paginated cross-program customer directory and detail read functions (`functions-admin/customer-program-service.js`), callable-gated to `platform_owner`/`customer_support`/`privacy_data_admin` (`functions-admin/index.js`).
-- Raw assessment responses (`assessmentAttempts/{id}/responseParts`) are never read by this phase; Consent and Audit detail tabs are withheld from `customer_support` at the service layer, not just hidden in the UI.
-- Added a new admin console tab (`admin/index.html` → Customers → Directory) with search, pagination, a row/detail view, and the full required state set (identity, participation, missing-data, migrated, duplicate, deletion/restricted, empty, error, responsive, accessible).
-- The console is inert unless `platformFeatureFlags/customersConsole.enabled == true` (new `firestore.rules` match block, read-only for staff, no client write path); the flag is off by default and nothing changes for existing admin users.
-- New `tests/customer-program-phase5-directory.test.js` plus the full existing TSA/customer-program emulator suite pass together; static sweep unchanged (71 pass, 11 emulator-only skips, 1 pre-existing typography baseline failure).
-- Phase 4 later passed and direct service reconciliation against 55 production customers succeeded. Phase 5 callables/UI remain undeployed and flagged off pending scale, accessibility, ownership, and gate evidence. See `docs/CUSTOMER_PROGRAM_PLATFORM_PHASE_5.md`.
-
-### 2026-10-04 — Cross-program Phase 4 local gate passed; production gate pending
-
-- Added emulator-only source/target inventory, checksum-protected dry-run planning, bounded/checkpointed application, per-record migration ledger, reconciliation, and exact-target restore tooling.
-- Existing canonical email claims are reused; duplicates, unverified Auth links, changed-email cases, and ownership conflicts are quarantined with named reason codes rather than auto-merged.
-- Synthetic and full TSA/customer-program emulator gates pass, including idempotent rerun, source immutability, conflict, and restore drills. The sole static-suite failure remains the pre-existing typography baseline.
-- Phase 4 remains **In verification** until the restricted production baseline, recoverable export, isolated restore, reviewed dry run, authorized backfill, and signed reconciliation are complete. Phase 5 remains locked and nothing was deployed.
-
-### 2026-10-03 — Cross-program Phase 1 passed in emulators
-
-- Added the exact additive schema contract, Firestore rule boundaries, composite-index manifest, payload-size checks, and behavioral authorization tests for TSA, Executive Signature, and future programs.
-- Existing TSA/member, organization-console, and readiness-account Firestore behavior suites pass together with the new cross-program suite in isolated local emulators.
-- New domain writes are server-only; raw ES responses require a narrowly privileged role; sponsors and analysts receive aggregate-only access.
-- Phase 2 identity and entitlement work is open for emulator-only implementation. No Phase 1 Firebase rules, indexes, functions, data, or hosting were deployed to production.
-
-### 2026-10-03 — Cross-program Phase 2 passed in emulators
-
-- Added transactional canonical identity resolution, verified email change, duplicate-candidate routing, entitlement grants/lifecycle changes, append-only audits, and idempotency receipts.
-- Concurrent exact-email/Auth claims converge on one customer; conflicting customers remain separate and enter manual review.
-- Existing readiness completion now creates/reuses canonical ES identity and entitlement records while retaining its current legacy summary.
-- Complete member, organization, readiness, cross-program rules, and identity/entitlement emulator regression passed. Phase 3 is open for emulator-only work; nothing was deployed.
-
-### 2026-10-04 — Cross-program Phase 3 passed in emulators
-
-- Added immutable, server-scored Executive Signature attempts with one 20-answer Quick Check response part or two 20-answer Full Assessment parts.
-- Added locked version/scoring snapshots, versioned consent events, deterministic response/result checksums, rebuildable customer projections, redacted audits, and pending analytics/report outbox work.
-- Full Assessment one-use and administrator-granted retake limits are transactionally enforced; every retake creates a separate immutable attempt.
-- Browser/server scoring parity and the seven-suite TSA/cross-program Firebase regression gate pass. Phase 4 is open only for local/synthetic migration preparation; production data and deployment remain locked.
-
-### 2026-10-03 — Superseded Claude/Codex handoff after chat reset
-
-**Historical only:** Later 2026-10-04 phase evidence and the current sections above supersede the architecture/status directions in this handoff. It remains in the three-day change window to preserve why the subsequent work was undertaken; do not use it instead of the tracker.
-
-Immediate open item if continuing the last active task:
-
-- **Executive Signature result polish**: The user asked to fix spacing in the Executive Signature/readiness result pages before moving on. Work mainly lives in `apps/readiness-assessment/index.html` and `apps/readiness-assessment/my-results/index.html`.
-  - Add more breathing room between text and beige/cream boxes across result sections.
-  - Fix spectrum rows where the score and labels collide, such as `50HigherLower`; the `Higher` and `Lower` labels need their own line or clearer spacing.
-  - Rename the CTA currently reading `Get the full report, free for now`. The accurate action is to take a separate 40-statement Full Assessment after the 20-question Quick Check. Suggested wording: `Take the 40-statement Full Assessment`.
-  - Redesign the full-report table of contents. The current TOC is too plain. Use a cleaner card/step treatment that still fits the UTL brand.
-  - PDF print header: the UTL logo is already intended for the top-left running header through the print-logo assets. Add more vertical space below the orange rule before body content. Be careful with print CSS because the 2026-10-01 Chromium `@page margin` bug still applies.
-  - Do not make new factual claims about the assessment without user approval.
-
-Suggested low-risk wiring after the result polish:
-
-- Add an `Executive Signature` entry in the member profile/dropdown so TSA learners can find the assessment/results from the workspace. Keep it as a link to `apps/readiness-assessment/my-results/` or the assessment landing flow rather than changing the Learning Journey structure.
-- If showing it inside `My Results` later, keep it separated from TSA exercise results. Executive Signature is its own product/signal, not a TSA exercise.
-
-Recent readiness-assessment product decisions:
-
-- The public title and positioning should use `Are you ready to be an executive?`
-- Use `Executive Signature` as the learner-facing assessment/report concept where appropriate.
-- Avoid saying the assessment is "free" as the core value. If needed, say it is open sourced or currently available while testing, but lead with history and scientific soundness.
-- Introduce Big Five/IPIP in plain language first, with sources in smaller type. Do not assume visitors know IPIP or Big Five.
-- Use the user's voice guide: concrete, direct, no `X, not Y` constructions, no AI-sounding abstractions, no forbidden terms such as "verdict" when describing assessment results, and use Bolded Summary Phrase style for bullets where used.
-- There are no right answers. Copy should make clear that scores describe traits commonly found in executives and should not make someone feel they "failed."
-- Replace `What the check looks at` with `What the assessment looks at`.
-- Remove the orange outline/card top bars where they feel too AI-ish. Brand colors are fine; avoid decorative outlines that make cards feel generated.
-- Results should be easier to scan. Results need clearer structure, better spacing, and more careful explanation of the five areas.
-- Scale copy preference: use labels like `1 = Not me at all` and `5 = Spot on`.
-
-Readiness assessment data and architecture direction:
-
-- Keep readiness-assessment leads, attempts, results, and versions separate from TSA program progress so Student Progress stays fast and clean.
-- A good split is:
-  - `readiness_leads` or equivalent for public assessment lead/contact info.
-  - `readiness_attempts` for raw 20/40-statement attempt data, item order, answers, timing, and form version.
-  - `readiness_results` for computed scores and report data.
-  - `readiness_forms` or equivalent for versioned form definitions.
-  - Existing TSA data remains under the current users/member/progress paths.
-- The 20-question Quick Check and 40-statement Full Assessment are fixed item sets, but item display order should be shuffled per attempt and stored as `itemOrder`.
-- Scoring must depend on item ID, not display order.
-- Every attempt and result should store the exact `formVersion`.
-- Admin needs a Readiness Assessment tab eventually, not a page-within-a-page. It should manage form versions, uploads, downloads, attempts, results, and lead/contact details independently from Student Progress.
-
-Important non-readiness recent work and open notes:
-
-- Mobile exercise headers were recently compacted because the sticky header consumed too much of the phone screen. Continue to test important member pages at 375px and 768px.
-- Dropdown/select controls needed more right padding because arrows were too close to the edge. Apply consistently to shared select styling, not one-off controls.
-- Program page learning-experience screenshots were added/reworked. User prefers screenshots that open on click rather than explicit `Open full view` buttons, and wants the copy to say `Mastery Points (MP)`.
-- Testimonials were redesigned to reduce excessive white space and return to a slow rolling movement.
-- Toolkit AI prompt section was redesigned; template framework exists or is planned with `AI prompts` usable now and documents/spreadsheets/presentations as coming soon.
-- Organization console foundation exists. Known org IDs: `ALI` = AyalaLand, `ADMU` = Ateneo de Manila University. Individual/beta users should not be forced into an organization.
-
-Before pushing anything:
-
-- Run the relevant local tests for the touched area. For readiness work, likely start with:
-  - `node --test tests/readiness-assessment-forms.test.js tests/readiness-assessment-preview.test.js tests/readiness-assessment-account.test.js tests/readiness-signature.test.js`
-  - `node --check member-login/content-config.js` if that file changes.
-- Do not push unless the user explicitly asks.

@@ -594,12 +594,6 @@
       <span class="lsh-title">Let's switch hats</span>
       <a class="module-back-link" href="../../member-login/index.html#learning-journey">← Back to Learning Journey</a>
     </div>
-    <div class="lsh-timer" aria-label="Exercise timer">
-      <span class="lsh-timer-label">Timer</span>
-      <span class="lsh-timer-value" id="timerValue">00:00</span>
-      <button class="lsh-icon-button" id="timerPause" type="button" aria-label="Pause timer" title="Pause timer"></button>
-      <button class="lsh-icon-button" id="timerReset" type="button" aria-label="Reset timer" title="Reset timer"></button>
-    </div>
   </header>
 
   <main class="lsh-main">
@@ -667,62 +661,6 @@
     </section>
   </main>
 
-  <script>
-    (() => {
-      const timerValue = document.getElementById('timerValue');
-      const timerPause = document.getElementById('timerPause');
-      const timerReset = document.getElementById('timerReset');
-      let elapsed = 0;
-      let intervalId = null;
-
-      function formatTime(seconds) {
-        const minutes = Math.floor(seconds / 60).toString().padStart(2, '0');
-        const secs = (seconds % 60).toString().padStart(2, '0');
-        return `${minutes}:${secs}`;
-      }
-
-      function renderTimer() {
-        timerValue.textContent = formatTime(elapsed);
-        timerPause.setAttribute('aria-label', intervalId ? 'Pause timer' : 'Resume timer');
-        timerPause.setAttribute('title', intervalId ? 'Pause timer' : 'Resume timer');
-        timerPause.innerHTML = intervalId
-          ? '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round"><path d="M8 5v14"/><path d="M16 5v14"/></svg>'
-          : '<svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
-        timerReset.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>';
-      }
-
-      function stopTimer() {
-        if (intervalId) {
-          clearInterval(intervalId);
-          intervalId = null;
-        }
-      }
-
-      function startTimer() {
-        if (intervalId) return;
-        intervalId = window.setInterval(() => {
-          elapsed += 1;
-          renderTimer();
-        }, 1000);
-        renderTimer();
-      }
-
-      timerReset.addEventListener('click', () => {
-        stopTimer();
-        elapsed = 0;
-        startTimer();
-        renderTimer();
-      });
-
-      timerPause.addEventListener('click', () => {
-        intervalId ? stopTimer() : startTimer();
-        renderTimer();
-      });
-
-      renderTimer();
-      startTimer();
-    })();
-  </script>
   <script type="module" src="../../assets/app-access-guard.js?v=20260925-mobile-v1"></script>
   <script src="../../assets/exercise-scoring-intro.js?v=20260925-mobile-v1"></script>
   <script src="../../assets/app-reward-header.js?v=20260925-mobile-v1"></script>

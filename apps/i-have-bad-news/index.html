@@ -20,514 +20,151 @@
       --bad-news-gold: #EEA320;
       --bad-news-cream: #F3EDE2;
       --bad-news-charcoal: #4A4A4A;
+      --bad-news-steel: #4D7094;
       --bad-news-white: #FFFFFF;
       --bad-news-line: #C7D8E8;
+      --bad-news-rule: #D8CFC1;
       --bad-news-soft: #F7F5EF;
-      --bad-news-shadow: none;
+      --bad-news-ok: #2C7A4B;
     }
 
     * { box-sizing: border-box; }
-
-    body {
-      margin: 0;
-      background: var(--bad-news-cream);
-      color: var(--bad-news-charcoal);
-      font-family: 'Lato', Arial, sans-serif;
-    }
-
+    body { margin: 0; background: var(--bad-news-cream); color: var(--bad-news-charcoal); font-family: 'Lato', Arial, sans-serif; }
     a { color: inherit; }
+    button, input, textarea { font: inherit; }
+    button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible, summary:focus-visible { outline: 2px solid var(--bad-news-gold); outline-offset: 3px; }
 
-    button {
-      font: inherit;
-    }
+    .bad-news-header { position: sticky; top: 0; z-index: 20; display: grid; grid-template-columns: auto auto minmax(220px, 1fr) auto; align-items: center; column-gap: 20px; min-height: 76px; padding: 12px 32px; background: var(--bad-news-navy); color: var(--bad-news-white); }
+    .bad-news-logo { display: block; width: 224px; height: 46px; }
+    .bad-news-logo img { display: block; width: 100%; height: 100%; object-fit: contain; }
+    .bad-news-divider { width: 1px; height: 38px; background: rgba(255, 255, 255, .42); }
+    .bad-news-kicker { display: block; color: var(--bad-news-gold); font-size: 10px; letter-spacing: 0; }
+    .bad-news-title { display: block; margin-top: 3px; color: var(--bad-news-white); font-family: 'Playfair Display', Georgia, serif; font-size: 27px; font-weight: 700; line-height: 1; }
+    .module-back-link { display: inline-flex; align-items: center; gap: 6px; margin-top: 8px; color: rgba(255, 255, 255, .82); font-family: 'Lato', sans-serif; font-size: 15px; font-weight: 700; line-height: 1.25; text-decoration: none; }
+    .module-back-link:hover { color: var(--gold, var(--ab-gold, var(--eisenhower-gold, #EEA320))); text-decoration: underline; text-underline-offset: 3px; }
 
-    button:focus-visible,
-    a:focus-visible {
-      outline: 2px solid var(--bad-news-gold);
-      outline-offset: 3px;
-    }
+    .bad-news-main { width: min(960px, calc(100% - 56px)); margin: 0 auto; padding: 28px 0 84px; display: grid; gap: 24px; }
+    .bad-news-label { margin: 0 0 8px; color: #7A4E00; font-size: 11px; font-weight: 700; }
+    .bad-news-intro h1 { margin: 0 0 12px; color: var(--bad-news-navy); font-family: 'Playfair Display', Georgia, serif; font-size: clamp(32px, 5vw, 52px); line-height: 1.05; text-wrap: balance; }
+    .bad-news-intro p { max-width: 65ch; margin: 0; font-size: 17px; line-height: 1.55; }
 
-    .bad-news-header {
-      position: sticky;
-      top: 0;
-      z-index: 20;
-      display: grid;
-      grid-template-columns: auto auto minmax(220px, 1fr) auto;
-      align-items: center;
-      column-gap: 20px;
-      min-height: 76px;
-      padding: 12px 32px;
-      background: var(--bad-news-navy);
-      color: var(--bad-news-white);
-    }
+    .bad-news-step { display: grid; gap: 24px; padding: 24px; border: 1px solid var(--bad-news-line); border-radius: 8px; background: var(--bad-news-white); }
+    .bad-news-step-head { display: flex; align-items: flex-start; gap: 16px; }
+    .bad-news-step-number { flex: none; display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: var(--bad-news-gold); color: var(--bad-news-white); font-size: 13px; font-weight: 700; }
+    .bad-news-step h2 { margin: 0; color: var(--bad-news-navy); font-family: 'Playfair Display', Georgia, serif; font-size: 24px; line-height: 1.2; text-wrap: balance; }
+    .bad-news-step-head p { margin: 4px 0 0; font-size: 15px; line-height: 1.5; }
+    .bad-news-step-body { display: grid; gap: 24px; }
 
-    .bad-news-logo {
-      display: block;
-      width: 224px;
-      height: 46px;
-    }
+    details.bad-news-fold { border-top: 1px solid var(--bad-news-rule); }
+    details.bad-news-fold summary { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 0; color: var(--bad-news-navy); cursor: pointer; font-weight: 700; list-style: none; }
+    details.bad-news-fold summary::-webkit-details-marker { display: none; }
+    details.bad-news-fold summary::after { content: '+'; display: grid; place-items: center; flex: 0 0 auto; width: 28px; height: 28px; border: 1px solid var(--bad-news-rule); border-radius: 6px; color: var(--bad-news-navy); font-size: 20px; line-height: 1; }
+    details.bad-news-fold[open] summary::after { content: '\2212'; }
+    .bad-news-fold-summary { display: block; color: var(--bad-news-steel); font-size: 14px; font-weight: 400; }
+    .bad-news-fold-body { display: grid; gap: 24px; padding: 8px 0; }
 
-    .bad-news-logo img {
-      display: block;
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-    }
+    fieldset { min-width: 0; margin: 0; padding: 0; border: 0; }
+    legend, .bad-news-field-label { display: block; padding: 0; margin-bottom: 12px; color: var(--bad-news-navy); font-weight: 700; }
+    .bad-news-options { display: flex; flex-wrap: wrap; gap: 16px; }
+    .bad-news-option { position: relative; }
+    .bad-news-option input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+    .bad-news-option .box { display: block; min-height: 44px; padding: 10px 18px; border: 1.5px solid var(--bad-news-line); border-radius: 8px; background: var(--bad-news-soft); cursor: pointer; }
+    .bad-news-option input:checked + .box { padding: 9.5px 17.5px; border: 2px solid var(--bad-news-gold); background: #FFF7E8; color: var(--bad-news-navy); }
+    .bad-news-option input:focus-visible + .box { outline: 2px solid var(--bad-news-gold); outline-offset: 3px; }
+    .bad-news-option small { display: block; font-size: 13px; opacity: .85; }
+    .bad-news-option em, .bad-news-tag-light { display: inline-block; margin-left: 8px; padding: 0 8px; border-radius: 999px; background: rgba(238, 163, 32, .16); color: #8a6a2c; font-size: 11px; font-style: normal; font-weight: 400; vertical-align: middle; }
+    .bad-news-options.stack .bad-news-option { flex: 1 1 220px; }
+    .bad-news-options.stack .bad-news-option .box { height: 100%; }
+    .bad-news-text { width: 100%; max-width: 360px; min-height: 44px; padding: 13px 14px; border: 1px solid var(--bad-news-line); border-radius: 7px; background: #FCFBF8; color: var(--bad-news-charcoal); }
+    .bad-news-own { margin-top: 12px; }
+    .bad-news-hint { margin: 0; font-size: 14px; line-height: 1.5; }
+    [hidden] { display: none !important; }
 
-    .bad-news-divider {
-      width: 1px;
-      height: 38px;
-      background: rgba(255, 255, 255, .42);
-    }
+    .bad-news-button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 11px 22px; border: 1.5px solid var(--bad-news-navy); border-radius: 7px; background: var(--bad-news-white); color: var(--bad-news-navy); font-size: 14px; font-weight: 700; text-decoration: none; cursor: pointer; }
+    .bad-news-button:hover { background: var(--bad-news-soft); }
+    .bad-news-button-primary { border-color: var(--bad-news-gold); background: var(--bad-news-gold); color: var(--bad-news-navy); }
+    .bad-news-button-primary:hover { background: #d9941c; }
+    .bad-news-button-accent { border: 2px solid var(--bad-news-gold); }
+    .bad-news-button:disabled { opacity: .45; cursor: not-allowed; }
+    .bad-news-row { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; }
+    .bad-news-launch { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 16px; }
+    .bad-news-launch .bad-news-button { flex: 1 1 200px; }
+    .bad-news-launch .bad-news-button-wide { flex: 2 1 0; }
+    .bad-news-launch .bad-news-button-narrow { flex: 1 1 0; }
+    @media (max-width: 520px) { .bad-news-launch .bad-news-button-wide, .bad-news-launch .bad-news-button-narrow { flex: 1 1 100%; } }
+    .bad-news-status { margin: 0; color: var(--bad-news-ok); font-size: 13px; font-weight: 700; }
+    .bad-news-bonus { display: inline-block; vertical-align: middle; padding: 2px 10px; border-radius: 999px; background: var(--bad-news-gold); color: #2b1c00; font-family: 'Lato', Arial, sans-serif; font-size: 13px; font-weight: 700; }
+    .bad-news-paste { width: 100%; min-height: 140px; padding: 14px; border: 1px solid var(--bad-news-line); border-radius: 7px; background: #FCFBF8; color: var(--bad-news-charcoal); resize: vertical; }
+    .bad-news-complete { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; padding-top: 24px; border-top: 1px solid var(--bad-news-rule); }
+    .bad-news-exit-link { color: var(--bad-news-navy); font-size: 14px; font-weight: 700; }
 
-    .bad-news-kicker,
-    .bad-news-label,
-    .bad-news-meta,
-    .bad-news-button,
-    .bad-news-timer-label,
-    .bad-news-timer-value,
-    .bad-news-note,
-    .bad-news-step-number {
-      font-family: Lato, Arial, sans-serif;
-    }
 
-    .bad-news-kicker {
-      display: block;
-      color: var(--bad-news-gold);
-      font-size: 10px;
-      letter-spacing: 0;
-      text-transform: none;
-    }
-
-    .bad-news-title {
-      display: block;
-      margin-top: 3px;
-      color: var(--bad-news-white);
-      font-family: 'Playfair Display', Georgia, serif;
-      font-size: 27px;
-      font-weight: 700;
-      line-height: 1;
-    }
-
-    .module-back-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      margin-top: 8px;
-      color: rgba(255, 255, 255, .82);
-      font-family: 'Lato', sans-serif;
-      font-size: 15px;
-      font-weight: 700;
-      line-height: 1.25;
-      text-decoration: none;
-    }
-
-    .module-back-link:hover {
-      color: var(--gold, var(--ab-gold, var(--eisenhower-gold, #EEA320)));
-      text-decoration: underline;
-      text-underline-offset: 3px;
-    }
-
-    .bad-news-timer {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 7px 10px;
-      border: 1px solid rgba(255, 255, 255, .32);
-      border-radius: 6px;
-      background: rgba(255, 255, 255, .08);
-      white-space: nowrap;
-    }
-
-    .bad-news-timer-label {
-      color: var(--bad-news-gold);
-      font-size: 9px;
-      letter-spacing: 0;
-      text-transform: none;
-    }
-
-    .bad-news-timer-value {
-      color: var(--bad-news-white);
-      font-size: 18px;
-      font-weight: 700;
-      line-height: 1;
-    }
-
-    .bad-news-icon-button {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 30px;
-      height: 30px;
-      border: 1px solid rgba(255, 255, 255, .34);
-      border-radius: 6px;
-      background: transparent;
-      color: var(--bad-news-white);
-      cursor: pointer;
-      font-weight: 700;
-      line-height: 1;
-      padding: 0;
-    }
-
-    .bad-news-icon-button svg {
-      width: 17px;
-      height: 17px;
-      stroke-width: 2.2;
-      vertical-align: middle;
-    }
-
-    .bad-news-main {
-      width: min(960px, calc(100% - 56px));
-      margin: 0 auto;
-      padding: 28px 0 84px;
-    }
-
-    .bad-news-intro {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(260px, 340px);
-      gap: 24px;
-      align-items: stretch;
-      padding-bottom: 18px;
-      border-bottom: 1px solid #D8CFC1;
-    }
-
-    .bad-news-intro h1 {
-      margin: 0 0 8px;
-      color: var(--bad-news-navy);
-      font-family: 'Playfair Display', Georgia, serif;
-      font-size: clamp(36px, 5vw, 58px);
-      line-height: 1.03;
-    }
-
-    .bad-news-intro p {
-      max-width: 760px;
-      margin: 0;
-      color: var(--bad-news-charcoal);
-      font-size: 17px;
-      line-height: 1.55;
-    }
-
-    .bad-news-brief-card,
-    .bad-news-panel,
-    .bad-news-action-card {
-      border: 1px solid var(--bad-news-line);
-      border-radius: 8px;
-      background: var(--bad-news-white);
-      box-shadow: var(--bad-news-shadow);
-    }
-
-    .bad-news-brief-card {
-      padding: 18px;
-    }
-
-    .bad-news-label {
-      margin: 0 0 8px;
-      color: var(--bad-news-gold);
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0;
-      text-transform: none;
-    }
-
-    .bad-news-brief-card strong {
-      display: block;
-      color: var(--bad-news-gold);
-      font-family: 'Playfair Display', Georgia, serif;
-      font-size: 26px;
-      line-height: 1.1;
-    }
-
-    .bad-news-brief-card span {
-      display: block;
-      margin-top: 8px;
-      font-size: 15px;
-      line-height: 1.45;
-    }
-
-    .bad-news-grid {
-      display: grid;
-      grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr);
-      gap: 18px;
-      margin-top: 36px;
-    }
-
-    .bad-news-panel {
-      padding: 20px;
-    }
-
-    .bad-news-panel h2 {
-      margin: 0 0 12px;
-      color: var(--bad-news-navy);
-      font-family: 'Playfair Display', Georgia, serif;
-      font-size: 28px;
-      line-height: 1.15;
-    }
-
-    .bad-news-panel p {
-      margin: 0 0 14px;
-      font-size: 16px;
-      line-height: 1.55;
-    }
-
-    .bad-news-panel p:last-child {
-      margin-bottom: 0;
-    }
-
-    .bad-news-scenario {
-      display: grid;
-      gap: 12px;
-      padding: 16px;
-      border: 1px dashed var(--bad-news-line);
-      border-radius: 8px;
-      background: var(--bad-news-soft);
-    }
-
-    .bad-news-scenario p {
-      margin: 0;
-    }
-
-    .bad-news-steps {
-      display: grid;
-      gap: 12px;
-      margin: 0;
-      padding: 0;
-      list-style: none;
-    }
-
-    .bad-news-step {
-      position: relative;
-      display: grid;
-      grid-template-columns: 42px minmax(0, 1fr);
-      gap: 12px;
-      padding: 14px;
-      border: 1px solid var(--bad-news-line);
-      border-radius: 8px;
-      background: var(--bad-news-soft);
-    }
-
-    .bad-news-step:not(:last-child)::after {
-      content: "";
-      position: absolute;
-      left: 30px;
-      top: 49px;
-      bottom: -15px;
-      width: 1px;
-      border-left: 1px dashed rgba(74, 74, 74, .2);
-    }
-
-    .bad-news-step-number {
-      position: relative;
-      z-index: 1;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 30px;
-      height: 30px;
-      border-radius: 999px;
-      background: var(--bad-news-gold);
-      color: var(--bad-news-white);
-      font-size: 13px;
-      font-weight: 700;
-    }
-
-    .bad-news-step strong {
-      display: block;
-      margin-bottom: 4px;
-      color: var(--bad-news-navy);
-      font-size: 16px;
-    }
-
-    .bad-news-step > span:not(.bad-news-step-number) {
-      display: block;
-      font-size: 15px;
-      line-height: 1.45;
-    }
-
-    .bad-news-action-card {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) auto;
-      gap: 20px;
-      align-items: center;
-      margin-top: 36px;
-      padding: 20px;
-      border-color: var(--bad-news-gold);
-    }
-
-    .bad-news-action-card h2 {
-      margin: 0 0 6px;
-      color: var(--bad-news-navy);
-      font-family: 'Playfair Display', Georgia, serif;
-      font-size: 30px;
-      line-height: 1.1;
-    }
-
-    .bad-news-action-card p {
-      margin: 0;
-      font-size: 16px;
-      line-height: 1.5;
-    }
-
-    .bad-news-voice-help {
-      display: inline-flex;
-      margin-top: 12px;
-      color: var(--bad-news-navy);
-      font-family: 'Lato', Arial, sans-serif;
-      font-size: 14px;
-      font-weight: 700;
-      text-underline-offset: 3px;
-    }
-
-    .bad-news-actions {
-      display: flex;
-      flex-direction: column;
-      align-items: stretch;
-      flex-wrap: wrap;
-      gap: 10px;
-      justify-content: flex-end;
-    }
-
-    .bad-news-button {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 11px 22px;
-      border-radius: 7px;
-      border: 0;
-      background: var(--bad-news-white);
-      color: var(--bad-news-navy);
-      font-family: 'Lato', Arial, sans-serif;
-      font-size: 14px;
-      font-weight: 700;
-      letter-spacing: 0;
-      text-decoration: none;
-      cursor: pointer;
-    }
-
-    .bad-news-button-primary {
-      border-color: var(--bad-news-gold);
-      background: var(--bad-news-gold);
-      color: var(--bad-news-navy);
-    }
-
-    .bad-news-button-accent {
-      border: 2px solid var(--bad-news-gold);
-      background: var(--bad-news-white);
-      color: var(--bad-news-navy);
-    }
-
-    .bad-news-button-accent:hover {
-      background: rgba(238, 163, 32, .12);
-    }
-
-    .bad-news-note {
-      margin-top: 12px;
-      color: var(--bad-news-navy);
-      font-family: 'Lato', Arial, sans-serif;
-      font-size: 16px;
-      font-weight: 700;
-      line-height: 1.45;
-    }
-
-    .bad-news-prep-cue {
-      margin: 12px 0 0;
-      padding-left: 0;
-      color: var(--bad-news-navy);
-      font-family: 'Lato', Arial, sans-serif;
-      font-size: 16px;
-      font-weight: 600;
-      line-height: 1.45;
-    }
-
-    .bad-news-exit-link {
-      align-self: center;
-      margin-top: 2px;
-      padding: 4px 0;
-      color: var(--bad-news-navy);
-      font-family: 'Lato', Arial, sans-serif;
-      font-size: 12px;
-      font-weight: 600;
-      text-decoration: none;
-    }
-
-    .bad-news-exit-link:hover {
-      color: #2e7d4f;
-      text-decoration: underline;
+    .bad-news-part { display: grid; gap: 12px; padding-top: 24px; border-top: 1px solid var(--bad-news-rule); }
+    .bad-news-part:first-child { padding-top: 0; border-top: 0; }
+    .bad-news-part-title { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin: 0; color: var(--bad-news-navy); font-size: 17px; font-weight: 700; }
+    .bad-news-part-letter { display: grid; place-items: center; width: 24px; height: 24px; border: 1.5px solid var(--bad-news-gold); border-radius: 50%; color: var(--bad-news-navy); font-size: 12px; font-weight: 700; }
+    .bad-news-read-tag { padding: 2px 10px; border-radius: 999px; background: var(--bad-news-gold); color: #2b1c00; font-size: 12px; font-weight: 700; }
+    .bad-news-read-tag.is-read { background: #E3F1E8; color: var(--bad-news-ok); }
+    .bad-news-part .bad-news-launch { margin-top: 4px; }
+    .bad-news-part .utl-coach-prompt { margin-top: 0; }
+    .bad-news-personal { display: grid; gap: 12px; padding: 16px; border: 1px solid var(--bad-news-line); border-radius: 8px; background: var(--bad-news-soft); }
+    .bad-news-personal .bad-news-field-label { margin: 0; }
+    .bad-news-check { display: flex; align-items: center; gap: 10px; min-height: 44px; color: var(--bad-news-navy); font-size: 14px; font-weight: 700; cursor: pointer; }
+    .bad-news-check input { width: 18px; height: 18px; accent-color: var(--bad-news-navy); }
+    .bad-news-voice-link { justify-self: start; min-height: 44px; padding: 0 4px; border: 0; background: none; color: var(--bad-news-navy); font-size: 14px; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+    .bn-voice-dialog { box-sizing: border-box; width: min(780px, calc(100vw - 28px)); max-height: min(90dvh, 820px); overflow: hidden; border: 0; border-radius: 16px; padding: 0; background: #fff; color: #333; box-shadow: 0 26px 80px rgba(0, 31, 61, .38); }
+    .bn-voice-dialog::backdrop { background: rgba(0, 31, 61, .62); }
+    .bn-voice-dialog * { box-sizing: border-box; }
+    .bn-voice-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; padding: 24px 26px 18px; border-bottom: 1px solid #d8e1e8; }
+    .bn-voice-kicker { display: block; margin: 0 0 5px; color: #a86400; font: 700 12px/1.2 Lato, Arial, sans-serif; }
+    .bn-voice-head h2 { margin: 0; color: #003366; font: 700 30px/1.15 'Playfair Display', Georgia, serif; }
+    .bn-voice-close { display: grid; flex: 0 0 36px; width: 36px; height: 36px; place-items: center; border: 1px solid #c7d8e8; border-radius: 50%; background: #fff; color: #003366; font: 700 22px/1 Arial, sans-serif; cursor: pointer; }
+    .bn-voice-close:hover, .bn-voice-close:focus-visible { border-color: #003366; background: #f3f7fa; }
+    .bn-voice-body { max-height: calc(90dvh - 92px); overflow-y: auto; overscroll-behavior: contain; padding: 22px 26px 26px; }
+    .bn-voice-intro { margin: 0 0 16px; color: #4d7094; font: 16px/1.5 Lato, Arial, sans-serif; }
+    .bn-voice-steps { display: grid; gap: 12px; margin: 0; padding: 0; list-style: none; }
+    .bn-voice-step { display: grid; grid-template-columns: 30px minmax(0, 1fr) 200px; gap: 16px; align-items: center; min-width: 0; border: 1px solid #c7d8e8; border-radius: 12px; background: #fff; padding: 14px 16px; }
+    .bn-voice-step-number { display: grid; width: 30px; height: 30px; place-items: center; border-radius: 50%; background: #EEA320; color: #fff; font: 800 13px/1 Lato, Arial, sans-serif; }
+    .bn-voice-step h3 { margin: 0 0 4px; color: #003366; font: 800 16px/1.25 Lato, Arial, sans-serif; }
+    .bn-voice-step p { margin: 0 0 4px; color: #4a4a4a; font: 14px/1.48 Lato, Arial, sans-serif; }
+    .bn-voice-step p:last-child { margin-bottom: 0; }
+    .bn-voice-graphic { display: flex; align-items: center; justify-content: center; height: 84px; padding: 8px; border-radius: 9px; background: #f5f7f9; color: #003366; }
+    .bn-voice-window { width: 100%; max-width: 184px; border: 1px solid #d7dde3; border-radius: 10px; background: #fff; padding: 8px; box-shadow: 0 4px 12px rgba(0, 31, 61, .08); }
+    .bn-voice-compose { display: flex; align-items: center; justify-content: flex-end; gap: 7px; height: 30px; border: 1px solid #d8dee5; border-radius: 15px; padding: 4px 5px; }
+    .bn-voice-compose.is-focus { justify-content: flex-start; border: 2px solid #1768c4; padding: 4px 9px; box-shadow: 0 0 0 3px rgba(23, 104, 196, .14); }
+    .bn-voice-caret { width: 2px; height: 16px; background: #1768c4; }
+    .bn-voice-highlight { display: grid; place-items: center; padding: 5px; border: 2px solid #eea320; border-radius: 10px; background: #fff7e8; box-shadow: 0 0 0 3px rgba(238, 163, 32, .12); }
+    .bn-voice-button { display: grid; width: 24px; height: 24px; place-items: center; border-radius: 50%; background: #287ff0; color: #fff; box-shadow: 0 0 0 3px rgba(40, 127, 240, .14); }
+    .bn-voice-button span { display: flex; align-items: center; gap: 1px; height: 11px; }
+    .bn-voice-button i { display: block; width: 2px; border-radius: 2px; background: #fff; }
+    .bn-voice-button i:nth-child(1), .bn-voice-button i:nth-child(5) { height: 5px; }
+    .bn-voice-button i:nth-child(2), .bn-voice-button i:nth-child(4) { height: 9px; }
+    .bn-voice-button i:nth-child(3) { height: 12px; }
+    .bn-voice-callout { margin: 6px 0 0; text-align: right; color: #1768c4; font: 800 11px/1.2 Lato, Arial, sans-serif; }
+    .bn-voice-callout.left { text-align: left; }
+    .bn-voice-icon { display: grid; min-height: 40px; place-items: center; padding: 0 20px; border-radius: 20px; background: #eaf3fb; color: #003366; font: 700 15px/1 Lato, Arial, sans-serif; }
+    .bn-voice-note { margin: 16px 0 0; padding: 11px 13px; border-radius: 8px; background: #f3ede2; color: #4a4a4a; font: 13px/1.45 Lato, Arial, sans-serif; }
+    .bn-voice-actions { display: flex; align-items: center; margin-top: 20px; }
+    .bn-voice-done { display: inline-flex; min-height: 48px; align-items: center; justify-content: center; border: 0; border-radius: 8px; background: #eea320; color: #003366; padding: 0 22px; font: 800 15px/1.2 Lato, Arial, sans-serif; cursor: pointer; }
+    @media (max-width: 680px) {
+      .bn-voice-dialog { width: calc(100vw - 20px); max-height: 94dvh; }
+      .bn-voice-head { padding: 19px 18px 15px; }
+      .bn-voice-head h2 { font-size: 25px; }
+      .bn-voice-body { max-height: calc(94dvh - 78px); padding: 17px 18px 20px; }
+      .bn-voice-step { grid-template-columns: 30px minmax(0, 1fr); }
+      .bn-voice-graphic { grid-column: 1 / -1; }
+      .bn-voice-done { width: 100%; }
     }
 
     @media (max-width: 860px) {
-      .bad-news-header {
-        grid-template-columns: 1fr auto;
-        row-gap: 10px;
-        padding: 12px 18px;
-      }
-
-      .bad-news-logo {
-        width: 176px;
-        height: 38px;
-      }
-
-      .bad-news-divider {
-        display: none;
-      }
-
-      .bad-news-heading {
-        grid-column: 1 / -1;
-        grid-row: 2;
-      }
-
-      .bad-news-timer {
-        grid-column: 2;
-        grid-row: 1;
-      }
-
-      .bad-news-main {
-        width: min(100% - 32px, 640px);
-        padding-top: 20px;
-      }
-
-      .bad-news-intro,
-      .bad-news-grid,
-      .bad-news-action-card {
-        grid-template-columns: 1fr;
-      }
-
-      .bad-news-actions {
-        align-items: stretch;
-        justify-content: flex-start;
-      }
+      .bad-news-header { grid-template-columns: 1fr; row-gap: 8px; padding: 12px 16px; }
+      .bad-news-divider { display: none; }
+      .bad-news-logo { width: 180px; height: 38px; }
+      .bad-news-main { width: calc(100% - 32px); }
     }
-
     @media (max-width: 520px) {
-      .bad-news-header {
-        grid-template-columns: 1fr;
-      }
-
-      .bad-news-timer {
-        grid-column: 1;
-        grid-row: 3;
-        width: 100%;
-        justify-content: space-between;
-      }
-
-      .bad-news-title {
-        font-size: 24px;
-      }
-
-      .bad-news-step {
-        grid-template-columns: 1fr;
-      }
-
-      .bad-news-step:not(:last-child)::after {
-        display: none;
-      }
-
-      .bad-news-button {
-        width: 100%;
-      }
-
-      .bad-news-exit-link {
-        align-self: center;
-      }
+      .bad-news-step { padding: 16px; }
+      .bad-news-row > .bad-news-button, .bad-news-complete > .bad-news-button { width: 100%; }
     }
   </style>
 </head>
@@ -542,133 +179,359 @@
       <span class="bad-news-title">I have bad news...</span>
       <a class="module-back-link" href="../../member-login/index.html#learning-journey">← Back to Learning Journey</a>
     </div>
-    <div class="bad-news-timer" aria-label="Exercise timer">
-      <span class="bad-news-timer-label">Timer</span>
-      <span class="bad-news-timer-value" id="timerValue">00:00</span>
-      <button class="bad-news-icon-button" id="timerPause" type="button" aria-label="Pause timer" title="Pause timer"></button>
-      <button class="bad-news-icon-button" id="timerReset" type="button" aria-label="Reset timer" title="Reset timer"></button>
-    </div>
   </header>
 
   <main class="bad-news-main">
     <section class="bad-news-intro" aria-labelledby="badNewsIntroTitle">
-      <div>
-        <p class="bad-news-label">Difficult conversations</p>
-        <h1 id="badNewsIntroTitle">Say the hard thing without making it harder.</h1>
-        <p>Deliver bad news so it is clear, calm and useful. Do not bury the message or over-explain it. Give the person the reason behind the decision, enough context to understand it and one concrete next step.</p>
-      </div>
-      <aside class="bad-news-brief-card" aria-label="Exercise brief">
-        <p class="bad-news-label">Exercise brief</p>
-        <strong>25 minutes</strong>
-        <span>Use the Difficult Conversations CustomGPT to rehearse the message, test your wording, and practice responding when the other person pushes back.</span>
-        <span>When you finish, note one thing you would say differently next time.</span>
-      </aside>
+      <p class="bad-news-label">Difficult conversations</p>
+      <h1 id="badNewsIntroTitle">Say the hard thing without making it harder.</h1>
+      <p>Deliver bad news so it is clear, calm and useful. An AI plays the other person, then coaches you on what you said. Plan for about <strong>25 minutes</strong>.</p>
     </section>
 
-    <section class="bad-news-grid" aria-label="Practice instructions">
-      <article class="bad-news-panel">
-        <h2>The scenario</h2>
-        <div class="bad-news-scenario">
-          <p>You are the person who has to say it. Something has changed, someone will be disappointed, and delaying the message will only make the situation worse.</p>
-          <p>Before opening the GPT, choose one real or realistic situation: a missed deadline, a rejected request, a budget cut, a performance concern, a client setback, or a decision someone will not like.</p>
+    <section class="bad-news-step" aria-labelledby="stepSetupTitle">
+      <div class="bad-news-step-head"><span class="bad-news-step-number">1</span><div><h2 id="stepSetupTitle">Set up your practice</h2><p>We pre-selected the recommended choices. Keep them or change any of them.</p></div></div>
+      <div class="bad-news-step-body">
+        <details class="bad-news-fold" open>
+          <summary><span>Your setup<span class="bad-news-fold-summary" id="setupSummary"></span></span></summary>
+          <div class="bad-news-fold-body">
+            <fieldset>
+              <legend>Who are you talking to?</legend>
+              <div class="bad-news-options" id="nameOptions"></div>
+              <div class="bad-news-own" id="ownNameWrap" hidden>
+                <label for="ownName" class="bad-news-hint">Type the name you want to use</label>
+                <input class="bad-news-text" id="ownName" type="text" maxlength="30" placeholder="For example, Jordan" autocomplete="off">
+              </div>
+            </fieldset>
+            <div class="bad-news-personal">
+              <p class="bad-news-field-label">Make the practice fit you</p>
+              <p class="bad-news-hint">Details about you can be added to the prompt so the other person and the coach respond to you, not to a generic learner. Today that is your first name. Later it can include non-sensitive details about how you work, such as findings from your Executive Signature. You see everything before you copy it, and nothing is sent automatically.</p>
+              <label for="learnerName" class="bad-news-hint"><strong>What should they call you?</strong> Optional.</label>
+              <input class="bad-news-text" id="learnerName" type="text" maxlength="30" placeholder="Your first name" autocomplete="given-name">
+              <label class="bad-news-check"><input type="checkbox" id="usePersonal" checked> Use my details to personalize the practice</label>
+              <p class="bad-news-hint" id="personalIncluded" aria-live="polite"></p>
+            </div>
+            <fieldset>
+              <legend>How hard should it be?</legend>
+              <div class="bad-news-options stack" id="levelOptions"></div>
+            </fieldset>
+            <fieldset>
+              <legend>Where does this conversation happen?</legend>
+              <div class="bad-news-options" id="categoryOptions"></div>
+            </fieldset>
+            <fieldset id="situationField">
+              <legend>Which situation?</legend>
+              <div class="bad-news-options stack" id="situationOptions"></div>
+            </fieldset>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <section class="bad-news-step" aria-labelledby="stepPromptTitle">
+      <div class="bad-news-step-head"><span class="bad-news-step-number">2</span><div><h2 id="stepPromptTitle">Get ready and open your AI</h2><p>Do these three parts in order. Each one takes under a minute.</p></div></div>
+      <div class="bad-news-step-body">
+        <div class="bad-news-part">
+          <p class="bad-news-part-title"><span class="bad-news-part-letter">a</span>Prepare your practice prompt</p>
+          <div id="practicePromptMount"></div>
         </div>
-        <p class="bad-news-note">Keep the situation professional. Preserve the person's trust while leaving no doubt about what has happened.</p>
-        <p class="bad-news-prep-cue">Complete your scenario above before opening the GPT.</p>
-      </article>
-
-      <article class="bad-news-panel">
-        <h2>Your delivery structure</h2>
-        <ol class="bad-news-steps">
-          <li class="bad-news-step">
-            <span class="bad-news-step-number">1</span>
-            <span><strong>Lead with the news:</strong> Say the core message in the first one or two sentences. Do not delay it with a long lead-in.</span>
-          </li>
-          <li class="bad-news-step">
-            <span class="bad-news-step-number">2</span>
-            <span><strong>Explain the reason, not every detail:</strong> Give the logic that matters. Avoid sounding defensive or vague.</span>
-          </li>
-          <li class="bad-news-step">
-            <span class="bad-news-step-number">3</span>
-            <span><strong>Name the impact:</strong> Show that you understand what this means for the other person or team.</span>
-          </li>
-          <li class="bad-news-step">
-            <span class="bad-news-step-number">4</span>
-            <span><strong>Offer the next step:</strong> Be specific about what happens now, what support is available, or what decision is needed.</span>
-          </li>
-        </ol>
-      </article>
+        <div class="bad-news-part">
+          <p class="bad-news-part-title"><span class="bad-news-part-letter">b</span>Learn how to talk with AI instead of typing <span class="bad-news-read-tag" id="readTag">Read first</span></p>
+          <div class="utl-coach-prompt">
+            <div><strong>How voice chat works</strong><span>Four short steps, including how to end the practice. Open this before you start.</span></div>
+            <button type="button" id="openVoiceHelp" aria-haspopup="dialog" style="flex:0 0 auto;min-height:42px;border:0;border-radius:7px;background:#003366;color:#fff;padding:0 15px;font:700 14px Lato,Arial,sans-serif;cursor:pointer">Read the instructions</button>
+          </div>
+        </div>
+        <div class="bad-news-part">
+          <p class="bad-news-part-title"><span class="bad-news-part-letter">c</span>Open ChatGPT or Gemini</p>
+          <p class="bad-news-hint">These buttons also copy your prompt. Paste it into a new chat and send it. For voice on a computer, use ChatGPT. Gemini voice chat is in the Gemini phone app.</p>
+          <div class="bad-news-launch">
+            <a class="bad-news-button bad-news-button-accent bad-news-button-wide" id="openChatGpt" href="https://chatgpt.com/" target="_blank" rel="noopener">Open ChatGPT <span class="bad-news-tag-light">Recommended</span></a>
+            <a class="bad-news-button bad-news-button-accent bad-news-button-narrow" id="openGemini" href="https://gemini.google.com/app" target="_blank" rel="noopener">Open Gemini <span class="bad-news-tag-light">Voice on phone only</span></a>
+          </div>
+          <p class="bad-news-status" id="openStatus" aria-live="polite"></p>
+          <p class="bad-news-hint"><strong>To finish:</strong> say or type "Coach, debrief now". The AI also asks whether you want to continue after about eight turns. Stuck? Say "Coach, hint".</p>
+        </div>
+      </div>
     </section>
 
-    <section class="bad-news-action-card" aria-label="Open CustomGPT">
-      <div>
-        <p class="bad-news-label">Practice with AI</p>
-        <h2>Open the Difficult Conversations CustomGPT.</h2>
-        <p>Paste your situation, ask it to role-play the other person, and revise until your message is direct, humane, and ready to say out loud.</p>
-        <a class="bad-news-voice-help" data-custom-gpt-voice-help href="https://chatgpt.com/g/g-6a3e9a1b55c08191a19cd53f882b746d-utl-difficult-conversations">New to voice mode? View the three steps.</a>
+    <section class="bad-news-step" aria-labelledby="stepFeedbackTitle">
+      <div class="bad-news-step-head"><span class="bad-news-step-number">3</span><div><h2 id="stepFeedbackTitle">Bring back your feedback <span class="bad-news-bonus">+10 MP</span></h2><p>Copy this request and paste it into the same chat. Then press the copy button on the box the AI returns.</p></div></div>
+      <div class="bad-news-step-body">
+        <div id="transcriptPromptMount"></div>
+        <div>
+          <label class="bad-news-field-label" for="transcriptPaste">Paste the conversation and feedback here</label>
+          <textarea class="bad-news-paste" id="transcriptPaste" placeholder="Paste here."></textarea>
+          <p class="bad-news-hint">This text stays in your browser. It is only used to confirm that you finished the practice.</p>
+        </div>
+        <div class="bad-news-row"><button class="bad-news-button bad-news-button-accent" id="saveTranscriptBtn" type="button" disabled>Add to my record · +10 MP</button><span class="bad-news-status" id="saveStatus" aria-live="polite"></span></div>
+        <div class="bad-news-complete">
+          <button class="bad-news-button bad-news-button-primary" id="completeExerciseBtn" type="button">Mark exercise complete · +30 MP</button>
+          <a class="bad-news-exit-link" id="journeyLink" href="../../member-login/index.html#learning-journey">Back to Learning Journey</a>
+        </div>
       </div>
-      <div class="bad-news-actions">
-        <a class="bad-news-button bad-news-button-accent" data-custom-gpt-voice-guide data-voice-guide-label="Open CustomGPT and start voice practice" href="https://chatgpt.com/g/g-6a3e9a1b55c08191a19cd53f882b746d-utl-difficult-conversations" target="_blank" rel="noopener">Open CustomGPT and start voice practice</a>
-        <button class="bad-news-button bad-news-button-primary" id="completeExerciseBtn" type="button">Mark exercise complete · +30 MP</button>
-        <a class="bad-news-exit-link" id="journeyLink" href="../../member-login/index.html#learning-journey">Back to Learning Journey</a>
-      </div>
-      <p>This opens ChatGPT in a new tab. You may need to sign in, then return here when you finish.</p>
     </section>
   </main>
 
+  <dialog class="bn-voice-dialog" id="voiceDialog" aria-labelledby="voiceDialogTitle">
+    <div class="bn-voice-head"><div><span class="bn-voice-kicker">Voice practice</span><h2 id="voiceDialogTitle">Talk through the conversation.</h2></div><button class="bn-voice-close" type="button" aria-label="Close voice instructions" data-voice-close>&times;</button></div>
+    <div class="bn-voice-body">
+      <p class="bn-voice-intro">Voice chat lets you practice responding in the moment. It works in ChatGPT on a computer or phone, and in the Gemini phone app. It takes four steps.</p>
+      <ol class="bn-voice-steps">
+        <li class="bn-voice-step"><span class="bn-voice-step-number">1</span><div><h3>Paste and send</h3><p>Paste the prompt into a new chat and send it as text. The AI takes a moment to read it, then writes a short briefing with your scenario.</p></div><div class="bn-voice-graphic"><span class="bn-voice-icon" aria-hidden="true">Paste</span></div></li>
+        <li class="bn-voice-step"><span class="bn-voice-step-number">2</span><div><h3>Click inside the message box</h3><p>In ChatGPT, the voice button stays hidden until your cursor is in the box. Click the box and wait a moment.</p></div><div class="bn-voice-graphic"><div class="bn-voice-window" aria-hidden="true"><div class="bn-voice-compose is-focus"><span class="bn-voice-caret"></span></div><p class="bn-voice-callout left">Click here first</p></div></div></li>
+        <li class="bn-voice-step"><span class="bn-voice-step-number">3</span><div><h3>Select the voice button</h3><p><strong>ChatGPT:</strong> the blue voice button appears at the right of the box.</p><p><strong>Gemini:</strong> use the phone app and select the Live button at the bottom right. On a computer, the Gemini microphone only types what you say. It does not talk back, so use ChatGPT there.</p><p>Allow microphone access if asked.</p></div><div class="bn-voice-graphic"><div class="bn-voice-window" aria-hidden="true"><div class="bn-voice-compose"><span class="bn-voice-highlight"><span class="bn-voice-button"><span><i></i><i></i><i></i><i></i><i></i></span></span></span></div><p class="bn-voice-callout">Then select this button</p></div></div></li>
+        <li class="bn-voice-step"><span class="bn-voice-step-number">4</span><div><h3>Talk, then end it</h3><p>Read the briefing, then speak first, as if you are walking up to the person. When you are done, say "Coach, debrief now".</p><p>After the debrief, end the voice chat. Your words stay in the chat as text, so you can paste the transcript request from step 3 of this page.</p></div><div class="bn-voice-graphic"><span class="bn-voice-icon" aria-hidden="true">Talk</span></div></li>
+      </ol>
+      <p class="bn-voice-note"><strong>Cannot use voice?</strong> You can complete the same practice by typing. The buttons may look different on another device or app version.</p>
+      <div class="bn-voice-actions"><button class="bn-voice-done" type="button" data-voice-close>Got it</button></div>
+    </div>
+  </dialog>
+
+  <script src="../../assets/exercise-feedback-coach.js?v=20260925-mobile-v1"></script>
   <script>
-    (() => {
-      const timerValue = document.getElementById('timerValue');
-      const timerPause = document.getElementById('timerPause');
-      const timerReset = document.getElementById('timerReset');
-      let elapsed = 0;
-      let intervalId = null;
+    (function () {
+      var NAMES = ['Alex', 'Elon', 'Priya', 'Marcus'];
+      var LEVELS = [
+        { id: 'Easy', note: 'Understanding and calm', rule: 'Cooperative and easy to talk to. A good outcome is possible.' },
+        { id: 'Medium', note: 'Disappointed, questions your reasons', rule: 'Real disagreement and some emotional tension. They may deny parts of what I say or describe it differently. A compromise is still possible.' },
+        { id: 'Hard', note: 'Upset, rarely agrees', rule: 'Repeated disagreement. They challenge fairness, tone and timing, and rarely compromise. Do not make me feel that everything is settled.' }
+      ];
+      // Each situation is [text shown to the learner, text placed in the prompt]. {n} is replaced with the other person's name.
+      var CATEGORIES = {
+        'Work': [
+          ['You have to tell {n} that your project will miss its deadline.', 'My project will miss its deadline, and {n} is counting on it. I have to tell {n}.'],
+          ['{n} asked you for a raise. You have to tell {n} the answer is no.', '{n} asked me for a raise. I have to tell {n} the answer is no.'],
+          ['You have to tell {n} that their role is being changed.', 'I have to tell {n} that their role is being changed.'],
+          ['A budget cut means you have to tell {n} that the team loses something they were counting on.', 'A budget cut means I have to tell {n} that the team loses something they were counting on.']
+        ],
+        'Personal': [
+          ['You have to tell {n} that they have bad breath.', 'I have to tell {n} that they have bad breath.'],
+          ['You planned a trip with {n}. You have to tell {n} that you must cancel.', 'I planned a trip with {n}. I have to tell {n} that I must cancel.'],
+          ['You promised {n} a loan. You have to tell {n} that you cannot lend the money.', 'I promised {n} a loan. I have to tell {n} that I cannot lend the money.'],
+          ['You have to tell {n}, a close friend, that you need to step back from the friendship.', 'I have to tell {n}, a close friend, that I need to step back from the friendship.'],
+          ['{n} invited you to an important family event. You have to tell {n} that you cannot come.', '{n} invited me to an important family event. I have to tell {n} that I cannot come.']
+        ],
+        'Client or customer': [
+          ['{n} is your customer. You have to tell {n} that their delivery will arrive late.', '{n} is my customer. I have to tell {n} that their delivery will arrive late.'],
+          ['{n} is your customer. You have to tell {n} that your price is going up.', '{n} is my customer. I have to tell {n} that my price is going up.'],
+          ['{n} is your customer and asked for a feature. You have to tell {n} that it will not be built.', '{n} is my customer and asked for a feature. I have to tell {n} that it will not be built.'],
+          ['{n} is your client. You have to tell {n} that you will not renew their contract.', '{n} is my client. I have to tell {n} that I will not renew their contract.']
+        ],
+        'Community': [
+          ['{n} is a volunteer in your group. You have to tell {n} that they must step down from their role.', '{n} is a volunteer in my group. I have to tell {n} that they must step down from their role.'],
+          ['{n} organized an event for your group. You have to tell {n} that it is cancelled.', '{n} organized an event for my group. I have to tell {n} that it is cancelled.'],
+          ['{n} applied to join your group. You have to tell {n} that the application was not accepted.', '{n} applied to join my group. I have to tell {n} that the application was not accepted.'],
+          ['You lead a group. You have to tell {n} that a shared rule is changing and they will not like it.', 'I lead a group. I have to tell {n} that a shared rule is changing and they will not like it.']
+        ]
+      };
+      var SURPRISE = 'Surprise me';
+      var RECOMMENDED = { name: 'Alex', level: 'Medium', category: 'Work', situation: CATEGORIES['Work'][0][0] };
+      var state = { name: RECOMMENDED.name, ownName: false, level: RECOMMENDED.level, category: RECOMMENDED.category, situation: RECOMMENDED.situation };
+      var TRANSCRIPT_KEY = 'utl_bad_news_transcript_done';
+      function $(id) { return document.getElementById(id); }
+      function lower(text) { return text.charAt(0).toLowerCase() + text.slice(1); }
 
-      function formatTime(seconds) {
-        const minutes = Math.floor(seconds / 60).toString().padStart(2, '0');
-        const secs = (seconds % 60).toString().padStart(2, '0');
-        return `${minutes}:${secs}`;
+      function safeGet(key) { try { return localStorage.getItem(key); } catch (error) { return null; } }
+      function safeSet(key, value) { try { localStorage.setItem(key, value); } catch (error) {} }
+
+      function option(group, value, label, note, checked, recommended) {
+        var wrap = document.createElement('label'); wrap.className = 'bad-news-option';
+        var input = document.createElement('input'); input.type = 'radio'; input.name = group; input.value = value; input.checked = !!checked;
+        var box = document.createElement('span'); box.className = 'box'; box.textContent = label;
+        if (recommended) { var tag = document.createElement('em'); tag.textContent = 'Recommended'; box.appendChild(tag); }
+        if (note) { var small = document.createElement('small'); small.textContent = note; box.appendChild(small); }
+        wrap.appendChild(input); wrap.appendChild(box); return wrap;
+      }
+      function buildNames() {
+        var box = $('nameOptions'); box.innerHTML = '';
+        NAMES.forEach(function (name) { box.appendChild(option('who', name, name, '', !state.ownName && state.name === name, name === RECOMMENDED.name)); });
+        box.appendChild(option('who', '__own', 'Type my own', '', state.ownName, false));
+      }
+      function buildLevels() {
+        var box = $('levelOptions'); box.innerHTML = '';
+        LEVELS.forEach(function (level) { box.appendChild(option('level', level.id, level.id, level.note, state.level === level.id, level.id === RECOMMENDED.level)); });
+      }
+      function buildCategories() {
+        var box = $('categoryOptions'); box.innerHTML = '';
+        Object.keys(CATEGORIES).forEach(function (category) { box.appendChild(option('category', category, category, '', state.category === category, category === RECOMMENDED.category)); });
+        box.appendChild(option('category', SURPRISE, SURPRISE, '', state.category === SURPRISE, false));
+      }
+      function buildSituations() {
+        var box = $('situationOptions'); box.innerHTML = '';
+        $('situationField').hidden = state.category === SURPRISE;
+        if (state.category === SURPRISE) return;
+        CATEGORIES[state.category].forEach(function (item) { box.appendChild(option('situation', item[0], fillName(item[0]), '', state.situation === item[0], state.category === RECOMMENDED.category && item[0] === RECOMMENDED.situation)); });
+        box.appendChild(option('situation', SURPRISE, SURPRISE, 'Invent one for me in this setting', state.situation === SURPRISE, false));
+      }
+      // Personalization. Today only the first name is used. profileHints() is the single place where
+      // non-sensitive working-style details (for example from the learner's Executive Signature) can be added later.
+      // A future source only needs to provide window.UTLLearnerProfile.practiceHints(), returning short plain sentences.
+      function personalOn() { return $('usePersonal').checked; }
+      function learnerName() { return personalOn() ? $('learnerName').value.trim() : ''; }
+      function profileHints() {
+        if (!personalOn()) return [];
+        try {
+          var hints = window.UTLLearnerProfile && window.UTLLearnerProfile.practiceHints && window.UTLLearnerProfile.practiceHints();
+          return Array.isArray(hints) ? hints.filter(function (hint) { return typeof hint === 'string' && hint.trim(); }).slice(0, 6) : [];
+        } catch (error) { return []; }
+      }
+      function renderPersonalIncluded() {
+        var items = [];
+        if (learnerName()) items.push('your first name');
+        if (profileHints().length) items.push(profileHints().length + (profileHints().length === 1 ? ' working style note' : ' working style notes'));
+        $('personalIncluded').textContent = items.length ? 'Included in your prompt: ' + items.join(' and ') + '.' : 'Nothing personal is included in your prompt.';
+      }
+      function personName() { var typed = $('ownName').value.trim(); return state.ownName ? (typed || 'Jordan') : state.name; }
+      function currentLevel() { return LEVELS.filter(function (level) { return level.id === state.level; })[0]; }
+      function fillName(text) { return text.replace(/\{n\}/g, personName()); }
+      function situationPrompt() {
+        var found = (CATEGORIES[state.category] || []).filter(function (item) { return item[0] === state.situation; })[0];
+        return found ? fillName(found[1]) : '';
+      }
+      function isSurprise() { return state.category === SURPRISE || state.situation === SURPRISE; }
+
+      function renderSummary() {
+        renderPersonalIncluded();
+        var where = state.category === SURPRISE ? 'surprise setting' : lower(state.category);
+        var what = isSurprise() ? 'surprise situation' : lower(fillName(state.situation));
+        $('setupSummary').textContent = personName() + ', ' + lower(state.level) + ', ' + where + ', ' + what;
       }
 
-      function renderTimer() {
-        timerValue.textContent = formatTime(elapsed);
-        timerPause.setAttribute('aria-label', intervalId ? 'Pause timer' : 'Resume timer');
-        timerPause.setAttribute('title', intervalId ? 'Pause timer' : 'Resume timer');
-        timerPause.innerHTML = intervalId
-          ? '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round"><path d="M8 5v14"/><path d="M16 5v14"/></svg>'
-          : '<svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
-        timerReset.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>';
-      }
-
-      function stopTimer() {
-        if (intervalId) {
-          clearInterval(intervalId);
-          intervalId = null;
+      function practicePrompt() {
+        var name = personName(), level = currentLevel(), situation;
+        if (isSurprise()) {
+          var where = state.category === SURPRISE ? 'any everyday setting' : 'the ' + lower(state.category) + ' setting';
+          situation = 'Invent a realistic, everyday, low risk situation in ' + where + ' where I must deliver bad news to ' + name + '. Include it in your briefing.';
+        } else {
+          situation = 'Setting: ' + lower(state.category) + '. ' + situationPrompt() + ' I am the person delivering the news, and ' + name + ' is the person receiving it.';
         }
+        return [
+          'Help me practice a difficult conversation. You play two roles: ' + name + ', the other person, and Coach, my warm and direct coach.',
+          '',
+          'THE SITUATION',
+          situation,
+          '',
+          (learnerName() ? 'MY NAME' : null),
+          (learnerName() ? 'My name is ' + learnerName() + '. When you play ' + name + ', call me ' + learnerName() + ' naturally, and start your first line in the role by saying my name. In the debrief, use my name once.' : null),
+          (learnerName() ? '' : null),
+          (profileHints().length ? 'ABOUT ME' : null),
+          (profileHints().length ? 'These are non-sensitive notes about how I work. Use them quietly to make the reactions and the coaching fit me. Never mention that you were given them.' : null),
+          (profileHints().length ? profileHints().map(function (hint, index) { return 'Note ' + (index + 1) + ': ' + hint; }).join('\n') : null),
+          (profileHints().length ? '' : null),
+          'HOW TO PLAY ' + name.toUpperCase(),
+          'Difficulty: ' + lower(level.id) + '. ' + level.rule,
+          'Speak in short, natural turns of one to three sentences, like a real person. I may be speaking out loud, so keep your replies brief. Stay in character until I say "Coach, debrief now". Do not coach me during the conversation. If I am vague, ask me for specifics.',
+          '',
+          'HOW IT ENDS',
+          'If I say "Coach, hint", step out of the role for one sentence with a suggestion, then return to the role.',
+          'After about eight of my turns, or sooner if the conversation reaches a natural end, step out of the role and ask in one sentence whether I want to keep going or get my debrief. If I keep going, ask again after four more turns.',
+          'If I say "Coach, debrief now" at any time, go straight to the debrief.',
+          '',
+          'START',
+          'Do not begin the role play yet. First write me a short briefing that I can read on screen: the scenario in two or three sentences (who ' + name + ' is to me and what has happened), the difficulty level, and what I should do. Then remind me of my two commands, "Coach, hint" and "Coach, debrief now", and tell me you will ask whether I want to continue after about eight turns. End the briefing by telling me to begin whenever I am ready, then add this note in brackets, word for word: "[Using voice? Click inside the message box first. In ChatGPT, the blue voice button then appears at the right of the box. In the Gemini phone app, select the Live button. On a computer, the Gemini microphone only types what you say, so it will not talk back. Allow microphone access if asked, then speak first. Say Coach, debrief now when you are done.]" Then wait for me to speak first. Once I speak, respond only as ' + name + '.',
+          '',
+          'THE DEBRIEF',
+          'When I say "Coach, debrief now", leave the role and become Coach. Give me:',
+          'Went well: three points. Quote my exact words in each.',
+          'Even better: three points. For each one, quote my exact words, give a stronger version, and explain why it works.',
+          'Then ask whether I want to try again, harder or easier, and wait for my answer.'
+        ].filter(function (line) { return line !== null; }).join('\n');
+      }
+      function transcriptPrompt() {
+        return [
+          'Put the full conversation and your complete debrief into one code block, so I can copy everything with one click.',
+          'Label each line "Me:" or "' + personName() + ':". Put the debrief after the conversation, labeled "Coach:".',
+          'Use only one code block, with no other text.'
+        ].join('\n');
       }
 
-      function startTimer() {
-        if (intervalId) return;
-        intervalId = window.setInterval(() => {
-          elapsed += 1;
-          renderTimer();
-        }, 1000);
-        renderTimer();
+      document.addEventListener('change', function (event) {
+        var target = event.target;
+        if (!target || target.tagName !== 'INPUT') return;
+        if (target.name === 'who') { state.ownName = target.value === '__own'; if (!state.ownName) state.name = target.value; $('ownNameWrap').hidden = !state.ownName; if (state.ownName) $('ownName').focus(); buildSituations(); }
+        if (target.name === 'level') state.level = target.value;
+        if (target.name === 'category') { state.category = target.value; state.situation = state.category === SURPRISE ? SURPRISE : CATEGORIES[state.category][0][0]; buildSituations(); }
+        if (target.name === 'situation') state.situation = target.value;
+        renderSummary();
+      });
+      $('ownName').addEventListener('input', function () { buildSituations(); renderSummary(); });
+      $('learnerName').addEventListener('input', renderSummary);
+      $('usePersonal').addEventListener('change', renderSummary);
+      try {
+        var profile = JSON.parse(localStorage.getItem('utl_member_profile') || 'null');
+        var first = profile && profile.displayName ? String(profile.displayName).trim().split(/\s+/)[0] : '';
+        if (first) $('learnerName').value = first;
+      } catch (error) {}
+
+      // Opening an AI tool also copies the prompt, so one click is enough before pasting.
+      function copyAndAnnounce() {
+        var text = practicePrompt();
+        var done = function () { $('openStatus').textContent = 'Prompt copied. Paste it into the new chat.'; setTimeout(function () { $('openStatus').textContent = ''; }, 5000); };
+        var failed = function () { $('openStatus').textContent = 'Use "Prepare practice prompt" above to copy it.'; };
+        try { navigator.clipboard.writeText(text).then(done, failed); } catch (error) { failed(); }
+      }
+      $('openChatGpt').addEventListener('click', copyAndAnnounce);
+      $('openGemini').addEventListener('click', copyAndAnnounce);
+
+      if (window.UTLFeedbackCoach) {
+        window.UTLFeedbackCoach.mountPreparedPrompt({
+          mount: '#practicePromptMount',
+          heading: 'Review and copy your prompt',
+          description: 'Your person, difficulty and situation are included. Nothing is sent automatically.',
+          buttonLabel: 'Prepare practice prompt',
+          kicker: 'Use another AI',
+          dialogTitle: 'Bring the practice prompt with you',
+          promptLabel: 'Your practice prompt',
+          prompt: practicePrompt
+        });
+        window.UTLFeedbackCoach.mountPreparedPrompt({
+          mount: '#transcriptPromptMount',
+          heading: 'Get the full transcript in one box',
+          description: 'The AI returns your conversation and feedback in a single copyable box.',
+          buttonLabel: 'Prepare transcript request',
+          kicker: 'Use another AI',
+          dialogTitle: 'Bring the transcript request with you',
+          promptLabel: 'Your transcript request',
+          prompt: transcriptPrompt
+        });
       }
 
-      timerReset.addEventListener('click', () => {
-        stopTimer();
-        elapsed = 0;
-        startTimer();
-        renderTimer();
+      var saveButton = $('saveTranscriptBtn');
+      function markTranscriptSaved() { saveButton.disabled = true; saveButton.textContent = 'Added to my record'; }
+      if (safeGet(TRANSCRIPT_KEY) === 'true') markTranscriptSaved();
+      $('transcriptPaste').addEventListener('input', function () {
+        if (safeGet(TRANSCRIPT_KEY) === 'true') return;
+        saveButton.disabled = $('transcriptPaste').value.trim().length < 40;
+      });
+      saveButton.addEventListener('click', function () {
+        if (safeGet(TRANSCRIPT_KEY) === 'true') return;
+        safeSet(TRANSCRIPT_KEY, 'true');
+        var result = window.UTLRewardEvents && window.UTLRewardEvents.awardEvent && window.UTLRewardEvents.awardEvent({
+          eventId: 'transcript-shared:i-have-bad-news',
+          type: 'transcript-shared',
+          title: 'Feedback added',
+          body: 'You brought your conversation and feedback back.',
+          mpEarned: 10,
+          metadata: { appId: 'i-have-bad-news' }
+        });
+        $('saveStatus').textContent = result && result.awarded ? 'Added. You earned 10 MP.' : 'Added.';
+        markTranscriptSaved();
       });
 
-      timerPause.addEventListener('click', () => {
-        intervalId ? stopTimer() : startTimer();
-        renderTimer();
+      var VOICE_KEY = 'utl_bad_news_voice_read';
+      function markVoiceRead() { var tag = $('readTag'); tag.textContent = 'Read'; tag.classList.add('is-read'); }
+      if (safeGet(VOICE_KEY) === 'true') markVoiceRead();
+      var voiceDialog = $('voiceDialog');
+      $('openVoiceHelp').addEventListener('click', function () {
+        safeSet(VOICE_KEY, 'true'); markVoiceRead();
+        if (typeof voiceDialog.showModal === 'function') voiceDialog.showModal(); else voiceDialog.setAttribute('open', '');
       });
+      Array.prototype.forEach.call(voiceDialog.querySelectorAll('[data-voice-close]'), function (button) {
+        button.addEventListener('click', function () { if (typeof voiceDialog.close === 'function') voiceDialog.close(); else voiceDialog.removeAttribute('open'); });
+      });
+      voiceDialog.addEventListener('click', function (event) { if (event.target === voiceDialog && voiceDialog.close) voiceDialog.close(); });
 
-      renderTimer();
-      startTimer();
+      buildNames(); buildLevels(); buildCategories(); buildSituations(); renderSummary();
     })();
   </script>
   <script type="module" src="../../assets/app-access-guard.js?v=20260925-mobile-v1"></script>
@@ -711,7 +574,6 @@
     });
   </script>
   <script type="module" src="../../assets/feedback-widget.js?v=20260925-mobile-v1"></script>
-  <script src="../../assets/custom-gpt-voice-guide.js?v=20260925-mobile-v1"></script>
   <script src="../../assets/tactile-buttons.js?v=20260925-mobile-v1" defer></script>
 </body>
 </html>
