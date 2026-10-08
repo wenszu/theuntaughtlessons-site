@@ -126,6 +126,11 @@ async function rejects(promise) { try { await promise; } catch (error) { return 
     });
   });
   await check('the real vendored library works with this module: verifyOtp posts the token to this project and the session is stored', async () => {
+    // Browsers and Node 22 have a native WebSocket. Node 20 (the CI runner) does not, and supabase-js refuses to start without one
+    // even though this test never opens a realtime connection. A do nothing stand in keeps the test the same on every Node version.
+    if (typeof globalThis.WebSocket === 'undefined') {
+      globalThis.WebSocket = class { constructor() { this.readyState = 3; } close() {} send() {} addEventListener() {} removeEventListener() {} };
+    }
     const real = await import(pathToFileURL(path.join(VENDOR_DIR, 'supabase-js.mjs')).href);
     const calls = [];
     const jwt = ['e30', Buffer.from(JSON.stringify({ sub: UID, exp: 4102444800, role: 'authenticated', email: 'member@example.test' })).toString('base64url'), 'sig'].join('.');
