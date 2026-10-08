@@ -276,7 +276,7 @@ const UTL_CONTENT = {
         legacyEmbedKey: "utl_embed_p3_read_room",
         title: "Let's switch hats",
         type: "Perspective taking",
-        aiTool: "CustomGPT",
+        aiTool: "ChatGPT, Gemini",
         description: "You will need to understand how others think.",
         appUrl: "../apps/lets-switch-hats/index.html",
         contextType: "video",
