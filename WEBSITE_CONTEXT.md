@@ -280,6 +280,12 @@ Decisions are made in Claude (claude.ai). JSON updates are handled in Codex. Doc
 
 Entries older than ~3 days live in `archive/WEBSITE_CONTEXT_ARCHIVE.md` (most recent archived block: 2026-10-03 through 2026-10-04).
 
+### 2026-10-08 (late night) — Virtual learner run and a shared prompt dialog fix
+
+- `scripts/virtual-learner-run.mjs` drives the three updated exercises (`i-have-bad-news`, `lets-switch-hats`, `speak-like-obama`) in a fresh throwaway Chrome profile through the Chrome DevTools protocol, with a made up learner on `127.0.0.1:8061` (no real sign in, no real record). It checks the page loads, the setup choices, both generated prompts and what they must and must not contain, the copy and open buttons, the voice instructions, the transcript bonus, completion keys, console errors, and horizontal scroll at 1280px and 390px. Result on 2026-10-08: 74 of 74 checks pass.
+- It found one real bug in the shared prompt dialog: `assets/exercise-feedback-coach.js` read `event.currentTarget` after `await`, when it is already `null`, so the `Copy prompt` button threw a TypeError and never showed `Copied ✓` (the status line above it still updated). Fixed by capturing the button first. Affects every exercise that uses the dialog (Advisory Board and the three updated pages).
+- **Executive Signature wording:** the sticky nav hover card keeps the small label `Executive Signature` and now explains it as a personality assessment (`A free 5-minute personality assessment on how you lead under pressure` and `Answer a short set of questions about your working style, then see your profile and one area to grow, instantly on screen.`); the link still reads `Try Executive Signature`. The Account page row says `a free 5-minute personality assessment`.
+
 ### 2026-10-08 (night) — `lets-switch-hats` rebuilt around the Michael case; collapsible personalization on both pages
 
 - **Design source:** the original exercise is `Phase 3 - Let's switch hats (Michael) - Gem` (Drive `01-switch-hats-michael-gem-v6.md`, source Google Doc `1G4NOkNldAA7EShDhNrRlPdzukSaXyX43qxl1BLT0V74`): you are Aiko's Chief of Staff recruiting Michael Felipe for the Olympic project, four rounds (Ambiguity, Accountability, Stability, Downside), a ready gate between rounds, an optional revise step, a final three step approach. The generalised `switch-hats-aiko` GPT (I v4, three scenarios) that the old page linked to had dropped the case. Mock-up source of truth: `reference/mockups/lets-switch-hats-mockup.html` (https://claude.ai/artifact/L8SdToEG4zbguJoPGUyWei).
