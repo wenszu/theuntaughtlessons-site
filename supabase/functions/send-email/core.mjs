@@ -22,6 +22,8 @@ export const MAX_SUBJECT_LENGTH = 200;
 export const MAX_HTML_LENGTH = 200000;
 export const MAX_TEXT_LENGTH = 100000;
 export const MAX_BODY_CHARS = 1000000;
+// Byte cap used while streaming the request body (UTF-8 can use up to 3 bytes per character).
+export const MAX_BODY_BYTES = 1500000;
 export const PROVIDER_TIMEOUT_MS = 15000;
 export const RESEND_URL = "https://api.resend.com/emails";
 export const SECRET_HEADER = "x-utl-mail-secret";
@@ -117,6 +119,45 @@ function configured(value) {
   return typeof value === "string" && value.trim() !== "";
 }
 
+// First gate, usable before the body is read. Returns "ok", "not-configured" (the server
+// secret is missing or blank after trimming) or "unauthorized". Stray spaces or a line
+// break pasted into the secret are trimmed on the server side before comparing.
+export function checkSecret(headers, expectedSecret) {
+  const expected = String(expectedSecret == null ? "" : expectedSecret).trim();
+  if (!expected) return "not-configured";
+  const presented = readHeader(headers, SECRET_HEADER);
+  return presented && safeEqual(presented, expected) ? "ok" : "unauthorized";
+}
+
+// Reads a request body stream (anything with getReader(), such as a web ReadableStream)
+// and stops as soon as the byte cap is passed, with or without a Content-Length header.
+// Resolves { ok: true, text } or { ok: false }.
+export async function readBodyCapped(body, maxBytes) {
+  const limit = Number(maxBytes) > 0 ? Number(maxBytes) : MAX_BODY_BYTES;
+  if (!body) return { ok: true, text: "" };
+  const reader = body.getReader();
+  const chunks = [];
+  let total = 0;
+  try {
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      total += value.byteLength;
+      if (total > limit) {
+        try { await reader.cancel(); } catch (error) { /* already closed */ }
+        return { ok: false };
+      }
+      chunks.push(value);
+    }
+  } catch (error) {
+    return { ok: false };
+  }
+  const bytes = new Uint8Array(total);
+  let offset = 0;
+  for (const chunk of chunks) { bytes.set(chunk, offset); offset += chunk.byteLength; }
+  return { ok: true, text: new TextDecoder().decode(bytes) };
+}
+
 // request: { method, headers (Headers or plain object), bodyText }
 // deps: { env: { RESEND_API_KEY, MAIL_FROM, MAIL_REPLY_TO, MAIL_RELAY_SECRET },
 //         fetchImpl, log, now, timeoutMs }
@@ -138,10 +179,9 @@ export async function handleSendEmail(request, deps) {
   const env = deps.env || {};
   // Without the shared secret the function cannot tell friend from stranger, so it
   // refuses everything until the owner sets it.
-  if (!configured(env.MAIL_RELAY_SECRET)) return finish(503, { ok: false, error: "not-configured" });
-
-  const presented = readHeader(request.headers, SECRET_HEADER);
-  if (!presented || !safeEqual(presented, env.MAIL_RELAY_SECRET)) return finish(401, { ok: false, error: "unauthorized" });
+  const gate = checkSecret(request.headers, env.MAIL_RELAY_SECRET);
+  if (gate === "not-configured") return finish(503, { ok: false, error: "not-configured" });
+  if (gate !== "ok") return finish(401, { ok: false, error: "unauthorized" });
 
   const bodyText = typeof request.bodyText === "string" ? request.bodyText : "";
   if (!bodyText || bodyText.length > MAX_BODY_CHARS) return finish(400, { ok: false, error: "invalid" });

@@ -67,6 +67,8 @@ The address part must be on the domain you verified. This is stored as a secret 
 | `MAIL_REPLY_TO` | the reply address, for example `hello@theuntaughtlessons.com` |
 | `MAIL_RELAY_SECRET` | the output of `openssl rand -hex 32` |
 
+Paste each secret without spaces or line breaks before or after it.
+
 If a secret is missing, the function answers "not configured" and sends nothing. That is safe.
 
 ## Step 6. Add the same password in Firebase
@@ -77,9 +79,9 @@ In Terminal, from the project folder:
 firebase functions:secrets:set MAIL_RELAY_SECRET --project the-untaught-lessons
 ```
 
-Paste the same value as in Step 5 when asked. It is not shown on screen.
+Paste the same value as in Step 5 when asked. It is not shown on screen. When you paste any secret (here, in Supabase, or the Resend key), paste it without spaces or line breaks before or after it.
 
-Note for the code change: once the admin functions reference this secret, it must exist in Firebase before they are deployed, otherwise that deploy fails. That is why this step comes before switching over.
+Important order: the Firebase secret must exist **before** you add `MAIL_TRANSPORT=resend` and deploy. While `MAIL_TRANSPORT` is not set to `resend`, the code does not mention this secret at all and deploys are exactly as before. As soon as it is set to `resend`, the deploy looks the secret up and fails or asks questions if it does not exist. That is why this step comes before switching over.
 
 ## Step 7. Deploy the Edge Function
 
@@ -125,7 +127,7 @@ The function never writes addresses, subjects or message text to its logs. It re
 
 After the code change described in the handoff report is merged and deployed, the whole switch is one setting:
 
-- **Turn on the new sender:** in `functions-admin/.env` (the local file that is deployed with the functions and is not stored in git) add the line `MAIL_TRANSPORT=resend`, then deploy the admin functions (`firebase deploy --only functions:admin-actions --project the-untaught-lessons`).
+- **Turn on the new sender (only after Step 6 is done):** in `functions-admin/.env` (the local file that is deployed with the functions and is not stored in git) add the line `MAIL_TRANSPORT=resend`, then deploy the admin functions (`firebase deploy --only functions:admin-actions --project the-untaught-lessons`).
 - **Switch back to Apps Script:** change the line to `MAIL_TRANSPORT=appscript` (or delete it) and deploy again. The Apps Script path is not removed, so it works as before.
 
 Suggested order for the first real use: send the admin "test email" from the admin console to yourself (the subject starts with `[TEST]`), compare it with an Apps Script one, then try "email me this result" on the Executive Signature page with a test member, then leave it on.
@@ -136,7 +138,7 @@ A few emails never move to Resend: the "removed member" log entry is not an emai
 
 - **Daily limit:** the Free plan allows 100 emails per day. Weekly organization reports and welcome emails are far below that today. If a bulk welcome run could pass 100 in a day, upgrade for that month or spread the sends over two days.
 - **Per call limit:** one request can have at most 5 recipients (the "email my results" feature already limits itself to 5).
-- **Results emails:** the old Apps Script attached the results as a text file. The new sender puts the same text in the body of the email instead, and uses the signed in person's address as the reply address.
+- **Results emails:** the old Apps Script attached the results as a text file. The new sender puts the same text in the body of the email instead, sends one separate email to each recipient (so they do not see each other's addresses), keeps the old subject style (`<your address> — workspace results from The Untaught Lessons`), and uses the signed in person's address as the reply address.
 - **Sign in emails later:** when the sign in moves to Supabase, the same Resend account can be used as the sign in email sender (Supabase Auth SMTP settings). That is a separate step, described in `docs/SUPABASE_PLAN_SIGNIN.md`.
 - **If you need to rotate the password:** generate a new one, update it in both Supabase and Firebase, redeploy the admin functions. Until both match, sends fail with "unauthorized" (nothing is lost, the Firebase side reports an error).
 

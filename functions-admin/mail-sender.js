@@ -34,20 +34,22 @@ class MailSendError extends Error {
   }
 }
 
-// The Firebase secret. Declared here so index.js can add it to each function's
-// `secrets` list. It is null only if firebase-functions is not installed (never in
-// production).
-let MAIL_RELAY_SECRET = null;
-try {
-  MAIL_RELAY_SECRET = require("firebase-functions/params").defineSecret("MAIL_RELAY_SECRET");
-} catch (error) {
-  MAIL_RELAY_SECRET = null;
-}
-
 // The single switch. Anything other than the word "resend" means Apps Script.
 function mailTransport(env) {
   const source = env || process.env;
   return String(source.MAIL_TRANSPORT || "").trim().toLowerCase() === "resend" ? "resend" : "appscript";
+}
+
+// The Firebase secret MAIL_RELAY_SECRET is declared ONLY when MAIL_TRANSPORT=resend.
+// firebase-tools adds every declared secret to a deploy and looks it up in Secret
+// Manager, even when no function binds it, so declaring it unconditionally would make
+// every deploy fail or prompt while the secret does not exist. With the default
+// (Apps Script) this stays null and the deploy is exactly as before.
+// ORDER: create the secret first (firebase functions:secrets:set MAIL_RELAY_SECRET),
+// and only then add MAIL_TRANSPORT=resend and deploy.
+let MAIL_RELAY_SECRET = null;
+if (mailTransport() === "resend") {
+  MAIL_RELAY_SECRET = require("firebase-functions/params").defineSecret("MAIL_RELAY_SECRET");
 }
 
 function isMailAction(action) {
@@ -171,37 +173,75 @@ function templateMail(action, payload) {
   return { to: [recipient], subject, html, text };
 }
 
+// Shrinks a plain text until the escaped html built from it fits the cap. Escaping is
+// done AFTER truncating, so an entity such as &amp; is never cut in the middle.
+function fitHtml(build, text) {
+  let current = String(text);
+  let html = build(current);
+  while (html.length > MAX_HTML_LENGTH && current.length > 0) {
+    current = current.slice(0, Math.floor(current.length * 0.9));
+    if (/[\ud800-\udbff]$/.test(current)) current = current.slice(0, -1);
+    html = build(current + "\n[Shortened to fit in an email.]");
+  }
+  return html;
+}
+
+const PAGE_OPEN = "<!doctype html><html><body style=\"margin:0;padding:16px;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.5;color:#4A4A4A;\">";
+
 // The My results email. Apps Script used to build this one itself and attach the text as
-// a file. Here the results text goes in the body instead, and the verified signed in
+// a file. Here the results text goes in the body instead. One email is made per
+// recipient so recipients never see each other's addresses, and the verified signed in
 // address is the reply address so a reply reaches the person who sent it.
-function resultsMail(payload) {
-  const recipients = Array.isArray(payload.recipients) ? payload.recipients : [];
+function resultsMails(payload) {
+  const recipients = (Array.isArray(payload.recipients) ? payload.recipients : []).filter((value) => typeof value === "string" && value.trim());
   const intro = oneLine(payload.email_intro, 400);
   const results = String(payload.results_text || "");
   const sender = oneLine(payload.user_email, 254);
   const footer = sender
     ? "This message was sent from the My results page of The Untaught Lessons by " + sender + "."
     : "This message was sent from the My results page of The Untaught Lessons.";
-  const text = (intro ? intro + "\n\n" : "") + results + "\n\n" + footer;
-  const html = "<!doctype html><html><body style=\"margin:0;padding:16px;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.5;color:#4A4A4A;\">" +
+  const subject = sender
+    ? oneLine(sender, 150) + " \u2014 workspace results from The Untaught Lessons"
+    : "Workspace results from The Untaught Lessons";
+  const text = ((intro ? intro + "\n\n" : "") + results + "\n\n" + footer).slice(0, MAX_TEXT_LENGTH);
+  const build = (body) => PAGE_OPEN +
     (intro ? "<p style=\"margin:0 0 16px;\">" + escapeHtml(intro) + "</p>" : "") +
-    "<div style=\"white-space:pre-wrap;\">" + escapeHtml(results) + "</div>" +
+    "<div style=\"white-space:pre-wrap;\">" + escapeHtml(body) + "</div>" +
     "<p style=\"margin:16px 0 0;font-size:13px;color:#4D7094;\">" + escapeHtml(footer) + "</p></body></html>";
-  const mail = { to: recipients, subject: "Your Untaught Lessons results", html, text };
-  if (sender) mail.replyTo = sender;
+  const html = fitHtml(build, results);
+  return recipients.map((recipient) => {
+    const mail = { to: [recipient], subject, html, text };
+    if (sender) mail.replyTo = sender;
+    return mail;
+  });
+}
+
+function fitTemplateHtml(mail, fallbackText) {
+  if (mail.html.length <= MAX_HTML_LENGTH) return mail;
+  // Cutting finished html would break its tags, so fall back to the plain text version.
+  mail.html = fitHtml((body) => plainTextToHtml(body), fallbackText);
   return mail;
 }
 
-// Returns {to, subject, html, text, kind, replyTo?} or null when the action is not an
-// email (for example RemovedMember).
-function relayPayloadToMail(action, payload) {
+// Returns an array of {to, subject, html, text, kind, replyTo?}, or null when the action
+// is not an email (for example RemovedMember). ResultsEmail yields one mail per recipient.
+function relayPayloadToMails(action, payload) {
   if (!isMailAction(action)) return null;
   const source = payload && typeof payload === "object" ? payload : {};
-  const mail = action === "ResultsEmail" ? resultsMail(source) : templateMail(action, source);
-  mail.kind = MAIL_ACTIONS[action];
-  mail.html = String(mail.html).slice(0, MAX_HTML_LENGTH);
-  mail.text = String(mail.text).slice(0, MAX_TEXT_LENGTH);
-  return mail;
+  let mails;
+  if (action === "ResultsEmail") {
+    mails = resultsMails(source);
+  } else {
+    const mail = templateMail(action, source);
+    mails = [fitTemplateHtml(mail, mail.text)];
+  }
+  return mails.map((mail) => Object.assign(mail, { kind: MAIL_ACTIONS[action], text: String(mail.text).slice(0, MAX_TEXT_LENGTH) }));
+}
+
+// First mail of relayPayloadToMails (the only one for every action except ResultsEmail).
+function relayPayloadToMail(action, payload) {
+  const mails = relayPayloadToMails(action, payload);
+  return mails ? (mails[0] || null) : null;
 }
 
 const defaultSender = createMailSender();
@@ -210,17 +250,24 @@ async function sendMail(input) {
   return defaultSender.sendMail(input);
 }
 
-// Same contract as the Apps Script path: resolves when the email was handed over, throws
-// otherwise. Logs only the action and a fixed error code.
+// Same contract as the Apps Script path: resolves when the emails were handed over,
+// throws otherwise. Every mail is attempted; the first failure is thrown afterwards.
+// Logs only the action and a fixed error code.
 async function sendRelayAsMail(action, payload, sender) {
-  const mail = relayPayloadToMail(action, payload);
-  if (!mail) throw new MailSendError("invalid");
-  try {
-    return await (sender || defaultSender).sendMail(mail);
-  } catch (error) {
-    console.error("Mail sender failed", { action, code: error && typeof error.code === "string" ? error.code : "unknown" });
-    throw error;
+  const mails = relayPayloadToMails(action, payload);
+  if (!mails || !mails.length) throw new MailSendError("invalid");
+  let failure = null;
+  let last = null;
+  for (const mail of mails) {
+    try {
+      last = await (sender || defaultSender).sendMail(mail);
+    } catch (error) {
+      console.error("Mail sender failed", { action, code: error && typeof error.code === "string" ? error.code : "unknown" });
+      if (!failure) failure = error;
+    }
   }
+  if (failure) throw failure;
+  return last;
 }
 
 module.exports = {
@@ -233,6 +280,7 @@ module.exports = {
   isMailAction,
   mailTransport,
   relayPayloadToMail,
+  relayPayloadToMails,
   sendMail,
   sendRelayAsMail,
   useResendFor

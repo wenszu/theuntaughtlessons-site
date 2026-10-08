@@ -14,39 +14,50 @@
 //
 // All behaviour lives in core.mjs (pure, tested in node). This file only wires the
 // environment, fetch and Deno.serve. It logs nothing but kind, status and duration.
-import { handleSendEmail, MAX_BODY_CHARS } from "./core.mjs";
+import { checkSecret, handleSendEmail, MAX_BODY_BYTES, readBodyCapped } from "./core.mjs";
 
 const JSON_HEADERS = { "Content-Type": "application/json", "Cache-Control": "no-store" };
+
+// The only log line in this function: label, status, milliseconds. See core.mjs.
+const log = (entry: { kind: string; status: number; ms: number }) => console.log(JSON.stringify(entry));
 
 function json(status: number, body: unknown, extra: Record<string, string> = {}): Response {
   return new Response(JSON.stringify(body), { status, headers: { ...JSON_HEADERS, ...extra } });
 }
 
 Deno.serve(async (request: Request): Promise<Response> => {
-  if (request.method !== "POST") {
-    // Same answer the core gives; handled here too so we never read a body for it.
-    return json(405, { ok: false, error: "invalid" }, { "Allow": "POST" });
-  }
+  const started = Date.now();
+  const early = (status: number, error: string, extra: Record<string, string> = {}): Response => {
+    log({ kind: "unknown", status, ms: Date.now() - started });
+    return json(status, { ok: false, error }, extra);
+  };
 
-  // Refuse a clearly oversized body before reading it. Characters can be up to 4 bytes.
+  if (request.method !== "POST") return early(405, "invalid", { "Allow": "POST" });
+
+  const env = {
+    RESEND_API_KEY: Deno.env.get("RESEND_API_KEY"),
+    MAIL_FROM: Deno.env.get("MAIL_FROM"),
+    MAIL_REPLY_TO: Deno.env.get("MAIL_REPLY_TO"),
+    MAIL_RELAY_SECRET: Deno.env.get("MAIL_RELAY_SECRET"),
+  };
+
+  // First layer: the shared secret is checked BEFORE the body is read, so a stranger
+  // cannot make this function read or parse anything.
+  const gate = checkSecret(request.headers, env.MAIL_RELAY_SECRET);
+  if (gate === "not-configured") return early(503, "not-configured");
+  if (gate !== "ok") return early(401, "unauthorized");
+
+  // Refuse an oversized body early when it announces its size, and cap the stream
+  // itself so a missing or false Content-Length does not get around the limit.
   const declared = Number(request.headers.get("content-length") || 0);
-  if (declared > MAX_BODY_CHARS * 4) return json(413, { ok: false, error: "invalid" });
+  if (declared > MAX_BODY_BYTES) return early(413, "invalid");
+  const body = await readBodyCapped(request.body, MAX_BODY_BYTES);
+  if (!body.ok) return early(413, "invalid");
 
-  const bodyText = await request.text();
-
+  // Second layer: the core checks everything again (secret, shape, limits).
   const result = await handleSendEmail(
-    { method: request.method, headers: request.headers, bodyText },
-    {
-      env: {
-        RESEND_API_KEY: Deno.env.get("RESEND_API_KEY"),
-        MAIL_FROM: Deno.env.get("MAIL_FROM"),
-        MAIL_REPLY_TO: Deno.env.get("MAIL_REPLY_TO"),
-        MAIL_RELAY_SECRET: Deno.env.get("MAIL_RELAY_SECRET"),
-      },
-      fetchImpl: fetch,
-      // Only kind, status and ms ever reach this function. See core.mjs.
-      log: (entry: { kind: string; status: number; ms: number }) => console.log(JSON.stringify(entry)),
-    },
+    { method: request.method, headers: request.headers, bodyText: body.text },
+    { env, fetchImpl: fetch, log },
   );
 
   return json(result.status, result.body);

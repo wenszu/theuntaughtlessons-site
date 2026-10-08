@@ -89,6 +89,43 @@ async function main() {
   r = await post(core, GOOD, { env: Object.assign({}, ENV, { MAIL_RELAY_SECRET: '' }), headers: {} });
   assert.strictEqual(r.result.status, 503, 'empty server secret refuses everything');
 
+  // ---- secret helper, trimmed server secret ----
+  const hdr = (value) => new Headers(value === undefined ? {} : { 'x-utl-mail-secret': value });
+  assert.strictEqual(core.checkSecret(hdr(SECRET), SECRET), 'ok');
+  assert.strictEqual(core.checkSecret(hdr(SECRET), '  ' + SECRET + '\n'), 'ok', 'stray spaces or a line break in the server secret are trimmed');
+  assert.strictEqual(core.checkSecret(hdr('nope'), SECRET), 'unauthorized');
+  assert.strictEqual(core.checkSecret(hdr(), SECRET), 'unauthorized');
+  assert.strictEqual(core.checkSecret({ 'X-UTL-Mail-Secret': SECRET }, SECRET), 'ok', 'plain objects work and header case does not matter');
+  assert.strictEqual(core.checkSecret(hdr(''), ''), 'not-configured');
+  assert.strictEqual(core.checkSecret(hdr(SECRET), '   \n'), 'not-configured', 'blank after trimming means not configured');
+  assert.strictEqual(core.checkSecret(hdr(SECRET), undefined), 'not-configured');
+  r = await post(core, GOOD, { env: Object.assign({}, ENV, { MAIL_RELAY_SECRET: ' ' + SECRET + '\n' }) });
+  assert.strictEqual(r.result.status, 200, 'the handler accepts a server secret with stray whitespace');
+  r = await post(core, GOOD, { env: Object.assign({}, ENV, { MAIL_RELAY_SECRET: '  \n' }), headers: { 'x-utl-mail-secret': '' } });
+  assert.strictEqual(r.result.status, 503);
+  r = await post(core, GOOD, { env: Object.assign({}, ENV, { MAIL_RELAY_SECRET: '  \n' }), headers: { 'x-utl-mail-secret': ' ' } });
+  assert.strictEqual(r.result.status, 503, 'a blank header never matches a blank secret');
+  assert.strictEqual(r.calls.length, 0);
+
+  // ---- capped body reader ----
+  const streamOf = (chunks) => new ReadableStream({ start(controller) { chunks.forEach((c) => controller.enqueue(c)); controller.close(); } });
+  const enc = new TextEncoder();
+  let read = await core.readBodyCapped(streamOf([enc.encode('{"a":'), enc.encode('1}')]), 100);
+  assert.deepStrictEqual(read, { ok: true, text: '{"a":1}' });
+  read = await core.readBodyCapped(streamOf([enc.encode('x'.repeat(60)), enc.encode('y'.repeat(60))]), 100);
+  assert.deepStrictEqual(read, { ok: false }, 'over the cap across chunks is refused');
+  read = await core.readBodyCapped(streamOf([enc.encode('x'.repeat(100))]), 100);
+  assert.strictEqual(read.ok, true, 'exactly at the cap is accepted');
+  read = await core.readBodyCapped(streamOf([enc.encode('\u00e9'.repeat(60))]), 100);
+  assert.strictEqual(read.ok, false, 'the cap counts bytes, not characters');
+  let pulled = 0;
+  const endless = new ReadableStream({ pull(controller) { pulled += 1; controller.enqueue(enc.encode('x'.repeat(1000))); } });
+  read = await core.readBodyCapped(endless, 5000);
+  assert.strictEqual(read.ok, false, 'an endless stream with no length is cut off');
+  assert.ok(pulled < 20, 'reading stops soon after the cap');
+  assert.deepStrictEqual(await core.readBodyCapped(null, 100), { ok: true, text: '' });
+  assert.ok(core.MAX_BODY_BYTES >= 900000);
+
   // ---- validation ----
   const bad = async (patch, label) => {
     const out = await post(core, Object.assign({}, GOOD, patch));
@@ -219,7 +256,9 @@ async function main() {
   assert.ok(!/\bDeno\b/.test(coreSource.replace(/\/\/.*$/gm, '')), 'core has no Deno specific code');
   assert.ok(!/require\(|process\./.test(coreSource), 'core has no node specific code');
   assert.ok((indexSource.match(/console\./g) || []).length === 1, 'index.ts logs in exactly one place');
-  assert.ok(/log:\s*\(entry[^)]*\)\s*=>\s*console\.log\(JSON\.stringify\(entry\)\)/.test(indexSource), 'index.ts logs only the entry the core produces');
+  assert.ok(/const log = \(entry[^)]*\)\s*=>\s*console\.log\(JSON\.stringify\(entry\)\)/.test(indexSource), 'index.ts logs only kind, status and ms');
+  assert.ok(indexSource.indexOf('checkSecret(') < indexSource.indexOf('readBodyCapped(request.body'), 'index.ts checks the secret before reading the body');
+  assert.ok(/request\.body/.test(indexSource) && !/request\.text\(\)|request\.json\(\)/.test(indexSource), 'index.ts reads the body only through the capped stream reader');
   assert.ok(/Deno\.serve/.test(indexSource) && /from "\.\/core\.mjs"/.test(indexSource));
   assert.ok(/no-verify-jwt|verify_jwt/i.test(indexSource), 'index.ts documents the JWT setting');
   assert.ok(!/@[a-z0-9-]+\.(com|org|net)/i.test(coreSource.replace(/\/\/.*$/gm, '')), 'no address is hardcoded in the core');

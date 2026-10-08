@@ -12,7 +12,40 @@ async function rejects(promise, code) {
   assert.fail('expected failure ' + code);
 }
 
+// Loads a fresh copy of mail-sender with MAIL_TRANSPORT set as given and a stubbed
+// firebase-functions/params, and reports how often defineSecret was called.
+function loadWithStub(transport) {
+  const modulePath = require.resolve('../functions-admin/mail-sender.js');
+  const paramsPath = require.resolve('firebase-functions/params', { paths: [require('path').dirname(modulePath)] });
+  const savedParams = require.cache[paramsPath];
+  const savedModule = require.cache[modulePath];
+  const savedEnv = process.env.MAIL_TRANSPORT;
+  const calls = [];
+  require.cache[paramsPath] = { id: paramsPath, filename: paramsPath, loaded: true, exports: { defineSecret: (name) => { calls.push(name); return { name, value: () => 'stub' }; } } };
+  delete require.cache[modulePath];
+  if (transport === undefined) delete process.env.MAIL_TRANSPORT; else process.env.MAIL_TRANSPORT = transport;
+  try {
+    const loaded = require(modulePath);
+    return { calls, secret: loaded.MAIL_RELAY_SECRET };
+  } finally {
+    if (savedEnv === undefined) delete process.env.MAIL_TRANSPORT; else process.env.MAIL_TRANSPORT = savedEnv;
+    if (savedParams) require.cache[paramsPath] = savedParams; else delete require.cache[paramsPath];
+    if (savedModule) require.cache[modulePath] = savedModule; else delete require.cache[modulePath];
+  }
+}
+
 async function main() {
+  // ---- the Firebase secret is declared only when the new sender is on ----
+  let loaded = loadWithStub(undefined);
+  assert.deepStrictEqual(loaded.calls, [], 'unset MAIL_TRANSPORT: defineSecret is never called');
+  assert.strictEqual(loaded.secret, null);
+  loaded = loadWithStub('appscript');
+  assert.deepStrictEqual(loaded.calls, [], 'appscript: defineSecret is never called');
+  assert.strictEqual(loaded.secret, null);
+  loaded = loadWithStub('resend');
+  assert.deepStrictEqual(loaded.calls, ['MAIL_RELAY_SECRET'], 'resend: the secret is declared once');
+  assert.ok(loaded.secret);
+
   // ---- the switch ----
   assert.strictEqual(mail.mailTransport({}), 'appscript', 'default is Apps Script');
   assert.strictEqual(mail.mailTransport({ MAIL_TRANSPORT: '' }), 'appscript');
@@ -85,21 +118,56 @@ async function main() {
   assert.ok(!/[\r\n]/.test(bannerSubject.subject), 'subject is one line');
   assert.strictEqual(bannerSubject.text, 'Welcome to The Untaught Lessons.');
 
-  const results = mail.relayPayloadToMail('ResultsEmail', {
+  const resultsPayload = {
     recipients: ['one@example.test', 'two@example.test'], user_email: 'me@example.test', results_text: 'Score: 5 <b>', filename: 'x.txt',
     email_intro: 'Thank you.', submitted_at: '2026-10-08T00:00:00.000Z'
-  });
-  assert.deepStrictEqual(results.to, ['one@example.test', 'two@example.test']);
-  assert.strictEqual(results.replyTo, 'me@example.test');
-  assert.ok(results.text.includes('Score: 5 <b>') && results.text.startsWith('Thank you.'));
-  assert.ok(results.html.includes('Score: 5 &lt;b&gt;') && !results.html.includes('<b>'));
-  assert.strictEqual(results.kind, 'results');
+  };
+  const results = mail.relayPayloadToMails('ResultsEmail', resultsPayload);
+  assert.strictEqual(results.length, 2, 'one email per recipient');
+  assert.deepStrictEqual(results.map((m) => m.to), [['one@example.test'], ['two@example.test']], 'recipients never see each other');
+  for (const m of results) {
+    assert.strictEqual(m.replyTo, 'me@example.test');
+    assert.strictEqual(m.subject, 'me@example.test \u2014 workspace results from The Untaught Lessons');
+    assert.ok(m.text.includes('Score: 5 <b>') && m.text.startsWith('Thank you.'));
+    assert.ok(m.html.includes('Score: 5 &lt;b&gt;') && !m.html.includes('<b>'));
+    assert.strictEqual(m.kind, 'results');
+  }
+  assert.ok(!results[0].html.includes('two@example.test') && !results[0].text.includes('two@example.test'), 'other recipients are not in the body');
+  const noSender = mail.relayPayloadToMails('ResultsEmail', { recipients: ['one@example.test'], results_text: 'R' });
+  assert.strictEqual(noSender[0].subject, 'Workspace results from The Untaught Lessons');
+  assert.ok(!('replyTo' in noSender[0]));
+  assert.strictEqual(mail.relayPayloadToMail('ResultsEmail', resultsPayload).to[0], 'one@example.test');
+  const lineBreakSender = mail.relayPayloadToMails('ResultsEmail', Object.assign({}, resultsPayload, { user_email: 'me@example.test\nBcc: x@example.test' }));
+  assert.ok(!/[\r\n]/.test(lineBreakSender[0].subject), 'subject stays on one line');
+
+  // html cap: escaping must never be cut in the middle of an entity
+  const heavy = '<&>"\''.repeat(12000); // 60000 characters, about 6 times longer once escaped
+  const capped = mail.relayPayloadToMails('ResultsEmail', Object.assign({}, resultsPayload, { results_text: heavy }))[0];
+  assert.ok(capped.html.length <= 200000, 'html is within the cap');
+  assert.ok(capped.text.length <= 100000);
+  assert.ok(capped.html.includes('Shortened to fit'), 'the reader is told the text was shortened');
+  const body = capped.html.slice(capped.html.indexOf('white-space:pre-wrap;">') + 23, capped.html.indexOf('</div>'));
+  assert.ok(!/&(?!(?:amp|lt|gt|quot|#39|#96);)/.test(body), 'every ampersand in the body starts a whole entity');
+  const small = mail.relayPayloadToMails('ResultsEmail', Object.assign({}, resultsPayload, { results_text: 'short' }))[0];
+  assert.ok(!small.html.includes('Shortened'), 'short text is left alone');
+  // very large template html falls back to a whole plain version, not a cut tag
+  const bigTemplate = mail.relayPayloadToMail('WelcomeEmail', { recipient: 'a@example.test', subject: 'S', plainBody: 'Hello <there>', renderedHtml: '<p>' + 'x'.repeat(250000) + '</p>' });
+  assert.ok(bigTemplate.html.length <= 200000 && bigTemplate.html.includes('Hello &lt;there&gt;'));
 
   // ---- sendRelayAsMail ----
   const sentMails = [];
   const fake = { sendMail: async (m) => { sentMails.push(m); return { ok: true, id: 'x' }; } };
   await mail.sendRelayAsMail('WelcomeEmail', { recipient: 'new@example.test', subject: 'S', plainBody: 'P' }, fake);
   assert.strictEqual(sentMails.length, 1);
+  sentMails.length = 0;
+  await mail.sendRelayAsMail('ResultsEmail', resultsPayload, fake);
+  assert.strictEqual(sentMails.length, 2, 'ResultsEmail sends one mail per recipient');
+  const partial = [];
+  const flaky = { sendMail: async (m) => { partial.push(m.to[0]); if (m.to[0] === 'one@example.test') throw new mail.MailSendError('provider'); return { ok: true, id: 'y' }; } };
+  const originalErr = console.error;
+  console.error = () => {};
+  try { await rejects(mail.sendRelayAsMail('ResultsEmail', resultsPayload, flaky), 'provider'); } finally { console.error = originalErr; }
+  assert.deepStrictEqual(partial, ['one@example.test', 'two@example.test'], 'a failure does not stop the other recipients');
   await rejects(mail.sendRelayAsMail('RemovedMember', { memberEmail: 'x@example.test' }, fake), 'invalid');
   const logged = [];
   const originalError = console.error;
