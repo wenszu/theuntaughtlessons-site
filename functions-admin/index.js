@@ -34,13 +34,8 @@ const paymentsService = createPaymentsService({
 });
 
 const APPS_SCRIPT_ADMIN_RELAY_SECRET = defineSecret("APPS_SCRIPT_ADMIN_RELAY_SECRET");
-// The new mail sender needs its own secret, declared only when MAIL_TRANSPORT=resend is set in
-// functions-admin/.env. With the default (Apps Script) it is not declared at all. Once it is
-// declared, firebase-tools looks it up in Secret Manager, so it must exist BEFORE
-// MAIL_TRANSPORT=resend is added and deployed (firebase functions:secrets:set MAIL_RELAY_SECRET).
-const RELAY_SECRETS = mailSender.mailTransport() === "resend" && mailSender.MAIL_RELAY_SECRET
-  ? [APPS_SCRIPT_ADMIN_RELAY_SECRET, mailSender.MAIL_RELAY_SECRET]
-  : [APPS_SCRIPT_ADMIN_RELAY_SECRET];
+// The new mail sender has its own secret, always declared (see mail-sender.js for why it cannot depend on MAIL_TRANSPORT).
+const RELAY_SECRETS = [APPS_SCRIPT_ADMIN_RELAY_SECRET, mailSender.MAIL_RELAY_SECRET];
 const STRIPE_SECRET_KEY = defineSecret("STRIPE_SECRET_KEY");
 const STRIPE_WEBHOOK_SECRET = defineSecret("STRIPE_WEBHOOK_SECRET");
 const APPS_SCRIPT_ADMIN_URL = defineString("APPS_SCRIPT_ADMIN_URL", {

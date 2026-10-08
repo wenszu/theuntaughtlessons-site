@@ -35,13 +35,13 @@ function loadWithStub(transport) {
 }
 
 async function main() {
-  // ---- the Firebase secret is declared only when the new sender is on ----
+  // ---- the Firebase secret is always declared (firebase-tools analyses the code before it loads .env) ----
   let loaded = loadWithStub(undefined);
-  assert.deepStrictEqual(loaded.calls, [], 'unset MAIL_TRANSPORT: defineSecret is never called');
-  assert.strictEqual(loaded.secret, null);
+  assert.deepStrictEqual(loaded.calls, ['MAIL_RELAY_SECRET'], 'unset MAIL_TRANSPORT: the secret is still declared once');
+  assert.ok(loaded.secret);
   loaded = loadWithStub('appscript');
-  assert.deepStrictEqual(loaded.calls, [], 'appscript: defineSecret is never called');
-  assert.strictEqual(loaded.secret, null);
+  assert.deepStrictEqual(loaded.calls, ['MAIL_RELAY_SECRET'], 'appscript: the secret is still declared once');
+  assert.ok(loaded.secret);
   loaded = loadWithStub('resend');
   assert.deepStrictEqual(loaded.calls, ['MAIL_RELAY_SECRET'], 'resend: the secret is declared once');
   assert.ok(loaded.secret);

@@ -40,17 +40,12 @@ function mailTransport(env) {
   return String(source.MAIL_TRANSPORT || "").trim().toLowerCase() === "resend" ? "resend" : "appscript";
 }
 
-// The Firebase secret MAIL_RELAY_SECRET is declared ONLY when MAIL_TRANSPORT=resend.
-// firebase-tools adds every declared secret to a deploy and looks it up in Secret
-// Manager, even when no function binds it, so declaring it unconditionally would make
-// every deploy fail or prompt while the secret does not exist. With the default
-// (Apps Script) this stays null and the deploy is exactly as before.
-// ORDER: create the secret first (firebase functions:secrets:set MAIL_RELAY_SECRET),
-// and only then add MAIL_TRANSPORT=resend and deploy.
-let MAIL_RELAY_SECRET = null;
-if (mailTransport() === "resend") {
-  MAIL_RELAY_SECRET = require("firebase-functions/params").defineSecret("MAIL_RELAY_SECRET");
-}
+// The Firebase secret MAIL_RELAY_SECRET (created with: firebase functions:secrets:set MAIL_RELAY_SECRET) is always
+// declared now. It used to be declared only when MAIL_TRANSPORT=resend, but firebase-tools analyses the code before it
+// loads functions-admin/.env, so the condition was never true at deploy time and the deployed functions could not read
+// the secret ("Mail could not be sent: not-configured"). Whether mail goes through Resend is still decided by
+// MAIL_TRANSPORT at run time.
+const MAIL_RELAY_SECRET = require("firebase-functions/params").defineSecret("MAIL_RELAY_SECRET");
 
 function isMailAction(action) {
   return Object.prototype.hasOwnProperty.call(MAIL_ACTIONS, action);
