@@ -23,19 +23,14 @@
   },
   "functions": [
     {
-      "source": "functions",
-      "codebase": "group-sync",
-      "runtime": "nodejs20"
-    },
-    {
       "source": "functions-aiko",
       "codebase": "aiko",
-      "runtime": "nodejs20"
+      "runtime": "nodejs22"
     },
     {
       "source": "functions-admin",
       "codebase": "admin-actions",
-      "runtime": "nodejs20"
+      "runtime": "nodejs22"
     }
   ],
   "hosting": {

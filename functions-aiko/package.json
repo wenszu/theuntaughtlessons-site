@@ -3,14 +3,14 @@
   "description": "Firebase Function for Explain to Aiko AI scoring.",
   "private": true,
   "engines": {
-    "node": "20"
+    "node": "22"
   },
   "main": "index.js",
   "scripts": {
     "lint": "node --check index.js"
   },
   "dependencies": {
-    "firebase-functions": "^7.3.2"
+    "firebase-functions": "^7.4.0"
   },
   "overrides": {
     "qs": "6.16.0",
