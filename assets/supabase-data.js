@@ -1552,7 +1552,7 @@ function createSupabaseData(context = {}) {
     if (name.length > 200) throw invalidArgument("Please shorten your name to 200 characters or fewer.");
     if (goals.length > 2000) throw invalidArgument("Please shorten your goals to 2,000 characters or fewer.");
     if (avatarIconId && !AVATAR_ICON_IDS.includes(avatarIconId)) throw invalidArgument("Please choose one of the available avatars.");
-    await rpc("update_my_profile", { p_fields: pickKeys({ displayName: name, goals, avatarIconId }, PROFILE_KEYS) });
+    await rpc("update_my_profile", { p_fields: pickKeys({ displayName: name, goals, avatarIconId: avatarIconId || null }, PROFILE_KEYS) });
     return { name, goals, avatarIconId };
   }
 

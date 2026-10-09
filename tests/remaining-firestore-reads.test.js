@@ -241,6 +241,8 @@ const warningLines = (harness) => harness.warnings.map((line) => line.join(' '))
       assert.strictEqual(bad.outcome.error.message, message);
       assert.strictEqual(bad.fetches.length, 0);
     }
+    const noAvatar = await observe(() => current.updateMemberAccount({ name: 'Mia Lin', goals: '', avatarIconId: '' }), only({ before: (h) => h.onFetch('POST', '/rest/v1/rpc/update_my_profile', { saved: true }) }));
+    assert.deepStrictEqual(rpcOf(noAvatar, 'update_my_profile')[0].body, { p_fields: { displayName: 'Mia Lin', goals: '', avatarIconId: null } }, 'no avatar chosen travels as JSON null: the database accepts null (no avatar) but refuses an empty string');
     const refused = await observe(() => current.updateMemberAccount({ name: 'a' }), only({ before: (h) => h.onFetch('POST', '/rest/v1/rpc/update_my_profile', { __status: 400, body: { code: '22023', message: 'bad' } }) }));
     assert.ok(refused.outcome.error, 'a refusal is thrown to the page');
     assert.strictEqual(firestoreCalls(refused).length, 0, 'and Firestore is not tried instead');
