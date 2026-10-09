@@ -328,6 +328,8 @@ async function supabaseData() {
       supabaseUrl: SUPABASE_URL,
       publishableKey: SUPABASE_PUBLISHABLE_KEY,
       getIdToken: (forceRefresh) => auth.currentUser && auth.currentUser.getIdToken(forceRefresh === true),
+      // Used by the data layer only while utl_auth is "supabase" (it picks between the two itself).
+      getSupabaseAuthToken: (forceRefresh) => supabaseAuth().then((module) => module.getIdToken(forceRefresh === true)),
       previewActive: experiencePreviewActive,
       aggregateLearningProfileEvidence
     });
@@ -390,6 +392,37 @@ function startAdminSupabaseCopy(label, run) {
   } catch (error) {
     // Never matters to the admin flow.
   }
+}
+
+// -- Supabase-only member mode (docs/SUPABASE_CUTOVER_RUNBOOK.md, section 8) ------------------------------------------------------
+// Active exactly when localStorage utl_auth is "supabase": the person has a Supabase session and no Firebase user, so Firestore
+// refuses every request. The member data functions below then skip Firestore completely and use the Supabase data layer as the only
+// source (entry check, progress, rewards and streak, drafts, attempts, submissions, evidence, analytics, stability, sign in stamp).
+// Failures are thrown to the caller (so the completion queue and the pages see them), never swallowed. With any other value of
+// utl_auth none of this runs and every function is the unchanged Firebase code (and the optional Supabase copy of the data switch).
+async function supabaseOnlyRun(run) {
+  const result = await runSupabase(run);
+  if (!result.ok) throw result.error;
+  return result.value;
+}
+
+// The signed in person, or null. The first call of a page also links the Supabase account to the person (link_my_identity),
+// so every Supabase-only function asks for the user before it makes a data request.
+async function supabaseOnlyUser() {
+  const user = await getSignedInUser();
+  return user && user.uid ? user : null;
+}
+
+// One Supabase-only write. options.preview / options.signedOut are the answers the Firestore version gave in those cases;
+// without options.signedOut a missing session throws options.signedOutMessage.
+async function supabaseOnlyWrite(run, options = {}) {
+  if (experiencePreviewActive()) return options.preview || { preview: true, saved: false };
+  const user = await supabaseOnlyUser();
+  if (!user) {
+    if (options.signedOut) return options.signedOut;
+    throw new Error(options.signedOutMessage || "Your sign-in session is no longer active.");
+  }
+  return supabaseOnlyRun(run);
 }
 
 // -- admin read screens: shadow and Supabase-first reads (wave 3, docs/SUPABASE_PLAN_SERVERS_AND_ADMIN.md) -------------------
@@ -533,6 +566,10 @@ async function getEsDataGovernance(options = {}) {
 // support snapshot (it carries the learner's saved answers, which the database never returns), the cohort details (the cohorts
 // table cannot hold the draft and cancelled statuses) and the member progress (the edit, reset and repair tools of Student
 // Progress write whatever this answer holds back into Firestore, and the rebuilt progress is not complete enough for that).
+// They stay with Firebase only while Firestore is still where the tools write. When utl_server_writes is also "supabase", or the
+// session is Supabase-only (utl_auth supabase: no Firebase user), the tools write to Supabase (migrations 2370 and 2372) and these
+// three are answered by Supabase too (the cohort details with the draft, upcoming and cancelled words, the progress and the support
+// snapshot without the learner's saved answers).
 const ADMIN_CONSOLE_FIREBASE_ANSWERS = new Set(["getAllMemberWorkspaceProgress", "getMemberSupportSnapshot", "getCohortDetails"]);
 const ADMIN_CONSOLE_USABLE = {
   listAuthorizedMembers: (value) => Boolean(value) && Number(value.size) > 0,
@@ -586,9 +623,11 @@ async function runSupabaseAdminConsoleRead(name, args) {
 async function adminConsoleReadRoute(name, args, firebaseCall) {
   const mode = adminReadMode();
   if (mode === "firebase") return firebaseCall();
-  if (mode === "supabase" && !ADMIN_CONSOLE_FIREBASE_ANSWERS.has(name)) {
+  if (mode === "supabase" && (!ADMIN_CONSOLE_FIREBASE_ANSWERS.has(name) || directWritesToSupabase())) {
     const remote = await runSupabaseAdminConsoleRead(name, args);
     if (remote.ok && ADMIN_CONSOLE_USABLE[name](remote.value)) return remote.value;
+    // A Supabase-only session has no Firestore to fall back to, so a plain answer (an empty list, an empty cohort map) is the answer.
+    if (remote.ok && supabaseAuthActive() && remote.value !== null && remote.value !== undefined) return remote.value;
     console.warn(`Admin console read ${name}: Supabase gave no usable answer (${String((remote.error && remote.error.code) || (remote.ok ? "empty" : "unknown"))}); the Firebase answer is used.`);
     return firebaseCall();
   }
@@ -940,6 +979,8 @@ if (useLocalFirebaseEmulators) {
 // that chose ?utl_data=firebase and sessions already checked do nothing. A failed or offline read changes nothing.
 async function settleDataSourceAtPageLoad() {
   try {
+    // Supabase-only member mode: there is no Firebase session to read the member document with, and the data source is not a choice.
+    if (supabaseAuthActive()) return;
     const storage = window.localStorage;
     const user = await getSignedInUser();
     const email = user && user.email ? String(user.email).trim().toLowerCase() : "";
@@ -1494,6 +1535,10 @@ async function getOrganizationAccessAdminFromFirebase() {
 async function getCustomersConsoleFeatureFlag() {
   const user = await getSignedInUser();
   if (!user) return { enabled: false };
+  if (settingsReadsFromSupabase()) {
+    const remote = await runSite((site) => site.getFeatureFlag("customersConsole"));
+    if (remote.ok && remote.value && remote.value.found) return { enabled: remote.value.enabled === true };
+  }
   try {
     const snap = await getDoc(doc(requireFirestore(), "platformFeatureFlags", "customersConsole"));
     return { enabled: snap.exists() && snap.data().enabled === true };
@@ -1528,6 +1573,10 @@ async function getCustomerDetailForStaffFromFirebase(customerId) {
 async function getEsWorkspaceFeatureFlag() {
   const user = await getSignedInUser();
   if (!user) return { enabled: false };
+  if (settingsReadsFromSupabase()) {
+    const remote = await runSite((site) => site.getFeatureFlag("esWorkspace"));
+    if (remote.ok && remote.value && remote.value.found) return { enabled: remote.value.enabled === true };
+  }
   try {
     const snap = await getDoc(doc(requireFirestore(), "platformFeatureFlags", "esWorkspace"));
     return { enabled: snap.exists() && snap.data().enabled === true };
@@ -1599,6 +1648,8 @@ async function repairMemberExerciseProgress(userId) {
   const user = await getSignedInUser();
   if (!user) throw new Error("Please sign in with a UTL administrator account.");
   if (!userId) throw new Error("A learner user ID is required.");
+  // Supabase writes: progress lives in one table, so there is no second copy (Firestore completed_exercises against workspaceProgress) to repair.
+  if (directWritesToSupabase()) return { ok: true, repaired: 0 };
   const callable = httpsCallable(functions, "repairMemberExerciseProgress");
   const result = await callable({ userId });
   return result && result.data ? result.data : null;
@@ -1748,10 +1799,31 @@ async function accessFallbackMember(normalizedEmail) {
   return null;
 }
 
+// Supabase-only member mode (utl_auth is supabase, no Firebase user): the entry check answers from get_my_access with the shape of an
+// authorized_members document (name, email, role, status, expiryDate, cohort, and avatar and goals when the profile row has them).
+// Only the signed in person's own address can be answered (the database resolves the person from the token); another address is null.
+// null means "not a member" (the caller signs the person out), so a failed or hanging request is thrown, never turned into null.
+// There is no fallback and no Firestore call.
+async function getAuthorizedMemberSupabaseOnly(normalizedEmail) {
+  const user = await getSignedInUser();
+  if (!user || String(user.email || "").trim().toLowerCase() !== normalizedEmail) return null;
+  const answer = await supabaseOnlyRun((data) => data.getMemberRecordWithReason(normalizedEmail));
+  if (answer.member || (answer.reason !== "no_person" && answer.reason !== "not_signed_in")) return answer.member;
+  // "No person found" is only an answer when the account was linked to its person (or the link was definitively refused). If the link
+  // could not be tried (an error, a timeout, anything unknown) this first sign in must not be called "not a member", because the
+  // caller signs a person without a membership out. Throw instead; the page shows an error and the person is still signed in.
+  let status = null;
+  try { status = await (await supabaseAuth()).getLinkStatus(); } catch { status = null; }
+  const linkReason = String((status && status.reason) || "");
+  if (status && (status.linked === true || linkReason === "no_person" || linkReason === "person_inactive")) return null;
+  throw Object.assign(new Error("Your sign-in could not be matched to your membership yet. Please try again in a moment."), { code: "auth/link-failed" });
+}
+
 async function getAuthorizedMember(email) {
   const normalizedEmail = String(email || "").trim().toLowerCase();
   if (!normalizedEmail) return null;
 
+  if (supabaseAuthActive()) return getAuthorizedMemberSupabaseOnly(normalizedEmail);
   if (!supabaseModeActive()) return getAuthorizedMemberFirestore(normalizedEmail);
   let member;
   try {
@@ -1785,6 +1857,8 @@ async function getMemberAccount() {
   }
 
   const email = String(user.email).trim().toLowerCase();
+  // Supabase-only session (utl_auth is supabase, no Firebase user): the account record comes from get_my_account, in the same shape.
+  if (supabaseAuthActive()) return getMemberAccountSupabaseOnly(user, email);
   const readyDb = requireFirestore();
   const [memberSnap, userSnap] = await Promise.all([
     getDoc(doc(readyDb, "authorized_members", email)),
@@ -1807,6 +1881,25 @@ async function getMemberAccount() {
   };
 }
 
+// The account page record of a Supabase-only session. member is the authorized_members shaped object (name, goals, avatarIconId, cohort,
+// addedAt, role, status, expiryDate), workspaceProgress holds what the page needs to show "not started, in progress, completed".
+async function getMemberAccountSupabaseOnly(user, email) {
+  const account = await siteOrThrow((site) => site.getMyAccount());
+  if (!account || account.found !== true || account.hasMember !== true) {
+    throw new Error("This account does not have an active membership invite.");
+  }
+  return {
+    email,
+    authDisplayName: user.displayName || "",
+    authPhotoURL: user.photoURL || account.photoUrl || "",
+    signInProviderIds: Array.from(new Set((user.providerData || [])
+      .map((provider) => String(provider && provider.providerId || "").trim())
+      .filter(Boolean))),
+    member: account.member || {},
+    workspaceProgress: account.workspaceProgress || {}
+  };
+}
+
 async function updateMemberAccount(fields = {}) {
   const user = await getSignedInUser();
   if (!user || !user.email) {
@@ -1824,12 +1917,27 @@ async function updateMemberAccount(fields = {}) {
     throw new Error("Please choose one of the available avatars.");
   }
 
+  // Supabase-only session: the profile function of the signed in person (display name, goals, avatar), no Firestore call.
+  if (supabaseAuthActive()) {
+    await dataOrThrow((data) => data.updateMemberAccount({ name, goals, avatarIconId }));
+    return { name, goals, avatarIconId };
+  }
   await updateDoc(doc(requireFirestore(), "authorized_members", email), {
     name,
     goals: goals || null,
     avatarIconId: avatarIconId || null
   });
   return { name, goals, avatarIconId };
+}
+
+// The name a member types on the first visit (member-login/content-config.js): the name field of the member document. A Supabase-only session
+// saves it as the display name of the signed in person instead. Resolves nothing; a failure is thrown (the page logs it and goes on).
+async function saveMemberDisplayName(email, name) {
+  if (supabaseAuthActive()) {
+    await dataOrThrow((data) => data.updateMyProfile({ displayName: name }));
+    return;
+  }
+  await updateDoc(doc(requireFirestore(), "authorized_members", email), { name });
 }
 
 async function requireAuthorizedMember(user) {
@@ -2014,6 +2122,8 @@ async function authorizeMember(email, fields = {}) {
 
 async function saveUserProfile(user, member = {}, signInProvider = "") {
   if (!user || !user.uid) return;
+  // Supabase-only member mode: only the Supabase sign in record (no users document, no member document, no data source gate).
+  if (supabaseAuthActive()) return saveUserProfileSupabaseOnly(user, signInProvider);
 
   const email = user.email ? String(user.email).trim().toLowerCase() : "";
   const readyDb = requireFirestore();
@@ -2093,6 +2203,15 @@ async function saveUserProfile(user, member = {}, signInProvider = "") {
   }
 }
 
+// Supabase-only member mode: the sign in stamp (record_login) and the provider photo. Awaited, because the login page goes to the
+// workspace right after and a background request could be cut off, but never thrown: a failed stamp is a console warning and
+// must not stop a person from signing in. The account is linked to the person first (getSignedInUser does that once per page).
+async function saveUserProfileSupabaseOnly(user, signInProvider) {
+  try { await supabaseOnlyUser(); } catch { /* the steps below report their own failure */ }
+  const provider = ["emailLink", "google.com", "microsoft.com", "facebook.com", "password"].includes(signInProvider) ? signInProvider : "";
+  await recordSupabaseSignIn(user, provider, undefined);
+}
+
 async function recordSupabaseSignIn(user, provider, feedbackEnabled) {
   const photoUrl = user && typeof user.photoURL === "string" ? user.photoURL.trim() : "";
   const steps = [];
@@ -2108,6 +2227,8 @@ async function recordSupabaseSignIn(user, provider, feedbackEnabled) {
 async function getMemberWorkspaceProgress() {
   const user = await getSignedInUser();
   if (!user || !user.uid) return null;
+  // Supabase-only member mode: the view, rewards and streak included, comes from Supabase alone.
+  if (supabaseAuthActive()) return supabaseOnlyRun((data) => data.getMemberWorkspaceProgress({ adminRevision: true }));
 
   const readyDb = requireFirestore();
   // Supabase mode: Supabase is read alongside Firestore and merged in (Firestore is the base, Supabase
@@ -2182,14 +2303,12 @@ function emailTemplatesFromDoc(stored) {
 }
 
 async function saveEmailTemplate(id, data) {
-  await setDoc(doc(requireFirestore(), "settings", "emailTemplates"), {
-    [id]: data
-  }, { merge: true });
-  bridgeSettingsWrite("emailTemplates");
+  await writeSettingsDoc("emailTemplates", { [id]: data });
 }
 
 async function saveMemberWorkspaceProgress(progress = {}) {
   if (experiencePreviewActive()) return { preview: true, saved: false };
+  if (supabaseAuthActive()) return supabaseOnlyWrite((data) => data.saveMemberWorkspaceProgress(progress), { signedOutMessage: "A signed-in user is required to save workspace progress." });
   const user = await getSignedInUser();
   if (!user || !user.uid) {
     throw new Error("A signed-in Firebase user is required to save workspace progress.");
@@ -2211,6 +2330,7 @@ async function saveMemberWorkspaceProgress(progress = {}) {
 
 async function saveMemberRewards(incoming = {}) {
   if (experiencePreviewActive()) return { preview: true, saved: false };
+  if (supabaseAuthActive()) return supabaseOnlyWrite((data) => data.saveMemberRewards(incoming), { signedOutMessage: "A signed-in user is required to save rewards." });
   const user = await getSignedInUser();
   if (!user || !user.uid) throw new Error("A signed-in Firebase user is required to save rewards.");
   const readyDb = requireFirestore();
@@ -2312,6 +2432,10 @@ function programCompletionAdjustmentNeeded(member, options = {}) {
 }
 
 async function repairMemberProgramCompletionReward(userId, options = {}) {
+  return directWriteRoute("repairMemberProgramCompletionReward", [userId, options], () => repairMemberProgramCompletionRewardFromFirebase(userId, options));
+}
+
+async function repairMemberProgramCompletionRewardFromFirebase(userId, options = {}) {
   if (!userId) throw new Error("A user ID is required to repair the program completion reward.");
   const userRef = doc(requireFirestore(), "users", userId);
   let result = { repaired: false, mpEarned: 0, mpTotal: 0, rewards: null };
@@ -2466,13 +2590,23 @@ async function saveUserProgress(exerciseId, exerciseName, exercisePayload = {}) 
   // submission key and any queued retry all carry the same time (a retry must never count as a second
   // completion). Default mode leaves the payload exactly as it arrived.
   const useSupabase = supabaseModeActive();
-  if (useSupabase && exercisePayload && !exercisePayload.completed_at && !exercisePayload.completedAt && !exercisePayload.submitted_at) {
+  // Supabase-only member mode (utl_auth is supabase): the completion goes to Supabase alone, with the same stamp, queue and banner.
+  const supabaseOnly = supabaseAuthActive();
+  if ((useSupabase || supabaseOnly) && exercisePayload && !exercisePayload.completed_at && !exercisePayload.completedAt && !exercisePayload.submitted_at) {
     exercisePayload = Object.assign({}, exercisePayload, { completed_at: new Date().toISOString() });
   }
   try {
     const user = await getSignedInUser();
     if (!user || !user.uid) {
       throw new Error("Your sign-in session is no longer active.");
+    }
+    if (supabaseOnly) {
+      const recoveredKeys = matchingProgressSyncKeys(readProgressSyncQueue(), exerciseId, exercisePayload);
+      await supabaseOnlyRun((data) => data.saveUserProgress(exerciseId, exerciseName, exercisePayload));
+      const remaining = clearQueuedProgressSync(exerciseId, exercisePayload);
+      if (!remaining && recoveredKeys.length) showProgressSyncSuccess();
+      window.dispatchEvent(new CustomEvent("utl:activity-completed", { detail: { activityId: exerciseId, activityTitle: exerciseName } }));
+      return { saved: true };
     }
     const docRef = doc(requireFirestore(), "users", user.uid, "completed_exercises", exerciseId);
     await setDoc(docRef, {
@@ -2546,6 +2680,17 @@ async function saveUserProgress(exerciseId, exerciseName, exercisePayload = {}) 
     if (useSupabase) startSupabaseBridge("completion", exerciseId, (data) => data.saveUserProgress(exerciseId, exerciseName, exercisePayload));
     return { saved: true };
   } catch (error) {
+    // Supabase-only: an answer that no retry can change (the database refused the input, or a limit was reached) is not queued,
+    // because it would stay in the queue and on the banner for good. It is reported and thrown; the answer stays in this browser.
+    if (supabaseOnly && ["22023", "54000", "data/invalid-argument"].includes(String((error && error.code) || ""))) {
+      window.dispatchEvent(new CustomEvent("utl:stability-event", { detail: {
+        eventType: "sync_error",
+        severity: "warning",
+        activityId: exerciseId,
+        message: `Exercise progress was refused by the data service (${String(error.code)}) and was not queued`
+      } }));
+      throw error;
+    }
     queueProgressSync(exerciseId, exerciseName, exercisePayload, error);
     window.dispatchEvent(new CustomEvent("utl:stability-event", { detail: {
       eventType: "sync_error",
@@ -2587,6 +2732,7 @@ async function saveExerciseAttemptFirestore(attemptPayload = {}) {
 
 // Firestore first, exactly as before; with the switch on, a best-effort Supabase copy follows once the Firestore write has succeeded.
 async function saveExerciseAttempt(attemptPayload = {}) {
+  if (supabaseAuthActive()) return supabaseOnlyWrite((data) => data.saveExerciseAttempt(attemptPayload), { signedOutMessage: "A signed-in user is required to save an exercise attempt." });
   const result = await saveExerciseAttemptFirestore(attemptPayload);
   if (supabaseModeActive() && result && result.saved !== false && !result.preview) {
     startSupabaseBridge("exercise attempt", attemptPayload.exerciseId, (data) => data.saveExerciseAttempt(attemptPayload));
@@ -2597,6 +2743,15 @@ async function saveExerciseAttempt(attemptPayload = {}) {
 async function getExerciseAttempts(exerciseId) {
   const user = await getSignedInUser();
   if (!user || !user.uid) return [];
+  if (supabaseAuthActive()) {
+    // An id the catalog does not know has no attempts; any other failure is thrown, as a failing Firestore read was.
+    try {
+      return await supabaseOnlyRun((data) => data.getExerciseAttempts(exerciseId));
+    } catch (error) {
+      if (error && error.code === "data/unknown-activity") return [];
+      throw error;
+    }
+  }
   // Supabase mode: both sources, a union by attemptId. One failing source leaves the other; an id the
   // catalog cannot resolve counts as a Supabase failure and leaves the Firestore attempts.
   const remotePromise = supabaseModeActive() ? runSupabase((data) => data.getExerciseAttempts(exerciseId)) : null;
@@ -2643,6 +2798,7 @@ async function saveExerciseDraftFirestore(exerciseId, exerciseTitle, draftPayloa
 
 // Firestore first, exactly as before; with the switch on, a best-effort Supabase copy follows once the Firestore write has succeeded.
 async function saveExerciseDraft(exerciseId, exerciseTitle, draftPayload = {}) {
+  if (supabaseAuthActive()) return supabaseOnlyWrite((data) => data.saveExerciseDraft(exerciseId, exerciseTitle, draftPayload), { signedOutMessage: "A signed-in user is required to save an exercise draft." });
   const result = await saveExerciseDraftFirestore(exerciseId, exerciseTitle, draftPayload);
   if (supabaseModeActive() && result && result.saved !== false && !result.preview) {
     startSupabaseBridge("draft", exerciseId, (data) => data.saveExerciseDraft(exerciseId, exerciseTitle, draftPayload));
@@ -2655,6 +2811,13 @@ async function getExerciseWork(exerciseId) {
   if (!user || !user.uid) return { draft: null, submissions: [] };
   const safeExerciseId = String(exerciseId || "").trim().slice(0, 100);
   if (!safeExerciseId) return { draft: null, submissions: [] };
+  if (supabaseAuthActive()) {
+    // Like the Firestore reads below, a failed read never throws: the page gets an empty record (and a stability event says why).
+    const outcome = await runSupabase((data) => data.getExerciseWork(exerciseId));
+    if (outcome.ok && outcome.value) return outcome.value;
+    if (!outcome.ok) reportSupabaseFailure("exercise work read", exerciseId, outcome.error);
+    return { draft: null, submissions: [] };
+  }
   // Supabase mode: both sources; the newer draft wins and the submissions are a union by id. One
   // failing source leaves the other (the Firestore reads below never throw, as today).
   const remotePromise = supabaseModeActive() ? runSupabase((data) => data.getExerciseWork(exerciseId)) : null;
@@ -2722,6 +2885,7 @@ async function saveExerciseSubmissionFirestore(submissionPayload = {}) {
 
 // Firestore first, exactly as before; with the switch on, a best-effort Supabase copy follows once the Firestore write has succeeded.
 async function saveExerciseSubmission(submissionPayload = {}) {
+  if (supabaseAuthActive()) return supabaseOnlyWrite((data) => data.saveExerciseSubmission(submissionPayload), { signedOutMessage: "A signed-in user is required to save an exercise submission." });
   const result = await saveExerciseSubmissionFirestore(submissionPayload);
   if (supabaseModeActive() && result && result.saved !== false && !result.preview) {
     startSupabaseBridge("practice round", submissionPayload.exerciseId, (data) => data.saveExerciseSubmission(submissionPayload));
@@ -2947,6 +3111,7 @@ async function saveLearningProfileEvidenceFirestore(input = {}) {
 
 // Firestore first, exactly as before; with the switch on, a best-effort Supabase copy follows once the Firestore write has succeeded.
 async function saveLearningProfileEvidence(input = {}) {
+  if (supabaseAuthActive()) return supabaseOnlyWrite((data) => data.saveLearningProfileEvidence(input), { signedOutMessage: "A signed-in user is required to save learning-profile evidence." });
   const result = await saveLearningProfileEvidenceFirestore(input);
   if (supabaseModeActive() && result && result.saved !== false && !result.preview) {
     startSupabaseBridge("learning evidence", input.exerciseId, (data) => data.saveLearningProfileEvidence(input));
@@ -3025,6 +3190,7 @@ async function saveEngagementAnalyticsFirestore(payload = {}) {
 
 // Firestore first, exactly as before; with the switch on, a best-effort Supabase copy follows once the Firestore write has succeeded.
 async function saveEngagementAnalytics(payload = {}) {
+  if (supabaseAuthActive()) return supabaseOnlyWrite((data) => data.saveEngagementAnalytics(payload), { preview: { saved: false, reason: "preview" }, signedOut: { saved: false, reason: "signed-out" } });
   const result = await saveEngagementAnalyticsFirestore(payload);
   if (supabaseModeActive() && result && result.saved !== false && !result.preview) {
     startSupabaseBridge("engagement analytics", payload.activity && payload.activity.activityId, (data) => data.saveEngagementAnalytics(payload));
@@ -3065,6 +3231,8 @@ async function saveStabilityEventFirestore(input = {}) {
 
 // Firestore first, exactly as before; with the switch on, a best-effort Supabase copy follows once the Firestore write has succeeded.
 async function saveStabilityEvent(input = {}) {
+  // Supabase-only: a failed save is thrown without raising another stability event (the monitor would otherwise loop).
+  if (supabaseAuthActive()) return supabaseOnlyWrite((data) => data.saveStabilityEvent(input), { preview: { saved: false, reason: "preview" }, signedOut: { saved: false, reason: "signed-out" } });
   const result = await saveStabilityEventFirestore(input);
   if (supabaseModeActive() && result && result.saved !== false && !result.preview) {
     startSupabaseBridge("stability event", input.activityId, (data) => data.saveStabilityEvent(input), { silent: true });
@@ -3143,6 +3311,14 @@ const tsaItemBridges = new Map();
 
 // Firestore first, exactly as before; with the switch on, a best-effort Supabase copy follows once the Firestore write has succeeded.
 async function saveAssessmentItemAttempt(attemptPayload = {}) {
+  if (supabaseAuthActive()) {
+    // Supabase-only: the attempt is the first and only write; the scoring comparison of the same attempt waits for it.
+    const attemptId = String(attemptPayload.attemptId || "").trim();
+    const saving = supabaseOnlyWrite((data) => data.saveAssessmentItemAttempt(attemptPayload), { signedOutMessage: "A signed-in user is required to save assessment item results." });
+    const settled = saving.then(() => {}, () => {}).then(() => { if (tsaItemBridges.get(attemptId) === settled) tsaItemBridges.delete(attemptId); });
+    if (attemptId) tsaItemBridges.set(attemptId, settled);
+    return saving;
+  }
   const result = await saveAssessmentItemAttemptFirestore(attemptPayload);
   if (supabaseModeActive() && result && result.saved !== false && !result.preview) {
     try {
@@ -3280,6 +3456,13 @@ async function getCohortDetailsFromFirebase() {
 async function setCohortDetails(cohortName, details) {
   const key = String(cohortName || "").trim();
   if (!key) throw new Error("A cohort name is required.");
+  // Supabase writes (utl_server_writes supabase, or a Supabase-only session): the cohorts table is the only writer (migration 2370 keeps
+  // the draft, upcoming and cancelled words). No Firestore call; a failure is thrown.
+  if (directWritesToSupabase()) {
+    try { await getSignedInUser(); } catch { /* the request reports its own sign in problem */ }
+    await dataOrThrow((data) => data.mirrorAdminCohort(key, details));
+    return;
+  }
   const readyDb = requireFirestore();
   await setDoc(doc(readyDb, "settings", "cohorts"), { [key]: details }, { merge: true });
   // Supabase mode: a background copy of the stored entry (the merge may hold more than this save sent).
@@ -3294,8 +3477,14 @@ async function renameCohort(oldName, newName, memberEmails) {
   const to = String(newName || "").trim();
   if (!from || !to) throw new Error("Both the current and new cohort name are required.");
   if (from === to) return { renamed: 0 };
-  const readyDb = requireFirestore();
   const emails = Array.isArray(memberEmails) ? memberEmails : [];
+  // Supabase writes: the cohort row and every enrollment of it move to the new name in one database function. No Firestore call.
+  if (directWritesToSupabase()) {
+    try { await getSignedInUser(); } catch { /* the request reports its own sign in problem */ }
+    await dataOrThrow((data) => data.mirrorAdminCohortRename(from, to, undefined));
+    return { renamed: emails.length };
+  }
+  const readyDb = requireFirestore();
   await Promise.all(emails.map((email) => updateDoc(doc(readyDb, "authorized_members", email), { cohort: to })));
   const details = await getCohortDetailsFromFirebase();
   if (details[from]) {
@@ -3313,7 +3502,13 @@ async function renameCohort(oldName, newName, memberEmails) {
   return { renamed: emails.length };
 }
 
+// The Student Progress tools (edit, reset, reward repair). Firebase writes the Firestore user document; with utl_server_writes "supabase", or
+// in a Supabase-only session, the staff database functions of migration 2372 do the work instead (directWriteRoute): same answer shape.
 async function replaceMemberWorkspaceProgress(userId, nextProgress = {}, options = {}) {
+  return directWriteRoute("replaceMemberWorkspaceProgress", [userId, nextProgress, options], () => replaceMemberWorkspaceProgressFromFirebase(userId, nextProgress, options));
+}
+
+async function replaceMemberWorkspaceProgressFromFirebase(userId, nextProgress = {}, options = {}) {
   if (!userId) throw new Error("A user UID is required.");
   const readyDb = requireFirestore();
   const userRef = doc(readyDb, "users", userId);
@@ -3366,7 +3561,11 @@ async function replaceMemberWorkspaceProgress(userId, nextProgress = {}, options
 }
 
 async function resetMemberWorkspaceProgress(userId) {
-  return replaceMemberWorkspaceProgress(userId, {
+  return directWriteRoute("resetMemberWorkspaceProgress", [userId], () => resetMemberWorkspaceProgressFromFirebase(userId));
+}
+
+async function resetMemberWorkspaceProgressFromFirebase(userId) {
+  return replaceMemberWorkspaceProgressFromFirebase(userId, {
     version: 1,
     orientation: { ready: false, open: false },
     lessons: {},
@@ -3379,6 +3578,7 @@ async function resetMemberWorkspaceProgress(userId) {
 async function getUserFeedbackEnabled() {
   const user = await getSignedInUser();
   if (!user || !user.uid) return null;
+  if (supabaseAuthActive()) return supabaseOnlyRun((data) => data.getMyFeedbackEnabled());
 
   const userSnap = await getDoc(doc(requireFirestore(), "users", user.uid));
   if (!userSnap.exists()) return null;
@@ -3388,6 +3588,12 @@ async function getUserFeedbackEnabled() {
 
 async function setUserFeedbackEnabled(uid, enabled) {
   if (!uid) throw new Error("A user UID is required to set feedbackEnabled.");
+  // Supabase writes: the profile row of the person is the only copy (migration 2372 finds a Supabase-only person too). No Firestore call.
+  if (directWritesToSupabase()) {
+    try { await getSignedInUser(); } catch { /* the request reports its own sign in problem */ }
+    await dataOrThrow((data) => data.mirrorAdminFeedbackEnabled(uid, enabled));
+    return;
+  }
   await updateDoc(doc(requireFirestore(), "users", uid), {
     feedbackEnabled: Boolean(enabled)
   });
@@ -3479,6 +3685,11 @@ async function logMemberSupportPreview(snapshot = {}) {
   const adminUser = await getSignedInUser();
   if (!adminUser?.uid) throw new Error("An administrator session is required.");
   const eventId = `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+  // Supabase writes: the audit row of the database is the only record (admin_mirror_support_preview, person ids only). No Firestore call.
+  if (directWritesToSupabase()) {
+    await dataOrThrow((data) => data.mirrorAdminSupportPreview(eventId, snapshot.uid, snapshot.email));
+    return { logged: true, eventId };
+  }
   await setDoc(doc(requireFirestore(), "support_preview_audit", eventId), {
     action: "opened",
     adminUid: adminUser.uid,
@@ -3490,6 +3701,171 @@ async function logMemberSupportPreview(snapshot = {}) {
   });
   startAdminSupabaseCopy("support preview audit", (data) => data.mirrorAdminSupportPreview(eventId, snapshot.uid, snapshot.email));
   return { logged: true, eventId };
+}
+
+// -- the last direct Firestore reads and writes (docs/SUPABASE_REMAINING_FIRESTORE_READS.md) ---------------------------------------
+// Settings, feature flags, the account page, the admin gate, the Student Progress tools, cohort details and the public certificate
+// check page read or write Firestore straight from the browser. Each function below keeps its Firestore code unchanged (and runs it with
+// every flag on firebase) and takes the Supabase path only when one of these holds:
+//   * localStorage utl_auth is "supabase" (a Supabase-only session: there is no Firebase user, so Firestore refuses the request), or
+//   * the reads or writes switch says so: utl_server_reads "supabase" (settings reads, feature flags, the public certificate check) or
+//     utl_server_writes "supabase" (settings writes, cohort details, the Student Progress tools, the feedback switch, the support audit).
+// A Supabase write is the ONLY write (no Firestore call, no second path); a failure is thrown to the caller. Supabase reads fall back to
+// Firestore when Supabase has no usable answer, which fails by itself in a Supabase-only session.
+let siteModulePromise = null;
+let siteApiPromise = null;
+
+function loadSiteModule() {
+  if (!siteModulePromise) {
+    siteModulePromise = import("./supabase-site.js").catch((error) => {
+      siteModulePromise = null;
+      throw error;
+    });
+  }
+  return siteModulePromise;
+}
+
+function loadSiteApi() {
+  if (!siteApiPromise) {
+    siteApiPromise = loadSiteModule().then((module) => module.createSiteApi({
+      supabaseUrl: SUPABASE_URL,
+      publishableKey: SUPABASE_PUBLISHABLE_KEY,
+      getIdToken: siteIdToken
+    })).catch((error) => {
+      siteApiPromise = null;
+      throw error;
+    });
+  }
+  return siteApiPromise;
+}
+
+// One request of the site module, never longer than SUPABASE_WAIT_MS. Resolves { ok: true, value } or { ok: false, error }; never rejects.
+async function runSite(run) {
+  let timer = null;
+  try {
+    const api = await loadSiteApi();
+    const value = await Promise.race([
+      run(api),
+      new Promise((resolve, reject) => {
+        timer = window.setTimeout(() => {
+          reject(Object.assign(new Error("The data service did not answer in time."), { code: "network/timeout" }));
+        }, SUPABASE_WAIT_MS);
+      })
+    ]);
+    return { ok: true, value };
+  } catch (error) {
+    return { ok: false, error };
+  } finally {
+    if (timer !== null) window.clearTimeout(timer);
+  }
+}
+
+async function siteOrThrow(run) {
+  const result = await runSite(run);
+  if (!result.ok) throw result.error;
+  return result.value;
+}
+
+// The data layer (assets/supabase-data.js) for a Supabase-only write: a failure is thrown, never swallowed.
+async function dataOrThrow(run) {
+  const result = await runSupabase(run);
+  if (!result.ok) throw result.error;
+  return result.value;
+}
+
+function settingsReadsFromSupabase() {
+  return supabaseAuthActive() || adminReadMode() === "supabase";
+}
+
+function directWritesToSupabase() {
+  return supabaseAuthActive() || staffWriteMode() === "supabase";
+}
+
+// A Student Progress tool or similar write that Firestore takes straight from the browser. In a Supabase-only session, or with
+// utl_server_writes "supabase", the database function is the only writer; otherwise the old route (Firebase, plus the shadow dry run).
+async function directWriteRoute(name, args, firebaseCall) {
+  if (supabaseAuthActive() && staffWriteMode() !== "supabase") {
+    try { await getSignedInUser(); } catch { /* the request reports its own sign in problem */ }
+    return (await loadStaffWrites()).writes.run(name, args, {});
+  }
+  return staffWriteRoute(name, args, firebaseCall);
+}
+
+// The public certificate check page (verify/index.html): the Firestore document public_credentials/<id> as a plain object, or null when
+// there is none. Anyone may read it, so this works for a logged out visitor in every mode. Supabase first (utl_server_reads "supabase" or a
+// Supabase-only browser): get_public_credential, anonymous, in the same field names. When Supabase has no such certificate (a revoked one is
+// not returned by the database function, or the copy has not caught up) Firestore is asked. With utl_server_reads "shadow" Firestore answers
+// and Supabase is compared in the background (field names only).
+async function getPublicCredential(credentialId) {
+  const id = String(credentialId || "").trim().toUpperCase();
+  const fromFirestore = async () => {
+    const snap = await getDoc(doc(requireFirestore(), "public_credentials", id));
+    return snap.exists() ? (snap.data() || {}) : null;
+  };
+  const mode = adminReadMode();
+  if (mode === "supabase" || supabaseAuthActive()) {
+    const remote = await runSite((site) => site.getPublicCredential(id));
+    if (remote.ok && remote.value) return remote.value;
+    return fromFirestore();
+  }
+  if (mode === "shadow") {
+    const pending = runSite((site) => site.getPublicCredential(id));
+    const stored = await fromFirestore();
+    pending.then(async (remote) => {
+      if (!remote.ok) {
+        console.warn(`Public credential shadow: Supabase did not answer (${String((remote.error && remote.error.code) || "unknown")}).`);
+        return;
+      }
+      const result = (await loadSiteModule()).compareCredential(stored, remote.value);
+      console.warn(result.same ? "Public credential shadow: match" : `Public credential shadow: ${result.differences.length} difference(s) - ${result.differences.join("; ")}`);
+    }).catch(() => {});
+    return stored;
+  }
+  return fromFirestore();
+}
+
+// The administrator gate of the admin page: the role word of the member record of this address ("admin", "owner", "member", or "" when
+// there is none). Firestore reads authorized_members/<address>. A Supabase-only session asks get_my_access instead (the caller's own
+// record; a platform owner reads as "admin"). A failure is thrown and the page treats it as no role.
+async function getAdminRole(email) {
+  const address = String(email || "").trim().toLowerCase();
+  if (supabaseAuthActive()) {
+    let access;
+    try {
+      access = await dataOrThrow((data) => data.getMyAccess());
+    } catch (error) {
+      // Marked so the admin page can tell an outage from "this account is not an administrator".
+      throw Object.assign(error instanceof Error ? error : new Error(String(error)), { adminCheckFailed: true });
+    }
+    return access && access.found && access.isAdmin ? "admin" : "";
+  }
+  const snap = await getDoc(doc(requireFirestore(), "authorized_members", address));
+  return snap.exists() ? ((snap.data() || {}).role || "") : "";
+}
+
+// "Is this address a member?" for the admin "send login link" box: authorized_members/<address> exists. A Supabase-only session asks
+// admin_member_exists (platform owners only).
+async function memberRecordExists(email) {
+  const address = String(email || "").trim().toLowerCase();
+  if (supabaseAuthActive()) {
+    const answer = await siteOrThrow((site) => site.memberExists(address));
+    return Boolean(answer && answer.exists === true);
+  }
+  const snap = await getDoc(doc(requireFirestore(), "authorized_members", address));
+  return snap.exists();
+}
+
+// The admin console invitation. Firebase: the email link (sendSignInInvite). A Supabase-only session: the Edge Function auth-admin, which also
+// makes the sign in account of a person who has none yet (sign up is off). When that function is off or not deployed (answers 404, or cannot
+// be reached) the plain email link is sent instead, which only works for a person who already has an account.
+async function sendAdminSignInInvite(email) {
+  if (!supabaseAuthActive()) return sendSignInInvite(email);
+  try {
+    await (await loadSiteApi()).authAdminInvite(email, "member");
+  } catch (error) {
+    if (!error || error.code !== "unavailable") throw error;
+    return sendSignInInvite(email);
+  }
 }
 
 // -- site settings ----------------------------------------------------------------------------------
@@ -3513,6 +3889,12 @@ async function readSettingsDocFirestore(docId) {
 }
 
 async function readSettingsDoc(docId, view) {
+  // Supabase first (utl_server_reads "supabase", or a Supabase-only session): the app_settings row, when it holds something. An
+  // empty or hidden row, or any failure, goes on to the Firestore code below (which only the public documents answer without a session).
+  if (settingsReadsFromSupabase()) {
+    const remote = await runSupabase((data) => data.getAppSetting(docId));
+    if (remote.ok && remote.value && remote.value.found && Object.keys(remote.value.value || {}).length > 0) return remote.value.value;
+  }
   if (!supabaseModeActive()) return readSettingsDocFirestore(docId);
   let stored;
   try {
@@ -3561,6 +3943,31 @@ function bridgeSettingsWrite(docId) {
   settingsCopyChain.set(docId, next);
 }
 
+// Supabase writes of a settings document (utl_server_writes "supabase", or a Supabase-only session): the Firestore merge of setDoc(..., { merge: true })
+// done on the stored row, then the whole document goes to admin_set_app_setting (platform owners only). Saves of one setting run one
+// after the other, so two quick saves cannot overwrite each other. No Firestore call. A refusal or a failure is thrown to the admin.
+const settingsSupabaseChain = new Map();
+function writeSettingsToSupabase(docId, partial) {
+  const previous = settingsSupabaseChain.get(docId) || Promise.resolve();
+  const next = previous.then(() => {}, () => {}).then(async () => {
+    try { await getSignedInUser(); } catch { /* the request reports its own sign in problem */ }
+    const site = await loadSiteModule();
+    await dataOrThrow(async (data) => {
+      const current = await data.getAppSetting(docId);
+      return data.saveAppSetting(docId, site.mergeSettings(current && current.found ? current.value : {}, partial));
+    });
+  });
+  settingsSupabaseChain.set(docId, next.then(() => {}, () => {}));
+  return next;
+}
+
+// setDoc(settings/<docId>, partial, { merge: true }) with the Supabase copy afterwards, or Supabase alone (see above).
+async function writeSettingsDoc(docId, partial) {
+  if (directWritesToSupabase()) return writeSettingsToSupabase(docId, partial);
+  await setDoc(doc(requireFirestore(), "settings", docId), partial, { merge: true });
+  bridgeSettingsWrite(docId);
+}
+
 function feedbackSettingFromDoc(stored) {
   if (stored === null) return true;
   return stored.defaultFeedbackEnabled !== false;
@@ -3571,10 +3978,7 @@ async function getGlobalFeedbackSetting() {
 }
 
 async function setGlobalFeedbackSetting(enabled) {
-  await setDoc(doc(requireFirestore(), "settings", "feedback"), {
-    defaultFeedbackEnabled: Boolean(enabled)
-  }, { merge: true });
-  bridgeSettingsWrite("feedback");
+  await writeSettingsDoc("feedback", { defaultFeedbackEnabled: Boolean(enabled) });
 }
 
 function publicFindLevelSettingFromDoc(stored) {
@@ -3587,10 +3991,7 @@ async function getPublicFindLevelSetting() {
 }
 
 async function setPublicFindLevelSetting(visible) {
-  await setDoc(doc(requireFirestore(), "settings", "publicSite"), {
-    findLevelVisible: Boolean(visible)
-  }, { merge: true });
-  bridgeSettingsWrite("publicSite");
+  await writeSettingsDoc("publicSite", { findLevelVisible: Boolean(visible) });
 }
 
 function getDefaultEngagementSettings() {
@@ -3639,8 +4040,7 @@ async function getEngagementSettings() {
 }
 
 async function setEngagementSettings(partial) {
-  await setDoc(doc(requireFirestore(), "settings", "engagement"), partial, { merge: true });
-  bridgeSettingsWrite("engagement");
+  await writeSettingsDoc("engagement", partial);
 }
 
 function getDefaultRewardSettings() {
@@ -3718,8 +4118,7 @@ async function getRewardSettings() {
 }
 
 async function setRewardSettings(partial) {
-  await setDoc(doc(requireFirestore(), "settings", "rewards"), partial, { merge: true });
-  bridgeSettingsWrite("rewards");
+  await writeSettingsDoc("rewards", partial);
 }
 
 function getDefaultAssessmentVisibility() {
@@ -3736,8 +4135,7 @@ async function getAssessmentVisibility() {
 }
 
 async function setAssessmentVisibility(partial) {
-  await setDoc(doc(requireFirestore(), "settings", "assessments"), partial, { merge: true });
-  bridgeSettingsWrite("assessments");
+  await writeSettingsDoc("assessments", partial);
 }
 
 function getDefaultPublicAssessmentSettings() {
@@ -3760,8 +4158,7 @@ async function getPublicAssessmentSettings() {
   }
 }
 async function setPublicAssessmentSettings(partial) {
-  await setDoc(doc(requireFirestore(), "settings", "public_assessments"), partial, { merge: true });
-  bridgeSettingsWrite("public_assessments");
+  await writeSettingsDoc("public_assessments", partial);
 }
 
 function getDefaultPaymentSettings() {
@@ -3786,8 +4183,7 @@ async function getPaymentSettings() {
   }
 }
 async function setPaymentSettings(partial) {
-  await setDoc(doc(requireFirestore(), "settings", "payments"), partial, { merge: true });
-  bridgeSettingsWrite("payments");
+  await writeSettingsDoc("payments", partial);
 }
 async function createCheckoutSession({ program, successUrl, cancelUrl }) {
   // Checkout path, per browser, for the Stripe test mode rehearsal: localStorage utl_payments is "supabase" or "firebase"
@@ -3832,8 +4228,7 @@ async function getAdminVisibilitySettings() {
   }
 }
 async function setAdminVisibilitySettings(partial) {
-  await setDoc(doc(requireFirestore(), "settings", "admin_visibility"), partial, { merge: true });
-  bridgeSettingsWrite("admin_visibility");
+  await writeSettingsDoc("admin_visibility", partial);
 }
 function getDefaultTsaScoringSettings() {
   return { speakGenAiEnabled: false, actGenAiEnabled: false };
@@ -3853,8 +4248,7 @@ async function getTsaScoringSettings() {
   }
 }
 async function setTsaScoringSettings(partial) {
-  await setDoc(doc(requireFirestore(), "settings", "tsa_scoring"), partial, { merge: true });
-  bridgeSettingsWrite("tsa_scoring");
+  await writeSettingsDoc("tsa_scoring", partial);
 }
 async function saveTsaScoringComparisonFirestore(payload = {}) {
   if (experiencePreviewActive()) return { preview: true, saved: false };
@@ -3883,6 +4277,10 @@ async function saveTsaScoringComparisonFirestore(payload = {}) {
 // Firestore first, exactly as before; with the switch on, a best-effort Supabase copy follows once the Firestore write has succeeded.
 // The copy waits for the Supabase copy of the same attempt, which the database requires to exist first.
 async function saveTsaScoringComparison(payload = {}) {
+  if (supabaseAuthActive()) {
+    await (tsaItemBridges.get(String(payload.attemptId || "").trim()) || Promise.resolve());
+    return supabaseOnlyWrite((data) => data.saveTsaScoringComparison(payload), { signedOutMessage: "A signed-in user is required to save scoring calibration data." });
+  }
   const result = await saveTsaScoringComparisonFirestore(payload);
   if (supabaseModeActive() && result && result.saved !== false && !result.preview) {
     const attemptId = String(payload.attemptId || "").trim();
@@ -3913,6 +4311,11 @@ export {
   firebaseInitError,
   getAuthorizedMember,
   getMemberAccount,
+  saveMemberDisplayName,
+  getPublicCredential,
+  getAdminRole,
+  memberRecordExists,
+  sendAdminSignInInvite,
   getMyWorkspaces,
   getMyEsStatus,
   getMyOrganizationAccess,

@@ -46,6 +46,21 @@ assert.ok(plan.warnings.some((w) => w.includes('cohort "Batch 7" is not in setti
 const daveEnr = t.enrollments.find((e) => e.person_id === uuidFor('person:dave@example.com'));
 assert.equal(daveEnr.cohort_id, batch7.id);
 
+// Cohort statuses: the six words of the admin console (migration 2370), upcoming stored as planned, an unknown word as active, a cohort made
+// from a member value as active. The existing snapshot keeps its two cohorts (completed, active).
+assert.equal(t.cohorts.find((c) => c.name === 'TSA-01-ADMU-01').status, 'completed');
+assert.equal(batch7.status, 'active');
+{
+  const words = JSON.parse(JSON.stringify(snapshot));
+  const doc = words.collections.settings.find((d) => d.id === 'cohorts');
+  const sent = { Draft: 'draft', Cancelled: 'cancelled', Upcoming: 'upcoming', Planned: 'planned', Active: 'active', Completed: 'completed', Archived: 'archived', Odd: 'whatever', Blank: '' };
+  Object.keys(sent).forEach((name) => { doc.data[name] = { status: sent[name] }; });
+  const stored = {};
+  buildPlan(words, catalog, { importDate: '2026-10-06T00:00:00.000Z', runId: uuidFor('run:test') }).tables.cohorts.forEach((c) => { stored[c.name] = c.status; });
+  assert.deepStrictEqual([stored.Draft, stored.Cancelled, stored.Upcoming, stored.Planned, stored.Active, stored.Completed, stored.Archived, stored.Odd, stored.Blank],
+    ['draft', 'cancelled', 'planned', 'planned', 'active', 'completed', 'archived', 'active', 'active']);
+}
+
 // Enrollments: Firestore enrollment merged with member fields; Carol created from member only.
 const aliceEnr = t.enrollments.find((e) => e.person_id === alice);
 assert.equal(aliceEnr.legacy_firestore_id, 'enrollments/enr-alice');

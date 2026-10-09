@@ -176,7 +176,7 @@ async function rejects(promise) { try { await promise; } catch (error) { return 
     assert.equal(mod.authFlagIsSupabase({ getItem() { throw new Error('blocked'); } }), false);
   });
   await check('the surface the site uses exists', () => {
-    ['getSignedInUser', 'onAuthChange', 'getIdToken', 'linkPerson', 'signInWithGoogle', 'signInWithMicrosoft', 'signInWithFacebook', 'getRedirectResult',
+    ['getSignedInUser', 'onAuthChange', 'getIdToken', 'linkPerson', 'getLinkStatus', 'signInWithGoogle', 'signInWithMicrosoft', 'signInWithFacebook', 'getRedirectResult',
       'sendEmailLink', 'isEmailLinkUrl', 'signInWithEmailLink', 'signInWithEmailCode', 'signInWithPassword', 'signOut'].forEach((name) => assert.equal(typeof mod[name], 'function', name));
   });
 
@@ -296,6 +296,21 @@ async function rejects(promise) { try { await promise; } catch (error) { return 
     const hanging = newAuth(mod, { session: SESSION, rpcHang: true });
     assert.equal((await hanging.auth.getSignedInUser()).uid, UID);
     assert.equal(hanging.session.getItem('utl_auth_linked'), null);
+  });
+  await check('getLinkStatus answers what the link of this page was (linked, refused, error, timeout) without a second call, and null when signed out', async () => {
+    const ok = newAuth(mod, { session: SESSION });
+    assert.equal((await ok.auth.getLinkStatus()).linked, true);
+    assert.equal((await ok.auth.getLinkStatus()).linked, true);
+    assert.equal(ok.fake.of('rpc').length, 1, 'one database call for both');
+    const refused = newAuth(mod, { session: SESSION, link: { linked: false, person_id: null, reason: 'no_person' } });
+    assert.deepEqual(await refused.auth.getLinkStatus(), { linked: false, person_id: null, reason: 'no_person' });
+    const failing = newAuth(mod, { session: SESSION, rpcError: { code: '42883', message: 'x' } });
+    assert.equal((await failing.auth.getLinkStatus()).reason, 'error');
+    const hanging = newAuth(mod, { session: SESSION, rpcHang: true });
+    assert.equal((await hanging.auth.getLinkStatus()).reason, 'timeout');
+    const out = newAuth(mod, { session: null });
+    assert.equal(await out.auth.getLinkStatus(), null);
+    assert.equal(out.fake.of('rpc').length, 0);
   });
   await check('getIdToken returns the access token, "" when signed out, and refreshes on request', async () => {
     const t = newAuth(mod, { session: SESSION, refreshed: { access_token: 'fresh-token', user: USER } });

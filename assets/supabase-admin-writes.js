@@ -1,9 +1,10 @@
 // Supabase twin of the staff writes of the admin console (waves 6 and 7 of docs/SUPABASE_PLAN_SERVERS_AND_ADMIN.md).
 //
-// Eleven functions with the SAME names, arguments and return shapes as the Firebase wrappers in assets/firebase.js:
+// Fourteen functions with the SAME names, arguments and return shapes as the Firebase wrappers in assets/firebase.js:
 //   grantCustomerEntitlement, changeCustomerEntitlementStatus, revealAssessmentResponse, saveOrganizationDefinition,
 //   saveOrganizationAccessMember, submitOrganizationRosterDraft, reviewOrganizationRosterDraft, manageVerifiedCredential,
-//   removeMember, repairMemberVerifiedCredential (migration 2340), authorizeMember.
+//   removeMember, repairMemberVerifiedCredential (migration 2340), authorizeMember, and the three Student Progress tools of
+//   migration 2372: replaceMemberWorkspaceProgress, resetMemberWorkspaceProgress, repairMemberProgramCompletionReward.
 // Each one calls one database function from supabase/migrations/20261008002260_admin_writes.sql over PostgREST:
 //   POST {SUPABASE_URL}/rest/v1/rpc/<function>   body { p_input: <the payload of the Firebase callable>, p_dry_run: <boolean> }
 // with the publishable key (apikey) and the signed in person's Firebase ID token. The database decides who may call (the same role
@@ -93,6 +94,29 @@ const ROSTER_REVIEW_KEYS = ["organizationId", "draftId", "action", "reviewNote"]
 const AUTHORIZE_KEYS = ["name", "role", "status", "cohort", "notes", "expiryDate", "addedBy", "invitedSignInMethod", "loginLinkStatus",
   "welcomeEmailStatus", "welcomeEmailFormat", "localUsername", "feedbackEnabled", "goals", "avatarIconId", "googleGroupAdded"];
 
+// The parts of a Student Progress edit the database function reads (migration 2372), and nothing else: the orientation flag, the watched
+// lessons, the completed and visited exercises, the completed contexts. At most 500 entries of each kind, only the true or false flags.
+const PROGRESS_ENTRY_LIMIT = 500;
+function progressForDatabase(progress) {
+  const source = isPlainObject(progress) ? progress : {};
+  const out = {};
+  if (isPlainObject(source.orientation) && "ready" in source.orientation) out.orientation = { ready: source.orientation.ready === true };
+  const collect = (map, flags) => {
+    const result = {};
+    if (!isPlainObject(map)) return result;
+    Object.keys(map).slice(0, PROGRESS_ENTRY_LIMIT).forEach((id) => {
+      if (!isPlainObject(map[id])) return;
+      result[id] = {};
+      flags.forEach((flag) => { result[id][flag] = map[id][flag] === true; });
+    });
+    return result;
+  };
+  if (isPlainObject(source.lessons)) out.lessons = collect(source.lessons, ["watched"]);
+  if (isPlainObject(source.exercises)) out.exercises = collect(source.exercises, ["completed", "visited"]);
+  if (isPlainObject(source.contexts)) out.contexts = collect(source.contexts, ["completed"]);
+  return out;
+}
+
 // The database function and the document it takes, for each Firebase wrapper. args are the arguments of the wrapper.
 const FUNCTIONS = {
   grantCustomerEntitlement: {
@@ -154,6 +178,40 @@ const FUNCTIONS = {
         }
         // An object that is not a value (a server time stamp placeholder) is not stated.
       });
+      return input;
+    }
+  },
+  // Migration 2372: the Student Progress tools. The first argument is the learner's uid (the Firebase uid or the Supabase uid).
+  replaceMemberWorkspaceProgress: {
+    rpc: "admin_replace_member_progress",
+    arity: 3,
+    input(args) {
+      if (!args[0]) throw new AdminWriteError("A user UID is required.", { code: "invalid-argument" });
+      return { userId: String(args[0]), workspaceProgress: progressForDatabase(args[1]) };
+    }
+  },
+  resetMemberWorkspaceProgress: {
+    rpc: "admin_reset_member_progress",
+    arity: 1,
+    input(args) {
+      if (!args[0]) throw new AdminWriteError("A user UID is required.", { code: "invalid-argument" });
+      return { userId: String(args[0]) };
+    }
+  },
+  repairMemberProgramCompletionReward: {
+    rpc: "admin_repair_reward",
+    arity: 2,
+    input(args) {
+      if (!args[0]) throw new AdminWriteError("A user ID is required to repair the program completion reward.", { code: "invalid-argument" });
+      const options = isPlainObject(args[1]) ? args[1] : {};
+      const input = { userId: String(args[0]) };
+      if (options.programCompletion !== undefined && options.programCompletion !== null && Number.isFinite(Number(options.programCompletion))) input.programCompletion = Number(options.programCompletion);
+      if (Array.isArray(options.levels) && options.levels.length) {
+        input.levels = options.levels.filter(isPlainObject).slice(0, 50).map((level) => ({
+          name: String(level.name || level.title || "").slice(0, 60),
+          threshold: Number.isFinite(Number(level.threshold)) ? Math.max(0, Math.floor(Number(level.threshold))) : 0
+        }));
+      }
       return input;
     }
   }

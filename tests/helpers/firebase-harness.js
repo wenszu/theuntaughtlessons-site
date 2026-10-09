@@ -29,6 +29,7 @@ const SUPABASE_ADMIN_WRITES_SOURCE = path.join(REPO_ROOT, 'assets', 'supabase-ad
 const SUPABASE_ADMIN_CONSOLE_READS_SOURCE = path.join(REPO_ROOT, 'assets', 'supabase-admin-console-reads.js');
 const SUPABASE_QUESTION_BANK_SOURCE = path.join(REPO_ROOT, 'assets', 'supabase-question-bank.js');
 const SUPABASE_CALLABLES_SOURCE = path.join(REPO_ROOT, 'assets', 'supabase-callables.js');
+const SUPABASE_SITE_SOURCE = path.join(REPO_ROOT, 'assets', 'supabase-site.js');
 
 const FIXED_NOW = Date.parse('2026-10-06T10:00:00.000Z');
 
@@ -220,7 +221,9 @@ const IMPORT_REWRITES = [
   // The question bank twin is copied the same way.
   [/import\("\.\/supabase-question-bank\.js"\)/g, 'import("./supabase-question-bank.mjs")'],
   // The callables twin (admin mail, member certificate, readiness access link) is copied the same way.
-  [/import\("\.\/supabase-callables\.js"\)/g, 'import("./supabase-callables.mjs")']
+  [/import\("\.\/supabase-callables\.js"\)/g, 'import("./supabase-callables.mjs")'],
+  // The remaining Firestore reads twin (account page, feature flags, public certificate, invitation) is copied the same way.
+  [/import\("\.\/supabase-site\.js"\)/g, 'import("./supabase-site.mjs")']
 ];
 
 // ---------------------------------------------------------------------------
@@ -494,6 +497,7 @@ function createHarness() {
       fs.copyFileSync(SUPABASE_ADMIN_CONSOLE_READS_SOURCE, path.join(dir, 'supabase-admin-console-reads.mjs'));
       fs.copyFileSync(SUPABASE_QUESTION_BANK_SOURCE, path.join(dir, 'supabase-question-bank.mjs'));
       fs.copyFileSync(SUPABASE_CALLABLES_SOURCE, path.join(dir, 'supabase-callables.mjs'));
+      fs.copyFileSync(SUPABASE_SITE_SOURCE, path.join(dir, 'supabase-site.mjs'));
       let text = sourceText;
       IMPORT_REWRITES.forEach(([pattern, replacement]) => { text = text.replace(pattern, replacement); });
       if (/https:\/\/www\.gstatic\.com/.test(text)) throw new Error('An SDK import was not rewritten.');

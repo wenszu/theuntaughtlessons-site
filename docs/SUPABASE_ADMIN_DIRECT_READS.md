@@ -152,12 +152,17 @@ Reads that Firestore itself needs (the cohort rename reads the stored details, t
    holds planned, active, completed, archived, and the 2220 write function turns draft and cancelled into active. Reading
    back, `planned` reads as `upcoming` and the rest of the lost words cannot be recovered. This is why `getCohortDetails` stays
    Firebase answered. Fix: widen the check constraint and the 2220 mapping (owner approval, schema change).
+   BUILT LATER (2026-10-09, migration `20261008002370_cohort_status.sql`, notes in `docs/SUPABASE_REMAINING_FIRESTORE_READS.md`): the check holds six words
+   and the 2220 function keeps them (upcoming is stored as planned). Not applied. The cohort details are answered by Supabase when the writes flag is on too.
 4. **Student Progress write tools** (`replaceMemberWorkspaceProgress`, `resetMemberWorkspaceProgress`, the three repair
    callables, `logMemberSupportPreview`). The edit dialog takes the member object it received, changes a few fields and writes
    the whole progress document back to Firestore, together with the matching `completed_exercises` documents (it deletes any
    document whose id is not in the answer). The rebuilt progress cannot be that source, so `getAllMemberWorkspaceProgress` stays
    Firebase answered until `admin_replace_member_progress`, `admin_reset_member_progress` and `admin_repair_reward` exist (plan,
    wave 13).
+   BUILT LATER (2026-10-09, migration `20261008002372_admin_progress_writes.sql`): `admin_replace_member_progress`, `admin_reset_member_progress` and
+   `admin_repair_reward` exist (with a dry run), wired into the browser wrappers behind `utl_server_writes`. Not applied. See
+   `docs/SUPABASE_REMAINING_FIRESTORE_READS.md`, sections 3.3 and 5, for what they do and what differs from Firestore.
 5. **Saved answers in the support preview.** `getMemberSupportSnapshot` in Firestore includes `savedPayload` (the learner's
    answers) so the preview shows their results. The database function leaves it out on purpose, so the support preview keeps
    asking Firebase. A preview with answers should go through the audited `admin_reveal_response` path.
