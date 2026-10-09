@@ -32,7 +32,8 @@ const SETTINGS_STAFF_FUNCTIONS = ['admin_set_app_setting'];
 const ADMIN_MIRROR_FUNCTIONS = ['admin_mirror_cohort', 'admin_mirror_cohort_rename', 'admin_mirror_feedback_enabled', 'admin_mirror_support_preview'];
 // Member reads (migration 2250): the caller's own workspaces, organization access, cohort standing and saved answers. Read only,
 // authenticated only, the caller comes from the token; the only parameter is the standing metric.
-const MEMBER_READ_FUNCTIONS = ['get_my_workspaces', 'get_my_organization_access', 'get_my_cohort_standing', 'get_my_exercise_responses'];
+const MEMBER_READ_FUNCTIONS = ['get_my_workspaces', 'get_my_organization_access', 'get_my_cohort_standing', 'get_my_exercise_responses',
+  'get_my_account'];   // get_my_account is migration 2371: the account page record, read only, no argument
 // Admin read screens (migration 2240): read only staff functions. Each is authenticated only and refuses a caller without the staff
 // role (platform_owner, or the Firebase staff roles for the customer and Executive Signature screens) with 42501 as its first statement.
 // Admin console direct reads (migration 2310): read only staff functions for the screens that read Firestore from the browser. Same checks as
@@ -41,12 +42,14 @@ const ADMIN_CONSOLE_READ_FUNCTIONS = ['admin_console_members', 'admin_member_pro
   'admin_member_support_snapshot', 'admin_find_user_uid', 'admin_cohorts_summary', 'admin_leaderboard', 'admin_platform_overview', 'admin_engagement_summary',
   'admin_support_preview_audit', 'admin_credential_counts'];
 const ADMIN_READ_FUNCTIONS = ['admin_list_customers', 'admin_get_customer', 'admin_list_es_participants', 'admin_list_es_attempts', 'admin_get_es_configuration',
-  'admin_get_es_governance', 'admin_search_credentials', 'admin_credential_registry', 'admin_organization_access', 'admin_check_org_rep_email', ...ADMIN_CONSOLE_READ_FUNCTIONS];
+  'admin_get_es_governance', 'admin_search_credentials', 'admin_credential_registry', 'admin_organization_access', 'admin_check_org_rep_email', 'admin_member_exists', ...ADMIN_CONSOLE_READ_FUNCTIONS];   // admin_member_exists is migration 2373
 // Staff writes (migration 2260): the Firebase callables of the admin console as database functions. Each takes one jsonb document and a
 // dry run flag, is authenticated only, and refuses the wrong caller with 42501 as its first statement. submit_roster_draft is for sponsor
 // staff (an organization role), so its first statement only requires a signed in person; the organization role is checked straight after.
 const ADMIN_WRITE_FUNCTIONS = ['admin_grant_entitlement', 'admin_set_entitlement_status', 'admin_reveal_response', 'admin_save_organization', 'admin_save_org_access_member',
-  'submit_roster_draft', 'admin_review_roster_draft', 'admin_manage_credential', 'admin_remove_member', 'admin_authorize_member', 'admin_issue_credential'];
+  'submit_roster_draft', 'admin_review_roster_draft', 'admin_manage_credential', 'admin_remove_member', 'admin_authorize_member', 'admin_issue_credential',
+  // migration 2372: the Student Progress tools
+  'admin_replace_member_progress', 'admin_reset_member_progress', 'admin_repair_reward'];
 // A parameter must not let the caller name a person, role, email or organization. (A plain p_status is a progress state.)
 // Organization console (migration 2342): read only, authenticated only, the caller comes from the token; the one parameter names the
 // organization to open, and the function refuses (42501) an organization the caller holds no role in (a platform owner sees all).
@@ -275,7 +278,10 @@ const ADMIN_WRITE_TABLES = {
   admin_manage_credential: ['credentials'],
   admin_remove_member: ['people', 'enrollments', 'role_grants'],
   admin_authorize_member: ['people', 'person_emails', 'person_profiles', 'role_grants', 'cohorts', 'enrollments'],
-  admin_issue_credential: []   // migration 2340: the insert happens inside private.issue_credential_core, never here
+  admin_issue_credential: [],   // migration 2340: the insert happens inside private.issue_credential_core, never here
+  admin_replace_member_progress: ['activity_progress', 'person_profiles'],        // migration 2372
+  admin_reset_member_progress: ['activity_progress', 'reward_ledger', 'reward_state', 'person_profiles'],
+  admin_repair_reward: ['reward_ledger']
 };
 for (const name of ADMIN_WRITE_FUNCTIONS) {
   const f = fns.find((x) => x.proname === name);
@@ -292,6 +298,20 @@ for (const name of ADMIN_WRITE_FUNCTIONS) {
   ok(`${name}: audit rows only through private.aw_audit (no free text in a direct insert)`, !/insert\s+into\s+public\.audit_events/i.test(f.prosrc));
   const touched = [...f.prosrc.matchAll(/(?:insert\s+into|update|delete\s+from)\s+public\.([a-z_]+)/gi)].map((m) => m[1].toLowerCase());
   ok(`${name}: writes only ${ADMIN_WRITE_TABLES[name].join(', ') || 'nothing but the audit row'}`, touched.every((t) => ADMIN_WRITE_TABLES[name].includes(t)), touched.join());
+}
+// Student Progress helpers (migration 2372): closed to browsers.
+{
+  const mpHelpers = await db.query(`select p.proname, has_function_privilege('anon', p.oid, 'execute') as anon_exec, has_function_privilege('authenticated', p.oid, 'execute') as auth_exec
+    from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'private' and p.proname like 'mp\\_%'`);
+  ok('the Student Progress helpers exist', mpHelpers.rows.length === 2, String(mpHelpers.rows.length));
+  for (const h of mpHelpers.rows) ok(`private.${h.proname}: closed to browsers`, !h.anon_exec && !h.auth_exec);
+  // The three tools write the ledger only by adding rows (it is append only) and never touch roles, enrollments or entitlements.
+  for (const name of ['admin_replace_member_progress', 'admin_reset_member_progress', 'admin_repair_reward']) {
+    const f = fns.find((x) => x.proname === name);
+    if (!f) continue;
+    ok(`${name}: never updates or deletes ledger rows, never touches people, role_grants, enrollments or entitlements`, !/(update|delete\s+from)\s+public\.reward_ledger/i.test(f.prosrc) && !/(insert\s+into|update|delete\s+from)\s+public\.(people|role_grants|enrollments|entitlements|organizations|affiliations)\b/i.test(f.prosrc));
+    ok(`${name}: never reads or writes the learner's answers, drafts or attempts`, !/activity_submissions|activity_drafts|activity_attempts|assessment_response_parts|assessment_attempts/i.test(f.prosrc));
+  }
 }
 const awHelpers = await db.query(`select p.proname, has_function_privilege('anon', p.oid, 'execute') as anon_exec, has_function_privilege('authenticated', p.oid, 'execute') as auth_exec
   from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'private' and p.proname like 'aw\\_%'`);

@@ -322,7 +322,9 @@ function buildPlan(snapshot, catalog, options = {}) {
         program_id: PROGRAM_TSA,
         organization_id: orgId,
         name: text(name, 120),
-        status: oneOf(details.status, ["planned", "active", "completed", "archived"], "active"),
+        // The admin console's six words. upcoming is stored as planned. NEEDS migration 20261008002370 (cohort_status): the old four word
+        // check refuses draft and cancelled, so run the import with this line only after that migration is applied.
+        status: oneOf(details.status === "upcoming" ? "planned" : details.status, ["draft", "planned", "active", "completed", "archived", "cancelled"], "active"),
         starts_on: dateOnly(details.startDate),
         ends_on: dateOnly(details.endDate),
         contact_name: text(details.contactName, 200),

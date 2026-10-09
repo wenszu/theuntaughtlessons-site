@@ -4540,6 +4540,9 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       saveOrganizationDefinition,
       reviewOrganizationRosterDraft,
       sendSignInInvite,
+      sendAdminSignInInvite,
+      memberRecordExists,
+      getAdminRole,
       setCohortDetails,
       setEngagementSettings,
       setGlobalFeedbackSetting,
@@ -4613,6 +4616,9 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       saveOrganizationDefinition,
       reviewOrganizationRosterDraft,
       sendSignInInvite,
+      sendAdminSignInInvite,
+      memberRecordExists,
+      getAdminRole,
       setCohortDetails,
       setEngagementSettings,
       setGlobalFeedbackSetting,
@@ -5234,6 +5240,10 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         }
 
         const adminStatus = await mbGetFirebaseAdminRole(user);
+        if (adminStatus.checkFailed) {
+          // An outage, not a refusal: stay signed in and let the person try again.
+          throw new Error('Could not check administrator access. Please try again in a moment.');
+        }
         if (!adminStatus.isAdmin) {
           if (fb.signOut && fb.auth) await fb.signOut(fb.auth);
           throw new Error('This Google account is not approved as an administrator.');
@@ -5328,8 +5338,10 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         const normalizedEmail = email.toLowerCase();
 
         // Verify member exists before sending link — don't silently add them
-        const memberSnap = await firebaseAuth.getDoc(firebaseAuth.doc(firebaseAuth.db, 'authorized_members', normalizedEmail));
-        if (!memberSnap.exists()) {
+        const memberFound = firebaseAuth.memberRecordExists
+          ? await firebaseAuth.memberRecordExists(normalizedEmail)
+          : (await firebaseAuth.getDoc(firebaseAuth.doc(firebaseAuth.db, 'authorized_members', normalizedEmail))).exists();
+        if (!memberFound) {
           if (notMemberWarn) notMemberWarn.hidden = false;
           setInviteStatus('', '');
           return;
@@ -5337,7 +5349,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
 
         sendLoginInvite.textContent = 'Sending...';
         try { await firebaseAuth.authorizeMember(normalizedEmail, { invitedSignInMethod:'emailLink', loginLinkStatus:'pending' }); } catch (_) {}
-        await firebaseAuth.sendSignInInvite(normalizedEmail);
+        await (firebaseAuth.sendAdminSignInInvite || firebaseAuth.sendSignInInvite)(normalizedEmail);
         try {
           await firebaseAuth.authorizeMember(normalizedEmail, {
             invitedSignInMethod: 'emailLink',
@@ -7187,10 +7199,19 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
 
       let role = '';
       try {
-        const snap = await fb.getDoc(fb.doc(fb.db, 'authorized_members', email));
-        role = snap.exists() ? (snap.data().role || '') : '';
+        if (fb.getAdminRole) {
+          // The same Firestore read as below, or (Supabase-only session) the signed in person's own access record.
+          role = await fb.getAdminRole(email);
+        } else {
+          const snap = await fb.getDoc(fb.doc(fb.db, 'authorized_members', email));
+          role = snap.exists() ? (snap.data().role || '') : '';
+        }
       } catch (e) {
         role = '';
+        // A Supabase-only session whose access check failed (an outage): not the same as "not an administrator".
+        if (e && e.adminCheckFailed) {
+          return { email, role: '', isAdmin: false, checkFailed: true };
+        }
       }
       return {
         email,
@@ -7265,6 +7286,10 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         let adminStatus = await mbGetFirebaseAdminRole(user);
         if (!adminStatus.email) {
           throw new Error('Sign in with your Google admin account before managing members.');
+        }
+
+        if (adminStatus.checkFailed) {
+          throw new Error('Could not check administrator access. Please try again in a moment.');
         }
 
         if (!adminStatus.isAdmin && fb.signOut && fb.auth) {

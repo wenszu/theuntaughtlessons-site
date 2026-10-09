@@ -319,6 +319,9 @@ const UTL_CONTENT = {
   var REWARD_STATE_KEY = "utl_rewards_state";
   var REWARD_SETTINGS_KEY = "utl_reward_settings";
   var ADMIN_PROGRESS_REVISION_KEY = "utl_admin_progress_revision";
+  // The browser switches of the move to Supabase (assets/switchboard.js). A progress reset or an account change clears the learner's
+  // device state, but must never clear these: without utl_auth a Supabase-only browser would fall back to Firebase and look signed out.
+  var SITE_SWITCH_KEYS = ["utl_auth", "utl_data_source", "utl_server_reads", "utl_server_writes", "utl_payments", "utl_ai", "utl_es", "utl_mail", "utl_switchboard_applied", "utl_switchboard_cache"];
   var VIDEO_COMPLETE_MP = 10;
   var CONTEXT_COMPLETE_MP = 5;
   var REWARD_LEVELS = [
@@ -579,9 +582,12 @@ const UTL_CONTENT = {
     };
   }
 
-  function mergeRemoteRewards(remoteRewards) {
+  // replaceLocal: after an administrator reset the remote state is the truth and the device copy is dropped, not merged with a larger value.
+  function mergeRemoteRewards(remoteRewards, replaceLocal) {
     if (!remoteRewards || typeof remoteRewards !== "object") return;
-    var local = readRewardState();
+    var local = replaceLocal
+      ? { mpTotal: 0, masteryPoints: 0, tokens: 0, streakDays: 0, level: "Intern", earnedEvents: {}, earnedEventIds: {}, ledger: [] }
+      : readRewardState();
     var remoteMp = Math.max(0, Number(remoteRewards.mpTotal || remoteRewards.masteryPoints || 0));
     local.tokens = Math.max(local.tokens, Number(remoteRewards.tokens || 0));
     local.streakDays = Math.max(local.streakDays, Number(remoteRewards.streakDays || 0));
@@ -882,7 +888,8 @@ const UTL_CONTENT = {
     if (!progress || typeof progress !== "object") return;
     var remoteRevision = String(progress.adminProgressRevision || "");
     var revisionChanged = remoteRevision && remoteRevision !== localStorage.getItem(ADMIN_PROGRESS_REVISION_KEY);
-    if (revisionChanged && progress.adminProgressReset === true) {
+    var resetApplied = Boolean(revisionChanged && progress.adminProgressReset === true);
+    if (resetApplied) {
       var preservedPrefixes = [
         "utl_member_", "utl_admin_", "utl_local_pw_", "utl_aiko_",
         "utl_feedback_", "utl_global_feedback",
@@ -892,6 +899,7 @@ const UTL_CONTENT = {
       Object.keys(localStorage).forEach(function (key) {
         if (key.indexOf("utl_") !== 0 || key === ADMIN_PROGRESS_REVISION_KEY) return;
         if (preservedPrefixes.some(function (prefix) { return key.indexOf(prefix) === 0; })) return;
+        if (SITE_SWITCH_KEYS.indexOf(key) !== -1) return;
         localStorage.removeItem(key);
       });
     }
@@ -942,7 +950,7 @@ const UTL_CONTENT = {
       videosDone(phaseKey);
       exercisesDone(phaseKey);
     });
-    mergeRemoteRewards(progress.rewards);
+    mergeRemoteRewards(progress.rewards, resetApplied);
     if (remoteRevision) localStorage.setItem(ADMIN_PROGRESS_REVISION_KEY, remoteRevision);
   }
 
@@ -1796,10 +1804,14 @@ const UTL_CONTENT = {
           var firebaseAuth = await import(firebaseHref());
           var nameVal = [firstName, lastName].filter(Boolean).join(" ").trim();
           if (nameVal) {
-            await firebaseAuth.updateDoc(
-              firebaseAuth.doc(firebaseAuth.db, "authorized_members", email),
-              { name: nameVal }
-            );
+            if (firebaseAuth.saveMemberDisplayName) {
+              await firebaseAuth.saveMemberDisplayName(email, nameVal);
+            } else {
+              await firebaseAuth.updateDoc(
+                firebaseAuth.doc(firebaseAuth.db, "authorized_members", email),
+                { name: nameVal }
+              );
+            }
           }
         } catch (e) {
           console.warn("Could not save name to Firestore:", e && e.message);
@@ -1857,9 +1869,12 @@ const UTL_CONTENT = {
         "utl_public_site_",
         "utl_data_"
       ];
+      // The browser switches of the move to Supabase (assets/switchboard.js) belong to the browser, not to the learner.
+      var switchKeys = ["utl_auth", "utl_data_source", "utl_server_reads", "utl_server_writes", "utl_payments", "utl_ai", "utl_es", "utl_mail", "utl_switchboard_applied", "utl_switchboard_cache"];
       Object.keys(localStorage).forEach(function (key) {
         if (key.indexOf("utl_") !== 0 || key === ACCOUNT_SCOPE_KEY) return;
         if (preservedPrefixes.some(function (prefix) { return key.indexOf(prefix) === 0; })) return;
+        if (switchKeys.indexOf(key) !== -1) return;
         localStorage.removeItem(key);
       });
     }

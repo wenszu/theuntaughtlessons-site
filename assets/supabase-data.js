@@ -646,6 +646,17 @@ function normalizeLearningSummary(summary = {}) {
   };
 }
 
+// The balancing ledger entry an administrator reset adds (migration 2372: key admin-reset:<revision>, type admin-reset, the negative
+// of the total at that moment). It is a database record only: the member page ignores negative amounts and add_reward_entries
+// accepts 0 to 100000, so it can never round trip through a browser.
+function isAdminResetEntry(entry) {
+  if (!isPlainObject(entry)) return false;
+  return entry.type === "admin-reset" || String(entry.id || entry.entry_key || "").startsWith("admin-reset:");
+}
+
+// The revision an administrator reset writes starts with this word (an edit writes admin-edit-).
+const ADMIN_RESET_REVISION_PREFIX = "admin-reset-";
+
 // Site reward state (mpTotal, ledger, streak.{currentDays, lastQualifiedDate, dailyActivities,
 // awardedDates}, streakDays, tokens) to add_reward_entries arguments: display-only ledger entries and
 // the flat state object. mpTotal, level and earnedEvents are not sent: the ledger is the source of
@@ -655,6 +666,8 @@ function mapRewards(incoming = {}) {
   const byId = {};
   (Array.isArray(source.ledger) ? source.ledger : []).forEach((entry) => {
     if (!isPlainObject(entry) || !entry.id) return;
+    // The balancing entry an administrator reset adds (a negative amount) is the database's own; a browser never uploads it.
+    if (isAdminResetEntry(entry)) return;
     const picked = pickKeys(entry, REWARD_ENTRY_KEYS);
     picked.id = text(entry.id, 200);
     picked.mpEarned = clampInt(entry.mpEarned, 0, 100000, 0);
@@ -852,8 +865,13 @@ function buildExerciseResults({ catalog, progressRows = [], lightAttempts = [], 
   return result;
 }
 
-function rebuildRewards(ledgerRows = [], totalRows = [], stateRows = []) {
-  const ledger = (ledgerRows || []).map((row) => {
+// options.afterReset (Supabase-only member mode): the total is the database total (the sum of ALL points, the reset's negative entry
+// included), and the ledger the page sees starts after the last administrator reset, so the page's own sum of positive amounts equals
+// that total. Every entry key stays in earnedEvents, so a milestone earned before a reset is not awarded a second time (the database
+// would refuse the second entry). Without the option nothing changes.
+function rebuildRewards(ledgerRows = [], totalRows = [], stateRows = [], options = {}) {
+  const afterReset = Boolean(options && options.afterReset);
+  const allEntries = (ledgerRows || []).map((row) => {
     const source = isPlainObject(row.source) ? row.source : {};
     return Object.assign(
       { id: row.entry_key, reason: row.reason || "", activityId: row.activity_id || undefined },
@@ -864,14 +882,22 @@ function rebuildRewards(ledgerRows = [], totalRows = [], stateRows = []) {
         earnedAt: toIsoOrNull(row.earned_at) || source.earnedAt || ""
       }
     );
-  }).sort((a, b) => String(a.earnedAt || "").localeCompare(String(b.earnedAt || ""))).slice(-500);
+  }).sort((a, b) => String(a.earnedAt || "").localeCompare(String(b.earnedAt || "")));
+  let ledger = allEntries.slice(-500);
+  if (afterReset) {
+    let lastReset = -1;
+    allEntries.forEach((entry, index) => { if (isAdminResetEntry(entry)) lastReset = index; });
+    ledger = allEntries.slice(lastReset + 1).filter((entry) => !isAdminResetEntry(entry)).slice(-500);
+  }
   const state = (stateRows || [])[0] || null;
   const total = (totalRows || [])[0] || null;
-  if (!ledger.length && !state && !total) return null;
+  if (!ledger.length && !allEntries.length && !state && !total) return null;
 
   const earnedEvents = {};
-  ledger.forEach((entry) => { earnedEvents[entry.id] = true; });
-  const ledgerSum = ledger.reduce((sum, entry) => sum + Math.max(0, Number(entry.mpEarned) || 0), 0);
+  (afterReset ? allEntries : ledger).forEach((entry) => { earnedEvents[entry.id] = true; });
+  const ledgerSum = afterReset
+    ? Math.max(0, allEntries.reduce((sum, entry) => sum + (Number(entry.mpEarned) || 0), 0))
+    : ledger.reduce((sum, entry) => sum + Math.max(0, Number(entry.mpEarned) || 0), 0);
   const mpTotal = total && Number.isFinite(Number(total.points_total)) ? Math.max(0, Number(total.points_total)) : ledgerSum;
   const streakJson = state && isPlainObject(state.streak) ? state.streak : {};
   const streakDays = state ? Number(state.streak_days) || 0 : 0;
@@ -897,14 +923,14 @@ function rebuildRewards(ledgerRows = [], totalRows = [], stateRows = []) {
 //     exercises: {id: {visited, completed, completedAt, title, appKey}}, contexts: {id: {completed}}, rewards }
 // Exercises appear under the canonical id (with appKey) and under each alias key, as Firestore did.
 // orientation.open is a browser-only flag with no Supabase column; null leaves the page's own value alone.
-function rebuildWorkspaceProgress({ progressRows = [], ledgerRows = [], totalRows = [], stateRows = [] }, catalog) {
+function rebuildWorkspaceProgress({ progressRows = [], ledgerRows = [], totalRows = [], stateRows = [], afterReset = false }, catalog) {
   const progress = {
     version: 1,
     orientation: { ready: false, open: null },
     lessons: {},
     exercises: {},
     contexts: {},
-    rewards: rebuildRewards(ledgerRows, totalRows, stateRows)
+    rewards: rebuildRewards(ledgerRows, totalRows, stateRows, { afterReset })
   };
   (progressRows || []).forEach((row) => {
     // A not_started row carries no flag the page can use, so it adds nothing to the view.
@@ -1059,6 +1085,48 @@ function buildFallbackMember(access, email) {
   const member = { email: address, name: access.name || "", role: "member", status: "active", source: "supabase-fallback" };
   if (access.expiryDate) member.expiryDate = access.expiryDate;
   if (access.cohort) member.cohort = access.cohort;
+  return member;
+}
+
+// ---------------------------------------------------------------------------
+// Supabase-only member mode (a Supabase session and no Firebase session): the member entry record.
+
+// The object the pages expect from a Firestore authorized_members document, built from get_my_access (already normalized by
+// normalizeAccess). Unlike buildFallbackMember it may carry an administrator, because here Supabase is the only source and the
+// platform_owner grant is enforced by the database itself. The person is resolved from the token, so the answer is always the signed
+// in person's own; email is the address that was asked about.
+//   no person, archived or deletion pending account, or no TSA enrollment at all  -> null (the same as a missing document)
+//   enrollment ended (cancelled, suspended, ...)                                   -> a record with status "inactive" (the page refuses it)
+//   enrollment past valid_until                                                   -> a record with its past expiryDate (the page refuses it)
+//   any other refusal                                                              -> status "inactive" (fails closed)
+//   allowed                                                                        -> status "active"; role "admin" for a platform owner, else "member"
+// profile is the optional person_profiles row ({ avatar_icon_id, goals, feedback_enabled }).
+function buildMemberFromAccess(access, email, profile = null) {
+  if (!access || access.found !== true) return null;
+  const address = String(email || "").trim().toLowerCase();
+  if (!address) return null;
+  const reason = String(access.reason || "");
+  if (access.allowed !== true && (reason === "account_not_active" || reason === "no_enrollment" || reason === "no_person" || reason === "not_signed_in")) return null;
+  const member = {
+    email: address,
+    name: access.name || "",
+    role: access.isAdmin === true ? "admin" : "member",
+    status: "active",
+    source: "supabase"
+  };
+  if (access.expiryDate) member.expiryDate = access.expiryDate;
+  if (access.cohort) member.cohort = access.cohort;
+  if (access.allowed !== true) {
+    const expiredWithDate = reason === "expired" && Boolean(access.expiryDate);
+    if (!expiredWithDate) member.status = "inactive";
+  } else if (access.status === "inactive") {
+    member.status = "inactive";
+  }
+  if (isPlainObject(profile)) {
+    if (typeof profile.avatar_icon_id === "string" && profile.avatar_icon_id) member.avatarIconId = profile.avatar_icon_id;
+    if (typeof profile.goals === "string" && profile.goals) member.goals = profile.goals;
+    if (typeof profile.feedback_enabled === "boolean") member.feedbackEnabled = profile.feedback_enabled;
+  }
   return member;
 }
 
@@ -1490,18 +1558,30 @@ function createSupabaseData(context = {}) {
 
   // -- reads ----------------------------------------------------------------
 
-  async function getMemberWorkspaceProgress() {
+  // options.adminRevision (Supabase-only member mode only): also read the administrator revision (person_profiles.progress_revision)
+  // and answer it as adminProgressRevision / adminProgressReset, the way the Firestore document carried them, and read the rewards
+  // the Supabase-only way (rebuildRewards afterReset). adminProgressReset is true only for a revision written by a reset
+  // (it starts with admin-reset-); an edit writes admin-edit-. A revision is answered even when the person has no other rows.
+  async function getMemberWorkspaceProgress(options = {}) {
     if (!(await currentToken())) return null;
-    const [catalog, progressRows, ledgerRows, totalRows, stateRows] = await Promise.all([
+    const adminRevision = isPlainObject(options) && options.adminRevision === true;
+    const [catalog, progressRows, ledgerRows, totalRows, stateRows, profileRows] = await Promise.all([
       loadCatalog(),
       selectOwn("activity_progress", "select=activity_id,status,first_visited_at,completed_at,completion_count"),
       selectOwn("reward_ledger", `select=entry_key,points,reason,activity_id,earned_at,source&program_id=${eq(PROGRAM_TSA)}&order=earned_at.asc`),
       selectOwn("reward_totals", `select=program_id,points_total,entry_count,last_earned_at&program_id=${eq(PROGRAM_TSA)}`),
-      selectOwn("reward_state", `select=streak_days,last_qualified_on,tokens,streak&program_id=${eq(PROGRAM_TSA)}`)
+      selectOwn("reward_state", `select=streak_days,last_qualified_on,tokens,streak&program_id=${eq(PROGRAM_TSA)}`),
+      adminRevision ? selectOwn("person_profiles", "select=progress_revision,progress_reset_at") : Promise.resolve([])
     ]);
-    // No rows at all is the same as no users document in Firestore.
-    if (!progressRows.length && !ledgerRows.length && !stateRows.length && !totalRows.length) return null;
-    return rebuildWorkspaceProgress({ progressRows, ledgerRows, totalRows, stateRows }, catalog);
+    const revision = adminRevision && profileRows[0] && typeof profileRows[0].progress_revision === "string" ? profileRows[0].progress_revision : "";
+    // No rows at all is the same as no users document in Firestore, unless an administrator revision has to be told.
+    if (!progressRows.length && !ledgerRows.length && !stateRows.length && !totalRows.length && !revision) return null;
+    const view = rebuildWorkspaceProgress({ progressRows, ledgerRows, totalRows, stateRows, afterReset: adminRevision }, catalog);
+    if (adminRevision) {
+      view.adminProgressRevision = revision;
+      view.adminProgressReset = revision.startsWith(ADMIN_RESET_REVISION_PREFIX);
+    }
+    return view;
   }
 
   async function getExerciseWork(exerciseId) {
@@ -1711,6 +1791,38 @@ function createSupabaseData(context = {}) {
     return buildFallbackMember(await getMyAccess(), email);
   }
 
+  // Supabase-only member mode: the member entry record (the shape of an authorized_members document), built from
+  // get_my_access plus, for an allowed person, the profile row (avatar, goals). A failing profile read leaves those fields out.
+  // Throws when get_my_access fails or is not understood, so a caller never mistakes an outage for "not a member".
+  async function getMemberRecord(email) {
+    return (await getMemberRecordWithReason(email)).member;
+  }
+
+  // The same, with the reason get_my_access gave, so a caller can tell "no person found" (which may only mean the account is not linked
+  // yet) from "no enrollment" or "account not active".
+  async function getMemberRecordWithReason(email) {
+    const access = await getMyAccess();
+    let profile = null;
+    if (access.found && access.allowed) {
+      try {
+        const rows = await selectOwn("person_profiles", "select=avatar_icon_id,goals,feedback_enabled");
+        profile = rows[0] || null;
+      } catch (error) {
+        profile = null;
+      }
+    }
+    return { member: buildMemberFromAccess(access, email, profile), found: access.found, allowed: access.allowed, reason: access.reason };
+  }
+
+  // users/{uid}.feedbackEnabled for the signed in person: null when nothing is stored, otherwise true or false
+  // (an unset personal switch counts as true, as the Firestore document did).
+  async function getMyFeedbackEnabled() {
+    if (!(await currentToken())) return null;
+    const rows = await selectOwn("person_profiles", "select=feedback_enabled");
+    if (!rows.length) return null;
+    return rows[0].feedback_enabled === false ? false : true;
+  }
+
   return {
     saveUserProgress,
     saveExerciseAttempt,
@@ -1742,6 +1854,9 @@ function createSupabaseData(context = {}) {
     getMyAccess,
     checkAccess,
     getAccessFallback,
+    getMemberRecord,
+    getMemberRecordWithReason,
+    getMyFeedbackEnabled,
     // For the page switch and tests.
     loadCatalog,
     resetCatalog() { catalogPromise = null; }
@@ -1778,6 +1893,9 @@ export {
   summarizeFirestoreMember,
   compareAccess,
   buildFallbackMember,
+  buildMemberFromAccess,
+  isAdminResetEntry,
+  ADMIN_RESET_REVISION_PREFIX,
   SETTING_DOC_KEYS,
   PUBLIC_SETTING_KEYS,
   normalizeEngagementSession,

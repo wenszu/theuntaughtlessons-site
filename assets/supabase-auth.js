@@ -271,6 +271,14 @@ export function createSupabaseAuth(deps = {}) {
     return result;
   }
 
+  // The answer of the person link for the signed in account ({ linked, reason }, reason 'timeout' or 'error' when the link could not
+  // be tried), or null when nobody is signed in. Asks the database at most once per page load, like getSignedInUser.
+  async function getLinkStatus() {
+    const session = await currentSession();
+    const user = session ? siteUser(session.user) : null;
+    return user ? linkOnce(user) : null;
+  }
+
   async function getSignedInUser() {
     const session = await currentSession();
     const user = session ? siteUser(session.user) : null;
@@ -440,7 +448,7 @@ export function createSupabaseAuth(deps = {}) {
   }
 
   return {
-    getSignedInUser, onAuthChange, getIdToken, linkPerson,
+    getSignedInUser, onAuthChange, getIdToken, linkPerson, getLinkStatus,
     signInWithGoogle, signInWithMicrosoft, signInWithFacebook, getRedirectResult,
     sendEmailLink, isEmailLinkUrl, signInWithEmailLink, signInWithEmailCode, signInWithPassword, signOut,
     lastLinkResult: () => lastLink
@@ -453,6 +461,7 @@ export const getSignedInUser = (...args) => instance.getSignedInUser(...args);
 export const onAuthChange = (...args) => instance.onAuthChange(...args);
 export const getIdToken = (...args) => instance.getIdToken(...args);
 export const linkPerson = (...args) => instance.linkPerson(...args);
+export const getLinkStatus = (...args) => instance.getLinkStatus(...args);
 export const signInWithGoogle = (...args) => instance.signInWithGoogle(...args);
 export const signInWithMicrosoft = (...args) => instance.signInWithMicrosoft(...args);
 export const signInWithFacebook = (...args) => instance.signInWithFacebook(...args);
