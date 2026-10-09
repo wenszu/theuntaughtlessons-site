@@ -7,8 +7,8 @@
 //
 // DEPLOY WITH THE GATEWAY TOKEN CHECK OFF:
 //   supabase functions deploy ai-score --no-verify-jwt --project-ref czljyikfavtjgqcibdda
-// Two reasons. The browser's cross-origin check (OPTIONS) carries no token, and the member's token is a Firebase
-// token that the gateway may not accept. The lock is not removed: core.mjs asks the database who the token belongs
+// Two reasons. The browser's cross-origin check (OPTIONS) carries no token, and the gateway's own token check is not
+// the lock we want. The member's token is a Supabase session token now (a Firebase token also works). The lock is not removed: core.mjs asks the database who the token belongs
 // to (public.get_my_person_id) before it reads the body or calls Gemini, and refuses everyone else with 401.
 //
 // Secrets this function reads (Supabase dashboard, Edge Functions, Secrets):

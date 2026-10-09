@@ -40,8 +40,8 @@ export const MODELS = ["gemini-flash-latest", "gemini-2.5-flash"];
 export const GEMINI_URL_BASE = "https://generativelanguage.googleapis.com/v1beta/models/";
 export const ALLOWED_ORIGINS = ["https://theuntaughtlessons.com", "https://www.theuntaughtlessons.com"];
 // http only for a local test page: localhost or 127.0.0.1 with any port.
-const LOCAL_ORIGIN = /^http:\/\/(localhost|127\.0\.0\.1)(:\d{1,5})?$/;
-const TOKEN_PATTERN = /^[A-Za-z0-9._~+\/-]{1,4096}=*$/;
+const LOCAL_ORIGIN = /^http:[/][/](localhost|127[.]0[.]0[.]1)(:[0-9]{1,5})?$/;
+const TOKEN_PATTERN = /^[A-Za-z0-9._~+/-]{1,4096}=*$/;
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const ATTEMPT_ID_PATTERN = /^[A-Za-z0-9-]{8,100}$/;
 const ACTIVITY_BY_MODE = { "120": "explain-to-aiko-120", "60": "explain-to-aiko-60" };
@@ -58,6 +58,55 @@ const RUBRIC_NAMES = [
 
 // ---------------------------------------------------------------------------
 // Small helpers
+//
+// This file must contain no backslash and no character outside plain ASCII, because the deploy tool can corrupt
+// both. Where a backslash, a new line or a special character is needed it is built from its code number.
+// (tests/edge-functions-no-backslash.test.js fails if one slips in.)
+
+const NL = String.fromCharCode(10);
+const BACKSLASH = String.fromCharCode(92);
+const BOM = String.fromCharCode(65279);
+const OPEN_QUOTE = String.fromCharCode(8220);
+const CLOSE_QUOTE = String.fromCharCode(8221);
+
+// True for exactly the characters a regular expression whitespace class would match: space, tab, new line,
+// vertical tab, form feed, carriage return, no-break space, the Unicode space separators, line and paragraph
+// separators, and the byte order mark. (The same set String.prototype.trim removes.)
+function isSpaceCode(code) {
+  return code === 32 || (code >= 9 && code <= 13) || code === 160 || code === 5760 || (code >= 8192 && code <= 8202)
+    || code === 8232 || code === 8233 || code === 8239 || code === 8287 || code === 12288 || code === 65279;
+}
+
+// Same result as text.split(a run of whitespace): a leading or trailing run of whitespace gives an empty first or last piece.
+export function splitOnWhitespace(text) {
+  const value = String(text);
+  const parts = [];
+  let start = 0;
+  let index = 0;
+  while (index < value.length) {
+    if (isSpaceCode(value.charCodeAt(index))) {
+      let end = index + 1;
+      while (end < value.length && isSpaceCode(value.charCodeAt(end))) end += 1;
+      parts.push(value.slice(start, index));
+      start = end;
+      index = end;
+    } else {
+      index += 1;
+    }
+  }
+  parts.push(value.slice(start));
+  return parts;
+}
+
+export function countWords(text) {
+  return splitOnWhitespace(text).filter(Boolean).length;
+}
+
+function stripTrailingSlashes(text) {
+  let end = text.length;
+  while (end > 0 && text.charCodeAt(end - 1) === 47) end -= 1;
+  return text.slice(0, end);
+}
 
 export function originAllowed(origin) {
   const value = String(origin || "");
@@ -76,9 +125,13 @@ function readHeader(headers, name) {
 
 // Returns the bearer token from an Authorization header value, or "" when there is none or it looks unusable.
 export function tokenFromHeader(headerValue) {
-  const match = /^Bearer ([^\s]+)$/i.exec(String(headerValue || "").trim());
-  if (!match) return "";
-  return TOKEN_PATTERN.test(match[1]) ? match[1] : "";
+  const value = String(headerValue || "").trim();
+  if (value.length < 8 || value.slice(0, 6).toLowerCase() !== "bearer" || value.charCodeAt(6) !== 32) return "";
+  const token = value.slice(7);
+  for (let index = 0; index < token.length; index += 1) {
+    if (isSpaceCode(token.charCodeAt(index))) return "";
+  }
+  return TOKEN_PATTERN.test(token) ? token : "";
 }
 
 function clampInt(value, min, max, fallback) {
@@ -149,7 +202,7 @@ function levelFor(total) {
 export function buildExplainPrompt(input) {
   const isSixty = input.mode === "60";
   const compression = isSixty && input.priorTranscript
-    ? `\nORIGINAL 120-SECOND TRANSCRIPT FOR COMPRESSION COMPARISON:\n"""\n${input.priorTranscript}\n"""\nFor C5, weigh whether the 60-second version kept the bottom line and strongest reasons while cutting lower-value detail.`
+    ? `${NL}ORIGINAL 120-SECOND TRANSCRIPT FOR COMPRESSION COMPARISON:${NL}"""${NL}${input.priorTranscript}${NL}"""${NL}For C5, weigh whether the 60-second version kept the bottom line and strongest reasons while cutting lower-value detail.`
     : "";
   return `You are an expert executive-communication coach scoring a spoken explanation to a CEO named Aiko.
 
@@ -196,14 +249,36 @@ function isTsaShape(parsed) {
   return Boolean(parsed) && typeof parsed === "object" && Boolean(parsed.scores) && typeof parsed.scores === "object";
 }
 
+// The text inside every triple-backtick block, with an optional "json" label (any letter case) and the white space
+// after it skipped, in the order they appear. Same result as a global, case-insensitive match of
+// three backticks, an optional json, white space, then as little as possible up to the next three backticks.
+function fencedBlocks(source) {
+  const marker = "```";
+  const blocks = [];
+  let from = 0;
+  for (;;) {
+    const open = source.indexOf(marker, from);
+    if (open < 0) break;
+    let at = open + marker.length;
+    if (source.slice(at, at + 4).toLowerCase() === "json") at += 4;
+    while (at < source.length && isSpaceCode(source.charCodeAt(at))) at += 1;
+    const close = source.indexOf(marker, at);
+    // No closing marker here means there is none further on either (every later start needs one too).
+    if (close < 0) break;
+    blocks.push(source.slice(at, close));
+    from = close + marker.length;
+  }
+  return blocks;
+}
+
 export function extractJson(text, accept = isExplainShape) {
-  const source = String(text || "").replace(/^﻿/, "").trim();
+  let source = String(text || "");
+  if (source.charAt(0) === BOM) source = source.slice(1);
+  source = source.trim();
   if (!source) throw new Error("Gemini returned no JSON object.");
 
   const candidates = [source];
-  const fencePattern = /```(?:json)?\s*([\s\S]*?)```/gi;
-  let fence;
-  while ((fence = fencePattern.exec(source))) candidates.push(fence[1].trim());
+  for (const block of fencedBlocks(source)) candidates.push(block.trim());
 
   for (const candidate of candidates) {
     try {
@@ -221,7 +296,7 @@ export function extractJson(text, accept = isExplainShape) {
       const char = source[index];
       if (inString) {
         if (escaped) escaped = false;
-        else if (char === "\\") escaped = true;
+        else if (char === BACKSLASH) escaped = true;
         else if (char === '"') inString = false;
         continue;
       }
@@ -265,7 +340,7 @@ export function normalizeResult(result) {
 // Same field handling as scoreExplainToAiko. Returns { error } for a refusal or { input }.
 export function parseExplainInput(body) {
   const transcript = String(body?.transcript || "").trim().slice(0, 12000);
-  if (transcript.split(/\s+/).filter(Boolean).length < 5) return { error: "Transcript is empty or too short to score." };
+  if (countWords(transcript) < 5) return { error: "Transcript is empty or too short to score." };
   return {
     input: {
       mode: body?.mode === "60" ? "60" : "120",
@@ -296,7 +371,7 @@ SCORE SPEAK: ${input.speakEnabled}
 SCORE ACT: ${input.actEnabled}
 
 SPEAK SCENARIO FACTS:
-${input.speakFacts.map((fact) => `- ${fact}`).join("\n")}
+${input.speakFacts.map((fact) => `- ${fact}`).join(NL)}
 SPEAK TASK: Give a recommendation, two or three reasons, and a clear next step.
 SPEAK TRANSCRIPT:
 """${input.speakTranscript}"""
@@ -308,10 +383,19 @@ ACT TASK: State a decision, respond to the concern, explain the tradeoff, and gi
 ACT TRANSCRIPT:
 """${input.actTranscript}"""
 
-Speak rubric when enabled: Leads 0–8, Supports 0–14, Focuses 0–8. Act rubric when enabled: Decides 0–10, Adapts 0–12, Advances 0–8. Each total must equal its three dimensions. A defensible Act choice can earn full credit regardless of the reference default. Return null for a disabled section.
+Speak rubric when enabled: Leads 0-8, Supports 0-14, Focuses 0-8. Act rubric when enabled: Decides 0-10, Adapts 0-12, Advances 0-8. Each total must equal its three dimensions. A defensible Act choice can earn full credit regardless of the reference default. Return null for a disabled section.
 
 Return strict JSON only:
 {"scores":{"speak":{"total":0,"leads":0,"supports":0,"focuses":0},"act":{"total":0,"decides":0,"adapts":0,"advances":0}},"feedback":{"speakEvidence":"Short verbatim quote","actEvidence":"Short verbatim quote","speakStrength":"One observed strength","speakImprovement":"One specific improvement area","speakPractice":"One small practical exercise","actStrength":"One observed strength","actImprovement":"One specific improvement area","actPractice":"One small practical exercise"}}`;
+}
+
+// Removes one opening quote (straight or curly) at the start and one closing quote at the end.
+function stripQuoteMarks(text) {
+  let start = 0;
+  let end = text.length;
+  if (end > 0 && (text.charAt(0) === '"' || text.charAt(0) === OPEN_QUOTE)) start = 1;
+  if (end > start && (text.charAt(end - 1) === '"' || text.charAt(end - 1) === CLOSE_QUOTE)) end -= 1;
+  return text.slice(start, end);
 }
 
 export function normalizeTsaDiagnostic(result, input) {
@@ -325,7 +409,7 @@ export function normalizeTsaDiagnostic(result, input) {
   };
   const feedback = result.feedback || {};
   const quote = (value, transcript) => {
-    const cleaned = String(value || "").trim().replace(/^[“"]|[”"]$/g, "");
+    const cleaned = stripQuoteMarks(String(value || "").trim());
     if (!cleaned || !transcript.toLowerCase().includes(cleaned.toLowerCase())) return "No relevant content found";
     return cleaned.slice(0, 400);
   };
@@ -364,7 +448,7 @@ export function parseTsaInput(body) {
     actPushback: String(body?.scenario?.actPushback || "").slice(0, 1000)
   };
   if (!input.speakEnabled && !input.actEnabled) return { fallback: true };
-  if ((input.speakEnabled && input.speakTranscript.split(/\s+/).length < 5) || (input.actEnabled && input.actTranscript.split(/\s+/).length < 5)) return { fallback: true };
+  if ((input.speakEnabled && splitOnWhitespace(input.speakTranscript).length < 5) || (input.actEnabled && splitOnWhitespace(input.actTranscript).length < 5)) return { fallback: true };
   return { input };
 }
 
@@ -567,7 +651,7 @@ export async function handleAiScore(request, deps) {
   if (!token) return finish(401, { error: "Sign in required." }, "no-token");
   const supabase = {
     fetchImpl,
-    supabaseUrl: String(deps.supabaseUrl || SUPABASE_URL).replace(/\/+$/, ""),
+    supabaseUrl: stripTrailingSlashes(String(deps.supabaseUrl || SUPABASE_URL)),
     supabaseKey: String(deps.supabaseKey || SUPABASE_PUBLISHABLE_KEY),
     databaseTimeoutMs: Number(deps.databaseTimeoutMs) > 0 ? Number(deps.databaseTimeoutMs) : DATABASE_TIMEOUT_MS
   };
@@ -633,7 +717,7 @@ export async function handleAiScore(request, deps) {
   } catch (error) {
     // Same as Firebase: the page gets {fallback:true} and carries on. The note is fixed text, never the error text.
     const message = error && typeof error.message === "string" ? error.message : "";
-    const note = message === "timeout" ? "gemini-timeout" : /^gemini-http-\d+$/.test(message) ? message : "gemini-failed";
+    const note = message === "timeout" ? "gemini-timeout" : /^gemini-http-[0-9]+$/.test(message) ? message : "gemini-failed";
     return finish(200, { fallback: true }, note);
   }
 }

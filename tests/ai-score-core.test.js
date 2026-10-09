@@ -174,8 +174,9 @@ async function main() {
     const mine = await run(core, world, { body: variant, pathname: '/ai-score/tsa-diagnostic' });
     assert.strictEqual(fb.sent.length, 1, 'Firebase asked Gemini once');
     assert.strictEqual(world.gemini().length, 1);
-    assert.strictEqual(promptOf(world.gemini()[0]), promptOf(fb.sent[0]), 'TSA prompt is identical to the Firebase prompt');
-    assert.deepStrictEqual(JSON.parse(world.gemini()[0].init.body), JSON.parse(fb.sent[0].init.body));
+    // The only difference: the deployable file may hold plain ASCII only, so the Firebase en dashes in the rubric ranges are hyphens here.
+    assert.strictEqual(promptOf(world.gemini()[0]), promptOf(fb.sent[0]).split(String.fromCharCode(8211)).join('-'), 'TSA prompt is identical to the Firebase prompt (en dashes written as hyphens)');
+    assert.deepStrictEqual(JSON.parse(world.gemini()[0].init.body), JSON.parse(fb.sent[0].init.body.split(String.fromCharCode(8211)).join('-')));
     assert.ok(world.gemini()[0].url.includes('gemini-flash-latest'), 'TSA uses the first model only');
   }
   // The TSA route works (the Firebase one rejected every well formed TSA answer; see the note in core.mjs).
@@ -713,6 +714,153 @@ async function main() {
     const clientSource = fs.readFileSync(source, 'utf8');
     assert.ok(!/console\./.test(clientSource), 'the client logs nothing');
     assert.ok(!/localStorage\.setItem/.test(clientSource.replace(/\/\/.*$/gm, '')), 'the client never changes the setting by itself');
+  }
+
+  // ================= the backslash-free helpers behave exactly like the old regular expressions =================
+  // The OLD implementations live here, in the test file only. The deployable core.mjs has none of these regular expressions.
+  {
+    const OLD_LOCAL_ORIGIN = /^http:\/\/(localhost|127\.0\.0\.1)(:\d{1,5})?$/;
+    const OLD_TOKEN_PATTERN = /^[A-Za-z0-9._~+\/-]{1,4096}=*$/;
+    const OLD_BOM = new RegExp('^' + String.fromCharCode(92) + 'ufeff');
+    const oldOriginAllowed = (origin) => { const value = String(origin || ''); return core.ALLOWED_ORIGINS.includes(value) || OLD_LOCAL_ORIGIN.test(value); };
+    const oldTokenFromHeader = (headerValue) => { const match = /^Bearer ([^\s]+)$/i.exec(String(headerValue || '').trim()); if (!match) return ''; return OLD_TOKEN_PATTERN.test(match[1]) ? match[1] : ''; };
+    const oldCountWords = (text) => text.split(/\s+/).filter(Boolean).length;
+    const oldSplit = (text) => text.split(/\s+/);
+    const oldQuote = (value) => String(value || '').trim().replace(/^[\u201c"]|[\u201d"]$/g, '');
+    const oldExtractJson = (text, accept) => {
+      const source = String(text || '').replace(OLD_BOM, '').trim();
+      if (!source) throw new Error('Gemini returned no JSON object.');
+      const candidates = [source];
+      const fencePattern = /```(?:json)?\s*([\s\S]*?)```/gi;
+      let fence;
+      while ((fence = fencePattern.exec(source))) candidates.push(fence[1].trim());
+      for (const candidate of candidates) {
+        try { const parsed = JSON.parse(candidate); if (accept(parsed)) return parsed; } catch (_) { /* next */ }
+      }
+      for (let start = 0; start < source.length; start += 1) {
+        if (source[start] !== '{') continue;
+        let depth = 0; let inString = false; let escaped = false;
+        for (let index = start; index < source.length; index += 1) {
+          const char = source[index];
+          if (inString) { if (escaped) escaped = false; else if (char === '\\') escaped = true; else if (char === '"') inString = false; continue; }
+          if (char === '"') { inString = true; continue; }
+          if (char === '{') depth += 1;
+          if (char === '}') depth -= 1;
+          if (depth !== 0) continue;
+          try { const parsed = JSON.parse(source.slice(start, index + 1)); if (accept(parsed)) return parsed; } catch (_) { break; }
+        }
+      }
+      throw new Error('Gemini returned text, but no valid JSON object could be extracted.');
+    };
+
+    // A small seeded random generator, so a failure can be repeated.
+    let seed = 20260817;
+    const rnd = () => { seed = (seed * 1664525 + 1013904223) % 4294967296; return seed / 4294967296; };
+    const pick = (list) => list[Math.floor(rnd() * list.length)];
+    const randomString = (alphabet, maxLength) => { let out = ''; const n = Math.floor(rnd() * (maxLength + 1)); for (let i = 0; i < n; i += 1) out += pick(alphabet); return out; };
+    const SPACES = [' ', '\t', '\n', '\r', '\v', '\f', '\u00a0', '\u1680', '\u2000', '\u200a', '\u200b', '\u2028', '\u2029', '\u202f', '\u205f', '\u3000', '\ufeff', '\u0085', '\u180e'];
+    const LETTERS = ['a', 'b', 'Z', '7', '.', '_', '~', '+', '/', '-', '=', ':', '"', '\u201c', '\u201d', "'", '{', '}', '[', ']', ',', '`', '\u00e9', '\u4e2d', '\ud83d', '\ude00'];
+    const mixed = LETTERS.concat(SPACES, SPACES);
+    const sameOrBothThrow = (label, a, b) => {
+      let ra; let rb; let ea = false; let eb = false;
+      try { ra = a(); } catch (error) { ea = true; ra = error.message; }
+      try { rb = b(); } catch (error) { eb = true; rb = error.message; }
+      assert.strictEqual(ea, eb, label + ' throws the same way');
+      assert.deepStrictEqual(rb, ra, label);
+    };
+
+    // Word counting and splitting on white space.
+    assert.deepStrictEqual(core.splitOnWhitespace(''), ['']);
+    assert.deepStrictEqual(core.splitOnWhitespace('  a  b '), ['', 'a', 'b', '']);
+    for (let i = 0; i < 6000; i += 1) {
+      const text = randomString(i % 3 === 0 ? mixed : i % 3 === 1 ? ['a', 'b', ' ', ' ', '\n'] : SPACES.concat(['x']), 40);
+      assert.deepStrictEqual(core.splitOnWhitespace(text), oldSplit(text), 'split on white space: ' + JSON.stringify(text));
+      assert.strictEqual(core.countWords(text), oldCountWords(text), 'word count: ' + JSON.stringify(text));
+    }
+    for (let code = 0; code < 70000; code += 1) {
+      const text = 'a' + String.fromCharCode(code) + 'b';
+      assert.deepStrictEqual(core.splitOnWhitespace(text), oldSplit(text), 'every character, code ' + code);
+    }
+
+    // Origin check.
+    const originSamples = ['https://theuntaughtlessons.com', 'https://www.theuntaughtlessons.com', 'http://localhost', 'http://localhost:8080', 'http://localhost:123456', 'http://localhost:', 'http://127.0.0.1', 'http://127.0.0.1:5500', 'http://127x0.0.1', 'http://localhost/', 'http://localhost:80 ', 'http://localhost:80' + String.fromCharCode(10), 'https://localhost', 'HTTP://localhost', 'http://localhost:\u0663\u0663', 'http://evil.com', '', null, undefined, 'null', 'http://127.0.0.12'];
+    for (const sample of originSamples) assert.strictEqual(core.originAllowed(sample), oldOriginAllowed(sample), 'origin: ' + JSON.stringify(sample));
+    const originPieces = ['http://', 'localhost', '127.0.0.1', ':', '8', '80', '123456', '/', '.', ' ', 'x', 'https://', 'theuntaughtlessons.com'];
+    for (let i = 0; i < 8000; i += 1) {
+      let sample = '';
+      const n = 1 + Math.floor(rnd() * 5);
+      for (let j = 0; j < n; j += 1) sample += pick(originPieces);
+      assert.strictEqual(core.originAllowed(sample), oldOriginAllowed(sample), 'origin: ' + JSON.stringify(sample));
+      const noisy = sample + randomString(mixed, 2);
+      assert.strictEqual(core.originAllowed(noisy), oldOriginAllowed(noisy), 'origin: ' + JSON.stringify(noisy));
+    }
+
+    // Token header parsing.
+    const tokenSamples = [TOKEN, 'Bearer ' + TOKEN, 'bearer ' + TOKEN, 'BEARER ' + TOKEN, 'BeArEr ' + TOKEN, '  Bearer ' + TOKEN + '  ', 'Bearer  ' + TOKEN, 'Bearer\t' + TOKEN, 'Bearer ' + TOKEN + ' x', 'Bearer', 'Bearer ', 'Bearer =', 'Bearer abc==', 'Bearer abc=d', 'Bearer ' + 'x'.repeat(4096), 'Bearer ' + 'x'.repeat(4097), 'Bearer a/b-c_d.e~f+g', 'Bearer a%b', '', null, undefined, 'Basic ' + TOKEN, 'Bearer ' + String.fromCharCode(0x212a) + 'x', String.fromCharCode(0x212a) + 'earer abc', 'Bearer\u00a0abc', 'Bearer abc\u00a0def'];
+    for (const sample of tokenSamples) assert.strictEqual(core.tokenFromHeader(sample), oldTokenFromHeader(sample), 'token: ' + JSON.stringify(sample));
+    const tokenPieces = ['Bearer', 'bearer', 'BEARER', 'Bearer ', ' ', '  ', 'abc', 'A1_-', '.', '~+/', '==', '=', '\t', '\n', 'x'.repeat(50), '%', '\u00a0', '\ufeff'];
+    for (let i = 0; i < 12000; i += 1) {
+      let sample = '';
+      const n = Math.floor(rnd() * 5);
+      for (let j = 0; j < n; j += 1) sample += pick(tokenPieces);
+      assert.strictEqual(core.tokenFromHeader(sample), oldTokenFromHeader(sample), 'token: ' + JSON.stringify(sample));
+      const noisy = 'Bearer ' + randomString(mixed.concat(['a', 'b', '1', '=']), 12);
+      assert.strictEqual(core.tokenFromHeader(noisy), oldTokenFromHeader(noisy), 'token: ' + JSON.stringify(noisy));
+    }
+
+    // JSON extraction (plain, fenced in any letter case, inside prose, with a byte order mark, with quotes and backslashes in strings).
+    const anyShape = () => true;
+    const explainAccept = (parsed) => Boolean(parsed) && (Array.isArray(parsed.criteria) || Array.isArray(parsed.advisors) || Object.prototype.hasOwnProperty.call(parsed, 'speakScore'));
+    const BS = String.fromCharCode(92);
+    const NL = String.fromCharCode(10);
+    const jsonPieces = [
+      '{"criteria":[1]}', '{"scores":{"a":1}}', '{"a":"b ' + BS + '" } ' + BS + BS + '"}', '{"criteria":["x}' + BS + '"y"]}', '{"speakScore":1}', '{bad}', '{', '}', '[', ']', '"', BS, '"{"', '`', '```', '```json', '```JSON', '```Json ', '```javascript', '```', ' ', NL, '\r\n', '\t', BOM_FOR_TEST(), 'text ', 'Here is the result:', '{"criteria":[{"a":"```"}]}', '1', 'true', 'null', '{"scores":null}', '{"scores":{}}', '{"x":{"y":{"criteria":[]}}}'
+    ];
+    function BOM_FOR_TEST() { return String.fromCharCode(65279); }
+    const fixedJson = [
+      '', '   ', JSON.stringify({ criteria: [1] }), BOM_FOR_TEST() + JSON.stringify({ criteria: [1] }), BOM_FOR_TEST() + BOM_FOR_TEST() + JSON.stringify({ criteria: [1] }),
+      '```json' + NL + JSON.stringify({ criteria: [] }) + NL + '```', '```JSON   ' + JSON.stringify({ scores: { a: 1 } }) + '```', '```' + JSON.stringify({ criteria: [] }), 'intro ```json {"criteria":[]} ``` outro ```json {"speakScore":3}```',
+      'Sure! {"criteria":[1],"note":"he said ' + BS + '"hi' + BS + '" and left"} thanks', '````json ' + JSON.stringify({ criteria: [] }) + ' ````', '```` ' + JSON.stringify({ criteria: [] }) + ' ```',
+      '```json', '```json```', '``````', '```' + NL + NL + '{"criteria":[]}' + NL + '```', '```jsonx {"criteria":[]} ```', 'no json at all', '{"unrelated":1}'
+    ];
+    const jsonSamples = fixedJson.slice();
+    for (let i = 0; i < 12000; i += 1) {
+      let sample = '';
+      const n = Math.floor(rnd() * 7);
+      for (let j = 0; j < n; j += 1) sample += pick(jsonPieces);
+      jsonSamples.push(sample);
+    }
+    for (const sample of jsonSamples) {
+      for (const accept of [explainAccept, anyShape, (parsed) => Boolean(parsed) && typeof parsed === 'object' && Boolean(parsed.scores) && typeof parsed.scores === 'object']) {
+        sameOrBothThrow('extractJson: ' + JSON.stringify(sample), () => oldExtractJson(sample, accept), () => core.extractJson(sample, accept));
+      }
+    }
+    sameOrBothThrow('extractJson with default accept', () => oldExtractJson('{"criteria":[]}', explainAccept), () => core.extractJson('{"criteria":[]}'));
+    // A model answer with an invisible byte order mark in front is still read.
+    assert.deepStrictEqual(core.extractJson(BOM_FOR_TEST() + '{"criteria":[]}'), { criteria: [] });
+
+    // The quote cleaning of the TSA evidence, through the real function: compare with the old regular expression.
+    const quoteInput = { speakEnabled: true, actEnabled: false, speakTranscript: '', actTranscript: '' };
+    const quoteChars = ['"', String.fromCharCode(8220), String.fromCharCode(8221), 'a', 'b', ' ', "'", String.fromCharCode(8216)];
+    for (let i = 0; i < 4000; i += 1) {
+      const value = randomString(quoteChars, 7);
+      const cleaned = oldQuote(value);
+      const transcript = 'xx ' + cleaned + ' yy';
+      const input = Object.assign({}, quoteInput, { speakTranscript: transcript });
+      const result = core.normalizeTsaDiagnostic({ scores: { speak: { leads: 1, supports: 1, focuses: 1 } }, feedback: { speakEvidence: value } }, input);
+      const expected = !cleaned || !transcript.toLowerCase().includes(cleaned.toLowerCase()) ? 'No relevant content found' : cleaned.slice(0, 400);
+      assert.strictEqual(result.feedback.speakEvidence, expected, 'quote cleaning: ' + JSON.stringify(value));
+    }
+
+    // The two thresholds that use word counting, through the real parsers.
+    for (let i = 0; i < 3000; i += 1) {
+      const text = randomString(['a', 'b', ' ', '\n', '\t', '\u00a0', '\u200b', '\u2003'], 24);
+      const trimmed = text.trim().slice(0, 12000);
+      const explain = core.parseExplainInput({ transcript: text });
+      assert.strictEqual(Boolean(explain.error), oldCountWords(trimmed) < 5, 'explain threshold: ' + JSON.stringify(text));
+      const tsa = core.parseTsaInput({ enabled: { speak: true }, speak: { transcript: text } });
+      assert.strictEqual(Boolean(tsa.fallback), oldSplit(trimmed).length < 5, 'tsa threshold: ' + JSON.stringify(text));
+    }
   }
 
   console.log('ai-score core tests passed');

@@ -314,6 +314,60 @@ async function rejects(promise) { try { await promise; } catch (error) { return 
     assert.equal(await out.auth.getLinkStatus(), null);
     assert.equal(out.fake.of('rpc').length, 0);
   });
+  // ---- which providers the project has switched on (the public Auth settings)
+  const SETTINGS = (external) => ({ ok: true, status: 200, json: async () => ({ external, disable_signup: true }) });
+  const UNKNOWN = { google: true, email: true, azure: false, facebook: false };
+  const providerOptions = (extra = {}) => Object.assign({ session: memoryStore(), now: () => 1000, setTimeoutImpl: (fn, ms) => setTimeout(fn, ms >= 1000 ? 20 : 0) }, extra);
+  await check('getEnabledProviders: azure and facebook on or off as the settings say, sent to /auth/v1/settings with the publishable key only', async () => {
+    for (const [azure, facebook] of [[true, false], [false, true], [true, true], [false, false]]) {
+      const calls = [];
+      const answer = await mod.getEnabledProviders(providerOptions({ fetchImpl: async (url, init) => { calls.push([url, init]); return SETTINGS({ email: true, google: true, azure, facebook, github: true }); } }));
+      assert.deepStrictEqual(answer, { google: true, email: true, azure, facebook });
+      assert.strictEqual(calls.length, 1);
+      assert.strictEqual(calls[0][0], 'https://czljyikfavtjgqcibdda.supabase.co/auth/v1/settings');
+      assert.deepStrictEqual(calls[0][1].headers, { apikey: mod.SUPABASE_PUBLISHABLE_KEY });
+      assert.strictEqual(calls[0][1].method, 'GET');
+    }
+    const missing = await mod.getEnabledProviders(providerOptions({ fetchImpl: async () => SETTINGS({ email: true }) }));
+    assert.deepStrictEqual(missing, { google: false, email: true, azure: false, facebook: false }, 'a provider the settings do not list is off');
+  });
+  await check('getEnabledProviders: every failure means the email link and Google only, never throws, and is not remembered', async () => {
+    const failures = {
+      'a network error': async () => { throw new TypeError('Failed to fetch'); },
+      'a refusal': async () => ({ ok: false, status: 401, json: async () => ({}) }),
+      'an answer that is not the settings': async () => ({ ok: true, status: 200, json: async () => ({ hello: 1 }) }),
+      'an answer that is not JSON': async () => ({ ok: true, status: 200, json: async () => { throw new SyntaxError('x'); } }),
+      'nothing': async () => null,
+      'a hanging request': () => new Promise(() => {})
+    };
+    for (const [label, fetchImpl] of Object.entries(failures)) {
+      const session = memoryStore();
+      assert.deepStrictEqual(await mod.getEnabledProviders(providerOptions({ fetchImpl, session })), UNKNOWN, label);
+      assert.strictEqual(session.getItem('utl_auth_providers'), null, `${label}: not cached`);
+    }
+    assert.strictEqual(mod.PROVIDERS_TIMEOUT_MS, 4000);
+  });
+  await check('getEnabledProviders: a good answer is kept in session storage for five minutes', async () => {
+    const session = memoryStore();
+    let clock = 1000;
+    let calls = 0;
+    const options = () => providerOptions({ session, now: () => clock, fetchImpl: async () => { calls += 1; return SETTINGS({ email: true, google: true, azure: calls === 1, facebook: false }); } });
+    assert.strictEqual((await mod.getEnabledProviders(options())).azure, true);
+    clock += 299000;
+    assert.strictEqual((await mod.getEnabledProviders(options())).azure, true, 'still the cached answer');
+    assert.strictEqual(calls, 1);
+    clock += 2000;
+    assert.strictEqual((await mod.getEnabledProviders(options())).azure, false, 'after five minutes it asks again');
+    assert.strictEqual(calls, 2);
+    session.setItem('utl_auth_providers', 'not json');
+    assert.strictEqual((await mod.getEnabledProviders(options())).azure, false, 'a broken cache is ignored');
+    assert.strictEqual(mod.PROVIDERS_CACHE_MS, 300000);
+  });
+  await check('getEnabledProviders: unreadable storage still works (no cache), and a storage that cannot write is not an error', async () => {
+    const throwing = { getItem() { throw new Error('blocked'); }, setItem() { throw new Error('blocked'); } };
+    const answer = await mod.getEnabledProviders(providerOptions({ session: throwing, fetchImpl: async () => SETTINGS({ email: true, google: true, azure: true, facebook: true }) }));
+    assert.deepStrictEqual(answer, { google: true, email: true, azure: true, facebook: true });
+  });
   await check('getIdToken returns the access token, "" when signed out, and refreshes on request', async () => {
     const t = newAuth(mod, { session: SESSION, refreshed: { access_token: 'fresh-token', user: USER } });
     assert.equal(await t.auth.getIdToken(), 'sb-access-token');

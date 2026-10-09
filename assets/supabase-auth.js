@@ -455,6 +455,57 @@ export function createSupabaseAuth(deps = {}) {
   };
 }
 
+// Which sign in providers the Supabase project has switched on (the public Auth settings, readable with the publishable key). The login
+// page shows the Microsoft and Facebook buttons only when this says so. Never throws and never waits longer than the timeout: any failure
+// (no answer, a refusal, a page that is not the settings, unreadable storage) answers "the email link and Google only", and is not
+// remembered. A good answer is kept in sessionStorage for five minutes.
+export const PROVIDERS_CACHE_KEY = "utl_auth_providers";
+export const PROVIDERS_CACHE_MS = 5 * 60 * 1000;
+export const PROVIDERS_TIMEOUT_MS = 4000;
+function providersWhenUnknown() { return { google: true, email: true, azure: false, facebook: false }; }
+
+export async function getEnabledProviders(options = {}) {
+  try {
+    let session = null;
+    try { session = options.session || (typeof sessionStorage !== "undefined" ? sessionStorage : null); } catch (error) { session = null; }
+    const now = typeof options.now === "function" ? options.now : Date.now;
+    const ttl = Number(options.cacheMs) >= 0 ? Number(options.cacheMs) : PROVIDERS_CACHE_MS;
+    if (session) {
+      try {
+        const cached = JSON.parse(session.getItem(PROVIDERS_CACHE_KEY) || "null");
+        if (cached && typeof cached.at === "number" && now() - cached.at >= 0 && now() - cached.at < ttl && cached.value && typeof cached.value === "object") {
+          return { google: cached.value.google === true, email: cached.value.email === true, azure: cached.value.azure === true, facebook: cached.value.facebook === true };
+        }
+      } catch (error) { /* an unreadable cache is no cache */ }
+    }
+    const fetchImpl = options.fetchImpl || (typeof fetch === "function" ? fetch.bind(globalThis) : null);
+    if (typeof fetchImpl !== "function") return providersWhenUnknown();
+    const url = String(options.supabaseUrl || SUPABASE_URL).replace(/\/+$/, "");
+    const controller = typeof AbortController === "function" ? new AbortController() : null;
+    const timeoutMs = Number(options.timeoutMs) > 0 ? Number(options.timeoutMs) : PROVIDERS_TIMEOUT_MS;
+    let timer = null;
+    let answer;
+    try {
+      const request = fetchImpl(`${url}/auth/v1/settings`, { method: "GET", headers: { apikey: String(options.publishableKey || SUPABASE_PUBLISHABLE_KEY) }, signal: controller ? controller.signal : undefined });
+      const limit = new Promise((resolve, reject) => {
+        timer = (options.setTimeoutImpl || setTimeout)(() => { if (controller) controller.abort(); reject(new Error("timeout")); }, timeoutMs);
+      });
+      answer = await Promise.race([request, limit]);
+    } finally {
+      if (timer !== null) (options.clearTimeoutImpl || clearTimeout)(timer);
+    }
+    if (!answer || !answer.ok) return providersWhenUnknown();
+    const body = await answer.json();
+    const external = body && typeof body === "object" ? body.external : null;
+    if (!external || typeof external !== "object") return providersWhenUnknown();
+    const value = { google: external.google === true, email: external.email === true, azure: external.azure === true, facebook: external.facebook === true };
+    if (session) { try { session.setItem(PROVIDERS_CACHE_KEY, JSON.stringify({ at: now(), value })); } catch (error) { /* not remembered */ } }
+    return value;
+  } catch (error) {
+    return providersWhenUnknown();
+  }
+}
+
 // The instance the site uses. The library is not fetched until one of these is called.
 const instance = createSupabaseAuth();
 export const getSignedInUser = (...args) => instance.getSignedInUser(...args);

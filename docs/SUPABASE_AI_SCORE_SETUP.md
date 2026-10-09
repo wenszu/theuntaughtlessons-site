@@ -10,6 +10,17 @@ Written 2026-10-08. For the owner. About 20 minutes of your time in total. Nothi
 - **Risk:** low. The Firebase scorers stay deployed and stay the default. The new path is used only in a browser where the setting `utl_ai` is `supabase`.
 - **Cost:** the same Gemini usage as today. It is billed to the Google project that owns the key.
 
+## Order of operations
+
+Do these in this order. Each step is safe on its own, and nobody sees a change until the last one.
+
+1. **Deploy** the function (Step 3). Without the key it answers `{fallback:true}` to a signed in member, so nothing breaks.
+2. **Set the key** `GEMINI_API_KEY` in the Supabase secrets (Step 1). Do not skip this: without it every call falls back.
+3. **Test** (Step 4), with the test member, before any page is switched.
+4. **Flip the `ai` flag** (Step 5, or the `ai` switch in `docs/SUPABASE_SWITCHBOARD.md`) only after the tests pass.
+
+Time limits to know about: the function allows Gemini up to 25 seconds per attempt, but the TSA page waits only 8 seconds for the answer. With the 8 second wait, a slow but successful AI answer is thrown away and the page uses its own rules. Raise the TSA page wait to about 30 seconds before you turn on a TSA GenAI toggle (`settings/tsa_scoring`). Explain to Aiko waits 50 seconds, which is enough.
+
 ## Step 1. Copy the Gemini key from Firebase to Supabase
 
 The key already exists. It is the Firebase secret named `GEMINI_API_KEY`. You will copy it to your clipboard without it ever appearing on the screen, then paste it into the Supabase dashboard.
@@ -26,6 +37,7 @@ The key already exists. It is the Firebase secret named `GEMINI_API_KEY`. You wi
 
 Notes:
 - Do not paste the key into the chat.
+- If the key is not set (or is empty), the function does not fail. After the sign in check passes it answers `200` with `{fallback:true}`, so the page uses its own rules, exactly as when the AI service is down. It is not a `503`. This also means a missing key shows up as "AI feedback is unavailable", not as an error: do Step 4 only after the key is set.
 - The old key stays in Firebase and keeps working. Nothing is removed. The plan (task 3 in `docs/SUPABASE_PLAN_SERVERS_AND_ADMIN.md`) prefers a fresh key in a Google project you keep, and revoking the old one at the close of the migration. That can be done later by repeating this step with the new key.
 
 ## Step 2. The assistant applies the database change (needs your go in chat)
@@ -34,7 +46,7 @@ Migration `20261008002280_ai_score_limits.sql` adds one small table (counts of c
 
 ## Step 3. The assistant deploys the function
 
-The assistant deploys `ai-score` with its Supabase tool. The function is deployed with the gateway sign in check off. This is deliberate and safe: the browser's pre-flight check carries no token, and the member token is a Firebase token. The function does its own, stricter check before it reads anything or calls Gemini: it asks the database who the token belongs to, and refuses everyone else.
+The assistant deploys `ai-score` with its Supabase tool. The function is deployed with the gateway sign in check off. This is deliberate and safe: the browser's pre-flight check carries no token, and the member token is a Supabase session token now (a Firebase token also works). The function does its own, stricter check before it reads anything or calls Gemini: it asks the database who the token belongs to, and refuses everyone else.
 
 If you ever need to deploy by hand: `supabase functions deploy ai-score --no-verify-jwt --project-ref czljyikfavtjgqcibdda`
 
@@ -76,4 +88,4 @@ Nobody else is affected by what you set in your own browser. When the comparison
 ## Two things that differ from Firebase
 
 - **Sign in is required.** A page opened without a signed in member (for example a preview with no sign in) gets the fallback from the new path.
-- **The TSA diagnostic scorer now actually returns scores.** The Firebase version rejected every well formed answer from the AI and always returned the fallback, so the TSA page always used its own rules. The new one accepts the AI answer. If the TSA setting that turns AI scoring on (`settings/tsa_scoring`) is on, switching the TSA page to the new path will start using AI scores for Speak and Act. Check that setting with the assistant before you switch the TSA page. The TSA page also waits only 8 seconds for the AI, which is often too short, so the assistant will normally raise that wait when it switches the page.
+- **The TSA diagnostic scorer now actually returns scores.** The Firebase version rejected every well formed answer from the AI and always returned the fallback, so the TSA page always used its own rules. The new one accepts the AI answer. If the TSA setting that turns AI scoring on (`settings/tsa_scoring`) is on, switching the TSA page to the new path will start using AI scores for Speak and Act. Check that setting with the assistant before you switch the TSA page. The TSA page also waits only 8 seconds for the AI while the function allows 25 seconds, which is often too short: raise the page wait to about 30 seconds before you turn on a TSA GenAI toggle (the assistant will normally do this when it switches the page).

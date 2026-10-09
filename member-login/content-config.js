@@ -2499,6 +2499,73 @@ const UTL_CONTENT = {
     });
   }
 
+  function supabaseAuthHref() {
+    // Literal ?v= strings so scripts/sync-cache-versions.js keeps them in step with every other module URL.
+    if (inPhasePracticeRoot()) return "../../../assets/supabase-auth.js?v=20260925-mobile-v1";
+    return "../assets/supabase-auth.js?v=20260925-mobile-v1";
+  }
+
+  function switchboardHref() {
+    if (inPhasePracticeRoot()) return "../../../assets/switchboard.js?v=20260925-mobile-v1";
+    return "../assets/switchboard.js?v=20260925-mobile-v1";
+  }
+
+  // The enabled providers of the Supabase project ({ azure, facebook, google, email }); any failure answers "email link and Google only".
+  function loadEnabledProviders() {
+    return import(supabaseAuthHref()).then(function (module) { return module.getEnabledProviders(); }).catch(function () {
+      return { google: true, email: true, azure: false, facebook: false };
+    });
+  }
+
+  // On a first visit utl_auth is not set until the switchboard has been applied. Waits for it, but never longer than two seconds.
+  function waitForSwitchboard() {
+    return new Promise(function (resolve) {
+      var timer = setTimeout(resolve, 2000);
+      import(switchboardHref()).then(function (module) { return module.loadSwitchboard(); }).catch(function () {}).then(function () {
+        clearTimeout(timer);
+        resolve();
+      });
+    });
+  }
+
+  // The Microsoft and Facebook buttons of the login card. With sign in on Supabase (utl_auth is supabase) each one is shown only when the
+  // Supabase project has that provider switched on. They start hidden in that mode, and on a first visit (utl_auth not set yet) until the
+  // switchboard has been applied, so the card never flashes a button that is then taken away. With Firebase sign in (utl_auth set to
+  // anything else, or still unset after the wait) all three buttons stay as they are. Unreadable storage leaves the card as it is.
+  function applyProviderButtons() {
+    var buttons = { azure: qs("#wsMicrosoftLogin"), facebook: qs("#wsFacebookLogin") };
+    function authMode() {
+      try {
+        var value = window.localStorage.getItem("utl_auth");
+        return value === null || value === undefined ? "unset" : (value === "supabase" ? "supabase" : "other");
+      } catch (storageError) {
+        return "unreadable";
+      }
+    }
+    function setShown(name, shown) {
+      if (buttons[name]) buttons[name].style.display = shown ? "" : "none";
+    }
+    function decide() {
+      loadEnabledProviders().then(function (providers) {
+        setShown("azure", Boolean(providers && providers.azure === true));
+        setShown("facebook", Boolean(providers && providers.facebook === true));
+      }).catch(function () {});
+    }
+    var mode = authMode();
+    if (mode === "unreadable" || mode === "other") return;
+    setShown("azure", false);
+    setShown("facebook", false);
+    if (mode === "supabase") { decide(); return; }
+    waitForSwitchboard().then(function () {
+      if (authMode() === "supabase") { decide(); return; }
+      setShown("azure", true);
+      setShown("facebook", true);
+    }).catch(function () {
+      setShown("azure", true);
+      setShown("facebook", true);
+    });
+  }
+
   function renderIndex() {
     injectStyles();
     document.body.classList.add("ws-page");
@@ -2516,15 +2583,7 @@ const UTL_CONTENT = {
         event.preventDefault();
         handleFacebookLogin(event.currentTarget, qs("#wsLoginMessage"));
       });
-      // Sign in on Supabase offers the email link and Google only: Microsoft and Facebook are switched off there (no member uses them).
-      try {
-        if (window.localStorage.getItem("utl_auth") === "supabase") {
-          ["#wsMicrosoftLogin", "#wsFacebookLogin"].forEach(function (selector) {
-            var button = qs(selector);
-            if (button) button.style.display = "none";
-          });
-        }
-      } catch (storageError) { /* storage unreadable: leave the buttons as they are */ }
+      applyProviderButtons();
       qs("#wsEmailLinkForm").addEventListener("submit", async function (event) {
           event.preventDefault();
           var email = qs("#wsEmailLinkAddr").value.trim().toLowerCase();
