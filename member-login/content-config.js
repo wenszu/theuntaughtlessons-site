@@ -2516,6 +2516,15 @@ const UTL_CONTENT = {
         event.preventDefault();
         handleFacebookLogin(event.currentTarget, qs("#wsLoginMessage"));
       });
+      // Sign in on Supabase offers the email link and Google only: Microsoft and Facebook are switched off there (no member uses them).
+      try {
+        if (window.localStorage.getItem("utl_auth") === "supabase") {
+          ["#wsMicrosoftLogin", "#wsFacebookLogin"].forEach(function (selector) {
+            var button = qs(selector);
+            if (button) button.style.display = "none";
+          });
+        }
+      } catch (storageError) { /* storage unreadable: leave the buttons as they are */ }
       qs("#wsEmailLinkForm").addEventListener("submit", async function (event) {
           event.preventDefault();
           var email = qs("#wsEmailLinkAddr").value.trim().toLowerCase();
