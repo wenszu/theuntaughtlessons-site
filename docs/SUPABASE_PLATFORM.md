@@ -2,7 +2,7 @@
 
 Last updated: 2026-10-09. Read this together with `WEBSITE_CONTEXT.md` before changing anything about data, sign in, email, payments, or any server function.
 
-**Status line (update this first when it changes):** since 2026-10-09 the website runs on Supabase: data layer, server reads, admin saves, sign in, Executive Signature saves and mail. Only AI scoring and payments still use Firebase, because their keys (Gemini, Stripe) are not set yet. Firebase stays in place as the safety net for about two weeks (the quiet period), then is closed following `docs/SUPABASE_CUTOVER_RUNBOOK.md` section 10.
+**Status line (update this first when it changes):** since 2026-10-09 the website runs on Supabase: data layer, server reads, admin saves, sign in, Executive Signature saves and mail. AI scoring moved on 2026-10-09 (flag `ai` is `supabase`, Gemini key set in Supabase). Only payments still use Firebase, because the Stripe keys are not set yet. The TSA GenAI toggles stay off. Firebase stays in place as the safety net for about two weeks (the quiet period), then is closed following `docs/SUPABASE_CUTOVER_RUNBOOK.md` section 10.
 
 ## 1. The three places data can live
 
@@ -27,7 +27,7 @@ One public row in the table `public.app_settings` (key `switchboard`) holds eigh
 | `mail` | `utl_mail` | Admin and result emails through Edge Functions |
 | `es_submit` | `utl_es` | Executive Signature saves through the Edge Function |
 | `payments` | `utl_payments` | Stripe checkout (needs the Stripe keys, not set yet) |
-| `ai` | `utl_ai` | AI scoring through Supabase (needs the Gemini key, not set yet) |
+| `ai` | `utl_ai` | AI scoring through Supabase (`ai-score`). `supabase` since 2026-10-09 |
 
 Values are `firebase` or `supabase` (`server_reads` and `server_writes` also accept `shadow`). Flip with one statement in the Supabase SQL editor, undo with the same statement and `firebase`:
 
@@ -46,7 +46,8 @@ Every change is logged (`audit_events`, action `switchboard.changed`). Details: 
 | `data_source`, `server_reads` | Supabase, live. |
 | Sign in setup (Supabase Auth, Resend sender, Google) | Done and tested with the test member and by the owner (phone and Google). 56 Supabase accounts exist and are linked. Sign up is OFF. |
 | `server_writes`, `es_submit`, `mail`, `auth` | **Flipped to Supabase on 2026-10-09** (owner approved). Tested live as the test member with no manual switches: email link sign in, workspace, Executive Signature quick check saved in Supabase, result email delivered, zero Firebase requests. Undo: one statement setting these four flags back to `firebase` (see section 2). |
-| `ai`, `payments` | Waiting for the Gemini and Stripe keys. Edge Functions `ai-score`, `stripe-checkout`, `stripe-webhook` are written, not deployed. |
+| `ai` | Done 2026-10-09. `ai-score` deployed, tested live as the test member (real Gemini feedback in about 16 seconds, no Firebase call). Undo: set `ai` back to `firebase`. Keep the TSA GenAI toggles off, and raise the TSA page wait from 8 s to about 30 s before turning one on. |
+| `payments` | Waiting for the Stripe keys. Edge Functions `stripe-checkout`, `stripe-webhook` are written, not deployed. |
 | Certificates | Database trigger `credential_auto_issue` is ENABLED (2026-10-09). The Firebase trigger is idle because progress no longer lands in Firestore; remove it when closing Firebase. Three real members have all required exercises marked complete but never received a certificate in Firebase either: do NOT run `private.issue_missing_credentials()` without the owner's decision. |
 | DOC identity | Adapter built on a branch, not switched on. Needs the flip first. |
 | Closing Firebase | After the quiet period (about two weeks), see the runbook section 10. |
@@ -80,7 +81,7 @@ Hard rules (each one was learned the hard way):
 
 ## 6. Edge Functions (Supabase)
 
-Deployed to utl-core, all with `verify_jwt` off and their own checks: `send-email`, `weekly-org-reports`, `result-emails`, `readiness-submit`, `readiness-access`, `admin-mail`. Written, not deployed: `ai-score`, `stripe-checkout`, `stripe-webhook`, `auth-admin` (invite only; the emergency password was retired). They fail closed when their secrets are missing. Deploy through the Supabase MCP `deploy_edge_function` with the files copied exactly, then fetch them back and compare. Files in `supabase/functions/<name>/` (`core.mjs` pure logic, `index.ts` thin entry).
+Deployed to utl-core, all with `verify_jwt` off and their own checks: `send-email`, `weekly-org-reports`, `result-emails`, `readiness-submit`, `readiness-access`, `admin-mail`, `ai-score`. Written, not deployed: `stripe-checkout`, `stripe-webhook`, `auth-admin` (invite only; the emergency password was retired). They fail closed when their secrets are missing. Deploy through the Supabase MCP `deploy_edge_function` with the files copied exactly, then fetch them back and compare. Files in `supabase/functions/<name>/` (`core.mjs` pure logic, `index.ts` thin entry).
 
 Secrets that exist: `MAIL_RELAY_SECRET` (Supabase and Firebase), Resend sender key, Firebase `SUPABASE_SERVICE_ROLE_KEY`. Secrets still to create: `CRON_SECRET` (weekly report schedule), `GEMINI_API_KEY`, Stripe keys.
 

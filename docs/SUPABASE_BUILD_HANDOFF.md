@@ -360,3 +360,11 @@ Add one dated line per step, newest last.
 - Known small items: (1) on the very first page load after the flip a browser draws the page before the flags are applied: the Microsoft and Facebook buttons show for that one load (cosmetic; the sign in clicks already follow the new flags), and a member with a Firebase session bounces once to the login page; (2) three real members have all required exercises marked complete but never had a certificate in Firebase: left for the owner (do not run issue_missing_credentials without the decision); (3) the old Firebase certificate trigger is idle; remove it when closing Firebase.
 - UNDO: update public.app_settings set value = value || '{"es_submit":"firebase","mail":"firebase","auth":"firebase","server_writes":"firebase"}' where key='switchboard';  (then disable the Supabase certificate trigger if the Firebase one must run again: alter table public.activity_progress disable trigger credential_auto_issue;)
 - Quiet period now (about two weeks): watch daily with scripts/supabase-cutover-check.js, keep every Firebase piece in place; DOC identity switch, Stripe and Gemini keys, CRON_SECRET and the weekly report schedule remain; closing Firebase follows docs/SUPABASE_CUTOVER_RUNBOOK.md section 10.
+
+## 2026-10-09 (late): AI scoring moved to Supabase
+
+- Switchboard flag `ai` set to `supabase`. Only `payments` is still `firebase`.
+- Live test as the test member (wenszu+utltest, signed in with the email link): the Explain to Aiko scoring client sent one request to `/functions/v1/ai-score/explain-to-aiko`, got real Gemini feedback (not the fallback) in 16.5 s, and made no Firebase scoring call. The Aiko page waits 50 s, so there is margin.
+- Phase 2 apps are locked for the test member until Phase 1 is done, so the test called the same client from a signed in page.
+- TSA GenAI toggles (`settings/tsa_scoring`) stay off. Raise the TSA page wait from 8 s to about 30 s before turning one on.
+- Undo: `update public.app_settings set value = jsonb_set(value,'{ai}','"firebase"') where key='switchboard';`
