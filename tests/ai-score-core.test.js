@@ -12,6 +12,7 @@ const os = require('os');
 const path = require('path');
 const Module = require('module');
 const { pathToFileURL } = require('url');
+const rpcContract = require('./helpers/rpc-contract');
 
 const root = path.join(__dirname, '..');
 const coreUrl = pathToFileURL(path.join(root, 'supabase/functions/ai-score/core.mjs')).href;
@@ -64,6 +65,7 @@ function makeWorld(options) {
   const geminiQueue = (o.gemini || [() => reply(200, explainPayload())]).slice();
   const fetchImpl = async (url, init) => {
     calls.push({ url, init });
+    const rpcRefused = rpcContract.reject(url, init); if (rpcRefused) return rpcRefused;
     if (url === `${SUPABASE}/rest/v1/rpc/get_my_person_id`) {
       if (o.auth) return o.auth(init);
       return reply(200, PERSON);

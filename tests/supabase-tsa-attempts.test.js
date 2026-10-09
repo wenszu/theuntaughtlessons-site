@@ -18,6 +18,7 @@ const os = require('os');
 const path = require('path');
 const { pathToFileURL } = require('url');
 const { createHarness } = require('./helpers/firebase-harness');
+const rpcContract = require('./helpers/rpc-contract');
 
 const REPO_ROOT = path.resolve(__dirname, '..');
 const FIREBASE_SOURCE = fs.readFileSync(path.join(REPO_ROOT, 'assets', 'firebase.js'), 'utf8');
@@ -68,6 +69,7 @@ function fakeFetch() {
   const impl = async (url, init = {}) => {
     const call = { method: init.method || 'GET', path: String(url).replace('https://example-project.supabase.co', ''), headers: init.headers || {}, body: init.body ? JSON.parse(init.body) : undefined };
     calls.push(call);
+    const rpcRefused = rpcContract.reject(url, init); if (rpcRefused) return rpcRefused;
     const handler = handlers.find((h) => h.match(call.path));
     const answer = handler ? handler.respond(call) : {};
     if (answer && answer.__status) return { ok: false, status: answer.__status, text: async () => JSON.stringify(answer.body || {}) };

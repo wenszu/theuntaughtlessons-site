@@ -3,6 +3,7 @@
 const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
+const rpcContract = require('./helpers/rpc-contract');
 
 const root = path.join(__dirname, '..');
 const coreUrl = 'file://' + path.join(root, 'supabase/functions/readiness-access/core.mjs');
@@ -26,6 +27,7 @@ function makeWorld(options) {
   const fetchImpl = async (url, init) => {
     const call = { url, method: init.method, headers: init.headers, body: init.body ? JSON.parse(init.body) : null, redirect: init.redirect };
     calls.push(call);
+    const rpcRefused = rpcContract.reject(url, init); if (rpcRefused) return rpcRefused;
     if (url.endsWith('/rest/v1/rpc/readiness_access_check')) {
       if (settings.databaseThrows) throw new Error('network');
       return { ok: settings.databaseOk, status: settings.databaseOk ? 200 : 500, json: async () => settings.decision };

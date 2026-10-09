@@ -2,6 +2,7 @@
 const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
+const rpcContract = require('./helpers/rpc-contract');
 
 const root = path.join(__dirname, '..');
 const coreUrl = 'file://' + path.join(root, 'supabase/functions/auth-admin/core.mjs');
@@ -40,6 +41,7 @@ function makeWorld(options) {
   const fetchImpl = async (url, init) => {
     const call = { url, method: init.method, headers: init.headers, body: init.body ? JSON.parse(init.body) : null, redirect: init.redirect };
     calls.push(call);
+    const rpcRefused = rpcContract.reject(url, init); if (rpcRefused) return rpcRefused;
     const pick = (setting, key) => {
       if (s.throwOn === key) throw new Error('network');
       return { ok: setting.status >= 200 && setting.status < 300, status: setting.status, json: async () => setting.value };

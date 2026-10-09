@@ -19,6 +19,7 @@ const REPO_ROOT = path.resolve(__dirname, '..');
 const view = require('../assets/exercise-results-view.js');
 const FIREBASE_SOURCE = fs.readFileSync(path.join(REPO_ROOT, 'assets', 'firebase.js'), 'utf8');
 const PAGE = require('./helpers/unversioned')(fs.readFileSync(path.join(REPO_ROOT, 'my-results', 'index.html'), 'utf8'));
+const rpcContract = require('./helpers/rpc-contract');
 
 let passed = 0;
 async function check(name, fn) {
@@ -189,6 +190,7 @@ function fakeFetch() {
     const method = init.method || 'GET';
     const call = { method, url: String(url), path: String(url).replace(URL_BASE, ''), headers: init.headers || {}, body: init.body ? JSON.parse(init.body) : undefined };
     calls.push(call);
+    const rpcRefused = rpcContract.reject(url, init); if (rpcRefused) return rpcRefused;
     const handler = handlers.find((h) => h.method === method && h.match(call.path));
     const answer = handler ? handler.respond(call) : (method === 'GET' ? [] : {});
     if (answer && answer.__status) return { ok: false, status: answer.__status, text: async () => JSON.stringify(answer.body || {}) };

@@ -1,6 +1,7 @@
 const assert = require('assert');
 const fs = require('fs');
 const vm = require('vm');
+const rpcContract = require('./helpers/rpc-contract');
 
 const pages = ['index.html', 'about.html', 'programs.html', 'programs/think-speak-act.html', 'contact.html'];
 for (const page of pages) {
@@ -105,6 +106,7 @@ function runWaitlist({ supabase, beacon = 'queue', storage = makeStorage(), href
   const fetchFn = async (url, opts) => {
     const call = { url, opts, body: opts && opts.body ? JSON.parse(opts.body) : null };
     log.push({ via: 'fetch', ...call });
+    const rpcRefused = rpcContract.reject(url, opts); if (rpcRefused) return rpcRefused;
     if (url === APPS_SCRIPT) return {};
     return supabase(call);
   };

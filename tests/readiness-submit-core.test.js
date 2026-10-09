@@ -27,6 +27,7 @@ const firebaseVersions = require('../functions-admin/executive-signature-version
 const guard = require('../functions-admin/readiness-completion-guard');
 const persistence = require('../functions-admin/assessment-persistence-service');
 const mirror = require('../functions-admin/supabase-mirror/payments-assessments');
+const rpcContract = require('./helpers/rpc-contract');
 
 let checks = 0;
 const ok = (condition, name) => { checks += 1; assert.ok(condition, name); };
@@ -66,6 +67,7 @@ function makeWorld(options) {
   world.fetchImpl = async (url, init) => {
     const entry = { url: String(url), method: init && init.method, headers: (init && init.headers) || {}, body: init && init.body ? JSON.parse(init.body) : undefined };
     world.calls.push(entry);
+    const rpcRefused = rpcContract.reject(url, init); if (rpcRefused) return rpcRefused;
     if (entry.url.endsWith('/rest/v1/rpc/apply_readiness_completion')) {
       if (settings.databaseThrows) throw new Error('network down');
       if (settings.databaseHangs) return new Promise(() => {});

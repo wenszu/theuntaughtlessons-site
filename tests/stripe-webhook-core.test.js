@@ -2,6 +2,7 @@ const assert = require('assert');
 const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
+const rpcContract = require('./helpers/rpc-contract');
 
 // Tests for supabase/functions/stripe-webhook/core.mjs (the pure part of the stripe-webhook Edge Function).
 // The signatures in these tests are computed with node's crypto module, independently of the WebCrypto code under test.
@@ -44,6 +45,7 @@ function dbReturning(answer, status) {
   const calls = [];
   const fetchImpl = async (url, init) => {
     calls.push({ url, init });
+    const rpcRefused = rpcContract.reject(url, init); if (rpcRefused) return rpcRefused;
     return { ok: (status || 200) < 300, status: status || 200, json: async () => answer };
   };
   return { calls, fetchImpl };
@@ -203,6 +205,7 @@ async function main() {
       calls,
       fetchImpl: async (url, init) => {
         calls.push({ url, init });
+        const rpcRefused = rpcContract.reject(url, init); if (rpcRefused) return rpcRefused;
         const id = JSON.parse(init.body).p_session.id;
         const status = seen.has(id) ? 'already_processed' : 'processed';
         seen.add(id);

@@ -3,6 +3,7 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const { pathToFileURL } = require('url');
+const rpcContract = require('./helpers/rpc-contract');
 
 // assets/supabase-data.js is a browser ES module. Node treats .js in this repo as CommonJS, so the test
 // copies it to a temporary .mjs file and imports that.
@@ -38,6 +39,7 @@ function fakeFetch() {
       body: init.body ? JSON.parse(init.body) : undefined
     };
     calls.push(call);
+    const rpcRefused = rpcContract.reject(url, init); if (rpcRefused) return rpcRefused;
     const handler = handlers.find((h) => h.method === method && h.match(call.path));
     const answer = handler ? handler.respond(call) : (method === 'GET' ? [] : {});
     if (answer && answer.__status) {
@@ -591,8 +593,9 @@ function check(name, fn) {
 
     await data.updateMemberAccount({ name: ' Zed ', goals: 'Lead', avatarIconId: 'compass', userId: 'u' });
     const [profile] = fetchImpl.rpcCalls('update_my_profile');
-    assertOnlyKeys(profile.body, ['displayName', 'goals', 'avatarIconId'], 'profile fields');
-    assert.deepEqual(profile.body, { displayName: 'Zed', goals: 'Lead', avatarIconId: 'compass' });
+    assertOnlyKeys(profile.body, ['p_fields'], 'update_my_profile takes one argument, p_fields');
+    assertOnlyKeys(profile.body.p_fields, ['displayName', 'goals', 'avatarIconId'], 'profile fields');
+    assert.deepEqual(profile.body, { p_fields: { displayName: 'Zed', goals: 'Lead', avatarIconId: 'compass' } });
     await rejects(data.updateMemberAccount({ name: 'Zed', avatarIconId: 'dragon' }), (error) => assert.match(error.message, /available avatars/));
   });
 
@@ -605,11 +608,12 @@ function check(name, fn) {
     assert.deepEqual(await data.updateMyProfile({ photoUrl: '' }), { saved: true, fields: ['photoUrl'] }, 'an empty photo clears it');
     const calls = fetchImpl.rpcCalls('update_my_profile');
     assert.equal(calls.length, 3);
-    calls.forEach((call) => assertOnlyKeys(call.body, ['displayName', 'goals', 'avatarIconId', 'photoUrl', 'feedbackEnabled'], 'profile fields'));
-    assert.deepEqual(calls[0].body, { photoUrl: photo });
-    assert.ok(!('displayName' in calls[0].body), 'the display name is never sent at sign-in');
-    assert.deepEqual(calls[1].body, { feedbackEnabled: false });
-    assert.deepEqual(calls[2].body, { photoUrl: null });
+    calls.forEach((call) => assertOnlyKeys(call.body, ['p_fields'], 'update_my_profile takes one argument, p_fields'));
+    calls.forEach((call) => assertOnlyKeys(call.body.p_fields, ['displayName', 'goals', 'avatarIconId', 'photoUrl', 'feedbackEnabled'], 'profile fields'));
+    assert.deepEqual(calls[0].body, { p_fields: { photoUrl: photo } });
+    assert.ok(!('displayName' in calls[0].body.p_fields), 'the display name is never sent at sign-in');
+    assert.deepEqual(calls[1].body, { p_fields: { feedbackEnabled: false } });
+    assert.deepEqual(calls[2].body, { p_fields: { photoUrl: null } });
     fetchImpl.reset();
     await rejects(data.updateMyProfile({ photoUrl: 'http://insecure.example.test/x.png' }), (error) => assert.equal(error.code, 'data/invalid-argument'));
     await rejects(data.updateMyProfile({ photoUrl: 'https://x.test/' + 'a'.repeat(2000) }), (error) => assert.equal(error.code, 'data/invalid-argument'));

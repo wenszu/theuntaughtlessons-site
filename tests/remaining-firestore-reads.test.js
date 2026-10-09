@@ -233,7 +233,7 @@ const warningLines = (harness) => harness.warnings.map((line) => line.join(' '))
     assert.strictEqual(firestoreCalls(r).length, 0);
     const calls = rpcOf(r, 'update_my_profile');
     assert.strictEqual(calls.length, 1);
-    assert.deepStrictEqual(calls[0].body, { displayName: 'Mia Lin', goals: 'g', avatarIconId: 'leaf' });
+    assert.deepStrictEqual(calls[0].body, { p_fields: { displayName: 'Mia Lin', goals: 'g', avatarIconId: 'leaf' } }, 'the fields travel under p_fields, the one argument of public.update_my_profile(p_fields jsonb)');
     assert.strictEqual(calls[0].headers.Authorization, 'Bearer sb-token');
     for (const [fields, message] of [[{ name: '' }, 'Please enter your name.'], [{ name: 'x'.repeat(201) }, 'Please shorten your name to 200 characters or fewer.'],
       [{ name: 'a', goals: 'g'.repeat(2001) }, 'Please shorten your goals to 2,000 characters or fewer.'], [{ name: 'a', avatarIconId: 'bogus' }, 'Please choose one of the available avatars.']]) {
@@ -469,7 +469,7 @@ const warningLines = (harness) => harness.warnings.map((line) => line.join(' '))
     const supa = await observe(() => current.saveMemberDisplayName(MEMBER, 'Mia Lin'), only({ before: (h) => h.onFetch('POST', '/rest/v1/rpc/update_my_profile', { saved: true }) }));
     assert.strictEqual(supa.outcome.error, null);
     assert.strictEqual(firestoreCalls(supa).length, 0);
-    assert.deepStrictEqual(rpcOf(supa, 'update_my_profile')[0].body, { displayName: 'Mia Lin' });
+    assert.deepStrictEqual(rpcOf(supa, 'update_my_profile')[0].body, { p_fields: { displayName: 'Mia Lin' } });
     assert.strictEqual(rpcOf(supa, 'update_my_profile')[0].headers.Authorization, 'Bearer sb-token');
     const failed = await observe(() => current.saveMemberDisplayName(MEMBER, 'Mia Lin'), only({ before: (h) => h.onFetch('POST', '/rest/v1/rpc/update_my_profile', { __status: 500, body: {} }) }));
     assert.ok(failed.outcome.error, 'a failure is thrown to the page, which logs it');

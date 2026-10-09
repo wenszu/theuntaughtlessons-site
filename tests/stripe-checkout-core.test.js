@@ -1,6 +1,7 @@
 const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
+const rpcContract = require('./helpers/rpc-contract');
 
 // Tests for supabase/functions/stripe-checkout/core.mjs (the pure part of the stripe-checkout Edge Function), and a
 // parity check against functions-admin/payments-service.js (the Firebase version it replaces).
@@ -26,6 +27,7 @@ function network(options) {
   const answer = (value, status) => ({ ok: (status || 200) < 300, status: status || 200, json: async () => value });
   const fetchImpl = async (url, init) => {
     calls.push({ url, init });
+    const rpcRefused = rpcContract.reject(url, init); if (rpcRefused) return rpcRefused;
     if (url.endsWith('/rest/v1/rpc/get_my_checkout_identity')) {
       if (o.rpcThrows) throw new Error('network down');
       return answer(o.person === undefined ? IDENTITY : o.person, o.rpcStatus);

@@ -6,6 +6,7 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const { pathToFileURL } = require('url');
+const rpcContract = require('./helpers/rpc-contract');
 
 const SOURCE = path.resolve(__dirname, '..', 'assets', 'supabase-member-reads.js');
 function moduleCopy() {
@@ -25,6 +26,7 @@ function fakeFetch(answers = {}) {
   const impl = async (url, init = {}) => {
     const call = { method: init.method || 'GET', path: String(url).replace(URL_BASE, ''), headers: init.headers || {}, body: init.body ? JSON.parse(init.body) : undefined };
     calls.push(call);
+    const rpcRefused = rpcContract.reject(url, init); if (rpcRefused) return rpcRefused;
     const name = call.path.replace('/rest/v1/rpc/', '');
     const answer = typeof answers[name] === 'function' ? answers[name](call, calls.filter((c) => c.path === call.path).length) : answers[name];
     if (answer && answer.__throw) throw answer.__throw;
