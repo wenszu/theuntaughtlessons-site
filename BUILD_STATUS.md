@@ -1,5 +1,8 @@
 # Readiness assessment build status
 
+> **Platform note (2026-10-09):** the platform has moved from Firebase to Supabase. Where this file mentions Firebase, Firestore, Google Apps Script or Node 20 functions, read `docs/SUPABASE_PLATFORM.md` first for the current state and rules; that guide wins on any conflict.
+
+
 Last updated: October 4, 2026
 
 ## Current phase

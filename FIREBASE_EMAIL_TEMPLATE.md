@@ -1,5 +1,8 @@
 # Firebase Auth Email Template
 
+> **Legacy (2026-10-09):** member sign in emails now come from Supabase Auth through Resend (Magic Link template and sender settings are described in `docs/SUPABASE_PLATFORM.md` section 7 and `docs/SUPABASE_SIGNIN_OWNER_STEPS.md`). This file describes the Firebase email that stays in place until Firebase is closed.
+
+
 Firebase's built-in "send sign-in link" email is controlled in the Firebase Console, not in this static website code. The Admin Console can trigger the email, but the wording and layout come from Firebase Authentication templates.
 
 Use this for the Firebase **Sign-in link** template.

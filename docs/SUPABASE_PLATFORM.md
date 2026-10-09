@@ -2,7 +2,7 @@
 
 Last updated: 2026-10-09. Read this together with `WEBSITE_CONTEXT.md` before changing anything about data, sign in, email, payments, or any server function.
 
-**Status line (update this first when it changes):** the data layer and the server reads run on Supabase. The combined flip (sign in, admin saves, Executive Signature saves, mail) is built, tested and waiting for the owner's go. Firebase is still the safety net and stays in place until the quiet period after the flip is over. See "Cutover status" below and `docs/SUPABASE_CUTOVER_RUNBOOK.md`.
+**Status line (update this first when it changes):** since 2026-10-09 the website runs on Supabase: data layer, server reads, admin saves, sign in, Executive Signature saves and mail. Only AI scoring and payments still use Firebase, because their keys (Gemini, Stripe) are not set yet. Firebase stays in place as the safety net for about two weeks (the quiet period), then is closed following `docs/SUPABASE_CUTOVER_RUNBOOK.md` section 10.
 
 ## 1. The three places data can live
 
@@ -45,9 +45,9 @@ Every change is logged (`audit_events`, action `switchboard.changed`). Details: 
 | Server mirror (Firestore changes copied to Supabase by the server) | On (Firebase secret `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_MIRROR=on`). |
 | `data_source`, `server_reads` | Supabase, live. |
 | Sign in setup (Supabase Auth, Resend sender, Google) | Done and tested with the test member and by the owner (phone and Google). 56 Supabase accounts exist and are linked. Sign up is OFF. |
-| `server_writes`, `es_submit`, `mail`, `auth` | Built, reviewed, tested live as the test member with the browser switch set by hand. Waiting for the owner's go (all four together, see the runbook). |
+| `server_writes`, `es_submit`, `mail`, `auth` | **Flipped to Supabase on 2026-10-09** (owner approved). Tested live as the test member with no manual switches: email link sign in, workspace, Executive Signature quick check saved in Supabase, result email delivered, zero Firebase requests. Undo: one statement setting these four flags back to `firebase` (see section 2). |
 | `ai`, `payments` | Waiting for the Gemini and Stripe keys. Edge Functions `ai-score`, `stripe-checkout`, `stripe-webhook` are written, not deployed. |
-| Certificates | Database trigger `credential_auto_issue` exists but is DISABLED. Enable it right after the flip (and run `select private.issue_missing_credentials();`), and never run it together with the Firebase trigger for long. |
+| Certificates | Database trigger `credential_auto_issue` is ENABLED (2026-10-09). The Firebase trigger is idle because progress no longer lands in Firestore; remove it when closing Firebase. Three real members have all required exercises marked complete but never received a certificate in Firebase either: do NOT run `private.issue_missing_credentials()` without the owner's decision. |
 | DOC identity | Adapter built on a branch, not switched on. Needs the flip first. |
 | Closing Firebase | After the quiet period (about two weeks), see the runbook section 10. |
 

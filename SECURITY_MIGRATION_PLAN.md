@@ -1,5 +1,8 @@
 # Security migration plan
 
+> **Platform note (2026-10-09):** the platform has moved from Firebase to Supabase. Where this file mentions Firebase, Firestore, Google Apps Script or Node 20 functions, read `docs/SUPABASE_PLATFORM.md` first for the current state and rules; that guide wins on any conflict.
+
+
 This document separates changes that can ship without altering the learner journey
 from changes that require coordinated Firebase, Cloudflare, Google Workspace, or
 Google Apps Script deployment. Do not treat browser-side checks as authorization.

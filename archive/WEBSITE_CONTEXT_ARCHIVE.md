@@ -1,5 +1,8 @@
 # WEBSITE_CONTEXT Archive
 
+> Archive (historical). Entries before 2026-10-09 describe the Firebase era; the current platform is described in `docs/SUPABASE_PLATFORM.md`.
+
+
 Archived from `WEBSITE_CONTEXT.md` on 2026-05-30.
 Contains entries older than 2026-05-27 and reference sections moved to reduce token load.
 Current implementation facts live in `WEBSITE_CONTEXT.md`.
