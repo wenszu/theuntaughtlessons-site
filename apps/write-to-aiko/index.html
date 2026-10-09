@@ -904,7 +904,7 @@ Yutee Elle</div>
           localStorage.setItem(DRAFT_KEY, JSON.stringify(savedDraft));
           window.clearTimeout(accountSaveTimer);
           accountSaveTimer = window.setTimeout(() => {
-            import('../../assets/firebase.js')
+            import('../../assets/firebase.js?v=20260925-mobile-v1')
               .then(({ saveExerciseDraft }) => saveExerciseDraft('write-to-aiko', 'Write to Aiko', savedDraft))
               .catch(() => {});
           }, 2500);
@@ -1238,12 +1238,12 @@ Yutee Elle</div>
           localStorage.setItem('utl_p2_ex4_done', 'true');
           
           // 2. Save to Firestore for the permanent member record
-          const { saveUserProgress } = await import('../../assets/firebase.js');
+          const { saveUserProgress } = await import('../../assets/firebase.js?v=20260925-mobile-v1');
           await saveUserProgress('write-to-aiko', 'Write to Aiko', payload);
           mergeSubmissions([submission]);
           localStorage.removeItem(DRAFT_KEY);
           savedDraft = null;
-          import('../../assets/firebase.js')
+          import('../../assets/firebase.js?v=20260925-mobile-v1')
             .then(({ saveExerciseDraft }) => saveExerciseDraft('write-to-aiko', 'Write to Aiko', { mode: 'structured', openText: '', structuredValues: [], updatedAtClient: new Date().toISOString(), durationSeconds: 0 }))
             .catch(() => {});
 
@@ -1302,7 +1302,7 @@ Yutee Elle</div>
         resetTimer();
         updateCounts();
         returnEl.hidden = true;
-        import('../../assets/firebase.js')
+        import('../../assets/firebase.js?v=20260925-mobile-v1')
           .then(({ saveExerciseDraft }) => saveExerciseDraft('write-to-aiko', 'Write to Aiko', { mode: 'structured', openText: '', structuredValues: [], updatedAtClient: new Date().toISOString(), durationSeconds: 0 }))
           .catch(() => {});
       });
@@ -1327,7 +1327,7 @@ Yutee Elle</div>
         returnEl.hidden = true;
       }
       reviewLatestSubmission();
-      import('../../assets/firebase.js').then(({ getExerciseWork }) => getExerciseWork('write-to-aiko')).then((accountWork) => {
+      import('../../assets/firebase.js?v=20260925-mobile-v1').then(({ getExerciseWork }) => getExerciseWork('write-to-aiko')).then((accountWork) => {
         if (accountWork.draft && hasDraftContent(accountWork.draft.draftPayload)) {
           const remoteDraft = accountWork.draft.draftPayload;
           if (!savedDraft || String(remoteDraft.updatedAtClient || '') > String(savedDraft.updatedAtClient || '')) savedDraft = remoteDraft;

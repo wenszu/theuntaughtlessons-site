@@ -704,7 +704,7 @@ async function main() {
   ok(!fs.readFileSync(path.join(root, 'supabase/migrations/20261008002330_readiness_submit.sql'), 'utf8').includes('\\'), 'the migration has no backslash');
   ok(!fs.readFileSync(path.join(root, 'supabase/rollbacks/20261008002330_readiness_submit_down.sql'), 'utf8').includes('\\'), 'the rollback has no backslash');
   ok(/--no-verify-jwt/.test(fs.readFileSync(path.join(funcDir, 'index.ts'), 'utf8')), 'index.ts says it must be deployed with the gateway token check off');
-  const page = fs.readFileSync(path.join(root, 'apps/executive-signature/index.html'), 'utf8');
+  const page = require('./helpers/unversioned')(fs.readFileSync(path.join(root, 'apps/executive-signature/index.html'), 'utf8'));
   ok(page.includes("import { recordReadinessCompletion as recordReadinessCompletionChoice } from '../../assets/readiness-submit-client.js';") && page.includes('window.raRecordCompletion = recordReadinessCompletionChoice;'), 'the page loads the client (browser wiring); with no switch the client calls the Firebase function');
   ok(!/readiness-submit/.test(fs.readFileSync(path.join(root, 'assets/firebase.js'), 'utf8')), 'firebase.js does not mention the new function');
 

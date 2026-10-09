@@ -151,7 +151,7 @@ const warningText = (out) => out.warnings.map((w) => w.join(' '));
   });
   await check('default: the new export, the dynamic import only, and every wrapped function keeps its Firebase body', () => {
     assert.strictEqual(typeof current.listAuthorizedMembers, 'function');
-    const imports = FIREBASE_SOURCE.match(/import\(["']\.\/supabase-admin-console-reads\.js["']\)/g) || [];
+    const imports = FIREBASE_SOURCE.match(/import\(["']\.\/supabase-admin-console-reads\.js(?:\?v=[^"']*)?["']\)/g) || [];
     assert.strictEqual(imports.length, 1);
     assert.ok(!/^import .*supabase-admin-console-reads/m.test(FIREBASE_SOURCE), 'no static import');
     NAMES.filter((name) => name !== 'listAuthorizedMembers').forEach((name) => assert.ok(new RegExp(`async function ${name}FromFirebase\\(`).test(FIREBASE_SOURCE), `${name} keeps its Firebase body`));

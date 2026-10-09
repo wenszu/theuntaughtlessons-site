@@ -48,7 +48,7 @@ export const signInWithEmailLink = async () => ({ user: USER() });
 `;
 const fakeFile = path.join(dir, 'fake-supabase-auth.mjs');
 fs.writeFileSync(fakeFile, FAKE_AUTH);
-const withFake = (source) => source.replace(/import\("\.\/supabase-auth\.js"\)/g, `import(${JSON.stringify(pathToFileURL(fakeFile).href)})`);
+const withFake = (source) => source.replace(/import\("\.\/supabase-auth\.js(?:\?v=[^"]*)?"\)/g, `import(${JSON.stringify(pathToFileURL(fakeFile).href)})`);
 const resetFake = (user) => { globalThis.__fakeAuth = { calls: [], tokenCalls: [], user }; };
 
 let passed = 0;
@@ -267,12 +267,14 @@ const warningLines = (harness) => harness.warnings.map((line) => line.join(' '))
       assert.strictEqual(reads[0].headers.Authorization, 'Bearer sb-token', name);
     }
   });
-  await check('Supabase only: an empty or hidden row goes on to Firestore (public documents answer anonymously), a failure there gives the defaults', async () => {
+  await check('Supabase only: an empty or hidden row gives the defaults and never goes on to Firestore', async () => {
     const empty = await observe(() => current.getPublicFindLevelSetting(), only({ seed: (h) => h.seed('settings/publicSite', { findLevelVisible: true }), before: (h) => h.onFetch('GET', '/rest/v1/app_settings?', [{ key: 'public_site', value: {}, updated_at: 'x' }]) }));
-    assert.strictEqual(empty.outcome.value, true, 'the Firestore copy of a public document is used when the Supabase row is empty');
+    assert.strictEqual(typeof empty.outcome.value, 'boolean', 'the default applies when the Supabase row is empty');
+    assert.strictEqual(firestoreCalls(empty).length, 0, 'the Firestore copy of the public document is NOT asked');
     const hidden = await observe(() => current.getRewardSettings(), only({ before: (h) => { h.onFetch('GET', '/rest/v1/app_settings?', []); h.failWhen('getDoc', /settings\/rewards/, Object.assign(new Error('Missing or insufficient permissions.'), { code: 'permission-denied' })); } }));
     assert.strictEqual(hidden.outcome.error, null);
     assert.strictEqual(hidden.outcome.value.enabled, true, 'the defaults, as any failing read gives');
+    assert.strictEqual(firestoreCalls(hidden).length, 0, 'and Firestore is not asked');
   });
   await check('Supabase only: a logged out page reads the public settings with the publishable key alone', async () => {
     const r = await observe(() => current.getPublicAssessmentSettings(), only({ supabaseUser: null, signedIn: false, before: (h) => h.onFetch('GET', '/rest/v1/app_settings?', SETTING_ROWS({ public_assessments: { diagnosticVisible: true, checkpointVisible: true } })) }));
@@ -324,7 +326,7 @@ const warningLines = (harness) => harness.warnings.map((line) => line.join(' '))
     await harness.flush();
     assert.deepStrictEqual(storedRewards, { enabled: true, mp: { a: 1, b: 2, c: 3 } });
   });
-  await check('Supabase only: feature flags come from the app_settings row feature_flags; a missing flag falls through to Firestore, which cannot answer here, so the flag is off', async () => {
+  await check('Supabase only: feature flags come from the app_settings row feature_flags; a missing flag is off and Firestore is not asked', async () => {
     const flags = { feature_flags: { customersConsole: { enabled: true }, esWorkspace: { enabled: false } } };
     const on = await observe(() => current.getCustomersConsoleFeatureFlag(), only({ before: (h) => h.onFetch('GET', '/rest/v1/app_settings?', SETTING_ROWS(flags)) }));
     assert.deepStrictEqual(on.outcome.value, { enabled: true });
@@ -335,7 +337,7 @@ const warningLines = (harness) => harness.warnings.map((line) => line.join(' '))
     assert.deepStrictEqual(off.outcome.value, { enabled: false });
     const missing = await observe(() => current.getEsWorkspaceFeatureFlag(), only({ before: (h) => { h.onFetch('GET', '/rest/v1/app_settings?', []); h.failWhen('getDoc', /platformFeatureFlags/, Object.assign(new Error('denied'), { code: 'permission-denied' })); } }));
     assert.deepStrictEqual(missing.outcome.value, { enabled: false });
-    assert.ok(missing.warnings.some((line) => line.includes('Could not read the ES workspace feature flag')));
+    assert.strictEqual(firestoreCalls(missing).length, 0, 'Firestore is not asked at all');
   });
 
   // The admin console with reads and writes on Supabase and no Firebase user.
@@ -580,9 +582,9 @@ const warningLines = (harness) => harness.warnings.map((line) => line.join(' '))
   // ============================================================================================================
   // 6. the pages and the scan
   // ============================================================================================================
-  const PORTAL = fs.readFileSync(path.join(REPO_ROOT, 'member-login', 'content-config.js'), 'utf8');
-  const VERIFY = fs.readFileSync(path.join(REPO_ROOT, 'verify', 'index.html'), 'utf8');
-  const ADMIN = fs.readFileSync(path.join(REPO_ROOT, 'admin', 'index.html'), 'utf8');
+  const PORTAL = require('./helpers/unversioned')(fs.readFileSync(path.join(REPO_ROOT, 'member-login', 'content-config.js'), 'utf8'));
+  const VERIFY = require('./helpers/unversioned')(fs.readFileSync(path.join(REPO_ROOT, 'verify', 'index.html'), 'utf8'));
+  const ADMIN = require('./helpers/unversioned')(fs.readFileSync(path.join(REPO_ROOT, 'admin', 'index.html'), 'utf8'));
   await check('verify/index.html asks getPublicCredential when the loaded firebase.js has it, and reads the Firestore document itself when it has not', () => {
     assert.ok(VERIFY.includes("import * as fb from '../assets/firebase.js';"), 'a namespace import: a missing export is undefined, not an error');
     assert.ok(VERIFY.includes("if(typeof fb.getPublicCredential==='function')return fb.getPublicCredential(id);"));
@@ -650,7 +652,9 @@ const warningLines = (harness) => harness.warnings.map((line) => line.join(' '))
       'getAllStabilityEventsFromFirebase', 'getAllEngagementAnalyticsFromFirebase', 'saveAssessmentItemAttemptFirestore', 'getMemberExerciseResponsesFromFirebase',
       'getUserFeedbackEnabled', 'saveTsaScoringComparisonFirestore',
       // intentionally left on Firestore or Firebase (see the doc)
-      'setEmergencyCredential', 'submitAccessRequest'
+      'setEmergencyCredential', 'submitAccessRequest',
+      // the guard around the SDK function itself: in a Supabase-only session it rejects before any request is sent
+      'httpsCallable'
     ]);
     const unclassified = names.filter((name) => !CLASSIFIED.has(name));
     assert.deepStrictEqual(unclassified, [], `unclassified Firestore touches: ${unclassified.join(', ')}`);

@@ -22,7 +22,8 @@ const REQUEST_TIMEOUT_MS = 25000;
 export function esBackend(storage) {
   try {
     const store = storage || (typeof localStorage !== "undefined" ? localStorage : null);
-    return store && store.getItem(ES_BACKEND_KEY) === "supabase" ? "supabase" : "firebase";
+    // A Supabase-only session (utl_auth is supabase) has no Firebase user, so it always takes the Supabase side.
+    return store && (store.getItem(ES_BACKEND_KEY) === "supabase" || store.getItem("utl_auth") === "supabase") ? "supabase" : "firebase";
   } catch (error) {
     return "firebase";
   }
@@ -72,7 +73,7 @@ let defaultClient = null;
 function client() {
   if (!defaultClient) {
     defaultClient = createReadinessSubmitClient({
-      firebaseRecord: async (payload) => (await import("./firebase.js")).recordReadinessCompletion(payload)
+      firebaseRecord: async (payload) => (await import("./firebase.js?v=20260925-mobile-v1")).recordReadinessCompletion(payload)
     });
   }
   return defaultClient;

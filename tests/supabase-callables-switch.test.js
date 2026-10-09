@@ -48,7 +48,7 @@ export const signInWithEmailLink = async () => ({ user: USER() });
 `;
 const fakeFile = path.join(dir, 'fake-supabase-auth.mjs');
 fs.writeFileSync(fakeFile, FAKE_AUTH);
-const withFake = (source) => source.replace(/import\("\.\/supabase-auth\.js"\)/g, `import(${JSON.stringify(pathToFileURL(fakeFile).href)})`);
+const withFake = (source) => source.replace(/import\("\.\/supabase-auth\.js(?:\?v=[^"]*)?"\)/g, `import(${JSON.stringify(pathToFileURL(fakeFile).href)})`);
 const resetFake = (user) => { globalThis.__fakeAuth = { calls: [], tokenCalls: [], user }; };
 
 let passed = 0;
@@ -158,7 +158,7 @@ const settle = async (promise) => {
     });
   }
   await check('default: the new code is loaded only by a dynamic import and every old function keeps its Firebase body', () => {
-    const imports = FIREBASE_SOURCE.match(/import\(["']\.\/supabase-callables\.js["']\)/g) || [];
+    const imports = FIREBASE_SOURCE.match(/import\(["']\.\/supabase-callables\.js(?:\?v=[^"']*)?["']\)/g) || [];
     assert.strictEqual(imports.length, 1);
     assert.ok(!/^import .*supabase-callables/m.test(FIREBASE_SOURCE), 'no static import');
     ['runAdminAction', 'issueVerifiedCredential', 'repairMemberVerifiedCredential', 'getOrganizationConsole', 'checkOrganizationRepEmail'].forEach((name) => {
@@ -291,12 +291,15 @@ const settle = async (promise) => {
     assert.strictEqual(out.fetches.length, 0);
     assert.ok(out.log.some((entry) => entry.op === 'sendSignInLinkToEmail'));
   });
-  await check('utl_auth=supabase alone keeps the Firebase check and the Supabase Auth link, as before this change', async () => {
+  await check('utl_auth=supabase alone (a Supabase-only session): the readiness-access function is used and no Firebase callable is called', async () => {
     const out = await observe(() => current.requestReadinessAccess('visitor@example.test'), {
-      storage: { utl_auth: 'supabase' }, supabaseOnly: true, callables: { checkReadinessAccountEmail: { ok: true, hasResult: true } }
+      storage: { utl_auth: 'supabase' }, supabaseOnly: true, callables: { checkReadinessAccountEmail: { ok: true, hasResult: true } },
+      before: (h) => h.onFetch('POST', '/functions/v1/readiness-access', () => ({ ok: true }))
     });
-    assert.strictEqual(out.fetches.length, 0);
-    assert.deepStrictEqual(out.fake.calls, [['sendEmailLink', 'visitor@example.test']]);
+    assert.deepStrictEqual(out.outcome.value, { ok: true });
+    assert.strictEqual(out.fetches.length, 1);
+    assert.strictEqual(out.fetches[0].url, `${PROJECT}/functions/v1/readiness-access`);
+    assert.strictEqual(out.log.filter((entry) => entry.sdk === 'functions').length, 0, 'no Firebase callable');
   });
   await check('utl_es=supabase with utl_auth=supabase: a limit or an outage is thrown (the page ignores it) and nothing else is tried', async () => {
     for (const [answer, code] of [[{ __status: 429, body: { ok: false, error: 'Please try again later.' } }, 'resource-exhausted'], [{ __status: 503, body: { ok: false, error: 'x' } }, 'unavailable'], [{ __throw: new TypeError('Failed to fetch') }, 'unavailable']]) {
@@ -331,7 +334,7 @@ const settle = async (promise) => {
     assert.strictEqual(out.outcome.error, null);
     assert.deepStrictEqual(out.fetches.map((call) => call.headers.Authorization), ['Bearer sb-token', 'Bearer fresh-sb-token']);
   });
-  await check('staff writes, Supabase only session, shadow: the Firebase write is not possible without a Firebase user, the dry run uses the Supabase token', async () => {
+  await check('staff writes, Supabase only session, shadow: the Firebase write is not possible without a Firebase user, so the database function is the writer (real, not a dry run) with the Supabase token', async () => {
     const out = await observe(() => current.repairMemberVerifiedCredential('uid-learner-1'), {
       ...SUPABASE_ONLY, storage: { ...SUPABASE_ONLY.storage, utl_server_writes: 'shadow' },
       callables: { repairMemberVerifiedCredential: { ok: true, credential: { credentialId: 'UTL-TSA-AAAAAAAAAAAA' } } },
@@ -339,7 +342,8 @@ const settle = async (promise) => {
     });
     assert.strictEqual(out.fetches.length, 1);
     assert.strictEqual(out.fetches[0].headers.Authorization, 'Bearer sb-token');
-    assert.deepStrictEqual(out.fetches[0].body, { p_input: { userId: 'uid-learner-1' }, p_dry_run: true });
+    assert.deepStrictEqual(out.fetches[0].body, { p_input: { userId: 'uid-learner-1' }, p_dry_run: false });
+    assert.strictEqual(out.log.filter((entry) => entry.sdk === 'functions').length, 0, 'no Firebase callable');
   });
   await check('staff writes, Firebase session: the Firebase token is sent as before (and no Supabase Auth token is asked for)', async () => {
     const out = await observe(() => current.removeMember('gone@example.test'), {

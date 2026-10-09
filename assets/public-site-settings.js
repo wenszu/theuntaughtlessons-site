@@ -1,4 +1,4 @@
-import { getPublicFindLevelSetting, getPublicAssessmentSettings } from './firebase.js';
+import { getPublicFindLevelSetting, getPublicAssessmentSettings } from './firebase.js?v=20260925-mobile-v1';
 
 const FIND_LEVEL_VISIBILITY_KEY = 'utl_public_find_level';
 const ES_VISIBILITY_KEY = 'utl_public_es_visible';

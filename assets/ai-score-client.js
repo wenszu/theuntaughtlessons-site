@@ -132,7 +132,7 @@ function client() {
   if (!defaultClient) {
     defaultClient = createAiScoreClient({
       getIdToken: async (forceRefresh) => {
-        const { getSignedInUser } = await import("./firebase.js");
+        const { getSignedInUser } = await import("./firebase.js?v=20260925-mobile-v1");
         const user = await getSignedInUser();
         return user && typeof user.getIdToken === "function" ? String(await user.getIdToken(forceRefresh === true) || "") : "";
       }

@@ -625,7 +625,7 @@
       localStorage.setItem('utl_p2_ex3_done', 'true');
       localStorage.setItem('utl_result_advisory-board', JSON.stringify(payload));
       localStorage.setItem('utl-advisory-board-draft', JSON.stringify(payload));
-      return import('../../assets/firebase.js')
+      return import('../../assets/firebase.js?v=20260925-mobile-v1')
         .then(({ saveUserProgress }) => saveUserProgress('advisory-board', 'Advisory board with AI', payload))
         .catch(error => { console.warn('Remote progress save failed. Local progress was kept.', error); return null; });
     }

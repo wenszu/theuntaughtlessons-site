@@ -25,7 +25,8 @@ const REQUEST_TIMEOUT_MS = 30000;
 export function mailBackend(storage) {
   try {
     const store = storage || (typeof localStorage !== "undefined" ? localStorage : null);
-    return store && store.getItem(MAIL_BACKEND_KEY) === "supabase" ? "supabase" : "firebase";
+    // A Supabase-only session (utl_auth is supabase) has no Firebase user, so it always takes the Supabase side.
+    return store && (store.getItem(MAIL_BACKEND_KEY) === "supabase" || store.getItem("utl_auth") === "supabase") ? "supabase" : "firebase";
   } catch (error) {
     return "firebase";
   }
@@ -36,7 +37,7 @@ export function mailBackend(storage) {
 export function createResultEmailClient(context = {}) {
   const fetchImpl = context.fetchImpl || (typeof fetch === "function" ? fetch.bind(globalThis) : null);
   const getIdToken = typeof context.getIdToken === "function" ? context.getIdToken : async () => "";
-  const loadFirebase = typeof context.firebase === "function" ? context.firebase : async () => import("./firebase.js");
+  const loadFirebase = typeof context.firebase === "function" ? context.firebase : async () => import("./firebase.js?v=20260925-mobile-v1");
   const baseUrl = String(context.supabaseUrl || SUPABASE_MAIL_URL).replace(/\/+$/, "");
   const tokenWaitMs = Number(context.tokenWaitMs) > 0 ? Number(context.tokenWaitMs) : TOKEN_WAIT_MS;
   const requestTimeoutMs = Number(context.requestTimeoutMs) > 0 ? Number(context.requestTimeoutMs) : REQUEST_TIMEOUT_MS;
@@ -129,7 +130,7 @@ function client() {
   if (!defaultClient) {
     defaultClient = createResultEmailClient({
       getIdToken: async (forceRefresh) => {
-        const { getSignedInUser } = await import("./firebase.js");
+        const { getSignedInUser } = await import("./firebase.js?v=20260925-mobile-v1");
         const user = await getSignedInUser();
         return user && typeof user.getIdToken === "function" ? String(await user.getIdToken(forceRefresh === true) || "") : "";
       }

@@ -120,7 +120,7 @@
   </main>
 
   <script type="module">
-    import { auth, getMyEsStatus, onAuthStateChanged } from '../../../assets/firebase.js';
+    import { auth, getMyEsStatus, onAuthStateChanged } from '../../../assets/firebase.js?v=20260925-mobile-v1';
 
     const $ = (s) => document.querySelector(s);
     const esc = (s) => String(s || '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));

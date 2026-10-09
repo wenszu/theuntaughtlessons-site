@@ -390,7 +390,7 @@ const USER = { uid: 'sb-uid', email: 'member@example.test', getIdToken: async ()
 export const getSignedInUser = async () => USER;
 export const getIdToken = async (forceRefresh) => { state().tokenCalls.push(forceRefresh === true); return 'sb-token'; };
 `);
-  const withFakeAuth = (source) => source.replace(/import\("\.\/supabase-auth\.js"\)/g, `import(${JSON.stringify(pathToFileURL(fakeAuthFile).href)})`);
+  const withFakeAuth = (source) => source.replace(/import\("\.\/supabase-auth\.js(?:\?v=[^"]*)?"\)/g, `import(${JSON.stringify(pathToFileURL(fakeAuthFile).href)})`);
 
   await check('token: with utl_auth off the Firebase token is used and the Supabase Auth file is not read', async () => {
     globalThis.__fakeAuth = { tokenCalls: [] };

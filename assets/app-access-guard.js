@@ -103,7 +103,7 @@ const slug = appSlug();
 const phase = APP_PHASES[slug];
 
 // Shared engagement instrumentation for every guarded exercise.
-import("./engagement-analytics.js").catch((error) => console.warn("Engagement analytics could not start.", error));
+import("./engagement-analytics.js?v=20260925-mobile-v1").catch((error) => console.warn("Engagement analytics could not start.", error));
 
 if (phase && !localDesignPreview()) {
   if (!hasMemberSession()) redirect("signin");

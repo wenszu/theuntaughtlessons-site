@@ -42,7 +42,7 @@ export const signOut = async () => { rec('signOut'); };
 `;
 const fakeFile = path.join(dir, 'fake-supabase-auth.mjs');
 fs.writeFileSync(fakeFile, FAKE_AUTH);
-const withFake = (source) => source.replace(/import\("\.\/supabase-auth\.js"\)/g, `import(${JSON.stringify(pathToFileURL(fakeFile).href)})`);
+const withFake = (source) => source.replace(/import\("\.\/supabase-auth\.js(?:\?v=[^"]*)?"\)/g, `import(${JSON.stringify(pathToFileURL(fakeFile).href)})`);
 
 const ON = { utl_auth: 'supabase' };
 const SITE = 'https://www.theuntaughtlessons.com';
@@ -145,10 +145,10 @@ const neverSettles = async (promise) => {
     ['signOut', 'onAuthStateChanged', 'isSignInWithEmailLink', 'signInWithEmailLink'].forEach((name) => assert.equal(typeof current[name], 'function'));
   });
   await check('default: the Supabase Auth file is only imported inside supabaseAuth()', () => {
-    const imports = FIREBASE_SOURCE.match(/import\(["']\.\/supabase-auth\.js["']\)/g) || [];
+    const imports = FIREBASE_SOURCE.match(/import\(["']\.\/supabase-auth\.js(?:\?v=[^"']*)?["']\)/g) || [];
     assert.equal(imports.length, 1, 'one dynamic import');
     assert.ok(!/^import .*supabase-auth/m.test(FIREBASE_SOURCE), 'no static import');
-    assert.ok(/function supabaseAuth\(\)[\s\S]{0,200}import\("\.\/supabase-auth\.js"\)/.test(FIREBASE_SOURCE));
+    assert.ok(/function supabaseAuth\(\)[\s\S]{0,200}import\("\.\/supabase-auth\.js(?:\?v=[^"]*)?"\)/.test(FIREBASE_SOURCE));
     assert.ok(/getItem\("utl_auth"\) === "supabase"/.test(FIREBASE_SOURCE), 'the exact value turns it on');
   });
 

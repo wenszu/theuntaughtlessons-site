@@ -48,7 +48,7 @@ export const getRedirectResult = async () => null;
 `;
 const fakeFile = path.join(dir, 'fake-supabase-auth.mjs');
 fs.writeFileSync(fakeFile, FAKE_AUTH);
-const withFake = (source) => source.replace(/import\("\.\/supabase-auth\.js"\)/g, `import(${JSON.stringify(pathToFileURL(fakeFile).href)})`);
+const withFake = (source) => source.replace(/import\("\.\/supabase-auth\.js(?:\?v=[^"]*)?"\)/g, `import(${JSON.stringify(pathToFileURL(fakeFile).href)})`);
 
 const UID = 'uid-1';
 const SB_UID = 'sb-uid-1';

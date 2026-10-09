@@ -20,7 +20,7 @@
   </main>
   <footer>Verification records are provided by The Untaught Lessons. No learner email, score or private account information is displayed.</footer>
   <script type="module">
-    import * as fb from '../assets/firebase.js';
+    import * as fb from '../assets/firebase.js?v=20260925-mobile-v1';
     const form=document.getElementById('lookupForm'),input=document.getElementById('credentialInput'),result=document.getElementById('result');
     const esc=(v)=>String(v??'').replace(/[&<>"']/g,(c)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
     const date=(v)=>{const d=v&&typeof v.toDate==='function'?v.toDate():new Date(v);return Number.isNaN(d.getTime())?'—':d.toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});};

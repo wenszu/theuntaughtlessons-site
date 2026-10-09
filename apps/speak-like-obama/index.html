@@ -1453,7 +1453,7 @@ I am about to upload my video now.`;
       // reads esContextLine fresh each time it opens, so this only needs to
       // resolve before someone clicks "Prepare AI feedback prompt," not
       // before the page itself finishes loading.
-      import('../../assets/firebase.js').then(({ getMyEsStatus }) => getMyEsStatus()).then((status) => {
+      import('../../assets/firebase.js?v=20260925-mobile-v1').then(({ getMyEsStatus }) => getMyEsStatus()).then((status) => {
         const assessments = status && status.assessments;
         const full = assessments && assessments['full-assessment'] && assessments['full-assessment'].latestAttempt;
         const quick = assessments && assessments['quick-check'] && assessments['quick-check'].latestAttempt;
@@ -1901,7 +1901,7 @@ I am about to upload my video now.`;
         const completedRecord = { ...draft, stage: 'complete', completedAt: new Date().toISOString() };
         saved.push(completedRecord);
         localStorage.setItem(PRACTICE_ATTEMPTS_KEY, JSON.stringify(saved));
-        import('../../assets/firebase.js').then(({ saveExerciseSubmission }) => saveExerciseSubmission({
+        import('../../assets/firebase.js?v=20260925-mobile-v1').then(({ saveExerciseSubmission }) => saveExerciseSubmission({
           exerciseId: 'speak-like-obama',
           exerciseTitle: 'Speak like Obama',
           submissionId: completedRecord.id || `speak-like-obama-${Date.now()}`,
@@ -1991,7 +1991,7 @@ I am about to upload my video now.`;
             practice_rounds_saved: Array.isArray(rounds) ? rounds.length : 0,
             practice_topic_ids: (Array.isArray(rounds) ? rounds : []).slice(-20).map((item) => String(item && item.topicId || ''))
           };
-          import('../../assets/firebase.js')
+          import('../../assets/firebase.js?v=20260925-mobile-v1')
             .then(({ saveUserProgress }) => saveUserProgress('speak-like-obama', 'Speak like Obama', completion))
             .catch((error) => console.warn('Completion record sync failed.', error));
         }

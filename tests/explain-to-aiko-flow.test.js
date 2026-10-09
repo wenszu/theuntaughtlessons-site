@@ -7,7 +7,7 @@ const path = require('path');
 const vm = require('vm');
 
 const SOURCE_PATH = path.join(__dirname, '..', 'apps', 'explain-to-aiko', 'aiko.js');
-const SOURCE = fs.readFileSync(SOURCE_PATH, 'utf8');
+const SOURCE = require('./helpers/unversioned')(fs.readFileSync(SOURCE_PATH, 'utf8'));
 const IMPORT_CALL = "import('../../assets/firebase.js')";
 const tick = () => new Promise((resolve) => setImmediate(resolve));
 const settle = async () => { for (let i = 0; i < 12; i += 1) await tick(); };

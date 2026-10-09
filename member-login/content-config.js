@@ -440,9 +440,9 @@ const UTL_CONTENT = {
   }
 
   function firebaseHref() {
-    var version = "?v=20260914-member-account-2";
-    if (inPhasePracticeRoot()) return "../../../assets/firebase.js" + version;
-    return (inAdminRoot() ? "../assets/firebase.js" : "../assets/firebase.js") + version;
+    // Literal ?v= strings so scripts/sync-cache-versions.js keeps them in step with every other firebase.js URL.
+    if (inPhasePracticeRoot()) return "../../../assets/firebase.js?v=20260925-mobile-v1";
+    return inAdminRoot() ? "../assets/firebase.js?v=20260925-mobile-v1" : "../assets/firebase.js?v=20260925-mobile-v1";
   }
 
   function engagementAnalyticsHref() {
@@ -455,9 +455,8 @@ const UTL_CONTENT = {
   });
 
   function rewardUiHref() {
-    var version = "?v=20260907-vimeo-all-media-1";
-    if (inPhasePracticeRoot()) return "../../../assets/reward-ui.js" + version;
-    return (inAdminRoot() ? "../assets/reward-ui.js" : "../assets/reward-ui.js") + version;
+    if (inPhasePracticeRoot()) return "../../../assets/reward-ui.js?v=20260925-mobile-v1";
+    return inAdminRoot() ? "../assets/reward-ui.js?v=20260925-mobile-v1" : "../assets/reward-ui.js?v=20260925-mobile-v1";
   }
 
   function ensureRewardUiLoaded() {

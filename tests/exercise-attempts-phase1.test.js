@@ -4,7 +4,8 @@ const path = require('path');
 const vm = require('vm');
 
 const root = path.join(__dirname, '..');
-const read = (file) => fs.readFileSync(path.join(root, file), 'utf8');
+const unversioned = require('./helpers/unversioned');
+const read = (file) => unversioned(fs.readFileSync(path.join(root, file), 'utf8'));
 const pages = {
   'grocery-list': read('apps/grocery-list/index.html'),
   'messy-notes': read('apps/messy-notes/index.html'),

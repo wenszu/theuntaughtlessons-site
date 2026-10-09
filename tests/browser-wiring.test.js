@@ -20,7 +20,8 @@ const vm = require('vm');
 const { pathToFileURL } = require('url');
 
 const REPO_ROOT = path.resolve(__dirname, '..');
-const read = (...parts) => fs.readFileSync(path.join(REPO_ROOT, ...parts), 'utf8');
+const unversioned = require('./helpers/unversioned');
+const read = (...parts) => unversioned(fs.readFileSync(path.join(REPO_ROOT, ...parts), 'utf8'));
 const ADMIN = read('admin', 'index.html');
 const ES_INDEX = read('apps', 'executive-signature', 'index.html');
 const ES_RESULTS = read('apps', 'executive-signature', 'my-results', 'index.html');

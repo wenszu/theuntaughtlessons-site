@@ -428,7 +428,7 @@ async function check(name, fn) {
 
   // ---- assets/firebase.js
   await check('firebase.js loads the switchboard by one dynamic import that cannot fail the page, and has no static import of it', () => {
-    assert.equal((FIREBASE_SOURCE.match(/^import\("\.\/switchboard\.js"\)\.catch\(\(\) => \{\}\);$/gm) || []).length, 1);
+    assert.equal((FIREBASE_SOURCE.match(/^import\("\.\/switchboard\.js(?:\?v=[^"]*)?"\)\.catch\(\(\) => \{\}\);$/gm) || []).length, 1);
     assert.ok(!/^\s*import\s[^(]*from\s*["']\.\/switchboard\.js/m.test(FIREBASE_SOURCE), 'no static import');
   });
   await check('firebase.js gained no export for the switchboard', () => {

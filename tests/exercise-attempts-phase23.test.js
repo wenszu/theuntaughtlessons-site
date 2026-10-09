@@ -11,7 +11,8 @@ const FIREBASE_IMPORT = "import('../../assets/firebase.js')";
 const tick = () => new Promise((resolve) => setImmediate(resolve));
 async function settle() { for (let i = 0; i < 8; i += 1) await tick(); }
 
-function readPage(name) { return fs.readFileSync(path.join(ROOT, 'apps', name, 'index.html'), 'utf8'); }
+const unversioned = require('./helpers/unversioned');
+function readPage(name) { return unversioned(fs.readFileSync(path.join(ROOT, 'apps', name, 'index.html'), 'utf8')); }
 
 function inlineScripts(html) {
   const scripts = [];

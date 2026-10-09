@@ -494,7 +494,7 @@ async function rejects(promise) { try { await promise; } catch (error) { return 
   });
 
   // ---- the data layer picks the token by the flag
-  const dataMod = await load('supabase-data.mjs', DATA_SOURCE.replace(/import\("\.\/supabase-auth\.js"\)/g, 'Promise.reject(new Error("no auth module in this test"))'));
+  const dataMod = await load('supabase-data.mjs', DATA_SOURCE.replace(/import\("\.\/supabase-auth\.js(?:\?v=[^"]*)?"\)/g, 'Promise.reject(new Error("no auth module in this test"))'));
   const PERSON = '11111111-2222-4333-8444-555555555555';
   function dataFixture(flag, extra = {}) {
     const calls = [];

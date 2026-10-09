@@ -136,7 +136,7 @@ async function run(harness, mod, name, options = {}) {
   });
   await check('default: the export list of the eleven is untouched and the file loads the twin only through a dynamic import', () => {
     NAMES.forEach((name) => assert.strictEqual(typeof current[name], 'function', `${name} is exported`));
-    const imports = FIREBASE_SOURCE.match(/import\(["']\.\/supabase-admin-reads\.js["']\)/g) || [];
+    const imports = FIREBASE_SOURCE.match(/import\(["']\.\/supabase-admin-reads\.js(?:\?v=[^"']*)?["']\)/g) || [];
     assert.strictEqual(imports.length, 1);
     assert.ok(!/^import .*supabase-admin-reads/m.test(FIREBASE_SOURCE), 'no static import');
     NAMES.forEach((name) => assert.ok(new RegExp(`async function ${name}FromFirebase\\(`).test(FIREBASE_SOURCE), `${name} keeps its Firebase body`));

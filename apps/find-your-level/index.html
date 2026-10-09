@@ -666,7 +666,7 @@
   <main class="main" id="app" hidden></main>
 
   <script type="module">
-    import { getBand, scoreExercise } from '../../data/tsa-score-bands.js';
+    import { getBand, scoreExercise } from '../../data/tsa-score-bands.js?v=20260925-mobile-v1';
 
     // Leads go to Supabase through the public submit_lead function. The URL and the publishable key
     // are public configuration (same values as assets/firebase.js).
@@ -794,7 +794,7 @@
     };
 
     function loadFirebaseModule() {
-      if (!firebaseModulePromise) firebaseModulePromise = import('../../assets/firebase.js');
+      if (!firebaseModulePromise) firebaseModulePromise = import('../../assets/firebase.js?v=20260925-mobile-v1');
       return firebaseModulePromise;
     }
 
@@ -1180,7 +1180,7 @@
         source: payload.source,
         extra: { version: payload.version, submitted_at: payload.submitted_at }
       }));
-      import('../../assets/firebase.js')
+      import('../../assets/firebase.js?v=20260925-mobile-v1')
         .then(({ saveUserProgress }) => saveUserProgress('find-your-level', 'Find your level', payload))
         .catch((error) => console.warn('Firestore progress save failed.', error));
     }

@@ -208,22 +208,23 @@ const IMPORT_REWRITES = [
   [/"https:\/\/www\.gstatic\.com\/firebasejs\/[^"]+\/firebase-auth\.js"/g, '"./firebase-auth.mjs"'],
   [/"https:\/\/www\.gstatic\.com\/firebasejs\/[^"]+\/firebase-firestore\.js"/g, '"./firebase-firestore.mjs"'],
   [/"https:\/\/www\.gstatic\.com\/firebasejs\/[^"]+\/firebase-functions\.js"/g, '"./firebase-functions.mjs"'],
-  // Node treats .js in this repo as CommonJS, so the data layer is copied next to the module as .mjs.
-  [/import\("\.\/supabase-data\.js"\)/g, 'import("./supabase-data.mjs")'],
+  // The site imports its modules with a ?v=<version> cache-busting query (scripts/sync-cache-versions.js); the
+  // patterns below accept it with or without. Node treats .js in this repo as CommonJS, so the data layer is copied next to the module as .mjs.
+  [/import\("\.\/supabase-data\.js(?:\?v=[^"]*)?"\)/g, 'import("./supabase-data.mjs")'],
   // The admin read screens twin (wave 3) is copied the same way.
-  [/import\("\.\/supabase-admin-reads\.js"\)/g, 'import("./supabase-admin-reads.mjs")'],
+  [/import\("\.\/supabase-admin-reads\.js(?:\?v=[^"]*)?"\)/g, 'import("./supabase-admin-reads.mjs")'],
   // The member reads twin (wave 4) is copied the same way.
-  [/import\("\.\/supabase-member-reads\.js"\)/g, 'import("./supabase-member-reads.mjs")'],
+  [/import\("\.\/supabase-member-reads\.js(?:\?v=[^"]*)?"\)/g, 'import("./supabase-member-reads.mjs")'],
   // The staff writes twin (waves 6 and 7) is copied the same way.
-  [/import\("\.\/supabase-admin-writes\.js"\)/g, 'import("./supabase-admin-writes.mjs")'],
+  [/import\("\.\/supabase-admin-writes\.js(?:\?v=[^"]*)?"\)/g, 'import("./supabase-admin-writes.mjs")'],
   // The admin console direct reads twin (wave 13) is copied the same way.
-  [/import\("\.\/supabase-admin-console-reads\.js"\)/g, 'import("./supabase-admin-console-reads.mjs")'],
+  [/import\("\.\/supabase-admin-console-reads\.js(?:\?v=[^"]*)?"\)/g, 'import("./supabase-admin-console-reads.mjs")'],
   // The question bank twin is copied the same way.
-  [/import\("\.\/supabase-question-bank\.js"\)/g, 'import("./supabase-question-bank.mjs")'],
+  [/import\("\.\/supabase-question-bank\.js(?:\?v=[^"]*)?"\)/g, 'import("./supabase-question-bank.mjs")'],
   // The callables twin (admin mail, member certificate, readiness access link) is copied the same way.
-  [/import\("\.\/supabase-callables\.js"\)/g, 'import("./supabase-callables.mjs")'],
+  [/import\("\.\/supabase-callables\.js(?:\?v=[^"]*)?"\)/g, 'import("./supabase-callables.mjs")'],
   // The remaining Firestore reads twin (account page, feature flags, public certificate, invitation) is copied the same way.
-  [/import\("\.\/supabase-site\.js"\)/g, 'import("./supabase-site.mjs")']
+  [/import\("\.\/supabase-site\.js(?:\?v=[^"]*)?"\)/g, 'import("./supabase-site.mjs")']
 ];
 
 // ---------------------------------------------------------------------------

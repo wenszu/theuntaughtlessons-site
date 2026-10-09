@@ -2399,7 +2399,7 @@
       try {
         if (localStorage.getItem("utl_experience_preview_active") === "true") return;
         const attempt = { attemptId: attemptIdFor(ATTEMPT_APP_ID, nonce), exerciseId: ATTEMPT_APP_ID, exerciseTitle: ATTEMPT_TITLE, contentVersion: ATTEMPT_CONTENT_VERSION, score, scoreMaximum, attemptNumber: attemptNumberFor(ATTEMPT_APP_ID, nonce), durationSeconds, detail };
-        import('../../assets/firebase.js')
+        import('../../assets/firebase.js?v=20260925-mobile-v1')
           .then(({ saveExerciseAttempt }) => saveExerciseAttempt(attempt))
           .catch((error) => console.warn("Exercise attempt save failed.", error));
       } catch (error) {
@@ -2470,7 +2470,7 @@
       };
       localStorage.setItem('utl_result_' + appId, JSON.stringify(record));
       if (appId === 'issue-tree') localStorage.setItem('utl_p2_ex1_done', 'true');
-      import('../../assets/firebase.js')
+      import('../../assets/firebase.js?v=20260925-mobile-v1')
         .then(({ saveUserProgress }) => saveUserProgress(appId, exerciseName, record))
         .catch((error) => console.warn('Firestore progress save failed.', error));
     }

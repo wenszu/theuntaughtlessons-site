@@ -1,4 +1,4 @@
-import { getSignedInUser, getUserFeedbackEnabled, auth, onAuthStateChanged } from "./firebase.js";
+import { getSignedInUser, getUserFeedbackEnabled, auth, onAuthStateChanged } from "./firebase.js?v=20260925-mobile-v1";
 
 // Feedback goes to Supabase through the public submit_feedback function. The URL and the publishable
 // key are public configuration (same values as assets/firebase.js).

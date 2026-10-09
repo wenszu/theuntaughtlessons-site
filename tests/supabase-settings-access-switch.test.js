@@ -708,7 +708,7 @@ async function check(name, fn) {
 
   await check('the file keeps the safety rules: no secret, one dynamic import of the data layer, the new calls only inside the switch', () => {
     assert.ok(!/service_role|sb_secret/.test(FIREBASE_SOURCE));
-    assert.equal((FIREBASE_SOURCE.match(/import\(["']\.\/supabase-data\.js["']\)/g) || []).length, 1);
+    assert.equal((FIREBASE_SOURCE.match(/import\(["']\.\/supabase-data\.js(?:\?v=[^"']*)?["']\)/g) || []).length, 1);
     const getter = FIREBASE_SOURCE.slice(FIREBASE_SOURCE.indexOf('async function getAuthorizedMember(email)'), FIREBASE_SOURCE.indexOf('const MEMBER_ACCOUNT_AVATAR_ICON_IDS'));
     assert.ok(/if \(!supabaseModeActive\(\)\) return getAuthorizedMemberFirestore\(normalizedEmail\);/.test(getter), 'the switch is checked first');
     const settingsRead = FIREBASE_SOURCE.slice(FIREBASE_SOURCE.indexOf('async function readSettingsDoc('), FIREBASE_SOURCE.indexOf('// After a Firestore settings write'));

@@ -18,7 +18,7 @@ const { createHarness } = require('./helpers/firebase-harness');
 const REPO_ROOT = path.resolve(__dirname, '..');
 const view = require('../assets/exercise-results-view.js');
 const FIREBASE_SOURCE = fs.readFileSync(path.join(REPO_ROOT, 'assets', 'firebase.js'), 'utf8');
-const PAGE = fs.readFileSync(path.join(REPO_ROOT, 'my-results', 'index.html'), 'utf8');
+const PAGE = require('./helpers/unversioned')(fs.readFileSync(path.join(REPO_ROOT, 'my-results', 'index.html'), 'utf8'));
 
 let passed = 0;
 async function check(name, fn) {

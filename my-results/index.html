@@ -1667,7 +1667,7 @@
         logout.addEventListener('click', async () => {
           logout.disabled = true;
           try {
-            const fb = await import('../assets/firebase.js');
+            const fb = await import('../assets/firebase.js?v=20260925-mobile-v1');
             if (fb.signOut && fb.auth) await fb.signOut(fb.auth);
           } catch (error) {
             console.warn('Firebase sign-out did not complete:', error && error.message);
@@ -2151,7 +2151,7 @@
       setSendStatus('Sending your results...', '');
 
       try {
-        const fb = await import('../assets/result-email-client.js');
+        const fb = await import('../assets/result-email-client.js?v=20260925-mobile-v1');
         const outcome = await fb.sendMyResultsEmail({ recipients, resultsText, filename: resultsFilename() });
         if (outcome && outcome.ok) {
           setSendStatus('Sent. Your thank-you summary email has been queued.', 'success');
@@ -2193,7 +2193,7 @@
     applySendInstructorStatus();
   </script>
   <script type="module">
-    import { getSignedInUser, getAssessmentVisibility, getMemberExerciseResponses, getMyExerciseResults, issueVerifiedCredential } from '../assets/firebase.js';
+    import { getSignedInUser, getAssessmentVisibility, getMemberExerciseResponses, getMyExerciseResults, issueVerifiedCredential } from '../assets/firebase.js?v=20260925-mobile-v1';
     (async () => {
       const callout = document.getElementById('certificateCallout');
       if (!callout || callout.hidden) return;

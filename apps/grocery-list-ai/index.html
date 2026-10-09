@@ -900,7 +900,7 @@ ${SUPPLY_LIST_FOR_PROMPT}`
         body: 'Your AI comparison was saved.'
       });
 
-      import('../../assets/firebase.js')
+      import('../../assets/firebase.js?v=20260925-mobile-v1')
         .then(({ saveUserProgress }) => saveUserProgress(APP_ID, EXERCISE_NAME, record))
         .catch((error) => console.warn('Firestore progress save failed.', error));
     }

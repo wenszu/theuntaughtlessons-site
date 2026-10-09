@@ -688,7 +688,7 @@
       // Explicit cloud completion record for this self reported exercise. Fire and forget; never blocks or changes the flow.
       try {
         if (localStorage.getItem('utl_experience_preview_active') !== 'true') {
-          import('../../assets/firebase.js')
+          import('../../assets/firebase.js?v=20260925-mobile-v1')
             .then(({ saveUserProgress }) => saveUserProgress('lets-switch-hats', 'Let\'s switch hats', { completed_at: firstCompletionStamp(), self_reported: true, exercise: 'lets-switch-hats' }))
             .catch((error) => console.warn('Completion record sync failed.', error));
         }

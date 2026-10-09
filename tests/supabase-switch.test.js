@@ -316,11 +316,11 @@ async function check(name, fn) {
   });
 
   await check('default mode: the data layer file is only imported inside the loader; no secret in the file', () => {
-    const imports = FIREBASE_SOURCE.match(/import\(["']\.\/supabase-data\.js["']\)/g) || [];
+    const imports = FIREBASE_SOURCE.match(/import\(["']\.\/supabase-data\.js(?:\?v=[^"']*)?["']\)/g) || [];
     assert.equal(imports.length, 1, 'one dynamic import');
     assert.ok(!/^import .*supabase-data/m.test(FIREBASE_SOURCE), 'no static import of the data layer');
     const loader = FIREBASE_SOURCE.slice(FIREBASE_SOURCE.indexOf('function loadSupabaseModule'), FIREBASE_SOURCE.indexOf('async function supabaseData'));
-    assert.ok(loader.includes('import("./supabase-data.js")'), 'the import lives in loadSupabaseModule');
+    assert.ok(/import\("\.\/supabase-data\.js(\?v=[^"]*)?"\)/.test(loader), 'the import lives in loadSupabaseModule');
     assert.ok(!/service_role|sb_secret/.test(FIREBASE_SOURCE), 'no secret key in the file');
     assert.ok(/supabaseOptOut === true/.test(FIREBASE_SOURCE), 'the gate checks the exact opt out flag');
   });
@@ -1303,7 +1303,7 @@ async function check(name, fn) {
     harness.storage.setItem('utl_data_source', 'supabase');
     harness.signIn();
     seedFirestore(harness);
-    const broken = await harness.loadFirebaseModule(FIREBASE_SOURCE.replace('import("./supabase-data.js")', 'import("./missing-data-layer.js")'), 'firebase-broken-loader');
+    const broken = await harness.loadFirebaseModule(FIREBASE_SOURCE.replace(/import\("\.\/supabase-data\.js(\?v=[^"]*)?"\)/, 'import("./missing-data-layer.js")'), 'firebase-broken-loader');
     await broken.saveUserProfile(harness.auth.currentUser, { role: 'member' }, 'google.com');
     await harness.flush(10);
     assert.equal(harness.read(`users/${UID}`).lastSignInProvider, 'google.com');

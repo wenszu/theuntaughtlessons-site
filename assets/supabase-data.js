@@ -1217,7 +1217,7 @@ function createSupabaseData(context = {}) {
     try { return globalThis.localStorage.getItem("utl_auth") === "supabase"; } catch (error) { return false; }
   };
   const getSupabaseAuthToken = typeof context.getSupabaseAuthToken === "function" ? context.getSupabaseAuthToken
-    : (forceRefresh) => import("./supabase-auth.js").then((module) => module.getIdToken(forceRefresh));
+    : (forceRefresh) => import("./supabase-auth.js?v=20260925-mobile-v1").then((module) => module.getIdToken(forceRefresh));
 
   // getIdToken(forceRefresh): true asks Firebase for a fresh token (used once, after an expiry answer).
   async function currentToken(forceRefresh = false) {

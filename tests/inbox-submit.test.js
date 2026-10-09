@@ -10,8 +10,9 @@ const vm = require('node:vm');
 const root = path.join(__dirname, '..');
 const PAGE_PATH = path.join(root, 'apps/find-your-level/index.html');
 const WIDGET_PATH = path.join(root, 'assets/feedback-widget.js');
-const pageHtml = fs.readFileSync(PAGE_PATH, 'utf8');
-const widgetSource = fs.readFileSync(WIDGET_PATH, 'utf8');
+const unversioned = require('./helpers/unversioned');
+const pageHtml = unversioned(fs.readFileSync(PAGE_PATH, 'utf8'));
+const widgetSource = unversioned(fs.readFileSync(WIDGET_PATH, 'utf8'));
 const firebaseSource = fs.readFileSync(path.join(root, 'assets/firebase.js'), 'utf8');
 
 const SUPABASE_URL = 'https://czljyikfavtjgqcibdda.supabase.co';
