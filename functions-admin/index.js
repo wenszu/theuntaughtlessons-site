@@ -17,6 +17,9 @@ const mirrorRuntime = require("./supabase-mirror/runtime");
 const credentialsMirror = require("./supabase-mirror/credentials");
 const organizationsMirror = require("./supabase-mirror/organizations");
 const peopleMirror = require("./supabase-mirror/people");
+// The Supabase service key for the server side mirror, a Firebase secret. Every function that calls the mirror lists it in
+// `secrets` below; a function that does not list it simply has the mirror off. See docs/SUPABASE_MIRROR_SWITCH_ON.md.
+const { SUPABASE_SERVICE_ROLE_KEY } = require("./supabase-mirror/secret");
 
 admin.initializeApp();
 const customerProgramService = createCustomerProgramService({
@@ -147,7 +150,7 @@ async function resolveMyCustomerIdentityHandler(request) {
     throw customerProgramHttpsError(error);
   }
 }
-exports.resolveMyCustomerIdentity = onCall({ timeoutSeconds: 30, memory: "256MiB" }, resolveMyCustomerIdentityHandler);
+exports.resolveMyCustomerIdentity = onCall({ secrets: [SUPABASE_SERVICE_ROLE_KEY], timeoutSeconds: 30, memory: "256MiB" }, resolveMyCustomerIdentityHandler);
 
 async function getMyWorkspacesHandler(request) {
   const caller = await requireVerifiedCaller(request);
@@ -200,7 +203,7 @@ async function changeMyCustomerEmailHandler(request) {
     throw customerProgramHttpsError(error);
   }
 }
-exports.changeMyCustomerEmail = onCall({ timeoutSeconds: 30, memory: "256MiB" }, changeMyCustomerEmailHandler);
+exports.changeMyCustomerEmail = onCall({ secrets: [SUPABASE_SERVICE_ROLE_KEY], timeoutSeconds: 30, memory: "256MiB" }, changeMyCustomerEmailHandler);
 
 async function grantCustomerEntitlementHandler(request) {
   const caller = await requireCustomerProgramRole(request, ["platform_owner", "customer_support", "es_program_lead"]);
@@ -214,7 +217,7 @@ async function grantCustomerEntitlementHandler(request) {
     throw customerProgramHttpsError(error);
   }
 }
-exports.grantCustomerEntitlement = onCall({ timeoutSeconds: 30, memory: "256MiB" }, grantCustomerEntitlementHandler);
+exports.grantCustomerEntitlement = onCall({ secrets: [SUPABASE_SERVICE_ROLE_KEY], timeoutSeconds: 30, memory: "256MiB" }, grantCustomerEntitlementHandler);
 
 async function changeCustomerEntitlementStatusHandler(request) {
   const caller = await requireCustomerProgramRole(request, ["platform_owner", "customer_support", "es_program_lead"]);
@@ -228,7 +231,7 @@ async function changeCustomerEntitlementStatusHandler(request) {
     throw customerProgramHttpsError(error);
   }
 }
-exports.changeCustomerEntitlementStatus = onCall({ timeoutSeconds: 30, memory: "256MiB" }, changeCustomerEntitlementStatusHandler);
+exports.changeCustomerEntitlementStatus = onCall({ secrets: [SUPABASE_SERVICE_ROLE_KEY], timeoutSeconds: 30, memory: "256MiB" }, changeCustomerEntitlementStatusHandler);
 
 async function getCustomerDirectoryHandler(request) {
   const caller = await requireCustomerProgramRole(request, ["platform_owner", "customer_support", "privacy_data_admin"]);
@@ -448,12 +451,12 @@ async function issueCredentialForUser(uid, email, fallbackName, options = {}) {
   return { ok: true, issued: true, credential: { ...credential, issuedAt: timestampToIso(credential.issuedAt) } };
 }
 
-exports.issueVerifiedCredential = onCall({ timeoutSeconds: 30, memory: "256MiB" }, async (request) => {
+exports.issueVerifiedCredential = onCall({ secrets: [SUPABASE_SERVICE_ROLE_KEY], timeoutSeconds: 30, memory: "256MiB" }, async (request) => {
   const caller = await requireVerifiedCaller(request);
   return issueCredentialForUser(caller.uid, caller.email, request.auth.token.name, { throwOnIneligible: true });
 });
 
-exports.repairMemberVerifiedCredential = onCall({ timeoutSeconds: 30, memory: "256MiB" }, async (request) => {
+exports.repairMemberVerifiedCredential = onCall({ secrets: [SUPABASE_SERVICE_ROLE_KEY], timeoutSeconds: 30, memory: "256MiB" }, async (request) => {
   const caller = await requireVerifiedCaller(request);
   if (!(await isAuthorizedAdmin(caller.email))) throw new HttpsError("permission-denied", "Administrator access is required.");
   const uid = String(request.data && request.data.userId || "").trim();
@@ -871,7 +874,7 @@ exports.getOrganizationAccessAdmin = onCall({ timeoutSeconds: 30, memory: "256Mi
   };
 });
 
-exports.submitOrganizationRosterDraft = onCall({ timeoutSeconds: 30, memory: "256MiB" }, async (request) => {
+exports.submitOrganizationRosterDraft = onCall({ secrets: [SUPABASE_SERVICE_ROLE_KEY], timeoutSeconds: 30, memory: "256MiB" }, async (request) => {
   const caller = await requireVerifiedCaller(request);
   const db = admin.firestore();
   const { definitions } = await organizationDefinitions();
@@ -924,7 +927,7 @@ exports.submitOrganizationRosterDraft = onCall({ timeoutSeconds: 30, memory: "25
   return { ok: true, draftId: draftRef.id };
 });
 
-exports.reviewOrganizationRosterDraft = onCall({ timeoutSeconds: 30, memory: "256MiB" }, async (request) => {
+exports.reviewOrganizationRosterDraft = onCall({ secrets: [SUPABASE_SERVICE_ROLE_KEY], timeoutSeconds: 30, memory: "256MiB" }, async (request) => {
   const caller = await requireVerifiedCaller(request);
   if (!(await isAuthorizedAdmin(caller.email))) throw new HttpsError("permission-denied", "UTL administrator access is required.");
   const db = admin.firestore();
@@ -989,7 +992,7 @@ function normalizeOrganizationReportSettings(input) {
   return { weeklyReportOptIn: (input && input.weeklyReportOptIn) === true };
 }
 
-exports.saveOrganizationDefinition = onCall({ timeoutSeconds: 30, memory: "256MiB" }, async (request) => {
+exports.saveOrganizationDefinition = onCall({ secrets: [SUPABASE_SERVICE_ROLE_KEY], timeoutSeconds: 30, memory: "256MiB" }, async (request) => {
   const caller = await requireVerifiedCaller(request);
   if (!(await isAuthorizedAdmin(caller.email))) throw new HttpsError("permission-denied", "UTL administrator access is required.");
   const db = admin.firestore();
@@ -1122,7 +1125,7 @@ exports.checkOrganizationRepEmail = onCall({ timeoutSeconds: 15, memory: "256MiB
   }
 });
 
-exports.saveOrganizationAccessMember = onCall({ timeoutSeconds: 30, memory: "256MiB" }, async (request) => {
+exports.saveOrganizationAccessMember = onCall({ secrets: [SUPABASE_SERVICE_ROLE_KEY], timeoutSeconds: 30, memory: "256MiB" }, async (request) => {
   const caller = await requireVerifiedCaller(request);
   if (!(await isAuthorizedAdmin(caller.email))) throw new HttpsError("permission-denied", "UTL administrator access is required.");
   const db = admin.firestore();
@@ -1295,7 +1298,7 @@ function exerciseWorkspaceProgressPatch(exerciseId, exerciseData) {
 // trigger keeps workspaceProgress.exercises in sync server-side, from the same authoritative
 // document every other consumer already trusts.
 exports.autoIssueVerifiedCredential = onDocumentWritten({
-  document: "users/{userId}/completed_exercises/{exerciseId}", timeoutSeconds: 30, memory: "256MiB"
+  document: "users/{userId}/completed_exercises/{exerciseId}", secrets: [SUPABASE_SERVICE_ROLE_KEY], timeoutSeconds: 30, memory: "256MiB"
 }, async (event) => {
   const after = event.data && event.data.after;
   if (!after || !after.exists || String((after.data() || {}).status || "").toLowerCase() !== "done") return;
@@ -1331,7 +1334,7 @@ exports.repairMemberExerciseProgress = onCall({ timeoutSeconds: 30, memory: "256
   return { ok: true, repaired };
 });
 
-exports.manageVerifiedCredential = onCall({ timeoutSeconds: 30, memory: "256MiB" }, async (request) => {
+exports.manageVerifiedCredential = onCall({ secrets: [SUPABASE_SERVICE_ROLE_KEY], timeoutSeconds: 30, memory: "256MiB" }, async (request) => {
   const caller = await requireVerifiedCaller(request);
   if (!(await isAuthorizedAdmin(caller.email))) throw new HttpsError("permission-denied", "Administrator access is required.");
   const input = request.data && typeof request.data === "object" ? request.data : {};
@@ -1536,7 +1539,7 @@ function weeklyOrgReportBody(organization, aggregate, cohortAggregates) {
 exports.sendWeeklyOrganizationReports = onSchedule({
   schedule: "0 8 * * TUE",
   timeZone: "Asia/Manila",
-  secrets: RELAY_SECRETS,
+  secrets: [...RELAY_SECRETS, SUPABASE_SERVICE_ROLE_KEY],
   timeoutSeconds: 300,
   memory: "512MiB"
 }, async () => {
@@ -1658,7 +1661,7 @@ async function removeMemberHandler(request) {
     throw new HttpsError("internal", "Could not remove this member.");
   }
 }
-exports.removeMember = onCall({ timeoutSeconds: 30, memory: "256MiB" }, removeMemberHandler);
+exports.removeMember = onCall({ secrets: [SUPABASE_SERVICE_ROLE_KEY], timeoutSeconds: 30, memory: "256MiB" }, removeMemberHandler);
 
 const MIN_EMERGENCY_PASSWORD_LENGTH = 12;
 
@@ -1865,7 +1868,7 @@ async function recordReadinessCompletionHandler(request) {
   }
 }
 
-exports.recordReadinessCompletion = onCall({ timeoutSeconds: 30, memory: "256MiB", maxInstances: 10 }, recordReadinessCompletionHandler);
+exports.recordReadinessCompletion = onCall({ secrets: [SUPABASE_SERVICE_ROLE_KEY], timeoutSeconds: 30, memory: "256MiB", maxInstances: 10 }, recordReadinessCompletionHandler);
 
 // Public, unauthenticated by design: the "resend my access" page on the readiness
 // assessment needs to know whether to send a magic link, without ever confirming
@@ -1960,7 +1963,7 @@ async function createCheckoutSessionHandler(request) {
     throw new HttpsError(notReady ? "failed-precondition" : "invalid-argument", error.message || "Could not start checkout.");
   }
 }
-exports.createCheckoutSession = onCall({ secrets: [STRIPE_SECRET_KEY], timeoutSeconds: 30, memory: "256MiB" }, createCheckoutSessionHandler);
+exports.createCheckoutSession = onCall({ secrets: [STRIPE_SECRET_KEY, SUPABASE_SERVICE_ROLE_KEY], timeoutSeconds: 30, memory: "256MiB" }, createCheckoutSessionHandler);
 
 async function stripeWebhookHandler(req, res) {
   const secretKey = String(STRIPE_SECRET_KEY.value() || "").trim();
@@ -1988,7 +1991,7 @@ async function stripeWebhookHandler(req, res) {
     res.status(500).send("Processing failed.");
   }
 }
-exports.stripeWebhook = onRequest({ secrets: [STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET], timeoutSeconds: 30, memory: "256MiB" }, stripeWebhookHandler);
+exports.stripeWebhook = onRequest({ secrets: [STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, SUPABASE_SERVICE_ROLE_KEY], timeoutSeconds: 30, memory: "256MiB" }, stripeWebhookHandler);
 
 // Adds role = "authenticated" to every new Firebase user, merging into existing
 // claims. Supabase reads this claim. Auth triggers are v1-only in this SDK.

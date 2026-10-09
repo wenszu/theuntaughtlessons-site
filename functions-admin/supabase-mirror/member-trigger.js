@@ -27,6 +27,7 @@
 const { onDocumentWritten } = require("firebase-functions/v2/firestore");
 const mirrorRuntime = require("./runtime");
 const peopleMirror = require("./people");
+const { SUPABASE_SERVICE_ROLE_KEY } = require("./secret");
 
 const QUIET_KEYS = new Set(["lastLoginAt", "firstLoginAt", "lastSignInProvider", "signInProviders", "updatedAt", "lastSeenAt"]);
 const WAIT_MS = 8000;
@@ -84,7 +85,7 @@ async function handleMemberWrite(event, deps = {}) {
 }
 
 const mirrorAuthorizedMemberWrite = onDocumentWritten({
-  document: "authorized_members/{email}", timeoutSeconds: 30, memory: "256MiB"
+  document: "authorized_members/{email}", secrets: [SUPABASE_SERVICE_ROLE_KEY], timeoutSeconds: 30, memory: "256MiB"
 }, handleMemberWrite);
 
 module.exports = { mirrorAuthorizedMemberWrite, handleMemberWrite, readCurrentMember, shouldMirror, changedKeys, QUIET_KEYS };
