@@ -37,8 +37,8 @@ ok(/#wsMicrosoftLogin/.test(apply) && /#wsFacebookLogin/.test(apply), "it handle
 ok(source.indexOf("      applyProviderButtons();") > source.indexOf('qs("#wsFacebookLogin").addEventListener'), "it runs after the buttons exist");
 ok(!/Sign in on Supabase offers the email link and Google only/.test(source), "the blanket hiding is gone");
 ok(/import\(supabaseAuthHref\(\)\)/.test(functionSource("loadEnabledProviders")) && /getEnabledProviders\(\)/.test(functionSource("loadEnabledProviders")), "the provider lookup is the one in assets/supabase-auth.js");
-ok(/assets\/supabase-auth\.js\?v=\d{8}-[a-z0-9-]+/.test(functionSource("supabaseAuthHref")), "the module address carries the cache version");
-ok(/assets\/switchboard\.js\?v=\d{8}-[a-z0-9-]+/.test(functionSource("switchboardHref")), "the switchboard address carries the cache version");
+ok(/assets\/supabase-auth\.js\?v=(?:\d{8}-[a-z0-9-]+|[0-9a-f]{12})/.test(functionSource("supabaseAuthHref")), "the module address carries the cache version");
+ok(/assets\/switchboard\.js\?v=(?:\d{8}-[a-z0-9-]+|[0-9a-f]{12})/.test(functionSource("switchboardHref")), "the switchboard address carries the cache version");
 ok(/setTimeout\(resolve, 2000\)/.test(functionSource("waitForSwitchboard")) && /loadSwitchboard\(\)/.test(functionSource("waitForSwitchboard")), "the switchboard wait is two seconds at most");
 
 // -- the behaviour -----------------------------------------------------------------------------------------------------------------
