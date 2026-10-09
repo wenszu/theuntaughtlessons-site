@@ -2150,22 +2150,22 @@ if(internalMode){
 }
 </script>
 <script type="module">
-  import { recordReadinessCompletion, checkReadinessAccountEmail, sendReadinessAccessLink } from '../../assets/firebase.js';
-  import { recordReadinessCompletion as recordReadinessCompletionChoice } from '../../assets/readiness-submit-client.js';
+  import { recordReadinessCompletion, checkReadinessAccountEmail, sendReadinessAccessLink } from '../../assets/firebase.js?v=20260925-mobile-v1';
+  import { recordReadinessCompletion as recordReadinessCompletionChoice } from '../../assets/readiness-submit-client.js?v=20260925-mobile-v1';
   window.raRecordCompletion = recordReadinessCompletionChoice;
   window.raCheckAccountEmail = checkReadinessAccountEmail;
   window.raSendAccessLink = sendReadinessAccessLink;
 </script>
 <script type="module">
-  import { getMyEsStatus } from '../../assets/firebase.js';
+  import { getMyEsStatus } from '../../assets/firebase.js?v=20260925-mobile-v1';
   window.raGetMyEsStatus = getMyEsStatus;
 </script>
 <script type="module">
-  import { sendReadinessResultEmail } from '../../assets/result-email-client.js';
+  import { sendReadinessResultEmail } from '../../assets/result-email-client.js?v=20260925-mobile-v1';
   window.raSendResultEmail = sendReadinessResultEmail;
 </script>
 <script type="module">
-  import { getPaymentSettings, createCheckoutSession } from '../../assets/firebase.js';
+  import { getPaymentSettings, createCheckoutSession } from '../../assets/firebase.js?v=20260925-mobile-v1';
   window.raCreateCheckoutSession = createCheckoutSession;
   window.__raPaymentSettings = { enabled: false, prices: {} };
   getPaymentSettings().then((settings) => { window.__raPaymentSettings = settings; }).catch(() => {});

@@ -4,12 +4,13 @@ const path = require('path');
 const vm = require('vm');
 
 const root = path.resolve(__dirname, '..');
-const html = fs.readFileSync(path.join(root, 'apps/executive-signature/index.html'), 'utf8');
+const unversioned = require('./helpers/unversioned');
+const html = unversioned(fs.readFileSync(path.join(root, 'apps/executive-signature/index.html'), 'utf8'));
 const content = fs.readFileSync(path.join(root, 'apps/executive-signature/content.js'), 'utf8');
-const howItWorks = fs.readFileSync(path.join(root, 'apps/executive-signature/how-it-works/index.html'), 'utf8');
+const howItWorks = unversioned(fs.readFileSync(path.join(root, 'apps/executive-signature/how-it-works/index.html'), 'utf8'));
 const sources = fs.readFileSync(path.join(root, 'apps/executive-signature/sources.js'), 'utf8');
-const research = fs.readFileSync(path.join(root, 'apps/executive-signature/research/index.html'), 'utf8');
-const siteNav = fs.readFileSync(path.join(root, 'apps/executive-signature/assets/site-nav.js'), 'utf8');
+const research = unversioned(fs.readFileSync(path.join(root, 'apps/executive-signature/research/index.html'), 'utf8'));
+const siteNav = unversioned(fs.readFileSync(path.join(root, 'apps/executive-signature/assets/site-nav.js'), 'utf8'));
 
 assert.match(html, /Are you ready to be an executive yet\?/, 'Participant title uses the executive readiness question');
 assert.match(html, /What the assessment looks at/, 'Participant page uses assessment terminology');

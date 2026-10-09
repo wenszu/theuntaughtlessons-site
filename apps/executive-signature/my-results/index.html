@@ -164,9 +164,9 @@
   <script src="../content.js"></script>
   <script src="../facet-report.js"></script>
   <script type="module">
-    import { auth, db, doc, getDoc, getDataSource, getMyEsStatus, isSignInWithEmailLink, onAuthStateChanged, signInWithEmailLink, requestReadinessAccess } from '../../../assets/firebase.js';
-    import { accountDataFor, supabaseSessionActive } from '../assets/account-record.js';
-    import { sendReadinessResultEmail } from '../../../assets/result-email-client.js';
+    import { auth, db, doc, getDoc, getDataSource, getMyEsStatus, isSignInWithEmailLink, onAuthStateChanged, signInWithEmailLink, requestReadinessAccess } from '../../../assets/firebase.js?v=20260925-mobile-v1';
+    import { accountDataFor, supabaseSessionActive } from '../assets/account-record.js?v=20260925-mobile-v1';
+    import { sendReadinessResultEmail } from '../../../assets/result-email-client.js?v=20260925-mobile-v1';
 
     const $ = (s) => document.querySelector(s);
     const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));

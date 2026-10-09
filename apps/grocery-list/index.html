@@ -2492,7 +2492,7 @@
         completed_at: new Date().toISOString(),
         marked_done: done
       };
-      import('../../assets/firebase.js')
+      import('../../assets/firebase.js?v=20260925-mobile-v1')
         .then(({ saveUserProgress }) => saveUserProgress('grocery-list', 'Grocery list', record))
         .catch((error) => console.warn('Firestore completion save failed.', error));
     }
@@ -2520,7 +2520,7 @@
     async function hydrateGroceryAttempts() {
       if (new URLSearchParams(window.location.search).get('design-preview') === 'score-history') return;
       try {
-        const { getExerciseAttempts, getExerciseWork } = await import('../../assets/firebase.js');
+        const { getExerciseAttempts, getExerciseWork } = await import('../../assets/firebase.js?v=20260925-mobile-v1');
         const [cloudAttempts, ...cloudWorkRecords] = await Promise.all([
           getExerciseAttempts('grocery-list'),
           getExerciseWork('grocery-list'),
@@ -2659,7 +2659,7 @@
       const history = loadGroceryAttempts().filter((item) => item.attemptId !== attemptId);
       history.push({ attemptId, attemptNumber: attempt, score: record.score, scoreMaximum: 100, contentVersion: GROCERY_CONTENT_VERSION, completedAt: record.completed_at, record });
       localStorage.setItem(GROCERY_ATTEMPTS_KEY, JSON.stringify(history.slice(-10)));
-      import('../../assets/firebase.js')
+      import('../../assets/firebase.js?v=20260925-mobile-v1')
         .then(({ saveUserProgress, saveExerciseAttempt }) => Promise.allSettled([
           saveUserProgress(appId, exerciseName, record),
           localStorage.getItem('utl_experience_preview_active') === 'true' ? null : saveExerciseAttempt({ attemptId, exerciseId: appId, exerciseTitle: exerciseName, contentVersion: GROCERY_CONTENT_VERSION, score: record.score, scoreMaximum: 100, attemptNumber: attempt, durationSeconds, detail: record.score_detail })

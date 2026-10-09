@@ -17,7 +17,7 @@
   // through assets/ai-score-client.js; with any other value, or none, the request to the Firebase scorer below is sent exactly as before.
   function aiBackendIsSupabase() { try { return localStorage.getItem('utl_ai') === 'supabase'; } catch (_) { return false; } }
   async function scoreViaSupabase(payload, signal, idToken) {
-    const { scoreExplainToAiko } = await import('../../assets/ai-score-client.js');
+    const { scoreExplainToAiko } = await import('../../assets/ai-score-client.js?v=20260925-mobile-v1');
     return scoreExplainToAiko(payload, { signal, idToken });
   }
   const SCORE_CONTENT_VERSION = '2026-10-08-v1';
@@ -185,7 +185,7 @@ Best, Yutee Elle`;
 
   async function hydrateSavedResults() {
     try {
-      const { getExerciseWork } = await import('../../assets/firebase.js');
+      const { getExerciseWork } = await import('../../assets/firebase.js?v=20260925-mobile-v1');
       const legacyIds = mode === '60'
         ? ['explain-to-aiko-60', 'explain-to-aiko-60-v2', 'explain-to-aiko-60s']
         : LEGACY_120_IDS;
@@ -256,7 +256,7 @@ Best, Yutee Elle`;
     } catch (error) { console.warn('Could not save Explain to Aiko prep notes.', error); }
     clearTimeout(prepCloudTimer);
     prepCloudTimer = setTimeout(() => {
-      import('../../assets/firebase.js')
+      import('../../assets/firebase.js?v=20260925-mobile-v1')
         .then(({ saveExerciseDraft }) => saveExerciseDraft(APP_ID, APP_TITLE, draftPayload))
         .catch((error) => console.warn('Could not sync Explain to Aiko prep notes.', error));
     }, 600);
@@ -417,7 +417,7 @@ Best, Yutee Elle`;
     let timer = null;
     try {
       const cloud = (async () => {
-        const { getExerciseWork } = await import('../../assets/firebase.js');
+        const { getExerciseWork } = await import('../../assets/firebase.js?v=20260925-mobile-v1');
         const settled = await Promise.allSettled(LEGACY_120_IDS.map(async (exerciseId) => getExerciseWork(exerciseId)));
         const found = [];
         settled.forEach((entry) => { if (entry.status === 'fulfilled') ((entry.value && entry.value.submissions) || []).forEach((item) => { const payload = item && (item.responsePayload || item.savedPayload); if (payload && payload.transcript && !isPracticeWork(item) && !isPracticeWork(payload)) found.push({ at: String(payload.submitted_at || payload.completed_at || item.completedAtClient || ''), text: String(payload.transcript) }); }); });
@@ -433,7 +433,7 @@ Best, Yutee Elle`;
     if (previewActive()) return '';
     let timer = null;
     try {
-      const lookup = (async () => { const { getSignedInUser } = await import('../../assets/firebase.js'); const user = await getSignedInUser(); return user && typeof user.getIdToken === 'function' ? String(await user.getIdToken() || '') : ''; })();
+      const lookup = (async () => { const { getSignedInUser } = await import('../../assets/firebase.js?v=20260925-mobile-v1'); const user = await getSignedInUser(); return user && typeof user.getIdToken === 'function' ? String(await user.getIdToken() || '') : ''; })();
       lookup.catch(() => {});
       return await Promise.race([lookup, new Promise((resolve) => { timer = setTimeout(() => resolve(''), ID_TOKEN_CAP_MS); })]);
     } catch (_) { return ''; }
@@ -475,8 +475,8 @@ Best, Yutee Elle`;
       ai_criteria: JSON.stringify(score.criteria || []), used_estimate: Boolean(state.usedEstimate), scored_by: score.fallback ? 'local-fallback' : 'gemini', score_attempt_id: scoreAttemptId
     };
     try { localStorage.setItem(RESULT_KEY, JSON.stringify(payload)); saveResultHistory(payload); localStorage.setItem(DONE_KEY, 'true'); } catch (error) { console.warn('Local progress save failed.', error); }
-    import('../../assets/firebase.js').then(({ saveUserProgress }) => saveUserProgress(APP_ID, APP_TITLE, payload)).catch((error) => console.warn('Firestore progress save failed.', error));
-    if (scoreAttemptId && !scorerRecorded) import('../../assets/firebase.js').then(({ saveExerciseAttempt }) => saveExerciseAttempt({ attemptId: scoreAttemptId, exerciseId: APP_ID, exerciseTitle: APP_TITLE, contentVersion: SCORE_CONTENT_VERSION, score: score.total, scoreMaximum: 30, attemptNumber, durationSeconds: payload.duration_seconds })).catch((error) => console.warn('Score attempt save failed.', error));
+    import('../../assets/firebase.js?v=20260925-mobile-v1').then(({ saveUserProgress }) => saveUserProgress(APP_ID, APP_TITLE, payload)).catch((error) => console.warn('Firestore progress save failed.', error));
+    if (scoreAttemptId && !scorerRecorded) import('../../assets/firebase.js?v=20260925-mobile-v1').then(({ saveExerciseAttempt }) => saveExerciseAttempt({ attemptId: scoreAttemptId, exerciseId: APP_ID, exerciseTitle: APP_TITLE, contentVersion: SCORE_CONTENT_VERSION, score: score.total, scoreMaximum: 30, attemptNumber, durationSeconds: payload.duration_seconds })).catch((error) => console.warn('Score attempt save failed.', error));
     const rewardDetail = { title: mode === '60' ? 'Explain to Aiko in 60 seconds complete' : 'Explain to Aiko complete', body: `Your ${TARGET_SECONDS}-second explanation was saved.` };
     if (window.awardAikoCompletion) window.awardAikoCompletion(rewardDetail);
     else window.UTLRewardEvents?.awardCompletionExercise(Object.assign({ appId: APP_ID }, rewardDetail));
@@ -672,7 +672,7 @@ Best, Yutee Elle`;
     writePracticeWorkspaces(workspaces);
     const completed = { ...practiceDraft };
     const finished = attempts[attempts.length - 1];
-    import('../../assets/firebase.js').then(({ saveExerciseSubmission }) => saveExerciseSubmission({ exerciseId: APP_ID, exerciseTitle: APP_TITLE, submissionId: deterministicId(APP_ID, 'practice', finished.id), attemptNumber: attempts.length, completedAtClient: finished.completedAt, durationSeconds: (Number(finished.duration120) || 0) + (Number(finished.duration60) || 0), responsePayload: { ...finished, practice: true } })).catch((error) => console.warn('Practice round cloud save failed.', error));
+    import('../../assets/firebase.js?v=20260925-mobile-v1').then(({ saveExerciseSubmission }) => saveExerciseSubmission({ exerciseId: APP_ID, exerciseTitle: APP_TITLE, submissionId: deterministicId(APP_ID, 'practice', finished.id), attemptNumber: attempts.length, completedAtClient: finished.completedAt, durationSeconds: (Number(finished.duration120) || 0) + (Number(finished.duration60) || 0), responsePayload: { ...finished, practice: true } })).catch((error) => console.warn('Practice round cloud save failed.', error));
     practiceDraft = null;
     history.replaceState(null, '', `?practice=1&attempt=${encodeURIComponent(completed.id)}`);
     renderPracticeSaved(completed);

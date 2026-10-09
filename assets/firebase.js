@@ -22,26 +22,26 @@ import {
 import {
   collection,
   connectFirestoreEmulator,
-  deleteDoc,
+  deleteDoc as sdkDeleteDoc,
   doc,
-  getDoc,
-  getDocFromServer,
-  getDocs,
+  getDoc as sdkGetDoc,
+  getDocFromServer as sdkGetDocFromServer,
+  getDocs as sdkGetDocs,
   getFirestore,
   limit,
   orderBy,
   query,
-  runTransaction,
+  runTransaction as sdkRunTransaction,
   serverTimestamp,
-  setDoc,
+  setDoc as sdkSetDoc,
   Timestamp,
-  updateDoc,
+  updateDoc as sdkUpdateDoc,
   where
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 import {
   connectFunctionsEmulator,
   getFunctions,
-  httpsCallable
+  httpsCallable as sdkHttpsCallable
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-functions.js";
 
 // Your web app's Firebase configuration
@@ -65,7 +65,7 @@ const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_uxSIlhwWdbAa6EnHyn_Flw__P3u6tlW
 // The switchboard (docs/SUPABASE_SWITCHBOARD.md): a public setting that sets the per browser switches below for everyone, but
 // only where the person has not set a switch by hand. With every flag on firebase it writes nothing. Never required: a missing
 // file or a failed request changes nothing.
-import("./switchboard.js").catch(() => {});
+import("./switchboard.js?v=20260925-mobile-v1").catch(() => {});
 
 // Data source switch, per browser. localStorage utl_data_source is "supabase" or "firebase" (the
 // default until a signed in member's browser has been checked); only "supabase" turns the switch on.
@@ -113,10 +113,40 @@ function supabaseAuthActive() {
   }
 }
 
+// Supabase-only member mode: there is no Firebase user, so Firestore and the Firebase callables would only answer with a refusal (a 401
+// from cloudfunctions.net, permission-denied from Firestore). This is the safety net behind every route that already avoids them: in that
+// mode these wrappers do not send the request at all. They reject with the code supabase-only/no-firebase and leave one console warning
+// that names the kind of call (a route that still reaches one shows up there). With any other utl_auth they are the SDK functions.
+function firebaseBlocked(kind) {
+  if (!supabaseAuthActive()) return null;
+  console.warn(`Blocked: ${kind} is not available in a Supabase-only session.`);
+  return Object.assign(new Error(`${kind} is not available in a Supabase-only session.`), { code: "supabase-only/no-firebase" });
+}
+function guardedFirestore(kind, sdkFunction) {
+  return function guarded(...args) {
+    const blocked = firebaseBlocked(kind);
+    return blocked ? Promise.reject(blocked) : sdkFunction(...args);
+  };
+}
+const getDoc = guardedFirestore("A Firestore read", sdkGetDoc);
+const getDocFromServer = guardedFirestore("A Firestore read", sdkGetDocFromServer);
+const getDocs = guardedFirestore("A Firestore read", sdkGetDocs);
+const setDoc = guardedFirestore("A Firestore write", sdkSetDoc);
+const updateDoc = guardedFirestore("A Firestore write", sdkUpdateDoc);
+const deleteDoc = guardedFirestore("A Firestore write", sdkDeleteDoc);
+const runTransaction = guardedFirestore("A Firestore transaction", sdkRunTransaction);
+function httpsCallable(...args) {
+  const call = sdkHttpsCallable(...args);
+  return function guardedCallable(...payload) {
+    const blocked = firebaseBlocked(`The Firebase function ${String(args[1] || "")}`);
+    return blocked ? Promise.reject(blocked) : call(...payload);
+  };
+}
+
 let supabaseAuthModulePromise = null;
 function supabaseAuth() {
   if (!supabaseAuthModulePromise) {
-    supabaseAuthModulePromise = import("./supabase-auth.js").catch((error) => {
+    supabaseAuthModulePromise = import("./supabase-auth.js?v=20260925-mobile-v1").catch((error) => {
       supabaseAuthModulePromise = null;
       throw error;
     });
@@ -313,7 +343,7 @@ let supabaseDataInstance = null;
 
 function loadSupabaseModule() {
   if (!supabaseModulePromise) {
-    supabaseModulePromise = import("./supabase-data.js").catch((error) => {
+    supabaseModulePromise = import("./supabase-data.js?v=20260925-mobile-v1").catch((error) => {
       supabaseModulePromise = null;
       throw error;
     });
@@ -439,6 +469,7 @@ const ADMIN_READ_SHADOW_PARAMETER = "utl_server";
 let supabaseAdminReadsPromise = null;
 
 function adminReadMode() {
+  if (supabaseAuthActive()) return "supabase"; // no Firebase user to read with
   try {
     if (window.localStorage.getItem(ADMIN_READ_FLAG_KEY) === "supabase") return "supabase";
     if (window.localStorage.getItem(ADMIN_READ_FLAG_KEY) === "shadow") return "shadow"; // set for everyone by the switchboard
@@ -451,7 +482,7 @@ function adminReadMode() {
 
 function loadSupabaseAdminReads() {
   if (!supabaseAdminReadsPromise) {
-    supabaseAdminReadsPromise = import("./supabase-admin-reads.js").then((module) => ({
+    supabaseAdminReadsPromise = import("./supabase-admin-reads.js?v=20260925-mobile-v1").then((module) => ({
       reads: module.createSupabaseAdminReads({
         supabaseUrl: SUPABASE_URL,
         publishableKey: SUPABASE_PUBLISHABLE_KEY,
@@ -584,7 +615,7 @@ let supabaseAdminConsolePromise = null;
 
 function loadSupabaseAdminConsoleReads() {
   if (!supabaseAdminConsolePromise) {
-    supabaseAdminConsolePromise = import("./supabase-admin-console-reads.js").then((module) => ({
+    supabaseAdminConsolePromise = import("./supabase-admin-console-reads.js?v=20260925-mobile-v1").then((module) => ({
       reads: module.createSupabaseAdminConsoleReads({
         supabaseUrl: SUPABASE_URL,
         publishableKey: SUPABASE_PUBLISHABLE_KEY,
@@ -669,7 +700,7 @@ let questionBankPromise = null;
 
 function loadQuestionBank() {
   if (!questionBankPromise) {
-    questionBankPromise = import("./supabase-question-bank.js").then((module) => ({
+    questionBankPromise = import("./supabase-question-bank.js?v=20260925-mobile-v1").then((module) => ({
       module,
       api: module.createQuestionBank({ supabaseUrl: SUPABASE_URL, publishableKey: SUPABASE_PUBLISHABLE_KEY, getIdToken: siteIdToken })
     })).catch((error) => {
@@ -748,7 +779,7 @@ async function getAssessmentItemHealthFromFirebase() {
   ]);
   const reviews = {};
   reviewSnapshot.forEach((entry) => { reviews[entry.id] = entry.data() || {}; });
-  const module = await import("./supabase-question-bank.js");
+  const module = await import("./supabase-question-bank.js?v=20260925-mobile-v1");
   return module.summarizeItemAttempts(attemptSnapshot.docs.map((entry) => Object.assign({ id: entry.id }, entry.data() || {})), reviews);
 }
 
@@ -1015,6 +1046,8 @@ async function runAdminActionFromFirebase(action, payload = {}) {
 let supabaseCallablesPromise = null;
 
 function browserFlagIs(key, value) {
+  // A Supabase-only session has no Firebase user, so the Firebase side of these callables could only refuse: they take the Supabase route.
+  if (value === "supabase" && supabaseAuthActive() && ["utl_mail", "utl_es", "utl_server_writes", "utl_server_reads", "utl_payments"].includes(key)) return true;
   try {
     return window.localStorage.getItem(key) === value;
   } catch {
@@ -1024,7 +1057,7 @@ function browserFlagIs(key, value) {
 
 function loadSupabaseCallables() {
   if (!supabaseCallablesPromise) {
-    supabaseCallablesPromise = import("./supabase-callables.js").then((module) => module.createCallables({
+    supabaseCallablesPromise = import("./supabase-callables.js?v=20260925-mobile-v1").then((module) => module.createCallables({
       supabaseUrl: SUPABASE_URL,
       publishableKey: SUPABASE_PUBLISHABLE_KEY,
       getIdToken: siteIdToken
@@ -1095,6 +1128,7 @@ const STAFF_WRITE_SHADOW_PARAMETER = "utl_server";
 let staffWritesModulePromise = null;
 
 function staffWriteMode() {
+  if (supabaseAuthActive()) return "supabase"; // no Firebase user to write with: the database function is the only writer
   try {
     if (window.localStorage.getItem(STAFF_WRITE_FLAG_KEY) === "supabase") return "supabase";
     if (window.localStorage.getItem(STAFF_WRITE_FLAG_KEY) === "shadow") return "shadow"; // set for everyone by the switchboard
@@ -1107,7 +1141,7 @@ function staffWriteMode() {
 
 function loadStaffWrites() {
   if (!staffWritesModulePromise) {
-    staffWritesModulePromise = import("./supabase-admin-writes.js").then((module) => ({
+    staffWritesModulePromise = import("./supabase-admin-writes.js?v=20260925-mobile-v1").then((module) => ({
       writes: module.createAdminWrites({
         supabaseUrl: SUPABASE_URL,
         publishableKey: SUPABASE_PUBLISHABLE_KEY,
@@ -1225,7 +1259,7 @@ let memberReadsInstance = null;
 
 function loadMemberReadsModule() {
   if (!memberReadsModulePromise) {
-    memberReadsModulePromise = import("./supabase-member-reads.js").catch((error) => {
+    memberReadsModulePromise = import("./supabase-member-reads.js?v=20260925-mobile-v1").catch((error) => {
       memberReadsModulePromise = null;
       throw error;
     });
@@ -1278,10 +1312,33 @@ async function siteIdToken(forceRefresh) {
   return auth.currentUser && auth.currentUser.getIdToken(forceRefresh === true);
 }
 
+// The answers a member read gives when there is nothing to give, in the shape of the Firebase callable (the pages read these fields).
+const MEMBER_READ_EMPTY = {
+  getMyOrganizationAccess: () => ({ ok: true, hasAccess: false, organizations: [] }),
+  getMyWorkspaces: () => ({ ok: true, customerId: null, workspaces: [], hasMultiple: false }),
+  getMyEsStatus: () => emptyEsStatus(),
+  getCohortStanding: () => ({ ok: false, state: "unavailable" }),
+  getMemberExerciseResponses: () => ({})
+};
+
+// Supabase-only member mode: the Supabase answer IS the answer, an empty one included. There is no mode switch, no usable test and no
+// fallback, because there is no Firebase user to call the Firebase function with. A call the database cannot answer for this person
+// (the support preview of another member, another member's answers) gets the empty answer. A failing read is thrown to the page.
+async function memberReadSupabaseOnly(name, supabaseRun, options) {
+  const empty = (MEMBER_READ_EMPTY[name] || (() => null))();
+  if (options.firebaseOnly) return empty;
+  const user = await getSignedInUser(); // also links the account to the person on the first call of a page
+  if (!user || !user.uid) return empty;
+  const remote = await runMemberReads(supabaseRun);
+  if (!remote.ok) throw remote.error;
+  return remote.value === null || remote.value === undefined ? empty : remote.value;
+}
+
 // One member read. firebaseRun is the original function body; supabaseRun gets the Supabase reads.
 // options.firebaseOnly keeps a call on Firebase (the support preview), options.usable(value) says whether a Supabase
 // answer may be used in place of Firebase's.
 async function memberRead(name, firebaseRun, supabaseRun, options = {}) {
+  if (supabaseAuthActive()) return memberReadSupabaseOnly(name, supabaseRun, options);
   const mode = options.firebaseOnly ? "off" : memberReadsMode();
   if (mode === "off") return firebaseRun();
   const usable = typeof options.usable === "function" ? options.usable : (MEMBER_READ_USABLE[name] || ((value) => value !== null && value !== undefined));
@@ -1513,7 +1570,7 @@ async function getMyEsStatusFromFirebase() {
 // submissions, for the page to merge with its local data (assets/exercise-results-view.js). Resolves null with the
 // switch off, with no signed in user, or when Supabase fails (the page then keeps its local results as they are).
 async function getMyExerciseResults() {
-  if (!supabaseModeActive()) return null;
+  if (!supabaseModeActive() && !supabaseAuthActive()) return null;
   const user = await getSignedInUser();
   if (!user || !user.uid) return null;
   const remote = await runSupabase((data) => data.getMemberExerciseResults());
@@ -1538,6 +1595,8 @@ async function getCustomersConsoleFeatureFlag() {
   if (settingsReadsFromSupabase()) {
     const remote = await runSite((site) => site.getFeatureFlag("customersConsole"));
     if (remote.ok && remote.value && remote.value.found) return { enabled: remote.value.enabled === true };
+    // A Supabase-only session never touches Firestore: no flag row means the flag is off.
+    if (supabaseAuthActive()) return { enabled: false };
   }
   try {
     const snap = await getDoc(doc(requireFirestore(), "platformFeatureFlags", "customersConsole"));
@@ -1576,6 +1635,8 @@ async function getEsWorkspaceFeatureFlag() {
   if (settingsReadsFromSupabase()) {
     const remote = await runSite((site) => site.getFeatureFlag("esWorkspace"));
     if (remote.ok && remote.value && remote.value.found) return { enabled: remote.value.enabled === true };
+    // A Supabase-only session never touches Firestore: no flag row means the flag is off.
+    if (supabaseAuthActive()) return { enabled: false };
   }
   try {
     const snap = await getDoc(doc(requireFirestore(), "platformFeatureFlags", "esWorkspace"));
@@ -1984,6 +2045,9 @@ async function recordReadinessCompletion(payload = {}) {
 }
 
 async function checkReadinessAccountEmail(email) {
+  // Supabase-only: the Firebase check cannot be called (the "send me a link" step is requestReadinessAccess, one Edge Function call that
+  // answers the same whatever the address). The page then treats the address as having no result, as it does when the check fails.
+  if (supabaseAuthActive()) return { ok: false, hasResult: false };
   const callable = httpsCallable(functions, "checkReadinessAccountEmail");
   const result = await callable({ email });
   return result && result.data ? result.data : { ok: false, hasResult: false };
@@ -2008,6 +2072,8 @@ async function requestReadinessAccess(email) {
 // and sends it only to the address on file. Never throws for an expected failure; the
 // page reads { ok, error } and shows a gentle message.
 async function sendReadinessResultEmail(attemptId) {
+  // Supabase-only: the pages reach the Supabase function through assets/result-email-client.js; this Firebase callable cannot be used.
+  if (supabaseAuthActive()) return { ok: false, error: "unavailable" };
   try {
     const callable = httpsCallable(functions, "sendReadinessResultEmail");
     const result = await callable({ attemptId });
@@ -2021,6 +2087,7 @@ async function sendReadinessResultEmail(attemptId) {
 // is always the signed in, verified address. Never throws; the page reads { ok, error, message }
 // where message is the server's plain sentence for a refusal.
 async function sendMyResultsEmail({ recipients, resultsText, filename } = {}) {
+  if (supabaseAuthActive()) return { ok: false, error: "unavailable" }; // see sendReadinessResultEmail
   try {
     const callable = httpsCallable(functions, "sendMyResultsEmail");
     const result = await callable({ recipients, resultsText, filename });
@@ -3340,7 +3407,7 @@ async function getMemberExerciseResponses(uid) {
   if (!uid) throw new Error("A user UID is required.");
   // Another person's answers (an administrator's read) stay on Firebase: the database function answers for the caller only.
   // An empty Supabase answer is not trusted over Firebase (it may just mean nothing was copied yet).
-  const signedIn = memberReadsMode() === "off" ? null : await getSignedInUser().catch(() => null);
+  const signedIn = memberReadsMode() === "off" && !supabaseAuthActive() ? null : await getSignedInUser().catch(() => null);
   return memberRead(
     "getMemberExerciseResponses",
     () => getMemberExerciseResponsesFromFirebase(uid),
@@ -3717,7 +3784,7 @@ let siteApiPromise = null;
 
 function loadSiteModule() {
   if (!siteModulePromise) {
-    siteModulePromise = import("./supabase-site.js").catch((error) => {
+    siteModulePromise = import("./supabase-site.js?v=20260925-mobile-v1").catch((error) => {
       siteModulePromise = null;
       throw error;
     });
@@ -3806,6 +3873,7 @@ async function getPublicCredential(credentialId) {
   if (mode === "supabase" || supabaseAuthActive()) {
     const remote = await runSite((site) => site.getPublicCredential(id));
     if (remote.ok && remote.value) return remote.value;
+    if (supabaseAuthActive()) return null; // a Supabase-only session never touches Firestore
     return fromFirestore();
   }
   if (mode === "shadow") {
@@ -3891,6 +3959,13 @@ async function readSettingsDocFirestore(docId) {
 async function readSettingsDoc(docId, view) {
   // Supabase first (utl_server_reads "supabase", or a Supabase-only session): the app_settings row, when it holds something. An
   // empty or hidden row, or any failure, goes on to the Firestore code below (which only the public documents answer without a session).
+  if (supabaseAuthActive()) {
+    // A Supabase-only session never touches Firestore: the row answers (an empty or hidden row is "no document", so the getter's
+    // defaults apply) and a failure is thrown to the getter, which treats it like any failing read.
+    const only = await runSupabase((data) => data.getAppSetting(docId));
+    if (only.ok) return only.value && only.value.found ? only.value.value : null;
+    throw only.error;
+  }
   if (settingsReadsFromSupabase()) {
     const remote = await runSupabase((data) => data.getAppSetting(docId));
     if (remote.ok && remote.value && remote.value.found && Object.keys(remote.value.value || {}).length > 0) return remote.value.value;
@@ -4191,7 +4266,7 @@ async function createCheckoutSession({ program, successUrl, cancelUrl }) {
   // from a link; it is set by hand in the console. The Supabase function needs a signed in member and answers 401 otherwise.
   let paymentsPath = "firebase";
   try { paymentsPath = window.localStorage.getItem("utl_payments") === "supabase" ? "supabase" : "firebase"; } catch { /* storage unreadable */ }
-  if (paymentsPath === "supabase") {
+  if (paymentsPath === "supabase" || supabaseAuthActive()) { // a Supabase-only session has no Firebase user for the callable
     // The same token the other Supabase calls use: the Supabase Auth token when utl_auth is "supabase", else the Firebase one.
     const token = supabaseAuthActive()
       ? await (await supabaseAuth()).getIdToken()

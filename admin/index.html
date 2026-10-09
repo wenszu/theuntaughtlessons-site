@@ -8551,7 +8551,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         if (qbServerMode('utl_server_reads') !== 'firebase' && fb.getAssessmentItemHealth && fb.listAssessmentItemReviews) {
           // A server flag is on: counts only (no learner answers reach the page), from Supabase or, in shadow mode, worked out from Firestore.
           const [health, reviewSnapshot] = await Promise.all([fb.getAssessmentItemHealth(), fb.listAssessmentItemReviews()]);
-          qbQuestionStats = (await import('../assets/supabase-question-bank.js')).questionStats;
+          qbQuestionStats = (await import('../assets/supabase-question-bank.js?v=20260925-mobile-v1')).questionStats;
           qbHealth = health;
           qbAttempts = [];
           qbReviews = {};

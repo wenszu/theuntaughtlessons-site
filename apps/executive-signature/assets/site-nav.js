@@ -2,8 +2,8 @@
 // exercise header (member-login/content-config.js: navHtml()'s .ws-nav /
 // .ws-focused-nav-context / .ws-avatar / .ws-profile-menu) rather than a
 // simplified approximation of it. See site-nav.css for the ported CSS.
-import { auth, db, doc, getDoc, getMyEsStatus, getMyWorkspaces, onAuthStateChanged, signOut } from '../../../assets/firebase.js';
-import { readAccountRecord } from './account-record.js';
+import { auth, db, doc, getDoc, getMyEsStatus, getMyWorkspaces, onAuthStateChanged, signOut } from '../../../assets/firebase.js?v=20260925-mobile-v1';
+import { readAccountRecord } from './account-record.js?v=20260925-mobile-v1';
 
 function escapeHtml(value) {
   return String(value).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));

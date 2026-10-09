@@ -1548,7 +1548,7 @@
           durationSeconds: Math.max(0, Math.round(Number(durationSeconds) || 0)),
           detail: scored.detail
         };
-        import('../../assets/firebase.js')
+        import('../../assets/firebase.js?v=20260925-mobile-v1')
           .then(({ saveExerciseAttempt }) => saveExerciseAttempt(payload))
           .catch((error) => console.warn('Exercise attempt could not be recorded.', error));
       } catch (error) {
@@ -1575,7 +1575,7 @@
         record.attempt_id = buildAttemptId(appId, takeNonce);
       }
       localStorage.setItem('utl_result_' + appId, JSON.stringify(record));
-      import('../../assets/firebase.js')
+      import('../../assets/firebase.js?v=20260925-mobile-v1')
         .then(({ saveUserProgress }) => saveUserProgress(appId, exerciseName, record))
         .catch((error) => console.warn('Firestore progress save failed.', error));
       if (scored) recordExerciseAttempt(appId, exerciseName, scored, attempt, durationSeconds);

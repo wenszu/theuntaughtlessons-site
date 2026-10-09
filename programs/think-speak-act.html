@@ -2398,7 +2398,7 @@
   <script type="module">
     // Off by default. While settings/payments.enabled is false (the default),
     // this does nothing and the self-led card keeps its normal waitlist button.
-    import { getPaymentSettings, createCheckoutSession } from '../assets/firebase.js';
+    import { getPaymentSettings, createCheckoutSession } from '../assets/firebase.js?v=20260925-mobile-v1';
     getPaymentSettings().then((settings) => {
       const price = settings.enabled && settings.prices && settings.prices.tsa;
       // A price of exactly 0 means this program is deliberately kept free even

@@ -1067,7 +1067,7 @@ Here is the transcript:
         title: 'Rushed voice memo with AI complete',
         body: 'Your AI-structured output was saved.'
       });
-      import('../../assets/firebase.js')
+      import('../../assets/firebase.js?v=20260925-mobile-v1')
         .then(({ saveUserProgress }) => saveUserProgress('rushed-voice-memo-ai', 'Rushed voice memo with AI', record))
         .catch(err => console.warn('Progress save failed.', err));
       btn.disabled = true;

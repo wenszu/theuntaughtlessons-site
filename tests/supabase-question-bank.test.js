@@ -350,7 +350,7 @@ const warningText = (out) => out.warnings.map((w) => w.join(' '));
   });
   await check('default: the new module is only reached through dynamic imports (never a static import)', () => {
     assert.ok(!/^import .*supabase-question-bank/m.test(FIREBASE_SOURCE));
-    const imports = FIREBASE_SOURCE.match(/import\(["']\.\/supabase-question-bank\.js["']\)/g) || [];
+    const imports = FIREBASE_SOURCE.match(/import\(["']\.\/supabase-question-bank\.js(?:\?v=[^"']*)?["']\)/g) || [];
     assert.strictEqual(imports.length, 2, 'the loader and the Firebase side summary');
     ['getAssessmentItemHealth', 'listAssessmentItemReviews', 'saveAssessmentItemReview'].forEach((name) => assert.strictEqual(typeof current[name], 'function', name));
   });
