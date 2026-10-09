@@ -1236,8 +1236,8 @@ async function check(name, fn) {
     assert.deepEqual(login.body, { p_provider: 'google.com' });
     const profiles = harness.rpcCalls('update_my_profile');
     assert.equal(profiles.length, 1, 'existing user: photo only');
-    assert.deepEqual(profiles[0].body, { photoUrl: 'https://photos.example.test/member-one.jpg' });
-    profiles.forEach((call) => assert.ok(!('displayName' in call.body), 'the display name is never written at sign-in'));
+    assert.deepEqual(profiles[0].body, { p_fields: { photoUrl: 'https://photos.example.test/member-one.jpg' } });
+    profiles.forEach((call) => assert.ok(!('displayName' in call.body.p_fields), 'the display name is never written at sign-in'));
 
     const fresh = await supa('saveUserProfile', {
       before: (h) => {
@@ -1248,7 +1248,7 @@ async function check(name, fn) {
     assert.equal(fresh.outcome.error, null);
     const freshProfiles = harness.rpcCalls('update_my_profile');
     assert.equal(freshProfiles.length, 2);
-    assert.deepEqual(freshProfiles[1].body, { feedbackEnabled: false }, 'the same value written to Firestore');
+    assert.deepEqual(freshProfiles[1].body, { p_fields: { feedbackEnabled: false } }, 'the same value written to Firestore');
     assert.equal(fresh.store[`users/${UID}`].feedbackEnabled, false);
     assert.equal(harness.tokenRequests[0], true, 'the new-account token refresh happens before any Supabase call');
 
@@ -1262,7 +1262,7 @@ async function check(name, fn) {
       before: (h) => {
         h.store.delete(`users/${UID}`);
         h.onFetch('POST', '/rest/v1/rpc/record_login', FAILURES['42501']);
-        h.onFetch('POST', '/rest/v1/rpc/update_my_profile', (call) => (call.body.photoUrl ? FAILURES.network : { __status: 400, body: { code: '22023', message: 'feedbackEnabled must be boolean' } }));
+        h.onFetch('POST', '/rest/v1/rpc/update_my_profile', (call) => (call.body.p_fields.photoUrl ? FAILURES.network : { __status: 400, body: { code: '22023', message: 'feedbackEnabled must be boolean' } }));
       }
     });
     assert.equal(result.outcome.error, null, 'sign-in completes');

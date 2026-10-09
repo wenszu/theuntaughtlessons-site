@@ -20,6 +20,7 @@ const os = require('os');
 const path = require('path');
 const { pathToFileURL } = require('url');
 const { setTimeout: realSleep } = require('timers/promises');
+const rpcContract = require('./rpc-contract');
 
 const REPO_ROOT = path.resolve(__dirname, '..', '..');
 const SUPABASE_DATA_SOURCE = path.join(REPO_ROOT, 'assets', 'supabase-data.js');
@@ -405,6 +406,9 @@ function createHarness() {
       };
       this.fetchCalls.push(call);
       this.sequence.push(`fetch:${method}:${call.path.split('?')[0]}`);
+      // Like PostgREST: an unknown function, an unknown argument name or a missing required argument is a 404 (and fails the test run).
+      const refused = rpcContract.reject(url, init);
+      if (refused) return refused;
       const handler = this.fetchHandlers.find((item) => item.method === method && item.match(call.path));
       const answer = handler ? handler.respond(call) : (method === 'GET' ? [] : {});
       // { __hang: true } never answers; the request ends only when the caller's AbortController fires.

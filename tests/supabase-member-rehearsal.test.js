@@ -10,6 +10,7 @@
 
 const assert = require('assert');
 const rehearsal = require('../scripts/supabase-member-rehearsal');
+const rpcContract = require('./helpers/rpc-contract');
 
 const URL_BASE = 'https://czljyikfavtjgqcibdda.supabase.co';
 const SERVICE_KEY = 'SERVICE-KEY-SECRET-VALUE';
@@ -115,6 +116,7 @@ function makeBackend(options = {}) {
     const [pathOnly, query = ''] = pathAndQuery.split('?');
     const call = { method, path: pathOnly, query, headers: init.headers || {}, body: init.body ? JSON.parse(init.body) : undefined };
     state.calls.push(call);
+    const rpcRefused = rpcContract.reject(url, init); if (rpcRefused) return rpcRefused;
     const json = (status, body) => ({ ok: status >= 200 && status < 300, status, text: async () => JSON.stringify(body === undefined ? null : body), json: async () => body });
     const isService = call.headers.Authorization === `Bearer ${SERVICE_KEY}`;
     if (pathOnly === '/rest/v1/people' && method === 'GET') return json(200, state.people.filter((row) => matches(row, parseFilters(query))));

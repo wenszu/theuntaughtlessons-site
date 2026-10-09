@@ -8,6 +8,7 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const crypto = require('crypto');
+const rpcContract = require('./helpers/rpc-contract');
 const { pathToFileURL } = require('url');
 
 const REPO_ROOT = path.resolve(__dirname, '..');
@@ -55,6 +56,7 @@ function fakeClientFactory(state = {}) {
     },
     rpc: async (name, args) => {
       record('rpc', { name, args });
+      const rpcRefused = rpcContract.rejectCall(name, args); if (rpcRefused) return rpcRefused;
       if (state.rpcHang) return new Promise(() => {});
       if (state.rpcError) return { data: null, error: state.rpcError };
       return { data: state.link || { linked: true, person_id: 'p1', reason: 'linked' }, error: null };

@@ -20,6 +20,7 @@ const os = require('os');
 const path = require('path');
 const { pathToFileURL } = require('url');
 const { createHarness } = require('./helpers/firebase-harness');
+const rpcContract = require('./helpers/rpc-contract');
 
 const REPO_ROOT = path.resolve(__dirname, '..');
 const FIREBASE_SOURCE = fs.readFileSync(path.join(REPO_ROOT, 'assets', 'firebase.js'), 'utf8');
@@ -407,6 +408,7 @@ const settle = async (promise) => {
     const queue = Array.isArray(answers) ? answers.slice() : null;
     const fetchImpl = async (url, init) => {
       calls.push({ url, init });
+      const rpcRefused = rpcContract.reject(url, init); if (rpcRefused) return rpcRefused;
       const next = queue ? queue.shift() : answers;
       if (next && next.__throw) throw next.__throw;
       if (next && next.__hang) return new Promise((resolve, reject) => { init.signal.addEventListener('abort', () => reject(Object.assign(new Error('aborted'), { name: 'AbortError' }))); });

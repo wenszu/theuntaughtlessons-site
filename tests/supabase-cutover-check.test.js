@@ -13,6 +13,7 @@
 // Run: node tests/supabase-cutover-check.test.js
 
 const assert = require('assert');
+const rpcContract = require('./helpers/rpc-contract');
 const fs = require('fs');
 const path = require('path');
 
@@ -64,6 +65,7 @@ function fakeProject(initial = {}) {
     if (u.pathname.startsWith('/rest/v1/rpc/')) {
       const name = u.pathname.split('/').pop();
       assert.equal(method, 'POST');
+      const rpcRefused = rpcContract.reject(url, init); if (rpcRefused) return rpcRefused;
       if (name === 'get_public_credential') return reply(state.publicCredentialStatus || 200, state.publicCredentialRows || []);
       return reply(state.probeStatus[name] || 401, { code: '42501', message: `permission denied for function ${name}` });
     }

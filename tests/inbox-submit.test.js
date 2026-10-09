@@ -11,6 +11,7 @@ const root = path.join(__dirname, '..');
 const PAGE_PATH = path.join(root, 'apps/find-your-level/index.html');
 const WIDGET_PATH = path.join(root, 'assets/feedback-widget.js');
 const unversioned = require('./helpers/unversioned');
+const rpcContract = require('./helpers/rpc-contract');
 const pageHtml = unversioned(fs.readFileSync(PAGE_PATH, 'utf8'));
 const widgetSource = unversioned(fs.readFileSync(WIDGET_PATH, 'utf8'));
 const firebaseSource = fs.readFileSync(path.join(root, 'assets/firebase.js'), 'utf8');
@@ -64,6 +65,7 @@ function makeFetch(responder) {
   const calls = [];
   const fn = async (url, opts) => {
     calls.push({ url, opts: Object.assign({}, opts, { headers: JSON.parse(JSON.stringify(opts.headers || {})) }), body: opts && opts.body ? JSON.parse(opts.body) : null });
+    const rpcRefused = rpcContract.reject(url, opts); if (rpcRefused) return rpcRefused;
     return responder(url, opts, calls.length);
   };
   fn.calls = calls;

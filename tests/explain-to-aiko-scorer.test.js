@@ -19,6 +19,7 @@ Module._load = function (request, parent, isMain) {
 };
 const functions = require(indexPath);
 const { storeAttempt } = require(storePath);
+const rpcContract = require('./helpers/rpc-contract');
 const handler = functions.scoreExplainToAiko;
 assert.strictEqual(typeof handler, 'function');
 
@@ -75,6 +76,7 @@ async function run({ env, auth, body, gemini = geminiPayload(), supabase } = {})
   console.warn = (...a) => logs.push(a.map(String).join(' '));
   global.fetch = async (url, init = {}) => {
     calls.push({ url: String(url), init });
+    const rpcRefused = rpcContract.reject(url, init); if (rpcRefused) return rpcRefused;
     if (String(url).startsWith('https://generativelanguage.googleapis.com/')) {
       if (gemini === 'fail') return { ok: false, status: 503, json: async () => ({}) };
       return { ok: true, status: 200, json: async () => gemini };
@@ -308,7 +310,7 @@ const goodBody = (extra = {}) => Object.assign({ mode: '120', transcript: TRANSC
   // 7. The store module on its own: total clamps to 30, off does nothing, never throws.
   {
     const sent = [];
-    const fetchImpl = async (url, init) => { sent.push(JSON.parse(init.body)); return { ok: true, status: 204 }; };
+    const fetchImpl = async (url, init) => { const rpcRefused = rpcContract.reject(url, init); if (rpcRefused) return rpcRefused; sent.push(JSON.parse(init.body)); return { ok: true, status: 204 }; };
     const env = { AIKO_STORE_ATTEMPT: 'on' };
     const big = await storeAttempt({ env, fetchImpl, token: TOKEN, attemptId: ATTEMPT_ID, mode: '120', total: 99, durationSeconds: -4 });
     assert.deepStrictEqual(big, { recorded: true, attemptId: ATTEMPT_ID });

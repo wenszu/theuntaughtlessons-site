@@ -14,6 +14,7 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const { pathToFileURL } = require('url');
+const rpcContract = require('./helpers/rpc-contract');
 
 const SOURCE = path.resolve(__dirname, '..', 'assets', 'supabase-admin-writes.js');
 const copy = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'utl-admin-writes-')), 'supabase-admin-writes.mjs');
@@ -29,6 +30,7 @@ function fakeFetch(answers) {
   const impl = async (url, init = {}) => {
     const call = { url: String(url), path: String(url).replace(URL_BASE, ''), method: init.method, headers: init.headers, body: init.body ? JSON.parse(init.body) : undefined };
     calls.push(call);
+    const rpcRefused = rpcContract.reject(url, init); if (rpcRefused) return rpcRefused;
     const answer = typeof answers === 'function' ? answers(call, calls.length) : answers;
     if (answer && answer.__throw) throw answer.__throw;
     if (answer && answer.__status) return { ok: false, status: answer.__status, text: async () => JSON.stringify(answer.body || {}) };

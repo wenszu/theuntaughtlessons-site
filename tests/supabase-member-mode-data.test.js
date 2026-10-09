@@ -7,6 +7,7 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const { pathToFileURL } = require('url');
+const rpcContract = require('./helpers/rpc-contract');
 
 const SOURCE = path.resolve(__dirname, '..', 'assets', 'supabase-data.js');
 const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'utl-member-mode-data-test-'));
@@ -23,6 +24,7 @@ function fakeFetch(handlers) {
     const method = init.method || 'GET';
     const call = { method, path: String(url).replace(BASE, ''), headers: init.headers || {}, body: init.body ? JSON.parse(init.body) : undefined };
     calls.push(call);
+    const rpcRefused = rpcContract.reject(url, init); if (rpcRefused) return rpcRefused;
     const handler = handlers.find((item) => item.method === method && call.path.startsWith(item.prefix));
     const answer = handler ? (typeof handler.answer === 'function' ? handler.answer(call) : handler.answer) : (method === 'GET' ? [] : {});
     if (answer && answer.__status) return { ok: false, status: answer.__status, text: async () => JSON.stringify(answer.body || {}) };

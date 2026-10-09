@@ -1538,7 +1538,7 @@ function createSupabaseData(context = {}) {
       throw invalidArgument("feedbackEnabled must be true, false or null.");
     }
     if (!Object.keys(picked).length) throw invalidArgument("updateMyProfile needs at least one profile field.");
-    await rpc("update_my_profile", picked);
+    await rpc("update_my_profile", { p_fields: picked });
     return { saved: true, fields: Object.keys(picked) };
   }
 
@@ -1552,7 +1552,7 @@ function createSupabaseData(context = {}) {
     if (name.length > 200) throw invalidArgument("Please shorten your name to 200 characters or fewer.");
     if (goals.length > 2000) throw invalidArgument("Please shorten your goals to 2,000 characters or fewer.");
     if (avatarIconId && !AVATAR_ICON_IDS.includes(avatarIconId)) throw invalidArgument("Please choose one of the available avatars.");
-    await rpc("update_my_profile", pickKeys({ displayName: name, goals, avatarIconId }, PROFILE_KEYS));
+    await rpc("update_my_profile", { p_fields: pickKeys({ displayName: name, goals, avatarIconId }, PROFILE_KEYS) });
     return { name, goals, avatarIconId };
   }
 

@@ -16,6 +16,7 @@ const fs = require('fs');
 const path = require('path');
 const { pathToFileURL } = require('url');
 const { createHarness } = require('./helpers/firebase-harness');
+const rpcContract = require('./helpers/rpc-contract');
 
 const REPO_ROOT = path.resolve(__dirname, '..');
 const FIREBASE_SOURCE = fs.readFileSync(path.join(REPO_ROOT, 'assets', 'firebase.js'), 'utf8');
@@ -293,6 +294,7 @@ async function run(harness, mod, name, options = {}) {
     const calls = [];
     const fetchImpl = async (url, init) => {
       calls.push({ url, init, body: JSON.parse(init.body) });
+      const rpcRefused = rpcContract.reject(url, init); if (rpcRefused) return rpcRefused;
       const next = answers.shift();
       return { ok: next.status === undefined || next.status < 400, status: next.status || 200, text: async () => JSON.stringify(next.body) };
     };

@@ -17,6 +17,7 @@ const clientUrl = pathToFileURL(path.join(root, 'assets/result-email-client.js')
 const readiness = require('../functions-admin/readiness-email.js');
 const resultsFirebase = require('../functions-admin/results-email.js');
 const mailSender = require('../functions-admin/mail-sender.js');
+const rpcContract = require('./helpers/rpc-contract');
 
 const SUPABASE = 'https://example-project.supabase.co';
 const SERVICE_KEY = 'service-role-key-do-not-leak-0123456789';
@@ -51,6 +52,7 @@ function makeWorld(options) {
     const headers = init && init.headers ? init.headers : {};
     const body = init && init.body ? JSON.parse(init.body) : null;
     calls.push({ url, headers, body });
+    const rpcRefused = rpcContract.reject(url, init); if (rpcRefused) return rpcRefused;
     if (url === SUPABASE + '/functions/v1/send-email' || (o.sendEmailUrl && url === o.sendEmailUrl)) {
       sent.push({ headers, body });
       if (o.sendFail && o.sendFail(body, sent.length)) return reply(502, { ok: false, error: 'provider' });

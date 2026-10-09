@@ -13,6 +13,7 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const { pathToFileURL } = require('url');
+const rpcContract = require('./helpers/rpc-contract');
 
 const SOURCE = path.resolve(__dirname, '..', 'assets', 'supabase-data.js');
 
@@ -42,6 +43,7 @@ function fakeFetch() {
       body: init.body ? JSON.parse(init.body) : undefined
     };
     calls.push(call);
+    const rpcRefused = rpcContract.reject(url, init); if (rpcRefused) return rpcRefused;
     const handler = handlers.find((h) => h.method === method && h.match(call.path, call));
     const answer = handler ? handler.respond(call) : (method === 'GET' ? [] : {});
     if (answer && answer.__throw) throw answer.__throw;

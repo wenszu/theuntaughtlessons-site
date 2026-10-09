@@ -8,6 +8,7 @@ const path = require('path');
 const root = path.join(__dirname, '..');
 const coreUrl = 'file://' + path.join(root, 'supabase/functions/admin-mail/core.mjs');
 const oracle = require(path.join(root, 'functions-admin/mail-sender.js'));
+const rpcContract = require('./helpers/rpc-contract');
 const PROJECT = 'https://example-project.supabase.co';
 const TOKEN = 'caller.token.' + 'x'.repeat(40);
 const MAIL_SECRET = 'm'.repeat(48);
@@ -39,6 +40,7 @@ function makeWorld(options) {
   const fetchImpl = async (url, init) => {
     const call = { url, method: init.method, headers: init.headers, body: init.body ? JSON.parse(init.body) : null, redirect: init.redirect };
     calls.push(call);
+    const rpcRefused = rpcContract.reject(url, init); if (rpcRefused) return rpcRefused;
     const pick = (setting, key) => {
       if (s.throwOn === key) throw new Error('network');
       return { ok: setting.status >= 200 && setting.status < 300, status: setting.status, json: async () => setting.value };

@@ -5,6 +5,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
+const rpcContract = require('./helpers/rpc-contract');
 
 const root = path.join(__dirname, '..');
 const scriptPath = path.join(root, 'admin/inbox/inbox.js');
@@ -220,6 +221,7 @@ function makeServer(overrides) {
     const name = url.split('/rest/v1/rpc/')[1];
     const args = JSON.parse(init.body);
     calls.push({ url, name, args, headers: init.headers, method: init.method });
+    const rpcRefused = rpcContract.reject(url, init); if (rpcRefused) return rpcRefused;
     const result = handlers[name](args, calls.length);
     return {
       ok: result.status >= 200 && result.status < 300,

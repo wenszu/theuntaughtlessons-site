@@ -355,7 +355,7 @@ const rpcNames = (run) => run.calls.filter((call) => call.method === 'POST').map
     assertSupabaseOnly(run, 'saveUserProfile');
     assert.deepEqual(rpcNames(run), ['record_login', 'update_my_profile']);
     assert.deepEqual(rpcBody(run, 'record_login'), { p_provider: 'google.com' });
-    assert.deepEqual(rpcBody(run, 'update_my_profile'), { photoUrl: 'https://photos.example.test/member-one.jpg' });
+    assert.deepEqual(rpcBody(run, 'update_my_profile'), { p_fields: { photoUrl: 'https://photos.example.test/member-one.jpg' } });
     assert.equal(run.storage.utl_data_source, undefined, 'no data source gate decision is written');
   });
 
