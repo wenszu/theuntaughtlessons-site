@@ -1,5 +1,8 @@
 # Documentation and context audit report
 
+> **Platform note (2026-10-09):** the platform has moved from Firebase to Supabase. Where this file mentions Firebase, Firestore, Google Apps Script or Node 20 functions, read `docs/SUPABASE_PLATFORM.md` first for the current state and rules; that guide wins on any conflict.
+
+
 Audit date: 2026-10-04  
 Status: Initial findings recorded before documentation edits; final disposition and counts will be added after cleanup.  
 Authority used: repository code and configuration, git history from the last 60 days, and a read-only Firebase deployed-functions inventory. Markdown files were treated as claims to verify.

@@ -1,5 +1,8 @@
 # Customer and Program Platform Implementation Plan
 
+> **Platform note (2026-10-09):** the platform has moved from Firebase to Supabase. Where this file mentions Firebase, Firestore, Google Apps Script or Node 20 functions, read `docs/SUPABASE_PLATFORM.md` first for the current state and rules; that guide wins on any conflict.
+
+
 Last updated: 2026-10-03  
 Status: Phases 0–4 passed; Phases 5–6 built locally and still gated  
 Scope: Cross-program customer data, Executive Signature (ES), TSA compatibility, admin console, and member workspace switching

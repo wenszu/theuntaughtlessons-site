@@ -1,5 +1,8 @@
 # Member account foundation audit
 
+> **Platform note (2026-10-09):** the platform has moved from Firebase to Supabase. Where this file mentions Firebase, Firestore, Google Apps Script or Node 20 functions, read `docs/SUPABASE_PLATFORM.md` first for the current state and rules; that guide wins on any conflict.
+
+
 ## Scope and source of truth
 
 This audit reflects fields defined by the repository's current readers and writers. Firestore is schemaless, so a historical field that is no longer referenced in code cannot be discovered without a separate live-data export. No live data was changed or migrated for this pass.

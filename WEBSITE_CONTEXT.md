@@ -1,11 +1,14 @@
 # The Untaught Lessons Website Context
 
-Last updated: 2026-10-08
+Last updated: 2026-10-09 (platform moved to Supabase)
 
 Single source of truth for agents working on this repo. Read before making changes, update after structural changes. Detailed historical entries and full page/app maps are in `archive/WEBSITE_CONTEXT_ARCHIVE.md`.
 
+**The platform is moving from Firebase to Supabase. Read `docs/SUPABASE_PLATFORM.md` first for anything about data, sign in, email, payments, server functions or the admin console.** It says where data lives, how the switchboard decides Firebase or Supabase, the rules for database changes and for browser code, and the current cutover status. Wherever this file still describes Firebase Authentication, Firestore, Google Apps Script email or Node 20 functions, treat it as the legacy safety net that stays in place until the quiet period after the cutover is over; `docs/SUPABASE_PLATFORM.md` wins on any conflict.
+
 ## How to use this file
 
+0. `docs/SUPABASE_PLATFORM.md` — the platform guide (read first)
 1. `Working Rules` — how to behave in the repo
 2. `Git and Deployment Rules` — how to commit and push
 3. `Brand System` — colors, fonts, logos
@@ -63,10 +66,10 @@ Local server: `python3 -m http.server 8061 --bind 127.0.0.1`
 
 - **Hosting:** The production browser artifact is static HTML/CSS/JavaScript deployed by `.github/workflows/deploy-pages.yml` to GitHub Pages. Firebase Hosting is configured for local emulation/manual fallback, not as the production origin.
 - **Edge:** `theuntaughtlessons.com` is the `CNAME` and is proxied by Cloudflare. GitHub Pages does not apply the repository's `_headers` file, so it is not an enforced production-header policy.
-- **Authentication:** Firebase Authentication supports email links, Google, Microsoft, and Facebook. A hidden emergency-password path exists only for eligible administrator accounts; localhost/emulator test accounts are separate from production access.
-- **Database:** Cloud Firestore stores TSA membership/progress, organizations, rewards/credentials, and the additive customer/program/ES model. See `firestore.rules`, `firestore.indexes.json`, and the [schema contract](docs/CUSTOMER_PROGRAM_PLATFORM_SCHEMA_V1.md).
-- **Functions:** `firebase.json` declares `aiko` and `admin-actions`, all on Node 20 (the `group-sync` codebase was retired and its `functions/` folder deleted on 2026-10-08). Deployment is per exported function/codebase; source presence does not mean deployment. See the deployment inventory under Current implementation notes.
-- **Email and sheet logging:** Public forms and administrative email actions use the Google Apps Script relay; `scripts/apps-script-email-actions.gs` is a repository reference, not an automatically deployed script.
+- **Authentication:** Two systems, switched by the switchboard flag `auth` (see `docs/SUPABASE_PLATFORM.md`). Supabase Auth (project utl-core: email link and Google only, sign up off, accounts created by script and linked to `people.supabase_uid`, Resend as the mail sender) is the live sign in since 2026-10-09. Firebase Authentication (email links, Google, Microsoft, Facebook; a hidden emergency-password path for eligible administrators) is the legacy safety net and is still reachable by setting the switchboard flag `auth` back to `firebase`. The emergency password feature is retired. Localhost/emulator test accounts are separate from production access.
+- **Database:** The platform database is Supabase Postgres (project utl-core: people, enrollments, activity progress, rewards, Executive Signature, certificates, organizations, settings, audit). Cloud Firestore holds the original copy, still receives writes until the flip, and is the safety net afterwards; the server copies Firestore changes into Supabase (the mirror). See `supabase/migrations/`, `docs/SUPABASE_PLATFORM.md`, and for history `firestore.rules`, `firestore.indexes.json` and the [schema contract](docs/CUSTOMER_PROGRAM_PLATFORM_SCHEMA_V1.md). The DOC simulation uses its own separate Supabase project.
+- **Functions:** Firebase: `firebase.json` declares `aiko` and `admin-actions` on Node 22 (the `group-sync` codebase was retired on 2026-10-08). Deployment is per exported function/codebase; source presence does not mean deployment. Supabase Edge Functions (deployed to utl-core): `send-email`, `weekly-org-reports`, `result-emails`, `readiness-submit`, `readiness-access`, `admin-mail`; written, not deployed: `ai-score`, `stripe-checkout`, `stripe-webhook`, `auth-admin`. Every Firebase function and what replaces it: `docs/SUPABASE_CALLABLE_GAP.md`.
+- **Email:** All mail goes through Resend from `hello@theuntaughtlessons.com` (SPF, DKIM, DMARC pass): Firebase `admin-actions` and the Supabase Edge Function `send-email` for admin and result emails, Supabase Auth custom SMTP for sign in emails. The Google Apps Script relay is retired (`scripts/apps-script-email-actions.gs` is a repository reference only).
 - **AI scoring:** The `aiko` Functions codebase provides Gemini-backed HTTP scoring for selected practice experiences. Apps keep non-blocking/fallback behavior where documented.
 - **Media:** Current lesson/exercise media is primarily Vimeo; some Google Drive/Docs embeds remain and are cross-origin.
 - **CI:** GitHub Actions runs static tests, syntax/dependency/security checks, cache-version validation, and Pages deployment. See `.github/workflows/`.
@@ -74,7 +77,7 @@ Local server: `python3 -m http.server 8061 --bind 127.0.0.1`
 ## Planned platform work
 
 - **Planning source:** “20261004 - Sales practice system design v1” is the product/architecture source for the next sales-practice system. It is external to this repository; add its stable link when available.
-- **Open architecture decision:** Decide whether new practice-system data will live in Firestore or Postgres before implementation. Do not infer the database from the existing TSA/customer platform.
+- **Architecture decision (made 2026-10-09):** New data lives in Supabase Postgres. The DOC simulation keeps its own Supabase project and borrows identity from utl-core (adapter built, not switched on). Do not build new features on Firestore.
 
 ## Brand system
 
@@ -279,6 +282,13 @@ Decisions are made in Claude (claude.ai). JSON updates are handled in Codex. Doc
 ## Change Log
 
 Entries older than ~3 days live in `archive/WEBSITE_CONTEXT_ARCHIVE.md` (most recent archived block: 2026-10-03 through 2026-10-04).
+
+### 2026-10-09 — The platform moved to Supabase (read `docs/SUPABASE_PLATFORM.md`)
+
+- The website now runs on Supabase (project utl-core): member data layer, server reads, admin saves, sign in (Supabase Auth: email link and Google, Resend as sender, sign up off, 56 accounts linked), Executive Signature saves and mail. One public setting (`switchboard` in `public.app_settings`) decides Firebase or Supabase per area; one SQL statement undoes any flip. Firebase stays as the safety net for about two weeks. AI scoring and payments still use Firebase until the Gemini and Stripe keys exist.
+- New rules for every thread: database changes only through reviewed migrations in `supabase/migrations/` (explicit revokes, `search_path` empty, no backslashes, additive); browser code keeps Firebase behaviour unchanged when flags are off, versions every module import (`node scripts/sync-cache-versions.js`), and in Supabase-only mode never calls Firebase; browser database calls are checked against `supabase/rpc-signatures.json`. Full list and the cutover status table are in `docs/SUPABASE_PLATFORM.md`.
+- Login page: Microsoft and Facebook buttons are hidden on Supabase sign in (nobody used them). Email: Resend from `hello@theuntaughtlessons.com`, SPF, DKIM and DMARC pass, Apps Script relay retired. Firebase functions run on Node 22.
+- DOC simulation: its own Supabase project (`geavcshbhryikljhgsmy`); a Supabase sign in adapter is built on a branch in the DOC clone and is not switched on.
 
 ### 2026-10-08 (late night) — Copy and open flow reviewed on `i-have-bad-news`, then applied to `lets-switch-hats`
 

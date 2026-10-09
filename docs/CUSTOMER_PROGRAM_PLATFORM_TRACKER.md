@@ -1,5 +1,8 @@
 # Customer and Program Platform Execution Tracker
 
+> **Platform note (2026-10-09):** the platform has moved from Firebase to Supabase. Where this file mentions Firebase, Firestore, Google Apps Script or Node 20 functions, read `docs/SUPABASE_PLATFORM.md` first for the current state and rules; that guide wins on any conflict.
+
+
 Last updated: 2026-10-04  
 Plan: `docs/CUSTOMER_PROGRAM_PLATFORM_IMPLEMENTATION_PLAN.md`  
 Phases 7–11 execution plan and coordination log (which work stream/agent owns which files right now): `docs/CUSTOMER_PROGRAM_PLATFORM_PHASES_7_TO_11_PLAN.md`  

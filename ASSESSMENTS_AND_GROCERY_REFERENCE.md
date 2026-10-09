@@ -1,4 +1,7 @@
 # Assessments and Grocery List Reference
+
+> **Platform note (2026-10-09):** the platform has moved from Firebase to Supabase. Where this file mentions Firebase, Firestore, Google Apps Script or Node 20 functions, read `docs/SUPABASE_PLATFORM.md` first for the current state and rules; that guide wins on any conflict.
+
 Last updated: 2026-06-02
 
 > **PARTIALLY ARCHIVED (2026-08-11):** Every "Member Diagnostic / Checkpoint" section below (Sort & Bucket, Spot the Problem, Speak Concisely, Act Confidently) documents the retired v1 assessment — fully removed, it was never finished and saw no real production use. The live assessment is now `apps/tsa-diagnostic/index.html` (a single unified Think/Speak/Act flow, member-facing names unchanged), which uses different content and scoring entirely. Kept here as historical reference only. The **"Public Find your level"** sections (using `data/sort-bucket.json` at the repo root) are unrelated and still current/live — not affected by this archival.

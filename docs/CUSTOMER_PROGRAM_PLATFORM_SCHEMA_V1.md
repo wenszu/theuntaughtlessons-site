@@ -1,5 +1,8 @@
 # Customer and Program Platform Schema v1
 
+> **Platform note (2026-10-09):** the platform has moved from Firebase to Supabase. Where this file mentions Firebase, Firestore, Google Apps Script or Node 20 functions, read `docs/SUPABASE_PLATFORM.md` first for the current state and rules; that guide wins on any conflict.
+
+
 Last updated: 2026-10-04  
 Phase: 3 — immutable ES persistence  
 Deployment status: Phase 4 migration records and declared composite indexes exist in production; current rules and customer/ES callables remain undeployed  

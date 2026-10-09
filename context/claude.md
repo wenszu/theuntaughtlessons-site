@@ -1,3 +1,5 @@
+Always read `WEBSITE_CONTEXT.md` first, then `docs/SUPABASE_PLATFORM.md` (the platform has moved from Firebase to Supabase: where data lives, the switchboard, rules for database and browser changes, current cutover status).
+
 Always read `WEBSITE_CONTEXT.md` first. For voice and design, follow the "[Oct 2026] Wen-Szu voice and design style guide v8" Google Doc (ID `12N1FpcYZDJLbHrjPv30SzNWvooMe2F8bC63lDQd4Wbg`, pointer file at `[AI] Markdown files/[Oct 2026] Wen-Szu voice and design style guide v8.gdoc`), not `context/brand.md` or `context/voice-editor.md`, which now just redirect there.
 
 For customer/program platform, TSA, Executive Signature, admin-console, identity, entitlement, assessment persistence, or workspace-switcher work, also read:
