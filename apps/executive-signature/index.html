@@ -903,7 +903,7 @@ function logCompletedResult(attemptId,tier,email,name,band,profile,formVersion,s
       name:name||'',email,tier,band,profile,formVersion:formVersion||'',submissionId:attemptId,
       answers:answersForItems(submission.answers,submission.itemOrder),itemOrder:submission.itemOrder||[],startedAt:submission.startedAt||new Date().toISOString(),
       durationSeconds:Number.isInteger(submission.durationSeconds)?submission.durationSeconds:null,
-      consent:{assessmentProcessing:participant.assessmentConsent===true,marketing:participant.marketingConsent===true,noticeVersion:'readiness-privacy-preview@1.0'},
+      consent:{assessmentProcessing:participant.assessmentConsent===true,marketing:participant.marketingConsent===true,noticeVersion:'privacy-notice@2026-10-09'},
       source:{channel:'web',campaignId:null,referrerCode:null}
     });
     recordedAttempts.set(attemptId,recording.then(result=>result&&result.attemptId?String(result.attemptId):'',()=>''));

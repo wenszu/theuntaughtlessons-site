@@ -22,4 +22,10 @@ assert.match(print, /Page " counter\(page\) " of " counter\(pages\)/, 'the foote
 assert.match(html, /window\.print\(\)/, 'the page has a print or save as PDF button');
 assert.doesNotMatch(html, /[–—]/, 'no en or em dashes in the notice');
 
+// The version a person agrees to is the version on the page: change both together.
+const shown = (html.match(/Version (\d{4}-\d{2}-\d{2})\./) || [])[1];
+const assessment = fs.readFileSync(path.join(__dirname, '..', 'apps', 'executive-signature', 'index.html'), 'utf8');
+assert.ok(shown, 'the page shows its version date');
+assert.ok(assessment.includes(`noticeVersion:'privacy-notice@${shown}'`), 'the Executive Signature consent records the version shown on the privacy page');
+
 console.log('Privacy page print checks passed');
