@@ -53,7 +53,7 @@
         ['Write 200 words of anything each day', 'Put words down without judging them'],
         ['Learn one new thing and write it down', 'Curiosity as a daily practice'],
         ['Practice an instrument for 20 minutes', "Show up even when it is imperfect"],
-        ['Study one concept from a book each day', 'Read slowly and keep one idea']
+        ['Learn one idea from a book each day', 'Read slowly and keep one idea']
       ]
     }
   };
@@ -661,22 +661,24 @@
   // The worker script is registered with the same ?v= value as every other asset (scripts/sync-cache-versions.js
   // rewrites it). A new deploy means a new worker URL, which waits until the person chooses to reload.
   let waitingWorker = null;
+  let updateRequested = false;
   let reloadingForUpdate = false;
 
   function showUpdatePrompt(worker) {
     waitingWorker = worker;
     els.updateBanner.classList.remove('hidden');
+    document.body.classList.add('has-update');
   }
 
   function applyUpdate() {
-    if (waitingWorker) waitingWorker.postMessage({ type: 'SKIP_WAITING' });
+    if (!waitingWorker) return;
+    updateRequested = true;
+    waitingWorker.postMessage({ type: 'SKIP_WAITING' });
   }
 
   function registerServiceWorker() {
     if (!('serviceWorker' in navigator)) return;
     window.addEventListener('load', () => {
-      // On the very first visit the new worker takes control without a reload. Only an update needs one.
-      const hadController = Boolean(navigator.serviceWorker.controller);
       navigator.serviceWorker.register('./sw.js?v=20260925-mobile-v1', { scope: './' }).then((registration) => {
         if (registration.waiting && navigator.serviceWorker.controller) showUpdatePrompt(registration.waiting);
         registration.addEventListener('updatefound', () => {
@@ -688,7 +690,8 @@
         });
       }).catch(() => {});
       navigator.serviceWorker.addEventListener('controllerchange', () => {
-        if (!hadController || reloadingForUpdate) return;
+        // The first install takes control without a reload. Only a reload the person asked for happens.
+        if (!updateRequested || reloadingForUpdate) return;
         reloadingForUpdate = true;
         window.location.reload();
       });

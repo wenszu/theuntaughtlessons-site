@@ -83,7 +83,8 @@
     .tabs button:hover { color: var(--white); }
 
     /* Update prompt */
-    .update-banner { background: var(--cream); border-bottom: 2px solid var(--navy); }
+    .update-banner { position: fixed; left: 0; right: 0; bottom: 0; z-index: 90; background: var(--cream); border-top: 2px solid var(--navy); }
+    body.has-update { padding-bottom: 120px; }
     .update-banner-inner { width: min(1060px, calc(100% - 32px)); margin: 0 auto; padding: 12px 0; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: var(--gap-control); color: var(--navy); font-weight: 700; }
 
     /* Page */
@@ -415,7 +416,7 @@
             <h2 id="settingsTitle">Settings</h2>
           </div>
           <div class="panel-body">
-            <p class="settings-note">Your challenge and check-ins are saved only in this browser on this device. There is no account and nothing is sent to a server. They do not sync across devices. Clearing your browser data removes them, so download a backup now and then.</p>
+            <p class="settings-note">Your challenge and check-ins are saved only in this browser on this device. There is no account, and they are never sent to a server. They do not sync across devices. Clearing your browser data removes them, so download a backup now and then.</p>
 
             <div class="field">
               <label for="settingsGoal">Challenge name</label>
