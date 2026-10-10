@@ -21,6 +21,10 @@
       --steel: #4D7094;
       --white: #FFFFFF;
       --parchment: #E8DFD1;
+      --gold-dark: #C9860F;
+      --scrim: rgba(0, 51, 102, .6);
+      --on-navy: rgba(255, 255, 255, .85);
+      --on-navy-line: rgba(255, 255, 255, .35);
       --radius: 8px;
       --gap-control: 16px;
       --gap-group: 24px;
@@ -34,11 +38,11 @@
       min-height: 100dvh;
       background: var(--cream);
       color: var(--charcoal);
-      font-family: 'Lato', Arial, sans-serif;
+      font-family: 'Lato', sans-serif;
       font-size: 16px;
       line-height: 1.5;
     }
-    h1, h2, h3 { font-family: 'Playfair Display', Georgia, serif; color: var(--navy); line-height: 1.2; margin: 0; }
+    h1, h2, h3 { font-family: 'Playfair Display', serif; color: var(--navy); line-height: 1.2; margin: 0; }
     p { margin: 0; }
     button, input, select, textarea { font: inherit; color: inherit; }
     .hidden { display: none !important; }
@@ -62,7 +66,7 @@
     }
     .brand { display: flex; align-items: center; gap: var(--gap-control); color: var(--white); text-decoration: none; }
     .brand img { width: 132px; height: 44px; object-fit: contain; display: block; }
-    .brand-name { font-family: 'Playfair Display', Georgia, serif; font-weight: 700; font-size: 20px; padding-left: var(--gap-control); border-left: 1px solid rgba(255, 255, 255, .35); }
+    .brand-name { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 20px; padding-left: var(--gap-control); border-left: 1px solid var(--on-navy-line); }
     .tabs { display: flex; gap: 8px; }
     .tabs button {
       min-height: 44px;
@@ -71,19 +75,22 @@
       border-bottom: 3px solid transparent;
       border-radius: 0;
       background: transparent;
-      color: rgba(255, 255, 255, .85);
+      color: var(--on-navy);
       font-weight: 700;
       cursor: pointer;
     }
     .tabs button.active { color: var(--white); border-bottom-color: var(--white); }
     .tabs button:hover { color: var(--white); }
 
+    /* Update prompt */
+    .update-banner { background: var(--cream); border-bottom: 2px solid var(--navy); }
+    .update-banner-inner { width: min(1060px, calc(100% - 32px)); margin: 0 auto; padding: 12px 0; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: var(--gap-control); color: var(--navy); font-weight: 700; }
+
     /* Page */
     .app-shell { width: min(1060px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 64px; }
     .topbar { margin-bottom: var(--gap-group); }
     .topbar h1 { font-size: 36px; }
     .topbar p { margin-top: 8px; font-size: 18px; }
-    #setupScreen { display: none !important; }
 
     .panel { background: var(--white); border: 1px solid var(--parchment); border-radius: var(--radius); }
     .panel-head { padding: 16px 24px; border-bottom: 1px solid var(--parchment); }
@@ -97,7 +104,7 @@
     /* Challenge banner */
     .challenge-banner { background: var(--navy); color: var(--white); border-radius: var(--radius); padding: 24px; }
     .banner-row { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--gap-control); }
-    .banner-kicker { display: block; font-size: 14px; font-weight: 700; color: rgba(255, 255, 255, .85); }
+    .banner-kicker { display: block; font-size: 14px; font-weight: 700; color: var(--on-navy); }
     .challenge-banner h2 { color: var(--white); font-size: 26px; margin-top: 8px; }
     .banner-pill { font-size: 14px; font-weight: 700; color: var(--gold); white-space: nowrap; }
     .banner-link { margin-top: var(--gap-control); background: transparent; border: 0; padding: 0; min-height: 44px; color: var(--gold); font-weight: 700; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
@@ -105,7 +112,7 @@
     /* Today */
     .today-card h2 { font-size: 24px; }
     .date-label { margin-top: 8px; }
-    .prompt { font-family: 'Playfair Display', Georgia, serif; font-weight: 700; font-size: 20px; color: var(--navy); margin-top: var(--gap-group); }
+    .prompt { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 20px; color: var(--navy); margin-top: var(--gap-group); }
     .status-actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--gap-control); margin-top: var(--gap-control); }
     .status-btn {
       min-height: 88px;
@@ -133,7 +140,7 @@
     .note-panel { margin-top: var(--gap-group); }
     .microcopy { margin-bottom: var(--gap-control); }
     .calendar-summary > * + * { margin-top: 12px; }
-    .progress { height: 8px; background: var(--parchment); border-radius: 4px; overflow: hidden; }
+    .progress { height: 8px; background: var(--parchment); overflow: hidden; }
     .progress span { display: block; height: 100%; width: 0; background: var(--navy); }
 
     /* Forms and buttons */
@@ -148,7 +155,7 @@
       border-radius: var(--radius);
       font-size: 16px;
     }
-    select { appearance: none; -webkit-appearance: none; padding-right: 44px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23003366' stroke-width='2'/%3E%3C/svg%3E"); background-position: right 14px center; background-repeat: no-repeat; }
+    select { appearance: none; -webkit-appearance: none; padding-right: 44px; background-image: linear-gradient(45deg, transparent 50%, var(--navy) 50%), linear-gradient(135deg, var(--navy) 50%, transparent 50%); background-position: calc(100% - 22px) 50%, calc(100% - 16px) 50%; background-size: 6px 6px, 6px 6px; background-repeat: no-repeat; }
     textarea { resize: vertical; }
     .primary-action, .secondary-action, .use-template, .edit-status button {
       min-height: var(--tap);
@@ -158,7 +165,7 @@
       cursor: pointer;
     }
     .primary-action { background: var(--gold); border: 1px solid var(--gold); color: var(--navy); }
-    .primary-action:hover { background: #D9921A; border-color: #D9921A; }
+    .primary-action:hover { background: var(--gold-dark); border-color: var(--gold-dark); }
     .secondary-action, .use-template { background: var(--white); border: 1px solid var(--navy); color: var(--navy); }
     .secondary-action:hover, .use-template:hover { background: var(--cream); }
     .quiet-action { min-height: var(--tap); padding: 12px 8px; background: transparent; border: 0; color: var(--charcoal); font-weight: 700; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
@@ -183,7 +190,7 @@
       gap: 0;
       background: var(--white);
       border: 1px solid var(--steel);
-      border-radius: 6px;
+      border-radius: var(--radius);
       color: var(--navy);
       font-weight: 700;
       font-size: 16px;
@@ -231,6 +238,7 @@
     .template-card.selected { border: 3px solid var(--navy); padding: 14px; }
     .checkmark { color: var(--navy); font-weight: 900; font-size: 20px; }
 
+    .onboarding:focus { outline: none; }
     .onboarding { position: fixed; inset: 0; z-index: 60; overflow-y: auto; background: var(--cream); padding: max(24px, env(safe-area-inset-top)) 16px max(32px, env(safe-area-inset-bottom)); }
     .onboarding-inner { width: min(560px, 100%); margin: 0 auto; display: flex; flex-direction: column; gap: var(--gap-group); }
     .onboarding-top { display: grid; grid-template-columns: 48px 1fr 48px; align-items: center; }
@@ -240,7 +248,7 @@
     .onboarding-copy p { margin-top: var(--gap-control); font-size: 18px; }
     #onboardingWelcome, #onboardingCategories, #onboardingTemplates { display: flex; flex-direction: column; gap: var(--gap-group); }
 
-    .modal-backdrop { position: fixed; inset: 0; z-index: 80; display: grid; place-items: center; padding: 16px; background: rgba(0, 51, 102, .6); }
+    .modal-backdrop { position: fixed; inset: 0; z-index: 80; display: grid; place-items: center; padding: 16px; background: var(--scrim); }
     .modal-card { width: min(440px, 100%); background: var(--white); border-radius: var(--radius); padding: 24px; display: flex; flex-direction: column; gap: var(--gap-control); }
     .modal-actions { display: flex; gap: var(--gap-control); justify-content: flex-end; flex-wrap: wrap; }
 
@@ -283,44 +291,14 @@
     </div>
   </header>
 
+  <div id="updateBanner" class="update-banner hidden" role="status">
+    <div class="update-banner-inner">
+      <span>A new version is ready. Reload when you have finished what you are doing.</span>
+      <button id="updateReloadBtn" class="secondary-action" type="button">Reload</button>
+    </div>
+  </div>
+
   <main id="content" class="app-shell">
-    <section id="setupScreen" class="screen active" aria-labelledby="setupTitle">
-      <header id="setup-hero" class="topbar">
-        <h1 id="setupTitle">Start your challenge</h1>
-        <p>One goal. One day at a time.</p>
-      </header>
-
-      <form id="setupForm" class="panel setup-card">
-        <div class="panel-body">
-          <div class="field">
-            <span class="field-label">Challenge type</span>
-            <div class="segmented" role="group" aria-label="Challenge type">
-              <button id="typeMonthly" type="button" data-type="monthly">Monthly</button>
-              <button id="typeTwelve" type="button" data-type="12-in-12">12 in 12</button>
-            </div>
-          </div>
-
-          <div class="field">
-            <label for="setupGoal">Challenge name</label>
-            <input id="setupGoal" name="goal" type="text" autocomplete="off" placeholder="Exercise daily" required />
-          </div>
-
-          <div class="field">
-            <label for="setupCategory">Category</label>
-            <select id="setupCategory" name="category" required></select>
-          </div>
-
-          <div class="field">
-            <label for="setupStartDate">Start date</label>
-            <input id="setupStartDate" name="startDate" type="date" required />
-          </div>
-
-          <button class="primary-action" type="submit">Start challenge</button>
-          <p id="setupMessage" class="message" aria-live="polite"></p>
-        </div>
-      </form>
-    </section>
-
     <section id="appScreen" class="screen" aria-labelledby="appTitle">
       <header id="app-hero" class="topbar">
         <h1 id="appTitle">Today</h1>
@@ -437,7 +415,7 @@
             <h2 id="settingsTitle">Settings</h2>
           </div>
           <div class="panel-body">
-            <p class="settings-note">Your data stays on this device and in this browser. It does not sync across devices. Clearing your browser data removes it, so download a backup now and then.</p>
+            <p class="settings-note">Your challenge and check-ins are saved only in this browser on this device. There is no account and nothing is sent to a server. They do not sync across devices. Clearing your browser data removes them, so download a backup now and then.</p>
 
             <div class="field">
               <label for="settingsGoal">Challenge name</label>
@@ -458,7 +436,8 @@
 
             <div id="importBox" class="import-box hidden">
               <label for="importText">Paste your backup</label>
-              <textarea id="importText" rows="5" placeholder='{"version":1,...}'></textarea>
+              <p class="settings-note">Restoring replaces what is saved here. Only paste a backup you downloaded from 12 in 12.</p>
+              <textarea id="importText" rows="5" maxlength="102400" spellcheck="false" autocomplete="off"></textarea>
               <button id="importBtn" class="primary-action" type="button">Restore backup</button>
             </div>
 
@@ -473,7 +452,7 @@
     </section>
   </main>
 
-  <section id="onboardingOverlay" class="onboarding hidden" aria-modal="true" role="dialog">
+  <section id="onboardingOverlay" class="onboarding hidden" aria-modal="true" role="dialog" aria-label="Pick a challenge" tabindex="-1">
     <div class="onboarding-inner">
       <div class="onboarding-top">
         <button id="onboardingBack" class="back-btn hidden" type="button" aria-label="Go back">&larr;</button>
@@ -521,8 +500,8 @@
     </div>
   </div>
 
-  <script src="./app.js"></script>
-  <script type="module" src="../../assets/feedback-widget.js?v=20260925-mobile-v1"></script>
+  <script src="./core.js?v=20260925-mobile-v1"></script>
+  <script src="./app.js?v=20260925-mobile-v1"></script>
   <script src="../../assets/tactile-buttons.js?v=20260925-mobile-v1" defer></script>
 </body>
 </html>

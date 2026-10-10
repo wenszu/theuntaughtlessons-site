@@ -1,17 +1,20 @@
 (function () {
-  const STORAGE_KEY = '12in12_data';
-  const LEGACY_KEY = 'utl-12-in-12-data';
-  const STATUSES = ['done', 'partial', 'missed'];
+  const Core = window.TwelveCore;
+  const STATUSES = Core.STATUSES;
+  const isoDate = Core.isoDate;
+  const parseIsoDate = Core.parseIsoDate;
+  const monthKey = Core.monthKey;
+  const currentMonth = () => Core.currentMonth(new Date());
 
   const LIBRARY = {
     Body: {
       description: 'physical habits (sleep, movement, food, stretching)',
       templates: [
         ['Stretch for 15 minutes each day', 'A short daily practice to stay loose and present'],
-        ['Walk 8,000 steps every day', 'Build movement into the rhythm of your day'],
-        ['Sleep by 10:30 PM each night', 'Protect your recovery and your mornings'],
+        ['Walk 8,000 steps every day', 'Fit movement into your day'],
+        ['Sleep by 10:30 PM each night', 'Give your evenings a set end'],
         ['Eat one fully home-cooked meal a day', 'Slow down and nourish deliberately'],
-        ['No alcohol for 30 days', 'A clean reset for body and clarity']
+        ['No alcohol this month', 'A month off to see how it feels']
       ]
     },
     Mind: {
@@ -19,7 +22,7 @@
       templates: [
         ["Write 3 things I am grateful for", 'End each day with what went right'],
         ['Meditate for 10 minutes each morning', 'Start the day before the noise begins'],
-        ['One page of journaling before bed', 'Process the day, clear the mind'],
+        ['One page of journaling before bed', 'Write down how the day went'],
         ['No phone for the first 30 minutes after waking', 'Reclaim your mornings'],
         ['Spend 5 minutes in silence each day', 'Practice stillness on purpose']
       ]
@@ -28,7 +31,7 @@
       description: 'attention and deep work (no phone, reading, time blocking)',
       templates: [
         ['No social media before noon', 'Protect your best hours for real work'],
-        ['Read for 20 minutes before bed', 'Replace scrolling with something that compounds'],
+        ['Read for 20 minutes before bed', 'Swap scrolling for a few pages'],
         ['One deep work block of 90 minutes daily', 'Uninterrupted, single-task focus'],
         ['Plan tomorrow the night before', 'End the day with intention for the next'],
         ['No screen time after 9 PM', 'Wind down without the feed']
@@ -46,11 +49,11 @@
     Learning: {
       description: 'skills and creative practice (language, writing, instrument)',
       templates: [
-        ['Practice a new language for 15 minutes', 'Consistency over intensity'],
-        ['Write 200 words of anything each day', 'Build the habit of putting words down'],
+        ['Practice a new language for 15 minutes', 'A little each day'],
+        ['Write 200 words of anything each day', 'Put words down without judging them'],
         ['Learn one new thing and write it down', 'Curiosity as a daily practice'],
         ['Practice an instrument for 20 minutes', "Show up even when it is imperfect"],
-        ['Study one concept from a book each day', 'Slow reading, deep retention']
+        ['Study one concept from a book each day', 'Read slowly and keep one idea']
       ]
     }
   };
@@ -65,23 +68,19 @@
   let selectedTemplateName = '';
   let expandedBrowseCategory = '';
   let pendingResetAction = null;
+  let keepCalendarFocus = false;
+  let modalReturnFocus = null;
 
   function $(id) {
     return document.getElementById(id);
   }
 
-  function isoDate(date) {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  }
-
-  function parseIsoDate(value) {
-    const parts = String(value || '').split('-').map(Number);
-    if (parts.length !== 3 || parts.some(Number.isNaN)) return null;
-    const parsed = new Date(parts[0], parts[1] - 1, parts[2]);
-    return isoDate(parsed) === value ? parsed : null;
+  // Builds an element and sets text with textContent only. Nothing here ever parses markup.
+  function el(tag, className, text) {
+    const node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text !== undefined) node.textContent = text;
+    return node;
   }
 
   function firstOfMonth(date) {
@@ -89,16 +88,7 @@
   }
 
   function daysInMonth(date) {
-    return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
-  }
-
-  function monthKey(date) {
-    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-  }
-
-  function currentMonth() {
-    const now = new Date();
-    return { month: now.getMonth() + 1, year: now.getFullYear() };
+    return Core.daysInMonth(date.getFullYear(), date.getMonth() + 1);
   }
 
   function formatLongDate(value) {
@@ -120,83 +110,22 @@
     return status ? status.charAt(0).toUpperCase() + status.slice(1) : '';
   }
 
-  function normalizeData(candidate) {
-    const empty = { activeChallenge: null, log: {} };
-    if (!candidate || typeof candidate !== 'object') return empty;
-    const active = candidate.activeChallenge && typeof candidate.activeChallenge === 'object'
-      ? candidate.activeChallenge
-      : null;
-    const normalized = { activeChallenge: null, log: {} };
-
-    if (active) {
-      const name = typeof active.name === 'string' ? active.name.trim() : '';
-      const category = LIBRARY[active.category] ? active.category : 'Body';
-      const month = Number(active.month);
-      const year = Number(active.year);
-      if (name && month >= 1 && month <= 12 && year >= 2000) {
-        normalized.activeChallenge = { name, category, month, year };
-      }
-    }
-
-    if (candidate.log && typeof candidate.log === 'object') {
-      Object.keys(candidate.log).forEach((dateKey) => {
-        const value = candidate.log[dateKey];
-        if (parseIsoDate(dateKey) && STATUSES.includes(value)) {
-          normalized.log[dateKey] = value;
-        }
-      });
-    }
-    return normalized;
-  }
-
-  function migrateLegacy(candidate) {
-    if (!candidate || typeof candidate !== 'object' || !candidate.goal) return null;
-    const startDate = parseIsoDate(candidate.startDate) || new Date();
-    const activeChallenge = {
-      name: String(candidate.goal || '').trim(),
-      category: LIBRARY[candidate.category] ? candidate.category : 'Body',
-      month: startDate.getMonth() + 1,
-      year: startDate.getFullYear()
-    };
-    const log = {};
-    if (candidate.entries && typeof candidate.entries === 'object') {
-      Object.keys(candidate.entries).forEach((dateKey) => {
-        const entry = candidate.entries[dateKey];
-        if (parseIsoDate(dateKey) && entry && STATUSES.includes(entry.status)) {
-          log[dateKey] = entry.status;
-        }
-      });
-    }
-    return normalizeData({ activeChallenge, log });
-  }
-
   function loadData() {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) return rollMonthIfNeeded(normalizeData(JSON.parse(raw)));
-      const legacyRaw = localStorage.getItem(LEGACY_KEY);
-      if (!legacyRaw) return { activeChallenge: null, log: {} };
-      const migrated = migrateLegacy(JSON.parse(legacyRaw));
-      return rollMonthIfNeeded(migrated || { activeChallenge: null, log: {} });
+      return Core.loadData(localStorage, new Date());
     } catch (error) {
-      return { activeChallenge: null, log: {} };
+      return Core.emptyData();
     }
-  }
-
-  function rollMonthIfNeeded(candidate) {
-    const current = currentMonth();
-    if (
-      candidate.activeChallenge &&
-      (candidate.activeChallenge.month !== current.month || candidate.activeChallenge.year !== current.year)
-    ) {
-      candidate.activeChallenge = null;
-      candidate.log = {};
-    }
-    return candidate;
   }
 
   function saveData() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    try {
+      Core.saveData(localStorage, data);
+      return true;
+    } catch (error) {
+      els.settingsMessage.textContent = 'Your browser would not save that. Download a backup so nothing is lost.';
+      return false;
+    }
   }
 
   function hasActiveChallenge() {
@@ -217,8 +146,13 @@
     return currentMonthLogKeys().length > 0;
   }
 
+  function isEditableDate(dateKey) {
+    const parsed = parseIsoDate(dateKey);
+    return Boolean(parsed) && hasActiveChallenge() && monthKey(parsed) === monthKey(new Date());
+  }
+
   function setEntry(dateKey, status) {
-    if (!hasActiveChallenge() || !STATUSES.includes(status)) return;
+    if (!isEditableDate(dateKey) || !STATUSES.includes(status)) return;
     data.log[dateKey] = status;
     saveData();
     render();
@@ -234,8 +168,8 @@
   function startChallenge(name, category, shouldReset) {
     const current = currentMonth();
     data.activeChallenge = {
-      name: String(name || '').trim(),
-      category: LIBRARY[category] ? category : 'Body',
+      name: Core.cleanName(name),
+      category: Core.CATEGORIES.includes(category) ? category : 'Body',
       month: current.month,
       year: current.year
     };
@@ -301,6 +235,7 @@
     document.querySelectorAll('[data-status]').forEach((button) => {
       button.disabled = !hasActiveChallenge();
       button.classList.toggle('active', Boolean(entry && entry === button.dataset.status));
+      button.setAttribute('aria-pressed', String(Boolean(entry && entry === button.dataset.status)));
     });
 
     els.todayNotePanel.classList.add('hidden');
@@ -314,7 +249,7 @@
 
     renderBanner('calendar');
     els.calendarTitle.textContent = formatMonth(viewedMonth);
-    els.calendarGrid.innerHTML = '';
+    els.calendarGrid.replaceChildren();
     ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].forEach((day) => {
       const label = document.createElement('div');
       label.className = 'weekday';
@@ -343,21 +278,41 @@
       if (dateKey === todayKey) button.classList.add('today');
       if (dateKey === selectedCalendarDate) button.classList.add('selected');
       button.setAttribute('aria-label', `${formatLongDate(dateKey)}${entry ? `, ${titleCaseStatus(entry)}` : ''}`);
+      button.dataset.date = dateKey;
       button.addEventListener('click', () => {
         selectedCalendarDate = dateKey;
+        keepCalendarFocus = true;
         renderCalendar();
       });
+      button.addEventListener('keydown', onCalendarKey);
       els.calendarGrid.appendChild(button);
+    }
+
+    if (keepCalendarFocus) {
+      keepCalendarFocus = false;
+      const selected = els.calendarGrid.querySelector('.day.selected');
+      if (selected) selected.focus();
     }
 
     renderCountsOnly();
     els.editSheet.classList.toggle('hidden', monthKey(parseIsoDate(selectedCalendarDate)) !== monthKey(viewedMonth));
     els.editDateTitle.textContent = formatLongDate(selectedCalendarDate);
     document.querySelectorAll('[data-edit-status]').forEach((button) => {
-      button.disabled = !hasActiveChallenge();
+      button.disabled = !isEditableDate(selectedCalendarDate);
       button.classList.toggle('active', Boolean(selectedEntry && selectedEntry === button.dataset.editStatus));
+      button.setAttribute('aria-pressed', String(Boolean(selectedEntry && selectedEntry === button.dataset.editStatus)));
     });
     els.editNoteWrap.classList.add('hidden');
+  }
+
+  function onCalendarKey(event) {
+    const moves = { ArrowLeft: -1, ArrowRight: 1, ArrowUp: -7, ArrowDown: 7 };
+    if (!(event.key in moves)) return;
+    const days = Array.from(els.calendarGrid.querySelectorAll('.day[data-date]'));
+    const target = days[days.indexOf(event.currentTarget) + moves[event.key]];
+    if (!target) return;
+    event.preventDefault();
+    target.focus();
   }
 
   function renderSettings() {
@@ -366,62 +321,62 @@
   }
 
   function categoryButton(category, handler) {
-    const button = document.createElement('button');
-    button.className = 'category-card';
+    const button = el('button', 'category-card');
     button.type = 'button';
-    button.innerHTML = `
-      <span>
-        <span class="card-title">${category}</span>
-        <span class="card-copy">${LIBRARY[category].description}</span>
-      </span>
-      <span class="arrow" aria-hidden="true">&rarr;</span>
-    `;
+    const text = el('span');
+    text.appendChild(el('span', 'card-title', category));
+    text.appendChild(el('span', 'card-copy', LIBRARY[category].description));
+    button.appendChild(text);
+    const arrow = el('span', 'arrow', '\u2192');
+    arrow.setAttribute('aria-hidden', 'true');
+    button.appendChild(arrow);
     button.addEventListener('click', () => handler(category));
     return button;
   }
 
   function templateButton(template, category, handler, isSelected) {
     const [name, description] = template;
-    const button = document.createElement('button');
-    button.className = `template-card${isSelected ? ' selected' : ''}`;
+    const button = el('button', `template-card${isSelected ? ' selected' : ''}`);
     button.type = 'button';
-    button.innerHTML = `
-      <span class="template-head">
-        <span>
-          <span class="card-title">${name}</span>
-          <span class="card-copy">${description}</span>
-        </span>
-        ${isSelected ? '<span class="checkmark" aria-hidden="true">✓</span>' : ''}
-      </span>
-    `;
+    button.setAttribute('aria-pressed', String(isSelected));
+    const head = el('span', 'template-head');
+    const text = el('span');
+    text.appendChild(el('span', 'card-title', name));
+    text.appendChild(el('span', 'card-copy', description));
+    head.appendChild(text);
+    if (isSelected) {
+      const mark = el('span', 'checkmark', '\u2713');
+      mark.setAttribute('aria-hidden', 'true');
+      head.appendChild(mark);
+    }
+    button.appendChild(head);
     button.addEventListener('click', () => handler(name, category));
     return button;
   }
 
   function renderBrowse() {
-    els.browseList.innerHTML = '';
+    els.browseList.replaceChildren();
     Object.keys(LIBRARY).forEach((category) => {
-      const wrap = document.createElement('div');
-      wrap.className = 'browse-category';
-      wrap.appendChild(categoryButton(category, (selected) => {
+      const wrap = el('div', 'browse-category');
+      const header = categoryButton(category, (selected) => {
         expandedBrowseCategory = expandedBrowseCategory === selected ? '' : selected;
         renderBrowse();
-      }));
+        const again = Array.from(els.browseList.querySelectorAll('.category-card'))
+          .find((node) => node.querySelector('.card-title').textContent === selected);
+        if (again) again.focus();
+      });
+      header.setAttribute('aria-expanded', String(expandedBrowseCategory === category));
+      wrap.appendChild(header);
 
       if (expandedBrowseCategory === category) {
-        const templates = document.createElement('div');
-        templates.className = 'browse-templates';
+        const templates = el('div', 'browse-templates');
         LIBRARY[category].templates.forEach(([name, description]) => {
-          const card = document.createElement('div');
-          card.className = 'template-card';
-          card.innerHTML = `
-            <span class="card-title">${name}</span>
-            <span class="card-copy">${description}</span>
-          `;
-          const useButton = document.createElement('button');
-          useButton.className = 'use-template';
+          const card = el('div', 'template-card');
+          card.appendChild(el('span', 'card-title', name));
+          card.appendChild(el('span', 'card-copy', description));
+          const useButton = el('button', 'use-template', 'Use this challenge');
           useButton.type = 'button';
-          useButton.textContent = 'Use this challenge';
+          useButton.setAttribute('aria-label', `Use this challenge: ${name}`);
           useButton.addEventListener('click', () => requestChallengeChange(name, category));
           card.appendChild(useButton);
           templates.appendChild(card);
@@ -453,7 +408,6 @@
   }
 
   function render() {
-    els.setupScreen.classList.remove('active');
     els.appScreen.classList.add('active');
     els.bottomNav.classList.toggle('hidden', !els.onboardingOverlay.classList.contains('hidden'));
     if (currentView === 'today') renderToday();
@@ -469,12 +423,14 @@
     els.onboardingWelcome.classList.toggle('hidden', step !== 1);
     els.onboardingCategories.classList.toggle('hidden', step !== 2);
     els.onboardingTemplates.classList.toggle('hidden', step !== 3);
+    if (!els.onboardingOverlay.classList.contains('hidden')) els.onboardingOverlay.focus({ preventScroll: true });
   }
 
   function openOnboarding(step) {
     setOnboardingStep(step || 1);
     els.onboardingOverlay.classList.remove('hidden');
     els.bottomNav.classList.add('hidden');
+    els.onboardingOverlay.focus({ preventScroll: true });
   }
 
   function closeOnboarding() {
@@ -483,7 +439,7 @@
   }
 
   function renderOnboardingCategories() {
-    els.onboardingCategoryList.innerHTML = '';
+    els.onboardingCategoryList.replaceChildren();
     Object.keys(LIBRARY).forEach((category) => {
       els.onboardingCategoryList.appendChild(categoryButton(category, (selected) => {
         onboardingCategory = selected;
@@ -497,7 +453,7 @@
 
   function renderOnboardingTemplates() {
     els.templateStepTitle.textContent = `${onboardingCategory} challenges`;
-    els.onboardingTemplateList.innerHTML = '';
+    els.onboardingTemplateList.replaceChildren();
     LIBRARY[onboardingCategory].templates.forEach((template) => {
       els.onboardingTemplateList.appendChild(templateButton(
         template,
@@ -516,7 +472,7 @@
     const action = () => startChallenge(name, category, true);
     if (hasCurrentMonthLog()) {
       pendingResetAction = action;
-      els.warningModal.classList.remove('hidden');
+      openWarning();
       return;
     }
     action();
@@ -536,14 +492,55 @@
     };
     if (hasCurrentMonthLog()) {
       pendingResetAction = action;
-      els.warningModal.classList.remove('hidden');
+      openWarning();
       return;
     }
     action();
   }
 
+  function openWarning() {
+    modalReturnFocus = document.activeElement;
+    els.warningModal.classList.remove('hidden');
+    els.cancelWarningBtn.focus();
+  }
+
+  function closeWarning() {
+    els.warningModal.classList.add('hidden');
+    if (modalReturnFocus && modalReturnFocus.isConnected) modalReturnFocus.focus();
+    modalReturnFocus = null;
+  }
+
+  // Keeps Tab inside the open dialog and lets Escape close the warning.
+  function onDialogKey(event) {
+    const warningOpen = !els.warningModal.classList.contains('hidden');
+    const onboardingOpen = !els.onboardingOverlay.classList.contains('hidden');
+    if (!warningOpen && !onboardingOpen) return;
+    const box = warningOpen ? els.warningModal : els.onboardingOverlay;
+    if (event.key === 'Escape' && warningOpen) {
+      pendingResetAction = null;
+      closeWarning();
+      return;
+    }
+    if (event.key !== 'Tab') return;
+    const focusable = Array.from(box.querySelectorAll('button, input, select, textarea, a[href]'))
+      .filter((node) => !node.disabled && node.offsetParent !== null);
+    if (!focusable.length) return;
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (!box.contains(document.activeElement)) {
+      event.preventDefault();
+      first.focus();
+    } else if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  }
+
   function exportData() {
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const blob = new Blob([Core.buildBackup(data, new Date())], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
@@ -552,27 +549,34 @@
     link.click();
     link.remove();
     URL.revokeObjectURL(url);
-    els.settingsMessage.textContent = 'Export ready.';
+    els.settingsMessage.textContent = 'Your backup was downloaded.';
   }
 
   function importData() {
-    try {
-      data = rollMonthIfNeeded(normalizeData(JSON.parse(els.importText.value)));
-      saveData();
-      els.importText.value = '';
-      els.importBox.classList.add('hidden');
-      els.settingsMessage.textContent = 'Imported.';
-      if (!hasActiveChallenge()) openOnboarding(1);
-      render();
-    } catch (error) {
-      els.settingsMessage.textContent = 'That JSON could not be read.';
+    const result = Core.parseBackup(els.importText.value);
+    if (!result.ok) {
+      els.settingsMessage.textContent = result.error;
+      return;
     }
+    const restored = Core.rollMonthIfNeeded(result.data, new Date());
+    if (result.data.activeChallenge && !restored.activeChallenge) {
+      els.settingsMessage.textContent = 'That backup is from an earlier month. This version only keeps the current month, so nothing was changed.';
+      return;
+    }
+    if (hasActiveChallenge() && !window.confirm('Restoring replaces your current challenge and check-ins. Continue?')) return;
+    data = restored;
+    if (!saveData()) return;
+    els.importText.value = '';
+    els.importBox.classList.add('hidden');
+    els.settingsMessage.textContent = 'Your backup was restored.';
+    if (!hasActiveChallenge()) openOnboarding(1);
+    render();
   }
 
   function clearData() {
     const confirmed = window.confirm('Clear this challenge and all saved check-ins?');
     if (!confirmed) return;
-    data = { activeChallenge: null, log: {} };
+    data = Core.emptyData();
     saveData();
     currentView = 'today';
     openOnboarding(1);
@@ -625,26 +629,75 @@
 
     els.cancelWarningBtn.addEventListener('click', () => {
       pendingResetAction = null;
-      els.warningModal.classList.add('hidden');
+      closeWarning();
     });
     els.confirmWarningBtn.addEventListener('click', () => {
       const action = pendingResetAction;
       pendingResetAction = null;
-      els.warningModal.classList.add('hidden');
+      closeWarning();
       if (action) action();
     });
+    document.addEventListener('keydown', onDialogKey);
+    document.addEventListener('visibilitychange', refreshForNewDay);
+    window.addEventListener('focus', refreshForNewDay);
+    els.updateReloadBtn.addEventListener('click', applyUpdate);
+  }
+
+  // A page left open past midnight, or past the end of the month, catches up when the person returns to it.
+  let shownDay = isoDate(new Date());
+  function refreshForNewDay() {
+    if (document.visibilityState === 'hidden') return;
+    const today = isoDate(new Date());
+    if (today === shownDay) return;
+    shownDay = today;
+    data = Core.rollMonthIfNeeded(data, new Date());
+    saveData();
+    viewedMonth = firstOfMonth(new Date());
+    selectedCalendarDate = today;
+    if (!hasActiveChallenge() && els.onboardingOverlay.classList.contains('hidden')) openOnboarding(1);
+    render();
+  }
+
+  // The worker script is registered with the same ?v= value as every other asset (scripts/sync-cache-versions.js
+  // rewrites it). A new deploy means a new worker URL, which waits until the person chooses to reload.
+  let waitingWorker = null;
+  let reloadingForUpdate = false;
+
+  function showUpdatePrompt(worker) {
+    waitingWorker = worker;
+    els.updateBanner.classList.remove('hidden');
+  }
+
+  function applyUpdate() {
+    if (waitingWorker) waitingWorker.postMessage({ type: 'SKIP_WAITING' });
   }
 
   function registerServiceWorker() {
     if (!('serviceWorker' in navigator)) return;
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js').catch(() => {});
+      // On the very first visit the new worker takes control without a reload. Only an update needs one.
+      const hadController = Boolean(navigator.serviceWorker.controller);
+      navigator.serviceWorker.register('./sw.js?v=20260925-mobile-v1', { scope: './' }).then((registration) => {
+        if (registration.waiting && navigator.serviceWorker.controller) showUpdatePrompt(registration.waiting);
+        registration.addEventListener('updatefound', () => {
+          const installing = registration.installing;
+          if (!installing) return;
+          installing.addEventListener('statechange', () => {
+            if (installing.state === 'installed' && navigator.serviceWorker.controller) showUpdatePrompt(installing);
+          });
+        });
+      }).catch(() => {});
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (!hadController || reloadingForUpdate) return;
+        reloadingForUpdate = true;
+        window.location.reload();
+      });
     });
   }
 
   function boot() {
     [
-      'setupScreen', 'appScreen', 'bottomNav', 'appTitle', 'screenSubtext', 'todayView',
+      'appScreen', 'bottomNav', 'appTitle', 'screenSubtext', 'todayView',
       'calendarView', 'browseView', 'settingsView', 'challengeBanner', 'bannerKicker',
       'bannerTitle', 'bannerCategory', 'bannerPickBtn', 'calendarChallengeBanner',
       'calendarBannerKicker', 'calendarBannerTitle', 'calendarBannerCategory',
@@ -659,7 +712,7 @@
       'onboardingWelcome', 'onboardingCategories', 'onboardingTemplates',
       'startOnboardingBtn', 'onboardingCategoryList', 'templateStepTitle',
       'onboardingTemplateList', 'customChallengeInput', 'confirmChallengeBtn',
-      'warningModal', 'cancelWarningBtn', 'confirmWarningBtn'
+      'warningModal', 'cancelWarningBtn', 'confirmWarningBtn', 'updateBanner', 'updateReloadBtn'
     ].forEach((id) => {
       els[id] = $(id);
     });
