@@ -3,6 +3,8 @@
 > **Platform note (2026-10-09):** the platform has moved from Firebase to Supabase. Where this file mentions Firebase, Firestore, Google Apps Script or Node 20 functions, read `docs/SUPABASE_PLATFORM.md` first for the current state and rules; that guide wins on any conflict.
 
 
+> **Status note (2026-10-10):** this file predates 2026-10-06. Executive Signature is no longer a private preview. The folder was renamed from `apps/readiness-assessment` to `apps/executive-signature`, the deploy workflow no longer excludes it, and the Quick Check is public. Where this file says private preview, excluded from the Pages artifact, or emulator-only, treat it as history and read `WEBSITE_CONTEXT.md` and `docs/SUPABASE_PLATFORM.md` for the current state.
+
 ## Private preview and cross-program persistence status
 
 The app remains excluded from the production GitHub Pages artifact and Firebase Hosting configuration. Customer-program Phase 4 has completed its additive production backfill, but the readiness completion/customer-program callables in the current `functions-admin` source are absent from the deployed-functions inventory taken 2026-10-04. Treat the browser flow as a private preview until those functions, current rules, legal/consent decisions, and release gates are explicitly deployed and approved.

@@ -41,6 +41,7 @@ jobs:
             --exclude '.git/' \
             --exclude '.github/' \
             --exclude '.claude/' \
+            --exclude '.utl-planning/' \
             --exclude '.firebase/' \
             --exclude 'functions/' \
             --exclude 'functions-aiko/' \

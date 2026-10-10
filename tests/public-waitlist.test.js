@@ -18,6 +18,10 @@ for (const page of pages) {
 const component = fs.readFileSync('assets/public-waitlist.js', 'utf8');
 for (const field of ['I am interested for', 'Myself', 'My organization', 'Name', 'Email', 'Organization name', 'What are you hoping to work on?']) assert.ok(component.includes(field));
 assert.ok(component.includes("We'll reach out to find a time to talk."));
+// Source tracking: only the referring site name and campaign tags, kept in session storage, no cookie.
+assert.match(component, /sessionStorage\.setItem\(ATTRIBUTION_KEY/);
+assert.doesNotMatch(component, /document\.cookie|localStorage\.setItem\(ATTRIBUTION_KEY/);
+assert.match(component, /\.slice\(0, 200\)/, 'source must stay within the 200 character column');
 assert.ok(component.includes('dataset.waitlistAudience'));
 assert.match(component, /navigator\.sendBeacon/);
 assert.match(component, /new Blob\(\[body\], \{ type: 'text\/plain;charset=UTF-8' \}\)/);

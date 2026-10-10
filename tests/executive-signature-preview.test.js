@@ -19,13 +19,18 @@ assert.match(html, /1 = Not me at all · 5 = Spot on/, 'Participant feedback sca
 assert.match(html, /Download image/, 'Public result image download is missing');
 assert.match(html, /shareLinkedIn/, 'LinkedIn sharing is missing');
 assert.match(html, /shareFacebook/, 'Facebook sharing is missing');
+assert.match(html, /shareWhatsApp/, 'WhatsApp sharing is missing');
+assert.match(html, /wa\.me\/\?text=/, 'WhatsApp share link is missing');
 assert.match(howItWorks, /There are no right answers/, 'Scoring explanation repeats the reassurance');
 assert.doesNotMatch(html, /How do you approach bigger roles\?|What the check looks at|Free readiness check/, 'Old assessment language is removed');
 assert.doesNotMatch(content, /bigger roles?/, 'Result content does not use the old bigger role language');
 const workflow = fs.readFileSync(path.join(root, '.github/workflows/deploy-pages.yml'), 'utf8');
 const firebase = JSON.parse(fs.readFileSync(path.join(root, 'firebase.json'), 'utf8'));
 
-assert.match(html, /Phase 0 preview/i, 'Preview must identify itself as Phase 0');
+assert.match(html, /<title>Executive Signature \| The Untaught Lessons<\/title>/, 'Public page must carry the product title');
+assert.doesNotMatch(html, /Phase 0 preview|Private Phase 0/i, 'Public page must not describe itself as a private preview');
+assert.doesNotMatch(html, /<meta name="robots" content="[^"]*noindex/i, 'The founder opened Executive Signature to search engines on 2026-10-10');
+assert.match(html, /<link rel="canonical" href="https:\/\/theuntaughtlessons\.com\/apps\/executive-signature\/">/, 'Public page needs a canonical link');
 assert.match(html, /Sample data only/, 'Preview must identify sample data');
 assert.match(html, /Keep your result on file/i, 'Consent must explain that the result is kept on file');
 assert.match(html, /separate from being contacted about UTL programs/i, 'Consent must separate keeping the result from marketing consent');

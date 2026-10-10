@@ -3,13 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="robots" content="noindex,nofollow">
-<meta name="description" content="Private Phase 0 preview of The Untaught Lessons readiness assessment.">
+<meta name="description" content="Find your Executive Signature. A free five-minute check of five traits connected with executive work. Your detailed score stays private.">
+<link rel="canonical" href="https://theuntaughtlessons.com/apps/executive-signature/">
 <meta property="og:title" content="Are you ready to be an executive yet?">
 <meta property="og:description" content="Find your Executive Signature and see five traits connected with executive work.">
 <meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
 <meta property="og:url" content="https://theuntaughtlessons.com/apps/executive-signature/">
-<title>UTL readiness assessment · Phase 0 preview</title>
+<title>Executive Signature | The Untaught Lessons</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lato:wght@400;700&family=Roboto+Mono:wght@400;500&display=swap">
@@ -903,7 +904,7 @@ function logCompletedResult(attemptId,tier,email,name,band,profile,formVersion,s
       name:name||'',email,tier,band,profile,formVersion:formVersion||'',submissionId:attemptId,
       answers:answersForItems(submission.answers,submission.itemOrder),itemOrder:submission.itemOrder||[],startedAt:submission.startedAt||new Date().toISOString(),
       durationSeconds:Number.isInteger(submission.durationSeconds)?submission.durationSeconds:null,
-      consent:{assessmentProcessing:participant.assessmentConsent===true,marketing:participant.marketingConsent===true,noticeVersion:'privacy-notice@2026-10-09'},
+      consent:{assessmentProcessing:participant.assessmentConsent===true,marketing:participant.marketingConsent===true,noticeVersion:'privacy-notice@2026-10-10'},
       source:{channel:'web',campaignId:null,referrerCode:null}
     });
     recordedAttempts.set(attemptId,recording.then(result=>result&&result.attemptId?String(result.attemptId):'',()=>''));
@@ -1509,7 +1510,7 @@ function renderResult(){
   <div class="card profile" id="result-profile"><p class="result-step">4 · Your profile</p><h3>${esc(p[2])}</h3><p class="pwords">${esc(p[3])}</p><p>${esc(p[4])}</p>
     <div class="two"><div><h4>Where you add the most</h4><p>${esc(p[5])}</p></div><div><h4>What to watch</h4><p>${esc(p[6])}</p></div></div>
     <p class="small muted">${s.voice} voice, ${s.drive.toLowerCase()}.${s.close?' Your drive result was close, so the full facet report may give a more definite view.':''}</p>${famousPeopleBlock(p)}${profileSource}</div>
-  <div class="card share" id="result-share"><p class="result-step">5 · Share your result</p><div><h3>Share the public summary</h3><p class="muted">Your detailed score stays private. The share card includes your range and profile and leaves out your answers and email.</p></div><button class="btn primary share-primary" id="shareNative">Share your result</button><p class="share-hint">On a phone, this opens your device's own share menu, including Instagram when available.</p><div class="share-more"><p class="share-more-label">Or post directly</p><div class="share-chips"><button class="chip" id="shareLinkedIn">LinkedIn</button><button class="chip" id="shareFacebook">Facebook</button></div></div><div class="share-more"><p class="share-more-label">Or do it yourself</p><div class="share-chips"><button class="chip" id="shareImage">Download image</button><button class="chip" id="copyCaption">Copy caption</button><button class="chip" id="copyResultLink">Copy link</button></div></div><p class="share-note">The shared link brings people back to this assessment.</p></div>
+  <div class="card share" id="result-share"><p class="result-step">5 · Share your result</p><div><h3>Share the public summary</h3><p class="muted">Your detailed score stays private. The share card includes your range and profile and leaves out your answers and email.</p></div><button class="btn primary share-primary" id="shareNative">Share your result</button><p class="share-hint">On a phone, this opens your device's own share menu, including Instagram when available.</p><div class="share-more"><p class="share-more-label">Or post directly</p><div class="share-chips"><button class="chip" id="shareLinkedIn">LinkedIn</button><button class="chip" id="shareFacebook">Facebook</button><button class="chip" id="shareWhatsApp">WhatsApp</button></div></div><div class="share-more"><p class="share-more-label">Or do it yourself</p><div class="share-chips"><button class="chip" id="shareImage">Download image</button><button class="chip" id="copyCaption">Copy caption</button><button class="chip" id="copyResultLink">Copy link</button></div></div><p class="share-note">The shared link brings people back to this assessment.</p></div>
   <div class="card"><p class="eyebrow">Keep a copy</p><h3>Get this in your inbox</h3><p class="muted">A private copy of your band, profile and next step, sent to the email you gave us. Not shared with anyone else.</p>${emailResultBlock(participant.email)}</div>
   <div class="card feedback" id="fb"><h3 style="font-size:22px">How well does this description fit you?</h3>
     <div class="stars" id="stars">${[1,2,3,4,5].map(n=>`<button aria-pressed="false" data-n="${n}">${n}</button>`).join('')}<span class="small muted" style="align-self:center">1 = Not me at all · 5 = Spot on</span></div>
@@ -1531,6 +1532,7 @@ function renderResult(){
   $('#shareNative').onclick=async()=>{const url=trackedUrl('native_share');if(!navigator.share){copyShare(shareText,'Share caption copied');return}try{const blob=await buildResultCard(signature,p,shapeScores,shareBaseUrl);const file=new File([blob],'UTL-executive-signature.png',{type:'image/png'});const payload=navigator.canShare&&navigator.canShare({files:[file]})?{title:'My Executive Signature',text:shareCaption,url,files:[file]}:{title:'My Executive Signature',text:shareCaption,url};await navigator.share(payload)}catch(e){if(e&&e.name!=='AbortError')copyShare(shareText,'Share caption copied')}};
   $('#shareLinkedIn').onclick=()=>window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(trackedUrl('linkedin'))}`,'_blank','noopener');
   $('#shareFacebook').onclick=()=>window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(trackedUrl('facebook'))}`,'_blank','noopener');
+  $('#shareWhatsApp').onclick=()=>window.open(`https://wa.me/?text=${encodeURIComponent(`${shareCaption} ${trackedUrl('whatsapp')}`)}`,'_blank','noopener');
   $('#copyCaption').onclick=()=>copyShare(`${shareCaption} ${trackedUrl('copy_caption')}`,'Share caption copied');
   $('#copyResultLink').onclick=()=>copyShare(trackedUrl('copy_link'),'Assessment link copied');
   $('#shareImage').onclick=()=>downloadResultCard(signature,p,shapeScores,shareBaseUrl);
@@ -1844,7 +1846,7 @@ function renderFullResult(){
       ${partOpener(5,'Next steps and appendix','Your five areas at a glance, what to try next, and how this report is built.')}
       <div class="card section-group">
         <div id="full-facets"><p class="result-step">Your five areas, in detail</p><p class="muted small">Ten facets in total: six contribute to your readiness score, and four describe your working style.</p>${areaScores.map(areaDetailBlock).join('')}</div>
-        <div class="section-divider" id="full-development"><p class="result-step">Suggestions for development</p><p class="muted small">Ideas worth trying, drawn from your growth edges and profile.</p>${devCards(depth.developmentSuggestions||[])}<div class="reflection-box"><b>Optional reflection:</b> Which situation this month gives you a safe place to practise one of these moves?</div><div class="callout-navy"><p>These habits grow through practice and feedback from real work. The Think, Speak, and Act Like an Executive™ cohort gives you a place to build them. <a href="../../programs.html" target="_blank" rel="noopener">See how the cohort works.</a></p></div></div>
+        <div class="section-divider" id="full-development"><p class="result-step">Suggestions for development</p><p class="muted small">Ideas worth trying, drawn from your growth edges and profile.</p>${devCards(depth.developmentSuggestions||[])}<div class="reflection-box"><b>Optional reflection:</b> Which situation this month gives you a safe place to practise one of these moves?</div><div class="callout-navy"><p>These habits grow through practice and feedback from real work. The Think, speak and act like an executive™ cohort gives you a place to build them. <a href="../../programs.html" target="_blank" rel="noopener">See how the cohort works.</a></p></div></div>
         <div class="section-divider" id="full-appendix"><p class="result-step">How this report is built</p>
           <h4>The source</h4><p class="small muted">The full report selects 40 statements from the IPIP-NEO-120, an established, openly available personality measure built on the same five-area research tradition as the 20-question quick check (the short assessment page explains that tradition in full). Some statements run in the opposite direction, so their scores are reversed before a facet score is calculated.</p>
           <h4>How the score is built</h4><p class="small muted">Each of the 10 facets shown in this report runs on its own 0 to 100 scale, built from your own answers. Achievement‑Striving, Self‑Discipline, Orderliness, Intellect, Anxiety and Self‑Consciousness average into the one readiness score on your executive summary. Assertiveness, Activity Level, Cooperation and Altruism describe your working style and sit outside that score on purpose, since neither end of a style facet is the better one. The shape on your summary page draws from the same five broad areas as the quick check, built here from these 10 facets rather than estimated from 20 broader questions.</p>
@@ -1853,11 +1855,11 @@ function renderFullResult(){
       </div>
     </div>
     <div class="card no-print"><p class="result-step">Keep a copy</p><h3>Get this in your inbox</h3><p class="muted">A private copy of your confirmed profile, top strengths and growth edges, sent to the email you gave us. Not shared with anyone else.</p>${emailResultBlock(participant.email)}</div>
-    <div class="card next no-print"><h3>The TSA cohort is built around these habits</h3><p>The Think, Speak, and Act Like an Executive™ cohort is built around these habits. Join the waitlist to hear when the next cohort opens.</p><div class="row"><a class="btn" style="background:transparent;color:inherit;border-color:currentColor" href="../../programs.html" target="_blank" rel="noopener">Join the TSA waitlist</a></div></div>
+    <div class="card next no-print"><h3>The TSA cohort is built around these habits</h3><p>The Think, speak and act like an executive™ cohort is built around these habits. Join the waitlist to hear when the next cohort opens.</p><div class="row"><a class="btn" style="background:transparent;color:inherit;border-color:currentColor" href="../../programs.html" target="_blank" rel="noopener">Join the TSA waitlist</a></div></div>
     <div class="report-closing print-only">
       <div class="cover-logos"><img src="../../assets/print-logo-utl-white-cover.svg" alt="The Untaught Lessons" class="cover-logo-utl"><img src="../../assets/print-logo-signature-white-cover.svg" alt="Executive Signature" class="cover-logo-readiness"></div>
       <h2>Put this report into practice</h2>
-      <p>The Think, Speak, and Act Like an Executive™ cohort helps you practice the habits in this report with feedback from real work. Join the waitlist at theuntaughtlessons.com/programs.html to hear when the next cohort opens.</p>
+      <p>The Think, speak and act like an executive™ cohort helps you practice the habits in this report with feedback from real work. Join the waitlist at theuntaughtlessons.com/programs.html to hear when the next cohort opens.</p>
       <p class="cover-foot">theuntaughtlessons.com</p>
     </div>
     <div class="row no-print"><button class="btn" id="fullAgain">Take the full report again</button></div>

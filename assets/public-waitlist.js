@@ -111,6 +111,45 @@ async function flushPendingLeads() {
   }
 }
 
+// Where the visitor came from. Only the referring site name and the campaign tags (utm_source, utm_medium,
+// utm_campaign) are kept. They stay in this tab's session storage and are sent with a lead only when the visitor
+// submits the form. Nothing is sent otherwise, and no cookie is set.
+const ATTRIBUTION_KEY = 'utl_attribution';
+function cleanTag(value) {
+  return String(value || '').toLowerCase().replace(/[^a-z0-9._-]/g, '').slice(0, 40);
+}
+function captureAttribution() {
+  try {
+    if (sessionStorage.getItem(ATTRIBUTION_KEY)) return;
+    const params = new URLSearchParams(window.location.search);
+    const found = {
+      ref: '',
+      utm_source: cleanTag(params.get('utm_source')),
+      utm_medium: cleanTag(params.get('utm_medium')),
+      utm_campaign: cleanTag(params.get('utm_campaign'))
+    };
+    if (document.referrer) {
+      const host = new URL(document.referrer).hostname.replace(/^www\./, '');
+      if (host && host !== window.location.hostname.replace(/^www\./, '')) found.ref = cleanTag(host);
+    }
+    sessionStorage.setItem(ATTRIBUTION_KEY, JSON.stringify(found));
+  } catch (error) {
+    // Attribution is optional. A blocked storage or a bad referrer never affects the form.
+  }
+}
+function attributionLabel() {
+  try {
+    const found = JSON.parse(sessionStorage.getItem(ATTRIBUTION_KEY) || '{}');
+    const parts = [];
+    if (found.ref) parts.push('ref=' + cleanTag(found.ref));
+    ['utm_source', 'utm_medium', 'utm_campaign'].forEach((key) => { if (found[key]) parts.push(key + '=' + cleanTag(found[key])); });
+    return parts.length ? ' | ' + parts.join(' ') : '';
+  } catch (error) {
+    return '';
+  }
+}
+captureAttribution();
+
 // Builds the submit_lead payload from the waitlist form values.
 function buildLeadPayload(values, formStartedAt) {
   const organization = String(values.organization || '').trim();
@@ -122,7 +161,7 @@ function buildLeadPayload(values, formStartedAt) {
     role: values.role,
     message: organization ? (message ? message + '\n' : '') + 'Organization: ' + organization : message,
     page: String(values.page || '').split('#')[0].split('?')[0],
-    source: 'waitlist-form',
+    source: ('waitlist-form' + attributionLabel()).slice(0, 200),
     website: String(values.website || ''),
     form_started_at: formStartedAt
   };
