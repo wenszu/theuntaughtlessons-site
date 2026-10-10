@@ -18,6 +18,8 @@ Single source of truth for agents working on this repo. Read before making chang
 7. `Current Implementation Notes` — architecture rules
 8. `Change Log` — recent context only (last 3 days)
 
+Product roadmap, backlog and open decisions: `planning/README.md` (start there for "what are we building next"; update `planning/backlog.csv` when scope or status changes).
+
 Related files: `context/brand.md` (brand/UI rules), `context/voice-editor.md` (writing voice), `context/claude.md` (Claude-specific reminders).
 Operational email template: `FIREBASE_EMAIL_TEMPLATE.md`.
 Historical Google Group setup/migration material: `archive/GOOGLE_GROUP_SETUP.md` and `archive/GOOGLE_GROUP_SYNC_MIGRATION.md`.

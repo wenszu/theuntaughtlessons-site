@@ -19,3 +19,5 @@ Before making changes:
 - Do not over-design
 - Mobile layouts: check at 375px and 768px for meaningful UI changes.
 - Logo clicks in app headers link back to the homepage.
+
+For roadmap, backlog or "what should we build next" conversations, read `planning/README.md`, `planning/PRODUCTS.md` and `planning/backlog.csv`, and update them when scope, priority or status changes.
