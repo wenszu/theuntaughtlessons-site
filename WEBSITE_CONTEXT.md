@@ -188,6 +188,7 @@ The Google Group sync (`functions/processGoogleGroupSyncJob`, codebase `group-sy
 | `apps/speak-like-obama/` | Phase 3 | Speech delivery launch page |
 | `apps/tsa-diagnostic/` | Assessment | The sole TSA assessment — Think/Speak/Act in one saved flow. `?assessment=checkpoint` serves the post-program Checkpoint from the same file |
 | `apps/executive-signature/` | Live ES program (renamed from `apps/readiness-assessment/` 2026-10-06) | Executive Signature Quick Check and Full Assessment plus admin, build-plan, how-it-works, research, and returning-results pages. Public on the production site as of 2026-10-06; its callable persistence code has been deployed since earlier this week. Read `README-assessment.md` and `BUILD_STATUS.md` before editing. |
+| `apps/12-in-12/` | Public, built, not yet linked | Private habit tracker, free, no account. One small challenge a month, daily Done, Partial or Missed, month calendar, JSON backup and restore. Data stays in the browser (`localStorage`), no server calls. Installable PWA with its own service worker scoped to the folder. Files: `index.html`, `core.js` (dates, storage, strict restore parser, no DOM), `app.js`, `sw.js`, `manifest.webmanifest`. Tests: `tests/twelve-in-twelve.test.js`. Not in `sitemap.xml`, and the Tools page card is still Coming soon. Staging record and design notes: `reference/12-in-12/`. |
 
 Data files: `data/sort-bucket.json` (public concept-scored Find your level exercises), `data/tsa-score-bands.js` (public score bands/scoring helpers), `data/practice/*.json` (member practice), and `data/testimonials.json`. The unified member assessment embeds its current question/scoring data in `apps/tsa-diagnostic/index.html`; removed `data/tsa/` files survive only in history/archive references.
 
@@ -282,6 +283,16 @@ Decisions are made in Claude (claude.ai). JSON updates are handled in Codex. Doc
 ## Change Log
 
 Entries older than ~3 days live in `archive/WEBSITE_CONTEXT_ARCHIVE.md` (most recent archived block: 2026-10-03 through 2026-10-04).
+
+### 2026-10-10 — 12 in 12 version 1 built in `apps/12-in-12/` (not live)
+
+- **What it is:** the recovered habit tracker, restyled and rebuilt as a free, public, local-first app (Option A: no account, no server). Copy only describes what the app does. There are no research claims, rewards, credentials, prices or competitor names.
+- **Cache rule:** every first party asset carries the one shared `?v=` value. The service worker is registered as `sw.js` with that value, derives its cache name from it, and the sync script rewrites it on deploy. There is no automatic `skipWaiting`. A "new version is ready" bar asks the person to reload, and only then does the new worker take over. Scope is `apps/12-in-12/` only. It precaches the app shell and the logo, and answers nothing else.
+- **Backup and restore:** "Download backup" writes versioned JSON. "Restore from backup" pastes it through a strict parser in `core.js` (size cap, known fields only, whitelisted statuses and categories, real calendar dates, one bad field rejects everything). Lists and calendar are built with `textContent`, never `innerHTML`.
+- **Dates:** the day is always the local calendar day. A page left open past midnight or month end catches up when the person returns to it.
+- **Left out on purpose:** the site feedback widget, because it loads sign-in code and this app has no account.
+- **Tests:** `tests/twelve-in-twelve.test.js` covers legacy key migration, backup round trip, bad input, month lengths and leap years, time zones at midnight, the service worker, and design and copy contracts. `deployment-cache` and `module-imports-versioned` still pass.
+- **Still to do before launch (founder decisions):** make the Tools page card live, add the app to `sitemap.xml`, merge and deploy.
 
 ### 2026-10-10 — Executive Signature report previews and PDF design pass
 
