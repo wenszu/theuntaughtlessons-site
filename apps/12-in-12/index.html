@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#003366" />
+  <meta name="description" content="A private tracker for one small experiment a month. Pick a challenge, check in daily, and see how the month went. Your data stays on your device." />
+  <title>12 in 12 | The Untaught Lessons</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="../../assets/favicon-bluebg-whitedoor-thicker-32.png?v=20260925-mobile-v1">
+  <link rel="apple-touch-icon" sizes="180x180" href="../../assets/apple-touch-icon.png?v=20260925-mobile-v1">
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lato:wght@400;700;900&display=swap');
+
+    /* UTL brand tokens. Same values as styles.css. Status colors reuse brand colors only. */
+    :root {
+      --navy: #003366;
+      --gold: #EEA320;
+      --cream: #F3EDE2;
+      --charcoal: #4A4A4A;
+      --steel: #4D7094;
+      --white: #FFFFFF;
+      --parchment: #E8DFD1;
+      --radius: 8px;
+      --gap-control: 16px;
+      --gap-group: 24px;
+      --tap: 48px;
+    }
+
+    * { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; background: var(--cream); }
+    body {
+      margin: 0;
+      min-height: 100dvh;
+      background: var(--cream);
+      color: var(--charcoal);
+      font-family: 'Lato', Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.5;
+    }
+    h1, h2, h3 { font-family: 'Playfair Display', Georgia, serif; color: var(--navy); line-height: 1.2; margin: 0; }
+    p { margin: 0; }
+    button, input, select, textarea { font: inherit; color: inherit; }
+    .hidden { display: none !important; }
+    .screen { display: none; }
+    .screen.active { display: block; }
+
+    /* Focus is always visible */
+    :focus-visible { outline: 2px solid var(--navy); outline-offset: 2px; }
+    .app-header :focus-visible, .banner :focus-visible { outline-color: var(--white); }
+
+    /* App header: same pattern as the other UTL apps, logo links home */
+    .app-header { background: var(--navy); color: var(--white); position: sticky; top: 0; z-index: 40; }
+    .app-header-inner {
+      width: min(1060px, calc(100% - 32px));
+      margin: 0 auto;
+      min-height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--gap-group);
+    }
+    .brand { display: flex; align-items: center; gap: var(--gap-control); color: var(--white); text-decoration: none; }
+    .brand img { width: 132px; height: 44px; object-fit: contain; display: block; }
+    .brand-name { font-family: 'Playfair Display', Georgia, serif; font-weight: 700; font-size: 20px; padding-left: var(--gap-control); border-left: 1px solid rgba(255, 255, 255, .35); }
+    .tabs { display: flex; gap: 8px; }
+    .tabs button {
+      min-height: 44px;
+      padding: 0 16px;
+      border: 0;
+      border-bottom: 3px solid transparent;
+      border-radius: 0;
+      background: transparent;
+      color: rgba(255, 255, 255, .85);
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .tabs button.active { color: var(--white); border-bottom-color: var(--white); }
+    .tabs button:hover { color: var(--white); }
+
+    /* Page */
+    .app-shell { width: min(1060px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 64px; }
+    .topbar { margin-bottom: var(--gap-group); }
+    .topbar h1 { font-size: 36px; }
+    .topbar p { margin-top: 8px; font-size: 18px; }
+    #setupScreen { display: none !important; }
+
+    .panel { background: var(--white); border: 1px solid var(--parchment); border-radius: var(--radius); }
+    .panel-head { padding: 16px 24px; border-bottom: 1px solid var(--parchment); }
+    .panel-head h2 { font-size: 22px; }
+    .panel-body { padding: 24px; }
+    .panel-body > * + * { margin-top: var(--gap-group); }
+    .muted { color: var(--charcoal); }
+    .message { min-height: 24px; }
+    .desktop-grid { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: var(--gap-group); margin-top: var(--gap-group); align-items: start; }
+
+    /* Challenge banner */
+    .challenge-banner { background: var(--navy); color: var(--white); border-radius: var(--radius); padding: 24px; }
+    .banner-row { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--gap-control); }
+    .banner-kicker { display: block; font-size: 14px; font-weight: 700; color: rgba(255, 255, 255, .85); }
+    .challenge-banner h2 { color: var(--white); font-size: 26px; margin-top: 8px; }
+    .banner-pill { font-size: 14px; font-weight: 700; color: var(--gold); white-space: nowrap; }
+    .banner-link { margin-top: var(--gap-control); background: transparent; border: 0; padding: 0; min-height: 44px; color: var(--gold); font-weight: 700; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+
+    /* Today */
+    .today-card h2 { font-size: 24px; }
+    .date-label { margin-top: 8px; }
+    .prompt { font-family: 'Playfair Display', Georgia, serif; font-weight: 700; font-size: 20px; color: var(--navy); margin-top: var(--gap-group); }
+    .status-actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--gap-control); margin-top: var(--gap-control); }
+    .status-btn {
+      min-height: 88px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      background: var(--white);
+      border: 2px solid var(--steel);
+      border-radius: var(--radius);
+      color: var(--navy);
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .status-btn:disabled { opacity: .5; cursor: not-allowed; }
+    .status-mark { font-size: 24px; line-height: 1; }
+    .status-btn:hover:not(:disabled) { border-color: var(--navy); }
+    .status-done.active { background: var(--navy); border-color: var(--navy); color: var(--white); }
+    .status-partial.active { background: var(--white); border: 4px solid var(--steel); color: var(--navy); }
+    .status-missed.active { background: var(--parchment); border: 2px solid var(--charcoal); color: var(--charcoal); }
+    .status-help { margin-top: var(--gap-control); font-size: 15px; }
+    .reinforcement { margin-top: var(--gap-control); min-height: 24px; font-weight: 700; color: var(--navy); }
+    .note-panel { margin-top: var(--gap-group); }
+    .microcopy { margin-bottom: var(--gap-control); }
+    .calendar-summary > * + * { margin-top: 12px; }
+    .progress { height: 8px; background: var(--parchment); border-radius: 4px; overflow: hidden; }
+    .progress span { display: block; height: 100%; width: 0; background: var(--navy); }
+
+    /* Forms and buttons */
+    .field { display: flex; flex-direction: column; gap: 8px; }
+    label, .field-label { font-weight: 700; color: var(--navy); }
+    input[type=text], input[type=date], select, textarea {
+      width: 100%;
+      min-height: var(--tap);
+      padding: 12px;
+      background: var(--white);
+      border: 1px solid var(--steel);
+      border-radius: var(--radius);
+      font-size: 16px;
+    }
+    select { appearance: none; -webkit-appearance: none; padding-right: 44px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23003366' stroke-width='2'/%3E%3C/svg%3E"); background-position: right 14px center; background-repeat: no-repeat; }
+    textarea { resize: vertical; }
+    .primary-action, .secondary-action, .use-template, .edit-status button {
+      min-height: var(--tap);
+      padding: 12px 24px;
+      border-radius: var(--radius);
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .primary-action { background: var(--gold); border: 1px solid var(--gold); color: var(--navy); }
+    .primary-action:hover { background: #D9921A; border-color: #D9921A; }
+    .secondary-action, .use-template { background: var(--white); border: 1px solid var(--navy); color: var(--navy); }
+    .secondary-action:hover, .use-template:hover { background: var(--cream); }
+    .quiet-action { min-height: var(--tap); padding: 12px 8px; background: transparent; border: 0; color: var(--charcoal); font-weight: 700; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+    .settings-note { max-width: 62ch; }
+    .settings-actions { display: flex; flex-wrap: wrap; gap: var(--gap-control); align-items: center; }
+    .import-box { display: flex; flex-direction: column; gap: var(--gap-control); }
+
+    /* Calendar */
+    .month-row h2 { font-size: 24px; }
+    .panel-head { display: flex; justify-content: space-between; align-items: center; gap: var(--gap-control); }
+    .month-controls { display: flex; gap: 8px; }
+    .icon-btn { width: 44px; height: 44px; background: var(--white); border: 1px solid var(--navy); border-radius: var(--radius); color: var(--navy); font-weight: 700; cursor: pointer; }
+    .calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; margin-top: var(--gap-group); }
+    .weekday { text-align: center; font-size: 13px; font-weight: 700; color: var(--charcoal); }
+    .day {
+      min-height: 52px;
+      padding: 4px 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      background: var(--white);
+      border: 1px solid var(--steel);
+      border-radius: 6px;
+      color: var(--navy);
+      font-weight: 700;
+      font-size: 16px;
+      line-height: 1.2;
+      cursor: pointer;
+    }
+    .day::after { content: ''; font-size: 13px; line-height: 1.2; min-height: 16px; }
+    .day.empty { visibility: hidden; }
+    .day.done { background: var(--navy); border-color: var(--navy); color: var(--white); }
+    .day.done::after { content: '\2713'; }
+    .day.partial { background: var(--white); border: 3px solid var(--steel); color: var(--navy); }
+    .day.partial::after { content: '\00BD'; }
+    .day.missed { background: var(--parchment); border-color: var(--charcoal); color: var(--charcoal); }
+    .day.missed::after { content: '\2715'; }
+    .day.future { background: transparent; border-style: dashed; color: var(--charcoal); font-weight: 400; }
+    .day.today { outline: 3px solid var(--navy); outline-offset: 2px; }
+    .day.selected { border-color: var(--gold); border-width: 3px; }
+    .legend { display: flex; flex-wrap: wrap; gap: var(--gap-control); margin-top: var(--gap-group); font-size: 15px; }
+    .edit-sheet { margin-top: var(--gap-group); }
+    .edit-sheet h2 { font-size: 22px; }
+    .edit-status { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--gap-control); margin-top: var(--gap-control); }
+    .edit-status button { padding: 12px 8px; background: var(--white); border: 2px solid var(--steel); color: var(--navy); }
+    .edit-status button.active { background: var(--navy); border-color: var(--navy); color: var(--white); }
+
+    /* Browse and onboarding lists */
+    .category-list, .template-list, .browse-templates { display: flex; flex-direction: column; gap: var(--gap-control); }
+    .browse-category { display: flex; flex-direction: column; gap: var(--gap-control); }
+    .browse-templates { padding-left: var(--gap-control); }
+    .category-card, .template-card {
+      width: 100%;
+      text-align: left;
+      padding: 16px;
+      background: var(--white);
+      border: 1px solid var(--steel);
+      border-radius: var(--radius);
+      cursor: pointer;
+    }
+    div.template-card { cursor: default; display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
+    .category-card { display: flex; justify-content: space-between; align-items: center; gap: var(--gap-control); }
+    .category-card:hover, button.template-card:hover { border-color: var(--navy); }
+    .card-title { display: block; font-weight: 700; color: var(--navy); font-size: 17px; }
+    .card-copy { display: block; margin-top: 4px; font-size: 15px; }
+    .arrow { color: var(--navy); font-weight: 700; }
+    .template-head { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--gap-control); }
+    .template-card.selected { border: 3px solid var(--navy); padding: 14px; }
+    .checkmark { color: var(--navy); font-weight: 900; font-size: 20px; }
+
+    .onboarding { position: fixed; inset: 0; z-index: 60; overflow-y: auto; background: var(--cream); padding: max(24px, env(safe-area-inset-top)) 16px max(32px, env(safe-area-inset-bottom)); }
+    .onboarding-inner { width: min(560px, 100%); margin: 0 auto; display: flex; flex-direction: column; gap: var(--gap-group); }
+    .onboarding-top { display: grid; grid-template-columns: 48px 1fr 48px; align-items: center; }
+    .back-btn { width: 48px; height: 48px; background: var(--white); border: 1px solid var(--navy); border-radius: var(--radius); color: var(--navy); font-weight: 700; cursor: pointer; }
+    .step-label { text-align: center; font-weight: 700; color: var(--charcoal); }
+    .onboarding-copy h2 { font-size: 34px; }
+    .onboarding-copy p { margin-top: var(--gap-control); font-size: 18px; }
+    #onboardingWelcome, #onboardingCategories, #onboardingTemplates { display: flex; flex-direction: column; gap: var(--gap-group); }
+
+    .modal-backdrop { position: fixed; inset: 0; z-index: 80; display: grid; place-items: center; padding: 16px; background: rgba(0, 51, 102, .6); }
+    .modal-card { width: min(440px, 100%); background: var(--white); border-radius: var(--radius); padding: 24px; display: flex; flex-direction: column; gap: var(--gap-control); }
+    .modal-actions { display: flex; gap: var(--gap-control); justify-content: flex-end; flex-wrap: wrap; }
+
+    @media (max-width: 768px) {
+      .app-header-inner { flex-direction: column; align-items: stretch; gap: 0; padding-top: 8px; min-height: 0; }
+      .brand { min-height: 56px; }
+      .brand img { width: 120px; height: 40px; }
+      .tabs { overflow-x: auto; gap: 0; margin: 0 -8px; }
+      .tabs button { flex: 1 0 auto; padding: 0 16px; }
+      .app-shell { padding: 24px 0 48px; }
+      .topbar h1 { font-size: 30px; }
+      .desktop-grid { grid-template-columns: 1fr; }
+      .panel-body { padding: 16px; }
+      .challenge-banner { padding: 16px; }
+      .challenge-banner h2 { font-size: 22px; }
+      .onboarding-copy h2 { font-size: 28px; }
+      .calendar-grid { gap: 6px; }
+      .browse-templates { padding-left: 0; }
+    }
+    @media (max-width: 400px) {
+      .status-btn { padding: 8px; font-size: 15px; }
+      .settings-actions > button { width: 100%; }
+    }
+    @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+  </style>
+</head>
+<body>
+  <header class="app-header">
+    <div class="app-header-inner">
+      <a class="brand" href="/" aria-label="The Untaught Lessons home">
+        <img src="../../assets/utl-logo-nav-white.png?v=20260925-mobile-v1" alt="The Untaught Lessons" />
+        <span class="brand-name">12 in 12</span>
+      </a>
+      <nav id="bottomNav" class="tabs" aria-label="App navigation">
+        <button type="button" data-view="today">Today</button>
+        <button type="button" data-view="calendar">Calendar</button>
+        <button type="button" data-view="browse">Browse</button>
+        <button type="button" data-view="settings">Settings</button>
+      </nav>
+    </div>
+  </header>
+
+  <main id="content" class="app-shell">
+    <section id="setupScreen" class="screen active" aria-labelledby="setupTitle">
+      <header id="setup-hero" class="topbar">
+        <h1 id="setupTitle">Start your challenge</h1>
+        <p>One goal. One day at a time.</p>
+      </header>
+
+      <form id="setupForm" class="panel setup-card">
+        <div class="panel-body">
+          <div class="field">
+            <span class="field-label">Challenge type</span>
+            <div class="segmented" role="group" aria-label="Challenge type">
+              <button id="typeMonthly" type="button" data-type="monthly">Monthly</button>
+              <button id="typeTwelve" type="button" data-type="12-in-12">12 in 12</button>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="setupGoal">Challenge name</label>
+            <input id="setupGoal" name="goal" type="text" autocomplete="off" placeholder="Exercise daily" required />
+          </div>
+
+          <div class="field">
+            <label for="setupCategory">Category</label>
+            <select id="setupCategory" name="category" required></select>
+          </div>
+
+          <div class="field">
+            <label for="setupStartDate">Start date</label>
+            <input id="setupStartDate" name="startDate" type="date" required />
+          </div>
+
+          <button class="primary-action" type="submit">Start challenge</button>
+          <p id="setupMessage" class="message" aria-live="polite"></p>
+        </div>
+      </form>
+    </section>
+
+    <section id="appScreen" class="screen" aria-labelledby="appTitle">
+      <header id="app-hero" class="topbar">
+        <h1 id="appTitle">Today</h1>
+        <p id="screenSubtext">A quick check-in for the day in front of you.</p>
+      </header>
+
+      <section id="todayView" class="screen active" aria-labelledby="todayTitle">
+        <article id="challengeBanner" class="challenge-banner">
+          <div class="banner-row">
+            <div>
+              <span id="bannerKicker" class="banner-kicker"></span>
+              <h2 id="bannerTitle"></h2>
+            </div>
+            <span id="bannerCategory" class="banner-pill"></span>
+          </div>
+          <button id="bannerPickBtn" class="banner-link hidden" type="button">Pick one &rarr;</button>
+        </article>
+
+        <div class="desktop-grid">
+          <article class="panel today-card">
+            <div class="panel-body">
+              <h2 id="todayTitle"></h2>
+              <p id="todayDate" class="date-label"></p>
+              <p class="prompt">Did you do it today?</p>
+
+              <div class="status-actions" aria-label="Today status">
+                <button class="status-btn status-done" type="button" data-status="done">
+                  <span class="status-mark" aria-hidden="true">&#10003;</span><span>Done</span>
+                </button>
+                <button class="status-btn status-partial" type="button" data-status="partial">
+                  <span class="status-mark" aria-hidden="true">&frac12;</span><span>Partial</span>
+                </button>
+                <button class="status-btn status-missed" type="button" data-status="missed">
+                  <span class="status-mark" aria-hidden="true">&#10005;</span><span>Missed</span>
+                </button>
+              </div>
+
+              <p class="status-help">Partial means less than you planned.</p>
+              <p id="todayReinforcement" class="reinforcement" aria-live="polite"></p>
+
+              <div id="todayNotePanel" class="note-panel hidden">
+                <p id="todayMicrocopy" class="microcopy hidden">That counts.</p>
+                <div class="field">
+                  <label for="todayNote">What got in the way?</label>
+                  <textarea id="todayNote" rows="2" maxlength="180" placeholder="Optional"></textarea>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <aside class="panel">
+            <div class="panel-head">
+              <h2>This month</h2>
+            </div>
+            <div class="panel-body calendar-summary">
+              <p id="todayMonthCount" class="muted"></p>
+              <div class="progress" aria-hidden="true"><span id="todayProgressBar"></span></div>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <section id="calendarView" class="screen" aria-labelledby="calendarTitle">
+        <article id="calendarChallengeBanner" class="challenge-banner">
+          <div class="banner-row">
+            <div>
+              <span id="calendarBannerKicker" class="banner-kicker"></span>
+              <h2 id="calendarBannerTitle"></h2>
+            </div>
+            <span id="calendarBannerCategory" class="banner-pill"></span>
+          </div>
+          <button id="calendarBannerPickBtn" class="banner-link hidden" type="button">Pick one &rarr;</button>
+        </article>
+
+        <article class="panel">
+          <div class="panel-head">
+            <div class="month-row">
+              <h2 id="calendarTitle"></h2>
+            </div>
+            <div class="month-controls">
+              <button id="prevMonthBtn" class="icon-btn" type="button" aria-label="Previous month">&lt;</button>
+              <button id="nextMonthBtn" class="icon-btn" type="button" aria-label="Next month">&gt;</button>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div class="calendar-summary">
+              <p id="calendarCount" class="muted"></p>
+              <div class="progress" aria-hidden="true"><span id="calendarProgressBar"></span></div>
+            </div>
+            <div id="calendarGrid" class="calendar-grid" aria-label="Monthly calendar"></div>
+            <p class="legend"><span>&#10003; Done</span><span>&frac12; Partial</span><span>&#10005; Missed</span></p>
+          </div>
+        </article>
+
+        <article id="editSheet" class="panel edit-sheet hidden">
+          <div class="panel-body">
+            <h2 id="editDateTitle"></h2>
+            <div class="edit-status" aria-label="Edit selected day">
+              <button type="button" data-edit-status="done">Done</button>
+              <button type="button" data-edit-status="partial">Partial</button>
+              <button type="button" data-edit-status="missed">Missed</button>
+            </div>
+            <div id="editNoteWrap" class="field hidden">
+              <label for="editNote">What got in the way?</label>
+              <textarea id="editNote" rows="2" maxlength="180" placeholder="Optional"></textarea>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <section id="settingsView" class="screen" aria-labelledby="settingsTitle">
+        <article class="panel">
+          <div class="panel-head">
+            <h2 id="settingsTitle">Settings</h2>
+          </div>
+          <div class="panel-body">
+            <p class="settings-note">Your data stays on this device and in this browser. It does not sync across devices. Clearing your browser data removes it, so download a backup now and then.</p>
+
+            <div class="field">
+              <label for="settingsGoal">Challenge name</label>
+              <input id="settingsGoal" type="text" autocomplete="off" />
+            </div>
+
+            <div class="field">
+              <label for="settingsCategory">Category</label>
+              <select id="settingsCategory"></select>
+            </div>
+
+            <div class="settings-actions">
+              <button id="saveSettingsBtn" class="primary-action" type="button">Save challenge</button>
+              <button id="exportBtn" class="secondary-action" type="button">Download backup (JSON)</button>
+              <button id="showImportBtn" class="secondary-action" type="button">Restore from backup (JSON)</button>
+              <button id="clearDataBtn" class="quiet-action" type="button">Clear data</button>
+            </div>
+
+            <div id="importBox" class="import-box hidden">
+              <label for="importText">Paste your backup</label>
+              <textarea id="importText" rows="5" placeholder='{"version":1,...}'></textarea>
+              <button id="importBtn" class="primary-action" type="button">Restore backup</button>
+            </div>
+
+            <p id="settingsMessage" class="message" aria-live="polite"></p>
+          </div>
+        </article>
+      </section>
+
+      <section id="browseView" class="screen" aria-labelledby="browseTitle">
+        <div id="browseList" class="category-list"></div>
+      </section>
+    </section>
+  </main>
+
+  <section id="onboardingOverlay" class="onboarding hidden" aria-modal="true" role="dialog">
+    <div class="onboarding-inner">
+      <div class="onboarding-top">
+        <button id="onboardingBack" class="back-btn hidden" type="button" aria-label="Go back">&larr;</button>
+        <span id="onboardingStep" class="step-label">Step 1 of 3</span>
+        <span aria-hidden="true"></span>
+      </div>
+
+      <div id="onboardingWelcome">
+        <div class="onboarding-copy">
+          <h2>A new month. One experiment.</h2>
+          <p>Pick one habit. Commit to it daily. See what you learn.</p>
+        </div>
+        <button id="startOnboardingBtn" class="primary-action" type="button">Pick my challenge &rarr;</button>
+      </div>
+
+      <div id="onboardingCategories" class="hidden">
+        <div class="onboarding-copy">
+          <h2>What do you want to work on?</h2>
+        </div>
+        <div id="onboardingCategoryList" class="category-list"></div>
+      </div>
+
+      <div id="onboardingTemplates" class="hidden">
+        <div class="onboarding-copy">
+          <h2 id="templateStepTitle"></h2>
+        </div>
+        <div id="onboardingTemplateList" class="template-list"></div>
+        <div class="field">
+          <label for="customChallengeInput">Challenge name</label>
+          <input id="customChallengeInput" type="text" autocomplete="off" />
+        </div>
+        <button id="confirmChallengeBtn" class="primary-action" type="button">Start this challenge &rarr;</button>
+      </div>
+    </div>
+  </section>
+
+  <div id="warningModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="warningTitle">
+    <div class="modal-card">
+      <h2 id="warningTitle">Change challenge?</h2>
+      <p>Changing your challenge will reset your progress for this month. Are you sure?</p>
+      <div class="modal-actions">
+        <button id="cancelWarningBtn" class="secondary-action" type="button">Cancel</button>
+        <button id="confirmWarningBtn" class="primary-action" type="button">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="./app.js"></script>
+  <script type="module" src="../../assets/feedback-widget.js?v=20260925-mobile-v1"></script>
+  <script src="../../assets/tactile-buttons.js?v=20260925-mobile-v1" defer></script>
+</body>
+</html>
