@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="How The Untaught Lessons collects, uses, shares and protects your personal data." />
-  <title>Privacy notice - The Untaught Lessons</title>
+  <title>Privacy notice | The Untaught Lessons</title>
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-bluebg-whitedoor-thicker-32.png?v=20260925-mobile-v1">
   <link rel="shortcut icon" type="image/png" href="/assets/favicon-bluebg-whitedoor-thicker-32.png?v=20260925-mobile-v1">
   <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png?v=20260925-mobile-v1">
@@ -25,6 +25,35 @@
     .privacy-wrap ul ul{margin:16px 0 0}
     .privacy-wrap ul ul li{margin-bottom:12px}
     .privacy-wrap a{color:#003366;text-decoration:underline}
+    .privacy-wrap .privacy-print{margin:0 0 40px}
+    .privacy-wrap .privacy-print button{border:1px solid #003366;border-radius:8px;background:#fff;color:#003366;padding:9px 16px;font:700 14px 'Lato',Arial,sans-serif;cursor:pointer}
+    .privacy-wrap .privacy-print button:hover{background:#EEF2F7}
+    .print-only{display:none}
+    @media print{
+      @page{size:letter;margin:28mm 18mm 20mm 18mm}
+      @page{
+        @top-left{content:url("/assets/print-logo-utl-navy-header.svg");border-bottom:1.5pt solid #EEA320;padding-bottom:6pt}
+        @top-center{content:"Privacy notice";font:600 8pt/1 'Lato',sans-serif;color:#7C8896;border-bottom:1.5pt solid #EEA320;padding-bottom:6pt}
+        @top-right{content:"";border-bottom:1.5pt solid #EEA320;padding-bottom:6pt}
+        @bottom-left{content:"theuntaughtlessons.com/privacy";font:7.5pt/1 'Lato',sans-serif;color:#fff;background:#003366;padding:9pt 0 9pt 18mm;margin-left:-18mm;white-space:nowrap}
+        @bottom-center{content:"Version 2026-10-09";font:7.5pt/1 'Lato',sans-serif;color:#EEA320;background:#003366;padding:9pt 0;white-space:nowrap}
+        @bottom-right{content:"Page " counter(page) " of " counter(pages);font:7.5pt/1 'Lato',sans-serif;color:#fff;background:#003366;padding:9pt 18mm 9pt 0;margin-right:-18mm;white-space:nowrap}
+      }
+      html,body,.privacy-page{background:#fff!important;color:#222;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+      .site-nav,#navigation,.nav-toggle,.privacy-print,.no-print{display:none!important}
+      .privacy-wrap{max-width:none;width:auto;margin:0;padding:0}
+      .privacy-wrap h1{font-size:26pt;margin:0 0 4pt;break-after:avoid}
+      .privacy-wrap .privacy-meta{font-size:9.5pt;margin:0 0 14pt;color:#687482}
+      .privacy-wrap .privacy-lead{font-size:12.5pt;line-height:1.55;margin:0 0 14pt;padding-bottom:12pt;border-bottom:1px solid #d4ccbf}
+      .privacy-wrap h2{font-size:15pt;margin:20pt 0 6pt;break-after:avoid;page-break-after:avoid}
+      .privacy-wrap p,.privacy-wrap li{font-size:10.5pt;line-height:1.55;margin:0 0 7pt;orphans:3;widows:3}
+      .privacy-wrap ul{padding-left:16pt;margin:0 0 9pt}
+      .privacy-wrap li{margin-bottom:6pt;break-inside:avoid}
+      .privacy-wrap ul ul{margin:6pt 0 0}
+      .privacy-wrap ul ul li{margin-bottom:4pt}
+      .privacy-wrap a{color:#003366;text-decoration:underline}
+      .privacy-wrap a[href^="/"]::after{content:" (theuntaughtlessons.com" attr(href) ")";font-size:8.5pt;color:#687482;text-decoration:none}
+    }
     @media (max-width:600px){.privacy-wrap{padding:40px 16px 72px}.privacy-wrap h2{font-size:22px;margin-top:48px}.privacy-wrap p,.privacy-wrap li{font-size:16px}.privacy-wrap .privacy-lead{font-size:19px}}
   </style>
 </head>
@@ -51,6 +80,7 @@
     <article class="privacy-wrap">
       <h1>Privacy notice</h1>
       <p class="privacy-meta">Version 2026-10-09. Last updated October 9, 2026.</p>
+      <p class="privacy-print"><button type="button" onclick="window.print()">Print or save as PDF</button></p>
 
       <p class="privacy-lead">We collect only what we need to run our programs and assessments, give you your results and keep the service safe. We never sell your personal data and we do not use advertising trackers. You can ask for a copy of your data, a correction or deletion at any time.</p>
 
