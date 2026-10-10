@@ -283,6 +283,14 @@ Decisions are made in Claude (claude.ai). JSON updates are handled in Codex. Doc
 
 Entries older than ~3 days live in `archive/WEBSITE_CONTEXT_ARCHIVE.md` (most recent archived block: 2026-10-03 through 2026-10-04).
 
+### 2026-10-10 — Executive Signature report previews and PDF design pass
+
+- **Admin console, Executive Signature, Report previews:** a new section (menu item between Attempts and Configuration) shows the real Quick check and Full report for six made-up people, one per profile, in a frame. A print button opens the browser print dialog so the PDF pages can be reviewed. The made-up people live in `apps/executive-signature/preview-personas.js`, shared by the admin page and the assessment page.
+- **Preview mode on the assessment page:** `/apps/executive-signature/?internal=1&preview=quick|full&persona=<id>`. It starts no attempt, sets no email and stores nothing, so nothing is recorded or sent. Covered by `tests/executive-signature-report-preview.test.js`.
+- **PDF design pass (print CSS and cover markup in `apps/executive-signature/index.html`):** full report 16 pages down to 13 with no blank or half-empty pages; framed cover with logos, title, score and a three column details row; slimmer footer (site, prepared for, page x of y) and the report name in the running header (the quick check no longer says Full Assessment); boxes inside boxes removed; each chapter starts on a fresh page with its opener band; strength and growth cards show name, score and bar on one line with the three notes side by side; quick check prints as four clean pages with the "What this means" notes opened for print and the share, feedback, upsell and email blocks left out.
+- **Chrome print limits learned:** Chrome lays the whole document out at the width of the first page, so a zero margin first or named page clips the pages after it. A true edge to edge cover is therefore not possible, which is why the cover is a framed plate. Negative margins do not bleed into the page margin either. Use `break-before` rather than `break-after` for forced page breaks, so a page that fills exactly does not leave a blank page behind.
+- **Also this day:** the admin Configuration view was redesigned (one readable section per assessment).
+
 ### 2026-10-09 — The platform moved to Supabase (read `docs/SUPABASE_PLATFORM.md`)
 
 - The website now runs on Supabase (project utl-core): member data layer, server reads, admin saves, sign in (Supabase Auth: email link and Google, Resend as sender, sign up off, 56 accounts linked), Executive Signature saves and mail. One public setting (`switchboard` in `public.app_settings`) decides Firebase or Supabase per area; one SQL statement undoes any flip. Firebase stays as the safety net for about two weeks. AI scoring and payments still use Firebase until the Gemini and Stripe keys exist.

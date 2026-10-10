@@ -153,7 +153,8 @@ assert.match(html, /print-logo-utl-white-cover\.svg/, 'Cover and closing pages n
 assert.match(html, /print-logo-signature-white-cover\.svg/, 'Cover and closing pages need the larger Executive Signature logo');
 assert.match(html, /\.report-summary,\.report-part\{page:pg-report\}/, 'Normal report sections must share one print page template');
 assert.match(html, /\.report-summary,\.report-part\{display:block\}/, 'Print report sections must use block flow so part banners do not strand on their own page');
-assert.doesNotMatch(html, /\.report-part\{break-before:page/, 'Major report sections must not force standalone opener pages');
+assert.match(html, /\.report-extended>\.report-part\{break-before:page/, 'Each report part starts on a fresh page, with its opener band sharing that page with the content');
+assert.match(html, /\.part-opener\{[^}]*break-after:avoid-page/, 'A part opener band must never be left alone at the bottom of a page');
 assert.match(html, /target-counter\(attr\(href\),page\)/, 'The contents page must resolve final page numbers from section anchors');
 assert.match(html, /six contribute to your readiness score, and four describe your working style/, 'The report must distinguish the six scored readiness facets from the four style facets');
 assert.match(html, /range across 6 readiness facets/, 'The executive summary must describe the numeric score using only the six readiness facets');

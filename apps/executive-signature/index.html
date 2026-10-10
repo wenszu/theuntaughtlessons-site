@@ -455,7 +455,7 @@ svg text{fill:var(--ink3);font-family:var(--sans);font-size:11px}
 .prepared-for{margin-top:6px}
 .print-only{display:none}
 @media print{
-  @page{size:letter;margin:30mm 18mm 26mm 18mm}
+  @page{size:letter;margin:28mm 18mm 20mm 18mm}
 
   /* Running header, every page except cover/closing: the real UTL logo
      left, current part name center (small, muted), the executive-readiness
@@ -469,16 +469,16 @@ svg text{fill:var(--ink3);font-family:var(--sans);font-size:11px}
      own intrinsic size). */
   @page{
     @top-left{content:url("../../assets/print-logo-utl-navy-header.svg");border-bottom:1.5pt solid #EEA320;padding-bottom:6pt}
-    @top-center{content:"";font:600 8pt/1 'Lato',sans-serif;color:#7C8896;border-bottom:1.5pt solid #EEA320;padding-bottom:6pt}
+    @top-center{content:var(--print-title,"");font:600 8pt/1 'Lato',sans-serif;color:#7C8896;border-bottom:1.5pt solid #EEA320;padding-bottom:6pt}
     @top-right{content:url("../../assets/print-logo-signature-navy-header.svg");border-bottom:1.5pt solid #EEA320;padding-bottom:6pt}
   }
   /* Footer, every page except cover/closing: one slim navy band (three
      margin boxes with matching backgrounds, abutting edge to edge) with
      white left/right text and a gold center. */
   @page{
-    @bottom-left{content:"The Untaught Lessons" "\00A0\00B7\00A0" "Executive Signature Full Assessment";font:8pt/1 'Lato',sans-serif;color:#fff;background:#003366;padding:9pt 0 9pt 18mm;margin-left:-18mm}
-    @bottom-center{content:var(--print-prepared,"");font:8pt/1 'Lato',sans-serif;color:#EEA320;background:#003366;padding:9pt 0}
-    @bottom-right{content:"theuntaughtlessons.com" "\00A0\00B7\00A0" "Page " counter(page) " of " counter(pages);font:8pt/1 'Lato',sans-serif;color:#fff;background:#003366;padding:9pt 18mm 9pt 0;margin-right:-18mm}
+    @bottom-left{content:"theuntaughtlessons.com";font:7.5pt/1 'Lato',sans-serif;color:#fff;background:#003366;padding:9pt 0 9pt 18mm;margin-left:-18mm;white-space:nowrap}
+    @bottom-center{content:var(--print-prepared,"");font:7.5pt/1 'Lato',sans-serif;color:#EEA320;background:#003366;padding:9pt 0;white-space:nowrap}
+    @bottom-right{content:"Page " counter(page) " of " counter(pages);font:7.5pt/1 'Lato',sans-serif;color:#fff;background:#003366;padding:9pt 18mm 9pt 0;margin-right:-18mm;white-space:nowrap}
   }
 
   /* Cover and closing: no header, no footer. Content resets only here —
@@ -514,7 +514,6 @@ svg text{fill:var(--ink3);font-family:var(--sans);font-size:11px}
      body supplies the local context while this compact running header keeps
      every normal page consistently branded. */
   @page pg-toc{@top-center{content:"Contents"}}
-  @page pg-report{@top-center{content:"Executive Signature Full Assessment"}}
   .report-toc{page:pg-toc}
   .report-summary,.report-part{page:pg-report}
 
@@ -525,7 +524,7 @@ svg text{fill:var(--ink3);font-family:var(--sans);font-size:11px}
   .print-only{display:block}
   main{padding:0}
   .stage{max-width:100%}
-  .card{box-shadow:none;border:1px solid var(--line);border-radius:10px;break-inside:avoid;padding:20px 24px}
+  .card{box-shadow:none;border:0;border-radius:0;break-inside:auto;padding:0}
   .section-group{break-inside:auto}
   .section-group>*{break-inside:avoid}
   /* Some section-group children (the full working-style list, the five-area
@@ -558,8 +557,8 @@ svg text{fill:var(--ink3);font-family:var(--sans);font-size:11px}
      margin on the element itself (bleeds top/left/right), not a zero-margin
      named @page — see the note above the cover/closing @page rules for why
      redeclaring `margin` on a named page is unsafe here. */
-  .report-cover,.report-closing{width:8.5in;min-height:8.6in;margin:-30mm -18mm 0;box-sizing:border-box;background:var(--navy);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 50px;break-after:page;page-break-after:always}
-  .report-closing{break-before:page;page-break-before:always}
+  .report-cover{width:100%;height:216mm;margin:0;box-sizing:border-box;background:var(--navy);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 50px;break-after:page;page-break-after:always}
+  .report-closing{width:100%;height:216mm;margin:0;box-sizing:border-box;background:var(--navy);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 50px;break-before:page;page-break-before:always}
   .cover-logos{display:flex;flex-direction:column;align-items:center;gap:14px;margin:0 0 26px}
   .cover-logo-utl{height:16mm;width:auto}
   .cover-logo-readiness{height:16mm;width:auto}
@@ -598,6 +597,105 @@ svg text{fill:var(--ink3);font-family:var(--sans);font-size:11px}
   h3{font-size:14pt}
   h4{font-size:12pt}
   .result-step{font-size:9.5pt}
+
+  /* Print design pass (2026-10-10). Later rules on purpose: they refine the rules above. */
+  /* Cover: a framed navy plate that fills the page area. Chrome lays the whole document out at the width of the first
+     page, so the cover cannot bleed to the paper edge without clipping the pages after it. */
+  .report-cover{justify-content:space-between;align-items:stretch;text-align:left;padding:15mm 15mm 13mm}
+  .cover-top{display:flex;justify-content:space-between;align-items:center;padding-bottom:7mm;border-bottom:1px solid rgba(255,255,255,.28)}
+  .cover-top .cover-logo-utl,.cover-top .cover-logo-readiness{height:13mm;width:auto}
+  .cover-mid{padding:0 2mm}
+  .cover-kicker{margin:0 0 5mm;font:700 11pt/1.2 'Lato',sans-serif;color:var(--gold)}
+  .report-cover .cover-title{font-size:46pt;line-height:1.04;margin:0 0 5mm;max-width:none}
+  .report-cover .cover-sub{font-size:12pt;margin:0 0 15mm}
+  .cover-score{display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto auto;column-gap:7mm;row-gap:1mm;align-items:center;margin:0}
+  .cover-score b{grid-row:1/4;font-family:'Playfair Display',Georgia,serif;font-size:76pt;line-height:.9;color:#fff}
+  .cover-score span{font-size:11pt;color:rgba(255,255,255,.75);align-self:end}
+  .cover-score em{font:400 17pt/1.2 'Playfair Display',Georgia,serif;font-style:normal;color:var(--gold)}
+  .cover-score small{font-size:10pt;color:rgba(255,255,255,.7);align-self:start}
+  .report-cover .cover-meta{display:grid;grid-template-columns:repeat(3,auto);justify-content:space-between;gap:8mm;border-top:1px solid rgba(255,255,255,.28);padding-top:7mm;font-size:12pt;color:#fff}
+  .cover-meta p{margin:0;max-width:none;color:#fff}
+  .cover-meta p span{display:block;margin-bottom:1.5mm;font-size:8.5pt;font-weight:700;color:var(--gold)}
+
+  /* Page breaks are set with break-before so a page that fills exactly never leaves a blank one behind */
+  .report-summary{break-after:auto;page-break-after:auto;break-before:page;page-break-before:always}
+  .toc-page{break-after:auto;page-break-after:auto}
+  .report-extended>.report-part{break-before:page;page-break-before:always}
+  .report-cover{break-after:auto;page-break-after:auto}
+  .report-toc{break-before:page;page-break-before:always}
+  .wrap,#view-test{padding:0}
+
+  /* Quick check: a two page summary. The share, feedback, upsell and email blocks and the collapsed notes are screen only. */
+  #t-result #result-share,#t-result #fb,#t-result .card.next,#t-result>.card:not([id]):not(.result-guide),#t-result details.source-panel,#t-result>.row,#t-result .readiness-score-block .source-panel{display:none!important}
+  #t-result{display:block}
+  #t-result>*{margin-bottom:14px}
+  #t-result .result-step{display:inline-block;width:auto;align-self:flex-start}
+  .quick-print-head{margin:0 0 16px;padding-bottom:10px;border-bottom:1px solid var(--line)}
+  .quick-print-head h1{margin:0 0 3px;font-size:20pt;color:var(--navy)}
+  .quick-print-head p{margin:0;font-size:10pt;color:#687482}
+  #t-result #result-overall{padding:0;display:block;break-inside:auto}
+  #t-result #result-overall>.eyebrow{margin:0 0 2px}
+  #t-result #result-overall>h2{font-size:30pt;margin:0 0 2px}
+  #t-result #result-overall>.pwords{margin:0 0 12px}
+  #t-result .signature-panel{display:grid;grid-template-columns:minmax(0,1fr) 70mm;column-gap:8mm;row-gap:6px;align-items:start;padding:14px 16px;margin:0 0 12px;break-inside:avoid}
+  #t-result .signature-panel>*{grid-column:1}
+  #t-result .signature-panel>.score-shape{grid-column:2;grid-row:1/span 6;margin:0;align-self:center}
+  #t-result .signature-panel h3{font-size:18pt;margin:0}
+  #t-result .score-shape-mark svg{width:70mm;height:auto}
+  #t-result .score-shape-mark svg{overflow:visible}
+  #t-result .score-shape-mark svg text{font-size:13px}
+  #t-result .score-shape-caption{font-size:8.5pt}
+  #t-result .score-shape-legend{display:none}
+  #t-result .readiness-score-block{padding:12px 0 0;border-top:1px solid var(--line)}
+  #t-result details.meaning summary{display:none}
+  #t-result .meaning-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 16px;margin-top:6px}
+  #t-result .meaning-grid p{margin:0;font-size:9pt;line-height:1.4}
+  #t-result .dom{grid-template-columns:1fr;gap:6px;padding:8px 0;border-bottom:1px solid var(--line)}
+  #t-result .readiness-score-block h2{font-size:17pt;margin:2px 0}
+  #t-result .domains,#t-result .profile{break-inside:auto}
+  #t-result .domain-section{break-inside:avoid;margin-bottom:12px}
+  #t-result .famous-people{break-inside:avoid}
+  #t-result #result-profile>*{break-after:avoid}
+  #t-result #result-profile>.two,#t-result #result-profile>.famous-people{break-after:auto;break-inside:avoid}
+  #t-result .domain-section>*{break-after:avoid}
+  #t-result .domain-section>.dom{break-after:auto}
+
+  .section-group>*{break-inside:auto}
+  #full-strengths,#full-growth{break-inside:auto}
+
+  /* Small units never split across pages */
+  .famous-people>*,.two>div,.tinted-para,.bucket,.signature-context-grid>*,.area-facet-row,.toc-parts>li,.detail-list>li,.domain-section>h3,.domain-section>.result-step,.profile h4{break-inside:avoid}
+  .profile h4,.domain-section>h3,.result-step{break-after:avoid}
+
+  /* Executive summary: tighter, so the signature and the score sit on one page */
+  .report-summary .card.score-first{padding:14px 22px}
+  .report-summary .signature-panel{margin:0;padding:12px 16px}
+  .report-summary .signature-panel h3{font-size:22pt;margin:0 0 4px}
+  .report-summary .signature-panel .signature-sentence{font-size:12pt;margin:0 0 10px}
+  .report-summary>.card:nth-last-child(2){margin-bottom:0}
+  .report-summary .dial{width:96px;height:96px}
+  .report-summary .dial .val b{font-size:32px}
+  .report-summary .summary-grid{margin:4px 0}
+  .report-summary .summary-score h2{font-size:17pt}
+  .report-summary .score-shape-mark svg{width:76mm;height:auto}
+  .report-summary .summary-score .muted{font-size:10pt}
+  .report-summary .shape-key{margin-top:2px}
+  .report-summary .card.score-first+.card.score-first{margin-top:-1px}
+  .report-summary .summary-grid{grid-template-columns:minmax(0,1fr) minmax(0,1.5fr)}
+  .report-summary .card.score-first{margin-left:0;margin-right:0;width:100%}
+  .part-opener{margin:0 0 18px;padding:16px 20px;border-radius:0}
+  .report-summary .score-shape-mark svg text{font-size:21px}
+  .part-opener .part-opener-num{font-size:24pt}
+  .part-opener h2{font-size:17pt}
+
+  /* Strengths and growth edges: name, score and bar on one line, the three notes side by side below */
+  .dom.readiness.tint-navy,.dom.readiness.tint-gold{grid-template-columns:54mm minmax(0,1fr);gap:6px 16px;padding:9px 14px;break-inside:avoid}
+  .dom.readiness.tint-navy .domain-title,.dom.readiness.tint-gold .domain-title{gap:10px}
+  #full-strengths .dom,#full-growth .dom{margin-bottom:9px}
+  #full-growth{margin-top:0}
+  .dom.readiness.tint-navy>div:last-child,.dom.readiness.tint-gold>div:last-child{grid-column:1/3;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+  .dom.readiness.tint-navy>div:last-child p,.dom.readiness.tint-gold>div:last-child p{margin:0;font-size:9pt;line-height:1.4}
+  .dom.readiness.tint-navy>div:last-child b,.dom.readiness.tint-gold>div:last-child b{display:block;margin-bottom:2px;color:var(--navy)}
 }
 </style>
 </head>
@@ -773,6 +871,7 @@ svg text{fill:var(--ink3);font-family:var(--sans);font-size:11px}
 <script src="sources.js"></script>
 <script src="content.js"></script>
 <script src="signature.js"></script>
+<script src="preview-personas.js?v=20260925-mobile-v1"></script>
 <script>
 const DATA = {"items": [{"t": "Am the life of the party.", "d": "Extraversion", "k": "+", "a": 3}, {"t": "Sympathize with others' feelings.", "d": "Agreeableness", "k": "+", "a": 4}, {"t": "Get chores done right away.", "d": "Conscientiousness", "k": "+", "a": 4}, {"t": "Have frequent mood swings.", "d": "Neuroticism", "k": "+", "a": 2}, {"t": "Have a vivid imagination.", "d": "Intellect", "k": "+", "a": 4}, {"t": "Don't talk a lot.", "d": "Extraversion", "k": "-", "a": 3}, {"t": "Am not interested in other people's problems.", "d": "Agreeableness", "k": "-", "a": 2}, {"t": "Often forget to put things back in their proper place.", "d": "Conscientiousness", "k": "-", "a": 2}, {"t": "Am relaxed most of the time.", "d": "Neuroticism", "k": "-", "a": 4}, {"t": "Am not interested in abstract ideas.", "d": "Intellect", "k": "-", "a": 2}, {"t": "Talk to a lot of different people at parties.", "d": "Extraversion", "k": "+", "a": 3}, {"t": "Feel others' emotions.", "d": "Agreeableness", "k": "+", "a": 3}, {"t": "Like order.", "d": "Conscientiousness", "k": "+", "a": 5}, {"t": "Get upset easily.", "d": "Neuroticism", "k": "+", "a": 2}, {"t": "Have difficulty understanding abstract ideas.", "d": "Intellect", "k": "-", "a": 1}, {"t": "Keep in the background.", "d": "Extraversion", "k": "-", "a": 3}, {"t": "Am not really interested in others.", "d": "Agreeableness", "k": "-", "a": 1}, {"t": "Make a mess of things.", "d": "Conscientiousness", "k": "-", "a": 2}, {"t": "Seldom feel blue.", "d": "Neuroticism", "k": "-", "a": 4}, {"t": "Do not have a good imagination.", "d": "Intellect", "k": "-", "a": 2}], "domains": [["Extraversion", "Social energy", false], ["Agreeableness", "Warmth", false], ["Conscientiousness", "Follow-through", false], ["Neuroticism", "Steadiness", true], ["Intellect", "Curiosity", false]], "dtext": {"Social energy|Low": "You recharge on your own and tend to speak once you have something worth saying. In a busy meeting you may be the one who listens longest.", "Social energy|Mid": "You can work a room when you need to and still enjoy time alone. Which way you lean depends on the day and the people.", "Social energy|High": "You get energy from people. You are often the first to start a conversation and people notice when you are not there.", "Warmth|Low": "You say what you think even when it is not what people want to hear. Others may read you as tough before they read you as fair.", "Warmth|Mid": "You care about how people feel and you can still hold a hard line when it matters.", "Warmth|High": "You notice how people are feeling and you often act on it. Colleagues likely come to you when something is not going well.", "Follow-through|Low": "You work best with room to move and may start more than you finish. Clear deadlines and simple systems tend to help you most.", "Follow-through|Mid": "You get the important things done and let smaller details slide when time is short.", "Follow-through|High": "You finish what you start and people can plan around you. Loose ends bother you more than they bother most people.", "Steadiness|Low": "Pressure reaches you quickly and a bad moment can stay with you for a while. Knowing this helps you plan recovery time into hard weeks.", "Steadiness|Mid": "Most days you stay level. The really hard weeks still get to you, like they do for most people.", "Steadiness|High": "You stay calm when things get loud. The people around you often borrow some of that calm without realizing it.", "Curiosity|Low": "You prefer ideas you can use tomorrow over theory. You judge an idea by whether it works in practice.", "Curiosity|Mid": "You enjoy a good idea when it connects to something real and lose interest when it drifts too far from practice.", "Curiosity|High": "You enjoy complex problems and new ideas for their own sake. You may be the one still asking why after everyone else has moved on."}, "bands": [["Emerging", 0, "Your answers suggest that these three habits are still developing. Choose one area to practise first."], ["Developing", 40, "You have a working base and a few clear gaps. Closing one or two of them would move your score the most."], ["Strong", 60, "Most of the habits that matter are already in place. The next gains come from sharpening one or two specific areas."], ["Exceptional", 80, "Your answers suggest strong habits across finishing work, staying clear under pressure and taking on unfamiliar problems."]], "profiles": [["Reserved", "Achievement-driven", "Quiet achiever", "Focused, self-driven, reliable", "You put in the work before anyone asks. People know you by what you finish, not by how much you talk about it.", "Work that needs finishing without anyone checking in. Your track record speaks before you do."], ["Reserved", "Connection-driven", "Steady supporter", "Calm, dependable, loyal", "People lean on you when things get hard. You do not need the spotlight to make a team work better.", "Tense moments and teams under strain. People calm down when you are in the room."], ["Balanced", "Achievement-driven", "Go-getter", "Driven, practical, adaptable", "You push hard for results and still read the room well enough to know when to ease off.", "Goals that need both push and judgment. You know when to press and when to wait."], ["Balanced", "Connection-driven", "Team player", "Cooperative, fair, easy to work with", "You keep a group working together. You often notice what two people missed about each other.", "Work across teams where people talk past each other."], ["Vocal", "Achievement-driven", "Natural leader", "Decisive, confident, ambitious", "You go first and set the pace. Other people often take their cue from you.", "New projects and moments that need someone to go first."], ["Vocal", "Connection-driven", "People person", "Outgoing, warm, encouraging", "You bring energy into a room and get people talking to each other, not only to you.", "Rallying people around a change or a new direction."]], "facets": {"Achievement-Striving": ["Readiness", 0.78, [["Go straight for the goal.", "+", 5], ["Work hard.", "+", 4], ["Do just enough work to get by.", "-", 1], ["Put little time and effort into my work.", "-", 2]]], "Self-Discipline": ["Readiness", 0.85, [["Start tasks right away.", "+", 4], ["Carry out my plans.", "+", 4], ["Waste my time.", "-", 3], ["Need a push to get started.", "-", 3]]], "Orderliness": ["Readiness", 0.82, [["Like to tidy up.", "+", 4], ["Do things according to a plan.", "+", 4], ["Leave my belongings around.", "-", 2], ["Am not bothered by disorder.", "-", 2]]], "Intellect": ["Readiness", 0.86, [["Like to solve complex problems.", "+", 5], ["Can handle a lot of information.", "+", 4], ["Avoid philosophical discussions.", "-", 2], ["Am not interested in theoretical discussions.", "-", 2]]], "Anxiety": ["Readiness, read inversely", 0.83, [["Worry about things.", "+", 3], ["Get stressed out easily.", "+", 3], ["Am not easily bothered by things.", "-", 3], ["Am not easily disturbed by events.", "-", 3]]], "Self-Consciousness": ["Readiness, read inversely", 0.8, [["Am easily intimidated.", "+", 2], ["Find it difficult to approach others.", "+", 3], ["Am comfortable in unfamiliar situations.", "-", 4], ["Am able to stand up for myself.", "-", 4]]], "Assertiveness": ["Style, the Voice axis", 0.84, [["Take charge.", "+", 4], ["Try to lead others.", "+", 4], ["Wait for others to lead the way.", "-", 2], ["Hold back my opinions.", "-", 2]]], "Activity Level": ["Style", 0.71, [["Am always busy.", "+", 5], ["Can manage many things at the same time.", "+", 4], ["Like to take it easy.", "-", 2], ["Like a leisurely lifestyle.", "-", 2]]], "Cooperation": ["Style", 0.73, [["Am easy to satisfy.", "+", 3], ["Hate to seem pushy.", "+", 3], ["Love a good fight.", "-", 3], ["Get back at others.", "-", 2]]], "Altruism": ["Style, the Drive axis", 0.77, [["Love to help others.", "+", 4], ["Anticipate the needs of others.", "+", 3], ["Am indifferent to the feelings of others.", "-", 2], ["Take no time for others.", "-", 2]]]}};
 const $ = s => document.querySelector(s);
@@ -1308,10 +1407,17 @@ function dial(val){const r=62,c=2*Math.PI*r;return `<div class="dial"><svg viewB
 // via the @page margin boxes above, rather than a DOM element inserted once
 // per section (which only ever showed on that section's first page, and ate
 // into the content area of whatever card followed it).
-function setPrintRunningHeader(name,dateStr){
-  const prepared=name?`Prepared for ${name}, ${dateStr}`:`Prepared ${dateStr}`;
+function setPrintRunningHeader(name,dateStr,title){
+  const prepared=name?`Prepared for ${name}`:`Prepared ${dateStr}`;
   document.documentElement.style.setProperty('--print-prepared', JSON.stringify(prepared));
+  document.documentElement.style.setProperty('--print-title', JSON.stringify(title||'Executive Signature'));
 }
+// The "What this means" notes are collapsed on screen. Open them while the page prints so the PDF carries them.
+(function(){
+  const flip=open=>document.querySelectorAll('#t-result details.meaning').forEach(d=>{if(open){d.dataset.wasOpen=d.open?'1':'';d.open=true}else{d.open=d.dataset.wasOpen==='1';delete d.dataset.wasOpen}});
+  window.addEventListener('beforeprint',()=>flip(true));
+  window.addEventListener('afterprint',()=>flip(false));
+})();
 function rid(){return Math.random().toString(36).slice(2,10)}
 function displayedLevelRange(level,S=SETTINGS){
   if(level==='Low')return `0–${S.levelLow-1}`;
@@ -1390,7 +1496,11 @@ function renderResult(){
     result:{id:resid,attemptId:activeAttempt?activeAttempt.id:aid,formVersion:activeAttempt?activeAttempt.formVersion:FREE_FORM_VERSION,isCurrent:true,scoringEngine:'1.0.0+git.4be21c7',readiness:s.readiness,band:s.band,profile:p[2],voice:s.voice,drive:s.drive,driveCloseCall:s.close},qaTiming,
     delivery:{resultId:resid,channel:'screen',status:'shown',shownAt:now}
   };
+  const quickName=[participant.firstName,participant.lastName].filter(Boolean).join(' ');
+  const quickDate=new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
+  setPrintRunningHeader(quickName,quickDate,'Executive Signature Quick Check');
   $('#t-result').innerHTML=`
+  <div class="quick-print-head print-only"><h1>Executive Signature Quick Check</h1><p>${quickName?`Prepared for ${esc(quickName)}, `:'Prepared on '}${quickDate}</p></div>
   <p class="chip navy tier-tag">Quick check &middot; 20 questions</p>
   <nav class="card result-guide" aria-label="Result sections"><h2>Your result, step by step</h2><p>Start with your Executive Signature, then open each area for the detail.</p><ol><li><a href="#result-overall"><span>1</span>Executive Signature</a></li><li><a href="#result-readiness"><span>2</span>Readiness habits</a></li><li><a href="#result-style"><span>3</span>Working style</a></li><li><a href="#result-profile"><span>4</span>Profile details</a></li><li><a href="#result-share"><span>5</span>Share</a></li></ol></nav>
   <div class="card score-first" id="result-overall"><p class="result-step">1 · Profile</p><p class="eyebrow">${pname?esc(pname)+', here is your result':'Your result'}</p><h2>${esc(p[2])}</h2><p class="pwords">${esc(p[3])}</p><div class="signature-panel"><p class="result-step">Your Executive Signature</p><h3>${esc(signature.profileName)}</h3>${shapeBlock}<p class="signature-sentence">${esc(signature.sentence)}</p><div class="two"><div><b>Executive Edge:</b> ${esc(signature.edge)}</div><div><b>Executive Unlock:</b> ${esc(signature.unlock)}</div></div><p class="small muted">This snapshot uses the broad five-area check. The full assessment tests the same signature across 10 more specific facets.</p></div><div class="readiness-score-block"><p class="result-step">Executive Readiness Score</p>${scoreLead}<p class="score-next">${esc(nextLine)}</p><p class="muted">${esc(s.bandText)}</p>${readinessSource}</div></div>
@@ -1613,7 +1723,7 @@ function renderFullResult(){
   const [hi1,hi2]=readinessRanked, lo1=readinessRanked[readinessRanked.length-1], style1=styleRanked[0];
   const scoreGrounding=`Your highest readiness facets are ${hi1[0]} and ${hi2[0]} (${hi1[1]} and ${hi2[1]}). Your clearest area to develop is ${lo1[0]} (${lo1[1]}). Your most distinctive style facet is ${style1[0]} (${style1[1]}).`;
   const signature=window.READINESS_SIGNATURE.createSignature({profileName:p[2],areaScores,tier:'full',facetScores:s.shown});
-  setPrintRunningHeader(fullName,todayStr);
+  setPrintRunningHeader(fullName,todayStr,'Executive Signature Full Assessment');
   const depth=PROFILE_DEPTH[p[2]]||{};
   const bulletList=items=>`<ul class="detail-list">${items.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`;
   const paras=val=>(Array.isArray(val)?val:[val]).filter(Boolean).map(t=>`<p>${esc(t)}</p>`).join('');
@@ -1641,16 +1751,18 @@ function renderFullResult(){
 
   const coverSection=`
   <div class="report-cover print-only">
-    <div class="cover-logos"><img src="../../assets/print-logo-utl-white-cover.svg" alt="The Untaught Lessons" class="cover-logo-utl"><img src="../../assets/print-logo-signature-white-cover.svg" alt="Executive Signature" class="cover-logo-readiness"></div>
-    <h1 class="cover-title">Executive Signature Full Assessment</h1>
-    <p class="cover-sub">40 questions &middot; 10 measured facets</p>
-    <p class="cover-score"><b>${s.readiness}</b><span>/ 100 &middot; ${s.band} range<br>Executive Readiness Score</span></p>
-    <div class="cover-meta">
-      ${fullName?`<p><b>Prepared for</b> ${esc(fullName)}</p>`:''}
-      <p><b>Date</b> ${todayStr}</p>
-      <p><b>Profile</b> ${esc(p[2])}</p>
+    <div class="cover-top"><img src="../../assets/print-logo-utl-white-cover.svg" alt="The Untaught Lessons" class="cover-logo-utl"><img src="../../assets/print-logo-signature-white-cover.svg" alt="Executive Signature" class="cover-logo-readiness"></div>
+    <div class="cover-mid">
+      <p class="cover-kicker">Executive Signature</p>
+      <h1 class="cover-title">Full Assessment</h1>
+      <p class="cover-sub">40 questions across 10 measured facets</p>
+      <div class="cover-score"><b>${s.readiness}</b><span>out of 100</span><em>${s.band} range</em><small>Executive Readiness Score</small></div>
     </div>
-    <p class="cover-foot">theuntaughtlessons.com</p>
+    <div class="cover-meta">
+      ${fullName?`<p><span>Prepared for</span>${esc(fullName)}</p>`:''}
+      <p><span>Date</span>${todayStr}</p>
+      <p><span>Profile</span>${esc(p[2])}</p>
+    </div>
   </div>`;
 
   const tocSection=`
@@ -1745,7 +1857,7 @@ function renderFullResult(){
     <div class="report-closing print-only">
       <div class="cover-logos"><img src="../../assets/print-logo-utl-white-cover.svg" alt="The Untaught Lessons" class="cover-logo-utl"><img src="../../assets/print-logo-signature-white-cover.svg" alt="Executive Signature" class="cover-logo-readiness"></div>
       <h2>Put this report into practice</h2>
-      <p>The Think, Speak, and Act Like an Executive™ cohort helps you practise the habits in this report with feedback from real work. Join the waitlist at theuntaughtlessons.com/programs.html to hear when the next cohort opens.</p>
+      <p>The Think, Speak, and Act Like an Executive™ cohort helps you practice the habits in this report with feedback from real work. Join the waitlist at theuntaughtlessons.com/programs.html to hear when the next cohort opens.</p>
       <p class="cover-foot">theuntaughtlessons.com</p>
     </div>
     <div class="row no-print"><button class="btn" id="fullAgain">Take the full report again</button></div>
@@ -2148,6 +2260,43 @@ if(internalMode){
 }else if(['admin','plan'].includes(initialView)){
   history.replaceState({},'',location.pathname);
 }
+
+/* ---------- report preview (admin console) ----------
+   ?internal=1&preview=quick|full&persona=<id> draws the real result page for a made-up person. Nothing is saved:
+   no attempt is started, no email is set, so the page records nothing and sends nothing. */
+const PREVIEW_PERSONAS=window.READINESS_PREVIEW_PERSONAS||[];
+function previewAnswersFor(items,shownByDomain,flipped){
+  const groups={};items.forEach(it=>{(groups[it.domain]=groups[it.domain]||[]).push(it)});
+  const out={};
+  Object.keys(groups).forEach(d=>{
+    const list=groups[d],shown=shownByDomain[d]==null?50:shownByDomain[d],raw=flipped.includes(d)?100-shown:shown;
+    const total=Math.round((1+4*raw/100)*list.length),base=Math.floor(total/list.length),extra=total-base*list.length;
+    list.forEach((it,i)=>{const e=Math.max(1,Math.min(5,base+(i<extra?1:0)));out[it.id]=it.key==='+'?e:6-e});
+  });
+  return out;
+}
+function previewQuickTargets(f){
+  const avg=(...k)=>k.reduce((a,x)=>a+f[x],0)/k.length;
+  return {Conscientiousness:avg('Achievement-Striving','Self-Discipline','Orderliness'),Neuroticism:avg('Anxiety','Self-Consciousness'),Intellect:f.Intellect,Extraversion:avg('Assertiveness','Activity Level'),Agreeableness:avg('Cooperation','Altruism')};
+}
+(function startReportPreview(){
+  const kind=assessmentParams.get('preview');
+  if(!internalMode||(kind!=='quick'&&kind!=='full'))return;
+  const persona=PREVIEW_PERSONAS.find(x=>x.id===assessmentParams.get('persona'))||PREVIEW_PERSONAS[0];
+  document.body.classList.add('report-preview');
+  const style=document.createElement('style');
+  style.textContent='.report-preview #raNav,.report-preview #internalAssessmentNav,.report-preview #assessmentPreviewChip{display:none!important}';
+  document.head.appendChild(style);
+  participant={firstName:persona.first,lastName:persona.last,email:'',ageRange:'35–44',careerStage:'People manager',primaryGoal:'Prepare for an executive role',organization:'',jobTitle:persona.title,region:'',invited:false,assessmentConsent:true,marketingConsent:false};
+  pname=persona.first;
+  if(kind==='quick'){
+    answers=previewAnswersFor(ITEMS,previewQuickTargets(persona.f),['Neuroticism']);
+    renderResult();go('t-result');
+  }else{
+    fullAnswers=previewAnswersFor(FULL_ITEMS,persona.f,['Anxiety','Self-Consciousness']);
+    renderFullResult();go('t-full-result');
+  }
+})();
 </script>
 <script type="module">
   import { recordReadinessCompletion, checkReadinessAccountEmail, sendReadinessAccessLink } from '../../assets/firebase.js?v=20260925-mobile-v1';

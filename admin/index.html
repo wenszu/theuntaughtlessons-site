@@ -2247,6 +2247,20 @@
     .cs-table th { border-bottom:2px solid var(--line); font-size:11px; font-weight:700; color:#687482; text-align:left; padding:8px; }
     .cs-table td { border-bottom:1px solid var(--line); padding:8px; vertical-align:top; }
     .cs-table tbody tr:hover { background:#FAF8F3; }
+    .es-prev-bar { display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; margin:20px 0 14px; }
+    .es-prev-group { display:inline-flex; border:1px solid var(--navy); border-radius:8px; overflow:hidden; }
+    .es-prev-toggle { border:0; background:var(--white); color:var(--navy); padding:9px 18px; font-size:14px; font-weight:700; cursor:pointer; }
+    .es-prev-toggle + .es-prev-toggle { border-left:1px solid var(--navy); }
+    .es-prev-toggle[aria-pressed="true"] { background:var(--navy); color:var(--white); }
+    .es-prev-actions { display:flex; gap:10px; flex-wrap:wrap; }
+    .es-prev-actions .small-button { text-decoration:none; }
+    .es-prev-people { display:flex; flex-wrap:wrap; gap:8px; margin:0 0 10px; }
+    .es-prev-person { border:1px solid var(--line); background:var(--white); color:var(--charcoal); border-radius:999px; padding:7px 14px; font-size:13px; cursor:pointer; }
+    .es-prev-person b { color:var(--navy); }
+    .es-prev-person[aria-pressed="true"] { border-color:var(--navy); background:#EEF2F7; }
+    .es-prev-caption { margin:0 0 14px; font-size:14px; color:#687482; }
+    .es-prev-frame { border:1px solid var(--line); background:var(--white); }
+    .es-prev-frame iframe { display:block; width:100%; height:78vh; min-height:620px; border:0; background:var(--white); }
     .es-cfg-lead { margin:0 0 28px; font-size:15px; line-height:1.6; max-width:760px; }
     .es-cfg-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(440px,1fr)); gap:48px; align-items:start; }
     .es-cfg-assessment { min-width:0; }
@@ -2893,6 +2907,7 @@
       <button class="admin-nav-item" data-admin-tab-scope="programs" data-admin-program="executive-signature" data-target="section-es-overview">Overview</button>
       <button class="admin-nav-item" data-admin-tab-scope="programs" data-admin-program="executive-signature" data-target="section-es-participants">Participants</button>
       <button class="admin-nav-item" data-admin-tab-scope="programs" data-admin-program="executive-signature" data-target="section-es-attempts">Attempts</button>
+      <button class="admin-nav-item" data-admin-tab-scope="programs" data-admin-program="executive-signature" data-target="section-es-report-previews">Report previews</button>
       <button class="admin-nav-item" data-admin-tab-scope="programs" data-admin-program="executive-signature" data-target="section-es-configuration">Configuration</button>
       <button class="admin-nav-item" data-admin-tab-scope="programs" data-admin-program="executive-signature" data-target="section-es-governance">Data governance</button>
 
@@ -4088,6 +4103,27 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
             <div id="esRevealResult"></div>
           </div>
         </div>
+      </section>
+
+      <section class="admin-section" id="section-es-report-previews" data-admin-tab-panel="programs" data-admin-program="executive-signature">
+        <span class="section-label">Executive Signature</span>
+        <h2>Report previews</h2>
+        <div class="section-divider"></div>
+        <p class="description">See how the results look for six made-up people, one for each profile. Nothing here is saved and no email is sent. Use the print button to see the PDF pages the way a participant would save them.</p>
+        <div class="es-prev-bar">
+          <div class="es-prev-group" role="group" aria-label="Report type">
+            <button type="button" class="es-prev-toggle" data-es-prev-kind="quick" aria-pressed="true">Quick check</button>
+            <button type="button" class="es-prev-toggle" data-es-prev-kind="full" aria-pressed="false">Full report</button>
+          </div>
+          <div class="es-prev-actions">
+            <a class="small-button secondary-button" id="esPrevOpen" href="#" target="_blank" rel="noopener">Open in a new tab</a>
+            <button type="button" class="small-button" id="esPrevPrint">Print or save as PDF</button>
+          </div>
+        </div>
+        <div class="es-prev-people" id="esPrevPeople" role="group" aria-label="Person"></div>
+        <p class="es-prev-caption" id="esPrevCaption" aria-live="polite"></p>
+        <div class="es-prev-frame"><iframe id="esPrevFrame" title="Report preview" referrerpolicy="no-referrer"></iframe></div>
+        <script src="../apps/executive-signature/preview-personas.js?v=20260925-mobile-v1"></script>
       </section>
 
       <section class="admin-section" id="section-es-configuration" data-admin-tab-panel="programs" data-admin-program="executive-signature">
@@ -11074,7 +11110,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         const programContentTargets = ['section-access-controls', 'section-orientation', 'section-phase1', 'section-phase2', 'section-phase3'];
         const studentProgressTargets = ['section-student-progress', 'section-platform-overview', 'section-launch-health', 'section-leaderboard', 'section-engagement-insights', 'section-cohort-analytics'];
         const rewardTargets = ['section-reward-levels', 'section-reward-overview', 'section-reward-rules', 'section-reward-simulator'];
-        const esTargets = ['section-es-overview', 'section-es-participants', 'section-es-attempts', 'section-es-configuration', 'section-es-governance'];
+        const esTargets = ['section-es-overview', 'section-es-participants', 'section-es-attempts', 'section-es-report-previews', 'section-es-configuration', 'section-es-governance'];
         if (programContentTargets.includes(target)) {
           loadAdminVisibilitySettings();
           loadPublicAssessmentSettings();
@@ -12138,8 +12174,58 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       return true;
     }
 
+    // Report previews: the real result pages, drawn for made-up people (see apps/executive-signature/preview-personas.js).
+    // The assessment page is opened in a frame in its preview mode, which saves nothing and sends nothing.
+    const esPreviewState = { kind: 'quick', personaId: '', built: false };
+    function esPreviewPeople() { return Array.isArray(window.READINESS_PREVIEW_PERSONAS) ? window.READINESS_PREVIEW_PERSONAS : []; }
+    function esPreviewUrl() {
+      return '../apps/executive-signature/?internal=1&preview=' + encodeURIComponent(esPreviewState.kind) + '&persona=' + encodeURIComponent(esPreviewState.personaId);
+    }
+    function esReportPreviewShow() {
+      const people = esPreviewPeople();
+      const person = people.find((x) => x.id === esPreviewState.personaId) || people[0];
+      if (!person) return;
+      esPreviewState.personaId = person.id;
+      document.querySelectorAll('[data-es-prev-kind]').forEach((b) => b.setAttribute('aria-pressed', b.dataset.esPrevKind === esPreviewState.kind ? 'true' : 'false'));
+      document.querySelectorAll('[data-es-prev-person]').forEach((b) => b.setAttribute('aria-pressed', b.dataset.esPrevPerson === person.id ? 'true' : 'false'));
+      const url = esPreviewUrl();
+      const frame = document.getElementById('esPrevFrame');
+      if (frame && frame.getAttribute('src') !== url) frame.setAttribute('src', url);
+      const open = document.getElementById('esPrevOpen');
+      if (open) open.setAttribute('href', url);
+      const caption = document.getElementById('esPrevCaption');
+      if (caption) caption.textContent = (esPreviewState.kind === 'full' ? 'Full report' : 'Quick check') + ' for ' + person.first + ' ' + person.last + ', ' + person.title + '. Profile: ' + person.profile + '.';
+    }
+    function esReportPreviewInit() {
+      if (!esPreviewState.built) {
+        const holder = document.getElementById('esPrevPeople');
+        const people = esPreviewPeople();
+        if (!holder || !people.length) return;
+        holder.innerHTML = people.map((x) => '<button type="button" class="es-prev-person" data-es-prev-person="' + escapeHtml(x.id) + '" aria-pressed="false"><b>' + escapeHtml(x.first + ' ' + x.last) + '</b>, ' + escapeHtml(x.profile) + '</button>').join('');
+        holder.addEventListener('click', (event) => {
+          const button = event.target.closest('[data-es-prev-person]');
+          if (!button) return;
+          esPreviewState.personaId = button.dataset.esPrevPerson;
+          esReportPreviewShow();
+        });
+        document.querySelectorAll('[data-es-prev-kind]').forEach((b) => b.addEventListener('click', () => {
+          esPreviewState.kind = b.dataset.esPrevKind;
+          esReportPreviewShow();
+        }));
+        const print = document.getElementById('esPrevPrint');
+        if (print) print.addEventListener('click', () => {
+          const frame = document.getElementById('esPrevFrame');
+          try { frame.contentWindow.focus(); frame.contentWindow.print(); } catch (error) { showToast('The browser blocked printing from this frame. Use Open in a new tab, then print there.', 'error'); }
+        });
+        esPreviewState.personaId = people[0].id;
+        esPreviewState.built = true;
+      }
+      esReportPreviewShow();
+    }
+
     function esLoadForTarget(target) {
-      if (target === 'section-es-participants') espLoadOnce();
+      if (target === 'section-es-report-previews') esReportPreviewInit();
+      else if (target === 'section-es-participants') espLoadOnce();
       else if (target === 'section-es-attempts') esaLoadOnce();
       else if (target === 'section-es-configuration') esConfigLoadOnce();
       else if (target === 'section-es-governance') esGovLoadOnce();
