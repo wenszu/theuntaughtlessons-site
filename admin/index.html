@@ -2247,6 +2247,33 @@
     .cs-table th { border-bottom:2px solid var(--line); font-size:11px; font-weight:700; color:#687482; text-align:left; padding:8px; }
     .cs-table td { border-bottom:1px solid var(--line); padding:8px; vertical-align:top; }
     .cs-table tbody tr:hover { background:#FAF8F3; }
+    .es-cfg-lead { margin:0 0 28px; font-size:15px; line-height:1.6; max-width:760px; }
+    .es-cfg-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(440px,1fr)); gap:48px; align-items:start; }
+    .es-cfg-assessment { min-width:0; }
+    .es-cfg-head { display:flex; align-items:baseline; justify-content:space-between; gap:16px; flex-wrap:wrap; margin:0 0 6px; }
+    .es-cfg-head h3 { margin:0; font-family:'Playfair Display',Georgia,serif; font-size:22px; line-height:1.25; color:var(--navy); }
+    .es-cfg-status { font-size:12px; font-weight:700; color:#687482; }
+    .es-cfg-status.is-live { color:var(--green); }
+    .es-cfg-meta { margin:0 0 20px; font-size:14px; color:#687482; }
+    .es-cfg-sub { margin:24px 0 8px; font-size:12px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:#687482; }
+    .es-cfg-facts { margin:0; display:grid; grid-template-columns:150px 1fr; border-top:1px solid var(--line); }
+    .es-cfg-facts dt, .es-cfg-facts dd { margin:0; padding:9px 0; border-bottom:1px solid var(--line); font-size:14px; line-height:1.45; }
+    .es-cfg-facts dt { color:#687482; padding-right:12px; }
+    .es-cfg-facts dd { color:var(--charcoal); min-width:0; overflow-wrap:anywhere; }
+    .es-cfg-id { font-family:'Roboto Mono',monospace; font-size:13px; }
+    .es-cfg-copy { margin-left:10px; padding:0; border:0; background:none; color:var(--navy); font-size:13px; font-weight:700; text-decoration:underline; cursor:pointer; }
+    .es-cfg-areas { width:100%; border-collapse:collapse; font-size:14px; }
+    .es-cfg-areas th { text-align:left; font-size:12px; font-weight:700; color:#687482; padding:0 0 8px; border-bottom:1px solid var(--line); }
+    .es-cfg-areas td { padding:8px 0; border-bottom:1px solid var(--line); }
+    .es-cfg-areas th:not(:first-child), .es-cfg-areas td:not(:first-child) { text-align:right; white-space:nowrap; padding-left:16px; }
+    .es-cfg-more { margin-top:20px; }
+    .es-cfg-more summary { cursor:pointer; font-weight:700; color:var(--navy); font-size:14px; padding:6px 0; }
+    .es-cfg-more .cs-table { margin-top:10px; }
+    .es-cfg-downloads { display:flex; gap:10px; flex-wrap:wrap; margin-top:14px; }
+    .es-cfg-earlier { margin:0; padding:0; list-style:none; font-size:14px; }
+    .es-cfg-earlier li { padding:8px 0; border-bottom:1px solid var(--line); overflow-wrap:anywhere; }
+    .es-cfg-note { margin:40px 0 0; max-width:760px; font-size:14px; line-height:1.6; color:#687482; }
+    @media (max-width:560px) { .es-cfg-grid { grid-template-columns:1fr; gap:40px; } .es-cfg-facts { grid-template-columns:1fr; } .es-cfg-facts dt { padding-bottom:0; border-bottom:0; } }
     .cs-row-open { background:none; border:1px solid var(--line); border-radius:6px; padding:4px 10px; font-size:12px; cursor:pointer; color:var(--navy); font-weight:700; }
     .cs-row-open:hover { background:#F2F6FA; }
     .cs-badge { display:inline-flex; padding:2px 8px; border-radius:999px; font-size:10px; font-weight:700; margin:0 4px 4px 0; }
@@ -4067,7 +4094,7 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         <span class="section-label">Executive Signature</span>
         <h2>Configuration</h2>
         <div class="section-divider"></div>
-        <p class="description">Read-only view of assessment definitions and their locked content and scoring versions, including the full question list and scoring logic for each version. Editing assessment content from here is not available; a new version is published through a code change, not this console.</p>
+        <p class="description">A read-only view of what each Executive Signature assessment asks and how it is scored. To change an assessment, publish a new version through a code change.</p>
         <div id="esConfigFlagNotice" hidden></div>
         <div id="esConfigLoaded" hidden>
           <p class="student-progress-status" id="esConfigStatus" aria-live="polite">Loading configuration…</p>
@@ -12411,6 +12438,83 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
       }
     }
 
+    function esConfigRender(definitions, versions) {
+      const e = escapeHtml;
+      const shortId = (id) => String(id || '').slice(0, 8);
+      const plural = (n, word) => n + ' ' + word + (n === 1 ? '' : 's');
+      const idView = (id) => id ? '<span class="es-cfg-id" title="' + e(id) + '">' + e(shortId(id)) + '</span><button type="button" class="es-cfg-copy" data-es-config-copy="' + e(id) + '">Copy full ID</button>' : 'Not set';
+      const fact = (label, valueHtml) => '<dt>' + e(label) + '</dt><dd>' + valueHtml + '</dd>';
+      const statusWord = (s) => { const t = String(s || '').toLowerCase(); return t === 'published' ? 'Published' : (t ? t.charAt(0).toUpperCase() + t.slice(1) : 'Not set'); };
+      const byId = {};
+      versions.forEach((v) => { byId[v.versionId] = v; });
+
+      function areaTable(questions) {
+        const areas = [];
+        const seen = {};
+        questions.forEach((q) => {
+          const name = q.area || 'No area';
+          if (!seen[name]) { seen[name] = { name: name, total: 0, reversed: 0 }; areas.push(seen[name]); }
+          seen[name].total += 1;
+          if (q.direction && String(q.direction).trim() !== '+') seen[name].reversed += 1;
+        });
+        return '<table class="es-cfg-areas"><thead><tr><th>Area</th><th>Questions</th><th>Reversed</th></tr></thead><tbody>' +
+          areas.map((a) => '<tr><td>' + e(a.name) + '</td><td>' + a.total + '</td><td>' + a.reversed + '</td></tr>').join('') +
+          '</tbody></table>';
+      }
+
+      function scoringFacts(scoring) {
+        if (!scoring) return '';
+        const list = (scoring.readinessAreas || []).join(', ');
+        return '<h4 class="es-cfg-sub">How the score is built</h4><dl class="es-cfg-facts">' +
+          fact('Readiness areas', e(list || 'Not set') + '<br><span style="color:#687482">Averaged into the score the participant sees.</span>') +
+          fact('Voice area', e(scoring.voiceArea || 'Not set') + '<br><span style="color:#687482">Gives Reserved, Balanced or Vocal.</span>') +
+          fact('Achievement area', e(scoring.achievementArea || 'Not set') + '<br><span style="color:#687482">Used in the drive comparison.</span>') +
+          fact('Connection area', e(scoring.connectionArea || 'Not set') + '<br><span style="color:#687482">Used in the drive comparison.</span>') +
+          '</dl>';
+      }
+
+      function questionList(v) {
+        if (!v.questions || !v.questions.length) return '';
+        return '<details class="es-cfg-more"><summary>Show all ' + v.questions.length + ' questions</summary>' +
+          '<table class="cs-table"><thead><tr><th>#</th><th>Item ID</th><th>Area</th><th>Direction</th></tr></thead><tbody>' +
+          v.questions.map((q) => '<tr><td>' + e(String(q.orderInForm || '')) + '</td><td class="mono">' + e(q.id || '') + '</td><td>' + e(q.area || '') + '</td><td>' + e(q.direction || '') + '</td></tr>').join('') +
+          '</tbody></table>' +
+          '<div class="es-cfg-downloads">' +
+            '<button type="button" class="small-button secondary-button" data-es-config-csv="' + e(v.versionId) + '">Download CSV</button>' +
+            '<button type="button" class="small-button secondary-button" data-es-config-xlsx="' + e(v.versionId) + '">Download spreadsheet</button>' +
+          '</div></details>';
+      }
+
+      if (!definitions.length && !versions.length) return '<p class="oa-empty">No assessments on file yet.</p>';
+      const liveCount = definitions.filter((d) => String(d.status).toLowerCase() === 'live').length;
+      const cards = definitions.map((d) => {
+        const current = byId[d.currentVersionId] || null;
+        const earlier = versions.filter((v) => v.assessmentId === d.assessmentId && v.versionId !== d.currentVersionId);
+        const meta = [];
+        if (d.estimatedMinutes != null) meta.push(plural(Number(d.estimatedMinutes), 'minute'));
+        if (current) meta.push(plural(Number(current.questionCount || (current.questions || []).length || 0), 'question'));
+        if (current && current.publishedAt) meta.push('published ' + formatProgressDate(current.publishedAt));
+        return '<article class="es-cfg-assessment">' +
+          '<div class="es-cfg-head"><h3>' + e(d.title || d.assessmentId) + '</h3><span class="es-cfg-status ' + (String(d.status).toLowerCase() === 'live' ? 'is-live' : '') + '">' + e(statusWord(d.status)) + '</span></div>' +
+          '<p class="es-cfg-meta">' + e(meta.join(', ') || 'No version published yet') + '</p>' +
+          '<dl class="es-cfg-facts">' +
+            fact('Assessment', e(d.assessmentId)) +
+            fact('Current version', idView(d.currentVersionId)) +
+            (current ? fact('Scoring version', e(current.scoringVersion || 'Not set')) + fact('Content version', e(current.contentVersion || 'Not set')) : '') +
+          '</dl>' +
+          (current && current.questions && current.questions.length ? '<h4 class="es-cfg-sub">Areas</h4>' + areaTable(current.questions) : '') +
+          (current ? scoringFacts(current.scoring) : '') +
+          (current ? questionList(current) : '') +
+          (earlier.length ? '<h4 class="es-cfg-sub">Earlier versions</h4><ul class="es-cfg-earlier">' + earlier.map((v) => '<li><span class="es-cfg-id" title="' + e(v.versionId) + '">' + e(shortId(v.versionId)) + '</span>, ' + e(statusWord(v.status).toLowerCase()) + ', ' + e(formatProgressDate(v.publishedAt)) + '</li>').join('') + '</ul>' : '') +
+        '</article>';
+      }).join('');
+      const orphans = versions.filter((v) => !definitions.some((d) => d.assessmentId === v.assessmentId));
+      const orphanHtml = orphans.length ? '<h4 class="es-cfg-sub" style="margin-top:40px">Versions without a definition</h4><ul class="es-cfg-earlier">' + orphans.map((v) => '<li><span class="es-cfg-id" title="' + e(v.versionId) + '">' + e(shortId(v.versionId)) + '</span>, ' + e(v.assessmentId || 'unknown assessment') + ', ' + e(statusWord(v.status).toLowerCase()) + '</li>').join('') + '</ul>' : '';
+      return '<p class="es-cfg-lead">' + e(plural(liveCount, 'assessment') + ' live. Each version locks its questions and scoring, so results stay comparable over time.') + '</p>' +
+        '<div class="es-cfg-grid">' + cards + '</div>' + orphanHtml +
+        '<p class="es-cfg-note"><strong>How questions are presented.</strong> The order in the full list is the fixed definition order. Each participant sees the same questions in a new random order every time they start an attempt. Reversed means the 1 to 5 answer is flipped (6 minus the answer) before it is averaged into its area. The shuffle is in <code>apps/executive-signature/forms.js</code>.</p>';
+    }
+
     async function esConfigLoadOnce() {
       if (esConfigLoadedOnce) return;
       const ready = await esGuardSection('esConfigFlagNotice', 'esConfigLoaded', false);
@@ -12426,45 +12530,15 @@ Marie Curie,marie.curie@example.com</pre></div><button class="small-button secon
         const definitions = (result && result.definitions) || [];
         const versions = (result && result.versions) || [];
         if (bodyEl) {
-          bodyEl.innerHTML =
-            '<h4 style="color:var(--navy);margin:0 0 8px">Assessment definitions</h4>' +
-            (definitions.length ? '<table class="cs-table"><thead><tr><th>Assessment</th><th>Title</th><th>Status</th><th>Current version</th><th>Est. minutes</th></tr></thead><tbody>' +
-              definitions.map((d) => '<tr><td>' + escapeHtml(d.assessmentId) + '</td><td>' + escapeHtml(d.title || '—') +
-                '</td><td>' + escapeHtml(d.status || '—') + '</td><td>' + escapeHtml(d.currentVersionId || '—') +
-                '</td><td>' + escapeHtml(d.estimatedMinutes != null ? String(d.estimatedMinutes) : '—') + '</td></tr>').join('') +
-              '</tbody></table>' : '<p class="oa-empty">No assessment definitions on file yet.</p>') +
-            '<h4 style="color:var(--navy);margin:16px 0 8px">Assessment versions</h4>' +
-            (versions.length ? '<table class="cs-table"><thead><tr><th>Version</th><th>Assessment</th><th>Status</th><th>Scoring version</th><th>Content version</th><th>Questions</th><th>Published</th></tr></thead><tbody>' +
-              versions.map((v) => '<tr><td>' + escapeHtml(v.versionId) + '</td><td>' + escapeHtml(v.assessmentId || '—') +
-                '</td><td>' + escapeHtml(v.status || '—') + '</td><td>' + escapeHtml(v.scoringVersion || '—') + '</td><td>' + escapeHtml(v.contentVersion || '—') +
-                '</td><td>' + escapeHtml(String(v.questionCount || 0)) + '</td><td>' + escapeHtml(formatProgressDate(v.publishedAt)) + '</td></tr>').join('') +
-              '</tbody></table>' : '<p class="oa-empty">No assessment versions on file yet.</p>') +
-            versions.filter((v) => v.questions && v.questions.length).map((v) => {
-              const areaCounts = {};
-              v.questions.forEach((q) => { areaCounts[q.area] = (areaCounts[q.area] || 0) + 1; });
-              const areaSummary = Object.keys(areaCounts).map((a) => escapeHtml(a) + ' (' + areaCounts[a] + ')').join(', ');
-              const scoringRows = v.scoring ? [
-                ['Readiness areas (average into the score shown to the participant)', (v.scoring.readinessAreas || []).join(', ')],
-                ['Voice area (Reserved / Balanced / Vocal)', v.scoring.voiceArea || '—'],
-                ['Achievement area (drive comparison)', v.scoring.achievementArea || '—'],
-                ['Connection area (drive comparison)', v.scoring.connectionArea || '—']
-              ] : [];
-              return '<details style="margin-top:12px;border:1px solid var(--line);border-radius:8px;padding:10px 14px;">' +
-                '<summary style="cursor:pointer;font-weight:700;color:var(--navy)">' + escapeHtml(v.versionId) + ', question content and scoring (' + v.questions.length + ' items, ' + areaSummary + ')</summary>' +
-                (scoringRows.length ? '<table class="cs-table" style="margin-top:10px"><tbody>' +
-                  scoringRows.map((r) => '<tr><td>' + escapeHtml(r[0]) + '</td><td>' + escapeHtml(r[1]) + '</td></tr>').join('') +
-                  '</tbody></table>' : '') +
-                '<table class="cs-table" style="margin-top:10px"><thead><tr><th>#</th><th>Item ID</th><th>Area</th><th>Direction</th></tr></thead><tbody>' +
-                v.questions.map((q) => '<tr><td>' + escapeHtml(String(q.orderInForm || '')) + '</td><td class="mono">' + escapeHtml(q.id || '') +
-                  '</td><td>' + escapeHtml(q.area || '') + '</td><td>' + escapeHtml(q.direction || '') + '</td></tr>').join('') +
-                '</tbody></table>' +
-                '<div class="sync-actions" style="margin-top:10px">' +
-                  '<button type="button" class="small-button secondary-button" data-es-config-csv="' + escapeHtml(v.versionId) + '">Download CSV</button>' +
-                  '<button type="button" class="small-button secondary-button" data-es-config-xlsx="' + escapeHtml(v.versionId) + '">Download XLSX</button>' +
-                '</div></details>';
-            }).join('') +
-            '<p class="description" style="margin-top:16px"><strong>How questions are presented:</strong> the order shown above is the fixed definition order, used only to build each attempt&rsquo;s shuffle. Every participant sees these same items in a freshly randomized order each time they start an attempt (a Fisher&ndash;Yates shuffle in <code>apps/executive-signature/forms.js</code>), not the order listed here. &ldquo;Direction&rdquo; of <code>+</code> or <code>&minus;</code> means the raw 1&ndash;5 answer is used as-is or reversed (6 minus the answer) before it is averaged into that item&rsquo;s area.</p>';
+          bodyEl.innerHTML = esConfigRender(definitions, versions);
           esConfigVersionsCache = versions;
+          bodyEl.querySelectorAll('[data-es-config-copy]').forEach((button) => {
+            button.addEventListener('click', async () => {
+              const value = button.dataset.esConfigCopy;
+              try { await navigator.clipboard.writeText(value); button.textContent = 'Copied'; } catch (error) { button.textContent = 'Copy not available'; }
+              setTimeout(() => { button.textContent = 'Copy full ID'; }, 1800);
+            });
+          });
           bodyEl.querySelectorAll('[data-es-config-csv]').forEach((button) => {
             button.addEventListener('click', () => exportEsConfigVersion(button.dataset.esConfigCsv, 'csv'));
           });
