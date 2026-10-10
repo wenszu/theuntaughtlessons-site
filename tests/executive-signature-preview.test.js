@@ -29,7 +29,7 @@ const firebase = JSON.parse(fs.readFileSync(path.join(root, 'firebase.json'), 'u
 
 assert.match(html, /<title>Executive Signature \| The Untaught Lessons<\/title>/, 'Public page must carry the product title');
 assert.doesNotMatch(html, /Phase 0 preview|Private Phase 0/i, 'Public page must not describe itself as a private preview');
-assert.doesNotMatch(html, /<meta name="robots" content="[^"]*noindex/i, 'The founder opened Executive Signature to search engines on 2026-10-10');
+assert.match(html, /<meta name="robots" content="[^"]*noindex/i, 'Executive Signature stays out of search until the founder launches it (held back 2026-10-10)');
 assert.match(html, /<link rel="canonical" href="https:\/\/theuntaughtlessons\.com\/apps\/executive-signature\/">/, 'Public page needs a canonical link');
 assert.match(html, /Sample data only/, 'Preview must identify sample data');
 assert.match(html, /Keep your result on file/i, 'Consent must explain that the result is kept on file');

@@ -50,6 +50,7 @@ jobs:
             --exclude 'scripts/' \
             --exclude 'tests/' \
             --exclude 'reference/' \
+            --exclude 'apps/12-in-12/' \
             --exclude 'visual/' \
             --exclude 'supabase/' \
             --exclude 'tools/' \
