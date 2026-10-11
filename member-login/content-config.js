@@ -1606,7 +1606,9 @@ const UTL_CONTENT = {
       { key: "results", label: "My Results", href: appHref("../my-results/index.html") }
     ];
     if (active === "admin") links.push({ key: "admin", label: "Admin", href: adminHref() });
-    var esNavLink = active === "admin" ? "" : '<span class="ws-sep">|</span><span class="ws-es-nav-wrap" data-es-nudge><a class="ws-link ws-link-es" href="' + appHref("../apps/executive-signature/") + '">Try Executive Signature</a><span class="ws-es-popover" role="tooltip"><small>Executive Signature</small><strong>A free 5-minute personality assessment on how you lead under pressure</strong><p>Answer a short set of questions about your working style, then see your profile and one area to grow, instantly on screen.</p></span></span>';
+    // Administrators reach Executive Signature from the admin console, so the "Try" nudge (a prompt for members who have not
+    // taken it) is never shown to them. Without this an admin on a Supabase-only phone saw it whenever the workspace lookup came back empty.
+    var esNavLink = (active === "admin" || isAdminUser(user)) ? "" : '<span class="ws-sep">|</span><span class="ws-es-nav-wrap" data-es-nudge><a class="ws-link ws-link-es" href="' + appHref("../apps/executive-signature/") + '">Try Executive Signature</a><span class="ws-es-popover" role="tooltip"><small>Executive Signature</small><strong>A free 5-minute personality assessment on how you lead under pressure</strong><p>Answer a short set of questions about your working style, then see your profile and one area to grow, instantly on screen.</p></span></span>';
     var center = navContextHtml || '<nav class="ws-links" aria-label="Member workspace">' + links.map(function (link, index) {
       return (index ? '<span class="ws-sep">|</span>' : "") + '<a class="ws-link ' + (active === link.key ? "ws-active" : "") + '" href="' + link.href + '">' + link.label + '</a>';
     }).join("") + esNavLink + '</nav>';
